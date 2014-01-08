@@ -128,8 +128,6 @@ bool ObjectData::o_toBooleanImpl() const noexcept {
       return c_Vector::ToBool(this);
     } else if (m_cls == c_Map::classof()) {
       return c_Map::ToBool(this);
-    } else if (m_cls == c_StableMap::classof()) {
-      return c_StableMap::ToBool(this);
     } else if (m_cls == c_FrozenMap::classof()) {
       return c_FrozenMap::ToBool(this);
     } else if (m_cls == c_Set::classof()) {
@@ -426,8 +424,6 @@ Array ObjectData::o_toArray() const {
       return c_Vector::ToArray(this);
     } else if (m_cls == c_Map::classof()) {
       return c_Map::ToArray(this);
-    } else if (m_cls == c_StableMap::classof()) {
-      return c_StableMap::ToArray(this);
     } else if (m_cls == c_Set::classof()) {
       return c_Set::ToArray(this);
     } else if (m_cls == c_Pair::classof()) {
@@ -798,8 +794,6 @@ ObjectData* ObjectData::clone() {
         return c_Vector::Clone(this);
       } else if (m_cls == c_Map::classof()) {
         return c_Map::Clone(this);
-      } else if (m_cls == c_StableMap::classof()) {
-        return c_StableMap::Clone(this);
       } else if (m_cls == c_FrozenMap::classof()) {
         return c_FrozenMap::Clone(this);
       } else if (m_cls == c_Set::classof()) {

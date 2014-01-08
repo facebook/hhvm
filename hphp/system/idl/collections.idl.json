@@ -362,17 +362,6 @@
                     ]
                 },
                 {
-                    "name": "toStableMap",
-                    "flags": [
-                    ],
-                    "desc": "Returns a StableMap built from the keys and values of this Vector.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "toSet",
                     "flags": [
                     ],
@@ -1012,17 +1001,6 @@
                   ]
               },
               {
-                  "name": "toStableMap",
-                  "flags": [
-                  ],
-                  "desc": "Returns a StableMap built from the keys and values of this FrozenVector.",
-                  "return": {
-                      "type": "Object"
-                  },
-                  "args": [
-                  ]
-              },
-              {
                   "name": "toSet",
                   "flags": [
                   ],
@@ -1525,17 +1503,6 @@
                     ]
                 },
                 {
-                    "name": "toStableMap",
-                    "flags": [
-                    ],
-                    "desc": "Returns a StableMap built from the keys and values of this Map.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "toSet",
                     "flags": [
                     ],
@@ -2025,17 +1992,6 @@
                     ]
                 },
                 {
-                    "name": "toStableMap",
-                    "flags": [
-                    ],
-                    "desc": "Returns a StableMap built from the keys and values of this FrozenMap.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "toSet",
                     "flags": [
                     ],
@@ -2285,7 +2241,7 @@
             "ifaces": [
                 "KeyedIterator"
             ],
-            "desc": "An iterator implementation for iterating over a Map/StableMap.",
+            "desc": "An iterator implementation for iterating over a Map.",
             "flags": [
                 "IsFinal",
                 "NoDefaultSweep"
@@ -3345,17 +3301,6 @@
                     "flags": [
                     ],
                     "desc": "Returns a Map built from the keys and values of this Pair.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "toStableMap",
-                    "flags": [
-                    ],
-                    "desc": "Returns a StableMap built from the keys and values of this Pair.",
                     "return": {
                         "type": "Object"
                     },

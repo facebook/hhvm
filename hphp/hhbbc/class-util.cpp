@@ -78,7 +78,6 @@ SString collectionTypeToString(uint32_t ctype) {
   case Collection::VectorType:
     return s_Vector.get();
   case Collection::MapType:
-  case Collection::StableMapType:
     return s_Map.get();
   case Collection::SetType:
     return s_Set.get();

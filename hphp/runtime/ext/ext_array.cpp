@@ -1875,8 +1875,7 @@ php_asort(VRefParam container, int sort_flags,
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == Collection::StableMapType ||
-        obj->getCollectionType() == Collection::MapType) {
+    if (obj->getCollectionType() == Collection::MapType) {
       BaseMap* mp = static_cast<BaseMap*>(obj);
       mp->asort(sort_flags, ascending);
       return true;
@@ -1896,8 +1895,7 @@ php_ksort(VRefParam container, int sort_flags, bool ascending) {
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == Collection::StableMapType ||
-        obj->getCollectionType() == Collection::MapType) {
+    if (obj->getCollectionType() == Collection::MapType) {
       BaseMap* mp = static_cast<BaseMap*>(obj);
       mp->ksort(sort_flags, ascending);
       return true;
@@ -1976,8 +1974,7 @@ bool f_uasort(VRefParam container, CVarRef cmp_function) {
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == Collection::StableMapType ||
-        obj->getCollectionType() == Collection::MapType) {
+    if (obj->getCollectionType() == Collection::MapType) {
       BaseMap* mp = static_cast<BaseMap*>(obj);
       return mp->uasort(cmp_function);
     }
@@ -1994,8 +1991,7 @@ bool f_uksort(VRefParam container, CVarRef cmp_function) {
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == Collection::StableMapType ||
-        obj->getCollectionType() == Collection::MapType) {
+    if (obj->getCollectionType() == Collection::MapType) {
       BaseMap* mp = static_cast<BaseMap*>(obj);
       return mp->uksort(cmp_function);
     }

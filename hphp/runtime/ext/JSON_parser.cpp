@@ -651,11 +651,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
           }
           /*<fb>*/
           if (collections) {
-            if (stable_maps) {
-              top = NEWOBJ(c_StableMap)();
-            } else {
-              top = NEWOBJ(c_Map)();
-            }
+            // stable_maps is meaningless
+            top = NEWOBJ(c_Map)();
           } else {
           /*</fb>*/
             if (!assoc) {

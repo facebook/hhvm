@@ -203,7 +203,6 @@ bool IRInstruction::isLoad() const {
     case VGetPropStk:
     case ArrayGet:
     case MapGet:
-    case StableMapGet:
     case CGetElem:
     case VGetElem:
     case VGetElemStk:
@@ -254,7 +253,6 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
 
     case ArraySet:
     case MapSet:
-    case StableMapSet:
       return srcIdx == 3;
 
     case SpillStack:
@@ -522,4 +520,3 @@ bool BCMarker::valid() const {
 }
 
 }}
-

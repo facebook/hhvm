@@ -728,9 +728,6 @@ O(StringGet,              D(StaticStr), C(TCA)                                \
 O(MapGet,                      D(Cell), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str),             E|N|PRc|Er) \
-O(StableMapGet,                D(Cell), C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int,Str),             E|N|PRc|Er) \
 O(CGetElem,                    D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
@@ -750,10 +747,6 @@ O(ArraySet,                     D(Arr), C(TCA)                                \
                                           S(Int,Str)                          \
                                           S(Cell),             E|N|PRc|CRc|K) \
 O(MapSet,                           ND, C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int,Str)                          \
-                                          S(Cell),                    E|N|Er) \
-O(StableMapSet,                     ND, C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str)                          \
                                           S(Cell),                    E|N|Er) \
@@ -807,9 +800,6 @@ O(PairIsset,                   D(Bool), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int),                        E|N) \
 O(MapIsset,                    D(Bool), C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int,Str),                    E|N) \
-O(StableMapIsset,              D(Bool), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str),                    E|N) \
 O(IssetElem,                   D(Bool), C(TCA)                                \

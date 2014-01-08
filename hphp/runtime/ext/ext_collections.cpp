@@ -1030,10 +1030,6 @@ Object c_Vector::t_tomap() {
   return materializeDefaultImpl<c_Map>(this);
 }
 
-Object c_Vector::t_tostablemap() {
-  return materializeDefaultImpl<c_StableMap>(this);
-}
-
 Object c_Vector::t_tofrozenset() {
   return materializeDefaultImpl<c_FrozenSet>(this);
 }
@@ -4420,14 +4416,7 @@ COLLECTION_MAGIC_METHODS(Pair)
     Object o = mp = NEWOBJ(c_Map)(); \
     mp->init(VarNR(this)); \
     return o; \
-  } \
-  Object c_##cls::t_tostablemap() { \
-    c_StableMap* smp; \
-    Object o = smp = NEWOBJ(c_StableMap)(); \
-    smp->init(VarNR(this)); \
-    return o; \
   }
-
 KEYEDITERABLE_MATERIALIZE_METHODS(Map)
 KEYEDITERABLE_MATERIALIZE_METHODS(FrozenMap)
 ITERABLE_MATERIALIZE_METHODS(Set)
@@ -4500,7 +4489,6 @@ void collectionDeepCopyTV(TypedValue* tv) {
           obj = collectionDeepCopyVector(static_cast<c_Vector*>(obj));
           break;
         case Collection::MapType:
-        case Collection::StableMapType:
           obj = collectionDeepCopyMap(static_cast<c_Map*>(obj));
           break;
         case Collection::FrozenMapType:
@@ -4655,7 +4643,6 @@ TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
     case Collection::VectorType:
       return c_Vector::OffsetGet(obj, key);
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return BaseMap::OffsetGet(obj, key);
     case Collection::SetType:
@@ -4692,7 +4679,6 @@ void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
       c_Vector::OffsetSet(obj, key, val);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
       BaseMap::OffsetSet(obj, key, val);
       break;
     case Collection::SetType:
@@ -4720,7 +4706,6 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
     case Collection::VectorType:
       return c_Vector::OffsetIsset(obj, key);
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return BaseMap::OffsetIsset(obj, key);
     case Collection::SetType:
@@ -4744,7 +4729,6 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
     case Collection::VectorType:
       return c_Vector::OffsetEmpty(obj, key);
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return BaseMap::OffsetEmpty(obj, key);
     case Collection::SetType:
@@ -4769,7 +4753,6 @@ void collectionUnset(ObjectData* obj, TypedValue* key) {
       c_Vector::OffsetUnset(obj, key);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
       BaseMap::OffsetUnset(obj, key);
       break;
     case Collection::SetType:
@@ -4802,8 +4785,7 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
       static_cast<c_Vector*>(obj)->add(val);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
-      static_cast<BaseMap*>(obj)->add(val);
+      static_cast<c_Map*>(obj)->add(val);
       break;
     case Collection::SetType:
       static_cast<c_Set*>(obj)->add(val);
@@ -4847,7 +4829,6 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
       static_cast<c_FrozenSet*>(obj)->add(val);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
     case Collection::InvalidType:
       assert(false);
@@ -4860,7 +4841,6 @@ Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
     case Collection::VectorType:
       return tvAsVariant(static_cast<c_Vector*>(obj)->at(offset));
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return tvAsVariant(static_cast<BaseMap*>(obj)->at(offset));
     case Collection::SetType:
@@ -4884,7 +4864,6 @@ Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
       collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return tvAsVariant(static_cast<BaseMap*>(obj)->at(key));
     case Collection::SetType:
@@ -4911,7 +4890,6 @@ Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
     case Collection::VectorType:
       return tvAsVariant(c_Vector::OffsetGet(obj, key));
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return tvAsVariant(BaseMap::OffsetGet(obj, key));
     case Collection::SetType:
@@ -4939,8 +4917,7 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
       static_cast<c_Vector*>(obj)->set(offset, tv);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
-      static_cast<BaseMap*>(obj)->set(offset, tv);
+      static_cast<c_Map*>(obj)->set(offset, tv);
       break;
     case Collection::SetType:
       c_Set::throwNoIndexAccess();
@@ -4974,8 +4951,7 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
       collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
-      static_cast<BaseMap*>(obj)->set(key, tv);
+      static_cast<c_Map*>(obj)->set(key, tv);
       break;
     case Collection::SetType:
     case Collection::FrozenSetType:
@@ -5007,8 +4983,7 @@ void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
       c_Vector::OffsetSet(obj, key, tv);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
-      BaseMap::OffsetSet(obj, key, tv);
+      c_Map::OffsetSet(obj, key, tv);
       break;
     case Collection::SetType:
       c_Set::OffsetSet(obj, key, tv);
@@ -5037,7 +5012,6 @@ bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
     case Collection::VectorType:
       return c_Vector::OffsetContains(obj, key);
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return BaseMap::OffsetContains(obj, key);
     case Collection::SetType:
@@ -5061,7 +5035,6 @@ void collectionReserve(ObjectData* obj, int64_t sz) {
       static_cast<c_Vector*>(obj)->reserve(sz);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       static_cast<BaseMap*>(obj)->reserve(sz);
       break;
@@ -5091,7 +5064,6 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
       c_Vector::Unserialize(obj, uns, sz, type);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       BaseMap::Unserialize(obj, uns, sz, type);
       break;
@@ -5143,7 +5115,6 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
     case Collection::VectorType: obj = NEWOBJ(c_Vector)(); break;
     case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
     case Collection::FrozenMapType: obj = NEWOBJ(c_FrozenMap)(); break;
-    case Collection::StableMapType: obj = NEWOBJ(c_StableMap)(); break;
     case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
     case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;
     case Collection::FrozenVectorType: obj = NEWOBJ(c_FrozenVector)(); break;

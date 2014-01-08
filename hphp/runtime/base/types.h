@@ -139,17 +139,17 @@ enum class Mode {
 
 namespace Collection {
 enum Type : uint16_t { // stored in ObjectData::o_subclassData
+  // values must be contiguous integers (for ArrayIter::initFuncTable)
   InvalidType = 0,
   VectorType = 1,
   MapType = 2,
-  StableMapType = 3,
+  FrozenMapType = 3,
   SetType = 4,
   PairType = 5,
   FrozenVectorType = 6,
   FrozenSetType = 7,
-  FrozenMapType = 8
 };
-const int MaxNumTypes = 9;
+const size_t MaxNumTypes = 8;
 
 inline Type stringToType(const char* str, size_t len) {
   switch (len) {
@@ -185,7 +185,6 @@ inline bool isVectorType(Collection::Type ctype) {
 
 inline bool isMapType(Collection::Type ctype) {
   return (ctype == Collection::MapType ||
-          ctype == Collection::StableMapType ||
           ctype == Collection::FrozenMapType);
 }
 

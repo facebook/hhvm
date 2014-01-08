@@ -695,7 +695,7 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
       auto const isVector    = klass == c_Vector::classof();
       auto const isPair      = klass == c_Pair::classof();
       auto const isMap       = klass == c_Map::classof();
-      auto const isStableMap = klass == c_StableMap::classof();
+      // TODO: Add Frozen collections
 
       if (isVector || isPair) {
         if (mcodeMaybeVectorKey(m_ni.immVecM[0])) {
@@ -707,11 +707,11 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
             return isVector ? SimpleOp::Vector : SimpleOp::Pair;
           }
         }
-      } else if (isMap || isStableMap) {
+      } else if (isMap) {
         if (mcodeIsElem(m_ni.immVecM[0])) {
           SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
           if (key->isA(Type::Int) || key->isA(Type::Str)) {
-            return isMap ? SimpleOp::Map : SimpleOp::StableMap;
+            return SimpleOp::Map;
           }
         }
       }
@@ -735,7 +735,6 @@ void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
     case SimpleOp::PackedArray:
     case SimpleOp::Vector:
     case SimpleOp::Map:
-    case SimpleOp::StableMap:
     case SimpleOp::Pair:
       constrainBase(DataTypeSpecialized);
       return;
@@ -1782,7 +1781,7 @@ void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
 
 template<KeyType keyType>
 static inline TypedValue mapGetImpl(
-    c_Map* map, typename KeyTypeTraits<keyType>::rawType key) {
+  c_Map* map, typename KeyTypeTraits<keyType>::rawType key) {
   TypedValue* ret = map->at(key);
   tvRefcountedIncRef(ret);
   return *ret;
@@ -1809,38 +1808,6 @@ void HhbcTranslator::MInstrTranslator::emitMapGet(SSATmp* key) {
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
   BUILD_OPTAB(keyType);
   m_result = gen(MapGet, makeCatch(), cns((TCA)opFunc), m_base, key);
-}
-#undef HELPER_TABLE
-
-template<KeyType keyType>
-static inline TypedValue stableMapGetImpl(
-    c_StableMap* map, typename KeyTypeTraits<keyType>::rawType key) {
-  TypedValue* ret = map->at(key);
-  tvRefcountedIncRef(ret);
-  return *ret;
-}
-
-#define HELPER_TABLE(m)              \
-  /* name            keyType  */     \
-  m(stableMapGetS,   KeyType::Str)   \
-  m(stableMapGetI,   KeyType::Int)
-
-#define ELEM(nm, keyType)                                        \
-TypedValue nm(c_StableMap* map, TypedValue* key) {               \
-  return stableMapGetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
-}
-namespace MInstrHelpers {
-HELPER_TABLE(ELEM)
-}
-#undef ELEM
-
-void HhbcTranslator::MInstrTranslator::emitStableMapGet(SSATmp* key) {
-  assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
-
-  typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
-  BUILD_OPTAB(keyType);
-  m_result = gen(StableMapGet, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1895,9 +1862,6 @@ void HhbcTranslator::MInstrTranslator::emitCGetElem() {
     break;
   case SimpleOp::Map:
     emitMapGet(key);
-    break;
-  case SimpleOp::StableMap:
-    emitStableMapGet(key);
     break;
   case SimpleOp::None:
     typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
@@ -2109,38 +2073,6 @@ void HhbcTranslator::MInstrTranslator::emitMapIsset() {
 }
 #undef HELPER_TABLE
 
-template<KeyType keyType>
-static inline uint64_t stableMapIssetImpl(
-  c_StableMap* map, typename KeyTypeTraits<keyType>::rawType key) {
-  auto result = map->get(key);
-  return result ? !cellIsNull(result) : false;
-}
-
-#define HELPER_TABLE(m)                \
-  /* name              keyType  */     \
-  m(stableMapIssetS,   KeyType::Str)   \
-  m(stableMapIssetI,   KeyType::Int)
-
-#define ELEM(nm, keyType)                                          \
-uint64_t nm(c_StableMap* map, TypedValue* key) {                   \
-  return stableMapIssetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
-}
-namespace MInstrHelpers {
-HELPER_TABLE(ELEM)
-}
-#undef ELEM
-
-void HhbcTranslator::MInstrTranslator::emitStableMapIsset() {
-  SSATmp* key = getKey();
-  assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
-
-  typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
-  BUILD_OPTAB(keyType);
-  m_result = gen(StableMapIsset, cns((TCA)opFunc), m_base, key);
-}
-#undef HELPER_TABLE
-
 void HhbcTranslator::MInstrTranslator::emitIssetElem() {
   SimpleOp simpleOpType = simpleCollectionOp();
   switch (simpleOpType) {
@@ -2161,9 +2093,6 @@ void HhbcTranslator::MInstrTranslator::emitIssetElem() {
     break;
   case SimpleOp::Map:
     emitMapIsset();
-    break;
-  case SimpleOp::StableMap:
-    emitStableMapIsset();
     break;
   case SimpleOp::None:
     emitIssetEmptyElem(false);
@@ -2394,40 +2323,6 @@ void HhbcTranslator::MInstrTranslator::emitMapSet(
 }
 #undef HELPER_TABLE
 
-template<KeyType keyType>
-static inline void stableMapSetImpl(
-    c_StableMap* map,
-    typename KeyTypeTraits<keyType>::rawType key,
-    Cell value) {
-  map->set(key, &value);
-}
-
-#define HELPER_TABLE(m)              \
-  /* name            keyType  */     \
-  m(stableMapSetS,   KeyType::Str)   \
-  m(stableMapSetI,   KeyType::Int)
-
-#define ELEM(nm, keyType)                                           \
-void nm(c_StableMap* map, TypedValue* key, Cell value) {            \
-  stableMapSetImpl<keyType>(map, keyAsRaw<keyType>(key), value);    \
-}
-namespace MInstrHelpers {
-HELPER_TABLE(ELEM)
-}
-#undef ELEM
-
-void HhbcTranslator::MInstrTranslator::emitStableMapSet(
-    SSATmp* key, SSATmp* value) {
-  assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
-
-  typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*, TypedValue*);
-  BUILD_OPTAB(keyType);
-  gen(StableMapSet, makeCatch(), cns((TCA)opFunc), m_base, key, value);
-  m_result = value;
-}
-#undef HELPER_TABLE
-
 template <KeyType keyType>
 static inline StringData* setElemImpl(TypedValue* base, TypedValue keyVal,
                                       Cell val) {
@@ -2471,9 +2366,6 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
     break;
   case SimpleOp::Map:
     emitMapSet(key, value);
-    break;
-  case SimpleOp::StableMap:
-    emitStableMapSet(key, value);
     break;
   case SimpleOp::Pair:
   case SimpleOp::None:

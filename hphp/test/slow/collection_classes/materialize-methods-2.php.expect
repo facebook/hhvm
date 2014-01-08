@@ -6,25 +6,17 @@ object(HH\Map)#4 (1) {
   [123]=>
   string(3) "abc"
 }
-object(HH\Map)#5 (1) {
-  [123]=>
+object(HH\Set)#5 (1) {
   string(3) "abc"
 }
-object(HH\Set)#6 (1) {
-  string(3) "abc"
-}
-object(HH\Vector)#9 (1) {
+object(HH\Vector)#8 (1) {
   [0]=>
   string(3) "abc"
 }
-object(HH\Map)#13 (1) {
+object(HH\Map)#12 (1) {
   [123]=>
   string(3) "abc"
 }
-object(HH\Map)#17 (1) {
-  [123]=>
-  string(3) "abc"
-}
-object(HH\Set)#21 (1) {
+object(HH\Set)#16 (1) {
   string(3) "abc"
 }

@@ -36,8 +36,7 @@
 
 #define DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS()  \
   DECLARE_ITERABLE_MATERIALIZE_METHODS();            \
-  Object t_tomap();                                  \
-  Object t_tostablemap()
+  Object t_tomap()
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1064,8 +1063,6 @@ class c_MapIterator : public ExtObjectData {
   friend class BaseMap;
 };
 
-typedef class c_Map c_StableMap;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -1786,7 +1783,7 @@ inline void collectionOffsetSet(ObjectData* obj, litstr offset, CVarRef val) {
 
 inline bool isOptimizableCollectionClass(const Class* klass) {
   return klass == c_Vector::classof() || klass == c_Map::classof() ||
-         klass == c_StableMap::classof() || klass == c_Pair::classof();
+    klass == c_Pair::classof();
 }
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);

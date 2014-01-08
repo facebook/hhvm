@@ -170,9 +170,6 @@ trait StrictKeyedIterable {
   public function toMap() {
     return new Map($this);
   }
-  public function toStableMap() {
-    return new StableMap($this);
-  }
   public function toSet() {
     return new Set($this);
   }
@@ -294,9 +291,6 @@ trait LazyKeyedIterable {
   }
   public function toMap() {
     return new Map($this);
-  }
-  public function toStableMap() {
-    return new StableMap($this);
   }
   public function toSet() {
     return new Set($this);
@@ -901,9 +895,6 @@ class LazyKeyedIterableView implements KeyedIterable {
   }
   public function toMap() {
     return $this->iterable->toMap();
-  }
-  public function toStableMap() {
-    return $this->iterable->toStableMap();
   }
   public function toSet() {
     return $this->iterable->toSet();

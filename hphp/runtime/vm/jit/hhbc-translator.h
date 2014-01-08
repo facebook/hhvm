@@ -528,9 +528,6 @@ private:
     void emitMapSet(SSATmp* key, SSATmp* value);
     void emitMapGet(SSATmp* key);
     void emitMapIsset();
-    void emitStableMapSet(SSATmp* key, SSATmp* value);
-    void emitStableMapGet(SSATmp* key);
-    void emitStableMapIsset();
 
     // Generate a catch trace that does not perform any final DecRef operations
     // on scratch space, and return its first block.
@@ -604,12 +601,10 @@ private:
       PackedArray,
       // simple opcode on String
       String,
-      // simple opcode on Vector* (c_Vector*)
+      // simple opcode on Vector* (c_Vector* or c_FrozenVector*)
       Vector,
       // simple opcode on Map* (c_Map*)
       Map,
-      // simple opcode on Map* (c_StableMap*)
-      StableMap,
       // simple opcode on Map* (c_Pair*)
       Pair
     };

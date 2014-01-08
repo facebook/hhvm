@@ -2003,6 +2003,7 @@ void Parser::AliasTable::map(std::string alias,
   addAutoImports();
   m_aliases[alias] = (NameEntry){name, type};
 }
+
 /*
  * To be called when we enter a fresh namespace.
  */
@@ -2015,10 +2016,10 @@ void Parser::AliasTable::clear() {
 
 
 /*
- * We auto-alias classes on HH mode and only if we're in the global namespace.
+ * We auto-alias classes only on HH mode.
  */
 bool Parser::isAutoAliasOn() {
-  return m_scanner.isHHSyntaxEnabled() && ("" == m_namespace);
+  return m_scanner.isHHSyntaxEnabled();
 }
 
 std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {

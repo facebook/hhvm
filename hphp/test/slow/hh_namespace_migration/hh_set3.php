@@ -1,12 +1,10 @@
 <?hh
 
-// Test that HH\Set is not "auto-imported" in a named
-// namespace.
-
 namespace Test;
 
+// Test that HH\Set is imported inside of a namespace.
 function main() {
-  $s = new Set(); // Should cause an error.
+  $s = new Set();
 }
 
 main();

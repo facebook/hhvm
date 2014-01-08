@@ -4582,26 +4582,17 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
       BaseMap::EqualityFlavor::OrderIrrelevant, obj1, obj2);
   }
 
-  if (ct != ct2) { return false; }
-
-  switch (ct) {
-    case Collection::VectorType:
-      return c_Vector::Equals(obj1, obj2);
-    case Collection::SetType:
-      return c_Set::Equals(obj1, obj2);
-    case Collection::PairType:
-      return c_Pair::Equals(obj1, obj2);
-    case Collection::FrozenVectorType:
-      return c_FrozenVector::Equals(obj1, obj2);
-    case Collection::FrozenSetType:
-      return c_FrozenSet::Equals(obj1, obj2);
-    case Collection::MapType:
-    case Collection::StableMapType:
-    case Collection::FrozenMapType:
-    default:
-      assert(false);
-      return false;
+  if (Collection::isVectorType(ct) && Collection::isVectorType(ct2)) {
+    return BaseVector::Equals(obj1, obj2);
   }
+
+  if (Collection::isSetType(ct) && Collection::isSetType(ct2)) {
+    return BaseSet::Equals(obj1, obj2);
+  }
+
+  if (ct != ct2) { return false; }
+  assert(ct == Collection::PairType);
+  return c_Pair::Equals(obj1, obj2);
 }
 
 ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {

@@ -13,38 +13,40 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_COMPATIBILITY_H_
-#define incl_HPHP_COMPATIBILITY_H_
+#ifndef incl_HPHP_LOG_FILE_FLUSHER_H_
+#define incl_HPHP_LOG_FILE_FLUSHER_H_
 
-#include <cstdint>
-#include <time.h>
+#include <cstdio>
+#include <atomic>
 #include <unistd.h>
 
-#include "hphp/util/portability.h"
+#include "hphp/util/compatibility.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-#define PHP_DIR_SEPARATOR '/'
+struct LogFileFlusher {
+  LogFileFlusher() {}
+  virtual ~LogFileFlusher() {}
 
-#if defined(__APPLE__) || defined(__FreeBSD__)
-char *strndup(const char* str, size_t len);
-int dprintf(int fd, const char *format, ...) ATTRIBUTE_PRINTF(2,3);
-typedef int clockid_t;
-#endif
+  void recordWriteAndMaybeDropCaches(int fd, int bytes);
+  inline void recordWriteAndMaybeDropCaches(FILE* f, int bytes) {
+    recordWriteAndMaybeDropCaches(fileno(f), bytes);
+  }
 
-int gettime(clockid_t which_clock, struct timespec *tp);
-int64_t gettime_diff_us(const timespec &start, const timespec &end);
+  enum {
+    kDropCacheTail = 1 * 1024 * 1024
+  };
 
-/*
- * Drop the cached pages associated with the file from the file system
- * cache, if supported on our build target.
- *
- * Returns: -1 on error, setting errno according to posix_fadvise
- * values.
- */
-int fadvise_dontneed(int fd, off_t len);
+  static int DropCacheChunkSize;
+
+private: // For testing
+  virtual void dropCache(int fd, off_t len) { fadvise_dontneed(fd, len); }
+
+private:
+  std::atomic<int> m_bytesWritten{0};
+};
 
 //////////////////////////////////////////////////////////////////////
 

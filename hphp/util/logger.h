@@ -23,6 +23,7 @@
 #include "hphp/util/thread-local.h"
 #include "hphp/util/util.h"
 #include "hphp/util/cronolog.h"
+#include "hphp/util/log-file-flusher.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

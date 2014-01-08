@@ -31,6 +31,7 @@
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/file-cache.h"
+#include "hphp/util/log-file-flusher.h"
 
 #include "hphp/parser/scanner.h"
 

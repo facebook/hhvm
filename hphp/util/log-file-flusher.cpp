@@ -13,41 +13,34 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_COMPATIBILITY_H_
-#define incl_HPHP_COMPATIBILITY_H_
+#include "hphp/util/log-file-flusher.h"
 
-#include <cstdint>
-#include <time.h>
+#include <sys/types.h>
 #include <unistd.h>
-
-#include "hphp/util/portability.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-#define PHP_DIR_SEPARATOR '/'
+int LogFileFlusher::DropCacheChunkSize = 1 << 20;
 
-#if defined(__APPLE__) || defined(__FreeBSD__)
-char *strndup(const char* str, size_t len);
-int dprintf(int fd, const char *format, ...) ATTRIBUTE_PRINTF(2,3);
-typedef int clockid_t;
-#endif
+void LogFileFlusher::recordWriteAndMaybeDropCaches(int fd, int bytes) {
+  int oldBytesWritten = m_bytesWritten.fetch_add(bytes);
+  int newBytesWritten = oldBytesWritten + bytes;
 
-int gettime(clockid_t which_clock, struct timespec *tp);
-int64_t gettime_diff_us(const timespec &start, const timespec &end);
+  if (!(newBytesWritten > DropCacheChunkSize &&
+        oldBytesWritten <= DropCacheChunkSize)) {
+    return;
+  }
 
-/*
- * Drop the cached pages associated with the file from the file system
- * cache, if supported on our build target.
- *
- * Returns: -1 on error, setting errno according to posix_fadvise
- * values.
- */
-int fadvise_dontneed(int fd, off_t len);
+  off_t offset = lseek(fd, 0, SEEK_CUR);
+  if (offset > kDropCacheTail) {
+    dropCache(fd, offset - kDropCacheTail);
+  }
+
+  m_bytesWritten = 0;
+}
 
 //////////////////////////////////////////////////////////////////////
 
 }
-
-#endif

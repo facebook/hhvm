@@ -85,5 +85,13 @@ int64_t gettime_diff_us(const timespec &start, const timespec &end) {
   return dsec * 1000000 + dnsec / 1000;
 }
 
+int fadvise_dontneed(int fd, off_t len) {
+#if defined(__FreeBSD__) || defined(__APPLE__)
+  return 0;
+#else
+  return posix_fadvise(fd, 0, len, POSIX_FADV_DONTNEED);
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

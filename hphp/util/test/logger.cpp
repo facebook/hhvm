@@ -13,18 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-#include "hphp/util/logger.h"
 #include <gtest/gtest.h>
+
+#include "hphp/util/log-file-flusher.h"
 
 namespace HPHP {
 
-class MockLogFileFlusher : public LogFileFlusher {
-public:
+struct MockLogFileFlusher : LogFileFlusher {
   MockLogFileFlusher() : last_flush(0) {}
   off_t last_flush;
-protected:
-  void dropCache(int fd, off_t off) {
+
+private:
+  void dropCache(int fd, off_t off) override {
     last_flush = off;
   }
 };

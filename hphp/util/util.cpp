@@ -32,6 +32,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/network.h"
+#include "hphp/util/compatibility.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -297,37 +298,6 @@ static int force_sync(int fd) {
 #endif
 }
 
-int Util::drop_cache(int fd, off_t len /* = 0 */) {
-#if defined(__FreeBSD__) || defined(__APPLE__)
-  return 0;
-#else
-  return posix_fadvise(fd, 0, len, POSIX_FADV_DONTNEED);
-#endif
-}
-
-int Util::drop_cache(FILE *f, off_t len /* = 0 */) {
-  return drop_cache(fileno(f), len);
-}
-
-
-int LogFileFlusher::DropCacheChunkSize = (1 << 20);
-void LogFileFlusher::recordWriteAndMaybeDropCaches(int fd, int bytes) {
-  int oldBytesWritten = m_bytesWritten.fetch_add(bytes);
-  int newBytesWritten = oldBytesWritten + bytes;
-
-  if (!(newBytesWritten > DropCacheChunkSize &&
-        oldBytesWritten <= DropCacheChunkSize)) {
-    return;
-  }
-
-  off_t offset = lseek(fd, 0, SEEK_CUR);
-  if (offset > kDropCacheTail) {
-    dropCache(fd, offset - kDropCacheTail);
-  }
-
-  m_bytesWritten = 0;
-}
-
 int Util::directCopy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
@@ -353,7 +323,7 @@ int Util::directCopy(const char *srcfile, const char *dstfile) {
       err = true;
       Logger::Error("read sync failed: %s",
                     folly::errnoStr(errno).c_str());
-    } else if (drop_cache(srcFd) == -1) {
+    } else if (fadvise_dontneed(srcFd, 0) == -1) {
       err = true;
       Logger::Error("read cache drop failed: %s",
                     folly::errnoStr(errno).c_str());
@@ -365,7 +335,7 @@ int Util::directCopy(const char *srcfile, const char *dstfile) {
       err = true;
       Logger::Error("write sync failed: %s",
                     folly::errnoStr(errno).c_str());
-    } else if (drop_cache(dstFd) == -1) {
+    } else if (fadvise_dontneed(dstFd, 0) == -1) {
       err = true;
       Logger::Error("write cache drop failed: %s",
                     folly::errnoStr(errno).c_str());

@@ -90,12 +90,6 @@ void syncdir(const std::string &dest, const std::string &src,
              bool keepSrc = false);
 
 /**
- * Drop the cached pages associated with the file from the file system cache.
- */
-int drop_cache(int fd, off_t len = 0);
-int drop_cache(FILE *f, off_t len = 0);
-
-/**
  * Copy srcfile to dstfile, return 0 on success, -1 otherwise
  */
 int copy(const char *srcfile, const char *dstfile);
@@ -276,31 +270,6 @@ T& getDataRef(void* base, unsigned offset) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-class LogFileFlusher {
-public:
-  LogFileFlusher() : m_bytesWritten(0) {}
-  virtual ~LogFileFlusher() {}
-
-  void recordWriteAndMaybeDropCaches(int fd, int bytes);
-  inline void recordWriteAndMaybeDropCaches(FILE* f, int bytes) {
-    recordWriteAndMaybeDropCaches(fileno(f), bytes);
-  }
-
-  enum {
-    kDropCacheTail = 1 * 1024 * 1024
-  };
-
-  static int DropCacheChunkSize;
-protected:
-  // For testing
-  virtual void dropCache(int fd, off_t len) {
-    Util::drop_cache(fd, len);
-  }
-
-private:
-  std::atomic<int> m_bytesWritten;
-};
 }
 
 #endif

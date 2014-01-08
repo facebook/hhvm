@@ -40,8 +40,6 @@ using std::string;
 using std::vector;
 namespace fs = boost::filesystem;
 
-static Mutex s_file_mutex;
-
 void Util::split(char delimiter, const char *s, vector<string> &out,
                  bool ignoreEmpty /* = false */) {
   assert(s);

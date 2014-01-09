@@ -56,6 +56,10 @@ const char *FastCGITransport::getUrl() {
   return m_requestURI.c_str();
 }
 
+const std::string FastCGITransport::getScriptFilename() {
+  return m_scriptFilename;
+}
+
 const std::string FastCGITransport::getDocumentRoot() {
   return m_documentRoot;
 }
@@ -331,6 +335,7 @@ void FastCGITransport::onHeadersComplete() {
   m_serverAddr = getRawHeader("SERVER_ADDR");
   m_extendedMethod = getRawHeader("REQUEST_METHOD");
   m_httpVersion = getRawHeader("HTTP_VERSION");
+  m_scriptFilename = getRawHeader("SCRIPT_FILENAME");
   m_documentRoot = getRawHeader("DOCUMENT_ROOT") + "/";
 
   try {

@@ -72,6 +72,14 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   m_originalURL = StringUtil::UrlDecode(m_originalURL, false);
   m_rewritten = false;
 
+  auto scriptFilename = transport->getScriptFilename();
+  if (!scriptFilename.empty()) {
+    // The transport is overriding everything and just handing us the filename
+    m_path = m_absolutePath = scriptFilename;
+    processExt();
+    return true;
+  }
+
   // Fast path for files that exist
   if (vhost->checkExistenceBeforeRewrite()) {
     String canon(

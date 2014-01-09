@@ -2000,6 +2000,102 @@ Object c_StableMap::t_filterwithkey(CVarRef callback) {
   return php_filterWithKey<c_StableMap>(callback);
 }
 
+Object BaseMap::php_retain(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  ++m_version;
+  auto size = m_size;
+  if (!size) { return this; }
+
+  uint32_t used = iterLimit();
+  for (int32_t i = 0; i < used; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
+    Variant ret;
+    int32_t version = m_version;
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+    if (UNLIKELY(version != m_version)) {
+      throw_collection_modified();
+    }
+    if (ret.toBoolean()) continue;
+
+    // checking version above allows us to defer compaction, since we
+    // know that no operations that mutate internal state have been
+    // allowed to happen inside this loop other than this erase
+    int32_t* pos = (p.hasIntKey()
+                    ? findForInsert(p.ikey)
+                    : findForInsert(p.skey, p.skey->hash()));
+    eraseNoCompact(pos);
+  }
+  assert(m_size <= size);
+  if (m_size < size) { compactIfNecessary(); }
+  return this;
+}
+
+Object c_Map::t_retain(CVarRef callback) {
+  return php_retain(callback);
+}
+
+Object c_StableMap::t_retain(CVarRef callback) {
+  return php_retain(callback);
+}
+
+Object BaseMap::php_retainWithKey(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  ++m_version;
+  auto size = m_size;
+  if (!size) { return this; }
+
+  uint32_t used = iterLimit();
+  for (int32_t i = 0; i < used; ++i) {
+    Elm& p = data()[i];
+    if (isTombstone(i)) continue;
+    Variant ret;
+    TypedValue args[2] = {
+      (p.hasIntKey()
+       ? make_tv<KindOfInt64>(p.ikey)
+       : make_tv<KindOfString>(p.skey)),
+      p.data
+    };
+    int32_t version = m_version;
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
+    if (UNLIKELY(version != m_version)) {
+      throw_collection_modified();
+    }
+    if (ret.toBoolean()) continue;
+
+    // checking version above allows us to defer compaction, since we
+    // know that no operations that mutate internal state have been
+    // allowed to happen inside this loop other than this erase
+    int32_t* pos = (p.hasIntKey()
+                    ? findForInsert(p.ikey)
+                    : findForInsert(p.skey, p.skey->hash()));
+    eraseNoCompact(pos);
+  }
+  assert(m_size <= size);
+  if (m_size < size) { compactIfNecessary(); }
+  return this;
+}
+
+Object c_Map::t_retainwithkey(CVarRef callback) {
+  return php_retainWithKey(callback);
+}
+
+Object c_StableMap::t_retainwithkey(CVarRef callback) {
+  return php_retainWithKey(callback);
+}
+
 template<typename TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
@@ -2448,7 +2544,7 @@ retry:
   ++m_version;
 }
 
-void BaseMap::erase(int32_t* pos) {
+void BaseMap::eraseNoCompact(int32_t* pos) {
   assert(validPos(*pos) && !isTombstone(*pos));
   assert(data());
   Elm* elms = data();
@@ -2467,12 +2563,11 @@ void BaseMap::erase(int32_t* pos) {
   assert(m_used <= m_cap);
   // Finally, decref the old value
   tvRefcountedDecRefHelper(oldType, oldDatum);
-  // Compact in order to keep elms from being overly sparse. Other parts
-  // of Map's implementation rely on the fact that erase() does not allow
-  // the Elm density to drop below ~50%.
-  if (isDensityTooLow()) {
-    compact();
-  }
+}
+
+void BaseMap::erase(int32_t* pos) {
+  eraseNoCompact(pos);
+  compactIfNecessary();
 }
 
 NEVER_INLINE void BaseMap::makeRoom() {
@@ -2546,7 +2641,8 @@ void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
   m_used = m_size;
 }
 
-void BaseMap::compact() {
+void BaseMap::compactIfNecessary() {
+  if (!isDensityTooLow()) { return; }
   auto* elms = data();
   assert(elms);
   auto mask = m_tableMask;

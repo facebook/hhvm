@@ -761,6 +761,7 @@ class BaseMap : public ExtCollectionObjectData {
   void update(StringData* key, TypedValue* data);
 
   void erase(int32_t* pos);
+  void eraseNoCompact(int32_t* pos);
 
   bool isFull() { return m_used == m_cap; }
   bool isDensityTooLow() const { return (m_size < m_used / 2); }
@@ -774,7 +775,7 @@ class BaseMap : public ExtCollectionObjectData {
   void reserve(int64_t sz);
 
   void grow(uint32_t newCap, uint32_t newMask);
-  void compact();
+  void compactIfNecessary();
 
   BaseMap::Elm& allocElm(int32_t* ei) {
     assert(!validPos(*ei) && m_size <= m_used && m_used < m_cap);
@@ -928,6 +929,9 @@ class BaseMap : public ExtCollectionObjectData {
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_filterWithKey(CVarRef callback) const;
 
+  Object php_retain(CVarRef callback);
+  Object php_retainWithKey(CVarRef callback);
+
   template<typename TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
@@ -988,6 +992,8 @@ class c_Map : public BaseMap {
   Object t_mapwithkey(CVarRef callback);
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
+  Object t_retain(CVarRef callback);
+  Object t_retainwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
@@ -1106,6 +1112,8 @@ class c_StableMap : public BaseMap {
   Object t_mapwithkey(CVarRef callback); // const
   Object t_filter(CVarRef callback); // const
   Object t_filterwithkey(CVarRef callback); // const
+  Object t_retain(CVarRef callback);
+  Object t_retainwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable); // const
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);

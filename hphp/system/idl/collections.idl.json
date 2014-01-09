@@ -1649,7 +1649,7 @@
                     "name": "filter",
                     "flags": [
                     ],
-                    "desc": "Returns a Map of all the keys/values from this Map for which the specified callback returns true.",
+                    "desc": "Returns a new Map of all the keys/values from this Map for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -1664,7 +1664,37 @@
                     "name": "filterWithKey",
                     "flags": [
                     ],
-                    "desc": "Returns a Map of all the keys/values from this Map for which the specified callback returns true.",
+                    "desc": "Returns a new Map of all the keys/values from this Map for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "retain",
+                    "flags": [
+                    ],
+                    "desc": "Ensures that this Map contains only keys/values for which the specified callback returns true when passed the value.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "retainWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Ensures that this Map contains only keys/values for which the specified callback returns true when passed the key and the value.",
                     "return": {
                         "type": "Object"
                     },
@@ -2774,6 +2804,36 @@
                     "flags": [
                     ],
                     "desc": "Returns a StableMap of all the keys/values from this StableMap for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "retain",
+                    "flags": [
+                    ],
+                    "desc": "Ensures that this StableMap contains only keys/values for which the specified callback returns true when passed the value.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "retainWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Ensures that this StableMap contains only keys/values for which the specified callback returns true when passed the key and the value.",
                     "return": {
                         "type": "Object"
                     },

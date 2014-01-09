@@ -133,7 +133,7 @@ Array Array::intersect(CVarRef array, bool by_key, bool by_value,
                   value_cmp_function, value_data);
 }
 
-int Array::CompareAsStrings(CVarRef v1, CVarRef v2, const void *data) {
+static int CompareAsStrings(CVarRef v1, CVarRef v2, const void *data) {
   return HPHP::same(HPHP::toString(v1), HPHP::toString(v2)) ? 0 : -1;
 }
 
@@ -665,10 +665,6 @@ void Array::remove(CVarRef key) {
   if (!k.isNull()) {
     removeImpl(k);
   }
-}
-
-void Array::removeAll() {
-  operator=(Create());
 }
 
 CVarRef Array::append(CVarRef v) {

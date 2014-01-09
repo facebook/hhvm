@@ -705,12 +705,12 @@ struct InterpStepper : boost::static_visitor<void> {
     if (!locCouldBeUninit(cgetl.loc1)) nothrow();
 
     auto const negate = jmp.op == Op::JmpNZ;
-    auto const converted_true = [&] {
+    auto const converted_true = [&]() -> const Type {
       if (is_opt(loc)) return unopt(loc);
       if (loc.subtypeOf(TBool)) return TTrue;
       return loc;
     }();
-    auto const converted_false = [&] {
+    auto const converted_false = [&]() -> const Type {
       if (!could_have_magic_bool_conversion(loc) && loc.subtypeOf(TOptObj)) {
         return TInitNull;
       }

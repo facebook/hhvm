@@ -348,7 +348,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         }
 
         case DefInlineSP: {
-          if (auto const fp = findPassFP(inst.src(1)->inst())) {
+          if (findPassFP(inst.src(1)->inst())) {
             ITRACE(4, "replacing {} with PassSP\n", inst);
             unit.replace(&inst, PassSP, inst.src(0));
             break;
@@ -357,7 +357,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         }
 
         case StLoc: {
-          if (auto const fp = findPassFP(inst.src(0)->inst())) {
+          if (findPassFP(inst.src(0)->inst())) {
             ITRACE(4, "marking {} as dead\n", inst);
             state[inst].setDead();
           }

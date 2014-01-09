@@ -4403,7 +4403,7 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr) {
 }
 
 template<typename TVector>
-static ObjectData* collectionDeepCopyBaseVector(TVector *vec) {
+ObjectData* collectionDeepCopyBaseVector(TVector *vec) {
   vec = TVector::Clone(vec);
   Object o = Object::attach(vec);
   size_t sz = vec->m_size;

@@ -220,6 +220,7 @@ class Options {
   public static bool $csv_only = false;
   public static bool $csv_header = false;
   public static bool $force_redownload = false;
+  public static bool $get_latest_framework_code = false;
   public static bool $generate_new_expect_file = false;
   public static string $zend_path = null;
   public static bool $all = false;
@@ -227,8 +228,14 @@ class Options {
   public static bool $test_by_single_test = false;
   public static string $results_root;
   public static string $script_errors_file;
+  public static Map $framework_code_commits;
+  public static Map $original_framework_code_commits;
 
   public static function parse(OptionInfoMap $options, array $argv): Vector {
+    self::$framework_code_commits = Map::fromArray(json_decode(
+      file_get_contents(__DIR__."/frameworks.json"), true));
+    self::$original_framework_code_commits =
+      self::$framework_code_commits->toMap();
     self::$results_root = __DIR__."/results";
     // Put any script error to a file when we are in a mode like --csv and
     // want to control what gets printed to something like STDOUT.
@@ -317,12 +324,30 @@ class Options {
       $framework_names->removeKey(0);
     }
 
-    if ($options->containsKey('redownload')) {
+    if ($options->containsKey('redownload') &&
+        $options->containsKey('latest')) {
+      error_and_exit("Cannot use --redownload and --latest together");
+    } else if ($options->containsKey('redownload') &&
+               $options->containsKey('latest-record')) {
+      error_and_exit("Cannot use --redownload and --latest-record together");
+    } else if ($options->containsKey('redownload')) {
       self::$force_redownload = true;
+      $framework_names->removeKey(0);
+    } else if ($options->containsKey('latest')) {
+      self::$get_latest_framework_code = true;
       $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('record')) {
+      self::$generate_new_expect_file = true;
+      $framework_names->removeKey(0);
+    }
+
+    // Probably bad practice to have --latest --record --latest-record, but it
+    // is not a contradiction. If you have those, we are just double setting
+    // variables to true.
+    if ($options->containsKey('latest-record')) {
+      self::$get_latest_framework_code = true;
       self::$generate_new_expect_file = true;
       $framework_names->removeKey(0);
     }
@@ -354,6 +379,7 @@ abstract class Framework {
   private string $install_root;
   private string $git_path;
   private string $git_commit;
+  private string $git_branch;
   private Set $blacklist;
   private Set $clownylist;
   private Vector $pull_requests;
@@ -379,7 +405,6 @@ abstract class Framework {
     $info = $this->getInfo();
     if (!$info->containsKey("install_root") ||
         !$info->containsKey("git_path") ||
-        !$info->containsKey("git_commit") ||
         !$info->containsKey("test_path")) {
       throw new Exception("Provide install, git and test file search info");
     }
@@ -388,7 +413,8 @@ abstract class Framework {
     // properties for a proper install, with pull_requests being optional.
     $this->setInstallRoot($info->get("install_root"));
     $this->setGitPath($info->get("git_path"));
-    $this->setGitCommit($info->get("git_commit"));
+    $this->setGitCommit(Options::$framework_code_commits[$name]['commit']);
+    $this->setGitBranch(Options::$framework_code_commits[$name]['branch']);
     $this->setPullRequests($info->get("pull_requests"));
     $this->setBlacklist($info->get("blacklist"));
     $this->setClownylist($info->get("clownylist"));
@@ -520,6 +546,10 @@ abstract class Framework {
 
   private function setGitCommit(string $git_commit): void {
     $this->git_commit = $git_commit;
+  }
+
+  private function setGitBranch(string $git_branch): void {
+    $this->git_branch = $git_branch;
   }
 
   private function setBlacklist(?Set $blacklist): void {
@@ -829,26 +859,40 @@ abstract class Framework {
   }
 
   protected function isInstalled(): bool {
-    /****************************************
-     *  See if framework is already installed
-     *  installed.
-     ***************************************/
-    $git_head_file =$this->install_root."/.git/HEAD";
+    /*****************************************
+     *  See if framework is already installed.
+     *****************************************/
     if (!(file_exists($this->install_root))) {
       return false;
-    } else if (Options::$force_redownload) {
-      verbose("Forced redownloading of ".$this->name."...\n",
-              !Options::$csv_only);
-      remove_dir_recursive($this->install_root);
-      return false;
-    // The commit hash has changed and we need to redownload
-    } else if (trim(file_get_contents($git_head_file)) !==
-               $this->git_commit) {
+    }
+
+    // Get current branch/hash information
+    $git_head_file =$this->install_root."/.git/HEAD";
+    $git_head_info = trim(file_get_contents($git_head_file));
+
+    // The commit hash has changed and we need to download new code
+    if ($git_head_info !== $this->git_commit) {
       verbose("Redownloading ".$this->name." because git commit changed...\n",
               !Options::$csv_only);
       remove_dir_recursive($this->install_root);
       return false;
     }
+
+    if (Options::$force_redownload) {
+      verbose("Forced redownloading of ".$this->name."...\n",
+              !Options::$csv_only);
+      remove_dir_recursive($this->install_root);
+      return false;
+    }
+
+    if (Options::$get_latest_framework_code) {
+      verbose("Get latest code for ".$this->name."...\n",
+              !Options::$csv_only);
+      remove_dir_recursive($this->install_root);
+      return false;
+    }
+
+    verbose($this->name." already installed.\n", Options::$verbose);
     return true;
   }
 
@@ -860,16 +904,29 @@ abstract class Framework {
     verbose("Retrieving framework ".$this->name."....\n", Options::$verbose);
     $git_command = "git clone";
     $git_command .= " ".$this->git_path;
+    $git_command .= " -b ".$this->git_branch;
     $git_command .= " ".$this->install_root;
 
     // "frameworks" directory will be created automatically on first git clone
     // of a framework.
+
     $git_ret = run_install($git_command, __DIR__, ProxyInformation::$proxies);
     if ($git_ret !== 0) {
       error_and_exit("Could not download framework ".$this->name."!\n",
                      Options::$csv_only);
     }
-    // Checkout out our baseline test code via SHA
+
+    // If we are using --latest or --latest-record, we checkout from a branch
+    // above, then get an updated commit hash to put in our frameworks.json file
+    if (Options::$get_latest_framework_code) {
+      $this->git_commit = trim(file_get_contents($this->install_root.
+                                                 "/.git/refs/heads/".
+                                                 $this->git_branch));
+      Options::$framework_code_commits[$this->name]['commit'] =
+        $this->git_commit;
+    }
+
+    // Checkout out our baseline test code via SHA or branch
     $git_command = "git checkout";
     $git_command .= " ".$this->git_commit;
     $git_ret = run_install($git_command, $this->install_root,
@@ -1085,8 +1142,7 @@ class Assetic extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/assetic",
-      "git_path" => "https://github.com/ptarjan/assetic.git",
-      'git_commit' => "0aada83090e28eff7a6a112f4e2d1a583f017242",
+      "git_path" => "https://github.com/kriswallsmith/assetic.git",
       "test_path" => __DIR__."/frameworks/assetic",
     };
   }
@@ -1099,7 +1155,6 @@ class Monolog extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/monolog",
       "git_path" => "https://github.com/Seldaek/monolog.git",
-      'git_commit' => "6225b22de9dcf36546be3a0b2fa8e3d986153f57", // stable 1.7
       "test_path" => __DIR__."/frameworks/monolog",
     };
   }
@@ -1111,8 +1166,6 @@ class ReactPHP extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/reactphp",
       "git_path" => "https://github.com/reactphp/react.git",
-      # current stable - v0.3.3
-      'git_commit' => "210c11a6041cfa2ce1701a4870b69475d9081265",
       "test_path" => __DIR__."/frameworks/reactphp",
     };
   }
@@ -1124,8 +1177,6 @@ class Ratchet extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/ratchet",
       "git_path" => "https://github.com/cboden/Ratchet.git",
-      # current stable - v0.3.0
-      'git_commit' => "d756e0b507a5f3cdbf8c59dbb7baf68574dc7d58",
       "test_path" => __DIR__."/frameworks/ratchet",
     };
   }
@@ -1137,7 +1188,6 @@ class CodeIgniter extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/CodeIgniter",
       "git_path" => "https://github.com/EllisLab/CodeIgniter.git",
-      "git_commit" => "b6fbcbefc8e6e883773f8f5d447413c367da9aaa",
       "test_path" => __DIR__."/frameworks/CodeIgniter/tests",
     };
   }
@@ -1149,7 +1199,6 @@ class Composer extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/composer",
       "git_path" => "https://github.com/composer/composer.git",
-      "git_commit" => "7defc95e4b9eded1156386b269a9d7d28fa73710",
       "test_path" => __DIR__."/frameworks/composer",
     };
   }
@@ -1161,16 +1210,7 @@ class Doctrine2 extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/doctrine2",
       "git_path" => "https://github.com/doctrine/doctrine2.git",
-      "git_commit" => "75d7ac2783345803da1cc211735382f7a4c5d055",
       "test_path" => __DIR__."/frameworks/doctrine2",
-      "pull_requests" => Vector {
-        Map {
-          'pull_dir' => __DIR__."/frameworks/doctrine2/vendor/doctrine/dbal",
-          'pull_repository' => "https://github.com/javer/dbal",
-          'git_commit' => "hhvm-pdo-implement-interfaces",
-          'type' => 'pull',
-        },
-      },
     };
   }
 }
@@ -1181,7 +1221,6 @@ class Drupal extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/drupal",
       "git_path" => "https://github.com/drupal/drupal.git",
-      "git_commit" => "adaf8355074ba3e142f61e10f1790382db5defb9",
       "test_path" => __DIR__."/frameworks/drupal/core",
       "clownylist" => Set {
         __DIR__."/frameworks/drupal/core/modules/views/tests/".
@@ -1197,7 +1236,6 @@ class FacebookPhpSdk extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/facebook-php-sdk",
       "git_path" => "https://github.com/facebook/facebook-php-sdk.git",
-      "git_commit" => "16d696c138b82003177d0b4841a3e4652442e5b1",
       "test_path" => __DIR__."/frameworks/facebook-php-sdk",
       "test_file_pattern" => PHPUnitPatterns::$facebook_sdk_test_file_pattern,
       "test_command" => get_runtime_build()." ".__DIR__.
@@ -1244,7 +1282,6 @@ class Idiorm extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/idiorm",
       "git_path" => "https://github.com/j4mie/idiorm.git",
-      "git_commit" => "3be516b440734811b58bb9d0b458a4109b49af71",
       "test_path" => __DIR__."/frameworks/idiorm",
     };
   }
@@ -1255,9 +1292,7 @@ class Joomla extends Framework {
   protected function getInfo(): Map {
     return Map {
       'install_root' => __DIR__.'/frameworks/joomla-framework',
-      // 'git_path' => 'https://github.com/joomla/joomla-framework.git',
-      'git_path' => 'https://github.com/elgenie/joomla-framework',
-      'git_commit' => 'f87645575d9f6be213bf34fda3ec5bcf0eeef7a0',
+      'git_path' => 'https://github.com/joomla/joomla-framework.git',
       'test_path' => __DIR__.'/frameworks/joomla-framework',
       "clownylist" => Set {
         // These are subtests which need their own composer set and aren't run
@@ -1295,7 +1330,6 @@ class Laravel extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/laravel",
       "git_path" => "https://github.com/laravel/framework.git",
-      "git_commit" => "77eab893edd30ccc42722358bee69b1ccea24f6a",
       "test_path" => __DIR__."/frameworks/laravel",
       "args_for_tests" => Map {
         __DIR__."/frameworks/laravel/./tests/Auth/AuthGuardTest.php"
@@ -1314,7 +1348,6 @@ class Magento2 extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/magento2",
       "git_path" => "https://github.com/magento/magento2.git",
-      "git_commit" => "a15ecb31976feb4ecb62f85257ff6b606fbdbc00",
       "test_path" => __DIR__."/frameworks/magento2/dev/tests/unit",
     };
   }
@@ -1328,13 +1361,17 @@ class Mediawiki extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/mediawiki-core",
+      // Changing from ptarjan to wikimedia causes a FATAL in the test
+      // script. So some code change in wikimedia between Paul's forked
+      // change and the time it was pulled into wikimedia master on
+      // Nov 22, 2013 is causing problems.
       "git_path" => "https://github.com/ptarjan/mediawiki-core.git",
-      "git_commit" => "2a280fcfccfd48fe5bf9479ca02d986367fa33e9",
       "test_path" => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       "test_file_pattern" => PHPUnitPatterns::$mediawiki_test_file_pattern,
       "config_file" => __DIR__.
                       "/frameworks/mediawiki-core/tests/phpunit/suite.xml",
-      "test_command" => get_runtime_build()." phpunit.php ".
+      "test_command" => get_runtime_build()." ".__DIR__.
+                        "/frameworks/mediawiki-core/tests/phpunit/phpunit.php ".
                         "--exclude-group=Database,Broken",
       "clownylist" => Set {
         __DIR__."/frameworks/mediawiki-core/tests/phpunit/".
@@ -1361,7 +1398,6 @@ class Paris extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/paris",
       "git_path" => "https://github.com/j4mie/paris.git",
-      "git_commit" => "b60d0857d10dec757427b336c427c1f13b6a5e48",
       "test_path" => __DIR__."/frameworks/paris",
     };
   }
@@ -1377,7 +1413,6 @@ class Pear extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/pear-core",
       "git_path" => "https://github.com/pear/pear-core.git",
-      "git_commit" => "e379594cef09079be131d2fbbb19b1c2256872c2",
       "test_path" => __DIR__."/frameworks/pear-core",
       "test_name_pattern" => PHPUnitPatterns::$pear_test_name_pattern,
       "test_file_pattern" => PHPUnitPatterns::$pear_test_file_pattern,
@@ -1552,7 +1587,6 @@ class Phpbb3 extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/phpbb3",
       "git_path" => "https://github.com/phpbb/phpbb.git",
-      "git_commit" => "b474917ba3fbb26e50a7145fa904efec949f20ce",
       "test_path" => __DIR__."/frameworks/phpbb3",
       "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       // This may work if we increase the timeout. Blacklist for now
@@ -1572,7 +1606,6 @@ class PhpMyAdmin extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/phpmyadmin",
       "git_path" => "https://github.com/phpmyadmin/phpmyadmin.git",
-      "git_commit" => "0ce072a3530694bcb0e2e0e3d91874bee6d9a6c4",
       "test_path" => __DIR__."/frameworks/phpmyadmin",
       "config_file" => __DIR__.
                        "/frameworks/phpmyadmin/phpunit.xml.nocoverage",
@@ -1589,7 +1622,6 @@ class PHPUnit extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/phpunit",
       "git_path" => "https://github.com/sebastianbergmann/phpunit.git",
-      "git_commit" => "236f65cc97d6beaa8fcb8a27b19bd278f3912677",
       "test_path" => __DIR__."/frameworks/phpunit",
       "test_command" => get_runtime_build()." ".__DIR__.
                         "/frameworks/phpunit/phpunit.php",
@@ -1606,9 +1638,8 @@ class SilverStripe extends Framework {
   protected function getInfo(): Map {
     return Map {
       'install_root' => __DIR__.'/frameworks/silverstripe',
-      'git_path' => 'https://github.com/silverstripe/'
-        . 'silverstripe-installer.git',
-      'git_commit' => 'c7fe54d08200e09094c7a6087572cc9d116c5774',
+      'git_path' => 'https://github.com/silverstripe/'.
+                    'silverstripe-installer.git',
       'test_path' => __DIR__.'/frameworks/silverstripe',
     };
   }
@@ -1677,10 +1708,7 @@ class Slim extends Framework {
   protected function getInfo(): Map {
     return Map {
       'install_root' => __DIR__.'/frameworks/Slim',
-      // Using a branch from https://github.com/codeguy/Slim to access an
-      // upstream hash_hmac fix
-      'git_path' => 'https://github.com/elgenie/Slim.git',
-      'git_commit' => '1beca31c1f0b0a7bb7747d9367fb07c07e190a8d',
+      'git_path' => 'https://github.com/codeguy/Slim',
       'test_path' => __DIR__.'/frameworks/Slim',
       'test_command' => get_runtime_build()
         .' -vServer.IniFile='.__DIR__.'/php_notice.ini'
@@ -1697,8 +1725,7 @@ class Symfony extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/symfony",
-      "git_path" => "https://github.com/JoelMarcey/symfony.git",
-      "git_commit" => "4016b4ed7f732211f6093d59913ff84e3cb1d729",
+      "git_path" => "https://github.com/symfony/symfony.git",
       "test_path" => __DIR__."/frameworks/symfony",
       "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       "blacklist" => Set {
@@ -1721,7 +1748,6 @@ class Twig extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/Twig",
       "git_path" => "https://github.com/fabpot/Twig.git",
-      "git_commit" => "2d012c4a4ae41cdf1682a10b3d567becc38a2d39",
       "test_path" => __DIR__."/frameworks/Twig",
     };
   }
@@ -1733,7 +1759,6 @@ class Yii extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/yii",
       "git_path" => "https://github.com/yiisoft/yii.git",
-      "git_commit" => "3deee8ee7d67122c21b5938109b37ba570caa761",
       "test_path" => __DIR__."/frameworks/yii/tests",
       "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       "clownylist" => Set {
@@ -1799,8 +1824,7 @@ class Zf2 extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/zf2",
-      "git_path" => "https://github.com/JoelMarcey/zf2.git",
-      "git_commit" => "b03b54c40fba11eb236e4ab710a1c55973633588",
+      "git_path" => "https://github.com/zendframework/zf2.git",
       "test_path" => __DIR__."/frameworks/zf2/tests",
       "blacklist" => Set {
         __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".
@@ -2591,6 +2615,18 @@ THUMBSDOWN
 
   // Print out summary information
   print_summary_information($summary_file);
+
+  // Update any git hashes in case --latest or --latest-record was used and we
+  // changed the hashes currently in frameworks.json. Use md5 of the original
+  // and current maps to see if we are different
+  if (md5(serialize(Options::$original_framework_code_commits)) !==
+      md5(serialize(Options::$framework_code_commits))) {
+    verbose("Updating frameworks.json because some hashes have been updated",
+            !Options::$csv_only);
+    file_put_contents(__DIR__."/frameworks.json",
+                      json_encode(Options::$framework_code_commits,
+                                  JSON_PRETTY_PRINT));
+  }
 }
 
 function run_test_bucket(array $test_bucket): int {
@@ -2864,9 +2900,19 @@ function oss_test_option_map(): OptionInfoMap {
                                         "and the path to the zend binary".
                                         "specified."},
     'redownload'          => Pair {'',  "Forces a redownload of the framework ".
-                                        "code and dependencies."},
+                                        "code and dependencies. This uses ".
+                                        "the current git hash associated with ".
+                                        "the current download."},
     'record'              => Pair {'',  "Forces a new expect file for the ".
                                         "framework test suite"},
+    'latest-record'       => Pair {'',  "Forces a complete update of a ".
+                                        "framework. The code is updated with ".
+                                        "the latest and greatest hash of the ".
+                                        "current branch (e.g., master) and ".
+                                        "the expect file is updated."},
+    'latest'              => Pair {'',  "Forces framework code to be updated ".
+                                        "with the latest and greatest hash of ".
+                                        "the current branch (e.g., master)."},
     'csv'                 => Pair {'',  "Just create the machine readable ".
                                         "summary CSV for parsing and chart ".
                                         "display."},

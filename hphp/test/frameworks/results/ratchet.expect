@@ -1,0 +1,792 @@
+Ratchet\AbstractConnectionDecoratorTest::testDecoratorRecursion
+.
+Ratchet\AbstractConnectionDecoratorTest::testDecoratorRecursionLevel2
+.
+Ratchet\AbstractConnectionDecoratorTest::testGet
+.
+Ratchet\AbstractConnectionDecoratorTest::testGetConnection
+.
+Ratchet\AbstractConnectionDecoratorTest::testGetConnectionLevel2
+.
+Ratchet\AbstractConnectionDecoratorTest::testIsSetFalse
+.
+Ratchet\AbstractConnectionDecoratorTest::testIsSetTrue
+.
+Ratchet\AbstractConnectionDecoratorTest::testSet
+.
+Ratchet\AbstractConnectionDecoratorTest::testSetLevel2
+.
+Ratchet\AbstractConnectionDecoratorTest::testUnset
+.
+Ratchet\AbstractConnectionDecoratorTest::testUnsetLevel2
+.
+Ratchet\AbstractConnectionDecoratorTest::testWarningGettingNothing
+F
+Ratchet\AbstractConnectionDecoratorTest::testWarningGettingNothingLevel1
+F
+Ratchet\AbstractConnectionDecoratorTest::testWarningGettingNothingLevel2
+F
+Ratchet\AbstractConnectionDecoratorTest::testWrapperCanStoreSelfInDecorator
+.
+Ratchet\Application\Server\FlashPolicyTest::testAddAllowedAccessOnlyAcceptsValidPorts
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #0
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #1
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #10
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #11
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #12
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #13
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #14
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #15
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #16
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #2
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #3
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #4
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #5
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #6
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #7
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #8
+.
+Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #9
+.
+Ratchet\Application\Server\FlashPolicyTest::testErrorClosesConnection
+.
+Ratchet\Application\Server\FlashPolicyTest::testInvalidDomainPolicyReader
+.
+Ratchet\Application\Server\FlashPolicyTest::testInvalidPolicyReader
+.
+Ratchet\Application\Server\FlashPolicyTest::testOnCloseExists
+.
+Ratchet\Application\Server\FlashPolicyTest::testOnMessageSendsString
+.
+Ratchet\Application\Server\FlashPolicyTest::testOnOpenExists
+.
+Ratchet\Application\Server\FlashPolicyTest::testPolicyRender
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #0
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #1
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #10
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #11
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #12
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #13
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #2
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #3
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #4
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #5
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #6
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #7
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #8
+.
+Ratchet\Application\Server\FlashPolicyTest::testPortValidation with data set #9
+.
+Ratchet\Application\Server\FlashPolicyTest::testSetSiteControlThrowsException
+.
+Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #0
+.
+Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #1
+.
+Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #2
+.
+Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #3
+.
+Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #4
+.
+Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #5
+.
+Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #6
+.
+Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #7
+.
+Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #8
+.
+Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #9
+.
+Ratchet\Application\Server\IoConnectionTest::testCloseBubbles
+.
+Ratchet\Application\Server\IoConnectionTest::testSendBubbles
+.
+Ratchet\Application\Server\IoConnectionTest::testSendReturnsSelf
+.
+Ratchet\Http\Guzzle\Http\Message\RequestFactoryTest::testExpectedDataFromGuzzleHeaders
+.
+Ratchet\Http\Guzzle\Http\Message\RequestFactoryTest::testExpectedDataFromNonGuzzleBody
+.
+Ratchet\Http\Guzzle\Http\Message\RequestFactoryTest::testExpectedDataFromNonGuzzleHeaders
+.
+Ratchet\Http\Guzzle\Http\Message\RequestFactoryTest::testMessageProvider
+.
+Ratchet\Http\HttpRequestParserTest::testBufferOverflowResponse
+.
+Ratchet\Http\HttpRequestParserTest::testIsEom with data set #0
+.
+Ratchet\Http\HttpRequestParserTest::testIsEom with data set #1
+.
+Ratchet\Http\HttpRequestParserTest::testIsEom with data set #2
+.
+Ratchet\Http\HttpRequestParserTest::testIsEom with data set #3
+.
+Ratchet\Http\HttpRequestParserTest::testIsEom with data set #4
+.
+Ratchet\Http\HttpRequestParserTest::testIsEom with data set #5
+.
+Ratchet\Http\HttpRequestParserTest::testReturnTypeIsRequest
+.
+Ratchet\Http\HttpServerTest::testBufferHeaders
+.
+Ratchet\Http\HttpServerTest::testBufferOverflow
+.
+Ratchet\Http\HttpServerTest::testCloseIfNotEstablished
+.
+Ratchet\Http\HttpServerTest::testOnClose
+.
+Ratchet\Http\HttpServerTest::testOnError
+.
+Ratchet\Http\HttpServerTest::testOnMessageAfterHeaders
+.
+Ratchet\Http\HttpServerTest::testOpen
+.
+Ratchet\Http\OriginCheckTest::testCloseOnNonMatchingOrigin
+.
+Ratchet\Http\OriginCheckTest::testOnClose
+.
+Ratchet\Http\OriginCheckTest::testOnError
+.
+Ratchet\Http\OriginCheckTest::testOnMessage
+.
+Ratchet\Http\OriginCheckTest::testOpen
+.
+Ratchet\Http\RouterTest::testControllerIsMessageComponentInterface
+.
+Ratchet\Http\RouterTest::testControllerOnCloseBubbles
+.
+Ratchet\Http\RouterTest::testControllerOnErrorBubbles
+.
+Ratchet\Http\RouterTest::testControllerOnMessageBubbles
+.
+Ratchet\Http\RouterTest::testControllerOnOpen
+.
+Ratchet\Http\RouterTest::testFourOhFour
+.
+Ratchet\Http\RouterTest::testNullRequest
+.
+Ratchet\Server\EchoServerTest::testErrorClosesConnection
+.
+Ratchet\Server\EchoServerTest::testMessageEchod
+.
+Ratchet\Server\IoServerTest::testFactory
+.
+Ratchet\Server\IoServerTest::testNoLoopProvidedError
+.
+Ratchet\Server\IoServerTest::testOnClose
+.
+Ratchet\Server\IoServerTest::testOnData
+.
+Ratchet\Server\IoServerTest::testOnErrorPassesException
+.
+Ratchet\Server\IoServerTest::testOnOpen
+.
+Ratchet\Server\IpBlackListTest::testAddAndRemoveWithFluentInterfaces
+.
+Ratchet\Server\IpBlackListTest::testBlockClosesConnection
+.
+Ratchet\Server\IpBlackListTest::testBlockDoesNotTriggerOnClose
+.
+Ratchet\Server\IpBlackListTest::testBlockDoesNotTriggerOnOpen
+.
+Ratchet\Server\IpBlackListTest::testDecoratorPassesErrors
+.
+Ratchet\Server\IpBlackListTest::testFilterAddress with data set #0
+.
+Ratchet\Server\IpBlackListTest::testFilterAddress with data set #1
+.
+Ratchet\Server\IpBlackListTest::testFilterAddress with data set #2
+.
+Ratchet\Server\IpBlackListTest::testFilterAddress with data set #3
+.
+Ratchet\Server\IpBlackListTest::testOnCloseDecoration
+.
+Ratchet\Server\IpBlackListTest::testOnMessageDecoration
+.
+Ratchet\Server\IpBlackListTest::testOnOpen
+.
+Ratchet\Server\IpBlackListTest::testUnblockingSilentlyFails
+.
+Ratchet\Session\Serialize\PhpHandlerTest::testUnserialize with data set #0
+.
+Ratchet\Session\SessionProviderTest::testConnectionValueFromPdo
+E
+Ratchet\Session\SessionProviderTest::testGetSubProtocolsGetFromApp
+E
+Ratchet\Session\SessionProviderTest::testGetSubProtocolsReturnsArray
+E
+Ratchet\Session\SessionProviderTest::testOnClose
+E
+Ratchet\Session\SessionProviderTest::testOnError
+E
+Ratchet\Session\SessionProviderTest::testOnMessageDecorator
+E
+Ratchet\Session\SessionProviderTest::testOpen
+E
+Ratchet\Session\SessionProviderTest::testRejectInvalidSeralizers
+E
+Ratchet\Session\SessionProviderTest::testToClassCase with data set #0
+E
+Ratchet\Session\SessionProviderTest::testToClassCase with data set #1
+E
+Ratchet\Wamp\ServerProtocolTest::testCall with data set #0
+.
+Ratchet\Wamp\ServerProtocolTest::testCall with data set #1
+.
+Ratchet\Wamp\ServerProtocolTest::testCall with data set #2
+.
+Ratchet\Wamp\ServerProtocolTest::testCall with data set #3
+.
+Ratchet\Wamp\ServerProtocolTest::testCall with data set #4
+.
+Ratchet\Wamp\ServerProtocolTest::testCall with data set #5
+.
+Ratchet\Wamp\ServerProtocolTest::testCall with data set #6
+.
+Ratchet\Wamp\ServerProtocolTest::testCall with data set #7
+.
+Ratchet\Wamp\ServerProtocolTest::testEvent with data set #0
+.
+Ratchet\Wamp\ServerProtocolTest::testEvent with data set #1
+.
+Ratchet\Wamp\ServerProtocolTest::testGetSubProtocolsGetFromApp
+.
+Ratchet\Wamp\ServerProtocolTest::testGetSubProtocolsReturnsArray
+.
+Ratchet\Wamp\ServerProtocolTest::testInvalidMessages with data set #0
+.
+Ratchet\Wamp\ServerProtocolTest::testInvalidMessages with data set #1
+.
+Ratchet\Wamp\ServerProtocolTest::testInvalidMessages with data set #2
+.
+Ratchet\Wamp\ServerProtocolTest::testInvalidMessages with data set #3
+.
+Ratchet\Wamp\ServerProtocolTest::testInvalidMessages with data set #4
+.
+Ratchet\Wamp\ServerProtocolTest::testMessageMustBeJson
+.
+Ratchet\Wamp\ServerProtocolTest::testOnClosePropagation
+.
+Ratchet\Wamp\ServerProtocolTest::testOnErrorPropagation
+.
+Ratchet\Wamp\ServerProtocolTest::testPrefix
+.
+Ratchet\Wamp\ServerProtocolTest::testPublish
+.
+Ratchet\Wamp\ServerProtocolTest::testPublishAndEligible
+.
+Ratchet\Wamp\ServerProtocolTest::testPublishAndExcludeMe
+.
+Ratchet\Wamp\ServerProtocolTest::testSubscribe
+.
+Ratchet\Wamp\ServerProtocolTest::testUnSubscribe
+.
+Ratchet\Wamp\ServerProtocolTest::testValidJsonButInvalidProtocol with data set #0
+.
+Ratchet\Wamp\ServerProtocolTest::testValidJsonButInvalidProtocol with data set #1
+.
+Ratchet\Wamp\ServerProtocolTest::testValidJsonButInvalidProtocol with data set #2
+.
+Ratchet\Wamp\ServerProtocolTest::testWampOnMessageApp
+.
+Ratchet\Wamp\ServerProtocolTest::testWelcomeMessage
+.
+Ratchet\Wamp\TopicManagerTest::testConnIsRemovedFromTopicOnClose
+.
+Ratchet\Wamp\TopicManagerTest::testDoubleSubscriptionFiresOnce
+.
+Ratchet\Wamp\TopicManagerTest::testGetSubProtocolsBubbles
+.
+Ratchet\Wamp\TopicManagerTest::testGetSubProtocolsReturnsArray
+.
+Ratchet\Wamp\TopicManagerTest::testGetTopicCreatesTopicWithSameName
+.
+Ratchet\Wamp\TopicManagerTest::testGetTopicReturnsSameObject
+.
+Ratchet\Wamp\TopicManagerTest::testGetTopicReturnsTopicObject
+.
+Ratchet\Wamp\TopicManagerTest::testOnCall
+.
+Ratchet\Wamp\TopicManagerTest::testOnCloseBubbles
+.
+Ratchet\Wamp\TopicManagerTest::testOnErrorBubbles
+.
+Ratchet\Wamp\TopicManagerTest::testOnOpen
+.
+Ratchet\Wamp\TopicManagerTest::testOnPublishBubbles
+.
+Ratchet\Wamp\TopicManagerTest::testOnSubscribeCreatesTopicObject
+.
+Ratchet\Wamp\TopicManagerTest::testTopicIsInConnectionOnSubscribe
+.
+Ratchet\Wamp\TopicManagerTest::testUnsubscribeEvent
+.
+Ratchet\Wamp\TopicManagerTest::testUnsubscribeFiresOnce
+.
+Ratchet\Wamp\TopicManagerTest::testUnsubscribeRemovesTopicFromConnection
+.
+Ratchet\Wamp\TopicTest::testAddAndCount
+.
+Ratchet\Wamp\TopicTest::testBroadcast
+.
+Ratchet\Wamp\TopicTest::testDoesHave
+.
+Ratchet\Wamp\TopicTest::testDoesNotHave
+.
+Ratchet\Wamp\TopicTest::testDoesNotHaveAfterRemove
+.
+Ratchet\Wamp\TopicTest::testGetId
+.
+Ratchet\Wamp\TopicTest::testIterator
+.
+Ratchet\Wamp\TopicTest::testRemove
+.
+Ratchet\Wamp\TopicTest::testToString
+.
+Ratchet\Wamp\WampConnectionTest::testCallError
+.
+Ratchet\Wamp\WampConnectionTest::testCallResult
+.
+Ratchet\Wamp\WampConnectionTest::testClose
+.
+Ratchet\Wamp\WampConnectionTest::testDetailedCallError
+.
+Ratchet\Wamp\WampConnectionTest::testGetUriWhenNoCurieGiven
+.
+Ratchet\Wamp\WampConnectionTest::testPrefix
+.
+Ratchet\Wamp\WampServerTest::testConnectionClosesOnInvalidJson
+.
+Ratchet\Wamp\WampServerTest::testConnectionClosesOnProtocolError
+.
+Ratchet\Wamp\WampServerTest::testGetSubProtocols
+.
+Ratchet\Wamp\WampServerTest::testOnClose
+.
+Ratchet\Wamp\WampServerTest::testOnError
+.
+Ratchet\Wamp\WampServerTest::testOnMessageToEvent
+.
+Ratchet\Wamp\WampServerTest::testOpen
+.
+Ratchet\WebSocket\VersionManagerTest::testFluentInterface
+.
+Ratchet\WebSocket\VersionManagerTest::testGetNopeVersionAndDisable
+.
+Ratchet\WebSocket\VersionManagerTest::testGetSupportedVersionAfterRemoval
+.
+Ratchet\WebSocket\VersionManagerTest::testGetSupportedVersionString
+.
+Ratchet\WebSocket\VersionManagerTest::testGetVersion
+.
+Ratchet\WebSocket\VersionManagerTest::testNoIsVersionEnabled
+.
+Ratchet\WebSocket\VersionManagerTest::testYesIsVersionEnabled
+.
+Ratchet\WebSocket\Version\Hixie76Test::testClassImplementsVersionInterface
+.
+Ratchet\WebSocket\Version\Hixie76Test::testKeySigningForHandshake with data set #0
+.
+Ratchet\WebSocket\Version\Hixie76Test::testKeySigningForHandshake with data set #1
+.
+Ratchet\WebSocket\Version\Hixie76Test::testKeySigningForHandshake with data set #2
+.
+Ratchet\WebSocket\Version\Hixie76Test::testNoUpgradeBeforeBody
+.
+Ratchet\WebSocket\Version\Hixie76Test::testTcpFragmentedUpgrade
+.
+Ratchet\WebSocket\Version\HyBi10Test::testClassImplementsVersionInterface
+.
+Ratchet\WebSocket\Version\HyBi10Test::testKeySigningForHandshake with data set #0
+.
+Ratchet\WebSocket\Version\HyBi10Test::testKeySigningForHandshake with data set #1
+.
+Ratchet\WebSocket\Version\HyBi10Test::testUnframeMatchesPreFraming
+.
+Ratchet\WebSocket\Version\HyBi10Test::testUnframeMessage with data set #0
+.
+Ratchet\WebSocket\Version\HyBi10Test::testUnframeMessage with data set #1
+.
+Ratchet\WebSocket\Version\HyBi10Test::testUnframeMessage with data set #2
+.
+Ratchet\WebSocket\Version\HyBi10Test::testUnframeMessage with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455Test::testIsProtocolWithCaseInsensitivity with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455Test::testIsProtocolWithCaseInsensitivity with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455Test::testIsProtocolWithCaseInsensitivity with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455Test::testIsProtocolWithCaseInsensitivity with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455Test::testKeySigningForHandshake with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455Test::testKeySigningForHandshake with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455Test::testNewFrame
+.
+Ratchet\WebSocket\Version\RFC6455Test::testNewMessage
+.
+Ratchet\WebSocket\Version\RFC6455Test::testUnframeMatchesPreFraming
+.
+Ratchet\WebSocket\Version\RFC6455Test::testUnframeMessage with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455Test::testUnframeMessage with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455Test::testUnframeMessage with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455Test::testUnframeMessage with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455Test::testVariousHeadersToCheckHandshakeTolerance with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455Test::testVariousHeadersToCheckHandshakeTolerance with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455Test::testVariousHeadersToCheckHandshakeTolerance with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455Test::testVariousHeadersToCheckHandshakeTolerance with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455Test::testVariousHeadersToCheckHandshakeTolerance with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455Test::testVariousHeadersToCheckHandshakeTolerance with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testCheckPiecingTogetherMessage with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testCheckPiecingTogetherMessage with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testCheckPiecingTogetherMessage with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testCheckPiecingTogetherMessage with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testDetermineHowManyBitsAreUsedToDescribePayload with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testDetermineHowManyBitsAreUsedToDescribePayload with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testDetermineHowManyBitsAreUsedToDescribePayload with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testDetermineHowManyBitsAreUsedToDescribePayload with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testDetermineHowManyBitsAreUsedToDescribePayload with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testDetermineHowManyBitsAreUsedToDescribePayload with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testEmptyExtractOverflow
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testExtractOverflow
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFinCodeFromBits with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFinCodeFromBits with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFinCodeFromBits with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFinCodeFromBits with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFinCodeFromBits with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFinCodeFromBits with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFinCodeFromFullMessage with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFinCodeFromFullMessage with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFinCodeFromFullMessage with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFinCodeFromFullMessage with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFirstPayloadDesignationValue with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFirstPayloadDesignationValue with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFirstPayloadDesignationValue with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFirstPayloadDesignationValue with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFirstPayloadDesignationValue with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFirstPayloadDesignationValue with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testFirstPayloadValUnderflow
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGenerateMaskingKey
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetContents
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetMaskingKey with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetMaskingKey with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetMaskingKey with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetMaskingKeyOnUnmaskedPayload
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetPayloadLengthFromFullMessage with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetPayloadLengthFromFullMessage with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetPayloadLengthFromFullMessage with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetPayloadLengthFromFullMessage with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetPayloadLengthWhenOnlyFirstFrameIsUsed with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetPayloadLengthWhenOnlyFirstFrameIsUsed with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetPayloadLengthWhenOnlyFirstFrameIsUsed with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetRsvFromBits with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetRsvFromBits with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetRsvFromBits with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetRsvFromBits with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetRsvFromBits with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGetRsvFromBits with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGivenMaskIsValid
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testGivenMaskIsValidAscii
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testIsMaskedFromFullMessage with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testIsMaskedFromFullMessage with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testIsMaskedFromFullMessage with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testIsMaskedFromFullMessage with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testIsMaskedReturnsExpectedValue with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testIsMaskedReturnsExpectedValue with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testIsMaskedReturnsExpectedValue with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testLongCreate
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testMasking
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testOpcodeFromBits with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testOpcodeFromBits with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testOpcodeFromBits with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testOpcodeFromBits with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testOpcodeFromBits with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testOpcodeFromBits with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testOpcodeFromFullMessage with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testOpcodeFromFullMessage with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testOpcodeFromFullMessage with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testOpcodeFromFullMessage with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testReallyLongCreate
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnMaskPayload
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnderflowExceptionFromAllTheMethodsMimickingBuffering with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnderflowExceptionFromAllTheMethodsMimickingBuffering with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnderflowExceptionFromAllTheMethodsMimickingBuffering with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnderflowExceptionFromAllTheMethodsMimickingBuffering with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnderflowExceptionFromAllTheMethodsMimickingBuffering with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnderflowExceptionFromAllTheMethodsMimickingBuffering with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnderflowExceptionFromAllTheMethodsMimickingBuffering with data set #6
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnderflowExceptionFromAllTheMethodsMimickingBuffering with data set #7
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnderflowExceptionFromAllTheMethodsMimickingBuffering with data set #8
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnderflowExceptionFromAllTheMethodsMimickingBuffering with data set #9
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnframeFullMessage with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnframeFullMessage with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnframeFullMessage with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testUnframeFullMessage with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\FrameTest::testgetNumPayloadBitsUnderflow
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testConnectionHeaderVerification with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testConnectionHeaderVerification with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testConnectionHeaderVerification with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testConnectionHeaderVerification with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testConnectionHeaderVerification with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testConnectionHeaderVerification with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testConnectionHeaderVerification with data set #6
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #10
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #11
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #6
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #7
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #8
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testHttpVersionIsAtLeast1Point1 with data set #9
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testKeyIsBase64Encoded16BitNonce with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testKeyIsBase64Encoded16BitNonce with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testKeyIsBase64Encoded16BitNonce with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testKeyIsBase64Encoded16BitNonce with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testKeyIsBase64Encoded16BitNonce with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testKeyIsBase64Encoded16BitNonce with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testKeyIsBase64Encoded16BitNonce with data set #6
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testKeyIsBase64Encoded16BitNonce with data set #7
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testKeyIsBase64Encoded16BitNonce with data set #8
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testKeyIsBase64Encoded16BitNonce with data set #9
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testMethodMustBeGet with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testMethodMustBeGet with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testMethodMustBeGet with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testMethodMustBeGet with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testMethodMustBeGet with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testMethodMustBeGet with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testMethodMustBeGet with data set #6
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testRequestUri with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testRequestUri with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testRequestUri with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testRequestUri with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testRequestUri with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testRequestUri with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVerifyHostIsSet with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVerifyHostIsSet with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVerifyUpgradeIsWebSocket with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVerifyUpgradeIsWebSocket with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVerifyUpgradeIsWebSocket with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVerifyUpgradeIsWebSocket with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVerifyUpgradeIsWebSocket with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVersionEquals13 with data set #0
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVersionEquals13 with data set #1
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVersionEquals13 with data set #2
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVersionEquals13 with data set #3
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVersionEquals13 with data set #4
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVersionEquals13 with data set #5
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVersionEquals13 with data set #6
+.
+Ratchet\WebSocket\Version\RFC6455\HandshakeVerifierTest::testVersionEquals13 with data set #7
+.
+Ratchet\WebSocket\Version\RFC6455\Message\MessageTest::testFragmentationPayload
+.
+Ratchet\WebSocket\Version\RFC6455\Message\MessageTest::testGetOpCode
+.
+Ratchet\WebSocket\Version\RFC6455\Message\MessageTest::testGetUnBufferedPayloadLength
+.
+Ratchet\WebSocket\Version\RFC6455\Message\MessageTest::testNoFrames
+.
+Ratchet\WebSocket\Version\RFC6455\Message\MessageTest::testNoFramesOpCode
+.
+Ratchet\WebSocket\Version\RFC6455\Message\MessageTest::testUnbufferedFragment
+.
+Ratchet\WebSocket\WsServerTest::testGetSubProtocolString with data set #0
+.
+Ratchet\WebSocket\WsServerTest::testGetSubProtocolString with data set #1
+.
+Ratchet\WebSocket\WsServerTest::testGetSubProtocolString with data set #2
+.
+Ratchet\WebSocket\WsServerTest::testGetSubProtocolString with data set #3
+.
+Ratchet\WebSocket\WsServerTest::testGetSubProtocolString with data set #4
+.
+Ratchet\WebSocket\WsServerTest::testIsSubProtocolSupported
+.

@@ -68,6 +68,7 @@ public:
 
   virtual std::string getHeader(const char *name) override;
   virtual void getHeaders(HeaderMap &headers) override;
+  virtual void getTransportParams(HeaderMap &serverParams) override;
 
   virtual void addHeaderImpl(const char *name, const char *value) override;
   virtual void removeHeaderImpl(const char *name) override;

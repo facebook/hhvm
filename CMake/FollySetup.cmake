@@ -13,11 +13,8 @@ if (FOLLY_IFUNC)
 endif()
 
 set(CMAKE_REQUIRED_LIBRARIES rt)
-CHECK_CXX_SOURCE_COMPILES("#include <time.h>
-int main() {
-  clock_gettime((clockid_t)0, NULL);
-  return 0;
-}" HAVE_CLOCK_GETTIME)
+include(CheckFunctionExists)
+CHECK_FUNCTION_EXISTS("clock_gettime" HAVE_CLOCK_GETTIME)
 
 if (HAVE_CLOCK_GETTIME)
 	add_definitions("-DFOLLY_HAVE_CLOCK_GETTIME=1")

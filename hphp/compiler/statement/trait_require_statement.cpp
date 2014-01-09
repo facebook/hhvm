@@ -17,6 +17,7 @@
 #include "hphp/compiler/statement/trait_require_statement.h"
 #include "hphp/compiler/statement/class_statement.h"
 #include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/code_model_enums.h"
 
 namespace HPHP {
 
@@ -76,8 +77,18 @@ void TraitRequireStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void TraitRequireStatement::outputCodeModel(CodeGenerator &cg) {
-  // TODO t3429526: add Code Model counterpart objects for this statement ;
-  // should depend on whether any runtime behavior changes for this syntax
+  cg.printObjectHeader("TraitRequiresStatement", 3);
+  cg.printPropertyHeader("name");
+  cg.printValue(m_required);
+  cg.printPropertyHeader("kind");
+  if (m_extends) {
+    cg.printValue(PHP_EXTENDS);
+  } else {
+    cg.printValue(PHP_IMPLEMENTS);
+  }
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -93,6 +93,12 @@ namespace HPHP {
     PHP_UNSET_CAST_OP = 26,
   };
 
+  /** Enumerates the kinds of trait require statements. */
+  enum CodeModelRequireKind {
+    PHP_EXTENDS = 1,
+    PHP_IMPLEMENTS = 2,
+  };
+
   /** Enumerates the kinds of type declaration statements. */
   enum CodeModelTypeKind {
     PHP_CLASS = 1,

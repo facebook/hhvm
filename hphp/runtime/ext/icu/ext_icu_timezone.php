@@ -277,7 +277,7 @@ function intltz_create_enumeration(mixed $countryOrRawOffset = null): mixed {
  * @return IntlTimeZone -
  */
 function intltz_create_time_zone(string $zoneId): IntlTimeZone {
-  return IntlTimeZone::createTimeZone($zoneid);
+  return IntlTimeZone::createTimeZone($zoneId);
 }
 
 /**

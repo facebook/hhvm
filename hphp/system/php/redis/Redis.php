@@ -106,8 +106,9 @@ class Redis {
         return true;
 
       case self::OPT_READ_TIMEOUT:
-        $this->timeout_seconds  = (int)($value - ((int)$value));
-        $this->timeout_useconds = (int)(($value - $seconds) * 1000000);
+        $this->timeout_seconds  = (int)floor($value);
+        $this->timeout_useconds =
+          (int)(($value - $this->timeout_seconds) * 1000000);
         return stream_set_timeout($this->connection, $this->timeout_seconds,
                                                      $this->timeout_useconds);
 
@@ -1435,7 +1436,7 @@ class Redis {
         case 's': $args[$i] = (string)$args[$i]; break;
         case 'l': $args[$i] = (int)$args[$i]; break;
         case 'd': $args[$i] = (float)$args[$i]; break;
-        case 'b': $args[$i] = (bool)$arts[$i]; break;
+        case 'b': $args[$i] = (bool)$args[$i]; break;
         case 'p':
           if (($args[$i] !== self::BEFORE) AND ($args[$i] !== self::AFTER)) {
             trigger_error(

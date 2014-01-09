@@ -548,6 +548,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
     return FAILURE;
   }
 
+// TODO: this doesn't work correctly when extension puts arguments on the stack and calls a php method
+/*
   arg_count = HPHP::liveFrame()->numArgs();
 
   if (num_args > arg_count) {
@@ -555,6 +557,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
       get_active_function_name(TSRMLS_C));
     return FAILURE;
   }
+*/
 
   i = 0;
   while (num_args-- > 0) {
@@ -1287,7 +1290,7 @@ ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_L
 
 ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC) /* {{{ */
 {
-  return _object_init_ex(arg, zend_standard_class_def ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
+  return _object_init_ex(arg, get_zend_standard_class_def() ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 }
 /* }}} */
 

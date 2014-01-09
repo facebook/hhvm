@@ -662,6 +662,7 @@ void zend_shutdown(TSRMLS_D);
 void zend_register_standard_ini_entries(TSRMLS_D);
 void zend_post_startup(TSRMLS_D);
 void zend_set_utility_values(zend_utility_values *utility_values);
+ZEND_API zend_class_entry *get_zend_standard_class_def();
 
 BEGIN_EXTERN_C()
 ZEND_API void _zend_bailout(char *filename, uint lineno);

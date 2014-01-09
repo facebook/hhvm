@@ -127,7 +127,7 @@ static void add_property(Array &properties, xmlNodePtr node, Object value) {
     String sname(name, namelen, CopyString);
 
     if (properties.exists(sname)) {
-      Variant &existing = properties.lval(sname);
+      Variant &existing = properties.lvalAt(sname, AccessFlags::Key);
       if (existing.is(KindOfArray)) {
         existing.append(value);
       } else {

@@ -300,20 +300,20 @@ int UserFile::statImpl(const String& path, struct stat* stat_sb,
   if (!ret.isArray()) {
     return -1;
   }
-  auto a = ret.toArray();
-  stat_sb->st_dev = a.lval(s_dev).toInt64();
-  stat_sb->st_ino = a.lval(s_ino).toInt64();
-  stat_sb->st_mode = a.lval(s_mode).toInt64();
-  stat_sb->st_nlink = a.lval(s_nlink).toInt64();
-  stat_sb->st_uid = a.lval(s_uid).toInt64();
-  stat_sb->st_gid = a.lval(s_gid).toInt64();
-  stat_sb->st_rdev = a.lval(s_rdev).toInt64();
-  stat_sb->st_size = a.lval(s_size).toInt64();
-  stat_sb->st_atime = a.lval(s_atime).toInt64();
-  stat_sb->st_mtime = a.lval(s_mtime).toInt64();
-  stat_sb->st_ctime = a.lval(s_ctime).toInt64();
-  stat_sb->st_blksize = a.lval(s_blksize).toInt64();
-  stat_sb->st_blocks = a.lval(s_blocks).toInt64();
+  auto a = ret.getArrayData();
+  stat_sb->st_dev = a->get(s_dev.get()).toInt64();
+  stat_sb->st_ino = a->get(s_ino.get()).toInt64();
+  stat_sb->st_mode = a->get(s_mode.get()).toInt64();
+  stat_sb->st_nlink = a->get(s_nlink.get()).toInt64();
+  stat_sb->st_uid = a->get(s_uid.get()).toInt64();
+  stat_sb->st_gid = a->get(s_gid.get()).toInt64();
+  stat_sb->st_rdev = a->get(s_rdev.get()).toInt64();
+  stat_sb->st_size = a->get(s_size.get()).toInt64();
+  stat_sb->st_atime = a->get(s_atime.get()).toInt64();
+  stat_sb->st_mtime = a->get(s_mtime.get()).toInt64();
+  stat_sb->st_ctime = a->get(s_ctime.get()).toInt64();
+  stat_sb->st_blksize = a->get(s_blksize.get()).toInt64();
+  stat_sb->st_blocks = a->get(s_blocks.get()).toInt64();
   return 0;
 }
 

@@ -258,7 +258,7 @@ Variant* ObjectData::o_realProp(const String& propName, int flags,
     if (!(flags & RealPropCreate)) {
       return nullptr;
     }
-    return &reserveProperties().lval(propName);
+    return &reserveProperties().lvalAt(propName, AccessFlags::Key);
   }
 
   // ret is non-NULL if we reach here
@@ -1247,7 +1247,7 @@ void ObjectData::propImpl(TypedValue*& retval, TypedValue& tvRef,
       }
       if (define) {
         retval = reinterpret_cast<TypedValue*>(
-          &reserveProperties().lval(StrNR(key))
+          &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
         );
       } else {
         retval = const_cast<TypedValue*>(
@@ -1420,7 +1420,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
 
     if (visible) raise_error("Cannot access protected property");
     propVal = reinterpret_cast<TypedValue*>(
-      &reserveProperties().lval(StrNR(key))
+      &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
     );
 
     // Normally this code path is defining a new dynamic property, but
@@ -1452,7 +1452,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
   // create a new dynamic property.  (We know this is a new property,
   // or it would've hit the visible && accessible case above.)
   propVal = reinterpret_cast<TypedValue*>(
-    &reserveProperties().lval(StrNR(key))
+    &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
   );
   assert(propVal->m_type == KindOfNull); // cannot exist yet
   SETOP_BODY_CELL(propVal, op, val);
@@ -1500,7 +1500,7 @@ void ObjectData::incDecProp(TypedValue& tvRef,
     IncDecBody<setResult>(op, &tvResult, &dest);
     if (visible) raise_error("Cannot access protected property");
     propVal = reinterpret_cast<TypedValue*>(
-      &reserveProperties().lval(StrNR(key))
+      &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
     );
 
     // Normally this code path is defining a new dynamic property, but
@@ -1529,7 +1529,7 @@ void ObjectData::incDecProp(TypedValue& tvRef,
   // create a new dynamic property.  (We know this is a new property,
   // or it would've hit the visible && accessible case above.)
   propVal = reinterpret_cast<TypedValue*>(
-    &reserveProperties().lval(StrNR(key))
+    &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
   );
   assert(propVal->m_type == KindOfNull); // cannot exist yet
   IncDecBody<setResult>(op, propVal, &dest);
@@ -1714,7 +1714,7 @@ void ObjectData::cloneSet(ObjectData* clone) {
       TypedValue* val = props->nvGet(strKey);
 
       auto const retval = reinterpret_cast<TypedValue*>(
-        &cloneProps.lval(strKey)
+        &cloneProps.lvalAt(String(strKey), AccessFlags::Key)
       );
       tvDupFlattenVars(val, retval, cloneProps.get());
       iter = dynProps.get()->iter_advance(iter);

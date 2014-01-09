@@ -2024,12 +2024,12 @@ magiccheck(struct magic_set *ms, struct magic *m)
 
     if (matches.isArray() && retval.isInteger() && retval.toInt64Val() > 0) {
       auto subpats = matches.toArray();
-      auto global = subpats.lval(0);
+      auto global = subpats.lvalAt(0);
 
       for (HPHP::ArrayIter iter(global); iter; ++iter) {
         auto pair = iter.second().toArray();
-        auto pattern_match = pair.lval(0);
-        auto pattern_offset = pair.lval(1);
+        auto pattern_match = pair.lvalAt(0);
+        auto pattern_offset = pair.lvalAt(1);
 
         if (!pattern_match.isNull() && !pattern_offset.isNull()) {
           ms->search.s += pattern_offset.toInt64Val(); /* this is where the match starts */

@@ -291,24 +291,6 @@ public:
   const Variant operator[](CVarRef key) const;
   const Variant operator[](const char*) const = delete; // use CStrRef
 
-  Variant &lval(int64_t key) {
-    if (!m_px) ArrayBase::operator=(ArrayData::Create());
-    Variant *ret = nullptr;
-    ArrayData *escalated = m_px->lval(key, ret, m_px->hasMultipleRefs());
-    if (escalated != m_px) ArrayBase::operator=(escalated);
-    assert(ret);
-    return *ret;
-  }
-
-  Variant &lval(const String& key) {
-    if (!m_px) ArrayBase::operator=(ArrayData::Create());
-    Variant *ret = nullptr;
-    ArrayData *escalated = m_px->lval(key, ret, m_px->hasMultipleRefs());
-    if (escalated != m_px) ArrayBase::operator=(escalated);
-    assert(ret);
-    return *ret;
-  }
-
   Variant &lvalAt();
 
   Variant &lvalAt(int     key, ACCESSPARAMS_DECL) {

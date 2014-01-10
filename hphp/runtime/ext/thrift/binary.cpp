@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/ext_thrift.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/reflction/ext_reflection.h"
+#include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/logger.h"
 

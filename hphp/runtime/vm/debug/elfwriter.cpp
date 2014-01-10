@@ -42,7 +42,8 @@ void ElfWriter::logError(const std::string& msg) {
   std::cerr << msg << '\n';
 }
 
-int ElfWriter::dwarfCallback(char *name, int size, Dwarf_Unsigned type,
+int ElfWriter::dwarfCallback(
+  LIBDWARF_CALLBACK_NAME_TYPE name, int size, Dwarf_Unsigned type,
   Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info) {
   if (!strncmp(name, ".rel", 4))
     return 0;
@@ -449,7 +450,7 @@ bool ElfWriter::addFrameInfo(DwarfChunk* d) {
   return true;
 }
 
-int ElfWriter::newSection(char *name,
+int ElfWriter::newSection(LIBDWARF_CALLBACK_NAME_TYPE name,
   uint64_t size, uint32_t type, uint64_t flags,
   uint64_t addr/* = 0*/) {
   Elf_Scn *scn = elf_newscn(m_elf);

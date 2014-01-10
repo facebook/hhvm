@@ -1,7 +1,7 @@
 <?php
 $bogus = 42;
 
-mysql_next_result($bogus);
-mysql_fetch_result($bogus);
-mysql_more_results($bogus);
-mysql_multi_query('SELECT 1;', $bogus);
+var_dump(mysql_next_result($bogus));
+var_dump(mysql_fetch_result($bogus));
+var_dump(mysql_more_results($bogus));
+var_dump(mysql_multi_query('SELECT 1;', $bogus));

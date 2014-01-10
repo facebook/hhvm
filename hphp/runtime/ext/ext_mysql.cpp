@@ -1150,7 +1150,7 @@ int f_mysql_next_result(CVarRef link_identifier /* = null */) {
 bool f_mysql_more_results(CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn == nullptr) {
-    return 2006 /* CR_SERVER_GONE_ERROR */;
+    return false;
   }
   return mysql_more_results(conn);
 }

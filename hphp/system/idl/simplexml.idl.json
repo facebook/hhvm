@@ -361,6 +361,21 @@
                     ]
                 },
                 {
+                    "name": "saveXML",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "value": "\"\""
+                        }
+                    ]
+                },
+                {
                     "name": "getNamespaces",
                     "flags": [
                     ],

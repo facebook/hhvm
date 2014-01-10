@@ -1277,6 +1277,10 @@ bool c_SimpleXMLElement::t_registerxpathnamespace(const String& prefix,
   return true;
 }
 
+Variant c_SimpleXMLElement::t_savexml(const String& filename /* = "" */) {
+  return t_asxml(filename);
+}
+
 Variant c_SimpleXMLElement::t_asxml(const String& filename /* = "" */) {
   xmlNodePtr node = this->node;
   xmlOutputBufferPtr outbuf = nullptr;

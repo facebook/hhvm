@@ -67,6 +67,7 @@ class c_SimpleXMLElement :
   public: Variant t_xpath(const String& path);
   public: bool t_registerxpathnamespace(const String& prefix, const String& ns);
   public: Variant t_asxml(const String& filename = "");
+  public: Variant t_savexml(const String& filename = "");
   public: Array t_getnamespaces(bool recursive = false);
   public: Array t_getdocnamespaces(bool recursive = false, bool from_root = true);
   public: Object t_children(const String& ns = "", bool is_prefix = false);

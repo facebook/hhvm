@@ -7,7 +7,7 @@ object(__PHP_Unserializable_Class)#2 (1) {
   ["__PHP_Unserializable_Class_Name"]=>
   string(16) "SimpleXMLElement"
 }
-array(22) {
+array(23) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -29,28 +29,30 @@ array(22) {
   [9]=>
   string(5) "asXML"
   [10]=>
-  string(13) "getNamespaces"
+  string(7) "saveXML"
   [11]=>
-  string(16) "getDocNamespaces"
+  string(13) "getNamespaces"
   [12]=>
-  string(8) "children"
+  string(16) "getDocNamespaces"
   [13]=>
-  string(7) "getName"
+  string(8) "children"
   [14]=>
-  string(10) "attributes"
+  string(7) "getName"
   [15]=>
-  string(8) "addChild"
+  string(10) "attributes"
   [16]=>
-  string(12) "addAttribute"
+  string(8) "addChild"
   [17]=>
-  string(10) "__toString"
+  string(12) "addAttribute"
   [18]=>
-  string(5) "__get"
+  string(10) "__toString"
   [19]=>
-  string(5) "__set"
+  string(5) "__get"
   [20]=>
-  string(7) "__isset"
+  string(5) "__set"
   [21]=>
+  string(7) "__isset"
+  [22]=>
   string(7) "__unset"
 }
 ================
@@ -63,7 +65,7 @@ object(__PHP_Unserializable_Class)#4 (1) {
   ["__PHP_Unserializable_Class_Name"]=>
   string(18) "A_SimpleXMLElement"
 }
-array(22) {
+array(23) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -85,27 +87,29 @@ array(22) {
   [9]=>
   string(5) "asXML"
   [10]=>
-  string(13) "getNamespaces"
+  string(7) "saveXML"
   [11]=>
-  string(16) "getDocNamespaces"
+  string(13) "getNamespaces"
   [12]=>
-  string(8) "children"
+  string(16) "getDocNamespaces"
   [13]=>
-  string(7) "getName"
+  string(8) "children"
   [14]=>
-  string(10) "attributes"
+  string(7) "getName"
   [15]=>
-  string(8) "addChild"
+  string(10) "attributes"
   [16]=>
-  string(12) "addAttribute"
+  string(8) "addChild"
   [17]=>
-  string(10) "__toString"
+  string(12) "addAttribute"
   [18]=>
-  string(5) "__get"
+  string(10) "__toString"
   [19]=>
-  string(5) "__set"
+  string(5) "__get"
   [20]=>
-  string(7) "__isset"
+  string(5) "__set"
   [21]=>
+  string(7) "__isset"
+  [22]=>
   string(7) "__unset"
 }

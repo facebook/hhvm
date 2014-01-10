@@ -163,7 +163,6 @@ vm_decode_function(CVarRef function,
           if (warn && nameContainsClass) {
             String nameClass = name.substr(0, pos);
             if (nameClass->isame(s_self.get())   ||
-                nameClass->isame(s_parent.get()) ||
                 nameClass->isame(s_static.get())) {
               raise_warning("behavior of call_user_func(array('%s', '%s')) "
                             "is undefined", sclass->data(), name->data());
@@ -280,7 +279,7 @@ vm_decode_function(CVarRef function,
           assert(!f || (f->attrs() & AttrStatic));
           this_ = nullptr;
         }
-        if (f) {
+        if (f && (cc == cls || cc->lookupMethod(f->name()))) {
           // We found __call or __callStatic!
           // Stash the original name into invName.
           invName = name.get();

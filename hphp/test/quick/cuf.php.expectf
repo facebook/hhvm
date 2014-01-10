@@ -35,7 +35,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
-HipHop Warning: behavior of call_user_func(array('B', 'parent::meth')) is undefined in %s on line %d
 A D D
 HipHop Warning: behavior of call_user_func(array('B', 'self::meth')) is undefined in %s on line %d
 B D D
@@ -52,7 +51,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 F F
 G G
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
-HipHop Warning: behavior of call_user_func(array('G', 'parent::meth')) is undefined in %s on line %d
 F F
 HipHop Warning: behavior of call_user_func(array('G', 'self::meth')) is undefined in %s on line %d
 G G
@@ -144,7 +142,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
-HipHop Warning: behavior of call_user_func(array('B', 'parent::meth')) is undefined in %s on line %d
 A D
 HipHop Warning: behavior of call_user_func(array('B', 'self::meth')) is undefined in %s on line %d
 B D
@@ -161,7 +158,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 F F
 G G
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
-HipHop Warning: behavior of call_user_func(array('G', 'parent::meth')) is undefined in %s on line %d
 F F
 HipHop Warning: behavior of call_user_func(array('G', 'self::meth')) is undefined in %s on line %d
 G G
@@ -253,7 +249,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
-HipHop Warning: behavior of call_user_func(array('B', 'parent::staticMeth')) is undefined in %s on line %d
 A D
 HipHop Warning: behavior of call_user_func(array('B', 'self::staticMeth')) is undefined in %s on line %d
 B D
@@ -270,7 +265,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 F F
 G G
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
-HipHop Warning: behavior of call_user_func(array('G', 'parent::staticMeth')) is undefined in %s on line %d
 F F
 HipHop Warning: behavior of call_user_func(array('G', 'self::staticMeth')) is undefined in %s on line %d
 G G
@@ -362,7 +356,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
-HipHop Warning: behavior of call_user_func(array('B', 'parent::staticMeth')) is undefined in %s on line %d
 A D
 HipHop Warning: behavior of call_user_func(array('B', 'self::staticMeth')) is undefined in %s on line %d
 B D
@@ -379,7 +372,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 F F
 G G
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
-HipHop Warning: behavior of call_user_func(array('G', 'parent::staticMeth')) is undefined in %s on line %d
 F F
 HipHop Warning: behavior of call_user_func(array('G', 'self::staticMeth')) is undefined in %s on line %d
 G G

@@ -1142,9 +1142,11 @@ void HhbcTranslator::emitIterInit(uint32_t iterId,
                                   bool invertCond) {
   constrainIterLocals(*m_tb, valLocalId);
 
+  auto catchBlock = makeCatch();
   emitIterInitCommon(offset, [&] (SSATmp* src) {
       return gen(IterInit,
                  Type::Bool,
+                 catchBlock,
                  src,
                  m_tb->fp(),
                  cns(iterId),
@@ -1160,9 +1162,11 @@ void HhbcTranslator::emitIterInitK(uint32_t iterId,
                                    bool invertCond) {
   constrainIterLocals(*m_tb, valLocalId, keyLocalId);
 
+  auto catchBlock = makeCatch();
   emitIterInitCommon(offset, [&] (SSATmp* src) {
       return gen(IterInitK,
                  Type::Bool,
+                 catchBlock,
                  src,
                  m_tb->fp(),
                  cns(iterId),
@@ -1181,6 +1185,7 @@ void HhbcTranslator::emitIterNext(uint32_t iterId,
   SSATmp* res = gen(
     IterNext,
     Type::Bool,
+    makeCatch(),
     m_tb->fp(),
     cns(iterId),
     cns(valLocalId)
@@ -1198,6 +1203,7 @@ void HhbcTranslator::emitIterNextK(uint32_t iterId,
   SSATmp* res = gen(
     IterNextK,
     Type::Bool,
+    makeCatch(),
     m_tb->fp(),
     cns(iterId),
     cns(valLocalId),
@@ -1212,10 +1218,12 @@ void HhbcTranslator::emitWIterInit(uint32_t iterId,
                                    bool invertCond) {
   constrainIterLocals(*m_tb, valLocalId);
 
+  auto catchBlock = makeCatch();
   emitIterInitCommon(
     offset, [&] (SSATmp* src) {
       return gen(WIterInit,
                  Type::Bool,
+                 catchBlock,
                  src,
                  m_tb->fp(),
                  cns(iterId),
@@ -1231,10 +1239,12 @@ void HhbcTranslator::emitWIterInitK(uint32_t iterId,
                                     bool invertCond) {
   constrainIterLocals(*m_tb, valLocalId, keyLocalId);
 
+  auto catchBlock = makeCatch();
   emitIterInitCommon(
     offset, [&] (SSATmp* src) {
       return gen(WIterInitK,
                  Type::Bool,
+                 catchBlock,
                  src,
                  m_tb->fp(),
                  cns(iterId),
@@ -1253,6 +1263,7 @@ void HhbcTranslator::emitWIterNext(uint32_t iterId,
   SSATmp* res = gen(
     WIterNext,
     Type::Bool,
+    makeCatch(),
     m_tb->fp(),
     cns(iterId),
     cns(valLocalId)
@@ -1270,6 +1281,7 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
   SSATmp* res = gen(
     WIterNextK,
     Type::Bool,
+    makeCatch(),
     m_tb->fp(),
     cns(iterId),
     cns(valLocalId),
@@ -1283,10 +1295,12 @@ void HhbcTranslator::emitMIterInit(uint32_t iterId,
                                   uint32_t valLocalId) {
   constrainIterLocals(*m_tb, valLocalId);
 
+  auto catchBlock = makeCatch();
   emitMIterInitCommon(offset, [&] (SSATmp* src) {
     return gen(
       MIterInit,
       Type::Bool,
+      catchBlock,
       src,
       m_tb->fp(),
       cns(iterId),
@@ -1301,10 +1315,12 @@ void HhbcTranslator::emitMIterInitK(uint32_t iterId,
                                    uint32_t keyLocalId) {
   constrainIterLocals(*m_tb, valLocalId, keyLocalId);
 
+  auto catchBlock = makeCatch();
   emitMIterInitCommon(offset, [&] (SSATmp* src) {
     return gen(
       MIterInitK,
       Type::Bool,
+      catchBlock,
       src,
       m_tb->fp(),
       cns(iterId),
@@ -1985,10 +2001,11 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId,
 
   // If we have to side exit, do the RDS lookup before chaining to
   // another Tracelet so forward progress still happens.
+  auto catchBlock = makeCatchNoSpill();
   auto const sideExit = makeSideExit(
     nextBcOff(),
     [&] {
-      return gen(LookupClsCns, clsCnsName);
+      return gen(LookupClsCns, catchBlock, clsCnsName);
     }
   );
 
@@ -3109,6 +3126,7 @@ void HhbcTranslator::emitJmpSurpriseCheck() {
 
 void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
+  auto catchBlock = makeCatch();
 
   m_tb->ifThen([&](Block* taken) {
                  gen(CheckSurpriseFlags, taken);
@@ -3116,7 +3134,7 @@ void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator) {
                [&] {
                  m_tb->hint(Block::Hint::Unlikely);
                  gen(FunctionExitSurpriseHook, InGeneratorData(inGenerator),
-                     m_tb->fp(), m_tb->sp(), retVal);
+                     catchBlock, m_tb->fp(), m_tb->sp(), retVal);
                });
 
 }
@@ -4912,7 +4930,7 @@ Block* HhbcTranslator::makeExitWarn(Offset targetBcOff,
   assert(targetBcOff != -1);
   return makeExitImpl(targetBcOff, ExitFlag::JIT, spillValues,
     [&]() -> SSATmp* {
-      gen(RaiseWarning, cns(warning));
+      gen(RaiseWarning, makeCatchNoSpill(), cns(warning));
       return nullptr;
     }
   );
@@ -5018,7 +5036,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
 
     // Blindly using None as the output type here might seem bogus, but since
     // this trace is about to end, it doesn't matter for downstream analysis.
-    gen(interpOp, Type::None, idata, stack, m_tb->fp());
+    gen(interpOp, Type::None, idata, makeCatchNoSpill(), stack, m_tb->fp());
 
     if (!changesPC) {
       // If the op changes PC, InterpOneCF handles getting to the right place
@@ -5040,26 +5058,45 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
 }
 
 /*
- * Create a catch trace for the current state of the eval stack. This is a
- * trace intended to be invoked by the unwinder while unwinding a frame
- * containing a call to C++ from translated code. When attached to an
- * instruction as its taken field, code will be generated and the trace will be
- * registered with the unwinder automatically.
- *
- * The incoming value of spillVals will be the top of the spilled stack: values
- * in m_evalStack will be appended to spillVals to form the sources for the
- * SpillStack.
+ * Create a catch block with a user-defined body (usually empty or a
+ * SpillStack). Regardless of what body() does, it must return the current
+ * stack pointer. This is a block to be invoked by the unwinder while unwinding
+ * through a call to C++ from translated code. When attached to an instruction
+ * as its taken field, code will be generated and the block will be registered
+ * with the unwinder automatically.
  */
-Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals) {
+template<typename Body>
+Block* HhbcTranslator::makeCatchImpl(Body body) {
   auto exit = m_tb->makeExit();
 
-  BlockPusher tp(*m_tb, makeMarker(bcOff()), exit);
+  BlockPusher bp(*m_tb, makeMarker(bcOff()), exit);
   gen(BeginCatch);
-  for (auto* val : peekSpillValues()) spillVals.push_back(val);
-  auto sp = emitSpillStack(m_tb->sp(), spillVals);
+  auto sp = body();
   gen(EndCatch, m_tb->fp(), sp);
 
   return exit;
+}
+
+/*
+ * Create a catch block that spills the current state of the eval stack. The
+ * incoming value of spillVals will be the top of the spilled stack: values in
+ * m_evalStack will be appended to spillVals to form the sources for the
+ * SpillStack.
+ */
+Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals) {
+  return makeCatchImpl([&] {
+    for (auto* val : peekSpillValues()) spillVals.push_back(val);
+    return emitSpillStack(m_tb->sp(), spillVals);
+  });
+}
+
+/*
+ * Create a catch block with no SpillStack. Some of our optimizations rely on
+ * the ability to insert code on *every* path out of a trace, so we can't
+ * simply elide the catch block in the cases that want an empty body.
+ */
+Block* HhbcTranslator::makeCatchNoSpill() {
+  return makeCatchImpl([&] { return m_tb->sp(); });
 }
 
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,

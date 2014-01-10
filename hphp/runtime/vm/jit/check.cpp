@@ -82,8 +82,8 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 4. The last instruction must be isBlockEnd() and the middle instructions
  *    must not be isBlockEnd().  Therefore, blocks cannot be empty.
  * 5. If the last instruction isTerminal(), block->next() must be null.
- * 6. Every instruction must have a catch block attached to it if it has the
- *    MayRaiseError flag.
+ * 6. Every instruction must have a catch block attached to it if and only if it
+ *    has the MayRaiseError flag.
  * 7. Any path from this block to a Block that expects values must be
  *    from a Jmp instruciton.
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
@@ -114,9 +114,8 @@ bool checkBlock(Block* b) {
     assert(inst.marker().valid());
     assert(inst.block() == b);
     // Invariant #6. CoerceStk is special: t3213636
-    assert_log(IMPLIES(!b->isExit() && inst.mayRaiseError() &&
-                       !inst.is(CoerceStk),
-                       inst.taken() && inst.taken()->isCatch()),
+    assert_log((inst.mayRaiseError() && !inst.is(CoerceStk)) ==
+               (inst.taken() && inst.taken()->isCatch()),
                [&]{ return inst.toString(); });
   }
 

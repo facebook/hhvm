@@ -198,7 +198,7 @@ public:
 
   void registerCatchBlock(CTCA ip, TCA block);
   void processPendingCatchTraces();
-  TCA getCatchTrace(CTCA ip) const;
+  folly::Optional<TCA> getCatchTrace(CTCA ip) const;
 
   TCA getTranslatedCaller() const;
 

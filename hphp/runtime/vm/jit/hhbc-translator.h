@@ -778,8 +778,11 @@ private: // Exit trace creation routines.
   Block* makeExitSlow();
   Block* makeExitOpt(JIT::TransID transId);
 
+  template<typename Body>
+  Block* makeCatchImpl(Body body);
   Block* makeCatch(std::vector<SSATmp*> extraSpill =
                    std::vector<SSATmp*>());
+  Block* makeCatchNoSpill();
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,

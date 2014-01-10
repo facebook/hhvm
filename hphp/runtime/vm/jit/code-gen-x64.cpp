@@ -957,14 +957,19 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
     recordSyncPoint(a, sync);
   }
 
-  if (Block* taken = m_curInst->taken()) {
-    if (taken->isCatch()) {
-      auto& info = m_state.catches[taken];
-      assert(!info.afterCall);
-      info.afterCall = a.frontier();
-      info.savedRegs = toSave;
-      info.rspOffset = regSaver.rspAdjustment();
-    }
+  auto* taken = m_curInst->taken();
+  if (taken && taken->isCatch()) {
+    auto& info = m_state.catches[taken];
+    assert(!info.afterCall);
+    info.afterCall = a.frontier();
+    info.savedRegs = toSave;
+    info.rspOffset = regSaver.rspAdjustment();
+  } else if (!m_curInst->is(Call, CallArray, ContEnter)) {
+    // The current instruction doesn't have a catch block so it'd better not
+    // throw. Register a null catch trace to indicate this to the
+    // unwinder. Call and CallArray don't have catch blocks because they smash
+    // all live values and optimizations are aware of this.
+    m_tx64->registerCatchBlock(a.frontier(), nullptr);
   }
 
   // copy the call result to the destination register(s)

@@ -2147,9 +2147,10 @@ void TranslatorX64::processPendingCatchTraces() {
   m_pendingCatchTraces.clear();
 }
 
-TCA TranslatorX64::getCatchTrace(CTCA ip) const {
+folly::Optional<TCA> TranslatorX64::getCatchTrace(CTCA ip) const {
   TCA* found = m_catchTraceMap.find(ip);
-  return found ? *found : nullptr;
+  if (found) return *found;
+  return folly::none;
 }
 
 void

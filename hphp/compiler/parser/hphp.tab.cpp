@@ -1596,10 +1596,10 @@ static const yytype_uint16 yyrline[] =
     2521,  2523,  2525,  2529,  2530,  2532,  2533,  2539,  2540,  2542,
     2544,  2546,  2548,  2551,  2552,  2553,  2557,  2558,  2559,  2560,
     2561,  2562,  2563,  2564,  2565,  2569,  2570,  2574,  2582,  2584,
-    2588,  2591,  2597,  2598,  2604,  2605,  2612,  2615,  2619,  2622,
-    2627,  2628,  2629,  2630,  2634,  2635,  2639,  2641,  2642,  2644,
-    2648,  2654,  2656,  2660,  2663,  2666,  2674,  2677,  2680,  2681,
-    2684,  2687,  2688,  2691,  2695,  2699,  2705,  2713,  2714
+    2588,  2592,  2599,  2600,  2606,  2607,  2614,  2617,  2621,  2624,
+    2629,  2630,  2631,  2632,  2636,  2637,  2641,  2643,  2644,  2646,
+    2650,  2656,  2658,  2662,  2665,  2668,  2676,  2679,  2682,  2683,
+    2686,  2689,  2690,  2693,  2697,  2701,  2707,  2715,  2716
 };
 #endif
 
@@ -11963,64 +11963,66 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 2589 "hphp.y"
-    { _p->onTypedef((yyval), (yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
+    { (yyvsp[(2) - (5)]).setText(_p->nsDecl((yyvsp[(2) - (5)]).text()));
+                                         _p->onTypedef((yyval), (yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
                                          _p->popTypeScope(); }
     break;
 
   case 781:
 
 /* Line 1806 of yacc.c  */
-#line 2592 "hphp.y"
-    { _p->onTypedef((yyval), (yyvsp[(2) - (6)]), (yyvsp[(5) - (6)]));
+#line 2593 "hphp.y"
+    { (yyvsp[(2) - (6)]).setText(_p->nsDecl((yyvsp[(2) - (6)]).text()));
+                                         _p->onTypedef((yyval), (yyvsp[(2) - (6)]), (yyvsp[(5) - (6)]));
                                          _p->popTypeScope(); }
     break;
 
   case 782:
 
 /* Line 1806 of yacc.c  */
-#line 2597 "hphp.y"
+#line 2599 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 783:
 
 /* Line 1806 of yacc.c  */
-#line 2598 "hphp.y"
+#line 2600 "hphp.y"
     { only_in_hh_syntax(_p); (yyval) = (yyvsp[(2) - (2)]); }
     break;
 
   case 784:
 
 /* Line 1806 of yacc.c  */
-#line 2604 "hphp.y"
+#line 2606 "hphp.y"
     { _p->pushTypeScope(); (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 785:
 
 /* Line 1806 of yacc.c  */
-#line 2608 "hphp.y"
+#line 2610 "hphp.y"
     { _p->pushTypeScope(); (yyval) = (yyvsp[(1) - (4)]); }
     break;
 
   case 786:
 
 /* Line 1806 of yacc.c  */
-#line 2614 "hphp.y"
+#line 2616 "hphp.y"
     { (yyval) = (yyvsp[(2) - (3)]); }
     break;
 
   case 787:
 
 /* Line 1806 of yacc.c  */
-#line 2615 "hphp.y"
+#line 2617 "hphp.y"
     { (yyval).reset(); }
     break;
 
   case 788:
 
 /* Line 1806 of yacc.c  */
-#line 2619 "hphp.y"
+#line 2621 "hphp.y"
     { Token t; t.reset();
                                          _p->onTypeList((yyvsp[(1) - (1)]), t);
                                          (yyval) = (yyvsp[(1) - (1)]); }
@@ -12029,7 +12031,7 @@ yyreduce:
   case 789:
 
 /* Line 1806 of yacc.c  */
-#line 2622 "hphp.y"
+#line 2624 "hphp.y"
     { _p->onTypeList((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));
                                          (yyval) = (yyvsp[(1) - (3)]); }
     break;
@@ -12037,105 +12039,105 @@ yyreduce:
   case 790:
 
 /* Line 1806 of yacc.c  */
-#line 2627 "hphp.y"
+#line 2629 "hphp.y"
     { (yyval) = (yyvsp[(1) - (3)]); }
     break;
 
   case 791:
 
 /* Line 1806 of yacc.c  */
-#line 2628 "hphp.y"
+#line 2630 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 792:
 
 /* Line 1806 of yacc.c  */
-#line 2629 "hphp.y"
+#line 2631 "hphp.y"
     { (yyval).reset(); }
     break;
 
   case 793:
 
 /* Line 1806 of yacc.c  */
-#line 2630 "hphp.y"
+#line 2632 "hphp.y"
     { (yyval).reset(); }
     break;
 
   case 794:
 
 /* Line 1806 of yacc.c  */
-#line 2634 "hphp.y"
+#line 2636 "hphp.y"
     { (yyval).reset(); }
     break;
 
   case 795:
 
 /* Line 1806 of yacc.c  */
-#line 2635 "hphp.y"
+#line 2637 "hphp.y"
     { only_in_hh_syntax(_p); (yyval) = (yyvsp[(2) - (2)]); }
     break;
 
   case 796:
 
 /* Line 1806 of yacc.c  */
-#line 2640 "hphp.y"
+#line 2642 "hphp.y"
     { _p->addTypeVar((yyvsp[(3) - (3)]).text()); }
     break;
 
   case 797:
 
 /* Line 1806 of yacc.c  */
-#line 2641 "hphp.y"
+#line 2643 "hphp.y"
     { _p->addTypeVar((yyvsp[(1) - (1)]).text()); }
     break;
 
   case 798:
 
 /* Line 1806 of yacc.c  */
-#line 2643 "hphp.y"
+#line 2645 "hphp.y"
     { _p->addTypeVar((yyvsp[(3) - (5)]).text()); }
     break;
 
   case 799:
 
 /* Line 1806 of yacc.c  */
-#line 2644 "hphp.y"
+#line 2646 "hphp.y"
     { _p->addTypeVar((yyvsp[(1) - (3)]).text()); }
     break;
 
   case 800:
 
 /* Line 1806 of yacc.c  */
-#line 2650 "hphp.y"
+#line 2652 "hphp.y"
     { validate_shape_keyname((yyvsp[(1) - (3)]), _p); }
     break;
 
   case 803:
 
 /* Line 1806 of yacc.c  */
-#line 2661 "hphp.y"
+#line 2663 "hphp.y"
     { (yyval) = (yyvsp[(1) - (2)]); }
     break;
 
   case 804:
 
 /* Line 1806 of yacc.c  */
-#line 2663 "hphp.y"
+#line 2665 "hphp.y"
     {}
     break;
 
   case 805:
 
 /* Line 1806 of yacc.c  */
-#line 2667 "hphp.y"
+#line 2669 "hphp.y"
     { (yyval).setText("array"); }
     break;
 
   case 806:
 
 /* Line 1806 of yacc.c  */
-#line 2674 "hphp.y"
+#line 2676 "hphp.y"
     { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization((yyvsp[(2) - (2)]), '?');
                                          (yyval) = (yyvsp[(2) - (2)]); }
@@ -12144,7 +12146,7 @@ yyreduce:
   case 807:
 
 /* Line 1806 of yacc.c  */
-#line 2677 "hphp.y"
+#line 2679 "hphp.y"
     { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization((yyvsp[(2) - (2)]), '@');
                                          (yyval) = (yyvsp[(2) - (2)]); }
@@ -12153,14 +12155,14 @@ yyreduce:
   case 808:
 
 /* Line 1806 of yacc.c  */
-#line 2680 "hphp.y"
+#line 2682 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 809:
 
 /* Line 1806 of yacc.c  */
-#line 2681 "hphp.y"
+#line 2683 "hphp.y"
     { Token t; t.reset();
                                          (yyvsp[(1) - (1)]).setText("array");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t); }
@@ -12169,7 +12171,7 @@ yyreduce:
   case 810:
 
 /* Line 1806 of yacc.c  */
-#line 2684 "hphp.y"
+#line 2686 "hphp.y"
     { Token t; t.reset();
                                          (yyvsp[(1) - (1)]).setText("callable");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t); }
@@ -12178,14 +12180,14 @@ yyreduce:
   case 811:
 
 /* Line 1806 of yacc.c  */
-#line 2687 "hphp.y"
+#line 2689 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 812:
 
 /* Line 1806 of yacc.c  */
-#line 2689 "hphp.y"
+#line 2691 "hphp.y"
     { (yyvsp[(1) - (4)]).setText("array");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)])); }
     break;
@@ -12193,7 +12195,7 @@ yyreduce:
   case 813:
 
 /* Line 1806 of yacc.c  */
-#line 2692 "hphp.y"
+#line 2694 "hphp.y"
     { _p->onTypeList((yyvsp[(3) - (6)]), (yyvsp[(5) - (6)]));
                                          (yyvsp[(1) - (6)]).setText("array");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (6)]), (yyvsp[(3) - (6)])); }
@@ -12202,7 +12204,7 @@ yyreduce:
   case 814:
 
 /* Line 1806 of yacc.c  */
-#line 2695 "hphp.y"
+#line 2697 "hphp.y"
     { (yyvsp[(1) - (1)]).xhpLabel();
                                          Token t; t.reset();
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (1)]), t);
@@ -12212,7 +12214,7 @@ yyreduce:
   case 815:
 
 /* Line 1806 of yacc.c  */
-#line 2701 "hphp.y"
+#line 2703 "hphp.y"
     { only_in_hh_syntax(_p);
                                         _p->onTypeList((yyvsp[(7) - (8)]), (yyvsp[(4) - (8)]));
                                         _p->onTypeAnnotation((yyval), (yyvsp[(2) - (8)]), (yyvsp[(7) - (8)]));
@@ -12222,7 +12224,7 @@ yyreduce:
   case 816:
 
 /* Line 1806 of yacc.c  */
-#line 2705 "hphp.y"
+#line 2707 "hphp.y"
     { only_in_hh_syntax(_p);
                                         _p->onTypeList((yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
                                         Token t; t.reset(); t.setText("array");
@@ -12233,21 +12235,21 @@ yyreduce:
   case 817:
 
 /* Line 1806 of yacc.c  */
-#line 2713 "hphp.y"
+#line 2715 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 818:
 
 /* Line 1806 of yacc.c  */
-#line 2714 "hphp.y"
+#line 2716 "hphp.y"
     { (yyval).reset(); }
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 12250 "hphp.tab.cpp"
+#line 12252 "hphp.tab.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -12486,7 +12488,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 2717 "hphp.y"
+#line 2719 "hphp.y"
 
 bool Parser::parseImpl() {
   return yyparse(this) == 0;

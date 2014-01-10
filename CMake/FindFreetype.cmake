@@ -1,15 +1,10 @@
 
-if (FREETYPE_LIBRARIES AND FREETYPE_INCLUDE_DIRS)
-  set (Freetype_FIND_QUIETLY TRUE)
-endif (FREETYPE_LIBRARIES AND FREETYPE_INCLUDE_DIRS)
+find_package(PkgConfig)
+pkg_check_modules(PC_FREETYPE QUIET freetype2)
 
-find_path(FREETYPE_INCLUDE_DIRS NAMES freetype/freetype.h)
-if (NOT FREETYPE_INCLUDE_DIRS)
-	find_path(FREETYPE_INCLUDE_DIRS NAMES freetype2/freetype/freetype.h)
-	if (FREETYPE_INCLUDE_DIRS)
-		set(FREETYPE_INCLUDE_DIRS "${FREETYPE_INCLUDE_DIRS}/freetype2" CACHE PATH "Freetype include directory" FORCE)
-	endif()
-endif()
+find_path(FREETYPE_INCLUDE_DIRS NAMES freetype/config/ftheader.h
+          HINTS ${PC_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDE_DIRS}
+          PATH_SUFFIXES freetype2)
 
 find_library(FREETYPE_LIBRARIES NAMES freetype)
 

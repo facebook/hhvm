@@ -1238,6 +1238,8 @@ class reflectionExtension : public Extension {
     HHVM_FE(hphp_set_static_property);
 
     loadSystemlib();
+    loadSystemlib("reflection-classes");
+    loadSystemlib("reflection-internals-functions");
   }
 } s_reflection_extension;
 

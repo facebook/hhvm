@@ -17,18 +17,23 @@
 #define incl_HPHP_UTIL_ABI_CXX_H_
 
 #include <inttypes.h>
+#include <string>
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Given the address of a C++ function, returns that function's name
- * or a hex string representation of the address if it can't find
- * the function's name. Attempts to demangle C++ function names. It's
- * the caller's responsibility to free the returned C string.
+ * Given a pointer to somewhere in a C++ function, returns that function's name
+ * or a hex string representation of the address if it can't find the
+ * function's name. Attempts to demangle C++ function names.
  */
-char* getNativeFunctionName(void* codeAddr);
+std::string getNativeFunctionName(void* codeAddr);
+
+template<typename Ret, typename... Args>
+inline std::string getNativeFunctionName(Ret (*ptr)(Args...)) {
+  return getNativeFunctionName(reinterpret_cast<void*>(ptr));
+}
 
 /**
  * Get the vtable offset corresponding to a method pointer. NB: only works

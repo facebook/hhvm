@@ -1617,12 +1617,15 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   TCA trampAddr = trampolines.frontier();
   if (Stats::enabled()) {
     Stats::emitInc(trampolines, &Stats::tl_helper_counters[0], index);
-    char* name = getNativeFunctionName(helperAddr);
+    auto name = getNativeFunctionName(helperAddr);
     const size_t limit = 50;
-    if (strlen(name) > limit) {
+    if (name.size() > limit) {
       name[limit] = '\0';
     }
-    Stats::helperNames[index].store(name, std::memory_order_release);
+
+    // The duped string lives until process death intentionally.
+    Stats::helperNames[index].store(strdup(name.c_str()),
+                                    std::memory_order_release);
   }
 
   Asm a { trampolines };
@@ -2389,16 +2392,13 @@ bool TranslatorX64::dumpTCCode(const char* filename) {
     result = (fwrite(code.stubs().base(), 1, count, astubFile) == count);
   }
   if (result) {
-    for(PointerMap::iterator iter = trampolineMap.begin();
-        iter != trampolineMap.end();
-        iter++) {
-      void* helperAddr = iter->first;
-      void* trampAddr = iter->second;
-      char* functionName = getNativeFunctionName(helperAddr);
+    for (auto const& pair : trampolineMap) {
+      void* helperAddr = pair.first;
+      void* trampAddr = pair.second;
+      auto functionName = getNativeFunctionName(helperAddr);
       fprintf(helperAddrFile,"%10p %10p %s\n",
               trampAddr, helperAddr,
-              functionName);
-      free(functionName);
+              functionName.c_str());
     }
   }
   return result;

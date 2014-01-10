@@ -385,16 +385,18 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
      {
        struct sockaddr_un *ua = (struct sockaddr_un*)sa;
 
-       if (ua->sun_path[0] == '\0') {
-         /* abstract name */
-         int len = strlen(ua->sun_path + 1) + 1;
+       if (sl == sizeof(sa_family_t)) {
+         /* unnamed socket. no text name. */
+       } else if (ua->sun_path[0] == '\0') {
+         /* abstract name. name is an arbitrary sequence of bytes. */
+         int len = sl - sizeof(sa_family_t);
          textaddrlen = len;
-         textaddr = (char *)malloc((len + 1) );
+         textaddr = (char *)malloc(len);
          memcpy(textaddr, ua->sun_path, len);
-         textaddr[len] = '\0';
        } else {
+         /* normal name. */
          textaddrlen = strlen(ua->sun_path);
-         textaddr = strndup((ua->sun_path), textaddrlen);
+         textaddr = strndup(ua->sun_path, textaddrlen);
        }
        break;
     }

@@ -15,17 +15,21 @@
 */
 #include "hphp/util/abi-cxx.h"
 
-#include <memory>
-#include <cstring>
-#include <cstdlib>
-#include <cstdio>
-#include <map>
-#include <string>
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <memory>
 #include <mutex>
+#include <string>
+#include <unordered_map>
 
 #include <cxxabi.h>
 #include <execinfo.h>
+
+#include "folly/Format.h"
+
+#include "hphp/util/functional.h"
 
 namespace HPHP {
 
@@ -35,28 +39,22 @@ namespace {
 
 typedef std::lock_guard<std::mutex> G;
 std::mutex nameCacheLock;
-std::map<void*,std::string> nameCache;
+std::unordered_map<void*, std::string, pointer_hash<void>> nameCache;
 
 }
 
 //////////////////////////////////////////////////////////////////////
 
-char* getNativeFunctionName(void* codeAddr) {
+std::string getNativeFunctionName(void* codeAddr) {
   {
     G g(nameCacheLock);
     auto it = nameCache.find(codeAddr);
-    if (it != end(nameCache)) {
-      auto ret = new char[it->second.size() + 1];
-      std::copy(it->second.data(),
-                it->second.data() + it->second.size() + 1,
-                ret);
-      return ret;
-    }
+    if (it != end(nameCache)) return it->second;
   }
 
   void* buf[1] = {codeAddr};
   char** symbols = backtrace_symbols(buf, 1);
-  char* functionName = nullptr;
+  std::string functionName;
   if (symbols != nullptr) {
     //
     // the output from backtrace_symbols looks like this:
@@ -78,38 +76,23 @@ char* getNativeFunctionName(void* codeAddr) {
       start++;
       char* end = strchr(start, '+');
       if (end != nullptr) {
-        size_t len = end-start;
-        functionName = new char[len+1];
-        strncpy(functionName, start, len);
-        functionName[len] = '\0';
+        functionName.assign(start, end);
         int status;
-        char* demangledName = abi::__cxa_demangle(functionName, 0, 0, &status);
-        if (status == 0) {
-          delete [] functionName;
-
-          // Callers expect the buffer to have come from new[] but demangledName
-          // came from malloc. Copy to a buffer from new[].
-          auto const len = strlen(demangledName) + 1;
-          char* buf = new char[len];
-          std::copy(demangledName, demangledName + len, buf);
-          free(demangledName);
-          functionName = buf;
-        }
+        char* demangledName = abi::__cxa_demangle(functionName.c_str(),
+                                                  0, 0, &status);
+        SCOPE_EXIT { free(demangledName); };
+        if (status == 0) functionName.assign(demangledName);
       }
     }
   }
-  free(symbols);
-  if (functionName == nullptr) {
-#define MAX_ADDR_HEX_LEN 40
-    functionName = new char[MAX_ADDR_HEX_LEN + 3];
-    std::sprintf(functionName, "%40p", codeAddr);
-  }
 
-  {
-    G g(nameCacheLock);
-    nameCache[codeAddr] = std::string(functionName);
-  }
-  return functionName;
+  // backtrace_symbols requires that we free the array of strings but not the
+  // strings themselves.
+  free(symbols);
+  if (functionName.empty()) functionName = folly::format("{}", codeAddr).str();
+
+  G g(nameCacheLock);
+  return nameCache[codeAddr] = functionName;
 }
 
 //////////////////////////////////////////////////////////////////////

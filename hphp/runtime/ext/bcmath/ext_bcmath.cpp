@@ -15,11 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_bcmath.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/bcmath/bcmath.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(bcmath);
 ///////////////////////////////////////////////////////////////////////////////
 
 class bcmath_data {
@@ -48,13 +48,13 @@ static void php_str2num(bc_num *num, const char *str) {
   }
 }
 
-bool f_bcscale(int64_t scale) {
+static bool HHVM_FUNCTION(bcscale, int64_t scale) {
   BCG(bc_precision) = scale < 0 ? 0 : scale;
   return true;
 }
 
-String f_bcadd(const String& left, const String& right,
-               int64_t scale /* = -1 */) {
+static String HHVM_FUNCTION(bcadd, const String& left, const String& right,
+                            int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -73,8 +73,8 @@ String f_bcadd(const String& left, const String& right,
   return ret;
 }
 
-String f_bcsub(const String& left, const String& right,
-               int64_t scale /* = -1 */) {
+static String HHVM_FUNCTION(bcsub, const String& left, const String& right,
+                            int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -93,8 +93,8 @@ String f_bcsub(const String& left, const String& right,
   return ret;
 }
 
-int64_t f_bccomp(const String& left, const String& right,
-                 int64_t scale /* = -1 */) {
+static int64_t HHVM_FUNCTION(bccomp, const String& left, const String& right,
+                             int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second;
   bc_init_num(&first);
@@ -107,8 +107,8 @@ int64_t f_bccomp(const String& left, const String& right,
   return ret;
 }
 
-String f_bcmul(const String& left, const String& right,
-               int64_t scale /* = -1 */) {
+static String HHVM_FUNCTION(bcmul, const String& left, const String& right,
+                            int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -127,7 +127,7 @@ String f_bcmul(const String& left, const String& right,
   return ret;
 }
 
-String f_bcdiv(const String& left, const String& right,
+static Variant HHVM_FUNCTION(bcdiv, const String& left, const String& right,
                int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
@@ -138,7 +138,7 @@ String f_bcdiv(const String& left, const String& right,
   php_str2num(&second, (char*)right.data());
   if (bc_divide(first, second, &result, scale) == -1) {
     raise_warning("Division by zero");
-    return String();
+    return Variant();
   }
   String ret(bc_num2str(result), AttachString);
   bc_free_num(&first);
@@ -147,7 +147,7 @@ String f_bcdiv(const String& left, const String& right,
   return ret;
 }
 
-String f_bcmod(const String& left, const String& right) {
+static Variant HHVM_FUNCTION(bcmod, const String& left, const String& right) {
   bc_num first, second, result;
   bc_init_num(&first);
   bc_init_num(&second);
@@ -156,7 +156,7 @@ String f_bcmod(const String& left, const String& right) {
   php_str2num(&second, (char*)right.data());
   if (bc_modulo(first, second, &result, 0) == -1) {
     raise_warning("Division by zero");
-    return String();
+    return Variant();
   }
   String ret(bc_num2str(result), AttachString);
   bc_free_num(&first);
@@ -165,8 +165,8 @@ String f_bcmod(const String& left, const String& right) {
   return ret;
 }
 
-String f_bcpow(const String& left, const String& right,
-               int64_t scale /* = -1 */) {
+static String HHVM_FUNCTION(bcpow, const String& left, const String& right,
+                           int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
   bc_init_num(&first);
@@ -185,8 +185,8 @@ String f_bcpow(const String& left, const String& right,
   return ret;
 }
 
-Variant f_bcpowmod(const String& left, const String& right,
-                   const String& modulus, int64_t scale /* = -1 */) {
+static Variant HHVM_FUNCTION(bcpowmod, const String& left, const String& right,
+                             const String& modulus, int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, mod, result;
   bc_init_num(&first);
@@ -210,7 +210,8 @@ Variant f_bcpowmod(const String& left, const String& right,
   return ret;
 }
 
-Variant f_bcsqrt(const String& operand, int64_t scale /* = -1 */) {
+static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
+                             int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num result;
   bc_init_num(&result);
@@ -227,6 +228,29 @@ Variant f_bcsqrt(const String& operand, int64_t scale /* = -1 */) {
   bc_free_num(&result);
   return ret;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+class bcmathExtension : public Extension {
+ public:
+  bcmathExtension() : Extension("bcmath") {}
+  virtual void moduleInit() {
+    IniSetting::Bind("bcmath.scale", "0", ini_on_update_long, ini_get_long,
+                     &BCG(bc_precision));
+
+    HHVM_FE(bcscale);
+    HHVM_FE(bcadd);
+    HHVM_FE(bcsub);
+    HHVM_FE(bccomp);
+    HHVM_FE(bcmul);
+    HHVM_FE(bcdiv);
+    HHVM_FE(bcmod);
+    HHVM_FE(bcpow);
+    HHVM_FE(bcpowmod);
+    HHVM_FE(bcsqrt);
+    loadSystemlib();
+  }
+} s_bcmath_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 

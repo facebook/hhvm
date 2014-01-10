@@ -11963,7 +11963,8 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 2589 "hphp.y"
-    { _p->onTypedef((yyval), (yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
+    { (yyvsp[(2) - (5)]).setText(_p->nsDecl((yyvsp[(2) - (5)]).text()));
+		_p->onTypedef((yyval), (yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
                                          _p->popTypeScope(); }
     break;
 
@@ -11971,7 +11972,8 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 2592 "hphp.y"
-    { _p->onTypedef((yyval), (yyvsp[(2) - (6)]), (yyvsp[(5) - (6)]));
+    { (yyvsp[(2) - (5)]).setText(_p->nsDecl((yyvsp[(2) - (5)]).text()));
+		_p->onTypedef((yyval), (yyvsp[(2) - (6)]), (yyvsp[(5) - (6)]));
                                          _p->popTypeScope(); }
     break;
 

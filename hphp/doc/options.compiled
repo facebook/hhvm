@@ -241,13 +241,12 @@ to use for sending.
 
     # static contents
     FileCache = filename
-    EnableStaticContentCache = true
     EnableStaticContentFromDisk = true
     ExpiresActive = true
     ExpiresDefault = 2592000
     DefaultCharsetName = UTF-8
 
-- EnableStaticContentCache, EnableStaticContentFromDisk
+- EnableStaticContentFromDisk
 
 A static content cache creates one single file from all static contents,
 including css, js, html, images and any other non-PHP files (or even PHP files,

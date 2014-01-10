@@ -217,7 +217,6 @@ bool RuntimeOption::ForbiddenAs404 = false;
 std::string RuntimeOption::ErrorDocument500;
 std::string RuntimeOption::FatalErrorMessage;
 std::string RuntimeOption::FontPath;
-bool RuntimeOption::EnableStaticContentCache = true;
 bool RuntimeOption::EnableStaticContentFromDisk = true;
 bool RuntimeOption::EnableOnDemandUncompress = true;
 bool RuntimeOption::EnableStaticContentMMap = true;
@@ -836,8 +835,6 @@ void RuntimeOption::Load(Hdf &config,
     normalizePath(ErrorDocument500);
     FatalErrorMessage = server["FatalErrorMessage"].getString();
     FontPath = Util::normalizeDir(server["FontPath"].getString());
-    EnableStaticContentCache =
-      server["EnableStaticContentCache"].getBool(true);
     EnableStaticContentFromDisk =
       server["EnableStaticContentFromDisk"].getBool(true);
     EnableOnDemandUncompress =

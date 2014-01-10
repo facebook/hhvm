@@ -728,13 +728,12 @@ Array HHVM_FUNCTION(hphp_get_method_info, CVarRef class_or_object,
      */
     return get_method_info(cls->clsInfo(), meth_name);
   }
-  const String& method_name = meth_name.toString();
-  const Func* func = cls->lookupMethod(method_name.get());
+  const Func* func = cls->lookupMethod(meth_name.get());
   if (!func) {
     if ((cls->attrs() & AttrAbstract) || (cls->attrs() & AttrInterface)) {
       const Class::InterfaceMap& ifaces = cls->allInterfaces();
       for (int i = 0, size = ifaces.size(); i < size; i++) {
-        func = ifaces[i]->lookupMethod(name.get());
+        func = ifaces[i]->lookupMethod(meth_name.get());
         if (func) break;
       }
     }

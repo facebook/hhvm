@@ -127,7 +127,7 @@ static String HHVM_FUNCTION(bcmul, const String& left, const String& right,
   return ret;
 }
 
-static String HHVM_FUNCTION(bcdiv, const String& left, const String& right,
+static Variant HHVM_FUNCTION(bcdiv, const String& left, const String& right,
                int64_t scale /* = -1 */) {
   if (scale < 0) scale = BCG(bc_precision);
   bc_num first, second, result;
@@ -138,7 +138,7 @@ static String HHVM_FUNCTION(bcdiv, const String& left, const String& right,
   php_str2num(&second, (char*)right.data());
   if (bc_divide(first, second, &result, scale) == -1) {
     raise_warning("Division by zero");
-    return String();
+    return Variant();
   }
   String ret(bc_num2str(result), AttachString);
   bc_free_num(&first);
@@ -147,7 +147,7 @@ static String HHVM_FUNCTION(bcdiv, const String& left, const String& right,
   return ret;
 }
 
-static String HHVM_FUNCTION(bcmod, const String& left, const String& right) {
+static Variant HHVM_FUNCTION(bcmod, const String& left, const String& right) {
   bc_num first, second, result;
   bc_init_num(&first);
   bc_init_num(&second);
@@ -156,7 +156,7 @@ static String HHVM_FUNCTION(bcmod, const String& left, const String& right) {
   php_str2num(&second, (char*)right.data());
   if (bc_modulo(first, second, &result, 0) == -1) {
     raise_warning("Division by zero");
-    return String();
+    return Variant();
   }
   String ret(bc_num2str(result), AttachString);
   bc_free_num(&first);

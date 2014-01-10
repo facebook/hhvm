@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/bcmath/bcmath.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -234,6 +235,9 @@ class bcmathExtension : public Extension {
  public:
   bcmathExtension() : Extension("bcmath") {}
   virtual void moduleInit() {
+    IniSetting::Bind("bcmath.scale", "0", ini_on_update_long, ini_get_long,
+                     &BCG(bc_precision));
+
     HHVM_FE(bcscale);
     HHVM_FE(bcadd);
     HHVM_FE(bcsub);

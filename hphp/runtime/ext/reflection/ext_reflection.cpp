@@ -94,7 +94,8 @@ const StaticString
   s_type_hint("type_hint"),
   s_type_profiling("type_profiling"),
   s_accessible("accessible"),
-  s_closure_scope_class("closure_scope_class");
+  s_closure_scope_class("closure_scope_class"),
+  s_reflectionexception("ReflectionException");
 
 static Class* get_cls(CVarRef class_or_object) {
   Class* cls = nullptr;
@@ -1214,6 +1215,24 @@ bool HHVM_FUNCTION(hphp_scalar_typehints_enabled) {
   return RuntimeOption::EnableHipHopSyntax;
 }
 
+ObjectData* Reflection::AllocReflectionExceptionObject(CVarRef message) {
+  ObjectData* inst = ObjectData::newInstance(s_ReflectionExceptionClass);
+  TypedValue ret;
+  {
+    /* Increment refcount across call to ctor, so the object doesn't */
+    /* get destroyed when ctor's frame is torn down */
+    CountableHelper cnt(inst);
+    g_vmContext->invokeFunc(&ret,
+                            s_ReflectionExceptionClass->getCtor(),
+                            make_packed_array(message),
+                            inst);
+  }
+  tvRefcountedDecRef(&ret);
+  return inst;
+}
+
+HPHP::Class* Reflection::s_ReflectionExceptionClass = nullptr;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class reflectionExtension : public Extension {
@@ -1239,6 +1258,9 @@ class reflectionExtension : public Extension {
     loadSystemlib();
     loadSystemlib("reflection-classes");
     loadSystemlib("reflection-internals-functions");
+
+    Reflection::s_ReflectionExceptionClass =
+        Unit::lookupClass(s_reflectionexception.get());
   }
 } s_reflection_extension;
 

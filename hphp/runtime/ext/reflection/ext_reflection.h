@@ -46,6 +46,12 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
 String HHVM_FUNCTION(hphp_get_original_class_name, const String& name);
 bool HHVM_FUNCTION(hphp_scalar_typehints_enabled);
 
+class Reflection {
+ public:
+  static HPHP::Class* s_ReflectionExceptionClass;
+  static ObjectData* AllocReflectionExceptionObject(CVarRef message);
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

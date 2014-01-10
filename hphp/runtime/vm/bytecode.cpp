@@ -69,6 +69,7 @@
 #include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+#include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -1154,6 +1155,7 @@ ObjectData* VMExecutionContext::createObject(StringData* clsName,
   if (class_ == nullptr) {
     throw_missing_class(clsName->data());
   }
+
   Object o;
   o = newInstance(class_);
   if (init) {
@@ -1161,7 +1163,7 @@ ObjectData* VMExecutionContext::createObject(StringData* clsName,
     if (!(ctor->attrs() & AttrPublic)) {
       std::string msg = "Access to non-public constructor of class ";
       msg += class_->name()->data();
-      throw Object(SystemLib::AllocReflectionExceptionObject(msg));
+      throw Object(Reflection::AllocReflectionExceptionObject(msg));
     }
     // call constructor
     if (!isContainerOrNull(params)) {

@@ -38,7 +38,6 @@ namespace Eval {
   x(RuntimeException)                           \
   x(OutOfBoundsException)                       \
   x(InvalidOperationException)                  \
-  x(ReflectionException)                        \
   x(pinitSentinel)                              \
   x(resource)                                   \
   x(Directory)                                  \
@@ -96,7 +95,6 @@ class SystemLib {
                                             const String& encoding = null_string);
   static ObjectData* AllocDOMExceptionObject(CVarRef message,
                                              CVarRef code);
-  static ObjectData* AllocReflectionExceptionObject(CVarRef message);
   static ObjectData* AllocDirectoryObject();
   static ObjectData* AllocPDOExceptionObject();
   static ObjectData* AllocSoapFaultObject(CVarRef code,

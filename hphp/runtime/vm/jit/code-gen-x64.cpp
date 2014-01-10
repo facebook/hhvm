@@ -632,7 +632,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   auto const& info = m_state.catches[inst->block()];
   assert(info.afterCall);
 
-  m_tx64->registerCatchTrace(info.afterCall, m_as.frontier());
+  m_tx64->registerCatchBlock(info.afterCall, m_as.frontier());
 
   Stats::emitInc(m_mainCode, Stats::TC_CatchTrace);
 

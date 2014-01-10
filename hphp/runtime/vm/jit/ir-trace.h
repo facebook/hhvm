@@ -31,58 +31,27 @@ struct IRUnit;
  * traces may contain internal forward-only control flow.
  */
 struct IRTrace : private boost::noncopyable {
-  static auto const kMinCap = 2;
-  typedef List<Block*> Blocks;
-  typedef Blocks::const_iterator const_iterator;
-  typedef Blocks::iterator iterator;
-
   // Create a new trace, reserving room for cap blocks, then
   // add the given block.
-  explicit IRTrace(IRUnit& unit, Block* first, size_t cap = kMinCap);
+  explicit IRTrace(IRUnit& unit, Block* first);
 
-  Blocks& blocks() { return m_blocks; }
-  const Blocks& blocks() const { return m_blocks; }
-
-  Block* front() { return m_blocks[0]; }
-  Block* back() { return m_blocks[m_blocks.size() - 1]; }
-  const Block* front() const { return m_blocks[0]; }
-  const Block* back()  const { return m_blocks[m_blocks.size() - 1 ]; }
-
-  const_iterator cbegin() const { return blocks().cbegin(); }
-  const_iterator cend()   const { return blocks().cend(); }
-  const_iterator begin()  const { return blocks().begin(); }
-  const_iterator end()    const { return blocks().end(); }
-        iterator begin()        { return blocks().begin(); }
-        iterator end()          { return blocks().end(); }
+  Block* entry() { return m_entry; }
 
   // Unlink a block from a trace by forwarding any incoming edges to the
   // block's successor, then erasing it.
-  iterator unlink(iterator it);
+  void unlink(Block* b);
 
   // Erase a block from a trace. Updates any successor blocks that
   // have a DefLabel with a dest depending on this block.
-  iterator erase(iterator it);
-
-  // Add a block to the back of this trace's block list.
-  Block* push_back(Block* b);
-
-  // ensure the internal block list is presized to hold at least nblocks.
-  void reserve(size_t nblocks);
-
-  bool isMain() const;
+  void erase(Block* b);
 
   std::string toString() const;
   const IRUnit& unit() const { return m_unit; }
 
 private:
   IRUnit& m_unit;
-  Blocks m_blocks; // Blocks in main trace starting with entry
+  Block* m_entry;
 };
-
-// defined here to avoid circular dependency
-inline bool Block::isMain() const {
-  return m_trace->isMain();
-}
 
 }}
 

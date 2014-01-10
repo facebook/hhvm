@@ -2662,7 +2662,7 @@ void HhbcTranslator::MInstrTranslator::emitBindNewElem() {
 void HhbcTranslator::MInstrTranslator::emitMPost() {
   SSATmp* catchSp = nullptr;
   if (m_failedSetBlock) {
-    auto* endCatch = &m_failedSetBlock->trace()->back()->back();
+    auto* endCatch = &m_failedSetBlock->back();
     assert(endCatch->is(EndCatch, TryEndCatch));
     catchSp = endCatch->src(1);
     assert(catchSp->isA(Type::StkPtr));
@@ -2685,8 +2685,8 @@ void HhbcTranslator::MInstrTranslator::emitMPost() {
       if (input->isA(Type::Gen)) {
         gen(DecRef, input);
         if (m_failedSetBlock) {
-          TracePusher tp(m_tb, m_failedSetBlock->trace(), m_marker);
-          gen(DecRefStack, StackOffset(m_stackInputs[i]), Type::Cell, catchSp);
+          BlockPusher bp(m_tb, m_marker, m_failedSetBlock);
+          gen(DecRefStack, StackOffset(m_stackInputs[i]), Type::Gen, catchSp);
         }
       }
       break;
@@ -2753,7 +2753,7 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
         cns(nStack), // cells popped since the last SpillStack
     };
 
-    TracePusher tp(m_tb, m_failedSetBlock->trace(), m_marker);
+    BlockPusher bp(m_tb, m_marker, m_failedSetBlock);
     if (!isSetWithRef) {
       gen(DecRefStack, StackOffset(0), Type::Cell, catchSp);
       args.push_back(m_ht.gen(LdUnwinderValue, Type::Cell));
@@ -2779,8 +2779,7 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
 
     auto exit = m_ht.makeExit(nextOff, toSpill);
     {
-      TracePusher tp(m_tb, exit->trace(), m_marker, exit->trace()->back(),
-                     exit->trace()->back()->skipHeader());
+      BlockPusher tp(m_tb, m_marker, exit, exit->skipHeader());
       gen(IncStat, cns(Stats::TC_SetMStrGuess_Miss), cns(1), cns(false));
       gen(DecRef, m_result);
       m_tb.add(str->inst());

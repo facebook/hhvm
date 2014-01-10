@@ -58,9 +58,6 @@ struct Block : boost::noncopyable {
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
 
-  // Returns true if this block is part of the main trace.
-  bool isMain() const;
-
   // Returns true if this block has no successors.
   bool isExit() const { return !taken() && !next(); }
 

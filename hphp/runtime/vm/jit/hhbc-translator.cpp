@@ -4939,7 +4939,7 @@ Block* HhbcTranslator::makeExitOpt(TransID transId) {
   exitMarker.spOff = m_tb->spOffset() + spillValues.size() - m_stackDeficit;
   exitMarker.func  = curFunc();
 
-  TracePusher tracePusher(*m_tb, exit->trace(), exitMarker);
+  BlockPusher blockPusher(*m_tb, exitMarker, exit);
 
   SSATmp* stack = nullptr;
   if (m_stackDeficit != 0 || !spillValues.empty()) {
@@ -4968,8 +4968,9 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   BCMarker currentMarker = makeMarker(bcOff());
 
   auto const exit = m_tb->makeExit();
-  TracePusher tp(*m_tb, exit->trace(),
-                 flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker);
+  BlockPusher tp(*m_tb,
+                 flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker,
+                 exit);
 
   // The value we use for stack is going to depend on whether we have
   // to spillstack or what.
@@ -5051,15 +5052,13 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
  */
 Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals) {
   auto exit = m_tb->makeExit();
-  assert(exit->trace()->blocks().size() == 1);
 
-  TracePusher tp(*m_tb, exit->trace(), makeMarker(bcOff()));
+  BlockPusher tp(*m_tb, makeMarker(bcOff()), exit);
   gen(BeginCatch);
   for (auto* val : peekSpillValues()) spillVals.push_back(val);
   auto sp = emitSpillStack(m_tb->sp(), spillVals);
   gen(EndCatch, m_tb->fp(), sp);
 
-  assert(exit->trace()->blocks().size() == 1);
   return exit;
 }
 

@@ -2135,9 +2135,9 @@ void TranslatorX64::initUniqueStubs() {
   }
 }
 
-void TranslatorX64::registerCatchTrace(CTCA ip, TCA trace) {
-  FTRACE(1, "registerCatchTrace: afterCall: {} trace: {}\n", ip, trace);
-  m_pendingCatchTraces.emplace_back(ip, trace);
+void TranslatorX64::registerCatchBlock(CTCA ip, TCA block) {
+  FTRACE(1, "registerCatchBlock: afterCall: {} block: {}\n", ip, block);
+  m_pendingCatchTraces.emplace_back(ip, block);
 }
 
 void TranslatorX64::processPendingCatchTraces() {

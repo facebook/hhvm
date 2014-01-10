@@ -350,33 +350,6 @@ std::string IRUnit::toString() const {
   return out.str();
 }
 
-// Print unlikely blocks at the end in normal generation.  If we have
-// asmInfo, order the blocks based on how they were layed out.
-static BlockList blocks(const IRUnit& unit,
-                        const IRTrace* trace,
-                        const AsmInfo* asmInfo) {
-  if (!asmInfo) {
-    return layoutBlocks(unit).blocks;
-  }
-
-  smart::vector<Block*> blocks;
-  blocks.assign(trace->blocks().begin(), trace->blocks().end());
-  if (trace->isMain()) {
-    for (auto* exit : unit.exits()) {
-      blocks.insert(blocks.end(), exit->blocks().begin(), exit->blocks().end());
-    }
-  }
-  std::sort(
-    blocks.begin(),
-    blocks.end(),
-    [&] (Block* a, Block* b) {
-      return asmInfo->asmRanges[a].begin() < asmInfo->asmRanges[b].begin();
-    }
-  );
-
-  return blocks;
-}
-
 static constexpr auto kIndent = 4;
 
 static void disasmRange(std::ostream& os, TCA begin, TCA end) {
@@ -406,19 +379,21 @@ void print(std::ostream& os, const Block* block,
   BCMarker dummy;
   BCMarker& curMarker = markerPtr ? *markerPtr : dummy;
 
-  if (!block->isMain()) {
-    os << "\n" << color(ANSI_COLOR_GREEN)
-       << "    -------  Exit Trace  -------"
-       << color(ANSI_COLOR_END) << '\n';
-    curMarker = BCMarker();
-  }
-
   TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
     TcaRange(nullptr, nullptr);
 
   os << '\n' << std::string(kIndent - 3, ' ');
   printLabel(os, block);
-  os << punc(":") << "\n";
+  os << punc(":");
+  auto& preds = block->preds();
+  if (!preds.empty()) {
+    os << " (preds";
+    for (auto const& edge : preds) {
+      os << " B" << edge.inst()->block()->id();
+    }
+    os << ')';
+  }
+  os << "\n";
 
   const char* markerEndl = "";
   for (auto it = block->begin(); it != block->end();) {
@@ -538,7 +513,7 @@ void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
            const AsmInfo* asmInfo, const GuardConstraints* guards) {
   // For nice-looking dumps, we want to remember curMarker between blocks.
   BCMarker curMarker;
-  for (Block* block : blocks(unit, trace, asmInfo)) {
+  for (Block* block : layoutBlocks(unit).blocks) {
     print(os, block, regs, lifetime, asmInfo, guards, &curMarker);
   }
 }

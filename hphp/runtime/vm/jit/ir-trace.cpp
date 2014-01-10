@@ -20,16 +20,13 @@
 
 namespace HPHP { namespace JIT {
 
-IRTrace::IRTrace(IRUnit& unit, Block* first, size_t cap)
+IRTrace::IRTrace(IRUnit& unit, Block* first)
   : m_unit(unit)
-  , m_blocks(new (unit.arena()) Block*[cap], 0, cap) {
-  assert(cap >= kMinCap);
-  push_back(first);
+  , m_entry(first) {
 }
 
-IRTrace::iterator IRTrace::unlink(iterator blockIt) {
+void IRTrace::unlink(Block* block) {
   // Update any predecessors to point to the empty block's next block.
-  auto block = *blockIt;
   assert(block->empty());
   auto next = block->next();
   for (auto it = block->preds().begin(); it != block->preds().end(); ) {
@@ -37,38 +34,15 @@ IRTrace::iterator IRTrace::unlink(iterator blockIt) {
     ++it;
     cur->setTo(next);
   }
-  return erase(blockIt);
 }
 
-IRTrace::iterator IRTrace::erase(iterator it) {
-  assert((*it)->preds().empty());
-  Block* b = *it;
-  b->setTrace(nullptr);
-  if (!b->empty()) {
-    b->back().setTaken(nullptr);
-    b->back().setNext(nullptr);
+void IRTrace::erase(Block* block) {
+  assert(block->preds().empty());
+  block->setTrace(nullptr);
+  if (!block->empty()) {
+    block->back().setTaken(nullptr);
+    block->back().setNext(nullptr);
   }
-  return m_blocks.erase(it);
-}
-
-void IRTrace::reserve(size_t cap) {
-  if (m_blocks.capacity() < cap) {
-    auto blocks = new (m_unit.arena()) Block*[cap];
-    std::copy(m_blocks.begin(), m_blocks.end(), blocks);
-    m_blocks = List<Block*>(blocks, m_blocks.len, cap);
-  }
-}
-
-Block* IRTrace::push_back(Block* b) {
-  b->setTrace(this);
-  auto len = m_blocks.size();
-  auto cap = m_blocks.capacity();
-  if (len == cap) {
-    static_assert(kMinCap / 2 > 0, "");
-    reserve(cap + cap / 2); // grow by 1.5x
-  }
-  m_blocks.push_back(b);
-  return b;
 }
 
 }}

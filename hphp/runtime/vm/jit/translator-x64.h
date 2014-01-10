@@ -196,7 +196,7 @@ public:
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
 
-  void registerCatchTrace(CTCA ip, TCA trace);
+  void registerCatchBlock(CTCA ip, TCA block);
   void processPendingCatchTraces();
   TCA getCatchTrace(CTCA ip) const;
 

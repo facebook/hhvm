@@ -75,8 +75,6 @@ void splitCriticalEdge(IRUnit& unit, Edge* edge) {
   if (from->hint() == unlikely || to->hint() == unlikely) {
     middle->setHint(unlikely);
   }
-
-  from->trace()->push_back(middle);
 }
 }
 
@@ -99,8 +97,7 @@ bool removeUnreachable(IRUnit& unit) {
   ITRACE(2, "removing unreachable blocks\n");
   Trace::Indent _i;
 
-  auto modified = false;
-  IdSet<Block> visited;
+  smart::hash_set<Block*, pointer_hash<Block>> visited;
   smart::stack<Block*> stack;
   stack.push(unit.entry());
 
@@ -108,31 +105,34 @@ bool removeUnreachable(IRUnit& unit) {
   while (!stack.empty()) {
     auto* b = stack.top();
     stack.pop();
-    if (visited[b]) continue;
+    if (visited.count(b)) continue;
 
-    visited.add(b);
+    visited.insert(b);
     if (auto* taken = b->taken()) {
-      if (!visited[taken]) stack.push(taken);
+      if (!visited.count(taken)) stack.push(taken);
     }
     if (auto* next = b->next()) {
-      if (!visited[next]) stack.push(next);
+      if (!visited.count(next)) stack.push(next);
     }
   }
 
-  // Erase any blocks not found above.
-  forEachTrace(unit, [&](IRTrace* trace) {
-    auto& blocks = trace->blocks();
-    for (auto it = blocks.begin(); it != blocks.end(); ) {
-      auto* b = *it;
-      if (!visited[b]) {
-        ITRACE(3, "removing unreachable B{}\n", b->id());
-        it = trace->erase(it);
+  // Walk through the reachable blocks and erase any preds that weren't
+  // found.
+  bool modified = false;
+  for (auto* block : visited) {
+    auto& preds = block->preds();
+    for (auto it = preds.begin(); it != preds.end(); ) {
+      auto* inst = it->inst();
+      ++it;
+
+      if (!visited.count(inst->block())) {
+        ITRACE(3, "removing unreachable B{}\n", inst->block()->id());
+        inst->setNext(nullptr);
+        inst->setTaken(nullptr);
         modified = true;
-      } else {
-        ++it;
       }
     }
-  });
+  }
 
   return modified;
 }

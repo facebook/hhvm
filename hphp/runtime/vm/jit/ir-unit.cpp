@@ -28,7 +28,7 @@ IRUnit::IRUnit(Offset initialBcOffset)
   , m_nextOpndId(0)
   , m_nextInstId(0)
   , m_bcOff(initialBcOffset)
-  , m_main(new (m_arena) IRTrace(*this, defBlock(), 8))
+  , m_main(new (m_arena) IRTrace(*this, defBlock()))
 {
 }
 
@@ -68,21 +68,8 @@ SSATmp* IRUnit::findConst(ConstData& cdata, Type ctype) {
   return m_constTable.insert(cloneInstruction(&inst)->dst());
 }
 
-Block* IRUnit::addExit() {
-  auto exit = defBlock();
-  exit->setHint(Block::Hint::Unlikely);
-  m_exits.push_back(new (m_arena) IRTrace(*this, exit));
-  return exit;
-}
-
 Block* IRUnit::entry() const {
-  return m_main->front();
-}
-
-// IRTrace methods declared here because of circular dependencies.
-
-bool IRTrace::isMain() const {
-  return this == m_unit.main();
+  return m_main->entry();
 }
 
 }}

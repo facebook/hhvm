@@ -35,8 +35,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   : m_unit(unit)
   , m_simplifier(*this)
   , m_state(unit, initialSpOffsetFromFp, func)
-  , m_curTrace(m_unit.main())
-  , m_curBlock(nullptr)
+  , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
   , m_inReoptimize(false)
 {
@@ -101,56 +100,60 @@ SSATmp* TraceBuilder::genDefNone() {
   return gen(DefConst, Type::None, ConstData(0));
 }
 
-void TraceBuilder::appendInstruction(IRInstruction* inst, Block* block) {
-  assert(inst->marker().valid());
-  Opcode opc = inst->op();
-  if (opc != Nop && opc != DefConst) {
-    block->push_back(inst);
-  }
-}
-
 void TraceBuilder::appendInstruction(IRInstruction* inst) {
-  if (m_curWhere) {
-    // We have a specific position to insert instructions.
-    assert(!inst->isBlockEnd());
-    auto& it = m_curWhere.get();
-    it = m_curBlock->insert(it, inst);
-    ++it;
-    return;
-  }
+  auto defaultWhere = m_curBlock->end();
+  auto& where = m_curWhere ? m_curWhere.get() : defaultWhere;
 
-  Block* block = m_curTrace->back();
-  if (!block->empty()) {
-    IRInstruction* prev = &block->back();
-    if (prev->isBlockEnd()) {
+  // If the block isn't empty, check if we need to create a new block.
+  if (where != m_curBlock->begin()) {
+    auto prevIt = where;
+    --prevIt;
+    auto& prev = *prevIt;
+
+    if (prev.isBlockEnd()) {
+      assert(where == m_curBlock->end());
       // start a new block
-      Block* next = m_unit.defBlock();
-      FTRACE(2, "lazily adding B{}\n", next->id());
-      m_curTrace->push_back(next);
-      if (!prev->isTerminal()) {
+      m_curBlock = m_unit.defBlock();
+      where = m_curBlock->begin();
+      FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
+      if (!prev.isTerminal()) {
         // new block is reachable from old block so link it.
-        prev->setNext(next);
-        next->setHint(block->hint());
+        prev.setNext(m_curBlock);
+        m_curBlock->setHint(prev.block()->hint());
       }
-      block = next;
     }
   }
-  appendInstruction(inst, block);
-  if (m_savedTraces.empty()) {
+
+  assert(IMPLIES(inst->isBlockEnd(), where == m_curBlock->end()) &&
+         "Can't insert a BlockEnd instruction in the middle of a block");
+  if (do_assert && where != m_curBlock->begin()) {
+    UNUSED auto prevIt = where;
+    --prevIt;
+    assert(!prevIt->isBlockEnd() &&
+           "Can't append an instruction after a BlockEnd instruction");
+  }
+
+  assert(inst->marker().valid());
+  if (!inst->is(Nop, DefConst)) {
+    where = m_curBlock->insert(where, inst);
+    ++where;
+  }
+
+  if (m_savedBlocks.empty()) {
     // We don't track state on non-main traces for now. t2982555
     m_state.update(inst);
   }
 }
 
 void TraceBuilder::appendBlock(Block* block) {
-  assert(m_savedTraces.empty()); // TODO(t2982555): Don't require this
+  assert(m_savedBlocks.empty()); // TODO(t2982555): Don't require this
 
-  m_state.finishBlock(m_curTrace->back());
+  m_state.finishBlock(m_curBlock);
 
   FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
   m_state.startBlock(block);
-  m_curTrace->push_back(block);
+  m_curBlock = block;
 }
 
 std::vector<RegionDesc::TypePred> TraceBuilder::getKnownTypes() const {
@@ -397,7 +400,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
                                    const folly::Optional<IdomVector>& idoms) {
   // Since some of these optimizations inspect tracked state, we don't
   // perform any of them on non-main traces.
-  if (m_savedTraces.size() > 0) return nullptr;
+  if (m_savedBlocks.size() > 0) return nullptr;
 
   static DEBUG_ONLY __thread int instNest = 0;
   if (debug) ++instNest;
@@ -499,8 +502,8 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
 void TraceBuilder::reoptimize() {
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
-  assert(m_curTrace->isMain());
-  assert(m_savedTraces.empty());
+  assert(m_savedBlocks.empty());
+  assert(!m_curWhere);
 
   m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
@@ -512,23 +515,17 @@ void TraceBuilder::reoptimize() {
   auto const idoms = findDominators(m_unit, sortedBlocks);
   m_state.clear();
 
-  auto& traceBlocks = m_curTrace->blocks();
-  BlockList blocks(traceBlocks.begin(), traceBlocks.end());
-  traceBlocks.clear();
-  for (auto* block : blocks) {
-    assert(block->trace() == m_curTrace);
+  for (auto* block : rpoSortCfg(m_unit)) {
     FTRACE(5, "Block: {}\n", block->id());
 
-    assert(m_curTrace->isMain());
     m_state.startBlock(block);
-    m_curTrace->push_back(block);
+    m_curBlock = block;
 
     auto instructions = std::move(block->instrs());
     assert(block->empty());
     while (!instructions.empty()) {
       auto *inst = &instructions.front();
       instructions.pop_front();
-      m_state.setMarker(inst->marker());
 
       // merging state looks at the current marker, and optimizeWork
       // below may create new instructions. Use the marker from this
@@ -539,10 +536,10 @@ void TraceBuilder::reoptimize() {
       auto const tmp = optimizeWork(inst, idoms); // Can generate new instrs!
       if (!tmp) {
         // Could not optimize; keep the old instruction
-        appendInstruction(inst, block);
-        m_state.update(inst);
+        appendInstruction(inst);
         continue;
       }
+
       SSATmp* dst = inst->dst();
       if (dst->type() != Type::None && dst != tmp) {
         // The result of optimization has a different destination than the inst.
@@ -551,9 +548,9 @@ void TraceBuilder::reoptimize() {
         // we would have to insert the mov on the fall-through edge.
         assert(block->empty() || !block->back().isBlockEnd());
         IRInstruction* mov = m_unit.mov(dst, tmp, inst->marker());
-        appendInstruction(mov, block);
-        m_state.update(mov);
+        appendInstruction(mov);
       }
+
       if (inst->isBlockEnd()) {
         // Not re-adding inst; replace it with a jump to the next block.
         auto next = inst->next();
@@ -566,10 +563,7 @@ void TraceBuilder::reoptimize() {
     if (block->empty()) {
       // If all the instructions in the block were optimized away, remove it
       // from the trace.
-      auto it = traceBlocks.end();
-      --it;
-      assert(*it == block);
-      m_curTrace->unlink(it);
+      trace()->unlink(block);
     } else {
       m_state.finishBlock(block);
     }
@@ -797,33 +791,36 @@ void TraceBuilder::setMarker(BCMarker marker) {
   m_state.setMarker(marker);
 }
 
-void TraceBuilder::pushTrace(IRTrace* t, BCMarker marker, Block* b,
+void TraceBuilder::pushBlock(BCMarker marker, Block* b,
                              const boost::optional<Block::iterator>& where) {
   FTRACE(2, "TraceBuilder saving {}@{} and using {}@{}\n",
-         m_curTrace, m_state.marker().show(), t, marker.show());
-  assert(t);
-  assert(bool(b) == bool(where));
-  assert(IMPLIES(b, b->trace() == t));
+         m_curBlock, m_state.marker().show(), b, marker.show());
+  assert(b);
 
-  m_savedTraces.push(
-    TraceState{ m_curTrace, m_curBlock, m_state.marker(), m_curWhere });
-  m_curTrace = t;
+  m_savedBlocks.push_back(
+    BlockState{ m_curBlock, m_state.marker(), m_curWhere });
   m_curBlock = b;
   setMarker(marker);
-  m_curWhere = where;
+  m_curWhere = where ? where : b->end();
+
+  if (do_assert) {
+    for (UNUSED auto const& state : m_savedBlocks) {
+      assert(state.block != b &&
+             "Can't push a block that's already in the saved stack");
+    }
+  }
 }
 
-void TraceBuilder::popTrace() {
-  assert(!m_savedTraces.empty());
+void TraceBuilder::popBlock() {
+  assert(!m_savedBlocks.empty());
 
-  auto const& top = m_savedTraces.top();
+  auto const& top = m_savedBlocks.back();
   FTRACE(2, "TraceBuilder popping {}@{} to restore {}@{}\n",
-         m_curTrace, m_state.marker().show(), top.trace, top.marker.show());
-  m_curTrace = top.trace;
+         m_curBlock, m_state.marker().show(), top.block, top.marker.show());
   m_curBlock = top.block;
   setMarker(top.marker);
   m_curWhere = top.where;
-  m_savedTraces.pop();
+  m_savedBlocks.pop_back();
 }
 
 }}

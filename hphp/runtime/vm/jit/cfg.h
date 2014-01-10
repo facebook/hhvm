@@ -171,17 +171,11 @@ void forPreorderDoms(Block* block, const DomChildren& children,
 template <class Body>
 void forEachTrace(IRUnit& unit, Body body) {
   body(unit.main());
-  for (auto* exit : unit.exits()) {
-    body(exit);
-  }
 }
 
 template <class Body>
 void forEachTrace(const IRUnit& unit, Body body) {
   body(unit.main());
-  for (auto* exit : unit.exits()) {
-    body(exit);
-  }
 }
 
 template <class BlockList, class Body>

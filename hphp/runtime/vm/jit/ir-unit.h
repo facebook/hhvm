@@ -102,6 +102,7 @@ private:
   }
 
   void setter(IRInstruction* inst, Block* target) {
+    assert(!target || hasEdges(inst->op()));
     inst->setTaken(target);
   }
 
@@ -256,11 +257,6 @@ public:
    */
   IRInstruction* mov(SSATmp* dst, SSATmp* src, BCMarker marker);
 
-  /*
-   * Create a new exit trace.
-   */
-  Block* addExit();
-
   Arena&   arena()               { return m_arena; }
   uint32_t numTmps() const       { return m_nextOpndId; }
   uint32_t numBlocks() const     { return m_nextBlockId; }
@@ -276,8 +272,6 @@ public:
   uint32_t numIds(const IRInstruction*) const { return numInsts(); }
 
   typedef smart::vector<IRTrace*> ExitList;
-  ExitList& exits()             { return m_exits; }
-  const ExitList& exits() const { return m_exits; }
   Block* entry() const;
   std::string toString() const;
 
@@ -297,7 +291,6 @@ private:
   uint32_t m_nextInstId;
   uint32_t m_bcOff; // bytecode offset where this unit starts
   IRTrace* m_main; // main entry point trace
-  ExitList m_exits; // exit traces
 };
 
 //////////////////////////////////////////////////////////////////////

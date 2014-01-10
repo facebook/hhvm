@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -1564,6 +1564,7 @@ class ReflectionClass implements Reflector {
         .' any constructor arguments'
       );
     }
+    var_dump($this->name, $args);
     return hphp_create_object($this->name, $args);
   }
 

@@ -5,6 +5,9 @@ class finfo {
 
   private $resource;
 
+  private $options;
+  private $magic_file;
+
   /**
    * Create a new fileinfo resource
    *
@@ -18,10 +21,21 @@ class finfo {
   public function finfo(int $options = FILEINFO_NONE,
                         ?string $magic_file = NULL): finfo {
     $this->resource = finfo_open($options, $magic_file);
+
+    $this->options = $options;
+    $this->magic_file = $magic_file;
   }
 
   public function __destruct() {
     finfo_close($this->resource);
+  }
+
+  public function __sleep() {
+    return array('options', 'magic_file');
+  }
+
+  public function __wakeup() {
+    $this->resource = finfo_open($this->options, $this->magic_file);
   }
 
   /**
@@ -64,7 +78,11 @@ class finfo {
    * @return bool -
    */
   public function set_flags(int $options): bool {
-    return finfo_set_flags($this->resource, $options);
+    $ret = finfo_set_flags($this->resource, $options);
+    if ($ret) {
+      $this->options = $options;
+    }
+    return $ret;
   }
 
 }

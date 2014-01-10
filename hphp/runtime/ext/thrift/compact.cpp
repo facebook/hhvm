@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/ext_thrift.h"
 
 #include <stack>

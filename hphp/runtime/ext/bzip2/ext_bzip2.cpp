@@ -15,30 +15,30 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_bzip2.h"
-#include "hphp/runtime/base/bzip2-file.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/bzip2/bzip2-file.h"
 #include "hphp/util/alloc.h"
 #include "folly/String.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(bz2);
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_bzclose(CResRef bz) {
+bool HHVM_FUNCTION(bzclose, CResRef bz) {
   return f_fclose(bz);
 }
 
-Variant f_bzread(CResRef bz, int length /* = 1024 */) {
+Variant HHVM_FUNCTION(bzread, CResRef bz, int length /* = 1024 */) {
   return f_fread(bz, length);
 }
 
-Variant f_bzwrite(CResRef bz, const String& data, int length /* = 0 */) {
+Variant HHVM_FUNCTION(bzwrite, CResRef bz, const String& data,
+                               int length /* = 0 */) {
   return f_fwrite(bz, data, length);
 }
 
 const StaticString s_r("r"), s_w("w");
 
-Variant f_bzopen(CVarRef filename, const String& mode) {
+Variant HHVM_FUNCTION(bzopen, CVarRef filename, const String& mode) {
   if (mode != s_r && mode != s_w) {
     raise_warning(
       "'%s' is not a valid mode for bzopen(). "
@@ -76,12 +76,14 @@ Variant f_bzopen(CVarRef filename, const String& mode) {
     if (stream_mode_len != 1 &&
         !(stream_mode_len == 2 &&
           stream_mode.find('b') != std::string::npos)) {
-      raise_warning("cannot use stream opened in mode '%s'", stream_mode.c_str());
+      raise_warning("cannot use stream opened in mode '%s'",
+                    stream_mode.c_str());
       return false;
     } else if (stream_mode_len == 1 &&
         stream_mode[0] != 'r' && stream_mode[0] != 'w' &&
         stream_mode[0] != 'a' && stream_mode[0] != 'x') {
-      raise_warning("cannot use stream opened in mode '%s'", stream_mode.c_str());
+      raise_warning("cannot use stream opened in mode '%s'",
+                    stream_mode.c_str());
       return false;
     }
 
@@ -101,28 +103,28 @@ Variant f_bzopen(CVarRef filename, const String& mode) {
   return handle;
 }
 
-Variant f_bzflush(CResRef bz) {
+bool HHVM_FUNCTION(bzflush, CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->flush();
 }
 
-String f_bzerrstr(CResRef bz) {
+String HHVM_FUNCTION(bzerrstr, CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->errstr();
 }
 
-Variant f_bzerror(CResRef bz) {
+Array HHVM_FUNCTION(bzerror, CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->error();
 }
 
-int64_t f_bzerrno(CResRef bz) {
+int64_t HHVM_FUNCTION(bzerrno, CResRef bz) {
   BZ2File *f = bz.getTyped<BZ2File>();
   return f->errnu();
 }
 
-Variant f_bzcompress(const String& source, int blocksize /* = 4 */,
-                     int workfactor /* = 0 */) {
+Variant HHVM_FUNCTION(bzcompress, const String& source, int blocksize /* = 4 */,
+                                  int workfactor /* = 0 */) {
   char *dest = NULL;
   int error;
   unsigned int source_len, dest_len;
@@ -148,7 +150,7 @@ Variant f_bzcompress(const String& source, int blocksize /* = 4 */,
   }
 }
 
-Variant f_bzdecompress(const String& source, int small /* = 0 */) {
+Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
   char *dest;
   int source_len = source.length();
   int error;
@@ -165,7 +167,8 @@ Variant f_bzdecompress(const String& source, int small /* = 0 */) {
   bzs.next_in = (char *) source.c_str();
   bzs.avail_in = source_len;
 
-  /* in most cases bz2 offers at least 2:1 compression, so we use that as our base */
+  /* in most cases bz2 offers at least 2:1 compression, */
+  /* so we use that as our base */
   bzs.avail_out = source_len * 2;
   bzs.next_out = dest = (char *) malloc(bzs.avail_out + 1);
   if (!dest) {
@@ -193,6 +196,27 @@ Variant f_bzdecompress(const String& source, int small /* = 0 */) {
     return error;
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+class bzipExtension : public Extension {
+ public:
+  bzipExtension() : Extension("bz2") {}
+  virtual void moduleInit() {
+    HHVM_FE(bzclose);
+    HHVM_FE(bzread);
+    HHVM_FE(bzwrite);
+    HHVM_FE(bzopen);
+    HHVM_FE(bzflush);
+    HHVM_FE(bzerrstr);
+    HHVM_FE(bzerror);
+    HHVM_FE(bzerrno);
+    HHVM_FE(bzcompress);
+    HHVM_FE(bzdecompress);
+
+    loadSystemlib("bzip2");
+  }
+} s_bzip_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/bzip2-file.h"
+#include "hphp/runtime/ext/bzip2/bzip2-file.h"
 
 namespace HPHP {
 
@@ -70,7 +70,7 @@ const StaticString
   s_errno("errno"),
   s_errstr("errstr");
 
-Variant BZ2File::error() {
+Array BZ2File::error() {
   assert(m_bzFile);
   int errnum;
   const char * errstr;

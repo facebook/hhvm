@@ -25,7 +25,6 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/ext_bcmath.h"
-#include "hphp/runtime/ext/ext_bzip2.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"

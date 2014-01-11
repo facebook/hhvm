@@ -101,6 +101,7 @@ bool BZ2File::closeImpl() {
   bool ret = true;
   BZ2_bzclose(m_bzFile);
   m_bzFile = nullptr;
+  m_closed = true;
   m_innerFile->close();
   File::closeImpl();
   m_eof = false;

@@ -50,7 +50,6 @@
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_ldap.h"
 #include "hphp/runtime/ext/ext_mailparse.h"
-#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_mcrypt.h"
 #include "hphp/runtime/ext/ext_memcache.h"

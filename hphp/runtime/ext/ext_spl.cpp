@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_spl.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/math/ext_math.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
@@ -127,11 +127,11 @@ String f_spl_object_hash(CObjRef obj) {
   if (!s_inited) {
     Lock lock(s_mutex);
     if (!s_inited) {
-      f_mt_srand();
-      s_hash_mask_handle |= f_mt_rand(); s_hash_mask_handle <<= 16;
-      s_hash_mask_handle |= f_mt_rand(); s_hash_mask_handle <<= 16;
-      s_hash_mask_handle |= f_mt_rand(); s_hash_mask_handle <<= 16;
-      s_hash_mask_handle |= f_mt_rand();
+      HHVM_FN(mt_srand)();
+      s_hash_mask_handle |= HHVM_FN(mt_rand)(); s_hash_mask_handle <<= 16;
+      s_hash_mask_handle |= HHVM_FN(mt_rand)(); s_hash_mask_handle <<= 16;
+      s_hash_mask_handle |= HHVM_FN(mt_rand)(); s_hash_mask_handle <<= 16;
+      s_hash_mask_handle |= HHVM_FN(mt_rand)();
       s_inited = true;
     }
   }

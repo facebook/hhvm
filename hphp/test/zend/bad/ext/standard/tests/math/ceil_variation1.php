@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype  : float ceil  ( float $value  )
  * Description: Round fractions up.
  * Source code: ext/standard/math.c

@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype  : string decbin  ( int $number  )
  * Description: Decimal to binary.
  * Source code: ext/standard/math.c

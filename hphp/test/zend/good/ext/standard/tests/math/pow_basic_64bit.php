@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 $bases = array(23,
 				-23,
 				23.1,

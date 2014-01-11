@@ -656,7 +656,7 @@ void throw_bad_type_exception(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
   if (RuntimeOption::ThrowBadTypeExceptions) {
@@ -688,7 +688,7 @@ void throw_invalid_argument(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
   if (RuntimeOption::ThrowInvalidArguments) {

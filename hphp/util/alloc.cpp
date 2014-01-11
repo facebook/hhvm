@@ -20,15 +20,16 @@
 #include <sys/mman.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "hphp/util/util.h"
-#include "hphp/util/logger.h"
-
-#include "folly/Format.h"
 
 #ifdef HAVE_NUMA
 #include <sys/prctl.h>
 #include <numa.h>
 #endif
+
+#include "folly/Bits.h"
+#include "folly/Format.h"
+
+#include "hphp/util/logger.h"
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
@@ -162,7 +163,7 @@ static void initNuma() {
 
   if (!ret || numa_num_nodes <= 1) return;
 
-  numa_node_mask = Util::roundUpToPowerOfTwo(numa_num_nodes) - 1;
+  numa_node_mask = folly::nextPowTwo(numa_num_nodes) - 1;
 }
 
 void enable_numa(bool local) {

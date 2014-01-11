@@ -16,11 +16,14 @@
 #include "hphp/util/light-process.h"
 
 #include <string>
+#include <vector>
 
 #include <boost/scoped_array.hpp>
 
-#include <vector>
+#include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/socket.h>
+
 #include <afdt.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,7 +35,6 @@
 #include "folly/String.h"
 
 #include "hphp/util/process.h"
-#include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {

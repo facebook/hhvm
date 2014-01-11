@@ -33,6 +33,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/network.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -707,23 +708,6 @@ void Util::string_printf(std::string &msg, const char *fmt, ...) {
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-}
-
-void Util::string_vsnprintf(std::string &msg, const char *fmt, va_list ap) {
-  int i = 0;
-  for (int len = 1024; msg.empty(); len <<= 1) {
-    va_list v;
-    va_copy(v, ap);
-
-    char *buf = (char*)malloc(len);
-    if (vsnprintf(buf, len, fmt, v) < len) {
-      msg = buf;
-    }
-    free(buf);
-
-    va_end(v);
-    if (++i > 10) break;
-  }
 }
 
 void Util::find(std::vector<std::string> &out,

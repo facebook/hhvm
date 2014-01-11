@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/kernel-version.h"
-#include "hphp/util/util.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/portability.h"
 
 #include <unistd.h>
 #include <sys/utsname.h>

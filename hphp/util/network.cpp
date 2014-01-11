@@ -17,6 +17,7 @@
 
 #include <netinet/in.h>
 #include <arpa/nameser.h>
+#include <arpa/inet.h>
 #include <resolv.h>
 #include <sys/utsname.h>
 
@@ -24,7 +25,6 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/process.h"
-#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

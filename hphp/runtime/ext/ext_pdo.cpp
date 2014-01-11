@@ -472,7 +472,7 @@ void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   obj->o_set(s_message, String(msg), s_PDOException);
   va_end(ap);
 

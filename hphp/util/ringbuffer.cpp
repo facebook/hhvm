@@ -22,7 +22,8 @@
 #include <cstring>
 #include <unistd.h>
 
-#include "hphp/util/util.h"
+#include "folly/Bits.h"
+
 #include "hphp/util/assertions.h"
 
 namespace HPHP {
@@ -82,7 +83,7 @@ std::atomic<uint32_t> g_seqnum(0);
 
 RingBufferEntry*
 allocEntry(RingBufferType t) {
-  assert(Util::isPowerOfTwo(kMaxRBEntries));
+  assert(folly::isPowTwo(kMaxRBEntries));
   RingBufferEntry* rb;
   int newRingPos, oldRingPos;
   do {

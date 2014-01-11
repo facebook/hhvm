@@ -13,46 +13,28 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/util/string-vsnprintf.h"
 
-#include "hphp/util/bitops.h"
-#include <gtest/gtest.h>
-
-#include "hphp/util/util.h"
+#include <cstdlib>
+#include <cstdio>
 
 namespace HPHP {
 
-TEST(BitopsTest, FfsNonzero) {
-  int64_t out;
-  int64_t one = 1;
-  bool res;
-  for (int i = 0; i < 63; i++) {
-    res = ffs64(one << i, out);
-    EXPECT_TRUE(res);
-    EXPECT_EQ(i, out);
+void string_vsnprintf(std::string &msg, const char *fmt, va_list ap) {
+  int i = 0;
+  for (int len = 1024; msg.empty(); len <<= 1) {
+    va_list v;
+    va_copy(v, ap);
+
+    char *buf = (char*)malloc(len);
+    if (vsnprintf(buf, len, fmt, v) < len) {
+      msg = buf;
+    }
+    free(buf);
+
+    va_end(v);
+    if (++i > 10) break;
   }
-}
-
-TEST(BitopsTest, FlsNonzero) {
-  int64_t out;
-  int64_t one = 1;
-  bool res;
-  for (int i = 0; i < 63; i++) {
-    res = fls64(one << i, out);
-    EXPECT_TRUE(res);
-    EXPECT_EQ(i, out);
-  }
-}
-
-TEST(BitopsTest, FfsZero) {
-  int64_t zero = 0;
-  int64_t out;
-  EXPECT_FALSE(ffs64(zero, out));
-}
-
-TEST(BitopsTest, FlsZero) {
-  int64_t zero = 0;
-  int64_t out;
-  EXPECT_FALSE(fls64(zero, out));
 }
 
 }

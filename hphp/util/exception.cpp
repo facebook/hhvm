@@ -15,7 +15,7 @@
 */
 #include "hphp/util/exception.h"
 
-#include "hphp/util/util.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ Exception::Exception()
 }
 
 void Exception::format(const char *fmt, va_list ap) {
-  Util::string_vsnprintf(m_msg, fmt, ap);
+  string_vsnprintf(m_msg, fmt, ap);
 }
 
 Exception::~Exception() throw() {

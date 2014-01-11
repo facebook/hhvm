@@ -16,10 +16,11 @@
 #include "hphp/util/db-query.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "hphp/util/db-conn.h"
 #include "hphp/util/db-dataset.h"
-#include "hphp/util/util.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +30,7 @@ DBQuery::DBQuery(DBConn *conn, const char *sql, ...)
   assert(sql && *sql);
   va_list ap;
   va_start(ap, sql);
-  Util::string_vsnprintf(m_base, sql, ap);
+  string_vsnprintf(m_base, sql, ap);
   va_end(ap);
 }
 
@@ -311,7 +312,7 @@ std::string DBQuery::escapeFieldName(const char *fieldNameList) {
   std::string ret = "`";
   ret += fieldNameList;
   ret += "`";
-  Util::replaceAll(ret, ",", "`,`");
+  boost::replace_all(ret, ",", "`,`");
   return ret;
 }
 

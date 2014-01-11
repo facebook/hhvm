@@ -199,7 +199,7 @@ void Parser::error(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
   fatal(&m_loc, msg.c_str());

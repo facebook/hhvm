@@ -429,7 +429,7 @@ struct Parser : ParserBase {
     va_list ap;
     va_start(ap, fmt);
     std::string msg;
-    Util::string_vsnprintf(msg, fmt, ap);
+    string_vsnprintf(msg, fmt, ap);
     va_end(ap);
 
     throw std::runtime_error(folly::format(

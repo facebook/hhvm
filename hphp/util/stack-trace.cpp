@@ -22,14 +22,13 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "folly/String.h"
 #include "folly/ScopeGuard.h"
 #include "folly/Conv.h"
 
 #include "hphp/util/process.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
-
 #include "hphp/util/light-process.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/hash.h"
@@ -106,7 +105,7 @@ StackTraceNoHeap::StackTraceNoHeap(bool trace) {
 
 void StackTrace::initFromHex(const char *hexEncoded) {
   std::vector<std::string> frames;
-  Util::split(':', hexEncoded, frames);
+  folly::split(':', hexEncoded, frames);
   for (unsigned int i = 0; i < frames.size(); i++) {
     m_bt_pointers.push_back((void*)strtoll(frames[i].c_str(), nullptr, 16));
   }

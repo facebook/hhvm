@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -830,6 +831,9 @@ void emit_class(EmitUnitState& state,
 }
 
 std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
+  auto const is_systemlib = is_systemlib_part(unit);
+  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib};
+
   auto ue = folly::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->setFilepath(unit.filename);
@@ -848,7 +852,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
    * that we have persistent classes, so we're not too worried about
    * this.)
    */
-  if (ue->isASystemLib()) {
+  if (is_systemlib) {
     ue->setMergeOnly(true);
     auto const tv = make_tv<KindOfInt64>(1);
     ue->setMainReturn(&tv);

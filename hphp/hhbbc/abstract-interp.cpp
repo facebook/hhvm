@@ -21,7 +21,6 @@
 #include <cmath>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/variant.hpp>
 
 #include "folly/Conv.h"
 #include "folly/Optional.h"
@@ -38,6 +37,7 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -3273,10 +3273,14 @@ FuncAnalysis::FuncAnalysis(Context ctx)
 }
 
 FuncAnalysis analyze_func(const Index& index, Context const ctx) {
+  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
+    is_systemlib_part(*ctx.unit)};
   return do_analyze(index, ctx, nullptr);
 }
 
 ClassAnalysis analyze_class(const Index& index, Context const ctx) {
+  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
+    is_systemlib_part(*ctx.unit)};
   assert(ctx.cls && !ctx.func);
   FTRACE(2, "{:#^70}\n", "Class");
 
@@ -3357,6 +3361,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 }
 
 void optimize_func(const Index& index, const FuncAnalysis& ainfo) {
+  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
+    is_systemlib_part(*ainfo.ctx.unit)};
   do_optimize(index, ainfo);
 }
 

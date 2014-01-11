@@ -46,14 +46,11 @@ borrowed_ptr<T> borrow(const std::unique_ptr<T>& p) {
 }
 
 /*
- * String that must be a static string.
+ * String that must be a static string, and and Array that must be a
+ * static array.
  */
-using SString    = const StringData*;
-
-/*
- * Array that must be a static array.
- */
-using SArray     = const ArrayData*;
+using SString = const StringData*;
+using SArray  = const ArrayData*;
 
 /*
  * HHBC evaluation stack flavors.
@@ -69,6 +66,15 @@ enum class FPIKind { Unknown, Func, Ctor, ObjMeth, ClsMeth };
  * Types of parameter preparation (or unknown).
  */
 enum class PrepKind { Ref, Val, Unknown };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Many places in the code want to bump tracing levels by some amount
+ * for systemlib-related processing.  This is the amount they all bump
+ * by.
+ */
+constexpr int kSystemLibBump = 10;
 
 //////////////////////////////////////////////////////////////////////
 

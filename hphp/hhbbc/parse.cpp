@@ -30,6 +30,7 @@
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -771,6 +772,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
 }
 
 std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
+  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, ue.isASystemLib()};
   FTRACE(2, "parse_unit {}\n", ue.getFilepath()->data());
 
   auto ret      = folly::make_unique<php::Unit>();

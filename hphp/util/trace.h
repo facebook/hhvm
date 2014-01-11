@@ -57,6 +57,31 @@
  * obviously a tty.
  */
 
+/*
+ * Trace levels can be bumped on a per-module, per-scope basis.  This
+ * lets you run code that has a set of trace levels in a mode as if
+ * they were all higher.
+ *
+ * Example:
+ *
+ *   {
+ *     Trace::Bump bumper{Trace::tx64, 2};
+ *     FTRACE(1, "asd\n");  // only fires at level >= 3
+ *   }
+ *   FTRACE(1, "asd\n");    // back to normal
+ *
+ *
+ * There is also support for conditionally bumping in the bumper:
+ *
+ *   {
+ *     Trace::Bump bumper{Trace::tx64, 2, somePredicate(foo)};
+ *     // Only bumped if somePredicate(foo) returned true.
+ *   }
+ *
+ * Note however that if you use that form, `somePredicate' will be
+ * evaluated even if tracing is off.
+ */
+
 namespace HPHP {
 namespace Trace {
 
@@ -131,6 +156,7 @@ enum Module {
   NumModules
 };
 
+//////////////////////////////////////////////////////////////////////
 
 /*
  * S-expression style structured pretty-printing. Implement
@@ -194,15 +220,24 @@ void ftraceRelease(Args&&... args) {
 void traceRingBufferRelease(const char* fmt, ...) ATTRIBUTE_PRINTF(1,2);
 
 extern int levels[NumModules];
+extern __thread int tl_levels[NumModules];
 const char* moduleName(Module mod);
 inline bool moduleEnabledRelease(Module tm, int level = 1) {
-  return levels[tm] >= level;
+  return levels[tm] + tl_levels[tm] >= level;
 }
+
+//////////////////////////////////////////////////////////////////////
 
 #if (defined(DEBUG) || defined(USE_TRACE)) /* { */
 #  ifndef USE_TRACE
 #    define USE_TRACE 1
 #  endif
+
+//////////////////////////////////////////////////////////////////////
+/*
+ * Implementation of for when tracing is enabled.
+ */
+
 inline bool moduleEnabled(Module tm, int level = 1) {
   return moduleEnabledRelease(tm, level);
 }
@@ -245,6 +280,36 @@ struct Indent {
   int n;
 };
 
+struct Bump {
+  Bump(Module mod, int adjust, bool condition = true)
+    : m_live(condition)
+    , m_mod(mod)
+    , m_adjust(adjust)
+  {
+    if (m_live) tl_levels[m_mod] -= m_adjust;
+  }
+
+  Bump(Bump&& o)
+    : m_live(o.m_live)
+    , m_mod(o.m_mod)
+    , m_adjust(o.m_adjust)
+  {
+    o.m_live = false;
+  }
+
+  ~Bump() {
+    if (m_live) tl_levels[m_mod] += m_adjust;
+  }
+
+  Bump(const Bump&) = delete;
+  Bump& operator=(const Bump&) = delete;
+
+private:
+  bool m_live;
+  Module m_mod;
+  int m_adjust;
+};
+
 inline std::string indent() {
   return std::string(indentDepth, ' ');
 }
@@ -264,11 +329,16 @@ inline void trace(Pretty p) { trace(p.pretty() + std::string("\n")); }
 
 void vtrace(const char *fmt, va_list args) ATTRIBUTE_PRINTF(1,0);
 void dumpRingbuffer();
+
+//////////////////////////////////////////////////////////////////////
+
 #else /* } (defined(DEBUG) || defined(USE_TRACE)) { */
+
+//////////////////////////////////////////////////////////////////////
 /*
- * Compile everything out of release builds. gcc is smart enough to
- * kill code hiding behind if (false) { ... }.
+ * Implementation for when tracing is disabled.
  */
+
 #define ONTRACE(...)    do { } while (0)
 #define TRACE(...)      do { } while (0)
 #define FTRACE(...)     do { } while (0)
@@ -286,6 +356,13 @@ struct Indent {
 };
 inline std::string indent() { return std::string(); }
 
+struct Bump {
+  Bump(Module mod, int adjust, bool condition = true) {
+    always_assert(true && "If this struct is completely empty we get unused "
+                  "variable warnings in code that uses it.");
+  }
+};
+
 const bool enabled = false;
 
 inline void trace(const char*, ...)      { }
@@ -293,9 +370,10 @@ inline void trace(const std::string&)    { }
 inline void vtrace(const char*, va_list) { }
 inline bool moduleEnabled(Module t, int level = 1) { return false; }
 inline int moduleLevel(Module tm) { return 0; }
-#endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
 
 //////////////////////////////////////////////////////////////////////
+
+#endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
 
 } // Trace
 

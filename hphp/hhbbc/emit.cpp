@@ -838,11 +838,29 @@ std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
   state.defClsMap.resize(unit.classes.size(), kInvalidOffset);
 
   /*
-   * TODO(#3017265): UnitEmitter is very coupled to emitter.cpp, and
-   * expects classes and things to be added in an order that isn't
-   * quite clear.  If you don't set returnSeen things break.
+   * Unfortunate special case for Systemlib units.
+   *
+   * We need to ensure these units end up mergeOnly, at runtime there
+   * are things that assume this (right now no other HHBBC units end
+   * up being merge only, because of the returnSeen stuff below).
+   *
+   * (Merge-only-ness provides no measurable perf win in repo mode now
+   * that we have persistent classes, so we're not too worried about
+   * this.)
    */
-  ue->returnSeen();
+  if (ue->isASystemLib()) {
+    ue->setMergeOnly(true);
+    auto const tv = make_tv<KindOfInt64>(1);
+    ue->setMainReturn(&tv);
+  } else {
+    /*
+     * TODO(#3017265): UnitEmitter is very coupled to emitter.cpp, and
+     * expects classes and things to be added in an order that isn't
+     * quite clear.  If you don't set returnSeen things relating to
+     * hoistability break.
+     */
+    ue->returnSeen();
+  }
 
   emit_pseudomain(state, *ue, unit);
   for (auto& c : unit.classes)     emit_class(state, *ue, *c);

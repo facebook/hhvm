@@ -258,8 +258,6 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
          i.nextOffset == takenOffset ||
          i.nextOffset == fallthruOffset);
 
-  if (!i.breaksTracelet && takenOffset == fallthruOffset) return;
-
   if (i.breaksTracelet || i.nextOffset == fallthruOffset) {
     if (op == OpJmpZ) {
       HHIR_EMIT(JmpZ,  takenOffset);

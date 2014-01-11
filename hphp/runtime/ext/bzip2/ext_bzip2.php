@@ -56,7 +56,7 @@ function bzdecompress(string $source, int $small = 0): mixed;
  * @return int - Returns the error number as an integer.
  */
 <<__Native>>
-function bzerrno(resource $bz): int;
+function bzerrno(resource $bz): mixed;
 
 /**
  * Returns the bzip2 error number and error string in an array
@@ -68,7 +68,7 @@ function bzerrno(resource $bz): int;
  *                 errno entry, and the error message in the errstr entry.
  */
 <<__Native>>
-function bzerror(resource $bz): array<string, mixed>;
+function bzerror(resource $bz): mixed;
 
 /**
  * Returns a bzip2 error string
@@ -79,7 +79,7 @@ function bzerror(resource $bz): array<string, mixed>;
  * @return string - Returns a string containing the error message.
  */
 <<__Native>>
-function bzerrstr(resource $bz): string;
+function bzerrstr(resource $bz): mixed;
 
 /**
  * Force a write of all buffered data

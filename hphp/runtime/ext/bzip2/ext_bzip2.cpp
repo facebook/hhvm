@@ -20,6 +20,13 @@
 #include "hphp/util/alloc.h"
 #include "folly/String.h"
 
+#define CHECK_BZFILE(handle, f) \
+  BZ2File *f = handle.getTyped<BZ2File>(true, true);          \
+  if (f == nullptr || f->isClosed()) {                        \
+    raise_warning("Not a valid stream resource");             \
+    return (false);                                             \
+  }
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -104,22 +111,22 @@ Variant HHVM_FUNCTION(bzopen, CVarRef filename, const String& mode) {
 }
 
 bool HHVM_FUNCTION(bzflush, CResRef bz) {
-  BZ2File *f = bz.getTyped<BZ2File>();
+  CHECK_BZFILE(bz, f);
   return f->flush();
 }
 
-String HHVM_FUNCTION(bzerrstr, CResRef bz) {
-  BZ2File *f = bz.getTyped<BZ2File>();
+Variant HHVM_FUNCTION(bzerrstr, CResRef bz) {
+  CHECK_BZFILE(bz, f);
   return f->errstr();
 }
 
-Array HHVM_FUNCTION(bzerror, CResRef bz) {
-  BZ2File *f = bz.getTyped<BZ2File>();
+Variant HHVM_FUNCTION(bzerror, CResRef bz) {
+  CHECK_BZFILE(bz, f);
   return f->error();
 }
 
-int64_t HHVM_FUNCTION(bzerrno, CResRef bz) {
-  BZ2File *f = bz.getTyped<BZ2File>();
+Variant HHVM_FUNCTION(bzerrno, CResRef bz) {
+  CHECK_BZFILE(bz, f);
   return f->errnu();
 }
 

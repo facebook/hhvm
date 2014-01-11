@@ -527,8 +527,8 @@ void FastCGISession::handleStdErr(RequestId request_id,
 }
 
 void FastCGISession::handleComplete(RequestId request_id) {
-  writeEndRequest(request_id, 0, ProtoStatus::REQUEST_COMPLETE);
   endTransaction(request_id);
+  writeEndRequest(request_id, 0, ProtoStatus::REQUEST_COMPLETE);
   if (!m_keepConn) {
     handleClose();
   }

@@ -280,7 +280,14 @@ pcre_get_compiled_regex_cache(const String& regex) {
     case 'S':  do_study = true;                 break;
     case 'U':  coptions |= PCRE_UNGREEDY;       break;
     case 'X':  coptions |= PCRE_EXTRA;          break;
-    case 'u':  coptions |= PCRE_UTF8;           break;
+    case 'u':  coptions |= PCRE_UTF8;
+  /* In  PCRE,  by  default, \d, \D, \s, \S, \w, and \W recognize only ASCII
+       characters, even in UTF-8 mode. However, this can be changed by setting
+       the PCRE_UCP option. */
+#ifdef PCRE_UCP
+            coptions |= PCRE_UCP;
+#endif
+      break;
 
       /* Custom preg options */
     case 'e':  poptions |= PREG_REPLACE_EVAL;   break;

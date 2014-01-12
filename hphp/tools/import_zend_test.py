@@ -418,6 +418,8 @@ other_files = (
     '/Zend/tests/ns_067.inc',
     '/Zend/tests/ns_069.inc',
     '/Zend/tests/unset.inc',
+    '/ext/bz2/tests/004_1.txt.bz2',
+    '/ext/bz2/tests/004_2.txt.bz2',
     '/ext/calendar/tests/skipif.inc',
     '/ext/curl/tests/curl_testdata1.txt',
     '/ext/curl/tests/curl_testdata2.txt',

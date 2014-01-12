@@ -392,7 +392,16 @@ void FastCGITransport::handleHeader(const std::string& key,
 }
 
 void FastCGITransport::onHeadersComplete() {
-  m_serverObject = getRawHeader("SCRIPT_NAME");
+  std::string pathTranslated = getRawHeader("PATH_TRANSLATED");
+  std::string documentRoot = getRawHeader("DOCUMENT_ROOT");
+  // use PATH_TRANSLATED - DOCUMENT_ROOT if it is valid instead of SCRIPT_NAME
+  // for mod_fastcgi support
+  if (!pathTranslated.empty() && !documentRoot.empty() &&
+      pathTranslated.find(documentRoot) == 0) {
+    m_serverObject = pathTranslated.substr(documentRoot.length());
+  } else {
+    m_serverObject = getRawHeader("SCRIPT_NAME");
+  }
   std::string queryString = getRawHeader("QUERY_STRING");
   if (!queryString.empty()) {
     m_serverObject += "?" + queryString;

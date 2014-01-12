@@ -508,13 +508,14 @@ Index::~Index() {}
 folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
   auto name_only = [&] () -> folly::Optional<res::Class> {
-    // We can't check typeAlias yet and return Obj, because it breaks
-    // for builtin "primitive" interfaces like KeyedTraversable.
-    // TODO(Builtin)
+    // We know it has to name a class only if there's no type alias
+    // with this name.
     //
-    // if (!m_data->typeAliases.count(clsName)) {
-    //   return res::Class { this, SStringOr<ClassInfo>(clsName) };
-    // }
+    // TODO(#3519401): when we start unfolding type aliases, we could
+    // look at whether it is an alias for a specific class here.
+    if (!m_data->typeAliases.count(clsName)) {
+      return res::Class { this, SStringOr<ClassInfo>(clsName) };
+    }
     return folly::none;
   };
 
@@ -569,8 +570,7 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   if (cls->parentName) {
     auto const parent = resolve_class(ctx, cls->parentName);
     if (!parent.hasValue() || !parent->val.other()) {
-      // TODO(Builtin): this is possible right now for classes that
-      // extend from builtin interfaces or classes.
+      // Deriving from some sort of malformed base class.
       return name_only();
     }
     cinfo->parent = parent->val.other();
@@ -582,12 +582,8 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
     auto const iface = resolve_class(ctx, ifaceName);
     if (!iface || !iface->val.other() ||
         !(iface->val.other()->cls->attrs & AttrInterface)) {
-      /*
-       * Resolution failure.
-       *
-       * TODO(Builtin): classes that extend from builtin interfaces
-       * are currently hitting this path.
-       */
+      // Deriving from a malformed interface.  (E.g., "implements Foo"
+      // when Foo is actually a class.)
       return name_only();
     }
     cinfo->declInterfaces.push_back(iface->val.other());

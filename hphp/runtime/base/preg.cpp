@@ -745,7 +745,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
                        flags, start_offset, g_notempty, global);
       }
       pcre_handle_exec_error(count);
-      break;
+      return false;
     }
 
     /* If we have matched an empty string, mimic what Perl's /g options does.

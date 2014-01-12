@@ -2286,7 +2286,12 @@ private:
   void constprop()     { m_flags.canConstProp = true; }
   void nofallthrough() { m_flags.tookBranch = true; }
   void readLocals()    { m_flags.mayReadLocals = true; }
-  void doRet(Type t)   { assert(m_state.stack.empty()); m_flags.returned = t; }
+
+  void doRet(Type t) {
+    readLocals();
+    assert(m_state.stack.empty());
+    m_flags.returned = t;
+  }
 
   /*
    * It's not entirely clear whether we need to propagate state for a

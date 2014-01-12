@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/ext/ext_math.h" // f_abs
 
@@ -733,12 +734,16 @@ struct InterpStepper : boost::static_visitor<void> {
   void group(const bc::CGetL& cgetl,
              const bc::InstanceOfD& inst,
              const JmpOp& jmp) {
+    auto bail = [&] { this->impl(cgetl, inst, jmp); };
+
+    if (interface_supports_non_objects(inst.str1)) return bail();
     auto const rcls = m_index.resolve_class(m_ctx, inst.str1);
-    if (!rcls) return impl(cgetl, inst, jmp);
+    if (!rcls) return bail();
+
     auto const instTy = subObj(*rcls);
     auto const loc = derefLoc(cgetl.loc1);
     if (loc.subtypeOf(instTy) || !loc.couldBe(instTy)) {
-      return impl(cgetl, inst, jmp);
+      return bail();
     }
 
     auto const negate    = jmp.op == Op::JmpNZ;
@@ -946,8 +951,10 @@ struct InterpStepper : boost::static_visitor<void> {
     // alias, so it's not nothrow unless we know it's an object type.
     if (auto const rcls = m_index.resolve_class(m_ctx, op.str1)) {
       nothrow();
-      isTypeImpl(t1, subObj(*rcls));
-      return;
+      if (!interface_supports_non_objects(rcls->name())) {
+        isTypeImpl(t1, subObj(*rcls));
+        return;
+      }
     }
     push(TBool);
   }

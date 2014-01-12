@@ -22,10 +22,13 @@
 #include <boost/next_prior.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <tbb/concurrent_hash_map.h>
+#include <tbb/concurrent_unordered_map.h>
 
 #include "folly/Format.h"
 #include "folly/Hash.h"
 #include "folly/Memory.h"
+
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
@@ -689,20 +692,20 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
            * type for unique classes.
            */
           if (auto const rcls = resolve_class(ctx, tc.typeName())) {
-            return subObj(*rcls);
+            return interface_supports_non_objects(rcls->name())
+                ? TInitCell // none of these interfaces support Uninits
+                : subObj(*rcls);
           }
           /*
-           * If the class isn't unique, but there's no type aliases or
-           * class_alias calls, we could still use TObj.
-           *
-           * TODO(Builtin): this only will be possible when we are
-           * also checking the builtin names for pseudo-interfaces
-           * like KeyedTraversable.
+           * TODO: if the class isn't unique, but there's no type
+           * aliases or class_alias calls with that name, we could
+           * still use TObj.
            */
           return TInitCell;
         case KindOfResource: // Note, some day we may have resource hints.
           break;
-        default:                   break;
+        default:
+          break;
         }
         return TInitCell;
       }();

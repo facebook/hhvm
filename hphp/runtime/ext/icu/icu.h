@@ -135,7 +135,6 @@ class IntlResourceData : public SweepableResourceData {
     return m_error.custom_error_message;
   }
 
- private:
   intl_error m_error;
 };
 
@@ -171,6 +170,7 @@ DECLARE_EXTERN_REQUEST_LOCAL(RequestData, s_intl_request);
 
 const String GetDefaultLocale();
 bool SetDefaultLocale(const String& locale);
+double VariantToMilliseconds(CVarRef arg);
 
 // Common encoding conversions UTF8<->UTF16
 String u16(const char *u8, int32_t u8_len, UErrorCode &error);
@@ -203,6 +203,7 @@ class IntlExtension : public Extension {
     initNumberFormatter();
     initTimeZone();
     initIterator();
+    initDateFormatter();
   }
 
  private:
@@ -219,6 +220,7 @@ class IntlExtension : public Extension {
   void initNumberFormatter();
   void initTimeZone();
   void initIterator();
+  void initDateFormatter();
 };
 
 } // namespace Intl

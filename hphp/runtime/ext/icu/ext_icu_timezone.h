@@ -5,7 +5,6 @@
 #include "hphp/runtime/ext/icu/icu.h"
 
 #include <unicode/timezone.h>
-#include <unicode/strenum.h>
 
 namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
@@ -49,6 +48,8 @@ class IntlTimeZone : public IntlResourceData {
 
   icu::TimeZone* timezone() const { return m_timezone; }
 
+  static icu::TimeZone* ParseArg(CVarRef arg, const String& funcname,
+                                 intl_error &err);
  private:
   icu::TimeZone *m_timezone;
   bool m_owned;

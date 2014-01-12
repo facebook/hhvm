@@ -49,6 +49,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_extract("extract");
+const StaticString s_Exception("Exception");
 const StaticString s_unreachable("static analysis error: supposedly "
                                  "unreachable code was reached");
 const StaticString s_noreturn("static analysis error: function "
@@ -772,7 +773,14 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::RetV& op)    { doRet(popV()); }
   void operator()(const bc::Unwind& op)  {}
   void operator()(const bc::Throw& op)   { popC(); }
-  void operator()(const bc::Catch&)      { push(TObj); }
+
+  void operator()(const bc::Catch&) {
+    nothrow();
+    auto const rcls = m_index.resolve_class(m_ctx, s_Exception.get());
+    always_assert(rcls &&
+      "You can't override the name Exception, so this must always resolve");
+    return push(subObj(*rcls));
+  }
 
   void operator()(const bc::NativeImpl&) {
     killLocals();

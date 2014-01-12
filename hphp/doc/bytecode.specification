@@ -3804,6 +3804,7 @@ StaticLocInit <local variable id> <litstr id>    [C]  ->  []
 Catch    []  ->  [C:Obj]
 
   Catch. Retrieves the current exception object and pushes it onto the stack.
+  The exception object must be a subclass of the builtin Exception class.
   This instruction may only be used at the beginning of a catch entry point.
 
 ClassExists        [C C]  ->  [C:Bool]

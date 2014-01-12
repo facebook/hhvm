@@ -438,11 +438,13 @@ void IRTranslator::translateAssertTStk(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateAssertObjL(const NormalizedInstruction& i) {
-  HHIR_EMIT(AssertObjL, i.imm[0].u_LA, i.imm[1].u_IVA, i.imm[2].u_SA);
+  HHIR_EMIT(AssertObjL, i.imm[0].u_LA, i.imm[1].u_SA,
+    static_cast<AssertObjOp>(i.imm[2].u_OA));
 }
 
 void IRTranslator::translateAssertObjStk(const NormalizedInstruction& i) {
-  HHIR_EMIT(AssertObjStk, i.imm[0].u_IVA, i.imm[1].u_IVA, i.imm[2].u_SA);
+  HHIR_EMIT(AssertObjStk, i.imm[0].u_IVA, i.imm[1].u_SA,
+    static_cast<AssertObjOp>(i.imm[2].u_OA));
 }
 
 void IRTranslator::translatePredictTL(const NormalizedInstruction& i) {

@@ -2857,8 +2857,15 @@ template<class ObjBC, class TyBC, class ArgType>
 folly::Optional<Bytecode> makeAssert(ArgType arg, Type t) {
   if (t.strictSubtypeOf(TObj)) {
     auto const dobj = dobj_of(t);
-    auto const exact = dobj.type == DObj::Exact;
-    return Bytecode { ObjBC { arg, exact, dobj.cls.name() } };
+    auto const op = dobj.type == DObj::Exact ? AssertObjOp::Exact
+                                             : AssertObjOp::Sub;
+    return Bytecode { ObjBC { arg, dobj.cls.name(), op } };
+  }
+  if (is_opt(t) && t.strictSubtypeOf(TOptObj)) {
+    auto const dobj = dobj_of(t);
+    auto const op = dobj.type == DObj::Exact ? AssertObjOp::OptExact
+                                             : AssertObjOp::OptSub;
+    return Bytecode { ObjBC { arg, dobj.cls.name(), op } };
   }
 
   if (auto const op = assertTOpFor(t)) {

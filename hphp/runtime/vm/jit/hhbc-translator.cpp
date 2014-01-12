@@ -4187,12 +4187,28 @@ Type HhbcTranslator::assertObjType(const StringData* name) {
   return classIsUniqueOrCtxParent(cls) ? Type::Obj.specialize(cls) : Type::Obj;
 }
 
-void HhbcTranslator::emitAssertObjL(int32_t loc, bool exact, Id id) {
-  assertTypeLocal(loc, assertObjType(lookupStringId(id)));
+static bool is_nullable(AssertObjOp op) {
+  switch (op) {
+  case AssertObjOp::Exact:
+  case AssertObjOp::Sub:
+    return false;
+  case AssertObjOp::OptExact:
+  case AssertObjOp::OptSub:
+    return true;
+  }
+  not_reached();
 }
 
-void HhbcTranslator::emitAssertObjStk(int32_t offset, bool exact, Id id) {
-  assertTypeStack(offset, assertObjType(lookupStringId(id)));
+void HhbcTranslator::emitAssertObjL(int32_t loc, Id id, AssertObjOp op) {
+  auto ty = assertObjType(lookupStringId(id));
+  if (is_nullable(op)) ty = ty | Type::InitNull;
+  assertTypeLocal(loc, ty);
+}
+
+void HhbcTranslator::emitAssertObjStk(int32_t offset, Id id, AssertObjOp op) {
+  auto ty = assertObjType(lookupStringId(id));
+  if (is_nullable(op)) ty = ty | Type::InitNull;
+  assertTypeStack(offset, ty);
 }
 
 void HhbcTranslator::emitAbs() {

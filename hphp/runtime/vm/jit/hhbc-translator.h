@@ -338,8 +338,8 @@ struct HhbcTranslator {
   void emitCeil();
   void emitAssertTL(int32_t id, AssertTOp);
   void emitAssertTStk(int32_t offset, AssertTOp);
-  void emitAssertObjL(int32_t id, bool exact, Id);
-  void emitAssertObjStk(int32_t offset, bool exact, Id);
+  void emitAssertObjL(int32_t id, Id, AssertObjOp);
+  void emitAssertObjStk(int32_t offset, Id, AssertObjOp);
   void emitPredictTL(int32_t id, AssertTOp);
   void emitPredictTStk(int32_t offset, AssertTOp);
 

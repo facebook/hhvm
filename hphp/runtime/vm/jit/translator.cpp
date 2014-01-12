@@ -1448,6 +1448,19 @@ static bool isTypeAssert(Op op) {
          op == Op::AssertObjL || op == Op::AssertObjStk;
 }
 
+static bool isNullableAssertObj(const NormalizedInstruction& i) {
+  if (i.op() != Op::AssertObjStk && i.op() != Op::AssertObjL) return false;
+  switch (static_cast<AssertObjOp>(i.imm[2].u_OA)) {
+  case AssertObjOp::Exact:
+  case AssertObjOp::Sub:
+    return false;
+  case AssertObjOp::OptExact:
+  case AssertObjOp::OptSub:
+    return true;
+  }
+  not_reached();
+}
+
 static bool isTypePredict(Op op) {
   return op == Op::PredictTL || op == Op::PredictTStk;
 }
@@ -1490,6 +1503,26 @@ void Translator::handleAssertionEffects(Tracelet& t,
 
   auto const rt = [&]() -> folly::Optional<RuntimeType> {
     if (ni.op() == Op::AssertObjStk || ni.op() == Op::AssertObjL) {
+      if (isNullableAssertObj(ni)) {
+        /*
+         * To handle these properly, we'd need to actually record a
+         * read of the live type, so it will be guarded on.  (Whether
+         * we can provide any more useful information depends on first
+         * guarding that it's not-null.)
+         *
+         * If you try to just do that right here, guard relaxation
+         * will always throw away the dependency, because no
+         * instructions will have it as an input.
+         *
+         * So for now, we try to make use of this extra info at JIT
+         * time but not for tracelet formation.
+         *
+         * Note, this causes inlining not to work on these functions:
+         * TODO(#3520763).
+         */
+        return folly::none;
+      }
+
       /*
        * Even though the class must be defined at the point of the
        * AssertObj, we might not have defined it yet in this tracelet,
@@ -1498,9 +1531,10 @@ void Translator::handleAssertionEffects(Tracelet& t,
        * context).
        *
        * There's nothing we can do with the 'exact' bit right now.
+       * We've already bailed if it was nullable above.
        */
       auto const cls = Unit::lookupUniqueClass(
-        ni.m_unit->lookupLitstrId(ni.imm[2].u_SA)
+        ni.m_unit->lookupLitstrId(ni.imm[1].u_SA)
       );
       if (cls && (cls->attrs() & AttrUnique)) {
         return RuntimeType{KindOfObject, KindOfNone, cls};

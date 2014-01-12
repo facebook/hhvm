@@ -48,15 +48,15 @@
 
 .function obj_type($x, $sub) {
   CGetL $x
-  AssertObjStk 0 1 "Foo"
-  AssertObjL $x   1 "Foo"
-  AssertObjL $sub 0 "Bar"
+  AssertObjStk 0 "Foo" Exact
+  AssertObjL $x "Foo" Exact
+  AssertObjL $sub "Bar" Sub
   PopC
-  AssertObjL $x   1 "Foo"
-  AssertObjL $x   0 "Foo"
-  AssertObjL $sub 0 "Bar"
-  AssertObjL $sub 0 "Foo"
-  AssertObjL $sub 1 "Bar"
+  AssertObjL $x   "Foo" Exact
+  AssertObjL $x   "Foo" Sub
+  AssertObjL $sub "Bar" Sub
+  AssertObjL $sub "Foo" Sub
+  AssertObjL $sub "Bar" Exact
   Int 1
   RetC
 }
@@ -66,9 +66,9 @@
   FCall 0
   AssertTStk 0 InitNull
   AssertTStk 1 Obj
-  AssertObjStk 1 1 "Bar"
+  AssertObjStk 1 "Bar" Exact
   PopR
-  AssertObjStk 0 1 "Bar"
+  AssertObjStk 0 "Bar" Exact
   RetC
 }
 
@@ -76,7 +76,7 @@
   FPushFuncD 0 "make_bar"
   FCall 0
   AssertTStk 0 Obj
-  AssertObjStk 0 1 "Bar"
+  AssertObjStk 0 "Bar" Exact
   AssertTL $x Uninit
   UnboxR
   AssertTStk 0 Obj

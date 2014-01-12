@@ -1,0 +1,55 @@
+.main {
+  DefCls 0
+
+  FPushCtorD 0 "Foo"
+  FCall 0
+  PopR
+  SetL $object
+  PopC
+
+  CGetL $object
+  FPushObjMethodD 1 "main"
+   FPushCtorD 0 "Foo"
+   FCall 0
+   PopR
+   FPassC 0
+  FCall 1
+  PopR
+
+  CGetL $object
+  FPushObjMethodD 1 "main"
+   Null
+   FPassC 0
+  FCall 1
+  PopR
+
+  Int 1
+  RetC
+}
+
+.class [unique] Foo {
+  .default_ctor;
+
+  .property [public] x = """s:3:"heh";""";
+
+  .method [public] __toString() {
+    String "hey\n"
+    RetC
+  }
+
+  # Do all this work in a member function so that we will assert
+  # specific object types without RepoAuthoritative mode
+  .method [public] main($x) {
+    # Test that the guard for an optional AssertObj stays: we could be
+    # called with the object or nulls.
+
+    AssertObjL $x "Foo" OptExact
+    CGetL $x
+    Print
+    PopC
+    CGetM <L:$x PT:"x">
+    PopC
+    Int 1
+    RetC
+  }
+}

@@ -4858,34 +4858,58 @@ OPTBLD_INLINE void VMExecutionContext::iopPredictTStk(IOP_ARGS) {
 }
 
 OPTBLD_INLINE static void implAssertObj(TypedValue* tv,
-                                        bool exact,
-                                        const StringData* str) {
+                                        const StringData* str,
+                                        AssertObjOp subop) {
   DEBUG_ONLY auto const cls = Unit::lookupClass(str);
-  assert(cls && "asserted class was not defined at AssertObj{L,Stk}");
-  assert(tv->m_type == KindOfObject);
-  if (exact) {
+  auto cls_defined = [&] {
+    assert(cls && "asserted class was not defined at AssertObj{L,Stk}");
+  };
+
+  switch (subop) {
+  case AssertObjOp::Exact:
+    assert(tv->m_type == KindOfObject);
+    cls_defined();
     assert(tv->m_data.pobj->getVMClass() == cls);
-  } else {
+    return;
+  case AssertObjOp::Sub:
+    assert(tv->m_type == KindOfObject);
+    cls_defined();
     assert(tv->m_data.pobj->getVMClass()->classof(cls));
+    return;
+  case AssertObjOp::OptExact:
+    assert(tv->m_type == KindOfObject || tv->m_type == KindOfNull);
+    if (tv->m_type == KindOfObject) {
+      cls_defined();
+      assert(tv->m_data.pobj->getVMClass() == cls);
+    }
+    return;
+  case AssertObjOp::OptSub:
+    assert(tv->m_type == KindOfObject || tv->m_type == KindOfNull);
+    if (tv->m_type == KindOfObject) {
+      cls_defined();
+      assert(tv->m_data.pobj->getVMClass()->classof(cls));
+    }
+    return;
   }
+  not_reached();
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopAssertObjL(IOP_ARGS) {
   NEXT();
   DECODE_LA(localId);
-  DECODE_IVA(exact);
   DECODE(Id, strId);
+  DECODE_OA(AssertObjOp, subop);
   auto const str = m_fp->m_func->unit()->lookupLitstrId(strId);
-  implAssertObj(frame_local(m_fp, localId), exact, str);
+  implAssertObj(frame_local(m_fp, localId), str, subop);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopAssertObjStk(IOP_ARGS) {
   NEXT();
   DECODE_IVA(stkSlot);
-  DECODE_IVA(exact);
   DECODE(Id, strId);
+  DECODE_OA(AssertObjOp, subop);
   auto const str = m_fp->m_func->unit()->lookupLitstrId(strId);
-  implAssertObj(m_stack.indTV(stkSlot), exact, str);
+  implAssertObj(m_stack.indTV(stkSlot), str, subop);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopBreakTraceHint(IOP_ARGS) {

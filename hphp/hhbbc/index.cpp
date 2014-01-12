@@ -166,9 +166,6 @@ struct FuncInfo {
    * The best-known return type of the function, if we have any
    * information.  May be TBottom if the function is known to never
    * return (e.g. always throws).
-   *
-   * TODO(#3519344): we should use NativeInfo on the func for this if
-   * we have it.
    */
   Type returnTy = TInitGen;
 };
@@ -334,7 +331,16 @@ void add_dependency(IndexData& data,
 borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
                                         borrowed_ptr<const php::Func> f) {
   auto& ret = data.funcInfo[f];
-  if (!ret.func) ret.func = f;
+  if (ret.func) return &ret;
+  ret.func = f;
+  if (f->nativeInfo) {
+    // We'd infer this anyway when we look at the bytecode body
+    // (NativeImpl) for the HNI function, but just initializing it
+    // here saves on whole-program iterations.
+    if (f->nativeInfo->returnType != KindOfInvalid) {
+      ret.returnTy = from_DataType(f->nativeInfo->returnType);
+    }
+  }
   return &ret;
 }
 

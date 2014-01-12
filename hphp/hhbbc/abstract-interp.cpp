@@ -773,7 +773,15 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Unwind& op)  {}
   void operator()(const bc::Throw& op)   { popC(); }
   void operator()(const bc::Catch&)      { push(TObj); }
-  void operator()(const bc::NativeImpl&) { killLocals(); doRet(TInitGen); }
+
+  void operator()(const bc::NativeImpl&) {
+    killLocals();
+    if (m_ctx.func->nativeInfo) {
+      auto const dt = m_ctx.func->nativeInfo->returnType;
+      if (dt != KindOfInvalid) return doRet(from_DataType(dt));
+    }
+    doRet(TInitGen);
+  }
 
   void operator()(const bc::CGetL& op) {
     if (!locCouldBeUninit(op.loc1)) { nothrow(); constprop(); }

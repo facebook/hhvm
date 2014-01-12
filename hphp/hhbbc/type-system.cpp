@@ -492,6 +492,25 @@ Type from_cell(Cell cell) {
   always_assert(0 && "reference counted type in from_cell");
 }
 
+Type from_DataType(DataType dt) {
+  switch (dt) {
+  case KindOfUninit:   return TUninit;
+  case KindOfNull:     return TInitNull;
+  case KindOfBoolean:  return TBool;
+  case KindOfInt64:    return TInt;
+  case KindOfDouble:   return TDbl;
+  case KindOfStaticString:
+  case KindOfString:   return TStr;
+  case KindOfArray:    return TArr;
+  case KindOfRef:      return TRef;
+  case KindOfObject:   return TObj;
+  case KindOfResource: return TRes;
+  default:
+    break;
+  }
+  always_assert(0 && "dt in from_DataType didn't satisfy preconditions");
+}
+
 Type union_of(Type a, Type b) {
   if (a.subtypeOf(b)) return b;
   if (b.subtypeOf(a)) return a;

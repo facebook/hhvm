@@ -64,7 +64,6 @@
 #include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/ext_pdo.h"
-#include "hphp/runtime/ext/ext_phar.h"
 #include "hphp/runtime/ext/ext_posix.h"
 #include "hphp/runtime/ext/ext_preg.h"
 #include "hphp/runtime/ext/ext_process.h"

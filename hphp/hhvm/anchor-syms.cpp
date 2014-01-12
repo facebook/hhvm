@@ -24,6 +24,7 @@ namespace HPHP {
 extern Extension s_zip_extension;
 extern Extension s_fileinfo_extension;
 extern Extension s_intl_extension;
+extern Extension s_phar_extension;
 #ifdef HAVE_UODBC
 extern Extension s_odbc_extension;
 #endif
@@ -31,6 +32,7 @@ const Extension *g_anchor_extensions[] = {
   &s_zip_extension,
   &s_fileinfo_extension,
   &s_intl_extension,
+  &s_phar_extension,
 #ifdef HAVE_UODBC
   &s_odbc_extension,
 #endif

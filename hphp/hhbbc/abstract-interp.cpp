@@ -630,8 +630,9 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::Clone& op) {
     auto const val = popC();
-    if (val.subtypeOf(TObj)) return push(val);
-    return push(TObj);
+    push(val.subtypeOf(TObj) ? val :
+         is_opt(val)         ? unopt(val) :
+         TObj);
   }
 
   void operator()(const bc::Exit&)  { popC(); push(TInitNull); }

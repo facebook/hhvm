@@ -202,6 +202,13 @@ struct Param {
   UserAttributeMap userAttributes;
 
   /*
+   * The type of the arguments for builtin functions, or for HNI
+   * functions with a native implementation.  KindOfInvalid for
+   * non-builtins.
+   */
+  DataType builtinType;
+
+  /*
    * Whether this parameter is passed by reference.
    */
   bool byRef : 1;
@@ -230,6 +237,16 @@ struct Iter {
 struct StaticLocalInfo {
   SString name;
   SString phpCode;
+};
+
+/*
+ * Extra information for function with a HNI native implementation.
+ */
+struct NativeInfo {
+  /*
+   * Return type from the C++ implementation function, as a DataType.
+   */
+  DataType returnType;
 };
 
 /*
@@ -360,6 +377,13 @@ struct Func {
    * backtraces and things work correctly.  Otherwise this is nullptr.
    */
   SString originalFilename;
+
+  /*
+   * For HNI-based extensions, additional information for functions
+   * with a native-implementation is here.  If this isn't a function
+   * with an HNI-based native implementation, this will be nullptr.
+   */
+  std::unique_ptr<NativeInfo> nativeInfo;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -738,9 +738,13 @@ public:
   }
   const StringData* originalFilename() const { return m_originalFilename; }
 
-  void setReturnType(DataType dt) {
-    m_returnType = dt;
-  }
+  /*
+   * Return types used for HNI functions with a native C++
+   * implementation.
+   */
+  void setReturnType(DataType dt) { m_returnType = dt; }
+  DataType getReturnType() const { return m_returnType; }
+
   void setDocComment(const char *dc) {
     m_docComment = makeStaticString(dc);
   }

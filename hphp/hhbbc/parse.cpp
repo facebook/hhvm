@@ -644,6 +644,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
         param.userType(),
         param.phpCode(),
         param.userAttributes(),
+        param.builtinType(),
         param.ref()
       }
     );
@@ -688,7 +689,8 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
                                         fe.getDocComment() };
   ret->unit            = unit;
   ret->cls             = cls;
-  // Note: probably need to clear AttrLeaf here eventually.
+  ret->nextBlockId     = 0;
+
   ret->attrs                  = fe.attrs();
   ret->userAttributes         = fe.getUserAttributes();
   ret->returnUserType         = fe.returnUserType();
@@ -699,9 +701,16 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isGeneratorBody        = fe.isGenerator();
   ret->isGeneratorFromClosure = fe.isGeneratorFromClosure();
   ret->isPairGenerator        = fe.isPairGenerator();
+  ret->isAsync                = fe.isAsync();
   ret->generatorBodyName      = fe.getGeneratorBodyName();
 
-  ret->nextBlockId     = 0;
+  /*
+   * HNI-style native functions get some extra information.
+   */
+  if (fe.getReturnType() != KindOfInvalid) {
+    ret->nativeInfo             = folly::make_unique<php::NativeInfo>();
+    ret->nativeInfo->returnType = fe.getReturnType();
+  }
 
   add_frame_variables(*ret, fe);
   build_cfg(puState, *ret, fe);

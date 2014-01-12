@@ -166,6 +166,9 @@ struct FuncInfo {
    * The best-known return type of the function, if we have any
    * information.  May be TBottom if the function is known to never
    * return (e.g. always throws).
+   *
+   * TODO(#3519344): we should use NativeInfo on the func for this if
+   * we have it.
    */
   Type returnTy = TInitGen;
 };

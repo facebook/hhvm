@@ -477,6 +477,7 @@ void emit_locals_and_params(FuncEmitter& fe,
       pinfo.setUserType(param.userTypeConstraint);
       pinfo.setPhpCode(param.phpCode);
       pinfo.setUserAttributes(param.userAttributes);
+      pinfo.setBuiltinType(param.builtinType);
       pinfo.setRef(param.byRef);
       fe.appendParam(func.locals[id]->name, pinfo);
       if (auto const dv = param.dvEntryPoint) {
@@ -736,6 +737,10 @@ void emit_finish_func(const php::Func& func,
   fe.setIsPairGenerator(func.isPairGenerator);
   fe.setGeneratorBodyName(func.generatorBodyName);
   fe.setIsAsync(func.isAsync);
+
+  if (func.nativeInfo) {
+    fe.setReturnType(func.nativeInfo->returnType);
+  }
 
   fe.finish(fe.ue().bcPos(), false /* load */);
   fe.ue().recordFunction(&fe);

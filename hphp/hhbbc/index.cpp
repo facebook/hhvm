@@ -17,10 +17,11 @@
 
 #include <unordered_map>
 #include <mutex>
+#include <map>
 
-#include <boost/container/flat_map.hpp>
 #include <boost/next_prior.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <tbb/concurrent_hash_map.h>
 
 #include "folly/Format.h"
 #include "folly/Hash.h"
@@ -114,6 +115,17 @@ Dep operator|(Dep a, Dep b) {
 bool has_dep(Dep m, Dep t) {
   return static_cast<uintptr_t>(m) & static_cast<uintptr_t>(t);
 }
+
+/*
+ * Maps functions to contexts that depend on information about that
+ * function, with information about the type of dependency.
+ * (Currently only return types.)
+ */
+using DepMap =
+  tbb::concurrent_hash_map<
+    borrowed_ptr<const php::Func>,
+    std::map<Context,Dep>
+  >;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -292,11 +304,7 @@ struct IndexData {
   > privatePropInfo;
 
   // For now we only need dependencies for function return types.
-  std::mutex dependencyLock;
-  std::unordered_map<
-    borrowed_ptr<const php::Func>,
-    boost::container::flat_map<Context,Dep>
-  > dependencyMap;
+  DepMap dependencyMap;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -309,8 +317,9 @@ void add_dependency(IndexData& data,
                     borrowed_ptr<const php::Func> src,
                     const Context& dst,
                     Dep newMask) {
-  G g(data.dependencyLock);
-  auto& current = data.dependencyMap[src][dst];
+  DepMap::accessor acc;
+  data.dependencyMap.insert(acc, src);
+  auto& current = acc->second[dst];
   current = current | newMask;
 }
 
@@ -326,10 +335,12 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
 std::vector<Context> find_deps(IndexData& data,
                                borrowed_ptr<const php::Func> src,
                                Dep mask) {
-  G g(data.dependencyLock);
   std::vector<Context> ret;
-  for (auto& kv : data.dependencyMap[src]) {
-    if (has_dep(kv.second, mask)) ret.push_back(kv.first);
+  DepMap::const_accessor acc;
+  if (data.dependencyMap.find(acc, src)) {
+    for (auto& kv : acc->second) {
+      if (has_dep(kv.second, mask)) ret.push_back(kv.first);
+    }
   }
   return ret;
 }

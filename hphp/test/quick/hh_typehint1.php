@@ -1,12 +1,6 @@
 <?hh
 
-class Bar { public function frob() { echo "frob\n"; } }
+class Bar {}
 class Foo {}
-
-function foo(?Bar $x) {
-  if ($x) {
-    $x->frob();
-  }
-}
-
+function foo(?Bar $x) {}
 foo(new Foo);

@@ -119,6 +119,7 @@ private:
   static const std::string k_serverNameKey;
   static const std::string k_serverPortKey;
   static const std::string k_serverAddrKey;
+  static const std::string k_httpsKey;
 
   FastCGIConnection* m_connection;
   int m_id;

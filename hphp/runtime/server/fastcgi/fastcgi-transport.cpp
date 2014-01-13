@@ -28,6 +28,7 @@
 #include "hphp/util/timer.h"
 #include "folly/MoveWrapper.h"
 
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 using folly::IOBuf;
@@ -305,6 +306,7 @@ const std::string FastCGITransport::k_documentRoot = "DOCUMENT_ROOT";
 const std::string FastCGITransport::k_serverNameKey = "SERVER_NAME";
 const std::string FastCGITransport::k_serverPortKey = "SERVER_PORT";
 const std::string FastCGITransport::k_serverAddrKey = "SERVER_ADDR";
+const std::string FastCGITransport::k_httpsKey = "HTTPS";
 
 void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
                                 std::unique_ptr<folly::IOBuf> value_chain) {
@@ -349,6 +351,15 @@ void FastCGITransport::handleHeader(const std::string& key,
     }
   } else if (compareKeys(key, k_serverNameKey)) {
     m_serverName = value;
+  } else if (compareKeys(key, k_httpsKey)) {
+    if (!value.empty()) {
+      std::string lValue(value);
+      boost::to_lower(lValue);
+      // IIS sets this value but sets it to off when SSL is off.
+      if (lValue.compare("off") != 0) {
+        setSSL();
+      }
+    }
   } else if (compareKeys(key, k_serverAddrKey)) {
     m_serverAddr = value;
   } else if (compareKeys(key, k_serverPortKey)) {

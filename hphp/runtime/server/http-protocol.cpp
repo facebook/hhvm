@@ -465,8 +465,17 @@ void HttpProtocol::CopyServerInfo(Variant& server,
 
 void HttpProtocol::CopyRemoteInfo(Variant& server,
                                   Transport *transport) {
-  server.set(s_REMOTE_ADDR, String(transport->getRemoteHost(), CopyString));
-  server.set(s_REMOTE_HOST, empty_string); // I don't think we need to nslookup
+  String remoteAddr(transport->getRemoteAddr(), CopyString);
+  String remoteHost(transport->getRemoteHost(), CopyString);
+
+  if(remoteAddr.empty()) {
+    remoteAddr = remoteHost;
+  }
+
+  server.set(s_REMOTE_ADDR, remoteAddr);
+  if(!remoteHost.empty()) {
+    server.set(s_REMOTE_HOST, remoteHost);
+  }
   server.set(s_REMOTE_PORT, transport->getRemotePort());
 }
 

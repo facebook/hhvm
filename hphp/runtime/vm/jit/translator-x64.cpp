@@ -1144,6 +1144,10 @@ TranslatorX64::enterTC(TCA start, void* data) {
     }
 
     if (RuntimeOption::EvalSimulateARM) {
+      // This is a pseudo-copy of the logic in enterTCHelper: it sets up the
+      // simulator's registers and stack, runs the translation, and gets the
+      // necessary information out of the registers when it's done.
+
       vixl::PrintDisassembler disasm(std::cout);
       vixl::Decoder decoder;
       if (getenv("ARM_DISASM")) {
@@ -1163,11 +1167,11 @@ TranslatorX64::enterTC(TCA start, void* data) {
       g_vmContext->m_activeSims.push_back(&sim);
       SCOPE_EXIT { g_vmContext->m_activeSims.pop_back(); };
 
-      sim.   set_xreg(JIT::ARM::rGContextReg.code(), g_vmContext);
-      sim.   set_xreg(JIT::ARM::rVmFp.code(), vmfp());
-      sim.   set_xreg(JIT::ARM::rVmSp.code(), vmsp());
-      sim.   set_xreg(JIT::ARM::rVmTl.code(), RDS::tl_base);
-      sim.   set_xreg(JIT::ARM::rStashedAR.code(), info.saved_rStashedAr);
+      sim.   set_xreg(ARM::rGContextReg.code(), g_vmContext);
+      sim.   set_xreg(ARM::rVmFp.code(), vmfp());
+      sim.   set_xreg(ARM::rVmSp.code(), vmsp());
+      sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
+      sim.   set_xreg(ARM::rStashedAR.code(), info.saved_rStashedAr);
 
       // Leave space for register spilling and MInstrState.
       sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
@@ -1182,6 +1186,15 @@ TranslatorX64::enterTC(TCA start, void* data) {
       sim.   set_sp(sim.sp() - 16);
       *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
 
+      // The handshake is different in the case of REQ_BIND_CALL. The code we're
+      // jumping to expects to find a return address in x30, and a saved return
+      // address on the stack.
+      if (info.requestNum == REQ_BIND_CALL) {
+        // Put the call's return address in the link register.
+        auto* ar = reinterpret_cast<ActRec*>(info.saved_rStashedAr);
+        sim.set_lr(ar->m_savedRip);
+      }
+
       std::cout.flush();
       sim.RunFrom(vixl::Instruction::Cast(start));
       std::cout.flush();
@@ -1194,9 +1207,9 @@ TranslatorX64::enterTC(TCA start, void* data) {
       info.args[2] = sim.xreg(3);
       info.args[3] = sim.xreg(4);
       info.args[4] = sim.xreg(5);
-      info.saved_rStashedAr = sim.xreg(JIT::ARM::rStashedAR.code());
+      info.saved_rStashedAr = sim.xreg(ARM::rStashedAR.code());
 
-      info.stubAddr = reinterpret_cast<TCA>(sim.xreg(JIT::ARM::rAsm.code()));
+      info.stubAddr = reinterpret_cast<TCA>(sim.xreg(ARM::rAsm.code()));
     } else {
       // We have to force C++ to spill anything that might be in a callee-saved
       // register (aside from rbp). enterTCHelper does not save them.
@@ -1769,10 +1782,12 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   TransKind  transKind = TransInterp;
   UndoMarker undoA(code.main());
   UndoMarker undoAstubs(code.stubs());
+  UndoMarker undoGlobalData(code.data());
 
   auto resetState = [&] {
     undoA.undo();
     undoAstubs.undo();
+    undoGlobalData.undo();
     m_fixupMap.clearPendingFixups();
     m_pendingCatchTraces.clear();
     m_bcMap.clear();

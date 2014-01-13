@@ -33,7 +33,11 @@ void emitCallToExit(UniqueStubs& us) {
 
   a.   Nop   ();
   us.callToExit = a.frontier();
-  a.   Brk   (0);
+  emitServiceReq(
+    tx64->code.main(),
+    SRFlags::Align | SRFlags::JmpInsteadOfRet,
+    REQ_EXIT
+  );
 
   us.add("callToExit", us.callToExit);
 }
@@ -78,7 +82,15 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   MacroAssembler a { tx64->code.stubs() };
 
   us.stackOverflowHelper = a.frontier();
-  a.   Brk   (0);
+  a.  Ldr  (rAsm, rVmFp[AROFF(m_func)]);
+  a.  Ldr  (rAsm2.W(), rStashedAR[AROFF(m_soff)]);
+  a.  Ldr  (rAsm, rAsm[Func::sharedOffset()]);
+  a.  Ldr  (rAsm.W(), rAsm[Func::sharedBaseOffset()]);
+  // The VM-reg-save helper will read the current BC offset out of argReg(0).
+  a.  Add  (argReg(0).W(), rAsm.W(), rAsm2.W());
+
+  emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
+  emitServiceReq(tx64->code.stubs(), REQ_STACK_OVERFLOW);
 
   us.add("stackOverflowHelper", us.stackOverflowHelper);
 }
@@ -104,9 +116,44 @@ void emitFreeLocalsHelpers(UniqueStubs& us) {
 
 void emitFuncPrologueRedispatch(UniqueStubs& us) {
   MacroAssembler a { tx64->code.main() };
+  vixl::Label actualDispatch;
+  vixl::Label numParamsCheck;
 
   us.funcPrologueRedispatch = a.frontier();
-  a.   Brk   (0);
+
+  // Using x0, x1 and x2 as scratch registers here. This is happening between
+  // compilation units -- trying to get into a func prologue, to be precise --
+  // so there are no live registers.
+
+  a.  Ldr  (x0, rStashedAR[AROFF(m_func)]);
+  a.  Ldr  (w1, rStashedAR[AROFF(m_numArgsAndCtorFlag)]);
+  a.  And  (w1, w1, 0x7fffffff);
+  a.  Ldr  (w2, x0[Func::numParamsOff()]);
+
+  // If we passed more args than declared, jump to the numParamsCheck.
+  a.  Cmp  (w2, w1);
+  a.  B    (&numParamsCheck, lt);
+
+  a.  bind (&actualDispatch);
+  // Need to load x0[w1 * 8 + Func::prologueTableOff()]. On x64 there's an
+  // addressing mode for this. Here, there's only base+imm and base+reg. So we
+  // add the immediate to the base first, then use base+reg with scaling.
+  a.  Add  (x0, x0, Func::prologueTableOff());
+  // What this is saying: base is x0, index is w1 (with Unsigned eXTension to 64
+  // bits), scaled by 2^3.
+  a.  Ldr  (x0, MemOperand(x0, w1, UXTW, 3));
+  a.  Br   (x0);
+  a.  Brk  (0);
+
+  a.  bind (&numParamsCheck);
+  a.  Cmp  (w1, kNumFixedPrologues);
+  a.  B    (&actualDispatch, lt);
+
+  // Too many parameters.
+  a.  Add  (x0, x0, Func::prologueTableOff() + sizeof(TCA));
+  a.  Ldr  (x0, MemOperand(x0, w2, UXTW, 3));
+  a.  Br   (x0);
+  a.  Brk  (0);
 
   us.add("funcPrologueRedispatch", us.funcPrologueRedispatch);
 }
@@ -184,6 +231,7 @@ void emitFunctionEnterHelper(UniqueStubs& us) {
 
   a.   Push    (rLinkReg, rVmFp);
   a.   Mov     (rVmFp, vixl::sp);
+  // rAsm2 gets the savedRbp, rAsm gets the savedRip.
   a.   Ldp     (rAsm2, rAsm, ar[AROFF(m_savedRbp)]);
   static_assert(AROFF(m_savedRbp) + 8 == AROFF(m_savedRip),
                 "m_savedRbp must precede m_savedRip");
@@ -198,10 +246,17 @@ void emitFunctionEnterHelper(UniqueStubs& us) {
 
   a.   bind    (&skip);
 
-  a.   Pop     (rVmFp, rLinkReg, rAsm, rAsm2);
+  // Tricky. The last two things we pushed were the saved fp and return TCA from
+  // the function we were supposed to enter. Since we're now "returning" from
+  // that function, restore that fp and jump to that return TCA. Below that on
+  // the stack are that function's *caller's* saved fp and return TCA. We can
+  // ignore the saved fp, but we have to restore the return TCA into x30.
+  auto rIgnored = rAsm2;
+  a.   Pop     (rVmFp, rAsm);
+  a.   Pop     (rIgnored, rLinkReg);
   a.   Ldr     (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
                                     Stack::topOfStackOffset()]);
-  a.   Br      (rLinkReg);
+  a.   Br      (rAsm);
 
   us.add("functionEnterHelper", us.functionEnterHelper);
 }

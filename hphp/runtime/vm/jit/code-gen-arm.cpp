@@ -307,7 +307,6 @@ PUNT_OPCODE(NewStructArray)
 PUNT_OPCODE(NewCol)
 PUNT_OPCODE(Clone)
 PUNT_OPCODE(FreeActRec)
-PUNT_OPCODE(Call)
 PUNT_OPCODE(CallArray)
 PUNT_OPCODE(NativeImpl)
 PUNT_OPCODE(RetCtrl)
@@ -1429,6 +1428,35 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
 
   always_assert(false);
+}
+
+void CodeGenerator::cgCall(IRInstruction* inst) {
+  auto* actRec = inst->src(0);
+  auto* returnBcOffset = inst->src(1);
+  auto* func = inst->src(2);
+  SrcRange args = inst->srcs().subpiece(3);
+  int32_t numArgs = args.size();
+
+  auto spReg = x2a(curOpd(actRec).reg());
+  int64_t adjustment = cellsToBytes((int64_t)-numArgs);
+  for (int32_t i = 0; i < numArgs; ++i) {
+    if (args[i]->type() != Type::None) {
+      emitStore(spReg, cellsToBytes(-(i + 1)), args[i]);
+    }
+  }
+
+  m_as.  Mov  (rAsm.W(), returnBcOffset->getValInt());
+  m_as.  Str  (rAsm.W(), spReg[AROFF(m_soff)]);
+  emitRegGetsRegPlusImm(m_as, spReg, spReg, adjustment);
+
+  assert(m_curInst->marker().valid());
+  SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
+  bool isImmutable = (func->isConst() && !func->type().isNull());
+  const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
+  int32_t adjust  = emitBindCall(tx64->code.main(), tx64->code.stubs(),
+                                 srcKey, funcd, numArgs);
+
+  emitRegGetsRegPlusImm(m_as, rVmSp, rVmSp, adjust);
 }
 
 //////////////////////////////////////////////////////////////////////

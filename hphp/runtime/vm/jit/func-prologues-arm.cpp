@@ -37,7 +37,7 @@ void emitStackCheck(int funcDepth, Offset pc) {
 
   uint64_t stackMask = cellsToBytes(RuntimeOption::EvalVMStackElms) - 1;
   a.   And  (rAsm, rVmSp, stackMask);
-  a.   Sub  (rAsm, rAsm, funcDepth + Stack::sSurprisePageSize);
+  a.   Sub  (rAsm, rAsm, funcDepth + Stack::sSurprisePageSize, vixl::SetFlags);
   // This doesn't need to be smashable, but it is a long jump from mainCode to
   // stubs, so it can't be direct.
   emitSmashableJump(tx64->code.main(), tx64->uniqueStubs.stackOverflowHelper,
@@ -139,12 +139,18 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     a.    Str    (rAsm, rVmFp[AROFF(m_this)]);
 
     if (!(func->attrs() & AttrStatic)) {
+      // Only do the incref if rAsm is not zero AND its LSB is zero.
       vixl::Label notRealThis;
-      // This means "test bit 0" -- the LSB.
-      a.  Tbz    (rAsm, 0, &notRealThis);
-      // Clear the low bit
-      a.  Orr    (rAsm, rAsm, ~1ULL);
-      emitIncRefKnownType(a, rAsm, 0);
+      // Jump if rAsm is zero.
+      a.  Cbz    (rAsm, &notRealThis);
+      // Tbnz = test and branch if not zero. It tests a single bit, given by a
+      // position (in this case, 0, the second argument).
+      a.  Tbnz   (rAsm, 0, &notRealThis);
+
+      auto wCount = rAsm2.W();
+      a.  Ldr    (wCount, rAsm[FAST_REFCOUNT_OFFSET]);
+      a.  Add    (wCount, wCount, 1);
+      a.  Str    (wCount, rAsm[FAST_REFCOUNT_OFFSET]);
       a.  bind   (&notRealThis);
     }
 

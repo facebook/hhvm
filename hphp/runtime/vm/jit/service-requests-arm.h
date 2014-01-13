@@ -23,6 +23,8 @@ void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
                  SrcKey dest);
 void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
                       JIT::ConditionCode cc);
+int32_t emitBindCall(CodeBlock& cb, CodeBlock& stubs,
+                     SrcKey srcKey, const Func* funcd, int numArgs);
 
 }}}
 

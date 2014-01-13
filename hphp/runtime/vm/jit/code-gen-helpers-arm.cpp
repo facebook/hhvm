@@ -121,6 +121,25 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 
 //////////////////////////////////////////////////////////////////////
 
+void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
+  a.    Str  (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+                                  Stack::topOfStackOffset()]);
+  if ((bool)(flags & RegSaveFlags::SaveFP)) {
+    a.  Str  (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
+  }
+
+  if ((bool)(flags & RegSaveFlags::SavePC)) {
+    // m_fp->m_func->m_unit->m_bc
+    a.  Ldr  (rAsm, rVmFp[AROFF(m_func)]);
+    a.  Ldr  (rAsm, rAsm[Func::unitOff()]);
+    a.  Ldr  (rAsm, rAsm[Unit::bcOff()]);
+    a.  Add  (rAsm, rAsm, vixl::Operand(argReg(0), vixl::UXTW));
+    a.  Str  (rAsm, rGContextReg[offsetof(VMExecutionContext, m_pc)]);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void emitTransCounterInc(vixl::MacroAssembler& a) {
   if (!tx64->isTransDBEnabled()) return;
 

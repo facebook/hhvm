@@ -238,6 +238,8 @@ class ReflectionParameter implements Reflector {
       }
     } else if ($ltype === 'array') {
       return null;
+    } else if ($ltype === 'self') {
+      return new ReflectionClass($this->info['class']);
     }
     return new ReflectionClass($this->info['type']);
   }

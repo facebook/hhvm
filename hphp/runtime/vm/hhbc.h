@@ -20,7 +20,7 @@
 #include "folly/Optional.h"
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/trace.h"
 

@@ -416,9 +416,14 @@ static void find_address_in_section(bfd *abfd, asection *section, void *data) {
     return;
   }
 
+  // libdwarf allocates its own unaligned memory so it doesn't play well with
+  // valgrind
+#ifndef VALGRIND
   adata->found = bfd_find_nearest_line(abfd, section, adata->syms,
                                        adata->pc - vma, &adata->filename,
                                        &adata->functionname, &adata->line);
+#endif
+
   if (adata->found) {
     const char *file = adata->filename;
     unsigned int line = adata->line;

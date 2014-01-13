@@ -8968,11 +8968,10 @@ static void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   }
 }
 
-static void commitLitstrs() {
-  Repo& repo = Repo::get();
-  RepoTxn txn(repo);
-  repo.insertLitstrs(txn, UnitOrigin::File);
-  txn.commit();
+static void commitGlobalData() {
+  auto gd = Repo::GlobalData{};
+  gd.HardTypeHints = Option::HardTypeHints;
+  Repo::get().saveGlobalData(gd);
 }
 
 /*
@@ -9036,7 +9035,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
       }
     }
 
-    if (!Option::UseHHBBC) commitLitstrs();
+    if (!Option::UseHHBBC) commitGlobalData();
   } else {
     dispatcher.waitEmpty();
   }
@@ -9045,7 +9044,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   if (Option::UseHHBBC) {
     ues = HHBBC::whole_program(std::move(ues));
     batchCommit(std::move(ues));
-    commitLitstrs();
+    commitGlobalData();
   }
 }
 

@@ -16,9 +16,3 @@ changes.  This one might be ok (this optimization is allowed to break
 autoload order in hphpc too).
 
   hphp/test/slow/volatile/1221.php
-
-If type assertions are on, this one will notice that HardTypeHints was
-true by asserting in bytecode.cpp.  To fix this we need to support
-setting options from hphp_opts files.
-
-  slow/invalid_argument/1383.php

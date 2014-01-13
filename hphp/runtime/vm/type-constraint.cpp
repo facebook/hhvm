@@ -13,10 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/type-constraint.h"
 
 #include "folly/MapUtil.h"
+#include "folly/Format.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -277,8 +277,7 @@ static const char* describe_actual_type(const TypedValue* tv) {
 void TypeConstraint::verifyFail(const Func* func, int paramNum,
                                 const TypedValue* tv) const {
   JIT::VMRegAnchor _;
-  std::ostringstream fname;
-  fname << func->fullName()->data() << "()";
+
   const StringData* tn = typeName();
   if (isSelf()) {
     selfToTypeName(func, &tn);
@@ -296,12 +295,15 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
       (isSoft() || isNullable()) &&
       "Only nullable and soft extended type hints are currently implemented");
     raise_debugging(
-      "Argument %d to %s must be of type %s, %s given",
-      paramNum + 1, fname.str().c_str(), fullName().c_str(), givenType);
+      "Argument %d to %s() must be of type %s, %s given",
+      paramNum + 1, func->fullName()->data(), fullName().c_str(), givenType);
   } else {
-    raise_recoverable_error(
-      "Argument %d passed to %s must be an instance of %s, %s given",
-      paramNum + 1, fname.str().c_str(), tn->data(), givenType);
+    raise_typehint_error(
+      folly::format(
+        "Argument {} passed to {}() must be an instance of {}, {} given",
+        paramNum + 1, func->fullName()->data(), tn->data(), givenType
+      ).str()
+    );
   }
 }
 

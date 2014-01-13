@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -61,6 +62,13 @@ void raise_recoverable_error(const std::string &msg) {
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::ErrorThrowMode::IfUnhandled,
                          "HipHop Recoverable Fatal error: ");
+}
+
+void raise_typehint_error(const std::string& msg) {
+  raise_recoverable_error(msg);
+  if (RuntimeOption::RepoAuthoritative && Repo::global().HardTypeHints) {
+    raise_error("Error handler tried to recover from typehint violation");
+  }
 }
 
 void raise_recoverable_error(const char *fmt, ...) {

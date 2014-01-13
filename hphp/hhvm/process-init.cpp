@@ -125,7 +125,7 @@ void ProcessInit() {
 
   LitstrTable::init();
   LitstrTable::get().setWriting();
-  Repo::get().loadLitstrs();
+  Repo::get().loadGlobalData();
 
   // Save this in case the debugger needs it. Once we know if this
   // process does not have debugger support, we'll clear it.

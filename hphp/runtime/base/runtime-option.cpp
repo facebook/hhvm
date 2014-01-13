@@ -49,6 +49,7 @@
 #include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/crash-reporter.h"
+#include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1321,6 +1322,8 @@ void RuntimeOption::Load(Hdf &config,
     Fb303ServerPoolThreads = fb303Server["PoolThreads"].getInt16(1);
   }
 #endif
+
+  refineStaticStringTableSize();
 
   Extension::LoadModules(config);
   if (overwrites) Loaded = true;

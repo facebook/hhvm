@@ -2153,12 +2153,11 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   No value is returned.
    */
-  public function setValue($obj) {
-    $args = func_get_args();
-    if (count($args) > 1) {
-        $obj = array_shift($args);
+  public function setValue($obj, $value = null) {
+    if (func_num_args() == 1) {
+      $value = $obj;
+      $obj = null;
     }
-    $value = array_shift($args);
     if ($this->isStatic()) {
       hphp_set_static_property(
         $this->info['class'],
@@ -2167,6 +2166,11 @@ class ReflectionProperty implements Reflector {
         $this->forceAccessible
       );
     } else {
+      if (func_num_args() == 1) {
+        trigger_error('ReflectionProperty::setValue() expects exactly 2'
+          . ' parameters, 1 given', E_USER_WARNING);
+        return null;
+      }
       hphp_set_property(
         $obj,
         $this->forceAccessible ? $this->info['class'] : null,

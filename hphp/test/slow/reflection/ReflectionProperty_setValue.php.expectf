@@ -1,6 +1,6 @@
 int(1)
 int(2)
 int(20)
-HipHop Warning: %s
+HipHop Warning: ReflectionProperty::setValue() expects exactly 2 parameters%s
 int(42)
 int(4)

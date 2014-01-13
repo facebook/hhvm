@@ -1235,9 +1235,9 @@ HPHP::Class* Reflection::s_ReflectionExceptionClass = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class reflectionExtension : public Extension {
+class ReflectionExtension : public Extension {
  public:
-  reflectionExtension() : Extension("reflection") { }
+  ReflectionExtension() : Extension("reflection") { }
   virtual void moduleInit() {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);

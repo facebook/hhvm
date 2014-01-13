@@ -28,8 +28,8 @@
 #include "hphp/util/timer.h"
 #include "folly/MoveWrapper.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 using folly::IOBuf;
 using folly::IOBufQueue;
@@ -358,7 +358,12 @@ void FastCGITransport::handleHeader(const std::string& key,
   } else if (compareKeys(key, k_serverNameKey)) {
     m_serverName = value;
   } else if (compareKeys(key, k_httpsKey)) {
+    // According to PHP documentation we need to check if this is a non-empty value
+    // and then use setSSL() to let the transport know that this request has been
+    // requested via SSL.
     if(!value.empty()) {
+      // When using IIS this value is actually set to off if the request was not made
+      // over SSL so we need to check for this here.
       std::string lValue(value);
       boost::to_lower(lValue);
       if(lValue.compare("off") != 0) {

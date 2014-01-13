@@ -541,6 +541,7 @@ other_files = (
     '/ext/pdo/tests/pdo_test.inc',
     '/ext/pdo_mysql/tests/common.phpt',
     '/ext/pdo_mysql/tests/config.inc',
+    '/ext/pdo_mysql/tests/mysql_pdo_test.inc',
     '/ext/pdo_sqlite/tests/common.phpt',
     '/ext/phar/tests/files/phar_test.inc',
     '/ext/session/tests/save_handler.inc',

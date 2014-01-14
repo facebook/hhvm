@@ -6,39 +6,22 @@ class HHVMDocExtension {
   protected array $classes = [];
   protected array $functions = [];
 
-  protected function curlGet($url): string {
-    if ($this->verbose) {
-      fwrite(STDERR, "Fetching: $url\n");
-    }
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_PROXY, 'fwdproxy.any:8080');
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    return curl_exec($ch);
-  }
-
-  protected function svnScandir(string $url): array {
+  protected function svnScandir(string $path): array {
     $ret = [];
-    $index = $this->curlGet($url);
-    preg_match_all('@<a name="([^"]*)" '.
-                   'href="(/viewvc/phpdoc/en/trunk/reference/[^"]*)" '.
-                   'title="View directory contents">@',
-                   $index, $dirs, PREG_SET_ORDER);
-    foreach ($dirs as $dir) {
-      $ret['dirs'][$dir[1]] = [
-        'name' => $dir[1],
-        'path' => $this->host . $dir[2],
-      ];
-    }
-    preg_match_all('@<a name="([^"]*)" '.
-                   'href="(/viewvc/phpdoc/en/[^"]*)\?view=log" '.
-                   'title="View file revision log">@',
-                   $index, $files, PREG_SET_ORDER);
-    foreach ($files as $file) {
-      $ret['files'][$file[1]] = [
-        'name' => $file[1],
-        'path' => $this->host . $file[2],
-      ];
+    $entries = scandir($path);
+    foreach ($entries as $entry) {
+      if ($entry[0] == '.') continue;
+      if (is_dir("$path/$entry")) {
+        $ret['dirs'][$entry] = [
+          'name' => $entry,
+          'path' => "$path/$entry",
+        ];
+      } else {
+        $ret['files'][$entry] = [
+          'name' => $entry,
+          'path' => "$path/$entry",
+        ];
+      }
     }
     return $ret;
   }
@@ -67,8 +50,8 @@ class HHVMDocExtension {
     return trim(self::GetDescriptionDOM(dom_import_simplexml($e)));
   }
 
-  protected function getXml(string $url): SimpleXMLElement {
-    $xml = $this->curlGet($url.'?view=co&content-type=text%2Fplain');
+  protected function getXml(string $path): SimpleXMLElement {
+    $xml = file_get_contents($path);
     $xml = preg_replace_callback('@&([a-zA-Z0-9_\.-]*);@s',
     function (array<string> $ents) {
       $ent = $ents[1];
@@ -147,8 +130,8 @@ class HHVMDocExtension {
     }
   }
 
-  protected function parseFunctions(string $url): void {
-    $dirinfo = $this->svnScandir($url);
+  protected function parseFunctions(string $path): void {
+    $dirinfo = $this->svnScandir($path);
     foreach($dirinfo['files'] as $file) {
       $xml = $this->getXml($file['path']);
       $this->parseFunction($xml, true);
@@ -156,8 +139,8 @@ class HHVMDocExtension {
     }
   }
 
-  protected function parseClass(string $url): void {
-    $sxe = $this->getXml($url);
+  protected function parseClass(string $path): void {
+    $sxe = $this->getXml($path);
     foreach ($sxe->partintro->section as $sect) {
       $xmlattrs = $sect->attributes('xml', true);
       if (substr($xmlattrs->id, -6) == '.intro') {
@@ -209,8 +192,8 @@ class HHVMDocExtension {
   protected function parse(): object {
     if ($this->parsed) return $this;
 
-    $url = $this->host.
-           '/viewvc/phpdoc/en/trunk/reference/'.
+    $url = $this->root.
+           '/en/reference/'.
            urlencode($this->name);
     $dirinfo = $this->svnScandir($url);
     foreach($dirinfo['files'] as $file) {
@@ -220,7 +203,6 @@ class HHVMDocExtension {
     foreach ($dirinfo['dirs'] as $dir) {
       $this->parseFunctions($dir['path']);
     }
-
     $this->fixupClasses();
 
     $this->parsed = true;
@@ -228,8 +210,15 @@ class HHVMDocExtension {
   }
 
   public function __construct(protected string $name,
-                              protected string $host = 'http://svn.php.net'):
-                  void {}
+                              protected string $root):
+                  void {
+    if (!file_exists($this->root.'/en/reference') ||
+        !is_dir($this->root.'/en/reference')) {
+      throw new Exception("{$this->root} does not appear to be ".
+                          "a phpdoc checkout.  See http://php.net/svn ".
+                          "for instructions on how to checkout phpdoc-en.");
+    }
+  }
 
   public function getFunctions(): array { return $this->parse()->functions; }
   public function getClasses(): array { return $this->parse()->classes; }

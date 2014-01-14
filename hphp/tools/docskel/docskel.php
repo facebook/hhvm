@@ -224,18 +224,18 @@ function outputExtensionCPP(string $dest, string $extname,
   fwrite($fp, "} // namespace HPHP\n");
 }
 
-if (empty($_SERVER['argv'][1])) {
-  fwrite(STDERR, "Usage: {$_SERVER['argv'][0]} <extname> ".
+if (empty($_SERVER['argv'][2])) {
+  fwrite(STDERR, "Usage: {$_SERVER['argv'][0]} <phpdoc-root> <extname> ".
                  "[ exname.cpp [ extname.php ] ]\n");
   exit;
 }
 
-$extname = $_SERVER['argv'][1];
-$ext = new HHVMDocExtension($extname);
-$cppfile = empty($_SERVER['argv'][2])
-         ? "$extname.cpp" : $_SERVER['argv'][2];
-$phpfile = empty($_SERVER['argv'][3])
-         ? "$extname.php" : $_SERVER['argv'][3];
+$extname = $_SERVER['argv'][2];
+$ext = new HHVMDocExtension($extname, $_SERVER['argv'][1]);
+$cppfile = empty($_SERVER['argv'][3])
+         ? "$extname.cpp" : $_SERVER['argv'][3];
+$phpfile = empty($_SERVER['argv'][4])
+         ? "$extname.php" : $_SERVER['argv'][4];
 
 if (!preg_match('@^[a-zA-Z0-9_\.-]+$@', $extname)) {
   die("Invalid extension name: $extname\n");

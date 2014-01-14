@@ -1817,11 +1817,11 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "2.3.2"
+            "value": "2.3.3"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "2.3.2"
+            "value": "2.3.3"
         },
         {
             "name": "HTML_ENTITIES",

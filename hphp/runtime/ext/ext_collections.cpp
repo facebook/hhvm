@@ -2132,7 +2132,7 @@ Object c_StableMap::ti_fromarray(CVarRef arr) {
 template<typename TMap>
   typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, ObjectData*>::type
-static collectionDeepCopyBaseMap(TMap* mp) {
+collectionDeepCopyBaseMap(TMap* mp) {
   mp = TMap::Clone(mp);
   Object o = Object::attach(mp);
   uint used = mp->iterLimit();

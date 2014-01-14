@@ -14,12 +14,35 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_CLASS_TO_CLASS_ENTRY
-#define incl_HPHP_ZEND_CLASS_TO_CLASS_ENTRY
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-property-info.h"
 
-typedef struct _zend_class_entry zend_class_entry;
-struct _zend_class_entry;
 
-zend_class_entry *zend_hphp_class_to_class_entry(HPHP::Class* cls);
+template <class T>
+void prop_to_zpi(zend_class_entry* ce,
+                 const T* prop,
+                 zend_property_info* info) {
+  static_assert(std::is_same<T, HPHP::Class::Prop>::value ||
+                std::is_same<T, HPHP::Class::SProp>::value, "");
 
-#endif // incl_HPHP_ZEND_CLASS_TO_CLASS_ENTRY
+  info->flags = 0;
+
+  #define ATTR_TO_FLAGS                   \
+    AT(AttrStatic, ZEND_ACC_STATIC)       \
+    AT(AttrFinal, ZEND_ACC_FINAL)         \
+    AT(AttrPublic, ZEND_ACC_PUBLIC)       \
+    AT(AttrProtected, ZEND_ACC_PROTECTED) \
+    AT(AttrPrivate, ZEND_ACC_PRIVATE)     \
+
+  #define AT(ATTR, FLAG)              \
+    if (prop->m_attrs & HPHP::ATTR) { \
+      info->flags |= (FLAG);          \
+    }
+  ATTR_TO_FLAGS
+  #undef AT
+
+  info->name = prop->m_name->data();
+  info->name_length = prop->m_name->size();
+  info->doc_comment = prop->m_docComment->data();
+  info->doc_comment_len = prop->m_docComment->size();
+  info->ce = ce;
+}

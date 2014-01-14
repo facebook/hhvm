@@ -106,7 +106,7 @@ struct _php_core_globals {
 
   char *upload_tmp_dir;
   long upload_max_filesize;
-  
+
   char *error_append_string;
   char *error_prepend_string;
 
@@ -188,6 +188,20 @@ struct _php_core_globals {
 BEGIN_EXTERN_C()
 zval** PG_http_globals();
 _arg_separators PG_arg_separator();
+zend_bool PG_html_errors();
+zend_bool PG_display_errors();
+zend_bool PG_track_errors();
+int64_t PG_memory_limit();
+zend_bool PG_log_errors();
+
+char* PG_docref_root();
+char* PG_docref_ext();
+zend_bool PG_during_request_startup();
+int64_t PG_log_errors_max_len();
+const char* PG_last_error_message();
+const char* PG_last_error_file();
+int PG_last_error_type();
+int PG_last_error_lineno();
 END_EXTERN_C()
 #endif
 

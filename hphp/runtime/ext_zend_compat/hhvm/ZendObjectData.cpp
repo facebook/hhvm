@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_objects.h"
 

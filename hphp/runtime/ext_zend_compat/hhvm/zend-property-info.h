@@ -14,32 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_OBJECT_DATA
-#define incl_HPHP_ZEND_OBJECT_DATA
+#ifndef incl_ZEND_PROPERTY_INFO_
+#define incl_ZEND_PROPERTY_INFO_
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
+#include "Zend/zend_compile.h"
+#include "Zend/zend_types.h"
 
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+template <class T>
+void prop_to_zpi(zend_class_entry* ce, const T* prop, zend_property_info* info);
 
-class ObjectData;
-
-FORWARD_DECLARE_CLASS(ZendObjectData);
-class c_ZendObjectData : public ObjectData {
-  DECLARE_CLASS_NO_SWEEP(ZendObjectData)
-  public:
-    c_ZendObjectData(Class* cls = classof());
-    void setHandle(zend_object_handle handle) {
-      always_assert(uint16_t(handle) == handle);
-      o_subclassData.u16 = uint16_t(handle);
-    }
-    zend_object_handle getHandle() { return o_subclassData.u16; }
-};
-
-ObjectData* new_ZendObjectData_Instance(Class* cls);
-
-}
-
-#endif // incl_HPHP_ZEND_OBJECT_DATA
+#endif

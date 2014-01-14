@@ -14,32 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_OBJECT_DATA
-#define incl_HPHP_ZEND_OBJECT_DATA
+#ifndef incl_ZEND_CLASS_ENTRY_H_
+#define incl_ZEND_CLASS_ENTRY_H_
 
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
+#include "hphp/runtime/vm/class.h"
 
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+typedef struct _zend_class_entry zend_class_entry;
+struct _zend_class_entry;
 
-class ObjectData;
+zend_class_entry* zend_hphp_class_to_class_entry(HPHP::Class* cls);
 
-FORWARD_DECLARE_CLASS(ZendObjectData);
-class c_ZendObjectData : public ObjectData {
-  DECLARE_CLASS_NO_SWEEP(ZendObjectData)
-  public:
-    c_ZendObjectData(Class* cls = classof());
-    void setHandle(zend_object_handle handle) {
-      always_assert(uint16_t(handle) == handle);
-      o_subclassData.u16 = uint16_t(handle);
-    }
-    zend_object_handle getHandle() { return o_subclassData.u16; }
-};
+const HPHP::Class::SProp* zce_find_static_prop(const zend_class_entry* ce,
+                                               const char* name,
+                                               size_t len);
 
-ObjectData* new_ZendObjectData_Instance(Class* cls);
 
-}
-
-#endif // incl_HPHP_ZEND_OBJECT_DATA
+#endif

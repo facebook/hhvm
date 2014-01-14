@@ -89,6 +89,7 @@ require_once $FBCODE_ROOT.'/hphp/tools/command_line_lib.php';
 require_once __DIR__.'/SortedIterator.php';
 require_once __DIR__.'/utils.php';
 require_once __DIR__.'/TestFindModes.php';
+require_once __DIR__.'/spyc/Spyc.php';
 
 type Color = string;
 class Colors {
@@ -228,14 +229,12 @@ class Options {
   public static bool $test_by_single_test = false;
   public static string $results_root;
   public static string $script_errors_file;
-  public static Map $framework_code_commits;
-  public static Map $original_framework_code_commits;
+  public static array $framework_info;
+  public static array $original_framework_info;
 
   public static function parse(OptionInfoMap $options, array $argv): Vector {
-    self::$framework_code_commits = Map::fromArray(json_decode(
-      file_get_contents(__DIR__."/frameworks.json"), true));
-    self::$original_framework_code_commits =
-      self::$framework_code_commits->toMap();
+    self::$framework_info = Spyc::YAMLLoad(__DIR__."/frameworks.yaml");
+    self::$original_framework_info = self::$framework_info;
     self::$results_root = __DIR__."/results";
     // Put any script error to a file when we are in a mode like --csv and
     // want to control what gets printed to something like STDOUT.
@@ -404,23 +403,27 @@ abstract class Framework {
     // properties are optional and may or may not be set
     $info = $this->getInfo();
     if (!$info->containsKey("install_root") ||
-        !$info->containsKey("git_path") ||
-        !$info->containsKey("test_path")) {
+        !$info->containsKey("test_path") ||
+        !array_key_exists('url', Options::$framework_info[$name]) ||
+        !array_key_exists('commit', Options::$framework_info[$name]) ||
+        !array_key_exists('branch', Options::$framework_info[$name])) {
       throw new Exception("Provide install, git and test file search info");
     }
 
     // Set Framework information for install. These are the five necessary
     // properties for a proper install, with pull_requests being optional.
     $this->setInstallRoot($info->get("install_root"));
-    $this->setGitPath($info->get("git_path"));
-    $this->setGitCommit(Options::$framework_code_commits[$name]['commit']);
-    $this->setGitBranch(Options::$framework_code_commits[$name]['branch']);
+    $this->setGitPath(Options::$framework_info[$name]['url']);
+    $this->setGitCommit(Options::$framework_info[$name]['commit']);
+    $this->setGitBranch(Options::$framework_info[$name]['branch']);
+    $this->setTestPath($info->get("test_path"));
     $this->setPullRequests($info->get("pull_requests"));
+
+    // Get some more possible framework test information
     $this->setBlacklist($info->get("blacklist"));
     $this->setClownylist($info->get("clownylist"));
     $this->setTestNamePattern($info->get("test_name_pattern"));
     $this->setTestFilePattern($info->get("test_file_pattern"));
-    $this->setTestPath($info->get("test_path"));
 
     // Install if not already installed using the properties set above.
     if (!$this->isInstalled()) {
@@ -922,8 +925,7 @@ abstract class Framework {
       $this->git_commit = trim(file_get_contents($this->install_root.
                                                  "/.git/refs/heads/".
                                                  $this->git_branch));
-      Options::$framework_code_commits[$this->name]['commit'] =
-        $this->git_commit;
+      Options::$framework_info[$this->name]['commit'] = $this->git_commit;
     }
 
     // Checkout out our baseline test code via SHA or branch
@@ -1142,42 +1144,7 @@ class Assetic extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/assetic",
-      "git_path" => "https://github.com/kriswallsmith/assetic.git",
       "test_path" => __DIR__."/frameworks/assetic",
-    };
-  }
-}
-
-
-class Monolog extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/monolog",
-      "git_path" => "https://github.com/Seldaek/monolog.git",
-      "test_path" => __DIR__."/frameworks/monolog",
-    };
-  }
-}
-
-class ReactPHP extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/reactphp",
-      "git_path" => "https://github.com/reactphp/react.git",
-      "test_path" => __DIR__."/frameworks/reactphp",
-    };
-  }
-}
-
-class Ratchet extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/ratchet",
-      "git_path" => "https://github.com/cboden/Ratchet.git",
-      "test_path" => __DIR__."/frameworks/ratchet",
     };
   }
 }
@@ -1187,7 +1154,6 @@ class CodeIgniter extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/CodeIgniter",
-      "git_path" => "https://github.com/EllisLab/CodeIgniter.git",
       "test_path" => __DIR__."/frameworks/CodeIgniter/tests",
     };
   }
@@ -1198,7 +1164,6 @@ class Composer extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/composer",
-      "git_path" => "https://github.com/composer/composer.git",
       "test_path" => __DIR__."/frameworks/composer",
     };
   }
@@ -1209,7 +1174,6 @@ class Doctrine2 extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/doctrine2",
-      "git_path" => "https://github.com/doctrine/doctrine2.git",
       "test_path" => __DIR__."/frameworks/doctrine2",
     };
   }
@@ -1220,7 +1184,6 @@ class Drupal extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/drupal",
-      "git_path" => "https://github.com/drupal/drupal.git",
       "test_path" => __DIR__."/frameworks/drupal/core",
       "clownylist" => Set {
         __DIR__."/frameworks/drupal/core/modules/views/tests/".
@@ -1235,7 +1198,6 @@ class FacebookPhpSdk extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/facebook-php-sdk",
-      "git_path" => "https://github.com/facebook/facebook-php-sdk.git",
       "test_path" => __DIR__."/frameworks/facebook-php-sdk",
       "test_file_pattern" => PHPUnitPatterns::$facebook_sdk_test_file_pattern,
       "test_command" => get_runtime_build()." ".__DIR__.
@@ -1281,7 +1243,6 @@ class Idiorm extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/idiorm",
-      "git_path" => "https://github.com/j4mie/idiorm.git",
       "test_path" => __DIR__."/frameworks/idiorm",
     };
   }
@@ -1292,7 +1253,6 @@ class Joomla extends Framework {
   protected function getInfo(): Map {
     return Map {
       'install_root' => __DIR__.'/frameworks/joomla-framework',
-      'git_path' => 'https://github.com/joomla/joomla-framework.git',
       'test_path' => __DIR__.'/frameworks/joomla-framework',
       "clownylist" => Set {
         // These are subtests which need their own composer set and aren't run
@@ -1329,7 +1289,6 @@ class Laravel extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/laravel",
-      "git_path" => "https://github.com/laravel/framework.git",
       "test_path" => __DIR__."/frameworks/laravel",
       "args_for_tests" => Map {
         __DIR__."/frameworks/laravel/./tests/Auth/AuthGuardTest.php"
@@ -1347,7 +1306,6 @@ class Magento2 extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/magento2",
-      "git_path" => "https://github.com/magento/magento2.git",
       "test_path" => __DIR__."/frameworks/magento2/dev/tests/unit",
     };
   }
@@ -1361,11 +1319,6 @@ class Mediawiki extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/mediawiki-core",
-      // Changing from ptarjan to wikimedia causes a FATAL in the test
-      // script. So some code change in wikimedia between Paul's forked
-      // change and the time it was pulled into wikimedia master on
-      // Nov 22, 2013 is causing problems.
-      "git_path" => "https://github.com/ptarjan/mediawiki-core.git",
       "test_path" => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       "test_file_pattern" => PHPUnitPatterns::$mediawiki_test_file_pattern,
       "config_file" => __DIR__.
@@ -1391,13 +1344,21 @@ class Mediawiki extends Framework {
   }
 }
 
+class Monolog extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      "install_root" => __DIR__."/frameworks/monolog",
+      "test_path" => __DIR__."/frameworks/monolog",
+    };
+  }
+}
 
 class Paris extends Framework {
   public function __construct(string $name) { parent::__construct($name); }
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/paris",
-      "git_path" => "https://github.com/j4mie/paris.git",
       "test_path" => __DIR__."/frameworks/paris",
     };
   }
@@ -1412,7 +1373,6 @@ class Pear extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/pear-core",
-      "git_path" => "https://github.com/pear/pear-core.git",
       "test_path" => __DIR__."/frameworks/pear-core",
       "test_name_pattern" => PHPUnitPatterns::$pear_test_name_pattern,
       "test_file_pattern" => PHPUnitPatterns::$pear_test_file_pattern,
@@ -1586,7 +1546,6 @@ class Phpbb3 extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/phpbb3",
-      "git_path" => "https://github.com/phpbb/phpbb.git",
       "test_path" => __DIR__."/frameworks/phpbb3",
       "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       // This may work if we increase the timeout. Blacklist for now
@@ -1605,7 +1564,6 @@ class PhpMyAdmin extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/phpmyadmin",
-      "git_path" => "https://github.com/phpmyadmin/phpmyadmin.git",
       "test_path" => __DIR__."/frameworks/phpmyadmin",
       "config_file" => __DIR__.
                        "/frameworks/phpmyadmin/phpunit.xml.nocoverage",
@@ -1621,7 +1579,6 @@ class PHPUnit extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/phpunit",
-      "git_path" => "https://github.com/sebastianbergmann/phpunit.git",
       "test_path" => __DIR__."/frameworks/phpunit",
       "test_command" => get_runtime_build()." ".__DIR__.
                         "/frameworks/phpunit/phpunit.php",
@@ -1633,13 +1590,31 @@ class PHPUnit extends Framework {
   }
 }
 
+class Ratchet extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      "install_root" => __DIR__."/frameworks/ratchet",
+      "test_path" => __DIR__."/frameworks/ratchet",
+    };
+  }
+}
+
+class ReactPHP extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      "install_root" => __DIR__."/frameworks/reactphp",
+      "test_path" => __DIR__."/frameworks/reactphp",
+    };
+  }
+}
+
 class SilverStripe extends Framework {
   public function __construct(string $name) { parent::__construct($name); }
   protected function getInfo(): Map {
     return Map {
       'install_root' => __DIR__.'/frameworks/silverstripe',
-      'git_path' => 'https://github.com/silverstripe/'.
-                    'silverstripe-installer.git',
       'test_path' => __DIR__.'/frameworks/silverstripe',
     };
   }
@@ -1708,7 +1683,6 @@ class Slim extends Framework {
   protected function getInfo(): Map {
     return Map {
       'install_root' => __DIR__.'/frameworks/Slim',
-      'git_path' => 'https://github.com/codeguy/Slim',
       'test_path' => __DIR__.'/frameworks/Slim',
       'test_command' => get_runtime_build()
         .' -vServer.IniFile='.__DIR__.'/php_notice.ini'
@@ -1725,7 +1699,6 @@ class Symfony extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/symfony",
-      "git_path" => "https://github.com/symfony/symfony.git",
       "test_path" => __DIR__."/frameworks/symfony",
       "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       "blacklist" => Set {
@@ -1747,7 +1720,6 @@ class Twig extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/Twig",
-      "git_path" => "https://github.com/fabpot/Twig.git",
       "test_path" => __DIR__."/frameworks/Twig",
     };
   }
@@ -1758,7 +1730,6 @@ class Yii extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/yii",
-      "git_path" => "https://github.com/yiisoft/yii.git",
       "test_path" => __DIR__."/frameworks/yii/tests",
       "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       "clownylist" => Set {
@@ -1824,7 +1795,6 @@ class Zf2 extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/zf2",
-      "git_path" => "https://github.com/zendframework/zf2.git",
       "test_path" => __DIR__."/frameworks/zf2/tests",
       "blacklist" => Set {
         __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".
@@ -2619,13 +2589,12 @@ THUMBSDOWN
   // Update any git hashes in case --latest or --latest-record was used and we
   // changed the hashes currently in frameworks.json. Use md5 of the original
   // and current maps to see if we are different
-  if (md5(serialize(Options::$original_framework_code_commits)) !==
-      md5(serialize(Options::$framework_code_commits))) {
+  if (md5(serialize(Options::$original_framework_info)) !==
+      md5(serialize(Options::$framework_info))) {
     verbose("Updating frameworks.json because some hashes have been updated",
             !Options::$csv_only);
-    file_put_contents(__DIR__."/frameworks.json",
-                      json_encode(Options::$framework_code_commits,
-                                  JSON_PRETTY_PRINT));
+    file_put_contents(__DIR__."/frameworks.yaml",
+                      Spyc::YAMLDump(Options::$framework_info));
   }
 }
 

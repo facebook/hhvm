@@ -125,9 +125,9 @@ static class PharStreamWrapper : public Stream::Wrapper {
 
 } s_phar_stream_wrapper;
 
-class pharExtension : public Extension {
+class PharExtension : public Extension {
  public:
-  pharExtension() : Extension("phar") {}
+  PharExtension() : Extension("phar") {}
   virtual void moduleInit() {
     s_phar_stream_wrapper.registerAs("phar");
   }

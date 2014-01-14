@@ -196,7 +196,7 @@ void PreClass::prettyPrint(std::ostream &out) const {
 //=============================================================================
 // Class.
 
-static_assert(sizeof(Class) == 408, "Change this only on purpose");
+static_assert(sizeof(Class) == 368, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;

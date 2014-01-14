@@ -3640,7 +3640,7 @@ Object c_Set::t_zip(CVarRef iterable) {
   return BaseSet::phpZip<c_Set>(iterable);
 }
 
-Object c_Set::t_difference(CVarRef iterable) {
+Object c_Set::t_removeall(CVarRef iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -3648,6 +3648,10 @@ Object c_Set::t_difference(CVarRef iterable) {
     phpRemove(iter.second());
   }
   return this;
+}
+
+Object c_Set::t_difference(CVarRef iterable) {
+  return t_removeall(iterable);
 }
 
 Object c_Set::ti_fromitems(CVarRef iterable) {

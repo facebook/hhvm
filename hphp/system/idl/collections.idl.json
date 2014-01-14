@@ -3193,6 +3193,20 @@
                     ]
                 },
                 {
+                    "name": "removeAll",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "difference",
                     "flags": [
                     ],

@@ -1588,6 +1588,7 @@ class c_Set : public BaseSet {
   Object t_map(CVarRef callback);
   Object t_filter(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_removeall(CVarRef iterable);
   Object t_difference(CVarRef iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);

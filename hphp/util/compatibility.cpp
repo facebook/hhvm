@@ -17,6 +17,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/vdso.h"
 
+#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

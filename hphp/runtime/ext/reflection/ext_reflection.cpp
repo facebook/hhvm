@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_debugger.h"
 #include "hphp/runtime/ext/ext_misc.h"
@@ -34,7 +34,6 @@ namespace HPHP {
 
 using JIT::VMRegAnchor;
 
-IMPLEMENT_DEFAULT_EXTENSION(Reflection);
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -95,7 +94,8 @@ const StaticString
   s_type_hint("type_hint"),
   s_type_profiling("type_profiling"),
   s_accessible("accessible"),
-  s_closure_scope_class("closure_scope_class");
+  s_closure_scope_class("closure_scope_class"),
+  s_reflectionexception("ReflectionException");
 
 static Class* get_cls(CVarRef class_or_object) {
   Class* cls = nullptr;
@@ -108,7 +108,7 @@ static Class* get_cls(CVarRef class_or_object) {
   return cls;
 }
 
-Array f_hphp_get_extension_info(const String& name) {
+Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
   Array ret;
 
   Extension *ext = Extension::GetExtension(name);
@@ -422,8 +422,9 @@ static void set_function_info(Array &ret, const Func* func) {
   }
   if (func->isBuiltin()) {
     ret.set(s_internal, true_varNR);
-    if (func->methInfo() &&
-        func->methInfo()->attribute & ClassInfo::HipHopSpecific) {
+    if ((func->methInfo() &&
+         func->methInfo()->attribute & ClassInfo::HipHopSpecific) ||
+         (!func->methInfo() && func->attrs() & AttrHPHPSpecific)) {
       ret.set(s_hphp,     true_varNR);
     }
   }
@@ -717,7 +718,8 @@ static Array get_method_info(const ClassInfo *cls, CVarRef name) {
   return ret;
 }
 
-Array f_hphp_get_method_info(CVarRef class_or_object, CVarRef meth_name) {
+Array HHVM_FUNCTION(hphp_get_method_info, CVarRef class_or_object,
+                    const String &meth_name) {
   auto const cls = get_cls(class_or_object);
   if (!cls) return Array();
   if (cls->clsInfo()) {
@@ -727,13 +729,12 @@ Array f_hphp_get_method_info(CVarRef class_or_object, CVarRef meth_name) {
      */
     return get_method_info(cls->clsInfo(), meth_name);
   }
-  const String& method_name = meth_name.toString();
-  const Func* func = cls->lookupMethod(method_name.get());
+  const Func* func = cls->lookupMethod(meth_name.get());
   if (!func) {
     if ((cls->attrs() & AttrAbstract) || (cls->attrs() & AttrInterface)) {
       const Class::InterfaceMap& ifaces = cls->allInterfaces();
       for (int i = 0, size = ifaces.size(); i < size; i++) {
-        func = ifaces[i]->lookupMethod(method_name.get());
+        func = ifaces[i]->lookupMethod(meth_name.get());
         if (func) break;
       }
     }
@@ -744,10 +745,8 @@ Array f_hphp_get_method_info(CVarRef class_or_object, CVarRef meth_name) {
   return ret;
 }
 
-Array f_hphp_get_closure_info(CVarRef closure) {
-  auto const asObj = closure.toObject();
-
-  Array mi = f_hphp_get_method_info(asObj->o_getClassName(), s___invoke);
+Array HHVM_FUNCTION(hphp_get_closure_info, CObjRef closure) {
+  Array mi = HHVM_FN(hphp_get_method_info)(closure->o_getClassName(), s___invoke);
   mi.set(s_name, s_closure_in_braces);
   mi.set(s_closureobj, closure);
   mi.set(s_closure, empty_string);
@@ -757,12 +756,12 @@ Array f_hphp_get_closure_info(CVarRef closure) {
   mi.remove(s_class);
 
   // grab the use variables and their values
-  auto const cls = get_cls(asObj);
+  auto const cls = get_cls(closure);
   Array static_vars = Array::Create();
   for (Slot i = 0; i < cls->numDeclProperties(); ++i) {
     auto const& prop = cls->declProperties()[i];
-    auto val = asObj.o_get(StrNR(prop.m_name), false /* error */,
-                           cls->nameRef());
+    auto val = closure.o_get(StrNR(prop.m_name), false /* error */,
+                             cls->nameRef());
 
     // Closure static locals are represented as special instance
     // properties with a mangled name.
@@ -779,7 +778,7 @@ Array f_hphp_get_closure_info(CVarRef closure) {
   }
   mi.set(s_static_variables, static_vars);
 
-  auto clos = asObj.getTyped<c_Closure>();
+  auto clos = closure.getTyped<c_Closure>();
   if (auto const cls = clos->getClass()) {
     mi.set(s_closure_scope_class, cls->nameRef());
   } else if (auto const thiz = clos->getThis()) {
@@ -912,7 +911,7 @@ static Array get_class_info(const ClassInfo *cls) {
   return ret;
 }
 
-Array f_hphp_get_class_info(CVarRef name) {
+Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name) {
   auto cls = get_cls(name);
   if (!cls) return Array();
   if (cls->clsInfo()) {
@@ -1112,7 +1111,7 @@ Array f_hphp_get_class_info(CVarRef name) {
   return ret;
 }
 
-Array f_hphp_get_function_info(const String& name) {
+Array HHVM_FUNCTION(hphp_get_function_info, const String& name) {
   Array ret;
   if (name.get() == nullptr) return ret;
   const Func* func = Unit::loadFunc(name.get());
@@ -1130,37 +1129,35 @@ Array f_hphp_get_function_info(const String& name) {
   return ret;
 }
 
-Variant f_hphp_invoke(const String& name, CVarRef params) {
+Variant HHVM_FUNCTION(hphp_invoke, const String& name, CVarRef params) {
   return invoke(name.data(), params);
 }
 
-Variant f_hphp_invoke_method(CVarRef obj, const String& cls, const String& name,
-                             CVarRef params) {
-  if (!obj.isObject()) {
+Variant HHVM_FUNCTION(hphp_invoke_method, CVarRef obj, const String& cls,
+                                          const String& name, CVarRef params) {
+  if (obj.isNull()) {
     return invoke_static_method(cls, name, params);
   }
-  ObjectData *o = obj.toCObjRef().get();
+  ObjectData *o = obj.toObject().get();
   return o->o_invoke(name, params);
 }
 
-bool f_hphp_instanceof(CObjRef obj, const String& name) {
-  return obj.instanceof(name.data());
-}
-
-Object f_hphp_create_object(const String& name, CVarRef params) {
+Object HHVM_FUNCTION(hphp_create_object, const String& name, CVarRef params) {
   return g_vmContext->createObject(name.get(), params);
 }
 
-Object f_hphp_create_object_without_constructor(const String& name) {
+Object HHVM_FUNCTION(hphp_create_object_without_constructor,
+                      const String& name) {
   return g_vmContext->createObject(name.get(), init_null_variant, false);
 }
 
-Variant f_hphp_get_property(CObjRef obj, const String& cls, const String& prop) {
+Variant HHVM_FUNCTION(hphp_get_property, CObjRef obj, const String& cls,
+                                         const String& prop) {
   return obj->o_get(prop, true /* error */, cls);
 }
 
-void f_hphp_set_property(CObjRef obj, const String& cls, const String& prop,
-                         CVarRef value) {
+void HHVM_FUNCTION(hphp_set_property, CObjRef obj, const String& cls,
+                                      const String& prop, CVarRef value) {
   if (!cls.empty() && RuntimeOption::RepoAuthoritative) {
     raise_error(
       "We've already made many assumptions about private variables. "
@@ -1170,7 +1167,9 @@ void f_hphp_set_property(CObjRef obj, const String& cls, const String& prop,
   obj->o_set(prop, value, cls);
 }
 
-Variant f_hphp_get_static_property(const String& cls, const String& prop, bool force) {
+Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
+                                                const String& prop,
+                                                bool force) {
   StringData* sd = cls.get();
   Class* class_ = Unit::lookupClass(sd);
   if (!class_) {
@@ -1193,8 +1192,9 @@ Variant f_hphp_get_static_property(const String& cls, const String& prop, bool f
   return tvAsVariant(tv);
 }
 
-void f_hphp_set_static_property(const String& cls, const String& prop, CVarRef value,
-                                bool force) {
+void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
+                                             const String& prop, CVarRef value,
+                                             bool force) {
   StringData* sd = cls.get();
   Class* class_ = Unit::lookupClass(sd);
   if (!class_) {
@@ -1217,15 +1217,64 @@ void f_hphp_set_static_property(const String& cls, const String& prop, CVarRef v
   tvAsVariant(tv) = value;
 }
 
-String f_hphp_get_original_class_name(const String& name) {
+String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
   Class* cls = Unit::loadClass(name.get());
   if (!cls) return empty_string;
   return cls->nameRef();
 }
 
-bool f_hphp_scalar_typehints_enabled() {
+bool HHVM_FUNCTION(hphp_scalar_typehints_enabled) {
   return RuntimeOption::EnableHipHopSyntax;
 }
+
+ObjectData* Reflection::AllocReflectionExceptionObject(CVarRef message) {
+  ObjectData* inst = ObjectData::newInstance(s_ReflectionExceptionClass);
+  TypedValue ret;
+  {
+    /* Increment refcount across call to ctor, so the object doesn't */
+    /* get destroyed when ctor's frame is torn down */
+    CountableHelper cnt(inst);
+    g_vmContext->invokeFunc(&ret,
+                            s_ReflectionExceptionClass->getCtor(),
+                            make_packed_array(message),
+                            inst);
+  }
+  tvRefcountedDecRef(&ret);
+  return inst;
+}
+
+HPHP::Class* Reflection::s_ReflectionExceptionClass = nullptr;
+
+///////////////////////////////////////////////////////////////////////////////
+
+class ReflectionExtension : public Extension {
+ public:
+  ReflectionExtension() : Extension("reflection") { }
+  virtual void moduleInit() {
+    HHVM_FE(hphp_create_object);
+    HHVM_FE(hphp_create_object_without_constructor);
+    HHVM_FE(hphp_get_class_info);
+    HHVM_FE(hphp_get_closure_info);
+    HHVM_FE(hphp_get_extension_info);
+    HHVM_FE(hphp_get_function_info);
+    HHVM_FE(hphp_get_method_info);
+    HHVM_FE(hphp_get_original_class_name);
+    HHVM_FE(hphp_get_property);
+    HHVM_FE(hphp_get_static_property);
+    HHVM_FE(hphp_invoke);
+    HHVM_FE(hphp_invoke_method);
+    HHVM_FE(hphp_scalar_typehints_enabled);
+    HHVM_FE(hphp_set_property);
+    HHVM_FE(hphp_set_static_property);
+
+    loadSystemlib();
+    loadSystemlib("reflection-classes");
+    loadSystemlib("reflection-internals-functions");
+
+    Reflection::s_ReflectionExceptionClass =
+        Unit::lookupClass(s_reflectionexception.get());
+  }
+} s_reflection_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

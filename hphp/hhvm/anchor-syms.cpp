@@ -27,6 +27,7 @@ extern Extension s_intl_extension;
 extern Extension s_bcmath_extension;
 extern Extension s_phar_extension;
 extern Extension s_bz2_extension;
+extern Extension s_reflection_extension;
 #ifdef HAVE_UODBC
 extern Extension s_odbc_extension;
 #endif
@@ -37,6 +38,7 @@ const Extension *g_anchor_extensions[] = {
   &s_bcmath_extension,
   &s_phar_extension,
   &s_bz2_extension,
+  &s_reflection_extension,
 #ifdef HAVE_UODBC
   &s_odbc_extension,
 #endif

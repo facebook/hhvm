@@ -276,8 +276,9 @@ TypedValue* functionWrapper(ActRec* ar) {
 
   if (LIKELY(numNonDefault == numArgs) ||
       LIKELY(nativeWrapperCheckArgs(ar))) {
-    coerceFCallArgs(args, numArgs, numNonDefault, func);
-    callFunc(func, nullptr, args, numArgs, rv);
+    if (coerceFCallArgs(args, numArgs, numNonDefault, func)) {
+      callFunc(func, nullptr, args, numArgs, rv);
+    }
   }
 
   frame_free_locals_no_this_inl(ar, func->numLocals());
@@ -297,27 +298,28 @@ TypedValue* methodWrapper(ActRec* ar) {
 
   if (LIKELY(numNonDefault == numArgs) ||
       LIKELY(nativeWrapperCheckArgs(ar))) {
-    coerceFCallArgs(args, numArgs, numNonDefault, func);
+    if (coerceFCallArgs(args, numArgs, numNonDefault, func)) {
 
-    // Prepend a context arg for methods
-    // KindOfClass when it's being called statically Foo::bar()
-    // KindOfObject when it's being called on an instance $foo->bar()
-    TypedValue ctx;
-    if (ar->hasThis()) {
-      if (isStatic) {
-        throw_instance_method_fatal(getInvokeName(ar)->data());
+      // Prepend a context arg for methods
+      // KindOfClass when it's being called statically Foo::bar()
+      // KindOfObject when it's being called on an instance $foo->bar()
+      TypedValue ctx;
+      if (ar->hasThis()) {
+        if (isStatic) {
+          throw_instance_method_fatal(getInvokeName(ar)->data());
+        }
+        ctx.m_type = KindOfObject;
+        ctx.m_data.pobj = ar->getThis();
+      } else {
+        if (!isStatic) {
+          throw_instance_method_fatal(getInvokeName(ar)->data());
+        }
+        ctx.m_type = KindOfClass;
+        ctx.m_data.pcls = const_cast<Class*>(ar->getClass());
       }
-      ctx.m_type = KindOfObject;
-      ctx.m_data.pobj = ar->getThis();
-    } else {
-      if (!isStatic) {
-        throw_instance_method_fatal(getInvokeName(ar)->data());
-      }
-      ctx.m_type = KindOfClass;
-      ctx.m_data.pcls = const_cast<Class*>(ar->getClass());
+
+      callFunc(func, &ctx, args, numArgs, rv);
     }
-
-    callFunc(func, &ctx, args, numArgs, rv);
   }
 
   if (isStatic) {

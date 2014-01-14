@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/ext_thrift.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/logger.h"
 
@@ -110,7 +110,8 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         skip_element(T_STRUCT, transport);
         return uninit_null();
       }
-      Variant spec = f_hphp_get_static_property(structType, s_TSPEC, false);
+      Variant spec = HHVM_FN(hphp_get_static_property)(structType, s_TSPEC,
+                                                                   false);
       if (!spec.is(KindOfArray)) {
         char errbuf[128];
         snprintf(errbuf, 128, "spec for %s is wrong type: %d\n",
@@ -400,7 +401,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
                                  "type as a T_STRUCT", INVALID_DATA);
       }
       binary_serialize_spec(value.toObject(), transport,
-                            f_hphp_get_static_property(value.toObject()->
+                            HHVM_FN(hphp_get_static_property)(value.toObject()->
                                                        o_getClassName(),
                                                        s_TSPEC,
                                                        false).toArray());
@@ -541,7 +542,8 @@ void f_thrift_protocol_write_binary(CObjRef transportobj, const String& method_n
     transport.writeI32(seqid);
   }
 
-  Variant spec = f_hphp_get_static_property(request_struct->o_getClassName(),
+  Variant spec = HHVM_FN(hphp_get_static_property)(
+                                            request_struct->o_getClassName(),
                                             s_TSPEC,
                                             false);
   binary_serialize_spec(request_struct, transport, spec.toArray());
@@ -579,13 +581,15 @@ Variant f_thrift_protocol_read_binary(CObjRef transportobj,
 
   if (messageType == T_EXCEPTION) {
     Object ex = createObject("TApplicationException");
-    Variant spec = f_hphp_get_static_property("TApplicationException", s_TSPEC, false);
+    Variant spec = HHVM_FN(hphp_get_static_property)("TApplicationException",
+                                                     s_TSPEC, false);
     binary_deserialize_spec(ex, transport, spec.toArray());
     throw ex;
   }
 
   Object ret_val = createObject(obj_typename);
-  Variant spec = f_hphp_get_static_property(obj_typename, s_TSPEC, false);
+  Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename, s_TSPEC,
+                                                   false);
   binary_deserialize_spec(ret_val, transport, spec.toArray());
   return ret_val;
 }

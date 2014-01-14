@@ -280,6 +280,7 @@ struct Indent {
   int n;
 };
 
+// See doc comment above for usage.
 struct Bump {
   Bump(Module mod, int adjust, bool condition = true)
     : m_live(condition)

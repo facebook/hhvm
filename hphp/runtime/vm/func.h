@@ -643,6 +643,12 @@ public:
     return m_retUserType;
   }
 
+  /*
+   * Returns whether this FuncEmitter represents an HNI function with
+   * a native implementation.
+   */
+  bool isHNINative() const { return getReturnType() != KindOfInvalid; }
+
   Id numIterators() const { return m_numIterators; }
   void setNumIterators(Id numIterators);
   Id allocIterator();

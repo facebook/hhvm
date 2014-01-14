@@ -1,0 +1,20 @@
+array(9) {
+  [0]=>
+  string(36) "Parameter #0 [ <required> $untyped ]"
+  [1]=>
+  string(36) "Parameter #1 [ <required> mixed $m ]"
+  [2]=>
+  string(39) "Parameter #2 [ <required> string $str ]"
+  [3]=>
+  string(34) "Parameter #3 [ <required> int $i ]"
+  [4]=>
+  string(37) "Parameter #4 [ <required> Object $o ]"
+  [5]=>
+  string(38) "Parameter #5 [ <required> self $self ]"
+  [6]=>
+  string(47) "Parameter #6 [ <optional> $opt_untyped = NULL ]"
+  [7]=>
+  string(55) "Parameter #7 [ <optional> mixed or NULL $opt_m = NULL ]"
+  [8]=>
+  string(56) "Parameter #8 [ <optional> Object or NULL $opt_o = NULL ]"
+}

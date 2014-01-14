@@ -81,10 +81,16 @@ class BaseVector : public ExtCollectionObjectData {
 
   // KeyedIterable
   Object getiterator();
-  void map(BaseVector* bvec, CVarRef callback);
-  void mapwithkey(BaseVector* bvec, CVarRef callback);
-  void filter(BaseVector* bvec, CVarRef callback);
-  void filterwithkey(BaseVector* bvec, CVarRef callback);
+  template<class TVector, class MakeArgs>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_map(CVarRef callback, MakeArgs);
+
+  template<class TVector, class MakeArgs>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_filter(CVarRef callback, MakeArgs);
+
   void zip(BaseVector* bvec, CVarRef iterable);
   void kvzip(BaseVector* bvec);
   void keys(BaseVector* bvec);
@@ -97,7 +103,7 @@ class BaseVector : public ExtCollectionObjectData {
   Array tovaluesarray();
   int64_t linearsearch(CVarRef search_value);
 
-  template<typename T>
+  template<class T>
   static Object slice(const char* vecType, CVarRef vec, CVarRef offset,
                       CVarRef len = uninit_null()) {
 
@@ -169,10 +175,12 @@ class BaseVector : public ExtCollectionObjectData {
     return ret;
   }
 
-  template<typename T>
-  static T* Clone(ObjectData* obj) {
-    auto thiz = static_cast<T*>(obj);
-    auto target = static_cast<T*>(obj->cloneImpl());
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, TVector*>::type
+  static Clone(ObjectData* obj) {
+    auto thiz = static_cast<TVector*>(obj);
+    auto target = static_cast<TVector*>(obj->cloneImpl());
     uint sz = thiz->m_size;
     if (!sz) {
       return target;
@@ -307,7 +315,7 @@ class BaseVector : public ExtCollectionObjectData {
 
   friend class c_VectorIterator;
 
-  template<typename TVector>
+  template<class TVector>
   friend ObjectData* collectionDeepCopyBaseVector(TVector* vec);
 
   friend void collectionReserve(ObjectData* obj, int64_t sz);
@@ -678,12 +686,12 @@ class BaseMap : public ExtCollectionObjectData {
     return (m_size != 0);
   }
 
-  template<typename TMap>
+  template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, TMap*>::type
   static Clone(ObjectData* obj);
 
-  // template<typename TMap>
+  // template<class TMap>
   // typename std::enable_if<
   //   std::is_base_of<BaseMap, TMap>::value, TMap*>::type
   // static DeepCopy(TMap* mp);
@@ -856,7 +864,7 @@ class BaseMap : public ExtCollectionObjectData {
 
  private:
 
-  template<typename TMap>
+  template<class TMap>
   typename std::enable_if<
    std::is_base_of<BaseMap, TMap>::value, ObjectData*>::type
   friend collectionDeepCopyBaseMap(TMap* vec);
@@ -902,19 +910,19 @@ class BaseMap : public ExtCollectionObjectData {
   Array php_toValuesArray() const;
   Object php_values() const;
 
-  template<typename TMap>
+  template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_differenceByKey(CVarRef it);
 
   Object php_getIterator();
 
-  template<typename TMap, class MakeArgs>
+  template<class TMap, class MakeArgs>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_map(CVarRef callback, MakeArgs) const;
 
-  template<typename TMap, class MakeArgs>
+  template<class TMap, class MakeArgs>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_filter(CVarRef callback, MakeArgs) const;
@@ -922,17 +930,17 @@ class BaseMap : public ExtCollectionObjectData {
   template<class MakeArgs>
   Object php_retain(CVarRef callback, MakeArgs);
 
-  template<typename TMap>
+  template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_zip(CVarRef iterable) const;
 
-  template<typename TMap>
+  template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   static php_mapFromIterable(CVarRef iterable);
 
-  template<typename TMap>
+  template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   static php_mapFromArray(CVarRef arr);
@@ -1215,7 +1223,7 @@ public:
   int getVersion() const { return m_version; }
   int64_t size() const { return m_size; }
 
-  template<typename TSet>
+  template<class TSet>
   static TSet* Clone(ObjectData* obj) {
     auto thiz = static_cast<TSet*>(obj);
     auto target = static_cast<TSet*>(obj->cloneImpl());
@@ -1288,7 +1296,7 @@ protected:
   int64_t phpCount() { return m_size; }
   Object  phpItems() { return SystemLib::AllocLazyIterableViewObject(this); }
 
-  template<typename TVector>
+  template<class TVector>
   Object  phpValues() {
     TVector* vec;
     Object o = vec = NEWOBJ(TVector)();
@@ -1304,7 +1312,7 @@ protected:
   Array   phpToValuesArray();
   Object  phpGetIterator();
 
-  template<typename TSet>
+  template<class TSet>
   Object phpMap(CVarRef callback) {
     CallCtx ctx;
     vm_decode_function(callback, nullptr, false, ctx);
@@ -1341,7 +1349,7 @@ protected:
     return obj;
   }
 
-  template<typename TSet>
+  template<class TSet>
   Object phpFilter(CVarRef callback) {
     CallCtx ctx;
     vm_decode_function(callback, nullptr, false, ctx);
@@ -1374,7 +1382,7 @@ protected:
     return obj;
   }
 
-  template<typename TSet>
+  template<class TSet>
   Object phpZip(CVarRef iterable) {
     size_t sz;
     ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -1388,7 +1396,7 @@ protected:
     return obj;
   }
 
-  template<typename TSet>
+  template<class TSet>
   static Object phpFromItems(CVarRef iterable) {
     if (iterable.isNull()) return NEWOBJ(TSet)();
     size_t sz;
@@ -1408,7 +1416,7 @@ protected:
     return ret;
   }
 
-  template<typename TSet>
+  template<class TSet>
   static Object phpFromArray(CVarRef arr) {
     if (!arr.isArray()) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -1432,7 +1440,7 @@ protected:
     return ret;
   }
 
-  template<typename TSet>
+  template<class TSet>
   static Object phpFromArrays(int _argc, CArrRef _argv = null_array) {
     TSet* st;
     Object ret = st = NEWOBJ(TSet)();

@@ -169,7 +169,25 @@ Object BaseVector::getiterator() {
   return it;
 }
 
-void BaseVector::map(BaseVector* bvec, CVarRef callback) {
+ALWAYS_INLINE
+static std::array<TypedValue, 1> makeArgsFromVectorValue(
+  TypedValue val, uint index) {
+  return std::array<TypedValue, 1>{{ val }};
+}
+
+ALWAYS_INLINE
+static std::array<TypedValue, 2> makeArgsFromVectorKeyAndValue(
+  TypedValue val, uint index) {
+  return std::array<TypedValue, 2> {{
+    make_tv<KindOfInt64>(index),
+    val
+  }};
+}
+
+template<class TVector, class MakeArgs>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_map(CVarRef callback, MakeArgs makeArgs) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -177,21 +195,28 @@ void BaseVector::map(BaseVector* bvec, CVarRef callback) {
                "Parameter must be a valid callback"));
     throw e;
   }
+
+  TVector* nv = NEWOBJ(TVector);
   uint sz = m_size;
-  bvec->reserve(sz);
+  nv->reserve(sz);
   for (uint i = 0; i < sz; ++i) {
-    TypedValue* tv = &bvec->m_data[i];
+    TypedValue* tv = &nv->m_data[i];
     int32_t version = m_version;
-    g_vmContext->invokeFuncFew(tv, ctx, 1, &m_data[i]);
+    auto args = makeArgs(m_data[i], i);
+    g_vmContext->invokeFuncFew(tv, ctx, args.size(), &args[0]);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
     }
-    ++bvec->m_size;
+    ++nv->m_size;
   }
+  return nv;
 }
 
-void BaseVector::mapwithkey(BaseVector* bvec, CVarRef callback) {
+template<class TVector, class MakeArgs>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_filter(CVarRef callback, MakeArgs makeArgs) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -199,70 +224,21 @@ void BaseVector::mapwithkey(BaseVector* bvec, CVarRef callback) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  uint sz = m_size;
-  bvec->reserve(sz);
-  for (uint i = 0; i < sz; ++i) {
-    TypedValue* tv = &bvec->m_data[i];
-    int32_t version = m_version;
-    TypedValue args[2] = {
-      make_tv<KindOfInt64>(i),
-      m_data[i]
-    };
-    g_vmContext->invokeFuncFew(tv, ctx, 2, args);
-    if (UNLIKELY(version != m_version)) {
-      tvRefcountedDecRef(tv);
-      throw_collection_modified();
-    }
-    ++bvec->m_size;
-  }
-}
-
-void BaseVector::filter(BaseVector* bvec, CVarRef callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
-  }
+  TVector* nv = NEWOBJ(TVector);
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
     Variant ret;
     int32_t version = m_version;
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &m_data[i]);
+    auto args = makeArgs(m_data[i], i);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, args.size(), &args[0]);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
     if (ret.toBoolean()) {
-      bvec->add(&m_data[i]);
+      nv->add(&m_data[i]);
     }
   }
-}
-
-void BaseVector::filterwithkey(BaseVector* bvec, CVarRef callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
-  }
-  uint sz = m_size;
-  for (uint i = 0; i < sz; ++i) {
-    Variant ret;
-    int32_t version = m_version;
-    TypedValue args[2] = {
-      make_tv<KindOfInt64>(i),
-      m_data[i]
-    };
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
-    if (ret.toBoolean()) {
-      bvec->add(&m_data[i]);
-    }
-  }
+  return nv;
 }
 
 void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
@@ -822,31 +798,23 @@ Object c_Vector::t_getiterator() {
 }
 
 Object c_Vector::t_map(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::map(bv, callback);
-  return obj;
+  return BaseVector::php_map<c_Vector>(
+    callback, &makeArgsFromVectorValue);
 }
 
 Object c_Vector::t_mapwithkey(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::mapwithkey(bv, callback);
-  return obj;
+  return BaseVector::php_map<c_Vector>(
+    callback, &makeArgsFromVectorKeyAndValue);
 }
 
 Object c_Vector::t_filter(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::filter(bv, callback);
-  return obj;
+  return BaseVector::php_filter<c_Vector>(
+    callback, &makeArgsFromVectorValue);
 }
 
 Object c_Vector::t_filterwithkey(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::filterwithkey(bv, callback);
-  return obj;
+  return BaseVector::php_filter<c_Vector>(
+    callback, &makeArgsFromVectorKeyAndValue);
 }
 
 Object c_Vector::t_zip(CVarRef iterable) {
@@ -1154,31 +1122,19 @@ Object c_FrozenVector::t_getiterator() {
 }
 
 Object c_FrozenVector::t_map(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::map(bv, callback);
-  return obj;
+  return php_map<c_FrozenVector>(callback, &makeArgsFromVectorValue);
 }
 
 Object c_FrozenVector::t_mapwithkey(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::mapwithkey(bv, callback);
-  return obj;
+  return php_map<c_FrozenVector>(callback, &makeArgsFromVectorKeyAndValue);
 }
 
 Object c_FrozenVector::t_filter(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::filter(bv, callback);
-  return obj;
+  return php_filter<c_FrozenVector>(callback, &makeArgsFromVectorValue);
 }
 
 Object c_FrozenVector::t_filterwithkey(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::filterwithkey(bv, callback);
-  return obj;
+  return php_filter<c_FrozenVector>(callback, &makeArgsFromVectorKeyAndValue);
 }
 
 Object c_FrozenVector::t_zip(CVarRef iterable) {

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/bzip2/bzip2-file.h"
+#include "hphp/runtime/ext/bz2/bzip2-file.h"
 
 namespace HPHP {
 

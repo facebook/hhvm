@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/bzip2/bzip2-file.h"
+#include "hphp/runtime/ext/bz2/bzip2-file.h"
 #include "hphp/util/alloc.h"
 #include "folly/String.h"
 
@@ -206,9 +206,9 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class bzipExtension : public Extension {
+class BZ2Extension : public Extension {
  public:
-  bzipExtension() : Extension("bz2") {}
+  BZ2Extension() : Extension("bz2") {}
   virtual void moduleInit() {
     HHVM_FE(bzclose);
     HHVM_FE(bzread);
@@ -221,7 +221,7 @@ class bzipExtension : public Extension {
     HHVM_FE(bzcompress);
     HHVM_FE(bzdecompress);
 
-    loadSystemlib("bzip2");
+    loadSystemlib();
   }
 } s_bzip_extension;
 

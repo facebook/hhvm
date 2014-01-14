@@ -367,40 +367,38 @@ bool f_flock(CResRef handle, int operation, VRefParam wouldblock /* = null */) {
   return ret;
 }
 
+// match the behavior of Zend PHP
+#define FCSV_CHECK_ARG(NAME)                            \
+  if (NAME.size() == 0) {                               \
+    throw_invalid_argument(#NAME ": %s", NAME.data());  \
+    return false;                                       \
+  } else if (NAME.size() > 1) {                         \
+    raise_notice(#NAME " must be a single character");  \
+  }                                                     \
+  char NAME ## _char = NAME.charAt(0);                  \
+
 Variant f_fputcsv(CResRef handle, CArrRef fields,
                   const String& delimiter /* = "," */,
                   const String& enclosure /* = "\"" */) {
-  if (delimiter.size() != 1) {
-    throw_invalid_argument("delimiter: %s", delimiter.data());
-    return false;
-  }
-  if (enclosure.size() != 1) {
-    throw_invalid_argument("enclosure: %s", enclosure.data());
-    return false;
-  }
-  CHECK_HANDLE(handle, f);
-  return f->writeCSV(fields, delimiter.charAt(0), enclosure.charAt(0));
+  FCSV_CHECK_ARG(delimiter);
+  FCSV_CHECK_ARG(enclosure);
+
+  CHECK_HANDLE_RET_NULL(handle, f);
+  return f->writeCSV(fields, delimiter_char, enclosure_char);
 }
 
 Variant f_fgetcsv(CResRef handle, int64_t length /* = 0 */,
                   const String& delimiter /* = "," */,
                   const String& enclosure /* = "\"" */,
                   const String& escape /* = "\\" */) {
-  char delimiter_char = ',', enclosure_char = '"', escape_char = '\\';
+  if (length < 0) {
+    throw_invalid_argument("Length parameter may not be negative");
+    return false;
+  }
 
-  // match the behavior of Zend PHP
-  #define FGETCSV_CHECK_ARG(NAME)                         \
-    if (NAME.size() == 0) {                               \
-      throw_invalid_argument(#NAME ": %s", NAME.data());  \
-      return false;                                       \
-    } else if (NAME.size() > 1) {                         \
-      raise_notice(#NAME " must be a single character");  \
-    }                                                     \
-    NAME ## _char = NAME.charAt(0);                       \
-
-  FGETCSV_CHECK_ARG(delimiter);
-  FGETCSV_CHECK_ARG(enclosure);
-  FGETCSV_CHECK_ARG(escape);
+  FCSV_CHECK_ARG(delimiter);
+  FCSV_CHECK_ARG(enclosure);
+  FCSV_CHECK_ARG(escape);
 
   CHECK_HANDLE_RET_NULL(handle, f);
   Array ret = f->readCSV(length, delimiter_char, enclosure_char, escape_char);

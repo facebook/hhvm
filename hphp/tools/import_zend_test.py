@@ -911,8 +911,9 @@ def walk(filename, source_dir):
         test = test.replace('SplFileObject__fgetcsv.csv',
             os.path.basename(full_dest_filename).replace('.php', '.csv'))
     if '/ext/spl/tests/SplFileObject_' in full_dest_filename:
-        test = test.replace('testdata.csv',
-            os.path.basename(full_dest_filename).replace('.php', '.csv'))
+        new_path = os.path.basename(full_dest_filename).replace('.php', '.csv')
+        test = test.replace('testdata.csv', new_path)
+        test = test.replace('csv_control_data.csv', new_path)
     if '/ext/spl/tests/SplFileObject_rewind_error001.php' in full_dest_filename:
         test = test.replace("?>", "unlink('SplFileObject_rewind_error001.csv');\n?>")
     if '/ext/zlib/tests/gzfile_basic.php' in full_dest_filename:

@@ -1,12 +1,12 @@
 <?php
-file_put_contents('csv_control_data.csv',
+file_put_contents('SplFileObject_setCsvControl_basic.csv',
 <<<CDATA
 'groene appelen'|10
 'gele bananen'|20
 'rode kersen'|30
 CDATA
 );
-$s = new SplFileObject('csv_control_data.csv');
+$s = new SplFileObject('SplFileObject_setCsvControl_basic.csv');
 $s->setFlags(SplFileObject::READ_CSV);
 $s->setCsvControl('|', '\'', '/');
 foreach ($s as $row) {
@@ -15,5 +15,5 @@ foreach ($s as $row) {
 }
 ?>
 <?php
-unlink('csv_control_data.csv');
+unlink('SplFileObject_setCsvControl_basic.csv');
 ?>

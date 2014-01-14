@@ -909,28 +909,18 @@ class BaseMap : public ExtCollectionObjectData {
 
   Object php_getIterator();
 
-  template<typename TMap>
+  template<typename TMap, class MakeArgs>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
-  php_map(CVarRef callback) const;
+  php_map(CVarRef callback, MakeArgs) const;
 
-  template<typename TMap>
+  template<typename TMap, class MakeArgs>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
-  php_mapWithKey(CVarRef callback) const;
+  php_filter(CVarRef callback, MakeArgs) const;
 
-  template<typename TMap>
-  typename std::enable_if<
-    std::is_base_of<BaseMap, TMap>::value, Object>::type
-  php_filter(CVarRef callback) const;
-
-  template<typename TMap>
-  typename std::enable_if<
-    std::is_base_of<BaseMap, TMap>::value, Object>::type
-  php_filterWithKey(CVarRef callback) const;
-
-  Object php_retain(CVarRef callback);
-  Object php_retainWithKey(CVarRef callback);
+  template<class MakeArgs>
+  Object php_retain(CVarRef callback, MakeArgs);
 
   template<typename TMap>
   typename std::enable_if<

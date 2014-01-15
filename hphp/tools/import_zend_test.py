@@ -996,6 +996,10 @@ def walk(filename, source_dir):
         test = test.replace('rename_variation.tmp', dest_filename+'.tmp')
         test = test.replace('rename_variation2.tmp', dest_filename+'2.tmp')
         test = test.replace('rename_variation_link.tmp', dest_filename+'_link.tmp')
+    # Change the paths from zend to hhvm convention
+    # See: https://github.com/facebook/hhvm/pull/1489
+    if '/ext/pdo_mysql/tests/mysql_pdo_test.inc' in full_dest_filename:
+        test = test.replace('/../../../ext/pdo/tests/pdo_test.inc', '/../../pdo/tests/pdo_test.inc')
 
     file(full_dest_filename, 'w').write(test)
 

@@ -2856,7 +2856,7 @@ const StaticString
   s_T1Lib_Support("T1Lib_Support"),
   s_GIF_Read_Support("GIF Read Support"),
   s_GIF_Create_Support("GIF Create Support"),
-  s_JPG_Support("JPG Support"),
+  s_JPG_Support("JPEG Support"),
   s_PNG_Support("PNG Support"),
   s_WBMP_Support("WBMP Support"),
   s_XPM_Support("XPM Support"),

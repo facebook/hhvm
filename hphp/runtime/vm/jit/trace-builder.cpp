@@ -560,13 +560,8 @@ void TraceBuilder::reoptimize() {
       }
     }
 
-    if (block->empty()) {
-      // If all the instructions in the block were optimized away, remove it
-      // from the trace.
-      trace()->unlink(block);
-    } else {
-      m_state.finishBlock(block);
-    }
+    assert(!block->empty());
+    m_state.finishBlock(block);
   }
 }
 

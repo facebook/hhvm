@@ -82,7 +82,6 @@ struct TraceBuilder {
   bool typeMightRelax(SSATmp* val = nullptr) const;
   bool shouldElideAssertType(Type oldType, Type newType, SSATmp* oldVal) const;
 
-  IRTrace* trace() const { return m_unit.main(); }
   IRUnit& unit() { return m_unit; }
   FrameState& state() { return m_state; }
   const Func* curFunc() const { return m_state.func(); }
@@ -138,14 +137,14 @@ struct TraceBuilder {
 
   /*
    * Run another pass of TraceBuilder-managed optimizations on this
-   * trace.
+   * unit.
    */
   void reoptimize();
 
   /*
-   * Create an IRInstruction attached to the current IRTrace, and
-   * allocate a destination SSATmp for it.  Uses the same argument
-   * list format as IRUnit::gen.
+   * Create an IRInstruction at the end of the current Block, and allocate a
+   * destination SSATmp for it.  Uses the same argument list format as
+   * IRUnit::gen.
    */
   template<class... Args>
   SSATmp* gen(Opcode op, Args&&... args) {

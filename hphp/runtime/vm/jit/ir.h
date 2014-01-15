@@ -63,7 +63,6 @@ using HPHP::JIT::ConditionCode;
 
 class IRUnit;
 struct IRInstruction;
-struct IRTrace;
 class SSATmp;
 struct LocalStateHook;
 

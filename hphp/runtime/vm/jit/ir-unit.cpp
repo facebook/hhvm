@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/ir-trace.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -28,7 +27,7 @@ IRUnit::IRUnit(Offset initialBcOffset)
   , m_nextOpndId(0)
   , m_nextInstId(0)
   , m_bcOff(initialBcOffset)
-  , m_main(new (m_arena) IRTrace(*this, defBlock()))
+  , m_entry(defBlock())
 {
 }
 
@@ -66,10 +65,6 @@ SSATmp* IRUnit::findConst(ConstData& cdata, Type ctype) {
     return tmp;
   }
   return m_constTable.insert(cloneInstruction(&inst)->dst());
-}
-
-Block* IRUnit::entry() const {
-  return m_main->entry();
 }
 
 }}

@@ -2072,11 +2072,11 @@ TranslatorX64::translateTracelet(Tracelet& t) {
     fa.print();
     StackTraceNoHeap::AddExtraLogging(
       "Assertion failure",
-      folly::format("{}\n\nActive Trace:\n{}\n",
-                    fa.summary, ht.trace()->toString()).str());
+      folly::format("{}\n\nActive Unit:\n{}\n",
+                    fa.summary, ht.unit().toString()).str());
     abort();
   } catch (const JIT::FailedTraceGen& e) {
-    FTRACE(1, "HHIR: FAILED to translate whole trace: {}\n",
+    FTRACE(1, "HHIR: FAILED to translate whole unit: {}\n",
            e.what());
   }
   return Failure;

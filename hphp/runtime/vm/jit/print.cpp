@@ -26,7 +26,6 @@
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/ir-trace.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -328,19 +327,9 @@ void print(const SSATmp* tmp) {
   std::cerr << std::endl;
 }
 
-void print(const IRTrace* trace) {
-  print(std::cout, trace->unit(), trace);
-}
-
 std::string Block::toString() const {
   std::ostringstream out;
   print(out, this);
-  return out.str();
-}
-
-std::string IRTrace::toString() const {
-  std::ostringstream out;
-  print(out, unit(), this, nullptr);
   return out.str();
 }
 
@@ -508,7 +497,7 @@ void print(const Block* block) {
   std::cerr << std::endl;
 }
 
-void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
+void print(std::ostream& os, const IRUnit& unit,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime,
            const AsmInfo* asmInfo, const GuardConstraints* guards) {
   // For nice-looking dumps, we want to remember curMarker between blocks.
@@ -530,7 +519,7 @@ void dumpTrace(int level, const IRUnit& unit, const char* caption,
         << folly::format(bannerFmt, caption)
         << color(ANSI_COLOR_END)
         ;
-    print(str, unit, unit.main(), regs, lifetime, ai, guards);
+    print(str, unit, regs, lifetime, ai, guards);
     str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
         << folly::format(bannerFmt, "")
         << color(ANSI_COLOR_END)

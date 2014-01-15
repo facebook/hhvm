@@ -152,13 +152,11 @@ makeInstruction(Func func, Args&&... args) {
 
 //////////////////////////////////////////////////////////////////////
 
-struct IRTrace;
-
 /*
- * IRUnit is the compilation unit for the JIT.  It owns an Arena used
- * for allocating and controlling the lifetime of Block, IRInstruction,
- * ExtraData, SSATmp, and IRTrace objects, as well as a constant table
- * containing all DefConst instructions, which don't live in Blocks.
+ * IRUnit is the compilation unit for the JIT.  It owns an Arena used for
+ * allocating and controlling the lifetime of Block, IRInstruction, ExtraData,
+ * and SSATmp objects, as well as a constant table containing all DefConst
+ * instructions, which don't live in Blocks.
  *
  * IRUnit also assigns unique ids to each block, instruction, and tmp,
  * which are useful for StateVector or sparse maps of pass specific
@@ -262,17 +260,16 @@ public:
   uint32_t numBlocks() const     { return m_nextBlockId; }
   uint32_t numInsts() const      { return m_nextInstId; }
   CSEHash& constTable()          { return m_constTable; }
-  IRTrace* main()                { return m_main; }
-  const IRTrace* main() const    { return m_main; }
   uint32_t bcOff() const         { return m_bcOff; }
+
+  // This should return a const Block*. t3538578
+  Block*   entry() const         { return m_entry; }
 
   // Overloads useful for StateVector and IdSet
   uint32_t numIds(const SSATmp*) const { return numTmps(); }
   uint32_t numIds(const Block*) const { return numBlocks(); }
   uint32_t numIds(const IRInstruction*) const { return numInsts(); }
 
-  typedef smart::vector<IRTrace*> ExitList;
-  Block* entry() const;
   std::string toString() const;
 
 private:
@@ -284,13 +281,13 @@ private:
   }
 
 private:
-  Arena m_arena; // contains IRTrace, Block, IRInstruction, and SSATmp objects
+  Arena m_arena; // contains Block, IRInstruction, and SSATmp objects
   CSEHash m_constTable; // DefConst's for each unique constant in this IR
   uint32_t m_nextBlockId;
   uint32_t m_nextOpndId;
   uint32_t m_nextInstId;
   uint32_t m_bcOff; // bytecode offset where this unit starts
-  IRTrace* m_main; // main entry point trace
+  Block* m_entry; // entry point
 };
 
 //////////////////////////////////////////////////////////////////////

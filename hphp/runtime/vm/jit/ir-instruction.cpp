@@ -48,10 +48,6 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   }
 }
 
-IRTrace* IRInstruction::trace() const {
-  return block()->trace();
-}
-
 bool IRInstruction::hasExtra() const {
   return m_extra;
 }

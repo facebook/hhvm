@@ -118,7 +118,7 @@ private:
   static SSATmp* getSpilledTmp(SSATmp* tmp);
   static SSATmp* getOrigTmp(SSATmp* tmp);
   uint32_t assignSpillLoc();
-  void collectInfo(BlockList::iterator it, IRTrace* trace);
+  void collectInfo(BlockList::iterator it);
   RegNumber getJmpPreColor(SSATmp* tmp, uint32_t regIndx, bool isReload);
   void computePreColoringHint();
   void findFullSIMDCandidates();
@@ -673,7 +673,7 @@ uint32_t LinearScan::assignSpillLoc() {
   return maxSpillLoc;
 }
 
-void LinearScan::collectInfo(BlockList::iterator it, IRTrace* trace) {
+void LinearScan::collectInfo(BlockList::iterator it) {
   m_natives.clear();
   m_uses.reset(); // TODO(#2536764): serious time sink
 
@@ -1041,9 +1041,7 @@ RegAllocInfo LinearScan::allocRegs() {
 }
 
 void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt) {
-  auto const trace = (*blockIt)->trace();
-
-  collectInfo(blockIt, trace);
+  collectInfo(blockIt);
   computePreColoringHint();
 
   assert(blockIt == m_blocks.begin());

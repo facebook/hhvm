@@ -118,7 +118,6 @@ struct HhbcTranslator {
                  const Func* func);
 
   // Accessors.
-  IRTrace* trace() const { return m_tb->trace(); }
   TraceBuilder& traceBuilder() const { return *m_tb.get(); }
   IRUnit& unit() { return m_unit; }
 

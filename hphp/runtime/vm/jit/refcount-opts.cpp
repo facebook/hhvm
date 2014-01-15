@@ -501,7 +501,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
                                block->id()).str();
           ret += show(m_state);
           ret += folly::format("{:-^80}\n{}{:-^80}\n",
-                               " trace ", m_unit.main()->toString(), "").str();
+                               " unit ", m_unit.toString(), "").str();
           return ret;
         };
 
@@ -1137,7 +1137,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
                            *m_inst, *value, what).str();
       ret += show(m_state);
       ret += folly::format("{:-^80}\n{}{:-^80}\n",
-                           " trace ", m_unit.main()->toString(), "").str();
+                           " unit ", m_unit.toString(), "").str();
       return ret;
     };
 

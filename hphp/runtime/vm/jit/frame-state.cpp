@@ -27,7 +27,7 @@ namespace HPHP {
 namespace JIT {
 
 FrameState::FrameState(IRUnit& unit)
-  : FrameState(unit, unit.main()->entry()->front().marker())
+  : FrameState(unit, unit.entry()->front().marker())
 {
 }
 

@@ -56,7 +56,6 @@
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
-#include "hphp/runtime/vm/jit/ir-trace.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"

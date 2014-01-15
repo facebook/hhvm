@@ -47,9 +47,10 @@ bool shouldIRInline(const Func* caller, const Func* callee,
                     const JIT::Tracelet& tlet);
 
 /*
- * IRTranslator is used to convert hhbc instructions to an IRTrace of hhir
- * instructions. It uses an HhbcTranslator to do the actual translation,
- * driving it with a translate<Op> method for each supported bytecode.
+ * IRTranslator is used to convert hhbc instructions to a cfg of Blocks
+ * containing hhir instructions. It uses an HhbcTranslator to do the actual
+ * translation, driving it with a translate<Op> method for each supported
+ * bytecode.
  */
 struct IRTranslator {
   IRTranslator(Offset bcOff, Offset spOff, const Func* curFunc);

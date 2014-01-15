@@ -29,7 +29,6 @@ struct IRInstruction;
 class  SSATmp;
 struct Block;
 struct AsmInfo;
-class  IRTrace;
 struct LifetimeInfo;
 
 // IRInstruction
@@ -67,23 +66,12 @@ void print(std::ostream& os, const Block* block,
            BCMarker* curMarker = nullptr);
 void print(const Block* block);
 
-// Trace
-void print(std::ostream& ostream, const IRUnit&, const IRTrace*,
+// Unit
+void print(std::ostream& ostream, const IRUnit&,
            const RegAllocInfo* regs = nullptr,
            const LifetimeInfo* lifetime = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr);
-
-// Print the whole unit
-inline void print(std::ostream& ostream, const IRUnit& unit,
-                  const RegAllocInfo* regs = nullptr,
-                  const LifetimeInfo* lifetime = nullptr,
-                  const AsmInfo* asmInfo = nullptr,
-                  const GuardConstraints* guards = nullptr) {
-  print(ostream, unit, unit.main(), regs, lifetime, asmInfo, guards);
-}
-
-void print(const IRTrace*);
 
 /*
  * Some utilities related to dumping. Rather than file-by-file control, we

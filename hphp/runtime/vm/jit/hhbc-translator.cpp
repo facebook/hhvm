@@ -3523,7 +3523,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
     assert_log(false,
     [&] {
       return folly::format("Bad type {} for local {}:\n\n{}\n",
-                           locType, paramId, m_tb->trace()->toString()).str();
+                           locType, paramId, m_tb->unit().toString()).str();
     });
     emitInterpOne(Type::None, 0);
     return;

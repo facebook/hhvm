@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/ir-trace.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -159,7 +158,6 @@ Type previousGuardType(const IRInstruction* guard) {
  * each instruction. Returns true iff any changes were made to the trace.
  */
 bool relaxGuards(IRUnit& unit, const GuardConstraints& guards) {
-  FTRACE(1, "relaxing guards for trace {}\n", unit.main());
   auto blocks = rpoSortCfg(unit);
   auto changed = false;
 

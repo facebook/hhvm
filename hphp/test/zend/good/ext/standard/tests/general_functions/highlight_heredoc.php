@@ -1,6 +1,4 @@
 <?php
-ini_set('highlight.html', #000000);
-
 $str = '
 $x=<<<DD
 jhdsjkfhjdsh

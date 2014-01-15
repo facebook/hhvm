@@ -1,6 +1,4 @@
 <?php
-ini_set('open_basedir', .);
-
 
 $tmp_dir = __DIR__ . "/bug41518/";
 @mkdir($tmp_dir);

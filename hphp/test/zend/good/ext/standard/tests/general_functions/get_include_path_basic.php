@@ -1,6 +1,4 @@
 <?php
-ini_set('include_path', .);
-
 /* Prototype: string get_include_path  ( void  )
  * Description: Gets the current include_path configuration option
 

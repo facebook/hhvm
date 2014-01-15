@@ -1,6 +1,4 @@
 <?php
-ini_set('magic_quotes_runtime ',  0);
-
 /* Prototype: bool set_magic_quotes_runtime  ( int $new_setting  )
  * Description: Sets the current active configuration setting of magic_quotes_runtime
 */

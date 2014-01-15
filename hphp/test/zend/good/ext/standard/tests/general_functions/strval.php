@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype: string strval ( mixed $var );
  * Description: Returns the string value of var
  */

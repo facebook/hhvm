@@ -40,6 +40,10 @@ $inis = array(
   'negative_number_as_key' =>
     '[FORMERRORCODES]'."\n".
     '-1= "SimpleError"',
+  'double slash' =>
+    'key1 = "start\\\\"'."\n".
+    'key2 = "\\\\end"'."\n".
+    'key3 = "start\\\\end"',
 );
 
 foreach ($inis as $key => $ini) {

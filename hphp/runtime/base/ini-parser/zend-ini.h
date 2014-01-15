@@ -23,6 +23,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // defined in zend-ini.ll
 
+#if YYDEBUG
+extern int ini_debug;
+#endif
 int ini_parse();
 void ini_error(const char *msg);
 int ini_lex(HPHP::String *ini_lval, void *loc);

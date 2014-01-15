@@ -167,7 +167,7 @@ RAW_VALUE_CHARS [^\n\r;\000]
 LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
 VALUE_CHARS         ([^$= \t\n\r;&|~()!"'\000]|{LITERAL_DOLLAR})
 SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
-DOUBLE_QUOTES_CHARS ("\\"{ANY_CHAR}|"$"[^{\"]|[^$\"])
+DOUBLE_QUOTES_CHARS (("\\"{ANY_CHAR}|"$"[^{\"]|[^$\"\\])+|"$")
 
 %%
 
@@ -346,7 +346,7 @@ DOUBLE_QUOTES_CHARS ("\\"{ANY_CHAR}|"$"[^{\"]|[^$\"])
   return '"';
 }
 
-<ST_DOUBLE_QUOTES>({DOUBLE_QUOTES_CHARS}+|[$]) {
+<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS} {
 /* Escape double quoted string contents */
   zend_ini_escape_string(*ini_lval, yytext, yyleng, '"');
   return TC_QUOTED_STRING;

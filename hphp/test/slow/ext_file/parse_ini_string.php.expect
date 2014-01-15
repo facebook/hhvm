@@ -151,3 +151,23 @@ array(1) {
   }
 }
 ===
+string(12) "double slash"
+===
+array(3) {
+  ["key1"]=>
+  string(6) "start\"
+  ["key2"]=>
+  string(4) "\end"
+  ["key3"]=>
+  string(9) "start\end"
+}
+===
+array(3) {
+  ["key1"]=>
+  string(6) "start\"
+  ["key2"]=>
+  string(4) "\end"
+  ["key3"]=>
+  string(9) "start\end"
+}
+===

@@ -185,7 +185,6 @@ bool zend_parse_ini_string(const String& str, const String& filename,
                            IniSetting::PFN_PARSER_CALLBACK callback,
                            void *arg) {
   zend_ini_scan(str, scanner_mode, filename, callback, arg);
-  // ini_debug = 1;
   bool ret = (ini_parse() == 0);
   zend_ini_scan_cleanup();
   return ret;

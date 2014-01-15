@@ -538,18 +538,18 @@ class BaseMap : public ExtCollectionObjectData {
   struct Elm {
     /* The key is either a string pointer or an int value, and the m_aux
      * field in data is used to discriminate the key type. m_aux = 0 means
-     * int, nonzero values contain 32 bits of a string's hashcode.
-     * It is critical that when we return &data to clients, that they not
-     * read or write the m_aux field! */
+     * int, nonzero values contain 32 bits of a string's hashcode. It is
+     * critical that when we return &data to clients, that they not read
+     * or write the m_aux field! */
     union {
       int64_t ikey;
       StringData* skey;
     };
-    // We store values here, but also some information local to this array:
-    // data.m_aux.u_hash contains either 0 (for an int key) or a string
-    // hashcode; the high bit is the int/string key descriminator.
-    // data.m_type == KindOfInvalid if this is an empty slot in the
-    // array (e.g. after a key is deleted).
+    /* We store values here, but also some information local to this array:
+     * data.m_aux.u_hash contains either 0 (for an int key) or a string
+     * hashcode; the high bit is the int/string key descriminator.
+     * data.m_type == KindOfInvalid if this is an empty slot in the
+     * Map (e.g. after an element is removed). */
     TypedValueAux data;
     bool hasStrKey() const {
       return data.hash() != 0;
@@ -1131,16 +1131,11 @@ class c_StableMap : public BaseMap {
  */
 class BaseSet : public ExtCollectionObjectData {
 
-public:
-  // Inner types and constants.
-
-  static const int32_t KindOfTombstone = -1;
-  static const char emptySetSlot[];
-
-  /**
-   * A hash-table bucket.
-   */
-  struct Bucket {
+ public:
+  struct Elm {
+    // data.m_type == KindOfInvalid if this is an empty slot in the
+    // Set (e.g. after a value is deleted).
+    TypedValueAux data;
 
     inline bool hasStr() const { return IS_STRING_TYPE(data.m_type); }
     inline bool hasInt() const { return data.m_type == KindOfInt64; }
@@ -1159,28 +1154,193 @@ public:
     }
 
     inline int32_t hash() const { return data.hash(); }
-    bool validValue() const { return (intptr_t(data.m_type) > 0); }
-    bool empty() const { return data.m_type == KindOfUninit; }
-    bool tombstone() const { return data.m_type == KindOfTombstone; }
 
-    void dump() {
-      if (!validValue()) {
-        printf("BaseSet::Bucket: %s\n", (empty() ? "empty" : "tombstone"));
-        return;
-      }
-      printf("BaseSet::Bucket: %d\n", hash());
-      tvAsCVarRef(&data).dump();
+    static constexpr size_t dataOff() {
+      return offsetof(Elm, data);
     }
-
-    // Buckets are 16 bytes. We use m_aux for our own nefarious purposes.
-    // It is critical that when we return &data to clients, that they not
-    // read or write the m_aux field.
-    TypedValueAux data;
   };
 
-public:
-  // API
+ protected:
+  uint32_t m_size;          // Number of values
+  union {
+    struct {
+      uint32_t m_used;      // Number of currently used Elm slots (values or
+                            // tombstones)
+      uint32_t m_cap;       // Maximum number of Elm slots we can use without
+                            // having to grow
+    };
+    uint64_t m_capAndUsed;
+  };
+  union {
+    struct {
+      uint32_t m_tableMask; // Bitmask used when indexing into the hash table
+      int32_t m_version;    // Version number; used to keep track if the
+                            // collection has been modified during iteration
+    };
+    uint64_t m_maskAndVersion;
+  };
+  Elm* m_data;              // Elm store.
+  int32_t* m_hash;          // Hash table.
 
+ public:
+
+  static const int32_t Empty      = -1;
+  static const int32_t Tombstone  = -2;
+
+  static const uint LoadScale = 4;
+
+  static const uint32_t SmallLgTableSize = 2;
+  static const uint32_t SmallMask = (size_t(1) << SmallLgTableSize) - 1;
+  static const uint32_t SmallSize = SmallMask - SmallMask / LoadScale;
+
+  static const uint32_t MaxLgTableSize = 32;
+  static const uint32_t MaxMask = (size_t(1) << MaxLgTableSize) - 1;
+  static const uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
+
+  static const uint32_t MaxReserveSize = MaxSize / 2;
+
+ private:
+  void deleteElms();
+  void freeData();
+
+ protected:
+  Elm* data() const { return (Elm*)m_data; }
+  int32_t* hashTab() const { return (int32_t*)m_hash; }
+  uint32_t iterLimit() const { return m_used; }
+
+  static void throwTooLarge() ATTRIBUTE_NORETURN;
+  static void throwReserveTooLarge() ATTRIBUTE_NORETURN;
+  static int32_t* warnUnbalanced(size_t n, int32_t* ei);
+
+ public:
+
+  int getVersion() const {
+    return m_version;
+  }
+  int64_t size() const {
+    return m_size;
+  }
+
+  static uint sizeOffset() {
+    return offsetof(BaseSet, m_size);
+  }
+
+  static bool validPos(ssize_t pos) {
+    return pos >= 0;
+    static_assert(ssize_t(Empty) == ssize_t(-1), "");
+  }
+
+  static bool validPos(int32_t pos) {
+    return pos >= 0;
+    static_assert(Empty == -1, "");
+  }
+
+  static bool isTombstone(DataType t) {
+    assert(IS_REAL_TYPE(t) || t == KindOfInvalid);
+    return t < KindOfUninit;
+    static_assert(KindOfUninit == 0 && KindOfInvalid < 0, "");
+  }
+
+  bool isTombstone(ssize_t pos) const {
+    assert(size_t(pos) <= m_used);
+    return isTombstone(data()[pos].data.m_type);
+  }
+
+  size_t hashSize() const {
+    return size_t(m_tableMask) + 1;
+  }
+
+  static uint32_t computeMaxElms(uint32_t tableMask) {
+    return tableMask - tableMask / LoadScale;
+  }
+
+  static void initHash(int32_t* table, size_t tableSize) {
+    wordfill(table, Empty, tableSize);
+  }
+
+  template <class Hit>
+  ssize_t findImpl(size_t h0, Hit) const;
+  ssize_t find(int64_t h) const;
+  ssize_t find(const StringData* s, strhash_t prehash) const;
+
+  template <class Hit>
+  int32_t* findForInsertImpl(size_t h0, Hit) const;
+  int32_t* findForInsert(int64_t h) const;
+  int32_t* findForInsert(const StringData* s, strhash_t prehash) const;
+
+  int32_t* findForNewInsert(size_t h0) const;
+  int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
+
+  void erase(int32_t* pos);
+
+  bool isFull() { return m_used == m_cap; }
+  bool isDensityTooLow() const { return (m_size < m_used / 2); }
+
+  // This method will grow or compact as needed to make room to add
+  // one new element.
+  void makeRoom();
+
+  // This method will grow or compact as needed in preparation for
+  // repeatedly adding new elements until m_size >= sz.
+  void reserve(int64_t sz);
+
+  void grow(uint32_t newCap, uint32_t newMask);
+  void compact();
+
+  BaseSet::Elm& allocElm(int32_t* ei) {
+    assert(!validPos(*ei) && m_size <= m_used && m_used < m_cap);
+    size_t i = m_used;
+    (*ei) = i;
+    m_used = i + 1;
+    ++m_size;
+    return data()[i];
+  }
+
+ public:
+  ssize_t iter_begin() const {
+    Elm* p = data();
+    auto* pLimit = data() + iterLimit();
+    for (; p != pLimit; ++p) {
+      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+    }
+    return 0;
+  }
+
+  ssize_t iter_next(ssize_t pos) const {
+    if (!iter_valid(pos)) return pos;
+    auto* p = (Elm*)pos;
+    auto* pLimit = data() + iterLimit();
+    for (++p; p != pLimit; ++p) {
+      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+    }
+    return 0;
+  }
+
+  ssize_t iter_prev(ssize_t pos) const {
+    if (!iter_valid(pos)) return pos;
+    auto* p = (Elm*)pos;
+    auto* pFirst = data();
+    for (--p; p >= pFirst; --p) {
+      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+    }
+    return 0;
+  }
+
+  Variant iter_key(ssize_t pos) const {
+    return tvAsCVarRef(iter_value(pos));
+  }
+
+  TypedValue* iter_value(ssize_t pos) const {
+    assert(iter_valid(pos));
+    auto* p = (Elm*)pos;
+    return &p->data;
+  }
+
+  bool iter_valid(ssize_t pos) const {
+    return pos != 0;
+  }
+
+ public:
   void init(CVarRef t);
 
   void add(TypedValue* val) {
@@ -1198,54 +1358,27 @@ public:
 
   void remove(int64_t key) {
     ++m_version;
-    erase(find(key));
+    auto* p = findForInsert(key);
+    if (validPos(*p)) {
+      erase(p);
+    }
   }
 
   void remove(StringData* key) {
     ++m_version;
-    erase(find(key->data(), key->size(), key->hash()));
-  }
-
-  bool contains(int64_t key) {
-    return find(key);
-  }
-
-  bool contains(StringData* key) {
-    return find(key->data(), key->size(), key->hash());
-  }
-
-  void reserve(int64_t sz) {
-    if (int64_t(m_load) + sz - int64_t(m_size) >= computeMaxLoad()) {
-      adjustCapacityImpl(sz);
+    auto* p = findForInsert(key, key->hash());
+    if (validPos(*p)) {
+      erase(p);
     }
   }
 
-  int getVersion() const { return m_version; }
-  int64_t size() const { return m_size; }
+  bool contains(int64_t key) const;
+  bool contains(StringData* key) const;
 
   template<class TSet>
-  static TSet* Clone(ObjectData* obj) {
-    auto thiz = static_cast<TSet*>(obj);
-    auto target = static_cast<TSet*>(obj->cloneImpl());
-
-    if (!thiz->m_size) return target;
-
-    assert(thiz->m_nLastSlot != 0);
-    target->m_size = thiz->m_size;
-    target->m_load = thiz->m_load;
-    target->m_nLastSlot = thiz->m_nLastSlot;
-    target->m_data = (Bucket*)smart_malloc(thiz->numSlots() * sizeof(Bucket));
-    memcpy(target->m_data, thiz->m_data, thiz->numSlots() * sizeof(Bucket));
-
-    for (uint i = 0; i <= thiz->m_nLastSlot; ++i) {
-      Bucket& p = thiz->m_data[i];
-      if (p.validValue()) {
-        tvRefcountedIncRef(&p.data);
-      }
-    }
-
-    return target;
-  }
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, TSet*>::type
+  static Clone(ObjectData* obj);
 
   // Static methods
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
@@ -1267,198 +1400,70 @@ public:
   static void Unserialize(const char* setType, ObjectData* obj,
                           VariableUnserializer* uns, int64_t sz, char type);
 
-  static uint sizeOffset() { return offsetof(BaseSet, m_size); }
-
 protected:
   // PHP-land methods exported by child classes.
 
-  void    phpConstruct(CVarRef iterable = null_variant);
+  void    php_construct(CVarRef iterable = null_variant);
 
-  Object  phpAdd(CVarRef val) {
+  Object  php_add(CVarRef val) {
     TypedValue* tv = cvarToCell(&val);
     add(tv);
     return this;
   }
 
-  Object  phpAddAll(CVarRef val);
+  Object  php_addAll(CVarRef val);
 
-  Object  phpClear() {
-    deleteBuckets();
-    freeData();
-    m_size = 0;
-    m_load = 0;
-    m_nLastSlot = 0;
-    m_data = (Bucket*)emptySetSlot;
-    return this;
-  }
+  Object  php_clear();
 
-  bool    phpIsEmpty() { return !toBoolImpl(); }
-  int64_t phpCount() { return m_size; }
-  Object  phpItems() { return SystemLib::AllocLazyIterableViewObject(this); }
+  bool    php_isEmpty() { return !toBoolImpl(); }
+  int64_t php_count() { return m_size; }
+  Object  php_items() { return SystemLib::AllocLazyIterableViewObject(this); }
 
   template<class TVector>
-  Object  phpValues() {
+  Object  php_values() {
     TVector* vec;
     Object o = vec = NEWOBJ(TVector)();
     vec->init(VarNR(this));
     return o;
   }
 
-  Object  phpLazy() { return SystemLib::AllocLazyIterableViewObject(this); }
-  bool    phpContains(CVarRef key);
-  Object  phpRemove(CVarRef key);
-  Array   phpToArray() { return toArrayImpl(); }
-  Array   phpToKeysArray() { return phpToValuesArray(); }
-  Array   phpToValuesArray();
-  Object  phpGetIterator();
+  Object  php_lazy() { return SystemLib::AllocLazyIterableViewObject(this); }
+  bool    php_contains(CVarRef key);
+  Object  php_remove(CVarRef key);
+  Array   php_toArray() { return toArrayImpl(); }
+  Array   php_toKeysArray() { return php_toValuesArray(); }
+  Array   php_toValuesArray();
+  Object  php_getIterator();
 
   template<class TSet>
-  Object phpMap(CVarRef callback) {
-    CallCtx ctx;
-    vm_decode_function(callback, nullptr, false, ctx);
-
-    if (!ctx.func) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Parameter must be a valid callback"));
-      throw e;
-    }
-
-    TSet* st;
-    Object obj = st = NEWOBJ(TSet)();
-
-    if (!m_size) return obj;
-    assert(m_nLastSlot != 0);
-
-    uint nLastSlot = m_nLastSlot;
-    for (uint i = 0; i <= nLastSlot; i++) {
-
-      Bucket& curBucket = m_data[i];
-      if (!curBucket.validValue()) continue;
-
-      TypedValue tvCbRet;
-      int32_t pVer = m_version;
-      g_vmContext->invokeFuncFew(&tvCbRet, ctx, 1, &curBucket.data);
-
-      // Now that tvCbRet is live, make sure to decref even if we throw.
-      SCOPE_EXIT { tvRefcountedDecRef(&tvCbRet); };
-
-      if (UNLIKELY(m_version != pVer)) throw_collection_modified();
-      st->add(&tvCbRet);
-    }
-
-    return obj;
-  }
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
+  php_map(CVarRef callback);
 
   template<class TSet>
-  Object phpFilter(CVarRef callback) {
-    CallCtx ctx;
-    vm_decode_function(callback, nullptr, false, ctx);
-    if (!ctx.func) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Parameter must be a valid callback"));
-      throw e;
-    }
-    TSet* st;
-    Object obj = st = NEWOBJ(TSet)();
-    if (!m_size) return obj;
-    uint nLastSlot = m_nLastSlot;
-    for (uint i = 0; i <= nLastSlot; ++i) {
-      Bucket& p = m_data[i];
-      if (!p.validValue()) continue;
-      Variant ret;
-      int32_t version = m_version;
-      g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-      if (!ret.toBoolean()) continue;
-      if (p.hasInt()) {
-        st->add(p.data.m_data.num);
-      } else {
-        assert(p.hasStr());
-        st->add(p.data.m_data.pstr);
-      }
-    }
-    return obj;
-  }
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
+  php_filter(CVarRef callback);
 
   template<class TSet>
-  Object phpZip(CVarRef iterable) {
-    size_t sz;
-    ArrayIter iter = getArrayIterHelper(iterable, sz);
-    if (m_size && iter) {
-      // At present, BaseSets only support int values and string values,
-      // so if this BaseSet is non empty and the iterable is non empty
-      // the zip operation will always fail
-      throwBadValueType();
-    }
-    Object obj = NEWOBJ(TSet)();
-    return obj;
-  }
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
+  php_zip(CVarRef iterable);
 
   template<class TSet>
-  static Object phpFromItems(CVarRef iterable) {
-    if (iterable.isNull()) return NEWOBJ(TSet)();
-    size_t sz;
-    ArrayIter iter = getArrayIterHelper(iterable, sz);
-    TSet* target;
-    Object ret = target = NEWOBJ(TSet)();
-    for (; iter; ++iter) {
-      Variant v = iter.second();
-      if (v.isInteger()) {
-        target->add(v.toInt64());
-      } else if (v.isString()) {
-        target->add(v.getStringData());
-      } else {
-        throwBadValueType();
-      }
-    }
-    return ret;
-  }
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
+  static php_fromItems(CVarRef iterable);
 
   template<class TSet>
-  static Object phpFromArray(CVarRef arr) {
-    if (!arr.isArray()) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Parameter arr must be an array"));
-      throw e;
-    }
-    TSet* st;
-    Object ret = st = NEWOBJ(TSet)();
-    ArrayData* ad = arr.getArrayData();
-    for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
-         pos = ad->iter_advance(pos)) {
-      CVarRef v = ad->getValueRef(pos);
-      if (v.isInteger()) {
-        st->add(v.toInt64());
-      } else if (v.isString()) {
-        st->add(v.getStringData());
-      } else {
-        throwBadValueType();
-      }
-    }
-    return ret;
-  }
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
+  static php_fromArray(CVarRef arr);
 
   template<class TSet>
-  static Object phpFromArrays(int _argc, CArrRef _argv = null_array) {
-    TSet* st;
-    Object ret = st = NEWOBJ(TSet)();
-    for (ArrayIter iter(_argv); iter; ++iter) {
-      Variant arr = iter.second();
-      if (!arr.isArray()) {
-        Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-          "Parameters must be arrays"));
-        throw e;
-      }
-      ArrayData* ad = arr.getArrayData();
-      for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
-           pos = ad->iter_advance(pos)) {
-        st->phpAdd(ad->getValueRef(pos));
-      }
-    }
-    return ret;
-  }
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
+  static php_fromArrays(int _argc, CArrRef _argv = null_array);
 
 protected:
   // BaseSet is an abstract class.
@@ -1477,82 +1482,14 @@ private:
 
   Array toArrayImpl() const;
   bool toBoolImpl() const { return (m_size != 0); }
-  size_t numSlots() const { return m_nLastSlot + 1; }
-
-  void freeData() {
-    if (m_data != (Bucket*)emptySetSlot) {
-      smart_free(m_data);
-    }
-    m_data = (Bucket*)emptySetSlot;
-  }
-
-  // The maximum load factor is 75%.
-  size_t computeMaxLoad() const {
-    size_t n = numSlots();
-    return (n - (n >> 2));
-  }
-
-  // When the map is not empty, the minimum allowed ratio
-  // of # elements / # slots is 18.75%.
-  size_t computeMinElements() const {
-    size_t n = numSlots();
-    return ((n >> 3) + ((n+8) >> 4));
-  }
-
-  Bucket* fetchBucket(Bucket* data, intptr_t slot) const {
-    return &data[slot];
-  }
-
-  Bucket* fetchBucket(intptr_t slot) const {
-    return fetchBucket(m_data, slot);
-  }
-
-  Bucket* find(int64_t h) const;
-  Bucket* find(const char* k, int len, strhash_t prehash) const;
-  Bucket* findForInsert(int64_t h) const;
-  Bucket* findForInsert(const char* k, int len, strhash_t prehash) const;
-  Bucket* findForNewInsert(size_t h0) const;
-
-  void erase(Bucket* prev);
-  void adjustCapacity() { adjustCapacityImpl(m_size); }
-  void adjustCapacityImpl(int64_t sz);
-
-  void deleteBuckets();
-
-  ssize_t iter_begin() const {
-    if (!m_size) return 0;
-    for (uint i = 0; i <= m_nLastSlot; ++i) {
-      Bucket* p = fetchBucket(i);
-      if (p->validValue()) {
-        return reinterpret_cast<ssize_t>(p);
-      }
-    }
-    return 0;
-  }
-
-  ssize_t iter_next(ssize_t prev) const;
-  ssize_t iter_prev(ssize_t prev) const;
-  const TypedValue* iter_value(ssize_t pos) const;
-  Variant iter_key(ssize_t pos) const;
-  bool iter_valid(ssize_t pos) const {
-    return pos != 0;
-  }
 
   static void throwBadValueType() ATTRIBUTE_NORETURN;
 
  private:
-  // Internal state.
-
-  uint m_size;
-  Bucket* m_data;
-  uint m_load;
-  uint m_nLastSlot;
-  int32_t m_version;
 
   friend class c_SetIterator;
   friend class c_Vector;
-  friend class c_Map;
-  friend class c_StableMap;
+  friend class c_Set;
   friend class ArrayIter;
 
   static void compileTimeAssertions() {
@@ -1755,7 +1692,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
     cellDup(*val, getElms()[m_size]);
     ++m_size;
   }
-  bool contains(int64_t key) {
+  bool contains(int64_t key) const {
     assert(isFullyConstructed());
     return (uint64_t(key) < uint64_t(2));
   }

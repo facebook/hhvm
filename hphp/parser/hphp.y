@@ -2179,6 +2179,9 @@ static_class_constant:
   | T_XHP_LABEL T_DOUBLE_COLON
     ident                              { $1.xhpLabel();
                                          _p->onClassConst($$, $1, $3, 1);}
+  | class_namespace_string_typeargs
+    T_DOUBLE_COLON
+    T_CLASS                            { _p->onClassClass($$, $1, $3, 1);}
 ;
 
 scalar:
@@ -2571,8 +2574,10 @@ variable_list:
 ;
 
 class_constant:
-  static_class_name
-  T_DOUBLE_COLON ident                 { _p->onClassConst($$, $1, $3, 0);}
+    static_class_name
+    T_DOUBLE_COLON ident               { _p->onClassConst($$, $1, $3, 0);}
+  | static_class_name
+    T_DOUBLE_COLON T_CLASS             { _p->onClassClass($$, $1, $3, 0);}
 ;
 
 /* hack productions -- these allow some extra stuff in hack

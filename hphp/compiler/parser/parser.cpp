@@ -797,6 +797,30 @@ void Parser::onClassConst(Token &out, Token &cls, Token &name, bool text) {
   out->exp = con;
 }
 
+void Parser::onClassClass(Token &out, Token &cls, Token &name,
+                          bool inStaticContext) {
+  if (inStaticContext) {
+    if (cls->same("parent") || cls->same("static")) {
+      PARSE_ERROR(
+        "%s::class cannot be used for compile-time class name resolution",
+        cls->text().c_str()
+      );
+      return;
+    }
+  }
+  if (cls->same("self") || cls->same("parent") || cls->same("static")) {
+    if (cls->same("self") && m_inTrait) {
+      // Sooo... self:: works dynamically for everything in a trait except
+      // for self::CLASS where it returns the trait name. Great...
+      onScalar(out, T_TRAIT_C, cls);
+    } else {
+      onClassConst(out, cls, name, inStaticContext);
+    }
+  } else {
+    onScalar(out, T_STRING, cls);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // function/method declaration
 

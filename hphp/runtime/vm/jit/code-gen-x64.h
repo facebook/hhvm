@@ -288,29 +288,23 @@ private:
   template <typename F>
   Address cgCheckStaticBitAndDecRef(Type type,
                                     PhysReg dataReg,
-                                    Block* exit,
                                     F destroy);
   Address cgCheckStaticBitAndDecRef(Type type,
-                                    PhysReg dataReg,
-                                    Block* exit);
+                                    PhysReg dataReg);
   Address cgCheckRefCountedType(PhysReg typeReg);
   Address cgCheckRefCountedType(PhysReg baseReg,
                                 int64_t offset);
   void cgDecRefStaticType(Type type,
                           PhysReg dataReg,
-                          Block* exit,
                           bool genZeroCheck);
   void cgDecRefDynamicType(PhysReg typeReg,
                            PhysReg dataReg,
-                           Block* exit,
                            bool genZeroCheck);
   void cgDecRefDynamicTypeMem(PhysReg baseReg,
-                              int64_t offset,
-                              Block* exit);
+                              int64_t offset);
   void cgDecRefMem(Type type,
                    PhysReg baseReg,
-                   int64_t offset,
-                   Block* exit);
+                   int64_t offset);
 
   void cgIterNextCommon(IRInstruction* inst);
   void cgIterInitCommon(IRInstruction* inst);

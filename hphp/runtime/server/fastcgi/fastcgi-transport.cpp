@@ -64,6 +64,10 @@ const char *FastCGITransport::getRemoteHost() {
   return m_remoteHost.c_str();
 }
 
+const char *FastCGITransport::getRemoteAddr() {
+  return m_remoteAddr.c_str();
+}
+
 uint16_t FastCGITransport::getRemotePort() {
   return m_remotePort;
 }
@@ -304,6 +308,7 @@ void FastCGITransport::onBodyComplete() {
 
 const std::string FastCGITransport::k_requestURIKey = "REQUEST_URI";
 const std::string FastCGITransport::k_remoteHostKey = "REMOTE_HOST";
+const std::string FastCGITransport::k_remoteAddrKey = "REMOTE_ADDR";
 const std::string FastCGITransport::k_remotePortKey = "REMOTE_PORT";
 const std::string FastCGITransport::k_methodKey = "REQUEST_METHOD";
 const std::string FastCGITransport::k_httpVersionKey = "HTTP_VERSION";
@@ -342,6 +347,8 @@ void FastCGITransport::handleHeader(const std::string& key,
     m_requestURI = value;
   } else if (compareKeys(key, k_remoteHostKey)) {
     m_remoteHost = value;
+  } else if (compareKeys(key, k_remoteAddrKey)) {
+    m_remoteAddr = value;
   } else if (compareKeys(key, k_remotePortKey)) {
     try {
       int remote_port = std::stoi(value);

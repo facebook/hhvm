@@ -64,7 +64,7 @@ CALL_OPCODE(ConvIntToStr)
 
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
             const Func* vmFunc) {
-  FTRACE(1, "punting: {} {}\n", file, line);
+  FTRACE(1, "punting: {}\n", func);
   throw FailedCodeGen(file, line, func, bcOff, vmFunc);
 }
 
@@ -274,7 +274,6 @@ PUNT_OPCODE(LdGblAddrDef)
 PUNT_OPCODE(LdGblAddr)
 PUNT_OPCODE(LdObjClass)
 PUNT_OPCODE(LdFunc)
-PUNT_OPCODE(LdFuncCached)
 PUNT_OPCODE(LdFuncCachedU)
 PUNT_OPCODE(LdFuncCachedSafe)
 PUNT_OPCODE(LdSSwitchDestFast)
@@ -1228,6 +1227,35 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   auto baseReg = x2a(curOpd(inst->src(0)).reg());
   auto offset  = inst->src(1)->getValInt();
   m_as.  Ldr  (dstReg, baseReg[offset + AROFF(m_func)]);
+}
+
+void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
+  auto dstReg = x2a(curOpd(inst->dst()).reg());
+  auto const name = inst->extra<LdFuncCachedData>()->name;
+  auto const ch = Unit::GetNamedEntity(name)->getFuncHandle();
+  vixl::Label noLookup;
+
+  if (!dstReg.IsValid()) {
+    m_as.  Ldr  (rAsm, rVmTl[ch]);
+    dstReg = rAsm;
+  } else {
+    m_as.  Ldr  (dstReg, rVmTl[ch]);
+  }
+  m_as.    Cbnz (dstReg, &noLookup);
+
+  const Func* (*const func)(const StringData*) = lookupUnknownFunc;
+  CppCall call(func);
+  cgCallHelper(
+    m_as,
+    call,
+    callDest(inst->dst()),
+    SyncOptions::kSyncPoint,
+    ArgGroup(curOpds())
+      .immPtr(inst->extra<LdFuncCached>()->name),
+    m_state.liveRegs[m_curInst]
+  );
+
+  m_as.    bind (&noLookup);
 }
 
 void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {

@@ -3645,7 +3645,8 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     // instructions. However, we'll trace through a few unconditional jmps.
     if (isUnconditionalJmp(ni->op()) &&
         ni->imm[0].u_BA > 0 &&
-        tas.m_numJmps < MaxJmpsTracedThrough) {
+        tas.m_numJmps < MaxJmpsTracedThrough &&
+        m_mode != TransProfile) {
       // Continue tracing through jumps. To prevent pathologies, only trace
       // through a finite number of forward jumps.
       SKTRACE(1, sk, "greedily continuing through %dth jmp + %d\n",

@@ -299,6 +299,7 @@ public:
 
   // Returns a string with cache usage information
   std::string getUsage();
+  std::string getTCAddrs();
 
   // true iff calling thread is sole writer.
   static bool canWrite() {

@@ -2291,6 +2291,14 @@ std::string TranslatorX64::getUsage() {
   return usage;
 }
 
+std::string TranslatorX64::getTCAddrs() {
+  std::string addrs;
+  code.forEachBlock([&](const char* name, const CodeBlock& a) {
+      addrs += folly::format("{}: {}\n", name, a.base()).str();
+  });
+  return addrs;
+}
+
 bool TranslatorX64::addDbgGuards(const Unit* unit) {
   // TODO refactor
   // It grabs the write lease and iterating through whole SrcDB...

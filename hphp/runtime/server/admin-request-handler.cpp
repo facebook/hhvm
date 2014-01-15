@@ -195,6 +195,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/prof-exe:        returns sampled execution profile\n"
 #endif
         "/vm-tcspace:      show space used by translator caches\n"
+        "/vm-tcaddr:       show addresses of translation cache sections\n"
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
         "/vm-namedentities:show size of the NamedEntityTable\n"
@@ -840,6 +841,10 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
     transport->sendString(JIT::tx64->getUsage());
+    return true;
+  }
+  if (cmd == "vm-tcaddr") {
+    transport->sendString(JIT::tx64->getTCAddrs());
     return true;
   }
   if (cmd == "vm-namedentities") {

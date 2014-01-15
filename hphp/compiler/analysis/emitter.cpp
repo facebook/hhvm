@@ -3940,6 +3940,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ClassConstantExpressionPtr cc(
           static_pointer_cast<ClassConstantExpression>(node));
         StringData* nName = makeStaticString(cc->getConName());
+        auto const getOriginalClassName = [&] {
+          const std::string& clsName = cc->getOriginalClassName();
+          return makeStaticString(clsName);
+        };
         if (cc->isStatic()) {
           // static::Constant
           e.LateBoundCls();
@@ -3953,9 +3957,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         } else if (cc->getOriginalClass() &&
                    !cc->getOriginalClass()->isTrait()) {
           // C::Constant inside a class
-          const std::string& clsName = cc->getOriginalClassName();
-          StringData* nCls = makeStaticString(clsName);
-          e.ClsCnsD(nName, nCls);
+          auto nCls = getOriginalClassName();
+          if (cc->isColonColonClass()) {
+            e.String(nCls);
+          } else {
+            e.ClsCnsD(nName, nCls);
+          }
         } else if (cc->isSelf()) {
           // self::Constant inside trait or pseudomain
           e.Self();
@@ -3971,8 +3978,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           // will set cc->originalClassName to the trait's name for
           // the isSelf and isParent cases, but self and parent must
           // be resolved dynamically when used inside of traits.
-          const std::string& clsName = cc->getOriginalClassName();
-          StringData* nCls = makeStaticString(clsName);
+          assert(!cc->isColonColonClass());
+          auto nCls = getOriginalClassName();
           e.ClsCnsD(nName, nCls);
         }
         return true;

@@ -47,6 +47,7 @@ public:
 
   virtual const char *getUrl() override;
   virtual const char *getRemoteHost() override;
+  virtual const char *getRemoteAddr() override;
   virtual uint16_t getRemotePort() override;
   virtual const std::string getDocumentRoot() override;
   virtual const char *getServerName() override;
@@ -110,6 +111,7 @@ private:
 
   static const std::string k_requestURIKey;
   static const std::string k_remoteHostKey;
+  static const std::string k_remoteAddrKey;
   static const std::string k_remotePortKey;
   static const std::string k_methodKey;
   static const std::string k_httpVersionKey;
@@ -128,6 +130,7 @@ private:
   std::string m_requestURI;
   std::string m_documentRoot;
   std::string m_remoteHost;
+  std::string m_remoteAddr;
   uint16_t m_remotePort;
   std::string m_serverName;
   std::string m_serverAddr;

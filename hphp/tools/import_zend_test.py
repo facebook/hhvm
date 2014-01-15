@@ -23,7 +23,7 @@ no_import = (
     '/ext/standard/tests/general_functions/usleep_error.phpt',
     '/ext/zlib/tests/gzgetc_basic.phpt',
     '/ext/zlib/tests/gzgets_basic.phpt',
-    
+
     # too large input
     '/tests/lang/024.phpt',
 
@@ -568,6 +568,10 @@ other_files = (
     '/ext/standard/tests/file/test2.csv',
     '/ext/standard/tests/file/test3.csv',
     '/ext/standard/tests/general_functions/004.data',
+    '/ext/standard/tests/general_functions/bug49692.ini',
+    '/ext/standard/tests/general_functions/bug52138.data',
+    '/ext/standard/tests/general_functions/parse_ini_basic.data',
+    '/ext/standard/tests/general_functions/parse_ini_booleans.data',
     '/ext/standard/tests/image/246x247.png',
     '/ext/standard/tests/image/384x385.png',
     '/ext/standard/tests/image/bug13213.jpg',

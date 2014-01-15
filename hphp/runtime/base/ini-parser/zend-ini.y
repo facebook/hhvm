@@ -19,45 +19,34 @@
 #define YYERROR_VERBOSE
 #define YYSTYPE String
 
-#include <runtime/base/complex-types.h>
-#include <runtime/base/ini-setting.h>
-#include <runtime/base/externals.h>
-#include <runtime/ext/ext_misc.h>
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/ini-parser/zend-ini.h"
+#include "hphp/runtime/ext/ext_misc.h"
 using namespace HPHP;
-
-///////////////////////////////////////////////////////////////////////////////
-// defined in zend-ini.x
-
-extern int ini_parse();
-extern void ini_error(char *msg);
-extern int ini_lex(String *ini_lval);
-
-extern void zend_ini_scan(CStrRef str, int scanner_mode, CStrRef filename,
-                          IniSetting::PFN_PARSER_CALLBACK callback, void *arg);
-extern void zend_ini_scan_cleanup();
-extern void zend_ini_callback(String *arg1, String *arg2, String *arg3,
-                              int callback_type);
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
 static void zend_ini_do_op(char type, String &result,
-                           CStrRef op1, CStrRef op2 = String()) {
+                           const String& op1, const String& op2 = String()) {
   int i_op1 = op1.toInt32();
   int i_op2 = op2.toInt32();
 
   int i_result = 0;
   switch (type) {
-  case '|': i_result = i_op1 | i_op2; break;
-  case '&': i_result = i_op1 & i_op2; break;
-  case '~': i_result = ~i_op1;        break;
-  case '!': i_result = !i_op1;        break;
+    case '|': i_result = i_op1 | i_op2; break;
+    case '&': i_result = i_op1 & i_op2; break;
+    case '^': i_result = i_op1 ^ i_op2; break;
+    case '~': i_result = ~i_op1;        break;
+    case '!': i_result = !i_op1;        break;
   }
 
-  result = String((int64)i_result);
+  result = String((int64_t)i_result);
 }
 
-static void zend_ini_get_constant(String &result, CStrRef name) {
+static void zend_ini_get_constant(String &result, const String& name) {
   if (f_defined(name)) {
     result = f_constant(name);
   } else {
@@ -65,7 +54,7 @@ static void zend_ini_get_constant(String &result, CStrRef name) {
   }
 }
 
-static void zend_ini_get_var(String &result, CStrRef name) {
+static void zend_ini_get_var(String &result, const String& name) {
   String curval;
   if (IniSetting::Get(name, curval)) {
     result = curval;
@@ -102,8 +91,9 @@ static void zend_ini_get_var(String &result, CStrRef name) {
 %token BOOL_TRUE
 %token BOOL_FALSE
 %token END_OF_LINE
+%token JUNK
 %token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@' '{' '}'
-%left '|' '&'
+%left '|' '&' '^'
 %right '~' '!'
 
 %%
@@ -132,15 +122,15 @@ statement:
 ;
 
 section_string_or_value:
-    var_string_list                         { $$ = $1;}
-  |  /* empty */                            { $$.clear();}
+     var_string_list                        { $$ = $1;}
+  |  /* empty */                            { $$ = empty_string;}
 ;
 
 string_or_value:
      expr                                   { $$ = $1;}
   |  BOOL_TRUE                              { $$ = $1;}
   |  BOOL_FALSE                             { $$ = $1;}
-  |  END_OF_LINE                            { $$.clear();}
+  |  END_OF_LINE                            { $$ = empty_string;}
 ;
 
 option_offset:
@@ -151,24 +141,25 @@ option_offset:
 encapsed_list:
      encapsed_list cfg_var_ref              { $$ = $1 + $2;}
   |  encapsed_list TC_QUOTED_STRING         { $$ = $1 + $2;}
-  |  /* empty */                            { $$.clear();}
+  |  /* empty */                            { $$ = empty_string;}
 ;
 
 var_string_list:
-     cfg_var_ref                            { $$ = $1;}
-  |  constant_string                        { $$ = $1;}
-  |  '"' encapsed_list '"'                  { $$ = $2;}
-  |  var_string_list cfg_var_ref            { $$ = $1 + $2;}
-  |  var_string_list constant_string        { $$ = $1 + $2;}
-  |  var_string_list '"' encapsed_list '"'  { $$ = $1 + $3;}
+     cfg_var_ref                             { $$ = $1;}
+  |  constant_string                         { $$ = $1;}
+  |  '"' encapsed_list '"'                   { $$ = $2;}
+  |  var_string_list cfg_var_ref             { $$ = $1 + $2;}
+  |  var_string_list constant_string         { $$ = $1 + $2;}
+  |  var_string_list '"' encapsed_list '"'   { $$ = $1 + $3;}
 ;
 
 expr:
      var_string_list                        { $$ = $1;}
   |  expr '|' expr                          { zend_ini_do_op('|', $$, $1, $3);}
   |  expr '&' expr                          { zend_ini_do_op('&', $$, $1, $3);}
+  |  expr '^' expr                          { zend_ini_do_op('^', $$, $1, $3);}
   |  '~' expr                               { zend_ini_do_op('~', $$, $2    );}
-  |  '!'  expr                              { zend_ini_do_op('!', $$, $2    );}
+  |  '!' expr                               { zend_ini_do_op('!', $$, $2    );}
   |  '(' expr ')'                           { $$ = $2;}
 ;
 
@@ -189,10 +180,12 @@ constant_string:
 ///////////////////////////////////////////////////////////////////////////////
 // exposed to runtime/base/ini-setting.cpp
 
-bool zend_parse_ini_string(CStrRef str, CStrRef filename, int scanner_mode,
+bool zend_parse_ini_string(const String& str, const String& filename,
+                           int scanner_mode,
                            IniSetting::PFN_PARSER_CALLBACK callback,
                            void *arg) {
   zend_ini_scan(str, scanner_mode, filename, callback, arg);
+  // ini_debug = 1;
   bool ret = (ini_parse() == 0);
   zend_ini_scan_cleanup();
   return ret;

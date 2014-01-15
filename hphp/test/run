@@ -814,8 +814,8 @@ SHIP
         ? $options['failure-file']
         : tempnam('/tmp', 'test-failures');
       file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
-      print $header_start.'For xargs, list of failures is available using:'.
-        $header_end.'cat '.$failing_tests_file."\n";
+      print make_header('For xargs, list of failures is available using:').
+        'cat '.$failing_tests_file."\n";
 
       print_commands($failed, $options);
 
@@ -823,7 +823,7 @@ SHIP
             $argv[0].' '.implode(' ', $failed)."\n";
 
       if (idx($options, 'mode') == 'automain') {
-        print header_start(
+        print make_header(
           'Automain caveat: wrapper script may change semantics');
         print 'The automain wrapper script ('.__DIR__.'/pseudomain_wrapper.php)'
           .' may have changed behavior'."\n"

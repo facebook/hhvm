@@ -396,12 +396,24 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::AddNewElemC&) { popC(); popC(); push(TArr); }
   void operator()(const bc::AddNewElemV&) { popV(); popC(); push(TArr); }
 
-  void operator()(const bc::NewCol&)      { push(TObj); }
-  void operator()(const bc::ColAddElemC&) {
-    popC(); popC(); popC();
-    push(TObj);
+  void operator()(const bc::NewCol& op) {
+    auto collName = collectionTypeToString(op.arg1);
+    auto const collCls = m_index.resolve_class(m_ctx, collName);
+    always_assert(collCls &&
+                  "Collection names thorugh NewCol must alwasy resolve");
+    push(objExact(*collCls));
   }
-  void operator()(const bc::ColAddNewElemC&) { popC(); popC(); push(TObj); }
+
+  void operator()(const bc::ColAddElemC&) {
+    popC(); popC();
+    auto const coll = popC();
+    push(coll);
+  }
+  void operator()(const bc::ColAddNewElemC&) {
+    popC();
+    auto const coll = popC();
+    push(coll);
+  }
 
   // Note: unlike class constants, these can be dynamic system
   // constants, so this doesn't have to be TInitUnc.

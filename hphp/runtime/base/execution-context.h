@@ -263,6 +263,8 @@ public:
     m_out = sb;
     return current;
   }
+  String getRawPostData() const { return m_rawPostData; }
+  void setRawPostData(String& pd) { m_rawPostData = pd; }
 
   /**
    * Request sequences and program execution hooks.
@@ -365,6 +367,7 @@ private:
   int m_protectedLevel;
   PFUNC_STDOUT m_stdout;
   void *m_stdoutData;
+  String m_rawPostData;
 
   // request handlers
   std::set<RequestEventHandler*> m_requestEventHandlerSet;

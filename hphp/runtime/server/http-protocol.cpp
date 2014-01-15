@@ -316,17 +316,19 @@ void HttpProtocol::PreparePostVariables(Variant& post,
       }
     }
 
-    if (needDelete) {
-      if (RuntimeOption::AlwaysPopulateRawPostData &&
-          uint32_t(size) <= StringData::MaxSize) {
-        raw_post = String((char*)data, size, AttachString);
-      } else {
-        free((void *)data);
+    if (uint32_t(size) > StringData::MaxSize) {
+      // Can't store it anywhere
+      if (needDelete) {
+        free((void*) data);
       }
     } else {
-      // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
-      if (uint32_t(size) <= StringData::MaxSize) {
-        raw_post = String((char*)data, size, CopyString);
+      auto string_data = needDelete ?
+        String((char*)data, size, AttachString) :
+        String((char*)data, size, CopyString);
+      g_context->setRawPostData(string_data);
+      if (RuntimeOption::AlwaysPopulateRawPostData || ! needDelete) {
+        // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
+        raw_post = string_data;
       }
     }
   }

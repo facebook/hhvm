@@ -2890,7 +2890,7 @@ void BaseMap::Unserialize(ObjectData* obj,
     Variant k;
     k.unserialize(uns, Uns::Mode::ColKey);
     int32_t* p;
-    Elm* e;
+    Elm* e = nullptr;
     if (k.isInteger()) {
       auto h = k.toInt64();
       p = mp->findForInsert(h);

@@ -157,6 +157,7 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
     case LOC_CANONICALIZE: ulocfunc = uloc_canonicalize; break;
     default:
       assert(false);
+      return false;
   }
 
   String buf(64, ReserveString);
@@ -211,6 +212,7 @@ static Variant get_icu_display_value(const String &locale,
     case LOC_DISPLAY:  ulocfunc = uloc_getDisplayName;     break;
     default:
       assert(false);
+      return false;
   }
 
   String buf(64 * sizeof(UChar), ReserveString);

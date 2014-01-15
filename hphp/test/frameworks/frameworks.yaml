@@ -31,6 +31,10 @@
     url: https://github.com/joomla/joomla-framework.git
     branch: master
     commit: fb57d5e2a83979c90c1a7a186ac2804404a61385
+  joomlacms:
+    url: https://github.com/joomla/joomla-cms.git
+    branch: master
+    commit: 925cb82ee989a3af6adf09e3285d0c4a67eaa306
   laravel:
     url: https://github.com/laravel/framework.git
     branch: master

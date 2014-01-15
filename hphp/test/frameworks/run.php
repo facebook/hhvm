@@ -1284,6 +1284,18 @@ class Joomla extends Framework {
   }
 }
 
+class JoomlaCMS extends Framework {
+  public function __construct(string $name) {
+    parent::__construct($name, true, TestFindModes::TOKEN);
+  }
+  protected function getInfo(): Map {
+    return Map {
+      'install_root' => __DIR__.'/frameworks/joomla-cms',
+      'test_path' => __DIR__.'/frameworks/joomla-cms'
+    };
+  }
+}
+
 class Laravel extends Framework {
   public function __construct(string $name) { parent::__construct($name); }
   protected function getInfo(): Map {

@@ -2,19 +2,15 @@
 
 include "queryable.inc";
 
-function orderby() { return "ok\n"; }
-function descending() { return orderby(); }
-function ascending() { return descending(); }
-
 $customers = new Queryable();
+$name = "foo";
+$id = 123;
 
 $q = from $c in $customers
      from $o in $c->Orders
-     orderby $o->Total descending
+     where $c->Name == $name && $id == $o->OrderId
      select tuple($c->Name, $o->OrderID, $o->Total);
 
 foreach ($q as $e) {
   echo $e."\n";
 }
-
-echo ascending();

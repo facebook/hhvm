@@ -2,8 +2,8 @@
 
 class Queryable {
 
-  public function executeQuery($ast, $args) {
-    return Vector{$ast};
+  public function executeQuery() {
+    return func_get_args();
   }
 }
 

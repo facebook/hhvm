@@ -5019,20 +5019,24 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
       case Expression::KindOfQueryExpression: {
         QueryExpressionPtr query(static_pointer_cast<QueryExpression>(node));
-
-        visit(query->getCollection());
+        auto args = *query->getQueryArguments();
+        auto numArgs = args.getCount();
+        visit(args[0]);
         emitConvertToCell(e);
         auto fpiStart = m_ue.bcPos();
         StringData* executeQuery = makeStaticString("executeQuery");
-        e.FPushObjMethodD(2, executeQuery);
+        e.FPushObjMethodD(numArgs, executeQuery);
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
           e.String(query->getQueryString());
           emitFPass(e, 0, PassByRefKind::ErrorOnCell);
-          e.Null();
-          emitFPass(e, 1, PassByRefKind::ErrorOnCell);
+          for (int i = 1; i < numArgs; i++) {
+            visit(args[i]);
+            emitConvertToCell(e);
+            emitFPass(e, i, PassByRefKind::ErrorOnCell);
+          }
         }
-        e.FCall(2);
+        e.FCall(numArgs);
         e.UnboxR();
 
         return true;

@@ -91,7 +91,6 @@ public:
 private:
   typedef std::map<std::string, std::vector<std::string>> ResponseHeaders;
 
-  void handleHeader(const std::string& key, const std::string& value);
   std::string getRawHeader(const std::string& name);
   /*
    * HTTP_IF_MODIFIED_SINCE -> If-Unmodified-Since
@@ -102,31 +101,13 @@ private:
    */
   std::string mangleHeader(const std::string& name);
 
-  static bool compareKeys(const std::string& key,
-                          const std::string& other_key);
-  static bool compareValues(const std::string& value,
-                            const std::string& other_value);
-
   const void *getPostDataImpl(int &size, bool progress);
-
-  static const std::string k_requestURIKey;
-  static const std::string k_remoteHostKey;
-  static const std::string k_remoteAddrKey;
-  static const std::string k_remotePortKey;
-  static const std::string k_methodKey;
-  static const std::string k_httpVersionKey;
-  static const std::string k_contentLengthKey;
-  static const std::string k_documentRoot;
-  static const std::string k_serverNameKey;
-  static const std::string k_serverPortKey;
-  static const std::string k_serverAddrKey;
-  static const std::string k_httpsKey;
 
   FastCGIConnection* m_connection;
   int m_id;
   folly::IOBufQueue m_bodyQueue;
   std::unique_ptr<folly::IOBuf> m_currBody;
-  HeaderMap m_requestHeaders;
+  std::unordered_map<std::string, std::string> m_requestHeaders;
   std::string m_requestURI;
   std::string m_documentRoot;
   std::string m_remoteHost;
@@ -153,4 +134,3 @@ private:
 }
 
 #endif
-

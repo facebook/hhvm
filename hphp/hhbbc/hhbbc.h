@@ -119,7 +119,7 @@ struct Options {
    * potentially segfaulting at runtime.  We want to change this to
    * fatal at unserialize time.  TODO(#2516227).
    */
-  bool HardPrivatePropInference = false;
+  bool HardPrivatePropInference = true;
 };
 extern Options options;
 

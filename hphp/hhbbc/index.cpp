@@ -722,13 +722,6 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   if (tc.isTypeVar()) return TCell;
 
   /*
-   * Currently, nullable extended hints (?Foo) are runtime enforced,
-   * except that failing to pass a parameter doesn't fail the type
-   * hint, so we can't assume it's TInitCell yet.
-   */
-  if (tc.isNullable() && tc.isExtended()) return TCell;
-
-  /*
    * Soft hints (@Foo) are not checked.
    */
   if (tc.isSoft()) return TCell;

@@ -264,12 +264,44 @@ struct IRBuilder {
    * an SSATmp* that is only defined in the next branch, without letting it
    * escape into the caller's scope (most commonly used with things like
    * LdMem).
+   *
+   * The producedRefs argument is needed for the refcount optimizations in
+   * refcount-opts.cpp. It should be the number of unconsumed references
+   * forwarded from each Jmp src to the DefLabel's dst (for a description of
+   * reference producers and consumers, read the "Refcount Optimizations"
+   * section in hphp/doc/hackers-guide/jit-optimizations.md). As an example,
+   * code that looks like the following should pass 1 for producedRefs, since
+   * LdCns and LookupCns each produce a reference that should then be forwarded
+   * to t2, the dest of the DefLabel:
+   *
+   * B0:
+   *   t0:FramePtr = DefFP
+   *   t1:Cell = LdCns "foo"        // produce reference to t1
+   *   CheckInit t1:Cell -> B3<Unlikely>
+   *  -> B1
+   *
+   * B1 (preds B0):
+   *   Jmp t1:Cell -> B2            // forward t1's unconsumed ref to t2
+   *
+   * B2 (preds B1, B3):
+   *   t2:Cell = DefLabel           // produce reference to t2, from t1 and t4
+   *   StLoc<1> t0:FramePtr t2:Cell // consume reference to t2
+   *   Halt
+   *
+   * B3<Unlikely> (preds B0):
+   *   t3:Uninit = AssertType<Uninit> t1:Cell // consume reference to t1
+   *   t4:Cell = LookupCns "foo"    // produce reference to t4
+   *   Jmp t4:Cell -> B2            // forward t4's unconsumed ref to t2
+   *
+   * A sufficiently advanced analysis pass could deduce this value from the
+   * structure of the IR, but it would require traversing all possible control
+   * flow paths, causing an explosion of required CPU time and/or memory.
    */
   template <class Branch, class Next, class Taken>
-  SSATmp* cond(Branch branch, Next next, Taken taken) {
+  SSATmp* cond(unsigned producedRefs, Branch branch, Next next, Taken taken) {
     Block* taken_block = m_unit.defBlock();
     Block* done_block = m_unit.defBlock();
-    IRInstruction* label = m_unit.defLabel(1, m_state.marker());
+    IRInstruction* label = m_unit.defLabel(1, m_state.marker(), {producedRefs});
     done_block->push_back(label);
     DisableCseGuard guard(*this);
 

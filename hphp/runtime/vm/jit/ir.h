@@ -158,6 +158,7 @@ class FailedCodeGen : public std::runtime_error {
  *               types such as (Type::Str | Type::Null)
  *     DSubtract(N,t) single dest has type of src N with t removed
  *     DLdRaw    single dst has type determined by RawMemData
+ *     DCns      single dst's type is the union of legal types for PHP constants
  *
  * srcinfo:
  *
@@ -438,10 +439,10 @@ O(LdClsCns,                     DParam, NA,                                B) \
 O(LookupClsRDSHandle,     D(RDSHandle), S(Str),                          C|N) \
 O(DerefClsRDSHandle,            D(Cls), S(RDSHandle),                     NF) \
 O(LookupClsCns,           D(Uncounted), NA,                           E|Er|N) \
-O(LdCns,                  D(Uncounted), CStr,                             NF) \
-O(LookupCns,              D(Uncounted), CStr,                         E|Er|N) \
-O(LookupCnsE,             D(Uncounted), CStr,                         E|Er|N) \
-O(LookupCnsU,             D(Uncounted), CStr CStr,                    E|Er|N) \
+O(LdCns,                          DCns, CStr,                            PRc) \
+O(LookupCns,                      DCns, CStr,                     E|Er|N|PRc) \
+O(LookupCnsE,                     DCns, CStr,                     E|Er|N|PRc) \
+O(LookupCnsU,                     DCns, CStr CStr,                E|Er|N|PRc) \
 O(LookupClsMethod,                  ND, S(Cls)                                \
                                           S(Str)                              \
                                           S(StkPtr)                           \

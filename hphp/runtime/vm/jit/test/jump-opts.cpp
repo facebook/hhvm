@@ -57,7 +57,7 @@ TEST(JumpOpts, eliminateTrivial) {
     auto value = unit.gen(Conjure, marker, Type::Gen);
     entry->push_back(value);
     entry->push_back(unit.gen(Jmp, marker, second, value->dst()));
-    second->push_back(unit.defLabel(1, marker));
+    second->push_back(unit.defLabel(1, marker, {0}));
     second->push_back(unit.gen(Halt, marker));
 
     optimizeJumps(unit);

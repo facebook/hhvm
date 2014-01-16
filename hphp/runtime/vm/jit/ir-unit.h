@@ -159,6 +159,11 @@ makeInstruction(Func func, Args&&... args) {
 
 //////////////////////////////////////////////////////////////////////
 
+/* Map from DefLabel instructions to produced references. See comment in
+ * IRBuilder::cond for more details. */
+using LabelRefs = smart::hash_map<const IRInstruction*,
+                                  smart::vector<unsigned>>;
+
 /*
  * IRUnit is the compilation unit for the JIT.  It owns an Arena used for
  * allocating and controlling the lifetime of Block, IRInstruction, ExtraData,
@@ -269,7 +274,8 @@ public:
   /*
    * Some helpers for creating specific instruction patterns.
    */
-  IRInstruction* defLabel(unsigned numDst, BCMarker marker);
+  IRInstruction* defLabel(unsigned numDst, BCMarker marker,
+                          const smart::vector<unsigned>& producedRefs);
   Block* defBlock();
 
   template<typename T> SSATmp* cns(T val) {
@@ -302,6 +308,8 @@ public:
   uint32_t numIds(const Block*) const { return numBlocks(); }
   uint32_t numIds(const IRInstruction*) const { return numInsts(); }
 
+  const LabelRefs& labelRefs() const { return m_labelRefs; }
+
   std::string toString() const;
 
 private:
@@ -315,6 +323,9 @@ private:
   uint32_t m_nextInstId;
   uint32_t m_bcOff; // bytecode offset where this unit starts
   Block* m_entry; // entry point
+
+  // Information collected for optimization passes
+  LabelRefs m_labelRefs;
 };
 
 //////////////////////////////////////////////////////////////////////

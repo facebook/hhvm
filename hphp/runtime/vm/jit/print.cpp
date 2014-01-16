@@ -418,13 +418,32 @@ std::string Block::toString() const {
  */
 void print(std::ostream& os, const IRUnit& unit,
            const RegAllocInfo* regs, const AsmInfo* asmInfo,
-           const GuardConstraints* guards) {
+           const GuardConstraints* guards, bool dotBodies) {
+  // For nice-looking dumps, we want to remember curMarker between blocks.
+  BCMarker curMarker;
+
   auto const layout = layoutBlocks(unit);
   auto const& blocks = layout.blocks;
   // Print the block CFG above the actual code.
   os << "digraph G {\n";
   for (Block* block : blocks) {
     if (block->empty()) continue;
+    if (dotBodies && block->hint() != Block::Hint::Unlikely) {
+      // Include the IR in the body of the node
+      std::ostringstream out;
+      print(out, block, regs, asmInfo, guards, &curMarker);
+      auto bodyRaw = out.str();
+      std::string body;
+      body.reserve(bodyRaw.size() * 1.25);
+      for (auto c : bodyRaw) {
+        if (c == '\n')      body += "\\n";
+        else if (c == '"')  body += "\\\"";
+        else if (c == '\\') body += "\\\\";
+        else                body += c;
+      }
+      os << folly::format("B{} [shape=\"box\" label=\"{}\"]\n",
+                          block->id(), body);
+    }
 
     auto* next = block->next();
     auto* taken = block->taken();
@@ -437,8 +456,8 @@ void print(std::ostream& os, const IRUnit& unit,
     os << "\n";
   }
   os << "}\n";
-  // For nice-looking dumps, we want to remember curMarker between blocks.
-  BCMarker curMarker;
+
+  curMarker = BCMarker();
   for (auto it = blocks.begin(); it != blocks.end(); ++it) {
     if (it == layout.astubsIt) {
       os << folly::format("\n{:-^60}", "unlikely blocks");

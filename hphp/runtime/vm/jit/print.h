@@ -67,7 +67,8 @@ void print(const Block* block);
 void print(std::ostream& ostream, const IRUnit&,
            const RegAllocInfo* regs = nullptr,
            const AsmInfo* asmInfo = nullptr,
-           const GuardConstraints* guards = nullptr);
+           const GuardConstraints* guards = nullptr,
+           bool dotBodies = false);
 void print(const IRUnit& unit);
 
 /*

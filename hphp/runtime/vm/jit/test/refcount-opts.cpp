@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/opt.h"
@@ -49,6 +50,5 @@ TEST(RefcountOpts, trivial) {
   EXPECT_EQ(1, std::count_if(b->begin(), b->end(), matcher(IncRef)));
   EXPECT_EQ(1, std::count_if(b->begin(), b->end(), matcher(DecRef)));
 }
-
 
 }}

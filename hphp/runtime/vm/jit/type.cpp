@@ -770,6 +770,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DBuiltin  return builtinReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
 #define DLdRaw    return inst->extra<RawMemData>()->info().type;
+#define DCns      return Type::Uninit | Type::InitNull | Type::Bool |   \
+                         Type::Int | Type::Dbl | Type::Str | Type::Res;
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -796,6 +798,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DBuiltin
 #undef DSubtract
 #undef DLdRaw
+#undef DCns
 
 }
 
@@ -968,6 +971,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DAllocObj
 #define DThis
 #define DLdRaw
+#define DCns
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
   case opcode: dstinfo srcinfo countCheck(); return;
@@ -1002,6 +1006,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DLdRef
 #undef DThis
 #undef DLdRaw
+#undef DCns
 
 }
 

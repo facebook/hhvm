@@ -1081,44 +1081,47 @@ void IRBuilder::insertLocalPhis() {
 
   smart::hash_map<Block*, smart::vector<SSATmp*>> blockToPhiTmpsMap;
   smart::vector<uint32_t> localIds;
-  int numPhis = 0;
 
-  // Determine which SSATmps must receive a phi.
+  // Determine which SSATmps must receive a phi. To make some optimizations
+  // simpler, we require that an SSATmp for a local is either provided in no
+  // incoming branches, or all incoming branches. Sometimes we have to insert
+  // LdLocs in our preds to make this true.
   for (int i = 0; i < m_state.func()->numLocals(); i++) {
-    SSATmp* phiLocal = nullptr;
-    bool needsPhi = false;
-    bool definedAll = true;
+    smart::hash_set<Edge*> missingPreds;
+    smart::hash_set<SSATmp*> incomingValues;
 
     for (auto& e : m_curBlock->preds()) {
       Block* pred = e.inst()->block();
       auto local = m_state.localsForBlock(pred)[i].value;
-      if (local == nullptr) {
-        definedAll = false;
-        break;
-      }
-      if (phiLocal == nullptr) {
-        phiLocal = local;
-      } else if (phiLocal != local) {
-        needsPhi = true;
-      }
+      if (local == nullptr) missingPreds.insert(&e);
+      incomingValues.insert(local);
     }
 
-    if (!needsPhi || !definedAll) {
-      continue;
-    }
-    numPhis++;
+    // If there's only one unique incoming value, we don't need a phi. This
+    // includes situations where no incoming blocks provide the value, since
+    // they're really providing nullptr.
+    if (incomingValues.size() == 1) continue;
     localIds.push_back(i);
 
     for (auto& e : m_curBlock->preds()) {
       Block* pred = e.inst()->block();
-      auto local = m_state.localsForBlock(pred)[i].value;
-      blockToPhiTmpsMap[pred].push_back(local);
+      auto& local = m_state.localsForBlock(pred)[i];
+      if (missingPreds.count(&e)) {
+        // We need to insert a LdLoc in pred. It's safe to use the fpValue from
+        // m_curBlock since we currently require that all our preds share the
+        // same fp.
+        auto* ldLoc = m_unit.gen(LdLoc, e.inst()->marker(),
+                                 local.type, LocalId(i), m_state.fp());
+        pred->insert(pred->iteratorTo(e.inst()), ldLoc);
+        blockToPhiTmpsMap[pred].push_back(ldLoc->dst());
+      } else {
+        blockToPhiTmpsMap[pred].push_back(local.value);
+      }
     }
   }
 
-  if (numPhis == 0) {
-    return;
-  }
+  if (localIds.empty()) return;
+  auto const numPhis = localIds.size();
 
   // Split incoming critical edges.
   bool again = true;
@@ -1154,13 +1157,16 @@ void IRBuilder::insertLocalPhis() {
     m_unit.replace(&jmp, Jmp, std::make_pair(tmpVec.size(), tmpVec.data()));
   }
 
-  // Create a DefLabel with appropriately-typed dests.
-  IRInstruction* label = m_unit.defLabel(numPhis, m_state.marker());
+  // Create a DefLabel with appropriately-typed dests. We pass a vector of 1's
+  // for the producedRefs argument to defLabel since each local owns a single
+  // reference to its value.
+  IRInstruction* label = m_unit.defLabel(numPhis, m_state.marker(),
+                                         smart::vector<unsigned>(numPhis, 1));
   m_curBlock->prepend(label);
   retypeDests(label);
 
   // Add TrackLoc's to update local state.
-  for (int i = 0; i < numPhis; ++i) {
+  for (unsigned i = 0; i < numPhis; ++i) {
     gen(TrackLoc, LocalId(localIds.at(i)), label->dst(i));
   }
 }

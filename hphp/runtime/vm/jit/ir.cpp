@@ -79,6 +79,7 @@ namespace {
 #define DBuiltin  HasDest
 #define DSubtract(n,t) HasDest
 #define DLdRaw    HasDest
+#define DCns      HasDest
 
 struct {
   const char* name;
@@ -125,6 +126,7 @@ struct {
 #undef DBuiltin
 #undef DSubtract
 #undef DLdRaw
+#undef DCns
 
 } // namespace
 

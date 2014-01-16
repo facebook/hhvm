@@ -153,6 +153,7 @@ function get_options($argv) {
     'log' => 'l',
     'failure-file:' => '',
     'arm' => '',
+    'bccf' => '',
     'hhas-round-trip' => '',
     'color' => 'c',
     'no-fun' => '',
@@ -335,6 +336,7 @@ function hhvm_cmd_impl($options, $config /*, $extra_args... */) {
     '-vEval.EnableArgsInBacktraces=true',
     mode_cmd($options),
     isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
+    isset($options['bccf']) ? '-vEval.HHIRBytecodeControlFlow=1' : '',
     extra_args($options),
   );
 

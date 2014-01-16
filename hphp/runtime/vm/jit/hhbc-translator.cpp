@@ -694,6 +694,7 @@ void HhbcTranslator::emitCnsCommon(uint32_t id,
   } else {
     SSATmp* c1 = gen(LdCns, cnsNameTmp);
     result = m_irb->cond(
+      1,
       [&] (Block* taken) { // branch
         gen(CheckInit, taken, c1);
       },
@@ -702,6 +703,10 @@ void HhbcTranslator::emitCnsCommon(uint32_t id,
       },
       [&] { // Taken: miss in TC, do lookup & init
         m_irb->hint(Block::Hint::Unlikely);
+        // We know that c1 is Uninit in this branch but we have to encode this
+        // in the IR.
+        gen(AssertType, Type::Uninit, c1);
+
         if (fallbackNameTmp) {
           return gen(LookupCnsU, makeCatch(),
                      cnsNameTmp, fallbackNameTmp);
@@ -710,8 +715,7 @@ void HhbcTranslator::emitCnsCommon(uint32_t id,
           return gen(LookupCnsE, makeCatch(), cnsNameTmp);
         }
         return gen(LookupCns, makeCatch(), cnsNameTmp);
-      }
-    );
+      });
   }
   push(result);
 }
@@ -1234,6 +1238,7 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
     gen(LdStaticLocCached, StaticLocName { curFunc(), name });
 
   auto const res = m_irb->cond(
+    0,
     [&] (Block* taken) {
       gen(CheckStaticLocInit, taken, box);
     },
@@ -1253,8 +1258,7 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
        */
       gen(StaticLocInitCached, box, cns(Type::InitNull));
       return cns(false);
-    }
-  );
+    });
   gen(IncRef, box);
   auto const oldValue = ldLoc(locId, ldgblExit, DataTypeGeneric);
   genStLocal(locId, m_irb->fp(), box);
@@ -2922,6 +2926,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
     // Look up the Func* in the targetcache. If it's not there, try the slow
     // path. If that fails, slow exit.
     auto func = m_irb->cond(
+      0,
       [&](Block* taken) {
         return gen(CheckNonNull, taken, gen(LdClsMethodCacheFunc, data));
       },
@@ -2933,8 +2938,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
         auto result = gen(LookupClsMethodCache, makeCatch(), data,
                           m_irb->fp());
         return gen(CheckNonNull, slowExit, result);
-      }
-    );
+      });
     auto clsCtx = gen(LdClsMethodCacheCls, data);
 
     emitFPushActRec(func,
@@ -3027,6 +3031,7 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
   } else {
     auto const data = ClsMethodData{cls->name(), methName};
     auto func = m_irb->cond(
+      0,
       [&](Block* taken) {
         return gen(CheckNonNull, taken, gen(LdClsMethodFCacheFunc, data));
       },
@@ -3038,8 +3043,7 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
         auto result = gen(LookupClsMethodFCache, catchBlock, data,
                           cns(cls), m_irb->fp());
         return gen(CheckNonNull, exitBlock, result);
-      }
-    );
+      });
     auto ctx = gen(GetCtxFwdCallDyn, data, curCtxTmp);
 
     emitFPushActRec(func,
@@ -4275,6 +4279,7 @@ void HhbcTranslator::emitIssetS() {
   auto const ssaCls = popA();
 
   auto const ret = m_irb->cond(
+    0,
     [&] (Block* taken) {
       auto propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName, false);
       return gen(CheckNonNull, taken, propAddr);
@@ -4284,8 +4289,7 @@ void HhbcTranslator::emitIssetS() {
     },
     [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
       return cns(false);
-    }
-  );
+    });
 
   destroyName(ssaPropName);
   push(ret);
@@ -4301,6 +4305,7 @@ void HhbcTranslator::emitEmptyS() {
 
   auto const ssaCls = popA();
   auto const ret = m_irb->cond(
+    0,
     [&] (Block* taken) {
       auto propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName, false);
       return gen(CheckNonNull, taken, propAddr);
@@ -4312,8 +4317,7 @@ void HhbcTranslator::emitEmptyS() {
     },
     [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
       return cns(true);
-    }
-  );
+    });
 
   destroyName(ssaPropName);
   push(ret);
@@ -4359,6 +4363,7 @@ void HhbcTranslator::emitIssetG() {
   if (!name->isA(Type::Str)) PUNT(IssetG-NameNotStr);
 
   auto const ret = m_irb->cond(
+    0,
     [&] (Block* taken) {
       return gen(LdGblAddr, taken, name);
     },
@@ -4367,8 +4372,7 @@ void HhbcTranslator::emitIssetG() {
     },
     [&] { // Taken: global doesn't exist
       return cns(false);
-    }
-  );
+    });
   destroyName(name);
   push(ret);
 }
@@ -4378,6 +4382,7 @@ void HhbcTranslator::emitEmptyG() {
   if (!name->isA(Type::Str)) PUNT(EmptyG-NameNotStr);
 
   auto const ret = m_irb->cond(
+    0,
     [&] (Block* taken) {
       return gen(LdGblAddr, taken, name);
     },
@@ -4388,8 +4393,7 @@ void HhbcTranslator::emitEmptyG() {
     },
     [&] { // Taken: global doesn't exist
       return cns(true);
-    }
-  );
+    });
   destroyName(name);
   push(ret);
 }
@@ -4780,6 +4784,7 @@ void HhbcTranslator::emitMod() {
 
   // check for -1 (dynamic version)
   SSATmp *res = m_irb->cond(
+    0,
     [&] (Block* taken) {
       SSATmp* negone = gen(Eq, tr, cns(-1));
       gen(JmpNZero, taken, negone);
@@ -4790,8 +4795,7 @@ void HhbcTranslator::emitMod() {
     [&] {
       m_irb->hint(Block::Hint::Unlikely);
       return cns(0);
-    }
-  );
+    });
   push(res);
 }
 

@@ -951,6 +951,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::checkInitProp(
   if (!needsCheck) return propAddr;
 
   return m_irb.cond(
+    0,
     [&] (Block* taken) {
       gen(CheckInitMem, taken, propAddr, cns(0));
     },
@@ -974,8 +975,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::checkInitProp(
         return propAddr;
       }
       return m_irb.genPtrToInitNull();
-    }
-  );
+    });
 }
 
 Class* HhbcTranslator::MInstrTranslator::contextClass() const {
@@ -1007,6 +1007,7 @@ void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
     m_base = checkInitProp(m_base, propAddr, propInfo, doWarn, doDefine);
   } else {
     m_base = m_irb.cond(
+      0,
       [&] (Block* taken) {
         return gen(LdMem, Type::Obj, taken, m_base, cns(0));
       },
@@ -1049,8 +1050,7 @@ void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
           gen(ThrowNonObjProp, makeCatch());
         }
         return initNull;
-      }
-    );
+      });
   }
 
   // At this point m_base is either a pointer to init_null_variant or
@@ -1235,6 +1235,7 @@ void HhbcTranslator::MInstrTranslator::emitRatchetRefs() {
   }
 
   m_base = m_irb.cond(
+    0,
     [&] (Block* taken) {
       gen(CheckInitMem, taken, m_misBase, cns(MISOFF(tvRef)));
     },
@@ -1258,8 +1259,7 @@ void HhbcTranslator::MInstrTranslator::emitRatchetRefs() {
     },
     [&] { // Taken: tvRef is Uninit. Do nothing.
       return m_base;
-    }
-  );
+    });
 }
 
 void HhbcTranslator::MInstrTranslator::emitFinalMOp() {
@@ -1665,6 +1665,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
   assert(m_base->isA(Type::Arr) &&
          m_base->type().getArrayKind() == ArrayData::kPackedKind);
   m_result = m_irb.cond(
+    1,
     [&] (Block* taken) {
       gen(CheckPackedArrayBounds, taken, m_base, key);
     },
@@ -1678,8 +1679,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
       m_irb.hint(Block::Hint::Unlikely);
       gen(RaiseArrayIndexNotice, makeCatch(), key);
       return cns(Type::InitNull);
-    }
-  );
+    });
 }
 
 template<KeyType keyType, bool checkForInt>
@@ -1944,6 +1944,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayIsset() {
   assert(m_base->type().getArrayKind() == ArrayData::kPackedKind);
   SSATmp* key = getKey();
   m_result = m_irb.cond(
+    0,
     [&] (Block* taken) {
       gen(CheckPackedArrayBounds, taken, m_base, key);
     },
@@ -1952,8 +1953,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayIsset() {
     },
     [&] { // Taken:
       return cns(false);
-    }
-  );
+    });
 }
 
 template<KeyType keyType, bool checkForInt>

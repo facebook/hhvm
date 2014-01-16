@@ -1980,7 +1980,7 @@ SSATmp* Simplifier::simplifyCheckPackedArrayBounds(const IRInstruction* inst) {
       if (idxVal >= array->arrVal()->size()) {
         return gen(Jmp, inst->taken());
       } else {
-        // We should convert inst to a nop here but that exposes t3626113
+        return gen(Nop);
       }
     }
   }

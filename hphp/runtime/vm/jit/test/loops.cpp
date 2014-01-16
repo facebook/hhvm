@@ -52,7 +52,7 @@ TEST(Loops, Counting) {
   auto exit = unit.defBlock();
   auto back = unit.defBlock();
 
-  auto loop_label = unit.defLabel(2, marker);
+  auto loop_label = unit.defLabel(2, marker, {0, 0});
   loop->push_back(loop_label);
 
   auto cnt0 = unit.cns(0);
@@ -104,7 +104,7 @@ TEST(Loops, ComputeLive) {
   auto exit = unit.defBlock();
   auto back = unit.defBlock();
 
-  auto loop_label = unit.defLabel(2, marker);
+  auto loop_label = unit.defLabel(2, marker, {0, 0});
   loop->push_back(loop_label);
 
   auto cnt0 = unit.cns(0);

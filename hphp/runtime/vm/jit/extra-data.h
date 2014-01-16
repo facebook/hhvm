@@ -696,6 +696,9 @@ struct ShuffleData : IRExtraData {
 
   std::string show() const;
 
+  PhysLoc* begin() const { return dests; }
+  PhysLoc* end()   const { return dests + size; }
+
   PhysLoc* dests; // array of up to [cap] PhysLocs
   uint32_t size; // number of valid dests
   uint32_t cap; // available slots for more dests & srcs

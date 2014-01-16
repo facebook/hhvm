@@ -936,6 +936,7 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
   // so we use the generic version here.
   toSave = toSave & kCallerSaved;
   assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
+  assert(IMPLIES(m_curInst->is(Call, CallArray), toSave.empty()));
   PhysRegSaverParity regSaver(1 + args.numStackArgs(), a, toSave);
 
   // Assign registers to the arguments then prepare them for the call.
@@ -6328,6 +6329,25 @@ void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
                [&](ConditionCode cc) {
                  ifThen(m_as, ccNegate(cc), [&] { m_as.ud2(); });
                });
+}
+
+/*
+ * Defined in translator-asm-helpers.S. Used for an assert in DbgAssertRetAddr.
+ */
+extern "C" void enterTCServiceReq();
+
+void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
+  // With the exception of FreeActRec and RetCtrl, the native return address
+  // should always be the part of enterTCHelper that handles service
+  // requests. To keep things reasonable we only emit this at the beginning of
+  // a bytecode's translation, which should never begin with FreeActRec or
+  // RetCtrl.
+  always_assert(!inst->is(FreeActRec, RetCtrl));
+
+  m_as.cmpq((uintptr_t)enterTCServiceReq, *rsp);
+  ifBlock(CC_NE, [&](Asm& a) {
+     a.ud2();
+  });
 }
 
 void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {

@@ -838,6 +838,7 @@ O(GenericIdx,                  D(Cell), S(Cell)                               \
 O(DbgAssertRefCount,                ND, S(Counted,StaticStr,StaticArr),  N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(DbgAssertType,                    ND, S(Cell),                           E) \
+O(DbgAssertRetAddr,                 ND, NA,                                E) \
 O(Nop,                              ND, NA,                               NF) \
 /* */
 

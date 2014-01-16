@@ -493,16 +493,21 @@ void HhbcTranslator::emitCheckThis() {
   gen(LdThis, makeExitSlow(), m_tb->fp());
 }
 
-void HhbcTranslator::emitRB(Trace::RingBufferType t, SrcKey sk) {
-  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) return;
+void HhbcTranslator::emitRB(Trace::RingBufferType t, SrcKey sk, int level) {
+  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, level)) return;
 
   gen(RBTrace, RBTraceData(t, sk));
 }
 
-void HhbcTranslator::emitRB(Trace::RingBufferType t, const StringData* msg) {
-  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) return;
+void HhbcTranslator::emitRB(Trace::RingBufferType t, const StringData* msg,
+                            int level) {
+  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, level)) return;
 
   gen(RBTrace, RBTraceData(t, msg));
+}
+
+void HhbcTranslator::emitDbgAssertRetAddr() {
+  gen(DbgAssertRetAddr);
 }
 
 void HhbcTranslator::emitBareThis(int notice) {

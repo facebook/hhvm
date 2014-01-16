@@ -452,11 +452,12 @@ struct HhbcTranslator {
   void emitIncTransCounter();
   void emitIncProfCounter(JIT::TransID transId);
   void emitCheckCold(JIT::TransID transId);
-  void emitRB(Trace::RingBufferType t, SrcKey sk);
-  void emitRB(Trace::RingBufferType t, std::string msg) {
-    emitRB(t, makeStaticString(msg));
+  void emitRB(Trace::RingBufferType t, SrcKey sk, int level = 1);
+  void emitRB(Trace::RingBufferType t, std::string msg, int level = 1) {
+    emitRB(t, makeStaticString(msg), level);
   }
-  void emitRB(Trace::RingBufferType t, const StringData* msg);
+  void emitRB(Trace::RingBufferType t, const StringData* msg, int level = 1);
+  void emitDbgAssertRetAddr();
   void emitIdx();
   void emitIdxCommon(Opcode opc, Block* catchBlock = nullptr);
   void emitArrayIdx();

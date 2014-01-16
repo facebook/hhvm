@@ -1917,6 +1917,10 @@ DbgAssertType<T> S0:Cell
   Assert that S0 is of type T at runtime.  If the assertion fails,
   execution is aborted via a hardware exception.
 
+DbgAssertRetAddr
+
+  Assert that the current hardware return address is the expected value. If the
+  assertion fails, execution is aborted via a hardware exception.
 
 18. Iterators
 

@@ -51,6 +51,10 @@ NOOP_OPCODE(TakeStack)
 // XXX
 NOOP_OPCODE(DbgAssertPtr);
 
+// When implemented this shouldn't be a nop, but there's no reason to make us
+// punt on everything until then.
+NOOP_OPCODE(DbgAssertRetAddr)
+
 #undef NOOP_OPCODE
 
 //////////////////////////////////////////////////////////////////////

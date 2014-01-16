@@ -83,6 +83,12 @@ ETCH_LABEL(enterTCHelper$jumpToTC:)
   call *%rdx
 ETCH_LABEL(enterTCHelper$serviceReqLabel:)
 
+  /*
+   * enterTCServiceReq is never called directly; this exists to give the jit
+   * access to the address of the expected return address while in the TC.
+   */
+  .globl ETCH_NAME(enterTCServiceReq)
+  ETCH_NAME(enterTCServiceReq:)
   add $RESERVED_STACK_TOTAL_SPACE, %rsp
   CFI2(adjust_cfa_offset, -RESERVED_STACK_TOTAL_SPACE)
   // Restore infoPtr into %rbx
@@ -123,6 +129,8 @@ ETCH_LABEL(enterTCHelper$copyReqArgs:)
 #elif defined(__AARCH64EL__)
   .globl enterTCHelper
 enterTCHelper:
+  .globl enterTCServiceReq
+enterTCServiceReq:
   brk 0
 
 #endif

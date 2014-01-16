@@ -91,9 +91,8 @@ struct RegAllocInfo {
   RegSet dstRegs(IRInstruction& inst) const {
     auto regs = RegSet();
     if (inst.is(Shuffle)) {
-      auto dests = inst.extra<Shuffle>()->dests;
-      for (uint32_t i = 0, n = inst.numSrcs(); i < n; ++i) {
-        regs |= dests[i].regs();
+      for (auto const& dest : *inst.extra<Shuffle>()) {
+        regs |= dest.regs();
       }
     } else {
       auto& map = m_regs[inst];

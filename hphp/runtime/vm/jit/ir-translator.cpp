@@ -1606,11 +1606,16 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
     ht.emitIncStat(Stats::opcodeToIRPostStatCounter(ni.op()),
                             1, true);
   }
+  ht.emitRB(RBTypeBytecodeStart, ni.source, 2);
 
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     auto const type = flavorToType(instrInputFlavor(pc, i));
     if (type != Type::Gen) m_hhbcTrans.assertTypeStack(i, type);
+  }
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    ht.emitDbgAssertRetAddr();
   }
 
   if (instrMustInterp(ni) || ni.interp) {

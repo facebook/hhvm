@@ -26,7 +26,7 @@
 #define KindOfInvalid DontUseKindOfInvalidInThisFile
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 static inline DataType
 normalizeDataType(DataType dt) {

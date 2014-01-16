@@ -17,6 +17,7 @@
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/code_model_enums.h"
 #include "hphp/parser/hphp.tab.hpp"
 
 using namespace HPHP;
@@ -122,6 +123,25 @@ bool ArrayPairExpression::canonCompare(ExpressionPtr e) const {
   return m_ref == a->m_ref;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void ArrayPairExpression::outputCodeModel(CodeGenerator &cg) {
+  if (m_name) {
+    cg.printObjectHeader("BinaryOpExpression", 4);
+    cg.printPropertyHeader("expression1");
+    m_name->outputCodeModel(cg);
+    cg.printPropertyHeader("expression2");
+    cg.printExpression(m_value, m_ref);
+    cg.printPropertyHeader("operation");
+    cg.printValue(PHP_ARRAY_PAIR);
+    cg.printPropertyHeader("sourceLocation");
+    cg.printLocation(this->getLocation());
+    cg.printObjectFooter();
+  } else {
+    cg.printExpression(m_value, m_ref);
+  }
+  return;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions

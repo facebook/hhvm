@@ -13,8 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/server/admin-request-handler.h"
+
+#include <string>
+#include <sstream>
+#include <iomanip>
+
+#include <boost/lexical_cast.hpp>
+
+#ifdef GOOGLE_CPU_PROFILER
+#include <google/profiler.h>
+#endif
+
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
@@ -31,9 +41,8 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/ext/mysql_stats.h"
-#include "hphp/runtime/base/shared-store-stats.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/timer.h"
@@ -41,16 +50,12 @@
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_apc.h"
 
-#include <sstream>
-#include <iomanip>
-
-#ifdef GOOGLE_CPU_PROFILER
-#include <google/profiler.h>
-#endif
+namespace HPHP {
 
 using std::endl;
+using boost::lexical_cast;
+using std::string;
 
-namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
@@ -112,7 +117,7 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
 void AdminRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().onNewRequest();
   transport->addHeader("Content-Type", "text/plain");
-  string cmd = transport->getCommand();
+  std::string cmd = transport->getCommand();
 
   do {
     if (cmd == "" || cmd == "help") {
@@ -151,8 +156,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
         "/stats-web:       turn on/off server page stats (CPU and gen time)\n"
         "/stats-mem:       turn on/off memory statistics\n"
-        "/stats-apc:       turn on/off APC statistics\n"
-        "/stats-apc-key:   turn on/off APC key statistics\n"
         "/stats-mcc:       turn on/off memcache statistics\n"
         "/stats-sql:       turn on/off SQL statistics\n"
         "/stats-mutex:     turn on/off mutex statistics\n"
@@ -175,13 +178,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/stats.html:      show server stats in HTML\n"
         "    (same as /stats.xml)\n"
 
-        "/apc-ss:          get apc size stats\n"
-        "/apc-ss-flat:     get apc size stats in flat format\n"
-        "/apc-ss-keys:     get apc size break-down on keys\n"
-        "/apc-ss-dump:     dump the size info on each key to /tmp/APC_details\n"
-        "                  only valid when EnableAPCSizeDetail is true\n"
-        "    keysample     optional, only dump keys that belongs to the same\n"
-        "                  group as <keysample>\n"
         "/const-ss:        get const_map_size\n"
         "/static-strings:  get number of static strings\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
@@ -201,7 +197,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/vm-tcspace:      show space used by translator caches\n"
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
-        "/vm-tcreset:      throw away translations and start over\n"
         "/vm-namedentities:show size of the NamedEntityTable\n"
         ;
 #ifdef USE_TCMALLOC
@@ -264,6 +259,26 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       HttpServer::Server->stop();
       break;
     }
+    if (cmd == "set-log-level") {
+      string result("OK\n");
+      string level = transport->getParam("level");
+      if (level == "None") {
+        Logger::LogLevel = Logger::LogNone;
+      } else if (level == "Error") {
+        Logger::LogLevel = Logger::LogError;
+      } else if (level == "Warning") {
+        Logger::LogLevel = Logger::LogWarning;
+      } else if (level == "Info") {
+        Logger::LogLevel = Logger::LogInfo;
+      } else if (level == "Verbose") {
+        Logger::LogLevel = Logger::LogVerbose;
+      } else {
+        result = "Failed to set log level\n";
+      }
+
+      transport->sendString(result);
+      break;
+    }
     if (cmd == "build-id") {
       transport->sendString(RuntimeOption::BuildId, 200);
       break;
@@ -306,10 +321,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "prof", 4) == 0 &&
         handleProfileRequest(cmd, transport)) {
-      break;
-    }
-    if (strncmp(cmd.c_str(), "apc-ss", 6) == 0 &&
-        handleAPCSizeRequest(cmd, transport)) {
       break;
     }
     if (strncmp(cmd.c_str(), "dump", 4) == 0 &&
@@ -513,6 +524,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().log(transport, nullptr);
 }
 
+void AdminRequestHandler::abortRequest(Transport *transport) {
+  GetAccessLog().onNewRequest();
+  transport->sendString("Service Unavailable", 503);
+  GetAccessLog().log(transport, nullptr);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // stats commands
 
@@ -526,13 +543,13 @@ static bool send_report(Transport *transport, ServerStats::Format format,
                         const char *mime) {
   int64_t  from   = transport->getInt64Param ("from");
   int64_t  to     = transport->getInt64Param ("to");
-  string agg    = transport->getParam      ("agg");
-  string keys   = transport->getParam      ("keys");
-  string url    = transport->getParam      ("url");
+  std::string agg    = transport->getParam      ("agg");
+  std::string keys   = transport->getParam      ("keys");
+  std::string url    = transport->getParam      ("url");
   int    code   = transport->getIntParam   ("code");
-  string prefix = transport->getParam      ("prefix");
+  std::string prefix = transport->getParam      ("prefix");
 
-  string out;
+  std::string out;
   ServerStats::Report(out, format, from, to, agg, keys, url, code, prefix);
 
   transport->addHeader("Content-Type", mime);
@@ -556,7 +573,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
   if (cmd == "check-load") {
     int count = HttpServer::Server->getPageServer()->getActiveWorker();
-    transport->sendString(lexical_cast<string>(count));
+    transport->sendString(boost::lexical_cast<std::string>(count));
     return true;
   }
   if (cmd == "check-ev") {
@@ -581,14 +598,16 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     ServerPtr server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
-    Transl::Translator* tx = Transl::Translator::Get();
+    auto* tx = JIT::tx64;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
+    appendStat("tc-hotsize", tx->getHotCodeSize());
     appendStat("tc-size", tx->getCodeSize());
+    appendStat("tc-profsize", tx->getProfCodeSize());
     appendStat("tc-stubsize", tx->getStubSize());
     appendStat("targetcache", RDS::usedBytes());
     appendStat("rds", RDS::usedBytes()); // TODO(#2966387): temp double logging
     appendStat("units", Eval::FileRepository::getLoadedFiles());
-    appendStat("Funcs", Func::nextFuncId());
+    appendStat("funcs", Func::nextFuncId());
     out << "}" << endl;
     transport->sendString(out.str());
     return true;
@@ -604,7 +623,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "check-sat") {
-    vector<std::pair<std::string, int>> stats;
+    std::vector<std::pair<std::string, int>> stats;
     HttpServer::Server->getSatelliteStats(&stats);
     std::stringstream out;
     bool first = true;
@@ -670,12 +689,6 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
   if (cmd == "stats-mem") {
     toggle_switch(transport, RuntimeOption::EnableMemoryStats);
     return true;
-  }
-  if (cmd == "stats-apc") {
-    return toggle_switch(transport, RuntimeOption::EnableAPCStats);
-  }
-  if (cmd == "stats-apc-key") {
-    return toggle_switch(transport, RuntimeOption::EnableAPCKeyStats);
   }
   if (cmd == "stats-mcc") {
     return toggle_switch(transport, RuntimeOption::EnableMemcacheStats);
@@ -787,52 +800,6 @@ bool AdminRequestHandler::handleCPUProfilerRequest(const std::string &cmd,
 }
 #endif
 
-///////////////////////////////////////////////////////////////////////////////
-// APC size profiling
-
-bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
-                                                Transport *transport) {
-  if (!RuntimeOption::EnableAPCSizeStats &&
-      (cmd == "apc-ss" || cmd == "apc-ss-keys" || cmd == "apc-ss-dump" ||
-       cmd == "apc-ss-flat")) {
-    transport->sendString("Not Enabled\n");
-    return true;
-  }
-  if (cmd == "apc-ss") {
-    std::string result = SharedStoreStats::report_basic();
-    transport->sendString(result);
-    return true;
-  }
-  if (cmd == "apc-ss-flat") {
-    std::string result = SharedStoreStats::report_basic_flat();
-    transport->sendString(result);
-    return true;
-  }
-  if (cmd == "apc-ss-keys") {
-    if (!RuntimeOption::EnableAPCSizeGroup) {
-      transport->sendString("Not Enabled\n");
-      return true;
-    }
-    std::string result = SharedStoreStats::report_keys();
-    transport->sendString(result);
-    return true;
-  }
-  if (cmd == "apc-ss-dump") {
-    if (!RuntimeOption::EnableAPCSizeDetail) {
-      transport->sendString("Not Enabled\n");
-      return true;
-    }
-    string key_sample = transport->getParam("keysample");
-    if (SharedStoreStats::snapshot("/tmp/APC_details", key_sample)) {
-      transport->sendString("Done\n");
-    } else {
-      transport->sendString("Failed\n");
-    }
-    return true;
-  }
-  return false;
-}
-
 bool AdminRequestHandler::handleConstSizeRequest (const std::string &cmd,
                                                   Transport *transport) {
   if (!apcExtension::EnableConstLoad && cmd == "const-ss") {
@@ -869,7 +836,7 @@ typedef std::map<int, PCInfo> InfoMap;
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(Transl::Translator::Get()->getUsage());
+    transport->sendString(JIT::tx64->getUsage());
     return true;
   }
   if (cmd == "vm-namedentities") {
@@ -879,22 +846,10 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "vm-dump-tc") {
-    if (HPHP::Transl::tc_dump()) {
+    if (HPHP::JIT::tc_dump()) {
       transport->sendString("Done");
     } else {
       transport->sendString("Error dumping the translation cache");
-    }
-    return true;
-  }
-  if (cmd == "vm-tcreset") {
-    int64_t start = Timer::GetCurrentTimeMicros();
-    if (Transl::Translator::Get()->replace()) {
-      string msg;
-      Util::string_printf(msg, "Done %" PRId64 " ms",
-                          (Timer::GetCurrentTimeMicros() - start) / 1000);
-      transport->sendString(msg);
-    } else {
-      transport->sendString("Failed");
     }
     return true;
   }

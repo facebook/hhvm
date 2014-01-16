@@ -31,6 +31,7 @@
 #include <limits.h>
 #include <errno.h>
 #include <vector>
+#include <iosfwd>
 
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
@@ -106,7 +107,7 @@ class FormatToken;
 
 class Debugger : public Simulator {
  public:
-  explicit Debugger(Decoder* decoder, std::ostream& stream = std::cout);
+  explicit Debugger(Decoder* decoder, std::ostream& stream);
 
   virtual void Run();
   void VisitException(Instruction* instr);

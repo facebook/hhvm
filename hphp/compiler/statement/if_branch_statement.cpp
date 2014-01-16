@@ -84,6 +84,26 @@ void IfBranchStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void IfBranchStatement::outputCodeModel(CodeGenerator &cg) {
+  if (m_condition == nullptr) {
+    cg.printAsBlock(m_stmt);
+    return;
+  }
+  auto numProps = m_stmt != nullptr ? 3 : 2;
+  cg.printObjectHeader("ConditionalStatement", numProps);
+  cg.printPropertyHeader("condition");
+  m_condition->outputCodeModel(cg);
+  if (m_stmt != nullptr) {
+    cg.printPropertyHeader("trueBlock");
+    cg.printAsBlock(m_stmt);
+  }
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void IfBranchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

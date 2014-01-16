@@ -39,13 +39,18 @@ TRACE_SET_MOD(tprefix);
 namespace Trace {
 
 int levels[NumModules];
+__thread int tl_levels[NumModules];
+__thread int indentDepth = 0;
+
 static FILE* out;
 
-const char *tokNames[] = {
+static const char *tokNames[] = {
 #define TM(x) #x,
   TRACE_MODULES
 #undef TM
 };
+
+namespace {
 
 /*
  * Dummy class to get some code to run before main().
@@ -101,6 +106,8 @@ class Init {
 };
 
 Init i;
+
+}
 
 const char* moduleName(Module mod) {
   return tokNames[mod];

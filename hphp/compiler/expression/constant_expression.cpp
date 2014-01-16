@@ -274,6 +274,17 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ConstantExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("SimpleVariableExpression", 2);
+  cg.printPropertyHeader("variableName");
+  cg.printValue(m_origName);
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ConstantExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

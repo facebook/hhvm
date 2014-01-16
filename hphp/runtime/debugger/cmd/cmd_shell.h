@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdShell);
 class CmdShell : public DebuggerCommand {
 public:
   CmdShell() : DebuggerCommand(KindOfShell) {}
@@ -38,7 +37,7 @@ protected:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
-  StringVec m_args;
+  std::vector<std::string> m_args;
   std::string m_out;
 };
 

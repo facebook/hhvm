@@ -1,7 +1,5 @@
 auto_sources(IDL_SRCS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
-foreach (zext calendar ftp gettext mongo oauth yaml)
-	list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/${zext}.idl.json")
-endforeach ()
+ZEND_COMPAT_STRIP_IDLS(IDL_SRCS ${ZEND_COMPAT_EXCLUDE_IDLS})
 
 add_custom_command(OUTPUT "class_map.cpp" "constants.h"
                    DEPENDS ${IDL_SRCS} gen-class-map

@@ -16,6 +16,7 @@
 
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
+#include "hphp/compiler/code_model_enums.h"
 
 using namespace HPHP;
 
@@ -82,6 +83,18 @@ TypePtr AwaitExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   return Type::Variant;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void AwaitExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("UnaryOpExpression", 3);
+  cg.printPropertyHeader("expression");
+  m_exp->outputCodeModel(cg);
+  cg.printPropertyHeader("operation");
+  cg.printValue(PHP_AWAIT_OP);
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions

@@ -14,27 +14,32 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_fb.h"
+
+#include <fstream>
+
+#include <netinet/in.h>
+
+#include <unicode/uchar.h>
+#include <unicode/utf8.h>
+
+#include "folly/String.h"
+
+#include "hphp/util/db-conn.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stat-cache.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/ext/FBSerialize.h"
 #include "hphp/runtime/ext/VariantController.h"
-#include "hphp/util/db-conn.h"
-#include "hphp/util/logger.h"
-#include "hphp/runtime/base/stat-cache.h"
-#include "folly/String.h"
-#include <netinet/in.h>
-#include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/code-coverage.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/vm/unwind.h"
-#include <unicode/uchar.h>
-#include <unicode/utf8.h>
-#include "hphp/runtime/base/file-repository.h"
 
 #include "hphp/parser/parser.h"
 
@@ -486,9 +491,9 @@ int fb_compact_unserialize_int64_from_buffer(
 
   } else if ((first & kInt20PrefixMsbMask) == kInt20PrefixMsb) {
     CHECK_ENOUGH(3, p, n);
-    char b[4];
-    memcpy(b, buf + p, 3);
-    uint32_t val = (uint32_t)ntohl(*reinterpret_cast<const uint32_t*>(b));
+    uint32_t b = 0;
+    memcpy(&b, buf + p, 3);
+    uint32_t val = ntohl(b);
     p += 3;
     out = (val >> 8) & kInt20Mask;
 
@@ -501,9 +506,9 @@ int fb_compact_unserialize_int64_from_buffer(
 
   } else if ((first & kInt54PrefixMsbMask) == kInt54PrefixMsb) {
     CHECK_ENOUGH(7, p, n);
-    char b[8];
-    memcpy(b, buf + p, 7);
-    uint64_t val = (uint64_t)ntohll(*reinterpret_cast<const uint64_t*>(b));
+    uint64_t b = 0;
+    memcpy(&b, buf + p, 7);
+    uint64_t val = ntohll(b);
     p += 7;
     out = (val >> 8) & kInt54Mask;
 
@@ -752,26 +757,26 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
   for (ArrayIter iter(sql_map); iter; ++iter) {
     Array data = iter.second().toArray();
     if (!data.empty()) {
-      std::vector< std::pair<string, string> > sessionVariables;
+      std::vector< std::pair<std::string, std::string> > sessionVariables;
       if (data.exists(s_session_variable)) {
         Array sv = data[s_session_variable].toArray();
         for (ArrayIter svIter(sv); svIter; ++svIter) {
-          sessionVariables.push_back(std::pair<string, string>(
+          sessionVariables.push_back(std::pair<std::string,std::string>(
             svIter.first().toString().data(),
             svIter.second().toString().data()));
         }
       }
-      ServerDataPtr server
-        (new ServerData(data[s_ip].toString().data(),
+      auto server = std::make_shared<ServerData>(
+                        data[s_ip].toString().data(),
                         data[s_db].toString().data(),
                         data[s_port].toInt32(),
                         data[s_username].toString().data(),
                         data[s_password].toString().data(),
-                        sessionVariables));
+                        sessionVariables);
       queries.push_back(ServerQuery(server, data[s_sql].toString().data()));
     } else {
       // so we can report errors according to array index
-      queries.push_back(ServerQuery(ServerDataPtr(), ""));
+      queries.push_back(ServerQuery(std::shared_ptr<ServerData>(), ""));
     }
   }
 
@@ -786,9 +791,9 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
                      mysqlExtension::MaxRetryQueryOnFail);
     output_dataset(ret, affected, ds, errors);
   } else {
-    DBDataSetPtrVec dss(queries.size());
+    std::vector<std::shared_ptr<DBDataSet>> dss(queries.size());
     for (unsigned int i = 0; i < dss.size(); i++) {
-      dss[i] = DBDataSetPtr(new DBDataSet());
+      dss[i] = std::make_shared<DBDataSet>();
     }
 
     DBConn::ErrorInfoMap errors;
@@ -1034,15 +1039,15 @@ bool f_fb_rename_function(const String& orig_func_name, const String& new_func_n
   }
 
   if (!function_exists(orig_func_name)) {
-    raise_warning("fb_rename_function(%s, %s) failed: %s does not exists!",
+    raise_warning("fb_rename_function(%s, %s) failed: %s does not exist!",
                   orig_func_name.data(), new_func_name.data(),
                   orig_func_name.data());
     return false;
   }
 
-  if (new_func_name->isame(s_extract.get())) {
+  if (orig_func_name->isame(s_extract.get())) {
     raise_warning(
-        "fb_rename_function(%s, %s) failed: rename to extract not allowed!",
+        "fb_rename_function(%s, %s) failed: rename of extract not allowed!",
         orig_func_name.data(), new_func_name.data());
     return false;
   }

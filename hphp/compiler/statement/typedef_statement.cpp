@@ -56,6 +56,17 @@ void TypedefStatement::analyzeProgram(AnalysisResultPtr) {}
 
 void TypedefStatement::inferTypes(AnalysisResultPtr) {}
 
+void TypedefStatement::outputCodeModel(CodeGenerator& cg) {
+  cg.printObjectHeader("TypedefStatement", 3);
+  cg.printPropertyHeader("name");
+  cg.printValue(name);
+  cg.printPropertyHeader("typeAnnotation");
+  annot->outputCodeModel(cg);
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
 void TypedefStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr ar) {
 }
 

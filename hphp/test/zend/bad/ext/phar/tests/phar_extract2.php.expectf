@@ -1,0 +1,7 @@
+%sextract%cfile1.txt
+%sextract%cfile2.txt
+%sextract%cone
+%sextract%csubdir
+%sextract%csubdir%cectory
+%sextract%csubdir%cectory%cfile.txt
+===DONE===

@@ -69,10 +69,12 @@ struct ProfileDump {
   }
 
   void addAlloc(size_t size, const ProfileStackTrace &trace) {
+    m_numDumps = 1;
     m_currentlyAllocated[trace] += size;
     m_accumAllocated[trace] += size;
   }
   void removeAlloc(size_t size, const ProfileStackTrace &trace) {
+    m_numDumps = 1;
     auto &current = m_currentlyAllocated[trace];
     current -= size;
     assert(current.m_count >= 0 && current.m_bytes >= 0);
@@ -103,12 +105,25 @@ struct ProfileDump {
     return *this;
   }
 
+  bool empty() {
+    return m_numDumps == 0;
+  }
+
 private:
   std::map<ProfileStackTrace, SiteAllocations> m_currentlyAllocated;
   std::map<ProfileStackTrace, SiteAllocations> m_accumAllocated;
 
-  int m_numDumps;
+  int m_numDumps = 0;
 };
+
+enum class ProfileType {
+  Default,    // use the value of RuntimeOption::HHProfAllocationProfile to
+              // determine which mode to use
+  Heap,       // only record allocations that are live at the end of a request
+  Allocation  // record all allocations
+};
+
+typedef std::function<void(const ProfileDump&)> DumpFunc;
 
 // Static controller for requesting and fetching profile dumps. The pprof
 // server will place requests for dumps, and the VM threads will give
@@ -117,16 +132,23 @@ private:
 // it needs to wait for a request to finish, it will.
 struct ProfileController {
   // request API
-  static bool requestNext();
-  static bool requestNextURL(const std::string &url);
-  static bool requestGlobal();
+  static bool requestNext(ProfileType type);
+  static bool requestNextURL(ProfileType type, const std::string &url);
+  static bool requestGlobal(ProfileType type);
   static void cancelRequest();
 
   // give API
   static void offerProfile(const ProfileDump &dump);
 
-  // get API
-  static ProfileDump waitForProfile();
+  // process API
+  static void waitForProfile(DumpFunc df);
+
+  // control API
+  static bool isTracking();
+  static bool isProfiling();
+  static ProfileType profileType();
+private:
+  static void cleanup(const std::unique_lock<std::mutex>& lock);
 };
 
 }

@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class APCVariant;
+class APCHandle;
 struct TypedValue;
 class HphpArray;
 
@@ -192,6 +192,7 @@ public:
    * Specific derived class type querying operators.
    */
   bool isPacked() const { return m_kind == kPackedKind; }
+  bool isMixed() const { return m_kind == kMixedKind; }
   bool isHphpArray() const {
     return m_kind <= kMixedKind;
     static_assert(kPackedKind < kMixedKind, "");
@@ -210,18 +211,10 @@ public:
    */
   bool isVectorData() const;
 
-  static APCVariant *GetSharedVariant(const ArrayData* ad) {
+  static APCHandle *GetAPCHandle(const ArrayData* ad) {
     return nullptr;
   }
-  APCVariant* getSharedVariant();
-
-  /**
-   * Whether or not this array has a referenced Variant or Object appearing
-   * twice. This is mainly for APC to decide whether to serialize an array.
-   * Also used for detecting whether there is serializable object in the tree.
-   */
-  bool hasInternalReference(PointerSet &seen,
-                            bool detectSerializable = false) const;
+  APCHandle* getAPCHandle();
 
   /**
    * Position-based iterations, implemented using iter_begin,
@@ -429,19 +422,21 @@ public:
   ArrayData* appendWithRef(CVarRef v, bool copy);
 
   /*
-   * Implements array appending and merging.
+   * PHP array +=.
    *
-   * Returns a new array that is a copy of this combined with elems in
-   * the appropriate manner.  Copies the array even if *this has
-   * enough space.
-   *
-   * The returned array has already been incref'd.
-   *
-   * NB. the merge() function does *not* exactly implement
-   * array_merge.  The key renumbering step currently must be
-   * performed by the caller.
+   * Performs array addition, mutating the this array.  It may return
+   * a new array the array needed to grow, or if it needed to COW---in
+   * this case the new returned array will already have a reference
+   * count of 1.  Otherwise returns `elems' without manipulating its
+   * reference count.
    */
-  ArrayData* plus(const ArrayData* elems);
+  ArrayData* plusEq(const ArrayData* elems);
+
+  /*
+   * PHP array_merge.
+   *
+   * This function always produces a new array with reference count 1.
+   */
   ArrayData* merge(const ArrayData* elems);
 
   /**
@@ -502,8 +497,8 @@ public:
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad);
 
-  static ArrayData *GetScalarArray(ArrayData *arr,
-                                   const StringData *key = nullptr);
+  static ArrayData* GetScalarArray(ArrayData *arr);
+  static ArrayData* GetScalarArray(ArrayData *arr, const std::string& key);
 
   static constexpr size_t offsetofKind() {
     return offsetof(ArrayData, m_kind);
@@ -515,13 +510,16 @@ public:
 
   static const char* kindToString(ArrayKind kind);
 
- private:
+public: // for heap profiler
+  void getChildren(std::vector<TypedValue *> &out);
+
+private:
   void serializeImpl(VariableSerializer *serializer) const;
   static void compileTimeAssertions() {
     static_assert(offsetof(ArrayData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
 
- protected:
+protected:
   void freeStrongIterators();
   static void moveStrongIterators(ArrayData* dest, ArrayData* src);
   FullPos* strongIterators() const {
@@ -563,9 +561,6 @@ protected:
     uint64_t m_posAndCount;   // be careful, m_pos is signed
   };
   FullPos* m_strongIterators; // head of linked list
-
-public: // for heap profiler
-  void getChildren(std::vector<TypedValue *> &out);
 };
 
 /*
@@ -619,7 +614,7 @@ struct ArrayFunctions {
   ArrayData* (*append[NK])(ArrayData*, CVarRef v, bool copy);
   ArrayData* (*appendRef[NK])(ArrayData*, CVarRef v, bool copy);
   ArrayData* (*appendWithRef[NK])(ArrayData*, CVarRef v, bool copy);
-  ArrayData* (*plus[NK])(ArrayData*, const ArrayData* elems);
+  ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
@@ -627,7 +622,7 @@ struct ArrayFunctions {
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
-  APCVariant* (*getSharedVariant[NK])(const ArrayData*);
+  APCHandle* (*getAPCHandle[NK])(const ArrayData*);
   ArrayData* (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
   ArrayData* (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
   ArrayData* (*zAppend[NK])(ArrayData*, RefData* v);

@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_DB_CONN_H_
 #define incl_HPHP_DB_CONN_H_
 
+#include <map>
+
 #include "hphp/util/db-dataset.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/mutex.h"
@@ -47,8 +49,7 @@ public:
 /**
  * What it takes to connect to a MySQL server.
  */
-DECLARE_BOOST_TYPES(ServerData);
-DECLARE_BOOST_TYPES(DBConnQueryJob);
+struct DBConnQueryJob;
 template <> class WorkerInfo<DBConnQueryJob> {
  public:
   enum { DoInit = false };
@@ -67,7 +68,7 @@ class ServerData {
    *
    *   username:password@server:port/database
    */
-  static ServerDataPtr Create(const std::string &connection);
+  static std::shared_ptr<ServerData> Create(const std::string &connection);
 
  public:
   ServerData();
@@ -92,7 +93,7 @@ class ServerData {
   SessionVariableVec m_sessionVariables;
 };
 
-typedef std::pair<ServerDataPtr, std::string> ServerQuery;
+typedef std::pair<std::shared_ptr<ServerData>, std::string> ServerQuery;
 typedef std::vector<ServerQuery> ServerQueryVec;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,7 +114,7 @@ class DBConn {
   /**
    * Open a database by specifying a type and an id.
    */
-  void open(ServerDataPtr server, int connectTimeout = -1,
+  void open(std::shared_ptr<ServerData> server, int connectTimeout = -1,
             int readTimeout = -1);
 
   /**
@@ -155,7 +156,7 @@ class DBConn {
      int connectTimeout = -1, int readTimeout = -1,
      int maxRetryOpenOnFail = 1, int maxRetryQueryOnFail = 1);
   static int parallelExecute
-    (const ServerQueryVec &sqls, DBDataSetPtrVec &dss,
+    (const ServerQueryVec &sqls, std::vector<std::shared_ptr<DBDataSet>> &dss,
      ErrorInfoMap &errors, int maxThread, bool retryQueryOnFail = true,
      int connectTimeout = -1, int readTimeout = -1,
      int maxRetryOpenOnFail = 1, int maxRetryQueryOnFail = 1);
@@ -183,16 +184,17 @@ class DBConn {
 
  private:
   static Mutex s_mutex;
-  typedef std::map<int, ServerDataPtr> DatabaseMap;
+  typedef std::map<int, std::shared_ptr<ServerData>> DatabaseMap;
   static DatabaseMap s_localDatabases;
 
   MYSQL *m_conn;
-  ServerDataPtr m_server;
+  std::shared_ptr<ServerData> m_server;
   unsigned int m_connectTimeout;
   unsigned int m_readTimeout;
   int m_maxRetryOpenOnFail;
 
-  static int parallelExecute(DBConnQueryJobPtrVec &jobs, ErrorInfoMap &errors,
+  static int parallelExecute(std::vector<std::shared_ptr<DBConnQueryJob>> &jobs,
+                             ErrorInfoMap &errors,
                              int maxThread);
 };
 

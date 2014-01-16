@@ -133,7 +133,7 @@ class ObjectDataPrinter:
             self.end = end
             if self.cur != self.end:
                 addr = val.address.cast(gdb.lookup_type('char').pointer())
-                addr = addr + val.type.sizeof + cls['m_builtinPropSize']
+                addr = addr + val.type.sizeof + cls['m_builtinODTailSize']
                 self.addr = addr.cast(gdb.lookup_type('HPHP::TypedValue').pointer())
 
         def __iter__(self):
@@ -225,6 +225,14 @@ class ResourceDataPrinter:
     def to_string(self):
         return "Res #%d" % self.val['o_id']
 
+class ClassPrinter:
+    RECOGNIZE = '^HPHP::Class$'
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return "Class %s" % string_data_val(self.val['m_preClass']['m_px']['m_name'])
+
 printer_classes = [
     TypedValuePrinter,
     StringDataPrinter,
@@ -233,6 +241,7 @@ printer_classes = [
     SmartPtrPrinter,
     RefDataPrinter,
     ResourceDataPrinter,
+    ClassPrinter,
 ]
 type_printers = dict((re.compile(cls.RECOGNIZE), cls)
                      for cls in printer_classes)

@@ -15,10 +15,17 @@
 */
 
 #include "hphp/compiler/expression/user_attribute.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/parser/scanner.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
+DECLARE_BOOST_TYPES(Expression);
+DECLARE_BOOST_TYPES(ExpressionList);
+DECLARE_BOOST_TYPES(UnaryOpExpression);
+
 // constructors/destructors
 
 UserAttribute::UserAttribute
@@ -49,6 +56,38 @@ TypePtr UserAttribute::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                   bool coerce) {
   assert(false);
   return TypePtr();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void UserAttribute::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("Attribute", m_exp != nullptr ? 3 : 2);
+  cg.printPropertyHeader("attributeName");
+  cg.printValue(m_name);
+  if (m_exp != nullptr && m_exp->is(Expression::KindOfUnaryOpExpression)) {
+    UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(m_exp));
+    if (u->getOp() == T_ARRAY) {
+      ExpressionPtr ex = u->getExpression();
+      if (ex != nullptr) {
+        if (ex->is(Expression::KindOfExpressionList)) {
+          ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
+          cg.printPropertyHeader("expressions");
+          cg.printExpressionVector(el);
+        } else {
+          assert(false);
+        }
+      } else {
+        ExpressionListPtr el;
+        cg.printPropertyHeader("expressions");
+        cg.printExpressionVector(el);
+      }
+    } else {
+      assert(false);
+    }
+  }
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

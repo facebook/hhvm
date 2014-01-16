@@ -123,9 +123,10 @@ void TypeAnnotation::functionTypeName(std::string &name) const {
 }
 
 // xhp names are mangled so we get them back to their original definition
+// @see the mangling in ScannerToken::xhpLabel
 void TypeAnnotation::xhpTypeName(std::string &name) const {
   // remove prefix if any
-  if (m_name.compare(0, sizeof("xhp_xhp__") - 1, "xhp_xhp__") == 0) {
+  if (m_name.compare(0, sizeof("xhp_") - 1, "xhp_") == 0) {
     name += std::string(m_name).replace(0, sizeof("xhp_") - 1, ":");
   } else {
     name += m_name;
@@ -170,6 +171,43 @@ void TypeAnnotation::appendToTypeList(TypeAnnotationPtr typeList) {
   } else {
     m_typeList = typeList;
   }
+}
+
+void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
+  TypeAnnotationPtr typeArgsElem = m_typeArgs;
+  auto numTypeArgs = 0;
+  while (typeArgsElem != nullptr) {
+    numTypeArgs++;
+    typeArgsElem = typeArgsElem->m_typeList;
+  }
+  typeArgsElem = m_typeArgs;
+
+  auto numProps = 3;
+  if (m_function) numProps++;
+  if (numTypeArgs > 0) numProps++;
+  cg.printObjectHeader("TypeExpression", numProps);
+  cg.printPropertyHeader("name");
+  cg.printValue(m_tuple ? "tuple" : m_name);
+  cg.printPropertyHeader("isNullable");
+  cg.printBool((bool)m_nullable);
+  cg.printPropertyHeader("isSoft");
+  cg.printBool((bool)m_soft);
+  if (m_function) {
+    cg.printPropertyHeader("returnType");
+    typeArgsElem->outputCodeModel(cg);
+    typeArgsElem = typeArgsElem->m_typeList;
+    numTypeArgs--;
+  }
+  if (numTypeArgs > 0) {
+    cg.printPropertyHeader("typeArguments");
+    cg.printf("V:9:\"HH\\Vector\":%d:{", numTypeArgs);
+    while (typeArgsElem != nullptr) {
+      typeArgsElem->outputCodeModel(cg);
+      typeArgsElem = typeArgsElem->m_typeList;
+    }
+    cg.printf("}");
+  }
+  cg.printObjectFooter();
 }
 
 }

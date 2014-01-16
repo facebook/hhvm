@@ -19,6 +19,8 @@
 
 #include <limits>
 
+#include "hphp/util/compilation-flags.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -31,6 +33,21 @@ static_assert(
 //////////////////////////////////////////////////////////////////////
 
 inline MemoryManager& MM() { return *MemoryManager::TlsWrapper::getNoCheck(); }
+
+template<class T, class... Args> T* smart_new(Args&&... args) {
+  auto const mem = MM().smartMallocSize(sizeof(T));
+  try {
+    return new (mem) T(std::forward<Args>(args)...);
+  } catch (...) {
+    MM().smartFreeSize(mem, sizeof(T));
+    throw;
+  }
+}
+
+template<class T> void smart_delete(T* t) {
+  t->~T();
+  MM().smartFreeSize(t, sizeof *t);
+}
 
 template<class T> T* smart_new_array(size_t count) {
   T* ret = static_cast<T*>(smart_malloc(count * sizeof(T)));
@@ -180,7 +197,7 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
 
   unsigned i = (bytes - 1) >> kLgSizeQuantum;
   assert(i < kNumSizes);
-  void* p = m_sizeUntrackedFree[i].maybePop();
+  void* p = m_freelists[i].maybePop();
   if (UNLIKELY(p == nullptr)) {
     p = slabAlloc(debugAddExtra(MemoryManager::smartSizeClass(bytes)));
   }
@@ -197,7 +214,7 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
 
   unsigned i = (bytes - 1) >> kLgSizeQuantum;
   assert(i < kNumSizes);
-  m_sizeUntrackedFree[i].push(debugPreFree(ptr, bytes, bytes));
+  m_freelists[i].push(debugPreFree(ptr, bytes, bytes));
   m_stats.usage -= bytes;
 
   FTRACE(1, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);

@@ -1,0 +1,3 @@
+*** Testing exif_imagetype() : basic functionality ***
+int(2)
+===Done===

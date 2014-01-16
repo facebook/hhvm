@@ -50,6 +50,7 @@ public:
 private:
   gzFile m_gzFile;
   PlainFile *m_innerFile;
+  bool m_eof;
 
   bool closeImpl();
 };

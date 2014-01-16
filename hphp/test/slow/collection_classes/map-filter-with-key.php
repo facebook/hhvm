@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $x = Vector {1, 2, 3, 4};
 $y = $x->mapWithKey(function ($k,$v) {

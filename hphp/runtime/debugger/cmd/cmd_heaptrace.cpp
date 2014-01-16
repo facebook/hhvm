@@ -17,7 +17,6 @@
 #include "hphp/runtime/debugger/cmd/cmd_heaptrace.h"
 
 #include "hphp/runtime/base/memory-profile.h"
-#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -209,7 +208,7 @@ void CmdHeaptrace::onClient(DebuggerClient &client) {
     return;
   }
 
-  CmdHeaptracePtr cmd = client.xend<CmdHeaptrace>(this);
+  auto cmd = client.xend<CmdHeaptrace>(this);
 
   if (file.empty()) {
     cmd->printHeap(client);

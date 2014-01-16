@@ -17,8 +17,10 @@
 #ifndef incl_HPHP_PROGRAM_FUNCTIONS_H_
 #define incl_HPHP_PROGRAM_FUNCTIONS_H_
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/base/types.h"
+
+// Needed for compatibility with oniguruma-5.9.4+
+#define ONIG_ESCAPE_UCHAR_COLLISION
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,7 +66,7 @@ class ExecutionContext;
 
 void pcre_init();
 void pcre_reinit();
-void hphp_process_init() ATTRIBUTE_COLD;
+void hphp_process_init();
 void hphp_session_init();
 
 ExecutionContext* hphp_context_init();
@@ -80,7 +82,7 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
 
 void hphp_thread_exit();
 void hphp_session_exit();
-void hphp_process_exit() ATTRIBUTE_COLD;
+void hphp_process_exit();
 std::string get_systemlib(std::string* hhas = nullptr,
                           const std::string &section = "systemlib",
                           const std::string &filename = "");

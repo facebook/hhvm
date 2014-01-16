@@ -92,6 +92,22 @@ bool ini_on_update_string_non_empty(const String& value, void *p) {
   return true;
 }
 
+String ini_get_bool(void *p) {
+  return *(bool*) p;
+}
+
+String ini_get_long(void *p) {
+  return *((int64_t*)p);
+}
+
+String ini_get_real(void *p) {
+  return *((double*)p);
+}
+
+String ini_get_string(void *p) {
+  return *((std::string*)p);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // callbacks for creating arrays out of ini
 
@@ -173,12 +189,13 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
   return false;
 }
 
-struct UpdateCallbackData {
-  IniSetting::PFN_UPDATE_CALLBACK callback;
+struct IniCallbackData {
+  IniSetting::UpdateCallback updateCallback;
+  IniSetting::GetCallback getCallback;
   void *p;
 };
 
-typedef std::map<std::string, UpdateCallbackData> CallbackMap;
+typedef std::map<std::string, IniCallbackData> CallbackMap;
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_callbacks);
 
 typedef std::map<std::string, std::string> DefaultMap;
@@ -193,14 +210,16 @@ void IniSetting::SetGlobalDefault(const char *name, const char *value) {
 }
 
 void IniSetting::Bind(const char *name, const char *value,
-                      PFN_UPDATE_CALLBACK callback, void *p /* = NULL */) {
+                      UpdateCallback updateCallback, GetCallback getCallback,
+                      void *p /* = NULL */) {
   assert(name && *name);
   assert(value);
 
-  UpdateCallbackData &data = (*s_callbacks)[name];
-  data.callback = callback;
+  auto &data = (*s_callbacks)[name];
+  data.updateCallback = updateCallback;
+  data.getCallback = getCallback;
   data.p = p;
-  (*callback)(value, p);
+  (*updateCallback)(value, p);
 }
 
 void IniSetting::Unbind(const char *name) {
@@ -209,6 +228,7 @@ void IniSetting::Unbind(const char *name) {
 }
 
 const StaticString
+  s_allow_url_fopen("allow_url_fopen"),
   s_error_reporting("error_reporting"),
   s_memory_limit("memory_limit"),
   s_max_execution_time("max_execution_time"),
@@ -235,9 +255,7 @@ bool IniSetting::Get(const String& name, String &value) {
     return true;
   }
   if (name == s_memory_limit) {
-    int64_t v = g_context->getRequestMemoryMaxBytes();
-    if (v == std::numeric_limits<int64_t>::max()) v = -1;
-    value = String(v);
+    value = g_context->getRequestMemoryMaxBytes();
     return true;
   }
   if (name == s_max_execution_time || name == s_maximum_execution_time) {
@@ -300,10 +318,20 @@ bool IniSetting::Get(const String& name, String &value) {
     value = g_context->getIncludePath();
     return true;
   }
+  if (name == s_allow_url_fopen) {
+    value = s_1;
+    return true;
+  }
 
   DefaultMap::iterator iter = s_global_ini.find(name.data());
   if (iter != s_global_ini.end()) {
     value = iter->second;
+    return true;
+  }
+
+  CallbackMap::iterator cb_iter = s_callbacks->find(name.data());
+  if (cb_iter != s_callbacks->end()) {
+    value = (*cb_iter->second.getCallback)(cb_iter->second.p);
     return true;
   }
 
@@ -313,23 +341,18 @@ bool IniSetting::Get(const String& name, String &value) {
 bool IniSetting::Set(const String& name, const String& value) {
   CallbackMap::iterator iter = s_callbacks->find(name.data());
   if (iter != s_callbacks->end()) {
-    return (*iter->second.callback)(value, iter->second.p);
+    return (*iter->second.updateCallback)(value, iter->second.p);
   }
-  if (name == s_memory_limit) {
+
+  if (name == s_error_reporting) {
+    g_context->setErrorReportingLevel(value.toInt64());
+    return true;
+  } else if (name == s_memory_limit) {
     if (!value.empty()) {
-      int64_t newInt = value.toInt64();
-      char lastChar = value.charAt(value.size() - 1);
-      if (lastChar == 'K' || lastChar == 'k') {
-        newInt <<= 10;
-      } else if (lastChar == 'M' || lastChar == 'm') {
-        newInt <<= 20;
-      } else if (lastChar == 'G' || lastChar == 'g') {
-        newInt <<= 30;
-      }
-      g_context->setRequestMemoryMaxBytes(newInt);
+      g_context->setRequestMemoryMaxBytes(value);
       return true;
     }
-  } else if (name == s_max_execution_time || name == s_maximum_execution_time){
+  } else if (name == s_max_execution_time || name == s_maximum_execution_time) {
     int64_t limit = value.toInt64();
     ThreadInfo::s_threadInfo.getNoCheck()->
       m_reqInjectionData.setTimeout(limit);

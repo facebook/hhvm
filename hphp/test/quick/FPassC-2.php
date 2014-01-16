@@ -24,9 +24,9 @@ echo "==============================\n";
 
 // doesn't fatal, raises strict standards warning
 
-$x = null;
-g(eval('return $x;'));
-var_dump($x);
+
+
+
 
 $x = null;
 g($x = 'abc');

@@ -36,7 +36,7 @@ public:
 
   FastCGITransaction(FastCGISession* session,
                      RequestId request_id,
-                     ProtocolSessionHandlerPtr handler);
+                     std::shared_ptr<ProtocolSessionHandler> handler);
   virtual ~FastCGITransaction();
 
   void onStdIn(std::unique_ptr<folly::IOBuf> chain);
@@ -86,7 +86,7 @@ private:
   folly::IOBufQueue m_valueBuf;
   FastCGISession* m_session;
   RequestId m_requestId;
-  ProtocolSessionHandlerPtr m_handler;
+  std::shared_ptr<ProtocolSessionHandler> m_handler;
 };
 
 
@@ -108,9 +108,10 @@ protected:
   typedef uint8_t Version;
 
   enum Phase {
-    AT_RECORD_BEGIN = 0,
-    INSIDE_RECORD_BODY = 1,
-    AT_RECORD_BODY_END = 2
+    INVALID = 0,
+    AT_RECORD_BEGIN = 1,
+    INSIDE_RECORD_BODY = 2,
+    AT_RECORD_BODY_END = 3
   };
 
   enum RecordType : uint8_t {
@@ -270,6 +271,8 @@ void FastCGISession::appendRecordBegin(AppenderT& cursor,
   cursor.template writeBE<uint16_t>(content_length);
   CHECK(padding_length <= std::template numeric_limits<uint8_t>::max());
   cursor.template writeBE<uint8_t>(padding_length);
+  cursor.ensure(k_recordReservedLength);
+  memset(cursor.writableData(), 0, k_recordReservedLength);
   cursor.append(k_recordReservedLength);
 }
 
@@ -277,6 +280,8 @@ template<typename AppenderT>
 void FastCGISession::appendRecordEnd(AppenderT& cursor,
                                      size_t padding_length) {
   CHECK(padding_length <= std::numeric_limits<uint8_t>::max());
+  cursor.ensure(padding_length);
+  memset(cursor.writableData(), 0, padding_length);
   cursor.append(padding_length);
 }
 

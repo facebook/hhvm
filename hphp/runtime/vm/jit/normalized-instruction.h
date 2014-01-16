@@ -26,9 +26,8 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
-using JIT::Type;
 
 struct DynLocation;
 struct Tracelet;
@@ -59,7 +58,7 @@ class NormalizedInstruction {
   DynLocation* outStack2; // Used for CGetL2
   DynLocation* outStack3; // Used for CGetL3
   Type         outPred;
-  vector<Location> deadLocs; // locations that die at the end of this
+  std::vector<Location> deadLocs; // locations that die at the end of this
                              // instruction
   ArgUnion imm[4];
   ImmVector immVec; // vector immediate; will have !isValid() if the
@@ -115,11 +114,6 @@ class NormalizedInstruction {
    * guardedCls indicates that we know the class exists
    */
   bool guardedCls:1;
-
-  /*
-   * dont check the surprise flag
-   */
-  bool noSurprise:1;
 
   /*
    * instruction is statically known to have no effect, e.g. unboxing a Cell
@@ -184,8 +178,8 @@ class NormalizedInstruction {
   }
 
  private:
-  smart::vector<smart::unique_ptr<DynLocation>::type> m_dynLocs;
+  smart::vector<smart::unique_ptr<DynLocation>> m_dynLocs;
 };
 
-} } // HPHP::Transl
+} } // HPHP::JIT
 #endif

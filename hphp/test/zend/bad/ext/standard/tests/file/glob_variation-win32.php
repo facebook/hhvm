@@ -68,7 +68,8 @@ foreach($patterns as $pattern) {
 }
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 rmdir("$file_path/glob_variation/wonder1/wonder2");
 rmdir("$file_path/glob_variation/wonder1/");

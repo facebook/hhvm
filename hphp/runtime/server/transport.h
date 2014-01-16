@@ -17,8 +17,11 @@
 #ifndef incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 #define incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 
-#include "hphp/util/base.h"
+#include <map>
+#include <string>
+
 #include "hphp/util/compression.h"
+#include "hphp/util/functional.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/debuggable.h"
@@ -84,10 +87,10 @@ public:
   virtual ~Transport();
 
   void onRequestStart(const timespec &queueTime);
-  const timespec &getQueueTime() const { return m_queueTime;}
-  const timespec &getWallTime() const { return m_wallTime;}
-  const timespec &getCpuTime() const { return m_cpuTime;}
-  const int64_t &getInstructions() const { return m_instructions;}
+  const timespec &getQueueTime() const { return m_queueTime; }
+  const timespec &getWallTime() const { return m_wallTime; }
+  const timespec &getCpuTime() const { return m_cpuTime; }
+  const int64_t &getInstructions() const { return m_instructions; }
   const int64_t &getSleepTime() const { return m_sleepTime; }
   void incSleepTime(unsigned int seconds) { m_sleepTime += seconds; }
   const int64_t &getuSleepTime() const { return m_usleepTime; }
@@ -109,6 +112,21 @@ public:
   virtual const char *getUrl() = 0;
   virtual const char *getRemoteHost() = 0;
   virtual uint16_t getRemotePort() = 0;
+  // The transport can override the virtualhosts' docroot
+  virtual const std::string getDocumentRoot() { return ""; }
+
+  /**
+   * Server Headers
+   */
+  virtual const char *getServerName() {
+    return "";
+  };
+  virtual const char *getServerAddr() {
+    return RuntimeOption::ServerPrimaryIP.c_str();
+  };
+  virtual uint16_t getServerPort() {
+    return RuntimeOption::ServerPort;
+  };
 
   /**
    * POST request's data.
@@ -139,6 +157,7 @@ public:
    */
   virtual std::string getHeader(const char *name) = 0;
   virtual void getHeaders(HeaderMap &headers) = 0;
+  virtual void getTransportParams(HeaderMap &serverParams) {};
 
 
   /**
@@ -368,8 +387,8 @@ protected:
    * token's start char * addresses in ParamMaps. Therefore, this entire
    * process is very efficient without excessive string copying.
    */
-  typedef hphp_hash_map<const char *, std::vector<const char *>,
-                        hphp_hash<const char *>, eqstr> ParamMap;
+  typedef hphp_hash_map<const char*, std::vector<const char*>,
+                        cstr_hash, eqstr> ParamMap;
 
   // timers
   timespec m_queueTime;

@@ -39,7 +39,7 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC) {
 }
 
 ZEND_API void *zend_object_store_get_object(const zval *zobject TSRMLS_DC) {
-  const auto& zod = dynamic_cast<HPHP::c_ZendObjectData*>(Z_OBJVAL_P(zobject));
+  const auto& zod = static_cast<HPHP::c_ZendObjectData*>(Z_OBJVAL_P(zobject));
   return zend_object_store_get_object_by_handle(zod->getHandle());
 }
 
@@ -61,4 +61,6 @@ ZEND_API zend_object_handlers *zend_get_std_object_handlers(void) {
     return &std_object_handlers;
 }
 
-
+/* Called when the ctor was terminated by an exception */
+ZEND_API void zend_object_store_ctor_failed(zval *zobject TSRMLS_DC) {
+}

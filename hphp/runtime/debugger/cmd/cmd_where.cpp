@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,7 +79,7 @@ Array CmdWhere::fetchStackTrace(DebuggerClient &client) {
   bool isAsync = m_type == KindOfWhereAsync;
   if (st.isNull() || (isAsync != client.isStackTraceAsync())) {
     m_stackArgs = client.getDebuggerClientStackArgs();
-    CmdWherePtr cmd = client.xend<CmdWhere>(this);
+    auto cmd = client.xend<CmdWhere>(this);
     st = cmd->m_stacktrace;
     client.setStackTrace(st, isAsync);
   }
@@ -129,7 +131,7 @@ void CmdWhere::onClient(DebuggerClient &client) {
       }
     }
   } else {
-    string snum = client.argValue(argBase);
+    std::string snum = client.argValue(argBase);
     int num = atoi(snum.c_str());
     if (snum[0] == '-') {
       snum = snum.substr(1);

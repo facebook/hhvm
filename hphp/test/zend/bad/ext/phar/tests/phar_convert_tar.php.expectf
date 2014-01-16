@@ -1,0 +1,9 @@
+bool(false)
+string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
+bool(true)
+string(60) "<?php // tar-based phar archive stub file
+__HALT_COMPILER();"
+bool(true)
+string(60) "<?php // tar-based phar archive stub file
+__HALT_COMPILER();"
+===DONE===

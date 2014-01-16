@@ -101,7 +101,7 @@ foreach($inputs as $input) {
 
 fclose($fp);
 ?>
-===DONE===?>
+===DONE===
 <?php
 $path = dirname(__FILE__) . "/opendir_variation1";
 rmdir($path);

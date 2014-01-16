@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_CODEGENHELPERS_H_
 
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP { namespace JIT {
 
@@ -35,19 +36,32 @@ struct CppCall {
 
   explicit CppCall(int off) : m_kind(Virtual), m_offset(off) {}
 
+  explicit CppCall(PhysReg reg)
+    : m_kind(Indirect)
+    , m_reg(reg)
+  {}
+
   CppCall(CppCall const&) = default;
 
-  bool isDirect()  const { return m_kind == Direct;  }
-  bool isVirtual() const { return m_kind == Virtual; }
+  bool isDirect()   const { return m_kind == Direct;  }
+  bool isVirtual()  const { return m_kind == Virtual; }
+  bool isIndirect() const { return m_kind == Indirect; }
 
-  const void* getAddress() const { return m_fptr; }
-  int         getOffset()  const { return m_offset; }
+  const void*       getAddress() const { return m_fptr; }
+  int               getOffset()  const { return m_offset; }
+  PhysReg           getReg()     const { return m_reg; }
+
+  void updateCallIndirect(PhysReg reg) {
+    assert(isIndirect());
+    m_reg = reg;
+  }
 
  private:
-  enum { Direct, Virtual } m_kind;
+  enum { Direct, Virtual, Indirect } m_kind;
   union {
     void* m_fptr;
     int   m_offset;
+    PhysReg m_reg;
   };
 };
 

@@ -55,9 +55,9 @@ void CmdMacro::help(DebuggerClient &client) {
 }
 
 void CmdMacro::processList(DebuggerClient &client) {
-  const MacroPtrVec &macros = client.getMacros();
+  const auto& macros = client.getMacros();
   for (unsigned int i = 0; i < macros.size(); i++) {
-    MacroPtr macro = macros[i];
+    auto macro = macros[i];
     client.output("%4d  %s", i + 1, macro->m_name.c_str());
     client.print("%s", macro->desc("     > ").c_str());
   }
@@ -82,7 +82,7 @@ void CmdMacro::onClient(DebuggerClient &client) {
   } else if (client.arg(1, "list")) {
     processList(client);
   } else if (client.arg(1, "clear")) {
-    string snum = client.argValue(2);
+    std::string snum = client.argValue(2);
     if (!DebuggerClient::IsValidNumber(snum)) {
       client.error("'& [c]lear' needs an {index} argument.");
       client.tutorial(

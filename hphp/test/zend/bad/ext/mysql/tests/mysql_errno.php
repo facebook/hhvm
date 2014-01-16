@@ -41,6 +41,7 @@ if ($link = @mysql_connect($host . '_unknown', $user . '_unknown', $passwd, true
 }
 
 print "done!";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

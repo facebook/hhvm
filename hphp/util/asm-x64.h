@@ -18,11 +18,11 @@
 
 #include <type_traits>
 
-#include "hphp/util/util.h"
-#include "hphp/util/base.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/atomic.h"
+#include "hphp/util/immed.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/safe-cast.h"
 
 /*
  * An experimental macro assembler for x64, that strives for low coupling to
@@ -49,7 +49,7 @@
  */
 #define logical_const /* nothing */
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 #define TRACEMOD ::HPHP::Trace::asmx64
 
@@ -62,10 +62,6 @@ struct ScaledIndex;
 struct ScaledIndexDisp;
 struct DispReg;
 
-const int kNumGPRegs  = 16;
-const int kNumXMMRegs = 16;
-const int kNumRegs    = kNumGPRegs + kNumXMMRegs;
-
 const uint8_t kOpsizePrefix = 0x66;
 
 /*
@@ -74,7 +70,7 @@ const uint8_t kOpsizePrefix = 0x66;
  * physical registers for different instructions (e.g. xmm0 and rax
  * are both 0).
  *
- * This type is mainly published for backward compatability with the
+ * This type is mainly published for backward compatibility with the
  * APIs that look like store_reg##_disp_reg##, which predate the
  * size-specific types.  (Some day it may become internal to this
  * module.)
@@ -84,7 +80,7 @@ enum class RegNumber : int {};
 struct Reg64 {
   explicit constexpr Reg64(int rn) : rn(rn) {}
 
-  // Implicit conversion for backward compatability only.  This is
+  // Implicit conversion for backward compatibility only.  This is
   // needed to keep the store_reg##_disp_reg## style apis working.
   constexpr /* implicit */ operator RegNumber() const { return RegNumber(rn); }
 
@@ -200,6 +196,7 @@ struct DispReg {
   }
 
   MemoryRef operator*() const;
+  MemoryRef operator[](intptr_t) const;
 
   DispReg operator+(intptr_t x) const {
     return DispReg(base, disp + x);
@@ -225,6 +222,7 @@ struct IndexedDispReg {
   }
 
   IndexedMemoryRef operator*() const;
+  IndexedMemoryRef operator[](intptr_t disp) const;
 
   IndexedDispReg operator+(intptr_t disp) const {
     auto ret = *this;
@@ -249,6 +247,7 @@ struct DispRIP {
   explicit DispRIP(intptr_t disp) : disp(disp) {}
 
   RIPRelativeRef operator*() const;
+  RIPRelativeRef operator[](intptr_t x) const;
 
   DispRIP operator+(intptr_t x) const {
     return DispRIP(disp + x);
@@ -283,12 +282,24 @@ inline IndexedMemoryRef IndexedDispReg::operator*() const {
   return IndexedMemoryRef(*this);
 }
 
+inline IndexedMemoryRef IndexedDispReg::operator[](intptr_t x) const {
+  return *(*this + x);
+}
+
 inline MemoryRef DispReg::operator*() const {
   return MemoryRef(*this);
 }
 
+inline MemoryRef DispReg::operator[](intptr_t x) const {
+  return *(*this + x);
+}
+
 inline RIPRelativeRef DispRIP::operator*() const {
   return RIPRelativeRef(*this);
+}
+
+inline RIPRelativeRef DispRIP::operator[](intptr_t x) const {
+  return *(*this + x);
 }
 
 inline DispReg operator+(Reg64 r, intptr_t d) { return DispReg(r, d); }
@@ -473,7 +484,7 @@ namespace reg {
 
 //////////////////////////////////////////////////////////////////////
 
-enum instrFlags {
+enum X64InstrFlags {
   IF_REVERSE    = 0x0001, // The operand encoding for some instructions are
                           // "backwards" in x64; these instructions are
                           // called "reverse" instructions. There are a few
@@ -574,6 +585,7 @@ const X64Instr instr_testb =   { { 0x84,0x84,0xF6,0x00,0xA8,0xF1 }, 0x0810  };
 const X64Instr instr_cmp =     { { 0x39,0x3B,0x81,0x07,0x3D,0xF1 }, 0x0810  };
 const X64Instr instr_cmpb =    { { 0x38,0x3A,0x80,0x07,0x3C,0xF1 }, 0x0810  };
 const X64Instr instr_sbb =     { { 0x19,0x1B,0x81,0x03,0x1D,0xF1 }, 0x0810  };
+const X64Instr instr_sbbb =    { { 0x18,0x1A,0x80,0x03,0x1C,0xF1 }, 0x0810  };
 const X64Instr instr_adc =     { { 0x11,0x13,0x81,0x02,0x15,0xF1 }, 0x0810  };
 const X64Instr instr_lea =     { { 0xF1,0x8D,0xF1,0x00,0xF1,0xF1 }, 0x0000  };
 const X64Instr instr_xchgb =   { { 0x86,0x86,0xF1,0x00,0xF1,0xF1 }, 0x0000  };
@@ -657,65 +669,6 @@ inline ConditionCode ccNegate(ConditionCode c) {
   return ConditionCode(int(c) ^ 1); // And you thought x86 was irregular!
 }
 
-/*
- * When selecting encodings, we often need to assess a two's complement
- * distance to see if it fits in a shorter encoding.
- */
-inline bool deltaFits(int64_t delta, int s) {
-  // sz::qword is always true
-  assert(s == sz::byte ||
-         s == sz::word ||
-         s == sz::dword);
-  int64_t bits = s * 8;
-  return delta < (1ll << (bits-1)) && delta >= -(1ll << (bits-1));
-}
-
-// The unsigned equivalent of deltaFits
-inline bool magFits(uint64_t val, int s) {
-  // sz::qword is always true
-  assert(s == sz::byte ||
-         s == sz::word ||
-         s == sz::dword);
-  uint64_t bits = s * 8;
-  return (val & ((1ull << bits) - 1)) == val;
-}
-
-/*
- * Immediate wrapper for the assembler.
- *
- * This wrapper picks up whether the immediate argument was an integer
- * or a pointer type, so we don't have to cast pointers at callsites.
- *
- * Immediates are always treated as sign-extended values, but it's
- * often convenient to use unsigned types, so we allow it with an
- * implicit implementation-defined conversion.
- */
-struct Immed {
-  template<class T>
-  /* implicit */ Immed(T i,
-                       typename std::enable_if<
-                         std::is_integral<T>::value ||
-                         std::is_enum<T>::value
-                       >::type* = 0)
-    : m_int(i)
-  {}
-
-  template<class T>
-  /* implicit */ Immed(T* p)
-    : m_int(reinterpret_cast<uintptr_t>(p))
-  {}
-
-  int64_t q() const { return m_int; }
-  int32_t l() const { return safe_cast<int32_t>(m_int); }
-  int16_t w() const { return safe_cast<int16_t>(m_int); }
-  int8_t  b() const { return safe_cast<int8_t>(m_int); }
-
-  bool fits(int sz) const { return deltaFits(m_int, sz); }
-
-private:
-  intptr_t m_int;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Label;
@@ -749,10 +702,11 @@ struct Label;
 
 class X64Assembler : private boost::noncopyable {
   friend struct Label;
-  friend class CodeCursor;
 
 public:
   explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
+
+  CodeBlock& code() const { return codeBlock; }
 
   CodeAddress base() const {
     return codeBlock.base();
@@ -919,6 +873,7 @@ public:
   FULL_OP(or,  instr_or)
   FULL_OP(test,instr_test)
   FULL_OP(cmp, instr_cmp)
+  FULL_OP(sbb, instr_sbb)
 
 #undef IMM64_OP
 #undef IMM64R_OP
@@ -940,6 +895,8 @@ public:
   void loadzbl(IndexedMemoryRef m, Reg32 r) { instrMR(instr_movzbx,
                                                       m, rbyte(r)); }
   void movzbl(Reg8 src, Reg32 dest)         { emitRR32(instr_movzbx,
+                                                       rn(src), rn(dest)); }
+  void movsbl(Reg8 src, Reg32 dest)         { emitRR(instr_movsbx,
                                                        rn(src), rn(dest)); }
 
   void loadsbq(MemoryRef m, Reg64 r)        { instrMR(instr_movsbx,
@@ -1052,6 +1009,7 @@ public:
 
   // May smash rAsm.
   void jmp(CodeAddress dest) {
+    always_assert(dest);
     if (!jmpDeltaFits(dest)) {
       movq (dest, reg::rAsm);
       jmp  (reg::rAsm);
@@ -1062,6 +1020,7 @@ public:
 
   // May smash rAsm.
   void call(CodeAddress dest) {
+    always_assert(dest);
     if (!jmpDeltaFits(dest)) {
       movq (dest, reg::rAsm);
       call (reg::rAsm);
@@ -1893,7 +1852,7 @@ public:
 public:
   /*
    * The following functions are an older API to the assembler, which
-   * still partially exist here for backward compatability.
+   * still partially exist here for backward compatibility.
    *
    * Our ordering convention follows the gas standard of "destination
    * last": <op>_<src1>_<src2>_<dest>. Be warned that Intel manuals go the
@@ -2557,43 +2516,6 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
   inline void X64Assembler::j##nm##8(Label& l) { l.jcc8(*this, code); }
   CCS
 #undef CC
-
-//////////////////////////////////////////////////////////////////////
-
-/**
- * gcc-4.7 warns about use of uninitialized memory around the use of
- * a.code.frontier even though this is explicitly initialized at each point.
- */
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-
-/*
- * RAII bookmark for scoped rewinding of frontier.
- */
-class CodeCursor : public UndoMarker {
-  public:
-  CodeCursor(CodeBlock& cb, CodeAddress newFrontier) :
-    UndoMarker(cb) {
-    cb.setFrontier(newFrontier);
-  }
-
-  explicit CodeCursor(X64Assembler& as, CodeAddress newFrontier)
-      : UndoMarker(as.codeBlock) {
-    as.codeBlock.setFrontier(newFrontier);
-  }
-
-  ~CodeCursor() {
-    undo();
-  }
-};
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
 
 //////////////////////////////////////////////////////////////////////
 

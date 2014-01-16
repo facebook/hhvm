@@ -1,0 +1,10 @@
+*** Testing error conditions ***
+
+-- Testing is_callable() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing is_callable() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

@@ -50,7 +50,9 @@ class c_SpoofChecker : public ExtObjectData {
 
   // need to implement
   public: c_SpoofChecker(Class* cls = c_SpoofChecker::classof());
-  public: ~c_SpoofChecker();
+  ~c_SpoofChecker() {
+    uspoof_close(m_spoof_checker);
+  }
   public: void t___construct();
   public: bool t_issuspicious(
     const String& text, VRefParam issuesFound = uninit_null());

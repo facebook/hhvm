@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/parser/scanner.h"
+
+#include <fstream>
+
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/zend/zend-string.h"
@@ -44,7 +46,7 @@ bool ScannerToken::htmlTrim() {
     return false;
   }
   while (isspace(*p1) && p1 > p0) --p1;
-  string text;
+  std::string text;
   text.reserve(m_text.length());
   if (p0 != p00) {
     text = " ";
@@ -76,7 +78,7 @@ void ScannerToken::xhpDecode() {
   // Pretty sure it is universally available!
   // (Do assertion anyway.)
   assert(ret);
-  m_text = string(ret, len);
+  m_text = std::string(ret, len);
   free(ret);
 }
 
@@ -119,7 +121,7 @@ Scanner::Scanner(const char *source, int len, int type,
   assert(m_source);
   m_streamOwner = false;
   if (md5) {
-    m_stream = new std::istringstream(string(source, len));
+    m_stream = new std::istringstream(std::string(source, len));
     m_streamOwner = true;
     computeMd5();
   }
@@ -135,11 +137,8 @@ void Scanner::computeMd5() {
   char *ptr = (char*)malloc(length);
   m_stream->read(ptr, length);
   m_stream->seekg(startpos, std::ios::beg);
-  int out_len;
-  char *md5str = string_md5(ptr, length, false, out_len);
+  m_md5 = string_md5(ptr, length);
   free(ptr);
-  m_md5 = string(md5str, out_len);
-  free(md5str);
 }
 
 Scanner::~Scanner() {
@@ -246,6 +245,121 @@ bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
   }
 }
 
+bool Scanner::tryParseNonEmptyLambdaParams(TokenStore::iterator& pos) {
+  for (;; nextLookahead(pos)) {
+    if (pos->t != T_VARIABLE) {
+      if (pos->t == T_VARARG) {
+        nextLookahead(pos);
+        return true;
+      }
+      if (!tryParseNSType(pos)) return false;
+      if (pos->t == '&') {
+        nextLookahead(pos);
+      }
+      if (pos->t != T_VARIABLE) return false;
+    }
+    nextLookahead(pos);
+    if (pos->t == '=') {
+      nextLookahead(pos);
+      parseApproxParamDefVal(pos);
+    }
+    if (pos->t != ',') return true;
+  }
+}
+
+void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
+  int64_t opNum = 0; // counts nesting for ( and T_UNRESOLVED_OP
+  int64_t obNum = 0; // counts nesting for [
+  int64_t ocNum = 0; // counts nesting for {
+  int64_t ltNum = 0; // counts nesting for T_TYPELIST_LT
+  for (;; nextLookahead(pos)) {
+    switch (pos->t) {
+      case ',':
+        if (!opNum && !obNum && !ocNum && !ltNum) return;
+        break;
+      case '(':
+      case T_UNRESOLVED_OP:
+        ++opNum;
+        break;
+      case ')':
+        if (!opNum) return;
+        --opNum;
+        break;
+      case '[':
+        ++obNum;
+        break;
+      case ']':
+        if (!obNum) return;
+        --obNum;
+        break;
+      case '{':
+        ++ocNum;
+        break;
+      case '}':
+        if (!ocNum) return;
+        --ocNum;
+        break;
+      case T_TYPELIST_LT:
+        ++ltNum;
+        break;
+      case T_UNRESOLVED_LT: {
+        auto endPos = pos;
+        nextLookahead(endPos);
+        if (tryParseTypeList(endPos) && endPos->t == '>') {
+          pos->t = T_TYPELIST_LT;
+          endPos->t = T_TYPELIST_GT;
+        } else {
+          pos->t = '<';
+        }
+        ++ltNum;
+        break;
+      }
+      case T_TYPELIST_GT:
+        if (!ltNum) return;
+        --ltNum;
+        break;
+      case T_LNUMBER:
+      case T_DNUMBER:
+      case T_CONSTANT_ENCAPSED_STRING:
+      case T_START_HEREDOC:
+      case T_ENCAPSED_AND_WHITESPACE:
+      case T_END_HEREDOC:
+      case T_LINE:
+      case T_FILE:
+      case T_DIR:
+      case T_CLASS_C:
+      case T_TRAIT_C:
+      case T_METHOD_C:
+      case T_FUNC_C:
+      case T_NS_C:
+      case T_COMPILER_HALT_OFFSET:
+      case T_STRING:
+      case T_XHP_LABEL:
+      case T_XHP_ATTRIBUTE:
+      case T_XHP_CATEGORY:
+      case T_XHP_CHILDREN:
+      case T_XHP_REQUIRED:
+      case T_XHP_ENUM:
+      case T_NS_SEPARATOR:
+      case T_NAMESPACE:
+      case T_SHAPE:
+      case T_ARRAY:
+      case T_TUPLE:
+      case T_FUNCTION:
+      case T_DOUBLE_ARROW:
+      case T_DOUBLE_COLON:
+      case '+':
+      case '-':
+      case ':':
+      case '?':
+      case '@':
+        break;
+      default:
+        return;
+    }
+  }
+}
+
 bool Scanner::tryParseFuncTypeList(TokenStore::iterator& pos) {
   for (;;) {
     if (pos->t == T_VARARG) {
@@ -266,7 +380,7 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
   if (pos->t == '?') {
     nextLookahead(pos);
   }
-  if (pos->t == '(') {
+  if (pos->t == '(' || pos->t == T_UNRESOLVED_OP) {
     nextLookahead(pos);
     if (pos->t == T_FUNCTION) {
       nextLookahead(pos);
@@ -383,7 +497,8 @@ bool Scanner::tryParseShapeMemberList(TokenStore::iterator& pos) {
 static bool isUnresolved(int tokid) {
   return tokid == T_UNRESOLVED_LT ||
          tokid == T_UNRESOLVED_NEWTYPE ||
-         tokid == T_UNRESOLVED_TYPE;
+         tokid == T_UNRESOLVED_TYPE ||
+         tokid == T_UNRESOLVED_OP;
 }
 
 int Scanner::getNextToken(ScannerToken &t, Location &l) {
@@ -431,11 +546,40 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
     ++m_lookaheadLtDepth;
     bool isTypeList = tryParseTypeList(pos);
     --m_lookaheadLtDepth;
-    if (!isTypeList || pos->t != '>') {
-      ltPos->t = '<';
-    } else {
+    if (isTypeList && pos->t == '>') {
       ltPos->t = T_TYPELIST_LT;
       pos->t = T_TYPELIST_GT;
+    } else {
+      ltPos->t = '<';
+    }
+    break;
+  }
+  case T_UNRESOLVED_OP: {
+    // Look at subsequent tokens to determine if the '(' character
+    // is the start of a lambda expression
+    auto pos = m_lookahead.begin();
+    auto opPos = pos;
+    nextLookahead(pos);
+    if (pos->t != ')' && pos->t != T_LAMBDA_CP) {
+      if (!tryParseNonEmptyLambdaParams(pos) || pos->t != ')') {
+        opPos->t = '(';
+        break;
+      }
+    }
+    auto cpPos = pos;
+    nextLookahead(pos);
+    if (pos->t == ':') {
+      nextLookahead(pos);
+      if (!tryParseNSType(pos)) {
+        opPos->t = '(';
+        break;
+      }
+    }
+    if (pos->t == T_LAMBDA_ARROW) {
+      opPos->t = T_LAMBDA_OP;
+      cpPos->t = T_LAMBDA_CP;
+    } else {
+      opPos->t = '(';
     }
     break;
   }
@@ -474,15 +618,15 @@ int Scanner::read(char *text, int &result, int max) {
 void Scanner::error(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  Util::string_vsnprintf(m_error, fmt, ap);
+  string_vsnprintf(m_error, fmt, ap);
   va_end(ap);
 }
 
 void Scanner::warn(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  std::string msg;
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
   Logger::Warning("%s: %s (Line: %d, Char %d)", msg.c_str(),
@@ -527,8 +671,8 @@ void Scanner::incLoc(const char *rawText, int rawLeng, int type) {
   }
 }
 
-string Scanner::escape(const char *str, int len, char quote_type) const {
-  string output;
+std::string Scanner::escape(const char *str, int len, char quote_type) const {
+  std::string output;
   output.reserve(len);
 
   if (quote_type == '\'') {
@@ -575,7 +719,7 @@ string Scanner::escape(const char *str, int len, char quote_type) const {
             case 'x':
             case 'X': {
               if (isxdigit(str[i+1])) {
-                string shex;
+                std::string shex;
                 shex += str[++i]; // 0th hex digit
                 if (isxdigit(str[i+1])) {
                   shex += str[++i]; // 1st hex digit
@@ -590,7 +734,7 @@ string Scanner::escape(const char *str, int len, char quote_type) const {
             default: {
               // check for an octal
               if ('0' <= str[i] && str[i] <= '7') {
-                string soct;
+                std::string soct;
                 soct += str[i]; // 0th octal digit
                 if ('0' <= str[i+1] && str[i+1] <= '7') {
                   soct += str[++i];   // 1st octal digit

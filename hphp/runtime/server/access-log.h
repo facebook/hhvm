@@ -22,6 +22,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/cronolog.h"
 #include "hphp/util/util.h"
+#include "hphp/util/log-file-flusher.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,7 +88,7 @@ private:
                FILE *outFile, const char *format);
 
   std::vector<LogFileData> m_output;
-  std::vector<CronologPtr> m_cronOutput;
+  std::vector<std::shared_ptr<Cronolog>> m_cronOutput;
   bool m_initialized;
   GetThreadDataFunc m_fGetThreadData;
   std::string m_defaultFormat;

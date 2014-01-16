@@ -1,0 +1,7 @@
+*** Testing session_save_path() : variation ***
+bool(true)
+bool(true)
+HipHop Warning: %s
+string(0) ""
+HipHop Warning: %s
+HipHop Fatal error: %s

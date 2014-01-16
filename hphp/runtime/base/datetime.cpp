@@ -282,7 +282,9 @@ void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
   if (utc) {
     timelib_unixtime2gmt(t, (timelib_sll)m_timestamp);
   } else {
-    m_tz = TimeZone::Current();
+    if (!m_tz.get()) {
+      m_tz = TimeZone::Current();
+    }
     t->tz_info = m_tz->get();
     t->zone_type = TIMELIB_ZONETYPE_ID;
     timelib_unixtime2local(t, (timelib_sll)m_timestamp);
@@ -602,7 +604,7 @@ String DateTime::rfcFormat(const String& format) const {
       if (utc()) {
         s.printf("+00%s00", rfc_colon ? ":" : "");
       } else {
-        int offset = m_tz->offset(toTimeStamp(error));
+        int offset = this->offset();
         s.printf("%c%02d%s%02d",
                  (offset < 0 ? '-' : '+'), abs(offset / 3600),
                  rfc_colon ? ":" : "", abs((offset % 3600) / 60));
@@ -610,14 +612,13 @@ String DateTime::rfcFormat(const String& format) const {
       break;
     case 'T': s.append(utc() ? "GMT" : m_time->tz_abbr); break;
     case 'e': s.append(utc() ? "UTC" : m_tz->name()); break;
-    case 'Z': s.append(utc() ? 0 : m_tz->offset(toTimeStamp(error)));
-      break;
+    case 'Z': s.append(utc() ? 0 : this->offset()); break;
     case 'c':
       if (utc()) {
         s.printf("%04d-%02d-%02dT%02d:%02d:%02d+00:00",
                  year(), month(), day(), hour(), minute(), second());
       } else {
-        int offset = m_tz->offset(toTimeStamp(error));
+        int offset = this->offset();
         s.printf("%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
                  year(), month(), day(), hour(), minute(), second(),
                  (offset < 0 ? '-' : '+'),
@@ -630,7 +631,7 @@ String DateTime::rfcFormat(const String& format) const {
                  shortWeekdayName(), day(), shortMonthName(), year(),
                  hour(), minute(), second());
       } else {
-        int offset = m_tz->offset(toTimeStamp(error));
+        int offset = this->offset();
         s.printf("%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
                  shortWeekdayName(), day(), shortMonthName(), year(),
                  hour(), minute(), second(),
@@ -746,7 +747,8 @@ Array DateTime::toArray(ArrayFormat format) const {
 }
 
 bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
-                          const char* format /*=NUL*/) {
+                          const char* format /*=NUL*/,
+                          bool throw_on_error /*= true*/) {
   struct timelib_error_container *error;
   timelib_time *t;
   if (format) {
@@ -764,6 +766,21 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
   }
   int error1 = error->error_count;
   setLastErrors(error);
+  if (error1) {
+    timelib_time_dtor(t);
+    if (!throw_on_error) {
+      return false;
+    }
+    auto msg = folly::format(
+      "DateTime::__construct(): Failed to parse time string "
+      "({}) at position {} ({}): {}",
+      input.data(),
+      error->error_messages[0].position,
+      error->error_messages[0].character,
+      error->error_messages[0].message
+    ).str();
+    throw Object(SystemLib::AllocExceptionObject(msg));
+  }
 
   if (m_timestamp == -1) {
     fromTimeStamp(0);

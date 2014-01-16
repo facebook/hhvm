@@ -28,9 +28,8 @@ namespace HPHP {
 class FastCGIServer;
 class FastCGITransportTraits;
 
-DECLARE_BOOST_TYPES(FastCGIJob);
 class FastCGIJob : public ServerJob {
-friend class FastCGITransportTraits;
+  friend class FastCGITransportTraits;
 public:
   explicit FastCGIJob(std::shared_ptr<FastCGITransport> transport)
     : m_transport(transport) {}
@@ -47,7 +46,8 @@ private:
 
 class FastCGITransportTraits {
 public:
-  FastCGITransportTraits(FastCGIJobPtr job, void* context, int id);
+  FastCGITransportTraits(std::shared_ptr<FastCGIJob> job,
+    void* context, int id);
   ~FastCGITransportTraits();
 
   Server *getServer() const;
@@ -58,7 +58,7 @@ private:
   std::shared_ptr<FastCGITransport> m_transport;
 };
 
-typedef ServerWorker<FastCGIJobPtr,
+typedef ServerWorker<std::shared_ptr<FastCGIJob>,
                      FastCGITransportTraits> FastCGIWorker;
 
 ///////////////////////////////////////////////////////////////////////////////

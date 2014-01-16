@@ -9,6 +9,7 @@ $file = __DIR__ . '/parse.ini';
 file_put_contents($file, $str);
 
 var_dump(parse_ini_file($file));
-?><?php
+?>
+<?php
 unlink(__DIR__.'/parse.ini');
 ?>

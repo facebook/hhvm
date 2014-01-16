@@ -35,7 +35,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   : m_unit(unit)
   , m_simplifier(*this)
   , m_state(unit, initialSpOffsetFromFp, func)
-  , m_curTrace(m_unit.makeMain(initialBcOffset)->trace())
+  , m_curTrace(m_unit.main())
   , m_curBlock(nullptr)
   , m_enableSimplification(false)
   , m_inReoptimize(false)
@@ -57,7 +57,7 @@ TraceBuilder::~TraceBuilder() {
 bool TraceBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
   if (!RuntimeOption::EvalHHIRRelaxGuards) return false;
   if (inReoptimize()) return false;
-  if (tmp && tmp->isConst()) return false;
+  if (tmp && (tmp->isConst() || tmp->isA(Type::Cls))) return false;
 
   return true;
 }
@@ -121,14 +121,16 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
 
   Block* block = m_curTrace->back();
   if (!block->empty()) {
-    IRInstruction* prev = block->back();
+    IRInstruction* prev = &block->back();
     if (prev->isBlockEnd()) {
       // start a new block
       Block* next = m_unit.defBlock();
+      FTRACE(2, "lazily adding B{}\n", next->id());
       m_curTrace->push_back(next);
       if (!prev->isTerminal()) {
         // new block is reachable from old block so link it.
-        block->setNext(next);
+        prev->setNext(next);
+        next->setHint(block->hint());
       }
       block = next;
     }
@@ -145,6 +147,7 @@ void TraceBuilder::appendBlock(Block* block) {
 
   m_state.finishBlock(m_curTrace->back());
 
+  FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
   m_state.startBlock(block);
   m_curTrace->push_back(block);
@@ -233,11 +236,14 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
 
 SSATmp* TraceBuilder::preOptimizeLdThis(IRInstruction* inst) {
   if (m_state.thisAvailable()) {
-    auto fpInst = inst->src(0)->inst();
-    if (fpInst->op() == DefInlineFP) {
+    auto fpInst = frameRoot(inst->src(0)->inst());
+
+    if (fpInst->is(DefInlineFP)) {
       if (!m_state.frameSpansCall()) { // check that we haven't nuked the SSATmp
-        auto spInst = fpInst->src(0)->inst();
-        if (spInst->op() == SpillFrame && spInst->src(3)->isA(Type::Obj)) {
+        auto spInst = findSpillFrame(fpInst->src(0));
+        // In an inlined call, we should always be able to find our SpillFrame.
+        always_assert(spInst && spInst->src(0) == fpInst->src(1));
+        if (spInst->src(3)->isA(Type::Obj)) {
           return spInst->src(3);
         }
       }
@@ -252,33 +258,6 @@ SSATmp* TraceBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimizeDecRef(IRInstruction* inst) {
-  /*
-   * Refcount optimization:
-   *
-   * If the decref'ed value is guaranteed to be available after the decref,
-   * generate DecRefNZ instead of DecRef.
-   *
-   * This is safe WRT copy-on-write because all the instructions that
-   * could cause a COW return a new SSATmp that will replace the
-   * tracked state that we are using to determine the value is still
-   * available.  I.e. by the time they get to the DecRef we won't see
-   * it in isValueAvailable anymore and won't convert to DecRefNZ.
-   */
-  auto srcInst = inst->src(0)->inst();
-  while (srcInst->isPassthrough() && !srcInst->is(IncRef)) {
-    srcInst = srcInst->getPassthroughValue()->inst();
-  }
-
-  if (srcInst->is(IncRef)) {
-    if (m_state.isValueAvailable(srcInst->src(0))) {
-      inst->setOpcode(DecRefNZ);
-    }
-  }
-
-  return nullptr;
-}
-
 SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
   /*
    * If $this is available, convert to an instruction sequence that
@@ -286,28 +265,8 @@ SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
    */
   if (thisAvailable()) {
     auto const thiss = gen(LdThis, m_state.fp());
-    auto const thisInst = thiss->inst();
-
-    /*
-     * DecRef optimization for $this in an inlined frame: if a caller
-     * local contains the $this, we know it can't go to zero and can
-     * switch DecRef to DecRefNZ.
-     *
-     * It's ok not to do DecRefThis (which normally nulls out the ActRec
-     * $this), because there is still a reference to it in the caller
-     * frame, so debug_backtrace() can't see a non-live pointer value.
-     */
-    if (thisInst->op() == IncRef &&
-        m_state.callerHasValueAvailable(thisInst->src(0))) {
-      gen(DecRefNZ, thiss);
-      inst->convertToNop();
-      return nullptr;
-    }
-
-    assert(inst->src(0) == m_state.fp());
     gen(DecRef, thiss);
     inst->convertToNop();
-    return nullptr;
   }
 
   return nullptr;
@@ -384,13 +343,29 @@ SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
 
   assert(inst->typeParam() == Type::None);
 
-  // There's no need to store the type if it's going to be the same
-  // KindOfFoo. We still have to store string types because we don't
-  // guard on KindOfStaticString vs. KindOfString.
+  /*
+   * There's no need to store the type if it's going to be the same
+   * KindOfFoo.  We'll still have to store string types because we
+   * aren't specific about storing KindOfStaticString
+   * vs. KindOfString, and a Type::Null might mean KindOfUninit or
+   * KindOfNull.
+   */
   auto const bothBoxed = curType.isBoxed() && newType.isBoxed();
-  auto const sameUnboxed =
-    curType.isSameKindOf(newType) && !curType.isString();
-  if (bothBoxed || sameUnboxed) {
+  auto const sameUnboxed = [&] {
+    auto avoidable = { Type::Uninit,
+                       Type::InitNull,
+                       Type::Int,
+                       Type::Dbl,
+                       // No strings.
+                       Type::Arr,
+                       Type::Obj,
+                       Type::Res };
+    for (auto& t : avoidable) {
+      if (curType.subtypeOf(t) && newType.subtypeOf(t)) return true;
+    }
+    return false;
+  };
+  if (bothBoxed || sameUnboxed()) {
     inst->setOpcode(StLocNT);
   }
 
@@ -404,7 +379,6 @@ SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
     X(AssertLoc);
     X(LdThis);
     X(LdCtx);
-    X(DecRef);
     X(DecRefThis);
     X(DecRefLoc);
     X(LdLoc);
@@ -430,15 +404,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
   SCOPE_EXIT { if (debug) --instNest; };
   DEBUG_ONLY auto indent = [&] { return std::string(instNest * 2, ' '); };
 
-  FTRACE(1, "{}{}\n", indent(), inst->toString());
-
-  // turn off ActRec optimization for instructions that will require a frame
-  if (m_state.needsFPAnchor(inst)) {
-    m_state.setHasFPAnchor();
-    always_assert(m_state.fp() != nullptr);
-    gen(InlineFPAnchor, m_state.fp());
-    FTRACE(2, "Anchor for: {}\n", inst->toString());
-  }
+  FTRACE(1, "optimizing {}{}\n", indent(), inst->toString());
 
   // First pass of tracebuilder optimizations try to replace an
   // instruction based on tracked state before we do anything else.
@@ -455,41 +421,42 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
   copyProp(inst);
 
   SSATmp* result = nullptr;
-  if (m_state.enableCse() && inst->canCSE()) {
-    result = m_state.cseLookup(inst, idoms);
-    if (result) {
-      // Found a dominating instruction that can be used instead of inst
-      FTRACE(1, "  {}cse found: {}\n",
-             indent(), result->inst()->toString());
-
-      // CheckType and AssertType are special. They're marked as both PRc and
-      // CRc to placate our refcounting optimizations, for for the purposes of
-      // CSE they're neither.
-      if (inst->is(CheckType, AssertType)) {
-        return result;
-      }
-      assert(!inst->consumesReferences());
-      if (inst->producesReference()) {
-        // Replace with an IncRef
-        FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
-        return gen(IncRef, result);
-      } else {
-        return result;
-      }
-    }
-  }
 
   if (m_enableSimplification) {
     result = m_simplifier.simplify(inst);
     if (result) {
-      // Found a simpler instruction that can be used instead of inst
-      FTRACE(1, "  {}simplification returned: {}\n",
-             indent(), result->inst()->toString());
-      assert(inst->hasDst());
-      return result;
+      inst = result->inst();
+      if (inst->producesReference(0)) {
+        // This effectively prevents CSE from kicking in below, which
+        // would replace the instruction with an IncRef.  That is
+        // correct if the simplifier morphed the instruction, but it's
+        // incorrect if the simplifier returned one of original
+        // instruction sources.  We currently have no way to
+        // distinguish the two cases, so we prevent CSE completely for
+        // now.
+        return result;
+      }
     }
   }
-  return nullptr;
+
+  if (m_state.enableCse() && inst->canCSE()) {
+    SSATmp* cseResult = m_state.cseLookup(inst, idoms);
+    if (cseResult) {
+      // Found a dominating instruction that can be used instead of inst
+      FTRACE(1, "  {}cse found: {}\n",
+             indent(), cseResult->inst()->toString());
+
+      assert(!inst->consumesReferences());
+      if (inst->producesReference(0)) {
+        // Replace with an IncRef
+        FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
+        gen(IncRef, cseResult);
+      }
+      return cseResult;
+    }
+  }
+
+  return result;
 }
 
 SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
@@ -545,11 +512,10 @@ void TraceBuilder::reoptimize() {
   auto const idoms = findDominators(m_unit, sortedBlocks);
   m_state.clear();
 
-  auto blocks = std::move(m_curTrace->blocks());
-  assert(m_curTrace->blocks().empty());
-  while (!blocks.empty()) {
-    Block* block = blocks.front();
-    blocks.pop_front();
+  auto& traceBlocks = m_curTrace->blocks();
+  BlockList blocks(traceBlocks.begin(), traceBlocks.end());
+  traceBlocks.clear();
+  for (auto* block : blocks) {
     assert(block->trace() == m_curTrace);
     FTRACE(5, "Block: {}\n", block->id());
 
@@ -563,13 +529,6 @@ void TraceBuilder::reoptimize() {
       auto *inst = &instructions.front();
       instructions.pop_front();
       m_state.setMarker(inst->marker());
-
-      // last attempt to elide ActRecs, if we still need the InlineFPAnchor
-      // it will be added back to the trace when we re-add instructions that
-      // rely on it
-      if (inst->op() == InlineFPAnchor) {
-        continue;
-      }
 
       // merging state looks at the current marker, and optimizeWork
       // below may create new instructions. Use the marker from this
@@ -590,27 +549,28 @@ void TraceBuilder::reoptimize() {
         // Generate a mov(tmp->dst) to get result into dst. If we get here then
         // assume the last instruction in the block isn't a guard. If it was,
         // we would have to insert the mov on the fall-through edge.
-        assert(block->empty() || !block->back()->isBlockEnd());
+        assert(block->empty() || !block->back().isBlockEnd());
         IRInstruction* mov = m_unit.mov(dst, tmp, inst->marker());
         appendInstruction(mov, block);
         m_state.update(mov);
       }
-      // Not re-adding inst; remove the inst->taken edge
-      if (inst->taken()) inst->setTaken(nullptr);
+      if (inst->isBlockEnd()) {
+        // Not re-adding inst; replace it with a jump to the next block.
+        auto next = inst->next();
+        appendInstruction(m_unit.gen(Jmp, inst->marker(), next));
+        inst->setTaken(nullptr);
+        inst->setNext(nullptr);
+      }
     }
 
     if (block->empty()) {
       // If all the instructions in the block were optimized away, remove it
       // from the trace.
-      auto it = m_curTrace->blocks().end();
+      auto it = traceBlocks.end();
       --it;
       assert(*it == block);
       m_curTrace->unlink(it);
     } else {
-      if (block->back()->isTerminal()) {
-        // Could have converted a conditional branch to Jmp; clear next.
-        block->setNext(nullptr);
-      }
       m_state.finishBlock(block);
     }
   }

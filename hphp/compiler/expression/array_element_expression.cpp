@@ -19,6 +19,7 @@
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/code_model_enums.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -386,6 +387,42 @@ ExpressionPtr ArrayElementExpression::unneeded() {
     if (m_offset) return m_offset->unneeded();
   }
   return Expression::unneeded();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ArrayElementExpression::outputCodeModel(CodeGenerator &cg) {
+  if (Option::ConvertSuperGlobals && m_global && !m_dynamicGlobal &&
+      getScope() && (getScope()->is(BlockScope::ProgramScope) ||
+                     getScope()-> getVariables()->
+                     isConvertibleSuperGlobal(m_globalName))) {
+    cg.printObjectHeader("SimpleVariableExpression", 2);
+    cg.printPropertyHeader("name");
+    cg.printValue(m_globalName);
+    cg.printPropertyHeader("sourceLocation");
+    cg.printLocation(this->getLocation());
+    cg.printObjectFooter();
+  } else if (m_offset) {
+    cg.printObjectHeader("BinaryOpExpression", 4);
+    cg.printPropertyHeader("expression1");
+    m_variable->outputCodeModel(cg);
+    cg.printPropertyHeader("expression2");
+    cg.printExpression(m_offset, false);
+    cg.printPropertyHeader("operation");
+    cg.printValue(PHP_ARRAY_ELEMENT);
+    cg.printPropertyHeader("sourceLocation");
+    cg.printLocation(this->getLocation());
+    cg.printObjectFooter();
+  } else {
+    cg.printObjectHeader("UnaryOpExpression", 3);
+    cg.printPropertyHeader("expression");
+    m_variable->outputCodeModel(cg);
+    cg.printPropertyHeader("operation");
+    cg.printValue(PHP_ARRAY_APPEND_POINT_OP);
+    cg.printPropertyHeader("sourceLocation");
+    cg.printLocation(this->getLocation());
+    cg.printObjectFooter();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

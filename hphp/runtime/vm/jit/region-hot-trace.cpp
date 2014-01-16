@@ -130,7 +130,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
 
   PostConditions accumPostConds;
 
-  while (!setContains(selectedSet, tid)) {
+  while (!selectedSet.count(tid)) {
 
     RegionDescPtr blockRegion = profData->transRegion(tid);
     if (blockRegion == nullptr) break;
@@ -185,7 +185,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       Op* lastInstr = profData->transLastInstr(prevId);
       const Unit* unit = profData->transFunc(prevId)->unit();
       OffsetSet succOffs = findSuccOffsets(lastInstr, unit);
-      if (!setContains(succOffs, profData->transSrcKey(tid).offset())) {
+      if (!succOffs.count(profData->transSrcKey(tid).offset())) {
         if (HPHP::Trace::moduleEnabled(HPHP::Trace::pgo, 2)) {
           FTRACE(2, "selectHotTrace: WARNING: Breaking region @: {}\n",
                  JIT::show(*region));

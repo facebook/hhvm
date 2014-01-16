@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdEval);
 class CmdEval : public DebuggerCommand {
 public:
   CmdEval() : DebuggerCommand(KindOfEval), m_bypassAccessCheck(false) {

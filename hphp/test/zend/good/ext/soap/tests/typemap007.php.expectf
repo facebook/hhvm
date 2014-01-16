@@ -1,0 +1,7 @@
+object(book)#%d (2) {
+  ["a"]=>
+  string(3) "foo"
+  ["b"]=>
+  string(3) "bar"
+}
+ok

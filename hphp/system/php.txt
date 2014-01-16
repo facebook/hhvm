@@ -21,6 +21,7 @@ hphp/system/php/spl/file_handling/SplFileInfo.php
 hphp/system/php/spl/interfaces/SeekableIterator.php
 hphp/system/php/spl/iterators/DirectoryIterator.php
 hphp/system/php/spl/iterators/FilesystemIterator.php
+hphp/system/php/spl/iterators/GlobIterator.php
 hphp/system/php/spl/iterators/RecursiveDirectoryIterator.php
 hphp/system/php/spl/file_handling/SplFileObject.php
 hphp/system/php/spl/file_handling/SplTempFileObject.php
@@ -66,7 +67,8 @@ hphp/system/php/array_filter.hhas
 hphp/system/php/array_map.hhas
 hphp/system/php/asio/Awaitable.php
 hphp/system/php/asio/InvalidOperationException.php
-hphp/system/php/collections/collections.php
+hphp/system/php/collections/collections.ns.php
+hphp/system/php/date/dateperiod.php
 hphp/system/php/dom/DOMException.php
 hphp/system/php/file_system/Directory.php
 hphp/system/php/hash/furchash.php
@@ -76,11 +78,10 @@ hphp/system/php/json/JsonSerializable.php
 hphp/system/php/lang/ErrorException.php
 hphp/system/php/misc/highlight.php
 hphp/system/php/misc/php_strip_whitespace.php
-hphp/system/php/misc/str_getcsv.php
+hphp/system/php/password/password.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
 hphp/system/php/redis/RedisSessionModule.php
-hphp/system/php/reflection/reflection.php
 hphp/system/php/sessions/session_register_shutdown.php
 hphp/system/php/soap/SoapFault.php
 hphp/system/php/spl/datastructures/SplFixedArray.php
@@ -95,3 +96,5 @@ hphp/system/php/spl/iterators/LimitIterator.php
 hphp/system/php/spl/iterators/NoRewindIterator.php
 hphp/system/php/spl/iterators/RecursiveIteratorIterator.php
 hphp/system/php/spl/miscellaneous/ArrayObject.php
+hphp/system/php/string/wordwrap.php
+hphp/system/php/zlib/zlib_funcs.php

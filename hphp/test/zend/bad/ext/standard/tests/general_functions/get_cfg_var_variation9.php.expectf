@@ -1,0 +1,4 @@
+*** Test substituting argument with array of valid parameters ***
+string(1) "0"
+string(3) "php"
+string(5) "files"

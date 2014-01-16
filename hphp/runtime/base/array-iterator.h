@@ -28,12 +28,24 @@ namespace HPHP {
 
 struct TypedValue;
 class c_Vector;
-class c_Map;
-class c_StableMap;
+class BaseMap;
 class c_Set;
 class c_Pair;
 class c_FrozenVector;
+class c_FrozenSet;
 struct Iter;
+
+enum class IterNextIndex : uint16_t {
+  ArrayPacked = 0,
+  ArrayMixed,
+  Array,
+  Vector,
+  FrozenVector,
+  Map,
+  Set,
+  Pair,
+  Object,
+};
 
 /**
  * An iteration normally looks like this:
@@ -48,7 +60,7 @@ struct Iter;
  */
 class ArrayIter {
  public:
-  enum Type {
+  enum Type : uint16_t {
     TypeUndefined = 0,
     TypeArray,
     TypeIterator  // for objects that implement Iterator or
@@ -95,6 +107,7 @@ class ArrayIter {
     m_pos = iter.m_pos;
     m_version = iter.m_version;
     m_itype = iter.m_itype;
+    m_nextHelperIdx = iter.m_nextHelperIdx;
     iter.m_data = nullptr;
   }
 
@@ -145,22 +158,7 @@ class ArrayIter {
     }
     return firstHelper();
   }
-  /**
-   * keyish() works similarly to first(), except that for Sets it will
-   * return the value (second()) instead of returning null. We use keyish()
-   * instead of first() in a number of the array builtins that have been
-   * adapted to work with collections.
-   */
-  Variant keyish() {
-    if (LIKELY(hasArrayData())) {
-      const ArrayData* ad = getArrayData();
-      assert(ad);
-      assert(m_pos != ArrayData::invalid_index);
-      return ad->getKey(m_pos);
-    }
-    return firstHelper(true);
-  }
-  Variant firstHelper(bool keyishMode = false);
+  Variant firstHelper();
   void nvFirst(TypedValue* out) {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ArrayData::invalid_index);
@@ -181,7 +179,7 @@ class ArrayIter {
    */
   RefData* zSecond();
 
-  bool hasArrayData() {
+  bool hasArrayData() const {
     return !((intptr_t)m_data & 1);
   }
   bool hasCollection() {
@@ -215,7 +213,8 @@ class ArrayIter {
    * an insertion or deletion is made to the collection while iterating.
    * Moreover the collection elements are accessed via an iterator.
    * Templatized VersionableSparse functions expect the collection to implement
-   * getVersion(), iter_begin(), iter_next(), iter_value() and iter_key().
+   * getVersion(), iter_begin(), iter_next(), iter_value(), iter_key(), and
+   * iter_valid().
    */
   enum class VersionableSparse {};
 
@@ -249,7 +248,7 @@ class ArrayIter {
   template<class Mappish>
   Variant iterKey(VersionableSparse);
 
-  const ArrayData* getArrayData() {
+  const ArrayData* getArrayData() const {
     assert(hasArrayData());
     return m_data;
   }
@@ -264,6 +263,10 @@ class ArrayIter {
   }
   void setIterType(Type iterType) {
     m_itype = iterType;
+  }
+
+  IterNextIndex getHelperIndex() {
+    return m_nextHelperIdx;
   }
 
   ObjectData* getObject() {
@@ -282,13 +285,15 @@ class ArrayIter {
   static void VectorInit(ArrayIter* iter, ObjectData* obj);
   static void MapInit(ArrayIter* iter, ObjectData* obj);
   static void StableMapInit(ArrayIter* iter, ObjectData* obj);
+  static void FrozenMapInit(ArrayIter* iter, ObjectData* obj);
   static void SetInit(ArrayIter* iter, ObjectData* obj);
   static void PairInit(ArrayIter* iter, ObjectData* obj);
   static void FrozenVectorInit(ArrayIter* iter, ObjectData* obj);
+  static void FrozenSetInit(ArrayIter* iter, ObjectData* obj);
   static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
 
   typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
-  static const InitFuncPtr initFuncTable[7];
+  static const InitFuncPtr initFuncTable[Collection::MaxNumTypes];
 
   void destruct();
 
@@ -296,13 +301,10 @@ class ArrayIter {
     assert(hasCollection() && getCollectionType() == Collection::VectorType);
     return (c_Vector*)((intptr_t)m_obj & ~1);
   }
-  c_Map* getMap() {
-    assert(hasCollection() && getCollectionType() == Collection::MapType);
-    return (c_Map*)((intptr_t)m_obj & ~1);
-  }
-  c_StableMap* getStableMap() {
-    assert(hasCollection() && getCollectionType() == Collection::StableMapType);
-    return (c_StableMap*)((intptr_t)m_obj & ~1);
+  BaseMap* getMappish() {
+    assert(hasCollection());
+    assert(Collection::isMapType(getCollectionType()));
+    return (BaseMap*)((intptr_t)m_obj & ~1);
   }
   c_Set* getSet() {
     assert(hasCollection() && getCollectionType() == Collection::SetType);
@@ -318,6 +320,10 @@ class ArrayIter {
 
     return (c_FrozenVector*)((intptr_t)m_obj & ~1);
   }
+  c_FrozenSet* getFrozenSet() {
+    assert(hasCollection() && getCollectionType() == Collection::FrozenSetType);
+    return (c_FrozenSet*)((intptr_t)m_obj & ~1);
+  }
   Collection::Type getCollectionType() {
     ObjectData* obj = getObject();
     return obj->getCollectionType();
@@ -330,11 +336,22 @@ class ArrayIter {
   void setArrayData(const ArrayData* ad) {
     assert((intptr_t(ad) & 1) == 0);
     m_data = ad;
+    m_nextHelperIdx = IterNextIndex::ArrayMixed;
+    if (ad != nullptr) {
+      if (ad->isPacked()) {
+        m_nextHelperIdx = IterNextIndex::ArrayPacked;
+      } else if (!ad->isHphpArray()) {
+        m_nextHelperIdx = IterNextIndex::Array;
+      }
+    }
   }
+
   void setObject(ObjectData* obj) {
     assert((intptr_t(obj) & 1) == 0);
     m_obj = (ObjectData*)((intptr_t)obj | 1);
+    m_nextHelperIdx = getNextHelperIdx(obj);
   }
+  IterNextIndex getNextHelperIdx(ObjectData* obj);
 
   union {
     const ArrayData* m_data;
@@ -345,6 +362,7 @@ class ArrayIter {
  private:
   int m_version;
   Type m_itype;
+  IterNextIndex m_nextHelperIdx;
 
   friend struct Iter;
 };
@@ -624,6 +642,17 @@ int64_t miter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 ArrayIter getContainerIter(CVarRef v);
 ArrayIter getContainerIter(CVarRef v, size_t& sz);
+
+int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
+int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
+
+///////////////////////////////////////////////////////////////////////////////
+
+const unsigned int kIterNextTableSize = 9;
+typedef int64_t(*IterNextHelper)(Iter*, TypedValue*);
+extern const IterNextHelper g_iterNextHelpers[kIterNextTableSize];
+typedef int64_t(*IterNextKHelper)(Iter*, TypedValue*, TypedValue*);
+extern const IterNextKHelper g_iterNextKHelpers[kIterNextTableSize];
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -13,13 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/exception.h"
 
-#include <string>
-
-#include "util.h"
-#include "hphp/util/base.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,7 +39,7 @@ Exception::Exception()
 }
 
 void Exception::format(const char *fmt, va_list ap) {
-  Util::string_vsnprintf(m_msg, fmt, ap);
+  string_vsnprintf(m_msg, fmt, ap);
 }
 
 Exception::~Exception() throw() {

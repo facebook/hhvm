@@ -1,0 +1,123 @@
+array(3) {
+  [0]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(17)
+    ["function"]=>
+    string(10) "__destruct"
+    ["class"]=>
+    string(2) "bt"
+    ["object"]=>
+    object(bt)#2 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(22)
+    ["function"]=>
+    string(3) "foo"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(29)
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+array(3) {
+  [0]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(17)
+    ["function"]=>
+    string(10) "__destruct"
+    ["class"]=>
+    string(2) "bt"
+    ["object"]=>
+    object(bt)#2 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(22)
+    ["function"]=>
+    string(3) "foo"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(29)
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+array(2) {
+  [0]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(27)
+    ["function"]=>
+    string(10) "__destruct"
+    ["class"]=>
+    string(2) "bt"
+    ["object"]=>
+    object(bt)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(29)
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}

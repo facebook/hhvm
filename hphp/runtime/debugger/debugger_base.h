@@ -17,6 +17,10 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_BASE_H_
 #define incl_HPHP_EVAL_DEBUGGER_BASE_H_
 
+#include <memory>
+#include <vector>
+#include <string>
+
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -30,7 +34,7 @@ struct DebuggerClientOptions {
   std::string host;
   int port;
   std::string extension;
-  StringVec cmds;
+  std::vector<std::string> cmds;
   std::string sandbox;
   std::string user;
   std::string configFName;
@@ -84,7 +88,8 @@ class DebuggerClientExitException  : public DebuggerException {
 
 class DebuggerRestartException     : public DebuggerException {
 public:
-  explicit DebuggerRestartException(StringVecPtr args) : m_args(args) {}
+  explicit DebuggerRestartException(
+    std::shared_ptr<std::vector<std::string>> args) : m_args(args) {}
   ~DebuggerRestartException() throw() {}
 
   virtual const char *what() const throw() {
@@ -92,7 +97,7 @@ public:
   }
   EXCEPTION_COMMON_IMPL(DebuggerRestartException);
 
-  StringVecPtr m_args;
+  std::shared_ptr<std::vector<std::string>> m_args;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,8 +132,11 @@ extern const char *PHP_KEYWORDS[];
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(DSandboxInfo);
-DECLARE_BOOST_TYPES(DMachineInfo);
+struct DSandboxInfo;
+struct DMachineInfo;
+
+using DSandboxInfoPtr = std::shared_ptr<DSandboxInfo>;
+
 class DMachineInfo {
 public:
   DMachineInfo()
@@ -175,7 +183,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(DThreadInfo);
 class DThreadInfo {
 public:
   int64_t m_id;
@@ -189,10 +196,11 @@ public:
   void recvImpl(ThriftBuffer &thrift);
 };
 
+using DThreadInfoPtr = std::shared_ptr<DThreadInfo>;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class BreakPointInfo;
-DECLARE_BOOST_TYPES(DFunctionInfo);
 class DFunctionInfo {
 public:
   std::string m_namespace;
@@ -209,11 +217,10 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(Macro);
 class Macro {
 public:
   std::string m_name;
-  StringVec m_cmds;
+  std::vector<std::string> m_cmds;
 
   unsigned int m_index; // currently playing position
 

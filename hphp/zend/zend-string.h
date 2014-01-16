@@ -19,6 +19,8 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <stdint.h>
+#include <string>
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -41,10 +43,19 @@ inline char *string_duplicate(const char *s, int len) {
 char *string_rot13(const char *input, int len);
 int   string_crc32(const char *p, int len);
 char *string_crypt(const char *key, const char *salt);
-char *string_md5(const char *arg, int arg_len, bool raw, int &out_len);
 char *string_sha1(const char *arg, int arg_len, bool raw, int &out_len);
 
+struct Md5Digest {
+  Md5Digest(const char* s, int len);
+  uint8_t digest[16];
+};
+std::string string_md5(const char* s, int len);
+
+/*
+ * Convert input[len] to a malloced, nul-terminated, lowercase, hex string
+ */
 char *string_bin2hex(const char *input, int &len);
+char *string_bin2hex(const char* input, int len, char* output);
 
 //////////////////////////////////////////////////////////////////////
 }

@@ -15,13 +15,14 @@
 */
 #include "hphp/runtime/vm/tread-hash-map.h"
 
+#include <cstdint>
 #include <vector>
 #include <algorithm>
 #include <iostream>
 
 #include <gtest/gtest.h>
 
-#include "hphp/util/base.h"
+#include "hphp/util/functional.h"
 
 namespace HPHP {
 

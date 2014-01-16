@@ -21,12 +21,13 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/util.h"
 
 namespace HPHP {
 
-using Transl::CallerFrame;
-using Transl::VMRegAnchor;
+using JIT::CallerFrame;
+using JIT::VMRegAnchor;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -44,10 +45,12 @@ static inline const String& ctxClassName() {
 }
 
 static const Class* get_cls(CVarRef class_or_object) {
-  Class* cls = NULL;
+  Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.toCObjRef().get();
     cls = obj->getVMClass();
+  } else if (class_or_object.is(KindOfArray)) {
+    // do nothing but avoid the toString conversion notice
   } else {
     cls = Unit::loadClass(class_or_object.toString().get());
   }
@@ -98,13 +101,23 @@ bool f_trait_exists(const String& trait_name, bool autoload /* = true */) {
 static void getMethodNamesImpl(const Class* cls,
                                const Class* ctx,
                                Array& out) {
+
+  // The order of these methods is so that the first ones win on
+  // case insensitive name conflicts.
+
   auto const methods = cls->methods();
   auto const numMethods = cls->numMethods();
 
   for (Slot i = 0; i < numMethods; ++i) {
     auto const meth = methods[i];
-    auto const methName = meth->name();
     auto const declCls = meth->cls();
+    auto addMeth = [&]() {
+      auto const methName = Variant(meth->name());
+      auto const lowerName = f_strtolower(methName.toString());
+      if (!out.exists(lowerName)) {
+        out.add(lowerName, methName);
+      }
+    };
 
     // Only pick methods declared in this class, in order to match
     // Zend's order.  Inherited methods will be inserted in the
@@ -116,7 +129,7 @@ static void getMethodNamesImpl(const Class* cls,
 
     // Public methods are always visible.
     if ((meth->attrs() & AttrPublic)) {
-      out.set(StrNR(methName), true_varNR, true /* isKey */);
+      addMeth();
       continue;
     }
 
@@ -129,7 +142,7 @@ static void getMethodNamesImpl(const Class* cls,
     if (declCls == ctx ||
         ((meth->attrs() & AttrProtected) &&
          (ctx->classof(declCls) || declCls->classof(ctx)))) {
-      out.set(StrNR(methName), true_varNR, true /* isKey */);
+      addMeth();
     }
   }
 
@@ -155,7 +168,7 @@ Array f_get_class_methods(const Variant& class_or_object) {
     arGetContextClassFromBuiltin(g_vmContext->getFP()),
     retVal
   );
-  return f_array_keys(retVal).toArray();
+  return f_array_values(retVal).toArray();
 }
 
 Array f_get_class_constants(const String& className) {
@@ -359,7 +372,7 @@ Variant f_get_object_vars(CObjRef object) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_call_user_method_array(const String& method_name, VRefParam obj,
-                                 CArrRef paramarr) {
+                                 CVarRef paramarr) {
   return obj.toObject()->o_invoke(method_name, paramarr);
 }
 

@@ -16,26 +16,34 @@
 */
 #include "hphp/runtime/ext/ext_mysql.h"
 
-#include "folly/ScopeGuard.h"
+#include <boost/lexical_cast.hpp>
 
-#include "hphp/runtime/ext/ext_preg.h"
-#include "hphp/runtime/ext/ext_network.h"
-#include "hphp/runtime/ext/mysql_stats.h"
-#include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/extended-logger.h"
-#include "hphp/util/timer.h"
-#include "hphp/util/db-mysql.h"
-#include "folly/String.h"
 #include <netinet/in.h>
 #include <netdb.h>
+#include <poll.h>
 
+#include "folly/ScopeGuard.h"
+#include "folly/String.h"
+
+#include "hphp/util/network.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/db-mysql.h"
+
+#include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/socket.h"
+#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/ext_preg.h"
+#include "hphp/runtime/ext/mysql_stats.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+using std::string;
 
 bool mysqlExtension::ReadOnly = false;
 #ifdef FACEBOOK
@@ -542,25 +550,25 @@ static Variant php_mysql_do_connect(String server, String username,
   if (database.empty()) database = MySQL::GetDefaultDatabase();
 
   // server format: hostname[:port][:/path/to/socket]
+  // ipv6 hostname:port is of the form [1:2:3:4:5]:port
   String host, socket;
-  int port = MYSQL_PORT;
-  int pos = server.find(':');
-  if (pos >= 0) {
-    host = server.substr(0, pos);
-    if (server.charAt(pos + 1) != '/') {
-      String sport = server.substr(pos + 1);
-      port = sport.toInt32();
-      pos = sport.find(':');
-      if (pos >= 0) {
-        socket = sport.substr(pos + 1);
-      }
-    } else {
-      socket = server.substr(pos + 1);
-    }
+  int port;
+
+  auto slash_pos = server.find('/');
+  if (slash_pos != std::string::npos) {
+    socket = server.substr(slash_pos);
+    server = server.substr(0, slash_pos - 1);
+  }
+
+  Util::HostURL hosturl(std::string(server), MySQL::GetDefaultPort());
+  if (hosturl.isValid()) {
+    host = hosturl.getHost();
+    port = hosturl.getPort();
   } else {
     host = server;
     port = MySQL::GetDefaultPort();
   }
+
   if (socket.empty()) {
     socket = MySQL::GetDefaultSocket();
   }
@@ -930,6 +938,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
 
 static Variant php_mysql_do_query_general(const String& query, CVarRef link_id,
                                           bool use_store, bool async_mode) {
+  SYNC_VM_REGS_SCOPED();
   if (mysqlExtension::ReadOnly &&
       same(f_preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query), 0)) {
     raise_notice("runtime/ext_mysql: write query not executed [%s]",
@@ -1011,13 +1020,8 @@ static Variant php_mysql_do_query_general(const String& query, CVarRef link_id,
 
   if (async_mode) {
 #ifdef FACEBOOK
-    int ok =
-      mysql_real_query_nonblocking_init(conn, query.data(), query.size());
-    if (!ok) {
-      raise_notice("runtime/ext_mysql: failed async executing [%s] [%s]",
-                   query.data(), mysql_error(conn));
-    }
-    return ok;
+    mySQL->m_async_query = query;
+    return true;
 #else
     throw NotImplementedException("mysql_async_query_start");
 #endif
@@ -1108,6 +1112,9 @@ Variant f_mysql_query(const String& query, CVarRef link_identifier /* = null */)
 
 Variant f_mysql_multi_query(const String& query, CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (conn == nullptr) {
+    return false;
+  }
   MySQL *mySQL = MySQL::Get(link_identifier);
   if (!mySQL->m_multi_query && !mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_ON)) {
     mySQL->m_multi_query = true;
@@ -1129,6 +1136,9 @@ Variant f_mysql_multi_query(const String& query, CVarRef link_identifier /* = nu
 
 int f_mysql_next_result(CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (conn == nullptr) {
+    return 2006 /* CR_SERVER_GONE_ERROR */;
+  }
   if (!mysql_more_results(conn)) {
     raise_strict_warning("There is no next result set. "
       "Please, call mysql_more_results() to check "
@@ -1139,11 +1149,17 @@ int f_mysql_next_result(CVarRef link_identifier /* = null */) {
 
 bool f_mysql_more_results(CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (conn == nullptr) {
+    return false;
+  }
   return mysql_more_results(conn);
 }
 
 Variant f_mysql_fetch_result(CVarRef link_identifier /* = null */) {
     MYSQL *conn = MySQL::GetConn(link_identifier);
+    if (conn == nullptr) {
+      return false;
+    }
     MYSQL_RES *mysql_result;
 
     mysql_result = mysql_store_result(conn);
@@ -1293,7 +1309,6 @@ const int64_t k_ASYNC_OP_INVALID = 0;
 const int64_t k_ASYNC_OP_UNSET = ASYNC_OP_UNSET;
 const int64_t k_ASYNC_OP_CONNECT = ASYNC_OP_CONNECT;
 const int64_t k_ASYNC_OP_QUERY = ASYNC_OP_QUERY;
-const int64_t k_ASYNC_OP_FETCH_ROW = ASYNC_OP_FETCH_ROW;
 
 bool MySQL::async_connect(const String& host, int port, const String& socket,
                           const String& username, const String& password,
@@ -1306,10 +1321,15 @@ bool MySQL::async_connect(const String& host, int port, const String& socket,
   }
   IOStatusHelper io("mysql::async_connect", host.data(), port);
   m_xaction_count = 0;
+  m_host = static_cast<std::string>(host);
+  m_username = static_cast<std::string>(username);
+  m_password = static_cast<std::string>(password);
+  m_socket = static_cast<std::string>(socket);
+  m_database = static_cast<std::string>(database);
   if (!mysql_real_connect_nonblocking_init(
-        m_conn, host.data(), username.data(), password.data(),
-        (database.empty() ? NULL : database.data()), port,
-        socket.empty() ? NULL : socket.data(), CLIENT_INTERACTIVE)) {
+        m_conn, m_host.c_str(), m_username.c_str(), m_password.c_str(),
+        (m_database.empty() ? NULL : m_database.c_str()), port,
+        m_socket.empty() ? NULL : m_socket.c_str(), CLIENT_INTERACTIVE)) {
     return false;
   }
   return true;
@@ -1340,11 +1360,8 @@ bool f_mysql_async_connect_completed(CVarRef link_identifier) {
   }
 
   int error = 0;
-  int status = mysql_real_connect_nonblocking_run(conn, &error);
-  if (error) {
-    return true;
-  }
-  return status == ASYNC_CLIENT_COMPLETE;
+  auto status = mysql_real_connect_nonblocking_run(conn, &error);
+  return status == NET_ASYNC_COMPLETE;
 }
 
 bool f_mysql_async_query_start(const String& query, CVarRef link_identifier) {
@@ -1359,35 +1376,41 @@ bool f_mysql_async_query_start(const String& query, CVarRef link_identifier) {
     return false;
   }
   Variant ret = php_mysql_do_query_general(query, link_identifier, true, true);
-  if (ret.getRawType() != KindOfInt64) {
+  if (ret.getRawType() != KindOfBoolean) {
     raise_warning("runtime/ext_mysql: unexpected return from "
                   "php_mysql_do_query_general");
     return false;
   }
-  return true;
+  return ret.toBooleanVal();
 }
 
 Variant f_mysql_async_query_result(CVarRef link_identifier) {
   MySQL* mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
-    return false;
+    return Variant(Variant::NullInit());
   }
   MYSQL* conn = mySQL->get();
-  if (!conn || conn->async_op_status != ASYNC_OP_QUERY) {
+  if (!conn || (conn->async_op_status != ASYNC_OP_QUERY &&
+                conn->async_op_status != ASYNC_OP_UNSET)) {
     raise_warning("runtime/ext_mysql: attempt to check query result when query "
                   "not executing");
-    return false;
+    return Variant(Variant::NullInit());
   }
 
   int error = 0;
-  int status = mysql_real_query_nonblocking_run(conn, &error);
+  auto status = mysql_real_query_nonblocking(
+    conn, mySQL->m_async_query.data(), mySQL->m_async_query.size(), &error);
+
+  if (status != NET_ASYNC_COMPLETE) {
+    return Variant(Variant::NullInit());
+  }
+
   if (error) {
-    return false;
+    return Variant(Variant::NullInit());
   }
-  if (status != ASYNC_CLIENT_COMPLETE) {
-    return false;
-  }
+
+  mySQL->m_async_query.reset();
 
   MYSQL_RES* mysql_result = mysql_use_result(conn);
   MySQLResult *r = NEWOBJ(MySQLResult)(mysql_result);
@@ -1421,9 +1444,9 @@ Variant f_mysql_async_fetch_array(CVarRef result, int result_type /* = 1 */) {
   }
 
   MYSQL_ROW mysql_row = NULL;
-  int status = mysql_fetch_row_nonblocking(&mysql_row, mysql_result);
+  int status = mysql_fetch_row_nonblocking(mysql_result, &mysql_row);
   // Last row, or no row yet available.
-  if (status == ASYNC_CLIENT_NOT_READY) {
+  if (status != NET_ASYNC_COMPLETE) {
     return false;
   }
   if (mysql_row == NULL) {
@@ -1504,8 +1527,8 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
     }
 
     pollfd* fd = &fds[nfds++];
-    fd->fd = conn->net.fd;
-    if (conn->net.nonblocking_status == NET_NONBLOCKING_READ) {
+    fd->fd = mysql_get_file_descriptor(conn);
+    if (conn->net.async_blocking_state == NET_NONBLOCKING_READ) {
       fd->events = POLLIN;
     } else {
       fd->events = POLLOUT;
@@ -1538,7 +1561,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
     MYSQL* conn = mySQL->get();
 
     pollfd* fd = &fds[nfds++];
-    if (fd->fd != conn->net.fd) {
+    if (fd->fd != mysql_get_file_descriptor(conn)) {
       raise_warning("poll returned events out of order wtf");
       continue;
     }
@@ -1567,7 +1590,6 @@ const int64_t k_ASYNC_OP_INVALID = 0;
 const int64_t k_ASYNC_OP_UNSET = -1;
 const int64_t k_ASYNC_OP_CONNECT = -2;
 const int64_t k_ASYNC_OP_QUERY = -3;
-const int64_t k_ASYNC_OP_FETCH_ROW = -4;
 
 Variant f_mysql_async_connect_start(const String& server,
                                     const String& username,

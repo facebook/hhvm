@@ -1,0 +1,8 @@
+ReflectionException: Class D lacks a constructor, so you cannot pass any constructor arguments
+ReflectionException: Class D lacks a constructor, so you cannot pass any constructor arguments
+P::__construct C
+P::__construct C
+P::__construct C
+P::__construct P
+P::__construct P
+P::__construct P

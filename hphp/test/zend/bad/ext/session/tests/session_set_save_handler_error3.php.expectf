@@ -1,0 +1,7 @@
+*** Testing session_set_save_handler() : error functionality ***
+HipHop Fatal error: %s
+Stack trace:
+#0 [internal function]: open('', 'PHPSESSID')
+#1 %s(%d): session_start()
+#2 {main}
+  thrown in %s on line %d

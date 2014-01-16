@@ -25,19 +25,29 @@ static class DateExtension : public Extension {
  public:
   DateExtension() : Extension("date") { }
   void moduleInit() {
-    auto callback = [](const HPHP::String& value, void *p) -> bool {
-      assert(p == nullptr);
-      if (value.empty()) {
-        return false;
-      }
-      return f_date_default_timezone_set(value);
-    };
     IniSetting::Bind(
-      "date.timezone", 
-      g_context->getDefaultTimeZone().c_str(), 
-      callback, 
+      "date.timezone",
+      g_context->getDefaultTimeZone().c_str(),
+      dateTimezoneIniUpdate, dateTimezoneIniGet,
       nullptr
     );
+  }
+
+ private:
+  static bool dateTimezoneIniUpdate(const HPHP::String& value, void *p) {
+    assert(p == nullptr);
+    if (value.empty()) {
+      return false;
+    }
+    return f_date_default_timezone_set(value);
+  }
+
+  static String dateTimezoneIniGet(void* p) {
+    auto ret = g_context->getTimeZone();
+    if (ret.isNull()) {
+      return empty_string;
+    }
+    return ret;
   }
 } s_date_extension;
 
@@ -74,13 +84,6 @@ const int64_t q_DateTimeZone$$PER_COUNTRY = 4096;
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-c_DateTime::c_DateTime(Class* cb)
-  : ExtObjectDataFlags<ObjectData::HasClone>(cb) {
-}
-
-c_DateTime::~c_DateTime() {
-}
-
 Object c_DateTime::t_add(CObjRef interval) {
   m_dt->add(c_DateInterval::unwrap(interval));
   return this;
@@ -91,15 +94,23 @@ void c_DateTime::t___construct(const String& time /*= "now"*/,
   m_dt = NEWOBJ(DateTime)(TimeStamp::Current());
   if (!time.empty()) {
     m_dt->fromString(time, c_DateTimeZone::unwrap(timezone));
+  } else if (!timezone.isNull()) {
+    // We still have to tell the underlying DateTime the timezone incase they
+    // call setTimestamp or something else later
+    m_dt->setTimezone(c_DateTimeZone::unwrap(timezone));
   }
 }
 
-Object c_DateTime::ti_createfromformat(const String& format, const String& time,
-                                       CObjRef timezone /*= null_object */) {
+Variant c_DateTime::ti_createfromformat(const String& format,
+                                        const String& time,
+                                        CObjRef timezone /*= null_object */) {
   c_DateTime *datetime = NEWOBJ(c_DateTime);
   datetime->m_dt = NEWOBJ(DateTime);
-  datetime->m_dt->fromString(time, c_DateTimeZone::unwrap(timezone),
-                             format.data());
+  if(!datetime->m_dt->fromString(time, c_DateTimeZone::unwrap(timezone),
+                             format.data(), false)) {
+    return false;
+  }
+
   return datetime;
 }
 
@@ -136,6 +147,10 @@ int64_t c_DateTime::t_getoffset() {
 }
 
 int64_t c_DateTime::t_gettimestamp() {
+  return gettimestamp();
+}
+
+int64_t c_DateTime::gettimestamp() const {
   bool err = false;
   return m_dt->toTimeStamp(err);
 }
@@ -185,17 +200,24 @@ Object c_DateTime::t_sub(CObjRef interval) {
   return this;
 }
 
+const StaticString
+  s_c("c"),
+  s__date_time("_date_time");
+
+Array c_DateTime::t___sleep() {
+  o_set(s__date_time, t_format(s_c));
+  return make_packed_array(s__date_time);
+}
+
+void c_DateTime::t___wakeup() {
+  t___construct(o_get(s__date_time));
+  unsetProp(getVMClass(), s__date_time.get());
+}
+
 c_DateTime* c_DateTime::Clone(ObjectData* obj) {
   c_DateTime* dt = static_cast<c_DateTime*>(obj->cloneImpl());
   dt->m_dt = static_cast<c_DateTime*>(obj)->m_dt->cloneDateTime();
   return dt;
-}
-
-c_DateTimeZone::c_DateTimeZone(Class* cb) :
-    ExtObjectDataFlags<ObjectData::HasClone>(cb) {
-}
-
-c_DateTimeZone::~c_DateTimeZone() {
 }
 
 void c_DateTimeZone::t___construct(const String& timezone) {
@@ -238,15 +260,6 @@ c_DateTimeZone* c_DateTimeZone::Clone(ObjectData* obj) {
   c_DateTimeZone* dtz = static_cast<c_DateTimeZone*>(obj->cloneImpl());
   dtz->m_tz = static_cast<c_DateTimeZone*>(obj)->m_tz->cloneTimeZone();
   return dtz;
-}
-
-c_DateInterval::c_DateInterval(Class* cb)
-  : ExtObjectDataFlags<ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::HasClone>(cb) {
-}
-
-c_DateInterval::~c_DateInterval() {
 }
 
 void c_DateInterval::t___construct(const String& interval_spec) {
@@ -458,7 +471,7 @@ Variant f_strtotime(const String& input,
   }
 
   DateTime dt(timestamp);
-  if (!dt.fromString(input, SmartResource<TimeZone>())) {
+  if (!dt.fromString(input, SmartResource<TimeZone>(), nullptr, false)) {
     return false;
   }
   bool error;
@@ -532,7 +545,7 @@ Object f_date_add(CObjRef datetime, CObjRef interval) {
     t_add(interval.getTyped<c_DateInterval>());
 }
 
-Object f_date_create_from_format(const String& format,
+Variant f_date_create_from_format(const String& format,
                                  const String& time,
                                  CObjRef timezone /* = null_object */) {
   return c_DateTime::ti_createfromformat(format, time, timezone);
@@ -546,11 +559,16 @@ Variant f_date_parse_from_format(const String& format, const String& date) {
   return ret;
 }
 
-Object f_date_create(const String& time /* = null_string */,
-                     CObjRef timezone /* = null_object */) {
+Variant f_date_create(const String& time /* = null_string */,
+                      CObjRef timezone /* = null_object */) {
   c_DateTime *cdt = NEWOBJ(c_DateTime)();
   Object ret(cdt);
-  cdt->t___construct(time, timezone);
+  // Don't set the time here because it will throw if it is bad
+  cdt->t___construct();
+  auto dt = c_DateTime::unwrap(ret);
+  if (!dt->fromString(time, c_DateTimeZone::unwrap(timezone), nullptr, false)) {
+    return false;
+  }
   return ret;
 }
 

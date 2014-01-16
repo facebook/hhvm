@@ -1,0 +1,15 @@
+array(1) {
+  ["options"]=>
+  array(1) {
+    ["http"]=>
+    array(1) {
+      ["header"]=>
+      array(2) {
+        [0]=>
+        string(21) "Accept-Encoding: gzip"
+        [1]=>
+        string(40) "User-Agent: Composer/source PHP 5.4.999)"
+      }
+    }
+  }
+}

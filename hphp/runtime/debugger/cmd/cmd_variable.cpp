@@ -20,6 +20,8 @@
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
 #include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,7 +89,7 @@ void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
                   ? KindOfVariableAsync : KindOfVariable);
   auto charCount = client.getDebuggerClientShortPrintCharCount();
   cmd.m_frame = client.getFrame();
-  CmdVariablePtr rcmd = client.xend<CmdVariable>(&cmd);
+  auto rcmd = client.xend<CmdVariable>(&cmd);
   if (rcmd->m_version == 2) {
     // Using the new protocol. rcmd contains a list of variables only.
     // Fetch value of varName only, so that we can recover nicely when its
@@ -231,7 +233,7 @@ void CmdVariable::onClient(DebuggerClient &client) {
 
   m_frame = client.getFrame();
 
-  CmdVariablePtr cmd = client.xend<CmdVariable>(this);
+  auto cmd = client.xend<CmdVariable>(this);
   if (cmd->m_variables.empty()) {
     client.info("(no variable was defined)");
   } else {
@@ -254,7 +256,10 @@ static c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
 }
 
 static c_AsyncFunctionWaitHandle *objToContinuationWaitHandle(Object o) {
-  return dynamic_cast<c_AsyncFunctionWaitHandle*>(o.get());
+  if (o->instanceof(c_AsyncFunctionWaitHandle::classof())) {
+    return static_cast<c_AsyncFunctionWaitHandle*>(o.get());
+  }
+  return nullptr;
 }
 
 static

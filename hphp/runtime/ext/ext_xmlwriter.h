@@ -35,7 +35,7 @@ bool f_xmlwriter_set_indent_string(CObjRef xmlwriter,
 bool f_xmlwriter_set_indent(CObjRef xmlwriter, bool indent);
 bool f_xmlwriter_start_document(CObjRef xmlwriter, const String& version = "1.0", const String& encoding = null_string, const String& standalone = null_string);
 bool f_xmlwriter_start_element(CObjRef xmlwriter, const String& name);
-bool f_xmlwriter_start_element_ns(CObjRef xmlwriter, const String& prefix, const String& name, const String& uri);
+bool f_xmlwriter_start_element_ns(CObjRef xmlwriter, const CVarRef prefix, const String& name, const String& uri);
 bool f_xmlwriter_write_element_ns(CObjRef xmlwriter, const String& prefix, const String& name, const String& uri, const String& content = null_string);
 bool f_xmlwriter_write_element(CObjRef xmlwriter, const String& name, const String& content = null_string);
 bool f_xmlwriter_end_element(CObjRef xmlwriter);
@@ -80,7 +80,6 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
  public:
   DECLARE_CLASS(XMLWriter)
 
-  // need to implement
   public: c_XMLWriter(Class* cls = c_XMLWriter::classof());
   public: ~c_XMLWriter();
   public: void t___construct();
@@ -90,7 +89,7 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
   public: bool t_setindent(bool indent);
   public: bool t_startdocument(const String& version = "1.0", const String& encoding = null_string, const String& standalone = null_string);
   public: bool t_startelement(const String& name);
-  public: bool t_startelementns(const String& prefix, const String& name, const String& uri);
+  public: bool t_startelementns(const CVarRef prefix, const String& name, const String& uri);
   public: bool t_writeelementns(const String& prefix, const String& name, const String& uri, const String& content = null_string);
   public: bool t_writeelement(const String& name, const String& content = null_string);
   public: bool t_endelement();
@@ -134,7 +133,6 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
  private:
   xmlTextWriterPtr   m_ptr;
   xmlBufferPtr       m_output;
-  xmlOutputBufferPtr m_uri_output;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

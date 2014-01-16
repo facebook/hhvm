@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 try {
   $v = new Vector();

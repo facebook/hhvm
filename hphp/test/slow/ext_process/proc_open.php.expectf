@@ -1,0 +1,7 @@
+hello foo
+hello foo
+%stest/slow/ext_process/test_proc_open.sh: line 3: read: read error: 0: Is a directory
+hello 
+hello foo
+hello 
+hello

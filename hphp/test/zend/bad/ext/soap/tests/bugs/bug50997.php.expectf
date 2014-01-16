@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://www.example.org/service2/"><SOAP-ENV:Body><ns1:NewOperation><code>foo</code></ns1:NewOperation></SOAP-ENV:Body></SOAP-ENV:Envelope>

@@ -261,30 +261,6 @@
             ]
         },
         {
-            "name": "array_filter",
-            "desc": "Iterates over each value in the input array passing them to the callback function. If the callback function returns true, the current value from input is returned into the result array. Array keys are preserved.",
-            "flags": [
-                "FunctionIsFoldable"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Returns the filtered array."
-            },
-            "args": [
-                {
-                    "name": "input",
-                    "type": "Variant",
-                    "desc": "The array to iterate over"
-                },
-                {
-                    "name": "callback",
-                    "type": "Variant",
-                    "value": "null_variant",
-                    "desc": "The callback function to use\n\nIf no callback is supplied, all entries of input equal to FALSE (see converting to boolean) will be removed."
-                }
-            ]
-        },
-        {
             "name": "array_flip",
             "desc": "array_flip() returns an array in flip order, i.e. keys from trans become values and values from trans become keys.\n\nNote that the values of trans need to be valid keys, i.e. they need to be either integer or string. A warning will be emitted if a value has the wrong type, and the key\/value pair in question will not be flipped.\n\nIf a value has several occurrences, the latest key will be used as its values, and all others will be lost.",
             "flags": [
@@ -558,19 +534,19 @@
         },
         {
             "name": "array_push",
-            "desc": "array_push() treats array as a stack, and pushes the passed variables onto the end of array. The length of array increases by the number of variables pushed. Has the same effect as:\n\nrepeated for each var. If you use array_push() to add one element to the array it's better to use $array[] = because in that way there is no overhead of calling a function. array_push() will raise a warning if the first argument is not an array. This differs from the $var[] behaviour where a new array is created.",
+            "desc": "array_push() treats array as a stack, and pushes the passed variables onto the end. The length of array increases by the number of variables pushed. Has the same effect as \"$array[] = $var;\" repeated for each var. If you use array_push() to add one element to the array it's better to use $array[] = because in that way there is no overhead of calling a function. array_push() will raise a warning if the first argument is not a suitable container. This differs from the $var[] behaviour where a new array is created.",
             "flags": [
                 "VariableArguments"
             ],
             "return": {
                 "type": "Variant",
-                "desc": "Returns the new number of elements in the array."
+                "desc": "Returns the new number of elements in the container."
             },
             "args": [
                 {
                     "name": "array",
                     "type": "Variant",
-                    "desc": "The input array.",
+                    "desc": "The input array or collection.",
                     "ref": true
                 },
                 {
@@ -1973,14 +1949,14 @@
             },
             "args": [
                 {
-                    "name": "key",
-                    "type": "Variant",
-                    "desc": "Value to check."
-                },
-                {
                     "name": "search",
                     "type": "Variant",
                     "desc": "An array with keys to check."
+                },
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "Value to check."
                 },
                 {
                     "name": "def",

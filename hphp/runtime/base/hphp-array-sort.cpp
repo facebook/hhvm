@@ -124,20 +124,24 @@ done:
  */
 void HphpArray::postSort(bool resetKeys) {
   assert(m_size > 0);
-  size_t tableSize = computeTableSize(m_tableMask);
-  initHash(tableSize);
+  auto const ht = hashTab();
+  initHash(ht, hashSize());
+  m_hLoad = 0;
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];
       if (e.hasStrKey()) decRefStr(e.key);
       e.setIntKey(pos);
-      m_hash[pos] = pos;
+      ht[pos] = pos;
     }
     m_nextKI = m_size;
   } else {
+    auto mask = m_tableMask;
+    auto data = this->data();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
-      auto& e = data()[pos];
-      auto ei = findForNewInsert(e.hasIntKey() ? e.ikey : e.hash());
+      auto& e = data[pos];
+      auto ei = findForNewInsert(ht, mask,
+                                 e.hasIntKey() ? e.ikey : e.hash());
       *ei = pos;
     }
   }
@@ -229,7 +233,7 @@ void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
       return true;                                              \
     }                                                           \
     CallCtx ctx;                                                \
-    Transl::CallerFrame cf;                                     \
+    JIT::CallerFrame cf;                                     \
     vm_decode_function(cmp_function, cf(), false, ctx);         \
     if (!ctx.func) {                                            \
       return false;                                             \

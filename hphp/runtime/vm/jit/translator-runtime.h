@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/bytecode.h"
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 struct MInstrState {
   // Room for this structure is allocated on the stack before we
@@ -48,7 +48,7 @@ struct MInstrState {
 static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,
               "MInstrState members require 16-byte alignment for SSE");
 static_assert(sizeof(MInstrState) - sizeof(uintptr_t) // return address
-              < kReservedRSPTotalSpace,
+              < X64::kReservedRSPTotalSpace,
               "MInstrState is too large for the rsp scratch space "
               "in enterTCHelper");
 
@@ -121,7 +121,7 @@ void VerifyParamTypeCallable(TypedValue value, int param);
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
                          int param,
-                         const TypeConstraint* expected);
+                         const HPHP::TypeConstraint* expected);
 
 void raise_error_sd(const StringData* sd);
 
@@ -136,6 +136,8 @@ TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
+TypedValue genericIdx(TypedValue, TypedValue, TypedValue);
+
 int32_t arrayVsize(ArrayData*);
 
 TypedValue* ldGblAddrHelper(StringData* name);
@@ -149,7 +151,6 @@ typedef FixedStringMap<TCA,true> SSwitchMap;
 TCA sswitchHelperFast(const StringData* val, const SSwitchMap* table, TCA* def);
 
 void tv_release_generic(TypedValue* tv);
-void tv_release_typed(RefData* pv, DataType dt);
 
 Cell lookupCnsHelper(const TypedValue* tv,
                      StringData* nm,
@@ -184,10 +185,10 @@ ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value);
 
 void trimExtraArgs(ActRec* ar);
-void setArgInActRec(ActRec* ar, int argNum, uint64_t datum, DataType t);
-int shuffleArgsForMagicCall(ActRec* ar);
 
 void raiseMissingArgument(const char* name, int expected, int got);
+
+RDS::Handle lookupClsRDSHandle(const StringData* name);
 
 /*
  * Just calls tlsBase, but not inlined, so it can be called from the TC.

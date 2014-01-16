@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include <cassert>
+
 #include "hphp/util/rank.h"
-#include "hphp/util/base.h"
 #include "hphp/runtime/vm/pendq.h"
 
 namespace HPHP {

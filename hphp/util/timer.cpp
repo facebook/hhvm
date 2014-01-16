@@ -13,15 +13,20 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/timer.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/trace.h"
+
+#include <cassert>
 
 #ifdef __APPLE__
 #include <mach/clock.h>
 #include <mach/mach.h>
 #endif
+
+#include <sys/time.h>
+#include <sys/resource.h>
+
+#include "hphp/util/logger.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

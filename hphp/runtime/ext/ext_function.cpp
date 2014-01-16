@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_function.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -31,8 +33,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-using HPHP::Transl::CallerFrame;
-using HPHP::Transl::EagerCallerFrame;
+using HPHP::JIT::CallerFrame;
+using HPHP::JIT::EagerCallerFrame;
+using std::string;
 
 const StaticString
   s_internal("internal"),
@@ -135,7 +138,7 @@ Variant f_call_user_func(int _argc, CVarRef function,
   return vm_call_user_func(function, _argv);
 }
 
-Variant f_call_user_func_array(CVarRef function, CArrRef params) {
+Variant f_call_user_func_array(CVarRef function, CVarRef params) {
   return vm_call_user_func(function, params);
 }
 
@@ -179,7 +182,7 @@ Variant f_call_user_func_rpc(int _argc, const String& host, int port,
                              const String& auth,
                              int timeout, CVarRef function,
                              CArrRef _argv /* = null_array */) {
-  string shost = host.data();
+  std::string shost = host.data();
   if (!RuntimeOption::DebuggerRpcHostDomain.empty()) {
     unsigned int pos = shost.find(RuntimeOption::DebuggerRpcHostDomain);
     if (pos != shost.length() - RuntimeOption::DebuggerRpcHostDomain.size()) {
@@ -187,17 +190,17 @@ Variant f_call_user_func_rpc(int _argc, const String& host, int port,
     }
   }
 
-  string url = "http://";
+  std::string url = "http://";
   url += shost;
   url += ":";
-  url += lexical_cast<string>(port);
+  url += boost::lexical_cast<std::string>(port);
   url += "/call_user_func_serialized?auth=";
   url += auth.data();
 
   Array blob = make_map_array(s_func, function, s_args, _argv);
   String message = f_serialize(blob);
 
-  vector<string> headers;
+  std::vector<string> headers;
   LibEventHttpClientPtr http = LibEventHttpClient::Get(shost, port);
   if (!http->send(url, headers, timeout < 0 ? 0 : timeout, false,
                   message.data(), message.size())) {
@@ -329,18 +332,19 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos) {
   return false;
 }
 
-Array hhvm_get_frame_args(const ActRec* ar) {
+Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   if (ar == NULL) {
     return Array();
   }
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
 
-  PackedArrayInit retInit(numArgs);
+  PackedArrayInit retInit(std::max(numArgs - offset, 0));
   auto local = reinterpret_cast<TypedValue*>(
     uintptr_t(ar) - sizeof(TypedValue)
   );
-  for (int i = 0; i < numArgs; ++i) {
+  local -= offset;
+  for (int i = offset; i < numArgs; ++i) {
     if (i < numParams) {
       // This corresponds to one of the function's formal parameters, so it's
       // on the stack.
@@ -355,16 +359,20 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   return retInit.toArray();
 }
 
+#define FUNC_GET_ARGS_IMPL(offset) do {                                        \
+  EagerCallerFrame cf;                                                         \
+  ActRec* ar = cf.actRecForArgs();                                             \
+  if (ar && ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {             \
+    raise_warning(                                                             \
+      "func_get_args():  Called from the global scope - no function context"   \
+    );                                                                         \
+    return false;                                                              \
+  }                                                                            \
+  return hhvm_get_frame_args(ar, offset);                                      \
+} while(0)
+
 Variant f_func_get_args() {
-  EagerCallerFrame cf;
-  ActRec* ar = cf.actRecForArgs();
-  if (ar && ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
-    raise_warning(
-      "func_get_args():  Called from the global scope - no function context"
-    );
-    return false;
-  }
-  return hhvm_get_frame_args(ar);
+  FUNC_GET_ARGS_IMPL(0);
 }
 
 Array func_get_args(int num_args, CArrRef params, CArrRef args) {
@@ -385,6 +393,13 @@ Array func_get_args(int num_args, CArrRef params, CArrRef args) {
   assert(num_args > params.size());
   Array ret = Array(params).merge(derefArgs);
   return ret;
+}
+
+Variant f_hphp_func_slice_args(int offset) {
+  if (offset < 0) {
+    offset = 0;
+  }
+  FUNC_GET_ARGS_IMPL(offset);
 }
 
 int64_t f_func_num_args() {
@@ -417,14 +432,6 @@ void f_register_shutdown_function(int _argc, CVarRef function, CArrRef _argv /* 
 void f_register_cleanup_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
   g_context->registerShutdownFunction(function, _argv,
                                       ExecutionContext::CleanUp);
-}
-
-bool f_register_tick_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
-  throw NotImplementedException(__func__);
-}
-
-void f_unregister_tick_function(CVarRef function_name) {
-  throw NotImplementedException(__func__);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

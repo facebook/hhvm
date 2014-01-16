@@ -41,13 +41,9 @@ String::IntegerStringDataMap String::integer_string_data_map;
 
 static const StringData* convert_integer_helper(int64_t n) {
   char tmpbuf[21];
-  char *p;
-  int is_negative;
-  int len;
-
   tmpbuf[20] = '\0';
-  p = conv_10(n, &is_negative, &tmpbuf[20], &len);
-  return makeStaticString(p);
+  auto sl = conv_10(n, &tmpbuf[20]);
+  return makeStaticString(sl.ptr, sl.len);
 }
 
 void String::PreConvertInteger(int64_t n) {
@@ -64,7 +60,7 @@ const StringData *String::ConvertInteger(int64_t n) {
   return sd;
 }
 
-static int precompute_integers() ATTRIBUTE_COLD;
+static int precompute_integers();
 static int precompute_integers() {
   String::converted_integers_raw =
     (StringData const **)calloc(NUM_CONVERTED_INTEGERS, sizeof(StringData*));
@@ -90,13 +86,10 @@ String::~String() {}
 
 StringData* buildStringData(int n) {
   char tmpbuf[12];
-  char* p;
-  int is_negative;
-  int len;
 
   tmpbuf[11] = '\0';
-  p = conv_10(n, &is_negative, &tmpbuf[11], &len);
-  return StringData::Make(p, len, CopyString);
+  auto sl = conv_10(n, &tmpbuf[11]);
+  return StringData::Make(sl, CopyString);
 }
 
 String::String(int n) {
@@ -112,16 +105,12 @@ String::String(int n) {
 
 StringData* buildStringData(int64_t n) {
   char tmpbuf[21];
-  char* p;
-  int is_negative;
-  int len;
 
   tmpbuf[20] = '\0';
-  p = conv_10(n, &is_negative, &tmpbuf[20], &len);
-  return StringData::Make(p, len, CopyString);
+  auto const sl = conv_10(n, &tmpbuf[20]);
+  return StringData::Make(sl, CopyString);
 }
 
-HOT_FUNC
 String::String(int64_t n) {
   const StringData *sd = GetIntegerStringData(n);
   if (sd) {
@@ -185,7 +174,6 @@ int String::find(const char *s, int pos /* = 0 */,
                      pos, caseSensitive);
 }
 
-HOT_FUNC
 int String::find(const String& s, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
@@ -271,7 +259,6 @@ String &String::operator=(const std::string & s) {
   return *this;
 }
 
-HOT_FUNC
 String &String::operator=(const String& str) {
   StringBase::operator=(str.m_px);
   return *this;
@@ -356,22 +343,18 @@ String operator+(const String & lhs, litstr rhs) {
   return StringData::Make(lhs.slice(), rhs);
 }
 
-HOT_FUNC
 String&& operator+(String&& lhs, String&& rhs) {
   return std::move(lhs += rhs);
 }
 
-HOT_FUNC
 String operator+(String&& lhs, const String & rhs) {
   return std::move(lhs += rhs);
 }
 
-HOT_FUNC
 String operator+(const String & lhs, String&& rhs) {
   return StringData::Make(lhs.slice(), rhs.slice());
 }
 
-HOT_FUNC
 String operator+(const String & lhs, const String & rhs) {
   if (lhs.empty()) return rhs;
   if (rhs.empty()) return lhs;
@@ -381,7 +364,6 @@ String operator+(const String & lhs, const String & rhs) {
 ///////////////////////////////////////////////////////////////////////////////
 // conversions
 
-HOT_FUNC
 VarNR String::toKey() const {
   if (!m_px) return VarNR(empty_string);
   int64_t n = 0;

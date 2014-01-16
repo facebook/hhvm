@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_HTTP_SERVER_SERVER_H_
 #define incl_HPHP_HTTP_SERVER_SERVER_H_
 
+#include <chrono>
+#include <memory>
+
 #include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/lock.h"
-
-#include <chrono>
-#include <memory>
 
 /**
  * (1) For people who want to quickly come up with an HTTP server handling
@@ -39,7 +39,7 @@
  *
  *     Then, run a server like this,
  *
- *       ServerPtr server = make_shared<LibEventServer>("127.0.0.1", 80, 20);
+ *       auto server = std::make_shared<LibEventServer>("127.0.0.1", 80, 20);
  *       server->setRequestHandlerFactory<MyRequestHandler>();
  *       Server::InstallStopSignalHandlers(server);
  *       server->start();
@@ -68,8 +68,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(Server);
-DECLARE_BOOST_TYPES(ServerFactory);
+struct Server;
+struct ServerFactory;
+using ServerPtr = std::shared_ptr<Server>;
+using ServerFactoryPtr = std::shared_ptr<ServerFactory>;
 
 /**
  * Base class of an HTTP request handler. Defining minimal interface an
@@ -87,6 +89,12 @@ public:
    * Sub-class handles a request by implementing this function.
    */
   virtual void handleRequest(Transport *transport) = 0;
+  /**
+   * Sub-class handles a request by implementing this function. This is called
+   * when the server determines this request should not be processed (ie. due to
+   * timeout).
+   */
+  virtual void abortRequest(Transport *transport) = 0;
   int getDefaultTimeout() const { return m_timeout; }
 private:
   int m_timeout;
@@ -194,16 +202,6 @@ public:
    * Block until web server is stopped.
    */
   virtual void waitForEnd() = 0;
-
-  /*
-   * Stop accepting new connections and finish ongoing requests.
-   */
-  virtual void waitForJobs() = 0;
-
-  /*
-   * Close the port this server is listening on.
-   */
-  virtual void closePort() = 0;
 
   /**
    * Gracefully stop this web server. We will stop accepting new connections

@@ -38,7 +38,7 @@ ZEND_API const char *zend_get_type_by_const(int type) {
 }
 
 ZEND_API const char *zend_zval_type_name(const zval *arg) {
-	return zend_get_type_by_const(Z_TYPE_P(arg));
+  return zend_get_type_by_const(Z_TYPE_P(arg));
 }
 
 ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC) {
@@ -474,7 +474,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
   zval ****varargs = NULL;
   int *n_varargs = NULL;
 
-  HPHP::Transl::VMRegAnchor _;
+  HPHP::JIT::VMRegAnchor _;
 
   for (spec_walk = type_spec; *spec_walk; spec_walk++) {
     c = *spec_walk;
@@ -548,7 +548,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
     return FAILURE;
   }
 
-  arg_count = HPHP::liveFrame()->numArgs();
+  arg_count = ZendExecutionStack::numArgs();
 
   if (num_args > arg_count) {
     zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
@@ -1287,7 +1287,7 @@ ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_L
 
 ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC) /* {{{ */
 {
-  return _object_init_ex(arg, zend_standard_class_def ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
+  return _object_init_ex(arg, get_zend_standard_class_def() ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 }
 /* }}} */
 

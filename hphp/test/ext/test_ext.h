@@ -19,6 +19,7 @@
 #ifndef incl_EXT_LIST_TEST_EXT_H_
 #define incl_EXT_LIST_TEST_EXT_H_
 
+#include "hphp/test/ext/test_ext_apc.h"
 #ifdef HAVE_CUSTOM_LIBEVENT
 #include "hphp/test/ext/test_ext_curl.h"
 #endif

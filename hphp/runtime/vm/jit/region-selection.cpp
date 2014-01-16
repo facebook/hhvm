@@ -35,8 +35,6 @@ namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(region);
 
-using Transl::TransID;
-using Transl::TranslatorX64;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -265,7 +263,7 @@ void RegionDesc::Block::checkMetadata() const {
 //////////////////////////////////////////////////////////////////////
 
 RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
-                                   const Transl::Tracelet& tlet) {
+                                   const JIT::Tracelet& tlet) {
   typedef RegionDesc::Block Block;
 
   auto region = std::make_shared<RegionDesc>();
@@ -330,7 +328,7 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
       curBlock->setParamByRef(sk, ni->preppedByRef);
     }
 
-    if (ni->next && ni->op() == OpJmp) {
+    if (ni->next && isUnconditionalJmp(ni->op())) {
       // A Jmp that isn't the final instruction in a Tracelet means we traced
       // through a forward jump in analyze. Update sk to point to the next NI
       // in the stream.
@@ -361,13 +359,13 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
     };
 
     switch (dep.first.space) {
-      case Transl::Location::Stack: {
+      case JIT::Location::Stack: {
         uint32_t offsetFromSp = uint32_t(-dep.first.offset - 1);
         uint32_t offsetFromFp = initSpOffset - offsetFromSp;
         addPred(R::Location::Stack{offsetFromSp, offsetFromFp});
         break;
       }
-      case Transl::Location::Local:
+      case JIT::Location::Local:
         addPred(R::Location::Local{uint32_t(dep.first.offset)});
         break;
 
@@ -389,7 +387,7 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
 }
 
 RegionDescPtr selectRegion(const RegionContext& context,
-                           const Transl::Tracelet* t) {
+                           const JIT::Tracelet* t) {
   auto const mode = regionMode();
 
   FTRACE(1,
@@ -457,8 +455,8 @@ RegionDescPtr selectHotRegion(TransID transId,
   }
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
-    std::string dotFileName = string("/tmp/trans-cfg-") +
-                              lexical_cast<std::string>(transId) + ".dot";
+    std::string dotFileName = std::string("/tmp/trans-cfg-") +
+                              folly::to<std::string>(transId) + ".dot";
 
     cfg.print(dotFileName, funcId, profData, &selectedTIDs);
     FTRACE(5, "selectHotRegion: New Translation {} (file: {}) {}\n",

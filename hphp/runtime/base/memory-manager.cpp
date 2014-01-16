@@ -13,15 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/memory-manager.h"
-
-// Get SIZE_MAX definition.  Do this before including any other files, to make
-// sure that this is the first place that stdint.h is included.
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
-#endif
-#define __STDC_LIMIT_MACROS
 
 #include <algorithm>
 #include <cstdint>
@@ -236,8 +228,7 @@ void MemoryManager::resetAllocator() {
   m_sweep.next = m_sweep.prev = &m_sweep;
 
   // zero out freelists
-  for (auto& i : m_sizeUntrackedFree) i.head = nullptr;
-  for (auto& i : m_sizeTrackedFree)   i.head = nullptr;
+  for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
 }
 
@@ -296,18 +287,9 @@ inline void* MemoryManager::smartMalloc(size_t nbytes) {
     return smartMallocBig(nbytes);
   }
 
-  nbytes = smartSizeClass(nbytes);
-  m_stats.usage += nbytes;
-
-  auto const idx = (nbytes - 1) >> kLgSizeQuantum;
-  assert(idx < kNumSizes && idx >= 0);
-  void* vp = m_sizeTrackedFree[idx].maybePop();
-  if (UNLIKELY(vp == nullptr)) {
-    return smartMallocSlab(nbytes);
-  }
-  FTRACE(1, "smartMalloc: {} -> {}\n", nbytes, vp);
-
-  return vp;
+  auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes));
+  ptr->padbytes = nbytes;
+  return ptr + 1;
 }
 
 inline void MemoryManager::smartFree(void* ptr) {
@@ -315,13 +297,7 @@ inline void MemoryManager::smartFree(void* ptr) {
   auto const n = static_cast<SweepNode*>(ptr) - 1;
   auto const padbytes = n->padbytes;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
-    assert(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
-    auto const idx = (padbytes - 1) >> kLgSizeQuantum;
-    assert(idx < kNumSizes && idx >= 0);
-    FTRACE(1, "smartFree: {}\n", ptr);
-    m_sizeTrackedFree[idx].push(ptr);
-    m_stats.usage -= padbytes;
-    return;
+    return smartFreeSize(static_cast<SmallNode*>(ptr) - 1, n->padbytes);
   }
   smartFreeBig(n);
 }
@@ -464,14 +440,12 @@ void MemoryManager::smartFreeBig(SweepNode* n) {
 
 // smart_malloc api entry points, with support for malloc/free corner cases.
 
-HOT_FUNC
 void* smart_malloc(size_t nbytes) {
   auto& mm = MM();
   auto const size = mm.debugAddExtra(std::max(nbytes, size_t(1)));
   return mm.debugPostAllocate(mm.smartMalloc(size), 0, 0);
 }
 
-HOT_FUNC
 void* smart_calloc(size_t count, size_t nbytes) {
   auto& mm = MM();
   auto const totalBytes = std::max<size_t>(count * nbytes, 1);
@@ -484,7 +458,6 @@ void* smart_calloc(size_t count, size_t nbytes) {
   );
 }
 
-HOT_FUNC
 void* smart_realloc(void* ptr, size_t nbytes) {
   auto& mm = MM();
   if (!ptr) return smart_malloc(nbytes);
@@ -495,7 +468,6 @@ void* smart_realloc(void* ptr, size_t nbytes) {
   return mm.smartRealloc(ptr, nbytes);
 }
 
-HOT_FUNC
 void smart_free(void* ptr) {
   if (!ptr) return;
   auto& mm = MM();

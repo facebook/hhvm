@@ -1,4 +1,4 @@
-<?php
+<?hh
 $x = new Vector(null);
 var_dump($x);
 $x->addAll(null);

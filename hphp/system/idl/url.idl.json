@@ -1,6 +1,38 @@
 {
     "preamble": "",
     "consts": [
+        {
+            "name": "PHP_URL_FRAGMENT",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_HOST",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_PASS",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_PATH",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_PORT",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_QUERY",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_SCHEME",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_USER",
+            "type": "Int64"
+        }
     ],
     "funcs": [
         {

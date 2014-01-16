@@ -68,6 +68,7 @@ if (!in_array('test', $list1))
 mysql_close($link);
 
 print "done!\n";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

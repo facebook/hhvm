@@ -1,0 +1,11 @@
+<?php
+if (!extension_loaded('sockets')) {
+    die('SKIP The sockets extension is not loaded.');
+}
+$filename = dirname(__FILE__) . '/006_root_check.tmp';
+$fp = fopen($filename, 'w');
+fclose($fp);
+if (fileowner($filename) == 0) {
+    unlink ($filename);
+    die('SKIP Test cannot be run as root.');
+}

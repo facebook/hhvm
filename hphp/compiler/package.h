@@ -67,7 +67,7 @@ public:
   void commitStats(ServerDataPtr server, int runId) const;
 
   const std::string& getRoot() const { return m_root;}
-  FileCachePtr getFileCache();
+  std::shared_ptr<FileCache> getFileCache();
 
 private:
   std::string m_root;
@@ -80,7 +80,7 @@ private:
   int m_lineCount;
   int m_charCount;
 
-  FileCachePtr m_fileCache;
+  std::shared_ptr<FileCache> m_fileCache;
   std::set<std::string> m_directories;
   std::set<std::string> m_staticDirectories;
   std::set<std::string> m_extraStaticFiles;

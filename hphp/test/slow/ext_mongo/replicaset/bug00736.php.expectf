@@ -1,0 +1,23 @@
+MongoClient constructed with empty tag set fallback
+array(2) {
+  ["_id"]=>
+  object(MongoId)#6 (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+  ["example"]=>
+  string(8) "document"
+}
+MongoClient constructed without empty tag set fallback
+Finding one (should fail, we don't have that tag)
+error message: No candidate servers found
+Secondary read, killing that tag
+array(2) {
+  ["_id"]=>
+  object(MongoId)#7 (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+  ["example"]=>
+  string(8) "document"
+}

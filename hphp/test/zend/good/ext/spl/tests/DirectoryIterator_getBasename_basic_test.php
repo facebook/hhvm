@@ -7,7 +7,8 @@
       $dir->next();
    }
    echo $dir->getBasename('.txt');
-?><?php
+?>
+<?php
    $targetDir = __DIR__.DIRECTORY_SEPARATOR.md5('directoryIterator::getbasename');
    unlink($targetDir.DIRECTORY_SEPARATOR.'getBasename_test.txt');
    rmdir($targetDir);

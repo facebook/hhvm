@@ -17,9 +17,14 @@
 #ifndef incl_HPHP_SERVER_NAME_INDICATION_H_
 #define incl_HPHP_SERVER_NAME_INDICATION_H_
 
-#include "hphp/util/base.h"
+#include <functional>
+#include <string>
+#include <vector>
+
 #include <evhttp.h>
 #include <openssl/ssl.h>
+
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 
@@ -70,9 +75,10 @@ private:
   static std::string s_path;
   static CertHanlderFn s_certHandlerFn;
 
-  static bool setCTXFromMemory(SSL*, const string&);
-  static bool setCTXFromFile(SSL*, const string&);
-  static void find_server_names(const std::string &, vector<std::string> &);
+  static bool setCTXFromMemory(SSL*, const std::string&);
+  static bool setCTXFromFile(SSL*, const std::string&);
+  static void find_server_names(const std::string &,
+                                std::vector<std::string> &);
   static bool ends_with(const std::string &, const std::string &);
   static bool fileIsValid(const std::string &);
 };

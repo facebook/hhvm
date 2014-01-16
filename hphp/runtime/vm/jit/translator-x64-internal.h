@@ -24,14 +24,13 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
-TRACE_SET_MOD(tx64);
 static const DataType BitwiseKindOfString = KindOfString;
 
 // Generate an if-then block into a.  thenBlock is executed if cc is true.
 template <class Then>
-void ifThen(Transl::X64Assembler& a, ConditionCode cc, Then thenBlock) {
+void ifThen(JIT::X64Assembler& a, ConditionCode cc, Then thenBlock) {
   Label done;
   a.jcc8(ccNegate(cc), done);
   thenBlock();
@@ -160,7 +159,7 @@ locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
                           l.space == Location::Local ||
                           l.space == Location::Iter));
   *outdisp = cellsToBytes(locPhysicalOffset(l, f));
-  *outbase = l.space == Location::Stack ? rVmSp : rVmFp;
+  *outbase = l.space == Location::Stack ? X64::rVmSp : X64::rVmFp;
 }
 
 // Common code emission patterns.
@@ -301,10 +300,9 @@ emitCopyTo(X64Assembler& a,
 // Pops the return address pushed by fcall and stores it into the
 // actrec in rStashedAR.
 inline void emitPopRetIntoActRec(X64Assembler& a) {
-  a.    pop  (rStashedAR[AROFF(m_savedRip)]);
+  a.    pop  (X64::rStashedAR[AROFF(m_savedRip)]);
 }
 
 }}
 
 #endif
-

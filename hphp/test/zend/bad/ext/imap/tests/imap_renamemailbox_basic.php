@@ -32,6 +32,7 @@ var_dump(imap_createmailbox($stream_id, $newbox.'.test'));
 var_dump(imap_renamemailbox($stream_id, $newbox.'.test', $newbox.'.testd'));
 
 imap_close($stream_id);
-?><?php 
+?>
+<?php 
 require_once('clean.inc');
 ?>

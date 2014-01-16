@@ -16,14 +16,13 @@
 
 #include "hphp/runtime/base/stats.h"
 
-#include "hphp/util/base.h"
 #include "hphp/util/data-block.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP {
 namespace Stats {
 
-using namespace HPHP::Transl;
+using namespace HPHP::JIT;
 
 TRACE_SET_MOD(stats);
 

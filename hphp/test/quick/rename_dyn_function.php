@@ -20,5 +20,5 @@ fb_rename_function('a', 'old_a');
 fb_rename_function('b', 'a');
 fb_rename_function('old_a', 'b');
 callfns('a', 'b');
-fb_rename_function('a', 'extract');
+fb_rename_function('extract', 'a');
 

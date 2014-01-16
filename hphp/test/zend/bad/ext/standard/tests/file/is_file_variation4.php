@@ -41,7 +41,8 @@ foreach($files_arr as $file) {
 }
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $dir_name = $file_path."/is_file_variation4";
 unlink($dir_name."/is_file_variation4.tmp");

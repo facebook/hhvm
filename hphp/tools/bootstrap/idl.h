@@ -31,7 +31,8 @@ namespace HPHP { namespace IDL {
 /////////////////////////////////////////////////////////////////////////////
 
 enum FuncFlags {
-  ZendParamMode                 = (1 <<  0),
+  ZendParamModeNull             = (1 <<  0),
+  CppCustomDelete               = (1 <<  1),
   IsAbstract                    = (1 <<  4),
   IsFinal                       = (1 <<  5),
   IsPublic                      = (1 <<  6),
@@ -59,6 +60,7 @@ enum FuncFlags {
   NoDefaultSweep                = (1 << 27),
   IsSystem                      = (1 << 28),
   IsTrait                       = (1 << 29),
+  ZendParamModeFalse            = (1 << 30),
   NeedsActRec                   = (1 << 31),
 };
 
@@ -128,7 +130,8 @@ fbstring phpSerialize(const folly::dynamic& d);
 
 enum class ParamMode {
   CoerceAndCall,
-  Zend
+  ZendNull,
+  ZendFalse
 };
 
 class PhpConst {
@@ -335,14 +338,17 @@ class PhpClass {
  public:
   explicit PhpClass(const folly::dynamic &c);
 
-  fbstring name() const { return m_name; }
   fbstring lowerName() const {
-    fbstring name = m_name;
+    fbstring name = m_cppName;
     for (char& c : name) {
       c = tolower(c);
     }
     return name;
   }
+
+  fbstring getPhpName() const { return m_phpName; };
+  fbstring getCppName() const { return m_cppName; };
+
   fbstring parent() const {
     auto p = m_class.find("parent");
     if (p == m_class.items().end()) {
@@ -378,7 +384,12 @@ class PhpClass {
 
  private:
   folly::dynamic m_class;
-  fbstring m_name;
+  // The name in the IDL file. Use '\\' for namespaces.
+  fbstring m_idlName;
+  // The name in PHP land.
+  fbstring m_phpName;
+  // The name in the IDL with namespaces stripped.
+  fbstring m_cppName;
   fbvector<fbstring> m_ifaces;
   fbvector<PhpFunc> m_methods;
   fbvector<PhpConst> m_constants;

@@ -84,7 +84,7 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
   } else if (limit < 0) {
     int pos = input.find(delimiter);
     if (pos >= 0) {
-      vector<int> positions;
+      std::vector<int> positions;
       int len = delimiter.size();
       int pos0 = 0;
       int found = 0;
@@ -114,6 +114,9 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
 }
 
 String StringUtil::Implode(CVarRef items, const String& delim) {
+  if (!isContainer(items)) {
+    throw_param_is_not_container();
+  }
   int size = getContainerSize(items);
   if (size == 0) return "";
 
@@ -196,6 +199,12 @@ Variant StringUtil::ChunkSplit(const String& body, int chunklen /* = 76 */,
 
 String StringUtil::HtmlEncode(const String& input, QuoteStyle quoteStyle,
                               const char *charset, bool nbsp) {
+  return HtmlEncode(input, static_cast<int64_t>(quoteStyle),
+                    charset, nbsp);
+}
+
+String StringUtil::HtmlEncode(const String& input, const int64_t qsBitmask,
+                              const char *charset, bool nbsp) {
   if (input.empty()) return input;
 
   assert(charset);
@@ -208,11 +217,9 @@ String StringUtil::HtmlEncode(const String& input, QuoteStyle quoteStyle,
 
   int len = input.size();
   char *ret = string_html_encode(input.data(), len,
-                                 quoteStyle != QuoteStyle::No,
-                                 quoteStyle == QuoteStyle::Both,
-                                 utf8, nbsp);
+                                 qsBitmask, utf8, nbsp);
   if (!ret) {
-    raise_error("HtmlEncode called on too large input (%d)", len);
+    return empty_string;
   }
   return String(ret, len, AttachString);
 }
@@ -432,9 +439,13 @@ String StringUtil::Crypt(const String& input, const char *salt /* = "" */) {
 }
 
 String StringUtil::MD5(const String& input, bool raw /* = false */) {
-  int len;
-  char *ret = string_md5(input.data(), input.size(), raw, len);
-  return String(ret, len, AttachString);
+  Md5Digest md5(input.data(), input.size());
+  auto const rawLen = sizeof(md5.digest);
+  if (raw) return String((char*)md5.digest, rawLen, CopyString);
+  auto const hexLen = rawLen * 2;
+  String hex(hexLen, ReserveString);
+  string_bin2hex((char*)md5.digest, rawLen, hex.bufferSlice().ptr);
+  return hex.setSize(hexLen);
 }
 
 String StringUtil::SHA1(const String& input, bool raw /* = false */) {

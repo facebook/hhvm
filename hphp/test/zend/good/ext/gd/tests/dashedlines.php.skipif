@@ -1,0 +1,3 @@
+<?php
+        if (!function_exists('imagecreatefromstring')) die("skip gd extension not available\n");
+?>

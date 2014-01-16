@@ -10,6 +10,7 @@ fclose($fp);
 
 $fo = new SplFileObject('SplFileObject_fgetcsv_delimiter_basic.csv');
 var_dump($fo->fgetcsv('|'));
-?><?php
+?>
+<?php
 unlink('SplFileObject_fgetcsv_delimiter_basic.csv');
 ?>

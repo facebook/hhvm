@@ -65,11 +65,11 @@ class apcExtension : public Extension {
 
 ///////////////////////////////////////////////////////////////////////////////
 Variant f_apc_add(CVarRef key_or_array, CVarRef var = null_variant,
-                    int64_t ttl = 0, int64_t cache_id = 0);
+                  int64_t ttl = 0, int64_t cache_id = 0);
 Variant f_apc_store(CVarRef key_or_array, CVarRef var = null_variant,
                     int64_t ttl = 0, int64_t cache_id = 0);
 bool f_apc_store_as_primed_do_not_use(const String& key, CVarRef var,
-  int64_t cache_id = 0);
+                                      int64_t cache_id = 0);
 
 Variant f_apc_fetch(CVarRef key, VRefParam success = uninit_null(),
                     int64_t cache_id = 0);
@@ -87,24 +87,6 @@ Variant f_apc_exists(CVarRef key, int64_t cache_id = 0);
 
 Variant f_apc_cache_info(int64_t cache_id = 0, bool limited = false);
 Array f_apc_sma_info(bool limited = false);
-bool f_apc_define_constants(const String& key, const String& constants,
-                            bool case_sensitive = true,
-                            int64_t cache_id = 0);
-bool f_apc_load_constants(const String& key, bool case_sensitive = true,
-                          int64_t cache_id = 0);
-bool f_apc_compile_file(const String& filename, bool atomic = true,
-                        int64_t cache_id = 0);
-Array f_apc_filehits();
-Variant f_apc_delete_file(CVarRef keys, int64_t cache_id = 0);
-Variant f_apc_bin_dump(int64_t cache_id = 0, CVarRef filter = null_variant);
-bool f_apc_bin_load(const String& data, int64_t flags = 0,
-                    int64_t cache_id = 0);
-Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
-                           const String& filename, int64_t flags = 0,
-                           CResRef context = Resource());
-bool f_apc_bin_loadfile(const String& filename,
-                        CResRef context = Resource(),
-                        int64_t flags = 0, int64_t cache_id = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // loading APC from archive files

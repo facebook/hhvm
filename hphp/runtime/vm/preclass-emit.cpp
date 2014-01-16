@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/preclass-emit.h"
 
+#include <limits>
+
 #include "folly/Memory.h"
 
 #include "hphp/runtime/vm/repo.h"
@@ -57,8 +59,6 @@ PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
   , m_name(n)
   , m_id(id)
   , m_hoistable(hoistable)
-  , m_instanceCtor(nullptr)
-  , m_builtinPropSize(0)
 {}
 
 void PreClassEmitter::init(int line1, int line2, Offset offset, Attr attrs,
@@ -70,6 +70,9 @@ void PreClassEmitter::init(int line1, int line2, Offset offset, Attr attrs,
   m_attrs = attrs;
   m_parent = parent;
   m_docComment = docComment;
+  if (!SystemLib::s_inited) {
+    m_attrs = m_attrs | AttrBuiltin;
+  }
 }
 
 PreClassEmitter::~PreClassEmitter() {
@@ -163,7 +166,8 @@ void PreClassEmitter::commit(RepoTxn& txn) const {
 
 void PreClassEmitter::setBuiltinClassInfo(const ClassInfo* info,
                                           BuiltinCtorFunction ctorFunc,
-                                          int sz) {
+                                          BuiltinDtorFunction dtorFunc,
+                                          BuiltinObjExtents extents) {
   if (info->getAttribute() & ClassInfo::IsFinal) {
     m_attrs = m_attrs | AttrFinal;
   }
@@ -175,7 +179,12 @@ void PreClassEmitter::setBuiltinClassInfo(const ClassInfo* info,
   }
   m_attrs = m_attrs | AttrUnique;
   m_instanceCtor = ctorFunc;
-  m_builtinPropSize = sz - sizeof(ObjectData);
+  m_instanceDtor = dtorFunc;
+
+  assert(extents.totalSizeBytes <= std::numeric_limits<uint32_t>::max());
+  assert(extents.odOffsetBytes  <= std::numeric_limits<int32_t>::max());
+  m_builtinObjSize  = extents.totalSizeBytes - sizeof(ObjectData);
+  m_builtinODOffset = extents.odOffsetBytes;
 }
 
 PreClass* PreClassEmitter::create(Unit& unit) const {
@@ -190,9 +199,12 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     attrs, m_parent, m_docComment, m_id,
     m_hoistable);
   pc->m_instanceCtor = m_instanceCtor;
-  pc->m_builtinPropSize = m_builtinPropSize;
+  pc->m_instanceDtor = m_instanceDtor;
+  pc->m_builtinObjSize = m_builtinObjSize;
+  pc->m_builtinODOffset = m_builtinODOffset;
   pc->m_interfaces = m_interfaces;
   pc->m_usedTraits = m_usedTraits;
+  pc->m_traitRequirements = m_traitRequirements;
   pc->m_traitPrecRules = m_traitPrecRules;
   pc->m_traitAliasRules = m_traitAliasRules;
   pc->m_userAttributes = m_userAttributes;
@@ -254,6 +266,7 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
 
     (m_interfaces)
     (m_usedTraits)
+    (m_traitRequirements)
     (m_traitPrecRules)
     (m_traitAliasRules)
     (m_userAttributes)
@@ -339,6 +352,10 @@ void PreClassRepoProxy::GetPreClassesStmt
       PreClassEmitter* pce = ue.newPreClassEmitter(
         name, (PreClass::Hoistable)hoistable);
       pce->serdeMetaData(extraBlob);
+      if (!SystemLib::s_inited) {
+        assert(pce->attrs() & AttrPersistent);
+        assert(pce->attrs() & AttrUnique);
+      }
       assert(pce->id() == preClassId);
     }
   } while (!query.done());

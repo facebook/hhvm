@@ -32,6 +32,8 @@
 #define INT_32  4
 #define FLAGS   0
 
+#pragma GCC optimize "no-strict-aliasing"
+
 #define MONGO_REPLY_FLAG_QUERY_FAILURE 0x02
 
 static void mongo_close_socket(int socket, int why);
@@ -341,7 +343,7 @@ static int mongo_connect_send_packet(mongo_con_manager *manager, mongo_connectio
 {
 	int            read;
 	uint32_t       data_size;
-	char           reply_buffer[MONGO_REPLY_HEADER_SIZE];
+	int             reply_buffer[MONGO_REPLY_HEADER_SIZE];
 	uint32_t       flags; /* To check for query reply status */
 
 	/* Send and wait for reply */

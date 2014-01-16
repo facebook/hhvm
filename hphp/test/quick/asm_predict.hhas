@@ -1,0 +1,36 @@
+.adata values = """a:3:{s:3:"int";i:24;s:3:"dbl";d:123.456;s:3:"str";s:12:"hello, world";}""";
+
+.main {
+  FPushFuncD 1 "main"
+  Array @values
+  FPassC 0
+  FCall 1
+  UnboxR
+  RetC
+}
+
+.function main($a) {
+  CGetM <L:$a ET:"int">
+  PredictTStk 0 Int
+  CGetM <L:$a ET:"dbl">
+  PredictTStk 0 Dbl
+  Add
+  SetL $result1
+  PopC
+
+  CGetM <L:$a ET:"str">
+  PredictTStk 0 Str
+  String "!"
+  Concat
+  SetL $result2
+  PopC
+
+  FPushFuncD 2 "var_dump"
+  FPassL 0 $result1
+  FPassL 1 $result2
+  FCall 2
+  PopR
+
+  Null
+  RetC
+}

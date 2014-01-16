@@ -1,0 +1,4 @@
+HipHop Fatal error: Uncaught exception 'RuntimeException' with message 'Cannot add an element to a FrozenSet' in %s
+Stack trace:
+#0 %s/slow/collection_classes/frozen_set/immutability1.php(10): main()
+#1 {main}

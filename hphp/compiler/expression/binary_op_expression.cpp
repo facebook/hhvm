@@ -21,6 +21,7 @@
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/code_model_enums.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -32,6 +33,7 @@
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/statement/loop_statement.h"
 #include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/vm/runtime.h"
 
 using namespace HPHP;
 
@@ -65,7 +67,7 @@ BinaryOpExpression::BinaryOpExpression
     break;
   case T_COLLECTION: {
     std::string s = m_exp1->getLiteralString();
-    int cType = 0;
+    Collection::Type cType = Collection::InvalidType;
     if (strcasecmp(s.c_str(), "vector") == 0) {
       cType = Collection::VectorType;
     } else if (strcasecmp(s.c_str(), "map") == 0) {
@@ -76,6 +78,12 @@ BinaryOpExpression::BinaryOpExpression
       cType = Collection::SetType;
     } else if (strcasecmp(s.c_str(), "pair") == 0) {
       cType = Collection::PairType;
+    } else if (strcasecmp(s.c_str(), "frozenvector") == 0) {
+      cType = Collection::FrozenVectorType;
+    } else if (strcasecmp(s.c_str(), "frozenmap") == 0) {
+      cType = Collection::FrozenMapType;
+    } else if (strcasecmp(s.c_str(), "frozenset") == 0) {
+      cType = Collection::FrozenSetType;
     }
     ExpressionListPtr el = static_pointer_cast<ExpressionList>(m_exp2);
     el->setCollectionType(cType);
@@ -476,6 +484,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
               ExpressionPtr aExp = m_exp1;
               ExpressionPtr bExp = binOpExp->m_exp1;
               ExpressionPtr cExp = binOpExp->m_exp2;
+              if (aExp->isArray() || bExp->isArray() || cExp->isArray()) {
+                break;
+              }
               m_exp1 = binOpExp = Clone(binOpExp);
               m_exp2 = cExp;
               binOpExp->m_exp1 = aExp;
@@ -536,6 +547,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           *result.asCell() = cellBitXor(*v1.asCell(), *v2.asCell());
           break;
         case '.':
+          if (v1.isArray() || v2.isArray()) {
+            return ExpressionPtr();
+          }
           result = concat(v1.toString(), v2.toString());
           break;
         case T_IS_IDENTICAL:
@@ -802,7 +816,7 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_COLLECTION:
     et1 = Type::Any;
     et2 = Type::Any;
-    rt = Type::Object;
+    rt = Type::CreateObjectType(m_exp1->getLiteralString());
     break;
   default:
     assert(false);
@@ -912,6 +926,76 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
+  if (m_op == T_COLLECTION) {
+    cg.printObjectHeader("CollectionInitializerExpression", 3);
+    cg.printPropertyHeader("collection");
+    m_exp1->outputCodeModel(cg);
+    cg.printPropertyHeader("arguments");
+    cg.printExpressionVector(static_pointer_cast<ExpressionList>(m_exp2));
+    cg.printPropertyHeader("sourceLocation");
+    cg.printLocation(this->getLocation());
+    cg.printObjectFooter();
+    return;
+  }
+
+  cg.printObjectHeader("BinaryOpExpression", 4);
+  cg.printPropertyHeader("expression1");
+  m_exp1->outputCodeModel(cg);
+  cg.printPropertyHeader("expression2");
+  m_exp2->outputCodeModel(cg);
+  cg.printPropertyHeader("operation");
+
+  int op = 0;
+  switch (m_op) {
+    case T_PLUS_EQUAL: op = PHP_PLUS_ASSIGN; break;
+    case T_MINUS_EQUAL: op = PHP_MINUS_ASSIGN; break;
+    case T_MUL_EQUAL: op = PHP_MULTIPLY_ASSIGN; break;
+    case T_DIV_EQUAL: op = PHP_DIVIDE_ASSIGN; break;
+    case T_CONCAT_EQUAL: op = PHP_CONCAT_ASSIGN; break;
+    case T_MOD_EQUAL:  op = PHP_MODULUS_ASSIGN;  break;
+    case T_AND_EQUAL: op = PHP_AND_ASSIGN; break;
+    case T_OR_EQUAL: op = PHP_OR_ASSIGN;  break;
+    case T_XOR_EQUAL: op = PHP_XOR_ASSIGN; break;
+    case T_SL_EQUAL: op = PHP_SHIFT_LEFT_ASSIGN; break;
+    case T_SR_EQUAL: op = PHP_SHIFT_RIGHT_ASSIGN; break;
+    case T_BOOLEAN_OR: op = PHP_BOOLEAN_OR;  break;
+    case T_BOOLEAN_AND: op = PHP_BOOLEAN_AND; break;
+    case T_LOGICAL_OR: op = PHP_LOGICAL_OR; break;
+    case T_LOGICAL_AND: op = PHP_LOGICAL_AND;  break;
+    case T_LOGICAL_XOR: op = PHP_LOGICAL_XOR; break;
+    case '|': op = PHP_OR; break;
+    case '&': op = PHP_AND;  break;
+    case '^': op = PHP_XOR; break;
+    case '.': op = PHP_CONCAT; break;
+    case '+': op = PHP_PLUS; break;
+    case '-': op = PHP_MINUS; break;
+    case '*': op = PHP_MULTIPLY; break;
+    case '/': op = PHP_DIVIDE; break;
+    case '%': op = PHP_MODULUS; break;
+    case T_SL: op = PHP_SHIFT_LEFT; break;
+    case T_SR: op = PHP_SHIFT_RIGHT; break;
+    case T_IS_IDENTICAL: op = PHP_IS_IDENTICAL; break;
+    case T_IS_NOT_IDENTICAL: op = PHP_IS_NOT_IDENTICAL; break;
+    case T_IS_EQUAL: op = PHP_IS_EQUAL; break;
+    case T_IS_NOT_EQUAL: op = PHP_IS_NOT_EQUAL; break;
+    case '<': op = PHP_IS_SMALLER; break;
+    case T_IS_SMALLER_OR_EQUAL: op = PHP_IS_SMALLER_OR_EQUAL; break;
+    case '>': op = PHP_IS_GREATER; break;
+    case T_IS_GREATER_OR_EQUAL: op = PHP_IS_GREATER_OR_EQUAL;  break;
+    case T_INSTANCEOF: op = PHP_INSTANCEOF;  break;
+    default:
+      assert(false);
+  }
+
+  cg.printValue(op);
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -991,4 +1075,3 @@ bool BinaryOpExpression::isOpEqual() {
   }
   return false;
 }
-

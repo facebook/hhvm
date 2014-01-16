@@ -61,9 +61,10 @@ void LibEventJob::getRequestStart(struct timespec *reqStart) {
 ///////////////////////////////////////////////////////////////////////////////
 // LibEventTransportTraits
 
-LibEventTransportTraits::LibEventTransportTraits(LibEventJobPtr job,
-                                                 void *opaque,
-                                                 int id) :
+LibEventTransportTraits::LibEventTransportTraits(
+  std::shared_ptr<LibEventJob> job,
+  void *opaque,
+  int id) :
     server_((LibEventServer*)opaque),
     request_(job->request),
     transport_(server_, request_, id) {
@@ -170,12 +171,11 @@ int LibEventServer::getAcceptSocket() {
                                           m_port, RuntimeOption::ServerBacklog);
   if (ret < 0) {
     if (errno == EADDRINUSE && m_takeover_agent) {
-      m_accept_sock = m_takeover_agent->takeover();
-      if (m_accept_sock < 0) {
+      ret = m_takeover_agent->takeover();
+      if (ret < 0) {
         return -1;
       }
-      if (useExistingFd(m_server, m_accept_sock, false /* no listen */) != 0) {
-        m_accept_sock = -1;
+      if (useExistingFd(m_server, ret, false /* no listen */) != 0) {
         return -1;
       }
     } else {
@@ -249,10 +249,8 @@ int LibEventServer::getLibEventConnectionCount() {
 void LibEventServer::start() {
   if (getStatus() == RunStatus::RUNNING) return;
 
-  if (m_server != nullptr) {
-    if (getAcceptSocket() != 0) {
-      throw FailedToListenException(m_address, m_port);
-    }
+  if (getAcceptSocket() != 0) {
+    throw FailedToListenException(m_address, m_port);
   }
 
   if (m_server_ssl != nullptr) {
@@ -316,7 +314,7 @@ void LibEventServer::dispatch() {
   }
 }
 
-void LibEventServer::waitForJobs() {
+void LibEventServer::stop() {
   Lock lock(m_mutex);
   if (getStatus() != RunStatus::RUNNING || m_server == nullptr) return;
 
@@ -365,16 +363,9 @@ void LibEventServer::waitForJobs() {
     // an error occured but we're in shutdown already, so ignore
   }
   m_dispatcherThread.waitForEnd();
-}
 
-void LibEventServer::closePort() {
   evhttp_free(m_server);
   m_server = nullptr;
-}
-
-void LibEventServer::stop() {
-  waitForJobs();
-  closePort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -490,7 +481,7 @@ void LibEventServer::onRequest(struct evhttp_request *request) {
   }
   if (getStatus() == RunStatus::RUNNING) {
     RequestPriority priority = getRequestPriority(request);
-    m_dispatcher.enqueue(LibEventJobPtr(new LibEventJob(request)), priority);
+    m_dispatcher.enqueue(std::make_shared<LibEventJob>(request), priority);
   } else {
     Logger::Error("throwing away one new request while shutting down");
   }
@@ -544,7 +535,7 @@ void LibEventServer::onChunkedResponseEnd(int worker,
 
 LibEventServer::RequestPriority LibEventServer::getRequestPriority(
   struct evhttp_request* request) {
-  string command = URL::getCommand(URL::getServerObject(request->uri));
+  std::string command = URL::getCommand(URL::getServerObject(request->uri));
   if (RuntimeOption::ServerHighPriorityEndPoints.find(command) ==
       RuntimeOption::ServerHighPriorityEndPoints.end()) {
     return PRIORITY_NORMAL;
@@ -558,7 +549,7 @@ LibEventServer::RequestPriority LibEventServer::getRequestPriority(
 PendingResponseQueue::PendingResponseQueue() {
   assert(RuntimeOption::ResponseQueueCount > 0);
   for (int i = 0; i < RuntimeOption::ResponseQueueCount; i++) {
-    m_responseQueues.push_back(ResponseQueuePtr(new ResponseQueue()));
+    m_responseQueues.push_back(std::make_shared<ResponseQueue>());
   }
 }
 
@@ -584,7 +575,8 @@ void PendingResponseQueue::close() {
   event_del(&m_event);
 }
 
-void PendingResponseQueue::enqueue(int worker, ResponsePtr response) {
+void PendingResponseQueue::enqueue(int worker,
+                                   std::shared_ptr<Response> response) {
   {
     int i = worker % RuntimeOption::ResponseQueueCount;
     ResponseQueue &q = *m_responseQueues[i];
@@ -600,7 +592,7 @@ void PendingResponseQueue::enqueue(int worker, ResponsePtr response) {
 
 void PendingResponseQueue::enqueue(int worker, evhttp_request *request,
                                    int code, int nwritten) {
-  ResponsePtr res(new Response());
+  auto res = std::make_shared<Response>();
   res->request = request;
   res->code = code;
   res->nwritten = nwritten;
@@ -610,7 +602,7 @@ void PendingResponseQueue::enqueue(int worker, evhttp_request *request,
 void PendingResponseQueue::enqueue(int worker, evhttp_request *request,
                                    int code, evbuffer *chunk,
                                    bool firstChunk) {
-  ResponsePtr res(new Response());
+  auto res = std::make_shared<Response>();
   res->request = request;
   res->code = code;
   res->chunked = true;
@@ -620,7 +612,7 @@ void PendingResponseQueue::enqueue(int worker, evhttp_request *request,
 }
 
 void PendingResponseQueue::enqueue(int worker, evhttp_request *request) {
-  ResponsePtr res(new Response());
+  auto res = std::make_shared<Response>();
   res->request = request;
   res->chunked = true;
   enqueue(worker, res);
@@ -634,7 +626,7 @@ void PendingResponseQueue::process() {
   }
 
   // making a copy so we don't hold up the mutex very long
-  ResponsePtrVec responses;
+  std::vector<std::shared_ptr<Response>> responses;
   for (int i = 0; i < RuntimeOption::ResponseQueueCount; i++) {
     ResponseQueue &q = *m_responseQueues[i];
     Lock lock(q.m_mutex);

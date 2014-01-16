@@ -50,7 +50,7 @@ void CmdFlowControl::onClient(DebuggerClient &client) {
   }
 
   if (client.argCount() == 1) {
-    string snum = client.argValue(1);
+    std::string snum = client.argValue(1);
     if (!DebuggerClient::IsValidNumber(snum)) {
       client.error("Count needs to be a number.");
       return;
@@ -108,7 +108,7 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   auto excludeContinuationReturns = [] (Op op) {
     return (op != OpContSuspend) &&
            (op != OpContSuspendK) &&
-           (op != OpCreateAsync) &&
+           (op != OpAsyncESuspend) &&
            (op != OpContRetC);
   };
   g_vmContext->m_lastLocFilter->addRanges(unit, ranges,

@@ -16,7 +16,10 @@
 #ifndef incl_HPHP_DEBUGGABLE_H_
 #define incl_HPHP_DEBUGGABLE_H_
 
-#include "hphp/util/base.h"
+#include <utility>
+#include <vector>
+#include <string>
+
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/complex-types.h"
 
@@ -74,7 +77,8 @@ public:
   /**
    * Execute a debugger action.
    */
-  virtual String debuggerVerb(const std::string &verb, const StringVec &args) {
+  virtual String debuggerVerb(const std::string &verb,
+                              const std::vector<std::string> &args) {
     return String();
   }
 };

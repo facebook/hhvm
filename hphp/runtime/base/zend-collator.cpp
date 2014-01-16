@@ -27,8 +27,6 @@
 
 namespace HPHP {
 
-IMPLEMENT_REQUEST_LOCAL(IntlError, s_intl_error);
-
 #define UCHARS(len) ((len) / sizeof(UChar))
 #define UBYTES(len) ((len) * sizeof(UChar))
 

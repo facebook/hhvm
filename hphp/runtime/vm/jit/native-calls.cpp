@@ -25,10 +25,13 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
+#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
 
 namespace HPHP {  namespace JIT { namespace NativeCalls {
 
-using namespace HPHP::Transl;
 
 namespace {
 
@@ -68,6 +71,8 @@ auto constexpr SSA      = ArgType::SSA;
 auto constexpr TV       = ArgType::TV;
 auto constexpr MemberKeyS  = ArgType::MemberKeyS;
 auto constexpr MemberKeyIS = ArgType::MemberKeyIS;
+
+using IFaceSupportFn = bool (*)(const StringData*);
 
 }
 
@@ -189,6 +194,7 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}}},
+    {LookupClsRDSHandle, lookupClsRDSHandle, DSSA, SNone, {{SSA, 0}}},
     {LookupClsMethod,    lookupClsMethodHelper, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {LdArrFuncCtx,       loadArrayFunctionContext, DNone, SSync,
@@ -207,6 +213,7 @@ static CallMap s_callMap {
     {VerifyParamFail,    VerifyParamTypeFail, DNone, SSync, {{SSA, 0}}},
     {RaiseUninitLoc,     raiseUndefVariable, DNone, SSync, {{SSA, 0}}},
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},
+    {RaiseNotice,        raiseNotice, DNone, SSync, {{SSA, 0}}},
     {RaiseArrayIndexNotice,
                          raiseArrayIndexNotice, DNone, SSync, {{SSA, 0}}},
     {WarnNonObjProp,     raisePropertyOnNonObject, DNone, SSync, {}},
@@ -221,6 +228,8 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {ArrayIdx,           fssa(0), DTV, SSync,
                            {{SSA, 1}, {SSA, 2}, {TV, 3}}},
+    {GenericIdx,         genericIdx, DTV, SSync,
+                          {{TV, 0}, {TV, 1}, {TV, 2}}},
     {LdGblAddrDef,       ldGblAddrDefHelper, DSSA, SNone,
                            {{SSA, 0}}},
 
@@ -233,13 +242,24 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* Continuation support helpers */
-    {CreateContFunc,     &VMExecutionContext::createContFunc, DSSA, SNone,
-                          { extra(&CreateContData::origFunc),
-                            extra(&CreateContData::genFunc) }},
-    {CreateContMeth,     &VMExecutionContext::createContMeth, DSSA, SNone,
-                          { extra(&CreateContData::origFunc),
-                            extra(&CreateContData::genFunc),
+    {CreateContFunc,     &c_Continuation::CreateFunc, DSSA, SNone,
+                          { extra(&CreateContData::genFunc) }},
+    {CreateContMeth,     &c_Continuation::CreateMeth, DSSA, SNone,
+                          { extra(&CreateContData::genFunc),
                             {SSA, 0} }},
+
+    /* Async function support helpers */
+    {CreateAFWHFunc,     &c_AsyncFunctionWaitHandle::CreateFunc, DSSA, SSync,
+                          { extra(&CreateContData::genFunc),
+                            {SSA, 0}, {SSA, 1} }},
+    {CreateAFWHMeth,     &c_AsyncFunctionWaitHandle::CreateMeth, DSSA, SSync,
+                          { extra(&CreateContData::genFunc),
+                            {SSA, 0}, {SSA, 1}, {SSA, 2} }},
+    {CreateSRWH,         &c_StaticResultWaitHandle::CreateFromVM, DSSA, SNone,
+                          { {TV, 0} }},
+    {CreateSEWH,         &c_StaticExceptionWaitHandle::CreateFromVM,
+                          DSSA, SNone,
+                          { {SSA, 0} }},
 
     /* MInstrTranslator helpers */
     {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}, {SSA, 2}}},
@@ -277,10 +297,6 @@ static CallMap s_callMap {
                  {{SSA, 1}, {SSA, 2}}},
     {StringGet, fssa(0), DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}}},
-    {VectorGet, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
-    {PairGet,  fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
     {MapGet,   fssa(0), DTV, SSync,
                  {{SSA, 1}, {SSA, 2}}},
     {StableMapGet, fssa(0), DTV, SSync,
@@ -294,8 +310,6 @@ static CallMap s_callMap {
     {SetWithRefElem, fssa(0), DNone, SSync,
                  {{SSA, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
     {ArraySet, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {VectorSet, fssa(0), DNone, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}}},
     {MapSet,   fssa(0), DNone, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}}},
@@ -331,6 +345,14 @@ static CallMap s_callMap {
     {InstanceOf, method(&Class::classof), DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {InstanceOfIface, method(&Class::ifaceofDirect), DSSA,
                       SNone, {{SSA, 0}, {SSA, 1}}},
+    {InterfaceSupportsArr, IFaceSupportFn{interface_supports_array},
+                             DSSA, SNone, {{SSA, 0}}},
+    {InterfaceSupportsStr, IFaceSupportFn{interface_supports_string},
+                             DSSA, SNone, {{SSA, 0}}},
+    {InterfaceSupportsInt, IFaceSupportFn{interface_supports_int},
+                             DSSA, SNone, {{SSA, 0}}},
+    {InterfaceSupportsDbl, IFaceSupportFn{interface_supports_double},
+                             DSSA, SNone, {{SSA, 0}}},
 
     /* debug assert helpers */
     {DbgAssertPtr, assertTv, DNone, SNone, {{SSA, 0}}},
@@ -340,6 +362,36 @@ static CallMap s_callMap {
     {FunctionExitSurpriseHook, &EventHook::onFunctionExit, DNone, SSync,
                                {{SSA, 0}}},
 };
+
+ArgGroup CallInfo::toArgGroup(const RegAllocInfo::RegMap& curOpds,
+                              IRInstruction* inst) const {
+  ArgGroup argGroup{curOpds};
+
+  for (auto const& arg : args) {
+    switch (arg.type) {
+    case ArgType::SSA:
+      argGroup.ssa(inst->src(arg.ival));
+      break;
+    case ArgType::TV:
+      argGroup.typedValue(inst->src(arg.ival));
+      break;
+    case ArgType::MemberKeyS:
+      argGroup.vectorKeyS(inst->src(arg.ival));
+      break;
+    case ArgType::MemberKeyIS:
+      argGroup.vectorKeyIS(inst->src(arg.ival));
+      break;
+    case ArgType::ExtraImm:
+      argGroup.imm(arg.extraFunc(inst));
+      break;
+    case ArgType::Imm:
+      argGroup.imm(arg.ival);
+      break;
+    }
+  }
+
+  return argGroup;
+}
 
 CallMap::CallMap(CallInfoList infos) {
   for (auto const& info : infos) {
@@ -358,7 +410,7 @@ CallMap::CallMap(CallInfoList infos) {
 }
 
 bool CallMap::hasInfo(Opcode op) {
-  return mapContains(s_callMap.m_map, op);
+  return s_callMap.m_map.count(op) != 0;
 }
 
 const CallInfo& CallMap::info(Opcode op) {

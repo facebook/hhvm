@@ -16,33 +16,39 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
-// Get SIZE_MAX definition.  Do this before including any more files, to make
-// sure that this is the first place that stdint.h is included.
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
-#endif
-#define __STDC_LIMIT_MACROS
-#include <stdint.h>
+#include <cstdint>
 #include <limits>
 
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/shared-store-base.h"
-#include "hphp/runtime/server/access-log.h"
-#include "hphp/runtime/base/extended-logger.h"
-#include "hphp/runtime/base/simple-counter.h"
+#include <sys/time.h>
+#include <sys/resource.h>
+
+#include "folly/String.h"
+
+#include "hphp/util/hdf.h"
 #include "hphp/util/util.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/file-cache.h"
+#include "hphp/util/log-file-flusher.h"
+
+#include "hphp/parser/scanner.h"
+
+#include "hphp/runtime/server/satellite-server.h"
+#include "hphp/runtime/server/virtual-host.h"
+#include "hphp/runtime/server/files-match.h"
+#include "hphp/runtime/server/access-log.h"
+
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/simple-counter.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/parser/scanner.h"
-#include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/base/crash-reporter.h"
-#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -83,6 +89,7 @@ bool RuntimeOption::AssertActive = false;
 bool RuntimeOption::AssertWarning = false;
 int RuntimeOption::NoticeFrequency = 1;
 int RuntimeOption::WarningFrequency = 1;
+int RuntimeOption::RaiseDebuggingFrequency = 1;
 int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
 int64_t RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
 
@@ -114,7 +121,7 @@ int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
 int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
 bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
-bool RuntimeOption::ServerStatCache = true;
+bool RuntimeOption::ServerStatCache = false;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 boost::container::flat_set<std::string>
 RuntimeOption::ServerHighPriorityEndPoints;
@@ -168,6 +175,7 @@ int RuntimeOption::ExpiresDefault = 2592000;
 std::string RuntimeOption::DefaultCharsetName = "utf-8";
 bool RuntimeOption::ForceServerNameToHeader = false;
 bool RuntimeOption::EnableCufAsync = false;
+bool RuntimeOption::PathDebug = false;
 
 int RuntimeOption::RequestBodyReadLimit = -1;
 
@@ -180,9 +188,10 @@ std::string RuntimeOption::SSLCertificateDir;
 bool RuntimeOption::TLSDisableTLS1_2;
 std::string RuntimeOption::TLSClientCipherSpec;
 
-VirtualHostPtrVec RuntimeOption::VirtualHosts;
-IpBlockMapPtr RuntimeOption::IpBlocks;
-SatelliteServerInfoPtrVec RuntimeOption::SatelliteServerInfos;
+std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
+std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
+std::vector<std::shared_ptr<SatelliteServerInfo>>
+  RuntimeOption::SatelliteServerInfos;
 
 int RuntimeOption::XboxServerThreadCount = 10;
 int RuntimeOption::XboxServerMaxQueueLength = INT_MAX;
@@ -209,7 +218,6 @@ bool RuntimeOption::ForbiddenAs404 = false;
 std::string RuntimeOption::ErrorDocument500;
 std::string RuntimeOption::FatalErrorMessage;
 std::string RuntimeOption::FontPath;
-bool RuntimeOption::EnableStaticContentCache = true;
 bool RuntimeOption::EnableStaticContentFromDisk = true;
 bool RuntimeOption::EnableOnDemandUncompress = true;
 bool RuntimeOption::EnableStaticContentMMap = true;
@@ -230,7 +238,7 @@ hphp_string_imap<std::string> RuntimeOption::StaticFileExtensions;
 hphp_string_imap<std::string> RuntimeOption::PhpFileExtensions;
 std::set<std::string> RuntimeOption::ForbiddenFileExtensions;
 std::set<std::string> RuntimeOption::StaticFileGenerators;
-FilesMatchPtrVec RuntimeOption::FilesMatches;
+std::vector<std::shared_ptr<FilesMatch>> RuntimeOption::FilesMatches;
 
 bool RuntimeOption::WhitelistExec = false;
 bool RuntimeOption::WhitelistExecWarningOnly = false;
@@ -339,9 +347,9 @@ bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableInstructionCounts = false;
 bool RuntimeOption::CheckSymLink = true;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
-bool RuntimeOption::EnableFinallyStatement = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
+bool RuntimeOption::TimeoutsUseWallTime = true;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -367,14 +375,30 @@ static inline bool evalJitDefault() {
 }
 
 static inline std::string regionSelectorDefault() {
+  if (RuntimeOption::EvalJitPGO) {
+    return "hottrace";
+  }
+
 #ifdef HHVM_REGION_SELECTOR_TRACELET
   return "tracelet";
 #else
 #ifdef HHVM_REGION_SELECTOR_LEGACY
   return "legacy";
 #else
+#ifdef HHVM_REGION_SELECTOR_HOTTRACE
+  return "hottrace";
+#else
   return "";
 #endif
+#endif
+#endif
+}
+
+static inline bool pgoDefault() {
+#ifdef HHVM_REGION_SELECTOR_HOTTRACE
+  return true;
+#else
+  return false;
 #endif
 }
 
@@ -384,6 +408,18 @@ static inline bool hhirRelaxGuardsDefault() {
 
 static inline bool hhbcRelaxGuardsDefault() {
   return !RuntimeOption::EvalHHIRRelaxGuards;
+}
+
+static inline bool simulateARMDefault() {
+#ifdef HHVM_SIMULATE_ARM_BY_DEFAULT
+  return true;
+#else
+  return false;
+#endif
+}
+
+static inline bool xlsDefault() {
+  return RuntimeOption::EvalSimulateARM;
 }
 
 static inline bool hugePagesSoundNice() {
@@ -399,7 +435,13 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultWarmupRequests = debug ? 1 : 11;
-static const int kDefaultJitPGOThreshold = debug ? 2 : 100;
+static const int kDefaultJitPGOThreshold = debug ? 2 : 4;
+static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 500;
+static const size_t kJitGlobalDataDef = RuntimeOption::EvalJitASize >> 2;
+inline size_t maxUsageDef() {
+  return RuntimeOption::EvalJitASize;
+}
+using std::string;
 #define F(type, name, def) \
   type RuntimeOption::Eval ## name = type(def);
 EVALFLAGS();
@@ -407,11 +449,6 @@ EVALFLAGS();
 std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
-size_t RuntimeOption::VMTranslAHotSize   =   4 << 20;
-size_t RuntimeOption::VMTranslASize      =  60 << 20;
-size_t RuntimeOption::VMTranslAProfSize  =  64 << 20;
-size_t RuntimeOption::VMTranslAStubsSize =  64 << 20;
-size_t RuntimeOption::VMTranslGDataSize  = RuntimeOption::VMTranslASize >> 2;
 
 std::string RuntimeOption::RepoLocalMode;
 std::string RuntimeOption::RepoLocalPath;
@@ -455,6 +492,7 @@ long RuntimeOption::PregBacktraceLimit = 1000000;
 long RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnablePregErrorLog = true;
 
+bool RuntimeOption::HHProfServerEnabled = false;
 int RuntimeOption::HHProfServerPort = 4327;
 int RuntimeOption::HHProfServerThreads = 2;
 int RuntimeOption::HHProfServerTimeoutSeconds = 30;
@@ -522,7 +560,8 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
   return true;
 }
 
-void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
+void RuntimeOption::Load(Hdf &config,
+                         std::vector<std::string> *overwrites /* = NULL */,
                          bool empty /* = false */) {
   // Machine metrics
   string hostname, tier, cpu;
@@ -717,7 +756,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       server["ThreadJobMaxQueuingMilliSeconds"].getInt16(-1);
     ServerThreadDropStack = server["ThreadDropStack"].getBool();
     ServerHttpSafeMode = server["HttpSafeMode"].getBool();
-    ServerStatCache = server["StatCache"].getBool(true);
+    ServerStatCache = server["StatCache"].getBool(false);
     server["WarmupRequests"].get(ServerWarmupRequests);
     server["HighPriorityEndPoints"].get(ServerHighPriorityEndPoints);
 
@@ -797,8 +836,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     normalizePath(ErrorDocument500);
     FatalErrorMessage = server["FatalErrorMessage"].getString();
     FontPath = Util::normalizeDir(server["FontPath"].getString());
-    EnableStaticContentCache =
-      server["EnableStaticContentCache"].getBool(true);
     EnableStaticContentFromDisk =
       server["EnableStaticContentFromDisk"].getBool(true);
     EnableOnDemandUncompress =
@@ -855,7 +892,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     IniFile = server["IniFile"].getString(IniFile);
     if (access(IniFile.c_str(), R_OK) == -1) {
       if (IniFile != "/etc/hhvm/php.ini") {
-        Logger::Error("INI file doens't exist: %s", IniFile.c_str());
+        Logger::Error("INI file doesn't exist: %s", IniFile.c_str());
       }
       IniFile.clear();
     }
@@ -896,6 +933,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool();
 
     EnableCufAsync = server["EnableCufAsync"].getBool(false);
+    PathDebug = server["PathDebug"].getBool(false);
 
     ServerUser = server["User"].getString("");
   }
@@ -909,7 +947,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
           VirtualHost::GetDefault().init(hdf);
           VirtualHost::GetDefault().addAllowedDirectories(AllowedDirectories);
         } else {
-          VirtualHostPtr host(new VirtualHost(hdf));
+          auto host = std::make_shared<VirtualHost>(hdf);
           host->addAllowedDirectories(AllowedDirectories);
           VirtualHosts.push_back(host);
         }
@@ -924,13 +962,13 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
   {
     Hdf ipblocks = config["IpBlockMap"];
-    IpBlocks = IpBlockMapPtr(new IpBlockMap(ipblocks));
+    IpBlocks = std::make_shared<IpBlockMap>(ipblocks);
   }
   {
     Hdf satellites = config["Satellites"];
     if (satellites.exists()) {
       for (Hdf hdf = satellites.firstChild(); hdf.exists(); hdf = hdf.next()) {
-        SatelliteServerInfoPtr satellite(new SatelliteServerInfo(hdf));
+        auto satellite = std::make_shared<SatelliteServerInfo>(hdf);
         SatelliteServerInfos.push_back(satellite);
         if (satellite->getType() == SatelliteServer::Type::KindOfRPCServer) {
           XboxPassword = satellite->getPassword();
@@ -980,7 +1018,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     Hdf matches = content["FilesMatch"];
     if (matches.exists()) {
       for (Hdf hdf = matches.firstChild(); hdf.exists(); hdf = hdf.next()) {
-        FilesMatches.push_back(FilesMatchPtr(new FilesMatch(hdf)));
+        FilesMatches.push_back(std::make_shared<FilesMatch>(hdf));
       }
     }
   }
@@ -1103,6 +1141,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableAspTags = eval["EnableAspTags"].getBool();
     EnableXHP = eval["EnableXHP"].getBool(false);
     EnableZendCompat = eval["EnableZendCompat"].getBool(false);
+    TimeoutsUseWallTime = eval["TimeoutsUseWallTime"].getBool(true);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -1115,8 +1154,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     CheckSymLink = eval["CheckSymLink"].getBool(true);
 
     EnableAlternative = eval["EnableAlternative"].getInt32(0);
-
-    EnableFinallyStatement = eval["EnableFinallyStatement"].getBool();
 
 #define get_double getDouble
 #define get_bool getBool
@@ -1157,11 +1194,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     }
     if (RecordCodeCoverage) CheckSymLink = true;
     CodeCoverageOutputFile = eval["CodeCoverageOutputFile"].getString();
-    VMTranslAHotSize = eval["JitAHotSize"].getUInt64(VMTranslAHotSize);
-    VMTranslAProfSize = eval["JitAProfSize"].getUInt64(VMTranslAProfSize);
-    VMTranslASize = eval["JitASize"].getUInt64(VMTranslASize);
-    VMTranslAStubsSize = eval["JitAStubsSize"].getUInt64(VMTranslAStubsSize);
-    VMTranslGDataSize = eval["JitGlobalDataSize"].getUInt64(VMTranslGDataSize);
     {
       Hdf debugger = eval["Debugger"];
       EnableDebugger = debugger["EnableDebugger"].getBool();
@@ -1266,6 +1298,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
   {
     Hdf hhprofServer = config["HHProfServer"];
+    HHProfServerEnabled = hhprofServer["Enabled"].getBool(false);
     HHProfServerPort = hhprofServer["Port"].getInt16(4327);
     HHProfServerThreads = hhprofServer["Threads"].getInt16(2);
     HHProfServerTimeoutSeconds =

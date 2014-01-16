@@ -66,7 +66,7 @@ char* getNativeFunctionName(void* codeAddr) {
     // _ZN4HPHP2VM6Transl17interpOneIterInitEv
     //
     // and then pass this to abi::__cxa_demangle to get the demanged name:
-    // HPHP::Transl::interpOneIterInit()
+    // HPHP::JIT::interpOneIterInit()
     //
     // Sometimes, though, backtrace_symbols can't find the function name
     // and ends up giving us a blank managled name, like this:
@@ -86,7 +86,14 @@ char* getNativeFunctionName(void* codeAddr) {
         char* demangledName = abi::__cxa_demangle(functionName, 0, 0, &status);
         if (status == 0) {
           delete [] functionName;
-          functionName = demangledName;
+
+          // Callers expect the buffer to have come from new[] but demangledName
+          // came from malloc. Copy to a buffer from new[].
+          auto const len = strlen(demangledName) + 1;
+          char* buf = new char[len];
+          std::copy(demangledName, demangledName + len, buf);
+          free(demangledName);
+          functionName = buf;
         }
       }
     }

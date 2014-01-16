@@ -20,13 +20,15 @@
 #include "folly/json.h"
 
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
-#include "hphp/runtime/ext/ext_reflection.h"
+#include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+
+using std::string;
 
 TRACE_SET_MOD(debugger);
 
@@ -88,7 +90,7 @@ void CmdInfo::recvImpl(DebuggerThriftBuffer &thrift) {
       if (i < DebuggerClient::AutoCompleteCount) {
         thrift.read(m_acLiveLists[i]);
       } else {
-        vector<std::string> future;
+        std::vector<std::string> future;
         thrift.read(future);
       }
     }
@@ -133,7 +135,7 @@ bool CmdInfo::parseZeroArg(DebuggerClient &client) {
   return !m_symbol.empty();
 }
 
-void CmdInfo::parseOneArg(DebuggerClient &client, string &subsymbol) {
+void CmdInfo::parseOneArg(DebuggerClient &client, std::string &subsymbol) {
   assert(client.argCount() == 1);
   string symbol = client.argValue(1);
   size_t pos = symbol.find("::");
@@ -153,7 +155,7 @@ void CmdInfo::parseOneArg(DebuggerClient &client, string &subsymbol) {
 void CmdInfo::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
-  string subsymbol;
+  std::string subsymbol;
 
   if (client.argCount() == 0) {
     if (!parseZeroArg(client)) {
@@ -172,7 +174,7 @@ void CmdInfo::onClient(DebuggerClient &client) {
     return;
   }
 
-  CmdInfoPtr cmd = client.xend<CmdInfo>(this);
+  auto cmd = client.xend<CmdInfo>(this);
   Array info = cmd->m_info;
   if (info.empty()) {
     client.info("(specified symbol cannot be found)");
@@ -188,7 +190,7 @@ void CmdInfo::onClient(DebuggerClient &client) {
 void CmdInfo::UpdateLiveLists(DebuggerClient &client) {
   CmdInfo cmd;
   cmd.m_type = KindOfLiveLists;
-  CmdInfoPtr res = client.xend<CmdInfo>(&cmd);
+  auto res = client.xend<CmdInfo>(&cmd);
   client.setLiveLists(res->m_acLiveLists);
 }
 
@@ -201,7 +203,7 @@ String CmdInfo::GetProtoType(DebuggerClient &client, const std::string &cls,
   } else {
     cmd.m_symbol = String(cls) + "::" + String(func);
   }
-  CmdInfoPtr res = client.xend<CmdInfo>(&cmd);
+  auto res = client.xend<CmdInfo>(&cmd);
   Array info = res->m_info;
   if (!info.empty()) {
     info = info[0];
@@ -254,7 +256,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
 
     Array variables = g_vmContext->getLocalDefinedVariables(0);
     variables += CmdVariable::GetGlobalVariables();
-    vector<std::string> &vars =
+    std::vector<std::string> &vars =
       m_acLiveLists[DebuggerClient::AutoCompleteVariables];
     vars.reserve(variables.size());
     for (ArrayIter iter(variables); iter; ++iter) {
@@ -266,7 +268,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
 
   if (m_type == KindOfUnknown || m_type == KindOfClass) {
     try {
-      Array ret = f_hphp_get_class_info(m_symbol);
+      Array ret = HHVM_FN(hphp_get_class_info)(m_symbol);
       if (!ret.empty()) {
         m_info.append(ret);
       }
@@ -274,7 +276,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
   }
   if (m_type == KindOfUnknown || m_type == KindOfFunction) {
     try {
-      Array ret = f_hphp_get_function_info(m_symbol);
+      Array ret = HHVM_FN(hphp_get_function_info)(m_symbol);
       if (!ret.empty()) {
         m_info.append(ret);
       }

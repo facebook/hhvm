@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,15 +123,14 @@ public:
       return nullptr;
     }
 
-    T *px = static_cast<T*>(cur);
-    // Assert that casting does not adjust the 'this' pointer
-    assert((void*)px == (void*)cur);
-    return px;
+    return static_cast<T*>(cur);
   }
+
   template<typename T>
   bool is() const {
     return getTyped<T>(true, true) != nullptr;
   }
+
   template<typename T>
   T *cast() const {
     return getTyped<T>();

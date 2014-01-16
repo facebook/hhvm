@@ -40,6 +40,9 @@
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(curl);
 
+using std::string;
+using std::vector;
+
 const StaticString
   s_exception("exception"),
   s_previous("previous");
@@ -72,12 +75,11 @@ private:
     SmartResource<File> fp;
   };
 
-  DECLARE_BOOST_TYPES(ToFree);
   class ToFree {
   public:
-    vector<char*>          str;
-    vector<curl_httppost*> post;
-    vector<curl_slist*>    slist;
+    std::vector<char*>          str;
+    std::vector<curl_httppost*> post;
+    std::vector<curl_slist*>    slist;
 
     ~ToFree() {
       for (unsigned int i = 0; i < str.size(); i++) {
@@ -104,7 +106,7 @@ public:
 
     memset(m_error_str, 0, sizeof(m_error_str));
     m_error_no = CURLE_OK;
-    m_to_free = ToFreePtr(new ToFree());
+    m_to_free = std::make_shared<ToFree>();
 
     m_write.method = PHP_CURL_STDOUT;
     m_write.type   = PHP_CURL_ASCII;
@@ -655,7 +657,7 @@ public:
       {
         int data_size = size * nmemb;
         Variant ret = ch->do_callback(
-          t->callback, make_packed_array(Resource(ch), t->fp->fd(), data_size));
+          t->callback, make_packed_array(Resource(ch), t->fp, data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -752,7 +754,7 @@ private:
   char m_error_str[CURL_ERROR_SIZE + 1];
   CURLcode m_error_no;
 
-  ToFreePtr m_to_free;
+  std::shared_ptr<ToFree> m_to_free;
 
   String m_url;
   String m_header;
@@ -1401,7 +1403,7 @@ IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle)
 static LibEventHttpClientPtr prepare_client
 (const String& url, const String& data, CArrRef headers, int timeout,
  bool async, bool post) {
-  string sUrl = url.data();
+  std::string sUrl = url.data();
   if (sUrl.size() < 7 || sUrl.substr(0, 7) != "http://") {
     raise_warning("Invalid URL: %s", sUrl.c_str());
     return LibEventHttpClientPtr();
@@ -1410,7 +1412,7 @@ static LibEventHttpClientPtr prepare_client
   // parsing server address
   size_t pos = sUrl.find('/', 7);
   string path;
-  if (pos == string::npos) {
+  if (pos == std::string::npos) {
     pos = sUrl.length();
     path = "/";
   } else if (pos == 7) {
@@ -1437,7 +1439,7 @@ static LibEventHttpClientPtr prepare_client
     return client;
   }
 
-  vector<string> sheaders;
+  std::vector<std::string> sheaders;
   for (ArrayIter iter(headers); iter; ++iter) {
     sheaders.push_back(iter.second().toString().data());
   }

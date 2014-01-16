@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdUp);
 class CmdUp : public DebuggerCommand {
 public:
   static int ParseNumber(DebuggerClient &client);

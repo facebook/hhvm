@@ -29,7 +29,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
-using namespace HPHP::Transl;
+using namespace HPHP::JIT;
 
 namespace HPHP {
 namespace Debug {
@@ -37,12 +37,13 @@ namespace Debug {
 TRACE_SET_MOD(debuginfo);
 static const uint8_t CFA_OFFSET = 16;
 
-void ElfWriter::logError(const string& msg) {
+void ElfWriter::logError(const std::string& msg) {
   perror("");
   std::cerr << msg << '\n';
 }
 
-int ElfWriter::dwarfCallback(char *name, int size, Dwarf_Unsigned type,
+int ElfWriter::dwarfCallback(
+  LIBDWARF_CALLBACK_NAME_TYPE name, int size, Dwarf_Unsigned type,
   Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info) {
   if (!strncmp(name, ".rel", 4))
     return 0;
@@ -81,7 +82,7 @@ bool ElfWriter::initElfHeader() {
   return true;
 }
 
-int ElfWriter::addSectionString(const string& name) {
+int ElfWriter::addSectionString(const std::string& name) {
   int off = m_strtab.size();
   for (unsigned int i = 0; i < name.size(); i++) {
     m_strtab.push_back(name[i]);
@@ -449,7 +450,7 @@ bool ElfWriter::addFrameInfo(DwarfChunk* d) {
   return true;
 }
 
-int ElfWriter::newSection(char *name,
+int ElfWriter::newSection(LIBDWARF_CALLBACK_NAME_TYPE name,
   uint64_t size, uint32_t type, uint64_t flags,
   uint64_t addr/* = 0*/) {
   Elf_Scn *scn = elf_newscn(m_elf);
@@ -532,7 +533,7 @@ int ElfWriter::writeStringSection() {
 
 int ElfWriter::writeTextSection() {
   int section = -1;
-  CodeBlock& a = TranslatorX64::Get()->mainCode;
+  CodeBlock& a = tx64->mainCode;
   if ((section = newSection(
       ".text.tracelets", a.capacity(), SHT_NOBITS, SHF_ALLOC | SHF_EXECINSTR,
       reinterpret_cast<uint64_t>(a.base()))) < 0) {
@@ -551,7 +552,7 @@ ElfWriter::ElfWriter(DwarfChunk* d):
   off_t elf_size;
   char *symfile;
 
-  m_filename = string("/tmp/vm_dwarf.XXXXXX");
+  m_filename = std::string("/tmp/vm_dwarf.XXXXXX");
   m_fd = mkstemp((char *)m_filename.c_str());
   if (m_fd < 0) {
     logError("Unable to open file for writing.");

@@ -54,6 +54,7 @@ fclose($read_handle);
 
 echo "*** Done ***\n";
 
-?><?php
+?>
+<?php
 unlink(dirname(__FILE__)."/passthru.tmp");
 ?>

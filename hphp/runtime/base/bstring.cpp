@@ -26,7 +26,21 @@ namespace HPHP {
  */
 
 bool bstrcaseeq(const char* left, const char* right, size_t n) {
-  for (size_t i = 0; i < n; ++i) {
+  // Early exit if we're given the same two strings.
+  if (left == right) return true;
+
+  // Fast case sensitive comparison, unrolled to do 8 bytes at a time.
+  typedef uint64_t widecmp_t;
+  size_t i = 0;
+  if (n >= sizeof(widecmp_t)) {
+    while (*(const widecmp_t*)(&left[i]) == *(const widecmp_t*)(&right[i])) {
+      i += sizeof(widecmp_t);
+      if (i >= (n - (sizeof(widecmp_t) - 1))) break;
+    }
+  }
+
+  // Finish whatever is left over.
+  for (; i < n; ++i) {
     if (!chrcaseeq(left[i], right[i])) return false;
   }
   return true;
@@ -37,7 +51,7 @@ int bstrcasecmp(const char* left, size_t leftSize,
   size_t minSize = leftSize < rightSize ? leftSize : rightSize;
   for (size_t i = 0; i < minSize; ++i) {
     ssize_t ret = chrcasecmp(left[i], right[i]);
-    if (ret) return ret; 
+    if (ret) return ret;
   }
   return (leftSize > rightSize) - (leftSize < rightSize);
 }
@@ -52,7 +66,15 @@ char* bstrcasechr(const char* haystack, char needle, size_t haystackSize) {
   return nullptr;
 }
 
-HOT_FUNC
+// Simple implementation of bstrcaseeq, used for bstrcasestr since the
+// above implementation is specialized for exact-matching strings.
+static bool bstrcasestreq(const char* left, const char* right, size_t n) {
+  for (size_t i = 0; i < n; ++i) {
+    if (!chrcaseeq(left[i], right[i])) return false;
+  }
+  return true;
+}
+
 char* bstrcasestr(const char* haystack, size_t haystackSize,
                   const char* needle, size_t needleSize) {
   if (needleSize > haystackSize) {
@@ -60,7 +82,7 @@ char* bstrcasestr(const char* haystack, size_t haystackSize,
   }
   const char* haystackLast = haystack + (haystackSize - needleSize);
   for (;;) {
-    if (bstrcaseeq(haystack, needle, needleSize)) {
+    if (bstrcasestreq(haystack, needle, needleSize)) {
       return (char*)haystack;
     }
     if (haystack == haystackLast) return nullptr;

@@ -1,1 +1,1 @@
-HipHop Fatal error: cannot use 'static' as access modifier in %s/test/slow/traits/2080.php on line 8
+HipHop Fatal error: Only access and visibility modifiers are allowed in trait alias rule in %s/test/slow/traits/2080.php on line 10

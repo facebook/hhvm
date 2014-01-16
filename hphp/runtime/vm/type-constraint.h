@@ -17,11 +17,11 @@
 #define incl_HPHP_TYPE_CONSTRAINT_H_
 
 #include <string>
-#include <tr1/functional>
+#include <functional>
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/util/case-insensitive.h"
-#include "hphp/runtime/vm/unit.h"
+#include "hphp/util/functional.h"
+#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/type-profile.h"
 
 namespace HPHP { struct Func; }
@@ -94,6 +94,16 @@ struct TypeConstraint {
     , m_namedEntity(nullptr)
   {
     init();
+  }
+
+  template<class SerDe>
+  void serde(SerDe& sd) {
+    sd(m_typeName)
+      (m_flags)
+      ;
+    if (SerDe::deserializing) {
+      init();
+    }
   }
 
   TypeConstraint(const TypeConstraint&) = default;

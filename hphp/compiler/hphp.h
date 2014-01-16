@@ -17,8 +17,10 @@
 #ifndef incl_HPHP_H_
 #define incl_HPHP_H_
 
-#include "hphp/util/base.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/util/deprecated/base.h"
+#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/deprecated/declare-boost-types.h"
+#include "hphp/util/functional.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

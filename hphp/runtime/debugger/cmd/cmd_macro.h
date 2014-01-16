@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdMacro);
 class CmdMacro : public DebuggerCommand {
 public:
   CmdMacro() : DebuggerCommand(KindOfMacro) {}

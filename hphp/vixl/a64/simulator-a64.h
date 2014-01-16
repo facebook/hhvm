@@ -27,6 +27,8 @@
 #ifndef VIXL_A64_SIMULATOR_A64_H_
 #define VIXL_A64_SIMULATOR_A64_H_
 
+#include <iosfwd>
+
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
 #include "hphp/vixl/a64/instructions-a64.h"
@@ -118,7 +120,7 @@ class SimSystemRegister {
 
 class Simulator : public DecoderVisitor {
  public:
-  explicit Simulator(Decoder* decoder, std::ostream& stream = std::cout);
+  explicit Simulator(Decoder* decoder, std::ostream& stream);
   ~Simulator();
 
   void ResetState();
@@ -385,15 +387,9 @@ class Simulator : public DecoderVisitor {
       disasm_trace_ = value;
     }
   }
-  inline void set_instruction_stats(bool value) {
-    if (value != instruction_stats_) {
-      if (value) {
-        decoder_->AppendVisitor(instrumentation_);
-      } else {
-        decoder_->RemoveVisitor(instrumentation_);
-      }
-      instruction_stats_ = value;
-    }
+
+  bool is_on_stack(void* ptr) const {
+    return uint64_t((byte*)ptr - stack_) < (uint64_t)stack_size_;
   }
 
  protected:
@@ -585,9 +581,6 @@ class Simulator : public DecoderVisitor {
 
   // Indicates whether the disassembly trace is active.
   bool disasm_trace_;
-
-  // Indicates whether the instruction instrumentation is active.
-  bool instruction_stats_;
 };
 }  // namespace vixl
 

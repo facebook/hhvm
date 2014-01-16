@@ -48,6 +48,7 @@ if ('' == mysql_error())
 	printf("[009] Connect error should have been set\n");
 
 print "done!";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

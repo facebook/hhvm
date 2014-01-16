@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_DATASET_H_
 #define incl_HPHP_DATASET_H_
 
-#include "hphp/util/base.h"
-#include "mysql.h"
+#include <string>
+
+#include <mysql.h>
 
 namespace HPHP {
 
-DECLARE_BOOST_TYPES(DataSet);
 ///////////////////////////////////////////////////////////////////////////////
 
 /**

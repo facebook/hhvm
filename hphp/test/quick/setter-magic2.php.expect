@@ -1,0 +1,6 @@
+string(4) "prop"
+int(2)
+object(Heh)#1 (1) {
+  ["prop"]=>
+  int(3)
+}

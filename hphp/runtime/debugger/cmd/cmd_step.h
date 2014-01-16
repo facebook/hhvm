@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdStep);
 class CmdStep : public CmdFlowControl {
 public:
   CmdStep() : CmdFlowControl(KindOfStep) {}

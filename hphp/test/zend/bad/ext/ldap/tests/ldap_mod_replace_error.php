@@ -20,7 +20,7 @@ var_dump(ldap_mod_replace($link, "weirdAttribute=val", array()));
 // Invalid attributes
 var_dump(ldap_mod_replace($link, "dc=my-domain,dc=com", array('dc')));
 ?>
-===DONE===?>
+===DONE===
 <?php
 require "connect.inc";
 

@@ -1,0 +1,278 @@
+log_insert
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;-;.;%d"
+  ["type"]=>
+  int(16)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+bool(true)
+NULL
+
+
+log_query
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;-;.;%d"
+  ["type"]=>
+  int(16)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(3) {
+  ["getlasterror"]=>
+  int(1)
+  ["w"]=>
+  int(2)
+  ["wtimeout"]=>
+  int(10000)
+}
+array(5) {
+  ["request_id"]=>
+  int(4)
+  ["skip"]=>
+  int(0)
+  ["limit"]=>
+  int(-1)
+  ["options"]=>
+  int(0)
+  ["cursor_id"]=>
+  int(0)
+}
+
+
+log_query
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;-;.;%d"
+  ["type"]=>
+  int(16)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["count"]=>
+    string(4) "jobs"
+    ["query"]=>
+    array(1) {
+      ["_id"]=>
+      object(MongoId)#%d (1) {
+        ["$id"]=>
+        string(24) "%s"
+      }
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(9) "secondary"
+  }
+}
+array(5) {
+  ["request_id"]=>
+  int(5)
+  ["skip"]=>
+  int(0)
+  ["limit"]=>
+  int(-1)
+  ["options"]=>
+  int(4)
+  ["cursor_id"]=>
+  int(0)
+}
+
+
+log_query
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;-;.;%d"
+  ["type"]=>
+  int(16)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(2) {
+  ["$query"]=>
+  array(1) {
+    ["_id"]=>
+    object(MongoId)#%d (1) {
+      ["$id"]=>
+      string(24) "%s"
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(9) "secondary"
+  }
+}
+array(5) {
+  ["request_id"]=>
+  int(6)
+  ["skip"]=>
+  int(0)
+  ["limit"]=>
+  int(-1)
+  ["options"]=>
+  int(4)
+  ["cursor_id"]=>
+  int(0)
+}
+
+
+log_update
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;-;.;%d"
+  ["type"]=>
+  int(16)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(1) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+}
+array(3) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+  ["with"]=>
+  string(4) "some"
+  ["x"]=>
+  int(%d)
+}
+array(1) {
+  ["w"]=>
+  int(1)
+}
+array(2) {
+  ["namespace"]=>
+  string(12) "phpunit.jobs"
+  ["flags"]=>
+  int(0)
+}
+
+
+log_query
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;-;.;%d"
+  ["type"]=>
+  int(16)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(1) {
+  ["getlasterror"]=>
+  int(1)
+}
+array(5) {
+  ["request_id"]=>
+  int(8)
+  ["skip"]=>
+  int(0)
+  ["limit"]=>
+  int(-1)
+  ["options"]=>
+  int(0)
+  ["cursor_id"]=>
+  int(0)
+}
+
+
+log_delete
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;-;.;%d"
+  ["type"]=>
+  int(16)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(1) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+}
+array(0) {
+}
+array(2) {
+  ["namespace"]=>
+  string(12) "phpunit.jobs"
+  ["flags"]=>
+  int(0)
+}
+
+
+log_query
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;-;.;%d"
+  ["type"]=>
+  int(16)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(3) {
+  ["getlasterror"]=>
+  int(1)
+  ["w"]=>
+  int(2)
+  ["wtimeout"]=>
+  int(10000)
+}
+array(5) {
+  ["request_id"]=>
+  int(10)
+  ["skip"]=>
+  int(0)
+  ["limit"]=>
+  int(-1)
+  ["options"]=>
+  int(0)
+  ["cursor_id"]=>
+  int(0)
+}

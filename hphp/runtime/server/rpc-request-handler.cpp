@@ -26,6 +26,7 @@
 #include "hphp/runtime/server/request-uri.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/util/process.h"
+#include "hphp/runtime/server/satellite-server.h"
 
 #include "folly/ScopeGuard.h"
 
@@ -103,10 +104,9 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   StackTraceNoHeap::AddExtraLogging("RPC-URL", transport->getUrl());
 
   // authentication
-  const set<string> &passwords = m_serverInfo->getPasswords();
+  const std::set<std::string> &passwords = m_serverInfo->getPasswords();
   if (!passwords.empty()) {
-    set<string>::const_iterator iter =
-      passwords.find(transport->getParam("auth"));
+    auto iter = passwords.find(transport->getParam("auth"));
     if (iter == passwords.end()) {
       transport->sendString("Unauthorized", 401);
       transport->onSendEnd();
@@ -119,7 +119,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
       return;
     }
   } else {
-    const string &password = m_serverInfo->getPassword();
+    const std::string &password = m_serverInfo->getPassword();
     if (!password.empty() && password != transport->getParam("auth")) {
       transport->sendString("Unauthorized", 401);
       transport->onSendEnd();
@@ -157,8 +157,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   };
 
   // resolve source root
-  string host = transport->getHeader("Host");
-  SourceRootInfo sourceRootInfo(host.c_str());
+  SourceRootInfo sourceRootInfo(transport);
 
   // set thread type
   switch (m_serverInfo->getType()) {
@@ -184,6 +183,14 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 
+void RPCRequestHandler::abortRequest(Transport *transport) {
+  HttpRequestHandler::GetAccessLog().onNewRequest();
+  const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
+  assert(vhost);
+  transport->sendString("Service Unavailable", 503);
+  HttpRequestHandler::GetAccessLog().log(transport, vhost);
+}
+
 const StaticString
   s_output("output"),
   s_return("return"),
@@ -193,7 +200,7 @@ const StaticString
 bool RPCRequestHandler::executePHPFunction(Transport *transport,
                                            SourceRootInfo &sourceRootInfo,
                                            ReturnEncodeType returnEncodeType) {
-  string rpcFunc = transport->getCommand();
+  std::string rpcFunc = transport->getCommand();
   {
     ServerStatsHelper ssh("input");
     RequestURI reqURI(rpcFunc);
@@ -203,12 +210,12 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     g->getRef(s__ENV).set(s_HPHP_RPC, 1);
   }
 
-  bool isFile = rpcFunc.rfind('.') != string::npos;
-  string rpcFile;
+  bool isFile = rpcFunc.rfind('.') != std::string::npos;
+  std::string rpcFile;
   bool error = false;
 
   Array params;
-  string sparams = transport->getParam("params");
+  std::string sparams = transport->getParam("params");
   if (!sparams.empty()) {
     Variant jparams = f_json_decode(String(sparams), true);
     if (jparams.isArray()) {
@@ -217,7 +224,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       error = true;
     }
   } else {
-    vector<string> sparams;
+    std::vector<std::string> sparams;
     transport->getArrayParam("p", sparams);
     if (!sparams.empty()) {
       for (unsigned int i = 0; i < sparams.size(); i++) {
@@ -246,8 +253,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   int code;
   if (!error) {
     Variant funcRet;
-    string errorMsg = "Internal Server Error";
-    string reqInitFunc, reqInitDoc;
+    std::string errorMsg = "Internal Server Error";
+    std::string reqInitFunc, reqInitDoc;
     reqInitDoc = transport->getHeader("ReqInitDoc");
     if (reqInitDoc.empty() && m_serverInfo) {
       reqInitFunc = m_serverInfo->getReqInitFunc();
@@ -356,12 +363,12 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   return !error;
 }
 
-string RPCRequestHandler::getSourceFilename(const string &path,
+std::string RPCRequestHandler::getSourceFilename(const std::string &path,
                                             SourceRootInfo &sourceRootInfo) {
   if (path.empty() || path[0] == '/') return path;
   // If it is not a sandbox, sourceRoot will be the same as
   // RuntimeOption::SourceRoot.
-  string sourceRoot = sourceRootInfo.path();
+  std::string sourceRoot = sourceRootInfo.path();
   if (sourceRoot.empty()) {
     return Process::GetCurrentDirectory() + "/" + path;
   }

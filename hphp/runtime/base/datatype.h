@@ -17,14 +17,22 @@
 #ifndef incl_HPHP_DATATYPE_H_
 #define incl_HPHP_DATATYPE_H_
 
+#include <cstdint>
+#include <string>
+#include <cstdio>
+
 #include "folly/Format.h"
 
-#include "hphp/util/base.h"
+#include "hphp/util/portability.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// definitions
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * DataType is the type tag for a TypedValue (see typed-value.h).
+ */
 enum DataType : int8_t {
   KindOfClass            = -13,
   MinDataType            = -13,
@@ -99,8 +107,7 @@ enum class DataTypeCategory : uint8_t {
 DT_CATEGORIES(DT)
 #undef DT
 
-///////////////////////////////////////////////////////////////////////////////
-// nannies
+//////////////////////////////////////////////////////////////////////
 
 static_assert(KindOfString       & KindOfStringBit, "");
 static_assert(KindOfStaticString & KindOfStringBit, "");
@@ -148,11 +155,11 @@ static_assert(!(kNotConstantValueTypeMask &
               "DataType & kNotConstantValueTypeMask must be zero for "
               "null, bool, int, double and string types");
 
-///////////////////////////////////////////////////////////////////////////////
-// helpers
+
+//////////////////////////////////////////////////////////////////////
 
 inline std::string tname(DataType t) {
-  switch(t) {
+  switch (t) {
 #define CS(name) \
     case KindOf ## name: return std::string(#name);
     CS(Uninit)
@@ -292,8 +299,11 @@ inline bool equivDataTypes(DataType t1, DataType t2) {
     (IS_NULL_TYPE(t1) && IS_NULL_TYPE(t2));
 }
 
-///////////////////////////////////////////////////////////////////////////////
-} // namespace HPHP
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
 
 namespace folly {
 template<> struct FormatValue<HPHP::DataTypeCategory> {
@@ -321,4 +331,6 @@ template<> struct FormatValue<HPHP::DataType> {
 };
 }
 
-#endif // incl_HPHP_DATATYPE_H_
+//////////////////////////////////////////////////////////////////////
+
+#endif

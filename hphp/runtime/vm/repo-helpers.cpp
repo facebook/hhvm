@@ -193,6 +193,10 @@ void RepoQuery::bindStaticString(const char* paramName, const StringData* sd) {
   }
 }
 
+void RepoQuery::bindStdString(const char* paramName, const std::string& s) {
+  bindText(paramName, s.data(), s.size(), true);
+}
+
 void RepoQuery::bindDouble(const char* paramName, double val) {
   sqlite3_stmt* stmt = m_stmt.get();
   int rc UNUSED =
@@ -370,6 +374,13 @@ void RepoQuery::getText(int iCol, const char*& text) {
 void RepoQuery::getText(int iCol, const char*& text, size_t& size) {
   getText(iCol, text);
   size = size_t(sqlite3_column_bytes(m_stmt.get(), iCol));
+}
+
+void RepoQuery::getStdString(int iCol, std::string& s) {
+  const char* text;
+  size_t size;
+  getText(iCol, text, size);
+  s = std::string(text, size);
 }
 
 void RepoQuery::getStaticString(int iCol, StringData*& s) {

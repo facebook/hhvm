@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/util/functional.h"
 
 namespace HPHP {
 

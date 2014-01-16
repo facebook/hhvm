@@ -85,7 +85,7 @@
             "name": "simplexml_import_dom",
             "desc": "This function takes a node of a DOM document and makes it into a SimpleXML node. This new object can then be used as a native SimpleXML element.",
             "flags": [
-                "ZendParamMode"
+                "ZendParamModeNull"
             ],
             "return": {
                 "type": "Variant",
@@ -156,23 +156,6 @@
                     "type": "Variant",
                     "value": "null_variant",
                     "desc": "Whether to enable user error handling."
-                }
-            ]
-        },
-        {
-            "name": "libxml_set_streams_context",
-            "desc": "Sets the streams context for the next libxml document load or write.",
-            "flags": [
-            ],
-            "return": {
-                "type": null,
-                "desc": "No value is returned."
-            },
-            "args": [
-                {
-                    "name": "streams_context",
-                    "type": "Resource",
-                    "desc": "The stream context resource (created with stream_context_create())"
                 }
             ]
         },

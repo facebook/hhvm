@@ -55,6 +55,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(StatementList);
+DECLARE_BOOST_TYPES(LabelScope);
 DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(BlockScope);
@@ -126,7 +127,6 @@ public:
   virtual bool parseImpl();
   bool parse();
   virtual void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  virtual bool enableFinallyStatement();
   IMPLEMENT_XHP_ATTRIBUTES;
 
   virtual void fatal(const Location* loc, const char* msg);
@@ -159,8 +159,7 @@ public:
   void onStaticMember(Token &out, Token &cls, Token &name);
   void onRefDim(Token &out, Token &var, Token &offset);
   void onCallParam(Token &out, Token *params, Token &expr, bool ref);
-  void onCall(Token &out, bool dynamic, Token &name, Token &params,
-              Token *cls, bool fromCompiler = false);
+  void onCall(Token &out, bool dynamic, Token &name, Token &params, Token *cls);
   void onEncapsList(Token &out, int type, Token &list);
   void addEncap(Token &out, Token *list, Token &expr, int type);
   void encapRefDim(Token &out, Token &var, Token &offset);
@@ -203,6 +202,7 @@ public:
   void onInterface(Token &out, Token &name, Token &base, Token &stmt,
                    Token *attr);
   void onInterfaceName(Token &out, Token *names, Token &name);
+  void onTraitRequire(Token &out, Token &name, bool isClass);
   void onTraitUse(Token &out, Token &traits, Token &rules);
   void onTraitName(Token &out, Token *names, Token &name);
   void onTraitRule(Token &out, Token &stmtList, Token &newStmt);
@@ -257,9 +257,15 @@ public:
   void onThrow(Token &out, Token &expr);
 
   void onClosureStart(Token &name);
-  void onClosure(Token &out, Token *modifiers, Token &ret, Token &ref,
-                 Token &params, Token &cparams, Token &stmts);
+  Token onClosure(ClosureType type,
+                  Token* modifiers,
+                  Token& ref,
+                  Token& params,
+                  Token& cparams,
+                  Token& stmts);
+  Token onExprForLambda(const Token& expr);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);
+
   void onLabel(Token &out, Token &label);
   void onGoto(Token &out, Token &label, bool limited);
   void onTypedef(Token& out, const Token& name, const Token& type);
@@ -268,6 +274,24 @@ public:
   void onTypeList(Token& type1, const Token& type2);
   void onTypeSpecialization(Token& type, char specialization);
 
+  // for language integrated query expressions
+  void onQuery(Token &out, Token &head, Token &body);
+  void onQueryBody(Token &out, Token *clauses, Token &select, Token *cont);
+  void onQueryBodyClause(Token &out, Token *clauses, Token &clause);
+  void onFromClause(Token &out, Token &var, Token &coll);
+  void onLetClause(Token &out, Token &var, Token &expr);
+  void onWhereClause(Token &out, Token &expr);
+  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
+    Token &right);
+  void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
+    Token &right, Token &group);
+  void onOrderbyClause(Token &out, Token &orderings);
+  void onOrdering(Token &out, Token *orderings, Token &ordering);
+  void onOrderingExpr(Token &out, Token &expr, Token *direction);
+  void onSelectClause(Token &out, Token &expr);
+  void onGroupClause(Token &out, Token &coll, Token &key);
+  void onIntoClause(Token &out, Token &var, Token &query);
+
   // for namespace support
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
   void onNamespaceEnd();
@@ -275,6 +299,36 @@ public:
   void nns(int token = 0);
   std::string nsDecl(const std::string &name);
   std::string resolve(const std::string &ns, bool cls);
+
+  /*
+   * Get the current label scope. A new label scope is demarcated by
+   * one of the following: a loop, a switch statement, a finally block,
+   * a try block or one of the constructs demarcating variables scopes
+   * (i.e. functions, closures, etc.)
+   * For every label scope, we keep track of the labels
+   * that are available inside it. This is required for supporting
+   * features such as try ... finally.
+   */
+  LabelScopePtr getLabelScope() const;
+
+  /*
+   * Called whenever a new label scope is entered. The fresh parameter
+   * indicates whether the scope is also a variable scope (i.e. a
+   * function, a closure, ...) or just a label scope (i.e. a loop body,
+   * a switch statement, a finally block, ...).
+   */
+  void onNewLabelScope(bool fresh);
+
+  /*
+   * Called whenever a new label is encountered.
+   */
+  void onScopeLabel(const Token& stmt, const Token& label);
+
+  /*
+   * Called whenever a label scope ends. The fresh parameter has the
+   * same meaning as for onNewLabelScope.
+   */
+  void onCompleteLabelScope(bool fresh);
 
   virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
   virtual void invalidateLabel(TStatementPtr stmt);
@@ -310,8 +364,8 @@ private:
   FileScopePtr m_file;
   std::vector<std::string> m_comments; // for docComment stack
   std::vector<BlockScopePtrVec> m_scopes;
+  std::vector<LabelScopePtrVec> m_labelScopes;
   std::vector<FunctionContext> m_funcContexts;
-  std::vector<std::vector<StatementPtr> > m_prependingStatements;
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::string m_clsName; // for T_CLASS_C inside a closure
   std::string m_funcName;
@@ -385,20 +439,27 @@ private:
       std::string name;
     };
 
+    enum class AliasType {
+      AUTO,
+      USE,
+      CURRENT_NS
+    };
+
     AliasTable(const std::vector<AliasEntry>& autoAliases,
                std::function<bool ()> autoOracle);
 
     std::string getName(std::string alias);
     bool isAliased(std::string alias);
     bool isAutoImported(std::string alias);
-    void map(std::string alias, std::string name);
+    bool isUseType(std::string alias);
+    void map(std::string alias, std::string name, AliasType type);
     void clear();
 
   private:
 
     struct NameEntry {
       std::string name;
-      bool isAuto; // Is the name automatically-imported?
+      AliasType type;
     };
 
     hphp_string_imap<NameEntry> m_aliases;

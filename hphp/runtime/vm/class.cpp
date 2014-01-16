@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/enum-cache.h"
 #include "hphp/util/util.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/rds.h"
@@ -135,10 +136,17 @@ void PreClass::Const::prettyPrint(std::ostream& out) const {
 PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
                    const StringData* n, Attr attrs, const StringData* parent,
                    const StringData* docComment, Id id, Hoistable hoistable)
-    : m_unit(unit), m_line1(line1), m_line2(line2), m_offset(o), m_id(id),
-      m_builtinPropSize(0), m_attrs(attrs), m_hoistable(hoistable),
-      m_name(n), m_parent(parent), m_docComment(docComment),
-      m_instanceCtor(nullptr) {
+  : m_unit(unit)
+  , m_line1(line1)
+  , m_line2(line2)
+  , m_offset(o)
+  , m_id(id)
+  , m_attrs(attrs)
+  , m_hoistable(hoistable)
+  , m_name(n)
+  , m_parent(parent)
+  , m_docComment(docComment)
+{
   m_namedEntity = Unit::GetNamedEntity(n);
 }
 
@@ -189,7 +197,7 @@ void PreClass::prettyPrint(std::ostream &out) const {
 //=============================================================================
 // Class.
 
-static_assert(sizeof(Class) == 400, "Change this only on purpose");
+static_assert(sizeof(Class) == 408, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
@@ -212,13 +220,11 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   , m_traitsBeginIdx(0)
   , m_traitsEndIdx(0)
   , m_clsInfo(nullptr)
-  , m_builtinPropSize(0)
   , m_classVecLen(classVecLen)
   , m_cachedClass(RDS::kInvalidHandle)
   , m_propDataCache(RDS::kInvalidHandle)
   , m_propSDataCache(RDS::kInvalidHandle)
   , m_nonScalarConstantCache(RDS::kInvalidHandle)
-  , m_instanceCtor(nullptr)
   , m_nextClass(nullptr)
 {
   setParent();
@@ -231,6 +237,7 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   setProperties();
   setInitializers();
   setClassVec();
+  checkTraitConstraints();
 }
 
 Class::~Class() {
@@ -241,6 +248,8 @@ Class::~Class() {
     Func* meth = methods.popFront();
     if (meth) Func::destroy(meth);
   }
+  // clean enum cache
+  EnumCache::deleteValues(this);
 }
 
 void Class::releaseRefs() {
@@ -928,16 +937,23 @@ void Class::setParent() {
       }
     }
   }
+
   // Cache m_preClass->attrs()
   m_attrCopy = m_preClass->attrs();
+
   // Handle stuff specific to cppext classes
   if (m_preClass->instanceCtor()) {
     m_instanceCtor = m_preClass->instanceCtor();
-    m_builtinPropSize = m_preClass->builtinPropSize();
+    m_instanceDtor = m_preClass->instanceDtor();
+    m_builtinODTailSize = m_preClass->builtinObjSize() -
+      m_preClass->builtinODOffset();
     m_clsInfo = ClassInfo::FindSystemClassInterfaceOrTrait(nameRef());
   } else if (m_parent.get()) {
     m_instanceCtor = m_parent->m_instanceCtor;
-    m_builtinPropSize = m_parent->m_builtinPropSize;
+    m_instanceDtor = m_parent->m_instanceDtor;
+    m_builtinODTailSize = m_parent->m_builtinODTailSize;
+    // XXX: should this be copying over the clsInfo also?  Might be
+    // broken...
   }
 }
 
@@ -955,7 +971,15 @@ const StaticString
   s_toString("__toString"),
   s_construct("__construct"),
   s_destruct("__destruct"),
-  s_invoke("__invoke");
+  s_invoke("__invoke"),
+  s_sleep("__sleep"),
+  s_get("__get"),
+  s_set("__set"),
+  s_isset("__isset"),
+  s_unset("__unset"),
+  s_call("__call"),
+  s_callStatic("__callStatic"),
+  s_clone("__clone");
 
 void Class::setSpecial() {
   m_toString = lookupMethod(s_toString.get());
@@ -1021,8 +1045,7 @@ void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
                                MethodToTraitListMap& importMethToTraitMap) {
   const StringData* methName          = rule.getMethodName();
   const StringData* selectedTraitName = rule.getSelectedTraitName();
-  TraitNameSet      otherTraitNames;
-  rule.getOtherTraitNames(otherTraitNames);
+  auto otherTraitNames = rule.getOtherTraitNames();
 
   auto methIter = importMethToTraitMap.find(methName);
   if (methIter == importMethToTraitMap.end()) {
@@ -1048,10 +1071,11 @@ void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
 
   // Check error conditions
   if (!foundSelectedTrait) {
-    raise_error("unknown trait '%s'", selectedTraitName->data());
+    raise_error(Strings::TRAITS_UNKNOWN_TRAIT, selectedTraitName->data());
   }
   if (otherTraitNames.size()) {
-    raise_error("unknown trait '%s'", (*otherTraitNames.begin())->data());
+    raise_error(Strings::TRAITS_UNKNOWN_TRAIT,
+                (*otherTraitNames.begin())->data());
   }
 }
 
@@ -1061,7 +1085,8 @@ Class* Class::findSingleTraitWithMethod(const StringData* methName) {
   for (auto const& t : m_usedTraits) {
     if (t->m_methods.contains(methName)) {
       if (traitCls != nullptr) { // more than one trait contains method
-        return nullptr;
+        raise_error("more than one trait contains method '%s'",
+          methName->data());
       }
       traitCls = t.get();
     }
@@ -1094,6 +1119,23 @@ void Class::addTraitAlias(const StringData* traitName,
                            (newMethName, origName));
 }
 
+// not const due to memoization
+const Class::TraitAliasVec& Class::traitAliases() {
+
+  // We keep track of trait aliases in the class only to support
+  // ReflectionClass::getTraitAliases. So let's load this info from the
+  // preClass only on demand.
+  auto const& preClassRules = m_preClass->traitAliasRules();
+  if (m_traitAliases.size() != preClassRules.size()) {
+    for (auto const& rule : preClassRules) {
+      addTraitAlias(rule.getTraitName(),
+                    rule.getOrigMethodName(),
+                    rule.getNewMethodName());
+    }
+  }
+  return m_traitAliases;
+}
+
 void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
                                 MethodToTraitListMap& importMethToTraitMap) {
   const StringData* traitName    = rule.getTraitName();
@@ -1108,7 +1150,7 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
   }
 
   if (!traitCls || (!(traitCls->attrs() & AttrTrait))) {
-    raise_error("unknown trait '%s'", traitName->data());
+    raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
   }
 
   // Save info to support ReflectionClass::getTraitAliases
@@ -1116,7 +1158,7 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
 
   Func* traitMeth = traitCls->lookupMethod(origMethName);
   if (!traitMeth) {
-    raise_error("unknown trait method '%s'", origMethName->data());
+    raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, origMethName->data());
   }
 
   Attr ruleModifiers;
@@ -1131,19 +1173,14 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
       importMethToTraitMap[newMethName].push_back(traitMethod);
     }
   }
-  if (ruleModifiers & AttrStatic) {
-    raise_error("cannot use 'static' as access modifier");
-  }
 }
 
 void Class::applyTraitRules(MethodToTraitListMap& importMethToTraitMap) {
-  for (size_t i = 0; i < m_preClass->traitPrecRules().size(); i++) {
-    applyTraitPrecRule(m_preClass->traitPrecRules()[i],
-                       importMethToTraitMap);
+  for (auto const& precRule : m_preClass->traitPrecRules()) {
+    applyTraitPrecRule(precRule, importMethToTraitMap);
   }
-  for (size_t i = 0; i < m_preClass->traitAliasRules().size(); i++) {
-    applyTraitAliasRule(m_preClass->traitAliasRules()[i],
-                        importMethToTraitMap);
+  for (auto const& aliasRule : m_preClass->traitAliasRules()) {
+    applyTraitAliasRule(aliasRule, importMethToTraitMap);
   }
 }
 
@@ -1286,7 +1323,7 @@ void Class::importTraitMethods(MethodMap::Builder& builder) {
       // OK if the class will override the method...
       if (m_preClass->hasMethod(iter->first)) continue;
 
-      raise_error("method '%s' declared in multiple traits",
+      raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS,
                   iter->first->data());
     }
 
@@ -1335,6 +1372,11 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
                 (method->attrs() & AttrStatic) ? "" : "non-",
                 m_preClass->name()->data());
   }
+
+  // This used to be a global bool that guarded all bug-for-bug
+  // compatibility with hphpi, but it's moved here because this is the
+  // last use site.  (We need to evaluate if we can remove this one.)
+  const bool hphpiCompat = true;
 
   Func* baseMethod = parentMethod->baseCls()->lookupMethod(method->name());
   if (!(method->attrs() & AttrAbstract) &&
@@ -1465,23 +1507,14 @@ void Class::setMethods() {
 }
 
 void Class::setODAttributes() {
-  static StringData* sd__sleep = makeStaticString("__sleep");
-  static StringData* sd__get = makeStaticString("__get");
-  static StringData* sd__set = makeStaticString("__set");
-  static StringData* sd__isset = makeStaticString("__isset");
-  static StringData* sd__unset = makeStaticString("__unset");
-  static StringData* sd__call = makeStaticString("__call");
-  static StringData* sd__callStatic
-    = makeStaticString("__callStatic");
-
   m_ODAttrs = 0;
-  if (lookupMethod(sd__sleep     )) { m_ODAttrs |= ObjectData::HasSleep;      }
-  if (lookupMethod(sd__get       )) { m_ODAttrs |= ObjectData::UseGet;        }
-  if (lookupMethod(sd__set       )) { m_ODAttrs |= ObjectData::UseSet;        }
-  if (lookupMethod(sd__isset     )) { m_ODAttrs |= ObjectData::UseIsset;      }
-  if (lookupMethod(sd__unset     )) { m_ODAttrs |= ObjectData::UseUnset;      }
-  if (lookupMethod(sd__call      )) { m_ODAttrs |= ObjectData::HasCall;       }
-  if (lookupMethod(sd__callStatic)) { m_ODAttrs |= ObjectData::HasCallStatic; }
+  if (lookupMethod(s_sleep.get()     )) { m_ODAttrs |= ObjectData::HasSleep; }
+  if (lookupMethod(s_get.get()       )) { m_ODAttrs |= ObjectData::UseGet;   }
+  if (lookupMethod(s_set.get()       )) { m_ODAttrs |= ObjectData::UseSet;   }
+  if (lookupMethod(s_isset.get()     )) { m_ODAttrs |= ObjectData::UseIsset; }
+  if (lookupMethod(s_unset.get()     )) { m_ODAttrs |= ObjectData::UseUnset; }
+  if (lookupMethod(s_call.get()      )) { m_ODAttrs |= ObjectData::HasCall;  }
+  if (lookupMethod(s_clone.get()     )) { m_ODAttrs |= ObjectData::HasClone; }
 }
 
 void Class::setConstants() {
@@ -2072,19 +2105,119 @@ void Class::setInterfaces() {
 }
 
 void Class::setUsedTraits() {
-  for (PreClass::UsedTraitVec::const_iterator
-       it = m_preClass->usedTraits().begin();
-       it != m_preClass->usedTraits().end(); it++) {
-    Class* classPtr = Unit::loadClass(*it);
+  for (auto const& traitName : m_preClass->usedTraits()) {
+    Class* classPtr = Unit::loadClass(traitName);
     if (classPtr == nullptr) {
-      raise_error("Trait '%s' not found", (*it)->data());
+      raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
     }
     if (!(classPtr->attrs() & AttrTrait)) {
       raise_error("%s cannot use %s - it is not a trait",
                   m_preClass->name()->data(),
                   classPtr->name()->data());
     }
+
+
+    if (RuntimeOption::RepoAuthoritative) {
+      // In RepoAuthoritative mode (with the WholeProgram compiler
+      // optimizations), the contents of traits are flattened away into the
+      // preClasses of "use"r classes. Continuing here allows us to avoid
+      // unnecessarily attempting to re-import trait methods and
+      // properties, only to fail due to (surprise surprise!) the same
+      // method/property existing on m_preClass.
+      continue;
+    }
+
     m_usedTraits.push_back(ClassPtr(classPtr));
+  }
+}
+
+void Class::checkTraitConstraints() const {
+
+  if (attrs() & AttrInterface) {
+    return; // nothing to do
+  }
+
+  if (attrs() & AttrTrait) {
+    for (auto const& req : m_preClass->traitRequirements()) {
+      auto const reqName = req.name();
+      auto const reqCls = Unit::loadClass(reqName);
+      if (!reqCls) {
+        raise_error("%s '%s' required by trait '%s' cannot be loaded",
+                    req.is_extends() ? "Class" : "Interface",
+                    reqName->data(),
+                    m_preClass->name()->data());
+      }
+
+      if (req.is_extends()) {
+        if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
+          raise_error(Strings::TRAIT_BAD_REQ_EXTENDS,
+                      m_preClass->name()->data(),
+                      reqName->data(),
+                      reqName->data());
+        }
+      } else {
+        assert(req.is_implements());
+        if (!(reqCls->attrs() & AttrInterface)) {
+          raise_error(Strings::TRAIT_BAD_REQ_IMPLEMENTS,
+                      m_preClass->name()->data(),
+                      reqName->data(),
+                      reqName->data());
+        }
+      }
+    }
+    return;
+  }
+
+  checkTraitConstraintsRec(usedTraitClasses(), nullptr);
+}
+
+void Class::checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
+                                     const StringData* recName) const {
+
+  if (!usedTraits.size()) { return; }
+
+  for (auto const& ut : usedTraits) {
+    auto const usedTrait = ut.get();
+    auto const ptrait = usedTrait->preClass();
+
+    for (auto const& req : ptrait->traitRequirements()) {
+      auto const reqName = req.name();
+      if (req.is_extends()) {
+        auto reqExtCls = Unit::lookupClass(reqName);
+        // errors should've been raised for the following when the
+        // usedTrait was first loaded
+        assert(reqExtCls != nullptr);
+        assert(!(reqExtCls->attrs() & (AttrTrait | AttrInterface)));
+
+        if ((m_classVecLen < reqExtCls->m_classVecLen) ||
+            (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls)) {
+          raise_error(Strings::TRAIT_REQ_EXTENDS,
+                      m_preClass->name()->data(),
+                      reqName->data(),
+                      ptrait->name()->data(),
+                      ((recName == nullptr) ? "use" : recName->data()));
+        }
+        continue;
+      }
+
+      assert(req.is_implements());
+      if (!ifaceofDirect(reqName)) {
+        raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
+                    m_preClass->name()->data(),
+                    reqName->data(),
+                    ptrait->name()->data(),
+                    ((recName == nullptr) ? "use" : recName->data()));
+      }
+    }
+  }
+
+  // separate loop for recursive checks
+  for (auto const& ut : usedTraits) {
+    Class* usedTrait = ut.get();
+    checkTraitConstraintsRec(
+      usedTrait->usedTraitClasses(),
+      recName == nullptr ? usedTrait->preClass()->name() : recName
+    );
   }
 }
 
@@ -2182,10 +2315,12 @@ void Class::getClassInfo(ClassInfoVM* ci) {
   }
 
   // Used traits.
-  for (unsigned t = 0; t < m_usedTraits.size(); t++) {
-    const char* traitName = m_usedTraits[t]->name()->data();
-    ci->m_traitsVec.push_back(traitName);
-    ci->m_traits.insert(traitName);
+  for (auto const& traitName : m_preClass->usedTraits()) {
+    // Use the preclass list of trait names to avoid accounting for
+    // trait flattening.
+    const char* traitNameChars = traitName->data();
+    ci->m_traitsVec.push_back(traitNameChars);
+    ci->m_traits.insert(traitNameChars);
   }
 
   // Trait aliases.
@@ -2284,8 +2419,7 @@ void Class::getClassInfo(ClassInfoVM* ci) {
 
 size_t Class::declPropOffset(Slot index) const {
   assert(index >= 0);
-  return sizeof(ObjectData) + m_builtinPropSize
-    + index * sizeof(TypedValue);
+  return sizeof(ObjectData) + m_builtinODTailSize + index * sizeof(TypedValue);
 }
 
 Class::PropInitVec::~PropInitVec() {
@@ -2380,9 +2514,14 @@ void Class::getChildren(std::vector<TypedValue*>& out) {
 
 // True if a CPP extension class has opted into serialization.
 bool Class::isCppSerializable() const {
-  assert(builtinPropSize() > 0); // Only call this on CPP classes
-  return clsInfo() &&
-    (clsInfo()->getAttribute() & ClassInfo::IsCppSerializable);
+  assert(instanceCtor()); // Only call this on CPP classes
+  auto info = clsInfo();
+  auto p = this;
+  while ((!info) && (p = p->parent())) {
+    info = p->clsInfo();
+  }
+  return info &&
+    (info->getAttribute() & ClassInfo::IsCppSerializable);
 }
 
 bool Class::isCollectionClass() const {

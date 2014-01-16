@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdInternalTesting);
 class CmdInternalTesting : public DebuggerCommand {
 public:
   CmdInternalTesting() : DebuggerCommand(KindOfInternalTesting),

@@ -26,6 +26,10 @@
 #include "zend_compile.h"
 #include "zend_build.h"
 
+#ifdef HHVM
+#include "hphp/runtime/ext/extension.h"
+#endif
+
 #define INIT_FUNC_ARGS    int type, int module_number TSRMLS_DC
 #define INIT_FUNC_ARGS_PASSTHRU  type, module_number TSRMLS_CC
 #define SHUTDOWN_FUNC_ARGS  int type, int module_number TSRMLS_DC
@@ -70,6 +74,17 @@ struct _zend_ini_entry;
 typedef struct _zend_module_entry zend_module_entry;
 typedef struct _zend_module_dep zend_module_dep;
 
+#ifdef HHVM
+class ZendExtension : public HPHP::Extension {
+private:
+  zend_module_entry *getEntry();
+public:
+  /* implicit */ ZendExtension(const char* name) : HPHP::Extension(name) {}
+  virtual void moduleInit() override;
+  virtual void moduleShutdown() override;
+};
+#endif
+
 struct _zend_module_entry {
   unsigned short size;
   unsigned int zend_api;
@@ -77,7 +92,11 @@ struct _zend_module_entry {
   unsigned char zts;
   const struct _zend_ini_entry *ini_entry;
   const struct _zend_module_dep *deps;
-  const char *name;
+#ifdef HHVM
+  ZendExtension name;
+#else
+  const char* name;
+#endif
   const struct _zend_function_entry *functions;
   int (*module_startup_func)(INIT_FUNC_ARGS);
   int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
@@ -100,6 +119,37 @@ struct _zend_module_entry {
   int module_number;
   const char *build_id;
 };
+
+#ifdef HHVM
+inline void ZendExtension::moduleInit() {
+  if (!HPHP::RuntimeOption::EnableZendCompat) {
+    return;
+  }
+  zend_module_entry* entry = getEntry();
+  if (entry->globals_ctor) {
+    entry->globals_ctor(entry->globals_ptr);
+  }
+  if (entry->module_startup_func) {
+    entry->module_startup_func(1, 1);
+  }
+}
+inline void ZendExtension::moduleShutdown() {
+  if (!HPHP::RuntimeOption::EnableZendCompat) {
+    return;
+  }
+  zend_module_entry* entry = getEntry();
+  if (entry->module_shutdown_func) {
+    entry->module_shutdown_func(1, 1);
+  }
+  if (entry->globals_dtor) {
+    entry->globals_dtor(entry->globals_ptr);
+  }
+}
+inline zend_module_entry *ZendExtension::getEntry() {
+  enum { offset = offsetof(struct _zend_module_entry, name) };
+  return (zend_module_entry*)(((char*)this) - offset);
+}
+#endif
 
 #define MODULE_DEP_REQUIRED    1
 #define MODULE_DEP_CONFLICTS  2

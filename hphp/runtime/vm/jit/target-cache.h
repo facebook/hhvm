@@ -19,14 +19,15 @@
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
-  struct Func;
-  struct ActRec;
-  struct StringData;
-  struct TypedValue;
-  struct Class;
-  struct NamedEntity;
+struct Func;
+struct ActRec;
+struct StringData;
+struct TypedValue;
+struct Class;
+struct NamedEntity;
 }
 
 namespace HPHP { namespace JIT {
@@ -89,8 +90,7 @@ struct StaticMethodCache {
                       const char* ctxName);
   static const Func* lookup(RDS::Handle chand,
                             const NamedEntity* ne, const StringData* cls,
-                            const StringData* meth, TypedValue* vmfp,
-                            TypedValue* vmsp);
+                            const StringData* meth, TypedValue* vmfp);
 };
 
 struct StaticMethodFCache {
@@ -147,10 +147,30 @@ struct MethodCache {
   const Func* m_value;
 };
 
+/*
+ * When we first create method cache entries, we need some information
+ * for pmethodCacheMissPath to set up an immediate for the first
+ * dispatched function.  A pointer to one of these is passed in
+ * pdataRaw to pmethodCacheMissPath.
+ */
+struct MethodCachePrimeData {
+  JIT::TCA smashImmAddr;
+  JIT::TCA retAddr;
+};
+
+template<bool fatal>
 void methodCacheSlowPath(MethodCache* mce,
                          ActRec* ar,
                          StringData* name,
-                         Class* cls);
+                         Class* cls,
+                         uintptr_t mcePrime);
+
+template<bool fatal>
+void pmethodCacheMissPath(MethodCache* mce,
+                          ActRec* ar,
+                          StringData* name,
+                          Class* cls,
+                          uintptr_t pdataRaw);
 
 //////////////////////////////////////////////////////////////////////
 

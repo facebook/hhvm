@@ -1,0 +1,1 @@
+<?php require 'filter_errors.inc'; filter_errors_skipif('zlib.inflate'); ?>

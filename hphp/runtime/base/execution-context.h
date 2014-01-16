@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/util/base.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
 #include <setjmp.h>
@@ -46,7 +45,7 @@ class PhpFile;
 }
 
 class EventHook;
-namespace Transl {
+namespace JIT {
 class Translator;
 }
 class PCFilter;
@@ -227,8 +226,8 @@ public:
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
-  int64_t getRequestMemoryMaxBytes() const { return m_maxMemory; }
-  void setRequestMemoryMaxBytes(int64_t max);
+  String getRequestMemoryMaxBytes() const { return m_maxMemory; }
+  void setRequestMemoryMaxBytes(const String& max);
   String getCwd() const { return m_cwd;}
   void setCwd(const String& cwd) { m_cwd = cwd;}
 
@@ -273,6 +272,7 @@ public:
   void registerRequestEventHandler(RequestEventHandler *handler);
   void registerShutdownFunction(CVarRef function, Array arguments,
                                 ShutdownType type);
+  Variant popShutdownFunction(ShutdownType type);
   void onRequestShutdown();
   void onShutdownPreSend();
   void onShutdownPostSend();
@@ -296,7 +296,7 @@ public:
                    bool skipFrame = false);
   bool callUserErrorHandler(const Exception &e, int errnum,
                             bool swallowExceptions);
-  void recordLastError(const Exception &e, int errnum = 0);
+  virtual void recordLastError(const Exception &e, int errnum = 0);
   bool onFatalError(const Exception &e); // returns handled
   bool onUnhandledException(Object e);
   ErrorState getErrorState() const { return m_errorState;}
@@ -322,6 +322,7 @@ public:
   String getTimeZone() const { return m_timezone;}
   void setTimeZone(const String& timezone) { m_timezone = timezone;}
   String getDefaultTimeZone() const { return m_timezoneDefault;}
+  void setDefaultTimeZone(const String& s) { m_timezoneDefault = s;}
   String getArgSeparatorOutput() const {
     if (m_argSeparatorOutput.isNull()) return s_amp;
     return m_argSeparatorOutput;
@@ -356,7 +357,7 @@ private:
   static const StaticString s_amp;
   // system settings
   Transport *m_transport;
-  int64_t m_maxMemory;
+  String m_maxMemory;
   String m_cwd;
 
   // output buffering
@@ -407,6 +408,7 @@ private:
   // helper functions
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);
+  int64_t convertBytesToInt(const String& value) const;
 
   DECLARE_DBG_SETTING
 };
@@ -427,11 +429,6 @@ public:
   void requestInit();
   void requestExit();
 
-  static c_Continuation* createContFunc(const Func* origFunc,
-                                        const Func* genFunc);
-  static c_Continuation* createContMeth(const Func* origFunc,
-                                        const Func* genFunc,
-                                        void* objOrCls);
   static void fillContinuationVars(
     ActRec* origFp, const Func* origFunc, ActRec* genFp, const Func* genFunc);
   void pushLocalsAndIterators(const HPHP::Func* f, int nparams = 0);
@@ -475,10 +472,10 @@ private:
   void setHelperPost(unsigned ndiscard, Variant& tvRef,
                      Variant& tvRef2);
   template <bool isEmpty>
-  void isSetEmptyM(PC& pc);
+  void isSetEmptyM(IOP_ARGS);
 
-  template<class Op> void implCellBinOp(PC&, Op op);
-  template<class Op> void implCellBinOpBool(PC&, Op op);
+  template<class Op> void implCellBinOp(IOP_ARGS, Op op);
+  template<class Op> void implCellBinOpBool(IOP_ARGS, Op op);
   bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);
   bool iopInstanceOfHelper(const StringData* s1, Cell* c2);
   bool initIterator(PC& pc, PC& origPc, Iter* it,
@@ -486,14 +483,14 @@ private:
   bool initIteratorM(PC& pc, PC& origPc, Iter* it,
                      Offset offset, Ref* r1, TypedValue* val, TypedValue* key);
   void jmpSurpriseCheck(Offset o);
-  template<Op op> void jmpOpImpl(PC& pc);
+  template<Op op> void jmpOpImpl(IOP_ARGS);
   template<class Op> void roundOpImpl(Op op);
 #define O(name, imm, pusph, pop, flags)                                       \
-  void iop##name(PC& pc);
+  void iop##name(IOP_ARGS);
 OPCODES
 #undef O
 
-  void classExistsImpl(PC& pc, Attr typeAttr);
+  void classExistsImpl(IOP_ARGS, Attr typeAttr);
   void fPushObjMethodImpl(
       Class* cls, StringData* name, ObjectData* obj, int numArgs);
   ActRec* fPushFuncImpl(const Func* func, int numArgs);
@@ -502,6 +499,8 @@ public:
   typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,
                         string_data_hash, string_data_same> ConstInfoMap;
   ConstInfoMap m_constInfo;
+
+  std::unordered_map<const ObjectData*,ArrayNoDtor> dynPropTable;
 
   const HPHP::Func* lookupMethodCtx(const HPHP::Class* cls,
                                         const StringData* methodName,
@@ -523,7 +522,7 @@ public:
                                               const HPHP::Class* cls,
                                               bool raise = false);
   ObjectData* createObject(StringData* clsName,
-                           CArrRef params,
+                           CVarRef params,
                            bool init = true);
   ObjectData* createObjectOnly(StringData* clsName);
 
@@ -639,24 +638,29 @@ public:
   bool doFCallArray(PC& pc);
   bool doFCallArrayTC(PC pc);
   CVarRef getEvaledArg(const StringData* val, const String& namespacedName);
+  virtual void recordLastError(const Exception &e, int errnum = 0);
+  String getLastErrorPath() const { return m_lastErrorPath; }
+  int getLastErrorLine() const { return m_lastErrorLine; }
 
 private:
   void enterVMWork(ActRec* enterFnAr);
   void enterVMPrologue(ActRec* enterFnAr);
   void enterVM(TypedValue* retval, ActRec* ar);
   void reenterVM(TypedValue* retval, ActRec* ar, TypedValue* savedSP);
-  void doFPushCuf(PC& pc, bool forward, bool safe);
+  void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
   bool prepareFuncEntry(ActRec* ar, PC& pc);
-  bool prepareArrayArgs(ActRec* ar, Array& arrayArgs);
+  bool prepareArrayArgs(ActRec* ar, CVarRef arrayArgs);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);
   void switchModeForDebugger();
   int m_coverPrevLine;
   HPHP::Unit* m_coverPrevUnit;
   Array m_evaledArgs;
+  String m_lastErrorPath;
+  int m_lastErrorLine;
 public:
   void resetCoverageCounters();
   void shuffleMagicArgs(ActRec* ar);
@@ -668,7 +672,7 @@ public:
   };
   void invokeFunc(TypedValue* retval,
                   const HPHP::Func* f,
-                  CArrRef params,
+                  CVarRef args_ = init_null_variant,
                   ObjectData* this_ = nullptr,
                   HPHP::Class* class_ = nullptr,
                   VarEnv* varEnv = nullptr,
@@ -676,9 +680,9 @@ public:
                   InvokeFlags flags = InvokeNormal);
   void invokeFunc(TypedValue* retval,
                   const CallCtx& ctx,
-                  CArrRef params,
+                  CVarRef args_,
                   VarEnv* varEnv = nullptr) {
-    invokeFunc(retval, ctx.func, params, ctx.this_, ctx.cls, varEnv,
+    invokeFunc(retval, ctx.func, args_, ctx.this_, ctx.cls, varEnv,
                ctx.invName);
   }
   void invokeFuncCleanupHelper(TypedValue* retval,

@@ -35,7 +35,8 @@ clearstatcache();
 var_dump(compare_stats($old_stat, $new_stat, $affected_members, "<"));
 
 echo "\n--- Done ---";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation8/lstat_stat_variation8a.tmp");
 rmdir("$file_path/lstat_stat_variation8/lstat_stat_variation8_subdir/");

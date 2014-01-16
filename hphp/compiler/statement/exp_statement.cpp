@@ -97,6 +97,17 @@ void ExpStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ExpStatement::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("ExpressionStatement", 2);
+  cg.printPropertyHeader("expression");
+  m_exp->outputCodeModel(cg);
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ExpStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

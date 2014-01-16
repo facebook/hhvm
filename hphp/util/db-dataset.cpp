@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/db-dataset.h"
+
+#include <cassert>
+#include <cstring>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -23,7 +23,6 @@
 #include <list>
 
 #include "hphp/util/trace.h"
-#include "hphp/util/base.h"
 #include "hphp/util/rank.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"

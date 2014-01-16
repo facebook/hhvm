@@ -186,6 +186,9 @@ Array stat_impl(struct stat *stat_sb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const int64_t k_STREAM_URL_STAT_LINK = 1;
+const int64_t k_STREAM_URL_STAT_QUIET = 2;
+
 Variant f_fopen(const String& filename, const String& mode,
                 bool use_include_path /* = false */,
                 CVarRef context /* = null */) {
@@ -193,6 +196,10 @@ Variant f_fopen(const String& filename, const String& mode,
       (!context.isResource() ||
        !context.toResource().getTyped<StreamContext>())) {
     raise_warning("$context must be a valid Stream Context or NULL");
+    return false;
+  }
+  if (filename.empty()) {
+    raise_warning("Filename cannot be empty");
     return false;
   }
 
@@ -206,6 +213,8 @@ Variant f_popen(const String& command, const String& mode) {
   Resource handle(file);
   bool ret = CHECK_ERROR(file->open(File::TranslateCommand(command), mode));
   if (!ret) {
+    raise_warning("popen(%s,%s): Invalid argument",
+                  command.data(), mode.data());
     return false;
   }
   return handle;
@@ -1114,14 +1123,13 @@ bool f_copy(const String& source, const String& dest,
 
 bool f_rename(const String& oldname, const String& newname,
               CVarRef context /* = null */) {
-  int ret =
-    RuntimeOption::UseDirectCopy ?
-      Util::directRename(File::TranslatePath(oldname).data(),
-                         File::TranslatePath(newname).data())
-                                 :
-      Util::rename(File::TranslatePath(oldname).data(),
-                   File::TranslatePath(newname).data());
-  return (ret == 0);
+  Stream::Wrapper* w = Stream::getWrapperFromURI(oldname);
+  if (w != Stream::getWrapperFromURI(newname)) {
+    raise_warning("Can't rename a file on different streams");
+    return false;
+  }
+  CHECK_SYSTEM(w->rename(oldname, newname));
+  return true;
 }
 
 int64_t f_umask(CVarRef mask /* = null_variant */) {
@@ -1135,7 +1143,8 @@ int64_t f_umask(CVarRef mask /* = null_variant */) {
 }
 
 bool f_unlink(const String& filename, CVarRef context /* = null */) {
-  CHECK_SYSTEM(unlink(File::TranslatePath(filename).data()));
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  CHECK_SYSTEM(w->unlink(filename));
   return true;
 }
 
@@ -1305,20 +1314,16 @@ Variant f_tmpfile() {
 
 bool f_mkdir(const String& pathname, int64_t mode /* = 0777 */,
              bool recursive /* = false */, CVarRef context /* = null */) {
-  if (recursive) {
-    String path = File::TranslatePath(pathname);
-    if (path.empty()) return false;
-    if (path.charAt(path.size() - 1) != '/') {
-      path += "/";
-    }
-    return Util::mkdir(path.data(), mode);
-  }
-  CHECK_SYSTEM(mkdir(File::TranslatePath(pathname).data(), mode));
+  Stream::Wrapper* w = Stream::getWrapperFromURI(pathname);
+  int options = recursive ? k_STREAM_MKDIR_RECURSIVE : 0;
+  CHECK_SYSTEM(w->mkdir(pathname, mode, options));
   return true;
 }
 
 bool f_rmdir(const String& dirname, CVarRef context /* = null */) {
-  CHECK_SYSTEM(rmdir(File::TranslatePath(dirname).data()));
+  Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
+  int options = 0;
+  CHECK_SYSTEM(w->rmdir(dirname, options));
   return true;
 }
 
@@ -1359,7 +1364,7 @@ struct directory_data {
   }
 };
 IMPLEMENT_THREAD_LOCAL(directory_data, s_directory_data);
-InitFiniNode file_init([&] () {
+InitFiniNode file_init([]() {
   s_directory_data->defaultDirectory.detach();
 }, InitFiniNode::When::ThreadInit);
 
@@ -1411,11 +1416,7 @@ Variant f_readdir(CResRef dir_handle /* = null */) {
   if (!dir) {
     return false;
   }
-  String s = dir->read();
-  if (!s) {
-    return false;
-  }
-  return s;
+  return dir->read();
 }
 
 void f_rewinddir(CResRef dir_handle /* = null */) {
@@ -1445,12 +1446,13 @@ Variant f_scandir(const String& directory, bool descending /* = false */,
 
   std::vector<String> names;
   while (true) {
-    String name = dir->read();
-    if (!name) {
+    auto name = dir->read();
+    if (!name.toBoolean()) {
       break;
     }
-    names.push_back(name);
+    names.push_back(name.toString());
   }
+  dir->close();
 
   if (descending) {
     sort(names.begin(), names.end(), StringDescending);

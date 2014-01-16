@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/user-file.h"
+#include "hphp/runtime/base/user-directory.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +30,14 @@ class UserStreamWrapper : public Stream::Wrapper {
   UserStreamWrapper(const String& name, const String& clsname);
   virtual File* open(const String& filename, const String& mode,
                      int options, CVarRef context);
+  virtual int access(const String& path, int mode);
+  virtual int lstat(const String& path, struct stat* buf);
+  virtual int stat(const String& path, struct stat* buf);
+  virtual int unlink(const String& path);
+  virtual int rename(const String& oldname, const String& newname);
+  virtual int mkdir(const String& path, int mode, int options);
+  virtual int rmdir(const String& path, int options);
+  virtual Directory* opendir(const String& path);
  private:
   String m_name;
   Class *m_cls;

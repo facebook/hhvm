@@ -77,6 +77,16 @@ void* smart_realloc(void* ptr, size_t nbytes);
 void  smart_free(void* ptr);
 
 /*
+ * Smart (de)allocate for non-POD C++-style stuff.  (Runs constructors
+ * and destructors.)
+ *
+ * Unlike the normal operator delete, smart_delete requires ~T() must
+ * be nothrow and that p is not null.
+ */
+template<class T, class... Args> T* smart_new(Args&&...);
+template<class T> void smart_delete(T* p);
+
+/*
  * Allocate an array of objects.  Similar to smart_malloc, but with
  * support for constructors.
  *
@@ -121,7 +131,7 @@ constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 
 /*
  * This is the header MemoryManager uses for large allocations, and
- * it's also used for StringData's that wrap APCVariant.
+ * it's also used for StringData's that wrap APCHandle.
  *
  * TODO(#2946560): refactor this not to be shared with StringData.
  */
@@ -305,7 +315,7 @@ private:
     void* maybePop();
     void push(void*);
 
-    Node* head;
+    Node* head = nullptr;
   };
 
   static constexpr unsigned kLgSizeQuantum = 4; // 16 bytes
@@ -353,8 +363,7 @@ private:
 
   char* m_front;
   char* m_limit;
-  std::array<FreeList,kNumSizes> m_sizeTrackedFree;
-  std::array<FreeList,kNumSizes> m_sizeUntrackedFree;
+  std::array<FreeList,kNumSizes> m_freelists;
   SweepNode m_sweep;   // oversize smart_malloc'd blocks
   SweepNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;

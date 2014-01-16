@@ -38,6 +38,7 @@ namespace HPHP {
       ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
       ZendResourceData() {}
       ~ZendResourceData() {}
+      const String& o_getClassNameHook() const;
       void* ptr;
       int type;
       int refcount;
@@ -75,6 +76,9 @@ typedef struct _zend_rsrc_list_dtors_entry {
   rsrc_dtor_func_t plist_dtor_ex;
 
   const char *type_name;
+#ifdef HHVM
+  HPHP::String type_name_str;
+#endif
 
   int module_number;
   int resource_id;

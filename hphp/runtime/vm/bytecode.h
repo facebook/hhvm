@@ -36,39 +36,46 @@
 
 namespace HPHP {
 
+/**
+ * These macros allow us to easily change the arguments to iop*() opcode
+ * implementations.
+ */
+#define IOP_ARGS        PC& pc
+#define IOP_PASS_ARGS   pc
+#define IOP_PASS(pc)    pc
+
 ALWAYS_INLINE
-void SETOP_BODY_CELL(Cell* lhs, unsigned char op, Cell* rhs) {
+void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
   assert(cellIsPlausible(*lhs));
   assert(cellIsPlausible(*rhs));
 
   switch (op) {
-  case SetOpPlusEqual:      cellAddEq(*lhs, *rhs); break;
-  case SetOpMinusEqual:     cellSubEq(*lhs, *rhs); break;
-  case SetOpMulEqual:       cellMulEq(*lhs, *rhs); break;
-  case SetOpDivEqual:       cellDivEq(*lhs, *rhs); break;
-  case SetOpModEqual:       cellModEq(*lhs, *rhs); break;
-  case SetOpConcatEqual:
+  case SetOpOp::PlusEqual:      cellAddEq(*lhs, *rhs); return;
+  case SetOpOp::MinusEqual:     cellSubEq(*lhs, *rhs); return;
+  case SetOpOp::MulEqual:       cellMulEq(*lhs, *rhs); return;
+  case SetOpOp::DivEqual:       cellDivEq(*lhs, *rhs); return;
+  case SetOpOp::ModEqual:       cellModEq(*lhs, *rhs); return;
+  case SetOpOp::ConcatEqual:
     concat_assign(tvAsVariant(lhs), cellAsCVarRef(*rhs).toString());
-    break;
-  case SetOpAndEqual:       cellBitAndEq(*lhs, *rhs); break;
-  case SetOpOrEqual:        cellBitOrEq(*lhs, *rhs);  break;
-  case SetOpXorEqual:       cellBitXorEq(*lhs, *rhs); break;
+    return;
+  case SetOpOp::AndEqual:       cellBitAndEq(*lhs, *rhs); return;
+  case SetOpOp::OrEqual:        cellBitOrEq(*lhs, *rhs);  return;
+  case SetOpOp::XorEqual:       cellBitXorEq(*lhs, *rhs); return;
 
-  case SetOpSlEqual:
+  case SetOpOp::SlEqual:
     cellCastToInt64InPlace(lhs);
     lhs->m_data.num <<= cellToInt(*rhs);
-    break;
-  case SetOpSrEqual:
+    return;
+  case SetOpOp::SrEqual:
     cellCastToInt64InPlace(lhs);
     lhs->m_data.num >>= cellToInt(*rhs);
-    break;
-  default:
-    not_reached();
+    return;
   }
+  not_reached();
 }
 
 ALWAYS_INLINE
-void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
+void SETOP_BODY(TypedValue* lhs, SetOpOp op, Cell* rhs) {
   SETOP_BODY_CELL(tvToCell(lhs), op, rhs);
 }
 
@@ -311,15 +318,18 @@ struct ActRec {
     return cls ? (char*)cls + 1 : nullptr;
   }
   static ObjectData* decodeThis(void* p) {
-    return uintptr_t(p) & 1 ? nullptr : (ObjectData*)p;
+    return (uintptr_t(p) & 1) ? nullptr : (ObjectData*)p;
   }
   static Class* decodeClass(void* p) {
-    return uintptr_t(p) & 1 ? (Class*)(uintptr_t(p)&~1LL) : nullptr;
+    return (uintptr_t(p) & 1) ? (Class*)(uintptr_t(p)&~1LL) : nullptr;
   }
 
   void setThisOrClass(void* objOrCls) {
-    m_this = (ObjectData*)objOrCls;
+    setThisOrClassAllowNull(objOrCls);
     assert(hasThis() || hasClass());
+  }
+  void setThisOrClassAllowNull(void* objOrCls) {
+    m_this = (ObjectData*)objOrCls;
   }
 
   void* getThisOrClass() const {
@@ -483,6 +493,9 @@ constexpr int kStackCheckReenterPadding = 9;
 constexpr int kStackCheckPadding = kStackCheckLeafPadding +
   kStackCheckReenterPadding;
 
+constexpr int kInvalidRaiseLevel = -1;
+constexpr int kInvalidNesting = -1;
+
 struct Fault {
   enum class Type : int16_t {
     UserException,
@@ -490,9 +503,10 @@ struct Fault {
   };
 
   explicit Fault()
-    : m_handledCount(0)
-    , m_savedRaiseOffset(kInvalidOffset)
-  {}
+    : m_raiseNesting(kInvalidNesting),
+      m_raiseFrame(nullptr),
+      m_raiseOffset(kInvalidOffset),
+      m_handledCount(0) {}
 
   union {
     ObjectData* m_userException;
@@ -500,15 +514,23 @@ struct Fault {
   };
   Type m_faultType;
 
-  // During unwinding, this tracks the number of nested EHEnt::Fault
-  // regions we've propagated through in a given frame.
-  int16_t m_handledCount;
-
-  // This is used when executing a fault handler to remember the
-  // location the exception was raised at.  We will need to resume
-  // throwing at the same location when it executes Unwind.  In all
-  // other situations this is set to kInvalidOffset.
-  Offset m_savedRaiseOffset;
+  // The VM nesting at the moment where the exception was thrown.
+  int m_raiseNesting;
+  // The frame where the exception was thrown.
+  ActRec* m_raiseFrame;
+  // The offset within the frame where the exception was thrown.
+  // This value is updated when a fault is updated when exception
+  // chaining takes place. In this case the raise offset of the newly
+  // thrown exception is set to the offset of the previously thrown
+  // exception. The offset is also updated when the exception
+  // propagates outside its current frame.
+  Offset m_raiseOffset;
+  // The number of EHs that were already examined for this exception.
+  // This is used to ensure that the same exception handler is not
+  // run twice for the same exception. The unwinder may be entered
+  // multiple times for the same fault as a result of calling Unwind.
+  // The field is used to skip through the EHs that were already run.
+  int m_handledCount;
 };
 
 // Interpreter evaluation stack.
@@ -734,6 +756,7 @@ public:
     m_top->m_data.field = arg;                                                \
     m_top->m_type = type;                                                     \
   }
+  PUSH_METHOD_ARG(Bool, KindOfBoolean, num, bool, b)
   PUSH_METHOD_ARG(Int, KindOfInt64, num, int64_t, i)
   PUSH_METHOD_ARG(Double, KindOfDouble, dbl, double, d)
 
@@ -750,7 +773,10 @@ public:
   ALWAYS_INLINE
   void pushStaticString(StringData* s) {
     assert(s->isStatic()); // No need to call s->incRefCount().
-    pushStringNoRc(s);
+    assert(m_top != m_elms);
+    m_top--;
+    m_top->m_data.pstr = s;
+    m_top->m_type = KindOfStaticString;
   }
 
   // This should only be called directly when the caller has
@@ -832,6 +858,55 @@ public:
     assert(kNumIterCells * sizeof(Cell) == sizeof(Iter));
     assert((uintptr_t)&m_top[-kNumIterCells] >= (uintptr_t)m_elms);
     m_top -= kNumIterCells;
+  }
+
+  ALWAYS_INLINE
+  void replaceC(const Cell& c) {
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
+    tvRefcountedDecRefCell(m_top);
+    *m_top = c;
+  }
+
+  template <DataType DT>
+  ALWAYS_INLINE
+  void replaceC() {
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
+    tvRefcountedDecRefCell(m_top);
+    *m_top = make_tv<DT>();
+  }
+
+  template <DataType DT, typename T>
+  ALWAYS_INLINE
+  void replaceC(T value) {
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
+    tvRefcountedDecRefCell(m_top);
+    *m_top = make_tv<DT>(value);
+  }
+
+  ALWAYS_INLINE
+  void replaceTV(const TypedValue& tv) {
+    assert(m_top != m_base);
+    tvRefcountedDecRef(m_top);
+    *m_top = tv;
+  }
+
+  template <DataType DT>
+  ALWAYS_INLINE
+  void replaceTV() {
+    assert(m_top != m_base);
+    tvRefcountedDecRef(m_top);
+    *m_top = make_tv<DT>();
+  }
+
+  template <DataType DT, typename T>
+  ALWAYS_INLINE
+  void replaceTV(T value) {
+    assert(m_top != m_base);
+    tvRefcountedDecRef(m_top);
+    *m_top = make_tv<DT>(value);
   }
 
   ALWAYS_INLINE

@@ -15,10 +15,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_SDL_H
-#define PHP_SDL_H
+#ifndef incl_HPHP_PHP_SDL_H
+#define incl_HPHP_PHP_SDL_H
+
+#include <unordered_map>
+#include <vector>
+#include <memory>
 
 #include "hphp/runtime/ext/soap/encoding.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/runtime/base/http-client.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,28 +72,55 @@ enum sdlForm {
 ///////////////////////////////////////////////////////////////////////////////
 // XSD types
 
-DECLARE_BOOST_TYPES(sdlType);
-DECLARE_BOOST_TYPES(sdlContentModel);
-DECLARE_BOOST_TYPES(sdlAttribute);
-DECLARE_BOOST_TYPES(sdlExtraAttribute);
-DECLARE_BOOST_TYPES(sdlRestrictions);
-DECLARE_BOOST_TYPES(sdlRestrictionChar);
-DECLARE_BOOST_TYPES(sdlRestrictionInt);
+struct sdlType;
+struct sdlContentModel;
+struct sdlAttribute;
+struct sdlExtraAttribute;
+struct sdlRestrictions;
+struct sdlRestrictionChar;
+struct sdlRestrictionInt;
 
-typedef StringTosdlTypePtrMap sdlTypeMap;
-typedef sdlTypePtrVec sdlTypeVec;
-typedef StringTosdlAttributePtrMap sdlAttributeMap;
-typedef StringTosdlExtraAttributePtrMap sdlExtraAttributeMap;
+using sdlTypePtr = std::shared_ptr<sdlType>;
+using sdlTypePtrVec = std::vector<std::shared_ptr<sdlType>>;
+typedef hphp_string_hash_map<std::shared_ptr<sdlType>,sdlType> sdlTypeMap;
+using sdlAttributePtr = std::shared_ptr<sdlAttribute>;
+typedef hphp_string_hash_map<std::shared_ptr<sdlAttribute>,sdlAttribute>
+        sdlAttributeMap;
+typedef hphp_string_hash_map<std::shared_ptr<sdlExtraAttribute>,
+                             sdlExtraAttribute>
+        sdlExtraAttributeMap;
+
+struct sdlBinding;
+struct sdlContentModel;
+struct sdl;
+struct sdlRestrictions;
+struct sdlSoapBindingFunctionFault;
+struct sdlSoapBindingFunction;
+struct sdlSoapBinding;
+
+using sdlBindingPtr = std::shared_ptr<sdlBinding>;
+using sdlContentModelPtr = std::shared_ptr<sdlContentModel>;
+using sdlPtr = std::shared_ptr<sdl>;
+using sdlRestrictionsPtr = std::shared_ptr<sdlRestrictions>;
+using sdlSoapBindingFunctionFaultPtr = std::shared_ptr<sdlSoapBindingFunctionFault>;
+using sdlSoapBindingFunctionPtr = std::shared_ptr<sdlSoapBindingFunction>;
+using sdlSoapBindingPtr = std::shared_ptr<sdlSoapBinding>;
 
 struct sdlRestrictionInt {
   int value;
   bool fixed;
 };
 
+using sdlRestrictionIntPtr = std::shared_ptr<sdlRestrictionInt>;
+using sdlRestrictionIntPtrVec = std::vector<sdlRestrictionIntPtr>;
+
 struct sdlRestrictionChar {
   std::string value;
   bool fixed;
 };
+
+using sdlRestrictionCharPtr = std::shared_ptr<sdlRestrictionChar>;
+using sdlRestrictionCharPtrVec = std::vector<sdlRestrictionCharPtr>;
 
 struct sdlRestrictions {
   sdlRestrictionCharPtrVec enumeration;
@@ -113,7 +145,8 @@ struct sdlContentModel {
   // only one of these is effective, depending on "kind"
   sdlType              *u_element;   // pointer to element
   sdlType              *u_group;     // pointer to group
-  sdlContentModelPtrVec u_content;   // array of sequnce,all,choice
+  std::vector<std::shared_ptr<sdlContentModel>>
+                        u_content;   // array of sequnce,all,choice
   std::string           u_group_ref; // reference to group
 };
 
@@ -133,6 +166,9 @@ struct sdlAttribute {
   sdlExtraAttributeMap extraAttributes;
   encodePtr  encode;
 };
+
+struct sdlType;
+using sdlTypeVec = std::vector<std::shared_ptr<sdlType>>;
 
 struct sdlType {
   sdlType() : kind(XSD_TYPEKIND_SIMPLE), nillable(false),
@@ -185,23 +221,28 @@ enum sdlTransport {
 // SOAP types
 
 /* Soap Binding Specfic stuff */
-DECLARE_BOOST_TYPES(sdl);
-DECLARE_BOOST_TYPES(sdlSoapBinding);
-DECLARE_BOOST_TYPES(sdlBinding);
-DECLARE_BOOST_TYPES(sdlSoapBindingFunctionHeader);
-DECLARE_BOOST_TYPES(sdlSoapBindingFunctionFault);
-DECLARE_BOOST_TYPES(sdlSoapBindingFunction);
-DECLARE_BOOST_TYPES(sdlParam);
-DECLARE_BOOST_TYPES(sdlFault);
-DECLARE_BOOST_TYPES(sdlFunction);
 
-typedef sdlTypePtrVec sdlTypeVec;
-typedef StringTosdlBindingPtrMap sdlBindingMap;
-typedef StringTosdlSoapBindingFunctionHeaderPtrMap \
+struct sdl;
+struct sdlSoapBinding;
+struct sdlBinding;
+struct sdlSoapBindingFunctionHeader;
+struct sdlSoapBindingFunctionFault;
+struct sdlSoapBindingFunction;
+struct sdlParam;
+struct sdlFault;
+struct sdlFunction;
+
+typedef hphp_string_hash_map<std::shared_ptr<sdlBinding>,sdlBinding>
+        sdlBindingMap;
+typedef hphp_string_hash_map<std::shared_ptr<sdlSoapBindingFunctionHeader>,
+                             sdlSoapBindingFunctionHeader>
   sdlSoapBindingFunctionHeaderMap;
-typedef sdlParamPtrVec sdlParamVec;
-typedef StringTosdlFaultPtrMap sdlFaultMap;
-typedef StringTosdlFunctionPtrMap sdlFunctionMap;
+using sdlParamPtr = std::shared_ptr<sdlParam>;
+using sdlParamVec = std::vector<std::shared_ptr<sdlParam>>;
+typedef hphp_string_hash_map<std::shared_ptr<sdlFault>,sdlFault>
+        sdlFaultMap;
+typedef hphp_string_hash_map<std::shared_ptr<sdlFunction>,sdlFunction>
+        sdlFunctionMap;
 
 struct sdlSoapBinding {
   sdlEncodingStyle  style;

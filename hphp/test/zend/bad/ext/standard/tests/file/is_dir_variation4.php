@@ -40,7 +40,8 @@ foreach($dirs_arr as $dir) {
 }
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $dir_name = $file_path."/is_dir_variation4";
 rmdir($dir_name);

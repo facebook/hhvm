@@ -23,8 +23,6 @@
 #include <vector>
 #include <string>
 
-using namespace HPHP::Transl;
-
 namespace HPHP {
 namespace Debug {
 
@@ -33,14 +31,15 @@ struct ElfWriter {
   Elf *m_elf;
   std::string m_filename;
   Elf64_Ehdr *m_ehdr;
-  vector<unsigned char> m_strtab;
+  std::vector<unsigned char> m_strtab;
   Dwarf_P_Debug m_dwarfProducer;
   typedef std::map<const char *, Dwarf_Signed> FileDB;
   FileDB m_fileDB;
 
-  ElfWriter(DwarfChunk* d);
+  explicit ElfWriter(DwarfChunk* d);
   ~ElfWriter();
-  int dwarfCallback(char *name, int size, Dwarf_Unsigned type,
+  int dwarfCallback(
+    LIBDWARF_CALLBACK_NAME_TYPE name, int size, Dwarf_Unsigned type,
     Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info);
   void logError(const std::string& msg);
   int addSectionString(const std::string& name);
@@ -53,7 +52,7 @@ struct ElfWriter {
   bool addFrameInfo(DwarfChunk* d);
   bool writeDwarfInfo();
   int newSection(
-    char *name, uint64_t size, uint32_t type,
+    LIBDWARF_CALLBACK_NAME_TYPE name, uint64_t size, uint32_t type,
     uint64_t flags, uint64_t addr = 0);
   bool addSectionData(int section, void *data, uint64_t size);
   int writeStringSection();

@@ -29,14 +29,9 @@ static const char long_min_digits[] = "9223372036854775808";
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
-char *
-conv_10(register int64_t num, register int *is_negative, char *buf_end,
-        register int *len) {
-  register char *p = buf_end;
-  register uint64_t magnitude;
-
-  *is_negative = (num < 0);
+StringSlice conv_10(int64_t num, char* buf_end) {
+  auto p = buf_end;
+  uint64_t magnitude;
 
   /*
    * On a 2's complement machine, negating the most negative integer
@@ -47,30 +42,24 @@ conv_10(register int64_t num, register int *is_negative, char *buf_end,
    *      c. convert it to unsigned
    *      d. add 1
    */
-  if (*is_negative) {
-    int64_t t = num + 1;
-    magnitude = ((uint64_t) - t) + 1;
+  if (num < 0) {
+    magnitude = static_cast<uint64_t>(-(num + 1)) + 1;
   } else {
-    magnitude = (uint64_t) num;
+    magnitude = static_cast<uint64_t>(num);
   }
 
   /*
    * We use a do-while loop so that we write at least 1 digit
    */
   do {
-    uint64_t new_magnitude = magnitude / 10;
+    auto const q = magnitude / 10;
+    auto const r = static_cast<uint32_t>(magnitude % 10);
+    *--p = r + '0';
+    magnitude = q;
+  } while (magnitude);
 
-    *--p = (char)(magnitude - new_magnitude * 10 + '0');
-    magnitude = new_magnitude;
-  }
-  while (magnitude);
-
-  if (*is_negative) {
-    *--p = '-';
-  }
-
-  *len = buf_end - p;
-  return (p);
+  if (num < 0) *--p = '-';
+  return StringSlice{p, static_cast<uint32_t>(buf_end - p)};
 }
 
 DataType is_numeric_string(const char *str, int length, int64_t *lval,

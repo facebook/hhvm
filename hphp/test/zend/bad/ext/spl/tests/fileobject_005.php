@@ -19,7 +19,7 @@ $fo->fwrite("blahlubba");
 var_dump($fo->ftruncate());
 
 ?>
-==DONE==?>
+==DONE==
 <?php
 $path = dirname(__FILE__).DIRECTORY_SEPARATOR.'fileobject_005.txt';
 unlink($path);

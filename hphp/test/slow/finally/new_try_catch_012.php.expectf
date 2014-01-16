@@ -1,0 +1,32 @@
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+HipHop Fatal error: Uncaught exception 'A' with message 'bla!' in %s/test/slow/finally/new_try_catch_012.php:41
+Stack trace:
+#0 %s/test/slow/finally/new_try_catch_012.php(%s): blah()
+#1 {main}
+
+Next exception 'C' with message '24' in %s/test/slow/finally/new_try_catch_012.php:45
+Stack trace:
+#0 %s/test/slow/finally/new_try_catch_012.php(76): blah()
+#1 {main}

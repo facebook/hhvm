@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/util/functional.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ class ClassInfoHook;
 class ClassInfo {
 public:
   enum Attribute {                      //  class   prop   func  method param
-    ZendParamMode          = (1 <<  0), //                  x      x
+    ZendParamModeNull      = (1 <<  0), //                  x      x
     IsRedeclared           = (1 <<  1), //    x             x
     IsVolatile             = (1 <<  2), //    x             x
 
@@ -50,7 +50,6 @@ public:
     IsStatic               = (1 <<  9), //           x             x
     IsCppAbstract          = (1 << 10), //    x
     HasCall                = IsPublic,  //    x
-    HasCallStatic          = IsProtected,//   x
     AllowOverride          = IsPrivate, //                  x
     IsReference            = (1 << 11), //                  x      x     x
     IsConstructor          = (1 << 12), //                         x
@@ -60,7 +59,6 @@ public:
 
     ZendCompat             = (1 << 14), //                  x      x
 
-    HasGeneratorAsBody     = (1 << 15), //                  x      x
     IsCppSerializable      = (1 << 15), //    x
     HipHopSpecific         = (1 << 16), //    x             x
 
@@ -79,6 +77,7 @@ public:
     IsSystem               = (1 << 28), //    x             x
 
     IsTrait                = (1 << 29), //    x
+    ZendParamModeFalse     = (1 << 30), //                  x      x
     NeedsActRec            = (1u << 31),//                  x      x
   };
 

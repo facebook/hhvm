@@ -1,0 +1,9 @@
+NULL
+array(3) {
+  [0]=>
+  string(5) "HY000"
+  [1]=>
+  int(1)
+  [2]=>
+  string(31) "table test_table already exists"
+}

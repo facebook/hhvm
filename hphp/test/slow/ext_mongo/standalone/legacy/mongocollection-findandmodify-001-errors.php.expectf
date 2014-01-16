@@ -1,0 +1,36 @@
+0 : Modified field name may not start with $
+array(5) {
+  ["err"]=>
+  string(40) "Modified field name may not start with $"
+  ["code"]=>
+  int(15896)
+  ["n"]=>
+  int(0)
+  ["connectionId"]=>
+  int(%d)
+  ["ok"]=>
+  float(1)
+}
+string(40) "Modified field name may not start with $"
+float(0)
+13097 : exception: Unsupported projection option: $pop
+array(3) {
+  ["errmsg"]=>
+  string(46) "exception: Unsupported projection option: $pop"
+  ["code"]=>
+  int(13097)
+  ["ok"]=>
+  float(0)
+}
+12515 : exception: can't remove and update
+array(3) {
+  ["errmsg"]=>
+  string(34) "exception: can't remove and update"
+  ["code"]=>
+  int(12515)
+  ["ok"]=>
+  float(0)
+}
+0 : need remove or update
+string(21) "need remove or update"
+float(0)

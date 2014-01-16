@@ -30,7 +30,7 @@ TRACE_SET_MOD(hhir);
 
 namespace {
 
-void postorderWalk(smart::vector<Block*>& out,
+void postorderWalk(BlockList& out,
                    StateVector<Block,bool>& visited,
                    Block* block) {
   if (visited[block]) return;
@@ -40,11 +40,11 @@ void postorderWalk(smart::vector<Block*>& out,
   out.push_back(block);
 }
 
-smart::vector<Block*> rpoForCodegen(const IRUnit& unit, Block* head) {
+BlockList rpoForCodegen(const IRUnit& unit) {
   StateVector<Block,bool> visited(unit, false);
-  smart::vector<Block*> ret;
+  BlockList ret;
   ret.reserve(unit.numBlocks());
-  postorderWalk(ret, visited, head);
+  postorderWalk(ret, visited, unit.entry());
   std::reverse(ret.begin(), ret.end());
   return ret;
 }
@@ -60,7 +60,7 @@ smart::vector<Block*> rpoForCodegen(const IRUnit& unit, Block* head) {
  */
 LayoutInfo layoutBlocks(const IRUnit& unit) {
   LayoutInfo ret;
-  ret.blocks = rpoForCodegen(unit, unit.entry());
+  ret.blocks = rpoForCodegen(unit);
 
   // Optionally stress test by randomizing the positions.
   if (RuntimeOption::EvalHHIRStressCodegenBlocks) {
@@ -77,11 +77,11 @@ LayoutInfo layoutBlocks(const IRUnit& unit) {
   );
 
   if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhir, 5)) {
-    std::string str = "CG Layout:";
+    std::string str = "Layout:";
 
     auto printRegion = [&] (const char* what,
-                            smart::vector<Block*>::iterator& it,
-                            smart::vector<Block*>::iterator stop) {
+                            BlockList::iterator& it,
+                            BlockList::iterator stop) {
       folly::toAppend(what, &str);
       for (; it != stop; ++it) {
         folly::toAppend((*it)->id(), &str);
@@ -106,7 +106,6 @@ LayoutInfo layoutBlocks(const IRUnit& unit) {
    */
   if (!RuntimeOption::EvalHHIRStressCodegenBlocks) {
     always_assert(ret.blocks.front()->isEntry());
-    always_assert((*boost::prior(ret.astubsIt))->isExit());
   }
 
   return ret;

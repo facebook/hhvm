@@ -18,7 +18,11 @@
 #ifndef incl_HPHP_ZEND_MATH_H_
 #define incl_HPHP_ZEND_MATH_H_
 
-#include "hphp/util/base.h"
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+#include <cmath>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,7 +65,7 @@ inline double php_math_round(double value, int places,
   }
 
   int precision_places = 14 - floor(log10(fabs(value)));
-  float f1 = pow(10.0, (double)abs(places));
+  float f1 = pow(10.0, (double)std::abs(places));
 
   /* If the decimal precision guaranteed by FP arithmetic is higher than
    * the requested places BUT is small enough to make sure a non-zero value
@@ -172,7 +176,7 @@ void math_mt_srand(uint32_t seed);
 int64_t math_mt_rand(int64_t min = 0, int64_t max = RAND_MAX);
 double math_combined_lcg();
 int64_t math_generate_seed();
-void zend_get_rand_data() ATTRIBUTE_COLD;
+void zend_get_rand_data();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

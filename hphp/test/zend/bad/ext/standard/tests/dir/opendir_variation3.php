@@ -28,7 +28,7 @@ if ($dh1 !== $dh2) {
 closedir($dh1);
 closedir($dh2);
 ?>
-===DONE===?>
+===DONE===
 <?php
 $path = dirname(__FILE__) . "/opendir_variation3";
 rmdir($path);

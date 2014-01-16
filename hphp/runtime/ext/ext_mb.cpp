@@ -1408,8 +1408,8 @@ Variant f_mb_convert_variables(int _argc, const String& to_encoding,
   if (convd != NULL) {
     vars = php_mbfl_convert(vars, convd, &string, &result);
     for (int n = 0; n < _argv.size(); n++) {
-      const_cast<Array&>(_argv).lval(n) =
-        php_mbfl_convert(_argv[n], convd, &string, &result);
+      const_cast<Array&>(_argv).set(n, php_mbfl_convert(_argv[n], convd,
+                                                        &string, &result));
     }
     MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
     mbfl_buffer_converter_delete(convd);

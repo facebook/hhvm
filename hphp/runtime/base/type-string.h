@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
@@ -70,7 +70,7 @@ public:
   static bool HasConverted(int n) {
     return HasConverted((int64_t)n);
   }
-  static void PreConvertInteger(int64_t n) ATTRIBUTE_COLD;
+  static void PreConvertInteger(int64_t n);
 
   // create a string from a character
   static String FromChar(char ch) {
@@ -80,7 +80,7 @@ public:
     return makeStaticString(str);
   }
 
-  static const StringData *ConvertInteger(int64_t n) ATTRIBUTE_COLD;
+  static const StringData *ConvertInteger(int64_t n);
   static const StringData *GetIntegerStringData(int64_t n) {
     if (HasConverted(n)) {
       const StringData *sd = *(converted_integers + n);
@@ -120,7 +120,7 @@ public:
    */
   /* implicit */ String(StringData *data) : StringBase(data) { }
   /* implicit */ String(int     n);
-  /* implicit */ String(int64_t   n);
+  /* implicit */ String(int64_t n);
   /* implicit */ String(double  n);
   /* implicit */ String(litstr  s) {
     if (s) {
@@ -129,6 +129,7 @@ public:
     }
   }
   String(const String& str) : StringBase(str.m_px) { }
+  /* implicit */ String(char) = delete; // prevent unintentional promotion
 
   // Move ctor
   /* implicit */ String(String&& str) : StringBase(std::move(str)) {}
@@ -300,9 +301,7 @@ public:
   String &operator &= (const String& v) = delete;
   String &operator ^= (const String& v) = delete;
   String  operator ~  () const = delete;
-  explicit operator std::string () const {
-    return std::string(c_str(), size());
-  }
+  explicit operator std::string () const { return toCppString(); }
   explicit operator bool() const {
     return m_px != nullptr;
   }
@@ -341,6 +340,7 @@ public:
   int64_t  toInt64  () const { return m_px ? m_px->toInt64  () : 0;}
   double toDouble () const { return m_px ? m_px->toDouble () : 0;}
   VarNR  toKey   () const;
+  std::string toCppString() const { return std::string(c_str(), size()); }
 
   /**
    * Comparisons

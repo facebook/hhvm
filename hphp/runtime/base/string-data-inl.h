@@ -94,12 +94,11 @@ inline void StringData::destruct() {
 
 inline void StringData::setRefCount(RefCount n) { m_count = n; }
 inline bool StringData::isStatic() const {
-  return !isRefCounted();
+  return m_count == StaticValue;
 }
 
-inline APCVariant* StringData::getSharedVariant() const {
-  if (isShared()) return sharedPayload()->shared;
-  return nullptr;
+inline bool StringData::isUncounted() const {
+  return m_count == UncountedValue;
 }
 
 inline StringSlice StringData::slice() const {
@@ -143,6 +142,14 @@ inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const { return m_cap; }
 
 inline bool StringData::isStrictlyInteger(int64_t& res) const {
+  // Exploit the NUL terminator and unsigned comparison. This single comparison
+  // checks whether the string is empty or if the first byte is greater than '9'
+  // or less than '-'. Note that '-' == 45 and '0' == 48, which makes this
+  // valid. (46 == '.' and 47 == '/', so if one of those is the first byte, this
+  // check will be a false positive, but it will still be caught later.)
+  if ((unsigned char)(data()[0] - '-') > ('9' - '-')) {
+    return false;
+  }
   if (isStatic() && m_hash < 0) return false;
   auto const s = slice();
   return is_strictly_integer(s.ptr, s.len, res);
@@ -199,7 +206,7 @@ inline StringData::SharedPayload* StringData::sharedPayload() {
 inline bool StringData::isShared() const { return !m_cap; }
 inline bool StringData::isFlat() const { return m_data == voidPayload(); }
 inline bool StringData::isImmutable() const {
-  return isStatic() || isShared();
+  return isStatic() || isShared() ||  isUncounted();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -218,6 +225,12 @@ struct string_data_same {
   bool operator()(const StringData *s1, const StringData *s2) const {
     assert(s1 && s2);
     return s1->same(s2);
+  }
+};
+
+struct string_data_eq_same {
+  bool operator()(const StringData* a, const StringData* b) const {
+    return a == b || a->same(b);
   }
 };
 

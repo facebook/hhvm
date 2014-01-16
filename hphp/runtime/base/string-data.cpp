@@ -18,7 +18,7 @@
 
 #include <cmath>
 
-#include "hphp/runtime/base/apc-variant.h"
+#include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/util/alloc.h"
@@ -38,12 +38,12 @@ namespace HPHP {
 
 namespace {
 
-NEVER_INLINE void throw_string_too_large(uint32_t len) ATTRIBUTE_COLD;
+NEVER_INLINE void throw_string_too_large(uint32_t len);
 NEVER_INLINE void throw_string_too_large(uint32_t len) {
   throw InvalidArgumentException("len > 2^31-2", len);
 }
 
-NEVER_INLINE void throw_string_too_large2(size_t len) ATTRIBUTE_COLD;
+NEVER_INLINE void throw_string_too_large2(size_t len);
 NEVER_INLINE void throw_string_too_large2(size_t len) {
   throw FatalErrorException(0, "String length exceeded 2^31-2: %zu", len);
 }
@@ -146,7 +146,6 @@ void StringData::sweepAll() {
 
 //////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
 StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   auto const allocRet = allocFlatForLen(sl.len);
   auto const sd       = allocRet.first;
@@ -172,12 +171,10 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   return ret;
 }
 
-HOT_FUNC
 StringData* StringData::Make(const char* data, CopyStringMode) {
   return Make(StringSlice(data, strlen(data)), CopyString);
 }
 
-HOT_FUNC
 StringData* StringData::MakeMalloced(const char* data, int len) {
   if (UNLIKELY(uint32_t(len) > MaxSize)) {
     throw_string_too_large(len);
@@ -207,7 +204,6 @@ StringData* StringData::MakeMalloced(const char* data, int len) {
   return ret;
 }
 
-HOT_FUNC
 StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   auto const len      = r1.len + r2.len;
   auto const allocRet = allocFlatForLen(len);
@@ -228,12 +224,11 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   return sd;
 }
 
-HOT_FUNC
 StringData* StringData::Make(StringSlice s1, const char* lit2) {
   return Make(s1, StringSlice(lit2, strlen(lit2)));
 }
 
-HOT_FUNC NEVER_INLINE
+NEVER_INLINE
 void StringData::releaseDataSlowPath() {
   assert(!isFlat());
   assert(isShared());
@@ -244,7 +239,6 @@ void StringData::releaseDataSlowPath() {
   freeForSize(this, sizeof(StringData) + sizeof(SharedPayload));
 }
 
-HOT_FUNC
 void StringData::release() {
   assert(checkSane());
 
@@ -254,7 +248,6 @@ void StringData::release() {
   freeForSize(this, sizeof(StringData) + m_cap);
 }
 
-HOT_FUNC
 StringData* StringData::Make(int reserveLen) {
   auto const allocRet = allocFlatForLen(reserveLen);
   auto const sd       = allocRet.first;
@@ -364,7 +357,7 @@ void StringData::dump() const {
   for (uint32_t i = 0; i < s.len; i++) {
     char ch = s.ptr[i];
     if (isprint(ch)) {
-      std::cout << ch;
+      printf("%c", ch);
     } else {
       printf("\\x%02x", ch);
     }
@@ -372,7 +365,6 @@ void StringData::dump() const {
   printf("]\n");
 }
 
-HOT_FUNC
 StringData *StringData::getChar(int offset) const {
   if (offset >= 0 && offset < size()) {
     return makeStaticString(m_data[offset]);
@@ -485,7 +477,12 @@ void StringData::preCompute() const {
 }
 
 void StringData::setStatic() const {
-  m_count = RefCountStaticValue;
+  m_count = StaticValue;
+  preCompute();
+}
+
+void StringData::setUncounted() const {
+  m_count = UncountedValue;
   preCompute();
 }
 
@@ -560,7 +557,6 @@ DataType StringData::toNumeric(int64_t &lval, double &dval) const {
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
-HOT_FUNC
 bool StringData::equal(const StringData *s) const {
   assert(s);
   if (s == this) return true;
@@ -575,7 +571,6 @@ bool StringData::equal(const StringData *s) const {
   return same(s);
 }
 
-HOT_FUNC
 int StringData::numericCompare(const StringData *v2) const {
   assert(v2);
 
@@ -612,7 +607,6 @@ int StringData::numericCompare(const StringData *v2) const {
   return -1;
 }
 
-HOT_FUNC
 int StringData::compare(const StringData *v2) const {
   assert(v2);
 
@@ -631,7 +625,6 @@ int StringData::compare(const StringData *v2) const {
   return ret;
 }
 
-HOT_FUNC
 strhash_t StringData::hashHelper() const {
   assert(!isShared());
   strhash_t h = hash_string_inline(m_data, m_len);

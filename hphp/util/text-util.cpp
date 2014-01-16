@@ -67,7 +67,7 @@ string TextUtil::StripTrailing(const std::string& str, char ch) {
 vector<string> TextUtil::MakePathList(const string& path) {
   vector<string> temp;
 
-  if (path.empty() || path[0] != '/') {
+  if (path.empty()) {
     return temp;
   }
 
@@ -78,7 +78,6 @@ vector<string> TextUtil::MakePathList(const string& path) {
     }
   }
 
-  temp.push_back(path);
   return temp;
 }
 

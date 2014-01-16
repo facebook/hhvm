@@ -13,7 +13,6 @@ info array_key_exists
 function array_key_exists($key, $search);
 
 info stdClass
-// defined on line %d to %d of %s/systemlib.php
 class stdClass {
 }
 

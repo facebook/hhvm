@@ -13,6 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include <atomic>
+
+#include <sys/time.h>
+#include <sys/mman.h>
+#include <sys/resource.h>
+#include <signal.h>
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/code-coverage.h"
@@ -20,8 +28,6 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "folly/String.h"
-
-#include <sys/mman.h>
 
 using std::map;
 
@@ -33,7 +39,7 @@ static std::set<ThreadInfo*> s_thread_infos;
 
 __thread char* ThreadInfo::t_stackbase = 0;
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(ThreadInfo, ThreadInfo::s_threadInfo);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
 ThreadInfo::ThreadInfo()
     : m_stacklimit(0), m_executing(Idling) {
@@ -145,7 +151,10 @@ void RequestInjectionData::setTimeout(int seconds) {
     sev.sigev_notify = SIGEV_SIGNAL;
     sev.sigev_signo = SIGVTALRM;
     sev.sigev_value.sival_ptr = this;
-    if (timer_create(CLOCK_REALTIME, &sev, &m_timer_id)) {
+    auto const& clockType =
+      RuntimeOption::TimeoutsUseWallTime ? CLOCK_REALTIME :
+                                           CLOCK_THREAD_CPUTIME_ID;
+    if (timer_create(clockType, &sev, &m_timer_id)) {
       raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
     }
     m_hasTimer = true;
@@ -215,7 +224,7 @@ void RequestInjectionData::resetTimer(int seconds /* = 0 */) {
 }
 
 void RequestInjectionData::reset() {
-  __sync_fetch_and_and(getConditionFlags(), 0);
+  getConditionFlags()->store(0);
   m_coverage = RuntimeOption::RecordCodeCoverage;
   m_debugger = false;
   m_debuggerIntr = false;
@@ -232,64 +241,52 @@ void RequestInjectionData::updateJit() {
 }
 
 void RequestInjectionData::setMemExceededFlag() {
-  __sync_fetch_and_or(getConditionFlags(),
-                      RequestInjectionData::MemExceededFlag);
+  getConditionFlags()->fetch_or(RequestInjectionData::MemExceededFlag);
 }
 
 void RequestInjectionData::setTimedOutFlag() {
-  __sync_fetch_and_or(getConditionFlags(),
-                      RequestInjectionData::TimedOutFlag);
+  getConditionFlags()->fetch_or(RequestInjectionData::TimedOutFlag);
 }
 
 void RequestInjectionData::clearTimedOutFlag() {
-  __sync_fetch_and_and(getConditionFlags(),
-                       ~RequestInjectionData::TimedOutFlag);
+  getConditionFlags()->fetch_and(~RequestInjectionData::TimedOutFlag);
 }
 
 void RequestInjectionData::setSignaledFlag() {
-  __sync_fetch_and_or(getConditionFlags(),
-                      RequestInjectionData::SignaledFlag);
+  getConditionFlags()->fetch_or(RequestInjectionData::SignaledFlag);
 }
 
 void RequestInjectionData::setEventHookFlag() {
-  __sync_fetch_and_or(getConditionFlags(),
-                      RequestInjectionData::EventHookFlag);
+  getConditionFlags()->fetch_or(RequestInjectionData::EventHookFlag);
 }
 
 void RequestInjectionData::clearEventHookFlag() {
-  __sync_fetch_and_and(getConditionFlags(),
-                       ~RequestInjectionData::EventHookFlag);
+  getConditionFlags()->fetch_and(~RequestInjectionData::EventHookFlag);
 }
 
 void RequestInjectionData::setPendingExceptionFlag() {
-  __sync_fetch_and_or(getConditionFlags(),
-                      RequestInjectionData::PendingExceptionFlag);
+  getConditionFlags()->fetch_or(RequestInjectionData::PendingExceptionFlag);
 }
 
 void RequestInjectionData::clearPendingExceptionFlag() {
-  __sync_fetch_and_and(getConditionFlags(),
-                       ~RequestInjectionData::PendingExceptionFlag);
+  getConditionFlags()->fetch_and(~RequestInjectionData::PendingExceptionFlag);
 }
 
 void RequestInjectionData::setInterceptFlag() {
-  __sync_fetch_and_or(getConditionFlags(),
-                      RequestInjectionData::InterceptFlag);
+  getConditionFlags()->fetch_or(RequestInjectionData::InterceptFlag);
 }
 
 void RequestInjectionData::clearInterceptFlag() {
-  __sync_fetch_and_and(getConditionFlags(),
-                       ~RequestInjectionData::InterceptFlag);
+  getConditionFlags()->fetch_and(~RequestInjectionData::InterceptFlag);
 }
 
 void RequestInjectionData::setDebuggerSignalFlag() {
-  __sync_fetch_and_or(getConditionFlags(),
-                      RequestInjectionData::DebuggerSignalFlag);
+  getConditionFlags()->fetch_or(RequestInjectionData::DebuggerSignalFlag);
 }
 
 ssize_t RequestInjectionData::fetchAndClearFlags() {
-  return __sync_fetch_and_and(getConditionFlags(),
-                              (RequestInjectionData::EventHookFlag |
-                               RequestInjectionData::InterceptFlag));
+  return getConditionFlags()->fetch_and(RequestInjectionData::EventHookFlag |
+                                        RequestInjectionData::InterceptFlag);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

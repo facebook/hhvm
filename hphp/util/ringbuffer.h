@@ -19,8 +19,9 @@
 #include <cstdlib>
 #include <cstdarg>
 #include <cinttypes>
+#include <atomic>
 
-#include "hphp/util/util.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 namespace Trace {
@@ -71,7 +72,7 @@ struct RingBufferEntry {
 static_assert(sizeof(RingBufferEntry) == 32,
               "RingBufferEntry expected to be 32 bytes");
 
-constexpr int kMaxRBEntries = (1 << 20); // Must exceed number of threads
+constexpr unsigned kMaxRBEntries = (1 << 20); // Must exceed number of threads
 
 extern RingBufferEntry g_ring[];
 extern std::atomic<int> g_ringIdx;

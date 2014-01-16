@@ -26,7 +26,6 @@ namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(pgo);
 
-using Transl::TransID;
 
 typedef hphp_hash_map<TransID, RegionDescPtr>            TransIDToRegionMap;
 typedef hphp_hash_map<RegionDescPtr, TransIDVec,
@@ -49,7 +48,7 @@ static void markCovered(const TransCFG& cfg, const TransIDVec selectedVec,
   // Mark all incoming arcs into newHead from covered nodes as covered.
   for (auto arc : cfg.inArcs(newHead)) {
     TransID src = arc->src();
-    if (setContains(coveredNodes, src)) {
+    if (coveredNodes.count(src)) {
       coveredArcs.insert(arc);
     }
   }
@@ -71,7 +70,7 @@ static void markCovered(const TransCFG& cfg, const TransIDVec selectedVec,
   // Mark all outgoing arcs from the region to a head node as covered.
   for (auto node : selectedVec) {
     for (auto arc : cfg.outArcs(node)) {
-      if (setContains(heads, arc->dst())) {
+      if (heads.count(arc->dst())) {
         coveredArcs.insert(arc);
       }
     }
@@ -116,22 +115,28 @@ static void sortRegion(RegionVec&                  regions,
   RegionVec sorted;
   RegionSet selected;
 
-  // First, pick the region for the function body entry.  There may be
-  // multiple translations of the function body, so pick the one with
-  // largest profile weight.
+  if (regions.size() == 0) return;
+
+  // First, pick the region starting at the lowest bytecode offset.
+  // This will normally correspond to the main function entry (for
+  // normal, regular bytecode), but it may not be for irregular
+  // functions written in hhas (like array_map and array_filter).  If
+  // there multiple regions starting at the lowest bytecode offset,
+  // pick the one with the largest profile weight.
   RegionDescPtr entryRegion = nullptr;
   int64_t    maxEntryWeight = -1;
+  Offset     lowestOffset   = kInvalidOffset;
   for (const auto& pair : regionToTransIds) {
     auto  r    = pair.first;
     auto& tids = pair.second;
-    for (auto tid : tids) {
-      if (profData->transSrcKey(tid).offset() == func->base()) {
-        int64_t weight = cfg.weight(tid);
-        if (weight > maxEntryWeight) {
-          entryRegion    = r;
-          maxEntryWeight = weight;
-        }
-      }
+    TransID firstTid = tids[0];
+    Offset firstOffset = profData->transSrcKey(firstTid).offset();
+    int64_t weight = cfg.weight(firstTid);
+    if (lowestOffset == kInvalidOffset || firstOffset < lowestOffset ||
+        (firstOffset == lowestOffset && weight > maxEntryWeight)) {
+      entryRegion    = r;
+      maxEntryWeight = weight;
+      lowestOffset   = firstOffset;
     }
   }
 
@@ -148,7 +153,7 @@ static void sortRegion(RegionVec&                  regions,
     RegionDescPtr bestNext = nullptr;
     auto    regionTransIds = getRegionTransIDVec(regionToTransIds, region);
     for (auto next : regions) {
-      if (setContains(selected, next)) continue;
+      if (selected.count(next)) continue;
       auto nextTransIds = getRegionTransIDVec(regionToTransIds, next);
       int64_t weight = interRegionWeight(regionTransIds, nextTransIds[0], cfg);
       int64_t headWeight = cfg.weight(nextTransIds[0]);
@@ -181,7 +186,7 @@ static void sortRegion(RegionVec&                  regions,
 static bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
                            const TransCFG::ArcPtrSet& coveredArcs) {
   for (auto arc : arcs) {
-    if (!setContains(coveredArcs, arc)) {
+    if (!coveredArcs.count(arc)) {
       return false;
     }
   }
@@ -205,23 +210,24 @@ static bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  *      2.2) select a region starting at this node and mark nodes/arcs as
  *           covered appropriately
  */
-void regionizeFunc(const Func*            func,
-                   Transl::TranslatorX64* tx64,
-                   RegionVec&             regions) {
+void regionizeFunc(const Func*         func,
+                   JIT::TranslatorX64* tx64,
+                   RegionVec&          regions) {
   assert(RuntimeOption::EvalJitPGO);
   FuncId funcId = func->getFuncId();
   ProfData* profData = tx64->profData();
   TransCFG cfg(funcId, profData, tx64->getSrcDB(), tx64->getJmpToTransIDMap());
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
-    string dotFileName = folly::to<string>("/tmp/func-cfg-", funcId, ".dot");
+    auto dotFileName = folly::to<std::string>(
+      "/tmp/func-cfg-", funcId, ".dot");
     cfg.print(dotFileName, funcId, profData, nullptr);
     FTRACE(5, "regionizeFunc: initial CFG for func {} saved to file {}\n",
            funcId, dotFileName);
   }
 
   TransCFG::ArcPtrVec arcs = cfg.arcs();
-  vector<TransID>    nodes = cfg.nodes();
+  std::vector<TransID>    nodes = cfg.nodes();
 
   std::sort(nodes.begin(), nodes.end(),
             [&](TransID tid1, TransID tid2) -> bool {
@@ -241,7 +247,7 @@ void regionizeFunc(const Func*            func,
   regions.clear();
 
   for (auto node : nodes) {
-    if (!setContains(coveredNodes, node) ||
+    if (!coveredNodes.count(node) ||
         !allArcsCovered(cfg.inArcs(node),  coveredArcs)) {
       TransID newHead = node;
       FTRACE(6, "regionizeFunc: selecting trace to cover node {}\n", newHead);

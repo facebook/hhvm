@@ -13,3 +13,5 @@ target_link_libraries(hphp_thrift ${Boost_LIBRARIES}
                                   ${LIBGLOG_LIBRARY}
                                   ${LIBPTHREAD_LIBRARIES})
 
+# Workaround for GCC bug, remove after 4.8 is the minimum supported
+add_definitions(-D_GLIBCXX_USE_NANOSLEEP)

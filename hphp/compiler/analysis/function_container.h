@@ -24,7 +24,7 @@ namespace HPHP {
 
 class CodeGenerator;
 DECLARE_BOOST_TYPES(AnalysisResult);
-DECLARE_BOOST_TYPES(FunctionScope);
+DECLARE_EXTENDED_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionContainer);
 

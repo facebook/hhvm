@@ -213,7 +213,9 @@ String f_stripslashes(const String& str) {
         ret.append('\0');
         return;
       }
-      ret.append(*src);
+      if (src < end) {
+        ret.append(*src);
+      }
     });
 }
 
@@ -272,10 +274,15 @@ Variant f_hex2bin(const String& str) {
 
 const StaticString
   s_nl("\n"),
-  s_br("<br />\n");
+  s_br("<br />\n"),
+  s_non_xhtml_br("<br>\n");
 
-String f_nl2br(const String& str) {
-  return string_replace(str, s_nl, s_br);
+String f_nl2br(const String& str, bool is_xhtml /* = true */) {
+  if (is_xhtml) {
+    return string_replace(str, s_nl, s_br);
+  } else {
+    return string_replace(str, s_nl, s_non_xhtml_br);
+  }
 }
 
 String f_quotemeta(const String& str) {
@@ -533,11 +540,13 @@ Variant f_strtok(const String& str, CVarRef token /* = null_variant */) {
   return ret;
 }
 
-HOT_FUNC static
+static
 Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
                     int &count, bool caseSensitive) {
+  count = 0;
   if (search.is(KindOfArray)) {
     String ret = subject;
+    int c = 0;
 
     Array searchArr = search.toArray();
     if (replace.is(KindOfArray)) {
@@ -547,20 +556,22 @@ Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
         if (replIter) {
           ret = string_replace(ret, iter.second().toString(),
                                replIter.second().toString(),
-                               count, caseSensitive);
+                               c, caseSensitive);
           ++replIter;
         } else {
           ret = string_replace(ret, iter.second().toString(),
-                               "", count, caseSensitive);
+                               "", c, caseSensitive);
         }
+        count +=c;
       }
       return ret;
     }
 
     String repl = replace.toString();
     for (ArrayIter iter(searchArr); iter; ++iter) {
-      ret = string_replace(ret, iter.second().toString(), repl, count,
+      ret = string_replace(ret, iter.second().toString(), repl, c,
                            caseSensitive);
+      count += c;
     }
     return ret;
   }
@@ -572,12 +583,13 @@ Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
                         caseSensitive);
 }
 
-HOT_FUNC
 static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                            int &count, bool caseSensitive) {
+  count = 0;
   if (subject.is(KindOfArray)) {
     Array arr = subject.toArray();
-    Array ret;
+    Array ret = Array::Create();
+    int c;
     for (ArrayIter iter(arr); iter; ++iter) {
       if (iter.second().is(KindOfArray) || iter.second().is(KindOfObject)) {
         ret.set(iter.first(), iter.second());
@@ -585,8 +597,9 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
       }
 
       String replaced = str_replace(search, replace, iter.second().toString(),
-                                    count, caseSensitive);
+                                    c, caseSensitive);
       ret.set(iter.first(), replaced);
+      count += c;
     }
     return ret;
   }
@@ -594,7 +607,6 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                      caseSensitive);
 }
 
-HOT_FUNC
 Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                       VRefParam count /* = null */) {
   int nCount = 0;
@@ -717,111 +729,13 @@ String f_str_repeat(const String& input, int multiplier) {
   return ret.detach();
 }
 
-Variant f_wordwrap(const String& str, int width /* = 75 */, const String& wordbreak /* = "\n" */,
-                   bool cut /* = false */) {
-
-  if (str.empty()) {
-    return str;
-  }
-
-  if (UNLIKELY(wordbreak.empty())) {
-    throw_invalid_argument("wordbreak: (empty)");
-    return false;
-  }
-
-  if (UNLIKELY(width == 0 && cut)) {
-    throw_invalid_argument("width: can't force cut when width = 0");
-    return false;
-  }
-
-  uint32_t pos = 0;
-  auto len = str.size();
-  auto brkLen = wordbreak.size();
-  auto bufLen = !cut && brkLen == 1 ? str.size()
-          : str.size() + brkLen * str.size() / (width ?: 1);
-
-  StringBuffer ret(bufLen);
-
-  const char* brk = wordbreak.data();
-  const char* src = str.data();
-
-next_line:
-  while (pos < len) {
-    int lineWidth, spaceWidth = -1;
-
-    for (lineWidth = 0; pos + lineWidth < len &&
-         lineWidth < width; ++lineWidth) {
-      if (lineWidth >= brkLen && !bcmp(&src[pos + lineWidth - brkLen],
-                                       brk, brkLen)) {
-        ret.append(&src[pos], lineWidth);
-        pos += lineWidth;
-        goto next_line;
-      }
-
-      if (src[pos + lineWidth] == ' ') spaceWidth = lineWidth;
-    }
-
-    if (pos + lineWidth == len) {
-      ret.append(&src[pos], lineWidth);
-      break;
-    }
-
-    if (src[pos + lineWidth] == ' ') {
-      ret.append(&src[pos], lineWidth);
-      ret.append(wordbreak);
-      pos += lineWidth + 1;
-      continue;
-    }
-
-    if (spaceWidth != -1) {
-      ret.append(&src[pos], spaceWidth);
-      ret.append(wordbreak);
-      pos += spaceWidth + 1;
-      continue;
-    }
-
-    if (cut) {
-      ret.append(&src[pos], lineWidth);
-      ret.append(wordbreak);
-      pos += lineWidth;
-
-      if (!lineWidth) { // zend is weird
-        ret.append(src[pos++]);
-      }
-      continue;
-    }
-
-    for (; pos + lineWidth < len && src[pos + lineWidth] != ' ';
-         ++lineWidth) {
-      if (lineWidth >= brkLen && !bcmp(&src[pos + lineWidth - brkLen],
-                                       brk, brkLen)) {
-        ret.append(&src[pos], lineWidth);
-        pos += lineWidth;
-        lineWidth = -1;
-        goto next_line;
-      }
-    }
-
-    if (pos + lineWidth == len) {
-      ret.append(&src[pos], lineWidth);
-      break;
-    }
-
-    ret.append(&src[pos], lineWidth);
-    ret.append(wordbreak);
-    pos += lineWidth + 1;
-  }
-
-  return ret.detach();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_printf(int _argc, const String& format, CArrRef _argv /* = null_array */) {
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             _argv, &len);
   if (output == NULL) return false;
-  echo(output); free(output);
+  echo(output, len); free(output);
   return len;
 }
 
@@ -829,7 +743,7 @@ Variant f_vprintf(const String& format, CArrRef args) {
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             args, &len);
   if (output == NULL) return false;
-  echo(output); free(output);
+  echo(output, len); free(output);
   return len;
 }
 
@@ -978,14 +892,6 @@ Variant f_substr_compare(const String& main_str, const String& str, int offset,
   return string_ncmp(s1 + offset, str.data(), cmp_len);
 }
 
-Variant f_strrchr(const String& haystack, CVarRef needle) {
-  Variant ret = f_strrpos(haystack, needle);
-  if (same(ret, false)) {
-    return false;
-  }
-  return haystack.substr(ret.toInt32());
-}
-
 Variant f_strstr(const String& haystack, CVarRef needle,
                  bool before_needle /* = false */) {
   Variant ret = f_strpos(haystack, needle);
@@ -1073,6 +979,21 @@ static bool is_valid_strrpos_args(
     return false;
   }
   return true;
+}
+
+Variant f_strrchr(const String& haystack, CVarRef needle) {
+  if (haystack.size() == 0) {
+    return false;
+  }
+
+  int pos;
+  if (needle.isString() && needle.toString().size() > 0) {
+    pos = haystack.rfind(needle.toString().data()[0], false);
+  } else {
+    pos = haystack.rfind(needle.toByte(), false);
+  }
+  if (pos < 0) return false;
+  return haystack.substr(pos);
 }
 
 Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
@@ -1191,6 +1112,27 @@ Variant f_strlen(CVarRef vstr) {
     const String& str = vstr.toString();
     return Variant(str.size());
   }
+}
+
+Array f_str_getcsv(const String& str,
+                   const String& delimiter /* = "," */,
+                   const String& enclosure /* = "\"" */,
+                   const String& escape /* = "\\" */) {
+  if (str.empty()) {
+    return Array::Create(null_variant);
+  }
+
+  auto check_arg = [](const String& arg, char default_arg) {
+    return arg.size() > 0 ? arg[0] : default_arg;
+  };
+
+  char delimiter_char = check_arg(delimiter, ',');
+  char enclosure_char = check_arg(enclosure, '"');
+  char escape_char = check_arg(escape, '\\');
+
+  auto dummy = NEWOBJ(PlainFile)();
+  auto wrapper = Resource(dummy);
+  return dummy->readCSV(0, delimiter_char, enclosure_char, escape_char, &str);
 }
 
 Variant f_count_chars(const String& str, int64_t mode /* = 0 */) {
@@ -1357,44 +1299,44 @@ Variant f_metaphone(const String& str, int phones /* = 0 */) {
   return false;
 }
 
-String f_html_entity_decode(const String& str, int quote_style /* = k_ENT_COMPAT */,
+String f_html_entity_decode(const String& str, int flags /* = k_ENT_COMPAT */,
                             const String& charset /* = "ISO-8859-1" */) {
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
+  return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 scharset, true);
 }
 
-String f_htmlentities(const String& str, int quote_style /* = k_ENT_COMPAT */,
+String f_htmlentities(const String& str, int flags /* = k_ENT_COMPAT */,
                       const String& charset /* = "ISO-8859-1" */,
                       bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
+  return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyleBitmask(flags),
                                 scharset, true);
 }
 
 String f_htmlspecialchars_decode(const String& str,
-                                 int quote_style /* = k_ENT_COMPAT */) {
-  return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
+                                 int flags /* = k_ENT_COMPAT */) {
+  return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 "UTF-8", false);
 }
 
-String f_htmlspecialchars(const String& str, int quote_style /* = k_ENT_COMPAT */,
+String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
                           const String& charset /* = "ISO-8859-1" */,
                           bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
+  return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyleBitmask(flags),
                                 scharset, false);
 }
 
-String f_fb_htmlspecialchars(const String& str, int quote_style /* = k_ENT_COMPAT */,
+String f_fb_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
                              const String& charset /* = "ISO-8859-1" */,
                              CArrRef extra /* = Array() */) {
-  return StringUtil::HtmlEncodeExtra(str, (StringUtil::QuoteStyle)quote_style,
+  return StringUtil::HtmlEncodeExtra(str, StringUtil::toQuoteStyle(flags),
                                      charset.data(), false, extra);
 }
 
@@ -1644,15 +1586,22 @@ const StaticString
   s_amp("&"),
   s_ampsemi("&amp;");
 
-Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_ENT_COMPAT */) {
-  static entity_charset charset = determine_charset(nullptr); // get default one
+Array f_get_html_translation_table(int table /* = 0 */,
+                                   int flags /* = k_ENT_COMPAT */,
+                                   const String& encoding /* = "UTF-8" */) {
+  using namespace entity_charset_enum;
 
-  assert(charset != entity_charset_enum::cs_unknown);
+  auto charset = determine_charset(encoding.data());
+  if (charset == cs_unknown) {
+    charset = cs_utf_8;
+    if (!encoding.empty()) {
+      raise_warning("get_html_translation_table(): charset `%s' not supported"
+                    ", assuming utf-8", encoding.data());
+    }
+  }
 
   const int HTML_SPECIALCHARS = 0;
   const int HTML_ENTITIES = 1;
-
-  using namespace entity_charset_enum;
 
   Array ret;
   switch (table) {
@@ -1680,7 +1629,7 @@ Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_E
   case HTML_SPECIALCHARS:
     for (int j = 0; basic_entities[j].charcode != 0; j++) {
       if (basic_entities[j].flags &&
-          (quote_style & basic_entities[j].flags) == 0)
+          (flags & basic_entities[j].flags) == 0)
         continue;
 
       ret.set(String::FromChar(basic_entities[j].charcode),

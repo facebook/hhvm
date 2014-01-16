@@ -1,0 +1,911 @@
+--- libmagic.php-src/apprentice.c	2013-11-11 00:56:38.032787556 -0800
++++ libmagic/apprentice.cpp	2013-11-11 16:33:08.294594345 -0800
+@@ -29,8 +29,6 @@
+  * apprentice - make one pass through /etc/magic, learning its secrets.
+  */
+ 
+-#include "php.h"
+-
+ #include "file.h"
+ 
+ #ifndef	lint
+@@ -157,7 +155,7 @@
+ 	{ NULL, 0, NULL }
+ };
+ 
+-#include "../data_file.c"
++#include "data_file.inc"
+ 
+ struct type_tbl_s {
+ 	const char name[16];
+@@ -527,7 +525,7 @@
+ 	for (ml = mlist->next; ml != mlist;) {
+ 		struct mlist *next = ml->next;
+ 		if (ml->map)
+-			apprentice_unmap(ml->map);
++      apprentice_unmap((struct magic_map*) ml->map);
+ 		efree(ml);
+ 		ml = next;
+ 	}
+@@ -562,10 +560,13 @@
+ 		return apprentice_1(ms, fn, action);
+ 	}
+ 
+-	if ((mfn = estrdup(fn)) == NULL) {
++  mfn = (char*) emalloc(strlen(fn) + 1);
++  if (mfn == NULL) {
+ 		file_oomem(ms, strlen(fn));
+ 		return -1;
+ 	}
++  strncpy(mfn, fn, strlen(fn));
++  mfn[strlen(fn)] = '\0';
+ 
+ 	for (i = 0; i < MAGIC_SETS; i++) {
+ 		mlist_free(ms->mlist[i]);
+@@ -584,7 +585,7 @@
+ 	fn = mfn;
+ 
+ 	while (fn) {
+-		p = strchr(fn, PATHSEP);
++    p = (char*) strchr(fn, PATHSEP);
+ 		if (p)
+ 			*p++ = '\0';
+ 		if (*fn == '\0')
+@@ -935,22 +936,16 @@
+ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
+    struct magic_entry **mentry, uint32_t *mentrycount)
+ {
+-	char buffer[BUFSIZ + 1];
+-	char *line = NULL;
++  const char *line = NULL;
+ 	size_t len;
+ 	size_t lineno = 0;
+ 	struct magic_entry me;
+ 
+ 	php_stream *stream;
+ 
+-	TSRMLS_FETCH();
+-
+ 	ms->file = fn;
+-#if PHP_API_VERSION < 20100412
+-	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+-#else
+-	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
+-#endif
++  auto wrapper = HPHP::Stream::getWrapperFromURI(fn);
++  stream = wrapper->open(fn, "rb", 0, HPHP::Variant());
+ 
+ 	if (stream == NULL) {
+ 		if (errno != ENOENT)
+@@ -962,12 +957,17 @@
+ 
+ 	memset(&me, 0, sizeof(me));
+ 	/* read and parse this file */
+-	for (ms->line = 1; (line = php_stream_get_line(stream, buffer , BUFSIZ, &len)) != NULL; ms->line++) {
++  HPHP::String strline;
++  for (ms->line = 1; strline = stream->readLine(); ms->line++) {
++    line = strline.data();
++    len = strline.size();
+ 		if (len == 0) /* null line, garbage, etc */
+ 			continue;
+ 		if (line[len - 1] == '\n') {
+ 			lineno++;
+-			line[len - 1] = '\0'; /* delete newline */
++      strline = strline.substr(0, len-1);
++      line = strline.data();
++      len = strline.size();
+ 		}
+ 		switch (line[0]) {
+ 		case '\0':	/* empty, do not parse */
+@@ -1020,7 +1020,7 @@
+ 	}
+ 	if (me.mp)
+ 		(void)addentry(ms, &me, mentry, mentrycount);
+-	php_stream_close(stream);
++  stream->close();
+ }
+ 
+ /*
+@@ -1136,10 +1136,7 @@
+ 	char **filearr = NULL;
+ 	struct stat st;
+ 	struct magic_map *map;
+-	php_stream *dir;
+-	php_stream_dirent d;
+-
+-	TSRMLS_FETCH();
++  HPHP::Directory *dir;
+ 
+ 	ms->flags |= MAGIC_CHECK;	/* Enable checks for parsed files */
+ 
+@@ -1165,21 +1162,24 @@
+ 	/* load directory or file */
+ 	/* FIXME: Read file names and sort them to prevent
+ 	   non-determinism. See Debian bug #488562. */
+-	if (php_sys_stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
++  auto w = HPHP::Stream::getWrapperFromURI(fn);
++  if (w->stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
+ 		int mflen;
+ 		char mfn[MAXPATHLEN];
+ 
+-		dir = php_stream_opendir((char *)fn, REPORT_ERRORS, NULL);
++    HPHP::Stream::Wrapper* w = HPHP::Stream::getWrapperFromURI(fn);
++    dir = w->opendir(fn);
+ 		if (!dir) {
+ 			errs++;
+ 			goto out;
+ 		}
+-		while (php_stream_readdir(dir, &d)) {
+-			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d.d_name)) < 0) {
++    HPHP::Variant d;
++    while (true) {
++      d = dir->read());
++      if (!d.toBoolean()) {
++        break;
++      }
++      HPHP::String s = d.toString();
++      if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, s.data())) < 0) {
+ 				file_oomem(ms,
+-				strlen(fn) + strlen(d.d_name) + 2);
++        strlen(fn) + s.size() + 2);
+ 				errs++;
+-				php_stream_closedir(dir);
++        dir->close();
+ 				goto out;
+ 			}
+ 			if (stat(mfn, &st) == -1 || !S_ISREG(st.st_mode)) {
+@@ -1192,14 +1192,18 @@
+ 				if ((filearr = CAST(char **,
+ 				    erealloc(filearr, mlen))) == NULL) {
+ 					file_oomem(ms, mlen);
+-					php_stream_closedir(dir);
++          dir->close();
+ 					errs++;
+ 					goto out;
+ 				}
+ 			}
+-			filearr[files++] = estrndup(mfn, (mflen > sizeof(mfn) - 1)? sizeof(mfn) - 1: mflen);
++      auto tmplen = (mflen > sizeof(mfn) - 1)? sizeof(mfn) - 1: mflen;
++      auto tmp = (char*) emalloc(tmplen + 1);
++      strncpy(tmp, mfn, tmplen);
++      tmp[tmplen] = '\0';
++      filearr[files++] = tmp;
+ 		}
+-		php_stream_closedir(dir);
++    dir->close();
+ 		qsort(filearr, files, sizeof(*filearr), cmpstrp);
+ 		for (i = 0; i < files; i++) {
+ 			load_1(ms, action, filearr[i], &errs, mentry,
+@@ -1919,6 +1923,8 @@
+ 	 *	magwarn("offset too big"); }
+ 	 */
+ 
++
++  if (l[-1] != '\0') {
+ 	/*
+ 	 * Now get last part - the description
+ 	 */
+@@ -1938,6 +1944,7 @@
+ 		if (ms->flags & MAGIC_CHECK)
+ 			file_magwarn(ms, "description `%s' truncated", m->desc);
+ 	}
++  }
+ 
+         /*
+ 	 * We only do this check while compiling, or if any of the magic
+@@ -2594,10 +2601,8 @@
+ 	struct magic_map *map;
+ 	size_t i;
+ 	php_stream *stream = NULL;
+-	php_stream_statbuf st;
+-
+-
+-	TSRMLS_FETCH();
++  HPHP::Stream::Wrapper* wrapper;
++  struct stat sb;
+ 
+ 	if ((map = CAST(struct magic_map *, ecalloc(1, sizeof(*map)))) == NULL) {
+ 		file_oomem(ms, sizeof(*map));
+@@ -2610,53 +2615,40 @@
+ 		goto internal_loaded;
+ 	}
+ 
+-#ifdef PHP_WIN32
+-	/* Don't bother on windows with php_stream_open_wrapper,
+-	return to give apprentice_load() a chance. */
+-	if (php_stream_stat_path_ex((char *)fn, 0, &st, NULL) == SUCCESS) {
+-               if (st.sb.st_mode & S_IFDIR) {
+-                       goto error;
+-               }
+-       }
+-#endif
+-
+ 	dbname = mkdbname(ms, fn, 0);
+ 	if (dbname == NULL)
+ 		goto error;
+ 
+-#if PHP_API_VERSION < 20100412
+-		stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+-#else
+-		stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
+-#endif
++  wrapper = HPHP::Stream::getWrapperFromURI(fn);
++  stream = wrapper->open(fn, "rb", 0, HPHP::Variant());
+ 
+ 	if (!stream) {
+ 		goto error;
+ 	}
+ 
+-	if (php_stream_stat(stream, &st) < 0) {
++  if (wrapper->stat(fn, &sb) < 0) {
+ 		file_error(ms, errno, "cannot stat `%s'", dbname);
+ 		goto error;
+ 	}
+ 
+-	if (st.sb.st_size < 8) {
++  if (sb.st_size < 8) {
+ 		file_error(ms, 0, "file `%s' is too small", dbname);
+ 		goto error;
+ 	}
+ 
+-	map->len = (size_t)st.sb.st_size;
++  map->len = (size_t)sb.st_size;
+ 	if ((map->p = CAST(void *, emalloc(map->len))) == NULL) {
+ 		file_oomem(ms, map->len);
+ 		goto error;
+ 	}
+-	if (php_stream_read(stream, map->p, (size_t)st.sb.st_size) != (size_t)st.sb.st_size) {
++  if (stream->readImpl((char*)map->p, (size_t)sb.st_size) != (size_t)sb.st_size) {
+ 		file_badread(ms);
+ 		goto error;
+ 	}
+ 	map->len = 0;
+ #define RET	1
+ 
+-	php_stream_close(stream);
++  stream->close();
+ 	stream = NULL;
+ 
+ internal_loaded:
+@@ -2689,11 +2681,11 @@
+ 	}
+ 
+ 	if (NULL != fn) {
+-		nentries = (uint32_t)(st.sb.st_size / sizeof(struct magic));
+-		entries = (uint32_t)(st.sb.st_size / sizeof(struct magic));
+-		if ((off_t)(entries * sizeof(struct magic)) != st.sb.st_size) {
++    nentries = (uint32_t)(sb.st_size / sizeof(struct magic));
++    entries = (uint32_t)(sb.st_size / sizeof(struct magic));
++    if ((off_t)(entries * sizeof(struct magic)) != sb.st_size) {
+ 			file_error(ms, 0, "Size of `%s' %llu is not a multiple of %zu",
+-				dbname, (unsigned long long)st.sb.st_size,
++        dbname, (unsigned long long)sb.st_size,
+ 				sizeof(struct magic));
+ 			goto error;
+ 		}
+@@ -2726,7 +2718,7 @@
+ 
+ error:
+ 	if (stream) {
+-		php_stream_close(stream);
++    stream->close();
+ 	}
+ 	apprentice_unmap(map);
+ 	if (dbname) {
+@@ -2753,8 +2745,7 @@
+ 	int rv = -1;
+ 	uint32_t i;
+ 	php_stream *stream;
+-
+-	TSRMLS_FETCH();
++  HPHP::Stream::Wrapper *wrapper;
+ 
+ 	dbname = mkdbname(ms, fn, 0);
+ 
+@@ -2762,11 +2753,8 @@
+ 		goto out;
+ 
+ /* wb+ == O_WRONLY|O_CREAT|O_TRUNC|O_BINARY */
+-#if PHP_API_VERSION < 20100412
+-	stream = php_stream_open_wrapper((char *)fn, "wb+", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+-#else
+-	stream = php_stream_open_wrapper((char *)fn, "wb+", REPORT_ERRORS, NULL);
+-#endif
++  wrapper = HPHP::Stream::getWrapperFromURI(fn);
++  stream = wrapper->open(fn, "wb+", 0, HPHP::Variant());
+ 
+ 	if (!stream) {
+ 		file_error(ms, errno, "cannot open `%s'", dbname);
+@@ -2778,28 +2766,28 @@
+ 		goto out;
+ 	}
+ 
+-	if (php_stream_write(stream, (const char *)map->nmagic, nm) != (ssize_t)nm) {
++  if (stream->writeImpl((const char *)map->nmagic, nm) != (ssize_t)nm) {
+ 		file_error(ms, errno, "error writing `%s'", dbname);
+ 		goto out;
+ 	}
+ 
+ 	assert(nm + sizeof(ar) < m);
+ 
+-	if (php_stream_seek(stream,(off_t)sizeof(struct magic), SEEK_SET) != sizeof(struct magic)) {
++  if (stream->seek((off_t)sizeof(struct magic), SEEK_SET) != sizeof(struct magic)) {
+ 		file_error(ms, errno, "error seeking `%s'", dbname);
+ 		goto out;
+ 	}
+ 
+ 	for (i = 0; i < MAGIC_SETS; i++) {
+ 		len = m * map->nmagic[i];
+-		if (php_stream_write(stream, (const char *)map->magic[i], len) != (ssize_t)len) {
++    if (stream->writeImpl((const char *)map->magic[i], len) != (ssize_t)len) {
+ 			file_error(ms, errno, "error writing `%s'", dbname);
+ 			goto out;
+ 		}
+ 	}
+ 
+ 	if (stream) {
+-		php_stream_close(stream);
++    stream->close();
+ 	}
+ 
+ 	rv = 0;
+@@ -2817,7 +2805,6 @@
+ {
+ 	const char *p, *q;
+ 	char *buf;
+-	TSRMLS_FETCH();
+ 
+ 	if (strip) {
+ 		if ((p = strrchr(fn, '/')) != NULL)
+@@ -2840,11 +2827,7 @@
+ 	/* Compatibility with old code that looked in .mime */
+ 	if (ms->flags & MAGIC_MIME) {
+ 		spprintf(&buf, MAXPATHLEN, "%.*s.mime%s", (int)(q - fn), fn, ext);
+-#ifdef PHP_WIN32
+-		if (VCWD_ACCESS(buf, R_OK) == 0) {
+-#else
+-		if (VCWD_ACCESS(buf, R_OK) != -1) {
+-#endif
++    if (access(buf, R_OK) != -1) {
+ 			ms->flags &= MAGIC_MIME_TYPE;
+ 			return buf;
+ 		}
+--- libmagic.php-src/cdf.c	2013-09-17 11:27:52.780298776 -0700
++++ libmagic/cdf.cpp	2013-11-11 15:15:05.590210659 -0800
+@@ -352,7 +352,7 @@
+ cdf_read_sector(const cdf_info_t *info, void *buf, size_t offs, size_t len,
+     const cdf_header_t *h, cdf_secid_t id)
+ {
+-	size_t ss = CDF_SEC_SIZE(h);
++  DEBUG_ONLY size_t ss = CDF_SEC_SIZE(h);
+ 	size_t pos = CDF_SEC_POS(h, id);
+ 	assert(ss == len);
+ 	return cdf_read(info, (off_t)pos, ((char *)buf) + offs, len);
+@@ -362,7 +362,7 @@
+ cdf_read_short_sector(const cdf_stream_t *sst, void *buf, size_t offs,
+     size_t len, const cdf_header_t *h, cdf_secid_t id)
+ {
+-	size_t ss = CDF_SHORT_SEC_SIZE(h);
++  DEBUG_ONLY size_t ss = CDF_SHORT_SEC_SIZE(h);
+ 	size_t pos = CDF_SHORT_SEC_POS(h, id);
+ 	assert(ss == len);
+ 	if (pos > CDF_SEC_SIZE(h) * sst->sst_len) {
+--- libmagic.php-src/fsmagic.c	2013-09-17 11:27:52.820299229 -0700
++++ libmagic/fsmagic.cpp	2013-11-11 16:33:11.237628416 -0800
+@@ -94,7 +94,6 @@
+ {
+ 	int ret, did = 0;
+ 	int mime = ms->flags & MAGIC_MIME;
+-	TSRMLS_FETCH();
+ 
+ 	if (ms->flags & MAGIC_APPLE)
+ 		return 0;
+@@ -105,25 +104,19 @@
+ 
+ #define COMMA	(did++ ? ", " : "")
+ 
++  HPHP::String name;
+ 	if (stream) {
+-		php_stream_statbuf ssb;
+-		if (php_stream_stat(stream, &ssb) < 0) {
+-			if (ms->flags & MAGIC_ERROR) {
+-				file_error(ms, errno, "cannot stat `%s'", fn);
+-				return -1;
+-			}
+-			return 1;
++    name = stream->getName();
++    fn = name.data();
+ 		}
+-		memcpy(sb, &ssb.sb, sizeof(struct stat));
+-	} else {
+-		if (php_sys_stat(fn, sb) != 0) {
++  auto w = HPHP::Stream::getWrapperFromURI(fn);
++  if (w->stat(fn, sb) < 0) {
+ 			if (ms->flags & MAGIC_ERROR) {
+ 				file_error(ms, errno, "cannot stat `%s'", fn);
+ 				return -1;
+ 			}
+ 			return 1;
+ 		}
+-	}
+ 
+ 	ret = 1;
+ 	if (!mime) {
+--- libmagic.php-src/funcs.c	2013-09-17 11:27:52.821299240 -0700
++++ libmagic/funcs.cpp	2013-11-11 15:15:05.657211440 -0800
+@@ -50,7 +50,7 @@
+ # define PREG_OFFSET_CAPTURE                 (1<<8)
+ #endif
+ 
+-extern public void convert_libmagic_pattern(zval *pattern, int options);
++extern public void convert_libmagic_pattern(HPHP::String& pattern, int options);
+ 
+ /*
+  * Like printf, only we append to a buffer.
+@@ -59,15 +59,14 @@
+ file_printf(struct magic_set *ms, const char *fmt, ...)
+ {
+ 	va_list ap;
+-	int len;
+ 	char *buf = NULL, *newstr;
+ 
+ 	va_start(ap, fmt);
+-	len = vspprintf(&buf, 0, fmt, ap);
++  vspprintf(&buf, 0, fmt, ap);
+ 	va_end(ap);
+ 
+ 	if (ms->o.buf != NULL) {
+-		len = spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
++    spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
+ 		if (buf) {
+ 			efree(buf);
+ 		}
+@@ -223,8 +222,7 @@
+ 	/* Check if we have a CDF file */
+ 	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
+ 		int fd;
+-		TSRMLS_FETCH();
+-		if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
++    if (stream && (fd = stream->fd())) {
+ 			if ((m = file_trycdf(ms, fd, ubuf, nb)) != 0) {
+ 				if ((ms->flags & MAGIC_DEBUG) != 0)
+ 					(void)fprintf(stderr, "cdf %d\n", m);
+@@ -240,6 +238,8 @@
+ 			if ((ms->flags & MAGIC_DEBUG) != 0)
+ 				(void)fprintf(stderr, "softmagic %d\n", m);
+ #ifdef BUILTIN_ELF
++      int fd;
++      if (stream && (fd = stream->fd()))
+ 			if ((ms->flags & MAGIC_NO_CHECK_ELF) == 0 && m == 1 &&
+ 			    nb > 5 && fd != -1) {
+ 				/*
+@@ -441,43 +441,24 @@
+ protected int 
+ file_replace(struct magic_set *ms, const char *pat, const char *rep)
+ {
+-	zval *patt;
++  HPHP::String patt(pat);
+ 	int opts = 0;
+-	pcre_cache_entry *pce;
+-	char *res;
+-	zval *repl;
+-	int res_len, rep_cnt = 0;
+-	TSRMLS_FETCH();
++  int res_len;
++  HPHP::Variant rep_cnt;
+ 
+-	MAKE_STD_ZVAL(patt);
+-	ZVAL_STRINGL(patt, pat, strlen(pat), 0);
+ 	opts |= PCRE_MULTILINE;
+ 	convert_libmagic_pattern(patt, opts);
+-	if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(patt), Z_STRLEN_P(patt) TSRMLS_CC)) == NULL) {
+-		zval_dtor(patt);
+-		FREE_ZVAL(patt);
+-		return -1;
+-	}
+-
+-	MAKE_STD_ZVAL(repl);
+-	ZVAL_STRINGL(repl, rep, strlen(rep), 0);
+-
+-	res = php_pcre_replace_impl(pce, ms->o.buf, strlen(ms->o.buf), repl,
+-			0, &res_len, -1, &rep_cnt TSRMLS_CC);
+-
+-	FREE_ZVAL(repl);
+-	zval_dtor(patt);
+-	FREE_ZVAL(patt);
+ 
+-	if (NULL == res) {
++  auto ret = HPHP::preg_replace_impl(patt, rep, ms->o.buf, -1, rep_cnt, 0);
++  if (!ret.isString()) {
+ 		return -1;
+ 	}
++  auto res = ret.toString();
++  res_len = res.size();
+ 
+-	strncpy(ms->o.buf, res, res_len);
++  strncpy(ms->o.buf, res.data(), res_len);
+ 	ms->o.buf[res_len] = '\0';
+ 
+-	efree(res);
+-
+-	return rep_cnt;
++  return rep_cnt.toInt64Val();
+ }
+ 
+--- libmagic.php-src/magic.c	2013-09-17 11:27:52.821299240 -0700
++++ libmagic/magic.cpp	2013-11-11 16:33:12.375641593 -0800
+@@ -40,11 +40,6 @@
+ #include <unistd.h>
+ #endif
+ #include <string.h>
+-#ifdef PHP_WIN32
+-# include "config.w32.h"
+-#else
+-# include "php_config.h"
+-#endif
+ 
+ #ifdef PHP_WIN32
+ #include <shlwapi.h>
+@@ -353,7 +348,6 @@
+ 	struct stat	sb;
+ 	ssize_t nbytes = 0;	/* number of bytes read from a datafile */
+ 	int no_in_stream = 0;
+-	TSRMLS_FETCH();
+ 
+ 	if (!inname && !stream) {
+ 		return NULL;
+@@ -364,7 +358,7 @@
+ 	 * some overlapping space for matches near EOF
+ 	 */
+ #define SLOP (1 + sizeof(union VALUETYPE))
+-	buf = emalloc(HOWMANY + SLOP);
++  buf = (unsigned char*) emalloc(HOWMANY + SLOP);
+ 
+ 	if (file_reset(ms) == -1)
+ 		goto done;
+@@ -383,11 +377,8 @@
+ 
+ 	if (!stream && inname) {
+ 		no_in_stream = 1;
+-#if PHP_API_VERSION < 20100412
+-		stream = php_stream_open_wrapper((char *)inname, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+-#else
+-		stream = php_stream_open_wrapper((char *)inname, "rb", REPORT_ERRORS, NULL);
+-#endif
++    auto wrapper = HPHP::Stream::getWrapperFromURI(inname);
++    stream = wrapper->open(inname, "rb", 0, HPHP::Variant());
+ 	}
+ 
+ 	if (!stream) {
+@@ -404,7 +395,7 @@
+ 	/*
+ 	 * try looking at the first HOWMANY bytes
+ 	 */
+-	if ((nbytes = php_stream_read(stream, (char *)buf, HOWMANY)) < 0) {
++  if ((nbytes = stream->readImpl((char *)buf, HOWMANY)) < 0) {
+ 		file_error(ms, errno, "cannot read `%s'", inname);
+ 		goto done;
+ 	}
+@@ -417,7 +408,7 @@
+ 	efree(buf);
+ 
+ 	if (no_in_stream && stream) {
+-		php_stream_close(stream);
++    stream->close();
+ 	}
+ 
+ 	close_and_restore(ms, inname, 0, &sb);
+--- libmagic.php-src/print.c	2013-09-17 11:27:52.822299252 -0700
++++ libmagic/print.cpp	2013-11-11 15:15:05.658211451 -0800
+@@ -28,8 +28,6 @@
+ /*
+  * print.c - debugging printout routines
+  */
+-#define _GNU_SOURCE
+-#include "php.h"
+ 
+ #include "file.h"
+ #include "cdf.h"
+@@ -60,13 +58,12 @@
+ {
+ 	va_list va;
+ 	char *expanded_format;
+-	TSRMLS_FETCH();
+ 
+ 	va_start(va, f);
+ 	if (vasprintf(&expanded_format, f, va)); /* silence */
+ 	va_end(va);
+ 	
+-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Warning: %s", expanded_format);
++  HPHP::raise_notice("Warning: %s", expanded_format);
+ 
+ 	free(expanded_format);
+ }
+--- libmagic.php-src/readelf.c	2013-09-17 11:27:52.822299252 -0700
++++ libmagic/readelf.cpp	2013-11-11 15:15:05.659211462 -0800
+@@ -48,8 +48,8 @@
+ private int dophn_exec(struct magic_set *, int, int, int, off_t, int, size_t,
+     off_t, int *, int);
+ private int doshn(struct magic_set *, int, int, int, off_t, int, size_t,
+-    off_t, int *, int);
+-private size_t donote(struct magic_set *, unsigned char *, size_t, size_t, int,
++    off_t, int *, int, int);
++private size_t donote(struct magic_set *, void *, size_t, size_t, int,
+     int, size_t, int *);
+ 
+ #define	ELF_ALIGN(a)	((((a) + align - 1) / align) * align)
+@@ -82,6 +82,7 @@
+ private uint32_t
+ getu32(int swap, uint32_t value)
+ {
++  (void)getu64;
+ 	union {
+ 		uint32_t ui;
+ 		char c[4];
+@@ -856,10 +857,9 @@
+ 	Elf64_Shdr sh64;
+ 	int stripped = 1;
+ 	void *nbuf;
+-	off_t noff, coff, name_off;
+-	uint64_t cap_hw1 = 0;	/* SunOS 5.x hardware capabilites */
+-	uint64_t cap_sf1 = 0;	/* SunOS 5.x software capabilites */
+-	char name[50];
++  off_t noff, coff;
++  uint64_t cap_hw1 = 0;  /* SunOS 5.x hardware capabilities */
++  uint64_t cap_sf1 = 0;  /* SunOS 5.x software capabilities */
+ 
+ 	if (size != xsh_sizeof) {
+ 		if (file_printf(ms, ", corrupted section header size") == -1)
+--- libmagic.php-src/softmagic.c	2013-09-25 23:58:06.021600794 -0700
++++ libmagic/softmagic.cpp	2013-11-11 15:15:05.659211462 -0800
+@@ -340,20 +340,12 @@
+ private int
+ check_fmt(struct magic_set *ms, struct magic *m)
+ {
+-	pcre *pce;
+-	int re_options;
+-	pcre_extra *re_extra;
+-	TSRMLS_FETCH();
+-	
+ 	if (strchr(m->desc, '%') == NULL) {
+ 		return 0;
+ 	}
+-	
+-	if ((pce = pcre_get_compiled_regex("~%[-0-9.]*s~", &re_extra, &re_options TSRMLS_CC)) == NULL) {
+-		return -1;
+-	} else {
+-	 	return !pcre_exec(pce, re_extra, m->desc, strlen(m->desc), 0, re_options, NULL, 0);
+-	}
++  HPHP::Variant matches;
++  auto ret = HPHP::preg_match("~%[-0-9.]*s~", m->desc, matches, 0, 0);
++  return ret.toInt64Val();
+ }
+ 
+ private int32_t
+@@ -566,11 +558,13 @@
+ 		char *cp;
+ 		int rval;
+ 
+-		cp = estrndup((const char *)ms->search.s, ms->search.rm_len);
++    cp = (char*) emalloc(ms->search.rm_len + 1);
+ 		if (cp == NULL) {
+ 			file_oomem(ms, ms->search.rm_len);
+ 			return -1;
+ 		}
++    memcpy(cp, ms->search.s, ms->search.rm_len);
++    cp[ms->search.rm_len] = '\0';
+ 		rval = file_printf(ms, m->desc, cp);
+ 		efree(cp);
+ 
+@@ -1815,23 +1809,23 @@
+ }
+ 
+ public void
+-convert_libmagic_pattern(zval *pattern, int options)
++convert_libmagic_pattern(HPHP::String& pattern, int options)
+ {
+ 		int i, j=0;
+ 		char *t;
+ 
+-		t = (char *) safe_emalloc(Z_STRLEN_P(pattern), 2, 5);
++    t = (char *) emalloc(pattern.size() * 2 + 5);
+ 		
+ 		t[j++] = '~';
+ 		
+-		for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
+-			switch (Z_STRVAL_P(pattern)[i]) {
++    for (i=0; i<pattern.size(); i++, j++) {
++      switch (pattern.data()[i]) {
+ 				case '~':
+ 					t[j++] = '\\';
+ 					t[j] = '~';
+ 					break;
+ 				default:
+-					t[j] = Z_STRVAL_P(pattern)[i];
++          t[j] = pattern.data()[i];
+ 					break;
+ 			}
+ 		}
+@@ -1845,9 +1839,7 @@
+ 
+ 		t[j]='\0';
+ 	
+-		Z_STRVAL_P(pattern) = t;
+-		Z_STRLEN_P(pattern) = j;
+-
++    pattern = HPHP::String(t, j, HPHP::CopyString);
+ }
+ 
+ private int
+@@ -2009,151 +2001,48 @@
+ 		break;
+ 	}
+ 	case FILE_REGEX: {
+-		zval *pattern;
+ 		int options = 0;
+-		pcre_cache_entry *pce;
+-		TSRMLS_FETCH();
+ 		
+-		MAKE_STD_ZVAL(pattern);
+-		ZVAL_STRINGL(pattern, (char *)m->value.s, m->vallen, 0);
++    HPHP::String pattern((char *)m->value.s, m->vallen, HPHP::CopyString);
+ 	
+ 		options |= PCRE_MULTILINE;
+-		
+ 		if (m->str_flags & STRING_IGNORE_CASE) {
+ 			options |= PCRE_CASELESS;
+ 		}
+ 		
+ 		convert_libmagic_pattern(pattern, options);
+-		
+ 		l = v = 0;
+-		if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
+-			zval_dtor(pattern);
+-			FREE_ZVAL(pattern);
+-			return -1;
+-		} else {
+-			/* pce now contains the compiled regex */
+-			zval *retval;
+-			zval *subpats;
+-			char *haystack;
+-			
+-			MAKE_STD_ZVAL(retval);
+-			ALLOC_INIT_ZVAL(subpats);
+-			
+-			/* Cut the search len from haystack, equals to REG_STARTEND */
+-			haystack = estrndup(ms->search.s, ms->search.s_len);
+-
+-			/* match v = 0, no match v = 1 */
+-			php_pcre_match_impl(pce, haystack, ms->search.s_len, retval, subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
+-			/* Free haystack */
+-			efree(haystack);
+-			
+-			if (Z_LVAL_P(retval) < 0) {
+-				zval_ptr_dtor(&subpats);
+-				FREE_ZVAL(retval);
+-				zval_dtor(pattern);
+-				FREE_ZVAL(pattern);
+-				return -1;
+-			} else if ((Z_LVAL_P(retval) > 0) && (Z_TYPE_P(subpats) == IS_ARRAY)) {
+-				
+-				/* Need to fetch global match which equals pmatch[0] */
+-				HashTable *ht = Z_ARRVAL_P(subpats);
+-				HashPosition outer_pos;
+-				zval *pattern_match = NULL, *pattern_offset = NULL;
+-				
+-				zend_hash_internal_pointer_reset_ex(ht, &outer_pos); 
+-				
+-				if (zend_hash_has_more_elements_ex(ht, &outer_pos) == SUCCESS &&
+-					zend_hash_move_forward_ex(ht, &outer_pos)) {
+-					
+-					zval **ppzval;
+-					
+-					/* The first element (should be) is the global match 
+-					   Need to move to the inner array to get the global match */
+ 					
+-					if (zend_hash_get_current_data_ex(ht, (void**)&ppzval, &outer_pos) != FAILURE) { 
+-						
+-						HashTable *inner_ht;
+-						HashPosition inner_pos;
+-						zval **match, **offset;
+-						zval tmpcopy = **ppzval, matchcopy, offsetcopy;
+-						
+-						zval_copy_ctor(&tmpcopy); 
+-						INIT_PZVAL(&tmpcopy);
+-						
+-						inner_ht = Z_ARRVAL(tmpcopy);
+-						
+-						/* If everything goes according to the master plan
+-						   tmpcopy now contains two elements:
+-						   0 = the match
+-						   1 = starting position of the match */
+-						zend_hash_internal_pointer_reset_ex(inner_ht, &inner_pos); 
+-						
+-						if (zend_hash_has_more_elements_ex(inner_ht, &inner_pos) == SUCCESS &&
+-							zend_hash_move_forward_ex(inner_ht, &inner_pos)) {
+-						
+-							if (zend_hash_get_current_data_ex(inner_ht, (void**)&match, &inner_pos) != FAILURE) { 
+-									
+-								matchcopy = **match;
+-								zval_copy_ctor(&matchcopy);
+-								INIT_PZVAL(&matchcopy);
+-								convert_to_string(&matchcopy); 
+-								
+-								MAKE_STD_ZVAL(pattern_match);
+-								Z_STRVAL_P(pattern_match) = (char *)Z_STRVAL(matchcopy);
+-								Z_STRLEN_P(pattern_match) = Z_STRLEN(matchcopy);
+-								Z_TYPE_P(pattern_match) = IS_STRING; 
+-
+-								zval_dtor(&matchcopy);
+-							}
+-						}
+-						
+-						if (zend_hash_has_more_elements_ex(inner_ht, &inner_pos) == SUCCESS &&
+-							zend_hash_move_forward_ex(inner_ht, &inner_pos)) {
+-							
+-							if (zend_hash_get_current_data_ex(inner_ht, (void**)&offset, &inner_pos) != FAILURE) { 
+-								
+-								offsetcopy = **offset;
+-								zval_copy_ctor(&offsetcopy);
+-								INIT_PZVAL(&offsetcopy);
+-								convert_to_long(&offsetcopy); 
++    HPHP::Variant matches;
++    auto retval = preg_match_all(
++      pattern,
++      HPHP::String(ms->search.s, ms->search.s_len, HPHP::CopyString),
++      matches,
++      PREG_OFFSET_CAPTURE,
++      0
++    );
+ 								
+-								MAKE_STD_ZVAL(pattern_offset);
+-								Z_LVAL_P(pattern_offset) = Z_LVAL(offsetcopy);
+-								Z_TYPE_P(pattern_offset) = IS_LONG;
++    if (matches.isArray() && retval.isInteger() && retval.toInt64Val() > 0) {
++      auto subpats = matches.toArray();
++      auto global = subpats.lval(0);
+ 								
+-								zval_dtor(&offsetcopy);
+-							}
+-						}
+-						zval_dtor(&tmpcopy); 	
+-					}
++      for (HPHP::ArrayIter iter(global); iter; ++iter) {
++        auto pair = iter.second().toArray();
++        auto pattern_match = pair.lval(0);
++        auto pattern_offset = pair.lval(1);
+ 					
+-					if ((pattern_match != NULL) && (pattern_offset != NULL)) {
+-						ms->search.s += (int)Z_LVAL_P(pattern_offset); /* this is where the match starts */
+-						ms->search.offset += (size_t)Z_LVAL_P(pattern_offset); /* this is where the match starts as size_t */
+-						ms->search.rm_len = Z_STRLEN_P(pattern_match) /* This is the length of the matched pattern */;
++        if (!pattern_match.isNull() && !pattern_offset.isNull()) {
++          ms->search.s += pattern_offset.toInt64Val(); /* this is where the match starts */
++          ms->search.offset += (size_t)pattern_offset.toInt64Val(); /* this is where the match starts as size_t */
++          ms->search.rm_len = pattern_match.toString().size() /* This is the length of the matched pattern */;
+ 						v = 0;
+-						
+-						efree(pattern_match);
+-						efree(pattern_offset);
+-						
+ 					} else {
+-						zval_ptr_dtor(&subpats);
+-						FREE_ZVAL(retval);
+-						zval_dtor(pattern);
+-						FREE_ZVAL(pattern);
+ 						return -1;
+ 					}					
+ 				}
+-
+-				
+ 			} else {
+ 				v = 1;
+ 			}
+-			zval_ptr_dtor(&subpats);
+-			FREE_ZVAL(retval);
+-		}
+-		zval_dtor(pattern);
+-		FREE_ZVAL(pattern);
+ 		break;	
+ 	}
+ 	case FILE_INDIRECT:

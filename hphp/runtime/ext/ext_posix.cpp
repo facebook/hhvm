@@ -14,19 +14,26 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_posix.h"
-#include "hphp/runtime/base/file.h"
-#include "folly/String.h"
+
+#include <memory>
+
 #include <sys/times.h>
+#include <sys/time.h>
 #include <sys/utsname.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/resource.h>
 #ifdef __FreeBSD__
 #include <sys/param.h>
 #endif
 #include <sys/time.h>
+#include <unistd.h>
 #include <pwd.h>
-#include <memory>
+
+#include "folly/String.h"
+
+#include "hphp/runtime/base/file.h"
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(posix);

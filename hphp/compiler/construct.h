@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_CONSTRUCT_H_
 #define incl_HPHP_CONSTRUCT_H_
 
-#include "hphp/util/json.h"
+#include "hphp/compiler/json.h"
 #include "hphp/compiler/code_generator.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/block_scope.h"
@@ -180,6 +180,8 @@ public:
   void resetScope(BlockScopeRawPtr scope, bool resetOrigScope=false);
   void parseTimeFatal(Compiler::ErrorType error, const char *fmt, ...)
     ATTRIBUTE_PRINTF(3,4);
+  void analysisTimeFatal(Compiler::ErrorType error, const char *fmt, ...)
+    ATTRIBUTE_PRINTF(3,4);
   virtual int getLocalEffects() const { return UnknownEffect;}
   int getChildrenEffects() const;
   int getContainedEffects() const;
@@ -195,7 +197,8 @@ public:
   }
 
   template<typename T>
-  std::shared_ptr<T> Clone(std::shared_ptr<T> constr, BlockScopePtr scope) {
+  std::shared_ptr<T> Clone(std::shared_ptr<T> constr,
+                           BlockScopePtr scope) {
     if (constr) {
       constr = constr->clone();
       constr->resetScope(scope);
@@ -242,6 +245,11 @@ public:
   static void dump(int spc, AnalysisResultConstPtr ar, bool functionOnly,
                    const AstWalkerStateVec &start,
                    ConstructPtr endBefore, ConstructPtr endAfter);
+
+  /**
+   * Generates a serialized Code Model corresponding to this AST.
+   */
+  virtual void outputCodeModel(CodeGenerator &cg) = 0;
 
   /**
    * Called when generating code.

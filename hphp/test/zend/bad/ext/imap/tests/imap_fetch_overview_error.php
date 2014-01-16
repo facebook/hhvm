@@ -25,7 +25,7 @@ var_dump( imap_fetch_overview($stream_id, $msg_no, $options, $extra_arg) );
 echo "\n-- Testing imap_fetch_overview() function with less than expected no. of arguments --\n";
 var_dump( imap_fetch_overview($stream_id) );
 ?>
-===DONE===?>
+===DONE===
 <?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

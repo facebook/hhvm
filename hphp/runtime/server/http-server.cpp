@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/server/http-server.h"
 
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/http-client.h"
@@ -43,10 +45,14 @@
 namespace HPHP {
 extern InitFiniNode *extra_server_init, *extra_server_exit;
 
+using boost::lexical_cast;
+using std::string;
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-HttpServerPtr HttpServer::Server;
+std::shared_ptr<HttpServer> HttpServer::Server;
 time_t HttpServer::StartTime;
 
 const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
@@ -106,8 +112,8 @@ HttpServer::HttpServer()
 
   for (unsigned int i = 0; i < RuntimeOption::SatelliteServerInfos.size();
        i++) {
-    SatelliteServerInfoPtr info = RuntimeOption::SatelliteServerInfos[i];
-    SatelliteServerPtr satellite = SatelliteServer::Create(info);
+    auto info = RuntimeOption::SatelliteServerInfos[i];
+    auto satellite = SatelliteServer::Create(info);
     if (satellite) {
       if (info->getType() == SatelliteServer::Type::KindOfDanglingPageServer) {
         m_danglings.push_back(satellite);
@@ -118,17 +124,14 @@ HttpServer::HttpServer()
   }
 
   if (RuntimeOption::XboxServerPort != 0) {
-    SatelliteServerInfoPtr xboxInfo(new XboxServerInfo());
-    SatelliteServerPtr satellite = SatelliteServer::Create(xboxInfo);
+    std::shared_ptr<SatelliteServerInfo> xboxInfo(new XboxServerInfo());
+    auto satellite = SatelliteServer::Create(xboxInfo);
     if (satellite) {
       m_satellites.push_back(satellite);
     }
   }
 
-  if (RuntimeOption::EnableStaticContentCache) {
-    StaticContentCache::TheCache.load();
-  }
-
+  StaticContentCache::TheCache.load();
   hphp_process_init();
 
   Server::InstallStopSignalHandlers(m_pageServer);
@@ -158,18 +161,18 @@ HttpServer::HttpServer()
   }
 
   for (unsigned int i = 0; i < RuntimeOption::ThreadDocuments.size(); i++) {
-    ServiceThreadPtr thread
-      (new ServiceThread(RuntimeOption::ThreadDocuments[i]));
-    m_serviceThreads.push_back(thread);
+    m_serviceThreads.push_back(
+      std::make_shared<ServiceThread>(RuntimeOption::ThreadDocuments[i]));
   }
 
   for (unsigned int i = 0; i < RuntimeOption::ThreadLoopDocuments.size(); i++) {
-    ServiceThreadPtr thread
-      (new ServiceThread(RuntimeOption::ThreadLoopDocuments[i], true));
-    m_serviceThreads.push_back(thread);
+    m_serviceThreads.push_back(
+      std::make_shared<ServiceThread>(
+        RuntimeOption::ThreadLoopDocuments[i], true));
   }
 }
 
+// Synchronously stop satellites and start danglings
 void HttpServer::onServerShutdown() {
   for (InitFiniNode *in = extra_server_exit; in; in = in->next) {
     in->func();
@@ -185,18 +188,19 @@ void HttpServer::onServerShutdown() {
   // When a new instance of HPHP has taken over our page server socket,
   // stop our admin server and satellites so it can acquire those ports.
   for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    string name = m_satellites[i]->getName();
+    std::string name = m_satellites[i]->getName();
     m_satellites[i]->stop();
     Logger::Info("satellite server %s stopped", name.c_str());
   }
   if (RuntimeOption::AdminServerPort) {
     m_adminServer->stop();
+    m_adminServer->waitForEnd();
     Logger::Info("admin server stopped");
   }
 
   // start dangling servers, so they can serve old version of pages
   for (unsigned int i = 0; i < m_danglings.size(); i++) {
-    string name = m_danglings[i]->getName();
+    std::string name = m_danglings[i]->getName();
     try {
       m_danglings[i]->start();
       Logger::Info("dangling server %s started", name.c_str());
@@ -216,10 +220,22 @@ void HttpServer::takeoverShutdown() {
 }
 
 HttpServer::~HttpServer() {
+  // XXX: why should we have to call stop here?  If we haven't already
+  // stopped (and joined all the threads), watchDog could still be
+  // running and leaving this destructor without a wait would be
+  // wrong...
   stop();
 }
 
-void HttpServer::run() {
+void HttpServer::startupFailure() {
+  Logger::Error("Shutting down due to failure(s) to bind in "
+                "HttpServer::run");
+  // Logger flushes itself---we don't need to run any atexit handlers
+  // (historically we've mostly just SEGV'd while trying) ...
+  _Exit(1);
+}
+
+void HttpServer::runOrExitProcess() {
   StartTime = time(0);
 
   m_watchDog.start();
@@ -234,7 +250,8 @@ void HttpServer::run() {
   if (RuntimeOption::ServerPort) {
     if (!startServer(true)) {
       Logger::Error("Unable to start page server");
-      return;
+      startupFailure();
+      not_reached();
     }
     Logger::Info("page server started");
   }
@@ -242,29 +259,29 @@ void HttpServer::run() {
   if (RuntimeOption::AdminServerPort) {
     if (!startServer(false)) {
       Logger::Error("Unable to start admin server");
-      abortServers();
-      return;
+      startupFailure();
+      not_reached();
     }
     Logger::Info("admin server started");
   }
 
   for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    string name = m_satellites[i]->getName();
+    std::string name = m_satellites[i]->getName();
     try {
       m_satellites[i]->start();
       Logger::Info("satellite server %s started", name.c_str());
     } catch (Exception &e) {
       Logger::Error("Unable to start satellite server %s: %s",
                     name.c_str(), e.getMessage().c_str());
-      abortServers();
-      return;
+      startupFailure();
+      not_reached();
     }
   }
 
   if (!Eval::Debugger::StartServer()) {
     Logger::Error("Unable to start debugger server");
-    abortServers();
-    return;
+    startupFailure();
+    not_reached();
   } else if (RuntimeOption::EnableDebuggerServer) {
     Logger::Info("debugger server started");
   }
@@ -284,15 +301,14 @@ void HttpServer::run() {
     if (m_stopReason) {
       Logger::Warning("Server stopping with reason: %s\n", m_stopReason);
     }
+    removePid();
     Logger::Info("page server stopped");
   }
 
   onServerShutdown(); // dangling server already started here
   time_t t0 = time(0);
   if (RuntimeOption::ServerPort) {
-    m_pageServer->waitForJobs();
-    removePid();
-    m_pageServer->closePort();
+    m_pageServer->stop();
   }
   time_t t1 = time(0);
   if (!m_danglings.empty() && RuntimeOption::ServerDanglingWait > 0) {
@@ -315,9 +331,20 @@ void HttpServer::run() {
     m_serviceThreads[i]->waitForEnd();
   }
 
+  waitForServers();
   hphp_process_exit();
   m_watchDog.waitForEnd();
   Logger::Info("all servers stopped");
+}
+
+void HttpServer::waitForServers() {
+  if (RuntimeOption::ServerPort) {
+    m_pageServer->waitForEnd();
+  }
+  if (RuntimeOption::AdminServerPort) {
+    m_adminServer->waitForEnd();
+  }
+  // all other servers invoke waitForEnd on stop
 }
 
 static void exit_on_timeout(int sig) {
@@ -433,7 +460,8 @@ void HttpServer::checkMemory() {
   }
 }
 
-void HttpServer::getSatelliteStats(vector<std::pair<std::string, int>> *stats) {
+void HttpServer::getSatelliteStats(
+    std::vector<std::pair<std::string, int>> *stats) {
   for (auto i : m_satellites) {
     std::pair<std::string, int> active("satellite." + i->getName() + ".load",
                                        i->getActiveWorker());
@@ -471,32 +499,15 @@ bool HttpServer::startServer(bool pageServer) {
       }
 
       HttpClient http;
-      string url = "http://";
-      if (!RuntimeOption::ServerIP.empty()) {
-        url += RuntimeOption::ServerIP;
-      } else {
-        url += "localhost";
-      }
+      std::string url = "http://";
+      url += RuntimeOption::ServerIP;
       url += ":";
-      url += lexical_cast<string>(RuntimeOption::AdminServerPort);
+      url += boost::lexical_cast<std::string>(RuntimeOption::AdminServerPort);
       url += "/stop";
-      if (!RuntimeOption::AdminPasswords.empty()) {
-        for (auto it = RuntimeOption::AdminPasswords.begin();
-             it != RuntimeOption::AdminPasswords.end();
-             ++it) {
-          string passUrl = url + "?auth=" + *it;
-          StringBuffer response;
-          http.get(passUrl.c_str(), response);
-          sleep(1);
-        }
-      } else {
-        if (!RuntimeOption::AdminPassword.empty()) {
-          url += "?auth=" + RuntimeOption::AdminPassword;
-        }
-        StringBuffer response;
-        http.get(url.c_str(), response);
-        sleep(1);
-      }
+      StringBuffer response;
+      http.get(url.c_str(), response);
+
+      sleep(1);
     }
   }
 
@@ -535,8 +546,8 @@ bool HttpServer::startServer(bool pageServer) {
           Logger::Info("killing anything listening on port %d", port);
         }
 
-        string cmd = "lsof -t -i :";
-        cmd += lexical_cast<string>(port);
+        std::string cmd = "lsof -t -i :";
+        cmd += lexical_cast<std::string>(port);
         cmd += " | xargs kill -9";
         Util::ssystem(cmd.c_str());
 

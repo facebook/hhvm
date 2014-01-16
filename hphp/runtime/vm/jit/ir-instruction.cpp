@@ -30,12 +30,22 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   , m_id(id)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(nullptr)
+  , m_block(nullptr)
   , m_marker(inst->m_marker)
   , m_extra(inst->m_extra ? cloneExtra(op(), inst->m_extra, arena)
                           : nullptr)
 {
+  assert(!isTransient());
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
-  setTaken(inst->taken());
+  if (hasEdges()) {
+    m_edges = new (arena) Edge[2];
+    m_edges[0].setInst(this);
+    m_edges[0].setTo(inst->next());
+    m_edges[1].setInst(this);
+    m_edges[1].setTo(inst->taken());
+  } else {
+    m_edges = nullptr;
+  }
 }
 
 IRTrace* IRInstruction::trace() const {
@@ -62,22 +72,16 @@ bool IRInstruction::isNative() const {
   return opcodeHasFlags(op(), CallsNative);
 }
 
-bool IRInstruction::producesReference() const {
+bool IRInstruction::producesReference(int dstNo) const {
   return opcodeHasFlags(op(), ProducesRC);
-}
-
-bool IRInstruction::hasMemEffects() const {
-  return opcodeHasFlags(op(), MemEffects) || mayReenterHelper();
 }
 
 bool IRInstruction::canCSE() const {
   auto canCSE = opcodeHasFlags(op(), CanCSE);
-  // Make sure that instructions that are CSE'able can't produce a reference
-  // count or consume reference counts. CheckType/AssertType are special
-  // because they can refine a maybeCounted type to a notCounted type, so they
-  // logically consume and produce a reference without doing any work.
-  assert(!canCSE || !consumesReferences() || is(CheckType, AssertType));
-  return canCSE && !mayReenterHelper();
+  // Make sure that instructions that are CSE'able can't consume reference
+  // counts.
+  assert(!canCSE || !consumesReferences());
+  return canCSE;
 }
 
 bool IRInstruction::consumesReferences() const {
@@ -88,71 +92,87 @@ bool IRInstruction::consumesReference(int srcNo) const {
   if (!consumesReferences()) {
     return false;
   }
-  // CheckType/AssertType consume a reference if we're guarding from a
-  // maybeCounted type to a notCounted type.
-  if (m_op == CheckType || m_op == AssertType) {
-    assert(srcNo == 0);
-    return src(0)->type().maybeCounted() && typeParam().notCounted();
-  }
-  // SpillStack consumes inputs 2 and onward
-  if (m_op == SpillStack) return srcNo >= 2;
-  // Call consumes inputs 3 and onward
-  if (m_op == Call) return srcNo >= 3;
-  // StRetVal only consumes input 1
-  if (m_op == StRetVal) return srcNo == 1;
 
-  if (m_op == StLoc || m_op == StLocNT) {
-    // StLoc[NT] <stkptr>, <value>
-    return srcNo == 1;
-  }
-  if (m_op == StProp || m_op == StPropNT || m_op == StMem || m_op == StMemNT) {
-    // StProp[NT]|StMem[NT] <base>, <offset>, <value>
-    return srcNo == 2;
-  }
-  if (m_op == ArraySet || m_op == ArraySetRef) {
-    // Only consumes the reference to its input array
-    return srcNo == 1;
-  }
-  return true;
-}
+  switch (op()) {
+    case ConcatStrStr:
+    case ConcatStrInt:
+    case ConcatCellCell:
+      // Call a helper that decrefs the first argument
+      return srcNo == 0;
 
-bool IRInstruction::mayModifyRefs() const {
-  Opcode opc = op();
-  // DecRefNZ does not have side effects other than decrementing the ref
-  // count. Therefore, its MayModifyRefs should be false.
-  if (opc == DecRef) {
-    auto type = src(0)->type();
-    if (isControlFlow()) {
-      // If the decref has a target label, then it exits if the destructor
-      // has to be called, so it does not have any side effects on the main
-      // trace.
-      return false;
-    }
-    if (!type.canRunDtor()) {
-      return false;
-    }
+    case StRef:
+    case StRefNT:
+    case StClosureArg:
+    case StClosureCtx:
+    case StContArValue:
+    case StContArKey:
+    case StRetVal:
+    case StLoc:
+    case StLocNT:
+      // Consume the value being stored, not the thing it's being stored into
+      return srcNo == 1;
+
+    case StProp:
+    case StPropNT:
+    case StMem:
+    case StMemNT:
+      // StProp[NT]|StMem[NT] <base>, <offset>, <value>
+      return srcNo == 2;
+
+    case ArraySet:
+    case ArraySetRef:
+      // Only consumes the reference to its input array
+      return srcNo == 1;
+
+    case SpillStack:
+      // Inputs 2+ are values to store
+      return srcNo >= 2;
+
+    case SpillFrame:
+      // Consumes the $this/Class field of the ActRec
+      return srcNo == 3;
+
+    case Call:
+      // Inputs 3+ are arguments to the function
+      return srcNo >= 3;
+
+    case ColAddElemC:
+      // value at index 2
+      return srcNo == 2;
+
+    case ColAddNewElemC:
+      // value at index 1
+      return srcNo == 1;
+
+    case CheckNullptr:
+      return srcNo == 0;
+
+    case CreateAFWHFunc:
+      return srcNo == 1;
+
+    case CreateAFWHMeth:
+      return srcNo == 2;
+
+    default:
+      return true;
   }
-  return opcodeHasFlags(opc, MayModifyRefs) || mayReenterHelper();
 }
 
 bool IRInstruction::mayRaiseError() const {
-  return opcodeHasFlags(op(), MayRaiseError) || mayReenterHelper();
+  if (!opcodeHasFlags(op(), MayRaiseError)) return false;
+
+  // Some instructions only throw if they do not have a non-catch label.
+  if (is(LdClsPropAddrCached, LdClsPropAddr) &&
+      taken() && !taken()->isCatch()) {
+    return false;
+  }
+
+  return opcodeHasFlags(op(), MayRaiseError);
 }
 
 bool IRInstruction::isEssential() const {
-  Opcode opc = op();
-  if (is(IncRef, IncRefCtx, DecRefNZ, DecRefNZOrBranch)) {
-    // If the ref count optimization is turned off, mark all refcounting
-    // operations as essential.
-    if (!RuntimeOption::EvalHHIREnableRefCountOpt) return true;
-
-    // If the source of a DecRefNZ is not an IncRef, mark it as essential
-    // because we won't remove its source as well as itself.
-    if (is(DecRefNZ) && !src(0)->inst()->is(IncRef)) return true;
-  }
   return isControlFlow() ||
-         opcodeHasFlags(opc, Essential) ||
-         mayReenterHelper();
+         opcodeHasFlags(op(), Essential);
 }
 
 bool IRInstruction::isTerminal() const {
@@ -186,14 +206,35 @@ bool IRInstruction::isLoad() const {
     case VGetProp:
     case VGetPropStk:
     case ArrayGet:
-    case VectorGet:
-    case PairGet:
     case MapGet:
     case StableMapGet:
     case CGetElem:
     case VGetElem:
     case VGetElemStk:
     case ArrayIdx:
+    case GenericIdx:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+/*
+ * Returns true if the instruction does nothing but load a PHP value from
+ * memory, possibly with some straightforward computation beforehand to decide
+ * where the load should come from. This specifically excludes opcodes such as
+ * CGetProp and ArrayGet that incref their return value.
+ */
+bool IRInstruction::isRawLoad() const {
+  switch (m_op) {
+    case LdMem:
+    case LdRef:
+    case LdStack:
+    case LdElem:
+    case LdProp:
+    case LdPackedArrayElem:
+    case Unbox:
       return true;
 
     default:
@@ -216,7 +257,6 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
       return srcIdx == 2;
 
     case ArraySet:
-    case VectorSet:
     case MapSet:
     case StableMapSet:
       return srcIdx == 3;
@@ -240,9 +280,11 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
 
 SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
-  assert(m_op == IncRef || m_op == PassFP || m_op == PassSP ||
-         m_op == CheckType || m_op == AssertType ||
-         m_op == Mov);
+  assert(is(IncRef, PassFP, PassSP,
+            CheckType, AssertType, AssertNonNull,
+            StRef, StRefNT,
+            ColAddElemC, ColAddNewElemC,
+            Mov));
   return src(0);
 }
 
@@ -283,25 +325,21 @@ bool IRInstruction::modifiesStack() const {
 
 SSATmp* IRInstruction::modifiedStkPtr() const {
   assert(modifiesStack());
-  assert(MInstrEffects::supported(this));
   SSATmp* sp = dst(hasMainDst() ? 1 : 0);
   assert(sp->isA(Type::StkPtr));
   return sp;
 }
 
-bool IRInstruction::hasMainDst() const {
-  return opcodeHasFlags(op(), HasDest);
+SSATmp* IRInstruction::previousStkPtr() const {
+  assert(modifiesStack());
+  assert(MInstrEffects::supported(this));
+  auto base = src(minstrBaseIdx(this));
+  assert(base->inst()->is(LdStackAddr));
+  return base->inst()->src(0);
 }
 
-bool IRInstruction::mayReenterHelper() const {
-  if (isCmpOp(op())) {
-    return cmpOpTypesMayReenter(op(),
-                                src(0)->type(),
-                                src(1)->type());
-  }
-  // Not necessarily actually false; this is just a helper for other
-  // bits.
-  return false;
+bool IRInstruction::hasMainDst() const {
+  return opcodeHasFlags(op(), HasDest);
 }
 
 SSATmp* IRInstruction::dst(unsigned i) const {
@@ -320,21 +358,21 @@ Range<const SSATmp*> IRInstruction::dsts() const {
 }
 
 void IRInstruction::convertToNop() {
+  if (hasEdges()) clearEdges();
   IRInstruction nop(Nop, marker());
-  // copy all but m_id, m_taken, m_listNode
+  // copy all but m_id, m_edges, m_listNode
   m_op = nop.m_op;
   m_typeParam = nop.m_typeParam;
   m_numSrcs = nop.m_numSrcs;
   m_srcs = nop.m_srcs;
   m_numDsts = nop.m_numDsts;
   m_dst = nop.m_dst;
-  setTaken(nullptr);
   m_extra = nullptr;
 }
 
 void IRInstruction::convertToJmp() {
   assert(isControlFlow());
-  assert(IMPLIES(block(), block()->back() == this));
+  assert(IMPLIES(block(), &block()->back() == this));
   m_op = Jmp;
   m_typeParam = Type::None;
   m_numSrcs = 0;
@@ -343,7 +381,12 @@ void IRInstruction::convertToJmp() {
   m_dst = nullptr;
   m_extra = nullptr;
   // Instructions in the simplifier don't have blocks yet.
-  if (block()) block()->setNext(nullptr);
+  setNext(nullptr);
+}
+
+void IRInstruction::convertToJmp(Block* target) {
+  convertToJmp();
+  setTaken(target);
 }
 
 void IRInstruction::convertToMov() {
@@ -360,15 +403,29 @@ void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
   assert(other->isTransient() || m_numDsts == other->m_numDsts);
   auto& arena = unit.arena();
 
-  // Copy all but m_id, m_taken.from, m_listNode, m_marker, and don't clone
+  // Copy all but m_id, m_edges[].from, m_listNode, m_marker, and don't clone
   // dests---the whole point of become() is things still point to us.
+  if (hasEdges() && !other->hasEdges()) {
+    clearEdges();
+  } else if (!hasEdges() && other->hasEdges()) {
+    m_edges = new (arena) Edge[2];
+    setNext(other->next());
+    setTaken(other->taken());
+  }
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
   m_numSrcs = other->m_numSrcs;
   m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
   m_srcs = new (arena) SSATmp*[m_numSrcs];
   std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
-  setTaken(other->taken());
+}
+
+void IRInstruction::setOpcode(Opcode newOpc) {
+  assert(hasEdges() || !JIT::hasEdges(newOpc)); // cannot allocate new edges
+  if (hasEdges() && !JIT::hasEdges(newOpc)) {
+    clearEdges();
+  }
+  m_op = newOpc;
 }
 
 void IRInstruction::addCopy(IRUnit& unit, SSATmp* src, const PhysLoc& dest) {
@@ -421,7 +478,7 @@ bool IRInstruction::cseEquals(IRInstruction* inst) const {
     return false;
   }
   /*
-   * Don't CSE on m_taken---it's ok to use the destination of some
+   * Don't CSE on the edges--it's ok to use the destination of some
    * earlier guarded load even though the instruction we may have
    * generated here would've exited to a different trace.
    *
@@ -462,7 +519,10 @@ bool BCMarker::valid() const {
   return
     func != nullptr &&
     bcOff >= func->base() && bcOff < func->past() &&
-    spOff <= func->numSlotsInFrame() + func->maxStackCells();
+    (RuntimeOption::EvalHHIREnableGenTimeInlining ||
+     spOff <= func->numSlotsInFrame() + func->maxStackCells());
+  // When inlining is on, we may modify markers to weird values in case reentry
+  // happens.
 }
 
 }}

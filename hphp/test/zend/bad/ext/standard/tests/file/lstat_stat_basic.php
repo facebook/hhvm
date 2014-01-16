@@ -67,7 +67,8 @@ echo "-- comparing difference in file stats before and after creating link to it
 var_dump( compare_stats($file_stat, $new_file_stat, $all_stat_keys, "==", true) ); // expect true
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_basic_link.tmp");
 unlink("$file_path/lstat_stat_basic/lstat_stat_basic.tmp");

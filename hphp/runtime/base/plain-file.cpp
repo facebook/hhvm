@@ -13,11 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/plain-file.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
-#include <unistd.h>
 
 namespace HPHP {
 
@@ -88,6 +92,7 @@ bool PlainFile::open(const String& filename, const String& mode) {
   m_stream = f;
   m_fd = fileno(f);
   m_buffer = (char *)malloc(BUFSIZ);
+  m_name = static_cast<std::string>(filename);
   if (m_buffer)
     setbuffer(f, m_buffer, BUFSIZ);
   return true;
@@ -138,6 +143,13 @@ int64_t PlainFile::readImpl(char *buffer, int64_t length) {
 int PlainFile::getc() {
   assert(valid());
   return File::getc();
+}
+
+// This definition is needed to avoid triggering a gcc compiler error about
+// an overloaded virtual when only overriding the one parameter version from
+// File.
+String PlainFile::read() {
+  return File::read();
 }
 
 String PlainFile::read(int64_t length) {

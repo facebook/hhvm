@@ -17,7 +17,9 @@
 #ifndef incl_HPHP_TIMER_H_
 #define incl_HPHP_TIMER_H_
 
-#include "hphp/util/base.h"
+#include <cstdint>
+#include <string>
+
 #include "hphp/util/compatibility.h"
 
 namespace HPHP {

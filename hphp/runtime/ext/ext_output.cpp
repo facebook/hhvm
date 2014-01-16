@@ -26,10 +26,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-bool f_ob_start(CVarRef output_callback /* = uninit_null() */,
+bool f_ob_start(CVarRef callback /* = uninit_null() */,
                 int chunk_size /* = 0 */, bool erase /* = true */) {
   // ignoring chunk_size and erase
-  g_context->obStart(output_callback);
+
+  if (!callback.isNull()) {
+    CallCtx ctx;
+    vm_decode_function(callback, nullptr, false, ctx);
+    if (!ctx.func) {
+      return false;
+    }
+  }
+  g_context->obStart(callback);
   return true;
 }
 void f_ob_clean() {
@@ -50,17 +58,24 @@ bool f_ob_end_flush() {
 void f_flush() {
   g_context->flush();
 }
-String f_ob_get_contents() {
+Variant f_ob_get_contents() {
+  if (f_ob_get_level() == 0) {
+    return false;
+  }
   return g_context->obCopyContents();
 }
-String f_ob_get_clean() {
+Variant f_ob_get_clean() {
   String output = f_ob_get_contents();
-  f_ob_end_clean();
+  if (!f_ob_end_clean()) {
+    return false;
+  }
   return output;
 }
-String f_ob_get_flush() {
+Variant f_ob_get_flush() {
   String output = g_context->obCopyContents();
-  g_context->obFlush();
+  if (!f_ob_end_flush()) {
+    return false;
+  }
   return output;
 }
 int64_t f_ob_get_length() {
@@ -71,9 +86,6 @@ int64_t f_ob_get_level() {
 }
 Array f_ob_get_status(bool full_status /* = false */) {
   return g_context->obGetStatus(full_status);
-}
-String f_ob_gzhandler(const String& buffer, int mode) {
-  throw NotSupportedException(__func__, "something that's in transport layer");
 }
 void f_ob_implicit_flush(bool flag /* = true */) {
   g_context->obSetImplicitFlush(flag);

@@ -17,6 +17,7 @@
 #define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -142,7 +143,7 @@ inline SRFlags operator|(SRFlags a, SRFlags b) {
 // REQ_BIND_CALL
 struct ReqBindCall {
   SrcKey m_sourceInstr;
-  Transl::TCA m_toSmash;
+  JIT::TCA m_toSmash;
   int m_nArgs;
   bool m_isImmutable; // call was to known func.
 };
@@ -155,13 +156,13 @@ struct ServiceReqArgInfo {
   } m_kind;
   union {
     uint64_t m_imm;
-    Transl::ConditionCode m_cc;
+    JIT::ConditionCode m_cc;
   };
 };
 
 typedef smart::vector<ServiceReqArgInfo> ServiceReqArgVec;
 
-inline ServiceReqArgInfo ccServiceReqArgInfo(Transl::ConditionCode cc) {
+inline ServiceReqArgInfo ccServiceReqArgInfo(JIT::ConditionCode cc) {
   return ServiceReqArgInfo{ServiceReqArgInfo::CondCode, { uint64_t(cc) }};
 }
 
@@ -192,7 +193,6 @@ inline void packServiceReqArgs(ServiceReqArgVec& argv) {
 
 //////////////////////////////////////////////////////////////////////
 
-using Transl::TCA;
 
 /*
  * emitServiceReqWork --

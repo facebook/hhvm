@@ -23,6 +23,8 @@
 
 #include <boost/noncopyable.hpp>
 
+struct stat;
+
 namespace HPHP {
 
 class Directory;
@@ -44,6 +46,18 @@ class Wrapper : boost::noncopyable {
     return -1;
   }
   virtual int stat(const String& path, struct stat* buf) {
+    return -1;
+  }
+  virtual int unlink(const String& path) {
+    return -1;
+  }
+  virtual int rename(const String& oldname, const String& newname) {
+    return -1;
+  }
+  virtual int mkdir(const String& path, int mode, int options) {
+    return -1;
+  }
+  virtual int rmdir(const String& path, int options) {
     return -1;
   }
   virtual Directory* opendir(const String& path) {

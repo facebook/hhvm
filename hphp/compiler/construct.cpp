@@ -469,9 +469,23 @@ void Construct::parseTimeFatal(Compiler::ErrorType err, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
   if (err != Compiler::NoError) Compiler::Error(err, shared_from_this());
   throw ParseTimeFatalException(m_loc->file, m_loc->line0, "%s", msg.c_str());
+}
+
+void Construct::analysisTimeFatal(Compiler::ErrorType err,
+                                  const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  string msg;
+  string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+
+  assert(err != Compiler::NoError);
+  Compiler::Error(err, shared_from_this());
+  throw AnalysisTimeFatalException(m_loc->file, m_loc->line0,
+                                   "%s [analysis]", msg.c_str());
 }

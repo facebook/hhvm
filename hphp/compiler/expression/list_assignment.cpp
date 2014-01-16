@@ -31,7 +31,7 @@ using namespace HPHP;
 // constructors/destructors
 
 /*
-  Determine whether the rhs behaves normall, or abnormally.
+  Determine whether the rhs behaves normally, or abnormally.
 
   1) If the expression is the silence operator, recurse on the inner expression.
   2) If the expression is a list assignment expression, recurse on the
@@ -77,6 +77,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
     case Expression::KindOfIncludeExpression:
     case Expression::KindOfYieldExpression:
     case Expression::KindOfAwaitExpression:
+    case Expression::KindOfQueryExpression:
       return ListAssignment::Regular;
 
     case Expression::KindOfListAssignment:
@@ -118,6 +119,15 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
     case Expression::KindOfParameterExpression:
     case Expression::KindOfModifierExpression:
     case Expression::KindOfUserAttribute:
+    case Expression::KindOfFromClause:
+    case Expression::KindOfLetClause:
+    case Expression::KindOfWhereClause:
+    case Expression::KindOfSelectClause:
+    case Expression::KindOfIntoClause:
+    case Expression::KindOfJoinClause:
+    case Expression::KindOfGroupClause:
+    case Expression::KindOfOrderbyClause:
+    case Expression::KindOfOrdering:
       always_assert(false);
 
     // non-arrays
@@ -271,6 +281,22 @@ TypePtr ListAssignment::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
   if (!m_array) return TypePtr();
   return m_array->inferAndCheck(ar, Type::Variant, false);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ListAssignment::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = m_array != nullptr ? 3 : 2;
+  cg.printObjectHeader("ListAssignmentExpression", numProps);
+  cg.printPropertyHeader("variables");
+  cg.printExpressionVector(m_variables);
+  if (m_array != nullptr) {
+    cg.printPropertyHeader("expression");
+    m_array->outputCodeModel(cg);
+  }
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,8 +1,8 @@
-object(Vector)#1 (0) {
+object(HH\Vector)#1 (0) {
 }
 object(Map)#1 (0) {
 }
-object(Vector)#1 (2) {
+object(HH\Vector)#1 (2) {
   [0]=>
   int(1)
   [1]=>
@@ -14,11 +14,11 @@ object(StableMap)#1 (2) {
   ["b"]=>
   int(2)
 }
-object(Vector)#1 (0) {
+object(HH\Vector)#1 (0) {
 }
 object(Map)#1 (0) {
 }
-object(Vector)#1 (2) {
+object(HH\Vector)#1 (2) {
   [0]=>
   int(1)
   [1]=>

@@ -25,7 +25,7 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/builtin_symbols.h"
-#include "hphp/util/json.h"
+#include "hphp/compiler/json.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/db-conn.h"
 #include "hphp/util/exception.h"
@@ -484,6 +484,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Option::ParseTimeOpts = false;
   }
 
+  initialize_hhbbc_options();
+
   return 0;
 }
 
@@ -540,6 +542,12 @@ int process(const CompilerOptions &po) {
 
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {
+    bool wp = Option::WholeProgram;
+    Option::WholeProgram = false;
+    BuiltinSymbols::s_systemAr = ar;
+    hphp_process_init();
+    BuiltinSymbols::s_systemAr.reset();
+    Option::WholeProgram = wp;
     if (po.target == "hhbc" && !Option::WholeProgram) {
       // We're trying to produce the same bytecode as runtime parsing.
       // There's nothing to do.
@@ -547,9 +555,7 @@ int process(const CompilerOptions &po) {
       if (!BuiltinSymbols::Load(ar)) {
         return false;
       }
-      ar->loadBuiltins();
     }
-    hphp_process_init();
   }
 
   {
@@ -801,6 +807,7 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   if (po.format.find("exe") != string::npos) {
     RuntimeOption::RepoCentralPath += ".hhbc";
   }
+  unlink(RuntimeOption::RepoCentralPath.c_str());
   RuntimeOption::RepoLocalMode = "--";
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
@@ -915,9 +922,9 @@ int runTarget(const CompilerOptions &po) {
     if (buf.empty()) return -1;
 
     cmd += buf;
-    cmd += " -vEval.Jit=0";
-    cmd += " -vEval.DumpBytecode=1";
     cmd += " -vRepo.Authoritative=true";
+    if (getenv("HPHP_DUMP_BYTECODE")) cmd += " -vEval.DumpBytecode=1";
+    if (getenv("HPHP_INTERP"))        cmd += " -vEval.Jit=0";
     cmd += " -vRepo.Local.Mode=r- -vRepo.Local.Path=";
   }
   cmd += po.outputDir + '/' + po.program;

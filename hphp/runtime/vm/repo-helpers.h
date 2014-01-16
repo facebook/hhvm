@@ -99,6 +99,7 @@ class RepoQuery {
   void bindText(const char* paramName, const char* text, size_t size,
                 bool isStatic=false);
   void bindStaticString(const char* paramName, const StringData* sd);
+  void bindStdString(const char* paramName, const std::string& s);
   void bindDouble(const char* paramName, double val);
   void bindInt(const char* paramName, int val);
   void bindId(const char* paramName, Id id);
@@ -129,6 +130,7 @@ class RepoQuery {
   void getText(int iCol, const char*& text);
   void getText(int iCol, const char*& text, size_t& size);
   void getStaticString(int iCol, StringData*& s);
+  void getStdString(int iCol, std::string& s);
   void getDouble(int iCol, double& val);
   void getInt(int iCol, int& val);
   void getId(int iCol, Id& id);

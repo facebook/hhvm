@@ -39,13 +39,6 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(iconv);
 ///////////////////////////////////////////////////////////////////////////////
 
-#define _php_iconv_memequal(a, b, c) \
-  ((c) == sizeof(unsigned long)                                         \
-   ? *((unsigned long *)(a)) == *((unsigned long *)(b))                 \
-   : ((c) == sizeof(unsigned int)                                       \
-      ? *((unsigned int *)(a)) == *((unsigned int *)(b))                \
-      : memcmp(a, b, c) == 0))
-
 static char _generic_superset_name[] = "UCS-4LE";
 #define GENERIC_SUPERSET_NAME _generic_superset_name
 #define GENERIC_SUPERSET_NBYTES 4
@@ -581,7 +574,19 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
                                          size_t haystk_nbytes,
                                          const char *ndl, size_t ndl_nbytes,
                                          int offset, const char *enc) {
-  char buf[GENERIC_SUPERSET_NBYTES];
+
+#define _php_iconv_memequal(a, b, c)            \
+  ((c) == sizeof(uint64_t)                      \
+   ? (x).buf_64 == *((uint64_t *)(b))           \
+   : ((c) == sizeof(uint32_t)                   \
+      ? (x).buf_32 == *((uint32_t *)(b))        \
+      : memcmp((a).buf, b, c) == 0))
+
+  union gsnb_t {
+    char buf[GENERIC_SUPERSET_NBYTES];
+    uint32_t buf_32;
+    uint64_t buf_64;
+  } x;
   php_iconv_err_t err = PHP_ICONV_ERR_SUCCESS;
   iconv_t cd;
   const char *in_p;
@@ -629,8 +634,8 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 
   for (in_p = haystk, in_left = haystk_nbytes, cnt = 0; in_left > 0; ++cnt) {
     size_t prev_in_left;
-    out_p = buf;
-    out_left = sizeof(buf);
+    out_p = x.buf;
+    out_left = sizeof(x.buf);
 
     prev_in_left = in_left;
 
@@ -653,7 +658,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
     }
     if (offset >= 0) {
       if (cnt >= (unsigned int)offset) {
-        if (_php_iconv_memequal(buf, ndl_buf_p, sizeof(buf))) {
+        if (_php_iconv_memequal(x, ndl_buf_p, sizeof(x.buf))) {
           if (match_ofs == (unsigned int)-1) {
             match_ofs = cnt;
           }
@@ -671,7 +676,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
           lim = (unsigned int)(ndl_buf_p - ndl_buf);
 
           while (j < lim) {
-            if (_php_iconv_memequal(&ndl_buf[j], &ndl_buf[i],
+            if (_php_iconv_memequal(*(gsnb_t*)&ndl_buf[j], &ndl_buf[i],
                                     GENERIC_SUPERSET_NBYTES)) {
               i += GENERIC_SUPERSET_NBYTES;
             } else {
@@ -681,7 +686,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
             j += GENERIC_SUPERSET_NBYTES;
           }
 
-          if (_php_iconv_memequal(buf, &ndl_buf[i], sizeof(buf))) {
+          if (_php_iconv_memequal(x, &ndl_buf[i], sizeof(x.buf))) {
             match_ofs += (lim - i) / GENERIC_SUPERSET_NBYTES;
             i += GENERIC_SUPERSET_NBYTES;
             ndl_buf_p = &ndl_buf[i];
@@ -694,7 +699,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
         }
       }
     } else {
-      if (_php_iconv_memequal(buf, ndl_buf_p, sizeof(buf))) {
+      if (_php_iconv_memequal(x, ndl_buf_p, sizeof(x.buf))) {
         if (match_ofs == (unsigned int)-1) {
           match_ofs = cnt;
         }
@@ -714,7 +719,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
         lim = (unsigned int)(ndl_buf_p - ndl_buf);
 
         while (j < lim) {
-          if (_php_iconv_memequal(&ndl_buf[j], &ndl_buf[i],
+          if (_php_iconv_memequal(*(gsnb_t*)&ndl_buf[j], &ndl_buf[i],
                                   GENERIC_SUPERSET_NBYTES)) {
             i += GENERIC_SUPERSET_NBYTES;
           } else {
@@ -724,7 +729,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
           j += GENERIC_SUPERSET_NBYTES;
         }
 
-        if (_php_iconv_memequal(buf, &ndl_buf[i], sizeof(buf))) {
+        if (_php_iconv_memequal(x, &ndl_buf[i], sizeof(x.buf))) {
           match_ofs += (lim - i) / GENERIC_SUPERSET_NBYTES;
           i += GENERIC_SUPERSET_NBYTES;
           ndl_buf_p = &ndl_buf[i];

@@ -71,7 +71,7 @@ public: // ArrayData implementation
   static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
 
-  static ArrayData* Plus(ArrayData*, const ArrayData* elems);
+  static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant &value);
   static ArrayData* Dequeue(ArrayData*, Variant &value);
@@ -88,7 +88,7 @@ public: // ArrayData implementation
   static bool ValidFullPos(const ArrayData*, const FullPos & fp);
   static bool AdvanceFullPos(ArrayData*, FullPos&);
   static bool IsVectorData(const ArrayData*);
-  static APCVariant *GetSharedVariant(const ArrayData* ad);
+  static APCHandle *GetAPCHandle(const ArrayData* ad);
 
   static ArrayData* EscalateForSort(ArrayData*);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);

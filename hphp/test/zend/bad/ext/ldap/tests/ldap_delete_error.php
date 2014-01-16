@@ -24,7 +24,7 @@ var_dump(
 	ldap_errno($link)
 );
 ?>
-===DONE===?>
+===DONE===
 <?php
 require "connect.inc";
 

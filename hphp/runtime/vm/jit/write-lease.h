@@ -16,12 +16,12 @@
 #ifndef incl_HPHP_WRITELEASE_H_
 #define incl_HPHP_WRITELEASE_H_
 
-#include "hphp/util/base.h"
+#include "hphp/util/compilation-flags.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include <pthread.h>
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 /*
  * The write Lease guards write access to the translation caches,
@@ -106,6 +106,6 @@ struct BlockingLeaseHolder : public LeaseHolderBase {
     : LeaseHolderBase(l, LeaseAcquire::BLOCKING) {}
 };
 
-}} // HPHP::Transl
+}} // HPHP::JIT
 
 #endif /* incl_HPHP_WRITELEASE_H_ */

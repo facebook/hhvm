@@ -656,21 +656,6 @@ bool TestCodeError::TestUnknownTraitMethod() {
   return true;
 }
 
-bool TestCodeError::TestInvalidAccessModifier() {
-  VE(InvalidAccessModifier,
-    "<?php\n"
-     "trait T1 {\n"
-     "  public function Func1() { }\n"
-     "}\n"
-     "class C {\n"
-     "  use T1 {\n"
-     "    T1::Func1 as static Func2;\n"
-     "  }\n"
-     "}\n");
-
-  return true;
-}
-
 bool TestCodeError::TestCyclicDependentTraits() {
   VE(CyclicDependentTraits,
      "<?php\n"
@@ -774,5 +759,10 @@ bool TestCodeError::TestBadDefaultValueType() {
 
   VE(BadDefaultValueType, "<?php class C { function f(int $i1 = array()) {} }");
   VE(BadDefaultValueType, "<?php function f(int $i1 = array()) {}");
+  return true;
+}
+
+bool TestCodeError::TestInvalidMethodDefinition() {
+  VE(InvalidMethodDefinition, "<?php interface I {public function f() {}}");
   return true;
 }

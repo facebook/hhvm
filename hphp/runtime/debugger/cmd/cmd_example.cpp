@@ -62,7 +62,7 @@ void CmdExample::onClient(DebuggerClient &client) {
   }
 
   m_input = client.lineRest(2);
-  CmdExamplePtr res = client.xend<CmdExample>(this);
+  auto res = client.xend<CmdExample>(this);
   client.output("%d", res->m_output);
 }
 

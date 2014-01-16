@@ -16,6 +16,11 @@
 */
 #include "hphp/runtime/ext/ext_options.h"
 
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/utsname.h>
+#include <pwd.h>
+
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/ext/ext_misc.h"
@@ -31,8 +36,6 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
-#include <sys/utsname.h>
-#include <pwd.h>
 
 #include "hphp/runtime/vm/request-arena.h"
 
@@ -115,7 +118,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
   g_vmContext->invokeFunc(
     &retVal,
     func,
-    null_array,
+    init_null_variant,
     nullptr,
     nullptr,
     // Zend appears to share the variable environment with the assert()
@@ -131,7 +134,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
 Variant f_assert(CVarRef assertion) {
   if (!s_option_data->assertActive) return true;
 
-  Transl::CallerFrame cf;
+  JIT::CallerFrame cf;
   Offset callerOffset;
   auto const fp = cf(&callerOffset);
 
@@ -247,10 +250,6 @@ int64_t f_get_magic_quotes_gpc() {
 
 int64_t f_get_magic_quotes_runtime() {
   return 0;
-}
-
-Array f_get_required_files() {
-  throw NotSupportedException(__func__, "requires PHP source code");
 }
 
 Variant f_getenv(const String& varname) {
@@ -545,7 +544,7 @@ Array f_getopt(const String& options, CVarRef longopts /* = null_variant */) {
   Array vargv = g->get(s_argv).toArray();
   int argc = vargv.size();
   char **argv = (char **)malloc((argc+1) * sizeof(char*));
-  vector<String> holders;
+  std::vector<String> holders;
   int index = 0;
   for (ArrayIter iter(vargv); iter; ++iter) {
     String arg = iter.second().toString();
@@ -723,14 +722,6 @@ bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec) {
 int64_t f_cpu_get_count() { return Process::GetCPUCount();}
 String f_cpu_get_model() { return Process::GetCPUModel();}
 
-String f_ini_alter(const String& varname, const String& newvalue) {
-  throw NotSupportedException(__func__, "not using ini");
-}
-
-Array f_ini_get_all(const String& extension /* = null_string */) {
-  throw NotSupportedException(__func__, "not using ini");
-}
-
 String f_ini_get(const String& varname) {
   String value = empty_string;
   IniSetting::Get(varname, value);
@@ -773,14 +764,6 @@ Variant f_php_ini_loaded_file() {
   return false;
 }
 
-String f_php_ini_scanned_files() {
-  throw NotSupportedException(__func__, "not using ini");
-}
-
-String f_php_logo_guid() {
-  throw NotSupportedException(__func__, "not PHP anymore");
-}
-
 String f_php_sapi_name() {
   return RuntimeOption::ExecutionMode;
 }
@@ -814,10 +797,6 @@ String f_php_uname(const String& mode /* = null_string */) {
     }
   }
   return ret;
-}
-
-bool f_phpcredits(int flag /* = 0 */) {
-  throw NotSupportedException(__func__, "not PHP anymore");
 }
 
 bool f_phpinfo(int what /* = 0 */) {
@@ -857,14 +836,6 @@ String f_sys_get_temp_dir() {
   char *env = getenv("TMPDIR");
   if (env && *env) return String(env, CopyString);
   return "/tmp";
-}
-
-String f_zend_logo_guid() {
-  throw NotSupportedException(__func__, "deprecated and removed");
-}
-
-int64_t f_zend_thread_id() {
-  throw NotSupportedException(__func__, "not zend anymore");
 }
 
 String f_zend_version() {
@@ -1087,8 +1058,10 @@ void f_gc_disable() {
 }
 
 int64_t f_gc_collect_cycles() {
-  raise_warning("HipHop currently does not support circular reference "
-                "collection");
+  if (RuntimeOption::EnableHipHopSyntax) {
+    raise_warning("HipHop currently does not support circular reference "
+                  "collection");
+  }
   return 0;
 }
 

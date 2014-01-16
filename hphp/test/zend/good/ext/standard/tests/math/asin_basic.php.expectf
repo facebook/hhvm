@@ -1,0 +1,8 @@
+asin .5  = float(%f)
+Pass
+asin 0.86602540378444 = float(%f)
+Pass
+asin 1.0 = float(%f)
+Pass
+asin 0.0 = float(%f)
+Pass

@@ -1,3 +1,18 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 
 #include "hphp/runtime/base/runtime-option.h"
@@ -30,9 +45,13 @@ void emitStoreRetIntoActRec(vixl::MacroAssembler& a) {
 TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   if (call.isDirect()) {
     a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call.getAddress()));
-  } else {
+  } else if (call.isVirtual()) {
     a. Ldr  (rHostCallReg, argReg(0)[0]);
     a. Ldr  (rHostCallReg, rHostCallReg[call.getOffset()]);
+  } else {
+    // call indirect currently not implemented. It'll be somthing like
+    // a.Br(x2a(call.getReg()))
+    not_implemented();
   }
 
   using namespace vixl;
@@ -47,6 +66,18 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   // will still be pointing to the HostCall; it's not advanced past it until the
   // host call returns. In the native case, by contrast, we'll be looking at
   // return addresses, which point after the call.
+  return fixupAddr;
+}
+
+TCA emitCall(vixl::MacroAssembler& a, TCA call) {
+  a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call));
+
+  using namespace vixl;
+  a.   Push    (x30, x29);
+  a.   Blr     (rHostCallReg);
+  auto fixupAddr = a.frontier();
+  a.   Pop     (x29, x30);
+
   return fixupAddr;
 }
 
@@ -69,8 +100,8 @@ void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
-                                 bool inTracelet, Transl::FixupMap& fixupMap,
-                                 Transl::Fixup fixup) {
+                                 bool inTracelet, JIT::FixupMap& fixupMap,
+                                 JIT::Fixup fixup) {
   vixl::MacroAssembler a { mainCode };
   vixl::MacroAssembler astubs { stubsCode };
 
@@ -78,9 +109,8 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   emitSmashableJump(mainCode, stubsCode.frontier(), CC_NZ);
 
   astubs.  Mov  (argReg(0), rVmFp);
-  void (*helper)(const ActRec*) = functionEnterHelper;
 
-  auto fixupAddr = emitCall(astubs, CppCall(helper));
+  auto fixupAddr = emitCall(astubs, tx64->uniqueStubs.functionEnterHelper);
   if (inTracelet) {
     fixupMap.recordSyncPoint(fixupAddr,
                              fixup.m_pcOffset, fixup.m_spOffset);
@@ -124,7 +154,7 @@ void emitIncRefKnownType(vixl::MacroAssembler& a,
   a.   Ldr   (rCount, rAddr[FAST_REFCOUNT_OFFSET]);
   // Careful: tbnz can only test a single bit, so you pass a bit position
   // instead of a full-blown immediate. 0 = lsb, 63 = msb.
-  a.   Tbnz  (rCount.X(), RefCountStaticBitPos, &dontCount);
+  a.   Tbnz  (rCount.X(), UncountedBitPos, &dontCount);
   // Increment and store count.
   a.   Add   (rCount, rCount, 1);
   a.   Str   (rCount, rAddr[FAST_REFCOUNT_OFFSET]);

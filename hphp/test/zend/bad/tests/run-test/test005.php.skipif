@@ -1,0 +1,3 @@
+<?php
+!extension_loaded("Zend Optimizer") or die("skip Zend Optimizer is loaded");
+?>

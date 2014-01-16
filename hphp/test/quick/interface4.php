@@ -1,4 +1,8 @@
 <?php
+
+// disable array -> "Array" conversion notice
+error_reporting(error_reporting() & ~E_NOTICE);
+
 interface I {
   function foo($x, $y=0);
 }

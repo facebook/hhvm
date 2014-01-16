@@ -15,11 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
+#include <hphp/runtime/ext/asio/gen_map_wait_handle.h>
+
 #include <hphp/runtime/ext/ext_collections.h>
-#include <hphp/runtime/ext/ext_asio.h>
 #include <hphp/runtime/ext/ext_closure.h>
 #include <hphp/runtime/ext/asio/asio_context.h>
 #include <hphp/runtime/ext/asio/asio_session.h>
+#include <hphp/runtime/ext/asio/static_exception_wait_handle.h>
+#include <hphp/runtime/ext/asio/static_result_wait_handle.h>
 #include <hphp/system/systemlib.h>
 
 namespace HPHP {
@@ -36,13 +39,6 @@ namespace {
       exception_field = new_exception;
     }
   }
-}
-
-c_GenMapWaitHandle::c_GenMapWaitHandle(Class* cb)
-    : c_BlockableWaitHandle(cb), m_exception() {
-}
-
-c_GenMapWaitHandle::~c_GenMapWaitHandle() {
 }
 
 void c_GenMapWaitHandle::t___construct() {
@@ -67,9 +63,9 @@ Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
     throw e;
   }
   assert(dependencies.getObjectData()->instanceof(c_Map::classof()));
-  p_Map deps = static_cast<c_Map*>(dependencies.getObjectData())->clone();
+  auto deps = p_Map::attach(c_Map::Clone(dependencies.getObjectData()));
   for (ssize_t iter_pos = deps->iter_begin();
-       iter_pos;
+       deps->iter_valid(iter_pos);
        iter_pos = deps->iter_next(iter_pos)) {
 
     Cell* current = tvAssertCell(deps->iter_value(iter_pos));
@@ -82,7 +78,7 @@ Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
 
   Object exception;
   for (ssize_t iter_pos = deps->iter_begin();
-       iter_pos;
+       deps->iter_valid(iter_pos);
        iter_pos = deps->iter_next(iter_pos)) {
 
     Cell* current = tvAssertCell(deps->iter_value(iter_pos));
@@ -121,18 +117,24 @@ void c_GenMapWaitHandle::initialize(CObjRef exception, c_Map* deps, ssize_t iter
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
-  try {
-    blockOn(child);
-  } catch (const Object& cycle_exception) {
-    putException(m_exception, cycle_exception.get());
-    m_iterPos = m_deps->iter_next(m_iterPos);
-    onUnblocked();
+
+  if (isInContext()) {
+    try {
+      child->enterContext(getContextIdx());
+    } catch (const Object& cycle_exception) {
+      putException(m_exception, cycle_exception.get());
+      m_iterPos = m_deps->iter_next(m_iterPos);
+      onUnblocked();
+      return;
+    }
   }
+
+  blockOn(child);
 }
 
 void c_GenMapWaitHandle::onUnblocked() {
   for (;
-       m_iterPos;
+       m_deps->iter_valid(m_iterPos);
        m_iterPos = m_deps->iter_next(m_iterPos)) {
 
     Cell* current = tvAssertCell(m_deps->iter_value(m_iterPos));
@@ -149,6 +151,10 @@ void c_GenMapWaitHandle::onUnblocked() {
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       try {
+        if (isInContext()) {
+          child_wh->enterContext(getContextIdx());
+        }
+        detectCycle(child_wh);
         blockOn(child_wh);
         return;
       } catch (const Object& cycle_exception) {
@@ -177,19 +183,7 @@ c_WaitableWaitHandle* c_GenMapWaitHandle::getChild() {
       m_deps->iter_value(m_iterPos)->m_data.pobj);
 }
 
-void c_GenMapWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-
-  // stop before corrupting unioned data
-  if (isFinished()) {
-    return;
-  }
-
-  // already in the more specific context?
-  if (LIKELY(getContextIdx() >= ctx_idx)) {
-    return;
-  }
-
+void c_GenMapWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   assert(getState() == STATE_BLOCKED);
 
   // recursively import current child
@@ -209,7 +203,7 @@ void c_GenMapWaitHandle::enterContext(context_idx_t ctx_idx) {
   // try to import other children
   try {
     for (ssize_t iter_pos = m_deps->iter_next(m_iterPos);
-         iter_pos;
+         m_deps->iter_valid(iter_pos);
          iter_pos = m_deps->iter_next(iter_pos)) {
 
       Cell* current = tvAssertCell(m_deps->iter_value(iter_pos));

@@ -86,6 +86,7 @@ private:
   SSATmp* simplifySame(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyNSame(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyIsType(IRInstruction*);
+  SSATmp* simplifyIsScalarType(IRInstruction*);
   SSATmp* simplifyJmpIsType(IRInstruction*);
   SSATmp* simplifyConcatCellCell(IRInstruction*);
   SSATmp* simplifyConcatStrStr(SSATmp* src1, SSATmp* src2);
@@ -128,6 +129,7 @@ private:
   SSATmp* simplifyLdCtx(IRInstruction*);
   SSATmp* simplifyLdClsCtx(IRInstruction*);
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
+  SSATmp* simplifyConvClsToCctx(IRInstruction* inst);
   SSATmp* simplifySpillStack(IRInstruction* inst);
   SSATmp* simplifyCall(IRInstruction* inst);
   SSATmp* simplifyCmp(Opcode opName, IRInstruction* inst,
@@ -139,12 +141,31 @@ private:
   SSATmp* simplifyCoerceStk(IRInstruction*);
   SSATmp* simplifyAssertStk(IRInstruction*);
   SSATmp* simplifyLdStack(IRInstruction*);
+  SSATmp* simplifyTakeStack(IRInstruction*);
   SSATmp* simplifyLdStackAddr(IRInstruction*);
   SSATmp* simplifyDecRefStack(IRInstruction*);
   SSATmp* simplifyDecRefLoc(IRInstruction*);
   SSATmp* simplifyLdLoc(IRInstruction*);
   SSATmp* simplifyStRef(IRInstruction*);
   SSATmp* simplifyAssertNonNull(IRInstruction*);
+
+
+  template <class Oper>
+  SSATmp* simplifyConst(SSATmp* src1, SSATmp* src2, Oper op);
+
+  template <class Oper>
+  SSATmp* simplifyCommutative(SSATmp* src1,
+                              SSATmp* src2,
+                              Opcode opcode,
+                              Oper op);
+
+  template <class OutOper, class InOper>
+  SSATmp* simplifyDistributive(SSATmp* src1,
+                               SSATmp* src2,
+                               Opcode outcode,
+                               Opcode incode,
+                               OutOper outop,
+                               InOper inop);
 
   template<class Oper>
   SSATmp* simplifyShift(SSATmp* src1, SSATmp* src2, Oper op);
@@ -255,10 +276,35 @@ bool canUseSPropCache(SSATmp* clsTmp,
                       const StringData* propName,
                       const Class* ctx);
 
+
 /*
- * Traces through any IncRefs to get the true value of tmp.
+ * Returns the canonical version of the given value by tracing through any
+ * passthrough instructions (Mov, CheckType, etc...).
  */
-SSATmp* chaseIncRefs(SSATmp* tmp);
+const SSATmp* canonical(const SSATmp* tmp);
+SSATmp* canonical(SSATmp* tmp);
+
+/*
+ * Assuming sp is the VM stack pointer either from inside an FPI region or an
+ * inlined call, find the SpillFrame instruction that defined the current
+ * frame. Returns nullptr if the frame can't be found.
+ */
+IRInstruction* findSpillFrame(SSATmp* sp);
+
+/*
+ * Given an instruction defining a frame pointer, chase backwards in the
+ * definition chain looking for a PassFP, returning it if found. If a
+ * DefInlineFP or DefFP is found before a PassFP, returns nullptr.
+ */
+IRInstruction* findPassFP(IRInstruction* inst);
+
+/*
+ * Given an instruction defining a frame pointer, chase backwards in the
+ * definition chain looking for the first DefFP or DefInlineFP. Never returns
+ * nullptr.
+ */
+const IRInstruction* frameRoot(const IRInstruction* inst);
+IRInstruction* frameRoot(IRInstruction* inst);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -158,6 +158,9 @@ flood error logs.
 
     # Forcing $_SERVER['SERVER_NAME'] to come from request header
     ForceServerNameToHeader = false
+    
+    # Print file paths traversed onto the 404 page
+    PathDebug = false
 
     # startup options
     TakeoverFilename = filename   # for port takeover between server instances
@@ -238,13 +241,12 @@ to use for sending.
 
     # static contents
     FileCache = filename
-    EnableStaticContentCache = true
     EnableStaticContentFromDisk = true
     ExpiresActive = true
     ExpiresDefault = 2592000
     DefaultCharsetName = UTF-8
 
-- EnableStaticContentCache, EnableStaticContentFromDisk
+- EnableStaticContentFromDisk
 
 A static content cache creates one single file from all static contents,
 including css, js, html, images and any other non-PHP files (or even PHP files,
@@ -373,6 +375,7 @@ These are experimental LFU settings.
       Prefix = prefix.
       Pattern = regex pattern
       PathTranslation = html
+      CheckExistenceBeforeRewrite = true
       ServerName =
       ServerVariables {
         name = value
@@ -419,6 +422,12 @@ These are experimental LFU settings.
       }
     }
   }
+
+- CheckExistenceBeforeRewrite
+
+With this setting, rewrite rules will not be applied for files that exist in
+the original path. This is the default behavior. Set this to false if one wants
+to block access to certain files (ex. .htaccess.)
 
 = Administration Server
 
@@ -722,6 +731,8 @@ users can use the same machine serving their own source files.
       }
     }
 
+    TimeoutsUseWallTime = true
+
     # experimental, please ignore
     BytecodeInterpreter = false
     DumpBytecode = false
@@ -736,6 +747,11 @@ standpoint, make the associated realpath() calls needed) when resolving
 includes/requires and loading code. This is enabled by default for parity with
 the reference implementation. If not needed for a particular application and/or
 configuration, disable this when tuning.
+
+- TimeoutsUseWallTime
+
+Determines whether or not to interpret set_time_limit timeouts as wall time or
+CPU time (which the reference implementation uses.) Defaults to wall time.
 
 = MySQL
 

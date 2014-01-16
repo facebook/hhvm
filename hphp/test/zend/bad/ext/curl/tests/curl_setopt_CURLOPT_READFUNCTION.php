@@ -30,7 +30,7 @@ fclose ($hReadHandle);
 $sOutput = file_get_contents($sWriteFile); 
 var_dump($sOutput);
 ?>
-===DONE===?>
+===DONE===
 <?php
 $sFileBase  = dirname(__FILE__).DIRECTORY_SEPARATOR.'curl_opt_CURLOPT_READFUNCTION';
 $sReadFile  = $sFileBase.'_in.tmp';

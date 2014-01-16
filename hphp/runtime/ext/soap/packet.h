@@ -24,9 +24,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class c_SoapClient;
-bool parse_packet_soap(c_SoapClient *client, const char *buffer,
-                       int buffer_size, sdlFunctionPtr fn, const char *fn_name,
-                       Variant &return_value, Variant &soap_headers);
+bool parse_packet_soap(c_SoapClient *client,
+                       const char *buffer,
+                       int buffer_size,
+                       std::shared_ptr<sdlFunction> fn,
+                       const char *fn_name,
+                       Variant &return_value,
+                       Variant &soap_headers);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

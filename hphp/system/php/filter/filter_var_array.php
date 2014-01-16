@@ -57,7 +57,7 @@ function filter_var_array($data, $definition = null, $add_empty = true) {
     } else if (is_int($definition)) {
       // A bit painful in php, exposing the IDs might be better if this is hot
       $ids = array_fill_keys(array_map('filter_id', filter_list()), null);
-      if (!isset($ids[$definition])) {
+      if (!array_key_exists($definition, $ids)) {
         return false;
       }
       $default_filter = $definition;

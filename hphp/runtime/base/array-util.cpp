@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/array-util.h"
+
+#include <vector>
+
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -469,19 +471,6 @@ Variant ArrayUtil::ChangeKeyCase(CArrRef input, bool lower) {
   return ret;
 }
 
-Variant ArrayUtil::Flip(CArrRef input) {
-  Array ret = Array::Create();
-  for (ArrayIter iter(input); iter; ++iter) {
-    CVarRef value(iter.secondRef());
-    if (value.isString() || value.isInteger()) {
-      ret.set(value, iter.first());
-    } else {
-      raise_warning("Can only flip STRING and INTEGER values!");
-    }
-  }
-  return ret;
-}
-
 Variant ArrayUtil::Reverse(CArrRef input, bool preserve_keys /* = false */) {
   if (input.empty()) {
     return input;
@@ -565,44 +554,6 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
   return ret;
 }
 
-Variant ArrayUtil::RandomValues(CArrRef input, int num_req /* = 1 */) {
-  int count = input.size();
-  if (num_req <= 0 || num_req > count) {
-    return init_null();
-  }
-
-  std::vector<ssize_t> indices;
-  indices.reserve(count);
-  for (ssize_t pos = input->iter_begin(); pos != ArrayData::invalid_index;
-       pos = input->iter_advance(pos)) {
-    indices.push_back(pos);
-  }
-  php_array_data_shuffle(indices);
-
-  if (num_req == 1) {
-    return input->getValue(indices[0]);
-  }
-
-  Array ret = Array::Create();
-  for (int i = 0; i < num_req; i++) {
-    ssize_t pos = indices[i];
-    ret.append(input->getValueRef(pos));
-  }
-  return ret;
-}
-
-Variant ArrayUtil::Filter(CArrRef input, PFUNC_FILTER filter /* = NULL */,
-                          const void *data /* = NULL */) {
-  Array ret = Array::Create();
-  for (ArrayIter iter(input); iter; ++iter) {
-    CVarRef value(iter.secondRef());
-    if (filter ? filter(Variant(value), data) : value.toBoolean()) {
-      ret.setWithRef(iter.first(), iter.secondRef(), true);
-    }
-  }
-  return ret;
-}
-
 Variant ArrayUtil::StringUnique(CArrRef input) {
   Array seenValues;
   Array ret = Array::Create();
@@ -643,10 +594,10 @@ Variant ArrayUtil::RegularSortUnique(CArrRef input) {
   if (input.size() <= 1) return input;
 
   Array::SortData opaque;
-  vector<int> indices;
+  std::vector<int> indices;
   Array::SortImpl(indices, input, opaque, Array::SortRegularAscending, false);
 
-  vector<bool> duplicates(indices.size(), false);
+  std::vector<bool> duplicates(indices.size(), false);
   int lastIdx = indices[0];
   Variant last = input->getValue(opaque.positions[lastIdx]);
   for (unsigned int i = 1; i < indices.size(); ++i) {
@@ -705,71 +656,6 @@ void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
   }
 }
 
-Variant ArrayUtil::Map(CArrRef inputs, PFUNC_MAP map_function,
-                       const void *data) {
-  Array ret = Array::Create();
-
-  if (inputs.size() == 1) {
-    Array arr = inputs.begin().secondRef().toArray();
-    if (!arr.empty()) {
-      for (ssize_t k = arr->iter_begin(); k != ArrayData::invalid_index;
-           k = arr->iter_advance(k)) {
-        Array params;
-        params.append(arr->getValueRef(k));
-        Variant result;
-        if (map_function) {
-          result = map_function(params, data);
-        } else {
-          result = params;
-        }
-        ret.add(arr->getKey(k), result, true);
-      }
-    }
-  } else {
-    int maxlen = 0;
-    vector<vector<ssize_t> > positions;
-    positions.resize(inputs.size());
-    int i = 0;
-    for (ArrayIter iter(inputs); iter; ++iter, ++i) {
-      Array arr = iter.secondRef().toArray();
-      int count = arr.size();
-      if (count > maxlen) maxlen = count;
-
-      if (count > 0) {
-        positions[i].reserve(count);
-        for (ssize_t pos = arr->iter_begin(); pos != ArrayData::invalid_index;
-             pos = arr->iter_advance(pos)) {
-          positions[i].push_back(pos);
-        }
-      }
-    }
-
-    for (int k = 0; k < maxlen; k++) {
-      Array params;
-      int i = 0;
-      for (ArrayIter iter(inputs); iter; ++iter, ++i) {
-        Array arr = iter.secondRef().toArray();
-        if (k < arr.size()) {
-          params.append(arr->getValueRef(positions[i][k]));
-        } else {
-          params.append(init_null_variant);
-        }
-      }
-
-      Variant result;
-      if (map_function) {
-        result = map_function(params, data);
-      } else {
-        result = params;
-      }
-
-      ret.append(result);
-    }
-  }
-
-  return ret;
-}
-
 Variant ArrayUtil::Reduce(CArrRef input, PFUNC_REDUCE reduce_function,
                           const void *data,
                           CVarRef initial /* = null_variant */) {
@@ -778,24 +664,6 @@ Variant ArrayUtil::Reduce(CArrRef input, PFUNC_REDUCE reduce_function,
     result = reduce_function(result, iter.second(), data);
   }
   return result;
-}
-
-void ArrayUtil::InitScalarArrays(Array arrs[], int nArrs,
-                                 const char *scalarArrayData,
-                                 int scalarArrayDataSize) {
-  int len = scalarArrayDataSize;
-  char *uncompressed = gzdecode(scalarArrayData, len);
-  if (uncompressed == nullptr) {
-    throw Exception("Bad scalarArrayData %p", scalarArrayData);
-  }
-  Variant v(unserialize_from_buffer(uncompressed, len));
-  assert(v.isArray());
-  Array scalarArrays = v.toArray();
-  assert(scalarArrays.size() == nArrs);
-  for (int i = 0; i < nArrs; i++) {
-    arrs[i] = scalarArrays[i];
-    arrs[i].setEvalScalar();
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

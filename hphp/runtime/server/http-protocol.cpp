@@ -13,30 +13,39 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/server/http-protocol.h"
-#include "hphp/runtime/base/hphp-system.h"
-#include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/server/request-uri.h"
-#include "hphp/runtime/server/transport.h"
+
+#include <sys/time.h>
+
+#include <map>
+#include <string>
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
-#include "hphp/runtime/server/upload.h"
-#include "hphp/runtime/server/replay-transport.h"
-#include "hphp/runtime/server/virtual-host.h"
+
+#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include <boost/lexical_cast.hpp>
+#include "hphp/runtime/server/replay-transport.h"
+#include "hphp/runtime/server/request-uri.h"
+#include "hphp/runtime/server/source-root-info.h"
+#include "hphp/runtime/server/transport.h"
+#include "hphp/runtime/server/upload.h"
+#include "hphp/runtime/server/virtual-host.h"
+#include "hphp/runtime/vm/jit/arch.h"
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
 using std::map;
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
+using std::string;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,9 +72,9 @@ static bool read_all_post_data(Transport *transport,
 
 const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
   if (!RuntimeOption::VirtualHosts.empty()) {
-    string host = transport->getHeader("Host");
+    std::string host = transport->getHeader("Host");
     for (unsigned int i = 0; i < RuntimeOption::VirtualHosts.size(); i++) {
-      VirtualHostPtr vhost = RuntimeOption::VirtualHosts[i];
+      auto vhost = RuntimeOption::VirtualHosts[i];
       if (vhost->match(host)) {
         VirtualHost::SetCurrent(vhost.get());
         return vhost.get();
@@ -81,6 +90,7 @@ const StaticString
   s_HPHP("HPHP"),
   s_HHVM("HHVM"),
   s_HHVM_JIT("HHVM_JIT"),
+  s_HHVM_ARCH("HHVM_ARCH"),
   s_HPHP_SERVER("HPHP_SERVER"),
   s_HPHP_HOTPROFILER("HPHP_HOTPROFILER"),
   s_HTTP_HOST("HTTP_HOST"),
@@ -140,9 +150,12 @@ static auto const s_arraysToClear = {
   s__POST,
   s__FILES,
   s__REQUEST,
-  s__SESSION,
   s__ENV,
   s__COOKIE,
+};
+
+static auto const s_arraysToUnset = {
+  s__SESSION,
 };
 
 /**
@@ -160,6 +173,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   for (auto& key : s_arraysToClear) {
     g->remove(key.get(), false);
     g->set(key.get(), emptyArr, false);
+  }
+  for (auto& key : s_arraysToUnset) {
+    g->remove(key.get(), false);
   }
   g->set(s_HTTP_RAW_POST_DATA, empty_string, false);
 
@@ -188,6 +204,14 @@ void HttpProtocol::PrepareEnv(Variant& env,
   env.set(s_HHVM, 1);
   if (RuntimeOption::EvalJit) {
     env.set(s_HHVM_JIT, 1);
+  }
+  switch (JIT::arch()) {
+  case JIT::Arch::X64:
+    env.set(s_HHVM_ARCH, "x64");
+    break;
+  case JIT::Arch::ARM:
+    env.set(s_HHVM_ARCH, "arm");
+    break;
   }
 
   bool isServer = RuntimeOption::ServerExecutionMode();
@@ -238,17 +262,17 @@ void HttpProtocol::PreparePostVariables(Variant& post,
                                         Variant& files,
                                         Transport *transport) {
 
-  string contentType = transport->getHeader("Content-Type");
-  string contentLength = transport->getHeader("Content-Length");
+  std::string contentType = transport->getHeader("Content-Type");
+  std::string contentLength = transport->getHeader("Content-Length");
 
   bool needDelete = false;
   int size = 0;
   const void *data = transport->getPostData(size);
   if (data && size) {
-    string boundary;
+    std::string boundary;
     int content_length = atoi(contentLength.c_str());
     bool rfc1867Post = IsRfc1867(contentType, boundary);
-    string files_str;
+    std::string files_str;
     if (rfc1867Post) {
       if (content_length > VirtualHost::GetMaxPostSize()) {
         // $_POST and $_FILES are empty
@@ -323,23 +347,8 @@ bool HttpProtocol::PrepareCookieVariable(Variant& cookie,
 }
 
 void HttpProtocol::CopyHeaderVariables(Variant& server,
-                                       const HeaderMap& headers,
-                                       bool normalize) {
+                                       const HeaderMap& headers) {
   static std::atomic<int> badRequests(-1);
-
-  if (!normalize) {
-    for (HeaderMap::const_iterator iter = headers.begin();
-         iter != headers.end();
-         ++iter) {
-      const vector<string> &values = iter->second;
-      for (unsigned int i = 0; i < values.size(); i++) {
-        String key = string_replace(f_strtoupper(iter->first), s_dash,
-                                    s_underscore);
-        server.set(key, String(values[i]));
-      }
-    }
-    return;
-  }
 
   std::vector<std::string> badHeaders;
   for (auto const& header : headers) {
@@ -392,12 +401,35 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
   }
 }
 
+void HttpProtocol::CopyTransportParams(Variant& server,
+                                    Transport *transport) {
+  HeaderMap transportParams;
+  // Get additional server params from the transport if it has any. In the case
+  // of fastcgi this is basically a full header list from apache/nginx.
+  transport->getTransportParams(transportParams);
+  for (auto const& header : transportParams) {
+    auto const& key = header.first;
+    auto const& values = header.second;
+    auto normalizedKey = string_replace(f_strtoupper(key), s_dash,
+                                        s_underscore);
+
+    // Be careful here to not overwrite any _SERVER variable
+    // that has already been set elsewhere and make sure it has a value.
+    if (!values.empty() && !server.asArrRef().exists(normalizedKey)) {
+      // When a header has multiple values, we always take the last one.
+      server.set(normalizedKey, String(values.back()));
+    }
+  }
+
+}
+
 void HttpProtocol::CopyServerInfo(Variant& server,
                                   Transport *transport,
                                   const VirtualHost *vhost) {
 
   string hostHeader = transport->getHeader("Host");
   String hostName(vhost->serverName(hostHeader));
+  String serverNameHeader(transport->getServerName());
 
   if (hostHeader.empty()) {
     server.set(s_HTTP_HOST, hostName);
@@ -405,19 +437,26 @@ void HttpProtocol::CopyServerInfo(Variant& server,
   } else {
     StackTraceNoHeap::AddExtraLogging("Server", hostHeader.c_str());
   }
-  if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
+
+  // Use the header from the transport if it is available
+  if (!serverNameHeader.empty()) {
+    hostName = serverNameHeader;
+  } else if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
     hostName = hostHeader;
-    // _SERVER['SERVER_NAME'] shouldn't contain the port number
-    int colonPos = hostName.find(':');
-    if (colonPos != String::npos) {
-      hostName = hostName.substr(0, colonPos);
-    }
   }
 
+  // _SERVER['SERVER_NAME'] shouldn't contain the port number
+  int colonPos = hostName.find(':');
+  if (colonPos != String::npos) {
+    hostName = hostName.substr(0, colonPos);
+  }
+
+  StackTraceNoHeap::AddExtraLogging("Server_SERVER_NAME", hostName.data());
+
   server.set(s_GATEWAY_INTERFACE, s_CGI_1_1);
-  server.set(s_SERVER_ADDR, String(RuntimeOption::ServerPrimaryIP));
+  server.set(s_SERVER_ADDR, transport->getServerAddr());
   server.set(s_SERVER_NAME, hostName);
-  server.set(s_SERVER_PORT, RuntimeOption::ServerPort);
+  server.set(s_SERVER_PORT, transport->getServerPort());
   server.set(s_SERVER_SOFTWARE, s_HPHP);
   server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
   server.set(s_SERVER_ADMIN, empty_string);
@@ -459,7 +498,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   String prefix(transport->isSSL() ? "https://" : "http://");
 
   // Need to append port
-  DCHECK(server.toCArrRef().exists(s_SERVER_PORT));
+  assert(server.toCArrRef().exists(s_SERVER_PORT));
   std::string serverPort = "80";
   if (server.toCArrRef().exists(s_SERVER_PORT)) {
     CHECK(server[s_SERVER_PORT].isInteger() ||
@@ -482,7 +521,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   }
   String hostName;
   if (server.toCArrRef().exists(s_SERVER_NAME)) {
-    DCHECK(server[s_SERVER_NAME].isString());
+    assert(server[s_SERVER_NAME].isString());
     hostName = server[s_SERVER_NAME].toCStrRef();
   }
   server.set(s_SCRIPT_URI,
@@ -512,25 +551,23 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   if (r.rewritten()) {
     server.set(s_PHP_SELF, r.originalURL());
   } else {
-    server.set(s_PHP_SELF, hostName + r.origPathInfo());
+    server.set(s_PHP_SELF, r.resolvedURL() + r.origPathInfo());
   }
 
-  String documentRoot;
-  if (RuntimeOption::ServerType != "fastcgi") {
+  String documentRoot = transport->getDocumentRoot();
+  if (documentRoot.empty()) {
+    // Right now this is just RuntimeOption::SourceRoot but mwilliams wants to
+    // fix it so it is settable, so I'll leave this for now
     documentRoot = vhost->getDocumentRoot();
-    server.set(s_DOCUMENT_ROOT, documentRoot);
-  } else if (server.asCArrRef().exists(s_DOCUMENT_ROOT)) {
-    CHECK(server[s_DOCUMENT_ROOT].isString());
-    documentRoot = server[s_DOCUMENT_ROOT].toCStrRef();
   }
-
+  server.set(s_DOCUMENT_ROOT, documentRoot);
   server.set(s_SCRIPT_FILENAME, r.absolutePath());
 
   if (r.pathInfo().empty()) {
     server.set(s_PATH_TRANSLATED, r.absolutePath());
   } else {
-    DCHECK(server.toCArrRef().exists(s_DOCUMENT_ROOT));
-    DCHECK(server[s_DOCUMENT_ROOT].isString());
+    assert(server.toCArrRef().exists(s_DOCUMENT_ROOT));
+    assert(server[s_DOCUMENT_ROOT].isString());
     server.set(s_PATH_TRANSLATED,
                String(server[s_DOCUMENT_ROOT].toCStrRef() +
                       r.pathInfo().data()));
@@ -590,14 +627,10 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
   // "may" exclude them; this is not what APE does, but it's harmless.
   HeaderMap headers;
   transport->getHeaders(headers);
-  if (RuntimeOption::ServerType != "fastcgi") {
-    CopyHeaderVariables(server, headers, true);
-    CopyServerInfo(server, transport, vhost);
-    CopyRemoteInfo(server, transport);
-    CopyAuthInfo(server, transport);
-  } else {
-    CopyHeaderVariables(server, headers, false);
-  }
+  CopyHeaderVariables(server, headers);
+  CopyServerInfo(server, transport, vhost);
+  CopyRemoteInfo(server, transport);
+  CopyAuthInfo(server, transport);
 
   CopyPathInfo(server, transport, r, vhost);
 
@@ -622,6 +655,8 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
        iter != vServerVars.end(); ++iter) {
     server.set(String(iter->first), String(iter->second));
   }
+  // Do this last as to not overwrite any existing server variables.
+  CopyTransportParams(server, transport);
   sri.setServerVariables(server);
 
   const char *threadType = transport->getThreadTypeName();
@@ -861,7 +896,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
   if (extraHeaders) {
     for (HeaderMap::const_iterator iter = extraHeaders->begin();
          iter != extraHeaders->end(); ++iter) {
-      vector<string> &values = requestHeaders[iter->first];
+      std::vector<std::string> &values = requestHeaders[iter->first];
       values.insert(values.end(), iter->second.begin(), iter->second.end());
     }
   }
@@ -873,7 +908,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
   }
 
   code = 0; // HTTP status of curl or 0 for "no server response code"
-  vector<String> responseHeaders;
+  std::vector<String> responseHeaders;
   HttpClient http;
   if (data && size) {
     code = http.post(url.c_str(), data, size, response, &requestHeaders,

@@ -20,15 +20,12 @@
 #include <memory>
 #include <string>
 
-#include "hphp/util/base.h"
-
 namespace HPHP {
 
 /**
  * Stores file contents in memory. Used by web server for faster static
  * content serving.
  */
-DECLARE_BOOST_TYPES(FileCache);
 
 class CacheManager;
 
@@ -45,7 +42,7 @@ class FileCache {
    * Archiving data.
    */
 
-  void write(const char *name, bool addDirectories = true);
+  void write(const char *name);   // just the name
   void write(const char *name, const char *fullpath); // name + data
 
   void save(const char *filename);
@@ -53,7 +50,7 @@ class FileCache {
   /**
    * Reading data.
    */
-  void loadMmap(const char *filename, short version);
+  void loadMmap(const char *filename);
   bool fileExists(const char *name, bool isRelative = true) const;
   bool dirExists(const char *name, bool isRelative = true) const;
   bool exists(const char *name, bool isRelative = true) const;
@@ -62,11 +59,6 @@ class FileCache {
   void dump() const;
 
   static std::string GetRelativePath(const char *path);
-
-  // To be removed (leftover from old cache implementation).
-  short getVersion(const char *filename);
-  void load(const char *filename, bool onDemandUncompress, short version);
-  void adviseOutMemory();
 
  private:
   std::unique_ptr<CacheManager> cache_manager_;

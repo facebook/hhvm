@@ -55,7 +55,7 @@ void CmdShell::onClient(DebuggerClient &client) {
     return;
   }
   m_args = *client.args();
-  CmdShellPtr cmd = client.xend<CmdShell>(this);
+  auto cmd = client.xend<CmdShell>(this);
   client.print(cmd->m_out);
 }
 

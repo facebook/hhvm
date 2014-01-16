@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/dataset.h"
+
+#include <cstdlib>
+#include <boost/lexical_cast.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +47,7 @@ unsigned long long DataSet::getUInt64Field(int field) const {
 }
 
 std::string DataSet::getRowString() const {
-  string ret;
+  std::string ret;
 
   int nonameCount = 0;
   for (int i = 0; i < getColCount(); i++) {
@@ -56,7 +58,7 @@ std::string DataSet::getRowString() const {
       ret += fieldName;
     } else {
       ret += "Noname";
-      ret += boost::lexical_cast<string>(nonameCount++);
+      ret += boost::lexical_cast<std::string>(nonameCount++);
     }
     ret += "' => ";
     const char *s = getField(i);
@@ -72,7 +74,7 @@ std::string DataSet::getRowString() const {
 }
 
 std::string DataSet::escape(const char *s) {
-  string ret;
+  std::string ret;
   for (const char *p = s; *p; p++) {
     switch (*p) {
     case '\'':      ret += "\\'" ;  break;

@@ -25,10 +25,10 @@
 #include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/option.h"
+#include "hphp/compiler/json.h"
 #include "hphp/util/process.h"
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/json.h"
 #include "hphp/util/db-conn.h"
 #include "hphp/util/db-query.h"
 #include "hphp/util/exception.h"
@@ -45,7 +45,7 @@ Package::Package(const char *root, bool bShortTags /* = true */,
   : m_files(4000), m_dispatcher(0), m_lineCount(0), m_charCount(0) {
   m_root = Util::normalizeDir(root);
   m_ar = AnalysisResultPtr(new AnalysisResult());
-  m_fileCache = FileCachePtr(new FileCache());
+  m_fileCache = std::make_shared<FileCache>();
 }
 
 void Package::addAllFiles(bool force) {
@@ -132,7 +132,7 @@ void Package::getFiles(std::vector<std::string> &files) const {
   }
 }
 
-FileCachePtr Package::getFileCache() {
+std::shared_ptr<FileCache> Package::getFileCache() {
   for (set<string>::const_iterator iter = m_directories.begin();
        iter != m_directories.end(); ++iter) {
     vector<string> files;

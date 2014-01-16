@@ -73,11 +73,17 @@ public:
   }
 
   T *operator->() const {
-    return static_cast<T*>(static_cast<void*>((Object::operator->())));
+    return static_cast<T*>(Object::operator->());
   }
 
   T *get() const {
-    return static_cast<T*>(static_cast<void*>(Object::get()));
+    return static_cast<T*>(Object::get());
+  }
+
+  static SmartObject attach(T* object) {
+    SmartObject o;
+    o.m_px = object;
+    return o;
   }
 
   template<class Y>
@@ -124,11 +130,11 @@ public:
   }
 
   T *operator->() const {
-    return static_cast<T*>(static_cast<void*>((Resource::operator->())));
+    return static_cast<T*>(Resource::operator->());
   }
 
   T *get() const {
-    return static_cast<T*>(static_cast<void*>(Resource::get()));
+    return static_cast<T*>(Resource::get());
   }
 
   template<class Y>

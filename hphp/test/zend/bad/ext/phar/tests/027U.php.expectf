@@ -1,0 +1,32 @@
+unicode(%d) "phar://*/027U.phar.php/"
+unicode(6) "/a.php"
+bool(false)
+unicode(2) "/b"
+bool(true)
+unicode(%d) "phar://*/027U.phar.php/b"
+unicode(8) "/b/c.php"
+bool(false)
+unicode(8) "/b/d.php"
+bool(false)
+unicode(6) "/b.php"
+bool(false)
+unicode(6) "/e.php"
+bool(false)
+fseek on dir handle
+int(0)
+int(4)
+int(-1)
+int(4)
+int(0)
+int(1)
+fwrite on dir handle
+int(0)
+bool(false)
+opendir edge cases
+HipHop Warning: %s
+phar url "phar://" is unknown in %s027U.php on line %d
+bool(false)
+HipHop Warning: %s
+phar url "phar://foo.phar/hi" is unknown in %s027U.php on line %d
+bool(false)
+===DONE===

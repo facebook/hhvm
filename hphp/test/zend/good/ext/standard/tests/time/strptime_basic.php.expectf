@@ -17,7 +17,7 @@ array(9) {
   ["tm_yday"]=>
   int(182)
   ["unparsed"]=>
-  string(3) "GMT"
+  string(4) " GMT"
 }
 array(9) {
   ["tm_sec"]=>

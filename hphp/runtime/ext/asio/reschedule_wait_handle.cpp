@@ -15,9 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
+
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -31,13 +33,6 @@ const int64_t q_RescheduleWaitHandle$$QUEUE_DEFAULT =
   AsioContext::QUEUE_DEFAULT;
 const int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO =
   AsioContext::QUEUE_NO_PENDING_IO;
-
-c_RescheduleWaitHandle::c_RescheduleWaitHandle(Class *cb)
-    : c_WaitableWaitHandle(cb) {
-}
-
-c_RescheduleWaitHandle::~c_RescheduleWaitHandle() {
-}
 
 void c_RescheduleWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
@@ -88,19 +83,7 @@ String c_RescheduleWaitHandle::getName() {
   return s_reschedule;
 }
 
-void c_RescheduleWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-
-  // stop before corrupting unioned data
-  if (isFinished()) {
-    return;
-  }
-
-  // already in the more specific context?
-  if (LIKELY(getContextIdx() >= ctx_idx)) {
-    return;
-  }
-
+void c_RescheduleWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   assert(getState() == STATE_SCHEDULED);
 
   setContextIdx(ctx_idx);

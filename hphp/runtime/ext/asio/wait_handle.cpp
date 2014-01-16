@@ -15,19 +15,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/wait_handle.h"
+
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_WaitHandle::c_WaitHandle(Class* cb)
-    : ExtObjectData(cb), m_resultOrException(make_tv<KindOfNull>()) {
-}
-
-c_WaitHandle::~c_WaitHandle() {
-}
+const StaticString s_result("<result>");
+const StaticString s_exception("<exception>");
 
 void c_WaitHandle::t___construct() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
@@ -54,7 +52,7 @@ void c_WaitHandle::t_import() {
 
   context_idx_t ctx_idx = AsioSession::Get()->getCurrentContextIdx();
   if (ctx_idx) {
-    assert(dynamic_cast<c_WaitableWaitHandle*>(this));
+    assert(instanceof(c_WaitableWaitHandle::classof()));
     static_cast<c_WaitableWaitHandle*>(this)->enterContext(ctx_idx);
   }
 }
@@ -62,7 +60,7 @@ void c_WaitHandle::t_import() {
 Variant c_WaitHandle::t_join() {
   if (!isFinished()) {
     // run the full blown machinery
-    assert(dynamic_cast<c_WaitableWaitHandle*>(this));
+    assert(instanceof(c_WaitableWaitHandle::classof()));
     static_cast<c_WaitableWaitHandle*>(this)->join();
   }
 
@@ -95,7 +93,14 @@ int64_t c_WaitHandle::t_getid() {
 }
 
 String c_WaitHandle::t_getname() {
-  return getName();
+  if (isSucceeded()) {
+    return s_result;
+  } else if (isFailed()) {
+    return s_exception;
+  }
+
+  assert(instanceof(c_WaitableWaitHandle::classof()));
+  return static_cast<c_WaitableWaitHandle*>(this)->getName();
 }
 
 Object c_WaitHandle::t_getexceptioniffailed() {

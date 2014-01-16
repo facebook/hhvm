@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/array-data.h"
 
+#include <boost/lexical_cast.hpp>
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/exception.h"
@@ -39,18 +40,16 @@ static_assert(
   "Performance is sensitive to sizeof(ArrayData)."
   " Make sure you changed it with good reason and then update this assert.");
 
-typedef tbb::concurrent_hash_map<const StringData *, ArrayData *,
-                                 StringDataHashCompare> ArrayDataMap;
+typedef tbb::concurrent_hash_map<std::string, ArrayData*> ArrayDataMap;
 static ArrayDataMap s_arrayDataMap;
 
-ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
-                                     const StringData *key /* = nullptr */) {
-  if (!key) {
-    key = makeStaticString(f_serialize(arr).get());
-  } else {
-    assert(key->isStatic());
-    assert(key->same(f_serialize(arr).get()));
-  }
+ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
+  auto key = f_serialize(arr).toCppString();
+  return GetScalarArray(arr, key);
+}
+
+ArrayData *ArrayData::GetScalarArray(ArrayData *arr, const std::string& key) {
+  assert(key == f_serialize(arr).toCppString());
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
     ArrayData *ad = arr->nonSmartCopy();
@@ -271,11 +270,11 @@ extern const ArrayFunctions g_array_funcs = {
     &APCLocalArray::AppendRef,
     &NameValueTableWrapper::AppendRef,
     &ProxyArray::AppendRef },
-  // plus
-  { &HphpArray::Plus, &HphpArray::Plus,
-    &APCLocalArray::Plus,
-    &NameValueTableWrapper::Plus,
-    &ProxyArray::Plus },
+  // plusEq
+  { &HphpArray::PlusEq, &HphpArray::PlusEq,
+    &APCLocalArray::PlusEq,
+    &NameValueTableWrapper::PlusEq,
+    &ProxyArray::PlusEq },
   // merge
   { &HphpArray::Merge, &HphpArray::Merge,
     &APCLocalArray::Merge,
@@ -311,11 +310,11 @@ extern const ArrayFunctions g_array_funcs = {
     &APCLocalArray::Escalate,
     &ArrayData::Escalate,
     &ProxyArray::Escalate },
-  // getSharedVariant
-  { &ArrayData::GetSharedVariant, &ArrayData::GetSharedVariant,
-    &APCLocalArray::GetSharedVariant,
-    &ArrayData::GetSharedVariant,
-    &ProxyArray::GetSharedVariant },
+  // getAPCHandle
+  { &ArrayData::GetAPCHandle, &ArrayData::GetAPCHandle,
+    &APCLocalArray::GetAPCHandle,
+    &ArrayData::GetAPCHandle,
+    &ProxyArray::GetAPCHandle },
   // zSetInt
   { &HphpArray::ZSetInt, &HphpArray::ZSetInt,
     &ArrayData::ZSetInt,
@@ -350,12 +349,10 @@ bool ArrayData::IsValidKey(CVarRef k) {
 
 // constructors/destructors
 
-HOT_FUNC
 ArrayData *ArrayData::Create() {
   return ArrayInit((ssize_t)0).create();
 }
 
-HOT_FUNC
 ArrayData *ArrayData::Create(CVarRef value) {
   ArrayInit init(1);
   init.set(value);
@@ -658,38 +655,6 @@ void ArrayData::serialize(VariableSerializer *serializer,
   }
 }
 
-bool ArrayData::hasInternalReference(PointerSet &vars,
-                                     bool ds /* = false */) const {
-  if (isSharedArray()) return false;
-  for (ArrayIter iter(this); iter; ++iter) {
-    CVarRef var = iter.secondRef();
-    if (var.isReferenced()) {
-      Variant *pvar = var.getRefData();
-      if (vars.find(pvar) != vars.end()) {
-        return true;
-      }
-      vars.insert(pvar);
-    }
-    if (var.isObject()) {
-      ObjectData *pobj = var.getObjectData();
-      if (vars.find(pobj) != vars.end()) {
-        return true;
-      }
-      vars.insert(pobj);
-      if (ds && pobj->instanceof(SystemLib::s_SerializableClass)) {
-        return true;
-      }
-      if (pobj->hasInternalReference(vars, ds)) {
-        return true;
-      }
-    } else if (var.isArray() &&
-               var.getArrayData()->hasInternalReference(vars, ds)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 CVarRef ArrayData::get(CVarRef k, bool error) const {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
@@ -749,16 +714,16 @@ const char* ArrayData::kindToString(ArrayKind kind) {
 }
 
 void ArrayData::dump() {
-  string out; dump(out); fwrite(out.c_str(), out.size(), 1, stdout);
+  std::string out; dump(out); fwrite(out.c_str(), out.size(), 1, stdout);
 }
 
 void ArrayData::dump(std::string &out) {
   VariableSerializer vs(VariableSerializer::Type::VarDump);
   String ret(vs.serialize(Array(this), true));
   out += "ArrayData(";
-  out += boost::lexical_cast<string>(m_count);
+  out += boost::lexical_cast<std::string>(m_count);
   out += "): ";
-  out += string(ret.data(), ret.size());
+  out += std::string(ret.data(), ret.size());
 }
 
 void ArrayData::dump(std::ostream &out) {

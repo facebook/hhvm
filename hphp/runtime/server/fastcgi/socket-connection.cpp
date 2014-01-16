@@ -42,7 +42,7 @@ SocketConnection::SocketConnection(
     m_sock(std::move(sock)) {}
 
 SocketConnection::~SocketConnection() {
-  DCHECK(!m_sock->getReadCallback());
+  assert(!m_sock->getReadCallback());
   shutdownTransport();
 }
 

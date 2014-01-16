@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/server/ip-block-map.h"
+
+#include <arpa/inet.h>
+
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -44,13 +47,18 @@ bool IpBlockMap::BinaryPrefixTrie::isAllowedImpl(
   const unsigned char *search_bytes = (const unsigned char *)search;
   BinaryPrefixTrie *child;
 
-  if (bit_offset > num_bits) {
-    // This should never happen because the trie should only ever contain
-    // prefixes of fixed-size network addresses, so the trie should never be
-    // any deeper than the network address size.
-    Logger::Error("trie depth exceeds search depth");
-    return false;
+  if (bit_offset == num_bits) {
+    if (m_children[0] != nullptr || m_children[1] != nullptr) {
+      // This should never happen because the trie should only ever contain
+      // prefixes of fixed-size network addresses, so the trie should never be
+      // any deeper than the network address size.
+      Logger::Error("trie depth exceeds search depth");
+      return false;
+    }
+    return m_allow;
   }
+
+  assert(bit_offset < num_bits);
 
   child = m_children[(*search_bytes >> (7 - bit_offset)) & 1];
   if (child) {
@@ -142,9 +150,9 @@ bool IpBlockMap::ReadIPv6Address(const char *text,
   return true;
 }
 
-void IpBlockMap::LoadIpList(AclPtr acl, Hdf hdf, bool allow) {
+void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl, Hdf hdf, bool allow) {
   for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
-    string ip = child.getString();
+    std::string ip = child.getString();
 
     int bits;
     struct in6_addr address;
@@ -159,7 +167,7 @@ void IpBlockMap::LoadIpList(AclPtr acl, Hdf hdf, bool allow) {
 
 IpBlockMap::IpBlockMap(Hdf config) {
   for (Hdf hdf = config.firstChild(); hdf.exists(); hdf = hdf.next()) {
-    AclPtr acl(new Acl());
+    auto acl = std::make_shared<Acl>();
     // sgrimm note: not sure AllowFirst is relevant with my implementation
     // since we always search for the narrowest matching rule -- it really
     // just sets whether we deny or allow by default, I think.
@@ -174,7 +182,7 @@ IpBlockMap::IpBlockMap(Hdf config) {
       LoadIpList(acl, hdf["Ip.Deny"], false);
     }
 
-    string location = hdf["Location"].getString();
+    std::string location = hdf["Location"].getString();
     if (!location.empty() && location[0] == '/') {
       location = location.substr(1);
     }
@@ -188,9 +196,8 @@ bool IpBlockMap::isBlocking(const std::string &command,
   struct in6_addr address;
   int bits;
 
-  for (StringToAclPtrMap::const_iterator iter = m_acls.begin();
-       iter != m_acls.end(); ++iter) {
-    const string &path = iter->first;
+  for (auto iter = m_acls.begin(); iter != m_acls.end(); ++iter) {
+    const std::string &path = iter->first;
     if (command.size() >= path.size() &&
         strncmp(command.c_str(), path.c_str(), path.size()) == 0) {
 

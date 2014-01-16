@@ -1,0 +1,16 @@
+*** Testing strncasecmp() function: error conditions ***
+
+-- Testing strncasecmp() function with Zero arguments --HipHop Warning: %s
+NULL
+
+-- Testing strncasecmp() function with less than expected number of arguments --HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Testing strncasecmp() function with more than expected number of arguments --HipHop Warning: %s
+NULL
+
+-- Testing strncasecmp() function with invalid argument --HipHop Warning: %s
+bool(false)
+*** Done ***

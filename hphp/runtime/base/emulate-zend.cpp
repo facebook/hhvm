@@ -42,7 +42,7 @@ bool check_option(const char *option) {
 }
 
 int emulate_zend(int argc, char** argv){
-  vector<string> newargv;
+  std::vector<std::string> newargv;
 
   newargv.push_back(argv[0]);
 #ifdef PHP_DEFAULT_HDF
@@ -140,8 +140,8 @@ int emulate_zend(int argc, char** argv){
     if (program == nullptr) {
       // If the program wasn't specified on the command-line, ala' -r,
       // is no command-line parameter, read the PHP file from stdin.
-      string line;
-      while (getline(std::cin, line)) {
+      std::string line;
+      while (std::getline(std::cin, line)) {
         write(tmp_fd, line.c_str(), line.length());
         write(tmp_fd, "\n", 1);
       }

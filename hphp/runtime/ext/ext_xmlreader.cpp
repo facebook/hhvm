@@ -17,6 +17,9 @@
 
 #include "hphp/runtime/ext/ext_xmlreader.h"
 
+
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -167,7 +170,7 @@ bool c_XMLReader::t_xml(const String& source, const String& encoding /*= null_st
     String directory = g_context->getCwd();
     if (!directory.empty()) {
       if (directory[directory.size() - 1] != '/') {
-        directory += '/';
+        directory += "/";
       }
       uri = (char *) xmlCanonicPath((const xmlChar *) directory.c_str());
     }
@@ -410,10 +413,6 @@ bool c_XMLReader::t_movetonextattribute() {
 
 bool c_XMLReader::t_isvalid() {
   return bool_func_no_arg(xmlTextReaderIsValid);
-}
-
-bool c_XMLReader::t_expand() {
-  throw NotImplementedException(__func__);
 }
 
 bool c_XMLReader::t_getparserproperty(int64_t property) {

@@ -15,7 +15,8 @@ var_dump($authstmt->fetch(PDO::FETCH_NUM));
 $info = $logstmt->errorInfo();
 unset($info[2]);
 var_dump($info);
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');

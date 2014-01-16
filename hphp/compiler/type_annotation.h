@@ -17,8 +17,9 @@
 #ifndef incl_HPHP_TYPEANNOTATION_H_
 #define incl_HPHP_TYPEANNOTATION_H_
 
-#include "hphp/util/base.h"
+#include "hphp/util/deprecated/base.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/compiler/code_generator.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,6 +107,10 @@ public:
    */
   bool isMixed() const { return !m_name.compare("mixed"); }
 
+  bool isVoid() const { return !m_name.compare("void"); }
+
+  bool isThis() const { return !m_name.compare("this"); }
+
   /*
    * Returns whether this TypeAnnotation is "simple"---as described
    * above, this implies it has only one level of depth.  Both the
@@ -153,6 +158,11 @@ public:
    * pass TRUE for the optional argument.
    */
   DataType dataType(bool expectedType = false) const;
+
+  /*
+   *  Serializes the type annotation using the given CodeGenerator.
+   */
+  void outputCodeModel(CodeGenerator& cg);
 
 private:
   void functionTypeName(std::string &name) const;

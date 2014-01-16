@@ -16,6 +16,8 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
+#include "folly/Optional.h"
+
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
@@ -29,8 +31,7 @@ using namespace vixl;
 namespace {
 
 void emitBindJ(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
-               Transl::ConditionCode cc, ServiceRequest req) {
-  using namespace Transl;
+               JIT::ConditionCode cc, ServiceRequest req) {
 
   TCA toSmash = cb.frontier();
   if (cb.base() == stubs.base()) {
@@ -64,7 +65,17 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argv) {
   MacroAssembler a { cb };
 
-  assert(start == cb.frontier());
+  folly::Optional<CodeCursor> maybeCc = folly::none;
+  if (start != cb.frontier()) {
+    maybeCc.emplace(cb, start);
+  }
+
+  // There are 6 instructions after the argument-shuffling, and they're all
+  // single instructions (i.e. not macros). There are up to 4 instructions per
+  // argument (it may take up to 4 instructions to move a 64-bit immediate into
+  // a register).
+  constexpr auto kMaxStubSpace = 6 * vixl::kInstructionSize +
+    (4 * maxArgReg()) * vixl::kInstructionSize;
 
   for (auto i = 0; i < argv.size(); ++i) {
     auto reg = serviceReqArgReg(i);
@@ -101,20 +112,27 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   }
   a.     Brk   (0);
 
+  if (!persist) {
+    assert(cb.frontier() - start <= kMaxStubSpace);
+    while (cb.frontier() - start < kMaxStubSpace) {
+      a. Nop   ();
+    }
+  }
+
   return start;
 }
 
 void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest) {
-  emitBindJ(cb, stubs, dest, Transl::CC_None, REQ_BIND_JMP);
+  emitBindJ(cb, stubs, dest, JIT::CC_None, REQ_BIND_JMP);
 }
 
-void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
                  SrcKey dest) {
   emitBindJ(cb, stubs, dest, cc, REQ_BIND_JCC);
 }
 
 void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
-                      Transl::ConditionCode cc) {
+                      JIT::ConditionCode cc) {
   emitBindJ(cb, stubs, dest, cc, REQ_BIND_SIDE_EXIT);
 }
 

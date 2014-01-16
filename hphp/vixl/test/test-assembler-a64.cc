@@ -26,8 +26,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+#include <cmath>
 #include <float.h>
+#include <iostream>
 #include <gtest/gtest.h>
 
 #include "hphp/vixl/test/test-utils-a64.h"
@@ -103,7 +104,7 @@ namespace vixl {
   cb.init(buf, buf_size);                                                      \
   Decoder decoder;                                                             \
   Simulator* simulator = nullptr;                                              \
-  simulator = new Simulator(&decoder);                                         \
+  simulator = new Simulator(&decoder, std::cout);                              \
   RegisterDump core;                                                           \
   { /* masm needs to be destroyed before buf is deleted */                     \
     MacroAssembler masm(cb)                                                    \
@@ -5024,7 +5025,7 @@ TEST(Assembler, fcvt_sd) {
     {2.0, 2.0f},
     {FLT_MAX, FLT_MAX},
     //  - The smallest normalized float.
-    {pow(2, -126), pow(2, -126)},
+    {pow(2, -126), static_cast<float>(pow(2, -126))},
     //  - Normal floats that need (ties-to-even) rounding.
     //    For normalized numbers:
     //         bit 29 (0x0000000020000000) is the lowest-order bit which will
@@ -7395,9 +7396,9 @@ TEST(Assembler, noreg) {
   assert(NoFPReg.Is(NoCPUReg));
   assert(NoCPUReg.Is(NoFPReg));
 
-  assert(NoReg.IsNone());
-  assert(NoFPReg.IsNone());
-  assert(NoCPUReg.IsNone());
+  assert(!NoReg.IsValid());
+  assert(!NoFPReg.IsValid());
+  assert(!NoCPUReg.IsValid());
 }
 
 

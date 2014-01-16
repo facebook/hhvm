@@ -18,7 +18,8 @@ foreach ($res as $k => $v) {
 }
 
 echo "DONE";
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>

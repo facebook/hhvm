@@ -73,7 +73,8 @@ foreach($files as $file) {
 }
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $dirname = dirname(__FILE__)."/symlink_link_linkinfo_is_link_basic1";
 unlink("$dirname/symlink_link_linkinfo_is_link_basic1.tmp");
 rmdir($dirname);

@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdConstant);
 class CmdConstant : public DebuggerCommand {
 public:
   CmdConstant() : DebuggerCommand(KindOfConstant) {}

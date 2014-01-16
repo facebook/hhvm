@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/tread-hash-map.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 template<typename T>
 struct GrowableVector {

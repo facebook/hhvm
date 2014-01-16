@@ -151,6 +151,17 @@ public:
   bool m_parseFatal;
 };
 
+class AnalysisTimeFatalException : public Exception {
+ public:
+  AnalysisTimeFatalException(const char* file, int line,
+                             const char* msg, ...) ATTRIBUTE_PRINTF(4,5);
+  virtual ~AnalysisTimeFatalException() throw() {}
+  EXCEPTION_COMMON_IMPL(AnalysisTimeFatalException);
+
+  std::string m_file;
+  int m_line;
+};
+
 class FatalErrorException : public ExtendedException {
 public:
   explicit FatalErrorException(const char *msg)
@@ -335,7 +346,7 @@ public:
   EXCEPTION_COMMON_IMPL(RequestMemoryExceededException);
 };
 
-void throw_null_pointer_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throw_null_pointer_exception() ATTRIBUTE_NORETURN;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

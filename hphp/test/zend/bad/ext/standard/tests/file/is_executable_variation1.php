@@ -48,7 +48,8 @@ foreach($files_arr as $file) {
 }
 
 echo "Done\n";
-?><?php
+?>
+<?php
 unlink(dirname(__FILE__)."/is_executable_variation1/bar.tmp");
 rmdir(dirname(__FILE__)."/is_executable_variation1/");
 ?>

@@ -46,6 +46,11 @@
 #include "hphp/compiler/expression/yield_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
+#include "hphp/compiler/expression/query_expression.h"
+#include "hphp/compiler/expression/simple_query_clause.h"
+#include "hphp/compiler/expression/join_clause.h"
+#include "hphp/compiler/expression/group_clause.h"
+#include "hphp/compiler/expression/ordering.h"
 
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/class_statement.h"
@@ -78,6 +83,7 @@
 #include "hphp/compiler/statement/goto_statement.h"
 #include "hphp/compiler/statement/label_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_require_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
@@ -100,13 +106,17 @@
 #endif
 
 #define NEW_EXP0(cls)                                           \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation()))
+  cls##Ptr(new cls(BlockScopePtr(),                             \
+                   getLocation()))
 #define NEW_EXP(cls, e...)                                      \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation(), ##e))
+  cls##Ptr(new cls(BlockScopePtr(),                             \
+                   getLocation(), ##e))
 #define NEW_STMT0(cls)                                          \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation()))
+  cls##Ptr(new cls(BlockScopePtr(), getLabelScope(),            \
+                   getLocation()))
 #define NEW_STMT(cls, e...)                                     \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation(), ##e))
+  cls##Ptr(new cls(BlockScopePtr(), getLabelScope(),            \
+                   getLocation(), ##e))
 
 #define PARSE_ERROR(fmt, args...)  HPHP_PARSER_ERROR(fmt, this, ##args)
 
@@ -164,8 +174,6 @@ Parser::Parser(Scanner &scanner, const char *fileName,
 
   Lock lock(m_ar->getMutex());
   m_ar->addFileScope(m_file);
-
-  m_prependingStatements.push_back(vector<StatementPtr>());
 }
 
 bool Parser::parse() {
@@ -191,7 +199,7 @@ void Parser::error(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
   fatal(&m_loc, msg.c_str());
@@ -211,10 +219,6 @@ void Parser::fatal(const Location* loc, const char* msg) {
 
 string Parser::errString() {
   return m_error.empty() ? getMessage() : m_error;
-}
-
-bool Parser::enableFinallyStatement() {
-  return Option::EnableFinallyStatement;
 }
 
 void Parser::pushComment() {
@@ -246,6 +250,39 @@ void Parser::completeScope(BlockScopePtr inner) {
   m_scopes.pop_back();
   if (m_scopes.size()) {
     m_scopes.back().push_back(inner);
+  }
+}
+
+LabelScopePtr Parser::getLabelScope() const {
+  assert(!m_labelScopes.empty());
+  assert(!m_labelScopes.back().empty());
+  assert(m_labelScopes.back().back() != nullptr);
+  return m_labelScopes.back().back();
+}
+
+void Parser::onNewLabelScope(bool fresh) {
+  if (fresh) {
+    m_labelScopes.push_back(LabelScopePtrVec());
+  }
+  assert(!m_labelScopes.empty());
+  LabelScopePtr labelScope(new LabelScope());
+  m_labelScopes.back().push_back(labelScope);
+}
+
+void Parser::onScopeLabel(const Token& stmt, const Token& label) {
+  assert(!m_labelScopes.empty());
+  assert(!m_labelScopes.back().empty());
+  for (auto& scope : m_labelScopes.back()) {
+    scope->addLabel(stmt.stmt, label.text());
+  }
+}
+
+void Parser::onCompleteLabelScope(bool fresh) {
+  assert(!m_labelScopes.empty());
+  assert(!m_labelScopes.back().empty());
+  m_labelScopes.back().pop_back();
+  if (fresh) {
+    m_labelScopes.pop_back();
   }
 }
 
@@ -387,7 +424,7 @@ void Parser::onCallParam(Token &out, Token *params, Token &expr, bool ref) {
 }
 
 void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
-                    Token *cls, bool fromCompiler) {
+                    Token *cls) {
   ExpressionPtr clsExp;
   if (cls) {
     clsExp = cls->exp;
@@ -396,7 +433,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     out->exp = NEW_EXP(DynamicFunctionCall, name->exp,
                        dynamic_pointer_cast<ExpressionList>(params->exp),
                        clsExp);
-    assert(!fromCompiler);
   } else {
     const string &s = name.text();
     // strip out namespaces for func_get_args and friends check
@@ -416,8 +452,13 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
       (new RealSimpleFunctionCall
        (BlockScopePtr(), getLocation(), name->text(), name->num() & 2,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
-    if (fromCompiler) {
-      call->setFromCompiler();
+    if (m_scanner.isHHSyntaxEnabled() && !(name->num() & 2)) {
+      // If the function name is without any backslashes or
+      // namespace qualification then we treat this as a candidate
+      // for optimization via bytecode promotion.
+      // "idx" is the only function in that class for now but it's
+      // cheaper to set the bit that to check for the function name
+      call->setOptimizable();
     }
     out->exp = call;
 
@@ -766,7 +807,6 @@ void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
   }
   newScope();
   m_funcContexts.push_back(FunctionContext());
-  m_prependingStatements.push_back(vector<StatementPtr>());
   m_funcName = name.text();
   m_hasCallToGetArgs.push_back(false);
   m_staticVars.push_back(StringToExpressionPtrVecMap());
@@ -907,7 +947,7 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
 
   StatementListPtr stmts = stmt->stmt || stmt->num() != 1 ?
     dynamic_pointer_cast<StatementList>(stmt->stmt)
-    : NEW_EXP0(StatementList);
+    : NEW_STMT0(StatementList);
 
   ExpressionListPtr old_params =
     dynamic_pointer_cast<ExpressionList>(params->exp);
@@ -969,7 +1009,6 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
     mth->getLocation()->char0 = loc->char0;
   }
 
-  m_prependingStatements.pop_back();
   return mth;
 }
 
@@ -1113,6 +1152,10 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
   out->exp = expList;
 }
 
+void Parser::onTraitRequire(Token &out, Token &name, bool isExtends) {
+  out->stmt = NEW_STMT(TraitRequireStatement, name->text(), isExtends);
+}
+
 void Parser::onTraitUse(Token &out, Token &traits, Token &rules) {
   if (!rules->stmt) {
     rules->stmt = NEW_STMT0(StatementList);
@@ -1185,8 +1228,13 @@ void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
   }
 
   if (accessModifiers->exp) {
-    ruleStmt->setModifiers(dynamic_pointer_cast<ModifierExpression>
-                           (accessModifiers->exp));
+    auto modifiersExp =
+      dynamic_pointer_cast<ModifierExpression>(accessModifiers->exp);
+    if (!modifiersExp->validForTraitAliasRule()) {
+      PARSE_ERROR("Only access and visibility modifiers are allowed"
+                  " in trait alias rule");
+    }
+    ruleStmt->setModifiers(modifiersExp);
   }
 
   out->stmt = ruleStmt;
@@ -1270,15 +1318,6 @@ void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
 }
 
 void Parser::addStatement(StatementPtr stmt, StatementPtr new_stmt) {
-  assert(!m_prependingStatements.empty());
-  vector<StatementPtr> &prepending = m_prependingStatements.back();
-  if (!prepending.empty()) {
-    assert(prepending.size() == 1);
-    for (unsigned i = 0; i < prepending.size(); i++) {
-      stmt->addElement(prepending[i]);
-    }
-    prepending.clear();
-  }
   if (new_stmt) {
     stmt->addElement(new_stmt);
   }
@@ -1633,12 +1672,18 @@ void Parser::onTry(Token &out, Token &tryStmt, Token &className, Token &var,
   out->stmt = NEW_STMT(TryStatement, tryStmt->stmt,
                        dynamic_pointer_cast<StatementList>(stmtList),
                        finallyStmt->stmt);
+  if (tryStmt->stmt) {
+    out->stmt->setLabelScope(stmtList->getLabelScope());
+  }
 }
 
 void Parser::onTry(Token &out, Token &tryStmt, Token &finallyStmt) {
   out->stmt = NEW_STMT(TryStatement, tryStmt->stmt,
                        dynamic_pointer_cast<StatementList>(NEW_STMT0(StatementList)),
                        finallyStmt->stmt);
+  if (tryStmt->stmt) {
+    out->stmt->setLabelScope(tryStmt->stmt->getLabelScope());
+  }
 }
 
 void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
@@ -1656,6 +1701,11 @@ void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
 
 void Parser::onFinally(Token &out, Token &stmt) {
   out->stmt = NEW_STMT(FinallyStatement, stmt->stmt);
+  // TODO (#3271396) This can be greatly improved. In particular
+  // even when a finally block exists inside a function it is often
+  // the case that the unnamed locals state & ret are not needed.
+  // See task description for further details.
+  m_file->setAttribute(FileScope::NeedsFinallyLocals);
 }
 
 void Parser::onThrow(Token &out, Token &expr) {
@@ -1671,10 +1721,27 @@ void Parser::onClosureStart(Token &name) {
   onFunctionStart(name, true);
 }
 
-void Parser::onClosure(Token &out, Token* modifiers, Token &ret, Token &ref,
-                       Token &params, Token &cparams, Token &stmts) {
-  auto stmt = onFunctionHelper(FunctionType::Closure,
-                modifiers, ret, ref, nullptr, params, stmts, nullptr, true);
+Token Parser::onClosure(ClosureType type,
+                        Token* modifiers,
+                        Token& ref,
+                        Token& params,
+                        Token& cparams,
+                        Token& stmts) {
+  Token out;
+  Token name;
+
+  Token retIgnore;
+  auto stmt = onFunctionHelper(
+    FunctionType::Closure,
+    modifiers,
+    retIgnore,
+    ref,
+    nullptr,
+    params,
+    stmts,
+    nullptr,
+    true
+  );
 
   ExpressionListPtr vars = dynamic_pointer_cast<ExpressionList>(cparams->exp);
   if (vars) {
@@ -1689,11 +1756,22 @@ void Parser::onClosure(Token &out, Token* modifiers, Token &ret, Token &ref,
 
   ClosureExpressionPtr closure = NEW_EXP(
     ClosureExpression,
+    type,
     dynamic_pointer_cast<FunctionStatement>(stmt),
     vars
   );
   closure->getClosureFunction()->setContainingClosure(closure);
   out->exp = closure;
+
+  return out;
+}
+
+Token Parser::onExprForLambda(const Token& expr) {
+  auto stmt = NEW_STMT(ReturnStatement, expr.exp);
+  Token ret;
+  ret.stmt = NEW_STMT0(StatementList);
+  ret.stmt->addElement(stmt);
+  return ret;
 }
 
 void Parser::onClosureParam(Token &out, Token *params, Token &param,
@@ -1774,6 +1852,95 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
   }
 }
 
+void Parser::onQuery(Token &out, Token &head, Token &body) {
+  out->exp = NEW_EXP(QueryExpression, head.exp, body.exp);
+}
+
+void appendList(ExpressionListPtr expList, Token *exps) {
+  if (exps != nullptr) {
+    assert(exps->exp->is(Expression::KindOfExpressionList));
+    ExpressionListPtr el(static_pointer_cast<ExpressionList>(exps->exp));
+    for (unsigned int i = 0; i < el->getCount(); i++) {
+      if ((*el)[i]) expList->addElement((*el)[i]);
+    }
+  }
+}
+
+void Parser::onQueryBody(
+  Token &out, Token *clauses, Token &select, Token *cont) {
+  ExpressionListPtr expList(NEW_EXP0(ExpressionList));
+  appendList(expList, clauses);
+  expList->addElement(select.exp);
+  if (cont != nullptr) expList->addElement(cont->exp);
+  out->exp = expList;
+}
+
+void Parser::onQueryBodyClause(Token &out, Token *clauses, Token &clause) {
+  ExpressionPtr expList;
+  if (clauses && clauses->exp) {
+    expList = clauses->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  expList->addElement(clause->exp);
+  out->exp = expList;
+}
+
+void Parser::onFromClause(Token &out, Token &var, Token &coll) {
+  out->exp = NEW_EXP(FromClause, var.text(), coll.exp);
+}
+
+void Parser::onLetClause(Token &out, Token &var, Token &expr) {
+  out->exp = NEW_EXP(LetClause, var.text(), expr.exp);
+}
+
+void Parser::onWhereClause(Token &out, Token &expr) {
+  out->exp = NEW_EXP(WhereClause, expr.exp);
+}
+
+void Parser::onJoinClause(Token &out, Token &var, Token &coll,
+  Token &left, Token &right) {
+  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
+                     left.exp, right.exp, "");
+}
+
+void Parser::onJoinIntoClause(Token &out, Token &var, Token &coll,
+  Token &left, Token &right, Token &group) {
+  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
+                     left.exp, right.exp, group.text());
+}
+
+void Parser::onOrderbyClause(Token &out, Token &orderings) {
+  out->exp = NEW_EXP(OrderbyClause, orderings.exp);
+}
+
+void Parser::onOrdering(Token &out, Token *orderings, Token &ordering) {
+  ExpressionPtr expList;
+  if (orderings && orderings->exp) {
+    expList = orderings->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  expList->addElement(ordering->exp);
+  out->exp = expList;
+}
+
+void Parser::onOrderingExpr(Token &out, Token &expr, Token *direction) {
+  out->exp = NEW_EXP(Ordering, expr.exp, (direction) ? direction->num() : 0);
+}
+
+void Parser::onSelectClause(Token &out, Token &expr) {
+  out->exp = NEW_EXP(SelectClause, expr.exp);
+}
+
+void Parser::onGroupClause(Token &out, Token &coll, Token &key) {
+  out->exp = NEW_EXP(GroupClause, coll.exp, key.exp);
+}
+
+void Parser::onIntoClause(Token &out, Token &var, Token &query) {
+  out->exp = NEW_EXP(IntoClause, var.text(), query.exp);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // namespace support
 
@@ -1803,7 +1970,7 @@ void Parser::AliasTable::addAutoImports() {
     m_alreadyImported = true;
 
     for (auto entry : m_autoAliases) {
-      m_aliases[entry.alias] = (NameEntry){entry.name, true};
+      m_aliases[entry.alias] = (NameEntry){entry.name, AliasType::AUTO};
     }
   }
 }
@@ -1822,12 +1989,19 @@ bool Parser::AliasTable::isAliased(std::string alias) {
 bool Parser::AliasTable::isAutoImported(std::string alias) {
   addAutoImports();
   auto it = m_aliases.find(alias);
-  return it != m_aliases.end() && it->second.isAuto;
+  return it != m_aliases.end() && (it->second.type == AliasType::AUTO);
 }
 
-void Parser::AliasTable::map(std::string alias, std::string name) {
+bool Parser::AliasTable::isUseType(std::string alias) {
+  auto it = m_aliases.find(alias);
+  return it != m_aliases.end() && (it->second.type == AliasType::USE);
+}
+
+void Parser::AliasTable::map(std::string alias,
+                             std::string name,
+                             AliasType type) {
   addAutoImports();
-  m_aliases[alias] = (NameEntry){name, false};
+  m_aliases[alias] = (NameEntry){name, type};
 }
 
 /*
@@ -1842,18 +2016,26 @@ void Parser::AliasTable::clear() {
 
 
 /*
- * We auto-alias classes on HH mode and only if we're in the global namespace.
+ * We auto-alias classes only on HH mode.
  */
 bool Parser::isAutoAliasOn() {
-  return m_scanner.isHHSyntaxEnabled() && ("" == m_namespace);
+  return m_scanner.isHHSyntaxEnabled();
 }
 
 std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
-  std::vector<AliasTable::AliasEntry> aliases;
-  aliases.push_back(
-    (AliasTable::AliasEntry){"Traversable", "HH\\Traversable"});
-  aliases.push_back(
-    (AliasTable::AliasEntry){"Iterator", "HH\\Iterator"});
+  typedef AliasTable::AliasEntry AliasEntry;
+
+  std::vector<AliasEntry> aliases {
+    (AliasEntry){"Traversable", "HH\\Traversable"},
+    (AliasEntry){"Iterator", "HH\\Iterator"},
+    (AliasEntry){"Collection", "HH\\Collection"},
+    (AliasEntry){"Vector", "HH\\Vector"},
+    (AliasEntry){"Set", "HH\\Set"},
+    (AliasEntry){"FrozenVector", "HH\\FrozenVector"},
+    (AliasEntry){"FrozenSet", "HH\\FrozenSet"},
+    (AliasEntry){"FrozenMap", "HH\\FrozenMap"},
+  };
+
   return aliases;
 }
 
@@ -1903,15 +2085,16 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
   }
 
   // It's not an error if the alias already exists but is auto-imported.
-  // In that case, it gets replaced.
+  // In that case, it gets replaced. It prompts an error if it is not
+  // auto-imported and 'use' statement is trying to replace it.
   if (m_aliasTable.isAliased(key) && !m_aliasTable.isAutoImported(key) &&
-      m_aliasTable.getName(key) != ns) {
+      (m_aliasTable.isUseType(key) || m_aliasTable.getName(key) != ns)) {
     error("Cannot use %s as %s because the name is already in use: %s",
           ns.c_str(), key.c_str(), getMessage().c_str());
     return;
   }
 
-  m_aliasTable.map(key, ns);
+  m_aliasTable.map(key, ns, AliasTable::AliasType::USE);
 }
 
 std::string Parser::nsDecl(const std::string &name) {
@@ -2002,7 +2185,7 @@ void Parser::registerAlias(std::string name) {
   size_t pos = name.rfind(NAMESPACE_SEP);
   if (pos != string::npos) {
     string key = name.substr(pos + 1);
-    m_aliasTable.map(key, name);
+    m_aliasTable.map(key, name, AliasTable::AliasType::CURRENT_NS);
   }
 }
 

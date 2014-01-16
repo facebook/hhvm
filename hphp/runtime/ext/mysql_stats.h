@@ -18,7 +18,10 @@
 #ifndef incl_HPHP_MYSQLSTATS_H_
 #define incl_HPHP_MYSQLSTATS_H_
 
-#include "hphp/util/base.h"
+#include <string>
+#include <memory>
+
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/lock.h"
 
 namespace HPHP {
@@ -66,11 +69,10 @@ public:
   static std::string ReportStats();
 
 private:
-  DECLARE_BOOST_TYPES(Stats);
   struct Stats {
     int actions[VERB_COUNT];
   };
-  typedef hphp_string_map<StatsPtr> StatsMap;
+  typedef hphp_string_map<std::shared_ptr<Stats>> StatsMap;
 
   static bool s_inited;
   static hphp_string_map<Verb> s_verbs;

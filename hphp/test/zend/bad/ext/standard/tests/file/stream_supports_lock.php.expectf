@@ -1,0 +1,12 @@
+resource(%d) of type (stream)
+bool(true)
+resource(%d) of type (stream)
+bool(true)
+resource(%d) of type (stream)
+bool(false)
+resource(%d) of type (stream)
+bool(false)
+resource(%d) of type (stream-context)
+HipHop Warning: %s
+bool(false)
+Done

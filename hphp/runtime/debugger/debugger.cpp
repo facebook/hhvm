@@ -19,7 +19,7 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/base/hphp-system.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/util.h"
@@ -99,7 +99,8 @@ bool Debugger::SwitchSandbox(DebuggerProxyPtr proxy,
   return s_debugger.switchSandbox(proxy, newId, force);
 }
 
-void Debugger::GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes) {
+void Debugger::GetRegisteredSandboxes(
+    std::vector<DSandboxInfoPtr> &sandboxes) {
   TRACE(2, "Debugger::GetRegisteredSandboxes\n");
   s_debugger.getSandboxes(sandboxes);
 }
@@ -352,7 +353,7 @@ void Debugger::addOrUpdateSandbox(const DSandboxInfo &sandbox) {
   }
 }
 
-void Debugger::getSandboxes(DSandboxInfoPtrVec &sandboxes) {
+void Debugger::getSandboxes(std::vector<DSandboxInfoPtr> &sandboxes) {
   TRACE(2, "Debugger::getSandboxes\n");
   sandboxes.reserve(m_sandboxMap.size());
   for (SandboxMap::const_iterator iter =
@@ -515,7 +516,7 @@ void Debugger::removeProxy(DebuggerProxyPtr proxy) {
   m_proxyMap.erase(dummySid);
   // Clear the debugger blacklist PC upon last detach if JIT is used
   if (RuntimeOption::EvalJit && countConnectedProxy() == 0) {
-    Transl::Translator::Get()->clearDbgBL();
+    JIT::tx64->clearDbgBL();
   }
 }
 

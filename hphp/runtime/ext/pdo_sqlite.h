@@ -43,6 +43,7 @@ public:
   PDOSqliteConnection();
   virtual ~PDOSqliteConnection();
   virtual bool create(CArrRef options);
+  virtual void sweep();
 
   int handleError(const char *file, int line, PDOStatement *stmt = nullptr);
 
@@ -69,7 +70,7 @@ public:
 private:
   sqlite3 *m_db;
   PDOSqliteError m_einfo;
-  c_SQLite3::UserDefinedFuncPtrVec m_udfs;
+  std::vector<std::shared_ptr<c_SQLite3::UserDefinedFunc>> m_udfs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -15,8 +15,18 @@ class MyClass2 {
     sayHello as final;
   }
 }
+class MyClass3 {
+  use HelloWorld {
+    sayHello as protected final;
+  }
+  public function sayHi() {
+    return $this->sayHello();
+  }
+}
 $a = new MyClass1;
 $a->sayHello();
 $a = new MyClass2;
 $a->sayHello();
+$a = new MyClass3;
+$a->sayHi();
 ?>

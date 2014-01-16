@@ -23,7 +23,6 @@ namespace HPHP { namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
-using Transl::TCA;
 
 constexpr int kNumFreeLocalsHelpers = 9;
 
@@ -71,34 +70,6 @@ struct UniqueStubs {
   TCA defClsHelper;
 
   /*
-   * Functions for releasing various php objects when their reference
-   * count goes to zero.  Indexed using typeToDestrIndex.
-   *
-   * FIXME: this is dead code after the tx64->hhir switch.  Leaving in
-   * for now to review whether we want to use it.
-   */
-  TCA dtorStubs[kDestrTableSize];
-
-  /*
-   * Generic destructor stub for PtrToGen types.
-   *
-   * The irPopRHelper takes the pointer to the value to decref in
-   * rVmSp, and is intended for generic PopR instructions.  The normal
-   * dtorGenericStub takes the pointer to the value to dec ref in the
-   * first argument register.
-   */
-  TCA irPopRHelper;
-  TCA dtorGenericStub;
-
-  /*
-   * Generic destructor stub for in-registered Gen or Cell types.
-   *
-   * FIXME: currently dead code after tx64->hhir.  We need to look at
-   * whether we want to use this again.
-   */
-  TCA dtorGenericStubRegs;
-
-  /*
    * Helper stubs for doing generic decrefs on a function return.  The
    * stub is a partially-unrolled loop with kNumFreeLocalsHelpers
    * points to call to.  The freeManyLocalsHelper entry point should
@@ -138,6 +109,12 @@ struct UniqueStubs {
    * dispatches to the translation.
    */
   TCA funcBodyHelperThunk;
+
+  /*
+   * Calls EventHook::onFunctionEnter, and handles the case where it requests
+   * that we skip the function.
+   */
+  TCA functionEnterHelper;
 
   /*
    * Utility for logging stubs addresses during startup and registering the gdb

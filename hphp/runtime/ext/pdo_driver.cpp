@@ -38,9 +38,9 @@ PDOConnection *PDODriver::createConnection(const String& datasource,
                                            const String& username,
                                            const String& password, CArrRef options) {
   PDOConnection *conn = createConnectionObject();
-  conn->data_source = string(datasource.data(), datasource.size());
-  conn->username = string(username.data(), username.size());
-  conn->password = string(password.data(), password.size());
+  conn->data_source = std::string(datasource.data(), datasource.size());
+  conn->username = std::string(username.data(), username.size());
+  conn->password = std::string(password.data(), password.size());
 
   if (options.exists(PDO_ATTR_AUTOCOMMIT)) {
     conn->auto_commit = options[PDO_ATTR_AUTOCOMMIT].toInt64();
@@ -72,9 +72,16 @@ PDOConnection::PDOConnection()
 PDOConnection::~PDOConnection() {
 }
 
+void PDOConnection::sweep() {
+  assert(!is_persistent);
+  def_stmt_ctor_args.asTypedValue()->m_type = KindOfNull;
+  delete this;
+}
+
 void PDOConnection::persistentSave() {
   String serialized = f_serialize(def_stmt_ctor_args);
-  serialized_def_stmt_ctor_args = string(serialized.data(), serialized.size());
+  serialized_def_stmt_ctor_args = std::string(serialized.data(),
+    serialized.size());
   def_stmt_ctor_args.reset();
 }
 

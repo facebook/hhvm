@@ -30,7 +30,7 @@ loop:   CGetL $x
         Print
         PopC
 
-        IncDecL $x 0
+        IncDecL $x PreInc
         PopC
 
         CGetL $x

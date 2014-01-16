@@ -34,7 +34,8 @@ using folly::io::RWPrivateCursor;
 
 FastCGITransaction::FastCGITransaction(FastCGISession* session,
                                        RequestId request_id,
-                                       ProtocolSessionHandlerPtr handler)
+                                       std::shared_ptr<ProtocolSessionHandler>
+                                         handler)
   : m_phase(Phase::READ_KEY_LENGTH),
     m_readBuf(IOBufQueue::cacheChainLength()),
     m_keyBuf(IOBufQueue::cacheChainLength()),
@@ -54,7 +55,7 @@ void FastCGITransaction::onStdIn(std::unique_ptr<IOBuf> chain) {
     handleInvalidRecord();
     return;
   }
-  DCHECK(m_handler);
+  assert(m_handler);
 
   if (chain->empty()) {
     m_handler->onBodyComplete();
@@ -68,7 +69,7 @@ void FastCGITransaction::onParams(std::unique_ptr<IOBuf> chain) {
     handleInvalidRecord();
     return;
   }
-  DCHECK(m_handler);
+  assert(m_handler);
 
   if (chain == nullptr || chain->computeChainDataLength() == 0) {
     if (m_readBuf.chainLength() != 0 ||
@@ -104,7 +105,7 @@ void FastCGITransaction::onGetValues(std::unique_ptr<IOBuf> chain) {
     handleInvalidRecord();
     return;
   }
-  DCHECK(!m_handler);
+  assert(!m_handler);
 
   if (chain == nullptr || chain->computeChainDataLength() == 0) {
     if (m_readBuf.chainLength() != 0 ||
@@ -210,15 +211,15 @@ bool FastCGITransaction::parseKeyValueContent(Cursor& cursor,
   std::unique_ptr<IOBuf> buf;
   size_t len = cursor.cloneAtMost(buf, length);
   queue.append(std::move(buf));
-  DCHECK(length >= len);
+  assert(length >= len);
   length -= len;
-  DCHECK(available >= len);
+  assert(available >= len);
   available -= len;
   return (length == 0);
 }
 
 void FastCGITransaction::handleGetValue(std::unique_ptr<IOBuf> key_chain) {
-  DCHECK(m_requestId == 0);
+  assert(m_requestId == 0);
   size_t key_length = key_chain ? key_chain->computeChainDataLength() : 0;
   Cursor cursor(key_chain.get());
   std::string key = cursor.readFixedString(key_length);
@@ -247,13 +248,16 @@ const FastCGISession::Version FastCGISession::k_version = 1;
 const size_t FastCGISession::k_writeGrowth = 256;
 
 size_t FastCGISession::onIngress(const IOBuf* chain) {
-  DCHECK(m_keepConn);
+  if (m_phase == Phase::INVALID) {
+    return 0;
+  }
+  assert(m_keepConn);
 
   size_t available = chain ? chain->computeChainDataLength() : 0;
   size_t avail = available;
 
   Cursor cursor(chain);
-  while (true) {
+  while (m_phase != Phase::INVALID) {
     if (m_phase == Phase::AT_RECORD_BEGIN) {
       if (parseRecordBegin(cursor, avail)) {
         m_phase = Phase::INSIDE_RECORD_BODY;
@@ -267,9 +271,6 @@ size_t FastCGISession::onIngress(const IOBuf* chain) {
     if (m_phase == Phase::AT_RECORD_BODY_END) {
       if (parseRecordEnd(cursor, avail)) {
         m_phase = Phase::AT_RECORD_BEGIN;
-        if (!m_keepConn) {
-          handleClose();
-        }
       } else break;
     }
   }
@@ -277,12 +278,12 @@ size_t FastCGISession::onIngress(const IOBuf* chain) {
 }
 
 void FastCGISession::setMaxConns(int max_conns) {
-  DCHECK(max_conns > 0);
+  assert(max_conns > 0);
   m_maxConns = max_conns;
 }
 
 void FastCGISession::setMaxRequests(int max_requests) {
-  DCHECK(max_requests > 0);
+  assert(max_requests > 0);
   m_maxRequests = max_requests;
 }
 
@@ -298,27 +299,27 @@ const size_t FastCGISession::k_recordBeginLength = (
 const size_t FastCGISession::k_recordReservedLength = 1;
 
 bool FastCGISession::parseRecordBegin(Cursor& cursor, size_t& available) {
-  DCHECK(m_phase == Phase::AT_RECORD_BEGIN);
+  assert(m_phase == Phase::AT_RECORD_BEGIN);
   if (available < FastCGISession::k_recordBeginLength) {
     return false;
   }
   Version version = cursor.readBE<Version>();
   if (version != k_version) {
     handleInvalidRecord();
-    return true;
+    return false;
   }
   m_recordType = static_cast<RecordType>(cursor.readBE<uint8_t>());
-  m_requestId = cursor.readBE<typeof(m_requestId)>();
-  m_contentLength = cursor.readBE<typeof(m_contentLength)>();
+  m_requestId = cursor.readBE<decltype(m_requestId)>();
+  m_contentLength = cursor.readBE<decltype(m_contentLength)>();
   m_contentLeft = m_contentLength;
-  m_paddingLength = cursor.readBE<typeof(m_paddingLength)>();
+  m_paddingLength = cursor.readBE<decltype(m_paddingLength)>();
   cursor.skip(k_recordReservedLength);
   available -= k_recordBeginLength;
   return true;
 }
 
 bool FastCGISession::parseRecordBody(Cursor& cursor, size_t& available) {
-  DCHECK(m_phase == Phase::INSIDE_RECORD_BODY);
+  assert(m_phase == Phase::INSIDE_RECORD_BODY);
 
   if (m_contentLength > 0 && available == 0) {
     return false;
@@ -363,8 +364,8 @@ bool FastCGISession::parseRecordBody(Cursor& cursor, size_t& available) {
 
   size_t length = available - avail;
   available = avail;
-  DCHECK(m_contentLength >= m_contentLeft);
-  DCHECK(m_contentLeft >= length);
+  assert(m_contentLength >= m_contentLeft);
+  assert(m_contentLeft >= length);
   m_contentLeft -= length;
 
   if (unknown && m_contentLeft == 0) {
@@ -375,11 +376,11 @@ bool FastCGISession::parseRecordBody(Cursor& cursor, size_t& available) {
 }
 
 bool FastCGISession::parseRecordEnd(Cursor& cursor, size_t& available) {
-  DCHECK(m_phase == Phase::AT_RECORD_BODY_END);
+  assert(m_phase == Phase::AT_RECORD_BODY_END);
   size_t length = cursor.skipAtMost(m_paddingLength);
-  DCHECK(available >= length);
+  assert(available >= length);
   available -= length;
-  DCHECK(m_paddingLength >= length);
+  assert(m_paddingLength >= length);
   m_paddingLength -= length;
   if (m_paddingLength != 0) {
     return false;
@@ -483,6 +484,9 @@ void FastCGISession::handleAbortRequest() {
   }
   endTransaction(m_requestId);
   writeEndRequest(m_requestId, 1, ProtoStatus::REQUEST_COMPLETE);
+  if (!m_keepConn) {
+    handleClose();
+  }
 }
 
 void FastCGISession::handleStdIn(std::unique_ptr<IOBuf> chain) {
@@ -524,8 +528,11 @@ void FastCGISession::handleStdErr(RequestId request_id,
 }
 
 void FastCGISession::handleComplete(RequestId request_id) {
-  writeEndRequest(request_id, 0, ProtoStatus::REQUEST_COMPLETE);
   endTransaction(request_id);
+  writeEndRequest(request_id, 0, ProtoStatus::REQUEST_COMPLETE);
+  if (!m_keepConn) {
+    handleClose();
+  }
 }
 
 const std::string FastCGISession::k_getValueMaxConnKey =
@@ -538,11 +545,11 @@ const std::string FastCGISession::k_getValueMultiplexConnsKey =
 void FastCGISession::handleGetValueResult(const std::string& key) {
   std::string value;
   if (key == k_getValueMaxConnKey) {
-    DCHECK(m_maxConns > 0);
+    assert(m_maxConns > 0);
     value = std::to_string(m_maxConns);
     writeGetValueResult(key, value);
   } else if (key == k_getValueMaxRequestsKey) {
-    DCHECK(m_maxRequests > 0);
+    assert(m_maxRequests > 0);
     value = std::to_string(m_maxRequests);
     writeGetValueResult(key, value);
   } else if (key == k_getValueMultiplexConnsKey) {
@@ -557,6 +564,7 @@ void FastCGISession::handleGetValueResult(const std::string& key) {
 
 void FastCGISession::handleInvalidRecord() {
   LOG(ERROR) << "FastCGI protocol: received an invalid record";
+  m_phase = Phase::INVALID;
   if (m_callback) {
     m_callback->onSessionError();
   }
@@ -588,6 +596,8 @@ void FastCGISession::writeEndRequest(RequestId request_id,
                     padding_length);
   appender.writeBE<AppStatus>(app_status);
   appender.writeBE<uint8_t>(static_cast<uint8_t>(proto_status));
+  appender.ensure(k_endRequestReservedLength);
+  memset(appender.writableData(), 0, k_endRequestReservedLength);
   appender.append(k_endRequestReservedLength);
   appendRecordEnd(appender, padding_length);
   writeEgress(std::move(chain));
@@ -596,12 +606,12 @@ void FastCGISession::writeEndRequest(RequestId request_id,
 void FastCGISession::writeStream(RequestId request_id,
                                  RecordType record_type,
                                  std::unique_ptr<IOBuf> stream_chain) {
-  DCHECK(record_type == RecordType::STDOUT ||
+  assert(record_type == RecordType::STDOUT ||
         record_type == RecordType::STDERR);
   if (stream_chain == nullptr) {
     return; // Nothing to do.
   }
-  DCHECK(stream_chain != nullptr);
+  assert(stream_chain != nullptr);
   IOBufQueue queue(IOBufQueue::cacheChainLength());
   QueueAppender appender(&queue, k_writeGrowth);
   Cursor cursor(stream_chain.get());
@@ -640,6 +650,8 @@ void FastCGISession::writeGetValueResult(const std::string& key,
                                          const std::string& value) {
   std::unique_ptr<IOBuf> chain(IOBuf::create(0));
   Appender cursor(chain.get(), k_writeGrowth);
+  cursor.ensure(k_recordBeginLength);
+  memset(cursor.writableData(), 0, k_recordBeginLength);
   cursor.append(k_recordBeginLength);
   if (key.size() & k_longLengthFlag) {
     cursor.writeBE<LongLength>(key.size() | (k_longLengthFlag << 24));
@@ -682,6 +694,8 @@ void FastCGISession::writeUnknownType(RecordType record_type) {
                     k_unknownTypeLength,
                     padding_length);
   cursor.writeBE<uint8_t>(static_cast<uint8_t>(record_type));
+  cursor.ensure(k_unknownTypeReservedLength);
+  memset(cursor.writableData(), 0, k_unknownTypeReservedLength);
   cursor.append(k_unknownTypeReservedLength);
   appendRecordEnd(cursor, padding_length);
   writeEgress(std::move(chain));
@@ -695,9 +709,9 @@ void FastCGISession::prependRecordBegin(RWPrivateCursor& cursor,
   cursor.writeBE<Version>(k_version);
   cursor.writeBE<uint8_t>(static_cast<uint8_t>(record_type));
   cursor.writeBE<RequestId>(request_id);
-  DCHECK(content_length <= std::numeric_limits<uint16_t>::max());
+  assert(content_length <= std::numeric_limits<uint16_t>::max());
   cursor.writeBE<uint16_t>(content_length);
-  DCHECK(padding_length <= std::numeric_limits<uint8_t>::max());
+  assert(padding_length <= std::numeric_limits<uint8_t>::max());
   cursor.writeBE<uint8_t>(padding_length);
   cursor.skip(k_recordReservedLength);
 }
@@ -708,10 +722,10 @@ size_t FastCGISession::getPaddingLength(size_t content_length) {
 }
 
 void FastCGISession::beginTransaction(RequestId request_id) {
-  DCHECK(request_id != 0);
-  DCHECK(!m_transactions.count(request_id));
+  assert(request_id != 0);
+  assert(!m_transactions.count(request_id));
   // TODO: Make transactions reusable for performance.
-  DCHECK(m_callback != nullptr);
+  assert(m_callback != nullptr);
   auto handler = m_callback->newSessionHandler(request_id);
   m_transactions[request_id] = folly::make_unique<Transaction>(
                                  this, request_id, handler);
@@ -723,13 +737,13 @@ bool FastCGISession::hasTransaction(RequestId request_id) {
 
 std::unique_ptr<FastCGISession::Transaction>& FastCGISession::getTransaction(
                                                         RequestId request_id) {
-  DCHECK(m_transactions.count(request_id));
+  assert(m_transactions.count(request_id));
   return m_transactions[request_id];
 }
 
 void FastCGISession::endTransaction(RequestId request_id) {
-  DCHECK(request_id != 0);
-  DCHECK(m_transactions.count(request_id));
+  assert(request_id != 0);
+  assert(m_transactions.count(request_id));
   // TODO: Make transactions reusable for performance.
   m_transactions.erase(request_id);
 }

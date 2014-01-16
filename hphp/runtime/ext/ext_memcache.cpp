@@ -28,8 +28,10 @@
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(memcache);
 
-bool ini_on_update_hash_strategy(const String& value, void *p);
-bool ini_on_update_hash_function(const String& value, void *p);
+static bool ini_on_update_hash_strategy(const String& value, void *p);
+static String ini_get_hash_strategy(void *p);
+static bool ini_on_update_hash_function(const String& value, void *p);
+static String ini_get_hash_function(void *p);
 
 class MEMCACHEGlobals : public RequestEventHandler {
 public:
@@ -42,10 +44,12 @@ public:
     hash_strategy = "standard";
     hash_function = "crc32";
 
-    IniSetting::Bind("memcache.hash_strategy",     "standard",
-                     ini_on_update_hash_strategy,  &hash_strategy);
-    IniSetting::Bind("memcache.hash_function",     "crc32",
-                     ini_on_update_hash_function,  &hash_function);
+    IniSetting::Bind("memcache.hash_strategy", "standard",
+                     ini_on_update_hash_strategy, ini_get_hash_strategy,
+                     &hash_strategy);
+    IniSetting::Bind("memcache.hash_function", "crc32",
+                     ini_on_update_hash_function, ini_get_hash_function,
+                     &hash_function);
   }
 
   virtual void requestShutdown() {
@@ -55,26 +59,30 @@ public:
 IMPLEMENT_STATIC_REQUEST_LOCAL(MEMCACHEGlobals, s_memcache_globals);
 #define MEMCACHEG(name) s_memcache_globals->name
 
-bool ini_on_update_hash_strategy(const String& value, void *p) {
+static bool ini_on_update_hash_strategy(const String& value, void *p) {
   if (!strncasecmp(value.data(), "standard", sizeof("standard"))) {
     MEMCACHEG(hash_strategy) = "standard";
-  } else if (!strncasecmp(value.data(), "standard", sizeof("consistent"))) {
+  } else if (!strncasecmp(value.data(), "consistent", sizeof("consistent"))) {
     MEMCACHEG(hash_strategy) = "consistent";
-  } else {
-    return false;
   }
-  return true;
+  return false;
 }
 
-bool ini_on_update_hash_function(const String& value, void *p) {
+static String ini_get_hash_strategy(void *p) {
+  return MEMCACHEG(hash_strategy);
+}
+
+static bool ini_on_update_hash_function(const String& value, void *p) {
   if (!strncasecmp(value.data(), "crc32", sizeof("crc32"))) {
     MEMCACHEG(hash_strategy) = "crc32";
   } else if (!strncasecmp(value.data(), "fnv", sizeof("fnv"))) {
     MEMCACHEG(hash_strategy) = "fnv";
-  } else {
-    return false;
   }
-  return true;
+  return false;
+}
+
+static String ini_get_hash_function(void *p) {
+  return MEMCACHEG(hash_strategy);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -616,10 +624,6 @@ int64_t f_memcache_decrement(CObjRef memcache, const String& key,
 bool f_memcache_close(CObjRef memcache) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_close();
-}
-
-bool f_memcache_debug(bool onoff) {
-  throw NotImplementedException(__func__);
 }
 
 Variant f_memcache_get_version(CObjRef memcache) {

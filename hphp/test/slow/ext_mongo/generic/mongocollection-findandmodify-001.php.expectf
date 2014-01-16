@@ -1,0 +1,90 @@
+array(6) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+  ["inprogress"]=>
+  bool(true)
+  ["name"]=>
+  string(10) "Biz report"
+  ["priority"]=>
+  int(2)
+  ["started"]=>
+  object(MongoDate)#%d (2) {
+    ["sec"]=>
+    int(%d)
+    ["usec"]=>
+    int(%d)
+  }
+  ["tasks"]=>
+  array(2) {
+    [0]=>
+    string(20) "run marketing report"
+    [1]=>
+    string(12) "email report"
+  }
+}
+array(2) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+  ["tasks"]=>
+  array(3) {
+    [0]=>
+    string(14) "select product"
+    [1]=>
+    string(13) "add inventory"
+    [2]=>
+    string(12) "do placement"
+  }
+}
+array(2) {
+  [%s]=>
+  array(5) {
+    ["_id"]=>
+    object(MongoId)#%d (1) {
+      ["$id"]=>
+      string(24) "%s"
+    }
+    ["inprogress"]=>
+    bool(false)
+    ["name"]=>
+    string(10) "Next promo"
+    ["priority"]=>
+    int(0)
+    ["tasks"]=>
+    array(2) {
+      [0]=>
+      string(13) "add inventory"
+      [1]=>
+      string(12) "do placement"
+    }
+  }
+  [%s]=>
+  array(5) {
+    ["_id"]=>
+    object(MongoId)#%d (1) {
+      ["$id"]=>
+      string(24) "%s"
+    }
+    ["name"]=>
+    string(10) "Biz report"
+    ["inprogress"]=>
+    bool(false)
+    ["priority"]=>
+    int(1)
+    ["tasks"]=>
+    array(2) {
+      [0]=>
+      string(16) "run sales report"
+      [1]=>
+      string(12) "email report"
+    }
+  }
+}
+0 need remove or update
+string(21) "need remove or update"
+float(0)

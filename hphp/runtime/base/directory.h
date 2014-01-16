@@ -28,11 +28,9 @@ namespace HPHP {
 class Directory : public SweepableResourceData {
 public:
   virtual void close() = 0;
-  virtual String read() = 0;
+  virtual Variant read() = 0;
   virtual void rewind() = 0;
-  void sweep() FOLLY_OVERRIDE {
-    close();
-  }
+  void sweep() FOLLY_OVERRIDE { close(); }
 
   CLASSNAME_IS("Directory")
   // overriding ResourceData
@@ -51,12 +49,12 @@ public:
   ~PlainDirectory();
 
   virtual void close();
-  virtual String read();
+  virtual Variant read();
   virtual void rewind();
   bool isValid() const;
 
 private:
-  DIR *m_dir;
+  DIR* m_dir;
 };
 
 class ArrayDirectory : public Directory {
@@ -66,7 +64,7 @@ public:
   explicit ArrayDirectory(CArrRef a) : m_it(a) {}
 
   virtual void close() {}
-  virtual String read();
+  virtual Variant read();
   virtual void rewind();
 
   void sweep() FOLLY_OVERRIDE {
@@ -74,9 +72,11 @@ public:
     Directory::sweep();
   }
 
+  size_t size() const { return m_it.getArrayData()->size(); }
+  String path();
+
 private:
   ArrayIter m_it;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

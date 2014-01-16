@@ -1,0 +1,4 @@
+*** Testing mail() : basic functionality ***
+-- failure --
+bool(false)
+===DONE===

@@ -131,6 +131,17 @@ void ClassConstant::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ClassConstant::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("ConstantStatement", 2);
+  cg.printPropertyHeader("expressions");
+  cg.printExpressionVector(m_exp);
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ClassConstant::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

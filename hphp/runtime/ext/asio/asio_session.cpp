@@ -16,7 +16,14 @@
 */
 
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/runtime/ext/ext_asio.h"
+
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
+#include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
+#include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
+#include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
+#include "hphp/runtime/ext/asio/sleep_wait_handle.h"
+#include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -74,12 +81,12 @@ void AsioSession::initAbruptInterruptException() {
     "The request was abruptly interrupted.");
 }
 
-void AsioSession::onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont) {
+void AsioSession::onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child) {
   assert(m_onAsyncFunctionCreateCallback.get());
   try {
     vm_call_user_func(
       m_onAsyncFunctionCreateCallback,
-      Array::Create(cont));
+     make_packed_array(cont, child));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onCreate callback");
   }

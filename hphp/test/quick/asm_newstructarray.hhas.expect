@@ -1,0 +1,10 @@
+array(4) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  string(3) "two"
+  ["three"]=>
+  float(3.1415)
+  ["four"]=>
+  int(4)
+}

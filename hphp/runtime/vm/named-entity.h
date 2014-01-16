@@ -23,6 +23,7 @@
 #include "folly/AtomicHashMap.h"
 
 #include "hphp/util/atomic.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/type-alias.h"
 

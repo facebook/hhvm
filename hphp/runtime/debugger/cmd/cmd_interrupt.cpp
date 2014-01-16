@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
 #include "hphp/runtime/base/array-init.h"
@@ -70,7 +72,7 @@ void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
   // we rev the protocol.
   bool dummy;
   thrift.read(dummy);
-  m_bpi = BreakPointInfoPtr(new BreakPointInfo());
+  m_bpi = std::make_shared<BreakPointInfo>();
   bool site; thrift.read(site);
   if (site) {
     thrift.read(m_bpi->m_file);
@@ -78,7 +80,7 @@ void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
     thrift.read(m_bpi->m_char1);
     thrift.read(m_bpi->m_line2);
     thrift.read(m_bpi->m_char2);
-    DFunctionInfoPtr func(new DFunctionInfo());
+    auto func = std::make_shared<DFunctionInfo>();
     thrift.read(func->m_namespace);
     thrift.read(func->m_class);
     thrift.read(func->m_function);
@@ -176,7 +178,7 @@ void CmdInterrupt::onClient(DebuggerClient &client) {
     case ExceptionThrown: {
       bool found = false;
       bool toggled = false;
-      BreakPointInfoPtrVec *bps = client.getBreakPoints();
+      auto *bps = client.getBreakPoints();
       for (unsigned int i = 0; i < m_matched.size(); i++) {
         BreakPointInfoPtr bpm = m_matched[i];
         BreakPointInfoPtr bp;
@@ -263,7 +265,7 @@ bool CmdInterrupt::onServer(DebuggerProxy &proxy) {
 }
 
 bool CmdInterrupt::shouldBreak(DebuggerProxy &proxy,
-                               const BreakPointInfoPtrVec &bps,
+                               const std::vector<BreakPointInfoPtr> &bps,
                                int stackDepth) {
 
   switch (m_interrupt) {
@@ -298,12 +300,12 @@ bool CmdInterrupt::shouldBreak(DebuggerProxy &proxy,
 }
 
 std::string CmdInterrupt::getFileLine() const {
-  string ret;
+  std::string ret;
   if (m_site) {
     if (m_site->getFile()) {
       ret = m_site->getFile();
     }
-    ret += ":" + lexical_cast<string>(m_site->getLine0());
+    ret += ":" + boost::lexical_cast<std::string>(m_site->getLine0());
   }
   return ret;
 }

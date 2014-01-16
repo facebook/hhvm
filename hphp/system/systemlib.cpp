@@ -32,12 +32,14 @@ namespace HPHP {
   }
 
 bool SystemLib::s_inited = false;
-string SystemLib::s_source = "";
+std::string SystemLib::s_source = "";
 HPHP::Unit* SystemLib::s_unit = nullptr;
 HPHP::Unit* SystemLib::s_hhas_unit = nullptr;
 HPHP::Unit* SystemLib::s_nativeFuncUnit = nullptr;
 HPHP::Unit* SystemLib::s_nativeClassUnit = nullptr;
 HPHP::Func* SystemLib::s_nullFunc = nullptr;
+HPHP::Func* SystemLib::s_continuationSendFunc = nullptr;
+HPHP::Func* SystemLib::s_continuationRaiseFunc = nullptr;
 
 #define DEFINE_SYSTEMLIB_CLASS(cls)       \
   HPHP::Class* SystemLib::s_ ## cls ## Class = nullptr;

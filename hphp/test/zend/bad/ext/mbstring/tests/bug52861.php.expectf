@@ -1,0 +1,7 @@
+To: example@example.com
+Subject: %s
+MIME-Version: 2.0
+Content-Type: text/plain; charset=%s
+Content-Transfer-Encoding: %s
+
+%s

@@ -15,24 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
+
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-namespace {
-  StaticString s_staticException("<static-exception>");
-}
-
-c_StaticExceptionWaitHandle::c_StaticExceptionWaitHandle(Class* cb)
-    : c_StaticWaitHandle(cb) {
-  setState(STATE_FAILED);
-}
-
-c_StaticExceptionWaitHandle::~c_StaticExceptionWaitHandle() {
-  tvRefcountedDecRefCell(&m_resultOrException);
-}
 
 void c_StaticExceptionWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
@@ -50,14 +38,24 @@ Object c_StaticExceptionWaitHandle::ti_create(CObjRef exception) {
   return Create(exception.get());
 }
 
-p_StaticExceptionWaitHandle c_StaticExceptionWaitHandle::Create(ObjectData* exception) {
-  p_StaticExceptionWaitHandle wh = NEWOBJ(c_StaticExceptionWaitHandle)();
-  tvWriteObject(exception, &wh->m_resultOrException);
-  return wh;
+c_StaticExceptionWaitHandle*
+c_StaticExceptionWaitHandle::Create(ObjectData* exception) {
+  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+
+  auto wait_handle = NEWOBJ(c_StaticExceptionWaitHandle)();
+  tvWriteObject(exception, &wait_handle->m_resultOrException);
+  return wait_handle;
 }
 
-String c_StaticExceptionWaitHandle::getName() {
-  return s_staticException;
+ObjectData*
+c_StaticExceptionWaitHandle::CreateFromVM(ObjectData* exception) {
+  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+
+  auto wait_handle = NEWOBJ(c_StaticExceptionWaitHandle)();
+  wait_handle->m_resultOrException.m_type = KindOfObject;
+  wait_handle->m_resultOrException.m_data.pobj = exception;
+  wait_handle->incRefCount();
+  return wait_handle;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

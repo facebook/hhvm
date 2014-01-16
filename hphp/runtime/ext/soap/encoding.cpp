@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/soap/encoding.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/ext_soap.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -23,6 +25,9 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+using std::string;
+using boost::lexical_cast;
 
 bool php_libxml_xmlCheckUTF8(const unsigned char *s) {
   int i;
@@ -391,7 +396,7 @@ static string get_full_typename(const char *ns, const char *type) {
 
 static encodePtr get_typemap_type(const char *ns, const char *type) {
   USE_SOAP_GLOBAL;
-  string nscat = get_full_typename(ns, type);
+  std::string nscat = get_full_typename(ns, type);
   if (SOAP_GLOBAL(typemap)) {
     encodeMap::const_iterator iter = SOAP_GLOBAL(typemap)->find(nscat);
     if (iter != SOAP_GLOBAL(typemap)->end()) {
@@ -463,7 +468,7 @@ static bool soap_check_zval_ref(CVarRef data, xmlNodePtr node) {
       xmlSetNs(node, node_ptr->ns);
       xmlAttrPtr attr = node_ptr->properties;
       const char *id;
-      string prefix;
+      std::string prefix;
       if (SOAP_GLOBAL(soap_version) == SOAP_1_1) {
         while (1) {
           attr = get_attribute(attr, "id");
@@ -627,7 +632,7 @@ static Variant master_to_zval_int(encodePtr encode, xmlNodePtr data) {
       xmlAttrPtr type_attr = get_attribute_ex(data->properties, "type",
                                               XSI_NAMESPACE);
       if (type_attr) {
-        string ns, cptype;
+        std::string ns, cptype;
         parse_namespace(type_attr->children->content, cptype, ns);
         xmlNsPtr nsptr = xmlSearchNs(data->doc, data, NS_STRING(ns));
         string nscat;
@@ -943,7 +948,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, CVarRef data, int style,
       err[i++] = '.';
       err[i++] = 0;
     }
-    string serr = err;
+    std::string serr = err;
     free(err);
     throw SoapException("Encoding: string '%s' is not a valid utf-8 string",
                         serr.c_str());
@@ -1673,7 +1678,7 @@ static sdlTypePtr model_array_element(sdlContentModelPtr model) {
   switch (model->kind) {
   case XSD_CONTENT_ELEMENT: {
     if (model->max_occurs == -1 || model->max_occurs > 1) {
-      return sdlTypePtr(model->u_element, null_deleter());
+      return sdlTypePtr(model->u_element, [] (const void*) {});
     } else {
       return sdlTypePtr();
     }
@@ -2043,9 +2048,10 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
   }
 }
 
-static sdlExtraAttributePtr get_extra_attributes(sdlType *sdl_type,
-                                                 const char *type,
-                                                 const char *wsdl_type) {
+static std::shared_ptr<sdlExtraAttribute>
+get_extra_attributes(sdlType *sdl_type,
+                     const char *type,
+                     const char *wsdl_type) {
   if (sdl_type) {
     sdlAttributeMap::const_iterator iterAttributes =
       sdl_type->attributes.find(type);
@@ -2058,7 +2064,7 @@ static sdlExtraAttributePtr get_extra_attributes(sdlType *sdl_type,
       }
     }
   }
-  return sdlExtraAttributePtr();
+  return std::shared_ptr<sdlExtraAttribute>();
 }
 
 static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
@@ -2066,7 +2072,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
   USE_SOAP_GLOBAL;
   sdlType *sdl_type = type->sdl_type;
   sdlTypePtr element_type;
-  string array_type, array_size;
+  std::string array_type, array_size;
   int i;
   xmlNodePtr xmlParam;
   encodePtr enc;
@@ -2109,7 +2115,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
   }
 
   if (data.isArray()) {
-    sdlExtraAttributePtr ext;
+    std::shared_ptr<sdlExtraAttribute> ext;
     sdlTypeMap::const_iterator iterElements;
     sdlAttributeMap::const_iterator iterAttributes;
     sdlExtraAttributeMap::const_iterator iterExtraAttributes;
@@ -2172,7 +2178,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
              iterAttributes->second->extraAttributes.find
              (WSDL_NAMESPACE":arraySize")) !=
             iterAttributes->second->extraAttributes.end()) {
-          sdlExtraAttributePtr ext = iterExtraAttributes->second;
+          auto ext = iterExtraAttributes->second;
           dimension = calc_dimension_12(ext->val.c_str());
           dims = get_position_12(dimension, ext->val.c_str());
           if (dims[0] == 0) {dims[0] = i;}
@@ -2293,7 +2299,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
   xmlAttrPtr attr;
   sdl *sdl;
   sdlAttributePtr arrayType;
-  sdlExtraAttributePtr ext;
+  std::shared_ptr<sdlExtraAttribute> ext;
   sdlTypePtr elementType;
 
   FIND_XML_NULL(data, ret);

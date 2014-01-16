@@ -49,8 +49,9 @@ class SplStack extends SplDoublyLinkedList
    * @return     mixed   No value is returned.
    */
   public function setIteratorMode($mode) {
-    if ($mode & self::IT_MODE_FIFO) {
-      throw new RuntimeException('SplStack can only be used in LIFO mode.');
+    if (($mode & self::IT_MODE_LIFO) == 0) {
+      throw new RuntimeException(
+        'Iterators\' LIFO/FIFO modes for SplStack/SplQueue objects are frozen');
     }
     parent::setIteratorMode($mode);
   }

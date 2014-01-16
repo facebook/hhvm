@@ -1,0 +1,4 @@
+<?php
+extension_loaded('iconv') or die('skip');
+function_exists('iconv_mime_decode_headers') or die("skip iconv_mime_decode_headers() is not available in this build");
+?>

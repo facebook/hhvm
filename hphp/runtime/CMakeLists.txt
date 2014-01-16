@@ -1,29 +1,23 @@
 set(RECURSIVE_SOURCE_SUBDIRS base debugger eval ext server vm)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
-	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
-	list(APPEND CXX_SOURCES ${files})
-
-	auto_sources(files "*.c" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
-	list(APPEND C_SOURCES ${files})
-
-	auto_sources(files "*.S" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
-	list(APPEND ASM_SOURCES ${files})
+	HHVM_SELECT_SOURCES("${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
+foreach (dir ${ZEND_COMPAT_BUILD_DIRS})
+	HHVM_SELECT_SOURCES("${dir}")
+endforeach(dir ${ZEND_COMPAT_BUILD_DIRS})
 
 if(NOT LINUX)
 	add_definitions(-DNO_HARDWARE_COUNTERS)
 	list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.cpp)
 endif()
 
-# remove ext_hhvm, and anything in a test folder
-foreach (file ${CXX_SOURCES})
-	if (${file} MATCHES "ext_hhvm")
-		list(REMOVE_ITEM CXX_SOURCES ${file})
-	endif()
-	if (${file} MATCHES "/test/")
-		list(REMOVE_ITEM CXX_SOURCES ${file})
-	endif()
-endforeach(file ${CXX_SOURCES})
+if(NOT ENABLE_FASTCGI)
+	foreach (file ${CXX_SOURCES})
+		if (${file} MATCHES "/fastcgi/")
+			list(REMOVE_ITEM CXX_SOURCES ${file})
+		endif()
+	endforeach(file ${CXX_SOURCES})
+endif()
 
 if(NOT HAVE_CUSTOM_LIBEVENT)
 	# Not working with off-the-shelf libevent
@@ -48,3 +42,5 @@ SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
 hphp_link(hphp_runtime_static)
 add_dependencies(hphp_runtime_static hphp_parser)
 
+# Workaround for GCC bug, remove after 4.8 is the minimum supported
+add_definitions(-D_GLIBCXX_USE_NANOSLEEP)

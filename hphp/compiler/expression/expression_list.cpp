@@ -33,7 +33,6 @@ using namespace HPHP;
 ExpressionList::ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                                ListKind kind)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ExpressionList)),
-    m_outputCount(-1),
     m_arrayElements(false), m_collectionType(0), m_kind(kind) {
 }
 
@@ -240,26 +239,15 @@ void ExpressionList::stripConcat() {
       BinaryOpExpressionPtr b
         (static_pointer_cast<BinaryOpExpression>(e));
       if (b->getOp() == '.') {
-        e = b->getExp1();
-        el.insertElement(b->getExp2(), i + 1);
-        continue;
+        if(!b->getExp1()->isArray() && !b->getExp2()->isArray()) {
+          e = b->getExp1();
+          el.insertElement(b->getExp2(), i + 1);
+          continue;
+        }
       }
     }
     i++;
   }
-}
-
-void ExpressionList::setOutputCount(int count) {
-  assert(count >= 0 && count <= (int)m_exps.size());
-  m_outputCount = count;
-}
-
-int ExpressionList::getOutputCount() const {
-  return m_outputCount < 0 ? m_exps.size() : m_outputCount;
-}
-
-void ExpressionList::resetOutputCount() {
-  m_outputCount = -1;
 }
 
 void ExpressionList::markParam(int p, bool noRefWrapper) {
@@ -286,7 +274,7 @@ void ExpressionList::markParams(bool noRefWrapper) {
   }
 }
 
-void ExpressionList::setCollectionType(int cType) {
+void ExpressionList::setCollectionType(Collection::Type cType) {
   m_arrayElements = true;
   m_collectionType = cType;
 }
@@ -479,6 +467,19 @@ bool ExpressionList::canonCompare(ExpressionPtr e) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ExpressionList::outputCodeModel(CodeGenerator &cg) {
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    ExpressionPtr exp = m_exps[i];
+    if (exp) {
+      cg.printExpression(exp, exp->hasContext(RefParameter));
+    } else {
+      cg.printNull();
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -513,4 +514,3 @@ unsigned int ExpressionList::checkLitstrKeys() const {
   }
   return keys.size();
 }
-

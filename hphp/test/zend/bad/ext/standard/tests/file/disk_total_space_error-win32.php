@@ -21,7 +21,8 @@ var_dump( disk_total_space( $file_path."/disk_total_space.tmp" )); // file input
 fclose($fh);
 
 echo"\n--- Done ---";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/disk_total_space.tmp");
 ?>

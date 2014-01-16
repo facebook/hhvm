@@ -23,6 +23,7 @@ echo "3\n";
 echo fread($fp, 2000);
 fclose($fp);
 
-?><?php
+?>
+<?php
 @unlink(dirname(__FILE__) . '/test.txt.gz');
 ?>

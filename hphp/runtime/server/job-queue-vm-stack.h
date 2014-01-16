@@ -16,8 +16,6 @@
 #ifndef incl_HPHP_RUNTIME_BASE_SERVER_JOB_QUEUE_VM_STACK_H_
 #define incl_HPHP_RUNTIME_BASE_SERVER_JOB_QUEUE_VM_STACK_H_
 
-#include "hphp/util/base.h"
-
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 

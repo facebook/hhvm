@@ -72,6 +72,7 @@ public:
   }
   StatementListPtr getStmts() { return m_stmt;}
   bool isRef(int index = -1) const;
+  bool isSystem() const;
 
   int getLocalEffects() const;
 

@@ -1,5 +1,8 @@
 <?php
 
+// disable array -> "Array" conversion notice
+error_reporting(error_reporting() & ~E_NOTICE);
+
 var_export(array("\0" => 1));
 var_export(array("\0" => "\0"));
 var_export(array("\0" => "\\"));

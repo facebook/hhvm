@@ -42,7 +42,8 @@ var_dump( file_exists($filename) );
 var_dump( file_exists($dirname) );
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/rename_variation3_link.tmp");
 unlink($file_path."/rename_variation3.tmp");

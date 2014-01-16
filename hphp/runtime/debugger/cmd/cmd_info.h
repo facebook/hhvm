@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdInfo);
 class CmdInfo : public DebuggerCommand {
 public:
   static void UpdateLiveLists(DebuggerClient &client);

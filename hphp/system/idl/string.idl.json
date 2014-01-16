@@ -125,6 +125,12 @@
                     "name": "str",
                     "type": "String",
                     "desc": "The input string."
+                },
+                {
+                    "name": "is_xhtml",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to use XHTML compatible line breaks or not."
                 }
             ]
         },
@@ -449,7 +455,7 @@
             "name": "str_split",
             "desc": "Converts a string to an array.",
             "flags": [
-                "ZendParamMode"
+                "ZendParamModeNull"
             ],
             "return": {
                 "type": "Variant",
@@ -702,41 +708,6 @@
                     "name": "multiplier",
                     "type": "Int32",
                     "desc": "Number of time the input string should be repeated.\n\nmultiplier has to be greater than or equal to 0. If the multiplier is set to 0, the function will return an empty string."
-                }
-            ]
-        },
-        {
-            "name": "wordwrap",
-            "desc": "Wraps a string to a given number of characters using a string break character.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Returns the given string wrapped at the specified column."
-            },
-            "args": [
-                {
-                    "name": "str",
-                    "type": "String",
-                    "desc": "The input string."
-                },
-                {
-                    "name": "width",
-                    "type": "Int32",
-                    "value": "75",
-                    "desc": "The column width."
-                },
-                {
-                    "name": "wordbreak",
-                    "type": "String",
-                    "value": "\"\\n\"",
-                    "desc": "The line is broken using the optional break parameter."
-                },
-                {
-                    "name": "cut",
-                    "type": "Boolean",
-                    "value": "false",
-                    "desc": "If the cut is set to TRUE, the string is always wrapped at or before the specified width. So if you have a word that is larger than the given width, it is broken apart. (See second example)."
                 }
             ]
         },
@@ -1146,6 +1117,12 @@
                     "type": "Int32",
                     "value": "k_ENT_COMPAT",
                     "desc": "Like the htmlspecialchars() and htmlentities() functions you can optionally specify the quote_style you are working with. See the description of these modes in htmlspecialchars()."
+                },
+                {
+                    "name": "encoding",
+                    "type": "String",
+                    "value": "\"UTF-8\"",
+                    "desc": "Encoding to use. If omitted, the default value for this argument is ISO-8859-1 in versions of PHP prior to 5.4.0, and UTF-8 from PHP 5.4.0 onwards."
                 }
             ]
         },
@@ -2004,6 +1981,41 @@
                     "name": "vstr",
                     "type": "Variant",
                     "desc": "The string being measured for length."
+                }
+            ]
+        },
+        {
+            "name": "str_getcsv",
+            "desc": "Parses a string input for fields in CSV format and returns an array containing the fields read.",
+            "flags": [
+            ],
+            "return": {
+              "type": "StringVec",
+              "desc": "Returns an indexed array containing the fields read."
+            },
+            "args": [
+                {
+                    "name": "input",
+                    "type": "String",
+                    "desc": "The string to parse."
+                },
+                {
+                    "name": "delimiter",
+                    "type": "String",
+                    "value": "\",\"",
+                    "desc": "Set the field delimiter (one character only)."
+                },
+                {
+                    "name": "enclosure",
+                    "type": "String",
+                    "value": "\"\\\"\"",
+                    "desc": "Set the field enclosure character (one character only)."
+                },
+                {
+                    "name": "escape",
+                    "type": "String",
+                    "value": "\"\\\\\"",
+                    "desc": "Set the escape character (one character only). Defaults as a backslash (\\)"
                 }
             ]
         },

@@ -21,5 +21,4 @@ $y = new Bar();
 $x = new Foo($y);
 }
 main();
-
 ?>

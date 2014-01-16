@@ -1,0 +1,29 @@
+Deprecated: Assigning the return value of new by reference is deprecated in %s on line %d
+ok1
+bar::run1
+foo::method1
+HipHop Notice: %s
+foo::method1
+HipHop Notice: %s
+foo::finalize
+done!
+ok2
+bar::run2
+foo::method2
+foo::method2
+foo::finalize
+done!
+ok3
+bar::run3
+foo::method3
+foo::method3
+foo::finalize
+done!
+ouch
+bar::run1
+foo::method1
+HipHop Notice: %s
+foo::method1
+HipHop Notice: %s
+foo::finalize
+I'm alive!

@@ -72,29 +72,32 @@ TEST_F(TestTextUtil, GetPathList) {
   vector<string> out;
 
   out = TextUtil::MakePathList("/some/path/to/foo");
-
-  ASSERT_EQ(out.size(), 4);
+  ASSERT_EQ(out.size(), 3);
   EXPECT_EQ(out[0], "/some");
   EXPECT_EQ(out[1], "/some/path");
   EXPECT_EQ(out[2], "/some/path/to");
-  EXPECT_EQ(out[3], "/some/path/to/foo");
 
   out = TextUtil::MakePathList("/justonebiglongname");
-
-  ASSERT_EQ(out.size(), 1);
-  EXPECT_EQ(out[0], "/justonebiglongname");
+  ASSERT_EQ(out.size(), 0);
 
   out = TextUtil::MakePathList("trailingslashonly/");
-  ASSERT_EQ(out.size(), 0);
+  ASSERT_EQ(out.size(), 1);
+  EXPECT_EQ(out[0], "trailingslashonly");
 
   out = TextUtil::MakePathList("middle/slash");
-  ASSERT_EQ(out.size(), 0);
+  ASSERT_EQ(out.size(), 1);
+  EXPECT_EQ(out[0], "middle");
 
   out = TextUtil::MakePathList("noslashesatall");
   ASSERT_EQ(out.size(), 0);
 
   out = TextUtil::MakePathList("");
   ASSERT_EQ(out.size(), 0);
+
+  out = TextUtil::MakePathList("foo/bar/index.php");
+  ASSERT_EQ(out.size(), 2);
+  EXPECT_EQ(out[0], "foo");
+  EXPECT_EQ(out[1], "foo/bar");
 }
 
 }  // namespace HPHP

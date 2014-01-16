@@ -13,8 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/server/http-request-handler.h"
+
+#include <string>
+#include <vector>
+
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -29,12 +32,17 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/server/request-uri.h"
 #include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/service-data.h"
 
 namespace HPHP {
+
+using std::string;
+using std::vector;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
@@ -56,11 +64,10 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
                                            const std::string &cmd,
                                            const char *ext) {
   assert(ext);
-  assert(cmd.rfind('.') != string::npos);
+  assert(cmd.rfind('.') != std::string::npos);
   assert(strcmp(ext, cmd.c_str() + cmd.rfind('.') + 1) == 0);
 
-  hphp_string_imap<string>::const_iterator iter =
-    RuntimeOption::StaticFileExtensions.find(ext);
+  auto iter = RuntimeOption::StaticFileExtensions.find(ext);
   if (iter != RuntimeOption::StaticFileExtensions.end()) {
     string val = iter->second;
     const char *valp = val.c_str();
@@ -154,8 +161,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
                             vhost->getName().c_str());
 
   // resolve source root
-  string host = transport->getHeader("Host");
-  SourceRootInfo sourceRootInfo(host.c_str());
+  SourceRootInfo sourceRootInfo(transport);
 
   if (sourceRootInfo.error()) {
     sourceRootInfo.handleError(transport);
@@ -197,29 +203,26 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   // If this is not a php file, check the static and dynamic content caches
   if (treatAsContent) {
-    if (RuntimeOption::EnableStaticContentCache) {
-      bool original = compressed;
-      // check against static content cache
-      if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
-        Util::ScopedMem decompressed_data;
-        // (qigao) not calling stat at this point because the timestamp of
-        // local cache file is not valuable, maybe misleading. This way
-        // the Last-Modified header will not show in response.
-        // stat(RuntimeOption::FileCache.c_str(), &st);
-        if (!original && compressed) {
-          data = gzdecode(data, len);
-          if (data == nullptr) {
-            throw FatalErrorException("cannot unzip compressed data");
-          }
-          decompressed_data = const_cast<char*>(data);
-          compressed = false;
+    bool original = compressed;
+    // check against static content cache
+    if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
+      Util::ScopedMem decompressed_data;
+      // (qigao) not calling stat at this point because the timestamp of
+      // local cache file is not valuable, maybe misleading. This way
+      // the Last-Modified header will not show in response.
+      // stat(RuntimeOption::FileCache.c_str(), &st);
+      if (!original && compressed) {
+        data = gzdecode(data, len);
+        if (data == nullptr) {
+          throw FatalErrorException("cannot unzip compressed data");
         }
-        sendStaticContent(transport, data, len, 0, compressed, path, ext);
-        StaticContentCache::TheFileCache->adviseOutMemory();
-        ServerStats::LogPage(path, 200);
-        GetAccessLog().log(transport, vhost);
-        return;
+        decompressed_data = const_cast<char*>(data);
+        compressed = false;
       }
+      sendStaticContent(transport, data, len, 0, compressed, path, ext);
+      ServerStats::LogPage(path, 200);
+      GetAccessLog().log(transport, vhost);
+      return;
     }
 
     if (RuntimeOption::EnableStaticContentFromDisk) {
@@ -300,6 +303,14 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 
+void HttpRequestHandler::abortRequest(Transport *transport) {
+  GetAccessLog().onNewRequest();
+  const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
+  assert(vhost);
+  transport->sendString("Service Unavailable", 503);
+  GetAccessLog().log(transport, vhost);
+}
+
 bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                            RequestURI &reqURI,
                                            SourceRootInfo &sourceRootInfo,
@@ -321,6 +332,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   {
     ServerStatsHelper ssh("input");
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
+    Extension::RequestInitModules();
 
     if (RuntimeOption::EnableDebugger) {
       Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();

@@ -30,7 +30,7 @@
 
 namespace HPHP {
 
-namespace Transl {
+namespace JIT {
 struct Tracelet;
 struct TranslatorX64;
 }
@@ -338,22 +338,22 @@ struct RegionContext::PreLiveAR {
  * well.
  */
 RegionDescPtr selectRegion(const RegionContext& context,
-                           const Transl::Tracelet* t);
+                           const JIT::Tracelet* t);
 
 /*
  * Select a compilation region based on profiling information.  This
  * is used in JitPGO mode.  Argument transId specifies the profiling
  * translation that triggered the profiling-based region selection.
  */
-RegionDescPtr selectHotRegion(Transl::TransID transId,
-                              Transl::TranslatorX64* tx64);
+RegionDescPtr selectHotRegion(JIT::TransID transId,
+                              JIT::TranslatorX64* tx64);
 
 /*
  * Create a compilation region corresponding to a tracelet created by
  * the old analyze() framework.
  */
 RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
-                                   const Transl::Tracelet& tlet);
+                                   const JIT::Tracelet& tlet);
 
 /*
  * Checks whether the type predictions at the beginning of block
@@ -367,7 +367,7 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
  * func, and returns them in the regions vector.
  */
 void regionizeFunc(const Func*            func,
-                   Transl::TranslatorX64* tx64,
+                   JIT::TranslatorX64* tx64,
                    RegionVec&             regions);
 
 /*

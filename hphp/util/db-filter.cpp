@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/db-filter.h"
+
 #include "hphp/util/db-conn.h"
 
 namespace HPHP {
@@ -39,7 +39,7 @@ const char *DBInNumberFilter::getNext(const std::string &where) {
 }
 
 const char *DBInNumberFilter::getFilter(const std::string &where) {
-  string values;
+  std::string values;
   for (int i = 0; i < MAX_COUNT; i++) {
     if (i > 0) values += ",";
 
@@ -51,8 +51,8 @@ const char *DBInNumberFilter::getFilter(const std::string &where) {
     if (m_iter == m_values.end()) break;
   }
 
-  string::size_type pos = where.find("%s");
-  assert(pos != string::npos);
+  auto pos = where.find("%s");
+  assert(pos != std::string::npos);
 
   m_filter = where;
   m_filter.replace(pos, 2, values.c_str());
@@ -78,13 +78,13 @@ const char *DBInStringFilter::getNext(const std::string &where) {
 }
 
 const char *DBInStringFilter::getFilter(const std::string &where) {
-  string values;
+  std::string values;
   for (int i = 0; i < MAX_COUNT; i++) {
     if (i > 0) values += ",";
 
     values += "'";
     if (m_conn) {
-      string escaped;
+      std::string escaped;
       m_conn->escapeString(m_iter->c_str(), escaped);
       values += escaped;
     } else {
@@ -96,8 +96,8 @@ const char *DBInStringFilter::getFilter(const std::string &where) {
     if (m_iter == m_values.end()) break;
   }
 
-  string::size_type pos = where.find("%s");
-  assert(pos != string::npos);
+  auto pos = where.find("%s");
+  assert(pos != std::string::npos);
 
   m_filter = where;
   m_filter.replace(pos, 2, values.c_str());
@@ -122,7 +122,7 @@ const char *DBOrStringFilter::getNext(const std::string &where) {
 }
 
 const char *DBOrStringFilter::getFilter(const std::string &where) {
-  string values = "(";
+  std::string values = "(";
   for (int i = 0; i < MAX_COUNT; i++) {
     if (i > 0) values += ") or (";
 
@@ -133,8 +133,8 @@ const char *DBOrStringFilter::getFilter(const std::string &where) {
   }
   values += ")";
 
-  string::size_type pos = where.find("%s");
-  assert(pos != string::npos);
+  auto pos = where.find("%s");
+  assert(pos != std::string::npos);
 
   m_filter = where;
   m_filter.replace(pos, 2, values.c_str());

@@ -1,0 +1,16 @@
+NULL
+array(2) {
+  ["name"]=>
+  string(19) "phpunit.create-col1"
+  ["options"]=>
+  array(3) {
+    ["create"]=>
+    string(11) "create-col1"
+    ["size"]=>
+    int(100)
+    ["capped"]=>
+    bool(true)
+  }
+}
+int(%d)
+bool(true)

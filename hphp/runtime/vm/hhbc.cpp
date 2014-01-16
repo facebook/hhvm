@@ -15,11 +15,15 @@
 */
 
 #include "hphp/runtime/vm/hhbc.h"
+
+#include <type_traits>
+#include <sstream>
+
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/stats.h"
-#include <sstream>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,9 +58,11 @@ ArgType immType(const Op opcode, int idx) {
 #define TWO(a, b) a,
 #define THREE(a, b, c) a,
 #define FOUR(a, b, c, d) a,
+#define OA(x) OA
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm
     OPCODES
 // re-using definition of O below.
+#undef OA
 #undef NA
 #undef ONE
 #undef TWO
@@ -69,8 +75,10 @@ ArgType immType(const Op opcode, int idx) {
 #define TWO(a, b) b,
 #define THREE(a, b, c) b,
 #define FOUR(a, b, c, d) b,
+#define OA(x) OA
     OPCODES
 // re-using definition of O below.
+#undef OA
 #undef NA
 #undef ONE
 #undef TWO
@@ -83,7 +91,9 @@ ArgType immType(const Op opcode, int idx) {
 #define TWO(a, b) -1,
 #define THREE(a, b, c) c,
 #define FOUR(a, b, c, d) c,
+#define OA(x) OA
     OPCODES
+#undef OA
 #undef NA
 #undef ONE
 #undef TWO
@@ -96,7 +106,9 @@ ArgType immType(const Op opcode, int idx) {
 #define TWO(a, b) -1,
 #define THREE(a, b, c) -1,
 #define FOUR(a, b, c, d) d,
+#define OA(x) OA
     OPCODES
+#undef OA
 #undef O
 #undef NA
 #undef ONE
@@ -150,6 +162,9 @@ int immSize(const Op* opcode, int idx) {
     } else if (itype == ILA) {
       prefixes = 1;
       vecElemSz = 2 * sizeof(uint32_t);
+    } else if (itype == VSA) {
+      prefixes = 1;
+      vecElemSz = sizeof(Id);
     } else {
       assert(itype == SLA);
       prefixes = 1;
@@ -165,7 +180,7 @@ int immSize(const Op* opcode, int idx) {
 
 bool immIsVector(Op opcode, int idx) {
   ArgType type = immType(opcode, idx);
-  return (type == MA || type == BLA || type == SLA || type == ILA);
+  return type == MA || type == BLA || type == SLA || type == ILA || type == VSA;
 }
 
 bool hasImmVector(Op opcode) {
@@ -244,7 +259,7 @@ size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
   return 4;
 }
 
-void encodeIvaToVector(std::vector<uchar>& out, int32_t val) {
+void encodeIvaToVector(std::vector<unsigned char>& out, int32_t val) {
   size_t currentLen = out.size();
   out.resize(currentLen + 4);
   out.resize(currentLen + encodeVariableSizeImm(val, &out[currentLen]));
@@ -260,7 +275,7 @@ int instrLen(const Op* opcode) {
   return len;
 }
 
-Offset* instrJumpOffset(Op* instr) {
+Offset* instrJumpOffset(const Op* instr) {
   static const int8_t jumpMask[] = {
 #define NA 0
 #define MA 0
@@ -272,7 +287,8 @@ Offset* instrJumpOffset(Op* instr) {
 #define BA 1
 #define LA 0
 #define IA 0
-#define OA 0
+#define OA(x) 0
+#define VSA 0
 #define ONE(a) a
 #define TWO(a, b) (a + 2 * b)
 #define THREE(a, b, c) (a + 2 * b + 4 * c)
@@ -290,6 +306,7 @@ Offset* instrJumpOffset(Op* instr) {
 #undef IA
 #undef BA
 #undef OA
+#undef VSA
 #undef ONE
 #undef TWO
 #undef THREE
@@ -324,7 +341,7 @@ Offset* instrJumpOffset(Op* instr) {
 }
 
 Offset instrJumpTarget(const Op* instrs, Offset pos) {
-  Offset* offset = instrJumpOffset(const_cast<Op*>(instrs + pos));
+  Offset* offset = instrJumpOffset(instrs + pos);
 
   if (!offset) {
     return InvalidAbsoluteOffset;
@@ -343,7 +360,7 @@ int numSuccs(const Op* instr) {
     if (isSwitch(*instr)) {
       return *(int*)(instr + 1);
     }
-    if (*instr == OpJmp || *instr == OpIterBreak) return 1;
+    if (isUnconditionalJmp(*instr) || *instr == OpIterBreak) return 1;
     return 0;
   }
   if (instrJumpOffset(const_cast<Op*>(instr))) return 2;
@@ -370,6 +387,7 @@ int instrNumPops(const Op* opcode) {
 #define CVMANY -3
 #define CVUMANY -3
 #define CMANY -3
+#define SMANY -1
 #define O(name, imm, pop, push, flags) pop,
     OPCODES
 #undef NOV
@@ -385,6 +403,7 @@ int instrNumPops(const Op* opcode) {
 #undef CVMANY
 #undef CVUMANY
 #undef CMANY
+#undef SMANY
 #undef O
   };
   int n = numberOfPops[uint8_t(*opcode)];
@@ -487,8 +506,8 @@ FlavorDesc minstrFlavor(const Op* op, uint32_t i, FlavorDesc top) {
 }
 
 FlavorDesc manyFlavor(const Op* op, uint32_t i, FlavorDesc flavor) {
-  if (i < getImm(op, 0).u_IVA) return flavor;
-  always_assert(0 && "Invalid stack index");
+  always_assert(i < uint32_t(instrNumPops(op)));
+  return flavor;
 }
 }
 
@@ -510,6 +529,7 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define CMANY return manyFlavor(op, idx, CV);
+#define SMANY return manyFlavor(op, idx, CV);
 #define O(name, imm, pop, push, flags) case Op::name: pop
   switch (*op) {
     OPCODES
@@ -528,6 +548,7 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #undef CVMANY
 #undef CVUMANY
 #undef CMANY
+#undef SMANY
 #undef O
 }
 
@@ -774,31 +795,6 @@ MemberCode parseMemberCode(const char* s) {
 }
 
 std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
-  // IncDec names
-  static const char* incdecNames[] = {
-    "PreInc", "PostInc", "PreDec", "PostDec"
-  };
-  static const int incdecNamesCount =
-    (int)(sizeof(incdecNames)/sizeof(const char*));
-  // SetOp names
-  static const char* setopNames[] = {
-#define SETOP_OP(setOpOp, bcOp) #bcOp,
-    SETOP_OPS
-#undef SETOP_OP
-  };
-  static const int setopNamesCount =
-    (int)(sizeof(setopNames)/sizeof(const char*));
-
-  auto assertTName = [&] (int immVal) {
-#   define ASSERTT_OP(x) case AssertTOp::x: return #x;
-    switch (static_cast<AssertTOp>(immVal)) {
-      ASSERTT_OPS
-    }
-#   undef ASSERTT_OP
-    assert(false);
-    return "<" "?" ">";
-  };
-
   std::stringstream out;
   const Op* iStart = it;
   Op op = *it;
@@ -829,28 +825,12 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   immIdx++;                                 \
 } while (false)
 
-#define READOA() do {                                             \
-  int immVal = (int)*((uchar*)&*it);                              \
-  it += sizeof(uchar);                                            \
-  out << " ";                                                     \
-  switch (op) {                                                   \
-  case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS: \
-  case OpIncDecM:                                                 \
-    out << ((immVal >= 0 && immVal < incdecNamesCount) ?          \
-            incdecNames[immVal] : "?");                           \
-    break;                                                        \
-  case OpSetOpL: case OpSetOpN: case OpSetOpG: case OpSetOpS:     \
-  case OpSetOpM:                                                  \
-    out << ((immVal >=0 && immVal < setopNamesCount) ?            \
-            setopNames[immVal] : "?");                            \
-    break;                                                        \
-  case Op::AssertTL: case Op::AssertTStk:                         \
-    out << assertTName(immVal);                                   \
-    break;                                                        \
-  default:                                                        \
-    out << immVal;                                                \
-    break;                                                        \
-  }                                                               \
+#define READOA(type) do {                       \
+  auto const immVal = static_cast<type>(        \
+    *reinterpret_cast<const uint8_t*>(it)       \
+  );                                            \
+  it += sizeof(unsigned char);                  \
+  out << " " << subopToName(immVal);            \
 } while (false)
 
 #define READVEC() do {                                                  \
@@ -859,19 +839,19 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   const uint8_t* const start = (uint8_t*)it;                             \
   out << " <";                                                          \
   if (sz > 0) {                                                         \
-    int immVal = (int)*((uchar*)&*it);                                  \
+    int immVal = (int)*((unsigned char*)&*it);                          \
     out << ((immVal >= 0 && size_t(immVal) < locationNamesCount) ?      \
             locationCodeString(LocationCode(immVal)) : "?");            \
-    it += sizeof(uchar);                                                \
+    it += sizeof(unsigned char);                                        \
     int numLocImms = numLocationCodeImms(LocationCode(immVal));         \
     for (int i = 0; i < numLocImms; ++i) {                              \
       out << ':' << decodeVariableSizeImm((const uint8_t**)&it);        \
     }                                                                   \
     while (reinterpret_cast<const uint8_t*>(it) - start < sz) {         \
-      immVal = (int)*((uchar*)&*it);                                    \
+      immVal = (int)*((unsigned char*)&*it);                            \
       out << " " << ((immVal >=0 && size_t(immVal) < memberNamesCount) ? \
                      memberCodeString(MemberCode(immVal)) : "?");       \
-      it += sizeof(uchar);                                              \
+      it += sizeof(unsigned char);                                      \
       if (memberCodeHasImm(MemberCode(immVal))) {                       \
         int64_t imm = decodeMemberCodeImm((const uint8_t**)&it,         \
                                           MemberCode(immVal));          \
@@ -964,7 +944,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
 #define H_IA READV()
 #define H_DA READ(double)
 #define H_BA READOFF()
-#define H_OA READOA()
+#define H_OA(type) READOA(type)
 #define H_SA READLITSTR(" ")
 #define H_AA                                                  \
   if (u) {                                                    \
@@ -974,6 +954,15 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
     out << " " << *((Id*)it);                                 \
   }                                                           \
   it += sizeof(Id)
+#define H_VSA do {                                      \
+  int sz = readData<int32_t>(it);                       \
+  out << " <";                                          \
+  for (int i = 0; i < sz; ++i) {                        \
+    H_SA;                                               \
+  }                                                     \
+  out << " >";                                          \
+} while (false)
+
 #define O(name, imm, push, pop, flags)    \
   case Op##name: {                        \
     out << #name;                         \
@@ -1002,6 +991,7 @@ OPCODES
 #undef H_OA
 #undef H_SA
 #undef H_AA
+#undef H_VSA
     default: assert(false);
   };
   return out.str();
@@ -1019,6 +1009,95 @@ const char* opcodeToName(Op op) {
   }
   return "Invalid";
 }
+
+//////////////////////////////////////////////////////////////////////
+
+static const char* IsTypeOp_names[] = {
+#define ISTYPE_OP(x) #x,
+  ISTYPE_OPS
+#undef ISTYPE_OP
+};
+
+static const char* AssertTOp_names[] = {
+#define ASSERTT_OP(op) #op,
+  ASSERTT_OPS
+#undef ASSERTT_OP
+};
+
+static const char* FatalOp_names[] = {
+#define FATAL_OP(op) #op,
+  FATAL_OPS
+#undef FATAL_OP
+};
+
+static const char* SetOpOp_names[] = {
+#define SETOP_OP(x, y) #x,
+  SETOP_OPS
+#undef SETOP_OP
+};
+
+static const char* IncDecOp_names[] = {
+#define INCDEC_OP(x) #x,
+  INCDEC_OPS
+#undef INCDEC_OP
+};
+
+static const char* BareThisOp_names[] = {
+#define BARETHIS_OP(x) #x,
+  BARETHIS_OPS
+#undef BARETHIS_OP
+};
+
+template<class T, size_t Sz>
+const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
+  static_assert(
+    std::is_same<typename std::underlying_type<T>::type,uint8_t>::value,
+    "Subops are all expected to be single-bytes"
+  );
+  auto const idx = static_cast<uint8_t>(opcode);
+  always_assert(idx < Sz);
+  return arr[idx];
+}
+
+template<class T, size_t Sz>
+folly::Optional<T> nameToSubopImpl(const char* (&arr)[Sz], const char* str) {
+  for (auto i = size_t{0}; i < Sz; ++i) {
+    if (!strcmp(str, arr[i])) return static_cast<T>(i);
+  }
+  return folly::none;
+}
+
+namespace {
+template<class T> struct NameToSubopHelper;
+}
+
+template<class T> folly::Optional<T> nameToSubop(const char* str) {
+  return NameToSubopHelper<T>::conv(str);
+}
+
+#define X(subop)                                            \
+  const char* subopToName(subop op) {                       \
+    return subopToNameImpl(subop##_names, op);              \
+  }                                                         \
+  namespace {                                               \
+  template<> struct NameToSubopHelper<subop> {              \
+    static folly::Optional<subop> conv(const char* str) {   \
+      return nameToSubopImpl<subop>(subop##_names, str);    \
+    }                                                       \
+  };                                                        \
+  }                                                         \
+  template folly::Optional<subop> nameToSubop(const char*);
+
+X(IsTypeOp)
+X(AssertTOp)
+X(FatalOp)
+X(SetOpOp)
+X(IncDecOp)
+X(BareThisOp)
+
+#undef X
+
+//////////////////////////////////////////////////////////////////////
 
 bool instrIsNonCallControlFlow(Op opcode) {
   if (!instrIsControlFlow(opcode) || isFCallStar(opcode)) return false;
@@ -1059,6 +1138,10 @@ ImmVector getImmVector(const Op* opcode) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const int32_t*>(vp));
+    } else if (t == VSA) {
+      const int32_t* vp = (int32_t*) getImmPtr(opcode, k);
+      return ImmVector(reinterpret_cast<const uint8_t*>(vp + 1),
+                       vp[0], vp[0]);
     }
   }
 
@@ -1143,7 +1226,6 @@ bool ImmVector::decodeLastMember(const Unit* u,
   }
   return false;
 }
-
 
 int instrSpToArDelta(const Op* opcode) {
   // This function should only be called for instructions that read

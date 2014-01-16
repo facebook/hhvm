@@ -22,9 +22,15 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/vdso.h"
 #include "hphp/util/cycles.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/ext/ext_function.h"
+
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #ifdef __FreeBSD__
 #include <sys/resource.h>
@@ -69,6 +75,10 @@ namespace HPHP {
 
 IMPLEMENT_DEFAULT_EXTENSION(hotprofiler);
 IMPLEMENT_DEFAULT_EXTENSION(xhprof);
+
+using std::vector;
+using std::string;
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -156,14 +166,19 @@ static int64_t get_cpu_frequency() {
     return 0.0;
   }
   uint64_t tsc_start = cpuCycles();
-  // Sleep for 5 miliseconds. Comparaing with gettimeofday's  few microseconds
-  // execution time, this should be enough.
-  usleep(5000);
-  if (gettimeofday(&end, 0)) {
-    perror("gettimeofday");
-    return 0.0;
-  }
-  uint64_t tsc_end = cpuCycles();
+  uint64_t tsc_end;
+  volatile int i;
+  // Busy loop for 5 miliseconds. Don't use usleep() here since it causes the
+  // CPU to halt which will generate meaningless results.
+  do {
+    for (i = 0; i < 1000000; i++);
+    if (gettimeofday(&end, 0)) {
+      perror("gettimeofday");
+      return 0.0;
+    }
+    tsc_end = cpuCycles();
+  } while (get_us_interval(&start, &end) < 5000);
+
   return nearbyint((tsc_end - tsc_start) * 1.0
                                    / (get_us_interval(&start, &end)));
 }
@@ -1003,7 +1018,8 @@ class TraceProfiler : public Profiler {
       char buf[20];
       sprintf(buf, "%d", RuntimeOption::ProfilerMaxTraceBuffer);
       IniSetting::Bind("profiler.max_trace_buffer", buf,
-                       ini_on_update_long, &m_maxTraceBuffer);
+                       ini_on_update_long, ini_get_long,
+                       &m_maxTraceBuffer);
     }
   }
 
@@ -1325,6 +1341,234 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// Memoization Opportunity Profiler
+//
+// Identifies potential memoization opportunities by comparing the
+// serialized form of function return values. Functions which return
+// the same data every time, but not the same instance, are
+// candidates.
+//
+// For member functions, the args are serialized and kept along with
+// the 'this' pointer, and used to look for constant returns given the
+// same args.
+//
+// This profiler is very, very slow. It tries to be faster by giving
+// up on functions quickly, and making a quick test to ignore them
+// later. It also ignores functions which return "small"
+// things. Nevertheless, you likely need to adjust
+// Server.RequestTimeoutSeconds to get a full request processed.
+//
+// Future options:
+// - Collect the data cross-request to find APC opportunities.
+// - Auto-identify keys to functions which could be used to place things in APC
+//   - i.e., same per-request, but not cross-request unless, say, locale is
+//     considered.
+//
+// @TODO: this is quite ghetto right now, but is useful as is to
+// others. In particular, it should provide the results via the return
+// value from writeStats, not print to stderr :) Task 3396401 tracks this.
+
+class MemoProfiler : public Profiler {
+ public:
+  explicit MemoProfiler(int flags)
+    : m_flags(flags)
+  {
+  }
+
+  ~MemoProfiler() {
+  }
+
+ private:
+  virtual void beginFrame(const char *symbol) {
+    JIT::VMRegAnchor _;
+    ActRec *ar = g_vmContext->getFP();
+    Frame f(symbol);
+    if (ar->hasThis()) {
+      auto& memo = m_memos[symbol];
+      if (!memo.m_ignore) {
+        auto args = hhvm_get_frame_args(ar, 0);
+        args.append((int64_t)(ar->getThis())); // Use the pointer not the obj
+        VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
+        String sdata;
+        try {
+          sdata = vs.serialize(args, true);
+          f.m_args = sdata;
+        } catch (...) {
+          fprintf(stderr, "Args Serialization failure: %s\n", symbol);
+        }
+      }
+    }
+    m_stack.push_back(f);
+  }
+
+  virtual void endFrame(const char *symbol, bool endMain = false) {
+    if (m_stack.empty()) {
+      fprintf(stderr, "STACK IMBALANCE empty %s\n", symbol);
+      return;
+    }
+    auto f = m_stack.back();
+    m_stack.pop_back();
+    if (strcmp(f.m_symbol, symbol) != 0) {
+      fprintf(stderr, "STACK IMBALANCE %s\n", symbol);
+      return;
+    }
+    auto& memo = m_memos[symbol];
+    if (memo.m_ignore) return;
+    ++memo.m_count;
+    memo.m_ignore = true;
+    JIT::VMRegAnchor _;
+    ActRec *ar = g_vmContext->getFP();
+    // Lots of random cases to skip just to keep this simple for
+    // now. There's no reason not to do more later.
+    if (!g_vmContext->m_faults.empty()) return;
+    if (ar->m_func->isCPPBuiltin() || ar->m_func->isGenerator()) return;
+    auto ret_tv = g_vmContext->m_stack.topTV();
+    auto ret = tvAsCVarRef(ret_tv);
+    if (ret.isNull()) return;
+    if (!(ret.isString() || ret.isObject() || ret.isArray())) return;
+    VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
+    String sdata;
+    try {
+      sdata = vs.serialize(ret, true);
+    } catch (...) {
+      fprintf(stderr, "Serialization failure: %s\n", symbol);
+      return;
+    }
+    if (sdata.length() < 3) return;
+    if (ar->hasThis()) {
+      memo.m_has_this = true;
+      auto& member_memo = memo.m_member_memos[f.m_args.data()];
+      ++member_memo.m_count;
+      if (member_memo.m_return_value.length() == 0) { // First time
+        member_memo.m_return_value = sdata;
+        // Intentionally copy the raw pointer value
+        member_memo.m_ret_tv = *ret_tv;
+        memo.m_ignore = false;
+      } else if (member_memo.m_return_value == sdata) { // Same
+        memo.m_ignore = false;
+        if ((member_memo.m_ret_tv.m_data.num != ret_tv->m_data.num) ||
+            (member_memo.m_ret_tv.m_type != ret_tv->m_type)) {
+          memo.m_ret_tv_same = false;
+        }
+      } else {
+        memo.m_member_memos.clear(); // Cleanup and ignore
+      }
+    } else {
+      if (memo.m_return_value.length() == 0) { // First time
+        memo.m_return_value = sdata;
+        // Intentionally copy the raw pointer value
+        memo.m_ret_tv = *ret_tv;
+        memo.m_ignore = false;
+      } else if (memo.m_return_value == sdata) { // Same
+        memo.m_ignore = false;
+        if ((memo.m_ret_tv.m_data.num != ret_tv->m_data.num) ||
+            (memo.m_ret_tv.m_type != ret_tv->m_type)) {
+          memo.m_ret_tv_same = false;
+        }
+      } else {
+        memo.m_return_value = ""; // Different, cleanup and ignore
+      }
+    }
+  }
+
+  virtual void endAllFrames() {
+    // Nothing to do for this profiler since all work is done as we go.
+  }
+
+  virtual void writeStats(Array &ret) {
+    fprintf(stderr, "writeStats start\n");
+    // RetSame: the return value is the same instance every time
+    // HasThis: call has a this argument
+    // AllSame: all returns were the same data even though args are different
+    // MemberCount: number of different arg sets (including this)
+    fprintf(stderr, "Count Function MinSerLen MaxSerLen RetSame HasThis "
+            "AllSame MemberCount\n");
+    for (auto& me : m_memos) {
+      if (me.second.m_ignore) continue;
+      if (me.second.m_count == 1) continue;
+      int min_ser_len = 999999999;
+      int max_ser_len = 0;
+      int count = 0;
+      int member_count = 0;
+      bool all_same = true;
+      if (me.second.m_has_this) {
+        bool any_multiple = false;
+        auto& fr = me.second.m_member_memos.begin()->second.m_return_value;
+        member_count = me.second.m_member_memos.size();
+        for (auto& mme : me.second.m_member_memos) {
+          if (mme.second.m_return_value != fr) all_same = false;
+          count += mme.second.m_count;
+          auto ser_len = mme.second.m_return_value.length();
+          min_ser_len = std::min(min_ser_len, ser_len);
+          max_ser_len = std::max(max_ser_len, ser_len);
+          if (mme.second.m_count > 1) any_multiple = true;
+        }
+        if (!any_multiple && !all_same) continue;
+      } else {
+        min_ser_len = max_ser_len = me.second.m_return_value.length();
+        count = me.second.m_count;
+        all_same = me.second.m_ret_tv_same;
+      }
+      fprintf(stderr, "%d %s %d %d %s %s %s %d\n",
+              count, me.first.data(),
+              min_ser_len, max_ser_len,
+              me.second.m_ret_tv_same ? " true" : "false",
+              me.second.m_has_this ? " true" : "false",
+              all_same ? " true" : "false",
+              member_count
+             );
+    }
+    fprintf(stderr, "writeStats end\n");
+  }
+
+  class MemberMemoInfo {
+   public:
+    MemberMemoInfo()
+        : m_count(0)
+      {}
+
+    String m_return_value;
+    TypedValue m_ret_tv;
+    int m_count;
+  };
+  typedef hphp_hash_map<std::string, MemberMemoInfo, string_hash>
+    MemberMemoMap;
+
+  class MemoInfo {
+   public:
+    MemoInfo()
+        : m_count(0)
+        , m_ignore(false)
+        , m_has_this(false)
+        , m_ret_tv_same(true)
+      {}
+
+    MemberMemoMap m_member_memos; // Keyed by serialized args
+    String m_return_value;
+    TypedValue m_ret_tv;
+    int m_count;
+    bool m_ignore;
+    bool m_has_this;
+    bool m_ret_tv_same;
+  };
+  typedef hphp_hash_map<std::string, MemoInfo, string_hash> MemoMap;
+  MemoMap m_memos; // Keyed by function name
+
+  class Frame {
+   public:
+    explicit Frame(const char* symbol)
+        : m_symbol(symbol)
+      {}
+
+    const char* m_symbol;
+    String m_args;
+  };
+  vector<Frame> m_stack;
+
+  uint32_t m_flags;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 
 class ProfilerFactory : public RequestEventHandler {
 public:
@@ -1333,6 +1577,7 @@ public:
     Hierarchical = 2,
     Memory       = 3,
     Trace        = 4,
+    Memo         = 5,
     Sample       = 620002, // Rockfort's zip code
   };
 
@@ -1377,6 +1622,9 @@ public:
         break;
       case Trace:
         m_profiler = new TraceProfiler(flags);
+        break;
+      case Memo:
+        m_profiler = new MemoProfiler(flags);
         break;
       default:
         throw_invalid_argument("level: %d", level);

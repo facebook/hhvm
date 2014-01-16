@@ -85,7 +85,6 @@ Variant::Variant(litstr  v) {
   m_data.pstr->incRefCount();
 }
 
-HOT_FUNC
 Variant::Variant(const String& v) {
   m_type = KindOfString;
   StringData *s = v.get();
@@ -109,7 +108,6 @@ Variant::Variant(const std::string & v) {
   s->incRefCount();
 }
 
-HOT_FUNC
 Variant::Variant(CArrRef v) {
   m_type = KindOfArray;
   ArrayData *a = v.get();
@@ -121,7 +119,6 @@ Variant::Variant(CArrRef v) {
   }
 }
 
-HOT_FUNC
 Variant::Variant(CObjRef v) {
   m_type = KindOfObject;
   ObjectData *o = v.get();
@@ -133,7 +130,6 @@ Variant::Variant(CObjRef v) {
   }
 }
 
-HOT_FUNC
 Variant::Variant(CResRef v) {
   m_type = KindOfResource;
   ResourceData* o = v.get();
@@ -145,7 +141,6 @@ Variant::Variant(CResRef v) {
   }
 }
 
-HOT_FUNC
 Variant::Variant(StringData *v) {
   if (v) {
     m_data.pstr = v;
@@ -220,12 +215,10 @@ Variant::Variant(RefData *r, NoInc) {
 }
 
 // the version of the high frequency function that is not inlined
-HOT_FUNC
 Variant::Variant(CVarRef v) {
   constructValHelper(v);
 }
 
-HOT_FUNC
 Variant::Variant(CVarStrongBind v) {
   constructRefHelper(variant(v));
 }
@@ -262,14 +255,12 @@ const RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&RefData::release),
 };
 
-HOT_FUNC
 Variant::~Variant() {
   if (IS_REFCOUNTED_TYPE(m_type)) {
     tvDecRefHelper(m_type, uint64_t(m_data.pref));
   }
 }
 
-HOT_FUNC
 void tvDecRefHelper(DataType type, uint64_t datum) {
   assert(type == KindOfString || type == KindOfArray ||
          type == KindOfObject || type == KindOfResource ||
@@ -279,19 +270,16 @@ void tvDecRefHelper(DataType type, uint64_t datum) {
     g_destructors[typeToDestrIndex(type)]((void*)datum));
 }
 
-HOT_FUNC
 Variant &Variant::assign(CVarRef v) {
   AssignValHelper(this, &v);
   return *this;
 }
 
-HOT_FUNC
 Variant &Variant::assignRef(CVarRef v) {
   assignRefHelper(v);
   return *this;
 }
 
-HOT_FUNC
 Variant &Variant::setWithRef(CVarRef v) {
   setWithRefHelper(v, IS_REFCOUNTED_TYPE(m_type));
   return *this;
@@ -318,9 +306,9 @@ Variant &Variant::setWithRef(CVarRef v) {
   CVarRef IMPLEMENT_SET_IMPL(set, argType, v, setOp, return *this)
 
 IMPLEMENT_VOID_SET(setNull, m_type = KindOfNull)
-HOT_FUNC IMPLEMENT_SET(bool, m_type = KindOfBoolean; m_data.num = v)
+IMPLEMENT_SET(bool, m_type = KindOfBoolean; m_data.num = v)
 IMPLEMENT_SET(int, m_type = KindOfInt64; m_data.num = v)
-HOT_FUNC IMPLEMENT_SET(int64_t, m_type = KindOfInt64; m_data.num = v)
+IMPLEMENT_SET(int64_t, m_type = KindOfInt64; m_data.num = v)
 IMPLEMENT_SET(double, m_type = KindOfDouble; m_data.dbl = v)
 IMPLEMENT_SET(const StaticString&,
               StringData* s = v.get();
@@ -348,11 +336,11 @@ IMPLEMENT_SET(const StaticString&,
     return *this;                                                       \
   }
 
-HOT_FUNC IMPLEMENT_PTR_SET(StringData, pstr,
+IMPLEMENT_PTR_SET(StringData, pstr,
                            v->isStatic() ? KindOfStaticString : KindOfString);
-HOT_FUNC IMPLEMENT_PTR_SET(ArrayData, parr, KindOfArray)
-HOT_FUNC IMPLEMENT_PTR_SET(ObjectData, pobj, KindOfObject)
-HOT_FUNC IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
+IMPLEMENT_PTR_SET(ArrayData, parr, KindOfArray)
+IMPLEMENT_PTR_SET(ObjectData, pobj, KindOfObject)
+IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
 
 #undef IMPLEMENT_PTR_SET
 
@@ -394,7 +382,6 @@ bool Variant::isInteger() const {
   return false;
 }
 
-HOT_FUNC
 bool Variant::isNumeric(bool checkString /* = false */) const {
   int64_t ival;
   double dval;
@@ -444,7 +431,6 @@ bool Variant::isResource() const {
   return (cell->m_type == KindOfResource);
 }
 
-HOT_FUNC
 bool Variant::instanceof(const String& s) const {
   if (m_type == KindOfObject) {
     assert(m_data.pobj);
@@ -456,7 +442,6 @@ bool Variant::instanceof(const String& s) const {
   return false;
 }
 
-HOT_FUNC
 bool Variant::instanceof(Class* cls) const {
   if (m_type == KindOfObject) {
     assert(m_data.pobj);
@@ -527,7 +512,6 @@ inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
 ///////////////////////////////////////////////////////////////////////////////
 // iterator functions
 
-HOT_FUNC
 ArrayIter Variant::begin(const String& context /* = null_string */) const {
   if (is(KindOfArray)) {
     return ArrayIter(getArrayData());
@@ -539,7 +523,6 @@ ArrayIter Variant::begin(const String& context /* = null_string */) const {
   return ArrayIter();
 }
 
-HOT_FUNC
 MutableArrayIter Variant::begin(Variant *key, Variant &val,
                                 const String& context /* = null_string */) {
   if (is(KindOfObject)) {
@@ -622,7 +605,8 @@ String Variant::toStringHelper() const {
   case KindOfString:
     assert(false); // Should be done in caller
     return m_data.pstr;
-  case KindOfArray:   return s_array;
+  case KindOfArray:   raise_notice("Array to string conversion");
+                      return s_array;
   case KindOfObject:  return m_data.pobj->invokeToString();
   case KindOfResource: return m_data.pres->o_toString();
   case KindOfRef: return m_data.pref->var()->toString();
@@ -698,7 +682,6 @@ Resource Variant::toResourceHelper() const {
   return Resource(NEWOBJ(DummyResource));
 }
 
-HOT_FUNC
 VarNR Variant::toKey() const {
   if (m_type == KindOfString || m_type == KindOfStaticString) {
     int64_t n;
@@ -1721,7 +1704,11 @@ static const StringData* getAlternateName(const StringData* clsName) {
     static ClsNameMap m;
 
     static std::vector<SStringPair> mappings {
-      std::make_pair(StaticString("Vector"), StaticString("HH\\Vector"))
+      std::make_pair(StaticString("Vector"), StaticString("HH\\Vector")),
+      std::make_pair(StaticString("Map"), StaticString("HH\\Map")),
+      std::make_pair(StaticString("StableMap"), StaticString("HH\\StableMap")),
+      std::make_pair(StaticString("Set"), StaticString("HH\\Set")),
+      std::make_pair(StaticString("Pair"), StaticString("HH\\Pair"))
     };
 
     for (const auto& p : mappings) {
@@ -1740,6 +1727,10 @@ static const StringData* getAlternateName(const StringData* clsName) {
 
 void Variant::unserialize(VariableUnserializer *uns,
                           Uns::Mode mode /* = Uns::Mode::Value */) {
+
+  // NOTE: If you make changes to how serialization and unserialization work,
+  // make sure to update the reserialize() method in "runtime/ext/ext_apc.cpp"
+  // and to update test_apc_reserialize() in "test/ext/test_ext_apc.cpp".
 
   char type, sep;
   type = uns->readChar();
@@ -1915,7 +1906,7 @@ void Variant::unserialize(VariableUnserializer *uns,
         // Only unserialize CPP extension types which can actually
         // support it. Otherwise, we risk creating a CPP object
         // without having it intialized completely.
-        if ((cls->builtinPropSize() > 0) && !cls->isCppSerializable()) {
+        if (cls->instanceCtor() && !cls->isCppSerializable()) {
           obj = ObjectData::newInstance(
             SystemLib::s___PHP_Unserializable_ClassClass);
           obj->o_set(s_PHP_Unserializable_Class_Name, clsName);
@@ -2037,19 +2028,6 @@ void Variant::unserialize(VariableUnserializer *uns,
   if (sep != ';') {
     throw Exception("Expected ';' but got '%c'", sep);
   }
-}
-
-APCVariant *Variant::getSharedVariant() const {
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->getSharedVariant();
-  }
-  if (m_type == KindOfString) {
-    return m_data.pstr->getSharedVariant();
-  }
-  if (m_type == KindOfArray) {
-    return m_data.parr->getSharedVariant();
-  }
-  return nullptr;
 }
 
 void Variant::dump() const {

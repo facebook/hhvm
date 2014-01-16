@@ -1,0 +1,19 @@
+===CLOSE===
+object(PharFileInfo)#%d (2) {
+  [%spathName":%sSplFileInfo":private]=>
+  string(%d) "phar://%srefcount1.phar.zip/b/c.php"
+  [%sfileName":%sSplFileInfo":private]=>
+  string(%d) "c.php"
+}
+string(5) "extra"
+===UNLINK===
+HipHop Warning: %s
+object(PharFileInfo)#%d (2) {
+  [%spathName":%sSplFileInfo":private]=>
+  string(%d) "phar://%srefcount1.phar.zip/b/c.php"
+  [%sfileName":%sSplFileInfo":private]=>
+  string(%s) "c.php"
+}
+string(5) "extra"
+extra
+===DONE===

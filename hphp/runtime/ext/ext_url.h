@@ -23,6 +23,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const int64_t k_PHP_URL_SCHEME;
+extern const int64_t k_PHP_URL_HOST;
+extern const int64_t k_PHP_URL_PORT;
+extern const int64_t k_PHP_URL_USER;
+extern const int64_t k_PHP_URL_PASS;
+extern const int64_t k_PHP_URL_PATH;
+extern const int64_t k_PHP_URL_QUERY;
+extern const int64_t k_PHP_URL_FRAGMENT;
+
 Variant f_base64_decode(const String& data, bool strict = false);
 String f_base64_encode(const String& data);
 

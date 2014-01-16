@@ -1,0 +1,8 @@
+d constructing
+d constructing
+d destructing
+string(6) "ceeone"
+string(6) "ceetwo"
+string(8) "ceethree"
+string(7) "ceefour"
+d destructing

@@ -28,7 +28,7 @@ echo "\n-- Testing imap_fetchbody() function with less than expected no. of argu
 
 var_dump( imap_fetchbody($stream_id, $msg_no) );
 ?>
-===DONE===?>
+===DONE===
 <?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

@@ -16,6 +16,9 @@
 */
 
 #include "hphp/runtime/base/preg.h"
+
+#include <pcre.h>
+
 #include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -23,7 +26,19 @@
 #include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(pcre);
+
+const StaticString s_PCRE_VERSION("PCRE_VERSION");
+
+class PcreExtension : public Extension {
+public:
+  PcreExtension() : Extension("pcre") {}
+
+  void moduleInit() override {
+    Native::registerConstant<KindOfString>(
+      s_PCRE_VERSION.get(), makeStaticString(pcre_version())
+    );
+  }
+} s_pcre_extension;
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_preg_grep(const String& pattern, CArrRef input, int flags /* = 0 */) {
@@ -42,8 +57,9 @@ Variant f_preg_match(const String& pattern, const String& subject,
   }
 }
 
-Variant f_preg_match_all(const String& pattern, const String& subject, VRefParam matches,
-                         int flags /* = 0 */, int offset /* = 0 */) {
+Variant f_preg_match_all(const String& pattern, const String& subject,
+                         VRefParam matches /* = null */, int flags /* = 0 */,
+                         int offset /* = 0 */) {
   if (matches.isReferenced()) {
     return preg_match_all(pattern, subject, matches, flags, offset);
   } else {

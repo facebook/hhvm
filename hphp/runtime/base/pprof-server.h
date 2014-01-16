@@ -31,14 +31,13 @@ struct HeapProfileRequestHandler : public RequestHandler {
 
   virtual ~HeapProfileRequestHandler() {}
   virtual void handleRequest(Transport *transport);
+  virtual void abortRequest(Transport *transport);
 
 private:
   bool handleStartRequest(Transport *transport);
 };
 
-DECLARE_BOOST_TYPES(HeapProfileServer);
 struct HeapProfileServer {
-
   HeapProfileServer() :
     m_server(ServerFactoryRegistry::createServer(
       RuntimeOption::ServerType,
@@ -65,7 +64,7 @@ struct HeapProfileServer {
 
   static void waitForPProf();
 
-  static HeapProfileServerPtr Server;
+  static std::shared_ptr<HeapProfileServer> Server;
 
 private:
   const ServerPtr m_server;

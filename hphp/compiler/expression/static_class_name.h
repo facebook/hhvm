@@ -56,6 +56,7 @@ protected:
   std::string m_className;
 
   void updateClassName();
+  void outputCodeModel(CodeGenerator &cg);
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 private:
   unsigned m_self : 1;

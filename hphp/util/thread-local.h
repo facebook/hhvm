@@ -20,7 +20,6 @@
 #include <pthread.h>
 #include "hphp/util/exception.h"
 #include <errno.h>
-#include "hphp/util/util.h"
 #include "folly/String.h"
 #include <boost/aligned_storage.hpp>
 
@@ -178,7 +177,7 @@ void ThreadLocal<T>::create() {
 
 template<typename T>
 struct ThreadLocalNoCheck {
-  T *getCheck() const ATTRIBUTE_COLD NEVER_INLINE;
+  T *getCheck() const NEVER_INLINE;
   T* getNoCheck() const {
     assert(m_node.m_p);
     return m_node.m_p;
@@ -237,7 +236,7 @@ class ThreadLocalSingleton {
 public:
   ThreadLocalSingleton() { s_inited = true; }
 
-  static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
+  static T *getCheck() NEVER_INLINE;
 
   static T* getNoCheck() {
     assert(s_inited);
@@ -347,15 +346,6 @@ struct ThreadLocalProxy {
   __thread ThreadLocalNoCheck<T> f
 #define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) \
   __thread ThreadLocalNoCheck<T> f
-#ifndef __APPLE__
-#define IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(T, f) \
-  __attribute((section(".tbss.hot")))             \
-  __thread ThreadLocalNoCheck<T> f
-#else
-#define IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(T, f) \
-  __attribute((section(".tbss.hot,")))             \
-  __thread ThreadLocalNoCheck<T> f
-#endif
 
 #define DECLARE_THREAD_LOCAL_PROXY(T, N, f) \
   __thread ThreadLocalProxy<T, N> f
@@ -427,7 +417,7 @@ public:
     ThreadLocalCreateKey(&m_key, ThreadLocalOnThreadExit<T>);
   }
 
-  T *getCheck() const ATTRIBUTE_COLD NEVER_INLINE;
+  T *getCheck() const NEVER_INLINE;
 
   T* getNoCheck() const {
     T *obj = (T*)pthread_getspecific(m_key);
@@ -482,7 +472,7 @@ class ThreadLocalSingleton {
 public:
   ThreadLocalSingleton() { getKey(); }
 
-  static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
+  static T *getCheck() NEVER_INLINE;
   static T* getNoCheck() {
     assert(s_inited);
     T *obj = (T*)pthread_getspecific(s_key);
@@ -588,7 +578,6 @@ public:
 
 #define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) ThreadLocalNoCheck<T> f
 #define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) ThreadLocalNoCheck<T> f
-#define IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(T, f) ThreadLocalNoCheck<T> f
 
 #define DECLARE_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f
 #define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f

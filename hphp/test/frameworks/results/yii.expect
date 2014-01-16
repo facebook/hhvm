@@ -157,7 +157,7 @@ CActiveRecordTest::testMergingWith
 CActiveRecordTest::testModel
 .
 CActiveRecordTest::testNamespacedTableName
-E
+FATAL
 CActiveRecordTest::testPublicAttribute
 .
 CActiveRecordTest::testRefresh
@@ -209,11 +209,11 @@ CArrayDataProviderTest::testGetSortedData
 CArrayDataProviderTest::testGetSortedDataByInnerArrayField
 .
 CAssetManagerTest::testBasePath
-E
+.
 CAssetManagerTest::testBaseUrl
-E
+.
 CAssetManagerTest::testPublishFile
-E
+.
 CAttributeCollectionTest::testAdd
 .
 CAttributeCollectionTest::testCanGetProperty
@@ -245,7 +245,7 @@ CAttributeCollectionTest::testSetCaseSensitive
 CAttributeCollectionTest::testUnset
 .
 CAutoCompleteTest::testCallbackEncoding
-E
+.
 CBehaviorTest::testAttachBehavior
 .
 CBehaviorTest::testDisableAndEnableBehaviorsAndModels
@@ -265,7 +265,7 @@ CBooleanValidatorTest::testValidationUsingCustomFalseTrueValues
 CBooleanValidatorTest::testValidationUsingStrict
 .
 CButtonColumnTest::testCallbackEncoding
-E
+.
 CCacheDependencyTest::testReuseDependentData
 .
 CClientScriptTest::testGetCoreScriptUrl
@@ -275,7 +275,7 @@ CClientScriptTest::testGetPackageBaseUrl with data set #0
 CClientScriptTest::testGetPackageBaseUrl with data set #1 
 .
 CClientScriptTest::testRegisterCoreScript with data set #0 
-F
+.
 CClientScriptTest::testRegisterCoreScript with data set #1 
 .
 CClientScriptTest::testRegisterCoreScript with data set #2 
@@ -291,7 +291,7 @@ CClientScriptTest::testRegisterMetaTag with data set #0
 CClientScriptTest::testRegisterMetaTag with data set #1 
 .
 CClientScriptTest::testRegisterPackage with data set #0 
-F
+.
 CClientScriptTest::testRegisterPackage with data set #1 
 .
 CClientScriptTest::testRegisterPackage with data set #2 
@@ -423,19 +423,19 @@ CConfigurationTest::testLoadFromFile
 CConfigurationTest::testSaveAsString
 .
 CControllerTest::testActionParams
-E
+.
 CControllerTest::testActionParamsInvalid
-E
+.
 CControllerTest::testDefaultProperties
-E
+.
 CControllerTest::testRunAction
-E
+.
 CCookieCollectionTest::testAdd
 E
 CCookieCollectionTest::testConstructorCookieBuilding
-E
+.
 CCookieCollectionTest::testGetRequest
-E
+.
 CCookieCollectionTest::testRemove
 E
 CDataProviderIteratorTest::testInitWithDisabledPagination with data set #0 
@@ -579,25 +579,25 @@ S
 CDbAuthManagerTest::testcreateAuthItem
 S
 CDbCacheTest::testAdd
-E
+.
 CDbCacheTest::testArrayAccess
-E
+.
 CDbCacheTest::testDelete
-E
+.
 CDbCacheTest::testDependency
-E
+.
 CDbCacheTest::testExpire
-E
+.
 CDbCacheTest::testFlush
-E
+.
 CDbCacheTest::testGetAndSet
-E
+.
 CDbCacheTest::testKeyPrefix
-E
+.
 CDbCacheTest::testMGet
-E
+.
 CDbCacheTest::testUseDbConnection
-E
+.
 CDbCommand2Test::testAndWhere
 .
 CDbCommand2Test::testArraySyntax
@@ -744,6 +744,12 @@ CDefaultValueValidatorTest::testDefaultValueIsSetWhenSetOnEmptyIsFalse
 .
 CDefaultValueValidatorTest::testDefaultValueIsSetWhenSetOnEmptyIsTrue
 .
+CDirectoryCacheDependencyTest::testDirectoryName
+.
+CDirectoryCacheDependencyTest::testHasChanged
+.
+CDirectoryCacheDependencyTest::testRecursiveLevel
+.
 CEmailValidatorTest::testArrayValue
 .
 CEmailValidatorTest::testEmpty
@@ -803,11 +809,11 @@ CFileCacheDependencyTest::testFileName
 CFileCacheDependencyTest::testHasChanged
 .
 CFileCacheTest::testEmbedExpiry
-E
+.
 CFileCacheTest::testFileMode
-E
+.
 CFileCacheTest::testPathMode
-E
+.
 CFileHelperTest::testCopyDirectory_subDir_modeShoudBe0775
 .
 CFileHelperTest::testCopyDirectory_subDir_modeShoudBe0777
@@ -855,9 +861,7 @@ CFileValidatorTest::testSizeToBytes with data set #8
 CFileValidatorTest::testSizeToBytes with data set #9 
 .
 CFileValidatorTest::testValidate
-E
-CFileValidatorTest::testValidateNoFile
-E
+FATAL
 CFormatterTest::testFormatNtext with data set #0 
 .
 CFormatterTest::testFormatNtext with data set #1 
@@ -885,7 +889,7 @@ CFormatterTest::testSizeFormatTranslation with data set #6
 CGettextPoFileTest::testLoad
 .
 CGridViewTest::testCallbackEncoding
-E
+.
 CHtmlTest::testActiveCheckbox with data set #0 
 .
 CHtmlTest::testActiveCheckbox with data set #1 
@@ -1097,7 +1101,7 @@ CHtmlTest::testPageStateField with data set #1
 CHtmlTest::testRefresh with data set #0 
 .
 CHtmlTest::testRefresh with data set #1 
-F
+.
 CHtmlTest::testResetButton with data set #0 
 .
 CHtmlTest::testResetButton with data set #1 
@@ -1263,7 +1267,7 @@ CJavaScriptTest::testLegacyEncode
 CJavaScriptTest::testLegacyEncodeSafe
 .
 CJuiButtonTest::testCallbackEncoding
-E
+.
 CListTest::testAdd
 .
 CListTest::testArrayMisc
@@ -1309,211 +1313,211 @@ CListTest::testRemoveAt
 CListTest::testToArray
 .
 CListViewTest::testCallbackEncoding
-E
+.
 CLocaleTest::testGetLanguage with data set #0 
-E
+.
 CLocaleTest::testGetLanguage with data set #1 
-E
+.
 CLocaleTest::testGetLanguage with data set #10 
-E
+.
 CLocaleTest::testGetLanguage with data set #11 
-E
+.
 CLocaleTest::testGetLanguage with data set #12 
-E
+.
 CLocaleTest::testGetLanguage with data set #13 
-E
+.
 CLocaleTest::testGetLanguage with data set #14 
-E
+.
 CLocaleTest::testGetLanguage with data set #15 
-E
+.
 CLocaleTest::testGetLanguage with data set #16 
-E
+.
 CLocaleTest::testGetLanguage with data set #17 
-E
+.
 CLocaleTest::testGetLanguage with data set #18 
-E
+.
 CLocaleTest::testGetLanguage with data set #19 
-E
+.
 CLocaleTest::testGetLanguage with data set #2 
-E
+.
 CLocaleTest::testGetLanguage with data set #20 
-E
+.
 CLocaleTest::testGetLanguage with data set #21 
-E
+.
 CLocaleTest::testGetLanguage with data set #22 
-E
+.
 CLocaleTest::testGetLanguage with data set #23 
-E
+.
 CLocaleTest::testGetLanguage with data set #24 
-E
+.
 CLocaleTest::testGetLanguage with data set #25 
-E
+.
 CLocaleTest::testGetLanguage with data set #26 
-E
+.
 CLocaleTest::testGetLanguage with data set #27 
-E
+.
 CLocaleTest::testGetLanguage with data set #28 
-E
+.
 CLocaleTest::testGetLanguage with data set #29 
-E
+.
 CLocaleTest::testGetLanguage with data set #3 
-E
+.
 CLocaleTest::testGetLanguage with data set #30 
-E
+.
 CLocaleTest::testGetLanguage with data set #31 
-E
+.
 CLocaleTest::testGetLanguage with data set #32 
-E
+.
 CLocaleTest::testGetLanguage with data set #33 
-E
+.
 CLocaleTest::testGetLanguage with data set #4 
-E
+.
 CLocaleTest::testGetLanguage with data set #5 
-E
+.
 CLocaleTest::testGetLanguage with data set #6 
-E
+.
 CLocaleTest::testGetLanguage with data set #7 
-E
+.
 CLocaleTest::testGetLanguage with data set #8 
-E
+.
 CLocaleTest::testGetLanguage with data set #9 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #0 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #1 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #10 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #11 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #2 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #3 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #4 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #5 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #6 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #7 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #8 
-E
+.
 CLocaleTest::testGetLocaleDisplayName with data set #9 
-E
+.
 CLocaleTest::testGetScript with data set #0 
-E
+.
 CLocaleTest::testGetScript with data set #1 
-E
+.
 CLocaleTest::testGetScript with data set #10 
-E
+.
 CLocaleTest::testGetScript with data set #11 
-E
+.
 CLocaleTest::testGetScript with data set #12 
-E
+.
 CLocaleTest::testGetScript with data set #13 
-E
+.
 CLocaleTest::testGetScript with data set #14 
-E
+.
 CLocaleTest::testGetScript with data set #15 
-E
+.
 CLocaleTest::testGetScript with data set #16 
-E
+.
 CLocaleTest::testGetScript with data set #17 
-E
+.
 CLocaleTest::testGetScript with data set #18 
-E
+.
 CLocaleTest::testGetScript with data set #19 
-E
+.
 CLocaleTest::testGetScript with data set #2 
-E
+.
 CLocaleTest::testGetScript with data set #20 
-E
+.
 CLocaleTest::testGetScript with data set #21 
-E
+.
 CLocaleTest::testGetScript with data set #22 
-E
+.
 CLocaleTest::testGetScript with data set #23 
-E
+.
 CLocaleTest::testGetScript with data set #3 
-E
+.
 CLocaleTest::testGetScript with data set #4 
-E
+.
 CLocaleTest::testGetScript with data set #5 
-E
+.
 CLocaleTest::testGetScript with data set #6 
-E
+.
 CLocaleTest::testGetScript with data set #7 
-E
+.
 CLocaleTest::testGetScript with data set #8 
-E
+.
 CLocaleTest::testGetScript with data set #9 
-E
+.
 CLocaleTest::testGetTerritory with data set #0 
-E
+.
 CLocaleTest::testGetTerritory with data set #1 
-E
+.
 CLocaleTest::testGetTerritory with data set #10 
-E
+.
 CLocaleTest::testGetTerritory with data set #11 
-E
+.
 CLocaleTest::testGetTerritory with data set #12 
-E
+.
 CLocaleTest::testGetTerritory with data set #13 
-E
+.
 CLocaleTest::testGetTerritory with data set #14 
-E
+.
 CLocaleTest::testGetTerritory with data set #15 
-E
+.
 CLocaleTest::testGetTerritory with data set #16 
-E
+.
 CLocaleTest::testGetTerritory with data set #17 
-E
+.
 CLocaleTest::testGetTerritory with data set #18 
-E
+.
 CLocaleTest::testGetTerritory with data set #19 
-E
+.
 CLocaleTest::testGetTerritory with data set #2 
-E
+.
 CLocaleTest::testGetTerritory with data set #20 
-E
+.
 CLocaleTest::testGetTerritory with data set #21 
-E
+.
 CLocaleTest::testGetTerritory with data set #22 
-E
+.
 CLocaleTest::testGetTerritory with data set #23 
-E
+.
 CLocaleTest::testGetTerritory with data set #24 
-E
+.
 CLocaleTest::testGetTerritory with data set #25 
-E
+.
 CLocaleTest::testGetTerritory with data set #26 
-E
+.
 CLocaleTest::testGetTerritory with data set #27 
-E
+.
 CLocaleTest::testGetTerritory with data set #28 
-E
+.
 CLocaleTest::testGetTerritory with data set #3 
-E
+.
 CLocaleTest::testGetTerritory with data set #4 
-E
+.
 CLocaleTest::testGetTerritory with data set #5 
-E
+.
 CLocaleTest::testGetTerritory with data set #6 
-E
+.
 CLocaleTest::testGetTerritory with data set #7 
-E
+.
 CLocaleTest::testGetTerritory with data set #8 
-E
+.
 CLocaleTest::testGetTerritory with data set #9 
-E
+.
 CLocaleTest::testRequiredDataExistence
-E
+.
 CLocalizedFormatterTest::testBooleanFormat
 .
 CLogRouterTest::testRoutes
-E
+.
 CLoggerTest::testGetLogs
 .
 CLoggerTest::testLog
@@ -1557,21 +1561,21 @@ CMapTest::testRemove
 CMapTest::testToArray
 .
 CMaskedTextFieldTest::testCallbackEncoding
-UNKNOWN STATUS
+.
 CMemCacheTest::testArrayAccess
-E
+F
 CMemCacheTest::testBigExpireValues
-E
+F
 CMemCacheTest::testDelete
-E
+.
 CMemCacheTest::testExpire2
-E
+F
 CMemCacheTest::testGetAndSet
-E
+F
 CMemCacheTest::testKeyPrefix
-E
+.
 CMemCacheTest::testMget
-E
+F
 CModelTest::testAddingAnErrorToASingleAttribute
 .
 CModelTest::testAddingAnErrorToMultipleAttributes
@@ -1659,7 +1663,7 @@ S
 CMssqlTest::testTransactions
 S
 CMultiFileUploadTest::testCallbackEncoding
-UNKNOWN STATUS
+.
 CMysql2Test::testAddColumn
 S
 CMysql2Test::testAddForeignKey
@@ -1895,31 +1899,31 @@ CRequiredValidatorTest::testEmptyWithSpaces
 CRequiredValidatorTest::testSpaces
 .
 CSecurityManagerTest::testComputeHMAC with data set #0 
-E
+.
 CSecurityManagerTest::testComputeHMAC with data set #1 
-E
+.
 CSecurityManagerTest::testComputeHMAC with data set #2 
-E
+.
 CSecurityManagerTest::testComputeHMAC with data set #3 
-E
+.
 CSecurityManagerTest::testEncryptData
-E
+.
 CSecurityManagerTest::testEncryptionKey
-E
+.
 CSecurityManagerTest::testGenerateRandomBytes
-E
+.
 CSecurityManagerTest::testGenerateRandomBytesCS
-E
+.
 CSecurityManagerTest::testGenerateRandomString
-E
+.
 CSecurityManagerTest::testGenerateRandomStringCS
-E
+.
 CSecurityManagerTest::testValidateData
-E
+.
 CSecurityManagerTest::testValidation
-E
+.
 CSecurityManagerTest::testValidationKey
-E
+.
 CSortTest::testGetDirectionsWithArrays
 .
 CSortTest::testGetDirectionsWithDots
@@ -1975,17 +1979,13 @@ CStackTest::testPush
 CStackTest::testToArray
 .
 CStarRatingTest::testCallbackEncoding
-E
+.
 CStatePersisterTest::testLoadSave
-E
+.
 CStatePersisterTest::testStateFile
-E
-CStringValidatorTest::testIs
-E
-CStringValidatorTest::testMax
-E
+.
 CStringValidatorTest::testMin
-E
+FATAL
 CTimestampBehaviorTest::testCreateAttribute
 .
 CTimestampBehaviorTest::testUpdateAttribute
@@ -2033,21 +2033,21 @@ CUploadedFileTest::testGetInstancesByName
 CUploadedFileTest::testGetInstancesByNamePartOfOtherName
 .
 CUrlManagerTest::testCreateUrlWithGetFormat
-E
+.
 CUrlManagerTest::testDefaultParams
-E
+.
 CUrlManagerTest::testParseUrlWithGetFormat
-E
+.
 CUrlManagerTest::testParseUrlWithPathFormat
-E
+.
 CUrlManagerTest::testParsingOnly
-E
+.
 CUrlManagerTest::testVerb
-E
+.
 CUrlManagerTest::testcreateUrlWithPathFormat
-E
+.
 CUrlRuleTest::testParseUrlMatchValue
-E
+.
 CUrlValidatorTest::testAllowEmpty with data set #0 
 .
 CUrlValidatorTest::testAllowEmpty with data set #1 
@@ -2189,9 +2189,9 @@ E
 CWebUserTest::testLoginLogout with data set #1 
 E
 CWsdlGeneratorTest::testGenerateHtmlDocumentation
-E
+.
 CWsdlGeneratorTest::testGenerateWsdl
-E
+.
 MessageCommandTest::testConfigFileNotExist
 .
 MessageCommandTest::testCreateTranslation
@@ -2203,30 +2203,30 @@ F
 MessageCommandTest::testNothingNew
 .
 YiiTTest::testChoice
-E
+.
 YiiTTest::testChoicePlaceholders
-E
+.
 YiiTTest::testChoicePlaceholdersSameLanguage
-E
+.
 YiiTTest::testChoiceSameLanguage
-E
+.
 YiiTTest::testPlural
-E
+.
 YiiTTest::testPluralLessVariants
-E
+.
 YiiTTest::testPluralMoreVariants
-E
+.
 YiiTTest::testPluralPlaceholders
-E
+.
 YiiTTest::testPluralPlaceholdersSameLanguage
-E
+.
 YiiTTest::testPluralSameLanguage
-E
+.
 YiiTTest::testSimple
-E
+.
 YiiTTest::testSimplePlaceholders
-E
+.
 YiiTTest::testSimplePlaceholdersSameLanguage
-E
+.
 YiiTTest::testSimpleSameLanguage
-E
+.

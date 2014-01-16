@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/util/hash.h"
+#include "hphp/util/slice.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,12 +40,10 @@ bool is_valid_var_name(const char *var_name, int len);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
+/*
  * Adapted from ap_php_conv_10 for fast signed integer to string conversion.
  */
-char *
-conv_10(register int64_t num, register int *is_negative, char *buf_end,
-        register int *len);
+StringSlice conv_10(int64_t num, char* buf_end);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

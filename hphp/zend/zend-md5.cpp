@@ -309,20 +309,20 @@ static void MD5Transform(uint32_t *state, const unsigned char *block) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char *string_md5(const char *arg, int arg_len, bool raw, int &out_len) {
+Md5Digest::Md5Digest(const char *arg, int arg_len) {
   PHP_MD5_CTX context;
-  unsigned char digest[16];
-
   PHP_MD5Init(&context);
   PHP_MD5Update(&context, (const unsigned char*)arg, arg_len);
   PHP_MD5Final(digest, &context);
-  if (raw) {
-    out_len = 16;
-    return string_duplicate((const char *)digest, 16);
-  }
+}
 
-  out_len = 16;
-  return string_bin2hex((const char *)digest, out_len);
+std::string string_md5(const char* s, int len) {
+  Md5Digest md5(s, len);
+  const auto rawLen = sizeof(md5.digest);
+  const auto hexLen = 2*rawLen;
+  char hex[hexLen+1];
+  string_bin2hex((char*)md5.digest, rawLen, hex);
+  return std::string(hex, hexLen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -29,14 +29,14 @@
 
 namespace vixl {
 
-const unsigned kNumberOfRegisters = 32;
-const unsigned kNumberOfFPRegisters = 32;
-// Callee saved registers are x21-x30(lr).
-const int kNumberOfCalleeSavedRegisters = 10;
-const int kFirstCalleeSavedRegisterIndex = 21;
+constexpr unsigned kNumberOfRegisters = 32;
+constexpr unsigned kNumberOfFPRegisters = 32;
+// Callee saved registers are x19-x28.
+constexpr int kNumberOfCalleeSavedRegisters = 10;
+constexpr int kFirstCalleeSavedRegisterIndex = 19;
 // Callee saved FP registers are d8-d15.
-const int kNumberOfCalleeSavedFPRegisters = 8;
-const int kFirstCalleeSavedFPRegisterIndex = 8;
+constexpr int kNumberOfCalleeSavedFPRegisters = 8;
+constexpr int kFirstCalleeSavedFPRegisterIndex = 8;
 
 constexpr byte kSimulatorStackJunk = 0x8b;
 

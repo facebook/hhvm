@@ -138,6 +138,19 @@ inline void tvRefcountedDecRef(TypedValue v) {
   return tvRefcountedDecRefHelper(v.m_type, v.m_data.num);
 }
 
+// Assumes the value is live, and has a count of at least 2 coming in.
+inline void tvRefcountedDecRefHelperNZ(DataType type, uint64_t datum) {
+  if (IS_REFCOUNTED_TYPE(type)) {
+    auto* asStr = reinterpret_cast<StringData*>(datum);
+    auto const DEBUG_ONLY newCount = asStr->decRefCount();
+    assert(newCount != 0);
+  }
+}
+
+inline void tvRefcountedDecRefNZ(TypedValue v) {
+  return tvRefcountedDecRefHelperNZ(v.m_type, v.m_data.num);
+}
+
 // Assumes 'tv' is live
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
 inline void tvDecRef(TypedValue* tv) {
@@ -318,6 +331,21 @@ inline void tvSet(const Cell& fr, TypedValue& inTo) {
 }
 
 /*
+ * Assign null to `to', with appropriate reference count modifications.
+ *
+ * If `to' is KindOfRef, places the null in the RefData pointed to by `to'.
+ *
+ * `to' must contain a live php value; use tvWriteNull when it doesn't.
+ */
+inline void tvSetNull(TypedValue& inTo) {
+  Cell* to = tvToCell(&inTo);
+  auto const oldType = to->m_type;
+  auto const oldDatum = to->m_data.num;
+  tvWriteNull(to);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+/*
  * Assign the value of the Cell in `fr' to `to', with appropriate
  * reference count modifications.
  *
@@ -397,7 +425,7 @@ inline const TypedValue* tvDerefIndirect(const TypedValue* tv) {
 inline bool tvIsStatic(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   return !IS_REFCOUNTED_TYPE(tv->m_type) ||
-    tv->m_data.pref->m_count == RefCountStaticValue;
+    tv->m_data.pref->m_count == StaticValue;
 }
 
 /**
@@ -487,7 +515,8 @@ inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
   });
 }
 
-inline bool tvIsNull(const TypedValue* tv) {
+inline bool cellIsNull(const Cell* tv) {
+  assert(cellIsPlausible(*tv));
   return IS_NULL_TYPE(tv->m_type);
 }
 
@@ -495,7 +524,9 @@ inline bool tvIsString(const TypedValue* tv) {
   return (tv->m_type & KindOfStringBit) != 0;
 }
 
-void tvUnboxIfNeeded(TypedValue* tv);
+inline void tvUnboxIfNeeded(TypedValue* tv) {
+  if (tv->m_type == KindOfRef) tvUnbox(tv);
+}
 
 /*
  * TypedValue conversions that update the tv in place (decrefing and

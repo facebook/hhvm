@@ -25,18 +25,23 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(HttpServer);
-
 class HttpServer : public Synchronizable, public TakeoverListener {
 public:
-  static HttpServerPtr Server;
+  static std::shared_ptr<HttpServer> Server;
   static time_t StartTime;
 
 public:
   explicit HttpServer();
   ~HttpServer();
 
-  void run();
+  /*
+   * Try to run the various servers that this class controls.
+   *
+   * If any of them can't bind their appropriate port (or otherwise
+   * fail their initialization steps), shut down the entire process
+   * without running any atexit handlers.
+   */
+  void runOrExitProcess();
 
   // Stop may be called from a signal handler.
   void stop(const char* reason = nullptr);
@@ -49,7 +54,10 @@ public:
   void takeoverShutdown() override;
 
   ServerPtr getPageServer() { return m_pageServer;}
-  void getSatelliteStats(vector<std::pair<std::string, int>> *stats);
+  void getSatelliteStats(std::vector<std::pair<std::string, int>> *stats);
+
+private:
+  static void startupFailure();
 
 private:
   bool m_stopped;
@@ -57,14 +65,15 @@ private:
 
   ServerPtr m_pageServer;
   ServerPtr m_adminServer;
-  SatelliteServerPtrVec m_satellites;
-  SatelliteServerPtrVec m_danglings;
+  std::vector<std::shared_ptr<SatelliteServer>> m_satellites;
+  std::vector<std::shared_ptr<SatelliteServer>> m_danglings;
   AsyncFunc<HttpServer> m_watchDog;
-  ServiceThreadPtrVec m_serviceThreads;
+  std::vector<std::shared_ptr<ServiceThread>> m_serviceThreads;
 
   bool startServer(bool pageServer);
   void onServerShutdown();
   void abortServers();
+  void waitForServers();
 
   // pid file functions
   void createPid();

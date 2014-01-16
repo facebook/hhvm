@@ -28,7 +28,8 @@ $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
 bug_pecl_7976($db);
 
 print "done!";
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP PROCEDURE IF EXISTS p');

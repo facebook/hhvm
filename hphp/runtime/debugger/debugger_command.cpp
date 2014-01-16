@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/debugger/debugger_command.h"
+
+#include <poll.h>
+
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/util/logger.h"
@@ -96,7 +98,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
   }
 
   int32_t type;
-  string clsname;
+  std::string clsname;
   try {
     thrift.reset(true);
     thrift.read(type);

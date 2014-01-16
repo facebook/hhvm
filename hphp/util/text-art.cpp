@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/text-art.h"
+
+#include <cassert>
 
 namespace HPHP { namespace Util { namespace TextArt {
 ///////////////////////////////////////////////////////////////////////////////

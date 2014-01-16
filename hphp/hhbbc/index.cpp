@@ -17,14 +17,18 @@
 
 #include <unordered_map>
 #include <mutex>
+#include <map>
 
-#include <boost/container/flat_map.hpp>
 #include <boost/next_prior.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <tbb/concurrent_hash_map.h>
+#include <tbb/concurrent_unordered_map.h>
 
 #include "folly/Format.h"
 #include "folly/Hash.h"
 #include "folly/Memory.h"
+
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
@@ -115,6 +119,29 @@ bool has_dep(Dep m, Dep t) {
   return static_cast<uintptr_t>(m) & static_cast<uintptr_t>(t);
 }
 
+/*
+ * Maps functions to contexts that depend on information about that
+ * function, with information about the type of dependency.
+ * (Currently only return types.)
+ */
+using DepMap =
+  tbb::concurrent_hash_map<
+    borrowed_ptr<const php::Func>,
+    std::map<Context,Dep>
+  >;
+
+//////////////////////////////////////////////////////////////////////
+
+PropState unknown_private_props(borrowed_ptr<const php::Class> cls) {
+  auto ret = PropState{};
+  for (auto& prop : cls->properties) {
+    if ((prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic)) {
+      ret[prop.name] = TGen;
+    }
+  }
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -139,6 +166,9 @@ struct FuncInfo {
    * The best-known return type of the function, if we have any
    * information.  May be TBottom if the function is known to never
    * return (e.g. always throws).
+   *
+   * TODO(#3519344): we should use NativeInfo on the func for this if
+   * we have it.
    */
   Type returnTy = TInitGen;
 };
@@ -272,12 +302,15 @@ struct IndexData {
   std::mutex funcInfoLock;
   std::unordered_map<borrowed_ptr<const php::Func>,FuncInfo> funcInfo;
 
-  // For now just functions..
-  std::mutex dependencyLock;
+  // Private property types are stored separately from ClassInfo,
+  // because you don't need to resolve a class to get at them.
   std::unordered_map<
-    borrowed_ptr<const php::Func>,
-    boost::container::flat_map<Context,Dep>
-  > dependencyMap;
+    borrowed_ptr<const php::Class>,
+    PropState
+  > privatePropInfo;
+
+  // For now we only need dependencies for function return types.
+  DepMap dependencyMap;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -290,8 +323,9 @@ void add_dependency(IndexData& data,
                     borrowed_ptr<const php::Func> src,
                     const Context& dst,
                     Dep newMask) {
-  G g(data.dependencyLock);
-  auto& current = data.dependencyMap[src][dst];
+  DepMap::accessor acc;
+  data.dependencyMap.insert(acc, src);
+  auto& current = acc->second[dst];
   current = current | newMask;
 }
 
@@ -307,10 +341,12 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
 std::vector<Context> find_deps(IndexData& data,
                                borrowed_ptr<const php::Func> src,
                                Dep mask) {
-  G g(data.dependencyLock);
   std::vector<Context> ret;
-  for (auto& kv : data.dependencyMap[src]) {
-    if (has_dep(kv.second, mask)) ret.push_back(kv.first);
+  DepMap::const_accessor acc;
+  if (data.dependencyMap.find(acc, src)) {
+    for (auto& kv : acc->second) {
+      if (has_dep(kv.second, mask)) ret.push_back(kv.first);
+    }
   }
   return ret;
 }
@@ -358,23 +394,25 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    * Duplicate method names override parent methods, unless the parent
    * method is final, in which case it's a resolution error.
    */
-  if (!isIface) for (auto& m : rparent->cls->methods) {
-    if (m->attrs & AttrAbstract) continue;
-    auto& mptr = rleaf->methods[m->name];
-    if (mptr) {
-      if (mptr->attrs & AttrFinal) return false;
-      if (!(mptr->attrs & AttrPrivate)) {
-        assert(!(mptr->attrs & AttrNoOverride));
+  if (!isIface) {
+    for (auto& m : rparent->cls->methods) {
+      if (m->attrs & AttrAbstract) continue;
+      auto& mptr = rleaf->methods[m->name];
+      if (mptr) {
+        if (mptr->attrs & AttrFinal) return false;
+        if (!(mptr->attrs & AttrPrivate)) {
+          assert(!(mptr->attrs & AttrNoOverride));
+        }
       }
+      mptr = borrow(m);
     }
-    mptr = borrow(m);
   }
 
   return true;
 }
 
 borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
-  if (cinfo->cls->attrs & (AttrInterface|AttrTrait|AttrAbstract)) {
+  if (cinfo->cls->attrs & (AttrInterface|AttrTrait)) {
     return nullptr;
   }
 
@@ -399,8 +437,9 @@ borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
     return cinfo->parent->ctor;
   }
 
-  // Use the generated 86ctor.  This must exist at this point or the
-  // bytecode is ill-formed.
+  // Use the generated 86ctor.  Unless the class is abstract, this
+  // must exist at this point or the bytecode is ill-formed.
+  if (cinfo->cls->attrs & AttrAbstract) return nullptr;
   cit = cinfo->methods.find(s_86ctor.get());
   if (cit == end(cinfo->methods)) {
     always_assert(!"no 86ctor found on class");
@@ -420,9 +459,7 @@ bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
 
 //////////////////////////////////////////////////////////////////////
 
-static void add_unit_to_index(IndexData& index,
-                              const php::Unit& unit,
-                              const Options& opts) {
+static void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   for (auto& c : unit.classes) {
     index.classes.insert({c->name, borrow(c)});
     for (auto& m : c->methods) {
@@ -430,7 +467,7 @@ static void add_unit_to_index(IndexData& index,
     }
   }
   for (auto& f : unit.funcs) {
-    if (opts.InterceptableFunctions.count(std::string{f->name->data()})) {
+    if (options.InterceptableFunctions.count(std::string{f->name->data()})) {
       f->attrs = f->attrs | AttrDynamicInvoke;
     }
     index.funcs.insert({f->name, borrow(f)});
@@ -440,18 +477,18 @@ static void add_unit_to_index(IndexData& index,
   }
 }
 
-Index::Index(borrowed_ptr<php::Program> program, const Options& opts)
+Index::Index(borrowed_ptr<php::Program> program)
   : m_data(folly::make_unique<IndexData>())
 {
   trace_time tracer("create index");
-  for (auto& u : program->units) add_unit_to_index(*m_data, *u, opts);
+  for (auto& u : program->units) add_unit_to_index(*m_data, *u);
   m_data->isComprehensive = true;
 }
 
 Index::Index(borrowed_ptr<php::Unit> unit)
   : m_data(folly::make_unique<IndexData>())
 {
-  add_unit_to_index(*m_data, *unit, Options{});
+  add_unit_to_index(*m_data, *unit);
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr
@@ -471,13 +508,14 @@ Index::~Index() {}
 folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
   auto name_only = [&] () -> folly::Optional<res::Class> {
-    // We can't check typeAlias yet and return Obj, because it breaks
-    // for builtin "primitive" interfaces like KeyedTraversable.
-    // TODO(Builtin)
+    // We know it has to name a class only if there's no type alias
+    // with this name.
     //
-    // if (!m_data->typeAliases.count(clsName)) {
-    //   return res::Class { this, SStringOr<ClassInfo>(clsName) };
-    // }
+    // TODO(#3519401): when we start unfolding type aliases, we could
+    // look at whether it is an alias for a specific class here.
+    if (!m_data->typeAliases.count(clsName)) {
+      return res::Class { this, SStringOr<ClassInfo>(clsName) };
+    }
     return folly::none;
   };
 
@@ -532,8 +570,7 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   if (cls->parentName) {
     auto const parent = resolve_class(ctx, cls->parentName);
     if (!parent.hasValue() || !parent->val.other()) {
-      // TODO(Builtin): this is possible right now for classes that
-      // extend from builtin interfaces or classes.
+      // Deriving from some sort of malformed base class.
       return name_only();
     }
     cinfo->parent = parent->val.other();
@@ -545,12 +582,8 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
     auto const iface = resolve_class(ctx, ifaceName);
     if (!iface || !iface->val.other() ||
         !(iface->val.other()->cls->attrs & AttrInterface)) {
-      /*
-       * Resolution failure.
-       *
-       * TODO(Builtin): classes that extend from builtin interfaces
-       * are currently hitting this path.
-       */
+      // Deriving from a malformed interface.  (E.g., "implements Foo"
+      // when Foo is actually a class.)
       return name_only();
     }
     cinfo->declInterfaces.push_back(iface->val.other());
@@ -644,7 +677,7 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   switch (tc.metaType()) {
   case TypeConstraint::MetaType::Precise:
     {
-      auto const mainType = [&] {
+      auto const mainType = [&]() -> const Type {
         switch (tc.underlyingDataType()) {
         case KindOfString:        return TStr;
         case KindOfStaticString:  return TStr;
@@ -658,20 +691,20 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
            * type for unique classes.
            */
           if (auto const rcls = resolve_class(ctx, tc.typeName())) {
-            return subObj(*rcls);
+            return interface_supports_non_objects(rcls->name())
+                ? TInitCell // none of these interfaces support Uninits
+                : subObj(*rcls);
           }
           /*
-           * If the class isn't unique, but there's no type aliases or
-           * class_alias calls, we could still use TObj.
-           *
-           * TODO(Builtin): this only will be possible when we are
-           * also checking the builtin names for pseudo-interfaces
-           * like KeyedTraversable.
+           * TODO: if the class isn't unique, but there's no type
+           * aliases or class_alias calls with that name, we could
+           * still use TObj.
            */
           return TInitCell;
         case KindOfResource: // Note, some day we may have resource hints.
           break;
-        default:                   break;
+        default:
+          break;
         }
         return TInitCell;
       }();
@@ -730,6 +763,15 @@ PrepKind Index::lookup_param_prep(Context ctx,
   return finfo->func->params[paramId].byRef ? PrepKind::Ref : PrepKind::Val;
 }
 
+PropState
+Index::lookup_private_props(borrowed_ptr<const php::Class> cls) const {
+  auto it = m_data->privatePropInfo.find(cls);
+  if (it != end(m_data->privatePropInfo)) return it->second;
+  return unknown_private_props(cls);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 std::vector<Context>
 Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
   auto const fdata = create_func_info(*m_data, func);
@@ -739,6 +781,20 @@ Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
     return find_deps(*m_data, func, Dep::ReturnTy);
   }
   return {};
+}
+
+void Index::refine_private_props(borrowed_ptr<const php::Class> cls,
+                                 const PropState& state) {
+  auto it = m_data->privatePropInfo.find(cls);
+  if (it == end(m_data->privatePropInfo)) {
+    m_data->privatePropInfo[cls] = state;
+    return;
+  }
+  for (auto& kv : state) {
+    auto& target = it->second[kv.first];
+    assert(kv.second.subtypeOf(target));
+    target = kv.second;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

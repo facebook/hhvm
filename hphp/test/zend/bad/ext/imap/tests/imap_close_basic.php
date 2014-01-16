@@ -30,7 +30,7 @@ echo "There are now " . imap_num_msg($stream_id) . " msgs in mailbox '$mailbox'\
 echo "\n-- Call to imap_close() with mandatory arguments --\n";
 var_dump( imap_close($stream_id) );
 ?>
-===DONE===?>
+===DONE===
 <?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

@@ -17,9 +17,10 @@
 #ifndef incl_HPHP_TEST_FASTCGI_PROTOCOL_H_
 #define incl_HPHP_TEST_FASTCGI_PROTOCOL_H_
 
+#include <string>
+
 #include "hphp/test/ext/test_fastcgi.h"
 #include "hphp/test/ext/test_base.h"
-#include "hphp/util/base.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -80,7 +80,7 @@ static int y_write_object(
     y_emit_state_t *state, zval *data, yaml_char_t *tag TSRMLS_DC);
 static int y_write_object_callback (
     y_emit_state_t *state, zval *callback, zval *data,
-    char *clazz_name TSRMLS_DC);
+    const char *clazz_name TSRMLS_DC);
 /* }}} */
 
 
@@ -317,7 +317,7 @@ static int y_write_bool(
   yaml_event_t event;
   int omit_tag = 0;
   int status;
-  char *res = Z_BVAL_P(data) ? "true" : "false";
+  const char *res = Z_BVAL_P(data) ? "true" : "false";
 
   if (NULL == tag) {
     tag = (yaml_char_t *) YAML_BOOL_TAG;
@@ -353,7 +353,7 @@ static int y_write_long(
   }
 
   res_size = snprintf(res, 0, "%ld", Z_LVAL_P(data));
-  res = emalloc(res_size + 1);
+  res = (char*) emalloc(res_size + 1);
   snprintf(res, res_size + 1, "%ld", Z_LVAL_P(data));
 
   status = yaml_scalar_event_initialize(&event, NULL, tag,
@@ -386,7 +386,7 @@ static int y_write_double(
   }
 
   res_size = snprintf(res, 0, "%f", Z_DVAL_P(data));
-  res = emalloc(res_size + 1);
+  res = (char*) emalloc(res_size + 1);
   snprintf(res, res_size + 1, "%f", Z_DVAL_P(data));
 
   status = yaml_scalar_event_initialize(&event, NULL, tag,
@@ -493,7 +493,7 @@ static int y_write_array(
   if (-1 != recursive_idx) {
     /* create anchor to refer to this structure */
     anchor_size = snprintf(anchor, 0, "refid%ld", recursive_idx + 1);
-    anchor = emalloc(anchor_size + 1);
+    anchor = (char*) emalloc(anchor_size + 1);
     snprintf(anchor, anchor_size + 1, "refid%ld", recursive_idx + 1);
 
   if (state->seen[ht] > 1) {
@@ -648,12 +648,10 @@ static int y_write_object(
 {
   yaml_event_t event;
   int status;
-  char *clazz_name = { 0 };
+  const char *clazz_name = { 0 };
   zend_uint name_len;
-  zend_class_entry *clazz;
   zval **callback = { 0 };
 
-  clazz = Z_OBJCE_P(data);
   zend_get_object_classname(data, &clazz_name, &name_len TSRMLS_CC);
 
   /* TODO check for a "yamlSerialize()" instance method */
@@ -689,7 +687,7 @@ static int y_write_object(
     }
   }
 
-  efree(clazz_name);
+  efree(const_cast<char*>(clazz_name));
   return status;
 }
 /* }}} */
@@ -699,7 +697,7 @@ static int y_write_object(
 static int
 y_write_object_callback (
     y_emit_state_t *state, zval *callback, zval *data,
-    char *clazz_name TSRMLS_DC) {
+    const char *clazz_name TSRMLS_DC) {
   zval **argv[] = { &data };
   zval *zret = { 0 };
   zval **ztag = { 0 };

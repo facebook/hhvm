@@ -205,7 +205,7 @@ bool url_parse(Url &output, const char *str, int length) {
     p = s;
   } else {
     /* memrchr is a GNU specific extension
-       Emulate for wide compatability */
+       Emulate for wide compatibility */
     for(p = e; *p != ':' && p >= s; p--);
   }
 

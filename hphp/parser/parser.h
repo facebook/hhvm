@@ -17,9 +17,15 @@
 #ifndef incl_HPHP_PARSER_PARSER_H_
 #define incl_HPHP_PARSER_PARSER_H_
 
+#include <map>
+#include <set>
+#include <vector>
+#include <string>
+
 #include "hphp/parser/scanner.h"
 #include "hphp/util/lock.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 #define IMPLEMENT_XHP_ATTRIBUTES                \
   Token m_xhpAttributes;                        \
@@ -40,9 +46,30 @@
 #define NAMESPACE_SEP                  '\\'
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-typedef void * TStatementPtr;
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * HHVM supports multiple types of lambda expressions.
+ */
+enum class ClosureType {
+  /*
+   * Short = Lambda syntax. Automatically captures variables mentioned in the
+   * body.
+   */
+  Short,
+
+  /*
+   * Long = Traditional closure syntax. Only captures variables that are
+   * explicitly specified in the "use" list.
+   */
+  Long,
+};
+
+//////////////////////////////////////////////////////////////////////
+
+typedef void* TStatementPtr;
+
 class ParserBase {
 public:
   enum NameKind {
@@ -141,7 +168,7 @@ protected:
   const char *m_fileName;
 
   Location m_loc;
-  LocationPtrVec m_funcLocs;
+  std::vector<std::shared_ptr<Location>> m_funcLocs;
   std::vector<bool> m_classes; // used to determine if we are currently
                                // inside a regular class or an XHP class
 

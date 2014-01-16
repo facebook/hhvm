@@ -199,8 +199,7 @@ public:
 
   // Deserialization version.
   template<class SerDe>
-  typename boost::enable_if_c<SerDe::deserializing>::type
-  serde(SerDe& sd) {
+  typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd) {
     uint32_t size;
     sd(size);
     for (uint32_t i = 0; i < size; ++i) {
@@ -218,8 +217,7 @@ public:
 
   // Serialization version.
   template<class SerDe>
-  typename boost::disable_if_c<SerDe::deserializing>::type
-  serde(SerDe& sd) {
+  typename std::enable_if<!SerDe::deserializing>::type serde(SerDe& sd) {
     std::vector<const StringData*> names(m_list.size());
     for (typename Map::const_iterator it = m_map.begin();
         it != m_map.end();

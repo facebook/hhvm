@@ -428,7 +428,9 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
   type = setType(ar, sym, type, true);
   if (sym->isParameter()) {
     auto p = dynamic_pointer_cast<ParameterExpression>(construct);
-    if (p) sym->setDeclaration(construct);
+    if (p) {
+      sym->setDeclaration(construct);
+    }
   } else {
     sym->setDeclaration(construct);
   }

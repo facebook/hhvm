@@ -110,24 +110,18 @@ struct Allocator {
 };
 
 /*
- * Shorthand to create a std::unique_ptr to a smart-allocated object.
+ * Shorthand to create an std::unique_ptr to a smart-allocated object.
  *
  * Usage:
  *
  *   auto ptr = smart::make_unique<Foo>(arg1, arg2);
- *
- * If you need to make a typedef to one, since we don't have type
- * aliases yet in our version of gcc you have to do:
- *
- *   typedef smart::unique_ptr<T>::type type;
  */
 
-template<class T> struct unique_ptr
-  : folly::AllocatorUniquePtr<T,Allocator<T>>
-{};
+template<class T>
+using unique_ptr = typename folly::AllocatorUniquePtr<T,Allocator<T>>::type;
 
 template<class T, class... Args>
-typename unique_ptr<T>::type make_unique(Args&&... args) {
+unique_ptr<T> make_unique(Args&&... args) {
   return folly::allocate_unique<T>(
     Allocator<T>(),
     std::forward<Args>(args)...
@@ -136,7 +130,7 @@ typename unique_ptr<T>::type make_unique(Args&&... args) {
 
 #ifndef __APPLE__ // XXX: this affects codegen quality but not correctness
 static_assert(
-  sizeof(unique_ptr<int>::type) == sizeof(std::unique_ptr<int>),
+  sizeof(unique_ptr<int>) == sizeof(std::unique_ptr<int>),
   "smart::unique_ptr pointer should not be larger than std::unique_ptr"
 );
 #endif
@@ -203,7 +197,7 @@ using flat_multiset = boost::container::flat_multiset<K, Pref, Allocator<K>>;
 
 template <class T,
           class U,
-          class V = hphp_hash<T>,
+          class V = std::hash<T>,
           class W = std::equal_to<T>>
 struct hash_map : std::unordered_map<
   T, U, V, W,
@@ -219,7 +213,7 @@ struct hash_map : std::unordered_map<
 
 template <class T,
           class U,
-          class V = hphp_hash<T>,
+          class V = std::hash<T>,
           class W = std::equal_to<T>>
 struct hash_multimap : std::unordered_multimap<
   T, U, V, W,
@@ -234,7 +228,7 @@ struct hash_multimap : std::unordered_multimap<
 };
 
 template <class T,
-          class V = hphp_hash<T>,
+          class V = std::hash<T>,
           class W = std::equal_to<T>>
 struct hash_set : std::unordered_set<T,V,W,Allocator<T> > {
   hash_set()

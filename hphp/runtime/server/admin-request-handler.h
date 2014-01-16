@@ -31,13 +31,13 @@ public:
   explicit AdminRequestHandler(int timeout);
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport);
+  virtual void abortRequest(Transport *transport);
 
 private:
   bool handleCheckRequest  (const std::string &cmd, Transport *transport);
   bool handleStatusRequest (const std::string &cmd, Transport *transport);
   bool handleStatsRequest  (const std::string &cmd, Transport *transport);
   bool handleProfileRequest(const std::string &cmd, Transport *transport);
-  bool handleAPCSizeRequest (const std::string &cmd, Transport *transport);
   bool handleDumpCacheRequest (const std::string &cmd, Transport *transport);
   bool handleConstSizeRequest (const std::string &cmd, Transport *transport);
   bool handleStaticStringsRequest(const std::string &cmd,

@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include <cstring>
 
-#include "hphp/util/util.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -281,13 +281,13 @@ inline strhash_t hash_string_i(const char *arKey) {
 // is a non-empty string that matches one of the following conditions:
 //   1) The string is "0".
 //   2) The string starts with a non-zero digit, followed by at most
-//      18 more digits, and is less than or equal to 9223372036854775806.
+//      18 more digits, and is less than or equal to 2^63 - 1.
 //   3) The string starts with a negative sign, followed by a non-zero
 //      digit, followed by at most 18 more digits, and is greater than
-//      or equal to -9223372036854775807.
+//      or equal to -2^63.
 inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
                                 int64_t& res) {
-  if (nKeyLength == 0 || ((unsigned char)(arKey[0])) > '9')
+  if ((unsigned char)(arKey[0] - '-') > ('9' - '-'))
     return false;
   if (nKeyLength <= 19 ||
       (arKey[0] == '-' && nKeyLength == 20)) {

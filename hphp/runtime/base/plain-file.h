@@ -42,7 +42,8 @@ public:
   virtual bool close();
   virtual int64_t readImpl(char *buffer, int64_t length);
   virtual int getc();
-  virtual String read(int64_t length = 0);
+  virtual String read();
+  virtual String read(int64_t length);
   virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool seekable() { return true;}
   virtual bool seek(int64_t offset, int whence = SEEK_SET);

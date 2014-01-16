@@ -1,0 +1,1 @@
+HipHop Fatal error: AsyncAwait on a non-WaitHandle in %s/test/quick/asm_fatal_await.hhas on line -1

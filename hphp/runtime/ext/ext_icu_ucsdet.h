@@ -43,7 +43,9 @@ class c_EncodingDetector : public ExtObjectData {
 
   // need to implement
   public: c_EncodingDetector(Class* cls = c_EncodingDetector::classof());
-  public: ~c_EncodingDetector();
+  ~c_EncodingDetector() {
+    ucsdet_close(m_encoding_detector);
+  }
   public: void t___construct();
   public: void t_settext(const String& text);
   public: void t_setdeclaredencoding(const String& text);
@@ -67,8 +69,12 @@ class c_EncodingMatch : public ExtObjectData {
   DECLARE_CLASS_NO_SWEEP(EncodingMatch)
 
   // need to implement
-  public: c_EncodingMatch(Class* cls = c_EncodingMatch::classof());
-  public: ~c_EncodingMatch();
+  c_EncodingMatch(Class* cls = c_EncodingMatch::classof())
+    : ExtObjectData(cls)
+    , m_encoding_match(0)
+  {}
+  ~c_EncodingMatch() {}
+
   public: void t___construct();
   public: bool t_isvalid();
   public: String t_getencoding();

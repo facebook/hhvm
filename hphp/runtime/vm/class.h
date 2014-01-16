@@ -22,7 +22,7 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/range.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
@@ -59,13 +59,14 @@ typedef hphp_hash_map<
   string_data_isame
 > UserAttributeMap;
 
-typedef ObjectData*(*BuiltinCtorFunction)(Class*);
+using BuiltinCtorFunction = ObjectData* (*)(Class*);
+using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);
 
 /*
  * A PreClass represents the source-level definition of a php class,
  * interface, or trait.  Includes things like the names of the parent
  * class (if any), and the names of any interfaces implemented or
- * traits used.  Also contains metadata about properites and methods
+ * traits used.  Also contains metadata about properties and methods
  * of the class.
  *
  * This is separate from an actual Class because in different requests
@@ -114,7 +115,8 @@ class PreClass : public AtomicCountable {
     NotHoistable,
     Mergeable,
     MaybeHoistable,
-    AlwaysHoistable
+    AlwaysHoistable,
+    ClosureHoistable
   };
 
   struct Prop {
@@ -193,8 +195,8 @@ class PreClass : public AtomicCountable {
     const StringData* getSelectedTraitName() const {
       return m_selectedTraitName;
     }
-    void getOtherTraitNames(TraitNameSet& nameSet) const {
-      nameSet = m_otherTraitNames;
+    TraitNameSet getOtherTraitNames() const {
+      return m_otherTraitNames;
     }
 
     template<class SerDe> void serde(SerDe& sd) {
@@ -241,8 +243,50 @@ class PreClass : public AtomicCountable {
     Attr              m_modifiers;
   };
 
+  struct TraitRequirement {
+   public:
+    // Solely for SerDe
+    TraitRequirement(): m_word(0) {}
+
+    explicit TraitRequirement(const StringData* req, bool isExtends) {
+      m_word = pack(req, isExtends);
+    }
+
+    const StringData* name() const {
+      return reinterpret_cast<const StringData*>(m_word & ~0x1);
+    }
+    bool is_extends() const { return m_word & 0x1; }
+    bool is_implements() const { return !is_extends(); }
+
+    // Deserialization version.
+    template<class SerDe>
+    typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd) {
+      const StringData* sd_name;
+      bool sd_is_extends;
+      sd(sd_name)(sd_is_extends);
+      m_word = pack(sd_name, sd_is_extends);
+    }
+
+    // Serialization version.
+    template<class SerDe>
+    typename std::enable_if<!SerDe::deserializing>::type serde(SerDe& sd) {
+      const StringData* sd_name = name();
+      bool sd_is_extends = is_extends();
+      sd(sd_name)(sd_is_extends);
+    }
+
+   private:
+    static uintptr_t pack(const StringData* req, bool isExtends) {
+      auto req_ptr = reinterpret_cast<uintptr_t>(req);
+      return isExtends ? (req_ptr | 0x1) : req_ptr;
+    }
+
+    uintptr_t m_word;
+  };
+
   typedef FixedVector<const StringData*> InterfaceVec;
   typedef FixedVector<const StringData*> UsedTraitVec;
+  typedef FixedVector<TraitRequirement> TraitRequirementsVec;
   typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
   typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
 
@@ -266,17 +310,22 @@ class PreClass : public AtomicCountable {
   Id id() const { return m_id; }
   const InterfaceVec& interfaces() const { return m_interfaces; }
   const UsedTraitVec& usedTraits() const { return m_usedTraits; }
+  const TraitRequirementsVec& traitRequirements() const {
+    return m_traitRequirements;
+  }
   const TraitPrecRuleVec& traitPrecRules() const { return m_traitPrecRules; }
   const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes() const { return m_userAttributes; }
   bool isPersistent() const { return m_attrs & AttrPersistent; }
+  bool isBuiltin() const { return attrs() & AttrBuiltin; }
 
   /*
-   *  Funcs, Consts, and Props all behave similarly. Define raw accessors
-   *  foo() and numFoos() for people munging by hand, and ranges.
-   *    methods(); numMethods(); FuncRange allMethods();
-   *    consts(); numConsts(); ConstRange allConsts();
-   *    properties; numProperties(); PropRange allProperties();
+   * Funcs, Consts, and Props all behave similarly. Define raw accessors
+   * foo() and numFoos() for people munging by hand, and ranges.
+   *
+   *   methods();   numMethods();    FuncRange allMethods();
+   *   constants(); numConstants();  ConstRange allConstants();
+   *   properties;  numProperties(); PropRange allProperties();
    */
 
 #define DEF_ACCESSORS(Type, TypeName, fields, Fields)                   \
@@ -285,7 +334,7 @@ class PreClass : public AtomicCountable {
   size_t num##Fields()  const { return m_##fields.size(); }             \
   typedef IterRange<Type const*> TypeName##Range;                       \
   TypeName##Range all##Fields() const {                                 \
-    return TypeName##Range(fields(), fields() + m_##fields.size() - 1); \
+    return TypeName##Range(fields(), fields() + m_##fields.size());     \
   }
 
   DEF_ACCESSORS(Func*, Func, methods, Methods)
@@ -314,8 +363,21 @@ class PreClass : public AtomicCountable {
     return &m_properties[s];
   }
 
+  /*
+   * Extension builtin classes have custom creation and destruction
+   * routines.
+   */
   BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
-  int builtinPropSize() const { return m_builtinPropSize; }
+  BuiltinDtorFunction instanceDtor() const { return m_instanceDtor; }
+
+  /*
+   * For a builtin class c_Foo, the builtinObjSize is the size of the
+   * object excluding ObjectData (sizeof(c_Foo) - sizeof(ObjectData)),
+   * and builtinODOffset is the offset of the ObjectData subobject in
+   * c_Foo.
+   */
+  uint32_t builtinObjSize() const { return m_builtinObjSize; }
+  int32_t builtinODOffset() const { return m_builtinODOffset; }
 
   void prettyPrint(std::ostream& out) const;
 
@@ -337,21 +399,24 @@ private:
   int m_line2;
   Offset m_offset;
   Id m_id;
-  int m_builtinPropSize;
+  uint32_t m_builtinObjSize{0};
+  int32_t m_builtinODOffset{0};
   Attr m_attrs;
   Hoistable m_hoistable;
   const StringData* m_name;
   const StringData* m_parent;
   const StringData* m_docComment;
-  BuiltinCtorFunction m_instanceCtor;
+  BuiltinCtorFunction m_instanceCtor = nullptr;
   InterfaceVec m_interfaces;
   UsedTraitVec m_usedTraits;
+  TraitRequirementsVec m_traitRequirements;
   TraitPrecRuleVec m_traitPrecRules;
   TraitAliasRuleVec m_traitAliasRules;
   UserAttributeMap m_userAttributes;
   MethodMap m_methods;
   PropMap m_properties;
   ConstMap m_constants;
+  BuiltinDtorFunction m_instanceDtor = nullptr;
 };
 
 typedef AtomicSmartPtr<PreClass> PreClassPtr;
@@ -578,18 +643,32 @@ struct Class : AtomicCountable {
   bool hasInitMethods() const { return m_hasInitMethods; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
   const InterfaceMap& allInterfaces() const { return m_interfaces; }
-  const std::vector<ClassPtr>& usedTraits() const {
+  // See comment for m_usedTraits
+  const std::vector<ClassPtr>& usedTraitClasses() const {
     return m_usedTraits;
   }
-  const TraitAliasVec& traitAliases() const { return m_traitAliases; }
+  const TraitAliasVec& traitAliases();
   const InitVec& pinitVec() const { return m_pinitVec; }
   const PropInitVec& declPropInit() const { return m_declPropInit; }
 
   // ObjectData attributes, to be set during instance initialization.
   int getODAttrs() const { return m_ODAttrs; }
 
-  int builtinPropSize() const { return m_builtinPropSize; }
+  /*
+   * Custom initialization and destruction routines for builtin
+   * classes.
+   */
   BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
+  BuiltinDtorFunction instanceDtor() const { return m_instanceDtor; }
+
+  /*
+   * This value is the pointer adjustment from an ObjectData* to get
+   * to the property vector, for a builtin class.  I.e., it's the
+   * number of bytes of subclass data following the ObjectData
+   * subobject.
+   */
+  int32_t builtinODTailSize() const { return m_builtinODTailSize; }
+
   bool isCppSerializable() const;
   bool isCollectionClass() const;
 
@@ -611,6 +690,7 @@ struct Class : AtomicCountable {
   }
 
   bool isPersistent() const { return m_attrCopy & AttrPersistent; }
+  bool isBuiltin() const { return attrs() & AttrBuiltin; }
 
   // Finds the base class defining the given method (NULL if none).
   // Note: for methods imported via traits, the base class is the one that
@@ -807,16 +887,23 @@ private:
   void setInterfaces();
   void setClassVec();
   void setUsedTraits();
+  void checkTraitConstraints() const;
+  void checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
+                                const StringData* recName) const;
   template<bool setParents> void setInstanceBitsImpl();
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
 
 private:
+
   PreClassPtr m_preClass;
   ClassPtr m_parent;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
   size_t m_numDeclInterfaces;
   InterfaceMap m_interfaces;
 
+  // Note: In RepoAuthoritative mode, we rely on trait flattening in the
+  // compile phase to import the contents of traits. As a result,
+  // m_usedTraits is empty.
   std::vector<ClassPtr> m_usedTraits;
   TraitAliasVec m_traitAliases;
 
@@ -852,14 +939,15 @@ private:
   unsigned m_attrCopy : 28;               // cache of m_preClass->attrs().
   int32_t m_ODAttrs;
 
-  int32_t m_builtinPropSize;
+  uint32_t m_builtinODTailSize{0};
   int32_t m_declPropNumAccessible;
   unsigned m_classVecLen;
   mutable RDS::Link<Class*> m_cachedClass; // can this be const Class*?
   mutable RDS::Link<PropInitVec*> m_propDataCache;
   mutable RDS::Link<TypedValue*> m_propSDataCache;
   mutable RDS::Link<Array> m_nonScalarConstantCache;
-  BuiltinCtorFunction m_instanceCtor;
+  BuiltinCtorFunction m_instanceCtor{nullptr};
+  BuiltinDtorFunction m_instanceDtor{nullptr};
   ConstMap m_constants;
 
   /*

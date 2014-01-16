@@ -1,6 +1,6 @@
 #########################################
 # 
-# Install all the dependancies for HipHop
+# Install all the dependencies for HipHop
 #
 #########################################
 
@@ -20,12 +20,15 @@ if [ "x${TRAVIS}" != "x" ]; then
 fi
 
 export CMAKE_PREFIX_PATH=`/bin/pwd`/..
-export HPHP_HOME=`/bin/pwd`
 
-# install apt-fast to speedup later dependency installation
+# install python-software-properties before trying to add a PPA
+sudo apt-get -y update
+sudo apt-get install -y python-software-properties
+
+# install apt-fast to speed up later dependency installation
 sudo add-apt-repository -y ppa:apt-fast/stable
-sudo apt-get update
-sudo apt-get install apt-fast
+sudo apt-get -y update
+sudo apt-get -y install apt-fast
 
 # install the actual dependencies
 sudo apt-fast -y update
@@ -36,13 +39,15 @@ sudo apt-fast -y install git-core cmake g++ libboost1.48-dev libmysqlclient-dev 
   libboost-program-options1.48-dev libboost-filesystem1.48-dev libboost-thread1.48-dev wget memcached \
   libreadline-dev libncurses-dev libmemcached-dev libbz2-dev \
   libc-client2007e-dev php5-mcrypt php5-imagick libgoogle-perftools-dev \
-  libcloog-ppl0 libelf-dev libdwarf-dev libunwind7-dev subversion \
-  python-software-properties &
+  libcloog-ppl0 libelf-dev libdwarf-dev libunwind7-dev subversion &
 
 git clone git://github.com/libevent/libevent.git --quiet &
 git clone git://github.com/bagder/curl.git --quiet &
 svn checkout http://google-glog.googlecode.com/svn/trunk/ google-glog --quiet &
 wget http://www.canonware.com/download/jemalloc/jemalloc-3.0.0.tar.bz2 --quiet &
+
+# init submodules
+git submodule update --init
 
 # wait until all background processes finished
 FAIL=0
@@ -118,4 +123,4 @@ cmake .
 
 echo "-------------------------------------------------------------------------"
 echo "Done. Now run:"
-echo "  CMAKE_PREFIX_PATH=\`pwd\`/.. HPHP_HOME=\`pwd\` make"
+echo "  CMAKE_PREFIX_PATH=\`pwd\`/.. make"

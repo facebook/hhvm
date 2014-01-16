@@ -16,7 +16,8 @@
 
 #include "hphp/runtime/vm/type-constraint.h"
 
-#include "hphp/util/base.h"
+#include "folly/MapUtil.h"
+
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -24,7 +25,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
 
@@ -101,10 +102,13 @@ void TypeConstraint::init() {
   Type dtype;
   TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
         this, m_typeName->data(), isNullable());
-  if (!mapGet(s_typeNamesToTypes, m_typeName, &dtype) ||
+  auto const mptr = folly::get_ptr(s_typeNamesToTypes, m_typeName);
+  if (mptr) dtype = *mptr;
+  if (!mptr ||
       !(isHHType() || dtype.dt == KindOfArray ||
         dtype.metatype == MetaType::Parent ||
-        dtype.metatype == MetaType::Self)) {
+        dtype.metatype == MetaType::Self ||
+        dtype.metatype == MetaType::Callable)) {
     TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
           this, m_typeName->data());
     m_type = { KindOfObject, MetaType::Precise };
@@ -272,7 +276,7 @@ static const char* describe_actual_type(const TypedValue* tv) {
 
 void TypeConstraint::verifyFail(const Func* func, int paramNum,
                                 const TypedValue* tv) const {
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
   std::ostringstream fname;
   fname << func->fullName()->data() << "()";
   const StringData* tn = typeName();
@@ -291,7 +295,7 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
     assert(
       (isSoft() || isNullable()) &&
       "Only nullable and soft extended type hints are currently implemented");
-    raise_warning(
+    raise_debugging(
       "Argument %d to %s must be of type %s, %s given",
       paramNum + 1, fname.str().c_str(), fullName().c_str(), givenType);
   } else {

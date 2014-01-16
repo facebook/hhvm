@@ -29,7 +29,7 @@ foreach ($options as $key => $option) {
 echo "\n-- Mandatory arguments --\n";
 var_dump( imap_fetchheader($stream_id, $msg_no) );
 ?>
-===DONE===?>
+===DONE===
 <?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

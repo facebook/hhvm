@@ -37,6 +37,7 @@ assert($row === $row2);
 mysql_close($link);
 
 print "done!\n";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

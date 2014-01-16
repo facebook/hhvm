@@ -1,0 +1,4 @@
+int(12)
+string(19) "non-utf8 string: F%s"
+int(12)
+string(19) "non-utf8 string: F%s"

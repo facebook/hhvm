@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/server/replay-transport.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -30,11 +32,11 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
 
   char buf[32];
   snprintf(buf, sizeof(buf), "%u", Process::GetProcessId());
-  hdf["pid"] = string(buf);
+  hdf["pid"] = std::string(buf);
   snprintf(buf, sizeof(buf), "%" PRIx64, (int64_t)Process::GetThreadId());
-  hdf["tid"] = string(buf);
+  hdf["tid"] = std::string(buf);
   snprintf(buf, sizeof(buf), "%u", Process::GetThreadPid());
-  hdf["tpid"] = string(buf);
+  hdf["tpid"] = std::string(buf);
 
   hdf["cmd"] = static_cast<int>(transport->getMethod());
   hdf["url"] = transport->getUrl();
@@ -78,7 +80,7 @@ void ReplayTransport::replayInput(Hdf hdf) {
 
 void ReplayTransport::replayInputImpl() {
   String postData = StringUtil::UUDecode(m_hdf["post"].get(""));
-  m_postData = string(postData.data(), postData.size());
+  m_postData = std::string(postData.data(), postData.size());
   m_requestHeaders.clear();
   for (Hdf hdf = m_hdf["headers"].firstChild(); hdf.exists();
        hdf = hdf.next()) {
@@ -134,7 +136,7 @@ void ReplayTransport::sendImpl(const void *data, int size, int code,
   m_code = code;
 
   m_response = "HTTP/1.1 ";
-  m_response += boost::lexical_cast<string>(code);
+  m_response += boost::lexical_cast<std::string>(code);
   m_response += " ";
   m_response += (m_code == 200 ? "OK" : "Internal Server Error");
   m_response += "\r\n";

@@ -15,17 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/static_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-c_StaticWaitHandle::c_StaticWaitHandle(Class* cb)
-    : c_WaitHandle(cb) {
-}
-
-c_StaticWaitHandle::~c_StaticWaitHandle() {
-}
 
 void c_StaticWaitHandle::t___construct() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");

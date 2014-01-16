@@ -1,0 +1,23 @@
+string(1) "a"
+string(1) "b"
+string(1) "c"
+string(1) "d"
+NULL
+unicode(8) "hi there"
+array(2) {
+  [0]=>
+  unicode(2) "hi"
+  [1]=>
+  unicode(5) "there"
+}
+array(2) {
+  [u"hi"]=>
+  unicode(5) "there"
+  [u"foo"]=>
+  unicode(3) "bar"
+}
+string(1) "a"
+string(1) "b"
+string(1) "c"
+string(1) "d"
+===DONE===

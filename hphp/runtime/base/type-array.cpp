@@ -62,7 +62,6 @@ Array &Array::operator=(ArrayData *data) {
   return *this;
 }
 
-HOT_FUNC
 Array &Array::operator=(CArrRef arr) {
   ArrayBase::operator=(arr.m_px);
   return *this;
@@ -112,7 +111,7 @@ Array Array::diff(CVarRef array, bool by_key, bool by_value,
                   PFUNC_CMP value_cmp_function /* = NULL */,
                   const void *value_data /* = NULL */) const {
   if (!array.isArray()) {
-    throw_bad_array_exception();
+    throw_expected_array_exception();
     return Array();
   }
   return diffImpl(array.getArrayData(), by_key, by_value, false,
@@ -126,7 +125,7 @@ Array Array::intersect(CVarRef array, bool by_key, bool by_value,
                        PFUNC_CMP value_cmp_function /* = NULL */,
                        const void *value_data /* = NULL */) const {
   if (!array.isArray()) {
-    throw_bad_array_exception();
+    throw_expected_array_exception();
     return Array();
   }
   return diffImpl(array.getArrayData(), by_key, by_value, true,
@@ -134,7 +133,7 @@ Array Array::intersect(CVarRef array, bool by_key, bool by_value,
                   value_cmp_function, value_data);
 }
 
-int Array::CompareAsStrings(CVarRef v1, CVarRef v2, const void *data) {
+static int CompareAsStrings(CVarRef v1, CVarRef v2, const void *data) {
   return HPHP::same(HPHP::toString(v1), HPHP::toString(v2)) ? 0 : -1;
 }
 
@@ -178,7 +177,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
     key_cmp_function = SortRegularAscending;
   }
 
-  vector<int> perm1;
+  std::vector<int> perm1;
   SortData opaque1;
   int bottom = 0;
   int top = array.size();
@@ -269,7 +268,6 @@ Array &Array::merge(CArrRef arr) {
   return mergeImpl(arr.m_px);
 }
 
-HOT_FUNC
 Array &Array::plusImpl(ArrayData *data) {
   if (m_px == nullptr || data == nullptr) {
     throw BadArrayMergeException();
@@ -278,13 +276,15 @@ Array &Array::plusImpl(ArrayData *data) {
     if (m_px->empty()) {
       ArrayBase::operator=(data);
     } else if (m_px != data) {
-      ArrayBase::operator=(Array::attach(m_px->plus(data)));
+      auto const escalated = m_px->plusEq(data);
+      if (escalated != m_px) {
+        ArrayBase::operator=(Array::attach(escalated));
+      }
     }
   }
   return *this;
 }
 
-HOT_FUNC
 Array &Array::mergeImpl(ArrayData *data) {
   if (m_px == nullptr || data == nullptr) {
     throw BadArrayMergeException();
@@ -390,7 +390,6 @@ bool Array::more(CVarRef v2) const {
 ///////////////////////////////////////////////////////////////////////////////
 // iterator
 
-HOT_FUNC
 ArrayIter Array::begin(const String& context /* = null_string */) const {
   return ArrayIter(m_px);
 }
@@ -668,10 +667,6 @@ void Array::remove(CVarRef key) {
   }
 }
 
-void Array::removeAll() {
-  operator=(Create());
-}
-
 CVarRef Array::append(CVarRef v) {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::Create(v));
@@ -825,7 +820,7 @@ static int multi_compare_func(const void *n1, const void *n2, const void *op) {
   return 0;
 }
 
-void Array::SortImpl(vector<int> &indices, CArrRef source,
+void Array::SortImpl(std::vector<int> &indices, CArrRef source,
                      Array::SortData &opaque, Array::PFUNC_CMP cmp_func,
                      bool by_key, const void *data /* = NULL */) {
   assert(cmp_func);
@@ -855,7 +850,7 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
                  const void *data /* = NULL */) {
   Array sorted = Array::Create();
   SortData opaque;
-  vector<int> indices;
+  std::vector<int> indices;
   SortImpl(indices, *this, opaque, cmp_func, by_key, data);
   int count = size();
   for (int i = 0; i < count; i++) {

@@ -46,6 +46,8 @@
 #define STRCASECMP strcasecmp
 #endif
 
+sapi_globals_struct sapi_globals;
+
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC) {
   not_implemented();
   return FAILURE;

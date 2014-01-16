@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/vm/debugger-hook.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
@@ -28,16 +28,13 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debuggerflow);
-
-static inline Transl::Translator* transl() {
-  return Transl::Translator::Get();
-}
+using JIT::tx64;
 
 // Hook called from the bytecode interpreter before every opcode executed while
 // a debugger is attached. The debugger may choose to hold the thread below
 // here and execute any number of commands from the client. Return from here
 // lets the opcode execute.
-void phpDebuggerOpcodeHook(const uchar* pc) {
+void phpDebuggerOpcodeHook(const unsigned char* pc) {
   TRACE(5, "in phpDebuggerOpcodeHook() with pc %p\n", pc);
   // Short-circuit when we're doing things like evaling PHP for print command,
   // or conditional breakpoints.
@@ -112,10 +109,10 @@ static void blacklistRangesInJit(const Unit* unit,
        it != offsets.end(); ++it) {
     for (PC pc = unit->at(it->m_base); pc < unit->at(it->m_past);
          pc += instrLen((Op*)pc)) {
-      transl()->addDbgBLPC(pc);
+      tx64->addDbgBLPC(pc);
     }
   }
-  if (!transl()->addDbgGuards(unit)) {
+  if (!tx64->addDbgGuards(unit)) {
     Logger::Warning("Failed to set breakpoints in Jitted code");
   }
   // In this case, we may be setting a breakpoint in a tracelet which could
@@ -160,7 +157,7 @@ static void addBreakPointInUnit(Eval::BreakPointInfoPtr bp, Unit* unit) {
 
 static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
                                  Eval::PhpFile* efile) {
-  Eval::BreakPointInfoPtrVec bps;
+  std::vector<Eval::BreakPointInfoPtr> bps;
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];
@@ -176,9 +173,9 @@ static void addBreakPointFuncEntry(const Func* f) {
         f->fullName()->data(), f->unit(), f->base(), pc);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (transl()->addDbgBLPC(pc)) {
+    if (tx64->addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!transl()->addDbgGuard(f, f->base())) {
+      if (!tx64->addDbgGuard(f, f->base())) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }
@@ -193,15 +190,16 @@ static void addBreakPointFuncEntry(const Func* f) {
 // general codegen strategy as generators, the original function still
 // starts the work, so we treat generators from async functions
 // normally.
-static bool matchFunctionName(string name, const Func* f) {
+static bool matchFunctionName(std::string name, const Func* f) {
   if (f->hasGeneratorAsBody() && !f->isAsync()) return false; // Original func
   auto funcName = f->name()->data();
   if (!f->isGenerator() || f->isAsync()) {
     return name == funcName;
   } else {
-    DEBUG_ONLY string s(funcName);
-    assert(s.compare(s.length() - 13, string::npos, "$continuation") == 0);
-    return name.compare(0, string::npos, funcName, strlen(funcName) - 13) == 0;
+    DEBUG_ONLY std::string s(funcName);
+    assert(s.compare(s.length() - 13, std::string::npos, "$continuation") == 0);
+    return name.compare(0, std::string::npos, funcName,
+      strlen(funcName) - 13) == 0;
   }
 }
 
@@ -209,7 +207,7 @@ static bool matchFunctionName(string name, const Func* f) {
 // function, arrange for the VM to stop execution and notify the debugger
 // whenever execution enters the given function.
 static void addBreakPointFuncEntry(Eval::DebuggerProxy* proxy, const Func* f) {
-  Eval::BreakPointInfoPtrVec bps;
+  std::vector<Eval::BreakPointInfoPtr> bps;
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];
@@ -231,7 +229,7 @@ static void addBreakPointsClass(Eval::DebuggerProxy* proxy, const Class* cls) {
   if (numFuncs == 0) return;
   auto clsName = cls->name();
   auto funcs = cls->methods();
-  Eval::BreakPointInfoPtrVec bps;
+  std::vector<Eval::BreakPointInfoPtr> bps;
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];
@@ -252,9 +250,9 @@ void phpAddBreakPoint(const Unit* unit, Offset offset) {
   PC pc = unit->at(offset);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (transl()->addDbgBLPC(pc)) {
+    if (tx64->addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!transl()->addDbgGuards(unit)) {
+      if (!tx64->addDbgGuards(unit)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
       // In this case, we may be setting a breakpoint in a tracelet which could
@@ -311,7 +309,7 @@ void phpDebuggerDefFuncHook(const Func* func) {
 // Since this intended to be called when user input is received, it is not
 // performance critical. Also, in typical scenarios, the list is short.
 void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
-  Eval::BreakPointInfoPtrVec bps;
+  std::vector<Eval::BreakPointInfoPtr> bps;
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];

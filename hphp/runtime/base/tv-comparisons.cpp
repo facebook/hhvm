@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/ext/ext_datetime.h"
 
 namespace HPHP {
 
@@ -319,9 +320,21 @@ struct Eq {
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
     if (od1 == od2) return true;
-    if (od1->getVMClass() != od2->getVMClass()) return false;
     if (od1->isCollection()) {
       return collectionEquals(od1, od2);
+    }
+    if (od1->getVMClass() != od2->getVMClass()) return false;
+    if (UNLIKELY(od1->instanceof(SystemLib::s_ArrayObjectClass))) {
+      // Compare the whole object, not just the array representation
+      Array ar1(ArrayData::Create());
+      Array ar2(ArrayData::Create());
+      od1->o_getArray(ar1, false);
+      od2->o_getArray(ar2, false);
+      return ar1->equal(ar2.get(), false);
+    }
+    if (UNLIKELY(od1->instanceof(c_DateTime::classof()))) {
+      return static_cast<const c_DateTime*>(od1)->gettimestamp() ==
+             static_cast<const c_DateTime*>(od2)->gettimestamp();
     }
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
@@ -356,6 +369,10 @@ struct Lt {
       throw_collection_compare_exception();
     }
     if (od1 == od2) return false;
+    if (UNLIKELY(od1->instanceof(c_DateTime::classof()))) {
+      return static_cast<const c_DateTime*>(od1)->gettimestamp() <
+             static_cast<const c_DateTime*>(od2)->gettimestamp();
+    }
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
     return (*this)(ar1.get(), ar2.get());
@@ -392,6 +409,10 @@ struct Gt {
       throw_collection_compare_exception();
     }
     if (od1 == od2) return false;
+    if (UNLIKELY(od1->instanceof(c_DateTime::classof()))) {
+      return static_cast<const c_DateTime*>(od1)->gettimestamp() >
+             static_cast<const c_DateTime*>(od2)->gettimestamp();
+    }
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
     return (*this)(ar1.get(), ar2.get());
@@ -460,16 +481,10 @@ bool tvSame(TypedValue tv1, TypedValue tv2) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * XXX: HOT_FUNC selections are basically whatever random choices were
- * in the old code ... we should probably re-evaluate this.
- */
-
 bool cellEqual(Cell cell, bool val) {
   return cellRelOp(Eq(), cell, val);
 }
 
-HOT_FUNC
 bool cellEqual(Cell cell, int64_t val) {
   return cellRelOp(Eq(), cell, val);
 }
@@ -498,7 +513,6 @@ bool cellEqual(Cell c1, Cell c2) {
   return cellRelOp(Eq(), c1, c2);
 }
 
-HOT_FUNC
 bool tvEqual(TypedValue tv1, TypedValue tv2) {
   return tvRelOp(Eq(), tv1, tv2);
 }
@@ -535,7 +549,6 @@ bool cellLess(Cell c1, Cell c2) {
   return cellRelOp(Lt(), c1, c2);
 }
 
-HOT_FUNC
 bool tvLess(TypedValue tv1, TypedValue tv2) {
   return tvRelOp(Lt(), tv1, tv2);
 }
@@ -544,7 +557,6 @@ bool cellGreater(Cell cell, bool val) {
   return cellRelOp(Gt(), cell, val);
 }
 
-//NB: was HOT_FUNC in old code ... dunno if this makes sense anymore.
 bool cellGreater(Cell cell, int64_t val) {
   return cellRelOp(Gt(), cell, val);
 }
@@ -606,4 +618,3 @@ bool cellGreaterOrEqual(Cell c1, Cell c2) {
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -39,7 +39,7 @@ namespace HPHP   {
  */
 inline Cell*&  vmsp() { return (Cell*&)g_vmContext->m_stack.top(); }
 inline Cell*&  vmfp() { return (Cell*&)g_vmContext->m_fp; }
-inline const uchar*& vmpc() { return g_vmContext->m_pc; }
+inline const unsigned char*& vmpc() { return g_vmContext->m_pc; }
 inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
 
 inline ActRec* liveFrame()    { return (ActRec*)vmfp(); }
@@ -56,19 +56,6 @@ inline Offset liveSpOff() {
 }
 
 namespace JIT {
-
-enum class Arch {
-  X64,
-  ARM,
-};
-
-inline Arch arch() {
-  return RuntimeOption::EvalSimulateARM ? Arch::ARM : Arch::X64;
-}
-
-}
-
-namespace Transl {
 
 inline uintptr_t tlsBase() {
   uintptr_t retval;
@@ -98,7 +85,7 @@ struct VMRegAnchor : private boost::noncopyable {
   VMRegAnchor() {
     Util::assert_native_stack_aligned();
     m_old = tl_regState;
-    Translator::Get()->sync();
+    g_translator->sync();
   }
   explicit VMRegAnchor(ActRec* ar) {
     // Some C++ entry points have an ActRec prepared from after a call
@@ -127,7 +114,7 @@ struct EagerVMRegAnchor {
     if (debug) {
       DEBUG_ONLY const Cell* fp = vmfp();
       DEBUG_ONLY const Cell* sp = vmsp();
-      DEBUG_ONLY const uchar* pc = vmpc();
+      DEBUG_ONLY const auto* pc = vmpc();
       VMRegAnchor _;
       assert(vmfp() == fp && vmsp() == sp && vmpc() == pc);
     }
@@ -183,8 +170,8 @@ struct CallerFrame : public VMRegAnchor {
 };
 
 #define SYNC_VM_REGS_SCOPED() \
-  HPHP::Transl::VMRegAnchor _anchorUnused
+  HPHP::JIT::VMRegAnchor _anchorUnused
 
-} } // HPHP::Transl
+} } // HPHP::JIT
 
 #endif

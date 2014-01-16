@@ -82,9 +82,6 @@ Simulator::Simulator(Decoder* decoder, std::ostream& stream)
   print_disasm_ = new PrintDisassembler(stream_);
   coloured_trace_ = false;
   disasm_trace_ = false;
-
-  // Set the sample period to 10, as the VIXL examples and tests are short.
-  instrumentation_ = new Instrument("vixl_stats.csv", 10);
 }
 
 
@@ -113,9 +110,6 @@ Simulator::~Simulator() {
   // The decoder may outlive the simulator.
   decoder_->RemoveVisitor(print_disasm_);
   delete print_disasm_;
-
-  decoder_->RemoveVisitor(instrumentation_);
-  delete instrumentation_;
 }
 
 
@@ -2080,8 +2074,7 @@ void Simulator::DoPrintf(Instruction* instr) {
     result = printf(format, x1(), x2(), x3(), x4(), x5(), x6(), x7());
   } else if (type == CPURegister::kFPRegister) {
     result = printf(format, d0(), d1(), d2(), d3(), d4(), d5(), d6(), d7());
-  } else {
-    assert(type == CPURegister::kNoRegister);
+  } else if (type == CPURegister::kInvalid) {
     result = printf("%s", format);
   }
   set_x0(result);
@@ -2147,11 +2140,14 @@ void Simulator::DoHostCall(Instruction* instr) {
   }
 
   // Trash all caller-saved registers
-  auto callerSaved = CPURegList::GetCallerSaved();
-  while (!callerSaved.IsEmpty()) {
-    auto reg = callerSaved.PopLowestIndex();
-    set_xreg(reg.code(), 0xf00dbeef);
+  for (auto code = 1; code < kFirstCalleeSavedRegisterIndex; code++) {
+    // Add the code to the magic number to leave a clue as to where a bogus
+    // value may have come from
+    set_xreg(code, 0xf00dbeeff00dbeef + code);
   }
+
+  // The link register, also caller-saved
+  set_xreg(30, 0xf00dbeeff00dbeef + 30);
 
   set_xreg(0, result);
 

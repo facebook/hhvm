@@ -139,6 +139,8 @@ function get_options($argv) {
     'args:' => 'a:',
     'log' => 'l',
     'failure-file:' => '',
+    'arm' => '',
+    'hhas-round-trip' => '',
   );
   $options = array();
   $files = array();
@@ -164,6 +166,12 @@ function get_options($argv) {
       $files[] = $arg;
     }
   }
+
+  if (isset($options['repo']) && isset($options['hhas-round-trip'])) {
+    echo "repo and hhas-round-trip are mutually exclusive options\n";
+    exit(1);
+  }
+
   return array($options, $files);
 }
 
@@ -204,7 +212,7 @@ function find_tests($files, array $options = null) {
   }
   $files = implode(' ', $files);
   $tests = explode("\n", shell_exec(
-      "find $files -name '*.php' -o -name '*.hhas'"
+      "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
   ));
   if (!$tests) {
     error(usage());
@@ -305,12 +313,16 @@ function hhvm_cmd($options, $test, $test_run = null) {
     mode_cmd($options),
     '-vEval.EnableArgsInBacktraces=true',
     read_file(find_test_ext($test, 'opts')),
+    isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
     extra_args($options),
     '-vResourceLimit.CoreFileSize=0',
     '--file',
     escapeshellarg($test_run),
     $use_automain ? escapeshellarg($test) : ''
   ));
+  if (file_exists($test.'.ini')) {
+    $cmd .= " -vServer.IniFile=$test.ini";
+  }
   $env = $_ENV;
   $in = find_test_ext($test, 'in');
   if ($in !== null) {
@@ -361,7 +373,7 @@ class Status {
         if (self::hasColor()) {
           print "$test \033[1;32mpassed\033[0m\n";
         } else {
-          print "$test passed";
+          print "$test passed\n";
         }
         break;
       case self::MODE_FBMAKE:
@@ -383,7 +395,7 @@ class Status {
         if (self::hasColor()) {
           print "$test \033[1;33mskipped\033[0m\n";
         } else {
-          print "$test skipped";
+          print "$test skipped\n";
         }
         break;
       case self::MODE_FBMAKE:
@@ -396,11 +408,11 @@ class Status {
     array_push(self::$results, array(
         'name' => $test,
         'status' => 'failed',
-        'details' => @file_get_contents("$test.diff")
+        'details' => (string)@file_get_contents("$test.diff")
     ));
     switch (self::$mode) {
       case self::MODE_NORMAL:
-        $diff = @file_get_contents($test.'.diff');
+        $diff = (string)@file_get_contents($test.'.diff');
         if (self::hasColor()) {
           print "\n\033[0;31m$test\033[0m\n$diff";
         } else {
@@ -424,7 +436,7 @@ class Status {
     $start = array('op' => 'start', 'test' => $test);
     $end = array('op' => 'test_done', 'test' => $test, 'status' => $status);
     if ($status == 'failed') {
-      $end['details'] = @file_get_contents("$test.diff");
+      $end['details'] = (string)@file_get_contents("$test.diff");
     }
     self::say($start, $end);
   }
@@ -436,13 +448,23 @@ class Status {
   /** Output is in the format expected by JsonTestRunner. */
   public static function say(/* ... */) {
     $data = array_map(function($row) {
-      return json_encode($row, JSON_UNESCAPED_SLASHES) . "\n";
+      return self::jsonEncode($row) . "\n";
     }, func_get_args());
     fwrite(STDERR, implode("", $data));
   }
 
   private static function hasColor() {
     return posix_isatty(STDOUT);
+  }
+
+  public static function jsonEncode($data) {
+    // JSON_UNESCAPED_SLASHES is Zend 5.4+
+    if (defined("JSON_UNESCAPED_SLASHES")) {
+      return json_encode($data, JSON_UNESCAPED_SLASHES);
+    }
+
+    $json = json_encode($data);
+    return str_replace('\\/', '/', $json);
   }
 }
 
@@ -484,8 +506,14 @@ function skip_test($options, $test) {
   return (bool)strlen($out);
 }
 
-function run_test($options, $test) {
+function dump_hhas_to_temp($hhvm_cmd, $test) {
+  $tmp_file = $test . '.round_trip.hhas';
+  system("$hhvm_cmd -vEval.DumpHhas=1 > $tmp_file", $ret);
+  if ($ret) { echo "system failed\n"; exit(1); }
+  return $tmp_file;
+}
 
+function run_test($options, $test) {
   if (skip_test($options, $test)) {
     return 'skip';
   }
@@ -510,6 +538,11 @@ function run_test($options, $test) {
     }
   }
 
+  if (isset($options['hhas-round-trip'])) {
+    $hhas_temp = dump_hhas_to_temp($hhvm, $test);
+    list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
+  }
+
   $descriptorspec = array(
      0 => array("pipe", "r"),
      1 => array("pipe", "w"),
@@ -527,7 +560,7 @@ function run_test($options, $test) {
   }
 
   fclose($pipes[0]);
-  $output .= stream_get_contents($pipes[1]);
+  $output .= trim(stream_get_contents($pipes[1]));
   file_put_contents("$test.out", $output);
   fclose($pipes[1]);
 
@@ -551,13 +584,15 @@ function run_test($options, $test) {
 
   if (file_exists("$test.expect")) {
     $diff_cmds = "--text -u";
-    exec("diff --text -u $test.expect $test.out > $test.diff 2>&1",
+    file_put_contents("$test.expect-trimmed",
+                      trim(file_get_contents("$test.expect")));
+    exec("diff --text -u $test.expect-trimmed $test.out > $test.diff 2>&1",
          $_, $status);
     // unix 0 == success
+    unlink("$test.expect-trimmed");
     return !$status;
-
   } else if (file_exists("$test.expectf")) {
-    $wanted_re = file_get_contents("$test.expectf");
+    $wanted_re = trim(file_get_contents("$test.expectf"));
 
     // do preg_quote, but miss out any %r delimited sections
     $temp = "";
@@ -633,7 +668,7 @@ function run_test($options, $test) {
     return preg_match("/^$wanted_re\$/s", $output);
 
   } else if (file_exists("$test.expectregex")) {
-    $wanted_re = file_get_contents("$test.expectregex");
+    $wanted_re = trim(file_get_contents("$test.expectregex"));
 
     # a poor man's aide for debugging
     shell_exec("diff --text -u $test.expectregex $test.out > $test.diff 2>&1");
@@ -658,6 +693,25 @@ function num_cpus() {
       return exec('sysctl -n hw.ncpu');
   }
   return 2; // default when we don't know how to detect
+}
+
+function make_header($str) {
+  return "\n\033[0;33m".$str."\033[0m\n";
+}
+
+function print_commands($tests, $options) {
+  print make_header("Run these by hand:");
+
+  foreach ($tests as $test) {
+    list($command, $_) = hhvm_cmd($options, $test);
+    if (isset($options['repo'])) {
+      $command .= " -vRepo.Authoritative=true ";
+      $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc",
+                             $command);
+      $command = hphp_cmd($options, $test)."\n".$command."\n";
+    }
+    print "$command\n";
+  }
 }
 
 function main($argv) {
@@ -738,6 +792,9 @@ function main($argv) {
          ^^^^      ^^^
 SHIP
 ."\n";
+      if (isset($options['verbose'])) {
+        print_commands($tests, $options);
+      }
     } else {
       $failed = array();
       foreach ($results as $result) {
@@ -746,11 +803,9 @@ SHIP
         }
       }
       asort($failed);
-      $header_start = "\n\033[0;33m";
-      $header_end = "\033[0m\n";
       print "\n".count($failed)." tests failed\n";
 
-      print $header_start."See the diffs:".$header_end.
+      print make_header("See the diffs:").
         implode("\n", array_map(
           function($test) { return 'cat '.$test.'.diff'; },
         $failed))."\n";
@@ -762,26 +817,14 @@ SHIP
       print $header_start.'For xargs, list of failures is available using:'.
         $header_end.'cat '.$failing_tests_file."\n";
 
-      print $header_start."Run these by hand:".$header_end;
+      print_commands($failed, $options);
 
-      foreach ($failed as $test) {
-        list($command, $_) = hhvm_cmd($options, $test);
-        if (isset($options['repo'])) {
-          $command .= " -vRepo.Authoritative=true ";
-          $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc",
-                                 $command);
-          $command = hphp_cmd($options, $test)."\n".$command."\n";
-        }
-        print "$command\n";
-      }
-
-      print $header_start."Re-run just the failing tests:".$header_end.
+      print make_header("Re-run just the failing tests:").
             $argv[0].' '.implode(' ', $failed)."\n";
 
       if (idx($options, 'mode') == 'automain') {
-        print $header_start
-          .'Automain caveat: wrapper script may change semantics'
-          .$header_end;
+        print header_start(
+          'Automain caveat: wrapper script may change semantics');
         print 'The automain wrapper script ('.__DIR__.'/pseudomain_wrapper.php)'
           .' may have changed behavior'."\n"
           .'(e.g. extra frames in backtraces) by moving code from '

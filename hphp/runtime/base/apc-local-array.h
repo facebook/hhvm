@@ -17,25 +17,27 @@
 #ifndef incl_HPHP_APC_LOCAL_ARRAY_H_
 #define incl_HPHP_APC_LOCAL_ARRAY_H_
 
-#include "hphp/runtime/base/apc-variant.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/apc-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
+class APCArray;
+
+/*
  * Wrapper for APCArray. It is what gets returned when an array is fetched
  * via APC. It has a pointer to the APCArray that it represents and it may
  * cache values locally depending on the type accessed and/or the operation.
  */
 class APCLocalArray : public ArrayData, Sweepable {
-  explicit APCLocalArray(APCVariant* source)
+  explicit APCLocalArray(APCArray* source)
     : ArrayData(kSharedKind)
     , m_arr(source)
     , m_localCache(nullptr) {
-    m_size = m_arr->arrSize();
+    m_size = m_arr->size();
     source->incRef();
   }
 
@@ -48,7 +50,11 @@ public:
       APCLocalArray(std::forward<Args>(args)...);
   }
 
-  static APCVariant *GetSharedVariant(const ArrayData* ad);
+  static APCHandle *GetAPCHandle(const ArrayData* ad) {
+    auto a = asSharedArray(ad);
+    if (a->m_arr->shouldCache()) return nullptr;
+    return a->m_arr->getHandle();
+  }
 
   // these using directives ensure the full set of overloaded functions
   // are visible in this class, to avoid triggering implicit conversions
@@ -66,7 +72,9 @@ public:
   }
 
   CVarRef getValueRef(ssize_t pos) const;
-  static CVarRef GetValueRef(const ArrayData* ad, ssize_t pos);
+  static CVarRef GetValueRef(const ArrayData* ad, ssize_t pos) {
+    return asSharedArray(ad)->getValueRef(pos);
+  }
 
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
@@ -92,7 +100,7 @@ public:
   static ArrayData* Append(ArrayData* a, CVarRef v, bool copy);
   static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
-  static ArrayData* Plus(ArrayData*, const ArrayData *elems);
+  static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
   static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
 
@@ -104,6 +112,12 @@ public:
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
 
   static bool IsVectorData(const ArrayData* ad);
+
+  ssize_t iterAdvanceImpl(ssize_t prev) const {
+    assert(prev >= 0 && prev < m_size);
+    ssize_t next = prev + 1;
+    return next < m_size ? next : invalid_index;
+  }
 
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
@@ -124,12 +138,23 @@ public:
 private:
   ssize_t getIndex(int64_t k) const;
   ssize_t getIndex(const StringData* k) const;
-  static APCLocalArray* asSharedArray(ArrayData* ad);
-  static const APCLocalArray* asSharedArray(const ArrayData* ad);
+
+  static APCLocalArray* asSharedArray(ArrayData* ad) {
+    assert(ad->kind() == kSharedKind);
+    return static_cast<APCLocalArray*>(ad);
+  }
+
+  static const APCLocalArray* asSharedArray(const ArrayData* ad) {
+    assert(ad->kind() == kSharedKind);
+    return static_cast<const APCLocalArray*>(ad);
+  }
+
+  ArrayData* loadElems() const;
 
 public:
   void getChildren(std::vector<TypedValue *> &out);
-  APCVariant *m_arr;
+
+  APCArray *m_arr;
   mutable TypedValue* m_localCache;
 };
 

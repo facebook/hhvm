@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdAbort);
 class CmdAbort : public DebuggerCommand {
 public:
   CmdAbort() : DebuggerCommand(KindOfAbort) {}

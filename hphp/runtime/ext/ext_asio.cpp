@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {

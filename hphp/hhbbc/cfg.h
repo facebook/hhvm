@@ -73,6 +73,13 @@ inline bool ends_with_unwind(const php::Block& b) {
 }
 
 /*
+ * Returns whether a block consists of a single Nop instruction.
+ */
+inline bool is_single_nop(const php::Block& b) {
+  return b.hhbcs.size() == 1 && b.hhbcs.back().op == Op::Nop;
+}
+
+/*
  * Call a function for every jump target of a given bytecode.  If the
  * bytecode has no targets, the function is not called.
  */
@@ -95,11 +102,22 @@ void forEachTakenEdge(const T& op, Fun f) {
  *
  * Order unspecified, and the types of successor edges are not
  * distinguished.
+ *
+ * Factored exit edges are traversed only if the block consists of
+ * more than a single Nop instruction.  The order_blocks routine in
+ * emit.cpp relies on this for correctness: if the only block for a
+ * protected fault region is empty, we need to not include the fault
+ * funclet blocks as reachable, or we can end up with fault funclet
+ * handlers without an EHEnt pointing at them.  In cases other than
+ * emit.cpp, this is not required for correctness, but is slightly
+ * better than always traversing the factored exit edges.
  */
 template<class Fun>
 void forEachSuccessor(const php::Block& block, Fun f) {
-  forEachTakenEdge(block.hhbcs.back(), f);
-  for (auto& ex : block.factoredExits) f(*ex);
+  if (!is_single_nop(block)) {
+    forEachTakenEdge(block.hhbcs.back(), f);
+    for (auto& ex : block.factoredExits) f(*ex);
+  }
   if (block.fallthrough) f(*block.fallthrough);
 }
 
@@ -122,9 +140,12 @@ void forEachNormalSuccessor(const php::Block& block, Fun f) {
 std::vector<borrowed_ptr<php::Block>> rpoSortFromMain(const php::Func&);
 
 /*
- * Obtain the blocks for a function in a reverse post order, starting
- * from the main entry point, and prepend each of the DV entry blocks
- * in parameter order.
+ * Obtain the blocks for a function in a reverse post order, taking
+ * into account all entry points.
+ *
+ * This can be thought of as an RPO on the CFG of Func starting from a
+ * virtual empty "entry" block, with edges to each DV entry point and
+ * an edge to the main entry point.
  */
 std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func&);
 

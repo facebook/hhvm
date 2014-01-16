@@ -15,11 +15,13 @@
 */
 #include "hphp/runtime/vm/jit/tracelet.h"
 
+#include <iostream>
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 Tracelet::Tracelet() :
     m_stackChange(0),
@@ -102,4 +104,4 @@ const Func* Tracelet::func() const {
   return m_sk.func();
 }
 
-} } // HPHP::Transl
+} } // HPHP::JIT

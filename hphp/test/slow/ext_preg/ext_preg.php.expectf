@@ -18,6 +18,22 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+HipHop Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 198
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 202
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 205
+bool(true)
+bool(true)
+HipHop Warning: Parameter mismatch, pattern is a string while replacement is an array in %s/test/slow/ext_preg/ext_preg.php on line 208
+bool(true)
+HipHop Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 209
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)

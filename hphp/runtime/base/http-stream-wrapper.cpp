@@ -60,8 +60,15 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
     }
     Array headers;
     if (opts.exists(s_header)) {
-      Array lines = StringUtil::Explode(
-        opts[s_header].toString(), "\r\n").toArray();
+
+      Array lines;
+      if (opts[s_header].isString()) {
+        lines = StringUtil::Explode(
+          opts[s_header].toString(), "\r\n").toArray();
+      } else if (opts[s_header].isArray()) {
+        lines = opts[s_header];
+      }
+
       for (ArrayIter it(lines); it; ++it) {
         Array parts = StringUtil::Explode(
           it.second().toString(), ": ").toArray();

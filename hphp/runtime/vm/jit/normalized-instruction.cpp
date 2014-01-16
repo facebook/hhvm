@@ -19,25 +19,36 @@
 #include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 NormalizedInstruction::NormalizedInstruction()
     : next(nullptr)
     , prev(nullptr)
+    , source()
     , funcd(nullptr)
+    , funcName(nullptr)
+    , m_unit(nullptr)
     , outStack(nullptr)
     , outLocal(nullptr)
     , outLocal2(nullptr)
     , outStack2(nullptr)
     , outStack3(nullptr)
     , outPred(Type::Gen)
+    , immVec()
+    , calleeTrace(nullptr)
     , checkedInputs(0)
+    , stackOffset(0)
+    , sequenceNum(0)
+    , nextOffset(0)
+    , breaksTracelet(false)
+    , changesPC(false)
+    , fuseBranch(false)
+    , preppedByRef(false)
     , outputPredicted(false)
     , outputPredictionStatic(false)
     , ignoreInnerType(false)
     , guardedThis(false)
     , guardedCls(false)
-    , noSurprise(false)
     , noOp(false)
     , interp(false)
     , inlineReturn(false) {
@@ -130,4 +141,4 @@ bool NormalizedInstruction::isAnyOutputUsed() const
           isOutputUsed(outLocal));
 }
 
-} } // HPHP::Transl
+} } // HPHP::JIT

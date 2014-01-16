@@ -26,7 +26,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-array.h"
@@ -429,8 +429,8 @@ class Variant : private TypedValue {
   }
 
   ALWAYS_INLINE const Resource& asCResRef() const {
-    assert(m_type == KindOfResource && m_data.pobj);
-    return *reinterpret_cast<const Resource*>(&m_data.pobj);
+    assert(m_type == KindOfResource && m_data.pres);
+    return *reinterpret_cast<const Resource*>(&m_data.pres);
   }
 
   ALWAYS_INLINE Resource & asResRef() {
@@ -720,9 +720,9 @@ class Variant : private TypedValue {
                    Uns::Mode mode = Uns::Mode::Value);
 
   /**
-   * Get the wrapped APCVariant, if any.
+   * Get the wrapped APCHandle, if any.
    */
-  APCVariant *getSharedVariant() const;
+  APCHandle *getAPCHandle() const;
 
   /*
    * Print information about a variant to stdout.  For debugging
@@ -1299,7 +1299,7 @@ public:
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
     assert(v && v->isStatic());
-    init(KindOfString);
+    init(KindOfStaticString);
     m_data.pstr = const_cast<StringData*>(v);
   }
   explicit VarNR(ArrayData *v);

@@ -1,0 +1,13 @@
+string(60) "<?php // zip-based phar archive stub file
+__HALT_COMPILER();"
+string(200) "<?php
+function __autoload($class)
+{
+    include 'phar://' . str_replace('_', '/', $class);
+}
+Phar::mapPhar('brandnewphar.phar');
+include 'phar://brandnewphar.phar/startup.php';
+__HALT_COMPILER(); ?>
+"
+bool(true)
+===DONE===

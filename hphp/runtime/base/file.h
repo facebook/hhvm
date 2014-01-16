@@ -98,7 +98,8 @@ public:
    */
   virtual int64_t readImpl(char *buffer, int64_t length) = 0;
   virtual int getc();
-  virtual String read(int64_t length = 0);
+  virtual String read(int64_t length);
+  virtual String read();
 
   /**
    * Write one chunk of output. Returns bytes written.
@@ -158,7 +159,7 @@ public:
    * Read one line of csv record.
    */
   Array readCSV(int64_t length = 0, char delimiter = ',', char enclosure = '"',
-                char escape = '\\');
+                char escape = '\\', const String* initial = nullptr);
 
   /**
    * Return the last error we know about

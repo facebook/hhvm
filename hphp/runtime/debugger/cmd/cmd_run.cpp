@@ -30,7 +30,7 @@ void CmdRun::sendImpl(DebuggerThriftBuffer &thrift) {
 void CmdRun::recvImpl(DebuggerThriftBuffer &thrift) {
   TRACE(2, "CmdRun::recvImpl\n");
   DebuggerCommand::recvImpl(thrift);
-  m_args = StringVecPtr(new StringVec());
+  m_args = std::make_shared<std::vector<std::string>>();
   thrift.read(*m_args);
 }
 
@@ -62,7 +62,8 @@ void CmdRun::onClient(DebuggerClient &client) {
   TRACE(2, "CmdRun::onClient\n");
   if (DebuggerCommand::displayedHelp(client)) return;
 
-  m_args = StringVecPtr(client.args(), null_deleter());
+  m_args = std::shared_ptr<std::vector<std::string>>(client.args(),
+    [] (const void*) {});
   client.sendToServer(this);
   client.clearCachedLocal();
   client.setFrame(0);

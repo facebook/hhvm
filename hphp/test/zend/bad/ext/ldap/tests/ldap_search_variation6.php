@@ -23,7 +23,7 @@ var_dump(
 	ldap_get_entries($link, $result[1])
 );
 ?>
-===DONE===?>
+===DONE===
 <?php
 include "connect.inc";
 

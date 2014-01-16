@@ -17,22 +17,35 @@
 #ifndef incl_HPHP_RUNTIME_OPTION_H_
 #define incl_HPHP_RUNTIME_OPTION_H_
 
+#include <unordered_map>
+#include <vector>
+#include <string>
+#include <map>
+#include <set>
+
 #include <boost/container/flat_set.hpp>
-#include "hphp/runtime/server/files-match.h"
-#include "hphp/runtime/server/satellite-server.h"
-#include "hphp/runtime/server/virtual-host.h"
+
+#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/functional.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class AccessLogFileData;
+struct VirtualHost;
+struct IpBlockMap;
+struct SatelliteServerInfo;
+struct FilesMatch;
+struct Hdf;
+
 /**
  * Configurable options set from command line or configurable file at startup
  * time.
  */
 class RuntimeOption {
 public:
-  static void Load(Hdf &config, StringVec *overwrites = nullptr,
+  static void Load(Hdf& config,
+                   std::vector<std::string>* overwrites = nullptr,
                    bool empty = false);
 
   static bool Loaded;
@@ -78,6 +91,7 @@ public:
   static bool AssertWarning;
   static int NoticeFrequency; // output 1 out of NoticeFrequency notices
   static int WarningFrequency;
+  static int RaiseDebuggingFrequency;
   static int64_t SerializationSizeLimit;
   static int64_t StringOffsetLimit;
 
@@ -159,9 +173,11 @@ public:
   static std::string DefaultCharsetName;
   static bool ForceServerNameToHeader;
   static bool EnableCufAsync;
-  static VirtualHostPtrVec VirtualHosts;
-  static IpBlockMapPtr IpBlocks;
-  static SatelliteServerInfoPtrVec SatelliteServerInfos;
+  static bool PathDebug;
+  static std::vector<std::shared_ptr<VirtualHost>> VirtualHosts;
+  static std::shared_ptr<IpBlockMap> IpBlocks;
+  static std::vector<std::shared_ptr<SatelliteServerInfo>>
+         SatelliteServerInfos;
 
   // If a request has a body over this limit, switch to on-demand reading.
   // -1 for no limit.
@@ -201,7 +217,6 @@ public:
   static std::string ErrorDocument500;
   static std::string FatalErrorMessage;
   static std::string FontPath;
-  static bool EnableStaticContentCache;
   static bool EnableStaticContentFromDisk;
   static bool EnableOnDemandUncompress;
   static bool EnableStaticContentMMap;
@@ -222,7 +237,7 @@ public:
   static hphp_string_imap<std::string> PhpFileExtensions;
   static std::set<std::string> ForbiddenFileExtensions;
   static std::set<std::string> StaticFileGenerators;
-  static FilesMatchPtrVec FilesMatches;
+  static std::vector<std::shared_ptr<FilesMatch>> FilesMatches;
 
   static bool WhitelistExec;
   static bool WhitelistExecWarningOnly;
@@ -334,9 +349,9 @@ public:
   static bool EnableInstructionCounts;
   static bool CheckSymLink;
   static int MaxUserFunctionId;
-  static bool EnableFinallyStatement;
   static bool EnableArgsInBacktraces;
   static bool EnableZendCompat;
+  static bool TimeoutsUseWallTime;
 
   static int GetScannerType();
 
@@ -357,7 +372,14 @@ public:
   F(uint32_t, VMInitialGlobalTableSize,                                 \
     kEvalVMInitialGlobalTableSizeDefault)                               \
   F(bool, Jit,                         evalJitDefault())                \
+  F(bool, SimulateARM,                 simulateARMDefault())            \
   F(bool, JitRequireWriteLease,        false)                           \
+  F(uint64_t, JitAHotSize,             4 << 20)                         \
+  F(uint64_t, JitASize,                60 << 20)                        \
+  F(uint64_t, JitAMaxUsage,            maxUsageDef())                   \
+  F(uint64_t, JitAProfSize,            64 << 20)                        \
+  F(uint64_t, JitAStubsSize,           64 << 20)                        \
+  F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(bool, AllowHhas,                   false)                           \
   F(bool, CheckExtendedTypeHints,      true)                            \
   F(bool, JitNoGdb,                    true)                            \
@@ -372,15 +394,16 @@ public:
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHeapAcrossRequests,   false)                           \
   F(bool, ProfileHWEnable,             true)                            \
-  F(string, ProfileHWEvents,           string(""))                      \
+  F(string, ProfileHWEvents,      std::string(""))                      \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(uint32_t, JitMaxTranslations,      12)                              \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(bool, JitTrampolines,              true)                            \
-  F(string, JitProfilePath,            string(""))                      \
+  F(string, JitProfilePath,       std::string(""))                      \
   F(bool, JitTypePrediction,           true)                            \
   F(int32_t, JitStressTypePredPercent, 0)                               \
   F(uint32_t, JitWarmupRequests,       kDefaultWarmupRequests)          \
+  F(uint32_t, JitProfileRequests,      kDefaultProfileRequests)         \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitStressLease,              false)                           \
@@ -390,11 +413,12 @@ public:
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitTransCounters,            false)                           \
-  F(bool, HHIRGenericDtorHelper,       true)                            \
   F(bool, HHIRCse,                     true)                            \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRJumpOpts,                true)                            \
+  F(bool, HHIRRefcountOpts,            true)                            \
+  F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
   F(bool, HHIRExtraOptPass,            true)                            \
   F(uint32_t, HHIRNumFreeRegs,         -1)                              \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
@@ -402,34 +426,36 @@ public:
   F(uint32_t, HHIRAlwaysInlineMaxCost, 10)                              \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
-  F(bool, HHIREnableRefCountOpt,       true)                            \
-  F(bool, HHIREnableSinking,           true)                            \
+  F(bool, HHIRInlineFrameOpts,         false)                           \
   F(bool, HHIRGenerateAsserts,         debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   /* Register allocation flags */                                       \
-  F(bool, HHIRXls,                     false)                           \
+  F(bool, HHIRXls,                     xlsDefault())                    \
   F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
-  F(bool, HHIRAllocXMMRegs,            true)                            \
+  F(bool, HHIRAllocSIMDRegs,           true)                            \
   /* Region compiler flags */                                           \
-  F(string,   JitRegionSelector,       regionSelectorDefault())         \
-  F(bool,     JitPGO,                  false)                           \
+  F(bool,     JitPGO,                  pgoDefault())                    \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   F(bool,     JitPGOUsePostConditions, true)                            \
+  F(string,   JitRegionSelector,       regionSelectorDefault())         \
+  F(uint32_t, HotFuncThreshold,        10)                              \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
   F(bool, HHBCRelaxGuards,             hhbcRelaxGuardsDefault())        \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
+  F(bool, DumpHhas,                    false)                           \
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpTCAnchors,               false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   hugePagesSoundNice())            \
+  F(bool, MapHotTextHuge,              hugePagesSoundNice())            \
   F(bool, MapTgtCacheHuge,             false)                           \
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)   \
   F(uint32_t, TCNumHugeHotMB,          16)                              \
@@ -441,12 +467,14 @@ public:
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
-  F(bool, SimulateARM,                 false)                           \
   F(bool, DecRefUsePlainDecl,          true)                            \
   F(bool, DecRefUsePlainDeclWithDestroy,true)                           \
   F(bool, DecRefUseScratch,            false)                           \
   /* */
 
+private:
+  using string = std::string;
+public:
 #define F(type, name, unused) \
   static type Eval ## name;
   EVALFLAGS()
@@ -455,13 +483,6 @@ public:
 
   static bool RecordCodeCoverage;
   static std::string CodeCoverageOutputFile;
-
-  // TranslatorX64 allocation options
-  static size_t VMTranslASize;
-  static size_t VMTranslAHotSize;
-  static size_t VMTranslAProfSize;
-  static size_t VMTranslAStubsSize;
-  static size_t VMTranslGDataSize;
 
   // Repo (hhvm bytecode repository) options
   static std::string RepoLocalMode;
@@ -510,6 +531,7 @@ public:
   static bool EnablePregErrorLog;
 
   // pprof/hhprof server options
+  static bool HHProfServerEnabled;
   static int HHProfServerPort;
   static int HHProfServerThreads;
   static int HHProfServerTimeoutSeconds;

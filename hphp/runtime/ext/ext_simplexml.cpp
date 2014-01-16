@@ -127,7 +127,7 @@ static void add_property(Array &properties, xmlNodePtr node, Object value) {
     String sname(name, namelen, CopyString);
 
     if (properties.exists(sname)) {
-      Variant &existing = properties.lval(sname);
+      Variant &existing = properties.lvalAt(sname, AccessFlags::Key);
       if (existing.is(KindOfArray)) {
         existing.append(value);
       } else {
@@ -340,16 +340,18 @@ Variant f_simplexml_load_file(const String& filename,
 ///////////////////////////////////////////////////////////////////////////////
 // SimpleXMLElement
 
-c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
-    ExtObjectDataFlags<ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::UseIsset|
-                       ObjectData::UseUnset|
-                       ObjectData::CallToImpl|
-                       ObjectData::HasClone>(cb),
-      m_root(nullptr), m_node(nullptr), m_is_text(false), m_free_text(false),
-      m_is_attribute(false), m_is_children(false), m_is_property(false),
-      m_is_array(false), m_xpath(nullptr) {
+c_SimpleXMLElement::c_SimpleXMLElement(Class* cb)
+  : ExtObjectDataFlags(cb)
+  , m_root(nullptr)
+  , m_node(nullptr)
+  , m_is_text(false)
+  , m_free_text(false)
+  , m_is_attribute(false)
+  , m_is_children(false)
+  , m_is_property(false)
+  , m_is_array(false)
+  , m_xpath(nullptr)
+{
   m_children = Array::Create();
 }
 
@@ -994,12 +996,20 @@ int64_t c_SimpleXMLElement::t_count() {
   }
   if (m_is_property) {
     int64_t n = 0; Variant var(this);
-    for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
+    for (ArrayIter iter = var.begin(); iter; ++iter) {
       ++n;
     }
     return n;
   }
-  return m_children.toArray().size();
+  int64_t n = 0; Variant var(this);
+  for (ArrayIter iter = var.begin(); iter; ++iter) {
+    if (iter.second().isArray()) {
+      n += iter.second().toArray().size();
+    } else {
+      ++n;
+    }
+  }
+  return n;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1007,13 +1017,16 @@ int64_t c_SimpleXMLElement::t_count() {
 
 bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
   if (index.isInteger()) {
-    int64_t n = 0; int64_t nIndex = index.toInt64(); Variant var(this);
-    for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
-      if (n++ == nIndex) {
-        return true;
+    if (m_is_property || m_is_children) {
+      int64_t n = 0; int64_t nIndex = index.toInt64(); Variant var(this);
+      for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
+        if (n++ == nIndex) {
+          return true;
+        }
       }
     }
-    return false;
+
+    return index.toInt64() == 0;
   }
   return m_attributes.toArray().exists(index);
 }
@@ -1027,9 +1040,12 @@ Variant c_SimpleXMLElement::t_offsetget(CVarRef index) {
           return iter.second();
         }
       }
+    }
+
+    if (index.toInt64() == 0) {
       return this;
     }
-    return m_children[index];
+    return null_variant;
   }
   return m_attributes[index];
 }
@@ -1230,6 +1246,9 @@ void c_LibXMLError::t___construct() {
 ///////////////////////////////////////////////////////////////////////////////
 // libxml
 
+static xmlParserInputBufferPtr
+hphp_libxml_input_buffer(const char *URI, xmlCharEncoding enc);
+
 class xmlErrorVec : public std::vector<xmlError> {
 public:
   ~xmlErrorVec() {
@@ -1249,13 +1268,15 @@ public:
   virtual void requestInit() {
     m_use_error = false;
     m_errors.reset();
-    xmlParserInputBufferCreateFilenameDefault(nullptr);
+    m_entity_loader_disabled = false;
+    xmlParserInputBufferCreateFilenameDefault(hphp_libxml_input_buffer);
   }
   virtual void requestShutdown() {
     m_use_error = false;
     m_errors.reset();
   }
 
+  bool m_entity_loader_disabled;
   bool m_use_error;
   xmlErrorVec m_errors;
 };
@@ -1357,24 +1378,20 @@ bool f_libxml_use_internal_errors(CVarRef use_errors /* = null_variant */) {
   return ret;
 }
 
-void f_libxml_set_streams_context(CResRef streams_context) {
-  throw NotImplementedException(__func__);
-}
-
 static xmlParserInputBufferPtr
-hphp_libxml_input_buffer_noload(const char *URI, xmlCharEncoding enc) {
-  return nullptr;
+hphp_libxml_input_buffer(const char *URI, xmlCharEncoding enc) {
+  if (s_libxml_errors->m_entity_loader_disabled) {
+    return nullptr;
+  }
+  return __xmlParserInputBufferCreateFilename(URI, enc);
 }
 
 bool f_libxml_disable_entity_loader(bool disable /* = true */) {
-  xmlParserInputBufferCreateFilenameFunc old;
+  bool old = s_libxml_errors->m_entity_loader_disabled;
 
-  if (disable) {
-    old = xmlParserInputBufferCreateFilenameDefault(hphp_libxml_input_buffer_noload);
-  } else {
-    old = xmlParserInputBufferCreateFilenameDefault(nullptr);
-  }
-  return (old == hphp_libxml_input_buffer_noload);
+  s_libxml_errors->m_entity_loader_disabled = disable;
+
+  return old;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,11 @@
+int(6683)
+string(200) "<?php
+function __autoload($class)
+{
+    include 'phar://' . str_replace('_', '/', $class);
+}
+Phar::mapPhar('brandnewphar.phar');
+include 'phar://brandnewphar.phar/startup.php';
+__HALT_COMPILER(); ?>
+"
+===DONE===

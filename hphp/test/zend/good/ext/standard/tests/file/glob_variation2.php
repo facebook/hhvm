@@ -26,7 +26,8 @@ var_dump( glob("$dir_name/*"));
 var_dump( glob("$dir_name"));
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/glob_test/file.text");
 rmdir("$file_path/glob_test/");

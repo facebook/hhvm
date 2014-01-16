@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,9 +155,9 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
     return;
   }
 
-  if (m_skippingCreateAsync) {
-    m_skippingCreateAsync = false;
-    stepAfterCreateAsync();
+  if (m_skippingAsyncESuspend) {
+    m_skippingAsyncESuspend = false;
+    stepAfterAsyncESuspend();
     return;
   }
 
@@ -213,11 +214,11 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
     }
     removeLocationFilter();
     return;
-  } else if (fp->m_func->hasGeneratorAsBody() && (op == OpCreateAsync)) {
+  } else if (fp->m_func->hasGeneratorAsBody() && (op == OpAsyncESuspend)) {
     // We need to step over this opcode, then grab the continuation
     // and setup continuation stepping like we do for OpContSuspend.
     TRACE(2, "CmdNext: encountered create async\n");
-    m_skippingCreateAsync = true;
+    m_skippingAsyncESuspend = true;
     m_needsVMInterrupt = true;
     removeLocationFilter();
     return;
@@ -246,26 +247,27 @@ void CmdNext::setupStepCont(ActRec* fp, PC pc) {
   c_Continuation* cont = frame_continuation(fp);
   Offset nextInst = cont->getExecutionOffset(label);
   assert(nextInst != InvalidAbsoluteOffset);
-  m_stepContTag = cont;
+  m_stepContTag = cont->actRec();
   TRACE(2, "CmdNext: patch for cont step at '%s' offset %d\n",
         fp->m_func->fullName()->data(), nextInst);
   m_stepCont = StepDestination(fp->m_func->unit(), nextInst);
 }
 
-// A CreateAsync is used in the codegen for an async function to setup
+// A AsyncESuspend is used in the codegen for an async function to setup
 // a Continuation and return a wait handle so execution can continue
-// later. We have just completed a CreateAsync, so the new
+// later. We have just completed a AsyncESuspend, so the new
 // Continuation is available, and it can predict where execution will
 // resume.
-void CmdNext::stepAfterCreateAsync() {
+void CmdNext::stepAfterAsyncESuspend() {
   auto topObj = g_vmContext->getStack().topTV()->m_data.pobj;
-  assert(topObj->instanceof(c_Continuation::classof()));
-  auto cont = static_cast<c_Continuation*>(topObj);
-  auto func = cont->actRec()->m_func;
-  Offset nextInst = cont->getNextExecutionOffset();
+  assert(topObj->instanceof(c_AsyncFunctionWaitHandle::classof()));
+  auto wh = static_cast<c_AsyncFunctionWaitHandle*>(topObj);
+  auto func = wh->getActRec()->m_func;
+  Offset nextInst = wh->getNextExecutionOffset();
   assert(nextInst != InvalidAbsoluteOffset);
-  m_stepContTag = cont;
-  TRACE(2, "CmdNext: patch for cont step after CreateAsync at '%s' offset %d\n",
+  m_stepContTag = wh->getActRec();
+  TRACE(2,
+        "CmdNext: patch for cont step after AsyncESuspend at '%s' offset %d\n",
         func->fullName()->data(), nextInst);
   m_stepCont = StepDestination(func->unit(), nextInst);
 }
@@ -286,7 +288,8 @@ void* CmdNext::getContinuationTag(ActRec* fp) {
   c_Continuation* cont = frame_continuation(fp);
   TRACE(2, "CmdNext: continuation tag %p for %s\n", cont,
         cont->t_getorigfuncname()->data());
-  return cont;
+  assert(cont->actRec() == fp);
+  return cont->actRec();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

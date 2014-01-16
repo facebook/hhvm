@@ -1,0 +1,3 @@
+iconv extension is available
+string(15) "ISO-8859-1: æøå"
+string(13) "UTF-8: Ã¦Ã¸Ã¥"

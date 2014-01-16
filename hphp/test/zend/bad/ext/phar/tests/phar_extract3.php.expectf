@@ -1,0 +1,4 @@
+Invalid argument, %sfiles/bogus.zip cannot be found
+phar://%sfiles/notbogus.zip%cnonsense.txt
+phar://%sfiles/notbogus.zip%cstuff.txt
+===DONE===

@@ -20,8 +20,9 @@
 #include "hphp/compiler/expression/user_attribute.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/option.h"
+#include "hphp/compiler/json.h"
 
-#include "hphp/util/json.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/parser/parser.h"
 
 namespace HPHP {
@@ -95,6 +96,7 @@ public:
    * What kind of function this is.
    */
   bool isUserFunction() const { return !m_system && !isNative(); }
+  bool isSystem() const { return m_system; }
   bool isDynamic() const { return m_dynamic; }
   bool isPublic() const;
   bool isProtected() const;
@@ -225,6 +227,8 @@ public:
    */
   bool allowOverride() const;
   void setAllowOverride();
+
+  bool needsFinallyLocals() const;
 
   /**
    * Whether this function is a runtime helper function
@@ -385,7 +389,7 @@ public:
 
   ReadWriteMutex &getInlineMutex() { return m_inlineMutex; }
 
-  DECLARE_BOOST_TYPES(FunctionInfo);
+  DECLARE_EXTENDED_BOOST_TYPES(FunctionInfo);
 
   static void RecordFunctionInfo(std::string fname, FunctionScopePtr func);
 

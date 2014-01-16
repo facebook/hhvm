@@ -1,0 +1,5 @@
+getTimezone():
+string(13) "Europe/London"
+
+getTimestamp():
+int(1356625448)

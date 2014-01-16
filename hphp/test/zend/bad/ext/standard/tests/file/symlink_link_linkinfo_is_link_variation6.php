@@ -44,7 +44,8 @@ clearstatcache();
 
 chmod($dirname, 0777);  // to enable dir deletion
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation6";
 $filename = "$dirname/symlink_link_linkinfo_is_link_variation6.tmp";

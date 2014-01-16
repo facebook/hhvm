@@ -419,7 +419,8 @@ static int filter_into_work_buffer(int c, void *dat) {
 }
 
 int MimePart::filter(int c) {
-  m_parsedata.workbuf += (char)c;
+  char buf[] = {(char)c, '\0'};
+  m_parsedata.workbuf += buf;
   if (m_parsedata.workbuf.size() >= 4096) {
     (this->*m_extract_func)(m_parsedata.workbuf);
     m_parsedata.workbuf.clear();

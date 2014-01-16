@@ -17,7 +17,9 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 
 #include <vector>
-#include "hphp/util/base.h"
+
+#include "folly/MapUtil.h"
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -28,15 +30,6 @@ namespace JIT {
 
 static const Trace::Module TRACEMOD = Trace::pgo;
 
-using Transl::Tracelet;
-using Transl::TransLive;
-using Transl::TransAnchor;
-using Transl::TransInterp;
-using Transl::TransPrologue;
-using Transl::TransProflogue;
-using Transl::TransProfile;
-using Transl::TransOptimize;
-using Transl::InvalidID;
 
 ///////////   Counters   //////////
 
@@ -96,7 +89,7 @@ void PrologueToTransMap::add(FuncId funcId, int numArgs, TransID transId) {
 
 TransID PrologueToTransMap::get(FuncId funcId, int numArgs) const {
   auto pid = PrologueID(funcId, numArgs);
-  return mapGet(m_prologueIdToTransId, pid, InvalidID);
+  return folly::get_default(m_prologueIdToTransId, pid, InvalidID);
 }
 
 
@@ -241,6 +234,12 @@ Func* ProfData::transFunc(TransID id) const {
   return m_transRecs[id]->func();
 }
 
+const TransIDVec& ProfData::funcProfTransIDs(FuncId funcId) const {
+  auto it = m_funcProfTrans.find(funcId);
+  assert(it != m_funcProfTrans.end());
+  return it->second;
+}
+
 TransKind ProfData::transKind(TransID id) const {
   assert(id < m_numTrans);
   return m_transRecs[id]->kind();
@@ -281,11 +280,11 @@ int ProfData::prologueArgs(TransID id) const {
 }
 
 bool ProfData::optimized(const SrcKey& sk) const {
-  return mapContains(m_optimizedSKs, sk);
+  return m_optimizedSKs.count(sk);
 }
 
 bool ProfData::optimized(FuncId funcId) const {
-  return mapContains(m_optimizedFuncs, funcId);
+  return m_optimizedFuncs.count(funcId);
 }
 
 void ProfData::setOptimized(const SrcKey& sk) {
@@ -294,6 +293,14 @@ void ProfData::setOptimized(const SrcKey& sk) {
 
 void ProfData::setOptimized(FuncId funcId) {
   m_optimizedFuncs.insert(funcId);
+}
+
+bool ProfData::profiling(FuncId funcId) const {
+  return m_profilingFuncs.count(funcId);
+}
+
+void ProfData::setProfiling(FuncId funcId) {
+  m_profilingFuncs.insert(funcId);
 }
 
 RegionDescPtr ProfData::transRegion(TransID id) const {
@@ -333,6 +340,8 @@ TransID ProfData::addTransProfile(const Tracelet&       tracelet,
       m_dvFuncletDB.add(funcId, nParams, transId);
     }
   }
+
+  m_funcProfTrans[funcId].push_back(transId);
   return transId;
 }
 

@@ -59,8 +59,9 @@ public:
                                     const SourceRootInfo &sri,
                                     const VirtualHost *vhost);
   static void CopyHeaderVariables(Variant& server,
-                                  const HeaderMap& headers,
-                                  bool normalize);
+                                  const HeaderMap& headers);
+  static void CopyTransportParams(Variant& server,
+                               Transport *transport);
   static void CopyServerInfo(Variant& server,
                              Transport *transport,
                              const VirtualHost *vhost);

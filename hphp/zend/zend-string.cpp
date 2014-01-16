@@ -159,6 +159,7 @@ int string_crc32(const char *p, int len) {
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
 # include <crypt.h>
 #endif
+#include "hphp/zend/crypt-blowfish.h"
 
 static unsigned char itoa64[] =
   "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -180,32 +181,50 @@ char *string_crypt(const char *key, const char *salt) {
     salt = random_salt;
   }
 
+  if ((strlen(salt) > sizeof("$2X$00$")) &&
+    (salt[0] == '$') &&
+    (salt[1] == '2') &&
+    (salt[2] >= 'a') && (salt[2] <= 'z') &&
+    (salt[3] == '$') &&
+    (salt[4] >= '0') && (salt[4] <= '3') &&
+    (salt[5] >= '0') && (salt[5] <= '9') &&
+    (salt[6] == '$')) {
+    // Bundled blowfish crypt()
+    char output[61];
+    if (php_crypt_blowfish_rn(key, salt, output, sizeof(output))) {
+      return strdup(output);
+    }
+
+  } else {
+    // System crypt() function
 #ifdef HAVE_CRYPT_R
 # if defined(CRYPT_R_STRUCT_CRYPT_DATA)
-  struct crypt_data buffer;
-  memset(&buffer, 0, sizeof(buffer));
+    struct crypt_data buffer;
+    memset(&buffer, 0, sizeof(buffer));
 # elif defined(CRYPT_R_CRYPTD)
-  CRYPTD buffer;
+    CRYPTD buffer;
 # else
 #  error "Data struct used by crypt_r() is unknown. Please report."
 # endif
-  char *crypt_res = crypt_r(key, salt, &buffer);
+    char *crypt_res = crypt_r(key, salt, &buffer);
 #else
-  static Mutex mutex;
-  Lock lock(mutex);
-  char *crypt_res = crypt(key, salt);
+    static Mutex mutex;
+    Lock lock(mutex);
+    char *crypt_res = crypt(key, salt);
 #endif
 
-  if (crypt_res) {
-    return strdup(crypt_res);
+    if (crypt_res) {
+      return strdup(crypt_res);
+    }
   }
+
   return ((salt[0] == '*') && (salt[1] == '0'))
                   ? strdup("*1") : strdup("*0");
 }
 
 //////////////////////////////////////////////////////////////////////
 
-char *string_bin2hex(const char *input, int &len) {
+char *string_bin2hex(const char *input, int len, char* result) {
   static char hexconvtab[] = "0123456789abcdef";
 
   assert(input);
@@ -214,8 +233,6 @@ char *string_bin2hex(const char *input, int &len) {
   }
 
   int i, j;
-  char *result = (char *)malloc((len << 1) + 1);
-
   for (i = j = 0; i < len; i++) {
     result[j++] = hexconvtab[(unsigned char)input[i] >> 4];
     result[j++] = hexconvtab[(unsigned char)input[i] & 15];
@@ -223,6 +240,15 @@ char *string_bin2hex(const char *input, int &len) {
   result[j] = '\0';
   len = j;
   return result;
+}
+
+char *string_bin2hex(const char *input, int &len) {
+  if (!len) return nullptr;
+  int inLen = len;
+  int outLen = inLen * 2;
+  char* result = (char*)malloc(outLen + 1);
+  len = outLen;
+  return string_bin2hex(input, inLen, result);
 }
 
 //////////////////////////////////////////////////////////////////////

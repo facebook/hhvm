@@ -28,7 +28,7 @@ namespace HPHP { namespace JIT { namespace ARM {
 struct CodeGenerator {
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
-                Transl::TranslatorX64* tx64, CodegenState& state)
+                JIT::TranslatorX64* tx64, CodegenState& state)
       : m_unit(unit)
       , m_mainCode(mainCode)
       , m_stubsCode(stubsCode)
@@ -40,9 +40,17 @@ struct CodeGenerator {
     {
     }
 
-  void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
+  void cgBlock(Block* block, std::vector<TransBCMapping>* bcMap);
 
  private:
+  template<class Then>
+  void ifThen(vixl::MacroAssembler& a, vixl::Condition cc, Then thenBlock) {
+    vixl::Label done;
+    a.  B   (&done, InvertCondition(cc));
+    thenBlock();
+    a.  bind(&done);
+  }
+
   template<class Then, class Else>
   void ifThenElse(vixl::MacroAssembler& a, vixl::Condition cc, Then thenBlock,
                   Else elseBlock) {
@@ -57,8 +65,31 @@ struct CodeGenerator {
 
   const Func* curFunc() { return m_curInst->marker().func; }
 
+  CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
+  CallDest callDest(SSATmp* dst) const;
+  CallDest callDestTV(SSATmp* dst) const;
+  CallDest callDest2(SSATmp* dst) const;
+
+  void cgCallNative(vixl::MacroAssembler& as, IRInstruction* inst);
+  void cgCallHelper(vixl::MacroAssembler& a,
+                    CppCall& call,
+                    const CallDest& dstInfo,
+                    SyncOptions sync,
+                    ArgGroup& args,
+                    RegSet toSave);
+
   template<class Loc, class JmpFn>
   void emitTypeTest(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);
+
+  void emitLoadTypedValue(SSATmp* dst, vixl::Register base, ptrdiff_t offset,
+                          Block* label);
+  void emitStoreTypedValue(vixl::Register base, ptrdiff_t offset, SSATmp* src);
+  void emitLoad(SSATmp* dst, vixl::Register base, ptrdiff_t offset,
+                Block* label = nullptr);
+  void emitStore(vixl::Register base,
+                 ptrdiff_t offset,
+                 SSATmp* src,
+                 bool genStoreType = true);
 
   Address cgInst(IRInstruction* inst);
 
@@ -72,7 +103,7 @@ struct CodeGenerator {
     return m_state.regs[m_curInst];
   }
 
-  void recordHostCallSyncPoint(vixl::MacroAssembler& as, Transl::TCA tca);
+  void recordHostCallSyncPoint(vixl::MacroAssembler& as, JIT::TCA tca);
   void cgInterpOneCommon(IRInstruction* inst);
 
 #define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);

@@ -20,6 +20,8 @@
 
 #include <stdint.h>
 
+#include "folly/MapUtil.h"
+
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/text-color.h"
@@ -46,7 +48,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(ExecutionContext, g_context);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 
 int64_t VMExecutionContext::s_threadIdxCounter = 0;
 Mutex VMExecutionContext::s_threadIdxLock;
@@ -65,7 +67,7 @@ BaseExecutionContext::BaseExecutionContext() :
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
     m_vhost(nullptr) {
 
-  setRequestMemoryMaxBytes(RuntimeOption::RequestMemoryMaxBytes);
+  setRequestMemoryMaxBytes(String(RuntimeOption::RequestMemoryMaxBytes));
   restoreIncludePath();
 }
 
@@ -75,6 +77,7 @@ VMExecutionContext::VMExecutionContext() :
     m_lambdaCounter(0), m_nesting(0),
     m_breakPointFilter(nullptr), m_lastLocFilter(nullptr),
     m_dbgNoBreak(false), m_coverPrevLine(-1), m_coverPrevUnit(nullptr),
+    m_lastErrorPath(""), m_lastErrorLine(0),
     m_executingSetprofileCallback(false) {
 
   // Make sure any fields accessed from the TC are within a byte of
@@ -91,7 +94,9 @@ VMExecutionContext::VMExecutionContext() :
   {
     Lock lock(s_threadIdxLock);
     pid_t tid = Process::GetThreadPid();
-    if (!mapGet(s_threadIdxMap, tid, &m_currentThreadIdx)) {
+    if (auto const idx = folly::get_ptr(s_threadIdxMap, tid)) {
+      m_currentThreadIdx = *idx;
+    } else {
       m_currentThreadIdx = s_threadIdxCounter++;
       s_threadIdxMap[tid] = m_currentThreadIdx;
     }
@@ -176,12 +181,34 @@ void BaseExecutionContext::setContentType(const String& mimetype,
   }
 }
 
-void BaseExecutionContext::setRequestMemoryMaxBytes(int64_t max) {
-  if (max <= 0) {
-    max = INT64_MAX;
+int64_t BaseExecutionContext::convertBytesToInt(const String& value) const {
+  int64_t newInt = value.toInt64();
+  if (newInt <= 0) {
+    newInt = INT64_MAX;
+  } else {
+    char lastChar = value.charAt(value.size() - 1);
+    if (lastChar == 'K' || lastChar == 'k') {
+      newInt <<= 10;
+    } else if (lastChar == 'M' || lastChar == 'm') {
+      newInt <<= 20;
+    } else if (lastChar == 'G' || lastChar == 'g') {
+      newInt <<= 30;
+    }
   }
-  m_maxMemory = max;
-  MM().getStatsNoRefresh().maxBytes = m_maxMemory;
+  return newInt;
+}
+
+
+void BaseExecutionContext::setRequestMemoryMaxBytes(const String& max) {
+  int64_t newInt = max.toInt64();
+  if (newInt <= 0) {
+    newInt = INT64_MAX;
+    m_maxMemory = String(newInt);
+  } else {
+    m_maxMemory = max;
+    newInt = convertBytesToInt(max);
+  }
+  MM().getStatsNoRefresh().maxBytes = newInt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -282,9 +309,9 @@ bool BaseExecutionContext::obFlush() {
         prev->oss.absorb(last->oss);
       } else {
         try {
-          Variant tout =
-            vm_call_user_func(last->handler,
-                                   make_packed_array(last->oss.detach(), flag));
+          Variant tout = vm_call_user_func(
+            last->handler, make_packed_array(last->oss.detach(), flag)
+          );
           prev->oss.append(tout.toString());
           last->oss.clear();
         } catch (...) {
@@ -296,9 +323,9 @@ bool BaseExecutionContext::obFlush() {
 
     if (!last->handler.isNull()) {
       try {
-        Variant tout =
-          vm_call_user_func(last->handler,
-                                 make_packed_array(last->oss.detach(), flag));
+        Variant tout = vm_call_user_func(
+          last->handler, make_packed_array(last->oss.detach(), flag)
+        );
         String sout = tout.toString();
         writeStdout(sout.data(), sout.size());
         last->oss.clear();
@@ -377,9 +404,9 @@ void BaseExecutionContext::obSetImplicitFlush(bool on) {
 
 Array BaseExecutionContext::obGetHandlers() {
   Array ret;
-  for (std::list<OutputBuffer*>::const_iterator iter = m_buffers.begin();
-       iter != m_buffers.end(); ++iter) {
-    ret.append((*iter)->handler);
+  for (auto& ob : m_buffers) {
+    auto& handler = ob->handler;
+    ret.append(handler.isNull() ? s_default_output_handler : handler);
   }
   return ret;
 }
@@ -421,6 +448,14 @@ void BaseExecutionContext::registerShutdownFunction(CVarRef function,
   Array callback = make_map_array(s_name, function, s_args, arguments);
   Variant &funcs = m_shutdowns.lvalAt(type);
   funcs.append(callback);
+}
+
+Variant BaseExecutionContext::popShutdownFunction(ShutdownType type) {
+  Variant& funcs = m_shutdowns.lvalAt(type);
+  if (!funcs.isArray()) {
+    return uninit_null();
+  }
+  return funcs.pop();
 }
 
 Variant BaseExecutionContext::pushUserErrorHandler(CVarRef function,
@@ -689,7 +724,8 @@ void BaseExecutionContext::recordLastError(const Exception &e,
 }
 
 bool BaseExecutionContext::onFatalError(const Exception &e) {
-  recordLastError(e);
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
+  recordLastError(e, errnum);
   String file = empty_string;
   int line = 0;
   bool silenced = false;
@@ -711,7 +747,6 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
-    int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
@@ -778,10 +813,11 @@ void BaseExecutionContext::setErrorLog(const String& filename) {
 // IDebuggable
 
 void BaseExecutionContext::debuggerInfo(InfoVec &info) {
-  if (m_maxMemory <= 0) {
+  int64_t newInt = convertBytesToInt(m_maxMemory);
+  if (newInt == INT64_MAX) {
     Add(info, "Max Memory", "(unlimited)");
   } else {
-    Add(info, "Max Memory", FormatSize(m_maxMemory));
+    Add(info, "Max Memory", FormatSize(newInt));
   }
   Add(info, "Max Time", FormatTime(ThreadInfo::s_threadInfo.getNoCheck()->
                                    m_reqInjectionData.getTimeout() * 1000));

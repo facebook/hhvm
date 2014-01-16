@@ -1,0 +1,13 @@
+*** Testing finfo_open() : basic functionality ***
+resource(%d) of type (file_info)
+resource(%d) of type (file_info)
+resource(%d) of type (file_info)
+resource(%d) of type (file_info)
+resource(%d) of type (file_info)
+resource(%d) of type (file_info)
+resource(%d) of type (file_info)
+object(finfo)#%d (%d) {
+}
+object(finfo)#%d (%d) {
+}
+===DONE===

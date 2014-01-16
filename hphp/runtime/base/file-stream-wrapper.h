@@ -17,6 +17,10 @@
 #ifndef HPHP_FILE_STREAM_WRAPPER_H
 #define HPHP_FILE_STREAM_WRAPPER_H
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"
@@ -41,7 +45,19 @@ class FileStreamWrapper : public Stream::Wrapper {
   virtual int lstat(const String& path, struct stat* buf) {
     return ::lstat(File::TranslatePath(path).data(), buf);
   }
+  virtual int unlink(const String& path) {
+    return ::unlink(File::TranslatePath(path).data());
+  }
+  virtual int rename(const String& oldname, const String& newname);
+  virtual int mkdir(const String& path, int mode, int options);
+  virtual int rmdir(const String& path, int options) {
+    return ::rmdir(File::TranslatePath(path).data());
+  }
+
   virtual Directory* opendir(const String& path);
+
+ private:
+  int mkdir_recursive(const String& path, int mode);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

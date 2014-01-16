@@ -1,0 +1,106 @@
+---
+  assetic:
+    url: https://github.com/kriswallsmith/assetic.git
+    branch: master
+    commit: 5e519fd750ea54a035386562ae03716ffba7014c
+  codeigniter:
+    url: https://github.com/EllisLab/CodeIgniter.git
+    branch: develop
+    commit: 27e91a07ed66308ba02833b104ca8ca6a05e7be8
+  composer:
+    url: https://github.com/composer/composer.git
+    branch: master
+    commit: 11facc3f449310e862feb95a140fe0e84aaee7b4
+  doctrine2:
+    url: https://github.com/doctrine/doctrine2.git
+    branch: master
+    commit: 93c110673521c18273b885fb9359d049b6676df4
+  drupal:
+    url: https://github.com/drupal/drupal.git
+    branch: 8.x
+    commit: fa17da8649d492c302cd45499cbbd30fe462d650
+  facebookphpsdk:
+    url: https://github.com/facebook/facebook-php-sdk.git
+    branch: master
+    commit: 55f179f3741bfb3732d92b7c041b7e56966173a7
+  idiorm:
+    url: https://github.com/j4mie/idiorm.git
+    branch: master
+    commit: 11e964157a6a2c6128a0546673ad5e99ac1a62cd
+  joomla:
+    url: https://github.com/joomla/joomla-framework.git
+    branch: master
+    commit: fb57d5e2a83979c90c1a7a186ac2804404a61385
+  laravel:
+    url: https://github.com/laravel/framework.git
+    branch: master
+    commit: f59b8e834e0e6e91110c6179152335fb78a7a1ed
+  magento2:
+    url: https://github.com/magento/magento2.git
+    branch: master
+    commit: f98550dd6d7f32951c0221cbb0a0e68086d780c7
+  # Changing from ptarjan to wikimedia causes a FATAL in the test
+  # script. So some code change in wikimedia between Paul's forked
+  # change and the time it was pulled into wikimedia master on
+  # Nov 22, 2013 is causing problems.
+  mediawiki:
+    url: https://github.com/ptarjan/mediawiki-core.git
+    branch: master
+    commit: 2a280fcfccfd48fe5bf9479ca02d986367fa33e9
+  monolog:
+    url: https://github.com/Seldaek/monolog.git
+    branch: master
+    commit: a1e98f4e1da5b0235a74d11dcf7cdb2692b28ffc
+  paris:
+    url: https://github.com/j4mie/paris.git
+    branch: master
+    commit: dd1a87544127874dce367f0252dcc81246dfc83b
+  pear:
+    url: https://github.com/pear/pear-core.git
+    branch: master
+    commit: e379594cef09079be131d2fbbb19b1c2256872c2
+  phpbb3:
+    url: https://github.com/phpbb/phpbb.git
+    branch: master
+    commit: 3e84fb76a3639dce2becb7ae620423a5cfdccecb
+  phpmyadmin:
+    url: https://github.com/phpmyadmin/phpmyadmin.git
+    branch: master
+    commit: 993023de918c34673c96ef7d7f810baedd24d3d4
+  phpunit:
+    url: https://github.com/sebastianbergmann/phpunit.git
+    branch: master
+    commit: 92e8faf88773fa173b0ab2425ba4ade434c58c5d
+  ratchet:
+    url: https://github.com/cboden/Ratchet.git
+    branch: master
+    commit: c2f82efb8536a3d6a94e19a371f928f76ed0f31c
+  reactphp:
+    url: https://github.com/reactphp/react.git
+    branch: "0.3"
+    commit: 0dac387e29f10db50dc23acc1da746f53862a662
+  silverstripe:
+    url: https://github.com/silverstripe/silverstripe-installer.git
+    branch: "3.1"
+    commit: 6ba883823987534c4e6984c037e5b1d5e25e47cf
+  slim:
+    url: https://github.com/codeguy/Slim
+    branch: release-2.4.1
+    commit: fa8495e7dd5399d7de2e32170ac1aea2547713a9
+  symfony:
+    url: https://github.com/symfony/symfony.git
+    branch: master
+    commit: 147c82b39d5c55d49e1b96ffe8d7041fc544f259
+  twig:
+    url: https://github.com/fabpot/Twig.git
+    branch: master
+    commit: ae89c8853582f074c1e8f26ac3b67b2c4fff2609
+  yii:
+    url: https://github.com/yiisoft/yii.git
+    branch: master
+    commit: 32b8f82e58d1e8465fc04f74562f6a2e0f6c62c9
+  zf2:
+    url: https://github.com/zendframework/zf2.git
+    branch: master
+    commit: 5b510228f58539348daae42730cd8137606bb4b6
+

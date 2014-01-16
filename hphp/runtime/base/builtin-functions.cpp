@@ -48,6 +48,9 @@
 using namespace HPHP::MethodLookup;
 
 namespace HPHP {
+
+using std::string;
+
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
 
@@ -66,15 +69,11 @@ const StaticString
   s_function("function"),
   s_constant("constant"),
   s_type("type"),
-  s_failure("failure"),
-  s_HH_Traversable("HH\\Traversable"),
-  s_KeyedTraversable("KeyedTraversable"),
-  s_Indexish("Indexish"),
-  s_XHPChild("XHPChild");
+  s_failure("failure");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef smart::unique_ptr<CufIter>::type SmartCufIterPtr;
+typedef smart::unique_ptr<CufIter> SmartCufIterPtr;
 
 bool array_is_valid_callback(CArrRef arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
@@ -164,7 +163,6 @@ vm_decode_function(CVarRef function,
           if (warn && nameContainsClass) {
             String nameClass = name.substr(0, pos);
             if (nameClass->isame(s_self.get())   ||
-                nameClass->isame(s_parent.get()) ||
                 nameClass->isame(s_static.get())) {
               raise_warning("behavior of call_user_func(array('%s', '%s')) "
                             "is undefined", sclass->data(), name->data());
@@ -281,7 +279,7 @@ vm_decode_function(CVarRef function,
           assert(!f || (f->attrs() & AttrStatic));
           this_ = nullptr;
         }
-        if (f) {
+        if (f && (cc == cls || cc->lookupMethod(f->name()))) {
           // We found __call or __callStatic!
           // Stash the original name into invName.
           invName = name.get();
@@ -336,15 +334,15 @@ vm_decode_function(CVarRef function,
   return nullptr;
 }
 
-Variant vm_call_user_func(CVarRef function, CArrRef params,
+Variant vm_call_user_func(CVarRef function, CVarRef params,
                           bool forwarding /* = false */) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
-  HPHP::Transl::CallerFrame cf;
+  HPHP::JIT::CallerFrame cf;
   StringData* invName = nullptr;
   const HPHP::Func* f = vm_decode_function(function, cf(), forwarding,
                                            obj, cls, invName);
-  if (f == nullptr) {
+  if (f == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();
   }
   Variant ret;
@@ -360,7 +358,7 @@ static bool vm_decode_function_cufiter(CVarRef function,
                                        SmartCufIterPtr& cufIter) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
-  HPHP::Transl::CallerFrame cf;
+  HPHP::JIT::CallerFrame cf;
   StringData* invName = nullptr;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
   const HPHP::Func* func = vm_decode_function(function, cf(), false,
@@ -408,32 +406,34 @@ static Variant vm_call_user_func_cufiter(const CufIter& cufIter,
   return ret;
 }
 
-Variant invoke(const String& function, CArrRef params, strhash_t hash /* = -1 */,
-               bool tryInterp /* = true */, bool fatal /* = true */) {
+Variant invoke(const String& function, CVarRef params,
+               strhash_t hash /* = -1 */, bool tryInterp /* = true */,
+               bool fatal /* = true */) {
   Func* func = Unit::loadFunc(function.get());
-  if (func) {
+  if (func && (isContainer(params) || params.isNull())) {
     Variant ret;
     g_vmContext->invokeFunc(ret.asTypedValue(), func, params);
     return ret;
   }
-  return invoke_failed(function.c_str(), params, fatal);
+  return invoke_failed(function.c_str(), fatal);
 }
 
-Variant invoke(const char *function, CArrRef params, strhash_t hash /* = -1*/,
+Variant invoke(const char *function, CVarRef params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   String funcName(function, CopyString);
   return invoke(funcName, params, hash, tryInterp, fatal);
 }
 
 Variant invoke_static_method(const String& s, const String& method,
-                             CArrRef params, bool fatal /* = true */) {
+                             CVarRef params, bool fatal /* = true */) {
   HPHP::Class* class_ = Unit::lookupClass(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
   }
   const HPHP::Func* f = class_->lookupMethod(method.get());
-  if (f == nullptr || !(f->attrs() & AttrStatic)) {
+  if (f == nullptr || !(f->attrs() & AttrStatic) ||
+    (!isContainer(params) && !params.isNull())) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
   }
@@ -442,18 +442,18 @@ Variant invoke_static_method(const String& s, const String& method,
   return ret;
 }
 
-Variant invoke_failed(CVarRef func, CArrRef params,
+Variant invoke_failed(CVarRef func,
                       bool fatal /* = true */) {
   if (func.isObject()) {
     return o_invoke_failed(
         func.objectForCall()->o_getClassName().c_str(),
         "__invoke", fatal);
   } else {
-    return invoke_failed(func.toString().c_str(), params, fatal);
+    return invoke_failed(func.toString().c_str(), fatal);
   }
 }
 
-Variant invoke_failed(const char *func, CArrRef params,
+Variant invoke_failed(const char *func,
                       bool fatal /* = true */) {
   if (fatal) {
     throw InvalidFunctionCallException(func);
@@ -600,7 +600,12 @@ ssize_t check_request_surprise(ThreadInfo *info) {
 }
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
-                                int level /* = 0 */) {
+                                int level /* = 0 */,
+                                TypedValue *rv /* = nullptr */) {
+  if (rv != nullptr) {
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
   if (level == 2 || RuntimeOption::ThrowMissingArguments) {
     if (expected == 1) {
       raise_error(Strings::MISSING_ARGUMENT, fn, got);
@@ -616,7 +621,12 @@ void throw_missing_arguments_nr(const char *fn, int expected, int got,
   }
 }
 
-void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */) {
+void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */,
+                                TypedValue *rv /* = nullptr */) {
+  if (rv != nullptr) {
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
   if (level == 2 || RuntimeOption::ThrowTooManyArguments) {
     raise_error("Too many arguments for %s(), expected %d", fn, num);
   } else if (level == 1 || RuntimeOption::WarnTooManyArguments) {
@@ -625,7 +635,12 @@ void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */) {
 }
 
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                              int level /* = 0 */) {
+                              int level /* = 0 */,
+                              TypedValue *rv /* = nullptr */) {
+  if (rv != nullptr) {
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
   if (cmin >= 0 && count < cmin) {
     throw_missing_arguments_nr(fn, cmin, count, level);
     return;
@@ -641,7 +656,7 @@ void throw_bad_type_exception(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
   if (RuntimeOption::ThrowBadTypeExceptions) {
@@ -651,7 +666,7 @@ void throw_bad_type_exception(const char *fmt, ...) {
   raise_warning("Invalid operand type was used: %s", msg.c_str());
 }
 
-void throw_bad_array_exception() {
+void throw_expected_array_exception() {
   const char* fn = "(unknown)";
   ActRec *ar = g_vmContext->getStackFrame();
   if (ar) {
@@ -660,11 +675,20 @@ void throw_bad_array_exception() {
   throw_bad_type_exception("%s expects array(s)", fn);
 }
 
+void throw_expected_array_or_collection_exception() {
+  const char* fn = "(unknown)";
+  ActRec *ar = g_vmContext->getStackFrame();
+  if (ar) {
+    fn = ar->m_func->name()->data();
+  }
+  throw_bad_type_exception("%s expects array(s) or collection(s)", fn);
+}
+
 void throw_invalid_argument(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
   if (RuntimeOption::ThrowInvalidArguments) {
@@ -839,48 +863,6 @@ String concat4(const String& s1, const String& s2, const String& s3,
   memcpy(r.ptr + r1.len + r2.len + r3.len, r4.ptr, r4.len);
   str->setSize(len);
   return str;
-}
-
-bool interface_supports_array(const StringData* s) {
-  return (s->isame(s_HH_Traversable.get()) ||
-          s->isame(s_KeyedTraversable.get()) ||
-          s->isame(s_Indexish.get()) ||
-          s->isame(s_XHPChild.get()));
-}
-
-bool interface_supports_array(const std::string& n) {
-  const char* s = n.c_str();
-  return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
-          (n.size() == 16 && !strcasecmp(s, "KeyedTraversable")) ||
-          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
-          (n.size() == 8 && !strcasecmp(s, "XHPChild")));
-}
-
-bool interface_supports_string(const StringData* s) {
-  return (s->isame(s_XHPChild.get()));
-}
-
-bool interface_supports_string(const std::string& n) {
-  const char *s = n.c_str();
-  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
-}
-
-bool interface_supports_int(const StringData* s) {
-  return (s->isame(s_XHPChild.get()));
-}
-
-bool interface_supports_int(const std::string& n) {
-  const char *s = n.c_str();
-  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
-}
-
-bool interface_supports_double(const StringData* s) {
-  return (s->isame(s_XHPChild.get()));
-}
-
-bool interface_supports_double(const std::string& n) {
-  const char *s = n.c_str();
-  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
 }
 
 Variant include_impl_invoke(const String& file, bool once,
@@ -1136,14 +1118,14 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
         }
       }
       try {
-        Transl::VMRegAnchor _;
+        JIT::VMRegAnchor _;
         bool initial;
         VMExecutionContext* ec = g_vmContext;
         Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
         if (u) {
           if (initial) {
             TypedValue retval;
-            ec->invokeFunc(&retval, u->getMain(), null_array,
+            ec->invokeFunc(&retval, u->getMain(), init_null_variant,
                            nullptr, nullptr, nullptr, nullptr,
                            ExecutionContext::InvokePseudoMain);
             tvRefcountedDecRef(&retval);

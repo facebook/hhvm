@@ -35,10 +35,6 @@ c_EncodingDetector::c_EncodingDetector(Class* cb) :
   }
 }
 
-c_EncodingDetector::~c_EncodingDetector() {
-  ucsdet_close(m_encoding_detector);
-}
-
 void c_EncodingDetector::t___construct() {
 }
 
@@ -110,12 +106,6 @@ Array c_EncodingDetector::t_detectall() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-c_EncodingMatch::c_EncodingMatch(Class* cb) :
-    ExtObjectData(cb), m_encoding_match(0) {
-}
-
-c_EncodingMatch::~c_EncodingMatch() {
-}
 
 void c_EncodingMatch::t___construct() {
 }

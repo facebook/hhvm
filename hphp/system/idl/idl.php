@@ -267,7 +267,7 @@ function idl_format_extmap_header($map_header) {
   fprintf($f,
           <<<EOT
 
-#include <util/base.h>
+#include <util/deprecated/base.h>
 ///////////////////////////////////////////////////////////////////////////////
 
 extern "C" {

@@ -25,7 +25,8 @@ echo"\nTotal Space after writing to a file\n";
 var_dump( disk_total_space($file_path.$dir) );
 
 echo"\n-- Done --";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/disk_total_space/disk_total_space.tmp");
 rmdir($file_path."/disk_total_space");

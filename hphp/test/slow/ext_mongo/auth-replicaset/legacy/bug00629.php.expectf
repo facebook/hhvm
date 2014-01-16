@@ -1,0 +1,7 @@
+%s: MongoClient::__construct(): The 'timeout' option is deprecated. Please use 'connectTimeoutMS' instead in %s on line %d
+array(2) {
+  ["retval"]=>
+  string(%d) "%s"
+  ["ok"]=>
+  float(1)
+}

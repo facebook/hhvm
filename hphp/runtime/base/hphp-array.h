@@ -28,13 +28,26 @@ class ArrayInit;
 struct MemoryProfile;
 
 class HphpArray : public ArrayData {
-  // Load factor scaler.  If S is the # of elements, C is the
+  // Load factor scaler. If S is the # of elements, C is the
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
   // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
-  // 0.125 load factor.  Use powers of 2 to enable shift-divide.
+  // 0.875 load factor. Use powers of 2 to enable shift-divide.
   static const uint LoadScale = 4;
 
 public:
+  /*
+   * Iterator helper for kPackedKind and kMixedKind.  You can use this
+   * to look at the values in the array, but not the keys unless you
+   * know it is kMixedKind.
+   *
+   * This can be used as an optimization vs. ArrayIter, which uses
+   * indirect calls in the loop.
+   *
+   * Note that this iterator class doesn't skip tombstones.  You have
+   * to do that yourself if you want it.
+   */
+  struct ValIter;
+
   struct Elm {
     /* The key is either a string pointer or an int value, and the _count
      * field in data is used to discriminate the key type. _count = 0 means
@@ -59,6 +72,11 @@ public:
     }
     int32_t hash() const {
       return data.hash();
+    }
+    void setStaticKey(StringData* k, strhash_t h) {
+      assert(k->isStatic());
+      key = k;
+      data.hash() = h | STRHASH_MSB;
     }
     void setStrKey(StringData* k, strhash_t h) {
       key = k;
@@ -99,6 +117,13 @@ public:
    * Pre: size > 0
    */
   static HphpArray* MakePacked(uint32_t size, const TypedValue* values);
+
+  /*
+   * Like MakePacked, but given static strings, make a struct-like array.
+   * Also requires size > 0.
+   */
+  static HphpArray* MakeStruct(uint32_t size, StringData** keys,
+                               const TypedValue* values);
 
   /*
    * Return a pointer to the singleton static empty array.  This is
@@ -203,7 +228,7 @@ public:
   static ArrayData* AppendRefPacked(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRefPacked(ArrayData*, CVarRef v, bool copy);
-  static ArrayData* Plus(ArrayData*, const ArrayData* elems);
+  static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* PopPacked(ArrayData*, Variant& value);
@@ -290,6 +315,7 @@ public:
   static const uint32_t SmallHashSize = 1 << MinLgTableSize;
   static const uint32_t SmallMask = SmallHashSize - 1;
   static const uint32_t SmallSize = SmallHashSize - SmallHashSize / LoadScale;
+  static const uint32_t MaxMakeSize = 4 * SmallSize;
 
   uint32_t iterLimit() const { return m_used; }
 
@@ -299,11 +325,12 @@ public:
   // Otherwise get the value cell (unboxing), and initialize keyOut.
   template <bool withRef>
   void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
+  void getArrayElm(ssize_t pos, TypedValue* out) const;
   bool isTombstone(ssize_t pos) const;
 
   static bool validPos(ssize_t pos);
   static bool validPos(int32_t pos);
-  static size_t computeTableSize(uint32_t tableMask);
+  size_t hashSize() const;
   static size_t computeMaxElms(uint32_t tableMask);
   static size_t computeDataSize(uint32_t tableMask);
 
@@ -340,12 +367,15 @@ private:
   ~HphpArray() = delete;
 
 private:
-  void initHash(size_t tableSize);
+  static void initHash(int32_t* table, size_t tableSize);
+  static int32_t* copyHash(int32_t* to, const int32_t* from, size_t tableSize);
+  static Elm* copyElms(Elm* to, const Elm* from, size_t count);
 
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
-  static ArrayData* ArrayPlusGeneric(HphpArray*, const ArrayData*);
+  static ArrayData* ArrayPlusEqGeneric(ArrayData*,
+    HphpArray*, const ArrayData*, size_t);
   static ArrayData* ArrayMergeGeneric(HphpArray*, const ArrayData*);
 
   // convert in-place from kPackedKind to kMixedKind: fill in keys & hashtable
@@ -391,7 +421,7 @@ private:
   ssize_t findForRemove(int64_t ki, bool updateNext);
   ssize_t findForRemove(const StringData* k, strhash_t prehash);
 
-  ssize_t iter_advance_helper(ssize_t prev) const ATTRIBUTE_COLD;
+  ssize_t iter_advance_helper(ssize_t prev) const;
 
   /**
    * findForNewInsert() CANNOT be used unless the caller can guarantee that
@@ -399,8 +429,7 @@ private:
    * put the array into a bad state; use with caution.
    */
   int32_t* findForNewInsert(size_t h0) const;
-  static int32_t* findForNewInsertLoop(int32_t* table, size_t h0,
-                                       size_t mask);
+  int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
 
   bool nextInsert(CVarRef data);
   ArrayData* nextInsertRef(CVarRef data);
@@ -445,15 +474,15 @@ private:
    * elements by a factor of 2. grow() rebuilds the hash table, but it
    * does not compact the elements.
    */
-  static HphpArray* Grow(HphpArray* old) ATTRIBUTE_COLD;
-  static HphpArray* GrowPacked(HphpArray* old) ATTRIBUTE_COLD;
+  static HphpArray* Grow(HphpArray* old);
+  static HphpArray* GrowPacked(HphpArray* old);
 
   /**
    * compact() does not change the hash table size or the number of slots
    * for elements. compact() rebuilds the hash table and compacts the
    * elements into the slots with lower addresses.
    */
-  void compact(bool renumber) ATTRIBUTE_COLD;
+  void compact(bool renumber);
 
   /*
    * resize() and resizeIfNeeded() will grow or compact the array as
@@ -477,6 +506,14 @@ private:
     return const_cast<Elm*>(reinterpret_cast<Elm const*>(this + 1));
   }
 
+  int32_t* hashTab() const {
+    return const_cast<int32_t*>(
+      reinterpret_cast<int32_t const*>(
+        data() + m_cap
+      )
+    );
+  }
+
   bool isZombie() const { return m_used + 1 == 0; }
 
 private:
@@ -498,7 +535,6 @@ private:
     uint64_t m_maskAndLoad;
   };
   int64_t  m_nextKI;        // Next integer key to use for append.
-  int32_t* m_hash;          // Hash table.
 };
 
 extern std::aligned_storage<

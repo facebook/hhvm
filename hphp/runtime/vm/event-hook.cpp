@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -78,7 +78,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
       Func::isSpecial(ar->m_func->name())) {
     return;
   }
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
@@ -86,7 +86,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
 
   if (mode == ProfileEnter) {
     params.append(s_enter);
-    frameinfo.set(s_args, hhvm_get_frame_args(ar));
+    frameinfo.set(s_args, hhvm_get_frame_args(ar, 0));
   } else {
     params.append(s_exit);
     if (!g_vmContext->m_faults.empty()) {
@@ -139,7 +139,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
                                      &func->maybeIntercepted());
   if (!h) return true;
 
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
 
   PC savePc = g_vmContext->m_pc;
 
@@ -152,7 +152,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     // For static methods, give handler the name of called class
     called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
   }
-  Array intArgs =
+  Variant intArgs =
     PackedArrayInit(5)
       .append(ar->m_func->fullNameRef())
       .append(called_on)
@@ -227,8 +227,8 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar) {
-  auto const inlinedRip = Transl::Translator::Get()->uniqueStubs.retInlHelper;
-  if ((Transl::TCA)ar->m_savedRip == inlinedRip) {
+  auto const inlinedRip = JIT::tx64->uniqueStubs.retInlHelper;
+  if ((JIT::TCA)ar->m_savedRip == inlinedRip) {
     // Inlined calls normally skip the function enter and exit events. If we
     // side exit in an inlined callee, we want to make sure to skip the exit
     // event to avoid unbalancing the call stack.

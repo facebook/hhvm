@@ -1,5 +1,6 @@
 %{ /* -*- mode: c++ -*- */
 #include "hphp/parser/scanner.h"
+#include <cassert>
 
 // macros for flex
 #define YYSTYPE HPHP::ScannerToken
@@ -47,22 +48,26 @@
    (c) == '_' || (c) >= 0x7F)
 
 /**
- * "Next token" types tell us how to treat a token based on the previous
- * token for the purpose of recognizing XHP tags, XHP class names, XHP
- * category names, and type lists.
+ * "Next token types" tell us how to interpret the next characters in the
+ * input stream based on the previous token for the purpose of recognizing
+ * XHP tags, XHP class names, XHP category names, type lists, and lambda
+ * expressions.
  *   XhpTag:
- *     '<' will be treated as the start of an XHP tag
+ *     "<"[a-zA-Z_\x7f-\xff] will be treated as the start of an XHP tag
  *   XhpTagMaybe:
- *     '<' will be treated as possibly being the start of an XHP tag;
- *     we will scan ahead looking at subsequent characters to figure
- *     out if '<' is definitely the start of an XHP tag
+ *     "<"[a-zA-Z_\x7f-\xff] will be treated as possibly being the start of an
+ *     XHP tag; we will scan ahead looking at subsequent characters to figure
+ *     out if "<" is definitely the start of an XHP tag
  *   XhpClassName:
- *     ':' will be treated as the start of an XHP class name
+ *     ":"{XHPLABEL} will be treated as an XHP class name
  *   XhpCategoryName:
- *     '%' will be treated as the start of an XHP category name
+ *     "%"{XHPLABEL} will be treated as an XHP category name
  *   TypeListMaybe:
- *     '<' should be recognized as possibly being the start of a type list;
+ *     "<" should be recognized as possibly being the start of a type list;
  *     this will be resolved by inspecting subsequent tokens
+ *   LambdaMaybe:
+ *     "(" should be recognized as possibly being the start of a lambda
+ *     expression; this will be resolved by inspecting subsequent tokens
  */
 namespace NextTokenType {
   static const int Normal = 0x1;
@@ -71,6 +76,7 @@ namespace NextTokenType {
   static const int XhpClassName = 0x8;
   static const int XhpCategoryName = 0x10;
   static const int TypeListMaybe = 0x20;
+  static const int LambdaMaybe = 0x40;
 }
 
 static int getNextTokenType(int t) {
@@ -112,6 +118,7 @@ static int getNextTokenType(int t) {
     case T_NEW:
     case T_INSTANCEOF:
     case T_DOUBLE_ARROW:
+    case T_LAMBDA_ARROW:
     case T_NS_SEPARATOR:
     case T_INLINE_HTML:
     case T_INT_CAST:
@@ -124,14 +131,17 @@ static int getNextTokenType(int t) {
     case T_UNRESOLVED_LT:
     case T_AS:
       return NextTokenType::XhpTag |
-             NextTokenType::XhpClassName;
-    case ',': case '(': case '|':
+             NextTokenType::XhpClassName |
+             NextTokenType::LambdaMaybe;
+    case ',': case '(': case '|': case T_UNRESOLVED_OP:
       return NextTokenType::XhpTag |
              NextTokenType::XhpClassName |
-             NextTokenType::XhpCategoryName;
+             NextTokenType::XhpCategoryName |
+             NextTokenType::LambdaMaybe;
     case '}':
       return NextTokenType::XhpTagMaybe |
-             NextTokenType::XhpClassName;
+             NextTokenType::XhpClassName |
+             NextTokenType::LambdaMaybe;
     case T_INC:
     case T_DEC:
       return NextTokenType::XhpTagMaybe;
@@ -147,6 +157,20 @@ static int getNextTokenType(int t) {
     case T_XHP_REQUIRED:
     case T_XHP_ENUM:
     case T_ARRAY:
+    case T_FROM:
+    case T_IN:
+    case T_WHERE:
+    case T_JOIN:
+    case T_ON:
+    case T_EQUALS:
+    case T_INTO:
+    case T_LET:
+    case T_ORDERBY:
+    case T_ASCENDING:
+    case T_DESCENDING:
+    case T_SELECT:
+    case T_GROUP:
+    case T_BY:
       return NextTokenType::TypeListMaybe;
     case T_XHP_ATTRIBUTE:
       return NextTokenType::XhpClassName |
@@ -188,12 +212,13 @@ static int getNextTokenType(int t) {
 
 LNUM    [0-9]+
 DNUM    ([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
+BNUM    "0b"[01]+
 EXPONENT_DNUM   (({LNUM}|{DNUM})[eE][+-]?{LNUM})
 HNUM    "0x"[0-9a-fA-F]+
 LABEL   [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
-TOKENS [;:,.\[\]()|^&+\-*/=%!~$<>?@]
+TOKENS [;:,.\[\])|^&+\-*/=%!~$<>?@]
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
 XHPLABEL {LABEL}([:-]{LABEL})*
@@ -354,6 +379,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   RETSTEP('(');
 }
 
+<ST_IN_SCRIPTING>"callable"           { RETTOKEN(T_CALLABLE);}
 <ST_IN_SCRIPTING>"eval"               { RETTOKEN(T_EVAL);}
 <ST_IN_SCRIPTING>"include"            { RETTOKEN(T_INCLUDE);}
 <ST_IN_SCRIPTING>"include_once"       { RETTOKEN(T_INCLUDE_ONCE);}
@@ -373,6 +399,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"protected"          { RETTOKEN(T_PROTECTED);}
 <ST_IN_SCRIPTING>"public"             { RETTOKEN(T_PUBLIC);}
 <ST_IN_SCRIPTING>"unset"              { RETTOKEN(T_UNSET);}
+<ST_IN_SCRIPTING>"==>"                { RETTOKEN(T_LAMBDA_ARROW);}
 <ST_IN_SCRIPTING>"=>"                 { RETSTEP(T_DOUBLE_ARROW);}
 <ST_IN_SCRIPTING>"list"               { RETTOKEN(T_LIST);}
 <ST_IN_SCRIPTING>"array"              { RETTOKEN(T_ARRAY);}
@@ -406,6 +433,22 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
 <ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}
+<ST_IN_SCRIPTING>"from"/{WHITESPACE_AND_COMMENTS}\$[a-zA-Z0-9_\x7f-\xff] {
+  HH_ONLY_KEYWORD(T_FROM);
+}
+<ST_IN_SCRIPTING>"where"              { HH_ONLY_KEYWORD(T_WHERE); }
+<ST_IN_SCRIPTING>"join"               { HH_ONLY_KEYWORD(T_JOIN); }
+<ST_IN_SCRIPTING>"in"                 { HH_ONLY_KEYWORD(T_IN); }
+<ST_IN_SCRIPTING>"on"                 { HH_ONLY_KEYWORD(T_ON); }
+<ST_IN_SCRIPTING>"equals"             { HH_ONLY_KEYWORD(T_EQUALS); }
+<ST_IN_SCRIPTING>"into"               { HH_ONLY_KEYWORD(T_INTO); }
+<ST_IN_SCRIPTING>"let"                { HH_ONLY_KEYWORD(T_LET); }
+<ST_IN_SCRIPTING>"orderby"            { HH_ONLY_KEYWORD(T_ORDERBY); }
+<ST_IN_SCRIPTING>"ascending"          { HH_ONLY_KEYWORD(T_ASCENDING); }
+<ST_IN_SCRIPTING>"descending"         { HH_ONLY_KEYWORD(T_DESCENDING); }
+<ST_IN_SCRIPTING>"select"             { HH_ONLY_KEYWORD(T_SELECT); }
+<ST_IN_SCRIPTING>"group"              { HH_ONLY_KEYWORD(T_GROUP); }
+<ST_IN_SCRIPTING>"by"                 { HH_ONLY_KEYWORD(T_BY); }
 <ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }
@@ -527,6 +570,16 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   RETSTEP('%');
 }
 
+<ST_IN_SCRIPTING>"("            {
+  if (_scanner->isHHSyntaxEnabled()) {
+    int ntt = getNextTokenType(_scanner->lastToken());
+    if (ntt & NextTokenType::LambdaMaybe) {
+      RETSTEP(T_UNRESOLVED_OP);
+    }
+  }
+  RETSTEP(yytext[0]);
+}
+
 <ST_IN_SCRIPTING>{TOKENS}             {RETSTEP(yytext[0]);}
 
 <ST_IN_SCRIPTING>"{" {
@@ -607,6 +660,19 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         RETTOKEN(T_LNUMBER);
 }
 
+<ST_IN_SCRIPTING,ST_XHP_IN_TAG>{BNUM} {
+        errno = 0;
+        long ret = strtoull(yytext + 2 /* skip over 0b */, NULL, 2);
+        if (errno == ERANGE || ret < 0) {
+                _scanner->error("Bin number is too big: %s", yytext);
+                if (_scanner->isHHFile()) {
+                        RETTOKEN(T_HH_ERROR);
+                }
+        }
+        RETTOKEN(T_LNUMBER);
+}
+
+
 <ST_VAR_OFFSET>0|([1-9][0-9]*) { /* Offset could be treated as a long */
         errno = 0;
         long ret = strtoll(yytext, NULL, 0);
@@ -619,7 +685,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         RETTOKEN(T_NUM_STRING);
 }
 
-<ST_VAR_OFFSET>{LNUM}|{HNUM} { /* Offset must be treated as a string */
+<ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
         RETTOKEN(T_NUM_STRING);
 }
 
@@ -636,14 +702,14 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"__DIR__"              { RETTOKEN(T_DIR); }
 <ST_IN_SCRIPTING>"__NAMESPACE__"        { RETTOKEN(T_NS_C); }
 
-<INITIAL>"#"[^\n]*"\n" {
+<INITIAL>"#!"[^\n]*"\n" {
         _scanner->setHashBang(yytext, yyleng, T_INLINE_HTML);
         BEGIN(ST_IN_SCRIPTING);
         yy_push_state(ST_AFTER_HASHBANG, yyscanner);
         return T_INLINE_HTML;
 }
 
-<INITIAL>(([^<#]|"<"[^?%s<]){1,400})|"<s"|"<" {
+<INITIAL>(([^<#]|"<"[^?%s<]|"#"[^!]){1,400})|"<s"|"<" {
         SETTOKEN(T_INLINE_HTML);
         BEGIN(ST_IN_SCRIPTING);
         yy_push_state(ST_IN_HTML, yyscanner);
@@ -754,7 +820,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return ']';
 }
 
-<ST_VAR_OFFSET>{TOKENS}|[{}\"`] {
+<ST_VAR_OFFSET>{TOKENS}|[({}\"`] {
         /* Only '[' can be valid, but returning other tokens will allow
            a more explicit parse error */
         return yytext[0];

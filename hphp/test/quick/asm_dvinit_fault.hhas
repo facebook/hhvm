@@ -1,0 +1,55 @@
+#
+# Fault funclets / try catch in a DV initializer.
+#
+# HHVM doesn't generate code like this, but it's legal bytecode.
+#
+
+.main {
+  FPushFuncD 1 "var_dump"
+    FPushFuncD 0 "main"
+    FCall 0
+    FPassR 0
+  FCall 1
+  PopR
+  Int 1
+  RetC
+}
+
+.function main($x = dv_init1, $y = dv_init2) {
+  main_entry:
+    CGetL $x
+    CGetL2 $y
+    Add
+    RetC
+
+  ex:
+    Catch
+    PopC
+    Jmp out_of_catch
+
+  dv_init1:
+    Int 0
+    SetL $x
+    PopC
+  dv_init2:
+   .try_catch (Exception ex) {
+     .try_fault fault {
+        Int 1
+        SetL $y
+        PopC
+
+        FPushCtorD 0 "Exception"
+        FCall 0
+        PopR
+        Throw
+     }
+   }
+  out_of_catch:
+   Jmp main_entry
+
+fault:
+   Int 4321
+   SetL $x
+   PopC
+   Unwind
+}

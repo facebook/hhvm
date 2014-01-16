@@ -1,0 +1,12 @@
+cos 30 = float(%f)
+Pass
+cos 60 = float(%f)
+Pass
+cos 90 = float(%f)
+Pass
+cos 180 = float(%f)
+Pass
+cos 270 = float(%f)
+Pass
+cos 360 = float(%f)
+Pass

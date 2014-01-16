@@ -6,7 +6,7 @@ insert_dummy_data($link);
 $result = ldap_search($link, "dc=my-domain,dc=com", "(objectclass=person)");
 var_dump(ldap_count_entries($link, $result));
 ?>
-===DONE===?>
+===DONE===
 <?php
 include "connect.inc";
 

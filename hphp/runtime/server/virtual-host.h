@@ -24,7 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(VirtualHost);
 class VirtualHost {
 public:
   static VirtualHost &GetDefault();
@@ -54,6 +53,11 @@ public:
   bool valid() const { return !(m_prefix.empty() && m_pattern.empty()); }
   bool match(const std::string &host) const;
   bool disabled() const { return m_disabled; }
+
+  // whether to check (and serve) files that exist before applying rewrite rules
+  bool checkExistenceBeforeRewrite() const {
+    return m_checkExistenceBeforeRewrite;
+  }
 
   // url rewrite rules
   bool rewriteURL(const String& host, String &url, bool &qsa, int &redirect) const;
@@ -101,6 +105,7 @@ private:
 
   void initRuntimeOption(Hdf overwrite);
   bool m_disabled;
+  bool m_checkExistenceBeforeRewrite;
   std::string m_name;
   std::string m_prefix;
   std::string m_pattern;
@@ -111,7 +116,7 @@ private:
   std::string m_documentRoot;
 
   std::vector<RewriteRule> m_rewriteRules;
-  IpBlockMapPtr m_ipBlocks;
+  std::shared_ptr<IpBlockMap> m_ipBlocks;
   std::vector<QueryStringFilter> m_queryStringFilters;
 
   VhostRuntimeOption m_runtimeOption;

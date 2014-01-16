@@ -30,7 +30,8 @@ if (!mysql_query("DROP DATABASE mysqlcreatedb", $link))
 	printf("[008] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 print "done!";
-?><?php
+?>
+<?php
 require_once('connect.inc');
 if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket))
 	printf("[c001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",

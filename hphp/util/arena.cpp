@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/arena.h"
-#include "hphp/util/util.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/malloc-size-class.h"
 
@@ -64,11 +63,21 @@ void* ArenaImpl<kChunkBytes>::allocSlow(size_t nbytes) {
   // Large allocations go directly to malloc without discarding our
   // current chunk.
   if (UNLIKELY(nbytes >= kChunkBytes)) {
-    char* ptr = static_cast<char*>(malloc(nbytes));
-#ifdef DEBUG
-    m_externalAllocSize += nbytes;
+#if defined(VALGRIND) || !defined(USE_JEMALLOC)
+    // We want all our pointers to be kMinBytes - 1 byte aligned.
+    // Without jemalloc we have to do that by hand.
+    auto extra = kMinBytes - 1;
+#else
+    auto extra = 0;
 #endif
-    m_externalPtrs.push(ptr);
+
+    char* ptr = static_cast<char*>(malloc(nbytes + extra));
+#ifdef DEBUG
+    m_externalAllocSize += nbytes + extra;
+#endif
+    m_externalPtrs.push(ptr); // save ptr before aligning it
+    // align up to (extra + 1) bytes
+    ptr = (char*)((uintptr_t(ptr) + extra) & ~extra);
     assert((intptr_t(ptr) & (kMinBytes - 1)) == 0);
     return ptr;
   }

@@ -292,9 +292,6 @@ void CacheManager::addDirectories(const string& path) {
     return;
   }
 
-  // The last entry is the filename itself.
-  path_list.pop_back();
-
   for (const auto& it : path_list) {
     unique_ptr<CacheData> cd(new CacheData);
     cd->createDirectory(it, entry_counter_++);

@@ -19,6 +19,8 @@
 
 #include "hphp/runtime/base/profile-dump.h"
 #include "hphp/util/thread-local.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/crash-reporter.h"
 
 namespace HPHP {
 
@@ -36,22 +38,22 @@ struct MemoryProfile {
 
   // Start profiling
   static inline void startProfiling() {
-    if (!memory_profiling) return;
+    if (!RuntimeOption::HHProfServerEnabled) return;
     s_memory_profile->startProfilingImpl();
   }
   // Dumps profiled data
   static inline void finishProfiling() {
-    if (!memory_profiling) return;
+    if (!RuntimeOption::HHProfServerEnabled) return;
     s_memory_profile->finishProfilingImpl();
   }
   // Log allocation event
   static inline void logAllocation(void *ptr, size_t size) {
-    if (!memory_profiling) return;
+    if (!RuntimeOption::HHProfServerEnabled || IsCrashing) return;
     s_memory_profile->logAllocationImpl(ptr, size);
   }
   // Log deallocation event
   static inline void logDeallocation(void *ptr) {
-    if (!memory_profiling) return;
+    if (!RuntimeOption::HHProfServerEnabled || IsCrashing) return;
     s_memory_profile->logDeallocationImpl(ptr);
   }
 
@@ -76,6 +78,8 @@ private:
   std::map<void *, Allocation> m_livePointers;
   // Profile dump of the current thread's request.
   ProfileDump m_dump;
+
+  bool m_active = false;
 };
 
 }

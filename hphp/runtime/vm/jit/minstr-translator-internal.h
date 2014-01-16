@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
 #define incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -45,9 +44,9 @@ static const MInstrAttr WarnDefineReffy = MInstrAttr(Warn | Define | Reffy);
  * on a variable number of bool and enum arguments. */
 
 template<typename T> constexpr unsigned bitWidth() {
-  static_assert(IncDec_invalid == 4,
+  static_assert(kNumIncDecOps == 4,
                 "IncDecOp enum must fit in 2 bits");
-  static_assert(SetOp_invalid == 11,
+  static_assert(kNumSetOpOps == 11,
                 "SetOpOp enum must fit in 4 bits");
   return std::is_same<T, bool>::value ? 1
     : std::is_same<T, KeyType>::value ? 2
@@ -87,11 +86,8 @@ inline unsigned buildBitmask(T c, Args... args) {
     assert(*dest == nullptr);                                   \
     *dest = (OpFunc)MInstrHelpers::nm;                          \
   } while (false);
-#define FILL_ROW_HOT(nm, hot, ...) FILL_ROW(nm, __VA_ARGS__)
 
 #define BUILD_OPTAB(...) BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROW), __VA_ARGS__)
-#define BUILD_OPTAB_HOT(...)                            \
-  BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROW_HOT), __VA_ARGS__)
 #define BUILD_OPTAB_ARG(FILL_TABLE, ...)                                \
   static OpFunc* optab = nullptr;                                       \
   if (!optab) {                                                         \

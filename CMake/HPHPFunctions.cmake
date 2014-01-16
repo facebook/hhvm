@@ -38,6 +38,27 @@ function(auto_sources RETURN_VALUE PATTERN SOURCE_SUBDIRS)
 	set(${RETURN_VALUE} ${${RETURN_VALUE}} PARENT_SCOPE)
 endfunction(auto_sources)
 
+macro(HHVM_SELECT_SOURCES DIR)
+	auto_sources(files "*.cpp" "RECURSE" "${DIR}")
+	foreach(f ${files})
+		if (NOT (${f} MATCHES "(ext_hhvm|/(old-)?tests?/)"))
+			list(APPEND CXX_SOURCES ${f})
+		endif()
+	endforeach()
+	auto_sources(files "*.c" "RECURSE" "${DIR}")
+	foreach(f ${files})
+		if (NOT (${f} MATCHES "(ext_hhvm|/(old-)?tests?/)"))
+			list(APPEND C_SOURCES ${f})
+		endif()
+	endforeach()
+	auto_sources(files "*.S" "RECURSE" "${DIR}")
+	foreach(f ${files})
+		if (NOT (${f} MATCHES "(ext_hhvm|/(old-)?tests?/)"))
+			list(APPEND ASM_SOURCES ${f})
+		endif()
+	endforeach()
+endmacro(HHVM_SELECT_SOURCES)
+
 function(CONTAINS_STRING FILE SEARCH RETURN_VALUE)
 	file(STRINGS ${FILE} FILE_CONTENTS REGEX ".*${SEARCH}.*")
 	if (FILE_CONTENTS)
@@ -68,19 +89,33 @@ macro(MYSQL_SOCKET_SEARCH)
 	endif()
 endmacro()
 
-function(embed_systemlib TARGET DEST SOURCE)
+function(embed_systemlib TARGET DEST SOURCE SECTNAME)
 	if (APPLE)
-	        target_link_libraries(${TARGET} -Wl,-sectcreate,__text,systemlib,${SOURCE})
+	        target_link_libraries(${TARGET} -Wl,-sectcreate,__text,${SECTNAME},${SOURCE})
 	else()
 	        add_custom_command(TARGET ${TARGET} POST_BUILD
 	                   COMMAND "objcopy"
-	                   ARGS "--add-section" "systemlib=${SOURCE}" ${DEST}
-	                   COMMENT "Embedding systemlib.php in ${TARGET}")
+	                   ARGS "--add-section" "${SECTNAME}=${SOURCE}" ${DEST}
+	                   COMMENT "Embedding ${SOURCE} in ${TARGET} as ${SECTNAME}")
 	endif()
 	# Add the systemlib file to the "LINK_DEPENDS" for the systemlib, this will cause it
 	# to be relinked and the systemlib re-embedded
 	set_property(TARGET ${TARGET} APPEND PROPERTY LINK_DEPENDS ${SOURCE})
 endfunction(embed_systemlib)
+
+function(embed_all_systemlibs TARGET DEST)
+	embed_systemlib(${TARGET} ${DEST} ${HPHP_HOME}/hphp/system/systemlib.php systemlib)
+	auto_sources(SYSTEMLIBS "ext_*.php" "RECURSE" "${HPHP_HOME}/hphp/runtime")
+	foreach(SLIB ${SYSTEMLIBS})
+		get_filename_component(SLIB_BN ${SLIB} "NAME_WE")
+		string(LENGTH ${SLIB_BN} SLIB_BN_LEN)
+		math(EXPR SLIB_BN_REL_LEN "${SLIB_BN_LEN} - 4")
+		string(SUBSTRING ${SLIB_BN} 4 ${SLIB_BN_REL_LEN} SLIB_EXTNAME)
+		string(MD5 SLIB_HASH_NAME ${SLIB_EXTNAME})
+		string(SUBSTRING ${SLIB_HASH_NAME} 0 12 SLIB_HASH_NAME_SHORT)
+		embed_systemlib(${TARGET} ${DEST} ${SLIB} "ext.${SLIB_HASH_NAME_SHORT}")
+	endforeach()
+endfunction(embed_all_systemlibs)
 
 # Custom install function that doesn't relink, instead it uses chrpath to change it, if
 # it's available, otherwise, it leaves the chrpath alone
@@ -108,5 +143,5 @@ function(HHVM_EXTENSION EXTNAME)
 endfunction()
 
 function(HHVM_SYSTEMLIB EXTNAME SOURCE_FILE)
-	embed_systemlib(${EXTNAME} "${EXTNAME}.so" ${SOURCE_FILE})
+	embed_systemlib(${EXTNAME} "${EXTNAME}.so" ${SOURCE_FILE} systemlib)
 endfunction()

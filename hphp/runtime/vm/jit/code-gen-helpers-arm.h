@@ -1,3 +1,18 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
 #ifndef incl_HPHP_JIT_CODE_GEN_HELPERS_ARM_H
 #define incl_HPHP_JIT_CODE_GEN_HELPERS_ARM_H
 
@@ -33,7 +48,7 @@ void emitStoreRetIntoActRec(vixl::MacroAssembler& a);
  * differently depending on whether we're simulating ARM or running native.
  * Returns the address at which to record a fixup, if you need to.
  */
-Transl::TCA emitCall(vixl::MacroAssembler& a, CppCall call);
+JIT::TCA emitCall(vixl::MacroAssembler& a, CppCall call);
 
 /*
  * Swaps two registers. Uses XOR swap, so will not touch memory, flags, or any
@@ -46,8 +61,8 @@ void emitXorSwap(vixl::MacroAssembler& a,
  * Check the surprise flags. If surprised, call functionEnterHelper.
  */
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
-                                 bool inTracelet, Transl::FixupMap& fixupMap,
-                                 Transl::Fixup fixup);
+                                 bool inTracelet, JIT::FixupMap& fixupMap,
+                                 JIT::Fixup fixup);
 
 /*
  * Increments the current (at translation time) translation counter.
@@ -80,14 +95,14 @@ inline void emitTLSLoad(vixl::MacroAssembler& a,
                         const ThreadLocalNoCheck<T>& datum,
                         const vixl::Register& destReg) {
   using namespace vixl;
-  a.   Mov  (rHostCallReg, Transl::tlsBaseNoInline);
+  a.   Mov  (rHostCallReg, JIT::tlsBaseNoInline);
   a.   Push (x30, x29);
   a.   HostCall(0);
   // tlsBaseNoInline doesn't need a sync point
   a.   Pop  (x29, x30);
 
   a.   Add  (rReturnReg, rReturnReg,
-             uintptr_t(&datum.m_node.m_p) - Transl::tlsBase());
+             uintptr_t(&datum.m_node.m_p) - JIT::tlsBase());
   // Now rReturnReg holds a pointer to *a pointer to* the object.
   a.   Ldr  (destReg, rReturnReg[0]);
 }

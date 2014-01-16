@@ -1,6 +1,6 @@
 object(A)#1 (1) {
   ["f"]=>
-  object(Vector)#2 (3) {
+  object(HH\Vector)#2 (3) {
     [0]=>
     int(1)
     [1]=>

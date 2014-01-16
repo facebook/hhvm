@@ -39,7 +39,8 @@ var_dump($color1, $color2);
 
 imagedestroy($image); 
 echo "Done\n"; 
-?><?php 
+?>
+<?php 
 	$dest = dirname(realpath(__FILE__)) . '/imagedashedline.png';
 	@unlink($dest);
 ?>

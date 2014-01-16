@@ -42,9 +42,8 @@ Array f_apache_request_headers() {
     HeaderMap headers;
     transport->getHeaders(headers);
     Array ret;
-    for (HeaderMap::const_iterator iter = headers.begin();
-         iter != headers.end(); ++iter) {
-      const vector<string> &values = iter->second;
+    for (auto iter = headers.begin(); iter != headers.end(); ++iter) {
+      const auto& values = iter->second;
       ret.set(String(iter->first), String(values.back()));
     }
     return ret;
@@ -58,9 +57,8 @@ Array f_apache_response_headers() {
     HeaderMap headers;
     transport->getResponseHeaders(headers);
     Array ret;
-    for (HeaderMap::const_iterator iter = headers.begin();
-         iter != headers.end(); ++iter) {
-      const vector<string> &values = iter->second;
+    for (auto iter = headers.begin(); iter != headers.end(); ++iter) {
+      const auto& values = iter->second;
       ret.set(String(iter->first), String(values.back()));
     }
     return ret;
@@ -75,10 +73,6 @@ bool f_apache_setenv(const String& variable, const String& value,
 
 Array f_getallheaders() {
   return f_apache_request_headers();
-}
-
-bool f_virtual(const String& filename) {
-  throw NotSupportedException(__func__, "apache is not in use");
 }
 
 const StaticString
@@ -110,10 +104,6 @@ Variant f_apache_get_scoreboard() {
   ArrayInit ret(1);
   ret.set(s_child_status, child_status);
   return ret.create();
-}
-
-Variant f_apache_get_rewrite_rules() {
-  throw NotSupportedException(__func__, "apache is not in use");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

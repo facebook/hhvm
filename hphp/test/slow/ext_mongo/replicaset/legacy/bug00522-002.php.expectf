@@ -1,0 +1,43 @@
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: append_getlasterror: added w=4
+IO      FINE: append_getlasterror: added wtimeout=10000 (from collection property)
+IO      FINE: append_getlasterror: added fsync=1
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+%s:%d: Timed out waiting for header data
+-----
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: append_getlasterror: added w=4
+IO      FINE: append_getlasterror: added wtimeout=10000 (from collection property)
+IO      FINE: append_getlasterror: added fsync=1
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+%s:%d: Timed out waiting for header data
+-----
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body
+float(1)
+-----
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: append_getlasterror: added w=5
+IO      FINE: append_getlasterror: added wtimeout=10000 (from collection property)
+IO      FINE: append_getlasterror: added fsync=1
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+%s:%d: Timed out waiting for header data
+-----
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: append_getlasterror: added w='allDCs'
+IO      FINE: append_getlasterror: added wtimeout=4500 (from collection property)
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body
+%s:%d: exception: unrecognized getLastError mode: allDCs
+-----

@@ -57,7 +57,8 @@ for($loop_counter = 0; $loop_counter < count($file_string); $loop_counter++) {
 }
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $name_prefix = dirname(__FILE__)."/realpath_variation";
 unlink("$name_prefix/home/tests/realpath_variation.tmp");
 rmdir("$name_prefix/home/tests/");

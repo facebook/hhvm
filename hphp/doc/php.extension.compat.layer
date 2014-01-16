@@ -154,7 +154,7 @@ value slots share an array "by value" under PHP vs. HHVM:
 Under PHP, a zval exclusively "owns" the array it points to, and the array
 itself does not have a refcount field. Instead of having multiple things point
 to the same array, sharing "by value" is achieved by having multiple things
-point to the zval that exclusivey owns the array (with the zval's is_ref flag
+point to the zval that exclusively owns the array (with the zval's is_ref flag
 set to 0). When the PHP runtime or a PHP extension wants to mutate an array,
 the SEPARATE_ZVAL_IF_NOT_REF() macro is used, which makes a copy of the zval
 and the array it points to iff the zval's refcount is 2 or greater and the

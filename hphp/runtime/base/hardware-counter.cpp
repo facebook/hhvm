@@ -66,7 +66,7 @@ public:
     pe.config = config;
     pe.disabled = 1;
     pe.pinned = 0;
-    pe.exclude_kernel = 1;
+    pe.exclude_kernel = 0;
     pe.exclude_hv = 1;
     pe.read_format =
       PERF_FORMAT_TOTAL_TIME_ENABLED|PERF_FORMAT_TOTAL_TIME_RUNNING;
@@ -375,7 +375,7 @@ bool HardwareCounter::setPerfEvents(const String& events) {
   while (s) {
     int len = strlen(s);
     char* event = url_decode(s, len);
-    bool isPseudoEvent = TranslatorX64::isPseudoEvent(event);
+    bool isPseudoEvent = JIT::TranslatorX64::isPseudoEvent(event);
     m_pseudoEvents = m_pseudoEvents || isPseudoEvent;
     if (!isPseudoEvent && !eventExists(event) && !addPerfEvent(event)) {
       return false;
@@ -415,7 +415,7 @@ void HardwareCounter::getPerfEvents(Array& ret) {
     ret.set(m_counters[i]->m_desc, m_counters[i]->read());
   }
   if (m_pseudoEvents) {
-    TranslatorX64::Get()->getPerfCounters(ret);
+    JIT::tx64->getPerfCounters(ret);
   }
 }
 

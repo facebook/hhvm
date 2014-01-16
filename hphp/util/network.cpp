@@ -13,17 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/network.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/process.h"
-#include "util.h"
-
-#include "folly/String.h"
 
 #include <netinet/in.h>
 #include <arpa/nameser.h>
+#include <arpa/inet.h>
 #include <resolv.h>
+#include <sys/utsname.h>
+
+#include "folly/String.h"
+
+#include "hphp/util/lock.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

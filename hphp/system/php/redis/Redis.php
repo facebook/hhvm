@@ -106,8 +106,9 @@ class Redis {
         return true;
 
       case self::OPT_READ_TIMEOUT:
-        $this->timeout_seconds  = (int)($value - ((int)$value));
-        $this->timeout_useconds = (int)(($value - $seconds) * 1000000);
+        $this->timeout_seconds  = (int)floor($value);
+        $this->timeout_useconds =
+          (int)(($value - $this->timeout_seconds) * 1000000);
         return stream_set_timeout($this->connection, $this->timeout_seconds,
                                                      $this->timeout_useconds);
 
@@ -322,7 +323,7 @@ class Redis {
 
   public function hMGet($key, array $members) {
     $members = array_values($members);
-    $args = [$this->prefix($key)] + $members;
+    $args = array_merge([$this->prefix($key)], $members);
     $this->processArrayCommand('HMGET', $args);
     return $this->processAssocResponse($members);
   }
@@ -409,7 +410,7 @@ class Redis {
     if ($withscores) {
       $args[] = 'WITHSCORES';
     }
-    $this->processCommand('ZRANGE', $args);
+    $this->processArrayCommand('ZRANGE', $args);
     if ($withscores) {
       return $this->processMapResponse(true, false);
     } else {
@@ -461,7 +462,7 @@ class Redis {
     if ($withscores) {
       $args[] = 'WITHSCORES';
     }
-    $this->processCommand('ZREVRANGE', $args);
+    $this->processArrayCommand('ZREVRANGE', $args);
     if ($withscores) {
       return $this->processMapResponse(true, false);
     } else {
@@ -903,7 +904,7 @@ class Redis {
     if ($auto_reconnect AND
         $this->doConnect($this->host, $this->port,
                          $this->timeout_connect,
-                         null, $this->retry_internal,
+                         null, $this->retry_interval,
                          $this->persistent)) {
       if ($this->password) {
         $this->auth($this->password);
@@ -1435,7 +1436,7 @@ class Redis {
         case 's': $args[$i] = (string)$args[$i]; break;
         case 'l': $args[$i] = (int)$args[$i]; break;
         case 'd': $args[$i] = (float)$args[$i]; break;
-        case 'b': $args[$i] = (bool)$arts[$i]; break;
+        case 'b': $args[$i] = (bool)$args[$i]; break;
         case 'p':
           if (($args[$i] !== self::BEFORE) AND ($args[$i] !== self::AFTER)) {
             trigger_error(

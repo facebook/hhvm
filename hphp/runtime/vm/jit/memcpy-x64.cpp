@@ -27,7 +27,6 @@
 
 extern "C" {
 
-HOT_FUNC
 void*
 memcpy(void* vdest, const void* vsrc, size_t len) {
   auto src  = (const char*)vsrc;

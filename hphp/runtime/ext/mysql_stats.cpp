@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/mysql_stats.h"
+
+#include <sstream>
+
 #include "hphp/util/util.h"
 
 namespace HPHP {
@@ -86,7 +88,7 @@ void MySqlStats::Init() {
 MySqlStats::Verb MySqlStats::Translate(const std::string &verb,
                                        int xactionCount) {
   if (!s_inited) Init();
-  string composed = xactionCount ? (xactionCount > 1 ? "x_" : "t_") : "n_";
+  std::string composed = xactionCount ? (xactionCount > 1 ? "x_" : "t_") : "n_";
   composed += Util::toLower(verb);
   hphp_string_map<Verb>::const_iterator iter = s_verbs.find(composed);
   if (iter != s_verbs.end()) {
@@ -109,12 +111,12 @@ void MySqlStats::Record(const std::string &verb,
   Verb v = Translate(verb, xactionCount);
   if (v == UNKNOWN) return;
 
-  string ltable = Util::toLower(table);
+  std::string ltable = Util::toLower(table);
 
   Lock lock(s_mutex);
-  StatsMap::iterator iter = s_stats.find(ltable);
+  auto iter = s_stats.find(ltable);
   if (iter == s_stats.end()) {
-    StatsPtr stats(new Stats());
+    auto stats = std::make_shared<Stats>();
     memset(stats.get(), 0, sizeof(Stats));
     stats->actions[v] = 1;
     s_stats[ltable] = stats;
@@ -128,9 +130,10 @@ std::string MySqlStats::ReportStats() {
   std::ostringstream out;
 
   Lock lock(s_mutex);
-  for (StatsMap::const_iterator iter = s_stats.begin(); iter != s_stats.end();
-       ++iter) {
-    string table = iter->first;
+  for (auto iter = s_stats.begin();
+      iter != s_stats.end();
+      ++iter) {
+    std::string table = iter->first;
     if (table.empty()) {
       table = "x";
     } else {

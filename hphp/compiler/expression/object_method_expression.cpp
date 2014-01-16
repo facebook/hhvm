@@ -146,7 +146,6 @@ void ObjectMethodExpression::setInvokeParams(AnalysisResultPtr ar) {
   for (int i = 0; i < m_params->getCount(); i++) {
     (*m_params)[i]->inferAndCheck(ar, Type::Variant, false);
   }
-  m_params->resetOutputCount();
 }
 
 ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultConstPtr ar) {
@@ -276,6 +275,28 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
 
   assert(func);
   return checkParamsAndReturn(ar, type, coerce, func, false);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ObjectMethodExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("ObjectMethodCallExpression",
+      m_params == nullptr ? 3 : 4);
+  cg.printPropertyHeader("object");
+  m_object->outputCodeModel(cg);
+  if (m_nameExp->is(Expression::KindOfScalarExpression)) {
+    cg.printPropertyHeader("methodName");
+  } else {
+    cg.printPropertyHeader("methodExpression");
+  }
+  m_nameExp->outputCodeModel(cg);
+  if (m_params != nullptr) {
+    cg.printPropertyHeader("arguments");
+    cg.printExpressionVector(m_params);
+  }
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -34,8 +34,8 @@ static void destroy_uploaded_files();
 
 class Rfc1867Data : public RequestEventHandler {
 public:
-  std::set<string> rfc1867ProtectedVariables;
-  std::set<string> rfc1867UploadedFiles;
+  std::set<std::string> rfc1867ProtectedVariables;
+  std::set<std::string> rfc1867UploadedFiles;
   apc_rfc1867_data rfc1867ApcData;
   int (*rfc1867Callback)(apc_rfc1867_data *rfc1867ApcData,
                          unsigned int event, void *event_data, void **extra);
@@ -147,8 +147,7 @@ static void add_protected_variable(char *varname) {
 
 static bool is_protected_variable(char *varname) {
   normalize_protected_variable(varname);
-  set<string>::iterator iter =
-    s_rfc1867_data->rfc1867ProtectedVariables.find(varname);
+  auto iter = s_rfc1867_data->rfc1867ProtectedVariables.find(varname);
   return iter != s_rfc1867_data->rfc1867ProtectedVariables.end();
 }
 
@@ -161,18 +160,20 @@ static void safe_php_register_variable(char *var, CVarRef val,
   }
 }
 
-bool is_uploaded_file(const string filename) {
-  set<string> &rfc1867UploadedFiles = s_rfc1867_data->rfc1867UploadedFiles;
+bool is_uploaded_file(const std::string filename) {
+  std::set<std::string> &rfc1867UploadedFiles =
+    s_rfc1867_data->rfc1867UploadedFiles;
   return rfc1867UploadedFiles.find(filename) != rfc1867UploadedFiles.end();
 }
 
-const set<string> &get_uploaded_files() {
+const std::set<std::string> &get_uploaded_files() {
   return s_rfc1867_data->rfc1867UploadedFiles;
 }
 
 static void destroy_uploaded_files() {
-  set<string> &rfc1867UploadedFiles = s_rfc1867_data->rfc1867UploadedFiles;
-  for (set<string>::iterator iter = rfc1867UploadedFiles.begin();
+  std::set<std::string> &rfc1867UploadedFiles =
+    s_rfc1867_data->rfc1867UploadedFiles;
+  for (auto iter = rfc1867UploadedFiles.begin();
        iter != rfc1867UploadedFiles.end(); iter++) {
     unlink(iter->c_str());
   }
@@ -314,7 +315,7 @@ static int multipart_buffer_eof(multipart_buffer *self) {
 /* create new multipart_buffer structure */
 static multipart_buffer *multipart_buffer_new(Transport *transport,
                                               const char *data, int size,
-                                              string boundary) {
+                                              std::string boundary) {
   multipart_buffer *self =
     (multipart_buffer *)calloc(1, sizeof(multipart_buffer));
 
@@ -421,8 +422,8 @@ static int find_boundary(multipart_buffer *self, char *boundary) {
 static int multipart_buffer_headers(multipart_buffer *self,
                                     header_list &header) {
   char *line;
-  StringPair prev_entry;
-  StringPair entry;
+  std::pair<std::string, std::string> prev_entry;
+  std::pair<std::string, std::string> entry;
 
   /* didn't find boundary, abort */
   if (!find_boundary(self, self->boundary)) {
@@ -446,10 +447,10 @@ static int multipart_buffer_headers(multipart_buffer *self,
     if (value) {
       *value = 0;
       do { value++; } while(isspace(*value));
-      entry = StringPair(key, value);
+      entry = std::make_pair(key, value);
     } else if (!header.empty()) {
       /* If no ':' on the line, add to previous line */
-      entry = StringPair(prev_entry.first, prev_entry.second + line);
+      entry = std::make_pair(prev_entry.first, prev_entry.second + line);
       header.pop_back();
     } else {
       continue;
@@ -693,13 +694,13 @@ static char *multipart_buffer_read_body(multipart_buffer *self,
 
 void rfc1867PostHandler(Transport *transport,
                         Variant &post, Variant &files, int content_length,
-                        const void *&data, int &size, const string boundary) {
+                        const void *&data, int &size, const std::string boundary) {
   char *s=nullptr, *start_arr=nullptr;
-  string array_index, abuf;
+  std::string array_index, abuf;
   char *temp_filename=nullptr, *lbuf=nullptr;
   int total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0;
   int max_file_size=0, skip_upload=0, anonindex=0, is_anonymous;
-  set<string> &uploaded_files = s_rfc1867_data->rfc1867UploadedFiles;
+  std::set<std::string> &uploaded_files = s_rfc1867_data->rfc1867UploadedFiles;
   multipart_buffer *mbuff;
   int fd=-1;
   void *event_extra_data = nullptr;
@@ -1016,7 +1017,7 @@ void rfc1867PostHandler(Transport *transport,
 
       if (is_arr_upload) {
         array_len = strlen(start_arr);
-        array_index = string(start_arr+1, array_len-2);
+        array_index = std::string(start_arr+1, array_len-2);
       }
 
       /* Add $foo_name */
@@ -1027,7 +1028,7 @@ void rfc1867PostHandler(Transport *transport,
       }
 
       if (is_arr_upload) {
-        abuf = string(param, strlen(param)-array_len);
+        abuf = std::string(param, strlen(param)-array_len);
         snprintf(lbuf, llen, "%s_name[%s]",
                  abuf.c_str(), array_index.c_str());
       } else {

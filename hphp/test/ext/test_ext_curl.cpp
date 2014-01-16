@@ -42,6 +42,9 @@ public:
       transport->sendString("OK");
     }
   }
+  virtual void abortRequest(Transport *transport) {
+    transport->sendString("Aborted");
+  }
 };
 
 static int s_server_port = 0;

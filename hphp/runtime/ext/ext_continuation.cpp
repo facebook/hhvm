@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_continuation.h"
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
 #include "hphp/runtime/ext/ext_spl.h"
@@ -32,23 +32,26 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Object f_hphp_create_continuation(const String& clsname,
-                                          const String& funcname,
-                                          const String& origFuncName,
-                                          CArrRef args /* = null_array */) {
-  throw_fatal("Invalid call hphp_create_continuation");
-  return NULL;
+void delete_Continuation(ObjectData* od, const Class*) {
+  auto const cont = static_cast<c_Continuation*>(od);
+  auto const size = cont->getObjectSize();
+  auto const base = cont->getMallocBase();
+  cont->~c_Continuation();
+  if (LIKELY(size <= kMaxSmartSize)) {
+    return MM().smartFreeSizeLogged(base, size);
+  }
+  MM().smartFreeSizeBigLogged(base, size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Continuation::c_Continuation(Class* cb)
-    : ExtObjectDataFlags<ObjectData::HasClone>(cb)
-    , m_label(0)
-    , m_index(-1LL)
-    , m_key(-1LL)
-    , m_value(Variant::NullInit())
-    , m_origFunc(nullptr) {
+  : ExtObjectDataFlags(cb)
+  , m_label(0)
+  , m_index(-1LL)
+  , m_key(-1LL)
+  , m_value(Variant::NullInit())
+{
   o_subclassData.u16 = 0;
 }
 
@@ -64,6 +67,8 @@ c_Continuation::~c_Continuation() {
     frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
   }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 void c_Continuation::t___construct() {}
 
@@ -83,14 +88,6 @@ void c_Continuation::t_update_key(int64_t label, CVarRef key, CVarRef value) {
     int64_t new_index = m_key.toInt64Val();
     m_index = new_index > m_index ? new_index : m_index;
   }
-}
-
-Object c_Continuation::t_getwaithandle() {
-  if (m_waitHandle.isNull()) {
-    c_AsyncFunctionWaitHandle::Create(this);
-    assert(!m_waitHandle.isNull());
-  }
-  return m_waitHandle;
 }
 
 int64_t c_Continuation::t_getlabel() {
@@ -134,8 +131,9 @@ void c_Continuation::t_raise(CVarRef v) {
 }
 
 String c_Continuation::t_getorigfuncname() {
-  auto const origName = m_origFunc->isClosureBody() ? s__closure_.get()
-                                                    : m_origFunc->name();
+  const Func* origFunc = actRec()->func()->getGeneratorOrigFunc();
+  auto const origName = origFunc->isClosureBody() ? s__closure_.get()
+                                                  : origFunc->name();
   assert(origName->isStatic());
   return String(const_cast<StringData*>(origName));
 }
@@ -205,15 +203,13 @@ void c_Continuation::copyContinuationVars(ActRec* fp) {
 
 c_Continuation *c_Continuation::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Continuation*>(obj);
-  const Func *origFunc = thiz->m_origFunc;
-  const Func *genFunc = thiz->actRec()->m_func;
+  auto fp = thiz->actRec();
 
-  ActRec *fp = g_vmContext->getFP();
-  c_Continuation* cont = origFunc->isMethod()
-    ? g_vmContext->createContMeth(origFunc, genFunc, fp->getThisOrClass())
-    : g_vmContext->createContFunc(origFunc, genFunc);
+  c_Continuation* cont = static_cast<c_Continuation*>(fp->getThisOrClass()
+    ? CreateMeth(fp->func(), fp->getThisOrClass())
+    : CreateFunc(fp->func()));
 
-  cont->copyContinuationVars(thiz->actRec());
+  cont->copyContinuationVars(fp);
 
   cont->o_subclassData.u16 = thiz->o_subclassData.u16;
   cont->m_label = thiz->m_label;
@@ -225,37 +221,31 @@ c_Continuation *c_Continuation::Clone(ObjectData* obj) {
 }
 
 namespace {
-  StaticString s_send("send");
-  StaticString s_raise("raise");
-}
-
-void c_Continuation::call_next() {
-  const HPHP::Func* func = m_cls->lookupMethod(s_next.get());
-  g_vmContext->invokeContFunc(func, this);
+  DEBUG_ONLY StaticString s_send("send");
+  DEBUG_ONLY StaticString s_raise("raise");
 }
 
 void c_Continuation::call_send(Cell& v) {
-  const HPHP::Func* func = m_cls->lookupMethod(s_send.get());
-  g_vmContext->invokeContFunc(func, this, &v);
+  assert(SystemLib::s_continuationSendFunc ==
+         getVMClass()->lookupMethod(s_send.get()));
+  g_vmContext->invokeContFunc(SystemLib::s_continuationSendFunc, this, &v);
 }
 
 void c_Continuation::call_raise(ObjectData* e) {
+  assert(SystemLib::s_continuationRaiseFunc ==
+         getVMClass()->lookupMethod(s_raise.get()));
   assert(e);
   assert(e->instanceof(SystemLib::s_ExceptionClass));
-
-  const HPHP::Func* func = m_cls->lookupMethod(s_raise.get());
-
   Cell arg;
   arg.m_type = KindOfObject;
   arg.m_data.pobj = e;
-
-  g_vmContext->invokeContFunc(func, this, &arg);
+  g_vmContext->invokeContFunc(SystemLib::s_continuationRaiseFunc, this, &arg);
 }
 
 // Compute the bytecode offset at which execution will resume assuming
 // the given label.
 Offset c_Continuation::getExecutionOffset(int32_t label) const {
-  auto func = m_arPtr->m_func;
+  auto func = actRec()->m_func;
   PC funcBase = func->unit()->entry() + func->base();
   assert(toOp(*funcBase) == OpUnpackCont); // One byte
   PC switchOffset = funcBase + 1;

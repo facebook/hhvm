@@ -57,7 +57,6 @@ Variant f_array_combine(CVarRef keys, CVarRef values);
 Variant f_array_count_values(CVarRef input);
 Variant f_array_fill_keys(CVarRef keys, CVarRef value);
 Variant f_array_fill(int start_index, int num, CVarRef value);
-Variant f_array_filter(CVarRef input, CVarRef callback = null_variant);
 Variant f_array_flip(CVarRef trans);
 bool f_array_key_exists(CVarRef key, CVarRef search);
 bool f_key_exists(CVarRef key, CVarRef search);
@@ -77,7 +76,8 @@ Variant f_array_replace(int _argc, CVarRef array1, CArrRef _argv = null_array);
 Variant f_array_pad(CVarRef input, int pad_size, CVarRef pad_value);
 Variant f_array_pop(VRefParam array);
 Variant f_array_product(CVarRef array);
-Variant f_array_push(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
+Variant f_array_push(int _argc, VRefParam container, CVarRef var,
+                     CArrRef _argv = null_array);
 
 Variant f_array_rand(CVarRef input, int num_req = 1);
 Variant f_array_reduce(CVarRef input, CVarRef callback,
@@ -173,7 +173,9 @@ bool f_i18n_loc_set_attribute(int64_t attr, int64_t val);
 bool f_i18n_loc_set_strength(int64_t strength);
 Variant f_i18n_loc_get_error_code();
 
-Variant f_hphp_array_idx(CVarRef key, CVarRef search, CVarRef def);
+Variant f_hphp_array_idx(CVarRef search, CVarRef key, CVarRef def);
+
+Array ArrayObject_toArray(const ObjectData* obj);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

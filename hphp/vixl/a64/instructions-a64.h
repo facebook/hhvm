@@ -69,9 +69,14 @@ const int64_t kXMinInt = 0x8000000000000000L;
 const int32_t kWMaxInt = 0x7fffffff;
 const int32_t kWMinInt = 0x80000000;
 const unsigned kLinkRegCode = 30;
+// Register 31 in hardware is the stack pointer. But the zero register is also
+// encoded as register 31. Within vixl, we use SPRegInternalCode to distinguish
+// the stack pointer (to avoid accidentally emitting encodings where the
+// programmer means one and gets the other). It is converted to SPRegCode by the
+// assembler.
 const unsigned kZeroRegCode = 31;
-const unsigned kSPRegInternalCode = 63;
-const unsigned kRegCodeMask = 0x1f;
+const unsigned kSPRegCode = 31;
+const unsigned kSPRegInternalCode = 32;
 
 // AArch64 floating-point specifics. These match IEEE-754.
 const unsigned kDoubleMantissaBits = 52;

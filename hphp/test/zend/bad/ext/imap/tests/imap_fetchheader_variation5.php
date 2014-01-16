@@ -30,7 +30,7 @@ foreach($sequences as $msg_no) {
 // clear error stack
 imap_errors();
 ?>
-===DONE===?>
+===DONE===
 <?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

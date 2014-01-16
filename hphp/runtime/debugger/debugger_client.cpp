@@ -13,8 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/debugger/debugger_client.h"
+
+#include <boost/lexical_cast.hpp>
+#include <signal.h>
+
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -52,7 +55,20 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
+using std::string;
+
 static boost::scoped_ptr<DebuggerClient> debugger_client;
+
+static String wordwrap(const String& str, int width /* = 75 */,
+                       const String& wordbreak /* = "\n" */,
+                       bool cut /* = false */) {
+  Array args = Array::Create();
+  args.append(str);
+  args.append(width);
+  args.append(wordbreak);
+  args.append(cut);
+  return vm_call_user_func("wordwrap", args);
+}
 
 static DebuggerClient& getStaticDebuggerClient() {
   TRACE(2, "DebuggerClient::getStaticDebuggerClient\n");
@@ -381,7 +397,7 @@ String DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
   StringBuffer sb;
   for (unsigned int i = 0; i < info.size(); i++) {
     if (ItemNameColor) sb.append(ItemNameColor);
-    string name = info[i].first;
+    std::string name = info[i].first;
     name += ":                                                        ";
     sb.append(name.substr(0, maxlen + 4));
     if (ItemNameColor) sb.append(ANSI_COLOR_END);
@@ -464,7 +480,7 @@ bool DebuggerClient::connect(const std::string &host, int port) {
 bool DebuggerClient::connectRPC(const std::string &host, int port) {
   TRACE(2, "DebuggerClient::connectRPC\n");
   assert(!m_machines.empty());
-  DMachineInfoPtr local = m_machines[0];
+  auto local = m_machines[0];
   assert(local->m_name == LocalPrompt);
   local->m_rpcHost = host;
   local->m_rpcPort = port;
@@ -477,7 +493,7 @@ bool DebuggerClient::connectRPC(const std::string &host, int port) {
 bool DebuggerClient::disconnect() {
   TRACE(2, "DebuggerClient::disconnect\n");
   assert(!m_machines.empty());
-  DMachineInfoPtr local = m_machines[0];
+  auto local = m_machines[0];
   assert(local->m_name == LocalPrompt);
   local->m_rpcHost.clear();
   local->m_rpcPort = 0;
@@ -485,7 +501,7 @@ bool DebuggerClient::disconnect() {
   return !local->m_interrupting;
 }
 
-void DebuggerClient::switchMachine(DMachineInfoPtr machine) {
+void DebuggerClient::switchMachine(std::shared_ptr<DMachineInfo> machine) {
   TRACE(2, "DebuggerClient::switchMachine\n");
   m_rpcHost.clear();
   machine->m_initialized = false; // even if m_machine == machine
@@ -516,7 +532,7 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
 
   socket1->unregister();
   socket2->unregister();
-  DMachineInfoPtr machine(new DMachineInfo());
+  auto machine = std::make_shared<DMachineInfo>();
   machine->m_sandboxAttached = true;
   machine->m_name = LocalPrompt;
   machine->m_thrift.create(socket1);
@@ -595,7 +611,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
           }
         }
       }
-      DMachineInfoPtr machine(new DMachineInfo());
+      auto machine = std::make_shared<DMachineInfo>();
       machine->m_name = host;
       machine->m_port = port;
       machine->m_thrift.create(SmartPtr<Socket>(sock));
@@ -686,7 +702,7 @@ void DebuggerClient::run() {
   playMacro("startup");
 
   if (!m_options.cmds.empty()) {
-    m_macroPlaying = MacroPtr(new Macro());
+    m_macroPlaying = std::make_shared<Macro>();
     m_macroPlaying->m_cmds = m_options.cmds;
     m_macroPlaying->m_cmds.push_back("q");
     m_macroPlaying->m_index = 0;
@@ -1066,7 +1082,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
         throw DebuggerProtocolException();
       }
       m_sigCount = 0;
-      CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
+      auto intr = std::dynamic_pointer_cast<CmdInterrupt>(cmd);
       Debugger::UsageLogInterrupt("terminal", getSandboxId(), *intr.get());
       cmd->onClient(*this);
 
@@ -1270,7 +1286,7 @@ char DebuggerClient::ask(const char *fmt, ...) {
   string msg;
   va_list ap;
   va_start(ap, fmt);
-  Util::string_vsnprintf(msg, fmt, ap); va_end(ap);
+  string_vsnprintf(msg, fmt, ap); va_end(ap);
   if (UseColor && InfoColor && RuntimeOption::EnableDebuggerColor) {
     msg = InfoColor + msg + ANSI_COLOR_END;
   }
@@ -1302,7 +1318,7 @@ void DebuggerClient::print(const char *fmt, ...) {
   string msg;
   va_list ap;
   va_start(ap, fmt);
-  Util::string_vsnprintf(msg, fmt, ap); va_end(ap);
+  string_vsnprintf(msg, fmt, ap); va_end(ap);
   print(msg);
 }
 
@@ -1336,7 +1352,7 @@ void DebuggerClient::print(const String& msg) {
     string msg;                                                         \
     va_list ap;                                                         \
     va_start(ap, fmt);                                                  \
-    Util::string_vsnprintf(msg, fmt, ap); va_end(ap);                   \
+    string_vsnprintf(msg, fmt, ap); va_end(ap);                         \
     name(msg);                                                          \
   }                                                                     \
   void DebuggerClient::name(const std::string &msg) {                   \
@@ -1353,8 +1369,8 @@ IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor);
 
 string DebuggerClient::wrap(const std::string &s) {
   TRACE(2, "DebuggerClient::wrap\n");
-  String ret = f_wordwrap(String(s.c_str(), s.size(), CopyString),
-                                    LineWidth - 4, "\n", true);
+  String ret = wordwrap(String(s.c_str(), s.size(), CopyString), LineWidth - 4,
+                        "\n", true);
   return string(ret.data(), ret.size());
 }
 
@@ -1412,8 +1428,8 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
       continue;
     }
 
-    cmd = f_wordwrap(cmd, left, "\n", true);
-    desc = f_wordwrap(desc, right, "\n", true);
+    cmd = wordwrap(cmd, left, "\n", true);
+    desc = wordwrap(desc, right, "\n", true);
     Array lines1 = StringUtil::Explode(cmd, "\n").toArray();
     Array lines2 = StringUtil::Explode(desc, "\n").toArray();
     for (int n = 0; n < lines1.size() || n < lines2.size(); n++) {
@@ -1450,7 +1466,7 @@ void DebuggerClient::tutorial(const char *text) {
   if (m_tutorial < 0) return;
 
   String ret = string_replace(String(text), "\t", "    ");
-  ret = f_wordwrap(ret, LineWidth - 4, "\n", true);
+  ret = wordwrap(ret, LineWidth - 4, "\n", true);
   Array lines = StringUtil::Explode(ret, "\n").toArray();
 
   StringBuffer sb;
@@ -1914,7 +1930,7 @@ std::string DebuggerClient::getSandboxId() {
   return "None";
 }
 
-void DebuggerClient::updateThreads(DThreadInfoPtrVec threads) {
+void DebuggerClient::updateThreads(std::vector<DThreadInfoPtr> threads) {
   TRACE(2, "DebuggerClient::updateThreads\n");
   m_threads = threads;
   for (unsigned int i = 0; i < m_threads.size(); i++) {
@@ -1997,9 +2013,10 @@ void DebuggerClient::setSourceRoot(const std::string &sourceRoot) {
   setListLocation(m_listFile, m_listLine, true);
 }
 
-void DebuggerClient::setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints) {
+void DebuggerClient::setMatchedBreakPoints(
+    std::vector<BreakPointInfoPtr> breakpoints) {
   TRACE(2, "DebuggerClient::setMatchedBreakPoints\n");
-  m_matched = breakpoints;
+  m_matched = std::move(breakpoints);
 }
 
 void DebuggerClient::setCurrentLocation(int64_t threadId,
@@ -2158,7 +2175,7 @@ void DebuggerClient::startMacro(std::string name) {
       break;
     }
   }
-  m_macroRecording = MacroPtr(new Macro());
+  m_macroRecording = std::make_shared<Macro>();
   m_macroRecording->m_name = name;
 }
 
@@ -2298,7 +2315,7 @@ void DebuggerClient::loadConfig() {
 
   for (Hdf node = m_config["Macros"].firstChild(); node.exists();
        node = node.next()) {
-    MacroPtr macro(new Macro());
+    auto macro = std::make_shared<Macro>();
     macro->load(node);
     m_macros.push_back(macro);
   }
@@ -2339,7 +2356,7 @@ void DebuggerClient::saveConfig() {
 
 void DebuggerClient::defineColors() {
   TRACE(2, "DebuggerClient::defineColors\n");
-  vector<string> names;
+  std::vector<std::string> names;
   get_supported_colors(names);
   Hdf support = m_config["Color"]["SupportedNames"];
   for (unsigned int i = 0; i < names.size(); i++) {
@@ -2368,6 +2385,5 @@ void DebuggerClient::defineColors() {
   vim["Constant"]      = "WHITE";
   vim["LineNo"]        = "GRAY";
 }
-
 ///////////////////////////////////////////////////////////////////////////////
 }}

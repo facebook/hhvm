@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_TREADMILL_H_
 #define incl_HPHP_TREADMILL_H_
 
-#include "hphp/runtime/vm/unit.h"
+#include <stdint.h>
 
 namespace HPHP {
 

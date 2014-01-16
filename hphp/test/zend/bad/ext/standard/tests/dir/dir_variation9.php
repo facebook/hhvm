@@ -46,7 +46,8 @@ var_dump( dir("$dir_path2/sub_dir21/../../dir_variation91/sub_dir12/..") );
 var_dump( dir("$dir_path1/sub_dir11/sub_dir111/../../dir_variation92/sub_dir21/..") );
 
 echo "Done";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 
 $dir_path1 = $file_path."/dir_variation91";

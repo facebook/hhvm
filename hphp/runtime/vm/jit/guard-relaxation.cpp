@@ -121,6 +121,35 @@ void visitLoad(IRInstruction* inst, const FrameState& state) {
     default: break;
   }
 }
+
+/*
+ * Returns the best known type of the value being guarded by guard, from right
+ * before guard.
+ */
+Type previousGuardType(const IRInstruction* guard) {
+  switch (guard->op()) {
+    case GuardLoc:
+    case CheckLoc: {
+      auto* prevGuard = guardForLocal(guard->extra<LocalId>()->locId,
+                                      guard->src(0));
+      if (!prevGuard) return Type::Gen;
+      return prevGuard->typeParam();
+    }
+
+    case GuardStk:
+    case CheckStk: {
+      auto stkVal = getStackValue(guard->src(0),
+                                  guard->extra<StackOffset>()->offset);
+      return stkVal.knownType;
+    }
+
+    case CheckType:
+      return guard->src(0)->type();
+
+    default:
+      not_reached();
+  }
+}
 }
 
 /*
@@ -149,17 +178,19 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& guards) {
         // If the known type is at least as good as the relaxed type, we can
         // replace the guard with an assert.
         auto newOp = guardToAssert(inst.op());
+        auto newType = std::min(constraint.knownType, previousGuardType(&inst));
         FTRACE(1, "relaxGuards changing {}'s type to {}, op to {}\n",
-               inst, constraint.knownType, newOp);
-        inst.setTypeParam(constraint.knownType);
+               inst, newType, newOp);
+        assert(!hasEdges(newOp));
+        if (inst.hasEdges()) {
+          block->push_back(unit.gen(Jmp, inst.marker(), inst.next()));
+        }
+        inst.setTypeParam(newType);
         inst.setOpcode(newOp);
-        inst.setTaken(nullptr);
-
         changed = true;
       } else if (!oldType.equals(newType)) {
         FTRACE(1, "relaxGuards changing {}'s type to {}\n", inst, newType);
         inst.setTypeParam(newType);
-
         changed = true;
       }
     }
@@ -168,8 +199,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& guards) {
   if (!changed) return false;
 
   // Make a second pass to reflow types, with some special logic for loads.
-  auto const firstMarker = unit.main()->front()->front()->marker();
-  FrameState state(unit, firstMarker.spOff, firstMarker.func);
+  FrameState state(unit);
   for (auto* block : blocks) {
     state.startBlock(block);
 

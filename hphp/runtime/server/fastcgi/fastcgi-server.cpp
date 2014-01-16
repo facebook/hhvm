@@ -62,7 +62,8 @@ void FastCGIAcceptor::onNewConnection(
     localAddress = s_unknownSocketAddress;
   }
 
-  FastCGIConnection* conn = new FastCGIConnection(
+  // Will delete itself when it gets a closing callback
+  auto conn = new FastCGIConnection(
       m_server,
       std::move(sock),
       localAddress,
@@ -86,7 +87,7 @@ FastCGIConnection::FastCGIConnection(
   : SocketConnection(std::move(sock), localAddr, peerAddr),
     m_server(server) {
   m_eventBase = m_server->getEventBaseManager()->getExistingEventBase();
-  DCHECK(m_eventBase != nullptr);
+  assert(m_eventBase != nullptr);
   m_sock->setReadCallback(this);
   m_session.setCallback(this);
 }
@@ -128,8 +129,8 @@ bool FastCGIConnection::hasReadDataAvailable() {
   return ((chain != nullptr) && (chain->length() != 0));
 }
 
-ProtocolSessionHandlerPtr FastCGIConnection::newSessionHandler(
-                                               int transport_id) {
+std::shared_ptr<ProtocolSessionHandler>
+FastCGIConnection::newSessionHandler(int transport_id) {
   auto transport = std::make_shared<FastCGITransport>(this, transport_id);
   m_transports[transport_id] = transport;
   return transport;
@@ -140,14 +141,12 @@ void FastCGIConnection::onSessionEgress(std::unique_ptr<IOBuf> chain) {
 }
 
 void FastCGIConnection::onSessionError() {
-  CHECK(false); // This will print a nice stack-trace.
-                // FastCGI specification allows us to exit with a
-                // non-zero status in case o protocol-level errors.
+  onSessionClose();
 }
 
 void FastCGIConnection::onSessionClose() {
   shutdownTransport();
-  m_readBuf.clear();
+  delete this;
 }
 
 void FastCGIConnection::setMaxConns(int max_conns) {
@@ -159,7 +158,7 @@ void FastCGIConnection::setMaxRequests(int max_requests) {
 }
 
 void FastCGIConnection::handleRequest(int transport_id) {
-  DCHECK(m_transports.count(transport_id));
+  assert(m_transports.count(transport_id));
   m_server->handleRequest(m_transports[transport_id]);
   m_transports.erase(transport_id);
 }
@@ -180,7 +179,7 @@ FastCGIServer::FastCGIServer(const std::string &address,
                  RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
                  RequestPriority::k_numPriorities) {
   TSocketAddress sock_addr;
-  if (sock_addr.empty()) {
+  if (address.empty()) {
     sock_addr.setFromLocalPort(port);
   } else {
     sock_addr.setFromHostPort(address, port);
@@ -287,7 +286,8 @@ int FastCGIServer::getLibEventConnectionCount() {
   return conns;
 }
 
-void FastCGIServer::handleRequest(FastCGITransportPtr transport) {
+void FastCGIServer::handleRequest(
+    std::shared_ptr<FastCGITransport> transport) {
   auto job = std::make_shared<FastCGIJob>(transport);
   m_dispatcher.enqueue(job);
 }

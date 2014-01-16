@@ -24,16 +24,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(Type);
+DECLARE_EXTENDED_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(AnalysisResult);
-DECLARE_BOOST_TYPES(FunctionScope);
-DECLARE_BOOST_TYPES(ClassScope);
+DECLARE_EXTENDED_BOOST_TYPES(FunctionScope);
+DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(VariableTable);
 DECLARE_BOOST_TYPES(ConstantTable);
 
 class BuiltinSymbols {
 public:
   static bool Loaded;
+  static AnalysisResultPtr s_systemAr;
 
   static bool Load(AnalysisResultPtr ar);
 
@@ -46,11 +47,6 @@ public:
   static void LoadConstants(AnalysisResultPtr ar,
                             ConstantTablePtr constants);
 
-  /*
-   * Load system/globals/constants.php.
-   */
-  static ConstantTablePtr LoadSystemConstants();
-
   /**
    * Testing whether a variable is a PHP superglobal.
    */
@@ -60,35 +56,24 @@ public:
   static bool IsDeclaredDynamic(const std::string& name);
   static void LoadSuperGlobals();
 
-  static StringToFunctionScopePtrMap s_functions;
-  static StringToClassScopePtrMap s_classes;
-  static VariableTablePtr s_variables;
-  static ConstantTablePtr s_constants;
-  static AnalysisResultPtr s_systemAr;
-
   static const char *const GlobalNames[];
   static int NumGlobalNames();
 private:
   static StringBag s_strings;
   static const char *SystemClasses[];
 
-  static AnalysisResultPtr LoadGlobalSymbols(const char *fileName);
-
   static StringToTypePtrMap s_superGlobals;
 
   static std::set<std::string> s_declaredDynamic;
-
-  static void *s_handle_main;
 
   static FunctionScopePtr ImportFunctionScopePtr(AnalysisResultPtr ar,
                                                  ClassInfo *cls,
                                                  ClassInfo::MethodInfo *method);
   static void ImportExtFunctions(AnalysisResultPtr ar,
-                                 StringToFunctionScopePtrMap &map,
                                  ClassInfo *cls);
-  static void ImportExtFunctions(AnalysisResultPtr ar,
-                                 FunctionScopePtrVec &vec,
-                                 ClassInfo *cls);
+  static void ImportExtMethods(AnalysisResultPtr ar,
+                               FunctionScopePtrVec &vec,
+                               ClassInfo *cls);
   static void ImportExtProperties(AnalysisResultPtr ar,
                                   VariableTablePtr dest,
                                   ClassInfo *cls);

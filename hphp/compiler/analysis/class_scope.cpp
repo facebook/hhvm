@@ -39,6 +39,7 @@
 #include "hphp/compiler/statement/class_variable.h"
 #include "hphp/compiler/statement/class_constant.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_require_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -473,6 +474,17 @@ void ClassScope::addImportTraitMethod(const TraitMethod &traitMethod,
   m_importMethToTraitMap[methName].push_back(traitMethod);
 }
 
+void ClassScope::addTraitRequirement(const string &requiredName,
+                                     bool isExtends) {
+  assert(isTrait());
+
+  if (isExtends) {
+    m_traitRequiredExtends.insert(requiredName);
+  } else {
+    m_traitRequiredImplements.insert(requiredName);
+  }
+}
+
 void
 ClassScope::setImportTraitMethodModifiers(const string &methName,
                                           ClassScopePtr traitCls,
@@ -533,6 +545,7 @@ ClassScope::findTraitMethod(AnalysisResultPtr ar,
 
 void ClassScope::findTraitMethodsToImport(AnalysisResultPtr ar,
                                           ClassScopePtr trait) {
+  assert(Option::WholeProgram);
   ClassStatementPtr tStmt =
     dynamic_pointer_cast<ClassStatement>(trait->getStmt());
   StatementListPtr tStmts = tStmt->getStmts();
@@ -549,7 +562,45 @@ void ClassScope::findTraitMethodsToImport(AnalysisResultPtr ar,
   }
 }
 
+void ClassScope::importTraitRequirements(AnalysisResultPtr ar,
+                                         ClassScopePtr trait) {
+  if (isTrait()) {
+    for (auto const& req : trait->getTraitRequiredExtends()) {
+      addTraitRequirement(req, true);
+    }
+    for (auto const& req : trait->getTraitRequiredImplements()) {
+      addTraitRequirement(req, false);
+    }
+  } else {
+    for (auto const& req : trait->getTraitRequiredExtends()) {
+      if (!derivesFrom(ar, req, true, false)) {
+        getStmt()->analysisTimeFatal(
+          Compiler::InvalidDerivation,
+          Strings::TRAIT_REQ_EXTENDS,
+          m_originalName.c_str(),
+          req.c_str(),
+          trait->getOriginalName().c_str(),
+          "use"
+        );
+      }
+    }
+    for (auto const& req : trait->getTraitRequiredImplements()) {
+      if (!derivesFrom(ar, req, true, false)) {
+        getStmt()->analysisTimeFatal(
+          Compiler::InvalidDerivation,
+          Strings::TRAIT_REQ_IMPLEMENTS,
+          m_originalName.c_str(),
+          req.c_str(),
+          trait->getOriginalName().c_str(),
+          "use"
+        );
+      }
+    }
+  }
+}
+
 void ClassScope::applyTraitPrecRule(TraitPrecStatementPtr stmt) {
+  assert(Option::WholeProgram);
   const string methodName = Util::toLower(stmt->getMethodName());
   const string selectedTraitName = Util::toLower(stmt->getTraitName());
   std::set<string> otherTraitNames;
@@ -580,12 +631,20 @@ void ClassScope::applyTraitPrecRule(TraitPrecStatementPtr stmt) {
 
   // Report error if didn't find the selected trait
   if (!foundSelectedTrait) {
-    Compiler::Error(Compiler::UnknownTrait, stmt);
+    stmt->analysisTimeFatal(
+      Compiler::UnknownTrait,
+      Strings::TRAITS_UNKNOWN_TRAIT,
+      selectedTraitName.c_str()
+    );
   }
 
   // Sanity checking: otherTraitNames should be empty now
   if (otherTraitNames.size()) {
-    Compiler::Error(Compiler::UnknownTrait, stmt);
+    stmt->analysisTimeFatal(
+      Compiler::UnknownTrait,
+      Strings::TRAITS_UNKNOWN_TRAIT,
+      selectedTraitName.c_str()
+    );
   }
 }
 
@@ -596,6 +655,7 @@ bool ClassScope::hasMethod(const string &methodName) const {
 ClassScopePtr
 ClassScope::findSingleTraitWithMethod(AnalysisResultPtr ar,
                                       const string &methodName) const {
+  assert(Option::WholeProgram);
   ClassScopePtr trait = ClassScopePtr();
 
   for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
@@ -613,6 +673,7 @@ ClassScope::findSingleTraitWithMethod(AnalysisResultPtr ar,
 }
 
 void ClassScope::addTraitAlias(TraitAliasStatementPtr aliasStmt) {
+  assert(Option::WholeProgram);
   const string &traitName = aliasStmt->getTraitName();
   const string &origMethName = aliasStmt->getMethodName();
   const string &newMethName = aliasStmt->getNewMethodName();
@@ -623,6 +684,7 @@ void ClassScope::addTraitAlias(TraitAliasStatementPtr aliasStmt) {
 
 void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
                                      TraitAliasStatementPtr stmt) {
+  assert(Option::WholeProgram);
   const string traitName = Util::toLower(stmt->getTraitName());
   const string origMethName = Util::toLower(stmt->getMethodName());
   const string newMethName = Util::toLower(stmt->getNewMethodName());
@@ -635,8 +697,11 @@ void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
     traitCls = ar->findClass(traitName);
   }
   if (!traitCls || !(traitCls->isTrait())) {
-    Compiler::Error(Compiler::UnknownTrait, stmt);
-    return;
+    stmt->analysisTimeFatal(
+      Compiler::UnknownTrait,
+      Strings::TRAITS_UNKNOWN_TRAIT,
+      traitName.empty() ? origMethName.c_str() : traitName.c_str()
+    );
   }
 
   // Keep record of alias rule
@@ -647,8 +712,10 @@ void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
   MethodStatementPtr methStmt = findTraitMethod(ar, traitCls, origMethName,
                                                 visitedTraits);
   if (!methStmt) {
-    Compiler::Error(Compiler::UnknownTraitMethod, stmt);
-    return;
+    stmt->analysisTimeFatal(
+      Compiler::UnknownTraitMethod,
+      Strings::TRAITS_UNKNOWN_TRAIT_METHOD, origMethName.c_str()
+    );
   }
 
   if (origMethName == newMethName) {
@@ -663,6 +730,7 @@ void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
 }
 
 void ClassScope::applyTraitRules(AnalysisResultPtr ar) {
+  assert(Option::WholeProgram);
   ClassStatementPtr classStmt = dynamic_pointer_cast<ClassStatement>(getStmt());
   assert(classStmt);
   StatementListPtr stmts = classStmt->getStmts();
@@ -695,6 +763,7 @@ void ClassScope::applyTraitRules(AnalysisResultPtr ar) {
 //   1) implemented by other traits
 //   2) duplicate
 void ClassScope::removeSpareTraitAbstractMethods(AnalysisResultPtr ar) {
+  assert(Option::WholeProgram);
   for (MethodToTraitListMap::iterator iter = m_importMethToTraitMap.begin();
        iter != m_importMethToTraitMap.end(); iter++) {
 
@@ -732,9 +801,17 @@ void ClassScope::removeSpareTraitAbstractMethods(AnalysisResultPtr ar) {
 }
 
 void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
+  // Trait flattening is supposed to happen only when we have awareness of
+  // the whole program.
+  assert(Option::WholeProgram);
+
   if (m_traitStatus == FLATTENED) return;
   if (m_traitStatus == BEING_FLATTENED) {
-    Compiler::Error(Compiler::CyclicDependentTraits, getStmt());
+    getStmt()->analysisTimeFatal(
+      Compiler::CyclicDependentTraits,
+      "Cyclic dependency between traits involving %s",
+      getOriginalName().c_str()
+    );
     return;
   }
   if (m_usedTraitNames.size() == 0) {
@@ -751,18 +828,53 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     }
   }
 
+  if (isTrait()) {
+    for (auto const& req : getTraitRequiredExtends()) {
+      ClassScopePtr rCls = ar->findClass(req);
+      if (!rCls || rCls->isFinal() || rCls->isInterface()) {
+        getStmt()->analysisTimeFatal(
+          Compiler::InvalidDerivation,
+          Strings::TRAIT_BAD_REQ_EXTENDS,
+          m_originalName.c_str(),
+          req.c_str(),
+          req.c_str()
+        );
+      }
+    }
+    for (auto const& req : getTraitRequiredImplements()) {
+      ClassScopePtr rCls = ar->findClass(req);
+      if (!rCls || !(rCls->isInterface())) {
+        getStmt()->analysisTimeFatal(
+          Compiler::InvalidDerivation,
+          Strings::TRAIT_BAD_REQ_IMPLEMENTS,
+          m_originalName.c_str(),
+          req.c_str(),
+          req.c_str()
+        );
+      }
+    }
+  }
+
   // Find trait methods to be imported
   for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
     ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
     if (!tCls || !(tCls->isTrait())) {
-      setAttribute(UsesUnknownTrait);
-      Compiler::Error(Compiler::UnknownTrait, getStmt());
-      continue;
+      setAttribute(UsesUnknownTrait); // XXX: is this useful ... for anything?
+      getStmt()->analysisTimeFatal(
+        Compiler::UnknownTrait,
+        Strings::TRAITS_UNKNOWN_TRAIT,
+        m_usedTraitNames[i].c_str()
+      );
     }
     // First, make sure the used trait is flattened
     tCls->importUsedTraits(ar);
 
     findTraitMethodsToImport(ar, tCls);
+
+    // Import any interfaces implemented
+    tCls->getInterfaces(ar, m_bases, false);
+
+    importTraitRequirements(ar, tCls);
   }
 
   // Apply rules
@@ -782,7 +894,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   }
 
   std::map<string, MethodStatementPtr> importedTraitMethods;
-  std::vector<std::pair<string,const TraitMethod*> > importedTraitsWithOrigName;
+  std::vector<std::pair<string,const TraitMethod*>> importedTraitsWithOrigName;
 
   // Actually import the methods
   for (MethodToTraitListMap::const_iterator
@@ -796,7 +908,11 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     }
     // Consistency checking: each name must only refer to one imported method
     if (iter->second.size() > 1) {
-      Compiler::Error(Compiler::MethodInMultipleTraits, getStmt());
+      getStmt()->analysisTimeFatal(
+        Compiler::MethodInMultipleTraits,
+        Strings::METHOD_IN_MULTIPLE_TRAITS,
+        iter->first.c_str()
+      );
     } else {
       TraitMethodList::const_iterator traitMethIter = iter->second.begin();
       if ((traitMethIter->m_modifiers ? traitMethIter->m_modifiers :
@@ -807,13 +923,6 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
           continue;
         }
       }
-      if (traitMethIter->m_modifiers &&
-          traitMethIter->m_modifiers->isStatic()) {
-        Compiler::Error(Compiler::InvalidAccessModifier,
-                        traitMethIter->m_modifiers);
-        continue;
-      }
-
       string sourceName = traitMethIter->m_ruleStmt ?
         Util::toLower(((TraitAliasStatement*)traitMethIter->m_ruleStmt.get())->
                       getMethodName()) : iter->first;
@@ -1134,8 +1243,7 @@ void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
       if (cls && cls->isRedeclaring()) {
         cls = self->findExactClass(cls);
       }
-      if (cls) names.push_back(cls->getDocName());
-      else     names.push_back(*it);
+      names.push_back(cls ? cls->getDocName() : *it);
       if (cls && recursive) {
         cls->getInterfaces(ar, names, true);
       }

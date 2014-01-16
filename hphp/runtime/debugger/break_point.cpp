@@ -13,9 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-// force tests to run
-
 #include "hphp/runtime/debugger/break_point.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
 #include "hphp/runtime/debugger/debugger_thrift_buffer.h"
@@ -27,6 +28,10 @@
 #include "hphp/runtime/base/comparisons.h"
 
 namespace HPHP { namespace Eval {
+
+using std::string;
+using boost::lexical_cast;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -41,7 +46,7 @@ int InterruptSite::getFileLen() const {
 
 std::string InterruptSite::desc() const {
   TRACE(2, "InterruptSite::desc\n");
-  string ret;
+  std::string ret;
   if (m_error.isNull()) {
     ret = "Break";
   } else if (m_error.isObject()) {
@@ -65,7 +70,7 @@ std::string InterruptSite::desc() const {
   string file = getFile();
   int line0 = getLine0();
   if (line0) {
-    ret += " on line " + lexical_cast<string>(line0);
+    ret += " on line " + boost::lexical_cast<std::string>(line0);
     if (!file.empty()) {
       ret += " of " + file;
     }
@@ -93,7 +98,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
     // so we need to construct the site on the caller
     fp = context->getPrevVMState(fp, &m_offset);
   } else {
-    const uchar *pc = context->getPC();
+    const auto *pc = context->getPC();
     bail_on(!fp->m_func);
     m_unit = fp->m_func->unit();
     bail_on(!m_unit);
@@ -790,7 +795,7 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
     }
     // Now we have a namespace, class and func name.
     // The namespace only or the namespace and class might be empty.
-    DFunctionInfoPtr pfunc(new DFunctionInfo());
+    auto pfunc = std::make_shared<DFunctionInfo>();
     if (m_class.empty()) {
       if (!isValidIdentifier(name)) goto returnInvalid;
       if (m_namespace.empty()) {
@@ -1088,7 +1093,8 @@ bool BreakPointInfo::checkClause(DebuggerProxy &proxy) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void BreakPointInfo::SendImpl(int version, const BreakPointInfoPtrVec &bps,
+void BreakPointInfo::SendImpl(int version,
+                              const std::vector<BreakPointInfoPtr> &bps,
                               DebuggerThriftBuffer &thrift) {
   TRACE(2, "BreakPointInfo::SendImpl\n");
   int16_t size = bps.size();
@@ -1098,7 +1104,8 @@ void BreakPointInfo::SendImpl(int version, const BreakPointInfoPtrVec &bps,
   }
 }
 
-void BreakPointInfo::RecvImpl(int version, BreakPointInfoPtrVec &bps,
+void BreakPointInfo::RecvImpl(int version,
+                              std::vector<BreakPointInfoPtr> &bps,
                               DebuggerThriftBuffer &thrift) {
   TRACE(2, "BreakPointInfo::RecvImpl\n");
   int16_t size;

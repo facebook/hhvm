@@ -25,7 +25,6 @@ namespace HPHP {
 class SourceRootInfo;
 class RequestURI;
 class Transport;
-DECLARE_BOOST_TYPES(SatelliteServerInfo);
 ///////////////////////////////////////////////////////////////////////////////
 
 class RPCRequestHandler : public RequestHandler {
@@ -38,10 +37,13 @@ public:
   RPCRequestHandler(int timeout, bool info);
   virtual ~RPCRequestHandler();
 
-  void setServerInfo(SatelliteServerInfoPtr info) { m_serverInfo = info;}
+  void setServerInfo(std::shared_ptr<SatelliteServerInfo> info) {
+    m_serverInfo = info;
+  }
 
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport);
+  virtual void abortRequest(Transport *transport);
 
   /**
    * Force a reset before the next request.
@@ -54,7 +56,7 @@ public:
   ReturnEncodeType getReturnEncodeType() const { return m_returnEncodeType; }
 private:
   ExecutionContext *m_context;
-  SatelliteServerInfoPtr m_serverInfo;
+  std::shared_ptr<SatelliteServerInfo> m_serverInfo;
   int m_requestsSinceReset;
   bool m_reset;
   bool m_logResets;

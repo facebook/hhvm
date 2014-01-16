@@ -13,8 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/server/request-uri.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -50,7 +54,7 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
         return;
       }
     }
-    transport->sendString("Not Found", 404);
+    transport->sendString(getDefault404(), 404);
     transport->onSendEnd();
     m_done = true;
   }
@@ -62,19 +66,22 @@ RequestURI::RequestURI(const std::string & rpcFunc)
 }
 
 bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
-                         const string &sourceRoot,
-                         const string &pathTranslation, const char *url) {
+                         const std::string &sourceRoot,
+                         const std::string &pathTranslation, const char *url) {
   splitURL(url, m_originalURL, m_queryString);
   m_originalURL = StringUtil::UrlDecode(m_originalURL, false);
   m_rewritten = false;
 
   // Fast path for files that exist
-  String canon(Util::canonicalize(m_originalURL.c_str(), m_originalURL.size()),
-               AttachString);
-  if (virtualFileExists(vhost, sourceRoot, pathTranslation, canon)) {
-    m_rewrittenURL = canon;
-    m_resolvedURL = canon;
-    return true;
+  if (vhost->checkExistenceBeforeRewrite()) {
+    String canon(
+      Util::canonicalize(m_originalURL.c_str(), m_originalURL.size()),
+      AttachString);
+    if (virtualFileExists(vhost, sourceRoot, pathTranslation, canon)) {
+      m_rewrittenURL = canon;
+      m_resolvedURL = canon;
+      return true;
+    }
   }
 
   if (!rewriteURL(vhost, transport, pathTranslation, sourceRoot)) {
@@ -122,11 +129,11 @@ const StaticString s_https("https://");
  *  m_rewrittenURL is set and m_queryString is updated if needed
  */
 bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
-                            const string &pathTranslation,
-                            const string &sourceRoot) {
+                            const std::string &pathTranslation,
+                            const std::string &sourceRoot) {
   bool qsa = false;
   int redirect = 0;
-  string host = transport->getHeader("host");
+  std::string host = transport->getHeader("host");
   m_rewrittenURL = m_originalURL;
   if (vhost->rewriteURL(host, m_rewrittenURL, qsa, redirect)) {
     m_rewritten = true;
@@ -185,8 +192,8 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
  *   output is false and no file was found
  */
 bool RequestURI::resolveURL(const VirtualHost *vhost,
-                            const string &pathTranslation,
-                            const string &sourceRoot) {
+                            const std::string &pathTranslation,
+                            const std::string &sourceRoot) {
 
   String startURL;
   if (m_rewritten) {
@@ -228,8 +235,8 @@ bool RequestURI::resolveURL(const VirtualHost *vhost,
 }
 
 bool RequestURI::virtualFileExists(const VirtualHost *vhost,
-                                   const string &sourceRoot,
-                                   const string &pathTranslation,
+                                   const std::string &sourceRoot,
+                                   const std::string &pathTranslation,
                                    const String& filename) {
   if (filename.empty() || filename.charAt(filename.length() - 1) == '/') {
     return false;
@@ -237,7 +244,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
   String canon(Util::canonicalize(filename.c_str(), filename.size()),
                AttachString);
   if (!vhost->getDocumentRoot().empty()) {
-    string fullname = canon.data();
+    std::string fullname = canon.data();
     int i = 0;
     while (i < fullname.size() && fullname[i] == '/') ++i;
     if (i) {
@@ -249,6 +256,9 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
     m_path = fullname;
     m_absolutePath = String(sourceRoot) + m_path;
     processExt();
+    if (RuntimeOption::PathDebug) {
+      m_triedURLs.push_back(m_absolutePath.toCppString());
+    }
 
     if (StaticContentCache::TheFileCache && !fullname.empty() &&
         StaticContentCache::TheFileCache->fileExists(fullname.c_str())) {
@@ -268,11 +278,11 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
 }
 
 bool RequestURI::virtualFolderExists(const VirtualHost *vhost,
-                                     const string &sourceRoot,
-                                     const string &pathTranslation,
+                                     const std::string &sourceRoot,
+                                     const std::string &pathTranslation,
                                      const String& foldername) {
   if (!vhost->getDocumentRoot().empty()) {
-    string fullname = foldername.data();
+    std::string fullname = foldername.data();
     // If there is a trailing slash, remove it
     if (fullname.size() > 0 && fullname[fullname.size()-1] == '/') {
       fullname = fullname.substr(fullname.size()-1);
@@ -291,7 +301,7 @@ bool RequestURI::virtualFolderExists(const VirtualHost *vhost,
       return true;
     }
 
-    const vector<string> &allowedDirectories =
+    const std::vector<std::string> &allowedDirectories =
       VirtualHost::GetAllowedDirectories();
     if (find(allowedDirectories.begin(),
              allowedDirectories.end(),
@@ -361,6 +371,18 @@ void RequestURI::clear() {
   m_origPathInfo.reset();
   m_absolutePath.reset();
   m_path.reset();
+}
+
+const std::string RequestURI::getDefault404() {
+  std::string ret = "404 File Not Found";
+  if (RuntimeOption::PathDebug) {
+    ret += "<br/>Paths examined:<ul>";
+    for (auto& url : m_triedURLs) {
+      ret += "<li>" + url + "</li>";
+    }
+    ret += "</ul>";
+  }
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

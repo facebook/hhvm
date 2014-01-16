@@ -23,13 +23,11 @@
 #include "folly/String.h"
 #include "folly/Hash.h"
 
-#include "hphp/util/base.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/lock.h"
 
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace RDS {
 

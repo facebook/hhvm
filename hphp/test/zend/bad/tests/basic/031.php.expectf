@@ -1,0 +1,8 @@
+array(3) {
+  ["data"]=>
+  string(3) "abc"
+  ["data2"]=>
+  string(9) "more data"
+  ["data3"]=>
+  string(14) "even more data"
+}

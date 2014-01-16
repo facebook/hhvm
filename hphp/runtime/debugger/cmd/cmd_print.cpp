@@ -32,17 +32,17 @@ const char *CmdPrint::Formats[] = {
 std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
   if (format == nullptr) {
     String sret = DebuggerClient::FormatVariable(ret, -1);
-    return string(sret.data(), sret.size());
+    return std::string(sret.data(), sret.size());
   }
 
   if (strcmp(format, "r") == 0) {
     String sret = DebuggerClient::FormatVariable(ret, -1, 'r');
-    return string(sret.data(), sret.size());
+    return std::string(sret.data(), sret.size());
   }
 
   if (strcmp(format, "v") == 0) {
     String sret = DebuggerClient::FormatVariable(ret, -1, 'v');
-    return string(sret.data(), sret.size());
+    return std::string(sret.data(), sret.size());
   }
 
   if (strcmp(format, "dec") == 0 ||
@@ -251,7 +251,7 @@ void CmdPrint::processClear(DebuggerClient &client) {
     return;
   }
 
-  string snum = client.argValue(2);
+  std::string snum = client.argValue(2);
   if (!DebuggerClient::IsValidNumber(snum)) {
     client.error("'[p]rint [c]lear' needs an {index} argument.");
     client.tutorial(
@@ -277,7 +277,7 @@ Variant CmdPrint::processWatch(DebuggerClient &client, const char *format,
   m_body = php;
   m_frame = client.getFrame();
   m_noBreak = true;
-  CmdPrintPtr res = client.xend<CmdPrint>(this);
+  auto res = client.xend<CmdPrint>(this);
   if (!res->m_output.empty()) {
     client.output(res->m_output);
   }
@@ -333,7 +333,7 @@ void CmdPrint::onClient(DebuggerClient &client) {
   m_printLevel = client.getDebuggerClientPrintLevel();
   assert(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
   m_frame = client.getFrame();
-  CmdPrintPtr res = client.xendWithNestedExecution<CmdPrint>(this);
+  auto res = client.xendWithNestedExecution<CmdPrint>(this);
   m_output = res->m_output;
   m_ret = res->m_ret;
   if (!m_output.empty()) {

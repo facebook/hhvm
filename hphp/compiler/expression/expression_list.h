@@ -73,15 +73,7 @@ public:
   void markParam(int p, bool noRefWrapper);
   void markParams(bool noRefWrapper);
 
-  void setCollectionType(int cType);
-
-  /**
-   * When a function call has too many arguments, we only want to output
-   * max number of arguments, by limiting output count of subexpressions.
-   */
-  void setOutputCount(int count);
-  int getOutputCount() const;
-  void resetOutputCount();
+  void setCollectionType(Collection::Type cType);
 
   virtual bool canonCompare(ExpressionPtr e) const;
 
@@ -97,7 +89,6 @@ private:
   unsigned int checkLitstrKeys() const;
 
   ExpressionPtrVec m_exps;
-  int m_outputCount;
   bool m_arrayElements;
   int m_collectionType;
   ListKind m_kind;

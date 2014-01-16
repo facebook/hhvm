@@ -50,7 +50,8 @@
 
 	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>

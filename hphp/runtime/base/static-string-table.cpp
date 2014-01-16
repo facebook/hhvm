@@ -117,7 +117,7 @@ void create_string_data_map() {
                       config);
 }
 
-StringData** precompute_chars() ATTRIBUTE_COLD;
+StringData** precompute_chars();
 StringData** precompute_chars() {
   StringData** raw = new StringData*[256];
   for (int i = 0; i < 256; i++) {
@@ -211,7 +211,6 @@ StringData* makeStaticString(const char* str) {
   return makeStaticString(str, strlen(str));
 }
 
-HOT_FUNC
 StringData* makeStaticString(char c) {
   // TODO(#2880477): should this be inlined?
   return precomputed_chars[(uint8_t)c];
@@ -237,8 +236,8 @@ RDS::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
   }
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   assert(it != s_stringDataMap->end());
-  it->second.bind<kTVXmmAlign>(persistent ? RDS::Mode::Persistent
-                                          : RDS::Mode::Normal);
+  it->second.bind<kTVSimdAlign>(persistent ? RDS::Mode::Persistent
+                                           : RDS::Mode::Normal);
   return it->second.handle();
 }
 

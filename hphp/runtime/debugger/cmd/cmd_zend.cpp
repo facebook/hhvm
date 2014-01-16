@@ -46,7 +46,7 @@ void CmdZend::onClient(DebuggerClient &client) {
     if (!code.empty()) {
       const std::string zendExe = client.getZendExecutable();
       client.info("Executing last PHP block with \"%s\"...", zendExe.c_str());
-      string out;
+      std::string out;
       Process::Exec(zendExe.c_str(), nullptr, code.c_str(), out, &out, true);
       client.print(out);
       return;

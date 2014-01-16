@@ -17,11 +17,12 @@
 #ifndef incl_HPHP_ASYNC_JOB_H_
 #define incl_HPHP_ASYNC_JOB_H_
 
-#include "hphp/util/base.h"
+#include <algorithm>
+
+#include <sys/time.h>
+
 #include "hphp/util/async-func.h"
 #include "hphp/util/lock.h"
-#include <algorithm>
-#include <sys/time.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

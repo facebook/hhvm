@@ -1,3 +1,18 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
 #include "hphp/runtime/vm/jit/func-prologues-arm.h"
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
@@ -11,7 +26,6 @@
 
 namespace HPHP { namespace JIT { namespace ARM {
 
-using Transl::TCA;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -77,7 +91,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   // Resolve cases where the wrong number of args was passed.
   if (nPassed > numParams) {
-    void (*helper)(ActRec*) = Transl::trimExtraArgs;
+    void (*helper)(ActRec*) = JIT::trimExtraArgs;
     a.  Mov    (argReg(0), rStashedAR);
     emitCall(a, CppCall(helper));
     // We'll fix rVmSp below.
@@ -139,7 +153,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     a.    Str    (rAsm, rVmFp[AROFF(m_func)]);
 
     // Copy in all the use vars
-    int baseUVOffset = sizeof(ObjectData) + func->cls()->builtinPropSize();
+    int baseUVOffset = sizeof(ObjectData) + func->cls()->builtinODTailSize();
     for (auto i = 0; i < numUseVars + 1; i++) {
       auto spOffset = -cellsToBytes(i + 1);
       if (i == 0) {
@@ -188,7 +202,6 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       a.  B     (&loopTop, vixl::ne);
     } else {
       for (auto k = numLocals; k < func->numLocals(); ++k) {
-        using Transl::Location;
         int disp =
           cellsToBytes(locPhysicalOffset(Location(Location::Local, k), func));
         a.Strb  (vixl::xzr, rVmFp[disp + TVOFF(m_type)]);
@@ -219,7 +232,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.  Mov  (argReg(0), func->name()->data());
         a.  Mov  (argReg(1), numParams);
         a.  Mov  (argReg(2), i);
-        auto fixupAddr = emitCall(a, CppCall(Transl::raiseMissingArgument));
+        auto fixupAddr = emitCall(a, CppCall(JIT::raiseMissingArgument));
         tx64->fixupMap().recordFixup(fixupAddr, fixup);
         break;
       }
@@ -243,6 +256,57 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   }
   return funcBody;
 }
+
+//////////////////////////////////////////////////////////////////////
+// ARM-only prologue runtime helpers
+
+void setArgInActRec(ActRec* ar, int argNum, uint64_t datum, DataType t) {
+  TypedValue* tv =
+    (TypedValue*)(uintptr_t(ar) - (argNum+1) * sizeof(TypedValue));
+  tv->m_data.num = datum;
+  tv->m_type = t;
+}
+
+const StaticString s_call("__call");
+const StaticString s_callStatic("__callStatic");
+
+int shuffleArgsForMagicCall(ActRec* ar) {
+  if (!ar->hasInvName()) {
+    return 0;
+  }
+  const Func* f UNUSED = ar->m_func;
+  f->validate();
+  assert(f->name()->isame(s_call.get())
+         || f->name()->isame(s_callStatic.get()));
+  assert(f->numParams() == 2);
+  assert(ar->hasInvName());
+  StringData* invName = ar->getInvName();
+  assert(invName);
+  ar->setVarEnv(nullptr);
+  int nargs = ar->numArgs();
+
+  // We need to make an array containing all the arguments passed by the
+  // caller and put it where the second argument is
+  PackedArrayInit aInit(nargs);
+  for (int i = 0; i < nargs; ++i) {
+    auto const tv = reinterpret_cast<TypedValue*>(
+      uintptr_t(ar) - (i+1) * sizeof(TypedValue)
+    );
+    aInit.append(tvAsCVarRef(tv));
+    tvRefcountedDecRef(tv);
+  }
+
+  // Put invName in the slot for first argument
+  setArgInActRec(ar, 0, uint64_t(invName), KindOfString);
+  // Put argArray in the slot for second argument
+  auto const argArray = aInit.toArray().detach();
+  setArgInActRec(ar, 1, uint64_t(argArray), KindOfArray);
+  // Fix up ActRec's numArgs
+  ar->initNumArgs(2);
+  return 1;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 } // anonymous namespace
 
@@ -300,8 +364,8 @@ SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
     assert(func->numParams() == 2);
     // Special __call prologue
     a.   Mov   (argReg(0), rStashedAR);
-    auto fixupAddr = emitCall(a, CppCall(Transl::shuffleArgsForMagicCall));
-    if (memory_profiling) {
+    auto fixupAddr = emitCall(a, CppCall(shuffleArgsForMagicCall));
+    if (RuntimeOption::HHProfServerEnabled) {
       tx64->fixupMap().recordFixup(
         fixupAddr,
         Fixup(skFuncBody.offset() - func->base(), func->numSlotsInFrame())

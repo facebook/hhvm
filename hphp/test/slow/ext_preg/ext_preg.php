@@ -194,6 +194,20 @@ function test_preg_replace() {
   $count = 0;
   preg_replace(array("/\\d/", "/\\s/"), "*", "xp 4 to", -1, $count);
   VS($count, 3);
+
+  VS(preg_replace("/xxx", "w", "xxxx"), NULL);
+  VS(preg_replace("/xxx/", "w", "xxxx"), "wx");
+  VS(preg_replace("/xxy/", "w", "xxxx"), "xxxx");
+
+  VS(preg_replace("/xxx", "w", array("xxxx")), array());
+  VS(preg_replace("/xxx/", "w", array("xxxx")), array("wx"));
+  VS(preg_replace("/xxx/", "w", array("xxxx", "yyyy")), array("wx", "yyyy"));
+  VS(preg_replace(array("/xxx/", "/xxx"), "w", array("xxxx")), array());
+  VS(preg_replace(array("/xxx/", "/xxx/"), "w", array("xxxx")), array("wx"));
+
+  VS(preg_replace("/xxx", array("w"), array("xxxx")), false);
+  VS(preg_replace(array("/xxx"), array("w"), array("xxxx")), array());
+  VS(preg_replace(array("/xxx/"), array("w"), array("xxxx")), array("wx"));
 }
 
 function next_year($m) {

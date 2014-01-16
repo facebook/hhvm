@@ -16,8 +16,13 @@
 
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 
+#include "folly/Optional.h"
+
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
+#include "hphp/runtime/vm/jit/native-calls.h"
+#include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -35,20 +40,25 @@ NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
 NOOP_OPCODE(AssertLoc)
-NOOP_OPCODE(OverrideLoc)
 NOOP_OPCODE(OverrideLocVal)
-NOOP_OPCODE(SmashLocals)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(AssertStkVal)
 NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(ExceptionBarrier)
-NOOP_OPCODE(InlineFPAnchor)
+NOOP_OPCODE(TakeStack)
 
 // XXX
 NOOP_OPCODE(DbgAssertPtr);
 
 #undef NOOP_OPCODE
+
+//////////////////////////////////////////////////////////////////////
+
+#define CALL_OPCODE(name) \
+  void CodeGenerator::cg##name(IRInstruction* i) { cgCallNative(m_as, i); }
+
+CALL_OPCODE(ConvIntToStr)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -64,16 +74,16 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
            curFunc());                                            \
   }
 
+#define CG_PUNT(instr) \
+    cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff, curFunc())
+
 PUNT_OPCODE(CheckType)
-PUNT_OPCODE(AssertType)
 PUNT_OPCODE(CheckTypeMem)
 PUNT_OPCODE(CheckStk)
 PUNT_OPCODE(CheckLoc)
 PUNT_OPCODE(CastStk)
 PUNT_OPCODE(CoerceStk)
 PUNT_OPCODE(CheckDefinedClsEq)
-PUNT_OPCODE(BeginCatch)
-PUNT_OPCODE(EndCatch)
 PUNT_OPCODE(TryEndCatch)
 PUNT_OPCODE(LdUnwinderValue)
 PUNT_OPCODE(DeleteUnwinderException)
@@ -120,21 +130,31 @@ PUNT_OPCODE(ConvCellToInt)
 PUNT_OPCODE(ConvCellToObj)
 PUNT_OPCODE(ConvBoolToStr)
 PUNT_OPCODE(ConvDblToStr)
-PUNT_OPCODE(ConvIntToStr)
 PUNT_OPCODE(ConvObjToStr)
 PUNT_OPCODE(ConvResToStr)
 PUNT_OPCODE(ConvCellToStr)
 PUNT_OPCODE(ExtendsClass)
+PUNT_OPCODE(IsWaitHandle)
 PUNT_OPCODE(InstanceOf)
 PUNT_OPCODE(InstanceOfIface)
+PUNT_OPCODE(InterfaceSupportsArr)
+PUNT_OPCODE(InterfaceSupportsStr)
+PUNT_OPCODE(InterfaceSupportsInt)
+PUNT_OPCODE(InterfaceSupportsDbl)
 PUNT_OPCODE(IsTypeMem)
 PUNT_OPCODE(IsNTypeMem)
 PUNT_OPCODE(Gt)
+PUNT_OPCODE(GtX)
 PUNT_OPCODE(Gte)
+PUNT_OPCODE(GteX)
 PUNT_OPCODE(Lt)
+PUNT_OPCODE(LtX)
 PUNT_OPCODE(Lte)
+PUNT_OPCODE(LteX)
 PUNT_OPCODE(Eq)
+PUNT_OPCODE(EqX)
 PUNT_OPCODE(Neq)
+PUNT_OPCODE(NeqX)
 PUNT_OPCODE(Same)
 PUNT_OPCODE(NSame)
 PUNT_OPCODE(Floor)
@@ -142,6 +162,7 @@ PUNT_OPCODE(Ceil)
 PUNT_OPCODE(InstanceOfBitmask)
 PUNT_OPCODE(NInstanceOfBitmask)
 PUNT_OPCODE(IsType)
+PUNT_OPCODE(IsScalarType)
 PUNT_OPCODE(IsNType)
 PUNT_OPCODE(JmpGt)
 PUNT_OPCODE(JmpGte)
@@ -191,6 +212,7 @@ PUNT_OPCODE(ExitOnVarEnv)
 PUNT_OPCODE(ReleaseVVOrExit)
 PUNT_OPCODE(RaiseError)
 PUNT_OPCODE(RaiseWarning)
+PUNT_OPCODE(RaiseNotice)
 PUNT_OPCODE(RaiseArrayIndexNotice)
 PUNT_OPCODE(CheckInit)
 PUNT_OPCODE(CheckInitMem)
@@ -200,6 +222,9 @@ PUNT_OPCODE(CheckBounds)
 PUNT_OPCODE(LdVectorSize)
 PUNT_OPCODE(CheckPackedArrayBounds)
 PUNT_OPCODE(CheckPackedArrayElemNull)
+PUNT_OPCODE(VectorHasFrozenCopy)
+PUNT_OPCODE(VectorDoCow)
+PUNT_OPCODE(CheckNonNull)
 PUNT_OPCODE(AssertNonNull)
 PUNT_OPCODE(Unbox)
 PUNT_OPCODE(Box)
@@ -207,8 +232,6 @@ PUNT_OPCODE(UnboxPtr)
 PUNT_OPCODE(BoxPtr)
 PUNT_OPCODE(LdVectorBase)
 PUNT_OPCODE(LdPairBase)
-PUNT_OPCODE(LdStack)
-PUNT_OPCODE(LdLoc)
 PUNT_OPCODE(LdLocAddr)
 PUNT_OPCODE(LdMem)
 PUNT_OPCODE(LdProp)
@@ -232,8 +255,14 @@ PUNT_OPCODE(LookupCns)
 PUNT_OPCODE(LookupCnsE)
 PUNT_OPCODE(LookupCnsU)
 PUNT_OPCODE(LookupClsMethod)
-PUNT_OPCODE(LdClsMethodCache)
-PUNT_OPCODE(LdClsMethodFCache)
+PUNT_OPCODE(LookupClsRDSHandle)
+PUNT_OPCODE(DerefClsRDSHandle)
+PUNT_OPCODE(LookupClsMethodCache)
+PUNT_OPCODE(LdClsMethodCacheFunc)
+PUNT_OPCODE(LdClsMethodCacheCls)
+PUNT_OPCODE(LdClsMethodFCacheFunc)
+PUNT_OPCODE(LookupClsMethodFCache)
+PUNT_OPCODE(GetCtxFwdCallDyn);
 PUNT_OPCODE(GetCtxFwdCall)
 PUNT_OPCODE(LdClsMethod)
 PUNT_OPCODE(LdPropAddr)
@@ -265,6 +294,7 @@ PUNT_OPCODE(StClosureArg)
 PUNT_OPCODE(StClosureCtx)
 PUNT_OPCODE(NewArray)
 PUNT_OPCODE(NewPackedArray)
+PUNT_OPCODE(NewStructArray)
 PUNT_OPCODE(NewCol)
 PUNT_OPCODE(Clone)
 PUNT_OPCODE(FreeActRec)
@@ -292,12 +322,10 @@ PUNT_OPCODE(ClosureStaticLocInit)
 PUNT_OPCODE(StaticLocInitCached)
 PUNT_OPCODE(SpillFrame)
 PUNT_OPCODE(CufIterSpillFrame)
-PUNT_OPCODE(ReqInterpret)
 PUNT_OPCODE(ReqRetranslateOpt)
 PUNT_OPCODE(ReqRetranslate)
 PUNT_OPCODE(Mov)
 PUNT_OPCODE(LdAddr)
-PUNT_OPCODE(IncRef)
 PUNT_OPCODE(IncRefCtx)
 PUNT_OPCODE(DecRefLoc)
 PUNT_OPCODE(DecRefStack)
@@ -306,7 +334,6 @@ PUNT_OPCODE(GenericRetDecRefs)
 PUNT_OPCODE(DecRef)
 PUNT_OPCODE(DecRefMem)
 PUNT_OPCODE(DecRefNZ)
-PUNT_OPCODE(DecRefNZOrBranch)
 PUNT_OPCODE(DefInlineFP)
 PUNT_OPCODE(InlineReturn)
 PUNT_OPCODE(DefInlineSP)
@@ -339,7 +366,6 @@ PUNT_OPCODE(ArrayAdd)
 PUNT_OPCODE(AKExists)
 PUNT_OPCODE(Spill)
 PUNT_OPCODE(Reload)
-PUNT_OPCODE(Shuffle)
 PUNT_OPCODE(CreateContFunc)
 PUNT_OPCODE(CreateContMeth)
 PUNT_OPCODE(ContEnter)
@@ -349,11 +375,19 @@ PUNT_OPCODE(ContSetRunning)
 PUNT_OPCODE(ContValid)
 PUNT_OPCODE(ContArIncKey)
 PUNT_OPCODE(ContArUpdateIdx)
+PUNT_OPCODE(LdContActRec)
 PUNT_OPCODE(StContArRaw)
 PUNT_OPCODE(LdContArValue)
 PUNT_OPCODE(StContArValue)
 PUNT_OPCODE(LdContArKey)
 PUNT_OPCODE(StContArKey)
+PUNT_OPCODE(LdWHState)
+PUNT_OPCODE(LdWHResult)
+PUNT_OPCODE(LdAFWHActRec)
+PUNT_OPCODE(CreateAFWHFunc)
+PUNT_OPCODE(CreateAFWHMeth)
+PUNT_OPCODE(CreateSRWH)
+PUNT_OPCODE(CreateSEWH)
 PUNT_OPCODE(IterInit)
 PUNT_OPCODE(IterInitK)
 PUNT_OPCODE(IterNext)
@@ -397,8 +431,6 @@ PUNT_OPCODE(ElemUX)
 PUNT_OPCODE(ElemUXStk)
 PUNT_OPCODE(ArrayGet)
 PUNT_OPCODE(StringGet)
-PUNT_OPCODE(VectorGet)
-PUNT_OPCODE(PairGet)
 PUNT_OPCODE(MapGet)
 PUNT_OPCODE(StableMapGet)
 PUNT_OPCODE(CGetElem)
@@ -407,7 +439,6 @@ PUNT_OPCODE(VGetElemStk)
 PUNT_OPCODE(BindElem)
 PUNT_OPCODE(BindElemStk)
 PUNT_OPCODE(ArraySet)
-PUNT_OPCODE(VectorSet)
 PUNT_OPCODE(MapSet)
 PUNT_OPCODE(StableMapSet)
 PUNT_OPCODE(ArraySetRef)
@@ -444,7 +475,7 @@ PUNT_OPCODE(RBTrace)
 PUNT_OPCODE(IncTransCounter)
 PUNT_OPCODE(IncProfCounter)
 PUNT_OPCODE(ArrayIdx)
-PUNT_OPCODE(DbgAssertRefCount)
+PUNT_OPCODE(GenericIdx)
 PUNT_OPCODE(DbgAssertType)
 
 #undef PUNT_OPCODE
@@ -456,6 +487,335 @@ void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
   auto stackOff = m_curInst->marker().spOff;
   auto pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();
   m_tx64->fixupMap().recordSyncPoint(tca, pcOff, stackOff);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
+  vixl::Label done;
+  auto base = x2a(curOpd(inst->src(0)).reg());
+  auto rCount = rAsm;
+  m_as.  Ldr   (rCount.W(), base[FAST_REFCOUNT_OFFSET]);
+  m_as.  Tbnz  (rCount, UncountedBitPos, &done);
+  m_as.  Cmp   (rCount, RefCountMaxRealistic);
+  m_as.  B     (&done, vixl::ls);
+  m_as.  Brk   (0);
+  m_as.  bind  (&done);
+}
+
+void CodeGenerator::cgIncRef(IRInstruction* inst) {
+  SSATmp* src = inst->src(0);
+  Type type = src->type();
+
+  if (type.notCounted()) return;
+
+  auto increfMaybeStatic = [&] {
+    auto base = x2a(curOpd(src).reg(0));
+    auto rCount = rAsm.W();
+    m_as.    Ldr  (rCount, base[FAST_REFCOUNT_OFFSET]);
+    if (!type.needsStaticBitCheck()) {
+      m_as.  Add  (rCount, rAsm.W(), 1);
+      m_as.  Str  (rCount, base[FAST_REFCOUNT_OFFSET]);
+    } else {
+      m_as.  Cmp  (rCount, 0);
+      static_assert(UncountedValue < 0 && StaticValue < 0, "");
+      ifThen(m_as, vixl::ge, [&] {
+        m_as.Add(rCount, rCount, 1);
+        m_as.Str(rCount, base[FAST_REFCOUNT_OFFSET]);
+      });
+    }
+  };
+
+  if (type.isKnownDataType()) {
+    assert(IS_REFCOUNTED_TYPE(type.toDataType()));
+    increfMaybeStatic();
+  } else {
+    m_as.    Cmp (x2a(curOpd(src).reg(1)).W(), KindOfRefCountThreshold);
+    ifThen(m_as, vixl::gt, [&] { increfMaybeStatic(); });
+  }
+}
+
+void CodeGenerator::cgAssertType(IRInstruction* inst) {
+  auto const& srcRegs = curOpd(inst->src(0));
+  auto const& dstRegs = curOpd(inst->dst());
+
+  PhysReg::Map<PhysReg> moves;
+  if (dstRegs.reg(0) != InvalidReg)
+    moves[dstRegs.reg(0)] = srcRegs.reg(0);
+  if (dstRegs.reg(1) != InvalidReg)
+    moves[dstRegs.reg(1)] = srcRegs.reg(1);
+
+  auto howTo = doRegMoves(moves, rAsm);
+  for (auto& how : howTo) {
+    if (how.m_kind == MoveInfo::Kind::Move) {
+      m_as.  Mov  (x2a(how.m_reg2), x2a(how.m_reg1));
+    } else {
+      emitXorSwap(m_as, x2a(how.m_reg2), x2a(how.m_reg1));
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgShuffle(IRInstruction* inst) {
+  PhysReg::Map<PhysReg> moves;
+
+  // Put required reg-reg moves in the map, and do spills at the same time.
+  for (auto i = 0; i < inst->numSrcs(); ++i) {
+    auto src = inst->src(i);
+    auto& rd = inst->extra<Shuffle>()->dests[i];
+    auto& rs = curOpd(src);
+
+    if (rd.numAllocated() == 0) continue;
+    if (rd.spilled()) {
+      for (auto j = 0; j < rd.numAllocated(); ++j) {
+        m_as.  Str  (x2a(rs.reg(j)), vixl::MemOperand(vixl::sp, rd.offset(j)));
+      }
+    } else if (!rs.spilled()) {
+      if (rs.reg(0) != InvalidReg) moves[rd.reg(0)] = rs.reg(0);
+      if (rs.reg(1) != InvalidReg) moves[rd.reg(1)] = rs.reg(1);
+    }
+  }
+
+  // Do reg-reg moves.
+  auto howTo = doRegMoves(moves, rAsm);
+  for (auto& how : howTo) {
+    if (how.m_kind == MoveInfo::Kind::Move) {
+      emitRegGetsRegPlusImm(m_as, x2a(how.m_reg2), x2a(how.m_reg1), 0);
+    } else {
+      emitXorSwap(m_as, x2a(how.m_reg1), x2a(how.m_reg2));
+    }
+  }
+
+  // Now do reloads and reg<-imm.
+  for (auto i = 0; i < inst->numSrcs(); ++i) {
+    auto src = inst->src(i);
+    auto& rd = inst->extra<Shuffle>()->dests[i];
+    auto& rs = curOpd(src);
+    if (rd.numAllocated() == 0) continue;
+    if (rd.spilled()) continue;
+    if (rs.spilled()) {
+      for (auto j = 0; j < rd.numAllocated(); ++j) {
+        m_as.  Ldr  (x2a(rd.reg(i)), vixl::MemOperand(vixl::sp, rs.offset(j)));
+      }
+      continue;
+    }
+    if (rs.numAllocated() == 0) {
+      assert(src->inst()->op() == DefConst);
+      m_as.  Mov  (x2a(rd.reg(0)), src->getValBits());
+    }
+    if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
+      // Move src known type to register
+      m_as.  Mov  (x2a(rd.reg(1)), src->type().toDataType());
+    }
+  }
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+static void shuffleArgs(vixl::MacroAssembler& a,
+                        ArgGroup& args,
+                        CppCall& call) {
+  assert_not_implemented(args.numStackArgs() == 0);
+
+  PhysReg::Map<PhysReg> moves;
+  PhysReg::Map<ArgDesc*> argDescs;
+
+  for (size_t i = 0; i < args.numRegArgs(); i++) {
+    auto kind = args[i].kind();
+    if (!(kind == ArgDesc::Kind::Reg  ||
+          kind == ArgDesc::Kind::Addr ||
+          kind == ArgDesc::Kind::TypeReg)) {
+      continue;
+    }
+    auto dstReg = args[i].dstReg();
+    auto srcReg = args[i].srcReg();
+    if (dstReg != srcReg) {
+      moves[dstReg] = srcReg;
+      argDescs[dstReg] = &args[i];
+    }
+    if (call.isIndirect() && dstReg == call.getReg()) {
+      // an indirect call uses an argument register for the func ptr.
+      // Use rAsm2 instead and update the CppCall
+      moves[rAsm2] = call.getReg();
+      call.updateCallIndirect(rAsm2);
+    }
+  }
+
+  auto const howTo = doRegMoves(moves, rAsm);
+
+  for (auto& how : howTo) {
+    auto srcReg = x2a(how.m_reg1);
+    auto dstReg = x2a(how.m_reg2);
+    if (how.m_kind == MoveInfo::Kind::Move) {
+      auto* argDesc = argDescs[how.m_reg2];
+      if (argDesc) {
+        auto kind = argDesc->kind();
+        if (kind == ArgDesc::Kind::Addr) {
+          emitRegGetsRegPlusImm(a, dstReg, srcReg, argDesc->imm().q());
+        } else {
+          if (argDesc->isZeroExtend()) {
+            // "Unsigned eXTend Byte"
+            a.Uxtb (dstReg, srcReg.W());
+          } else {
+            a.Mov  (dstReg, srcReg);
+          }
+        }
+        if (kind != ArgDesc::Kind::TypeReg) {
+          argDesc->markDone();
+        }
+      } else {
+        a.  Mov  (dstReg, srcReg);
+      }
+    } else {
+      emitXorSwap(a, dstReg, srcReg);
+    }
+  }
+
+  for (size_t i = 0; i < args.numRegArgs(); ++i) {
+    if (!args[i].done()) {
+      auto kind = args[i].kind();
+      auto dstReg = x2a(args[i].dstReg());
+      if (kind == ArgDesc::Kind::Imm) {
+        a.  Mov  (dstReg, args[i].imm().q());
+      } else {
+        not_implemented();
+      }
+    }
+  }
+}
+
+void CodeGenerator::cgCallNative(vixl::MacroAssembler& as,
+                                 IRInstruction* inst) {
+  using namespace NativeCalls;
+
+  Opcode opc = inst->op();
+  always_assert(CallMap::hasInfo(opc));
+
+  auto const& info = CallMap::info(opc);
+  ArgGroup argGroup = info.toArgGroup(curOpds(), inst);
+
+  auto call = [&]() -> CppCall {
+    switch (info.func.type) {
+    case FuncType::Call:
+      return CppCall(info.func.call);
+    case FuncType::SSA:
+      return CppCall(inst->src(info.func.srcIdx)->getValTCA());
+    }
+    not_reached();
+  }();
+
+  auto const dest = [&]() -> CallDest {
+    switch (info.dest) {
+      case DestType::None:  return kVoidDest;
+      case DestType::TV:    return callDestTV(inst->dst(0));
+      case DestType::SSA:   return callDest(inst->dst(0));
+      case DestType::SSA2:  return callDest2(inst->dst(0));
+    }
+    not_reached();
+  }();
+
+  cgCallHelper(as, call, dest, info.sync, argGroup,
+               m_state.liveRegs[m_curInst]);
+}
+
+void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
+                                 CppCall& call,
+                                 const CallDest& dstInfo,
+                                 SyncOptions sync,
+                                 ArgGroup& args,
+                                 RegSet toSave) {
+  assert(m_curInst->isNative());
+
+  auto dstReg0 = dstInfo.reg0;
+  auto dstReg1 = dstInfo.reg1;
+
+  if (debug) {
+    toSave.forEach([](PhysReg r) { assert(r.isGP()); });
+  }
+
+  toSave = toSave & kCallerSaved;
+  assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
+
+  // Use vixl's handy helper to push caller-save regs. It uses ldp/stp when
+  // possible.
+  CPURegList pushedRegs(vixl::CPURegister::kRegister, vixl::kXRegSize, 0);
+  toSave.forEach([&](PhysReg r) { pushedRegs.Combine(r); });
+
+  // The vixl helper requires you to pass it an even number of registers. If we
+  // have an odd number of regs to save, remove one from the list we pass, and
+  // save it ourselves.
+  folly::Optional<vixl::CPURegister> maybeOddOne;
+  if (pushedRegs.Count() % 2 == 1) {
+    maybeOddOne = pushedRegs.PopHighestIndex();
+  }
+  a.    PushCPURegList(pushedRegs);
+  if (maybeOddOne) {
+    // We're only storing a single reg, but the stack pointer must always be
+    // 16-byte aligned. This instruction subtracts 16 from the stack pointer,
+    // then writes the value.
+    a.  Str  (maybeOddOne.value(), MemOperand(vixl::sp, -16, vixl::PreIndex));
+  }
+
+  SCOPE_EXIT {
+    if (maybeOddOne) {
+      // Read the value, then add 16 to the stack pointer.
+      a.Ldr  (maybeOddOne.value(), MemOperand(vixl::sp, 16, vixl::PostIndex));
+    }
+    a.  PopCPURegList(pushedRegs);
+  };
+
+  for (size_t i = 0; i < args.numRegArgs(); i++) {
+    args[i].setDstReg(PhysReg{argReg(i)});
+  }
+  shuffleArgs(a, args, call);
+
+  auto syncPoint = emitCall(a, call);
+
+  if (RuntimeOption::HHProfServerEnabled || sync != SyncOptions::kNoSyncPoint) {
+    recordHostCallSyncPoint(a, syncPoint);
+  }
+
+  auto armDst0 = x2a(dstReg0);
+  DEBUG_ONLY auto armDst1 = x2a(dstReg1);
+
+  switch (dstInfo.type) {
+    case DestType::TV: not_implemented();
+    case DestType::SSA:
+      assert(!armDst1.IsValid());
+      if (armDst0.IsValid() && !armDst0.Is(vixl::x0)) a.Mov(armDst0, vixl::x0);
+      break;
+    case DestType::SSA2: not_implemented();
+    case DestType::None:
+      assert(!armDst0.IsValid() && !armDst1.IsValid());
+      break;
+  }
+}
+
+/*
+ * XXX copypasta but has to be in the class because of curOpd and changing that
+ * would make callsites real messy
+ */
+
+CallDest CodeGenerator::callDest(PhysReg reg0,
+                                 PhysReg reg1 /* = InvalidReg */) const {
+  return { DestType::SSA, reg0, reg1 };
+}
+
+CallDest CodeGenerator::callDest(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::SSA, curOpd(ssa).reg(0), curOpd(ssa).reg(1) };
+}
+
+CallDest CodeGenerator::callDestTV(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::TV, curOpd(ssa).reg(0), curOpd(ssa).reg(1) };
+}
+
+CallDest CodeGenerator::callDest2(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::SSA2, curOpd(ssa).reg(0), curOpd(ssa).reg(1) };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -497,12 +857,14 @@ void CodeGenerator::emitTypeTest(Type type, Loc typeSrc, Loc dataSrc,
     cc = CC_E;
   }
   doJcc(cc);
-  if (type.strictSubtypeOf(Type::Obj) || type.strictSubtypeOf(Type::Res)) {
+  if (type < Type::Obj) {
     assert(type.getClass()->attrs() & AttrFinal);
     m_as.   Ldr   (rAsm, dataSrc);
     m_as.   Ldr   (rAsm, rAsm[ObjectData::getVMClassOffset()]);
     m_as.   Cmp   (rAsm, reinterpret_cast<int64_t>(type.getClass()));
     doJcc(CC_E);
+  } else if (type < Type::Res) {
+    CG_PUNT(TypeTest-on-Resource);
   } else if (type <= Type::Arr && type.hasArrayKind()) {
     m_as.   Ldr   (rAsm, dataSrc);
     m_as.   Ldrb  (rAsm.W(), rAsm[ArrayData::offsetofKind()]);
@@ -685,6 +1047,122 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
+void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
+  m_as.  Brk  (0);
+}
+
+void CodeGenerator::cgEndCatch(IRInstruction* inst) {
+  m_as.  Brk  (0);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::emitLoadTypedValue(SSATmp* dst,
+                                       vixl::Register base,
+                                       ptrdiff_t offset,
+                                       Block* label) {
+  auto valueDstReg = x2a(curOpd(dst).reg(0));
+  auto typeDstReg  = x2a(curOpd(dst).reg(1));
+
+  if (label) not_implemented();
+
+  if (valueDstReg.IsFPRegister()) {
+    not_implemented();
+  }
+
+  // Avoid clobbering the base reg if we'll need it later
+  if (base.Is(typeDstReg) && valueDstReg.IsValid()) {
+    m_as.  Mov  (rAsm, base);
+    base = rAsm;
+  }
+
+  if (typeDstReg.IsValid()) {
+    m_as.  Ldrb (typeDstReg.W(), base[offset + TVOFF(m_type)]);
+  }
+
+  if (valueDstReg.IsValid()) {
+    m_as.  Ldr  (valueDstReg, base[offset + TVOFF(m_data)]);
+  }
+}
+
+void CodeGenerator::emitStoreTypedValue(vixl::Register base,
+                                        ptrdiff_t offset,
+                                        SSATmp* src) {
+  assert(src->type().needsReg());
+  auto reg0 = x2a(curOpd(src).reg(0));
+  auto reg1 = x2a(curOpd(src).reg(1));
+  m_as.  Str  (reg0, base[offset + TVOFF(m_data)]);
+  m_as.  Strb (reg1.W(), base[offset + TVOFF(m_type)]);
+}
+
+void CodeGenerator::emitLoad(SSATmp* dst,
+                             vixl::Register base,
+                             ptrdiff_t offset,
+                             Block* label /* = nullptr */) {
+  auto type = dst->type();
+  if (type.needsReg()) {
+    return emitLoadTypedValue(dst, base, offset, label);
+  }
+  if (label) {
+    not_implemented();
+  }
+  if (type.isNull()) return;
+
+  auto dstReg = x2a(curOpd(dst).reg());
+  if (!dstReg.IsValid()) return;
+
+  m_as.  Ldr  (dstReg, base[offset + TVOFF(m_data)]);
+}
+
+void CodeGenerator::emitStore(vixl::Register base,
+                              ptrdiff_t offset,
+                              SSATmp* src,
+                              bool genStoreType /* = true */) {
+  Type type = src->type();
+  if (type.needsReg()) {
+    return emitStoreTypedValue(base, offset, src);
+  }
+  if (genStoreType) {
+    auto dt = type.toDataType();
+    if (dt == KindOfUninit) {
+      static_assert(KindOfUninit == 0, "zero register hack");
+      m_as.  Strb  (vixl::wzr, base[offset + TVOFF(m_type)]);
+    } else {
+      m_as.  Mov   (rAsm, dt);
+      m_as.  Strb  (rAsm.W(), base[offset + TVOFF(m_type)]);
+    }
+  }
+  if (type.isNull()) {
+    return;
+  }
+  if (src->isConst()) {
+    int64_t val = 0;
+    if (type <= (Type::Bool | Type::Int | Type::Dbl |
+                 Type::Arr | Type::StaticStr | Type::Cls)) {
+      val = src->getValBits();
+    } else {
+      not_reached();
+    }
+    m_as.    Mov  (rAsm, val);
+    m_as.    Str  (rAsm, base[offset + TVOFF(m_data)]);
+  } else {
+    m_as.    Str  (x2a(curOpd(src).reg()), base[offset + TVOFF(m_data)]);
+  }
+}
+
+void CodeGenerator::cgLdLoc(IRInstruction* inst) {
+  auto baseReg = x2a(curOpd(inst->src(0)).reg());
+  auto offset = localOffset(inst->extra<LdLoc>()->locId);
+  emitLoad(inst->dst(), baseReg, offset);
+}
+
+void CodeGenerator::cgLdStack(IRInstruction* inst) {
+  assert(inst->taken() == nullptr);
+  auto srcReg = x2a(curOpd(inst->src(0)).reg());
+  auto offset = cellsToBytes(inst->extra<LdStack>()->offset);
+  emitLoad(inst->dst(), srcReg, offset);
+}
+
 void CodeGenerator::cgLdConst(IRInstruction* inst) {
   auto const dstReg = x2a(curOpd(inst->dst()).reg());
   auto const val    = inst->extra<LdConst>()->as<uintptr_t>();
@@ -736,7 +1214,7 @@ void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
   auto kind        = inst->src(1)->getValInt();
   auto const& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
 
-  auto off = slot.offset() - c_Continuation::getArOffset(curFunc());
+  auto off = slot.offset() - c_Continuation::getArOffset();
   switch (slot.size()) {
     case sz::byte:  m_as.  Ldrb  (destReg.W(), contArReg[off]); break;
     case sz::dword: m_as.  Ldr   (destReg.W(), contArReg[off]); break;
@@ -779,46 +1257,26 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
       // The simplifier detected that this store was redundnant.
       continue;
     }
-    // XXX this is a cut-down version of cgStore.
-    if (val->isConst()) {
-      m_as. Mov (rAsm, val->getValBits());
-      m_as. Str (rAsm, spReg[offset]);
-    } else {
-      auto reg = x2a(curOpd(val).reg());
-      m_as. Str   (reg, spReg[offset]);
-    }
-    m_as. Mov   (rAsm, val->type().toDataType());
-    m_as. Strb  (rAsm.W(), spReg[offset + TVOFF(m_type)]);
+    emitStore(spReg, offset, val);
   }
   emitRegGetsRegPlusImm(m_as, dstReg, spReg, adjustment);
 }
 
 void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
-  auto fpReg = x2a(curOpd(inst->src(0)).reg());
-  auto spReg = x2a(curOpd(inst->src(1)).reg());
+  auto sp = inst->src(0);
+  auto fp = inst->src(1);
   auto pcOff = inst->extra<InterpOneData>()->bcOff;
 
   auto opc = *(curFunc()->unit()->at(pcOff));
   auto* interpOneHelper = interpOneEntryPoints[opc];
 
-  // This means push x30 (the link register) first, then x29. This mimics the
-  // x64 stack frame: return address higher in memory than saved FP.
-  m_as.   Push   (x30, x29);
-
-  // TODO(2966997): this really should be saving caller-save registers and
-  // basically doing everything else that cgCallHelper does. This only works
-  // now because no caller-saved registers are live.
-  m_as.   Mov    (rHostCallReg, reinterpret_cast<uint64_t>(interpOneHelper));
-  m_as.   Mov    (argReg(0), fpReg);
-  m_as.   Mov    (argReg(1), spReg);
-  m_as.   Mov    (argReg(2), pcOff);
-
-  // Note that sync points for HostCalls have to be recorded at the *start* of
-  // the instruction.
-  recordHostCallSyncPoint(m_as, m_as.frontier());
-  m_as.   HostCall(3);
-
-  m_as.   Pop    (x29, x30);
+  CppCall call(interpOneHelper);
+  cgCallHelper(m_as,
+               call,
+               callDest(InvalidReg),
+               SyncOptions::kSyncPoint,
+               ArgGroup(curOpds()).ssa(fp).ssa(sp).imm(pcOff),
+               m_state.liveRegs[m_curInst]);
 }
 
 void CodeGenerator::cgInterpOne(IRInstruction* inst) {
@@ -862,7 +1320,7 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
+void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
   FTRACE(6, "cgBlock: {}\n", block->id());
 
   BCMarker prevMarker;

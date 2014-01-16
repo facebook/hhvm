@@ -5,6 +5,7 @@ fclose($fp);
 
 $fo = new SplFileObject('SplFileObject_fgetcsv_escape_default.csv');
 var_dump($fo->fgetcsv());
-?><?php
+?>
+<?php
 unlink('SplFileObject_fgetcsv_escape_default.csv');
 ?>

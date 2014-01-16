@@ -35,6 +35,25 @@ struct IRInstruction;
 struct SSATmp;
 
 /*
+ * LocalStateHook is used to separate the acts of determining which locals are
+ * affected by an instruction and recording those changes. It allows consumers
+ * of FrameState to get details about how an instruciton affects the locals
+ * without having to query the state of each local before and after having
+ * FrameState process the instruction.
+ */
+struct LocalStateHook {
+  virtual void setLocalValue(uint32_t id, SSATmp* value) {}
+  virtual void refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {}
+  virtual void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) {}
+  virtual void updateLocalRefValue(uint32_t id, unsigned inlineIdx,
+                                   SSATmp* oldRef, SSATmp* newRef) {}
+  virtual void dropLocalInnerType(uint32_t id, unsigned inlineIdx) {}
+
+  virtual void refineLocalType(uint32_t id, Type type) {}
+  virtual void setLocalType(uint32_t id, Type type) {}
+};
+
+/*
  * FrameState tracks state about the VM stack frame in the function currently
  * being translated. It is responsible for both storing the state and updating
  * it appropriately as instructions and blocks are processed.
@@ -54,11 +73,13 @@ struct SSATmp;
  *
  *   - current function and bytecode offset
  */
-struct FrameState {
+struct FrameState : private LocalStateHook {
+  explicit FrameState(IRUnit& unit);
+  FrameState(IRUnit& unit, BCMarker firstMarker);
   FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func);
   ~FrameState();
 
-  void update(IRInstruction* inst);
+  void update(const IRInstruction* inst);
 
   void startBlock(Block*);
   void finishBlock(Block*);
@@ -73,19 +94,27 @@ struct FrameState {
   bool frameSpansCall() const { return m_frameSpansCall; }
   BCMarker marker() const { return m_marker; }
   void setMarker(BCMarker m) { m_marker = m; }
-  bool needsFPAnchor(IRInstruction*) const;
-  void setHasFPAnchor() { m_hasFPAnchor = true; }
   bool enableCse() const { return m_enableCse; }
   void setEnableCse(bool e) { m_enableCse = e; }
+  unsigned inlineDepth() const { return m_inlineSavedStates.size(); }
 
   Type localType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
   SSATmp* localValueSource(uint32_t id) const;
 
-  bool isValueAvailable(SSATmp*) const;
-  bool callerHasValueAvailable(SSATmp*) const;
+  typedef std::function<void(SSATmp*, int32_t)> FrameFunc;
+  // Call func for all enclosing frames, starting with the current one and
+  // proceeding upward through callers.
+  void forEachFrame(FrameFunc func) const;
+
+  typedef std::function<void(uint32_t, SSATmp*)> LocalFunc;
+  // Call func with all tracked locals, including callers if this is an inlined
+  // frame.
+  void forEachLocal(LocalFunc func) const;
 
   SSATmp* cseLookup(IRInstruction* inst, const folly::Optional<IdomVector>&);
+
+  void getLocalEffects(const IRInstruction* inst, LocalStateHook& hook) const;
 
  private:
   /*
@@ -104,7 +133,15 @@ struct FrameState {
     bool unsafe;   // true iff value is not safe to use at runtime. Currently
                    // this only happens across a Call or CallArray instruction.
     bool written;  // true iff the local has been written in this trace
+
+    bool operator==(const LocalState& b) const {
+      return value == b.value &&
+        type == b.type &&
+        unsafe == b.unsafe &&
+        written == b.written;
+    }
   };
+  typedef smart::vector<LocalState> LocalVec;
 
   /*
    * Snapshot stores fields of FrameState to be saved, restored, and merged for
@@ -118,35 +155,59 @@ struct FrameState {
     bool thisAvailable;
     smart::vector<LocalState> locals;
     bool frameSpansCall;
-    bool needsFPAnchor;
-    std::vector<SSATmp*> callerAvailableValues;
     BCMarker curMarker;
+    smart::vector<Snapshot> inlineSavedStates;
+
+    bool operator==(const Snapshot& b) const {
+      return spValue == b.spValue &&
+        fpValue == b.fpValue &&
+        curFunc == b.curFunc &&
+        spOffset == b.spOffset &&
+        thisAvailable == b.thisAvailable &&
+        locals == b.locals &&
+        frameSpansCall == b.frameSpansCall &&
+        curMarker == b.curMarker &&
+        inlineSavedStates == b.inlineSavedStates;
+    }
   };
 
-  void trackDefInlineFP(IRInstruction* inst);
-  void trackInlineReturn(IRInstruction* inst);
+  void trackDefInlineFP(const IRInstruction* inst);
+  void trackInlineReturn(const IRInstruction* inst);
 
-  void setLocalValue(uint32_t id, SSATmp* value);
-  void setLocalType(uint32_t id, Type type);
-  void refineLocalType(uint32_t id, Type type);
-  void clearLocals();
-  void killLocalValue(uint32_t id);
-  void killLocalsForCall();
-  void updateLocalValues(SSATmp* oldVal, SSATmp* newVal);
-  void updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
-  void dropLocalRefsInnerTypes();
-  bool anyLocalHasValue(SSATmp*) const;
+  /* LocalStateHook overrides */
+  void setLocalValue(uint32_t id, SSATmp* value) override;
+  void refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) override;
+  void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) override;
+  void updateLocalRefValue(uint32_t id, unsigned inlineIdx, SSATmp* oldRef,
+                           SSATmp* newRef) override;
+  void dropLocalInnerType(uint32_t id, unsigned inlineIdx) override;
+  void refineLocalType(uint32_t id, Type type) override;
+  void setLocalType(uint32_t id, Type type) override;
 
-  void cseInsert(IRInstruction* inst);
+  LocalVec& locals(unsigned inlineIdx);
+
+  /* Support for getLocalEffects */
+  void clearLocals(LocalStateHook& hook) const;
+  void refineLocalValues(LocalStateHook& hook,
+                         SSATmp* oldVal, SSATmp* newVal) const;
+  template<typename L>
+  void walkAllInlinedLocals(L body, bool skipThisFrame = false) const;
+  void killLocalsForCall(LocalStateHook& hook, bool skipThisFrame) const;
+  void updateLocalValues(LocalStateHook& hook,
+                         SSATmp* oldVal, SSATmp* newVal) const;
+  void updateLocalRefValues(LocalStateHook& hook,
+                            SSATmp* oldRef, SSATmp* newRef) const;
+  void dropLocalRefsInnerTypes(LocalStateHook& hook) const;
+
+  void cseInsert(const IRInstruction* inst);
   void cseKill(SSATmp* src);
-  CSEHash* cseHashTable(IRInstruction* inst);
+  CSEHash* cseHashTable(const IRInstruction* inst);
   void clearCse();
 
-  std::unique_ptr<Snapshot> createSnapshot() const;
+  Snapshot createSnapshot() const;
   void save(Block*);
-  void load(Block*);
-  void load(std::unique_ptr<Snapshot> state);
-  void merge(Snapshot* s1);
+  void load(Snapshot& state);
+  void merge(Snapshot& s1);
 
  private:
   IRUnit& m_unit;
@@ -174,13 +235,6 @@ struct FrameState {
   bool m_frameSpansCall;
 
   /*
-   * m_hasFPAnchor is a (hopefully) temporary hack to work around the fact that
-   * many instructions that can use the frame pointer by raising an error don't
-   * take m_fpValue as a source.
-   */
-  bool m_hasFPAnchor;
-
-  /*
    * m_locals tracks the current types and values of locals.
    */
   smart::vector<LocalState> m_locals;
@@ -189,12 +243,7 @@ struct FrameState {
    * m_inlineSavedStates holds snapshots of the caller(s)'s state while in an
    * inlined callee.
    */
-  std::vector<std::unique_ptr<Snapshot>> m_inlineSavedStates;
-
-  // Values known to be "available" for the purposes of DecRef to
-  // DecRefNZ transformations due to locals of the caller for an
-  // inlined call.
-  std::vector<SSATmp*> m_callerAvailableValues;
+  smart::vector<Snapshot> m_inlineSavedStates;
 
   /*
    * m_cseHash holds the destination of all tracked instructions that produced
@@ -206,7 +255,7 @@ struct FrameState {
   /*
    * Saved snapshots of the incoming state for Blocks.
    */
-  StateVector<Block, Snapshot*> m_snapshots;
+  smart::hash_map<Block*, Snapshot> m_snapshots;
 };
 
 } }

@@ -1,0 +1,43 @@
+*** Testing error conditions ***
+
+-- Testing ( (low < high) && (step = 0) ) --HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+
+-- Testing ( (low > high) && (step = 0) ) --HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+
+-- Testing ( (low < high) && (high-low < step) ) --HipHop Warning: %s
+bool(false)
+
+
+-- Testing ( (low > high) && (low-high < step) ) --HipHop Warning: %s
+bool(false)
+
+-- Testing Invalid number of arguments --HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- Testing Invalid steps --HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+Done

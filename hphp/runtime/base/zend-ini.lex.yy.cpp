@@ -696,6 +696,7 @@ struct ZendINIGlobals {
   int lineno;
   IniSetting::PFN_PARSER_CALLBACK callback;
   void *arg;
+  YY_BUFFER_STATE state;
 };
 static ZendINIGlobals s_zend_ini;
 #define SCNG(v) s_zend_ini.v
@@ -732,10 +733,15 @@ void zend_ini_scan(const String& str, int scanner_mode, const String& filename,
 
   /* Eat any UTF-8 BOM we find in the first 3 bytes */
   if (str.size() > 3 && memcmp(str.data(), "\xef\xbb\xbf", 3) == 0) {
-    yy_scan_string(str.data() + 3);
+    SCNG(state) = yy_scan_string(str.data() + 3);
   } else {
-    yy_scan_string(str.data());
+    SCNG(state) = yy_scan_string(str.data());
   }
+}
+
+void zend_ini_scan_cleanup() {
+  yy_delete_buffer(SCNG(state));
+  SCNG(state) = nullptr;
 }
 
 void zend_ini_callback(String *arg1, String *arg2, String *arg3,

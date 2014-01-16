@@ -3,7 +3,7 @@
 if [ "$1" = '--help' ] || [ "$1" = '-h' ]; then
 	echo 'usage: ./configure -Dvariable=argument ...\n'
 	echo 'Variables: '
-	echo '  CMAKE_BUILD_TYPE=Debug|Release        Sets build type (default Relase).'
+	echo '  CMAKE_BUILD_TYPE=Debug|Release        Sets build type (default Release).'
 
 	exit 2
 fi

@@ -38,6 +38,7 @@ func_test_mysql_num_fields($link, "SELECT id FROM test", 1, 20, true);
 mysql_close($link);
 
 print "done!";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

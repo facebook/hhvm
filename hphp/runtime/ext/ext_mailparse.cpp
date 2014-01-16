@@ -33,7 +33,7 @@ namespace HPHP {
  * from the beginning.
  */
 static String php_trim(const String& str) {
-  string s(str.c_str());
+  std::string s(str.c_str());
   unsigned int l = s.length();
   while (l > 0 && isspace((unsigned char)s[l - 1])) {
     l--;

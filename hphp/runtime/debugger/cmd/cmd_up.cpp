@@ -37,7 +37,7 @@ void CmdUp::help(DebuggerClient &client) {
 
 int CmdUp::ParseNumber(DebuggerClient &client) {
   if (client.argCount() == 1) {
-    string snum = client.argValue(1);
+    std::string snum = client.argValue(1);
     if (!DebuggerClient::IsValidNumber(snum)) {
       client.error("Please specify a number.");
       client.tutorial(

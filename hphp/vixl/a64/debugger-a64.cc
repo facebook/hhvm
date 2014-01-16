@@ -26,6 +26,8 @@
 
 #include "hphp/vixl/a64/debugger-a64.h"
 
+#include <iostream>
+
 #include "folly/Format.h"
 
 namespace vixl {

@@ -1,0 +1,7 @@
+bool(true)
+string(%d) "%sphar_magic.phar.zip.php"
+bool(true)
+in b
+<?php include "b/c.php";
+in d
+===DONE===

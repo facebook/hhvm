@@ -1,0 +1,7 @@
+-- Testing vfprintf() function with wrong variable types as argument --
+HipHop Notice: %s
+int(5)
+string(5) "Array"
+int(9)
+string(9) "Foo  fake"
+===DONE===

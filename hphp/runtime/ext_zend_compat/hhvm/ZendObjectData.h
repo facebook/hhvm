@@ -32,10 +32,11 @@ class c_ZendObjectData : public ObjectData {
   DECLARE_CLASS_NO_SWEEP(ZendObjectData)
   public:
     c_ZendObjectData(Class* cls = classof());
-    void setHandle(zend_object_handle handle) { m_handle = handle; }
-    zend_object_handle getHandle() { return m_handle; }
-  private:
-    zend_object_handle m_handle;
+    void setHandle(zend_object_handle handle) {
+      always_assert(uint16_t(handle) == handle);
+      o_subclassData.u16 = uint16_t(handle);
+    }
+    zend_object_handle getHandle() { return o_subclassData.u16; }
 };
 
 ObjectData* new_ZendObjectData_Instance(Class* cls);

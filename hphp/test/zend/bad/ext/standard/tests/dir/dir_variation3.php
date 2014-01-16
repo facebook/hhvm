@@ -64,7 +64,8 @@ for($count = 0; $count < count($permission_values); $count++) {
 }
 
 echo "Done";
-?><?php
+?>
+<?php
 // deleting temporary directory
 $file_path = dirname(__FILE__);
 $dir_path = $file_path."/dir_variation3";

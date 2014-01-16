@@ -1,0 +1,84 @@
+*** Testing dechex() : usage variations ***
+
+-- Iteration 1 --
+string(1) "0"
+
+-- Iteration 2 --
+string(1) "1"
+
+-- Iteration 3 --
+string(4) "3039"
+
+-- Iteration 4 --
+string(8) "fffff6d7"
+
+-- Iteration 5 --
+string(8) "ffffffff"
+
+-- Iteration 6 --
+string(1) "0"
+
+-- Iteration 7 --
+string(1) "a"
+
+-- Iteration 8 --
+string(8) "fffffff6"
+
+-- Iteration 9 --
+string(8) "be991a08"
+
+-- Iteration 10 --
+string(1) "0"
+
+-- Iteration 11 --
+string(1) "0"
+
+-- Iteration 12 --
+string(1) "0"
+
+-- Iteration 13 --
+string(1) "0"
+
+-- Iteration 14 --
+string(1) "1"
+
+-- Iteration 15 --
+string(1) "0"
+
+-- Iteration 16 --
+string(1) "1"
+
+-- Iteration 17 --
+string(1) "0"
+
+-- Iteration 18 --
+string(1) "0"
+
+-- Iteration 19 --
+string(1) "0"
+
+-- Iteration 20 --
+string(1) "0"
+
+-- Iteration 21 --
+string(1) "0"
+
+-- Iteration 22 --
+string(1) "0"
+
+-- Iteration 23 --
+string(1) "0"
+
+-- Iteration 24 --
+HipHop Notice: %s
+string(1) "1"
+
+-- Iteration 25 --
+string(1) "0"
+
+-- Iteration 26 --
+string(1) "0"
+
+-- Iteration 27 --
+string(%d) "%s"
+===Done===

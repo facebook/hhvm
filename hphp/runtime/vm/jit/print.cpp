@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -77,11 +78,20 @@ static std::string constToString(Type t, const ConstData* c) {
     os << "NamedEntity(" << ne << ")";
   } else if (t <= Type::TCA) {
     TCA tca = c->as<TCA>();
-    auto name = getNativeFunctionName(tca);
-    SCOPE_EXIT { free(name); };
-    os << folly::format("TCA: {}({})", tca,
-      boost::trim_copy(std::string(name)));
-  } else if (t <= Type::None) {
+    auto rawName = getNativeFunctionName(tca);
+    std::string name(rawName);
+    delete [] rawName;
+
+    const char* hphp = "HPHP::";
+    if (!name.compare(0, strlen(hphp), hphp)) {
+      name = name.substr(strlen(hphp));
+    }
+    auto pos = name.find_first_of('(');
+    if (pos != std::string::npos) {
+      name = name.substr(0, pos);
+    }
+    os << folly::format("TCA: {}({})", tca, boost::trim_copy(name));
+  } else if (t <=Type::None) {
     os << "None:" << c->as<int64_t>();
   } else if (t.isPtr()) {
     os << folly::format("{}({:#x})", t.toString(), c->as<uint64_t>());
@@ -118,11 +128,15 @@ void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
 void printLabel(std::ostream& os, const Block* block) {
   os << color(ANSI_COLOR_MAGENTA);
   os << "B" << block->id();
-  switch (block->hint()) {
-  case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
-  case Block::Hint::Likely:      os << "<Likely>"; break;
-  default:
-    break;
+  if (block->isCatch()) {
+    os << "<Catch>";
+  } else {
+    switch (block->hint()) {
+      case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
+      case Block::Hint::Likely:      os << "<Likely>"; break;
+      default:
+        break;
+    }
   }
   os << color(ANSI_COLOR_END);
 }
@@ -246,9 +260,20 @@ std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
   for (int i = 0; i < sz; ++i) {
     if (!loc.spilled()) {
       PhysReg reg = loc.reg(i);
-      auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
-                  reg::regname(RegXMM(reg));
-      os << delim << name;
+      if (arch() == Arch::X64) {
+        auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
+          reg::regname(RegXMM(reg));
+        os << delim << name;
+      } else if (arch() == Arch::ARM) {
+        auto prefix =
+          reg.isGP() ? (vixl::Register(reg).size() == vixl::kXRegSize
+                        ? 'x' : 'w')
+          : (vixl::FPRegister(reg).size() == vixl::kSRegSize
+             ? 's' : 'd');
+        os << delim << prefix << int(RegNumber(reg));
+      } else {
+        not_implemented();
+      }
     } else {
       os << delim << "spill[" << loc.slot(i) << "]";
     }
@@ -329,33 +354,17 @@ std::string IRUnit::toString() const {
 
 // Print unlikely blocks at the end in normal generation.  If we have
 // asmInfo, order the blocks based on how they were layed out.
-static smart::vector<Block*> blocks(const IRUnit& unit,
-                                    const IRTrace* trace,
-                                    const AsmInfo* asmInfo) {
-  smart::vector<Block*> blocks;
-
+static BlockList blocks(const IRUnit& unit,
+                        const IRTrace* trace,
+                        const AsmInfo* asmInfo) {
   if (!asmInfo) {
-    smart::vector<Block*> unlikely;
-    for (Block* block : trace->blocks()) {
-      if (block->hint() == Block::Hint::Unlikely) {
-        unlikely.push_back(block);
-      } else {
-        blocks.push_back(block);
-      }
-    }
-    if (trace->isMain()) {
-      for (auto exit : unit.exits()) {
-        unlikely.insert(unlikely.end(), exit->blocks().begin(),
-                        exit->blocks().end());
-      }
-    }
-    blocks.insert(blocks.end(), unlikely.begin(), unlikely.end());
-    return blocks;
+    return layoutBlocks(unit).blocks;
   }
 
+  smart::vector<Block*> blocks;
   blocks.assign(trace->blocks().begin(), trace->blocks().end());
   if (trace->isMain()) {
-    for (auto exit : unit.exits()) {
+    for (auto* exit : unit.exits()) {
       blocks.insert(blocks.end(), exit->blocks().begin(), exit->blocks().end());
     }
   }
@@ -394,8 +403,10 @@ static void disasmRange(std::ostream& os, TCA begin, TCA end) {
 
 void print(std::ostream& os, const Block* block,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime,
-           const AsmInfo* asmInfo, const GuardConstraints* guards) {
-  BCMarker curMarker;
+           const AsmInfo* asmInfo, const GuardConstraints* guards,
+           BCMarker* markerPtr) {
+  BCMarker dummy;
+  BCMarker& curMarker = markerPtr ? *markerPtr : dummy;
 
   if (!block->isMain()) {
     os << "\n" << color(ANSI_COLOR_GREEN)
@@ -427,7 +438,7 @@ void print(std::ostream& os, const Block* block,
            << '\n';
       } else {
         if (func != curMarker.func) {
-          func->prettyPrint(mStr);
+          func->prettyPrint(mStr, Func::PrintOpts().noFpi());
         }
         mStr << std::string(kIndent, ' ')
              << newMarker.show()
@@ -519,11 +530,18 @@ void print(std::ostream& os, const Block* block,
   }
 }
 
+void print(const Block* block) {
+  print(std::cerr, block);
+  std::cerr << std::endl;
+}
+
 void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime,
            const AsmInfo* asmInfo, const GuardConstraints* guards) {
+  // For nice-looking dumps, we want to remember curMarker between blocks.
+  BCMarker curMarker;
   for (Block* block : blocks(unit, trace, asmInfo)) {
-    print(os, block, regs, lifetime, asmInfo, guards);
+    print(os, block, regs, lifetime, asmInfo, guards, &curMarker);
   }
 }
 
@@ -549,4 +567,3 @@ void dumpTrace(int level, const IRUnit& unit, const char* caption,
 }
 
 }}
-

@@ -14,14 +14,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_apc.h"
+
+#include <fstream>
+
+#include <dlfcn.h>
+#include <sys/time.h> // gettimeofday
+
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/async-job.h"
 #include "hphp/util/timer.h"
-#include <dlfcn.h>
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -47,7 +51,7 @@ void apcExtension::moduleLoad(Hdf config) {
   PrimeLibrary = apc["PrimeLibrary"].getString();
   LoadThread = apc["LoadThread"].getInt16(2);
   apc["CompletionKeys"].get(CompletionKeys);
-  string tblType = apc["TableType"].getString("concurrent");
+  std::string tblType = apc["TableType"].getString("concurrent");
   if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
     TableType = TableTypes::ConcurrentTable;
   } else {
@@ -129,7 +133,7 @@ static apcExtension s_apc_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 Variant f_apc_store(CVarRef key_or_array, CVarRef var /* = null_variant */,
-    int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
+                    int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -137,34 +141,32 @@ Variant f_apc_store(CVarRef key_or_array, CVarRef var /* = null_variant */,
     return false;
   }
 
-  if (key_or_array.is(KindOfArray))
-  {
+  if (key_or_array.is(KindOfArray)) {
     Array valuesArr = key_or_array.toArray();
 
     // errors stores all keys corresponding to entries that could not be cached
     ArrayInit errors(valuesArr.size());
 
-    for (ArrayIter iter(valuesArr); iter; ++iter)
-    {
+    for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
       if (!key.isString()) {
-          throw_invalid_argument("apc key: (not a string)");
-          return false;
+        throw_invalid_argument("apc key: (not a string)");
+        return false;
       }
       Variant v = iter.second();
-      if (!(s_apc_store[cache_id].store(key.toString(), v, ttl)));
-          errors.set(key);
+      if (!(s_apc_store[cache_id].store(key.toString(), v, ttl))) {
+        errors.set(key);
+      }
     }
     return errors.create();
   }
 
   if (!key_or_array.isString()) {
-        throw_invalid_argument("apc key: (not a string)");
-        return false;
+    throw_invalid_argument("apc key: (not a string)");
+    return false;
   }
   String strKey = key_or_array.toString();
   return s_apc_store[cache_id].store(strKey, var, ttl);
-
 }
 
 /**
@@ -172,7 +174,7 @@ Variant f_apc_store(CVarRef key_or_array, CVarRef var /* = null_variant */,
  * Using this function is equivalent to adding your key to apc_prime.so.
  */
 bool f_apc_store_as_primed_do_not_use(const String& key, CVarRef var,
-    int64_t cache_id /* = 0 */) {
+                                      int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -184,7 +186,7 @@ bool f_apc_store_as_primed_do_not_use(const String& key, CVarRef var,
 }
 
 Variant f_apc_add(CVarRef key_or_array, CVarRef var /* = null_variant */,
-    int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
+                  int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -192,34 +194,32 @@ Variant f_apc_add(CVarRef key_or_array, CVarRef var /* = null_variant */,
     return false;
   }
 
-  if (key_or_array.is(KindOfArray))
-  {
+  if (key_or_array.is(KindOfArray)) {
     Array valuesArr = key_or_array.toArray();
 
     // errors stores all keys corresponding to entries that could not be cached
     ArrayInit errors(valuesArr.size());
 
-    for (ArrayIter iter(valuesArr); iter; ++iter)
-    {
+    for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
       if (!key.isString()) {
-          throw_invalid_argument("apc key: (not a string)");
-          return false;
+        throw_invalid_argument("apc key: (not a string)");
+        return false;
       }
       Variant v = iter.second();
-      if (!(s_apc_store[cache_id].store(key.toString(), v, ttl, false)))
-          errors.set(key);
+      if (!(s_apc_store[cache_id].store(key.toString(), v, ttl, false))) {
+        errors.set(key);
+      }
     }
     return errors.create();
   }
 
   if (!key_or_array.isString()) {
-      throw_invalid_argument("apc key: (not a string)");
-      return false;
+    throw_invalid_argument("apc key: (not a string)");
+    return false;
   }
   String strKey = key_or_array.toString();
   return s_apc_store[cache_id].store(strKey, var, ttl, false);
-
 }
 
 Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
@@ -309,6 +309,7 @@ Variant f_apc_inc(const String& key, int64_t step /* = 1 */,
   bool found = false;
   int64_t newValue = s_apc_store[cache_id].inc(key, step, found);
   success = found;
+  if (!found) return false;
   return newValue;
 }
 
@@ -323,6 +324,7 @@ Variant f_apc_dec(const String& key, int64_t step /* = 1 */,
   bool found = false;
   int64_t newValue = s_apc_store[cache_id].inc(key, -step, found);
   success = found;
+  if (!found) return false;
   return newValue;
 }
 
@@ -375,44 +377,6 @@ Variant f_apc_cache_info(int64_t cache_id /* = 0 */,
 Array f_apc_sma_info(bool limited /* = false */) {
   return Array::Create();
 }
-bool f_apc_define_constants(const String& key, const String& constants,
-                            bool case_sensitive /* = true */,
-                            int64_t cache_id /* = 0 */) {
-  throw NotSupportedException(__func__, "dynamic coding");
-}
-bool f_apc_load_constants(const String& key, bool case_sensitive /* = true */,
-                          int64_t cache_id /* = 0 */) {
-  throw NotSupportedException(__func__, "dynamic coding");
-}
-bool f_apc_compile_file(const String& filename, bool atomic /* = true */,
-                        int64_t cache_id /* = 0 */) {
-  throw NotSupportedException(__func__, "dynamic coding");
-}
-Array f_apc_filehits() {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-Variant f_apc_delete_file(CVarRef keys, int64_t cache_id /* = 0 */) {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-Variant f_apc_bin_dump(int64_t cache_id /* = 0 */,
-                       CVarRef filter /* = null_variant */) {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-bool f_apc_bin_load(const String& data, int64_t flags /* = 0 */,
-                    int64_t cache_id /* = 0 */) {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
-                           const String& filename, int64_t flags /* = 0 */,
-                           CResRef context /* =  uninit_null() */) {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-bool f_apc_bin_loadfile(const String& filename,
-                        CResRef context /* = uninit_null() */,
-                        int64_t flags /* = 0 */, int64_t cache_id /* = 0 */) {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // loading APC from archive files
@@ -440,7 +404,6 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
   return p;
 }
 
-DECLARE_BOOST_TYPES(ApcLoadJob);
 class ApcLoadJob {
 public:
   ApcLoadJob(void *handle, int index) : m_handle(handle), m_index(index) {}
@@ -450,7 +413,7 @@ public:
 class ApcLoadWorker {
 public:
   void onThreadEnter() {}
-  void doJob(ApcLoadJobPtr job) {
+  void doJob(std::shared_ptr<ApcLoadJob> job) {
     char func_name[128];
     snprintf(func_name, sizeof(func_name), "_apc_load_%d", job->m_index);
     apc_load_func(job->m_handle, func_name)();
@@ -506,10 +469,10 @@ void apc_load(int thread) {
   } else {
     int count = ((int(*)())apc_load_func(handle, "_apc_load_count"))();
 
-    ApcLoadJobPtrVec jobs;
+    std::vector<std::shared_ptr<ApcLoadJob>> jobs;
     jobs.reserve(count);
     for (int i = 0; i < count; i++) {
-      jobs.push_back(ApcLoadJobPtr(new ApcLoadJob(handle, i)));
+      jobs.push_back(std::make_shared<ApcLoadJob>(handle, i));
     }
     JobDispatcher<ApcLoadJob, ApcLoadWorker>(jobs, thread).run();
   }
@@ -632,7 +595,7 @@ void const_load_impl(struct cache_info *info,
   {
     int count = count_items(thrifts, 4);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
@@ -676,7 +639,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(int_keys, 2);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **k = int_keys;
       long long*v = int_values;
       for (int i = 0; i < count; i++, k += 2) {
@@ -691,7 +654,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(char_keys, 2);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **k = char_keys;
       char *v = char_values;
       for (int i = 0; i < count; i++, k += 2) {
@@ -712,7 +675,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(strings, 4);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **p = strings;
       for (int i = 0; i < count; i++, p += 4) {
         auto& item = vars[i];
@@ -728,7 +691,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(objects, 4);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **p = objects;
       for (int i = 0; i < count; i++, p += 4) {
         auto& item = vars[i];
@@ -743,7 +706,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(thrifts, 4);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
         auto& item = vars[i];
@@ -763,7 +726,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(others, 4);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **p = others;
       for (int i = 0; i < count; i++, p += 4) {
         auto& item = vars[i];
@@ -942,7 +905,7 @@ void apc_load_impl_compressed
     int count = int_lens[0];
     int len = int_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *keys = gzdecode(int_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
@@ -963,7 +926,7 @@ void apc_load_impl_compressed
     int count = char_lens[0];
     int len = char_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *keys = gzdecode(char_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
@@ -990,7 +953,7 @@ void apc_load_impl_compressed
     int count = string_lens[0] / 2;
     int len = string_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(strings, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
@@ -1014,7 +977,7 @@ void apc_load_impl_compressed
     int count = object_lens[0] / 2;
     int len = object_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(objects, len);
       if (decoded == NULL) throw Exception("bad compressed APC archive.");
       ScopedMem holder(decoded);
@@ -1036,7 +999,7 @@ void apc_load_impl_compressed
     int count = thrift_lens[0] / 2;
     int len = thrift_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(thrifts, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
@@ -1063,7 +1026,7 @@ void apc_load_impl_compressed
     int count = other_lens[0] / 2;
     int len = other_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(others, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
@@ -1152,13 +1115,13 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
         len = RFC1867_TRACKING_KEY_MAXLEN;
       }
       rfc1867ApcData->tracking_key =
-        string(RuntimeOption::Rfc1867Prefix.c_str(), len);
+        std::string(RuntimeOption::Rfc1867Prefix.c_str(), len);
       len = strlen(*data->value);
       int rem = RFC1867_TRACKING_KEY_MAXLEN -
                 rfc1867ApcData->tracking_key.size();
       if (len > rem) len = rem;
       rfc1867ApcData->tracking_key +=
-        string(*data->value, len);
+        std::string(*data->value, len);
       rfc1867ApcData->bytes_processed = data->post_bytes_processed;
     }
     /* Facebook: Temporary fix for a bug in PHP's rfc1867 code,
@@ -1177,11 +1140,11 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       rfc1867ApcData->bytes_processed = data->post_bytes_processed;
       int len = strlen(*data->filename);
       if (len > RFC1867_FILENAME_MAXLEN) len = RFC1867_FILENAME_MAXLEN;
-      rfc1867ApcData->filename = string(*data->filename, len);
+      rfc1867ApcData->filename = std::string(*data->filename, len);
       rfc1867ApcData->temp_filename = NULL;
       len = strlen(data->name);
       if (len > RFC1867_NAME_MAXLEN) len = RFC1867_NAME_MAXLEN;
-      rfc1867ApcData->name = string(data->name, len);
+      rfc1867ApcData->name = std::string(data->name, len);
       ArrayInit track(6);
       track.set(s_total, rfc1867ApcData->content_length);
       track.set(s_current, rfc1867ApcData->bytes_processed);
@@ -1371,6 +1334,8 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
     break;
   case 'o':
   case 'O':
+  case 'V':
+  case 'K':
     {
       buf.append(type);
       buf.append(sep);
@@ -1390,9 +1355,11 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
       buf.append(sep2);
       sep2 = uns->readChar(); // '{'
       buf.append(sep2);
-      for (int64_t i = 0; i < size; i++) {
-        reserialize(uns, buf); // property name
-        reserialize(uns, buf); // property value
+      // 'V' type is a series with values only, while all other
+      // types are series with keys and values
+      int64_t i = type == 'V' ? size : size * 2;
+      while (i--) {
+        reserialize(uns, buf);
       }
       sep2 = uns->readChar(); // '}'
       buf.append(sep2);

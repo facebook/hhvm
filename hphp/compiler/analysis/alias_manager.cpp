@@ -66,7 +66,7 @@
 #include "hphp/compiler/analysis/live_dict.h"
 #include "hphp/compiler/analysis/ref_dict.h"
 
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/parser/location.h"
@@ -1927,6 +1927,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
 
   switch (stype) {
   case Statement::KindOfUseTraitStatement:
+  case Statement::KindOfTraitRequireStatement:
   case Statement::KindOfTraitPrecStatement:
   case Statement::KindOfTraitAliasStatement:
     return StatementPtr();
@@ -1968,7 +1969,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
   }
 
   case Statement::KindOfIfBranchStatement:
-    always_assert(0);
+    always_assert(false);
     break;
 
   case Statement::KindOfForStatement: {
@@ -2360,9 +2361,6 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       case Expression::KindOfSimpleFunctionCall:
       {
         SimpleFunctionCallPtr sfc(spc(SimpleFunctionCall, e));
-        if (sfc->getName() == "hphp_create_continuation") {
-          m_inlineAsExpr = false;
-        }
         sfc->updateVtFlags();
       }
       case Expression::KindOfDynamicFunctionCall:
@@ -2533,8 +2531,10 @@ public:
   }
 private:
 
-  #define CONSTRUCT_PARAMS(from) \
+  #define CONSTRUCT_EXP(from) \
       (from)->getScope(), (from)->getLocation()
+  #define CONSTRUCT_STMT(from) \
+      (from)->getScope(), (from)->getLabelScope(), (from)->getLocation()
 
   AnalysisResultConstPtr m_ar;
   bool m_changed;
@@ -2607,7 +2607,7 @@ private:
 
     ExpressionListPtr el(
         new ExpressionList(
-          CONSTRUCT_PARAMS(target),
+          CONSTRUCT_EXP(target),
           ExpressionList::ListKindComma));
     if (target->isUnused()) {
       el->setUnused(true);
@@ -2951,7 +2951,7 @@ private:
         slistPtr->insertElement(
           ExpStatementPtr(
             new ExpStatement(
-              CONSTRUCT_PARAMS(slistPtr), assertion)),
+              CONSTRUCT_STMT(slistPtr), assertion)),
           idx);
       }
       break;
@@ -3032,12 +3032,12 @@ private:
                   } else {
                     ExpStatementPtr newExpStmt(
                       new ExpStatement(
-                        CONSTRUCT_PARAMS(branch),
+                        CONSTRUCT_STMT(branch),
                         after));
 
                     IfBranchStatementPtr newBranch(
                       new IfBranchStatement(
-                        CONSTRUCT_PARAMS(branch),
+                        CONSTRUCT_STMT(branch),
                         ExpressionPtr(), newExpStmt));
 
                     branches->addElement(newBranch);
@@ -3304,6 +3304,12 @@ private:
 static bool isNewResult(ExpressionPtr e) {
   if (!e) return false;
   if (e->is(Expression::KindOfNewObjectExpression)) return true;
+  if (e->is(Expression::KindOfBinaryOpExpression)) {
+    auto b = spc(BinaryOpExpression, e);
+    if (b->getOp() == T_COLLECTION) {
+      return true;
+    }
+  }
   if (e->is(Expression::KindOfAssignmentExpression)) {
     return isNewResult(spc(AssignmentExpression, e)->getValue());
   }

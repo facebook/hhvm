@@ -50,6 +50,7 @@ static class HashExtension : public Extension {
     HHVM_FE(hash_final);
     HHVM_FE(hash_init);
     HHVM_FE(hash_update);
+    HHVM_FE(hash_copy);
     HHVM_FE(furchash_hphp_ext);
     HHVM_FE(hphp_murmurhash);
   }
@@ -59,6 +60,7 @@ static class HashExtension : public Extension {
 // hash engines
 
 static HashEngineMap HashEngines;
+using HashEnginePtr = std::shared_ptr<HashEngine>;
 
 class HashEngineMapInitializer {
 public:
@@ -132,6 +134,16 @@ public:
 
   HashContext(HashEnginePtr ops_, void *context_, int options_)
     : ops(ops_), context(context_), options(options_), key(nullptr) {
+  }
+
+  explicit HashContext(const HashContext* ctx) {
+    assert(ctx->ops);
+    assert(ctx->ops->context_size >= 0);
+    ops = ctx->ops;
+    context = malloc(ops->context_size);
+    ops->hash_copy(context, ctx->context);
+    options = ctx->options;
+    key = ctx->key ? strdup(ctx->key) : nullptr;
   }
 
   ~HashContext() {
@@ -319,6 +331,12 @@ String HHVM_FUNCTION(hash_final, CResRef context,
     return raw;
   }
   return f_bin2hex(raw);
+}
+
+Resource HHVM_FUNCTION(hash_copy, CResRef context) {
+  HashContext *oldhash = context.getTyped<HashContext>();
+  auto const hash = new HashContext(oldhash);
+  return Resource(hash);
 }
 
 int64_t HHVM_FUNCTION(furchash_hphp_ext, const String& key,

@@ -37,13 +37,14 @@ namespace HPHP { namespace JIT {
 struct Block : boost::noncopyable {
   typedef InstructionList::iterator iterator;
   typedef InstructionList::const_iterator const_iterator;
+  typedef InstructionList::reference reference;
+  typedef InstructionList::const_reference const_reference;
 
   // Execution frequency hint; codegen will put Unlikely blocks in astubs.
   enum class Hint { Neither, Likely, Unlikely };
 
   explicit Block(unsigned id)
     : m_trace(nullptr)
-    , m_next(this, nullptr)
     , m_id(id)
     , m_hint(Hint::Neither)
   {}
@@ -69,19 +70,17 @@ struct Block : boost::noncopyable {
   // Returns whether this block starts with BeginCatch
   bool isCatch() const;
 
-  // return the last instruction in the block
-  IRInstruction* back() const;
-
-  // return the first instruction in the block.
-  IRInstruction* front() const;
-
   // return the fallthrough block.  Should be nullptr if the last
   // instruction is a Terminal.
-  Block* next() const { return m_next.to(); }
-  void setNext(Block* b) { m_next.setTo(b); }
+  Block* next() const { return back().next(); }
+  Edge*  nextEdge()   { return back().nextEdge(); }
 
   // return the target block if the last instruction is a branch.
-  Block* taken() const { return empty() ? nullptr : back()->taken(); }
+  Block* taken() const { return back().taken(); }
+  Edge*  takenEdge()   { return back().takenEdge(); }
+
+  // returns the number of successors.
+  size_t numSuccs() const { return (bool)taken() + (bool)next(); }
 
   // return the postorder number of this block. (updated each time
   // sortBlocks() is called.
@@ -103,8 +102,8 @@ struct Block : boost::noncopyable {
   // return an iterator to a specific instruction
   iterator iteratorTo(IRInstruction* inst);
 
-  // Accessors of list of predecessor edges.  Each edge has a from() property
-  // which is the predecessor block.
+  // Accessors of list of predecessor edges.  Each edge has a inst() property
+  // which is the instruction in the predecessor block.
   EdgeList& preds()             { return m_preds; }
   const EdgeList& preds() const { return m_preds; }
   size_t numPreds() const { return m_preds.size(); }
@@ -115,7 +114,7 @@ struct Block : boost::noncopyable {
 
   // visit each src that provides a value to label->dsts[i]. body
   // should take an IRInstruction* and an SSATmp*.
-  template<typename L> void forEachSrc(unsigned i, L body);
+  template<typename L> void forEachSrc(unsigned i, L body) const;
 
   // return the first src providing a value to label->dsts[i] for
   // which body(src) returns true, or nullptr if none are found.
@@ -132,12 +131,20 @@ struct Block : boost::noncopyable {
   iterator         end()         { return m_instrs.end(); }
   const_iterator   begin() const { return m_instrs.begin(); }
   const_iterator   end()   const { return m_instrs.end(); }
-  iterator erase(iterator pos)   { return m_instrs.erase(pos); }
+  iterator         erase(iterator pos);
+  iterator         erase(IRInstruction* inst);
   iterator insert(iterator pos, IRInstruction* inst);
-  void splice(iterator pos, Block* from, iterator begin, iterator end,
-              BCMarker newMarker);
+  void splice(iterator pos, Block* from, iterator begin, iterator end);
   void push_back(IRInstruction* inst);
   template <class Predicate> void remove_if(Predicate p);
+
+  // return the first instruction in the block.
+  reference front();
+  const_reference front() const;
+
+  // return the last instruction in the block
+  reference back();
+  const_reference back() const;
 
   friend const Edge* nextEdge(Block*); // only for validation
 
@@ -146,7 +153,6 @@ struct Block : boost::noncopyable {
  private:
   InstructionList m_instrs; // instructions in this block
   IRTrace* m_trace;         // owner of this block.
-  Edge m_next;              // fall-through path; null if back()->isTerminal().
   const unsigned m_id;      // unit-assigned unique id of this block
   unsigned m_postid;        // postorder number of this block
   EdgeList m_preds;         // Edges that point to this block
@@ -155,15 +161,30 @@ struct Block : boost::noncopyable {
 
 typedef smart::vector<Block*> BlockList;
 
-inline IRInstruction* Block::back() const {
+inline Block::reference Block::front() {
   assert(!m_instrs.empty());
-  auto it = m_instrs.end();
-  return const_cast<IRInstruction*>(&*(--it));
+  return m_instrs.front();
+}
+inline Block::const_reference Block::front() const {
+  return const_cast<Block*>(this)->front();
 }
 
-inline IRInstruction* Block::front() const {
+inline Block::reference Block::back() {
   assert(!m_instrs.empty());
-  return const_cast<IRInstruction*>(&*m_instrs.begin());
+  return m_instrs.back();
+}
+inline Block::const_reference Block::back() const {
+  return const_cast<Block*>(this)->back();
+}
+
+inline Block::iterator Block::erase(iterator pos) {
+  pos->setBlock(nullptr);
+  return m_instrs.erase(pos);
+}
+
+inline Block::iterator Block::erase(IRInstruction* inst) {
+  assert(inst->block() == this);
+  return erase(iteratorTo(inst));
 }
 
 inline Block::iterator Block::prepend(IRInstruction* inst) {
@@ -207,9 +228,9 @@ inline Block* Block::updatePreds(Edge* edge, Block* new_to) {
 }
 
 template<typename L> inline
-void Block::forEachSrc(unsigned i, L body) {
-  for (Edge& e : m_preds) {
-    IRInstruction* jmp = e.from()->back();
+void Block::forEachSrc(unsigned i, L body) const {
+  for (auto const& e : m_preds) {
+    auto jmp = e.inst();
     assert(jmp->op() == Jmp && jmp->taken() == this);
     body(jmp, jmp->src(i));
   }
@@ -218,7 +239,7 @@ void Block::forEachSrc(unsigned i, L body) {
 template<typename L> inline
 SSATmp* Block::findSrc(unsigned i, L body) {
   for (Edge& e : m_preds) {
-    SSATmp* src = e.from()->back()->src(i);
+    SSATmp* src = e.inst()->src(i);
     if (body(src)) return src;
   }
   return nullptr;
@@ -227,9 +248,9 @@ SSATmp* Block::findSrc(unsigned i, L body) {
 template <typename L> inline
 void Block::forEachPred(L body) {
   for (auto i = m_preds.begin(), e = m_preds.end(); i != e;) {
-    Block* from = i->from();
+    auto inst = i->inst();
     ++i;
-    body(from);
+    body(inst->block());
   }
 }
 
@@ -240,13 +261,9 @@ inline Block::iterator Block::insert(iterator pos, IRInstruction* inst) {
 }
 
 inline
-void Block::splice(iterator pos, Block* from, iterator begin, iterator end,
-                   BCMarker newMarker) {
+void Block::splice(iterator pos, Block* from, iterator begin, iterator end) {
   assert(from != this);
-  for (auto i = begin; i != end; ++i) {
-    i->setBlock(this);
-    i->setMarker(newMarker);
-  }
+  for (auto i = begin; i != end; ++i) i->setBlock(this);
   m_instrs.splice(pos, from->instrs(), begin, end);
 }
 

@@ -15,9 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -81,12 +84,6 @@ Array c_WaitableWaitHandle::t_getparents() {
   }
 
   return result;
-}
-
-c_BlockableWaitHandle* c_WaitableWaitHandle::addParent(c_BlockableWaitHandle* parent) {
-  c_BlockableWaitHandle* prev = m_firstParent;
-  m_firstParent = parent;
-  return prev;
 }
 
 void c_WaitableWaitHandle::setResult(const Cell& result) {
@@ -160,14 +157,15 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
   return nullptr;
 }
 
-bool c_WaitableWaitHandle::hasCycle(c_WaitableWaitHandle* start) {
-  assert(start);
+bool
+c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
+  assert(wait_handle);
 
-  while (start != this && start && !start->isFinished()) {
-    start = start->getChild();
+  while (wait_handle != this && wait_handle && !wait_handle->isFinished()) {
+    wait_handle = wait_handle->getChild();
   }
 
-  return start == this;
+  return wait_handle == this;
 }
 
 Array c_WaitableWaitHandle::t_getdependencystack() {

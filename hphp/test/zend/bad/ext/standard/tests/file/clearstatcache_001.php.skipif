@@ -1,0 +1,5 @@
+<?php
+if (strncmp(PHP_OS, "WIN", 3) === 0) {
+    die('skip not for Windows');
+}
+?>

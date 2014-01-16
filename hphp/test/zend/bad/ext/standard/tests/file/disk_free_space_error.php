@@ -25,7 +25,8 @@ var_dump( diskfreespace( $file_path."/disk_free_space.tmp" ));
 fclose($fh);
 
 echo"\n-- Done --";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/disk_free_space.tmp");
 

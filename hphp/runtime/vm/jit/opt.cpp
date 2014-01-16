@@ -109,7 +109,9 @@ void optimize(IRUnit& unit, TraceBuilder& traceBuilder) {
     dumpTrace(6, unit, folly::format("after {}", msg).str().c_str());
     assert(checkCfg(unit));
     assert(checkTmpsSpanningCalls(unit));
-    if (debug) forEachTraceInst(unit, assertOperandTypes);
+    if (debug) {
+      forEachInst(rpoSortCfg(unit), assertOperandTypes);
+    }
   };
 
   auto doPass = [&](void (*fn)(IRUnit&), const char* msg) {
@@ -126,6 +128,11 @@ void optimize(IRUnit& unit, TraceBuilder& traceBuilder) {
   if (RuntimeOption::EvalHHIRRelaxGuards) {
     auto changed = relaxGuards(unit, *traceBuilder.guards());
     if (changed) finishPass("guard relaxation");
+  }
+
+  if (RuntimeOption::EvalHHIRRefcountOpts) {
+    optimizeRefcounts(unit);
+    finishPass("refcount opts");
   }
 
   dce("initial");

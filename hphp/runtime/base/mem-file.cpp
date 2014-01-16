@@ -170,12 +170,12 @@ bool MemFile::rewind() {
 }
 
 int64_t MemFile::writeImpl(const char *buffer, int64_t length) {
-  throw FatalErrorException((string("cannot write a mem stream: ") +
+  throw FatalErrorException((std::string("cannot write a mem stream: ") +
                              m_name).c_str());
 }
 
 bool MemFile::flush() {
-  throw FatalErrorException((string("cannot flush a mem stream: ") +
+  throw FatalErrorException((std::string("cannot flush a mem stream: ") +
                              m_name).c_str());
 }
 
@@ -188,7 +188,7 @@ void MemFile::unzip() {
   int len = m_len;
   char *data = gzdecode(m_data, len);
   if (data == nullptr) {
-    throw FatalErrorException((string("cannot unzip mem stream: ") +
+    throw FatalErrorException((std::string("cannot unzip mem stream: ") +
                                m_name).c_str());
   }
   m_data = data;

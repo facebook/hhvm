@@ -36,7 +36,7 @@ String f_addslashes(const String& str);
 String f_stripslashes(const String& str);
 String f_bin2hex(const String& str);
 Variant f_hex2bin(const String& str);
-String f_nl2br(const String& str);
+String f_nl2br(const String& str, bool is_xhtml = true);
 String f_quotemeta(const String& str);
 String f_str_shuffle(const String& str);
 String f_strrev(const String& str);
@@ -72,8 +72,6 @@ Variant f_substr(const String& str, int start, int length = 0x7FFFFFFF);
 String f_str_pad(const String& input, int pad_length, const String& pad_string = " ",
                  int pad_type = k_STR_PAD_RIGHT);
 String f_str_repeat(const String& input, int multiplier);
-Variant f_wordwrap(const String& str, int width = 75, const String& wordbreak = "\n",
-                   bool cut = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 // encoding/decoding
@@ -105,7 +103,8 @@ Variant f_strtr(const String& str, CVarRef from, CVarRef to = null_variant);
 String f_convert_cyr_string(const String& str, const String& from, const String& to);
 
 Array f_get_html_translation_table(int table = 0,
-                                   int quote_style = k_ENT_COMPAT);
+                                   int quote_style = k_ENT_COMPAT,
+                                   const String& encoding = "UTF-8");
 
 String f_hebrev(const String& hebrew_text, int max_chars_per_line = 0);
 
@@ -167,6 +166,10 @@ Variant f_strcspn(const String& str1, const String& str2, int start = 0,
 
 Variant f_strlen(CVarRef vstr);
 
+Array f_str_getcsv(const String& str,
+                   const String& delimiter = ",",
+                   const String& enclosure = "\"",
+                   const String& escape = "\\");
 Variant f_count_chars(const String& str, int64_t mode = 0);
 
 Variant f_str_word_count(const String& str, int64_t format = 0, const String& charlist = "");

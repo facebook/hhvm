@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_H_
 #define incl_HPHP_EVAL_DEBUGGER_H_
 
+#include <vector>
+
 #include "hphp/util/lock.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -35,7 +37,7 @@ namespace HPHP { namespace Eval {
 // sandboxes with proxies. Interrupts get minimal handling before being handed
 // off to the proper proxy.
 
-DECLARE_BOOST_TYPES(CmdInterrupt);
+struct CmdInterrupt;
 
 class Debugger {
 public:
@@ -58,7 +60,7 @@ public:
   static int CountConnectedProxy();
   static DebuggerProxyPtr GetProxy();
 
-  static void GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes);
+  static void GetRegisteredSandboxes(std::vector<DSandboxInfoPtr> &sandboxes);
   static bool IsThreadDebugging(int64_t tid);
 
   static void RetireProxy(DebuggerProxyPtr proxy);
@@ -155,7 +157,7 @@ private:
   void registerThread();
   void addOrUpdateSandbox(const DSandboxInfo &sandbox);
   DSandboxInfoPtr getSandbox(const StringData* sid);
-  void getSandboxes(DSandboxInfoPtrVec &sandboxes);
+  void getSandboxes(std::vector<DSandboxInfoPtr> &sandboxes);
   void registerSandbox(const DSandboxInfo &sandbox);
   void unregisterSandbox(const StringData* sandboxId);
 

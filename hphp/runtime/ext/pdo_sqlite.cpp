@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_stream.h"
 #include "hphp/runtime/ext/ext_sqlite3.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include <sqlite3.h>
 
 namespace HPHP {
@@ -111,6 +112,15 @@ bool PDOSqliteConnection::create(CArrRef options) {
   sqlite3_busy_timeout(m_db, timeout * 1000);
 
   return true;
+}
+
+void PDOSqliteConnection::sweep() {
+  for (auto& udf : m_udfs) {
+    udf->func.asTypedValue()->m_type = KindOfNull;
+    udf->step.asTypedValue()->m_type = KindOfNull;
+    udf->fini.asTypedValue()->m_type = KindOfNull;
+  }
+  PDOConnection::sweep();
 }
 
 bool PDOSqliteConnection::support(SupportedMethod method) {
@@ -284,7 +294,7 @@ bool PDOSqliteConnection::createFunction(const String& name,
     return false;
   }
 
-  c_SQLite3::UserDefinedFuncPtr udf(new c_SQLite3::UserDefinedFunc());
+  auto udf = std::make_shared<c_SQLite3::UserDefinedFunc>();
   auto stat = sqlite3_create_function(m_db, name.data(), argcount, SQLITE_UTF8,
                                       udf.get(), php_sqlite3_callback_func,
                                       nullptr, nullptr);

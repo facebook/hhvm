@@ -86,7 +86,6 @@ class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepa
   public: bool t_movetoelement();
   public: bool t_movetofirstattribute();
   public: bool t_isvalid();
-  public: bool t_expand();
   public: Variant t___get(Variant name);
   public: bool t_getparserproperty(int64_t property);
   public: Variant t_lookupnamespace(const String& prefix);

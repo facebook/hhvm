@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_
 #define incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_
 
-#include "hphp/util/base.h"
 #include <pthread.h>
+
 #include "hphp/util/synchronizable.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/exception.h"

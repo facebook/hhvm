@@ -20,6 +20,7 @@
 #include <boost/variant.hpp>
 
 #include "hphp/util/trace.h"
+#include "hphp/util/match.h"
 
 namespace HPHP {
 struct StringData;
@@ -45,14 +46,11 @@ borrowed_ptr<T> borrow(const std::unique_ptr<T>& p) {
 }
 
 /*
- * String that must be a static string.
+ * String that must be a static string, and and Array that must be a
+ * static array.
  */
-using SString    = const StringData*;
-
-/*
- * Array that must be a static array.
- */
-using SArray     = const ArrayData*;
+using SString = const StringData*;
+using SArray  = const ArrayData*;
 
 /*
  * HHBC evaluation stack flavors.
@@ -68,6 +66,15 @@ enum class FPIKind { Unknown, Func, Ctor, ObjMeth, ClsMeth };
  * Types of parameter preparation (or unknown).
  */
 enum class PrepKind { Ref, Val, Unknown };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Many places in the code want to bump tracing levels by some amount
+ * for systemlib-related processing.  This is the amount they all bump
+ * by.
+ */
+constexpr int kSystemLibBump = 10;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -142,62 +149,6 @@ private:
 private:
   uintptr_t bits;
 };
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * This is a utility for short-hand visitors (using lambdas) with
- * boost::apply_visitor.
- *
- * Usage e.g.:
- *
- *   match<return_type>(
- *     thing,
- *     [&] (TypeA a) { ... },
- *     [&] (TypeB b) { ... }
- *   );
- */
-
-namespace detail {
-
-template<class Ret, class... Lambdas> struct visitor;
-
-template<class Ret, class L, class... Lambdas>
-struct visitor<Ret,L,Lambdas...> : L, visitor<Ret,Lambdas...> {
-  using L::operator();
-  using visitor<Ret,Lambdas...>::operator();
-  visitor(L l, Lambdas&&... lambdas)
-    : L(l)
-    , visitor<Ret,Lambdas...>(std::forward<Lambdas>(lambdas)...)
-  {}
-};
-
-template<class Ret, class L>
-struct visitor<Ret,L> : L {
-  typedef Ret result_type;
-  using L::operator();
-  /* implicit */ visitor(L l) : L(l) {}
-};
-
-template<class Ret> struct visitor<Ret> {
-  typedef Ret result_type;
-  visitor() {}
-};
-
-template<class Ret, class... Funcs>
-visitor<Ret,Funcs...> make_visitor(Funcs&&... funcs) {
-  return { std::forward<Funcs>(funcs)... };
-}
-
-}
-
-template<class Ret, class Var, class... Funcs>
-Ret match(Var&& v, Funcs&&... funcs) {
-  return boost::apply_visitor(
-    detail::make_visitor<Ret>(std::forward<Funcs>(funcs)...),
-    std::forward<Var>(v)
-  );
-}
 
 //////////////////////////////////////////////////////////////////////
 

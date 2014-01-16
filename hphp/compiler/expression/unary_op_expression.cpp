@@ -20,6 +20,7 @@
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/code_model_enums.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -565,6 +566,111 @@ ExpressionPtr UnaryOpExpression::unneededHelper() {
   }
 
   return static_pointer_cast<Expression>(shared_from_this());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = m_exp == nullptr ? 2 : 3;
+  switch (m_op) {
+    case T_UNSET:
+    case T_EXIT:
+    case T_ARRAY:
+    case T_ISSET:
+    case T_EMPTY:
+    case T_EVAL: {
+      cg.printObjectHeader("SimpleFunctionCallExpression", numProps);
+      std::string funcName;
+      switch (m_op) {
+        case T_UNSET: funcName = "unset"; break;
+        case T_EXIT: funcName = "exit"; break;
+        case T_ARRAY: funcName = "array"; break;
+        case T_ISSET: funcName = "isset"; break;
+        case T_EMPTY: funcName = "empty"; break;
+        case T_EVAL: funcName = "eval"; break;
+        default: break;
+      }
+      cg.printPropertyHeader("functionName");
+      cg.printValue(funcName);
+      if (m_exp != nullptr) {
+        cg.printPropertyHeader("arguments");
+        cg.printExpressionVector(m_exp);
+      }
+      cg.printPropertyHeader("sourceLocation");
+      cg.printLocation(this->getLocation());
+      cg.printObjectFooter();
+      return;
+    }
+    default:
+      break;
+  }
+
+  switch (m_op) {
+    case T_FILE:
+    case T_DIR:
+    case T_CLASS:
+    case T_FUNCTION: {
+      cg.printObjectHeader("SimpleVariableExpression", 2);
+      std::string varName;
+      switch (m_op) {
+        case T_FILE: varName = "__FILE__"; break;
+        case T_DIR: varName = "__DIR__"; break;
+        //case T_CLASS: varName = "class"; break;
+        //case T_FUNCTION: varName = "function"; break;
+        default:
+          assert(false); //fishing expedition. Are these cases dead?
+          break;
+      }
+      cg.printPropertyHeader("variableName");
+      cg.printValue(varName);
+      cg.printPropertyHeader("sourceLocation");
+      cg.printLocation(this->getLocation());
+      cg.printObjectFooter();
+      return;
+    }
+    default:
+      break;
+  }
+
+  cg.printObjectHeader("UnaryOpExpression", numProps);
+  if (m_exp != nullptr) {
+    cg.printPropertyHeader("expression");
+    m_exp->outputCodeModel(cg);
+  }
+  cg.printPropertyHeader("operation");
+  int op = 0;
+  switch (m_op) {
+    case T_CLONE: op = PHP_CLONE_OP; break;
+    case T_INC:
+      op = m_front ? PHP_PRE_INCREMENT_OP : PHP_POST_INCREMENT_OP;
+      break;
+    case T_DEC:
+      op = m_front ? PHP_PRE_DECREMENT_OP : PHP_POST_DECREMENT_OP;
+      break;
+    case '+': op = PHP_PLUS_OP; break;
+    case '-': op = PHP_MINUS_OP; break;
+    case '!': op = PHP_NOT_OP;  break;
+    case '~': op = PHP_BITWISE_NOT_OP; break;
+    case T_INT_CAST: op = PHP_INT_CAST_OP; break;
+    case T_DOUBLE_CAST: op = PHP_FLOAT_CAST_OP; break;
+    case T_STRING_CAST: op = PHP_STRING_CAST_OP; break;
+    case T_ARRAY_CAST: op = PHP_ARRAY_CAST_OP; break;
+    case T_OBJECT_CAST: op = PHP_OBJECT_CAST_OP; break;
+    case T_BOOL_CAST: op = PHP_BOOL_CAST_OP; break;
+    case T_UNSET_CAST: op = PHP_UNSET_CAST_OP; break;
+    case '@': op = PHP_ERROR_CONTROL_OP; break;
+    case T_PRINT: op = PHP_PRINT_OP; break;
+    case T_INCLUDE: op = PHP_INCLUDE_OP; break;
+    case T_INCLUDE_ONCE: op = PHP_INCLUDE_ONCE_OP; break;
+    case T_REQUIRE: op = PHP_REQUIRE_OP; break;
+    case T_REQUIRE_ONCE: op = PHP_REQUIRE_ONCE_OP; break;
+    default:
+      assert(false);
+  }
+  cg.printValue(op);
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,14 +27,12 @@
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 struct DynLocation;
 struct RuntimeType;
 }
 namespace JIT {
 
-using Transl::RuntimeType;
-using Transl::DynLocation;
 
 #define IRT_BOXES(name, bits)                                           \
   IRT(name,             (bits))                                         \
@@ -163,8 +161,6 @@ class Type {
     struct {
       bool m_arrayKindValid;
       ArrayData::ArrayKind m_arrayKind;
-      static_assert(sizeof(m_arrayKind) == 1,
-                    "Type expects ArrayKind to be one byte");
       char padding[6];
     };
   };
@@ -286,17 +282,22 @@ public:
 
   /*
    * Returns true if this value has a known constant DataType enum
-   * value, which allows us to avoid several checks.
+   * value, except if the type is exactly Type::Str or Type::Null, it
+   * returns true anyway, even though it could be either
+   * KindOfStaticString or KindOfString, or KindOfUninit or
+   * KindOfNull, respectively.
+   *
+   * TODO(#3390819): this function should return false for Str and
+   * Null.
+   *
+   * Pre: subtypeOf(Gen | Cls) || equals(None)
    */
   bool isKnownDataType() const {
     if (subtypeOf(Type::None)) return false;
-
-    // Calling this function with a type that can't be in a TypedValue isn't
-    // meaningful
     assert(subtypeOf(Gen | Cls));
-    // Str, Arr and Null are technically unions but can each be
-    // represented by one data type. Same for a union that consists of
-    // nothing but boxed types.
+
+    // Some unions that correspond to single KindOfs.  And Type::Str
+    // and Type::Null for now for historical reasons.
     if (isString() || isArray() || isNull() || isBoxed()) {
       return true;
     }
@@ -407,14 +408,6 @@ public:
    */
   bool equals(Type t2) const {
     return m_bits == t2.m_bits && m_extra == t2.m_extra;
-  }
-
-  /*
-   * True if t1 and t2 have the same KindOf, even if they're not
-   * precisely equal (due to specialization, for example).
-   */
-  bool isSameKindOf(Type t2) const {
-    return isKnownDataType() && toDataType() == t2.toDataType();
   }
 
   /*
@@ -594,7 +587,16 @@ public:
       != Type::Bottom;
   }
 
+  /*
+   * TODO(#3390819): this function does not exactly convert this type
+   * into a DataType in cases where a type does not exactly map to a
+   * DataType.  For example, Null.toDataType() returns KindOfNull,
+   * even though it could be KindOfUninit.
+   *
+   * Try not to use this function in new code.
+   */
   DataType toDataType() const;
+
   RuntimeType toRuntimeType() const;
 
   // return true if this corresponds to a type that

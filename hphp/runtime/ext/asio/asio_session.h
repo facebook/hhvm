@@ -128,7 +128,7 @@ class AsioSession {
     bool hasOnAsyncFunctionAwaitCallback() { return m_onAsyncFunctionAwaitCallback.get(); }
     bool hasOnAsyncFunctionSuccessCallback() { return m_onAsyncFunctionSuccessCallback.get(); }
     bool hasOnAsyncFunctionFailCallback() { return m_onAsyncFunctionFailCallback.get(); }
-    void onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont);
+    void onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child);
     void onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitHandle* child);
     void onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, CVarRef result);
     void onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, CObjRef exception);

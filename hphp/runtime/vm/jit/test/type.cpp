@@ -18,16 +18,9 @@
 
 #include "folly/ScopeGuard.h"
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/vm/jit/ir.h"
 // for specialized object tests to get some real VM::Class
 #include "hphp/system/systemlib.h"
-
-namespace std { namespace tr1 {
-  template<> struct hash<HPHP::JIT::Type> {
-    size_t operator()(HPHP::JIT::Type t) const { return t.hash(); }
-  };
-} }
 
 namespace HPHP {  namespace JIT {
 
@@ -61,15 +54,27 @@ TEST(Type, Null) {
 
 TEST(Type, KnownDataType) {
   auto trueTypes = {
-    Type::Int, Type::BoxedCell, Type::StaticStr, Type::Str,
-    Type::Null, Type::Uninit, Type::InitNull
+    Type::Int, Type::BoxedCell, Type::StaticStr,
+    Type::Str, // TODO(#3390819): this should return false...
+    Type::Obj,
+    Type::Dbl,
+    Type::Arr,
+    Type::StaticArr,
+    Type::CountedArr,
+    Type::Res,
+    Type::Bool,
+    Type::Uninit,
+    Type::InitNull
   };
   for (auto t : trueTypes) {
     EXPECT_TRUE(t.isKnownDataType())
       << t.toString() << ".isKnownDataType()";
   }
   auto falseTypes = {
-    Type::Cell, Type::Gen, Type::Int | Type::Dbl
+    // Type::Null, // TODO(#3390819)
+    Type::Cell,
+    Type::Gen,
+    Type::Int | Type::Dbl
   };
   for (auto t : falseTypes) {
     EXPECT_FALSE(t.isKnownDataType())
@@ -135,35 +140,35 @@ TEST(Type, RuntimeType) {
   auto sd = StringData::MakeMalloced("", 0);
   SCOPE_EXIT { sd->destruct(); };
 
-  HPHP::Transl::RuntimeType rt(sd);
+  HPHP::JIT::RuntimeType rt(sd);
   Type t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Str));
   EXPECT_FALSE(t.subtypeOf(Type::Int));
 
-  rt = HPHP::Transl::RuntimeType(HphpArray::GetStaticEmptyArray());
+  rt = HPHP::JIT::RuntimeType(HphpArray::GetStaticEmptyArray());
   t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Arr));
   EXPECT_FALSE(t.subtypeOf(Type::Str));
 
-  rt = HPHP::Transl::RuntimeType(true);
+  rt = HPHP::JIT::RuntimeType(true);
   t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Bool));
   EXPECT_FALSE(t.subtypeOf(Type::Obj));
 
-  rt = HPHP::Transl::RuntimeType((int64_t) 1);
+  rt = HPHP::JIT::RuntimeType((int64_t) 1);
   t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Int));
   EXPECT_FALSE(t.subtypeOf(Type::Dbl));
 
-  rt = HPHP::Transl::RuntimeType(DataType::KindOfObject,
+  rt = HPHP::JIT::RuntimeType(DataType::KindOfObject,
                                  DataType::KindOfInvalid);
   rt = rt.setKnownClass(SystemLib::s_TraversableClass);
   t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Obj));
   EXPECT_FALSE(Type::Obj.subtypeOf(t));
   EXPECT_FALSE(Type::Int.subtypeOf(t));
-  HPHP::Transl::RuntimeType rt1 =
-    HPHP::Transl::RuntimeType(DataType::KindOfObject,
+  HPHP::JIT::RuntimeType rt1 =
+    HPHP::JIT::RuntimeType(DataType::KindOfObject,
                               DataType::KindOfInvalid);
   rt1 = rt1.setKnownClass(SystemLib::s_IteratorClass);
   Type t1 = Type(rt1);

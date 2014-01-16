@@ -15,7 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/sleep_wait_handle.h"
+
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/system/systemlib.h"
@@ -26,13 +27,6 @@ namespace HPHP {
 
 namespace {
   StaticString s_sleep("<sleep>");
-}
-
-c_SleepWaitHandle::c_SleepWaitHandle(Class *cb)
-  : c_SessionScopedWaitHandle(cb) {
-}
-
-c_SleepWaitHandle::~c_SleepWaitHandle() {
 }
 
 void c_SleepWaitHandle::t___construct() {

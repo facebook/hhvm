@@ -559,8 +559,15 @@ public:
   void addWorkers(int n) {
     Lock lock(m_mutex);
     if (m_stopped) return;
-    for (int i = 0; i < n; ++i) {
-      addWorkerImpl(true);
+    m_maxThreadCount += n;
+    if (!TWorker::CountActive) {
+      for (int i = 0; i < n; ++i) {
+        addWorkerImpl(true);
+      }
+    } else {
+      while (m_workers.size() < getTargetNumWorkers()) {
+        addWorkerImpl(true);
+      }
     }
   }
 

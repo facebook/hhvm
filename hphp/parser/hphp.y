@@ -4,6 +4,7 @@
 #else
 #include "hphp/compiler/parser/parser.h"
 #endif
+#include <boost/lexical_cast.hpp>
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 
@@ -103,6 +104,8 @@
 
 using namespace HPHP::HPHP_PARSER_NS;
 
+typedef HPHP::ClosureType ClosureType;
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -148,12 +151,6 @@ static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-static void finally_statement(Parser *_p) {
-  if (!_p->enableFinallyStatement()) {
-    HPHP_PARSER_ERROR("Finally statement is not enabled", _p);
-  }
-}
 
 static void constant_ae(Parser *_p, Token &out, Token &value) {
   const std::string& valueStr = value.text();
@@ -564,6 +561,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %parse-param {HPHP::HPHP_PARSER_NS::Parser *_p}
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
+%right T_LAMBDA_ARROW
 %left ','
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR
@@ -643,6 +641,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_DOUBLE_ARROW
 %token T_LIST
 %token T_ARRAY
+%token T_CALLABLE
 %token T_CLASS_C
 %token T_METHOD_C
 %token T_FUNC_C
@@ -701,11 +700,34 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_ASYNC
 %token T_TUPLE
 
+%right T_FROM
+%token T_WHERE
+%token T_JOIN
+%token T_IN
+%token T_ON
+%token T_EQUALS
+%token T_INTO
+%token T_LET
+%token T_ORDERBY
+%token T_ASCENDING
+%token T_DESCENDING
+%token T_SELECT
+%token T_GROUP
+%token T_BY
+
+%token T_LAMBDA_OP
+%token T_LAMBDA_CP
+%token T_UNRESOLVED_OP
+
 %%
 
 start:
-    { _p->initParseTree(); } top_statement_list { _p->popLabelInfo();
-                                                  _p->finiParseTree();}
+                                       { _p->onNewLabelScope(true);
+                                         _p->initParseTree();}
+    top_statement_list
+                                       { _p->popLabelInfo();
+                                         _p->finiParseTree();
+                                         _p->onCompleteLabelScope(true);}
 ;
 
 top_statement_list:
@@ -741,6 +763,19 @@ ident:
   | T_XHP_REQUIRED                     { $$ = $1;}
   | T_XHP_ENUM                         { $$ = $1;}
   | T_TUPLE                            { $$ = $1;}
+  | T_WHERE                            { $$ = $1;}
+  | T_JOIN                             { $$ = $1;}
+  | T_ON                               { $$ = $1;}
+  | T_IN                               { $$ = $1;}
+  | T_EQUALS                           { $$ = $1;}
+  | T_INTO                             { $$ = $1;}
+  | T_LET                              { $$ = $1;}
+  | T_ORDERBY                          { $$ = $1;}
+  | T_ASCENDING                        { $$ = $1;}
+  | T_DESCENDING                       { $$ = $1;}
+  | T_SELECT                           { $$ = $1;}
+  | T_GROUP                            { $$ = $1;}
+  | T_BY                               { $$ = $1;}
 ;
 
 use_declarations:
@@ -819,21 +854,29 @@ statement:
     new_elseif_list
     new_else_single
     T_ENDIF ';'                        { _p->onIf($$,$2,$4,$5,$6);}
-  | T_WHILE parenthesis_expr           { _p->pushLabelScope();}
+  | T_WHILE parenthesis_expr           { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
     while_statement                    { _p->popLabelScope();
-                                         _p->onWhile($$,$2,$4);}
+                                         _p->onWhile($$,$2,$4);
+                                         _p->onCompleteLabelScope(false);}
 
-  | T_DO                               { _p->pushLabelScope();}
+  | T_DO                               { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
     statement T_WHILE parenthesis_expr
     ';'                                { _p->popLabelScope();
-                                         _p->onDo($$,$3,$5);}
+                                         _p->onDo($$,$3,$5);
+                                         _p->onCompleteLabelScope(false);}
   | T_FOR '(' for_expr ';'
-    for_expr ';' for_expr ')'          { _p->pushLabelScope();}
+    for_expr ';' for_expr ')'          { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
     for_statement                      { _p->popLabelScope();
-                                         _p->onFor($$,$3,$5,$7,$10);}
-  | T_SWITCH parenthesis_expr          { _p->pushLabelScope();}
+                                         _p->onFor($$,$3,$5,$7,$10);
+                                         _p->onCompleteLabelScope(false);}
+  | T_SWITCH parenthesis_expr          { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
     switch_case_list                   { _p->popLabelScope();
-                                         _p->onSwitch($$,$2,$4);}
+                                         _p->onSwitch($$,$2,$4);
+                                         _p->onCompleteLabelScope(false);}
   | T_BREAK ';'                        { _p->onBreakContinue($$, true, NULL);}
   | T_BREAK expr ';'                   { _p->onBreakContinue($$, true, &$2);}
   | T_CONTINUE ';'                     { _p->onBreakContinue($$, false, NULL);}
@@ -849,27 +892,30 @@ statement:
   | T_INLINE_HTML                      { _p->onEcho($$, $1, 1);}
   | T_FOREACH '(' expr
     T_AS foreach_variable
-    foreach_optional_arg ')'           { _p->pushLabelScope();}
+    foreach_optional_arg ')'           { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
     foreach_statement                  { _p->popLabelScope();
-                                         _p->onForEach($$,$3,$5,$6,$9);}
+                                         _p->onForEach($$,$3,$5,$6,$9);
+                                         _p->onCompleteLabelScope(false);}
   | T_DECLARE '(' declare_list ')'
     declare_statement                  { _p->onBlock($$, $5); $$ = T_DECLARE;}
-  | T_TRY '{'
-    inner_statement_list '}'
+  | T_TRY
+    try_statement_list
     T_CATCH '('
     fully_qualified_class_name
     T_VARIABLE ')' '{'
     inner_statement_list '}'
-    additional_catches
-    optional_finally                   { _p->onTry($$,$3,$7,$8,$11,$13,$14);}
-  | T_TRY '{'
-    inner_statement_list '}'
-    finally                            { _p->onTry($$, $3, $5);}
+    additional_catches                 { _p->onCompleteLabelScope(false);}
+    optional_finally                   { _p->onTry($$,$2,$5,$6,$9,$11,$13);}
+  | T_TRY
+    try_statement_list
+    T_FINALLY                          { _p->onCompleteLabelScope(false);}
+    finally_statement_list             { _p->onTry($$, $2, $5);}
   | T_THROW expr ';'                   { _p->onThrow($$, $2);}
   | T_GOTO ident ';'                   { _p->onGoto($$, $2, true);
                                          _p->addGoto($2.text(),
                                                      _p->getLocation(),
-                                                     &$$); }
+                                                     &$$);}
   | expr ';'                           { _p->onExpStatement($$, $1);}
   | yield_expr ';'                     { _p->onExpStatement($$, $1);}
   | yield_assign_expr ';'              { _p->onExpStatement($$, $1);}
@@ -878,10 +924,18 @@ statement:
   | await_assign_expr ';'              { _p->onExpStatement($$, $1);}
   | T_RETURN await_expr ';'            { _p->onReturn($$, &$2); }
   | await_list_assign_expr ';'         { _p->onExpStatement($$, $1);}
+  | query_assign_expr ';'              { _p->onExpStatement($$, $1);}
+  | T_RETURN query_expr ';'            { _p->onReturn($$, &$2); }
   | ident ':'                          { _p->onLabel($$, $1);
                                          _p->addLabel($1.text(),
                                                       _p->getLocation(),
-                                                      &$$); }
+                                                      &$$);
+                                         _p->onScopeLabel($$, $1);}
+;
+
+try_statement_list:
+   '{'                                 { _p->onNewLabelScope(false);}
+   inner_statement_list '}'            { $$ = $3;}
 ;
 
 additional_catches:
@@ -894,14 +948,16 @@ additional_catches:
   |                                    { $$.reset();}
 ;
 
-finally:
-    T_FINALLY '{'
-    inner_statement_list '}'           { _p->onFinally($$, $4);}
-                                       { finally_statement(_p);}
+finally_statement_list:
+    '{'                                { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
+    inner_statement_list '}'           { _p->popLabelScope();
+                                         _p->onFinally($$, $3);
+                                         _p->onCompleteLabelScope(false);}
 ;
 
 optional_finally:
-    finally
+    T_FINALLY finally_statement_list   { $$ = $2;}
   |                                    { $$.reset();}
 ;
 
@@ -911,39 +967,45 @@ is_reference:
 ;
 
 function_loc:
-    T_FUNCTION                         { _p->pushFuncLocation();}
+    T_FUNCTION                         { _p->pushFuncLocation(); }
 ;
 
 function_declaration_statement:
     function_loc
     is_reference hh_name_with_typevar  { $3.setText(_p->nsDecl($3.text()));
+                                         _p->onNewLabelScope(true);
                                          _p->onFunctionStart($3);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
     function_body                      { _p->onFunction($$,nullptr,$8,$2,$3,$6,$9,nullptr);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();}
+                                         _p->popTypeScope();
+                                         _p->onCompleteLabelScope(true);}
   | non_empty_member_modifiers
     function_loc
     is_reference hh_name_with_typevar  { $4.setText(_p->nsDecl($4.text()));
+                                         _p->onNewLabelScope(true);
                                          _p->onFunctionStart($4);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
     function_body                      { _p->onFunction($$,&$1,$9,$3,$4,$7,$10,nullptr);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();}
+                                         _p->popTypeScope();
+                                         _p->onCompleteLabelScope(true);}
   | non_empty_user_attributes
     method_modifiers function_loc
     is_reference hh_name_with_typevar  { $5.setText(_p->nsDecl($5.text()));
+                                         _p->onNewLabelScope(true);
                                          _p->onFunctionStart($5);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
     function_body                      { _p->onFunction($$,&$2,$10,$4,$5,$8,$11,&$1);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();}
+                                         _p->popTypeScope();
+                                         _p->onCompleteLabelScope(true);}
 ;
 
 class_declaration_statement:
@@ -1283,31 +1345,39 @@ class_statement:
                                          ($$,NULL,$1,NULL);}
   | method_modifiers function_loc
     is_reference hh_name_with_typevar '('
-                                       { _p->onMethodStart($4, $1);
+                                       { _p->onNewLabelScope(true);
+                                         _p->onMethodStart($4, $1);
                                          _p->pushLabelInfo();}
     method_parameter_list ')'
     hh_opt_return_type
     method_body
                                        { _p->onMethod($$,$1,$9,$3,$4,$7,$10,nullptr);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();}
+                                         _p->popTypeScope();
+                                         _p->onCompleteLabelScope(true);}
   | non_empty_user_attributes
     method_modifiers function_loc
     is_reference hh_name_with_typevar '('
-                                       { _p->onMethodStart($5, $2);
+                                       { _p->onNewLabelScope(true);
+                                         _p->onMethodStart($5, $2);
                                          _p->pushLabelInfo();}
     method_parameter_list ')'
     hh_opt_return_type
     method_body
                                        { _p->onMethod($$,$2,$10,$4,$5,$8,$11,&$1);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();}
+                                         _p->popTypeScope();
+                                         _p->onCompleteLabelScope(true);}
   | T_XHP_ATTRIBUTE
     xhp_attribute_stmt ';'             { _p->xhpSetAttributes($2);}
   | T_XHP_CATEGORY
     xhp_category_stmt ';'              { xhp_category_stmt(_p,$$,$2);}
   | T_XHP_CHILDREN
     xhp_children_stmt ';'              { xhp_children_stmt(_p,$$,$2);}
+  | T_REQUIRE T_EXTENDS fully_qualified_class_name  ';'
+                                       { _p->onTraitRequire($$, $3, true); }
+  | T_REQUIRE T_IMPLEMENTS fully_qualified_class_name ';'
+                                       { _p->onTraitRequire($$, $3, false); }
   | T_USE trait_list ';'               { Token t; t.reset();
                                          _p->onTraitUse($$,$2,t); }
   | T_USE trait_list '{'
@@ -1615,30 +1685,92 @@ expr_no_variable:
   | shape_literal                      { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
-  | function_loc
-    is_reference '('                   { Token t; _p->onClosureStart(t);
-                                         _p->pushLabelInfo();}
-    parameter_list ')'
-    hh_opt_return_type lexical_vars
-    '{' inner_statement_list '}'       { Token u; u.reset();
-                                         _p->finishStatement($10, $10); $10 = 1;
-                                         _p->onClosure($$,0,u,$2,$5,$8,$10);
-                                         _p->popLabelInfo();}
-  | non_empty_member_modifiers function_loc
-    is_reference '('                   { Token t; _p->onClosureStart(t);
-                                         _p->pushLabelInfo();}
-    parameter_list ')'
-    hh_opt_return_type lexical_vars
-    '{' inner_statement_list '}'       { Token u; u.reset();
-                                         _p->finishStatement($11, $11); $11 = 1;
-                                         _p->onClosure($$,&$1,u,$3,$6,$9,$11);
-                                         _p->popLabelInfo();}
+  | closure_expression                 { $$ = $1;}
+  | lambda_expression                  { $$ = $1;}
   | dim_expr                           { $$ = $1;}
+;
+
+lambda_use_vars:
+    T_USE '('
+    lexical_var_list
+    hh_possible_comma
+    ')'                                { $$ = $3;}
+  |                                    { $$.reset();}
+;
+
+closure_expression:
+    function_loc
+    is_reference '('                   { Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo(); }
+    parameter_list ')'
+    hh_opt_return_type lambda_use_vars
+    '{' inner_statement_list '}'       { _p->finishStatement($10, $10); $10 = 1;
+                                         $$ = _p->onClosure(ClosureType::Long,
+                                                            nullptr,
+                                                            $2,$5,$8,$10);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
+  | non_empty_member_modifiers
+    function_loc
+    is_reference '('                   { Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo(); }
+    parameter_list ')'
+    hh_opt_return_type lambda_use_vars
+    '{' inner_statement_list '}'       { _p->finishStatement($11, $11); $11 = 1;
+                                         $$ = _p->onClosure(ClosureType::Long,
+                                                            &$1,
+                                                            $3,$6,$9,$11);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
+;
+
+lambda_expression:
+    T_VARIABLE                         { _p->pushFuncLocation();
+                                         Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo();
+                                         Token u;
+                                         _p->onParam($1,NULL,u,$1,0,
+                                                     NULL,NULL,NULL);}
+    lambda_body                        { Token v; Token w;
+                                         _p->finishStatement($3, $3); $3 = 1;
+                                         $$ = _p->onClosure(ClosureType::Short,
+                                                            nullptr,
+                                                            v,$1,w,$3);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
+  | T_LAMBDA_OP                        { _p->pushFuncLocation();
+                                         Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo();}
+    parameter_list
+    T_LAMBDA_CP
+    hh_opt_return_type
+    lambda_body                        { Token u; Token v;
+                                         _p->finishStatement($6, $6); $6 = 1;
+                                         $$ = _p->onClosure(ClosureType::Short,
+                                                            nullptr,
+                                                            u,$3,v,$6);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
+;
+
+lambda_body:
+    T_LAMBDA_ARROW expr               { $$ = _p->onExprForLambda($2);}
+  | T_LAMBDA_ARROW
+    '{' inner_statement_list '}'      { $$ = $3;}
 ;
 
 shape_keyname:
     T_CONSTANT_ENCAPSED_STRING        { validate_shape_keyname($1, _p);
                                         _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $1); }
+;
 
 non_empty_shape_pair_list:
     non_empty_shape_pair_list ','
@@ -1708,10 +1840,100 @@ dim_expr_base:
   | '(' expr_no_variable ')'           { $$ = $2;}
 ;
 
-lexical_vars:
-    T_USE '(' lexical_var_list
-    hh_possible_comma ')'              { $$ = $3;}
-  |                                    { $$.reset();}
+query_expr:
+    query_head query_body            { _p->onQuery($$, $1, $2); }
+;
+
+query_assign_expr:
+    variable '=' query_expr          { _p->onAssign($$, $1, $3, 0, true);}
+;
+
+query_head:
+  T_FROM T_VARIABLE T_IN expr        { _p->onFromClause($$, $2, $4); }
+;
+
+query_body:
+    query_body_clauses select_or_group_clause
+                                     { _p->onQueryBody($$, &$1, $2, NULL); }
+  | query_body_clauses select_or_group_clause query_continuation
+                                     { _p->onQueryBody($$, &$1, $2, &$3); }
+  | select_or_group_clause
+                                     { _p->onQueryBody($$, NULL, $1, NULL); }
+  | select_or_group_clause query_continuation
+                                     { _p->onQueryBody($$, NULL, $1, &$2); }
+;
+
+query_body_clauses:
+    query_body_clause                { _p->onQueryBodyClause($$, NULL, $1); }
+  | query_body_clauses query_body_clause
+                                     { _p->onQueryBodyClause($$, &$1, $2); }
+;
+
+query_body_clause:
+    from_clause                      { $$ = $1;}
+  | let_clause                       { $$ = $1;}
+  | where_clause                     { $$ = $1;}
+  | join_clause                      { $$ = $1;}
+  | join_into_clause                 { $$ = $1;}
+  | orderby_clause                   { $$ = $1;}
+;
+
+from_clause:
+    T_FROM T_VARIABLE T_IN expr      { _p->onFromClause($$, $2, $4); }
+;
+
+let_clause:
+    T_LET T_VARIABLE '=' expr        { _p->onLetClause($$, $2, $4); }
+;
+
+where_clause:
+    T_WHERE expr                     { _p->onWhereClause($$, $2); }
+;
+
+join_clause:
+    T_JOIN T_VARIABLE T_IN expr T_ON expr T_EQUALS expr
+                                     { _p->onJoinClause($$, $2, $4, $6, $8); }
+;
+
+join_into_clause:
+    T_JOIN T_VARIABLE T_IN expr T_ON expr T_EQUALS expr T_INTO T_VARIABLE
+                              { _p->onJoinIntoClause($$, $2, $4, $6, $8, $10); }
+;
+
+orderby_clause:
+    T_ORDERBY orderings              { _p->onOrderbyClause($$, $2); }
+;
+
+orderings:
+    ordering                         { _p->onOrdering($$, NULL, $1); }
+  | orderings ',' ordering           { _p->onOrdering($$, &$1, $3); }
+;
+
+ordering:
+    expr                             { _p->onOrderingExpr($$, $1, NULL); }
+  | expr ordering_direction          { _p->onOrderingExpr($$, $1, &$2); }
+;
+
+ordering_direction:
+    T_ASCENDING                      { $$ = $1;}
+  | T_DESCENDING                     { $$ = $1;}
+;
+
+select_or_group_clause:
+    select_clause                    { $$ = $1;}
+  | group_clause                     { $$ = $1;}
+;
+
+select_clause:
+    T_SELECT expr                    { _p->onSelectClause($$, $2); }
+;
+
+group_clause:
+    T_GROUP expr T_BY expr           { _p->onGroupClause($$, $2, $4); }
+;
+
+query_continuation:
+    T_INTO T_VARIABLE query_body     { _p->onIntoClause($$, $2, $3); }
 ;
 
 lexical_var_list:
@@ -2191,6 +2413,10 @@ class_method_call:
     T_DOUBLE_COLON
     variable_without_objects '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$3,$5,&$1);}
+  | static_class_name
+    T_DOUBLE_COLON
+    '{' expr '}' '('
+    function_call_parameter_list ')'   { _p->onCall($$,1,$4,$7,&$1);}
 ;
 
 variable_without_objects:
@@ -2360,10 +2586,12 @@ hh_opt_constraint:
 
 hh_type_alias_statement:
     T_TYPE hh_name_with_typevar
-      '=' hh_type ';'                  { _p->onTypedef($$, $2, $4);
+      '=' hh_type ';'                  { $2.setText(_p->nsDecl($2.text()));
+                                         _p->onTypedef($$, $2, $4);
                                          _p->popTypeScope(); }
   | T_NEWTYPE hh_name_with_typevar
-    hh_opt_constraint '=' hh_type ';'  { _p->onTypedef($$, $2, $5);
+    hh_opt_constraint '=' hh_type ';'  { $2.setText(_p->nsDecl($2.text()));
+                                         _p->onTypedef($$, $2, $5);
                                          _p->popTypeScope(); }
 ;
 
@@ -2454,6 +2682,9 @@ hh_type:
   | class_namespace_string_typeargs    { $$ = $1; }
   | T_ARRAY                            { Token t; t.reset();
                                          $1.setText("array");
+                                         _p->onTypeAnnotation($$, $1, t); }
+  | T_CALLABLE                         { Token t; t.reset();
+                                         $1.setText("callable");
                                          _p->onTypeAnnotation($$, $1, t); }
   | hh_shape_type                      { $$ = $1; }
   | T_ARRAY T_TYPELIST_LT hh_type

@@ -23,7 +23,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-static HPHP::ServerPtrVec AllServers;
+static std::vector<HPHP::ServerPtr> AllServers;
 static void on_kill(int sig) {
   signal(sig, SIG_DFL);
   for (unsigned int i = 0; i < AllServers.size(); i++) {

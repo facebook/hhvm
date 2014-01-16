@@ -1004,7 +1004,7 @@ Array f_headers_list() {
     transport->getResponseHeaders(headers);
     for (HeaderMap::const_iterator iter = headers.begin();
          iter != headers.end(); ++iter) {
-      const vector<string> &values = iter->second;
+      const std::vector<std::string> &values = iter->second;
       for (unsigned int i = 0; i < values.size(); i++) {
         ret.append(String(iter->first + ": " + values[i]));
       }

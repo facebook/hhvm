@@ -1,0 +1,2 @@
+*** Testing session_set_save_handler() function: create_sid ***
+HipHop Fatal error: %s

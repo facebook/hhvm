@@ -1,0 +1,18 @@
+int(0)
+int(0)
+int(0)
+string(%d) "%s"
+string(0) ""
+object(ZipArchive)#%d (5) {
+  ["status"]=>
+  int(0)
+  ["statusSys"]=>
+  int(0)
+  ["numFiles"]=>
+  int(0)
+  ["filename"]=>
+  string(%d) "%s"
+  ["comment"]=>
+  string(0) ""
+}
+Done

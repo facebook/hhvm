@@ -34,7 +34,6 @@ struct GraphFormat {
   const std::string epilogue;
 };
 
-DECLARE_BOOST_TYPES(CmdHeaptrace);
 class CmdHeaptrace : public CmdExtended {
 public:
   virtual void list(DebuggerClient &client);

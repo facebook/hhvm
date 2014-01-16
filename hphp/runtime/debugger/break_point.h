@@ -17,6 +17,9 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
 #define incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
 
+#include <memory>
+#include <vector>
+
 #include "hphp/runtime/debugger/debugger_thrift_buffer.h"
 
 namespace HPHP { namespace Eval {
@@ -117,9 +120,13 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(DFunctionInfo);
-DECLARE_BOOST_TYPES(BreakPointInfo);
-DECLARE_BOOST_TYPES(DebuggerProxy);
+struct BreakPointInfo;
+struct DebuggerProxy;
+struct DFunctionInfo;
+
+using BreakPointInfoPtr = std::shared_ptr<BreakPointInfo>;
+using DebuggerProxyPtr = std::shared_ptr<DebuggerProxy>;
+
 class BreakPointInfo {
 public:
   // The state of the break point
@@ -174,9 +181,11 @@ public:
   void sendImpl(int version, DebuggerThriftBuffer &thrift);
   void recvImpl(int version, DebuggerThriftBuffer &thrift);
 
-  static void SendImpl(int version, const BreakPointInfoPtrVec &bps,
+  static void SendImpl(int version,
+                       const std::vector<BreakPointInfoPtr>& bps,
                        DebuggerThriftBuffer &thrift);
-  static void RecvImpl(int version, BreakPointInfoPtrVec &bps,
+  static void RecvImpl(int version,
+                       std::vector<BreakPointInfoPtr>& bps,
                        DebuggerThriftBuffer &thrift);
 
   bool breakable(int stackDepth, Offset offset) const;
@@ -198,7 +207,7 @@ public:
   int32_t m_char2;
 
   // class::func()
-  DFunctionInfoPtrVec m_funcs;
+  std::vector<std::shared_ptr<DFunctionInfo>> m_funcs;
 
   std::string getNamespace() const;
   std::string getClass() const;

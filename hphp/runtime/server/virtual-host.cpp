@@ -61,7 +61,7 @@ int64_t VirtualHost::GetUploadMaxFileSize() {
   return RuntimeOption::UploadMaxFileSize;
 }
 
-const vector<string> &VirtualHost::GetAllowedDirectories() {
+const std::vector<std::string> &VirtualHost::GetAllowedDirectories() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
   if (!vh->m_runtimeOption.allowedDirectories.empty()) {
@@ -75,7 +75,7 @@ void VirtualHost::SortAllowedDirectories(std::vector<std::string>& dirs) {
     Make sure corresponding realpath's are also allowed
   */
   for (unsigned int i = 0, s = dirs.size(); i < s; i++) {
-    string &directory = dirs[i];
+    std::string &directory = dirs[i];
     char resolved_path[PATH_MAX];
     if (realpath(directory.c_str(), resolved_path) &&
         directory != resolved_path) {
@@ -159,7 +159,7 @@ void VirtualHost::init(Hdf vh) {
 
   if (prefix) m_prefix = prefix;
   if (pattern) {
-    m_pattern = Util::format_pattern(pattern, true);
+    m_pattern = Util::format_pattern(pattern, false);
     if (!m_pattern.empty()) {
       m_pattern += "i"; // case-insensitive
     }
@@ -174,6 +174,9 @@ void VirtualHost::init(Hdf vh) {
   initRuntimeOption(overwrite);
 
   m_disabled = vh["Disabled"].getBool(false);
+
+  m_checkExistenceBeforeRewrite =
+    vh["CheckExistenceBeforeRewrite"].getBool(true);
 
   Hdf rewriteRules = vh["RewriteRules"];
   for (Hdf hdf = rewriteRules.firstChild(); hdf.exists(); hdf = hdf.next()) {
@@ -219,7 +222,7 @@ void VirtualHost::init(Hdf vh) {
 
   if (vh["IpBlockMap"].firstChild().exists()) {
     Hdf ipblocks = vh["IpBlockMap"];
-    m_ipBlocks = IpBlockMapPtr(new IpBlockMap(ipblocks));
+    m_ipBlocks = std::make_shared<IpBlockMap>(ipblocks);
   }
 
   Hdf logFilters = vh["LogFilters"];
@@ -229,8 +232,8 @@ void VirtualHost::init(Hdf vh) {
     filter.replaceWith = hdf["value"].getString("");
     filter.replaceWith = "\\1=" + filter.replaceWith;
 
-    string pattern = hdf["pattern"].getString("");
-    vector<string> names;
+    std::string pattern = hdf["pattern"].getString("");
+    std::vector<std::string> names;
     hdf["params"].get(names);
 
     if (pattern.empty()) {
@@ -259,7 +262,7 @@ void VirtualHost::init(Hdf vh) {
   m_serverName = vh["ServerName"].getString();
 }
 
-bool VirtualHost::match(const string &host) const {
+bool VirtualHost::match(const std::string &host) const {
   if (!m_pattern.empty()) {
     Variant ret = preg_match(String(m_pattern.c_str(), m_pattern.size(),
                                     CopyString),
@@ -294,8 +297,8 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
     const RewriteRule &rule = m_rewriteRules[i];
 
     bool passed = true;
-    for (vector<RewriteCond>::const_iterator it = rule.rewriteConds.begin();
-         it != rule.rewriteConds.end(); ++it) {
+    for (auto it = rule.rewriteConds.begin();
+        it != rule.rewriteConds.end(); ++it) {
       String subject;
       if (it->type == RewriteCond::Type::Request) {
         subject = normalized;

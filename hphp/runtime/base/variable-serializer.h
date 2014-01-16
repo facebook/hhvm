@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

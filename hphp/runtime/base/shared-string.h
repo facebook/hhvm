@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_CPP_BASE_SHARED_SHARED_STRING_H_
 #define incl_HPHP_CPP_BASE_SHARED_SHARED_STRING_H_
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/atomic.h>

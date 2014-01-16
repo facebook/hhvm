@@ -211,8 +211,10 @@ ProxyArray::AppendWithRef(ArrayData* ad, CVarRef v, bool copy) {
 }
 
 ArrayData*
-ProxyArray::Plus(ArrayData* ad, const ArrayData* elems) {
-  auto r = innerArr(ad)->plus(elems);
+ProxyArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
+  auto const ret = ad->hasMultipleRefs() ? Make(innerArr(ad))
+                                         : asProxyArray(ad);
+  auto r = ret->m_ad->plusEq(elems);
   return reseatable(ad, r);
 }
 
@@ -310,8 +312,8 @@ bool ProxyArray::IsVectorData(const ArrayData* ad) {
   return innerArr(ad)->isVectorData();
 }
 
-APCVariant *ProxyArray::GetSharedVariant(const ArrayData* ad) {
-  return innerArr(ad)->getSharedVariant();
+APCHandle *ProxyArray::GetAPCHandle(const ArrayData* ad) {
+  return innerArr(ad)->getAPCHandle();
 }
 
 ArrayData* ProxyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {

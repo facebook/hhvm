@@ -1,0 +1,47 @@
+HipHop Warning: %s
+blah
+<?php
+echo file_get_contents("foo/" . basename(__FILE__));
+$context = stream_context_create();
+file_get_contents("./hi", 0, $context, 0, -1);
+echo file_get_contents("foob");
+set_include_path("%stests");
+echo file_get_contents("foob", true);
+echo file_get_contents("./hi", 0, $context);
+echo file_get_contents("../oops");
+echo file_get_contents("./hi", 0, $context, 50000);
+echo file_get_contents("./hi");
+echo file_get_contents("./hi", 0, $context, 0, 0);
+?>
+HipHop Warning: %s
+test
+test
+<?php
+echo file_get_contents("foo/" . basename(__FILE__));
+$context = stream_context_create();
+file_get_contents("./hi", 0, $context, 0, -1);
+echo file_get_contents("foob");
+set_include_path("%stests");
+echo file_get_contents("foob", true);
+echo file_get_contents("./hi", 0, $context);
+echo file_get_contents("../oops");
+echo file_get_contents("./hi", 0, $context, 50000);
+echo file_get_contents("./hi");
+echo file_get_contents("./hi", 0, $context, 0, 0);
+?>
+HipHop Warning: %s
+HipHop Warning: %s
+<?php
+echo file_get_contents("foo/" . basename(__FILE__));
+$context = stream_context_create();
+file_get_contents("./hi", 0, $context, 0, -1);
+echo file_get_contents("foob");
+set_include_path("%stests");
+echo file_get_contents("foob", true);
+echo file_get_contents("./hi", 0, $context);
+echo file_get_contents("../oops");
+echo file_get_contents("./hi", 0, $context, 50000);
+echo file_get_contents("./hi");
+echo file_get_contents("./hi", 0, $context, 0, 0);
+?>
+===DONE===

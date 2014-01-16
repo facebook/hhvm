@@ -1,0 +1,15 @@
+%s:%d: tailable cursor requested on non capped collection
+Setting flag #1
+%s:%d: tailable cursor requested on non capped collection
+Setting flag #2
+Setting flag #3
+%s:%d: no ts field in query
+Setting flag #4
+Setting flag #5
+Setting flag #6
+HipHop Warning: %s
+HipHop Warning: %s
+Setting flag #7
+Setting flag #8
+Setting flag #9
+Setting flag #10

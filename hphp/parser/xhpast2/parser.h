@@ -22,6 +22,7 @@
 #include "folly/Format.h"
 #include "folly/String.h"
 #include "hphp/parser/parser.h"
+#include "hphp/util/util.h"
 #include "astnode.hpp"
 
 #define HPHP_PARSER_NS XHPAST2
@@ -257,6 +258,22 @@ enum NodeType {
   ONTYPESPECIALIZATION = 88,
   ONYIELDPAIR = 89,
   ONAWAIT = 90,
+  ONQUERY = 91,
+  ONQUERYBODY = 92,
+  ONQUERYBODYCLAUSE = 93,
+  ONFROMCLAUSE = 94,
+  ONLETCLAUSE = 95,
+  ONWHERECLAUSE = 96,
+  ONJOINCLAUSE = 97,
+  ONJOININTOCLAUSE = 98,
+  ONORDERBYCLAUSE = 99,
+  ONORDERING = 100,
+  ONORDERINGEXPR = 101,
+  ONSELECTCLAUSE = 102,
+  ONGROUPCLAUSE = 103,
+  ONINTOCLAUSE = 104,
+  ONTRAITREQUIREEXTEND = 105,
+  ONTRAITREQUIREIMPLEMENT = 106,
 };
 
 struct Token : ScannerToken {
@@ -270,7 +287,7 @@ struct Token : ScannerToken {
     ScannerToken::m_num = num;
     return *this;
   }
-  Token& operator=(Token& other) {
+  Token& operator=(const Token& other) {
     ScannerToken::operator=(other);
     nodeType = other.nodeType;
     extra = other.extra;
@@ -300,10 +317,9 @@ struct Token : ScannerToken {
     }
     return *this;
   }
-  Token& appendChildren(Token *token) {
-    for (std::vector<Token *>::iterator i = token->children.begin();
-         i != token->children.end(); ++i) {
-      children.push_back(*i);
+  Token& appendChildren(const Token* token) {
+    for (auto& c : token->children) {
+      children.push_back(c);
     }
     return *this;
   }
@@ -413,7 +429,7 @@ struct Parser : ParserBase {
     va_list ap;
     va_start(ap, fmt);
     std::string msg;
-    Util::string_vsnprintf(msg, fmt, ap);
+    string_vsnprintf(msg, fmt, ap);
     va_end(ap);
 
     throw std::runtime_error(folly::format(
@@ -672,6 +688,11 @@ struct Parser : ParserBase {
     out.setNodeType(ONTRAITUSE).appendChild(&traits).appendChild(&rules);
   }
 
+  void onTraitRequire(Token &out, Token &name, bool isExtends) {
+    out.setNodeType(isExtends ? ONTRAITREQUIREEXTEND : ONTRAITREQUIREIMPLEMENT)
+      .appendChild(&name);
+  }
+
   void onTraitName(Token &out, Token *names, Token &name) {
     out.setNodeType(ONTRAITNAME).appendChild(names).appendChild(&name);
   }
@@ -858,17 +879,23 @@ struct Parser : ParserBase {
     out.setNodeType(ONTHROW).appendChild(&expr);
   }
 
-  void onClosure(Token &out, Token *modifiers, Token &ret, Token &ref,
-                 Token &params, Token &cparams, Token &stmts) {
-    out.setNodeType(ONCLOSURE).appendChild(modifiers).appendChild(&ret)
-      .appendChild(&ref).appendChild(&params).appendChild(&cparams)
-      .appendChild(&stmts);
+  Token onClosure(ClosureType type,
+                  Token* modifier,
+                  Token& ref,
+                  Token& params,
+                  Token& cparams,
+                  Token& stmts) {
+    // TODO
+    Token ret;
+    return ret;
   }
 
   void onClosureParam(Token &out, Token *params, Token &param, bool ref) {
     out.setNodeType(ONCLOSUREPARAM).appendChild(params).appendChild(&param)
       .setExtra(new OnClosureParamEI(ref));
   }
+
+  Token onExprForLambda(const Token&) { /* TODO */ Token ret; return ret; }
 
   void onLabel(Token &out, Token &label) {
     out.setNodeType(ONLABEL).appendChild(&label);
@@ -893,6 +920,55 @@ struct Parser : ParserBase {
 //      .setExtra(new OnTypeSpecializationEI(specialization));
   }
 
+  void onQuery(Token &out, Token &head, Token &body) {
+    out.setNodeType(ONQUERY).appendChild(&head).appendChild(&body);
+  }
+  void onQueryBody(Token &out, Token *clauses, Token &select, Token *cont) {
+    out.setNodeType(ONQUERYBODY).appendChild(clauses).appendChild(&select)
+      .appendChild(cont);
+  }
+  void onQueryBodyClause(Token &out, Token *clauses, Token &clause) {
+    out.setNodeType(ONQUERYBODYCLAUSE).appendChild(clauses)
+      .appendChild(&clause);
+  }
+  void onFromClause(Token &out, Token &var, Token &coll) {
+    out.setNodeType(ONFROMCLAUSE).appendChild(&var).appendChild(&coll);
+  }
+  void onLetClause(Token &out, Token &var, Token &expr) {
+    out.setNodeType(ONLETCLAUSE).appendChild(&var).appendChild(&expr);
+  }
+  void onWhereClause(Token &out, Token &expr) {
+    out.setNodeType(ONWHERECLAUSE).appendChild(&expr);
+  }
+  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
+      Token &right) {
+    out.setNodeType(ONJOINCLAUSE).appendChild(&var).appendChild(&coll)
+      .appendChild(&left).appendChild(&right);
+  }
+  void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
+      Token &right, Token &group) {
+    out.setNodeType(ONJOININTOCLAUSE).appendChild(&var).appendChild(&coll)
+      .appendChild(&left).appendChild(&right).appendChild(&group);
+  }
+  void onOrderbyClause(Token &out, Token &orderings) {
+    out.setNodeType(ONORDERBYCLAUSE).appendChild(&orderings);
+  }
+  void onOrdering(Token &out, Token *orderings, Token &ordering) {
+    out.setNodeType(ONORDERING).appendChild(orderings).appendChild(&ordering);
+  }
+  void onOrderingExpr(Token &out, Token &expr, Token *direction) {
+    out.setNodeType(ONORDERINGEXPR).appendChild(&expr).appendChild(direction);
+  }
+  void onSelectClause(Token &out, Token &expr) {
+    out.setNodeType(ONSELECTCLAUSE).appendChild(&expr);
+  }
+  void onGroupClause(Token &out, Token &coll, Token &key) {
+    out.setNodeType(ONGROUPCLAUSE).appendChild(&coll).appendChild(&key);
+  }
+  void onIntoClause(Token &out, Token &var, Token &query) {
+    out.setNodeType(ONINTOCLAUSE).appendChild(&var).appendChild(&query);
+  }
+
   // for namespace support
   void onNamespaceStart(const std::string &ns, bool file_scope = false) {
     // TODO
@@ -913,6 +989,9 @@ struct Parser : ParserBase {
     return ns;
   }
 
+  void onNewLabelScope(bool fresh) {}
+  void onScopeLabel(const Token& stmt, const Token& label) {}
+  void onCompleteLabelScope(bool fresh) {}
 
 
   /////////////////////////////////////////////////////////////////////////////

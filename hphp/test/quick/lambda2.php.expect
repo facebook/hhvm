@@ -1,0 +1,17 @@
+~bar()
+array(4) {
+  [0]=>
+  string(3) "asd"
+  [1]=>
+  string(3) "asd"
+  [2]=>
+  string(3) "asd"
+  [3]=>
+  string(3) "asd"
+}
+~bar()
+sup
+holding this:
+asd
+~bar()
+Done

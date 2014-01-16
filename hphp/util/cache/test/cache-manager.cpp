@@ -325,4 +325,13 @@ TEST_F(TestCacheManager, SaveBadPath) {
   ASSERT_FALSE(cm.saveCache("/__invalid__/__path__/"));
 }
 
+TEST_F(TestCacheManager, NoLeadingSlash) {
+  CacheManager cm;
+  ASSERT_TRUE(cm.addEmptyEntry("foo/bar/test.php"));
+
+  EXPECT_TRUE(cm.dirExists("foo"));
+  EXPECT_TRUE(cm.dirExists("foo/bar"));
+  EXPECT_TRUE(cm.entryExists("foo/bar/test.php"));
+}
+
 }  // namespace HPHP

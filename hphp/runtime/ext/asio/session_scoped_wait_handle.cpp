@@ -15,38 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
+
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SessionScopedWaitHandle::c_SessionScopedWaitHandle(Class *cb)
-  : c_WaitableWaitHandle(cb) {
-}
-
-c_SessionScopedWaitHandle::~c_SessionScopedWaitHandle() {
-}
-
 void c_SessionScopedWaitHandle::t___construct() {
   throw NotSupportedException(__func__, "Cannot construct abstract class");
 }
 
-void c_SessionScopedWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-
-  // Stop before corrupting unioned data.
-  if (isFinished()) {
-    return;
-  }
-
-  // Already in the more specific context?
-  if (LIKELY(getContextIdx() >= ctx_idx)) {
-    return;
-  }
-
+void c_SessionScopedWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   assert(getState() == STATE_WAITING);
 
   if (isInContext()) {

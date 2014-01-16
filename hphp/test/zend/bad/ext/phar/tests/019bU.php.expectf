@@ -1,0 +1,18 @@
+unicode(11) "phar://hio/"
+unicode(2) "/a"
+bool(false)
+unicode(2) "/b"
+bool(true)
+unicode(12) "phar://hio/b"
+unicode(4) "/b/a"
+bool(false)
+unicode(4) "/b/c"
+bool(true)
+unicode(14) "phar://hio/b/c"
+unicode(6) "/b/c/d"
+bool(false)
+unicode(4) "/bad"
+bool(true)
+unicode(14) "phar://hio/bad"
+unicode(6) "/bad/c"
+bool(false)

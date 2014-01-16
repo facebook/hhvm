@@ -33,8 +33,6 @@ TRACE_SET_MOD(runtime);
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_staticPrefix("86static_");
-const StaticString s___call("__call");
-const StaticString s___callStatic("__callStatic");
 
 // Defined here so it can be inlined below.
 RefData* lookupStaticFromClosure(ObjectData* closure,
@@ -58,7 +56,7 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
   return val->m_data.pref;
 }
 
-namespace Transl {
+namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -104,33 +102,34 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
       return a2;
     }
     if (a1 != a2) {
-      auto const escalated = a1->plus(a2);
-      assert(escalated != a1 && escalated != a2);
-      decRefArr(a2);
-      decRefArr(a1);
-      return escalated;
+      auto const escalated = a1->plusEq(a2);
+      if (escalated != a1) {
+        decRefArr(a2);
+        decRefArr(a1);
+        return escalated;
+      }
     }
   }
   decRefArr(a2);
   return a1;
 }
 
-HOT_FUNC_VM void setNewElem(TypedValue* base, Cell val) {
-  SetNewElem<false>(base, &val);
+void setNewElem(TypedValue* base, Cell val) {
+  HPHP::SetNewElem<false>(base, &val);
 }
 
-HOT_FUNC_VM void setNewElemArray(TypedValue* base, Cell val) {
-  SetNewElemArray(base, &val);
+void setNewElemArray(TypedValue* base, Cell val) {
+  HPHP::SetNewElemArray(base, &val);
 }
 
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
-  base = NewElem(mis->tvScratch, mis->tvRef, base);
+  base = HPHP::NewElem(mis->tvScratch, mis->tvRef, base);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
     tvBindRef(val, base);
   }
 }
 
-HOT_FUNC_VM RefData* boxValue(TypedValue tv) {
+RefData* boxValue(TypedValue tv) {
   return RefData::Make(tv);
 }
 
@@ -237,7 +236,8 @@ StringData* convCellToStrHelper(TypedValue tv) {
                        /* fallthrough */
   case KindOfStaticString:
                        return tv.m_data.pstr;
-  case KindOfArray:    return s_Array.get();
+  case KindOfArray:    raise_notice("Array to string conversion");
+                       return s_Array.get();
   case KindOfObject:   return convObjToStrHelper(tv.m_data.pobj);
   case KindOfResource: return convResToStrHelper(tv.m_data.pres);
   default:             not_reached();
@@ -260,7 +260,7 @@ void VerifyParamTypeFail(int paramNum) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
-  const TypeConstraint& tc = func->params()[paramNum].typeConstraint();
+  auto const& tc = func->params()[paramNum].typeConstraint();
   TypedValue* tv = frame_local(ar, paramNum);
   assert(!tc.check(tv, func));
   tc.verifyFail(func, paramNum, tv);
@@ -272,11 +272,10 @@ void VerifyParamTypeCallable(TypedValue value, int param) {
   }
 }
 
-HOT_FUNC_VM
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
                          int param,
-                         const TypeConstraint* expected) {
+                         const HPHP::TypeConstraint* expected) {
   if (LIKELY(constraint && cls->classof(constraint))) {
     return;
   }
@@ -316,7 +315,7 @@ RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
   auto const closureLoc =
     LIKELY(func->isClosureBody())
       ? frame_local(fp, func->numParams())
-      : frame_local(fp, frame_continuation(fp)->m_origFunc->numParams());
+      : frame_local(fp, func->getGeneratorOrigFunc()->numParams());
 
   bool inited;
   auto const refData = lookupStaticFromClosure(
@@ -324,7 +323,6 @@ RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
   if (!inited) {
     cellCopy(val, *refData->tv());
   }
-  refData->incRefCount();
   return refData;
 }
 
@@ -337,18 +335,15 @@ static int64_t ak_exist_string_impl(ArrayData* arr, StringData* key) {
   return arr->exists(key);
 }
 
-HOT_FUNC_VM
 int64_t ak_exist_string(ArrayData* arr, StringData* key) {
   return ak_exist_string_impl(arr, key);
 }
 
-HOT_FUNC_VM
 int64_t ak_exist_int(ArrayData* arr, int64_t key) {
   bool res = arr->exists(key);
   return res;
 }
 
-HOT_FUNC_VM
 int64_t ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collectionOffsetContains(obj, key);
@@ -358,7 +353,6 @@ int64_t ak_exist_string_obj(ObjectData* obj, StringData* key) {
   return res;
 }
 
-HOT_FUNC_VM
 int64_t ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collectionOffsetContains(obj, key);
@@ -382,12 +376,10 @@ TypedValue& getDefaultIfNullCell(TypedValue* tv, TypedValue& def) {
   return *ret;
 }
 
-HOT_FUNC_VM
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
-HOT_FUNC_VM
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ?
@@ -395,22 +387,33 @@ TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
          getDefaultIfNullCell(a->nvGet(key), def);
 }
 
-HOT_FUNC_VM
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
+}
+
+const StaticString s_idx("idx");
+
+TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
+  static auto func = Unit::loadFunc(s_idx.get());
+  assert(func != nullptr);
+  Array args = PackedArrayInit(3)
+                         .append(tvAsVariant(&obj))
+                         .append(tvAsVariant(&key))
+                         .append(tvAsVariant(&def))
+                         .toArray();
+  TypedValue ret;
+  g_vmContext->invokeFunc(&ret, func, args);
+  return ret;
 }
 
 int32_t arrayVsize(ArrayData* ad) {
   return ad->vsize();
 }
 
-
-HOT_FUNC_VM
 TypedValue* ldGblAddrHelper(StringData* name) {
   return g_vmContext->m_globalVarEnv->lookup(name);
 }
 
-HOT_FUNC_VM
 TypedValue* ldGblAddrDefHelper(StringData* name) {
   return g_vmContext->m_globalVarEnv->lookupAdd(name);
 }
@@ -475,19 +478,11 @@ TCA sswitchHelperFast(const StringData* val,
 
 // TODO(#2031980): clear these out
 void tv_release_generic(TypedValue* tv) {
-  assert(Transl::tx64->stateIsDirty());
+  assert(JIT::tx64->stateIsDirty());
   assert(tv->m_type == KindOfString || tv->m_type == KindOfArray ||
          tv->m_type == KindOfObject || tv->m_type == KindOfResource ||
          tv->m_type == KindOfRef);
   g_destructors[typeToDestrIndex(tv->m_type)](tv->m_data.pref);
-}
-
-void tv_release_typed(RefData* pv, DataType dt) {
-  assert(Transl::tx64->stateIsDirty());
-  assert(dt == KindOfString || dt == KindOfArray ||
-         dt == KindOfObject || dt == KindOfResource ||
-         dt == KindOfRef);
-  g_destructors[typeToDestrIndex(dt)](pv);
 }
 
 Cell lookupCnsHelper(const TypedValue* tv,
@@ -639,7 +634,8 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
 
 void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
   if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhirTracelets)) {
-    FTRACE(0, "{} {} {}\n", fp->m_func->fullName()->data(), pcOff, rip);
+    FTRACE(0, "{} {} {} {} {}\n",
+           fp->m_func->fullName()->data(), pcOff, rip, fp, sp);
   }
   checkFrame(fp, sp, /*checkLocals*/true);
 }
@@ -785,7 +781,7 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
 }
 
 const Func* lookupUnknownFunc(const StringData* name) {
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
   auto const func = Unit::loadFunc(name);
   if (UNLIKELY(!func)) {
     raise_error("Undefined function: %s", name->data());
@@ -826,8 +822,9 @@ ObjectData* newColHelper(uint32_t type, uint32_t size) {
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
   if (coll->isCollection()) {
     collectionInitAppend(coll, &value);
-    // decref the value as the collection helper incref'ed it
-    tvRefcountedDecRef(&value);
+    // consume the input value. the collection setter either threw or created a
+    // reference to value, so we can use a cheaper decref.
+    tvRefcountedDecRefNZ(value);
   } else {
     raise_error("ColAddNewElemC: $2 must be a collection");
   }
@@ -837,9 +834,10 @@ ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value) {
   if (coll->isCollection()) {
-    collectionSet(coll, &key, &value);
-    // decref the value as the collection helper incref'ed it
-    tvRefcountedDecRef(&value);
+    collectionInitSet(coll, &key, &value);
+    // consume the input value. the collection setter either threw or created a
+    // reference to value, so we can use a cheaper decref.
+    tvRefcountedDecRefNZ(value);
   } else {
     raise_error("ColAddNewElemC: $2 must be a collection");
   }
@@ -847,50 +845,6 @@ ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void setArgInActRec(ActRec* ar, int argNum, uint64_t datum, DataType t) {
-  TypedValue* tv =
-    (TypedValue*)(uintptr_t(ar) - (argNum+1) * sizeof(TypedValue));
-  tv->m_data.num = datum;
-  tv->m_type = t;
-}
-
-int shuffleArgsForMagicCall(ActRec* ar) {
-  if (!ar->hasInvName()) {
-    return 0;
-  }
-  const Func* f UNUSED = ar->m_func;
-  f->validate();
-  assert(f->name()->isame(s___call.get())
-         || f->name()->isame(s___callStatic.get()));
-  assert(f->numParams() == 2);
-  TRACE(1, "shuffleArgsForMagicCall: ar %p\n", ar);
-  assert(ar->hasInvName());
-  StringData* invName = ar->getInvName();
-  assert(invName);
-  ar->setVarEnv(nullptr);
-  int nargs = ar->numArgs();
-
-  // We need to make an array containing all the arguments passed by the
-  // caller and put it where the second argument is
-  PackedArrayInit aInit(nargs);
-  for (int i = 0; i < nargs; ++i) {
-    auto const tv = reinterpret_cast<TypedValue*>(
-      uintptr_t(ar) - (i+1) * sizeof(TypedValue)
-    );
-    aInit.append(tvAsCVarRef(tv));
-    tvRefcountedDecRef(tv);
-  }
-
-  // Put invName in the slot for first argument
-  setArgInActRec(ar, 0, uint64_t(invName), BitwiseKindOfString);
-  // Put argArray in the slot for second argument
-  auto const argArray = aInit.toArray().detach();
-  setArgInActRec(ar, 1, uint64_t(argArray), KindOfArray);
-  // Fix up ActRec's numArgs
-  ar->initNumArgs(2);
-  return 1;
-}
 
 /*
  * The standard VMRegAnchor treatment won't work for some cases called
@@ -961,6 +915,10 @@ void raiseMissingArgument(const char* name, int expected, int got) {
   } else {
     raise_warning(Strings::MISSING_ARGUMENTS, name, expected, got);
   }
+}
+
+RDS::Handle lookupClsRDSHandle(const StringData* name) {
+  return Unit::GetNamedEntity(name)->getClassHandle();
 }
 
 //////////////////////////////////////////////////////////////////////

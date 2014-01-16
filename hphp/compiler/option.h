@@ -19,7 +19,8 @@
 
 #include "hphp/util/hdf.h"
 #include "hphp/util/string-bag.h"
-#include "hphp/util/base.h"
+#include "hphp/util/deprecated/base.h"
+#include "hphp/util/deprecated/declare-boost-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,10 +29,6 @@ DECLARE_BOOST_TYPES(FileScope);
 
 class Option {
 public:
-  /**
-   * Directory that has system HPHP files for loading builtin classes, etc.
-   */
-  static std::string GetSystemRoot();
 
   /**
    * Load options from different sources.
@@ -222,7 +219,6 @@ public:
   static bool EnableShortTags;
   static bool EnableAspTags;
   static bool EnableXHP;
-  static bool EnableFinallyStatement;
   static int ParserThreadCount;
 
   static int GetScannerType();
@@ -264,10 +260,6 @@ public:
 
   static bool (*PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr fs);
 private:
-  /**
-   * Directory that has system HPHP files for loading builtin classes, etc.
-   */
-  static std::string SystemRoot;
   static StringBag OptionStrings;
 
   static void LoadRootHdf(const Hdf &roots, std::map<std::string,
@@ -281,6 +273,17 @@ private:
 
   static void (*m_hookHandler)(Hdf &config);
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Hook called after Option is set up to propagate various options to
+ * HHBBC's option structure.
+ *
+ * This exists this way because we don't want to have libhhbbc depend
+ * on all of libhphp_analysis---the dependency goes the other way.
+ */
+void initialize_hhbbc_options();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

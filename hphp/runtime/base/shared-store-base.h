@@ -18,7 +18,7 @@
 #define incl_HPHP_SHARED_STORE_BASE_H_
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/apc-variant.h"
+#include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/concurrent-shared-store.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/complex-types.h"

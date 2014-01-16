@@ -41,6 +41,7 @@
   CASE(NewArray) \
   CASE(NewArrayReserve) \
   CASE(NewPackedArray) \
+  CASE(NewStructArray) \
   CASE(NewCol) \
   CASE(Clone) \
   CASE(Nop) \
@@ -68,6 +69,7 @@
   CASE(CastObject) \
   CASE(Print) \
   CASE(Jmp) \
+  CASE(JmpNS) \
   CASE(Switch) \
   CASE(SSwitch) \
   CASE(RetC) \
@@ -124,6 +126,7 @@
   CASE(FCallBuiltin) \
   CASE(VerifyParamType) \
   CASE(InstanceOfD) \
+  CASE(InstanceOf) \
   CASE(StaticLocInit) \
   CASE(StaticLoc) \
   CASE(IterInit) \
@@ -149,7 +152,6 @@
   CASE(Dup) \
   CASE(CreateCl) \
   CASE(CreateCont) \
-  CASE(CreateAsync) \
   CASE(ContEnter) \
   CASE(UnpackCont) \
   CASE(ContSuspend) \
@@ -161,14 +163,20 @@
   CASE(ContKey) \
   CASE(ContCurrent) \
   CASE(ContStopped) \
+  CASE(AsyncAwait) \
+  CASE(AsyncESuspend) \
+  CASE(AsyncWrapResult) \
+  CASE(AsyncWrapException) \
   CASE(Strlen) \
   CASE(IncStat) \
+  CASE(Idx) \
   CASE(ArrayIdx) \
   CASE(FPushCufIter) \
   CASE(CIterFree) \
   CASE(LateBoundCls) \
   CASE(IssetS) \
   CASE(IssetG) \
+  CASE(IssetL) \
   CASE(EmptyS) \
   CASE(EmptyG) \
   CASE(VGetS) \
@@ -177,7 +185,6 @@
   CASE(IterFree) \
   CASE(MIterFree) \
   CASE(IterBreak) \
-  CASE(UnsetN) \
   CASE(DecodeCufIter) \
   CASE(Shl) \
   CASE(Shr) \
@@ -188,6 +195,8 @@
   CASE(AssertTStk) \
   CASE(AssertObjL) \
   CASE(AssertObjStk) \
+  CASE(PredictTL) \
+  CASE(PredictTStk) \
   /* */
 
   // These are instruction-like functions which cover more than one
@@ -202,7 +211,8 @@
   CASE(AssignToLocalOp) \
   CASE(FPushCufOp) \
   CASE(FPassCOp) \
-  CASE(CheckTypeOp)
+  CASE(CheckTypeLOp) \
+  CASE(CheckTypeCOp)
 
 // PSEUDOINSTR_DISPATCH is a switch() fragment that routes opcodes to their
 // shared handlers, as per the PSEUDOINSTRS macro.
@@ -241,21 +251,9 @@
   case Op::FPushCufF:                             \
   case Op::FPushCufSafe:                          \
     func(FPushCufOp, i)                           \
-  case Op::IssetL:                                \
-  case Op::IsNullL:                               \
-  case Op::IsStringL:                             \
-  case Op::IsArrayL:                              \
-  case Op::IsIntL:                                \
-  case Op::IsObjectL:                             \
-  case Op::IsBoolL:                               \
-  case Op::IsDoubleL:                             \
-  case Op::IsNullC:                               \
-  case Op::IsStringC:                             \
-  case Op::IsArrayC:                              \
-  case Op::IsIntC:                                \
-  case Op::IsObjectC:                             \
-  case Op::IsBoolC:                               \
-  case Op::IsDoubleC:                             \
-    func(CheckTypeOp, i)
+  case Op::IsTypeL:                               \
+    func(CheckTypeLOp, i)                         \
+  case Op::IsTypeC:                               \
+    func(CheckTypeCOp, i)
 
 #endif

@@ -126,9 +126,8 @@ static fbstring genDocComment(const PhpFunc& func,
 }
 
 static fbstring genDocComment(const PhpClass& cls) {
-  return formatDocComment(
-           genDocCommentPreamble(cls.name(), cls.getDesc(), cls.flags(), "")
-         );
+  return formatDocComment(genDocCommentPreamble(cls.getPhpName(),
+        cls.getDesc(), cls.flags(), ""));
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -187,8 +186,8 @@ static void outputConstants(const char *outputfn,
                         HipHopSpecific|VariableArguments|\
                         RefVariableArguments|MixedVariableArguments|\
                         NeedsActRec|FunctionIsFoldable|\
-                        NoInjection|NoEffect|HasOptFunction|ZendParamMode|\
-                        ZendCompat)
+                        NoInjection|NoEffect|HasOptFunction|ZendParamModeNull|\
+                        ZendParamModeFalse|ZendCompat)
 
 static void writeFunction(std::ostream& out, const PhpFunc& func) {
   auto flags = (func.flags() & FUNC_FLAG_MASK) | IsSystem | IsNothing;
@@ -287,7 +286,7 @@ static void writeClass(std::ostream& out, const PhpClass& cls) {
   auto flags = (cls.flags() & CLASS_FLAG_MASK) | IsSystem | IsNothing;
 
   out << "  " << castLong(flags, true) << ", "
-      << "\"" << escapeCpp(cls.name()) << "\", "
+      << "\"" << escapeCpp(cls.getPhpName()) << "\", "
       << "\"" << escapeCpp(strtolower(cls.parent())) << "\", "
       << "\"\", "
       << castLong(0) << ", "

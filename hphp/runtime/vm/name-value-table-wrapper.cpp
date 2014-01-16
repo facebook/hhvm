@@ -172,7 +172,7 @@ NameValueTableWrapper::AppendWithRef(ArrayData*, CVarRef v, bool copy) {
 }
 
 ArrayData*
-NameValueTableWrapper::Plus(ArrayData*, const ArrayData* elems) {
+NameValueTableWrapper::PlusEq(ArrayData*, const ArrayData* elems) {
   throw NotImplementedException("plus on $GLOBALS");
 }
 

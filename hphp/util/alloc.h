@@ -18,6 +18,8 @@
 #define incl_HPHP_UTIL_ALLOC_H_
 
 #include <stdint.h>
+#include <cassert>
+#include <atomic>
 
 #include "folly/Portability.h"
 

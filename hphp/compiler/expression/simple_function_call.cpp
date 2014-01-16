@@ -106,9 +106,10 @@ SimpleFunctionCall::SimpleFunctionCall
   , m_type(FunType::Unknown)
   , m_dynamicConstant(false)
   , m_builtinFunction(false)
-  , m_fromCompiler(false)
   , m_dynamicInvoke(false)
   , m_transformed(false)
+  , m_changedToBytecode(false)
+  , m_optimizable(false)
   , m_safe(0)
   , m_extra(nullptr)
 {
@@ -522,7 +523,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       markRefParams(m_funcScope, m_name, canInvokeFewArgs());
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (!m_fromCompiler && m_type == FunType::Unknown &&
+    if (m_type == FunType::Unknown &&
         !m_class && !m_redeclared && !m_dynamicInvoke && !m_funcScope &&
         (m_className.empty() ||
          (m_classScope &&
@@ -544,7 +545,9 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
       if (!ok) {
-        Compiler::Error(Compiler::UnknownFunction, shared_from_this());
+        if (m_classScope || !Unit::lookupFunc(String(m_name).get())) {
+          Compiler::Error(Compiler::UnknownFunction, shared_from_this());
+        }
       }
     }
   }
@@ -574,7 +577,6 @@ void SimpleFunctionCall::updateVtFlags() {
           m_name == "call_user_func_array" ||
           m_name == "forward_static_call" ||
           m_name == "forward_static_call_array" ||
-          m_name == "hphp_create_continuation" ||
           m_name == "get_called_class") {
         f->setNextLSB(true);
       }
@@ -606,10 +608,6 @@ void SimpleFunctionCall::updateVtFlags() {
 bool SimpleFunctionCall::isCallToFunction(const char *name) const {
   return !strcasecmp(getName().c_str(), name) &&
     !getClass() && getClassName().empty();
-}
-
-bool SimpleFunctionCall::isCompilerCallToFunction(const char *name) const {
-  return m_fromCompiler && isCallToFunction(name);
 }
 
 bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
@@ -1045,7 +1043,6 @@ ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultConstPtr ar) {
                                               ExpressionPtr(), T_ARRAY, true));
       return replaceValue(rep);
     }
-    m_params->resetOutputCount();
   }
   /*
     Dont do this for now. Need to take account of newly created
@@ -1276,6 +1273,26 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 
   assert(rtype);
   return rtype;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void SimpleFunctionCall::outputCodeModel(CodeGenerator &cg) {
+  if (m_class || !m_className.empty()) {
+    cg.printObjectHeader("ClassMethodCallExpression", 4);
+    cg.printPropertyHeader("className");
+    StaticClassName::outputCodeModel(cg);
+    cg.printPropertyHeader("methodName");
+  } else {
+    cg.printObjectHeader("SimpleFunctionCallExpression", 3);
+    cg.printPropertyHeader("functionName");
+  }
+  cg.printValue(m_origName);
+  cg.printPropertyHeader("arguments");
+  cg.printExpressionVector(m_params);
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1617,4 +1634,3 @@ ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
 }
 
 }
-

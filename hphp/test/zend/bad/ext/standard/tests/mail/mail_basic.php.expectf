@@ -1,0 +1,16 @@
+*** Testing mail() : basic functionality ***
+-- All Mail Content Parameters --
+bool(true)
+To: user@company.com
+Subject: Test Subject
+KHeaders
+
+A Message
+
+-- Mandatory Parameters --
+bool(true)
+To: user@company.com
+Subject: Test Subject
+
+A Message
+===DONE===

@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_DEBUGGER_HOOK_H_
 #define incl_HPHP_DEBUGGER_HOOK_H_
 
-#include "hphp/util/base.h"
-#include "hphp/runtime/vm/unit.h"
 #include <functional>
+
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
 namespace Eval{
@@ -38,7 +38,7 @@ namespace HPHP {
 // "Hooks" called by the VM at various points during program execution while
 // debugging to give the debugger a chance to act. The debugger may block
 // execution indefinitely within one of these hooks.
-void phpDebuggerOpcodeHook(const uchar* pc);
+void phpDebuggerOpcodeHook(const unsigned char* pc);
 void phpDebuggerExceptionThrownHook(ObjectData* exception);
 void phpDebuggerExceptionHandlerHook();
 void phpDebuggerErrorHook(const std::string& message);
@@ -121,13 +121,13 @@ public:
   void removeOffset(const Unit* unit, Offset offset);
 
   // Add/remove/check explicit PCs.
-  void addPC(const uchar* pc) {
+  void addPC(const unsigned char* pc) {
     m_map.setPointer((void*)pc, (void*)pc);
   }
-  void removePC(const uchar* pc) {
+  void removePC(const unsigned char* pc) {
     m_map.setPointer((void*)pc, nullptr);
   }
-  bool checkPC(const uchar* pc) {
+  bool checkPC(const unsigned char* pc) {
     return m_map.getPointer((void*)pc) == (void*)pc;
   }
 

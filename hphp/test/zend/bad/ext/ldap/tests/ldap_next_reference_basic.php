@@ -19,7 +19,7 @@ var_dump($ref2 = ldap_next_reference($link, $ref));
 ldap_parse_reference($link, $ref2, $refs);
 var_dump($refs);
 ?>
-===DONE===?>
+===DONE===
 <?php
 include "connect.inc";
 

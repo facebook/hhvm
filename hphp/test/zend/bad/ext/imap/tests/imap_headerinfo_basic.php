@@ -73,6 +73,7 @@ var_dump($z->udate);
 
 imap_close($stream_id);
 
-?><?php 
+?>
+<?php 
 require_once('clean.inc');
 ?>

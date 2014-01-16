@@ -1,7 +1,7 @@
 Advisor_Test::testAdvisorBytime
 .
 Advisor_Test::testAdvisorTimespanFormat
-HipHop Fatal error: Class undefined: PMA_Util in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/Advisor.class.php on line 500
+FATAL
 Advisor_Test::testEscape with data set #0 
 .
 Advisor_Test::testEscape with data set #1 
@@ -32,18 +32,12 @@ Application_Octetstream_Hex_Test::testGetMIMEType
 .
 Application_Octetstream_Hex_Test::testGetName
 .
-Environment_Test::testMySQL
-S
-Environment_Test::testPhpVersion
-.
-Environment_Test::testSession
-I
 Image_JPEG_Inline_Test::testGetInfo
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/transformations/abstract/InlineTransformationsPlugin.class.php on line 35
+FATAL
 Image_JPEG_Link_Test::testGetInfo
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/test/classes/plugin/transformations/Image_Link_test.php on line 61
+FATAL
 Image_PNG_Inline_Test::testGetInfo
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/transformations/abstract/InlineTransformationsPlugin.class.php on line 35
+FATAL
 ImportCsv_Test::testDoImport
 .
 ImportCsv_Test::testDoImportNotAnalysis
@@ -67,9 +61,11 @@ ImportMediawiki_Test::testDoImport
 ImportMediawiki_Test::testGetProperties
 .
 ImportOds_Test::testGetProperties
-HipHop Fatal error: Not implemented is not implemented yet. in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/zip_extension.lib.php on line 25
+UNKNOWN STATUS
+ImportShp_Test::testDoImport
+UNKNOWN STATUS
 ImportShp_Test::testGetProperties
-HipHop Fatal error: Not implemented is not implemented yet. in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/zip_extension.lib.php on line 25
+.
 ImportSql_Test::testDoImport
 .
 ImportXml_Test::testDoImport
@@ -93,31 +89,31 @@ NodeFactory_Test::testFileError
 NodeFactory_Test::testGroupContainer
 .
 Node_Column_Container_Test::testConstructor
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/navigation/Nodes/Node_Column_Container.class.php on line 26
+FATAL
 Node_Column_Test::testConstructor
 .
 Node_DatabaseChildTest::testGetHtmlForControlButtons
-HipHop Fatal error: Uncaught exception 'PHP_Invoker_TimeoutException' with message 'Execution aborted after 3 seconds' in /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/php-invoker/PHP/Invoker.php:116
+.
 Node_Database_Test::testConstructor
 E
 Node_Event_Container_Test::testConstructor
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/navigation/Nodes/Node_Event_Container.class.php on line 26
+FATAL
 Node_Event_Test::testConstructor
 .
 Node_Function_Container_Test::testConstructor
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/navigation/Nodes/Node_Function_Container.class.php on line 26
+FATAL
 Node_Function_Test::testConstructor
 .
 Node_Index_Container_Test::testConstructor
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/navigation/Nodes/Node_Index_Container.class.php on line 26
+FATAL
 Node_Index_Test::testConstructor
 .
 Node_Procedure_Container_Test::testConstructor
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/navigation/Nodes/Node_Procedure_Container.class.php on line 26
+FATAL
 Node_Procedure_Test::testConstructor
 .
 Node_Table_Container_Test::testConstructor
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/navigation/Nodes/Node_Table_Container.class.php on line 26
+FATAL
 Node_Table_Test::testConstructor
 E
 Node_Table_Test::testIcon with data set #0 
@@ -159,11 +155,11 @@ Node_Test::testRealParent
 Node_Test::testRemoveNode
 .
 Node_Trigger_Container_Test::testConstructor
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/navigation/Nodes/Node_Trigger_Container.class.php on line 26
+FATAL
 Node_Trigger_Test::testConstructor
 .
 Node_View_Container_Test::testConstructor
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/navigation/Nodes/Node_View_Container.class.php on line 26
+FATAL
 Node_View_Test::testConstructor
 .
 PMA_Array_Test::testPMA_arrayMergeRecursive
@@ -191,7 +187,7 @@ E
 PMA_AuthenticationConfig_Test::testAuthSetUser
 .
 PMA_AuthenticationCookie_Test::testAuth
-HipHop Fatal error: Class undefined: PMA_Response in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/test/classes/plugin/auth/PMA_AuthenticationCookie_test.php on line 58
+FATAL
 PMA_AuthenticationHttp_Test::testAuth
 S
 PMA_AuthenticationHttp_Test::testAuthCheck with data set #0 
@@ -205,13 +201,17 @@ PMA_AuthenticationHttp_Test::testAuthCheck with data set #3
 PMA_AuthenticationHttp_Test::testAuthCheck with data set #4 
 .
 PMA_AuthenticationHttp_Test::testAuthFails
-HipHop Fatal error: Call to undefined method Mock_PMA_DatabaseInterface_4fffd46e::getError from context AuthenticationHttp in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/auth/AuthenticationHttp.class.php on line 238
+FATAL
 PMA_AuthenticationHttp_Test::testAuthSetUser
 .
 PMA_AuthenticationSignon_Test::testAuth
 S
 PMA_AuthenticationSignon_Test::testAuthCheck
-UNKNOWN STATUS
+E
+PMA_AuthenticationSignon_Test::testAuthFails
+FATAL
+PMA_AuthenticationSignon_Test::testAuthSetUser
+.
 PMA_Bookmark_Test::testPMA_Bookmark_delete
 .
 PMA_Bookmark_Test::testPMA_Bookmark_get
@@ -255,9 +255,9 @@ PMA_CheckPageValidity_Test::testGotoWhitelistEncodedPage
 PMA_CheckPageValidity_Test::testGotoWhitelistPage
 .
 PMA_CheckParameters_Test::testCheckParameterMissing
-HipHop Fatal error: Undefined function: PMA_sanitize in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/error.inc.php on line 56
+FATAL
 PMA_ConfigFile_Test::testConfigFileConstructor
-E
+.
 PMA_ConfigFile_Test::testConfigFileGet
 .
 PMA_ConfigFile_Test::testConfigFileSet
@@ -309,7 +309,7 @@ PMA_ConfigFile_Test::testSetPersistKeys
 PMA_ConfigFile_Test::testUpdateWithGlobalConfig
 .
 PMA_ConfigGenerator_Test::testGetConfigFile
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/config.values.php on line 49
+FATAL
 PMA_ConfigTest::testCheckClient with data set #0 
 .
 PMA_ConfigTest::testCheckClient with data set #1 
@@ -345,7 +345,7 @@ PMA_ConfigTest::testCheckCookiePath
 PMA_ConfigTest::testCheckGd2
 .
 PMA_ConfigTest::testCheckHTTP
-F
+.
 PMA_ConfigTest::testCheckOutputCompression
 .
 PMA_ConfigTest::testCheckPermissions
@@ -419,7 +419,7 @@ PMA_ConfigTest::testSetCookie
 PMA_ConfigTest::testSetUserValue
 .
 PMA_Config_Functions_Test::testPMALang
-HipHop Fatal error: Undefined function: PMA_sanitize in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/config/config_functions.lib.php on line 24
+FATAL
 PMA_ContainsNonPrintableAsciiTest::testContainsNonPrintableAscii with data set #0 
 .
 PMA_ContainsNonPrintableAsciiTest::testContainsNonPrintableAscii with data set #1 
@@ -469,7 +469,7 @@ PMA_DBI_Test::testFetch
 PMA_DBI_Test::testFormatError with data set #0 
 .
 PMA_DBI_Test::testFormatError with data set #1 
-HipHop Fatal error: Undefined function: PMA_convertString in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/DatabaseInterface.class.php on line 263
+FATAL
 PMA_DBI_Test::testQuery
 .
 PMA_DBI_Test::testSystemSchema with data set #0 
@@ -533,11 +533,11 @@ E
 PMA_DisplayCreateTable_Test::testPMAGetHtmlForCreateTable
 .
 PMA_DisplayExport_Test::testPMAGetHtmlForExportOptions
-E
+.
 PMA_DisplayExport_Test::testPMAGetHtmlForHiddenInput
 .
 PMA_DisplayResults_Test::testSetDisplayModeCase1 with data set #0 
-HipHop Fatal error: Undefined function: PMA_getRelationsParam in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/DisplayResults.class.php on line 251
+FATAL
 PMA_EVN_GetDataFromRequest_Test::testgetDataFromRequest_empty with data set #0 
 .
 PMA_EVN_GetDataFromRequest_Test::testgetDataFromRequest_empty with data set #1 
@@ -631,11 +631,11 @@ PMA_Eps_Relation_Schema_Test::testSetPageNumbere
 PMA_Error_Handler_Test::testGetDispErrorsForDisplayFalse with data set #0 
 .
 PMA_Error_Handler_Test::testGetDispErrorsForDisplayFalse with data set #1 
-HipHop Fatal error: Class undefined: PMA_Util in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/Message.class.php on line 744
+FATAL
 PMA_Error_Test::testGetBacktraceDisplay
 .
 PMA_Error_Test::testGetDisplay
-HipHop Fatal error: Class undefined: PMA_Util in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/Message.class.php on line 744
+FATAL
 PMA_Error_Test::testGetHash
 .
 PMA_Error_Test::testSetBacktrace
@@ -717,7 +717,7 @@ PMA_ExportCodegen_Test::testExportDBFooter
 PMA_ExportCodegen_Test::testExportDBHeader
 .
 PMA_ExportCodegen_Test::testExportData
-HipHop Fatal error: Call to undefined method Mock_PMA_DatabaseInterface_fb8003e7::query from context ExportCodegen in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/export/ExportCodegen.class.php on line 344
+FATAL
 PMA_ExportCodegen_Test::testExportFooter
 .
 PMA_ExportCodegen_Test::testExportHeader
@@ -733,7 +733,7 @@ PMA_ExportCsv_Test::testExportDBFooter
 PMA_ExportCsv_Test::testExportDBHeader
 .
 PMA_ExportCsv_Test::testExportData
-HipHop Fatal error: Call to undefined method Mock_PMA_DatabaseInterface_bbf8acb3::query from context ExportCsv in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/export/ExportCsv.class.php on line 224
+FATAL
 PMA_ExportCsv_Test::testExportFooter
 .
 PMA_ExportCsv_Test::testExportHeader
@@ -755,7 +755,7 @@ PMA_ExportHtmlword_Test::testExportFooter
 PMA_ExportHtmlword_Test::testExportHeader
 .
 PMA_ExportHtmlword_Test::testGetTableDef
-HipHop Fatal error: Undefined function: PMA_getForeigners in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/export/ExportHtmlword.class.php on line 364
+FATAL
 PMA_ExportHtmlword_Test::testGetTableDefStandIn
 .
 PMA_ExportHtmlword_Test::testSetProperties
@@ -767,7 +767,7 @@ PMA_ExportJson_Test::testExportDBFooter
 PMA_ExportJson_Test::testExportDBHeader
 .
 PMA_ExportJson_Test::testExportData
-HipHop Fatal error: Call to undefined method Mock_PMA_DatabaseInterface_f6545a5d::query from context ExportJson in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/export/ExportJson.class.php on line 163
+FATAL
 PMA_ExportJson_Test::testExportFooter
 .
 PMA_ExportJson_Test::testExportHeader
@@ -775,7 +775,7 @@ PMA_ExportJson_Test::testExportHeader
 PMA_ExportJson_Test::testSetProperties
 .
 PMA_ExportLatex_Test::testExportHeader
-HipHop Fatal error: Call to undefined method Mock_PMA_DatabaseInterface_78d684fb::tryQuery from context ExportLatex in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/export/ExportLatex.class.php on line 295
+FATAL
 PMA_ExportLatex_Test::testSetProperties
 .
 PMA_ExportMediawiki_Test::testExportDBCreate
@@ -789,7 +789,7 @@ PMA_ExportMediawiki_Test::testExportFooter
 PMA_ExportMediawiki_Test::testExportHeader
 .
 PMA_ExportMediawiki_Test::testExportStructure
-HipHop Fatal error: Call to undefined method Mock_PMA_DatabaseInterface_dd2bced4::getColumns from context ExportMediawiki in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/export/ExportMediawiki.class.php on line 205
+FATAL
 PMA_ExportMediawiki_Test::testSetProperties
 .
 PMA_ExportOds_Test::testExportDBCreate
@@ -815,17 +815,31 @@ PMA_ExportOdt_Test::testExportDBFooter
 PMA_ExportOdt_Test::testExportDBHeader
 .
 PMA_ExportOdt_Test::testExportData
-HipHop Fatal error: Couldn't find constant PMA_DatabaseInterface::QUERY_UNBUFFERED in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/test/classes/plugin/export/PMA_ExportOdt_test.php on line 444
+FATAL
 PMA_ExportOdt_Test::testExportFooter
 .
 PMA_ExportOdt_Test::testExportHeader
 .
 PMA_ExportOdt_Test::testSetProperties
 .
+PMA_ExportPdf_Test::testExportDBCreate
+.
+PMA_ExportPdf_Test::testExportDBFooter
+.
+PMA_ExportPdf_Test::testExportDBHeader
+.
+PMA_ExportPdf_Test::testExportData
+.
+PMA_ExportPdf_Test::testExportFooter
+.
 PMA_ExportPdf_Test::testExportHeader
-HipHop Fatal error: Redeclared method Mock_PMA_ExportPdf_9e5af04c::setTopMargin in /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit-mock-objects/PHPUnit/Framework/MockObject/Generator.php(231) : eval()'d code on line 11
+.
+PMA_ExportPdf_Test::testSetGetPdf
+.
+PMA_ExportPdf_Test::testSetGetPdfTitle
+.
 PMA_ExportPdf_Test::testSetProperties
-E
+.
 PMA_ExportPhparray_Test::testExportDBCreate
 .
 PMA_ExportPhparray_Test::testExportDBFooter
@@ -849,7 +863,7 @@ PMA_ExportPluginProperties_Test::testSetGetMimeType
 PMA_ExportPluginProperties_Test::testSetGetOptionsText
 .
 PMA_ExportSql_Test::testExportRoutines
-HipHop Fatal error: Call to undefined method Mock_PMA_DatabaseInterface_a6e1096b::getProceduresOrFunctions from context ExportSql in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/export/ExportSql.class.php on line 464
+FATAL
 PMA_ExportSql_Test::testSetProperties
 E
 PMA_ExportSql_Test::testSetPropertiesWithDrizzle
@@ -861,7 +875,7 @@ PMA_ExportTexytext_Test::testExportDBFooter
 PMA_ExportTexytext_Test::testExportDBHeader
 .
 PMA_ExportTexytext_Test::testExportData
-HipHop Fatal error: Couldn't find constant PMA_DatabaseInterface::QUERY_UNBUFFERED in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/test/classes/plugin/export/PMA_ExportTexytext_test.php on line 243
+FATAL
 PMA_ExportTexytext_Test::testExportFooter
 .
 PMA_ExportTexytext_Test::testExportHeader
@@ -891,7 +905,7 @@ PMA_ExportYaml_Test::testExportDBFooter
 PMA_ExportYaml_Test::testExportDBHeader
 .
 PMA_ExportYaml_Test::testExportData
-HipHop Fatal error: Couldn't find constant PMA_DatabaseInterface::QUERY_UNBUFFERED in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/test/classes/plugin/export/PMA_ExportYaml_test.php on line 205
+FATAL
 PMA_ExportYaml_Test::testExportFooter
 .
 PMA_ExportYaml_Test::testExportHeader
@@ -958,12 +972,18 @@ PMA_FileReader_Test::testRead
 .
 PMA_FileReader_Test::testSeekto
 .
+PMA_File_Test::testBinaryContent with data set #0 
+.
+PMA_File_Test::testBinaryContent with data set #1 
+.
+PMA_File_Test::testBinaryContent with data set #2 
+.
 PMA_File_Test::testContent with data set #0 
 .
 PMA_File_Test::testContent with data set #1 
 .
 PMA_File_Test::testContent with data set #2 
-HipHop Fatal error: Not implemented is not implemented yet. in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/zip_extension.lib.php on line 25
+.
 PMA_File_Test::testMIME with data set #0 
 .
 PMA_File_Test::testMIME with data set #1 
@@ -975,7 +995,7 @@ PMA_Footer_Test::testAjax
 PMA_Footer_Test::testDisable
 .
 PMA_Footer_Test::testDisplay
-HipHop Fatal error: Undefined function: PMA_getRelationsParam in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/Menu.class.php on line 135
+FATAL
 PMA_Footer_Test::testGetDebugMessage
 .
 PMA_Footer_Test::testGetScripts
@@ -985,13 +1005,13 @@ PMA_Footer_Test::testGetSelfLink
 PMA_Footer_Test::testGetSelfLinkWithImage
 .
 PMA_FormDisplay_Test::testFormDisplayContructor
-E
+.
 PMA_FormDisplay_Test::testRegisterForm
-HipHop Fatal error: Class undefined: Form in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/config/FormDisplay.class.php on line 108
+FATAL
 PMA_FormDisplay_Tpl_Test::testDisplayFormTop
-HipHop Fatal error: Undefined function: PMA_URL_getHiddenInputs in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/config/FormDisplay.tpl.php on line 38
+FATAL
 PMA_Form_Test::testContructor
-E
+.
 PMA_Form_Test::testGetOptionType
 .
 PMA_Form_Test::testGetOptionValueList
@@ -1348,8 +1368,6 @@ PMA_GetRealSize_Test::testNull
 .
 PMA_GetRealSize_Test::testUnspecified
 .
-PMA_GetTableCount_Test::testTableCount
-UNKNOWN STATUS
 PMA_GetTitleForTarget_Test::testGetTitleForTarget with data set #0 
 .
 PMA_GetTitleForTarget_Test::testGetTitleForTarget with data set #1 
@@ -1441,7 +1459,7 @@ PMA_Index_Test::testConstructor
 PMA_Index_Test::testGetIndexChoices
 .
 PMA_Index_Test::testIsUniquer
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/Index.class.php on line 470
+FATAL
 PMA_InsertEditTest::testAnalyzeTableColumnsArray
 .
 PMA_InsertEditTest::testAnalyzeWhereClause
@@ -1679,7 +1697,7 @@ PMA_Kanji_Encoding_Test::testCheckEncoding with data set #0
 PMA_Kanji_Encoding_Test::testCheckEncoding with data set #1 
 .
 PMA_Kanji_Encoding_Test::testEncodingForm
-HipHop Fatal error: Undefined function: _pgettext in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/kanji-encoding.lib.php on line 147
+FATAL
 PMA_Kanji_Encoding_Test::testFileConv
 .
 PMA_Kanji_Encoding_Test::testStrConv
@@ -2195,7 +2213,7 @@ PMA_PDF_Test::testBasic
 PMA_PDF_Test::testDocument
 .
 PMA_Pdf_Relation_Schema_Test::testConstructor
-E
+.
 PMA_PluginManager_Test::testAttach
 .
 PMA_PluginManager_Test::testConstructor
@@ -2491,7 +2509,7 @@ PMA_Relation_Test::testPMAGetRelationsParam
 PMA_Relation_Test::testPMAQueryAsControlUser
 .
 PMA_SQLParserAnalyze_Test::testPMA_SQP_getParserAnalyzeMa
-E
+.
 PMA_SQLParser_Data_Test::testPMA_SQPdata
 .
 PMA_SQLParser_Data_Test::testPMA_SQPdata_column_attrib
@@ -2557,7 +2575,7 @@ PMA_SecurePath::testReplaceDots
 PMA_ServerBinlog_Test::testPMAGetAllLogItemInfo
 .
 PMA_ServerBinlog_Test::testPMAGetLogInfo
-E
+.
 PMA_ServerBinlog_Test::testPMAGetLogSelector
 .
 PMA_ServerCollations_Test::testPMAGetHtmlForCharsets
@@ -2578,10 +2596,68 @@ PMA_ServerEngines_Test::testPMAGetPluginAndModuleInfoSpecific
 .
 PMA_ServerPlugins_Test::testPMAGetPluginAndModuleInfo
 .
+PMA_ServerPrivileges_Test::testPMAAddUser
+.
+PMA_ServerPrivileges_Test::testPMAGetChangeLoginInformationHtmlForm
+.
+PMA_ServerPrivileges_Test::testPMAGetDataForChangeOrCopyUser
+.
 PMA_ServerPrivileges_Test::testPMAGetDataForDBInfo
-HipHop Fatal error: Uncaught exception 'PHP_Invoker_TimeoutException' with message 'Execution aborted after 3 seconds' in /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/php-invoker/PHP/Invoker.php:116
-PMA_ServerReplication_Test::testPMAGetHtmlForMasterReplication
+.
+PMA_ServerPrivileges_Test::testPMAGetExtraDataForAjaxBehavior
+.
+PMA_ServerPrivileges_Test::testPMAGetGrantsArray
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlForAddUser
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlForDisplayColumnPrivileges
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlForDisplayLoginInformationFields
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlForDisplayResourceLimits
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlForExportUserDefinition
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlForSpecificDbPrivileges
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlForSpecificTablePrivileges
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlForTableSpecificPrivileges
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlForUserGroupDialog
 E
+PMA_ServerPrivileges_Test::testPMAGetHtmlTableBodyForSpecificDbOrTablePrivss
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlToChooseUserGroup
+.
+PMA_ServerPrivileges_Test::testPMAGetHtmlToDisplayPrivilegesTable
+.
+PMA_ServerPrivileges_Test::testPMAGetListOfPrivilegesAndComparedPrivileges
+.
+PMA_ServerPrivileges_Test::testPMAGetMessageAndSqlQueryForPrivilegesRevoke
+.
+PMA_ServerPrivileges_Test::testPMAGetSqlQueriesForDisplayAndAddNewUser
+.
+PMA_ServerPrivileges_Test::testPMAGetSqlQueriesForDisplayAndAddUser
+.
+PMA_ServerPrivileges_Test::testPMAGetSqlQueryForDisplayPrivTable
+.
+PMA_ServerPrivileges_Test::testPMAGetTableGrantsArray
+.
+PMA_ServerPrivileges_Test::testPMAGetUserEditLink
+.
+PMA_ServerPrivileges_Test::testPMAGetWithClauseForAddUserAndUpdatePrivs
+.
+PMA_ServerPrivileges_Test::testPMARangeOfUsers
+.
+PMA_ServerPrivileges_Test::testPMAUpdatePassword
+.
+PMA_ServerPrivileges_Test::testPMAUpdatePrivileges
+.
+PMA_ServerPrivileges_Test::testPMAWildcardEscapeForGrant
+.
+PMA_ServerReplication_Test::testPMAGetHtmlForMasterReplication
+.
 PMA_ServerReplication_Test::testPMAGetHtmlForNotServerReplication
 .
 PMA_ServerReplication_Test::testPMAGetHtmlForReplicationChangeMaster
@@ -2589,11 +2665,11 @@ PMA_ServerReplication_Test::testPMAGetHtmlForReplicationChangeMaster
 PMA_ServerReplication_Test::testPMAGetHtmlForSlaveConfiguration
 .
 PMA_ServerStatusAdvisor_Test::testPMAGetHTMLForAdvisor
-E
+.
 PMA_ServerStatusMonitor_Test::testPMAGetHtmlForClientSideDataAndLinks
 .
 PMA_ServerStatusMonitor_Test::testPMAGetHtmlForMonitor
-E
+.
 PMA_ServerStatusMonitor_Test::testPMAGetJsonForLogDataTypeGeneral
 .
 PMA_ServerStatusMonitor_Test::testPMAGetJsonForLogDataTypeSlow
@@ -2603,11 +2679,11 @@ PMA_ServerStatusMonitor_Test::testPMAGetJsonForLoggingVars
 PMA_ServerStatusMonitor_Test::testPMAGetJsonForQueryAnalyzer
 .
 PMA_ServerStatusQueries_Test::testPMAGetHtmlForQueryStatistics
-E
+.
 PMA_ServerStatusQueries_Test::testPMAGetHtmlForServerStatusQueriesDetails
 .
 PMA_ServerStatusVariables_Test::testPMAGetHtmlForFilter
-E
+.
 PMA_ServerStatusVariables_Test::testPMAGetHtmlForLinkSuggestions
 .
 PMA_ServerStatusVariables_Test::testPMAGetHtmlForVariablesList
@@ -2615,13 +2691,13 @@ PMA_ServerStatusVariables_Test::testPMAGetHtmlForVariablesList
 PMA_ServerStatus_Test::testPMAGetHtmlForServerProcessItem
 .
 PMA_ServerStatus_Test::testPMAGetHtmlForServerStatus
-E
+.
 PMA_ServerUserGroupsTest::testGetHtmlForUserGroupsTableWithNoUserGroups
 UNKNOWN STATUS
 PMA_ServerUsers_Test::testPMAGetHtmlForSubMenusOnUsersPage
 .
 PMA_ServerVariables_Test::testPMAFormatVariable
-E
+.
 PMA_ServerVariables_Test::testPMAGetHtmlForLinkTemplates
 .
 PMA_ServerVariables_Test::testPMAGetHtmlForServerVariables
@@ -2631,7 +2707,7 @@ PMA_ServerVariables_Test::testPMAGetHtmlForServerVariablesItems
 PMA_SetupIndex_Test::testPMAMessagesShowHTML
 .
 PMA_SetupIndex_Test::testPMAVersionCheckCase1
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/setup/lib/index.lib.php on line 117
+FATAL
 PMA_SetupIndex_Test::testPMAmessagesBegin
 .
 PMA_SetupIndex_Test::testPMAmessagesEnd
@@ -2640,8 +2716,6 @@ PMA_SetupIndex_Test::testPMAmessagesSet
 .
 PMA_ShowDocu_Test::testShowDocu
 .
-PMA_ShowMessage_Test::testShowMessageNotAjax
-HipHop Fatal error: Undefined function: PMA_sanitize in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/Util.class.php on line 1037
 PMA_ShowPHPDocu_Test::testShowPHPDocu
 .
 PMA_SqlQueryForm_Test::testPMAGetHtmlForSqlQueryForm
@@ -2999,7 +3073,7 @@ PMA_TRI_GetQueryFromRequest_Test::testgetQueryFromRequest with data set #3
 PMA_TableProperty_Test::testConstructor
 .
 PMA_TableProperty_Test::testFormatCs
-HipHop Fatal error: Class undefined: ExportCodegen in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/export/TableProperty.class.php on line 218
+FATAL
 PMA_TableProperty_Test::testGetDotNetObjectType with data set #0 
 .
 PMA_TableProperty_Test::testGetDotNetObjectType with data set #1 
@@ -3067,11 +3141,11 @@ PMA_TableProperty_Test::testIsUnique with data set #3
 PMA_TableProperty_Test::testIsUnique with data set #4 
 .
 PMA_TableReplaceSearchTest::testGetReplacePreview
-HipHop Fatal error: Call to undefined method Mock_PMA_DatabaseInterface_c3e129f5::query from context PMA_TableSearch in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/TableSearch.class.php on line 1326
+FATAL
 PMA_TableSearch_Test::testBuildSqlQueryw
 .
 PMA_TableSearch_Test::testConstruct
-E
+.
 PMA_TableSearch_Test::testGetReplacePreview
 .
 PMA_TableSearch_Test::testGetSearchAndReplaceHTML
@@ -3145,7 +3219,7 @@ PMA_TblChartTest::testPMAGetHtmlForTableChartDisplay
 PMA_TblColumnsDefinitionFormTest::testGetFormsParameters
 .
 PMA_TblColumnsDefinitionFormTest::testGetHtmlForTableConfigurations
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/tbl_columns_definition_form.lib.php on line 70
+FATAL
 PMA_TblGisVisualizaionTest::testPMAGetHtmlForColumn
 .
 PMA_TblGisVisualizaionTest::testPMAGetHtmlForGisVisualization
@@ -3223,7 +3297,7 @@ PMA_TblTrackingTest::testPMAGetTableLastVersionNumber
 PMA_TblTrackingTest::testPMAGetTrackingSet
 .
 PMA_TblViewsTest::testPMAGetColumnMap
-E
+.
 PMA_TblViewsTest::testPMAGetExistingTranformationData
 .
 PMA_TblViewsTest::testPMAGetNewTransformationDataSql
@@ -3295,7 +3369,7 @@ PMA_Tracker_Test::testEnabled
 PMA_Tracker_Test::testInit
 .
 PMA_Tracker_Test::testIsActive
-HipHop Fatal error: Undefined function: PMA_getRelationsParam in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/Tracker.class.php on line 143
+FATAL
 PMA_Transformation_Test::testGetMime
 .
 PMA_Transformation_Test::testGetOptions with data set #0 
@@ -3505,9 +3579,9 @@ PMA_Types_MySQL_Test::testGetUnknownTypeDescription
 PMA_UnsupportedDatatypes_Test::testNotSupportedDataTypes
 .
 PMA_User_Preferences_Test::testLoadUserprefs
-HipHop Fatal error: Call to undefined method Mock_PMA_DatabaseInterface_97a9e4e8::fetchSingleRow from anonymous context in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/user_preferences.lib.php on line 65
+FATAL
 PMA_User_Preferences_Test::testUserPrefPageInit
-E
+.
 PMA_User_Schema_Test::testSetActionAndProcessUserChoice
 .
 PMA_Util_Test::testAnalyzeLimitClause
@@ -3517,7 +3591,7 @@ PMA_Util_Test::testCreateGISData
 PMA_Util_Test::testGetGISFunctions
 .
 PMA_Util_Test::testGetLatestVersion
-E
+.
 PMA_Util_Test::testPageSelector
 .
 PMA_Util_Test::testVersionToInt with data set #0 
@@ -3565,7 +3639,9 @@ PMA_WarnMissingExtension_Test::testMissingExtensionFatalWithExtra
 PMA_WhichCrlf_Test::testWhichCrlf
 .
 PMA_ZipExtension_Test::testGetZipContents with data set #0 
-HipHop Fatal error: Not implemented is not implemented yet. in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/zip_extension.lib.php on line 25
+.
+PMA_ZipExtension_Test::testGetZipContents with data set #1 
+UNKNOWN STATUS
 PMA_Zip_Test::testAddFile
 .
 PMA_Zip_Test::testFile
@@ -3582,44 +3658,6 @@ ParsingTest::test_npgettext with data set #0
 .
 ParsingTest::test_npgettext with data set #1 
 .
-PmaSeleniumCreateDropDatabaseTest::testCreateDropDatabase
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumCreateRemoveUserTest::testCreateRemoveUser
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumDbEventsTest::testAddEvent
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumDbOperationsTest::testDbComment
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumDbProceduresTest::testAddProcedure
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumDbStructureTest::testTruncateTable
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumDbTriggersTest::testAddTrigger
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumExportTest::testServerImport with data set #0 
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumImportTest::testServerImport
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumLoginTest::testSuccessfulLogin
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumPrivilegesTest::testChangePassword
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumSettingsTest::testHideDatabase
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumTableBrowseTest::testSortRecords
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumTableCreateTest::testCreateTable
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumTableInsertTest::testAddData
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumTableOperationsTest::testChangeTableOrder
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumTableStructureTest::testAddColumn
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumTrackingTest::testTrackingData
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
-PmaSeleniumXSSTest::testQueryTabWithNullValue
-hhvm: ./hphp/runtime/base/countable.h:51: void HPHP::assert_refcount_realistic(int32_t): Assertion `count == RefCountStaticValue || (uint32_t)count <= (uint32_t)RefCountMaxRealistic' failed.
 Text_Plain_Append_Test::testApplyTransformation
 .
 Text_Plain_Append_Test::testGetInfo
@@ -3653,11 +3691,11 @@ Text_Plain_External_Test::testGetMIMEType
 Text_Plain_External_Test::testGetName
 .
 Text_Plain_Formatted_Test::testGetInfo
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/transformations/abstract/FormattedTransformationsPlugin.class.php on line 34
+FATAL
 Text_Plain_Imagelink_Test::testGetInfo
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/transformations/abstract/TextImageLinkTransformationsPlugin.class.php on line 36
+FATAL
 Text_Plain_Link_Test::testGetInfo
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/transformations/abstract/TextLinkTransformationsPlugin.class.php on line 36
+FATAL
 Text_Plain_Longtoipv4_Test::testApplyTransformation
 .
 Text_Plain_Longtoipv4_Test::testGetInfo
@@ -3669,7 +3707,7 @@ Text_Plain_Longtoipv4_Test::testGetMIMEType
 Text_Plain_Longtoipv4_Test::testGetName
 .
 Text_Plain_Sql_Test::testGetInfo
-HipHop Fatal error: Undefined function: __ in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/plugins/transformations/abstract/SQLTransformationsPlugin.class.php on line 32
+FATAL
 Text_Plain_Substring_Test::testApplyTransformation
 E
 Text_Plain_Substring_Test::testGetInfo

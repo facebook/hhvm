@@ -37,7 +37,8 @@ var_dump( mkdir("$file_path/mkdir/test1", 0777, true) );
 var_dump( chmod("$file_path/mkdir/", 0777) );  // chmod to enable removing test1 directory
 
 echo "Done\n";
-?><?php
+?>
+<?php
 rmdir(dirname(__FILE__)."/mkdir/test/");
 rmdir(dirname(__FILE__)."/mkdir/test1/");
 rmdir(dirname(__FILE__)."/mkdir/");

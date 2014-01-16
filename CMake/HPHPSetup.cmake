@@ -1,8 +1,17 @@
 include(Options)
 
-if (APPLE)
-	set(HHVM_ANCHOR_SYMS -Wl,-u,_register_libevent_server,_register_fastcgi_server)
+# Do this until cmake has a define for ARMv8
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __AARCH64EL__
+#error Not ARMv8  
+#endif
+int main() { return 0; }" IS_AARCH64)
+
+if (APPLE OR IS_AARCH64)
+	set(HHVM_ANCHOR_SYMS -Wl,-u,_register_libevent_server)
 else()
+	set(ENABLE_FASTCGI 1)
 	set(HHVM_ANCHOR_SYMS -Wl,-uregister_libevent_server,-uregister_fastcgi_server)
 endif()
 
@@ -15,10 +24,13 @@ set(HHVM_LINK_LIBRARIES
     hphp_zend
     hphp_util
     hphp_hhbbc
-    hphp_thrift
-    hphp_proxygen
     vixl neo
     ${HHVM_ANCHOR_SYMS})
+
+if(ENABLE_FASTCGI)
+	LIST(APPEND HHVM_LINK_LIBRARIES hphp_thrift)
+	LIST(APPEND HHVM_LINK_LIBRARIES hphp_proxygen)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
@@ -50,8 +62,7 @@ include(HPHPCompiler)
 include(HPHPFunctions)
 include(HPHPFindLibs)
 
-add_definitions(-D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS)
-add_definitions(-DHHVM_LIB_PATH_DEFAULT="${HPHP_HOME}/bin")
+add_definitions(-D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS -DFOLLY_HAVE_WEAK_SYMBOLS=1)
 
 if (LINUX)
 	add_definitions(-D_GNU_SOURCE)
@@ -107,6 +118,10 @@ if(APPLE)
 	# Enable weak linking
 	add_definitions(-DMACOSX_DEPLOYMENT_TARGET=10.6)
 endif()
+
+if(ENABLE_FASTCGI)
+	add_definitions(-DENABLE_FASTCGI=1)
+endif ()
 
 # enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)

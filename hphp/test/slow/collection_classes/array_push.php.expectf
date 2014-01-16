@@ -1,0 +1,9 @@
+int(5)
+int(8)
+bool(true)
+int(5)
+int(8)
+bool(true)
+HipHop Warning: Invalid operand type was used: array_push expects %s in %s on line 19
+HipHop Warning: Invalid operand type was used: array_push expects %s in %s on line 22
+Done

@@ -1,7 +1,7 @@
 set(FOLLY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/folly")
 
 if (NOT EXISTS "${FOLLY_DIR}/Portability.h")
-	message(FATAL_ERROR "${FOLLY_DIR}/Portability.h missing, did you forget to run `git submodule init && git submodule update`?")
+	message(FATAL_ERROR "${FOLLY_DIR}/Portability.h missing, did you forget to run `git submodule update --init`?")
 endif()
 
 # Generated files from folly/build/generate_*.py
@@ -21,16 +21,20 @@ list(REMOVE_ITEM files
 	${FOLLY_DIR}/Benchmark.cpp
 	${FOLLY_DIR}/build/GenerateFingerprintTables.cpp
 	${FOLLY_DIR}/detail/Clock.cpp
+	${FOLLY_DIR}/detail/Futex.cpp
 	${FOLLY_DIR}/experimental/File.cpp
 	${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracer.cpp
 	${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerBenchmark.cpp
 	${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerLib.cpp
 	${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerTest.cpp
+	${FOLLY_DIR}/experimental/exception_tracer/StackTrace.cpp
 	${FOLLY_DIR}/experimental/io/AsyncIO.cpp
 	${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
 	${FOLLY_DIR}/experimental/io/IOBufQueue.cpp
 	${FOLLY_DIR}/experimental/symbolizer/SymbolizerTest.cpp
+	${FOLLY_DIR}/experimental/symbolizer/StackTrace.cpp
 	${FOLLY_DIR}/experimental/symbolizer/ElfUtil.cpp
+	${FOLLY_DIR}/experimental/symbolizer/SignalHandler.cpp
     )
 list(REMOVE_ITEM cfiles
 	${FOLLY_DIR}/experimental/exception_tracer/StackTrace.c

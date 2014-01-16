@@ -43,7 +43,7 @@ BlockList::const_iterator rpoIteratorTo(const BlockList& cfg, Block* b);
 
 /*
  * Compute a reverse postorder list of the basic blocks reachable from
- * the IR's entry block.
+ * the IR's entry block. Updates the postId field of each reachable Block.
  *
  * Post: isRPOSorted(return value)
  */
@@ -54,6 +54,20 @@ BlockList rpoSortCfg(const IRUnit&);
  * order.
  */
 bool isRPOSorted(const BlockList&);
+
+/*
+ * Removes unreachable blocks from the unit and then splits any critical edges.
+ *
+ * Returns: true iff any modifications were made to the unit.
+ */
+bool splitCriticalEdges(IRUnit&);
+
+/*
+ * Remove unreachable blocks from the given unit.
+ *
+ * Returns: true iff one or more blocks were deleted.
+ */
+bool removeUnreachable(IRUnit& unit);
 
 /*
  * Compute the postorder number of each immediate dominator of each
@@ -97,20 +111,10 @@ void forPreorderDoms(Block* block, const DomChildren& children,
 template <class Body> void forEachTrace(const IRUnit&, Body body);
 
 /*
- * Visit the blocks in the main trace followed by exit trace blocks.
- */
-template <class Body> void forEachTraceBlock(const IRUnit&, Body body);
-
-/*
  * Visit the instructions in this blocklist, in block order.
  */
 template <class BlockList, class Body>
 void forEachInst(const BlockList& blocks, Body body);
-
-/*
- * Visit each instruction in the main trace, then the exit traces
- */
-template <class Body> void forEachTraceInst(const IRUnit&, Body body);
 
 namespace detail {
    // PostorderSort encapsulates a depth-first postorder walk
@@ -165,22 +169,18 @@ void forPreorderDoms(Block* block, const DomChildren& children,
 }
 
 template <class Body>
-void forEachTrace(const IRUnit& unit, Body body) {
+void forEachTrace(IRUnit& unit, Body body) {
   body(unit.main());
-  for (auto exit : unit.exits()) {
+  for (auto* exit : unit.exits()) {
     body(exit);
   }
 }
 
 template <class Body>
-void forEachTraceBlock(const IRUnit& unit, Body body) {
-  for (auto block : unit.main()->blocks()) {
-    body(block);
-  }
-  for (auto exit : unit.exits()) {
-    for (auto block : exit->blocks()) {
-      body(block);
-    }
+void forEachTrace(const IRUnit& unit, Body body) {
+  body(unit.main());
+  for (auto* exit : unit.exits()) {
+    body(exit);
   }
 }
 
@@ -191,13 +191,6 @@ void forEachInst(const BlockList& blocks, Body body) {
       body(&inst);
     }
   }
-}
-
-template <class Body>
-void forEachTraceInst(const IRUnit& unit, Body body) {
-  forEachTrace(unit, [=](IRTrace* t) {
-    forEachInst(t->blocks(), body);
-  });
 }
 
 }}

@@ -395,7 +395,7 @@ Mage_Backend_Model_Config_ScopeDefinerTest::testGetScopeReturnsStoreScopeIfStore
 Mage_Backend_Model_Config_ScopeDefinerTest::testGetScopeReturnsWebsiteScopeIfWebsiteIsSpecified
 .
 Mage_Backend_Model_Config_Source_Admin_PageTest::testToOptionArray
-E
+.
 Mage_Backend_Model_Config_StructureTest::testGetElementReturnsEmptyElementIfNotExistingElementIsRequested with data set #0 
 .
 Mage_Backend_Model_Config_StructureTest::testGetElementReturnsEmptyElementIfNotExistingElementIsRequested with data set #1 
@@ -681,47 +681,47 @@ Mage_Backend_Model_Locale_ManagerTest::testSwitchBackendInterfaceLocale with dat
 Mage_Backend_Model_Locale_ManagerTest::testSwitchBackendInterfaceLocale with data set "case2"
 .
 Mage_Backend_Model_MenuTest::testAdd
-E
+.
 Mage_Backend_Model_MenuTest::testAddDoLogAddAction
-E
+.
 Mage_Backend_Model_MenuTest::testAddSortsItemsByTheirSortIndex
-E
+.
 Mage_Backend_Model_MenuTest::testAddToItem
-E
+.
 Mage_Backend_Model_MenuTest::testAddWithSortIndexThatAlreadyExistsAddsItemOnNextAvailableIndex
-E
+.
 Mage_Backend_Model_MenuTest::testGet
-E
+.
 Mage_Backend_Model_MenuTest::testGetFirstAvailableReturnsLeafNode
-E
+.
 Mage_Backend_Model_MenuTest::testGetFirstAvailableReturnsOnlyAllowedAndNotDisabledItem
-E
+.
 Mage_Backend_Model_MenuTest::testGetRecursive
-E
+.
 Mage_Backend_Model_MenuTest::testIsLast
-E
+.
 Mage_Backend_Model_MenuTest::testMove
-E
+.
 Mage_Backend_Model_MenuTest::testMoveNonExistentItemThrowsException
-F
+.
 Mage_Backend_Model_MenuTest::testMoveToNonExistentItemThrowsException
-F
+.
 Mage_Backend_Model_MenuTest::testMultipleIterationsWorkProperly
-E
+.
 Mage_Backend_Model_MenuTest::testNestedLoop
-E
+.
 Mage_Backend_Model_MenuTest::testRemoveDoLogRemoveAction
-E
+.
 Mage_Backend_Model_MenuTest::testRemoveRemovesMenuItem
-E
+.
 Mage_Backend_Model_MenuTest::testRemoveRemovesMenuItemRecursively
-E
+.
 Mage_Backend_Model_MenuTest::testReorderReordersItemOnItsLevel
-E
+.
 Mage_Backend_Model_MenuTest::testReorderReordersItemOnTopLevel
-E
+.
 Mage_Backend_Model_MenuTest::testSerialize
-E
+.
 Mage_Backend_Model_Menu_BuilderTest::testGetResultBuildsTreeStructure
 .
 Mage_Backend_Model_Menu_BuilderTest::testGetResultSkipItemsWithInvalidParent
@@ -743,21 +743,7 @@ Mage_Backend_Model_Menu_Builder_Command_UpdateTest::testExecuteFillsEmptyItemWit
 Mage_Backend_Model_Menu_Builder_Command_UpdateTest::testExecuteRewritesDataInFilledItem
 .
 Mage_Backend_Model_Menu_ConfigTest::testGetMenuConfigurationFiles
-E
-Mage_Backend_Model_Menu_ConfigTest::testGetMenuGenericExceptionIsNotLogged
-E
-Mage_Backend_Model_Menu_ConfigTest::testGetMenuInvalidArgumentExceptionLogged
-E
-Mage_Backend_Model_Menu_ConfigTest::testGetMenuTriggersEventOnlyOnceAfterMenuIsCreated
-E
-Mage_Backend_Model_Menu_ConfigTest::testGetMenuWhenCacheEnabledAndCleaned
-E
-Mage_Backend_Model_Menu_ConfigTest::testGetMenuWhenEnabledCache
-E
-Mage_Backend_Model_Menu_ConfigTest::testGetMenuWithCachedObjectReturnsUnserializedObject
-E
-Mage_Backend_Model_Menu_ConfigTest::testGetMenuWithNotCachedObjectBuidlsObject
-E
+FATAL
 Mage_Backend_Model_Menu_Director_DomTest::testCommandLogging
 .
 Mage_Backend_Model_Menu_Director_DomTest::testCommandWithValidBuilder
@@ -765,15 +751,15 @@ Mage_Backend_Model_Menu_Director_DomTest::testCommandWithValidBuilder
 Mage_Backend_Model_Menu_Director_DomTest::testExtractData
 .
 Mage_Backend_Model_Menu_Filter_IteratorTest::testLoopIteratesDosntIterateDisabledItems
-E
+F
 Mage_Backend_Model_Menu_Filter_IteratorTest::testLoopIteratesDosntIterateNotAllowedItems
-E
+F
 Mage_Backend_Model_Menu_Filter_IteratorTest::testLoopIteratesMixedItems
-E
+F
 Mage_Backend_Model_Menu_Filter_IteratorTest::testLoopIteratesOnlyValidItems
-E
+F
 Mage_Backend_Model_Menu_Filter_IteratorTest::testLoopWithAllItemsDisabledDoesntIterate
-E
+.
 Mage_Backend_Model_Menu_ItemTest::testGetChildrenCreatesSubmenuOnFirstCall
 .
 Mage_Backend_Model_Menu_ItemTest::testGetClickCallbackReturnsEmptyStringIfItemHasAction
@@ -2347,9 +2333,9 @@ E
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #1 
 E
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #2 
-.
-Mage_Core_Model_LoggerTest::testInitForStore
 E
+Mage_Core_Model_LoggerTest::testInitForStore
+.
 Mage_Core_Model_LoggerTest::testLog
 .
 Mage_Core_Model_LoggerTest::testLogComplex
@@ -3791,7 +3777,7 @@ Mage_Install_Model_EntryPoint_UpgradeTest::testProcessRequest with data set "rei
 Mage_Install_Model_Installer_ConfigTest::testReplaceTmpEncryptKey
 .
 Mage_Install_Model_Installer_ConfigTest::testReplaceTmpInstallDate
-E
+.
 Mage_Install_Model_Installer_Db_Mysql4Test::testSupportEngine with data set #0 
 .
 Mage_Install_Model_Installer_Db_Mysql4Test::testSupportEngine with data set #1 
@@ -4882,16 +4868,8 @@ Mage_Webapi_Model_Resource_Acl_UserTest::testGetUniqueFields
 .
 Mage_Webapi_Model_Rest_Oauth_ServerTest::testAuthenticateTwoLegged
 .
-Mage_Webapi_Model_Soap_AutoDiscoverTest::testGenerate with data set "Method with complex type in parameters"
-E
 Mage_Webapi_Model_Soap_AutoDiscoverTest::testGenerate with data set "Method with simple parameters"
-E
-Mage_Webapi_Model_Soap_AutoDiscoverTest::testGenerate with data set "One-way method"
-E
-Mage_Webapi_Model_Soap_AutoDiscoverTest::testHandleLoadWsdlFromCache
-.
-Mage_Webapi_Model_Soap_AutoDiscoverTest::testHandleWithException
-.
+FATAL
 Mage_Webapi_Model_Soap_FaultTest::testGetSoapFaultMessage with data set #0 
 .
 Mage_Webapi_Model_Soap_FaultTest::testGetSoapFaultMessage with data set #1 
@@ -4960,18 +4938,8 @@ Mage_Webapi_Model_Soap_ServerTest::testGetEndpointUri
 .
 Mage_Webapi_Model_Soap_ServerTest::testWebapiSoapFault
 .
-Mage_Webapi_Model_Soap_Wsdl_ComplexTypeStrategy_ConfigBasedTest::testAddComplexTypeComplexParameters
-E
-Mage_Webapi_Model_Soap_Wsdl_ComplexTypeStrategy_ConfigBasedTest::testAddComplexTypeSimpleParameters with data set "parameter with call info"
-E
-Mage_Webapi_Model_Soap_Wsdl_ComplexTypeStrategy_ConfigBasedTest::testAddComplexTypeSimpleParameters with data set "parameter with doc instructions"
-E
-Mage_Webapi_Model_Soap_Wsdl_ComplexTypeStrategy_ConfigBasedTest::testAddComplexTypeSimpleParameters with data set "parameter with see link"
-E
 Mage_Webapi_Model_Soap_Wsdl_ComplexTypeStrategy_ConfigBasedTest::testAddComplexTypeSimpleParameters with data set "simple parameters"
-E
-Mage_Webapi_Model_Soap_Wsdl_ComplexTypeStrategy_ConfigBasedTest::testAddComplexTypeSimpleParameters with data set "type with call info"
-E
+FATAL
 Mage_Webapi_Model_Soap_Wsdl_ComplexTypeStrategy_ConfigBasedTest::testCheckTypeName
 .
 Mage_Webapi_Model_Soap_Wsdl_FactoryTest::testCreate
@@ -5279,7 +5247,7 @@ Mage_Webhook_Model_Webapi_User_FactoryTest::testCreateUser
 Mage_Webhook_Model_Webapi_User_FactoryTest::testCreateUserAndRoleException
 .
 Mage_Webhook_Model_Webapi_User_FactoryTest::testInitVirtualResourceMapping
-E
+FATAL
 Mage_Webhook_Service_SubscriptionV1Test::testActivate
 .
 Mage_Webhook_Service_SubscriptionV1Test::testActivateException
@@ -5448,58 +5416,8 @@ Magento_Cache_Backend_Decorator_DecoratorAbstractTest::testConstructorException 
 .
 Magento_Cache_Backend_Decorator_DecoratorAbstractTest::testConstructorException with data set "wrong_class"
 .
-Magento_Cache_Backend_MongoDbTest::testClean with data set "clean cache matching all tags 
-E
-Magento_Cache_Backend_MongoDbTest::testClean with data set "clean cache matching any tags 
-E
-Magento_Cache_Backend_MongoDbTest::testClean with data set "clean cache not matching tags 
-E
-Magento_Cache_Backend_MongoDbTest::testClean with data set "clean expired"
-E
-Magento_Cache_Backend_MongoDbTest::testCleanInvalidMode
-E
-Magento_Cache_Backend_MongoDbTest::testGetCapabilities
-E
-Magento_Cache_Backend_MongoDbTest::testGetFillingPercentage
-E
 Magento_Cache_Backend_MongoDbTest::testGetIds with data set "empty db"
-E
-Magento_Cache_Backend_MongoDbTest::testGetIds with data set "multiple records"
-E
-Magento_Cache_Backend_MongoDbTest::testGetIdsMatchingTags with data set "getIdsMatchingAnyTags
-E
-Magento_Cache_Backend_MongoDbTest::testGetIdsMatchingTags with data set "getIdsMatchingTags
-E
-Magento_Cache_Backend_MongoDbTest::testGetIdsMatchingTags with data set "getIdsNotMatchingTags
-E
-Magento_Cache_Backend_MongoDbTest::testGetIdsMatchingTagsNoInputTags
-E
-Magento_Cache_Backend_MongoDbTest::testGetMetadatas with data set "existing record"
-E
-Magento_Cache_Backend_MongoDbTest::testGetMetadatas with data set "non-existing record"
-E
-Magento_Cache_Backend_MongoDbTest::testGetMetadatas with data set "non-string id"
-E
-Magento_Cache_Backend_MongoDbTest::testGetTags with data set "multiple tags"
-E
-Magento_Cache_Backend_MongoDbTest::testGetTags with data set "no tags"
-E
-Magento_Cache_Backend_MongoDbTest::testLoad with data set "do not test validity"
-E
-Magento_Cache_Backend_MongoDbTest::testLoad with data set "test validity"
-E
-Magento_Cache_Backend_MongoDbTest::testLoadNoRecord
-E
-Magento_Cache_Backend_MongoDbTest::testRemove
-E
-Magento_Cache_Backend_MongoDbTest::testSave
-E
-Magento_Cache_Backend_MongoDbTest::testTest
-E
-Magento_Cache_Backend_MongoDbTest::testTestNotFound
-E
-Magento_Cache_Backend_MongoDbTest::testTouch
-E
+FATAL
 Magento_Cache_Frontend_Adapter_ZendTest::testCleanException with data set "cleaning mode "
 .
 Magento_Cache_Frontend_Adapter_ZendTest::testCleanException with data set "non-existing cleaning mode"
@@ -6851,15 +6769,15 @@ Magento_Profiler_Driver_StandardTest::testDisplayAndRegisterOutput
 Magento_Profiler_Driver_StandardTest::testInitOutputs
 .
 Magento_Profiler_Driver_StandardTest::testStart
-F
+.
 Magento_Profiler_Driver_StandardTest::testStop
-F
+.
 Magento_Profiler_Driver_Standard_OutputAbstractTest::testConstructor
 .
 Magento_Profiler_Driver_Standard_OutputAbstractTest::testGetTimerIds
 .
 Magento_Profiler_Driver_Standard_OutputAbstractTest::testRenderCaption
-F
+.
 Magento_Profiler_Driver_Standard_OutputAbstractTest::testRenderColumnValue with data set #0 
 .
 Magento_Profiler_Driver_Standard_OutputAbstractTest::testRenderColumnValue with data set #1 
@@ -7325,7 +7243,7 @@ Tools_Migration_Acl_Menu_GeneratorTest::testParseMenuFiles
 Tools_Migration_Acl_Menu_GeneratorTest::testParseMenuNode
 .
 Tools_Migration_Acl_Menu_GeneratorTest::testSaveMenuFiles
-HipHop Fatal error: Call to undefined method Mock_Tools_Migration_Acl_FileManager_07790bf5::write from context Tools_Migration_Acl_Menu_Generator in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/magento2/dev/tools/migration/Acl/Menu/Generator.php on line 405
+FATAL
 Tools_Migration_Acl_Menu_GeneratorTest::testUpdateMenuAttributes
 .
 Tools_Migration_System_Configuration_GeneratorTest::testCreateConfigurationGeneratesConfiguration
@@ -7381,7 +7299,7 @@ Tools_View_Generator_ThemeDeploymentTest::testConstructorException with data set
 Tools_View_Generator_ThemeDeploymentTest::testConstructorException with data set "no permitted config"
 .
 Tools_View_Generator_ThemeDeploymentTest::testRun
-F
+E
 Tools_View_Generator_ThemeDeploymentTest::testRunInDryRun
 .
 Tools_View_Generator_ThemeDeploymentTest::testRunWithCasedExtension

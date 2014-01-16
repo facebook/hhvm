@@ -19,7 +19,6 @@
 
 #include <vector>
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -30,10 +29,6 @@
 namespace HPHP {
 namespace JIT {
 
-using Transl::TransID;
-using Transl::TransKind;
-using Transl::Tracelet;
-using Transl::TCA;
 
 /**
  * A simple class of a growable number of profiling counters with
@@ -62,7 +57,7 @@ class ProfCounters {
   static const uint32_t kCountersPerChunk = 2 * 1024 * 1024 / sizeof(T);
 
   T                     m_initVal;
-  vector<T*>            m_chunks;
+  std::vector<T*>       m_chunks;
 };
 
 typedef std::vector<TCA> PrologueCallersVec;
@@ -167,6 +162,7 @@ class ProfTransRec {
 };
 
 typedef std::unique_ptr<ProfTransRec> ProfTransRecPtr;
+typedef std::unordered_map<FuncId, TransIDVec> FuncProfTransMap;
 
 /**
  * ProfData encapsulates the profiling data kept by the JIT.
@@ -188,6 +184,7 @@ public:
   Offset                  transStopBcOff(TransID id)  const;
   FuncId                  transFuncId(TransID id)     const;
   Func*                   transFunc(TransID id)       const;
+  const TransIDVec&       funcProfTransIDs(FuncId funcId) const;
   RegionDescPtr           transRegion(TransID id)     const;
   TransKind               transKind(TransID id)       const;
   int64_t                 transCounter(TransID id)    const;
@@ -217,13 +214,18 @@ public:
   bool                    optimized(FuncId funcId) const;
   void                    setOptimized(const SrcKey& sk);
   void                    setOptimized(FuncId funcId);
+  bool                    profiling(FuncId funcId) const;
+  void                    setProfiling(FuncId funcId);
 
 private:
   uint32_t                m_numTrans;
-  vector<ProfTransRecPtr> m_transRecs;
+  std::vector<ProfTransRecPtr>
+                          m_transRecs;
+  FuncProfTransMap        m_funcProfTrans;
   ProfCounters<int64_t>   m_counters;
   SrcKeySet               m_optimizedSKs;   // set of SrcKeys already optimized
   FuncIdSet               m_optimizedFuncs; // set of funcs already optimized
+  FuncIdSet               m_profilingFuncs; // set of funcs being profiled
   PrologueToTransMap      m_prologueDB;  // maps (Func,nArgs) => prolog TransID
   PrologueToTransMap      m_dvFuncletDB; // maps (Func,nArgs) => DV funclet
                                          //                      TransID

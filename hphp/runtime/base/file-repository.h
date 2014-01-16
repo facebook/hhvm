@@ -123,6 +123,7 @@ typedef tbb::concurrent_hash_map<const StringData *, struct UnitMd5Val,
 typedef RankedCHM<const StringData*, HPHP::Eval::PhpFileWrapper*,
                   StringDataHashCompare, RankFileRepo> ParsedFilesMap;
 typedef hphp_hash_map<std::string, PhpFile*, string_hash> Md5FileMap;
+typedef std::vector<HPHP::Unit *> UnitVec;
 
 /**
  * FileRepository tracks all the Units that are currently live in this session.
@@ -175,11 +176,14 @@ public:
   static void onDelete(PhpFile *f);
   static void forEachUnit(UnitVisitor& uit);
   static size_t getLoadedFiles();
+  static void enqueueOrphanedUnitForDeletion(HPHP::Unit *u);
+  static void deleteOrphanedUnits();
 private:
   static ParsedFilesMap s_files;
   static UnitMd5Map s_unitMd5Map;
   static ReadWriteMutex s_md5Lock;
   static Md5FileMap s_md5Files;
+  static UnitVec s_orphanedUnitsToDelete;
 
   static bool fileStat(const std::string &name, struct stat *s);
   static std::set<std::string> s_names;

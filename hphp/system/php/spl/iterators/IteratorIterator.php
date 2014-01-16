@@ -28,7 +28,7 @@ class IteratorIterator implements OuterIterator {
    * @return     mixed   No value is returned.
    */
   public function __construct($iterator) {
-    if ($iterator instanceof IteratorAggregate) {
+    while ($iterator instanceof IteratorAggregate) {
       $iterator = $iterator->getIterator();
     }
     if ($iterator instanceof \Iterator) {

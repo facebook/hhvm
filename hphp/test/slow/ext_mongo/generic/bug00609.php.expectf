@@ -1,0 +1,4 @@
+object(MongoId)#%d (1) {
+  ["$id"]=>
+  string(24) "%s"
+}

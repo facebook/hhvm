@@ -43,7 +43,7 @@ class TraceBuilder;
 class CodeGenerator;
 }}
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 struct TraceletCounters {
   uint64_t m_numEntered, m_numExecuted;
@@ -70,7 +70,7 @@ struct FreeStubList {
 };
 
 class TranslatorX64;
-extern __thread TranslatorX64* tx64;
+extern TranslatorX64* tx64;
 
 extern void* interpOneEntryPoints[];
 
@@ -157,7 +157,7 @@ private:
   // Data structures for HHIR-based translation
   uint64_t               m_numHHIRTrans;
 
-  virtual void traceCodeGen();
+  void traceCodeGen() override;
 
   FixupMap                   m_fixupMap;
   UnwindInfoHandle           m_unwindRegistrar;
@@ -277,7 +277,7 @@ public:
   void getPerfCounters(Array& ret);
 
 private:
-  virtual void syncWork();
+  void syncWork() override;
 
 public:
 
@@ -292,6 +292,9 @@ public:
   TranslateResult translateTracelet(Tracelet& t);
 
 private:
+  bool shouldTranslate() const {
+    return mainCode.used() < RuntimeOption::EvalJitAMaxUsage;
+  }
   TCA getTranslation(const TranslArgs& args);
   TCA createTranslation(const TranslArgs& args);
   TCA retranslate(const TranslArgs& args);
@@ -300,9 +303,8 @@ private:
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
-  void regeneratePrologues(Func* func);
-  void regeneratePrologue(TransID prologueTransId);
-  bool prologuesWereRegenerated(const Func* func);
+  TCA regeneratePrologues(Func* func, SrcKey triggerSk);
+  TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk);
 
   void recordGdbTranslation(SrcKey sk, const Func* f,
                             const CodeBlock& cb,
@@ -340,10 +342,9 @@ public:
   }
 
   TranslatorX64();
-  virtual ~TranslatorX64();
+  ~TranslatorX64();
 
   void initUniqueStubs();
-  static TranslatorX64* Get();
 
   // Called before entering a new PHP "world."
   void requestInit();
@@ -352,9 +353,11 @@ public:
   void requestExit();
 
   // Returns a string with cache usage information
-  virtual std::string getUsage();
-  virtual size_t getCodeSize();
-  virtual size_t getStubSize();
+  std::string getUsage();
+  size_t getHotCodeSize() const;
+  size_t getCodeSize() const;
+  size_t getProfCodeSize() const;
+  size_t getStubSize() const;
 
   // true iff calling thread is sole writer.
   static bool canWrite() {
@@ -376,10 +379,9 @@ public:
   void unprotectCode();
 
   int numTranslations(SrcKey sk) const;
-private:
-  virtual bool addDbgGuards(const Unit* unit);
-  virtual bool addDbgGuard(const Func* func, Offset offset);
 
+  bool addDbgGuards(const Unit* unit);
+  bool addDbgGuard(const Func* func, Offset offset);
 };
 
 const size_t kTrampolinesBlockSize = 8 << 12;
@@ -402,9 +404,8 @@ const size_t kExpectedPerTrampolineSize = 11;
 const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
   kExpectedPerTrampolineSize;
 
-TCA fcallHelper(ActRec* ar);
-TCA funcBodyHelper(ActRec* ar);
-void functionEnterHelper(const ActRec* ar);
+TCA fcallHelper(ActRec* ar, void* sp);
+TCA funcBodyHelper(ActRec* ar, void* sp);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
 // These could be static but are used in hopt/codegen.cpp

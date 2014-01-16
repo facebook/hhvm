@@ -217,3 +217,13 @@ function hash_update_stream(mixed $context, mixed $handle,
   }
   return $didread;
 }
+
+/**
+ * hash_copy - hash_copy — Copy hashing context
+ *
+ * @param resource $context - Hashing context returned by hash_init().
+ *
+ * @return resource - Returns a copy of Hashing Context resource.
+ */
+<<__Native>>
+function hash_copy(resource $context): resource;

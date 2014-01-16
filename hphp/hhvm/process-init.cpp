@@ -95,8 +95,9 @@ void ProcessInit() {
   // Install VM's ClassInfoHook
   ClassInfo::SetHook(&vm_class_info_hook);
 
-  // ensure that nextTx64 and tx64 are set
-  (void)Transl::Translator::Get();
+  // Create the global tx64 object
+  JIT::g_translator = JIT::tx64 = new JIT::TranslatorX64();
+  JIT::tx64->initUniqueStubs();
 
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the
@@ -130,8 +131,8 @@ void ProcessInit() {
   // process does not have debugger support, we'll clear it.
   SystemLib::s_source = slib;
 
-  SystemLib::s_unit = compile_string(slib.c_str(), slib.size(),
-                                     "systemlib.php");
+  SystemLib::s_unit = compile_systemlib_string(slib.c_str(), slib.size(),
+                                               "systemlib.php");
 
   const StringData* msg;
   int line;
@@ -146,6 +147,14 @@ void ProcessInit() {
   if (!hhas.empty()) {
     SystemLib::s_hhas_unit = compile_string(hhas.c_str(), hhas.size(),
                                             "systemlib.hhas");
+    if (SystemLib::s_hhas_unit->compileTimeFatal(msg, line)) {
+      Logger::Error("An error has been introduced in the hhas portion of "
+                    "systemlib.");
+      Logger::Error("Check all of your changes to hhas files in "
+                    "hphp/system/php");
+      Logger::Error("HipHop Parse Error: %s", msg->data());
+      _exit(1);
+    }
   }
 
   // Load the systemlib unit to build the Class objects
@@ -185,6 +194,11 @@ void ProcessInit() {
   SYSTEMLIB_CLASSES(INIT_SYSTEMLIB_CLASS_FIELD)
 
 #undef INIT_SYSTEMLIB_CLASS_FIELD
+
+  SystemLib::s_continuationSendFunc =
+    SystemLib::s_ContinuationClass->lookupMethod(makeStaticString("send"));
+  SystemLib::s_continuationRaiseFunc =
+    SystemLib::s_ContinuationClass->lookupMethod(makeStaticString("raise"));
 
   // Retrieve all of the class pointers
   for (long long i = 0; i < hhbc_ext_class_count; ++i) {

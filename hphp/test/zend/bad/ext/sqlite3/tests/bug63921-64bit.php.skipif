@@ -1,0 +1,4 @@
+<?php
+if (!extension_loaded('sqlite3')) die('skip');
+if (PHP_INT_SIZE < 8) die('skip'); // skip for 32bit builds - there is another test for that
+?>

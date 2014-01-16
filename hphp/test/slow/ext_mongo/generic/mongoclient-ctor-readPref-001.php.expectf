@@ -1,0 +1,16 @@
+primary
+primary
+primaryPreferred
+primaryPreferred
+primaryPreferred
+secondary
+secondary
+secondaryPreferred
+secondaryPreferred
+nearest
+nearest
+HipHop Fatal error: %s
+Stack trace:
+#0 %smongoclient-ctor-readPref-001.php(%d): Mongo->__construct('%s')
+#1 {main}
+  thrown in %smongoclient-ctor-readPref-001.php on line %d

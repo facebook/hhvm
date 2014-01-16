@@ -34,6 +34,7 @@ extern int ini_lex(String *ini_lval);
 
 extern void zend_ini_scan(CStrRef str, int scanner_mode, CStrRef filename,
                           IniSetting::PFN_PARSER_CALLBACK callback, void *arg);
+extern void zend_ini_scan_cleanup();
 extern void zend_ini_callback(String *arg1, String *arg2, String *arg3,
                               int callback_type);
 
@@ -192,5 +193,7 @@ bool zend_parse_ini_string(CStrRef str, CStrRef filename, int scanner_mode,
                            IniSetting::PFN_PARSER_CALLBACK callback,
                            void *arg) {
   zend_ini_scan(str, scanner_mode, filename, callback, arg);
-  return ini_parse() == 0;
+  bool ret = (ini_parse() == 0);
+  zend_ini_scan_cleanup();
+  return ret;
 }

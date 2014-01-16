@@ -1,0 +1,189 @@
+
+= empty =
+bool(false)
+bool(true)
+
+= count =
+int(3)
+int(0)
+
+= items =
+int(3)
+
+= keys =
+HH\Vector [
+int(0)
+int(1)
+int(2)
+]
+
+= lazy =
+LazyKeyedIterableView [
+object(Pair)#12 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#13 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(Pair)#14 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+]
+
+= at =
+int(1)
+OutOfBoundsException: Integer key 3 is not defined
+OutOfBoundsException: String key "3" is not defined
+
+= get =
+int(1)
+NULL
+
+= contains =
+bool(true)
+bool(false)
+bool(false)
+
+= containskey..
+bool(true)
+bool(false)
+bool(false)
+
+= values =
+HH\Vector [
+int(1)
+int(2)
+int(3)
+]
+
+= differencebykey =
+bool(true)
+HH\FrozenMap [
+object(Pair)#20 (2) {
+  [0]=>
+  int(3)
+  [1]=>
+  int(3)
+}
+]
+
+= map =
+bool(true)
+HH\FrozenMap [
+object(Pair)#22 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(2)
+}
+object(Pair)#23 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+}
+object(Pair)#24 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(6)
+}
+]
+
+= mapwithkey =
+bool(true)
+HH\FrozenMap [
+object(Pair)#30 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  object(Pair)#26 (2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(1)
+  }
+}
+object(Pair)#31 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  object(Pair)#27 (2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+}
+object(Pair)#32 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  object(Pair)#28 (2) {
+    [0]=>
+    int(2)
+    [1]=>
+    int(3)
+  }
+}
+]
+
+= filter =
+bool(true)
+HH\FrozenMap [
+object(Pair)#35 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+]
+
+= filterwithkey =
+bool(true)
+HH\FrozenMap [
+object(Pair)#37 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#38 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+]
+
+= fromItems =
+bool(true)
+HH\FrozenMap [
+object(Pair)#45 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(Pair)#46 (2) {
+  [0]=>
+  int(3)
+  [1]=>
+  int(4)
+}
+object(Pair)#47 (2) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(6)
+}
+]

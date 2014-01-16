@@ -10,6 +10,7 @@ fclose($fp);
 
 $fo = new SplFileObject('SplFileObject_fgetcsv_enclosure_error.csv');
 var_dump($fo->fgetcsv(',', 'invalid'));
-?><?php
+?>
+<?php
 unlink('SplFileObject_fgetcsv_enclosure_error.csv');
 ?>

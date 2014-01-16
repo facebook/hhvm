@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/vm/jit/trans-cfg.h"
+
+#include "folly/MapUtil.h"
+
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 namespace HPHP {
@@ -28,7 +31,8 @@ static TransIDSet findPredTrans(const SrcRec* sr,
   TransIDSet predSet;
 
   for (auto& inBr : sr->incomingBranches()) {
-    TransID srcId = mapGet(jmpToTransID, inBr.toSmash(), InvalidID);
+    TransID srcId = folly::get_default(jmpToTransID, inBr.toSmash(),
+      InvalidID);
     FTRACE(5, "findPredTrans: toSmash = {}   srcId = {}\n",
            inBr.toSmash(), srcId);
     if (srcId != InvalidID) {
@@ -77,13 +81,11 @@ TransCFG::TransCFG(FuncId funcId,
   assert(profData);
 
   // add nodes
-  for (TransID tid = 0; tid < profData->numTrans(); tid++) {
-    if (profData->transKind(tid) == TransProfile &&
-        profData->transRegion(tid) != nullptr &&
-        profData->transFuncId(tid) == funcId &&
-        // This will skip DV Funclets if they were already
-        // retranslated w/ the prologues:
-        !profData->optimized(profData->transSrcKey(tid))) {
+  for (auto tid : profData->funcProfTransIDs(funcId)) {
+    assert(profData->transRegion(tid) != nullptr);
+    // This will skip DV Funclets if they were already
+    // retranslated w/ the prologues:
+    if (!profData->optimized(profData->transSrcKey(tid))) {
       int64_t counter = profData->transCounter(tid);
       int64_t weight  = RuntimeOption::EvalJitPGOThreshold - counter;
       addNode(tid, weight);
@@ -134,19 +136,19 @@ TransCFG::TransCFG(FuncId funcId,
 
 int64_t TransCFG::weight(TransID id) const {
   assert(hasNode(id));
-  size_t idx = mapGet(m_idToIdx, id);
+  size_t idx = folly::get_default(m_idToIdx, id);
   return m_nodeInfo[idx].weight();
 }
 
 const TransCFG::ArcPtrVec& TransCFG::inArcs(TransID id) const {
   assert(hasNode(id));
-  size_t idx = mapGet(m_idToIdx, id);
+  size_t idx = folly::get_default(m_idToIdx, id);
   return m_nodeInfo[idx].inArcs();
 }
 
 const TransCFG::ArcPtrVec& TransCFG::outArcs(TransID id) const {
   assert(hasNode(id));
-  size_t idx = mapGet(m_idToIdx, id);
+  size_t idx = folly::get_default(m_idToIdx, id);
   return m_nodeInfo[idx].outArcs();
 }
 
@@ -210,10 +212,11 @@ void TransCFG::print(std::string fileName, FuncId funcId,
     uint32_t coldness  = 255 - (255 * w / maxWeight);
     Offset bcStart = profData->transStartBcOff(tid);
     Offset bcStop  = profData->transStopBcOff(tid);
-    const char* shape = selected && setContains(*selected, tid) ? "oval"
-                                                                : "box";
+    const char* shape = selected && selected->count(tid) ? "oval"
+                                                         : "box";
     fprintf(file,
-            "t%u [shape=%s,label=\"T: %u\\np: %" PRId64 "\\nbc: [0x%x-0x%x)\","
+            "t%u [shape=%s,label=\"T: %u\\np: %" PRId64 "\\n"
+            "bc: [%" PRIu32 "-%" PRIu32 ")\","
             "style=filled,fillcolor=\"#ff%02x%02x\"];\n", tid, shape, tid, w,
             bcStart, bcStop, coldness, coldness);
   }

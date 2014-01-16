@@ -48,7 +48,8 @@ unlink($link_arr[0]);
 unlink($link_arr[1]);  
   
 echo "Done\n";
-?><?php
+?>
+<?php
 $name_prefix = dirname(__FILE__)."/readlink_realpath_variation2";
 unlink("$name_prefix/home/tests/link/readlink_realpath_variation2.tmp");
 rmdir("$name_prefix/home/tests/link/");

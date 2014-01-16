@@ -16,6 +16,7 @@ $excluded = array(
   'runtime/base/compiler_id.h',
   'runtime/ext/bcmath/',
   'runtime/ext_zend_compat/',
+  'runtime/ext/fileinfo/libmagic/',
   'neo/',
   'util/cronoutils.h',
   'util/cronoutils.cpp',
@@ -23,6 +24,7 @@ $excluded = array(
   'runtime/ext/quicklz.h',
   'runtime/ext/quicklz.inc',
   'facebook',
+  'submodules',
 
   // non-PHP licenses
   'compiler/parser/hphp.tab.cpp',

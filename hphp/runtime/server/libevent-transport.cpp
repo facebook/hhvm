@@ -38,12 +38,6 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
   evbuffer *buf = m_request->input_buffer;
   assert(buf);
   m_requestSize = EVBUFFER_LENGTH(buf);
-  if (m_requestSize) {
-    evbuffer_expand(buf, m_requestSize + 1); // allowing NULL termination
-    // EVBUFFER_DATA(buf) might change after evbuffer_expand
-    ((char*)EVBUFFER_DATA(buf))[m_requestSize] = '\0';
-  }
-
   m_remote_host = m_request->remote_host;
   m_remote_port = m_request->remote_port;
 
@@ -148,9 +142,6 @@ const void *LibEventTransport::getMorePostData(int &size) {
     buf = m_request->input_buffer;
     assert(buf);
     size = EVBUFFER_LENGTH(buf);
-    evbuffer_expand(buf, size + 1); // allowing NULL termination
-    // EVBUFFER_DATA(buf) might change after evbuffer_expand
-    ((char*)EVBUFFER_DATA(buf))[size] = '\0';
     if (m_request->ntoread == 0) {
       if (m_eventBasePostData != nullptr) {
         event_base_free(m_eventBasePostData);

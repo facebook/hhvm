@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/debugger/debugger_proxy.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
@@ -136,7 +139,7 @@ std::string DebuggerProxy::getSandboxId() {
 // proxy. There is the thread currently processing an interrupt, plus
 // any other threads stacked up in blockUntilOwn() (represented in the
 // m_threads set).
-void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
+void DebuggerProxy::getThreads(std::vector<DThreadInfoPtr> &threads) {
   TRACE(2, "DebuggerProxy::getThreads\n");
   Lock lock(this);
   std::stack<void *> &interrupts =
@@ -233,7 +236,8 @@ void DebuggerProxy::notifyDummySandbox() {
   if (m_dummySandbox) m_dummySandbox->notifySignal(CmdSignal::SignalBreak);
 }
 
-void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
+void DebuggerProxy::setBreakPoints(
+    std::vector<BreakPointInfoPtr> &breakpoints) {
   TRACE(2, "DebuggerProxy::setBreakPoints\n");
   // Hold the break mutex while we update the proxy's state. There's no need
   // to hold it over the longer operation to set breakpoints in each file later.
@@ -269,7 +273,8 @@ void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
   phpSetBreakPoints(this);
 }
 
-void DebuggerProxy::getBreakPoints(BreakPointInfoPtrVec &breakpoints) {
+void DebuggerProxy::getBreakPoints(
+    std::vector<BreakPointInfoPtr> &breakpoints) {
   TRACE(7, "DebuggerProxy::getBreakPoints\n");
   ReadLock lock(m_breakMutex);
   breakpoints = m_breakpoints;
@@ -438,7 +443,7 @@ void DebuggerProxy::pollSignal() {
       break;
     }
 
-    CmdSignalPtr sig = dynamic_pointer_cast<CmdSignal>(res);
+    auto sig = std::dynamic_pointer_cast<CmdSignal>(res);
     if (!sig) {
       TRACE_RB(2, "DebuggerProxy::pollSignal: "
                "bad response from signal polling: %d", res->getType());
@@ -676,9 +681,9 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     if (res) {
       TRACE_RB(2, "Proxy got cmd type %d\n", res->getType());
       Debugger::UsageLog("server", getSandboxId(),
-                         boost::lexical_cast<string>(res->getType()));
+                         boost::lexical_cast<std::string>(res->getType()));
       // Any control flow command gets installed here and we continue execution.
-      m_flow = dynamic_pointer_cast<CmdFlowControl>(res);
+      m_flow = std::dynamic_pointer_cast<CmdFlowControl>(res);
       if (m_flow) {
         m_flow->onSetup(*this, cmd);
         if (!m_flow->complete()) {

@@ -77,12 +77,12 @@ namespace HPHP {
 class SoapData : public RequestEventHandler {
 private:
   // SDL cache
-  DECLARE_BOOST_TYPES(sdlCacheBucket);
   struct sdlCacheBucket {
     sdlPtr sdl;
     time_t time;
   };
-  typedef StringTosdlCacheBucketPtrMap sdlCache;
+  typedef hphp_string_hash_map<std::shared_ptr<sdlCacheBucket>,sdlCacheBucket>
+          sdlCache;
 
 public:
   int64_t m_cache;
@@ -128,7 +128,7 @@ public:
   virtual void requestShutdown() { reset();}
 
 private:
-  sdlPtrVec m_sdls;
+  std::vector<sdlPtr> m_sdls;
   std::vector<encodeMapPtr> m_typemaps;
   std::vector<xmlCharEncodingHandlerPtr> m_encodings;
 

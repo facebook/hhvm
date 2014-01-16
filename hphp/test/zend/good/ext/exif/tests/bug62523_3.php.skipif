@@ -1,0 +1,3 @@
+<?php
+extension_loaded("exif") or die("skip need exif");
+?>

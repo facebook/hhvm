@@ -37,7 +37,7 @@ class c_Closure : public ExtObjectDataFlags<ObjectData::HasClone> {
   DECLARE_CLASS_NO_SWEEP(Closure)
 
   c_Closure(Class* cls = c_Closure::classof())
-    : ExtObjectDataFlags<ObjectData::HasClone>(cls)
+    : ExtObjectDataFlags(cls)
   {
     if (debug) {
       // m_func and m_thisOrClass must be initialized by init(), or the TC.
@@ -60,13 +60,23 @@ public: // ObjectData overrides
   void t___construct(); // must not be called for Closures
 
 public:
-  ObjectData* getThisOrClass() { return m_thisOrClass; }
+
   const Func* getInvokeFunc() { return m_func; }
   TypedValue* getUseVars() { return propVec(); }
   TypedValue* getStaticVar(Slot s) { return propVec() + s; }
   int32_t getNumUseVars() const {
-    return m_cls->numDeclProperties() - m_func->numStaticLocals();
+    return getVMClass()->numDeclProperties() - m_func->numStaticLocals();
   }
+
+  void* getThisOrClass() { return m_thisOrClass; }
+
+  ObjectData* getThis() { return ActRec::decodeThis(m_thisOrClass); }
+  void setThis(ObjectData* od) { m_thisOrClass = ActRec::encodeThis(od); }
+  bool hasThis() { return getThis() != nullptr; }
+
+  Class* getClass() { return ActRec::decodeClass(m_thisOrClass); }
+  void setClass(Class* cls) { m_thisOrClass = ActRec::encodeClass(cls); }
+  bool hasClass() { return getClass() != nullptr; }
 
   static size_t funcOffset() { return offsetof(c_Closure, m_func); }
   static size_t ctxOffset() { return offsetof(c_Closure, m_thisOrClass); }
@@ -74,7 +84,7 @@ public:
   static c_Closure* Clone(ObjectData* obj);
 
 private:
-  ObjectData* m_thisOrClass;
+  void* m_thisOrClass;
   const Func* m_func;
 };
 

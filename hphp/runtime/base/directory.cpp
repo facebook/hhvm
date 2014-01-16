@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/ext/ext_file.h"
 #include <sys/types.h>
 
 namespace HPHP {
@@ -41,12 +42,12 @@ void PlainDirectory::close() {
   }
 }
 
-String PlainDirectory::read() {
+Variant PlainDirectory::read() {
   struct dirent entry;
   struct dirent *result;
   int ret = readdir_r(m_dir, &entry, &result);
   if (ret != 0 || !result) {
-    return null_string;
+    return false;
   }
   return String(entry.d_name, CopyString);
 }
@@ -59,18 +60,29 @@ bool PlainDirectory::isValid() const {
   return m_dir;
 }
 
-String ArrayDirectory::read() {
+Variant ArrayDirectory::read() {
   if (!m_it) {
-    return null_string;
+    return false;
   }
 
-  String ret = m_it.second();
+  auto ret = m_it.second();
+  assert(ret.isString());
   ++m_it;
-  return ret;
+  return Variant(f_basename(ret.toString()));
 }
 
 void ArrayDirectory::rewind() {
   m_it.setPos(0);
+}
+
+String ArrayDirectory::path() {
+  if (!m_it) {
+    return empty_string;
+  }
+
+  auto entry = m_it.second();
+  assert(entry.isString());
+  return f_dirname(entry.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/stream-wrapper.h"
+
+#include <sys/types.h>
+
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 
 namespace HPHP { namespace Stream {

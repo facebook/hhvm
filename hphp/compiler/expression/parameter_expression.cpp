@@ -301,6 +301,45 @@ void ParameterExpression::compatibleDefault() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
+  auto propCount = 2;
+  if (m_attributeList) propCount++;
+  if (m_modifier != 0) propCount++;
+  if (m_ref) propCount++;
+  if (m_defaultValue != nullptr) propCount++;
+  cg.printObjectHeader("ParameterDeclaration", propCount);
+  if (m_attributeList) {
+    cg.printPropertyHeader("isPassedByReference");
+    cg.printExpressionVector(m_attributeList);
+  }
+  if (m_modifier != 0) {
+    cg.printPropertyHeader("modifiers");
+    printf("V:9:\"HH\\Vector\":1:{");
+    switch (m_modifier) {
+      case T_PUBLIC: cg.printValue("public"); break;
+      case T_PROTECTED: cg.printValue("protected"); break;
+      case T_PRIVATE: cg.printValue("private"); break;
+      default: assert(false);
+    }
+    printf("}");
+  }
+  if (m_ref) {
+    cg.printPropertyHeader("isPassedByReference");
+    cg.printValue(true);
+  }
+  cg.printPropertyHeader("name");
+  cg.printValue(m_name);
+  if (m_defaultValue) {
+    cg.printPropertyHeader("expression");
+    m_defaultValue->outputCodeModel(cg);
+  }
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ParameterExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

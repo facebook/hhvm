@@ -51,6 +51,7 @@ namespace Eval {
   x(Continuation)                               \
   x(Serializable)                               \
   x(ArrayAccess)                                \
+  x(ArrayObject)                                \
   x(Iterator)                                   \
   x(IteratorAggregate)                          \
   x(JsonSerializable)                           \
@@ -66,7 +67,7 @@ namespace Eval {
 class SystemLib {
  public:
   static bool s_inited;
-  static string s_source;
+  static std::string s_source;
   static HPHP::Unit* s_unit;
   static HPHP::Unit* s_hhas_unit;
   static HPHP::Unit* s_nativeFuncUnit;
@@ -79,6 +80,8 @@ class SystemLib {
 #undef DECLARE_SYSTEMLIB_CLASS
 
   static HPHP::Func* s_nullFunc;
+  static HPHP::Func* s_continuationSendFunc;
+  static HPHP::Func* s_continuationRaiseFunc;
 
   static ObjectData* AllocStdClassObject();
   static ObjectData* AllocPinitSentinel();

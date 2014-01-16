@@ -14,6 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * This header is deprecated, please don't include it in anything new
+ * or add new code to this header.
+ *
+ * If you need something defined in this header, pull it out to a
+ * smaller header and include that.
+ *
+ * TODO(#3468751): split this header up
+ */
+
+//////////////////////////////////////////////////////////////////////
+
 #ifndef incl_HPHP_UTIL_H_
 #define incl_HPHP_UTIL_H_
 
@@ -30,75 +44,12 @@
 
 #include "folly/Likely.h"
 
-/**
- * Simple utility functions.
- */
+#include "hphp/util/portability.h"
+#include "hphp/util/string-vsnprintf.h"
+
 namespace HPHP { namespace Util {
-///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-// Non-gcc compat
-#ifndef __GNUC__
-# define __attribute__(x)
-#endif
-
-#define ATTRIBUTE_UNUSED   __attribute__((__unused__))
-#define ATTRIBUTE_NORETURN __attribute__((__noreturn__))
-#ifndef ATTRIBUTE_PRINTF
-# if __GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 6
-#  define ATTRIBUTE_PRINTF(a1,a2) \
-     __attribute__((__format__ (__printf__, a1, a2)))
-# else
-#  define ATTRIBUTE_PRINTF(a1,a2)
-# endif
-#endif
-#if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __ICC >= 1200 || __GNUC__ > 4
-# define ATTRIBUTE_COLD    __attribute__((__cold__))
-#else
-# define ATTRIBUTE_COLD
-#endif
-
-#define ALWAYS_INLINE      inline __attribute__((__always_inline__))
-#define NEVER_INLINE       __attribute__((__noinline__))
-#define INLINE_SINGLE_CALLER ALWAYS_INLINE
-#define UNUSED             __attribute__((__unused__))
-#define FLATTEN            __attribute__((__flatten__))
-#ifndef __APPLE__
-# define HOT_FUNC          __attribute__((__section__(".text.hot.builtin")))
-#else
-// TODO: Figure out a way to link hot functions first on OSX with gobjdump
-# define HOT_FUNC
-#endif
-#define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
-
-#ifdef DEBUG
-# define DEBUG_ONLY /* nop */
-#else
-# define DEBUG_ONLY UNUSED
-#endif
-
-#define HOT_FUNC_VM HOT_FUNC
-
-/*
- * We need to keep some unreferenced functions from being removed by
- * the linker. There is no compile time mechanism for doing this, but
- * by putting them in the same section as some other, referenced function
- * in the same file, we can keep them around.
- *
- * So this macro should be used to mark at least one function that is
- * referenced, and other functions that are not referenced in the same
- * file.
- *
- * Note: this may not work properly with LTO. We'll revisit when/if we
- * move to it.
- */
-#ifndef __APPLE__
-# define KEEP_SECTION \
-    __attribute__((__section__(".text.keep")))
-#else
-# define KEEP_SECTION \
-    __attribute__((__section__(".text.keep,")))
-#endif
 
 /**
  * Split a string into a list of tokens by character delimiter.
@@ -138,12 +89,6 @@ bool mkdir(const std::string &path, int mode = 0777);
  */
 void syncdir(const std::string &dest, const std::string &src,
              bool keepSrc = false);
-
-/**
- * Drop the cached pages associated with the file from the file system cache.
- */
-int drop_cache(int fd, off_t len = 0);
-int drop_cache(FILE *f, off_t len = 0);
 
 /**
  * Copy srcfile to dstfile, return 0 on success, -1 otherwise
@@ -279,8 +224,6 @@ const void *buffer_append(const void *buf1, int size1,
  */
 void string_printf(std::string &msg,
                    const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-void string_vsnprintf(std::string &msg,
-                      const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
 
 /**
  * Escaping strings for code generation.
@@ -309,38 +252,6 @@ void find(std::vector<std::string> &out,
  */
 std::string format_pattern(const std::string &pattern, bool prefixSlash);
 
-/**
- * Portable macros for mapping machine stack and frame pointers to variables.
- */
-#if defined(__x86_64__)
-
-#  define DECLARE_STACK_POINTER(sp)               \
-     void* sp;                                    \
-     asm volatile("mov %%rsp, %0" : "=r" (sp) ::)
-
-#  if defined(__clang__)
-#    define DECLARE_FRAME_POINTER(fp)               \
-       ActRec* fp;                                  \
-       asm volatile("mov %%rbp, %0" : "=r" (fp) ::)
-#  else
-#    define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("rbp");
-#  endif
-
-#elif defined(__AARCH64EL__)
-
-#  if defined(__clang__)
-#    error Clang implementation not done for ARM
-#  endif
-
-#  define DECLARE_STACK_POINTER(sp) register void*   sp asm("sp");
-#  define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29");
-
-#else
-
-#  error What are the stack and frame pointers called on your architecture?
-
-#endif
-
 inline void assert_native_stack_aligned() {
 #ifndef NDEBUG
   DECLARE_STACK_POINTER(sp);
@@ -358,31 +269,6 @@ T& getDataRef(void* base, unsigned offset) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-class LogFileFlusher {
-public:
-  LogFileFlusher() : m_bytesWritten(0) {}
-  virtual ~LogFileFlusher() {}
-
-  void recordWriteAndMaybeDropCaches(int fd, int bytes);
-  inline void recordWriteAndMaybeDropCaches(FILE* f, int bytes) {
-    recordWriteAndMaybeDropCaches(fileno(f), bytes);
-  }
-
-  enum {
-    kDropCacheTail = 1 * 1024 * 1024
-  };
-
-  static int DropCacheChunkSize;
-protected:
-  // For testing
-  virtual void dropCache(int fd, off_t len) {
-    Util::drop_cache(fd, len);
-  }
-
-private:
-  std::atomic<int> m_bytesWritten;
-};
 }
 
 #endif

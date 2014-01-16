@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdExtension);
 class CmdExtension : public CmdExtended {
 public:
   virtual void list(DebuggerClient &client);
@@ -36,7 +35,7 @@ protected:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
-  StringVec m_args;
+  std::vector<std::string> m_args;
   String m_out;
   String m_err;
 

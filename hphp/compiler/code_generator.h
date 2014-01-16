@@ -24,12 +24,16 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(Statement);
+DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_BOOST_TYPES(BlockScope);
-DECLARE_BOOST_TYPES(ClassScope);
+DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(LoopStatement);
+DECLARE_BOOST_TYPES(Location);
+DECLARE_BOOST_TYPES(Expression);
+DECLARE_BOOST_TYPES(ExpressionList);
 
 class CodeGenerator {
 public:
@@ -45,6 +49,7 @@ public:
     SystemCPP,  // special mode for generating builtin classes
     TextHHBC,   // HHBC dump in human-readable format
     BinaryHHBC, // serialized HHBC
+    CodeModel,  // serialized Code Model classes
   };
 
   enum Stream {
@@ -265,12 +270,37 @@ public:
   FileScopeRawPtr getLiteralScope() const {
     return m_literalScope;
   }
+
+  /**
+   * Support for printing AST nodes in PHP serialize() format.
+   */
+  void printObjectHeader(const std::string className, int numProperties);
+  void printPropertyHeader(const std::string propertyName);
+  void printObjectFooter();
+  void printNull();
+  void printBool(bool value);
+  void printValue(double value);
+  void printValue(int32_t value);
+  void printValue(int64_t value);
+  void printValue(std::string value);
+  void printModifierVector(std::string value);
+  void printTypeExpression(std::string value);
+  void printExpression(ExpressionPtr expression, bool isRef);
+  void printExpressionVector(ExpressionListPtr el);
+  void printExpressionVector(ExpressionPtr e);
+  void printAsBlock(StatementPtr s);
+  void printStatementVector(StatementListPtr sl);
+  void printStatementVector(StatementPtr s);
+  void printLocation(LocationPtr location);
+  void setAstClassPrefix(const std::string &prefix) { m_astPrefix = prefix; }
 private:
   std::string m_filename;
   Stream m_curStream;
   std::ostream *m_streams[StreamCount];
   std::ostream *m_out;
   Output m_output;
+  std::string m_astPrefix;
+  std::vector<std::string> m_astClassNames;
   bool m_verbose;
 
   int m_indentation[StreamCount];

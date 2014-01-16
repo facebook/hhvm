@@ -108,6 +108,7 @@ if (false !== ($tmp = @mysql_affected_rows($link)))
 	printf("[029] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 print "done!";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

@@ -46,7 +46,8 @@ $d = dir($child_dir_path); // try to open, expected failure
 var_dump( $d ); // dump it
 
 echo "Done";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $parent_dir_path = $file_path."/dir_variation7";
 $sub_dir_path = $parent_dir_path."/sub_dir";

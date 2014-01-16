@@ -118,6 +118,20 @@ bool ModifierExpression::validForClosure() const {
   return true;
 }
 
+/**
+ * In the context of a trait alias rule, only method access and visibility
+ * modifiers are allowed
+ */
+bool ModifierExpression::validForTraitAliasRule() const {
+  for (auto const& mod: m_modifiers) {
+    if (mod != T_PUBLIC && mod != T_PRIVATE && mod != T_PROTECTED
+        && mod != T_FINAL) {
+      return false;
+    }
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
@@ -129,6 +143,29 @@ TypePtr ModifierExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                        bool coerce) {
   assert(false);
   return TypePtr();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ModifierExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printf("V:9:\"HH\\Vector\":%d:{", (int)m_modifiers.size());
+  for (unsigned int i = 0; i < m_modifiers.size(); i++) {
+    cg.printObjectHeader("Modifier", 1);
+    cg.printPropertyHeader("name");
+    switch (m_modifiers[i]) {
+      case T_PUBLIC:    cg.printValue("public");    break;
+      case T_PROTECTED: cg.printValue("protected"); break;
+      case T_PRIVATE:   cg.printValue("private");   break;
+      case T_STATIC:    cg.printValue("static");    break;
+      case T_ABSTRACT:  cg.printValue("abstract");  break;
+      case T_FINAL:     cg.printValue("final");     break;
+      case T_ASYNC:     cg.printValue("async");     break;
+      default:
+        assert(false);
+    }
+    cg.printObjectFooter();
+  }
+  cg.printf("}");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

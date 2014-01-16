@@ -127,6 +127,31 @@ void TryStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void TryStatement::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = 1;
+  if (m_tryStmt != nullptr) numProps++;
+  if (m_catches->getCount() > 0) numProps++;
+  if (m_finallyStmt != nullptr) numProps++;
+  cg.printObjectHeader("TryStatement", numProps);
+  if (m_tryStmt != nullptr) {
+    cg.printPropertyHeader("block");
+    cg.printAsBlock(m_tryStmt);
+  }
+  if (m_catches->getCount() > 0)  {
+    cg.printPropertyHeader("catchStatements");
+    cg.printStatementVector(m_catches);
+  }
+  if (m_finallyStmt != nullptr) {
+    cg.printPropertyHeader("finallyStatement");
+    m_finallyStmt->outputCodeModel(cg);
+  }
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void TryStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

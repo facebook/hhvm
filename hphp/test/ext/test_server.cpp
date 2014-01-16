@@ -197,6 +197,9 @@ public:
   virtual void handleRequest(Transport *transport) {
     // do nothing
   }
+  virtual void abortRequest(Transport *transport) {
+    // do nothing
+  }
 };
 
 static int find_server_port(const std::string &serverType,
@@ -608,6 +611,9 @@ public:
 
     transport->addHeader("Custom", "blah");
     transport->sendString(response);
+  }
+  virtual void abortRequest(Transport *transport) {
+    transport->sendString("Service Unavailable", 503);
   }
 };
 

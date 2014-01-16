@@ -20,7 +20,8 @@ var_dump( filegroup($file_path."/filegroup_variation1_link.tmp") );  // expected
 clearstatcache();
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/filegroup_variation1_symlink.tmp");
 unlink($file_path."/filegroup_variation1_link.tmp");

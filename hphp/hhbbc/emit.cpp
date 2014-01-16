@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -62,35 +63,52 @@ struct EmitUnitState {
  *   - The "primary function body" must come first.  This is all blocks
  *     that aren't part of a fault funclet.
  *
- *   - Each funclet must have all of its block contiguous, with the
+ *   - Each funclet must have all of its blocks contiguous, with the
  *     entry block first.
  *
- *   - DV init entry points must fall through into each other, the final
- *     one makes a backward jump to the main entry point.
- *
  *   - Main entry point must be the first block.
+ *
+ * It is not a requirement, but we attempt to locate all the DV entry
+ * points after the rest of the primary function body.  The normal
+ * case for DV initializers is that each one falls through to the
+ * next, with the block jumping back to the main entry point.
  */
 std::vector<borrowed_ptr<php::Block>> order_blocks(const php::Func& f) {
   auto sorted = rpoSortFromMain(f);
 
-  // Add the DV initializers after the rpo from the main entry point.
-  for (auto& p : f.params) {
-    if (p.dvEntryPoint) sorted.push_back(p.dvEntryPoint);
-  }
+  // Get the DV blocks, without the rest of the primary function body,
+  // and then add them to the end of sorted.
+  auto const dvBlocks = [&] {
+    auto withDVs = rpoSortAddDVs(f);
+    withDVs.erase(
+      std::find(begin(withDVs), end(withDVs), sorted.front()),
+      end(withDVs)
+    );
+    return withDVs;
+  }();
+  sorted.insert(end(sorted), begin(dvBlocks), end(dvBlocks));
 
-  // The stable partition will keep the DV init entries after all
-  // other main code, and move fault funclets after all that.
-  std::stable_partition(
+  // This stable sort will keep the blocks only reachable from DV
+  // entry points after all other main code, and move fault funclets
+  // after all that.
+  std::stable_sort(
     begin(sorted), end(sorted),
-    [&] (borrowed_ptr<php::Block> b) {
-      return b->kind != php::Block::Kind::Fault;
+    [&] (borrowed_ptr<php::Block> a, borrowed_ptr<php::Block> b) {
+      using T = std::underlying_type<php::Block::Section>::type;
+      return static_cast<T>(a->section) < static_cast<T>(b->section);
     }
   );
 
   FTRACE(2, "      block order:{}\n",
     [&] {
       std::string ret;
-      for (auto& b : sorted) ret += " " + folly::to<std::string>(b->id);
+      for (auto& b : sorted) {
+        ret += " ";
+        if (b->section != php::Block::Section::Main) {
+          ret += "f";
+        }
+        ret += folly::to<std::string>(b->id);
+      }
       return ret;
     }()
   );
@@ -200,6 +218,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       for (size_t i = 0; i < immVec.size(); ++i) ue.emitByte(immVec[i]);
     };
 
+    auto emit_vsa = [&] (const std::vector<SString>& keys) {
+      auto n = keys.size();
+      ue.emitInt32(n);
+      for (size_t i = 0; i < n; ++i) {
+        ue.emitInt32(ue.mergeLitstr(keys[i]));
+      }
+    };
+
     auto emit_branch = [&] (const php::Block& target) {
       auto& info = blockInfo[target.id];
 
@@ -285,19 +311,21 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       euState.defClsMap[id] = startOffset;
     };
 
-#define IMM_MA(n)     emit_mvec(data.mvec);
-#define IMM_BLA(n)    emit_switch(data.targets);
-#define IMM_SLA(n)    emit_sswitch(data.targets);
-#define IMM_ILA(n)    emit_itertab(data.iterTab);
-#define IMM_IVA(n)    ue.emitIVA(data.arg##n);
-#define IMM_I64A(n)   ue.emitInt64(data.arg##n);
-#define IMM_LA(n)     ue.emitIVA(data.loc##n->id);
-#define IMM_IA(n)     ue.emitIVA(data.iter##n->id);
-#define IMM_DA(n)     ue.emitDouble(data.dbl##n);
-#define IMM_SA(n)     ue.emitInt32(ue.mergeLitstr(data.str##n));
-#define IMM_AA(n)     ue.emitInt32(ue.mergeArray(data.arr##n));
-#define IMM_OA(n)     ue.emitByte(data.subop);
-#define IMM_BA(n)     emit_branch(*data.target);
+#define IMM_MA(n)      emit_mvec(data.mvec);
+#define IMM_BLA(n)     emit_switch(data.targets);
+#define IMM_SLA(n)     emit_sswitch(data.targets);
+#define IMM_ILA(n)     emit_itertab(data.iterTab);
+#define IMM_IVA(n)     ue.emitIVA(data.arg##n);
+#define IMM_I64A(n)    ue.emitInt64(data.arg##n);
+#define IMM_LA(n)      ue.emitIVA(data.loc##n->id);
+#define IMM_IA(n)      ue.emitIVA(data.iter##n->id);
+#define IMM_DA(n)      ue.emitDouble(data.dbl##n);
+#define IMM_SA(n)      ue.emitInt32(ue.mergeLitstr(data.str##n));
+#define IMM_AA(n)      ue.emitInt32(ue.mergeArray(data.arr##n));
+#define IMM_OA_IMPL(n) ue.emitByte(static_cast<uint8_t>(data.subop));
+#define IMM_OA(type)   IMM_OA_IMPL
+#define IMM_BA(n)      emit_branch(*data.target);
+#define IMM_VSA(n)     emit_vsa(data.keys);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -315,6 +343,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_R_MMANY    pop(1); pop(count_stack_elems(data.mvec));
 #define POP_V_MMANY    pop(1); pop(count_stack_elems(data.mvec));
 #define POP_CMANY      pop(data.arg##1);
+#define POP_SMANY      pop(data.keys.size());
 #define POP_FMANY      pop(data.arg##1);
 #define POP_CVMANY     pop(data.arg##1);
 #define POP_CVUMANY    pop(data.arg##1);
@@ -358,7 +387,9 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_SA
 #undef IMM_AA
 #undef IMM_BA
+#undef IMM_OA_IMPL
 #undef IMM_OA
+#undef IMM_VSA
 
 #undef IMM_NA
 #undef IMM_ONE
@@ -372,6 +403,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_THREE
 
 #undef POP_CMANY
+#undef POP_SMANY
 #undef POP_MMANY
 #undef POP_FMANY
 #undef POP_CVMANY
@@ -416,7 +448,11 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     if (b->fallthrough) {
       if (boost::next(blockIt) == endBlockIt || blockIt[1] != b->fallthrough) {
-        emit_inst(bc::Jmp { b->fallthrough });
+        if (b->fallthroughNS) {
+          emit_inst(bc::JmpNS { b->fallthrough });
+        } else {
+          emit_inst(bc::Jmp { b->fallthrough });
+        }
       }
     }
 
@@ -441,6 +477,7 @@ void emit_locals_and_params(FuncEmitter& fe,
       pinfo.setUserType(param.userTypeConstraint);
       pinfo.setPhpCode(param.phpCode);
       pinfo.setUserAttributes(param.userAttributes);
+      pinfo.setBuiltinType(param.builtinType);
       pinfo.setRef(param.byRef);
       fe.appendParam(func.locals[id]->name, pinfo);
       if (auto const dv = param.dvEntryPoint) {
@@ -524,13 +561,15 @@ void exn_path(std::vector<const php::ExnNode*>& ret, const php::ExnNode* n) {
   ret.push_back(n);
 }
 
+// Return the count of shared elements in the front of two forward
+// ranges.
 template<class ForwardRange1, class ForwardRange2>
 size_t shared_prefix(ForwardRange1& r1, ForwardRange2& r2) {
   auto r1it = begin(r1);
   auto r2it = begin(r2);
   auto const r1end = end(r1);
   auto const r2end = end(r2);
-  size_t ret = 0;
+  auto ret = size_t{0};
   while (r1it != r1end && r2it != r2end && *r1it == *r2it) {
     ++ret; ++r1it; ++r2it;
   }
@@ -690,14 +729,18 @@ void emit_finish_func(const php::Func& func,
   emit_ehent_tree(fe, func, info);
 
   fe.setUserAttributes(func.userAttributes);
-  fe.setReturnTypeConstraint(func.userRetTypeConstraint);
+  fe.setReturnUserType(func.returnUserType);
   fe.setOriginalFilename(func.originalFilename);
   fe.setIsClosureBody(func.isClosureBody);
   fe.setIsGenerator(func.isGeneratorBody);
   fe.setIsGeneratorFromClosure(func.isGeneratorFromClosure);
   fe.setIsPairGenerator(func.isPairGenerator);
-  fe.setHasGeneratorAsBody(func.hasGeneratorAsBody);
+  fe.setGeneratorBodyName(func.generatorBodyName);
   fe.setIsAsync(func.isAsync);
+
+  if (func.nativeInfo) {
+    fe.setReturnType(func.nativeInfo->returnType);
+  }
 
   fe.finish(fe.ue().bcPos(), false /* load */);
   fe.ue().recordFunction(&fe);
@@ -754,6 +797,7 @@ void emit_class(EmitUnitState& state,
 
   for (auto& i : cls.interfaceNames)   pce->addInterface(i);
   for (auto& ut : cls.usedTraitNames)  pce->addUsedTrait(ut);
+  for (auto& req : cls.traitRequirements) pce->addTraitRequirement(req);
   for (auto& tp : cls.traitPrecRules)  pce->addTraitPrecRule(tp);
   for (auto& ta : cls.traitAliasRules) pce->addTraitAliasRule(ta);
 
@@ -792,6 +836,9 @@ void emit_class(EmitUnitState& state,
 }
 
 std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
+  auto const is_systemlib = is_systemlib_part(unit);
+  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib};
+
   auto ue = folly::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->setFilepath(unit.filename);
@@ -800,11 +847,29 @@ std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
   state.defClsMap.resize(unit.classes.size(), kInvalidOffset);
 
   /*
-   * TODO(#3017265): UnitEmitter is very coupled to emitter.cpp, and
-   * expects classes and things to be added in an order that isn't
-   * quite clear.  If you don't set returnSeen things break.
+   * Unfortunate special case for Systemlib units.
+   *
+   * We need to ensure these units end up mergeOnly, at runtime there
+   * are things that assume this (right now no other HHBBC units end
+   * up being merge only, because of the returnSeen stuff below).
+   *
+   * (Merge-only-ness provides no measurable perf win in repo mode now
+   * that we have persistent classes, so we're not too worried about
+   * this.)
    */
-  ue->returnSeen();
+  if (is_systemlib) {
+    ue->setMergeOnly(true);
+    auto const tv = make_tv<KindOfInt64>(1);
+    ue->setMainReturn(&tv);
+  } else {
+    /*
+     * TODO(#3017265): UnitEmitter is very coupled to emitter.cpp, and
+     * expects classes and things to be added in an order that isn't
+     * quite clear.  If you don't set returnSeen things relating to
+     * hoistability break.
+     */
+    ue->returnSeen();
+  }
 
   emit_pseudomain(state, *ue, unit);
   for (auto& c : unit.classes)     emit_class(state, *ue, *c);
@@ -825,4 +890,3 @@ std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

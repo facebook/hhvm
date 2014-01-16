@@ -120,6 +120,19 @@ bool EncapsListExpression::canonCompare(ExpressionPtr e) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void EncapsListExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("EncapsListExpression", 3);
+  cg.printPropertyHeader("delimiter");
+  cg.printValue(m_type);
+  cg.printPropertyHeader("expressions");
+  cg.printExpressionVector(m_exps);
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void EncapsListExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

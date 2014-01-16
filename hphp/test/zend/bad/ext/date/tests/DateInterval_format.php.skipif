@@ -1,0 +1,1 @@
+<?php if (!method_exists('DateInterval', 'format')) die("skip: method doesn't exist"); ?>

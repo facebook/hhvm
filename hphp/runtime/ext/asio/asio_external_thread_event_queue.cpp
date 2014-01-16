@@ -16,8 +16,9 @@
 */
 
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
-#include "hphp/runtime/ext/ext_asio.h"
+
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {

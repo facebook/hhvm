@@ -21,6 +21,7 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/runtime.h"
 #include <boost/format.hpp>
 
 using namespace HPHP;

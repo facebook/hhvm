@@ -103,7 +103,7 @@ fclose($fp);
 // clear the error stack
 imap_errors();
 ?>
-===DONE===?>
+===DONE===
 <?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

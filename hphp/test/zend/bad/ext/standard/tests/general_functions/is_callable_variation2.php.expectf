@@ -1,0 +1,90 @@
+*** Testing is_callable() on invalid function names ***
+-- Iteration  1 --
+bool(false)
+bool(false)
+bool(false)
+
+bool(false)
+bool(false)
+
+-- Iteration  2 --
+bool(false)
+bool(false)
+bool(false)
+0
+bool(false)
+bool(false)
+0
+-- Iteration  3 --
+bool(false)
+bool(false)
+bool(false)
+1234567890
+bool(false)
+bool(false)
+1234567890
+-- Iteration  4 --
+bool(false)
+bool(false)
+bool(false)
+-100123456782
+bool(false)
+bool(false)
+-100123456782
+-- Iteration  5 --
+bool(false)
+bool(false)
+bool(false)
+-2
+bool(false)
+bool(false)
+-2
+-- Iteration  6 --
+bool(false)
+bool(false)
+bool(false)
+0.567
+bool(false)
+bool(false)
+0.567
+-- Iteration  7 --
+bool(false)
+bool(false)
+bool(false)
+
+bool(false)
+bool(false)
+
+-- Iteration  8 --
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+bool(false)
+Array
+-- Iteration  9 --
+bool(false)
+bool(false)
+bool(false)
+
+bool(false)
+bool(false)
+
+-- Iteration  10 --
+bool(false)
+bool(false)
+bool(false)
+
+bool(false)
+bool(false)
+
+-- Iteration  11 --
+bool(false)
+bool(false)
+bool(false)
+Resource id #%d
+bool(false)
+bool(false)
+Resource id #%d
+===DONE===

@@ -9,6 +9,7 @@
  * temporary servers, which is easier from C++.
  */
 
+RUN_TESTSUITE(TestExtApc);
 #ifdef HAVE_CUSTOM_LIBEVENT
 RUN_TESTSUITE(TestExtCurl);
 #endif

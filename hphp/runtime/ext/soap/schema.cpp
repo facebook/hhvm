@@ -14,11 +14,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/soap/sdl.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/ext/soap/soap.h"
 
 namespace HPHP {
+
+using std::string;
+using boost::lexical_cast;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static bool schema_simpleType
@@ -78,7 +84,7 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type);
 
 static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type,
                                 const xmlChar *ns, const xmlChar *type) {
-  string nscat = (char*)ns;
+  std::string nscat = (char*)ns;
   nscat += ':';
   nscat += (char*)type;
 
@@ -164,7 +170,7 @@ bool checkBaseAttribute(sdlPtr sdl, xmlNodePtr extType, sdlTypePtr cur_type,
                         bool logError = true) {
   xmlAttrPtr base = get_attribute(extType->properties, "base");
   if (base) {
-    string type, ns;
+    std::string type, ns;
     parse_namespace(base->children->content, type, ns);
     xmlNsPtr nsptr = xmlSearchNs(extType->doc, extType, NS_STRING(ns));
     if (nsptr) {
@@ -358,7 +364,7 @@ static bool schema_simpleType(sdlPtr sdl, xmlAttrPtr tns,
     cur_type->encode->details.sdl_type = newType.get();
     cur_type->encode->to_xml = sdl_guess_convert_xml;
     cur_type->encode->to_zval = sdl_guess_convert_zval;
-    sdl->encoders[lexical_cast<string>(sdl->encoders.size())] =
+    sdl->encoders[boost::lexical_cast<std::string>(sdl->encoders.size())] =
       cur_type->encode;
 
     cur_type = newType;
@@ -421,7 +427,7 @@ static bool schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType,
                         sdlTypePtr cur_type) {
   xmlAttrPtr itemType = get_attribute(listType->properties, "itemType");
   if (itemType) {
-    string type, ns;
+    std::string type, ns;
     parse_namespace(itemType->children->content, type, ns);
     xmlNsPtr nsptr = xmlSearchNs(listType->doc, listType, NS_STRING(ns));
     if (nsptr) {
@@ -1631,7 +1637,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
       xmlNsPtr nsPtr = attr_find_ns(attr);
       if (strncmp((char*)nsPtr->href, SCHEMA_NAMESPACE,
                   sizeof(SCHEMA_NAMESPACE))) {
-        sdlExtraAttributePtr ext(new sdlExtraAttribute());
+        auto ext = std::make_shared<sdlExtraAttribute>();
         string value, ns;
         parse_namespace(attr->children->content, value, ns);
         xmlNsPtr nsptr = xmlSearchNs(attr->doc, attr->parent, NS_STRING(ns));
@@ -1801,7 +1807,7 @@ static void copy_extra_attributes(sdlAttributePtr dest, sdlAttributePtr src) {
   for (sdlExtraAttributeMap::const_iterator iter =
          src->extraAttributes.begin(); iter != src->extraAttributes.end();
        ++iter) {
-    sdlExtraAttributePtr eattr(new sdlExtraAttribute());
+    auto eattr = std::make_shared<sdlExtraAttribute>();
     eattr->ns = iter->second->ns;
     eattr->val = iter->second->val;
     dest->extraAttributes[iter->first] = eattr;

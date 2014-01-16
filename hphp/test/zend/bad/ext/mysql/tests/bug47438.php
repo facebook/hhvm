@@ -23,7 +23,8 @@ while($i<mysql_num_fields($result))
 
 mysql_query("DROP TABLE IF EXISTS test_47438", $link);
 
-?><?php
+?>
+<?php
 require_once('connect.inc');
 
 if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket))

@@ -332,7 +332,6 @@ struct Unit {
 
       GuardedThis,
       GuardedCls,
-      NoSurprise,
 
       /*
        * Information about the known class of a property base in the
@@ -748,9 +747,9 @@ private:
   // pseudoMain's return value, or KindOfUninit if its not known.
   TypedValue m_mainReturn;
   int64_t m_sn;
-  uchar const* m_bc;
+  unsigned char const* m_bc;
   size_t m_bclen;
-  uchar const* m_bc_meta;
+  unsigned char const* m_bc_meta;
   size_t m_bc_meta_len;
   const StringData* m_filepath;
   const StringData* m_dirpath;
@@ -785,15 +784,21 @@ class UnitEmitter {
   explicit UnitEmitter(const MD5& md5);
   ~UnitEmitter();
 
+  bool isASystemLib() const {
+    static const char systemlib_prefix[] = "/:systemlib";
+    return !strncmp(getFilepath()->data(),
+      systemlib_prefix, sizeof systemlib_prefix - 1);
+  }
+
   void addTrivialPseudoMain();
   int repoId() const { return m_repoId; }
   void setRepoId(int repoId) { m_repoId = repoId; }
   int64_t sn() const { return m_sn; }
   void setSn(int64_t sn) { m_sn = sn; }
-  const uchar* bc() const { return m_bc; }
+  const unsigned char* bc() const { return m_bc; }
   Offset bcPos() const { return (Offset)m_bclen; }
-  void setBc(const uchar* bc, size_t bclen);
-  void setBcMeta(const uchar* bc_meta, size_t bc_meta_len);
+  void setBc(const unsigned char* bc, size_t bclen);
+  void setBcMeta(const unsigned char* bc_meta, size_t bc_meta_len);
   const StringData* getFilepath() const { return m_filepath; }
   void setFilepath(const StringData* filepath) { m_filepath = filepath; }
   void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
@@ -802,7 +807,8 @@ class UnitEmitter {
   Id addTypeAlias(const TypeAlias& td);
   Id mergeLitstr(const StringData* litstr);
   Id mergeUnitLitstr(const StringData* litstr);
-  Id mergeArray(const ArrayData* a, const StringData* key=nullptr);
+  Id mergeArray(const ArrayData* a);
+  Id mergeArray(const ArrayData* a, const std::string& key);
   const StringData* lookupLitstr(Id id) const;
   const ArrayData* lookupArray(Id id) const;
   FuncEmitter* getMain();
@@ -844,11 +850,11 @@ class UnitEmitter {
  private:
   template<class T>
   void emitImpl(T n, int64_t pos) {
-    uchar *c = (uchar*)&n;
+    auto *c = (unsigned char*)&n;
     if (pos == -1) {
       // Make sure m_bc is large enough.
       while (m_bclen + sizeof(T) > m_bcmax) {
-        m_bc = (uchar*)realloc(m_bc, m_bcmax << 1);
+        m_bc = (unsigned char*)realloc(m_bc, m_bcmax << 1);
         m_bcmax <<= 1;
       }
       memcpy(&m_bc[m_bclen], c, sizeof(T));
@@ -862,9 +868,9 @@ class UnitEmitter {
   }
  public:
   void emitOp(Op op, int64_t pos = -1) {
-    emitByte((uchar)op, pos);
+    emitByte((unsigned char)op, pos);
   }
-  void emitByte(uchar n, int64_t pos = -1) { emitImpl(n, pos); }
+  void emitByte(unsigned char n, int64_t pos = -1) { emitImpl(n, pos); }
   void emitInt32(int n, int64_t pos = -1) { emitImpl(n, pos); }
   template<typename T> void emitIVA(T n) {
     if (LIKELY((n & 0x7f) == n)) {
@@ -882,6 +888,7 @@ class UnitEmitter {
                 int line1, int line2, Offset base, Offset past,
                 const StringData* name, Attr attrs, bool top,
                 const StringData* docComment, int numParams,
+                bool needsGeneratorOrigFunc,
                 bool needsNextClonedClosure);
   Unit* create();
   void returnSeen() { m_returnSeen = true; }
@@ -900,9 +907,9 @@ class UnitEmitter {
   int64_t m_sn;
   static const size_t BCMaxInit = 4096; // Initial bytecode size.
   size_t m_bcmax;
-  uchar* m_bc;
+  unsigned char* m_bc;
   size_t m_bclen;
-  uchar* m_bc_meta;
+  unsigned char* m_bc_meta;
   size_t m_bc_meta_len;
   TypedValue m_mainReturn;
   const StringData* m_filepath;
@@ -911,13 +918,12 @@ class UnitEmitter {
                         string_data_hash, string_data_same> LitstrMap;
   LitstrMap m_litstr2id;
   std::vector<const StringData*> m_litstrs;
-  typedef hphp_hash_map<const StringData*, Id,
-                        string_data_hash, string_data_same> ArrayIdMap;
+  typedef hphp_hash_map<std::string, Id, string_hash> ArrayIdMap;
   ArrayIdMap m_array2id;
-  typedef struct {
-    const StringData* serialized;
+  struct ArrayVecElm {
+    std::string serialized;
     const ArrayData* array;
-  } ArrayVecElm;
+  };
   typedef std::vector<ArrayVecElm> ArrayVec;
   ArrayVec m_arrays;
   int m_nextFuncSn;
@@ -928,12 +934,12 @@ class UnitEmitter {
                         pointer_hash<FuncEmitter> > FMap;
   FMap m_fMap;
   typedef std::vector<PreClassEmitter*> PceVec;
-  typedef std::vector<Id> IdVec;
+  typedef std::list<Id> IdList;
   PceVec m_pceVec;
   typedef hphp_hash_set<const StringData*, string_data_hash,
                         string_data_isame> HoistedPreClassSet;
   HoistedPreClassSet m_hoistablePreClassSet;
-  IdVec m_hoistablePceIdVec;
+  IdList m_hoistablePceIdList;
   typedef std::vector<std::pair<UnitMergeKind, Id> > MergeableStmtVec;
   MergeableStmtVec m_mergeableStmts;
   std::vector<std::pair<Id,TypedValue> > m_mergeableValues;
@@ -1021,8 +1027,10 @@ class UnitRepoProxy : public RepoProxy {
   class InsertUnitStmt : public RepoProxy::Stmt {
    public:
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5, const uchar* bc,
-                size_t bclen, const uchar* bc_meta, size_t bc_meta_len,
+    void insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5,
+                const unsigned char* bc,
+                size_t bclen, const unsigned char* bc_meta,
+                size_t bc_meta_len,
                 const TypedValue* mainReturn, bool mergeOnly,
                 const LineTable& lines,
                 const std::vector<TypeAlias>&);
@@ -1047,7 +1055,7 @@ class UnitRepoProxy : public RepoProxy {
    public:
     InsertUnitArrayStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
-                const StringData* array);
+                const std::string& array);
   };
   class GetUnitArraysStmt : public RepoProxy::Stmt {
    public:

@@ -20,7 +20,7 @@
 #include "hphp/util/slice.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/word-same.h"
+#include "hphp/util/word-mem.h"
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/countable.h"
@@ -32,7 +32,8 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-class APCVariant;
+class APCHandle;
+class APCString;
 class Array;
 class String;
 
@@ -52,7 +53,7 @@ enum CopyStringMode { CopyString };
  * StringData's have two different modes, not all of which we want to
  * keep forever.  The main mode is Flat, which means StringData is a
  * header in a contiguous allocation with the character array for the
- * string.  The other is for APCVariant-backed StringDatas.
+ * string.  The other is for APCString-backed StringDatas.
  *
  * StringDatas can also be allocated in multiple ways.  Normally, they
  * are created through one of the Make overloads, which drops them in
@@ -123,10 +124,10 @@ struct StringData {
   static StringData* Make(int reserve);
 
   /*
-   * Create a request-local StringData that wraps an APCVariant
+   * Create a request-local StringData that wraps an APCString
    * that contains a string.
    */
-  static StringData* Make(APCVariant* shared);
+  static StringData* Make(APCString* shared);
 
   /*
    * Create a StringData that is allocated by malloc, instead of the
@@ -162,7 +163,7 @@ struct StringData {
 
   /*
    * Shared StringData's have a sweep list running through them for
-   * decrefing the APCVariant they are fronting.  This function
+   * decrefing the APCString they are fronting.  This function
    * must be called at request cleanup time to handle this.
    */
   static void sweepAll();
@@ -184,7 +185,7 @@ struct StringData {
    * StringData objects allocated with MakeStatic should be freed
    * using this function.
    */
-  void destructStatic() ATTRIBUTE_COLD;
+  void destructStatic();
 
   /*
    * Reference-counting related.
@@ -192,12 +193,13 @@ struct StringData {
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
   void setRefCount(RefCount n);
   bool isStatic() const;
+  bool isUncounted() const;
 
   /*
-   * Get the wrapped APCVariant, or return null if this string is
+   * Get the wrapped APCHandle, or return null if this string is
    * not shared.
    */
-  APCVariant* getSharedVariant() const;
+  APCHandle* getAPCHandle() const;
 
   /*
    * Append the supplied range to this string.  If there is not
@@ -417,11 +419,11 @@ struct StringData {
 private:
   struct SharedPayload {
     SweepNode node;
-    APCVariant* shared;
+    APCString* shared;
   };
 
 private:
-  static StringData* MakeSVSlowPath(APCVariant*, uint32_t len);
+  static StringData* MakeSVSlowPath(APCString*, uint32_t len);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;
@@ -447,6 +449,7 @@ private:
   bool checkSane() const;
   void preCompute() const;
   void setStatic() const;
+  void setUncounted() const;
 
 private:
   char* m_data;
@@ -468,6 +471,8 @@ private:
     };
     uint64_t m_capAndHash;
   };
+
+  friend class APCString;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -500,6 +505,20 @@ struct string_data_isame;
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+namespace folly {
+template<> struct FormatValue<HPHP::StringData> {
+  explicit FormatValue(const HPHP::StringData& str) : m_val(str) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(m_val.data(), arg, cb);
+  }
+
+ private:
+  const HPHP::StringData& m_val;
+};
 }
 
 #include "hphp/runtime/base/string-data-inl.h"

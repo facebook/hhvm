@@ -24,10 +24,11 @@
 #include "hphp/util/db-query.h"
 #include "hphp/util/util.h"
 #include "hphp/util/process.h"
+#include "hphp/hhbbc/hhbbc.h"
 #include <boost/algorithm/string/trim.hpp>
 #include "hphp/runtime/base/preg.h"
 
-using namespace HPHP;
+namespace HPHP {
 
 using std::set;
 using std::map;
@@ -35,7 +36,6 @@ using std::map;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string Option::SystemRoot;
 std::string Option::RootDirectory;
 set<string> Option::PackageDirectories;
 set<string> Option::PackageFiles;
@@ -118,7 +118,6 @@ bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
 bool Option::EnableXHP = false;
-bool Option::EnableFinallyStatement = false;
 int Option::ParserThreadCount = 0;
 
 int Option::GetScannerType() {
@@ -155,22 +154,6 @@ bool Option::GenerateDocComments = true;
 
 void (*Option::m_hookHandler)(Hdf &config);
 bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
-
-///////////////////////////////////////////////////////////////////////////////
-// load from a PHP file
-
-std::string Option::GetSystemRoot() {
-  if (SystemRoot.empty()) {
-    const char *home = getenv("HPHP_HOME");
-    if (!home || !*home) {
-      throw Exception("Environment variable HPHP_HOME is not set, "
-                      "and neither is the SystemRoot option.");
-    }
-    SystemRoot = home;
-    SystemRoot += "/hphp";
-  }
-  return SystemRoot;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
@@ -278,8 +261,6 @@ void Option::Load(Hdf &config) {
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
-
-  EnableFinallyStatement = config["EnableFinallyStatement"].getBool();
 
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
   AllDynamic = config["AllDynamic"].getBool(true);
@@ -398,3 +379,13 @@ void Option::FilterFiles(std::vector<std::string> &files,
   }
 }
 
+//////////////////////////////////////////////////////////////////////
+
+void initialize_hhbbc_options() {
+  if (!Option::UseHHBBC) return;
+  HHBBC::options.InterceptableFunctions = Option::DynamicInvokeFunctions;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}

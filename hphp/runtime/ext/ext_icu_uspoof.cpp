@@ -61,10 +61,6 @@ c_SpoofChecker::c_SpoofChecker(Class* cb) :
   }
 }
 
-c_SpoofChecker::~c_SpoofChecker() {
-  uspoof_close(m_spoof_checker);
-}
-
 void c_SpoofChecker::t___construct() {
 }
 

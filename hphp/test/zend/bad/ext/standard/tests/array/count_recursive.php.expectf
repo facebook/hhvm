@@ -82,8 +82,7 @@ For mode '1' count is => int(9)
 For mode '' count is => int(3)
 For mode '' count is => int(3)
 
--- Testing error conditions --
-HipHop Warning: %s
+-- Testing error conditions --HipHop Warning: %s
 NULL
 HipHop Warning: %s
 NULL

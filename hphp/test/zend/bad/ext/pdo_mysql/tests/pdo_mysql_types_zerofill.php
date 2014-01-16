@@ -108,7 +108,8 @@
 	test_type($db, 240, 'NUMERIC UNSIGNED ZEROFILL', 1.01, NULL, '/^[0]*1$/');
 
 	echo "done!\n";
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');

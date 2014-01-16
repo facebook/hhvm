@@ -17,14 +17,6 @@
 #ifndef incl_HPHP_TYPES_H_
 #define incl_HPHP_TYPES_H_
 
-#include "hphp/util/base.h"
-#include "hphp/runtime/base/datatype.h"
-#include "hphp/util/thread-local.h"
-#include "hphp/util/mutex.h"
-#include "hphp/util/case-insensitive.h"
-#include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/base/memory-manager.h"
-
 #include <boost/intrusive_ptr.hpp>
 
 #include <stdint.h>
@@ -32,6 +24,16 @@
 #include <limits>
 #include <type_traits>
 #include <vector>
+#include <stack>
+#include <list>
+
+#include "hphp/util/thread-local.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +87,7 @@ const size_t FAST_REFCOUNT_OFFSET = 12;
  * All native collection class have their m_size field at the same
  * offset in the object.
  */
-const size_t FAST_COLLECTION_SIZE_OFFSET = 36;
+const size_t FAST_COLLECTION_SIZE_OFFSET = 20;
 
 /**
  * These are underlying data structures for the above complex data types. Since
@@ -136,7 +138,7 @@ enum class Mode {
 }
 
 namespace Collection {
-enum Type {
+enum Type : uint16_t { // stored in ObjectData::o_subclassData
   InvalidType = 0,
   VectorType = 1,
   MapType = 2,
@@ -144,25 +146,32 @@ enum Type {
   SetType = 4,
   PairType = 5,
   FrozenVectorType = 6,
-  MaxNumTypes = 7
+  FrozenSetType = 7,
+  FrozenMapType = 8
 };
+const int MaxNumTypes = 9;
+
 inline Type stringToType(const char* str, size_t len) {
   switch (len) {
     case 3:
       if (!strcasecmp(str, "map")) return MapType;
-      if (!strcasecmp(str, "set")) return SetType;
       break;
     case 4:
       if (!strcasecmp(str, "pair")) return PairType;
       break;
     case 6:
-      if (!strcasecmp(str, "vector")) return VectorType;
+      if (!strcasecmp(str, "hh\\set")) return SetType;
       break;
     case 9:
       if (!strcasecmp(str, "stablemap")) return StableMapType;
+      if (!strcasecmp(str, "hh\\vector")) return VectorType;
       break;
     case 12:
-      if (!strcasecmp(str, "frozenvector")) return FrozenVectorType;
+      if (!strcasecmp(str, "hh\\frozenmap")) return FrozenMapType;
+      if (!strcasecmp(str, "hh\\frozenset")) return FrozenSetType;
+      break;
+    case 15:
+      if (!strcasecmp(str, "hh\\frozenvector")) return FrozenVectorType;
       break;
     default:
       break;
@@ -172,6 +181,27 @@ inline Type stringToType(const char* str, size_t len) {
 inline Type stringToType(const std::string& s) {
   return stringToType(s.c_str(), s.size());
 }
+inline bool isVectorType(Collection::Type ctype) {
+  return (ctype == Collection::VectorType ||
+          ctype == Collection::FrozenVectorType);
+}
+
+inline bool isMapType(Collection::Type ctype) {
+  return (ctype == Collection::MapType ||
+          ctype == Collection::StableMapType ||
+          ctype == Collection::FrozenMapType);
+}
+
+inline bool isSetType(Collection::Type ctype) {
+  return (ctype == Collection::SetType ||
+          ctype == Collection::FrozenSetType);
+}
+
+inline bool isInvalidType(Collection::Type ctype) {
+  return (ctype == Collection::MaxNumTypes ||
+          ctype == Collection::InvalidType);
+}
+
 }
 
 /**
@@ -249,13 +279,13 @@ public:
 
   ~RequestInjectionData();
 
-  inline volatile ssize_t* getConditionFlags() {
+  inline std::atomic<ssize_t>* getConditionFlags() {
     assert(cflagsPtr);
     return cflagsPtr;
   }
 
-  ssize_t* cflagsPtr;  // this points to the real condition flags,
-                       // somewhere in the thread's targetcache
+  std::atomic<ssize_t>* cflagsPtr;  // this points to the real condition flags,
+                                    // somewhere in the thread's targetcache
 
  private:
 #ifndef __APPLE__
@@ -385,7 +415,7 @@ public:
 };
 
 extern void throw_infinite_recursion_exception();
-extern void throw_call_non_object() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+extern void throw_call_non_object() ATTRIBUTE_NORETURN;
 
 inline void* stack_top_ptr() {
   DECLARE_STACK_POINTER(sp);
@@ -404,7 +434,7 @@ inline void check_recursion(ThreadInfo *&info) {
 }
 
 // implemented in runtime/base/builtin-functions.cpp
-extern ssize_t check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
+extern ssize_t check_request_surprise(ThreadInfo *info);
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p, const char *symbol);
@@ -462,7 +492,7 @@ typedef uint8_t Opcode;
  * during a given instruction it is incremented while decoding
  * immediates and may point to arbitrary bytes.
  */
-typedef const uchar* PC;
+typedef const unsigned char* PC;
 
 /*
  * Id type for various components of a unit that have to have unique
@@ -539,34 +569,40 @@ typedef hphp_hash_set<FuncId> FuncIdSet;
  * AttrSkipFrame is set to indicate that the frame should be ignored
  *   when searching for the context (eg array_map evaluates its
  *   callback in the context of its caller).
+ *
+ * AttrVMEntry is set on functions that are generally VM entry points.
+ *   This is not necessary for correctness; it simply allows better
+ *   code generation in the JIT.
  */
 enum Attr {
-  AttrNone      = 0,             // class  property  method  //
-  AttrReference = (1 << 0),      //                     X    //
-  AttrPublic    = (1 << 1),      //            X        X    //
-  AttrProtected = (1 << 2),      //            X        X    //
-  AttrPrivate   = (1 << 3),      //            X        X    //
-  AttrStatic    = (1 << 4),      //            X        X    //
-  AttrAbstract  = (1 << 5),      //    X                X    //
-  AttrFinal     = (1 << 6),      //    X                X    //
-  AttrInterface = (1 << 7),      //    X                     //
-  AttrPhpLeafFn = (1 << 7),      //                     X    //
-  AttrTrait     = (1 << 8),      //    X                X    //
-  AttrNoInjection = (1 << 9),    //                     X    //
-  AttrUnique    = (1 << 10),     //    X                X    //
+  AttrNone          = 0,         // class  property  method  //
+  AttrReference     = (1 <<  0), //                     X    //
+  AttrPublic        = (1 <<  1), //            X        X    //
+  AttrProtected     = (1 <<  2), //            X        X    //
+  AttrPrivate       = (1 <<  3), //            X        X    //
+  AttrStatic        = (1 <<  4), //            X        X    //
+  AttrAbstract      = (1 <<  5), //    X                X    //
+  AttrFinal         = (1 <<  6), //    X                X    //
+  AttrInterface     = (1 <<  7), //    X                     //
+  AttrPhpLeafFn     = (1 <<  7), //                     X    //
+  AttrTrait         = (1 <<  8), //    X                X    //
+  AttrNoInjection   = (1 <<  9), //                     X    //
+  AttrUnique        = (1 << 10), //    X                X    //
   AttrDynamicInvoke = (1 << 11), //                     X    //
   AttrNoExpandTrait = (1 << 12), //    X                     //
-  AttrNoOverride= (1 << 13),     //    X                X    //
-  AttrClone     = (1 << 14),     //                     X    //
+  AttrNoOverride    = (1 << 13), //    X                X    //
+  AttrClone         = (1 << 14), //                     X    //
   AttrVariadicByRef = (1 << 15), //                     X    //
-  AttrMayUseVV  = (1 << 16),     //                     X    //
-  AttrPersistent= (1 << 17),     //    X                X    //
-  AttrDeepInit = (1 << 18),      //            X             //
-  AttrHot = (1 << 19),           //                     X    //
-  AttrBuiltin = (1 << 20),       //                     X    //
+  AttrMayUseVV      = (1 << 16), //                     X    //
+  AttrPersistent    = (1 << 17), //    X                X    //
+  AttrDeepInit      = (1 << 18), //            X             //
+  AttrHot           = (1 << 19), //                     X    //
+  AttrBuiltin       = (1 << 20), //    X                X    //
   AttrAllowOverride = (1 << 21), //                     X    //
-  AttrSkipFrame = (1 << 22),     //                     X    //
-  AttrNative = (1 << 23),        //                     X    //
+  AttrSkipFrame     = (1 << 22), //                     X    //
+  AttrNative        = (1 << 23), //                     X    //
+  AttrVMEntry       = (1 << 24), //                     X    //
+  AttrHPHPSpecific  = (1 << 25), //                     X    //
 };
 
 inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

@@ -240,24 +240,6 @@
                     },
                     "args": [
                     ]
-                },
-                {
-                    "name": "create",
-                    "desc": "Create a wait handle that always succeeds with a given result",
-                    "flags": [
-                        "IsStatic"
-                    ],
-                    "return": {
-                        "type": "Object",
-                        "desc": "A StaticResultWaitHandle representing given result"
-                    },
-                    "args": [
-                        {
-                            "name": "result",
-                            "type": "Variant",
-                            "desc": "A result wait handle will succeed with"
-                        }
-                    ]
                 }
             ],
             "consts": [
@@ -280,24 +262,6 @@
                         "type": null
                     },
                     "args": [
-                    ]
-                },
-                {
-                    "name": "create",
-                    "desc": "Create a wait handle that always fails with a given exception",
-                    "flags": [
-                        "IsStatic"
-                    ],
-                    "return": {
-                        "type": "Object",
-                        "desc": "A StaticExceptionWaitHandle representing given exception"
-                    },
-                    "args": [
-                        {
-                            "name": "exception",
-                            "type": "Object",
-                            "desc": "An exception wait handle will fail with"
-                        }
                     ]
                 }
             ],

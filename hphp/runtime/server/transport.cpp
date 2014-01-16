@@ -107,7 +107,7 @@ const char *Transport::getServerObject() {
   return URL::getServerObject(url);
 }
 
-string Transport::getCommand() {
+std::string Transport::getCommand() {
   const char *url = getServerObject();
   return URL::getCommand(url);
 }
@@ -271,7 +271,7 @@ void Transport::getArrayParam(const char *name,
     }
     ParamMap::const_iterator iter = m_getParams.find(name);
     if (iter != m_getParams.end()) {
-      const vector<const char *> &params = iter->second;
+      const std::vector<const char *> &params = iter->second;
       values.insert(values.end(), params.begin(), params.end());
     }
   }
@@ -282,7 +282,7 @@ void Transport::getArrayParam(const char *name,
     }
     ParamMap::const_iterator iter = m_postParams.find(name);
     if (iter != m_postParams.end()) {
-      const vector<const char *> &params = iter->second;
+      const std::vector<const char *> &params = iter->second;
       values.insert(values.end(), params.begin(), params.end());
     }
   }
@@ -345,7 +345,7 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
     m_firstHeaderLine = g_vmContext->getLine();
   }
 
-  string svalue = value;
+  std::string svalue = value;
   Util::replaceAll(svalue, "\n", "");
   m_responseHeaders[name].push_back(svalue);
 
@@ -410,28 +410,29 @@ void Transport::removeAllHeaders() {
 void Transport::getResponseHeaders(HeaderMap &headers) {
   headers = m_responseHeaders;
 
-  vector<string> &cookies = headers["Set-Cookie"];
-  for (CookieMap::const_iterator iter = m_responseCookies.begin();
-       iter != m_responseCookies.end(); ++iter) {
+  std::vector<std::string> &cookies = headers["Set-Cookie"];
+  for (auto iter = m_responseCookies.begin();
+       iter != m_responseCookies.end();
+       ++iter) {
     cookies.push_back(iter->second);
   }
 }
 
 bool Transport::acceptEncoding(const char *encoding) {
   assert(encoding && *encoding);
-  string header = getHeader("Accept-Encoding");
+  std::string header = getHeader("Accept-Encoding");
 
   // This is testing a substring than a word match, but in practice, this
   // always works.
-  return header.find(encoding) != string::npos;
+  return header.find(encoding) != std::string::npos;
 }
 
 bool Transport::cookieExists(const char *name) {
   assert(name && *name);
-  string header = getHeader("Cookie");
+  std::string header = getHeader("Cookie");
   int len = strlen(name);
   bool hasValue = (strchr(name, '=') != nullptr);
-  for (size_t pos = header.find(name); pos != string::npos;
+  for (size_t pos = header.find(name); pos != std::string::npos;
        pos = header.find(name, pos + 1)) {
     if (pos == 0 || isspace(header[pos-1]) || header[pos-1] == ';') {
       pos += len;
@@ -445,16 +446,16 @@ bool Transport::cookieExists(const char *name) {
   return false;
 }
 
-string Transport::getCookie(const string &name) {
+std::string Transport::getCookie(const std::string &name) {
   assert(!name.empty());
-  string header = getHeader("Cookie");
-  for (size_t pos = header.find(name); pos != string::npos;
+  std::string header = getHeader("Cookie");
+  for (size_t pos = header.find(name); pos != std::string::npos;
        pos = header.find(name, pos + 1)) {
     if (pos == 0 || isspace(header[pos-1]) || header[pos-1] == ';') {
       pos += name.size();
       if (pos < header.size() && header[pos] == '=') {
         size_t end = header.find(';', pos + 1);
-        if (end != string::npos) end -= pos + 1;
+        if (end != std::string::npos) end -= pos + 1;
         return header.substr(pos + 1, end);
       }
     }
@@ -591,7 +592,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
     const String &response, const String& orig_response) {
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
        iter != m_responseHeaders.end(); ++iter) {
-    const vector<string> &values = iter->second;
+    const std::vector<std::string> &values = iter->second;
     for (unsigned int i = 0; i < values.size(); i++) {
       addHeaderImpl(iter->first.c_str(), values[i].c_str());
     }
@@ -617,7 +618,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
         raise_warning("Cannot use chunked HTTP response and Content-MD5 header "
           "at the same time. Dropping Content-MD5.");
       } else {
-        string cur_md5 = it->second[0];
+        std::string cur_md5 = it->second[0];
         String expected_md5 = StringUtil::Base64Encode(StringUtil::MD5(
           orig_response, true));
         // Can never trust these PHP people...
@@ -633,7 +634,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
 
   if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end() &&
       m_responseCode != 304) {
-    string contentType = "text/html; charset="
+    std::string contentType = "text/html; charset="
                          + RuntimeOption::DefaultCharsetName;
     addHeaderImpl("Content-Type", contentType.c_str());
   }
@@ -752,7 +753,7 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
     // flush() triggers php's recursion guard
     // the recursion guard calls back into m_headerCallback
     m_headerCallbackDone = true;
-    vm_call_user_func(m_headerCallback, null_array);
+    vm_call_user_func(m_headerCallback, init_null_variant);
   }
 
   // compression handling
@@ -798,7 +799,7 @@ void Transport::onSendEnd() {
     sendImpl(response.data(), response.size(), m_responseCode, true);
   }
   auto httpResponseStats = ServiceData::createTimeseries(
-    folly::to<string>(HTTP_RESPONSE_STATS_PREFIX, getResponseCode()),
+    folly::to<std::string>(HTTP_RESPONSE_STATS_PREFIX, getResponseCode()),
     {ServiceData::StatsType::SUM});
   httpResponseStats->addValue(1);
   onSendEndImpl();

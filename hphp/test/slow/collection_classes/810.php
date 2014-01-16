@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $m = new Map();
 $m['foo'] = new Map();

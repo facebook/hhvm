@@ -23,8 +23,12 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-
+#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/system/systemlib.h"
+
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/string-vsnprintf.h"
 
 #define DOM_XMLNS_NAMESPACE                             \
   (const xmlChar *) "http://www.w3.org/2000/xmlns/"
@@ -61,8 +65,8 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
 static void php_libxml_internal_error_handler(int error_type, void *ctx,
                                               const char *fmt,
                                               va_list ap) {
-  string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  std::string msg;
+  string_vsnprintf(msg, fmt, ap);
 
   /* remove any trailing \n */
   while (!msg.empty() && msg[msg.size() - 1] == '\n') {
@@ -234,7 +238,7 @@ static void php_dom_throw_error(dom_exception_code error_code,
     Object e(SystemLib::AllocDOMExceptionObject(error_message, 0));
     throw e;
   }
-  raise_warning(string(error_message));
+  raise_warning(std::string(error_message));
 }
 
 static bool dom_has_feature(const char *feature, const char *version) {
@@ -691,7 +695,7 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
         xmlFree((char *) ctxt->directory);
       }
       if (directory[directory.size() - 1] != '/') {
-        directory += '/';
+        directory += "/";
       }
       ctxt->directory =
         (char*)xmlCanonicPath((const xmlChar*)directory.c_str());
@@ -837,7 +841,7 @@ static bool _dom_document_relaxNG_validate(c_DOMDocument *domdoc,
 
   xmlRelaxNGSetParserErrors
     (parser, (xmlRelaxNGValidityErrorFunc) php_libxml_ctx_error,
-     (xmlRelaxNGValidityWarningFunc) php_libxml_ctx_error, parser);
+     (xmlRelaxNGValidityWarningFunc) php_libxml_ctx_error, nullptr);
   sptr = xmlRelaxNGParse(parser);
   xmlRelaxNGFreeParserCtxt(parser);
   if (!sptr) {
@@ -853,7 +857,7 @@ static bool _dom_document_relaxNG_validate(c_DOMDocument *domdoc,
   }
 
   xmlRelaxNGSetValidErrors(vptr, php_libxml_ctx_error,
-                           php_libxml_ctx_error, vptr);
+                           php_libxml_ctx_error, nullptr);
   is_valid = xmlRelaxNGValidateDoc(vptr, docp);
   xmlRelaxNGFree(sptr);
   xmlRelaxNGFreeValidCtxt(vptr);
@@ -896,7 +900,7 @@ static bool _dom_document_schema_validate(c_DOMDocument * domdoc,
 
   xmlSchemaSetParserErrors
     (parser, (xmlSchemaValidityErrorFunc) php_libxml_ctx_error,
-    (xmlSchemaValidityWarningFunc) php_libxml_ctx_error, parser);
+    (xmlSchemaValidityWarningFunc) php_libxml_ctx_error, nullptr);
   sptr = xmlSchemaParse(parser);
   xmlSchemaFreeParserCtxt(parser);
   if (!sptr) {
@@ -912,7 +916,7 @@ static bool _dom_document_schema_validate(c_DOMDocument * domdoc,
   }
 
   xmlSchemaSetValidErrors(vptr, php_libxml_ctx_error,
-                          php_libxml_ctx_error, vptr);
+                          php_libxml_ctx_error, nullptr);
   is_valid = xmlSchemaValidateDoc(vptr, docp);
   xmlSchemaFree(sptr);
   xmlSchemaFreeValidCtxt(vptr);
@@ -1204,6 +1208,26 @@ static String domClassname(xmlNodePtr obj) {
   }
 }
 
+// This is so that if you fetch a node via two different paths, you get the same
+// PHP-level object back
+typedef std::map<xmlNodePtr, c_DOMNode*> NodeMap;
+static IMPLEMENT_THREAD_LOCAL(NodeMap, s_nodeMap);
+static InitFiniNode init(
+  []{ s_nodeMap->clear(); },
+  InitFiniNode::When::ThreadInit
+);
+static void clearNodeMap(xmlNodePtr startNode) {
+  xmlNodePtr curNode;
+  for (curNode = startNode; curNode; curNode = curNode->next) {
+    auto it = s_nodeMap->find(curNode);
+    if (it != s_nodeMap->end()) {
+      decRefObj(it->second);
+      s_nodeMap->erase(it);
+    }
+    clearNodeMap(curNode->children);
+  }
+}
+
 static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
                                      bool owner = false) {
   String clsname = domClassname(obj);
@@ -1215,14 +1239,22 @@ static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
     assert(doc->m_classmap[clsname].isString()); // or const char * is not safe
     clsname = doc->m_classmap[clsname].toString();
   }
-  Object wrapper = create_object_only(clsname);
-  c_DOMNode *nodeobj = wrapper.getTyped<c_DOMNode>();
-  nodeobj->m_doc = doc;
-  nodeobj->m_node = obj;
-  if (owner && doc.get()) {
-    appendOrphan(*doc->m_orphans, obj);
+  auto it = s_nodeMap->find(obj);
+  if (it == s_nodeMap->end()) {
+    auto od = g_vmContext->createObjectOnly(clsname.get());
+    auto nodeobj = static_cast<c_DOMNode*>(od);
+    auto inserted = s_nodeMap->insert(std::make_pair(obj, nodeobj));
+    assert(inserted.second);
+    it = inserted.first;
+    // This will be decRefed when the document is freed
+    nodeobj->incRefCount();
+    nodeobj->m_doc = doc;
+    nodeobj->m_node = obj;
+    if (owner && doc.get()) {
+      appendOrphan(*doc->m_orphans, obj);
+    }
   }
-  return wrapper;
+  return it->second;
 }
 
 static Variant create_node_object(xmlNodePtr node, p_DOMDocument doc,
@@ -1919,16 +1951,6 @@ static PropertyAccessorMap domnode_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMNode::c_DOMNode(Class* cb) :
-    ExtObjectDataFlags<ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::UseIsset|
-                       ObjectData::HasClone>(cb), m_node(nullptr) {
-}
-
-c_DOMNode::~c_DOMNode() {
-}
-
 void c_DOMNode::t___construct() {
 }
 
@@ -2482,12 +2504,6 @@ static PropertyAccessorMap domattr_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMAttr::c_DOMAttr(Class* cb) : c_DOMNode(cb) {
-}
-
-c_DOMAttr::~c_DOMAttr() {
-}
-
 void c_DOMAttr::t___construct(const String& name,
                               const String& value /* = null_string */) {
   int name_valid = xmlValidateName((xmlChar *)name.data(), 0);
@@ -2559,13 +2575,6 @@ static PropertyAccessorMap domcharacterdata_properties_map
 ((PropertyAccessor*)domcharacterdata_properties, &domnode_properties_map);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMCharacterData::c_DOMCharacterData(Class* cb) :
-    c_DOMNode(cb) {
-}
-
-c_DOMCharacterData::~c_DOMCharacterData() {
-}
 
 void c_DOMCharacterData::t___construct() {
 }
@@ -2718,13 +2727,6 @@ String c_DOMCharacterData::t_substringdata(int64_t offset, int64_t count) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMComment::c_DOMComment(Class* cb) :
-    c_DOMCharacterData(cb) {
-}
-
-c_DOMComment::~c_DOMComment() {
-}
-
 void c_DOMComment::t___construct(const String& value /* = null_string */) {
   m_node = xmlNewComment((xmlChar *)value.data());
   if (!m_node) {
@@ -2767,12 +2769,6 @@ static PropertyAccessorMap domtext_properties_map
 ((PropertyAccessor*)domtext_properties, &domcharacterdata_properties_map);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMText::c_DOMText(Class* cb) : c_DOMCharacterData(cb) {
-}
-
-c_DOMText::~c_DOMText() {
-}
 
 void c_DOMText::t___construct(const String& value /* = 'null_string' */) {
   m_node = xmlNewText((xmlChar *)value.data());
@@ -2837,13 +2833,6 @@ Variant c_DOMText::t_splittext(int64_t offset) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMCDATASection::c_DOMCDATASection(Class* cb) :
-    c_DOMText(cb) {
-}
-
-c_DOMCDATASection::~c_DOMCDATASection() {
-}
 
 void c_DOMCDATASection::t___construct(const String& value) {
   m_node = xmlNewCDataBlock(NULL, (xmlChar *)value.data(), value.size());
@@ -3047,13 +3036,18 @@ c_DOMDocument::c_DOMDocument(Class* cb) :
 }
 
 c_DOMDocument::~c_DOMDocument() {
+  for (auto& node : *m_orphans) {
+    clearNodeMap(node);
+  }
+  if (m_owner && m_node) {
+    xmlDocPtr doc = (xmlDocPtr)m_node;
+    clearNodeMap(xmlDocGetRootElement(doc));
+  }
   sweep();
 }
 
 void c_DOMDocument::sweep() {
-  for (XmlNodeSet::iterator iter = m_orphans->begin();
-       iter != m_orphans->end(); ++iter) {
-    xmlNodePtr node = *iter;
+  for (auto& node : *m_orphans) {
     xmlUnlinkNode(node);
     php_libxml_node_free(node);
   }
@@ -3481,20 +3475,6 @@ Variant c_DOMDocument::t_save(const String& file, int64_t options /* = 0 */) {
   return bytes;
 }
 
-Variant c_DOMDocument::t_savehtml() {
-  xmlDocPtr docp = (xmlDocPtr)m_node;
-  xmlChar *mem;
-  int size;
-  htmlDocDumpMemory(docp, &mem, &size);
-  if (!size) {
-    if (mem) xmlFree(mem);
-    return false;
-  }
-  String ret = String((char*)mem, size, CopyString);
-  xmlFree(mem);
-  return ret;
-}
-
 Variant c_DOMDocument::t_savehtmlfile(const String& file) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0;
@@ -3515,13 +3495,32 @@ Variant c_DOMDocument::t_savehtmlfile(const String& file) {
 
 Variant c_DOMDocument::t_savexml(CObjRef node /* = null_object */,
                                  int64_t options /* = 0 */) {
+  int saveempty = 0;
+
+  if (options & LIBXML_SAVE_NOEMPTYTAG) {
+    saveempty = xmlSaveNoEmptyTags;
+    xmlSaveNoEmptyTags = 1;
+  }
+
+  Variant ret = save_html_or_xml(/* as_xml = */ true, node);
+
+  if (options & LIBXML_SAVE_NOEMPTYTAG) {
+    xmlSaveNoEmptyTags = saveempty;
+  }
+
+  return ret;
+}
+
+Variant c_DOMDocument::t_savehtml(CObjRef node /* = null_object */) {
+  return save_html_or_xml(/* as_xml = */ false, node);
+}
+
+Variant c_DOMDocument::save_html_or_xml(bool as_xml,
+                                          CObjRef node /* = null_object */) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlBufferPtr buf;
   xmlChar *mem;
-  int size, format = 0, saveempty = 0;
-
-  format = m_formatoutput;
-
+  int size;
   if (!node.isNull()) {
     c_DOMNode *domnode = node.getTyped<c_DOMNode>();
     xmlNodePtr node = domnode->m_node;
@@ -3535,13 +3534,10 @@ Variant c_DOMDocument::t_savexml(CObjRef node /* = null_object */,
       raise_warning("Could not fetch buffer");
       return false;
     }
-    if (options & LIBXML_SAVE_NOEMPTYTAG) {
-      saveempty = xmlSaveNoEmptyTags;
-      xmlSaveNoEmptyTags = 1;
-    }
-    xmlNodeDump(buf, docp, node, 0, format);
-    if (options & LIBXML_SAVE_NOEMPTYTAG) {
-      xmlSaveNoEmptyTags = saveempty;
+    if (as_xml) {
+      xmlNodeDump(buf, docp, node, 0, m_formatoutput);
+    } else {
+      htmlNodeDump(buf, docp, node);
     }
     mem = (xmlChar*)xmlBufferContent(buf);
     if (!mem) {
@@ -3551,23 +3547,25 @@ Variant c_DOMDocument::t_savexml(CObjRef node /* = null_object */,
     String ret = String((char*)mem, CopyString);
     xmlBufferFree(buf);
     return ret;
-  } else {
-    if (options & LIBXML_SAVE_NOEMPTYTAG) {
-      saveempty = xmlSaveNoEmptyTags;
-      xmlSaveNoEmptyTags = 1;
-    }
-    // Encoding is handled from the encoding property set on the document
-    xmlDocDumpFormatMemory(docp, &mem, &size, format);
-    if (options & LIBXML_SAVE_NOEMPTYTAG) {
-      xmlSaveNoEmptyTags = saveempty;
-    }
-    if (!size) {
-      return false;
-    }
-    String ret = String((char*)mem, size, CopyString);
-    xmlFree(mem);
-    return ret;
   }
+
+  if (as_xml) {
+    xmlDocDumpFormatMemory(docp, &mem, &size, m_formatoutput);
+  } else {
+#if LIBXML_VERSION >= 20623
+    htmlDocDumpMemoryFormat(docp, &mem, &size, m_formatoutput);
+#else
+    htmlDocDumpMemory(docp, &mem, &size);
+#endif
+  }
+
+  if (!size) {
+    if (mem) xmlFree(mem);
+    return false;
+  }
+  String ret = String((char*)mem, size, CopyString);
+  xmlFree(mem);
+  return ret;
 }
 
 bool c_DOMDocument::t_schemavalidate(const String& filename) {
@@ -3618,13 +3616,6 @@ Variant c_DOMDocument::t_xinclude(int64_t options /* = 0 */) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMDocumentFragment::c_DOMDocumentFragment(Class* cb) :
-  c_DOMNode(cb) {
-}
-
-c_DOMDocumentFragment::~c_DOMDocumentFragment() {
-}
 
 void c_DOMDocumentFragment::t___construct() {
   m_node = xmlNewDocFragment(NULL);
@@ -3739,13 +3730,6 @@ static PropertyAccessorMap domdocumenttype_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMDocumentType::c_DOMDocumentType(Class* cb) :
-  c_DOMNode(cb) {
-}
-
-c_DOMDocumentType::~c_DOMDocumentType() {
-}
-
 void c_DOMDocumentType::t___construct() {
 }
 
@@ -3792,12 +3776,6 @@ static PropertyAccessorMap domelement_properties_map
 ((PropertyAccessor*)domelement_properties, &domnode_properties_map);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMElement::c_DOMElement(Class* cb) : c_DOMNode(cb) {
-}
-
-c_DOMElement::~c_DOMElement() {
-}
 
 void c_DOMElement::t___construct(const String& name,
                                  const String& value /* = null_string */,
@@ -4448,12 +4426,6 @@ static PropertyAccessorMap domentity_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMEntity::c_DOMEntity(Class* cb) : c_DOMNode(cb) {
-}
-
-c_DOMEntity::~c_DOMEntity() {
-}
-
 void c_DOMEntity::t___construct() {
 }
 
@@ -4471,13 +4443,6 @@ bool c_DOMEntity::t___isset(Variant name) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMEntityReference::c_DOMEntityReference(Class* cb) :
-  c_DOMNode(cb) {
-}
-
-c_DOMEntityReference::~c_DOMEntityReference() {
-}
 
 void c_DOMEntityReference::t___construct(const String& name) {
   int name_valid = xmlValidateName((xmlChar *)name.data(), 0);
@@ -4530,13 +4495,6 @@ static PropertyAccessorMap domnotation_properties_map
 ((PropertyAccessor*)domnotation_properties);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMNotation::c_DOMNotation(Class* cb) :
-  c_DOMNode(cb) {
-}
-
-c_DOMNotation::~c_DOMNotation() {
-}
 
 void c_DOMNotation::t___construct() {
 }
@@ -4660,14 +4618,6 @@ static PropertyAccessorMap domnamednodemap_properties_map
 ((PropertyAccessor*)domnamednodemap_properties);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMNamedNodeMap::c_DOMNamedNodeMap(Class* cb) :
-  ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|
-    ObjectData::UseIsset>(cb) {
-}
-
-c_DOMNamedNodeMap::~c_DOMNamedNodeMap() {
-}
 
 void c_DOMNamedNodeMap::t___construct() {
 }
@@ -4854,14 +4804,6 @@ static PropertyAccessorMap domnodelist_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMNodeList::c_DOMNodeList(Class* cb) :
-  ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|
-    ObjectData::UseIsset>(cb) {
-}
-
-c_DOMNodeList::~c_DOMNodeList() {
-}
-
 void c_DOMNodeList::t___construct() {
 }
 
@@ -4934,13 +4876,6 @@ Variant c_DOMNodeList::t_getiterator() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMImplementation::c_DOMImplementation(Class* cb)
-  : ExtObjectData(cb) {
-}
-
-c_DOMImplementation::~c_DOMImplementation() {
-}
 
 void c_DOMImplementation::t___construct() {
 }
@@ -5142,7 +5077,8 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
             xmlNodePtr node = obj->nodesetval->nodeTab[j];
             /* not sure, if we need this... it's copied from xpath.c */
             if (node->type == XML_NAMESPACE_DECL) {
-              xmlNodePtr nsparent = (xmlNodePtr)node->_private;
+              // xmlNodePtr nsparent = (xmlNodePtr)node->_private;
+              xmlNodePtr nsparent = nullptr;
               xmlNsPtr curns = xmlNewNs(NULL, node->name, NULL);
               if (node->children) {
                 curns->prefix = xmlStrdup((xmlChar *)node->children);
@@ -5307,16 +5243,14 @@ Variant c_DOMXPath::t_registerphpfunctions(CVarRef funcs /* = null */) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DOMNodeIterator::c_DOMNodeIterator(Class* cb) :
-    ExtObjectData(cb), m_objmap(NULL), m_iter(NULL), m_index(-1) {
+    ExtObjectData(cb), m_objmap(NULL), m_iter(), m_index(-1) {
 }
 
 c_DOMNodeIterator::~c_DOMNodeIterator() {
   sweep();
 }
 
-void c_DOMNodeIterator::sweep() {
-  delete m_iter;
-}
+void c_DOMNodeIterator::sweep() { }
 
 void c_DOMNodeIterator::reset_iterator() {
   assert(m_objmap);
@@ -5325,7 +5259,7 @@ void c_DOMNodeIterator::reset_iterator() {
   if (m_objmap->m_nodetype != XML_ENTITY_NODE &&
       m_objmap->m_nodetype != XML_NOTATION_NODE) {
     if (m_objmap->m_nodetype == DOM_NODESET) {
-      m_iter = new ArrayIter(m_objmap->m_baseobjptr);
+      m_iter = ArrayIter(m_objmap->m_baseobjptr);
     } else {
       xmlNodePtr nodep = m_objmap->m_baseobj.getTyped<c_DOMNode>()->m_node;
       if (!nodep) {
@@ -5382,14 +5316,14 @@ void c_DOMNodeIterator::t___construct() {
 
 Variant c_DOMNodeIterator::t_current() {
   if (m_iter) {
-    return m_iter->second();
+    return m_iter.second();
   }
   return m_curobj;
 }
 
 Variant c_DOMNodeIterator::t_key() {
   if (m_iter) {
-    return m_iter->first();
+    return m_iter.first();
   }
   xmlNodePtr curnode = m_curobj.getTyped<c_DOMNode>()->m_node;
   return String((const char *)curnode->name, CopyString);
@@ -5397,7 +5331,7 @@ Variant c_DOMNodeIterator::t_key() {
 
 Variant c_DOMNodeIterator::t_next() {
   if (m_iter) {
-    m_iter->next();
+    m_iter.next();
     return uninit_null();
   }
 
@@ -5447,8 +5381,7 @@ err:
 }
 
 Variant c_DOMNodeIterator::t_rewind() {
-  delete m_iter;
-  m_iter = NULL;
+  m_iter.reset();
   m_index = -1;
   reset_iterator();
   return uninit_null();
@@ -5456,7 +5389,7 @@ Variant c_DOMNodeIterator::t_rewind() {
 
 Variant c_DOMNodeIterator::t_valid() {
   if (m_iter) {
-    return !m_iter->end();
+    return !m_iter.end();
   }
   return !m_curobj.isNull();
 }
@@ -5586,9 +5519,10 @@ Variant f_dom_document_xinclude(CVarRef obj, int64_t options /* = 0 */) {
   return pobj->t_xinclude(options);
 }
 
-Variant f_dom_document_save_html(CVarRef obj) {
+Variant f_dom_document_save_html(CVarRef obj,
+                                 CObjRef node /* = null_object */) {
   DOM_GET_OBJ(Document);
-  return pobj->t_savehtml();
+  return pobj->t_savehtml(node);
 }
 
 Variant f_dom_document_save_html_file(CVarRef obj, const String& file) {

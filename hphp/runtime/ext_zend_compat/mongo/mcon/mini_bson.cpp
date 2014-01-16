@@ -46,7 +46,7 @@ static mcon_str *create_simple_header(mongo_connection *con, char *ns)
 	if (ns) {
 		mcon_str_addl(str, ns, strlen(ns) + 1, 0);
 	} else {
-		mcon_str_addl(str, "admin$cwd", 11, 0);
+		mcon_str_addl(str, "admin.$cmd", 11, 0);
 	}
 	mcon_serialize_int(str, 0); /* Number to skip */
 	mcon_serialize_int(str, -1); /* Number to return, has to be -1 for admin commands */

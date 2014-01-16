@@ -23,7 +23,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdInterrupt);
 class CmdInterrupt : public DebuggerCommand {
 public:
   CmdInterrupt()
@@ -47,7 +46,8 @@ public:
   virtual bool onServer(DebuggerProxy &proxy);
   virtual void onClient(DebuggerClient &client);
 
-  bool shouldBreak(DebuggerProxy &proxy, const BreakPointInfoPtrVec &bps,
+  bool shouldBreak(DebuggerProxy &proxy,
+                   const std::vector<BreakPointInfoPtr> &bps,
                    int stackDepth);
   std::string getFileLine() const;
 
@@ -64,7 +64,7 @@ private:
   int64_t m_threadId;
   InterruptSite *m_site;   // server side
   BreakPointInfoPtr m_bpi; // client side
-  BreakPointInfoPtrVec m_matched;
+  std::vector<BreakPointInfoPtr> m_matched;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

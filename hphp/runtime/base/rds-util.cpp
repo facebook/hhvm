@@ -31,7 +31,7 @@ Link<RefData> bindStaticLocal(const Func* func, const StringData* name) {
 
 Link<TypedValue> bindClassConstant(const StringData* clsName,
                                    const StringData* cnsName) {
-  return bind<TypedValue,kTVXmmAlign>(
+  return bind<TypedValue,kTVSimdAlign>(
     ClsConstant { clsName, cnsName },
     Mode::Normal
   );

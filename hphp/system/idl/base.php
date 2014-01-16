@@ -83,7 +83,8 @@ $MAGIC_METHODS = array('__get' => 'ObjectData::UseGet',
                        '__isset' => 'ObjectData::UseIsset',
                        '__unset' => 'ObjectData::UseUnset',
                        '__call' => 'ObjectData::HasCall',
-                       '__callStatic' => 'ObjectData::HasCallStatic');
+                       '__clone' => 'ObjectData::HasClone',
+                      );
 
 function get_idl_name($type, $null = '') {
   global $TYPENAMES;
@@ -117,7 +118,7 @@ function get_php_name($type, $null = 'mixed') {
 // flags
 
 // ClassInfo attributes, and these numbers need to be consistent with them!
-define('ZendParamMode',                  1 <<  0);
+define('ZendParamModeNull',              1 <<  0);
 define('IsAbstract',                     1 <<  4);
 define('IsFinal',                        1 <<  5);
 define('IsPublic',                       1 <<  6);
@@ -145,6 +146,7 @@ define('ContextSensitive',               1 << 26);
 define('NoDefaultSweep',                 1 << 27);
 define('IsSystem',                       1 << 28);
 define('IsTrait',                        1 << 29);
+define('ZendParamModeFalse',             1 << 30);
 define('NeedsActRec',                    1 << 31);
 
 // Mask for checking the flags related to variable arguments

@@ -78,7 +78,7 @@ std::aligned_storage<
 >::type s_theEmptyArray;
 
 struct HphpArray::EmptyArrayInitializer {
-  EmptyArrayInitializer() ATTRIBUTE_COLD {
+  EmptyArrayInitializer() {
     void* vpEmpty = &s_theEmptyArray;
 
     auto const ad = static_cast<HphpArray*>(vpEmpty);
@@ -92,7 +92,6 @@ struct HphpArray::EmptyArrayInitializer {
     ad->m_tableMask       = SmallHashSize - 1;
 
     ad->m_cap  = SmallSize;
-    ad->m_hash = nullptr;
 
     ad->setStatic();
 
@@ -168,7 +167,7 @@ HphpArray* mallocArray(uint32_t cap, uint32_t mask) {
 //=============================================================================
 // Construction
 
-HOT_FUNC_VM NEVER_INLINE
+NEVER_INLINE
 HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
   auto const cmret = computeCapAndMask(capacity);
   auto const cap   = cmret.first;
@@ -194,7 +193,6 @@ HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
   return ad;
 }
 
-HOT_FUNC_VM
 HphpArray* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
 
@@ -230,6 +228,57 @@ HphpArray* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(ad->m_count == 1);
   assert(ad->m_cap == cap);
   assert(ad->m_used == size);
+  assert(ad->checkInvariants());
+  return ad;
+}
+
+HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
+                                 const TypedValue* values) {
+  assert(size > 0);
+
+  auto const cmret = computeCapAndMask(size);
+  auto const cap   = cmret.first;
+  auto const mask  = cmret.second;
+  auto const ad    = smartAllocArray(cap, mask);
+
+  auto const shiftedSize = uint64_t{size} << 32;
+  ad->m_kindModeAndSize  = shiftedSize |
+                            static_cast<uint32_t>(AllocationMode::smart) << 8 |
+                            kMixedKind;
+  ad->m_posAndCount      = uint64_t{1} << 32;
+  ad->m_strongIterators  = nullptr;
+  ad->m_capAndUsed       = shiftedSize | cap;
+  ad->m_tableMask        = mask;
+  ad->m_nextKI           = 0;
+
+  auto const data = reinterpret_cast<Elm*>(ad + 1);
+  auto const hash = reinterpret_cast<int32_t*>(data + cap);
+  ad->initHash(hash, mask + 1);
+
+  // Append values by moving -- Caller assumes we update refcount.
+  // Values are in reverse order since they come from the stack, which
+  // grows down.
+  for (uint32_t i = 0; i < size; i++) {
+    assert(keys[i]->isStatic());
+    auto k = keys[i];
+    auto h = k->hash();
+    data[i].setStaticKey(k, h);
+    const auto& tv = values[size - i - 1];
+    data[i].data.m_data = tv.m_data;
+    data[i].data.m_type = tv.m_type;
+    auto ei = ad->findForNewInsert(h);
+    *ei = i;
+  }
+  ad->m_hLoad = size;
+
+  assert(ad->m_kind == kMixedKind);
+  assert(ad->m_allocMode == AllocationMode::smart);
+  assert(ad->m_size == size);
+  assert(ad->m_pos == 0);
+  assert(ad->m_count == 1);
+  assert(ad->m_cap == cap);
+  assert(ad->m_used == size);
+  assert(ad->m_nextKI == 0);
   assert(ad->checkInvariants());
   return ad;
 }
@@ -296,9 +345,7 @@ HphpArray* HphpArray::CopyMixed(const HphpArray& other, AllocationMode mode) {
   auto const data      = reinterpret_cast<Elm*>(ad + 1);
   auto const hash      = reinterpret_cast<int32_t*>(data + cap);
 
-  ad->m_hash = static_cast<int32_t*>(
-    memcpy(hash, other.m_hash, (mask + 1) * sizeof *hash)
-  );
+  copyHash(hash, other.hashTab(), mask + 1);
 
   // Copy the elements and bump up refcounts as needed.
   auto const elms = other.data();
@@ -390,17 +437,15 @@ HphpArray* HphpArray::copyMixedAndResizeIfNeededSlow() const {
   // For now I'm just making use of copyPacked to do it for me before
   // GrowPacked happens.
   auto const copy = copyMixed();
-  auto const ret  = Grow(copy);
-  assert(ret != copy);
-  assert(copy->getCount() == 0);
-  Release(copy);
+  auto const ret = copy->resize();
+  if (copy != ret) Release(copy);
   return ret;
 }
 
 //=============================================================================
 // Destruction
 
-HOT_FUNC_VM NEVER_INLINE
+NEVER_INLINE
 void HphpArray::ReleasePacked(ArrayData* in) {
   auto const ad = asPacked(in);
 
@@ -424,7 +469,7 @@ void HphpArray::ReleasePacked(ArrayData* in) {
   MM().objFreeLogged(ad, computeAllocBytes(cap, mask));
 }
 
-HOT_FUNC_VM NEVER_INLINE
+NEVER_INLINE
 void HphpArray::Release(ArrayData* in) {
   auto const ad = asMixed(in);
 
@@ -453,7 +498,7 @@ void HphpArray::Release(ArrayData* in) {
 //=============================================================================
 // State transitions
 
-NEVER_INLINE HOT_FUNC_VM
+NEVER_INLINE
 HphpArray* HphpArray::packedToMixed() {
   assert(isPacked());
 
@@ -465,7 +510,6 @@ HphpArray* HphpArray::packedToMixed() {
   m_kind   = kMixedKind;
   m_hLoad  = size;
   m_nextKI = size;
-  m_hash   = hash;
 
   uint32_t i = 0;
   for (; i < size; ++i) {
@@ -519,7 +563,6 @@ HphpArray* HphpArray::packedToMixed() {
  *   m_size == m_used
  *   m_nextKI = uninitialized
  *   m_hLoad = uninitialized
- *   m_hash = uninitialized
  *   Elm.key uninitialized
  *   Elm.hash uninitialized
  *   no KindOfInvalid tombstones
@@ -528,7 +571,7 @@ bool HphpArray::checkInvariants() const {
   static_assert(sizeof(Elm) == 24, "");
   static_assert(sizeof(ArrayData) == 3 * sizeof(uint64_t), "");
   static_assert(
-    sizeof(HphpArray) == sizeof(ArrayData) + 4 * sizeof(uint64_t),
+    sizeof(HphpArray) == sizeof(ArrayData) + 3 * sizeof(uint64_t),
     "Performance is sensitive to sizeof(HphpArray)."
     " Make sure you changed it with good reason and then update this assert."
   );
@@ -558,14 +601,13 @@ bool HphpArray::checkInvariants() const {
     assert(m_size == m_used);
     break;
   case kMixedKind: {
-    assert(m_hash);
     assert(m_hLoad >= m_size);
     size_t load = 0;
     return true;
     // The following loop is for debugging arrays only; it slows
     // things down too much for general use
     for (size_t i = 0; i <= m_tableMask; i++) {
-      load += m_hash[i] != Empty;
+      load += hashTab()[i] != Empty;
     }
     assert(m_hLoad == load);
     break;
@@ -712,25 +754,18 @@ ssize_t HphpArray::findImpl(size_t h0, Hit hit) const {
   // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
   size_t tableMask = m_tableMask;
-  size_t probeIndex = h0 & tableMask;
   auto* elms = data();
-  auto* hashtable = m_hash;
-  ssize_t pos = hashtable[probeIndex];
-  if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
-    return pos;
-  }
-  for (size_t i = 1;; ++i) {
-    assert(i <= tableMask);
-    probeIndex = (probeIndex + i) & tableMask;
-    assert(probeIndex == ((h0 + (i + i*i) / 2) & tableMask));
-    pos = hashtable[probeIndex];
+  auto* hashtable = hashTab();
+  for (size_t probeIndex = h0, i = 1;; ++i) {
+    ssize_t pos = hashtable[probeIndex & tableMask];
     if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
       return pos;
     }
+    probeIndex += i;
+    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
   }
 }
 
-NEVER_INLINE
 ssize_t HphpArray::find(int64_t ki) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
@@ -739,7 +774,6 @@ ssize_t HphpArray::find(int64_t ki) const {
   });
 }
 
-NEVER_INLINE
 ssize_t HphpArray::find(const StringData* s, strhash_t prehash) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
@@ -764,21 +798,11 @@ int32_t* HphpArray::findForInsertImpl(size_t h0, Hit hit) const {
   assert(m_hLoad <= computeMaxElms(m_tableMask));
   size_t tableMask = m_tableMask;
   auto* elms = data();
-  auto* hashtable = m_hash;
+  auto* hashtable = hashTab();
   int32_t* ret = nullptr;
-  size_t probeIndex = h0 & tableMask;
-  auto* ei = &hashtable[probeIndex];
-  ssize_t pos = *ei;
-  if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
-    return ei;
-  }
-  if (!validPos(pos)) ret = ei;
-  for (size_t i = 1;; ++i) {
-    assert(i <= tableMask);
-    probeIndex = (probeIndex + i) & tableMask;
-    assert(probeIndex == ((h0 + (i + i*i) / 2) & tableMask));
-    ei = &hashtable[probeIndex];
-    pos = *ei;
+  for (size_t probeIndex = h0, i = 1;; ++i) {
+    auto ei = &hashtable[probeIndex & tableMask];
+    ssize_t pos = *ei;
     if (validPos(pos)) {
       if (hit(elms[pos])) {
         return ei;
@@ -789,6 +813,8 @@ int32_t* HphpArray::findForInsertImpl(size_t h0, Hit hit) const {
         return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
       }
     }
+    probeIndex += i;
+    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
   }
 }
 
@@ -839,7 +865,7 @@ ssize_t HphpArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
   assert(m_hLoad <= computeMaxElms(m_tableMask));
   size_t mask = m_tableMask;
   auto* elms = data();
-  auto* hashtable = m_hash;
+  auto* hashtable = hashTab();
   for (size_t i = 1, probe = h0;; ++i) {
     auto* ei = &hashtable[probe & mask];
     ssize_t pos = *ei;
@@ -883,7 +909,7 @@ ssize_t HphpArray::findForRemove(int64_t ki, bool updateNext) {
   );
 }
 
-NEVER_INLINE ssize_t
+ssize_t
 HphpArray::findForRemove(const StringData* s, strhash_t prehash) {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
@@ -897,19 +923,6 @@ HphpArray::findForRemove(const StringData* s, strhash_t prehash) {
         e.setIntKey(0);
       }
     );
-}
-
-NEVER_INLINE int32_t*
-HphpArray::findForNewInsertLoop(int32_t* table, size_t h0, size_t mask) {
-  /* Quadratic probe. */
-  for (size_t i = 1, probe = h0;; ++i) {
-    assert(i <= mask);
-    probe += i;
-    assert(probe == h0 + ((i + i * i) / 2));
-    auto ei = &table[probe & mask];
-    ssize_t pos = *ei;
-    if (!validPos(pos)) return ei;
-  }
 }
 
 bool HphpArray::ExistsIntPacked(const ArrayData* ad, int64_t k) {
@@ -1090,7 +1103,7 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
   ad->m_maskAndLoad     = uint64_t{oldSize} << 32 | mask;
   ad->m_nextKI          = old->m_nextKI;
-  ad->m_hash            = reinterpret_cast<int32_t*>(ad->data() + cap);
+  auto table            = reinterpret_cast<int32_t*>(ad->data() + cap);
 
   // Migrate all strong iterators to the new array.
   auto si = oldStrongIters;
@@ -1099,22 +1112,17 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
     si = si->getNext();
   }
 
-  // Copy the old element array, and initialize the hashtable to all
-  // empty.
-  assert(HphpArray::Empty == -1);
-  memcpy(ad->data(), old->data(), oldUsed * sizeof(Elm));
-  memset(ad->m_hash, 0xffU, (mask + 1) * sizeof *ad->m_hash);
+  // Copy the old element array, and initialize the hashtable to all empty.
+  copyElms(ad->data(), old->data(), oldUsed);
+  ad->initHash(table, mask + 1);
 
-  // TODO(#2942020): findForNewInsert will reload m_hash and
-  // m_tableMask each time through the loop.  A naive attempt to keep
-  // them in temporaries just ends up spilling/filling things from the
-  // stack.  We can probably do better ...
   auto iter = ad->data();
   auto const stop = iter + oldUsed;
+  assert(mask == ad->m_tableMask);
   for (uint32_t i = 0; iter != stop; ++iter, ++i) {
     auto& e = *iter;
     if (isTombstone(e.data.m_type)) continue;
-    *ad->findForNewInsert(e.hasIntKey() ? e.ikey : e.hash()) = i;
+    *ad->findForNewInsert(table, mask, e.hasIntKey() ? e.ikey : e.hash()) = i;
   }
 
   old->m_used = -uint32_t{1};
@@ -1167,7 +1175,7 @@ HphpArray* HphpArray::GrowPacked(HphpArray* old) {
 
   // Steal the old array payload.
   old->m_used = -uint32_t{1};
-  memcpy(ad->data(), old->data(), oldUsed * sizeof(Elm));
+  copyElms(ad->data(), old->data(), oldUsed);
 
   // TODO(#2926276): it would be good to refactor callers to expect
   // our refcount to start at 1.
@@ -1226,8 +1234,11 @@ void HphpArray::compact(bool renumber /* = false */) {
     m_nextKI = 0;
   }
   auto elms = data();
-  size_t tableSize = computeTableSize(m_tableMask);
-  initHash(tableSize);
+  auto mask = m_tableMask;
+  size_t tableSize = mask + 1;
+  auto table = hashTab();
+  initHash(table, tableSize);
+  m_hLoad = 0;
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
     while (isTombstone(elms[frPos].data.m_type)) {
       assert(frPos + 1 < m_used);
@@ -1240,7 +1251,8 @@ void HphpArray::compact(bool renumber /* = false */) {
     if (renumber && !toE.hasStrKey()) {
       toE.ikey = m_nextKI++;
     }
-    auto ie = findForNewInsert(toE.hasIntKey() ? toE.ikey : toE.hash());
+    auto ie = findForNewInsert(table, mask,
+                               toE.hasIntKey() ? toE.ikey : toE.hash());
     *ie = toPos;
   }
   m_used = m_size;
@@ -1349,7 +1361,7 @@ inline ArrayData* HphpArray::addVal(StringData* key, CVarRef data) {
   return initVal(e.data, data);
 }
 
-template <class K> INLINE_SINGLE_CALLER
+template <class K> ALWAYS_INLINE
 ArrayData* HphpArray::update(K k, CVarRef data) {
   assert(!isPacked());
   assert(!isFull());
@@ -1371,7 +1383,7 @@ ArrayData* HphpArray::updateRef(K k, CVarRef data) {
   return initRef(p.tv, data);
 }
 
-template <class K> INLINE_SINGLE_CALLER
+template <class K> ALWAYS_INLINE
 ArrayData* HphpArray::zSetImpl(K k, RefData* data) {
   auto p = insert(k);
   if (p.found) {
@@ -1380,7 +1392,7 @@ ArrayData* HphpArray::zSetImpl(K k, RefData* data) {
   return zInitVal(p.tv, data);
 }
 
-INLINE_SINGLE_CALLER
+ALWAYS_INLINE
 ArrayData* HphpArray::zAppendImpl(RefData* data) {
   if (UNLIKELY(m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
@@ -1708,8 +1720,8 @@ void HphpArray::erase(ssize_t pos) {
 ArrayData* HphpArray::RemoveIntPacked(ArrayData* ad, int64_t k, bool copy) {
   auto a = asPacked(ad);
   if (copy) a = a->copyPacked();
-  // todo t2606310: what is probability of (k == size-1)
   if (size_t(k) < a->m_size) {
+    // escalate to mixed for correctness; unset preserves m_nextKI
     a->packedToMixed();
     auto pos = a->findForRemove(k, false);
     if (validPos(pos)) a->erase(pos);
@@ -1922,25 +1934,24 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
                             kMixedKind;
   ad->m_posAndCount     = uint64_t{1} << 32 | oldPosUnsigned;
   ad->m_strongIterators = nullptr;
+  ad->m_cap             = cap;
   ad->m_maskAndLoad     = uint64_t{oldSize} << 32 | mask;
   ad->m_nextKI          = oldNextKI;
 
-  auto const data = ad->data();
-  auto const hash = reinterpret_cast<int32_t*>(data + cap);
-  ad->m_hash      = hash;
-
-  assert(Empty == -1);
-  memset(hash, 0xffu, (mask + 1) * sizeof *hash);
+  auto const data  = ad->data();
+  auto const table = reinterpret_cast<int32_t*>(data + cap);
+  ad->initHash(table, mask + 1);
 
   auto dstElm = data;
   auto srcElm = src->data();
   auto const srcStop = src->data() + oldUsed;
   uint32_t i = 0;
   if (oldPacked) {
+    auto const mask = ad->m_tableMask;
     for (; srcElm != srcStop; ++srcElm, ++i) {
       tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
       dstElm->setIntKey(i);
-      *ad->findForNewInsert(i) = i;
+      *ad->findForNewInsert(table, mask, i) = i;
       ++dstElm;
     }
     assert(ad->m_pos == oldPosUnsigned);
@@ -1961,6 +1972,7 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
       mPos.key = nullptr;
     }
     // Copy the elements
+    auto const mask = ad->m_tableMask;
     for (; srcElm != srcStop; ++srcElm) {
       if (isTombstone(srcElm->data.m_type)) continue;
       tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
@@ -1972,7 +1984,7 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
         srcElm->key->incRefCount();
         dstElm->setStrKey(srcElm->key, hash);
       }
-      *ad->findForNewInsert(hash) = i;
+      *ad->findForNewInsert(table, mask, hash) = i;
       ++dstElm;
       ++i;
     }
@@ -1986,7 +1998,7 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
 
   // Set new used value (we've removed any tombstones).
   assert(i == dstElm - data);
-  ad->m_capAndUsed = static_cast<uint64_t>(i) << 32 | cap;
+  ad->m_used = i;
 
   assert(ad->m_kind == kMixedKind);
   assert(ad->m_allocMode == AllocationMode::smart);
@@ -2002,12 +2014,20 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
   return ad;
 }
 
-ATTRIBUTE_COLD NEVER_INLINE
-ArrayData* HphpArray::ArrayPlusGeneric(HphpArray* ret,
-                                       const ArrayData* elems) {
+NEVER_INLINE
+ArrayData* HphpArray::ArrayPlusEqGeneric(ArrayData* ad,
+                                         HphpArray* ret,
+                                         const ArrayData* elems,
+                                         size_t neededSize) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     CVarRef value = it.secondRef();
+
+    if (UNLIKELY(ret->isFull())) {
+      assert(ret == ad);
+      ret = CopyReserve(asHphpArray(ad), neededSize);
+    }
+
     auto tv = key.asTypedValue();
     auto p = tv->m_type == KindOfInt64
       ? ret->insert(tv->m_data.num)
@@ -2020,11 +2040,16 @@ ArrayData* HphpArray::ArrayPlusGeneric(HphpArray* ret,
   return ret;
 }
 
-ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems) {
-  auto const ret = CopyReserve(asHphpArray(ad), ad->size() + elems->size());
+ArrayData* HphpArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
+  auto const neededSize = ad->size() + elems->size();
 
-  if (UNLIKELY(elems->m_kind != kMixedKind)) {
-    return ArrayPlusGeneric(ret, elems);
+  auto ret =
+    ad->hasMultipleRefs() ? CopyReserve(asHphpArray(ad), neededSize) :
+    ad->isPacked()        ? asPacked(ad)->packedToMixed() :
+    asMixed(ad);
+
+  if (UNLIKELY(!elems->isMixed())) {
+    return ArrayPlusEqGeneric(ad, ret, elems, neededSize);
   }
 
   auto const rhs = asMixed(elems);
@@ -2033,6 +2058,11 @@ ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems) {
   auto const srcStop = rhs->data() + rhs->m_used;
   for (; srcElem != srcStop; ++srcElem) {
     if (isTombstone(srcElem->data.m_type)) continue;
+
+    if (UNLIKELY(ret->isFull())) {
+      assert(ret == ad);
+      ret = CopyReserve(ret, neededSize);
+    }
 
     auto const hash = srcElem->hash();
     if (srcElem->hasStrKey()) {
@@ -2054,7 +2084,7 @@ ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems) {
   return ret;
 }
 
-ATTRIBUTE_COLD NEVER_INLINE
+NEVER_INLINE
 ArrayData* HphpArray::ArrayMergeGeneric(HphpArray* ret,
                                         const ArrayData* elems) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
@@ -2075,7 +2105,7 @@ ArrayData* HphpArray::ArrayMergeGeneric(HphpArray* ret,
 ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems) {
   auto const ret = CopyReserve(asHphpArray(ad), ad->size() + elems->size());
 
-  if (elems->m_kind == kMixedKind) {
+  if (elems->isMixed()) {
     auto const rhs = asMixed(elems);
     auto srcElem = rhs->data();
     auto const srcStop = rhs->data() + rhs->m_used;
@@ -2093,7 +2123,7 @@ ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems) {
     return ret;
   }
 
-  if (UNLIKELY(elems->m_kind != kPackedKind)) {
+  if (UNLIKELY(!elems->isPacked())) {
     return ArrayMergeGeneric(ret, elems);
   }
 

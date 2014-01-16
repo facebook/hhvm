@@ -42,14 +42,21 @@ function bar($i) {
     $v10 = array();
     $v11 = array(1);
 
-    $vec_1 = Set {};
-    $vec_2 = StableMap {};
-    $vec_3 = Vector {};
-    $vec_4 = Map {};
-    $vfc_1 = Set {1};
-    $vfc_2 = StableMap {'k' => 'v'};
-    $vfc_3 = Vector {1};
-    $vfc_4 = Map {'k' => 'v'};
+    $empty_col_1 = Set {};
+    $empty_col_2 = StableMap {};
+    $empty_col_3 = Vector {};
+    $empty_col_4 = Map {};
+    $empty_col_5 = FrozenVector {};
+    $empty_col_6 = FrozenSet {};
+    $empty_col_7 = FrozenMap {};
+
+    $filled_col_1 = Set {1};
+    $filled_col_2 = StableMap {'k' => 'v'};
+    $filled_col_3 = Vector {1};
+    $filled_col_4 = Map {'k' => 'v'};
+    $filled_col_5 = FrozenVector {1};
+    $filled_col_6 = Set {1};
+    $filled_col_7 = Map {'k' => 'v'};
   }
   var_dump((bool) $v1);
   var_dump((bool) $v2);
@@ -63,14 +70,21 @@ function bar($i) {
   var_dump((bool) $v10);
   var_dump((bool) $v11);
 
-  var_dump((bool) $vec_1);
-  var_dump((bool) $vec_2);
-  var_dump((bool) $vec_3);
-  var_dump((bool) $vec_4);
-  var_dump((bool) $vfc_1);
-  var_dump((bool) $vfc_2);
-  var_dump((bool) $vfc_3);
-  var_dump((bool) $vfc_4);
+  echo "= collections =\n";
+  var_dump((bool) $empty_col_1);
+  var_dump((bool) $empty_col_2);
+  var_dump((bool) $empty_col_3);
+  var_dump((bool) $empty_col_4);
+  var_dump((bool) $empty_col_5);
+  var_dump((bool) $empty_col_6);
+  var_dump((bool) $empty_col_7);
+  var_dump((bool) $filled_col_1);
+  var_dump((bool) $filled_col_2);
+  var_dump((bool) $filled_col_3);
+  var_dump((bool) $filled_col_4);
+  var_dump((bool) $filled_col_5);
+  var_dump((bool) $filled_col_6);
+  var_dump((bool) $filled_col_7);
 }
 
 bar(1);

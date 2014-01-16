@@ -16,10 +16,6 @@
         {
             "name": "ASYNC_OP_QUERY",
             "type": "Int64"
-        },
-        {
-            "name": "ASYNC_OP_FETCH_ROW",
-            "type": "Int64"
         }
     ],
     "funcs": [
@@ -233,7 +229,7 @@
         },
         {
             "name": "mysql_async_status",
-            "desc": "Returns the async operation status for a given mysql connection.  For non-async connections, this returns ASYNC_OP_INVALID.  For an async connection, this can be either ASYNC_OP_UNSET (no pending async operation), ASYNC_OP_QUERY (async query pending), ASYNC_OP_FETCH_ROW (async row fetching pending), or ASYNC_OP_CONNECT (async connection pending).  Returns -1 if the supplied connection itself is invalid.",
+            "desc": "Returns the async operation status for a given mysql connection.  For non-async connections, this returns ASYNC_OP_INVALID.  For an async connection, this can be either ASYNC_OP_UNSET (no pending async operation), ASYNC_OP_QUERY (async query pending), or ASYNC_OP_CONNECT (async connection pending).  Returns -1 if the supplied connection itself is invalid.",
             "flags": [
             ],
             "return": {

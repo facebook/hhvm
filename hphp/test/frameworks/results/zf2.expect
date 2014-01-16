@@ -2786,20 +2786,8 @@ ZendTest\Cache\PatternFactoryTest::testDefaultPluginManager
 .
 ZendTest\Cache\PatternFactoryTest::testFactory
 .
-ZendTest\Cache\Pattern\CallbackCacheTest::testCallCanReturnCachedNullValues
-E
 ZendTest\Cache\Pattern\CallbackCacheTest::testCallEnabledCacheOutputByDefault
-F
-ZendTest\Cache\Pattern\CallbackCacheTest::testCallInvalidCallbackException
-.
-ZendTest\Cache\Pattern\CallbackCacheTest::testCallUnknownCallbackException
-.
-ZendTest\Cache\Pattern\CallbackCacheTest::testMagicFunctionCall
-.
-ZendTest\Cache\Pattern\CallbackCacheTest::testOptionNamesValid
-.
-ZendTest\Cache\Pattern\CallbackCacheTest::testOptionsGetAndSetDefault
-.
+UNKNOWN STATUS
 ZendTest\Cache\Pattern\CaptureCacheTest::testGetFilenameWithPublicDir
 .
 ZendTest\Cache\Pattern\CaptureCacheTest::testGetFilenameWithPublicDirAndNoPageId
@@ -2825,45 +2813,15 @@ ZendTest\Cache\Pattern\CaptureCacheTest::testSetWithIndexFilename
 ZendTest\Cache\Pattern\CaptureCacheTest::testSetWithNormalPageId
 .
 ZendTest\Cache\Pattern\ClassCacheTest::testCallEnabledCacheOutputByDefault
-F
-ZendTest\Cache\Pattern\ClassCacheTest::testGenerateKey
-.
-ZendTest\Cache\Pattern\ClassCacheTest::testOptionNamesValid
-.
-ZendTest\Cache\Pattern\ClassCacheTest::testOptionsGetAndSetDefault
-.
+UNKNOWN STATUS
 ZendTest\Cache\Pattern\CommonPatternTest::testOptionNamesValid
 F
 ZendTest\Cache\Pattern\CommonPatternTest::testOptionsGetAndSetDefault
 F
 ZendTest\Cache\Pattern\ObjectCacheTest::testCallEnabledCacheOutputByDefault
-F
-ZendTest\Cache\Pattern\ObjectCacheTest::testCallInvoke
-F
-ZendTest\Cache\Pattern\ObjectCacheTest::testGenerateKey
-.
-ZendTest\Cache\Pattern\ObjectCacheTest::testGetProperty
-.
-ZendTest\Cache\Pattern\ObjectCacheTest::testIssetProperty
-.
-ZendTest\Cache\Pattern\ObjectCacheTest::testOptionNamesValid
-.
-ZendTest\Cache\Pattern\ObjectCacheTest::testOptionsGetAndSetDefault
-.
-ZendTest\Cache\Pattern\ObjectCacheTest::testSetProperty
-.
-ZendTest\Cache\Pattern\ObjectCacheTest::testUnsetProperty
-.
-ZendTest\Cache\Pattern\OutputCacheTest::testOptionNamesValid
-.
-ZendTest\Cache\Pattern\OutputCacheTest::testOptionsGetAndSetDefault
-.
-ZendTest\Cache\Pattern\OutputCacheTest::testStartEndCacheHit
-F
+UNKNOWN STATUS
 ZendTest\Cache\Pattern\OutputCacheTest::testStartEndCacheMiss
-F
-ZendTest\Cache\Pattern\OutputCacheTest::testThrowMissingKeyException
-.
+UNKNOWN STATUS
 ZendTest\Cache\Service\StorageCacheAbstractServiceFactoryTest::testCanLookupCacheByName
 .
 ZendTest\Cache\Service\StorageCacheAbstractServiceFactoryTest::testCanRetrieveCacheByName
@@ -2897,21 +2855,21 @@ ZendTest\Cache\StorageFactoryTest::testPluginFactory
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testGetDefaultNamespaceNotEmpty
 .
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testGetItemCallsInternalGetItem
-.
+F
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testGetItemsCallsInternalGetItems
-.
+E
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testGetMetadataCallsInternalGetMetadata
-.
+F
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testGetOptions
 .
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testHasItemCallsInternalHasItem
-.
+F
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testHasItemsCallsInternalHasItems
-.
+E
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testInternalGetItemsCallsInternalGetItemForEachKey
 S
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testInternalHasItemsCallsInternalHasItem
-.
+E
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testInternalTriggerExceptionThrowRuntimeException
 .
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testInternalTriggerPost
@@ -2921,7 +2879,7 @@ ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testInternalTriggerPre
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testPluginRegistry
 .
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testPreEventsCanChangeArguments
-.
+F
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testSetKeyPattern
 .
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testSetKeyPatternThrowsExceptionOnInvalidPattern
@@ -2941,17 +2899,17 @@ ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testSetWritable
 ZendTest\Cache\Storage\Adapter\AbstractAdapterTest::testUnsetKeyPattern
 .
 ZendTest\Cache\Storage\Adapter\AbstractZendServerTest::testGetItem
-.
+F
 ZendTest\Cache\Storage\Adapter\AbstractZendServerTest::testGetMetadata
-.
+F
 ZendTest\Cache\Storage\Adapter\AbstractZendServerTest::testGetOptions
 .
 ZendTest\Cache\Storage\Adapter\AbstractZendServerTest::testHasItem
-.
+F
 ZendTest\Cache\Storage\Adapter\AbstractZendServerTest::testRemoveItem
-.
+UNKNOWN STATUS
 ZendTest\Cache\Storage\Adapter\AbstractZendServerTest::testSetItem
-.
+F
 ZendTest\Cache\Storage\Adapter\ApcTest::testAddItemReturnsFalseIfItemAlreadyExists
 S
 ZendTest\Cache\Storage\Adapter\ApcTest::testAddItemReturnsFalseIfNonWritable
@@ -4061,21 +4019,29 @@ ZendTest\Cache\Storage\Adapter\FilesystemTest::testAddItemReturnsFalseIfItemAlre
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testAddItemReturnsFalseIfNonWritable
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testAddItemsReturnsFailedKeys
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testAddNewItem
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testCheckAndSetItem
 F
+ZendTest\Cache\Storage\Adapter\FilesystemTest::testClearByNamespace
+FATAL
+ZendTest\Cache\Storage\Adapter\FilesystemTest::testClearByPrefix
+E
+ZendTest\Cache\Storage\Adapter\FilesystemTest::testClearByPrefixThrowsInvalidArgumentExceptionOnEmptyPrefix
+.
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testDatatypesCapability
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testDecrementItem
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testDecrementItemInitialValue
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testDecrementItemReturnsFalseIfNonWritable
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testDecrementItemsReturnsEmptyArrayIfNonWritable
-.
+F
+ZendTest\Cache\Storage\Adapter\FilesystemTest::testFlush
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testGetCapabilities
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testGetItemReturnsNullIfNonReadable
@@ -4089,7 +4055,7 @@ F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testGetItemsReturnsEmptyArrayIfNonReadable
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testGetItemsReturnsKeyValuePairsOfFoundItems
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testGetMetadata
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testGetMetadataReturnsFalseIfNonReadable
@@ -4101,7 +4067,7 @@ ZendTest\Cache\Storage\Adapter\FilesystemTest::testGetMetadataWithAtime
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testGetMetadataWithCtime
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testGetMetadatas
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testGetMetadatasReturnsEmptyArrayIfNonReadable
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testGettersAndSettersOfOptionsExists
@@ -4117,19 +4083,19 @@ ZendTest\Cache\Storage\Adapter\FilesystemTest::testHasItemReturnsTrueOnValidItem
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testHasItemsReturnsEmptyArrayIfNonReadable
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testHasItemsReturnsKeysOfFoundItems
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testIncrementItem
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testIncrementItemInitialValue
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testIncrementItemReturnsFalseIfNonWritable
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testIncrementItemsResturnsKeyValuePairsOfWrittenItems
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testIncrementItemsReturnsEmptyArrayIfNonWritable
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testIterator
-HipHop Fatal error: Class undefined: GlobIterator in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/library/Zend/Cache/Storage/Adapter/FilesystemIterator.php on line 63
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testKeyCapabilities
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testNormalizeCacheDir
@@ -4145,21 +4111,21 @@ ZendTest\Cache\Storage\Adapter\FilesystemTest::testOptionsGetAndSetDefault
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testRemoveItemReturnsFalseOnMissingItem
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testRemoveItemsReturnsMissingKeys
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testReplaceExistingItem
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testReplaceItemReturnsFalseIfNonWritable
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testReplaceItemReturnsFalseOnMissingItem
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testReplaceItemsReturnsFailedKeys
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetAndGetExpiredItem
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetAndGetExpiredItems
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetAndGetItemOfDifferentTypes
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetCacheDirNoDirectoryException
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetCacheDirNotReadableException
@@ -4183,13 +4149,13 @@ ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetFilePermissionThrowsExcept
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetFilePermissionThrowsExceptionIfNotWritable
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetGetHasAndRemoveItemWithNamespace
-.
+F
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetGetHasAndRemoveItemWithoutNamespace
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetGetHasAndRemoveItemsWithNamespace
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetGetHasAndRemoveItemsWithoutNamespace
-.
+E
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetItemReturnsFalseIfNonWritable
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testSetNoAtimeChangesAtimeOfMetadataCapability
@@ -4388,66 +4354,16 @@ ZendTest\Cache\Storage\Adapter\MemcachedTest::testTouchItemsReturnsGivenKeysIfNo
 S
 ZendTest\Cache\Storage\Adapter\MemcachedTest::testTtlCapabilities
 S
-ZendTest\Cache\Storage\Adapter\MemoryTest::testAddItemReturnsFalseIfItemAlreadyExists
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testAddItemReturnsFalseIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testAddItemsReturnsFailedKeys
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testAddNewItem
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testCheckAndSetItem
-F
-ZendTest\Cache\Storage\Adapter\MemoryTest::testClearByNamespace
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testClearByNamespaceThrowsInvalidArgumentExceptionOnEmptyNamespace
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testClearByPrefix
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testClearByPrefixThrowsInvalidArgumentExceptionOnEmptyPrefix
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testClearExpired
-F
 ZendTest\Cache\Storage\Adapter\MemoryTest::testDatatypesCapability
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testDecrementItem
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testDecrementItemInitialValue
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testDecrementItemReturnsFalseIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testDecrementItemsReturnsEmptyArrayIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testFlush
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testGetAvailableSpace
 .
 ZendTest\Cache\Storage\Adapter\MemoryTest::testGetCapabilities
 .
-ZendTest\Cache\Storage\Adapter\MemoryTest::testGetItemReturnsNullIfNonReadable
-.
 ZendTest\Cache\Storage\Adapter\MemoryTest::testGetItemReturnsNullOnExpiredItem
-.
+UNKNOWN STATUS
 ZendTest\Cache\Storage\Adapter\MemoryTest::testGetItemReturnsNullOnMissingItem
 .
 ZendTest\Cache\Storage\Adapter\MemoryTest::testGetItemSetsSuccessFlag
 F
-ZendTest\Cache\Storage\Adapter\MemoryTest::testGetItemsReturnsEmptyArrayIfNonReadable
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testGetItemsReturnsKeyValuePairsOfFoundItems
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testGetMetadata
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testGetMetadataReturnsFalseIfNonReadable
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testGetMetadataReturnsFalseOnMissingItem
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testGetMetadatas
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testGetMetadatasReturnsEmptyArrayIfNonReadable
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testGetTotalSpace
-.
 ZendTest\Cache\Storage\Adapter\MemoryTest::testGettersAndSettersOfOptionsExists
 .
 ZendTest\Cache\Storage\Adapter\MemoryTest::testHasItemNonReadable
@@ -4461,70 +4377,18 @@ ZendTest\Cache\Storage\Adapter\MemoryTest::testHasItemReturnsTrueOnValidItem
 ZendTest\Cache\Storage\Adapter\MemoryTest::testHasItemsReturnsEmptyArrayIfNonReadable
 .
 ZendTest\Cache\Storage\Adapter\MemoryTest::testHasItemsReturnsKeysOfFoundItems
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testIncrementItem
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testIncrementItemInitialValue
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testIncrementItemReturnsFalseIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testIncrementItemsResturnsKeyValuePairsOfWrittenItems
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testIncrementItemsReturnsEmptyArrayIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testIterator
-.
+E
 ZendTest\Cache\Storage\Adapter\MemoryTest::testKeyCapabilities
 .
-ZendTest\Cache\Storage\Adapter\MemoryTest::testOptimize
-S
 ZendTest\Cache\Storage\Adapter\MemoryTest::testOptionNamesValid
 .
 ZendTest\Cache\Storage\Adapter\MemoryTest::testOptionsFluentInterface
 .
 ZendTest\Cache\Storage\Adapter\MemoryTest::testOptionsGetAndSetDefault
 .
-ZendTest\Cache\Storage\Adapter\MemoryTest::testRemoveItemReturnsFalseOnMissingItem
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testRemoveItemsReturnsMissingKeys
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testReplaceExistingItem
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testReplaceItemReturnsFalseIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testReplaceItemReturnsFalseOnMissingItem
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testReplaceItemsReturnsFailedKeys
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testSetAndGetExpiredItem
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testSetAndGetExpiredItems
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testSetAndGetItemOfDifferentTypes
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testSetGetHasAndRemoveItemWithNamespace
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testSetGetHasAndRemoveItemWithoutNamespace
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testSetGetHasAndRemoveItemsWithNamespace
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testSetGetHasAndRemoveItemsWithoutNamespace
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testSetItemReturnsFalseIfNonWritable
-.
 ZendTest\Cache\Storage\Adapter\MemoryTest::testSupportedMetadataCapability
 .
-ZendTest\Cache\Storage\Adapter\MemoryTest::testTaggable
-.
 ZendTest\Cache\Storage\Adapter\MemoryTest::testThrowOutOfSpaceException
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testTouchItem
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testTouchItemReturnsFalseIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testTouchItemReturnsFalseOnMissingItem
-.
-ZendTest\Cache\Storage\Adapter\MemoryTest::testTouchItemsReturnsGivenKeysIfNonWritable
 .
 ZendTest\Cache\Storage\Adapter\MemoryTest::testTtlCapabilities
 .
@@ -4713,35 +4577,17 @@ ZendTest\Cache\Storage\Adapter\SessionTest::testAddItemReturnsFalseIfItemAlready
 ZendTest\Cache\Storage\Adapter\SessionTest::testAddItemReturnsFalseIfNonWritable
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testAddItemsReturnsFailedKeys
-.
+E
 ZendTest\Cache\Storage\Adapter\SessionTest::testAddNewItem
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testCheckAndSetItem
 F
-ZendTest\Cache\Storage\Adapter\SessionTest::testClearByNamespace
-S
-ZendTest\Cache\Storage\Adapter\SessionTest::testClearByNamespaceThrowsInvalidArgumentExceptionOnEmptyNamespace
-S
-ZendTest\Cache\Storage\Adapter\SessionTest::testClearByPrefix
-.
-ZendTest\Cache\Storage\Adapter\SessionTest::testClearByPrefixThrowsInvalidArgumentExceptionOnEmptyPrefix
-.
-ZendTest\Cache\Storage\Adapter\SessionTest::testClearExpired
-S
 ZendTest\Cache\Storage\Adapter\SessionTest::testDatatypesCapability
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testDecrementItem
-.
+F
 ZendTest\Cache\Storage\Adapter\SessionTest::testDecrementItemInitialValue
-.
-ZendTest\Cache\Storage\Adapter\SessionTest::testDecrementItemReturnsFalseIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\SessionTest::testDecrementItemsReturnsEmptyArrayIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\SessionTest::testFlush
-.
-ZendTest\Cache\Storage\Adapter\SessionTest::testGetAvailableSpace
-S
+UNKNOWN STATUS
 ZendTest\Cache\Storage\Adapter\SessionTest::testGetCapabilities
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testGetItemReturnsNullIfNonReadable
@@ -4755,7 +4601,7 @@ F
 ZendTest\Cache\Storage\Adapter\SessionTest::testGetItemsReturnsEmptyArrayIfNonReadable
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testGetItemsReturnsKeyValuePairsOfFoundItems
-.
+E
 ZendTest\Cache\Storage\Adapter\SessionTest::testGetMetadata
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testGetMetadataReturnsFalseIfNonReadable
@@ -4763,11 +4609,9 @@ ZendTest\Cache\Storage\Adapter\SessionTest::testGetMetadataReturnsFalseIfNonRead
 ZendTest\Cache\Storage\Adapter\SessionTest::testGetMetadataReturnsFalseOnMissingItem
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testGetMetadatas
-.
+E
 ZendTest\Cache\Storage\Adapter\SessionTest::testGetMetadatasReturnsEmptyArrayIfNonReadable
 .
-ZendTest\Cache\Storage\Adapter\SessionTest::testGetTotalSpace
-S
 ZendTest\Cache\Storage\Adapter\SessionTest::testGettersAndSettersOfOptionsExists
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testHasItemNonReadable
@@ -4781,23 +4625,19 @@ ZendTest\Cache\Storage\Adapter\SessionTest::testHasItemReturnsTrueOnValidItem
 ZendTest\Cache\Storage\Adapter\SessionTest::testHasItemsReturnsEmptyArrayIfNonReadable
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testHasItemsReturnsKeysOfFoundItems
-.
+E
 ZendTest\Cache\Storage\Adapter\SessionTest::testIncrementItem
-.
+F
 ZendTest\Cache\Storage\Adapter\SessionTest::testIncrementItemInitialValue
-.
+F
 ZendTest\Cache\Storage\Adapter\SessionTest::testIncrementItemReturnsFalseIfNonWritable
-.
+F
 ZendTest\Cache\Storage\Adapter\SessionTest::testIncrementItemsResturnsKeyValuePairsOfWrittenItems
-.
+E
 ZendTest\Cache\Storage\Adapter\SessionTest::testIncrementItemsReturnsEmptyArrayIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\SessionTest::testIterator
-.
+F
 ZendTest\Cache\Storage\Adapter\SessionTest::testKeyCapabilities
 .
-ZendTest\Cache\Storage\Adapter\SessionTest::testOptimize
-S
 ZendTest\Cache\Storage\Adapter\SessionTest::testOptionNamesValid
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testOptionsFluentInterface
@@ -4807,42 +4647,32 @@ ZendTest\Cache\Storage\Adapter\SessionTest::testOptionsGetAndSetDefault
 ZendTest\Cache\Storage\Adapter\SessionTest::testRemoveItemReturnsFalseOnMissingItem
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testRemoveItemsReturnsMissingKeys
-.
+E
 ZendTest\Cache\Storage\Adapter\SessionTest::testReplaceExistingItem
-.
+F
 ZendTest\Cache\Storage\Adapter\SessionTest::testReplaceItemReturnsFalseIfNonWritable
-.
+F
 ZendTest\Cache\Storage\Adapter\SessionTest::testReplaceItemReturnsFalseOnMissingItem
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testReplaceItemsReturnsFailedKeys
-.
+E
 ZendTest\Cache\Storage\Adapter\SessionTest::testSetAndGetExpiredItem
 S
 ZendTest\Cache\Storage\Adapter\SessionTest::testSetAndGetExpiredItems
 S
 ZendTest\Cache\Storage\Adapter\SessionTest::testSetAndGetItemOfDifferentTypes
-.
+F
 ZendTest\Cache\Storage\Adapter\SessionTest::testSetGetHasAndRemoveItemWithNamespace
-.
+F
 ZendTest\Cache\Storage\Adapter\SessionTest::testSetGetHasAndRemoveItemWithoutNamespace
-.
+F
 ZendTest\Cache\Storage\Adapter\SessionTest::testSetGetHasAndRemoveItemsWithNamespace
-.
+E
 ZendTest\Cache\Storage\Adapter\SessionTest::testSetGetHasAndRemoveItemsWithoutNamespace
-.
+E
 ZendTest\Cache\Storage\Adapter\SessionTest::testSetItemReturnsFalseIfNonWritable
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testSupportedMetadataCapability
-.
-ZendTest\Cache\Storage\Adapter\SessionTest::testTaggable
-S
-ZendTest\Cache\Storage\Adapter\SessionTest::testTouchItem
-S
-ZendTest\Cache\Storage\Adapter\SessionTest::testTouchItemReturnsFalseIfNonWritable
-.
-ZendTest\Cache\Storage\Adapter\SessionTest::testTouchItemReturnsFalseOnMissingItem
-.
-ZendTest\Cache\Storage\Adapter\SessionTest::testTouchItemsReturnsGivenKeysIfNonWritable
 .
 ZendTest\Cache\Storage\Adapter\SessionTest::testTtlCapabilities
 .
@@ -5621,7 +5451,7 @@ ZendTest\Code\Generator\ClassGeneratorTest::testCreateFromArrayWithDocBlockInsta
 ZendTest\Code\Generator\ClassGeneratorTest::testExtendedClassAccessors
 .
 ZendTest\Code\Generator\ClassGeneratorTest::testExtendedClassProperies
-E
+.
 ZendTest\Code\Generator\ClassGeneratorTest::testHasMethod
 .
 ZendTest\Code\Generator\ClassGeneratorTest::testHasProperty
@@ -5633,7 +5463,7 @@ ZendTest\Code\Generator\ClassGeneratorTest::testMethodAccessors
 ZendTest\Code\Generator\ClassGeneratorTest::testNameAccessors
 .
 ZendTest\Code\Generator\ClassGeneratorTest::testNonNamespaceClassReturnsAllMethods
-E
+.
 ZendTest\Code\Generator\ClassGeneratorTest::testPassingANamespacedClassnameShouldGenerateAClassnameWithoutItsNamespace
 .
 ZendTest\Code\Generator\ClassGeneratorTest::testPassingANamespacedClassnameShouldGenerateANamespaceDeclaration
@@ -5753,7 +5583,7 @@ ZendTest\Code\Generator\FileGeneratorTest::testToString
 ZendTest\Code\Generator\MethodGeneratorTest::testCreateFromArray
 .
 ZendTest\Code\Generator\MethodGeneratorTest::testDefaultValueGenerationDoesNotIncludeTrailingSemicolon
-E
+.
 ZendTest\Code\Generator\MethodGeneratorTest::testDocBlockGetterAndSetter
 .
 ZendTest\Code\Generator\MethodGeneratorTest::testMethodBodyGetterAndSetter
@@ -5771,60 +5601,6 @@ ZendTest\Code\Generator\MethodGeneratorTest::testMethodWithFinalModifierIsEmitte
 ZendTest\Code\Generator\MethodGeneratorTest::testMethodWithFinalModifierIsNotEmittedWhenMethodIsAbstract
 .
 ZendTest\Code\Generator\MethodGeneratorTest::testMethodWithStaticModifierIsEmitted
-.
-ZendTest\Code\Generator\ParameterGeneratorTest::testCallableTypeHint
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testDefaultValueGetterAndSetterPersistValue
-.
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #0 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #1 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #10 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #11 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #12 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #13 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #14 
-HipHop Fatal error: Class undefined: ZendTest\Code\Generator\TestAsset\ZendTest\Code\Generator\TestAsset\ParameterClass
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #2 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #3 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #4 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #5 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #6 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #7 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #8 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGenerate with data set #9 
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGetArrayHint
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGetDefaultValue
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGetParameterName
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGetParameterType
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGetReference
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testFromReflectionGetWithNativeType
-E
-ZendTest\Code\Generator\ParameterGeneratorTest::testGenerateIsCorrect
-.
-ZendTest\Code\Generator\ParameterGeneratorTest::testNameGetterAndSetterPersistValue
-.
-ZendTest\Code\Generator\ParameterGeneratorTest::testPositionGetterAndSetterPersistValue
-.
-ZendTest\Code\Generator\ParameterGeneratorTest::testTypeGetterAndSetterPersistValue
 .
 ZendTest\Code\Generator\PropertyValueGeneratorTest::testPropertyValueAddsSemicolonToValueGenerator
 .
@@ -5937,7 +5713,7 @@ ZendTest\Code\Reflection\FileReflectionTest::testFileReflectorRequiredFunctionsD
 ZendTest\Code\Reflection\FunctionReflectionTest::testFunctionDocBlockReturn
 .
 ZendTest\Code\Reflection\FunctionReflectionTest::testParemeterReturn
-E
+.
 ZendTest\Code\Reflection\MethodReflectionTest::testDeclaringClassReturn
 .
 ZendTest\Code\Reflection\MethodReflectionTest::testGetBodyReturnsCorrectBody
@@ -5945,29 +5721,29 @@ ZendTest\Code\Reflection\MethodReflectionTest::testGetBodyReturnsCorrectBody
 ZendTest\Code\Reflection\MethodReflectionTest::testGetContentsReturnsCorrectContent
 .
 ZendTest\Code\Reflection\MethodReflectionTest::testParemeterReturn
-E
+.
 ZendTest\Code\Reflection\MethodReflectionTest::testStartLine
 .
 ZendTest\Code\Reflection\ParameterReflectionTest::testCallableTypeHint
 E
 ZendTest\Code\Reflection\ParameterReflectionTest::testClassReturn
-E
+.
 ZendTest\Code\Reflection\ParameterReflectionTest::testClassReturn_NoClassGiven_ReturnsNull
-E
+.
 ZendTest\Code\Reflection\ParameterReflectionTest::testDeclaringClassReturn
 E
 ZendTest\Code\Reflection\ParameterReflectionTest::testTypeReturn with data set #0 
-E
+.
 ZendTest\Code\Reflection\ParameterReflectionTest::testTypeReturn with data set #1 
-E
+.
 ZendTest\Code\Reflection\ParameterReflectionTest::testTypeReturn with data set #2 
-E
+.
 ZendTest\Code\Reflection\ParameterReflectionTest::testTypeReturn with data set #3 
-E
+.
 ZendTest\Code\Reflection\ParameterReflectionTest::testTypeReturn with data set #4 
-E
+.
 ZendTest\Code\Reflection\PropertyReflectionTest::testAnnotationScanningIsPossible
-E
+.
 ZendTest\Code\Reflection\PropertyReflectionTest::testDeclaringClassReturn
 .
 ZendTest\Code\Reflection\ReflectionDocBlockTagTest::testAllowsMultipleSpacesInDocBlockTagLine
@@ -5993,13 +5769,13 @@ ZendTest\Code\Reflection\ReflectionDocBlockTagTest::testTypeParam
 ZendTest\Code\Reflection\ReflectionDocBlockTagTest::testVariableName
 .
 ZendTest\Code\Scanner\AnnotationScannerTest::testScannerWorks
-E
+.
 ZendTest\Code\Scanner\CachingFileScannerTest::testCachingFileScannerWillUseSameInternalFileScannerWithMatchingFileNameAnAnnotationManagerObject
 .
 ZendTest\Code\Scanner\ClassScannerTest::testClassScannerCanReturnLineNumbers
 .
 ZendTest\Code\Scanner\ClassScannerTest::testClassScannerCanScanAnnotations
-E
+.
 ZendTest\Code\Scanner\ClassScannerTest::testClassScannerCanScanInterface
 .
 ZendTest\Code\Scanner\ClassScannerTest::testClassScannerHasClassInformation
@@ -8705,27 +8481,27 @@ ZendTest\Di\Definition\ClassDefinitionTest::testHasMethod
 ZendTest\Di\Definition\ClassDefinitionTest::testHasMethodParameters
 .
 ZendTest\Di\Definition\CompilerDefinitionTest::testCompilerAllowReflectionException
-E
+.
 ZendTest\Di\Definition\CompilerDefinitionTest::testCompilerCompilesAgainstConstructorInjectionAssets
-E
+.
 ZendTest\Di\Definition\CompilerDefinitionTest::testCompilerDirectoryScannerAndFileScanner
-E
+.
 ZendTest\Di\Definition\CompilerDefinitionTest::testCompilerFileScanner
-E
+.
 ZendTest\Di\Definition\CompilerDefinitionTest::testCompilerReflectionException
-F
+.
 ZendTest\Di\Definition\CompilerDefinitionTest::testCompilerSupertypes
-E
+.
 ZendTest\Di\Definition\CompilerDefinitionTest::testExcludeAwareMethodsWithoutParameters
-E
+.
 ZendTest\Di\Definition\CompilerDefinitionTest::testStaticMethodsNotIncludedInDefinitions
-E
+.
 ZendTest\Di\Definition\RuntimeDefinitionTest::testExceptionDefaultValue
-E
+F
 ZendTest\Di\Definition\RuntimeDefinitionTest::testExcludeAwareMethodsWithoutParameters
-E
+.
 ZendTest\Di\Definition\RuntimeDefinitionTest::testIncludesDefaultMethodParameters
-E
+.
 ZendTest\Di\Definition\RuntimeDefinitionTest::testStaticMethodsNotIncludedInDefinitions
 .
 ZendTest\Di\DiCompatibilityTest::testCanCreateInstanceWithConstructorRequiredParameter with data set #0 
@@ -8735,7 +8511,7 @@ ZendTest\Di\DiCompatibilityTest::testCanCreateInstanceWithConstructorRequiredPar
 ZendTest\Di\DiCompatibilityTest::testCanCreateInstanceWithConstructorRequiredParameter with data set #2 
 .
 ZendTest\Di\DiCompatibilityTest::testCanCreateInstanceWithConstructorRequiredParameterWithDi with data set #0 
-E
+.
 ZendTest\Di\DiCompatibilityTest::testCanCreateInstanceWithConstructorRequiredParameterWithDi with data set #1 
 E
 ZendTest\Di\DiCompatibilityTest::testCanCreateInstanceWithConstructorRequiredParameterWithDi with data set #2 
@@ -8745,13 +8521,13 @@ E
 ZendTest\Di\DiCompatibilityTest::testDiSimple with data set #1 
 E
 ZendTest\Di\DiCompatibilityTest::testDiSimple with data set #2 
-E
+.
 ZendTest\Di\DiCompatibilityTest::testDiSimple with data set #3 
 E
 ZendTest\Di\DiCompatibilityTest::testDiSimple with data set #4 
-E
+.
 ZendTest\Di\DiCompatibilityTest::testDiSimple with data set #5 
-E
+.
 ZendTest\Di\DiCompatibilityTest::testDiSimple with data set #6 
 E
 ZendTest\Di\DiCompatibilityTest::testRaiseErrorMissingConstructorRequiredParameter with data set #0 
@@ -8761,9 +8537,9 @@ ZendTest\Di\DiCompatibilityTest::testRaiseErrorMissingConstructorRequiredParamet
 ZendTest\Di\DiCompatibilityTest::testRaiseErrorMissingConstructorRequiredParameter with data set #2 
 .
 ZendTest\Di\DiCompatibilityTest::testWillThrowExceptionMissingConstructorRequiredParameterWithDi with data set #0 
-F
+.
 ZendTest\Di\DiCompatibilityTest::testWillThrowExceptionMissingConstructorRequiredParameterWithDi with data set #1 
-F
+.
 ZendTest\Di\DiCompatibilityTest::testWillThrowExceptionMissingConstructorRequiredParameterWithDi with data set #2 
 F
 ZendTest\Di\DiTest::testDiConstructorCanTakeDependencies
@@ -8771,15 +8547,15 @@ ZendTest\Di\DiTest::testDiConstructorCanTakeDependencies
 ZendTest\Di\DiTest::testDiHasBuiltInImplementations
 .
 ZendTest\Di\DiTest::testDiWillInjectClassNameAsStringAtCallTime
-E
+.
 ZendTest\Di\DiTest::testDiWillInjectDefaultParameters
-E
+.
 ZendTest\Di\DiTest::testDiWillInjectDependenciesForAlias
-E
+.
 ZendTest\Di\DiTest::testDiWillInjectDependenciesForInstance
-E
+.
 ZendTest\Di\DiTest::testGetInstanceWithParamsHasSameNameAsDependencyParam
-E
+.
 ZendTest\Di\DiTest::testGetRetrievesDifferentInstanceOnSubsequentCallsIfSharingDisabled
 .
 ZendTest\Di\DiTest::testGetRetrievesObjectWithMatchingClassDefinition
@@ -8787,19 +8563,19 @@ ZendTest\Di\DiTest::testGetRetrievesObjectWithMatchingClassDefinition
 ZendTest\Di\DiTest::testGetRetrievesSameInstanceOnSubsequentCalls
 .
 ZendTest\Di\DiTest::testGetRetrievesSameSharedInstanceOnUsingInConstructor
-E
+.
 ZendTest\Di\DiTest::testGetThrowsExceptionWhenMissingParametersAreEncountered
-F
+.
 ZendTest\Di\DiTest::testGetThrowsExceptionWhenUnknownClassIsUsed
 .
 ZendTest\Di\DiTest::testGetWillResolveConstructorInjectionDependencies
-E
+.
 ZendTest\Di\DiTest::testGetWillResolveConstructorInjectionDependenciesAndInstanceAreTheSame
-E
+.
 ZendTest\Di\DiTest::testGetWillResolveSetterInjectionDependencies
-E
+.
 ZendTest\Di\DiTest::testGetWillResolveSetterInjectionDependenciesAndInstanceAreTheSame
-E
+.
 ZendTest\Di\DiTest::testGetWithParamsWillUseSharedInstance
 .
 ZendTest\Di\DiTest::testInjectionCanHandleDisambiguationViaNames
@@ -8807,19 +8583,19 @@ ZendTest\Di\DiTest::testInjectionCanHandleDisambiguationViaNames
 ZendTest\Di\DiTest::testInjectionCanHandleDisambiguationViaPositions
 .
 ZendTest\Di\DiTest::testInjectionCanHandleMultipleInjectionsWithMultipleArguments
-E
+.
 ZendTest\Di\DiTest::testInjectionForSetterInjectionWillConsultSupertypeDefinitionInClassDefinition
-E
+.
 ZendTest\Di\DiTest::testInjectionForSetterInjectionWillConsultSupertypeDefinitions
-E
+.
 ZendTest\Di\DiTest::testInjectionForSetterInjectionWillNotUseSupertypeWhenChildParamIsExplicitlyDefined
-E
+.
 ZendTest\Di\DiTest::testInjectionInstancesCanBeInjectedMultipleTimes
-E
+.
 ZendTest\Di\DiTest::testMarkingClassAsNotSharedInjectsNewInstanceIntoAllRequestersButDependentsAreShared
-E
+.
 ZendTest\Di\DiTest::testMatchPreferredClassWithAwareInterface
-E
+.
 ZendTest\Di\DiTest::testNewInstanceCanHandleClassesCreatedByCallback
 .
 ZendTest\Di\DiTest::testNewInstanceCanHandleComplexCallback
@@ -8831,31 +8607,31 @@ ZendTest\Di\DiTest::testNewInstanceReturnsInstanceThatIsNotSharedWithGet
 ZendTest\Di\DiTest::testNewInstanceReturnsInstanceThatIsSharedWithGet
 .
 ZendTest\Di\DiTest::testNewInstanceThrowsExceptionOnBasicCircularDependency
-F
+.
 ZendTest\Di\DiTest::testNewInstanceThrowsExceptionOnThreeLevelCircularDependency
-F
+.
 ZendTest\Di\DiTest::testNewInstanceThrowsExceptionWhenEnteringInMiddleOfCircularDependency
-F
+.
 ZendTest\Di\DiTest::testNewInstanceWillResolveConstructorInjectionDependencies
-E
+.
 ZendTest\Di\DiTest::testNewInstanceWillResolveConstructorInjectionDependenciesWithMoreThan2Dependencies
-E
+.
 ZendTest\Di\DiTest::testNewInstanceWillResolveConstructorInjectionDependenciesWithProperties
-E
+.
 ZendTest\Di\DiTest::testNewInstanceWillResolveSetterInjectionDependencies
-E
+.
 ZendTest\Di\DiTest::testNewInstanceWillResolveSetterInjectionDependenciesWithProperties
-E
+.
 ZendTest\Di\DiTest::testNewInstanceWillThrowAnClassNotFoundExceptionWhenClassIsAnInterface
 .
 ZendTest\Di\DiTest::testNewInstanceWillThrowExceptionOnConstructorInjectionDependencyWithMissingParameter
-F
+.
 ZendTest\Di\DiTest::testNewInstanceWillUsePreferredClassForInterfaceHints
-E
+.
 ZendTest\Di\DiTest::testWillNotCallStaticInjectionMethods
 .
 ZendTest\Di\DiTest::testWillNotUsePreferredClassForInterfaceHints
-E
+.
 ZendTest\Di\InstanceManagerTest::testInstanceManagerCanPersistInstances
 .
 ZendTest\Di\InstanceManagerTest::testInstanceManagerCanPersistInstancesWithParameters
@@ -8885,19 +8661,19 @@ ZendTest\Di\ServiceLocatorTest::testRetrievingUnknownServiceResultsInNullValue
 ZendTest\Di\ServiceLocatorTest::testReturnValueOfCallbackIsCachedBetweenRequestsToService
 .
 ZendTest\Di\ServiceLocator\DependencyInjectorProxyTest::testWillDiscoverInjectedMethodParameters
-E
+.
 ZendTest\Di\ServiceLocator\GeneratorTest::testAllowsRetrievingClassFileCodeGenerationObject
-E
+.
 ZendTest\Di\ServiceLocator\GeneratorTest::testCanSpecifyNamespaceForGeneratedPhpClassfile
-E
+.
 ZendTest\Di\ServiceLocator\GeneratorTest::testClassNamesInstantiatedDirectlyShouldBeFullyQualified
-E
+.
 ZendTest\Di\ServiceLocator\GeneratorTest::testCreatesContainerClassFromConfiguredDependencyInjector
-E
+.
 ZendTest\Di\ServiceLocator\GeneratorTest::testCreatesContainerClassWithCasesForEachService
-E
+.
 ZendTest\Di\ServiceLocator\GeneratorTest::testCreatesContainerClassWithMethodsForEachServiceAndAlias
-E
+.
 ZendTest\Di\ServiceLocator\GeneratorTest::testNullArgumentsResultInEmptyMethodParameterList
 I
 ZendTest\Di\ServiceLocator\GeneratorTest::testNullAsLastArgumentsResultsInTruncatedParameterList
@@ -8977,7 +8753,7 @@ ZendTest\Dom\QueryTest::testResultShouldIndicateNumberOfFoundNodes
 ZendTest\Dom\QueryTest::testShouldAllowSettingDocument
 .
 ZendTest\Dom\QueryTest::testXpathPhpFunctionsShouldBeDisableByDefault
-HipHop Fatal error: Call to undefined method ZendTest\Dom\QueryTest::assertFails from context ZendTest\Dom\QueryTest in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/tests/ZendTest/Dom/QueryTest.php on line 200
+FATAL
 ZendTest\Escaper\EscaperTest::testCssEscapingConvertsSpecialChars
 .
 ZendTest\Escaper\EscaperTest::testCssEscapingEscapesOwaspRecommendedRanges
@@ -9365,9 +9141,9 @@ ZendTest\Feed\PubSubHubbub\Subscriber\CallbackTest::testValidatesValidHttpGetDat
 ZendTest\Feed\Reader\Entry\AtomStandaloneEntryTest::testGetsAuthorFromAtom10
 .
 ZendTest\Feed\Reader\Entry\AtomStandaloneEntryTest::testGetsAuthorsFromAtom10
-F
+.
 ZendTest\Feed\Reader\Entry\AtomStandaloneEntryTest::testGetsCategoriesFromAtom10
-F
+.
 ZendTest\Feed\Reader\Entry\AtomStandaloneEntryTest::testGetsCommentLinkFromAtom10
 .
 ZendTest\Feed\Reader\Entry\AtomStandaloneEntryTest::testGetsContentFromAtom10
@@ -9399,25 +9175,25 @@ ZendTest\Feed\Reader\Entry\AtomTest::testGetsAuthorFromAtom03
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsAuthorFromAtom10
 .
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsAuthorsFromAtom03
-F
+.
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsAuthorsFromAtom10
-F
+.
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsBaseUriFromAtom10_FromEntryElement
 .
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsBaseUriFromAtom10_FromFeedElement
 .
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsCategoriesFromAtom03_Atom10Extension
-F
+.
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsCategoriesFromAtom03_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsCategoriesFromAtom03_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsCategoriesFromAtom03_None
-F
+.
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsCategoriesFromAtom10
-F
+.
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsCategoriesFromAtom10_None
-F
+.
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsCommentLinkFromAtom03
 .
 ZendTest\Feed\Reader\Entry\AtomTest::testGetsCommentLinkFromAtom10
@@ -9551,111 +9327,111 @@ ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorFromRss20_None
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss090
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss090_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss090_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss090_None
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss091
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss091_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss091_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss091_None
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss092
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss092_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss092_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss092_None
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss093
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss093_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss093_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss093_None
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss094
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss094_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss094_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss094_None
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss10
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss10_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss10_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss10_None
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss20
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss20_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss20_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsAuthorsFromRss20_None
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss090_Atom10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss090_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss090_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss090_None
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss091_Atom10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss091_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss091_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss091_None
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss092_Atom10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss092_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss092_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss092_None
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss093_Atom10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss093_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss093_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss093_None
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss094_Atom10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss094_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss094_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss094_None
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss10_Atom10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss10_Dc10
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss10_Dc11
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss10_None
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss20
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCategoriesFromRss20_None
-F
+.
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCommentCountFromRss090_Atom10
 .
 ZendTest\Feed\Reader\Entry\RssTest::testGetsCommentCountFromRss090_None
@@ -10097,9 +9873,9 @@ ZendTest\Feed\Reader\Entry\RssTest::testGetsTitleFromRss20_Dc11
 ZendTest\Feed\Reader\Entry\RssTest::testGetsTitleFromRss20_None
 .
 ZendTest\Feed\Reader\Feed\AtomSourceTest::testGetsAuthorArrayFromAtom10
-F
+.
 ZendTest\Feed\Reader\Feed\AtomSourceTest::testGetsCategoriesFromAtom10
-F
+.
 ZendTest\Feed\Reader\Feed\AtomSourceTest::testGetsCopyrightFromAtom10
 .
 ZendTest\Feed\Reader\Feed\AtomSourceTest::testGetsDateCreatedFromAtom10
@@ -10129,23 +9905,23 @@ ZendTest\Feed\Reader\Feed\AtomSourceTest::testGetsTitleFromAtom10
 ZendTest\Feed\Reader\Feed\AtomTest::testCountableInterface
 .
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsAuthorArrayFromAtom03
-F
+.
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsAuthorArrayFromAtom10
-F
+.
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsBaseUriFromAtom10
 .
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsCategoriesFromAtom03_Atom10Extension
-F
+.
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsCategoriesFromAtom03_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsCategoriesFromAtom03_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsCategoriesFromAtom03_None
-F
+.
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsCategoriesFromAtom10
-F
+.
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsCategoriesFromAtom10_None
-F
+.
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsCopyrightFromAtom03
 .
 ZendTest\Feed\Reader\Feed\AtomTest::testGetsCopyrightFromAtom10
@@ -10233,127 +10009,127 @@ ZendTest\Feed\Reader\Feed\CommonTest::testSaveXmlOutputsXmlStringForFeed
 ZendTest\Feed\Reader\Feed\RssTest::testCountableInterface
 .
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss090
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss090_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss090_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss090_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss090_None
 .
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss091
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss091_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss091_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss091_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss091_None
 .
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss092
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss092_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss092_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss092_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss092_None
 .
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss093
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss093_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss093_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss093_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss093_None
 .
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss094
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss094_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss094_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss094_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss094_None
 .
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss10_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss10_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss10_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss10_None
 .
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss20
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss20_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss20_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss20_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsAuthorArrayFromRss20_None
 .
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss090_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss090_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss090_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss090_None
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss091_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss091_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss091_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss091_None
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss092_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss092_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss092_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss092_None
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss093_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss093_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss093_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss093_None
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss094_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss094_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss094_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss094_None
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss10_Atom10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss10_Dc10
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss10_Dc11
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss10_None
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss20
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCategoriesFromRss20_None
-F
+.
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCopyrightFromRss090
 .
 ZendTest\Feed\Reader\Feed\RssTest::testGetsCopyrightFromRss090_Dc10
@@ -10853,7 +10629,7 @@ ZendTest\Feed\Reader\Feed\RssTest::testGetsTitleFromRss20_None
 ZendTest\Feed\Reader\Feed\RssTest::testGetsTitleFromRss20_atom10
 .
 ZendTest\Feed\Reader\Integration\HOnlineComAtom10Test::testGetsAuthors
-F
+.
 ZendTest\Feed\Reader\Integration\HOnlineComAtom10Test::testGetsCopyright
 .
 ZendTest\Feed\Reader\Integration\HOnlineComAtom10Test::testGetsDescription
@@ -10861,7 +10637,7 @@ ZendTest\Feed\Reader\Integration\HOnlineComAtom10Test::testGetsDescription
 ZendTest\Feed\Reader\Integration\HOnlineComAtom10Test::testGetsEncoding
 .
 ZendTest\Feed\Reader\Integration\HOnlineComAtom10Test::testGetsEntryAuthors
-F
+.
 ZendTest\Feed\Reader\Integration\HOnlineComAtom10Test::testGetsEntryContent
 .
 ZendTest\Feed\Reader\Integration\HOnlineComAtom10Test::testGetsEntryCount
@@ -10891,7 +10667,7 @@ ZendTest\Feed\Reader\Integration\HOnlineComAtom10Test::testGetsSingleAuthor
 ZendTest\Feed\Reader\Integration\HOnlineComAtom10Test::testGetsTitle
 .
 ZendTest\Feed\Reader\Integration\LautDeRdfTest::testGetsAuthors
-F
+.
 ZendTest\Feed\Reader\Integration\LautDeRdfTest::testGetsCopyright
 .
 ZendTest\Feed\Reader\Integration\LautDeRdfTest::testGetsDescription
@@ -10899,7 +10675,7 @@ ZendTest\Feed\Reader\Integration\LautDeRdfTest::testGetsDescription
 ZendTest\Feed\Reader\Integration\LautDeRdfTest::testGetsEncoding
 .
 ZendTest\Feed\Reader\Integration\LautDeRdfTest::testGetsEntryAuthors
-F
+.
 ZendTest\Feed\Reader\Integration\LautDeRdfTest::testGetsEntryContent
 .
 ZendTest\Feed\Reader\Integration\LautDeRdfTest::testGetsEntryDescription
@@ -10977,7 +10753,7 @@ ZendTest\Feed\Reader\Integration\PodcastRss2Test::testGetsSummary
 ZendTest\Feed\Reader\Integration\PodcastRss2Test::testGetsTitle
 .
 ZendTest\Feed\Reader\Integration\WordpressAtom10Test::testGetsAuthors
-F
+.
 ZendTest\Feed\Reader\Integration\WordpressAtom10Test::testGetsCopyright
 .
 ZendTest\Feed\Reader\Integration\WordpressAtom10Test::testGetsDescription
@@ -10985,7 +10761,7 @@ ZendTest\Feed\Reader\Integration\WordpressAtom10Test::testGetsDescription
 ZendTest\Feed\Reader\Integration\WordpressAtom10Test::testGetsEncoding
 .
 ZendTest\Feed\Reader\Integration\WordpressAtom10Test::testGetsEntryAuthors
-F
+.
 ZendTest\Feed\Reader\Integration\WordpressAtom10Test::testGetsEntryContent
 .
 ZendTest\Feed\Reader\Integration\WordpressAtom10Test::testGetsEntryCount
@@ -11015,7 +10791,7 @@ ZendTest\Feed\Reader\Integration\WordpressAtom10Test::testGetsSingleAuthor
 ZendTest\Feed\Reader\Integration\WordpressAtom10Test::testGetsTitle
 .
 ZendTest\Feed\Reader\Integration\WordpressRss2DcAtomTest::testGetsAuthors
-F
+.
 ZendTest\Feed\Reader\Integration\WordpressRss2DcAtomTest::testGetsCopyright
 .
 ZendTest\Feed\Reader\Integration\WordpressRss2DcAtomTest::testGetsDescription
@@ -11023,7 +10799,7 @@ ZendTest\Feed\Reader\Integration\WordpressRss2DcAtomTest::testGetsDescription
 ZendTest\Feed\Reader\Integration\WordpressRss2DcAtomTest::testGetsEncoding
 .
 ZendTest\Feed\Reader\Integration\WordpressRss2DcAtomTest::testGetsEntryAuthors
-F
+.
 ZendTest\Feed\Reader\Integration\WordpressRss2DcAtomTest::testGetsEntryContent
 .
 ZendTest\Feed\Reader\Integration\WordpressRss2DcAtomTest::testGetsEntryCount
@@ -11635,7 +11411,7 @@ ZendTest\Feed\Writer\FeedTest::testSetsLink
 ZendTest\Feed\Writer\FeedTest::testSetsTitle
 .
 ZendTest\Feed\Writer\Renderer\Entry\AtomTest::testCategoriesCanBeSet
-F
+.
 ZendTest\Feed\Writer\Renderer\Entry\AtomTest::testCommentCountRendered
 .
 ZendTest\Feed\Writer\Renderer\Entry\AtomTest::testCommentFeedLinksRendered
@@ -11691,9 +11467,9 @@ ZendTest\Feed\Writer\Renderer\Entry\RssTest::testAddsEnclosureThrowsExceptionOnN
 ZendTest\Feed\Writer\Renderer\Entry\RssTest::testAddsEnclosureThrowsExceptionOnNonNumericLength
 .
 ZendTest\Feed\Writer\Renderer\Entry\RssTest::testCategoriesCanBeSet
-F
+.
 ZendTest\Feed\Writer\Renderer\Entry\RssTest::testCategoriesCharDataEncoding
-F
+.
 ZendTest\Feed\Writer\Renderer\Entry\RssTest::testCommentCountRendered
 .
 ZendTest\Feed\Writer\Renderer\Entry\RssTest::testCommentFeedLinksRendered
@@ -11745,9 +11521,9 @@ ZendTest\Feed\Writer\Renderer\Feed\AtomTest::testBaseUrlCanBeSet
 ZendTest\Feed\Writer\Renderer\Feed\AtomTest::testBuildMethodRunsMinimalWriterContainerProperlyBeforeICheckAtomCompliance
 .
 ZendTest\Feed\Writer\Renderer\Feed\AtomTest::testCategoriesCanBeSet
-F
+.
 ZendTest\Feed\Writer\Renderer\Feed\AtomTest::testCategoriesCharDataEncoding
-F
+.
 ZendTest\Feed\Writer\Renderer\Feed\AtomTest::testCopyrightCanBeSet
 .
 ZendTest\Feed\Writer\Renderer\Feed\AtomTest::testCopyrightCharDataEncoding
@@ -11819,9 +11595,9 @@ ZendTest\Feed\Writer\Renderer\Feed\RssTest::testBaseUrlCanBeSet
 ZendTest\Feed\Writer\Renderer\Feed\RssTest::testBuildMethodRunsMinimalWriterContainerProperlyBeforeICheckRssCompliance
 .
 ZendTest\Feed\Writer\Renderer\Feed\RssTest::testCategoriesCanBeSet
-F
+.
 ZendTest\Feed\Writer\Renderer\Feed\RssTest::testCategoriesCharDataEncoding
-F
+.
 ZendTest\Feed\Writer\Renderer\Feed\RssTest::testCopyrightCanBeSet
 .
 ZendTest\Feed\Writer\Renderer\Feed\RssTest::testCopyrightCharDataEncoding
@@ -11911,7 +11687,7 @@ ZendTest\File\ClassFileLocatorTest::testConstructorThrowsInvalidArgumentExceptio
 ZendTest\File\ClassFileLocatorTest::testConstructorThrowsInvalidArgumentExceptionForNonDirectoryIteratorArgument
 .
 ZendTest\File\ClassFileLocatorTest::testIterationShouldReturnOnlyPhpFiles
-HipHop Fatal error: Call to undefined method RecursiveDirectoryIterator::addClass from context Zend\File\ClassFileLocator in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/library/Zend/File/ClassFileLocator.php on line 141
+FATAL
 ZendTest\File\Transfer\Adapter\AbstractTest::testAdapterShouldAllowAddingFilterInstance
 .
 ZendTest\File\Transfer\Adapter\AbstractTest::testAdapterShouldAllowAddingFilterViaPluginManager
@@ -12319,7 +12095,23 @@ E
 ZendTest\Filter\Compress\TarTest::testTarToString
 E
 ZendTest\Filter\Compress\ZipTest::testBasicUsage
-HipHop Fatal error: Not implemented is not implemented yet. in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/library/Zend/Filter/Compress/Zip.php on line 111
+.
+ZendTest\Filter\Compress\ZipTest::testCompressNonExistingTargetFile
+.
+ZendTest\Filter\Compress\ZipTest::testDecompressWillThrowExceptionWhenDecompressingWithNoTarget
+.
+ZendTest\Filter\Compress\ZipTest::testZipCompressDirectory
+.
+ZendTest\Filter\Compress\ZipTest::testZipCompressFile
+.
+ZendTest\Filter\Compress\ZipTest::testZipGetSetArchive
+.
+ZendTest\Filter\Compress\ZipTest::testZipGetSetOptions
+.
+ZendTest\Filter\Compress\ZipTest::testZipGetSetTarget
+.
+ZendTest\Filter\Compress\ZipTest::testZipToString
+.
 ZendTest\Filter\DateTimeFormatterTest::testAcceptDateTimeValue
 .
 ZendTest\Filter\DateTimeFormatterTest::testDateTimeFormatted
@@ -13461,7 +13253,7 @@ ZendTest\Form\FormTest::testBindOnValidateIsTrueByDefault
 ZendTest\Form\FormTest::testBindWithWrongFlagRaisesException
 .
 ZendTest\Form\FormTest::testCallingBindValuesWhenBindOnValidateIsDisabledPopulatesBoundObject
-F
+.
 ZendTest\Form\FormTest::testCallingGetDataPriorToValidationRaisesException
 .
 ZendTest\Form\FormTest::testCallingGetDataReturnsNormalizedDataByDefault
@@ -13481,7 +13273,7 @@ ZendTest\Form\FormTest::testCanAddFileEnctypeFromCollectionAttribute
 ZendTest\Form\FormTest::testCanBindModelsToArraySerializableObjects
 .
 ZendTest\Form\FormTest::testCanBindRawValuesToModel
-F
+.
 ZendTest\Form\FormTest::testCanComposeAnInputFilter
 .
 ZendTest\Form\FormTest::testCanComposeFactory
@@ -13519,13 +13311,13 @@ ZendTest\Form\FormTest::testDoNotApplyEmptyInputFiltersToSubFieldsetOfCollection
 ZendTest\Form\FormTest::testElementValuesArePopulatedFollowingBind
 .
 ZendTest\Form\FormTest::testExtractDataHydratorStrategy
-E
+.
 ZendTest\Form\FormTest::testFactoryCanSetPreferFormInputFilterFlag
 .
 ZendTest\Form\FormTest::testFieldsetValidationGroupStillPreparedWhenEmptyData
 .
 ZendTest\Form\FormTest::testFileInputFilterNotOverwritten
-HipHop Fatal error: Nesting level too deep - recursive dependency? in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/tests/ZendTest/Form/FormTest.php on line 1694
+FATAL
 ZendTest\Form\FormTest::testFormAsFieldsetWillBindValuesToObject
 .
 ZendTest\Form\FormTest::testFormValidationCanHandleNonConsecutiveKeysOfCollectionInData
@@ -13583,7 +13375,7 @@ ZendTest\Form\FormTest::testSettingDataShouldSetElementValues
 ZendTest\Form\FormTest::testSettingValidateAllFlagAfterPartialValidationForcesFullValidation
 .
 ZendTest\Form\FormTest::testSettingValidationGroupBindsOnlyThoseValuesToModel
-F
+.
 ZendTest\Form\FormTest::testShouldThrowExceptionWhenGetInvalidElement
 .
 ZendTest\Form\FormTest::testSpecifyingValidationGroupForNestedFieldsetsForcesPartialValidation
@@ -13591,7 +13383,7 @@ E
 ZendTest\Form\FormTest::testSpecifyingValidationGroupForcesPartialValidation
 .
 ZendTest\Form\FormTest::testUnsetValuesNotBound
-F
+.
 ZendTest\Form\FormTest::testUsesBoundObjectAsDataSourceWhenNoDataSet
 .
 ZendTest\Form\FormTest::testUsesBoundObjectHydratorToPopulateForm
@@ -13599,7 +13391,7 @@ ZendTest\Form\FormTest::testUsesBoundObjectHydratorToPopulateForm
 ZendTest\Form\FormTest::testValidatesEntireDataSetByDefault
 .
 ZendTest\Form\FormTest::testValuesBoundToModelAreNormalizedByDefault
-F
+.
 ZendTest\Form\FormTest::testWillPopulateSubInputFilterFromInputSpecificationsOnFieldsetElements
 .
 ZendTest\Form\FormTest::testWillUseFormInputFilterOverrideOverInputSpecificationFromElement
@@ -18313,7 +18105,7 @@ ZendTest\Http\ResponseTest::testToStringGzip
 ZendTest\Http\ResponseTest::testUnknownCode
 .
 ZendTest\I18n\Translator\Loader\GettextTest::testLoaderFailsToLoadMissingFile
-HipHop Fatal error: Class undefined: Locale in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/tests/ZendTest/I18n/Translator/Loader/GettextTest.php on line 24
+FATAL
 ZendTest\I18n\Translator\Loader\IniTest::testLoaderFailsToLoadBadSyntax
 .
 ZendTest\I18n\Translator\Loader\IniTest::testLoaderFailsToLoadMissingFile
@@ -18331,7 +18123,7 @@ ZendTest\I18n\Translator\Loader\IniTest::testLoaderReturnsValidTextDomainWithFil
 ZendTest\I18n\Translator\Loader\IniTest::testLoaderReturnsValidTextDomainWithSimpleSyntax
 .
 ZendTest\I18n\Translator\Loader\PhpArrayTest::testLoaderFailsToLoadMissingFile
-HipHop Fatal error: Class undefined: Locale in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/tests/ZendTest/I18n/Translator/Loader/PhpArrayTest.php on line 24
+FATAL
 ZendTest\I18n\Translator\Plural\RuleTest::testCompleteRules with data set #0 
 .
 ZendTest\I18n\Translator\Plural\RuleTest::testCompleteRules with data set #1 
@@ -18435,9 +18227,9 @@ ZendTest\I18n\Translator\TranslatorAwareTraitTest::testSetTranslatorTextDomain
 ZendTest\I18n\Translator\TranslatorServiceFactoryTest::testCreateServiceWithNoTranslatorKeyDefined
 .
 ZendTest\I18n\Translator\TranslatorTest::testFactoryCreatesTranslator
-HipHop Fatal error: Class undefined: Locale in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/tests/ZendTest/I18n/Translator/TranslatorTest.php on line 39
+FATAL
 ZendTest\I18n\Validator\FloatTest::testBasic with data set #0 
-HipHop Fatal error: Class undefined: Locale in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/tests/ZendTest/I18n/Validator/FloatTest.php on line 34
+FATAL
 ZendTest\I18n\Validator\IbanTest::testBasic with data set #0 
 .
 ZendTest\I18n\Validator\IbanTest::testBasic with data set #1 
@@ -18585,7 +18377,7 @@ ZendTest\I18n\Validator\IbanTest::testSepaNotSupportedCountryCode
 ZendTest\I18n\Validator\IbanTest::testSettingAndGettingCountryCode
 .
 ZendTest\I18n\Validator\IntTest::testBasic with data set #0 
-HipHop Fatal error: Class undefined: Locale in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/tests/ZendTest/I18n/Validator/IntTest.php on line 31
+FATAL
 ZendTest\I18n\Validator\PostCodeTest::testBasic with data set #0 
 E
 ZendTest\I18n\Validator\PostCodeTest::testBasic with data set #1 
@@ -20521,7 +20313,7 @@ ZendTest\Loader\ClassMapAutoloaderTest::testValidMapFileNotReturningMapRaisesInv
 ZendTest\Loader\ModuleAutoloaderTest\ManagerTest::testCanAutoloadModule
 .
 ZendTest\Loader\ModuleAutoloaderTest\ManagerTest::testCanAutoloadPharModules
-HipHop Fatal error: Class undefined: GlobIterator in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/library/Zend/Loader/ModuleAutoloader.php on line 195
+FATAL
 ZendTest\Loader\ModuleAutoloaderTest\ManagerTest::testCanAutoloadSubModule
 .
 ZendTest\Loader\ModuleAutoloaderTest\ManagerTest::testCanRegisterPathsFromConstructor
@@ -20609,7 +20401,7 @@ ZendTest\Loader\StandardAutoloaderTest::testPassingArrayOptionsPopulatesProperti
 ZendTest\Loader\StandardAutoloaderTest::testPassingNonTraversableOptionsToSetOptionsRaisesException
 .
 ZendTest\Loader\StandardAutoloaderTest::testPassingTraversableOptionsPopulatesProperties
-F
+.
 ZendTest\Loader\StandardAutoloaderTest::testRegisterRegistersCallbackWithSplAutoload
 .
 ZendTest\Loader\StandardAutoloaderTest::testReturnsFalseForInvalidClassNames
@@ -20923,13 +20715,7 @@ ZendTest\Log\Writer\MailTest::testSetSubjectPrependText
 ZendTest\Log\Writer\MockTest::testWrite
 .
 ZendTest\Log\Writer\MongoDBTest::testFormattingIsNotSupported
-E
-ZendTest\Log\Writer\MongoDBTest::testWriteConvertsDateTimeToMongoDate
-E
-ZendTest\Log\Writer\MongoDBTest::testWriteWithCustomSaveOptions
-E
-ZendTest\Log\Writer\MongoDBTest::testWriteWithDefaultSaveOptions
-E
+FATAL
 ZendTest\Log\Writer\NullTest::testWrite
 .
 ZendTest\Log\Writer\StreamWriterTest::testAllowSpecifyingLogSeparator
@@ -22197,7 +21983,7 @@ ZendTest\Math\BigInteger\BigIntegerTest::testFactoryUnknownAdapterRaisesServiceM
 ZendTest\Math\BigInteger\BigIntegerTest::testFactoryUsesDefaultAdapter
 .
 ZendTest\Math\RandTest::testAltGeneratorIsRandomWithCorrectLength
-HipHop Fatal error: f_zend_thread_id is not going to be supported: not zend anymore in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/vendor/ircmaxell/random-lib/lib/RandomLib/Source/MicroTime.php on line 66
+FATAL
 ZendTest\Math\RandTest::testGetString
 .
 ZendTest\Math\RandTest::testGetStringBase64
@@ -22236,10 +22022,8 @@ ZendTest\Memory\MemoryManagerTest::testCreate
 .
 ZendTest\Memory\MemoryManagerTest::testCreation
 .
-ZendTest\Memory\MemoryManagerTest::testNotEnoughSpaceThrowException
-.
 ZendTest\Memory\MemoryManagerTest::testProcessing
-.
+UNKNOWN STATUS
 ZendTest\Memory\MemoryManagerTest::testSettings
 .
 ZendTest\Memory\MovableTest::testCreation
@@ -22315,7 +22099,7 @@ ZendTest\Mime\PartTest::testContentEncoding
 ZendTest\Mime\PartTest::testHeaders
 .
 ZendTest\Mime\PartTest::testStreamEncoding
-HipHop Fatal error: f_stream_filter_append is not going to be supported: stream filter is not supported in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/library/Zend/Mime/Part.php on line 104
+FATAL
 ZendTest\ModuleManager\Listener\AutoloaderListenerTest::testAutoloadersRegisteredByAutoloaderListener
 .
 ZendTest\ModuleManager\Listener\AutoloaderListenerTest::testAutoloadersRegisteredIfModuleDoesNotInheritAutoloaderProviderInterfaceButDefinesGetAutoloaderConfigMethod
@@ -22389,7 +22173,7 @@ ZendTest\ModuleManager\Listener\ModuleLoaderListenerTest::testModuleLoaderListen
 ZendTest\ModuleManager\Listener\ModuleLoaderListenerTest::testModuleLoaderListenerFunctionsAsAggregateListenerHasCache
 .
 ZendTest\ModuleManager\Listener\ModuleResolverListenerTest::testModuleResolverListenerCanResolveModuleClasses
-HipHop Fatal error: Class undefined: GlobIterator in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/library/Zend/Loader/ModuleAutoloader.php on line 195
+FATAL
 ZendTest\ModuleManager\Listener\OnBootstrapListenerTest::testOnBootstrapMethodCalledByOnBootstrapListener
 .
 ZendTest\ModuleManager\Listener\ServiceListenerTest::testInvalidReturnFromModuleDoesNothing
@@ -23825,7 +23609,7 @@ ZendTest\Mvc\Service\ControllerLoaderFactoryTest::testCannotLoadInvalidDispatcha
 ZendTest\Mvc\Service\ControllerLoaderFactoryTest::testControllerLoadedCanBeInjectedWithValuesFromPeer
 .
 ZendTest\Mvc\Service\ControllerLoaderFactoryTest::testWillFetchDiDependenciesFromControllerLoaderServiceManager
-E
+.
 ZendTest\Mvc\Service\ControllerLoaderFactoryTest::testWillInstantiateControllersFromDiAbstractFactoryWhenWhitelisted
 .
 ZendTest\Mvc\Service\ControllerLoaderFactoryTest::testWillNotInstantiateControllersFromDiAbstractFactoryWhenNotWhitelisted
@@ -23835,7 +23619,7 @@ ZendTest\Mvc\Service\DiFactoryTest::testWillInitializeDiAndDiAbstractFactory
 ZendTest\Mvc\Service\DiStrictAbstractServiceFactoryTest::testSetGetAllowedServiceNames
 .
 ZendTest\Mvc\Service\DiStrictAbstractServiceFactoryTest::testWillFetchDependenciesFromServiceManagerBeforeDi
-E
+.
 ZendTest\Mvc\Service\DiStrictAbstractServiceFactoryTest::testWillOnlyCreateServiceInWhitelist
 .
 ZendTest\Mvc\Service\FormElementManagerFactoryTest::testWillGetFormElementManager
@@ -23901,9 +23685,9 @@ ZendTest\Mvc\View\Console\ExceptionStrategyTest::testMessageTokens with data set
 ZendTest\Mvc\View\Console\ExceptionStrategyTest::testMessageTokens with data set #5 
 .
 ZendTest\Mvc\View\Console\ExceptionStrategyTest::testPrepareExceptionRendersPreviousMessages
-E
+.
 ZendTest\Mvc\View\Console\ExceptionStrategyTest::testPrepareExceptionViewModelErrorException
-E
+.
 ZendTest\Mvc\View\Console\ExceptionStrategyTest::testPrepareExceptionViewModelErrorsThatMustGetSameResult
 .
 ZendTest\Mvc\View\Console\ExceptionStrategyTest::testPrepareExceptionViewModelNoErrorInResultGetsSameResult
@@ -24450,117 +24234,17 @@ ZendTest\Paginator\FactoryTest::testCanFactoryPaginatorWithStringAdapterName
 .
 ZendTest\Paginator\FactoryTest::testCanFactoryPaginatorWithStringAdapterObject
 .
-ZendTest\Paginator\PaginatorTest::testAcceptAndHandlePaginatorAdapterAggregateDataInFactory
-.
-ZendTest\Paginator\PaginatorTest::testAcceptAndHandlePaginatorAdapterAggregateInConstructor
-.
-ZendTest\Paginator\PaginatorTest::testAcceptsTraversableInstanceFromAdapter
-.
-ZendTest\Paginator\PaginatorTest::testArrayAccessInClassSerializableLimitIterator
-.
-ZendTest\Paginator\PaginatorTest::testCacheDoesNotDisturbResultsWhenChangingParam
-.
-ZendTest\Paginator\PaginatorTest::testCachedItem
-.
-ZendTest\Paginator\PaginatorTest::testCastsIntegerValuesToInteger
-.
-ZendTest\Paginator\PaginatorTest::testClearPageItemCache
-.
-ZendTest\Paginator\PaginatorTest::testFilter
-.
-ZendTest\Paginator\PaginatorTest::testGeneratesViewIfNonexistent
-.
-ZendTest\Paginator\PaginatorTest::testGetCacheId
-.
-ZendTest\Paginator\PaginatorTest::testGetSetDefaultItemCountPerPage
-.
-ZendTest\Paginator\PaginatorTest::testGetsAbsoluteItemNumber
-.
-ZendTest\Paginator\PaginatorTest::testGetsAndSetsCurrentPageNumber
-.
 ZendTest\Paginator\PaginatorTest::testGetsAndSetsDefaultScrollingStyle
-.
-ZendTest\Paginator\PaginatorTest::testGetsAndSetsItemCountPerPage
-.
-ZendTest\Paginator\PaginatorTest::testGetsAndSetsItemCounterPerPageOfNegativeOne
-.
-ZendTest\Paginator\PaginatorTest::testGetsAndSetsItemCounterPerPageOfNull
-.
-ZendTest\Paginator\PaginatorTest::testGetsAndSetsItemCounterPerPageOfZero
-.
-ZendTest\Paginator\PaginatorTest::testGetsAndSetsPageRange
-.
-ZendTest\Paginator\PaginatorTest::testGetsAndSetsView
-.
-ZendTest\Paginator\PaginatorTest::testGetsCurrentItemCount
-.
-ZendTest\Paginator\PaginatorTest::testGetsCurrentItems
-.
-ZendTest\Paginator\PaginatorTest::testGetsItem
-.
-ZendTest\Paginator\PaginatorTest::testGetsItemCount
-.
-ZendTest\Paginator\PaginatorTest::testGetsItemsByPage
-.
-ZendTest\Paginator\PaginatorTest::testGetsIterator
-.
-ZendTest\Paginator\PaginatorTest::testGetsPageCount
 .
 ZendTest\Paginator\PaginatorTest::testGetsPagesForPageOne
 .
 ZendTest\Paginator\PaginatorTest::testGetsPagesForPageTwo
-.
-ZendTest\Paginator\PaginatorTest::testGetsPagesInOutOfBoundsRange
-.
-ZendTest\Paginator\PaginatorTest::testGetsPagesInSubsetRange
-.
-ZendTest\Paginator\PaginatorTest::testGivesCorrectItemCount
-.
+UNKNOWN STATUS
 ZendTest\Paginator\PaginatorTest::testHasCorrectCountAfterInit
 .
 ZendTest\Paginator\PaginatorTest::testHasCorrectCountOfAllItemsAfterInit
 .
-ZendTest\Paginator\PaginatorTest::testInvalidDataInConstructor_ThrowsException
-.
-ZendTest\Paginator\PaginatorTest::testItemCountPerPageByDefault
-.
-ZendTest\Paginator\PaginatorTest::testKeepsCurrentPageNumberAfterItemCountPerPageSet
-.
-ZendTest\Paginator\PaginatorTest::testLoadScrollingStyleWithDigitThrowsInvalidArgumentException
-.
-ZendTest\Paginator\PaginatorTest::testLoadScrollingStyleWithObjectThrowsInvalidArgumentException
-.
 ZendTest\Paginator\PaginatorTest::testLoadsFromConfig
-.
-ZendTest\Paginator\PaginatorTest::testNegativeItemNumbers
-.
-ZendTest\Paginator\PaginatorTest::testNormalizesItemNumber
-.
-ZendTest\Paginator\PaginatorTest::testNormalizesItemNumberWhenGivenAFloat
-.
-ZendTest\Paginator\PaginatorTest::testNormalizesPageNumber
-.
-ZendTest\Paginator\PaginatorTest::testNormalizesPageNumberWhenGivenAFloat
-.
-ZendTest\Paginator\PaginatorTest::testRenders
-.
-ZendTest\Paginator\PaginatorTest::testRendersWithPartial
-.
-ZendTest\Paginator\PaginatorTest::testRendersWithoutPartial
-.
-ZendTest\Paginator\PaginatorTest::testSetGlobalConfigThrowsInvalidArgumentException
-.
-ZendTest\Paginator\PaginatorTest::testSetScrollingStylePluginManagerWithAdapterThrowsInvalidArgumentException
-.
-ZendTest\Paginator\PaginatorTest::testSetScrollingStylePluginManagerWithStringThrowsInvalidArgumentException
-.
-ZendTest\Paginator\PaginatorTest::testThrowsExceptionWhenCollectionIsEmpty
-.
-ZendTest\Paginator\PaginatorTest::testThrowsExceptionWhenRetrievingNonexistentItemFromLastPage
-.
-ZendTest\Paginator\PaginatorTest::testToJson
-F
-ZendTest\Paginator\PaginatorTest::testWithCacheDisabled
 .
 ZendTest\Paginator\ScrollingStyle\AllTest::testGetsNextAndPreviousPageForFirstPage
 .
@@ -24863,7 +24547,7 @@ ZendTest\ProgressBar\Adapter\ConsoleTest::testSetOutputStreamOpen
 ZendTest\ProgressBar\Adapter\ConsoleTest::testSetOutputStreamOpenFail
 .
 ZendTest\ProgressBar\Adapter\ConsoleTest::testSetOutputStreamReplaceStream
-.
+F
 ZendTest\ProgressBar\Adapter\ConsoleTest::testStandardOutputStream
 F
 ZendTest\ProgressBar\Adapter\ConsoleTest::testTextElementCustomLength
@@ -24875,7 +24559,7 @@ S
 ZendTest\ProgressBar\Adapter\ConsoleTest::testgetOutputStream
 .
 ZendTest\ProgressBar\Adapter\ConsoleTest::testgetOutputStreamReturnigStdout
-F
+E
 ZendTest\ProgressBar\Adapter\JsPullTest::testJson
 .
 ZendTest\ProgressBar\Adapter\JsPushTest::testJson
@@ -25435,9 +25119,9 @@ ZendTest\ServiceManager\Di\DiServiceInitializerTest::testInitialize
 ZendTest\ServiceManager\Di\DiServiceInitializerTest::testProxyInstanceManagersStayInSync
 .
 ZendTest\ServiceManager\Proxy\LazyServiceFactoryFactoryTest::testAutoGenerateAndEvaluateProxies
-E
+.
 ZendTest\ServiceManager\Proxy\LazyServiceFactoryFactoryTest::testAutoGenerateProxyFiles
-E
+.
 ZendTest\ServiceManager\Proxy\LazyServiceFactoryFactoryTest::testInvalidConfiguration with data set #0 
 .
 ZendTest\ServiceManager\Proxy\LazyServiceFactoryFactoryTest::testInvalidConfiguration with data set #1 
@@ -25495,7 +25179,7 @@ ZendTest\ServiceManager\ServiceManagerTest::testCreateWithInvokableClass
 ZendTest\ServiceManager\ServiceManagerTest::testCreateWithMultipleAbstractFactories
 .
 ZendTest\ServiceManager\ServiceManagerTest::testDiAbstractServiceFactory
-E
+.
 ZendTest\ServiceManager\ServiceManagerTest::testDoNotFallbackToAbstractFactory
 .
 ZendTest\ServiceManager\ServiceManagerTest::testExceptionThrowingFactory
@@ -25505,7 +25189,7 @@ ZendTest\ServiceManager\ServiceManagerTest::testGet
 ZendTest\ServiceManager\ServiceManagerTest::testGetDoesNotThrowExceptionOnEmptyArray
 .
 ZendTest\ServiceManager\ServiceManagerTest::testGetGlobIteratorServiceWorksProperly
-HipHop Fatal error: unknown class GlobIterator in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/tests/ZendTest/ServiceManager/TestAsset/GlobIteratorService.php on line 12
+FATAL
 ZendTest\ServiceManager\ServiceManagerTest::testGetServiceThrowsExceptionOnAliasWithNoSetService
 .
 ZendTest\ServiceManager\ServiceManagerTest::testGetServiceThrowsExceptionOnMultipleAliasesWithNoSetService
@@ -25523,7 +25207,7 @@ ZendTest\ServiceManager\ServiceManagerTest::testHas
 ZendTest\ServiceManager\ServiceManagerTest::testHasAlias
 .
 ZendTest\ServiceManager\ServiceManagerTest::testPeeringService
-E
+.
 ZendTest\ServiceManager\ServiceManagerTest::testServiceManagerIsPassedToInitializer
 .
 ZendTest\ServiceManager\ServiceManagerTest::testSetAlias
@@ -25635,7 +25319,7 @@ ZendTest\Session\ContainerTest::testSettingExpirationSecondsUpdatesStorageMetada
 ZendTest\Session\ContainerTest::testSettingExpiredKeyOverwritesExpiryMetadataForThatKey
 .
 ZendTest\Session\ContainerTest::testUpgradeBehaviors
-.
+UNKNOWN STATUS
 ZendTest\Session\ContainerTest::testUsingNewZF2NamespaceIsValid
 .
 ZendTest\Session\ContainerTest::testUsingOldZF1NameIsStillValid
@@ -25643,11 +25327,11 @@ ZendTest\Session\ContainerTest::testUsingOldZF1NameIsStillValid
 ZendTest\Session\ContainerTest::testValidationShouldNotRaiseErrorForMissingResponseObject
 .
 ZendTest\Session\SaveHandler\CacheTest::testReadWrite
-.
+F
 ZendTest\Session\SaveHandler\CacheTest::testReadWriteComplex
-.
+F
 ZendTest\Session\SaveHandler\CacheTest::testReadWriteTwice
-.
+F
 ZendTest\Session\SaveHandler\DbTableGatewayOptionsTest::testDefaults
 .
 ZendTest\Session\SaveHandler\DbTableGatewayOptionsTest::testInvalidDataColumn
@@ -26769,7 +26453,7 @@ ZendTest\Soap\AutoDiscoverTest::testChangingWsdlUriAfterGenerationIsPossible wit
 ZendTest\Soap\AutoDiscoverTest::testClassMap
 .
 ZendTest\Soap\AutoDiscoverTest::testComplexTypesThatAreUsedMultipleTimesAreRecoginzedOnce
-E
+.
 ZendTest\Soap\AutoDiscoverTest::testDocumentNodes
 .
 ZendTest\Soap\AutoDiscoverTest::testGetDiscoveryStrategy
@@ -26787,9 +26471,9 @@ ZendTest\Soap\AutoDiscoverTest::testNoReturnIsOneWayCallInAddFunction
 ZendTest\Soap\AutoDiscoverTest::testNoReturnIsOneWayCallInSetClass
 .
 ZendTest\Soap\AutoDiscoverTest::testRecursiveWsdlDependencies
-E
+.
 ZendTest\Soap\AutoDiscoverTest::testReturnSameArrayOfObjectsResponseOnDifferentMethodsWhenArrayComplex
-E
+.
 ZendTest\Soap\AutoDiscoverTest::testReturnSameArrayOfObjectsResponseOnDifferentMethodsWhenArraySequence
 .
 ZendTest\Soap\AutoDiscoverTest::testSetClass
@@ -26843,7 +26527,7 @@ E
 ZendTest\Soap\ClientTest::testGetOptions
 .
 ZendTest\Soap\ClientTest::testGetTypes
-E
+.
 ZendTest\Soap\ClientTest::testInitSoapClientObjectException with data set #0 
 .
 ZendTest\Soap\ClientTest::testInitSoapClientObjectException with data set #1 
@@ -26899,7 +26583,7 @@ ZendTest\Soap\ServerTest::testGetFunctionsWithClassAttached
 ZendTest\Soap\ServerTest::testGetFunctionsWithObjectAttached
 .
 ZendTest\Soap\ServerTest::testGetLastRequest
-HipHop Fatal error: A null object pointer was used. in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/library/Zend/Soap/Server.php on line 881
+FATAL
 ZendTest\Soap\ServerTest::testGetOptions
 .
 ZendTest\Soap\ServerTest::testGetPersistence
@@ -27015,7 +26699,7 @@ ZendTest\Soap\WsdlTest::testAddSoapBinding with data set #0
 ZendTest\Soap\WsdlTest::testAddSoapBinding with data set #1 
 .
 ZendTest\Soap\WsdlTest::testAddSoapOperation with data set #0 
-HipHop Fatal error: Unexpected object type stdClass. in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/library/Zend/Soap/Wsdl.php on line 471
+FATAL
 ZendTest\Soap\WsdlTest::testConstructor
 F
 ZendTest\Soap\WsdlTest::testObjectConstructionWithDifferentURI with data set #0 
@@ -27048,32 +26732,30 @@ ZendTest\Soap\WsdlTest::testSetUriWithZendUriChangesDomDocumentWsdlStructureTnsA
 F
 ZendTest\Soap\WsdlTest::testSetUriWithZendUriChangesDomDocumentWsdlStructureTnsAndTargetNamespaceAttributes with data set #4 
 .
-ZendTest\Soap\WsdlTestHelper::testDocumentNodes
-.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testAddComplexTypeOfNonExistingClassThrowsException
 .
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testAddingSingularThenArrayTypeIsRecognizedCorretly
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testAddingTypesMultipleTimesIsSavedOnlyOnce
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testArrayOfComplexNestedObjectsIsCoveredByStrategyAndAddsAllTypesRecursivly
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testArrayOfComplexObjects
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testArrayOfObjectWithObject
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testArrayOfSimpleObject
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testDocumentNodes
 .
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testNestingObjectsDeepMakesNoSenseThrowingException
 .
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testThatOverridingStrategyIsReset
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeSequenceStrategyTest::testAddComplexTypeArrayOfObject
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeSequenceStrategyTest::testAddComplexTypeObject
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeSequenceStrategyTest::testAddComplexTypeOfNonExistingClassThrowsException
 .
 ZendTest\Soap\Wsdl\ArrayOfTypeSequenceStrategyTest::testDocumentNodes
@@ -27117,7 +26799,7 @@ ZendTest\Soap\Wsdl\ComplexTypeStrategy\CompositeStrategyTest::testGetDefaultStra
 ZendTest\Soap\Wsdl\DefaultComplexTypeTest::testDocumentNodes
 .
 ZendTest\Soap\Wsdl\DefaultComplexTypeTest::testOnlyPublicPropertiesAreDiscoveredByStrategy
-E
+.
 ZendTest\Stdlib\ArrayObjectTest::testAppend
 .
 ZendTest\Stdlib\ArrayObjectTest::testArrayAsProps
@@ -27373,11 +27055,11 @@ ZendTest\Stdlib\HydratorClosureStrategyTest::testAddingStrategy
 ZendTest\Stdlib\HydratorClosureStrategyTest::testCheckStrategyEmpty
 .
 ZendTest\Stdlib\HydratorClosureStrategyTest::testCheckStrategyNotEmpty
-F
+.
 ZendTest\Stdlib\HydratorClosureStrategyTest::testExtractingObjects
-F
+.
 ZendTest\Stdlib\HydratorClosureStrategyTest::testHydratingObjects
-F
+.
 ZendTest\Stdlib\HydratorClosureStrategyTest::testRemovingStrategy
 .
 ZendTest\Stdlib\HydratorClosureStrategyTest::testRetrieveStrategy
@@ -27389,13 +27071,13 @@ ZendTest\Stdlib\HydratorStrategyTest::testAddingStrategy
 ZendTest\Stdlib\HydratorStrategyTest::testCheckStrategyEmpty
 .
 ZendTest\Stdlib\HydratorStrategyTest::testCheckStrategyNotEmpty
-F
+.
 ZendTest\Stdlib\HydratorStrategyTest::testContextAwarenessExtract
-F
+.
 ZendTest\Stdlib\HydratorStrategyTest::testContextAwarenessHydrate
-F
+.
 ZendTest\Stdlib\HydratorStrategyTest::testExtractingObjects
-E
+.
 ZendTest\Stdlib\HydratorStrategyTest::testHydratingObjects
 .
 ZendTest\Stdlib\HydratorStrategyTest::testRemovingStrategy
@@ -27403,9 +27085,9 @@ ZendTest\Stdlib\HydratorStrategyTest::testRemovingStrategy
 ZendTest\Stdlib\HydratorStrategyTest::testRetrieveStrategy
 .
 ZendTest\Stdlib\HydratorStrategyTest::testWhenUsingUnderscoreSeparatedKeysHydratorStrategyIsAlwaysConsideredUnderscoreSeparatedToo with data set #0 
-F
+.
 ZendTest\Stdlib\HydratorStrategyTest::testWhenUsingUnderscoreSeparatedKeysHydratorStrategyIsAlwaysConsideredUnderscoreSeparatedToo with data set #1 
-F
+.
 ZendTest\Stdlib\HydratorTest::testArraySerializableFilter with data set #0 
 .
 ZendTest\Stdlib\HydratorTest::testArraySerializableFilter with data set #1 
@@ -27447,9 +27129,9 @@ ZendTest\Stdlib\HydratorTest::testObjectBasedFilters
 ZendTest\Stdlib\HydratorTest::testRetrieveWildStrategyAndOther
 .
 ZendTest\Stdlib\HydratorTest::testUseWildStrategyAndOther
-F
+.
 ZendTest\Stdlib\HydratorTest::testUseWildStrategyByDefault
-F
+.
 ZendTest\Stdlib\Hydrator\Aggregate\AggregateHydratorFunctionalTest::testEmptyAggregate
 .
 ZendTest\Stdlib\Hydrator\Aggregate\AggregateHydratorFunctionalTest::testExtractWithMultipleHydrators
@@ -27703,9 +27385,9 @@ ZendTest\Stdlib\StringWrapper\IconvTest::testWordWrap with data set "cut-break-a
 ZendTest\Stdlib\StringWrapper\IconvTest::testWordWrap with data set "cut-break-before"
 .
 ZendTest\Stdlib\StringWrapper\IconvTest::testWordWrap with data set "cut-break-with"
-F
+.
 ZendTest\Stdlib\StringWrapper\IconvTest::testWordWrap with data set "cut-break-within"
-F
+.
 ZendTest\Stdlib\StringWrapper\IconvTest::testWordWrap with data set "cut-break-within-end"
 .
 ZendTest\Stdlib\StringWrapper\IconvTest::testWordWrap with data set "cut-ending-single-space"
@@ -27915,9 +27597,9 @@ ZendTest\Stdlib\StringWrapper\MbStringTest::testWordWrap with data set "cut-brea
 ZendTest\Stdlib\StringWrapper\MbStringTest::testWordWrap with data set "cut-break-before"
 .
 ZendTest\Stdlib\StringWrapper\MbStringTest::testWordWrap with data set "cut-break-with"
-F
+.
 ZendTest\Stdlib\StringWrapper\MbStringTest::testWordWrap with data set "cut-break-within"
-F
+.
 ZendTest\Stdlib\StringWrapper\MbStringTest::testWordWrap with data set "cut-break-within-end"
 .
 ZendTest\Stdlib\StringWrapper\MbStringTest::testWordWrap with data set "cut-ending-single-space"
@@ -28021,9 +27703,9 @@ ZendTest\Stdlib\StringWrapper\NativeTest::testWordWrap with data set "cut-break-
 ZendTest\Stdlib\StringWrapper\NativeTest::testWordWrap with data set "cut-break-before"
 .
 ZendTest\Stdlib\StringWrapper\NativeTest::testWordWrap with data set "cut-break-with"
-F
+.
 ZendTest\Stdlib\StringWrapper\NativeTest::testWordWrap with data set "cut-break-within"
-F
+.
 ZendTest\Stdlib\StringWrapper\NativeTest::testWordWrap with data set "cut-break-within-end"
 .
 ZendTest\Stdlib\StringWrapper\NativeTest::testWordWrap with data set "cut-ending-single-space"
@@ -28239,7 +27921,7 @@ ZendTest\Tag\ItemTest::testSetWeight
 ZendTest\Tag\ItemTest::testSkipOptions
 .
 ZendTest\Test\PHPUnit\Controller\AbstractConsoleControllerTestCaseTest::testAssertConsoleOutputContains
-F
+.
 ZendTest\Test\PHPUnit\Controller\AbstractConsoleControllerTestCaseTest::testAssertMatchedArgumentsWithValue
 .
 ZendTest\Test\PHPUnit\Controller\AbstractConsoleControllerTestCaseTest::testAssertMatchedArgumentsWithValueWithoutEqualsSign
@@ -28253,7 +27935,7 @@ ZendTest\Test\PHPUnit\Controller\AbstractConsoleControllerTestCaseTest::testAsse
 ZendTest\Test\PHPUnit\Controller\AbstractConsoleControllerTestCaseTest::testAssertResponseStatusCodeWithBadCode
 .
 ZendTest\Test\PHPUnit\Controller\AbstractConsoleControllerTestCaseTest::testNotAssertConsoleOutputContains
-F
+.
 ZendTest\Test\PHPUnit\Controller\AbstractConsoleControllerTestCaseTest::testUseOfRouter
 .
 ZendTest\Test\PHPUnit\Controller\AbstractControllerTestCaseTest::testApplicationClass
@@ -29099,13 +28781,13 @@ ZendTest\Uri\UriTest::testMergeToNewUri with data set #21
 ZendTest\Uri\UriTest::testMergeToNewUri with data set #22 
 .
 ZendTest\Uri\UriTest::testMergeToNewUri with data set #23 
-E
+.
 ZendTest\Uri\UriTest::testMergeToNewUri with data set #24 
-E
+.
 ZendTest\Uri\UriTest::testMergeToNewUri with data set #25 
 .
 ZendTest\Uri\UriTest::testMergeToNewUri with data set #26 
-E
+.
 ZendTest\Uri\UriTest::testMergeToNewUri with data set #27 
 .
 ZendTest\Uri\UriTest::testMergeToNewUri with data set #28 
@@ -29275,13 +28957,13 @@ ZendTest\Uri\UriTest::testRelativeUriResolvingRfcSamples with data set #21
 ZendTest\Uri\UriTest::testRelativeUriResolvingRfcSamples with data set #22 
 .
 ZendTest\Uri\UriTest::testRelativeUriResolvingRfcSamples with data set #23 
-E
+.
 ZendTest\Uri\UriTest::testRelativeUriResolvingRfcSamples with data set #24 
-E
+.
 ZendTest\Uri\UriTest::testRelativeUriResolvingRfcSamples with data set #25 
 .
 ZendTest\Uri\UriTest::testRelativeUriResolvingRfcSamples with data set #26 
-E
+.
 ZendTest\Uri\UriTest::testRelativeUriResolvingRfcSamples with data set #27 
 .
 ZendTest\Uri\UriTest::testRelativeUriResolvingRfcSamples with data set #28 
@@ -29969,15 +29651,15 @@ ZendTest\Validator\DateStepTest::testDateStepValidation with data set #12
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #13 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #14 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #15 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #16 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #17 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #18 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #19 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #2 
@@ -29987,13 +29669,13 @@ ZendTest\Validator\DateStepTest::testDateStepValidation with data set #20
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #21 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #22 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #23 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #24 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #25 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #26 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #27 
@@ -30001,11 +29683,11 @@ ZendTest\Validator\DateStepTest::testDateStepValidation with data set #27
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #28 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #29 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #3 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #30 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #31 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #32 
@@ -30013,13 +29695,13 @@ ZendTest\Validator\DateStepTest::testDateStepValidation with data set #32
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #33 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #34 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #35 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #36 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #37 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #38 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #39 
@@ -30027,27 +29709,27 @@ ZendTest\Validator\DateStepTest::testDateStepValidation with data set #39
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #4 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #40 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #41 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #42 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #5 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #6 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #7 
-F
+.
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #8 
 .
 ZendTest\Validator\DateStepTest::testDateStepValidation with data set #9 
-F
+.
 ZendTest\Validator\DateStepTest::testEqualsMessageTemplates
 .
 ZendTest\Validator\DateStepTest::testGetMessagesReturnsDefaultValue
 .
 ZendTest\Validator\DateStepTest::testStepError
-F
+.
 ZendTest\Validator\DateTest::testBasic with data set #0 
 .
 ZendTest\Validator\DateTest::testBasic with data set #1 
@@ -30786,6 +30468,48 @@ ZendTest\Validator\File\ImageSizeTest::testSetImageWidth
 .
 ZendTest\Validator\File\ImageSizeTest::testZF11258
 F
+ZendTest\Validator\File\IsCompressedTest::testAddMimeType
+.
+ZendTest\Validator\File\IsCompressedTest::testBasic with data set #0 
+.
+ZendTest\Validator\File\IsCompressedTest::testBasic with data set #1 
+.
+ZendTest\Validator\File\IsCompressedTest::testBasic with data set #2 
+.
+ZendTest\Validator\File\IsCompressedTest::testBasic with data set #3 
+.
+ZendTest\Validator\File\IsCompressedTest::testBasic with data set #4 
+.
+ZendTest\Validator\File\IsCompressedTest::testBasic with data set #5 
+.
+ZendTest\Validator\File\IsCompressedTest::testBasic with data set #6 
+.
+ZendTest\Validator\File\IsCompressedTest::testErrorMessages
+.
+ZendTest\Validator\File\IsCompressedTest::testGetMimeType
+.
+ZendTest\Validator\File\IsCompressedTest::testLegacy with data set #0 
+.
+ZendTest\Validator\File\IsCompressedTest::testLegacy with data set #1 
+.
+ZendTest\Validator\File\IsCompressedTest::testLegacy with data set #2 
+.
+ZendTest\Validator\File\IsCompressedTest::testLegacy with data set #3 
+.
+ZendTest\Validator\File\IsCompressedTest::testLegacy with data set #4 
+.
+ZendTest\Validator\File\IsCompressedTest::testLegacy with data set #5 
+.
+ZendTest\Validator\File\IsCompressedTest::testLegacy with data set #6 
+.
+ZendTest\Validator\File\IsCompressedTest::testNonMimeOptionsAtConstructorStillSetsDefaults
+.
+ZendTest\Validator\File\IsCompressedTest::testOptionsAtConstructor
+.
+ZendTest\Validator\File\IsCompressedTest::testSetMimeType
+.
+ZendTest\Validator\File\IsCompressedTest::testZF11258
+E
 ZendTest\Validator\File\IsImageTest::testAddMimeType
 .
 ZendTest\Validator\File\IsImageTest::testBasic with data set #0 
@@ -30835,11 +30559,11 @@ ZendTest\Validator\File\IsImageTest::testLegacy with data set #9
 ZendTest\Validator\File\IsImageTest::testNonMimeOptionsAtConstructorStillSetsDefaults
 .
 ZendTest\Validator\File\IsImageTest::testOptionsAtConstructor
-S
+.
 ZendTest\Validator\File\IsImageTest::testSetMimeType
 .
 ZendTest\Validator\File\IsImageTest::testZF11258
-F
+E
 ZendTest\Validator\File\Md5Test::testAddHash
 .
 ZendTest\Validator\File\Md5Test::testAddMd5
@@ -30961,13 +30685,13 @@ ZendTest\Validator\File\MimeTypeTest::testLegacy with data set #9
 ZendTest\Validator\File\MimeTypeTest::testOptionsAtConstructor
 .
 ZendTest\Validator\File\MimeTypeTest::testSetAndGetMagicFile
-S
+.
 ZendTest\Validator\File\MimeTypeTest::testSetMagicFileWithinConstructor
-S
+.
 ZendTest\Validator\File\MimeTypeTest::testSetMimeType
 .
 ZendTest\Validator\File\MimeTypeTest::testZF11258
-F
+E
 ZendTest\Validator\File\NotExistsTest::testAddDirectory
 .
 ZendTest\Validator\File\NotExistsTest::testBasic with data set #0 
@@ -32055,9 +31779,9 @@ ZendTest\View\Helper\HeadLinkTest::testBooleanStylesheet
 ZendTest\View\Helper\HeadLinkTest::testBooleanTrueConditionalStylesheet
 .
 ZendTest\View\Helper\HeadLinkTest::testConditionalStylesheetCreationOccursWhenRequested
-F
+.
 ZendTest\View\Helper\HeadLinkTest::testConditionalStylesheetNotCreatedByDefault
-F
+.
 ZendTest\View\Helper\HeadLinkTest::testContainerMaintainsCorrectOrderOfItems
 .
 ZendTest\View\Helper\HeadLinkTest::testCreatingLinkStackViaAlternateMethodsCreatesAppropriateOutput
@@ -32103,13 +31827,13 @@ ZendTest\View\Helper\HeadLinkTest::testSetThrowsExceptionWithoutArrayArgument
 ZendTest\View\Helper\HeadLinkTest::testSettingAlternateWithTooFewArgsRaisesException
 .
 ZendTest\View\Helper\HeadLinkTest::testStylesheetAttributesGetSet
-F
+.
 ZendTest\View\Helper\HeadLinkTest::testTurnOffAutoEscapeDoesNotEncodeAmpersand
 .
 ZendTest\View\Helper\HeadMetaTest::testAppendPrependAndSetThrowExceptionsWhenNonMetaValueProvided
 .
 ZendTest\View\Helper\HeadMetaTest::testCanBuildMetaTagsWithAttributes
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testCharset
 .
 ZendTest\View\Helper\HeadMetaTest::testCharsetValidateFail
@@ -32129,31 +31853,31 @@ ZendTest\View\Helper\HeadMetaTest::testItempropIsNotSupportedByDefaultDoctype
 ZendTest\View\Helper\HeadMetaTest::testItempropIsSupportedWithHtml5Doctype
 .
 ZendTest\View\Helper\HeadMetaTest::testOverloadingAppendHttpEquivAppendsMetaTagToStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingAppendItempropAppendsMetaTagToStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingAppendNameAppendsMetaTagToStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingAppendPropertyAppendsMetaTagToStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingOffsetInsertsAtOffset
 .
 ZendTest\View\Helper\HeadMetaTest::testOverloadingPrependHttpEquivPrependsMetaTagToStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingPrependItempropPrependsMetaTagToStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingPrependNamePrependsMetaTagToStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingPrependPropertyPrependsMetaTagToStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingSetHttpEquivOverwritesMetaTagStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingSetItempropOverwritesMetaTagStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingSetNameOverwritesMetaTagStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingSetPropertyOverwritesMetaTagStack
-F
+.
 ZendTest\View\Helper\HeadMetaTest::testOverloadingThrowsExceptionWithFewerThanTwoArgs
 .
 ZendTest\View\Helper\HeadMetaTest::testOverloadingThrowsExceptionWithInvalidMethodType
@@ -32193,7 +31917,7 @@ ZendTest\View\Helper\HeadScriptTest::testContainerMaintainsCorrectOrderOfItems
 ZendTest\View\Helper\HeadScriptTest::testDoesNotAllowDuplicateFiles
 .
 ZendTest\View\Helper\HeadScriptTest::testHeadScriptAppropriatelySetsScriptItems
-F
+.
 ZendTest\View\Helper\HeadScriptTest::testHeadScriptReturnsObjectInstance
 .
 ZendTest\View\Helper\HeadScriptTest::testIndentationIsHonored
@@ -32235,7 +31959,7 @@ ZendTest\View\Helper\HeadScriptTest::testTurnOffAutoEscapeDoesNotEncodeAmpersand
 ZendTest\View\Helper\HeadStyleTest::testAppendPrependAndSetThrowExceptionsWhenNonStyleValueProvided
 .
 ZendTest\View\Helper\HeadStyleTest::testCanBuildStyleTagsWithAttributes
-F
+.
 ZendTest\View\Helper\HeadStyleTest::testCapturingCapturesToObject
 .
 ZendTest\View\Helper\HeadStyleTest::testConditionalScript
@@ -32259,11 +31983,11 @@ ZendTest\View\Helper\HeadStyleTest::testMediaAttributeCanHaveSpaceInCommaSeparat
 ZendTest\View\Helper\HeadStyleTest::testNestedCapturingFails
 .
 ZendTest\View\Helper\HeadStyleTest::testOverloadAppendStyleAppendsStyleToStack
-F
+.
 ZendTest\View\Helper\HeadStyleTest::testOverloadPrependStylePrependsStyleToStack
-F
+.
 ZendTest\View\Helper\HeadStyleTest::testOverloadSetOversitesStack
-F
+.
 ZendTest\View\Helper\HeadStyleTest::testOverloadingOffsetSetWritesToSpecifiedIndex
 .
 ZendTest\View\Helper\HeadStyleTest::testRenderConditionalCommentsShouldNotContainHtmlEscaping
@@ -32611,7 +32335,7 @@ ZendTest\View\Helper\Navigation\NavigationTest::testInjectingContainer
 ZendTest\View\Helper\Navigation\NavigationTest::testInjectingTranslator
 E
 ZendTest\View\Helper\Navigation\NavigationTest::testMagicToStringShouldNotThrowException
-HipHop Fatal error: Argument 5 passed to ZendTest\View\Helper\Navigation\NavigationTest::toStringErrorHandler() must be an instance of array, string given in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/zf2/tests/ZendTest/View/Helper/Navigation/NavigationTest.php on line 380
+FATAL
 ZendTest\View\Helper\Navigation\NavigationTest::testMultipleNavigationsAndOneMenuDisplayedTwoTimes
 .
 ZendTest\View\Helper\Navigation\NavigationTest::testServiceManagerIsUsedToRetrieveContainer
@@ -33619,7 +33343,7 @@ ZendTest\XmlRpc\Request\HTTPTest::testGetHeaders
 ZendTest\XmlRpc\Request\HTTPTest::testGetRawRequest
 F
 ZendTest\XmlRpc\Request\HTTPTest::testHttpRequestGeneratesFaultIfReadFromPhpInputFails
-F
+.
 ZendTest\XmlRpc\Request\HTTPTest::testHttpRequestReadsFromPhpInput
 .
 ZendTest\XmlRpc\ResponseTest::testDoesNotAllowExternalEntities

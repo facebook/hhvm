@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SERVER_H_
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SERVER_H_
 
+#include <memory>
+
 #include "hphp/runtime/server/fastcgi/socket-connection.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
@@ -86,7 +88,8 @@ public:
     const apache::thrift::transport::TTransportException& ex)
     noexcept override;
 
-  virtual ProtocolSessionHandlerPtr newSessionHandler(int handler_id) override;
+  virtual std::shared_ptr<ProtocolSessionHandler>
+    newSessionHandler(int handler_id) override;
   virtual void onSessionEgress(std::unique_ptr<folly::IOBuf> chain) override;
   virtual void onSessionError() override;
   virtual void onSessionClose() override;
@@ -105,7 +108,7 @@ private:
   static const uint32_t k_minReadSize;
   static const uint32_t k_maxReadSize;
 
-  std::map<int, FastCGITransportPtr> m_transports;
+  std::map<int,std::shared_ptr<FastCGITransport>> m_transports;
   apache::thrift::async::TEventBase* m_eventBase;
   FastCGIServer* m_server;
   FastCGISession m_session;
@@ -132,8 +135,6 @@ public:
   }
   virtual void start() override;
   virtual void waitForEnd() override;
-  virtual void waitForJobs() override { always_assert(false); }
-  virtual void closePort() override { always_assert(false); }
   virtual void stop() override;
   virtual int getActiveWorker() override {
     return m_dispatcher.getActiveWorker();
@@ -159,7 +160,7 @@ public:
 
   void onConnectionsDrained();
 
-  void handleRequest(FastCGITransportPtr transport);
+  void handleRequest(std::shared_ptr<FastCGITransport> transport);
 
 private:
   enum RequestPriority {

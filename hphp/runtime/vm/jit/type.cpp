@@ -16,6 +16,7 @@
 
 #include "folly/Conv.h"
 #include "folly/Format.h"
+#include "folly/MapUtil.h"
 #include "folly/experimental/Gen.h"
 
 #include "hphp/util/trace.h"
@@ -25,7 +26,6 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-using namespace HPHP::Transl;
 
 namespace HPHP {  namespace JIT {
 
@@ -94,10 +94,12 @@ Type Type::fromString(const std::string& str) {
 #   undef IRT
     init = true;
   }
-  return mapGet(types, str, Type::None);
+  return folly::get_default(types, str, Type::None);
 }
 
 bool Type::checkValid() const {
+  static_assert(sizeof(m_arrayKind) == 1,
+                "Type expects ArrayKind to be one byte");
   if (m_extra) {
     assert((!(m_bits & kAnyObj) || !(m_bits & kAnyArr)) &&
            "Conflicting specialization");
@@ -548,7 +550,7 @@ Type thisReturn(const IRInstruction* inst) {
   // or a subclass of the context.
   while (!fpInst->is(DefFP, DefInlineFP)) {
     assert(fpInst->dst()->isA(Type::FramePtr));
-    assert(fpInst->is(GuardLoc, CheckLoc, AssertLoc, PassFP));
+    assert(fpInst->is(GuardLoc, CheckLoc, AssertLoc, SideExitGuardLoc, PassFP));
     fpInst = fpInst->src(0)->inst();
   }
   auto const func = fpInst->is(DefFP) ? fpInst->marker().func
@@ -593,7 +595,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
   IR_TYPES
 #undef IRT
 
-#define D(type)   return Type::type;
+#define D(type)   return type;
 #define DofS(n)   return inst->src(n)->type();
 #define DUnbox(n) return inst->src(n)->type().unbox();
 #define DBox(n)   return boxType(inst->src(n)->type());

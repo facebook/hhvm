@@ -17,16 +17,15 @@
 #ifndef incl_HPHP_DB_FILTER_H_
 #define incl_HPHP_DB_FILTER_H_
 
-#include "hphp/util/base.h"
+#include <string>
+#include <vector>
+#include <set>
+#include <assert.h>
 
 namespace HPHP {
 
 class DBConn;
 
-DECLARE_BOOST_TYPES(DBQueryFilter);
-DECLARE_BOOST_TYPES(DBInNumberFilter);
-DECLARE_BOOST_TYPES(DBInStringFilter);
-DECLARE_BOOST_TYPES(DBOrStringFilter);
 ///////////////////////////////////////////////////////////////////////////////
 
 /**

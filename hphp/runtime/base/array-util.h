@@ -113,11 +113,6 @@ public:
   static Variant ChangeKeyCase(CArrRef input, bool lower);
 
   /**
-   * Return array with key <-> value flipped.
-   */
-  static Variant Flip(CArrRef input);
-
-  /**
    * Return input as a new array with the order of the entries reversed.
    */
   static Variant Reverse(CArrRef input, bool preserve_keys = false);
@@ -131,14 +126,6 @@ public:
    * Return key/keys for random entry/entries in the array.
    */
   static Variant RandomKeys(CArrRef input, int num_req = 1);
-  static Variant RandomValues(CArrRef input, int num_req = 1);
-
-  /**
-   * Filters elements from the array via the callback.
-   */
-  typedef bool (*PFUNC_FILTER)(CVarRef value, const void *data);
-  static Variant Filter(CArrRef input, PFUNC_FILTER filter = nullptr,
-                        const void *data = nullptr);
 
   /**
    * Removes duplicate string values from array.
@@ -169,25 +156,12 @@ public:
                    CVarRef userdata = null_variant);
 
   /**
-   * Applies the callback to the elements in given arrays.
-   */
-  typedef Variant (*PFUNC_MAP)(CArrRef params, const void *data);
-  static Variant Map(CArrRef inputs, PFUNC_MAP map_function, const void *data);
-
-  /**
    * Iteratively reduce the array to a single value via the callback.
    */
   typedef Variant (*PFUNC_REDUCE)(CVarRef result, CVarRef operand,
                                   const void *data);
   static Variant Reduce(CArrRef input, PFUNC_REDUCE reduce_function,
                         const void *data, CVarRef initial = null_variant);
-
-  /**
-   * Construct scalar arrays from input data.
-   */
-  static void InitScalarArrays(Array arrs[], int nArrs,
-                               const char *scalarArrayData,
-                               int scalarArrayDataSize);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

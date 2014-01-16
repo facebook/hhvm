@@ -1,0 +1,19 @@
+*** Testing sqrt() : usage variations ***
+float(4.7958315233127)
+float(NAN)
+float(4.8425200051213)
+float(NAN)
+float(4.7958315233127)
+float(4.7958315233127)
+float(4.7958315233127)
+float(4.8425200051213)
+float(4.8425200051213)
+HipHop Warning: %s
+NULL
+float(31.622776601684)
+HipHop Notice: %s
+float(31.622776601684)
+float(0)
+float(1)
+float(0)
+===Done===

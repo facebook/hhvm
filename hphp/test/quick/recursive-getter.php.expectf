@@ -1,0 +1,14 @@
+string(3) "foo"
+string(3) "bar"
+--
+string(3) "bar"
+string(3) "foo"
+HipHop Notice: Undefined property: Foo2::$foo in %s/test/quick/recursive-getter.php on line 27
+NULL
+--
+string(3) "bar"
+string(3) "Bar"
+string(3) "foo"
+HipHop Notice: Undefined property: CaseFoo::$bar in %s/test/quick/recursive-getter.php on line 43
+NULL
+--

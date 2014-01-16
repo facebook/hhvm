@@ -18,6 +18,7 @@
 #include <list>
 #include <cstdio>
 #include <limits>
+#include <iostream>
 
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
@@ -220,13 +221,7 @@ bool FuncChecker::checkOffsets() {
   // check EH regions and targets
   for (Range<FixedVector<EHEnt> > i(m_func->ehtab()); !i.empty(); ) {
     const EHEnt& eh = i.popFront();
-    checkRegion("EH", eh.m_base, eh.m_past, "func body", base, funclets);
-    if (eh.m_type == EHEnt::Type::Catch) {
-      for (Range<vector<CatchEnt> > c(eh.m_catches); !c.empty(); ) {
-        ok &= checkOffset("catch", c.popFront().second, "func body", base,
-                          funclets);
-      }
-    } else {
+    if (eh.m_type == EHEnt::Type::Fault) {
       ok &= checkOffset("fault", eh.m_fault, "funclets", funclets, past);
     }
   }
@@ -489,6 +484,20 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
       ok &= checkString(pc, id);
       break;
     }
+    case VSA: { // vector of litstr ids
+      auto len = *(uint32_t*)pc;
+      if (len < 1 || len > HphpArray::MaxMakeSize) {
+        error("invalid length of immedate VSA vector %d at offset %d\n",
+              len, offset(pc));
+        return false;
+      }
+      for (int i = 0; i < len; i++) {
+        PC sa_pc = pc + (i + 1) * sizeof(int);
+        Id id = decodeId(&sa_pc);
+        ok &= checkString(pc, id);
+      }
+      break;
+    }
     case AA: { // static array id
       PC aa_pc = pc;
       Id id = decodeId(&aa_pc);
@@ -509,31 +518,41 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
       switch (*instr) {
       default: assert(false && "Unexpected opcode with immType OA");
       case Op::AssertTL: case Op::AssertTStk:
+      case Op::PredictTL: case Op::PredictTStk:
 #define ASSERTT_OP(x)  if (op == static_cast<uint8_t>(AssertTOp::x)) break;
         ASSERTT_OPS
 #undef ASSERTT_OP
         error("invalid operation for AssertT*: %d\n", op);
         ok = false;
         break;
+      case Op::IsTypeC: case Op::IsTypeL:
+#define ISTYPE_OP(x)  if (op == static_cast<uint8_t>(IsTypeOp::x)) break;
+        ISTYPE_OPS
+#undef ISTYPE_OP
+        error("invalid operation for IsType*: %d\n", op);
+        ok = false;
+        break;
       case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS:
       case OpIncDecM:
-        if (op >= IncDec_invalid) {
-          error("invalid operation for IncDec*: %d\n", op);
-          ok = false;
-        }
+#define INCDEC_OP(x)   if (op == static_cast<uint8_t>(IncDecOp::x)) break;
+        INCDEC_OPS
+#undef INCDEC_OP
+        error("invalid operation for IncDec*: %d\n", op);
+        ok = false;
         break;
       case OpSetOpL: case OpSetOpN: case OpSetOpG: case OpSetOpS:
       case OpSetOpM:
-        if (op >= SetOp_invalid) {
-          error("invalid operation for SetOp*: %d\n", op);
-          ok = false;
-        }
+#define SETOP_OP(x, y) if (op == static_cast<uint8_t>(SetOpOp::x)) break;
+        SETOP_OPS
+#undef SETOP_OP
+        error("invalid operation for SetOp*: %d\n", op);
+        ok = false;
         break;
       case OpBareThis:
         if (op > 1) ok = false;
         break;
       case OpFatal:
-#define FATAL_OP(x) if (FatalOp::x == static_cast<FatalOp>(op)) break;
+#define FATAL_OP(x)   if (op == static_cast<uint8_t>(FatalOp::x)) break;
         FATAL_OPS
 #undef FATAL_OP
         error("invalid error kind for Fatal: %d\n", op);
@@ -608,6 +627,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define CVMANY { },
   #define CVUMANY { },
   #define CMANY { },
+  #define SMANY { },
   #define ONE(a) { a },
   #define TWO(a,b) { b, a },
   #define THREE(a,b,c) { c, b, a },
@@ -627,6 +647,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef CVMANY
   #undef CVUMANY
   #undef CMANY
+  #undef SMANY
   #undef FOUR
   #undef THREE
   #undef TWO
@@ -668,6 +689,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     }
     return m_tmp_sig;
   case OpNewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
+  case OpNewStructArray:  // ONE(VSA),     SMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = CV;
     }
@@ -786,6 +808,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define NOV { },
   #define FMANY { },
   #define CMANY { },
+  #define SMANY { },
   #define ONE(a) { a },
   #define TWO(a,b) { a, b },
   #define THREE(a,b,c) { a, b, c },
@@ -805,6 +828,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef MMANY
   #undef FMANY
   #undef CMANY
+  #undef SMANY
   #undef INS_1
   #undef INS_2
   #undef FOUR

@@ -57,7 +57,7 @@ foreach ($permission_values as $perm) {
 	$iterator++;
 }
 ?>
-===DONE===?>
+===DONE===
 <?php
 // deleting temporary directory
 $dir_path = dirname(__FILE__) . "/opendir_variation7";

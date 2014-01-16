@@ -51,7 +51,8 @@
 	try_buffer_size(4, 2000);
 
 	print "done!";
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');

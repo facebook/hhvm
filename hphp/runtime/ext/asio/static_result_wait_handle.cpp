@@ -15,24 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
+
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-namespace {
-  StaticString s_staticResult("<static-result>");
-}
-
-c_StaticResultWaitHandle::c_StaticResultWaitHandle(Class* cb)
-    : c_StaticWaitHandle(cb) {
-  setState(STATE_SUCCEEDED);
-}
-
-c_StaticResultWaitHandle::~c_StaticResultWaitHandle() {
-  tvRefcountedDecRefCell(&m_resultOrException);
-}
 
 void c_StaticResultWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
@@ -40,18 +28,17 @@ void c_StaticResultWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_StaticResultWaitHandle::ti_create(CVarRef result) {
-  return Create(*result.asCell());
-}
-
-p_StaticResultWaitHandle c_StaticResultWaitHandle::Create(const Cell& result) {
-  p_StaticResultWaitHandle wh = NEWOBJ(c_StaticResultWaitHandle)();
+c_StaticResultWaitHandle* c_StaticResultWaitHandle::Create(const Cell& result) {
+  c_StaticResultWaitHandle* wh = NEWOBJ(c_StaticResultWaitHandle)();
   cellDup(result, wh->m_resultOrException);
   return wh;
 }
 
-String c_StaticResultWaitHandle::getName() {
-  return s_staticResult;
+ObjectData* c_StaticResultWaitHandle::CreateFromVM(const Cell result) {
+  c_StaticResultWaitHandle* wh = NEWOBJ(c_StaticResultWaitHandle)();
+  cellCopy(result, wh->m_resultOrException);
+  wh->incRefCount();
+  return wh;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

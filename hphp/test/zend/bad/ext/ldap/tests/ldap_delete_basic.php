@@ -16,7 +16,7 @@ var_dump(
 	@ldap_search($link, "dc=my-domain,dc=com", "(o=my-domain)")
 );
 ?>
-===DONE===?>
+===DONE===
 <?php
 require "connect.inc";
 

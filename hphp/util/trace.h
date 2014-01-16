@@ -22,6 +22,9 @@
 #include <stdarg.h>
 
 #include "folly/Format.h"
+
+#include "hphp/util/assertions.h"
+#include "hphp/util/portability.h"
 #include "hphp/util/text-color.h"
 
 /*
@@ -52,6 +55,31 @@
  * colorization.  You can set HPHP_TRACE_TTY to tell the tracing
  * facility to assume it should colorize even if the output file isn't
  * obviously a tty.
+ */
+
+/*
+ * Trace levels can be bumped on a per-module, per-scope basis.  This
+ * lets you run code that has a set of trace levels in a mode as if
+ * they were all higher.
+ *
+ * Example:
+ *
+ *   {
+ *     Trace::Bump bumper{Trace::tx64, 2};
+ *     FTRACE(1, "asd\n");  // only fires at level >= 3
+ *   }
+ *   FTRACE(1, "asd\n");    // back to normal
+ *
+ *
+ * There is also support for conditionally bumping in the bumper:
+ *
+ *   {
+ *     Trace::Bump bumper{Trace::tx64, 2, somePredicate(foo)};
+ *     // Only bumped if somePredicate(foo) returned true.
+ *   }
+ *
+ * Note however that if you use that form, `somePredicate' will be
+ * evaluated even if tracing is off.
  */
 
 namespace HPHP {
@@ -128,6 +156,7 @@ enum Module {
   NumModules
 };
 
+//////////////////////////////////////////////////////////////////////
 
 /*
  * S-expression style structured pretty-printing. Implement
@@ -191,15 +220,24 @@ void ftraceRelease(Args&&... args) {
 void traceRingBufferRelease(const char* fmt, ...) ATTRIBUTE_PRINTF(1,2);
 
 extern int levels[NumModules];
+extern __thread int tl_levels[NumModules];
 const char* moduleName(Module mod);
 inline bool moduleEnabledRelease(Module tm, int level = 1) {
-  return levels[tm] >= level;
+  return levels[tm] + tl_levels[tm] >= level;
 }
+
+//////////////////////////////////////////////////////////////////////
 
 #if (defined(DEBUG) || defined(USE_TRACE)) /* { */
 #  ifndef USE_TRACE
 #    define USE_TRACE 1
 #  endif
+
+//////////////////////////////////////////////////////////////////////
+/*
+ * Implementation of for when tracing is enabled.
+ */
+
 inline bool moduleEnabled(Module tm, int level = 1) {
   return moduleEnabledRelease(tm, level);
 }
@@ -229,6 +267,60 @@ const bool enabled = true;
 #define TRACE_SET_MOD(name)  \
   static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
+/*
+ * The Indent struct and ITRACE are used for tracing with nested
+ * indentation. Create an Indent object on the stack to increase the nesting
+ * level, then use ITRACE just as you would use FTRACE.
+ */
+extern __thread int indentDepth;
+struct Indent {
+  explicit Indent(int n = 2) : n(n) { indentDepth += n; }
+  ~Indent()                         { indentDepth -= n; }
+
+  int n;
+};
+
+struct Bump {
+  Bump(Module mod, int adjust, bool condition = true)
+    : m_live(condition)
+    , m_mod(mod)
+    , m_adjust(adjust)
+  {
+    if (m_live) tl_levels[m_mod] -= m_adjust;
+  }
+
+  Bump(Bump&& o)
+    : m_live(o.m_live)
+    , m_mod(o.m_mod)
+    , m_adjust(o.m_adjust)
+  {
+    o.m_live = false;
+  }
+
+  ~Bump() {
+    if (m_live) tl_levels[m_mod] += m_adjust;
+  }
+
+  Bump(const Bump&) = delete;
+  Bump& operator=(const Bump&) = delete;
+
+private:
+  bool m_live;
+  Module m_mod;
+  int m_adjust;
+};
+
+inline std::string indent() {
+  return std::string(indentDepth, ' ');
+}
+
+template<typename... Args>
+inline void itraceImpl(const char* fmtRaw, Args&&... args) {
+  auto const fmt = indent() + fmtRaw;
+  Trace::ftraceRelease(fmt, std::forward<Args>(args)...);
+}
+#define ITRACE(level, ...) ONTRACE((level), Trace::itraceImpl(__VA_ARGS__));
+
 void trace(const char *, ...) ATTRIBUTE_PRINTF(1,2);
 void trace(const std::string&);
 
@@ -237,11 +329,16 @@ inline void trace(Pretty p) { trace(p.pretty() + std::string("\n")); }
 
 void vtrace(const char *fmt, va_list args) ATTRIBUTE_PRINTF(1,0);
 void dumpRingbuffer();
+
+//////////////////////////////////////////////////////////////////////
+
 #else /* } (defined(DEBUG) || defined(USE_TRACE)) { */
+
+//////////////////////////////////////////////////////////////////////
 /*
- * Compile everything out of release builds. gcc is smart enough to
- * kill code hiding behind if (false) { ... }.
+ * Implementation for when tracing is disabled.
  */
+
 #define ONTRACE(...)    do { } while (0)
 #define TRACE(...)      do { } while (0)
 #define FTRACE(...)     do { } while (0)
@@ -250,6 +347,22 @@ void dumpRingbuffer();
 #define TRACE_SET_MOD(name) \
   DEBUG_ONLY static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
+#define ITRACE(...)     do { } while (0)
+struct Indent {
+  Indent() {
+    always_assert(true && "If this struct is completely empty we get unused "
+                  "variable warnings in code that uses it.");
+  }
+};
+inline std::string indent() { return std::string(); }
+
+struct Bump {
+  Bump(Module mod, int adjust, bool condition = true) {
+    always_assert(true && "If this struct is completely empty we get unused "
+                  "variable warnings in code that uses it.");
+  }
+};
+
 const bool enabled = false;
 
 inline void trace(const char*, ...)      { }
@@ -257,9 +370,10 @@ inline void trace(const std::string&)    { }
 inline void vtrace(const char*, va_list) { }
 inline bool moduleEnabled(Module t, int level = 1) { return false; }
 inline int moduleLevel(Module tm) { return 0; }
-#endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
 
 //////////////////////////////////////////////////////////////////////
+
+#endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
 
 } // Trace
 

@@ -34,8 +34,8 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * TODO: make options about this, and if inputs is small enough don't
- * use parallelism.
+ * TODO(#3343800): make options about this, and if inputs is small
+ * enough don't use parallelism.
  */
 constexpr size_t kNumThreads = 31;
 constexpr size_t kWorkChunk = 120;

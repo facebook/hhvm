@@ -13,15 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/logger.h"
-#include "hphp/util/base.h"
+
+#include <syslog.h>
+
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/exception.h"
-#include "util.h"
 #include "hphp/util/text-color.h"
-#include <syslog.h>
+#include "hphp/util/string-vsnprintf.h"
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
@@ -66,16 +66,16 @@ Logger *Logger::s_logger = new Logger();
 void Logger::Log(LogLevelType level, const char *fmt, va_list ap) {
   if (!IsEnabled()) return;
 
-  string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  std::string msg;
+  string_vsnprintf(msg, fmt, ap);
   Log(level, msg, nullptr);
 }
 
 void Logger::LogEscapeMore(LogLevelType level, const char *fmt, va_list ap) {
   if (!IsEnabled()) return;
 
-  string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  std::string msg;
+  string_vsnprintf(msg, fmt, ap);
   Log(level, msg, nullptr, true, true);
 }
 
@@ -145,9 +145,9 @@ void Logger::log(LogLevelType level, const std::string &msg,
     return;
   }
 
-  std::shared_ptr<StackTrace> deleter;
+  std::unique_ptr<StackTrace> deleter;
   if (LogNativeStackTrace && stackTrace == nullptr) {
-    deleter = std::shared_ptr<StackTrace>(new StackTrace());
+    deleter.reset(new StackTrace());
     stackTrace = deleter.get();
   }
 
@@ -163,7 +163,7 @@ void Logger::log(LogLevelType level, const std::string &msg,
     } else {
       f = Output ? Output : stdf;
     }
-    string header, sheader;
+    std::string header, sheader;
     if (LogHeader) {
       header = GetHeader();
       if (LogNativeStackTrace) {

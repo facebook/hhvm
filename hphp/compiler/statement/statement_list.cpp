@@ -262,7 +262,8 @@ bool StatementList::mergeConcatAssign() {
                                     var, exp1, T_CONCAT_EQUAL));
         }
         expStmt = ExpStatementPtr
-          (new ExpStatement(getScope(), getLocation(), exp));
+          (new ExpStatement(getScope(), getLabelScope(),
+                            getLocation(), exp));
 
         m_stmts[i - length] = expStmt;
         for (j = i - (length - 1); i > j; i--) removeElement(j);
@@ -410,6 +411,14 @@ StatementPtr StatementList::postOptimize(AnalysisResultConstPtr ar) {
 void StatementList::inferTypes(AnalysisResultPtr ar) {
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     m_stmts[i]->inferTypes(ar);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void StatementList::outputCodeModel(CodeGenerator &cg) {
+  for (unsigned int i = 0; i < m_stmts.size(); i++) {
+    m_stmts[i]->outputCodeModel(cg);
   }
 }
 

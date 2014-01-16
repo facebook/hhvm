@@ -17,15 +17,18 @@
 #ifndef incl_HPHP_DB_QUERY_H_
 #define incl_HPHP_DB_QUERY_H_
 
+#include <memory>
+#include <string>
 #include <stdarg.h>
+
 #include "hphp/util/db-filter.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 
 class DBConn;
 class DBDataSet;
 
-DECLARE_BOOST_TYPES(DBQuery);
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -76,7 +79,7 @@ class DBQuery {
   void filterBy(const char *fmt, const std::string &value, Op op = And);
   void filterBy(const char *fmt, int value, Op op = And);
   void filterBy(const char *fmt, unsigned int value, Op op = And);
-  void filterBy(const char *fmt, DBQueryFilterPtr filter, Op op = And);
+  void filterBy(const char *fmt, std::shared_ptr<DBQueryFilter> filter, Op op = And);
 
   /**
    * Append ORDER BY clause.
@@ -152,7 +155,7 @@ class DBQuery {
 
   std::string m_format;
 
-  DBQueryFilterPtr m_filter;
+  std::shared_ptr<DBQueryFilter> m_filter;
 
   const char *getFirstSql();
   const char *getNextSql();

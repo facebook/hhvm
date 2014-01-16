@@ -81,8 +81,6 @@ c_UConverter::c_UConverter(Class* cb)
   m_error.custom_error_message = "";
 }
 
-c_UConverter::~c_UConverter() { }
-
 void c_UConverter::throwFailure(UErrorCode error, const char *fname,
                                 intl_error &merror) {
   char message[1024];

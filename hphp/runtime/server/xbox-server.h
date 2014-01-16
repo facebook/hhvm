@@ -25,8 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(XboxServerInfo);
-
+struct XboxServerInfo;
 class RPCRequestHandler;
 class XboxTransport;
 
@@ -59,7 +58,7 @@ public:
    * Gets the ServerInfo and RequestHandler for the current xbox worker thread.
    * Returns NULL for non-xbox threads.
    */
-  static XboxServerInfoPtr GetServerInfo();
+  static std::shared_ptr<XboxServerInfo> GetServerInfo();
   static RPCRequestHandler *GetRequestHandler();
 };
 
@@ -146,13 +145,13 @@ public:
 private:
   std::atomic<int> m_refCount;
 
-  string m_message;
+  std::string m_message;
 
   bool m_done;
-  string m_response;
+  std::string m_response;
   int m_code;
-  string m_host;
-  string m_reqInitDoc;
+  std::string m_host;
+  std::string m_reqInitDoc;
 
   ServerTaskEvent<XboxServer, XboxTransport> *m_event;
 };

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
@@ -35,8 +36,7 @@ namespace HPHP { namespace JIT { namespace X64 {
 //////////////////////////////////////////////////////////////////////
 
 using namespace Util;
-using namespace Transl;
-using namespace Transl::reg;
+using namespace JIT::reg;
 
 TRACE_SET_MOD(hhir);
 
@@ -49,8 +49,6 @@ TRACE_SET_MOD(hhir);
  * just for some static_assertions relating to calls to helpers from
  * tx64 that hardcode these registers.)
  */
-using Transl::rVmFp;
-using Transl::rVmSp;
 
 /*
  * Satisfy an alignment constraint. Bridge the gap with int3's.
@@ -144,8 +142,9 @@ void emitGetGContext(Asm& as, PhysReg dest) {
 
 // IfCountNotStatic --
 //   Emits if (%reg->_count < 0) { ... }.
-//   This depends on RefCountStaticValue being the only valid
-//   negative refCount.
+//   This depends on UncountedValue and StaticValue
+//   being the only valid negative refCounts and both indicating no
+//   ref count is needed.
 //   May short-circuit this check if the type is known to be
 //   static already.
 struct IfCountNotStatic {
@@ -153,8 +152,7 @@ struct IfCountNotStatic {
                     0,
                     CC_S,
                     int32_t> NonStaticCondBlock;
-  static_assert(RefCountStaticValue < 0,
-                "RefCountStaticValue must be negative");
+  static_assert(UncountedValue < 0 && StaticValue < 0, "");
   NonStaticCondBlock *m_cb; // might be null
   IfCountNotStatic(Asm& as,
                    PhysReg reg,
@@ -218,11 +216,11 @@ void emitAssertFlagsNonNegative(Asm& as) {
 }
 
 void emitAssertRefCount(Asm& as, PhysReg base) {
-  as.cmpl(HPHP::RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
-  ifThen(as, CC_NE, [&] {
+  as.cmpl(HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET]);
+  ifThen(as, CC_NBE, [&] {
       as.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
       ifThen(as, CC_NBE, [&] { as.ud2(); });
-    });
+  });
 }
 
 // Logical register move: ensures the value in src will be in dest
@@ -275,19 +273,23 @@ void emitCall(Asm& a, TCA dest) {
   if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
     a.    call(dest);
   } else {
-    a.    call(TranslatorX64::Get()->getNativeTrampoline(dest));
+    a.    call(tx64->getNativeTrampoline(dest));
   }
 }
 
 void emitCall(Asm& a, CppCall call) {
   if (call.isDirect()) {
     return emitCall(a, (TCA)call.getAddress());
+  } else if (call.isVirtual()) {
+    // Virtual call.
+    // Load method's address from proper offset off of object in rdi,
+    // using rax as scratch.
+    a.  loadq  (*rdi, rax);
+    a.  call   (rax[call.getOffset()]);
+  } else {
+    assert(call.isIndirect());
+    a.  call   (call.getReg());
   }
-  // Virtual call.
-  // Load method's address from proper offset off of object in rdi,
-  // using rax as scratch.
-  a.  loadq  (*rdi, rax);
-  a.  call   (rax[call.getOffset()]);
 }
 
 void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
@@ -343,11 +345,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   a.  jnz  (stubsCode.frontier());
 
   astubs.  movq  (rVmFp, argNumToRegName[0]);
-  if (false) { // typecheck
-    const ActRec* ar = nullptr;
-    functionEnterHelper(ar);
-  }
-  emitCall(astubs, (TCA)&functionEnterHelper);
+  emitCall(astubs, tx64->uniqueStubs.functionEnterHelper);
   if (inTracelet) {
     fixupMap.recordSyncPoint(stubsCode.frontier(),
                              fixup.m_pcOffset, fixup.m_spOffset);
@@ -362,8 +360,8 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   assert(s0 != s1);
-  assert(!s0.isXMM() || s1 == InvalidReg); // never 2 XMMs
-  assert(!d0.isXMM() || d1 == InvalidReg); // never 2 XMMs
+  assert(!s0.isSIMD() || s1 == InvalidReg); // never 2 XMMs
+  assert(!d0.isSIMD() || d1 == InvalidReg); // never 2 XMMs
   if (d0 == s1 && d1 != InvalidReg) {
     assert(d0 != d1);
     if (d1 == s0) {
@@ -372,7 +370,7 @@ void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
       as.   movq (s1, d1); // save s1 first; d1 != s0
       as.   movq (s0, d0);
     }
-  } else if (d0.isXMM() && s0.isGP() && s1.isGP()) {
+  } else if (d0.isSIMD() && s0.isGP() && s1.isGP()) {
     // move 2 gpr to 1 xmm
     assert(d0 != rCgXMM0); // xmm0 is reserved for scratch
     as.   mov_reg64_xmm(s0, d0);
@@ -393,7 +391,6 @@ void zeroExtendIfBool(CodeGenerator::Asm& as, const SSATmp* src, PhysReg reg) {
 }
 
 ConditionCode opToConditionCode(Opcode opc) {
-  using namespace HPHP::Transl;
 
   switch (opc) {
   case JmpGt:                 return CC_G;

@@ -1,0 +1,3 @@
+string(4) "prop"
+int(2)
+HipHop Fatal error: Cannot access protected property in %s/test/quick/setter-magic.php on line 19

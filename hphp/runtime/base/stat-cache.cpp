@@ -21,6 +21,8 @@
 #include <fcntl.h>
 #include <sys/param.h>
 
+#include "folly/MapUtil.h"
+
 #include "hphp/util/trace.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -325,7 +327,7 @@ int StatCache::Node::stat(const std::string& path, struct stat* buf,
     if (validate(path, cached)) {
       return -1;
     }
-    mapInsert(m_paths, path, this);
+    m_paths.insert(std::make_pair(path, this));
     memcpy(buf, &m_stat, sizeof(struct stat));
   }
   if (debug && cached) {
@@ -342,7 +344,7 @@ int StatCache::Node::lstat(const std::string& path, struct stat* buf,
     if (validate(path, cached)) {
       return -1;
     }
-    mapInsert(m_lpaths, path, this);
+    m_lpaths.insert(std::make_pair(path, this));
     memcpy(buf, &m_lstat, sizeof(struct stat));
   }
   if (debug && cached) {
@@ -387,25 +389,24 @@ std::string StatCache::Node::readlink(const std::string& path,
 
 void StatCache::Node::insertChild(const std::string& childName,
                                   StatCache::NodePtr child, bool follow) {
-  mapInsertUnique(follow ? m_children : m_lChildren, childName, child);
+  auto& map = follow ? m_children : m_lChildren;
+  if (!map.insert(std::make_pair(childName, child)).second) {
+    assert(0); // should not already exist in the map here.
+  }
 }
 
 void StatCache::Node::removeChild(const std::string& childName) {
-  if (mapContains(m_children, childName)) {
+  if (m_children.count(childName)) {
     m_children.erase(childName);
   }
-  if (mapContains(m_lChildren, childName)) {
+  if (m_lChildren.count(childName)) {
     m_lChildren.erase(childName);
   }
 }
 
 StatCache::NodePtr StatCache::Node::getChild(const std::string& childName,
                                              bool follow) {
-  NodePtr child;
-  if (!mapGet(follow ? m_children : m_lChildren, childName, &child)) {
-    child = nullptr;
-  }
-  return child;
+  return folly::get_default(follow ? m_children : m_lChildren, childName);
 }
 
 //==============================================================================
@@ -481,9 +482,12 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
   }
   NodePtr node;
   if (wd != -1) {
-    if (!mapGet(m_watch2Node, wd, &node)) {
+    node = folly::get_default(m_watch2Node, wd);
+    if (!node.get()) {
       node = new Node(*this, wd);
-      mapInsertUnique(m_watch2Node, wd, node);
+      if (!m_watch2Node.insert(std::make_pair(wd, node)).second) {
+        assert(0); // should not already exist in the map
+      }
       TRACE(2, "StatCache: getNode('%s', follow=%s) --> %p (wd=%d)\n",
                path.c_str(), follow ? "true" : "false", node.get(), wd);
     } else {
@@ -549,8 +553,8 @@ bool StatCache::handleEvent(const struct inotify_event* event) {
     return true;
   }
   assert(event->wd != -1);
-  NodePtr node;
-  if (!mapGet(m_watch2Node, event->wd, &node)) {
+  NodePtr node = folly::get_default(m_watch2Node, event->wd);
+  if (!node.get()) {
     TRACE(1, "StatCache: inotify event (obsolete) %s\n",
              eventToString(event).c_str());
     return false;

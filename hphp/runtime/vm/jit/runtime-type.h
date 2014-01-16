@@ -17,11 +17,13 @@
 #ifndef incl_HPHP_RUNTIME_TYPE_H_
 #define incl_HPHP_RUNTIME_TYPE_H_
 
+#include "hphp/util/safe-cast.h"
+
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 // Location --
 //   A user-program-visible, and bytecode ISA addressable place for a PHP
@@ -180,7 +182,7 @@ class InputInfos : public std::vector<InputInfo> {
     for (size_t i = 0; i < size(); i++) {
       retval += (*this)[i].pretty();
       if (i != size() - 1) {
-        retval += string(" ");
+        retval += std::string(" ");
       }
     }
     return retval;

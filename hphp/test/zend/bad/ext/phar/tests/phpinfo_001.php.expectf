@@ -1,0 +1,45 @@
+%aPhar
+
+Phar: PHP Archive support => enabled
+Phar EXT version => %s
+Phar API version => 1.1.1
+SVN revision => %sId: %s $
+Phar-based phar archives => enabled
+Tar-based phar archives => enabled
+ZIP-based phar archives => enabled
+gzip compression => enabled
+bzip2 compression => enabled
+OpenSSL support => disabled (install ext/openssl)
+
+
+Phar based on pear/PHP_Archive, original concept by Davey Shafik.
+Phar fully realized by Gregory Beaver and Marcus Boerger.
+Portions of tar implementation Copyright (c) %d-%d Tim Kientzle.
+Directive => Local Value => Master Value
+phar.cache_list => no value => no value
+phar.readonly => Off => Off
+phar.require_hash => Off => Off
+%a
+Phar
+
+Phar: PHP Archive support => enabled
+Phar EXT version => %s
+Phar API version => 1.1.1
+SVN revision => %sId: %s $
+Phar-based phar archives => enabled
+Tar-based phar archives => enabled
+ZIP-based phar archives => enabled
+gzip compression => enabled
+bzip2 compression => enabled
+OpenSSL support => disabled (install ext/openssl)
+
+
+Phar based on pear/PHP_Archive, original concept by Davey Shafik.
+Phar fully realized by Gregory Beaver and Marcus Boerger.
+Portions of tar implementation Copyright (c) %d-%d Tim Kientzle.
+Directive => Local Value => Master Value
+phar.cache_list => no value => no value
+phar.readonly => On => Off
+phar.require_hash => On => Off
+%a
+===DONE===

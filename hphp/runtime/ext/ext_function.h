@@ -29,7 +29,7 @@ bool f_is_callable(CVarRef v, bool syntax = false,
                    VRefParam name = uninit_null());
 Variant f_call_user_func(
   int _argc, CVarRef function, CArrRef _argv = null_array);
-Variant f_call_user_func_array(CVarRef function, CArrRef params);
+Variant f_call_user_func_array(CVarRef function, CVarRef params);
 String f_call_user_func_serialized(const String& input);
 Variant f_call_user_func_array_rpc(
   const String& host, int port, const String& auth, int timeout,
@@ -57,8 +57,13 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos);
  * parameters to help the implementation.
  */
 Variant f_func_get_args();
-Array hhvm_get_frame_args(const ActRec* ar);
+Array hhvm_get_frame_args(const ActRec* ar, int offset);
 Array func_get_args(int num_args, CArrRef params, CArrRef args);
+
+/**
+ * HipHop extension that allows requesting only a subset of function arguments.
+ */
+Variant f_hphp_func_slice_args(int offset);
 
 /**
  * HPHP actually inlines this function, so this is degenerated.
@@ -73,9 +78,6 @@ void f_register_shutdown_function(
   int _argc, CVarRef function, CArrRef _argv = null_array);
 void f_register_cleanup_function(
   int _argc, CVarRef function, CArrRef _argv = null_array);
-bool f_register_tick_function(
-  int _argc, CVarRef function, CArrRef _argv = null_array);
-void f_unregister_tick_function(CVarRef function_name);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

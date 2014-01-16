@@ -1,0 +1,17 @@
+*** Testing session_commit() : variation ***
+string(0) ""
+bool(true)
+string(4) "test"
+NULL
+string(4) "test"
+bool(true)
+string(4) "test"
+NULL
+string(4) "test"
+bool(true)
+string(4) "test"
+NULL
+string(4) "test"
+bool(true)
+bool(true)
+Done

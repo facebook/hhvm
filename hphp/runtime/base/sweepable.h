@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_SWEEPABLE_H_
 #define incl_HPHP_SWEEPABLE_H_
 
-#include "hphp/util/base.h"
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +46,6 @@ public:
 
 public:
   Sweepable();
-  virtual ~Sweepable();
 
   /*
    * There is no default behavior. Make sure this function frees all
@@ -71,6 +68,9 @@ public:
    * sweep() called at the next SweepAll.
    */
   void unregister();
+
+protected:
+  ~Sweepable();
 
 private:
   Node m_sweepNode;

@@ -7,6 +7,9 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
+// Php doesn't support \u escapes.
+function u($x) { return json_decode("\"" . $x . "\""); }
+
 //////////////////////////////////////////////////////////////////////
 
 VS(addcslashes("ABCDEFGH\n", "A..D\n"), "\\A\\B\\C\\DEFGH\\n");
@@ -22,6 +25,8 @@ VS(bin2hex("ABC\n"), "4142430a");
 VS(hex2bin("4142430a"), "ABC\n");
 
 VS(nl2br("A\nB"), "A<br />\nB");
+VS(nl2br("A\nB", true), "A<br />\nB");
+VS(nl2br("A\nB", false), "A<br>\nB");
 
 VS(quotemeta(". \\ + * ? [ ^ ] ( $ )"),
    "\\. \\\\ \\+ \\* \\? \\[ \\^ \\] \\( \\$ \\)");
@@ -261,9 +266,27 @@ VS(htmlentities($str), "A 'quote' is &lt;b&gt;bold&lt;/b&gt;");
 VS(htmlentities($str, ENT_QUOTES),
    "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;");
 
-VS(htmlentities("\xA0", ENT_COMPAT), "&nbsp;");
+VS(htmlentities("\xA0", ENT_COMPAT), "");
 VS(htmlentities("\xc2\xA0", ENT_COMPAT, ""), "&nbsp;");
 VS(htmlentities("\xc2\xA0", ENT_COMPAT, "UTF-8"), "&nbsp;");
+
+$ic = u('\ufff0');
+$str_invalid = "<'{$ic} This includes invalid chars{$ic}\"zzz\"{$ic}'>";
+$str_valid = "<'This does not include invalid chars \"zzz\"'>";
+
+VS(htmlspecialchars($str_invalid, ENT_QUOTES | ENT_IGNORE),
+  "&lt;&#039; This includes invalid chars&quot;zzz&quot;&#039;&gt;");
+VS(htmlspecialchars($str_invalid, ENT_NOQUOTES | ENT_IGNORE),
+  "&lt;' This includes invalid chars\"zzz\"'&gt;");
+VS(htmlspecialchars($str_valid, ENT_COMPAT | ENT_IGNORE),
+  "&lt;'This does not include invalid chars &quot;zzz&quot;'&gt;");
+
+VS(htmlentities($str_invalid, ENT_COMPAT | ENT_IGNORE),
+  "&lt;' This includes invalid chars&quot;zzz&quot;'&gt;");
+VS(htmlentities($str_invalid, ENT_NOQUOTES | ENT_IGNORE),
+  "&lt;' This includes invalid chars\"zzz\"'&gt;");
+VS(htmlentities($str_valid, ENT_QUOTES | ENT_IGNORE),
+  "&lt;&#039;This does not include invalid chars &quot;zzz&quot;&#039;&gt;");
 
 VS(quoted_printable_encode("egfe \015\t"), "egfe=20=0D=09");
 
@@ -438,3 +461,25 @@ VS($output['arr'][1], 'baz');
 parse_str('a[2][i]=3&a[4][i]=5', $output);
 VS($output['a'][2]['i'], "3");
 VS($output['a'][4]['i'], "5");
+
+VS(wordwrap('foobar*foobar', 6, '*', true), 'foobar*foobar');
+VS(wordwrap("12345 12345 12345 12345"), "12345 12345 12345 12345");
+VS("12345 12345\n1234567890\n1234567890", wordwrap("12345 12345 1234567890 1234567890",12));
+VS("12345 12345\n1234567890\n1234567890", wordwrap("12345 12345 1234567890 1234567890",12));
+VS("12345\n12345\n12345\n12345", wordwrap("12345 12345 12345 12345",0));
+VS("12345ab12345ab12345ab12345", wordwrap("12345 12345 12345 12345",0,"ab"));
+VS("12345 12345ab1234567890ab1234567890", wordwrap("12345 12345 1234567890 1234567890",12,"ab"));
+VS("123ab123ab123", wordwrap("123ab123ab123", 3, "ab"));
+VS("123ab123ab123", wordwrap("123ab123ab123", 5, "ab"));
+VS("123ab 123ab123", wordwrap("123  123ab123", 3, "ab"));
+VS("123ab123ab123", wordwrap("123 123ab123", 5, "ab"));
+VS("123 123ab123", wordwrap("123 123 123", 10, "ab"));
+VS("123ab123ab123", wordwrap("123ab123ab123", 3, "ab", 1));
+VS("123ab123ab123", wordwrap("123ab123ab123", 5, "ab", 1));
+VS("123ab 12ab3ab123", wordwrap("123  123ab123", 3, "ab", 1));
+VS("123 ab123ab123", wordwrap("123  123ab123", 5, "ab", 1));
+VS("123  123ab 123", wordwrap("123  123  123", 8, "ab", 1));
+VS("123 ab12345 ab123", wordwrap("123  12345  123", 8, "ab", 1));
+VS("1ab2ab3ab4", wordwrap("1234", 1, "ab", 1));
+VS("12345|12345|67890", wordwrap("12345 1234567890", 5, "|", 1));
+VS("123|==1234567890|==123", wordwrap("123 1234567890 123", 10, "|==", 1));

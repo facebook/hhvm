@@ -1,0 +1,286 @@
+*** Testing is_float(), is_double() and is_real() with float values***
+-- Iteration 1 --
+bool(false)
+bool(false)
+bool(false)
+-- Iteration 2 --
+bool(false)
+bool(false)
+bool(false)
+-- Iteration 3 --
+bool(false)
+bool(false)
+bool(false)
+-- Iteration 4 --
+bool(false)
+bool(false)
+bool(false)
+-- Iteration 5 --
+bool(false)
+bool(false)
+bool(false)
+-- Iteration 6 --
+bool(false)
+bool(false)
+bool(false)
+-- Iteration 7 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 8 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 9 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 10 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 11 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 12 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 13 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 14 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 15 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 16 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 17 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 18 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 19 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 20 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 21 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 22 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 23 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 24 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 25 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 26 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 27 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 28 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 29 --
+bool(true)
+bool(true)
+bool(true)
+-- Iteration 30 --
+bool(true)
+bool(true)
+bool(true)
+
+*** Testing is_float(), is_double() & is_real() with non float values ***
+--Iteration 1--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 2--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 3--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 4--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 5--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 6--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 7--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 8--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 9--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 10--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 11--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 12--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 13--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 14--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 15--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 16--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 17--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 18--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 19--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 20--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 21--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 22--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 23--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 24--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 25--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 26--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 27--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 28--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 29--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 30--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 31--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 32--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 33--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 34--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 35--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 36--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 37--
+bool(false)
+bool(false)
+bool(false)
+
+*** Testing error conditions ***
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+Done

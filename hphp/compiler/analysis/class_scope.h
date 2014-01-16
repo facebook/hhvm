@@ -24,8 +24,9 @@
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/expression/user_attribute.h"
-#include "hphp/util/json.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/compiler/json.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/compiler/option.h"
 
 namespace HPHP {
@@ -173,6 +174,7 @@ public:
    * Get/set attributes.
    */
   void setSystem();
+  bool isSystem() const { return m_attribute & System; }
   void setAttribute(Attribute attr) { m_attribute |= attr;}
   void clearAttribute(Attribute attr) { m_attribute &= ~attr;}
   bool getAttribute(Attribute attr) const {
@@ -301,16 +303,28 @@ public:
     }
   }
 
+  const boost::container::flat_set<std::string>& getTraitRequiredExtends()
+    const {
+    return m_traitRequiredExtends;
+  }
+
+  const boost::container::flat_set<std::string>& getTraitRequiredImplements()
+    const {
+    return m_traitRequiredImplements;
+  }
+
   const std::vector<std::string> &getUsedTraitNames() const {
     return m_usedTraitNames;
   }
 
-  const std::vector<std::pair<std::string, std::string> > &getTraitAliases()
+  const std::vector<std::pair<std::string, std::string>>& getTraitAliases()
     const {
     return m_traitAliases;
   }
 
   void addTraitAlias(TraitAliasStatementPtr aliasStmt);
+
+  void addTraitRequirement(const std::string &requiredName, bool isExtends);
 
   void importUsedTraits(AnalysisResultPtr ar);
 
@@ -369,6 +383,16 @@ public:
   bool canSkipCreateMethod(AnalysisResultConstPtr ar) const;
   bool checkHasPropTable(AnalysisResultConstPtr ar);
 
+  const StringData* getFatalMessage() const {
+    return m_fatal_error_msg;
+  }
+
+  void setFatal(const AnalysisTimeFatalException& fatal) {
+    assert(m_fatal_error_msg == nullptr);
+    m_fatal_error_msg = makeStaticString(fatal.getMessage());
+    assert(m_fatal_error_msg != nullptr);
+  }
+
 private:
   // need to maintain declaration order for ClassInfo map
   FunctionScopePtrVec m_functionsVec;
@@ -378,6 +402,8 @@ private:
   UserAttributeMap m_userAttributes;
 
   std::vector<std::string> m_usedTraitNames;
+  boost::container::flat_set<std::string> m_traitRequiredExtends;
+  boost::container::flat_set<std::string> m_traitRequiredImplements;
   // m_traitAliases is used to support ReflectionClass::getTraitAliases
   std::vector<std::pair<std::string, std::string> > m_traitAliases;
 
@@ -427,6 +453,9 @@ private:
   // bases 32 through n are all known.
   unsigned m_knownBases;
 
+  // holds the fact that accessing this class declaration is a fatal error
+  const StringData* m_fatal_error_msg = nullptr;
+
   void addImportTraitMethod(const TraitMethod &traitMethod,
                             const std::string &methName);
   void informClosuresAboutScopeClone(ConstructPtr root,
@@ -446,6 +475,8 @@ private:
   void importTraitProperties(AnalysisResultPtr ar);
 
   void findTraitMethodsToImport(AnalysisResultPtr ar, ClassScopePtr trait);
+
+  void importTraitRequirements(AnalysisResultPtr ar, ClassScopePtr trait);
 
   MethodStatementPtr findTraitMethod(AnalysisResultPtr ar,
                                      ClassScopePtr trait,

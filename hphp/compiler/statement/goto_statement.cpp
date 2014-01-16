@@ -87,6 +87,17 @@ void GotoStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void GotoStatement::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("GotoStatement", 2);
+  cg.printPropertyHeader("label");
+  cg.printValue(m_label);
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void GotoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

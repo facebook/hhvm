@@ -175,7 +175,7 @@ function mmult ($rows, $cols, $m1, $m2) {
 }
 
 function matrix($n = 20) {
-  $SIZE = 30;
+  $SIZE = 5;
   $m1 = mkmatrix($SIZE, $SIZE);
   $m2 = mkmatrix($SIZE, $SIZE);
   while ($n--) {
@@ -353,19 +353,19 @@ function fannkuch($n = 9) {
 }
 
 function main_function() {
-  ackermann(4);
-  ary(50000);
-  ary2(50000);
-  ary3(100);
-  fibo(23);
-  hash1(10000);
-  hash2(200);
-  heapsort(2000);
+  ackermann(2);
+  ary(500);
+  ary2(500);
+  ary3(5);
+  fibo(13);
+  hash1(100);
+  hash2(20);
+  heapsort(200);
   matrix(3);
-  nestedloop(8);
-  sieve(5);
-  strcat(80000);
-  binary_trees(7);
+  nestedloop(3);
+  sieve(1);
+  strcat(80);
+  binary_trees(3);
   fannkuch(6);
 }
 

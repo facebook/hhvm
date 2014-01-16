@@ -122,7 +122,6 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
           if (getScope()->isFirstPass()) {
             Compiler::Error(Compiler::BadConstructorCall, self);
           }
-          m_params->setOutputCount(0);
         }
         m_params->inferAndCheck(ar, Type::Some, false);
       }
@@ -151,6 +150,25 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   m_nameExp->inferAndCheck(ar, Type::String, false);
   if (m_params) m_params->inferAndCheck(ar, Type::Any, false);
   return Type::Object;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void NewObjectExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("NewObjectExpression", m_params == nullptr ? 2 : 3);
+  if (m_nameExp->is(Expression::KindOfScalarExpression)) {
+    cg.printPropertyHeader("className");
+  } else {
+    cg.printPropertyHeader("classExpression");
+  }
+  m_nameExp->outputCodeModel(cg);
+  if (m_params != nullptr) {
+    cg.printPropertyHeader("arguments");
+    cg.printExpressionVector(m_params);
+  }
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

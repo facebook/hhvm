@@ -18,8 +18,6 @@
 #ifndef incl_HPHP_ZEND_URL_H_
 #define incl_HPHP_ZEND_URL_H_
 
-#include "hphp/util/base.h"
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

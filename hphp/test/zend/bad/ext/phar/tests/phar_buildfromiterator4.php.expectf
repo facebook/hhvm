@@ -1,0 +1,23 @@
+rewind
+valid
+current
+key
+next
+valid
+current
+key
+next
+valid
+current
+key
+next
+valid
+current
+key
+next
+valid
+array(1) {
+  ["a"]=>
+  string(%d) "%sphar_buildfromiterator4.phpt"
+}
+===DONE===

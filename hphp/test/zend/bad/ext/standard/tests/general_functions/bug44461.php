@@ -6,7 +6,7 @@ EOF
 );
 parse_ini_file(__DIR__ . 'bug44461.ini', true);
 ?>
-===DONE===?>
+===DONE===
 <?php
 unlink(__DIR__ . 'bug44461.ini');
 ?>

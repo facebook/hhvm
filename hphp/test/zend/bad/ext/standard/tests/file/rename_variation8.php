@@ -35,7 +35,8 @@ var_dump( file_exists($non_existent_dir_name) );  // expecting flase
 var_dump( file_exists($new_dir_name) );  // expecting false
 
 echo "Done\n";
-?><?php
+?>
+<?php
 unlink(dirname(__FILE__)."/rename_basic_new2.tmp");
 rmdir(dirname(__FILE__)."/rename_basic_dir1");
 ?>

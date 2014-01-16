@@ -27,9 +27,6 @@
 
 namespace HPHP { namespace JIT {
 
-using Transl::DynLocation;
-using Transl::ActRecState;
-using Transl::RefDeps;
 
 TRACE_SET_MOD(region);
 
@@ -97,7 +94,7 @@ private:
 
   bool prepareInstruction();
   void addInstruction();
-  bool consumeInput(int i, const Transl::InputInfo& ii);
+  bool consumeInput(int i, const JIT::InputInfo& ii);
   bool tryInline();
   void recordDependencies();
   void truncateLiterals();
@@ -151,8 +148,8 @@ RegionDescPtr RegionFormer::go() {
     if (!prepareInstruction()) break;
 
     // Instead of translating a Jmp, go to its destination.
-    if (m_inst.op() == OpJmp && m_inst.imm[0].u_BA > 0 &&
-        numJmps < Transl::Translator::MaxJmpsTracedThrough) {
+    if (isUnconditionalJmp(m_inst.op()) && m_inst.imm[0].u_BA > 0 &&
+        numJmps < JIT::Translator::MaxJmpsTracedThrough) {
       // Include the Jmp in the region and continue to its destination.
       ++numJmps;
       m_sk.setOffset(m_sk.offset() + m_inst.imm[0].u_BA);
@@ -164,7 +161,7 @@ RegionDescPtr RegionFormer::go() {
     m_curBlock->setKnownFunc(m_sk, m_inst.funcd);
 
     m_inst.interp = m_interp.count(m_sk);
-    auto const doPrediction = Transl::outputIsPredicted(m_startSk, m_inst);
+    auto const doPrediction = JIT::outputIsPredicted(m_startSk, m_inst);
 
     if (tryInline()) {
       // If m_inst is an FCall and the callee is suitable for inlining, we can
@@ -253,22 +250,22 @@ bool RegionFormer::prepareInstruction() {
   new (&m_inst) NormalizedInstruction();
   m_inst.source = m_sk;
   m_inst.m_unit = curUnit();
-  m_inst.breaksTracelet = Transl::opcodeBreaksBB(m_inst.op()) ||
-                            (Transl::dontGuardAnyInputs(m_inst.op()) &&
-                             Transl::opcodeChangesPC(m_inst.op()));
-  m_inst.changesPC = Transl::opcodeChangesPC(m_inst.op());
+  m_inst.breaksTracelet = JIT::opcodeBreaksBB(m_inst.op()) ||
+                            (JIT::dontGuardAnyInputs(m_inst.op()) &&
+                             JIT::opcodeChangesPC(m_inst.op()));
+  m_inst.changesPC = JIT::opcodeChangesPC(m_inst.op());
   m_inst.funcd = m_arStates.back().knownFunc();
-  Transl::populateImmediates(m_inst);
-  Transl::preInputApplyMetaData(m_metaHand, &m_inst);
+  JIT::populateImmediates(m_inst);
+  JIT::preInputApplyMetaData(m_metaHand, &m_inst);
   m_ht.setBcOff(m_sk.offset(), false);
 
-  Transl::InputInfos inputInfos;
+  JIT::InputInfos inputInfos;
   getInputs(m_startSk, m_inst, inputInfos, m_curBlock->func(), [&](int i) {
     return m_ht.traceBuilder().localType(i, DataTypeGeneric);
   });
 
   // Read types for all the inputs and apply MetaData.
-  auto newDynLoc = [&](const Transl::InputInfo& ii) {
+  auto newDynLoc = [&](const JIT::InputInfo& ii) {
     auto dl = m_inst.newDynLoc(ii.loc, m_ht.rttFromLocation(ii.loc));
     FTRACE(2, "rttFromLocation: {} -> {}\n",
            ii.loc.pretty(), dl->rtt.pretty());
@@ -300,7 +297,7 @@ bool RegionFormer::prepareInstruction() {
     try {
       m_inst.preppedByRef = m_arStates.back().checkByRef(argNum, entryArDelta,
                                                          &m_refDeps);
-    } catch (const Transl::UnknownInputExc& exn) {
+    } catch (const JIT::UnknownInputExc& exn) {
       // We don't have a guess for the current ActRec.
       FTRACE(1, "selectTracelet: don't have reffiness guess for {}\n",
              m_inst.toString());
@@ -461,7 +458,7 @@ void RegionFormer::truncateLiterals() {
  * Check if the current type for the location in ii is specific enough for what
  * the current opcode wants. If not, return false.
  */
-bool RegionFormer::consumeInput(int i, const Transl::InputInfo& ii) {
+bool RegionFormer::consumeInput(int i, const JIT::InputInfo& ii) {
   auto& rtt = m_inst.inputs[i]->rtt;
   if (ii.dontGuard || !rtt.isValue()) return true;
 

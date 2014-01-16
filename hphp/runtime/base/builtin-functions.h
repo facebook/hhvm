@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/util/functional.h"
 #include "hphp/runtime/base/type-conversions.h"
 
 #if defined(__APPLE__) || defined(__USE_BSD)
@@ -81,6 +81,9 @@ String concat4(const String& s1, const String& s2, const String& s3,
 inline void echo(const char *s) {
   g_context->write(s);
 }
+inline void echo(const char *s, int len) {
+  g_context->write(s, len);
+}
 inline void echo(const String& s) {
   g_context->write(s);
 }
@@ -106,15 +109,6 @@ inline bool is_object(CVarRef var) { return var.is(KindOfObject); }
 inline bool is_empty_string(CVarRef v) {
   return v.isString() && v.getStringData()->empty();
 }
-
-bool interface_supports_array(const StringData* s);
-bool interface_supports_array(const std::string& n);
-bool interface_supports_string(const StringData* s);
-bool interface_supports_string(const std::string& n);
-bool interface_supports_int(const StringData* s);
-bool interface_supports_int(const std::string& n);
-bool interface_supports_double(const StringData* s);
-bool interface_supports_double(const std::string& n);
 
 ///////////////////////////////////////////////////////////////////////////////
 // misc functions
@@ -144,23 +138,23 @@ vm_decode_function(CVarRef function,
 }
 
 ActRec* vm_get_previous_frame();
-Variant vm_call_user_func(CVarRef function, CArrRef params,
+Variant vm_call_user_func(CVarRef function, CVarRef params,
                           bool forwarding = false);
 
 /**
  * Invoking an arbitrary static method.
  */
 Variant invoke_static_method(const String& s, const String& method,
-                             CArrRef params, bool fatal = true);
+                             CVarRef params, bool fatal = true);
 
 /**
  * Fallback when a dynamic function call fails to find a user function
  * matching the name.  If no handlers are able to
  * invoke the function, throw an InvalidFunctionCallException.
  */
-Variant invoke_failed(const char *func, CArrRef params,
+Variant invoke_failed(const char *func,
                       bool fatal = true);
-Variant invoke_failed(CVarRef func, CArrRef params,
+Variant invoke_failed(CVarRef func,
                       bool fatal = true);
 
 Variant o_invoke_failed(const char *cls, const char *meth,
@@ -184,11 +178,11 @@ inline Variant throw_missing_file(const char *file) {
 }
 void throw_instance_method_fatal(const char *name);
 
-void throw_iterator_not_valid() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-void throw_collection_modified() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-void throw_collection_property_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-void throw_collection_compare_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-void throw_param_is_not_container() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throw_iterator_not_valid() ATTRIBUTE_NORETURN;
+void throw_collection_modified() ATTRIBUTE_NORETURN;
+void throw_collection_property_exception() ATTRIBUTE_NORETURN;
+void throw_collection_compare_exception() ATTRIBUTE_NORETURN;
+void throw_param_is_not_container() ATTRIBUTE_NORETURN;
 void check_collection_compare(ObjectData* obj);
 void check_collection_compare(ObjectData* obj1, ObjectData* obj2);
 void check_collection_cast_to_array();
@@ -206,18 +200,23 @@ inline bool isContainer(CVarRef v) {
   return isContainer(*v.asCell());
 }
 
-inline size_t getContainerSize(const Cell& c) {
+inline bool isContainerOrNull(const Cell& c) {
   assert(cellIsPlausible(c));
+  return IS_NULL_TYPE(c.m_type) || c.m_type == KindOfArray ||
+         (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
+}
+
+inline bool isContainerOrNull(CVarRef v) {
+  return isContainerOrNull(*v.asCell());
+}
+
+inline size_t getContainerSize(const Cell& c) {
+  assert(isContainer(c));
   if (c.m_type == KindOfArray) {
     return c.m_data.parr->size();
   }
-  if (c.m_type == KindOfObject) {
-    auto o = c.m_data.pobj;
-    if (o->isCollection()) {
-      return o->getCollectionSize();
-    }
-  }
-  throw_param_is_not_container();
+  assert(c.m_type == KindOfObject && c.m_data.pobj->isCollection());
+  return c.m_data.pobj->getCollectionSize();
 }
 
 inline size_t getContainerSize(CVarRef v) {
@@ -231,12 +230,14 @@ inline size_t getContainerSize(CVarRef v) {
  *   - When level is 0, it's from user funcs that turn missing arg in warnings
  */
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
-                                int level = 0)
+                                int level = 0, TypedValue *rv = nullptr)
   __attribute__((cold));
-void throw_toomany_arguments_nr(const char *fn, int num, int level = 0)
+void throw_toomany_arguments_nr(const char *fn, int num, int level = 0,
+                                TypedValue *rv = nullptr)
   __attribute__((cold));
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                              int level = 0) __attribute__((cold));
+                              int level = 0, TypedValue *rv = nullptr)
+  __attribute__((cold));
 
 /**
  * Handler for exceptions thrown from user functions that we don't
@@ -253,7 +254,8 @@ void handle_destructor_exception(const char* situation = "Destructor");
  * warning and swallow the error.
  */
 void throw_bad_type_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
-void throw_bad_array_exception();
+void throw_expected_array_exception();
+void throw_expected_array_or_collection_exception();
 
 /**
  * If RuntimeOption::ThrowInvalidArguments is on, we are running in
@@ -271,12 +273,12 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop);
 /**
  * Exceptions injected code throws
  */
-void throw_infinite_recursion_exception() ATTRIBUTE_COLD;
-Exception* generate_request_timeout_exception() ATTRIBUTE_COLD;
-Exception* generate_memory_exceeded_exception() ATTRIBUTE_COLD;
-void throw_call_non_object() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throw_infinite_recursion_exception();
+Exception* generate_request_timeout_exception();
+Exception* generate_memory_exceeded_exception();
+void throw_call_non_object() ATTRIBUTE_NORETURN;
 void throw_call_non_object(const char *methodName)
-  ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN;
 
 // unserializable default value arguments such as TimeStamp::Current()
 // are serialized as "\x01"
@@ -340,13 +342,13 @@ class AutoloadHandler : public RequestEventHandler {
   struct HandlerBundle {
     HandlerBundle() = delete;
     HandlerBundle(CVarRef handler,
-                  smart::unique_ptr<CufIter>::type& cufIter) :
+                  smart::unique_ptr<CufIter>& cufIter) :
       m_handler(handler) {
       m_cufIter = std::move(cufIter);
     }
 
     Variant m_handler; // used to respond to f_spl_autoload_functions
-    smart::unique_ptr<CufIter>::type m_cufIter; // used to invoke handlers
+    smart::unique_ptr<CufIter> m_cufIter; // used to invoke handlers
   };
 
   class CompareBundles {

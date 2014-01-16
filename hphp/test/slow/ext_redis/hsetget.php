@@ -15,5 +15,6 @@ var_dump($r->hVals('A'));
 var_dump($r->hGetAll('A'));
 var_dump($r->hGet('A', 'foo'));
 var_dump($r->hGet('A', 'baz'));
+var_dump($r->hGet('A', 'nofield'));
 
 $r->delete('A');

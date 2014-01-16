@@ -19,7 +19,7 @@
 namespace HPHP {
 namespace JIT{
 
-using namespace Transl::reg;
+using namespace JIT::reg;
 
 TRACE_SET_MOD(hhir);
 
@@ -33,7 +33,7 @@ int PhysLoc::numAllocated() const {
 }
 
 int PhysLoc::numWords() const {
-  return isFullXMM() ? 2 : numAllocated();
+  return isFullSIMD() ? 2 : numAllocated();
 }
 
 RegSet PhysLoc::regs() const {

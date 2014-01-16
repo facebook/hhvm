@@ -114,6 +114,10 @@ bool MethodStatement::isRef(int index /* = -1 */) const {
   return param->isRef();
 }
 
+bool MethodStatement::isSystem() const {
+  return getFunctionScope()->isSystem();
+}
+
 int MethodStatement::getRecursiveCount() const {
   return m_stmt ? m_stmt->getRecursiveCount() : 0;
 }
@@ -227,6 +231,13 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
           "interface", classScope->getOriginalName().c_str(),
           getOriginalName().c_str()
         );
+      }
+      if (getStmts()) {
+        getStmts()->parseTimeFatal(
+          Compiler::InvalidMethodDefinition,
+          "Interface method %s::%s() cannot contain body",
+          classScope->getOriginalName().c_str(),
+          getOriginalName().c_str());
       }
     }
     if (m_modifiers->isAbstract()) {
@@ -547,7 +558,8 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
                                Variant(Variant::NullInit()));
         ReturnStatementPtr returnStmt =
           ReturnStatementPtr(
-            new ReturnStatement(getScope(), getLocation(), constant));
+            new ReturnStatement(getScope(), getLabelScope(),
+                                getLocation(), constant));
         m_stmt->addElement(returnStmt);
       }
     }
@@ -560,6 +572,51 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   if (m_stmt) {
     m_stmt->inferTypes(ar);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void MethodStatement::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = 3;
+  if (m_attrList != nullptr) numProps++;
+  if (m_ref) numProps++;
+  if (m_params != nullptr) numProps++;
+  if (m_retTypeAnnotation != nullptr) numProps++;
+  if (m_stmt != nullptr) numProps++;
+  if (!m_docComment.empty()) numProps++;
+  cg.printObjectHeader("FunctionStatement", numProps);
+  if (m_attrList != nullptr) {
+    cg.printPropertyHeader("attributes");
+    cg.printExpressionVector(m_attrList);
+  }
+  cg.printPropertyHeader("modifiers");
+  m_modifiers->outputCodeModel(cg);
+  if (m_ref) {
+    cg.printPropertyHeader("returnsReference");
+    cg.printValue(m_ref);
+  }
+  cg.printPropertyHeader("name");
+  cg.printValue(m_originalName);
+  //TODO: type parameters (task 3262469)
+  if (m_params != nullptr) {
+    cg.printPropertyHeader("parameters");
+    cg.printExpressionVector(m_params);
+  }
+  if (m_retTypeAnnotation != nullptr) {
+    cg.printPropertyHeader("returnType");
+    m_retTypeAnnotation->outputCodeModel(cg);
+  }
+  if (m_stmt != nullptr) {
+    cg.printPropertyHeader("block");
+    cg.printAsBlock(m_stmt);
+  }
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  if (!m_docComment.empty()) {
+    cg.printPropertyHeader("comments");
+    cg.printValue(m_docComment);
+  }
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,11 +17,9 @@
 
 include(HPHPSetup)
 include(FollySetup)
+include(ExtZendCompat)
 
-# HHVM Build
-SET(USE_HHVM TRUE)
-SET(ENV{HHVM} 1)
-ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/hphp/hhvm/hhvm\\\"")
+add_definitions("-DHHVM")
 
 add_subdirectory(tools/bootstrap)
 
@@ -32,8 +30,11 @@ add_subdirectory(third_party/timelib)
 add_subdirectory(third_party/lz4)
 add_subdirectory(third_party/double-conversion)
 add_subdirectory(third_party/folly)
-add_subdirectory(third_party/ti)
-add_subdirectory(third_party/thrift)
+add_subdirectory(third_party/libzip)
+if(ENABLE_FASTCGI)
+	add_subdirectory(third_party/ti)
+	add_subdirectory(third_party/thrift)
+endif()
 
 add_subdirectory(vixl)
 add_subdirectory(neo)

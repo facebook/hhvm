@@ -78,7 +78,8 @@ foreach($modes as $mode) {
 } // end of outer for loop
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation55.tmp";
 unlink($filename);

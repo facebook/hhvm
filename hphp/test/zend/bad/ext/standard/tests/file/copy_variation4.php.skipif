@@ -1,0 +1,7 @@
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN")
+  die("skip Do not run on Windows");
+
+if(substr(PHP_OS, 0, 3) == "AIX")
+  die("skip Do not run on AIX");
+?>

@@ -68,7 +68,8 @@ foreach($unsigned_formats as $unsigned_format) {
 }
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation40.tmp";
 unlink($filename);

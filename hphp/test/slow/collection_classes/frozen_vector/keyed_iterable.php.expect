@@ -1,12 +1,12 @@
 
 map...
-string(12) "FrozenVector"
+string(15) "HH\FrozenVector"
 int(2)
 int(4)
 int(6)
 
 mapWithKey...
-string(12) "FrozenVector"
+string(15) "HH\FrozenVector"
 object(Pair)#6 (2) {
   [0]=>
   int(0)
@@ -27,16 +27,16 @@ object(Pair)#8 (2) {
 }
 
 filter...
-string(12) "FrozenVector"
+string(15) "HH\FrozenVector"
 int(1)
 
 filterWithKey...
-string(12) "FrozenVector"
+string(15) "HH\FrozenVector"
 int(1)
 int(2)
 
 zip...
-string(12) "FrozenVector"
+string(15) "HH\FrozenVector"
 object(Pair)#12 (2) {
   [0]=>
   int(1)
@@ -51,7 +51,7 @@ object(Pair)#13 (2) {
 }
 
 kvzip...
-string(12) "FrozenVector"
+string(15) "HH\FrozenVector"
 object(Pair)#14 (2) {
   [0]=>
   int(0)
@@ -72,7 +72,7 @@ object(Pair)#16 (2) {
 }
 
 keys...
-string(12) "FrozenVector"
+string(15) "HH\FrozenVector"
 int(0)
 int(1)
 int(2)

@@ -17,8 +17,13 @@
 #ifndef incl_HPHP_STACKTRACE_H_
 #define incl_HPHP_STACKTRACE_H_
 
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "hphp/util/portability.h"
+
 #include <dlfcn.h>
-#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,7 +33,6 @@ namespace HPHP {
  */
 class StackTraceBase {
 public:
-  DECLARE_BOOST_TYPES(Frame);
   class Frame {
   public:
     explicit Frame(void *_bt) : bt(_bt), lineno(0), offset(0) {}
@@ -68,7 +72,6 @@ protected:
 
 class StackTrace : public StackTraceBase {
 public:
-  DECLARE_BOOST_TYPES(Frame);
   class Frame : public StackTraceBase::Frame {
   public:
     explicit Frame(void *_bt) : StackTraceBase::Frame(_bt) {}
@@ -84,7 +87,7 @@ public:
   /**
    * Translate a frame pointer to file name and line number pair.
    */
-  static FramePtr Translate(void *bt);
+  static std::shared_ptr<Frame> Translate(void *bt);
 
   /**
    * Translate the frame pointer of a PHP function using the perf map.
@@ -117,7 +120,7 @@ public:
    * Get frames in raw pointers or translated frames.
    */
   void get(std::vector<void*> &bt) const { bt = m_bt_pointers;}
-  void get(FramePtrVec &frames) const;
+  void get(std::vector<std::shared_ptr<Frame>> &frames) const;
   std::string hexEncode(int minLevel = 0, int maxLevel = 999) const;
 
 private:

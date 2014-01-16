@@ -13,20 +13,28 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/process.h"
-#include "hphp/util/base.h"
-#include "util.h"
+
+#include <boost/lexical_cast.hpp>
+
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <pwd.h>
+#include <poll.h>
+#include <unistd.h>
+
+#include "folly/ScopeGuard.h"
+#include "folly/String.h"
+
 #include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/text-color.h"
-#include "folly/String.h"
-
-#include <pwd.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
+
+using std::string;
 
 static void swap_fd(const string &filename, FILE *fdesc) {
   FILE *f = fopen(filename.c_str(), "a");
@@ -38,24 +46,14 @@ static void swap_fd(const string &filename, FILE *fdesc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FileReader {
-public:
-  FileReader(FilePtr f, string &out) : m_f(f), m_out(out) {}
-  void read() { readString(m_f.get(), m_out); }
-
-  static void readString(FILE *f, string &out) {
-    size_t nread = 0;
-    const unsigned int BUFFER_SIZE = 1024;
-    char buf[BUFFER_SIZE];
-    while ((nread = fread(buf, 1, BUFFER_SIZE, f)) != 0) {
-      out.append(buf, nread);
-    }
+static void readString(FILE *f, string &out) {
+  size_t nread = 0;
+  const unsigned int BUFFER_SIZE = 1024;
+  char buf[BUFFER_SIZE];
+  while ((nread = fread(buf, 1, BUFFER_SIZE, f)) != 0) {
+    out.append(buf, nread);
   }
-
-private:
-  FilePtr m_f;
-  string &m_out;
-};
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -77,10 +75,11 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
   if (pid == 0) return false;
 
   {
-    FilePtr sin(fdopen(fdin, "w"), file_closer());
+    FILE* sin = fdopen(fdin, "w");
     if (!sin) return false;
+    SCOPE_EXIT { fclose(sin); };
     if (in && *in) {
-      fwrite(in, 1, strlen(in), sin.get());
+      fwrite(in, 1, strlen(in), sin);
     }
   }
 
@@ -178,8 +177,8 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
 
 int Process::Exec(const std::string &cmd, const std::string &outf,
                   const std::string &errf) {
-  vector<string> argvs;
-  Util::split(' ', cmd.c_str(), argvs);
+  std::vector<std::string> argvs;
+  folly::split(' ', cmd, argvs);
   if (argvs.empty()) {
     return -1;
   }
@@ -318,8 +317,8 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
   string out;
   Exec("find", argv, nullptr, out);
 
-  vector<string> files;
-  Util::split('\n', out.c_str(), files, true);
+  std::vector<std::string> files;
+  folly::split('\n', out, files, true);
 
   string ccmd = cmd;
   if (!matchAll) {
@@ -341,7 +340,7 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
     FILE * f = fopen(filename.c_str(), "r");
     if (f) {
       string cmdline;
-      FileReader::readString(f, cmdline);
+      readString(f, cmdline);
       fclose(f);
       string converted;
       if (matchAll) {
@@ -377,7 +376,7 @@ std::string Process::GetCommandLine(pid_t pid) {
   string cmdline;
   FILE * f = fopen(name.c_str(), "r");
   if (f) {
-    FileReader::readString(f, cmdline);
+    readString(f, cmdline);
     fclose(f);
   }
 
@@ -410,12 +409,12 @@ int Process::GetProcessRSS(pid_t pid) {
   string status;
   FILE * f = fopen(name.c_str(), "r");
   if (f) {
-    FileReader::readString(f, status);
+    readString(f, status);
     fclose(f);
   }
 
-  vector<string> lines;
-  Util::split('\n', status.c_str(), lines, true);
+  std::vector<std::string> lines;
+  folly::split('\n', status, lines, true /* ignoreEmpty */);
   for (unsigned int i = 0; i < lines.size(); i++) {
     string &line = lines[i];
     if (line.find("VmRSS:") == 0) {
@@ -453,7 +452,7 @@ size_t Process::GetCodeFootprint(pid_t pid) {
   string statm;
   FILE * f = fopen(name.c_str(), "r");
   if (f) {
-    FileReader::readString(f, statm);
+    readString(f, statm);
     fclose(f);
   }
 
@@ -490,16 +489,11 @@ std::string Process::GetCPUModel() {
   uint32_t regs[4];
   do_cpuid(0, regs);
 
-  char cpu_vendor[13];
-  //uint32_t cpu_high = regs[0];
-  ((uint32_t *)&cpu_vendor)[0] = regs[1];
-  ((uint32_t *)&cpu_vendor)[1] = regs[3];
-  ((uint32_t *)&cpu_vendor)[2] = regs[2];
-  cpu_vendor[12] = '\0';
-
+  const int vendor_size = sizeof(regs[1])*3;
+  std::swap(regs[2], regs[3]);
   uint32_t cpu_exthigh = 0;
-  if (strcmp(cpu_vendor, "GenuineIntel") == 0 ||
-      strcmp(cpu_vendor, "AuthenticAMD") == 0) {
+  if (memcmp(regs + 1, "GenuineIntel", vendor_size) == 0 ||
+      memcmp(regs + 1, "AuthenticAMD", vendor_size) == 0) {
     do_cpuid(0x80000000, regs);
     cpu_exthigh = regs[0];
   }

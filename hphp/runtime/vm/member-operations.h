@@ -28,6 +28,8 @@
 
 namespace HPHP {
 
+const StaticString s_storage("storage");
+
 class InvalidSetMException : public std::runtime_error {
  public:
   InvalidSetMException()
@@ -425,12 +427,20 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
                                TypedValue* key) {
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
-  if (LIKELY(base->m_data.pobj->isCollection())) {
+  auto obj = base->m_data.pobj;
+
+  if (LIKELY(obj->isCollection())) {
     if (reffy) {
       raise_error("Collection elements cannot be taken by reference");
       return nullptr;
     }
-    return collectionGet(base->m_data.pobj, key);
+    return collectionGet(obj, key);
+  } else if (obj->getVMClass() == SystemLib::s_ArrayObjectClass) {
+    auto storage = obj->o_realProp(s_storage, 0,
+                                   SystemLib::s_ArrayObjectClass->nameRef());
+    // ArrayObject should have the 'storage' property...
+    assert(storage != nullptr);
+    return ElemDArray<false /* warn */, keyType>(storage->asTypedValue(), key);
   }
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
 }
@@ -1034,7 +1044,7 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
 /**
  * SetOpElem when base is Null
  */
-inline TypedValue* SetOpElemEmptyish(unsigned char op, Cell* base,
+inline TypedValue* SetOpElemEmptyish(SetOpOp op, Cell* base,
                                      TypedValue* key, Cell* rhs) {
   assert(cellIsPlausible(*base));
 
@@ -1064,7 +1074,7 @@ inline TypedValue* SetOpElemNumberish(TypedValue& tvScratch) {
  */
 template <KeyType keyType = KeyType::Any>
 inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
-                             unsigned char op, TypedValue* base,
+                             SetOpOp op, TypedValue* base,
                              TypedValue* key, Cell* rhs) {
   TypedValue scratch;
   TypedValue* result;
@@ -1128,7 +1138,7 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
   return result;
 }
 
-inline TypedValue* SetOpNewElemEmptyish(unsigned char op,
+inline TypedValue* SetOpNewElemEmptyish(SetOpOp op,
                                         TypedValue* base, Cell* rhs) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt();
@@ -1142,7 +1152,7 @@ inline TypedValue* SetOpNewElemNumberish(TypedValue& tvScratch) {
   return &tvScratch;
 }
 inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                unsigned char op, TypedValue* base,
+                                SetOpOp op, TypedValue* base,
                                 Cell* rhs) {
   TypedValue* result;
   DataType type;
@@ -1200,7 +1210,7 @@ inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
 
 template <bool setResult>
 NEVER_INLINE
-void incDecBodySlow(unsigned char op, TypedValue* fr, TypedValue* to) {
+void incDecBodySlow(IncDecOp op, TypedValue* fr, TypedValue* to) {
   if (fr->m_type == KindOfUninit) {
     ActRec* fp = g_vmContext->m_fp;
     size_t pind = reinterpret_cast<TypedValue*>(fp) - fr - 1;
@@ -1218,75 +1228,72 @@ void incDecBodySlow(unsigned char op, TypedValue* fr, TypedValue* to) {
 
   assert(cellIsPlausible(*fr));
 
-  switch (static_cast<IncDecOp>(op)) {
-  case PreInc:
+  switch (op) {
+  case IncDecOp::PreInc:
     cellInc(*fr);
     if (setResult) {
       cellDup(*fr, *to);
     }
-    break;
-  case PostInc:
+    return;
+  case IncDecOp::PostInc:
     if (setResult) {
       cellDup(*fr, *to);
     }
     cellInc(*fr);
-    break;
-  case PreDec:
+    return;
+  case IncDecOp::PreDec:
     cellDec(*fr);
     if (setResult) {
       cellDup(*fr, *to);
     }
-    break;
-  case PostDec:
+    return;
+  case IncDecOp::PostDec:
     if (setResult) {
       cellDup(*fr, *to);
     }
     cellDec(*fr);
-    break;
-  case IncDec_invalid:
-    not_reached();
-  }
-}
-
-template <bool setResult>
-inline void IncDecBody(unsigned char op, TypedValue* fr, TypedValue* to) {
-  if (UNLIKELY(fr->m_type != KindOfInt64)) {
-    return incDecBodySlow<setResult>(op, fr, to);
-  }
-
-  switch (static_cast<IncDecOp>(op)) {
-  case PreInc:
-    ++fr->m_data.num;
-    if (setResult) {
-      cellCopy(*fr, *to);
-    }
     return;
-  case PostInc:
-    if (setResult) {
-      cellCopy(*fr, *to);
-    }
-    ++fr->m_data.num;
-    return;
-  case PreDec:
-    --fr->m_data.num;
-    if (setResult) {
-      cellCopy(*fr, *to);
-    }
-    return;
-  case PostDec:
-    if (setResult) {
-      cellCopy(*fr, *to);
-    }
-    --fr->m_data.num;
-    return;
-  case IncDec_invalid:
-    break;
   }
   not_reached();
 }
 
 template <bool setResult>
-inline void IncDecElemEmptyish(unsigned char op, TypedValue* base,
+inline void IncDecBody(IncDecOp op, TypedValue* fr, TypedValue* to) {
+  if (UNLIKELY(fr->m_type != KindOfInt64)) {
+    return incDecBodySlow<setResult>(op, fr, to);
+  }
+
+  switch (op) {
+  case IncDecOp::PreInc:
+    ++fr->m_data.num;
+    if (setResult) {
+      cellCopy(*fr, *to);
+    }
+    return;
+  case IncDecOp::PostInc:
+    if (setResult) {
+      cellCopy(*fr, *to);
+    }
+    ++fr->m_data.num;
+    return;
+  case IncDecOp::PreDec:
+    --fr->m_data.num;
+    if (setResult) {
+      cellCopy(*fr, *to);
+    }
+    return;
+  case IncDecOp::PostDec:
+    if (setResult) {
+      cellCopy(*fr, *to);
+    }
+    --fr->m_data.num;
+    return;
+  }
+  not_reached();
+}
+
+template <bool setResult>
+inline void IncDecElemEmptyish(IncDecOp op, TypedValue* base,
                                TypedValue* key, TypedValue& dest) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(key));
@@ -1306,7 +1313,7 @@ inline void IncDecElemNumberish(TypedValue& dest) {
 }
 template <bool setResult, KeyType keyType = KeyType::Any>
 inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
-                       unsigned char op, TypedValue* base,
+                       IncDecOp op, TypedValue* base,
                        TypedValue* key, TypedValue& dest) {
   TypedValue scratch;
   DataType type;
@@ -1362,7 +1369,7 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool setResult>
-inline void IncDecNewElemEmptyish(unsigned char op, TypedValue* base,
+inline void IncDecNewElemEmptyish(IncDecOp op, TypedValue* base,
                                   TypedValue& dest) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt();
@@ -1378,7 +1385,7 @@ inline void IncDecNewElemNumberish(TypedValue& dest) {
 }
 template <bool setResult>
 inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
-                          unsigned char op, TypedValue* base,
+                          IncDecOp op, TypedValue* base,
                           TypedValue& dest) {
   DataType type;
   opPre(base, type);
@@ -1607,7 +1614,7 @@ inline bool IssetEmptyElemArray(TypedValue* base, TypedValue* key) {
   if (useEmpty) {
     return !cellToBool(*tvToCell(result));
   }
-  return !tvIsNull(tvToCell(result));
+  return !cellIsNull(tvToCell(result));
 }
 
 /**
@@ -1875,7 +1882,7 @@ inline TypedValue* SetOpPropNull(TypedValue& tvScratch) {
   tvWriteNull(&tvScratch);
   return &tvScratch;
 }
-inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
+inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
                                      TypedValue* base, TypedValue* key,
                                      Cell* rhs) {
   ObjectData* obj = createDefaultObject();
@@ -1894,7 +1901,7 @@ inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
 
 template <KeyType keyType>
 inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
-                                unsigned char op, ObjectData* instance,
+                                SetOpOp op, ObjectData* instance,
                                 TypedValue* key, Cell* rhs) {
   StringData* keySD = prepareKey<keyType>(key);
   TypedValue* result = instance->setOpProp(tvRef, ctx, op, keySD, rhs);
@@ -1905,7 +1912,7 @@ inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
 // $base->$key <op>= $rhs
 template<bool isObj = false, KeyType keyType = KeyType::Any>
 inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
-                             Class* ctx, unsigned char op,
+                             Class* ctx, SetOpOp op,
                              TypedValue* base, TypedValue* key,
                              Cell* rhs) {
   TypedValue scratch;
@@ -1965,7 +1972,7 @@ inline void IncDecPropNull(TypedValue& dest) {
   }
 }
 template <bool setResult>
-inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
+inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
                                TypedValue* key, TypedValue& dest) {
   ObjectData* obj = createDefaultObject();
   obj->incRefCount();
@@ -1994,7 +2001,7 @@ inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
 
 template <bool setResult, KeyType keyType>
 inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
-                          unsigned char op, ObjectData* base,
+                          IncDecOp op, ObjectData* base,
                           TypedValue* key, TypedValue& dest) {
   StringData* keySD = prepareKey<keyType>(key);
   base->incDecProp<setResult>(tvRef, ctx, op, keySD, dest);
@@ -2003,7 +2010,7 @@ inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
 
 template <bool setResult, bool isObj = false, KeyType keyType = KeyType::Any>
 inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
-                       Class* ctx, unsigned char op,
+                       Class* ctx, IncDecOp op,
                        TypedValue* base, TypedValue* key,
                        TypedValue& dest) {
   TypedValue scratch;

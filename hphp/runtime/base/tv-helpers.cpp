@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/runtime-error.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -94,12 +95,6 @@ bool tvDecRefWillRelease(TypedValue* tv) {
     return tv->m_data.pref->getRealCount() <= 1;
   }
   return !tv->m_data.pstr->hasMultipleRefs();
-}
-
-void tvUnboxIfNeeded(TypedValue *tv) {
-  if (tv->m_type == KindOfRef) {
-    tvUnbox(tv);
-  }
 }
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
@@ -262,6 +257,7 @@ void tvCastToStringInPlace(TypedValue* tv) {
   case KindOfStaticString:
   case KindOfString:  return;
   case KindOfArray:
+    raise_notice("Array to string conversion");
     s = s_Array.get();
     tvDecRefArr(tv);
     goto static_string;
@@ -301,7 +297,8 @@ StringData* tvCastToString(const TypedValue* tv) {
   case KindOfDouble:  s = buildStringData(tv->m_data.dbl); break;
   case KindOfStaticString: return tv->m_data.pstr;
   case KindOfString:  s = tv->m_data.pstr; break;
-  case KindOfArray:   return s_Array.get();
+  case KindOfArray:   raise_notice("Array to string conversion");
+                      return s_Array.get();
   case KindOfObject:  return tv->m_data.pobj->invokeToString().detach();
   case KindOfResource: return tv->m_data.pres->o_toString().detach();
   default:            not_reached();
@@ -334,9 +331,9 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     return;
   }
   case KindOfResource:  {
-    // For resources, we fall back on the Variant machinery
-    tvAsVariant(tv) = tv->m_data.pres->o_toArray();
-    return;
+    a = ArrayData::Create(tvAsVariant(tv));
+    tvDecRefRes(tv);
+    break;
   }
   default:            assert(false); a = ArrayData::Create(); break;
   }

@@ -21,8 +21,9 @@
 #include <cstring>
 #include <sys/mman.h>
 
+#include "folly/Bits.h"
+
 #include "hphp/util/assertions.h"
-#include "hphp/util/util.h"
 
 namespace HPHP {
 
@@ -92,7 +93,7 @@ struct DataBlock {
    *   allocAt supports this.
    */
   void* allocAt(size_t &frontierOff, size_t sz, size_t align = 16) {
-    align = Util::roundUpToPowerOfTwo(align);
+    align = folly::nextPowTwo(align);
     uint8_t* frontier = m_base + frontierOff;
     assert(m_base && frontier);
     int slop = uintptr_t(frontier) & (align - 1);
@@ -239,6 +240,17 @@ class UndoMarker {
   }
 };
 
+/*
+ * RAII bookmark for scoped rewinding of frontier.
+ */
+class CodeCursor : public UndoMarker {
+ public:
+  CodeCursor(CodeBlock& cb, CodeAddress newFrontier) : UndoMarker(cb) {
+    cb.setFrontier(newFrontier);
+  }
+
+  ~CodeCursor() { undo(); }
+};
 }
 
 #endif

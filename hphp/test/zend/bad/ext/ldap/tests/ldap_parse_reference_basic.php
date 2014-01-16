@@ -16,7 +16,7 @@ var_dump(
 	$refs
 );
 ?>
-===DONE===?>
+===DONE===
 <?php
 include "connect.inc";
 

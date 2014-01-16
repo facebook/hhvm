@@ -37,7 +37,6 @@ class FastCGITransport;
 
 class FastCGIConnection;
 
-DECLARE_BOOST_TYPES(FastCGITransport);
 class FastCGITransport
   : public Transport,
     public ProtocolSessionHandler {
@@ -49,6 +48,10 @@ public:
   virtual const char *getUrl() override;
   virtual const char *getRemoteHost() override;
   virtual uint16_t getRemotePort() override;
+  virtual const std::string getDocumentRoot() override;
+  virtual const char *getServerName() override;
+  virtual const char *getServerAddr() override;
+  virtual uint16_t getServerPort() override;
 
   virtual const void *getPostData(int &size) override;
   virtual bool hasMorePostData() override;
@@ -65,6 +68,7 @@ public:
 
   virtual std::string getHeader(const char *name) override;
   virtual void getHeaders(HeaderMap &headers) override;
+  virtual void getTransportParams(HeaderMap &serverParams) override;
 
   virtual void addHeaderImpl(const char *name, const char *value) override;
   virtual void removeHeaderImpl(const char *name) override;
@@ -73,7 +77,7 @@ public:
                         int size,
                         int code,
                         bool chunked) override;
-  void sendResponseHeaders(folly::IOBufQueue& queue);
+  void sendResponseHeaders(folly::IOBufQueue& queue, int code);
   virtual void onSendEndImpl() override;
 
   // Implementing ProtocolSessionHandler
@@ -87,6 +91,15 @@ private:
   typedef std::map<std::string, std::vector<std::string>> ResponseHeaders;
 
   void handleHeader(const std::string& key, const std::string& value);
+  std::string getRawHeader(const std::string& name);
+  /*
+   * HTTP_IF_MODIFIED_SINCE -> If-Unmodified-Since
+   */
+  std::string unmangleHeader(const std::string& name);
+  /*
+   * If-Unmodified-Since -> HTTP_IF_MODIFIED_SINCE
+   */
+  std::string mangleHeader(const std::string& name);
 
   static bool compareKeys(const std::string& key,
                           const std::string& other_key);
@@ -101,6 +114,11 @@ private:
   static const std::string k_methodKey;
   static const std::string k_httpVersionKey;
   static const std::string k_contentLengthKey;
+  static const std::string k_documentRoot;
+  static const std::string k_serverNameKey;
+  static const std::string k_serverPortKey;
+  static const std::string k_serverAddrKey;
+  static const std::string k_httpsKey;
 
   FastCGIConnection* m_connection;
   int m_id;
@@ -108,8 +126,12 @@ private:
   std::unique_ptr<folly::IOBuf> m_currBody;
   HeaderMap m_requestHeaders;
   std::string m_requestURI;
+  std::string m_documentRoot;
   std::string m_remoteHost;
   uint16_t m_remotePort;
+  std::string m_serverName;
+  std::string m_serverAddr;
+  uint16_t m_serverPort;
   Method m_method;
   std::string m_extendedMethod;
   std::string m_httpVersion;

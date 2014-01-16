@@ -46,12 +46,15 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
   DECLARE_CLASS_NO_SWEEP(DateTime)
 
   // need to implement
-  public: c_DateTime(Class* cls = c_DateTime::classof());
-  public: ~c_DateTime();
+  c_DateTime(Class* cls = c_DateTime::classof())
+    : ExtObjectDataFlags(cls)
+  {}
+  ~c_DateTime() {}
+
   public: Object t_add(CObjRef interval);
   public: void t___construct(const String& time = "now",
                              CObjRef timezone = null_object);
-  public: static Object ti_createfromformat(
+  public: static Variant ti_createfromformat(
     const String& format, const String& time, CObjRef timezone = null_object);
   public: Object t_diff(CObjRef datetime2, bool absolute = false);
   public: String t_format(const String& format);
@@ -66,6 +69,10 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
   public: Object t_settimestamp(int64_t unixtimestamp);
   public: Object t_settimezone(CObjRef timezone);
   public: Object t_sub(CObjRef interval);
+  public: void t___wakeup();
+  public: Array t___sleep();
+
+  int64_t gettimestamp() const;
 
   // Helper for DateTime -> c_DateTime conversion
   public: static Object wrap(SmartResource<DateTime> dt) {
@@ -113,8 +120,11 @@ class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
   DECLARE_CLASS_NO_SWEEP(DateTimeZone)
 
   // need to implement
-  public: c_DateTimeZone(Class* cls = c_DateTimeZone::classof());
-  public: ~c_DateTimeZone();
+  c_DateTimeZone(Class* cls = c_DateTimeZone::classof())
+    : ExtObjectDataFlags(cls)
+  {}
+  ~c_DateTimeZone() {}
+
   public: void t___construct(const String& timezone);
   public: Array t_getlocation();
   public: String t_getname();
@@ -133,7 +143,8 @@ class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
 
   // Helper for c_DateTimeZone -> TimeZone conversion
   public: static SmartResource<TimeZone> unwrap(CObjRef timezone) {
-    SmartObject<c_DateTimeZone> ctz = timezone.getTyped<c_DateTimeZone>(true);
+    SmartObject<c_DateTimeZone> ctz =
+      timezone.getTyped<c_DateTimeZone>(true, true);
     if (ctz.get() == NULL)
       return SmartResource<TimeZone>();
     return ctz->m_tz;
@@ -156,8 +167,11 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|
   DECLARE_CLASS_NO_SWEEP(DateInterval)
 
   // need to implement
-  public: c_DateInterval(Class* cls = c_DateInterval::classof());
-  public: ~c_DateInterval();
+  c_DateInterval(Class* cls = c_DateInterval::classof())
+    : ExtObjectDataFlags(cls)
+  {}
+  ~c_DateInterval() {}
+
   public: void t___construct(const String& interval_spec);
   public: Variant t___get(Variant member);
   public: Variant t___set(Variant member, Variant value);
@@ -236,11 +250,11 @@ String f_timezone_version_get();
 
 bool f_checkdate(int month, int day, int year);
 Object f_date_add(CObjRef datetime, CObjRef interval);
-Object f_date_create_from_format(const String& format,
+Variant f_date_create_from_format(const String& format,
                                  const String& time,
                                  CObjRef timezone = null_object);
-Object f_date_create(const String& time = null_string,
-                     CObjRef timezone = null_object);
+Variant f_date_create(const String& time = null_string,
+                      CObjRef timezone = null_object);
 void f_date_date_set(CObjRef object, int year, int month, int day);
 Object f_date_diff(CObjRef datetime,
                    CObjRef datetime2,

@@ -25,7 +25,7 @@ var_dump(imap_body($imap_stream, 1, FT_UID));
 
 imap_close($imap_stream);
 ?>
-===Done===?>
+===Done===
 <?php 
 require_once('clean.inc');
 ?>

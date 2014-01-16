@@ -24,10 +24,10 @@
 #include <dwarf.h>
 #include <vector>
 
-using namespace HPHP::Transl;
-
 namespace HPHP {
 namespace Debug {
+
+using JIT::TCA;
 
 typedef enum {
   RAX,
@@ -52,7 +52,14 @@ typedef enum {
 const int DWARF_CODE_ALIGN = 1;
 const int DWARF_DATA_ALIGN = 8;
 
-extern int g_dwarfCallback(char *name, int size, Dwarf_Unsigned type,
+#ifdef HAVE_LIBDWARF_20130729
+#define LIBDWARF_CALLBACK_NAME_TYPE const char*
+#else
+#define LIBDWARF_CALLBACK_NAME_TYPE char*
+#endif
+
+extern int g_dwarfCallback(
+  LIBDWARF_CALLBACK_NAME_TYPE name, int size, Dwarf_Unsigned type,
   Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
   Dwarf_Unsigned *sect_name_index, Dwarf_Ptr handle, int *error);
 
@@ -94,7 +101,7 @@ class TCRange {
 };
 
 struct DwarfBuf {
-  vector<uint8_t> m_buf;
+  std::vector<uint8_t> m_buf;
 
   void byte(uint8_t c);
   void byte(int off, uint8_t c);
@@ -147,7 +154,7 @@ struct FunctionInfo {
 
 struct DwarfChunk {
   DwarfBuf m_buf;
-  vector<FunctionInfo *> m_functions;
+  std::vector<FunctionInfo *> m_functions;
   char *m_symfile;
   bool m_synced;
   DwarfChunk() : m_symfile(nullptr), m_synced(false) {}
@@ -157,12 +164,12 @@ struct DwarfChunk {
 };
 
 typedef std::map<TCA, FunctionInfo* > FuncDB;
-typedef vector<FunctionInfo* > FuncPtrDB;
+typedef std::vector<FunctionInfo* > FuncPtrDB;
 
 struct DwarfInfo {
-  typedef std::map<TCA, TransRec> TransDB;
+  typedef std::map<TCA, JIT::TransRec> TransDB;
 
-  vector<DwarfChunk*> m_dwarfChunks;
+  std::vector<DwarfChunk*> m_dwarfChunks;
   /* Array of chunks indexed by lg(#functions in chunk) + 1.
    * i.e. m_dwarfChunk[i] = pointer to chunk with
    * 2^(i-1) * RuntimeOption::EvalGdbSyncChunks functions, or NULL if
@@ -173,12 +180,12 @@ struct DwarfInfo {
 
   const char *lookupFile(const Unit *unit);
   void addLineEntries(TCRange range, const Unit *unit,
-		      const Opcode *instr, FunctionInfo* f);
+                      const Opcode *instr, FunctionInfo* f);
   void transferFuncs(DwarfChunk* from, DwarfChunk* to);
   void compactChunks();
   DwarfChunk* addTracelet(TCRange range, const char* name,
-			  const Func* func, const Opcode *instr,
-			  bool exit, bool inPrologue);
+                          const Func* func, const Opcode *instr,
+                          bool exit, bool inPrologue);
   void syncChunks();
 };
 

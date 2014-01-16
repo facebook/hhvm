@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/class-info.h"
@@ -55,22 +56,14 @@ struct Func {
 
     template<class SerDe>
     void serde(SerDe& sd) {
-      const StringData* tcName      = m_typeConstraint.typeName();
-      TypeConstraint::Flags tcFlags = m_typeConstraint.flags();
-
       sd(m_builtinType)
         (m_funcletOff)
         (m_defVal)
         (m_phpCode)
-        (tcName)
-        (tcFlags)
+        (m_typeConstraint)
         (m_userAttributes)
         (m_userType)
         ;
-
-      if (SerDe::deserializing) {
-        setTypeConstraint(TypeConstraint(tcName, tcFlags));
-      }
     }
 
     void setBuiltinType(DataType type) { m_builtinType = type; }
@@ -144,7 +137,7 @@ struct Func {
   static void destroy(Func* func);
 
   Func* clone(Class* cls) const;
-  const Func* cloneAndSetClass(Class* cls) const;
+  Func* cloneAndSetClass(Class* cls) const;
 
   void validate() const {
 #ifdef DEBUG
@@ -198,7 +191,20 @@ struct Func {
 
   bool byRef(int32_t arg) const;
   bool mustBeRef(int32_t arg) const;
-  void prettyPrint(std::ostream& out) const;
+
+  struct PrintOpts {
+    PrintOpts()
+      : fpi(true)
+    {}
+
+    PrintOpts& noFpi() {
+      fpi = false;
+      return *this;
+    }
+
+    bool fpi;
+  };
+  void prettyPrint(std::ostream& out, const PrintOpts& = PrintOpts()) const;
 
   bool isPseudoMain() const { return m_name->empty(); }
   bool isBuiltin() const { return m_attrs & AttrBuiltin; }
@@ -210,9 +216,6 @@ struct Func {
   bool isTraitMethod() const {
     PreClass* pcls = preClass();
     return pcls && (pcls->attrs() & AttrTrait);
-  }
-  bool isNonClosureMethod() const {
-    return isMethod() && !isClosureBody();
   }
   bool isPublic() const { return bool(m_attrs & AttrPublic); }
   bool isStatic() const { return bool(m_attrs & AttrStatic); }
@@ -248,6 +251,7 @@ struct Func {
   bool isEntry(Offset offset) const;
   bool isDVEntry(Offset offset) const;
   int  getDVEntryNumParams(Offset offset) const;
+  Offset getEntryForNumArgs(int numArgsPassed) const;
 
   Unit* unit() const { return m_unit; }
   PreClass* preClass() const { return shared()->m_preClass; }
@@ -316,8 +320,12 @@ struct Func {
     return id < numNamedLocals() ? shared()->m_localNames[id] : 0;
   }
 
-  const StringData* returnTypeConstraint() const {
+  const TypeConstraint& returnTypeConstraint() const {
     return shared()->m_retTypeConstraint;
+  }
+
+  const StringData* returnUserType() const {
+    return shared()->m_retUserType;
   }
 
   const StringData* originalFilename() const {
@@ -348,8 +356,21 @@ struct Func {
    * hook the parts up. If you know more and need it, there probably isn't a
    * technical reason not to.
    */
-  bool hasGeneratorAsBody() const { return shared()->m_hasGeneratorAsBody; }
-  const Func* getGeneratorBody(const StringData* name) const;
+  bool hasGeneratorAsBody() const { return shared()->m_generatorBodyName; }
+  const StringData* getGeneratorBodyName() const {
+    return shared()->m_generatorBodyName;
+  }
+  const Func* getGeneratorBody() const;
+
+  void setGeneratorOrigFunc(const Func* origFunc) {
+    assert(isGenerator());
+    ((const Func**)this)[-1] = origFunc;
+  }
+  const Func* getGeneratorOrigFunc() const {
+    assert(isGenerator());
+    return ((Func**)this)[-1];
+  }
+
   /**
    * Was this generated specially by the compiler to aide the runtime?
    */
@@ -371,6 +392,7 @@ struct Func {
   }
 
   bool shouldPGO() const;
+  void incProfCounter();
 
   /**
    * Closure's __invoke()s have an extra pointer used to keep cloned versions
@@ -380,11 +402,12 @@ struct Func {
    */
   Func*& nextClonedClosure() const {
     assert(isClosureBody() || isGeneratorFromClosure());
-    return ((Func**)this)[-1];
+    return ((Func**)this)[-1 - (int)isGenerator()];
   }
 
   static void* allocFuncMem(
     const StringData* name, int numParams,
+    bool needsGeneratorOrigFunc,
     bool needsNextClonedClosure,
     bool lowMem);
 
@@ -482,11 +505,12 @@ private:
     bool m_isGenerator : 1;
     bool m_isGeneratorFromClosure : 1;
     bool m_isPairGenerator : 1;
-    bool m_hasGeneratorAsBody : 1;
     bool m_isGenerated : 1;
     bool m_isAsync : 1;
     UserAttributeMap m_userAttributes;
-    const StringData* m_retTypeConstraint;
+    const StringData* m_generatorBodyName;
+    TypeConstraint m_retTypeConstraint;
+    const StringData* m_retUserType;
     // per-func filepath for traits flattened during repo construction
     const StringData* m_originalFilename;
     SharedData(PreClass* preClass, Id id, Offset base,
@@ -511,7 +535,7 @@ private:
   void allocVarId(const StringData* name);
   const SharedData* shared() const { return m_shared.get(); }
   SharedData* shared() { return m_shared.get(); }
-  const Func* findCachedClone(Class* cls) const;
+  Func* findCachedClone(Class* cls) const;
 
 private:
   Unit* m_unit;
@@ -535,6 +559,7 @@ private:
   int m_numParams;
   Attr m_attrs;
   FuncId m_funcId;
+  uint32_t m_profCounter;        // profile counter used to detect hot functions
   bool m_hasPrivateAncestor : 1; // This flag indicates if any of this
                                  // Class's ancestors provide a
                                  // "private" implementation for this
@@ -596,17 +621,34 @@ public:
   bool hasVar(const StringData* name) const;
   Id numParams() const { return m_params.size(); }
 
-  void setReturnTypeConstraint(const StringData* retTypeConstraint) {
+  /*
+   * Return type constraints will eventually be runtime-enforced
+   * return types, but for now are unused.
+   */
+  void setReturnTypeConstraint(const TypeConstraint retTypeConstraint) {
     m_retTypeConstraint = retTypeConstraint;
   }
-  const StringData* returnTypeConstraint() const {
+  const TypeConstraint& returnTypeConstraint() const {
     return m_retTypeConstraint;
   }
 
+  /*
+   * Return "user types" are string-format specifications of return
+   * types only used for reflection purposes.
+   */
+  void setReturnUserType(const StringData* retUserType) {
+    m_retUserType = retUserType;
+  }
+  const StringData* returnUserType() const {
+    return m_retUserType;
+  }
+
+  Id numIterators() const { return m_numIterators; }
+  void setNumIterators(Id numIterators);
   Id allocIterator();
   void freeIterator(Id id);
-  void setNumIterators(Id numIterators);
-  Id numIterators() const { return m_numIterators; }
+  Id numLiveIterators() { return m_nextFreeIterator; }
+  void setNumLiveIterators(Id id) { m_nextFreeIterator = id; }
 
   Id allocUnnamedLocal();
   void freeUnnamedLocal(Id id);
@@ -663,8 +705,11 @@ public:
   void setIsPairGenerator(bool b) { m_isPairGenerator = b; }
   bool isPairGenerator() const { return m_isPairGenerator; }
 
-  void setHasGeneratorAsBody(bool b) { m_hasGeneratorAsBody = b; }
-  bool hasGeneratorAsBody() const { return m_hasGeneratorAsBody; }
+  void setGeneratorBodyName(const StringData* name) {
+    m_generatorBodyName = name;
+  }
+  const StringData* getGeneratorBodyName() const { return m_generatorBodyName; }
+  bool hasGeneratorAsBody() const { return m_generatorBodyName; }
 
   void setContainsCalls() { m_containsCalls = true; }
 
@@ -678,7 +723,9 @@ public:
   const UserAttributeMap& getUserAttributes() const {
     return m_userAttributes;
   }
+  int parseUserAttributes(Attr &attrs) const;
   int parseNativeAttributes(Attr &attrs) const;
+  int parseHipHopAttributes(Attr &attrs) const;
 
   void commit(RepoTxn& txn) const;
   Func* create(Unit& unit, PreClass* preClass = nullptr) const;
@@ -693,7 +740,13 @@ public:
   }
   const StringData* originalFilename() const { return m_originalFilename; }
 
+  /*
+   * Return types used for HNI functions with a native C++
+   * implementation.
+   */
   void setReturnType(DataType dt) { m_returnType = dt; }
+  DataType getReturnType() const { return m_returnType; }
+
   void setDocComment(const char *dc) {
     m_docComment = makeStaticString(dc);
   }
@@ -734,7 +787,8 @@ private:
   int m_maxStackCells;
   SVInfoVec m_staticVars;
 
-  const StringData* m_retTypeConstraint;
+  TypeConstraint m_retTypeConstraint;
+  const StringData* m_retUserType;
 
   EHEntVec m_ehtab;
   bool m_ehTabSorted;
@@ -748,7 +802,6 @@ private:
   bool m_isGenerator;
   bool m_isGeneratorFromClosure;
   bool m_isPairGenerator;
-  bool m_hasGeneratorAsBody;
   bool m_containsCalls;
   bool m_isAsync;
 
@@ -758,6 +811,7 @@ private:
   BuiltinFunction m_builtinFuncPtr;
   BuiltinFunction m_nativeFuncPtr;
 
+  const StringData* m_generatorBodyName;
   const StringData* m_originalFilename;
 };
 

@@ -172,6 +172,28 @@ struct FuncData : IRExtraData {
   const Func* func;
 };
 
+struct ClsMethodData : IRExtraData {
+  ClsMethodData(const StringData* cls, const StringData* method)
+    : clsName(cls)
+    , methodName(method)
+  {}
+
+  std::string show() const {
+    return folly::format("{}::{}", *clsName, *methodName).str();
+  }
+
+  bool cseEquals(const ClsMethodData& b) const {
+    // Strings are static so we can use pointer equality
+    return clsName == b.clsName && methodName == b.methodName;
+  }
+  size_t cseHash() const {
+    return hash_int64_pair((uintptr_t)clsName, (uintptr_t)methodName);
+  }
+
+  const StringData* clsName;
+  const StringData* methodName;
+};
+
 struct FPushCufData : IRExtraData {
   FPushCufData(uint32_t a, int32_t id)
     : args(a), iterId(id)
@@ -301,22 +323,22 @@ struct BCOffset : IRExtraData {
  * Translation IDs.
  */
 struct TransIDData : IRExtraData {
-  explicit TransIDData(Transl::TransID transId) : transId(transId) {}
+  explicit TransIDData(JIT::TransID transId) : transId(transId) {}
   std::string show() const { return folly::to<std::string>(transId); }
-  Transl::TransID transId;
+  JIT::TransID transId;
 };
 
 /*
  * Information needed to generate a REQ_RETRANSLATE_OPT service request.
  */
 struct ReqRetransOptData : IRExtraData {
-  explicit ReqRetransOptData(Transl::TransID transId, Offset offset)
+  explicit ReqRetransOptData(JIT::TransID transId, Offset offset)
       : transId(transId)
       , offset(offset) {}
   std::string show() const {
     return folly::to<std::string>(transId, ", ", offset);
   }
-  Transl::TransID transId;
+  JIT::TransID transId;
   Offset offset;
 };
 
@@ -351,12 +373,43 @@ struct DefInlineFPData : IRExtraData {
  * FCallArray offsets
  */
 struct CallArrayData : IRExtraData {
-  explicit CallArrayData(Offset pcOffset, Offset aft)
-    : pc(pcOffset), after(aft) {}
+  explicit CallArrayData(Offset pcOffset, Offset aft, bool destroyLocals)
+    : pc(pcOffset)
+    , after(aft)
+    , destroyLocals(destroyLocals)
+  {}
 
-  std::string show() const { return folly::to<std::string>(pc, ",", after); }
+  std::string show() const {
+    return folly::to<std::string>(pc, ",", after,
+                                  destroyLocals ? " destroy locals" : "");
+  }
 
   Offset pc, after;
+  bool destroyLocals;
+};
+
+struct CallData : IRExtraData {
+  explicit CallData(bool destroy)
+    : destroyLocals(destroy)
+  {}
+
+  std::string show() const {
+    return destroyLocals ? "destroy locals" : "";
+  }
+
+  bool destroyLocals;
+};
+
+struct InGeneratorData : IRExtraData {
+  explicit InGeneratorData(bool inGenerator)
+    : inGenerator(inGenerator)
+  {}
+
+  std::string show() const {
+    return inGenerator ? "in generator" : "";
+  }
+
+  bool inGenerator;
 };
 
 /*
@@ -412,6 +465,18 @@ struct LdFuncCachedData : IRExtraData {
   const StringData* name;
 };
 
+struct LdObjMethodData : IRExtraData {
+  explicit LdObjMethodData(bool fatal)
+    : fatal(fatal)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(fatal ? "fatal" : "warn");
+  }
+
+  bool fatal;
+};
+
 struct LdFuncCachedUData : IRExtraData {
   explicit LdFuncCachedUData(const StringData* name,
                              const StringData* fallback)
@@ -455,6 +520,22 @@ struct CheckDefinedClsData : IRExtraData {
  * Offset and stack deltas for InterpOne.
  */
 struct InterpOneData : IRExtraData {
+  struct LocalType {
+    explicit LocalType(uint32_t id = 0, Type type = Type::Bottom)
+      : id(id)
+      , type(type)
+    {}
+
+    uint32_t id;
+    Type type;
+  };
+
+  InterpOneData()
+    : nChangedLocals(0)
+    , changedLocals(nullptr)
+    , smashesAllLocals(false)
+  {}
+
   // Offset of the instruction to interpret, in the Unit indicated by
   // the current Marker.
   Offset bcOff;
@@ -468,28 +549,54 @@ struct InterpOneData : IRExtraData {
   // code instructions modify things below the top of the stack.
   Op opcode;
 
+  uint32_t nChangedLocals;
+  LocalType* changedLocals;
+
+  bool smashesAllLocals;
+
+  InterpOneData* clone(Arena& arena) const {
+    auto* id = new (arena) InterpOneData;
+    id->bcOff = bcOff;
+    id->cellsPopped = cellsPopped;
+    id->cellsPushed = cellsPushed;
+    id->opcode = opcode;
+    id->nChangedLocals = nChangedLocals;
+    id->changedLocals = new (arena) LocalType[nChangedLocals];
+    id->smashesAllLocals = smashesAllLocals;
+    std::copy(changedLocals, changedLocals + nChangedLocals, id->changedLocals);
+    return id;
+  }
+
   std::string show() const {
-    return folly::format("{}: bcOff:{}, popped:{}, pushed:{}",
-                         opcodeToName(opcode), bcOff, cellsPopped,
-                         cellsPushed).str();
+    std::string ret = folly::format("{}: bcOff:{}, popped:{}, pushed:{}",
+                                    opcodeToName(opcode), bcOff, cellsPopped,
+                                    cellsPushed).str();
+
+    assert(!smashesAllLocals || !nChangedLocals);
+    if (smashesAllLocals) ret += ", smashes all locals";
+    if (nChangedLocals) {
+      for (auto i = 0; i < nChangedLocals; ++i) {
+        ret += folly::format(", Local {} -> {}",
+                             changedLocals[i].id, changedLocals[i].type).str();
+      }
+    }
+
+    return ret;
   }
 };
 
 /*
  * Information for creating continuation objects.
- * CreateCont{Func,Meth}.
+ * Create{Cont,AFWH}{Func,Meth}.
  */
 struct CreateContData : IRExtraData {
-  CreateContData(const Func* origFunc, const Func* genFunc)
-    : origFunc(origFunc)
-    , genFunc(genFunc)
-  {}
+  explicit CreateContData(const Func* genFunc) : genFunc(genFunc) {}
 
   std::string show() const {
-    return folly::to<std::string>(origFunc->fullName()->data(), "()");
+    auto name = genFunc->getGeneratorOrigFunc()->fullName()->data();
+    return folly::to<std::string>(name, "()");
   }
 
-  const Func* origFunc;
   const Func* genFunc;
 };
 
@@ -508,18 +615,47 @@ struct ReDefGeneratorSPData : IRExtraData {
 };
 
 /*
- * StackOffset to adjust stack pointer by and boolean indicating whether or
- * not the stack pointer in src1 used for analysis spans a function call.
+ * StackOffset to adjust stack pointer by and boolean indicating whether or not
+ * the stack pointer in src1 used for analysis spans a function call.
+ *
+ * Also contains a list of frame pointers and stack offsets for all enclosing
+ * frames. This is used during optimizations to recalculate offsets from the
+ * frame pointer when one or more enclosing frames have been elided.
  */
 struct ReDefSPData : IRExtraData {
-  explicit ReDefSPData(int32_t off, bool spans = false) : offset(off),
-                                                          spansCall(spans) {}
+  struct Frame {
+    explicit Frame(const SSATmp* fp = nullptr, int32_t spOff = 0)
+      : fp(fp)
+      , spOff(spOff)
+    {}
 
-  std::string show() const {
-    return folly::to<std::string>(offset, ',', spansCall);
+    const SSATmp* fp;
+    int32_t spOff;
+  };
+
+  explicit ReDefSPData(uint32_t nFrames, Frame* frames, int32_t off, bool spans)
+    : frames(frames)
+    , nFrames(nFrames)
+    , spOffset(off)
+    , spansCall(spans)
+  {}
+
+  ReDefSPData* clone(Arena& arena) const {
+    auto* r = new (arena) ReDefSPData(nFrames, frames, spOffset, spansCall);
+    r->frames = new (arena) Frame[nFrames];
+    std::copy(frames, frames + nFrames, r->frames);
+    return r;
   }
 
-  int32_t offset;
+  std::string show() const {
+    return folly::format("spOff:{}{}", spOffset,
+                         spansCall ? ", spans call" : "").str();
+  }
+
+  Frame* frames;
+  uint32_t nFrames;
+
+  int32_t spOffset;
   bool spansCall;
 };
 
@@ -580,6 +716,12 @@ struct ClassKindData : IRExtraData {
   ClassKind kind;
 };
 
+struct NewStructData : IRExtraData {
+  uint32_t numKeys;
+  StringData** keys;
+  std::string show() const;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -594,10 +736,10 @@ X(LdSSwitchDestSlow,            LdSSwitchData);
 X(GuardLoc,                     LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
-X(OverrideLoc,                  LocalId);
+X(OverrideLocVal,               LocalId);
 X(LdLocAddr,                    LocalData);
-X(DecRefLoc,                    LocalId);
 X(LdLoc,                        LocalData);
+X(DecRefLoc,                    LocalId);
 X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);
 X(IterFree,                     IterId);
@@ -625,17 +767,27 @@ X(LdStackAddr,                  StackOffset);
 X(DecRefStack,                  StackOffset);
 X(DefInlineFP,                  DefInlineFPData);
 X(ReqBindJmp,                   BCOffset);
-X(ReqInterpret,                 BCOffset);
 X(ReqRetranslateOpt,            ReqRetransOptData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
+X(Call,                         CallData);
+X(CallBuiltin,                  CallData);
 X(CallArray,                    CallArrayData);
+X(RetCtrl,                      InGeneratorData);
+X(FunctionExitSurpriseHook,     InGeneratorData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
+X(LookupClsMethodCache,         ClsMethodData);
+X(LdClsMethodCacheFunc,         ClsMethodData);
+X(LdClsMethodCacheCls,          ClsMethodData);
+X(LdClsMethodFCacheFunc,        ClsMethodData);
+X(LookupClsMethodFCache,        ClsMethodData);
+X(GetCtxFwdCallDyn,             ClsMethodData);
 X(LdStaticLocCached,            StaticLocName);
 X(LdFuncCached,                 LdFuncCachedData);
 X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);
+X(LdObjMethod,                  LdObjMethodData);
 X(ReqBindJmpGt,                 ReqBindJccData);
 X(ReqBindJmpGte,                ReqBindJccData);
 X(ReqBindJmpLt,                 ReqBindJccData);
@@ -668,11 +820,14 @@ X(TypeProfileFunc,              TypeProfileData);
 X(InterpOneCF,                  InterpOneData);
 X(CreateContFunc,               CreateContData);
 X(CreateContMeth,               CreateContData);
+X(CreateAFWHFunc,               CreateContData);
+X(CreateAFWHMeth,               CreateContData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
 X(Shuffle,                      ShuffleData);
 X(ThingExists,                  ClassKindData);
+X(NewStructArray,               NewStructData);
 
 #undef X
 

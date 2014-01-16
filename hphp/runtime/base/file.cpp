@@ -47,19 +47,21 @@ IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
 const int File::USE_INCLUDE_PATH = 1;
 
 String File::TranslatePathKeepRelative(const String& filename) {
-  String canonicalized(Util::canonicalize(filename.data(),
-                                          filename.size()), AttachString);
-
+  String canonicalized(
+    Util::canonicalize(
+      filename.data(),
+      strlen(filename.data()) // canonicalize asserts that we don't have nulls
+    ),
+    AttachString);
   if (RuntimeOption::SafeFileAccess) {
-    const vector<string> &allowedDirectories =
-      VirtualHost::GetAllowedDirectories();
+    auto const& allowedDirectories = VirtualHost::GetAllowedDirectories();
     auto it = std::upper_bound(allowedDirectories.begin(),
                                allowedDirectories.end(), canonicalized,
-                               [](const String& val, const string& dir) {
+                               [](const String& val, const std::string& dir) {
                                  return strcmp(val.c_str(), dir.c_str()) < 0;
                                });
     if (it != allowedDirectories.begin()) {
-      const string& dir = *--it;
+      const std::string& dir = *--it;
       if (dir.size() <= canonicalized.size() &&
           !strncmp(dir.c_str(), canonicalized.c_str(), dir.size())) {
         return canonicalized;
@@ -96,8 +98,12 @@ String File::TranslatePath(const String& filename) {
 }
 
 String File::TranslatePathWithFileCache(const String& filename) {
-  String canonicalized(Util::canonicalize(filename.data(),
-                                          filename.size()), AttachString);
+  String canonicalized(
+    Util::canonicalize(
+      filename.data(),
+      strlen(filename.data()) // canonicalize asserts that we don't have nulls
+    ),
+    AttachString);
   String translated = TranslatePath(canonicalized);
   if (!translated.empty() && access(translated.data(), F_OK) < 0 &&
       StaticContentCache::TheFileCache) {
@@ -159,6 +165,7 @@ void File::sweep() {
   // resources it might have allocated.
   assert(!valid());
   free(m_buffer);
+  using std::string;
   m_name.~string();
   m_mode.~string();
 }
@@ -184,6 +191,34 @@ int File::getc() {
   }
   m_position += len;
   return (int)(unsigned char)buffer[0];
+}
+
+String File::read() {
+  StringBuffer sb;
+  int64_t copied = 0;
+  int64_t avail = bufferedLen();
+
+  while (!eof() || avail) {
+    if (m_buffer == nullptr) {
+      m_buffer = (char *)malloc(CHUNK_SIZE);
+    }
+
+    if (avail > 0) {
+      sb.append(m_buffer + m_readpos, avail);
+      copied += avail;
+    }
+
+    m_writepos = readImpl(m_buffer, CHUNK_SIZE);
+    m_readpos = 0;
+    avail = bufferedLen();
+
+    if (avail == 0) {
+      break;
+    }
+  }
+
+  m_position += copied;
+  return sb.detach();
 }
 
 String File::read(int64_t length) {
@@ -589,12 +624,14 @@ static const char *lookup_trailing_spaces(const char *ptr, int len) {
   return ptr;
 }
 
-Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
+Array File::readCSV(int64_t length /* = 0 */,
+                    char delimiter_char /* = ',' */,
                     char enclosure_char /* = '"' */,
-                    char escape_char /* = '\\' */) {
-  String line = readLine(length);
+                    char escape_char /* = '\\' */,
+                    const String* input /* = nullptr */) {
+  const String& line = (input != nullptr) ? *input : readLine(length);
   if (line.empty()) {
-    return Array();
+    return null_array;
   }
 
   String new_line;
@@ -684,7 +721,7 @@ Array File::readCSV(int64_t length /* = 0 */, char delimiter_char /* = ',' */,
               memcpy(tptr, line_end, line_end_len);
               tptr += line_end_len;
 
-              new_line = readLine(length);
+              new_line = (input != nullptr) ? String() : readLine(length);
               const char *new_buf = new_line.data();
               int64_t new_len = new_line.size();
               if (new_len == 0) {

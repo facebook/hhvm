@@ -15,7 +15,7 @@ $thisTestDir = "readfileVar6.dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
-$filename = "afile.txt";
+$filename = "readfile_variation6.txt";
 $secondFile = $dir2."/".$filename;
 
 $newpath = create_include_path();

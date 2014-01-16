@@ -27,7 +27,7 @@ class Transport;
 
 class SourceRootInfo {
 public:
-  explicit SourceRootInfo(const char *host);
+  explicit SourceRootInfo(Transport* transport);
   SourceRootInfo(const std::string &user, const std::string &sandbox);
   void createFromUserConfig();
   void createFromCommonRoot(const String &sandboxName);

@@ -6,7 +6,7 @@ array(0) {
 }
 
 --- testing autoload ---
-attempting to autoload non-existent
+attempting to autoload non_existent
 HipHop Warning: %s
 bool(false)
 HipHop Warning: %s

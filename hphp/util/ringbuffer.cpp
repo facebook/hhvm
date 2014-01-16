@@ -22,7 +22,8 @@
 #include <cstring>
 #include <unistd.h>
 
-#include "hphp/util/util.h"
+#include "folly/Bits.h"
+
 #include "hphp/util/assertions.h"
 
 namespace HPHP {
@@ -34,7 +35,7 @@ namespace Trace {
 static const int kMaxRBBytes = 1 << 19; // 512KB
 __thread int  tl_rbPtr;
 __thread char tl_ring[kMaxRBBytes];
-__thread const char _unused[] = "\n----END OF RINGBUFFER---\n";
+UNUSED __thread const char _unused[] = "\n----END OF RINGBUFFER---\n";
 
 const char* ringbufferName(RingBufferType t) {
   switch (t) {
@@ -82,7 +83,7 @@ std::atomic<uint32_t> g_seqnum(0);
 
 RingBufferEntry*
 allocEntry(RingBufferType t) {
-  assert(Util::isPowerOfTwo(kMaxRBEntries));
+  assert(folly::isPowTwo(kMaxRBEntries));
   RingBufferEntry* rb;
   int newRingPos, oldRingPos;
   do {

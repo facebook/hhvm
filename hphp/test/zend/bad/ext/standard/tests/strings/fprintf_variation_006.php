@@ -3,7 +3,7 @@
 $int_numbers = array( 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/dump.txt';
+$data_file = dirname(__FILE__) . '/fprintf_variation_006.phpt.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

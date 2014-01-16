@@ -1,0 +1,30 @@
+unicode(1) "0"
+unicode(1) "0"
+unicode(1) "1"
+unicode(1) "1"
+bool(true)
+yes
+unicode(1) "0"
+unicode(1) "0"
+unicode(3) "yes"
+unicode(3) "yes"
+bool(false)
+on
+unicode(1) "0"
+unicode(1) "0"
+unicode(2) "on"
+unicode(2) "on"
+bool(false)
+true
+unicode(1) "0"
+unicode(1) "0"
+bool(false)
+unicode(4) "true"
+unicode(4) "true"
+0
+unicode(4) "true"
+unicode(4) "true"
+bool(true)
+unicode(1) "0"
+unicode(1) "0"
+===DONE===

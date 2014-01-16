@@ -47,12 +47,10 @@ void ServerNameIndication::load(const std::string &cert_dir,
     s_path.append("/");
   }
 
-  vector<std::string> server_names;
+  std::vector<std::string> server_names;
   find_server_names(s_path, server_names);
 
-  for (vector<std::string>::iterator it = server_names.begin();
-      it != server_names.end();
-      ++it) {
+  for (auto it = server_names.begin(); it != server_names.end(); ++it) {
     loadFromFile(*it, certHandlerFn);
   }
 }
@@ -88,18 +86,15 @@ bool ServerNameIndication::fileIsValid(const std::string &filename) {
 
 void ServerNameIndication::find_server_names(
     const std::string &path,
-    vector<std::string> &server_names) {
+    std::vector<std::string> &server_names) {
 
   hphp_string_map<bool> crt_files;
   hphp_string_map<bool> key_files;
 
   // Iterate through all files in the cert directory.
-  vector<std::string> crt_dir_files;
+  std::vector<std::string> crt_dir_files;
   Util::find(crt_dir_files, "/", path.c_str(), /* php */ false);
-  for (vector<std::string>::iterator it = crt_dir_files.begin();
-       it != crt_dir_files.end();
-       ++it) {
-
+  for (auto it = crt_dir_files.begin(); it != crt_dir_files.end(); ++it) {
     // Skip default cert and key; we'll fall back to those anyway.
     size_t filename_len = it->size() - path.size();
     if (ends_with(*it, crt_ext) && *it != RuntimeOption::SSLCertificateFile) {
@@ -113,9 +108,7 @@ void ServerNameIndication::find_server_names(
   }
 
   // Intersect key_files and crt_files to find valid pairs.
-  for (hphp_string_map<bool>::iterator it = key_files.begin();
-      it != key_files.end();
-      ++it) {
+  for (auto it = key_files.begin(); it != key_files.end(); ++it) {
     if (crt_files.find(it->first) == crt_files.end()) {
       continue;
     }
@@ -142,7 +135,7 @@ int ServerNameIndication::callback(void *s, int *ad, void *arg) {
   std::string fqdn = sn_ptr;
   size_t pos = fqdn.find('.');
   std::string wildcard;
-  if (pos != string::npos) {
+  if (pos != std::string::npos) {
     wildcard = fqdn.substr(pos + 1);
   }
 
@@ -163,7 +156,7 @@ bool ServerNameIndication::setCTXFromMemory(SSL *ssl, const std::string &name) {
   if (!ssl || name.empty()) {
     return false;
   }
-  hphp_string_map<SSL_CTX *>::iterator it = s_sn_ctxd_map.find(name);
+  auto it = s_sn_ctxd_map.find(name);
   if (it != s_sn_ctxd_map.end()) {
     SSL_CTX *ctx = it->second;
     if (ctx && ctx == SSL_set_SSL_CTX(ssl, ctx)) {

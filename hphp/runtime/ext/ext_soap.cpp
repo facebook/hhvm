@@ -40,6 +40,8 @@ IMPLEMENT_DEFAULT_EXTENSION(soap);
 ///////////////////////////////////////////////////////////////////////////////
 // helper classes for setting/resetting globals within a method call
 
+using std::string;
+
 class SoapScope {
 public:
   SoapScope() {
@@ -241,8 +243,9 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, Variant value,
 }
 
 static xmlDocPtr serialize_function_call
-(c_SoapClient *client, sdlFunctionPtr function, const char *function_name,
- const char *uri, CArrRef arguments, CArrRef soap_headers) {
+(c_SoapClient *client, std::shared_ptr<sdlFunction> function,
+  const char *function_name,
+  const char *uri, CArrRef arguments, CArrRef soap_headers) {
   xmlNodePtr envelope = NULL, body, method = NULL, head = NULL;
   xmlNsPtr ns = NULL;
   int style, use;
@@ -375,12 +378,12 @@ static xmlDocPtr serialize_function_call
       encodePtr enc;
 
       if (hdrs) {
-        string key = header->m_namespace.data();
+        std::string key = header->m_namespace.data();
         key += ':';
         key += header->m_name.data();
         sdlSoapBindingFunctionHeaderMap::iterator iter = hdrs->find(key);
         if (iter != hdrs->end()) {
-          sdlSoapBindingFunctionHeaderPtr hdr = iter->second;
+          auto hdr = iter->second;
           hdr_use = hdr->use;
           enc = hdr->encode;
           if (hdr_use == SOAP_ENCODED) {
@@ -565,7 +568,7 @@ static encodeMapPtr soap_create_typemap_impl(sdl *sdl, Array &ht) {
       }
       new_enc->to_xml = enc->to_xml;
       new_enc->to_zval = enc->to_zval;
-      new_enc->details.map = soapMappingPtr(new soapMapping());
+      new_enc->details.map = std::make_shared<soapMapping>();
       if (to_xml.toBoolean()) {
         new_enc->details.map->to_xml = to_xml;
         new_enc->to_xml = to_xml_user;
@@ -677,11 +680,12 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunction *function,
   }
 }
 
-static sdlFunctionPtr get_doc_function(sdl *sdl, xmlNodePtr params) {
+static std::shared_ptr<sdlFunction>
+get_doc_function(sdl *sdl, xmlNodePtr params) {
   if (sdl) {
     for (sdlFunctionMap::iterator iter = sdl->functions.begin();
          iter != sdl->functions.end(); ++iter) {
-      sdlFunctionPtr tmp = iter->second;
+      auto tmp = iter->second;
       if (tmp->binding && tmp->binding->bindingType == BINDING_SOAP) {
         sdlSoapBindingFunctionPtr fnb = tmp->bindingAttributes;
         if (fnb->style == SOAP_DOCUMENT) {
@@ -724,27 +728,28 @@ static sdlFunctionPtr get_doc_function(sdl *sdl, xmlNodePtr params) {
       }
     }
   }
-  return sdlFunctionPtr();
+  return std::shared_ptr<sdlFunction>();
 }
 
-static sdlFunctionPtr get_function(sdl *sdl, const char *function_name) {
+static std::shared_ptr<sdlFunction>
+get_function(sdl *sdl, const char *function_name) {
   if (sdl) {
     String lowered = f_strtolower(function_name);
     sdlFunctionMap::iterator iter = sdl->functions.find(lowered.data());
     if (iter == sdl->functions.end()) {
       iter = sdl->requests.find(lowered.data());
       if (iter == sdl->requests.end()) {
-        return sdlFunctionPtr();
+        return std::shared_ptr<sdlFunction>();
       }
     }
     return iter->second;
   }
-  return sdlFunctionPtr();
+  return std::shared_ptr<sdlFunction>();
 }
 
-static sdlFunctionPtr find_function(sdl *sdl, xmlNodePtr func,
-                                    String &function_name) {
-  sdlFunctionPtr function = get_function(sdl, (char*)func->name);
+static std::shared_ptr<sdlFunction>
+find_function(sdl *sdl, xmlNodePtr func, String &function_name) {
+  auto function = get_function(sdl, (char*)func->name);
   if (function && function->binding &&
       function->binding->bindingType == BINDING_SOAP) {
     sdlSoapBindingFunctionPtr fnb = function->bindingAttributes;
@@ -767,14 +772,14 @@ static sdlFunctionPtr find_function(sdl *sdl, xmlNodePtr func,
   return function;
 }
 
-static sdlFunctionPtr deserialize_function_call
+static std::shared_ptr<sdlFunction> deserialize_function_call
 (sdl *sdl, xmlDocPtr request, const char* actor, String &function_name,
  Array &parameters, int &version, Array &headers) {
   USE_SOAP_GLOBAL;
   char* envelope_ns = NULL;
   xmlNodePtr trav,env,head,body,func;
   xmlAttrPtr attr;
-  sdlFunctionPtr function;
+  std::shared_ptr<sdlFunction> function;
 
   encode_reset_ns();
 
@@ -1163,10 +1168,11 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunction *function,
   return use;
 }
 
-static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
-                                         const char *function_name,
-                                         const char *uri, Variant &ret,
-                                         CArrRef headers, int version) {
+static xmlDocPtr serialize_response_call(
+    std::shared_ptr<sdlFunction> function,
+    const char *function_name,
+    const char *uri, Variant &ret,
+    CArrRef headers, int version) {
   xmlNodePtr envelope = NULL, body, param;
   xmlNsPtr ns = NULL;
   int use = SOAP_LITERAL;
@@ -1198,7 +1204,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
     ObjectData* obj = ret.getObjectData();
 
     char *detail_name;
-    sdlFaultPtr fault;
+    std::shared_ptr<sdlFault> fault;
     string fault_ns;
 
     if (!headers.empty()) {
@@ -1228,7 +1234,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
           sdlSoapBindingFunctionHeaderMap::iterator iter =
             h->hdr->headerfaults.find(key);
           if (iter != h->hdr->headerfaults.end()) {
-            sdlSoapBindingFunctionHeaderPtr hdr = iter->second;
+            auto hdr = iter->second;
             hdr_enc = hdr->encode;
             hdr_use = hdr->use;
           }
@@ -1500,7 +1506,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
   return doc;
 }
 
-static void function_to_string(sdlFunctionPtr function, StringBuffer &sb) {
+static void function_to_string(std::shared_ptr<sdlFunction> function,
+                               StringBuffer &sb) {
   sdlParamPtr param;
   sdlParamVec &res = function->responseParameters;
   if (!res.empty()) {
@@ -1617,7 +1624,7 @@ static void type_to_string(sdlType *type, StringBuffer &buf, int level) {
         if ((iterExtra = iter->second->extraAttributes.find
              (WSDL_NAMESPACE":arrayType"))
             != iter->second->extraAttributes.end()) {
-          sdlExtraAttributePtr ext = iterExtra->second;
+          auto ext = iterExtra->second;
           const char *end = strchr(ext->val.c_str(), '[');
           int len;
           if (end == NULL) {
@@ -1646,7 +1653,7 @@ static void type_to_string(sdlType *type, StringBuffer &buf, int level) {
           if ((iterExtra = iter->second->extraAttributes.find
                (WSDL_NAMESPACE":itemType"))
               != iter->second->extraAttributes.end()) {
-            sdlExtraAttributePtr ext = iterExtra->second;
+            auto ext = iterExtra->second;
             buf.append(ext->val);
             buf.append(' ');
           }
@@ -1666,7 +1673,7 @@ static void type_to_string(sdlType *type, StringBuffer &buf, int level) {
           if ((iterExtra = iter->second->extraAttributes.find
                (WSDL_NAMESPACE":itemType"))
               != iter->second->extraAttributes.end()) {
-            sdlExtraAttributePtr ext = iterExtra->second;
+            auto ext = iterExtra->second;
             buf.append('[');
             buf.append(ext->val);
             buf.append(']');
@@ -1763,8 +1770,10 @@ const StaticString
   s__SERVER("_SERVER"),
   s_Shockwave_Flash("Shockwave Flash");
 
-static void send_soap_server_fault(sdlFunctionPtr function, Variant fault,
-                                   soapHeader *hdr) {
+static void send_soap_server_fault(
+    std::shared_ptr<sdlFunction> function,
+    Variant fault,
+    soapHeader *hdr) {
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
   GlobalVariables *g = get_global_variables();
@@ -1792,18 +1801,22 @@ static void send_soap_server_fault(sdlFunctionPtr function, Variant fault,
   xmlFreeDoc(doc_return);
 }
 
-static void send_soap_server_fault(sdlFunctionPtr function, Exception &e,
-                                   soapHeader *hdr) {
+static void send_soap_server_fault(
+    std::shared_ptr<sdlFunction> function,
+    Exception &e,
+    soapHeader *hdr) {
   USE_SOAP_GLOBAL;
   if (SOAP_GLOBAL(use_soap_error_handler)) {
-    send_soap_server_fault(sdlFunctionPtr(), create_soap_fault(e), NULL);
+    send_soap_server_fault(
+      std::shared_ptr<sdlFunction>(), create_soap_fault(e), NULL);
   } else {
     throw create_soap_fault(e); // assuming we are in "catch"
   }
 }
 
 static void throw_soap_server_fault(litstr code, litstr fault) {
-  send_soap_server_fault(sdlFunctionPtr(), create_soap_fault(code, fault),
+  send_soap_server_fault(
+    std::shared_ptr<sdlFunction>(), create_soap_fault(code, fault),
                          NULL);
   throw ExitException(1);
 }
@@ -2148,7 +2161,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
   String function_name;
   Array params;
   int soap_version = 0;
-  sdlFunctionPtr function;
+  std::shared_ptr<sdlFunction> function;
   try {
     function = deserialize_function_call(m_sdl, doc_request, m_actor.c_str(),
                                          function_name, params, soap_version,
@@ -2295,7 +2308,7 @@ void c_SoapServer::t_fault(CVarRef code, const String& fault,
                            const String& name /* = null_string */) {
   SoapServerScope ss(this);
   Object obj(SystemLib::AllocSoapFaultObject(code, fault, actor, detail, name));
-  send_soap_server_fault(sdlFunctionPtr(), obj, NULL);
+  send_soap_server_fault(std::shared_ptr<sdlFunction>(), obj, NULL);
 }
 
 void c_SoapServer::t_addsoapheader(CObjRef fault) {
@@ -2514,7 +2527,7 @@ Variant c_SoapClient::t___soapcall(const String& name, CArrRef args,
   bool ret = false;
   xmlDocPtr request = NULL;
   if (m_sdl) {
-    sdlFunctionPtr fn = get_function(m_sdl, name.data());
+    auto fn = get_function(m_sdl, name.data());
     if (fn) {
       sdlBindingPtr binding = fn->binding;
       bool one_way = false;
@@ -2572,7 +2585,7 @@ Variant c_SoapClient::t___soapcall(const String& name, CArrRef args,
                           "property");
     } else {
       request = serialize_function_call
-        (this, sdlFunctionPtr(), name.data(), m_uri.data(), args,
+        (this, std::shared_ptr<sdlFunction>(), name.data(), m_uri.data(), args,
          soap_headers);
       if (soap_action.empty()) {
         action += m_uri.data();
@@ -2594,7 +2607,9 @@ Variant c_SoapClient::t___soapcall(const String& name, CArrRef args,
         encode_reset_ns();
         String sresponse = response.toString();
         ret = parse_packet_soap(this, sresponse.data(), sresponse.size(),
-                                sdlFunctionPtr(), name.data(), return_value,
+                                std::shared_ptr<sdlFunction>(),
+                                name.data(),
+                                return_value,
                                 output_headers);
         encode_finish();
       }

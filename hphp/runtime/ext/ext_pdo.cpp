@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_pdo.h"
+
+#include <string>
+
 #include "hphp/runtime/ext/pdo_driver.h"
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/pdo_sqlite.h"
@@ -28,6 +30,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -43,6 +46,7 @@
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(PDO);
+using std::string;
 ///////////////////////////////////////////////////////////////////////////////
 // PDO constants
 
@@ -468,7 +472,7 @@ void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   obj->o_set(s_message, String(msg), s_PDOException);
   va_end(ap);
 
@@ -554,14 +558,6 @@ static inline int64_t pdo_attr_lval(CArrRef options, PDOAttributeType name,
   return defval;
 }
 
-static inline String pdo_attr_strval(CArrRef options, PDOAttributeType name,
-                                     const String& defval) {
-  if (options.exists(name)) {
-    return options[name].toString();
-  }
-  return defval;
-}
-
 static Object pdo_stmt_instantiate(sp_PDOConnection dbh, const String& clsname,
                                    CVarRef ctor_args) {
   String name = clsname;
@@ -582,6 +578,7 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, const String& clsname,
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
                                const String& clsname, CVarRef ctor_args) {
+  object->o_set("queryString", stmt->query_string);
   if (clsname.empty()) {
     return;
   }
@@ -589,7 +586,6 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
   if (!cls) {
     return;
   }
-  object->o_set("queryString", stmt->query_string);
   TypedValue ret;
   ObjectData* inst = object.get();
   g_vmContext->invokeFunc(&ret, cls->getCtor(), ctor_args.toArray(), inst);
@@ -923,13 +919,6 @@ c_PDO::c_PDO(Class* cb) : ExtObjectData(cb) {
 }
 
 c_PDO::~c_PDO() {
-}
-
-void c_PDO::sweep() {
-  // PDOConnection is not sweepable, so clean it up manually.
-  static_assert(!std::is_base_of<Sweepable, PDOConnection>::value,
-                "Remove the call to reset() below.");
-  m_dbh.detach();
 }
 
 void c_PDO::t___construct(const String& dsn, const String& username /* = null_string */,
@@ -1322,6 +1311,7 @@ Variant c_PDO::t_getattribute(int64_t attribute) {
 }
 
 Variant c_PDO::t_exec(const String& query) {
+  SYNC_VM_REGS_SCOPED();
   if (query.empty()) {
     pdo_raise_impl_error(m_dbh, nullptr, "HY000",
                          "trying to execute an empty query");
@@ -1407,6 +1397,7 @@ Array c_PDO::t_errorinfo() {
 }
 
 Variant c_PDO::t_query(const String& sql) {
+  SYNC_VM_REGS_SCOPED();
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -2560,7 +2551,7 @@ rewrite:
       newbuffer += t;
     }
     *newbuffer = '\0';
-    out = out.substr(0, newbuffer - out.data());
+    out.setSize(newbuffer - out.data());
 
     ret = 1;
     goto clean_up;
@@ -2621,6 +2612,7 @@ clean_up:
   while (placeholders) {
     plc = placeholders;
     placeholders = plc->next;
+    plc->quoted.reset();
     free(plc);
   }
 
@@ -2639,15 +2631,8 @@ c_PDOStatement::~c_PDOStatement() {
   m_row.reset();
 }
 
-void c_PDOStatement::sweep() {
-  // No resources allocated outside HHVM's control
-}
-
-void c_PDOStatement::t___construct() {
-  raise_error("You should not create a PDOStatement manually");
-}
-
 Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
+  SYNC_VM_REGS_SCOPED();
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
 
   if (!params.empty()) {
@@ -2722,6 +2707,7 @@ Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
 Variant c_PDOStatement::t_fetch(int64_t how /* = 0 */,
                                 int64_t orientation /* = q_PDO$$FETCH_ORI_NEXT */,
                                 int64_t offset /* = 0 */) {
+  SYNC_VM_REGS_SCOPED();
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!pdo_stmt_verify_mode(m_stmt, how, false)) {
     return false;

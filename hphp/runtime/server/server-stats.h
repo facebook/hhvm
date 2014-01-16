@@ -76,7 +76,7 @@ public:
   ServerStats();
   ~ServerStats();
 
-  static void GetLogger() ATTRIBUTE_COLD;
+  static void GetLogger();
 private:
   enum UDF {
     UDF_NONE = 1, // count

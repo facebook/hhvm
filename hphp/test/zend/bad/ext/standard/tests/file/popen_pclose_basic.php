@@ -53,7 +53,8 @@ $return_value_pclose = pclose($return_value_popen);
 var_dump( is_int($return_value_pclose) );
 
 echo "\n--- Done ---";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $dirpath = $file_path."/popen_basic";
 unlink($dirpath."/popen_basic.tmp");

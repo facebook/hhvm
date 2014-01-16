@@ -35,7 +35,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 121
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 122
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 123
-HipHop Warning: behavior of call_user_func(array('B', 'parent::foo')) is undefined in %s on line 124
 A D D
 HipHop Warning: behavior of call_user_func(array('B', 'self::foo')) is undefined in %s on line 125
 B D D
@@ -48,7 +47,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 F F 
 G G 
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 133
-HipHop Warning: behavior of call_user_func(array('G', 'parent::foo')) is undefined in %s on line 134
 F F 
 HipHop Warning: behavior of call_user_func(array('G', 'self::foo')) is undefined in %s on line 135
 G G 
@@ -114,7 +112,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 198
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 199
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 200
-HipHop Warning: behavior of call_user_func(array('B', 'parent::foo')) is undefined in %s on line 201
 A D 
 HipHop Warning: behavior of call_user_func(array('B', 'self::foo')) is undefined in %s on line 202
 B D 
@@ -127,7 +124,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 F F 
 G G 
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 210
-HipHop Warning: behavior of call_user_func(array('G', 'parent::foo')) is undefined in %s on line 211
 F F 
 HipHop Warning: behavior of call_user_func(array('G', 'self::foo')) is undefined in %s on line 212
 G G 
@@ -193,7 +189,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 275
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 276
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 277
-HipHop Warning: behavior of call_user_func(array('B', 'parent::bar')) is undefined in %s on line 278
 A D 
 HipHop Warning: behavior of call_user_func(array('B', 'self::bar')) is undefined in %s on line 279
 B D 
@@ -206,7 +201,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 F F 
 G G 
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 287
-HipHop Warning: behavior of call_user_func(array('G', 'parent::bar')) is undefined in %s on line 288
 F F 
 HipHop Warning: behavior of call_user_func(array('G', 'self::bar')) is undefined in %s on line 289
 G G 
@@ -272,7 +266,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 352
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 353
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 354
-HipHop Warning: behavior of call_user_func(array('B', 'parent::bar')) is undefined in %s on line 355
 A D 
 HipHop Warning: behavior of call_user_func(array('B', 'self::bar')) is undefined in %s on line 356
 B D 
@@ -285,7 +278,6 @@ HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class
 F F 
 G G 
 HipHop Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 364
-HipHop Warning: behavior of call_user_func(array('G', 'parent::bar')) is undefined in %s on line 365
 F F 
 HipHop Warning: behavior of call_user_func(array('G', 'self::bar')) is undefined in %s on line 366
 G G 

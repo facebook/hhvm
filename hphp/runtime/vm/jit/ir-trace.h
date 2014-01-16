@@ -18,6 +18,8 @@
 #define incl_HPHP_VM_TRACE_H_
 
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/util/slice.h"
+#include <algorithm>
 
 namespace HPHP { namespace JIT {
 
@@ -29,18 +31,22 @@ struct IRUnit;
  * traces may contain internal forward-only control flow.
  */
 struct IRTrace : private boost::noncopyable {
-  typedef std::list<Block*>::const_iterator const_iterator;
-  typedef std::list<Block*>::iterator iterator;
+  static auto const kMinCap = 2;
+  typedef List<Block*> Blocks;
+  typedef Blocks::const_iterator const_iterator;
+  typedef Blocks::iterator iterator;
 
-  explicit IRTrace(IRUnit& unit, Block* first);
+  // Create a new trace, reserving room for cap blocks, then
+  // add the given block.
+  explicit IRTrace(IRUnit& unit, Block* first, size_t cap = kMinCap);
 
-  std::list<Block*>& blocks() { return m_blocks; }
-  const std::list<Block*>& blocks() const { return m_blocks; }
+  Blocks& blocks() { return m_blocks; }
+  const Blocks& blocks() const { return m_blocks; }
 
-  Block* front() { return m_blocks.front(); }
-  Block* back() { auto it = m_blocks.end(); return *(--it); }
-  const Block* front() const { return *m_blocks.begin(); }
-  const Block* back()  const { auto it = m_blocks.end(); return *(--it); }
+  Block* front() { return m_blocks[0]; }
+  Block* back() { return m_blocks[m_blocks.size() - 1]; }
+  const Block* front() const { return m_blocks[0]; }
+  const Block* back()  const { return m_blocks[m_blocks.size() - 1 ]; }
 
   const_iterator cbegin() const { return blocks().cbegin(); }
   const_iterator cend()   const { return blocks().cend(); }
@@ -60,6 +66,9 @@ struct IRTrace : private boost::noncopyable {
   // Add a block to the back of this trace's block list.
   Block* push_back(Block* b);
 
+  // ensure the internal block list is presized to hold at least nblocks.
+  void reserve(size_t nblocks);
+
   bool isMain() const;
 
   std::string toString() const;
@@ -67,43 +76,8 @@ struct IRTrace : private boost::noncopyable {
 
 private:
   IRUnit& m_unit;
-  std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
+  Blocks m_blocks; // Blocks in main trace starting with entry
 };
-
-inline IRTrace::IRTrace(IRUnit& unit, Block* first)
-  : m_unit(unit) {
-  push_back(first);
-}
-
-inline IRTrace::iterator IRTrace::unlink(iterator blockIt) {
-  // Update any predecessors to point to the empty block's next block.
-  auto block = *blockIt;
-  assert(block->empty());
-  auto next = block->next();
-  for (auto it = block->preds().begin(); it != block->preds().end(); ) {
-    auto cur = it;
-    ++it;
-    cur->setTo(next);
-  }
-
-  return erase(blockIt);
-}
-
-inline IRTrace::iterator IRTrace::erase(iterator it) {
-  Block* b = *it;
-  assert(b->preds().empty());
-  it = m_blocks.erase(it);
-  b->setTrace(nullptr);
-  if (!b->empty()) b->back()->setTaken(nullptr);
-  b->setNext(nullptr);
-  return it;
-}
-
-inline Block* IRTrace::push_back(Block* b) {
-  b->setTrace(this);
-  m_blocks.push_back(b);
-  return b;
-}
 
 // defined here to avoid circular dependency
 inline bool Block::isMain() const {

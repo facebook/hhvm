@@ -53,7 +53,8 @@ imagedestroy($image);
 imagedestroy($image_in);
 
 echo "Done\n"; 
-?><?php 
+?>
+<?php 
 	$dest = dirname(realpath(__FILE__)) . '/imagefilledpolygon.png';
 	@unlink($dest);
 ?>

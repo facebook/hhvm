@@ -14,13 +14,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_socket.h"
-#include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/base/ssl-socket.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/util/logger.h"
-#include "folly/String.h"
+
+#include <boost/lexical_cast.hpp>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -35,14 +31,20 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/uio.h>
-#include "hphp/util/network.h"
 #include <poll.h>
+
+#include "folly/String.h"
+
+#include "hphp/util/network.h"
+#include "hphp/runtime/base/socket.h"
+#include "hphp/runtime/base/ssl-socket.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/util/logger.h"
 
 #define PHP_NORMAL_READ 0x0001
 #define PHP_BINARY_READ 0x0002
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(sockets);
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -1041,7 +1043,7 @@ void f_socket_clear_error(CResRef socket /* = null_object */) {
 Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
                       VRefParam errstr, double timeout, bool persistent) {
 
-  string key;
+  std::string key;
   if (persistent) {
     key = hosturl.getHostURL();
     Socket *sock =
@@ -1262,6 +1264,113 @@ Variant f_getaddrinfo(const String& host, const String& port, int family /* = 0 
 
   return ret;
 }
+
+#define SOCK_CONST(v) Native::registerConstant<KindOfInt64>( \
+                              makeStaticString(#v), v);
+
+const StaticString
+  s_SOL_TCP("SOL_TCP"),
+  s_SOL_UDP("SOL_UDP");
+
+class SocketsExtension : public Extension {
+ public:
+  SocketsExtension() : Extension("sockets") {}
+
+  void moduleInit() override {
+    SOCK_CONST(AF_UNIX);
+    SOCK_CONST(AF_INET);
+    SOCK_CONST(AF_INET6);
+    SOCK_CONST(SOCK_STREAM);
+    SOCK_CONST(SOCK_DGRAM);
+    SOCK_CONST(SOCK_RAW);
+    SOCK_CONST(SOCK_SEQPACKET);
+    SOCK_CONST(SOCK_RDM);
+
+    SOCK_CONST(MSG_OOB);
+    SOCK_CONST(MSG_WAITALL);
+    SOCK_CONST(MSG_CTRUNC);
+    SOCK_CONST(MSG_TRUNC);
+    SOCK_CONST(MSG_PEEK);
+    SOCK_CONST(MSG_DONTROUTE);
+#ifdef MSG_EOR
+    SOCK_CONST(MSG_EOR);
+#endif
+#ifdef MSG_EOF
+    SOCK_CONST(MSG_EOF);
+#endif
+#ifdef MSG_CONFIRM
+    SOCK_CONST(MSG_CONFIRM);
+#endif
+#ifdef MSG_ERRQUEUE
+    SOCK_CONST(MSG_ERRQUEUE);
+#endif
+#ifdef MSG_NOSIGNAL
+    SOCK_CONST(MSG_NOSIGNAL);
+#endif
+#ifdef MSG_DONTWAIT
+    SOCK_CONST(MSG_DONTWAIT);
+#endif
+#ifdef MSG_MORE
+    SOCK_CONST(MSG_MORE);
+#endif
+#ifdef MSG_WAITFORONE
+    SOCK_CONST(MSG_WAITFORONE);
+#endif
+#ifdef MSG_CMSG_CLOEXEC
+    SOCK_CONST(MSG_CMSG_CLOEXEC);
+#endif
+
+    SOCK_CONST(SO_DEBUG);
+    SOCK_CONST(SO_REUSEADDR);
+#ifdef SO_REUSEPORT
+    SOCK_CONST(SO_REUSEPORT);
+#endif
+    SOCK_CONST(SO_KEEPALIVE);
+    SOCK_CONST(SO_DONTROUTE);
+    SOCK_CONST(SO_LINGER);
+    SOCK_CONST(SO_BROADCAST);
+    SOCK_CONST(SO_OOBINLINE);
+    SOCK_CONST(SO_SNDBUF);
+    SOCK_CONST(SO_RCVBUF);
+    SOCK_CONST(SO_SNDLOWAT);
+    SOCK_CONST(SO_RCVLOWAT);
+    SOCK_CONST(SO_SNDTIMEO);
+    SOCK_CONST(SO_RCVTIMEO);
+    SOCK_CONST(SO_TYPE);
+#ifdef SO_FAMILY
+    SOCK_CONST(SO_FAMILY);
+#endif
+    SOCK_CONST(SO_ERROR);
+#ifdef SO_BINDTODEVICE
+    SOCK_CONST(SO_BINDTODEVICE);
+#endif
+    SOCK_CONST(SOL_SOCKET);
+    SOCK_CONST(SOMAXCONN);
+#ifdef TCP_NODELAY
+    SOCK_CONST(TCP_NODELAY);
+#endif
+    SOCK_CONST(PHP_NORMAL_READ);
+    SOCK_CONST(PHP_BINARY_READ);
+
+    /* TODO: MCAST_* constants and logic to handle them */
+
+    SOCK_CONST(IP_MULTICAST_IF);
+    SOCK_CONST(IP_MULTICAST_TTL);
+    SOCK_CONST(IP_MULTICAST_LOOP);
+    SOCK_CONST(IPV6_MULTICAST_IF);
+    SOCK_CONST(IPV6_MULTICAST_HOPS);
+    SOCK_CONST(IPV6_MULTICAST_LOOP);
+    SOCK_CONST(IPPROTO_IP);
+    SOCK_CONST(IPPROTO_IPV6);
+
+    Native::registerConstant<KindOfInt64>(s_SOL_TCP.get(), IPPROTO_TCP);
+    Native::registerConstant<KindOfInt64>(s_SOL_UDP.get(), IPPROTO_UDP);
+
+    SOCK_CONST(IPV6_UNICAST_HOPS);
+  }
+};
+
+SocketsExtension s_sockets_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

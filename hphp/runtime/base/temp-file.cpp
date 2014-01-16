@@ -35,8 +35,8 @@ TempFile::TempFile(bool autoDelete /* = true */) : m_autoDelete(autoDelete) {
     return;
   }
   m_fd = fd;
-  m_name = string(path);
-  m_rawName = string(path);
+  m_name = std::string(path);
+  m_rawName = std::string(path);
 }
 
 TempFile::~TempFile() {
@@ -44,7 +44,7 @@ TempFile::~TempFile() {
 }
 
 bool TempFile::open(const String& filename, const String& mode) {
-  throw FatalErrorException((string("cannot open a temp file ") +
+  throw FatalErrorException((std::string("cannot open a temp file ") +
                              m_name).c_str());
 }
 

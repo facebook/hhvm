@@ -21,7 +21,7 @@ $src_dirs = array (
   "$file_path//rename_variation//",
 );
 
-$dest_dir = "$file_path/rename_variation_dir";
+$dest_dir = "$file_path/rename_variation1-win32.phpt_dir";
 
 // create the $dest_dir
 mkdir($dest_dir);
@@ -46,9 +46,10 @@ foreach($src_dirs as $src_dir) {
 }
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/rename_variation_link.tmp");
-unlink($file_path."/rename_variation.tmp");
-rmdir($file_path."/rename_variation_dir");
+unlink($file_path."/rename_variation1-win32.phpt_link.tmp");
+unlink($file_path."/rename_variation1-win32.phpt.tmp");
+rmdir($file_path."/rename_variation1-win32.phpt_dir");
 ?>

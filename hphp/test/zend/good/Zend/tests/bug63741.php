@@ -39,4 +39,5 @@ EOT
 );
 
 include dirname(__FILE__)."/bug63741.tmp.php";
-?><?php unlink(dirname(__FILE__)."/bug63741.tmp.php"); ?>
+?>
+<?php unlink(dirname(__FILE__)."/bug63741.tmp.php"); ?>

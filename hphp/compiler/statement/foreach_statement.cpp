@@ -152,6 +152,30 @@ void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ForEachStatement::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = 3;
+  if (m_name != nullptr) numProps++;
+  if (m_stmt != nullptr) numProps++;
+  cg.printObjectHeader("ForeachStatement", numProps);
+  cg.printPropertyHeader("collection");
+  m_array->outputCodeModel(cg);
+  if (m_name != nullptr) {
+    cg.printPropertyHeader("key");
+    m_name->outputCodeModel(cg);
+  }
+  cg.printPropertyHeader("value");
+  cg.printExpression(m_value, m_ref);
+  if (m_stmt != nullptr) {
+    cg.printPropertyHeader("block");
+    cg.printAsBlock(m_stmt);
+  }
+  cg.printPropertyHeader("sourceLocation");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ForEachStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

@@ -1,0 +1,24 @@
+int(1)
+bool(false)
+bool(false)
+bool(true)
+NULL
+bool(true)
+string(0) ""
+bool(false)
+array(1) {
+  [0]=>
+  string(51) "{
+    "require": {
+        "php": ">=5.3.3"
+    }
+}"
+}
+bool(true)
+array(2) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+}
+bool(false)

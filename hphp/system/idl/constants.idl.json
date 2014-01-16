@@ -100,18 +100,6 @@
             "value": 131094
         },
         {
-            "name": "AF_INET",
-            "value": 2
-        },
-        {
-            "name": "AF_INET6",
-            "value": 10
-        },
-        {
-            "name": "AF_UNIX",
-            "value": 1
-        },
-        {
             "name": "ALT_DIGITS",
             "value": 131119
         },
@@ -1496,6 +1484,14 @@
             "value": 3
         },
         {
+            "name": "ENT_IGNORE",
+            "value": 4
+        },
+        {
+            "name": "ENT_SUBSTITUTE",
+            "value": 8
+        },
+        {
             "name": "ENT_FB_UTF8",
             "value": 32768
         },
@@ -1813,11 +1809,11 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "2.3.0-dev"
+            "value": "2.4.0-dev"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "2.3.0-dev"
+            "value": "2.4.0-dev"
         },
         {
             "name": "HTML_ENTITIES",
@@ -2162,6 +2158,10 @@
         {
             "name": "IMG_FILTER_SMOOTH",
             "value": 10
+        },
+        {
+            "name": "IMG_FILTER_PIXELATE",
+            "value": 11
         },
         {
             "name": "IMG_GD2_COMPRESSED",
@@ -2860,24 +2860,12 @@
             "value": 131106
         },
         {
-            "name": "MSG_DONTROUTE",
-            "value": 4
-        },
-        {
             "name": "MSG_EAGAIN",
             "value": 11
         },
         {
             "name": "MSG_ENOMSG",
             "value": 42
-        },
-        {
-            "name": "MSG_EOF",
-            "value": 512
-        },
-        {
-            "name": "MSG_EOR",
-            "value": 128
         },
         {
             "name": "MSG_EXCEPT",
@@ -2890,18 +2878,6 @@
         {
             "name": "MSG_NOERROR",
             "value": 2
-        },
-        {
-            "name": "MSG_OOB",
-            "value": 1
-        },
-        {
-            "name": "MSG_PEEK",
-            "value": 2
-        },
-        {
-            "name": "MSG_WAITALL",
-            "value": 256
         },
         {
             "name": "MW_AbsoluteIntent",
@@ -5000,6 +4976,14 @@
             "value": 16
         },
         {
+            "name": "PASSWORD_BCRYPT",
+            "value": 1
+        },
+        {
+            "name": "PASSWORD_DEFAULT",
+            "value": 1
+        },
+        {
             "name": "PATHINFO_BASENAME",
             "value": 2
         },
@@ -5020,10 +5004,6 @@
             "value": ":"
         },
         {
-            "name": "PCRE_VERSION",
-            "value": "7.3 2007-08-28"
-        },
-        {
             "name": "PEAR_EXTENSION_DIR",
             "value": ""
         },
@@ -5034,10 +5014,6 @@
         {   "name": "PHP_BINARY",
             "type": "String",
             "desc": "Dynamic constant - current_executable_path()"
-        },
-        {
-            "name": "PHP_BINARY_READ",
-            "value": 2
         },
         {
             "name": "PHP_BINDIR",
@@ -5081,10 +5057,6 @@
             "value": ""
         },
         {
-            "name": "PHP_NORMAL_READ",
-            "value": 1
-        },
-        {
             "name": "PHP_OS",
             "type": "String",
             "desc": "Dynamic constant - php_uname()"
@@ -5112,38 +5084,6 @@
         {
             "name": "PHP_SYSCONFDIR",
             "value": ""
-        },
-        {
-            "name": "PHP_URL_FRAGMENT",
-            "value": 7
-        },
-        {
-            "name": "PHP_URL_HOST",
-            "value": 1
-        },
-        {
-            "name": "PHP_URL_PASS",
-            "value": 4
-        },
-        {
-            "name": "PHP_URL_PATH",
-            "value": 5
-        },
-        {
-            "name": "PHP_URL_PORT",
-            "value": 2
-        },
-        {
-            "name": "PHP_URL_QUERY",
-            "value": 6
-        },
-        {
-            "name": "PHP_URL_SCHEME",
-            "value": 0
-        },
-        {
-            "name": "PHP_URL_USER",
-            "value": 3
         },
         {
             "name": "PHP_VERSION",
@@ -6018,42 +5958,6 @@
             "value": 54
         },
         {
-            "name": "SOCK_DGRAM",
-            "value": 2
-        },
-        {
-            "name": "SOCK_RAW",
-            "value": 3
-        },
-        {
-            "name": "SOCK_RDM",
-            "value": 4
-        },
-        {
-            "name": "SOCK_SEQPACKET",
-            "value": 5
-        },
-        {
-            "name": "SOCK_STREAM",
-            "value": 1
-        },
-        {
-            "name": "SOL_SOCKET",
-            "value": 1
-        },
-        {
-            "name": "SOL_TCP",
-            "value": 6
-        },
-        {
-            "name": "SOL_UDP",
-            "value": 17
-        },
-        {
-            "name": "SOMAXCONN",
-            "value": 128
-        },
-        {
             "name": "SORTARRIVAL",
             "value": 1
         },
@@ -6114,72 +6018,12 @@
             "value": 2
         },
         {
-            "name": "SO_BROADCAST",
-            "value": 6
-        },
-        {
-            "name": "SO_DEBUG",
-            "value": 1
-        },
-        {
-            "name": "SO_DONTROUTE",
-            "value": 5
-        },
-        {
-            "name": "SO_ERROR",
-            "value": 4
-        },
-        {
             "name": "SO_FREE",
             "value": 8
         },
         {
-            "name": "SO_KEEPALIVE",
-            "value": 9
-        },
-        {
-            "name": "SO_LINGER",
-            "value": 13
-        },
-        {
             "name": "SO_NOSERVER",
             "value": 16
-        },
-        {
-            "name": "SO_OOBINLINE",
-            "value": 10
-        },
-        {
-            "name": "SO_RCVBUF",
-            "value": 8
-        },
-        {
-            "name": "SO_RCVLOWAT",
-            "value": 18
-        },
-        {
-            "name": "SO_RCVTIMEO",
-            "value": 20
-        },
-        {
-            "name": "SO_REUSEADDR",
-            "value": 2
-        },
-        {
-            "name": "SO_SNDBUF",
-            "value": 7
-        },
-        {
-            "name": "SO_SNDLOWAT",
-            "value": 19
-        },
-        {
-            "name": "SO_SNDTIMEO",
-            "value": 21
-        },
-        {
-            "name": "SO_TYPE",
-            "value": 3
         },
         {
             "name": "SQLT_AFC",
@@ -6486,14 +6330,6 @@
             "value": 1
         },
         {
-            "name": "STREAM_URL_STAT_LINK",
-            "value": 1
-        },
-        {
-            "name": "STREAM_URL_STAT_QUIET",
-            "value": 2
-        },
-        {
             "name": "STREAM_USE_PATH",
             "value": 1
         },
@@ -6615,6 +6451,10 @@
         },
         {
             "name": "T_BREAK",
+            "type": "Int64"
+        },
+        {
+            "name": "T_CALLABLE",
             "type": "Int64"
         },
         {

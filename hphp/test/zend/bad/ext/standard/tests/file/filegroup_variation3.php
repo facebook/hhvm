@@ -40,7 +40,8 @@ foreach($files_arr as $file) {
 }
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $dir_name = $file_path."/filegroup_variation3";
 unlink($dir_name."/filegroup_variation3.tmp");

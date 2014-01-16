@@ -1,0 +1,41 @@
+*** Testing expm1() : basic functionality ***
+
+-- Iteration 1 --
+float(22025.465794807)
+
+-- Iteration 2 --
+float(29731.618852891)
+
+-- Iteration 3 --
+float(INF)
+
+-- Iteration 4 --
+float(29048849665246)
+
+-- Iteration 5 --
+float(1.811239082889E+41)
+
+-- Iteration 6 --
+float(22025.465794807)
+
+-- Iteration 7 --
+float(INF)
+
+-- Iteration 8 --
+float(INF)
+
+-- Iteration 9 --
+float(8.6593400423994E+16)
+
+-- Iteration 10 --
+float(1.811239082889E+41)
+
+-- Iteration 11 --
+float(1.718281828459)
+
+-- Iteration 12 --
+float(0)
+
+-- Iteration 13 --
+float(0)
+===Done===

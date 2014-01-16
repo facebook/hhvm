@@ -69,7 +69,8 @@ foreach($octal_formats as $octal_format) {
 }
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation30.tmp";
 unlink($filename);

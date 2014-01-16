@@ -30,31 +30,22 @@ ObjectData* newVectorHelper(int nElms);
 ObjectData* newMapHelper(int nElms);
 ObjectData* newStableMapHelper(int nElms);
 ObjectData* newSetHelper(int nElms);
+ObjectData* newFrozenVectorHelper(int nElms);
+ObjectData* newFrozenMapHelper(int nElms);
+ObjectData* newFrozenSetHelper(int nElms);
 ObjectData* newPairHelper();
 
 StringData* concat_is(int64_t v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64_t v2);
 StringData* concat_ss(StringData* v1, StringData* v2);
 
-int64_t eq_null_str(StringData* v1);
-int64_t eq_bool_str(int64_t v1, StringData* v2);
-int64_t eq_int_str(int64_t v1, StringData* v2);
-int64_t eq_str_str(StringData* v1, StringData* v2);
-
-int64_t same_str_str(StringData* v1, StringData* v2);
-
-int64_t str0_to_bool(StringData* sd);
-int64_t str_to_bool(StringData* sd);
-int64_t arr0_to_bool(ArrayData* ad);
-int64_t arr_to_bool(ArrayData* ad);
-
 void print_string(StringData* s);
 void print_int(int64_t i);
 void print_boolean(bool val);
 
 void raiseWarning(const StringData* sd);
+void raiseNotice(const StringData* sd);
 void raiseArrayIndexNotice(int64_t index);
-int64_t modHelper(int64_t left, int64_t right);
 
 inline Iter*
 frame_iter(const ActRec* fp, int i) {
@@ -77,7 +68,7 @@ frame_local_inner(const ActRec* fp, int n) {
 
 inline c_Continuation*
 frame_continuation(const ActRec* fp) {
-  size_t arOffset = c_Continuation::getArOffset(fp->m_func);
+  auto arOffset = c_Continuation::getArOffset();
   ObjectData* obj = (ObjectData*)((char*)fp - arOffset);
   assert(obj->getVMClass() == c_Continuation::classof());
   return static_cast<c_Continuation*>(obj);
@@ -107,7 +98,13 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     }
     // Free extra args
     assert(fp->hasExtraArgs());
-    ExtraArgs::deallocate(fp);
+    ExtraArgs* ea = fp->getExtraArgs();
+    int numExtra = fp->numArgs() - fp->m_func->numParams();
+    if (unwinding) {
+      fp->initNumArgs(fp->m_func->numParams());
+      fp->setVarEnv(nullptr);
+    }
+    ExtraArgs::deallocate(ea, numExtra);
   }
   // Free locals
   for (int i = numLocals - 1; i >= 0; --i) {
@@ -146,6 +143,16 @@ frame_free_locals_inl(ActRec* fp, int numLocals) {
 }
 
 void ALWAYS_INLINE
+frame_free_inl(ActRec* fp) { // For frames with no locals
+  assert(0 == fp->m_func->numLocals());
+  assert(!fp->hasInvName());
+  assert(fp->m_varEnv == nullptr);
+  assert(fp->hasThis());
+  decRefObj(fp->getThis());
+  EventHook::FunctionExit(fp);
+}
+
+void ALWAYS_INLINE
 frame_free_locals_unwind(ActRec* fp, int numLocals) {
   frame_free_locals_inl_no_hook<true>(fp, numLocals);
   EventHook::FunctionExit(fp);
@@ -177,6 +184,7 @@ frame_free_args(TypedValue* args, int count) {
 Unit*
 compile_file(const char* s, size_t sz, const MD5& md5, const char* fname);
 Unit* compile_string(const char* s, size_t sz, const char* fname = nullptr);
+Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname);
 Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
                                  ssize_t numBuiltinFuncs);
 Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
@@ -205,10 +213,12 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
  * be set up before you use those parts of the runtime.
  */
 
+typedef String (*CompileStringAST)(String, String);
 typedef Unit* (*CompileStringFn)(const char*, int, const MD5&, const char*);
 typedef Unit* (*BuildNativeFuncUnitFn)(const HhbcExtFuncInfo*, ssize_t);
 typedef Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
 
+extern CompileStringAST g_hphp_compiler_serialize_code_model_for;
 extern CompileStringFn g_hphp_compiler_parse;
 extern BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
 extern BuildNativeClassUnitFn g_hphp_build_native_class_unit;
@@ -220,6 +230,22 @@ void assertTv(const TypedValue* tv);
 int init_closure(ActRec* ar, TypedValue* sp);
 
 void defClsHelper(PreClass*);
+
+/*
+ * Returns whether the interface named `s' supports any non-object
+ * types.
+ */
+bool interface_supports_non_objects(const StringData* s);
+
+bool interface_supports_array(const StringData* s);
+bool interface_supports_string(const StringData* s);
+bool interface_supports_int(const StringData* s);
+bool interface_supports_double(const StringData* s);
+
+bool interface_supports_array(std::string const&);
+bool interface_supports_string(std::string const&);
+bool interface_supports_int(std::string const&);
+bool interface_supports_double(std::string const&);
 
 }
 #endif

@@ -17,14 +17,16 @@
 #ifndef incl_HPHP_FILE_SCOPE_H_
 #define incl_HPHP_FILE_SCOPE_H_
 
+#include <string>
 #include <map>
+#include <boost/algorithm/string.hpp>
 
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/code_generator.h"
 #include <boost/graph/adjacency_list.hpp>
-#include "hphp/util/json.h"
+#include "hphp/compiler/json.h"
 #include "hphp/util/md5.h"
 
 namespace HPHP {
@@ -62,6 +64,7 @@ public:
     IsFoldable                = 0x1000,// function can be constant folded
     NeedsActRec               = 0x2000,// builtin function needs ActRec
     AllowOverride             = 0x4000,// allow override of systemlib or builtin
+    NeedsFinallyLocals        = 0x8000,
   };
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;
@@ -77,6 +80,7 @@ public:
 
   const std::string &getName() const { return m_fileName;}
   const MD5& getMd5() const { return m_md5; }
+  void setMd5(const MD5& md5) { m_md5 = md5; }
   StatementListPtr getStmt() const { return m_tree;}
   const StringToClassScopePtrVecMap &getClasses() const {
     return m_classes;
@@ -141,8 +145,12 @@ public:
                              const std::string &decname);
 
   void addClassAlias(const std::string& target, const std::string& alias) {
-    m_classAliasMap.insert(std::make_pair(Util::toLower(target),
-                                          Util::toLower(alias)));
+    m_classAliasMap.insert(
+      std::make_pair(
+        boost::to_lower_copy(target),
+        boost::to_lower_copy(alias)
+      )
+    );
   }
 
   std::multimap<std::string,std::string> const& getClassAliases() const {
@@ -150,7 +158,7 @@ public:
   }
 
   void addTypeAliasName(const std::string& name) {
-    m_typeAliasNames.insert(Util::toLower(name));
+    m_typeAliasNames.insert(boost::to_lower_copy(name));
   }
 
   std::set<std::string> const& getTypeAliasNames() const {
@@ -165,10 +173,8 @@ public:
     m_vertex = vertex;
   }
 
-  void setModule() { m_module = true; }
-  void setPrivateInclude() { m_privateInclude = true; }
-  bool isPrivateInclude() const { return m_privateInclude && !m_externInclude; }
-  void setExternInclude() { m_externInclude = true; }
+  void setSystem();
+  bool isSystem() const { return m_system; }
 
   void analyzeProgram(AnalysisResultPtr ar);
   void analyzeIncludes(AnalysisResultPtr ar);
@@ -198,10 +204,8 @@ public:
 private:
   int m_size;
   MD5 m_md5;
-  unsigned m_module : 1;
-  unsigned m_privateInclude : 1;
-  unsigned m_externInclude : 1;
   unsigned m_includeState : 2;
+  unsigned m_system : 1;
 
   std::vector<int> m_attributes;
   std::string m_fileName;

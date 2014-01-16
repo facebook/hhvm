@@ -28,7 +28,7 @@ namespace HPHP {
 
 /**
  * Base class of extension modules. See ext_session.cpp for an example. It is
- * NOT required to have an extention class to derive from this base class,
+ * NOT required to have an extension class to derive from this base class,
  * unless one of these is needed:
  *
  *   - register an extension's name so extension_loaded() can work;
@@ -67,9 +67,11 @@ public:
   static void MergeSystemlib();
   static void ShutdownModules();
   static bool ModulesInitialised();
+  static void RequestInitModules();
+  static void RequestShutdownModules();
 
-  // Look for "systemlib.ext.{m_name}" in the binary and compile/merge it
-  void loadSystemlib();
+  // Look for "ext.{namehash}" in the binary and compile/merge it
+  void loadSystemlib(const std::string& name = "");
 
   // Compile and merge an systemlib fragment
   static void CompileSystemlib(const std::string &slib,
@@ -86,6 +88,8 @@ public:
   virtual void moduleInfo(Array &info) { info.set(m_name, true);}
   virtual void moduleInit() {}
   virtual void moduleShutdown() {}
+  virtual void requestInit() {}
+  virtual void requestShutdown() {}
 
   void setDSOName(const std::string &name) {
     m_dsoName = name;

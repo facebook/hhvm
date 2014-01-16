@@ -38,7 +38,8 @@ public:
   typedef void (*PFN_PARSER_CALLBACK)(String *arg1, String *arg2, String *arg3,
                                       int callback_type, void *arg);
 
-  typedef bool (*PFN_UPDATE_CALLBACK)(const String& value, void *p);
+  typedef bool (*UpdateCallback)(const String& value, void *p);
+  typedef String (*GetCallback)(void *p);
 
 public:
   static Variant FromString(const String& ini, const String& filename,
@@ -48,7 +49,8 @@ public:
   static bool Set(const String& name, const String& value);
 
   static void Bind(const char *name, const char *value,
-                   PFN_UPDATE_CALLBACK callback, void *p = nullptr);
+                   UpdateCallback updateCallback, GetCallback getCallback,
+                   void *p = nullptr);
   static void Unbind(const char *name);
 
   static void SetGlobalDefault(const char *name, const char *value);
@@ -61,6 +63,11 @@ bool ini_on_update_non_negative(const String& value, void *p);
 bool ini_on_update_real(const String& value, void *p);
 bool ini_on_update_string(const String& value, void *p);
 bool ini_on_update_string_non_empty(const String& value, void *p);
+
+String ini_get_bool(void *p);
+String ini_get_long(void *p);
+String ini_get_real(void *p);
+String ini_get_string(void *p);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

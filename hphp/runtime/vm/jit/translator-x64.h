@@ -183,12 +183,12 @@ private:
 
   void drawCFG(std::ofstream& out) const;
 
-  static JIT::CppCall getDtorCall(DataType type);
-
   void invalidateSrcKey(SrcKey sk);
   void invalidateFuncProfSrcKeys(const Func* func);
 
 public:
+  static JIT::CppCall getDtorCall(DataType type);
+
   FixupMap& fixupMap() { return m_fixupMap; }
 
   DataBlock& globalData() { return code.data(); }

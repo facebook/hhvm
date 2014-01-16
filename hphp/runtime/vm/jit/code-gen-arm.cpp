@@ -326,12 +326,9 @@ PUNT_OPCODE(ReqRetranslate)
 PUNT_OPCODE(Mov)
 PUNT_OPCODE(LdAddr)
 PUNT_OPCODE(IncRefCtx)
-PUNT_OPCODE(DecRefLoc)
-PUNT_OPCODE(DecRefStack)
 PUNT_OPCODE(DecRefThis)
 PUNT_OPCODE(GenericRetDecRefs)
 PUNT_OPCODE(DecRef)
-PUNT_OPCODE(DecRefMem)
 PUNT_OPCODE(DecRefNZ)
 PUNT_OPCODE(DefInlineFP)
 PUNT_OPCODE(InlineReturn)
@@ -556,6 +553,101 @@ void CodeGenerator::cgAssertType(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
+void CodeGenerator::emitDecRefStaticType(Type type,
+                                         vixl::Register dataReg) {
+  assert(type.isKnownDataType());
+  assert(!dataReg.Is(rAsm2));
+
+  vixl::Label allDone;
+
+  m_as.  Ldr  (rAsm2.W(), dataReg[FAST_REFCOUNT_OFFSET]);
+
+  if (type.needsStaticBitCheck()) {
+    m_as.Tbnz (rAsm2, UncountedBitPos, &allDone);
+  }
+
+  m_as.  Sub  (rAsm2.W(), rAsm2.W(), 1, vixl::SetFlags);
+  m_as.  Str  (rAsm2.W(), dataReg[FAST_REFCOUNT_OFFSET]);
+
+  m_as.  B    (&allDone, vixl::ne);
+  cgCallHelper(m_as,
+               TranslatorX64::getDtorCall(type.toDataType()),
+               kVoidDest,
+               SyncOptions::kSyncPoint,
+               ArgGroup(curOpds()).reg(dataReg));
+
+  m_as.  bind (&allDone);
+}
+
+void CodeGenerator::emitDecRefDynamicType(vixl::Register baseReg,
+                                          ptrdiff_t offset) {
+  // Make sure both temp registers are still available
+  assert(!baseReg.Is(rAsm));
+  assert(!baseReg.Is(rAsm2));
+
+  vixl::Label allDone;
+
+  // Check the type
+  m_as.  Ldrb (rAsm.W(), baseReg[offset + TVOFF(m_type)]);
+  m_as.  Cmp  (rAsm.W(), KindOfRefCountThreshold);
+  m_as.  B    (&allDone, vixl::le);
+
+  // Type is refcounted. Load the refcount.
+  m_as.  Ldr  (rAsm, baseReg[offset + TVOFF(m_data)]);
+  m_as.  Ldr  (rAsm2.W(), rAsm[FAST_REFCOUNT_OFFSET]);
+
+  // Is it static? Note that only the lower 32 bits of rAsm2 are valid right
+  // now, but tbnz is only looking at a single one of them, so this is OK.
+  m_as.  Tbnz (rAsm2, UncountedBitPos, &allDone);
+
+  // Not static. Decrement and write back.
+  m_as.  Sub  (rAsm2.W(), rAsm2.W(), 1, vixl::SetFlags);
+  m_as.  Str  (rAsm2.W(), rAsm[FAST_REFCOUNT_OFFSET]);
+
+  // Did it go to zero?
+  m_as.  B    (&allDone, vixl::ne);
+
+  // Went to zero. Have to destruct.
+  cgCallHelper(m_as,
+               CppCall(tv_release_generic),
+               kVoidDest,
+               SyncOptions::kSyncPoint,
+               ArgGroup(curOpds()).addr(baseReg, offset));
+
+  m_as.  bind (&allDone);
+}
+
+void CodeGenerator::emitDecRefMem(Type type,
+                                  vixl::Register baseReg,
+                                  ptrdiff_t offset) {
+  if (type.needsReg()) {
+    emitDecRefDynamicType(baseReg, offset);
+  } else if (type.maybeCounted()) {
+    m_as.  Ldr  (rAsm, baseReg[offset + TVOFF(m_data)]);
+    emitDecRefStaticType(type, rAsm);
+  }
+}
+
+void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
+  emitDecRefMem(inst->typeParam(),
+                x2a(curOpd(inst->src(0)).reg()),
+                cellsToBytes(inst->extra<DecRefStack>()->offset));
+}
+
+void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
+  emitDecRefMem(inst->typeParam(),
+                x2a(curOpd(inst->src(0)).reg()),
+                localOffset(inst->extra<DecRefLoc>()->locId));
+}
+
+void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
+  emitDecRefMem(inst->typeParam(),
+                x2a(curOpd(inst->src(0)).reg()),
+                inst->src(1)->getValInt());
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void CodeGenerator::cgShuffle(IRInstruction* inst) {
   PhysReg::Map<PhysReg> moves;
 
@@ -715,12 +807,11 @@ void CodeGenerator::cgCallNative(vixl::MacroAssembler& as,
     not_reached();
   }();
 
-  cgCallHelper(as, call, dest, info.sync, argGroup,
-               m_state.liveRegs[m_curInst]);
+  cgCallHelper(as, call, dest, info.sync, argGroup);
 }
 
 void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
-                                 CppCall& call,
+                                 CppCall call,
                                  const CallDest& dstInfo,
                                  SyncOptions sync,
                                  ArgGroup& args,
@@ -790,6 +881,14 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
       assert(!armDst0.IsValid() && !armDst1.IsValid());
       break;
   }
+}
+
+void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
+                                 CppCall call,
+                                 const CallDest& dstInfo,
+                                 SyncOptions sync,
+                                 ArgGroup& args) {
+  cgCallHelper(a, call, dstInfo, sync, args, m_state.liveRegs[m_curInst]);
 }
 
 /*
@@ -1244,15 +1343,13 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   m_as.    Cbnz (dstReg, &noLookup);
 
   const Func* (*const func)(const StringData*) = lookupUnknownFunc;
-  CppCall call(func);
   cgCallHelper(
     m_as,
-    call,
+    CppCall(func),
     callDest(inst->dst()),
     SyncOptions::kSyncPoint,
     ArgGroup(curOpds())
-      .immPtr(inst->extra<LdFuncCached>()->name),
-    m_state.liveRegs[m_curInst]
+      .immPtr(inst->extra<LdFuncCached>()->name)
   );
 
   m_as.    bind (&noLookup);
@@ -1298,13 +1395,11 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   auto opc = *(curFunc()->unit()->at(pcOff));
   auto* interpOneHelper = interpOneEntryPoints[opc];
 
-  CppCall call(interpOneHelper);
   cgCallHelper(m_as,
-               call,
+               CppCall(interpOneHelper),
                callDest(InvalidReg),
                SyncOptions::kSyncPoint,
-               ArgGroup(curOpds()).ssa(fp).ssa(sp).imm(pcOff),
-               m_state.liveRegs[m_curInst]);
+               ArgGroup(curOpds()).ssa(fp).ssa(sp).imm(pcOff));
 }
 
 void CodeGenerator::cgInterpOne(IRInstruction* inst) {

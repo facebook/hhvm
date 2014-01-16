@@ -421,6 +421,7 @@ other_files = (
     '/ext/bz2/tests/004_1.txt.bz2',
     '/ext/bz2/tests/004_2.txt.bz2',
     '/ext/calendar/tests/skipif.inc',
+    '/ext/curl/tests/responder/get.php',
     '/ext/curl/tests/curl_testdata1.txt',
     '/ext/curl/tests/curl_testdata2.txt',
     '/ext/date/tests/DateTime_data-absolute.inc',

@@ -511,8 +511,7 @@ Cell lookupCnsHelper(const TypedValue* tv,
   }
   if (LIKELY(cns != nullptr)) {
     Cell c1;
-    c1.m_type = cns->m_type;
-    c1.m_data = cns->m_data;
+    cellDup(*cns, c1);
     return c1;
   }
 

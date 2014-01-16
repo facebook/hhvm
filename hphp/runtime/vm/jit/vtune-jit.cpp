@@ -20,7 +20,7 @@
 #include "jitapi/jitprofiling.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 void reportTraceletToVtune(const Unit* unit, const Func* func, const TransRec& transRec)
 {

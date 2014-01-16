@@ -257,7 +257,7 @@ const StaticString
   s_versionString("versionString"),
   s_versionNumber("versionNumber");
 
-Array c_SQLite3::t_version() {
+Array c_SQLite3::ti_version() {
   ArrayInit ret(2);
   ret.set(s_versionString, String((char*)sqlite3_libversion(), CopyString));
   ret.set(s_versionNumber, (int64_t)sqlite3_libversion_number());

@@ -163,6 +163,7 @@
                     "name": "version",
                     "desc": "Returns the SQLite3 library version as a string constant and as a number.",
                     "flags": [
+                        "IsStatic"
                     ],
                     "return": {
                         "type": "VariantMap",

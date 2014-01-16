@@ -17,7 +17,7 @@ $q = from $c in $customers
      select Map {"Name" => $c->Name, "OrderCount" => $n };
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }
 
 echo into();

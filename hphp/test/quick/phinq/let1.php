@@ -13,7 +13,7 @@ $q = from $o in $orders
      select Map {"OrderID" => $o->OrderID, "Total" => $t };
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }
 
 echo let();

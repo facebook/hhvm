@@ -61,7 +61,7 @@ using ExtCollectionObjectData = ExtObjectDataFlags<
 void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
 ///////////////////////////////////////////////////////////////////////////////
-// class BaseVector encapsulates functionality that is common to both
+// class BaseVector: encapsulates functionality that is common to both
 // c_Vector and c_FrozenVector. It doesn't map to any PHP-land class.
 
 class BaseVector : public ExtCollectionObjectData {
@@ -423,7 +423,6 @@ class c_Vector : public BaseVector {
   void initFvFields(c_FrozenVector* fv);
 
   // Friends
-
   friend void collectionAppend(ObjectData* obj, TypedValue* val);
   friend void triggerCow(c_Vector* vec);
 

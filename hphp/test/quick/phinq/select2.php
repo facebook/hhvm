@@ -9,5 +9,5 @@ $q = from $c in $customers
      select $c;
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }

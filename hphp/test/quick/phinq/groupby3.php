@@ -15,5 +15,5 @@ $q = from $c in getCustomers()
      select Map { "Country" => $g->Key, "CustCount" => $g->Count() };
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }

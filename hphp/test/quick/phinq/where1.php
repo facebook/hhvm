@@ -14,7 +14,7 @@ function foo() {
 
 $q = foo();
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }
 
 echo where();

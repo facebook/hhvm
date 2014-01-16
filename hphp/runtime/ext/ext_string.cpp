@@ -29,6 +29,7 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_variable.h"
+#include "folly/Unicode.h"
 
 namespace HPHP {
 
@@ -1618,10 +1619,17 @@ Array f_get_html_translation_table(int table /* = 0 */,
 
         if (em.table[i] == NULL)
           continue;
-        /* what about wide chars here ?? */
         snprintf(buffer, sizeof(buffer), "&%s;", em.table[i]);
-        ret.set(String::FromChar(i + em.basechar),
-                String(buffer, CopyString));
+        String key;
+        int code = em.basechar + i;
+        if (charset == cs_utf_8) {
+          auto keyAsString = folly::codePointToUtf8(code);
+          key = String::FromCStr(keyAsString.data());
+        } else {
+          key = String::FromChar(code);
+        }
+
+        ret.set(key, String(buffer, CopyString));
       }
     }
     /* fall thru */

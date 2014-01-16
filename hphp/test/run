@@ -54,6 +54,9 @@ Examples:
   # All tests except those containing a string of 3 digits
   % $argv[0] -E '/\d{3}/' all
 
+  # All tests whose name containing pdo_mysql
+  % $argv[0] -i pdo_mysql -m jit -r zend
+
 EOT;
   return usage().$help;
 }
@@ -127,6 +130,7 @@ function rel_path($to) {
 
 function get_options($argv) {
   $parameters = array(
+    'include:' => 'i:',
     'exclude:' => 'e:',
     'exclude-pattern:' => 'E:',
     'repo' => 'r',
@@ -229,6 +233,12 @@ function find_tests($files, array $options = null) {
     $exclude = $options['exclude-pattern'];
     $tests = array_filter($tests, function($test) use ($exclude) {
       return !preg_match($exclude, $test);
+    });
+  }
+  if (!empty($options['include'])) {
+    $include = $options['include'];
+    $tests = array_filter($tests, function($test) use ($include) {
+      return (false !== strpos($test, $include));
     });
   }
   return $tests;
@@ -382,7 +392,7 @@ class Status {
     }
   }
 
-  public static function skip($test) {
+  public static function skip($test, $reason='default') {
     switch (self::$mode) {
       case self::MODE_NORMAL:
         if (self::hasColor()) {
@@ -393,9 +403,18 @@ class Status {
         break;
       case self::MODE_VERBOSE:
         if (self::hasColor()) {
-          print "$test \033[1;33mskipped\033[0m\n";
+          if ($reason === 'default') {
+            print "$test \033[1;33mskipped\033[0m\n";
+          } else {
+            print "$test \033[1;33mskipped\033[0m ";
+            print "\033[1;31m$reason\033[0m\n";
+          }
         } else {
-          print "$test skipped\n";
+          if ($reason === 'default') {
+            print "$test skipped\n";
+          } else {
+            print "$test skipped - $reason\n";
+          }
         }
         break;
       case self::MODE_FBMAKE:
@@ -479,6 +498,8 @@ function run($options, $tests, $bad_test_file) {
     $status = run_test($options, $test);
     if ($status === 'skip') {
       Status::skip($test);
+    } else if ($status === 'skip-norepo') {
+      Status::skip($test, 'norepo');
     } else if ($status) {
       Status::pass($test);
     } else {
@@ -527,7 +548,7 @@ function run_test($options, $test) {
     if ($test_ext === 'hhas' ||
         strpos($hhvm, '-m debug') !== false ||
         file_exists($test.'.norepo')) {
-      return 'skip';
+      return 'skip-norepo';
     } else {
       $repodb = "$test.repo/hhvm.hhbc";
       if (file_exists($repodb)) unlink($repodb);

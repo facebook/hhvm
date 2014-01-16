@@ -252,6 +252,7 @@ norepo_tests = (
     '/ext/pdo_sqlite/tests/bug33841.php',
     '/ext/pdo_sqlite/tests/bug46139.php',
     '/ext/pdo_sqlite/tests/bug52487.php',
+    '/ext/pdo_mysql/tests/pdo_mysql_connect_charset.php',
     '/ext/phar/tests/012.php',
     '/ext/sqlite3/tests/bug47159.php',
     '/ext/sqlite3/tests/sqlite3_01_open.php',
@@ -523,6 +524,7 @@ other_files = (
     '/ext/pdo/tests/pdo_test.inc',
     '/ext/pdo_mysql/tests/common.phpt',
     '/ext/pdo_mysql/tests/config.inc',
+    '/ext/pdo_mysql/tests/mysql_pdo_test.inc',
     '/ext/pdo_sqlite/tests/common.phpt',
     '/ext/phar/tests/files/phar_test.inc',
     '/ext/session/tests/save_handler.inc',
@@ -977,6 +979,10 @@ def walk(filename, source_dir):
         test = test.replace('rename_variation.tmp', dest_filename+'.tmp')
         test = test.replace('rename_variation2.tmp', dest_filename+'2.tmp')
         test = test.replace('rename_variation_link.tmp', dest_filename+'_link.tmp')
+    # Change the paths from zend to hhvm convention
+    # See: https://github.com/facebook/hhvm/pull/1489
+    if '/ext/pdo_mysql/tests/mysql_pdo_test.inc' in full_dest_filename:
+        test = test.replace('/../../../ext/pdo/tests/pdo_test.inc', '/../../pdo/tests/pdo_test.inc')
 
     file(full_dest_filename, 'w').write(test)
 

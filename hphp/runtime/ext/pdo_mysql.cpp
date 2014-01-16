@@ -243,6 +243,7 @@ bool PDOMySqlConnection::create(CArrRef options) {
   char *host = NULL, *unix_socket = NULL;
   unsigned int port = 3306;
   char *dbname;
+  char *charset = NULL;
   struct pdo_data_src_parser vars[] = {
     { "charset",      NULL,             0 },
     { "dbname",       "",               0 },
@@ -269,6 +270,7 @@ bool PDOMySqlConnection::create(CArrRef options) {
 
   m_max_buffer_size = 1024*1024;
   m_buffered = m_emulate_prepare = 1;
+  charset = vars[0].optval;
 
   /* handle MySQL options */
   if (!options.empty()) {
@@ -346,6 +348,13 @@ bool PDOMySqlConnection::create(CArrRef options) {
         handleError(__FILE__, __LINE__);
         goto cleanup;
       }
+    }
+  }
+
+  if (charset) {
+    if (mysql_options(m_server, MYSQL_SET_CHARSET_NAME, charset)) {
+      handleError(__FILE__, __LINE__);
+      goto cleanup;
     }
   }
 

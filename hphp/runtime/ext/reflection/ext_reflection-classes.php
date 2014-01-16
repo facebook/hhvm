@@ -1213,8 +1213,15 @@ class ReflectionClass implements Reflector {
     if ($this->hasMethod('__construct')) {
       return $this->getMethod('__construct');
     }
-    if (!$this->isTrait() && $this->hasMethod($name = $this->name)) {
-      return $this->getMethod($name);
+    if (!$this->isTrait()) {
+      /* - Foo::Foo can be a constructor too
+       * - then class Bar extends Foo { } also has a constructor called Foo
+       */
+      for ($class = $this; $class; $class = $class->getParentClass()) {
+        if ($this->hasMethod($name = $class->name)) {
+          return $this->getMethod($name);
+        }
+      }
     }
     return null;
   }

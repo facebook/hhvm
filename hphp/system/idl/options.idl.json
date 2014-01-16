@@ -645,7 +645,7 @@
             "flags": [
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "If the optional extension parameter is specified, phpversion() returns the version of that extension, or FALSE if there is no version information associated or the extension isn't enabled."
             },
             "args": [

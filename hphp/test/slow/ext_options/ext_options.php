@@ -31,6 +31,11 @@ ini_set("max_execution_time", 40);
 var_dump(ini_get("max_execution_time"));
 
 var_dump(phpversion());
+var_dump(phpversion('mysql'));
+var_dump(phpversion('memcached'));
+var_dump(phpversion('exif'));
+var_dump(phpversion('reflection'));
+var_dump(phpversion('nonexistent_extension'));
 
 var_dump(putenv("FOO=bar"));
 var_dump(!putenv("FOO"));

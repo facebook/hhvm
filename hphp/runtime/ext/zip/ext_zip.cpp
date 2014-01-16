@@ -1315,7 +1315,7 @@ static Variant HHVM_FUNCTION(zip_read, CResRef zip) {
 
 class zipExtension : public Extension {
  public:
-  zipExtension() : Extension("zip") {}
+  zipExtension() : Extension("zip", "1.12.4-dev") {}
   virtual void moduleInit() {
     HHVM_ME(ZipArchive, getProperty);
     HHVM_ME(ZipArchive, addEmptyDir);

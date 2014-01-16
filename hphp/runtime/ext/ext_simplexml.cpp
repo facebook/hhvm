@@ -29,7 +29,9 @@
 #endif
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(SimpleXML);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(SimpleXML, 0.1);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // This is to make sure each node holds one reference of m_doc, so not to let

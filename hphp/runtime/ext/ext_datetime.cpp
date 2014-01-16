@@ -23,7 +23,7 @@
 namespace HPHP {
 static class DateExtension : public Extension {
  public:
-  DateExtension() : Extension("date") { }
+  DateExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
   void moduleInit() {
     IniSetting::Bind(
       "date.timezone",

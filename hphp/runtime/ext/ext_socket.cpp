@@ -1274,7 +1274,7 @@ const StaticString
 
 class SocketsExtension : public Extension {
  public:
-  SocketsExtension() : Extension("sockets") {}
+  SocketsExtension() : Extension("sockets", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {
     SOCK_CONST(AF_UNIX);

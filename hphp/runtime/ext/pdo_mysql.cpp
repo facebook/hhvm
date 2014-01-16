@@ -28,7 +28,8 @@
 #endif
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(pdo_mysql);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_mysql, 1.0.2);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -195,7 +195,7 @@ class IntlExtension : public Extension {
   // the intl extension is loaded, yet not all the classes exist
   // Lie for now by using another name.  Change it when intl
   // coverage is complete
-  IntlExtension() : Extension("intl.not-done") {}
+  IntlExtension() : Extension("intl.not-done", "1.1.0") {}
 
   void moduleInit() override {
     bindIniSettings();

@@ -18,7 +18,9 @@
 #include "hphp/runtime/ext/ext_ctype.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(ctype);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(ctype, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static bool ctype(CVarRef v, int (*iswhat)(int)) {

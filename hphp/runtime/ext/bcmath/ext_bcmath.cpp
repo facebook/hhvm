@@ -233,7 +233,7 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
 
 class bcmathExtension : public Extension {
  public:
-  bcmathExtension() : Extension("bcmath") {}
+  bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET) {}
   virtual void moduleInit() {
     IniSetting::Bind("bcmath.scale", "0", ini_on_update_long, ini_get_long,
                      &BCG(bc_precision));

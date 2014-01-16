@@ -45,7 +45,9 @@
   }                                                     \
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(PDO);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(PDO, 1.0.4dev);
+
 using std::string;
 ///////////////////////////////////////////////////////////////////////////////
 // PDO constants

@@ -21,7 +21,9 @@
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(icu_uspoof);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(icu_uspoof, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const int64_t q_SpoofChecker$$SINGLE_SCRIPT_CONFUSABLE =

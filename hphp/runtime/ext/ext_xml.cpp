@@ -23,7 +23,9 @@
 #include <expat.h>
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(xml);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(xml, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class XmlParser : public SweepableResourceData {

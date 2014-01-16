@@ -37,8 +37,10 @@
 // #define IM_MEMORY_CHECK
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(exif);
-IMPLEMENT_DEFAULT_EXTENSION(gd);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(exif, 1.4 $Id$);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(gd, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define HAS_GDIMAGESETANTIALIASED

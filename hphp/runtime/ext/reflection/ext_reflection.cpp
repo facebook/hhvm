@@ -1259,7 +1259,7 @@ HPHP::Class* Reflection::s_ReflectionExceptionClass = nullptr;
 
 class ReflectionExtension : public Extension {
  public:
-  ReflectionExtension() : Extension("reflection") { }
+  ReflectionExtension() : Extension("reflection", "$Id$") { }
   virtual void moduleInit() {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);

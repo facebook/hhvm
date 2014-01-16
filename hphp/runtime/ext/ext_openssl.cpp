@@ -108,7 +108,8 @@ public:
 };
 static OpenSSLInitializer s_openssl_initializer;
 
-IMPLEMENT_DEFAULT_EXTENSION(openssl);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(openssl, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 // resource classes
 

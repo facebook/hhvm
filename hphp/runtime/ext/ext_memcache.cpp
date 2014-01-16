@@ -26,7 +26,8 @@
 #define MMC_COMPRESSED 2
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(memcache);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(memcache, 3.0.8);
 
 static bool ini_on_update_hash_strategy(const String& value, void *p);
 static String ini_get_hash_strategy(void *p);

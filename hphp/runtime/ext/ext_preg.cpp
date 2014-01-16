@@ -31,7 +31,7 @@ const StaticString s_PCRE_VERSION("PCRE_VERSION");
 
 class PcreExtension : public Extension {
 public:
-  PcreExtension() : Extension("pcre") {}
+  PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {
     Native::registerConstant<KindOfString>(

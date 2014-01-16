@@ -76,7 +76,7 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
 
 static class ZlibExtension : Extension {
  public:
-  ZlibExtension() : Extension("zlib") {}
+  ZlibExtension() : Extension("zlib", "2.0") {}
   virtual void moduleLoad(Hdf hdf) {
     s_zlib_stream_wrapper.registerAs("compress.zlib");
   }

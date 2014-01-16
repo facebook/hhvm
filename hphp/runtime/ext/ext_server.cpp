@@ -29,7 +29,9 @@
 #define DANGLING_HEADER "HPHP_DANGLING"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(server);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(server, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 // dangling server
 

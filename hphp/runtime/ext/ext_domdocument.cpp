@@ -43,7 +43,9 @@
 #define DOM_NODESET XML_XINCLUDE_START
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(dom);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(dom, 20031129);
+
 ///////////////////////////////////////////////////////////////////////////////
 // parser error handling
 

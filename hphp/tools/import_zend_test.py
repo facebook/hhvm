@@ -301,6 +301,7 @@ norepo_tests = (
     '/ext/pdo_sqlite/tests/bug33841.php',
     '/ext/pdo_sqlite/tests/bug46139.php',
     '/ext/pdo_sqlite/tests/bug52487.php',
+    '/ext/pdo_mysql/tests/pdo_mysql_connect_charset.php',
     '/ext/phar/tests/012.php',
     '/ext/sqlite3/tests/bug47159.php',
     '/ext/sqlite3/tests/sqlite3_01_open.php',

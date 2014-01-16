@@ -987,14 +987,24 @@ Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name) {
   // methods
   {
     Array arr = Array::Create();
+
+    // Fetch from PreClass as:
+    // - the order is important
+    // - we want type profiling info
+    // and neither of these are in the Class...
     Func* const* methods = cls->preClass()->methods();
     size_t const numMethods = cls->preClass()->numMethods();
     for (Slot i = 0; i < numMethods; ++i) {
-      const Func* m = methods[i];
-      if (m->isGenerated()) continue;
+      const Func* pcm = methods[i];
+      if (pcm->isGenerated()) continue;
+      // ... but the PreClass doesn't have the full base class information
+      // required for a ReflectionMethod::getPrototype()
+      const Func* m = cls->lookupMethod(pcm->name());
+
+      assert(m != nullptr);
       Array info = Array::Create();
       if (RuntimeOption::EvalRuntimeTypeProfile) {
-        set_type_profiling_info(info, cls, m);
+        set_type_profiling_info(info, cls, pcm);
       }
       set_method_info(info, m);
       arr.set(f_strtolower(m->nameRef()), VarNR(info));

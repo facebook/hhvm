@@ -2907,6 +2907,7 @@ void BaseMap::Unserialize(ObjectData* obj,
     } else {
       throw Exception("Invalid key");
     }
+    assert(e != nullptr);
     e->data.m_type = KindOfNull;
 do_unserialize:
     tvAsVariant(&e->data).unserialize(uns, Uns::Mode::ColValue);

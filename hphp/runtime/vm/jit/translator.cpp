@@ -1811,20 +1811,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       }
 
-      case Unit::MetaInfo::Kind::String: {
-        const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
-        assert((unsigned)arg < inputInfos.size());
-        InputInfo& ii = inputInfos[arg];
-        ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii, KindOfString);
-        assert(!dl->rtt.isString() || !dl->rtt.valueString() ||
-               dl->rtt.valueString() == sd);
-        SKTRACE(1, ni->source, "MetaInfo on input %d; old type = %s\n",
-                arg, dl->pretty().c_str());
-        dl->rtt = RuntimeType(sd);
-        break;
-      }
-
       case Unit::MetaInfo::Kind::Class: {
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
@@ -3953,13 +3939,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         hhbcTrans.assertType(
           stackFilter(inst.inputs[arg]->location).toLocation(inst.stackOffset),
           Type(DataType(info.m_data)));
-        updateType();
-        break;
-      }
-      case Unit::MetaInfo::Kind::String: {
-        hhbcTrans.assertString(
-          stackFilter(inst.inputs[arg]->location).toLocation(inst.stackOffset),
-          inst.unit()->lookupLitstrId(info.m_data));
         updateType();
         break;
       }

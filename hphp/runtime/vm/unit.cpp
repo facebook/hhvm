@@ -1677,12 +1677,6 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
               out << "*";
             }
             break;
-          case Unit::MetaInfo::Kind::String: {
-            const StringData* sd = lookupLitstrId(info.m_data);
-            out << " i" << argKind << arg << ":s=" <<
-              std::string(sd->data(), sd->size());
-            break;
-          }
           case Unit::MetaInfo::Kind::Class: {
             const StringData* sd = lookupLitstrId(info.m_data);
             out << " i" << argKind << arg << ":c=" << sd->data();

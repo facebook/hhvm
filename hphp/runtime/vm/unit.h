@@ -315,7 +315,6 @@ struct Unit {
    public:
     enum class Kind {
       None,
-      String,
       Class,
 
       /*

@@ -201,6 +201,9 @@ bad_tests = (
 
     # flaky: t3405896
     '/ext/session/tests/013.php'
+
+    # flaky: t3552849
+    '/ext/session/tests/014.php'
 )
 
 # Tests that work but not in repo mode

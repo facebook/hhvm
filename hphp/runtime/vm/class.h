@@ -21,13 +21,15 @@
 
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/range.h"
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
-#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -127,7 +129,7 @@ class PreClass : public AtomicCountable {
          const StringData* typeConstraint,
          const StringData* docComment,
          const TypedValue& val,
-         DataType hphpcType);
+         RepoAuthType);
 
     void prettyPrint(std::ostream& out) const;
 
@@ -138,7 +140,7 @@ class PreClass : public AtomicCountable {
     const String& mangledNameRef() const { return *(String*)(&m_mangledName); }
     Attr attrs() const { return m_attrs; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
-    DataType hphpcType() const { return m_hphpcType; }
+    RepoAuthType repoAuthType() const { return m_repoAuthType; }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
 
@@ -150,7 +152,7 @@ class PreClass : public AtomicCountable {
     const StringData* m_typeConstraint;
     const StringData* m_docComment;
     TypedValue m_val;
-    DataType m_hphpcType;
+    RepoAuthType m_repoAuthType;
   };
 
   struct Const {
@@ -446,12 +448,11 @@ struct Class : AtomicCountable {
     const StringData* m_typeConstraint;
 
     /*
-     * Set when the frontend can infer a particular type for a
-     * declared property.  When this is not KindOfInvalid, the type
-     * here is actually m_hphpcType OR KindOfNull, but we know
-     * KindOfUninit is not possible.
+     * When built in RepoAuthoritative mode, this is a control-flow
+     * insensitive, always-true type assertion for this property.  (It
+     * may be Gen if there was nothing interesting known.)
      */
-    DataType m_hphpcType;
+    RepoAuthType m_repoAuthType;
 
     const StringData* m_docComment;
   };
@@ -784,9 +785,9 @@ struct Class : AtomicCountable {
 
   size_t declPropOffset(Slot index) const;
 
-  DataType declPropHphpcType(Slot index) const {
+  RepoAuthType declPropRepoAuthType(Slot index) const {
     auto& prop = m_declProperties[index];
-    return prop.m_hphpcType;
+    return prop.m_repoAuthType;
   }
 
   unsigned classVecLen() const {

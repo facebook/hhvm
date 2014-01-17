@@ -19,6 +19,7 @@
 #include <memory>
 #include <boost/noncopyable.hpp>
 
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/asm-x64.h"
@@ -354,15 +355,15 @@ bool mInstrHasUnknownOffsets(const NormalizedInstruction& i,
 struct PropInfo {
   PropInfo()
     : offset(-1)
-    , hphpcType(KindOfInvalid)
+    , repoAuthType{}
   {}
-  explicit PropInfo(int offset, DataType hphpcType)
+  explicit PropInfo(int offset, RepoAuthType repoAuthType)
     : offset(offset)
-    , hphpcType(hphpcType)
+    , repoAuthType{repoAuthType}
   {}
 
   int offset;
-  DataType hphpcType;
+  RepoAuthType repoAuthType;
 };
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,

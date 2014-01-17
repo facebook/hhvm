@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/repo.h"
 
 // These files do ugly things with macros so include them last
 #include "hphp/util/assert-throw.h"
@@ -948,7 +949,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::checkInitProp(
   assert(propAddr->type().isPtr());
 
   auto const needsCheck =
-    propInfo.hphpcType == KindOfInvalid &&
+    Type::Uninit <= convertToType(propInfo.repoAuthType) &&
     // The m_mInd check is to avoid initializing a property to
     // InitNull right before it's going to be set to something else.
     (doWarn || (doDefine && m_mInd < m_ni.immVecM.size() - 1));
@@ -1340,8 +1341,19 @@ void HhbcTranslator::MInstrTranslator::emitCGetProp() {
                                             m_mii, m_mInd, m_iInd);
   if (propInfo.offset != -1) {
     emitPropSpecialized(MIA_warn, propInfo);
-    SSATmp* cellPtr = gen(UnboxPtr, m_base);
-    m_result = gen(LdMem, Type::Cell, cellPtr, cns(0));
+    auto const ty = convertToType(propInfo.repoAuthType);
+    bool const hhbbcRepo = RuntimeOption::RepoAuthoritative &&
+                             Repo::get().global().UsedHHBBC;
+    if (!hhbbcRepo) {
+      // For hphpc we always need to unbox, since it gives some types
+      // ignoring refiness.
+      SSATmp* cellPtr = gen(UnboxPtr, m_base);
+      m_result = gen(LdMem, Type::Cell, cellPtr, cns(0));
+      gen(IncRef, m_result);
+      return;
+    }
+    auto const cellPtr = ty.maybeBoxed() ? gen(UnboxPtr, m_base) : m_base;
+    m_result = gen(LdMem, ty.unbox(), cellPtr, cns(0));
     gen(IncRef, m_result);
     return;
   }

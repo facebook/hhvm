@@ -87,6 +87,7 @@
 #include "hphp/util/util.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/parser/hphp.tab.hpp"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
@@ -4877,7 +4878,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         tvWriteUninit(&uninit);
         for (auto& useVar : useVars) {
           pce->addProperty(useVar.first, AttrPrivate, nullptr, nullptr,
-                           &uninit, KindOfInvalid);
+                           &uninit, RepoAuthType{});
         }
 
         // The __invoke method. This is the body of the closure, preceded by
@@ -6551,7 +6552,7 @@ void EmitterVisitor::emitPostponedMeths() {
         auto const str = makeStaticString(
           folly::format("86static_{}", sv.name->data()).str());
         fe->pce()->addProperty(str, AttrPrivate, nullptr, nullptr,
-                               &uninit, KindOfInvalid);
+                               &uninit, RepoAuthType{});
         if (m_curFunc != fe && !fe->isAsync()) {
           // In the case of a generator (these func emitters will be
           // different), we need to propagate the information about
@@ -7599,6 +7600,28 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   e.DefTypeAlias(id);
 }
 
+static RepoAuthType repoAuthTypeForHphpcType(DataType dtype) {
+  switch (dtype) {
+  case KindOfBoolean:
+    return RepoAuthType{RepoAuthType::Tag::OptBool};
+  case KindOfInt64:
+    return RepoAuthType{RepoAuthType::Tag::OptInt};
+  case KindOfDouble:
+    return RepoAuthType{RepoAuthType::Tag::OptDbl};
+  case KindOfArray:
+    return RepoAuthType{RepoAuthType::Tag::OptArr};
+  case KindOfObject:
+    return RepoAuthType{RepoAuthType::Tag::OptObj};
+  case KindOfString:
+  case KindOfStaticString:
+    return RepoAuthType{RepoAuthType::Tag::OptStr};
+  case KindOfResource:
+    return RepoAuthType{RepoAuthType::Tag::OptRes};
+  default:
+    return RepoAuthType{};
+  }
+}
+
 void EmitterVisitor::emitClass(Emitter& e,
                                ClassScopePtr cNode,
                                bool toplevel) {
@@ -7741,15 +7764,21 @@ void EmitterVisitor::emitClass(Emitter& e,
             var = static_pointer_cast<SimpleVariable>(exp);
           }
 
-          // A non-invalid HPHPC type for a property implies the
-          // property's type is !KindOfUninit, and always
-          // hphpcType|KindOfNull.
-          const auto hphpcType = var->getSymbol()
-            ? var->getSymbol()->getFinalType()->getDataType()
-            : KindOfInvalid;
+          /*
+           * Translate what hphpc can infer about a property type into
+           * a RepoAuthType for the runtime.  The type hphpc has
+           * implies non-uninit, but is always nullable.
+           *
+           * Note: for hphpc's types it appears this doesn't actually
+           * imply the type is unboxed, either.
+           */
+          auto const hphpcType = repoAuthTypeForHphpcType(
+            var->getSymbol()
+              ? var->getSymbol()->getFinalType()->getDataType()
+              : KindOfInvalid);
 
-          StringData* propName = makeStaticString(var->getName());
-          StringData* propDoc = Option::GenerateDocComments ?
+          auto const propName = makeStaticString(var->getName());
+          auto const propDoc = Option::GenerateDocComments ?
             makeStaticString(var->getDocComment()) : empty_string.get();
           TypedValue tvVal;
           // Some properties may need to be marked with the AttrDeepInit
@@ -8810,7 +8839,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           propInfo->docComment ?
           makeStaticString(propInfo->docComment) : nullptr,
           &tvNull,
-          KindOfInvalid
+          RepoAuthType{}
         );
       }
     }
@@ -8956,8 +8985,11 @@ static void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
 }
 
 static void commitGlobalData() {
-  auto gd = Repo::GlobalData{};
-  gd.HardTypeHints = Option::HardTypeHints;
+  auto gd                     = Repo::GlobalData{};
+  gd.HardTypeHints            = Option::HardTypeHints;
+  gd.UsedHHBBC                = Option::UseHHBBC;
+  gd.HardPrivatePropInference = Option::UseHHBBC;
+
   Repo::get().saveGlobalData(gd);
 }
 

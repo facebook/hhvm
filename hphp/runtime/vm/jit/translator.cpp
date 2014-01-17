@@ -26,6 +26,7 @@
 #include <vector>
 #include <string>
 
+#include "folly/Optional.h"
 #include "folly/Conv.h"
 #include "folly/MapUtil.h"
 
@@ -448,7 +449,7 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
   // to be at the same offset
   return PropInfo(
     baseClass->declPropOffset(idx),
-    baseClass->declPropHphpcType(idx)
+    baseClass->declPropRepoAuthType(idx)
   );
 }
 
@@ -462,15 +463,72 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
   return getPropertyOffset(ni, context, cls, mii, mInd, iInd);
 }
 
+static folly::Optional<DataType>
+predictionForRepoAuthType(RepoAuthType repoTy) {
+  using T = RepoAuthType::Tag;
+  switch (repoTy.tag()) {
+  case T::OptBool:  return KindOfBoolean;
+  case T::OptInt:   return KindOfInt64;
+  case T::OptDbl:   return KindOfDouble;
+  case T::OptRes:   return KindOfResource;
+
+  case T::OptSArr:
+  case T::OptArr:
+    return KindOfArray;
+
+  case T::OptStr:
+  case T::OptSStr:
+    return KindOfString;
+
+  case T::OptSubObj:
+  case T::OptExactObj:
+  case T::OptObj:
+    return KindOfObject;
+
+  case T::Bool:
+  case T::Uninit:
+  case T::InitNull:
+  case T::Int:
+  case T::Dbl:
+  case T::Res:
+  case T::Str:
+  case T::Arr:
+  case T::Obj:
+  case T::Null:
+  case T::SStr:
+  case T::SArr:
+  case T::SubObj:
+  case T::ExactObj:
+  case T::Cell:
+  case T::Ref:
+  case T::InitUnc:
+  case T::Unc:
+  case T::InitCell:
+  case T::InitGen:
+  case T::Gen:
+    return folly::none;
+  }
+  not_reached();
+}
+
 static std::pair<DataType,double>
 predictMVec(const NormalizedInstruction* ni) {
   auto info = getFinalPropertyOffset(*ni,
                                      ni->func()->cls(),
                                      getMInstrInfo(ni->mInstrOp()));
-  if (info.offset != -1 && info.hphpcType != KindOfNone) {
-    FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
-           int(info.hphpcType));
-    return std::make_pair(info.hphpcType, 1.0);
+  if (info.offset != -1) {
+    auto const predTy = predictionForRepoAuthType(info.repoAuthType);
+    if (predTy) {
+      FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
+        static_cast<int>(*predTy));
+      return std::make_pair(*predTy, 1.0);
+    }
+    // If the RepoAuthType converts to an exact data type, there's no
+    // point in having a prediction because we know its type with 100%
+    // accuracy.  Disable it in that case here.
+    if (convertToDataType(info.repoAuthType)) {
+      return std::make_pair(KindOfAny, 0.0);
+    }
   }
 
   auto& immVec = ni->immVec;

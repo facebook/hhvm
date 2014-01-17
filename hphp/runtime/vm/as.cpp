@@ -1689,7 +1689,7 @@ void parse_property(AsmState& as) {
                       attrs, empty_string.get(),
                       empty_string.get(),
                       &tvInit,
-                      KindOfInvalid);
+                      RepoAuthType{});
 }
 
 /*

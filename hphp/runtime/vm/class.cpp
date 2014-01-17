@@ -76,13 +76,13 @@ PreClass::Prop::Prop(PreClass* preClass,
                      const StringData* typeConstraint,
                      const StringData* docComment,
                      const TypedValue& val,
-                     DataType hphpcType)
+                     RepoAuthType repoAuthType)
   : m_preClass(preClass)
   , m_name(n)
   , m_attrs(attrs)
   , m_typeConstraint(typeConstraint)
   , m_docComment(docComment)
-  , m_hphpcType(hphpcType)
+  , m_repoAuthType{repoAuthType}
 {
   m_mangledName = manglePropName(preClass->name(), n, attrs);
   memcpy(&m_val, &val, sizeof(TypedValue));
@@ -1609,7 +1609,7 @@ void Class::setProperties() {
       prop.m_docComment = parentProp.m_docComment;
       prop.m_typeConstraint = parentProp.m_typeConstraint;
       prop.m_name = parentProp.m_name;
-      prop.m_hphpcType = parentProp.m_hphpcType;
+      prop.m_repoAuthType = parentProp.m_repoAuthType;
       if (!(parentProp.m_attrs & AttrPrivate)) {
         curPropMap.add(prop.m_name, prop);
       } else {
@@ -1683,7 +1683,7 @@ void Class::setProperties() {
         prop.m_class = this;
         prop.m_typeConstraint = preProp->typeConstraint();
         prop.m_docComment = preProp->docComment();
-        prop.m_hphpcType = preProp->hphpcType();
+        prop.m_repoAuthType = preProp->repoAuthType();
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1716,7 +1716,7 @@ void Class::setProperties() {
         // This is the first class to declare this property
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
-        prop.m_hphpcType = preProp->hphpcType();
+        prop.m_repoAuthType = preProp->repoAuthType();
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1755,7 +1755,7 @@ void Class::setProperties() {
         // This is the first class to declare this property
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
-        prop.m_hphpcType = preProp->hphpcType();
+        prop.m_repoAuthType = preProp->repoAuthType();
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());

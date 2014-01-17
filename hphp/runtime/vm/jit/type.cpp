@@ -590,6 +590,60 @@ Type boxType(Type t) {
   return t.box();
 }
 
+Type convertToType(RepoAuthType ty) {
+  using T = RepoAuthType::Tag;
+  switch (ty.tag()) {
+  case T::OptBool:        return Type::Bool      | Type::InitNull;
+  case T::OptInt:         return Type::Int       | Type::InitNull;
+  case T::OptSArr:        return Type::StaticArr | Type::InitNull;
+  case T::OptArr:         return Type::Arr       | Type::InitNull;
+  case T::OptSStr:        return Type::StaticStr | Type::InitNull;
+  case T::OptStr:         return Type::Str       | Type::InitNull;
+  case T::OptDbl:         return Type::Dbl       | Type::InitNull;
+  case T::OptRes:         return Type::Res       | Type::InitNull;
+  case T::OptObj:         return Type::Obj       | Type::InitNull;
+
+  case T::Uninit:         return Type::Uninit;
+  case T::InitNull:       return Type::InitNull;
+  case T::Null:           return Type::Null;
+  case T::Bool:           return Type::Bool;
+  case T::Int:            return Type::Int;
+  case T::Dbl:            return Type::Dbl;
+  case T::Res:            return Type::Res;
+  case T::SStr:           return Type::StaticStr;
+  case T::Str:            return Type::Str;
+  case T::SArr:           return Type::StaticArr;
+  case T::Arr:            return Type::Arr;
+  case T::Obj:            return Type::Obj;
+
+  case T::Cell:           return Type::Cell;
+  case T::Ref:            return Type::BoxedCell;
+  case T::InitUnc:        return Type::UncountedInit;
+  case T::Unc:            return Type::Uncounted;
+  case T::InitCell:       return Type::InitCell;
+  case T::InitGen:        return Type::Init;
+  case T::Gen:            return Type::Gen;
+
+  case T::SubObj:
+  case T::ExactObj:
+    {
+      if (auto const cls = Unit::lookupUniqueClass(ty.clsName())) {
+        return Type::Obj.specialize(cls);
+      }
+      return Type::Obj;
+    }
+  case T::OptSubObj:
+  case T::OptExactObj:
+    {
+      if (auto const cls = Unit::lookupUniqueClass(ty.clsName())) {
+        return Type::Obj.specialize(cls) | Type::InitNull;
+      }
+      return Type::Obj | Type::InitNull;
+    }
+  }
+  not_reached();
+}
+
 Type outputType(const IRInstruction* inst, int dstId) {
 #define IRT(name, ...) UNUSED static const Type name = Type::name;
   IR_TYPES

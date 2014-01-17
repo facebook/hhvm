@@ -688,17 +688,17 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   if (tc.isSoft()) return TCell;
 
   switch (tc.metaType()) {
-    case TypeConstraint::MetaType::Precise:
+  case TypeConstraint::MetaType::Precise:
     {
       auto const mainType = [&]() -> const Type {
         switch (tc.underlyingDataType()) {
-          case KindOfString:        return TStr;
-          case KindOfStaticString:  return TStr;
-          case KindOfArray:         return TArr;
-          case KindOfInt64:         return TInt;
-          case KindOfBoolean:       return TBool;
-          case KindOfDouble:        return TDbl;
-          case KindOfObject:
+        case KindOfString:        return TStr;
+        case KindOfStaticString:  return TStr;
+        case KindOfArray:         return TArr;
+        case KindOfInt64:         return TInt;
+        case KindOfBoolean:       return TBool;
+        case KindOfDouble:        return TDbl;
+        case KindOfObject:
           /*
            * Type constraints only imply an object of a particular
            * type for unique classes.
@@ -714,9 +714,9 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
            * still use TObj.
            */
           return TInitCell;
-          case KindOfResource: // Note, some day we may have resource hints.
+        case KindOfResource: // Note, some day we may have resource hints.
           break;
-          default:
+        default:
           break;
         }
         return TInitCell;
@@ -724,14 +724,14 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
       return mainType == TInitCell || !tc.isNullable() ? mainType
         : opt(mainType);
     }
-    case TypeConstraint::MetaType::Self:
-    case TypeConstraint::MetaType::Parent:
-    case TypeConstraint::MetaType::Callable:
-      break;
-    case TypeConstraint::MetaType::Number:
-      // FIXME: a concept of TInt | TDbl is necessary
-      // to capture this case and the results of integer division
-      return TInitCell;
+  case TypeConstraint::MetaType::Self:
+  case TypeConstraint::MetaType::Parent:
+  case TypeConstraint::MetaType::Callable:
+    break;
+  case TypeConstraint::MetaType::Number:
+    // TODO(#3553967): a concept of TInt | TDbl is necessary to
+    // capture this case and the results of integer division
+    return TInitCell;
   }
 
   return TCell;

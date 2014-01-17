@@ -1634,6 +1634,10 @@ RaiseNotice S0:Str
 
   Raises a notice with the text in S0 as its message.
 
+RaiseArrayIndexNotice S0:Int
+
+  Raises a notice that S0 is an undefined index for an array.
+
 D:BoxedCell = ClosureStaticLocInit S0:ConstStr S1:FramePtr S2:Cell
 
   Get boxed value to initialize static local named S0 in frame S1,
@@ -2270,21 +2274,45 @@ D:Bool = EmptyElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
 CheckBounds S0:Int S1:Int
 
-  Check that the index in S0 is between 0 (included) and the values in S1
+  Checks that the index in S0 is between 0 (included) and the values in S1
   (excluded). Throws if out of bounds.
+
+CheckPackedArrayBounds S0:Arr S1:Int -> B
+  
+  Checks that the index in S1 is within the bounds of the packed array in S0.
+  Branches to B if the index is out of bounds.
+
+D:Bool = CheckPackedArrayElemNull S0:Arr S1:Int
+  
+  Returns true if the element at index S1 of the packed array in S0
+  is not null.
+
+D:Cell = LdPackedArrayElem S0:Arr S1:Int
+
+  Loads the element of the packed array in S0 at index S1.
 
 D:Int = LdVectorSize S0:Obj<Vector>
 
-  Return the size of the given Vector in S0.
+  Returns the size of the given Vector in S0.
+
+VectorHasFrozenCopy S0:Obj<Vector> -> B
+  
+  Checks if the Vector in S0 has live frozen vector copies and branches to
+  B if so.
+
+VectorDoCow S0:Obj<Vector>
+  
+  Triggers a copy on write for a Vector that has a live FrozenVector sharing
+  the same copy of the elements.
 
 D:Obj = ColAddNewElemC S0:Obj S0:Cell
 
-  Add item S0 to the end of collection S0. Throws a fatal error if S0 is not a
+  Adds item S0 to the end of collection S0. Throws a fatal error if S0 is not a
   collection. Returns S0.
 
 D:Obj = ColAddElemC S0:Obj S1:Cell S2:Cell
 
-  Add item to collection. Inserts item S2 into collection S0 at key S1. Throws
+  Adds item to collection. Inserts item S2 into collection S0 at key S1. Throws
   a fatal error if S0 is not a collection. Returns S0.
 
 20. Exception/unwinding support

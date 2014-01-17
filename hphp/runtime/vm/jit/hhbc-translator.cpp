@@ -521,6 +521,9 @@ void HhbcTranslator::emitBareThis(int notice) {
     emitInterpOne(Type::InitNull, 0); // will raise notice and push null
     return;
   }
+  if (notice == static_cast<int>(BareThisOp::NeverNull)) {
+    setThisAvailable();
+  }
   pushIncRef(gen(LdThis, makeExitSlow(), m_tb->fp()));
 }
 

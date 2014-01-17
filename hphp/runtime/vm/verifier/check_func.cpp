@@ -556,7 +556,11 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         ok = false;
         break;
       case OpBareThis:
-        if (op > 1) ok = false;
+#define BARETHIS_OP(x) if (op == static_cast<uint8_t>(BareThisOp::x)) break;
+        BARETHIS_OPS
+#undef BARETHIS_OP
+        error("invalid BareThisOp: %d\n", op);
+        ok = false;
         break;
       case OpFatal:
 #define FATAL_OP(x)   if (op == static_cast<uint8_t>(FatalOp::x)) break;

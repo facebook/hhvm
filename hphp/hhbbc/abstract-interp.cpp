@@ -86,6 +86,7 @@ std::string state_string(const php::Func& f, const State& st) {
   }
 
   ret = "state:\n";
+  if (st.thisAvailable) { ret += "$this is not null\n"; }
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
     ret += folly::format("${: <8} :: {}\n",
       f.locals[i]->name
@@ -149,6 +150,12 @@ bool merge_into(State& dst, const State& src) {
 
   auto changed = false;
 
+  auto const available = dst.thisAvailable && src.thisAvailable;
+  if (available != dst.thisAvailable) {
+    changed = true;
+    dst.thisAvailable = available;
+  }
+
   for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
     auto const newT = union_of(dst.stack[i], src.stack[i]);
     if (dst.stack[i] != newT) {
@@ -185,6 +192,7 @@ bool merge_into(State& dst, const State& src) {
 State without_stacks(State const& src) {
   auto ret = State{};
   ret.initialized       = src.initialized;
+  ret.thisAvailable     = src.thisAvailable;
   ret.locals            = src.locals;
   ret.privateProperties = src.privateProperties;
   return ret;
@@ -1563,19 +1571,33 @@ struct InterpStepper : boost::static_visitor<void> {
 
   // TODO_5: can we propagate our object type if unique?
   void operator()(const bc::This&) {
-    // TODO: This instruction will fatal if $this is null.  We could
-    // track that this is available starting now.
-    push(TObj);
+    if (thisAvailable()) {
+      return reduce(bc::BareThis {BareThisOp::NeverNull});
+    }
+    pushThis(TObj);
   }
 
   // TODO_5: can we propagate our class type if unique?
   void operator()(const bc::LateBoundCls&) { push(TCls); }
-  void operator()(const bc::CheckThis&)    {}
+  void operator()(const bc::CheckThis&)    {
+    if (thisAvailable()) {
+      reduce(bc::Nop {});
+    }
+    setThisAvailable();
+  }
 
   void operator()(const bc::BareThis& op) {
+    if (thisAvailable()) {
+      if (op.subop != BareThisOp::NeverNull) {
+        return reduce(bc::BareThis {BareThisOp::NeverNull});
+      }
+    }
     switch (op.subop) {
-    case BareThisOp::Notice:   break;
-    case BareThisOp::NoNotice: nothrow(); break;
+    case BareThisOp::Notice:    break;
+    case BareThisOp::NoNotice:  nothrow(); break;
+    case BareThisOp::NeverNull:
+      nothrow();
+      return pushThis(TObj);
     }
     push(TOptObj);
   }
@@ -2499,10 +2521,22 @@ private: // eval stack
     return topT(i);
   }
 
+  void pushThis(Type t) {
+    push(t);
+    setThisAvailable();
+  }
+
   void push(Type t) {
     FTRACE(2, "    push: {}\n", show(t));
     m_state.stack.push_back(t);
   }
+
+  void setThisAvailable() {
+    FTRACE(2, "    setThisAvailable\n");
+    m_state.thisAvailable = true;
+  }
+
+  bool thisAvailable() const { return m_state.thisAvailable; }
 
 private: // fpi
   void fpiPush(ActRec ar) {
@@ -3098,6 +3132,7 @@ State entry_state(const Index& index,
                   ClassAnalysis* clsAnalysis) {
   State ret;
   ret.initialized = true;
+  ret.thisAvailable = false;
   ret.locals.resize(ctx.func->locals.size());
 
   uint32_t locId = 0;
@@ -3302,6 +3337,7 @@ bool operator==(const ActRec& a, const ActRec& b) {
 
 bool operator==(const State& a, const State& b) {
   return a.initialized == b.initialized &&
+    a.thisAvailable == b.thisAvailable &&
     a.locals == b.locals &&
     a.stack == b.stack &&
     a.fpiStack == b.fpiStack &&

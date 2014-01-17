@@ -433,7 +433,8 @@ enum class SetOpOp : uint8_t {
 
 #define BARETHIS_OPS    \
   BARETHIS_OP(Notice)   \
-  BARETHIS_OP(NoNotice)
+  BARETHIS_OP(NoNotice) \
+  BARETHIS_OP(NeverNull)
 
 enum class BareThisOp : uint8_t {
 #define BARETHIS_OP(x) x,

@@ -6714,6 +6714,9 @@ OPTBLD_INLINE void VMExecutionContext::iopBareThis(IOP_ARGS) {
     switch (bto) {
     case BareThisOp::Notice:   raise_notice(Strings::WARN_NULL_THIS); break;
     case BareThisOp::NoNotice: break;
+    case BareThisOp::NeverNull:
+      assert(!"$this cannot be null in BareThis with NeverNull option");
+      break;
     }
   }
 }

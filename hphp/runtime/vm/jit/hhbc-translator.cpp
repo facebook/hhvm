@@ -1462,6 +1462,10 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
     LdRaw, Type::TCA, cont, cns(RawMemSlot::ContEntry)
   );
 
+  // The top of the stack will be consumed by the callee, so discard
+  // it without decreffing.
+  popC(DataTypeGeneric);
+
   gen(
     ContEnter,
     contAR,
@@ -1469,11 +1473,6 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
     cns(returnBcOffset),
     m_tb->fp()
   );
-  assert(m_stackDeficit == 0);
-
-  // The top of the stack was consumed by the callee, so discard it without
-  // decreffing.
-  popC(DataTypeGeneric);
 }
 
 void HhbcTranslator::emitContReturnControl() {

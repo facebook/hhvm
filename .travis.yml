@@ -6,7 +6,7 @@ compiler:
 before_script: 
   - time TRAVIS=1 ./configure_ubuntu_12.04.sh
 # for some tests  
-  - sudo time locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
+  - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - time HPHP_HOME=`pwd` make -j 6
 
 # Test suites take longer to run in RepoAuthoritative mode (-r) than normal so

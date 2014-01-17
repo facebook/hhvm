@@ -1169,6 +1169,13 @@ TranslatorX64::enterTC(TCA start, void* data) {
       sim.   set_xreg(JIT::ARM::rVmTl.code(), RDS::tl_base);
       sim.   set_xreg(JIT::ARM::rStashedAR.code(), info.saved_rStashedAr);
 
+      // Push the link register onto the stack. The link register is technically
+      // caller-saved; what this means in practice is that non-leaf functions
+      // push it at the very beginning and pop it just before returning (as
+      // opposed to just saving it around calls).
+      sim.   set_sp(sim.sp() - 16);
+      *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
+
       std::cout.flush();
       sim.RunFrom(vixl::Instruction::Cast(start));
       std::cout.flush();

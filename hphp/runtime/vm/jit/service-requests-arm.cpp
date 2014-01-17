@@ -103,11 +103,10 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   }
   a.     Mov   (argReg(0), req);
 
-  // The x64 equivalent loads to rax. I knew this was a trap.
   if (flags & SRFlags::JmpInsteadOfRet) {
-    a.   Ldr   (rAsm, MemOperand(sp, 8, PostIndex));
-    a.   Br    (rAsm);
+    not_implemented();
   } else {
+    a.   Ldr   (rLinkReg, MemOperand(sp, 16, PostIndex));
     a.   Ret   ();
   }
   a.     Brk   (0);

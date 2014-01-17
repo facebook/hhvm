@@ -63,8 +63,7 @@ void emitResumeHelpers(UniqueStubs& us) {
                        Stack::topOfStackOffset();
 
   us.resumeHelperRet = a.frontier();
-  a.   Ldr   (rAsm, MemOperand(vixl::sp, 8, PostIndex));
-  a.   Str   (rAsm, rStashedAR[AROFF(m_savedRip)]);
+  a.   Str   (vixl::x30, rStashedAR[AROFF(m_savedRip)]);
   us.resumeHelper = a.frontier();
   a.   Ldr   (rVmFp, rGContextReg[fpOff]);
   a.   Ldr   (rVmSp, rGContextReg[spOff]);

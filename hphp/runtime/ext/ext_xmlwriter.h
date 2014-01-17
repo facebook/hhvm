@@ -33,7 +33,10 @@ Variant f_xmlwriter_open_uri(const String& uri);
 bool f_xmlwriter_set_indent_string(CObjRef xmlwriter,
                                    const String& indentstring);
 bool f_xmlwriter_set_indent(CObjRef xmlwriter, bool indent);
-bool f_xmlwriter_start_document(CObjRef xmlwriter, const String& version = "1.0", const String& encoding = null_string, const String& standalone = null_string);
+bool f_xmlwriter_start_document(CObjRef xmlwriter,
+                                const String& version = "1.0",
+                                const String& encoding = null_string,
+                                const String& standalone = null_string);
 bool f_xmlwriter_start_element(CObjRef xmlwriter, const String& name);
 bool f_xmlwriter_start_element_ns(CObjRef xmlwriter, const CVarRef prefix, const String& name, const String& uri);
 bool f_xmlwriter_write_element_ns(CObjRef xmlwriter, const String& prefix, const String& name, const String& uri, const String& content = null_string);

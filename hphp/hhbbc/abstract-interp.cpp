@@ -1624,6 +1624,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Parent&) { push(TCls); }
 
   void operator()(const bc::CreateCl& op) {
+    // Closures can access properties on $this, but we don't yet know
+    // how to analyze this.
+    killThisProps();
+
     auto const nargs = op.arg1;
     for (auto i = uint32_t{0}; i < nargs; ++i) popT();
     if (auto const rcls = m_index.resolve_class(m_ctx, op.str2)) {

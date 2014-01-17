@@ -681,25 +681,25 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   if (tc.isSoft()) return TCell;
 
   switch (tc.metaType()) {
-  case TypeConstraint::MetaType::Precise:
+    case TypeConstraint::MetaType::Precise:
     {
       auto const mainType = [&]() -> const Type {
         switch (tc.underlyingDataType()) {
-        case KindOfString:        return TStr;
-        case KindOfStaticString:  return TStr;
-        case KindOfArray:         return TArr;
-        case KindOfInt64:         return TInt;
-        case KindOfBoolean:       return TBool;
-        case KindOfDouble:        return TDbl;
-        case KindOfObject:
+          case KindOfString:        return TStr;
+          case KindOfStaticString:  return TStr;
+          case KindOfArray:         return TArr;
+          case KindOfInt64:         return TInt;
+          case KindOfBoolean:       return TBool;
+          case KindOfDouble:        return TDbl;
+          case KindOfObject:
           /*
            * Type constraints only imply an object of a particular
            * type for unique classes.
            */
           if (auto const rcls = resolve_class(ctx, tc.typeName())) {
             return interface_supports_non_objects(rcls->name())
-                ? TInitCell // none of these interfaces support Uninits
-                : subObj(*rcls);
+              ? TInitCell // none of these interfaces support Uninits
+              : subObj(*rcls);
           }
           /*
            * TODO: if the class isn't unique, but there's no type
@@ -707,22 +707,24 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
            * still use TObj.
            */
           return TInitCell;
-        case KindOfResource: // Note, some day we may have resource hints.
+          case KindOfResource: // Note, some day we may have resource hints.
           break;
-        default:
+          default:
           break;
         }
         return TInitCell;
       }();
       return mainType == TInitCell || !tc.isNullable() ? mainType
-                                                       : opt(mainType);
+        : opt(mainType);
     }
-  case TypeConstraint::MetaType::Self:
-    // fallthrough
-  case TypeConstraint::MetaType::Parent:
-    // fallthrough
-  case TypeConstraint::MetaType::Callable:
-    break;
+    case TypeConstraint::MetaType::Self:
+    case TypeConstraint::MetaType::Parent:
+    case TypeConstraint::MetaType::Callable:
+      break;
+    case TypeConstraint::MetaType::Number:
+      // FIXME: a concept of TInt | TDbl is necessary
+      // to capture this case and the results of integer division
+      return TInitCell;
   }
 
   return TCell;
@@ -814,4 +816,3 @@ res::Func Index::do_resolve(borrowed_ptr<const php::Func> f) const {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

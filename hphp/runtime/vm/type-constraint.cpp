@@ -75,6 +75,9 @@ void TypeConstraint::init() {
                                                    MetaType::Parent }},
       { makeStaticString("callable"), { KindOfObject,
                                                    MetaType::Callable }},
+      { makeStaticString("num"),      { KindOfDouble,
+                                                   MetaType::Number }},
+
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
       s_typeNamesToTypes[pairs[i].name] = pairs[i].type;
@@ -173,7 +176,11 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
-  if (isNullable() && IS_NULL_TYPE(tv->m_type)) return true;
+  if (isNullable() && IS_NULL_TYPE(tv->m_type)) { return true; }
+
+  if (isNumber()) {
+    return IS_INT_TYPE(tv->m_type) || IS_DOUBLE_TYPE(tv->m_type);
+  }
 
   if (tv->m_type == KindOfObject) {
     if (!isObjectOrTypeAlias()) return false;
@@ -249,7 +256,8 @@ bool
 TypeConstraint::checkPrimitive(DataType dt) const {
   assert(m_type.dt != KindOfObject);
   assert(dt != KindOfRef);
-  if (isNullable() && IS_NULL_TYPE(dt)) return true;
+  if (isNullable() && IS_NULL_TYPE(dt)) { return true; }
+  if (isNumber()) { return IS_INT_TYPE(dt) || IS_DOUBLE_TYPE(dt); }
   return equivDataTypes(m_type.dt, dt);
 }
 

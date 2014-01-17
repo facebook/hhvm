@@ -78,7 +78,7 @@ struct TypeConstraint {
    *
    * See underlyingDataType().
    */
-  enum class MetaType { Precise, Self, Parent, Callable };
+  enum class MetaType { Precise, Self, Parent, Callable, Number };
 
   TypeConstraint()
     : m_flags(NoFlags)
@@ -149,9 +149,11 @@ struct TypeConstraint {
   bool isSelf()     const { return metaType() == MetaType::Self; }
   bool isParent()   const { return metaType() == MetaType::Parent; }
   bool isCallable() const { return metaType() == MetaType::Callable; }
+  bool isNumber()   const { return metaType() == MetaType::Number; }
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
 
   bool isObjectOrTypeAlias() const {
+    assert(IMPLIES(isNumber(), m_type.dt != KindOfObject));
     assert(IMPLIES(isParent(), m_type.dt == KindOfObject));
     assert(IMPLIES(isSelf(), m_type.dt == KindOfObject));
     assert(IMPLIES(isCallable(), m_type.dt == KindOfObject));

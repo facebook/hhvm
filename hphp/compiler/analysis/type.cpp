@@ -71,6 +71,8 @@ void Type::InitTypeHintMap() {
   s_HHTypeHintTypes["double"]  = Type::Double;
   s_HHTypeHintTypes["float"]   = Type::Double;
   s_HHTypeHintTypes["string"]  = Type::String;
+  // Type::Numeric doesn't include numeric strings; this is intentional
+  s_HHTypeHintTypes["num"]      = Type::Numeric;
   s_HHTypeHintTypes["resource"] = Type::Resource;
   s_HHTypeHintTypes["callable"] = Type::Variant;
 }

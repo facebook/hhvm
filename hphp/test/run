@@ -6,7 +6,7 @@
 
 function usage() {
   global $argv;
-  return "usage: $argv[0] [-m jit|interp] [-r] <test/directories>";
+  return "usage: $argv[0] [-m jit|interp] [-r] <test/directories/virtual-path>";
 }
 
 function help() {
@@ -56,6 +56,21 @@ Examples:
 
   # All tests whose name containing pdo_mysql
   % $argv[0] -i pdo_mysql -m jit -r zend
+
+Virtual-Path:
+
+ Currently the following are the supported mappings for the virtual-paths
+ i.e 'quick' is translated to directory 'hphp/test/quick' and so on
+
+    'quick'    => 'hphp/test/quick'
+    'slow'     => 'hphp/test/slow'
+    'debugger' => 'hphp/test/server/debugger/tests'
+    'zend'     => 'hphp/test/zend/good'
+    'zend_bad' => 'hphp/test/zend/bad'
+    'facebook' => 'hphp/facebook/test'
+
+ Sub-paths inside the virtual-paths can be looked up with the / convention
+ i.e 'zend/ext' is translated to directory 'hphp/test/zend/good/ext'
 
 EOT;
   return usage().$help;
@@ -192,11 +207,22 @@ function map_convenience_filename($file) {
     'zend_bad' => 'hphp/test/zend/bad',
     'facebook' => 'hphp/facebook/test',
   );
-
+  // code to easily determine the sub-paths from the
+  // above map
+  // i.e zend/ext in the command line translates to
+  //     hphp/test/zend/good/ext
   if (!isset($mappage[$file])) {
+    if (strpos($file, '/') !== false) {
+      foreach ($mappage as $k => $v) {
+        if (preg_match("/^$k/", $file) === 1) {
+            return hphp_home().'/'.preg_replace("/^$k/", $v, $file);
+        }
+      }
+    }
     return $file;
+  } else {
+    return hphp_home().'/'.$mappage[$file];
   }
-  return hphp_home().'/'.$mappage[$file];
 }
 
 function find_tests($files, array $options = null) {

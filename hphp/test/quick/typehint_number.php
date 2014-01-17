@@ -1,8 +1,15 @@
 <?hh
 
-function error_handler($errno, $errstr, $file, $line) {
-  echo $errstr, ' on line ', $line, '; ignoring ...', "\n";
-  return true; // don't fatal
+function my_handler($errno, $errstr, $file, $line) {
+  throw new Exception($errstr);
+}
+
+function try_takes_num($a) {
+  try {
+    takes_num($a);
+  } catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+  }
 }
 
 function takes_num(num $a) {
@@ -16,14 +23,14 @@ class NumericallyStringable {
 }
 
 function main() {
-  takes_num(10);
-  takes_num(10.0);
-  takes_num(10.5);
-  takes_num('10.5'); // nope: no strings, even numeric
-  takes_num('foo');  // nope: string
-  takes_num(new NumericallyStringable()); // nope: object
-  takes_num(new StdClass()); // nope: object
+  try_takes_num(10);
+  try_takes_num(10.0);
+  try_takes_num(10.5);
+  try_takes_num('10.5'); // nope: no strings, even numeric
+  try_takes_num('foo');  // nope: string
+  try_takes_num(new NumericallyStringable()); // nope: object
+  try_takes_num(new StdClass()); // nope: object
 }
 
-set_error_handler('error_handler');
+set_error_handler('my_handler');
 main();

@@ -115,7 +115,6 @@ void triggerCow(c_Vector* vec) {
 ///////////////////////////////////////////////////////////////////////////////
 
 // ConstCollection
-
 bool BaseVector::isempty() {
   return !toBoolImpl();
 }
@@ -129,7 +128,6 @@ Object BaseVector::items() {
 }
 
 // ConstIndexAccess
-
 bool BaseVector::containskey(CVarRef key) {
   if (key.isInteger()) {
     return contains(key.toInt64());
@@ -160,7 +158,6 @@ Variant BaseVector::get(CVarRef key) {
 }
 
 // KeyedIterable
-
 Object BaseVector::getiterator() {
   c_VectorIterator* it = NEWOBJ(c_VectorIterator)();
   it->m_obj = this;

@@ -286,6 +286,13 @@ const StaticString
   s_Indexish("Indexish"),
   s_XHPChild("XHPChild");
 
+bool interface_supports_non_objects(const StringData* s) {
+  return s->isame(s_HH_Traversable.get()) ||
+         s->isame(s_KeyedTraversable.get()) ||
+         s->isame(s_Indexish.get()) ||
+         s->isame(s_XHPChild.get());
+}
+
 bool interface_supports_array(const StringData* s) {
   return (s->isame(s_HH_Traversable.get()) ||
           s->isame(s_KeyedTraversable.get()) ||

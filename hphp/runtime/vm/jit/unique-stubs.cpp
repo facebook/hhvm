@@ -27,9 +27,9 @@ TRACE_SET_MOD(ustubs);
 //////////////////////////////////////////////////////////////////////
 
 TCA UniqueStubs::add(const char* name, TCA start) {
-  auto const inAStubs = start > tx64->stubsCode.base();
-  UNUSED auto const stop = inAStubs ? tx64->stubsCode.frontier()
-    : tx64->mainCode.frontier();
+  auto const inAStubs = start > tx64->code.stubs().base();
+  UNUSED auto const stop = inAStubs ? tx64->code.stubs().frontier()
+    : tx64->code.main().frontier();
 
   FTRACE(1, "unique stub: {} {} -- {:4} bytes: {}\n",
          inAStubs ? "astubs @ "
@@ -48,7 +48,7 @@ TCA UniqueStubs::add(const char* name, TCA start) {
          );
 
   tx64->recordGdbStub(
-    tx64->codeBlockFor(start),
+    tx64->code.blockFor(start),
     start,
     strdup(folly::format("HHVM::{}", name).str().c_str())
   );

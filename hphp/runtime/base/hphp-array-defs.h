@@ -103,6 +103,14 @@ void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut,
   }
 }
 
+ALWAYS_INLINE
+void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
+  assert(size_t(pos) < m_used);
+  auto& elm = data()[pos];
+  TypedValue* cur = tvToCell(&elm.data);
+  cellDup(*cur, *valOut);
+}
+
 inline HphpArray* HphpArray::asHphpArray(ArrayData* ad) {
   assert(ad->isHphpArray());
   auto a = static_cast<HphpArray*>(ad);

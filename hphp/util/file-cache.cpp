@@ -22,7 +22,6 @@
 #include "hphp/util/cache/cache-manager.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 
 namespace HPHP {
 

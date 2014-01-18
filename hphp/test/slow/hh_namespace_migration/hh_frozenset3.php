@@ -1,12 +1,10 @@
 <?hh
 
-// Test that HH\FrozenSet is not "auto-imported" in a named
-// namespace.
-
 namespace Test;
 
+// Test that HH\FrozenSet is imported inside of a namespace.
 function main() {
-  $s = new FrozenSet(); // Should cause an error.
+  $s = new FrozenSet();
 }
 
 main();

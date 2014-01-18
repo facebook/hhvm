@@ -304,6 +304,8 @@ struct IRInstruction {
   bool isControlFlow() const { return bool(taken()); }
   bool isBlockEnd() const { return taken() || isTerminal(); }
   bool isLoad() const;
+  bool isRawLoad() const;
+
   /*
    * Returns true if the instruction stores its source operand srcIdx to
    * memory as a cell.

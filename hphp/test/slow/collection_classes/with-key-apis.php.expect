@@ -1,0 +1,186 @@
+******** Vector ********
+callback(0, 1)
+callback(1, 2)
+callback(2, 3)
+callback(3, 4)
+========
+HH\Vector[
+0 => 101
+1 => 102
+2 => 103
+3 => 104
+]
+========
+callback(0, 1)
+callback(1, 2)
+callback(2, 3)
+callback(3, 4)
+========
+HH\Vector[
+0 => 1
+1 => 3
+]
+******** Map ********
+callback(a, 1)
+callback(b, 2)
+callback(c, 3)
+callback(d, 4)
+========
+Map[
+a => 101
+b => 102
+c => 103
+d => 104
+]
+========
+callback(a, 1)
+callback(b, 2)
+callback(c, 3)
+callback(d, 4)
+========
+Map[
+a => 1
+c => 3
+]
+========
+callback(a, 1)
+callback(b, 2)
+callback(c, 3)
+callback(d, 4)
+========
+bool(true)
+Map[
+a => 1
+c => 3
+]
+******** StableMap ********
+callback(a, 1)
+callback(b, 2)
+callback(c, 3)
+callback(d, 4)
+========
+StableMap[
+a => 101
+b => 102
+c => 103
+d => 104
+]
+========
+callback(a, 1)
+callback(b, 2)
+callback(c, 3)
+callback(d, 4)
+========
+StableMap[
+a => 1
+c => 3
+]
+========
+callback(a, 1)
+callback(b, 2)
+callback(c, 3)
+callback(d, 4)
+========
+bool(true)
+StableMap[
+a => 1
+c => 3
+]
+******** Pair ********
+callback(0, 1)
+callback(1, 2)
+========
+HH\Vector[
+0 => 101
+1 => 102
+]
+========
+callback(0, 1)
+callback(1, 2)
+========
+HH\Vector[
+0 => 1
+]
+
+
+
+
+******** LazyVector ********
+========
+LazyMapWithKeyIterable[
+callback(0, 1)
+0 => 101
+callback(1, 2)
+1 => 102
+callback(2, 3)
+2 => 103
+callback(3, 4)
+3 => 104
+]
+========
+========
+LazyFilterWithKeyIterable[
+callback(0, 1)
+0 => 1
+callback(1, 2)
+callback(2, 3)
+2 => 3
+callback(3, 4)
+]
+******** LazyMap ********
+========
+callback(a, 1)
+a => 101
+callback(b, 2)
+b => 102
+callback(c, 3)
+c => 103
+callback(d, 4)
+d => 104
+========
+========
+LazyFilterWithKeyIterable[
+callback(a, 1)
+a => 1
+callback(b, 2)
+callback(c, 3)
+c => 3
+callback(d, 4)
+]
+******** LazyStableMap ********
+========
+LazyMapWithKeyIterable[
+callback(a, 1)
+a => 101
+callback(b, 2)
+b => 102
+callback(c, 3)
+c => 103
+callback(d, 4)
+d => 104
+]
+========
+========
+LazyFilterWithKeyIterable[
+callback(a, 1)
+a => 1
+callback(b, 2)
+callback(c, 3)
+c => 3
+callback(d, 4)
+]
+******** LazyPair ********
+========
+LazyMapWithKeyIterable[
+callback(0, 1)
+0 => 101
+callback(1, 2)
+1 => 102
+]
+========
+========
+LazyFilterWithKeyIterable[
+callback(0, 1)
+0 => 1
+callback(1, 2)
+]

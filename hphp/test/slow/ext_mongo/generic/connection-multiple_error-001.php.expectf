@@ -1,0 +1,5 @@
+HipHop Fatal error: %s
+Stack trace:
+#0 %sconnection-multiple_error-001.php(%d): Mongo->__construct('mongodb://foofa...')
+#1 {main}
+  thrown in %sconnection-multiple_error-001.php on line %d

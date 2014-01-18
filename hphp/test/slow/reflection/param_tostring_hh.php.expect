@@ -1,0 +1,6 @@
+array(2) {
+  [0]=>
+  string(47) "Parameter #0 [ <optional> string $str = 'baz' ]"
+  [1]=>
+  string(39) "Parameter #1 [ <optional> int $i = 42 ]"
+}

@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/server/ip-block-map.h"
+
+#include <arpa/inet.h>
+
 #include "hphp/util/logger.h"
 
 namespace HPHP {

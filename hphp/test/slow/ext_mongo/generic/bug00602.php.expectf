@@ -1,0 +1,54 @@
+array(8) {
+  ["ns"]=>
+  string(%d) "%s.bug602"
+  ["limit"]=>
+  int(2)
+  ["batchSize"]=>
+  int(0)
+  ["skip"]=>
+  int(3)
+  ["flags"]=>
+  int(0)
+  ["query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["fields"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["started_iterating"]=>
+  bool(false)
+}
+array(15) {
+  ["ns"]=>
+  string(%d) "%s.bug602"
+  ["limit"]=>
+  int(2)
+  ["batchSize"]=>
+  int(0)
+  ["skip"]=>
+  int(3)
+  ["flags"]=>
+  int(0)
+  ["query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["fields"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["started_iterating"]=>
+  bool(true)
+  ["id"]=>
+  int(%d)
+  ["at"]=>
+  int(1)
+  ["numReturned"]=>
+  int(2)
+  ["server"]=>
+  string(%d) "%s"
+  ["host"]=>
+  string(%d) "%s"
+  ["port"]=>
+  int(%d)
+  ["connection_type_desc"]=>
+  string(%d) "%s"
+}

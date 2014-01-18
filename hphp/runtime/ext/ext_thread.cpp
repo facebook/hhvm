@@ -22,7 +22,9 @@
 #include "hphp/util/process.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(thread);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(thread, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool f_hphp_is_service_thread() {

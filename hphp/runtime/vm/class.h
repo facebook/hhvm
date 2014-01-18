@@ -22,7 +22,7 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/range.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"

@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include <cstring>
 
-#include "hphp/util/util.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

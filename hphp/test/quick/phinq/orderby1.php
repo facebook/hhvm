@@ -16,6 +16,5 @@ $q = from $c in $customers
 foreach ($q as $e) {
   echo $e."\n";
 }
-echo $q."\n";
 
 echo ascending();

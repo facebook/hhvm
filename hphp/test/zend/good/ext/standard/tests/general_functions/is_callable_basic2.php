@@ -1,8 +1,4 @@
 <?php
-ini_set('error_reporting ',  E_ALL & ~E_NOTICE | E_STRICT);
-
-ini_set('precision', 14);
-
 /* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
    Description: Verify that the contents of a variable can be called as a function
                 In case of objects, $var = array($SomeObject, 'MethodName')

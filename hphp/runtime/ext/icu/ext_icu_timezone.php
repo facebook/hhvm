@@ -160,7 +160,7 @@ class IntlTimeZone {
    * @return string -
    */
   <<__Native>>
-  public function getID(): string;
+  public function getID(): mixed;
 
   /**
    * Get the time zone raw and GMT offset for the given moment in time

@@ -315,20 +315,6 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
 
   LitstrTable::get().setReading();
 
-  // TODO(#3343796): hphpc will give us unit emitters for systemlib,
-  // but currently we can't handle it.
-  static const char systemlib_name[] = "/:systemlib";
-  ues.erase(
-    std::remove_if(begin(ues), end(ues),
-      [&] (const std::unique_ptr<UnitEmitter>& ue) {
-        return !strncmp(systemlib_name,
-                        ue->getFilepath()->data(),
-                        sizeof systemlib_name - 1);
-      }
-    ),
-    end(ues)
-  );
-
   auto program = parse_program(ues);
   ues.clear();
 

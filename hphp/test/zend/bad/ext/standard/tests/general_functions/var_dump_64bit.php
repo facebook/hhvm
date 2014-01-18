@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype: void var_dump ( mixed $expression [, mixed $expression [, $...]] );
    Description: Displays structured information about one or more expressions that includes its type and value.
 */

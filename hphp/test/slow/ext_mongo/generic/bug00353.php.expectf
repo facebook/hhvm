@@ -1,0 +1,32 @@
+int(0)
+array(1) {
+  ["value"]=>
+  string(3) "ONE"
+}
+int(1)
+array(1) {
+  ["value"]=>
+  string(3) "TWO"
+}
+int(2)
+array(1) {
+  ["value"]=>
+  string(5) "THREE"
+}
+array(3) {
+  [0]=>
+  array(1) {
+    ["value"]=>
+    string(3) "ONE"
+  }
+  [1]=>
+  array(1) {
+    ["value"]=>
+    string(3) "TWO"
+  }
+  [2]=>
+  array(1) {
+    ["value"]=>
+    string(5) "THREE"
+  }
+}

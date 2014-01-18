@@ -129,29 +129,32 @@ class SplFileObject extends SplFileInfo
    *                     lines are skipped.
    */
   public function fgetcsv(
-      $delimiter = ',',
-      $enclosure = '"',
-      $escape = '\\') {
+      $delimiter = null,
+      $enclosure = null,
+      $escape = null) {
+    $num_args = func_num_args();
+    if ($num_args < 3) {
+      $escape = $this->escape;
 
-    $args = array(
-      'delimiter' => $delimiter,
-      'enclosure' => $enclosure,
-      'escape' => $escape,
-    );
+      if ($num_args < 2) {
+        $enclosure = $this->enclosure;
 
-    foreach ($args as $name => $arg) {
-      if (!is_string($arg) || strlen($arg) != 1) {
-        error_log("HipHop Warning: $name must be a character");
-        return false;
+        if ($num_args < 1) {
+          $delimiter = $this->delimiter;
+        }
       }
+    }
+
+    if (!$this->checkCsvControl($delimiter, $enclosure, $escape)) {
+      return false;
     }
 
     return fgetcsv(
       $this->rsrc,
       $this->maxLineLen,
-      $args['delimiter'],
-      $args['enclosure'],
-      $args['escape'],
+      $delimiter,
+      $enclosure,
+      $escape,
     );
   }
 
@@ -254,11 +257,17 @@ class SplFileObject extends SplFileInfo
    *                     not a single character.
    */
   public function fputcsv($fields, $delimiter = null, $enclosure = null) {
-    if (!$delimiter) {
-      $delimiter = $this->delimiter;
-    }
-    if (!$enclosure) {
+    $num_args = func_num_args();
+    if ($num_args < 3) {
       $enclosure = $this->enclosure;
+
+      if ($num_args < 2) {
+        $delimiter = $this->delimiter;
+      }
+    }
+
+    if (!$this->checkCsvControl($delimiter, $enclosure)) {
+      return false;
     }
 
     return fputcsv(
@@ -471,6 +480,9 @@ class SplFileObject extends SplFileInfo
       $delimiter = ",",
       $enclosure = "\"",
       $escape = "\\") {
+    if (!$this->checkCsvControl($delimiter, $enclosure, $escape)) {
+      return;
+    }
 
     $this->delimiter = $delimiter;
     $this->enclosure = $enclosure;
@@ -616,5 +628,23 @@ class SplFileObject extends SplFileInfo
       return $this->current() !== false;
     }
     return !$this->eof();
+  }
+
+  private function checkCsvParameter($value, $name) {
+    if (!is_string($value) || strlen($value) != 1) {
+      error_log('HipHop Warning: '.$name.' must be a character');
+      return false;
+    }
+    return true;
+  }
+
+  private function checkCsvControl($delimiter, $enclosure, $escape = null) {
+    if (!$this->checkCsvParameter($delimiter, 'delimiter') ||
+        !$this->checkCsvParameter($enclosure, 'enclosure') ||
+        func_num_args() > 2 && !$this->checkCsvParameter($escape, 'escape')) {
+      return false;
+    }
+
+    return true;
   }
 }

@@ -23,7 +23,9 @@
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(xmlreader);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(xmlreader, 0.1);
+
 ///////////////////////////////////////////////////////////////////////////////
 // constants
 const int64_t q_XMLReader$$NONE = XML_READER_TYPE_NONE;

@@ -1,0 +1,5 @@
+string(%d) "%s:%d: not master and slaveOk=false"
+
+%s: Function Mongo::setSlaveOkay() is deprecated in %s on line %d
+bool(false)
+===DONE===

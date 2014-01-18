@@ -28,6 +28,7 @@
 #include "hphp/util/timer.h"
 #include "folly/MoveWrapper.h"
 
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 using folly::IOBuf;
@@ -61,6 +62,10 @@ const std::string FastCGITransport::getDocumentRoot() {
 
 const char *FastCGITransport::getRemoteHost() {
   return m_remoteHost.c_str();
+}
+
+const char *FastCGITransport::getRemoteAddr() {
+  return m_remoteAddr.c_str();
 }
 
 uint16_t FastCGITransport::getRemotePort() {
@@ -303,6 +308,7 @@ void FastCGITransport::onBodyComplete() {
 
 const std::string FastCGITransport::k_requestURIKey = "REQUEST_URI";
 const std::string FastCGITransport::k_remoteHostKey = "REMOTE_HOST";
+const std::string FastCGITransport::k_remoteAddrKey = "REMOTE_ADDR";
 const std::string FastCGITransport::k_remotePortKey = "REMOTE_PORT";
 const std::string FastCGITransport::k_methodKey = "REQUEST_METHOD";
 const std::string FastCGITransport::k_httpVersionKey = "HTTP_VERSION";
@@ -311,6 +317,7 @@ const std::string FastCGITransport::k_documentRoot = "DOCUMENT_ROOT";
 const std::string FastCGITransport::k_serverNameKey = "SERVER_NAME";
 const std::string FastCGITransport::k_serverPortKey = "SERVER_PORT";
 const std::string FastCGITransport::k_serverAddrKey = "SERVER_ADDR";
+const std::string FastCGITransport::k_httpsKey = "HTTPS";
 
 void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
                                 std::unique_ptr<folly::IOBuf> value_chain) {
@@ -340,6 +347,8 @@ void FastCGITransport::handleHeader(const std::string& key,
     m_requestURI = value;
   } else if (compareKeys(key, k_remoteHostKey)) {
     m_remoteHost = value;
+  } else if (compareKeys(key, k_remoteAddrKey)) {
+    m_remoteAddr = value;
   } else if (compareKeys(key, k_remotePortKey)) {
     try {
       int remote_port = std::stoi(value);
@@ -355,6 +364,15 @@ void FastCGITransport::handleHeader(const std::string& key,
     }
   } else if (compareKeys(key, k_serverNameKey)) {
     m_serverName = value;
+  } else if (compareKeys(key, k_httpsKey)) {
+    if (!value.empty()) {
+      std::string lValue(value);
+      boost::to_lower(lValue);
+      // IIS sets this value but sets it to off when SSL is off.
+      if (lValue.compare("off") != 0) {
+        setSSL();
+      }
+    }
   } else if (compareKeys(key, k_serverAddrKey)) {
     m_serverAddr = value;
   } else if (compareKeys(key, k_serverPortKey)) {
@@ -392,7 +410,16 @@ void FastCGITransport::handleHeader(const std::string& key,
 }
 
 void FastCGITransport::onHeadersComplete() {
-  m_serverObject = getRawHeader("SCRIPT_NAME");
+  std::string pathTranslated = getRawHeader("PATH_TRANSLATED");
+  std::string documentRoot = getRawHeader("DOCUMENT_ROOT");
+  // use PATH_TRANSLATED - DOCUMENT_ROOT if it is valid instead of SCRIPT_NAME
+  // for mod_fastcgi support
+  if (!pathTranslated.empty() && !documentRoot.empty() &&
+      pathTranslated.find(documentRoot) == 0) {
+    m_serverObject = pathTranslated.substr(documentRoot.length());
+  } else {
+    m_serverObject = getRawHeader("SCRIPT_NAME");
+  }
   std::string queryString = getRawHeader("QUERY_STRING");
   if (!queryString.empty()) {
     m_serverObject += "?" + queryString;

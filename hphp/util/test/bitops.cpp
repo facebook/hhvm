@@ -15,8 +15,9 @@
 */
 
 #include "hphp/util/bitops.h"
-#include "hphp/util/util.h"
 #include <gtest/gtest.h>
+
+#include "hphp/util/util.h"
 
 namespace HPHP {
 
@@ -52,29 +53,6 @@ TEST(BitopsTest, FlsZero) {
   int64_t zero = 0;
   int64_t out;
   EXPECT_FALSE(fls64(zero, out));
-}
-
-TEST(BitopsTest, NextPow32Bit) {
-  static uint32_t values[] = { 1, 2, 3, 63, 64, 65 };
-  for(auto v : values) {
-    auto next = HPHP::Util::nextPower2(v);
-    EXPECT_TRUE(next > 0 && (next & (next - 1)) == 0);
-    EXPECT_LE(v, next);
-    EXPECT_LT(next / 2, v);
-  }
-}
-
-
-TEST(BitopsTest, NextPow64Bit) {
-  static uint64_t values[] = {
-      1, 2, 3, 63, 64, 65, uint64_t(-1) / 2, (uint64_t(1) << 40) + 1
-  };
-  for(auto v : values) {
-    auto next = HPHP::Util::nextPower2(v);
-    EXPECT_TRUE(next > 0 && (next & (next - 1)) == 0);
-    EXPECT_LE(v, next);
-    EXPECT_LT(next / 2, v);
-  }
 }
 
 }

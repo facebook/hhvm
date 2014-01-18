@@ -41,7 +41,7 @@ void raise_error(const char *fmt, ...) {
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   raise_error(msg);
 }
@@ -67,7 +67,7 @@ void raise_recoverable_error(const char *fmt, ...) {
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   raise_recoverable_error(msg);
 }
@@ -102,7 +102,7 @@ void raise_strict_warning(const char *fmt, ...) {
   }
   va_list ap;
   va_start(ap, fmt);
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::ErrorThrowMode::Never,
@@ -139,7 +139,7 @@ void raise_warning(const char *fmt, ...) {
   }
   va_list ap;
   va_start(ap, fmt);
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::ErrorThrowMode::Never,
@@ -172,7 +172,7 @@ void raise_debugging(const char *fmt, ...) {
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   raise_debugging(msg);
 }
@@ -205,7 +205,7 @@ void raise_notice(const char *fmt, ...) {
   }
   va_list ap;
   va_start(ap, fmt);
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::ErrorThrowMode::Never,
@@ -238,7 +238,7 @@ void raise_message(ErrorConstants::ErrorModes mode,
                    const char *fmt,
                    va_list ap) {
   std::string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   raise_message(mode, msg);
 }
 

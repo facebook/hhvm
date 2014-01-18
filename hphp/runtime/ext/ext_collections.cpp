@@ -169,7 +169,25 @@ Object BaseVector::getiterator() {
   return it;
 }
 
-void BaseVector::map(BaseVector* bvec, CVarRef callback) {
+ALWAYS_INLINE
+static std::array<TypedValue, 1> makeArgsFromVectorValue(
+  TypedValue val, uint index) {
+  return std::array<TypedValue, 1>{{ val }};
+}
+
+ALWAYS_INLINE
+static std::array<TypedValue, 2> makeArgsFromVectorKeyAndValue(
+  TypedValue val, uint index) {
+  return std::array<TypedValue, 2> {{
+    make_tv<KindOfInt64>(index),
+    val
+  }};
+}
+
+template<class TVector, class MakeArgs>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_map(CVarRef callback, MakeArgs makeArgs) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -177,21 +195,28 @@ void BaseVector::map(BaseVector* bvec, CVarRef callback) {
                "Parameter must be a valid callback"));
     throw e;
   }
+
+  TVector* nv = NEWOBJ(TVector);
   uint sz = m_size;
-  bvec->reserve(sz);
+  nv->reserve(sz);
   for (uint i = 0; i < sz; ++i) {
-    TypedValue* tv = &bvec->m_data[i];
+    TypedValue* tv = &nv->m_data[i];
     int32_t version = m_version;
-    g_vmContext->invokeFuncFew(tv, ctx, 1, &m_data[i]);
+    auto args = makeArgs(m_data[i], i);
+    g_vmContext->invokeFuncFew(tv, ctx, args.size(), &args[0]);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
     }
-    ++bvec->m_size;
+    ++nv->m_size;
   }
+  return nv;
 }
 
-void BaseVector::mapwithkey(BaseVector* bvec, CVarRef callback) {
+template<class TVector, class MakeArgs>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_filter(CVarRef callback, MakeArgs makeArgs) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -199,70 +224,21 @@ void BaseVector::mapwithkey(BaseVector* bvec, CVarRef callback) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  uint sz = m_size;
-  bvec->reserve(sz);
-  for (uint i = 0; i < sz; ++i) {
-    TypedValue* tv = &bvec->m_data[i];
-    int32_t version = m_version;
-    TypedValue args[2] = {
-      make_tv<KindOfInt64>(i),
-      m_data[i]
-    };
-    g_vmContext->invokeFuncFew(tv, ctx, 2, args);
-    if (UNLIKELY(version != m_version)) {
-      tvRefcountedDecRef(tv);
-      throw_collection_modified();
-    }
-    ++bvec->m_size;
-  }
-}
-
-void BaseVector::filter(BaseVector* bvec, CVarRef callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
-  }
+  TVector* nv = NEWOBJ(TVector);
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
     Variant ret;
     int32_t version = m_version;
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &m_data[i]);
+    auto args = makeArgs(m_data[i], i);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, args.size(), &args[0]);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
     if (ret.toBoolean()) {
-      bvec->add(&m_data[i]);
+      nv->add(&m_data[i]);
     }
   }
-}
-
-void BaseVector::filterwithkey(BaseVector* bvec, CVarRef callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
-  }
-  uint sz = m_size;
-  for (uint i = 0; i < sz; ++i) {
-    Variant ret;
-    int32_t version = m_version;
-    TypedValue args[2] = {
-      make_tv<KindOfInt64>(i),
-      m_data[i]
-    };
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
-    if (ret.toBoolean()) {
-      bvec->add(&m_data[i]);
-    }
-  }
+  return nv;
 }
 
 void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
@@ -822,31 +798,23 @@ Object c_Vector::t_getiterator() {
 }
 
 Object c_Vector::t_map(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::map(bv, callback);
-  return obj;
+  return BaseVector::php_map<c_Vector>(
+    callback, &makeArgsFromVectorValue);
 }
 
 Object c_Vector::t_mapwithkey(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::mapwithkey(bv, callback);
-  return obj;
+  return BaseVector::php_map<c_Vector>(
+    callback, &makeArgsFromVectorKeyAndValue);
 }
 
 Object c_Vector::t_filter(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::filter(bv, callback);
-  return obj;
+  return BaseVector::php_filter<c_Vector>(
+    callback, &makeArgsFromVectorValue);
 }
 
 Object c_Vector::t_filterwithkey(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::filterwithkey(bv, callback);
-  return obj;
+  return BaseVector::php_filter<c_Vector>(
+    callback, &makeArgsFromVectorKeyAndValue);
 }
 
 Object c_Vector::t_zip(CVarRef iterable) {
@@ -1154,31 +1122,19 @@ Object c_FrozenVector::t_getiterator() {
 }
 
 Object c_FrozenVector::t_map(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::map(bv, callback);
-  return obj;
+  return php_map<c_FrozenVector>(callback, &makeArgsFromVectorValue);
 }
 
 Object c_FrozenVector::t_mapwithkey(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::mapwithkey(bv, callback);
-  return obj;
+  return php_map<c_FrozenVector>(callback, &makeArgsFromVectorKeyAndValue);
 }
 
 Object c_FrozenVector::t_filter(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::filter(bv, callback);
-  return obj;
+  return php_filter<c_FrozenVector>(callback, &makeArgsFromVectorValue);
 }
 
 Object c_FrozenVector::t_filterwithkey(CVarRef callback) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::filterwithkey(bv, callback);
-  return obj;
+  return php_filter<c_FrozenVector>(callback, &makeArgsFromVectorKeyAndValue);
 }
 
 Object c_FrozenVector::t_zip(CVarRef iterable) {
@@ -1775,10 +1731,28 @@ Object c_Map::t_getiterator() { return php_getIterator(); }
 
 Object c_StableMap::t_getiterator() { return php_getIterator(); }
 
-template<typename TMap>
+ALWAYS_INLINE
+static std::array<TypedValue, 2> makeArgsFromMapKeyAndValue(
+  BaseMap::Elm& e) {
+  return std::array<TypedValue, 2> {{
+    (e.hasIntKey() ? make_tv<KindOfInt64>(e.ikey)
+     : make_tv<KindOfString>(e.skey)),
+    e.data
+  }};
+}
+
+ALWAYS_INLINE
+static std::array<TypedValue, 1> makeArgsFromMapValue(BaseMap::Elm& e) {
+  // note that this is a potentially unnecessary copy
+  // that might be reinterpret_cast ed away
+  // http://stackoverflow.com/questions/11205186/treat-c-cstyle-array-as-stdarray
+  return std::array<TypedValue, 1> {{ e.data }};
+}
+
+template<typename TMap, class MakeArgs>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_map(CVarRef callback) const {
+BaseMap::php_map(CVarRef callback, MakeArgs makeArgs) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -1810,7 +1784,8 @@ BaseMap::php_map(CVarRef callback) const {
     }
     TypedValue* tv = &np.data;
     int32_t version = m_version;
-    g_vmContext->invokeFuncFew(tv, ctx, 1, &p.data);
+    auto args = makeArgs(p);
+    g_vmContext->invokeFuncFew(tv, ctx, args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -1825,87 +1800,33 @@ BaseMap::php_map(CVarRef callback) const {
 }
 
 Object c_FrozenMap::t_map(CVarRef callback) {
-  return php_map<c_FrozenMap>(callback);
+  return php_map<c_FrozenMap>(callback, &makeArgsFromMapValue);
 }
 
 Object c_Map::t_map(CVarRef callback) {
-  return php_map<c_Map>(callback);
+  return php_map<c_Map>(callback, &makeArgsFromMapValue);
 }
 
 Object c_StableMap::t_map(CVarRef callback) {
-  return php_map<c_StableMap>(callback);
-}
-
-template<typename TMap>
-typename std::enable_if<
-  std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_mapWithKey(CVarRef callback) const {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
-  }
-  TMap* mp;
-  Object obj = mp = NEWOBJ(TMap)();
-  if (!m_size) return obj;
-  assert(m_used != 0);
-  mp->deleteElms();
-  mp->freeData();
-  mp->m_cap = m_cap;
-  mp->m_tableMask = m_tableMask;
-  mp->m_size = m_size;
-  mp->m_data = (Elm*)smart_malloc(size_t(mp->m_cap) * sizeof(Elm) +
-                                  mp->hashSize() * sizeof(int32_t));
-  mp->m_hash = (int32_t*)(mp->m_data + mp->m_cap);
-  wordcpy(mp->hashTab(), hashTab(), hashSize());
-  uint32_t used = iterLimit();
-  mp->m_used = 0;
-  for (uint32_t i = 0; i < used; mp->m_used = ++i) {
-    Elm& p = data()[i];
-    Elm& np = mp->data()[i];
-    if (isTombstone(i)) {
-      np.data.m_type = p.data.m_type;
-      continue;
-    }
-    TypedValue* tv = &np.data;
-    int32_t version = m_version;
-    TypedValue args[2] = {
-      (p.hasIntKey() ? make_tv<KindOfInt64>(p.ikey)
-       : make_tv<KindOfString>(p.skey)),
-      p.data
-    };
-    g_vmContext->invokeFuncFew(tv, ctx, 2, args);
-    if (UNLIKELY(version != m_version)) {
-      tvRefcountedDecRef(tv);
-      throw_collection_modified();
-    }
-    if (p.hasStrKey()) {
-      p.skey->incRefCount();
-    }
-    np.ikey = p.ikey;
-    np.data.hash() = p.data.hash();
-  }
-  return obj;
+  return php_map<c_StableMap>(callback, &makeArgsFromMapValue);
 }
 
 Object c_FrozenMap::t_mapwithkey(CVarRef callback) {
-  return php_mapWithKey<c_FrozenMap>(callback);
+  return php_map<c_FrozenMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 Object c_Map::t_mapwithkey(CVarRef callback) {
-  return php_mapWithKey<c_Map>(callback);
+  return php_map<c_Map>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 Object c_StableMap::t_mapwithkey(CVarRef callback) {
-  return php_mapWithKey<c_StableMap>(callback);
+  return php_map<c_StableMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
-template<typename TMap>
+template<typename TMap, class MakeArgs>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_filter(CVarRef callback) const {
+BaseMap::php_filter(CVarRef callback, MakeArgs makeArgs) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -1923,7 +1844,9 @@ BaseMap::php_filter(CVarRef callback) const {
     Elm& p = data()[i];
     Variant ret;
     int32_t version = m_version;
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+    auto args = makeArgs(p);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx,
+                               args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -1938,21 +1861,31 @@ BaseMap::php_filter(CVarRef callback) const {
 }
 
 Object c_FrozenMap::t_filter(CVarRef callback) {
-  return php_filter<c_FrozenMap>(callback);
+  return php_filter<c_FrozenMap>(callback, &makeArgsFromMapValue);
 }
 
 Object c_Map::t_filter(CVarRef callback) {
-  return php_filter<c_Map>(callback);
+  return php_filter<c_Map>(callback, &makeArgsFromMapValue);
 }
 
 Object c_StableMap::t_filter(CVarRef callback) {
-  return php_filter<c_StableMap>(callback);
+  return php_filter<c_StableMap>(callback, &makeArgsFromMapValue);
 }
 
-template<typename TMap>
-typename std::enable_if<
-  std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_filterWithKey(CVarRef callback) const {
+Object c_FrozenMap::t_filterwithkey(CVarRef callback) {
+  return php_filter<c_FrozenMap>(callback, &makeArgsFromMapKeyAndValue);
+}
+
+Object c_Map::t_filterwithkey(CVarRef callback) {
+  return php_filter<c_Map>(callback, &makeArgsFromMapKeyAndValue);
+}
+
+Object c_StableMap::t_filterwithkey(CVarRef callback) {
+  return php_filter<c_StableMap>(callback, &makeArgsFromMapKeyAndValue);
+}
+
+template<class MakeArgs>
+Object BaseMap::php_retain(CVarRef callback, MakeArgs makeArgs) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -1960,44 +1893,51 @@ BaseMap::php_filterWithKey(CVarRef callback) const {
                "Parameter must be a valid callback"));
     throw e;
   }
-  TMap* mp;
-  Object obj = mp = NEWOBJ(TMap)();
-  if (!m_size) return obj;
+  ++m_version;
+  auto size = m_size;
+  if (!size) { return this; }
+
   uint32_t used = iterLimit();
-  for (uint32_t i = 0; i < used; ++i) {
-    Elm& p = data()[i];
+  for (int32_t i = 0; i < used; ++i) {
     if (isTombstone(i)) continue;
+    Elm& p = data()[i];
     Variant ret;
     int32_t version = m_version;
-    TypedValue args[2] = {
-      (p.hasIntKey() ? make_tv<KindOfInt64>(p.ikey)
-       : make_tv<KindOfString>(p.skey)),
-      p.data
-    };
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
+    auto args = makeArgs(p);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx,
+                               args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
-    if (!ret.toBoolean()) continue;
-    if (p.hasIntKey()) {
-      mp->update(p.ikey, &p.data);
-    } else {
-      mp->update(p.skey, &p.data);
-    }
+    if (ret.toBoolean()) continue;
+
+    // checking version above allows us to defer compaction, since we
+    // know that no operations that mutate internal state have been
+    // allowed to happen inside this loop other than this erase
+    int32_t* pos = (p.hasIntKey()
+                    ? findForInsert(p.ikey)
+                    : findForInsert(p.skey, p.skey->hash()));
+    eraseNoCompact(pos);
   }
-  return obj;
+  assert(m_size <= size);
+  if (m_size < size) { compactIfNecessary(); }
+  return this;
 }
 
-Object c_FrozenMap::t_filterwithkey(CVarRef callback) {
-  return php_filterWithKey<c_FrozenMap>(callback);
+Object c_Map::t_retain(CVarRef callback) {
+  return php_retain(callback, &makeArgsFromMapValue);
 }
 
-Object c_Map::t_filterwithkey(CVarRef callback) {
-  return php_filterWithKey<c_Map>(callback);
+Object c_StableMap::t_retain(CVarRef callback) {
+  return php_retain(callback, &makeArgsFromMapValue);
 }
 
-Object c_StableMap::t_filterwithkey(CVarRef callback) {
-  return php_filterWithKey<c_StableMap>(callback);
+Object c_Map::t_retainwithkey(CVarRef callback) {
+  return php_retain(callback, &makeArgsFromMapKeyAndValue);
+}
+
+Object c_StableMap::t_retainwithkey(CVarRef callback) {
+  return php_retain(callback, &makeArgsFromMapKeyAndValue);
 }
 
 template<typename TMap>
@@ -2132,7 +2072,7 @@ Object c_StableMap::ti_fromarray(CVarRef arr) {
 template<typename TMap>
   typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, ObjectData*>::type
-static collectionDeepCopyBaseMap(TMap* mp) {
+collectionDeepCopyBaseMap(TMap* mp) {
   mp = TMap::Clone(mp);
   Object o = Object::attach(mp);
   uint used = mp->iterLimit();
@@ -2448,7 +2388,7 @@ retry:
   ++m_version;
 }
 
-void BaseMap::erase(int32_t* pos) {
+void BaseMap::eraseNoCompact(int32_t* pos) {
   assert(validPos(*pos) && !isTombstone(*pos));
   assert(data());
   Elm* elms = data();
@@ -2467,12 +2407,11 @@ void BaseMap::erase(int32_t* pos) {
   assert(m_used <= m_cap);
   // Finally, decref the old value
   tvRefcountedDecRefHelper(oldType, oldDatum);
-  // Compact in order to keep elms from being overly sparse. Other parts
-  // of Map's implementation rely on the fact that erase() does not allow
-  // the Elm density to drop below ~50%.
-  if (isDensityTooLow()) {
-    compact();
-  }
+}
+
+void BaseMap::erase(int32_t* pos) {
+  eraseNoCompact(pos);
+  compactIfNecessary();
 }
 
 NEVER_INLINE void BaseMap::makeRoom() {
@@ -2546,7 +2485,8 @@ void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
   m_used = m_size;
 }
 
-void BaseMap::compact() {
+void BaseMap::compactIfNecessary() {
+  if (!isDensityTooLow()) { return; }
   auto* elms = data();
   assert(elms);
   auto mask = m_tableMask;
@@ -2950,7 +2890,7 @@ void BaseMap::Unserialize(ObjectData* obj,
     Variant k;
     k.unserialize(uns, Uns::Mode::ColKey);
     int32_t* p;
-    Elm* e;
+    Elm* e = nullptr;
     if (k.isInteger()) {
       auto h = k.toInt64();
       p = mp->findForInsert(h);
@@ -3640,7 +3580,7 @@ Object c_Set::t_zip(CVarRef iterable) {
   return BaseSet::phpZip<c_Set>(iterable);
 }
 
-Object c_Set::t_difference(CVarRef iterable) {
+Object c_Set::t_removeall(CVarRef iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -3648,6 +3588,10 @@ Object c_Set::t_difference(CVarRef iterable) {
     phpRemove(iter.second());
   }
   return this;
+}
+
+Object c_Set::t_difference(CVarRef iterable) {
+  return t_removeall(iterable);
 }
 
 Object c_Set::ti_fromitems(CVarRef iterable) {

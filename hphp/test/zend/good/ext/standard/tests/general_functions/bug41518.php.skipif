@@ -1,0 +1,8 @@
+<?php
+$tmp_dir = __DIR__ . '/bug41518';
+mkdir($tmp_dir);
+if (!is_dir($tmp_dir)) {
+	die("skip");
+}
+@unlink($tmp_dir);
+?>

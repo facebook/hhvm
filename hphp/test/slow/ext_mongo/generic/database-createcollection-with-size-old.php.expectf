@@ -1,0 +1,18 @@
+NULL
+
+%s: MongoDB::createCollection(): This method now accepts arguments as an options array instead of the three optional arguments for capped, size and max elements in %sdatabase-createcollection-with-size-old.php on line %d
+array(2) {
+  ["name"]=>
+  string(19) "phpunit.create-col1"
+  ["options"]=>
+  array(3) {
+    ["create"]=>
+    string(11) "create-col1"
+    ["size"]=>
+    int(100)
+    ["capped"]=>
+    bool(true)
+  }
+}
+int(%d)
+bool(true)

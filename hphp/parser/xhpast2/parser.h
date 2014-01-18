@@ -22,6 +22,7 @@
 #include "folly/Format.h"
 #include "folly/String.h"
 #include "hphp/parser/parser.h"
+#include "hphp/util/util.h"
 #include "astnode.hpp"
 
 #define HPHP_PARSER_NS XHPAST2
@@ -428,7 +429,7 @@ struct Parser : ParserBase {
     va_list ap;
     va_start(ap, fmt);
     std::string msg;
-    Util::string_vsnprintf(msg, fmt, ap);
+    string_vsnprintf(msg, fmt, ap);
     va_end(ap);
 
     throw std::runtime_error(folly::format(

@@ -1,6 +1,4 @@
 <?php
-ini_set('output_buffering', 0);
-
 echo "*** Testing ob_start() : closures as output handlers ***\n";
 
 ob_start(function ($output) {

@@ -31,6 +31,7 @@ public:
 
   std::string getIdentifier() const { return m_identifier; }
   ExpressionPtr getExpression() { return m_expression; }
+  void setExpression(ExpressionPtr value) { m_expression = value; }
 protected:
   SimpleQueryClause(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS,
              const std::string &identifier, ExpressionPtr collection);

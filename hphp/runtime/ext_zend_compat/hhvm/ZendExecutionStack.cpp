@@ -38,16 +38,30 @@ zval* ZendExecutionStack::getArg(int i) {
 
     case ZendStackMode::SIDE_STACK: {
       // Zend puts the number of args as the last thing on the stack
-      DEBUG_ONLY int numargs = uintptr_t(entry.value);
+      int numargs = uintptr_t(entry.value);
       assert(numargs < 4096);
       assert(i < numargs);
-      zval* zv = (zval*) stack[stack.size() - 2 - i].value;
+      zval* zv = (zval*) stack[stack.size() - 1 - numargs + i].value;
       zv->assertValid();
       return zv;
     }
   }
   not_reached();
   return nullptr;
+}
+
+int32_t ZendExecutionStack::numArgs() {
+  auto& stack = getStack();
+  auto& entry = stack.back();
+  switch (entry.mode) {
+    case ZendStackMode::HHVM_STACK:
+      return HPHP::liveFrame()->numArgs();
+    case ZendStackMode::SIDE_STACK:
+      // Zend puts the number of args as the last thing on the stack
+      return uintptr_t(entry.value);
+  }
+  not_reached();
+  return 0;
 }
 
 void ZendExecutionStack::push(void* z) {

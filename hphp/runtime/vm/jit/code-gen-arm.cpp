@@ -16,8 +16,13 @@
 
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 
+#include "folly/Optional.h"
+
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
+#include "hphp/runtime/vm/jit/native-calls.h"
+#include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -50,9 +55,16 @@ NOOP_OPCODE(DbgAssertPtr);
 
 //////////////////////////////////////////////////////////////////////
 
+#define CALL_OPCODE(name) \
+  void CodeGenerator::cg##name(IRInstruction* i) { cgCallNative(m_as, i); }
+
+CALL_OPCODE(ConvIntToStr)
+
+//////////////////////////////////////////////////////////////////////
+
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
             const Func* vmFunc) {
-  FTRACE(1, "punting: {} {}\n", file, line);
+  FTRACE(1, "punting: {}\n", func);
   throw FailedCodeGen(file, line, func, bcOff, vmFunc);
 }
 
@@ -66,7 +78,6 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
     cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff, curFunc())
 
 PUNT_OPCODE(CheckType)
-PUNT_OPCODE(AssertType)
 PUNT_OPCODE(CheckTypeMem)
 PUNT_OPCODE(CheckStk)
 PUNT_OPCODE(CheckLoc)
@@ -119,7 +130,6 @@ PUNT_OPCODE(ConvCellToInt)
 PUNT_OPCODE(ConvCellToObj)
 PUNT_OPCODE(ConvBoolToStr)
 PUNT_OPCODE(ConvDblToStr)
-PUNT_OPCODE(ConvIntToStr)
 PUNT_OPCODE(ConvObjToStr)
 PUNT_OPCODE(ConvResToStr)
 PUNT_OPCODE(ConvCellToStr)
@@ -222,7 +232,6 @@ PUNT_OPCODE(UnboxPtr)
 PUNT_OPCODE(BoxPtr)
 PUNT_OPCODE(LdVectorBase)
 PUNT_OPCODE(LdPairBase)
-PUNT_OPCODE(LdLoc)
 PUNT_OPCODE(LdLocAddr)
 PUNT_OPCODE(LdMem)
 PUNT_OPCODE(LdProp)
@@ -265,7 +274,6 @@ PUNT_OPCODE(LdGblAddrDef)
 PUNT_OPCODE(LdGblAddr)
 PUNT_OPCODE(LdObjClass)
 PUNT_OPCODE(LdFunc)
-PUNT_OPCODE(LdFuncCached)
 PUNT_OPCODE(LdFuncCachedU)
 PUNT_OPCODE(LdFuncCachedSafe)
 PUNT_OPCODE(LdSSwitchDestFast)
@@ -317,7 +325,6 @@ PUNT_OPCODE(ReqRetranslateOpt)
 PUNT_OPCODE(ReqRetranslate)
 PUNT_OPCODE(Mov)
 PUNT_OPCODE(LdAddr)
-PUNT_OPCODE(IncRef)
 PUNT_OPCODE(IncRefCtx)
 PUNT_OPCODE(DecRefLoc)
 PUNT_OPCODE(DecRefStack)
@@ -358,7 +365,6 @@ PUNT_OPCODE(ArrayAdd)
 PUNT_OPCODE(AKExists)
 PUNT_OPCODE(Spill)
 PUNT_OPCODE(Reload)
-PUNT_OPCODE(Shuffle)
 PUNT_OPCODE(CreateContFunc)
 PUNT_OPCODE(CreateContMeth)
 PUNT_OPCODE(ContEnter)
@@ -494,6 +500,321 @@ void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   m_as.  B     (&done, vixl::ls);
   m_as.  Brk   (0);
   m_as.  bind  (&done);
+}
+
+void CodeGenerator::cgIncRef(IRInstruction* inst) {
+  SSATmp* src = inst->src(0);
+  Type type = src->type();
+
+  if (type.notCounted()) return;
+
+  auto increfMaybeStatic = [&] {
+    auto base = x2a(curOpd(src).reg(0));
+    auto rCount = rAsm.W();
+    m_as.    Ldr  (rCount, base[FAST_REFCOUNT_OFFSET]);
+    if (!type.needsStaticBitCheck()) {
+      m_as.  Add  (rCount, rAsm.W(), 1);
+      m_as.  Str  (rCount, base[FAST_REFCOUNT_OFFSET]);
+    } else {
+      m_as.  Cmp  (rCount, 0);
+      static_assert(UncountedValue < 0 && StaticValue < 0, "");
+      ifThen(m_as, vixl::ge, [&] {
+        m_as.Add(rCount, rCount, 1);
+        m_as.Str(rCount, base[FAST_REFCOUNT_OFFSET]);
+      });
+    }
+  };
+
+  if (type.isKnownDataType()) {
+    assert(IS_REFCOUNTED_TYPE(type.toDataType()));
+    increfMaybeStatic();
+  } else {
+    m_as.    Cmp (x2a(curOpd(src).reg(1)).W(), KindOfRefCountThreshold);
+    ifThen(m_as, vixl::gt, [&] { increfMaybeStatic(); });
+  }
+}
+
+void CodeGenerator::cgAssertType(IRInstruction* inst) {
+  auto const& srcRegs = curOpd(inst->src(0));
+  auto const& dstRegs = curOpd(inst->dst());
+
+  PhysReg::Map<PhysReg> moves;
+  if (dstRegs.reg(0) != InvalidReg)
+    moves[dstRegs.reg(0)] = srcRegs.reg(0);
+  if (dstRegs.reg(1) != InvalidReg)
+    moves[dstRegs.reg(1)] = srcRegs.reg(1);
+
+  auto howTo = doRegMoves(moves, rAsm);
+  for (auto& how : howTo) {
+    if (how.m_kind == MoveInfo::Kind::Move) {
+      m_as.  Mov  (x2a(how.m_reg2), x2a(how.m_reg1));
+    } else {
+      emitXorSwap(m_as, x2a(how.m_reg2), x2a(how.m_reg1));
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgShuffle(IRInstruction* inst) {
+  PhysReg::Map<PhysReg> moves;
+
+  // Put required reg-reg moves in the map, and do spills at the same time.
+  for (auto i = 0; i < inst->numSrcs(); ++i) {
+    auto src = inst->src(i);
+    auto& rd = inst->extra<Shuffle>()->dests[i];
+    auto& rs = curOpd(src);
+
+    if (rd.numAllocated() == 0) continue;
+    if (rd.spilled()) {
+      for (auto j = 0; j < rd.numAllocated(); ++j) {
+        m_as.  Str  (x2a(rs.reg(j)), vixl::MemOperand(vixl::sp, rd.offset(j)));
+      }
+    } else if (!rs.spilled()) {
+      if (rs.reg(0) != InvalidReg) moves[rd.reg(0)] = rs.reg(0);
+      if (rs.reg(1) != InvalidReg) moves[rd.reg(1)] = rs.reg(1);
+    }
+  }
+
+  // Do reg-reg moves.
+  auto howTo = doRegMoves(moves, rAsm);
+  for (auto& how : howTo) {
+    if (how.m_kind == MoveInfo::Kind::Move) {
+      emitRegGetsRegPlusImm(m_as, x2a(how.m_reg2), x2a(how.m_reg1), 0);
+    } else {
+      emitXorSwap(m_as, x2a(how.m_reg1), x2a(how.m_reg2));
+    }
+  }
+
+  // Now do reloads and reg<-imm.
+  for (auto i = 0; i < inst->numSrcs(); ++i) {
+    auto src = inst->src(i);
+    auto& rd = inst->extra<Shuffle>()->dests[i];
+    auto& rs = curOpd(src);
+    if (rd.numAllocated() == 0) continue;
+    if (rd.spilled()) continue;
+    if (rs.spilled()) {
+      for (auto j = 0; j < rd.numAllocated(); ++j) {
+        m_as.  Ldr  (x2a(rd.reg(i)), vixl::MemOperand(vixl::sp, rs.offset(j)));
+      }
+      continue;
+    }
+    if (rs.numAllocated() == 0) {
+      assert(src->inst()->op() == DefConst);
+      m_as.  Mov  (x2a(rd.reg(0)), src->getValBits());
+    }
+    if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
+      // Move src known type to register
+      m_as.  Mov  (x2a(rd.reg(1)), src->type().toDataType());
+    }
+  }
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+static void shuffleArgs(vixl::MacroAssembler& a,
+                        ArgGroup& args,
+                        CppCall& call) {
+  assert_not_implemented(args.numStackArgs() == 0);
+
+  PhysReg::Map<PhysReg> moves;
+  PhysReg::Map<ArgDesc*> argDescs;
+
+  for (size_t i = 0; i < args.numRegArgs(); i++) {
+    auto kind = args[i].kind();
+    if (!(kind == ArgDesc::Kind::Reg  ||
+          kind == ArgDesc::Kind::Addr ||
+          kind == ArgDesc::Kind::TypeReg)) {
+      continue;
+    }
+    auto dstReg = args[i].dstReg();
+    auto srcReg = args[i].srcReg();
+    if (dstReg != srcReg) {
+      moves[dstReg] = srcReg;
+      argDescs[dstReg] = &args[i];
+    }
+    if (call.isIndirect() && dstReg == call.getReg()) {
+      // an indirect call uses an argument register for the func ptr.
+      // Use rAsm2 instead and update the CppCall
+      moves[rAsm2] = call.getReg();
+      call.updateCallIndirect(rAsm2);
+    }
+  }
+
+  auto const howTo = doRegMoves(moves, rAsm);
+
+  for (auto& how : howTo) {
+    auto srcReg = x2a(how.m_reg1);
+    auto dstReg = x2a(how.m_reg2);
+    if (how.m_kind == MoveInfo::Kind::Move) {
+      auto* argDesc = argDescs[how.m_reg2];
+      if (argDesc) {
+        auto kind = argDesc->kind();
+        if (kind == ArgDesc::Kind::Addr) {
+          emitRegGetsRegPlusImm(a, dstReg, srcReg, argDesc->imm().q());
+        } else {
+          if (argDesc->isZeroExtend()) {
+            // "Unsigned eXTend Byte"
+            a.Uxtb (dstReg, srcReg.W());
+          } else {
+            a.Mov  (dstReg, srcReg);
+          }
+        }
+        if (kind != ArgDesc::Kind::TypeReg) {
+          argDesc->markDone();
+        }
+      } else {
+        a.  Mov  (dstReg, srcReg);
+      }
+    } else {
+      emitXorSwap(a, dstReg, srcReg);
+    }
+  }
+
+  for (size_t i = 0; i < args.numRegArgs(); ++i) {
+    if (!args[i].done()) {
+      auto kind = args[i].kind();
+      auto dstReg = x2a(args[i].dstReg());
+      if (kind == ArgDesc::Kind::Imm) {
+        a.  Mov  (dstReg, args[i].imm().q());
+      } else {
+        not_implemented();
+      }
+    }
+  }
+}
+
+void CodeGenerator::cgCallNative(vixl::MacroAssembler& as,
+                                 IRInstruction* inst) {
+  using namespace NativeCalls;
+
+  Opcode opc = inst->op();
+  always_assert(CallMap::hasInfo(opc));
+
+  auto const& info = CallMap::info(opc);
+  ArgGroup argGroup = info.toArgGroup(curOpds(), inst);
+
+  auto call = [&]() -> CppCall {
+    switch (info.func.type) {
+    case FuncType::Call:
+      return CppCall(info.func.call);
+    case FuncType::SSA:
+      return CppCall(inst->src(info.func.srcIdx)->getValTCA());
+    }
+    not_reached();
+  }();
+
+  auto const dest = [&]() -> CallDest {
+    switch (info.dest) {
+      case DestType::None:  return kVoidDest;
+      case DestType::TV:    return callDestTV(inst->dst(0));
+      case DestType::SSA:   return callDest(inst->dst(0));
+      case DestType::SSA2:  return callDest2(inst->dst(0));
+    }
+    not_reached();
+  }();
+
+  cgCallHelper(as, call, dest, info.sync, argGroup,
+               m_state.liveRegs[m_curInst]);
+}
+
+void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
+                                 CppCall& call,
+                                 const CallDest& dstInfo,
+                                 SyncOptions sync,
+                                 ArgGroup& args,
+                                 RegSet toSave) {
+  assert(m_curInst->isNative());
+
+  auto dstReg0 = dstInfo.reg0;
+  auto dstReg1 = dstInfo.reg1;
+
+  if (debug) {
+    toSave.forEach([](PhysReg r) { assert(r.isGP()); });
+  }
+
+  toSave = toSave & kCallerSaved;
+  assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
+
+  // Use vixl's handy helper to push caller-save regs. It uses ldp/stp when
+  // possible.
+  CPURegList pushedRegs(vixl::CPURegister::kRegister, vixl::kXRegSize, 0);
+  toSave.forEach([&](PhysReg r) { pushedRegs.Combine(r); });
+
+  // The vixl helper requires you to pass it an even number of registers. If we
+  // have an odd number of regs to save, remove one from the list we pass, and
+  // save it ourselves.
+  folly::Optional<vixl::CPURegister> maybeOddOne;
+  if (pushedRegs.Count() % 2 == 1) {
+    maybeOddOne = pushedRegs.PopHighestIndex();
+  }
+  a.    PushCPURegList(pushedRegs);
+  if (maybeOddOne) {
+    // We're only storing a single reg, but the stack pointer must always be
+    // 16-byte aligned. This instruction subtracts 16 from the stack pointer,
+    // then writes the value.
+    a.  Str  (maybeOddOne.value(), MemOperand(vixl::sp, -16, vixl::PreIndex));
+  }
+
+  SCOPE_EXIT {
+    if (maybeOddOne) {
+      // Read the value, then add 16 to the stack pointer.
+      a.Ldr  (maybeOddOne.value(), MemOperand(vixl::sp, 16, vixl::PostIndex));
+    }
+    a.  PopCPURegList(pushedRegs);
+  };
+
+  for (size_t i = 0; i < args.numRegArgs(); i++) {
+    args[i].setDstReg(PhysReg{argReg(i)});
+  }
+  shuffleArgs(a, args, call);
+
+  auto syncPoint = emitCall(a, call);
+
+  if (RuntimeOption::HHProfServerEnabled || sync != SyncOptions::kNoSyncPoint) {
+    recordHostCallSyncPoint(a, syncPoint);
+  }
+
+  auto armDst0 = x2a(dstReg0);
+  DEBUG_ONLY auto armDst1 = x2a(dstReg1);
+
+  switch (dstInfo.type) {
+    case DestType::TV: not_implemented();
+    case DestType::SSA:
+      assert(!armDst1.IsValid());
+      if (armDst0.IsValid() && !armDst0.Is(vixl::x0)) a.Mov(armDst0, vixl::x0);
+      break;
+    case DestType::SSA2: not_implemented();
+    case DestType::None:
+      assert(!armDst0.IsValid() && !armDst1.IsValid());
+      break;
+  }
+}
+
+/*
+ * XXX copypasta but has to be in the class because of curOpd and changing that
+ * would make callsites real messy
+ */
+
+CallDest CodeGenerator::callDest(PhysReg reg0,
+                                 PhysReg reg1 /* = InvalidReg */) const {
+  return { DestType::SSA, reg0, reg1 };
+}
+
+CallDest CodeGenerator::callDest(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::SSA, curOpd(ssa).reg(0), curOpd(ssa).reg(1) };
+}
+
+CallDest CodeGenerator::callDestTV(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::TV, curOpd(ssa).reg(0), curOpd(ssa).reg(1) };
+}
+
+CallDest CodeGenerator::callDest2(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::SSA2, curOpd(ssa).reg(0), curOpd(ssa).reg(1) };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -755,7 +1076,7 @@ void CodeGenerator::emitLoadTypedValue(SSATmp* dst,
   }
 
   if (typeDstReg.IsValid()) {
-    m_as.  Ldr  (typeDstReg.W(), base[offset + TVOFF(m_type)]);
+    m_as.  Ldrb (typeDstReg.W(), base[offset + TVOFF(m_type)]);
   }
 
   if (valueDstReg.IsValid()) {
@@ -826,6 +1147,12 @@ void CodeGenerator::emitStore(vixl::Register base,
   } else {
     m_as.    Str  (x2a(curOpd(src).reg()), base[offset + TVOFF(m_data)]);
   }
+}
+
+void CodeGenerator::cgLdLoc(IRInstruction* inst) {
+  auto baseReg = x2a(curOpd(inst->src(0)).reg());
+  auto offset = localOffset(inst->extra<LdLoc>()->locId);
+  emitLoad(inst->dst(), baseReg, offset);
 }
 
 void CodeGenerator::cgLdStack(IRInstruction* inst) {
@@ -902,6 +1229,35 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   m_as.  Ldr  (dstReg, baseReg[offset + AROFF(m_func)]);
 }
 
+void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
+  auto dstReg = x2a(curOpd(inst->dst()).reg());
+  auto const name = inst->extra<LdFuncCachedData>()->name;
+  auto const ch = Unit::GetNamedEntity(name)->getFuncHandle();
+  vixl::Label noLookup;
+
+  if (!dstReg.IsValid()) {
+    m_as.  Ldr  (rAsm, rVmTl[ch]);
+    dstReg = rAsm;
+  } else {
+    m_as.  Ldr  (dstReg, rVmTl[ch]);
+  }
+  m_as.    Cbnz (dstReg, &noLookup);
+
+  const Func* (*const func)(const StringData*) = lookupUnknownFunc;
+  CppCall call(func);
+  cgCallHelper(
+    m_as,
+    call,
+    callDest(inst->dst()),
+    SyncOptions::kSyncPoint,
+    ArgGroup(curOpds())
+      .immPtr(inst->extra<LdFuncCached>()->name),
+    m_state.liveRegs[m_curInst]
+  );
+
+  m_as.    bind (&noLookup);
+}
+
 void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
   auto const dstReg  = x2a(curOpd(inst->dst()).reg());
   auto const baseReg = x2a(curOpd(inst->src(0)).reg());
@@ -935,31 +1291,20 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
-  auto spReg = x2a(curOpd(inst->src(0)).reg());
-  auto fpReg = x2a(curOpd(inst->src(1)).reg());
+  auto sp = inst->src(0);
+  auto fp = inst->src(1);
   auto pcOff = inst->extra<InterpOneData>()->bcOff;
 
   auto opc = *(curFunc()->unit()->at(pcOff));
   auto* interpOneHelper = interpOneEntryPoints[opc];
 
-  // This means push x30 (the link register) first, then x29. This mimics the
-  // x64 stack frame: return address higher in memory than saved FP.
-  m_as.   Push   (x30, x29);
-
-  // TODO(2966997): this really should be saving caller-save registers and
-  // basically doing everything else that cgCallHelper does. This only works
-  // now because no caller-saved registers are live.
-  m_as.   Mov    (rHostCallReg, reinterpret_cast<uint64_t>(interpOneHelper));
-  m_as.   Mov    (argReg(0), fpReg);
-  m_as.   Mov    (argReg(1), spReg);
-  m_as.   Mov    (argReg(2), pcOff);
-
-  // Note that sync points for HostCalls have to be recorded at the *start* of
-  // the instruction.
-  recordHostCallSyncPoint(m_as, m_as.frontier());
-  m_as.   HostCall(3);
-
-  m_as.   Pop    (x29, x30);
+  CppCall call(interpOneHelper);
+  cgCallHelper(m_as,
+               call,
+               callDest(InvalidReg),
+               SyncOptions::kSyncPoint,
+               ArgGroup(curOpds()).ssa(fp).ssa(sp).imm(pcOff),
+               m_state.liveRegs[m_curInst]);
 }
 
 void CodeGenerator::cgInterpOne(IRInstruction* inst) {
@@ -979,7 +1324,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   m_as.   Ldr   (rVmSp, rReturnReg[offsetof(VMExecutionContext, m_stack) +
                                    Stack::topOfStackOffset()]);
 
-  emitServiceReq(tx64->mainCode, REQ_RESUME);
+  emitServiceReq(tx64->code.main(), REQ_RESUME);
 }
 
 //////////////////////////////////////////////////////////////////////

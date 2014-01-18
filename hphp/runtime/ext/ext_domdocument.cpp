@@ -24,10 +24,11 @@
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/system/systemlib.h"
 
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
-#include "hphp/system/systemlib.h"
+#include "hphp/util/string-vsnprintf.h"
 
 #define DOM_XMLNS_NAMESPACE                             \
   (const xmlChar *) "http://www.w3.org/2000/xmlns/"
@@ -42,7 +43,9 @@
 #define DOM_NODESET XML_XINCLUDE_START
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(dom);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(dom, 20031129);
+
 ///////////////////////////////////////////////////////////////////////////////
 // parser error handling
 
@@ -65,7 +68,7 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
                                               const char *fmt,
                                               va_list ap) {
   std::string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
 
   /* remove any trailing \n */
   while (!msg.empty() && msg[msg.size() - 1] == '\n') {

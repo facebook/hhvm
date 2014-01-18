@@ -60,6 +60,7 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
 
 using HPHP::JIT::TCA;
 
@@ -555,13 +556,11 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
 void CodeGenerator::emitReqBindJcc(ConditionCode cc,
                                    const ReqBindJccData* extra) {
   auto& a = m_as;
-  assert(m_as.base() != m_astubs.base() &&
-         "ReqBindJcc only makes sense outside of astubs");
 
   prepareForTestAndSmash(m_mainCode, 0, TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a.frontier();
   auto const jccStub =
-    emitEphemeralServiceReq(tx64->stubsCode,
+    emitEphemeralServiceReq(tx64->code.stubs(),
                             tx64->getFreeStub(),
                             REQ_BIND_JMPCC_FIRST,
                             patchAddr,
@@ -863,30 +862,8 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
   Opcode opc = inst->op();
   always_assert(CallMap::hasInfo(opc));
 
-  const auto& info = CallMap::info(opc);
-  ArgGroup argGroup(curOpds());
-  for (auto const& arg : info.args) {
-    switch (arg.type) {
-    case ArgType::SSA:
-      argGroup.ssa(inst->src(arg.ival));
-      break;
-    case ArgType::TV:
-      argGroup.typedValue(inst->src(arg.ival));
-      break;
-    case ArgType::MemberKeyS:
-      argGroup.vectorKeyS(inst->src(arg.ival));
-      break;
-    case ArgType::MemberKeyIS:
-      argGroup.vectorKeyIS(inst->src(arg.ival));
-      break;
-    case ArgType::ExtraImm:
-      argGroup.imm(arg.extraFunc(inst));
-      break;
-    case ArgType::Imm:
-      argGroup.imm(arg.ival);
-      break;
-    }
-  }
+  auto const& info = CallMap::info(opc);
+  ArgGroup argGroup = info.toArgGroup(curOpds(), inst);
 
   auto call = [&]() -> CppCall {
     switch (info.func.type) {
@@ -2809,7 +2786,7 @@ void CodeGenerator::emitReqBindAddr(const Func* func,
                                     Offset offset) {
   tx64->setJmpTransID((TCA)&dest);
 
-  dest = emitServiceReq(tx64->stubsCode, REQ_BIND_ADDR,
+  dest = emitServiceReq(tx64->code.stubs(), REQ_BIND_ADDR,
                         &dest,
                         offset);
 }
@@ -2827,7 +2804,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       m_as.    cmpq(data->cases - 2, indexReg);
       prepareForSmash(m_mainCode, kJmpccLen);
       TCA def = emitEphemeralServiceReq(
-        tx64->stubsCode,
+        tx64->code.stubs(),
         tx64->getFreeStub(),
         REQ_BIND_JMPCC_SECOND,
         m_as.frontier(),
@@ -3177,8 +3154,8 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
 
-  emitServiceReq(tx64->stubsCode, REQ_RETRANSLATE_OPT, curFunc()->getFuncId(),
-                 extra->offset, extra->transId);
+  emitServiceReq(tx64->code.stubs(), REQ_RETRANSLATE_OPT,
+                 curFunc()->getFuncId(), extra->offset, extra->transId);
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
@@ -3970,8 +3947,8 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
   bool isImmutable = (func->isConst() && !func->type().isNull());
   const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
-  assert(m_as.base() == m_tx64->mainCode.base());
-  int32_t adjust = emitBindCall(m_tx64->mainCode, m_tx64->stubsCode,
+  assert(m_as.base() == m_tx64->code.main().base());
+  int32_t adjust = emitBindCall(m_tx64->code.main(), m_tx64->code.stubs(),
                                 srcKey, funcd, numArgs);
   if (adjust) {
     m_as.addq (adjust, rVmSp);
@@ -4861,8 +4838,7 @@ void CodeGenerator::cgLdAddr(IRInstruction* inst) {
 
 void CodeGenerator::cgLdLoc(IRInstruction* inst) {
   cgLoad(inst->dst(),
-         curOpd(inst->src(0)).reg()[localOffset(inst->extra<LdLoc>()->locId)],
-         inst->taken());
+         curOpd(inst->src(0)).reg()[localOffset(inst->extra<LdLoc>()->locId)]);
 }
 
 void CodeGenerator::cgLdLocAddr(IRInstruction* inst) {
@@ -6254,7 +6230,7 @@ void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
     args.imm(0);
   }
   TCA helperAddr = isWNext ? (TCA)iter_next_key<true> :
-    isNextK ? (TCA)iter_next_key<false> : (TCA)iter_next;
+    isNextK ? (TCA)iter_next_key_ind : (TCA)iter_next_ind;
   cgCallHelper(m_as, CppCall(helperAddr), callDest(inst->dst()),
     SyncOptions::kSyncPoint, args);
 }

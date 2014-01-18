@@ -21,7 +21,6 @@
 
 #include "folly/String.h"
 
-#include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {

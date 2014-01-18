@@ -50,10 +50,13 @@ bool SetDefaultLocale(const String& locale) {
 
 String u16(const char *u8, int32_t u8_len, UErrorCode &error) {
   error = U_ZERO_ERROR;
+  if (u8_len == 0) {
+    return empty_string;
+  }
   int32_t outlen = ucnv_toUChars(s_intl_request->utf8(),
                                  nullptr, 0, u8, u8_len, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
-    return uninit_null();
+    return null_string;
   }
   String ret = String(sizeof(UChar) * (outlen + 1), ReserveString);
   UChar *out = (UChar*)ret->mutableData();
@@ -61,7 +64,7 @@ String u16(const char *u8, int32_t u8_len, UErrorCode &error) {
   outlen = ucnv_toUChars(s_intl_request->utf8(),
                          out, outlen + 1, u8, u8_len, &error);
   if (U_FAILURE(error)) {
-    return uninit_null();
+    return null_string;
   }
   ret.setSize(outlen * sizeof(UChar));
   return ret;
@@ -69,18 +72,21 @@ String u16(const char *u8, int32_t u8_len, UErrorCode &error) {
 
 String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
   error = U_ZERO_ERROR;
+  if (u16_len == 0) {
+    return empty_string;
+  }
   int32_t outlen = ucnv_fromUChars(s_intl_request->utf8(),
                                    nullptr, 0, u16, u16_len, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
-    return uninit_null();
+    return null_string;
   }
-  String ret(outlen, ReserveString);
+  String ret(outlen + 1, ReserveString);
   char *out = ret->mutableData();
   error = U_ZERO_ERROR;
   outlen = ucnv_fromUChars(s_intl_request->utf8(),
                            out, outlen + 1, u16, u16_len, &error);
   if (U_FAILURE(error)) {
-    return uninit_null();
+    return null_string;
   }
   ret.setSize(outlen);
   return ret;
@@ -103,6 +109,14 @@ bool ustring_from_char(icu::UnicodeString& ret,
     return false;
   }
   return true;
+}
+
+double VariantToMilliseconds(CVarRef arg) {
+  if (arg.isNumeric(true)) {
+    return U_MILLIS_PER_SECOND * arg.toDouble();
+  }
+  // TODO: Handle object IntlCalendar and DateTime
+  return NAN;
 }
 
 } // namespace Intl

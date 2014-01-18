@@ -18,7 +18,6 @@
 #define incl_HPHP_UTIL_VDSO_H
 
 #include "hphp/util/compatibility.h"
-#include "hphp/util/util.h"
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////

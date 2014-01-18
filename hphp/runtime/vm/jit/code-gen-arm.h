@@ -43,6 +43,14 @@ struct CodeGenerator {
   void cgBlock(Block* block, std::vector<TransBCMapping>* bcMap);
 
  private:
+  template<class Then>
+  void ifThen(vixl::MacroAssembler& a, vixl::Condition cc, Then thenBlock) {
+    vixl::Label done;
+    a.  B   (&done, InvertCondition(cc));
+    thenBlock();
+    a.  bind(&done);
+  }
+
   template<class Then, class Else>
   void ifThenElse(vixl::MacroAssembler& a, vixl::Condition cc, Then thenBlock,
                   Else elseBlock) {
@@ -56,6 +64,19 @@ struct CodeGenerator {
   }
 
   const Func* curFunc() { return m_curInst->marker().func; }
+
+  CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
+  CallDest callDest(SSATmp* dst) const;
+  CallDest callDestTV(SSATmp* dst) const;
+  CallDest callDest2(SSATmp* dst) const;
+
+  void cgCallNative(vixl::MacroAssembler& as, IRInstruction* inst);
+  void cgCallHelper(vixl::MacroAssembler& a,
+                    CppCall& call,
+                    const CallDest& dstInfo,
+                    SyncOptions sync,
+                    ArgGroup& args,
+                    RegSet toSave);
 
   template<class Loc, class JmpFn>
   void emitTypeTest(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);

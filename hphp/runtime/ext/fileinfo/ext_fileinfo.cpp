@@ -260,7 +260,7 @@ const StaticString s_FILEINFO_RAW("FILEINFO_RAW");
 
 class fileinfoExtension : public Extension {
  public:
-  fileinfoExtension() : Extension("fileinfo") {}
+  fileinfoExtension() : Extension("fileinfo", "1.0.5-dev") {}
   virtual void moduleInit() {
     Native::registerConstant<KindOfInt64>(
       s_FILEINFO_NONE.get(), MAGIC_NONE

@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype: bool is_int ( mixed $var );
  * Description: Finds whether the given variable is an integer  
  */

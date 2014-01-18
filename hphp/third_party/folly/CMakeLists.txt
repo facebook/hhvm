@@ -31,13 +31,9 @@ list(REMOVE_ITEM files
 	${FOLLY_DIR}/experimental/io/AsyncIO.cpp
 	${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
 	${FOLLY_DIR}/experimental/io/IOBufQueue.cpp
-	${FOLLY_DIR}/experimental/symbolizer/SymbolizerTest.cpp
 	${FOLLY_DIR}/experimental/symbolizer/StackTrace.cpp
 	${FOLLY_DIR}/experimental/symbolizer/ElfUtil.cpp
 	${FOLLY_DIR}/experimental/symbolizer/SignalHandler.cpp
-    )
-list(REMOVE_ITEM cfiles
-	${FOLLY_DIR}/experimental/exception_tracer/StackTrace.c
     )
 
 # Remove non-portable items

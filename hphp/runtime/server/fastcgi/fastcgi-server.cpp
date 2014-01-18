@@ -118,12 +118,10 @@ void FastCGIConnection::readDataAvailable(size_t len) noexcept {
 
 void FastCGIConnection::readEOF() noexcept {
   shutdownTransport();
-  delete this;
 }
 
 void FastCGIConnection::readError(const TTransportException& ex) noexcept {
   shutdownTransport();
-  delete this;
 }
 
 bool FastCGIConnection::hasReadDataAvailable() {
@@ -148,6 +146,7 @@ void FastCGIConnection::onSessionError() {
 
 void FastCGIConnection::onSessionClose() {
   shutdownTransport();
+  delete this;
 }
 
 void FastCGIConnection::setMaxConns(int max_conns) {

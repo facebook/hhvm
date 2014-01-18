@@ -51,9 +51,9 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
   tx64->setJmpTransID(toSmash);
 
   TCA sr = (req == JIT::REQ_BIND_JMP
-            ? emitEphemeralServiceReq(tx64->stubsCode, tx64->getFreeStub(), req,
-                                      toSmash, dest.offset())
-            : emitServiceReq(tx64->stubsCode, req, toSmash, dest.offset()));
+            ? emitEphemeralServiceReq(tx64->code.stubs(), tx64->getFreeStub(),
+                                      req, toSmash, dest.offset())
+            : emitServiceReq(tx64->code.stubs(), req, toSmash, dest.offset()));
 
   Asm a { cb };
   if (cb.base() == stubs.base()) {

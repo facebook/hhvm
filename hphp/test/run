@@ -695,6 +695,25 @@ function num_cpus() {
   return 2; // default when we don't know how to detect
 }
 
+function make_header($str) {
+  return "\n\033[0;33m".$str."\033[0m\n";
+}
+
+function print_commands($tests, $options) {
+  print make_header("Run these by hand:");
+
+  foreach ($tests as $test) {
+    list($command, $_) = hhvm_cmd($options, $test);
+    if (isset($options['repo'])) {
+      $command .= " -vRepo.Authoritative=true ";
+      $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc",
+                             $command);
+      $command = hphp_cmd($options, $test)."\n".$command."\n";
+    }
+    print "$command\n";
+  }
+}
+
 function main($argv) {
 
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
@@ -773,6 +792,9 @@ function main($argv) {
          ^^^^      ^^^
 SHIP
 ."\n";
+      if (isset($options['verbose'])) {
+        print_commands($tests, $options);
+      }
     } else {
       $failed = array();
       foreach ($results as $result) {
@@ -781,11 +803,9 @@ SHIP
         }
       }
       asort($failed);
-      $header_start = "\n\033[0;33m";
-      $header_end = "\033[0m\n";
       print "\n".count($failed)." tests failed\n";
 
-      print $header_start."See the diffs:".$header_end.
+      print make_header("See the diffs:").
         implode("\n", array_map(
           function($test) { return 'cat '.$test.'.diff'; },
         $failed))."\n";
@@ -794,29 +814,17 @@ SHIP
         ? $options['failure-file']
         : tempnam('/tmp', 'test-failures');
       file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
-      print $header_start.'For xargs, list of failures is available using:'.
-        $header_end.'cat '.$failing_tests_file."\n";
+      print make_header('For xargs, list of failures is available using:').
+        'cat '.$failing_tests_file."\n";
 
-      print $header_start."Run these by hand:".$header_end;
+      print_commands($failed, $options);
 
-      foreach ($failed as $test) {
-        list($command, $_) = hhvm_cmd($options, $test);
-        if (isset($options['repo'])) {
-          $command .= " -vRepo.Authoritative=true ";
-          $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc",
-                                 $command);
-          $command = hphp_cmd($options, $test)."\n".$command."\n";
-        }
-        print "$command\n";
-      }
-
-      print $header_start."Re-run just the failing tests:".$header_end.
+      print make_header("Re-run just the failing tests:").
             $argv[0].' '.implode(' ', $failed)."\n";
 
       if (idx($options, 'mode') == 'automain') {
-        print $header_start
-          .'Automain caveat: wrapper script may change semantics'
-          .$header_end;
+        print make_header(
+          'Automain caveat: wrapper script may change semantics');
         print 'The automain wrapper script ('.__DIR__.'/pseudomain_wrapper.php)'
           .' may have changed behavior'."\n"
           .'(e.g. extra frames in backtraces) by moving code from '

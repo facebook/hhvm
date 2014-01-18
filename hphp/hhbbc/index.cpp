@@ -17,14 +17,18 @@
 
 #include <unordered_map>
 #include <mutex>
+#include <map>
 
-#include <boost/container/flat_map.hpp>
 #include <boost/next_prior.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <tbb/concurrent_hash_map.h>
+#include <tbb/concurrent_unordered_map.h>
 
 #include "folly/Format.h"
 #include "folly/Hash.h"
 #include "folly/Memory.h"
+
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
@@ -115,6 +119,17 @@ bool has_dep(Dep m, Dep t) {
   return static_cast<uintptr_t>(m) & static_cast<uintptr_t>(t);
 }
 
+/*
+ * Maps functions to contexts that depend on information about that
+ * function, with information about the type of dependency.
+ * (Currently only return types.)
+ */
+using DepMap =
+  tbb::concurrent_hash_map<
+    borrowed_ptr<const php::Func>,
+    std::map<Context,Dep>
+  >;
+
 //////////////////////////////////////////////////////////////////////
 
 PropState unknown_private_props(borrowed_ptr<const php::Class> cls) {
@@ -151,6 +166,9 @@ struct FuncInfo {
    * The best-known return type of the function, if we have any
    * information.  May be TBottom if the function is known to never
    * return (e.g. always throws).
+   *
+   * TODO(#3519344): we should use NativeInfo on the func for this if
+   * we have it.
    */
   Type returnTy = TInitGen;
 };
@@ -292,11 +310,7 @@ struct IndexData {
   > privatePropInfo;
 
   // For now we only need dependencies for function return types.
-  std::mutex dependencyLock;
-  std::unordered_map<
-    borrowed_ptr<const php::Func>,
-    boost::container::flat_map<Context,Dep>
-  > dependencyMap;
+  DepMap dependencyMap;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -309,8 +323,9 @@ void add_dependency(IndexData& data,
                     borrowed_ptr<const php::Func> src,
                     const Context& dst,
                     Dep newMask) {
-  G g(data.dependencyLock);
-  auto& current = data.dependencyMap[src][dst];
+  DepMap::accessor acc;
+  data.dependencyMap.insert(acc, src);
+  auto& current = acc->second[dst];
   current = current | newMask;
 }
 
@@ -326,10 +341,12 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
 std::vector<Context> find_deps(IndexData& data,
                                borrowed_ptr<const php::Func> src,
                                Dep mask) {
-  G g(data.dependencyLock);
   std::vector<Context> ret;
-  for (auto& kv : data.dependencyMap[src]) {
-    if (has_dep(kv.second, mask)) ret.push_back(kv.first);
+  DepMap::const_accessor acc;
+  if (data.dependencyMap.find(acc, src)) {
+    for (auto& kv : acc->second) {
+      if (has_dep(kv.second, mask)) ret.push_back(kv.first);
+    }
   }
   return ret;
 }
@@ -491,13 +508,14 @@ Index::~Index() {}
 folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
   auto name_only = [&] () -> folly::Optional<res::Class> {
-    // We can't check typeAlias yet and return Obj, because it breaks
-    // for builtin "primitive" interfaces like KeyedTraversable.
-    // TODO(Builtin)
+    // We know it has to name a class only if there's no type alias
+    // with this name.
     //
-    // if (!m_data->typeAliases.count(clsName)) {
-    //   return res::Class { this, SStringOr<ClassInfo>(clsName) };
-    // }
+    // TODO(#3519401): when we start unfolding type aliases, we could
+    // look at whether it is an alias for a specific class here.
+    if (!m_data->typeAliases.count(clsName)) {
+      return res::Class { this, SStringOr<ClassInfo>(clsName) };
+    }
     return folly::none;
   };
 
@@ -552,8 +570,7 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   if (cls->parentName) {
     auto const parent = resolve_class(ctx, cls->parentName);
     if (!parent.hasValue() || !parent->val.other()) {
-      // TODO(Builtin): this is possible right now for classes that
-      // extend from builtin interfaces or classes.
+      // Deriving from some sort of malformed base class.
       return name_only();
     }
     cinfo->parent = parent->val.other();
@@ -565,12 +582,8 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
     auto const iface = resolve_class(ctx, ifaceName);
     if (!iface || !iface->val.other() ||
         !(iface->val.other()->cls->attrs & AttrInterface)) {
-      /*
-       * Resolution failure.
-       *
-       * TODO(Builtin): classes that extend from builtin interfaces
-       * are currently hitting this path.
-       */
+      // Deriving from a malformed interface.  (E.g., "implements Foo"
+      // when Foo is actually a class.)
       return name_only();
     }
     cinfo->declInterfaces.push_back(iface->val.other());
@@ -678,20 +691,20 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
            * type for unique classes.
            */
           if (auto const rcls = resolve_class(ctx, tc.typeName())) {
-            return subObj(*rcls);
+            return interface_supports_non_objects(rcls->name())
+                ? TInitCell // none of these interfaces support Uninits
+                : subObj(*rcls);
           }
           /*
-           * If the class isn't unique, but there's no type aliases or
-           * class_alias calls, we could still use TObj.
-           *
-           * TODO(Builtin): this only will be possible when we are
-           * also checking the builtin names for pseudo-interfaces
-           * like KeyedTraversable.
+           * TODO: if the class isn't unique, but there's no type
+           * aliases or class_alias calls with that name, we could
+           * still use TObj.
            */
           return TInitCell;
         case KindOfResource: // Note, some day we may have resource hints.
           break;
-        default:                   break;
+        default:
+          break;
         }
         return TInitCell;
       }();

@@ -131,10 +131,7 @@ HttpServer::HttpServer()
     }
   }
 
-  if (RuntimeOption::EnableStaticContentCache) {
-    StaticContentCache::TheCache.load();
-  }
-
+  StaticContentCache::TheCache.load();
   hphp_process_init();
 
   Server::InstallStopSignalHandlers(m_pageServer);

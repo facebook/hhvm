@@ -16,6 +16,7 @@
 
 #include "hphp/compiler/expression/query_expression.h"
 #include "hphp/compiler/expression/simple_query_clause.h"
+#include "hphp/compiler/analysis/capture_extractor.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/runtime/base/complex-types.h"
 
@@ -34,11 +35,66 @@ ExpressionPtr QueryOrderby::clone() {
   return nullptr;
 }
 
+QueryExpression::QueryExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+                                 ExpressionPtr head, ExpressionPtr body)
+  : QueryOrderby(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(QueryExpression)) {
+  m_queryargs = ExpressionListPtr(
+    new ExpressionList(getScope(), getLocation())
+  );
+  m_expressions = ExpressionListPtr(
+    new ExpressionList(getScope(), getLocation())
+  );
+  m_expressions->addElement(head);
+
+  assert(body != nullptr && body->is(Expression::KindOfExpressionList));
+  ExpressionListPtr el(static_pointer_cast<ExpressionList>(body));
+  for (unsigned int i = 0; i < el->getCount(); i++) {
+    if ((*el)[i]) m_expressions->addElement((*el)[i]);
+  }
+
+}
+
+QueryExpression::QueryExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+                                 ExpressionListPtr clauses)
+  : QueryOrderby(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(QueryExpression)) {
+  m_queryargs = ExpressionListPtr(
+    new ExpressionList(getScope(), getLocation())
+  );
+  m_expressions = clauses;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
+
+ExpressionListPtr QueryExpression::getQueryArguments() {
+  if (m_queryargs->getCount() == 0) serializeQueryExpression();
+  return m_queryargs;
+}
+
+StringData* QueryExpression::getQueryString() {
+  if (m_querystr == nullptr) serializeQueryExpression();
+  return m_querystr;
+}
+
+void QueryExpression::serializeQueryExpression() {
+  CaptureExtractor ce;
+  auto qe = ce.rewrite(static_pointer_cast<Expression>(shared_from_this()));
+  m_queryargs->clearElements();
+  for (auto e : ce.getCapturedExpressions()) {
+    m_queryargs->addElement(e);
+  }
+  assert(m_queryargs->getCount() > 0); //syntax requires an initial from clause
+
+  std::ostringstream serialized;
+  CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
+  cg.setAstClassPrefix("Code"); //TODO: create option for this
+  qe->outputCodeModel(cg);
+  std::string s(serialized.str().c_str(), serialized.str().length());
+  m_querystr = makeStaticString(s);
+}
 
 void QueryOrderby::analyzeProgram(AnalysisResultPtr ar) {
   for (unsigned int i = 0; i < m_expressions->getCount(); i++) {
@@ -74,13 +130,6 @@ TypePtr QueryOrderby::inferTypes(AnalysisResultPtr ar, TypePtr type,
     }
   }
   return Type::Object;
-}
-
-ExpressionPtr QueryExpression::getCollection() const {
-  assert(m_expressions->getCount() > 0);
-  assert((*m_expressions)[0]->getKindOf() == Expression::KindOfFromClause);
-  auto fromClause = static_pointer_cast<FromClause>((*m_expressions)[0]);
-  return fromClause->getExpression();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

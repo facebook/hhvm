@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_result_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
@@ -361,6 +362,36 @@ static CallMap s_callMap {
     {FunctionExitSurpriseHook, &EventHook::onFunctionExit, DNone, SSync,
                                {{SSA, 0}}},
 };
+
+ArgGroup CallInfo::toArgGroup(const RegAllocInfo::RegMap& curOpds,
+                              IRInstruction* inst) const {
+  ArgGroup argGroup{curOpds};
+
+  for (auto const& arg : args) {
+    switch (arg.type) {
+    case ArgType::SSA:
+      argGroup.ssa(inst->src(arg.ival));
+      break;
+    case ArgType::TV:
+      argGroup.typedValue(inst->src(arg.ival));
+      break;
+    case ArgType::MemberKeyS:
+      argGroup.vectorKeyS(inst->src(arg.ival));
+      break;
+    case ArgType::MemberKeyIS:
+      argGroup.vectorKeyIS(inst->src(arg.ival));
+      break;
+    case ArgType::ExtraImm:
+      argGroup.imm(arg.extraFunc(inst));
+      break;
+    case ArgType::Imm:
+      argGroup.imm(arg.ival);
+      break;
+    }
+  }
+
+  return argGroup;
+}
 
 CallMap::CallMap(CallInfoList infos) {
   for (auto const& info : infos) {

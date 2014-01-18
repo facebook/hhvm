@@ -26,7 +26,6 @@
 #include "folly/ScopeGuard.h"
 #include "folly/String.h"
 
-#include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/text-color.h"
@@ -179,7 +178,7 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
 int Process::Exec(const std::string &cmd, const std::string &outf,
                   const std::string &errf) {
   std::vector<std::string> argvs;
-  Util::split(' ', cmd.c_str(), argvs);
+  folly::split(' ', cmd, argvs);
   if (argvs.empty()) {
     return -1;
   }
@@ -319,7 +318,7 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
   Exec("find", argv, nullptr, out);
 
   std::vector<std::string> files;
-  Util::split('\n', out.c_str(), files, true);
+  folly::split('\n', out, files, true);
 
   string ccmd = cmd;
   if (!matchAll) {
@@ -415,7 +414,7 @@ int Process::GetProcessRSS(pid_t pid) {
   }
 
   std::vector<std::string> lines;
-  Util::split('\n', status.c_str(), lines, true);
+  folly::split('\n', status, lines, true /* ignoreEmpty */);
   for (unsigned int i = 0; i < lines.size(); i++) {
     string &line = lines[i];
     if (line.find("VmRSS:") == 0) {

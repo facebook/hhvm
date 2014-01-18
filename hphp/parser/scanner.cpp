@@ -618,7 +618,7 @@ int Scanner::read(char *text, int &result, int max) {
 void Scanner::error(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  Util::string_vsnprintf(m_error, fmt, ap);
+  string_vsnprintf(m_error, fmt, ap);
   va_end(ap);
 }
 
@@ -626,7 +626,7 @@ void Scanner::warn(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   std::string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
   Logger::Warning("%s: %s (Line: %d, Char %d)", msg.c_str(),

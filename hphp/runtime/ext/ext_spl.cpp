@@ -113,7 +113,7 @@ void throw_spl_exception(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   std::string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
   throw Object(SystemLib::AllocExceptionObject(Variant(msg)));
@@ -392,7 +392,7 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
 
 static class SPLExtension : public Extension {
  public:
-  SPLExtension() : Extension("SPL") { }
+  SPLExtension() : Extension("SPL", "0.2") { }
   virtual void moduleLoad(Hdf config) {
     HHVM_ME(DirectoryIterator, hh_readdir);
     HHVM_ME(GlobIterator, count);

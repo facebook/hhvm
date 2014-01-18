@@ -41,7 +41,6 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/ext/mysql_stats.h"
-#include "hphp/runtime/base/shared-store-stats.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/base/rds.h"
@@ -157,8 +156,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
         "/stats-web:       turn on/off server page stats (CPU and gen time)\n"
         "/stats-mem:       turn on/off memory statistics\n"
-        "/stats-apc:       turn on/off APC statistics\n"
-        "/stats-apc-key:   turn on/off APC key statistics\n"
         "/stats-mcc:       turn on/off memcache statistics\n"
         "/stats-sql:       turn on/off SQL statistics\n"
         "/stats-mutex:     turn on/off mutex statistics\n"
@@ -181,13 +178,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/stats.html:      show server stats in HTML\n"
         "    (same as /stats.xml)\n"
 
-        "/apc-ss:          get apc size stats\n"
-        "/apc-ss-flat:     get apc size stats in flat format\n"
-        "/apc-ss-keys:     get apc size break-down on keys\n"
-        "/apc-ss-dump:     dump the size info on each key to /tmp/APC_details\n"
-        "                  only valid when EnableAPCSizeDetail is true\n"
-        "    keysample     optional, only dump keys that belongs to the same\n"
-        "                  group as <keysample>\n"
         "/const-ss:        get const_map_size\n"
         "/static-strings:  get number of static strings\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
@@ -205,6 +195,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/prof-exe:        returns sampled execution profile\n"
 #endif
         "/vm-tcspace:      show space used by translator caches\n"
+        "/vm-tcaddr:       show addresses of translation cache sections\n"
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
         "/vm-namedentities:show size of the NamedEntityTable\n"
@@ -331,10 +322,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "prof", 4) == 0 &&
         handleProfileRequest(cmd, transport)) {
-      break;
-    }
-    if (strncmp(cmd.c_str(), "apc-ss", 6) == 0 &&
-        handleAPCSizeRequest(cmd, transport)) {
       break;
     }
     if (strncmp(cmd.c_str(), "dump", 4) == 0 &&
@@ -605,8 +592,9 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     std::stringstream out;
     bool first = true;
     out << "{" << endl;
-    auto appendStat = [&](const char* name, int64_t value) {
-       out << (!first ? "," : "") << "  \"" << name << "\":" << value << endl;
+    auto appendStat = [&](const std::string& name, int64_t value) {
+       out << folly::format("{} \"{}\":{}\n",
+                            first ? "" : ",", name, value);
        first = false;
     };
     ServerPtr server = HttpServer::Server->getPageServer();
@@ -614,10 +602,12 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("queued", server->getQueuedJobs());
     auto* tx = JIT::tx64;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
-    appendStat("tc-hotsize", tx->getHotCodeSize());
-    appendStat("tc-size", tx->getCodeSize());
-    appendStat("tc-profsize", tx->getProfCodeSize());
-    appendStat("tc-stubsize", tx->getStubSize());
+    tx->code.forEachBlock([&](const char* name, const CodeBlock& a) {
+      auto isMain = strncmp(name, "main", 4) == 0;
+      appendStat(folly::format("tc-{}size",
+                               isMain ? "" : name).str(),
+                 a.used());
+    });
     appendStat("targetcache", RDS::usedBytes());
     appendStat("rds", RDS::usedBytes()); // TODO(#2966387): temp double logging
     appendStat("units", Eval::FileRepository::getLoadedFiles());
@@ -703,12 +693,6 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
   if (cmd == "stats-mem") {
     toggle_switch(transport, RuntimeOption::EnableMemoryStats);
     return true;
-  }
-  if (cmd == "stats-apc") {
-    return toggle_switch(transport, RuntimeOption::EnableAPCStats);
-  }
-  if (cmd == "stats-apc-key") {
-    return toggle_switch(transport, RuntimeOption::EnableAPCKeyStats);
   }
   if (cmd == "stats-mcc") {
     return toggle_switch(transport, RuntimeOption::EnableMemcacheStats);
@@ -820,52 +804,6 @@ bool AdminRequestHandler::handleCPUProfilerRequest(const std::string &cmd,
 }
 #endif
 
-///////////////////////////////////////////////////////////////////////////////
-// APC size profiling
-
-bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
-                                                Transport *transport) {
-  if (!RuntimeOption::EnableAPCSizeStats &&
-      (cmd == "apc-ss" || cmd == "apc-ss-keys" || cmd == "apc-ss-dump" ||
-       cmd == "apc-ss-flat")) {
-    transport->sendString("Not Enabled\n");
-    return true;
-  }
-  if (cmd == "apc-ss") {
-    std::string result = SharedStoreStats::report_basic();
-    transport->sendString(result);
-    return true;
-  }
-  if (cmd == "apc-ss-flat") {
-    std::string result = SharedStoreStats::report_basic_flat();
-    transport->sendString(result);
-    return true;
-  }
-  if (cmd == "apc-ss-keys") {
-    if (!RuntimeOption::EnableAPCSizeGroup) {
-      transport->sendString("Not Enabled\n");
-      return true;
-    }
-    std::string result = SharedStoreStats::report_keys();
-    transport->sendString(result);
-    return true;
-  }
-  if (cmd == "apc-ss-dump") {
-    if (!RuntimeOption::EnableAPCSizeDetail) {
-      transport->sendString("Not Enabled\n");
-      return true;
-    }
-    string key_sample = transport->getParam("keysample");
-    if (SharedStoreStats::snapshot("/tmp/APC_details", key_sample)) {
-      transport->sendString("Done\n");
-    } else {
-      transport->sendString("Failed\n");
-    }
-    return true;
-  }
-  return false;
-}
-
 bool AdminRequestHandler::handleConstSizeRequest (const std::string &cmd,
                                                   Transport *transport) {
   if (!apcExtension::EnableConstLoad && cmd == "const-ss") {
@@ -903,6 +841,10 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
     transport->sendString(JIT::tx64->getUsage());
+    return true;
+  }
+  if (cmd == "vm-tcaddr") {
+    transport->sendString(JIT::tx64->getTCAddrs());
     return true;
   }
   if (cmd == "vm-namedentities") {

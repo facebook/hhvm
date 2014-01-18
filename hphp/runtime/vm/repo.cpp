@@ -18,6 +18,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/repo-schema.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 
@@ -423,12 +424,17 @@ void Repo::initCentral() {
   }
 
   // Database initialization failed; this is an unrecoverable state.
-  for (std::vector<std::string>::const_iterator it = failPaths.begin();
-       it != failPaths.end(); ++it) {
+  for (auto const& p : failPaths) {
     Logger::Error("Failed to initialize central HHBC repository at '%s'",
-                  (*it).c_str());
+                  p.c_str());
   }
-  exit(1);
+  // TODO(#3518905): this fails in practice sometimes if file
+  // descriptor limits are too low, which is why the assertion
+  // suggests that.  But we should restructure this code so we know
+  // here why each failPath failed and can log the real reasons
+  // instead of guessing.
+  always_assert(!"Failed to connect to HHBC repo (possibly "
+                 "out of file descriptors?); aborting");
 }
 
 static int busyHandler(void* opaque, int nCalls) {

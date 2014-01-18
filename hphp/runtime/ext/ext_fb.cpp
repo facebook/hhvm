@@ -44,7 +44,9 @@
 #include "hphp/parser/parser.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(fb);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(fb, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;

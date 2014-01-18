@@ -634,7 +634,8 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
 
 void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
   if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhirTracelets)) {
-    FTRACE(0, "{} {} {}\n", fp->m_func->fullName()->data(), pcOff, rip);
+    FTRACE(0, "{} {} {} {} {}\n",
+           fp->m_func->fullName()->data(), pcOff, rip, fp, sp);
   }
   checkFrame(fp, sp, /*checkLocals*/true);
 }

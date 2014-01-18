@@ -1,10 +1,4 @@
 <?php
-ini_set('session.save_handler', files);
-
-ini_set('session.serialize_handler', php);
-
-ini_set('session.use_cookies', 0);
-
 
 
 echo "*** Test substituting argument 1 with object values ***\n";

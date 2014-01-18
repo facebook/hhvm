@@ -305,8 +305,8 @@ struct Index {
    * Refine the return type for a function, based on a round of
    * analysis.
    *
-   * No threads should be reading from this Index when this function
-   * is called.
+   * No other threads should be calling functions on this Index when
+   * this function is called.
    *
    * Returns: the set of Contexts that depended on the return type of
    * this php::Func.
@@ -317,8 +317,8 @@ struct Index {
    * Refine the private property types for a class, based on a round
    * of analysis.
    *
-   * No threads should be reading from this Index when this function
-   * is called.
+   * No other threads should be calling functions on this Index when
+   * this function is called.
    */
   void refine_private_props(borrowed_ptr<const php::Class> cls,
                             const PropState&);

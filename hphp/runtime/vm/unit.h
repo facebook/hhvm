@@ -784,6 +784,12 @@ class UnitEmitter {
   explicit UnitEmitter(const MD5& md5);
   ~UnitEmitter();
 
+  bool isASystemLib() const {
+    static const char systemlib_prefix[] = "/:systemlib";
+    return !strncmp(getFilepath()->data(),
+      systemlib_prefix, sizeof systemlib_prefix - 1);
+  }
+
   void addTrivialPseudoMain();
   int repoId() const { return m_repoId; }
   void setRepoId(int repoId) { m_repoId = repoId; }

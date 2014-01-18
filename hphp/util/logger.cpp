@@ -15,12 +15,13 @@
 */
 #include "hphp/util/logger.h"
 
+#include <syslog.h>
+
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/exception.h"
-#include "hphp/util/util.h"
 #include "hphp/util/text-color.h"
-#include <syslog.h>
+#include "hphp/util/string-vsnprintf.h"
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
@@ -66,7 +67,7 @@ void Logger::Log(LogLevelType level, const char *fmt, va_list ap) {
   if (!IsEnabled()) return;
 
   std::string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   Log(level, msg, nullptr);
 }
 
@@ -74,7 +75,7 @@ void Logger::LogEscapeMore(LogLevelType level, const char *fmt, va_list ap) {
   if (!IsEnabled()) return;
 
   std::string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   Log(level, msg, nullptr, true, true);
 }
 

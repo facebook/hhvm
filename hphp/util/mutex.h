@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_MUTEX_H_
 #define incl_HPHP_MUTEX_H_
 
-#include "hphp/util/assertions.h"
-#include "hphp/util/util.h"
 #include <pthread.h>
 #include <time.h>
 #include <tbb/concurrent_hash_map.h>
@@ -26,6 +24,8 @@
 #include "pthread-spin-lock-shim.h"
 #endif
 
+#include "hphp/util/portability.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/rank.h"
 
 namespace HPHP {

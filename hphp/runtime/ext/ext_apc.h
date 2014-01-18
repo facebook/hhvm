@@ -27,7 +27,7 @@ namespace HPHP {
 
 class apcExtension : public Extension {
  public:
-  apcExtension() : Extension("apc") {}
+  apcExtension() : Extension("apc", "4.0.2") {}
 
   static bool Enable;
   static bool EnableConstLoad;

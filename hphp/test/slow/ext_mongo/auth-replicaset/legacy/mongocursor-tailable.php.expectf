@@ -1,0 +1,2 @@
+%s: MongoDB::createCollection(): This method now accepts arguments as an options array instead of the three optional arguments for capped, size and max elements in %smongocursor-tailable.php on line %d
+AWAIT DATA WAITED

@@ -445,6 +445,9 @@ static void pcre_log_error(const char *func, int line, int pcre_code,
                            const char *repl, int repl_size,
                            int arg1 = 0, int arg2 = 0,
                            int arg3 = 0, int arg4 = 0) {
+  if (!RuntimeOption::EnableHipHopSyntax) {
+    return;
+  }
   const char *escapedPattern;
   const char *escapedSubject;
   const char *escapedRepl;
@@ -742,7 +745,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
                        flags, start_offset, g_notempty, global);
       }
       pcre_handle_exec_error(count);
-      break;
+      return false;
     }
 
     /* If we have matched an empty string, mimic what Perl's /g options does.

@@ -17,6 +17,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/vdso.h"
 
+#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -83,6 +84,14 @@ int64_t gettime_diff_us(const timespec &start, const timespec &end) {
   int64_t dsec = end.tv_sec - start.tv_sec;
   int64_t dnsec = end.tv_nsec - start.tv_nsec;
   return dsec * 1000000 + dnsec / 1000;
+}
+
+int fadvise_dontneed(int fd, off_t len) {
+#if defined(__FreeBSD__) || defined(__APPLE__)
+  return 0;
+#else
+  return posix_fadvise(fd, 0, len, POSIX_FADV_DONTNEED);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

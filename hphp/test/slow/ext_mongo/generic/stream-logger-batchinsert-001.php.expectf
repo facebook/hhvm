@@ -1,0 +1,26 @@
+log_batchinsert
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;-;.;%d"
+  ["type"]=>
+  int(1)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+int(201)
+array(1) {
+  ["flags"]=>
+  int(1)
+}
+array(1) {
+  ["continueOnError"]=>
+  bool(true)
+}
+array(1) {
+  ["continueOnError"]=>
+  int(2)
+}

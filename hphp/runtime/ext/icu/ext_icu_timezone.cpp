@@ -1,5 +1,6 @@
 #include "hphp/runtime/ext/icu/ext_icu_timezone.h"
 #include "hphp/runtime/ext/icu/ext_icu_iterator.h"
+#include "hphp/runtime/ext/ext_datetime.h"
 
 #include <unicode/locid.h>
 
@@ -13,6 +14,54 @@ IntlTimeZone *IntlTimeZone::Get(Object obj) {
 
 Object IntlTimeZone::wrap() {
   return WrapResData(s_IntlTimeZone.get());
+}
+
+icu::TimeZone* IntlTimeZone::ParseArg(CVarRef arg,
+                                      const String& funcname,
+                                      intl_error &err) {
+  String tzstr;
+
+  if (arg.isNull()) {
+    tzstr = f_date_default_timezone_get();
+  } else if (arg.isObject()) {
+    Object objarg = arg.toObject();
+    if (auto obj = IntlTimeZone::Get(objarg)) {
+      return obj->timezone();
+    }
+    if (auto dtz = objarg.getTyped<c_DateTimeZone>(true, true)) {
+      tzstr = dtz->t_getname();
+    } else {
+      tzstr = arg.toString();
+    }
+  } else {
+    tzstr = arg.toString();
+  }
+
+  UErrorCode error = U_ZERO_ERROR;
+  icu::UnicodeString id;
+  if (!Intl::ustring_from_char(id, tzstr, error)) {
+    err.code = error;
+    err.custom_error_message = funcname +
+      String(": Time zone identifier given is not a "
+             "valid UTF-8 string", CopyString);
+    return nullptr;
+  }
+  auto ret = icu::TimeZone::createTimeZone(id);
+  if (!ret) {
+    err.code = U_MEMORY_ALLOCATION_ERROR;
+    err.custom_error_message = funcname +
+      String(": could not create time zone", CopyString);
+    return nullptr;
+  }
+  icu::UnicodeString gottenId;
+  if (ret->getID(gottenId) != id) {
+    err.code = U_ILLEGAL_ARGUMENT_ERROR;
+    err.custom_error_message = funcname +
+      String(": no such time zone: '", CopyString) + arg.toString() + "'";
+    delete ret;
+    return nullptr;
+  }
+  return ret;
 }
 
 #define TZ_GET(dest, src, def) \

@@ -1,0 +1,1 @@
+%s: Argument 2 passed to MongoCollection::ensureIndex() must be %s array, boolean given in %sbug00802.php on line %d

@@ -1,0 +1,5 @@
+HipHop Fatal error: %s
+Stack trace:
+#0 %sconnection-single_error-002.php(%d): Mongo->__construct('foofas:5345')
+#1 {main}
+  thrown in %sconnection-single_error-002.php on line %d

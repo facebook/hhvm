@@ -217,7 +217,6 @@ public:
   static std::string ErrorDocument500;
   static std::string FatalErrorMessage;
   static std::string FontPath;
-  static bool EnableStaticContentCache;
   static bool EnableStaticContentFromDisk;
   static bool EnableOnDemandUncompress;
   static bool EnableStaticContentMMap;

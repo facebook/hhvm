@@ -45,6 +45,7 @@
 #include "folly/Likely.h"
 
 #include "hphp/util/portability.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP { namespace Util {
 
@@ -88,12 +89,6 @@ bool mkdir(const std::string &path, int mode = 0777);
  */
 void syncdir(const std::string &dest, const std::string &src,
              bool keepSrc = false);
-
-/**
- * Drop the cached pages associated with the file from the file system cache.
- */
-int drop_cache(int fd, off_t len = 0);
-int drop_cache(FILE *f, off_t len = 0);
 
 /**
  * Copy srcfile to dstfile, return 0 on success, -1 otherwise
@@ -229,8 +224,6 @@ const void *buffer_append(const void *buf1, int size1,
  */
 void string_printf(std::string &msg,
                    const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-void string_vsnprintf(std::string &msg,
-                      const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
 
 /**
  * Escaping strings for code generation.
@@ -276,31 +269,6 @@ T& getDataRef(void* base, unsigned offset) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-class LogFileFlusher {
-public:
-  LogFileFlusher() : m_bytesWritten(0) {}
-  virtual ~LogFileFlusher() {}
-
-  void recordWriteAndMaybeDropCaches(int fd, int bytes);
-  inline void recordWriteAndMaybeDropCaches(FILE* f, int bytes) {
-    recordWriteAndMaybeDropCaches(fileno(f), bytes);
-  }
-
-  enum {
-    kDropCacheTail = 1 * 1024 * 1024
-  };
-
-  static int DropCacheChunkSize;
-protected:
-  // For testing
-  virtual void dropCache(int fd, off_t len) {
-    Util::drop_cache(fd, len);
-  }
-
-private:
-  std::atomic<int> m_bytesWritten;
-};
 }
 
 #endif

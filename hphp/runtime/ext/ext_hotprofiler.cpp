@@ -73,8 +73,8 @@
 
 namespace HPHP {
 
-IMPLEMENT_DEFAULT_EXTENSION(hotprofiler);
-IMPLEMENT_DEFAULT_EXTENSION(xhprof);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(hotprofiler, NO_VERSION_YET);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(xhprof, 0.9.4);
 
 using std::vector;
 using std::string;

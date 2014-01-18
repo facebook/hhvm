@@ -8,7 +8,7 @@ array(6) {
     ["originalClass"]=>
     string(8) "my_child"
     ["info"]=>
-    array(16) {
+    array(17) {
       ["name"]=>
       string(17) "my_other_override"
       ["access"]=>
@@ -44,6 +44,13 @@ array(6) {
       int(20)
       ["line2"]=>
       int(20)
+      ["prototype"]=>
+      array(2) {
+        ["class"]=>
+        string(8) "my_class"
+        ["name"]=>
+        string(17) "my_other_override"
+      }
     }
   }
   [1]=>
@@ -149,7 +156,7 @@ array(6) {
     ["originalClass"]=>
     string(8) "my_child"
     ["info"]=>
-    array(16) {
+    array(17) {
       ["name"]=>
       string(18) "my_override_method"
       ["access"]=>
@@ -185,6 +192,13 @@ array(6) {
       int(15)
       ["line2"]=>
       int(15)
+      ["prototype"]=>
+      array(2) {
+        ["class"]=>
+        string(7) "my_base"
+        ["name"]=>
+        string(18) "my_override_method"
+      }
     }
   }
   [4]=>

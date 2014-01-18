@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/pprof-server.h"
-#include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/hphp-array-defs.h"
 

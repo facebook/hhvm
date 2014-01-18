@@ -231,6 +231,12 @@ int init_closure(ActRec* ar, TypedValue* sp);
 
 void defClsHelper(PreClass*);
 
+/*
+ * Returns whether the interface named `s' supports any non-object
+ * types.
+ */
+bool interface_supports_non_objects(const StringData* s);
+
 bool interface_supports_array(const StringData* s);
 bool interface_supports_string(const StringData* s);
 bool interface_supports_int(const StringData* s);

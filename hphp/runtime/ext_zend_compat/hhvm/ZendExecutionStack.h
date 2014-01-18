@@ -33,6 +33,7 @@ struct ZendStackEntry {
 class ZendExecutionStack : public HPHP::RequestEventHandler {
   public:
     static zval* getArg(int i);
+    static int numArgs();
 
     static void push(void* z);
     static void* pop();

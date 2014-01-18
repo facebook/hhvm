@@ -1,0 +1,15 @@
+NULL
+array(6) {
+  ["host"]=>
+  string(%d) "%s"
+  ["port"]=>
+  int(%d)
+  ["health"]=>
+  int(%d)
+  ["state"]=>
+  int(%d)
+  ["ping"]=>
+  int(%d)
+  ["lastPing"]=>
+  int(%d)
+}

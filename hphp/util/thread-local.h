@@ -20,7 +20,6 @@
 #include <pthread.h>
 #include "hphp/util/exception.h"
 #include <errno.h>
-#include "hphp/util/util.h"
 #include "folly/String.h"
 #include <boost/aligned_storage.hpp>
 

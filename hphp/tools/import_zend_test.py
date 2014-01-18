@@ -23,7 +23,7 @@ no_import = (
     '/ext/standard/tests/general_functions/usleep_error.phpt',
     '/ext/zlib/tests/gzgetc_basic.phpt',
     '/ext/zlib/tests/gzgets_basic.phpt',
-    
+
     # too large input
     '/tests/lang/024.phpt',
 
@@ -418,6 +418,8 @@ other_files = (
     '/Zend/tests/ns_067.inc',
     '/Zend/tests/ns_069.inc',
     '/Zend/tests/unset.inc',
+    '/ext/bz2/tests/004_1.txt.bz2',
+    '/ext/bz2/tests/004_2.txt.bz2',
     '/ext/calendar/tests/skipif.inc',
     '/ext/curl/tests/curl_testdata1.txt',
     '/ext/curl/tests/curl_testdata2.txt',
@@ -566,6 +568,10 @@ other_files = (
     '/ext/standard/tests/file/test2.csv',
     '/ext/standard/tests/file/test3.csv',
     '/ext/standard/tests/general_functions/004.data',
+    '/ext/standard/tests/general_functions/bug49692.ini',
+    '/ext/standard/tests/general_functions/bug52138.data',
+    '/ext/standard/tests/general_functions/parse_ini_basic.data',
+    '/ext/standard/tests/general_functions/parse_ini_booleans.data',
     '/ext/standard/tests/image/246x247.png',
     '/ext/standard/tests/image/384x385.png',
     '/ext/standard/tests/image/bug13213.jpg',
@@ -909,8 +915,9 @@ def walk(filename, source_dir):
         test = test.replace('SplFileObject__fgetcsv.csv',
             os.path.basename(full_dest_filename).replace('.php', '.csv'))
     if '/ext/spl/tests/SplFileObject_' in full_dest_filename:
-        test = test.replace('testdata.csv',
-            os.path.basename(full_dest_filename).replace('.php', '.csv'))
+        new_path = os.path.basename(full_dest_filename).replace('.php', '.csv')
+        test = test.replace('testdata.csv', new_path)
+        test = test.replace('csv_control_data.csv', new_path)
     if '/ext/spl/tests/SplFileObject_rewind_error001.php' in full_dest_filename:
         test = test.replace("?>", "unlink('SplFileObject_rewind_error001.csv');\n?>")
     if '/ext/zlib/tests/gzfile_basic.php' in full_dest_filename:

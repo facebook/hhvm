@@ -48,6 +48,19 @@
 /* true multithread-shared globals */
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 
+/* This probably should be initialized somewhere, but I didn't find a suitable
+ * place so it's wrapped in a function for now */
+zend_class_entry *get_zend_standard_class_def() {
+  if (!zend_standard_class_def) {
+    zend_class_entry class_entry;
+
+    INIT_CLASS_ENTRY(class_entry, "stdClass", nullptr);
+    zend_standard_class_def =
+      zend_register_internal_class(&class_entry TSRMLS_CC);
+  }
+  return zend_standard_class_def;
+}
+
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy) {
   if (Z_TYPE_P(expr)==IS_STRING) {
     *use_copy = 0;

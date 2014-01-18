@@ -31,7 +31,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * DataType is the type tag for a TypedValue (see hphp-value.h).
+ * DataType is the type tag for a TypedValue (see typed-value.h).
  */
 enum DataType : int8_t {
   KindOfClass            = -13,

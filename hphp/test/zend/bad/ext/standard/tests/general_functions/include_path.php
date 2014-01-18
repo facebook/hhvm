@@ -1,6 +1,4 @@
 <?php
-ini_set('include_path', .);
-
 
 var_dump(get_include_path());
 var_dump(get_include_path("var"));

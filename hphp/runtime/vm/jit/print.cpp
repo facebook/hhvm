@@ -78,11 +78,9 @@ static std::string constToString(Type t, const ConstData* c) {
     os << "NamedEntity(" << ne << ")";
   } else if (t <= Type::TCA) {
     TCA tca = c->as<TCA>();
-    auto rawName = getNativeFunctionName(tca);
-    std::string name(rawName);
-    delete [] rawName;
-
+    auto name = getNativeFunctionName(tca);
     const char* hphp = "HPHP::";
+
     if (!name.compare(0, strlen(hphp), hphp)) {
       name = name.substr(strlen(hphp));
     }

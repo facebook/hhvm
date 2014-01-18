@@ -89,6 +89,7 @@ require_once $FBCODE_ROOT.'/hphp/tools/command_line_lib.php';
 require_once __DIR__.'/SortedIterator.php';
 require_once __DIR__.'/utils.php';
 require_once __DIR__.'/TestFindModes.php';
+require_once __DIR__.'/spyc/Spyc.php';
 
 type Color = string;
 class Colors {
@@ -159,9 +160,6 @@ class PHPUnitPatterns {
   static string $test_name_pattern =
   "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\".*?\"|#[0-9]+))?/";
 
-  static string $pear_test_name_pattern =
- "/[\-_a-zA-Z0-9\.\/]*\.phpt/";
-
   // Matches:
   //    E
   //    .
@@ -190,9 +188,6 @@ class PHPUnitPatterns {
   // Paris and Idiorm have tests with ending digits (e.g. Test53.php)
   static string $test_file_pattern =
                 "/.*(\.phpt|Test[\d]*\.php|test[\d]*\.php)$/";
-  static string $pear_test_file_pattern = "/.*(\.phpt)$/";
-  static string $facebook_sdk_test_file_pattern = "/.*(tests\.php)$/";
-  static string $mediawiki_test_file_pattern = "/.*(\Test.*\.php)$/";
 
   static string $tests_ok_skipped_inc_pattern =
                "/^OK, but incomplete or skipped tests!/";
@@ -214,6 +209,7 @@ class PHPUnitPatterns {
 }
 
 class Options {
+  public static string $frameworks_root;
   // seconds to run any individual test for any framework
   public static int $timeout = 90;
   public static bool $verbose = false;
@@ -228,14 +224,13 @@ class Options {
   public static bool $test_by_single_test = false;
   public static string $results_root;
   public static string $script_errors_file;
-  public static Map $framework_code_commits;
-  public static Map $original_framework_code_commits;
+  public static array $framework_info;
+  public static array $original_framework_info;
 
   public static function parse(OptionInfoMap $options, array $argv): Vector {
-    self::$framework_code_commits = Map::fromArray(json_decode(
-      file_get_contents(__DIR__."/frameworks.json"), true));
-    self::$original_framework_code_commits =
-      self::$framework_code_commits->toMap();
+    self::$frameworks_root = __DIR__.'/frameworks';
+    self::$framework_info = Spyc::YAMLLoad(__DIR__."/frameworks.yaml");
+    self::$original_framework_info = self::$framework_info;
     self::$results_root = __DIR__."/results";
     // Put any script error to a file when we are in a mode like --csv and
     // want to control what gets printed to something like STDOUT.
@@ -374,7 +369,6 @@ abstract class Framework {
   private string $test_file_pattern;
   private ?Map $current_test_statuses = null;
   private Set $test_files = null;
-  private Map $env_vars;
 
   private string $install_root;
   private string $git_path;
@@ -382,45 +376,70 @@ abstract class Framework {
   private string $git_branch;
   private Set $blacklist;
   private Set $clownylist;
-  private Vector $pull_requests;
-  private Map $args_for_tests;
-  private string $test_command;
+  private array<int, array<string, string>> $pull_requests;
   private Set $individual_tests = null;
   private string $bootstrap_file = null;
   private string $config_file = null;
 
-  // $name, $parallel and $test_fine_mode are constructor promoted
+  // $name, $parallel, $test_fine_mode, etc. are constructor promoted
   // Assume the framework unit tests will be run in parallel until otherwise
   // proven. Also assume that tests will be found by reflecting over the
   // framework. However, some require that we use php tokens or are found via
   // phpt files.
   protected function __construct(private string $name,
+                                 private string $test_command = null,
+                                 private Map $env_vars = null,
+                                 private Map $args_for_tests = null,
                                  private bool $parallel = true,
                                  private string $test_find_mode =
                                                 TestFindModes::REFLECTION) {
 
     // Get framework information and set all needed properties. Beyond
-    // the install root, git info and test search roots, the other
+    // the install root, git info, test roots, etc., the other
     // properties are optional and may or may not be set
-    $info = $this->getInfo();
-    if (!$info->containsKey("install_root") ||
-        !$info->containsKey("git_path") ||
-        !$info->containsKey("test_path")) {
+    if (!array_key_exists("install_root", Options::$framework_info[$name]) ||
+        !array_key_exists("test_root", Options::$framework_info[$name]) ||
+        !array_key_exists('url', Options::$framework_info[$name]) ||
+        !array_key_exists('commit', Options::$framework_info[$name]) ||
+        !array_key_exists('branch', Options::$framework_info[$name])) {
       throw new Exception("Provide install, git and test file search info");
     }
 
     // Set Framework information for install. These are the five necessary
     // properties for a proper install, with pull_requests being optional.
-    $this->setInstallRoot($info->get("install_root"));
-    $this->setGitPath($info->get("git_path"));
-    $this->setGitCommit(Options::$framework_code_commits[$name]['commit']);
-    $this->setGitBranch(Options::$framework_code_commits[$name]['branch']);
-    $this->setPullRequests($info->get("pull_requests"));
-    $this->setBlacklist($info->get("blacklist"));
-    $this->setClownylist($info->get("clownylist"));
-    $this->setTestNamePattern($info->get("test_name_pattern"));
-    $this->setTestFilePattern($info->get("test_file_pattern"));
-    $this->setTestPath($info->get("test_path"));
+    $this->setInstallRoot(Options::$framework_info[$name]["install_root"]);
+    $this->setGitPath(Options::$framework_info[$name]['url']);
+    $this->setGitCommit(Options::$framework_info[$name]['commit']);
+    $this->setGitBranch(Options::$framework_info[$name]['branch']);
+    $this->setTestPath(Options::$framework_info[$name]["test_root"]);
+    if (array_key_exists('pull_requests', Options::$framework_info[$name])) {
+      $this->setPullRequests(Options::$framework_info[$name]["pull_requests"]);
+    } else {
+      $this->setPullRequests(null);
+    }
+    // Get some more possible framework test information
+    if (array_key_exists('blacklist', Options::$framework_info[$name])) {
+      $this->setBlacklist(Options::$framework_info[$name]["blacklist"]);
+    } else {
+       $this->setBlacklist(null);
+    }
+    if (array_key_exists('clowns', Options::$framework_info[$name])) {
+      $this->setClownylist(Options::$framework_info[$name]["clowns"]);
+    } else {
+      $this->setClownylist(null);
+    }
+    if (array_key_exists('test_name_regex', Options::$framework_info[$name])) {
+      $this->setTestNamePattern(
+        Options::$framework_info[$name]["test_name_regex"]);
+    } else {
+      $this->setTestNamePattern(null);
+    }
+    if (array_key_exists('test_file_regex', Options::$framework_info[$name])) {
+      $this->setTestFilePattern(
+        Options::$framework_info[$name]["test_file_regex"]);
+    } else {
+      $this->setTestFilePattern(null);
+    }
 
     // Install if not already installed using the properties set above.
     if (!$this->isInstalled()) {
@@ -434,16 +453,21 @@ abstract class Framework {
 
     // Now that we have an install, we can safely set all possible
     // other framework information
-    $this->setEnvVars($info->get("env_vars"));
-    $this->setConfigFile($info->get("config_file"));
-    $this->setBootstrapFile($info->get("bootstrap"));
-    $this->setTestCommand($info->get("test_command"));
-    $this->setArgsForTests($info->get("args_for_tests"));
+    if (array_key_exists('config_file', Options::$framework_info[$name])) {
+      $this->setConfigFile(Options::$framework_info[$name]["config_file"]);
+    } else {
+      $this->setConfigFile(null);
+    }
+    if (array_key_exists('bootstrap_file', Options::$framework_info[$name])) {
+      $this->setBootstrapFile(
+        Options::$framework_info[$name]["bootstrap_file"]);
+    } else {
+      $this->setBootstrapFile(null);
+    }
+    $this->setTestCommand(true);
     $this->prepareOutputFiles();
     $this->findTests();
   }
-
-  abstract protected function getInfo(): Map;
 
   //********************
   // Public setters
@@ -552,16 +576,46 @@ abstract class Framework {
     $this->git_branch = $git_branch;
   }
 
-  private function setBlacklist(?Set $blacklist): void {
-    $this->blacklist = $blacklist;
+  private function setBlacklist(?array<int, string> $blacklist): void {
+    $this->blacklist = null;
+    if ($blacklist !== null) {
+      $this->blacklist = Set {};
+      foreach ($blacklist as $test) {
+        $this->blacklist[] = Options::$frameworks_root."/".$test;
+      }
+    }
   }
 
-  private function setClownylist(?Set $clownylist): void {
-    $this->clownylist = $clownylist;
+  private function setClownylist(?array<int, string> $clownylist): void {
+    $this->clownylist = null;
+    if ($clownylist !== null) {
+      $this->clownylist = Set {};
+      foreach ($clownylist as $test) {
+        $this->clownylist[] = Options::$frameworks_root."/".$test;
+      }
+    }
   }
 
-  private function setPullRequests(?Vector $pull_requests): void {
-    $this->pull_requests = $pull_requests;
+  private function setPullRequests(
+    ?array<int, array<string, string>> $pull_requests
+    ): void {
+    $this->pull_requests = null;
+    if ($pull_requests !== null) {
+      $this->pull_requests = array();
+      foreach($pull_requests as $pr) {
+        if (array_key_exists("pull_dir", $pr)) {
+          $pr['pull_dir'] = Options::$frameworks_root."/".$pr['pull_dir'];
+        }
+        if (array_key_exists("move_from_dir", $pr)) {
+          $pr['move_from_dir'] = Options::$frameworks_root."/".
+                                 $pr['move_from_dir'];
+        }
+        if (array_key_exists("dir_to_move", $pr)) {
+          $pr['dir_to_move'] = Options::$frameworks_root."/".$pr['dir_to_move'];
+        }
+        $this->pull_requests[] = $pr;
+      }
+    }
   }
 
   private function setBootstrapFile(?string $bootstrap_file = null): void {
@@ -569,19 +623,11 @@ abstract class Framework {
   }
 
   private function setTestPath(string $test_path): void {
-    $this->test_path = $test_path;
+    $this->test_path = Options::$frameworks_root."/".$test_path;
   }
 
   private function setInstallRoot(string $install_root): void {
-    $this->install_root = $install_root;
-  }
-
-  private function setEnvVars(?Map $env_vars): void {
-    $this->env_vars = $env_vars;
-  }
-
-  private function setArgsForTests(?Map $args_for_tests): void {
-    $this->args_for_tests = $args_for_tests;
+    $this->install_root = Options::$frameworks_root."/".$install_root;
   }
 
   private function setTestNamePattern(?string $test_name_pattern = null):
@@ -593,13 +639,12 @@ abstract class Framework {
                              : $test_name_pattern;
   }
 
-  private function setTestCommand(?string $test_command = null,
-                                    bool $redirect = true): void {
-    if ($test_command === null) {
+  private function setTestCommand(bool $redirect = true): void {
+    if ($this->test_command === null) {
       $this->test_command = get_runtime_build()." ".__DIR__.
                             "/vendor/bin/phpunit --debug";
     } else {
-      $this->test_command = $test_command." --debug";
+      $this->test_command .= " --debug";
     }
     if ($this->config_file !== null) {
       $this->test_command .= " -c ".$this->config_file;
@@ -626,7 +671,6 @@ abstract class Framework {
     if ($config_file == null) {
       // 2 possibilities, phpunit.xml and phpunit.xml.dist for configuration
       $phpunit_config_files = Set {'phpunit.xml', 'phpunit.xml.dist'};
-
       $this->config_file = find_first_file_recursive($phpunit_config_files,
                                                      $this->test_path,
                                                      false);
@@ -639,7 +683,7 @@ abstract class Framework {
                 Options::$verbose);
       }
     } else {
-      $this->config_file = $config_file;
+      $this->config_file = Options::$frameworks_root."/".$config_file;
     }
   }
 
@@ -654,7 +698,7 @@ abstract class Framework {
     return $this->clownylist;
   }
 
-  private function getPullRequests(): ?Vector {
+  private function getPullRequests(): ?array<int, array> {
     return $this->pull_requests;
   }
 
@@ -922,8 +966,7 @@ abstract class Framework {
       $this->git_commit = trim(file_get_contents($this->install_root.
                                                  "/.git/refs/heads/".
                                                  $this->git_branch));
-      Options::$framework_code_commits[$this->name]['commit'] =
-        $this->git_commit;
+      Options::$framework_info[$this->name]['commit'] = $this->git_commit;
     }
 
     // Checkout out our baseline test code via SHA or branch
@@ -1087,7 +1130,7 @@ abstract class Framework {
             Options::$verbose);
     foreach ($this->pull_requests as $pr) {
       $dir = $pr["pull_dir"];
-      $rep = $pr["pull_repository"];
+      $rep = $pr["pull_repo"];
       $gc = $pr["git_commit"];
       $type = $pr["type"];
       $move_from_dir = null;
@@ -1137,112 +1180,40 @@ abstract class Framework {
   }
 }
 
+/***************
+ FRAMEWORKS
+***************/
 class Assetic extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/assetic",
-      "git_path" => "https://github.com/kriswallsmith/assetic.git",
-      "test_path" => __DIR__."/frameworks/assetic",
-    };
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
-
-
-class Monolog extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/monolog",
-      "git_path" => "https://github.com/Seldaek/monolog.git",
-      "test_path" => __DIR__."/frameworks/monolog",
-    };
-  }
-}
-
-class ReactPHP extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/reactphp",
-      "git_path" => "https://github.com/reactphp/react.git",
-      "test_path" => __DIR__."/frameworks/reactphp",
-    };
-  }
-}
-
-class Ratchet extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/ratchet",
-      "git_path" => "https://github.com/cboden/Ratchet.git",
-      "test_path" => __DIR__."/frameworks/ratchet",
-    };
-  }
-}
-
 class CodeIgniter extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/CodeIgniter",
-      "git_path" => "https://github.com/EllisLab/CodeIgniter.git",
-      "test_path" => __DIR__."/frameworks/CodeIgniter/tests",
-    };
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
-
 class Composer extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/composer",
-      "git_path" => "https://github.com/composer/composer.git",
-      "test_path" => __DIR__."/frameworks/composer",
-    };
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
-
 class Doctrine2 extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/doctrine2",
-      "git_path" => "https://github.com/doctrine/doctrine2.git",
-      "test_path" => __DIR__."/frameworks/doctrine2",
-    };
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
-
 class Drupal extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/drupal",
-      "git_path" => "https://github.com/drupal/drupal.git",
-      "test_path" => __DIR__."/frameworks/drupal/core",
-      "clownylist" => Set {
-        __DIR__."/frameworks/drupal/core/modules/views/tests/".
-        "Drupal/views/Tests/ViewsDataHelperTest.php",
-      },
-    };
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
-
 class FacebookPhpSdk extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/facebook-php-sdk",
-      "git_path" => "https://github.com/facebook/facebook-php-sdk.git",
-      "test_path" => __DIR__."/frameworks/facebook-php-sdk",
-      "test_file_pattern" => PHPUnitPatterns::$facebook_sdk_test_file_pattern,
-      "test_command" => get_runtime_build()." ".__DIR__.
-                      "/vendor/bin/phpunit --bootstrap tests/bootstrap.php",
-    };
+  public function __construct(string $name) {
+    $tc =  get_runtime_build()." ".__DIR__.
+           "/vendor/bin/phpunit --bootstrap tests/bootstrap.php";
+    parent::__construct($name, $tc);
   }
-
   protected function install(): void {
     parent::install();
     verbose("Creating a phpunit.xml for running the pear tests.\n",
@@ -1275,111 +1246,41 @@ XML;
     return parent::isInstalled();
   }
 }
-
 class Idiorm extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/idiorm",
-      "git_path" => "https://github.com/j4mie/idiorm.git",
-      "test_path" => __DIR__."/frameworks/idiorm",
-    };
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
-
 class Joomla extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      'install_root' => __DIR__.'/frameworks/joomla-framework',
-      'git_path' => 'https://github.com/joomla/joomla-framework.git',
-      'test_path' => __DIR__.'/frameworks/joomla-framework',
-      "clownylist" => Set {
-        // These are subtests which need their own composer set and aren't run
-        // by their travis setup
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleAuthOauth2Test.php",
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleDataAdsenseTest.php",
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleDataCalendarTest.php",
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleDataPicasaAlbumTest.php",
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleDataPicasaPhotoTest.php",
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleDataPicasaTest.php",
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleDataPlusActivitiesTest.php",
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleDataPlusCommentsTest.php",
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleDataPlusPeopleTest.php",
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleDataPlusTest.php",
-        __DIR__."/frameworks/joomla-framework/".
-          "src/Joomla/Google/Tests/JGoogleTest.php",
-      },
-    };
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
-
+class JoomlaCMS extends Framework {
+  public function __construct(string $name) {
+    parent::__construct($name);
+  }
+}
 class Laravel extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/laravel",
-      "git_path" => "https://github.com/laravel/framework.git",
-      "test_path" => __DIR__."/frameworks/laravel",
-      "args_for_tests" => Map {
-        __DIR__."/frameworks/laravel/./tests/Auth/AuthGuardTest.php"
-        => "-v JitEnableRenameFunction"
-      },
+  public function __construct(string $name) {
+    $args_for_tests = Map {
+      __DIR__."/frameworks/laravel/./tests/Auth/AuthGuardTest.php" =>
+      "-v JitEnableRenameFunction"
     };
+    parent::__construct($name, null, null, $args_for_tests);
   }
 }
-
 class Magento2 extends Framework {
   public function __construct(string $name) {
-    parent::__construct($name, true, TestFindModes::TOKEN);
-  }
-
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/magento2",
-      "git_path" => "https://github.com/magento/magento2.git",
-      "test_path" => __DIR__."/frameworks/magento2/dev/tests/unit",
-    };
+    parent::__construct($name, null, null, null, true, TestFindModes::TOKEN);
   }
 }
-
 class Mediawiki extends Framework {
   public function __construct(string $name) {
-    parent::__construct($name, true, TestFindModes::TOKEN);
-  }
-
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/mediawiki-core",
-      // Changing from ptarjan to wikimedia causes a FATAL in the test
-      // script. So some code change in wikimedia between Paul's forked
-      // change and the time it was pulled into wikimedia master on
-      // Nov 22, 2013 is causing problems.
-      "git_path" => "https://github.com/ptarjan/mediawiki-core.git",
-      "test_path" => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
-      "test_file_pattern" => PHPUnitPatterns::$mediawiki_test_file_pattern,
-      "config_file" => __DIR__.
-                      "/frameworks/mediawiki-core/tests/phpunit/suite.xml",
-      "test_command" => get_runtime_build()." ".__DIR__.
-                        "/frameworks/mediawiki-core/tests/phpunit/phpunit.php ".
-                        "--exclude-group=Database,Broken",
-      "clownylist" => Set {
-        __DIR__."/frameworks/mediawiki-core/tests/phpunit/".
-        "includes/HttpTest.php",
-        __DIR__."/frameworks/mediawiki-core/tests/phpunit/".
-        "includes/libs/CSSJanusTest.php",
-      },
-    };
+    $tc = get_runtime_build()." ".__DIR__.
+          "/frameworks/mediawiki-core/tests/phpunit/phpunit.php ".
+          "--exclude-group=Database,Broken";
+    parent::__construct($name, $tc, null, null, true, TestFindModes::TOKEN);
   }
 
   protected function install(): void {
@@ -1390,153 +1291,20 @@ class Mediawiki extends Framework {
     exec($touch_command);
   }
 }
-
-
-class Paris extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/paris",
-      "git_path" => "https://github.com/j4mie/paris.git",
-      "test_path" => __DIR__."/frameworks/paris",
-    };
+class Monolog extends Framework {
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
-
+class Paris extends Framework {
+  public function __construct(string $name) {
+    parent::__construct($name);
+  }
+}
 class Pear extends Framework {
   public function __construct(string $name) {
     // Pear will currently run serially
-    parent::__construct($name, false, TestFindModes::PHPT);
-  }
-
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/pear-core",
-      "git_path" => "https://github.com/pear/pear-core.git",
-      "test_path" => __DIR__."/frameworks/pear-core",
-      "test_name_pattern" => PHPUnitPatterns::$pear_test_name_pattern,
-      "test_file_pattern" => PHPUnitPatterns::$pear_test_file_pattern,
-      "pull_requests" => Vector {
-        Map {
-          'pull_dir' => __DIR__."/frameworks/pear-core",
-          'pull_repository' => "https://github.com/pear/Console_Getopt",
-          'git_commit' => "trunk",
-          'type' => 'submodulemove',
-          'move_from_dir' => __DIR__."/frameworks/pear-core/Console_Getopt",
-          'dir_to_move' => __DIR__.
-                           "/frameworks/pear-core/Console_Getopt/Console",
-        },
-        Map {
-          'pull_dir' => __DIR__."/frameworks/pear-core",
-          'pull_repository' => "https://github.com/pear/XML_Util",
-          'git_commit' => "trunk",
-          'type' => 'submodulemove',
-          'move_from_dir' => __DIR__."/frameworks/pear-core/XML_Util",
-          'dir_to_move' => __DIR__."/frameworks/pear-core/XML_Util/XML",
-        },
-        Map {
-          'pull_dir' => __DIR__."/frameworks/pear-core",
-          'pull_repository' => "https://github.com/pear/Archive_Tar",
-          'git_commit' => "master",
-          'type' => 'submodulemove',
-          'move_from_dir' => __DIR__."/frameworks/pear-core/Archive_Tar",
-          'dir_to_move' => __DIR__."/frameworks/pear-core/Archive_Tar/Archive",
-        },
-        Map {
-          'pull_dir' => __DIR__."/frameworks/pear-core",
-          'pull_repository' => "https://github.com/pear/Structures_Graph",
-          'git_commit' => "trunk",
-          'type' => 'submodulemove',
-          'move_from_dir' => __DIR__."/frameworks/pear-core/Structures_Graph",
-          'dir_to_move' => __DIR__.
-                           "/frameworks/pear-core/Structures_Graph/Structures",
-        },
-      },
-      "clownylist" => Set {
-        __DIR__."/frameworks/pear-core/tests/PEAR_Command/".
-        "test_registerCommands_standard.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Config/".
-        "config-create/test.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Config/".
-        "config-create/test_windows.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Config/".
-        "config-help/test.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Config/".
-        "config-show/test.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Install/".
-        "upgrade/test_bug17986.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Package/".
-        "convert/test_fail.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Config/".
-        "test_getGroupKeys.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Config/".
-        "test_getKeys.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_download_abstractpackage_channelneedsupdating.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_download_abstractpackage_rest.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_download_alreadyinstalled.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_download_complexabstractpackage.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_download_complexabstractpackage_alphapostfix.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_download_complexlocalpackage.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_download_complexlocalpackage_onlyreqdeps.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_download_complexlocalpackage_optional.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_download_complexlocaltgz.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_download_complexremotetgz.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
-        "test_upgrade_pear_to_pecl.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
-        "test_initialize_abstractpackage_discover.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
-        "test_initialize_downloadurl.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
-        "test_initialize_invalidabstractpackage5.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
-        "test_initialize_invalidabstractpackage6.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
-        "test_initialize_invalidabstractpackage_discover.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
-        "test_initialize_invaliddownloadurl.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
-        "test_mergeDependencies_basic_required_uri.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
-        "test_install_complexlocalpackage.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
-        "test_install_complexlocalpackage2.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
-        "test_install_complexlocalpackage2_force.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
-        "test_install_complexlocalpackage2_ignore-errors.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
-        "test_install_complexlocalpackage2_ignore-errorssoft.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
-        "test_upgrade_complexlocalpackage2.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Installer_Role/".
-        "test_getInstallableRoles.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_Installer_Role/".
-        "test_getValidRoles.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/".
-        "test_extbinrelease.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/".
-        "test_extsrcrelease.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/".
-        "test_phprelease.phpt",
-        __DIR__."/frameworks/pear-core/tests/System/".
-        "find_test.phpt",
-        __DIR__."/frameworks/pear-core/tests/System/".
-        "test_which.phpt",
-        __DIR__."/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/".
-        "test_contents.phpt",
-      },
-    };
+    parent::__construct($name, null, null, null, false, TestFindModes::PHPT);
   }
 
   protected function install(): void {
@@ -1577,73 +1345,39 @@ XML;
     return parent::isInstalled();
   }
 }
-
 class Phpbb3 extends Framework {
   public function __construct(string $name) {
-    parent::__construct($name, true, TestFindModes::TOKEN);
-  }
-
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/phpbb3",
-      "git_path" => "https://github.com/phpbb/phpbb.git",
-      "test_path" => __DIR__."/frameworks/phpbb3",
-      "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
-      // This may work if we increase the timeout. Blacklist for now
-      "blacklist" => Set {
-        __DIR__."/frameworks/phpbb3/tests/lint_test.php",
-      },
-    };
+    $env_vars = Map { "PHP_BINARY" =>  get_runtime_build(false, true) };
+    parent::__construct($name, null, $env_vars, null, true,
+                        TestFindModes::TOKEN);
   }
 }
-
 class PhpMyAdmin extends Framework {
   public function __construct(string $name) {
-    parent::__construct($name, true, TestFindModes::TOKEN);
-  }
-
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/phpmyadmin",
-      "git_path" => "https://github.com/phpmyadmin/phpmyadmin.git",
-      "test_path" => __DIR__."/frameworks/phpmyadmin",
-      "config_file" => __DIR__.
-                       "/frameworks/phpmyadmin/phpunit.xml.nocoverage",
-    };
+    parent::__construct($name, null, null, null, true, TestFindModes::TOKEN);
   }
 }
-
 class PHPUnit extends Framework {
+  public function __construct(string $name) {
+    $tc = get_runtime_build()." ".__DIR__."/frameworks/phpunit/phpunit.php";
+    $env_vars = Map { "PHP_BINARY" =>  get_runtime_build(false, true) };
+    parent::__construct($name, $tc, $env_vars);
+  }
+}
+class Ratchet extends Framework {
   public function __construct(string $name) {
     parent::__construct($name);
   }
-
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/phpunit",
-      "git_path" => "https://github.com/sebastianbergmann/phpunit.git",
-      "test_path" => __DIR__."/frameworks/phpunit",
-      "test_command" => get_runtime_build()." ".__DIR__.
-                        "/frameworks/phpunit/phpunit.php",
-      "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
-      "blacklist" => Set {
-        __DIR__."/frameworks/phpunit/Tests/Util/ConfigurationTest.php",
-      }
-    };
+}
+class ReactPHP extends Framework {
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
-
 class SilverStripe extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      'install_root' => __DIR__.'/frameworks/silverstripe',
-      'git_path' => 'https://github.com/silverstripe/'.
-                    'silverstripe-installer.git',
-      'test_path' => __DIR__.'/frameworks/silverstripe',
-    };
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
-
   protected function install(): void {
     parent::install();
     verbose("Installing dependencies.\n", Options::$verbose);
@@ -1702,72 +1436,30 @@ ENV_FILE;
     return parent::isInstalled();
   }
 }
-
 class Slim extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      'install_root' => __DIR__.'/frameworks/Slim',
-      'git_path' => 'https://github.com/codeguy/Slim',
-      'test_path' => __DIR__.'/frameworks/Slim',
-      'test_command' => get_runtime_build()
-        .' -vServer.IniFile='.__DIR__.'/php_notice.ini'
-        .' '.__DIR__.'/vendor/bin/phpunit',
-    };
+  public function __construct(string $name) {
+    $tc = get_runtime_build().' -vServer.IniFile='.__DIR__.'/php_notice.ini'.
+          ' '.__DIR__.'/vendor/bin/phpunit';
+    parent::__construct($name, $tc);
   }
 }
-
 class Symfony extends Framework {
   public function __construct(string $name) {
-    parent::__construct($name, true, TestFindModes::TOKEN);
-  }
-
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/symfony",
-      "git_path" => "https://github.com/symfony/symfony.git",
-      "test_path" => __DIR__."/frameworks/symfony",
-      "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
-      "blacklist" => Set {
-        __DIR__."/frameworks/symfony/src/Symfony/Component/Console".
-        "/Tests/Helper/DialogHelperTest.php",
-        __DIR__."/frameworks/symfony/src/Symfony/Component/Process".
-        "/Tests/SigchildDisabledProcessTest.php",
-        __DIR__."/frameworks/symfony/src/Symfony/Component/Process".
-        "/Tests/SigchildEnabledProcessTest.php",
-        __DIR__."/frameworks/symfony/src/Symfony/Component/Process".
-        "/Tests/SimpleProcessTest.php",
-      },
-    };
+    $env_vars = Map { "PHP_BINARY" =>  get_runtime_build(false, true) };
+    parent::__construct($name, null, $env_vars, null, true,
+                        TestFindModes::TOKEN);
   }
 }
-
 class Twig extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/Twig",
-      "git_path" => "https://github.com/fabpot/Twig.git",
-      "test_path" => __DIR__."/frameworks/Twig",
-    };
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
-
 class Yii extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/yii",
-      "git_path" => "https://github.com/yiisoft/yii.git",
-      "test_path" => __DIR__."/frameworks/yii/tests",
-      "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
-      "clownylist" => Set {
-        // Needs a local memcache server
-        __DIR__."/frameworks/yii/tests/framework/caching/CMemCacheTest.php",
-      },
-    };
+  public function __construct(string $name) {
+    $env_vars = Map { "PHP_BINARY" =>  get_runtime_build(false, true) };
+    parent::__construct($name, null, $env_vars);
   }
-
   public function clean(): void {
     parent::clean();
     $files = glob($this->getInstallRoot().
@@ -1818,23 +1510,9 @@ XML;
     return parent::isInstalled();
   }
 }
-
 class Zf2 extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
-  protected function getInfo(): Map {
-    return Map {
-      "install_root" => __DIR__."/frameworks/zf2",
-      "git_path" => "https://github.com/zendframework/zf2.git",
-      "test_path" => __DIR__."/frameworks/zf2/tests",
-      "blacklist" => Set {
-        __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".
-        "/ParameterGeneratorTest.php",
-        __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".
-        "/PropertyGeneratorTest.php",
-        __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".
-        "/ValueGeneratorTest.php",
-      }
-    };
+  public function __construct(string $name) {
+    parent::__construct($name);
   }
 }
 
@@ -2619,13 +2297,12 @@ THUMBSDOWN
   // Update any git hashes in case --latest or --latest-record was used and we
   // changed the hashes currently in frameworks.json. Use md5 of the original
   // and current maps to see if we are different
-  if (md5(serialize(Options::$original_framework_code_commits)) !==
-      md5(serialize(Options::$framework_code_commits))) {
+  if (md5(serialize(Options::$original_framework_info)) !==
+      md5(serialize(Options::$framework_info))) {
     verbose("Updating frameworks.json because some hashes have been updated",
             !Options::$csv_only);
-    file_put_contents(__DIR__."/frameworks.json",
-                      json_encode(Options::$framework_code_commits,
-                                  JSON_PRETTY_PRINT));
+    file_put_contents(__DIR__."/frameworks.yaml",
+                      Spyc::YAMLDump(Options::$framework_info));
   }
 }
 

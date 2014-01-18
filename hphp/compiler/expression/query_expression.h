@@ -41,40 +41,26 @@ DECLARE_BOOST_TYPES(QueryExpression);
 class QueryExpression : public QueryOrderby {
 public:
   QueryExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                  ExpressionPtr head, ExpressionPtr body)
-  : QueryOrderby(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(QueryExpression)) {
-    m_expressions = ExpressionListPtr(
-      new ExpressionList(getScope(), getLocation()));
-    m_expressions->addElement(head);
-
-    assert(body != nullptr && body->is(Expression::KindOfExpressionList));
-    ExpressionListPtr el(static_pointer_cast<ExpressionList>(body));
-    for (unsigned int i = 0; i < el->getCount(); i++) {
-      if ((*el)[i]) m_expressions->addElement((*el)[i]);
-    }
-
-    // Do this here so that it happens before any optimizations
-    // are done to the AST.
-    std::ostringstream serialized;
-    CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
-    cg.setAstClassPrefix("Code"); //TODO: create option for this
-    this->outputCodeModel(cg);
-    std::string s(serialized.str().c_str(), serialized.str().length());
-    m_querystr = makeStaticString(s);
-  }
+                  ExpressionPtr head, ExpressionPtr body);
+  QueryExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+                  ExpressionListPtr clauses);
 
   virtual ExpressionPtr clone() {
     QueryExpressionPtr exp(new QueryExpression(*this));
     Expression::deepCopy(exp);
     exp->m_expressions = Clone(m_expressions);
+    exp->m_queryargs = Clone(m_queryargs);
     exp->m_querystr = m_querystr;
     return exp;
   }
 
   ExpressionListPtr getClauses() const { return m_expressions; }
-  ExpressionPtr getCollection() const;
-  StringData* getQueryString() const { return m_querystr; }
+  ExpressionListPtr getQueryArguments();
+  StringData* getQueryString();
 private:
+  void serializeQueryExpression();
+
+  ExpressionListPtr m_queryargs;
   StringData* m_querystr;
 };
 

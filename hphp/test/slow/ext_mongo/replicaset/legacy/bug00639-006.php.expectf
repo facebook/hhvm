@@ -1,0 +1,6 @@
+pick server: random element %d
+- connection: type: PRIMARY, socket: %d, ping: %d, hash: %s
+connection type: PRIMARY
+pick server: random element %d while ignoring the primary
+- connection: type: SECONDARY, socket: %d, ping: %d, hash: %s
+connection type: SECONDARY

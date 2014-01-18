@@ -24,7 +24,9 @@
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(sqlite3);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(sqlite3, 0.7-dev);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define PHP_SQLITE3_ASSOC  (1<<0)

@@ -1,0 +1,294 @@
+# Frameworks REQUIRE:
+#
+# name
+# url: a github url
+# branch: a github branch
+# commit: a commit hash
+# install_root: an install root (usually just the name of the framework)
+# test_root: the root where the tests are located.
+#
+# Optionally, you can specify:
+#
+# pull_requests: a list of maps of pull requests (see pear)
+# blacklist: a list of tests that will cause the runner to behave badly
+# clowns: a list of tests that are clowny (e.g. fail both HHVM and Zend)
+# test_name_regex: A custom regex for test names beyond the normal default:
+#      /[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\".*?\"|#[0-9]+))?/
+# test_file_regex: A custom regex for test file names beyond the normal default:
+#      /.*(\.phpt|Test[\d]*\.php|test[\d]*\.php)$/
+# config_file: a specific phpunit config file to use beyond phpunit.xml[.dist]
+# bootstrap_file: a specific bootstrap file to use
+#
+# Then add the class to run.php (e.g. class Assetic extends Framework {}),
+# passing in values to constructors and overriding any methods you need to get
+# your particular framework to run.
+---
+  assetic:
+    url: https://github.com/kriswallsmith/assetic.git
+    branch: master
+    commit: 5e519fd750ea54a035386562ae03716ffba7014c
+    install_root: assetic
+    test_root: assetic
+  codeigniter:
+    url: https://github.com/EllisLab/CodeIgniter.git
+    branch: develop
+    commit: 27e91a07ed66308ba02833b104ca8ca6a05e7be8
+    install_root: codeigniter
+    test_root: codeigniter/tests
+  composer:
+    url: https://github.com/composer/composer.git
+    branch: master
+    commit: 11facc3f449310e862feb95a140fe0e84aaee7b4
+    install_root: composer
+    test_root: composer
+  doctrine2:
+    url: https://github.com/doctrine/doctrine2.git
+    branch: master
+    commit: 93c110673521c18273b885fb9359d049b6676df4
+    install_root: doctrine2
+    test_root: doctrine2
+  drupal:
+    url: https://github.com/drupal/drupal.git
+    branch: 8.x
+    commit: fa17da8649d492c302cd45499cbbd30fe462d650
+    install_root: drupal
+    test_root: drupal/core
+    clowns:
+      - drupal/core/modules/views/tests/Drupal/views/Tests/ViewsDataHelperTest.php
+  facebookphpsdk:
+    url: https://github.com/facebook/facebook-php-sdk.git
+    branch: master
+    commit: 55f179f3741bfb3732d92b7c041b7e56966173a7
+    install_root: facebook-php-sdk
+    test_root: facebook-php-sdk
+    test_file_regex: /.*(tests\.php)$/
+  idiorm:
+    url: https://github.com/j4mie/idiorm.git
+    branch: master
+    commit: 11e964157a6a2c6128a0546673ad5e99ac1a62cd
+    install_root: idiorm
+    test_root: idiorm
+  joomla:
+    url: https://github.com/joomla/joomla-framework.git
+    branch: master
+    commit: fb57d5e2a83979c90c1a7a186ac2804404a61385
+    install_root: joolma-framework
+    test_root: joomla-framework
+    # These are subtests which need their own composer set and aren't run
+    # by their travis setup
+    clowns:
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleAuthOauth2Test.php
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataAdsenseTest.php
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataCalendarTest.php
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPicasaAlbumTest.php
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPicasaPhotoTest.php
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPicasaTest.php
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPlusActivitiesTest.php
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPlusCommentsTest.php
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPlusPeopleTest.php
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPlusTest.php
+      - joomla-framework/src/Joomla/Google/Tests/JGoogleTest.php
+  joomlacms:
+    url: https://github.com/joomla/joomla-cms.git
+    branch: master
+    commit: 925cb82ee989a3af6adf09e3285d0c4a67eaa306
+    install_root: joomla-cms
+    test_root: joomla-cms
+  laravel:
+    url: https://github.com/laravel/framework.git
+    branch: master
+    commit: f59b8e834e0e6e91110c6179152335fb78a7a1ed
+    install_root: laravel
+    test_root: laravel
+  magento2:
+    url: https://github.com/magento/magento2.git
+    branch: master
+    commit: f98550dd6d7f32951c0221cbb0a0e68086d780c7
+    install_root: magento2
+    test_root: magento2/dev/tests/unit
+  # Changing from ptarjan to wikimedia causes a FATAL in the test
+  # script. So some code change in wikimedia between Paul's forked
+  # change and the time it was pulled into wikimedia master on
+  # Nov 22, 2013 is causing problems.
+  mediawiki:
+    url: https://github.com/ptarjan/mediawiki-core.git
+    branch: master
+    commit: 2a280fcfccfd48fe5bf9479ca02d986367fa33e9
+    install_root: mediawiki-core
+    test_root: mediawiki-core/tests/phpunit
+    test_file_regex: /.*(\Test.*\.php)$/
+    config_file: mediawiki-core/tests/phpunit/suite.xml
+    clowns:
+      - mediawiki-core/tests/phpunit/includes/HttpTest.php
+      - mediawiki-core/tests/phpunit/includes/libs/CSSJanusTest.php
+  monolog:
+    url: https://github.com/Seldaek/monolog.git
+    branch: master
+    commit: a1e98f4e1da5b0235a74d11dcf7cdb2692b28ffc
+    install_root: monolog
+    test_root: monolog
+  paris:
+    url: https://github.com/j4mie/paris.git
+    branch: master
+    commit: dd1a87544127874dce367f0252dcc81246dfc83b
+    install_root: paris
+    test_root: paris
+  pear:
+    url: https://github.com/pear/pear-core.git
+    branch: master
+    commit: e379594cef09079be131d2fbbb19b1c2256872c2
+    install_root: pear-core
+    test_root: pear-core
+    test_file_regex: /.*(\.phpt)$/
+    test_name_regex: /[\-_a-zA-Z0-9\.\/]*\.phpt/
+    pull_requests:
+      - pull_dir: pear-core
+        pull_repo: https://github.com/pear/Console_Getopt
+        git_commit: trunk
+        type: submodulemove
+        move_from_dir: pear-core/Console_Getopt
+        dir_to_move: pear-core/Console_Getopt/Console
+      - pull_dir: pear-core
+        pull_repo: https://github.com/pear/XML_Util
+        git_commit: trunk
+        type: submodulemove
+        move_from_dir: pear-core/XML_Util
+        dir_to_move: pear-core/XML_Util/XML
+      - pull_dir: pear-core
+        pull_repo: https://github.com/pear/Archive_Tar
+        git_commit: master
+        type: submodulemove
+        move_from_dir: pear-core/Archive_Tar
+        dir_to_move: pear-core/Archive_Tar/Archive
+      - pull_dir: pear-core
+        pull_repo: https://github.com/pear/Structures_Graph
+        git_commit: trunk
+        type: submodulemove
+        move_from_dir: pear-core/Structures_Graph
+        dir_to_move: pear-core/Structures_Graph/Structures
+    clowns:
+      - pear-core/tests/PEAR_Command/test_registerCommands_standard.phpt
+      - pear-core/tests/PEAR_Command_Config/config-create/test.phpt
+      - pear-core/tests/PEAR_Command_Config/config-create/test_windows.phpt
+      - pear-core/tests/PEAR_Command_Config/config-help/test.phpt
+      - pear-core/tests/PEAR_Command_Config/config-show/test.phpt
+      - pear-core/tests/PEAR_Command_Install/upgrade/test_bug17986.phpt
+      - pear-core/tests/PEAR_Command_Package/convert/test_fail.phpt
+      - pear-core/tests/PEAR_Config/test_getGroupKeys.phpt
+      - pear-core/tests/PEAR_Config/test_getKeys.phpt
+      - pear-core/tests/PEAR_Downloader/test_download_abstractpackage_channelneedsupdating.phpt
+      - pear-core/tests/PEAR_Downloader/test_download_abstractpackage_rest.phpt
+      - pear-core/tests/PEAR_Downloader/test_download_alreadyinstalled.phpt
+      - pear-core/tests/PEAR_Downloader/test_download_complexabstractpackage.phpt
+      - pear-core/tests/PEAR_Downloader/test_download_complexabstractpackage_alphapostfix.phpt
+      - pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage.phpt
+      - pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_onlyreqdeps.phpt
+      - pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_optional.phpt
+      - pear-core/tests/PEAR_Downloader/test_download_complexlocaltgz.phpt
+      - pear-core/tests/PEAR_Downloader/test_download_complexremotetgz.phpt
+      - pear-core/tests/PEAR_Downloader/test_upgrade_pear_to_pecl.phpt
+      - pear-core/tests/PEAR_Downloader_Package/test_initialize_abstractpackage_discover.phpt
+      - pear-core/tests/PEAR_Downloader_Package/test_initialize_downloadurl.phpt
+      - pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage5.phpt
+      - pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage6.phpt
+      - pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage_discover.phpt
+      - pear-core/tests/PEAR_Downloader_Package/test_initialize_invaliddownloadurl.phpt
+      - pear-core/tests/PEAR_Downloader_Package/test_mergeDependencies_basic_required_uri.phpt
+      - pear-core/tests/PEAR_Installer/test_install_complexlocalpackage.phpt
+      - pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2.phpt
+      - pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_force.phpt
+      - pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_ignore-errors.phpt
+      - pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_ignore-errorssoft.phpt
+      - pear-core/tests/PEAR_Installer/test_upgrade_complexlocalpackage2.phpt
+      - pear-core/tests/PEAR_Installer_Role/test_getInstallableRoles.phpt
+      - pear-core/tests/PEAR_Installer_Role/test_getValidRoles.phpt
+      - pear-core/tests/PEAR_PackageFile_v2_Validator/test_extbinrelease.phpt
+      - pear-core/tests/PEAR_PackageFile_v2_Validator/test_extsrcrelease.phpt
+      - pear-core/tests/PEAR_PackageFile_v2_Validator/test_phprelease.phpt
+      - pear-core/tests/System/find_test.phpt
+      - pear-core/tests/System/test_which.phpt
+      - pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt
+  phpbb3:
+    url: https://github.com/phpbb/phpbb.git
+    branch: master
+    commit: 3e84fb76a3639dce2becb7ae620423a5cfdccecb
+    install_root: phpbb3
+    test_root: phpbb3
+    # This may work if we increase the timeout. Blacklist for now
+    blacklist:
+      - phpbb3/tests/lint_test.php
+  phpmyadmin:
+    url: https://github.com/phpmyadmin/phpmyadmin.git
+    branch: master
+    commit: 993023de918c34673c96ef7d7f810baedd24d3d4
+    install_root: phpmyadmin
+    test_root: phpmyadmin
+    config_file: phpmyadmin/phpunit.xml.nocoverage
+  phpunit:
+    url: https://github.com/sebastianbergmann/phpunit.git
+    branch: master
+    commit: 92e8faf88773fa173b0ab2425ba4ade434c58c5d
+    install_root: phpunit
+    test_root: phpunit
+    blacklist:
+      - phpunit/Tests/Util/ConfigurationTest.php
+  ratchet:
+    url: https://github.com/cboden/Ratchet.git
+    branch: master
+    commit: c2f82efb8536a3d6a94e19a371f928f76ed0f31c
+    install_root: ratchet
+    test_root: ratchet
+  reactphp:
+    url: https://github.com/reactphp/react.git
+    branch: "0.3"
+    commit: 0dac387e29f10db50dc23acc1da746f53862a662
+    install_root: reactphp
+    test_root: reactphp
+  silverstripe:
+    url: https://github.com/silverstripe/silverstripe-installer.git
+    branch: "3.1"
+    commit: 6ba883823987534c4e6984c037e5b1d5e25e47cf
+    install_root: silverstripe
+    test_root: silverstripe
+  slim:
+    url: https://github.com/codeguy/Slim
+    branch: release-2.4.1
+    commit: fa8495e7dd5399d7de2e32170ac1aea2547713a9
+    install_root: slim
+    test_root: slim
+  symfony:
+    url: https://github.com/symfony/symfony.git
+    branch: master
+    commit: 147c82b39d5c55d49e1b96ffe8d7041fc544f259
+    install_root: symfony
+    test_root: symfony
+    blacklist:
+      - symfony/src/Symfony/Component/Console/Tests/Helper/DialogHelperTest.php
+      - symfony/src/Symfony/Component/Process/Tests/SigchildDisabledProcessTest.php
+      - symfony/src/Symfony/Component/Process/Tests/SigchildEnabledProcessTest.php
+      - symfony/src/Symfony/Component/Process/Tests/SimpleProcessTest.php
+  twig:
+    url: https://github.com/fabpot/Twig.git
+    branch: master
+    commit: ae89c8853582f074c1e8f26ac3b67b2c4fff2609
+    install_root: twig
+    test_root: twig
+  yii:
+    url: https://github.com/yiisoft/yii.git
+    branch: master
+    commit: 32b8f82e58d1e8465fc04f74562f6a2e0f6c62c9
+    install_root: yii
+    test_root: yii/tests
+    clowns:
+      # Needs a local memcache server
+      - yii/tests/framework/caching/CMemCacheTest.php
+  zf2:
+    url: https://github.com/zendframework/zf2.git
+    branch: master
+    commit: 5b510228f58539348daae42730cd8137606bb4b6
+    install_root: zf2
+    test_root: zf2/tests
+    blacklist:
+      - zf2/tests/ZendTest/Code/Generator/ParameterGeneratorTest.php
+      - zf2/tests/ZendTest/Code/Generator/PropertyGeneratorTest.php
+      - zf2/tests/ZendTest/Code/Generator/ValueGeneratorTest.php

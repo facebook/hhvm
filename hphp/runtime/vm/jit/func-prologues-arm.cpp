@@ -32,7 +32,7 @@ namespace HPHP { namespace JIT { namespace ARM {
 namespace {
 
 void emitStackCheck(int funcDepth, Offset pc) {
-  vixl::MacroAssembler a { tx64->mainCode };
+  vixl::MacroAssembler a { tx64->code.main() };
   funcDepth += cellsToBytes(kStackCheckPadding);
 
   uint64_t stackMask = cellsToBytes(RuntimeOption::EvalVMStackElms) - 1;
@@ -40,7 +40,7 @@ void emitStackCheck(int funcDepth, Offset pc) {
   a.   Sub  (rAsm, rAsm, funcDepth + Stack::sSurprisePageSize);
   // This doesn't need to be smashable, but it is a long jump from mainCode to
   // stubs, so it can't be direct.
-  emitSmashableJump(tx64->mainCode, tx64->uniqueStubs.stackOverflowHelper,
+  emitSmashableJump(tx64->code.main(), tx64->uniqueStubs.stackOverflowHelper,
                     CC_L);
 }
 
@@ -79,7 +79,7 @@ TCA emitFuncGuard(vixl::MacroAssembler& a, Func* func) {
 constexpr auto kLocalsToInitializeInline = 9;
 
 SrcKey emitPrologueWork(Func* func, int nPassed) {
-  vixl::MacroAssembler a { tx64->mainCode };
+  vixl::MacroAssembler a { tx64->code.main() };
 
   if (tx64->mode() == TransProflogue) {
     not_implemented();
@@ -242,7 +242,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(tx64->mainCode, tx64->stubsCode, false,
+  emitCheckSurpriseFlagsEnter(tx64->code.main(), tx64->code.stubs(), false,
                               tx64->fixupMap(), fixup);
 
   if (func->isClosureBody() && func->cls()) {
@@ -252,7 +252,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     a.   Ldr   (rAsm, rAsm[Func::prologueTableOff() + sizeof(TCA)*entry]);
     a.   Br    (rAsm);
   } else {
-    emitBindJmp(tx64->mainCode, tx64->stubsCode, funcBody);
+    emitBindJmp(tx64->code.main(), tx64->code.stubs(), funcBody);
   }
   return funcBody;
 }
@@ -313,8 +313,8 @@ int shuffleArgsForMagicCall(ActRec* ar) {
 //////////////////////////////////////////////////////////////////////
 
 TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
-  auto& mainCode = tx64->mainCode;
-  auto& stubsCode = tx64->stubsCode;
+  auto& mainCode = tx64->code.main();
+  auto& stubsCode = tx64->code.stubs();
   vixl::MacroAssembler a { mainCode };
   vixl::MacroAssembler astubs { stubsCode };
   TCA start = mainCode.frontier();

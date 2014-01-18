@@ -37,8 +37,10 @@
 // #define IM_MEMORY_CHECK
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(exif);
-IMPLEMENT_DEFAULT_EXTENSION(gd);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(exif, 1.4 $Id$);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(gd, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define HAS_GDIMAGESETANTIALIASED
@@ -2856,7 +2858,7 @@ const StaticString
   s_T1Lib_Support("T1Lib_Support"),
   s_GIF_Read_Support("GIF Read Support"),
   s_GIF_Create_Support("GIF Create Support"),
-  s_JPG_Support("JPG Support"),
+  s_JPG_Support("JPEG Support"),
   s_PNG_Support("PNG Support"),
   s_WBMP_Support("WBMP Support"),
   s_XPM_Support("XPM Support"),

@@ -1,0 +1,44 @@
+bool(true)
+array(4) {
+  ["n"]=>
+  int(0)
+  ["connectionId"]=>
+  int(%d)
+  ["err"]=>
+  NULL
+  ["ok"]=>
+  float(1)
+}
+bool(true)
+bool(true)
+array(4) {
+  ["n"]=>
+  int(0)
+  ["connectionId"]=>
+  int(%d)
+  ["err"]=>
+  NULL
+  ["ok"]=>
+  float(1)
+}
+array(4) {
+  ["n"]=>
+  int(0)
+  ["connectionId"]=>
+  int(%d)
+  ["err"]=>
+  NULL
+  ["ok"]=>
+  float(1)
+}
+bool(true)
+array(4) {
+  ["n"]=>
+  int(0)
+  ["connectionId"]=>
+  int(%d)
+  ["err"]=>
+  NULL
+  ["ok"]=>
+  float(1)
+}

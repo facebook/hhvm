@@ -36,7 +36,9 @@
 namespace HPHP {
 
 const StaticString s___dorequest("__dorequest");
-IMPLEMENT_DEFAULT_EXTENSION(soap);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(soap, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 // helper classes for setting/resetting globals within a method call
 

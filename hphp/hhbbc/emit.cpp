@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -476,6 +477,7 @@ void emit_locals_and_params(FuncEmitter& fe,
       pinfo.setUserType(param.userTypeConstraint);
       pinfo.setPhpCode(param.phpCode);
       pinfo.setUserAttributes(param.userAttributes);
+      pinfo.setBuiltinType(param.builtinType);
       pinfo.setRef(param.byRef);
       fe.appendParam(func.locals[id]->name, pinfo);
       if (auto const dv = param.dvEntryPoint) {
@@ -736,6 +738,10 @@ void emit_finish_func(const php::Func& func,
   fe.setGeneratorBodyName(func.generatorBodyName);
   fe.setIsAsync(func.isAsync);
 
+  if (func.nativeInfo) {
+    fe.setReturnType(func.nativeInfo->returnType);
+  }
+
   fe.finish(fe.ue().bcPos(), false /* load */);
   fe.ue().recordFunction(&fe);
 }
@@ -830,6 +836,9 @@ void emit_class(EmitUnitState& state,
 }
 
 std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
+  auto const is_systemlib = is_systemlib_part(unit);
+  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib};
+
   auto ue = folly::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->setFilepath(unit.filename);
@@ -838,11 +847,29 @@ std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
   state.defClsMap.resize(unit.classes.size(), kInvalidOffset);
 
   /*
-   * TODO(#3017265): UnitEmitter is very coupled to emitter.cpp, and
-   * expects classes and things to be added in an order that isn't
-   * quite clear.  If you don't set returnSeen things break.
+   * Unfortunate special case for Systemlib units.
+   *
+   * We need to ensure these units end up mergeOnly, at runtime there
+   * are things that assume this (right now no other HHBBC units end
+   * up being merge only, because of the returnSeen stuff below).
+   *
+   * (Merge-only-ness provides no measurable perf win in repo mode now
+   * that we have persistent classes, so we're not too worried about
+   * this.)
    */
-  ue->returnSeen();
+  if (is_systemlib) {
+    ue->setMergeOnly(true);
+    auto const tv = make_tv<KindOfInt64>(1);
+    ue->setMainReturn(&tv);
+  } else {
+    /*
+     * TODO(#3017265): UnitEmitter is very coupled to emitter.cpp, and
+     * expects classes and things to be added in an order that isn't
+     * quite clear.  If you don't set returnSeen things relating to
+     * hoistability break.
+     */
+    ue->returnSeen();
+  }
 
   emit_pseudomain(state, *ue, unit);
   for (auto& c : unit.classes)     emit_class(state, *ue, *c);

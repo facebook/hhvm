@@ -29,7 +29,7 @@ namespace {
 using namespace vixl;
 
 void emitCallToExit(UniqueStubs& us) {
-  MacroAssembler a { tx64->mainCode };
+  MacroAssembler a { tx64->code.main() };
 
   a.   Nop   ();
   us.callToExit = a.frontier();
@@ -39,7 +39,7 @@ void emitCallToExit(UniqueStubs& us) {
 }
 
 void emitReturnHelpers(UniqueStubs& us) {
-  MacroAssembler a { tx64->mainCode };
+  MacroAssembler a { tx64->code.main() };
 
   us.retHelper = a.frontier();
   a.   Brk   (0);
@@ -56,7 +56,7 @@ void emitReturnHelpers(UniqueStubs& us) {
 }
 
 void emitResumeHelpers(UniqueStubs& us) {
-  MacroAssembler a { tx64->mainCode };
+  MacroAssembler a { tx64->code.main() };
 
   auto const fpOff = offsetof(VMExecutionContext, m_fp);
   auto const spOff = offsetof(VMExecutionContext, m_stack) +
@@ -69,14 +69,14 @@ void emitResumeHelpers(UniqueStubs& us) {
   a.   Ldr   (rVmFp, rGContextReg[fpOff]);
   a.   Ldr   (rVmSp, rGContextReg[spOff]);
 
-  emitServiceReq(tx64->mainCode, REQ_RESUME);
+  emitServiceReq(tx64->code.main(), REQ_RESUME);
 
   us.add("resumeHelper", us.resumeHelper);
   us.add("resumeHelperRet", us.resumeHelperRet);
 }
 
 void emitStackOverflowHelper(UniqueStubs& us) {
-  MacroAssembler a { tx64->stubsCode };
+  MacroAssembler a { tx64->code.stubs() };
 
   us.stackOverflowHelper = a.frontier();
   a.   Brk   (0);
@@ -86,7 +86,7 @@ void emitStackOverflowHelper(UniqueStubs& us) {
 
 
 void emitDefClsHelper(UniqueStubs& us) {
-  MacroAssembler a { tx64->mainCode };
+  MacroAssembler a { tx64->code.main() };
 
   us.defClsHelper = a.frontier();
   a.   Brk   (0);
@@ -95,7 +95,7 @@ void emitDefClsHelper(UniqueStubs& us) {
 }
 
 void emitFreeLocalsHelpers(UniqueStubs& us) {
-  MacroAssembler a { tx64->mainCode };
+  MacroAssembler a { tx64->code.main() };
 
   us.freeManyLocalsHelper = a.frontier();
   a.   Brk   (0);
@@ -104,7 +104,7 @@ void emitFreeLocalsHelpers(UniqueStubs& us) {
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& us) {
-  MacroAssembler a { tx64->mainCode };
+  MacroAssembler a { tx64->code.main() };
 
   us.funcPrologueRedispatch = a.frontier();
   a.   Brk   (0);
@@ -113,7 +113,7 @@ void emitFuncPrologueRedispatch(UniqueStubs& us) {
 }
 
 void emitFCallArrayHelper(UniqueStubs& us) {
-  MacroAssembler a { tx64->mainCode };
+  MacroAssembler a { tx64->code.main() };
 
   us.fcallArrayHelper = a.frontier();
   a.   Brk   (0);
@@ -123,7 +123,7 @@ void emitFCallArrayHelper(UniqueStubs& us) {
 
 void emitFCallHelperThunk(UniqueStubs& us) {
   TCA (*helper)(ActRec*, void*) = &fcallHelper;
-  MacroAssembler a { tx64->mainCode };
+  MacroAssembler a { tx64->code.main() };
 
   us.fcallHelperThunk = a.frontier();
   vixl::Label popAndXchg, jmpRet;
@@ -159,7 +159,7 @@ void emitFCallHelperThunk(UniqueStubs& us) {
 
 void emitFuncBodyHelperThunk(UniqueStubs& us) {
   TCA (*helper)(ActRec*, void*) = &funcBodyHelper;
-  MacroAssembler a { tx64->mainCode };
+  MacroAssembler a { tx64->code.main() };
 
   us.funcBodyHelperThunk = a.frontier();
   a.   Mov   (argReg(0), rVmFp);
@@ -175,7 +175,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& us) {
 
 void emitFunctionEnterHelper(UniqueStubs& us) {
   bool (*helper)(const ActRec*, int) = &EventHook::onFunctionEnter;
-  MacroAssembler a { tx64->mainCode };
+  MacroAssembler a { tx64->code.main() };
 
   us.functionEnterHelper = a.frontier();
 

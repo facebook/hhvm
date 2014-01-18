@@ -1,6 +1,4 @@
 <?php
-ini_set('include_path', .);
-
 /* Prototype: array get_included_files  ( void  )
  * Description: Returns an array with the names of included or required files
 

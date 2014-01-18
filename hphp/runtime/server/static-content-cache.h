@@ -31,8 +31,6 @@ public:
   static std::shared_ptr<FileCache> TheFileCache;
 
 public:
-  StaticContentCache();
-
   /**
    * Load all registered static files from RuntimeOption::DocumentRoot.
    */
@@ -49,10 +47,6 @@ private:
     std::shared_ptr<CstrBuffer> file;
     std::shared_ptr<CstrBuffer> compressed;
   };
-
-  int m_totalSize;
-  hphp_hash_map<std::string,std::shared_ptr<ResourceFile>,string_hash>
-    m_files;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

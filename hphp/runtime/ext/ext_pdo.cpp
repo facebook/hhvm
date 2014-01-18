@@ -45,7 +45,9 @@
   }                                                     \
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(PDO);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(PDO, 1.0.4dev);
+
 using std::string;
 ///////////////////////////////////////////////////////////////////////////////
 // PDO constants
@@ -472,7 +474,7 @@ void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
+  string_vsnprintf(msg, fmt, ap);
   obj->o_set(s_message, String(msg), s_PDOException);
   va_end(ap);
 
@@ -2865,7 +2867,7 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
   if (!error) {
     if ((how & PDO_FETCH_GROUP)) {
       do {
-        data.reset();
+        data.unset();
       } while (do_fetch(m_stmt, true, data, (PDOFetchType)(how | flags),
                         PDO_FETCH_ORI_NEXT, 0, return_all));
     } else if (how == PDO_FETCH_KEY_PAIR ||
@@ -2877,7 +2879,7 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
       return_value = Array::Create();
       do {
         return_value.append(data);
-        data.reset();
+        data.unset();
       } while (do_fetch(m_stmt, true, data, (PDOFetchType)(how | flags),
                         PDO_FETCH_ORI_NEXT, 0, NULL));
     }

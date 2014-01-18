@@ -1,0 +1,10 @@
+array(2) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+  ["example"]=>
+  string(8) "document"
+}
+Drop succeeded as it should

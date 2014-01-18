@@ -1,0 +1,4 @@
+float(1234567890)
+MongoCursorException: Can not natively represent the long 1234567890 on this platform
+MongoInt64(1234567890)
+MongoInt64(1234567890)

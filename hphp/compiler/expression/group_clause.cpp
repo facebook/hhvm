@@ -26,7 +26,7 @@ using namespace HPHP;
 GroupClause::GroupClause
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
     ExpressionPtr coll, ExpressionPtr key)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(JoinClause)),
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(GroupClause)),
     m_coll(coll), m_key(key) {
 }
 

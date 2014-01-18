@@ -1,0 +1,33 @@
+Testing primary query with MongoCursor::setReadPreference()
+Bit 2 (SlaveOk) is not set
+string(%d) "%s:%d: not master and slaveOk=false"
+int(13435)
+
+Testing primary query with MongoCursor::setFlag()
+Bit 2 (SlaveOk) is not set
+string(%d) "%s:%d: not master and slaveOk=false"
+int(13435)
+
+Testing primary query
+Bit 2 (SlaveOk) is not set
+string(%d) "%s:%d: not master and slaveOk=false"
+int(13435)
+
+Testing primary count
+Bit 2 (SlaveOk) is not set
+string(%d) "Cannot run command count(): not master"
+int(20)
+
+----
+
+Testing non-primary query with MongoCursor::setReadPreference()
+Bit 2 (SlaveOk) is set
+
+Testing non-primary query with MongoCursor::setFlag()
+Bit 2 (SlaveOk) is set
+
+Testing non-primary query with MongoCollection::setReadPreference()
+Bit 2 (SlaveOk) is set
+
+Testing non-primary count with MongoCollection::setReadPreference()
+Bit 2 (SlaveOk) is set

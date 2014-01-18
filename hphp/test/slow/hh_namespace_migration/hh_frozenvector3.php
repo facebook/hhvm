@@ -1,12 +1,10 @@
 <?hh
 
-// Test that HH\FrozenVector is not "auto-imported" in a named
-// namespace.
-
 namespace Test;
 
+// Test that HH\FrozenVector is auto-imported in a namespace.
 function main() {
-  $s = new FrozenVector(); // Should cause an error.
+  $s = new FrozenVector();
 }
 
 main();

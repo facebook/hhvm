@@ -1,0 +1,45 @@
+forcing primary for command
+forcing primary for getlasterror
+forcing primary for getlasterror
+forcing primary for getlasterror
+forcing primary for getlasterror
+forcing primary for getlasterror
+
+Done priming data... now the actual tests
+
+Testing count
+command supports Read Preferences
+int(5)
+
+Testing group
+command supports Read Preferences
+float(1)
+
+Testing dbStats
+command supports Read Preferences
+float(1)
+
+Testing collStats
+command supports Read Preferences
+float(1)
+
+Testing distinct
+command supports Read Preferences
+array(2) {
+  [0]=>
+  string(5) "fruit"
+  [1]=>
+  string(6) "veggie"
+}
+
+Testing aggregate
+command supports Read Preferences
+float(1)
+
+Testing mapreduce
+forcing primary for command
+float(1)
+
+Testing *inline* mapreduce
+command supports Read Preferences
+float(1)

@@ -31,6 +31,7 @@
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/file-cache.h"
+#include "hphp/util/log-file-flusher.h"
 
 #include "hphp/parser/scanner.h"
 
@@ -217,7 +218,6 @@ bool RuntimeOption::ForbiddenAs404 = false;
 std::string RuntimeOption::ErrorDocument500;
 std::string RuntimeOption::FatalErrorMessage;
 std::string RuntimeOption::FontPath;
-bool RuntimeOption::EnableStaticContentCache = true;
 bool RuntimeOption::EnableStaticContentFromDisk = true;
 bool RuntimeOption::EnableOnDemandUncompress = true;
 bool RuntimeOption::EnableStaticContentMMap = true;
@@ -647,6 +647,9 @@ void RuntimeOption::Load(Hdf &config,
     Logger::UseCronolog = logger["UseCronolog"].getBool(false);
     if (Logger::UseLogFile) {
       LogFile = logger["File"].getString();
+      if (!RuntimeOption::ServerExecutionMode()) {
+        LogFile.clear();
+      }
       if (LogFile[0] == '|') Logger::IsPipeOutput = true;
       LogFileSymLink = logger["SymLink"].getString();
     }
@@ -836,8 +839,6 @@ void RuntimeOption::Load(Hdf &config,
     normalizePath(ErrorDocument500);
     FatalErrorMessage = server["FatalErrorMessage"].getString();
     FontPath = Util::normalizeDir(server["FontPath"].getString());
-    EnableStaticContentCache =
-      server["EnableStaticContentCache"].getBool(true);
     EnableStaticContentFromDisk =
       server["EnableStaticContentFromDisk"].getBool(true);
     EnableOnDemandUncompress =

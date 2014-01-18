@@ -1311,10 +1311,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       auto& state = pair.first->second;
       if (m_inst->producesReference(i)) state.realCount = 1;
 
-      if (m_inst->is(LdMem, LdRef, LdStack, LdElem, LdProp,
-                     LdPackedArrayElem, Unbox)) {
-        state.fromLoad = true;
-      }
+      if (m_inst->isRawLoad()) state.fromLoad = true;
       ITRACE(3, "{}\n", show(state));
       assert(state.optDelta() == 0);
     }

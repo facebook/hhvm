@@ -1,6 +1,4 @@
 <?php
-ini_set('precision ',  14);
-
 /* Prototype: float floatval( mixed $var );
  * Description: Returns the float value of var.
  */

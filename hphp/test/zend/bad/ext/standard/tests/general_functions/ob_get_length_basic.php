@@ -1,6 +1,4 @@
 <?php
-ini_set('output_buffering', 0);
-
 /* Prototype  : int ob_get_length(void)
  * Description: Return the length of the output buffer 
  * Source code: main/output.c

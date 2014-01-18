@@ -203,28 +203,26 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   // If this is not a php file, check the static and dynamic content caches
   if (treatAsContent) {
-    if (RuntimeOption::EnableStaticContentCache) {
-      bool original = compressed;
-      // check against static content cache
-      if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
-        Util::ScopedMem decompressed_data;
-        // (qigao) not calling stat at this point because the timestamp of
-        // local cache file is not valuable, maybe misleading. This way
-        // the Last-Modified header will not show in response.
-        // stat(RuntimeOption::FileCache.c_str(), &st);
-        if (!original && compressed) {
-          data = gzdecode(data, len);
-          if (data == nullptr) {
-            throw FatalErrorException("cannot unzip compressed data");
-          }
-          decompressed_data = const_cast<char*>(data);
-          compressed = false;
+    bool original = compressed;
+    // check against static content cache
+    if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
+      Util::ScopedMem decompressed_data;
+      // (qigao) not calling stat at this point because the timestamp of
+      // local cache file is not valuable, maybe misleading. This way
+      // the Last-Modified header will not show in response.
+      // stat(RuntimeOption::FileCache.c_str(), &st);
+      if (!original && compressed) {
+        data = gzdecode(data, len);
+        if (data == nullptr) {
+          throw FatalErrorException("cannot unzip compressed data");
         }
-        sendStaticContent(transport, data, len, 0, compressed, path, ext);
-        ServerStats::LogPage(path, 200);
-        GetAccessLog().log(transport, vhost);
-        return;
+        decompressed_data = const_cast<char*>(data);
+        compressed = false;
       }
+      sendStaticContent(transport, data, len, 0, compressed, path, ext);
+      ServerStats::LogPage(path, 200);
+      GetAccessLog().log(transport, vhost);
+      return;
     }
 
     if (RuntimeOption::EnableStaticContentFromDisk) {

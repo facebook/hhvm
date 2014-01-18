@@ -1,8 +1,4 @@
 <?php
-ini_set('session.use_only_cookies', 0);
-
-ini_set('session.name', PHPSESSID);
-
 
 ini_set('session.use_trans_sid', 1);
 session_save_path(__DIR__);

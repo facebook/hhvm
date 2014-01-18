@@ -17,14 +17,15 @@
 
 #include <cstdlib>
 
-#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
+
+#include "folly/Conv.h"
 
 #include "hphp/util/db-query.h"
 #include "hphp/util/db-mysql.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/async-job.h"
-#include "hphp/util/util.h"
 #include "hphp/util/alloc.h"
 
 namespace HPHP {
@@ -412,8 +413,8 @@ int DBConn::parallelExecute(std::vector<std::shared_ptr<DBConnQueryJob>> &jobs,
 
 void DBConnQueryWorker::doJob(std::shared_ptr<DBConnQueryJob> job) {
   std::string &sql = job->m_sql;
-  Util::replaceAll(sql, "INDEX",
-    boost::lexical_cast<std::string>(job->m_index).c_str());
+  boost::replace_all(sql, "INDEX",
+    folly::to<std::string>(job->m_index));
 
   if (!job->m_server) {
     job->m_affected = -1;

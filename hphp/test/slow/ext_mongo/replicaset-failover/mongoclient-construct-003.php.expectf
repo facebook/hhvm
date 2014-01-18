@@ -1,0 +1,98 @@
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;REPLICASET;.;%d"
+  ["type"]=>
+  int(2)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(1) {
+  ["getlasterror"]=>
+  int(1)
+}
+array(5) {
+  ["request_id"]=>
+  int(1)
+  ["skip"]=>
+  int(0)
+  ["limit"]=>
+  int(-1)
+  ["options"]=>
+  int(0)
+  ["cursor_id"]=>
+  int(0)
+}
+About to kill master
+Master killed
+Doing primary read, should fail since we don't have primary
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;REPLICASET;.;%d"
+  ["type"]=>
+  int(2)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(1) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+}
+array(5) {
+  ["request_id"]=>
+  int(2)
+  ["skip"]=>
+  int(0)
+  ["limit"]=>
+  int(-1)
+  ["options"]=>
+  int(0)
+  ["cursor_id"]=>
+  int(0)
+}
+string(20) "MongoCursorException"
+string(%d) "%s:%d: Remote server has closed the connection"
+int(32)
+Doing secondary read
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;REPLICASET;.;%d"
+  ["type"]=>
+  int(4)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(1) {
+  ["_id"]=>
+  object(MongoId)#5 (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+}
+array(5) {
+  ["request_id"]=>
+  int(3)
+  ["skip"]=>
+  int(0)
+  ["limit"]=>
+  int(-1)
+  ["options"]=>
+  int(4)
+  ["cursor_id"]=>
+  int(0)
+}
+bool(false)

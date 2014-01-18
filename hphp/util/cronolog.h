@@ -23,7 +23,7 @@
 
 #include "hphp/util/cronoutils.h"
 #include "hphp/util/lock.h"
-#include "hphp/util/util.h"
+#include "hphp/util/log-file-flusher.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

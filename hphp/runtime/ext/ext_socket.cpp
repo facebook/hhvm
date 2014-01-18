@@ -1061,14 +1061,15 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
 
   Resource ret;
   Socket *sock = NULL;
+  double default_timeout = RuntimeOption::SocketDefaultTimeout;
+  if (timeout < 0) timeout = default_timeout;
 
-  if (timeout < 0) timeout = RuntimeOption::SocketDefaultTimeout;
   // test if protocol is SSL
-  SSLSocket *sslsock = SSLSocket::Create(hosturl, timeout);
+  SSLSocket *sslsock = SSLSocket::Create(hosturl, default_timeout);
   if (sslsock) {
     sock = sslsock;
     ret = sock;
-  } else if (!create_new_socket(hosturl, errnum, errstr, ret, sock, timeout)) {
+  } else if (!create_new_socket(hosturl, errnum, errstr, ret, sock, default_timeout)) {
     return false;
   }
   assert(ret.get() && sock);

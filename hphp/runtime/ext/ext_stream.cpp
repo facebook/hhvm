@@ -254,9 +254,13 @@ const StaticString
 bool f_stream_set_timeout(CResRef stream, int seconds,
                           int microseconds /* = 0 */) {
   if (stream.getTyped<Socket>(false, true)) {
-    return f_socket_set_option
+    return (
+      f_socket_set_option
       (stream, SOL_SOCKET, SO_RCVTIMEO,
-       make_map_array(s_sec, seconds, s_usec, microseconds));
+       make_map_array(s_sec, seconds, s_usec, microseconds)) &&
+      f_socket_set_option
+      (stream, SOL_SOCKET, SO_SNDTIMEO,
+       make_map_array(s_sec, seconds, s_usec, microseconds)));
   }
   return false;
 }

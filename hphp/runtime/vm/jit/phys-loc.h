@@ -44,9 +44,11 @@ namespace HPHP { namespace JIT {
  * PhysLoc contains Register/spill locations for one SSATmp
  */
 class PhysLoc {
-  enum Kind { kRegister, kSIMD, kSpill };
+  enum Kind : uint8_t { kRegister, kSIMD, kSpill };
 
 public:
+  static auto constexpr kMaxSlotNum = 255; // since we use uint8_t
+
   PhysLoc() : m_kind(kRegister) {
     m_regs[0] = m_regs[1] = InvalidReg;
   }
@@ -168,7 +170,7 @@ private:
   Kind m_kind;
   union {
     PhysReg m_regs[2];
-    uint32_t m_slots[2];
+    uint8_t m_slots[2];
   };
 };
 

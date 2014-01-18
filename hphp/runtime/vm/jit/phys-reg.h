@@ -223,7 +223,7 @@ private:
   friend struct RegSet;
   explicit constexpr PhysReg(int n) : n(n) {}
 
-  int n;
+  int8_t n;
 };
 
 constexpr PhysReg InvalidReg;

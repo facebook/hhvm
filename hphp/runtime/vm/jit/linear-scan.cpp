@@ -224,9 +224,14 @@ static SSATmp* canonicalize(SSATmp* tmp) {
 RegAllocInfo LinearScan::computeRegs() const {
   RegAllocInfo regs(m_unit);
   for (auto b : m_blocks) {
-    for (auto& i : *b) {
-      for (auto  s : i.srcs()) regs[i][s] = m_allocInfo[s];
-      for (auto& d : i.dsts()) regs[i][d] = m_allocInfo[d];
+    for (auto& inst : *b) {
+      auto& inst_regs = regs[inst];
+      for (unsigned i = 0, n = inst.numSrcs(); i < n; ++i) {
+        inst_regs.src(i) = m_allocInfo[inst.src(i)];
+      }
+      for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
+        inst_regs.dst(i) = m_allocInfo[inst.dst(i)];
+      }
     }
   }
   return regs;

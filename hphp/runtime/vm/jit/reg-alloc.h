@@ -32,35 +32,58 @@ const size_t NumPreAllocatedSpillLocs = kReservedRSPSpillSpace /
 
 struct RegAllocInfo {
   struct RegMap {
-    PhysLoc& operator[](const SSATmp* k) { return m_map[k->id()]; }
-    PhysLoc& operator[](const SSATmp& k) { return m_map[k.id()]; }
-    const PhysLoc& operator[](const SSATmp* k) const {
-      return m_map[k->id()];
-    }
-    const PhysLoc& operator[](const SSATmp& k) const {
-      return m_map[k.id()];
+    // new way
+    PhysLoc& src(unsigned i) { return at(i); }
+    PhysLoc& dst(unsigned i) { return at(i + m_dstOff); }
+    const PhysLoc& src(unsigned i) const { return at(i); }
+    const PhysLoc& dst(unsigned i) const { return at(i + m_dstOff); }
+    void resize(unsigned n) const {
+      m_dstOff = n;
+      m_locs.resize(n);
     }
   private:
-    mutable smart::flat_map<uint32_t,PhysLoc> m_map;
+    PhysLoc& at(unsigned i) {
+      assert(i < m_locs.size());
+      return m_locs[i];
+    }
+    const PhysLoc& at(unsigned i) const {
+      assert(i < m_locs.size());
+      return m_locs[i];
+    }
+    friend struct RegAllocInfo;
+    RegMap& init(const IRInstruction* inst) const {
+      if (m_locs.empty()) {
+        m_dstOff = inst->numSrcs();
+        m_locs.resize(inst->numSrcs() + inst->numDsts());
+      }
+      return *const_cast<RegMap*>(this);
+    }
+  private:
+    mutable unsigned m_dstOff { 0 };
+    mutable std::vector<PhysLoc> m_locs;
   };
   explicit RegAllocInfo(const IRUnit& unit) : m_regs(unit, RegMap()) {}
   RegAllocInfo(const RegAllocInfo& other) : m_regs(other.m_regs) {}
   RegAllocInfo(RegAllocInfo&& other) : m_regs(other.m_regs) {}
-  RegMap& operator[](const IRInstruction* i) { return m_regs[i]; }
-  RegMap& operator[](const IRInstruction& i) { return m_regs[i]; }
-  const RegMap& operator[](const IRInstruction* i) const { return m_regs[i]; }
-  const RegMap& operator[](const IRInstruction& i) const { return m_regs[i]; }
+  RegMap& operator[](const IRInstruction* i) { return m_regs[i].init(i); }
+  RegMap& operator[](const IRInstruction& i) { return m_regs[i].init(&i); }
+  const RegMap& operator[](const IRInstruction* i) const {
+    return m_regs[i].init(i);
+  }
+  const RegMap& operator[](const IRInstruction& i) const {
+    return m_regs[i].init(&i);
+  }
 
-  RegSet srcRegs(IRInstruction& inst) const {
+  RegSet srcRegs(const IRInstruction& inst) const {
     auto regs = RegSet();
     auto& map = m_regs[inst];
-    for (auto src : inst.srcs()) {
-      regs |= map[src].regs();
+    for (unsigned i = 0, n = inst.numSrcs(); i < n; ++i) {
+      regs |= map.src(i).regs();
     }
     return regs;
   }
 
-  RegSet dstRegs(IRInstruction& inst) const {
+  RegSet dstRegs(const IRInstruction& inst) const {
     auto regs = RegSet();
     if (inst.is(Shuffle)) {
       for (auto const& dest : *inst.extra<Shuffle>()) {
@@ -68,8 +91,8 @@ struct RegAllocInfo {
       }
     } else {
       auto& map = m_regs[inst];
-      for (auto& dst : inst.dsts()) {
-        regs |= map[dst].regs();
+      for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
+        regs |= map.dst(i).regs();
       }
     }
     return regs;

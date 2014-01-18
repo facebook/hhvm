@@ -507,6 +507,8 @@ public:
   static constexpr size_t offsetofSize() {
     return offsetof(ArrayData, m_size);
   }
+  static constexpr size_t sizeofKind() { return sizeof(m_kind); }
+  static constexpr size_t sizeofSize() { return sizeof(m_size); }
 
   static const char* kindToString(ArrayKind kind);
 

@@ -1,3 +1,6 @@
+"D<something>"
+  - Deleted legacy register allocator and removed the -vEval.HHIRXls option
+
 "Coolio" 21-Jan-2014
   - Turn on Region JIT
   - FastCGI fixes, perf improvements

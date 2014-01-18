@@ -20,7 +20,7 @@
 #include <vector>
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"

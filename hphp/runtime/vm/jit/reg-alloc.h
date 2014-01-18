@@ -32,32 +32,6 @@ class IRUnit;
 const size_t NumPreAllocatedSpillLocs = X64::kReservedRSPSpillSpace /
                                         sizeof(uint64_t);
 
-struct UseInfo {
-  UseInfo() : lastUse(0), count(0) {}
-  uint32_t lastUse; // linear id of last use
-  uint32_t count;   // number of uses
-};
-
-typedef StateVector<IRInstruction, uint32_t> LinearIdVector;
-typedef StateVector<SSATmp, UseInfo> UsesVector;
-
-struct LifetimeInfo {
-  explicit LifetimeInfo(const IRUnit& unit)
-    : linear(unit, 0), uses(unit, UseInfo()) {
-  }
-  explicit LifetimeInfo(const LinearIdVector& linear,
-                        const UsesVector& uses)
-    : linear(linear), uses(uses) {
-  }
-  explicit LifetimeInfo(LinearIdVector&& linear,
-                        UsesVector&& uses)
-    : linear(linear), uses(uses) {
-  }
-
-  LinearIdVector linear; // linear id of each instruction
-  UsesVector uses;       // last use id and use count of each tmp
-};
-
 struct RegAllocInfo {
   struct RegMap {
     PhysLoc& operator[](const SSATmp* k) { return m_map[k->id()]; }
@@ -110,12 +84,6 @@ private:
 // Return a valid register if this tmp should be forced into a particular
 // register, otherwise return InvalidReg.
 PhysReg forceAlloc(SSATmp& t);
-
-/*
- * The main entry point for register allocation.  Called prior to code
- * generation.
- */
-RegAllocInfo allocRegsForUnit(IRUnit&);
 
 /*
  * New register allocator doing extended linear scan

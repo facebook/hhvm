@@ -1732,16 +1732,6 @@ D:Bool = ThingExists<class|interface|trait> S0:Str
 15. Register allocation
 
 
-D:T = Spill S0:T
-D:T = Reload S0:T
-
-  Spill stores from S0's registers into the spill location assigned to D.
-  Reload loads from S0's spill slot into D's assigned registers.
-
-  Spill and Reload are SSA copies, equivalent to Mov.  The destination
-  will be the same value and type as the source.  Like all operations
-  in SSA, the definition of the source must dominate the operation.
-
 Shuffle<d...> S...
 
   Shuffle takes N source variables and N destination operands, and performs

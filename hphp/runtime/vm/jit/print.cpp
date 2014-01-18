@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/layout.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 
@@ -106,14 +106,10 @@ const PhysLoc* loc(const RegAllocInfo* regs,
 }
 
 void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
-              const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
+              const RegAllocInfo* regs) {
   SSATmp* src = inst->src(i);
   if (src != nullptr) {
-    if (lifetime && lifetime->linear[inst] != 0 && !src->isConst() &&
-        lifetime->uses[src].lastUse == lifetime->linear[inst]) {
-      ostream << "~";
-    }
-    print(ostream, src, loc(regs, inst, src), lifetime);
+    print(ostream, src, loc(regs, inst, src));
   } else {
     ostream << color(ANSI_COLOR_RED)
             << "!!!NULL @ " << i
@@ -186,8 +182,7 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
 }
 
 void printSrcs(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs,
-               const LifetimeInfo* lifetime) {
+               const RegAllocInfo* regs) {
   bool first = true;
   if (inst->op() == IncStat) {
     os << " " << Stats::g_counterNames[inst->src(0)->getValInt()]
@@ -201,34 +196,28 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
       os << " ";
       first = false;
     }
-    printSrc(os, inst, i, regs, lifetime);
+    printSrc(os, inst, i, regs);
   }
 }
 
 void printDsts(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
+               const RegAllocInfo* regs) {
   const char* sep = "";
   for (const SSATmp& dst : inst->dsts()) {
     os << punc(sep);
-    print(os, &dst, loc(regs, inst, &dst), lifetime, true);
+    print(os, &dst, loc(regs, inst, &dst));
     sep = ", ";
   }
 }
 
 void print(std::ostream& ostream, const IRInstruction* inst,
-           const RegAllocInfo* regs, const LifetimeInfo* lifetime,
-           const GuardConstraints* guards) {
+           const RegAllocInfo* regs, const GuardConstraints* guards) {
   if (!inst->isTransient()) {
     ostream << color(ANSI_COLOR_YELLOW);
-    if (!lifetime || !lifetime->linear[inst]) {
-      ostream << folly::format("({:02d}) ", inst->id());
-    } else {
-      ostream << folly::format("({:02d}@{:02d}) ", inst->id(),
-                               lifetime->linear[inst]);
-    }
+    ostream << folly::format("({:02d}) ", inst->id());
     ostream << color(ANSI_COLOR_END);
   }
-  printInstr(ostream, inst, regs, lifetime);
+  printInstr(ostream, inst, regs);
   if (Block* taken = inst->taken()) {
     ostream << punc(" -> ");
     printLabel(ostream, taken);
@@ -236,12 +225,11 @@ void print(std::ostream& ostream, const IRInstruction* inst,
 }
 
 void printInstr(std::ostream& ostream, const IRInstruction* inst,
-                const RegAllocInfo* regs, const LifetimeInfo* lifetime,
-                const GuardConstraints* guards) {
-  printDsts(ostream, inst, regs, lifetime);
+                const RegAllocInfo* regs, const GuardConstraints* guards) {
+  printDsts(ostream, inst, regs);
   if (inst->numDsts()) ostream << punc(" = ");
   printOpcode(ostream, inst, guards);
-  printSrcs(ostream, inst, regs, lifetime);
+  printSrcs(ostream, inst, regs);
 }
 
 void print(const IRInstruction* inst) {
@@ -297,8 +285,7 @@ std::string ShuffleData::show() const {
   return os.str();
 }
 
-void print(std::ostream& os, const SSATmp* tmp, const PhysLoc* loc,
-           const LifetimeInfo* lifetime, bool printLastUse) {
+void print(std::ostream& os, const SSATmp* tmp, const PhysLoc* loc) {
   if (tmp->inst()->op() == DefConst) {
     os << constToString(tmp->inst()->typeParam(),
                         tmp->inst()->extra<DefConst>());
@@ -307,11 +294,6 @@ void print(std::ostream& os, const SSATmp* tmp, const PhysLoc* loc,
   os << color(ANSI_COLOR_WHITE);
   os << "t" << tmp->id();
   os << color(ANSI_COLOR_END);
-  if (printLastUse && lifetime && lifetime->uses[tmp].lastUse != 0) {
-    os << color(ANSI_COLOR_GRAY)
-       << "@" << lifetime->uses[tmp].lastUse << "#" << lifetime->uses[tmp].count
-       << color(ANSI_COLOR_END);
-  }
   if (loc) {
     printPhysLoc(os, *loc);
   }
@@ -362,9 +344,8 @@ static void disasmRange(std::ostream& os, TCA begin, TCA end) {
 }
 
 void print(std::ostream& os, const Block* block,
-           const RegAllocInfo* regs, const LifetimeInfo* lifetime,
-           const AsmInfo* asmInfo, const GuardConstraints* guards,
-           BCMarker* markerPtr) {
+           const RegAllocInfo* regs, const AsmInfo* asmInfo,
+           const GuardConstraints* guards, BCMarker* markerPtr) {
   BCMarker dummy;
   BCMarker& curMarker = markerPtr ? *markerPtr : dummy;
 
@@ -433,14 +414,14 @@ void print(std::ostream& os, const Block* block,
                           folly::format("({}) ", inst.id()).str().size(),
                           ' ');
         auto dst = inst.dst(i);
-        JIT::print(os, dst, loc(regs, &inst, dst), lifetime, false);
+        JIT::print(os, dst, loc(regs, &inst, dst));
         os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
            << color(ANSI_COLOR_END);
         bool first = true;
         inst.block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
             if (!first) os << punc(", ");
             first = false;
-            printSrc(os, jmp, i, regs, lifetime);
+            printSrc(os, jmp, i, regs);
             os << punc("@");
             printLabel(os, jmp->block());
           });
@@ -449,7 +430,7 @@ void print(std::ostream& os, const Block* block,
     }
 
     os << std::string(kIndent, ' ');
-    JIT::print(os, &inst, regs, lifetime, guards);
+    JIT::print(os, &inst, regs, guards);
     os << '\n';
 
     if (asmInfo) {
@@ -499,20 +480,20 @@ void print(const Block* block) {
 }
 
 void print(std::ostream& os, const IRUnit& unit,
-           const RegAllocInfo* regs, const LifetimeInfo* lifetime,
-           const AsmInfo* asmInfo, const GuardConstraints* guards) {
+           const RegAllocInfo* regs, const AsmInfo* asmInfo,
+           const GuardConstraints* guards) {
   // For nice-looking dumps, we want to remember curMarker between blocks.
   BCMarker curMarker;
   for (Block* block : layoutBlocks(unit).blocks) {
-    print(os, block, regs, lifetime, asmInfo, guards, &curMarker);
+    print(os, block, regs, asmInfo, guards, &curMarker);
   }
 }
 
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
 void dumpTrace(int level, const IRUnit& unit, const char* caption,
-               const RegAllocInfo* regs, const LifetimeInfo* lifetime,
-               AsmInfo* ai, const GuardConstraints* guards) {
+               const RegAllocInfo* regs, AsmInfo* ai,
+               const GuardConstraints* guards) {
   if (dumpIREnabled(level)) {
     std::ostringstream str;
     auto bannerFmt = "{:-^80}\n";
@@ -520,7 +501,7 @@ void dumpTrace(int level, const IRUnit& unit, const char* caption,
         << folly::format(bannerFmt, caption)
         << color(ANSI_COLOR_END)
         ;
-    print(str, unit, regs, lifetime, ai, guards);
+    print(str, unit, regs, ai, guards);
     str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
         << folly::format(bannerFmt, "")
         << color(ANSI_COLOR_END)

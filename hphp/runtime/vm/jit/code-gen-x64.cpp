@@ -49,7 +49,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/layout.h"
@@ -2991,20 +2991,6 @@ void emitReload(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
       emitLoadReg(as, reg::rsp[s.offset(i)], d.reg(i));
     }
   }
-}
-
-void CodeGenerator::cgSpill(IRInstruction* inst) {
-  SSATmp* dst   = inst->dst();
-  SSATmp* src   = inst->src(0);
-  assert(dst->numWords() == src->numWords());
-  emitSpill(m_as, curOpd(src), curOpd(dst), src->type());
-}
-
-void CodeGenerator::cgReload(IRInstruction* inst) {
-  SSATmp* dst   = inst->dst();
-  SSATmp* src   = inst->src(0);
-  assert(dst->numWords() == src->numWords());
-  emitReload(m_as, curOpd(src), curOpd(dst), src->type());
 }
 
 void CodeGenerator::cgShuffle(IRInstruction* inst) {
@@ -6388,7 +6374,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
 }
 
 void CodeGenerator::print() const {
-  JIT::print(std::cout, m_unit, &m_state.regs, nullptr, m_state.asmInfo);
+  JIT::print(std::cout, m_unit, &m_state.regs, m_state.asmInfo);
 }
 
 static void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
@@ -6552,7 +6538,7 @@ void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
     genCodeImpl(main, stubs, unit, bcMap, tx64, regs, &ai);
-    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, nullptr, &ai);
+    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
   } else {
     genCodeImpl(main, stubs, unit, bcMap, tx64, regs, nullptr);
   }

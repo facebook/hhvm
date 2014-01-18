@@ -142,13 +142,16 @@ public:
    * so all we really need to do is adjust for the return address and scale
    * by the machine word size.
    */
-  static int offset(uint32_t slot) {
-    return (slot + 1) * sizeof(uint64_t);
-  }
-
   uint32_t offset(int idx) const {
     assert(m_kind == kSpill);
-    return offset(m_slots[idx]);
+    return (m_slots[idx] + 1) * sizeof(uint64_t);
+  }
+
+  /*
+   * return true if the offset of this index is 16-byte aligned
+   */
+  static bool isAligned(uint32_t slot) {
+    return slot % 2 == 1;
   }
 
   bool operator==(const PhysLoc& other) const {

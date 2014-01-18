@@ -158,10 +158,10 @@ public:
 
   void threadInit() {
     IniSetting::Bind("session.save_path",          "",
-                     ini_on_update_save_dir,       ini_get_string,
+                     ini_on_update_save_dir,       ini_get_stdstring,
                      &m_save_path);
     IniSetting::Bind("session.name",               "PHPSESSID",
-                     ini_on_update_string,         ini_get_string,
+                     ini_on_update_stdstring,      ini_get_stdstring,
                      &m_session_name);
     IniSetting::Bind("session.save_handler",       "files",
                      ini_on_update_save_handler,   ini_get_save_handler);
@@ -183,10 +183,10 @@ public:
                      ini_on_update_long,           ini_get_long,
                      &m_cookie_lifetime);
     IniSetting::Bind("session.cookie_path",        "/",
-                     ini_on_update_string,         ini_get_string,
+                     ini_on_update_stdstring,      ini_get_stdstring,
                      &m_cookie_path);
     IniSetting::Bind("session.cookie_domain",      "",
-                     ini_on_update_string,         ini_get_string,
+                     ini_on_update_stdstring,      ini_get_stdstring,
                      &m_cookie_domain);
     IniSetting::Bind("session.cookie_secure",      "",
                      ini_on_update_bool,           ini_get_bool,
@@ -201,16 +201,16 @@ public:
                      ini_on_update_bool,           ini_get_bool,
                      &m_use_only_cookies);
     IniSetting::Bind("session.referer_check",      "",
-                     ini_on_update_string,         ini_get_string,
+                     ini_on_update_stdstring,      ini_get_stdstring,
                      &m_extern_referer_chk);
     IniSetting::Bind("session.entropy_file",       "",
-                     ini_on_update_string,         ini_get_string,
+                     ini_on_update_stdstring,      ini_get_stdstring,
                      &m_entropy_file);
     IniSetting::Bind("session.entropy_length",     "0",
                      ini_on_update_long,           ini_get_long,
                      &m_entropy_length);
     IniSetting::Bind("session.cache_limiter",      "nocache",
-                     ini_on_update_string,         ini_get_string,
+                     ini_on_update_stdstring,      ini_get_stdstring,
                      &m_cache_limiter);
     IniSetting::Bind("session.cache_expire",       "180",
                      ini_on_update_long,           ini_get_long,
@@ -218,7 +218,7 @@ public:
     IniSetting::Bind("session.use_trans_sid",      "0",
                      ini_on_update_trans_sid,      ini_get_trans_sid);
     IniSetting::Bind("session.hash_function",      "0",
-                     ini_on_update_string,         ini_get_string,
+                     ini_on_update_stdstring,      ini_get_stdstring,
                      &m_hash_func);
     IniSetting::Bind("session.hash_bits_per_character", "4",
                      ini_on_update_long,           ini_get_long,
@@ -1201,7 +1201,7 @@ static bool ini_on_update_save_dir(const String& value, void *p) {
   if (File::TranslatePath(path).empty()) {
     return false;
   }
-  return ini_on_update_string(value, p);
+  return ini_on_update_stdstring(value, p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/server/virtual-host.h"
@@ -323,11 +324,6 @@ public:
   void setTimeZone(const String& timezone) { m_timezone = timezone;}
   String getDefaultTimeZone() const { return m_timezoneDefault;}
   void setDefaultTimeZone(const String& s) { m_timezoneDefault = s;}
-  String getArgSeparatorOutput() const {
-    if (m_argSeparatorOutput.isNull()) return s_amp;
-    return m_argSeparatorOutput;
-  }
-  void setArgSeparatorOutput(const String& s) { m_argSeparatorOutput = s;}
   void setThrowAllErrors(bool f) { m_throwAllErrors = f; }
   bool getThrowAllErrors() const { return m_throwAllErrors; }
   void setExitCallback(Variant f) { m_exitCallback = f; }

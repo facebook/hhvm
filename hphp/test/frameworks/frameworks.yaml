@@ -72,7 +72,7 @@
     url: https://github.com/joomla/joomla-framework.git
     branch: master
     commit: fb57d5e2a83979c90c1a7a186ac2804404a61385
-    install_root: joolma-framework
+    install_root: joomla-framework
     test_root: joomla-framework
     # These are subtests which need their own composer set and aren't run
     # by their travis setup
@@ -103,7 +103,7 @@
   magento2:
     url: https://github.com/magento/magento2.git
     branch: master
-    commit: f98550dd6d7f32951c0221cbb0a0e68086d780c7
+    commit: fcc07ebc4b225abaae13bd93243733d0e1fc86a7
     install_root: magento2
     test_root: magento2/dev/tests/unit
   # Changing from ptarjan to wikimedia causes a FATAL in the test
@@ -124,7 +124,7 @@
   monolog:
     url: https://github.com/Seldaek/monolog.git
     branch: master
-    commit: a1e98f4e1da5b0235a74d11dcf7cdb2692b28ffc
+    commit: 01a01a4841ea749426834d127c897f4dc9d62611
     install_root: monolog
     test_root: monolog
   paris:

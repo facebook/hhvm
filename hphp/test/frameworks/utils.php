@@ -1,5 +1,5 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
+require_once __DIR__.'/SortedIterator.php';
 
 // For determining number of processes
 function num_cpus() {
@@ -194,4 +194,114 @@ function get_subclasses_of(string $parent): Vector {
   }
   sort($result);
   return $result;
+}
+
+function get_runtime_build(bool $with_jit = true,
+                           bool $use_php = false): string {
+  $build = "";
+
+  // FIX: Should we try to install a vanilla zend binary here instead of
+  // relying on user to specify a path? Should we try to determine if zend
+  // is already installed via a $PATH variable?
+  if (Options::$zend_path !== null) {
+    if (!file_exists(Options::$zend_path)) {
+      error_and_exit("Zend build does not exists. Are you sure your path is ".
+                     "right?");
+    }
+    $build = Options::$zend_path;
+  } else {
+    $fbcode_root_dir = __DIR__.'/../../..';
+    $oss_root_dir = __DIR__.'/../..';
+    // See if we are using an internal development build
+    if ((file_exists($fbcode_root_dir."/_bin"))) {
+      $build .= $fbcode_root_dir;
+      if (!$use_php) {
+        $build .= "/_bin/hphp/hhvm/hhvm";
+      } else {
+        $build .= "/_bin/hphp/hhvm/php";
+      }
+    // Maybe we are in OSS land trying this script
+    } else if (file_exists($oss_root_dir."/hhvm")) {
+      // Pear won't run correctly unless a 'php' executable exists.
+      // This may be a Pear thing, a PHPUnit running phpt thing, or
+      // or something else. Until we know for sure, let's just create
+      // a php symlink to hhvm
+      symlink($oss_root_dir."/hhvm/hhvm", $oss_root_dir."/hhvm/php");
+
+      $build .= $oss_root_dir."/hhvm";
+      if (!$use_php) {
+        $build .= "/hhvm";
+      } else {
+        $build .= "/php";
+      }
+    } else {
+      error_and_exit("HHVM build doesn't exist. Did you build yet?");
+    }
+    if (!$use_php) {
+      $repo_loc = tempnam('/tmp', 'framework-test');
+      $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
+      $build .= $repo_args;
+      $build .= " --config ".__DIR__."/config.hdf";
+      $build .= " -v Server.IniFile=".__DIR__."/php.ini";
+    }
+    if ($with_jit) {
+      $build .= " -v Eval.Jit=true";
+    }
+  }
+  return $build;
+}
+
+function error_and_exit(string $message, bool $to_file = false): void {
+  if ($to_file) {
+    file_put_contents(Options::$script_errors_file, basename(__FILE__).": ".
+                      $message.PHP_EOL, FILE_APPEND);
+  } else {
+    echo basename(__FILE__).": ".$message.PHP_EOL;
+  }
+  exit(1);
+}
+
+// Include all PHP files in a directory
+function include_all_php($folder){
+  foreach (glob("{$folder}/*.php") as $filename)
+  {
+    include_once $filename;
+  }
+}
+
+// This will run processes that will get the test infra dependencies
+// (e.g. PHPUnit), frameworks and framework dependencies.
+function run_install(string $proc, string $path, ?Map $env): ?int
+{
+  verbose("Running: $proc\n", Options::$verbose);
+  $descriptorspec = array(
+    0 => array("pipe", "r"),
+    1 => array("pipe", "w"),
+    2 => array("pipe", "w"),
+  );
+
+  $env_arr = null; // $_ENV will passed in by default if this is null
+  if ($env !== null) {
+    $env_arr = array_merge($_ENV, $env->toArray());
+  }
+  $pipes = null;
+  $process = proc_open($proc, $descriptorspec, $pipes, $path, $env_arr);
+  if (is_resource($process)) {
+    fclose($pipes[0]);
+    $start_time = microtime(true);
+    while ($line = fgets($pipes[1])) {
+      verbose("$line", Options::$verbose);
+      if ((microtime(true) - $start_time) > 1) {
+        verbose(".", !Options::$verbose && !Options::$csv_only);
+        $start_time = microtime(true);
+      }
+    }
+    verbose(stream_get_contents($pipes[2]), Options::$verbose);
+    fclose($pipes[1]);
+    $ret = proc_close($process);
+    verbose("Returned status $ret\n", Options::$verbose);
+    return $ret;
+  }
+  verbose("Couldn't proc_open: $proc\n", Options::$verbose);
+  return null;
 }

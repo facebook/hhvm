@@ -1,7 +1,6 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
-$FBCODE_ROOT = __DIR__.'/../../..';
-include_once $FBCODE_ROOT.'/hphp/tools/command_line_lib.php';
+include_once __DIR__.'/../../../hphp/tools/command_line_lib.php';
 require_once __DIR__.'/SortedIterator.php';
 require_once __DIR__.'/utils.php';
 require_once __DIR__.'/TestFindModes.php';
@@ -22,6 +21,15 @@ class TestFinder {
     $this->findTestFiles();
   }
 
+  // BUG FIX NEEDED: Due to some recent updates to Reflection, this default
+  // method for finding tests in frameworks is failing for certain
+  // frameworks. The two failing frameworks are Monolog and ZF2. Luckily,
+  // I was able to move those tests to use TestFindModes::TOKEN. But
+  // there is a problem, either with this code (that worked before the
+  // Reflection changes) or Reflection itself.
+  // See git log 63e752f4f0bd141d4e401e7056b4850e7b9a4406 and git log
+  // faec990edc3e3e8f3b491070b0e8cd90e9df7a4d for the addition of the
+  // new ext_reflection-classes.php class.
   public function findTestMethods(): void {
     $current_classes = get_declared_classes();
     $tests = "";
@@ -68,26 +76,55 @@ class TestFinder {
       $php_code = file_get_contents($test_file);
       $tokens = token_get_all($php_code);
       $count = count($tokens);
+      $nspace = "";
+      $class_name = "";
+      // Get the namespace the class is in, if any
+      for ($i = 1; $i < $count; $i++) {
+        if ($tokens[$i - 1][0] === T_NAMESPACE && // namespace keyword
+            $tokens[$i][0] === T_WHITESPACE) {
+          $i++;
+          // Get the full namespace until we hit a ;
+          while ($tokens[$i][0] !== ";") {
+            $nspace .= $tokens[$i][1];
+            $i++;
+          }
+          break;
+        }
+      }
+      // Get the namespace qualified (if any) class name
       for ($i = 6; $i < $count; $i++) {
         if ($tokens[$i - 6][0] === T_CLASS &&       // class keyword
             $tokens[$i - 5][0] === T_WHITESPACE &&
             $tokens[$i - 4][0] === T_STRING &&      // class name
             $tokens[$i - 3][0] === T_WHITESPACE &&
             $tokens[$i - 2][0] === T_EXTENDS &&      // extends keyword
-            $tokens[$i - 1][0] === T_WHITESPACE &&
-            $tokens[$i - 0][0] === T_STRING &&
-            (strpos($tokens[$i - 0][1], "TestCase") !== false || // parent name
-             strpos($tokens[$i - 0][1], "test_case") !== false)) {
-          $class_name = $tokens[$i - 4][1];
+            $tokens[$i - 1][0] === T_WHITESPACE) {
+          $classpos = $i - 4;
+          // parent could be non-namespaced or be namespaced
+          // So get through all T_NS_SEPARATOR and T_STRING
+          // Last T_STRING before T_WHITESPACE will be parent name
+          while ($tokens[$i][0] !== T_WHITESPACE) { $i++;}
+          if (strpos($tokens[$i - 1][1], "TestCase") !== false || // parent name
+              strpos($tokens[$i - 1][1], "test_case") !== false) {
+            $class_name = $tokens[$classpos][1];
+          }
+          break;
         }
+      }
+      // Get all the test functions in the class
+      for ($i = 2; $i < $count; $i++) {
         if ($tokens[$i - 2][0] === T_FUNCTION &&
             $tokens[$i - 1][0] === T_WHITESPACE &&
             $tokens[$i][0] === T_STRING &&
             strpos($tokens[$i][1], "test") === 0) {
-              $tests .= $class_name."::".$tokens[$i][1].PHP_EOL;
+          if ($nspace !== "") {
+            $tests .= $nspace."\\";
+          }
+          $tests .= $class_name."::".$tokens[$i][1].PHP_EOL;
         }
       }
     }
+
     file_put_contents($this->tests_file, $tests);
   }
 

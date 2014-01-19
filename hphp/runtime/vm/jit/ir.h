@@ -211,7 +211,6 @@ O(CheckStk,                  D(StkPtr), S(StkPtr),                       B|E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                      N|Er) \
 O(CoerceStk,                 D(StkPtr), S(StkPtr),                    B|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
-O(AssertStkVal,              D(StkPtr), S(StkPtr) S(Gen),                  E) \
 O(CheckDefinedClsEq,                ND, NA,                              B|E) \
 O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
@@ -219,7 +218,6 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
                                           S(Int),                          E) \
 O(AssertLoc,               D(FramePtr), S(FramePtr),                       E) \
-O(OverrideLocVal,                   ND, S(FramePtr) S(Gen),                E) \
 O(BeginCatch,                       ND, NA,                                E) \
 O(EndCatch,                         ND, S(FramePtr) S(StkPtr),           E|T) \
 O(TryEndCatch,                      ND, S(FramePtr) S(StkPtr),             E) \

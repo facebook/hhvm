@@ -99,12 +99,6 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     }
     return getStackValue(inst->src(0), index);
 
-  case AssertStkVal:
-    if (inst->extra<StackOffset>()->offset == index) {
-      return StackValueInfo { inst->src(1) };
-    }
-    return getStackValue(inst->src(0), index);
-
   case CallArray: {
     if (index == 0) {
       // return value from call

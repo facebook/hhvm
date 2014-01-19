@@ -110,7 +110,6 @@ void FrameState::update(const IRInstruction* inst) {
     break;
 
   case AssertStk:
-  case AssertStkVal:
   case CastStk:
   case CoerceStk:
   case CheckStk:
@@ -223,12 +222,6 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
     case CheckLoc:
       hook.refineLocalType(inst->extra<LocalId>()->locId, inst->typeParam());
       break;
-
-    case OverrideLocVal: {
-      auto const locId = inst->extra<LocalId>()->locId;
-      hook.setLocalValue(locId, inst->src(1));
-      break;
-    }
 
     case CheckType: {
       SSATmp* newVal = inst->dst();

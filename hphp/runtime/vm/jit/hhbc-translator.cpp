@@ -3382,33 +3382,6 @@ void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
   }
 }
 
-void HhbcTranslator::assertString(const RegionDesc::Location& loc,
-                                  const StringData* str) {
-  typedef RegionDesc::Location::Tag T;
-  switch (loc.tag()) {
-    case T::Stack: {
-      auto idx = loc.stackOffset();
-      if (idx < m_evalStack.size()) {
-        // We're asserting a new type so we don't care about the previous type.
-        DEBUG_ONLY SSATmp* oldStr = m_evalStack.top(DataTypeGeneric, idx);
-        assert(oldStr->type().maybe(Type::Str));
-        m_evalStack.replace(idx, cns(str));
-      } else {
-        gen(AssertStkVal,
-            StackOffset(idx - m_evalStack.size() + m_stackDeficit),
-            m_tb->sp(), cns(str));
-      }
-    }
-    break;
-
-    case T::Local:
-      // We're asserting a new type so we don't care about the previous type.
-      assert(m_tb->localType(loc.localId(), DataTypeGeneric).maybe(Type::Str));
-      gen(OverrideLocVal, LocalId(loc.localId()), m_tb->fp(), cns(str));
-      break;
-  }
-}
-
 void HhbcTranslator::assertClass(const RegionDesc::Location& loc,
                                  const Class* cls) {
   Type curType;

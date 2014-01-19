@@ -374,11 +374,6 @@ D:FramePtr = AssertLoc<T,localId> S0:FramePtr
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the asserted local has type T.
 
-OverrideLocVal<localId> S0:FramePtr S1:Gen
-
-  Overrides tracked information about the value of a local in frame
-  S0, updating it to be S1.
-
 D:StkPtr = GuardStk<T,offset> S0:StkPtr
 
   Guard that the type of the cell on the stack pointed to by S0 at
@@ -402,11 +397,6 @@ D:StkPtr = AssertStk<T,offset> S0:StkPtr
   the knowledge that the slot at offset (in cells) has type T.  This
   is similar to a GuardStk except that it does not imply a runtime
   check and cannot cause control flow.
-
-D:StkPtr = AssertStkVal<offset> S0:StkPtr S1:Gen
-
-  Returns a new StkPtr that represents the same stack as S0, but with the
-  knowledge that the slot at offset has the value S1.
 
 D:StkPtr = CastStk<T,offset> S0:StkPtr
 

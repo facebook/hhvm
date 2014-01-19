@@ -127,6 +127,9 @@ class ReflectionParameter implements Reflector {
       }
       $type .= ' ';
     }
+    if (isset($this->info['ref'])) {
+      $type .= '&';
+    }
     $out = 'Parameter #'.$this->getPosition().' [ ';
     if ($this->isOptional()) {
       $default = var_export($this->getDefaultValue(), true);

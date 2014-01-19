@@ -259,6 +259,8 @@ class ReflectionParameter implements Reflector {
       return null;
     } else if ($ltype === 'self') {
       return new ReflectionClass($this->info['class']);
+    } else if ($ltype === 'parent') {
+      return new ReflectionClass(get_parent_class($this->info['class']));
     }
     return new ReflectionClass($this->info['type']);
   }

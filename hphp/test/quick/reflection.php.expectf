@@ -138,9 +138,9 @@ array(4) {
 --- getStaticVariables("f") ---
 array(2) {
   ["staticX"]=>
-  string(1) "4"
+  int(4)
   ["staticY"]=>
-  string(4) "null"
+  NULL
 }
 
 --- isInternal("f") ---

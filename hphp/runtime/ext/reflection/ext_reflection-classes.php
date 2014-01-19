@@ -1149,7 +1149,7 @@ class ReflectionClass implements Reflector {
     if (empty($clone)) {
       return true;
     }
-    return $clone->info['access'] == "public"; 
+    return $clone['access'] == "public"; 
   }
 
 

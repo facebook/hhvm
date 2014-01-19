@@ -533,7 +533,14 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
       auto const cls = it->second;
 
       if (cls->attrs & AttrUnique) {
-        assert(++it == end(classes));
+        if (debug && boost::next(it) != end(classes)) {
+          std::fprintf(stderr, "non unique \"unique\" class: %s\n",
+            cls->name->data());
+          for (; it != end(classes); ++it) {
+            std::fprintf(stderr, "   and %s\n", it->second->name->data());
+          }
+          assert(0);
+        }
         return cls;
       }
 

@@ -1,0 +1,840 @@
+#!/usr/bin/env php
+<?php
+/**
+* Run the test suites in various configurations.
+*/
+
+function usage() {
+  global $argv;
+  return "usage: $argv[0] [-m jit|interp] [-r] <test/directories>";
+}
+
+function help() {
+  global $argv;
+  $ztestexample = 'test/zend/good/*/*z*.php'; // sep. for syntax highlighting
+  $help = <<<EOT
+
+
+This is the hhvm test-suite runner.  For more detailed documentation,
+see hphp/test/README.md.
+
+The test argument may be a path to a php test file, a directory name, or
+one of a few pre-defined suite names that this script knows about.
+
+If you work with hhvm a lot, you might consider a bash alias:
+
+   alias ht="path/to/fbcode/hphp/test/run"
+
+Examples:
+
+  # Quick tests in JIT mode:
+  % $argv[0] test/quick
+
+  # Slow tests in interp mode:
+  % $argv[0] -m interp test/slow
+
+  # Slow closure tests in JIT mode:
+  % $argv[0] test/slow/closure
+
+  # Slow closure tests in JIT mode with RepoAuthoritative:
+  % $argv[0] -r test/slow/closure
+
+  # Slow array tests, in RepoAuthoritative:
+  % $argv[0] -r test/slow/array
+
+  # Zend tests with a "z" in their name:
+  % $argv[0] $ztestexample
+
+  # Quick tests in JIT mode with some extra runtime options:
+  % $argv[0] test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRJumpOpts=0'
+
+  # All quick tests except debugger
+  % $argv[0] -e debugger test/quick
+
+  # All tests except those containing a string of 3 digits
+  % $argv[0] -E '/\d{3}/' all
+
+EOT;
+  return usage().$help;
+}
+
+function error($message) {
+  print "$message\n";
+  exit(1);
+}
+
+function hphp_home() {
+  return realpath(__DIR__.'/../..');
+}
+
+function idx($array, $key, $default = null) {
+  return isset($array[$key]) ? $array[$key] : $default;
+}
+
+function idx_file($array, $key, $default = null) {
+  $file = is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
+  if (!is_file($file)) {
+    error("$file doesn't exist. Did you forget to build first?");
+  }
+  return rel_path($file);
+}
+
+function bin_root() {
+  $dir = hphp_home() . '/' . idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin');
+  return is_dir($dir) ?
+    $dir :      # fbmake
+    hphp_home() # github
+  ;
+}
+
+function verify_hhbc() {
+  return idx($_ENV, 'VERIFY_HHBC', bin_root().'/verify.hhbc');
+}
+
+function read_file($file) {
+  return file_exists($file) ?
+         str_replace('__DIR__', dirname($file),
+           preg_replace('/\s+/', ' ', (file_get_contents($file))))
+         : "";
+}
+
+// http://stackoverflow.com/questions/2637945/
+function rel_path($to) {
+    $from     = explode('/', getcwd().'/');
+    $to       = explode('/', $to);
+    $relPath  = $to;
+
+    foreach($from as $depth => $dir) {
+        // find first non-matching dir
+        if($dir === $to[$depth]) {
+            // ignore this directory
+            array_shift($relPath);
+        } else {
+            // get number of remaining dirs to $from
+            $remaining = count($from) - $depth;
+            if($remaining > 1) {
+                // add traversals up to first matching dir
+                $padLength = (count($relPath) + $remaining - 1) * -1;
+                $relPath = array_pad($relPath, $padLength, '..');
+                break;
+            } else {
+                $relPath[0] = './' . $relPath[0];
+            }
+        }
+    }
+    return implode('/', $relPath);
+}
+
+function get_options($argv) {
+  $parameters = array(
+    'exclude:' => 'e:',
+    'exclude-pattern:' => 'E:',
+    'repo' => 'r',
+    'mode:' => 'm:',
+    'server' => '',
+    'help' => 'h',
+    'verbose' => 'v',
+    'fbmake' => '',
+    'threads:' => '',
+    'args:' => 'a:',
+    'log' => 'l',
+    'failure-file:' => '',
+    'arm' => '',
+    'hhas-round-trip' => '',
+  );
+  $options = array();
+  $files = array();
+  for ($i = 1; $i < count($argv); $i++) {
+    $arg = $argv[$i];
+    $found = false;
+    if ($arg && $arg[0] == '-') {
+      foreach ($parameters as $long => $short) {
+        if ($arg == '-'.str_replace(':', '', $short) ||
+            $arg == '--'.str_replace(':', '', $long)) {
+          if (substr($long, -1, 1) == ':') {
+            $value = $argv[++$i];
+          } else {
+            $value = true;
+          }
+          $options[str_replace(':', '', $long)] = $value;
+          $found = true;
+          break;
+        }
+      }
+    }
+    if (!$found && $arg) {
+      $files[] = $arg;
+    }
+  }
+
+  if (isset($options['repo']) && isset($options['hhas-round-trip'])) {
+    echo "repo and hhas-round-trip are mutually exclusive options\n";
+    exit(1);
+  }
+
+  return array($options, $files);
+}
+
+/*
+ * We support some 'special' file names, that just know where the test
+ * suites are, to avoid typing 'hphp/test/foo'.
+ */
+function map_convenience_filename($file) {
+  $mappage = array(
+    'quick'    => 'hphp/test/quick',
+    'slow'     => 'hphp/test/slow',
+    'debugger' => 'hphp/test/server/debugger/tests',
+    'zend'     => 'hphp/test/zend/good',
+    'zend_bad' => 'hphp/test/zend/bad',
+    'facebook' => 'hphp/facebook/test',
+  );
+
+  if (!isset($mappage[$file])) {
+    return $file;
+  }
+  return hphp_home().'/'.$mappage[$file];
+}
+
+function find_tests($files, array $options = null) {
+  if (!$files) {
+    $files = array('quick');
+  }
+  if ($files == array('all')) {
+    $files = array('quick', 'slow', 'zend');
+  }
+  foreach ($files as &$file) {
+    $file = map_convenience_filename($file);
+    if (!@stat($file)) {
+      error("Not valid file or directory: '$file'");
+    }
+    $file = preg_replace(',//+,', '/', realpath($file));
+    $file = preg_replace(',^'.getcwd().'/,', '', $file);
+  }
+  $files = implode(' ', $files);
+  $tests = explode("\n", shell_exec(
+      "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
+  ));
+  if (!$tests) {
+    error(usage());
+  }
+  asort($tests);
+  $tests = array_filter($tests);
+  if (!empty($options['exclude'])) {
+    $exclude = $options['exclude'];
+    $tests = array_filter($tests, function($test) use ($exclude) {
+      return (false === strpos($test, $exclude));
+    });
+  }
+  if (!empty($options['exclude-pattern'])) {
+    $exclude = $options['exclude-pattern'];
+    $tests = array_filter($tests, function($test) use ($exclude) {
+      return !preg_match($exclude, $test);
+    });
+  }
+  return $tests;
+}
+
+function find_test_ext($test, $ext) {
+  if (is_file("{$test}.{$ext}")) {
+    return "{$test}.{$ext}";
+  }
+  return find_file_for_dir(dirname($test), "config.{$ext}");
+}
+
+function find_file($test, $name) {
+  return find_file_for_dir(dirname($test), $name);
+}
+
+function find_file_for_dir($dir, $name) {
+  while (($dir !== '.' && $dir !== '/') && is_dir($dir)) {
+    $file = "$dir/$name";
+    if (is_file($file)) {
+      return $file;
+    }
+    $dir = dirname($dir);
+  }
+  $file = __DIR__.'/'.$name;
+  if (file_exists($file)) {
+    return $file;
+  }
+  return null;
+}
+
+function find_debug_config($test, $name) {
+  $debug_config = find_file_for_dir(dirname($test), $name);
+  if ($debug_config !== null) {
+    return "-m debug --debug-config ".$debug_config;
+  }
+  return "";
+}
+
+function mode_cmd($options) {
+  $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
+  $jit_args = "$repo_args -vEval.Jit=true";
+  $mode = idx($options, 'mode', '');
+  switch ($mode) {
+    case '':
+    case 'jit':
+    case 'automain':
+      return "$jit_args";
+    case 'pgo':
+      return "$jit_args -vEval.JitPGO=1 -vEval.JitRegionSelector=hottrace ".
+             "-vEval.JitPGOHotOnly=0";
+    case 'interp':
+      return "$repo_args -vEval.Jit=0";
+    default:
+      error("-m must be one of jit | pgo | interp | automain. Got: '$mode'");
+  }
+}
+
+function extra_args($options) {
+  return idx($options, 'args', '');
+}
+
+function hhvm_path() {
+  return idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm');
+}
+
+// Return the command and the env to run it in.
+function hhvm_cmd($options, $test, $test_run = null) {
+  $use_automain = false;
+  if ($test_run === null) {
+    $use_automain = 'automain' === idx($options, 'mode')
+      && 'php' === pathinfo($test, PATHINFO_EXTENSION);
+    $test_run = $use_automain
+      ? __DIR__.'/pseudomain_wrapper.php'
+      : $test;
+  }
+  $cmd = implode(' ', array(
+    hhvm_path(),
+    '--config',
+    find_test_ext($test, 'hdf'),
+    find_debug_config($test, 'hphpd.hdf'),
+    mode_cmd($options),
+    '-vEval.EnableArgsInBacktraces=true',
+    read_file(find_test_ext($test, 'opts')),
+    isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
+    extra_args($options),
+    '-vResourceLimit.CoreFileSize=0',
+    '--file',
+    escapeshellarg($test_run),
+    $use_automain ? escapeshellarg($test) : ''
+  ));
+  if (file_exists($test.'.ini')) {
+    $cmd .= " -vServer.IniFile=$test.ini";
+  }
+  $env = $_ENV;
+  $in = find_test_ext($test, 'in');
+  if ($in !== null) {
+    $cmd .= ' < ' . escapeshellarg($in);
+    // If we're piping the input into the command then setup a simple
+    // dumb terminal so hhvm doesn't try to control it and pollute the
+    // output with control characters, which could change depending on
+    // a wide variety of terminal settings.
+    $env["TERM"] = "dumb";
+  }
+  return array($cmd, $env);
+}
+
+function hphp_cmd($options, $test) {
+  return implode(" ", array(
+    hhvm_path(),
+    '--hphp',
+    '--config',
+    find_file($test, 'hphp_config.hdf'),
+    read_file("$test.hphp_opts"),
+    "-thhbc -l0 -k1 -o $test.repo $test",
+  ));
+}
+
+class Status {
+  private static $results = array();
+  private static $mode = 0;
+
+  const MODE_NORMAL = 0;
+  const MODE_VERBOSE = 1;
+  const MODE_FBMAKE = 2;
+
+  public static function setMode($mode) {
+    self::$mode = $mode;
+  }
+
+  public static function pass($test) {
+    array_push(self::$results, array('name' => $test, 'status' => 'passed'));
+    switch (self::$mode) {
+      case self::MODE_NORMAL:
+        if (self::hasColor()) {
+          print "\033[1;32m.\033[0m";
+        } else {
+          print '.';
+        }
+        break;
+      case self::MODE_VERBOSE:
+        if (self::hasColor()) {
+          print "$test \033[1;32mpassed\033[0m\n";
+        } else {
+          print "$test passed\n";
+        }
+        break;
+      case self::MODE_FBMAKE:
+        self::sayFBMake($test, 'passed');
+        break;
+    }
+  }
+
+  public static function skip($test) {
+    switch (self::$mode) {
+      case self::MODE_NORMAL:
+        if (self::hasColor()) {
+          print "\033[1;33ms\033[0m";
+        } else {
+          print 's';
+        }
+        break;
+      case self::MODE_VERBOSE:
+        if (self::hasColor()) {
+          print "$test \033[1;33mskipped\033[0m\n";
+        } else {
+          print "$test skipped\n";
+        }
+        break;
+      case self::MODE_FBMAKE:
+        // Say nothing...
+        break;
+    }
+  }
+
+  public static function fail($test) {
+    array_push(self::$results, array(
+        'name' => $test,
+        'status' => 'failed',
+        'details' => (string)@file_get_contents("$test.diff")
+    ));
+    switch (self::$mode) {
+      case self::MODE_NORMAL:
+        $diff = (string)@file_get_contents($test.'.diff');
+        if (self::hasColor()) {
+          print "\n\033[0;31m$test\033[0m\n$diff";
+        } else {
+          print "\nFAILED: $test\n$diff";
+        }
+        break;
+      case self::MODE_VERBOSE:
+        if (self::hasColor()) {
+          print "$test \033[0;31mFAILED\033[0m\n";
+        } else {
+          print "$test FAILED\n";
+        }
+        break;
+      case self::MODE_FBMAKE:
+        self::sayFBMake($test, 'failed');
+        break;
+    }
+  }
+
+  private static function sayFBMake($test, $status) {
+    $start = array('op' => 'start', 'test' => $test);
+    $end = array('op' => 'test_done', 'test' => $test, 'status' => $status);
+    if ($status == 'failed') {
+      $end['details'] = (string)@file_get_contents("$test.diff");
+    }
+    self::say($start, $end);
+  }
+
+  public static function getResults() {
+    return self::$results;
+  }
+
+  /** Output is in the format expected by JsonTestRunner. */
+  public static function say(/* ... */) {
+    $data = array_map(function($row) {
+      return self::jsonEncode($row) . "\n";
+    }, func_get_args());
+    fwrite(STDERR, implode("", $data));
+  }
+
+  private static function hasColor() {
+    return posix_isatty(STDOUT);
+  }
+
+  public static function jsonEncode($data) {
+    // JSON_UNESCAPED_SLASHES is Zend 5.4+
+    if (defined("JSON_UNESCAPED_SLASHES")) {
+      return json_encode($data, JSON_UNESCAPED_SLASHES);
+    }
+
+    $json = json_encode($data);
+    return str_replace('\\/', '/', $json);
+  }
+}
+
+function run($options, $tests, $bad_test_file) {
+  if (isset($options['verbose'])) {
+    Status::setMode(Status::MODE_VERBOSE);
+  }
+  if (isset($options['fbmake'])) {
+    Status::setMode(Status::MODE_FBMAKE);
+  }
+  foreach ($tests as $test) {
+    $status = run_test($options, $test);
+    if ($status === 'skip') {
+      Status::skip($test);
+    } else if ($status) {
+      Status::pass($test);
+    } else {
+      Status::fail($test);
+    }
+  }
+  file_put_contents($bad_test_file, json_encode(Status::getResults()));
+  foreach (Status::getResults() as $result) {
+    if ($result['status'] == 'failed') {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+function skip_test($options, $test) {
+  $skipif_test = find_test_ext($test, 'skipif');
+  if (!$skipif_test) {
+    return false;
+  }
+
+  list($hhvm, $_) = hhvm_cmd($options, $test, $skipif_test);
+  $out = shell_exec($hhvm . ' 2> /dev/null');
+  $out = trim($out);
+  return (bool)strlen($out);
+}
+
+function dump_hhas_to_temp($hhvm_cmd, $test) {
+  $tmp_file = $test . '.round_trip.hhas';
+  system("$hhvm_cmd -vEval.DumpHhas=1 > $tmp_file", $ret);
+  if ($ret) { echo "system failed\n"; exit(1); }
+  return $tmp_file;
+}
+
+function run_test($options, $test) {
+  if (skip_test($options, $test)) {
+    return 'skip';
+  }
+  $test_ext = pathinfo($test, PATHINFO_EXTENSION);
+  list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
+
+  $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
+  $output = '';
+
+  if (isset($options['repo'])) {
+    if ($test_ext === 'hhas' ||
+        strpos($hhvm, '-m debug') !== false ||
+        file_exists($test.'.norepo')) {
+      return 'skip';
+    } else {
+      $repodb = "$test.repo/hhvm.hhbc";
+      if (file_exists($repodb)) unlink($repodb);
+      $hphp = hphp_cmd($options, $test);
+      $output .= shell_exec("$hphp 2>&1");
+      $hhvm .= " -vRepo.Authoritative=true ".
+               "-vRepo.Central.Path=$repodb";
+    }
+  }
+
+  if (isset($options['hhas-round-trip'])) {
+    $hhas_temp = dump_hhas_to_temp($hhvm, $test);
+    list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
+  }
+
+  $descriptorspec = array(
+     0 => array("pipe", "r"),
+     1 => array("pipe", "w"),
+     2 => array("pipe", "w"),
+  );
+  if (isset($options['log'])) {
+    $hhvm_env['TRACE'] = 'printir:1';
+    $hhvm_env['HPHP_TRACE_FILE'] = $test . '.log';
+  }
+  $pipes = null;
+  $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes, null, $hhvm_env);
+  if (!is_resource($process)) {
+    file_put_contents("$test.diff", "Couldn't invoke $hhvm");
+    return false;
+  }
+
+  fclose($pipes[0]);
+  $output .= trim(stream_get_contents($pipes[1]));
+  file_put_contents("$test.out", $output);
+  fclose($pipes[1]);
+
+  // hhvm redirects errors to stdout, so anything on stderr is really bad
+  $stderr = stream_get_contents($pipes[2]);
+  if ($stderr) {
+    file_put_contents(
+      "$test.diff",
+      "Test failed because the process wrote on stderr:\n$stderr"
+    );
+    return false;
+  }
+  fclose($pipes[2]);
+  proc_close($process);
+
+  // Needed for testing non-hhvm binaries that don't actually run the code
+  // e.g. parser/test/parse_tester.cpp
+  if ($output == "FORCE PASS") {
+    return true;
+  }
+
+  if (file_exists("$test.expect")) {
+    $diff_cmds = "--text -u";
+    file_put_contents("$test.expect-trimmed",
+                      trim(file_get_contents("$test.expect")));
+    exec("diff --text -u $test.expect-trimmed $test.out > $test.diff 2>&1",
+         $_, $status);
+    // unix 0 == success
+    unlink("$test.expect-trimmed");
+    return !$status;
+  } else if (file_exists("$test.expectf")) {
+    $wanted_re = trim(file_get_contents("$test.expectf"));
+
+    // do preg_quote, but miss out any %r delimited sections
+    $temp = "";
+    $r = "%r";
+    $startOffset = 0;
+    $length = strlen($wanted_re);
+    while($startOffset < $length) {
+      $start = strpos($wanted_re, $r, $startOffset);
+      if ($start !== false) {
+        // we have found a start tag
+        $end = strpos($wanted_re, $r, $start+2);
+        if ($end === false) {
+          // unbalanced tag, ignore it.
+          $end = $start = $length;
+        }
+      } else {
+        // no more %r sections
+        $start = $end = $length;
+      }
+      // quote a non re portion of the string
+      $temp = $temp.preg_quote(substr($wanted_re, $startOffset,
+                                      ($start - $startOffset)),  '/');
+      // add the re unquoted.
+      if ($end > $start) {
+        $temp = $temp.'('.substr($wanted_re, $start+2, ($end - $start-2)).')';
+      }
+      $startOffset = $end + 2;
+    }
+    $wanted_re = $temp;
+
+    $wanted_re = str_replace(
+      array('%binary_string_optional%'),
+      'string',
+      $wanted_re
+    );
+    $wanted_re = str_replace(
+      array('%unicode_string_optional%'),
+      'string',
+      $wanted_re
+    );
+    $wanted_re = str_replace(
+      array('%unicode\|string%', '%string\|unicode%'),
+      'string',
+      $wanted_re
+    );
+    $wanted_re = str_replace(
+      array('%u\|b%', '%b\|u%'),
+      '',
+      $wanted_re
+    );
+    // Stick to basics
+    $wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
+    $wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
+    $wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
+    $wanted_re = str_replace('%a', '.+', $wanted_re);
+    $wanted_re = str_replace('%A', '.*', $wanted_re);
+    $wanted_re = str_replace('%w', '\s*', $wanted_re);
+    $wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
+    $wanted_re = str_replace('%d', '\d+', $wanted_re);
+    $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
+    $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?',
+                             $wanted_re);
+    $wanted_re = str_replace('%c', '.', $wanted_re);
+    // %f allows two points "-.0.0" but that is the best *simple* expression
+
+    # a poor man's aide for debugging
+    shell_exec("diff --text -u $test.expectf $test.out > $test.diff 2>&1");
+
+    // Normalize newlines
+    $wanted_re = preg_replace("/(\r\n?|\n)/", "\n", $wanted_re);
+    $output    = preg_replace("/(\r\n?|\n)/", "\n", $output);
+
+    return preg_match("/^$wanted_re\$/s", $output);
+
+  } else if (file_exists("$test.expectregex")) {
+    $wanted_re = trim(file_get_contents("$test.expectregex"));
+
+    # a poor man's aide for debugging
+    shell_exec("diff --text -u $test.expectregex $test.out > $test.diff 2>&1");
+
+    return preg_match("/^$wanted_re\$/s", $output);
+  }
+}
+
+function num_cpus() {
+  switch(PHP_OS) {
+    case 'Linux':
+      $data = file('/proc/stat');
+      $cores = 0;
+      foreach($data as $line) {
+        if (preg_match('/^cpu[0-9]/', $line)) {
+          $cores++;
+        }
+      }
+      return $cores;
+    case 'Darwin':
+    case 'FreeBSD':
+      return exec('sysctl -n hw.ncpu');
+  }
+  return 2; // default when we don't know how to detect
+}
+
+function make_header($str) {
+  return "\n\033[0;33m".$str."\033[0m\n";
+}
+
+function print_commands($tests, $options) {
+  print make_header("Run these by hand:");
+
+  foreach ($tests as $test) {
+    list($command, $_) = hhvm_cmd($options, $test);
+    if (isset($options['repo'])) {
+      $command .= " -vRepo.Authoritative=true ";
+      $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc",
+                             $command);
+      $command = hphp_cmd($options, $test)."\n".$command."\n";
+    }
+    print "$command\n";
+  }
+}
+
+function main($argv) {
+
+  ini_set('pcre.backtrack_limit', PHP_INT_MAX);
+
+  list($options, $files) = get_options($argv);
+  if (isset($options['help'])) {
+    error(help());
+  }
+  $tests = find_tests($files, $options);
+
+  hhvm_path(); // check that binary exists
+
+  $threads = min(count($tests), idx($options, 'threads', num_cpus() + 1));
+
+  if (!isset($options['fbmake'])) {
+    print "Running ".count($tests)." tests in $threads threads\n";
+  }
+
+  // Try to construct the buckets so the test results are ready in
+  // approximately alphabetical order
+  $test_buckets = array();
+  $i = 0;
+  foreach ($tests as $test) {
+    $test_buckets[$i][] = $test;
+    $i = ($i + 1) % $threads;
+  }
+
+  // Spawn off worker threads
+  $children = array();
+  // A poor man's shared memory
+  $bad_test_files = array();
+  for ($i = 0; $i < $threads; $i++) {
+    $bad_test_file = tempnam('/tmp', 'test-run-');
+    $bad_test_files[] = $bad_test_file;
+    $pid = pcntl_fork();
+    if ($pid == -1) {
+      error('could not fork');
+    } else if ($pid) {
+      $children[] = $pid;
+    } else {
+      exit(run($options, $test_buckets[$i], $bad_test_file));
+    }
+  }
+
+  // Wait for the kids
+  $return_value = 0;
+  foreach ($children as $child) {
+    pcntl_waitpid($child, $status);
+    $return_value |= pcntl_wexitstatus($status);
+  }
+
+  $results = array();
+  foreach ($bad_test_files as $bad_test_file) {
+    $json = json_decode(file_get_contents($bad_test_file), true);
+    if (!is_array($json)) {
+      error(
+        "No JSON output was received from a test thread. ".
+        "This might be a bug in the test script."
+      );
+    }
+    $results = array_merge($results, $json);
+  }
+  if (isset($options['fbmake'])) {
+    Status::say(array('op' => 'all_done', 'results' => $results));
+  } else {
+    if (!$return_value) {
+      print "\nAll tests passed.\n\n".<<<SHIP
+              |    |    |
+             )_)  )_)  )_)
+            )___))___))___)\
+           )____)____)_____)\\
+         _____|____|____|____\\\__
+---------\      SHIP IT      /---------
+  ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
+    ^^^^      ^^^^     ^^^    ^^
+         ^^^^      ^^^
+SHIP
+."\n";
+      if (isset($options['verbose'])) {
+        print_commands($tests, $options);
+      }
+    } else {
+      $failed = array();
+      foreach ($results as $result) {
+        if ($result['status'] == 'failed') {
+          $failed[] = $result['name'];
+        }
+      }
+      asort($failed);
+      print "\n".count($failed)." tests failed\n";
+
+      print make_header("See the diffs:").
+        implode("\n", array_map(
+          function($test) { return 'cat '.$test.'.diff'; },
+        $failed))."\n";
+
+      $failing_tests_file = !empty($options['failure-file'])
+        ? $options['failure-file']
+        : tempnam('/tmp', 'test-failures');
+      file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
+      print make_header('For xargs, list of failures is available using:').
+        'cat '.$failing_tests_file."\n";
+
+      print_commands($failed, $options);
+
+      print make_header("Re-run just the failing tests:").
+            $argv[0].' '.implode(' ', $failed)."\n";
+
+      if (idx($options, 'mode') == 'automain') {
+        print make_header(
+          'Automain caveat: wrapper script may change semantics');
+        print 'The automain wrapper script ('.__DIR__.'/pseudomain_wrapper.php)'
+          .' may have changed behavior'."\n"
+          .'(e.g. extra frames in backtraces) by moving code from '
+          .'pseudo-main to file top-level and adding a wrapper function.'
+          ."\n";
+      }
+    }
+  }
+
+  return $return_value;
+}
+
+exit(main($argv));

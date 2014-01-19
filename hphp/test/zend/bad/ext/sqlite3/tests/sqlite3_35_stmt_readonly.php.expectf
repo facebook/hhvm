@@ -1,0 +1,14 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+Checking select statement
+bool(true)
+Checking update statement
+bool(false)
+Checking delete statement
+bool(false)
+Closing database
+bool(true)
+Done

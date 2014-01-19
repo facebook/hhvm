@@ -1,0 +1,67 @@
+*** Test strncmp() function: by supplying all types for 'len' ***
+HipHop Notice: %s
+HipHop Notice: %s
+-- Iteration 1 --
+int(0)
+-- Iteration 2 --
+int(0)
+-- Iteration 3 --
+int(0)
+-- Iteration 4 --
+int(0)
+-- Iteration 5 --
+int(0)
+-- Iteration 6 --
+int(0)
+-- Iteration 7 --
+int(0)
+-- Iteration 8 --
+int(0)
+-- Iteration 9 --
+int(0)
+-- Iteration 10 --
+int(0)
+-- Iteration 11 --
+HipHop Warning: %s
+NULL
+-- Iteration 12 --
+HipHop Warning: %s
+NULL
+-- Iteration 13 --
+HipHop Warning: %s
+NULL
+-- Iteration 14 --
+HipHop Warning: %s
+NULL
+-- Iteration 15 --
+HipHop Warning: %s
+NULL
+-- Iteration 16 --
+int(0)
+-- Iteration 17 --
+int(0)
+-- Iteration 18 --
+int(0)
+-- Iteration 19 --
+int(0)
+-- Iteration 20 --
+int(0)
+-- Iteration 21 --
+int(0)
+-- Iteration 22 --
+HipHop Warning: %s
+NULL
+-- Iteration 23 --
+HipHop Warning: %s
+NULL
+-- Iteration 24 --
+int(0)
+-- Iteration 25 --
+int(0)
+-- Iteration 26 --
+HipHop Warning: %s
+NULL
+-- Iteration 27 --
+HipHop Warning: %s
+NULL
+*** Done ***

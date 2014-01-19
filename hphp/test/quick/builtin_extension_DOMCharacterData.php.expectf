@@ -1,0 +1,127 @@
+DOMCharacterData
+object(DOMCharacterData)#1 (0) {
+}
+string(101) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:16:"DOMCharacterData";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(16) "DOMCharacterData"
+}
+array(26) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(10) "appendData"
+  [5]=>
+  string(10) "deleteData"
+  [6]=>
+  string(10) "insertData"
+  [7]=>
+  string(11) "replaceData"
+  [8]=>
+  string(13) "substringData"
+  [9]=>
+  string(11) "appendChild"
+  [10]=>
+  string(9) "cloneNode"
+  [11]=>
+  string(9) "getLineNo"
+  [12]=>
+  string(13) "hasAttributes"
+  [13]=>
+  string(13) "hasChildNodes"
+  [14]=>
+  string(12) "insertBefore"
+  [15]=>
+  string(18) "isDefaultNamespace"
+  [16]=>
+  string(10) "isSameNode"
+  [17]=>
+  string(11) "isSupported"
+  [18]=>
+  string(18) "lookupNamespaceUri"
+  [19]=>
+  string(12) "lookupPrefix"
+  [20]=>
+  string(9) "normalize"
+  [21]=>
+  string(11) "removeChild"
+  [22]=>
+  string(12) "replaceChild"
+  [23]=>
+  string(4) "c14n"
+  [24]=>
+  string(8) "c14nfile"
+  [25]=>
+  string(11) "getNodePath"
+}
+================
+A_DOMCharacterData
+object(A_DOMCharacterData)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(103) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:18:"A_DOMCharacterData";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(18) "A_DOMCharacterData"
+}
+array(26) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(10) "appendData"
+  [5]=>
+  string(10) "deleteData"
+  [6]=>
+  string(10) "insertData"
+  [7]=>
+  string(11) "replaceData"
+  [8]=>
+  string(13) "substringData"
+  [9]=>
+  string(11) "appendChild"
+  [10]=>
+  string(9) "cloneNode"
+  [11]=>
+  string(9) "getLineNo"
+  [12]=>
+  string(13) "hasAttributes"
+  [13]=>
+  string(13) "hasChildNodes"
+  [14]=>
+  string(12) "insertBefore"
+  [15]=>
+  string(18) "isDefaultNamespace"
+  [16]=>
+  string(10) "isSameNode"
+  [17]=>
+  string(11) "isSupported"
+  [18]=>
+  string(18) "lookupNamespaceUri"
+  [19]=>
+  string(12) "lookupPrefix"
+  [20]=>
+  string(9) "normalize"
+  [21]=>
+  string(11) "removeChild"
+  [22]=>
+  string(12) "replaceChild"
+  [23]=>
+  string(4) "c14n"
+  [24]=>
+  string(8) "c14nfile"
+  [25]=>
+  string(11) "getNodePath"
+}

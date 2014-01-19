@@ -1,0 +1,35 @@
+outer loop
+try 1
+inside inner loop
+inside inner loop
+inside inner loop
+inside inner loop
+finally
+inside outer loop
+outer loop
+try 2
+inside inner loop
+inside inner loop
+inside inner loop
+inside inner loop
+finally
+inside outer loop
+outer loop
+try 3
+inside inner loop
+inside inner loop
+before goto
+finally
+try 4
+inside inner loop
+before goto 2
+finally
+inside outer loop
+outer loop
+try 4
+inside inner loop
+before goto 2
+finally
+inside outer loop
+before label
+after label

@@ -1,0 +1,155 @@
+*** Indexing - Testing value assignment with key ***
+array(1) {
+  ["foo"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+HipHop Warning: %s
+int(0)
+HipHop Warning: %s
+int(1)
+HipHop Warning: %s
+bool(true)
+array(1) {
+  ["foo"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+array(1) {
+  ["foo"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+HipHop Warning: %s
+HipHop Notice: %s
+string(1) "A"
+HipHop Warning: %s
+float(0.1)
+array(1) {
+  ["foo"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+*** Indexing - Testing reference assignment with key ***
+array(1) {
+  ["foo"]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+HipHop Warning: %s
+int(0)
+HipHop Warning: %s
+int(1)
+HipHop Warning: %s
+bool(true)
+array(1) {
+  ["foo"]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+array(1) {
+  ["foo"]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+HipHop Warning: %s
+float(0.1)
+array(1) {
+  ["foo"]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+*** Indexing - Testing value assignment no key ***
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+HipHop Warning: %s
+int(0)
+HipHop Warning: %s
+int(1)
+HipHop Warning: %s
+bool(true)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+HipHop Warning: %s
+float(0.1)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+*** Indexing - Testing reference assignment no key ***
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+HipHop Warning: %s
+int(0)
+HipHop Warning: %s
+int(1)
+HipHop Warning: %s
+bool(true)
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+HipHop Warning: %s
+float(0.1)
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Done

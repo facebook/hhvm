@@ -1,0 +1,720 @@
+Assetic\Test\AssetManagerTest::testClear
+.
+Assetic\Test\AssetManagerTest::testGetAsset
+.
+Assetic\Test\AssetManagerTest::testGetInvalidAsset
+.
+Assetic\Test\AssetManagerTest::testHas
+.
+Assetic\Test\AssetManagerTest::testInvalidName
+.
+Assetic\Test\AssetWriterTest::testAssetWithInputVars
+.
+Assetic\Test\AssetWriterTest::testWriteAssetWithVars
+.
+Assetic\Test\AssetWriterTest::testWriteManagerAssets
+.
+Assetic\Test\Asset\AssetCacheTest::testDumpFromCache
+.
+Assetic\Test\Asset\AssetCacheTest::testDumpToCache
+.
+Assetic\Test\Asset\AssetCacheTest::testEnsureFilter
+.
+Assetic\Test\Asset\AssetCacheTest::testGetContent
+.
+Assetic\Test\Asset\AssetCacheTest::testGetFilters
+.
+Assetic\Test\Asset\AssetCacheTest::testGetLastModified
+.
+Assetic\Test\Asset\AssetCacheTest::testGetSourcePath
+.
+Assetic\Test\Asset\AssetCacheTest::testGetSourceRoot
+.
+Assetic\Test\Asset\AssetCacheTest::testLoadFromCache
+.
+Assetic\Test\Asset\AssetCacheTest::testLoadToCache
+.
+Assetic\Test\Asset\AssetCacheTest::testSetContent
+.
+Assetic\Test\Asset\AssetCollectionTest::testBasenameCollision
+.
+Assetic\Test\Asset\AssetCollectionTest::testClearingFiltersWorksAfterCollectionHasBeenIterated
+.
+Assetic\Test\Asset\AssetCollectionTest::testClone
+.
+Assetic\Test\Asset\AssetCollectionTest::testDumpDedupBySourceUrl
+.
+Assetic\Test\Asset\AssetCollectionTest::testDumpDedupByStrictEquality
+.
+Assetic\Test\Asset\AssetCollectionTest::testDumpFilter
+.
+Assetic\Test\Asset\AssetCollectionTest::testEmptyMtime
+.
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #0 
+.
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #1 
+.
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #2 
+.
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #3 
+.
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModifiedWithValues
+.
+Assetic\Test\Asset\AssetCollectionTest::testInterface
+.
+Assetic\Test\Asset\AssetCollectionTest::testIteration
+.
+Assetic\Test\Asset\AssetCollectionTest::testIterationFilters
+.
+Assetic\Test\Asset\AssetCollectionTest::testLeafManipulation
+.
+Assetic\Test\Asset\AssetCollectionTest::testLoadDedupBySourceUrl
+.
+Assetic\Test\Asset\AssetCollectionTest::testLoadDedupByStrictEquality
+.
+Assetic\Test\Asset\AssetCollectionTest::testLoadFilter
+.
+Assetic\Test\Asset\AssetCollectionTest::testMixedIteration
+.
+Assetic\Test\Asset\AssetCollectionTest::testNestedCollectionLoad
+.
+Assetic\Test\Asset\AssetCollectionTest::testNewFilterOnCloneDoesNotPropagateToPrototype
+.
+Assetic\Test\Asset\AssetCollectionTest::testRecursiveDeduplication
+.
+Assetic\Test\Asset\AssetCollectionTest::testRecursiveIteration
+.
+Assetic\Test\Asset\AssetCollectionTest::testRemoveInvalidLeaf
+.
+Assetic\Test\Asset\AssetCollectionTest::testRemoveLeaf
+.
+Assetic\Test\Asset\AssetCollectionTest::testRemoveRecursiveLeaf
+.
+Assetic\Test\Asset\AssetCollectionTest::testReplaceInvalidLeaf
+.
+Assetic\Test\Asset\AssetCollectionTest::testReplaceLeaf
+.
+Assetic\Test\Asset\AssetCollectionTest::testReplaceRecursiveLeaf
+.
+Assetic\Test\Asset\AssetCollectionTest::testSetContent
+.
+Assetic\Test\Asset\AssetCollectionTest::testTargetNameGeneration
+.
+Assetic\Test\Asset\AssetReferenceTest::testDump
+.
+Assetic\Test\Asset\AssetReferenceTest::testFilterFlush
+.
+Assetic\Test\Asset\AssetReferenceTest::testLazyFilters
+.
+Assetic\Test\Asset\AssetReferenceTest::testLoad
+.
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #0 
+.
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #1 
+.
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #2 
+.
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #3 
+.
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #4 
+.
+Assetic\Test\Asset\AssetReferenceTest::testSetContent
+.
+Assetic\Test\Asset\FileAssetTest::testDefaultBaseAndPath
+.
+Assetic\Test\Asset\FileAssetTest::testGetLastModifiedType
+.
+Assetic\Test\Asset\FileAssetTest::testGetLastModifiedTypeFileNotFound
+.
+Assetic\Test\Asset\FileAssetTest::testGetLastModifiedValue
+.
+Assetic\Test\Asset\FileAssetTest::testInterface
+.
+Assetic\Test\Asset\FileAssetTest::testInvalidBase
+.
+Assetic\Test\Asset\FileAssetTest::testLazyLoading
+.
+Assetic\Test\Asset\FileAssetTest::testPathGuessing
+.
+Assetic\Test\Asset\GlobAssetTest::testDump
+.
+Assetic\Test\Asset\GlobAssetTest::testGetLastModifiedType
+.
+Assetic\Test\Asset\GlobAssetTest::testGetLastModifiedValue
+.
+Assetic\Test\Asset\GlobAssetTest::testInterface
+.
+Assetic\Test\Asset\GlobAssetTest::testIteration
+.
+Assetic\Test\Asset\GlobAssetTest::testLoad
+.
+Assetic\Test\Asset\GlobAssetTest::testRecursiveIteration
+.
+Assetic\Test\Asset\HttpAssetTest::testGetLastModified
+.
+Assetic\Test\Asset\HttpAssetTest::testInvalidUrl
+.
+Assetic\Test\Asset\HttpAssetTest::testMalformedUrl
+.
+Assetic\Test\Asset\HttpAssetTest::testProtocolRelativeUrl
+.
+Assetic\Test\Asset\HttpAssetTest::testSourceMetadata
+.
+Assetic\Test\Asset\StringAssetTest::testAutomaticLoad
+.
+Assetic\Test\Asset\StringAssetTest::testDumpAppliesAdditionalFilter
+.
+Assetic\Test\Asset\StringAssetTest::testGetContentNullUnlessLoaded
+.
+Assetic\Test\Asset\StringAssetTest::testGetFilters
+.
+Assetic\Test\Asset\StringAssetTest::testInterface
+.
+Assetic\Test\Asset\StringAssetTest::testLastModified
+.
+Assetic\Test\Asset\StringAssetTest::testLoadAppliesAdditionalFilter
+.
+Assetic\Test\Asset\StringAssetTest::testLoadAppliesFilters
+.
+Assetic\Test\Cache\ApcCacheTest::testCache
+.
+Assetic\Test\Cache\ArrayCacheTest::testCache
+.
+Assetic\Test\Cache\ConfigCacheTest::testCache
+.
+Assetic\Test\Cache\ConfigCacheTest::testHas
+.
+Assetic\Test\Cache\ConfigCacheTest::testInvalidTimestamp
+.
+Assetic\Test\Cache\ConfigCacheTest::testInvalidValue
+.
+Assetic\Test\Cache\ConfigCacheTest::testTimestamp
+.
+Assetic\Test\Cache\ExpiringCacheTest::testGet
+.
+Assetic\Test\Cache\ExpiringCacheTest::testHasExpired
+.
+Assetic\Test\Cache\ExpiringCacheTest::testHasNotExpired
+.
+Assetic\Test\Cache\ExpiringCacheTest::testRemove
+.
+Assetic\Test\Cache\ExpiringCacheTest::testSetLifetime
+.
+Assetic\Test\Cache\FilesystemCacheTest::testCache
+.
+Assetic\Test\Cache\FilesystemCacheTest::testSetCreatesDir
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testAbsolutePath
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testCombine
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testDebug
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testFilterFunction
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testFilters
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testGlob
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testImage
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testMixture
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testMultipleSameVariableValues
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testOptionalFilter
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testOutput
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testOutputPattern
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testReference
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testUnclosedTag
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testVariables
+.
+Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testFunction
+.
+Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testMixture
+.
+Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testUnclosedTag
+.
+Assetic\Test\Extension\Twig\TwigResourceTest::testInvalidTemplateNameGetContent
+.
+Assetic\Test\Extension\Twig\TwigResourceTest::testInvalidTemplateNameIsFresh
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateAssetCollection
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateAssetReference
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateFileAsset
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAsset
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAssetAndExcludeDirectories
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAssetAndLoadFiles
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #0 
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #1 
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #2 
+.
+Assetic\Test\Factory\AssetFactoryTest::testFilter
+.
+Assetic\Test\Factory\AssetFactoryTest::testGetLastModified
+.
+Assetic\Test\Factory\AssetFactoryTest::testGetLastModifiedCollection
+.
+Assetic\Test\Factory\AssetFactoryTest::testIncludingOptionalFilter
+.
+Assetic\Test\Factory\AssetFactoryTest::testInvalidFilter
+.
+Assetic\Test\Factory\AssetFactoryTest::testNestedFormula
+.
+Assetic\Test\Factory\AssetFactoryTest::testNoAssetManagerNotReference
+.
+Assetic\Test\Factory\AssetFactoryTest::testNoAssetManagerReference
+.
+Assetic\Test\Factory\AssetFactoryTest::testNoFilterManager
+.
+Assetic\Test\Factory\AssetFactoryTest::testOptionalInvalidFilter
+.
+Assetic\Test\Factory\AssetFactoryTest::testWorkerReturn
+.
+Assetic\Test\Factory\AssetFactoryTest::testWorkers
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testGetFromLoader
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testGetLastModified
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testGetResources
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testGetResourcesEmpty
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testIsDebug
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testSetFormula
+.
+Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testDebugCached
+.
+Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testDebugCachedStale
+.
+Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testNotDebug
+.
+Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testNotDebugCached
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testComplexFormula
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #0 
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #1 
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #2 
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #3 
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #4 
+.
+Assetic\Test\Factory\Resource\CoalescingDirectoryResourceTest::shouldFilterFiles
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testFollowSymlinks
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #0 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #1 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #2 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testInvalidDirectory
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIsFresh
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #0 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #1 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #2 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testRecursiveIteration
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testTrailingSlash with data set #0 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testTrailingSlash with data set #1 
+.
+Assetic\Test\Factory\Resource\FileResourceTest::testGetContent
+.
+Assetic\Test\Factory\Resource\FileResourceTest::testGetContentOnInvalidPath
+.
+Assetic\Test\Factory\Resource\FileResourceTest::testIsFresh
+.
+Assetic\Test\Factory\Resource\FileResourceTest::testIsFreshOnInvalidPath
+.
+Assetic\Test\Factory\Worker\CacheBustingWorkerTest::shouldApplyConsistentHash
+.
+Assetic\Test\Factory\Worker\CacheBustingWorkerTest::shouldApplyHash
+.
+Assetic\Test\Factory\Worker\CacheBustingWorkerTest::shouldNotReapplyHash
+.
+Assetic\Test\Factory\Worker\EnsureFilterWorkerTest::testMatch
+.
+Assetic\Test\Factory\Worker\EnsureFilterWorkerTest::testNonMatch
+.
+Assetic\Test\FilterManagerTest::testGetFilter
+.
+Assetic\Test\FilterManagerTest::testHas
+.
+Assetic\Test\FilterManagerTest::testHasInvalid
+.
+Assetic\Test\FilterManagerTest::testInvalidAlias
+.
+Assetic\Test\FilterManagerTest::testInvalidName
+.
+Assetic\Test\Filter\BaseProcessFilterTest::testInterface
+.
+Assetic\Test\Filter\CallablesFilterTest::testDependencyExtractor
+.
+Assetic\Test\Filter\CallablesFilterTest::testDumper
+.
+Assetic\Test\Filter\CallablesFilterTest::testInterface
+.
+Assetic\Test\Filter\CallablesFilterTest::testLoader
+.
+Assetic\Test\Filter\CoffeeScriptFilterTest::testBare
+S
+Assetic\Test\Filter\CoffeeScriptFilterTest::testFilterLoad
+S
+Assetic\Test\Filter\CompassFilterTest::testCompassMixin
+S
+Assetic\Test\Filter\CompassFilterTest::testFilterLoadWithSass
+S
+Assetic\Test\Filter\CompassFilterTest::testFilterLoadWithScss
+S
+Assetic\Test\Filter\CssEmbedFilterTest::testCssEmbedDataUri
+S
+Assetic\Test\Filter\CssEmbedFilterTest::testCssEmbedMhtml
+S
+Assetic\Test\Filter\CssImportFilterTest::testImport with data set #0 
+.
+Assetic\Test\Filter\CssImportFilterTest::testImport with data set #1 
+.
+Assetic\Test\Filter\CssImportFilterTest::testNonCssImport
+.
+Assetic\Test\Filter\CssMinFilterTest::testRelativeSourceUrlImportImports
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testEmptySrcAttributeSelector
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testEmptyUrl
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testExternalSource
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #0 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #1 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #2 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #3 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #4 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #5 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testNoTargetPath
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #0 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #1 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #10 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #11 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #12 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #13 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #14 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #15 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #16 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #17 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #2 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #3 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #4 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #5 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #6 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #7 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #8 
+.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #9 
+.
+Assetic\Test\Filter\DartFilterTest::testFilterLoad
+S
+Assetic\Test\Filter\EmberPrecompileFilterTest::testEmberPrecompile
+S
+Assetic\Test\Filter\FilterCollectionTest::testAll
+.
+Assetic\Test\Filter\FilterCollectionTest::testCountable
+.
+Assetic\Test\Filter\FilterCollectionTest::testEmptyAll
+.
+Assetic\Test\Filter\FilterCollectionTest::testEnsure
+.
+Assetic\Test\Filter\FilterCollectionTest::testInterface
+.
+Assetic\Test\Filter\GoogleClosure\CompilerApiFilterTest::testRoundTrip
+.
+Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testCompile
+S
+Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testCompileEcma5
+S
+Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testFlagFile
+S
+Assetic\Test\Filter\GssFilterTest::testCompile
+S
+Assetic\Test\Filter\HandlebarsFilterTest::testHandlebars
+S
+Assetic\Test\Filter\HandlebarsFilterTest::testMinimizeHandlebars
+S
+Assetic\Test\Filter\HandlebarsFilterTest::testSimpleHandlebars
+S
+Assetic\Test\Filter\JSMinFilterTest::testRelativeSourceUrlImportImports
+.
+Assetic\Test\Filter\JSMinPlusFilterTest::testRelativeSourceUrlImportImports
+.
+Assetic\Test\Filter\JpegoptimFilterTest::testFilter
+S
+Assetic\Test\Filter\JpegtranFilterTest::testFilter
+.
+Assetic\Test\Filter\LessFilterTest::testCompressImport
+S
+Assetic\Test\Filter\LessFilterTest::testFilterLoad
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #0 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #1 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #10 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #11 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #12 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #13 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #14 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #15 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #16 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #17 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #18 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #19 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #2 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #3 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #4 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #5 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #6 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #7 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #8 
+S
+Assetic\Test\Filter\LessFilterTest::testGetChildren with data set #9 
+S
+Assetic\Test\Filter\LessFilterTest::testImport
+S
+Assetic\Test\Filter\LessFilterTest::testLoadPath
+S
+Assetic\Test\Filter\LessFilterTest::testSettingLoadPaths
+S
+Assetic\Test\Filter\LessphpFilterTest::testFilterLoad
+.
+Assetic\Test\Filter\LessphpFilterTest::testFormatterClassic
+.
+Assetic\Test\Filter\LessphpFilterTest::testFormatterCompressed
+.
+Assetic\Test\Filter\LessphpFilterTest::testFormatterLessjs
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #0 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #1 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #10 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #11 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #12 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #13 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #14 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #15 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #16 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #17 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #18 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #19 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #2 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #3 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #4 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #5 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #6 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #7 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #8 
+.
+Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #9 
+.
+Assetic\Test\Filter\LessphpFilterTest::testImport
+.
+Assetic\Test\Filter\LessphpFilterTest::testLoadPath
+.
+Assetic\Test\Filter\LessphpFilterTest::testPreserveCommentsFalse
+.
+Assetic\Test\Filter\LessphpFilterTest::testPreserveCommentsTrue
+.
+Assetic\Test\Filter\LessphpFilterTest::testPresets
+.
+Assetic\Test\Filter\OptiPngFilterTest::testFilter with data set #0 
+S
+Assetic\Test\Filter\OptiPngFilterTest::testFilter with data set #1 
+S
+Assetic\Test\Filter\PackagerFilterTest::testPackager
+.
+Assetic\Test\Filter\PackerFilterTest::testPacker
+.
+Assetic\Test\Filter\PhpCssEmbedFilterTest::testCssEmbedDataUri
+.
+Assetic\Test\Filter\PngoutFilterTest::testFilter with data set #0 
+S
+Assetic\Test\Filter\PngoutFilterTest::testFilter with data set #1 
+S
+Assetic\Test\Filter\PngoutFilterTest::testFilter with data set #2 
+S
+Assetic\Test\Filter\RooleFilterTest::testFilterLoad
+S
+Assetic\Test\Filter\Sass\SassFilterTest::testGetChildrenCatchesPartialsInSubfolders
+S
+Assetic\Test\Filter\Sass\SassFilterTest::testGetChildrenCatchesSassImports
+S
+Assetic\Test\Filter\Sass\SassFilterTest::testGetChildrenIgnoresCssImports
+S
+Assetic\Test\Filter\Sass\SassFilterTest::testSass
+S
+Assetic\Test\Filter\Sass\SassFilterTest::testScssGuess
+S
+Assetic\Test\Filter\Sass\ScssFilterTest::testImport
+S
+Assetic\Test\Filter\Sass\ScssFilterTest::testLoadPath
+S
+Assetic\Test\Filter\Sass\ScssFilterTest::testSettingLoadPaths
+S
+Assetic\Test\Filter\ScssphpFilterTest::testCompassExtension
+I
+Assetic\Test\Filter\ScssphpFilterTest::testFilterLoad
+.
+Assetic\Test\Filter\ScssphpFilterTest::testImport
+.
+Assetic\Test\Filter\ScssphpFilterTest::testRegisterFunction
+.
+Assetic\Test\Filter\ScssphpFilterTest::testSetImportPath
+.
+Assetic\Test\Filter\SprocketsFilterTest::testFilterLoad
+S
+Assetic\Test\Filter\StylusFilterTest::testFilterLoad
+S
+Assetic\Test\Filter\StylusFilterTest::testFilterLoadWithCompression
+S
+Assetic\Test\Filter\StylusFilterTest::testFilterLoadWithUseNib
+S
+Assetic\Test\Filter\TypeScriptFilterTest::testFilterLoad
+S
+Assetic\Test\Filter\UglifyCssFilterTest::testUglify
+S
+Assetic\Test\Filter\UglifyJs2FilterTest::testBeautify
+S
+Assetic\Test\Filter\UglifyJs2FilterTest::testCompress
+S
+Assetic\Test\Filter\UglifyJs2FilterTest::testCompressAndMangle
+S
+Assetic\Test\Filter\UglifyJs2FilterTest::testMangle
+S
+Assetic\Test\Filter\UglifyJs2FilterTest::testUglify
+S
+Assetic\Test\Filter\UglifyJsFilterTest::testBeautifyUglify
+S
+Assetic\Test\Filter\UglifyJsFilterTest::testNoCopyrightUglify
+S
+Assetic\Test\Filter\UglifyJsFilterTest::testNoMangleUglify
+S
+Assetic\Test\Filter\UglifyJsFilterTest::testUglify
+S
+Assetic\Test\Filter\UglifyJsFilterTest::testUnsafeUglify
+S
+Assetic\Test\Filter\Yui\BaseCompressorFilterTest::testInterface
+.
+Assetic\Test\Filter\Yui\CssCompressorFilterTest::testInterface
+.
+Assetic\Test\Filter\Yui\JsCompressorFilterTest::testFilterDump
+S
+Assetic\Test\Filter\Yui\JsCompressorFilterTest::testInterface
+.
+Assetic\Test\Util\CssUtilsTest::testExtractImports
+.
+Assetic\Test\Util\CssUtilsTest::testFilterCommentless
+.
+Assetic\Test\Util\CssUtilsTest::testFilterUrls
+.
+Assetic\Test\Util\LessUtilsTest::testExtractImports
+.
+Assetic\Test\Util\LessUtilsTest::testFilterCommentless
+.
+Assetic\Test\Util\LessUtilsTest::testFilterCommentlessLess
+.
+Assetic\Test\Util\LessUtilsTest::testFilterUrls
+.
+Assetic\Test\Util\TraversableStringTest::testArray
+.
+Assetic\Test\Util\TraversableStringTest::testString
+.
+Assetic\Test\Util\VarUtilsTest::testGetCombinations with data set #0 
+.
+Assetic\Test\Util\VarUtilsTest::testGetCombinations with data set #1 
+.
+Assetic\Test\Util\VarUtilsTest::testGetCombinations with data set #2 
+.
+Assetic\Test\Util\VarUtilsTest::testGetCombinations with data set #3 
+.
+Assetic\Test\Util\VarUtilsTest::testResolve
+.

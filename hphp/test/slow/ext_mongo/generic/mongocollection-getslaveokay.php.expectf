@@ -1,0 +1,9 @@
+%s: Function MongoCollection::setSlaveOkay() is deprecated in %s on line %d
+
+%s: Function MongoCollection::getSlaveOkay() is deprecated in %s on line %d
+bool(true)
+
+%s: Function MongoCollection::setSlaveOkay() is deprecated in %s on line %d
+
+%s: Function MongoCollection::getSlaveOkay() is deprecated in %s on line %d
+bool(false)

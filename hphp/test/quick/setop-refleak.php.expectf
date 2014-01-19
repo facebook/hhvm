@@ -1,0 +1,7 @@
+HipHop Notice: Object of class Dtor could not be converted to int in %s/test/quick/setop-refleak.php on line 12
+dtor
+object(Foo)#1 (1) {
+  ["bug"]=>
+  int(13)
+}
+done

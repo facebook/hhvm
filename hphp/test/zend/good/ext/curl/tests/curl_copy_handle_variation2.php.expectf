@@ -1,0 +1,6 @@
+*** Testing curl_copy_handle(): add options after copy ***
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+===DONE===

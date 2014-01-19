@@ -1,0 +1,40 @@
+*** Testing usort() : usage variation ***
+
+-- Testing usort() with built-in 'cmp_function': strcasecmp() --
+bool(true)
+array(5) {
+  [0]=>
+  string(5) "apple"
+  [1]=>
+  string(6) "Banana"
+  [2]=>
+  string(5) "Mango"
+  [3]=>
+  string(6) "orange"
+  [4]=>
+  string(9) "Pineapple"
+}
+
+-- Testing usort() with built-in 'cmp_function': strcmp() --
+bool(true)
+array(5) {
+  [0]=>
+  string(6) "Banana"
+  [1]=>
+  string(5) "Mango"
+  [2]=>
+  string(9) "Pineapple"
+  [3]=>
+  string(5) "apple"
+  [4]=>
+  string(6) "orange"
+}
+
+-- Testing usort() with language construct as 'cmp_function' --
+HipHop Warning: %s
+NULL
+
+-- Testing usort() with language construct as 'cmp_function' --
+HipHop Warning: %s
+NULL
+===DONE===

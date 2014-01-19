@@ -1,0 +1,58 @@
+
+.main {
+  FPushFuncD 0 "test"
+  FCall 0
+  PopR
+  String "\n"
+  Print
+  PopC
+  Int 1
+  RetC
+}
+
+.function test() {
+  Int 42
+  SetL $x
+  PopC
+
+  CGetL $x
+  Int 5
+  Int 0
+  Int 0
+  Int 0
+  Int 0
+  JmpZ target_cond2
+  PopC
+  PopC
+  PopC
+  JmpZ target_cond
+
+  Jmp target
+  RetC
+  PopC
+
+ label_before_its_jump:
+  PopC
+  PopC
+  Int 2
+  RetC
+
+ target:
+  Print
+  PopC
+  Int 1
+  RetC
+
+ target_cond:
+  Print
+  PopC
+  Int 2
+  RetC
+
+ target_cond2:
+  Print
+  PopC
+  PopC
+  PopC
+  Jmp label_before_its_jump
+}

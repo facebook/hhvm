@@ -1,0 +1,19 @@
+int(1)
+object(foo)#%d (1) {
+  ["arr"]=>
+  &array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    *RECURSION*
+  }
+}
+object(foo)#%d (1) {
+  ["arr"]=>
+  &array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    *RECURSION*
+  }
+}

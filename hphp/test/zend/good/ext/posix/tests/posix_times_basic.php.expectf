@@ -1,0 +1,14 @@
+Basic test of POSIX times function
+array(5) {
+  ["ticks"]=>
+  int(%i)
+  ["utime"]=>
+  int(%i)
+  ["stime"]=>
+  int(%i)
+  ["cutime"]=>
+  int(%i)
+  ["cstime"]=>
+  int(%i)
+}
+===DONE====

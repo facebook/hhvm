@@ -1,0 +1,12 @@
+*** Testing error conditions ***HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+array(0) {
+}
+HipHop Warning: %s
+bool(false)
+
+--- Done ---

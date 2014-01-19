@@ -1,0 +1,12 @@
+array(2) {
+  ["old"]=>
+  array(1) {
+    ["key"]=>
+    string(18) "should_be_modified"
+  }
+  ["new"]=>
+  array(1) {
+    ["key"]=>
+    string(18) "should_be_modified"
+  }
+}

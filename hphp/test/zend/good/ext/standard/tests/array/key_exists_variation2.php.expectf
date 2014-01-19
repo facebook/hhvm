@@ -1,0 +1,14 @@
+*** test key_exists() by using mixed type of arrays ***
+bool(false)
+integer
+bool(true)
+bool(true)
+string
+bool(true)
+bool(true)
+obj
+bool(true)
+bool(true)
+stream resource
+bool(true)
+bool(true)

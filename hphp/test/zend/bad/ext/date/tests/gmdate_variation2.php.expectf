@@ -1,0 +1,95 @@
+*** Testing gmdate() : usage variation ***
+
+--int 0--
+string(24) "1970-01-01T00:00:00+0000"
+
+--int 1--
+string(24) "1970-01-01T00:00:01+0000"
+
+--int 12345--
+string(24) "1970-01-01T03:25:45+0000"
+
+--int -12345--
+string(24) "1969-12-31T20:34:15+0000"
+
+--float 10.5--
+string(24) "1970-01-01T00:00:10+0000"
+
+--float -10.5--
+string(24) "1969-12-31T23:59:50+0000"
+
+--float .5--
+string(24) "1970-01-01T00:00:00+0000"
+
+--empty array--
+HipHop Warning: %s
+bool(false)
+
+--int indexed array--
+HipHop Warning: %s
+bool(false)
+
+--associative array--
+HipHop Warning: %s
+bool(false)
+
+--nested arrays--
+HipHop Warning: %s
+bool(false)
+
+--uppercase NULL--
+string(24) "1970-01-01T00:00:00+0000"
+
+--lowercase null--
+string(24) "1970-01-01T00:00:00+0000"
+
+--lowercase true--
+string(24) "1970-01-01T00:00:01+0000"
+
+--lowercase false--
+string(24) "1970-01-01T00:00:00+0000"
+
+--uppercase TRUE--
+string(24) "1970-01-01T00:00:01+0000"
+
+--uppercase FALSE--
+string(24) "1970-01-01T00:00:00+0000"
+
+--empty string DQ--
+HipHop Warning: %s
+bool(false)
+
+--empty string SQ--
+HipHop Warning: %s
+bool(false)
+
+--string DQ--
+HipHop Warning: %s
+bool(false)
+
+--string SQ--
+HipHop Warning: %s
+bool(false)
+
+--mixed case string--
+HipHop Warning: %s
+bool(false)
+
+--heredoc--
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithToString--
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithoutToString--
+HipHop Warning: %s
+bool(false)
+
+--undefined var--
+string(24) "1970-01-01T00:00:00+0000"
+
+--unset var--
+string(24) "1970-01-01T00:00:00+0000"
+===DONE===

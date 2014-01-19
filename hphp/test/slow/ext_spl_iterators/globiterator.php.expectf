@@ -1,0 +1,9 @@
+int(5)
+string(%d) "%s/../../sample_dir"
+string(%d) "%s/../../sample_dir/dir"
+string(3) "dir"
+%s/../../sample_dir/dir
+%s/../../sample_dir/empty
+%s/../../sample_dir/file
+%s/../../sample_dir/fix_mtimes.inc
+%s/../../sample_dir/symlink

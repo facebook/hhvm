@@ -1,0 +1,58 @@
+Program %s/break2.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break %s/break2.php:7
+Breakpoint 1 set on line 7 of %s/break2.php
+But wont break until file %s/break2.php has been loaded.
+break foo2()
+Breakpoint 2 set upon entering foo2()
+But wont break until function foo2 has been loaded.
+break cls2::pubObj()
+Breakpoint 3 set upon entering cls2::pubObj()
+But wont break until class cls2 has been loaded.
+break cls2::pubCls()
+Breakpoint 4 set upon entering cls2::pubCls()
+But wont break until class cls2 has been loaded.
+break list
+  1	ALWAYS    on line 7 of %s/break2.php (unbound)
+  2	ALWAYS    upon entering foo2() (unbound)
+  3	ALWAYS    upon entering cls2::pubObj() (unbound)
+  4	ALWAYS    upon entering cls2::pubCls() (unbound)
+run
+break2.php loaded
+Program %s/break2.php exited normally.
+@ foo2('test_break6')
+Breakpoint 2 reached at foo2() on line 6 of %s/break2.php
+   5 function foo2($x) {
+   6*  $y = $x.'_suffix';
+   7   error_log($y);
+
+break list
+  1	ALWAYS    on line 7 of %s/break2.php
+  2	ALWAYS    upon entering foo2()
+  3	ALWAYS    upon entering cls2::pubObj()
+  4	ALWAYS    upon entering cls2::pubCls()
+continue
+Breakpoint 1 reached at foo2() on line 7 of %s/break2.php
+   6   $y = $x.'_suffix';
+   7*  error_log($y);
+   8 }
+
+@ $break6=new cls2()
+@ $break6->pubObj('test_break6')
+Breakpoint 3 reached at cls2::pubObj() on line 12 of %s/break2.php
+  11   public function pubObj($x) {
+  12*    error_log("pubObj2:".$x);
+  13   }
+
+continue
+pubObj2:test_break6
+@ cls2::pubCls('test_break6')
+Breakpoint 4 reached at cls2::pubCls() on line 15 of %s/break2.php
+  14   public static function pubCls($x) {
+  15*    error_log("pubCls2:".$x);
+  16   }
+
+break clear all
+All breakpoints are cleared.
+continue
+pubCls2:test_break6
+quit

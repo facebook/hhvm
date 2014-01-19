@@ -1,0 +1,26 @@
+*** Testing ctype_xdigit() : usage variations ***
+
+-- Octal values --
+'Incorrect' Integers: 
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+'Correct' Integers: 
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+-- Hexadecimal values --
+'Incorrect' Integers: 
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+'Correct' Integers: 
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+===DONE===

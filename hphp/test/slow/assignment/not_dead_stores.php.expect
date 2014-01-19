@@ -1,0 +1,32 @@
+array(3) {
+  [0]=>
+  string(5) "opera"
+  [1]=>
+  string(2) "12"
+  [2]=>
+  string(2) "16"
+}
+array(3) {
+  [0]=>
+  string(17) "foo.browser.opera"
+  [1]=>
+  string(20) "foo.browser.opera.12"
+  [2]=>
+  string(23) "foo.browser.opera.12-16"
+}
+array(3) {
+  [0]=>
+  string(5) "opera"
+  [1]=>
+  string(2) "12"
+  [2]=>
+  string(2) "16"
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(13)
+  [2]=>
+  int(29)
+}

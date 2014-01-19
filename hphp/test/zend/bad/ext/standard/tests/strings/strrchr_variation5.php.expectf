@@ -1,0 +1,22 @@
+*** Testing strrchr() function: with heredoc strings ***
+string(32) "	 st
+
+ch
+ using
+scape \seque
+ce"
+string(9) "\seque
+ce"
+string(24) "
+ using
+scape \seque
+ce"
+string(9) "\seque
+ce"
+string(32) "	 st
+
+ch
+ using
+scape \seque
+ce"
+*** Done ***

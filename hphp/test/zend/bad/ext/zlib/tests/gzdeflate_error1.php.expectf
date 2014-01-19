@@ -1,0 +1,24 @@
+*** Testing gzdeflate() : error conditions ***
+
+-- Testing gzdeflate() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing gzdeflate() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing with incorrect compression level --
+HipHop Warning: %s
+bool(false)
+
+-- Testing with incorrect encoding --
+HipHop Warning: %s
+bool(false)
+
+-- Testing with incorrect parameters --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+===Done===

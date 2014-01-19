@@ -1,0 +1,21 @@
+{?[<?xml version="1.0" encoding="ISO-8859-1"?>]}{?[
+]}{?[<!DOCTYPE]}{?[ ]}{?[phptest]}{?[ ]}{?[SYSTEM]}{?[ ]}{?["notfound.dtd"]}{?[ ]}{?[[]}{?[
+]}{?[<!ENTITY]}{?[ ]}{?[%]}{?[ ]}{?[incent]}{?[ ]}{?[SYSTEM]}{?[ ]}{?["inc.ent"]}{?[>]}{?[
+]}{?[%incent;]}{?[
+]}{?[]]}{?[>]}{?[
+]}{ROOT ID="elem1"}{CDATA[
+]}{CDATA[ Plain text.]}{CDATA[
+]}{CDATA[ ]}{ELEM1}{CDATA[
+]}{CDATA[  ]}{?[<!-- comment -->]}{CDATA[
+]}{CDATA[  ]}{ELEM2}{CDATA[
+]}{CDATA[   ]}{?[<![CDATA[]}{CDATA[CDATA block]}{?[]]>]}{CDATA[
+]}{CDATA[   ]}{ELEM3}{CDATA[
+]}{CDATA[    ]}{ENTREF[&included-entity;]}{CDATA[
+]}{CDATA[    ]}{ELEM4}{CDATA[
+]}{CDATA[     ]}{PI[test,processing instruction ]}{CDATA[
+]}{CDATA[    ]}{/ELEM4}{CDATA[
+]}{CDATA[   ]}{/ELEM3}{CDATA[
+]}{CDATA[  ]}{/ELEM2}{CDATA[
+]}{CDATA[ ]}{/ELEM1}{CDATA[
+]}{/ROOT}{?[
+]}parse complete

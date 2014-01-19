@@ -1,0 +1,6 @@
+break :fb:my:thing::doIt()
+continue
+@ :fb:my:thing::doIt()
+break clear all
+continue
+quit

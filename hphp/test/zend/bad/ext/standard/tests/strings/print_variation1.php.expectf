@@ -1,0 +1,68 @@
+*** Testing print() function: with unexpected inputs for 'arg' argument ***
+-- Iteration 1 --
+0
+int(1)
+-- Iteration 2 --
+1
+int(1)
+-- Iteration 3 --
+-2
+int(1)
+-- Iteration 4 --
+2147483647
+int(1)
+-- Iteration 5 --
+-2147483648
+int(1)
+-- Iteration 6 --
+10.5
+int(1)
+-- Iteration 7 --
+-20.5
+int(1)
+-- Iteration 8 --
+101234567000
+int(1)
+-- Iteration 9 --
+HipHop Notice: %s
+Array
+int(1)
+-- Iteration 10 --
+HipHop Notice: %s
+Array
+int(1)
+-- Iteration 11 --
+HipHop Notice: %s
+Array
+int(1)
+-- Iteration 12 --
+1
+int(1)
+-- Iteration 13 --
+
+int(1)
+-- Iteration 14 --
+1
+int(1)
+-- Iteration 15 --
+
+int(1)
+-- Iteration 16 --
+
+int(1)
+-- Iteration 17 --
+
+int(1)
+-- Iteration 18 --
+sample object
+int(1)
+-- Iteration 19 --
+Resource id #%d
+int(1)
+-- Iteration 20 --
+
+int(1)
+-- Iteration 21 --
+
+int(1)
+===DONE===

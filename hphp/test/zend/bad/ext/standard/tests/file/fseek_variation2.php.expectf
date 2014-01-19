@@ -1,0 +1,82 @@
+*** Testing fseek() : usage variations ***
+
+Arg value -100 
+int(-1)
+int(0)
+
+Arg value 100 
+int(-1)
+int(0)
+
+Arg value 10.5 
+int(-1)
+int(0)
+
+Arg value -10.5 
+int(-1)
+int(0)
+
+Arg value 101234567000 
+int(-1)
+int(0)
+
+Arg value 1.07654321E-9 
+int(0)
+int(3)
+
+Arg value 0.5 
+int(0)
+int(3)
+
+Arg value  
+int(0)
+int(3)
+
+Arg value  
+int(0)
+int(3)
+
+Arg value 1 
+int(0)
+int(6)
+
+Arg value  
+int(0)
+int(3)
+
+Arg value 1 
+int(0)
+int(6)
+
+Arg value  
+int(0)
+int(3)
+
+Arg value  
+HipHop Warning: %s
+bool(false)
+int(3)
+
+Arg value  
+HipHop Warning: %s
+bool(false)
+int(3)
+
+Arg value string 
+HipHop Warning: %s
+bool(false)
+int(3)
+
+Arg value string 
+HipHop Warning: %s
+bool(false)
+int(3)
+
+Arg value  
+int(0)
+int(3)
+
+Arg value  
+int(0)
+int(3)
+Done

@@ -1,0 +1,17 @@
+HipHop Warning: %s
+HipHop Warning: %s
+object(SimpleXMLElement)#%d (3) {
+  ["@attributes"]=>
+  array(2) {
+    ["title"]=>
+    string(0) ""
+    ["y"]=>
+    string(0) ""
+  }
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "x"
+}
+string(0) ""
+string(0) ""

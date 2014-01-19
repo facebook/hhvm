@@ -1,0 +1,14 @@
+*** Testing compact() : usage variations  - variables outside of current scope ***
+array(2) {
+  ["b"]=>
+  string(3) "f.b"
+  ["c"]=>
+  string(3) "f.c"
+}
+array(2) {
+  ["b"]=>
+  string(3) "f.b"
+  ["c"]=>
+  string(3) "f.c"
+}
+==Done==

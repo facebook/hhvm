@@ -1,0 +1,243 @@
+Program %s/flow_multistep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break flow_multistep.php:58
+Breakpoint 1 set on line 58 of flow_multistep.php
+But wont break until file flow_multistep.php has been loaded.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+C2 destructor
+C1 oh hai
+C1 destructor!
+C2 destructor done
+object(C1)#1 (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
+  57   var_dump($d);
+  58*  var_dump(a(42));
+  59 }
+
+step 8
+Break at main() on line 58 of %s/flow_multistep.php
+  57   var_dump($d);
+  58*  var_dump(a(42));
+  59 }
+
+continue
+int(46)
+C1 destructor!
+C2 destructor
+C1 oh hai
+C1 destructor!
+C2 destructor done
+Program %s/flow_multistep.php exited normally.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+C2 destructor
+C1 oh hai
+C1 destructor!
+C2 destructor done
+object(C1)#3 (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
+  57   var_dump($d);
+  58*  var_dump(a(42));
+  59 }
+
+step 4
+Break at d() on line 17 of %s/flow_multistep.php
+  16 function d($a) {
+  17*  return $a + 1;
+  18 }
+
+step 4
+Break at main() on line 58 of %s/flow_multistep.php
+  57   var_dump($d);
+  58*  var_dump(a(42));
+  59 }
+
+continue
+int(46)
+C1 destructor!
+C2 destructor
+C1 oh hai
+C1 destructor!
+C2 destructor done
+Program %s/flow_multistep.php exited normally.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+C2 destructor
+C1 oh hai
+C1 destructor!
+C2 destructor done
+object(C1)#5 (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
+  57   var_dump($d);
+  58*  var_dump(a(42));
+  59 }
+
+step 4
+Break at d() on line 17 of %s/flow_multistep.php
+  16 function d($a) {
+  17*  return $a + 1;
+  18 }
+
+next 4
+Break at main() on line 58 of %s/flow_multistep.php
+  57   var_dump($d);
+  58*  var_dump(a(42));
+  59 }
+
+continue
+int(46)
+C1 destructor!
+C2 destructor
+C1 oh hai
+C1 destructor!
+C2 destructor done
+Program %s/flow_multistep.php exited normally.
+run
+C1 oh hai
+C2 oh hai
+C2 oh hai
+C2 destructor
+C1 oh hai
+C1 destructor!
+C2 destructor done
+object(C1)#7 (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
+  57   var_dump($d);
+  58*  var_dump(a(42));
+  59 }
+
+step 4
+Break at d() on line 17 of %s/flow_multistep.php
+  16 function d($a) {
+  17*  return $a + 1;
+  18 }
+
+out 4
+Break at main() on line 58 of %s/flow_multistep.php
+  57   var_dump($d);
+  58*  var_dump(a(42));
+  59 }
+
+continue
+int(46)
+C1 destructor!
+C2 destructor
+C1 oh hai
+C1 destructor!
+C2 destructor done
+Program %s/flow_multistep.php exited normally.
+break clear all
+All breakpoints are cleared.
+break flow_multistep.php:54
+Breakpoint 1 set on line 54 of flow_multistep.php
+run
+C1 oh hai
+C2 oh hai
+Breakpoint 1 reached at main() on line 54 of %s/flow_multistep.php
+  53   $c2 = new C2(5);
+  54*  $c2 = new C2(6);
+  55   $d = $c1;
+
+break clear all
+All breakpoints are cleared.
+step 12
+C2 oh hai
+C2 destructor
+C1 oh hai
+Break at C1::__destruct() on line 30 of %s/flow_multistep.php
+  29   public function __destruct() {
+  30*    echo "C1 destructor!\n";
+  31   }
+
+out 2
+C1 destructor!
+C2 destructor done
+Break at main() on line 54 of %s/flow_multistep.php
+  53   $c2 = new C2(5);
+  54*  $c2 = new C2(6);
+  55   $d = $c1;
+
+out
+object(C1)#9 (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+int(46)
+C1 destructor!
+C2 destructor
+C1 oh hai
+C1 destructor!
+C2 destructor done
+Break on line 61 of %s/flow_multistep.php
+  60 
+  61*main();
+  62 
+
+continue
+Program %s/flow_multistep.php exited normally.
+break flow_multistep.php:54
+Breakpoint 1 set on line 54 of flow_multistep.php
+run
+C1 oh hai
+C2 oh hai
+Breakpoint 1 reached at main() on line 54 of %s/flow_multistep.php
+  53   $c2 = new C2(5);
+  54*  $c2 = new C2(6);
+  55   $d = $c1;
+
+break clear all
+All breakpoints are cleared.
+step 12
+C2 oh hai
+C2 destructor
+C1 oh hai
+Break at C1::__destruct() on line 30 of %s/flow_multistep.php
+  29   public function __destruct() {
+  30*    echo "C1 destructor!\n";
+  31   }
+
+next 5
+C1 destructor!
+C2 destructor done
+Break at main() on line 54 of %s/flow_multistep.php
+  53   $c2 = new C2(5);
+  54*  $c2 = new C2(6);
+  55   $d = $c1;
+
+next
+Break at main() on line 55 of %s/flow_multistep.php
+  54   $c2 = new C2(6);
+  55*  $d = $c1;
+  56   $c1 = null;
+
+continue
+object(C1)#11 (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+int(46)
+C1 destructor!
+C2 destructor
+C1 oh hai
+C1 destructor!
+C2 destructor done
+Program %s/flow_multistep.php exited normally.
+quit

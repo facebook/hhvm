@@ -1,0 +1,241 @@
+string(3) "one"
+int(2)
+float(3.333)
+int(4)
+int(5)
+int(6)
+int(7)
+int(8)
+int(9)
+int(10)
+bool(true)
+bool(true)
+string(3) "one"
+int(2)
+float(3.333)
+int(4)
+int(5)
+int(6)
+int(7)
+int(8)
+int(9)
+int(10)
+int(11)
+int(12)
+string(3) "one"
+int(2)
+float(3.333)
+int(4)
+int(5)
+int(6)
+int(7)
+int(8)
+int(9)
+int(10)
+bool(true)
+bool(true)
+string(3) "one"
+int(2)
+float(3.333)
+int(4)
+int(5)
+int(6)
+int(7)
+int(8)
+int(9)
+int(10)
+int(11)
+int(12)
+int(2)
+array(10) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  int(2)
+  [2]=>
+  float(3.333)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+  [6]=>
+  int(7)
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+  [9]=>
+  int(10)
+}
+array(12) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  int(2)
+  [2]=>
+  float(3.333)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+  [6]=>
+  int(7)
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+  [9]=>
+  int(10)
+  [10]=>
+  int(11)
+  [11]=>
+  int(12)
+}
+array(10) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  int(2)
+  [2]=>
+  float(3.333)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+  [6]=>
+  int(7)
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+  [9]=>
+  int(10)
+}
+array(12) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  int(2)
+  [2]=>
+  float(3.333)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+  [6]=>
+  int(7)
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+  [9]=>
+  int(10)
+  [10]=>
+  int(11)
+  [11]=>
+  int(12)
+}
+array(10) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  int(2)
+  [2]=>
+  float(3.333)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+  [6]=>
+  int(7)
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+  [9]=>
+  int(10)
+}
+array(12) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  int(2)
+  [2]=>
+  float(3.333)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+  [6]=>
+  int(7)
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+  [9]=>
+  int(10)
+  [10]=>
+  int(11)
+  [11]=>
+  int(12)
+}
+array(10) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  int(2)
+  [2]=>
+  float(3.333)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+  [6]=>
+  int(7)
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+  [9]=>
+  int(10)
+}
+array(12) {
+  [0]=>
+  string(3) "one"
+  [1]=>
+  int(2)
+  [2]=>
+  float(3.333)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+  [6]=>
+  int(7)
+  [7]=>
+  int(8)
+  [8]=>
+  int(9)
+  [9]=>
+  int(10)
+  [10]=>
+  int(11)
+  [11]=>
+  int(12)
+}

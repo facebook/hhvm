@@ -1,0 +1,18 @@
+*** Testing checkdate() : basic functionality ***
+-- The following are all valid dates --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+-- The following are all invalid dates --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+===DONE===

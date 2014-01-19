@@ -1,0 +1,33 @@
+bool(true)
+bool(true)
+bool(true)
+string(15) "This was a test"
+string(15) "This was a test"
+string(15) "This was a test"
+string(24) "This string has 4 words."
+string(55) "<a href="http://test.com/test">http://test.com/test</a>"
+bool(true)
+int(10)
+bool(true)
+bool(true)
+array(2) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(3)
+}
+bool(true)
+array(1) {
+  [0]=>
+  string(3) "abc"
+}
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+string(2) "30"
+string(2) "04"
+string(4) "1973"
+string(10) "1973-04-30"
+string(43) ">whatever<span class="search">suffix</span>"
+int(1)

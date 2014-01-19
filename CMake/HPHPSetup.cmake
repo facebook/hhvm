@@ -1,5 +1,37 @@
 include(Options)
 
+# Do this until cmake has a define for ARMv8
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __AARCH64EL__
+#error Not ARMv8  
+#endif
+int main() { return 0; }" IS_AARCH64)
+
+if (APPLE OR IS_AARCH64)
+	set(HHVM_ANCHOR_SYMS -Wl,-u,_register_libevent_server)
+else()
+	set(ENABLE_FASTCGI 1)
+	set(HHVM_ANCHOR_SYMS -Wl,-uregister_libevent_server,-uregister_fastcgi_server)
+endif()
+
+set(HHVM_LINK_LIBRARIES
+    hphp_analysis
+    hphp_runtime_static
+    ext_hhvm_static
+    hphp_system
+    hphp_parser
+    hphp_zend
+    hphp_util
+    hphp_hhbbc
+    vixl neo
+    ${HHVM_ANCHOR_SYMS})
+
+if(ENABLE_FASTCGI)
+	LIST(APPEND HHVM_LINK_LIBRARIES hphp_thrift)
+	LIST(APPEND HHVM_LINK_LIBRARIES hphp_proxygen)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
@@ -8,29 +40,13 @@ IF(NOT DEFINED CMAKE_PREFIX_PATH)
   message(STATUS "CMAKE_PREFIX_PATH was missing, proceeding anyway")
 endif()
 
-if(CMAKE_COMPILER_IS_GNUCC)
-	INCLUDE(CheckCSourceCompiles)
-	CHECK_C_SOURCE_COMPILES("#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-#if GCC_VERSION < 40300
-#error Need GCC 4.3.0+
-#endif
-int main() { return 0; }" HAVE_GCC_43)
-
-	if(NOT HAVE_GCC_43)
-		message(FATAL_ERROR "Need at least GCC 4.3")
-	endif()
-
-endif()
-
-set(FREEBSD FALSE)
-set(LINUX FALSE)
-
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
-	set(FREEBSD TRUE)
-endif()
-
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-	set(LINUX TRUE)
+# Look for the chrpath tool so we can warn if it's not there
+find_program(CHRPATH chrpath)
+IF (CHRPATH STREQUAL "CHRPATH-NOTFOUND")
+    SET(FOUND_CHRPATH OFF)
+    message(WARNING "chrpath not found, rpath will not be stripped from installed binaries")
+else()
+    SET(FOUND_CHRPATH ON)
 endif()
 
 LIST(APPEND CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
@@ -42,29 +58,23 @@ if(APPLE)
 	endif()
 endif()
 
+include(HPHPCompiler)
 include(HPHPFunctions)
 include(HPHPFindLibs)
 
-add_definitions(-D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1)
+add_definitions(-D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS -DFOLLY_HAVE_WEAK_SYMBOLS=1)
+
+if (LINUX)
+	add_definitions(-D_GNU_SOURCE)
+endif()
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DRELEASE=1)
-endif()
-
-if(INFINITE_LOOP_DETECTION)
-	add_definitions(-DINFINITE_LOOP_DETECTION=1)
-endif()
-
-if(INFINITE_RECURSION_DETECTION)
-	add_definitions(-DINFINITE_RECURSION_DETECTION=1)
-endif()
-
-if(REQUEST_TIMEOUT_DETECTION)
-	add_definitions(-DREQUEST_TIMEOUT_DETECTION=1)
-endif()
-
-if(ENABLE_LATE_STATIC_BINDING)
-	add_definitions(-DENABLE_LATE_STATIC_BINDING=1)
+	add_definitions(-DNDEBUG)
+	message("Generating Release build")
+else()
+	add_definitions(-DDEBUG)
+	message("Generating DEBUG build")
 endif()
 
 if(DEBUG_MEMORY_LEAK)
@@ -83,10 +93,6 @@ if(HOTPROFILER)
 	add_definitions(-DHOTPROFILER=1)
 endif()
 
-if(HOTPROFILER_NO_BUILTIN)
-	add_definitions(-DHOTPROFILER_NO_BUILTIN=1)
-endif()
-
 if(EXECUTION_PROFILER)
 	add_definitions(-DEXECUTION_PROFILER=1)
 endif()
@@ -99,31 +105,30 @@ if(APPLE OR FREEBSD)
 	add_definitions(-DSKIP_USER_CHANGE=1)
 endif()
 
+if(APPLE)
+	# We have to be a little more permissive in some cases.
+	add_definitions(-fpermissive)
+
+	# Skip deprecation warnings in OpenSSL. 
+	add_definitions(-DMAC_OS_X_VERSION_MIN_REQUIRED=MAC_OS_X_VERSION_10_6)
+
+	# Just assume we have sched.h
+	add_definitions(-DFOLLY_HAVE_SCHED_H=1)
+
+	# Enable weak linking
+	add_definitions(-DMACOSX_DEPLOYMENT_TARGET=10.6)
+endif()
+
+if(ENABLE_FASTCGI)
+	add_definitions(-DENABLE_FASTCGI=1)
+endif ()
+
 # enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)
 
-execute_process(COMMAND git describe --all --long --abbrev=40 --always
-    OUTPUT_VARIABLE _COMPILER_ID OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+# later versions of binutils don't play well without automake
+add_definitions(-DPACKAGE=hhvm -DPACKAGE_VERSION=Release)
 
-if (_COMPILER_ID)
-	add_definitions(-DCOMPILER_ID="${_COMPILER_ID}")
-endif()
-
-IF($ENV{CXX} MATCHES "icpc")
-	set(CMAKE_C_FLAGS "-no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -w")
-	set(CMAKE_CXX_FLAGS "-no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -w1 -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names")
-else()
-	set(CMAKE_C_FLAGS "-w")
-	set(CMAKE_CXX_FLAGS "-fno-gcse -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names")
-endif()
-
-IF(CMAKE_COMPILER_IS_GNUCC)
-	SET (CMAKE_C_FLAGS_RELEASE "-O3")
-ENDIF()
-
-IF(CMAKE_COMPILER_IS_GNUCXX)
-	SET (CMAKE_CXX_FLAGS_RELEASE "-O3")
-ENDIF()
-
-include_directories(${HPHP_HOME}/src)
-include_directories(${HPHP_HOME}/src/lib/system/gen)
+include_directories(${HPHP_HOME}/hphp)
+include_directories(${HPHP_HOME}/hphp/lib/system/gen)
+include_directories(${HPHP_HOME})

@@ -1,0 +1,19 @@
+*** Testing array_walk() : error conditions - callback parameters ***
+HipHop Warning: %s
+
+callback1() invoked 
+bool(true)
+HipHop Warning: %s
+
+callback2() invoked 
+bool(true)
+
+callback1() invoked 
+bool(true)
+
+callback2() invoked 
+bool(true)
+-- Testing array_walk() function with too many callback parameters --
+HipHop Warning: %s
+NULL
+Done

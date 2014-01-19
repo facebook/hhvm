@@ -1,0 +1,18 @@
+int(4)
+int(5)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+HipHop Warning: strlen() expects parameter 1 to be string, array given in %s on line 62
+NULL
+HipHop Warning: strlen() expects parameter 1 to be string, object given in %s on line 69
+NULL
+int(1)
+HipHop Warning: strlen() expects parameter 1 to be string, object given in %s on line 83
+NULL

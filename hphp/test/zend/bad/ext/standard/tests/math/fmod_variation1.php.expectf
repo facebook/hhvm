@@ -1,0 +1,88 @@
+*** Testing fmod() : usage variations ***
+
+-- Iteration 1 --
+float(0)
+
+-- Iteration 2 --
+float(1)
+
+-- Iteration 3 --
+float(1)
+
+-- Iteration 4 --
+float(-1)
+
+-- Iteration 5 --
+float(1)
+
+-- Iteration 6 --
+float(0.5)
+
+-- Iteration 7 --
+float(-0.5)
+
+-- Iteration 8 --
+float(0)
+
+-- Iteration 9 --
+float(1.23456789E-9)
+
+-- Iteration 10 --
+float(0.5)
+
+-- Iteration 11 --
+float(0)
+
+-- Iteration 12 --
+float(0)
+
+-- Iteration 13 --
+float(1)
+
+-- Iteration 14 --
+float(0)
+
+-- Iteration 15 --
+float(1)
+
+-- Iteration 16 --
+float(0)
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 23 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 24 --
+float(0)
+
+-- Iteration 25 --
+float(0)
+
+-- Iteration 26 --
+HipHop Warning: %s
+NULL
+===Done===

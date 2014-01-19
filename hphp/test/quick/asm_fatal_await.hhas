@@ -1,0 +1,27 @@
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Null
+  RetC
+}
+
+.class heh {
+  .default_ctor;
+}
+
+.function main() {
+  FPushCtorD 0 "heh"
+  FCall 0
+  PopR
+  SetL $x
+  PopC
+
+  CGetL $x
+  AsyncAwait  # should fatal
+  PopC
+  PopC
+
+  Int 1
+  RetC
+}

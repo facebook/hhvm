@@ -1,0 +1,16 @@
+- Too many arguments
+HipHop Warning: %s
+NULL
+
+- Arg 1 wrong type
+HipHop Warning: %s
+HipHop Notice: %s
+bool(false)
+
+- Arg 2 wrong type
+HipHop Warning: %s
+NULL
+
+- Arg 3 wrong type
+HipHop Warning: %s
+NULL

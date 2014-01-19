@@ -1,0 +1,60 @@
+RecursiveArrayIteratorIterator::rewind
+RecursiveArrayIteratorIterator::valid
+RecursiveArrayIteratorIterator::current
+RecursiveArrayIteratorIterator::key
+0=>a
+RecursiveArrayIteratorIterator::next
+MyRecursiveArrayIterator::getChildren
+RecursiveArrayIteratorIterator::beginChildren(1)
+RecursiveArrayIteratorIterator::valid
+RecursiveArrayIteratorIterator::current
+RecursiveArrayIteratorIterator::key
+0=>ba
+RecursiveArrayIteratorIterator::next
+MyRecursiveArrayIterator::getChildren
+RecursiveArrayIteratorIterator::beginChildren(2)
+RecursiveArrayIteratorIterator::valid
+RecursiveArrayIteratorIterator::current
+RecursiveArrayIteratorIterator::key
+0=>bba
+RecursiveArrayIteratorIterator::next
+RecursiveArrayIteratorIterator::valid
+RecursiveArrayIteratorIterator::current
+RecursiveArrayIteratorIterator::key
+1=>bbb
+RecursiveArrayIteratorIterator::next
+MyRecursiveArrayIterator::valid = false
+RecursiveArrayIteratorIterator::endChildren(2)
+MyRecursiveArrayIterator::getChildren
+RecursiveArrayIteratorIterator::beginChildren(2)
+MyRecursiveArrayIterator::getChildren
+RecursiveArrayIteratorIterator::beginChildren(3)
+RecursiveArrayIteratorIterator::valid
+RecursiveArrayIteratorIterator::current
+RecursiveArrayIteratorIterator::key
+0=>bcaa
+RecursiveArrayIteratorIterator::next
+MyRecursiveArrayIterator::valid = false
+RecursiveArrayIteratorIterator::endChildren(3)
+MyRecursiveArrayIterator::valid = false
+RecursiveArrayIteratorIterator::endChildren(2)
+MyRecursiveArrayIterator::valid = false
+RecursiveArrayIteratorIterator::endChildren(1)
+MyRecursiveArrayIterator::getChildren
+RecursiveArrayIteratorIterator::beginChildren(1)
+RecursiveArrayIteratorIterator::valid
+RecursiveArrayIteratorIterator::current
+RecursiveArrayIteratorIterator::key
+0=>ca
+RecursiveArrayIteratorIterator::next
+MyRecursiveArrayIterator::valid = false
+RecursiveArrayIteratorIterator::endChildren(1)
+RecursiveArrayIteratorIterator::valid
+RecursiveArrayIteratorIterator::current
+RecursiveArrayIteratorIterator::key
+3=>d
+RecursiveArrayIteratorIterator::next
+MyRecursiveArrayIterator::valid = false
+RecursiveArrayIteratorIterator::valid
+MyRecursiveArrayIterator::valid = false
+===DONE===

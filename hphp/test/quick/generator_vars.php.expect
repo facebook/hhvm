@@ -1,0 +1,133 @@
+int(5)
+string(3) "foo"
+int(1234)
+int(1234)
+logger 0 constructing
+array(2) {
+  ["x"]=>
+  object(logger)#1 (1) {
+    ["idx":"logger":private]=>
+    int(0)
+  }
+  ["z"]=>
+  int(5)
+}
+string(12) "almost there"
+array(2) {
+  ["foo"]=>
+  string(10) "inside foo"
+  ["s"]=>
+  string(3) "foo"
+}
+array(4) {
+  ["x"]=>
+  object(logger)#1 (1) {
+    ["idx":"logger":private]=>
+    int(0)
+  }
+  ["y"]=>
+  int(5)
+  ["foo"]=>
+  string(10) "inside foo"
+  ["z"]=>
+  int(5)
+}
+logger 0 destructing
+int(3735928559)
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+int(4)
+string(32) "Continuation is already finished"
+array(12) {
+  ["b"]=>
+  int(2)
+  ["g"]=>
+  int(7)
+  ["f"]=>
+  int(6)
+  ["i"]=>
+  int(9)
+  ["d"]=>
+  int(4)
+  ["e"]=>
+  int(5)
+  ["c"]=>
+  int(3)
+  ["j"]=>
+  int(10)
+  ["k"]=>
+  int(11)
+  ["h"]=>
+  int(8)
+  ["a"]=>
+  int(1)
+  ["l"]=>
+  int(12)
+}
+array(12) {
+  ["b"]=>
+  int(3735928559)
+  ["g"]=>
+  int(7)
+  ["f"]=>
+  int(6)
+  ["i"]=>
+  int(9)
+  ["d"]=>
+  int(4)
+  ["e"]=>
+  int(5)
+  ["c"]=>
+  int(3)
+  ["j"]=>
+  int(10)
+  ["k"]=>
+  int(11)
+  ["h"]=>
+  int(8)
+  ["a"]=>
+  object(stdClass)#6 (0) {
+  }
+  ["l"]=>
+  int(12)
+}
+array(12) {
+  ["b"]=>
+  int(3735928559)
+  ["g"]=>
+  int(7)
+  ["f"]=>
+  int(6)
+  ["i"]=>
+  int(9)
+  ["d"]=>
+  int(3126047761)
+  ["e"]=>
+  int(3126047761)
+  ["c"]=>
+  object(Continuation)#5 (0) {
+  }
+  ["j"]=>
+  int(10)
+  ["k"]=>
+  int(11)
+  ["h"]=>
+  int(8)
+  ["a"]=>
+  object(stdClass)#6 (0) {
+  }
+  ["l"]=>
+  int(12)
+}
+NULL
+bool(false)

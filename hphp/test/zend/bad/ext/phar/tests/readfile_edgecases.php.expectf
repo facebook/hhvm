@@ -1,0 +1,24 @@
+HipHop Warning: %s
+blah
+<?php
+readfile("foo/" . basename(__FILE__));
+$context = stream_context_create();
+readfile("foob");
+set_include_path("%stests");
+readfile("foob", true);
+readfile("./hi", 0, $context);
+readfile("../oops");
+?>
+test
+test
+<?php
+readfile("foo/" . basename(__FILE__));
+$context = stream_context_create();
+readfile("foob");
+set_include_path("%stests");
+readfile("foob", true);
+readfile("./hi", 0, $context);
+readfile("../oops");
+?>
+HipHop Warning: %s
+===DONE===

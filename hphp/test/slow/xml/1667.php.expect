@@ -1,0 +1,7 @@
+string(1) "A"
+array(1) {
+  ["ID"]=>
+  string(5) "hallo"
+}
+string(3) "PHP"
+string(1) "A"

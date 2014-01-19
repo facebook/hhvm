@@ -1,0 +1,5 @@
+<?php
+if (!function_exists("glob")) {
+    die('skip glob() not available');
+}
+?>

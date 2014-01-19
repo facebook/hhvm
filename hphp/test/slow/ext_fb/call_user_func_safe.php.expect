@@ -1,0 +1,26 @@
+array(2) {
+  [0]=>
+  bool(true)
+  [1]=>
+  string(5) "param"
+}
+array(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  NULL
+}
+string(5) "param"
+string(2) "ok"
+array(2) {
+  [0]=>
+  bool(true)
+  [1]=>
+  string(5) "param"
+}
+array(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  NULL
+}

@@ -1,0 +1,26 @@
+*** Testing preg_match_all() : error conditions ***
+HipHop Warning: %s
+bool(false)
+NULL
+
+Arg value is: Array
+HipHop Warning: %s
+bool(false)
+NULL
+
+Arg value is: test
+int(4)
+array(1) {
+  [0]=>
+  array(4) {
+    [0]=>
+    string(1) "t"
+    [1]=>
+    string(1) "e"
+    [2]=>
+    string(1) "s"
+    [3]=>
+    string(1) "t"
+  }
+}
+Done

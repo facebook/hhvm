@@ -1,0 +1,123 @@
+#
+# Some tests of property/constant initializers.
+#
+
+.main {
+  FPushFuncD 0 "init_test"
+  FCall 0
+  PopR
+
+  FPushFuncD 0 "uninit_test"
+  FCall 0
+  PopR
+
+  Int 1
+  RetC
+}
+
+.class Init {
+  .default_ctor;
+  .const BAR = """s:4:"1242";""";
+  .property [static public] foo = """s:11:"static prop";""";
+  .property [public] nonstat = """s:25:"this is a normal property";""";
+}
+
+.class Uninit {
+  .default_ctor;
+  .const BAR = uninit;
+  .property [static public] foo = uninit;
+  .property [public] nonstat = uninit;
+
+  .method [public] 86cinit($which) {
+    CGetL $which
+    String "BAR"
+    Same
+    JmpZ wtf
+
+    String "default BAR value"
+    RetC
+
+  wtf:
+    String "unknown property"
+    Fatal Runtime
+  }
+
+  .method [public] 86sinit(&$props) {
+    String "foo"
+    String "default ::foo value"
+    SetM <L:$props EC>
+    PopC
+
+    Null
+    RetC
+  }
+
+  .method [public] 86pinit(&$props, $sentinel) {
+    String "nonstat"
+    CGetM <L:$props EC>
+    CGetL $sentinel
+    Same
+    JmpZ done
+
+    String "nonstat"
+    String "code-created prop value"
+    SetM <L:$props EC>
+    PopC
+
+  done:
+    Null
+    RetC
+  }
+}
+
+.function do_test($who) {
+  AGetL $who
+  ClsCns "BAR"
+  String "\n"
+  Concat
+  Print
+  PopC
+
+  String "foo"
+  AGetL $who
+  CGetS
+  String "\n"
+  Concat
+  Print
+  PopC
+
+  AGetL $who
+  FPushCtor 0
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+
+  String "nonstat"
+  CGetM <L:$obj PC>
+  String "\n"
+  Concat
+  Print
+  PopC
+
+  Null
+  RetC
+}
+
+.function init_test {
+  FPushFuncD 1 "do_test"
+    String "Init"
+    FPassC 0
+  FCall 1
+  UnboxR
+  RetC
+}
+
+.function uninit_test {
+  FPushFuncD 1 "do_test"
+    String "Uninit"
+    FPassC 0
+  FCall 1
+  UnboxR
+  RetC
+}

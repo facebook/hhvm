@@ -1,0 +1,143 @@
+diff --git a/hphp/third_party/libzip/zip.h b/hphp/third_party/libzip/zip.h
+index f11c9ab..88b13dd 100644
+--- a/hphp/third_party/libzip/zip.h
++++ b/hphp/third_party/libzip/zip.h
+@@ -34,23 +34,19 @@
+   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+ 
+-
+-#include "main/php.h"
+-
+-#ifdef PHP_WIN32
+-#	include "zip_win32.h"
+-#	ifdef PHP_ZIP_EXPORTS
+-#		define ZIP_EXTERN(rt) __declspec(dllexport)rt _stdcall
+-#	else
+-#		define ZIP_EXTERN(rt) rt
+-#	endif
+-#elif defined(__GNUC__) && __GNUC__ >= 4
+-#	define ZIP_EXTERN(rt) __attribute__ ((visibility("default"))) rt
+-#else
+-#	define ZIP_EXTERN(rt) rt
++#ifndef ZIP_EXTERN
++#  ifdef _WIN32
++#    define ZIP_EXTERN(rt) __declspec(dllexport)rt _stdcall
++#  elif defined(__GNUC__) && __GNUC__ >= 4
++#    define ZIP_EXTERN(rt) __attribute__ ((visibility("default"))) rt
++#  else
++#    define ZIP_EXTERN(rt) rt
++#  endif
+ #endif
+ 
+-BEGIN_EXTERN_C()
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #include "zipconf.h"
+ 
+@@ -272,5 +268,10 @@ ZIP_EXTERN(int) zip_unchange(struct zip *, zip_uint64_t);
+ ZIP_EXTERN(int) zip_unchange_all(struct zip *);
+ ZIP_EXTERN(int) zip_unchange_archive(struct zip *);
+ 
+-END_EXTERN_C();
++void _zip_free(struct zip *);
++
++#ifdef __cplusplus
++}
++#endif
++
+ #endif /* _HAD_ZIP_H */
+diff --git a/hphp/third_party/libzip/zip_close.c b/hphp/third_party/libzip/zip_close.c
+index 576be3b..1927ba8 100644
+--- a/hphp/third_party/libzip/zip_close.c
++++ b/hphp/third_party/libzip/zip_close.c
+@@ -44,7 +44,7 @@
+ #endif
+ #include <sys/types.h>
+ #include <sys/stat.h>
+-#ifdef PHP_WIN32
++#ifdef _WIN32
+ #include <io.h>
+ #include <fcntl.h>
+ #endif
+@@ -74,7 +74,7 @@ zip_close(struct zip *za)
+     int i, j, error;
+     char *temp;
+     FILE *out;
+-#ifndef PHP_WIN32
++#ifndef _WIN32
+     mode_t mask;
+ #endif
+     struct zip_cdir *cd;
+@@ -333,7 +333,7 @@ zip_close(struct zip *za)
+ 	}
+ 	return -1;
+     }
+-#ifndef PHP_WIN32
++#ifndef _WIN32
+     mask = umask(0);
+     umask(mask);
+     chmod(za->zn, 0666&~mask);
+@@ -625,7 +625,7 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
+ 	free(temp);
+ 	return NULL;
+     }
+-#ifdef PHP_WIN32
++#ifdef _WIN32
+     /*
+       According to Pierre Joye, Windows in some environments per
+       default creates text files, so force binary mode.
+diff --git a/hphp/third_party/libzip/zip_source_error.c b/hphp/third_party/libzip/zip_source_error.c
+index 70ec8bc..ffb4652 100644
+--- a/hphp/third_party/libzip/zip_source_error.c
++++ b/hphp/third_party/libzip/zip_source_error.c
+@@ -40,7 +40,7 @@
+ ZIP_EXTERN(void)
+ zip_source_error(struct zip_source *src, int *ze, int *se)
+ {
+-    int e[2] = { 0, 0 };
++    int e[2];
+ 
+     if (src->src == NULL) {
+     }
+diff --git a/hphp/third_party/libzip/zipint.h b/hphp/third_party/libzip/zipint.h
+index ea21ddd..61521f3 100644
+--- a/hphp/third_party/libzip/zipint.h
++++ b/hphp/third_party/libzip/zipint.h
+@@ -38,6 +38,8 @@
+ 
+ #include "zip.h"
+ 
++#include "config.h"
++
+ #ifndef HAVE_FSEEKO
+ #define fseeko(s, o, w)	(fseek((s), (long int)(o), (w)))
+ #endif
+@@ -46,14 +48,14 @@
+ #define ftello(s)	((long)ftell((s)))
+ #endif
+ 
+-#ifndef PHP_WIN32
++#ifndef _WIN32
+ #ifndef HAVE_MKSTEMP
+ int _zip_mkstemp(char *);
+ #define mkstemp _zip_mkstemp
+ #endif
+ #endif
+ 
+-#ifdef PHP_WIN32
++#ifdef _WIN32
+ #include <windows.h>
+ #include <wchar.h>
+ #define _zip_rename(s, t)						\
+@@ -326,7 +328,7 @@ struct zip_source *_zip_source_file_or_p(struct zip *, const char *, FILE *,
+ struct zip_source *_zip_source_new(struct zip *);
+ 
+ int _zip_changed(struct zip *, int *);
+-void _zip_free(struct zip *);
++//void _zip_free(struct zip *);
+ const char *_zip_get_name(struct zip *, zip_uint64_t, int, struct zip_error *);
+ int _zip_local_header_read(struct zip *, int);
+ void *_zip_memdup(const void *, size_t, struct zip_error *);

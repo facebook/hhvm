@@ -1,0 +1,6 @@
+*** Testing getdate() : error conditions ***
+
+-- Testing getdate() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+===DONE===

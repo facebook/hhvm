@@ -1,0 +1,161 @@
+{
+    "preamble": "",
+    "consts": [
+        {
+            "name": "JSON_HEX_TAG",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_HEX_AMP",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_HEX_APOS",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_HEX_QUOT",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_FORCE_OBJECT",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_NUMERIC_CHECK",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_UNESCAPED_SLASHES",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_PRETTY_PRINT",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_UNESCAPED_UNICODE",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_FB_LOOSE",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_FB_UNLIMITED",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_FB_EXTRA_ESCAPES",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_FB_COLLECTIONS",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_FB_STABLE_MAPS",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_NONE",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_DEPTH",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_STATE_MISMATCH",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_CTRL_CHAR",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_SYNTAX",
+            "type": "Int64"
+        },
+        {
+            "name": "JSON_ERROR_UTF8",
+            "type": "Int64"
+        }
+    ],
+    "funcs": [
+        {
+            "name": "json_last_error",
+            "desc": "Returns the last JSON error that occurred.",
+            "return": {
+                "type": "Int32",
+                "desc": "The JSON error code for the last error."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "json_last_error_msg",
+            "desc": "Returns the message from the JSON error that occurred.",
+            "return": {
+                "type": "String",
+                "desc": "The message corresponding to the last JSON error code."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "json_encode",
+            "desc": "Returns a string containing the JSON representation of value.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns a JSON encoded string on success."
+            },
+            "args": [
+                {
+                    "name": "value",
+                    "type": "Variant",
+                    "desc": "The value being encoded. Can be any type except a resource.\n\nThis function only works with UTF-8 encoded data."
+                },
+                {
+                    "name": "options",
+                    "type": "Variant",
+                    "value": "0",
+                    "desc": "Bitmask consisting of JSON_HEX_QUOT, JSON_HEX_TAG, JSON_HEX_AMP, JSON_HEX_APOS, JSON_FORCE_OBJECT."
+                }
+            ]
+        },
+        {
+            "name": "json_decode",
+            "desc": "Takes a JSON encoded string and converts it into a PHP variable.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the value encoded in json in appropriate PHP type. Values true, false and null (case-insensitive) are returned as TRUE, FALSE and NULL respectively. NULL is returned if the json cannot be decoded or if the encoded data is deeper than the recursion limit."
+            },
+            "args": [
+                {
+                    "name": "json",
+                    "type": "String",
+                    "desc": "The json string being decoded.\n\nThis function only works with UTF-8 encoded data."
+                },
+                {
+                    "name": "assoc",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "When TRUE, returned objects will be converted into associative arrays."
+                },
+                {
+                    "name": "options",
+                    "type": "Variant",
+                    "value": "0",
+                    "desc": "User specified recursion depth."
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

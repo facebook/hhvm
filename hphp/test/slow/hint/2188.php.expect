@@ -1,0 +1,4 @@
+int(1)
+float(5.5)
+bool(true)
+string(5) "hello"

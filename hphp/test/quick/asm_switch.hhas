@@ -1,0 +1,49 @@
+#
+# Switch statement
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+# array(0,1,2,3,4)
+.adata my_array = """a:5:{i:0;i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;i:4;}""";
+
+.function main() {
+         .numiters 1;
+
+         Array @my_array
+         SetL $arr
+         PopC
+
+         # Loop over array and jump to each label.
+         CGetL $arr
+         IterInit 0 endfor $foo
+loop:    CGetL $foo
+         Switch <label_0
+                 label_1
+                 label_2
+                 label_3
+                 label_4> 0 0
+
+label_0: String "label_0\n"
+         Jmp printer
+label_1: String "label_1\n"
+         Jmp printer
+label_2: String "label_2\n"
+         Jmp printer
+label_3: String "label_3\n"
+         Jmp printer
+label_4: String "label_4\n"
+
+printer: Print
+         PopC
+         IterNext 0 loop $foo
+
+endfor:  Int 1
+         RetC
+}

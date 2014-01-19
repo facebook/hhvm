@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ ! -f "config.cmake" ]; then
+  echo "config.cmake not found" >&2
+  exit 1
+fi
+
+cp ${HPHP_HOME}/hphp/tools/hphpize/hphpize.cmake CMakeLists.txt
+
+echo "** hphpize complete, now run \`cmake . && make\` to build"

@@ -1,0 +1,2 @@
+int(2)
+string(32) "'\0' not allowed in key: fo\0..."

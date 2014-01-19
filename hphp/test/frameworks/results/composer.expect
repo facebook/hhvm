@@ -1,0 +1,1980 @@
+Composer\Repository\ArtifactRepositoryTest::testExtractsConfigsFromZipArchives
+.
+Composer\Repository\FilesystemRepositoryTest::testCorruptedRepositoryFile
+.
+Composer\Repository\FilesystemRepositoryTest::testRepositoryRead
+.
+Composer\Repository\FilesystemRepositoryTest::testRepositoryWrite
+.
+Composer\Repository\FilesystemRepositoryTest::testUnexistentRepositoryFile
+.
+Composer\Repository\Pear\ChannelReaderTest::testShouldBuildPackagesFromPearSchema
+.
+Composer\Repository\Pear\ChannelReaderTest::testShouldCreatePackages
+.
+Composer\Repository\Pear\ChannelReaderTest::testShouldSelectCorrectReader
+.
+Composer\Repository\Pear\ChannelRest10ReaderTest::testShouldBuildPackagesFromPearSchema
+.
+Composer\Repository\Pear\ChannelRest11ReaderTest::testShouldBuildPackagesFromPearSchema
+.
+Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #0 
+.
+Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #1 
+.
+Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #2 
+.
+Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #3 
+.
+Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #4 
+.
+Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #5 
+.
+Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #6 
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testClassMapAutoloadingEmptyDirAndExactFile
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testEmptyPaths
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testFilesAutoloadGeneration
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testFilesAutoloadOrderByDependencies
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testIncludePathFileGeneration
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testIncludePathFileWithoutPathsIsSkipped
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testIncludePathsArePrependedInAutoloadFile
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testIncludePathsInMainPackage
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloading
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloadingAlternativeVendorDir
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloadingWithTargetDir
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testOverrideVendorsAutoloading
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testPSR0ToClassMapIgnoresNonExistingDir
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testPreAndPostEventsAreDispatchedDuringAutoloadDump
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testUpLevelRelativePaths
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testUseGlobalIncludePath
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testVendorDirExcludedFromWorkingDir
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testVendorDirSameAsWorkingDir
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsAutoloading
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsClassMapAutoloading
+.
+Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsClassMapAutoloadingWithTargetDir
+.
+Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #0 
+.
+Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #1 
+.
+Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #2 
+.
+Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #3 
+.
+Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #4 
+.
+Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #5 
+.
+Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMapFinderSupport
+.
+Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMapThrowsWhenDirectoryDoesNotExist
+.
+Composer\Test\Autoload\ClassMapGeneratorTest::testFindClassesThrowsWhenFileDoesNotExist
+.
+Composer\Test\CacheTest::testRemoveFilesWhenCacheIsTooLarge
+.
+Composer\Test\CacheTest::testRemoveOutdatedFiles
+F
+Composer\Test\Command\InitCommandTest::testParseAuthorStringWithInvalidEmail
+.
+Composer\Test\Command\InitCommandTest::testParseEmptyAuthorString
+.
+Composer\Test\Command\InitCommandTest::testParseValidAuthorString
+.
+Composer\Test\Command\InitCommandTest::testParseValidUtf8AuthorString
+.
+Composer\Test\ComposerTest::testSetGetDownloadManager
+.
+Composer\Test\ComposerTest::testSetGetInstallationManager
+.
+Composer\Test\ComposerTest::testSetGetLocker
+.
+Composer\Test\ComposerTest::testSetGetPackage
+.
+Composer\Test\ComposerTest::testSetGetRepositoryManager
+.
+Composer\Test\ConfigTest::testAddPackagistRepository with data set "local config adds above defaults"
+.
+Composer\Test\ConfigTest::testAddPackagistRepository with data set "local config can disable repos by name and re-add them anonymously to bring them above system config"
+.
+Composer\Test\ConfigTest::testAddPackagistRepository with data set "local config can disable system config by name"
+.
+Composer\Test\ConfigTest::testAddPackagistRepository with data set "local config can override by name to bring a repo above system config"
+.
+Composer\Test\ConfigTest::testAddPackagistRepository with data set "local config inherits system defaults"
+.
+Composer\Test\ConfigTest::testAddPackagistRepository with data set "system config adds above core defaults"
+.
+Composer\Test\ConfigTest::testMergeGithubOauth
+.
+Composer\Test\ConfigTest::testOverrideGithubProtocols
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testPreferNonReplacingFromSameRepo
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testPreferReplacingPackageFromSameVendor
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectAllProviders
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectFirstRepo
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectLocalReposFirst
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectNewest
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectNewestOverInstalled
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectNewestPicksLatest
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectNewestPicksLatestStableWithPreferStable
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectNewestWithDevPicksNonDev
+.
+Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectSingle
+.
+Composer\Test\DependencyResolver\PoolTest::testGetPriorityForNotRegisteredRepository
+.
+Composer\Test\DependencyResolver\PoolTest::testGetPriorityWhenRepositoryIsRegistered
+.
+Composer\Test\DependencyResolver\PoolTest::testPackageById
+.
+Composer\Test\DependencyResolver\PoolTest::testPool
+.
+Composer\Test\DependencyResolver\PoolTest::testPoolIgnoresIrrelevantPackages
+.
+Composer\Test\DependencyResolver\PoolTest::testWhatProvidesPackageWithConstraint
+.
+Composer\Test\DependencyResolver\PoolTest::testWhatProvidesSamePackageForDifferentRepositories
+.
+Composer\Test\DependencyResolver\PoolTest::testWhatProvidesWhenPackageCannotBeFound
+.
+Composer\Test\DependencyResolver\RequestTest::testRequestInstallAndRemove
+.
+Composer\Test\DependencyResolver\RequestTest::testRequestInstallSamePackageFromDifferentRepositories
+.
+Composer\Test\DependencyResolver\RequestTest::testUpdateAll
+.
+Composer\Test\DependencyResolver\RuleSetIteratorTest::testForeach
+.
+Composer\Test\DependencyResolver\RuleSetIteratorTest::testKeys
+.
+Composer\Test\DependencyResolver\RuleSetTest::testAdd
+.
+Composer\Test\DependencyResolver\RuleSetTest::testAddWhenTypeIsNotRecognized
+.
+Composer\Test\DependencyResolver\RuleSetTest::testContainsEqual
+.
+Composer\Test\DependencyResolver\RuleSetTest::testCount
+.
+Composer\Test\DependencyResolver\RuleSetTest::testGetIterator
+.
+Composer\Test\DependencyResolver\RuleSetTest::testGetIteratorFor
+.
+Composer\Test\DependencyResolver\RuleSetTest::testGetIteratorWithout
+.
+Composer\Test\DependencyResolver\RuleSetTest::testRuleById
+.
+Composer\Test\DependencyResolver\RuleSetTest::testToString
+.
+Composer\Test\DependencyResolver\RuleTest::testDisable
+.
+Composer\Test\DependencyResolver\RuleTest::testEnable
+.
+Composer\Test\DependencyResolver\RuleTest::testEqualsForRulesWithDifferLiteralsQuantity
+.
+Composer\Test\DependencyResolver\RuleTest::testEqualsForRulesWithDifferentHashes
+.
+Composer\Test\DependencyResolver\RuleTest::testEqualsForRulesWithSameLiterals
+.
+Composer\Test\DependencyResolver\RuleTest::testGetHash
+.
+Composer\Test\DependencyResolver\RuleTest::testIsAssertions
+.
+Composer\Test\DependencyResolver\RuleTest::testSetAndGetId
+.
+Composer\Test\DependencyResolver\RuleTest::testSetAndGetType
+.
+Composer\Test\DependencyResolver\RuleTest::testToString
+.
+Composer\Test\DependencyResolver\SolverTest::testConflictResultEmpty
+.
+Composer\Test\DependencyResolver\SolverTest::testInstallAlternativeWithCircularRequire
+.
+Composer\Test\DependencyResolver\SolverTest::testInstallCircularRequire
+.
+Composer\Test\DependencyResolver\SolverTest::testInstallDevAlias
+.
+Composer\Test\DependencyResolver\SolverTest::testInstallNonExistingPackageFails
+.
+Composer\Test\DependencyResolver\SolverTest::testInstallOneOfTwoAlternatives
+.
+Composer\Test\DependencyResolver\SolverTest::testInstallProvider
+.
+Composer\Test\DependencyResolver\SolverTest::testInstallRecursiveAliasDependencies
+.
+Composer\Test\DependencyResolver\SolverTest::testInstallReplacerOfMissingPackage
+.
+Composer\Test\DependencyResolver\SolverTest::testIssue265
+.
+Composer\Test\DependencyResolver\SolverTest::testLearnLiteralsWithSortedRuleLiterals
+.
+Composer\Test\DependencyResolver\SolverTest::testPickOlderIfNewerConflicts
+.
+Composer\Test\DependencyResolver\SolverTest::testRequireMismatchException
+.
+Composer\Test\DependencyResolver\SolverTest::testSkipReplacedPackageIfReplacerIsSelected
+.
+Composer\Test\DependencyResolver\SolverTest::testSkipReplacerOfExistingPackage
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverAllJobs
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverInstallHonoursNotEqualOperator
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverInstallInstalled
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverInstallInstalledWithAlternative
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverInstallSamePackageFromDifferentRepositories
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverInstallSingle
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverInstallWithDeps
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverInstallWithDepsInOrder
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverObsolete
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverRemoveIfNotInstalled
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverRemoveSingle
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverRemoveUninstalled
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverThreeAlternativeRequireAndConflict
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverUpdateAll
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverUpdateConstrained
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverUpdateCurrent
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverUpdateDoesOnlyUpdate
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverUpdateFullyConstrained
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverUpdateFullyConstrainedPrunesInstalledPackages
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverUpdateOnlyUpdatesSelectedPackage
+.
+Composer\Test\DependencyResolver\SolverTest::testSolverUpdateSingle
+.
+Composer\Test\DependencyResolver\SolverTest::testUnsatisfiableRequires
+.
+Composer\Test\DependencyResolver\SolverTest::testUseReplacerIfNecessary
+.
+Composer\Test\Downloader\ArchiveDownloaderTest::testGetFileName
+.
+Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrl
+.
+Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrl2
+.
+Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrl3
+.
+Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #0 
+.
+Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #1 
+.
+Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #2 
+.
+Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #3 
+.
+Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #4 
+.
+Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #5 
+.
+Composer\Test\Downloader\DownloadManagerTest::testBadPackageDownload
+.
+Composer\Test\Downloader\DownloadManagerTest::testBadPackageDownloadWithSourcePreferred
+.
+Composer\Test\Downloader\DownloadManagerTest::testDistOnlyPackageDownload
+.
+Composer\Test\Downloader\DownloadManagerTest::testDistOnlyPackageDownloadWithSourcePreferred
+.
+Composer\Test\Downloader\DownloadManagerTest::testFullPackageDownload
+.
+Composer\Test\Downloader\DownloadManagerTest::testFullPackageDownloadWithSourcePreferred
+.
+Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForCorrectlyInstalledDistPackage
+.
+Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForCorrectlyInstalledSourcePackage
+.
+Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForIncorrectlyInstalledDistPackage
+.
+Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForIncorrectlyInstalledPackage
+.
+Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForIncorrectlyInstalledSourcePackage
+.
+Composer\Test\Downloader\DownloadManagerTest::testRemove
+.
+Composer\Test\Downloader\DownloadManagerTest::testSetGetDownloader
+.
+Composer\Test\Downloader\DownloadManagerTest::testSourceOnlyPackageDownload
+.
+Composer\Test\Downloader\DownloadManagerTest::testSourceOnlyPackageDownloadWithSourcePreferred
+.
+Composer\Test\Downloader\DownloadManagerTest::testUpdateDistWithEqualTypes
+.
+Composer\Test\Downloader\DownloadManagerTest::testUpdateDistWithNotEqualTypes
+.
+Composer\Test\Downloader\DownloadManagerTest::testUpdateSourceWithEqualTypes
+.
+Composer\Test\Downloader\DownloadManagerTest::testUpdateSourceWithNotEqualTypes
+.
+Composer\Test\Downloader\FileDownloaderTest::testDownloadButFileIsUnsaved
+.
+Composer\Test\Downloader\FileDownloaderTest::testDownloadFileWithInvalidChecksum
+.
+Composer\Test\Downloader\FileDownloaderTest::testDownloadForPackageWithoutDistReference
+.
+Composer\Test\Downloader\FileDownloaderTest::testDownloadToExistingFile
+.
+Composer\Test\Downloader\FileDownloaderTest::testGetFileName
+.
+Composer\Test\Downloader\GitDownloaderTest::testDownload
+.
+Composer\Test\Downloader\GitDownloaderTest::testDownloadAndSetPushUrlUseCustomVariousProtocolsForGithub with data set #0 
+.
+Composer\Test\Downloader\GitDownloaderTest::testDownloadAndSetPushUrlUseCustomVariousProtocolsForGithub with data set #1 
+.
+Composer\Test\Downloader\GitDownloaderTest::testDownloadForPackageWithoutSourceReference
+.
+Composer\Test\Downloader\GitDownloaderTest::testDownloadThrowsRuntimeExceptionIfGitCommandFails
+.
+Composer\Test\Downloader\GitDownloaderTest::testDownloadUsesVariousProtocolsAndSetsPushUrlForGithub
+.
+Composer\Test\Downloader\GitDownloaderTest::testGetInstallationSource
+.
+Composer\Test\Downloader\GitDownloaderTest::testRemove
+.
+Composer\Test\Downloader\GitDownloaderTest::testUpdate
+.
+Composer\Test\Downloader\GitDownloaderTest::testUpdateThrowsRuntimeExceptionIfGitCommandFails
+.
+Composer\Test\Downloader\GitDownloaderTest::testUpdateforPackageWithoutSourceReference
+.
+Composer\Test\Downloader\HgDownloaderTest::testDownload
+.
+Composer\Test\Downloader\HgDownloaderTest::testDownloadForPackageWithoutSourceReference
+.
+Composer\Test\Downloader\HgDownloaderTest::testGetInstallationSource
+.
+Composer\Test\Downloader\HgDownloaderTest::testRemove
+.
+Composer\Test\Downloader\HgDownloaderTest::testUpdate
+.
+Composer\Test\Downloader\HgDownloaderTest::testUpdateforPackageWithoutSourceReference
+.
+Composer\Test\Downloader\PearPackageExtractorTest::testShouldExtractPackage_1_0
+.
+Composer\Test\Downloader\PearPackageExtractorTest::testShouldExtractPackage_2_0
+.
+Composer\Test\Downloader\PearPackageExtractorTest::testShouldExtractPackage_2_1
+.
+Composer\Test\Downloader\PearPackageExtractorTest::testShouldPerformReplacements
+.
+Composer\Test\Downloader\ZipDownloaderTest::testErrorMessages
+.
+Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherCanExecuteCliAndPhpInSameEventScriptStack
+.
+Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherCanExecuteSingleCommandLineScript with data set #0 
+.
+Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherCanExecuteSingleCommandLineScript with data set #1 
+.
+Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherCanExecuteSingleCommandLineScript with data set #2 
+.
+Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherOutputsCommands
+.
+Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherOutputsErrorOnFailedCommand
+.
+Composer\Test\EventDispatcher\EventDispatcherTest::testListenerExceptionsAreCaught
+.
+Composer\Test\IO\ConsoleIOTest::testAsk
+.
+Composer\Test\IO\ConsoleIOTest::testAskAndValidate
+.
+Composer\Test\IO\ConsoleIOTest::testAskConfirmation
+.
+Composer\Test\IO\ConsoleIOTest::testIsInteractive
+.
+Composer\Test\IO\ConsoleIOTest::testOverwrite
+.
+Composer\Test\IO\ConsoleIOTest::testSetAndgetAuthentication
+.
+Composer\Test\IO\ConsoleIOTest::testWrite
+.
+Composer\Test\IO\ConsoleIOTest::testgetAuthenticationWhenDidNotSet
+.
+Composer\Test\IO\ConsoleIOTest::testhasAuthentication
+.
+Composer\Test\IO\NullIOTest::testAsk
+.
+Composer\Test\IO\NullIOTest::testAskAndHideAnswer
+.
+Composer\Test\IO\NullIOTest::testAskAndValidate
+.
+Composer\Test\IO\NullIOTest::testAskConfirmation
+.
+Composer\Test\IO\NullIOTest::testIsInteractive
+.
+Composer\Test\IO\NullIOTest::testgetAuthentications
+.
+Composer\Test\IO\NullIOTest::testhasAuthentication
+.
+Composer\Test\InstallerTest::testInstaller with data set #0 
+.
+Composer\Test\InstallerTest::testInstaller with data set #1 
+.
+Composer\Test\InstallerTest::testIntegration with data set #0 
+.
+Composer\Test\InstallerTest::testIntegration with data set #1 
+.
+Composer\Test\InstallerTest::testIntegration with data set #10 
+.
+Composer\Test\InstallerTest::testIntegration with data set #11 
+.
+Composer\Test\InstallerTest::testIntegration with data set #12 
+.
+Composer\Test\InstallerTest::testIntegration with data set #13 
+.
+Composer\Test\InstallerTest::testIntegration with data set #14 
+.
+Composer\Test\InstallerTest::testIntegration with data set #15 
+.
+Composer\Test\InstallerTest::testIntegration with data set #16 
+.
+Composer\Test\InstallerTest::testIntegration with data set #17 
+.
+Composer\Test\InstallerTest::testIntegration with data set #18 
+.
+Composer\Test\InstallerTest::testIntegration with data set #19 
+.
+Composer\Test\InstallerTest::testIntegration with data set #2 
+.
+Composer\Test\InstallerTest::testIntegration with data set #20 
+.
+Composer\Test\InstallerTest::testIntegration with data set #21 
+.
+Composer\Test\InstallerTest::testIntegration with data set #22 
+.
+Composer\Test\InstallerTest::testIntegration with data set #23 
+.
+Composer\Test\InstallerTest::testIntegration with data set #24 
+.
+Composer\Test\InstallerTest::testIntegration with data set #25 
+.
+Composer\Test\InstallerTest::testIntegration with data set #26 
+.
+Composer\Test\InstallerTest::testIntegration with data set #27 
+.
+Composer\Test\InstallerTest::testIntegration with data set #28 
+.
+Composer\Test\InstallerTest::testIntegration with data set #29 
+.
+Composer\Test\InstallerTest::testIntegration with data set #3 
+.
+Composer\Test\InstallerTest::testIntegration with data set #30 
+.
+Composer\Test\InstallerTest::testIntegration with data set #31 
+.
+Composer\Test\InstallerTest::testIntegration with data set #32 
+.
+Composer\Test\InstallerTest::testIntegration with data set #33 
+.
+Composer\Test\InstallerTest::testIntegration with data set #34 
+.
+Composer\Test\InstallerTest::testIntegration with data set #35 
+.
+Composer\Test\InstallerTest::testIntegration with data set #36 
+.
+Composer\Test\InstallerTest::testIntegration with data set #37 
+.
+Composer\Test\InstallerTest::testIntegration with data set #4 
+.
+Composer\Test\InstallerTest::testIntegration with data set #5 
+.
+Composer\Test\InstallerTest::testIntegration with data set #6 
+.
+Composer\Test\InstallerTest::testIntegration with data set #7 
+.
+Composer\Test\InstallerTest::testIntegration with data set #8 
+.
+Composer\Test\InstallerTest::testIntegration with data set #9 
+.
+Composer\Test\Installer\InstallationManagerTest::testAddGetInstaller
+.
+Composer\Test\Installer\InstallationManagerTest::testAddRemoveInstaller
+.
+Composer\Test\Installer\InstallationManagerTest::testExecute
+.
+Composer\Test\Installer\InstallationManagerTest::testInstall
+.
+Composer\Test\Installer\InstallationManagerTest::testUninstall
+.
+Composer\Test\Installer\InstallationManagerTest::testUpdateWithEqualTypes
+.
+Composer\Test\Installer\InstallationManagerTest::testUpdateWithNotEqualTypes
+.
+Composer\Test\Installer\LibraryInstallerTest::testGetInstallPath
+.
+Composer\Test\Installer\LibraryInstallerTest::testGetInstallPathWithTargetDir
+.
+Composer\Test\Installer\LibraryInstallerTest::testInstall
+.
+Composer\Test\Installer\LibraryInstallerTest::testInstallerCreationShouldNotCreateBinDirectory
+.
+Composer\Test\Installer\LibraryInstallerTest::testInstallerCreationShouldNotCreateVendorDirectory
+.
+Composer\Test\Installer\LibraryInstallerTest::testIsInstalled
+.
+Composer\Test\Installer\LibraryInstallerTest::testUninstall
+.
+Composer\Test\Installer\LibraryInstallerTest::testUpdate
+.
+Composer\Test\Installer\MetapackageInstallerTest::testInstall
+.
+Composer\Test\Installer\MetapackageInstallerTest::testUninstall
+.
+Composer\Test\Installer\MetapackageInstallerTest::testUpdate
+.
+Composer\Test\Installer\PluginInstallerTest::testInstallMultiplePlugins
+.
+Composer\Test\Installer\PluginInstallerTest::testInstallNewPlugin
+.
+Composer\Test\Installer\PluginInstallerTest::testUpgradeWithNewClassName
+.
+Composer\Test\Installer\PluginInstallerTest::testUpgradeWithSameClassName
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #0 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #1 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #10 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #11 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #12 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #13 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #14 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #15 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #16 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #17 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #2 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #3 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #4 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #5 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #6 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #7 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #8 
+.
+Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #9 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #0 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #1 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #10 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #11 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #12 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #13 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #14 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #15 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #16 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #17 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #2 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #3 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #4 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #5 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #6 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #7 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #8 
+.
+Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #9 
+.
+Composer\Test\Json\JsonFileTest::testEscape
+.
+Composer\Test\Json\JsonFileTest::testEscapedBackslashes
+.
+Composer\Test\Json\JsonFileTest::testEscapedSlashes
+.
+Composer\Test\Json\JsonFileTest::testEscapedUnicode
+.
+Composer\Test\Json\JsonFileTest::testFormatEmptyArray
+.
+Composer\Test\Json\JsonFileTest::testOnlyUnicode
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectArrayAsHash
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectExtraComma
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectExtraCommaInArray
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingColon
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingComma
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingCommaMultiline
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingQuotes
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectSingleQuotes
+.
+Composer\Test\Json\JsonFileTest::testParseErrorDetectUnescapedBackslash
+.
+Composer\Test\Json\JsonFileTest::testParseErrorSkipsEscapedBackslash
+.
+Composer\Test\Json\JsonFileTest::testSchemaValidation
+.
+Composer\Test\Json\JsonFileTest::testSimpleJsonString
+.
+Composer\Test\Json\JsonFileTest::testTrailingBackslash
+.
+Composer\Test\Json\JsonFileTest::testUnicode
+.
+Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanAdd
+.
+Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanAddSubKeyInEmptyConfig
+.
+Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanAddSubKeyInEmptyVal
+.
+Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanAddSubKeyInHash
+.
+Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanOverwrite
+.
+Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanOverwriteArrays
+.
+Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanOverwriteNumbers
+.
+Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingEscapes
+.
+Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #0 
+.
+Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #1 
+.
+Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #2 
+.
+Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #3 
+.
+Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #4 
+.
+Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #5 
+.
+Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #6 
+.
+Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #7 
+.
+Composer\Test\Json\JsonManipulatorTest::testAddMainKey
+.
+Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanAdd
+.
+Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanInitializeEmptyRepositories
+.
+Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanInitializeFromScratch
+.
+Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanOverrideDeepRepos
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveConfigSettingCanRemoveSubKeyInHash
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveConfigSettingCanRemoveSubKeyInHashWithSiblings
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "fails on deep repos with borked texts"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "fails on deep repos with borked texts2"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on deep repos"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on empty repos"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on empty repos2"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on missing repos"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones first"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones last"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones middle"
+.
+Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones unique"
+.
+Composer\Test\Json\JsonManipulatorTest::testUpdateMainKey
+.
+Composer\Test\Json\JsonManipulatorTest::testUpdateMainKey2
+.
+Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testGitExcludes
+E
+Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testHgExcludes
+E
+Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testManualExcludes
+.
+Composer\Test\Package\Archiver\ArchiveManagerTest::testArchiveTar
+E
+Composer\Test\Package\Archiver\ArchiveManagerTest::testUnknownFormat
+.
+Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #0 
+.
+Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #1 
+.
+Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #2 
+.
+Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #3 
+.
+Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #4 
+.
+Composer\Test\Package\Archiver\PharArchiverTest::testTarArchive
+E
+Composer\Test\Package\Archiver\PharArchiverTest::testZipArchive
+E
+Composer\Test\Package\BasePackageTest::testSetAnotherRepository
+.
+Composer\Test\Package\BasePackageTest::testSetSameRepository
+.
+Composer\Test\Package\CompletePackageTest::testGetTargetDir
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedMarshallingSemantics with data set #0 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedMarshallingSemantics with data set #1 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedMarshallingSemantics with data set #2 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedMarshallingSemantics with data set #3 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedMarshallingSemantics with data set #4 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedNamingSemantics with data set #0 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedNamingSemantics with data set #1 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedNamingSemantics with data set #2 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedNamingSemantics with data set #3 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedNamingSemantics with data set #4 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedVersioningSemantics with data set #0 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedVersioningSemantics with data set #1 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedVersioningSemantics with data set #2 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedVersioningSemantics with data set #3 
+.
+Composer\Test\Package\CompletePackageTest::testPackageHasExpectedVersioningSemantics with data set #4 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #0 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #1 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #10 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #11 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #12 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #13 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #14 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #15 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #16 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #17 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #18 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #19 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #2 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #20 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #21 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #22 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #3 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #4 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #5 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #6 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #7 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #8 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #9 
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testRequiredInformation
+.
+Composer\Test\Package\Dumper\ArrayDumperTest::testRootPackage
+.
+Composer\Test\Package\LinkConstraint\MultiConstraintTest::testMultiVersionMatchFails
+.
+Composer\Test\Package\LinkConstraint\MultiConstraintTest::testMultiVersionMatchSucceeds
+.
+Composer\Test\Package\LinkConstraint\MultiConstraintTest::testMultiVersionProvidedMatchSucceeds
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testComparableBranches
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #0 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #1 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #10 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #11 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #12 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #13 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #14 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #15 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #2 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #3 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #4 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #5 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #6 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #7 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #8 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #9 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #0 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #1 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #10 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #11 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #12 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #13 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #14 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #15 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #16 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #17 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #18 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #19 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #2 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #3 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #4 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #5 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #6 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #7 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #8 
+.
+Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #9 
+.
+Composer\Test\Package\Loader\ArrayLoaderTest::testNormalizedVersionOptimization
+.
+Composer\Test\Package\Loader\ArrayLoaderTest::testPackageWithBranchAlias
+.
+Composer\Test\Package\Loader\ArrayLoaderTest::testParseDump
+.
+Composer\Test\Package\Loader\ArrayLoaderTest::testSelfVersion
+.
+Composer\Test\Package\Loader\ArrayLoaderTest::testTypeDefault
+.
+Composer\Test\Package\Loader\RootPackageLoaderTest::testDetachedHeadBecomesDevHash
+.
+Composer\Test\Package\Loader\RootPackageLoaderTest::testInvalidTagBecomesVersion
+.
+Composer\Test\Package\Loader\RootPackageLoaderTest::testStabilityFlagsParsing
+.
+Composer\Test\Package\Loader\RootPackageLoaderTest::testTagBecomesVersion
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #0 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #1 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #2 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #3 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #4 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSkipsWarningDataWhenIgnoringErrors with data set #0 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSkipsWarningDataWhenIgnoringErrors with data set #1 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSuccess with data set #0 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSuccess with data set #1 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSuccess with data set #2 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadWarnings with data set #0 
+.
+Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadWarnings with data set #1 
+.
+Composer\Test\Package\LockerTest::testGetLockedPackages
+.
+Composer\Test\Package\LockerTest::testGetNotLockedPackages
+.
+Composer\Test\Package\LockerTest::testIsFresh
+.
+Composer\Test\Package\LockerTest::testIsFreshFalse
+.
+Composer\Test\Package\LockerTest::testIsLocked
+.
+Composer\Test\Package\LockerTest::testLockBadPackages
+.
+Composer\Test\Package\LockerTest::testSetLockData
+.
+Composer\Test\Package\Version\VersionParserTest::testFormatVersionForDevPackage with data set #0 
+.
+Composer\Test\Package\Version\VersionParserTest::testFormatVersionForDevPackage with data set #1 
+.
+Composer\Test\Package\Version\VersionParserTest::testFormatVersionForDevPackage with data set #2 
+.
+Composer\Test\Package\Version\VersionParserTest::testFormatVersionForDevPackage with data set #3 
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses *"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses arbitrary"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses arbitrary/2"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses digits"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses digits/2"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses long *"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses long digits"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses long digits/2"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses long x"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses master"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses trunk"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses x"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeFails with data set "empty "
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeFails with data set "invalid chars"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeFails with data set "invalid type"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeFails with data set "non-dev arbitrary"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeFails with data set "too many bits"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "CI parsing"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "RC uppercase"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "delimiters"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "expand shorthand"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "expand shorthand2"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "forces w.x.y.z"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "forces w.x.y.z/2"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "ignores aliases"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "none"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "none/2"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses arbitrary"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses arbitrary2"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses arbitrary3"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses branches"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses dates w/ -"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses dates w/ ."
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses dates y-m"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses datetime"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses dt+number"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses dt+patch"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses long"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses master"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses numbers"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses state"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses trunk"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "patch replace"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "strips leading v"
+.
+Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "strips v/datetime"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsFails with data set "empty "
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsFails with data set "invalid version"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsFailsOnBadReference
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsIgnoresReferenceOnDevVersion
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsIgnoresStabilityFlag
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsMulti
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsMultiDisjunctiveHasPrioOverConjuctive
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsMultiWithStabilities
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts arbitrary"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts master"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts master/2"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts spaces"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "completes version"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "double equals"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "equals"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "great/eq than"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "greater than"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "ignores aliases"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "less/eq than"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "lesser than override"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "lesser than"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "match any"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "match any/2"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "match any/3"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "match any/4"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "no op means eq"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "not equal"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "not equal/2"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "regression #550"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "regression #935"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "shorthand beta"
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #0 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #1 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #2 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #3 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #4 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #5 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #6 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #0 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #1 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #10 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #11 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #12 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #13 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #14 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #15 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #16 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #17 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #2 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #3 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #4 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #5 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #6 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #7 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #8 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #9 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #0 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #1 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #10 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #2 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #3 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #4 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #5 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #6 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #7 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #8 
+.
+Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #9 
+.
+Composer\Test\Repository\ArrayRepositoryTest::testAddPackage
+.
+Composer\Test\Repository\ArrayRepositoryTest::testAutomaticallyAddAliasedPackage
+.
+Composer\Test\Repository\ArrayRepositoryTest::testFindPackages
+.
+Composer\Test\Repository\ArrayRepositoryTest::testHasPackage
+.
+Composer\Test\Repository\ArrayRepositoryTest::testRemovePackage
+.
+Composer\Test\Repository\ComposerRepositoryTest::testLoadData with data set #0 
+.
+Composer\Test\Repository\ComposerRepositoryTest::testLoadData with data set #1 
+.
+Composer\Test\Repository\ComposerRepositoryTest::testWhatProvides
+.
+Composer\Test\Repository\CompositeRepositoryTest::testAddRepository
+.
+Composer\Test\Repository\CompositeRepositoryTest::testCount
+.
+Composer\Test\Repository\CompositeRepositoryTest::testFindPackage
+.
+Composer\Test\Repository\CompositeRepositoryTest::testFindPackages
+.
+Composer\Test\Repository\CompositeRepositoryTest::testGetPackages
+.
+Composer\Test\Repository\CompositeRepositoryTest::testHasPackage
+.
+Composer\Test\Repository\CompositeRepositoryTest::testNoRepositories with data set #0 
+.
+Composer\Test\Repository\CompositeRepositoryTest::testNoRepositories with data set #1 
+.
+Composer\Test\Repository\CompositeRepositoryTest::testNoRepositories with data set #2 
+.
+Composer\Test\Repository\Vcs\GitHubDriverTest::testPrivateRepository
+.
+Composer\Test\Repository\Vcs\GitHubDriverTest::testPrivateRepositoryNoInteraction
+.
+Composer\Test\Repository\Vcs\GitHubDriverTest::testPublicRepository
+.
+Composer\Test\Repository\Vcs\GitHubDriverTest::testPublicRepository2
+.
+Composer\Test\Repository\Vcs\SvnDriverTest::testSupport with data set #0 
+.
+Composer\Test\Repository\Vcs\SvnDriverTest::testSupport with data set #1 
+.
+Composer\Test\Repository\Vcs\SvnDriverTest::testSupport with data set #2 
+.
+Composer\Test\Repository\Vcs\SvnDriverTest::testSupport with data set #3 
+.
+Composer\Test\Repository\Vcs\SvnDriverTest::testWrongCredentialsInUrl
+.
+Composer\Test\Util\ErrorHandlerTest::testErrorHandlerCaptureNotice
+.
+Composer\Test\Util\ErrorHandlerTest::testErrorHandlerCaptureWarning
+F
+Composer\Test\Util\ErrorHandlerTest::testErrorHandlerRespectsAtOperator
+.
+Composer\Test\Util\FilesystemTest::testDirectorySize
+.
+Composer\Test\Util\FilesystemTest::testFileSize
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #0 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #1 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #10 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #11 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #12 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #13 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #14 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #15 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #16 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #17 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #18 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #19 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #2 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #20 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #21 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #22 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #23 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #24 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #25 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #26 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #27 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #28 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #29 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #3 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #30 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #31 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #4 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #5 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #6 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #7 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #8 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #9 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #0 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #1 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #10 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #11 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #12 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #13 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #14 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #15 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #16 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #17 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #18 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #19 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #2 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #20 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #21 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #22 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #23 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #24 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #25 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #26 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #27 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #28 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #29 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #3 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #30 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #4 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #5 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #6 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #7 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #8 
+.
+Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #9 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #0 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #1 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #10 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #11 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #12 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #2 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #3 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #4 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #5 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #6 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #7 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #8 
+.
+Composer\Test\Util\FilesystemTest::testNormalizePath with data set #9 
+.
+Composer\Test\Util\FilesystemTest::testRemoveDirectoryPhp
+.
+Composer\Test\Util\ProcessExecutorTest::testExecuteCapturesOutput
+.
+Composer\Test\Util\ProcessExecutorTest::testExecuteCapturesStderr
+.
+Composer\Test\Util\ProcessExecutorTest::testExecuteOutputsIfNotCaptured
+.
+Composer\Test\Util\ProcessExecutorTest::testSplitLines
+.
+Composer\Test\Util\ProcessExecutorTest::testTimeout
+.
+Composer\Test\Util\RemoteFilesystemTest::testCallbackGetFileSize
+.
+Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyFailure404
+.
+Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyProgress
+.
+Composer\Test\Util\RemoteFilesystemTest::testCaptureAuthenticationParamsFromUrl
+F
+Composer\Test\Util\RemoteFilesystemTest::testCopy
+E
+Composer\Test\Util\RemoteFilesystemTest::testGetContents
+E
+Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrl
+.
+Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithAuthorization
+.
+Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithCallOptionsKeepsHeader
+.
+Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithStreamOptions
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #0 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #1 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #2 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #3 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #4 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #0 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #1 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #10 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #11 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #12 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #13 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #14 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #15 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #16 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #2 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #3 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #4 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #5 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #6 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #7 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #8 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #9 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #0 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #1 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #10 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #100 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #101 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #102 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #103 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #104 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #105 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #106 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #107 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #108 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #109 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #11 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #110 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #111 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #112 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #113 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #114 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #115 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #116 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #117 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #118 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #119 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #12 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #120 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #121 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #122 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #123 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #124 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #125 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #126 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #127 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #128 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #129 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #13 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #130 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #131 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #132 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #133 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #134 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #135 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #136 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #137 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #138 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #139 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #14 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #140 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #141 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #142 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #143 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #144 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #145 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #146 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #147 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #148 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #149 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #15 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #150 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #151 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #152 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #153 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #154 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #155 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #156 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #157 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #158 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #159 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #16 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #160 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #161 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #162 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #163 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #164 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #165 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #166 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #167 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #168 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #169 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #17 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #170 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #171 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #172 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #173 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #174 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #175 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #176 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #177 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #178 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #179 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #18 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #180 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #181 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #182 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #183 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #184 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #185 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #186 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #187 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #188 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #189 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #19 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #190 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #191 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #192 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #193 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #194 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #195 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #196 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #197 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #198 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #199 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #2 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #20 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #200 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #201 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #202 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #203 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #204 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #205 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #206 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #207 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #208 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #209 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #21 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #210 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #211 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #212 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #22 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #23 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #24 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #25 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #26 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #27 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #28 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #29 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #3 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #30 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #31 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #32 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #33 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #34 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #35 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #36 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #37 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #38 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #39 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #4 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #40 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #41 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #42 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #43 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #44 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #45 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #46 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #47 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #48 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #49 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #5 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #50 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #51 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #52 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #53 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #54 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #55 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #56 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #57 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #58 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #59 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #6 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #60 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #61 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #62 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #63 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #64 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #65 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #66 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #67 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #68 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #69 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #7 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #70 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #71 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #72 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #73 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #74 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #75 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #76 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #77 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #78 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #79 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #8 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #80 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #81 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #82 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #83 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #84 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #85 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #86 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #87 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #88 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #89 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #9 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #90 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #91 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #92 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #93 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #94 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #95 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #96 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #97 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #98 
+.
+Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #99 
+.
+Composer\Test\Util\StreamContextFactoryTest::testEnsureThatfixHttpHeaderFieldMovesContentTypeToEndOfOptions
+F
+Composer\Test\Util\StreamContextFactoryTest::testGetContext with data set #0 
+.
+Composer\Test\Util\StreamContextFactoryTest::testGetContext with data set #1 
+.
+Composer\Test\Util\StreamContextFactoryTest::testHttpProxy
+.
+Composer\Test\Util\StreamContextFactoryTest::testHttpProxyWithNoProxy
+.
+Composer\Test\Util\StreamContextFactoryTest::testHttpProxyWithNoProxyWildcard
+.
+Composer\Test\Util\StreamContextFactoryTest::testHttpProxyWithoutPort
+.
+Composer\Test\Util\StreamContextFactoryTest::testOptionsArePreserved
+.
+Composer\Test\Util\StreamContextFactoryTest::testSSLProxy with data set #0 
+.
+Composer\Test\Util\StreamContextFactoryTest::testSSLProxy with data set #1 
+.
+Composer\Test\Util\SvnTest::testCredentials with data set #0 
+.
+Composer\Test\Util\SvnTest::testCredentials with data set #1 
+.
+Composer\Test\Util\SvnTest::testCredentials with data set #2 
+F
+Composer\Test\Util\SvnTest::testInteractiveString
+.

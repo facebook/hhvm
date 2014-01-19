@@ -1,0 +1,21 @@
+ResourceBundle Object
+(
+)
+
+    0: U_ZERO_ERROR
+Hello World!
+ResourceBundle Object
+(
+)
+
+    0: U_ZERO_ERROR
+Hola Mundo!
+ResourceBundle Object
+(
+)
+
+ -127: U_USING_DEFAULT_WARNING
+NULL
+    2: resourcebundle_ctor: Cannot load libICU resource bundle: U_MISSING_RESOURCE_ERROR
+NULL
+    2: resourcebundle_ctor: Cannot load libICU resource bundle: U_MISSING_RESOURCE_ERROR

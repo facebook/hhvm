@@ -1,0 +1,20 @@
+array(6) {
+  [5]=>
+  string(6) "banana"
+  [6]=>
+  string(6) "banana"
+  [7]=>
+  string(6) "banana"
+  [8]=>
+  string(6) "banana"
+  [9]=>
+  string(6) "banana"
+  [10]=>
+  string(6) "banana"
+}
+array(2) {
+  [-2]=>
+  string(4) "pear"
+  [0]=>
+  string(4) "pear"
+}

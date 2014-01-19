@@ -1,0 +1,45 @@
+Eval {
+  EnableXHP = true
+  AllowHhas = true
+  EnableHipHopSyntax = true
+  EnableObjDestructCall = true
+  JitASize = 10485760 # 10 MB
+  JitAStubsSize = 10485760 # 10 MB
+  JitGlobalDataSize = 2097152 # 2 MB
+  Debugger {
+    EnableDebugger = true
+    EnableDebuggerColor = false
+    EnableDebuggerPrompt = false
+  }
+}
+
+Repo {
+  Local.Mode = --
+  Eval.Mode = readonly
+  Commit = true
+  DebugInfo = true
+}
+
+MySQL {
+  ReadTimeout = 5000
+}
+
+EnvVariables {
+  HPHP_INTERPRETER = 1
+}
+
+ServerVariables {
+  ALPHA_CONSOLE = 1
+  TFBENV = 16777216
+}
+
+ErrorHandling {
+  NoticeFrequency = 1
+  WarningFrequency = 1
+}
+
+ResourceLimit {
+  SerializationSizeLimit=134217728
+}
+
+

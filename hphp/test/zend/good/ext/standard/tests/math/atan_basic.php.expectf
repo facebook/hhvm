@@ -1,0 +1,4 @@
+atan 1.7320508075689 = float(%f)
+Pass
+atan 0.57735026918963 = float(%f)
+Pass

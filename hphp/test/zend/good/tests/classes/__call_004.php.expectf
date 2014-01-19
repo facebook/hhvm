@@ -1,0 +1,12 @@
+In B::__call(test1, array(1,a))
+object(B)#1 (0) {
+}
+In B::__call(test2, array(1,a))
+object(B)#1 (0) {
+}
+In B::__call(test3, array(1,a))
+object(B)#1 (0) {
+}
+In B::__call(test4, array(1,a))
+object(B)#1 (0) {
+}

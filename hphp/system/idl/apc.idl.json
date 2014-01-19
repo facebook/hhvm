@@ -1,0 +1,345 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "apc_add",
+            "desc": "Caches a variable in the data store, only if it's not already stored. Unlike many other mechanisms in PHP, variables stored using apc_add() will persist between requests (until the value is removed from the cache).",
+            "flags": [
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure and an array with error keys if passed an array."
+            },
+            "args": [
+                {
+                    "name": "key_or_array",
+                    "type": "Variant",
+                    "desc": "Store the variable using this name. Can also be an array of key-value pairs to insert into the cache. Keys are cache-unique, so attempting to use apc_add() to store data with a key that already exists will not overwrite the existing data, and will instead return FALSE. (This is the only difference between apc_add() and apc_store().)"
+                },
+                {
+                    "name": "var",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The variable to store. Defaults to null for the case where an array of key-value pairs is passed."
+                },
+                {
+                    "name": "ttl",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Time To Live; store var in the cache for ttl seconds. After the ttl has passed, the stored variable will be expunged from the cache (on the next request). If no ttl is supplied (or if the ttl is 0), the value will persist until it is removed from the cache manually, or otherwise fails to exist in the cache (clear, restart, etc.)."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_store",
+            "desc": "Cache a variable in the data store. Unlike many other mechanisms in PHP, variables stored using apc_store() will persist between requests (until the value is removed from the cache).",
+            "flags": [
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success, FALSE on failure and an array with error keys if passed an array."
+            },
+            "args": [
+                {
+                    "name": "key_or_array",
+                    "type": "Variant",
+                    "desc": "Store the variable using this name. Can also be an array of key-value pairs to insert into the cache. Keys are cache-unique, so storing a second value with the same key will overwrite the original value."
+                },
+                {
+                    "name": "var",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The variable to store. Defaults to null for the case where an array of key-value pairs is passed."
+                },
+                {
+                    "name": "ttl",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Time To Live; store var in the cache for ttl seconds. After the ttl has passed, the stored variable will be expunged from the cache (on the next request). If no ttl is supplied (or if the ttl is 0), the value will persist until it is removed from the cache manually, or otherwise fails to exist in the cache (clear, restart, etc.)."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_store_as_primed_do_not_use",
+            "desc": "Simlar to apc_store() but TTL is always 0 and there is TTL cap applied. Do not use in prod, use cachearchiver instead.",
+            "flags": [
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "Store the variable using this name. keys are cache-unique, so storing a second value with the same key will overwrite the original value."
+                },
+                {
+                    "name": "var",
+                    "type": "Variant",
+                    "desc": "The variable to store"
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_fetch",
+            "desc": "Fetchs a stored variable from the cache.",
+            "flags": [
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The stored variable or array of variables on success; FALSE on failure"
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "The key used to store the value (with apc_store()). If an array is passed then each element is fetched and returned."
+                },
+                {
+                    "name": "success",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Set to TRUE in success and FALSE in failure.",
+                    "ref": true
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_delete",
+            "desc": "Removes a stored variable from the cache.",
+            "flags": [
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "The key used to store the value (with apc_store())."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_cache_info",
+            "desc": "Retrieves cached information and meta-data from APC's data store.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Array of cached data (and meta-data) or FALSE on failure apc_cache_info() will raise a warning if it is unable to retrieve APC cache data. This typically occurs when APC is not enabled."
+            },
+            "args": [
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "If cache_type is \"user\", information about the user cache will be returned.\n\nIf cache_type is \"filehits\", information about which files have been served from the bytecode cache for the current request will be returned. This feature must be enabled at compile time using --enable-filehits .\n\nIf an invalid or no cache_type is specified, information about the system cache (cached files) will be returned."
+                },
+                {
+                    "name": "limited",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "If limited is TRUE, the return value will exclude the individual list of cache entries. This is useful when trying to optimize calls for statistics gathering."
+                }
+            ]
+        },
+        {
+            "name": "apc_clear_cache",
+            "desc": "Clears the user\/system cache.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "If cache_type is \"user\", the user cache will be cleared; otherwise, the system cache (cached files) will be cleared."
+                }
+            ]
+        },
+        {
+            "name": "apc_sma_info",
+            "desc": "Retrieves APC's Shared Memory Allocation information.",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Array of Shared Memory Allocation data; FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "limited",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "When set to FALSE (default) apc_sma_info() will return a detailed information about each segment."
+                }
+            ]
+        },
+        {
+            "name": "apc_inc",
+            "desc": "Increases a stored number.",
+            "flags": [
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the current value of key's value on success, or FALSE on failure"
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The key of the value being increased."
+                },
+                {
+                    "name": "step",
+                    "type": "Int64",
+                    "value": "1",
+                    "desc": "The step, or value to increase."
+                },
+                {
+                    "name": "success",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Optionally pass the success or fail boolean value to this referenced variable.",
+                    "ref": true
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_dec",
+            "desc": "Decreases a stored integer value.",
+            "flags": [
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the current value of key's value on success, or FALSE on failure"
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The key of the value being decreased."
+                },
+                {
+                    "name": "step",
+                    "type": "Int64",
+                    "value": "1",
+                    "desc": "The step, or value to decrease."
+                },
+                {
+                    "name": "success",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Optionally pass the success or fail boolean value to this referenced variable.",
+                    "ref": true
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_cas",
+            "desc": "apc_cas WarningThis function is currently not documented; only its argument list is available.",
+            "flags": [
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String"
+                },
+                {
+                    "name": "old_cas",
+                    "type": "Int64"
+                },
+                {
+                    "name": "new_cas",
+                    "type": "Int64"
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_exists",
+            "desc": "Checks if one ore more APC keys exist.",
+            "flags": [
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "TRUE if the key exists, otherwise FALSE. If array is passed in, then an array is returned that contains all existing keys, or an empty array if none exist."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "The key to check existence. If an array is passed then each element is checked."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

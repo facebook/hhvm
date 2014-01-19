@@ -1,0 +1,130 @@
+Array
+(
+    [year] => 2004
+    [month] => 6
+    [day] => 8
+    [hour] => 
+    [minute] => 
+    [second] => 
+    [fraction] => 
+    [warning_count] => 0
+    [warnings] => Array
+        (
+        )
+
+    [error_count] => 1
+    [errors] => Array
+        (
+            [8] => Trailing data
+        )
+
+    [is_localtime] => 
+)
+Array
+(
+    [year] => 2004
+    [month] => 6
+    [day] => 8
+    [hour] => 
+    [minute] => 
+    [second] => 
+    [fraction] => 
+    [warning_count] => 1
+    [warnings] => Array
+        (
+            [8] => Trailing data
+        )
+
+    [error_count] => 0
+    [errors] => Array
+        (
+        )
+
+    [is_localtime] => 
+)
+Array
+(
+    [year] => 2004
+    [month] => 6
+    [day] => 8
+    [hour] => 
+    [minute] => 
+    [second] => 
+    [fraction] => 
+    [warning_count] => 1
+    [warnings] => Array
+        (
+            [8] => Trailing data
+        )
+
+    [error_count] => 0
+    [errors] => Array
+        (
+        )
+
+    [is_localtime] => 
+)
+Array
+(
+    [year] => 2004
+    [month] => 6
+    [day] => 8
+    [hour] => 
+    [minute] => 
+    [second] => 
+    [fraction] => 
+    [warning_count] => 1
+    [warnings] => Array
+        (
+            [8] => Trailing data
+        )
+
+    [error_count] => 0
+    [errors] => Array
+        (
+        )
+
+    [is_localtime] => 
+)
+Array
+(
+    [year] => 2004
+    [month] => 6
+    [day] => 8
+    [hour] => 
+    [minute] => 
+    [second] => 
+    [fraction] => 
+    [warning_count] => 0
+    [warnings] => Array
+        (
+        )
+
+    [error_count] => 0
+    [errors] => Array
+        (
+        )
+
+    [is_localtime] => 
+)
+Array
+(
+    [year] => 2004
+    [month] => 6
+    [day] => 8
+    [hour] => 
+    [minute] => 
+    [second] => 
+    [fraction] => 
+    [warning_count] => 0
+    [warnings] => Array
+        (
+        )
+
+    [error_count] => 0
+    [errors] => Array
+        (
+        )
+
+    [is_localtime] => 
+)

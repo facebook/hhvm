@@ -1,0 +1,43 @@
+EncodingDetector
+object(EncodingDetector)#1 (0) {
+}
+string(101) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:16:"EncodingDetector";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(16) "EncodingDetector"
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "setText"
+  [2]=>
+  string(19) "setDeclaredEncoding"
+  [3]=>
+  string(6) "detect"
+  [4]=>
+  string(9) "detectAll"
+}
+================
+A_EncodingDetector
+object(A_EncodingDetector)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(103) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:18:"A_EncodingDetector";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(18) "A_EncodingDetector"
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "setText"
+  [2]=>
+  string(19) "setDeclaredEncoding"
+  [3]=>
+  string(6) "detect"
+  [4]=>
+  string(9) "detectAll"
+}

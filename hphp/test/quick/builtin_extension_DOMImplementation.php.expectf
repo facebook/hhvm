@@ -1,0 +1,39 @@
+DOMImplementation
+object(DOMImplementation)#1 (0) {
+}
+string(102) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:17:"DOMImplementation";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(17) "DOMImplementation"
+}
+array(4) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(14) "createDocument"
+  [2]=>
+  string(18) "createDocumentType"
+  [3]=>
+  string(10) "hasFeature"
+}
+================
+A_DOMImplementation
+object(A_DOMImplementation)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(104) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:19:"A_DOMImplementation";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(19) "A_DOMImplementation"
+}
+array(4) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(14) "createDocument"
+  [2]=>
+  string(18) "createDocumentType"
+  [3]=>
+  string(10) "hasFeature"
+}

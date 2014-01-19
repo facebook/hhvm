@@ -1,0 +1,16 @@
+string(17) "I am private in a"
+string(16) "I am public in b"
+object(b)#1 (2) {
+  ["prop"]=>
+  string(16) "I am public in b"
+  ["prop":"a":private]=>
+  string(9) "new value"
+}
+object(b)#1 (2) {
+  ["prop"]=>
+  string(11) "newer value"
+  ["prop":"a":private]=>
+  string(9) "new value"
+}
+string(17) "I am private in a"
+HipHop Fatal error: Cannot access private property a::$prop in %s on line 5

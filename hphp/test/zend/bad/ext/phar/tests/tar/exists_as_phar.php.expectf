@@ -1,0 +1,2 @@
+phar tar error: "%sexists_as_phar.phar.tar" already exists as a regular phar and must be deleted from disk prior to creating as a tar-based phar
+===DONE===

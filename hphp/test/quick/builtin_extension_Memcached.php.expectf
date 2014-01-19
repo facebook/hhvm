@@ -1,0 +1,175 @@
+Memcached
+object(Memcached)#1 (0) {
+}
+string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"Memcached";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(9) "Memcached"
+}
+array(38) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(3) "add"
+  [2]=>
+  string(8) "addByKey"
+  [3]=>
+  string(9) "addServer"
+  [4]=>
+  string(10) "addServers"
+  [5]=>
+  string(6) "append"
+  [6]=>
+  string(11) "appendByKey"
+  [7]=>
+  string(3) "cas"
+  [8]=>
+  string(8) "casByKey"
+  [9]=>
+  string(9) "decrement"
+  [10]=>
+  string(6) "delete"
+  [11]=>
+  string(11) "deleteByKey"
+  [12]=>
+  string(5) "fetch"
+  [13]=>
+  string(8) "fetchAll"
+  [14]=>
+  string(5) "flush"
+  [15]=>
+  string(3) "get"
+  [16]=>
+  string(8) "getByKey"
+  [17]=>
+  string(10) "getDelayed"
+  [18]=>
+  string(15) "getDelayedByKey"
+  [19]=>
+  string(8) "getMulti"
+  [20]=>
+  string(13) "getMultiByKey"
+  [21]=>
+  string(9) "getOption"
+  [22]=>
+  string(13) "getResultCode"
+  [23]=>
+  string(16) "getResultMessage"
+  [24]=>
+  string(14) "getServerByKey"
+  [25]=>
+  string(13) "getServerList"
+  [26]=>
+  string(8) "getStats"
+  [27]=>
+  string(10) "getVersion"
+  [28]=>
+  string(9) "increment"
+  [29]=>
+  string(7) "prepend"
+  [30]=>
+  string(12) "prependByKey"
+  [31]=>
+  string(7) "replace"
+  [32]=>
+  string(12) "replaceByKey"
+  [33]=>
+  string(3) "set"
+  [34]=>
+  string(8) "setByKey"
+  [35]=>
+  string(8) "setMulti"
+  [36]=>
+  string(13) "setMultiByKey"
+  [37]=>
+  string(9) "setOption"
+}
+================
+A_Memcached
+object(A_Memcached)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(96) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:11:"A_Memcached";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(11) "A_Memcached"
+}
+array(38) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(3) "add"
+  [2]=>
+  string(8) "addByKey"
+  [3]=>
+  string(9) "addServer"
+  [4]=>
+  string(10) "addServers"
+  [5]=>
+  string(6) "append"
+  [6]=>
+  string(11) "appendByKey"
+  [7]=>
+  string(3) "cas"
+  [8]=>
+  string(8) "casByKey"
+  [9]=>
+  string(9) "decrement"
+  [10]=>
+  string(6) "delete"
+  [11]=>
+  string(11) "deleteByKey"
+  [12]=>
+  string(5) "fetch"
+  [13]=>
+  string(8) "fetchAll"
+  [14]=>
+  string(5) "flush"
+  [15]=>
+  string(3) "get"
+  [16]=>
+  string(8) "getByKey"
+  [17]=>
+  string(10) "getDelayed"
+  [18]=>
+  string(15) "getDelayedByKey"
+  [19]=>
+  string(8) "getMulti"
+  [20]=>
+  string(13) "getMultiByKey"
+  [21]=>
+  string(9) "getOption"
+  [22]=>
+  string(13) "getResultCode"
+  [23]=>
+  string(16) "getResultMessage"
+  [24]=>
+  string(14) "getServerByKey"
+  [25]=>
+  string(13) "getServerList"
+  [26]=>
+  string(8) "getStats"
+  [27]=>
+  string(10) "getVersion"
+  [28]=>
+  string(9) "increment"
+  [29]=>
+  string(7) "prepend"
+  [30]=>
+  string(12) "prependByKey"
+  [31]=>
+  string(7) "replace"
+  [32]=>
+  string(12) "replaceByKey"
+  [33]=>
+  string(3) "set"
+  [34]=>
+  string(8) "setByKey"
+  [35]=>
+  string(8) "setMulti"
+  [36]=>
+  string(13) "setMultiByKey"
+  [37]=>
+  string(9) "setOption"
+}

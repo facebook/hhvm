@@ -1,0 +1,47 @@
+EncodingMatch
+object(EncodingMatch)#1 (0) {
+}
+string(98) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:13:"EncodingMatch";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(13) "EncodingMatch"
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "isValid"
+  [2]=>
+  string(11) "getEncoding"
+  [3]=>
+  string(13) "getConfidence"
+  [4]=>
+  string(11) "getLanguage"
+  [5]=>
+  string(7) "getUTF8"
+}
+================
+A_EncodingMatch
+object(A_EncodingMatch)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(100) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:15:"A_EncodingMatch";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(15) "A_EncodingMatch"
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "isValid"
+  [2]=>
+  string(11) "getEncoding"
+  [3]=>
+  string(13) "getConfidence"
+  [4]=>
+  string(11) "getLanguage"
+  [5]=>
+  string(7) "getUTF8"
+}

@@ -1,0 +1,28 @@
+object(stdClass)#1 (1) {
+  ["foo"]=>
+  &int(5)
+}
+object(stdClass)#1 (1) {
+  ["foo"]=>
+  &int(15)
+}
+int(15)
+object(stdClass)#1 (1) {
+  ["foo"]=>
+  &int(14)
+}
+int(14)
+array(1) {
+  ["ref"]=>
+  &string(8) "a string"
+}
+array(1) {
+  ["ref"]=>
+  &string(13) "a string tail"
+}
+string(13) "a string tail"
+array(1) {
+  ["ref"]=>
+  &string(13) "a string taim"
+}
+string(13) "a string taim"

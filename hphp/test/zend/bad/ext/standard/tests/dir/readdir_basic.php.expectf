@@ -1,0 +1,18 @@
+*** Testing readdir() : basic functionality ***
+
+-- Call readdir() with $path argument --
+resource(%d) of type (stream)
+string(1) "."
+string(2) ".."
+string(9) "file1.tmp"
+string(9) "file2.tmp"
+string(9) "file3.tmp"
+
+-- Call readdir() without $path argument --
+resource(%d) of type (stream)
+string(1) "."
+string(2) ".."
+string(9) "file1.tmp"
+string(9) "file2.tmp"
+string(9) "file3.tmp"
+===DONE===

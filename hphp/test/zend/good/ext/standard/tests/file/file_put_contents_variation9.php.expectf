@@ -1,0 +1,12 @@
+*** Testing file_put_contents() : usage variation ***
+int(17)
+int(11)
+Here is some data, more data
+int(17)
+int(11)
+Here is some data, more data
+int(17)
+int(11)
+Here is some data, more data
+
+*** Done ***

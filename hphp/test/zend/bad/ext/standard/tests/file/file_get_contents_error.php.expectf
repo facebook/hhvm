@@ -1,0 +1,15 @@
+*** Testing error conditions ***
+
+-- Testing with  Non-existing file --
+HipHop Warning: %s
+
+-- Testing No.of arguments less than expected --
+HipHop Warning: %s
+
+-- Testing No.of arguments greater than expected --
+HipHop Warning: %s
+
+-- Testing for invalid negative maxlen values --HipHop Warning: %s
+bool(false)
+
+*** Done ***

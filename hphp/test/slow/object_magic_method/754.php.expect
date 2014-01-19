@@ -1,0 +1,5 @@
+Setting 'a' to '1'
+Getting 'a'
+int(1)
+bool(false)
+Unsetting 'a'

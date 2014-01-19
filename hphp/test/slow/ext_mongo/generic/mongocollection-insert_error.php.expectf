@@ -1,0 +1,40 @@
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+array(4) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "baz"
+}
+array(2) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+  ["hello"]=>
+  string(13) "Hello, World!"
+}
+array(2) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+  ["yo"]=>
+  string(2) "ho"
+}
+Some Exception Message is expected

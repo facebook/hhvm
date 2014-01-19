@@ -1,0 +1,38 @@
+*** Testing arsort() : error conditions ***
+
+-- Testing arsort() function with Zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing arsort() function with more than expected no. of arguments --
+
+Sort flag = SORT_REGULAR
+HipHop Warning: %s
+bool(false)
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+
+Sort flag = SORT_STRING
+HipHop Warning: %s
+bool(false)
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+
+Sort flag = SORT_NUMERIC
+HipHop Warning: %s
+bool(false)
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+Done

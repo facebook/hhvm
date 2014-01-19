@@ -1,0 +1,14 @@
+object(Foo)#1 (6) {
+  ["message":protected]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["previous":protected]=>
+  NULL
+  ["file":protected]=>
+  NULL
+  ["line":protected]=>
+  NULL
+  ["trace":protected]=>
+  NULL
+}

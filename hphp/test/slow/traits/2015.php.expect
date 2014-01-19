@@ -1,0 +1,22 @@
+class C1:
+array(0) {
+}
+
+class C2:
+array(0) {
+}
+
+class C3:
+array(1) {
+  ["a1"]=>
+  string(10) "(null)::m1"
+}
+
+class C4:
+array(2) {
+  ["a1"]=>
+  string(10) "(null)::m1"
+  ["a2"]=>
+  string(10) "(null)::m2"
+}
+

@@ -1,0 +1,1160 @@
+{
+    "preamble": "#include <libmemcached\/memcached.h>",
+    "consts": [
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "Memcached",
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "Represents a connection to a set of memcached servers.",
+            "flags": [
+            ],
+            "footer": "\n private:\n  class Impl {\n  public:\n    Impl();\n    ~Impl();\n\n    memcached_st memcached;\n    bool compression;\n    int serializer;\n    int rescode;\n  };\n  typedef boost::shared_ptr<Impl> ImplPtr;\n  ImplPtr m_impl;\n\n  bool handleError(memcached_return status);\n  void toPayload(CVarRef value, std::vector<char> &payload, uint32 &flags);\n  bool toObject(Variant& value, const memcached_result_st &result);\n  memcached_return doCacheCallback(CVarRef callback, CStrRef key,\n                                   Variant& value);\n  bool getMultiImpl(CStrRef server_key, CArrRef keys, bool enableCas,\n                    Array *returnValue);\n  bool fetchImpl(memcached_result_st &result, Array &item);\n  typedef memcached_return_t (*SetOperation)(memcached_st *,\n      const char *, size_t, const char *, size_t, const char *, size_t,\n      time_t, uint32_t);\n  bool setOperationImpl(SetOperation op, CStrRef server_key,\n                        CStrRef key, CVarRef value, int expiration);\n  typedef memcached_return_t (*IncDecOperation)(memcached_st *,\n      const char *, size_t, uint32_t, uint64_t *);\n  Variant incDecOperationImpl(IncDecOperation op, CStrRef key, int64_t offset);\n\n  typedef std::map<std::string, ImplPtr> ImplMap;\n  static DECLARE_THREAD_LOCAL(ImplMap, s_persistentMap);",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "persistent_id",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "add",
+                    "desc": "Memcached::add() is similar to Memcached::set(), but the operation fails if the key already exists on the server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTSTORED if the key already exists."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key under which to store the value."
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "desc": "The value to store."
+                        },
+                        {
+                            "name": "expiration",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The expiration time, defaults to 0. See Expiration Times for more info."
+                        }
+                    ]
+                },
+                {
+                    "name": "addByKey",
+                    "desc": "Memcached::addByKey() is functionally equivalent to Memcached::add(), except that the free-form server_key can be used to map the key to a specific server. This is useful if you need to keep a bunch of related keys on a certain server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTSTORED if the key already exists."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key under which to store the value."
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "desc": "The value to store."
+                        },
+                        {
+                            "name": "expiration",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The expiration time, defaults to 0. See Expiration Times for more info."
+                        }
+                    ]
+                },
+                {
+                    "name": "addServer",
+                    "desc": "Memcached::addServer() adds the specified server to the server pool. No connection is established to the server at this time, but if you are using consistent key distribution option (via Memcached::DISTRIBUTION_CONSISTENT or Memcached::OPT_LIBKETAMA_COMPATIBLE), some of the internal data structures will have to be updated. Thus, if you need to add multiple servers, it is better to use Memcached::addServers() as the update then happens only once.\n\nThe same server may appear multiple times in the server pool, because no duplication checks are made. This is not advisable; instead, use the weight option to increase the selection weighting of this server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "host",
+                            "type": "String",
+                            "desc": "The hostname of the memcache server. If the hostname is invalid, data-related operations will set Memcached::RES_HOST_LOOKUP_FAILURE result code."
+                        },
+                        {
+                            "name": "port",
+                            "type": "Int32",
+                            "desc": "The port on which memcache is running. Usually, this is 11211."
+                        },
+                        {
+                            "name": "weight",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The weight of the server relative to the total weight of all the servers in the pool. This controls the probability of the server being selected for operations. This is used only with consistent distribution option and usually corresponds to the amount of memory available to memcache on that server."
+                        }
+                    ]
+                },
+                {
+                    "name": "addServers",
+                    "desc": "Memcached::addServers() adds servers to the server pool. Each entry in servers is supposed to be an array containing hostname, port, and, optionally, weight of the server. No connection is established to the servers at this time.\n\nThe same server may appear multiple times in the server pool, because no duplication checks are made. This is not advisable; instead, use the weight option to increase the selection weighting of this server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "servers",
+                            "type": "VariantVec",
+                            "desc": "Array of the servers to add to the pool."
+                        }
+                    ]
+                },
+                {
+                    "name": "append",
+                    "desc": "Memcached::append() appends the given value string to the value of an existing item. The reason that value is forced to be a string is that appending mixed types is not well-defined.\n\nIf the Memcached::OPT_COMPRESSION is enabled, the operation will fail and a warning will be issued, because appending compressed data to a value that is potentially already compressed is not possible.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTSTORED if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key under which to store the value."
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "desc": "The string to append."
+                        }
+                    ]
+                },
+                {
+                    "name": "appendByKey",
+                    "desc": "Memcached::appendByKey() is functionally equivalent to Memcached::append(), except that the free-form server_key can be used to map the key to a specific server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTSTORED if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key under which to store the value."
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "desc": "The string to append."
+                        }
+                    ]
+                },
+                {
+                    "name": "cas",
+                    "desc": "Memcached::cas() performs a \"check and set\" operation, so that the item will be stored only if no other client has updated it since it was last fetched by this client. The check is done via the cas_token parameter which is a unique 64-bit value assigned to the existing item by memcache. See the documentation for Memcached::get*() methods for how to obtain this token. Note that the token is represented as a double due to the limitations of PHP's integer space.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_DATA_EXISTS if the item you are trying to store has been modified since you last fetched it."
+                    },
+                    "args": [
+                        {
+                            "name": "cas_token",
+                            "type": "Double",
+                            "desc": "Unique value associated with the existing item. Generated by memcache."
+                        },
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key under which to store the value."
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "desc": "The value to store."
+                        },
+                        {
+                            "name": "expiration",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The expiration time, defaults to 0. See Expiration Times for more info."
+                        }
+                    ]
+                },
+                {
+                    "name": "casByKey",
+                    "desc": "Memcached::casByKey() is functionally equivalent to Memcached::cas(), except that the free-form server_key can be used to map the key to a specific server. This is useful if you need to keep a bunch of related keys on a certain server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_DATA_EXISTS if the item you are trying to store has been modified since you last fetched it."
+                    },
+                    "args": [
+                        {
+                            "name": "cas_token",
+                            "type": "Double",
+                            "desc": "Unique value associated with the existing item. Generated by memcache."
+                        },
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key under which to store the value."
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "desc": "The value to store."
+                        },
+                        {
+                            "name": "expiration",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The expiration time, defaults to 0. See Expiration Times for more info."
+                        }
+                    ]
+                },
+                {
+                    "name": "decrement",
+                    "desc": "Memcached::decrement() decrements a numeric item's value by the specified offset. If the item's value is not numeric, it is treated as if the value were 0. If the operation would decrease the value below 0, the new value will be 0. Memcached::decrement() will fail if the item does not exist.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns item's new value on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTFOUND if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key of the item to decrement."
+                        },
+                        {
+                            "name": "offset",
+                            "type": "Int64",
+                            "value": "1",
+                            "desc": "The amount by which to decrement the item's value."
+                        }
+                    ]
+                },
+                {
+                    "name": "delete",
+                    "desc": "Memcached::delete() deletes the key from the server. The time parameter is the amount of time in seconds (or Unix time until which) the client wishes the server to refuse add and replace commands for this key. For this amount of time, the item is put into a delete queue, which means that it won't possible to retrieve it by the get command, but add and replace command with this key will also fail (the set command will succeed, however). After the time passes, the item is finally deleted from server memory. The parameter time defaults to 0 (which means that the item will be deleted immediately and further storage commands with this key will succeed).",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTFOUND if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key to be deleted."
+                        },
+                        {
+                            "name": "time",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The amount of time the server will wait to delete the item."
+                        }
+                    ]
+                },
+                {
+                    "name": "deleteByKey",
+                    "desc": "Memcached::deleteByKey() is functionally equivalent to Memcached::delete(), except that the free-form server_key can be used to map the key to a specific server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTFOUND if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key to be deleted."
+                        },
+                        {
+                            "name": "time",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The amount of time the server will wait to delete the item."
+                        }
+                    ]
+                },
+                {
+                    "name": "fetch",
+                    "desc": "Memcached::fetch() retrieves the next result from the last request.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the next result or FALSE otherwise. The Memcached::getResultCode() will return Memcached::RES_END if result set is exhausted."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "fetchAll",
+                    "desc": "Memcached::fetchAll() retrieves all the remaining results from the last request.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the results or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "flush",
+                    "desc": "Memcached::flush() invalidates all existing cache items immediately (by default) or after the delay specified. After invalidation none of the items will be returned in response to a retrieval command (unless it's stored again under the same key after Memcached::flush() has invalidated the items). The flush does not actually free all the memory taken up by the existing items; that will happen gradually as new items are stored.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                        {
+                            "name": "delay",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Numer of seconds to wait before invalidating the items."
+                        }
+                    ]
+                },
+                {
+                    "name": "get",
+                    "desc": "Memcached::get() returns the item that was previously stored under the key. If the item is found and cas_token variable is provided, it will contain the CAS token value for the item. See Memcached::cas() for how to use CAS tokens. Read-through caching callback may be specified via cache_cb parameter.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the value stored in the cache or FALSE otherwise. The Memcached::getResultCode() will return Memcached::RES_NOTFOUND if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key of the item to retrieve."
+                        },
+                        {
+                            "name": "cache_cb",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "Read-through caching callback or NULL."
+                        },
+                        {
+                            "name": "cas_token",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "The variable to store the CAS token in.",
+                            "ref": true
+                        }
+                    ]
+                },
+                {
+                    "name": "getByKey",
+                    "desc": "Memcached::getByKey() is functionally equivalent to Memcached::get(), except that the free-form server_key can be used to map the key to a specific server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the value stored in the cache or FALSE otherwise. The Memcached::getResultCode() will return Memcached::RES_NOTFOUND if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key of the item to fetch."
+                        },
+                        {
+                            "name": "cache_cb",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "Read-through caching callback or NULL"
+                        },
+                        {
+                            "name": "cas_token",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "The variable to store the CAS token in.",
+                            "ref": true
+                        }
+                    ]
+                },
+                {
+                    "name": "getDelayed",
+                    "desc": "Memcached::getDelayed() issues a request to memcache for multiple items the keys of which are specified in the keys array. The method does not wait for response and returns right away. When you are ready to collect the items, call either Memcached::fetch() or Memcached::fetchAll(). If with_cas is true, the CAS token values will also be requested.\n\nInstead of fetching the results explicitly, you can specify a result callback via value_cb parameter.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                        {
+                            "name": "keys",
+                            "type": "StringVec",
+                            "desc": "Array of keys to request."
+                        },
+                        {
+                            "name": "with_cas",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "Whether to request CAS token values also."
+                        },
+                        {
+                            "name": "value_cb",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "The result callback or NULL."
+                        }
+                    ]
+                },
+                {
+                    "name": "getDelayedByKey",
+                    "desc": "Memcached::getDelayedByKey() is functionally equivalent to Memcached::getDelayed(), except that the free-form server_key can be used to map the keys to a specific server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "keys",
+                            "type": "StringVec",
+                            "desc": "Array of keys to request."
+                        },
+                        {
+                            "name": "with_cas",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "Whether to request CAS token values also."
+                        },
+                        {
+                            "name": "value_cb",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "The result callback or NULL."
+                        }
+                    ]
+                },
+                {
+                    "name": "getMulti",
+                    "desc": "Memcached::getMulti() is similar to Memcached::get(), but instead of a single key item, it retrieves multiple items the keys of which are specified in the keys array. If cas_tokens variable is provided, it is filled with the CAS token values for the found items.\n\nUnlike Memcached::get() it is not possible to specify a read-through cache callback for Memcached::getMulti(), because the memcache protocol does not provide information on which keys were not found in the multi-key request.\n\nThe flags parameter can be used to specify additional options for Memcached::getMulti(). Currently, the only available option is Memcached::GET_PRESERVE_ORDER that ensures that the keys are returned in the same order as they were requested in.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the array of found items or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                        {
+                            "name": "keys",
+                            "type": "StringVec",
+                            "desc": "Array of keys to retrieve."
+                        },
+                        {
+                            "name": "cas_tokens",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "The variable to store the CAS tokens for the found items.",
+                            "ref": true
+                        },
+                        {
+                            "name": "flags",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The flags for the get operation."
+                        }
+                    ]
+                },
+                {
+                    "name": "getMultiByKey",
+                    "desc": "Memcached::getMultiByKey() is functionally equivalent to Memcached::getMulti(), except that the free-form server_key can be used to map the keys to a specific server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the array of found items or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "keys",
+                            "type": "StringVec",
+                            "desc": "Array of keys to retrieve."
+                        },
+                        {
+                            "name": "cas_tokens",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "The variable to store the CAS tokens for the found items.",
+                            "ref": true
+                        },
+                        {
+                            "name": "flags",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The flags for the get operation."
+                        }
+                    ]
+                },
+                {
+                    "name": "getOption",
+                    "desc": "This method returns the value of a Memcached option. Some options correspond to the ones defined by libmemcached, and some are specific to the extension. See Memcached Constants for more information.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the value of the requested option, or FALSE on error."
+                    },
+                    "args": [
+                        {
+                            "name": "option",
+                            "type": "Int32",
+                            "desc": "One of the Memcached::OPT_* constants."
+                        }
+                    ]
+                },
+                {
+                    "name": "getResultCode",
+                    "desc": "Memcached::getResultCode() returns one of the Memcached::RES_* constants that is the result of the last executed Memcached method.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Result code of the last Memcached operation."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getResultMessage",
+                    "desc": "Memcached::getResultMessage() returns a string that describes the result code of the last executed Memcached method.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Message describing the result of the last Memcached operation."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getServerByKey",
+                    "desc": "Memcached::getServerByKey() returns the server that would be selected by a particular server_key in all the Memcached::*ByKey() operations.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        }
+                    ]
+                },
+                {
+                    "name": "getServerList",
+                    "desc": "Memcached::getServerList() returns the list of all servers that are in its server pool.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "VariantVec",
+                        "desc": "The list of all servers in the server pool."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getStats",
+                    "desc": "Memcached::getStats() returns an array containing the state of all available memcache servers. See \ufffd memcache protocol specification for details on these statistics.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Array of server statistics, one entry per server."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getVersion",
+                    "desc": "Memcached::getVersion() returns an array containing the version info for all available memcache servers.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Array of server versions, one entry per server."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "increment",
+                    "desc": "Memcached::increment() increments a numeric item's value by the specified offset. If the item's value is not numeric, it is treated as if the value were 0. Memcached::increment() will fail if the item does not exist.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns new item's value on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTFOUND if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key of the item to increment."
+                        },
+                        {
+                            "name": "offset",
+                            "type": "Int64",
+                            "value": "1",
+                            "desc": "The amount by which to increment the item's value."
+                        }
+                    ]
+                },
+                {
+                    "name": "prepend",
+                    "desc": "Memcached::prepend() prepends the given value string to the value of an existing item. The reason that value is forced to be a string is that prepending mixed types is not well-defined.\n\nIf the Memcached::OPT_COMPRESSION is enabled, the operation will fail and a warning will be issued, because prepending compressed data to a value that is potentially already compressed is not possible.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTSTORED if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key of the item to prepend the data to."
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "desc": "The string to prepend."
+                        }
+                    ]
+                },
+                {
+                    "name": "prependByKey",
+                    "desc": "Memcached::prependByKey() is functionally equivalent to Memcached::prepend(), except that the free-form server_key can be used to map the key to a specific server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTSTORED if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key of the item to prepend the data to."
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "desc": "The string to prepend."
+                        }
+                    ]
+                },
+                {
+                    "name": "replace",
+                    "desc": "Memcached::replace() is similar to Memcached::set(), but the operation fails if the key does not exist on the server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTSTORED if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key under which to store the value."
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "desc": "The value to store."
+                        },
+                        {
+                            "name": "expiration",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The expiration time, defaults to 0. See Expiration Times for more info."
+                        }
+                    ]
+                },
+                {
+                    "name": "replaceByKey",
+                    "desc": "Memcached::replaceByKey() is functionally equivalent to Memcached::replace(), except that the free-form server_key can be used to map the key to a specific server. This is useful if you need to keep a bunch of related keys on a certain server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. The Memcached::getResultCode() will return Memcached::RES_NOTSTORED if the key does not exist."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key under which to store the value."
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "desc": "The value to store."
+                        },
+                        {
+                            "name": "expiration",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The expiration time, defaults to 0. See Expiration Times for more info."
+                        }
+                    ]
+                },
+                {
+                    "name": "set",
+                    "desc": "Memcached::set() stores the value on a memcache server under the specified key. The expiration parameter can be used to control when the value is considered expired.\n\nThe value can be any valid PHP type except for resources, because those cannot be represented in a serialized form. If the Memcached::OPT_COMPRESSION option is turned on, the serialized value will also be compressed before storage.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key under which to store the value."
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "desc": "The value to store."
+                        },
+                        {
+                            "name": "expiration",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The expiration time, defaults to 0. See Expiration Times for more info."
+                        }
+                    ]
+                },
+                {
+                    "name": "setByKey",
+                    "desc": "Memcached::setByKey() is functionally equivalent to Memcached::set(), except that the free-form server_key can be used to map the key to a specific server. This is useful if you need to keep a bunch of related keys on a certain server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key under which to store the value."
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "desc": "The value to store."
+                        },
+                        {
+                            "name": "expiration",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The expiration time, defaults to 0. See Expiration Times for more info."
+                        }
+                    ]
+                },
+                {
+                    "name": "setMulti",
+                    "desc": "Memcached::setMulti() is similar to Memcached::set(), but instead of a single key\/value item, it works on multiple items specified in items. The expiration time applies to all the items at once.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                        {
+                            "name": "items",
+                            "type": "VariantMap",
+                            "desc": "An array of key\/value pairs to store on the server."
+                        },
+                        {
+                            "name": "expiration",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The expiration time, defaults to 0. See Expiration Times for more info."
+                        }
+                    ]
+                },
+                {
+                    "name": "setMultiByKey",
+                    "desc": "Memcached::setMultiByKey() is functionally equivalent to Memcached::setMulti(), except that the free-form server_key can be used to map the keys from items to a specific server. This is useful if you need to keep a bunch of related keys on a certain server.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. Use Memcached::getResultCode() if necessary."
+                    },
+                    "args": [
+                        {
+                            "name": "server_key",
+                            "type": "String",
+                            "desc": "The key identifying the server to store the value on."
+                        },
+                        {
+                            "name": "items",
+                            "type": "VariantMap",
+                            "desc": "An array of key\/value pairs to store on the server."
+                        },
+                        {
+                            "name": "expiration",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "The expiration time, defaults to 0. See Expiration Times for more info."
+                        }
+                    ]
+                },
+                {
+                    "name": "setOption",
+                    "desc": "This method sets the value of a Memcached option. Some options correspond to the ones defined by libmemcached, and some are specific to the extension. See Memcached Constants for more information.\n\nThe options listed below require values specified via constants.\n\nMemcached::OPT_HASH requires Memcached::HASH_* values.\n\nMemcached::OPT_DISTRIBUTION requires Memcached::DISTRIBUTION_* values.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "option",
+                            "type": "Int32"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+                {
+                    "name": "OPT_COMPRESSION",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_SERIALIZER",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SERIALIZER_PHP",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SERIALIZER_IGBINARY",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SERIALIZER_JSON",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_PREFIX_KEY",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_HASH",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HASH_DEFAULT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HASH_MD5",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HASH_CRC",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HASH_FNV1_64",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HASH_FNV1A_64",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HASH_FNV1_32",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HASH_FNV1A_32",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HASH_HSIEH",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HASH_MURMUR",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_DISTRIBUTION",
+                    "type": "Int64"
+                },
+                {
+                    "name": "DISTRIBUTION_MODULA",
+                    "type": "Int64"
+                },
+                {
+                    "name": "DISTRIBUTION_CONSISTENT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_LIBKETAMA_COMPATIBLE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_BUFFER_WRITES",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_BINARY_PROTOCOL",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_NO_BLOCK",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_TCP_NODELAY",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_SOCKET_SEND_SIZE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_SOCKET_RECV_SIZE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_CONNECT_TIMEOUT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_RETRY_TIMEOUT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_SEND_TIMEOUT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_RECV_TIMEOUT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_POLL_TIMEOUT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_CACHE_LOOKUPS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OPT_SERVER_FAILURE_LIMIT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HAVE_IGBINARY",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "HAVE_JSON",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "GET_PRESERVE_ORDER",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_SUCCESS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_FAILURE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_HOST_LOOKUP_FAILURE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_UNKNOWN_READ_FAILURE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_PROTOCOL_ERROR",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_CLIENT_ERROR",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_SERVER_ERROR",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_WRITE_FAILURE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_DATA_EXISTS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_NOTSTORED",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_NOTFOUND",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_PARTIAL_READ",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_SOME_ERRORS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_NO_SERVERS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_END",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_ERRNO",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_BUFFERED",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_TIMEOUT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_BAD_KEY_PROVIDED",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_CONNECTION_SOCKET_CREATE_FAILURE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_PAYLOAD_FAILURE",
+                    "type": "Int64"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,2 @@
+Strict Standards: Static function test::foo() should not be abstract in %s on line %d
+HipHop Fatal error: %s

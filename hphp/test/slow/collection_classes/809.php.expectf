@@ -1,0 +1,14 @@
+HipHop Notice: Unable to unserialize: [K:8:"stdClass":2:{
+i:0;
+i:0;
+i:1;
+i:1;
+}
+]. stdClass is not a collection class. in %s/test/slow/collection_classes/809.php on line 10
+bool(false)
+HipHop Notice: Unable to unserialize: [O:9:"HH\Vector":1:{
+s:3:"foo";
+i:7;
+}
+]. HH\Vector does not support the 'O' serialization format. in %s/test/slow/collection_classes/809.php on line 16
+bool(false)

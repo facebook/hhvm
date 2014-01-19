@@ -1,0 +1,14 @@
+*** Testing vprintf() : error conditions ***
+
+-- Testing vprintf() function with Zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing vprintf() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- testing vprintf() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+===DONE===

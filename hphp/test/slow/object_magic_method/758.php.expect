@@ -1,0 +1,48 @@
+sets
+bool(true)
+NULL
+float(3.2)
+array(1) {
+  [0]=>
+  int(3)
+}
+object(X)#1 (0) {
+}
+string(2) "57"
+string(3) "6.5"
+gets
+bool(true)
+NULL
+float(3.2)
+array(1) {
+  [0]=>
+  int(3)
+}
+object(X)#1 (0) {
+}
+string(2) "57"
+string(3) "6.5"
+unsets
+bool(true)
+NULL
+float(3.2)
+array(1) {
+  [0]=>
+  int(3)
+}
+object(X)#1 (0) {
+}
+string(2) "57"
+string(3) "6.5"
+issets
+bool(true)
+NULL
+float(3.2)
+array(1) {
+  [0]=>
+  int(3)
+}
+object(X)#1 (0) {
+}
+string(2) "57"
+string(3) "6.5"

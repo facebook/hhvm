@@ -1,0 +1,670 @@
+{
+    "preamble": "#include <runtime\/ext\/ext_simplexml_include.h>",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "simplexml_load_string",
+            "desc": "Takes a well-formed XML string and returns it as an object.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an object of class SimpleXMLElement with properties containing the data held within the xml document. On errors, it will return FALSE."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "A well-formed XML string"
+                },
+                {
+                    "name": "class_name",
+                    "type": "String",
+                    "value": "\"SimpleXMLElement\"",
+                    "desc": "You may use this optional parameter so that simplexml_load_string() will return an object of the specified class. That class should extend the SimpleXMLElement class."
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Since PHP 5.1.0 and Libxml 2.6.0, you may also use the options parameter to specify additional Libxml parameters."
+                },
+                {
+                    "name": "ns",
+                    "type": "String",
+                    "value": "\"\""
+                },
+                {
+                    "name": "is_prefix",
+                    "type": "Boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        {
+            "name": "simplexml_load_file",
+            "desc": "Convert the well-formed XML document in the given file to an object.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an object of class SimpleXMLElement with properties containing the data held within the XML document. On errors, it will return FALSE."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "Path to the XML file\n\nLibxml 2 unescapes the URI, so if you want to pass e.g. b&c as the URI parameter a, you have to call simplexml_load_file(rawurlencode('http:\/\/example.com\/?a=' . urlencode('b&c'))). Since PHP 5.1.0 you don't need to do this because PHP will do it for you."
+                },
+                {
+                    "name": "class_name",
+                    "type": "String",
+                    "value": "\"SimpleXMLElement\"",
+                    "desc": "You may use this optional parameter so that simplexml_load_file() will return an object of the specified class. That class should extend the SimpleXMLElement class."
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Since PHP 5.1.0 and Libxml 2.6.0, you may also use the options parameter to specify additional Libxml parameters."
+                },
+                {
+                    "name": "ns",
+                    "type": "String",
+                    "value": "\"\""
+                },
+                {
+                    "name": "is_prefix",
+                    "type": "Boolean",
+                    "value": "false"
+                }
+            ]
+        },
+        {
+            "name": "simplexml_import_dom",
+            "desc": "This function takes a node of a DOM document and makes it into a SimpleXML node. This new object can then be used as a native SimpleXML element.",
+            "flags": [
+                "ZendParamModeNull"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a SimpleXMLElement or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "node",
+                    "type": "Object",
+                    "desc": "A DOM Element node"
+                },
+                {
+                    "name": "class_name",
+                    "type": "String",
+                    "value": "\"SimpleXMLElement\"",
+                    "desc": "You may use this optional parameter so that simplexml_load_file() will return an object of the specified class. That class should extend the SimpleXMLElement class."
+                }
+            ]
+        },
+        {
+            "name": "libxml_get_errors",
+            "desc": "Retrieve array of errors.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array with LibXMLError objects if there are any errors in the buffer, or an empty array otherwise."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "libxml_get_last_error",
+            "desc": "Retrieve last error from libxml.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a LibXMLError object if there is any error in the buffer, FALSE otherwise."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "libxml_clear_errors",
+            "desc": "libxml_clear_errors() clears the libxml error buffer.",
+            "flags": [
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "libxml_use_internal_errors",
+            "desc": "libxml_use_internal_errors() allows you to disable standard libxml errors and enable user error handling.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "This function returns the previous value of use_errors."
+            },
+            "args": [
+                {
+                    "name": "use_errors",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "Whether to enable user error handling."
+                }
+            ]
+        },
+        {
+            "name": "libxml_disable_entity_loader",
+            "desc": "Disable\/enable the ability to load external entities.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns the previous value."
+            },
+            "args": [
+                {
+                    "name": "disable",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Disable (TRUE) or enable (FALSE) libxml extensions (such as DOM, XMLWriter and XMLReader) to load external entities."
+                }
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "SimpleXMLElement",
+            "bases": [
+                "Sweepable"
+            ],
+            "ifaces": [
+                "ArrayAccess",
+                "IteratorAggregate",
+                "Countable"
+            ],
+            "desc": "Represents an element in an XML document.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\n public:\n  Object m_doc;\n  xmlNodePtr m_node;\n  Variant m_children;\n  Variant m_attributes;\n  bool m_is_text;\n  bool m_free_text;\n  bool m_is_attribute;\n  bool m_is_children;\n  bool m_is_property;\n  virtual bool o_toBoolean() const;\n  virtual int64_t o_toInt64() const;\n  virtual double o_toDouble() const;\n  virtual Array o_toArray() const;\n private:\n  xmlXPathContextPtr m_xpath;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "data",
+                            "type": "String"
+                        },
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0"
+                        },
+                        {
+                            "name": "data_is_url",
+                            "type": "Boolean",
+                            "value": "false"
+                        },
+                        {
+                            "name": "ns",
+                            "type": "String",
+                            "value": "\"\""
+                        },
+                        {
+                            "name": "is_prefix",
+                            "type": "Boolean",
+                            "value": "false"
+                        }
+                    ]
+                },
+                {
+                    "name": "offsetExists",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "offsetGet",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "offsetSet",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "newvalue",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "offsetUnset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "desc": "This method counts the number of children of an element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns the number of elements of an element."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "xpath",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns an array of SimpleXMLElement objects or FALSE in case of an error."
+                    },
+                    "args": [
+                        {
+                            "name": "path",
+                            "type": "String",
+                            "desc": "An XPath path"
+                        }
+                    ]
+                },
+                {
+                    "name": "registerXPathNamespace",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "prefix",
+                            "type": "String"
+                        },
+                        {
+                            "name": "ns",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "asXML",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "value": "\"\""
+                        }
+                    ]
+                },
+                {
+                    "name": "getNamespaces",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "StringMap"
+                    },
+                    "args": [
+                        {
+                            "name": "recursive",
+                            "type": "Boolean",
+                            "value": "false"
+                        }
+                    ]
+                },
+                {
+                    "name": "getDocNamespaces",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "StringMap"
+                    },
+                    "args": [
+                        {
+                            "name": "recursive",
+                            "type": "Boolean",
+                            "value": "false"
+                        }
+                    ]
+                },
+                {
+                    "name": "children",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "Returns a SimpleXMLElement element, whether the node has children or not."
+                    },
+                    "args": [
+                        {
+                            "name": "ns",
+                            "type": "String",
+                            "value": "\"\"",
+                            "desc": "An XML namespace."
+                        },
+                        {
+                            "name": "is_prefix",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "If is_prefix is TRUE, ns will be regarded as a prefix. If FALSE, ns will be regarded as a namespace URL."
+                        }
+                    ]
+                },
+                {
+                    "name": "getName",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "attributes",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "ns",
+                            "type": "String",
+                            "value": "\"\"",
+                            "desc": "An optional namespace for the retrieved attributes"
+                        },
+                        {
+                            "name": "is_prefix",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "Default to FALSE"
+                        }
+                    ]
+                },
+                {
+                    "name": "addChild",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "qname",
+                            "type": "String"
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "ns",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "addAttribute",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "qname",
+                            "type": "String"
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "ns",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "LibXMLError",
+            "desc": null,
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SimpleXMLElementIterator",
+            "ifaces": [
+                "Iterator"
+            ],
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "\npublic:\n  void reset_iterator(c_SimpleXMLElement *parent);\n\n  c_SimpleXMLElement *m_parent;\n  ArrayIter *m_iter1;\n  ArrayIter *m_iter2;\n  Object     m_temp;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

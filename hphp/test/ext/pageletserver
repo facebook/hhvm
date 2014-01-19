@@ -1,0 +1,11 @@
+<?php
+
+echo "pagelet postparam: ";
+echo $HTTP_RAW_POST_DATA;
+echo "pagelet getparam: ";
+echo $_GET["getparam"];
+echo "pagelet header: ";
+echo $_SERVER["HTTP_MYHEADER"];
+header("ResponseHeader: okay");
+
+sleep(1); // give status check and timeout time to happen

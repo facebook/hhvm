@@ -1,0 +1,2 @@
+== Testing curl_error with a fake URL ==
+string(%d) "%sfakeURL%S"

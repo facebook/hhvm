@@ -1,0 +1,18 @@
+--- getShortName("\foo\bar\f") ---
+string(1) "f"
+
+--- getNamespaceName("\foo\bar\f") ---
+string(7) "foo\bar"
+
+--- getShortName("\foo\bar\Test::test") ---
+string(4) "test"
+
+--- getNamespaceName("\foo\bar\Test::test") ---
+string(0) ""
+
+--- getShortName("strlen") ---
+string(6) "strlen"
+
+--- getNamespaceName("strlen") ---
+string(0) ""
+

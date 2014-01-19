@@ -1,0 +1,28 @@
+constructing
+rewinding
+current: 1
+valid: true
+current: 1
+key: a
+string(1) "f"
+string(1) "g"
+a
+next: 2
+current: 2
+valid: true
+current: 2
+key: b
+string(1) "f"
+string(1) "g"
+b
+next: 3
+current: 3
+valid: true
+current: 3
+key: c
+string(1) "f"
+string(1) "g"
+c
+next: 
+current: 
+valid: false

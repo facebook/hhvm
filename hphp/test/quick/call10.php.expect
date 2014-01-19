@@ -1,0 +1,163 @@
+string(1) "a"
+string(1) "b"
+
+string(3) "foo"
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+
+string(1) "a"
+string(1) "b"
+
+string(3) "foo"
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+
+C2::__call
+bool(true)
+string(1) "a"
+string(1) "b"
+
+C2::__call
+bool(true)
+string(3) "foo"
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+
+C2::__call
+bool(true)
+string(1) "a"
+string(1) "b"
+
+C2::__call
+bool(true)
+string(3) "foo"
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+
+C2::__call
+bool(true)
+string(1) "a"
+string(1) "b"
+
+C2::__call
+bool(true)
+string(3) "foo"
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+
+C2::__call
+bool(true)
+string(1) "a"
+string(1) "b"
+
+C2::__call
+bool(true)
+string(3) "foo"
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+
+C2::__call
+bool(true)
+string(1) "a"
+string(1) "b"
+
+C2::__call
+bool(true)
+string(3) "foo"
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+
+string(1) "a"
+string(1) "b"
+
+string(3) "foo"
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+
+string(1) "a"
+string(1) "b"
+
+string(3) "foo"
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+
+A4::foo
+A4::foo
+string(3) "foo"
+array(0) {
+}
+string(3) "foo"
+array(0) {
+}

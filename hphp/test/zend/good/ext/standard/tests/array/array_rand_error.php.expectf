@@ -1,0 +1,10 @@
+*** Testing array_rand() : error conditions ***
+
+-- Testing array_rand() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing array_rand() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

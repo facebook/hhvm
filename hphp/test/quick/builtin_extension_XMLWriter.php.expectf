@@ -1,0 +1,195 @@
+XMLWriter
+object(XMLWriter)#1 (0) {
+}
+string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"XMLWriter";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(9) "XMLWriter"
+}
+array(43) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "openMemory"
+  [2]=>
+  string(7) "openURI"
+  [3]=>
+  string(15) "setIndentString"
+  [4]=>
+  string(9) "setIndent"
+  [5]=>
+  string(13) "startDocument"
+  [6]=>
+  string(12) "startElement"
+  [7]=>
+  string(14) "startElementNS"
+  [8]=>
+  string(14) "writeElementNS"
+  [9]=>
+  string(12) "writeElement"
+  [10]=>
+  string(10) "endElement"
+  [11]=>
+  string(14) "fullEndElement"
+  [12]=>
+  string(16) "startAttributens"
+  [13]=>
+  string(14) "startAttribute"
+  [14]=>
+  string(16) "writeAttributeNS"
+  [15]=>
+  string(14) "writeAttribute"
+  [16]=>
+  string(12) "endAttribute"
+  [17]=>
+  string(10) "startCData"
+  [18]=>
+  string(10) "writeCData"
+  [19]=>
+  string(8) "endCData"
+  [20]=>
+  string(12) "startComment"
+  [21]=>
+  string(12) "writeComment"
+  [22]=>
+  string(10) "endComment"
+  [23]=>
+  string(11) "endDocument"
+  [24]=>
+  string(7) "startPI"
+  [25]=>
+  string(7) "writePI"
+  [26]=>
+  string(5) "endPI"
+  [27]=>
+  string(4) "text"
+  [28]=>
+  string(8) "writeRaw"
+  [29]=>
+  string(8) "startDTD"
+  [30]=>
+  string(8) "writeDTD"
+  [31]=>
+  string(15) "startDTDElement"
+  [32]=>
+  string(15) "writeDTDElement"
+  [33]=>
+  string(13) "endDTDElement"
+  [34]=>
+  string(15) "startDTDAttlist"
+  [35]=>
+  string(15) "writeDTDAttlist"
+  [36]=>
+  string(13) "endDTDAttlist"
+  [37]=>
+  string(14) "startDTDEntity"
+  [38]=>
+  string(14) "writeDTDEntity"
+  [39]=>
+  string(12) "endDTDEntity"
+  [40]=>
+  string(6) "endDTD"
+  [41]=>
+  string(5) "flush"
+  [42]=>
+  string(12) "outputMemory"
+}
+================
+A_XMLWriter
+object(A_XMLWriter)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(96) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:11:"A_XMLWriter";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(11) "A_XMLWriter"
+}
+array(43) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "openMemory"
+  [2]=>
+  string(7) "openURI"
+  [3]=>
+  string(15) "setIndentString"
+  [4]=>
+  string(9) "setIndent"
+  [5]=>
+  string(13) "startDocument"
+  [6]=>
+  string(12) "startElement"
+  [7]=>
+  string(14) "startElementNS"
+  [8]=>
+  string(14) "writeElementNS"
+  [9]=>
+  string(12) "writeElement"
+  [10]=>
+  string(10) "endElement"
+  [11]=>
+  string(14) "fullEndElement"
+  [12]=>
+  string(16) "startAttributens"
+  [13]=>
+  string(14) "startAttribute"
+  [14]=>
+  string(16) "writeAttributeNS"
+  [15]=>
+  string(14) "writeAttribute"
+  [16]=>
+  string(12) "endAttribute"
+  [17]=>
+  string(10) "startCData"
+  [18]=>
+  string(10) "writeCData"
+  [19]=>
+  string(8) "endCData"
+  [20]=>
+  string(12) "startComment"
+  [21]=>
+  string(12) "writeComment"
+  [22]=>
+  string(10) "endComment"
+  [23]=>
+  string(11) "endDocument"
+  [24]=>
+  string(7) "startPI"
+  [25]=>
+  string(7) "writePI"
+  [26]=>
+  string(5) "endPI"
+  [27]=>
+  string(4) "text"
+  [28]=>
+  string(8) "writeRaw"
+  [29]=>
+  string(8) "startDTD"
+  [30]=>
+  string(8) "writeDTD"
+  [31]=>
+  string(15) "startDTDElement"
+  [32]=>
+  string(15) "writeDTDElement"
+  [33]=>
+  string(13) "endDTDElement"
+  [34]=>
+  string(15) "startDTDAttlist"
+  [35]=>
+  string(15) "writeDTDAttlist"
+  [36]=>
+  string(13) "endDTDAttlist"
+  [37]=>
+  string(14) "startDTDEntity"
+  [38]=>
+  string(14) "writeDTDEntity"
+  [39]=>
+  string(12) "endDTDEntity"
+  [40]=>
+  string(6) "endDTD"
+  [41]=>
+  string(5) "flush"
+  [42]=>
+  string(12) "outputMemory"
+}

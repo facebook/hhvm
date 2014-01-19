@@ -1,0 +1,16 @@
+array(7) {
+  [0]=>
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/."
+  [1]=>
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/.."
+  [2]=>
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/dir"
+  [3]=>
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/empty"
+  [4]=>
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/file"
+  [5]=>
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/fix_mtimes.inc"
+  [6]=>
+  string(%d) "%s/test/slow/filesystem_iterator/../../sample_dir/symlink"
+}

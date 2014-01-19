@@ -1,0 +1,21 @@
+object(ArrayObject)#1 (3) {
+  ["property"]=>
+  string(11) "prop:public"
+  ["4"]=>
+  string(4) "four"
+  ["group"]=>
+  array(2) {
+    [0]=>
+    string(2) "g1"
+    [1]=>
+    string(2) "g2"
+  }
+}
+object(ArrayObject)#3 (3) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  string(3) "one"
+  [2]=>
+  string(4) "last"
+}

@@ -1,0 +1,27 @@
+array(1) {
+  ["a"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [2]=>
+      int(3)
+    }
+  }
+}
+HipHop Warning: Cannot use a scalar value as an array in %s on line 7
+int(4)
+HipHop Warning: Cannot use a scalar value as an array in %s on line 11
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(1) {
+  [0]=>
+  string(1) "x"
+}
+HipHop Warning: Illegal string offset: -1 in %s on line 19
+string(7) "abc e g"
+int(1)
+int(1)
+HipHop Warning: Cannot use a scalar value as an array in %s on line 26
+NULL

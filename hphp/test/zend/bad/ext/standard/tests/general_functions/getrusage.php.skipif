@@ -1,0 +1,1 @@
+<?php if (!function_exists("getrusage")) print "skip"; ?>

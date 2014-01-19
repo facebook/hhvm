@@ -1,0 +1,1143 @@
+{
+    "preamble": "#include <libmemcached\/memcached.h>",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "memcache_connect",
+            "desc": "Memcache::connect() establishes a connection to the memcached server. The connection, which was opened using Memcache::connect() will be automatically closed at the end of script execution. Also you can close it with Memcache::close(). Also you can use memcache_connect() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Object",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "host",
+                    "type": "String",
+                    "desc": "Point to the host where memcached is listening for connections. This parameter may also specify other transports like unix:\/\/\/path\/to\/memcached.sock to use UNIX domain sockets, in this case port must also be set to 0."
+                },
+                {
+                    "name": "port",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Point to the port where memcached is listening for connections. Set this parameter to 0 when using UNIX domain sockets."
+                },
+                {
+                    "name": "timeout",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Value in seconds which will be used for connecting to the daemon. Think twice before changing the default value of 1 second - you can lose all the advantages of caching if your connection is too slow."
+                },
+                {
+                    "name": "timeoutms",
+                    "type": "Int32",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "memcache_pconnect",
+            "desc": "Memcache::pconnect() is similar to Memcache::connect() with the difference, that the connection it establishes is persistent. This connection is not closed after the end of script execution and by Memcache::close() function. Also you can use memcache_pconnect() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Object",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "host",
+                    "type": "String",
+                    "desc": "Point to the host where memcached is listening for connections. This parameter may also specify other transports like unix:\/\/\/path\/to\/memcached.sock to use UNIX domain sockets, in this case port must also be set to 0."
+                },
+                {
+                    "name": "port",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Point to the port where memcached is listening for connections. Set this parameter to 0 when using UNIX domain sockets."
+                },
+                {
+                    "name": "timeout",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Value in seconds which will be used for connecting to the daemon. Think twice before changing the default value of 1 second - you can lose all the advantages of caching if your connection is too slow."
+                },
+                {
+                    "name": "timeoutms",
+                    "type": "Int32",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "memcache_add",
+            "desc": "Memcache::add() stores variable var with key only if such key doesn't exist at the server yet. Also you can use memcache_add() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure. Returns FALSE if such key already exist. For the rest Memcache::add() behaves similarly to Memcache::set()."
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object",
+                    "desc": "The key that will be associated with the item."
+                },
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The variable to store. Strings and integers are stored as is, other types are stored serialized."
+                },
+                {
+                    "name": "var",
+                    "type": "Variant",
+                    "desc": "Use MEMCACHE_COMPRESSED to store the item compressed (uses zlib)."
+                },
+                {
+                    "name": "flag",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Expiration time of the item. If it's equal to zero, the item will never expire. You can also use Unix timestamp or a number of seconds starting from current time, but in the latter case the number of seconds may not exceed 2592000 (30 days)."
+                },
+                {
+                    "name": "expire",
+                    "type": "Int32",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "memcache_set",
+            "desc": "Memcache::set() stores an item var with key on the memcached server. Parameter expire is expiration time in seconds. If it's 0, the item never expires (but memcached server doesn't guarantee this item to be stored all the time, it could be deleted from the cache to make place for other items). You can use MEMCACHE_COMPRESSED constant as flag value if you want to use on-the-fly compression (uses zlib).\n\nRemember that resource variables (i.e. file and connection descriptors) cannot be stored in the cache, because they cannot be adequately represented in serialized state. Also you can use memcache_set() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object",
+                    "desc": "The key that will be associated with the item."
+                },
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The variable to store. Strings and integers are stored as is, other types are stored serialized."
+                },
+                {
+                    "name": "var",
+                    "type": "Variant",
+                    "desc": "Use MEMCACHE_COMPRESSED to store the item compressed (uses zlib)."
+                },
+                {
+                    "name": "flag",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Expiration time of the item. If it's equal to zero, the item will never expire. You can also use Unix timestamp or a number of seconds starting from current time, but in the latter case the number of seconds may not exceed 2592000 (30 days)."
+                },
+                {
+                    "name": "expire",
+                    "type": "Int32",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "memcache_replace",
+            "desc": "Memcache::replace() should be used to replace value of existing item with key. In case if item with such key doesn't exists, Memcache::replace() returns FALSE. For the rest Memcache::replace() behaves similarly to Memcache::set(). Also you can use memcache_replace() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object",
+                    "desc": "The key that will be associated with the item."
+                },
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The variable to store. Strings and integers are stored as is, other types are stored serialized."
+                },
+                {
+                    "name": "var",
+                    "type": "Variant",
+                    "desc": "Use MEMCACHE_COMPRESSED to store the item compressed (uses zlib)."
+                },
+                {
+                    "name": "flag",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Expiration time of the item. If it's equal to zero, the item will never expire. You can also use Unix timestamp or a number of seconds starting from current time, but in the latter case the number of seconds may not exceed 2592000 (30 days)."
+                },
+                {
+                    "name": "expire",
+                    "type": "Int32",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "memcache_get",
+            "desc": "Memcache::get() returns previously stored data if an item with such key exists on the server at this moment.\n\nYou can pass array of keys to Memcache::get() to get array of values. The result array will contain only found key-value pairs.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the string associated with the key or FALSE on failure or if such key was not found."
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object",
+                    "desc": "The key or array of keys to fetch."
+                },
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "If present, flags fetched along with the values will be written to this parameter. These flags are the same as the ones given to for example Memcache::set(). The lowest byte of the int is reserved for pecl\/memcache internal usage (e.g. to indicate compression and serialization status)."
+                },
+                {
+                    "name": "flags",
+                    "type": "Variant",
+                    "value": "null",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "memcache_delete",
+            "desc": "Memcache::delete() deletes item with the key. If parameter timeout is specified, the item will expire after timeout seconds. Also you can use memcache_delete() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object",
+                    "desc": "The key associated with the item to delete."
+                },
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "Execution time of the item. If it's equal to zero, the item will be deleted right away whereas if you set it to 30, the item will be deleted in 30 seconds."
+                },
+                {
+                    "name": "expire",
+                    "type": "Int32",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "memcache_increment",
+            "desc": "Memcache::increment() increments value of an item by the specified value. If item specified by key was not numeric and cannot be converted to a number, it will change its value to value. Memcache::increment() does not create an item if it doesn't already exist.\n\nDo not use Memcache::increment() with items that have been stored compressed because subsequent calls to Memcache::get() will fail. Also you can use memcache_increment() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns new items value on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object",
+                    "desc": "Key of the item to increment."
+                },
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "Increment the item by value."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "value": "1"
+                }
+            ]
+        },
+        {
+            "name": "memcache_decrement",
+            "desc": "Memcache::decrement() decrements value of the item by value. Similarly to Memcache::increment(), current value of the item is being converted to numerical and after that value is substracted.\n\nNew item's value will not be less than zero.\n\nDo not use Memcache::decrement() with item, which was stored compressed, because consequent call to Memcache::get() will fail. Memcache::decrement() does not create an item if it didn't exist. Also you can use memcache_decrement() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns item's new value on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object",
+                    "desc": "Key of the item do decrement."
+                },
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "Decrement the item by value."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "value": "1"
+                }
+            ]
+        },
+        {
+            "name": "memcache_close",
+            "desc": "Memcache::close() closes connection to memcached server. This function doesn't close persistent connections, which are closed only during web-server shutdown\/restart. Also you can use memcache_close() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object"
+                }
+            ]
+        },
+        {
+            "name": "memcache_get_version",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object"
+                }
+            ]
+        },
+        {
+            "name": "memcache_flush",
+            "desc": "Memcache::flush() immediately invalidates all existing items. Memcache::flush() doesn't actually free any resources, it only marks all the items as expired, so occupied memory will be overwritten by new items. Also you can use memcache_flush() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object"
+                },
+                {
+                    "name": "timestamp",
+                    "type": "Int32",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "memcache_setoptimeout",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object"
+                },
+                {
+                    "name": "timeoutms",
+                    "type": "Int32"
+                }
+            ]
+        },
+        {
+            "name": "memcache_get_server_status",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object"
+                },
+                {
+                    "name": "host",
+                    "type": "String"
+                },
+                {
+                    "name": "port",
+                    "type": "Int32",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "memcache_set_compress_threshold",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object"
+                },
+                {
+                    "name": "threshold",
+                    "type": "Int32"
+                },
+                {
+                    "name": "min_savings",
+                    "type": "Double",
+                    "value": "0.2"
+                }
+            ]
+        },
+        {
+            "name": "memcache_get_stats",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap"
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object"
+                },
+                {
+                    "name": "type",
+                    "type": "String",
+                    "value": "null_string"
+                },
+                {
+                    "name": "slabid",
+                    "type": "Int32",
+                    "value": "0"
+                },
+                {
+                    "name": "limit",
+                    "type": "Int32",
+                    "value": "100"
+                }
+            ]
+        },
+        {
+            "name": "memcache_get_extended_stats",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap"
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object"
+                },
+                {
+                    "name": "type",
+                    "type": "String",
+                    "value": "null_string"
+                },
+                {
+                    "name": "slabid",
+                    "type": "Int32",
+                    "value": "0"
+                },
+                {
+                    "name": "limit",
+                    "type": "Int32",
+                    "value": "100"
+                }
+            ]
+        },
+        {
+            "name": "memcache_set_server_params",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object"
+                },
+                {
+                    "name": "host",
+                    "type": "String"
+                },
+                {
+                    "name": "port",
+                    "type": "Int32",
+                    "value": "11211"
+                },
+                {
+                    "name": "timeout",
+                    "type": "Int32",
+                    "value": "0"
+                },
+                {
+                    "name": "retry_interval",
+                    "type": "Int32",
+                    "value": "0"
+                },
+                {
+                    "name": "status",
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                {
+                    "name": "failure_callback",
+                    "type": "Variant",
+                    "value": "null_variant"
+                }
+            ]
+        },
+        {
+            "name": "memcache_add_server",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "memcache",
+                    "type": "Object"
+                },
+                {
+                    "name": "host",
+                    "type": "String"
+                },
+                {
+                    "name": "port",
+                    "type": "Int32",
+                    "value": "11211"
+                },
+                {
+                    "name": "persistent",
+                    "type": "Boolean",
+                    "value": "false"
+                },
+                {
+                    "name": "weight",
+                    "type": "Int32",
+                    "value": "0"
+                },
+                {
+                    "name": "timeout",
+                    "type": "Int32",
+                    "value": "0"
+                },
+                {
+                    "name": "retry_interval",
+                    "type": "Int32",
+                    "value": "0"
+                },
+                {
+                    "name": "status",
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                {
+                    "name": "failure_callback",
+                    "type": "Variant",
+                    "value": "null_variant"
+                },
+                {
+                    "name": "timeoutms",
+                    "type": "Int32",
+                    "value": "0"
+                }
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "Memcache",
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "Represents a connection to a set of memcache servers.",
+            "flags": [
+            ],
+            "footer": "\n private:\n  memcached_st m_memcache;\n  int m_compress_threshold;\n  double m_min_compress_savings;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "connect",
+                    "desc": "Memcache::connect() establishes a connection to the memcached server. The connection, which was opened using Memcache::connect() will be automatically closed at the end of script execution. Also you can close it with Memcache::close(). Also you can use memcache_connect() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "host",
+                            "type": "String",
+                            "desc": "Point to the host where memcached is listening for connections. This parameter may also specify other transports like unix:\/\/\/path\/to\/memcached.sock to use UNIX domain sockets, in this case port must also be set to 0."
+                        },
+                        {
+                            "name": "port",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Point to the port where memcached is listening for connections. Set this parameter to 0 when using UNIX domain sockets."
+                        },
+                        {
+                            "name": "timeout",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Value in seconds which will be used for connecting to the daemon. Think twice before changing the default value of 1 second - you can lose all the advantages of caching if your connection is too slow."
+                        },
+                        {
+                            "name": "timeoutms",
+                            "type": "Int32",
+                            "value": "0"
+                        }
+                    ]
+                },
+                {
+                    "name": "pconnect",
+                    "desc": "Memcache::pconnect() is similar to Memcache::connect() with the difference, that the connection it establishes is persistent. This connection is not closed after the end of script execution and by Memcache::close() function. Also you can use memcache_pconnect() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "host",
+                            "type": "String",
+                            "desc": "Point to the host where memcached is listening for connections. This parameter may also specify other transports like unix:\/\/\/path\/to\/memcached.sock to use UNIX domain sockets, in this case port must also be set to 0."
+                        },
+                        {
+                            "name": "port",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Point to the port where memcached is listening for connections. Set this parameter to 0 when using UNIX domain sockets."
+                        },
+                        {
+                            "name": "timeout",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Value in seconds which will be used for connecting to the daemon. Think twice before changing the default value of 1 second - you can lose all the advantages of caching if your connection is too slow."
+                        },
+                        {
+                            "name": "timeoutms",
+                            "type": "Int32",
+                            "value": "0"
+                        }
+                    ]
+                },
+                {
+                    "name": "add",
+                    "desc": "Memcache::add() stores variable var with key only if such key doesn't exist at the server yet. Also you can use memcache_add() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure. Returns FALSE if such key already exist. For the rest Memcache::add() behaves similarly to Memcache::set()."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key that will be associated with the item."
+                        },
+                        {
+                            "name": "var",
+                            "type": "Variant",
+                            "desc": "The variable to store. Strings and integers are stored as is, other types are stored serialized."
+                        },
+                        {
+                            "name": "flag",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Use MEMCACHE_COMPRESSED to store the item compressed (uses zlib)."
+                        },
+                        {
+                            "name": "expire",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Expiration time of the item. If it's equal to zero, the item will never expire. You can also use Unix timestamp or a number of seconds starting from current time, but in the latter case the number of seconds may not exceed 2592000 (30 days)."
+                        }
+                    ]
+                },
+                {
+                    "name": "set",
+                    "desc": "Memcache::set() stores an item var with key on the memcached server. Parameter expire is expiration time in seconds. If it's 0, the item never expires (but memcached server doesn't guarantee this item to be stored all the time, it could be deleted from the cache to make place for other items). You can use MEMCACHE_COMPRESSED constant as flag value if you want to use on-the-fly compression (uses zlib).\n\nRemember that resource variables (i.e. file and connection descriptors) cannot be stored in the cache, because they cannot be adequately represented in serialized state. Also you can use memcache_set() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key that will be associated with the item."
+                        },
+                        {
+                            "name": "var",
+                            "type": "Variant",
+                            "desc": "The variable to store. Strings and integers are stored as is, other types are stored serialized."
+                        },
+                        {
+                            "name": "flag",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Use MEMCACHE_COMPRESSED to store the item compressed (uses zlib)."
+                        },
+                        {
+                            "name": "expire",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Expiration time of the item. If it's equal to zero, the item will never expire. You can also use Unix timestamp or a number of seconds starting from current time, but in the latter case the number of seconds may not exceed 2592000 (30 days)."
+                        }
+                    ]
+                },
+                {
+                    "name": "replace",
+                    "desc": "Memcache::replace() should be used to replace value of existing item with key. In case if item with such key doesn't exists, Memcache::replace() returns FALSE. For the rest Memcache::replace() behaves similarly to Memcache::set(). Also you can use memcache_replace() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key that will be associated with the item."
+                        },
+                        {
+                            "name": "var",
+                            "type": "Variant",
+                            "desc": "The variable to store. Strings and integers are stored as is, other types are stored serialized."
+                        },
+                        {
+                            "name": "flag",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Use MEMCACHE_COMPRESSED to store the item compressed (uses zlib)."
+                        },
+                        {
+                            "name": "expire",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Expiration time of the item. If it's equal to zero, the item will never expire. You can also use Unix timestamp or a number of seconds starting from current time, but in the latter case the number of seconds may not exceed 2592000 (30 days)."
+                        }
+                    ]
+                },
+                {
+                    "name": "get",
+                    "desc": "Memcache::get() returns previously stored data if an item with such key exists on the server at this moment.\n\nYou can pass array of keys to Memcache::get() to get array of values. The result array will contain only found key-value pairs.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the string associated with the key or FALSE on failure or if such key was not found."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant",
+                            "desc": "The key or array of keys to fetch."
+                        },
+                        {
+                            "name": "flags",
+                            "type": "Variant",
+                            "value": "null",
+                            "desc": "If present, flags fetched along with the values will be written to this parameter. These flags are the same as the ones given to for example Memcache::set(). The lowest byte of the int is reserved for pecl\/memcache internal usage (e.g. to indicate compression and serialization status).",
+                            "ref": true
+                        }
+                    ]
+                },
+                {
+                    "name": "delete",
+                    "desc": "Memcache::delete() deletes item with the key. If parameter timeout is specified, the item will expire after timeout seconds. Also you can use memcache_delete() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "The key associated with the item to delete."
+                        },
+                        {
+                            "name": "expire",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Execution time of the item. If it's equal to zero, the item will be deleted right away whereas if you set it to 30, the item will be deleted in 30 seconds."
+                        }
+                    ]
+                },
+                {
+                    "name": "increment",
+                    "desc": "Memcache::increment() increments value of an item by the specified value. If item specified by key was not numeric and cannot be converted to a number, it will change its value to value. Memcache::increment() does not create an item if it doesn't already exist.\n\nDo not use Memcache::increment() with items that have been stored compressed because subsequent calls to Memcache::get() will fail. Also you can use memcache_increment() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns new items value on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "Key of the item to increment."
+                        },
+                        {
+                            "name": "offset",
+                            "type": "Int32",
+                            "value": "1",
+                            "desc": "Increment the item by value."
+                        }
+                    ]
+                },
+                {
+                    "name": "decrement",
+                    "desc": "Memcache::decrement() decrements value of the item by value. Similarly to Memcache::increment(), current value of the item is being converted to numerical and after that value is substracted.\n\nNew item's value will not be less than zero.\n\nDo not use Memcache::decrement() with item, which was stored compressed, because consequent call to Memcache::get() will fail. Memcache::decrement() does not create an item if it didn't exist. Also you can use memcache_decrement() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns item's new value on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "String",
+                            "desc": "Key of the item do decrement."
+                        },
+                        {
+                            "name": "offset",
+                            "type": "Int32",
+                            "value": "1",
+                            "desc": "Decrement the item by value."
+                        }
+                    ]
+                },
+                {
+                    "name": "getversion",
+                    "desc": "Memcache::getVersion() returns a string with server's version number. Also you can use memcache_get_version() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns a string of server version number or FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "flush",
+                    "desc": "Memcache::flush() immediately invalidates all existing items. Memcache::flush() doesn't actually free any resources, it only marks all the items as expired, so occupied memory will be overwritten by new items. Also you can use memcache_flush() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "expire",
+                            "type": "Int32",
+                            "value": "0"
+                        }
+                    ]
+                },
+                {
+                    "name": "setoptimeout",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "timeoutms",
+                            "type": "Int64"
+                        }
+                    ]
+                },
+                {
+                    "name": "close",
+                    "desc": "Memcache::close() closes connection to memcached server. This function doesn't close persistent connections, which are closed only during web-server shutdown\/restart. Also you can use memcache_close() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getserverstatus",
+                    "desc": "Memcache::getServerStatus() returns a the servers online\/offline status. You can also use memcache_get_server_status() function.\n\nThis function has been added to Memcache version 2.1.0.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns a the servers status. 0 if server is failed, non-zero otherwise"
+                    },
+                    "args": [
+                        {
+                            "name": "host",
+                            "type": "String",
+                            "desc": "Point to the host where memcached is listening for connections."
+                        },
+                        {
+                            "name": "port",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Point to the port where memcached is listening for connections."
+                        }
+                    ]
+                },
+                {
+                    "name": "setcompressthreshold",
+                    "desc": "Memcache::setCompressThreshold() enables automatic compression of large values. You can also use the memcache_set_compress_threshold() function.\n\nThis function has been added to Memcache version 2.0.0.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "threshold",
+                            "type": "Int32",
+                            "desc": "Controls the minimum value length before attempting to compress automatically."
+                        },
+                        {
+                            "name": "min_savings",
+                            "type": "Double",
+                            "value": "0.2",
+                            "desc": "Specifies the minimum amount of savings to actually store the value compressed. The supplied value must be between 0 and 1. Default value is 0.2 giving a minimum 20% compression savings."
+                        }
+                    ]
+                },
+                {
+                    "name": "getstats",
+                    "desc": "Memcache::getStats() returns an associative array with server's statistics. Array keys correspond to stats parameters and values to parameter's values. Also you can use memcache_get_stats() function.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "VariantMap",
+                        "desc": "Returns an associative array of server statistics or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "type",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The type of statistics to fetch. Valid values are {reset, malloc, maps, cachedump, slabs, items, sizes}. According to the memcached protocol spec these additional arguments \"are subject to change for the convenience of memcache developers\"."
+                        },
+                        {
+                            "name": "slabid",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Used in conjunction with type set to cachedump to identify the slab to dump from. The cachedump command ties up the server and is strictly to be used for debugging purposes."
+                        },
+                        {
+                            "name": "limit",
+                            "type": "Int32",
+                            "value": "100",
+                            "desc": "Used in conjunction with type set to cachedump to limit the number of entries to dump."
+                        }
+                    ]
+                },
+                {
+                    "name": "getextendedstats",
+                    "desc": "Memcache::getExtendedStats() returns a two-dimensional associative array with server statistics. Array keys correspond to host:port of server and values contain the individual server statistics. A failed server will have its corresponding entry set to FALSE. You can also use the memcache_get_extended_stats() function.\n\nThis function has been added to Memcache version 2.0.0.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "VariantMap",
+                        "desc": "Returns a two-dimensional associative array of server statistics or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "type",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "The type of statistics to fetch. Valid values are {reset, malloc, maps, cachedump, slabs, items, sizes}. According to the memcached protocol spec these additional arguments \"are subject to change for the convenience of memcache developers\"."
+                        },
+                        {
+                            "name": "slabid",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Used in conjunction with type set to cachedump to identify the slab to dump from. The cachedump command ties up the server and is strictly to be used for debugging purposes."
+                        },
+                        {
+                            "name": "limit",
+                            "type": "Int32",
+                            "value": "100",
+                            "desc": "Used in conjunction with type set to cachedump to limit the number of entries to dump."
+                        }
+                    ]
+                },
+                {
+                    "name": "setserverparams",
+                    "desc": "Memcache::setServerParams() changes server parameters at runtime. You can also use the memcache_set_server_params() function.\n\nThis function has been added to Memcache version 2.1.0.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "host",
+                            "type": "String",
+                            "desc": "Point to the host where memcached is listening for connections."
+                        },
+                        {
+                            "name": "port",
+                            "type": "Int32",
+                            "value": "11211",
+                            "desc": "Point to the port where memcached is listening for connections."
+                        },
+                        {
+                            "name": "timeout",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Value in seconds which will be used for connecting to the daemon. Think twice before changing the default value of 1 second - you can lose all the advantages of caching if your connection is too slow."
+                        },
+                        {
+                            "name": "retry_interval",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Controls how often a failed server will be retried, the default value is 15 seconds. Setting this parameter to -1 disables automatic retry. Neither this nor the persistent parameter has any effect when the extension is loaded dynamically via dl()."
+                        },
+                        {
+                            "name": "status",
+                            "type": "Boolean",
+                            "value": "true",
+                            "desc": "Controls if the server should be flagged as online. Setting this parameter to FALSE and retry_interval to -1 allows a failed server to be kept in the pool so as not to affect the key distribution algoritm. Requests for this server will then failover or fail immediately depending on the memcache.allow_failover setting. Default to TRUE, meaning the server should be considered online."
+                        },
+                        {
+                            "name": "failure_callback",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "Allows the user to specify a callback function to run upon encountering an error. The callback is run before failover is attempted. The function takes two parameters, the hostname and port of the failed server."
+                        }
+                    ]
+                },
+                {
+                    "name": "addserver",
+                    "desc": "Memcache::addServer() adds a server to the connection pool. The connection, which was opened using Memcache::addServer() will be automatically closed at the end of script execution, you can also close it manually with Memcache::close(). You can also use the memcache_add_server() function.\n\nWhen using this method (as opposed to Memcache::connect() and Memcache::pconnect()) the network connection is not established until actually needed. Thus there is no overhead in adding a large number of servers to the pool, even though they might not all be used.\n\nFailover may occur at any stage in any of the methods, as long as other servers are available the request the user won't notice. Any kind of socket or Memcached server level errors (except out-of-memory) may trigger the failover. Normal client errors such as adding an existing key will not trigger a failover.\n\nThis function has been added to Memcache version 2.0.0.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "host",
+                            "type": "String",
+                            "desc": "Point to the host where memcached is listening for connections. This parameter may also specify other transports like unix:\/\/\/path\/to\/memcached.sock to use UNIX domain sockets, in this case port must also be set to 0."
+                        },
+                        {
+                            "name": "port",
+                            "type": "Int32",
+                            "value": "11211",
+                            "desc": "Point to the port where memcached is listening for connections. Set this parameter to 0 when using UNIX domain sockets."
+                        },
+                        {
+                            "name": "persistent",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "Controls the use of a persistent connection. Default to TRUE."
+                        },
+                        {
+                            "name": "weight",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Number of buckets to create for this server which in turn control its probability of it being selected. The probability is relative to the total weight of all servers."
+                        },
+                        {
+                            "name": "timeout",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Value in seconds which will be used for connecting to the daemon. Think twice before changing the default value of 1 second - you can lose all the advantages of caching if your connection is too slow."
+                        },
+                        {
+                            "name": "retry_interval",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Controls how often a failed server will be retried, the default value is 15 seconds. Setting this parameter to -1 disables automatic retry. Neither this nor the persistent parameter has any effect when the extension is loaded dynamically via dl().\n\nEach failed connection struct has its own timeout and before it has expired the struct will be skipped when selecting backends to serve a request. Once expired the connection will be successfully reconnected or marked as failed for another retry_interval seconds. The typical effect is that each web server child will retry the connection about every retry_interval seconds when serving a page."
+                        },
+                        {
+                            "name": "status",
+                            "type": "Boolean",
+                            "value": "true",
+                            "desc": "Controls if the server should be flagged as online. Setting this parameter to FALSE and retry_interval to -1 allows a failed server to be kept in the pool so as not to affect the key distribution algorithm. Requests for this server will then failover or fail immediately depending on the memcache.allow_failover setting. Default to TRUE, meaning the server should be considered online."
+                        },
+                        {
+                            "name": "failure_callback",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "Allows the user to specify a callback function to run upon encountering an error. The callback is run before failover is attempted. The function takes two parameters, the hostname and port of the failed server."
+                        },
+                        {
+                            "name": "timeoutms",
+                            "type": "Int32",
+                            "value": "0"
+                        }
+                    ]
+                },
+                {
+                    "name": "__destruct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

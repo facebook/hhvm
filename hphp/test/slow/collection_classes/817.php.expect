@@ -1,0 +1,20 @@
+=== HH\Vector ===
+Integer key 0 is out of bounds
+Integer key 9223372036854775807 is out of bounds
+Integer key -9223372036854775808 is out of bounds
+=== Map ===
+Integer key 0 is not defined
+Integer key 9223372036854775807 is not defined
+Integer key -9223372036854775808 is not defined
+String key "abc" is not defined
+String key "abcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrst" is not defined
+String key "ABCDEFGHIJKLMNOPQRSTabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrst" (truncated) is not defined
+String key "ABCDEFGHIJ<NUL>KLMNOPQRSTabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrs" (truncated) is not defined
+=== StableMap ===
+Integer key 0 is not defined
+Integer key 9223372036854775807 is not defined
+Integer key -9223372036854775808 is not defined
+String key "abc" is not defined
+String key "abcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrst" is not defined
+String key "ABCDEFGHIJKLMNOPQRSTabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrst" (truncated) is not defined
+String key "ABCDEFGHIJ<NUL>KLMNOPQRSTabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrstabcdefghijklmnopqrs" (truncated) is not defined

@@ -1,0 +1,531 @@
+{
+    "preamble": "",
+    "consts": [
+        {
+            "name": "CAL_GREGORIAN",
+            "value": 0
+        },
+        {
+            "name": "CAL_JULIAN",
+            "value": 1
+        },
+        {
+            "name": "CAL_JEWISH",
+            "value": 2
+        },
+        {
+            "name": "CAL_FRENCH",
+            "value": 3
+        },
+        {
+            "name": "CAL_NUM_CALS",
+            "value": 4
+        },
+        {
+            "name": "CAL_DOW_DAYNO",
+            "value": 0
+        },
+        {
+            "name": "CAL_DOW_SHORT",
+            "value": 1
+        },
+        {
+            "name": "CAL_DOW_LONG",
+            "value": 2
+        },
+        {
+            "name": "CAL_MONTH_GREGORIAN_SHORT",
+            "value": 0
+        },
+        {
+            "name": "CAL_MONTH_GREGORIAN_LONG",
+            "value": 1
+        },
+        {
+            "name": "CAL_MONTH_JULIAN_SHORT",
+            "value": 2
+        },
+        {
+            "name": "CAL_MONTH_JULIAN_LONG",
+            "value": 3
+        },
+        {
+            "name": "CAL_MONTH_JEWISH",
+            "value": 4
+        },
+        {
+            "name": "CAL_MONTH_FRENCH",
+            "value": 5
+        },
+        {
+            "name": "CAL_EASTER_DEFAULT",
+            "value": 0
+        },
+        {
+            "name": "CAL_EASTER_ROMAN",
+            "value": 1
+        },
+        {
+            "name": "CAL_EASTER_ALWAYS_GREGORIAN",
+            "value": 2
+        },
+        {
+            "name": "CAL_EASTER_ALWAYS_JULIAN",
+            "value": 3
+        },
+        {
+            "name": "CAL_JEWISH_ADD_ALAFIM_GERESH",
+            "value": 2
+        },
+        {
+            "name": "CAL_JEWISH_ADD_ALAFIM",
+            "value": 4
+        },
+        {
+            "name": "CAL_JEWISH_ADD_GERESHAYIM",
+            "value": 8
+        }
+    ],
+    "funcs": [
+        {
+            "name": "cal_days_in_month",
+            "desc": "This function will return the number of days in the month of year for the specified calendar.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The length in days of the selected month in the given calendar"
+            },
+            "args": [
+                {
+                    "name": "calendar",
+                    "type": "Variant",
+                    "desc": "Calendar to use for calculation"
+                },
+                {
+                    "name": "month",
+                    "type": "Variant",
+                    "desc": "Month in the selected calendar"
+                },
+                {
+                    "name": "year",
+                    "type": "Variant",
+                    "desc": "Year in the selected calendar"
+                }
+            ]
+        },
+        {
+            "name": "cal_from_jd",
+            "desc": "cal_from_jd() converts the Julian day given in jd into a date of the specified calendar. Supported calendar values are CAL_GREGORIAN, CAL_JULIAN, CAL_JEWISH and CAL_FRENCH.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array containing calendar information like month, day, year, day of week, abbreviated and full names of weekday and month and the date in string form \"month\/day\/year\"."
+            },
+            "args": [
+                {
+                    "name": "jd",
+                    "type": "Variant",
+                    "desc": "Julian day as integer"
+                },
+                {
+                    "name": "calendar",
+                    "type": "Variant",
+                    "desc": "Calendar to convert to"
+                }
+            ]
+        },
+        {
+            "name": "cal_info",
+            "desc": "cal_info() returns information on the specified calendar.\n\nCalendar information is returned as an array containing the elements calname, calsymbol, month, abbrevmonth and maxdaysinmonth. The names of the different calendars which can be used as calendar are as follows: 0 or CAL_GREGORIAN - Gregorian Calendar 1 or CAL_JULIAN - Julian Calendar 2 or CAL_JEWISH - Jewish Calendar 3 or CAL_FRENCH - French Revolutionary Calendar\n\nIf no calendar is specified information on all supported calendars is returned as an array.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": ""
+            },
+            "args": [
+                {
+                    "name": "calendar",
+                    "type": "Variant",
+                    "desc": "Calendar to return information for. If no calendar is specified information about all calendars is returned."
+                }
+            ]
+        },
+        {
+            "name": "cal_to_jd",
+            "desc": "cal_to_jd() calculates the Julian day count for a date in the specified calendar. Supported calendars are CAL_GREGORIAN, CAL_JULIAN, CAL_JEWISH and CAL_FRENCH.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A Julian Day number."
+            },
+            "args": [
+                {
+                    "name": "calendar",
+                    "type": "Variant",
+                    "desc": "Calendar to convert from, one of CAL_GREGORIAN, CAL_JULIAN, CAL_JEWISH or CAL_FRENCH."
+                },
+                {
+                    "name": "month",
+                    "type": "Variant",
+                    "desc": "The month as a number, the valid range depends on the calendar"
+                },
+                {
+                    "name": "day",
+                    "type": "Variant",
+                    "desc": "The day as a number, the valid range depends on the calendar"
+                },
+                {
+                    "name": "year",
+                    "type": "Variant",
+                    "desc": "The year as a number, the valid range depends on the calendar"
+                }
+            ]
+        },
+        {
+            "name": "easter_date",
+            "desc": "Returns the Unix timestamp corresponding to midnight on Easter of the given year. Warning\n\nThis function will generate a warning if the year is outside of the range for Unix timestamps (i.e. before 1970 or after 2037).\n\nThe date of Easter Day was defined by the Council of Nicaea in AD325 as the Sunday after the first full moon which falls on or after the Spring Equinox. The Equinox is assumed to always fall on 21st March, so the calculation reduces to determining the date of the full moon and the date of the following Sunday. The algorithm used here was introduced around the year 532 by Dionysius Exiguus. Under the Julian Calendar (for years before 1753) a simple 19-year cycle is used to track the phases of the Moon. Under the Gregorian Calendar (for years after 1753 - devised by Clavius and Lilius, and introduced by Pope Gregory XIII in October 1582, and into Britain and its then colonies in September 1752) two correction factors are added to make the cycle more accurate.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The easter date as a unix timestamp."
+            },
+            "args": [
+                {
+                    "name": "year",
+                    "type": "Variant",
+                    "desc": "The year as a number between 1970 an 2037"
+                }
+            ]
+        },
+        {
+            "name": "easter_days",
+            "desc": "Returns the number of days after March 21 on which Easter falls for a given year. If no year is specified, the current year is assumed.\n\nThis function can be used instead of easter_date() to calculate Easter for years which fall outside the range of Unix timestamps (i.e. before 1970 or after 2037).\n\nThe date of Easter Day was defined by the Council of Nicaea in AD325 as the Sunday after the first full moon which falls on or after the Spring Equinox. The Equinox is assumed to always fall on 21st March, so the calculation reduces to determining the date of the full moon and the date of the following Sunday. The algorithm used here was introduced around the year 532 by Dionysius Exiguus. Under the Julian Calendar (for years before 1753) a simple 19-year cycle is used to track the phases of the Moon. Under the Gregorian Calendar (for years after 1753 - devised by Clavius and Lilius, and introduced by Pope Gregory XIII in October 1582, and into Britain and its then colonies in September 1752) two correction factors are added to make the cycle more accurate.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The number of days after March 21st that the Easter Sunday is in the given year."
+            },
+            "args": [
+                {
+                    "name": "year",
+                    "type": "Variant",
+                    "desc": "The year as a positive number"
+                },
+                {
+                    "name": "method",
+                    "type": "Variant",
+                    "desc": "Allows to calculate easter dates based on the Gregorian calendar during the years 1582 - 1752 when set to CAL_EASTER_ROMAN. See the calendar constants for more valid constants."
+                }
+            ]
+        },
+        {
+            "name": "frenchtojd",
+            "desc": "Converts a date from the French Republican Calendar to a Julian Day Count.\n\nThese routines only convert dates in years 1 through 14 (Gregorian dates 22 September 1792 through 22 September 1806). This more than covers the period when the calendar was in use.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The julian day for the given french revolution date as an integer."
+            },
+            "args": [
+                {
+                    "name": "month",
+                    "type": "Variant",
+                    "desc": "The month as a number from 1 (for Vendmiaire) to 13 (for the period of 5-6 days at the end of each year)"
+                },
+                {
+                    "name": "day",
+                    "type": "Variant",
+                    "desc": "The day as a number from 1 to 30"
+                },
+                {
+                    "name": "year",
+                    "type": "Variant",
+                    "desc": "The year as a number between 1 and 14"
+                }
+            ]
+        },
+        {
+            "name": "gregoriantojd",
+            "desc": "Valid Range for Gregorian Calendar 4714 B.C. to 9999 A.D.\n\nAlthough this function can handle dates all the way back to 4714 B.C., such use may not be meaningful. The Gregorian calendar was not instituted until October 15, 1582 (or October 5, 1582 in the Julian calendar). Some countries did not accept it until much later. For example, Britain converted in 1752, The USSR in 1918 and Greece in 1923. Most European countries used the Julian calendar prior to the Gregorian.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The julian day for the given gregorian date as an integer."
+            },
+            "args": [
+                {
+                    "name": "month",
+                    "type": "Variant",
+                    "desc": "The month as a number from 1 (for January) to 12 (for December)"
+                },
+                {
+                    "name": "day",
+                    "type": "Variant",
+                    "desc": "The day as a number from 1 to 31"
+                },
+                {
+                    "name": "year",
+                    "type": "Variant",
+                    "desc": "The year as a number between -4714 and 9999"
+                }
+            ]
+        },
+        {
+            "name": "jddayofweek",
+            "desc": "Returns the day of the week. Can return a string or an integer depending on the mode.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The gregorian weekday as either an integer or string."
+            },
+            "args": [
+                {
+                    "name": "julianday",
+                    "type": "Variant",
+                    "desc": "A julian day number as integer"
+                },
+                {
+                    "name": "mode",
+                    "type": "Variant",
+                    "desc": "Calendar week modes Mode Meaning 0 (Default) Return the day number as an int (0=Sunday, 1=Monday, etc) 1 Returns string containing the day of week (English-Gregorian) 2 Return a string containing the abbreviated day of week (English-Gregorian)"
+                }
+            ]
+        },
+        {
+            "name": "jdmonthname",
+            "desc": "Returns a string containing a month name. mode tells this function which calendar to convert the Julian Day Count to, and what type of month names are to be returned. Calendar modes Mode Meaning Values 0 Gregorian - abbreviated Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec 1 Gregorian January, February, March, April, May, June, July, August, September, October, November, December 2 Julian - abbreviated Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec 3 Julian January, February, March, April, May, June, July, August, September, October, November, December 4 Jewish Tishri, Heshvan, Kislev, Tevet, Shevat, AdarI, AdarII, Nisan, Iyyar, Sivan, Tammuz, Av, Elul 5 French Republican Vendemiaire, Brumaire, Frimaire, Nivose, Pluviose, Ventose, Germinal, Floreal, Prairial, Messidor, Thermidor, Fructidor, Extra",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The month name for the given Julian Day and calendar."
+            },
+            "args": [
+                {
+                    "name": "jday",
+                    "type": "Variant",
+                    "desc": "The Julian Day to operate on"
+                },
+                {
+                    "name": "calendar",
+                    "type": "Variant",
+                    "desc": "The calendar to take the month name from"
+                }
+            ]
+        },
+        {
+            "name": "jdtofrench",
+            "desc": "Converts a Julian Day Count to the French Republican Calendar.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The french revolution date as a string in the form \"month\/day\/year\""
+            },
+            "args": [
+                {
+                    "name": "julianday",
+                    "type": "Variant",
+                    "desc": "A julian day number as integer"
+                }
+            ]
+        },
+        {
+            "name": "jdtogregorian",
+            "desc": "Converts Julian Day Count to a string containing the Gregorian date in the format of \"month\/day\/year\".",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The gregorian date as a string in the form \"month\/day\/year\""
+            },
+            "args": [
+                {
+                    "name": "julianday",
+                    "type": "Variant",
+                    "desc": "A julian day number as integer"
+                }
+            ]
+        },
+        {
+            "name": "jdtojewish",
+            "desc": "Converts a Julian Day Count to the Jewish Calendar.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The jewish date as a string in the form \"month\/day\/year\""
+            },
+            "args": [
+                {
+                    "name": "julianday",
+                    "type": "Variant",
+                    "desc": "A julian day number as integer"
+                },
+                {
+                    "name": "hebrew",
+                    "type": "Variant",
+                    "desc": "If the hebrew parameter is set to TRUE, the fl parameter is used for Hebrew, string based, output format."
+                },
+                {
+                    "name": "fl",
+                    "type": "Variant",
+                    "desc": "The available formats are: CAL_JEWISH_ADD_ALAFIM_GERESH, CAL_JEWISH_ADD_ALAFIM, CAL_JEWISH_ADD_GERESHAYIM."
+                }
+            ]
+        },
+        {
+            "name": "jdtojulian",
+            "desc": "Converts Julian Day Count to a string containing the Julian Calendar Date in the format of \"month\/day\/year\".",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The julian date as a string in the form \"month\/day\/year\""
+            },
+            "args": [
+                {
+                    "name": "julianday",
+                    "type": "Variant",
+                    "desc": "A julian day number as integer"
+                }
+            ]
+        },
+        {
+            "name": "jdtounix",
+            "desc": "This function will return a Unix timestamp corresponding to the Julian Day given in jday or FALSE if jday is not inside the Unix epoch (Gregorian years between 1970 and 2037 or 2440588 <= jday <= 2465342 ). The time returned is localtime (and not GMT).",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The unix timestamp for the start of the given julian day."
+            },
+            "args": [
+                {
+                    "name": "jday",
+                    "type": "Variant",
+                    "desc": "A julian day number between 2440588 and 2465342."
+                }
+            ]
+        },
+        {
+            "name": "jewishtojd",
+            "desc": "Although this function can handle dates all the way back to the year 1 (3761 B.C.), such use may not be meaningful. The Jewish calendar has been in use for several thousand years, but in the early days there was no formula to determine the start of a month. A new month was started when the new moon was first observed.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The julian day for the given jewish date as an integer."
+            },
+            "args": [
+                {
+                    "name": "month",
+                    "type": "Variant",
+                    "desc": "The month as a number from 1 to 13"
+                },
+                {
+                    "name": "day",
+                    "type": "Variant",
+                    "desc": "The day as a number from 1 to 30"
+                },
+                {
+                    "name": "year",
+                    "type": "Variant",
+                    "desc": "The year as a number between 1 and 9999"
+                }
+            ]
+        },
+        {
+            "name": "juliantojd",
+            "desc": "Valid Range for Julian Calendar 4713 B.C. to 9999 A.D.\n\nAlthough this function can handle dates all the way back to 4713 B.C., such use may not be meaningful. The calendar was created in 46 B.C., but the details did not stabilize until at least 8 A.D., and perhaps as late at the 4th century. Also, the beginning of a year varied from one culture to another - not all accepted January as the first month. Caution\n\nRemember, the current calendar system being used worldwide is the Gregorian calendar. gregoriantojd() can be used to convert such dates to their Julian Day count.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The julian day for the given julian date as an integer."
+            },
+            "args": [
+                {
+                    "name": "month",
+                    "type": "Variant",
+                    "desc": "The month as a number from 1 (for January) to 12 (for December)"
+                },
+                {
+                    "name": "day",
+                    "type": "Variant",
+                    "desc": "The day as a number from 1 to 31"
+                },
+                {
+                    "name": "year",
+                    "type": "Variant",
+                    "desc": "The year as a number between -4713 and 9999"
+                }
+            ]
+        },
+        {
+            "name": "unixtojd",
+            "desc": "Return the Julian Day for a Unix timestamp (seconds since 1.1.1970), or for the current day if no timestamp is given.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A julian day number as integer."
+            },
+            "args": [
+                {
+                    "name": "timestamp",
+                    "type": "Variant",
+                    "desc": "A unix timestamp to convert."
+                }
+            ]
+        }
+    ],
+    "classes": [
+
+    ]
+}

@@ -1,0 +1,18 @@
+object(TestStruct)#4 (8) {
+  ["aBool"]=>
+  bool(false)
+  ["anInt"]=>
+  int(-1234)
+  ["aDouble"]=>
+  float(-1.2345)
+  ["anInt64"]=>
+  int(-1)
+  ["anByte"]=>
+  int(-12)
+  ["anI16"]=>
+  int(-123)
+  ["aFloat"]=>
+  float(1.25)
+  ["bFloat"]=>
+  float(3.1415927410126)
+}

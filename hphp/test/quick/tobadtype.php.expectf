@@ -1,0 +1,6 @@
+test int
+HipHop Notice: Object of class X could not be converted to int in %s on line 21
+test dbl
+HipHop Notice: Object of class X could not be converted to int in %s on line 25
+test str
+HipHop Fatal error: Object of class X could not be converted to string in %s on line 17

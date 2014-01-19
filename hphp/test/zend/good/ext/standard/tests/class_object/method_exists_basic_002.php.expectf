@@ -1,0 +1,8 @@
+---(Internal classes, using string class name)---
+Does exception::getmessage exist? bool(true)
+Does stdclass::nonexistent exist? bool(false)
+
+ ---(Internal classes, using class instance)---
+Does exception::getmessage exist? bool(true)
+Does stdclass::nonexistent exist? bool(false)
+Done

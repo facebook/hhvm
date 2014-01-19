@@ -1,0 +1,5 @@
+Derived::__construct()
+Test::__construct()
+TestPriv::__construct()
+DerivedPriv::__construct()
+HipHop Fatal error: %s

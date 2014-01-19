@@ -1,0 +1,113 @@
+#
+# Simple test of AssertT opcodes
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+
+  FPushCtorD 0 "Foo"
+  FCall 0
+  PopR
+  SetL $x
+  PopC
+
+  FPushCtorD 0 "Bar"
+  FCall 0
+  PopR
+  SetL $y
+  PopC
+
+  FPushFuncD 2 "obj_type"
+  FPassL 0 $x
+  FPassL 1 $y
+  FCall 2
+  PopR
+
+  FPushFuncD 0 "obj_type2"
+  FCall 0
+  PopR
+
+  Int 1
+  RetC
+}
+
+.class Foo {
+  .default_ctor;
+
+  .method [public] returns_int {
+    Int 12
+    RetC
+  }
+}
+
+.class Bar extends Foo {
+  .default_ctor;
+}
+
+.function obj_type($x, $sub) {
+  CGetL $x
+  AssertObjStk 0 1 "Foo"
+  AssertObjL $x   1 "Foo"
+  AssertObjL $sub 0 "Bar"
+  PopC
+  AssertObjL $x   1 "Foo"
+  AssertObjL $x   0 "Foo"
+  AssertObjL $sub 0 "Bar"
+  AssertObjL $sub 0 "Foo"
+  AssertObjL $sub 1 "Bar"
+  Int 1
+  RetC
+}
+
+.function make_bar() {
+  FPushCtorD 0 "Bar"
+  FCall 0
+  AssertTStk 0 InitNull
+  AssertTStk 1 Obj
+  AssertObjStk 1 1 "Bar"
+  PopR
+  AssertObjStk 0 1 "Bar"
+  RetC
+}
+
+.function obj_type2() {
+  FPushFuncD 0 "make_bar"
+  FCall 0
+  AssertTStk 0 Obj
+  AssertObjStk 0 1 "Bar"
+  AssertTL $x Uninit
+  UnboxR
+  AssertTStk 0 Obj
+  SetL $x
+  PopC
+  Int 1
+  RetC
+}
+
+.function main() {
+  Jmp stuff
+out:
+  Null
+  RetC
+
+stuff:
+  FPushCtorD 0 "Foo"
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+
+  CGetL $obj
+  FPushObjMethodD 0 "returns_int"
+  FCall 0
+  AssertTStk 0 Int
+  UnboxR
+  Int 0
+  Add
+  SetL $k
+  PopC
+  Jmp out
+}
+

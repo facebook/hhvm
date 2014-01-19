@@ -1,0 +1,211 @@
+------ ArraySet -------
+object(HH\Vector)#3 (3) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ ArrayAppend -------
+object(HH\Vector)#3 (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(42)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ add -------
+object(HH\Vector)#3 (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(42)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ append -------
+object(HH\Vector)#3 (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(42)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ addAll -------
+object(HH\Vector)#3 (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(42)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ pop -------
+object(HH\Vector)#3 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ resize -------
+object(HH\Vector)#3 (0) {
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ clear -------
+object(HH\Vector)#3 (0) {
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ set -------
+object(HH\Vector)#3 (3) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ setAll -------
+object(HH\Vector)#3 (3) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ removeKey -------
+object(HH\Vector)#3 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ reverse -------
+object(HH\Vector)#3 (3) {
+  [0]=>
+  int(3)
+  [1]=>
+  int(2)
+  [2]=>
+  int(1)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ splice -------
+object(HH\Vector)#3 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}

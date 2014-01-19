@@ -1,0 +1,620 @@
+----------
+x == ''
+int(0)
+bool(true)
+----------
+x == '123'
+int(0)
+bool(false)
+----------
+x == '123q'
+int(0)
+bool(false)
+----------
+x == 'q123'
+int(0)
+bool(true)
+----------
+x == '123.0'
+int(0)
+bool(false)
+----------
+x == '-456'
+int(0)
+bool(false)
+----------
+x == '-456.7'
+int(0)
+bool(false)
+----------
+x == '7.80'
+int(0)
+bool(false)
+----------
+x == '90000000000'
+int(0)
+bool(false)
+----------
+x == '9e10'
+int(0)
+bool(false)
+----------
+x == ''
+int(123)
+bool(false)
+----------
+x == '123'
+int(123)
+bool(true)
+----------
+x == '123q'
+int(123)
+bool(true)
+----------
+x == 'q123'
+int(123)
+bool(false)
+----------
+x == '123.0'
+int(123)
+bool(true)
+----------
+x == '-456'
+int(123)
+bool(false)
+----------
+x == '-456.7'
+int(123)
+bool(false)
+----------
+x == '7.80'
+int(123)
+bool(false)
+----------
+x == '90000000000'
+int(123)
+bool(false)
+----------
+x == '9e10'
+int(123)
+bool(false)
+----------
+x == ''
+int(-456)
+bool(false)
+----------
+x == '123'
+int(-456)
+bool(false)
+----------
+x == '123q'
+int(-456)
+bool(false)
+----------
+x == 'q123'
+int(-456)
+bool(false)
+----------
+x == '123.0'
+int(-456)
+bool(false)
+----------
+x == '-456'
+int(-456)
+bool(true)
+----------
+x == '-456.7'
+int(-456)
+bool(false)
+----------
+x == '7.80'
+int(-456)
+bool(false)
+----------
+x == '90000000000'
+int(-456)
+bool(false)
+----------
+x == '9e10'
+int(-456)
+bool(false)
+----------
+x == ''
+float(7.8)
+bool(false)
+----------
+x == '123'
+float(7.8)
+bool(false)
+----------
+x == '123q'
+float(7.8)
+bool(false)
+----------
+x == 'q123'
+float(7.8)
+bool(false)
+----------
+x == '123.0'
+float(7.8)
+bool(false)
+----------
+x == '-456'
+float(7.8)
+bool(false)
+----------
+x == '-456.7'
+float(7.8)
+bool(false)
+----------
+x == '7.80'
+float(7.8)
+bool(true)
+----------
+x == '90000000000'
+float(7.8)
+bool(false)
+----------
+x == '9e10'
+float(7.8)
+bool(false)
+----------
+x == ''
+int(90000000000)
+bool(false)
+----------
+x == '123'
+int(90000000000)
+bool(false)
+----------
+x == '123q'
+int(90000000000)
+bool(false)
+----------
+x == 'q123'
+int(90000000000)
+bool(false)
+----------
+x == '123.0'
+int(90000000000)
+bool(false)
+----------
+x == '-456'
+int(90000000000)
+bool(false)
+----------
+x == '-456.7'
+int(90000000000)
+bool(false)
+----------
+x == '7.80'
+int(90000000000)
+bool(false)
+----------
+x == '90000000000'
+int(90000000000)
+bool(true)
+----------
+x == '9e10'
+int(90000000000)
+bool(true)
+----------
+x == 0
+string(0) ""
+bool(true)
+----------
+x == 123
+string(0) ""
+bool(false)
+----------
+x == -456
+string(0) ""
+bool(false)
+----------
+x == 7.8
+string(0) ""
+bool(false)
+----------
+x == 90000000000
+string(0) ""
+bool(false)
+----------
+x == 0
+string(3) "123"
+bool(false)
+----------
+x == 123
+string(3) "123"
+bool(true)
+----------
+x == -456
+string(3) "123"
+bool(false)
+----------
+x == 7.8
+string(3) "123"
+bool(false)
+----------
+x == 90000000000
+string(3) "123"
+bool(false)
+----------
+x == 0
+string(4) "123q"
+bool(false)
+----------
+x == 123
+string(4) "123q"
+bool(true)
+----------
+x == -456
+string(4) "123q"
+bool(false)
+----------
+x == 7.8
+string(4) "123q"
+bool(false)
+----------
+x == 90000000000
+string(4) "123q"
+bool(false)
+----------
+x == 0
+string(4) "q123"
+bool(true)
+----------
+x == 123
+string(4) "q123"
+bool(false)
+----------
+x == -456
+string(4) "q123"
+bool(false)
+----------
+x == 7.8
+string(4) "q123"
+bool(false)
+----------
+x == 90000000000
+string(4) "q123"
+bool(false)
+----------
+x == 0
+string(4) "-456"
+bool(false)
+----------
+x == 123
+string(4) "-456"
+bool(false)
+----------
+x == -456
+string(4) "-456"
+bool(true)
+----------
+x == 7.8
+string(4) "-456"
+bool(false)
+----------
+x == 90000000000
+string(4) "-456"
+bool(false)
+----------
+x == 0
+string(6) "-456.7"
+bool(false)
+----------
+x == 123
+string(6) "-456.7"
+bool(false)
+----------
+x == -456
+string(6) "-456.7"
+bool(false)
+----------
+x == 7.8
+string(6) "-456.7"
+bool(false)
+----------
+x == 90000000000
+string(6) "-456.7"
+bool(false)
+----------
+x == 0
+string(4) "7.80"
+bool(false)
+----------
+x == 123
+string(4) "7.80"
+bool(false)
+----------
+x == -456
+string(4) "7.80"
+bool(false)
+----------
+x == 7.8
+string(4) "7.80"
+bool(true)
+----------
+x == 90000000000
+string(4) "7.80"
+bool(false)
+----------
+x == 0
+string(10) "9000000000"
+bool(false)
+----------
+x == 123
+string(10) "9000000000"
+bool(false)
+----------
+x == -456
+string(10) "9000000000"
+bool(false)
+----------
+x == 7.8
+string(10) "9000000000"
+bool(false)
+----------
+x == 90000000000
+string(10) "9000000000"
+bool(false)
+----------
+x == 0
+string(4) "9e10"
+bool(false)
+----------
+x == 123
+string(4) "9e10"
+bool(false)
+----------
+x == -456
+string(4) "9e10"
+bool(false)
+----------
+x == 7.8
+string(4) "9e10"
+bool(false)
+----------
+x == 90000000000
+string(4) "9e10"
+bool(true)
+----------
+x == y
+int(0)
+string(0) ""
+bool(true)
+----------
+x == y
+int(0)
+string(3) "123"
+bool(false)
+----------
+x == y
+int(0)
+string(4) "123q"
+bool(false)
+----------
+x == y
+int(0)
+string(4) "q123"
+bool(true)
+----------
+x == y
+int(0)
+string(4) "-456"
+bool(false)
+----------
+x == y
+int(0)
+string(6) "-456.7"
+bool(false)
+----------
+x == y
+int(0)
+string(4) "7.80"
+bool(false)
+----------
+x == y
+int(0)
+string(10) "9000000000"
+bool(false)
+----------
+x == y
+int(0)
+string(4) "9e10"
+bool(false)
+----------
+x == y
+int(123)
+string(0) ""
+bool(false)
+----------
+x == y
+int(123)
+string(3) "123"
+bool(true)
+----------
+x == y
+int(123)
+string(4) "123q"
+bool(true)
+----------
+x == y
+int(123)
+string(4) "q123"
+bool(false)
+----------
+x == y
+int(123)
+string(4) "-456"
+bool(false)
+----------
+x == y
+int(123)
+string(6) "-456.7"
+bool(false)
+----------
+x == y
+int(123)
+string(4) "7.80"
+bool(false)
+----------
+x == y
+int(123)
+string(10) "9000000000"
+bool(false)
+----------
+x == y
+int(123)
+string(4) "9e10"
+bool(false)
+----------
+x == y
+int(-456)
+string(0) ""
+bool(false)
+----------
+x == y
+int(-456)
+string(3) "123"
+bool(false)
+----------
+x == y
+int(-456)
+string(4) "123q"
+bool(false)
+----------
+x == y
+int(-456)
+string(4) "q123"
+bool(false)
+----------
+x == y
+int(-456)
+string(4) "-456"
+bool(true)
+----------
+x == y
+int(-456)
+string(6) "-456.7"
+bool(false)
+----------
+x == y
+int(-456)
+string(4) "7.80"
+bool(false)
+----------
+x == y
+int(-456)
+string(10) "9000000000"
+bool(false)
+----------
+x == y
+int(-456)
+string(4) "9e10"
+bool(false)
+----------
+x == y
+float(7.8)
+string(0) ""
+bool(false)
+----------
+x == y
+float(7.8)
+string(3) "123"
+bool(false)
+----------
+x == y
+float(7.8)
+string(4) "123q"
+bool(false)
+----------
+x == y
+float(7.8)
+string(4) "q123"
+bool(false)
+----------
+x == y
+float(7.8)
+string(4) "-456"
+bool(false)
+----------
+x == y
+float(7.8)
+string(6) "-456.7"
+bool(false)
+----------
+x == y
+float(7.8)
+string(4) "7.80"
+bool(true)
+----------
+x == y
+float(7.8)
+string(10) "9000000000"
+bool(false)
+----------
+x == y
+float(7.8)
+string(4) "9e10"
+bool(false)
+----------
+x == y
+int(90000000000)
+string(0) ""
+bool(false)
+----------
+x == y
+int(90000000000)
+string(3) "123"
+bool(false)
+----------
+x == y
+int(90000000000)
+string(4) "123q"
+bool(false)
+----------
+x == y
+int(90000000000)
+string(4) "q123"
+bool(false)
+----------
+x == y
+int(90000000000)
+string(4) "-456"
+bool(false)
+----------
+x == y
+int(90000000000)
+string(6) "-456.7"
+bool(false)
+----------
+x == y
+int(90000000000)
+string(4) "7.80"
+bool(false)
+----------
+x == y
+int(90000000000)
+string(10) "9000000000"
+bool(false)
+----------
+x == y
+int(90000000000)
+string(4) "9e10"
+bool(true)
+----------
+0 == 'q123'
+bool(true)
+----------
+123 == '123q'
+bool(true)
+----------
+123 == '123.0'
+bool(true)
+----------
+90000000000 == '9e10'
+bool(false)
+----------
+0 == '-456'
+bool(false)

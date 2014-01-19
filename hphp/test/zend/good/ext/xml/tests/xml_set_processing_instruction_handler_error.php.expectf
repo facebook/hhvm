@@ -1,0 +1,10 @@
+*** Testing xml_set_processing_instruction_handler() : error conditions ***
+
+-- Testing xml_set_processing_instruction_handler() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing xml_set_processing_instruction_handler() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

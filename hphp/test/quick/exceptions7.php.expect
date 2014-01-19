@@ -1,0 +1,180 @@
+----HANDLER----
+string(4) "frap"
+NULL
+array(1) {
+  [0]=>
+  string(8) "callfunc"
+}
+string(4) "data"
+bool(true)
+---------------
+caught call user func 1
+----HANDLER----
+string(4) "frap"
+NULL
+array(1) {
+  [0]=>
+  string(8) "callfunc"
+}
+NULL
+bool(true)
+---------------
+caught call user func 2
+Closure! wooooo
+caught closure 1
+magic call! string(12) "i_dont_exist"
+array(5) {
+  [0]=>
+  string(4) "frap"
+  [1]=>
+  NULL
+  [2]=>
+  array(1) {
+    [0]=>
+    string(8) "claptrap"
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+
+caught magic call 1
+----HANDLER----
+string(12) "Blark::sfrap"
+string(5) "Blark"
+array(0) {
+}
+NULL
+bool(true)
+---------------
+caught static call 1
+----HANDLER----
+string(12) "Blark::sfrap"
+string(5) "Blark"
+array(0) {
+}
+NULL
+bool(true)
+---------------
+caught static call 2
+magic call! string(19) "i_dont_exist_either"
+array(5) {
+  [0]=>
+  string(12) "Blark::sfrap"
+  [1]=>
+  string(5) "Blark"
+  [2]=>
+  array(0) {
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+
+caught magic call 2
+----HANDLER----
+string(11) "Blark::frap"
+object(Blark)#11 (0) {
+}
+array(0) {
+}
+NULL
+bool(true)
+---------------
+caught non-static call 1
+----HANDLER----
+string(11) "Blark::frap"
+object(Blark)#11 (0) {
+}
+array(0) {
+}
+NULL
+bool(true)
+---------------
+caught non-static call 2
+magic call! string(19) "i_dont_exist_either"
+array(5) {
+  [0]=>
+  string(11) "Blark::frap"
+  [1]=>
+  object(Blark)#11 (0) {
+  }
+  [2]=>
+  array(0) {
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+
+caught magic call 3
+----HANDLER----
+string(7) "handler"
+NULL
+array(5) {
+  [0]=>
+  string(4) "frap"
+  [1]=>
+  NULL
+  [2]=>
+  array(1) {
+    [0]=>
+    string(8) "claptrap"
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+NULL
+bool(true)
+---------------
+caught double intercept 1
+----HANDLER----
+string(7) "handler"
+NULL
+array(5) {
+  [0]=>
+  string(17) "MagicCall::__call"
+  [1]=>
+  object(MagicCall)#7 (0) {
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    string(5) "blark"
+    [1]=>
+    array(1) {
+      [0]=>
+      string(2) "hi"
+    }
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+NULL
+bool(true)
+---------------
+caught __call 1
+----HANDLER----
+string(17) "MagicCall::__call"
+object(MagicCall)#7 (0) {
+}
+array(2) {
+  [0]=>
+  string(5) "blark"
+  [1]=>
+  array(1) {
+    [0]=>
+    string(2) "ho"
+  }
+}
+NULL
+bool(true)
+---------------
+caught __call 2

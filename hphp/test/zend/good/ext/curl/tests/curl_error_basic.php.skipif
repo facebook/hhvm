@@ -1,0 +1,9 @@
+<?php
+
+if (!extension_loaded("curl")) die("skip\n");
+
+$url = "fakeURL";
+$ip = gethostbyname($url);
+if ($ip != $url) die("skip 'fakeURL' resolves to $ip\n");
+
+?>

@@ -1,0 +1,13 @@
+beginning...
+sup:  default Y value
+sup:  non-default y value
+x = defaultx
+y = defaulty
+z = defaultz
+x = nondef
+y = defaulty
+z = defaultz
+x = nondef1
+y = nondef2
+z = defaultz
+done

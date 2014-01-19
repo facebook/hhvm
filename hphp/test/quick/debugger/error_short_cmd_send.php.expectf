@@ -1,0 +1,13 @@
+Program %s/error_short_cmd_send.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break error_short_cmd_send.php:3
+Breakpoint 1 set on line 3 of error_short_cmd_send.php
+But wont break until file error_short_cmd_send.php has been loaded.
+run
+Breakpoint 1 reached on line 3 of %s/error_short_cmd_send.php
+   2 
+   3*error_log('error_short_cmd_send.php loaded');
+   4 (END)
+
+internaltesting shortcmdsend
+Executing internal test...
+DebuggerCommand::recv(): a socket error has happened

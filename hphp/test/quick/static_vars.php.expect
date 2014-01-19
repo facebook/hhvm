@@ -1,0 +1,12 @@
+foo 1
+bar 2
+A::baz 4
+A::priv 4
+A::baz 4
+A::priv 8
+foo 2
+bar 4
+A::baz 8
+A::priv 12
+A::baz 8
+A::priv 16

@@ -1,0 +1,23 @@
+*** Testing realpath() on filenames ***
+
+-- Iteration 1 --
+string(%d) "%s/readlink_realpath_basic2/home/readlink_realpath_basic2.tmp"
+
+-- Iteration 2 --
+string(%d) "%s/readlink_realpath_basic2/readlink_realpath_basic2.tmp"
+
+-- Iteration 3 --
+string(%d) "%s/readlink_realpath_basic2/home/test/readlink_realpath_basic2.tmp"
+
+-- Iteration 4 --
+string(%d) "%s/readlink_realpath_basic2/readlink_realpath_basic2.tmp"
+
+-- Iteration 5 --
+bool(false)
+
+-- Iteration 6 --
+bool(false)
+
+-- Iteration 7 --
+%s
+Done

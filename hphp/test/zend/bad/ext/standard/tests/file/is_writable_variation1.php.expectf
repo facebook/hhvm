@@ -1,0 +1,41 @@
+*** Testing is_writable(): usage variations ***
+-- Iteration 1 --
+bool(true)
+bool(true)
+-- Iteration 2 --
+bool(%s)
+bool(%s)
+-- Iteration 3 --
+bool(true)
+bool(true)
+-- Iteration 4 --
+bool(true)
+bool(true)
+-- Iteration 5 --
+bool(false)
+bool(false)
+-- Iteration 6 --
+bool(false)
+bool(false)
+-- Iteration 7 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+-- Iteration 8 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+-- Iteration 9 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+-- Iteration 10 --
+bool(true)
+bool(true)
+-- Iteration 11 --
+bool(true)
+bool(true)
+Done

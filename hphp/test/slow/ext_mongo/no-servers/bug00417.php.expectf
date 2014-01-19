@@ -1,0 +1,16 @@
+These should fail
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+These should pass
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+===DONE===

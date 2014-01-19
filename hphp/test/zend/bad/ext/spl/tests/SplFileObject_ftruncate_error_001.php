@@ -1,0 +1,27 @@
+<?php
+
+//create a basic stream class
+class VariableStream {
+    var $position;
+    var $varname;
+
+    function stream_open($path, $mode, $options, &$opened_path)
+    {
+        return true;
+    }
+
+    function url_stat() {
+    }
+}
+stream_wrapper_register("SPLtest", "VariableStream");
+$ftruncate_test = "";
+//end creating stream
+
+//open an SplFileObject using the above test stream
+$obj = New SplFileObject("SPLtest://ftruncate_test"); 
+try {
+	$obj->ftruncate(1);
+} catch (LogicException $e) {
+	echo($e->getMessage());
+}
+?>

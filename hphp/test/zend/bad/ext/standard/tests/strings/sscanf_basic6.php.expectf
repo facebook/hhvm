@@ -1,0 +1,19 @@
+*** Testing sscanf() : basic functionality - using unsigned format ***
+
+-- Try sccanf() WITHOUT optional args --
+string(10) "4294967285"
+int(11)
+int(11)
+string(10) "4294967285"
+NULL
+NULL
+
+-- Try sccanf() WITH optional args --
+int(4)
+string(10) "4294967285"
+int(11)
+int(11)
+string(10) "4294967285"
+NULL
+NULL
+===DONE===

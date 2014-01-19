@@ -1,0 +1,198 @@
+string(9) "HH\Vector"
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(2)
+}
+string(3) "Map"
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(2)
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(9) "StableMap"
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(2)
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(6) "HH\Set"
+array(2) {
+  ["a"]=>
+  string(1) "a"
+  [2]=>
+  int(2)
+}
+string(9) "HH\Vector"
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(2)
+}
+string(3) "Map"
+array(2) {
+  [1]=>
+  int(2)
+  ["A"]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(9) "StableMap"
+array(2) {
+  [1]=>
+  int(2)
+  ["A"]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(6) "HH\Set"
+array(2) {
+  ["a"]=>
+  string(1) "a"
+  [2]=>
+  int(2)
+}
+string(9) "HH\Vector"
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(2)
+}
+string(3) "Map"
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(2)
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(9) "StableMap"
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(2)
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(6) "HH\Set"
+array(2) {
+  ["a"]=>
+  string(1) "a"
+  [2]=>
+  int(2)
+}
+string(9) "HH\Vector"
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(2)
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(3) "Map"
+array(2) {
+  [1]=>
+  int(2)
+  ["A"]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(9) "StableMap"
+array(2) {
+  [1]=>
+  int(2)
+  ["A"]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(6) "HH\Set"
+array(2) {
+  [2]=>
+  int(2)
+  ["a"]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(9) "HH\Vector"
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(2)
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}
+string(6) "HH\Set"
+array(2) {
+  [2]=>
+  int(2)
+  ["a"]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "a"
+}

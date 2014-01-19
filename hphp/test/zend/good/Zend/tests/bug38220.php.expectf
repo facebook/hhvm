@@ -1,0 +1,30 @@
+before call func1
+A Object
+(
+    [i] => 1
+)
+func1(): 1
+after call func1
+A::__destruct()
+before call close
+A Object
+(
+    [i] => 1
+)
+close(): 1
+after call close
+before call func1
+A Object
+(
+    [i] => 2
+)
+func1(): 1
+after call func1
+A::__destruct()
+before call close
+A Object
+(
+    [i] => 2
+)
+close(): 2
+after call close

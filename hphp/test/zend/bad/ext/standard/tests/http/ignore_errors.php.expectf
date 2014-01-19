@@ -1,0 +1,70 @@
+-- Test: requests without ignore_errors --
+resource(%d) of type (stream)
+array(2) {
+  [0]=>
+  string(15) "HTTP/1.0 200 Ok"
+  [1]=>
+  string(10) "X-Foo: bar"
+}
+string(1) "1"
+string(48) "GET /foo/bar HTTP/1.0
+Host: 127.0.0.1:12342
+
+"
+HipHop Warning: %s
+ in %s on line %d
+bool(false)
+string(48) "GET /foo/bar HTTP/1.0
+Host: 127.0.0.1:12342
+
+"
+-- Test: requests with ignore_errors --
+resource(%d) of type (stream)
+array(2) {
+  [0]=>
+  string(15) "HTTP/1.0 200 Ok"
+  [1]=>
+  string(10) "X-Foo: bar"
+}
+string(1) "1"
+string(48) "GET /foo/bar HTTP/1.0
+Host: 127.0.0.1:12342
+
+"
+resource(%d) of type (stream)
+array(2) {
+  [0]=>
+  string(22) "HTTP/1.0 404 Not found"
+  [1]=>
+  string(10) "X-bar: baz"
+}
+string(1) "2"
+string(48) "GET /foo/bar HTTP/1.0
+Host: 127.0.0.1:12342
+
+"
+-- Test: requests with ignore_errors (2) --
+resource(%d) of type (stream)
+array(2) {
+  [0]=>
+  string(15) "HTTP/1.0 200 Ok"
+  [1]=>
+  string(10) "X-Foo: bar"
+}
+string(1) "1"
+string(48) "GET /foo/bar HTTP/1.0
+Host: 127.0.0.1:12342
+
+"
+resource(%d) of type (stream)
+array(2) {
+  [0]=>
+  string(22) "HTTP/1.0 404 Not found"
+  [1]=>
+  string(10) "X-bar: baz"
+}
+string(1) "2"
+string(48) "GET /foo/bar HTTP/1.0
+Host: 127.0.0.1:12342
+
+"

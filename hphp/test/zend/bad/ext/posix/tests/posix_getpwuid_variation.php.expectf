@@ -1,0 +1,84 @@
+*** Testing posix_getpwuid() : usage variations ***
+HipHop Notice: %s
+HipHop Notice: %s
+
+Arg value 10.5 
+valid output
+
+Arg value -10.5 
+valid output
+
+Arg value 101234567000 
+valid output
+
+Arg value 1.07654321E-9 
+valid output
+
+Arg value 0.5 
+valid output
+HipHop Notice: %s
+
+Arg value Array 
+HipHop Warning: %s
+valid output
+HipHop Notice: %s
+
+Arg value Array 
+HipHop Warning: %s
+valid output
+HipHop Notice: %s
+
+Arg value Array 
+HipHop Warning: %s
+valid output
+HipHop Notice: %s
+
+Arg value Array 
+HipHop Warning: %s
+valid output
+HipHop Notice: %s
+
+Arg value Array 
+HipHop Warning: %s
+valid output
+
+Arg value  
+valid output
+
+Arg value  
+valid output
+
+Arg value 1 
+valid output
+
+Arg value  
+valid output
+
+Arg value 1 
+valid output
+
+Arg value  
+valid output
+
+Arg value  
+HipHop Warning: %s
+valid output
+
+Arg value  
+HipHop Warning: %s
+valid output
+
+Arg value string 
+HipHop Warning: %s
+valid output
+
+Arg value string 
+HipHop Warning: %s
+valid output
+
+Arg value  
+valid output
+
+Arg value  
+valid output
+HipHop Fatal error: %s

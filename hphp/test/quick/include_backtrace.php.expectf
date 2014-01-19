@@ -1,0 +1,10 @@
+Array
+(
+    [0] => Array
+        (
+            [file] => %s
+            [line] => 1
+            [function] => include
+        )
+
+)

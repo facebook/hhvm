@@ -1,0 +1,86 @@
+*** Testing quoted_printable_decode() : with unexpected values for 'str' argument ***
+
+-- Iteration 1 --
+string(2) "30"
+
+-- Iteration 2 --
+string(2) "31"
+
+-- Iteration 3 --
+string(10) "3132333435"
+
+-- Iteration 4 --
+string(10) "2d32333435"
+
+-- Iteration 5 --
+string(8) "31302e35"
+
+-- Iteration 6 --
+string(10) "2d31302e35"
+
+-- Iteration 7 --
+string(24) "313031323334353637303030"
+
+-- Iteration 8 --
+string(26) "312e3037363534333231452d39"
+
+-- Iteration 9 --
+string(6) "302e35"
+
+-- Iteration 10 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 11 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 12 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 13 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 14 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 15 --
+string(0) ""
+
+-- Iteration 16 --
+string(0) ""
+
+-- Iteration 17 --
+string(2) "31"
+
+-- Iteration 18 --
+string(0) ""
+
+-- Iteration 19 --
+string(2) "31"
+
+-- Iteration 20 --
+string(0) ""
+
+-- Iteration 21 --
+string(0) ""
+
+-- Iteration 22 --
+string(0) ""
+
+-- Iteration 23 --
+string(12) "4f626a656374"
+
+-- Iteration 24 --
+string(0) ""
+
+-- Iteration 25 --
+string(0) ""
+
+-- Iteration 26 --
+HipHop Warning: %s
+string(0) ""
+===DONE===

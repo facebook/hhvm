@@ -1,0 +1,73 @@
+int(11)
+int(42)
+int(73)
+string(1) "a"
+int(1)
+int(2)
+string(1) "b"
+string(1) "z"
+int(9)
+object(HH\Vector)#10 (3) {
+  [0]=>
+  object(Pair)#14 (2) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    int(1)
+  }
+  [1]=>
+  object(Pair)#15 (2) {
+    [0]=>
+    int(2)
+    [1]=>
+    string(1) "b"
+  }
+  [2]=>
+  object(Pair)#16 (2) {
+    [0]=>
+    string(1) "z"
+    [1]=>
+    int(9)
+  }
+}
+------------------------
+object(HH\Vector)#19 (3) {
+  [0]=>
+  object(Pair)#20 (2) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    int(1)
+  }
+  [1]=>
+  object(Pair)#21 (2) {
+    [0]=>
+    int(2)
+    [1]=>
+    string(1) "b"
+  }
+  [2]=>
+  object(Pair)#22 (2) {
+    [0]=>
+    string(1) "z"
+    [1]=>
+    int(9)
+  }
+}
+object(StableMap)#26 (3) {
+  ["a"]=>
+  int(1)
+  [2]=>
+  string(1) "b"
+  ["z"]=>
+  int(9)
+}
+------------------------
+object(StableMap)#31 (3) {
+  ["a"]=>
+  int(1)
+  [2]=>
+  string(1) "b"
+  ["z"]=>
+  int(9)
+}

@@ -1,0 +1,180 @@
+*** Testing file() : usage variation ***
+
+--float 10.5--
+array(3) {
+  [0]=>
+  string(6) "Line 1"
+  [1]=>
+  string(6) "Line 2"
+  [2]=>
+  string(6) "Line 3"
+}
+
+--float -10.5--
+Error: 2 - file(): '-10' flag is not supported, %s(%d)
+bool(false)
+
+--float 12.3456789000e10--
+Error: 2 - file(): '%i' flag is not supported, %s(%d)
+bool(false)
+
+--float -12.3456789000e10--
+Error: 2 - file(): '%i' flag is not supported, %s(%d)
+bool(false)
+
+--float .5--
+array(3) {
+  [0]=>
+  string(7) "Line 1
+"
+  [1]=>
+  string(7) "Line 2
+"
+  [2]=>
+  string(6) "Line 3"
+}
+
+--empty array--
+Error: 2 - file() expects parameter 2 to be long, array given, %s(%d)
+NULL
+
+--int indexed array--
+Error: 2 - file() expects parameter 2 to be long, array given, %s(%d)
+NULL
+
+--associative array--
+Error: 2 - file() expects parameter 2 to be long, array given, %s(%d)
+NULL
+
+--nested arrays--
+Error: 2 - file() expects parameter 2 to be long, array given, %s(%d)
+NULL
+
+--uppercase NULL--
+array(3) {
+  [0]=>
+  string(7) "Line 1
+"
+  [1]=>
+  string(7) "Line 2
+"
+  [2]=>
+  string(6) "Line 3"
+}
+
+--lowercase null--
+array(3) {
+  [0]=>
+  string(7) "Line 1
+"
+  [1]=>
+  string(7) "Line 2
+"
+  [2]=>
+  string(6) "Line 3"
+}
+
+--lowercase true--
+array(3) {
+  [0]=>
+  string(7) "Line 1
+"
+  [1]=>
+  string(7) "Line 2
+"
+  [2]=>
+  string(6) "Line 3"
+}
+
+--lowercase false--
+array(3) {
+  [0]=>
+  string(7) "Line 1
+"
+  [1]=>
+  string(7) "Line 2
+"
+  [2]=>
+  string(6) "Line 3"
+}
+
+--uppercase TRUE--
+array(3) {
+  [0]=>
+  string(7) "Line 1
+"
+  [1]=>
+  string(7) "Line 2
+"
+  [2]=>
+  string(6) "Line 3"
+}
+
+--uppercase FALSE--
+array(3) {
+  [0]=>
+  string(7) "Line 1
+"
+  [1]=>
+  string(7) "Line 2
+"
+  [2]=>
+  string(6) "Line 3"
+}
+
+--empty string DQ--
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
+NULL
+
+--empty string SQ--
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
+NULL
+
+--string DQ--
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
+NULL
+
+--string SQ--
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
+NULL
+
+--mixed case string--
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
+NULL
+
+--heredoc--
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
+NULL
+
+--instance of classWithToString--
+Error: 2 - file() expects parameter 2 to be long, object given, %s(%d)
+NULL
+
+--instance of classWithoutToString--
+Error: 2 - file() expects parameter 2 to be long, object given, %s(%d)
+NULL
+
+--undefined var--
+array(3) {
+  [0]=>
+  string(7) "Line 1
+"
+  [1]=>
+  string(7) "Line 2
+"
+  [2]=>
+  string(6) "Line 3"
+}
+
+--unset var--
+array(3) {
+  [0]=>
+  string(7) "Line 1
+"
+  [1]=>
+  string(7) "Line 2
+"
+  [2]=>
+  string(6) "Line 3"
+}
+===DONE===

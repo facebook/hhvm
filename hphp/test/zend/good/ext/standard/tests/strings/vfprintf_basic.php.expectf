@@ -1,0 +1,18 @@
+*** Testing vfprintf() : basic functionality ***
+string(17) "Foo is 30 and bar"
+int(17)
+string(11) "bar bar bar"
+int(11)
+string(8) "54 digit"
+int(8)
+string(3) "1 0"
+int(3)
+string(5) "A B C"
+int(5)
+string(35) "1.000000e+3 2.000000E+4 2.000000e+2"
+int(35)
+string(2) "50"
+int(2)
+string(35) "Testing 1001 6 2.550200 foobar f 41"
+int(35)
+===DONE===

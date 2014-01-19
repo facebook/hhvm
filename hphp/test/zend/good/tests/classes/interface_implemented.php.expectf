@@ -1,0 +1,39 @@
+is_a(base, base) = yes
+is_a(base, derived_a) = no
+is_a(base, derived_b) = no
+is_a(base, derived_c) = no
+is_a(base, derived_d) = no
+is_a(base, if_a) = no
+is_a(base, if_b) = no
+
+is_a(derived_a, base) = yes
+is_a(derived_a, derived_a) = yes
+is_a(derived_a, derived_b) = no
+is_a(derived_a, derived_c) = no
+is_a(derived_a, derived_d) = no
+is_a(derived_a, if_a) = yes
+is_a(derived_a, if_b) = no
+
+is_a(derived_b, base) = yes
+is_a(derived_b, derived_a) = no
+is_a(derived_b, derived_b) = yes
+is_a(derived_b, derived_c) = no
+is_a(derived_b, derived_d) = no
+is_a(derived_b, if_a) = yes
+is_a(derived_b, if_b) = yes
+
+is_a(derived_c, base) = yes
+is_a(derived_c, derived_a) = yes
+is_a(derived_c, derived_b) = no
+is_a(derived_c, derived_c) = yes
+is_a(derived_c, derived_d) = no
+is_a(derived_c, if_a) = yes
+is_a(derived_c, if_b) = yes
+
+is_a(derived_d, base) = yes
+is_a(derived_d, derived_a) = yes
+is_a(derived_d, derived_b) = no
+is_a(derived_d, derived_c) = yes
+is_a(derived_d, derived_d) = yes
+is_a(derived_d, if_a) = yes
+is_a(derived_d, if_b) = yes

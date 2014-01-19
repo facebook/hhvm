@@ -1,0 +1,5 @@
+*** Testing readdir() : usage variations ***
+resource(%d) of type (stream)
+HipHop Warning: %s
+bool(false)
+===DONE===

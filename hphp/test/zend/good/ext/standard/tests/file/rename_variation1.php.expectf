@@ -1,0 +1,14 @@
+*** Testing rename() : renaming directory across directories ***
+-- Iteration 1 --
+bool(true)
+bool(false)
+bool(true)
+-- Iteration 2 --
+bool(true)
+bool(false)
+bool(true)
+-- Iteration 3 --
+bool(true)
+bool(false)
+bool(true)
+Done

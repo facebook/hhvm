@@ -1,0 +1,10 @@
+*** Testing mb_strlen() : error conditions ***
+
+-- Testing mb_strlen() function with Zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing mb_strlen() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+Done

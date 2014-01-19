@@ -1,0 +1,19 @@
+--> Access visible static prop like instance prop:
+bool(false)
+
+Strict Standards: Accessing static property C::$x as non static in %s on line 11
+
+Strict Standards: Accessing static property C::$x as non static in %s on line 12
+HipHop Notice: %s
+
+Strict Standards: Accessing static property C::$x as non static in %s on line 13
+
+Strict Standards: Accessing static property C::$x as non static in %s on line 15
+
+Strict Standards: Accessing static property C::$x as non static in %s on line 16
+%unicode|string%(3) "ref"
+%unicode|string%(5) "C::$x"
+
+--> Access non-visible static prop like instance prop:
+bool(false)
+==Done==

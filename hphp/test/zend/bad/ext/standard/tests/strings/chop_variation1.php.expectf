@@ -1,0 +1,96 @@
+*** Testing chop() : with unexpected values for str argument ***
+HipHop Notice: %s
+HipHop Notice: %s
+
+--- Testing chop() by supplying different values for 'str' argument ---
+-- Iteration 1 --
+string(1) "0"
+string(0) ""
+-- Iteration 2 --
+string(1) "1"
+string(0) ""
+-- Iteration 3 --
+string(5) "12345"
+string(0) ""
+-- Iteration 4 --
+string(5) "-2345"
+string(1) "-"
+-- Iteration 5 --
+string(4) "10.5"
+string(3) "10."
+-- Iteration 6 --
+string(5) "-10.5"
+string(4) "-10."
+-- Iteration 7 --
+string(12) "101234567000"
+string(0) ""
+-- Iteration 8 --
+string(13) "1.07654321E-9"
+string(12) "1.07654321E-"
+-- Iteration 9 --
+string(3) "0.5"
+string(2) "0."
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+-- Iteration 11 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+-- Iteration 12 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+-- Iteration 13 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+-- Iteration 14 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+-- Iteration 15 --
+string(1) "1"
+string(0) ""
+-- Iteration 16 --
+string(0) ""
+string(0) ""
+-- Iteration 17 --
+string(1) "1"
+string(0) ""
+-- Iteration 18 --
+string(0) ""
+string(0) ""
+-- Iteration 19 --
+string(0) ""
+string(0) ""
+-- Iteration 20 --
+string(0) ""
+string(0) ""
+-- Iteration 21 --
+string(0) ""
+string(0) ""
+-- Iteration 22 --
+string(0) ""
+string(0) ""
+-- Iteration 23 --
+string(0) ""
+string(0) ""
+-- Iteration 24 --
+string(0) ""
+string(0) ""
+-- Iteration 25 --
+string(16) " @#$%Object @#$%"
+string(11) " @#$%Object"
+-- Iteration 26 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

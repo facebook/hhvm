@@ -1,0 +1,7 @@
+*** Testing lstat() for link after using touch() on the link ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+--- Done ---

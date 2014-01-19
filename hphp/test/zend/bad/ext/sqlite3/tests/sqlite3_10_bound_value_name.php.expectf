@@ -1,0 +1,19 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+SELECTING results
+BINDING Value
+bool(true)
+BINDING Value Again
+bool(true)
+array(2) {
+  [0]=>
+  int(%d)
+  [1]=>
+  string(1) "a"
+}
+Closing database
+bool(true)
+Done

@@ -1,0 +1,13 @@
+*** Testing glob() : error conditions ***
+-- Testing glob() with unexpected no. of arguments --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Testing glob() with invalid arguments --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

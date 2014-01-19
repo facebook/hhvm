@@ -1,0 +1,114 @@
+*** Testing new DateTime() : usage variation -  unexpected values to second argument $timezone***
+
+-- int 0 --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer given
+
+-- int 1 --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer given
+
+-- int 12345 --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer given
+
+-- int -12345 --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer given
+
+-- float 10.5 --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, double given
+
+-- float -10.5 --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, double given
+
+-- float .5 --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, double given
+
+-- empty array --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, array given
+
+-- int indexed array --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, array given
+
+-- associative array --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, array given
+
+-- nested arrays --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, array given
+
+-- uppercase NULL --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- lowercase null --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- lowercase true --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+
+-- lowercase false --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+
+-- uppercase TRUE --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+
+-- uppercase FALSE --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+
+-- empty string DQ --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
+
+-- empty string SQ --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
+
+-- string DQ --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
+
+-- string SQ --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
+
+-- mixed case string --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
+
+-- heredoc --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
+
+-- instance of classWithToString --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, object given
+
+-- instance of classWithoutToString --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, object given
+
+-- undefined var --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- unset var --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2005-07-14 22:30:41"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- resource --
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, resource given
+===DONE===

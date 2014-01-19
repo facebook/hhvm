@@ -1,0 +1,127 @@
+XMLReader
+object(XMLReader)#1 (0) {
+}
+string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"XMLReader";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(9) "XMLReader"
+}
+array(26) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(4) "open"
+  [2]=>
+  string(3) "XML"
+  [3]=>
+  string(5) "close"
+  [4]=>
+  string(4) "read"
+  [5]=>
+  string(4) "next"
+  [6]=>
+  string(10) "readString"
+  [7]=>
+  string(12) "readInnerXML"
+  [8]=>
+  string(12) "readOuterXML"
+  [9]=>
+  string(19) "moveToNextAttribute"
+  [10]=>
+  string(12) "getAttribute"
+  [11]=>
+  string(14) "getAttributeNo"
+  [12]=>
+  string(14) "getAttributeNs"
+  [13]=>
+  string(15) "moveToAttribute"
+  [14]=>
+  string(17) "moveToAttributeNo"
+  [15]=>
+  string(17) "moveToAttributeNs"
+  [16]=>
+  string(13) "moveToElement"
+  [17]=>
+  string(20) "moveToFirstAttribute"
+  [18]=>
+  string(7) "isValid"
+  [19]=>
+  string(5) "__get"
+  [20]=>
+  string(17) "getParserProperty"
+  [21]=>
+  string(15) "lookupNamespace"
+  [22]=>
+  string(9) "setSchema"
+  [23]=>
+  string(17) "setParserProperty"
+  [24]=>
+  string(16) "setRelaxNGSchema"
+  [25]=>
+  string(22) "setRelaxNGSchemaSource"
+}
+================
+A_XMLReader
+object(A_XMLReader)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(96) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:11:"A_XMLReader";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(11) "A_XMLReader"
+}
+array(26) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(4) "open"
+  [2]=>
+  string(3) "XML"
+  [3]=>
+  string(5) "close"
+  [4]=>
+  string(4) "read"
+  [5]=>
+  string(4) "next"
+  [6]=>
+  string(10) "readString"
+  [7]=>
+  string(12) "readInnerXML"
+  [8]=>
+  string(12) "readOuterXML"
+  [9]=>
+  string(19) "moveToNextAttribute"
+  [10]=>
+  string(12) "getAttribute"
+  [11]=>
+  string(14) "getAttributeNo"
+  [12]=>
+  string(14) "getAttributeNs"
+  [13]=>
+  string(15) "moveToAttribute"
+  [14]=>
+  string(17) "moveToAttributeNo"
+  [15]=>
+  string(17) "moveToAttributeNs"
+  [16]=>
+  string(13) "moveToElement"
+  [17]=>
+  string(20) "moveToFirstAttribute"
+  [18]=>
+  string(7) "isValid"
+  [19]=>
+  string(5) "__get"
+  [20]=>
+  string(17) "getParserProperty"
+  [21]=>
+  string(15) "lookupNamespace"
+  [22]=>
+  string(9) "setSchema"
+  [23]=>
+  string(17) "setParserProperty"
+  [24]=>
+  string(16) "setRelaxNGSchema"
+  [25]=>
+  string(22) "setRelaxNGSchemaSource"
+}

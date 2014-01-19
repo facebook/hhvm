@@ -1,0 +1,6 @@
+*** Testing fileperms(), chmod() with files and dirs ***
+bool(true)
+100755
+bool(true)
+40777
+Done

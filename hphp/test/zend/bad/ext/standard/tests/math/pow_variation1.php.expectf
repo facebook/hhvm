@@ -1,0 +1,81 @@
+*** Testing pow() : usage variations ***
+
+-- Iteration 1 --
+int(0)
+
+-- Iteration 2 --
+int(1)
+
+-- Iteration 3 --
+float(1881365963625)
+
+-- Iteration 4 --
+float(-12895213625)
+
+-- Iteration 5 --
+float(9.903520300448E+27)
+
+-- Iteration 6 --
+float(1157.625)
+
+-- Iteration 7 --
+float(-1157.625)
+
+-- Iteration 8 --
+float(1.881676371789%dE+33)
+
+-- Iteration 9 --
+float(1.881676371789%dE-27)
+
+-- Iteration 10 --
+float(0.125)
+
+-- Iteration 11 --
+int(0)
+
+-- Iteration 12 --
+int(0)
+
+-- Iteration 13 --
+int(1)
+
+-- Iteration 14 --
+int(0)
+
+-- Iteration 15 --
+int(1)
+
+-- Iteration 16 --
+int(0)
+
+-- Iteration 17 --
+int(0)
+
+-- Iteration 18 --
+int(0)
+
+-- Iteration 19 --
+float(0)
+
+-- Iteration 20 --
+int(0)
+
+-- Iteration 21 --
+int(0)
+
+-- Iteration 22 --
+int(0)
+
+-- Iteration 23 --
+HipHop Notice: %s
+int(1)
+
+-- Iteration 24 --
+int(0)
+
+-- Iteration 25 --
+int(0)
+
+-- Iteration 26 --
+%s
+===Done===

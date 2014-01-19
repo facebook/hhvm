@@ -1,0 +1,7 @@
+Simple testcase for get_magic_quotes_gpc() function
+bool(false)
+
+-- Error cases --
+HipHop Warning: %s
+NULL
+===DONE===

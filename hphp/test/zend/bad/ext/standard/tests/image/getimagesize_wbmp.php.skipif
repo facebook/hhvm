@@ -1,0 +1,5 @@
+<?php
+	if (!defined("IMAGETYPE_WBMP")) {
+		die("skip wbmp file format is not available");
+	}
+?>

@@ -1,0 +1,18 @@
+*** Testing session_name() : variation ***
+string(9) "PHPSESSID"
+bool(true)
+string(9) "PHPSESSID"
+bool(true)
+string(9) "PHPSESSID"
+string(9) "PHPSESSID"
+bool(true)
+string(1) "	"
+bool(true)
+string(1) "	"
+HipHop Warning: %s
+string(1) "	"
+bool(true)
+string(1) "	"
+bool(true)
+string(1) "	"
+Done

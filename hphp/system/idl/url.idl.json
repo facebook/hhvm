@@ -1,0 +1,247 @@
+{
+    "preamble": "",
+    "consts": [
+        {
+            "name": "PHP_URL_FRAGMENT",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_HOST",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_PASS",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_PATH",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_PORT",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_QUERY",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_SCHEME",
+            "type": "Int64"
+        },
+        {
+            "name": "PHP_URL_USER",
+            "type": "Int64"
+        }
+    ],
+    "funcs": [
+        {
+            "name": "base64_decode",
+            "desc": "Decodes a base64 encoded data.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the original data or FALSE on failure. The returned data may be binary."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The encoded data."
+                },
+                {
+                    "name": "strict",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "Returns FALSE if input contains character from outside the base64 alphabet."
+                }
+            ]
+        },
+        {
+            "name": "base64_encode",
+            "desc": "Encodes the given data with base64.\n\nThis encoding is designed to make binary data survive transport through transport layers that are not 8-bit clean, such as mail bodies.\n\nBase64-encoded data takes about 33% more space than the original data.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "The encoded data, as a string."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data to encode."
+                }
+            ]
+        },
+        {
+            "name": "get_headers",
+            "desc": "get_headers() returns an array with the headers sent by the server in response to a HTTP request.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an indexed or associative array with the headers, or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "url",
+                    "type": "String",
+                    "desc": "The target URL."
+                },
+                {
+                    "name": "format",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "If the optional format parameter is set to non-zero, get_headers() parses the response and sets the array's keys."
+                }
+            ]
+        },
+        {
+            "name": "get_meta_tags",
+            "desc": "Opens filename and parses it line by line for <meta> tags in the file. The parsing stops at <\/head>.",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringVec",
+                "desc": "Returns an array with all the parsed meta tags.\n\nThe value of the name property becomes the key, the value of the content property becomes the value of the returned array, so you can easily use standard array functions to traverse it or access single values. Special characters in the value of the name property are substituted with '_', the rest is converted to lower case. If two meta tags have the same name, only the last one is returned."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "The path to the HTML file, as a string. This can be a local file or an URL.\n\nExample #1 What get_meta_tags() parses\n\n(pay attention to line endings - PHP uses a native function to parse the input, so a Mac file won't work on Unix)."
+                },
+                {
+                    "name": "use_include_path",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "Setting use_include_path to TRUE will result in PHP trying to open the file along the standard include path as per the include_path directive. This is used for local files, not URLs."
+                }
+            ]
+        },
+        {
+            "name": "http_build_query",
+            "desc": "Generates a URL-encoded query string from the associative (or indexed) array provided.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a URL-encoded string."
+            },
+            "args": [
+                {
+                    "name": "formdata",
+                    "type": "Variant",
+                    "desc": "May be an array or object containing properties.\n\nIf query_data is an array, it may be a simple one-dimensional structure, or an array of arrays (which in turn may contain other arrays).\n\nIf query_data is an object, then only public properties will be incorporated into the result."
+                },
+                {
+                    "name": "numeric_prefix",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "If numeric indices are used in the base array and this parameter is provided, it will be prepended to the numeric index for elements in the base array only.\n\nThis is meant to allow for legal variable names when the data is decoded by PHP or another CGI application later on."
+                },
+                {
+                    "name": "arg_separator",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "arg_separator.output is used to separate arguments, unless this parameter is specified, and is then used."
+                }
+            ]
+        },
+        {
+            "name": "parse_url",
+            "desc": "This function parses a URL and returns an associative array containing any of the various components of the URL that are present.\n\nThis function is not meant to validate the given URL, it only breaks it up into the above listed parts. Partial URLs are also accepted, parse_url() tries its best to parse them correctly.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "On seriously malformed URLs, parse_url() may return FALSE. Otherwise an associative array is returned, whose components may be (at least one): scheme - e.g. http host port user pass path query - after the question mark ? fragment - after the hashmark #\n\nIf the component parameter is specified a string is returned instead of an array."
+            },
+            "args": [
+                {
+                    "name": "url",
+                    "type": "String",
+                    "desc": "The URL to parse. Invalid characters are replaced by _."
+                },
+                {
+                    "name": "component",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "Specify one of PHP_URL_SCHEME, PHP_URL_HOST, PHP_URL_PORT, PHP_URL_USER, PHP_URL_PASS, PHP_URL_PATH, PHP_URL_QUERY or PHP_URL_FRAGMENT to retrieve just a specific URL component as a string."
+                }
+            ]
+        },
+        {
+            "name": "rawurldecode",
+            "desc": "Returns a string in which the sequences with percent (%) signs followed by two hex digits have been replaced with literal characters.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the decoded URL, as a string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The URL to be decoded."
+                }
+            ]
+        },
+        {
+            "name": "rawurlencode",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": null
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The URL to be encoded."
+                }
+            ]
+        },
+        {
+            "name": "urldecode",
+            "desc": "Decodes any %## encoding in the given string. Plus symbols ('+') are decoded to a space character.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the decoded string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to be decoded."
+                }
+            ]
+        },
+        {
+            "name": "urlencode",
+            "desc": "This function is convenient when encoding a string to be used in a query part of a URL, as a convenient way to pass variables to the next page.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": null
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to be encoded."
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

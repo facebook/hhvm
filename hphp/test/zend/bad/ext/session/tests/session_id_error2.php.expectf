@@ -1,0 +1,10 @@
+*** Testing session_id() : error functionality ***
+string(0) ""
+bool(true)
+string(%d) "%s"
+string(4) "test"
+string(4) "test"
+string(10) "1234567890"
+bool(true)
+string(0) ""
+Done

@@ -1,0 +1,160 @@
+Calling main
+Entering main
+dumper 0 constructing
+dumper 0 destructing
+object(dumper)#1 (2) {
+  ["n":"dumper":private]=>
+  int(0)
+  ["prop"]=>
+  string(13) "default value"
+}
+array(0) {
+}
+dumper 1 constructing
+dumper 1 destructing
+object(dumper)#2 (2) {
+  ["n":"dumper":private]=>
+  int(1)
+  ["prop"]=>
+  string(13) "default value"
+}
+array(1) {
+  ["dumper"]=>
+  int(24)
+}
+dumper 2 constructing
+dumper 3 constructing
+dumper 3 destructing
+object(dumper)#3 (2) {
+  ["n":"dumper":private]=>
+  int(3)
+  ["prop"]=>
+  NULL
+}
+array(2) {
+  ["dumper"]=>
+  object(dumper)#2 (2) {
+    ["n":"dumper":private]=>
+    int(2)
+    ["prop"]=>
+    string(13) "default value"
+  }
+  [234]=>
+  int(234)
+}
+dumper 4 constructing
+dumper 2 destructing
+object(dumper)#2 (2) {
+  ["n":"dumper":private]=>
+  int(2)
+  ["prop"]=>
+  string(13) "default value"
+}
+array(2) {
+  ["dumper"]=>
+  object(dumper)#3 (3) {
+    ["n":"dumper":private]=>
+    int(4)
+    ["prop"]=>
+    string(13) "default value"
+    ["propp"]=>
+    NULL
+  }
+  [234]=>
+  int(234)
+}
+dumper 5 constructing
+dumper 4 destructing
+object(dumper)#3 (3) {
+  ["n":"dumper":private]=>
+  int(4)
+  ["prop"]=>
+  string(13) "default value"
+  ["propp"]=>
+  NULL
+}
+array(2) {
+  ["dumper"]=>
+  object(dumper)#4 (3) {
+    ["n":"dumper":private]=>
+    int(5)
+    ["prop"]=>
+    string(13) "default value"
+    ["proppp"]=>
+    NULL
+  }
+  [234]=>
+  int(234)
+}
+dumper 6 constructing
+dumper 5 destructing
+object(dumper)#4 (3) {
+  ["n":"dumper":private]=>
+  int(5)
+  ["prop"]=>
+  string(13) "default value"
+  ["proppp"]=>
+  NULL
+}
+array(2) {
+  ["dumper"]=>
+  object(dumper)#5 (2) {
+    ["n":"dumper":private]=>
+    int(6)
+    ["prop"]=>
+    string(13) "default value"
+  }
+  [234]=>
+  int(234)
+}
+dumper 6 destructing
+object(dumper)#5 (2) {
+  ["n":"dumper":private]=>
+  int(6)
+  ["prop"]=>
+  string(13) "default value"
+}
+dumper 7 constructing
+dumper 7 destructing
+object(dumper)#5 (2) {
+  ["n":"dumper":private]=>
+  int(7)
+  ["prop"]=>
+  string(3) "foo"
+}
+dumper 8 constructing
+dumper 8 destructing
+object(dumper)#5 (2) {
+  ["n":"dumper":private]=>
+  int(8)
+  ["prop"]=>
+  string(13) "default value"
+}
+string(13) "default value"
+dumper 9 constructing
+dumper 9 destructing
+object(dumper)#5 (2) {
+  ["n":"dumper":private]=>
+  int(9)
+  ["prop"]=>
+  string(3) "bar"
+}
+dumper 10 constructing
+dumper 10 destructing
+object(dumper)#5 (2) {
+  ["n":"dumper":private]=>
+  int(10)
+  ["prop"]=>
+  string(13) "default value"
+}
+string(1) "f"
+dumper 11 constructing
+dumper 11 destructing
+object(dumper)#5 (2) {
+  ["n":"dumper":private]=>
+  int(11)
+  ["prop"]=>
+  string(13) "default value"
+}
+Done with main
+Main has returned

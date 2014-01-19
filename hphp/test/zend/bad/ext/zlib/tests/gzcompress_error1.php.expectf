@@ -1,0 +1,22 @@
+*** Testing gzcompress() : error conditions ***
+
+-- Testing gzcompress() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing gzcompress() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing with incorrect compression level --
+HipHop Warning: %s
+bool(false)
+
+-- Testing with invalid encoding --
+HipHop Warning: %s
+bool(false)
+
+-- Testing with incorrect parameters --
+HipHop Warning: %s
+NULL
+===Done===

@@ -1,0 +1,6 @@
+object(test)#1 (2) {
+  ["bar"]=>
+  int(1)
+  ["foo"]=>
+  int(2)
+}

@@ -1,0 +1,13 @@
+Calling main()
+main() starting
+Calling foo()
+Calling bar()
+In ThrowDestruct2::__destruct()
+HipHop Warning: Destructor threw an object exception: exception 'Ex2' with message 'Exception leaked out of ThrowDestruct2::__destruct()' in %s/test/quick/exception_destructor_3.php:23
+Stack trace:
+#0 %s/test/quick/exception_destructor_3.php(%d): ThrowDestruct2->__destruct()
+#1 %s/test/quick/exception_destructor_3.php(43): bar()
+#2 %s/test/quick/exception_destructor_3.php(64): foo()
+#3 %s/test/quick/exception_destructor_3.php(76): main()
+#4 {main} in %s/test/quick/exception_destructor_3.php on line %d
+After bar()

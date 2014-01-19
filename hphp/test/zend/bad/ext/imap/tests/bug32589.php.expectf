@@ -1,0 +1,9 @@
+MIME-Version: 1.0
+Content-Type: MULTIPART/mixed; BOUNDARY="%s"
+
+%s
+Content-Type: TEXT/plain; CHARSET=ISO-8859-2
+Content-Description: text_message
+
+hello
+%s

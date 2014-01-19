@@ -1,0 +1,111 @@
+SimpleXMLElement
+HipHop Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+object(SimpleXMLElement)#1 (0) {
+}
+string(101) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:16:"SimpleXMLElement";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(16) "SimpleXMLElement"
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "offsetExists"
+  [2]=>
+  string(9) "offsetGet"
+  [3]=>
+  string(9) "offsetSet"
+  [4]=>
+  string(11) "offsetUnset"
+  [5]=>
+  string(11) "getIterator"
+  [6]=>
+  string(5) "count"
+  [7]=>
+  string(5) "xpath"
+  [8]=>
+  string(22) "registerXPathNamespace"
+  [9]=>
+  string(5) "asXML"
+  [10]=>
+  string(13) "getNamespaces"
+  [11]=>
+  string(16) "getDocNamespaces"
+  [12]=>
+  string(8) "children"
+  [13]=>
+  string(7) "getName"
+  [14]=>
+  string(10) "attributes"
+  [15]=>
+  string(8) "addChild"
+  [16]=>
+  string(12) "addAttribute"
+  [17]=>
+  string(10) "__toString"
+  [18]=>
+  string(5) "__get"
+  [19]=>
+  string(5) "__set"
+  [20]=>
+  string(7) "__isset"
+  [21]=>
+  string(7) "__unset"
+}
+================
+A_SimpleXMLElement
+HipHop Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+object(A_SimpleXMLElement)#3 (0) {
+}
+string(103) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:18:"A_SimpleXMLElement";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(18) "A_SimpleXMLElement"
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "offsetExists"
+  [2]=>
+  string(9) "offsetGet"
+  [3]=>
+  string(9) "offsetSet"
+  [4]=>
+  string(11) "offsetUnset"
+  [5]=>
+  string(11) "getIterator"
+  [6]=>
+  string(5) "count"
+  [7]=>
+  string(5) "xpath"
+  [8]=>
+  string(22) "registerXPathNamespace"
+  [9]=>
+  string(5) "asXML"
+  [10]=>
+  string(13) "getNamespaces"
+  [11]=>
+  string(16) "getDocNamespaces"
+  [12]=>
+  string(8) "children"
+  [13]=>
+  string(7) "getName"
+  [14]=>
+  string(10) "attributes"
+  [15]=>
+  string(8) "addChild"
+  [16]=>
+  string(12) "addAttribute"
+  [17]=>
+  string(10) "__toString"
+  [18]=>
+  string(5) "__get"
+  [19]=>
+  string(5) "__set"
+  [20]=>
+  string(7) "__isset"
+  [21]=>
+  string(7) "__unset"
+}

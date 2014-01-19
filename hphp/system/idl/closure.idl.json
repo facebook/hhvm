@@ -1,0 +1,30 @@
+{
+    "preamble": "#include <runtime\/vm\/func.h>\n",
+    "consts": [
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "Closure",
+            "desc": "Used as the base class for all closures",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

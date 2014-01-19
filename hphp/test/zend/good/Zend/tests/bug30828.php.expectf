@@ -1,0 +1,12 @@
+#0  A->__construct() called at [%sbug30828.php:30]
+#1  B->__construct() called at [%sbug30828.php:42]
+A->__construct
+B->__construct
+#0  A->foo() called at [%sbug30828.php:34]
+#1  B->foo() called at [%sbug30828.php:43]
+A->foo
+B->foo
+#0  A::bar() called at [%sbug30828.php:38]
+#1  B::bar() called at [%sbug30828.php:44]
+A::bar
+B::bar

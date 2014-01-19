@@ -1,0 +1,43 @@
+*** Testing tempnam() with invalid/non-existing directory names ***
+-- Iteration 0 --
+File name is => %s%etempnam_variation3.tmp%s
+File permissions are => 100600
+File created in => temp dir
+-- Iteration 1 --
+File name is => %s%etempnam_variation3.tmp%s
+File permissions are => 100600
+File created in => temp dir
+-- Iteration 2 --
+File name is => %s%etempnam_variation3.tmp%s
+File permissions are => 100600
+File created in => temp dir
+-- Iteration 3 --
+File name is => %s%etempnam_variation3.tmp%s
+File permissions are => 100600
+File created in => temp dir
+-- Iteration 4 --
+File name is => %s%etempnam_variation3.tmp%s
+File permissions are => 100600
+File created in => temp dir
+-- Iteration 5 --
+File name is => %s%etempnam_variation3.tmp%s
+File permissions are => 100600
+File created in => temp dir
+-- Iteration 6 --
+HipHop Warning: %s
+-- File is not created --
+HipHop Warning: %s
+-- Iteration 7 --
+HipHop Warning: %s
+-- File is not created --
+HipHop Warning: %s
+-- Iteration 8 --
+File name is => %s/tempnam_variation3.tmp%s
+File permissions are => 100600
+File created in => temp dir
+-- Iteration 9 --
+File name is => %s/tempnam_variation3.tmp%s
+File permissions are => 100600
+File created in => temp dir
+
+*** Done ***

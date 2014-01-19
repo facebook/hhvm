@@ -1,0 +1,27 @@
+bool(true)
+bool(true)
+signo == SIGTERM
+bool(true)
+code === SI_USER || SI_NOINFO
+bool(true)
+signo == SIGCHLD
+bool(true)
+code === CLD_KILLED
+bool(true)
+signo === SIGCHLD
+bool(true)
+signo === uid
+bool(true)
+signo === pid
+bool(true)
+sigprocmask with invalid arguments
+Error triggered
+bool(false)
+Error triggered
+bool(false)
+sigwaitinfo with invalid arguments
+Error triggered
+bool(false)
+sigtimedwait with invalid arguments
+Error triggered
+int(-1)

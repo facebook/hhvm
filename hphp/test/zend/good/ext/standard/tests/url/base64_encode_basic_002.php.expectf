@@ -1,0 +1,14 @@
+*** Testing base64_encode() : basic functionality ***
+
+--- Testing base64_encode() with binary string input ---
+-- Iteration 1 --
+TEST PASSED
+-- Iteration 2 --
+TEST PASSED
+-- Iteration 3 --
+TEST PASSED
+-- Iteration 4 --
+TEST PASSED
+-- Iteration 5 --
+TEST PASSED
+===Done===

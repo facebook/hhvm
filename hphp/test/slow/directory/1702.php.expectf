@@ -1,0 +1,47 @@
+Path: %s/test/slow/directory/../../sample_dir/
+array(7) {
+  [0]=>
+  string(2) ".
+"
+  [1]=>
+  string(3) "..
+"
+  [2]=>
+  string(4) "dir
+"
+  [3]=>
+  string(6) "empty
+"
+  [4]=>
+  string(5) "file
+"
+  [5]=>
+  string(15) "fix_mtimes.inc
+"
+  [6]=>
+  string(8) "symlink
+"
+}
+array(7) {
+  [0]=>
+  string(2) ".
+"
+  [1]=>
+  string(3) "..
+"
+  [2]=>
+  string(4) "dir
+"
+  [3]=>
+  string(6) "empty
+"
+  [4]=>
+  string(5) "file
+"
+  [5]=>
+  string(15) "fix_mtimes.inc
+"
+  [6]=>
+  string(8) "symlink
+"
+}

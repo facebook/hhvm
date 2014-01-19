@@ -1,0 +1,10 @@
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    object(Foo)#%d (0) {
+    }
+    [1]=>
+    string(15) "nonstaticMethod"
+  }
+}

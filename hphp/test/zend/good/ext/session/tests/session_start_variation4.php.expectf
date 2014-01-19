@@ -1,0 +1,8 @@
+*** Testing session_start() : variation ***
+array(1) {
+  ["blah"]=>
+  string(3) "foo"
+}
+array(0) {
+}
+Done

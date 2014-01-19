@@ -1,0 +1,14 @@
+array(1) {
+  ["@attributes"]=>
+  array(1) {
+    ["kind"]=>
+    string(3) "dir"
+  }
+}
+array(1) {
+  ["@attributes"]=>
+  array(1) {
+    ["kind"]=>
+    string(4) "file"
+  }
+}

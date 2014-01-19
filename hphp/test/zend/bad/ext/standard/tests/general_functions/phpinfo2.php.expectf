@@ -1,0 +1,11 @@
+<!DOCTYPE %s>
+%a</html>bool(true)
+--
+HipHop Warning: %s
+NULL
+--
+<!DOCTYPE %s>
+%a</html>bool(true)
+--
+<!DOCTYPE %s>
+%a</html>bool(true)

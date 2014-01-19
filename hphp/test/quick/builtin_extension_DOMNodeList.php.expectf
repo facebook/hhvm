@@ -1,0 +1,47 @@
+DOMNodeList
+object(DOMNodeList)#1 (0) {
+}
+string(96) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:11:"DOMNodeList";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(11) "DOMNodeList"
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(4) "item"
+  [2]=>
+  string(5) "__get"
+  [3]=>
+  string(5) "__set"
+  [4]=>
+  string(7) "__isset"
+  [5]=>
+  string(11) "getIterator"
+}
+================
+A_DOMNodeList
+object(A_DOMNodeList)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(98) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:13:"A_DOMNodeList";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(13) "A_DOMNodeList"
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(4) "item"
+  [2]=>
+  string(5) "__get"
+  [3]=>
+  string(5) "__set"
+  [4]=>
+  string(7) "__isset"
+  [5]=>
+  string(11) "getIterator"
+}

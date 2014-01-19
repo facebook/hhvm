@@ -1,0 +1,44 @@
+Program %s/info1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+@
+info array_key_exists
+/**
+ * ( excerpt from http://php.net/manual/en/function.array-key-exists.php )
+ * array_key_exists() returns TRUE if the given key is set in the array. key can be any value possible for an array index.
+ *
+ * @key mixed Value to check.
+ * @search mixed An array with keys to check.
+ *
+ * @return bool Returns TRUE on success or FALSE on failure.
+ */
+function array_key_exists($key, $search);
+
+info stdClass
+class stdClass {
+}
+
+run
+Program %s/info1.php exited normally.
+@
+info myfunc
+// defined on line 3 to 5 of %s/info1.php
+function myfunc($a, $b);
+
+info MyClass
+// defined on line 7 to 11 of %s/info1.php
+class MyClass {
+  // properties
+  public $pub;
+  protected $pro;
+  private $pri;
+}
+
+info MyClass::pub
+  public $pub;
+
+info MyClass::pro
+  protected $pro;
+
+info MyClass::pri
+  private $pri;
+
+quit

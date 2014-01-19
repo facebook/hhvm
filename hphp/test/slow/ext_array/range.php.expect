@@ -1,0 +1,19 @@
+int(13)
+int(0)
+int(12)
+int(11)
+int(0)
+int(50)
+int(100)
+int(9)
+string(1) "a"
+string(1) "e"
+string(1) "i"
+array(3) {
+  [0]=>
+  string(1) "c"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "a"
+}

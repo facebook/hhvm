@@ -1,0 +1,1 @@
+Strict Standards: Declaration of foo::onCreate() should be compatible with php_user_filter::onCreate() in %s on line %d

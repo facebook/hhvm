@@ -1,0 +1,611 @@
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(13) "fb_setprofile"
+  [2]=>
+  NULL
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "pure_function_2"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(2) {
+      [0]=>
+      int(3)
+      [1]=>
+      int(4)
+    }
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(25) "pure_function_many_locals"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(3)
+    }
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(25) "pure_function_many_locals"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    int(7)
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(25) "pure_function_many_locals"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(4)
+    }
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+heh
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "Foo::__destruct"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    NULL
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(25) "pure_function_many_locals"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    int(7)
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(4) "exit"
+  [1]=>
+  string(15) "pure_function_2"
+  [2]=>
+  array(1) {
+    ["return"]=>
+    int(14)
+  }
+}
+yep
+array(3) {
+  [0]=>
+  string(5) "enter"
+  [1]=>
+  string(13) "fb_setprofile"
+  [2]=>
+  array(1) {
+    ["args"]=>
+    array(1) {
+      [0]=>
+      NULL
+    }
+  }
+}
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh
+heh

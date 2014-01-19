@@ -1,0 +1,7 @@
+*** Testing imap_mail_move() : basic functionality ***
+Create a new mailbox for test
+Create a temporary mailbox and add 1 msgs
+.. mailbox '%s' created
+Msg Count in new mailbox: 1
+bool(true)
+===Done===

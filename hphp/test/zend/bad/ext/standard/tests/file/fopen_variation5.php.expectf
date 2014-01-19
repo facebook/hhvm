@@ -1,0 +1,23 @@
+--- testing include path ---
+
+** testing with mode=r **
+in dir2
+in dir1
+in dir1
+in working dir
+in script dir
+
+** testing with mode=r+ **
+in dir2
+in dir1
+in dir1
+in working dir
+in script dir
+
+** testing with mode=rt **
+in dir2
+in dir1
+in dir1
+in working dir
+in script dir
+===DONE===

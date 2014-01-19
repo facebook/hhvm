@@ -1,0 +1,29 @@
+SoapVar
+HipHop Warning: SoapVar::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+object(SoapVar)#1 (0) {
+}
+string(91) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:7:"SoapVar";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(7) "SoapVar"
+}
+array(1) {
+  [0]=>
+  string(11) "__construct"
+}
+================
+A_SoapVar
+HipHop Warning: SoapVar::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+object(A_SoapVar)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"A_SoapVar";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(9) "A_SoapVar"
+}
+array(1) {
+  [0]=>
+  string(11) "__construct"
+}

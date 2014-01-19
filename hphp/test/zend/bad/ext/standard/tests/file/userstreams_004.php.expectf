@@ -1,0 +1,17 @@
+bool(true)
+bool(true)
+------ stream_lock not implemented: -------
+HipHop Warning: %s
+bool(false)
+------ fclock(LOCK_SH): -------
+bool(true)
+------ fclock(LOCK_SH|LOCK_NB): -------
+bool(true)
+------ fclock(LOCK_EX): -------
+bool(true)
+------ fclock(LOCK_EX|LOCK_NB): -------
+bool(true)
+------ fclock(LOCK_UN): -------
+bool(true)
+------ fclock(LOCK_UN|LOCK_NB): -------
+bool(true)

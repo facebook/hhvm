@@ -1,0 +1,8 @@
+*** Testing array_map() :  with non-existent class and method ***
+-- with non-existent class --
+HipHop Warning: %s
+NULL
+-- with existent class and non-existent method --
+HipHop Warning: %s
+NULL
+Done

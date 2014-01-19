@@ -1,0 +1,10 @@
+*** Testing ctype_punct() : error conditions ***
+
+-- Testing ctype_punct() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing ctype_punct() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

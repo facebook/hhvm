@@ -1,0 +1,11 @@
+br SplMaxHeap::insert()
+run
+list myfunc
+list MyClass
+list MyClass::myMeth
+list 3
+list noSuchFunc
+list NoSuchClass
+list MyClass::noSuchMethod
+list noSuchFile:5
+quit

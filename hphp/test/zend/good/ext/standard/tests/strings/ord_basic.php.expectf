@@ -1,0 +1,13 @@
+*** Testing ord() : basic functionality ***
+int(97)
+int(122)
+int(48)
+int(57)
+int(33)
+int(42)
+int(64)
+int(10)
+int(10)
+int(255)
+int(72)
+===DONE===

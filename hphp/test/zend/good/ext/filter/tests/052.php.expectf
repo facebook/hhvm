@@ -1,0 +1,54 @@
+array(1) {
+  ["bar"]=>
+  array(2) {
+    [0]=>
+    string(5) "fubar"
+    [1]=>
+    string(5) "barfu"
+  }
+}
+array(1) {
+  ["bar"]=>
+  array(2) {
+    [0]=>
+    string(13) "fu<script>bar"
+    [1]=>
+    string(13) "bar<script>fu"
+  }
+}
+array(1) {
+  ["bar"]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(1)
+  }
+}
+array(1) {
+  ["bar"]=>
+  array(2) {
+    [0]=>
+    string(13) "fu<script>bar"
+    [1]=>
+    string(13) "bar<script>fu"
+  }
+}
+array(1) {
+  ["bar"]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(1)
+  }
+}
+array(1) {
+  ["bar"]=>
+  array(2) {
+    [0]=>
+    string(13) "fu<script>bar"
+    [1]=>
+    string(13) "bar<script>fu"
+  }
+}

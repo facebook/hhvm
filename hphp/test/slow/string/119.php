@@ -1,0 +1,4 @@
+<?php
+
+print "test
+ok";

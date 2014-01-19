@@ -1,0 +1,25 @@
+*** Testing strripos() function: basic functionality ***
+
+-- regular string for haystack & needle, with various offsets --
+int(0)
+bool(false)
+int(7)
+int(7)
+
+-- heredoc string for haystack & needle, with various offsets --
+int(0)
+int(0)
+bool(false)
+int(0)
+bool(false)
+
+-- various +ve offsets --
+int(8)
+int(8)
+bool(false)
+
+-- various -ve offsets --
+int(8)
+int(4)
+bool(false)
+===DONE===

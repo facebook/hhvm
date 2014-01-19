@@ -1,0 +1,4 @@
+create LO from int
+create LO from string
+create LO using default connection
+OK

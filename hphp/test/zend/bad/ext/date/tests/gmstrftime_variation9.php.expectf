@@ -1,0 +1,10 @@
+*** Testing gmstrftime() : usage variation ***
+
+--The ISO 8601:1988 week number--
+bool(false)
+bool(false)
+
+--Weekday as decimal--
+bool(false)
+bool(false)
+===DONE===

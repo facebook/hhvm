@@ -1,0 +1,2215 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "addcslashes",
+            "desc": "Returns a string with backslashes before characters that are listed in charlist parameter.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the escaped string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to be escaped."
+                },
+                {
+                    "name": "charlist",
+                    "type": "String",
+                    "desc": "A list of characters to be escaped. If charlist contains characters \\n, \\r etc., they are converted in C-like style, while other non-alphanumeric characters with ASCII codes lower than 32 and higher than 126 converted to octal representation.\n\nWhen you define a sequence of characters in the charlist argument make sure that you know what characters come between the characters that you set as the start and end of the range.\n\nAlso, if the first character in a range has a higher ASCII value than the second character in the range, no range will be constructed. Only the start, end and period characters will be escaped. Use the ord() function to find the ASCII value for a character.\n\n\n\nBe careful if you choose to escape characters 0, a, b, f, n, r, t and v. They will be converted to \\0, \\a, \\b, \\f, \\n, \\r, \\t and \\v. In PHP \\0 (NULL), \\r (carriage return), \\n (newline), \\f (form feed), \\v (vertical tab) and \\t (tab) are predefined escape sequences, while in C all of these are predefined escape sequences."
+                }
+            ]
+        },
+        {
+            "name": "stripcslashes",
+            "desc": "Returns a string with backslashes stripped off. Recognizes C-like \\n, \\r ..., octal and hexadecimal representation.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the unescaped string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to be unescaped."
+                }
+            ]
+        },
+        {
+            "name": "addslashes",
+            "desc": "Returns a string with backslashes before characters that need to be quoted in database queries etc. These characters are single quote ('), double quote (\"), backslash (\\) and NUL (the NULL byte).\n\nAn example use of addslashes() is when you're entering data into a database. For example, to insert the name O'reilly into a database, you will need to escape it. It's highly recommended to use DBMS specific escape function (e.g. mysqli_real_escape_string() for MySQL or pg_escape_string() for PostgreSQL), but if the DBMS you're using does't have an escape function and the DBMS uses \\ to escape special chars, you can use this function. This would only be to get the data into the database, the extra \\ will not be inserted. Having the PHP directive magic_quotes_sybase set to on will mean ' is instead escaped with another '.\n\nThe PHP directive magic_quotes_gpc is on by default, and it essentially runs addslashes() on all GET, POST, and COOKIE data. Do not use addslashes() on strings that have already been escaped with magic_quotes_gpc as you'll then do double escaping. The function get_magic_quotes_gpc() may come in handy for checking this.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the escaped string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to be escaped."
+                }
+            ]
+        },
+        {
+            "name": "stripslashes",
+            "desc": "Un-quotes a quoted string.\n\nIf magic_quotes_sybase is on, no backslashes are stripped off but two apostrophes are replaced by one instead.\n\nAn example use of stripslashes() is when the PHP directive magic_quotes_gpc is on (it's on by default), and you aren't inserting this data into a place (such as a database) that requires escaping. For example, if you're simply outputting data straight from an HTML form.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns a string with backslashes stripped off. (\\' becomes ' and so on.) Double backslashes (\\\\) are made into a single backslash (\\)."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "bin2hex",
+            "desc": "Returns an ASCII string containing the hexadecimal representation of str. The conversion is done byte-wise with the high-nibble first.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the hexadecimal representation of the given string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "A character."
+                }
+            ]
+        },
+        {
+            "name": "hex2bin",
+            "desc": "Returns an ASCII string containing the binary representation of hexidecimal str.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "hint": 7,
+                "desc": "Returns the binary representation of the given hexidecimal string or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "A character."
+                }
+            ]
+        },
+        {
+            "name": "nl2br",
+            "desc": "Returns string with '<br \/>' or '<br>' inserted before all newlines.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the altered string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "is_xhtml",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to use XHTML compatible line breaks or not."
+                }
+            ]
+        },
+        {
+            "name": "quotemeta",
+            "desc": "Returns a version of str with a backslash character (\\) before every character that is among these: . \\ + * ? [ ^ ] ( $ )",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the string with meta characters quoted."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "str_shuffle",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the shuffled string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "strrev",
+            "desc": "Returns string, reversed.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the reversed string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to be reversed."
+                }
+            ]
+        },
+        {
+            "name": "strtolower",
+            "desc": "Returns string with all alphabetic characters converted to lowercase.\n\nNote that 'alphabetic' is determined by the current locale. This means that in i.e. the default \"C\" locale, characters such as umlaut-A () will not be converted.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the lowercased string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "strtoupper",
+            "desc": "Returns string with all alphabetic characters converted to uppercase.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a () will not be converted.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the uppercased string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "ucfirst",
+            "desc": "Returns a string with the first character of str capitalized, if that character is alphabetic.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a () will not be converted.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the resulting string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "lcfirst",
+            "desc": "Returns a string with the first character of str , lowercased if that character is alphabetic.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a (\u00e4) will not be converted.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the resulting string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "ucwords",
+            "desc": "Returns a string with the first character of each word in str capitalized, if that character is alphabetic.\n\nThe definition of a word is any string of characters that is immediately after a whitespace (These are: space, form-feed, newline, carriage return, horizontal tab, and vertical tab).",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the modified string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "strip_tags",
+            "desc": "This function tries to return a string with all NUL bytes, HTML and PHP tags stripped from a given str. It uses the same tag stripping state machine as the fgetss() function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the stripped string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "allowable_tags",
+                    "type": "String",
+                    "value": "\"\"",
+                    "desc": "You can use the optional second parameter to specify tags which should not be stripped.\n\nHTML comments and PHP tags are also stripped. This is hardcoded and can not be changed with allowable_tags."
+                }
+            ]
+        },
+        {
+            "name": "trim",
+            "desc": "This function returns a string with whitespace stripped from the beginning and end of str. Without the second parameter, trim() will strip these characters: \" \" (ASCII 32 (0x20)), an ordinary space. \"\\t\" (ASCII 9 (0x09)), a tab. \"\\n\" (ASCII 10 (0x0A)), a new line (line feed). \"\\r\" (ASCII 13 (0x0D)), a carriage return. \"\\0\" (ASCII 0 (0x00)), the NUL-byte. \"\\x0B\" (ASCII 11 (0x0B)), a vertical tab.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "The trimmed string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string that will be trimmed."
+                },
+                {
+                    "name": "charlist",
+                    "type": "String",
+                    "value": "k_HPHP_TRIM_CHARLIST",
+                    "desc": "Optionally, the stripped characters can also be specified using the charlist parameter. Simply list all characters that you want to be stripped. With .. you can specify a range of characters."
+                }
+            ]
+        },
+        {
+            "name": "ltrim",
+            "desc": "Strip whitespace (or other characters) from the beginning of a string.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "This function returns a string with whitespace stripped from the beginning of str. Without the second parameter, ltrim() will strip these characters: \" \" (ASCII 32 (0x20)), an ordinary space. \"\\t\" (ASCII 9 (0x09)), a tab. \"\\n\" (ASCII 10 (0x0A)), a new line (line feed). \"\\r\" (ASCII 13 (0x0D)), a carriage return. \"\\0\" (ASCII 0 (0x00)), the NUL-byte. \"\\x0B\" (ASCII 11 (0x0B)), a vertical tab."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "charlist",
+                    "type": "String",
+                    "value": "k_HPHP_TRIM_CHARLIST",
+                    "desc": "You can also specify the characters you want to strip, by means of the charlist parameter. Simply list all characters that you want to be stripped. With .. you can specify a range of characters."
+                }
+            ]
+        },
+        {
+            "name": "rtrim",
+            "desc": "This function returns a string with whitespace stripped from the end of str.\n\nWithout the second parameter, rtrim() will strip these characters: \" \" (ASCII 32 (0x20)), an ordinary space. \"\\t\" (ASCII 9 (0x09)), a tab. \"\\n\" (ASCII 10 (0x0A)), a new line (line feed). \"\\r\" (ASCII 13 (0x0D)), a carriage return. \"\\0\" (ASCII 0 (0x00)), the NUL-byte. \"\\x0B\" (ASCII 11 (0x0B)), a vertical tab.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the modified string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "charlist",
+                    "type": "String",
+                    "value": "k_HPHP_TRIM_CHARLIST",
+                    "desc": "You can also specify the characters you want to strip, by means of the charlist parameter. Simply list all characters that you want to be stripped. With .. you can specify a range of characters."
+                }
+            ]
+        },
+        {
+            "name": "chop",
+            "flags": [
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String"
+                },
+                {
+                    "name": "charlist",
+                    "type": "String",
+                    "value": "k_HPHP_TRIM_CHARLIST"
+                }
+            ]
+        },
+        {
+            "name": "explode",
+            "desc": "Returns an array of strings, each of which is a substring of string formed by splitting it on boundaries formed by the string delimiter.\nAlthough implode() can, for historical reasons, accept its parameters in either order, explode() cannot. You must ensure that the delimiter argument comes before the string argument.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array of strings created by splitting the string parameter on boundaries formed by the delimiter.\n\nIf delimiter is an empty string (\"\"), explode() will return FALSE. If delimiter contains a value that is not contained in string and a negative limit is used, then an empty arraywill be returned, otherwise an array containing string will be returned."
+            },
+            "args": [
+                {
+                    "name": "delimiter",
+                    "type": "String",
+                    "desc": "The boundary string."
+                },
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "limit",
+                    "type": "Int32",
+                    "value": "0x7FFFFFFF",
+                    "desc": "If limit is set and positive, the returned array will contain a maximum of limit elements with the last element containing the rest of string.\n\nIf the limit parameter is negative, all components except the last -limit are returned.\n\nIf the limit parameter is zero, then this is treated as 1."
+                }
+            ]
+        },
+        {
+            "name": "implode",
+            "desc": "Join container elements with a glue string.\n\nimplode() can, for historical reasons, accept its parameters in either order. For consistency with explode(), however, it may be less confusing to use the documented order of arguments.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns a string containing a string representation of all the array elements in the same order, with the glue string between each element."
+            },
+            "args": [
+                {
+                    "name": "arg1",
+                    "type": "Variant",
+                    "desc": "Defaults to an empty string. This is not the preferred usage of implode() as glue would be the second parameter and thus, the bad prototype would be used."
+                },
+                {
+                    "name": "arg2",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The array of strings to implode."
+                }
+            ]
+        },
+        {
+            "name": "join",
+            "desc": "An alias for implode().",
+            "flags": [
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "glue",
+                    "type": "Variant"
+                },
+                {
+                    "name": "pieces",
+                    "type": "Variant",
+                    "value": "null_variant"
+                }
+            ]
+        },
+        {
+            "name": "str_split",
+            "desc": "Converts a string to an array.",
+            "flags": [
+                "ZendParamModeNull"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "If the optional split_length parameter is specified, the returned array will be broken down into chunks with each being split_length in length, otherwise each chunk will be one character in length.\n\nFALSE is returned if split_length is less than 1. If the split_length length exceeds the length of string, the entire string is returned as the first (and only) array element."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "split_length",
+                    "type": "Int32",
+                    "value": "1",
+                    "desc": "Maximum length of the chunk."
+                }
+            ]
+        },
+        {
+            "name": "chunk_split",
+            "desc": "Can be used to split a string into smaller chunks which is useful for e.g. converting base64_encode() output to match RFC 2045 semantics. It inserts end every chunklen characters.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the chunked string."
+            },
+            "args": [
+                {
+                    "name": "body",
+                    "type": "String",
+                    "desc": "The string to be chunked."
+                },
+                {
+                    "name": "chunklen",
+                    "type": "Int32",
+                    "value": "76",
+                    "desc": "The chunk length."
+                },
+                {
+                    "name": "end",
+                    "type": "String",
+                    "value": "\"\\r\\n\"",
+                    "desc": "The line ending sequence."
+                }
+            ]
+        },
+        {
+            "name": "strtok",
+            "desc": "strtok() splits a string (str) into smaller strings (tokens), with each token being delimited by any character from token. That is, if you have a string like \"This is an example string\" you could tokenize this string into its individual words by using the space character as the token.\n\nNote that only the first call to strtok uses the string argument. Every subsequent call to strtok only needs the token to use, as it keeps track of where it is in the current string. To start over, or to tokenize a new string you simply call strtok with the string argument again to initialize it. Note that you may put multiple tokens in the token parameter. The string will be tokenized when any one of the characters in the argument are found.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A string token."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string being split up into smaller strings (tokens)."
+                },
+                {
+                    "name": "token",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The delimiter used when splitting up str."
+                }
+            ]
+        },
+        {
+            "name": "str_replace",
+            "desc": "This function returns a string or an array with all occurrences of search in subject replaced with the given replace value.\n\nIf you don't need fancy replacing rules (like regular expressions), you should always use this function instead of ereg_replace() or preg_replace().\nIf search and replace are arrays, then str_replace() takes a value from each array and uses them to do search and replace on subject. If replace has fewer values than search, then an empty string is used for the rest of replacement values. If search is an array and replace is a string, then this replacement string is used for every value of search. The converse would not make sense, though.\n\nIf search or replace are arrays, their elements are processed first to last.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "This function returns a string or an array with the replaced values."
+            },
+            "args": [
+                {
+                    "name": "search",
+                    "type": "Variant",
+                    "desc": "The value being searched for, otherwise known as the needle. An array may be used to designate multiple needles."
+                },
+                {
+                    "name": "replace",
+                    "type": "Variant",
+                    "desc": "The replacement value that replaces found search values. An array may be used to designate multiple replacements."
+                },
+                {
+                    "name": "subject",
+                    "type": "Variant",
+                    "desc": "The string or array being searched and replaced on, otherwise known as the haystack.\n\nIf subject is an array, then the search and replace is performed with every entry of subject, and the return value is an array as well."
+                },
+                {
+                    "name": "count",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "If passed, this will hold the number of matched and replaced needles.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "str_ireplace",
+            "desc": "This function returns a string or an array with all occurrences of search in subject (ignoring case) replaced with the given replace value. If you don't need fancy replacing rules, you should generally use this function instead of preg_replace() with the i modifier.\nIf search and replace are arrays, then str_ireplace() takes a value from each array and uses them to do search and replace on subject. If replace has fewer values than search, then an empty string is used for the rest of replacement values. If search is an array and replace is a string, then this replacement string is used for every value of search.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a string or an array of replacements."
+            },
+            "args": [
+                {
+                    "name": "search",
+                    "type": "Variant",
+                    "desc": "Every replacement with search array is performed on the result of previous replacement."
+                },
+                {
+                    "name": "replace",
+                    "type": "Variant"
+                },
+                {
+                    "name": "subject",
+                    "type": "Variant",
+                    "desc": "If subject is an array, then the search and replace is performed with every entry of subject, and the return value is an array as well."
+                },
+                {
+                    "name": "count",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "The number of matched and replaced needles will be returned in count which is passed by reference.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "substr_replace",
+            "desc": "substr_replace() replaces a copy of string delimited by the start and (optionally) length parameters with the string given in replacement.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The result string is returned. If string is an array then array is returned."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "Variant",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "replacement",
+                    "type": "Variant",
+                    "desc": "The replacement string."
+                },
+                {
+                    "name": "start",
+                    "type": "Variant",
+                    "desc": "If start is positive, the replacing will begin at the start'th offset into string.\n\nIf start is negative, the replacing will begin at the start'th character from the end of string."
+                },
+                {
+                    "name": "length",
+                    "type": "Variant",
+                    "value": "0x7FFFFFFF",
+                    "desc": "If given and is positive, it represents the length of the portion of string which is to be replaced. If it is negative, it represents the number of characters from the end of string at which to stop replacing. If it is not given, then it will default to strlen( string ); i.e. end the replacing at the end of string. Of course, if length is zero then this function will have the effect of inserting replacement into string at the given start offset."
+                }
+            ]
+        },
+        {
+            "name": "substr",
+            "desc": "Returns the portion of string specified by the start and length parameters.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the extracted part of string or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "start",
+                    "type": "Int32",
+                    "desc": "If start is non-negative, the returned string will start at the start'th position in string, counting from zero. For instance, in the string 'abcdef', the character at position 0 is 'a', the character at position 2 is 'c', and so forth.\n\nIf start is negative, the returned string will start at the start'th character from the end of string.\n\nIf string is less than or equal to start characters long, FALSE will be returned.\n\nExample #1 Using a negative start"
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "value": "0x7FFFFFFF",
+                    "desc": "If length is given and is positive, the string returned will contain at most length characters beginning from start (depending on the length of string).\n\nIf length is given and is negative, then that many characters will be omitted from the end of string (after the start position has been calculated when a start is negative). If start denotes a position beyond this truncation, an empty string will be returned.\n\nIf length is given and is 0, FALSE or NULL an empty string will be returned.\n\nIf length is omitted, the substring starting from start until the end of the string will be returned. Example #2 Using a negative length"
+                }
+            ]
+        },
+        {
+            "name": "str_pad",
+            "desc": "This functions returns the input string padded on the left, the right, or both sides to the specified padding length. If the optional argument pad_string is not supplied, the input is padded with spaces, otherwise it is padded with characters from pad_string up to the limit.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the padded string."
+            },
+            "args": [
+                {
+                    "name": "input",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "pad_length",
+                    "type": "Int32",
+                    "desc": "If the value of pad_length is negative, less than, or equal to the length of the input string, no padding takes place."
+                },
+                {
+                    "name": "pad_string",
+                    "type": "String",
+                    "value": "\" \"",
+                    "desc": "The pad_string may be truncated if the required number of padding characters can't be evenly divided by the pad_string's length."
+                },
+                {
+                    "name": "pad_type",
+                    "type": "Int32",
+                    "value": "k_STR_PAD_RIGHT",
+                    "desc": "Optional argument pad_type can be STR_PAD_RIGHT, STR_PAD_LEFT, or STR_PAD_BOTH. If pad_type is not specified it is assumed to be STR_PAD_RIGHT."
+                }
+            ]
+        },
+        {
+            "name": "str_repeat",
+            "desc": "Returns input repeated multiplier times.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the repeated string."
+            },
+            "args": [
+                {
+                    "name": "input",
+                    "type": "String",
+                    "desc": "The string to be repeated."
+                },
+                {
+                    "name": "multiplier",
+                    "type": "Int32",
+                    "desc": "Number of time the input string should be repeated.\n\nmultiplier has to be greater than or equal to 0. If the multiplier is set to 0, the function will return an empty string."
+                }
+            ]
+        },
+        {
+            "name": "html_entity_decode",
+            "desc": "html_entity_decode() is the opposite of htmlentities() in that it converts all HTML entities to their applicable characters from string.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the decoded string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "quote_style",
+                    "type": "Int32",
+                    "value": "k_ENT_COMPAT",
+                    "desc": "The optional second quote_style parameter lets you define what will be done with 'single' and \"double\" quotes. It takes on one of three constants with the default being ENT_COMPAT: Available quote_style constants Constant Name Description ENT_COMPAT Will convert double-quotes and leave single-quotes alone. ENT_QUOTES Will convert both double and single quotes. ENT_NOQUOTES Will leave both double and single quotes unconverted."
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "\"ISO-8859-1\"",
+                    "desc": "The ISO-8859-1 character set is used as default for the optional third charset. This defines the character set used in conversion.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead."
+                }
+            ]
+        },
+        {
+            "name": "htmlentities",
+            "desc": "This function is identical to htmlspecialchars() in all ways, except with htmlentities(), all characters which have HTML character entity equivalents are translated into these entities.\n\nIf you're wanting to decode instead (the reverse) you can use html_entity_decode().",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the encoded string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "quote_style",
+                    "type": "Int32",
+                    "value": "k_ENT_COMPAT",
+                    "desc": "Like htmlspecialchars(), the optional second quote_style parameter lets you define what will be done with 'single' and \"double\" quotes. It takes on one of three constants with the default being ENT_COMPAT: Available quote_style constants Constant Name Description ENT_COMPAT Will convert double-quotes and leave single-quotes alone. ENT_QUOTES Will convert both double and single quotes. ENT_NOQUOTES Will leave both double and single quotes unconverted."
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "\"ISO-8859-1\"",
+                    "desc": "Like htmlspecialchars(), it takes an optional third argument charset which defines character set used in conversion. Presently, the ISO-8859-1 character set is used as the default.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead."
+                },
+                {
+                    "name": "double_encode",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "When double_encode is turned off PHP will not encode existing html entities. The default is to convert everything."
+                }
+            ]
+        },
+        {
+            "name": "htmlspecialchars_decode",
+            "desc": "This function is the opposite of htmlspecialchars(). It converts special HTML entities back to characters.\n\nThe converted entities are: &amp;, &quot; (when ENT_NOQUOTES is not set), &#039; (when ENT_QUOTES is set), &lt; and &gt;.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the decoded string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to decode"
+                },
+                {
+                    "name": "quote_style",
+                    "type": "Int32",
+                    "value": "k_ENT_COMPAT",
+                    "desc": "The quote style. One of the following constants: quote_style constants Constant Name Description ENT_COMPAT Will convert double-quotes and leave single-quotes alone (default) ENT_QUOTES Will convert both double and single quotes ENT_NOQUOTES Will leave both double and single quotes unconverted"
+                }
+            ]
+        },
+        {
+            "name": "htmlspecialchars",
+            "desc": "Certain characters have special significance in HTML, and should be represented by HTML entities if they are to preserve their meanings. This function returns a string with some of these conversions made; the translations made are those most useful for everyday web programming. If you require all HTML character entities to be translated, use htmlentities() instead. This function is useful in preventing user-supplied text from containing HTML markup, such as in a message board or guest book application.\n\nThe translations performed are: '&' (ampersand) becomes '&amp;' '\"' (double quote) becomes '&quot;' when ENT_NOQUOTES is not set. ''' (single quote) becomes '&#039;' only when ENT_QUOTES is set. '<' (less than) becomes '&lt;' '>' (greater than) becomes '&gt;'",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "The converted string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string being converted."
+                },
+                {
+                    "name": "quote_style",
+                    "type": "Int32",
+                    "value": "k_ENT_COMPAT",
+                    "desc": "The optional second argument, quote_style, tells the function what to do with single and double quote characters. The default mode, ENT_COMPAT, is the backwards compatible mode which only translates the double-quote character and leaves the single-quote untranslated. If ENT_QUOTES is set, both single and double quotes are translated and if ENT_NOQUOTES is set neither single nor double quotes are translated."
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "\"ISO-8859-1\"",
+                    "desc": "Defines character set used in conversion. The default character set is ISO-8859-1.\n\nFor the purposes of this function, the charsets ISO-8859-1, ISO-8859-15, UTF-8, cp866, cp1251, cp1252, and KOI8-R are effectively equivalent, as the characters affected by htmlspecialchars() occupy the same positions in all of these charsets.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead."
+                },
+                {
+                    "name": "double_encode",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "When double_encode is turned off PHP will not encode existing html entities, the default is to convert everything."
+                }
+            ]
+        },
+        {
+            "name": "fb_htmlspecialchars",
+            "desc": "Certain characters have special significance in HTML, and should be represented by HTML entities if they are to preserve their meanings. This function returns a string with some of these conversions made; the translations made are those most useful for everyday web programming. If you require all HTML character entities to be translated, use htmlentities() instead. This function is useful in preventing user-supplied text from containing HTML markup, such as in a message board or guest book application.\n\nThe translations performed are: '&' (ampersand) becomes '&amp;' '\"' (double quote) becomes '&quot;' when ENT_NOQUOTES is not set. ''' (single quote) becomes '&#039;' only when ENT_QUOTES is set. '<' (less than) becomes '&lt;' '>' (greater than) becomes '&gt;'",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "The converted string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string being converted."
+                },
+                {
+                    "name": "quote_style",
+                    "type": "Int32",
+                    "value": "k_ENT_COMPAT",
+                    "desc": "The optional second argument, quote_style, tells the function what to do with single and double quote characters. The default mode, ENT_COMPAT, is the backwards compatible mode which only translates the double-quote character and leaves the single-quote untranslated. If ENT_QUOTES is set, both single and double quotes are translated and if ENT_NOQUOTES is set neither single nor double quotes are translated."
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "\"ISO-8859-1\"",
+                    "desc": "Defines character set used in conversion. The default character set is ISO-8859-1.\n\nFor the purposes of this function, the charsets ISO-8859-1, ISO-8859-15, UTF-8, cp866, cp1251, cp1252, and KOI8-R are effectively equivalent, as the characters affected by htmlspecialchars() occupy the same positions in all of these charsets.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead."
+                },
+                {
+                    "name": "extra",
+                    "type": "StringVec",
+                    "value": "empty_array",
+                    "desc": "An array of extra ascii chars to be encoded."
+                }
+            ]
+        },
+        {
+            "name": "quoted_printable_encode",
+            "desc": "Returns a quoted printable string created according to  RFC2045, section 6.7.\n\nThis function is similar to imap_8bit(), except this one does not require the IMAP module to work.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the encoded string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "quoted_printable_decode",
+            "desc": "This function returns an 8-bit binary string corresponding to the decoded quoted printable string (according to  RFC2045, section 6.7, not  RFC2821, section 4.5.2, so additional periods are not stripped from the beginning of line).\n\nThis function is similar to imap_qprint(), except this one does not require the IMAP module to work.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the 8-bit binary string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "convert_uudecode",
+            "desc": "convert_uudecode() decodes a uuencoded string.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the decoded data as a string."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The uuencoded data."
+                }
+            ]
+        },
+        {
+            "name": "convert_uuencode",
+            "desc": "convert_uuencode() encodes a string using the uuencode algorithm.\n\nUuencode translates all strings (including binary's ones) into printable characters, making them safe for network transmissions. Uuencoded data is about 35% larger than the original.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the uuencoded data."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data to be encoded."
+                }
+            ]
+        },
+        {
+            "name": "str_rot13",
+            "desc": "Performs the ROT13 encoding on the str argument and returns the resulting string.\n\nThe ROT13 encoding simply shifts every letter by 13 places in the alphabet while leaving non-alpha characters untouched. Encoding and decoding are done by the same function, passing an encoded string as argument will return the original version.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the ROT13 version of the given string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "crc32",
+            "desc": "Generates the cyclic redundancy checksum polynomial of 32-bit lengths of the str. This is usually used to validate the integrity of data being transmitted.\n\nBecause PHP's integer type is signed, and many crc32 checksums will result in negative integers, you need to use the \"%u\" formatter of sprintf() or printf() to get the string representation of the unsigned crc32 checksum.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the crc32 checksum of str as an integer."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The data."
+                }
+            ]
+        },
+        {
+            "name": "crypt",
+            "desc": "crypt() will return a hashed string using the standard Unix DES-based algorithm or alternative algorithms that may be available on the system.\n\nSome operating systems support more than one type of hash. In fact, sometimes the standard DES-based algorithm is replaced by an MD5-based algorithm. The hash type is triggered by the salt argument. Prior to 5.3, PHP would determine the available algorithms at install-time based on the system's crypt(). If no salt is provided, PHP will auto-generate either a standard two character (DES) salt, or a twelve character (MD5), depending on the availability of MD5 crypt(). PHP sets a constant named CRYPT_SALT_LENGTH which indicates the longest valid salt allowed by the available hashes.\n\nThe standard DES-based crypt() returns the salt as the first two characters of the output. It also only uses the first eight characters of str, so longer strings that start with the same eight characters will generate the same result (when the same salt is used). On systems where the crypt() function supports multiple hash types, the following constants are set to 0 or 1 depending on whether the given type is available: CRYPT_STD_DES - Standard DES-based hash with a two character salt from the alphabet \".\/0-9A-Za-z\". Using invalid characters in the salt will cause crypt() to fail. CRYPT_EXT_DES - Extended DES-based hash. The \"salt\" is a 9-character string consisting of an underscore followed by 4 bytes of iteration count and 4 bytes of salt. These are encoded as printable characters, 6 bits per character, least significant character first. The values 0 to 63 are encoded as \".\/0-9A-Za-z\". Using invalid characters in the salt will cause crypt() to fail. CRYPT_MD5 - MD5 hashing with a twelve character salt starting with $1$ CRYPT_BLOWFISH - Blowfish hashing with a salt as follows: \"$2a$\", a two digit cost parameter, \"$\", and 22 base 64 digits from the alphabet \".\/0-9A-Za-z\". Using characters outside of this range in the salt will cause crypt() to return a zero-length string. The two digit cost parameter is the base-2 logarithm of the iteration count for the underlying Blowfish-based hashing algorithmeter and must be in range 04-31, values outside this range will cause crypt() to fail. CRYPT_SHA256 - SHA-256 hash with a sixteen character salt prefixed with $5$. If the salt string starts with 'rounds=<N>$', the numeric value of N is used to indicate how many times the hashing loop should be executed, much like the cost parameter on Blowfish. The default number of rounds is 5000, there is a minimum of 1000 and a maximum of 999,999,999. Any selection of N outside this range will be truncated to the nearest limit. CRYPT_SHA512 - SHA-512 hash with a sixteen character salt prefixed with $6$. If the salt string starts with 'rounds=<N>$', the numeric value of N is used to indicate how many times the hashing loop should be executed, much like the cost parameter on Blowfish. The default number of rounds is 5000, there is a minimum of 1000 and a maximum of 999,999,999. Any selection of N outside this range will be truncated to the nearest limit.\n\nAs of PHP 5.3.0, PHP contains its own implementation and will use that if the system lacks of support for one or more of the algorithms.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the hashed string or a string that is shorter than 13 characters and is guaranteed to differ from the salt on failure."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to be hashed."
+                },
+                {
+                    "name": "salt",
+                    "type": "String",
+                    "value": "\"\"",
+                    "desc": "An optional salt string to base the hashing on. If not provided, the behaviour is defined by the algorithm implementation and can lead to unexpected results."
+                }
+            ]
+        },
+        {
+            "name": "md5",
+            "desc": "Calculates the MD5 hash of str using the RSA Data Security, Inc. MD5 Message-Digest Algorithm, and returns that hash.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the hash as a 32-character hexadecimal number."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string."
+                },
+                {
+                    "name": "raw_output",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "If the optional raw_output is set to TRUE, then the md5 digest is instead returned in raw binary format with a length of 16."
+                }
+            ]
+        },
+        {
+            "name": "sha1",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the sha1 hash as a string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "raw_output",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "If the optional raw_output is set to TRUE, then the sha1 digest is instead returned in raw binary format with a length of 20, otherwise the returned value is a 40-character hexadecimal number."
+                }
+            ]
+        },
+        {
+            "name": "strtr",
+            "desc": "This function returns a copy of str, translating all occurrences of each character in from to the corresponding character in to.\n\nIf from and to are different lengths, the extra characters in the longer of the two are ignored.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the translated string.\n\nIf replace_pairs contains a key which is an empty string (\"\"), FALSE will be returned."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string being translated."
+                },
+                {
+                    "name": "from",
+                    "type": "Variant",
+                    "desc": "The string being translated to to."
+                },
+                {
+                    "name": "to",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The string replacing from."
+                }
+            ]
+        },
+        {
+            "name": "convert_cyr_string",
+            "desc": "Converts from one Cyrillic character set to another.\nSupported characters are: k - koi8-r w - windows-1251 i - iso8859-5 a - x-cp866 d - x-cp866 m - x-mac-cyrillic",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the converted string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to be converted."
+                },
+                {
+                    "name": "from",
+                    "type": "String",
+                    "desc": "The source Cyrillic character set, as a single character."
+                },
+                {
+                    "name": "to",
+                    "type": "String",
+                    "desc": "The target Cyrillic character set, as a single character."
+                }
+            ]
+        },
+        {
+            "name": "get_html_translation_table",
+            "desc": "get_html_translation_table() will return the translation table that is used internally for htmlspecialchars() and htmlentities() with the default charset.\n\nSpecial characters can be encoded in several ways. E.g. \" can be encoded as &quot;, &#34; or &#x22. get_html_translation_table() returns only the most common form for them.",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringMap",
+                "desc": "Returns the translation table as an array."
+            },
+            "args": [
+                {
+                    "name": "table",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "There are two new constants (HTML_ENTITIES, HTML_SPECIALCHARS) that allow you to specify the table you want."
+                },
+                {
+                    "name": "quote_style",
+                    "type": "Int32",
+                    "value": "k_ENT_COMPAT",
+                    "desc": "Like the htmlspecialchars() and htmlentities() functions you can optionally specify the quote_style you are working with. See the description of these modes in htmlspecialchars()."
+                },
+                {
+                    "name": "encoding",
+                    "type": "String",
+                    "value": "\"UTF-8\"",
+                    "desc": "Encoding to use. If omitted, the default value for this argument is ISO-8859-1 in versions of PHP prior to 5.4.0, and UTF-8 from PHP 5.4.0 onwards."
+                }
+            ]
+        },
+        {
+            "name": "hebrev",
+            "desc": "Converts logical Hebrew text to visual text.\n\nThe function tries to avoid breaking words.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the visual string."
+            },
+            "args": [
+                {
+                    "name": "hebrew_text",
+                    "type": "String",
+                    "desc": "A Hebrew input string."
+                },
+                {
+                    "name": "max_chars_per_line",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "This optional parameter indicates maximum number of characters per line that will be returned."
+                }
+            ]
+        },
+        {
+            "name": "hebrevc",
+            "desc": "This function is similar to hebrev() with the difference that it converts newlines (\\n) to \"<br>\\n\".\n\nThe function tries to avoid breaking words.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the visual string."
+            },
+            "args": [
+                {
+                    "name": "hebrew_text",
+                    "type": "String",
+                    "desc": "A Hebrew input string."
+                },
+                {
+                    "name": "max_chars_per_line",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "This optional parameter indicates maximum number of characters per line that will be returned."
+                }
+            ]
+        },
+        {
+            "name": "setlocale",
+            "desc": "Sets locale information.\nOn Windows, setlocale(LC_ALL, '') sets the locale names from the system's regional\/language settings (accessible via Control Panel).",
+            "flags": [
+                "VariableArguments"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the new current locale, or FALSE if the locale functionality is not implemented on your platform, the specified locale does not exist or the category name is invalid.\n\nAn invalid category name also causes a warning message. Category\/locale names can be found in  RFC 1766 and  ISO 639. Different systems have different naming schemes for locales.\n\nThe return value of setlocale() depends on the system that PHP is running. It returns exactly what the system setlocale function returns."
+            },
+            "args": [
+                {
+                    "name": "category",
+                    "type": "Int32",
+                    "desc": "category is a named constant specifying the category of the functions affected by the locale setting: LC_ALL for all of the below LC_COLLATE for string comparison, see strcoll() LC_CTYPE for character classification and conversion, for example strtoupper() LC_MONETARY for localeconv() LC_NUMERIC for decimal separator (See also localeconv()) LC_TIME for date and time formatting with strftime() LC_MESSAGES for system responses (available if PHP was compiled with libintl)"
+                },
+                {
+                    "name": "locale",
+                    "type": "Variant",
+                    "desc": "If locale is NULL or the empty string \"\", the locale names will be set from the values of environment variables with the same names as the above categories, or from \"LANG\".\n\nIf locale is \"0\", the locale setting is not affected, only the current setting is returned.\n\nIf locale is an array or followed by additional parameters then each array element or parameter is tried to be set as new locale until success. This is useful if a locale is known under different names on different systems or for providing a fallback for a possibly not available locale."
+                }
+            ]
+        },
+        {
+            "name": "localeconv",
+            "desc": "Returns an associative array containing localized numeric and monetary formatting information.",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap"
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "nl_langinfo",
+            "desc": "nl_langinfo() is used to access individual elements of the locale categories. Unlike localeconv(), which returns all of the elements, nl_langinfo() allows you to select any specific element.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the element as a string, or FALSE if item is not valid."
+            },
+            "args": [
+                {
+                    "name": "item",
+                    "type": "Int32"
+                }
+            ]
+        },
+        {
+            "name": "printf",
+            "flags": [
+                "VariableArguments"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the length of the outputted string."
+            },
+            "args": [
+                {
+                    "name": "format",
+                    "type": "String",
+                    "desc": "See sprintf() for a description of format."
+                }
+            ]
+        },
+        {
+            "name": "vprintf",
+            "desc": "Display array values as a formatted string according to format (which is described in the documentation for sprintf()).\n\nOperates as printf() but accepts an array of arguments, rather than a variable number of arguments.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the length of the outputted string."
+            },
+            "args": [
+                {
+                    "name": "format",
+                    "type": "String",
+                    "desc": "See sprintf() for a description of format."
+                },
+                {
+                    "name": "args",
+                    "type": "VariantVec"
+                }
+            ]
+        },
+        {
+            "name": "sprintf",
+            "desc": "Returns a string produced according to the formatting string format.",
+            "flags": [
+                "VariableArguments",
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a string produced according to the formatting string format."
+            },
+            "args": [
+                {
+                    "name": "format",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "vsprintf",
+            "desc": "Operates as sprintf() but accepts an array of arguments, rather than a variable number of arguments.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Return array values as a formatted string according to format (which is described in the documentation for sprintf())."
+            },
+            "args": [
+                {
+                    "name": "format",
+                    "type": "String",
+                    "desc": "See sprintf() for a description of format."
+                },
+                {
+                    "name": "args",
+                    "type": "VariantVec"
+                }
+            ]
+        },
+        {
+            "name": "sscanf",
+            "desc": "The function sscanf() is the input analog of printf(). sscanf() reads from the string str and interprets it according to the specified format, which is described in the documentation for sprintf().\n\nAny whitespace in the format string matches any whitespace in the input string. This means that even a tab \\t in the format string can match a single space character in the input string.",
+            "flags": [
+                "RefVariableArguments"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "If only two parameters were passed to this function, the values parsed will be returned as an array. Otherwise, if optional parameters are passed, the function will return the number of assigned values. The optional parameters must be passed by reference."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string being parsed."
+                },
+                {
+                    "name": "format",
+                    "type": "String",
+                    "desc": "The interpreted format for str, which is described in the documentation for sprintf() with following differences: Function is not locale-aware. F, g, G and b are not supported. D stands for decimal number. i stands for integer with base detection. n stands for number of characters processed so far."
+                }
+            ]
+        },
+        {
+            "name": "chr",
+            "desc": "Returns a one-character string containing the character specified by ascii.\n\nThis function complements ord().",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns the specified character."
+            },
+            "args": [
+                {
+                    "name": "ascii",
+                    "type": "Int64",
+                    "desc": "The ascii code."
+                }
+            ]
+        },
+        {
+            "name": "ord",
+            "desc": "Returns the ASCII value of the first character of string.\n\nThis function complements chr().",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the ASCII value as an integer."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "A character."
+                }
+            ]
+        },
+        {
+            "name": "money_format",
+            "desc": "money_format() returns a formatted version of number. This function wraps the C library function strfmon(), with the difference that this implementation converts only one number at a time.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the formatted string. Characters before and after the formatting string will be returned unchanged. Non-numeric number causes returning NULL and emitting E_WARNING."
+            },
+            "args": [
+                {
+                    "name": "format",
+                    "type": "String",
+                    "desc": "The format specification consists of the following sequence: % character Flags\n\nOne or more of the optional flags below can be used: =f\n\nThe character = followed by a (single byte) character f to be used as the numeric fill character. The default fill character is space."
+                },
+                {
+                    "name": "number",
+                    "type": "Double",
+                    "desc": "Disable the use of grouping characters (as defined by the current locale)."
+                }
+            ]
+        },
+        {
+            "name": "number_format",
+            "desc": "This function accepts either one, two, or four parameters (not three):\n\nIf only one parameter is given, number will be formatted without decimals, but with a comma (\",\") between every group of thousands.\n\nIf two parameters are given, number will be formatted with decimals decimals with a dot (\".\") in front, and a comma (\",\") between every group of thousands.\n\nIf all four parameters are given, number will be formatted with decimals decimals, dec_point instead of a dot (\".\") before the decimals and thousands_sep instead of a comma (\",\") between every group of thousands.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "A formatted version of number."
+            },
+            "args": [
+                {
+                    "name": "number",
+                    "type": "Double",
+                    "desc": "The number being formatted."
+                },
+                {
+                    "name": "decimals",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Sets the number of decimal points."
+                },
+                {
+                    "name": "dec_point",
+                    "type": "Variant",
+                    "value": "\".\"",
+                    "desc": "Sets the separator for the decimal point."
+                },
+                {
+                    "name": "thousands_sep",
+                    "type": "Variant",
+                    "value": "\",\"",
+                    "desc": "Sets the thousands separator.\n\nOnly the first character of thousands_sep is used. For example, if you use bar as thousands_sep on the number 1000, number_format() will return 1b000."
+                }
+            ]
+        },
+        {
+            "name": "strcmp",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal."
+            },
+            "args": [
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "The first string."
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "The second string."
+                }
+            ]
+        },
+        {
+            "name": "strncmp",
+            "desc": "This function is similar to strcmp(), with the difference that you can specify the (upper limit of the) number of characters from each string to be used in the comparison.\n\nNote that this comparison is case sensitive.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
+                "predicted_type": 5
+            },
+            "args": [
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "The first string."
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "The second string."
+                },
+                {
+                    "name": "len",
+                    "type": "Int32",
+                    "desc": "Number of characters to use in the comparison."
+                }
+            ]
+        },
+        {
+            "name": "strnatcmp",
+            "desc": "This function implements a comparison algorithm that orders alphanumeric strings in the way a human being would, this is described as a \"natural ordering\". Note that this comparison is case sensitive.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Similar to other string comparison functions, this one returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal."
+            },
+            "args": [
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "The first string."
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "The second string."
+                }
+            ]
+        },
+        {
+            "name": "strcasecmp",
+            "desc": "Binary safe case-insensitive string comparison.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal."
+            },
+            "args": [
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "The first string"
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "The second string"
+                }
+            ]
+        },
+        {
+            "name": "strncasecmp",
+            "desc": "This function is similar to strcasecmp(), with the difference that you can specify the (upper limit of the) number of characters from each string to be used in the comparison.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
+                "predicted_type": 5
+            },
+            "args": [
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "The first string."
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "The second string."
+                },
+                {
+                    "name": "len",
+                    "type": "Int32",
+                    "desc": "The length of strings to be used in the comparison."
+                }
+            ]
+        },
+        {
+            "name": "strnatcasecmp",
+            "desc": "This function implements a comparison algorithm that orders alphanumeric strings in the way a human being would. The behaviour of this function is similar to strnatcmp(), except that the comparison is not case sensitive. For more information see: Martin Pool's  Natural Order String Comparison page.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Similar to other string comparison functions, this one returns < 0 if str1 is less than str2 > 0 if str1 is greater than str2, and 0 if they are equal."
+            },
+            "args": [
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "The first string."
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "The second string."
+                }
+            ]
+        },
+        {
+            "name": "strcoll",
+            "desc": "Note that this comparison is case sensitive, and unlike strcmp() this function is not binary safe.\n\nstrcoll() uses the current locale for doing the comparisons. If the current locale is C or POSIX, this function is equivalent to strcmp().",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal."
+            },
+            "args": [
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "The first string."
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "The second string."
+                }
+            ]
+        },
+        {
+            "name": "substr_compare",
+            "desc": "substr_compare() compares main_str from position offset with str up to length characters.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns < 0 if main_str from position offset is less than str, > 0 if it is greater than str, and 0 if they are equal. If offset is equal to or greater than the length of main_str or length is set and is less than 1, substr_compare() prints a warning and returns FALSE."
+            },
+            "args": [
+                {
+                    "name": "main_str",
+                    "type": "String",
+                    "desc": "The main string being compared."
+                },
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The secondary string being compared."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "desc": "The start position for the comparison. If negative, it starts counting from the end of the string."
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "value": "INT_MAX",
+                    "desc": "The length of the comparison. The default value is the largest of the length of the str compared to the length of main_str less the offset."
+                },
+                {
+                    "name": "case_insensitivity",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "If case_insensitivity is TRUE, comparison is case insensitive."
+                }
+            ]
+        },
+        {
+            "name": "strchr",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String"
+                },
+                {
+                    "name": "needle",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "strrchr",
+            "desc": "This function returns the portion of haystack which starts at the last occurrence of needle and goes until the end of haystack.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "This function returns the portion of string, or FALSE if needle is not found."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The string to search in"
+                },
+                {
+                    "name": "needle",
+                    "type": "Variant",
+                    "desc": "If needle contains more than one character, only the first is used. This behavior is different from that of strstr().\n\nIf needle is not a string, it is converted to an integer and applied as the ordinal value of a character."
+                }
+            ]
+        },
+        {
+            "name": "strstr",
+            "desc": "Returns part of haystack string from the first occurrence of needle to the end of haystack.\n\nThis function is case-sensitive. For case-insensitive searches, use stristr().\n\nIf you only want to determine if a particular needle occurs within haystack, use the faster and less memory intensive function strpos() instead.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the portion of string, or FALSE if needle is not found."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "needle",
+                    "type": "Variant",
+                    "desc": "If needle is not a string, it is converted to an integer and applied as the ordinal value of a character."
+                },
+                {
+                    "name": "before_needle",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "If TRUE, strstr() returns the part of the haystack before the first occurrence of the needle (excluding the needle)."
+                }
+            ]
+        },
+        {
+            "name": "stristr",
+            "desc": "Returns all of haystack from the first occurrence of needle to the end.\nneedle and haystack are examined in a case-insensitive manner.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the matched substring. If needle is not found, returns FALSE."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The string to search in"
+                },
+                {
+                    "name": "needle",
+                    "type": "Variant",
+                    "desc": "If needle is not a string, it is converted to an integer and applied as the ordinal value of a character."
+                }
+            ]
+        },
+        {
+            "name": "strpbrk",
+            "desc": "strpbrk() searches the haystack string for a char_list.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a string starting from the character found, or FALSE if it is not found."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The string where char_list is looked for."
+                },
+                {
+                    "name": "char_list",
+                    "type": "String",
+                    "desc": "This parameter is case sensitive."
+                }
+            ]
+        },
+        {
+            "name": "strpos",
+            "desc": "Returns the numeric position of the first occurrence of needle in the haystack string. Unlike the strrpos() before PHP 5, this function can take a full string as the needle parameter and the entire string will be used.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the position as an integer. If needle is not found, strpos() will return boolean FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The string to search in"
+                },
+                {
+                    "name": "needle",
+                    "type": "Variant",
+                    "desc": "If needle is not a string, it is converted to an integer and applied as the ordinal value of a character."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The optional offset parameter allows you to specify which character in haystack to start searching. The position returned is still relative to the beginning of haystack."
+                }
+            ]
+        },
+        {
+            "name": "stripos",
+            "desc": "Returns the numeric position of the first occurrence of needle in the haystack string.\n\nUnlike strpos(), stripos() is case-insensitive.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "If needle is not found, stripos() will return boolean FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The string to search in"
+                },
+                {
+                    "name": "needle",
+                    "type": "Variant",
+                    "desc": "Note that the needle may be a string of one or more characters.\n\nIf needle is not a string, it is converted to an integer and applied as the ordinal value of a character."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The optional offset parameter allows you to specify which character in haystack to start searching. The position returned is still relative to the beginning of haystack."
+                }
+            ]
+        },
+        {
+            "name": "strrpos",
+            "desc": "Returns the numeric position of the last occurrence of needle in the haystack string. Note that the needle in this case can only be a single character in PHP 4. If a string is passed as the needle, then only the first character of that string will be used.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the position where the needle exists. Returns FALSE if the needle was not found."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The string to search in."
+                },
+                {
+                    "name": "needle",
+                    "type": "Variant",
+                    "desc": "If needle is not a string, it is converted to an integer and applied as the ordinal value of a character."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "May be specified to begin searching an arbitrary number of characters into the string. Negative values will stop searching at an arbitrary point prior to the end of the string."
+                }
+            ]
+        },
+        {
+            "name": "strripos",
+            "desc": "Find position of last occurrence of a case-insensitive string in a string. Unlike strrpos(), strripos() is case-insensitive.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the numerical position of the last occurrence of needle. Also note that string positions start at 0, and not 1.\n\nIf needle is not found, FALSE is returned. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The string to search in"
+                },
+                {
+                    "name": "needle",
+                    "type": "Variant",
+                    "desc": "Note that the needle may be a string of one or more characters."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The offset parameter may be specified to begin searching an arbitrary number of characters into the string.\n\nNegative offset values will start the search at offset characters from the start of the string."
+                }
+            ]
+        },
+        {
+            "name": "substr_count",
+            "desc": "substr_count() returns the number of times the needle substring occurs in the haystack string. Please note that needle is case sensitive.\n\nThis function doesn't count overlapped substrings. See the example below!",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "This functions returns an integer."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The string to search in"
+                },
+                {
+                    "name": "needle",
+                    "type": "String",
+                    "desc": "The substring to search for"
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The offset where to start counting"
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "value": "0x7FFFFFFF",
+                    "desc": "The maximum length after the specified offset to search for the substring. It outputs a warning if the offset plus the length is greater than the haystack length."
+                }
+            ]
+        },
+        {
+            "name": "strspn",
+            "desc": "Returns the length of the first group of consecutive characters from mask found in subject.\n\nIf start and length are omitted, then all of subject will be examined. If they are included, then the effect will be the same as calling strspn(substr($subject, $start, $length), $mask) (see substr for more information).\n\nThe line of code:\n\nwill assign 2 to $var, because the string \"42\" is the first segment from subject to consist only of characters contained within \"1234567890\".",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the length of the initial segment of str1 which consists entirely of characters in str2."
+            },
+            "args": [
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "The string to examine."
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "The list of allowable characters to include in counted segments."
+                },
+                {
+                    "name": "start",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The position in subject to start searching.\n\nIf start is given and is non-negative, then strspn() will begin examining subject at the start'th position. For instance, in the string 'abcdef', the character at position 0 is 'a', the character at position 2 is 'c', and so forth.\n\nIf start is given and is negative, then strspn() will begin examining subject at the start'th position from the end of subject."
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "value": "0x7FFFFFFF",
+                    "desc": "The length of the segment from subject to examine.\n\nIf length is given and is non-negative, then subject will be examined for length characters after the starting position.\n\nIf lengthis given and is negative, then subject will be examined from the starting position up to length characters from the end of subject."
+                }
+            ]
+        },
+        {
+            "name": "strcspn",
+            "desc": "Returns the length of the initial segment of str1 which does not contain any of the characters in str2.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the length of the segment as an integer."
+            },
+            "args": [
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "The first string."
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "The second string."
+                },
+                {
+                    "name": "start",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The start position of the string to examine."
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "value": "0x7FFFFFFF",
+                    "desc": "The length of the string to examine."
+                }
+            ]
+        },
+        {
+            "name": "strlen",
+            "desc": "Returns the length of the given string.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The length of the string on success, and 0 if the string is empty."
+            },
+            "args": [
+                {
+                    "name": "vstr",
+                    "type": "Variant",
+                    "desc": "The string being measured for length."
+                }
+            ]
+        },
+        {
+            "name": "str_getcsv",
+            "desc": "Parses a string input for fields in CSV format and returns an array containing the fields read.",
+            "flags": [
+            ],
+            "return": {
+              "type": "StringVec",
+              "desc": "Returns an indexed array containing the fields read."
+            },
+            "args": [
+                {
+                    "name": "input",
+                    "type": "String",
+                    "desc": "The string to parse."
+                },
+                {
+                    "name": "delimiter",
+                    "type": "String",
+                    "value": "\",\"",
+                    "desc": "Set the field delimiter (one character only)."
+                },
+                {
+                    "name": "enclosure",
+                    "type": "String",
+                    "value": "\"\\\"\"",
+                    "desc": "Set the field enclosure character (one character only)."
+                },
+                {
+                    "name": "escape",
+                    "type": "String",
+                    "value": "\"\\\\\"",
+                    "desc": "Set the escape character (one character only). Defaults as a backslash (\\)"
+                }
+            ]
+        },
+        {
+            "name": "count_chars",
+            "desc": "Counts the number of occurrences of every byte-value (0..255) in string and returns it in various ways.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Depending on mode count_chars() returns one of the following: 0 - an array with the byte-value as key and the frequency of every byte as value. 1 - same as 0 but only byte-values with a frequency greater than zero are listed. 2 - same as 0 but only byte-values with a frequency equal to zero are listed. 3 - a string containing all unique characters is returned. 4 - a string containing all not used characters is returned."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The examined string."
+                },
+                {
+                    "name": "mode",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "See return values."
+                }
+            ]
+        },
+        {
+            "name": "str_word_count",
+            "desc": "Counts the number of words inside string. If the optional format is not specified, then the return value will be an integer representing the number of words found. In the event the format is specified, the return value will be an array, content of which is dependent on the format. The possible value for the format and the resultant outputs are listed below.\n\nFor the purpose of this function, 'word' is defined as a locale dependent string containing alphabetic characters, which also may contain, but not start with \"'\" and \"-\" characters.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array or an integer, depending on the format chosen."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string"
+                },
+                {
+                    "name": "format",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Specify the return value of this function. The current supported values are: 0 - returns the number of words found 1 - returns an array containing all the words found inside the string 2 - returns an associative array, where the key is the numeric position of the word inside the string and the value is the actual word itself"
+                },
+                {
+                    "name": "charlist",
+                    "type": "String",
+                    "value": "\"\"",
+                    "desc": "A list of additional characters which will be considered as 'word'"
+                }
+            ]
+        },
+        {
+            "name": "levenshtein",
+            "desc": "The Levenshtein distance is defined as the minimal number of characters you have to replace, insert or delete to transform str1 into str2. The complexity of the algorithm is O(m*n), where n and m are the length of str1 and str2 (rather good when compared to similar_text(), which is O(max(n,m)**3), but still expensive).\n\nIn its simplest form the function will take only the two strings as parameter and will calculate just the number of insert, replace and delete operations needed to transform str1 into str2.\n\nA second variant will take three additional parameters that define the cost of insert, replace and delete operations. This is more general and adaptive than variant one, but not as efficient.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "This function returns the Levenshtein-Distance between the two argument strings or -1, if one of the argument strings is longer than the limit of 255 characters."
+            },
+            "args": [
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "One of the strings being evaluated for Levenshtein distance."
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "One of the strings being evaluated for Levenshtein distance."
+                },
+                {
+                    "name": "cost_ins",
+                    "type": "Int32",
+                    "value": "1",
+                    "desc": "Defines the cost of insertion."
+                },
+                {
+                    "name": "cost_rep",
+                    "type": "Int32",
+                    "value": "1",
+                    "desc": "Defines the cost of replacement."
+                },
+                {
+                    "name": "cost_del",
+                    "type": "Int32",
+                    "value": "1",
+                    "desc": "Defines the cost of deletion."
+                }
+            ]
+        },
+        {
+            "name": "similar_text",
+            "desc": "This calculates the similarity between two strings as described in Oliver [1993]. Note that this implementation does not use a stack as in Oliver's pseudo code, but recursive calls which may or may not speed up the whole process. Note also that the complexity of this algorithm is O(N**3) where N is the length of the longest string.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the number of matching chars in both strings."
+            },
+            "args": [
+                {
+                    "name": "first",
+                    "type": "String",
+                    "desc": "The first string."
+                },
+                {
+                    "name": "second",
+                    "type": "String",
+                    "desc": "The second string."
+                },
+                {
+                    "name": "percent",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "By passing a reference as third argument, similar_text() will calculate the similarity in percent for you.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "soundex",
+            "desc": "Calculates the soundex key of str.\n\nSoundex keys have the property that words pronounced similarly produce the same soundex key, and can thus be used to simplify searches in databases where you know the pronunciation but not the spelling. This soundex function returns a string 4 characters long, starting with a letter.\n\nThis particular soundex function is one described by Donald Knuth in \"The Art Of Computer Programming, vol. 3: Sorting And Searching\", Addison-Wesley (1973), pp. 391-392.",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the soundex key as a string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                }
+            ]
+        },
+        {
+            "name": "metaphone",
+            "desc": "Calculates the metaphone key of str.\n\nSimilar to soundex() metaphone creates the same key for similar sounding words. It's more accurate than soundex() as it knows the basic rules of English pronunciation. The metaphone generated keys are of variable length.\n\nMetaphone was developed by Lawrence Philips <lphilips at verity dot com>. It is described in [\"Practical Algorithms for Programmers\", Binstock & Rex, Addison Wesley, 1995].",
+            "flags": [
+                "FunctionIsFoldable"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the metaphone key as a string, or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "phones",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "This parameter restricts the returned metaphone key to phonemes characters in length. The default value of 0 means no restriction."
+                }
+            ]
+        },
+        {
+            "name": "parse_str",
+            "desc": "Parses str as if it were the query string passed via a URL and sets variables in the current scope.\n\nTo get the current QUERY_STRING, you may use the variable $_SERVER['QUERY_STRING']. Also, you may want to read the section on variables from external sources.\n\nThe magic_quotes_gpc setting affects the output of this function, as parse_str() uses the same mechanism that PHP uses to populate the $_GET, $_POST, etc. variables.",
+            "flags": [
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The input string."
+                },
+                {
+                    "name": "arr",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "If the second parameter arr is present, variables are stored in this variable as array elements instead.",
+                    "ref": true
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

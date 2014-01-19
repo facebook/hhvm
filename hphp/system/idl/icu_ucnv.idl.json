@@ -1,0 +1,578 @@
+{
+    "preamble": "\n#include <runtime\/base\/zend\/zend-collator.h>\n\n\/\/ Avoid dragging in the icu namespace.\n#ifndef U_USING_ICU_NAMESPACE\n#define U_USING_ICU_NAMESPACE 0\n#endif\n\n#include <unicode\/utypes.h>\n#include <unicode\/ucnv.h>\n#include <unicode\/ustring.h>",
+    "consts": [
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "UConverter",
+            "desc": "ICU UConverter class",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "  private:\n    static void throwFailure(UErrorCode error,\n                             const char *fname,\n                             intl_error &merror);\n    bool checkLimits(int64_t available, int64_t needed);\n    void appendToUTarget(Variant val, UConverterToUnicodeArgs *args);\n    void appendFromUTarget(Variant val, UConverterFromUnicodeArgs *args);\n    static void ucnvToUCallback(c_UConverter *objval,\n                                UConverterToUnicodeArgs *args,\n                                const char *codeUnits, int32_t length,\n                                UConverterCallbackReason reason,\n                                UErrorCode *pErrorCode);\n    static void ucnvFromUCallback(c_UConverter *objval,\n                                  UConverterFromUnicodeArgs *args,\n                                  const UChar *codeUnits, int32_t length,\n                                  UChar32 codePoint,\n                                  UConverterCallbackReason reason,\n                                  UErrorCode *pErrorCode);\n    static bool setEncoding(CStrRef encoding,\n                            UConverter **pcnv,\n                            intl_error &err);\n    static bool setSubstChars(String chars, UConverter *cnv, intl_error &err);\n    bool setCallback(UConverter *cnv);\n    Variant defaultCallback(int64_t reason, VRefParam error);\n    static String doConvert(CStrRef str, UConverter *toCnv,\n                            UConverter *fromCnv, intl_error &err);\n  public:\n    intl_error  m_error;\n    UConverter *m_src;\n    UConverter *m_dest;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "desc": "Object constructor",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "toEncoding",
+                            "type": "String",
+                            "value": "\"utf-8\"",
+                            "desc": "Target character encoding"
+                        },
+                        {
+                            "name": "fromEncoding",
+                            "type": "String",
+                            "value": "\"utf-8\"",
+                            "desc": "Source character encoding"
+                        }
+                    ]
+                },
+                {
+                    "name": "__destruct",
+                    "desc": "Object destructor",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getSourceEncoding",
+                    "desc": "Returns the name of the source encoding",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Cannonical name of source encoding"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "setSourceEncoding",
+                    "desc": "Changes the source encoding converter to the named encoding",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "encoding",
+                            "type": "String",
+                            "desc": "Name of encoding to use"
+                        }
+                    ]
+                },
+                {
+                    "name": "getDestinationEncoding",
+                    "desc": "Returns the name of the destination encoding",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Cannonical name of destination encoding"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "setDestinationEncoding",
+                    "desc": "Changes the destination encoding converter to the named encoding",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "encoding",
+                            "type": "String",
+                            "desc": "Name of encoding to use"
+                        }
+                    ]
+                },
+                {
+                    "name": "getSourceType",
+                    "desc": "Returns the source algorithmic encoding type (e.g. SBCS, DBCS, LATIN_1, UTF8, etc...)",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Algorithmic encoding type"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getDestinationType",
+                    "desc": "Returns the destination algorithmic encoding type (e.g. SBCS, DBCS, LATIN_1, UTF8, etc...)",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Algorithmic encoding type"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getSubstChars",
+                    "desc": "Returns the current substitution character used for conversion failures",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "One or more codeunits representing a single codepoint"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "setSubstChars",
+                    "desc": "Set the substitution character to use for conversion failures",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Whether or not setting substitution characters succeeded"
+                    },
+                    "args": [
+                        {
+                            "name": "chars",
+                            "type": "String",
+                            "desc": "One or more codeunits representing a codepoint"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromUCallback",
+                    "desc": "Issued by the object when converting to the target encoding",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Substitution codeunits for illegal\/irregular\/unassigned codepoints"
+                    },
+                    "args": [
+                        {
+                            "name": "reason",
+                            "type": "Int64",
+                            "desc": "Event which caused the callback"
+                        },
+                        {
+                            "name": "source",
+                            "type": "Int64Vec",
+                            "desc": "Contextual codepoints from the string being converted"
+                        },
+                        {
+                            "name": "codepoint",
+                            "type": "Int64",
+                            "desc": "The specific codepoint in question"
+                        },
+                        {
+                            "name": "error",
+                            "type": "Variant",
+                            "ref": true,
+                            "desc": "Reference param, error condition on the way in, should be U_ZERO_ERROR on the way out"
+                        }
+                    ]
+                },
+                {
+                    "name": "toUCallback",
+                    "desc": "Issued by the object when converting from the source encoding",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Substitution codepoints for illegal\/irregular\/unassigned codeunits"
+                    },
+                    "args": [
+                        {
+                            "name": "reason",
+                            "type": "Int64",
+                            "desc": "Event which caused the callback"
+                        },
+                        {
+                            "name": "source",
+                            "type": "String",
+                            "desc": "Contextual codeunits from the string being converted"
+                        },
+                        {
+                            "name": "codeunits",
+                            "type": "String",
+                            "desc": "The specific codeunits in question"
+                        },
+                        {
+                            "name": "error",
+                            "type": "Variant",
+                            "ref": true,
+                            "desc": "Reference param, error condition on the way in, should be U_ZERO_ERROR on the way out"
+                        }
+                    ]
+                },
+                {
+                    "name": "convert",
+                    "desc": "Convert a string between the source\/destination encodings",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Transcoded string"
+                    },
+                    "args": [
+                        {
+                            "name": "str",
+                            "type": "String",
+                            "desc": "String to be transcoded"
+                        },
+                        {
+                            "name": "reverse",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "Convert from destination to source encodings instead"
+                        }
+                    ]
+                },
+                {
+                    "name": "transcode",
+                    "desc": "Convert a string between two encodings",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Transcoded string"
+                    },
+                    "args": [
+                        {
+                            "name": "str",
+                            "type": "String",
+                            "desc": "String to be transcoded"
+                        },
+                        {
+                            "name": "toEncoding",
+                            "type": "String",
+                            "desc": "Source encoding"
+                        },
+                        {
+                            "name": "fromEncoding",
+                            "type": "String",
+                            "desc": "Destination encoding"
+                        },
+                        {
+                            "name": "options",
+                            "type": "StringMap",
+                            "value": "null_variant",
+                            "desc": "Optional configuration for converters"
+                        }
+                    ]
+                },
+                {
+                    "name": "getErrorCode",
+                    "desc": "Last UErrorCode associated with this converter",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "UErrorCode U_* value"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getErrorMessage",
+                    "desc": "Last error message associated with this converter",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Descriptive error message"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "reasonText",
+                    "desc": "Name of REASON_* constant",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Printable REASON_* constant name"
+                    },
+                    "args": [
+                        {
+                            "name": "reason",
+                            "type": "Int64",
+                            "desc": "REASON_* constant"
+                        }
+                    ]
+                },
+                {
+                    "name": "getAvailable",
+                    "desc": "Returns list of available encodings",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "StringVec",
+                        "desc": "Available encodings"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getAliases",
+                    "desc": "Returns valid aliases of the named encoding",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "StringVec",
+                        "desc": "Valid aliases of the named encoding"
+                    },
+                    "args": [
+                        {
+                            "name": "encoding",
+                            "type": "String",
+                            "desc": "Encoding to get aliases of"
+                        }
+                    ]
+                },
+                {
+                    "name": "getStandards",
+                    "desc": "Returns list supported standards",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "StringVec",
+                        "desc": "Available standards"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getStandardName",
+                    "desc": "Returns a standard name for a given converter name.",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Standard name of converter"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "Original converter name"
+                        },
+                        {
+                            "name": "standard",
+                            "type": "String",
+                            "desc": "Name of the standard governing the names, e.g. 'MIME' or 'IANA'"
+                        }
+                    ]
+                },
+                {
+                    "name": "getMIMEName",
+                    "desc": "Returns the MIME name for a given converter name.",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Converter's MIME name"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "Original converter name"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+                {
+                    "name": "REASON_UNASSIGNED",
+                    "type": "Int64"
+                },
+                {
+                    "name": "REASON_ILLEGAL",
+                    "type": "Int64"
+                },
+                {
+                    "name": "REASON_IRREGULAR",
+                    "type": "Int64"
+                },
+                {
+                    "name": "REASON_RESET",
+                    "type": "Int64"
+                },
+                {
+                    "name": "REASON_CLOSE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "REASON_CLONE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "UNSUPPORTED_CONVERTER",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SBCS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "DBCS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "MBCS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LATIN_1",
+                    "type": "Int64"
+                },
+                {
+                    "name": "UTF8",
+                    "type": "Int64"
+                },
+                {
+                    "name": "UTF16_BigEndian",
+                    "type": "Int64"
+                },
+                {
+                    "name": "UTF16_LittleEndian",
+                    "type": "Int64"
+                },
+                {
+                    "name": "UTF32_BigEndian",
+                    "type": "Int64"
+                },
+                {
+                    "name": "UTF32_LittleEndian",
+                    "type": "Int64"
+                },
+                {
+                    "name": "EBCDIC_STATEFUL",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ISO_2022",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_1",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_2",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_3",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_4",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_5",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_6",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_8",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_11",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_16",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_17",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_18",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_19",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LMBCS_LAST",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HZ",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SCSU",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ISCII",
+                    "type": "Int64"
+                },
+                {
+                    "name": "US_ASCII",
+                    "type": "Int64"
+                },
+                {
+                    "name": "UTF7",
+                    "type": "Int64"
+                },
+                {
+                    "name": "BOCU1",
+                    "type": "Int64"
+                },
+                {
+                    "name": "UTF16",
+                    "type": "Int64"
+                },
+                {
+                    "name": "UTF32",
+                    "type": "Int64"
+                },
+                {
+                    "name": "CESU8",
+                    "type": "Int64"
+                },
+                {
+                    "name": "IMAP_MAILBOX",
+                    "type": "Int64"
+                }
+            ]
+        }
+    ]
+}

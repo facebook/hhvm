@@ -1,0 +1,97 @@
+*** Testing basic functionality of count() function ***
+-- Testing NULL --
+COUNT_NORMAL: should be 0, is 0
+COUNT_RECURSIVE: should be 0, is 0
+-- Testing arrays --
+COUNT_NORMAL: should be 2, is 2
+COUNT_RECURSIVE: should be 8, is 8
+-- Testing hashes --
+COUNT_NORMAL: should be 3, is 3
+COUNT_RECURSIVE: should be 6, is 6
+-- Testing strings --
+COUNT_NORMAL: should be 1, is 1
+COUNT_RECURSIVE: should be 1, is 1
+-- Testing various types with no second argument --
+COUNT_NORMAL: should be 1, is 1
+COUNT_NORMAL: should be 2, is 2
+-- Testing really cool arrays --
+COUNT_NORMAL: should be 3, is 3
+COUNT_RECURSIVE: should be 13, is 13
+
+*** Testing possible variations of count() function on arrays ***
+-- Iteration 0 --
+COUNT_NORMAL is 0
+COUNT_RECURSIVE is 0
+
+-- Iteration 1 --
+COUNT_NORMAL is 1
+COUNT_RECURSIVE is 1
+
+-- Iteration 2 --
+COUNT_NORMAL is 4
+COUNT_RECURSIVE is 7
+
+-- Iteration 3 --
+COUNT_NORMAL is 2
+COUNT_RECURSIVE is 8
+
+-- Iteration 4 --
+COUNT_NORMAL is 4
+COUNT_RECURSIVE is 4
+
+-- Iteration 5 --
+COUNT_NORMAL is 5
+COUNT_RECURSIVE is 5
+
+-- Iteration 6 --
+COUNT_NORMAL is 6
+COUNT_RECURSIVE is 6
+
+-- Iteration 7 --
+COUNT_NORMAL is 4
+COUNT_RECURSIVE is 7
+
+-- Testing count() on constants with no second argument --
+COUNT_NORMAL: should be 1, is 1
+COUNT_NORMAL: should be 1, is 1
+
+-- Testing count() on NULL and Unset variables --
+COUNT_NORMAL: should be 0, is 0
+COUNT_NORMAL: should be 1, is 1
+COUNT_NORMAL: should be 0, is 0
+
+-- Testing count() on an empty sub-array --
+COUNT_NORMAL: should be 2, is 2
+COUNT_RECURSIVE: should be 5, is 5
+
+-- Testing count() on objects with Countable interface --
+COUNT_NORMAL: should be 3, is 3
+
+-- Testing count() on resource type --
+int(2)
+
+-- Testing count() on arrays containing references --
+For mode '0' count is => int(3)
+For mode '1' count is => int(9)
+For mode '0' count is => int(3)
+For mode '1' count is => int(9)
+For mode '-1' count is => int(3)
+For mode '-1.45' count is => int(3)
+For mode '2' count is => int(3)
+For mode '1' count is => int(9)
+For mode '' count is => int(3)
+For mode '' count is => int(3)
+
+-- Testing error conditions --HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Notice: %s
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+Done

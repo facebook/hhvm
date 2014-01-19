@@ -1,0 +1,77 @@
+Collator
+HipHop Warning: Collator::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+object(Collator)#1 (0) {
+}
+string(92) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:8:"Collator";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(8) "Collator"
+}
+array(13) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "asort"
+  [2]=>
+  string(7) "compare"
+  [3]=>
+  string(6) "create"
+  [4]=>
+  string(12) "getattribute"
+  [5]=>
+  string(12) "geterrorcode"
+  [6]=>
+  string(15) "geterrormessage"
+  [7]=>
+  string(9) "getlocale"
+  [8]=>
+  string(11) "getstrength"
+  [9]=>
+  string(12) "setattribute"
+  [10]=>
+  string(11) "setstrength"
+  [11]=>
+  string(16) "sortwithsortkeys"
+  [12]=>
+  string(4) "sort"
+}
+================
+A_Collator
+HipHop Warning: Collator::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+object(A_Collator)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"A_Collator";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "A_Collator"
+}
+array(13) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "asort"
+  [2]=>
+  string(7) "compare"
+  [3]=>
+  string(6) "create"
+  [4]=>
+  string(12) "getattribute"
+  [5]=>
+  string(12) "geterrorcode"
+  [6]=>
+  string(15) "geterrormessage"
+  [7]=>
+  string(9) "getlocale"
+  [8]=>
+  string(11) "getstrength"
+  [9]=>
+  string(12) "setattribute"
+  [10]=>
+  string(11) "setstrength"
+  [11]=>
+  string(16) "sortwithsortkeys"
+  [12]=>
+  string(4) "sort"
+}

@@ -1,0 +1,21 @@
+Setting IP_MULTICAST_LOOP with 256
+bool(true)
+int(1)
+
+Setting IP_MULTICAST_LOOP with false
+bool(true)
+int(0)
+
+Setting IP_MULTICAST_TTL with 256
+HipHop Warning: %s
+bool(false)
+int(1)
+
+Setting IP_MULTICAST_TTL with "254"
+bool(true)
+int(254)
+
+Setting IP_MULTICAST_TTL with -1
+HipHop Warning: %s
+bool(false)
+int(254)

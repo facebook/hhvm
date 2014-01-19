@@ -1,0 +1,5 @@
+hello, world!
+hello, world!
+hello, world!
+is_callable($myfunc) = 1
+string(17) "Closure::__invoke"

@@ -1,0 +1,173 @@
+string(25) "general_ini_with_sections"
+===
+array(5) {
+  ["Version"]=>
+  string(1) "0"
+  ["Released"]=>
+  string(31) "Tue, 27 Oct 2009 12:01:07 -0000"
+  ["Browser"]=>
+  string(17) "DefaultProperties"
+  ["Platform"]=>
+  string(7) "unknown"
+  ["Beta"]=>
+  string(0) ""
+}
+===
+array(2) {
+  ["GJK_Browscap_Version"]=>
+  array(2) {
+    ["Version"]=>
+    string(4) "4520"
+    ["Released"]=>
+    string(31) "Tue, 27 Oct 2009 12:01:07 -0000"
+  }
+  ["DefaultProperties"]=>
+  array(4) {
+    ["Browser"]=>
+    string(17) "DefaultProperties"
+    ["Version"]=>
+    string(1) "0"
+    ["Platform"]=>
+    string(7) "unknown"
+    ["Beta"]=>
+    string(0) ""
+  }
+}
+===
+string(20) "comment_on_last_line"
+===
+array(1) {
+  ["key"]=>
+  string(5) "value"
+}
+===
+array(1) {
+  ["key"]=>
+  string(5) "value"
+}
+===
+string(19) "double_quote_escape"
+===
+array(5) {
+  ["key1"]=>
+  string(5) "value"
+  ["key2"]=>
+  string(11) "valuevalue2"
+  ["key3"]=>
+  string(6) "value""
+  ["key4"]=>
+  string(6) "value""
+  ["key5"]=>
+  string(18) "value"inner value""
+}
+===
+array(5) {
+  ["key1"]=>
+  string(5) "value"
+  ["key2"]=>
+  string(11) "valuevalue2"
+  ["key3"]=>
+  string(6) "value""
+  ["key4"]=>
+  string(6) "value""
+  ["key5"]=>
+  string(18) "value"inner value""
+}
+===
+string(10) "joomla_bug"
+===
+array(1) {
+  ["JERROR_COULD_NOT_FIND_TEMPLATE"]=>
+  string(29) "Could not find template "%s\."
+}
+===
+array(1) {
+  ["JERROR_COULD_NOT_FIND_TEMPLATE"]=>
+  string(29) "Could not find template "%s\."
+}
+===
+string(12) "slash_in_key"
+===
+array(3) {
+  ["key1"]=>
+  string(6) "value1"
+  ["path.a.b.c.key2"]=>
+  string(6) "value2"
+  ["path.a/b/c.key3"]=>
+  string(6) "value3"
+}
+===
+array(1) {
+  ["global"]=>
+  array(3) {
+    ["key1"]=>
+    string(6) "value1"
+    ["path.a.b.c.key2"]=>
+    string(6) "value2"
+    ["path.a/b/c.key3"]=>
+    string(6) "value3"
+  }
+}
+===
+string(18) "dollar_sign_at_end"
+===
+array(4) {
+  ["fonts.trackingUrl"]=>
+  string(56) "https://fast.fonts.com/t/1.css?apiType=css&projectid=123"
+  ["serviceCache.1.cacheable"]=>
+  string(4) "true"
+  ["anotherkey"]=>
+  string(11) "value$value"
+  ["somekey"]=>
+  string(6) "value$"
+}
+===
+array(1) {
+  ["global"]=>
+  array(4) {
+    ["fonts.trackingUrl"]=>
+    string(56) "https://fast.fonts.com/t/1.css?apiType=css&projectid=123"
+    ["serviceCache.1.cacheable"]=>
+    string(4) "true"
+    ["anotherkey"]=>
+    string(11) "value$value"
+    ["somekey"]=>
+    string(6) "value$"
+  }
+}
+===
+string(22) "negative_number_as_key"
+===
+array(1) {
+  [-1]=>
+  string(11) "SimpleError"
+}
+===
+array(1) {
+  ["FORMERRORCODES"]=>
+  array(1) {
+    [-1]=>
+    string(11) "SimpleError"
+  }
+}
+===
+string(12) "double slash"
+===
+array(3) {
+  ["key1"]=>
+  string(6) "start\"
+  ["key2"]=>
+  string(4) "\end"
+  ["key3"]=>
+  string(9) "start\end"
+}
+===
+array(3) {
+  ["key1"]=>
+  string(6) "start\"
+  ["key2"]=>
+  string(4) "\end"
+  ["key3"]=>
+  string(9) "start\end"
+}
+===

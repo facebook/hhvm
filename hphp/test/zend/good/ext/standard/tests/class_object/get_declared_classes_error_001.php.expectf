@@ -1,0 +1,6 @@
+*** Testing get_declared_classes() : error conditions ***
+
+-- Testing get_declared_classes() function with one argument --
+HipHop Warning: %s
+NULL
+Done

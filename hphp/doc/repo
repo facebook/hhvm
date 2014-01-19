@@ -1,0 +1,95 @@
+hhvm stores serialized HipHop Bytecode and metadata in on-disk repositories, or
+"repos" for short. Repos are implemented using SQLite (http://www.sqlite.org/),
+which means that repo introspection is possible using the sqlite3 command line
+program, as well as via SQLite API bindings for any number of programming
+languages. For example, here is how to determine the schema within a repo named
+hhvm.hhbc:
+
+  $ sqlite3 hhvm.hhbc '.schema'
+
+This dumps the SQLite database schema, but the repo schema is a slightly
+different concept, in that one repo can support multiple repo schemas
+simultaneously. To make this possible, every SQLite table name is suffixed with
+the repo schema version, which is normally based on the source code and
+relevant options used to compile the runtime. For example, repo schema
+77fae842fab099b2eb4771f620e15a4bbf3883aa contains a table called
+"magic_77fae842fab099b2eb4771f620e15a4bbf3883aa":
+
+  $ sqlite3 hhvm.hhbc '.dump magic_77fae842fab099b2eb4771f620e15a4bbf3883aa'
+  PRAGMA foreign_keys=OFF;
+  BEGIN TRANSACTION;
+  CREATE TABLE magic_77fae842fab099b2eb4771f620e15a4bbf3883aa(product TEXT);
+  INSERT INTO "magic_77fae842fab099b2eb4771f620e15a4bbf3883aa"
+    VALUES('facebook.com HipHop Virtual Machine bytecode repository');
+  COMMIT;
+
+This table is used as a sanity check to assure that the repo is initialized to
+support the schema.
+
+hhvm utilizes SQLite transactions to ensure that the repo is always in a
+consistent state. For example, the repo schema is either fully in place or fully
+absent. The same is true for compilation units; if an entry exists in the
+Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa table, then all the associated
+data exists in the other tables.
+
+  $ sqlite3 hhvm.hhbc '.dump Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa'
+  PRAGMA foreign_keys=OFF;
+  BEGIN TRANSACTION;
+  CREATE TABLE Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa(
+    unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB, bc_meta BLOB,
+    mainReturn BLOB, mergeable INTEGER,lines BLOB, UNIQUE (md5));
+  COMMIT;
+
+Rather than use the bulky md5 blob as a unique identifier throughout the repo,
+unitSn is used. Incidentally, here is how to find out how many compilation units
+are stored:
+
+  $ sqlite3 hhvm.hhbc 'SELECT COUNT(*)
+                       FROM Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa;'
+  19452
+
+hhvm uses one or two repos, depending on configuration. The 'central' repo must
+always be writeable, but the 'local' repo can be read-only, or even completely
+missing. Before opening either the central or local repo, the first occurrence
+of '%{schema}' in the path will be replaced by the current schema id. There are
+several runtime configuration options (and related environment variables) that
+can be used to control repo behavior:
+
+* Repo.Local.Mode: rw, r-(*), or -- (overrides HHVM_REPO_LOCAL_MODE)
+  rw: Use the local repo for reading and writing (if file permissions allow).
+  r-: Use the local repo for reading (if it exists and is readable).
+  --: Completely ignore the local repo, even if it exists.
+* Repo.Local.Path (overrides HHVM_REPO_LOCAL_PATH)
+  Repo.Local.Path or HHVM_REPO_LOCAL_PATH can be used to specify where the local
+  repo is. If unspecified, then the local repo is 'path/to/cli.php.hhbc' in cli
+  mode or '<cwd>/hhvm.hhbc' in srv mode.
+* Repo.Central.Path (overrides HHVM_REPO_CENTRAL_PATH)
+  There is always a central read-write repo. Non-eval units prefer to be written
+  in the local repo, but are written in the central repo if the local repo isn't
+  writeable. If unspecified, or unusable, will fall back first to
+  $HHVM_REPO_CENTRAL_PATH, and then to ~user/.hhvm.hhbc
+* Repo.Eval.Mode: local, central, or readonly(*)
+  local: Write eval units to the local repo if it is writeable; otherwise write
+         to the central repo.
+  central: Write eval units to the central repo.
+  readonly: Do not write eval units to a repo, but still search for them in
+            repos.
+* Repo.Journal: delete(*) or memory
+  delete: Delete the on-disk SQLite journal upon each successful transaction
+          commit.
+  memory: Store the SQLite journal in memory. The hphp compiler uses this mode
+          when compiling because it is faster than delete mode (and safe under
+          such conditions), but it is unsafe to use under normal operating
+          conditions.
+* Repo.Commit: true(*) or false
+  If true, commit newly emitted units to the repo.
+* Repo.DebugInfo: true(*) or false
+  If true, store full source locations; otherwise store only line
+  numbers.
+* Repo.Authoritative: false(*) or true
+  If true, use Repo as authoritative source for unit bytecode, do
+  not consult filesystem to check for existence of file or parse it.
+  Otherwise, fall back to parsing file from filesystem if unit
+  is not found in Repo.
+* The environment variable $HHVM_RUNTIME_REPO_SCHEMA will override the schema
+  id.

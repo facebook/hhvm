@@ -1,0 +1,14 @@
+array(0) {
+}
+array(2) {
+  ["a"]=>
+  int(10)
+  ["b"]=>
+  string(4) "test"
+}
+array(2) {
+  ["a"]=>
+  int(10)
+  ["b"]=>
+  string(4) "test"
+}

@@ -1,0 +1,9 @@
+*** Testing end() : usage variations ***
+
+-- Initial position of internal pointer --
+string(4) "zero"
+
+-- Position after calling end() --
+$array1: string(3) "two"
+$array2: string(3) "two"
+===DONE===

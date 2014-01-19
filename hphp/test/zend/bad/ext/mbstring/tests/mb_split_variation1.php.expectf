@@ -1,0 +1,144 @@
+*** Testing mb_split() : usage variations ***
+
+-- Iteration 1 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 2 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 3 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 4 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 5 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 6 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 7 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 8 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 9 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 10 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 11 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 12 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 13 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 14 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 15 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 16 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 17 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 18 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 19 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 20 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 21 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 22 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 23 --
+array(1) {
+  [0]=>
+  string(13) "a b c d e f g"
+}
+
+-- Iteration 24 --
+HipHop Warning: %s
+bool(false)
+Done

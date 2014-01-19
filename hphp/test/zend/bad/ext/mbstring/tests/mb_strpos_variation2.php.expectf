@@ -1,0 +1,83 @@
+*** Testing mb_strpos() : usage variations ***
+
+-- Iteration 1 --
+bool(false)
+
+-- Iteration 2 --
+bool(false)
+
+-- Iteration 3 --
+bool(false)
+
+-- Iteration 4 --
+bool(false)
+
+-- Iteration 5 --
+bool(false)
+
+-- Iteration 6 --
+bool(false)
+
+-- Iteration 7 --
+bool(false)
+
+-- Iteration 8 --
+bool(false)
+
+-- Iteration 9 --
+bool(false)
+
+-- Iteration 10 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 11 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 12 --
+bool(false)
+
+-- Iteration 13 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 14 --
+bool(false)
+
+-- Iteration 15 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 16 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 17 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 18 --
+int(0)
+
+-- Iteration 19 --
+int(0)
+
+-- Iteration 20 --
+bool(false)
+
+-- Iteration 21 --
+bool(false)
+
+-- Iteration 22 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 23 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 24 --
+HipHop Warning: %s
+bool(false)
+Done

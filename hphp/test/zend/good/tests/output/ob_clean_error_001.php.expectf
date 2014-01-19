@@ -1,0 +1,6 @@
+*** Testing ob_clean() : error conditions ***
+
+-- Testing ob_clean() function with one argument --
+HipHop Warning: %s
+NULL
+Done

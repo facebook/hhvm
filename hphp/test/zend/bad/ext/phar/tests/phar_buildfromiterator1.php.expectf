@@ -1,0 +1,3 @@
+%s(24) "UnexpectedValueException"
+Cannot write out phar archive, phar is read-only
+===DONE===

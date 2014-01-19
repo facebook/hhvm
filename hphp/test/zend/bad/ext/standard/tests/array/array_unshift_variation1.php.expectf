@@ -1,0 +1,172 @@
+*** Testing array_unshift() : unexpected values for $array argument ***
+
+-- Iteration 1 --HipHop Warning: %s
+NULL
+int(0)
+HipHop Warning: %s
+NULL
+int(0)
+
+-- Iteration 2 --HipHop Warning: %s
+NULL
+int(1)
+HipHop Warning: %s
+NULL
+int(1)
+
+-- Iteration 3 --HipHop Warning: %s
+NULL
+int(12345)
+HipHop Warning: %s
+NULL
+int(12345)
+
+-- Iteration 4 --HipHop Warning: %s
+NULL
+int(-2345)
+HipHop Warning: %s
+NULL
+int(-2345)
+
+-- Iteration 5 --HipHop Warning: %s
+NULL
+float(10.5)
+HipHop Warning: %s
+NULL
+float(10.5)
+
+-- Iteration 6 --HipHop Warning: %s
+NULL
+float(-10.5)
+HipHop Warning: %s
+NULL
+float(-10.5)
+
+-- Iteration 7 --HipHop Warning: %s
+NULL
+float(123456789000)
+HipHop Warning: %s
+NULL
+float(123456789000)
+
+-- Iteration 8 --HipHop Warning: %s
+NULL
+float(1.23456789E-9)
+HipHop Warning: %s
+NULL
+float(1.23456789E-9)
+
+-- Iteration 9 --HipHop Warning: %s
+NULL
+float(0.5)
+HipHop Warning: %s
+NULL
+float(0.5)
+
+-- Iteration 10 --HipHop Warning: %s
+NULL
+NULL
+HipHop Warning: %s
+NULL
+NULL
+
+-- Iteration 11 --HipHop Warning: %s
+NULL
+NULL
+HipHop Warning: %s
+NULL
+NULL
+
+-- Iteration 12 --HipHop Warning: %s
+NULL
+bool(true)
+HipHop Warning: %s
+NULL
+bool(true)
+
+-- Iteration 13 --HipHop Warning: %s
+NULL
+bool(false)
+HipHop Warning: %s
+NULL
+bool(false)
+
+-- Iteration 14 --HipHop Warning: %s
+NULL
+bool(true)
+HipHop Warning: %s
+NULL
+bool(true)
+
+-- Iteration 15 --HipHop Warning: %s
+NULL
+bool(false)
+HipHop Warning: %s
+NULL
+bool(false)
+
+-- Iteration 16 --HipHop Warning: %s
+NULL
+string(0) ""
+HipHop Warning: %s
+NULL
+string(0) ""
+
+-- Iteration 17 --HipHop Warning: %s
+NULL
+string(0) ""
+HipHop Warning: %s
+NULL
+string(0) ""
+
+-- Iteration 18 --HipHop Warning: %s
+NULL
+string(6) "string"
+HipHop Warning: %s
+NULL
+string(6) "string"
+
+-- Iteration 19 --HipHop Warning: %s
+NULL
+string(6) "string"
+HipHop Warning: %s
+NULL
+string(6) "string"
+
+-- Iteration 20 --HipHop Warning: %s
+NULL
+string(11) "hello world"
+HipHop Warning: %s
+NULL
+string(11) "hello world"
+
+-- Iteration 21 --HipHop Warning: %s
+NULL
+object(classA)#1 (0) {
+}
+HipHop Warning: %s
+NULL
+object(classA)#1 (0) {
+}
+
+-- Iteration 22 --HipHop Warning: %s
+NULL
+NULL
+HipHop Warning: %s
+NULL
+NULL
+
+-- Iteration 23 --HipHop Warning: %s
+NULL
+NULL
+HipHop Warning: %s
+NULL
+NULL
+
+-- Iteration 24 --HipHop Warning: %s
+NULL
+resource(%d) of type (stream)
+HipHop Warning: %s
+NULL
+resource(%d) of type (stream)
+Done

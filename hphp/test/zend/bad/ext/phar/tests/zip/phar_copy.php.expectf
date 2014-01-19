@@ -1,0 +1,5 @@
+hihibool(true)
+file "/error/.." contains invalid characters upper directory reference, cannot be copied from "a" in phar %s
+bool(true)
+
+a: hib: hic: hi===DONE===

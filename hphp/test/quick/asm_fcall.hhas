@@ -1,0 +1,83 @@
+#
+# Test some function call junk
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Null
+  RetC
+}
+
+.function caller($who, $arg) {
+  CGetL $who
+  FPushFunc 1
+  FPassL 0 $arg
+  FCall 1
+  UnboxR
+
+  SetL $ret
+  PopC
+
+  CGetL $ret
+  FPushFunc 0
+  FCall 0
+  PopR
+
+  True
+  RetC
+}
+
+.function b() {
+  String "In b() now\n"
+  Print
+  PopC
+
+  True
+  RetC
+}
+
+.function a($arg) {
+  CGetL $arg
+  String "\n"
+  Concat
+  Print
+  PopC
+
+  CGetL $arg
+  RetC
+}
+
+.function byref(&$foo) {
+  Int 42
+  SetL $foo
+  RetC
+}
+
+.function main() {
+  FPushFuncD 2 "caller"
+  String "a"
+  FPassC 0
+  String "b"
+  FPassC 1
+  FCall 2
+  PopR
+
+  String "strval"
+  SetL $funk
+  PopC
+  FPushFuncD 1 "byref"
+  FPassL 0 $funk
+  FCall 1
+  PopR
+  CGetL $funk
+  Print
+  PopC
+  String "\n"
+  Print
+  PopC
+
+  True
+  RetC
+}

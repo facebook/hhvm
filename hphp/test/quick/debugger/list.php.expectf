@@ -1,0 +1,59 @@
+Program %s/list.php loaded. Type '[r]un' or '[c]ontinue' to go.
+br SplMaxHeap::insert()
+Breakpoint 1 set upon entering SplMaxHeap::insert()
+run
+Breakpoint 1 reached at SplHeap::insert() on line %d of systemlib.php
+ %d   public function insert($value) {
+ %d*    $this->checkNotCorrupted();
+ %d     $index = $this->lowestFreeIndex();
+
+list myfunc
+   5 function myfunc($a, $b) {
+   6   error_log($a.$b);
+   7 }
+   8 
+   9 class MyClass {
+  10   function myMeth($a, $b) {
+  11     error_log($a.$b);
+  12   }
+  13 }
+  14 (END)
+
+list MyClass
+   9 class MyClass {
+  10   function myMeth($a, $b) {
+  11     error_log($a.$b);
+  12   }
+  13 }
+  14 (END)
+
+list MyClass::myMeth
+  10   function myMeth($a, $b) {
+  11     error_log($a.$b);
+  12   }
+  13 }
+  14 (END)
+
+list 3
+   1 <?php
+   2 $h = new SplMaxHeap();
+   3 $h->insert(1);
+   4 
+   5 function myfunc($a, $b) {
+   6   error_log($a.$b);
+   7 }
+   8 
+   9 class MyClass {
+  10   function myMeth($a, $b) {
+  11     error_log($a.$b);
+  12   }
+
+list noSuchFunc
+Unable to read specified function, class or source file location.
+list NoSuchClass
+Unable to read specified function, class or source file location.
+list MyClass::noSuchMethod
+Unable to read specified method.
+list noSuchFile:5
+Unable to read specified function, class or source file location.
+quit

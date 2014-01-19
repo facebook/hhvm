@@ -1,0 +1,18 @@
+object(StableMap)#2 (3) {
+  ["a"]=>
+  int(1)
+  [2]=>
+  string(1) "b"
+  ["c"]=>
+  array(0) {
+  }
+}
+object(StableMap)#3 (3) {
+  ["a"]=>
+  int(1)
+  [2]=>
+  string(1) "b"
+  ["c"]=>
+  array(0) {
+  }
+}

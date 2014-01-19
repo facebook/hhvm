@@ -1,0 +1,379 @@
+>>> no_attrs =>
+---- non-recursive: ----
+p1:
+array(0) {
+}
+p2:
+array(0) {
+}
+
+---- recursive: ----
+p1:
+array(0) {
+}
+p2:
+array(0) {
+}
+
+>>> simple_attr =>
+---- non-recursive: ----
+param:
+array(1) {
+  ["Attribute"]=>
+  array(0) {
+  }
+}
+
+---- recursive: ----
+param:
+array(1) {
+  ["Attribute"]=>
+  array(0) {
+  }
+}
+
+>>> two_attrs =>
+---- non-recursive: ----
+p1:
+array(1) {
+  ["Attr1"]=>
+  array(0) {
+  }
+}
+p2:
+array(1) {
+  ["Attr2"]=>
+  array(0) {
+  }
+}
+
+---- recursive: ----
+p1:
+array(1) {
+  ["Attr1"]=>
+  array(0) {
+  }
+}
+p2:
+array(1) {
+  ["Attr2"]=>
+  array(0) {
+  }
+}
+
+>>> C::m =>
+---- non-recursive: ----
+param:
+array(1) {
+  ["Attr"]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+}
+
+---- recursive: ----
+param:
+array(1) {
+  ["Attr"]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+}
+
+>>> C::n =>
+---- non-recursive: ----
+param:
+array(2) {
+  ["Bar"]=>
+  array(0) {
+  }
+  ["Foo"]=>
+  array(0) {
+  }
+}
+
+---- recursive: ----
+param:
+array(2) {
+  ["Bar"]=>
+  array(0) {
+  }
+  ["Foo"]=>
+  array(0) {
+  }
+}
+
+>>> C::o =>
+---- non-recursive: ----
+param:
+array(1) {
+  ["Hi"]=>
+  array(1) {
+    [0]=>
+    string(3) "bye"
+  }
+}
+
+---- recursive: ----
+param:
+array(1) {
+  ["Hi"]=>
+  array(1) {
+    [0]=>
+    string(3) "bye"
+  }
+}
+
+>>> C::p =>
+---- non-recursive: ----
+param:
+array(2) {
+  ["A"]=>
+  array(2) {
+    [0]=>
+    string(1) "b"
+    [1]=>
+    array(2) {
+      [0]=>
+      string(1) "c"
+      [1]=>
+      string(1) "d"
+    }
+  }
+  ["E"]=>
+  array(1) {
+    [0]=>
+    string(2) "fg"
+  }
+}
+
+---- recursive: ----
+param:
+array(2) {
+  ["A"]=>
+  array(2) {
+    [0]=>
+    string(1) "b"
+    [1]=>
+    array(2) {
+      [0]=>
+      string(1) "c"
+      [1]=>
+      string(1) "d"
+    }
+  }
+  ["E"]=>
+  array(1) {
+    [0]=>
+    string(2) "fg"
+  }
+}
+
+>>> C::q =>
+---- non-recursive: ----
+tuv:
+array(1) {
+  ["RS"]=>
+  array(0) {
+  }
+}
+
+---- recursive: ----
+tuv:
+array(1) {
+  ["RS"]=>
+  array(0) {
+  }
+}
+
+>>> C::wxy =>
+---- non-recursive: ----
+z:
+array(1) {
+  ["And_"]=>
+  array(0) {
+  }
+}
+wont_you_sing_with_me:
+array(1) {
+  ["NextTime"]=>
+  array(0) {
+  }
+}
+
+---- recursive: ----
+z:
+array(1) {
+  ["And_"]=>
+  array(0) {
+  }
+}
+wont_you_sing_with_me:
+array(1) {
+  ["NextTime"]=>
+  array(0) {
+  }
+}
+
+>>> D::m =>
+---- non-recursive: ----
+param:
+array(0) {
+}
+
+---- recursive: ----
+param:
+array(1) {
+  ["Attr"]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+}
+
+>>> D::n =>
+---- non-recursive: ----
+param:
+array(2) {
+  ["Bar"]=>
+  array(0) {
+  }
+  ["Foo"]=>
+  array(0) {
+  }
+}
+
+---- recursive: ----
+param:
+array(2) {
+  ["Bar"]=>
+  array(0) {
+  }
+  ["Foo"]=>
+  array(0) {
+  }
+}
+
+>>> D::o =>
+---- non-recursive: ----
+param:
+array(1) {
+  ["Hi"]=>
+  array(1) {
+    [0]=>
+    string(5) "hello"
+  }
+}
+
+---- recursive: ----
+param:
+array(1) {
+  ["Hi"]=>
+  array(1) {
+    [0]=>
+    string(5) "hello"
+  }
+}
+
+>>> D::p =>
+---- non-recursive: ----
+param:
+array(2) {
+  ["A"]=>
+  array(2) {
+    [0]=>
+    string(1) "b"
+    [1]=>
+    array(2) {
+      [0]=>
+      string(1) "c"
+      [1]=>
+      string(1) "d"
+    }
+  }
+  ["E"]=>
+  array(1) {
+    [0]=>
+    string(2) "fg"
+  }
+}
+
+---- recursive: ----
+param:
+array(2) {
+  ["A"]=>
+  array(2) {
+    [0]=>
+    string(1) "b"
+    [1]=>
+    array(2) {
+      [0]=>
+      string(1) "c"
+      [1]=>
+      string(1) "d"
+    }
+  }
+  ["E"]=>
+  array(1) {
+    [0]=>
+    string(2) "fg"
+  }
+}
+
+>>> D::q =>
+---- non-recursive: ----
+rstuv:
+array(0) {
+}
+
+---- recursive: ----
+rstuv:
+array(1) {
+  ["RS"]=>
+  array(0) {
+  }
+}
+
+>>> D::wxy =>
+---- non-recursive: ----
+z:
+array(1) {
+  ["EnglishPeopleCallThisZed"]=>
+  array(0) {
+  }
+}
+wont_you_sing_with_me:
+array(0) {
+}
+
+---- recursive: ----
+z:
+array(2) {
+  ["And_"]=>
+  array(0) {
+  }
+  ["EnglishPeopleCallThisZed"]=>
+  array(0) {
+  }
+}
+wont_you_sing_with_me:
+array(1) {
+  ["NextTime"]=>
+  array(0) {
+  }
+}
+

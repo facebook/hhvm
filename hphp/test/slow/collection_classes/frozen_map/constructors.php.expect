@@ -1,0 +1,126 @@
+Vector
+...
+object(Pair)#3 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#4 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(Pair)#5 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+...
+FrozenVector
+...
+object(Pair)#7 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#8 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(Pair)#9 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+...
+Map
+...
+object(Pair)#11 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#12 (2) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(2)
+}
+object(Pair)#13 (2) {
+  [0]=>
+  int(40)
+  [1]=>
+  int(3)
+}
+...
+FrozenMap
+...
+object(Pair)#15 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#16 (2) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(2)
+}
+object(Pair)#17 (2) {
+  [0]=>
+  int(40)
+  [1]=>
+  int(3)
+}
+...
+StableMap
+...
+object(Pair)#19 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#20 (2) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(2)
+}
+object(Pair)#21 (2) {
+  [0]=>
+  int(40)
+  [1]=>
+  int(3)
+}
+...
+array
+...
+object(Pair)#23 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#24 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(Pair)#25 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+...

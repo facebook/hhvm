@@ -1,0 +1,17 @@
+<h2>SSL Server Setup</h2>
+
+1. Prepare Certificates
+
+Prepare two files: one certificate file and one key file. Make sure they are
+readable by the user account that runs web server.
+
+2. Configuration Change
+
+Prepare configurations like this,
+
+  Server {
+    EnableSSL = true
+    SSLPort = 443
+    SSLCertificateFile = /full_path_to_certificate
+    SSLCertificateKeyFile = /full_path_to_certificate_file
+  }

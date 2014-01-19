@@ -1,0 +1,15 @@
+*** Test copy() function: destination with/without write permissions ***
+
+-- With write permissions --
+bool(true)
+bool(true)
+bool(true)
+int(1500)
+
+-- Without write permissions --
+bool(true)
+HipHop Warning: %s
+bool(false)
+bool(true)
+int(1500)
+*** Done ***

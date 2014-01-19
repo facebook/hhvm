@@ -1,0 +1,31 @@
+*** Testing hash_pbkdf2() : error conditions ***
+
+-- Testing hash_pbkdf2() function with less than expected no. of arguments --
+NULL
+hash_pbkdf2() expects at least 4 parameters, 0 given
+NULL
+hash_pbkdf2() expects at least 4 parameters, 1 given
+NULL
+hash_pbkdf2() expects at least 4 parameters, 2 given
+NULL
+hash_pbkdf2() expects at least 4 parameters, 3 given
+
+-- Testing hash_pbkdf2() function with more than expected no. of arguments --
+NULL
+hash_pbkdf2() expects at most 6 parameters, 7 given
+
+-- Testing hash_pbkdf2() function with invalid hash algorithm --
+bool(false)
+hash_pbkdf2(): Unknown hashing algorithm: foo
+
+-- Testing hash_pbkdf2() function with invalid iterations --
+bool(false)
+hash_pbkdf2(): Iterations must be a positive integer: 0
+bool(false)
+hash_pbkdf2(): Iterations must be a positive integer: -1
+
+-- Testing hash_pbkdf2() function with invalid length --
+bool(false)
+hash_pbkdf2(): Length must be greater than or equal to 0: -1
+
+===Done===

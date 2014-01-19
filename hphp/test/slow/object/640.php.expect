@@ -1,0 +1,20 @@
+object(stdClass)#1 (0) {
+}
+object(stdClass)#1 (1) {
+  ["scalar"]=>
+  bool(true)
+}
+object(stdClass)#1 (1) {
+  ["scalar"]=>
+  int(10)
+}
+object(stdClass)#1 (1) {
+  ["scalar"]=>
+  string(4) "test"
+}
+object(stdClass)#1 (2) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+}

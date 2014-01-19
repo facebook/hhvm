@@ -1,0 +1,6 @@
+*** Testing stat() for comparing stats after the deletion of subdir and file ***
+bool(true)
+bool(true)
+bool(true)
+
+--- Done ---

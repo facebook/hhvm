@@ -1,0 +1,11 @@
+*** Testing str_replace error conditions ***HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+===DONE===

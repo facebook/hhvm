@@ -1,0 +1,54 @@
+*** Testing str_pad() function: with unexpected inputs for 'pad_string' argument ***
+-- Iteration 1 --
+string(20) "Test string000000000"
+-- Iteration 2 --
+string(20) "Test string111111111"
+-- Iteration 3 --
+string(20) "Test string-2-2-2-2-"
+-- Iteration 4 --
+string(20) "Test string214748364"
+-- Iteration 5 --
+string(20) "Test string-21474836"
+-- Iteration 6 --
+string(20) "Test string10.510.51"
+-- Iteration 7 --
+string(20) "Test string-20.5-20."
+-- Iteration 8 --
+string(20) "Test string101234567"
+-- Iteration 9 --
+HipHop Warning: %s
+NULL
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+-- Iteration 11 --
+HipHop Warning: %s
+NULL
+-- Iteration 12 --
+string(20) "Test string111111111"
+-- Iteration 13 --
+HipHop Warning: %s
+NULL
+-- Iteration 14 --
+string(20) "Test string111111111"
+-- Iteration 15 --
+HipHop Warning: %s
+NULL
+-- Iteration 16 --
+HipHop Warning: %s
+NULL
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+-- Iteration 18 --
+string(20) "Test stringsample ob"
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+===DONE===

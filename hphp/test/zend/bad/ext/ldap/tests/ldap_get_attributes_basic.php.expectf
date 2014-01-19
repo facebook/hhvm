@@ -1,0 +1,36 @@
+array(7) {
+  ["objectClass"]=>
+  array(4) {
+    ["count"]=>
+    int(3)
+    [0]=>
+    string(3) "top"
+    [1]=>
+    string(8) "dcObject"
+    [2]=>
+    string(12) "organization"
+  }
+  [0]=>
+  string(11) "objectClass"
+  ["dc"]=>
+  array(2) {
+    ["count"]=>
+    int(1)
+    [0]=>
+    string(9) "my-domain"
+  }
+  [1]=>
+  string(2) "dc"
+  ["o"]=>
+  array(2) {
+    ["count"]=>
+    int(1)
+    [0]=>
+    string(9) "my-domain"
+  }
+  [2]=>
+  string(1) "o"
+  ["count"]=>
+  int(3)
+}
+===DONE===

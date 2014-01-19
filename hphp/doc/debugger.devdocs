@@ -1,0 +1,600 @@
+This document is intended to help developers understand how HHVM
+debugging is implemented. For user documentation, see
+docs/debugger.start.
+
+1. Overview
+-----------
+
+HHVM provides a rich set of debugging services as well as a
+command-line debugger client. The client and server (VM) can be on the
+same or different machines. The client and server may also be in the
+same process when debugging a script instead of a web server.
+
+For simplicity, much of this document will assume the client and
+server are in different processes. The operation of the various
+components below is mostly unchanged when they are in the same
+process, though.
+
+A HHVM server can be configured to allow remote debugging with option
+Eval.Debugger.EnableDebuggerServer. This creates a new debug-only
+endpoint to which debugger clients may connect on the port specified
+by Eval.Debugger.DebuggerServerPort (default 8089). The class
+DebuggerServer is responsible for setting up and listening for
+connections on this endpoint.
+
+
+1.1 The Proxy
+-------------
+
+When a debugger client connects to a VM, whether that VM is a remote
+server or a local instance running a script, a "debugger proxy" is
+created by the server. This proxy owns a connection, via a socket
+wrapped within a Thrift buffer, to the client which is doing the
+debugging. All interaction with the client is performed through this
+proxy, and any time the VM does something the debugger might need to
+know about it informs the proxy. The proxy is implemented in the
+DebuggerProxy class.
+
+The proxy has two important states: interrupted, or not
+interrupted. When a proxy is interrupted it listens for commands from
+the client and responds to them. When it is not interrupted, the proxy
+does nothing and simply sits around waiting to be interrupted. A proxy
+gets interrupted in one of two ways: interesting events from the VM,
+or by a dedicated signal polling thread in response to a signal from
+the client.
+
+The proxy will listen for commands from the client, and create
+instances of subclasses of DebuggerCommand to execute those
+commands. A command may respond to the client with results, or it may
+cause the proxy to allow the interrupted thread to run again.
+
+
+1.2 The Client
+--------------
+
+Anyone can build a client so long as they speak the protocol described
+below. HHVM provides a command line client, usually called
+"hphpd". The client is invoked by passing "--mode debug" on the
+command line. This causes HHVM to create a DebuggerClient object,
+which creates a new thread which will run the command processing
+loop. The client may attach to a server, or it may attach to the VM in
+its own process and debug a script running on the main thread. If
+there is no script to run, the main thread simply waits for the client
+to finish.
+
+Somewhat confusingly, the client also creates a proxy to represent the
+VM in its own process. Thus, the proxy is not only a server-side
+object. This proxy works just like the proxy on a server, and is
+connected to in the same way. This proxy is created even if the client
+is connecting to a server, though in that case it will not really be
+used. If the user disconnects from their server this proxy will be
+used to debug local scripts.
+
+
+2.0 Communication Protocol
+--------------------------
+
+The communication protocol between the client and server is fairly
+simple. It is based on Thrift, and the bulk of the implementation is
+held in DebuggerCommand and its subclasses. All communication is based
+on sending a Command, and in most cases receiving a response of the
+same Command back, sometimes updated with more information. User
+actions like print, where, and breakpoint translate into CmdPrint,
+CmdWhere, and CmdBreak being sent to the server, and received back
+with data like the result of the print or where operation, or status
+about the breakpoints being set. Some commands cause the server to
+resume execution of the program. User actions like continue, next, and
+step translate into CmdContinue, CmdNext, and CmdStep being sent to
+the server, which does not respond immediately but continues execution
+until the program reaches, say, a breakpoint. The server then responds
+with CmdInterrupt(BreakPointReached) to signal that it is now in the
+"interrupted state" and is ready to receive more commands.
+
+
+2.1 Initialization
+------------------
+
+When a new connection is made to the debugger port a proxy is created
+to own that connection. This proxy is held in a global map keyed by a
+sandbox ID. The proxy starts a "dummy sandbox" so it can accept
+commands when there is no active request, and it starts up a signal
+thread to poll the client for "signals", i.e., Ctrl-C. The dummy
+sandbox is always started, and should not be confused with a real
+sandbox. It will never serve a request and is really just there to
+provide a place to execute code and interact with the server when
+there are no requests.
+
+The proxy is now ready to use, and is not interrupted. The client,
+after establishing the connection on the debugger port now waits for a
+command from the proxy. Note that the proxy really doesn't have it's
+own thread. From now on, it runs on whatever thread interrupts
+it. That may be the dummy sandbox thread, or it may be a normal
+request thread.
+
+So long as the proxy is not interrupted, the signal thread will poll
+the client once per second with CmdSignal. The client responds with
+CmdSignal, updated with whether or not Ctrl-C was pressed. If it was,
+the signal thread asks each thread registered with the proxy to
+interrupt, then goes back to polling. If the proxy remains
+un-interrupted on the next poll, the signal thread will ask the dummy
+sandbox thread to interrupt.
+
+The dummy sandbox creates a thread which first interrupts the proxy
+with "session started", and then waits to see if it needs to respond
+to a signal from the client. If there is a signal from the client, the
+dummy sandbox thread simply loops and interrupts the proxy with
+"session started" again, and waits again.
+
+The proxy, having been interrupted with "session started" from the
+dummy sandbox, sends a CmdInterrupt(SessionStarted) to the client. The
+proxy is now interrupted, so it enters a loop listening for commands
+from the client. It also blocks the signal thread from sending
+CmdSignal to the client. The proxy will remain interrupted, processing
+commands requested by the client, until one of those commands causes
+the proxy to leave the interrupted state and let the thread which
+interrupted it continue. In the case of SessionStarted, that lets the
+dummy sandbox thread continue. In the case of more interesting
+interrupts from the VM, on threads executing requests or other user
+code, it lets those threads run.
+
+When the client receives the SessionStarted interrupt after making the
+initial connection, it sends CmdMachine to attach to the user's
+sandbox. The proxy "attaches" to the sandbox by registering itself as
+the proxy for that sandbox id in the global proxy map. It then signals
+the dummy sandbox thread, responds with CmdMachine, and returns to the
+un-interrupted state. The client again waits for a command from the
+proxy. The dummy sandbox receives the signal, loops, and interrupts
+the proxy again with "session started", which sends a second
+CmdInterrupt with type SessionStarted to the client. At this point the
+client has received CmdInterrupt(SessionStarted) and the proxy is
+interrupted in the dummy sandbox. The initial connection is complete,
+and the client can issue whatever commands it wishes.
+
+Graphically, the initial connection protocol is:
+
+Server threads:
+DL  -- Debugger Server Listening Thread
+SP  -- Signal Polling Thread
+DS  -- Dummy Sandbox Thread
+RTx -- Request Threads
+
+   Client                           Server
+-------------   --------------------------------------------------
+                    DL            SP            DS           RTx
+
+   |            Listen for
+   |            connections
+   |                |
+Connect on  ------> |
+debugger port     Create Proxy
+   |              Create SP ----> |
+   |              Create DS ------------------> |
+   |                |             |             |
+   |                |             |             |
+   | <----------------------- CmdSignal         |
+CmdSignal ----------------------> |             |
+   |                |             |             |
+   | <------------------------------------ CmdInterrupt(SS)
+CmdMachine(attach) ---------------------------> |
+   |                |             |        Switch sandbox
+   |                |             |        Notify DS
+   | <------------------------------------ CmdMachine
+   |                |             |        Loop due to notify
+   | <------------------------------------ CmdInterrupt(SS)
+Ready to go         |             |             |
+   |                |             |             |
+   v                v             v             v
+
+
+2.2 Steady State
+----------------
+
+Once the client and server are connected, the most common flow is that
+the client waits for a CmdInterrupt from the proxy while the
+application runs. When a request thread hits a breakpoint, throws an
+exception, etc. it will interrupt the proxy. The proxy may decide to
+ignore the interrupt (perhaps it is not configured to care about
+thrown exceptions, for instance), in which case the request thread
+will keep running and the client will never know about the event. If
+the proxy does decide to take the interrupt it will send CmdInterrupt
+to the client, then wait for commands from the client. The client will
+send commands and get responses from the proxy until it sends a
+command that causes the proxy to let the interrupted thread continue
+execution.
+
+Signal polling continues so long as the proxy is not interrupted.
+
+   Client                           Server
+-------------   --------------------------------------------------
+                    DL            SP            DS           RTx
+
+Listen for          |             |             |            |
+commands            |             |             |       IP is at a
+   |                |             |             |       breakpoint.
+   | <----------------------------------------------- CmdInterrupt(BPR)
+CmdWhere --------------------------------------------------> |
+   | <-------------------------------------------------- CmdWhere
+   |                |             |             |            |
+CmdPrint --------------------------------------------------> |
+   | <-------------------------------------------------- CmdPrint
+   |                |             |             |            |
+CmdContinue -----------------------------------------------> |
+   |                |             |             |       Continue request
+   | <----------------------- CmdSignal         |            |
+CmdSignal ----------------------> |             |            |
+   |                |             |             |            |
+   v                v             v             v            v
+
+
+2.3 Ctrl-C
+----------
+
+When the client wants to interrupt the server while it is executing
+code, it responds to CmdSignal with a flag indicating it wants to
+stop. In the command line client, pressing Ctrl-C will cause the next
+response to CmdSignal to set the flag. The proxy's signal polling
+thread will then ask all current request threads to interrupt. When
+one does, it will send a CmdInterrupt to the client.
+
+   Client                           Server
+-------------   --------------------------------------------------
+                    DL            SP            DS           RTx
+
+   | <----------------------- CmdSignal         |            |
+CmdSignal(stop) ----------------> |             |            |
+   |                |      Set flag on each     |            |
+   |                |      RTx thread to cause  |            |
+   |                |      it to interrupt      |            |
+   |                |             |             |    Interrupt flag seen.
+   | <----------------------------------------------- CmdInterrupt(BPR)
+   |                |             |             |            |
+   v                v             v             v            v
+
+
+2.4 Quitting
+------------
+
+CmdQuit is just like any other command, except that after the proxy
+responds it will remove itself from the global proxy map, close the
+connection, turn off the signal polling and dummy sandbox threads, and
+destroy itself. The same actions will occur if the connection with the
+client is lost for any other reason, even if no CmdQuit was
+received. An error reading from the socket, a closed socket, etc.
+
+2.4.1 Cleaning the proxy
+------------------------
+
+There are many cases where the proxy will notice that a client has
+terminated the connection. The easiest one is when a quit command is
+received, but the client may exit for any number of reasons, and in
+any state. At a minimum, the proxy's signal polling thread will, after
+one second, notice that the connection has been dropped and initiate
+cleanup. However, neither the signal polling thread nor the dummy
+sandbox thread can completely perform the cleanup because they are
+owned by the proxy, and destroying the proxy would destroy those
+threads before they have completed.
+
+Thus, proxy cleanup may be initiated by any thread with Proxy::stop(),
+but the final cleanup is performed by another thread doing
+housekeeping work. The cleanup work waits for both the signal polling
+and dummy sandbox threads to exit before completing. Server-side this
+housekeeping work is done by the server thread, which is also
+listening for new debugger connections. Note that this cleanup work
+may complete while a request thread is still using the proxy. The last
+reference to the proxy will finally destroy it, and the cleanup work
+ensures that the proxy is still usable (and communicates that it is
+stopped) by any outstanding request threads.
+
+
+
+3.0 Client Implementation
+-------------------------
+
+The debugger client provided by HHVM is not a separate program, but a
+special mode passed when executing HHVM. When "--mode debug" is
+passed, a DebuggerClient object is created and a new thread is started
+to execute DebuggerClient::run(). This "client thread" will execute
+the main loop of the client, presenting a command prompt at times, and
+running a communication loop with the server at other times.
+
+A "local proxy" is also created, which is a normal DebuggerProxy for
+the VM within the process. The client connects to this proxy normally,
+with a socket and a thrift buffer. The proxy will create a signal
+polling thread as usual, but it will not setup a dummy sandbox. The
+lack of a dummy sandbox is really the only difference between a normal
+proxy and this local proxy.
+
+The main thread of the process will run a script specified on the
+command line, just like HHVM normally would. The client will, by
+default, attempt to debug that script. The main thread's execution is
+slightly modified to allow the client to restart the script in
+response to the 'run' command, and to give control back to the client
+when the script is complete instead of exiting the process.
+
+If the client is asked to connect to a remote server (either via "-h"
+on the command line or via the 'machine connect' command) then it does
+so as described above, and the main thread of the process will simply
+idle and wait for the client to exit, at which time the process will
+exit.
+
+3.1 Console and communication loops
+-----------------------------------
+
+The debugger client has a top-level "event loop" which waits to
+receive commands from the proxy to which it is attached. It responds
+to CmdSignal, and when it receives a CmdInterrupt it enters a "console
+loop" which presents a prompt to the user and processes user
+commands. Each user command is recognized and an instance of a
+subclass of DebuggerCommand is created, then executed.
+
+The client will remain in the top-level event loop until an interrupt
+is received, and it will remain in the console loop until a command
+causes execution on the server to continue. When such a command is
+executed (e.g. 'continue'), it sends the request to the server and
+then throws DebuggerConsoleExitException. This is the notification to
+exit the console loop and return to the event loop. The use of an
+exception for this is a bit odd, as it is typically simply the last
+thing done from the command's onClientImpl() method, which is called
+directly from the console loop. The use of an exception here is
+similar to the use of DebuggerClientExitException, discussed below,
+but is now a vestige that will likely be removed soon.
+
+Some commands can cause the client to exit, like 'quit'. The client
+may also exit due to various error conditions, like loss of
+communication with the server. In these cases a
+DebuggerClientExitException is thrown. This causes execution to unwind
+out of both the console and event loops, back to
+DebuggerClient::run(), which eventually causes the client to exit. The
+use of an exception here is more interesting as we will see below when
+discussing nested event loops, as it allows the client to exit out of
+multiple nested event loops with ease.
+
+Somewhat confusingly, DebuggerClientExitException is also thrown by
+the proxy when it detects the client is exiting. This signals the
+termination of the request which was being debugged, which is
+reasonable. But you'd imagine that a different exception could serve
+that purpose. This is a subtle cheat in the system, and is more
+meaningful when the proxy is local: it is a signal back to the
+modified main thread that the debugger is quitting and the main thread
+should now quit. In the local case, the main thread is much like a web
+server request thread in that it calls into the proxy to interrupt it.
+
+
+4.0 Nested execution
+--------------------
+
+Some commands allow a user to recursively execute more PHP code while
+stopped at, say, a breakpoint. More breakpoints may be hit in the
+newly executed function, and more code may be executed while stopped
+at those breakpoints. The best example of this is CmdEval, which is
+used to evaluate arbitrary functions and code (e.g., '@foo(42)').
+
+Both the client and proxy are designed to handle this.
+
+On the proxy, execution is paused waiting for a command from the
+client. When an eval command is received, the proxy is put back into
+the running state and the code is executed directly from the command
+processing loop. If another interrupt is encountered, a new command
+processing loop is entered and the interrupt is communicated to the
+client just like normal. When then code completes, the response to the
+eval command is sent and control is returned to the command processing
+loop still on the stack. Thus we may recurse arbitrarily deep on the
+server down multiple levels of proxy command loops, depending on how
+deeply the user wishes to go. In practice this depth is quite shallow,
+and most often involves no recursion.
+
+On the client the story is much the same. When an eval command is
+entered by the user, the client sends CmdEval to the proxy then enters
+a nested event loop to wait for either the eval command to be sent
+back, indication completion of the command, or for new CmdInterrupts
+to be received, indicating breakpoints and other interesting events
+while the code was being executed. Interrupts are handled normally,
+and a new console loop is entered. Again, like the proxy these loops
+may nest to arbitrary depths.
+
+
+5.0 Control Flow
+----------------
+
+This section will discuss how the control flow commands 'next',
+'step', 'out', and 'continue' work in the proxy and the VM. Operation
+of these commands on the client isn't very interesting and is covered
+well enough elsewhere.
+
+Flow control commands are treated specially by the proxy. A single
+instance of a subclass of CmdFlowControl is held in the m_flow member
+variable of DebuggerProxy so long as it remains active, and having an
+active flow command typically means that the proxy will deliver all
+interrupts to the flow command for processing first. The flow command
+will have the opportunity to examine the interrupt and determine if
+the proxy should really stop at the interrupt, or continue
+execution. A flow command will mark itself as completed when it
+decides it's time to stop execution, and the proxy will remove it.
+
+The only thing that can get the proxy to stop at an interrupt when a
+flow command has said not to is an active breakpoint.
+
+When the proxy does finally have an interrupt to stop at and send to
+the client it removes and deletes the flow command. The flow command
+is either complete, in which case it doesn't need to remain active
+anyway, or it has been trumped by a breakpoint, in which case the flow
+command is essentially forced to be complete.
+
+A flow command is set as active on the proxy when it is received from
+the client. Execution continues at that time.
+
+
+5.1 Continue
+------------
+
+'continue' is the simplest control flow command. It simply marks
+itself completed and returns. The proxy will remove the CmdContinue
+and continue execution.
+
+
+5.2 Step
+--------
+
+'step' is the next simplest flow command. It operates on the very
+simple theory that to step to the next line executed you simply need
+to interpret the program until the current source location
+changes. This is, by definition, the next source line to be executed
+no matter how execution flows in the program: function call,
+exception, a simple add, etc.
+
+First, CmdStep sets a "VM interrupt" flag which is eventually
+installed on the VM's execution context for the current thread. The
+interpreter's execution loop is instrumented, only when a debugger
+client is actually attached to the VM, with a "hook" to the debugger
+infrastructure called phpDebuggerOpcodeHook(). This hook is given the
+PC of the opcode which is about to be executed. Setting the VM
+interrupt flag ensures the VM will only interpret code, and thus call
+the debugger opcode hook. This flag remains set only while the step
+command is active; the VM will go back to executing translated code
+once the command completes.
+
+Next, CmdStep sets up a "location filter" for the current source
+line. This is a very simple set which contains all PC's for bytecodes
+implementing the current source line.  It first consults the location
+filter to determine if this is a location which might be interesting
+to a debugger. If it gets a hit in the location filter, it simply
+returns to the interpreter and executes the opcode as usual. The
+location filter, then, is a simple mechanism which flow commands can
+use to avoid being interrupted when a set of bytecodes is executed.
+
+By setting up a location filter for the current source line and
+turning on interrupts the step command ensures it will be interrupted
+as soon as a bytecode not belonging to the current source line is
+encountered. When that occurs it marks itself completed, and the proxy
+will remove the CmdStep and destroy it. When any flow command is
+destroyed the location filter is cleared, and the VM interrupt flag is
+turned off.
+
+
+5.3 Out
+-------
+
+'out' works very differently from 'step'. It predicts the next
+execution location and sets up an "internal breakpoint" at that
+location. This internal breakpoint works just like a normal breakpoint
+set by a user, but it is not visible to the user. The breakpoint will
+be automatically removed when CmdOut is destroyed. CmdOut sets this
+breakpoint, then continues execution like normal (no location filter,
+no VM interrupt flag).
+
+The breakpoint is placed at the return address of the current
+function. When it is reached, there are two possibilities: we have
+returned from the function in question, in which case the command is
+marked as complete, or we have hit the breakpoint during a recursive
+call before exiting the original function.
+
+To determine which case it is, CmdOut remembers the original stack
+depth when the command was activated, and checks it when the
+breakpoint is hit. If the stack depth is the same or lower, execution
+is continued. Otherwise, the command is complete.
+
+
+5.3.1 Determining the location to step out to
+---------------------------------------------
+
+Finding the location a function will return to is not straightforward
+in all cases. For a function called from FCALL, the location is
+obvious and unambiguous. But for functions called from, say, ITERNEXT
+or a destructor called from a simple SETL the return offset stored in
+the VM's activation record is not what we would expect. A complex
+instruction may have multiple points at which execution could
+continue. ITERNEXT, for instance, will branch to the top of the loop
+if the iterator is not done, or fall through if the iterator is
+done. Thus the step out location could be multiple places.
+
+Also, functions with no source information are ignored for a step out
+operation, so the location could be multiple frames up, not just one.
+
+All of this is accounted for in CmdFlowControl::setupStepOuts(). See
+that function for the details.
+
+
+5.4 Next
+--------
+
+'next' is the most complex of the flow control commands, and builds on
+the primitives of the others. It starts just like 'step' by trying to
+use the interpreter to get off the current source line. But the goal
+is not to just get off the line, it is to get to the next line. If
+execution ends up deeper on the stack, a call has been made. CmdNext
+will re-use the step out facility needed for 'out' and, in essence,
+internally execute a step out to get back to the original source line,
+then continue try to interpret off of it. If execution ends up
+shallower on the stack, then we have stepped over a return and are
+done as well.
+
+There is extra logic to support stepping within continuations, so that
+a 'next' executed on a source line with a 'yield' on it will step over
+the yield. Thus CmdNext looks at the opcodes it is stepping over, and
+upon recognizing CONTEXIT or CONTRETC will setup its own internal
+breakpoints at destinations indicated by those opcodes.
+
+For the details, see CmdNext.
+
+
+5.5 Exceptions
+--------------
+
+Exceptions are non-local control flow that throw a monkey wrench into
+most flow control commands. The VM is further instrumented, again only
+while a debugger is attached, to call a hook whenever it is about to
+transfer control to a catch block. This gives all of the flow commands
+a chance to determine if the new location satisfies the completion
+criteria for their respective operations. In most cases, the flow
+command will force the first opcode of the catch clause to be
+interpreted and let it's normal logic run its course.
+
+6. Breakpoints
+--------------
+
+Breakpoints are set via commands processed by the client, which keeps a list
+of all breakpoints. This list is sent to the proxy whenever an element is added,
+modified or deleted. The proxy keeps of a copy of the list and updates each
+breakpoint with a flag that indicates if the breakpoint is bound. An unbound
+breakpoint is either invalid because it refers to a non existent source line
+or function, or it refers to a location that has not yet been loaded into the
+VM. The flag distinguishes these cases.
+
+6.1 Checking if breakpoints are hit.
+
+When a breakpoint becomes bound, it is mapped to a range of program counters
+(PCs) in an execution unit. Each of these PCs is then added to a set of
+breakable PCs (called the Breakpoint Filter) kept in the VM's execution context
+object. If a debugger is attached to the VM, the interpreter calls
+phpDebuggerOpcodeHook before executing each operation. This routine checks if
+the PC of the operation is a member of the Breakpoint Filter. If so, it calls
+the Debugger::InterruptVMHook method, which among other things, checks the
+proxy's list of breakpoints to see if any of them apply to the source location
+of the current PC. This involves a check if the breakpoint is enabled by the
+user, a check if the source location is the same, a check if the breakpoint is
+not already active and a check if the breakpoint is conditional on the value
+of an expression.
+
+6.2 Active breakpoints
+
+A breakpoint can be already active when InterruptVMHook is called because it
+can be set on a source line that maps to several interpreter operations.
+(InterruptVMHook will be called for each such operation). It is not safe to
+simply disable the breakpoint until the last of these operations are completed,
+since one or more of those operations may be function calls that recurse back
+to the active breakpoint.
+
+In order to deal with this, each breakpoint keeps track of the depth of the
+execution stack where it was activated. When InterruptVM finds that a breakpoint
+will be hit, it checks that the height of the execution stack is greater than
+the height recorded in the breakpoint before it proceeds with the steps that
+are taken when a breakpoint is first hit. When control leaves the site of a
+breakpoint at the right stack depth, the breakpoint is updated its previous
+active stack depth (it has a stack of stack depths and it pops the top entry).
+
+This pop operation cannot happen before the last operation corresponding to a
+breakpoint has completed. However, it is not convenient for this to happen on
+the very next operation. Instead, InterruptVM hook will update any breakpoints
+that do not correspond to the current operation to ensure they are active if a
+subsequent call to InterruptVMHook matches their location at the current stack
+level.

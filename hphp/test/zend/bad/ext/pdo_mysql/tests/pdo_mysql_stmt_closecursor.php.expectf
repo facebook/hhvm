@@ -1,0 +1,19 @@
+Testing emulated PS...
+Buffered...
+HipHop Warning: %s
+in = 0 -> id = 1 (integer) / label = 'a' (string)
+in = 0 -> id = 2 (integer) / label = 'b' (string)
+Unbuffered...
+HipHop Warning: %s
+in = 0 -> id = 1 (integer) / label = 'a' (string)
+in = 0 -> id = 2 (integer) / label = 'b' (string)
+Testing native PS...
+Buffered...
+HipHop Warning: %s
+in = 0 -> id = 1 (integer) / label = 'a' (string)
+in = 0 -> id = 2 (integer) / label = 'b' (string)
+Unbuffered...
+HipHop Warning: %s
+in = 0 -> id = 1 (integer) / label = 'a' (string)
+in = 0 -> id = 2 (integer) / label = 'b' (string)
+done!

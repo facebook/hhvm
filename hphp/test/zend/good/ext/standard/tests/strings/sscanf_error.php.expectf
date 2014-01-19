@@ -1,0 +1,14 @@
+*** Testing sscanf() : error conditions ***
+
+-- Testing sscanf() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing sscanf() function with one argument --
+HipHop Warning: %s
+NULL
+
+-- Testing sscanf() function with more than expected no. of arguments --
+HipHop Warning: %s
+int(-1)
+===DONE===

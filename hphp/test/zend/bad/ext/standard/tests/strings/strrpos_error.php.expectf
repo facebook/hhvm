@@ -1,0 +1,10 @@
+*** Testing strrpos() function: error conditions ***
+-- With Zero arguments --HipHop Warning: %s
+bool(false)
+
+-- With less than expected number of arguments --HipHop Warning: %s
+bool(false)
+
+-- With more than expected number of arguments --HipHop Warning: %s
+bool(false)
+*** Done ***

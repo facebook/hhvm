@@ -1,0 +1,98 @@
+*** Testing mb_encode_mimeheader() : usage variations ***
+
+-- Iteration 1 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 2 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 3 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 4 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 5 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66?=
+ =?UTF-8?B?zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 6 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 7 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 8 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 9 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 10 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 11 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 12 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 13 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 14 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 15 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 16 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 23 --
+string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
+ =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 24 --
+HipHop Warning: %s
+NULL
+Done

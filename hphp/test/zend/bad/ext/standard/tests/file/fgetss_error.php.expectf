@@ -1,0 +1,37 @@
+*** Testing error conditions ***
+-- Testing fgetss() with zero argument --
+HipHop Warning: %s
+bool(false)
+-- Testing fgetss() with more than expected number of arguments --
+HipHop Warning: %s
+bool(false)
+-- Testing fgetss() with invalid length arguments --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+bool(false)
+-- Testing fgetss() with invalid arguments --
+-- Iteration 1 --
+HipHop Warning: %s
+bool(false)
+-- Iteration 2 --
+HipHop Warning: %s
+bool(false)
+-- Iteration 3 --
+HipHop Warning: %s
+bool(false)
+-- Iteration 4 --
+HipHop Warning: %s
+bool(false)
+-- Iteration 5 --
+HipHop Warning: %s
+bool(false)
+-- Iteration 6 --
+HipHop Warning: %s
+bool(false)
+-- Testing fgetss() with closed/unset file handle --HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+Done

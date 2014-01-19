@@ -1,0 +1,30 @@
+*** Testing open_basedir configuration [realpath] ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+string(%d) "%s\test\ok"
+string(%d) "%s\test\ok\ok.txt"
+string(%d) "%s\test\ok\ok.txt"
+string(%d) "%s\test\ok\ok.txt"
+string(%d) "%s\test\ok\ok.txt"
+*** Finished testing open_basedir configuration [realpath] ***

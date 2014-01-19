@@ -1,0 +1,3 @@
+string(24) "http://example.com/foo@a"
+string(24) "http://example.com/bar@b"
+string(24) "http://example.com/foo@c"

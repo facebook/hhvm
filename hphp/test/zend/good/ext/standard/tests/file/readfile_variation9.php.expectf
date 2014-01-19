@@ -1,0 +1,28 @@
+*** Testing readfile() : variation ***
+
+-- Iteration 1 --
+The File Contents
+-- Iteration 2 --
+The File Contents
+-- Iteration 3 --
+The File Contents
+-- Iteration 4 --
+The File Contents
+-- Iteration 5 --
+HipHop Warning: %s
+
+-- Iteration 6 --
+HipHop Warning: %s
+
+-- Iteration 7 --
+The File Contents
+-- Iteration 8 --
+The File Contents
+-- Iteration 9 --
+The File Contents
+-- Iteration 10 --
+The File Contents
+-- Iteration 11 --
+HipHop Warning: %s
+
+*** Done ***

@@ -1,0 +1,10 @@
+Strict Standards: Non-static method Foo::test() should not be called statically in %sbug23384.php on line %d
+Array
+(
+    [100] => ten
+)
+Array
+(
+    [10] => ten
+)
+100100

@@ -1,0 +1,12 @@
+array(2) {
+  [0]=>
+  &int(123)
+  [1]=>
+  &bool(true)
+}
+array(2) {
+  [0]=>
+  &int(123)
+  [1]=>
+  &bool(true)
+}

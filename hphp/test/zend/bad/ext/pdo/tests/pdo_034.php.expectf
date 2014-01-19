@@ -1,0 +1,31 @@
+array(1) {
+  ["test0"]=>
+  string(1) "0"
+}
+array(5) {
+  ["test0"]=>
+  string(1) "0"
+  ["test1"]=>
+  string(1) "1"
+  ["test2"]=>
+  string(1) "2"
+  ["test3"]=>
+  string(1) "3"
+  ["test4"]=>
+  string(1) "4"
+}
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+array(5) {
+  ["test0"]=>
+  string(5) "test0"
+  ["test1"]=>
+  string(5) "test1"
+  ["test2"]=>
+  string(5) "test2"
+  ["test3"]=>
+  string(5) "test3"
+  ["test4"]=>
+  string(5) "test4"
+}

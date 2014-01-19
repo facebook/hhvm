@@ -1,0 +1,8 @@
+object(Closure)#%d (1) {
+  ["static"]=>
+  array(1) {
+    ["a"]=>
+    *RECURSION*
+  }
+}
+===DONE===

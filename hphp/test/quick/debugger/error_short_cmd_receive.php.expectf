@@ -1,0 +1,15 @@
+Program %s/error_short_cmd_receive.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break error_short_cmd_receive.php:3
+Breakpoint 1 set on line 3 of error_short_cmd_receive.php
+But wont break until file error_short_cmd_receive.php has been loaded.
+run
+Breakpoint 1 reached on line 3 of %s/error_short_cmd_receive.php
+   2 
+   3*error_log('error_short_cmd_receive.php loaded');
+   4 (END)
+
+internaltesting shortcmdreceive
+Executing internal test...
+DebuggerCommand::recv(): a socket error has happened
+Unable to communicate with server. Server's down?
+Unable to reconnect to server, exiting.

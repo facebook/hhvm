@@ -1,0 +1,13 @@
+Array
+(
+    [lemons] => 1
+    [oranges] => 4
+    [bananas] => 5
+    [apples] => 10
+)
+ArrayObject Object
+(
+    [0] => Amsterdam
+    [1] => Paris
+    [2] => London
+)

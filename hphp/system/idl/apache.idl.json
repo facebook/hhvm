@@ -1,0 +1,116 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "apache_note",
+            "desc": "This function is a wrapper for Apache's table_get and table_set. It edits the table of notes that exists during a request. The table's purpose is to allow Apache modules to communicate.\n\nThe main use for apache_note() is to pass information from one module to another within the same request.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "If called with one argument, it returns the current value of note note_name. If called with two arguments, it sets the value of note note_name to note_value and returns the previous value of note note_name. If the note cannot be retrieved, FALSE is returned."
+            },
+            "args": [
+                {
+                    "name": "note_name",
+                    "type": "String",
+                    "desc": "The name of the note."
+                },
+                {
+                    "name": "note_value",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The value of the note."
+                }
+            ]
+        },
+        {
+            "name": "apache_request_headers",
+            "desc": "Fetches all HTTP request headers from the current request. This function is only supported when PHP is installed as an Apache module.",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringVec",
+                "desc": "An associative array of all the HTTP headers in the current request, or FALSE on failure."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "apache_response_headers",
+            "desc": "Fetch all HTTP response headers.",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringVec",
+                "desc": "An array of all Apache response headers on success or FALSE on failure."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "apache_setenv",
+            "desc": "apache_setenv() sets the value of the Apache environment variable specified by variable.\n\nWhen setting an Apache environment variable, the corresponding $_SERVER variable is not changed.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "variable",
+                    "type": "String",
+                    "desc": "The environment variable that's being set."
+                },
+                {
+                    "name": "value",
+                    "type": "String",
+                    "desc": "The new variable value."
+                },
+                {
+                    "name": "walk_to_top",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "Whether to set the top-level variable available to all Apache layers."
+                }
+            ]
+        },
+        {
+            "name": "getallheaders",
+            "desc": "Fetches all HTTP headers from the current request.\n\nThis function is an alias for apache_request_headers(). Please read the apache_request_headers() documentation for more information on how this function works. This function is only supported when PHP is installed as an Apache module.",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringVec",
+                "desc": "An associative array of all the HTTP headers in the current request, or FALSE on failure."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "apache_get_config",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "apache_get_scoreboard",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

@@ -1,0 +1,19 @@
+object(MongoCollection)#4 (2) {
+  ["w"]=>
+  int(1)
+  ["wtimeout"]=>
+  int(10000)
+}
+object(MongoCollection)#5 (2) {
+  ["w"]=>
+  int(1)
+  ["wtimeout"]=>
+  int(10000)
+}
+object(MongoCollection)#6 (2) {
+  ["w"]=>
+  int(1)
+  ["wtimeout"]=>
+  int(10000)
+}
+===DONE===

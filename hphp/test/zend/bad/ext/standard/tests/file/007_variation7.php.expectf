@@ -1,0 +1,12 @@
+*** Test fopen() & fclose() functions:  with 'x' mode ***
+resource(%d) of type (stream)
+%unicode|string%(6) "stream"
+int(0)
+int(37)
+int(37)
+string(0) ""
+int(0)
+bool(true)
+%unicode|string%(7) "Unknown"
+HipHop Warning: %s
+*** Done ***

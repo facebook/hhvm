@@ -1,0 +1,24 @@
+*** Testing sscanf() : basic functionality -using exponential format ***
+
+-- Try sccanf() WITHOUT optional args --
+float(10.12345)
+float(10123.45)
+float(10123.45)
+float(-101234.5)
+float(10.12345)
+float(10123.45)
+float(10123.45)
+float(-101234.5)
+
+-- Try sccanf() WITH optional args --
+int(4)
+float(10.12345)
+float(10123.45)
+float(10123.45)
+float(-101234.5)
+int(4)
+float(10.12345)
+float(10123.45)
+float(10123.45)
+float(-101234.5)
+===DONE===

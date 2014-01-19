@@ -1,0 +1,1131 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "imap_8bit",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a quoted-printable string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The 8bit string to convert"
+                }
+            ]
+        },
+        {
+            "name": "imap_alerts",
+            "desc": "Returns all of the IMAP alert messages generated since the last imap_alerts() call, or the beginning of the page.\n\nWhen imap_alerts() is called, the alert stack is subsequently cleared. The IMAP specification requires that these messages be passed to the user.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array of all of the IMAP alert messages generated or FALSE if no alert messages are available."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "imap_base64",
+            "desc": "Decodes the given BASE-64 encoded text.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the decoded message as a string."
+            },
+            "args": [
+                {
+                    "name": "text",
+                    "type": "String",
+                    "desc": "The encoded text"
+                }
+            ]
+        },
+        {
+            "name": "imap_binary",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a base64 encoded string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The 8bit string"
+                }
+            ]
+        },
+        {
+            "name": "imap_body",
+            "desc": "imap_body() returns the body of the message, numbered msg_number in the current mailbox.\n\nimap_body() will only return a verbatim copy of the message body. To extract single parts of a multipart MIME-encoded message you have to use imap_fetchstructure() to analyze its structure and imap_fetchbody() to extract a copy of a single body component.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the body of the specified message, as a string."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msg_number",
+                    "type": "Int64",
+                    "desc": "The message number"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "The optional options are a bit mask with one or more of the following: FT_UID - The msg_number is a UID FT_PEEK - Do not set the \\Seen flag if not already set FT_INTERNAL - The return string is in internal format, will not canonicalize to CRLF."
+                }
+            ]
+        },
+        {
+            "name": "imap_bodystruct",
+            "desc": "Read the structure of a specified body section of a specific message.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the information in an object, for a detailed description of the object structure and properties see imap_fetchstructure()."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msg_number",
+                    "type": "Int64",
+                    "desc": "The message number"
+                },
+                {
+                    "name": "section",
+                    "type": "String",
+                    "desc": "The body section to read"
+                }
+            ]
+        },
+        {
+            "name": "imap_check",
+            "desc": "Checks information about the current mailbox.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": null
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                }
+            ]
+        },
+        {
+            "name": "imap_clearflag_full",
+            "desc": "This function causes a store to delete the specified flag to the flags set for the messages in the specified sequence.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "sequence",
+                    "type": "String",
+                    "desc": "A sequence of message numbers. You can enumerate desired messages with the X,Y syntax, or retrieve all messages within an interval with the X:Y syntax"
+                },
+                {
+                    "name": "flag",
+                    "type": "String",
+                    "desc": null
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "options are a bit mask and may contain the single option: ST_UID - The sequence argument contains UIDs instead of sequence numbers"
+                }
+            ]
+        },
+        {
+            "name": "imap_close",
+            "desc": "Closes the imap stream.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "flag",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "If set to CL_EXPUNGE, the function will silently expunge the mailbox before closing, removing all messages marked for deletion. You can achieve the same thing by using imap_expunge()"
+                }
+            ]
+        },
+        {
+            "name": "imap_createmailbox",
+            "desc": "Creates a new mailbox specified by mailbox.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "mailbox",
+                    "type": "String",
+                    "desc": "The mailbox name, see imap_open() for more information. Names containing international characters should be encoded by imap_utf7_encode()"
+                }
+            ]
+        },
+        {
+            "name": "imap_delete",
+            "desc": "Marks messages listed in msg_number for deletion. Messages marked for deletion will stay in the mailbox until either imap_expunge() is called or imap_close() is called with the optional parameter CL_EXPUNGE.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msg_number",
+                    "type": "String",
+                    "desc": "The message number"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "You can set the FT_UID which tells the function to treat the msg_number argument as an UID."
+                }
+            ]
+        },
+        {
+            "name": "imap_deletemailbox",
+            "desc": "Deletes the specified mailbox.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "mailbox",
+                    "type": "String",
+                    "desc": "The mailbox name, see imap_open() for more information"
+                }
+            ]
+        },
+        {
+            "name": "imap_errors",
+            "desc": "Gets all of the IMAP errors (if any) that have occurred during this page request or since the error stack was reset.\n\nWhen imap_errors() is called, the error stack is subsequently cleared.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "This function returns an array of all of the IMAP error messages generated since the last imap_errors() call, or the beginning of the page. Returns FALSE if no error messages are available."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "imap_expunge",
+            "desc": "Deletes all the messages marked for deletion by imap_delete(), imap_mail_move(), or imap_setflag_full().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                }
+            ]
+        },
+        {
+            "name": "imap_fetch_overview",
+            "desc": "This function fetches mail headers for the given sequence and returns an overview of their contents.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array of objects describing one message header each. The object will only define a property if it exists. The possible properties are: subject - the messages subject from - who sent it to - recipient date - when was it sent message_id - Message-ID references - is a reference to this message id in_reply_to - is a reply to this message id size - size in bytes uid - UID the message has in the mailbox msgno - message sequence number in the mailbox recent - this message is flagged as recent flagged - this message is flagged answered - this message is flagged as answered deleted - this message is flagged for deletion seen - this message is flagged as already read draft - this message is flagged as being a draft"
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "sequence",
+                    "type": "String",
+                    "desc": "A message sequence description. You can enumerate desired messages with the X,Y syntax, or retrieve all messages within an interval with the X:Y syntax"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "sequence will contain a sequence of message indices or UIDs, if this parameter is set to FT_UID."
+                }
+            ]
+        },
+        {
+            "name": "imap_fetchbody",
+            "desc": "Fetch of a particular section of the body of the specified messages. Body parts are not decoded by this function.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a particular section of the body of the specified messages as a text string."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msg_number",
+                    "type": "Int64",
+                    "desc": "The message number"
+                },
+                {
+                    "name": "section",
+                    "type": "String",
+                    "desc": "The part number. It is a string of integers delimited by period which index into a body part list as per the IMAP4 specification"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "A bitmask with one or more of the following: FT_UID - The msg_number is a UID FT_PEEK - Do not set the \\Seen flag if not already set FT_INTERNAL - The return string is in internal format, will not canonicalize to CRLF."
+                }
+            ]
+        },
+        {
+            "name": "imap_fetchheader",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the header of the specified message as a text string."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msg_number",
+                    "type": "Int64",
+                    "desc": "The message number"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "The possible options are: FT_UID - The msgno argument is a UID FT_INTERNAL - The return string is in \"internal\" format, without any attempt to canonicalize to CRLF newlines FT_PREFETCHTEXT - The RFC822.TEXT should be pre-fetched at the same time. This avoids an extra RTT on an IMAP connection if a full message text is desired (e.g. in a \"save to local file\" operation)"
+                }
+            ]
+        },
+        {
+            "name": "imap_fetchstructure",
+            "desc": "Fetches all the structured information for a given message.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msg_number",
+                    "type": "Int64",
+                    "desc": "The message number"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "This optional parameter only has a single option, FT_UID, which tells the function to treat the msg_number argument as a UID."
+                }
+            ]
+        },
+        {
+            "name": "imap_gc",
+            "desc": "Purges the cache of entries of a specific type.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "caches",
+                    "type": "Int64",
+                    "desc": "Specifies the cache to purge. It may one or a combination of the following constants: IMAP_GC_ELT (message cache elements), IMAP_GC_ENV (enveloppe and bodies), IMAP_GC_TEXTS (texts)."
+                }
+            ]
+        },
+        {
+            "name": "imap_header",
+            "desc": "Gets information about the given message number by reading its headers.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msg_number",
+                    "type": "Int64",
+                    "desc": "The message number"
+                },
+                {
+                    "name": "fromlength",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Number of characters for the fetchfrom property. Must be greater than or equal to zero."
+                },
+                {
+                    "name": "subjectlength",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Number of characters for the fetchsubject property Must be greater than or equal to zero."
+                },
+                {
+                    "name": "defaulthost",
+                    "type": "String",
+                    "value": "\"\""
+                }
+            ]
+        },
+        {
+            "name": "imap_headerinfo",
+            "desc": "Gets information about the given message number by reading its headers.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msg_number",
+                    "type": "Int64",
+                    "desc": "The message number"
+                },
+                {
+                    "name": "fromlength",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Number of characters for the fetchfrom property. Must be greater than or equal to zero."
+                },
+                {
+                    "name": "subjectlength",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Number of characters for the fetchsubject property Must be greater than or equal to zero."
+                },
+                {
+                    "name": "defaulthost",
+                    "type": "String",
+                    "value": "\"\""
+                }
+            ]
+        },
+        {
+            "name": "imap_last_error",
+            "desc": "Gets the full text of the last IMAP error message that occurred on the current page. The error stack is untouched; calling imap_last_error() subsequently, with no intervening errors, will return the same error.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the full text of the last IMAP error message that occurred on the current page. Returns FALSE if no error messages are available."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "imap_list",
+            "desc": "Read the list of mailboxes.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array containing the names of the mailboxes."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "ref",
+                    "type": "String",
+                    "desc": "ref should normally be just the server specification as described in imap_open()."
+                },
+                {
+                    "name": "pattern",
+                    "type": "String",
+                    "desc": "Specifies where in the mailbox hierarchy to start searching.\n\nThere are two special characters you can pass as part of the pattern: '*' and '%'. '*' means to return all mailboxes. If you pass pattern as '*', you will get a list of the entire mailbox hierarchy. '%' means to return the current level only. '%' as the pattern parameter will return only the top level mailboxes; '~\/mail\/%' on UW_IMAPD will return every mailbox in the ~\/mail directory, but none in subfolders of that directory."
+                }
+            ]
+        },
+        {
+            "name": "imap_listmailbox",
+            "desc": "Read the list of mailboxes.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array containing the names of the mailboxes."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "ref",
+                    "type": "String",
+                    "desc": "ref should normally be just the server specification as described in imap_open()."
+                },
+                {
+                    "name": "pattern",
+                    "type": "String",
+                    "desc": "Specifies where in the mailbox hierarchy to start searching.\n\nThere are two special characters you can pass as part of the pattern: '*' and '%'. '*' means to return all mailboxes. If you pass pattern as '*', you will get a list of the entire mailbox hierarchy. '%' means to return the current level only. '%' as the pattern parameter will return only the top level mailboxes; '~\/mail\/%' on UW_IMAPD will return every mailbox in the ~\/mail directory, but none in subfolders of that directory."
+                }
+            ]
+        },
+        {
+            "name": "imap_mail_copy",
+            "desc": "Copies mail messages specified by msglist to specified mailbox.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msglist",
+                    "type": "String",
+                    "desc": null
+                },
+                {
+                    "name": "mailbox",
+                    "type": "String",
+                    "desc": "The mailbox name, see imap_open() for more information"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "options is a bitmask of one or more of CP_UID - the sequence numbers contain UIDS CP_MOVE - Delete the messages from the current mailbox after copying"
+                }
+            ]
+        },
+        {
+            "name": "imap_mail_move",
+            "desc": "Moves mail messages specified by msglist to the specified mailbox.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msglist",
+                    "type": "String",
+                    "desc": null
+                },
+                {
+                    "name": "mailbox",
+                    "type": "String",
+                    "desc": "The mailbox name, see imap_open() for more information"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "options is a bitmask and may contain the single option: CP_UID - the sequence numbers contain UIDS"
+                }
+            ]
+        },
+        {
+            "name": "imap_mail",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "to",
+                    "type": "String",
+                    "desc": "The receiver"
+                },
+                {
+                    "name": "subject",
+                    "type": "String",
+                    "desc": "The mail subject"
+                },
+                {
+                    "name": "message",
+                    "type": "String",
+                    "desc": "The mail body"
+                },
+                {
+                    "name": "additional_headers",
+                    "type": "String",
+                    "value": "\"\"",
+                    "desc": "As string with additional headers to be set on the mail"
+                },
+                {
+                    "name": "cc",
+                    "type": "String",
+                    "value": "\"\""
+                },
+                {
+                    "name": "bcc",
+                    "type": "String",
+                    "value": "\"\"",
+                    "desc": "The receivers specified in bcc will get the mail, but are excluded from the headers."
+                },
+                {
+                    "name": "rpath",
+                    "type": "String",
+                    "value": "\"\"",
+                    "desc": "Use this parameter to specify return path upon mail delivery failure. This is useful when using PHP as a mail client for multiple users."
+                }
+            ]
+        },
+        {
+            "name": "imap_mailboxmsginfo",
+            "desc": "Checks the current mailbox status on the server. It is similar to imap_status(), but will additionally sum up the size of all messages in the mailbox, which will take some additional time to execute.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the information in an object with following properties: Mailbox properties Date date of last change (current datetime) Driver driver Mailbox name of the mailbox Nmsgs number of messages Recent number of recent messages Unread number of unread messages Deleted number of deleted messages Size mailbox size\n\nReturns FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                }
+            ]
+        },
+        {
+            "name": "imap_msgno",
+            "desc": "Returns the message sequence number for the given uid.\n\nThis function is the inverse of imap_uid().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the message sequence number for the given uid."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "uid",
+                    "type": "Int64",
+                    "desc": "The message UID"
+                }
+            ]
+        },
+        {
+            "name": "imap_num_msg",
+            "desc": "Gets the number of messages in the current mailbox.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Return the number of messages in the current mailbox, as an integer."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                }
+            ]
+        },
+        {
+            "name": "imap_num_recent",
+            "desc": "Gets the number of recent messages in the current mailbox.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the number of recent messages in the current mailbox, as an integer."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                }
+            ]
+        },
+        {
+            "name": "imap_open",
+            "desc": "Opens an IMAP stream to a mailbox.\n\nThis function can also be used to open streams to POP3 and NNTP servers, but some functions and features are only available on IMAP servers.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an IMAP stream on success or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "mailbox",
+                    "type": "String",
+                    "desc": "A mailbox name consists of a server and a mailbox path on this server. The special name INBOX stands for the current users personal mailbox. Mailbox names that contain international characters besides those in the printable ASCII space have to be encoded width imap_utf7_encode().\n\nThe server part, which is enclosed in '{' and '}', consists of the servers name or ip address, an optional port (prefixed by ':'), and an optional protocol specification (prefixed by '\/').\n\nThe server part is mandatory in all mailbox parameters.\n\nAll names which start with { are remote names, and are in the form \"{\" remote_system_name [\":\" port] [flags] \"}\" [mailbox_name] where: remote_system_name - Internet domain name or bracketed IP address of server. port - optional TCP port number, default is the default port for that service flags - optional flags, see following table. mailbox_name - remote mailbox name, default is INBOX\n\nOptional flags for names Flag Description \/service=service mailbox access service, default is \"imap\" \/user=user remote user name for login on the server \/authuser=user remote authentication user; if specified this is the user name whose password is used (e.g. administrator) \/anonymous remote access as anonymous user \/debug record protocol telemetry in application's debug log \/secure do not transmit a plaintext password over the network \/imap, \/imap2, \/imap2bis, \/imap4, \/imap4rev1 equivalent to \/service=imap \/pop3 equivalent to \/service=pop3 \/nntp equivalent to \/service=nntp \/norsh do not use rsh or ssh to establish a preauthenticated IMAP session \/ssl use the Secure Socket Layer to encrypt the session \/validate-cert validate certificates from TLS\/SSL server (this is the default behavior) \/novalidate-cert do not validate certificates from TLS\/SSL server, needed if server uses self-signed certificates \/tls force use of start-TLS to encrypt the session, and reject connection to servers that do not support it \/notls do not do start-TLS to encrypt the session, even with servers that support it \/readonly request read-only mailbox open (IMAP only; ignored on NNTP, and an error with SMTP and POP3)"
+                },
+                {
+                    "name": "username",
+                    "type": "String",
+                    "desc": "The user name"
+                },
+                {
+                    "name": "password",
+                    "type": "String",
+                    "desc": "The password associated with the username"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "The options are a bit mask with one or more of the following: OP_READONLY - Open mailbox read-only OP_ANONYMOUS - Don't use or update a .newsrc for news (NNTP only) OP_HALFOPEN - For IMAP and NNTP names, open a connection but don't open a mailbox. CL_EXPUNGE - Expunge mailbox automatically upon mailbox close (see also imap_delete() and imap_expunge()) OP_DEBUG - Debug protocol negotiations OP_SHORTCACHE - Short (elt-only) caching OP_SILENT - Don't pass up events (internal use) OP_PROTOTYPE - Return driver prototype OP_SECURE - Don't do non-secure authentication"
+                },
+                {
+                    "name": "retries",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Number of maximum connect attempts"
+                }
+            ]
+        },
+        {
+            "name": "imap_ping",
+            "desc": "imap_ping() pings the stream to see if it's still active. It may discover new mail; this is the preferred method for a periodic \"new mail check\" as well as a \"keep alive\" for servers which have inactivity timeout.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the stream is still alive, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                }
+            ]
+        },
+        {
+            "name": "imap_qprint",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an 8 bits string."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "A quoted-printable string"
+                }
+            ]
+        },
+        {
+            "name": "imap_renamemailbox",
+            "desc": "This function renames on old mailbox to new mailbox (see imap_open() for the format of mbox names).",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "old_mbox",
+                    "type": "String",
+                    "desc": "The old mailbox name, see imap_open() for more information"
+                },
+                {
+                    "name": "new_mbox",
+                    "type": "String",
+                    "desc": "The new mailbox name, see imap_open() for more information"
+                }
+            ]
+        },
+        {
+            "name": "imap_reopen",
+            "desc": "Reopens the specified stream to a new mailbox on an IMAP or NNTP server.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the stream is reopened, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "mailbox",
+                    "type": "String",
+                    "desc": "The mailbox name, see imap_open() for more information"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "The options are a bit mask with one or more of the following: OP_READONLY - Open mailbox read-only OP_ANONYMOUS - Don't use or update a .newsrc for news (NNTP only) OP_HALFOPEN - For IMAP and NNTP names, open a connection but don't open a mailbox. OP_EXPUNGE - Silently expunge recycle stream CL_EXPUNGE - Expunge mailbox automatically upon mailbox close (see also imap_delete() and imap_expunge())"
+                },
+                {
+                    "name": "retries",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Number of maximum connect attempts"
+                }
+            ]
+        },
+        {
+            "name": "imap_search",
+            "desc": null,
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array of message numbers or UIDs.\n\nReturn FALSE if it does not understand the search criteria or no messages have been found."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "criteria",
+                    "type": "String",
+                    "desc": "A string, delimited by spaces, in which the following keywords are allowed. Any multi-word arguments (e.g. FROM \"joey smith\") must be quoted. ALL - return all messages matching the rest of the criteria ANSWERED - match messages with the \\\\ANSWERED flag set BCC \"string\" - match messages with \"string\" in the Bcc: field BEFORE \"date\" - match messages with Date: before \"date\" BODY \"string\" - match messages with \"string\" in the body of the message CC \"string\" - match messages with \"string\" in the Cc: field DELETED - match deleted messages FLAGGED - match messages with the \\\\FLAGGED (sometimes referred to as Important or Urgent) flag set FROM \"string\" - match messages with \"string\" in the From: field KEYWORD \"string\" - match messages with \"string\" as a keyword NEW - match new messages OLD - match old messages ON \"date\" - match messages with Date: matching \"date\" RECENT - match messages with the \\\\RECENT flag set SEEN - match messages that have been read (the \\\\SEEN flag is set) SINCE \"date\" - match messages with Date: after \"date\" SUBJECT \"string\" - match messages with \"string\" in the Subject: TEXT \"string\" - match messages with text \"string\" TO \"string\" - match messages with \"string\" in the To: UNANSWERED - match messages that have not been answered UNDELETED - match messages that are not deleted UNFLAGGED - match messages that are not flagged UNKEYWORD \"string\" - match messages that do not have the keyword \"string\" UNSEEN - match messages which have not been read yet"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Valid values for options are SE_UID, which causes the returned array to contain UIDs instead of messages sequence numbers."
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "\"\""
+                }
+            ]
+        },
+        {
+            "name": "imap_setflag_full",
+            "desc": "Causes a store to add the specified flag to the flags set for the messages in the specified sequence.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "sequence",
+                    "type": "String",
+                    "desc": "A sequence of message numbers. You can enumerate desired messages with the X,Y syntax, or retrieve all messages within an interval with the X:Y syntax"
+                },
+                {
+                    "name": "flag",
+                    "type": "String",
+                    "desc": null
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "A bit mask that may contain the single option: ST_UID - The sequence argument contains UIDs instead of sequence numbers"
+                }
+            ]
+        },
+        {
+            "name": "imap_status",
+            "desc": "Gets status information about the given mailbox.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "This function returns an object containing status information. The object has the following properties: messages, recent, unseen, uidnext, and uidvalidity.\n\nflags is also set, which contains a bitmask which can be checked against any of the above constants."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "mailbox",
+                    "type": "String",
+                    "desc": "The mailbox name, see imap_open() for more information"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Valid flags are: SA_MESSAGES - set $status->messages to the number of messages in the mailbox SA_RECENT - set $status->recent to the number of recent messages in the mailbox SA_UNSEEN - set $status->unseen to the number of unseen (new) messages in the mailbox SA_UIDNEXT - set $status->uidnext to the next uid to be used in the mailbox SA_UIDVALIDITY - set $status->uidvalidity to a constant that changes when uids for the mailbox may no longer be valid SA_ALL - set all of the above"
+                }
+            ]
+        },
+        {
+            "name": "imap_subscribe",
+            "desc": "Subscribe to a new mailbox.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "mailbox",
+                    "type": "String",
+                    "desc": "The mailbox name, see imap_open() for more information"
+                }
+            ]
+        },
+        {
+            "name": "imap_timeout",
+            "desc": "Sets or fetches the imap timeout.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "If the timeout parameter is set, this function returns TRUE on success and FALSE on failure.\n\nIf timeout is not provided or evaluates to -1, the current timeout value of timeout_type is returned as an integer."
+            },
+            "args": [
+                {
+                    "name": "timeout_type",
+                    "type": "Int64",
+                    "desc": "One of the following: IMAP_OPENTIMEOUT, IMAP_READTIMEOUT, IMAP_WRITETIMEOUT, or IMAP_CLOSETIMEOUT."
+                },
+                {
+                    "name": "timeout",
+                    "type": "Int64",
+                    "value": "-1",
+                    "desc": "The timeout, in seconds."
+                }
+            ]
+        },
+        {
+            "name": "imap_uid",
+            "desc": "This function returns the UID for the given message sequence number. An UID is a unique identifier that will not change over time while a message sequence number may change whenever the content of the mailbox changes.\n\nThis function is the inverse of imap_msgno().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The UID of the given message."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msg_number",
+                    "type": "Int64",
+                    "desc": "The message number."
+                }
+            ]
+        },
+        {
+            "name": "imap_undelete",
+            "desc": "Removes the deletion flag for a specified message, which is set by imap_delete() or imap_mail_move().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "msg_number",
+                    "type": "String",
+                    "desc": "The message number"
+                },
+                {
+                    "name": "flags",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "imap_unsubscribe",
+            "desc": "Unsubscribe from the specified mailbox.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "imap_stream",
+                    "type": "Resource",
+                    "desc": "An IMAP stream returned by imap_open()."
+                },
+                {
+                    "name": "mailbox",
+                    "type": "String",
+                    "desc": "The mailbox name, see imap_open() for more information"
+                }
+            ]
+        },
+        {
+            "name": "imap_utf8",
+            "desc": "Converts the given mime_encoded_text to UTF-8.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an UTF-8 encoded string."
+            },
+            "args": [
+                {
+                    "name": "mime_encoded_text",
+                    "type": "String",
+                    "desc": null
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

@@ -1,0 +1,122 @@
+bool(true)
+bool(false)
+array(0) {
+}
+array(1) {
+  [0]=>
+  NULL
+}
+Foo: foo 12 bar
+array(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(54)
+  [2]=>
+  int(3)
+  [3]=>
+  int(23)
+  [4]=>
+  int(5)
+  [5]=>
+  int(2)
+}
+array(6) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+  [4]=>
+  string(1) "e"
+  [5]=>
+  string(1) "f"
+}
+array(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(5)
+  [4]=>
+  int(23)
+  [5]=>
+  int(54)
+}
+array(6) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "f"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "e"
+  [4]=>
+  string(1) "d"
+  [5]=>
+  string(1) "b"
+}
+array(6) {
+  [0]=>
+  int(54)
+  [1]=>
+  int(23)
+  [2]=>
+  int(5)
+  [3]=>
+  int(3)
+  [4]=>
+  int(2)
+  [5]=>
+  int(1)
+}
+array(6) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "d"
+  [2]=>
+  string(1) "e"
+  [3]=>
+  string(1) "c"
+  [4]=>
+  string(1) "f"
+  [5]=>
+  string(1) "a"
+}
+array(3) {
+  [0]=>
+  array(3) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(2)
+    [2]=>
+    int(1)
+  }
+  [1]=>
+  array(3) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(6)
+    [2]=>
+    int(5)
+  }
+  [2]=>
+  array(3) {
+    [0]=>
+    int(7)
+    [1]=>
+    int(9)
+    [2]=>
+    int(8)
+  }
+}

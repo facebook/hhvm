@@ -1,0 +1,12 @@
+--- testing rw moving about the file ---
+start:The 1st
+at end:
+bool(true)
+final:The 1st part of the text
+--- testing eof ---
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+last bytes: xtra
+Done

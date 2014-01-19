@@ -1,0 +1,12 @@
+object(stdClass)#%d (1) {
+  ["x0"]=>
+  &object(stdClass)#%d (3) {
+    ["y0"]=>
+    string(1) "b"
+    ["y1"]=>
+    *RECURSION*
+    ["y2"]=>
+    *RECURSION*
+  }
+}
+ok

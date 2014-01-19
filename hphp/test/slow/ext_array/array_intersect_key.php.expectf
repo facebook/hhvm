@@ -1,0 +1,8 @@
+array(2) {
+  ["blue"]=>
+  int(1)
+  ["green"]=>
+  int(3)
+}
+HipHop Warning: array_intersect_key() expects parameter 1 to be an array or collection in %s/test/slow/ext_array/array_intersect_key.php on line 6
+NULL

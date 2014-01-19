@@ -1,0 +1,93 @@
+*** Testing imagecolorallocate() : usage variations ***
+
+--float 10.5--
+int(657930)
+
+--float -10.5--
+bool(false)
+
+--float 10.1234567e10--
+bool(false)
+
+--float 10.7654321E-10--
+int(2570)
+
+--float .5--
+int(2570)
+
+--empty array--
+HipHop Warning: %s
+NULL
+
+--int indexed array--
+HipHop Warning: %s
+NULL
+
+--associative array--
+HipHop Warning: %s
+NULL
+
+--nested arrays--
+HipHop Warning: %s
+NULL
+
+--uppercase NULL--
+int(2570)
+
+--lowercase null--
+int(2570)
+
+--lowercase true--
+int(68106)
+
+--lowercase false--
+int(2570)
+
+--uppercase TRUE--
+int(68106)
+
+--uppercase FALSE--
+int(2570)
+
+--empty string DQ--
+HipHop Warning: %s
+NULL
+
+--empty string SQ--
+HipHop Warning: %s
+NULL
+
+--string DQ--
+HipHop Warning: %s
+NULL
+
+--string SQ--
+HipHop Warning: %s
+NULL
+
+--mixed case string--
+HipHop Warning: %s
+NULL
+
+--heredoc--
+HipHop Warning: %s
+NULL
+
+--instance of classWithToString--
+HipHop Warning: %s
+NULL
+
+--instance of classWithoutToString--
+HipHop Warning: %s
+NULL
+
+--undefined var--
+int(2570)
+
+--unset var--
+int(2570)
+
+--file resource--
+HipHop Warning: %s
+NULL
+===DONE===

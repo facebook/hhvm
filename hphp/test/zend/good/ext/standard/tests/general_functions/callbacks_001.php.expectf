@@ -1,0 +1,24 @@
+parent|who
+B
+C|parent::who
+B
+B|parent::who
+A
+E|parent::who
+D
+A|who
+A
+C|who
+B
+B|who2
+A
+===FOREIGN===
+parent|who
+O
+P|parent::who
+O
+$this|O::who
+O
+$this|B::who
+HipHop Warning: %s
+===DONE===

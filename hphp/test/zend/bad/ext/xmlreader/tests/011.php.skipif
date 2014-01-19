@@ -1,0 +1,4 @@
+<?php if (!extension_loaded("xmlreader")) print "skip";
+$reader = new XMLReader();
+if (!method_exists($reader, 'readInnerXml')) print "skip";
+?>

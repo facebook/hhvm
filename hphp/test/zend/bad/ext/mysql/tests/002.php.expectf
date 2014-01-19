@@ -1,0 +1,23 @@
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+resource(%d) of type (mysql link)
+bool(true)
+bool(true)
+bool(true)
+resource(%d) of type (mysql result)
+array(3) {
+  [%u|b%"col1"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"col2"]=>
+  %unicode|string%(3) "foo"
+  [%u|b%"col3"]=>
+  %unicode|string%(3) "bar"
+}
+array(3) {
+  [%u|b%"col1"]=>
+  %unicode|string%(1) "2"
+  [%u|b%"col2"]=>
+  %unicode|string%(3) "foo"
+  [%u|b%"col3"]=>
+  %unicode|string%(3) "bar"
+}
+done!

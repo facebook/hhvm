@@ -1,0 +1,10 @@
+*** Testing array_uintersect_uassoc() : error conditions ***
+
+-- Testing array_uintersect_uassoc() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing array_uintersect_uassoc() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

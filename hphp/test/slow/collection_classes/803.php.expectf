@@ -1,0 +1,25 @@
+=== Vector ===
+array(1) {
+  [0]=>
+  int(123)
+}
+int(123)
+array(0) {
+}
+=== Set ===
+array(0) {
+}
+HipHop Warning: Set::toArray() for a set containing both int(123) and string('123') in %s/test/slow/collection_classes/803.php on line 18
+array(2) {
+  ["foo"]=>
+  string(3) "foo"
+  [123]=>
+  string(3) "123"
+}
+bool(true)
+array(2) {
+  ["foo"]=>
+  string(3) "foo"
+  [123]=>
+  int(123)
+}

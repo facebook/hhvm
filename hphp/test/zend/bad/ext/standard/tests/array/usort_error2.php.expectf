@@ -1,0 +1,10 @@
+*** Testing usort() : error conditions ***
+
+-- Testing usort() function with non-existent compare function --
+HipHop Warning: %s
+NULL
+
+-- Testing usort() function with non-existent compare function and extra argument --
+HipHop Warning: %s
+NULL
+===DONE===

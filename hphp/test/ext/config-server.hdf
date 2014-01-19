@@ -1,0 +1,43 @@
+
+Log {
+  AlwaysLogUnhandledExceptions = false
+}
+
+Server {
+  Port = 8080
+  SourceRoot != echo $(pwd)/runtime/tmp
+  ThreadCount = 1
+  AllowedFiles {
+    0 = string
+  }
+}
+
+VirtualHost {
+  default {
+  }
+}
+
+Satellites {
+  rpc {
+    Type = RPCServer
+    Port = 8083
+    Password = test
+    RequestInitDocument = string
+  }
+}
+
+Xbox {
+  ServerInfo {
+    ThreadCount = 1
+    RequestInitDocument = string
+    MaxDuration = 10
+  }
+}
+
+PageletServer {
+  ThreadCount = 5
+}
+
+AdminServer {
+  Port = 8088
+}

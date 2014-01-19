@@ -1,0 +1,8 @@
+int(4096)
+%sphar_decompress2.phar
+%sphar_decompress.phar
+%sphar_decompress.hooba.phar
+HipHop Warning: %s
+Cannot decompress phar archive, phar is read-only
+Cannot decompress zip-based archives with whole-archive compression
+===DONE===

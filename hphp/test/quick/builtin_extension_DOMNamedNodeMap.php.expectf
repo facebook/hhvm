@@ -1,0 +1,55 @@
+DOMNamedNodeMap
+object(DOMNamedNodeMap)#1 (0) {
+}
+string(100) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:15:"DOMNamedNodeMap";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(15) "DOMNamedNodeMap"
+}
+array(8) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "getNamedItem"
+  [2]=>
+  string(14) "getNamedItemNS"
+  [3]=>
+  string(4) "item"
+  [4]=>
+  string(5) "__get"
+  [5]=>
+  string(5) "__set"
+  [6]=>
+  string(7) "__isset"
+  [7]=>
+  string(11) "getIterator"
+}
+================
+A_DOMNamedNodeMap
+object(A_DOMNamedNodeMap)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(102) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:17:"A_DOMNamedNodeMap";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(17) "A_DOMNamedNodeMap"
+}
+array(8) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "getNamedItem"
+  [2]=>
+  string(14) "getNamedItemNS"
+  [3]=>
+  string(4) "item"
+  [4]=>
+  string(5) "__get"
+  [5]=>
+  string(5) "__set"
+  [6]=>
+  string(7) "__isset"
+  [7]=>
+  string(11) "getIterator"
+}

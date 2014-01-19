@@ -1,0 +1,35 @@
+HipHop Fatal error: Class undefined: Y in %s on line 5
+array(6) {
+  [0]=>
+  int(16777217)
+  [1]=>
+  string(18) "Class undefined: Y"
+  [2]=>
+  string(%d) "%s"
+  [3]=>
+  int(5)
+  [4]=>
+  string(0) ""
+  [5]=>
+  array(2) {
+    [0]=>
+    array(2) {
+      ["file"]=>
+      string(%d) "%s"
+      ["line"]=>
+      int(5)
+    }
+    [1]=>
+    array(4) {
+      ["file"]=>
+      string(%d) "%s"
+      ["line"]=>
+      int(10)
+      ["function"]=>
+      string(4) "test"
+      ["args"]=>
+      array(0) {
+      }
+    }
+  }
+}

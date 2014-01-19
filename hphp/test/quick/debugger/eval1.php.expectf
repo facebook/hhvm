@@ -1,0 +1,85 @@
+Program %s/eval1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+eval1.php loaded
+Program %s/eval1.php exited normally.
+print function_exists('test1')
+false
+@ function test1($x){error_log($x);return $x+1;}
+print function_exists('test1')
+true
+@ $eval1=test1(4)
+4
+print $eval1
+5
+print class_exists('test2')
+false
+<?php
+class test2 {
+  public $a;
+  private $b;
+  public function ab() {
+    return $this->a . ":" . $this->b;
+  }
+  public function callCls() {
+    $obj = new cls();
+    return $obj->meth($this);
+  }
+  private function seven() {
+    return 7;
+  }
+}
+?>
+print class_exists('test2')
+true
+set bac off
+BypassAccessCheck(bac) set to off
+@ $eval2 = new test2()
+@ $eval2->a = 3
+@ $eval2->b = 4
+Hit fatal : Cannot access protected property
+    #0 at [:1]
+    #1 include(), called at [:1]
+
+print $eval2->ab()
+"3:"
+set bac on
+BypassAccessCheck(bac) set to on.
+All code executed from debugger is bypassing access check!
+@ $eval2->b = 4
+print $eval2->ab()
+"3:4"
+break eval1.php:12
+Breakpoint 1 set on line 12 of eval1.php
+print $eval2->callCls()
+Breakpoint 1 reached at cls::meth() on line 12 of %s/eval1.php
+  11     $a = $this->pub.':'.$this->pri;
+  12*    $b = $this->pub.':'.$this->pri;
+  13     $c = $this->pub.':'.$this->pri;
+
+break clear all
+All breakpoints are cleared.
+set bac off
+BypassAccessCheck(bac) set to off
+@ $this->pub = 21
+@ $this->pri = 22
+next
+Break at cls::meth() on line 13 of %s/eval1.php
+  12     $b = $this->pub.':'.$this->pri;
+  13*    $c = $this->pub.':'.$this->pri;
+  14     return $a.'-'.$b.'-'.$c;
+
+@ $this->pub = $x->seven()
+Hit fatal : Call to private method test2::seven from context cls
+    #0 at [:1]
+    #1 include(), called at %s/eval1.php:13]
+    #2 cls->meth(), called at [:%d]
+    #3 test2->callCls(), called at [:%d]
+    #4 include(), called at [:%d]
+
+set bac on
+BypassAccessCheck(bac) set to on.
+All code executed from debugger is bypassing access check!
+@ $this->pub = $x->seven()
+continue
+"11:12-21:22-7:22"
+quit

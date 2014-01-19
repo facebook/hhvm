@@ -1,0 +1,41 @@
+yall know what time it is. time to show you some properties
+array (7) {
+  c_priv
+  priv
+  priv_st
+  prot
+  prot_st
+  pub
+  pub_st
+}
+yall know what time it is now too. time to show you some methods
+array (6) {
+  fpriv
+  fpriv_st
+  fprot
+  fprot_st
+  fpub
+  fpub_st
+}
+yall know what time it is. time to show you some properties
+array (7) {
+  class_prop
+  foo
+  prot
+  prot_st
+  pub
+  pub_st
+  static
+}
+yall know what time it is now too. time to show you some methods
+array (9) {
+  class_method
+  ffoo
+  fpriv
+  fpriv_st
+  fprot
+  fprot_st
+  fpub
+  fpub_st
+  fstatic
+}

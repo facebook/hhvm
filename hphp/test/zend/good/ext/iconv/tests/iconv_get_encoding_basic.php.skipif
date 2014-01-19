@@ -1,0 +1,1 @@
+<?php if (!extension_loaded("iconv")) { echo 'skip extension not available'; } ?>

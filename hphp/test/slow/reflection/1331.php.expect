@@ -1,0 +1,15 @@
+string(1) "A"
+string(1) "B"
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+array(1) {
+  ["p"]=>
+  string(1) "g"
+}
+string(6) "okblah"
+string(6) "okblah"
+string(6) "okblah"

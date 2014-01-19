@@ -1,0 +1,234 @@
+>>> testing instance variables from global scope
+accessing C
+array(1) {
+  ["pub"]=>
+  string(7) "C::$pub"
+}
+accessing D
+array(2) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["pub_from_d"]=>
+  string(14) "D::$pub_from_d"
+}
+accessing E
+array(2) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["pub_from_d"]=>
+  string(14) "D::$pub_from_d"
+}
+>>> testing instance variables from class scope
+in C: accessing C
+array(3) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["prot"]=>
+  string(8) "C::$prot"
+  ["priv"]=>
+  string(8) "C::$priv"
+}
+in C: accessing D
+array(5) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["prot"]=>
+  string(8) "C::$prot"
+  ["priv"]=>
+  string(8) "C::$priv"
+  ["pub_from_d"]=>
+  string(14) "D::$pub_from_d"
+  ["prot_from_d"]=>
+  string(15) "D::$prot_from_d"
+}
+in C: accessing E
+array(5) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["prot"]=>
+  string(8) "C::$prot"
+  ["priv"]=>
+  string(8) "C::$priv"
+  ["pub_from_d"]=>
+  string(14) "D::$pub_from_d"
+  ["prot_from_d"]=>
+  string(15) "D::$prot_from_d"
+}
+in D: accessing C
+array(2) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["prot"]=>
+  string(8) "C::$prot"
+}
+in D: accessing D
+array(5) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["prot"]=>
+  string(8) "C::$prot"
+  ["pub_from_d"]=>
+  string(14) "D::$pub_from_d"
+  ["prot_from_d"]=>
+  string(15) "D::$prot_from_d"
+  ["priv_from_d"]=>
+  string(15) "D::$priv_from_d"
+}
+in D: accessing E
+array(5) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["prot"]=>
+  string(8) "C::$prot"
+  ["pub_from_d"]=>
+  string(14) "D::$pub_from_d"
+  ["prot_from_d"]=>
+  string(15) "D::$prot_from_d"
+  ["priv_from_d"]=>
+  string(15) "D::$priv_from_d"
+}
+in E: accessing C
+array(2) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["prot"]=>
+  string(8) "C::$prot"
+}
+in E: accessing D
+array(4) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["prot"]=>
+  string(8) "C::$prot"
+  ["pub_from_d"]=>
+  string(14) "D::$pub_from_d"
+  ["prot_from_d"]=>
+  string(15) "D::$prot_from_d"
+}
+in E: accessing E
+array(5) {
+  ["pub"]=>
+  string(7) "C::$pub"
+  ["prot"]=>
+  string(8) "C::$prot"
+  ["pub_from_d"]=>
+  string(14) "D::$pub_from_d"
+  ["prot_from_d"]=>
+  string(15) "D::$prot_from_d"
+  ["priv"]=>
+  string(8) "E::$priv"
+}
+>>> testing static variables from global scope
+accessing SC
+array(1) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+}
+accessing SD
+array(2) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["pub_from_d"]=>
+  string(15) "SD::$pub_from_d"
+}
+accessing SE
+array(2) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["pub_from_d"]=>
+  string(15) "SD::$pub_from_d"
+}
+>>> testing static variables from class scope
+in SC: accessing SC
+array(3) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["prot"]=>
+  string(9) "SC::$prot"
+  ["priv"]=>
+  string(9) "SC::$priv"
+}
+in SC: accessing SD
+array(4) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["prot"]=>
+  string(9) "SC::$prot"
+  ["pub_from_d"]=>
+  string(15) "SD::$pub_from_d"
+  ["prot_from_d"]=>
+  string(16) "SD::$prot_from_d"
+}
+in SC: accessing SE
+array(4) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["prot"]=>
+  string(9) "SC::$prot"
+  ["pub_from_d"]=>
+  string(15) "SD::$pub_from_d"
+  ["prot_from_d"]=>
+  string(16) "SD::$prot_from_d"
+}
+in SD: accessing SC
+array(2) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["prot"]=>
+  string(9) "SC::$prot"
+}
+in SD: accessing SD
+array(5) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["prot"]=>
+  string(9) "SC::$prot"
+  ["pub_from_d"]=>
+  string(15) "SD::$pub_from_d"
+  ["prot_from_d"]=>
+  string(16) "SD::$prot_from_d"
+  ["priv_from_d"]=>
+  string(16) "SD::$priv_from_d"
+}
+in SD: accessing SE
+array(4) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["prot"]=>
+  string(9) "SC::$prot"
+  ["pub_from_d"]=>
+  string(15) "SD::$pub_from_d"
+  ["prot_from_d"]=>
+  string(16) "SD::$prot_from_d"
+}
+in SE: accessing SC
+array(2) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["prot"]=>
+  string(9) "SC::$prot"
+}
+in SE: accessing SD
+array(4) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["prot"]=>
+  string(9) "SC::$prot"
+  ["pub_from_d"]=>
+  string(15) "SD::$pub_from_d"
+  ["prot_from_d"]=>
+  string(16) "SD::$prot_from_d"
+}
+in SE: accessing SE
+array(5) {
+  ["pub"]=>
+  string(8) "SC::$pub"
+  ["prot"]=>
+  string(9) "SC::$prot"
+  ["pub_from_d"]=>
+  string(15) "SD::$pub_from_d"
+  ["prot_from_d"]=>
+  string(16) "SD::$prot_from_d"
+  ["priv"]=>
+  string(9) "SE::$priv"
+}

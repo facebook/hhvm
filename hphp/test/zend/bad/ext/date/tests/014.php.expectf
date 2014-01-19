@@ -1,0 +1,20 @@
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2006-12-12 00:00:00"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "UTC"
+}
+object(DateTimeZone)#%d (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "UTC"
+}
+HipHop Warning: %s
+bool(false)
+int(0)
+HipHop Warning: %s
+bool(false)
+Done

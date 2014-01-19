@@ -1,0 +1,10 @@
+testing fault region
+In region
+about to throw: the message
+throw_stuff's fault ...
+In foo's fault handler
+top-level catch handler got: the message
+one
+two
+three
+top-level catch handler got: third exception from throw_various

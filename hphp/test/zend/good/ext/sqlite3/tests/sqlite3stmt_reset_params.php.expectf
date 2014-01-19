@@ -1,0 +1,10 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+Prepare query
+Reset query
+HipHop Warning: %s
+Closing database
+bool(true)
+Done

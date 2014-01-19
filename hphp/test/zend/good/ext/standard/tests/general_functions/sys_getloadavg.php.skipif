@@ -1,0 +1,3 @@
+<?php
+if (!function_exists("sys_getloadavg")) die("skip");
+?>

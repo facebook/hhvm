@@ -1,0 +1,7 @@
+ctor: 0
+ctor: 1
+ctor: 2
+dtor: 2
+dtor: 1
+dtor: 0
+Received exception:  hi

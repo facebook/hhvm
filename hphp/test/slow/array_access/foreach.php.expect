@@ -1,0 +1,12 @@
+C::offsetGet 1
+D::offsetGet 1
+  a=0 b=0 c=0 d=0
+C::offsetGet 1
+D::offsetGet 0
+  a=0 b=0 c=0 d=44
+C::offsetGet 0
+D::offsetGet 1
+  a=0 b=0 c=33 d=44
+C::offsetGet 0
+D::offsetGet 0
+  a=0 b=22 c=33 d=44

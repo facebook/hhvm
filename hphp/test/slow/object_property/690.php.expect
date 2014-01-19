@@ -1,0 +1,26 @@
+isset: string(3) "foo"
+bool(false)
+isset: string(3) "baz"
+bool(true)
+isset: string(3) "buz"
+bool(true)
+bool(false)
+bool(true)
+isset: string(8) "priv_var"
+bool(false)
+isset: string(3) "foo"
+bool(true)
+isset: string(3) "baz"
+get: string(3) "baz"
+bool(true)
+isset: string(3) "buz"
+get: string(3) "buz"
+bool(false)
+bool(true)
+bool(true)
+isset: string(8) "priv_var"
+bool(true)
+isset: string(7) "pub_var"
+bool(false)
+isset: string(7) "pub_var"
+bool(true)

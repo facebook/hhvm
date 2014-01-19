@@ -1,0 +1,30 @@
+*** Testing ctype_space() : usage variations ***
+
+-- Octal Values --
+-- Iteration 1 --
+bool(true)
+-- Iteration 2 --
+bool(true)
+-- Iteration 3 --
+bool(true)
+-- Iteration 4 --
+bool(true)
+-- Iteration 5 --
+bool(true)
+-- Iteration 6 --
+bool(true)
+
+-- Hexadecimal Values --
+-- Iteration 1 --
+bool(true)
+-- Iteration 2 --
+bool(true)
+-- Iteration 3 --
+bool(true)
+-- Iteration 4 --
+bool(true)
+-- Iteration 5 --
+bool(true)
+-- Iteration 6 --
+bool(true)
+===DONE===

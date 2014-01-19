@@ -1,0 +1,10 @@
+*** Testing utf8_decode() : error conditions ***
+
+-- Testing utf8_decode() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing utf8_decode() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

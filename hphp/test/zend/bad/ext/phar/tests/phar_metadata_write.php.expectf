@@ -1,0 +1,23 @@
+string(1) "a"
+string(1) "b"
+string(1) "c"
+string(1) "d"
+NULL
+array(1) {
+  ["my"]=>
+  string(6) "friend"
+}
+int(42)
+NULL
+array(2) {
+  [0]=>
+  int(25)
+  ["foo"]=>
+  string(3) "bar"
+}
+bool(true)
+string(1) "a"
+string(1) "b"
+string(1) "c"
+string(1) "d"
+===DONE===

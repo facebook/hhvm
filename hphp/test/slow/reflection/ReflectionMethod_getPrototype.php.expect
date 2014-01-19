@@ -1,0 +1,18 @@
+Method Cls1::method1 does not have a prototype
+Method Cls1::method2 does not have a prototype
+Method Cls2::method2 does not have a prototype
+Method Cls3::method1 does not have a prototype
+Method Cls3::method3 does not have a prototype
+Method Cls4::method1 does not have a prototype
+Int3::method3
+Int3::method3
+Int4::method4
+Int3::method3
+Int4::method4
+Method Cls6::method1 does not have a prototype
+Cls2::method1
+Method Cls7::method7 does not have a prototype
+Cls2::method1
+Cls7::method7
+Method PDO::commit does not have a prototype
+PDO::commit

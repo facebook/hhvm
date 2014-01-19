@@ -1,0 +1,112 @@
+*** Testing gmdate() : usage variation ***
+
+--int 0--
+string(1) "0"
+string(1) "0"
+
+--int 1--
+string(1) "1"
+string(1) "1"
+
+--int 12345--
+string(5) "12345"
+string(5) "12345"
+
+--int -12345--
+string(6) "-12345"
+string(6) "-12345"
+
+--float 10.5--
+string(4) "10.5"
+string(4) "10.5"
+
+--float -10.5--
+string(5) "-10.5"
+string(5) "-10.5"
+
+--float 12.3456789000e10--
+string(12) "123456789000"
+string(12) "123456789000"
+
+--float -12.3456789000e10--
+string(13) "-123456789000"
+string(13) "-123456789000"
+
+--float .5--
+string(3) "0.5"
+string(3) "0.5"
+
+--empty array--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--int indexed array--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--associative array--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--nested arrays--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--uppercase NULL--
+string(0) ""
+string(0) ""
+
+--lowercase null--
+string(0) ""
+string(0) ""
+
+--lowercase true--
+string(1) "1"
+string(1) "1"
+
+--lowercase false--
+string(0) ""
+string(0) ""
+
+--uppercase TRUE--
+string(1) "1"
+string(1) "1"
+
+--uppercase FALSE--
+string(0) ""
+string(0) ""
+
+--empty string DQ--
+string(0) ""
+string(0) ""
+
+--empty string SQ--
+string(0) ""
+string(0) ""
+
+--instance of classWithToString--
+string(53) "CFridayam0808 AM 2008b8UTC2008-08-08T08:08:08+00:0031"
+string(%d) "%s"
+
+--instance of classWithoutToString--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--undefined var--
+string(0) ""
+string(0) ""
+
+--unset var--
+string(0) ""
+string(0) ""
+===DONE===

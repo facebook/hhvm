@@ -1,0 +1,24 @@
+string(30) "Integer key 2 is out of bounds"
+string(30) "Integer key 2 is out of bounds"
+object(HH\Vector)#1 (2) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  string(3) "one"
+}
+string(31) "Integer key -2 is out of bounds"
+string(31) "Integer key -2 is out of bounds"
+object(HH\Vector)#3 (2) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  string(3) "one"
+}
+string(30) "Integer key 2 is out of bounds"
+string(37) "Cannot assign to an element of a Pair"
+object(Pair)#5 (2) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  string(3) "one"
+}

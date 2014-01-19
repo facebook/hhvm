@@ -1,0 +1,40 @@
+=> PHP level errors
+bad args:
+HipHop Warning: %s
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+HipHop Warning: %s
+NULL
+bad variant:
+HipHop Warning: %s
+bool(false)
+empty domain:
+HipHop Warning: %s
+bool(false)
+fourth arg for 2003 variant (only notice raised):
+HipHop Notice: %s
+string(7) "foo.com"
+with error, but no details arg:
+bool(false)
+with error, with details arg:
+bool(false)
+array(3) {
+  ["result"]=>
+  string(23) "www.xn--fuball-cta.com-"
+  ["isTransitionalDifferent"]=>
+  bool(true)
+  ["errors"]=>
+  int(16)
+}
+with error, with details arg, contextj:
+bool(false)
+array(3) {
+  ["result"]=>
+  string(18) "www.xn--ab-m1t.com"
+  ["isTransitionalDifferent"]=>
+  bool(true)
+  ["errors"]=>
+  int(4096)
+}
+bool(true)

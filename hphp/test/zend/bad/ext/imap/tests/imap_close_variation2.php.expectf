@@ -1,0 +1,99 @@
+*** Testing imap_close() : usage variations ***
+Create a temporary mailbox and add 3 msgs
+.. mailbox '{%s}%s' created
+
+-- Iteration 1 --
+bool(true)
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 2 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 3 --
+bool(true)
+CL_EXPUNGE was set
+
+-- Iteration 4 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 5 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 6 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 7 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 8 --
+bool(true)
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 9 --
+bool(true)
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 10 --
+bool(true)
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 11 --
+bool(true)
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 12 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 13 --
+bool(true)
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 14 --
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 15 --
+bool(true)
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 16 --
+HipHop Warning: %s
+NULL
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 19 --
+bool(true)
+CL_EXPUNGE was set
+
+-- Iteration 20 --
+bool(true)
+CL_EXPUNGE was set
+
+-- Iteration 21 --
+bool(true)
+CL_EXPUNGE was set
+
+-- Iteration 22 --
+bool(true)
+CL_EXPUNGE was not set, 3 msgs in mailbox
+
+-- Iteration 23 --
+bool(true)
+CL_EXPUNGE was not set, 3 msgs in mailbox
+===DONE===

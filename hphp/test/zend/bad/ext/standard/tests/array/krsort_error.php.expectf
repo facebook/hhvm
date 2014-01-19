@@ -1,0 +1,38 @@
+*** Testing krsort() : error conditions ***
+
+-- Testing krsort() function with zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing krsort() function with more than expected no. of arguments --
+
+- Sort flag = SORT_REGULAR -
+HipHop Warning: %s
+bool(false)
+array(2) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+}
+
+- Sort flag = SORT_STRING -
+HipHop Warning: %s
+bool(false)
+array(2) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+}
+
+- Sort flag = SORT_NUMERIC -
+HipHop Warning: %s
+bool(false)
+array(2) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+}
+Done

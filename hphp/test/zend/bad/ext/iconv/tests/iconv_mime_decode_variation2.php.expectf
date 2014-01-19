@@ -1,0 +1,81 @@
+*** Testing iconv_mime_decode() : usage variations ***
+
+-- Iteration 1 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 2 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 3 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 4 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 5 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 6 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 7 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 8 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 9 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 10 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 11 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 12 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 13 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 14 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 15 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 16 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 17 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 18 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 19 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 20 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 21 --
+HipHop Warning: %s
+string(0) ""
+
+-- Iteration 22 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 23 --
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+-- Iteration 24 --
+HipHop Warning: %s
+string(0) ""
+Done

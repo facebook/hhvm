@@ -1,0 +1,137 @@
+DOMCDATASection
+HipHop Warning: DOMCDATASection::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+object(DOMCDATASection)#1 (0) {
+}
+string(100) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:15:"DOMCDATASection";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(15) "DOMCDATASection"
+}
+array(28) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(28) "isWhitespaceInElementContent"
+  [5]=>
+  string(9) "splitText"
+  [6]=>
+  string(10) "appendData"
+  [7]=>
+  string(10) "deleteData"
+  [8]=>
+  string(10) "insertData"
+  [9]=>
+  string(11) "replaceData"
+  [10]=>
+  string(13) "substringData"
+  [11]=>
+  string(11) "appendChild"
+  [12]=>
+  string(9) "cloneNode"
+  [13]=>
+  string(9) "getLineNo"
+  [14]=>
+  string(13) "hasAttributes"
+  [15]=>
+  string(13) "hasChildNodes"
+  [16]=>
+  string(12) "insertBefore"
+  [17]=>
+  string(18) "isDefaultNamespace"
+  [18]=>
+  string(10) "isSameNode"
+  [19]=>
+  string(11) "isSupported"
+  [20]=>
+  string(18) "lookupNamespaceUri"
+  [21]=>
+  string(12) "lookupPrefix"
+  [22]=>
+  string(9) "normalize"
+  [23]=>
+  string(11) "removeChild"
+  [24]=>
+  string(12) "replaceChild"
+  [25]=>
+  string(4) "c14n"
+  [26]=>
+  string(8) "c14nfile"
+  [27]=>
+  string(11) "getNodePath"
+}
+================
+A_DOMCDATASection
+HipHop Warning: DOMCDATASection::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+object(A_DOMCDATASection)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(102) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:17:"A_DOMCDATASection";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(17) "A_DOMCDATASection"
+}
+array(28) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(28) "isWhitespaceInElementContent"
+  [5]=>
+  string(9) "splitText"
+  [6]=>
+  string(10) "appendData"
+  [7]=>
+  string(10) "deleteData"
+  [8]=>
+  string(10) "insertData"
+  [9]=>
+  string(11) "replaceData"
+  [10]=>
+  string(13) "substringData"
+  [11]=>
+  string(11) "appendChild"
+  [12]=>
+  string(9) "cloneNode"
+  [13]=>
+  string(9) "getLineNo"
+  [14]=>
+  string(13) "hasAttributes"
+  [15]=>
+  string(13) "hasChildNodes"
+  [16]=>
+  string(12) "insertBefore"
+  [17]=>
+  string(18) "isDefaultNamespace"
+  [18]=>
+  string(10) "isSameNode"
+  [19]=>
+  string(11) "isSupported"
+  [20]=>
+  string(18) "lookupNamespaceUri"
+  [21]=>
+  string(12) "lookupPrefix"
+  [22]=>
+  string(9) "normalize"
+  [23]=>
+  string(11) "removeChild"
+  [24]=>
+  string(12) "replaceChild"
+  [25]=>
+  string(4) "c14n"
+  [26]=>
+  string(8) "c14nfile"
+  [27]=>
+  string(11) "getNodePath"
+}

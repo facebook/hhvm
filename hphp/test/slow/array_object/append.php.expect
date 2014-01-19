@@ -1,0 +1,17 @@
+object(ArrayObject)#1 (5) {
+  [0]=>
+  string(5) "first"
+  [1]=>
+  string(6) "second"
+  [2]=>
+  string(5) "third"
+  [3]=>
+  string(6) "fourth"
+  [4]=>
+  array(2) {
+    [0]=>
+    string(4) "five"
+    [1]=>
+    string(3) "six"
+  }
+}

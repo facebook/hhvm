@@ -1,0 +1,15 @@
+array(1) {
+  ["key"]=>
+  string(3) "1.0"
+}
+array(1) {
+  ["key"]=>
+  array(1) {
+    ["key"]=>
+    string(3) "1.0"
+  }
+}
+array(1) {
+  ["key"]=>
+  string(4) "1.01"
+}

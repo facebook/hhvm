@@ -1,0 +1,21 @@
+== ASCII ==
+40
+40
+== EUC-JP ==
+43
+72
+== SJIS ==
+43
+72
+== JIS ==
+43
+90
+== UTF-8 ==
+43
+101
+== WRONG PARAMETERS ==
+ERR: Warning
+
+ERR: Warning
+
+ERR: Warning

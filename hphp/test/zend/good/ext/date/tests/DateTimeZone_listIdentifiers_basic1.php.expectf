@@ -1,0 +1,8 @@
+*** Testing DateTimeZone::listIdentifiers() : basic functionality ***
+Check return tpe is ARRAY
+bool(true)
+Check array contains some common timezones
+bool(true)
+bool(true)
+bool(true)
+===DONE===

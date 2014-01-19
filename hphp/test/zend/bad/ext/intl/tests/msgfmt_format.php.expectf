@@ -1,0 +1,22 @@
+Locale is: en_US
+'4,560 monkeys on 123 trees make 37.073 monkeys per tree'
+'4,560 monkeys on 123 trees make 37.073 monkeys per tree'
+
+Locale is: ru_UA
+'4 560 мавп на 123 деревах це 37,073 мавпи на кожному деревi'
+'4 560 мавп на 123 деревах це 37,073 мавпи на кожному деревi'
+
+Locale is: de
+'4.560 Affen über 123 Bäume um 37,073 Affen pro Baum'
+'4.560 Affen über 123 Bäume um 37,073 Affen pro Baum'
+
+Locale is: en_UK
+'4,560 monkeys on 123 trees make 37.073 monkeys per tree'
+'4,560 monkeys on 123 trees make 37.073 monkeys per tree'
+
+Locale is: root
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+
+Locale is: fr
+'C\'est la vie!'
+'C\'est la vie!'

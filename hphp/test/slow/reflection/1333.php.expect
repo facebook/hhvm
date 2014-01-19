@@ -1,0 +1,6 @@
+array(2) {
+  [0]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "foo"
+}

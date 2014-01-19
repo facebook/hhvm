@@ -1,0 +1,8 @@
+array(3) {
+  [0]=>
+  string(3) "aaa"
+  [1]=>
+  string(4) "b"bb"
+  [2]=>
+  string(3) "ccc"
+}

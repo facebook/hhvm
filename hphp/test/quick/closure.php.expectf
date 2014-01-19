@@ -1,0 +1,18 @@
+Use: 246 2000
+Args: 777 500
+#0  funk(777, 500) called at %s:17]
+#1  {closure}(777) called at %s:27]
+#2  main() called at %s:33]
+Use: 246 4000
+Args: 888 500
+#0  funk(888, 500) called at %s:17]
+#1  {closure}(888) called at %s:28]
+#2  main() called at %s:33]
+object(Closure$%s)#1 (2) {
+  ["use_by_val":"Closure$%s":private]=>
+  int(123)
+  ["use_by_ref":"Closure$%s":private]=>
+  &int(4000)
+}
+int(123)
+int(4000)

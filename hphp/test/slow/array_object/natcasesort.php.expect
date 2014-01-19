@@ -1,0 +1,21 @@
+Standard sorting
+ArrayObject Object
+(
+    [0] => IMG0.png
+    [5] => IMG3.png
+    [4] => img1.png
+    [2] => img10.png
+    [1] => img12.png
+    [3] => img2.png
+)
+
+Natural order sorting (case-insensitive)
+ArrayObject Object
+(
+    [0] => IMG0.png
+    [4] => img1.png
+    [3] => img2.png
+    [5] => IMG3.png
+    [2] => img10.png
+    [1] => img12.png
+)

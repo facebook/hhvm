@@ -1,0 +1,34 @@
+*** Testing parse_ini_file() : variation ***
+array(2) {
+  ["section1"]=>
+  array(2) {
+    ["value1"]=>
+    string(8) "original"
+    ["value2"]=>
+    string(8) "original"
+  }
+  ["section2"]=>
+  array(2) {
+    ["value1"]=>
+    string(8) "original"
+    ["value2"]=>
+    string(9) "different"
+  }
+}
+array(2) {
+  ["section1"]=>
+  array(2) {
+    ["value1"]=>
+    string(7) "changed"
+    ["value2"]=>
+    string(8) "original"
+  }
+  ["section2"]=>
+  array(2) {
+    ["value1"]=>
+    string(8) "original"
+    ["value2"]=>
+    string(9) "different"
+  }
+}
+===DONE===

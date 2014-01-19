@@ -1,0 +1,10 @@
+*** Testing array_diff() : error conditions ***
+
+-- Testing array_diff() function with zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing array_diff() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

@@ -1,0 +1,4 @@
+*** Testing mb_strlen() : error ***
+HipHop Warning: %s
+bool(false)
+Done

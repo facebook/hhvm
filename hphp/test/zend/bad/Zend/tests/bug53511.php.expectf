@@ -1,0 +1,11 @@
+HipHop Fatal error: %s
+Stack trace:
+#0 %sbug53511.php(17): test()
+#1 {main}
+
+Next exception 'Exception' with message 'ops 1' in %sbug53511.php:4
+Stack trace:
+#0 %sbug53511.php(12): Foo->__destruct()
+#1 %sbug53511.php(17): test()
+#2 {main}
+  thrown in %sbug53511.php on line 4

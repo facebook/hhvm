@@ -1,0 +1,16 @@
+--> Access the real property:
+bool(true)
+%unicode|string%(15) "object property"
+
+--> Remove the real property and access the array element:
+bool(true)
+%unicode|string%(13) "array element"
+
+--> Remove the array element and try access again:
+bool(false)
+HipHop Notice: %s
+NULL
+
+--> Re-add the real property:
+bool(true)
+%unicode|string%(15) "object property"

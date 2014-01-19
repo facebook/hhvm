@@ -1,0 +1,14 @@
+object(A)#2 (2) {
+  ["x"]=>
+  int(2)
+  ["y"]=>
+  string(3) "foo"
+}
+object(C)#3 (1) {
+  ["thing"]=>
+  int(10)
+}
+object(C)#3 (1) {
+  ["thing"]=>
+  int(10)
+}

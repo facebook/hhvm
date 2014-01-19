@@ -1,0 +1,7 @@
+string(1) "A"
+string(1) "A"
+string(1) "A"
+HipHop Warning: get_class() called without object from outside a class in %s on line 13
+bool(false)
+HipHop Warning: get_class() called without object from outside a class in %s on line 14
+bool(false)

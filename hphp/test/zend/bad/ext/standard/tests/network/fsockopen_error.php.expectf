@@ -1,0 +1,22 @@
+*** Testing fsockopen() : basic error conditions ***
+
+-- Testing fsockopen() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+string(10) "string_val"
+int(10)
+
+-- Testing fsockopen() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Attempting to connect to a non-existent socket --
+HipHop Warning: %s
+bool(false)
+string(%d) "%a"
+
+-- Attempting to connect using an invalid protocol --
+HipHop Warning: %s
+bool(false)
+string(100) "Unable to find the socket transport "invalid" - did you forget to enable it when you configured PHP?"
+Done

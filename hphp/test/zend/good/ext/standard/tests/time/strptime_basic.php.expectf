@@ -1,0 +1,62 @@
+*** Testing strptime() : basic functionality ***
+array(9) {
+  ["tm_sec"]=>
+  int(0)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(10)
+  ["tm_mday"]=>
+  int(2)
+  ["tm_mon"]=>
+  int(6)
+  ["tm_year"]=>
+  int(63)
+  ["tm_wday"]=>
+  int(2)
+  ["tm_yday"]=>
+  int(182)
+  ["unparsed"]=>
+  string(4) " GMT"
+}
+array(9) {
+  ["tm_sec"]=>
+  int(0)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(10)
+  ["tm_mday"]=>
+  int(2)
+  ["tm_mon"]=>
+  int(6)
+  ["tm_year"]=>
+  int(163)
+  ["tm_wday"]=>
+  int(1)
+  ["tm_yday"]=>
+  int(182)
+  ["unparsed"]=>
+  string(0) ""
+}
+array(9) {
+  ["tm_sec"]=>
+  int(0)
+  ["tm_min"]=>
+  int(0)
+  ["tm_hour"]=>
+  int(10)
+  ["tm_mday"]=>
+  int(2)
+  ["tm_mon"]=>
+  int(6)
+  ["tm_year"]=>
+  int(0)
+  ["tm_wday"]=>
+  int(2)
+  ["tm_yday"]=>
+  int(182)
+  ["unparsed"]=>
+  string(0) ""
+}
+===DONE===

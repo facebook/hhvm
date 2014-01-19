@@ -1,0 +1,86 @@
+
+map...
+string(15) "HH\FrozenVector"
+int(2)
+int(4)
+int(6)
+
+mapWithKey...
+string(15) "HH\FrozenVector"
+object(Pair)#6 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#7 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(Pair)#8 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+
+filter...
+string(15) "HH\FrozenVector"
+int(1)
+
+filterWithKey...
+string(15) "HH\FrozenVector"
+int(1)
+int(2)
+
+zip...
+string(15) "HH\FrozenVector"
+object(Pair)#12 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+}
+object(Pair)#13 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(5)
+}
+
+kvzip...
+string(15) "HH\FrozenVector"
+object(Pair)#14 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#15 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(Pair)#16 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+
+keys...
+string(15) "HH\FrozenVector"
+int(0)
+int(1)
+int(2)
+
+getIterator...
+k = int(0)
+v = int(1)
+k = int(1)
+v = int(2)
+k = int(2)
+v = int(3)

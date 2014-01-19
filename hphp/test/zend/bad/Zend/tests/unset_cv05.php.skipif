@@ -1,0 +1,5 @@
+<?php 
+
+include(dirname(__FILE__).'/../../ext/session/tests/skipif.inc'); 
+
+?>

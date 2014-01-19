@@ -1,0 +1,182 @@
+basename for path A:/foo is:
+string(3) "foo"
+basename for path A:/foo/ is:
+string(3) "foo"
+basename for path A:/foo\ is:
+string(3) "foo"
+basename for path A:/foo.bar is:
+string(7) "foo.bar"
+basename for path A:/foo.bar/ is:
+string(7) "foo.bar"
+basename for path A:/foo.bar\ is:
+string(7) "foo.bar"
+basename for path A:/dir/foo.bar is:
+string(7) "foo.bar"
+basename for path A:/dir\foo.bar is:
+string(7) "foo.bar"
+basename for path A:/dir with spaces/foo.bar is:
+string(7) "foo.bar"
+basename for path A:/dir with spaces\foo.bar is:
+string(7) "foo.bar"
+basename for path Z:/foo is:
+string(3) "foo"
+basename for path Z:/foo/ is:
+string(3) "foo"
+basename for path Z:/foo\ is:
+string(3) "foo"
+basename for path Z:/foo.bar is:
+string(7) "foo.bar"
+basename for path Z:/foo.bar/ is:
+string(7) "foo.bar"
+basename for path Z:/foo.bar\ is:
+string(7) "foo.bar"
+basename for path Z:/dir/foo.bar is:
+string(7) "foo.bar"
+basename for path Z:/dir\foo.bar is:
+string(7) "foo.bar"
+basename for path Z:/dir with spaces/foo.bar is:
+string(7) "foo.bar"
+basename for path Z:/dir with spaces\foo.bar is:
+string(7) "foo.bar"
+basename for path A:\foo is:
+string(3) "foo"
+basename for path A:\foo/ is:
+string(3) "foo"
+basename for path A:\foo\ is:
+string(3) "foo"
+basename for path A:\foo.bar is:
+string(7) "foo.bar"
+basename for path A:\foo.bar/ is:
+string(7) "foo.bar"
+basename for path A:\foo.bar\ is:
+string(7) "foo.bar"
+basename for path A:\dir/foo.bar is:
+string(7) "foo.bar"
+basename for path A:\dir\foo.bar is:
+string(7) "foo.bar"
+basename for path A:\dir with spaces/foo.bar is:
+string(7) "foo.bar"
+basename for path A:\dir with spaces\foo.bar is:
+string(7) "foo.bar"
+basename for path http://foo is:
+string(3) "foo"
+basename for path http://foo/ is:
+string(3) "foo"
+basename for path http://foo\ is:
+string(3) "foo"
+basename for path http://foo.bar is:
+string(7) "foo.bar"
+basename for path http://foo.bar/ is:
+string(7) "foo.bar"
+basename for path http://foo.bar\ is:
+string(7) "foo.bar"
+basename for path http://dir/foo.bar is:
+string(7) "foo.bar"
+basename for path http://dir\foo.bar is:
+string(7) "foo.bar"
+basename for path http://dir with spaces/foo.bar is:
+string(7) "foo.bar"
+basename for path http://dir with spaces\foo.bar is:
+string(7) "foo.bar"
+basename for path blah://foo is:
+string(3) "foo"
+basename for path blah://foo/ is:
+string(3) "foo"
+basename for path blah://foo\ is:
+string(3) "foo"
+basename for path blah://foo.bar is:
+string(7) "foo.bar"
+basename for path blah://foo.bar/ is:
+string(7) "foo.bar"
+basename for path blah://foo.bar\ is:
+string(7) "foo.bar"
+basename for path blah://dir/foo.bar is:
+string(7) "foo.bar"
+basename for path blah://dir\foo.bar is:
+string(7) "foo.bar"
+basename for path blah://dir with spaces/foo.bar is:
+string(7) "foo.bar"
+basename for path blah://dir with spaces\foo.bar is:
+string(7) "foo.bar"
+basename for path blah:\foo is:
+string(3) "foo"
+basename for path blah:\foo/ is:
+string(3) "foo"
+basename for path blah:\foo\ is:
+string(3) "foo"
+basename for path blah:\foo.bar is:
+string(7) "foo.bar"
+basename for path blah:\foo.bar/ is:
+string(7) "foo.bar"
+basename for path blah:\foo.bar\ is:
+string(7) "foo.bar"
+basename for path blah:\dir/foo.bar is:
+string(7) "foo.bar"
+basename for path blah:\dir\foo.bar is:
+string(7) "foo.bar"
+basename for path blah:\dir with spaces/foo.bar is:
+string(7) "foo.bar"
+basename for path blah:\dir with spaces\foo.bar is:
+string(7) "foo.bar"
+basename for path hostname:foo is:
+string(12) "hostname:foo"
+basename for path hostname:foo/ is:
+string(12) "hostname:foo"
+basename for path hostname:foo\ is:
+string(12) "hostname:foo"
+basename for path hostname:foo.bar is:
+string(16) "hostname:foo.bar"
+basename for path hostname:foo.bar/ is:
+string(16) "hostname:foo.bar"
+basename for path hostname:foo.bar\ is:
+string(16) "hostname:foo.bar"
+basename for path hostname:dir/foo.bar is:
+string(7) "foo.bar"
+basename for path hostname:dir\foo.bar is:
+string(7) "foo.bar"
+basename for path hostname:dir with spaces/foo.bar is:
+string(7) "foo.bar"
+basename for path hostname:dir with spaces\foo.bar is:
+string(7) "foo.bar"
+basename for path ~/foo is:
+string(3) "foo"
+basename for path ~/foo/ is:
+string(3) "foo"
+basename for path ~/foo\ is:
+string(3) "foo"
+basename for path ~/foo.bar is:
+string(7) "foo.bar"
+basename for path ~/foo.bar/ is:
+string(7) "foo.bar"
+basename for path ~/foo.bar\ is:
+string(7) "foo.bar"
+basename for path ~/dir/foo.bar is:
+string(7) "foo.bar"
+basename for path ~/dir\foo.bar is:
+string(7) "foo.bar"
+basename for path ~/dir with spaces/foo.bar is:
+string(7) "foo.bar"
+basename for path ~/dir with spaces\foo.bar is:
+string(7) "foo.bar"
+basename for path ~\foo is:
+string(3) "foo"
+basename for path ~\foo/ is:
+string(3) "foo"
+basename for path ~\foo\ is:
+string(3) "foo"
+basename for path ~\foo.bar is:
+string(7) "foo.bar"
+basename for path ~\foo.bar/ is:
+string(7) "foo.bar"
+basename for path ~\foo.bar\ is:
+string(7) "foo.bar"
+basename for path ~\dir/foo.bar is:
+string(7) "foo.bar"
+basename for path ~\dir\foo.bar is:
+string(7) "foo.bar"
+basename for path ~\dir with spaces/foo.bar is:
+string(7) "foo.bar"
+basename for path ~\dir with spaces\foo.bar is:
+string(7) "foo.bar"
+
+done

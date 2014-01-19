@@ -1,0 +1,13 @@
+break variables.php:5
+continue
+variable
+=$a
+variable
+=count($a)
+variable
+continue
+$xyzklj = array_fill(0, 5000000, "abcdefghijklmn");
+=$xyzklj
+variable xyzklj
+=count($xyzklj)
+global xyzklj

@@ -1,0 +1,14 @@
+*** Testing preg_match() : error conditions ***
+
+-- Testing preg_match() function with Zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing preg_match() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing preg_match() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+Done

@@ -1,0 +1,22 @@
+*** Testing current() : usage variations ***
+
+-- Two Dimensional Array --
+Initial Position: string(4) "zero"
+Next Position:    array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+End Position:     string(3) "two"
+
+-- Access an Array Within an Array --
+Initial Position: int(1)
+
+-- Recursive, Multidimensional Array --
+Current Position: string(3) "two"
+string(3) "two"
+int(1)
+===DONE===

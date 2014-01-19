@@ -1,0 +1,38 @@
+*** Testing ksort() : usage variations ***
+
+-- Testing ksort() by supplying boolean value array, 'flag' value is defualt --
+bool(true)
+array(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(true)
+}
+
+-- Testing ksort() by supplying boolean value array, 'flag' value is SORT_REGULAR --
+bool(true)
+array(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(true)
+}
+
+-- Testing ksort() by supplying boolean value array, 'flag' value is SORT_NUMERIC  --
+bool(true)
+array(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(true)
+}
+
+-- Testing ksort() by supplying boolean value array, 'flag' value is SORT_STRING --
+bool(true)
+array(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(true)
+}
+Done

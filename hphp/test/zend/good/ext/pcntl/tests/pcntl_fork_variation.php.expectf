@@ -1,0 +1,6 @@
+*** Testing the process isolations between a process and its forks ***
+son (0)
+grandson (0)
+son is father of %d
+father is %d
+father (%d) doesn't know its grandsons

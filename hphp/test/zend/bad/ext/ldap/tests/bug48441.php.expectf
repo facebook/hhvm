@@ -1,0 +1,127 @@
+resource(%d) of type (ldap result)
+array(4) {
+  ["count"]=>
+  int(3)
+  [0]=>
+  array(4) {
+    ["sn"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(7) "testSN1"
+    }
+    [0]=>
+    string(2) "sn"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(28) "cn=userA,dc=my-domain,dc=com"
+  }
+  [1]=>
+  array(4) {
+    ["sn"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(7) "testSN2"
+    }
+    [0]=>
+    string(2) "sn"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(28) "cn=userB,dc=my-domain,dc=com"
+  }
+  [2]=>
+  array(4) {
+    ["sn"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(7) "testSN3"
+    }
+    [0]=>
+    string(2) "sn"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(37) "cn=userC,cn=userB,dc=my-domain,dc=com"
+  }
+}
+HipHop Warning: %s
+resource(%d) of type (ldap result)
+array(2) {
+  ["count"]=>
+  int(1)
+  [0]=>
+  array(4) {
+    ["sn"]=>
+    array(1) {
+      ["count"]=>
+      int(0)
+    }
+    [0]=>
+    string(2) "sn"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(28) "cn=userA,dc=my-domain,dc=com"
+  }
+}
+resource(%d) of type (ldap result)
+array(4) {
+  ["count"]=>
+  int(3)
+  [0]=>
+  array(4) {
+    ["sn"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(7) "testSN1"
+    }
+    [0]=>
+    string(2) "sn"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(28) "cn=userA,dc=my-domain,dc=com"
+  }
+  [1]=>
+  array(4) {
+    ["sn"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(7) "testSN2"
+    }
+    [0]=>
+    string(2) "sn"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(28) "cn=userB,dc=my-domain,dc=com"
+  }
+  [2]=>
+  array(4) {
+    ["sn"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(7) "testSN3"
+    }
+    [0]=>
+    string(2) "sn"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(37) "cn=userC,cn=userB,dc=my-domain,dc=com"
+  }
+}
+===DONE===

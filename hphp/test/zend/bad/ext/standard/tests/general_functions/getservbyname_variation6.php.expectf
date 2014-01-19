@@ -1,0 +1,4 @@
+*** Test substituting argument 1 with object values ***
+bool(false)
+HipHop Warning: %s
+NULL

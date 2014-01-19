@@ -1,0 +1,65 @@
+*** Testing floor() : basic functionality ***
+
+-- floor 0 --
+float(0)
+
+-- floor 0 --
+float(0)
+
+-- floor 0.5 --
+float(0)
+
+-- floor -0.5 --
+float(-1)
+
+-- floor 1 --
+float(1)
+
+-- floor -1 --
+float(-1)
+
+-- floor 1.5 --
+float(1)
+
+-- floor -1.5 --
+float(-2)
+
+-- floor 2.6 --
+float(2)
+
+-- floor -2.6 --
+float(-3)
+
+-- floor 31 --
+float(31)
+
+-- floor 95 --
+float(95)
+
+-- floor 10.5 --
+float(10)
+
+-- floor -10.5 --
+float(-11)
+
+-- floor 3.95E3 --
+float(3950)
+
+-- floor -3.95E3 --
+float(-3950)
+
+-- floor 039 --
+float(39)
+
+-- floor 0x5F --
+float(95)
+
+-- floor 1 --
+float(1)
+
+-- floor  --
+float(0)
+
+-- floor  --
+float(0)
+===Done===

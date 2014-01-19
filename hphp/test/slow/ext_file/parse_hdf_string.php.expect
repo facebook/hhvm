@@ -1,0 +1,17 @@
+array(4) {
+  ["bool"]=>
+  bool(false)
+  ["string"]=>
+  string(4) "text"
+  ["num"]=>
+  int(12345)
+  ["arr"]=>
+  array(3) {
+    ["bool"]=>
+    bool(false)
+    ["string"]=>
+    string(11) "anothertext"
+    ["num"]=>
+    int(6789)
+  }
+}

@@ -1,0 +1,5 @@
+Error handler
+We hit our handler.
+HipHop Fatal error: Uncaught exception 'Exception' with message 'Sup' in %s/test/quick/nested_vm_exceptions.php:20
+Stack trace:
+#0 {main}

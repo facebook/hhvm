@@ -1,0 +1,4 @@
+--SQLite3::open--
+bool(true)
+int(6)
+string(42) "SQLITE3_OPEN_READWRITE|SQLITE3_OPEN_CREATE"

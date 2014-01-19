@@ -1,0 +1,40 @@
+object(HH\Vector)#1 (4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  int(44)
+}
+object(HH\Vector)#1 (4) {
+  [0]=>
+  int(11)
+  [1]=>
+  int(22)
+  [2]=>
+  int(33)
+  [3]=>
+  int(44)
+}
+object(StableMap)#1 (4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["e"]=>
+  int(33)
+  ["f"]=>
+  int(44)
+}
+object(StableMap)#4 (4) {
+  ["a"]=>
+  int(11)
+  ["b"]=>
+  int(22)
+  ["e"]=>
+  int(33)
+  ["f"]=>
+  int(44)
+}

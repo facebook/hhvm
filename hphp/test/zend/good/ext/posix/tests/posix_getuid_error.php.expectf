@@ -1,0 +1,6 @@
+*** Testing posix_getuid() : error conditions ***
+
+-- Testing posix_getuid() function with one argument --
+HipHop Warning: %s
+NULL
+Done

@@ -1,0 +1,48 @@
+=== 2453396
+string(3) "Jan"
+string(7) "January"
+string(3) "Jan"
+string(7) "January"
+string(6) "Shevat"
+string(0) ""
+
+=== 2440588
+string(3) "Jan"
+string(7) "January"
+string(3) "Dec"
+string(8) "December"
+string(5) "Tevet"
+string(0) ""
+
+=== -1
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+
+=== HipHop Notice: %s
+Array
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+=== 10000000
+string(3) "Dec"
+string(8) "December"
+string(3) "Jul"
+string(4) "July"
+string(6) "Tishri"
+string(0) ""
+
+Done

@@ -1,0 +1,89 @@
+*** Testing array_diff() : usage variations ***
+-- Compare two 2-D arrays --
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+array(0) {
+}
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+array(0) {
+}
+
+-- Compare subarrays from two 2-D arrays --
+array(1) {
+  [1]=>
+  int(2)
+}
+array(1) {
+  [2]=>
+  int(5)
+}
+array(2) {
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "z"
+  [2]=>
+  string(1) "y"
+}
+
+-- Compare a subarray from one 2-D array and one 2-D array --
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+array(2) {
+  ["sub_array1"]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["sub_array2"]=>
+  array(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    [2]=>
+    string(1) "c"
+  }
+}
+Done

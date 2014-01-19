@@ -1,0 +1,102 @@
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+**************************
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+array(1) {
+  [0]=>
+  NULL
+}
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+array(1) {
+  [0]=>
+  NULL
+}
+**************************
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+string(3) "abc"
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+string(3) "abc"
+**************************
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+**************************
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+**************************
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+**************************
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+**************************
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+**************************

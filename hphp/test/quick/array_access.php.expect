@@ -1,0 +1,88 @@
+Test begin
+In C::offsetGet()
+In D::offsetGet()
+In D::__destruct()
+In E::offsetGet()
+In E::__destruct()
+In E::__destruct()
+string(5) "hello"
+In C::offsetGet()
+In D::offsetGet()
+In D::__destruct()
+In E::offsetGet()
+In E::__destruct()
+In E::__destruct()
+In cls::offsetExists(two)
+bool(true)
+In cls::offsetGet(two)
+int(2)
+In cls::offsetUnset(two)
+In cls::offsetSet(two, 2)
+In cls::offsetUnset(two)
+In cls::offsetExists(two)
+bool(false)
+In cls::offsetSet(two, A value)
+In cls::offsetGet(two)
+string(7) "A value"
+In cls::offsetSet(, Append 1)
+In cls::offsetSet(, Append 2)
+In cls::offsetSet(, Append 3)
+In cls::offsetGet()
+In cls::offsetGet(x)
+In cls::offsetSet(x, 1)
+In cls::offsetGet(x)
+int(1)
+In cls::offsetGet(x)
+In cls::offsetSet(x, 0)
+In cls::offsetGet(x)
+int(0)
+In cls::offsetGet(x)
+In cls::offsetGet(x)
+int(0)
+In cls::offsetGet(x)
+In cls::offsetGet(x)
+int(0)
+In cls::offsetGet(x)
+In cls::offsetGet(x)
+int(0)
+In cls::offsetGet(x)
+In cls::offsetGet(x)
+int(0)
+In cls::offsetSet(, SetNewElem)
+In cls::offsetGet()
+In cls::offsetSet(, 1)
+In cls::offsetGet()
+cls Object
+(
+    [container:cls:private] => Array
+        (
+            [one] => 1
+            [three] => 3
+            [two] => A value
+            [0] => Append 1
+            [1] => Append 2
+            [2] => Append 3
+            [x] => 0
+            [3] => SetNewElem
+            [4] => 1
+        )
+
+)
+In cls::offsetUnset(x)
+cls Object
+(
+    [container:cls:private] => Array
+        (
+            [one] => 1
+            [three] => 3
+            [two] => A value
+            [0] => Append 1
+            [1] => Append 2
+            [2] => Append 3
+            [3] => SetNewElem
+            [4] => 1
+        )
+
+)
+Test end
+string(10) "hellohello"

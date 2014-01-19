@@ -1,0 +1,17 @@
+*** Testing unlink() on file inside a directory ***
+-- Unlink file having default permission and its dir having read only permission --
+bool(true)
+HipHop Warning: %s
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+
+-- Unlinking file without write permission, its dir having default permission --
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+Done

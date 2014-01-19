@@ -1,0 +1,5 @@
+string(17) "test_ext_file.txt"
+HipHop Warning: Not a valid directory resource in %s/test/slow/ext_file/readdir.php on line 9
+string(17) "test_ext_file.txt"
+string(17) "test_ext_file.txt"
+string(17) "test_ext_file.txt"

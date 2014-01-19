@@ -1,0 +1,49 @@
+---> Test arrays: 
+HipHop Warning: %s
+HipHop Notice: %s
+bool(false)
+Array
+(
+)
+HipHop Warning: %s
+HipHop Notice: %s
+bool(false)
+Array
+(
+)
+HipHop Warning: %s
+HipHop Notice: %s
+bool(false)
+Array
+(
+)
+HipHop Warning: %s
+HipHop Notice: %s
+bool(false)
+Array
+(
+)
+HipHop Warning: %s
+HipHop Notice: %s
+bool(false)
+Array
+(
+)
+C::h[call:1; len:37; id:originalID] - bool(true)
+Array
+(
+    [0] => C::h
+)
+
+C::h[call:2; len:37; id:changedID] - bool(true)
+Array
+(
+    [0] => C::h
+)
+
+HipHop Warning: %s
+HipHop Notice: %s
+bool(false)
+Array
+(
+)

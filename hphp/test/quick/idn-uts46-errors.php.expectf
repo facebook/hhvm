@@ -1,0 +1,34 @@
+=> PHP level errors
+bad args:
+string(0) ""
+HipHop Warning: Too many arguments for idn_to_ascii(), expected 4 in %s on line 7
+NULL
+bad variant:
+bool(false)
+empty domain:
+bool(false)
+fourth arg for 2003 variant (only notice raised):
+string(7) "foo.com"
+with error, but no details arg:
+bool(false)
+with error, with details arg:
+bool(false)
+array(3) {
+  ["result"]=>
+  string(0) ""
+  ["isTransitionalDifferent"]=>
+  int(1)
+  ["errors"]=>
+  int(16)
+}
+with error, with details arg, contextj:
+bool(false)
+array(3) {
+  ["result"]=>
+  string(0) ""
+  ["isTransitionalDifferent"]=>
+  int(1)
+  ["errors"]=>
+  int(4096)
+}
+bool(true)

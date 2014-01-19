@@ -1,0 +1,1 @@
+stream_socket_server(): socket path exceeded the maximum allowed length of %d bytes and was truncated

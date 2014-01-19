@@ -1,0 +1,10 @@
+break gen1()
+b main()
+continue
+break genFoo()
+c
+n
+c
+n
+c
+quit

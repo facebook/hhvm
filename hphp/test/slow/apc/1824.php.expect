@@ -1,0 +1,6 @@
+string(1) "a"
+string(1) "b"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(12) "Continuation"
+}

@@ -1,0 +1,46 @@
+# Test case for two fault regions with the same ending offset.
+
+.main {
+  .try_catch (Exception ex) {
+    FPushFuncD 0 "main"
+    FCall 0
+    UnboxR
+    PopC
+  }
+
+ex:
+  Catch
+  PopC
+  String "Finished!\n"
+  Print
+  RetC
+}
+
+.function main {
+  .try_fault fault1 {
+    String "foo\n"
+    Print
+    PopC
+
+    .try_fault fault2 {
+      FPushCtorD 1 "Exception"
+      String "ex"
+      FPassC 0
+      FCall 1
+      PopR
+      Throw
+    }
+  }
+
+fault1:
+  String "fault1\n"
+  Print
+  PopC
+  Unwind
+
+fault2:
+  String "fault2\n"
+  Print
+  PopC
+  Unwind
+}

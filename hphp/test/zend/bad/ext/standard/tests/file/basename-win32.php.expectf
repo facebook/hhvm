@@ -1,0 +1,195 @@
+*** Testing basic operations ***
+
+--Iteration 1--
+string(3) "bar"
+
+--Iteration 2--
+string(3) "bar"
+
+--Iteration 3--
+string(3) "bar"
+
+--Iteration 4--
+string(3) "bar"
+
+--Iteration 5--
+string(3) "bar"
+
+--Iteration 6--
+string(3) "bar"
+
+--Iteration 7--
+string(3) "bar"
+
+--Iteration 8--
+string(3) "bar"
+
+--Iteration 9--
+string(3) "bar"
+
+--Iteration 10--
+string(3) "bar"
+
+--Iteration 11--
+string(7) "bar.zip"
+
+--Iteration 12--
+string(3) "bar"
+
+--Iteration 13--
+string(3) "bar"
+
+--Iteration 14--
+string(3) "bar"
+
+--Iteration 15--
+string(3) "bar"
+
+--Iteration 16--
+string(3) "bar"
+
+--Iteration 17--
+string(3) "bar"
+
+--Iteration 18--
+string(3) "bar"
+
+--Iteration 19--
+string(3) "bar"
+
+--Iteration 20--
+string(4) ".zip"
+
+--Iteration 21--
+string(4) ".zip"
+
+--Iteration 22--
+string(4) ".zip"
+
+--Iteration 23--
+string(4) ".zip"
+
+--Iteration 24--
+string(4) ".zip"
+
+--Iteration 25--
+string(4) ".zip"
+
+*** Testing possible variations in path and suffix ***
+
+--Iteration 1--
+string(3) "bar"
+
+--Iteration 2--
+string(3) "bar"
+
+--Iteration 3--
+string(3) "bar"
+
+--Iteration 4--
+string(3) "bar"
+
+--Iteration 5--
+string(3) "bar"
+
+--Iteration 6--
+string(7) "bar.tar"
+
+--Iteration 7--
+string(7) "bar.tar"
+
+--Iteration 8--
+string(7) "bar.tar"
+
+--Iteration 9--
+string(7) "bar.tar"
+
+--Iteration 10--
+string(7) "bar.tar"
+
+--Iteration 11--
+string(7) "bar.tar"
+
+--Iteration 12--
+string(4) "10.5"
+
+--Iteration 13--
+string(2) "10"
+
+--Iteration 14--
+string(4) "10.5"
+
+--Iteration 15--
+string(2) "10"
+
+--Iteration 16--
+string(2) "10"
+
+--Iteration 17--
+string(4) "10.5"
+
+--Iteration 18--
+string(4) "10.5"
+
+--Iteration 19--
+string(6) "10.zip"
+
+--Iteration 20--
+string(1) "0"
+
+--Iteration 21--
+string(1) "0"
+
+--Iteration 22--
+string(7) "bar.zip"
+
+--Iteration 23--
+string(7) "bar.zip"
+
+--Iteration 24--
+string(7) "bar.zip"
+
+--Iteration 25--
+string(1) " "
+
+--Iteration 26--
+string(1) " "
+
+--Iteration 27--
+string(0) ""
+
+--Iteration 28--
+string(1) " "
+
+--Iteration 29--
+string(1) " "
+
+--Iteration 30--
+string(0) ""
+
+--Iteration 31--
+string(0) ""
+
+--Iteration 32--
+string(0) ""
+
+*** Testing error conditions ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

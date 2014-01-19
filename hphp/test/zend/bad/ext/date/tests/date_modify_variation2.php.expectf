@@ -1,0 +1,126 @@
+*** Testing date_modify() : usage variation -  unexpected values to second argument $format***
+
+-- int 0 --
+HipHop Warning: %s
+bool(false)
+
+-- int 1 --
+HipHop Warning: %s
+bool(false)
+
+-- int 12345 --
+HipHop Warning: %s
+bool(false)
+
+-- int -12345 --
+HipHop Warning: %s
+bool(false)
+
+-- float 10.5 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2009-01-31 10:05:00"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- float -10.5 --
+HipHop Warning: %s
+bool(false)
+
+-- float .5 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2009-01-31 00:05:00"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- empty array --
+HipHop Warning: %s
+bool(false)
+
+-- int indexed array --
+HipHop Warning: %s
+bool(false)
+
+-- associative array --
+HipHop Warning: %s
+bool(false)
+
+-- nested arrays --
+HipHop Warning: %s
+bool(false)
+
+-- uppercase NULL --
+HipHop Warning: %s
+bool(false)
+
+-- lowercase null --
+HipHop Warning: %s
+bool(false)
+
+-- lowercase true --
+HipHop Warning: %s
+bool(false)
+
+-- lowercase false --
+HipHop Warning: %s
+bool(false)
+
+-- uppercase TRUE --
+HipHop Warning: %s
+bool(false)
+
+-- uppercase FALSE --
+HipHop Warning: %s
+bool(false)
+
+-- empty string DQ --
+HipHop Warning: %s
+bool(false)
+
+-- empty string SQ --
+HipHop Warning: %s
+bool(false)
+
+-- string DQ --
+HipHop Warning: %s
+bool(false)
+
+-- string SQ --
+HipHop Warning: %s
+bool(false)
+
+-- mixed case string --
+HipHop Warning: %s
+bool(false)
+
+-- heredoc --
+HipHop Warning: %s
+bool(false)
+
+-- instance of classWithToString --
+HipHop Warning: %s
+bool(false)
+
+-- instance of classWithoutToString --
+HipHop Warning: %s
+bool(false)
+
+-- undefined var --
+HipHop Warning: %s
+bool(false)
+
+-- unset var --
+HipHop Warning: %s
+bool(false)
+
+-- resource --
+HipHop Warning: %s
+bool(false)
+===DONE===

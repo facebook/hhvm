@@ -1,0 +1,13 @@
+Simple test for DateTimeZone compare object handler
+
+-- All the following tests should compare equal --
+bool(true)
+
+-- All the following tests should compare NOT equal --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+===DONE===

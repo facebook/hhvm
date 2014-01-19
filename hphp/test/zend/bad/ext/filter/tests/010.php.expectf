@@ -1,0 +1,42 @@
+array(7) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(1)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(-23234)
+  [4]=>
+  bool(false)
+  [5]=>
+  bool(false)
+  [6]=>
+  array(0) {
+  }
+}
+array(7) {
+  [0]=>
+  float(1.2)
+  [1]=>
+  float(1.7)
+  [2]=>
+  bool(false)
+  [3]=>
+  float(-23234.123)
+  [4]=>
+  bool(false)
+  [5]=>
+  bool(false)
+  [6]=>
+  array(0) {
+  }
+}
+HipHop Warning: %s
+NULL
+string(1) "1"
+string(1) "1"
+string(1) "1"
+bool(false)
+bool(false)
+Done

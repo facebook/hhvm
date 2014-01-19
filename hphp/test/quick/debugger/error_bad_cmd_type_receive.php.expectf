@@ -1,0 +1,14 @@
+Program %s/error_bad_cmd_type_receive.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break error_bad_cmd_type_receive.php:3
+Breakpoint 1 set on line 3 of error_bad_cmd_type_receive.php
+But wont break until file error_bad_cmd_type_receive.php has been loaded.
+run
+Breakpoint 1 reached on line 3 of %s/error_bad_cmd_type_receive.php
+   2 
+   3*error_log('error_bad_cmd_type_receive.php loaded');
+   4 (END)
+
+internaltesting badcmdtypereceive
+Executing internal test...
+Unable to communicate with server. Server's down?
+Unable to reconnect to server, exiting.

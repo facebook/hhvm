@@ -1,0 +1,3 @@
+[submodule "hphp/submodules/folly"]
+	path = hphp/submodules/folly
+	url = git://github.com/facebook/folly.git

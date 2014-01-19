@@ -1,0 +1,749 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "stream_context_create",
+            "desc": "Creates and returns a stream context with any options supplied in options preset.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "A stream context resource."
+            },
+            "args": [
+                {
+                    "name": "options",
+                    "type": "VariantMap",
+                    "value": "null_array",
+                    "desc": "Must be an associative array of associative arrays in the format $arr['wrapper']['option'] = $value.\n\nDefault to an empty array."
+                },
+                {
+                    "name": "params",
+                    "type": "VariantMap",
+                    "value": "null_array",
+                    "desc": "Must be an associative array in the format $arr['parameter'] = $value. Refer to context parameters for a listing of standard stream parameters."
+                }
+            ]
+        },
+        {
+            "name": "stream_context_get_options",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an associative array with the options."
+            },
+            "args": [
+                {
+                    "name": "stream_or_context",
+                    "type": "Resource",
+                    "desc": "The stream or context to get options from"
+                }
+            ]
+        },
+        {
+            "name": "stream_context_set_option",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "stream_or_context",
+                    "type": "Variant",
+                    "desc": "The stream or context resource to apply the options too.",
+                    "value": "null_variant"
+                },
+                {
+                    "name": "wrapper_or_options",
+                    "type": "Variant",
+                    "desc": "The options to set for the default context.\n\noptions must be an associative array of associative arrays in the format $arr['wrapper']['option'] = $value.\n\nRefer to context options and parameters for a listing of stream options.",
+                    "value": "null_variant"
+                },
+                {
+                    "name": "option",
+                    "type": "Variant",
+                    "value": "null_variant"
+                },
+                {
+                    "name": "value",
+                    "type": "Variant",
+                    "value": "null_variant"
+                }
+            ]
+        },
+        {
+            "name": "stream_context_get_params",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "stream_or_context",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "stream_context_set_params",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "stream_or_context",
+                    "type": "Resource"
+                },
+                {
+                    "name": "params",
+                    "type": "VariantMap"
+                }
+            ]
+        },
+        {
+            "name": "stream_copy_to_stream",
+            "desc": "Makes a copy of up to maxlength bytes of data from the current position (or from the offset position, if specified) in source to dest. If maxlength is not specified, all remaining content in source will be copied.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the total count of bytes copied."
+            },
+            "args": [
+                {
+                    "name": "source",
+                    "type": "Resource",
+                    "desc": "The source stream"
+                },
+                {
+                    "name": "dest",
+                    "type": "Resource",
+                    "desc": "The destination stream"
+                },
+                {
+                    "name": "maxlength",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "Maximum bytes to copy"
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The offset where to start to copy data"
+                }
+            ]
+        },
+        {
+            "name": "stream_get_contents",
+            "desc": "Identical to file_get_contents(), except that stream_get_contents() operates on an already open stream resource and returns the remaining contents in a string, up to maxlength bytes and starting at the specified offset.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a string or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "handle",
+                    "type": "Resource",
+                    "desc": "A stream resource (e.g. returned from fopen())"
+                },
+                {
+                    "name": "maxlen",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "The maximum bytes to read. Defaults to -1 (read all the remaining buffer)."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "value": "-1",
+                    "desc": "Seek to the specified offset before reading. Defaults to -1 (don't seek)."
+                }
+            ]
+        },
+        {
+            "name": "stream_get_line",
+            "desc": "Gets a line from the given handle.\n\nReading ends when length bytes have been read, when the string specified by ending is found (which is not included in the return value), or on EOF (whichever comes first).\n\nThis function is nearly identical to fgets() except in that it allows end of line delimiters other than the standard \\n, \\r, and \\r\\n, and does not return the delimiter itself.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a string of up to length bytes read from the file pointed to by handle.\n\nIf an error occurs, returns FALSE."
+            },
+            "args": [
+                {
+                    "name": "handle",
+                    "type": "Resource",
+                    "desc": "A valid file handle."
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The number of bytes to read from the handle."
+                },
+                {
+                    "name": "ending",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "An optional string delimiter."
+                }
+            ]
+        },
+        {
+            "name": "stream_get_meta_data",
+            "desc": "Returns information about an existing stream.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The result array contains the following items:\n\ntimed_out (bool) - TRUE if the stream timed out while waiting for data on the last call to fread() or fgets().\n\nblocked (bool) - TRUE if the stream is in blocking IO mode. See stream_set_blocking().\n\neof (bool) - TRUE if the stream has reached end-of-file. Note that for socket streams this member can be TRUE even when unread_bytes is non-zero. To determine if there is more data to be read, use feof() instead of reading this item.\n\nunread_bytes (int) - the number of bytes currently contained in the PHP's own internal buffer. You shouldn't use this value in a script.\n\nstream_type (string) - a label describing the underlying implementation of the stream.\n\nwrapper_type (string) - a label describing the protocol wrapper implementation layered over the stream. See List of Supported Protocols\/Wrappers for more information about wrappers.\n\nwrapper_data (mixed) - wrapper specific data attached to this stream. See List of Supported Protocols\/Wrappers for more information about wrappers and their wrapper data.\n\nfilters (array) - and array containing the names of any filters that have been stacked onto this stream. Documentation on filters can be found in the Filters appendix.\n\nmode (string) - the type of access required for this stream (see Table 1 of the fopen() reference)\n\nseekable (bool) - whether the current stream can be seeked.\n\nuri (string) - the URI\/filename associated with this stream."
+            },
+            "args": [
+                {
+                    "name": "stream",
+                    "type": "Resource",
+                    "desc": "The stream can be any stream created by fopen(), fsockopen() and pfsockopen()."
+                }
+            ]
+        },
+        {
+            "name": "stream_get_transports",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringVec",
+                "desc": "Returns an indexed array of socket transports names."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "stream_get_wrappers",
+            "desc": "Retrieve list of registered streams available on the running system.",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringVec",
+                "desc": "Returns an indexed array containing the name of all stream wrappers available on the running system."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "stream_is_local",
+            "desc": "Checks if a stream is a local stream",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "type": "Variant",
+                    "name": "stream_or_url"
+                }
+            ]
+        },
+        {
+            "name": "stream_register_wrapper",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "protocol",
+                    "type": "String"
+                },
+                {
+                    "name": "classname",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "stream_wrapper_register",
+            "desc": "Allows you to implement your own protocol handlers and streams for use with all the other filesystem functions (such as fopen(), fread() etc.).",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure.\n\nstream_wrapper_register() will return FALSE if the protocol already has a handler."
+            },
+            "args": [
+                {
+                    "name": "protocol",
+                    "type": "String",
+                    "desc": "The wrapper name to be registered."
+                },
+                {
+                    "name": "classname",
+                    "type": "String",
+                    "desc": "The classname which implements the protocol."
+                }
+            ]
+        },
+        {
+            "name": "stream_wrapper_restore",
+            "desc": "Restores a built-in wrapper previously unregistered with stream_wrapper_unregister().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "protocol",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "stream_wrapper_unregister",
+            "desc": "Allows you to disable an already defined stream wrapper. Once the wrapper has been disabled you may override it with a user-defined wrapper using stream_wrapper_register() or reenable it later on with stream_wrapper_restore().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "protocol",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "stream_resolve_include_path",
+            "desc": "Resolve filename against the include path according to the same rules as fopen()\/include() does.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "On success, the resolved absolute filename is returned. On failure, FALSE is returned."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "The filename to resolve."
+                },
+                {
+                    "name": "context",
+                    "type": "Resource",
+                    "value": "null_resource",
+                    "desc": "A valid context resource created with stream_context_create()."
+                }
+            ]
+        },
+        {
+            "name": "stream_select",
+            "desc": "The stream_select() function accepts arrays of streams and waits for them to change status. Its operation is equivalent to that of the socket_select() function except in that it acts on streams.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "On success stream_select() returns the number of stream resources contained in the modified arrays, which may be zero if the timeout expires before anything interesting happens. On error FALSE is returned and a warning raised (this can happen if the system call is interrupted by an incoming signal)."
+            },
+            "args": [
+                {
+                    "name": "read",
+                    "type": "Variant",
+                    "desc": "The streams listed in the read array will be watched to see if characters become available for reading (more precisely, to see if a read will not block - in particular, a stream resource is also ready on end-of-file, in which case an fread() will return a zero length string).",
+                    "ref": true
+                },
+                {
+                    "name": "write",
+                    "type": "Variant",
+                    "desc": "The streams listed in the write array will be watched to see if a write will not block.",
+                    "ref": true
+                },
+                {
+                    "name": "except",
+                    "type": "Variant",
+                    "desc": "The streams listed in the except array will be watched for high priority exceptional (\"out-of-band\") data arriving.\n\nWhen stream_select() returns, the arrays read, write and except are modified to indicate which stream resource(s) actually changed status. You do not need to pass every array to stream_select(). You can leave it out and use an empty array or NULL instead. Also do not forget that those arrays are passed by reference and will be modified after stream_select() returns.",
+                    "ref": true
+                },
+                {
+                    "name": "vtv_sec",
+                    "type": "Variant",
+                    "desc": "The tv_sec and tv_usec together form the timeout parameter, tv_sec specifies the number of seconds while tv_usec the number of microseconds. The timeout is an upper bound on the amount of time that stream_select() will wait before it returns. If tv_sec and tv_usec are both set to 0, stream_select() will not wait for data - instead it will return immediately, indicating the current status of the streams.\n\nIf tv_sec is NULL stream_select() can block indefinitely, returning only when an event on one of the watched streams occurs (or if a signal interrupts the system call). Warning\n\nUsing a timeout value of 0 allows you to instantaneously poll the status of the streams, however, it is NOT a good idea to use a 0 timeout value in a loop as it will cause your script to consume too much CPU time.\n\nIt is much better to specify a timeout value of a few seconds, although if you need to be checking and running other code concurrently, using a timeout value of at least 200000 microseconds will help reduce the CPU usage of your script.\n\nRemember that the timeout value is the maximum time that will elapse; stream_select() will return as soon as the requested streams are ready for use."
+                },
+                {
+                    "name": "tv_usec",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "See tv_sec description."
+                }
+            ]
+        },
+        {
+            "name": "stream_set_blocking",
+            "desc": "Sets blocking or non-blocking mode on a stream.\n\nThis function works for any stream that supports non-blocking mode (currently, regular files and socket streams).",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "stream",
+                    "type": "Resource",
+                    "desc": "The stream."
+                },
+                {
+                    "name": "mode",
+                    "type": "Int32",
+                    "desc": "If mode is 0, the given stream will be switched to non-blocking mode, and if 1, it will be switched to blocking mode. This affects calls like fgets() and fread() that read from the stream. In non-blocking mode an fgets() call will always return right away while in blocking mode it will wait for data to become available on the stream."
+                }
+            ]
+        },
+        {
+            "name": "stream_set_timeout",
+            "desc": "Sets the timeout value on stream, expressed in the sum of seconds and microseconds.\n\nWhen the stream times out, the 'timed_out' key of the array returned by stream_get_meta_data() is set to TRUE, although no error\/warning is generated.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "stream",
+                    "type": "Resource",
+                    "desc": "The target stream."
+                },
+                {
+                    "name": "seconds",
+                    "type": "Int32",
+                    "desc": "The seconds part of the timeout to be set."
+                },
+                {
+                    "name": "microseconds",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The microseconds part of the timeout to be set."
+                }
+            ]
+        },
+        {
+            "name": "stream_set_write_buffer",
+            "desc": "Sets the buffering for write operations on the given stream to buffer bytes. Output using fwrite() is normally buffered at 8K. This means that if there are two processes wanting to write to the same output stream (a file), each is paused after 8K of data to allow the other to write.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns 0 on success, or EOF if the request cannot be honored."
+            },
+            "args": [
+                {
+                    "name": "stream",
+                    "type": "Resource",
+                    "desc": "The file pointer."
+                },
+                {
+                    "name": "buffer",
+                    "type": "Int32",
+                    "desc": "The number of bytes to buffer. If buffer is 0 then write operations are unbuffered. This ensures that all writes with fwrite() are completed before other processes are allowed to write to that output stream."
+                }
+            ]
+        },
+        {
+            "name": "set_file_buffer",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "stream",
+                    "type": "Resource"
+                },
+                {
+                    "name": "buffer",
+                    "type": "Int32"
+                }
+            ]
+        },
+        {
+            "name": "stream_socket_accept",
+            "desc": "Accept a connection on a socket previously created by stream_socket_server().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a stream to the accepted socket connection or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "server_socket",
+                    "type": "Resource",
+                    "desc": "The server socket to accept a connection from."
+                },
+                {
+                    "name": "timeout",
+                    "type": "Double",
+                    "value": "-1.0",
+                    "desc": "Override the default socket accept timeout. Time should be given in seconds."
+                },
+                {
+                    "name": "peername",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Will be set to the name (address) of the client which connected, if included and available from the selected transport.\n\nCan also be determined later using stream_socket_get_name().",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "stream_socket_server",
+            "desc": "Creates a stream or datagram socket on the specified local_socket.\n\nThis function only creates a socket, to begin accepting connections use stream_socket_accept().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the created stream, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "local_socket",
+                    "type": "String",
+                    "desc": "The type of socket created is determined by the transport specified using standard URL formatting: transport:\/\/target.\n\nFor Internet Domain sockets (AF_INET) such as TCP and UDP, the target portion of the remote_socket parameter should consist of a hostname or IP address followed by a colon and a port number. For Unix domain sockets, the target portion should point to the socket file on the filesystem.\n\nDepending on the environment, Unix domain sockets may not be available. A list of available transports can be retrieved using stream_get_transports(). See List of Supported Socket Transports for a list of bulitin transports."
+                },
+                {
+                    "name": "errnum",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "If the optional errno and errstr arguments are present they will be set to indicate the actual system level error that occurred in the system-level socket(), bind(), and listen() calls. If the value returned in errno is 0 and the function returned FALSE, it is an indication that the error occurred before the bind() call. This is most likely due to a problem initializing the socket. Note that the errno and errstr arguments will always be passed by reference.",
+                    "ref": true
+                },
+                {
+                    "name": "errstr",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "See errno description.",
+                    "ref": true
+                },
+                {
+                    "name": "flags",
+                    "type": "Int32",
+                    "value": "k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN",
+                    "desc": "A bitmask field which may be set to any combination of socket creation flags.\n\nFor UDP sockets, you must use STREAM_SERVER_BIND as the flags parameter."
+                },
+                {
+                    "name": "context",
+                    "type": "Resource",
+                    "value": "null_resource"
+                }
+            ]
+        },
+        {
+            "name": "stream_socket_client",
+            "desc": "Initiates a stream or datagram connection to the destination specified by remote_socket. The type of socket created is determined by the transport specified using standard URL formatting: transport:\/\/target. For Internet Domain sockets (AF_INET) such as TCP and UDP, the target portion of the remote_socket parameter should consist of a hostname or IP address followed by a colon and a port number. For Unix domain sockets, the target portion should point to the socket file on the filesystem.\n\nThe stream will by default be opened in blocking mode. You can switch it to non-blocking mode by using stream_set_blocking().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "On success a stream resource is returned which may be used together with the other file functions (such as fgets(), fgetss(), fwrite(), fclose(), and feof()), FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "remote_socket",
+                    "type": "String",
+                    "desc": "Address to the socket to connect to."
+                },
+                {
+                    "name": "errnum",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Will be set to the system level error number if connection fails.",
+                    "ref": true
+                },
+                {
+                    "name": "errstr",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Will be set to the system level error message if the connection fails.",
+                    "ref": true
+                },
+                {
+                    "name": "timeout",
+                    "type": "Double",
+                    "value": "-1.0",
+                    "desc": "Number of seconds until the connect() system call should timeout. This parameter only applies when not making asynchronous connection attempts.\n\nTo set a timeout for reading\/writing data over the socket, use the stream_set_timeout(), as the timeout only applies while making connecting the socket."
+                },
+                {
+                    "name": "flags",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Bitmask field which may be set to any combination of connection flags. Currently the select of connection flags is limited to STREAM_CLIENT_CONNECT (default), STREAM_CLIENT_ASYNC_CONNECT and STREAM_CLIENT_PERSISTENT."
+                },
+                {
+                    "name": "context",
+                    "type": "Resource",
+                    "value": "null_resource",
+                    "desc": "A valid context resource created with stream_context_create()."
+                }
+            ]
+        },
+        {
+            "name": "stream_socket_get_name",
+            "desc": "Returns the local or remote name of a given socket connection.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The name of the socket."
+            },
+            "args": [
+                {
+                    "name": "handle",
+                    "type": "Resource",
+                    "desc": "The socket to get the name of."
+                },
+                {
+                    "name": "want_peer",
+                    "type": "Boolean",
+                    "desc": "If set to TRUE the remote socket name will be returned, if set to FALSE the local socket name will be returned."
+                }
+            ]
+        },
+        {
+            "name": "stream_socket_pair",
+            "desc": "stream_socket_pair() creates a pair of connected, indistinguishable socket streams. This function is commonly used in IPC (Inter-Process Communication).\nPlease consult the Streams constant list for further details on each constant.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array with the two socket resources on success, or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "domain",
+                    "type": "Int32",
+                    "desc": "The protocol family to be used: STREAM_PF_INET, STREAM_PF_INET6 or STREAM_PF_UNIX"
+                },
+                {
+                    "name": "type",
+                    "type": "Int32",
+                    "desc": "The type of communication to be used: STREAM_SOCK_DGRAM, STREAM_SOCK_RAW, STREAM_SOCK_RDM, STREAM_SOCK_SEQPACKET or STREAM_SOCK_STREAM"
+                },
+                {
+                    "name": "protocol",
+                    "type": "Int32",
+                    "desc": "The protocol to be used: STREAM_IPPROTO_ICMP, STREAM_IPPROTO_IP, STREAM_IPPROTO_RAW, STREAM_IPPROTO_TCP or STREAM_IPPROTO_UDP"
+                }
+            ]
+        },
+        {
+            "name": "stream_socket_recvfrom",
+            "desc": "stream_socket_recvfrom() accepts data from a remote socket up to length bytes.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the read data, as a string"
+            },
+            "args": [
+                {
+                    "name": "socket",
+                    "type": "Resource",
+                    "desc": "The remote socket."
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "desc": "The number of bytes to receive from the socket."
+                },
+                {
+                    "name": "flags",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The value of flags can be any combination of the following: Possible values for flags STREAM_OOB Process OOB (out-of-band) data. STREAM_PEEK Retrieve data from the socket, but do not consume the buffer. Subsequent calls to fread() or stream_socket_recvfrom() will see the same data."
+                },
+                {
+                    "name": "address",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "If address is provided it will be populated with the address of the remote socket.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "stream_socket_sendto",
+            "desc": "Sends the specified data through the socket.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a result code, as an integer."
+            },
+            "args": [
+                {
+                    "name": "socket",
+                    "type": "Resource",
+                    "desc": "The socket to send data to."
+                },
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The data to be sent."
+                },
+                {
+                    "name": "flags",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The value of flags can be any combination of the following: possible values for flags STREAM_OOB Process OOB (out-of-band) data."
+                },
+                {
+                    "name": "address",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The address specified when the socket stream was created will be used unless an alternate address is specified in address.\n\nIf specified, it must be in dotted quad (or [ipv6]) format."
+                }
+            ]
+        },
+        {
+            "name": "stream_socket_shutdown",
+            "desc": "Shutdowns (partially or not) a full-duplex connection.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "stream",
+                    "type": "Resource",
+                    "desc": "An open stream (opened with stream_socket_client(), for example)"
+                },
+                {
+                    "name": "how",
+                    "type": "Int32",
+                    "desc": "One of the following constants: STREAM_SHUT_RD (disable further receptions), STREAM_SHUT_WR (disable further transmissions) or STREAM_SHUT_RDWR (disable further receptions and transmissions)."
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

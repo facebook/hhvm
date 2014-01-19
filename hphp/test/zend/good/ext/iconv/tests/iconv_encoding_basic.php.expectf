@@ -1,0 +1,48 @@
+*** Testing iconv_get_encoding()/iconv_set_encoding() : basic functionality ***
+--- Default get_encoding ---
+array(3) {
+  ["input_encoding"]=>
+  string(10) "ISO-8859-1"
+  ["output_encoding"]=>
+  string(10) "ISO-8859-1"
+  ["internal_encoding"]=>
+  string(10) "ISO-8859-1"
+}
+string(10) "ISO-8859-1"
+string(10) "ISO-8859-1"
+string(10) "ISO-8859-1"
+array(3) {
+  ["input_encoding"]=>
+  string(10) "ISO-8859-1"
+  ["output_encoding"]=>
+  string(10) "ISO-8859-1"
+  ["internal_encoding"]=>
+  string(10) "ISO-8859-1"
+}
+
+--- Altering encodings ---
+bool(true)
+bool(true)
+bool(true)
+
+--- results of alterations ---
+array(3) {
+  ["input_encoding"]=>
+  string(5) "UTF-8"
+  ["output_encoding"]=>
+  string(5) "UTF-8"
+  ["internal_encoding"]=>
+  string(5) "UTF-8"
+}
+string(5) "UTF-8"
+string(5) "UTF-8"
+string(5) "UTF-8"
+array(3) {
+  ["input_encoding"]=>
+  string(5) "UTF-8"
+  ["output_encoding"]=>
+  string(5) "UTF-8"
+  ["internal_encoding"]=>
+  string(5) "UTF-8"
+}
+Done

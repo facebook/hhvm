@@ -1,0 +1,14 @@
+*** Testing mcrypt_cbc() : error conditions ***
+
+-- Testing mcrypt_cbc() function with more than expected no. of arguments --
+
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
+HipHop Warning: %s
+NULL
+
+-- Testing mcrypt_cbc() function with less than expected no. of arguments --
+
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
+HipHop Warning: %s
+NULL
+===DONE===

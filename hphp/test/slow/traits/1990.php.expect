@@ -1,0 +1,5 @@
+__TRAIT__: <TestTrait> __CLASS__: <Direct> __METHOD__: <TestTrait::test>
+__TRAIT__: <TestTrait> __CLASS__: <Direct> __METHOD__: <TestTrait::test>
+__TRAIT__: <TestTrait> __CLASS__: <Indirect> __METHOD__: <TestTrait::test>
+__TRAIT__: <> __CLASS__: <NoTraitUsed> __METHOD__: <NoTraitUsed::test>
+__TRAIT__: <> __CLASS__: <> __METHOD__: <test>

@@ -1,0 +1,13 @@
+object(DirectoryIterator)#%d (4) {
+  %s"pathName"%s"SplFileInfo":private]=>
+  %s(%d) ".%c%s"
+  %s"fileName"%s"SplFileInfo":private]=>
+  %s(%d) "%s"
+  %s"glob"%s"DirectoryIterator":private]=>
+  bool(false)
+  %s"subPathName"%s"RecursiveDirectoryIterator":private]=>
+  %s(0) ""
+}
+bool(false)
+bool(false)
+===DONE===

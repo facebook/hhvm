@@ -1,0 +1,266 @@
+*** Testing date_create() : usage variation -  unexpected values to first argument $time***
+
+-- int 0 --
+bool(false)
+bool(false)
+
+-- int 1 --
+bool(false)
+bool(false)
+
+-- int 12345 --
+bool(false)
+bool(false)
+
+-- int -12345 --
+bool(false)
+bool(false)
+
+-- float 10.5 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- float -10.5 --
+bool(false)
+bool(false)
+
+-- float .5 --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- empty array --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- int indexed array --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- associative array --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- nested arrays --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- uppercase NULL --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- lowercase null --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- lowercase true --
+bool(false)
+bool(false)
+
+-- lowercase false --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- uppercase TRUE --
+bool(false)
+bool(false)
+
+-- uppercase FALSE --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- empty string DQ --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- empty string SQ --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- string DQ --
+bool(false)
+bool(false)
+
+-- string SQ --
+bool(false)
+bool(false)
+
+-- mixed case string --
+bool(false)
+bool(false)
+
+-- heredoc --
+bool(false)
+bool(false)
+
+-- instance of classWithToString --
+bool(false)
+bool(false)
+
+-- instance of classWithoutToString --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- undefined var --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- unset var --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
+}
+
+-- resource --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+===DONE===

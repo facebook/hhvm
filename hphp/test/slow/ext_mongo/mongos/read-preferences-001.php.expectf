@@ -1,0 +1,225 @@
+MongoCollection: RP=secondary, tags=dc:ny,dc:sf
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(2) {
+    ["mode"]=>
+    string(9) "secondary"
+    ["tags"]=>
+    array(2) {
+      [0]=>
+      array(1) {
+        ["dc"]=>
+        string(2) "ny"
+      }
+      [1]=>
+      array(1) {
+        ["dc"]=>
+        string(2) "sf"
+      }
+    }
+  }
+}
+Cursor options (slaveOkay=4): 4
+
+MongoDB: RP=secondary, tags=dc:sf
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(2) {
+    ["mode"]=>
+    string(9) "secondary"
+    ["tags"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["dc"]=>
+        string(2) "sf"
+      }
+    }
+  }
+}
+Cursor options (slaveOkay=4): 4
+
+MongoCollection: RP=secondary, tags=server:1
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(2) {
+    ["mode"]=>
+    string(9) "secondary"
+    ["tags"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["server"]=>
+        string(1) "1"
+      }
+    }
+  }
+}
+Cursor options (slaveOkay=4): 4
+
+MongoDB: RP=secondary, tags=dc:sf (shouldn't have changed after changing the collection)
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(2) {
+    ["mode"]=>
+    string(9) "secondary"
+    ["tags"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["dc"]=>
+        string(2) "sf"
+      }
+    }
+  }
+}
+Cursor options (slaveOkay=4): 4
+
+MongoCollection: RP=secondary, tags=dc:ny,dc:sf (shouldn't have changed at all)
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(2) {
+    ["mode"]=>
+    string(9) "secondary"
+    ["tags"]=>
+    array(2) {
+      [0]=>
+      array(1) {
+        ["dc"]=>
+        string(2) "ny"
+      }
+      [1]=>
+      array(1) {
+        ["dc"]=>
+        string(2) "sf"
+      }
+    }
+  }
+}
+Cursor options (slaveOkay=4): 4
+
+MongoDB Changing RP, ignoring tags
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(9) "secondary"
+  }
+}
+Cursor options (slaveOkay=4): 4
+
+Changing the global MongoClient RP!
+MongoDB: RP=secondary, tags=dc:sf
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(9) "secondary"
+  }
+}
+Cursor options (slaveOkay=4): 4
+
+MongoCollection: RP=secondary, tags=server:1
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(2) {
+    ["mode"]=>
+    string(9) "secondary"
+    ["tags"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["server"]=>
+        string(1) "1"
+      }
+    }
+  }
+}
+Cursor options (slaveOkay=4): 4
+
+New MongoCollection after changing the MongoClient: RP=nearest, tags=dc:ny
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(2) {
+    ["mode"]=>
+    string(7) "nearest"
+    ["tags"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["dc"]=>
+        string(2) "ny"
+      }
+    }
+  }
+}
+Cursor options (slaveOkay=4): 4
+
+MongoDB: RP=nearest, tags=dc:ny
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(2) {
+    ["mode"]=>
+    string(7) "nearest"
+    ["tags"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["dc"]=>
+        string(2) "ny"
+      }
+    }
+  }
+}
+Cursor options (slaveOkay=4): 4
+
+MongoCollection: RP=nearest, tags=dc:ny
+array(2) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$readPreference"]=>
+  array(2) {
+    ["mode"]=>
+    string(7) "nearest"
+    ["tags"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        ["dc"]=>
+        string(2) "ny"
+      }
+    }
+  }
+}
+Cursor options (slaveOkay=4): 4

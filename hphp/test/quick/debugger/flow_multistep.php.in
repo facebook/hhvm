@@ -1,0 +1,34 @@
+break flow_multistep.php:58
+run
+step 8
+continue
+run
+step 4
+step 4
+continue
+run
+step 4
+next 4
+continue
+run
+step 4
+out 4
+continue
+break clear all
+break flow_multistep.php:54
+run
+break clear all
+step 12
+out 2
+out
+continue
+break flow_multistep.php:54
+run
+break clear all
+step 12
+next 5
+next
+continue
+quit
+
+

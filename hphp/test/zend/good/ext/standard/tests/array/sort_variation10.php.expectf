@@ -1,0 +1,71 @@
+*** Testing sort() : usage variations ***
+
+-- Testing sort() by supplying octal value array, 'flag' value is defualt  --
+bool(true)
+array(9) {
+  [0]=>
+  int(-229)
+  [1]=>
+  int(-54)
+  [2]=>
+  int(0)
+  [3]=>
+  int(54)
+  [4]=>
+  int(63)
+  [5]=>
+  int(209)
+  [6]=>
+  int(229)
+  [7]=>
+  int(506)
+  [8]=>
+  int(669)
+}
+
+-- Testing sort() by supplying octal value array, 'flag' value is SORT_REGULAR  --
+bool(true)
+array(9) {
+  [0]=>
+  int(-229)
+  [1]=>
+  int(-54)
+  [2]=>
+  int(0)
+  [3]=>
+  int(54)
+  [4]=>
+  int(63)
+  [5]=>
+  int(209)
+  [6]=>
+  int(229)
+  [7]=>
+  int(506)
+  [8]=>
+  int(669)
+}
+
+-- Testing sort() by supplying octal value array, 'flag' value is SORT_NUMERIC  --
+bool(true)
+array(9) {
+  [0]=>
+  int(-229)
+  [1]=>
+  int(-54)
+  [2]=>
+  int(0)
+  [3]=>
+  int(54)
+  [4]=>
+  int(63)
+  [5]=>
+  int(209)
+  [6]=>
+  int(229)
+  [7]=>
+  int(506)
+  [8]=>
+  int(669)
+}
+Done

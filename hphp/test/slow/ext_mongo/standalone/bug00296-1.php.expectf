@@ -1,0 +1,14 @@
+log_batchinsert
+array(1) {
+  ["flags"]=>
+  int(1)
+}
+array(1) {
+  ["continueOnError"]=>
+  bool(true)
+}
+array(1) {
+  ["continueOnError"]=>
+  object(stdClass)#2 (0) {
+  }
+}

@@ -1,0 +1,677 @@
+*** Testing fgetcsv() : with default enclosure & delimiter of two chars ***
+
+-- Testing fgetcsv() with file opened using r mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water,fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(11) "water fruit"
+}
+int(12)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(13) "water "fruit""
+}
+int(16)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(19) "water\"fruit"\"air""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rb mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using rt mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using r+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using a+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using w+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+ mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+b mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+
+-- Testing fgetcsv() with file opened using x+t mode --
+HipHop Notice: %s
+array(1) {
+  [0]=>
+  string(17) "water\"fruit"\""""
+}
+int(20)
+bool(false)
+Done

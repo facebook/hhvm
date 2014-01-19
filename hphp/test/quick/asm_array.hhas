@@ -1,0 +1,115 @@
+#
+# Test arrays for hhbc asm.
+#
+
+.main {
+  String "main"
+  FPushFunc 0
+  FCall 0 # allow the JIT why not
+  PopR
+
+  Int 1
+  RetC
+}
+
+.adata my_array = """a:2:{s:3:"foo";s:3:"bar";s:3:"baz";s:4:"blah";}""";
+
+.class ClassWithArray {
+  .method [public] 86ctor {
+    Null
+    RetC
+  }
+
+  .property [static public] arr =
+            """a:4:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;}""";
+}
+
+.function ArrayMember() {
+  FPushFuncD 1 "var_dump"
+    String "arr"
+    String "ClassWithArray"
+    AGetC
+    CGetS
+    FPassC 0
+  FCall 1
+  PopR
+
+  String "ClassWithArray"
+  SetL $x
+  PopC
+
+  FPushFuncD 1 "var_dump"
+    String "arr"
+    Int 2
+    AGetL $x
+    CGetM <SC EC>
+    FPassC 0
+  FCall 1
+  PopR
+
+  True
+  RetC
+}
+
+.function main() {
+  FPushFuncD 0 "ArrayMember"
+  FCall 0
+  PopR
+
+  Array @my_array
+  SetL $arr
+  PopC
+
+  CGetM <L:$arr ET:"foo">
+  String "\n"
+  Concat
+  Print
+  PopC
+
+  String "one"
+  SetM <L:$arr EI:1>
+  PopC
+
+  CGetM <L:$arr EI:1>
+  String "\n"
+  Concat
+  Print
+  PopC
+
+  String "baz"
+  SetL $key
+  PopC
+  UnsetM <L:$arr EL:$key>
+
+  # Test that it's unset
+  CGetL $arr
+  IssetM <C EL:$key>
+  JmpZ unset_label
+
+  String "This should be impossible...\n"
+  Print
+  PopC
+
+  Null
+  RetC
+
+unset_label:  String "win\n"
+              Print
+              PopC
+
+              FPushFuncD 1 "var_dump"
+              FPassL 0 $arr
+              FCall 1
+              PopR
+
+              FPushFuncD 1 "var_dump"
+              Int 1
+              String "b"
+              NewPackedArray 2
+              FPassC 0
+              FCall 1
+              PopR
+
+              Null
+              RetC
+}

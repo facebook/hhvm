@@ -1,0 +1,18 @@
+*** Testing printf() : basic functionality - using exponential format ***
+
+-- Calling printf() with no arguments --
+format
+int(6)
+
+-- Calling printf() with one argument --
+1.000000e+3
+int(11)
+
+-- Calling printf() with two arguments --
+1.000000E+3 2.000000e+3
+int(23)
+
+-- Calling printf() with three arguments --
+1.000000e+3 2.000000E+3 3.000000e+3
+int(35)
+===DONE===

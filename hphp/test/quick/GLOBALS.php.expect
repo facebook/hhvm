@@ -1,0 +1,5 @@
+Test begin
+Key is set in $GLOBALS
+Key set visible via $a
+Key update visible via $b
+Test end

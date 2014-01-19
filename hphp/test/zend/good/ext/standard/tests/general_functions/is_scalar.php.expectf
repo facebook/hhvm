@@ -1,0 +1,114 @@
+*** Testing basic operations ***
+-- Iteration 1 --
+bool(true)
+-- Iteration 2 --
+bool(true)
+-- Iteration 3 --
+bool(true)
+-- Iteration 4 --
+bool(true)
+-- Iteration 5 --
+bool(true)
+-- Iteration 6 --
+bool(true)
+-- Iteration 7 --
+bool(true)
+-- Iteration 8 --
+bool(true)
+-- Iteration 9 --
+bool(true)
+-- Iteration 10 --
+bool(true)
+-- Iteration 11 --
+bool(true)
+-- Iteration 12 --
+bool(true)
+-- Iteration 13 --
+bool(true)
+-- Iteration 14 --
+bool(true)
+-- Iteration 15 --
+bool(true)
+-- Iteration 16 --
+bool(true)
+-- Iteration 17 --
+bool(true)
+-- Iteration 18 --
+bool(true)
+-- Iteration 19 --
+bool(true)
+-- Iteration 20 --
+bool(true)
+-- Iteration 21 --
+bool(true)
+-- Iteration 22 --
+bool(true)
+-- Iteration 23 --
+bool(true)
+-- Iteration 24 --
+bool(true)
+-- Iteration 25 --
+bool(true)
+-- Iteration 26 --
+bool(true)
+-- Iteration 27 --
+bool(true)
+-- Iteration 28 --
+bool(true)
+-- Iteration 29 --
+bool(true)
+-- Iteration 30 --
+bool(true)
+-- Iteration 31 --
+bool(true)
+-- Iteration 32 --
+bool(true)
+-- Iteration 33 --
+bool(true)
+
+*** Testing possible variations ***
+-- Iteration 1 --
+bool(false)
+-- Iteration 2 --
+bool(false)
+-- Iteration 3 --
+bool(false)
+-- Iteration 4 --
+bool(false)
+-- Iteration 5 --
+bool(false)
+-- Iteration 6 --
+bool(false)
+-- Iteration 7 --
+bool(false)
+-- Iteration 8 --
+bool(false)
+-- Iteration 9 --
+bool(false)
+-- Iteration 10 --
+bool(false)
+-- Iteration 11 --
+bool(false)
+-- Iteration 12 --
+bool(false)
+-- Iteration 13 --
+bool(false)
+-- Iteration 14 --
+bool(false)
+-- Iteration 15 --
+bool(false)
+-- Iteration 16 --
+bool(false)
+-- Iteration 17 --
+bool(false)
+-- Iteration 18 --
+bool(false)
+
+*** Testing error conditions ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

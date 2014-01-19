@@ -1,0 +1,127 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "thrift_protocol_write_binary",
+            "flags": [
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "transportobj",
+                    "type": "Object"
+                },
+                {
+                    "name": "method_name",
+                    "type": "String"
+                },
+                {
+                    "name": "msgtype",
+                    "type": "Int64"
+                },
+                {
+                    "name": "request_struct",
+                    "type": "Object"
+                },
+                {
+                    "name": "seqid",
+                    "type": "Int32"
+                },
+                {
+                    "name": "strict_write",
+                    "type": "Boolean"
+                }
+            ]
+        },
+        {
+            "name": "thrift_protocol_read_binary",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "transportobj",
+                    "type": "Object"
+                },
+                {
+                    "name": "obj_typename",
+                    "type": "String"
+                },
+                {
+                    "name": "strict_read",
+                    "type": "Boolean"
+                }
+            ]
+        },
+        {
+            "name": "thrift_protocol_set_compact_version",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int32"
+            },
+            "args": [
+                {
+                    "name": "version",
+                    "type": "Int32"
+                }
+            ]
+        },
+        {
+            "name": "thrift_protocol_write_compact",
+            "flags": [
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "transportobj",
+                    "type": "Object"
+                },
+                {
+                    "name": "method_name",
+                    "type": "String"
+                },
+                {
+                    "name": "msgtype",
+                    "type": "Int64"
+                },
+                {
+                    "name": "request_struct",
+                    "type": "Object"
+                },
+                {
+                    "name": "seqid",
+                    "type": "Int32"
+                }
+            ]
+        },
+        {
+            "name": "thrift_protocol_read_compact",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "transportobj",
+                    "type": "Object"
+                },
+                {
+                    "name": "obj_typename",
+                    "type": "String"
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

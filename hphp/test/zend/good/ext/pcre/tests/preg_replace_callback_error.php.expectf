@@ -1,0 +1,14 @@
+***Testing preg_replace_callback() : error conditions***
+
+-- Testing preg_replace_callback() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing preg_replace_callback() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing preg_replace_callback() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

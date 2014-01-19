@@ -1,0 +1,11 @@
+[
+  {
+    "command": "call",
+    "args": {
+      "name": "transaction_exists",
+      "request_id": 1,
+      "result": false
+    }
+  }
+]
+

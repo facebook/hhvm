@@ -1,0 +1,88 @@
+*** Testing is_finite() : usage variations ***
+
+-- Iteration 1 --
+bool(true)
+
+-- Iteration 2 --
+bool(true)
+
+-- Iteration 3 --
+bool(true)
+
+-- Iteration 4 --
+bool(true)
+
+-- Iteration 5 --
+bool(true)
+
+-- Iteration 6 --
+bool(true)
+
+-- Iteration 7 --
+bool(true)
+
+-- Iteration 8 --
+bool(true)
+
+-- Iteration 9 --
+bool(true)
+
+-- Iteration 10 --
+bool(true)
+
+-- Iteration 11 --
+bool(true)
+
+-- Iteration 12 --
+bool(true)
+
+-- Iteration 13 --
+bool(true)
+
+-- Iteration 14 --
+bool(true)
+
+-- Iteration 15 --
+bool(true)
+
+-- Iteration 16 --
+bool(true)
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 23 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 24 --
+bool(true)
+
+-- Iteration 25 --
+bool(true)
+
+-- Iteration 26 --
+HipHop Warning: %s
+NULL
+===Done===

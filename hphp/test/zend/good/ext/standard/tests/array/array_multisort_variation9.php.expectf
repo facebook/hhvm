@@ -1,0 +1,33 @@
+*** Testing array_multisort() : usage variation  - test sort order of all types***
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+bool(true)
+array(10) {
+  ["float -10.5"]=>
+  float(-10.5)
+  ["string DQ"]=>
+  string(6) "string"
+  ["undefined var"]=>
+  NULL
+  ["empty string DQ"]=>
+  string(0) ""
+  ["uppercase NULL"]=>
+  NULL
+  ["int 0"]=>
+  int(0)
+  [0]=>
+  array(0) {
+  }
+  ["instance of classWithoutToString"]=>
+  object(classWithoutToString)#2 (0) {
+  }
+  ["lowercase true"]=>
+  bool(true)
+  ["instance of classWithToString"]=>
+  object(classWithToString)#1 (0) {
+  }
+}
+===DONE===

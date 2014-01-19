@@ -1,0 +1,12 @@
+string(5) "a.php"
+string(32) "<?php echo "This is a.php\n"; ?>"
+This is a.php
+string(1) "b"
+%s(3) "DIR"
+string(5) "b.php"
+string(32) "<?php echo "This is b.php\n"; ?>"
+This is b.php
+string(5) "e.php"
+string(32) "<?php echo "This is e.php\n"; ?>"
+This is e.php
+===DONE===

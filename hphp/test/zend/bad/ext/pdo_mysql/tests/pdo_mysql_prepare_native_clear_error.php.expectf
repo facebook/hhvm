@@ -1,0 +1,17 @@
+HipHop Warning: %s
+[003] Execute has failed, '42S22' array (
+  0 => '42S22',
+  1 => 1054,
+  2 => 'Unknown column \'unknown_column\' in \'field list\'',
+)
+array(1) {
+  [0]=>
+  array(2) {
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(4) "row1"
+  }
+}
+HipHop Warning: %s
+HipHop Fatal error: %s

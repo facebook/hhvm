@@ -1,0 +1,22 @@
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+HipHop Warning: %s
+[030] Cannot connect using host '%s', user '%s', password '****', [0] 0
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+HipHop Warning: %s
+[060] Cannot connect using host '%s', user '%s', password '****', [0] 0
+array(3) {
+  [0]=>
+  resource(%d) of type (mysql link)
+  [1]=>
+  resource(%d) of type (mysql link)
+  [2]=>
+  bool(false)
+}
+done!

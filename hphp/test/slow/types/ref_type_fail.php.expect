@@ -1,0 +1,14 @@
+string(7) "handler"
+string(5) "hello"
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(0) {
+}
+string(7) "handler"
+string(5) "hello"

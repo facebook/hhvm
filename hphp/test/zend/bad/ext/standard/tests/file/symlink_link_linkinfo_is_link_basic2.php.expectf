@@ -1,0 +1,16 @@
+*** Testing symlink(), linkinfo(), link() and is_link() : basic functionality ***
+
+*** Testing symlink(), linkinfo(), link() and is_link() on directory ***
+
+-- Testing on soft links --
+bool(true)
+int(%d)
+bool(true)
+
+-- Testing on hard links --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+int(-1)
+bool(false)
+Done

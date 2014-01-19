@@ -1,0 +1,322 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "spl_classes",
+            "desc": "This function returns an array with the current available SPL classes.",
+            "flags": [
+            ],
+            "return": {
+                "type": "StringMap",
+                "desc": "Returns an array containing the currently available SPL classes."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "spl_object_hash",
+            "desc": "This function returns a unique identifier for the object. This id can be used as a hash key for storing objects or for identifying an object.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "A string that is unique for each currently existing object and is always the same for each object."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Object",
+                    "desc": "Any object."
+                }
+            ]
+        },
+        {
+            "name": "hphp_object_pointer",
+            "desc": "This function returns low level raw pointer the object. Used by closure and internal purposes.",
+            "flags": [
+                "NoInjection"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Low level ObjectData pointer."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Object",
+                    "desc": "Any object."
+                }
+            ]
+        },
+        {
+            "name": "hphp_get_this",
+            "desc": "This function returns this object if present, or NULL.",
+            "flags": [
+                "NoInjection"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "This object."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "class_implements",
+            "desc": "This function returns an array with the names of the interfaces that the given class and its parents implement.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An array on success, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "An object (class instance) or a string (class name)."
+                },
+                {
+                    "name": "autoload",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to allow this function to load the class automatically through the __autoload magic method."
+                }
+            ]
+        },
+        {
+            "name": "class_parents",
+            "desc": "This function returns an array with the name of the parent classes of the given class.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An array on success, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "An object (class instance) or a string (class name)."
+                },
+                {
+                    "name": "autoload",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to allow this function to load the class automatically through the __autoload magic method."
+                }
+            ]
+        },
+        {
+            "name": "class_uses",
+            "desc": "This function returns an array with the names of the traits that the given class uses.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An array on success, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "An object (class instance) or a string (class name)."
+                },
+                {
+                    "name": "autoload",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to allow this function to load the class automatically through the __autoload magic method."
+                }
+            ]
+        },
+        {
+            "name": "iterator_apply",
+            "desc": "Calls a function for every element in an iterator.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the iteration count."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "The class to iterate over."
+                },
+                {
+                    "name": "func",
+                    "type": "Variant",
+                    "desc": "The callback function to call on every element. The function must return TRUE in order to continue iterating over the iterator."
+                },
+                {
+                    "name": "params",
+                    "type": "VariantMap",
+                    "value": "null_array",
+                    "desc": "Arguments to pass to the callback function."
+                }
+            ]
+        },
+        {
+            "name": "iterator_count",
+            "desc": "Count the elements in an iterator.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The number of elements in iterator."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "The iterator being counted."
+                }
+            ]
+        },
+        {
+            "name": "iterator_to_array",
+            "desc": "Copy the elements of an iterator into an array.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An array containing the elements of the iterator."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "The iterator being copied."
+                },
+                {
+                    "name": "use_keys",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to use the iterator element keys as index."
+                }
+            ]
+        },
+        {
+            "name": "spl_autoload_call",
+            "desc": "This function can be used to manually search for a class or interface using the registered __autoload functions.",
+            "flags": [
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "class_name",
+                    "type": "String",
+                    "desc": "The class name being searched."
+                }
+            ]
+        },
+        {
+            "name": "spl_autoload_extensions",
+            "desc": "This function can modify and check the file extensions that the built in __autoload() fallback function spl_autoload() will be using.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "A comma delimited list of default file extensions for spl_autoload()."
+            },
+            "args": [
+                {
+                    "name": "file_extensions",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "When calling without an argument, it simply returns the current list of extensions each separated by comma. To modify the list of file extensions, simply invoke the functions with the new list of file extensions to use in a single string with each extensions separated by comma."
+                }
+            ]
+        },
+        {
+            "name": "spl_autoload_functions",
+            "desc": "Get all registered __autoload() functions.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An array of all registered __autoload functions. If the autoload stack is not activated then the return value is FALSE. If no function is registered the return value will be an empty array."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "spl_autoload_register",
+            "desc": "Register a function with the spl provided __autoload stack. If the stack is not yet activated it will be activated.\n\nIf your code has an existing __autoload function then this function must be explicitly registered on the __autoload stack. This is because spl_autoload_register() will effectively replace the engine cache for the __autoload function by either spl_autoload() or spl_autoload_call().\n\nIf there must be multiple autoload functions, spl_autoload_register() allows for this. It effectively creates a queue of autoload functions, and runs through each of them in the order they are defined. By contrast, __autoload() may only be defined once.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "autoload_function",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The autoload function being registered. If no parameter is provided, then the default implementation of spl_autoload() will be registered."
+                },
+                {
+                    "name": "throws",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "This parameter specifies whether spl_autoload_register() should throw exceptions on error."
+                },
+                {
+                    "name": "prepend",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "If true, spl_autoload_register() will prepend the autoloader on the autoload stack instead of appending it."
+                }
+            ]
+        },
+        {
+            "name": "spl_autoload_unregister",
+            "desc": "Unregister a function from the spl provided __autoload stack. If the stack is activated and empty after unregistering the given function then it will be deactivated.\n\nWhen this function results in the autoload stack being deactivated, any __autoload function that previously existed will not be reactivated.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "autoload_function",
+                    "type": "Variant",
+                    "desc": "The autoload function being unregistered."
+                }
+            ]
+        },
+        {
+            "name": "spl_autoload",
+            "desc": "This function is intended to be used as a default implementation for __autoload(). If nothing else is specified and spl_autoload_register() is called without any parameters then this functions will be used for any later call to __autoload().",
+            "flags": [
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "class_name",
+                    "type": "String"
+                },
+                {
+                    "name": "file_extensions",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "By default it checks all include paths to contain filenames built up by the lowercase class name appended by the filename extensions .inc and .php."
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

@@ -1,0 +1,42 @@
+*** Testing file_put_contents() : usage variation ***
+
+-- Iteration 1 --
+Data written correctly
+
+-- Iteration 2 --
+Data written correctly
+
+-- Iteration 3 --
+Data written correctly
+
+-- Iteration 4 --
+Data written correctly
+
+-- Iteration 5 --
+HipHop Warning: %s
+No data written
+
+-- Iteration 6 --
+HipHop Warning: %s
+No data written
+
+-- Iteration 7 --
+Data written correctly
+
+-- Iteration 8 --
+Data written correctly
+
+-- Iteration 9 --
+Data written correctly
+
+-- Iteration 10 --
+Data written correctly
+
+-- Iteration 11 --
+HipHop Warning: %s
+No data written
+
+-- Iteration 12 --
+Data written correctly
+
+*** Done ***

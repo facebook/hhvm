@@ -1,0 +1,5 @@
+Basic test of POSIX posix_initgroups function
+HipHop Warning: %s
+bool(false)
+bool(false)
+===DONE====

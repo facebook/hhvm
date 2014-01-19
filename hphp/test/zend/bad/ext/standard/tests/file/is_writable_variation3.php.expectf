@@ -1,0 +1,24 @@
+*** Testing is_writable(): usage variations ***
+
+*** Testing is_writable() with invalid filenames ***
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+bool(false)
+bool(false)
+Done

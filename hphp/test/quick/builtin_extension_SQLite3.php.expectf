@@ -1,0 +1,97 @@
+SQLite3
+HipHop Warning: SQLite3::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+object(SQLite3)#1 (0) {
+}
+string(91) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:7:"SQLite3";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(7) "SQLite3"
+}
+array(18) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(4) "open"
+  [2]=>
+  string(11) "busytimeout"
+  [3]=>
+  string(5) "close"
+  [4]=>
+  string(4) "exec"
+  [5]=>
+  string(7) "version"
+  [6]=>
+  string(15) "lastinsertrowid"
+  [7]=>
+  string(13) "lasterrorcode"
+  [8]=>
+  string(12) "lasterrormsg"
+  [9]=>
+  string(13) "loadextension"
+  [10]=>
+  string(7) "changes"
+  [11]=>
+  string(12) "escapestring"
+  [12]=>
+  string(7) "prepare"
+  [13]=>
+  string(5) "query"
+  [14]=>
+  string(11) "querysingle"
+  [15]=>
+  string(14) "createfunction"
+  [16]=>
+  string(15) "createaggregate"
+  [17]=>
+  string(8) "openblob"
+}
+================
+A_SQLite3
+HipHop Warning: SQLite3::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+object(A_SQLite3)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"A_SQLite3";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(9) "A_SQLite3"
+}
+array(18) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(4) "open"
+  [2]=>
+  string(11) "busytimeout"
+  [3]=>
+  string(5) "close"
+  [4]=>
+  string(4) "exec"
+  [5]=>
+  string(7) "version"
+  [6]=>
+  string(15) "lastinsertrowid"
+  [7]=>
+  string(13) "lasterrorcode"
+  [8]=>
+  string(12) "lasterrormsg"
+  [9]=>
+  string(13) "loadextension"
+  [10]=>
+  string(7) "changes"
+  [11]=>
+  string(12) "escapestring"
+  [12]=>
+  string(7) "prepare"
+  [13]=>
+  string(5) "query"
+  [14]=>
+  string(11) "querysingle"
+  [15]=>
+  string(14) "createfunction"
+  [16]=>
+  string(15) "createaggregate"
+  [17]=>
+  string(8) "openblob"
+}

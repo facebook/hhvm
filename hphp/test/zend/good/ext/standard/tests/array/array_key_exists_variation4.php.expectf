@@ -1,0 +1,5 @@
+*** Testing array_key_exists() : usage variations ***
+
+-- $search is a reference to $array --
+bool(true)
+Done

@@ -1,0 +1,9 @@
+HipHop Warning: Length must be greater than or equal to 0 in %s/test/slow/string/172.php on line 3
+bool(false)
+HipHop Warning: Length must be greater than or equal to 0 in %s/test/slow/string/172.php on line 4
+bool(false)
+HipHop Warning: The length must be greater than zero in %s/test/slow/string/172.php on line 5
+bool(false)
+HipHop Warning: The start position cannot exceed initial string length in %s/test/slow/string/172.php on line 6
+bool(false)
+int(1)

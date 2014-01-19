@@ -1,0 +1,58 @@
+Program %s/break_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break gen1()
+Breakpoint 1 set upon entering gen1()
+But wont break until function gen1 has been loaded.
+b main()
+Breakpoint 2 set upon entering main()
+But wont break until function main has been loaded.
+continue
+Breakpoint 2 reached at main() on line 43 of %s/break_async.php
+  42 function main($a) {
+  43*  $result = genFoo($a)->join();
+  44   var_dump($result);
+
+break genFoo()
+Breakpoint 3 set upon entering genFoo()
+c
+Breakpoint 3 reached at genFoo() on line 26 of %s/break_async.php
+  25 async function genFoo($a) {
+  26*  error_log('In genFoo');
+  27   var_dump($a);
+
+n
+In genFoo
+Break at genFoo() on line 27 of %s/break_async.php
+  26   error_log('In genFoo');
+  27*  var_dump($a);
+  28   $a++;
+
+c
+int(42)
+In genBar
+int(43)
+Finished in genBar
+In genBar
+int(44)
+Finished in genBar
+In gen2
+Breakpoint 1 reached at gen1() on line 6 of %s/break_async.php
+   5 async function gen1($a) {
+   6*  error_log('In gen1');
+   7   error_log('Finished in gen1');
+
+n
+In gen1
+Break at gen1() on line 7 of %s/break_async.php
+   6   error_log('In gen1');
+   7*  error_log('Finished in gen1');
+   8   return $a + 1;
+
+c
+Finished in gen1
+Finished in gen2
+int(45)
+int(46)
+Finished in genFoo
+int(91)
+Program %s/break_async.php exited normally.
+quit

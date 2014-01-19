@@ -1,0 +1,25 @@
+*** Testing fscanf() for error conditions ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+int(-1)
+HipHop Notice: %s
+HipHop Notice: %s
+array(0) {
+}
+array(0) {
+}
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+*** Done ***

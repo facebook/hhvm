@@ -1,0 +1,9 @@
+*** Testing array_intersect_uassoc() : usage variation ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Notice: %s
+HipHop Warning: %s
+NULL
+===DONE===

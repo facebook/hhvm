@@ -1,0 +1,22 @@
+*** Testing isset() : basic functionality ***
+Integer test: YES
+Float test: YES
+String test: YES
+Array test: YES
+Boolean test: YES
+Null test: NO
+Object test: YES
+Resource test: YES
+
+
+Unset the variables
+
+Integer test: NO
+Float test: NO
+String test: NO
+Array test: NO
+Boolean test: NO
+Null test: NO
+Object test: NO
+Resource test: NO
+===DONE===

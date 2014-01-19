@@ -1,0 +1,13 @@
+*** Testing posix_strerror() : error conditions ***
+
+-- Testing posix_strerror() function with Zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing posix_strerror() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing posix_strerror() function with invalid error number --
+string
+Done

@@ -1,0 +1,20 @@
+*** Testing array_intersect_key() : usage variation ***
+
+-- Testing array_intersect_key() function with float indexed array --
+array(3) {
+  [0]=>
+  string(1) "0"
+  [10]=>
+  string(2) "10"
+  [-10]=>
+  string(3) "-10"
+}
+array(3) {
+  [0]=>
+  string(3) "0.5"
+  [10]=>
+  string(4) "10.5"
+  [-10]=>
+  string(5) "-10.5"
+}
+===DONE===

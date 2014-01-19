@@ -1,0 +1,33 @@
+normal
+stream_set_blocking 1
+socket_set_block 1
+socket_get_option 2
+
+
+unset stream
+socket_set_block 1
+socket_get_option 2
+
+
+unset socket
+stream_set_blocking 1
+
+
+close stream
+stream_set_blocking HipHop Warning: %s
+
+socket_set_block HipHop Warning: %s
+
+socket_get_option HipHop Warning: %s
+
+
+
+close socket
+stream_set_blocking HipHop Warning: %s
+
+socket_set_block HipHop Warning: %s
+
+socket_get_option HipHop Warning: %s
+
+
+Done.

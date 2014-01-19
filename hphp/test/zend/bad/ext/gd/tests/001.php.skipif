@@ -1,0 +1,1 @@
+<?php if (!function_exists("imagecreatefrompng")) print "skip"; ?>

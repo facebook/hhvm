@@ -1,0 +1,96 @@
+---( $c->boolFalse )---
+  --> Attempting implicit conversion to object using increment...
+HipHop Warning: %s
+HipHop Notice: %s
+
+  --> Attempting implicit conversion to object using assignment...
+HipHop Warning: %s
+
+  --> Attempting implicit conversion to object using combined assignment...
+HipHop Warning: %s
+HipHop Notice: %s
+
+
+---( $c->emptyString )---
+  --> Attempting implicit conversion to object using increment...
+HipHop Warning: %s
+HipHop Notice: %s
+
+  --> Attempting implicit conversion to object using assignment...
+HipHop Warning: %s
+
+  --> Attempting implicit conversion to object using combined assignment...
+HipHop Warning: %s
+HipHop Notice: %s
+
+
+---( $c->null )---
+  --> Attempting implicit conversion to object using increment...
+HipHop Warning: %s
+HipHop Notice: %s
+
+  --> Attempting implicit conversion to object using assignment...
+HipHop Warning: %s
+
+  --> Attempting implicit conversion to object using combined assignment...
+HipHop Warning: %s
+HipHop Notice: %s
+
+
+---( $c->boolTrue )---
+  --> Attempting implicit conversion to object using increment...
+HipHop Warning: %s
+
+  --> Attempting implicit conversion to object using assignment...
+HipHop Warning: %s
+
+  --> Attempting implicit conversion to object using combined assignment...
+HipHop Warning: %s
+
+
+---( $c->nonEmptyString )---
+  --> Attempting implicit conversion to object using increment...
+HipHop Warning: %s
+
+  --> Attempting implicit conversion to object using assignment...
+HipHop Warning: %s
+
+  --> Attempting implicit conversion to object using combined assignment...
+HipHop Warning: %s
+
+
+---( $c->intZero )---
+  --> Attempting implicit conversion to object using increment...
+HipHop Warning: %s
+
+  --> Attempting implicit conversion to object using assignment...
+HipHop Warning: %s
+
+  --> Attempting implicit conversion to object using combined assignment...
+HipHop Warning: %s
+
+
+
+ --> Resulting object:object(C)#%d (6) {
+  [%u|b%"boolFalse"]=>
+  object(stdClass)#%d (1) {
+    [%u|b%"prop"]=>
+    %unicode|string%(24) " Implicit instantiation!"
+  }
+  [%u|b%"emptyString"]=>
+  object(stdClass)#%d (1) {
+    [%u|b%"prop"]=>
+    %unicode|string%(24) " Implicit instantiation!"
+  }
+  [%u|b%"null"]=>
+  object(stdClass)#%d (1) {
+    [%u|b%"prop"]=>
+    %unicode|string%(24) " Implicit instantiation!"
+  }
+  [%u|b%"boolTrue"]=>
+  bool(true)
+  [%u|b%"nonEmptyString"]=>
+  %unicode|string%(5) "hello"
+  [%u|b%"intZero"]=>
+  int(0)
+}

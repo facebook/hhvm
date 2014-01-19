@@ -1,0 +1,36 @@
+array(6) {
+  [0]=>
+  int(0)
+  [1]=>
+  float(0)
+  [2]=>
+  bool(false)
+  [3]=>
+  string(0) ""
+  [4]=>
+  array(0) {
+  }
+  [5]=>
+  object(X)#1 (0) {
+  }
+}
+array(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  float(1)
+  [2]=>
+  bool(true)
+  [3]=>
+  string(5) "hello"
+  [4]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(1)
+  }
+  [5]=>
+  object(X)#1 (0) {
+  }
+}

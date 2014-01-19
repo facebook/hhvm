@@ -1,0 +1,4 @@
+*** Testing ctype_graph() : basic functionality ***
+bool(true)
+bool(false)
+===DONE===

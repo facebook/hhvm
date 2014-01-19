@@ -1,0 +1,551 @@
+
+    --------------------------- Abort Command ---------------------------
+
+    [a]bort              aborts current PHP code input
+
+
+You will have to type this command on a new line, while you're typing
+ad-hoc PHP code to evaluate. In other words, it only works when you see
+continuation prompt like ">>>>".
+
+
+    --------------------------- Break Command ---------------------------
+
+    [b]reak                               breaks at current line of code
+    [b]reak {exp}                         breaks at matching location
+
+    [b]reak [o]nce  {above}               breaks just once then disables it
+
+    [b]reak {above} if {php}              breaks if condition meets
+    [b]reak {above} && {php}              breaks and evaluates an expression
+
+    [b]reak [l]ist                        lists all breakpoints
+    [b]reak [c]lear {index}               clears the n-th breakpoint on list
+    [b]reak [c]lear [a]ll                 clears all breakpoints
+    [b]reak [c]lear                       clears current breakpoint
+    [b]reak [t]oggle {index}              toggles the n-th breakpoint on list
+    [b]reak [t]oggle [a]ll                toggles all breakpoints
+    [b]reak [t]oggle                      toggles current breakpoint
+    [b]reak [e]nable {index}              enables the n-th breakpoint on list
+    [b]reak [e]nable [a]ll                enables all breakpoints
+    [b]reak [e]nable                      enables current breakpoint
+    [b]reak [d]isable {index}             disables the n-th breakpoint on list
+    [b]reak [d]isable [a]ll               disables all breakpoints
+    [b]reak [d]isable                     disables current breakpoint
+
+
+    -------------------------- Where to break? --------------------------
+
+There are many ways to specify a source file location to set a breakpoint,
+but it's ONE single string without whitespaces. The format looks like this,
+
+	file location: {file}:{line}
+	function call: {func}()
+	method invoke: {cls}::{method}()
+
+For examples,
+
+	b mypage.php:123
+	b foo()
+	b MyClass::foo()
+
+    ------------------------ Special Breakpoints ------------------------
+
+There are special breakpoints what can only be set by names:
+
+      start
+      end
+      psp
+
+They represent different time points of a web request. 'start' is at the
+beginning of a web request, when no PHP file is invoked yet, but query
+string and server variables are already prepared. 'end' is at the end of
+a web request, but BEFORE post-send processing (psp). 'psp' is at END of
+psp, not beginning. To set a breakpoint at the beginning of psp, use
+'end', because end of a request is the same as beginning of psp.
+
+    -------------- Conditional Breakpoints and Watchpoints --------------
+
+Every breakpoint can specify a condition, which is an arbitrary PHP expression
+that will be evaluated to TRUE or FALSE. When TRUE, it will break. When FALSE,
+it will continue without break. "&&" is similar to "if", except it will always
+break, regardless what the expression returns. This is useful to watch
+variables at breakpoints. For example,
+
+	b mypage.php:123 && print $a
+
+So every time it breaks at mypage.php line 123, it will print out $a.
+
+    -------------------------- Call chains -------------------------------
+
+Function/method call breakpoints can be qualified with the names of
+functions or methods that must be calling the right most function/method
+name for execution to stop at the breakpoint. These calls need not be
+direct calls. The syntax looks like this:
+    {call}=>{call}()
+where call is either a {func} or {cls}::{method} and zero or more
+"{call}=>" clauses can be specified.
+
+    --------------------- Breakpoint States and List ---------------------
+
+Every breakpoint has 3 states: ALWAYS, ONCE, DISABLED. Without keyword "once",
+a breakpoint is in ALWAYS state. ONCE breakpoints will turn into DISABLED after
+it's hit once. DISABLED breakpoints will not break, but they are kept in the
+list, so one can run 'b l' command and 'b t' command to toggle their states.
+
+Use '[b]reak [l]ist' command to view indices of different breakpoints. Then use
+those indices to clear or toggle their states. This list of breakpoints and
+their states will remain the same when switching to different machines,
+sandboxes and threads.
+
+    -------------------------- Hard Breakpoints --------------------------
+
+From within PHP code, you can place a function call hphpd_break() to embed a
+breakpoint. You may also specify a condition as the function's parameter, so it
+breaks when the condition is met. Please read about this function for more
+details with '[i]nfo hphpd_break'.
+
+    -------------------------- Continue Command --------------------------
+
+    [c]ontinue           continues program execution
+      {count=1}
+
+
+Use this command at break to resume program execution. Specify a count
+to repeat the same command many times.
+
+
+    ---------------------------- Down Command ----------------------------
+
+    [d]own {num=1}       moves to inner frames (callees) on stacktrace
+
+
+Use this command to walk down on stacktrace to find out inner callees of
+current frame. By default it moves down by one level. Specify a number
+to move down several levels a time.
+
+
+    ------------------------- Exception Command -------------------------
+
+    [e]xception {cls}    breaks if class of exception throws
+    [e]xception          breaks if class of exception throws
+      {ns}\{cls}
+    [e]xception error    breaks on errors, warnings and notices
+    [e]xception          breaks only if url also matches
+      {above}@{url}
+
+    [e]xception          breaks at matching regex pattern
+      [r]egex {above}
+    [e]xception          breaks just once then disables it
+      [o]nce  {above}
+
+    [e]xception          breaks if condition meets
+      {above} if {php}
+    [e]xception          breaks and evaluates an expression
+      {above} && {php}
+
+
+Exception command is similar to '[b]reak' command, except it's used to
+specify how to break on (or catch) a throw of an exception. Program
+stops right before the exception is about to throw. Resuming program
+execution will continue to throw the exception as is.
+
+Only a class name can be specified with an optional namespace. All
+exceptions of the class or its sub-classes will be matched. To specify a
+perfect match without sub-classing test, use '[e]xception [r]egex
+^{exact class name}$', although regex can match in a lot more different
+ways.
+
+An exception breakpoint can be listed, cleared or toggled with '[b]reak'
+commands.
+
+
+    --------------------------- Frame Command ---------------------------
+
+    [f]rame {index}      jumps to one particular frame
+
+
+Use '[w]here' command to find out the frame number. Use 'f 0' to jump
+back to the most recent frame or the innermost frame. Use 'f 999' or
+some big number to jump to the outermost frame.
+
+
+    --------------------------- Global Command ---------------------------
+
+    [g]lobal             lists all global variables
+    [g]lobal {text}      full-text search global variables
+
+
+This will print names and values of all global variables, if {text} is
+not speified. Otherwise, it will print global variables that contain the
+text in their names or values. The search is case-insensitive and
+string-based.
+
+
+    ---------------------------- Help Command ----------------------------
+
+    [h]elp [s]tart       displays material for getting started
+    [h]elp [t]utorial    changing tutorial modes
+      on|off|auto
+
+
+Please read "Getting Started" material with '[h]elp [s]tart' for first
+time use to get yourself familiar with basics.
+
+Tutorial mode displays extra information when something didn't work as
+you expected. "auto" mode will display the same information just once.
+"on" mode will display it as long as you run into the same situation.
+"off" mode completely turns off all tutorial texts.
+
+To get detailed information of a command, type '{cmd} [h]elp' or '{cmd}
+?' or 'help {cmd}' or '? {cmd}'.
+
+
+    ---------------------------- Info Command ----------------------------
+
+    info                 displays current function's info
+    info {cls}           displays declaration of this class
+    info {function}      displays declaration of this function
+    info                 displays declaration of this method
+      {cls::method}
+    info                 displays declaration of this constant
+      {cls::constant}
+    info                 displays declaration of this property
+      {cls::$property}
+
+
+Use this command to display declaration of a symbol.
+
+
+    -------------------------- Constant Command --------------------------
+
+    [k]onstant           lists all constants
+    [k]onstant {text}    full-text search constants
+
+
+This will print names and values of all constants, if {text} is not
+specified. Otherwise, it will print names and values of all constants
+that contain the text in their names or values. The search is
+case-insensitive and string-based.
+
+
+    ---------------------------- List Command ----------------------------
+
+    list                 displays current block of source code
+    list {line}          displays code around specified line
+    list                 displays specified block of source code
+      {line1}-{line2}
+    list {line1}-        displays code starting with the line
+    list -{line2}        displays code ending with the line
+    list {file}          displays beginning lines of the file
+    list                 displays code around specified file:line
+      {file}:{line}
+    list                 displays specified block in the file
+      {file}:{l1}-{l2}
+    list {file}:{l1}-    displays specified block in the file
+    list {file}:-{l2}    displays specified block in the file
+    list {directory}     sets PHP source root directory
+
+
+Use list command to display PHP source code. In remote debugging, this
+is displaying source code on server side. When server side cannot find
+the file, it will fall back to local files.
+
+Hit return to display more lines of code after current display.
+
+When a directory name is specified, this will be set to root directory
+for resolving relative paths of PHP files. Files with absolute paths
+will not be affected by this setting. This directory will be stored in
+configuration file for future sessions as well.
+
+
+    -------------------------- Machine Command ---------------------------
+
+    [m]achine            debugging remote server natively
+      [c]onnect {host}
+    [m]achine            debugging remote server natively
+      [c]onnect
+      {host}:{port}
+    [m]achine [r]pc      debugging remote server with RPC
+      {host}
+    [m]achine [r]pc      debugging remote server with RPC
+      {host}:{port}
+    [m]achine            disconnect, debug only local script
+      [d]isconnect
+    [m]achine [l]ist     list all sandboxes
+    [m]achine            attach to a sandbox
+      [a]ttach {index}
+    [m]achine            attach to my sandbox by name
+      [a]ttach
+      {sandbox}
+    [m]achine            attach to a sandbox by user and name
+      [a]ttach {user}
+      {sandbox}
+    [m]achine            force attach to a sandbox (see below)
+      [a]ttach [f]orce
+      {index|sandbox|us
+      er sandbox}
+
+
+Use this command to switch between different machines or sandboxes.
+
+If command prompt says "hphpd", all evaluation of PHP code happens
+locally within the debugger. This is the mode when debugger is started
+without a remote server name. No user libraries are pre-loaded in this
+mode.
+
+When connecting to a remote server, it will automatically attach to
+"default" sandbox under current user. If "default" sandbox does not
+exist, it will attach to a random sandbox under current user. In sandbox
+mode, a file specified in server's configuration of
+"Eval.Debugger.StartupDocument" is pre-loaded.
+
+If there is no sandbox available, it will create a "dummy" sandbox and
+attach to it.
+
+When your sandbox is not available, please hit it at least once from
+your browser. Then run '[m]achine [l]ist' command again.
+
+If another debugger client is already attached to your sandbox you can
+use the '[f]orce' option to '[m]achine [a]ttach'. This will disconnect
+the other client and force your client to connect.
+
+If a HipHop server has RPC port open, one can also debug the server in a
+very special RPC mode. In this mode, one can type in PHP scripts to run,
+but all functions will be executed on server through RPC. Because states
+are still maintained locally and only functions are executed remotely,
+it may not work with functions or scripts that depend on global
+variables or low-level raw resource pointers. As a simple rule,
+stateless functions will work just fine. This is true to objects and
+method calls as well, except classes will have to be loaded on client
+side by '=include("file-containing-the-class.php")'.
+
+
+    ---------------------------- Next Command ----------------------------
+
+    [n]ext {count=1}     steps over lines of code
+
+
+Use this command at break to step over lines of code. Specify a count to
+step over more than one line of code.
+
+
+    ---------------------------- Out Command ----------------------------
+
+    [o]ut {count=1}      steps out function calls
+
+
+Use this command at break to step out function calls. Specify a count to
+step out more than one level of function calls.
+
+
+    --------------------------- Print Command ---------------------------
+
+    [p]rint {php}        prints result of PHP code
+    [p]rint r {php}      prints result of PHP code, (print_r)
+    [p]rint v {php}      prints result of PHP code, (var_dump)
+    [p]rint x {php}      prints hex encoded string or number
+    [p]rint [h]ex        prints hex encoded string or number
+      {php}
+    [p]rint [o]ct        prints octal encoded string or number
+      {php}
+    [p]rint [d]ec        prints as signed integer
+      {php}
+    [p]rint              prints as unsigned integer
+      [u]nsigned {php}
+    [p]rint [t]ime       converts between time and timestamp
+      {php}
+
+    [p]rint [a]lways     adds a watch expression at break
+      {above}
+    [p]rint [l]ist       lists watch expressions
+    [p]rint [c]lear      clears a watch expression
+      {index}
+    [p]rint [c]lear      clears all watch expressions
+      [a]ll
+
+
+Prints result of an expression in certain format. If '[a]lways' is
+specified, the expression will be added to a watch list. At every break,
+either at a breakpoint or caused by step commands, these expressions
+will be evaluated and printed out.
+
+
+    ---------------------------- Quit Command ----------------------------
+
+    [q]uit               quits this program
+
+
+After you type this command, you will not see me anymore.
+
+
+    ---------------------------- Run Command ----------------------------
+
+    [r]un                restarts program
+    [r]un {file}         starts a new program
+      {arg1} {arg2} ...
+
+
+Aborts current execution and restarts program with specified arguments.
+If no arguments are specified, it will reuse the PHP file and old
+arguments. If arguments are to be changed, please include file name,
+even if it is the same, as the first one.
+
+In server mode, this command will simply abort current page handling
+without restarting anything.
+
+
+    ---------------------------- Set Command ----------------------------
+
+    set bac on/off    on makes debugger bypass access checks on class members
+    set lf path/off   turn logging on and specify log file
+    set pl level      if level > 0, only print out object trees to that depth
+    set cc count      display at most count characters when doing = command
+    set ss on/off     on makes the debugger take small steps (not entire lines)
+    set sa on/off     on makes where command display argument values
+    set mcl limit     display at most limit source lines at breakpoints
+
+Use this command to change default settings. The new values are persisted into
+the configuration file that normally can be found at ~/.hphpd.hdf.
+
+Level, count and limit can be <= 0, in which case they are unlimited.
+
+    ---------------------------- Step Command ----------------------------
+
+    [s]tep {count=1}     steps into lines of code
+
+
+Use this command at break to step into lines of code. Specify a count to
+step more than once.
+
+
+    --------------------------- Thread Command ---------------------------
+
+    [t]hread             displays current thread's information
+    [t]hread [l]ist      lists all threads at break
+    [t]hread {index}     switches to the specified thread
+    [t]hread [n]ormal    breaks all threads
+    [t]hread [s]ticky    only send command to current thread
+    [t]hread             only break current thread
+      [e]xclusive
+
+
+Use '[t]hread' alone to display information of current thread.
+
+When a thread is at break, you may specify how other threads should
+behave if they also happen to hit some breakpoints. Normally, other
+threads will also break, and they will interrupt debugger session with
+their breakpoints. So breaks from different threads may interleave. If
+'[t]hread [s]ticky' is specified, all other threads will wait until
+current thread is finished. This will help debugging to focus on just
+one thread without losing breaks from other threads. If there is no need
+to hold up any other threads, use '[t]hread [e]xclusive'. Then other
+threads will not break at all. This mode is useful for live debugging a
+production server, without interrupting many threads at a time. Use
+'[t]hread [n]ormal' to change thread mode back to normal.
+
+Some debugging commands will automatically turn thread mode to sticky.
+These include continue, step, next or out commands with a counter of
+more than 1. Or a jump command. These commands imply non-interruption
+from another thread. The mode will remain even after these commands
+until '[t]hread [n]ormal' is issued.
+When multple threads hit breakpoints at the same time, use '[t]hread
+[l]ist' command to display their indices, which can be used to switch
+between them with '[t]hread {index}'.
+
+
+    ----------------------------- Up Command -----------------------------
+
+    [u]p {num=1}         moves to outer frames (callers) on stacktrace
+
+
+Use this command to walk up on stacktrace to find out outer callers of
+current frame. By default it moves up by one level. Specify a number to
+move up several levels a time.
+
+
+    -------------------------- Variable Command --------------------------
+
+    [v]ariable           lists all local variables on stack
+    [v]ariable {text}    full-text search local variables
+
+
+This will print names and values of all variables that are currently
+accessible by simple names. Use '[w]here', '[u]p {num}', '[d]own {num}',
+'[f]rame {index}' commands to choose a different frame to view variables
+at different level of the stack.
+
+Specify some free text to print local variables that contain the text
+either in their names or values. The search is case-insensitive and
+string-based.
+
+
+    --------------------------- Where Command ---------------------------
+
+    [w]here              displays current stacktrace
+    [w]here {num}        displays number of innermost frames
+    [w]here -{num}       displays number of outermost frames
+
+
+Use '[u]p {num}' or '[d]own {num}' to walk up or down the stacktrace.
+Use '[f]rame {index}' to jump to one particular frame. At any frame, use
+'[v]ariable' command to display all local variables.
+
+
+    -------------------------- Extended Command --------------------------
+
+    x {cmd} {arg1}       invoke specified command
+      {arg2} ...
+    x{cmd} {arg1}        invoke specified command
+      {arg2} ...
+
+
+where {cmd} can be:
+
+	[a]mple
+	[t]ension
+
+Type 'x [h]elp|? {cmd} to read their usages.
+
+    ---------------------------- Zend Command ----------------------------
+
+    [z]end               running the most recent code snippet in Zend PHP
+
+
+This is mainly for comparing results from PHP vs. HipHop. After you type
+in some PHP code, it will be evaluated immediately in HipHop. Then you
+can type '[z]end' command to re-run the same script in Zend PHP. Please
+note that only the most recent block of code you manually typed in was
+evaluated, not any earlier ones, nor the ones from a PHP file.
+
+
+    --------------------------- Macro Command ---------------------------
+
+    & [s]tart            starts recording of default macro
+    & [s]tart {name}     starts recording of a named macro
+    & [e]nd              stops and saves recorded macro
+    & [r]eplay           replays default macro
+    & [r]eplay {name}    replays a named macro
+    & [l]ist             lists all macros
+    & [c]lear {index}    deletes a macro
+
+
+Macro command allows you to record a series of debugger command, so you
+can replay later by its name. When name is not specified, it will use
+"default" as the name.
+
+There is also a special macro "startup" that will be replayed every time
+when debugger is just started. Use startup macro to load certain PHP
+files or perform certain debugging environment setup.
+
+The space between & and command is not needed. '&s' works as well.
+
+
+    --------------------------- Shell Command ---------------------------
+
+! {cmd} {arg1} {arg2} ...    remotely executes shell command
+
+Executes the shell command on connected machine.
+
+The space between ! and command is not needed. '!ls' works as well.
+

@@ -1,0 +1,5 @@
+X:X:bool(false)
+Y:Y:bool(true)
+Y:y:bool(true)
+Z:Z:bool(true)
+Z:z:bool(true)

@@ -1,0 +1,17 @@
+*** Creating links in a directory without permission to allow the operation ***
+bool(true)
+
+-- Working with soft links --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+int(-1)
+bool(false)
+
+-- Working with hard links --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+int(-1)
+bool(false)
+Done

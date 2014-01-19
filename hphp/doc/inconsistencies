@@ -1,0 +1,156 @@
+<h2>Inconsistencies between Zend PHP and HipHop VM</h2>
+
+
+1. Arithmetic, arrays, and foreach loops
+
+(1) Arithmetic
+
+Under Zend PHP, the addition, subtraction, or multiplication of two integers
+will produce a floating-point value if the result overflows the integer type.
+Under HipHop VM, the addition, subtraction, or multiplication of two integers
+will always produce an integer value; if the result overflows the integer type,
+the high bits of the result will be discarded ("wrap-around").
+
+(2) Next free integer key for arrays
+
+Arrays contain a hidden field called the "NextFreeElement" field that tracks
+what integer key should be used when a new element is appended. Under Zend PHP,
+when an array is copied the NextFreeElement field of the new array will be
+recomputed based on the keys it currently contains. Under HipHop VM, when an
+array is copied the new array's NextFreeElement field is set to the same value
+as the original array's NextFreeElement field.
+
+(3) Array internal cursors
+
+Under Zend PHP, if an array's internal cursor points to the position past the
+last element and then a copy of the array is made, the copy will have its
+internal cursor reset to point at the first element. Under HipHop VM, when a
+copy of an array is made, the copy's internal cursor will always point to the
+same position that the original array's internal cursor pointed to.
+
+(4) Foreach by value
+
+Under Zend PHP, foreach by value will modify the array's internal cursor under
+certain circumstances. Under HipHop VM, foreach by value will never modify the
+array's internal cursor.
+
+(5) Foreach by reference
+
+Under Zend PHP, the behavior of a foreach by reference loop can be
+unpredictable if during iteration the next element of the array is unset, or if
+the array variable is assigned to directly or through a reference, or if
+copy-on-write causes the array to be copied. For such cases, HipHop VM's
+behavior may differ from Zend PHP.
+
+
+2. Classes and objects
+
+(1) Exceptions thrown from destructors
+
+Under HipHop VM, PHP exceptions thrown from destructors will be
+swallowed while logging an error. Effectively, there is a try/catch enclosing
+the body of the __destruct method. These exceptions are catchable under Zend
+PHP outside of the __destruct method.
+
+Fatals thrown from destructors will log an error, and prevent further PHP code
+from executing as the fatal propagates. This includes other __destruct methods.
+
+(2) __destruct behavior at end of request
+
+Under Zend PHP, if an object is still live at the end of a request, its
+__destruct method is invoked. By default, HipHop VM does not do this.
+
+The EnableObjDestructCall runtime option can be used to make HipHop VM invoke
+the __destruct method for objects that are live at the end of the request.
+
+(3) Exceptions thrown from __toString()
+
+Zend PHP does not allow exceptions to be thrown from __toString(). HipHop VM
+does. Also, Zend PHP doesn't allow __toString() to return anything other than a
+string. HipHop VM will just convert return value to string.
+
+(4) __call/__callStatic() handling
+
+These 2 examples give inconsistent results in Zend PHP 5.3:
+
+  <?php
+  class B {
+  }
+  class G extends B {
+    function __call($name, $arguments) { var_dump('G');}
+    function f4missing($a) {
+      B::f4missing(5); // __call checking happened at B
+    }
+  }
+  $g = new G();
+  $g->f4missing(3);
+
+  <?php
+  class B {
+    function __call($name, $arguments) { var_dump('B');}
+  }
+  class G extends B {
+    function __call($name, $arguments) { var_dump('G');}
+    function f4missing($a) {
+      B::f4missing(5); // G::__call() was called actually!
+    }
+  }
+  $g = new G();
+  $g->f4missing(3);
+
+Under HipHop VM, both checking and invocation of __call() happen on class G.
+
+(5) Object internal cursors
+
+Under Zend PHP, objects have an internal cursor (similar to the array internal
+cursor) that can be used to iterate over the object's properties. Under HipHop
+VM, objects do not have internal cursors, and the next(), prev(), current(),
+key(), reset(), end(), and each() builtin functions do not support objects.
+
+
+3. Misc
+
+(1) HipHop VM currently does not support PHP namespaces.
+
+(2) Case-insensitive constants
+
+HipHop VM does not support case-insensitive constants, for example:
+  define('FOO', 123, true);
+
+(3) get_defined_vars() and get_declared_classes()
+
+HipHop VM may return variables/classes in a different order than Zend PHP.
+
+(4) XMLWriter
+
+Under Zend PHP, XMLWriter class and its functions returned different types of
+objects,
+
+  <?php
+  function foo(XMLWriter $w) {}
+  $obj = new XMLWriter();
+  foo($obj); // <-- this one is actually okay
+  $obj2 = xmlwriter_open_memory(); // <-- just not this one
+  var_dump($obj, $obj2);
+  foo($obj2);
+
+Under HipHop VM, they are the same.
+
+(5) ReflectionProperty::setAccessible() and ReflectionMethod::setAccessible()
+are not currently supported under HipHop VM.
+
+(6) HipHop VM only support preg_replace /e in limited cases.
+Example unsupported case: phpt...bug24403
+
+(7) Under Zend PHP, you can assign to $GLOBALS:
+
+  $GLOBALS = 0;
+  $x = $GLOBALS - 5;
+
+  $g = $GLOBALS;
+  $g['x'] = 3;
+
+Under HipHop VM, this is not allowed or not working at present.
+
+(8) All fatals prevent further PHP code from executing, including __destruct
+methods. N.B.: exit() is a fatal.

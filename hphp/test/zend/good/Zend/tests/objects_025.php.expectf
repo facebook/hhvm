@@ -1,0 +1,9 @@
+non-static - ok
+static - ok
+non-static - ok
+static - ok
+non-static - ok
+static - ok
+non-static - ok
+static - ok
+HipHop Fatal error: %s

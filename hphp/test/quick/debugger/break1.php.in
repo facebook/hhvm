@@ -1,0 +1,87 @@
+run
+break break1.php:6
+@ foo('test_break1')
+break list
+continue
+break clear all
+break break1.php:7
+break break1.php:3
+break break1.php:77
+break list
+@ foo('test_break1')
+variable
+break start
+break end
+break psp
+break list
+break clear all
+continue
+break foo()
+@ foo('test_break2')
+variable
+break clear all
+continue
+break cls::pubObj()
+@ $break3=new cls()
+@ $break3->pubObj('test_break3')
+variable
+break clear all
+break break3->pubObj()
+continue
+break cls::pubCls()
+@ cls::pubCls('test_break4')
+variable
+break clear all
+break cls::break4->pubCls()
+continue
+@ $break5=new cls()
+@ $break5->pubHardBreak('test_break5')
+continue
+break clear all
+break cls::nosuchMethod()
+break list
+break noSuchFunction()
+break list
+break clear all
+break derived::pubObj()
+break list
+@ $break6 = new derived()
+@ $break6->pubObj('test_break6')
+continue
+break clear all
+b cls::pubObj() if $x == 'yes'
+@ $break7 = new cls()
+@ $break7->pubObj('yes');
+break list
+b 12 if $x == 'yes sir'
+@ $this->pubObj('yes sir');
+break list
+break clear all
+continue
+break derived::callPubObj=>cls::pubObj()
+break list
+@ $break8 = new derived();
+@ $break8->pubObj('no')
+@ $break8->callPubObj('yes')
+break clear all
+continue
+break derived::callCallPubObj=>derived::callPubObj=>cls::pubObj()
+break list
+@ $break9 = new derived();
+@ $break9->callPubObj('no')
+@ $break9->callCallPubObj('yes')
+break clear all
+continue
+break derived::callCallPubObj=>cls::pubObj()
+break list
+@ $break10 = new derived();
+@ $break10->callPubObj('no')
+@ $break10->callCallPubObj('yes')
+break clear all
+continue
+break foo()
+break break1.php:6
+@ foo('test_break7')
+continue
+break clear all
+quit

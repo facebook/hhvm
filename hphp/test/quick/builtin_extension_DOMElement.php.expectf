@@ -1,0 +1,181 @@
+DOMElement
+HipHop Warning: DOMElement::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+object(DOMElement)#1 (0) {
+}
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"DOMElement";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "DOMElement"
+}
+array(39) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(12) "getAttribute"
+  [5]=>
+  string(16) "getAttributeNode"
+  [6]=>
+  string(18) "getAttributeNodeNS"
+  [7]=>
+  string(14) "getAttributeNS"
+  [8]=>
+  string(20) "getElementsByTagName"
+  [9]=>
+  string(22) "getElementsByTagNameNS"
+  [10]=>
+  string(12) "hasAttribute"
+  [11]=>
+  string(14) "hasAttributeNS"
+  [12]=>
+  string(15) "removeAttribute"
+  [13]=>
+  string(19) "removeAttributeNode"
+  [14]=>
+  string(17) "removeAttributeNS"
+  [15]=>
+  string(12) "setAttribute"
+  [16]=>
+  string(16) "setAttributeNode"
+  [17]=>
+  string(18) "setAttributeNodeNS"
+  [18]=>
+  string(14) "setAttributeNS"
+  [19]=>
+  string(14) "setIDAttribute"
+  [20]=>
+  string(18) "setIDAttributeNode"
+  [21]=>
+  string(16) "setIDAttributeNS"
+  [22]=>
+  string(11) "appendChild"
+  [23]=>
+  string(9) "cloneNode"
+  [24]=>
+  string(9) "getLineNo"
+  [25]=>
+  string(13) "hasAttributes"
+  [26]=>
+  string(13) "hasChildNodes"
+  [27]=>
+  string(12) "insertBefore"
+  [28]=>
+  string(18) "isDefaultNamespace"
+  [29]=>
+  string(10) "isSameNode"
+  [30]=>
+  string(11) "isSupported"
+  [31]=>
+  string(18) "lookupNamespaceUri"
+  [32]=>
+  string(12) "lookupPrefix"
+  [33]=>
+  string(9) "normalize"
+  [34]=>
+  string(11) "removeChild"
+  [35]=>
+  string(12) "replaceChild"
+  [36]=>
+  string(4) "c14n"
+  [37]=>
+  string(8) "c14nfile"
+  [38]=>
+  string(11) "getNodePath"
+}
+================
+A_DOMElement
+HipHop Warning: DOMElement::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+object(A_DOMElement)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(97) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:12:"A_DOMElement";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(12) "A_DOMElement"
+}
+array(39) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(12) "getAttribute"
+  [5]=>
+  string(16) "getAttributeNode"
+  [6]=>
+  string(18) "getAttributeNodeNS"
+  [7]=>
+  string(14) "getAttributeNS"
+  [8]=>
+  string(20) "getElementsByTagName"
+  [9]=>
+  string(22) "getElementsByTagNameNS"
+  [10]=>
+  string(12) "hasAttribute"
+  [11]=>
+  string(14) "hasAttributeNS"
+  [12]=>
+  string(15) "removeAttribute"
+  [13]=>
+  string(19) "removeAttributeNode"
+  [14]=>
+  string(17) "removeAttributeNS"
+  [15]=>
+  string(12) "setAttribute"
+  [16]=>
+  string(16) "setAttributeNode"
+  [17]=>
+  string(18) "setAttributeNodeNS"
+  [18]=>
+  string(14) "setAttributeNS"
+  [19]=>
+  string(14) "setIDAttribute"
+  [20]=>
+  string(18) "setIDAttributeNode"
+  [21]=>
+  string(16) "setIDAttributeNS"
+  [22]=>
+  string(11) "appendChild"
+  [23]=>
+  string(9) "cloneNode"
+  [24]=>
+  string(9) "getLineNo"
+  [25]=>
+  string(13) "hasAttributes"
+  [26]=>
+  string(13) "hasChildNodes"
+  [27]=>
+  string(12) "insertBefore"
+  [28]=>
+  string(18) "isDefaultNamespace"
+  [29]=>
+  string(10) "isSameNode"
+  [30]=>
+  string(11) "isSupported"
+  [31]=>
+  string(18) "lookupNamespaceUri"
+  [32]=>
+  string(12) "lookupPrefix"
+  [33]=>
+  string(9) "normalize"
+  [34]=>
+  string(11) "removeChild"
+  [35]=>
+  string(12) "replaceChild"
+  [36]=>
+  string(4) "c14n"
+  [37]=>
+  string(8) "c14nfile"
+  [38]=>
+  string(11) "getNodePath"
+}

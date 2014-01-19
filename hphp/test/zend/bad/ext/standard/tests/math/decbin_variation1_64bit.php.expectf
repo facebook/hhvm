@@ -1,0 +1,84 @@
+*** Testing decbin() : usage variations ***
+
+-- Iteration 1 --
+string(1) "0"
+
+-- Iteration 2 --
+string(1) "1"
+
+-- Iteration 3 --
+string(14) "11000000111001"
+
+-- Iteration 4 --
+string(64) "1111111111111111111111111111111111111111111111111111011011010111"
+
+-- Iteration 5 --
+string(1) "0"
+
+-- Iteration 6 --
+string(1) "0"
+
+-- Iteration 7 --
+string(4) "1010"
+
+-- Iteration 8 --
+string(64) "1111111111111111111111111111111111111111111111111111111111110110"
+
+-- Iteration 9 --
+string(37) "1110010111110100110010001101000001000"
+
+-- Iteration 10 --
+string(1) "0"
+
+-- Iteration 11 --
+string(1) "0"
+
+-- Iteration 12 --
+string(1) "0"
+
+-- Iteration 13 --
+string(1) "0"
+
+-- Iteration 14 --
+string(1) "1"
+
+-- Iteration 15 --
+string(1) "0"
+
+-- Iteration 16 --
+string(1) "1"
+
+-- Iteration 17 --
+string(1) "0"
+
+-- Iteration 18 --
+string(1) "0"
+
+-- Iteration 19 --
+string(1) "0"
+
+-- Iteration 20 --
+string(1) "0"
+
+-- Iteration 21 --
+string(1) "0"
+
+-- Iteration 22 --
+string(1) "0"
+
+-- Iteration 23 --
+string(1) "0"
+
+-- Iteration 24 --
+HipHop Notice: %s
+string(1) "1"
+
+-- Iteration 25 --
+string(1) "0"
+
+-- Iteration 26 --
+string(1) "0"
+
+-- Iteration 27 --
+string(%d) "%d"
+===Done===

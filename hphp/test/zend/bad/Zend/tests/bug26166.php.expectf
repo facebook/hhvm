@@ -1,0 +1,5 @@
+Hello World!
+===NONE===
+string(52) "Method None::__toString() must return a string value"
+===THROW===
+HipHop Fatal error: %s

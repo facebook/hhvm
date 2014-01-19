@@ -1,0 +1,5 @@
+// this comment will not be removed
+string(87) "// this comment will not be removed
+<?php
+var_dump(php_strip_whitespace(__FILE__)); ?>
+"

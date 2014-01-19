@@ -1,0 +1,20 @@
+string(3) "bar"
+HipHop Notice: %s
+NULL
+object(Test)#%d (1) {
+  ["property":protected]=>
+  array(1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+}
+HipHop Notice: %s
+HipHop Notice: %s
+object(Test)#%d (1) {
+  ["property":protected]=>
+  array(1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+}
+===DONE===

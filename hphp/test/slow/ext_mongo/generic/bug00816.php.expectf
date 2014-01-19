@@ -1,0 +1,33 @@
+NS: test: FAIL
+int(21)
+string(40) "An invalid 'ns' argument is given (test)"
+
+NS: .test: FAIL
+int(21)
+string(41) "An invalid 'ns' argument is given (.test)"
+
+NS: test.: FAIL
+int(21)
+string(41) "An invalid 'ns' argument is given (test.)"
+
+NS: : FAIL
+int(21)
+string(36) "An invalid 'ns' argument is given ()"
+
+NS: .: FAIL
+int(21)
+string(37) "An invalid 'ns' argument is given (.)"
+
+NS: xx: FAIL
+int(21)
+string(38) "An invalid 'ns' argument is given (xx)"
+
+NS: xxx: FAIL
+int(21)
+string(39) "An invalid 'ns' argument is given (xxx)"
+
+NS: a.b: OK
+
+NS: db.foo: OK
+
+NS: foo.file.fs: OK

@@ -1,0 +1,7 @@
+foo 1
+foo 2
+array(1) {
+  [0]=>
+  int(2)
+}
+int(2)

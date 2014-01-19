@@ -1,0 +1,14 @@
+*** Testing gmstrftime() : usage variation ***
+
+--Preferred date and time representation--
+string(%d) "%d/%d/%d %d:%d:%d"
+string(17) "08/08/08 08:08:08"
+
+--Preferred date representation--
+string(%d) "%d/%d/%d"
+string(8) "08/08/08"
+
+--Preferred time representation--
+string(%d) "%d:%d:%d"
+string(8) "08:08:08"
+===DONE===

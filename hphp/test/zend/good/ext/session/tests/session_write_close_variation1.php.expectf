@@ -1,0 +1,10 @@
+*** Testing session_write_close() : variation ***
+bool(true)
+NULL
+NULL
+NULL
+NULL
+NULL
+bool(true)
+bool(true)
+Done

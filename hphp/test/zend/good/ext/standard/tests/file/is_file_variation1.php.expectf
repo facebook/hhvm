@@ -1,0 +1,11 @@
+-- Testing is_file() with file containing data --
+bool(true)
+
+-- Testing is_file() after truncating filesize to zero bytes --
+bool(true)
+
+-- Testing is_file() with an empty file --
+bool(true)
+bool(true)
+
+*** Done ***

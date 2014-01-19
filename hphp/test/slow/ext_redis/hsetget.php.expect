@@ -1,0 +1,23 @@
+int(1)
+int(2)
+array(2) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "baz"
+}
+array(2) {
+  [0]=>
+  string(3) "bar"
+  [1]=>
+  string(4) "boom"
+}
+array(2) {
+  ["foo"]=>
+  string(3) "bar"
+  ["baz"]=>
+  string(4) "boom"
+}
+string(3) "bar"
+string(4) "boom"
+NULL

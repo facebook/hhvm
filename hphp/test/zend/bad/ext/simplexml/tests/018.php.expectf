@@ -1,0 +1,18 @@
+<person name="Joe">
+  <child name="Ann">
+  </child>
+  <child name="Marray">
+  </child>
+</person>
+<person name="Boe">
+  <child name="Joe">
+  </child>
+  <child name="Ann">
+  </child>
+</person>
+----------
+<person name="Joe">
+  <child>
+  </child>
+</person>
+---Done---

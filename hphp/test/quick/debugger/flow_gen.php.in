@@ -1,0 +1,26 @@
+run
+break flow_gen.php:12
+@test(1)
+next
+next
+next
+next
+next
+next
+step
+step
+next
+next
+next
+next
+next
+next
+step
+step
+next
+next
+next
+next
+break clear all
+continue
+quit

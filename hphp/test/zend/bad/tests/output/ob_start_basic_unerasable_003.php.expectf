@@ -1,0 +1,3 @@
+[callback:1]This call will obtain the content, but will not clean the buffer.HipHop Notice: %s
+HipHop Notice: %s
+string(65) "This call will obtain the content, but will not clean the buffer."

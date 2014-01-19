@@ -17,16 +17,49 @@
 
 include(CheckFunctionExists)
 
-# boost checks
-
-find_package(Boost 1.37.0 COMPONENTS system;program_options;filesystem REQUIRED)
-if (BOOST_VERSION EQUAL 104200)
-	# Boost bug #3942 prevents us using 1.42
-	message(FATAL_ERROR "Boost 1.42 is not compatible with HipHop")
+# libdl
+find_package(LibDL)
+if (LIBDL_INCLUDE_DIRS)
+	add_definitions("-DHAVE_LIBDL")
+	include_directories(${LIBDL_INCLUDE_DIRS})
+	if (LIBDL_NEEDS_UNDERSCORE)
+		add_definitions("-DLIBDL_NEEDS_UNDERSCORE")
+	endif()
 endif()
 
+# boost checks
+find_package(Boost 1.48.0 COMPONENTS system program_options filesystem regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
+# Boost 1.49 supports a better flat_multimap, but 1.48 is good enough
+if (Boost_VERSION GREATER 104899)
+	add_definitions("-DHAVE_BOOST1_49")
+endif()
+
+
+# features.h
+FIND_PATH(FEATURES_HEADER features.h)
+if (FEATURES_HEADER)
+	add_definitions("-DHAVE_FEATURES_H=1")
+endif()
+
+# google-glog
+find_package(Glog REQUIRED)
+include_directories(${LIBGLOG_INCLUDE_DIR})
+
+# inotify checks
+find_package(Libinotify)
+if (LIBINOTIFY_INCLUDE_DIR)
+	include_directories(${LIBINOTIFY_INCLUDE_DIR})
+endif()
+
+# iconv checks
+find_package(Libiconv REQUIRED)
+include_directories(${LIBICONV_INCLUDE_DIR})
+if (LIBICONV_CONST)
+  message(STATUS "Using const for input to iconv() call")
+  add_definitions("-DICONV_CONST=const")
+endif()
 
 # mysql checks
 find_package(MySQL REQUIRED)
@@ -57,23 +90,46 @@ include_directories(${LIBEVENT_INCLUDE_DIR})
 
 set(CMAKE_REQUIRED_LIBRARIES "${LIBEVENT_LIB}")
 CHECK_FUNCTION_EXISTS("evhttp_bind_socket_with_fd" HAVE_CUSTOM_LIBEVENT)
-if (NOT HAVE_CUSTOM_LIBEVENT)
-	unset(HAVE_CUSTOM_LIBEVENT CACHE)
-	unset(LIBEVENT_INCLUDE_DIR CACHE)
-	unset(LIBEVENT_LIB CACHE)
-	unset(LibEvent_FOUND CACHE)
-	message(FATAL_ERROR "Custom libevent is required with HipHop patches")
-endif ()
+if(HAVE_CUSTOM_LIBEVENT)
+        message("Using custom LIBEVENT")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_CUSTOM_LIBEVENT")
+endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
-# GD checks
-find_package(GD REQUIRED)
+find_package(LibUODBC)
+if (LIBUODBC_INCLUDE_DIRS)
+	include_directories(${LIBUODBC_INCLUDE_DIRS})
+	add_definitions("-DHAVE_UODBC")
+endif ()
 
-if (WANT_FB_LIBMCC)
-	add_definitions(-DHPHP_WITH_LIBMCC)
-	message(FATAL_ERROR Need to add libmcc and libch for linking)
-else ()
-	# nothing for now
+# GD checks
+add_definitions(-DPNG_SKIP_SETJMP_CHECK)
+find_package(LibVpx)
+if (LIBVPX_INCLUDE_DIRS)
+	include_directories(${LIBVPX_INCLUDE_DIRS})
+	add_definitions("-DHAVE_GD_WEBP")
+endif()
+find_package(LibJpeg)
+if (LIBJPEG_INCLUDE_DIRS)
+	include_directories(${LIBJPEG_INCLUDE_DIRS})
+	add_definitions("-DHAVE_GD_JPG")
+endif()
+find_package(LibPng)
+if (LIBPNG_INCLUDE_DIRS)
+	include_directories(${LIBPNG_INCLUDE_DIRS})
+	add_definitions("-DHAVE_GD_PNG")
+endif()
+find_package(Freetype)
+if (FREETYPE_INCLUDE_DIRS)
+	include_directories(${FREETYPE_INCLUDE_DIRS})
+	add_definitions("-DHAVE_LIBFREETYPE -DHAVE_GD_FREETYPE -DENABLE_GD_TTF")
+endif()
+
+# libXed
+find_package(LibXed)
+if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
+	include_directories(${LibXed_INCLUDE_DIR})
+	add_definitions("-DHAVE_LIBXED")
 endif()
 
 # CURL checks
@@ -81,14 +137,14 @@ find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
 
 set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
-CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CUSTOM_CURL)
-if (NOT HAVE_CUSTOM_CURL)
-	unset(HAVE_CUSTOM_CURL CACHE)
-	unset(CURL_INCLUDE_DIR CACHE)
-	unset(CURL_LIBRARIES CACHE)
-	unset(CURL_FOUND CACHE)
-        message(FATAL_ERROR "Custom libcurl is required with the HipHop patch")
-endif ()
+CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CURL_MULTI_SELECT)
+CHECK_FUNCTION_EXISTS("curl_multi_wait" HAVE_CURL_MULTI_WAIT)
+if (HAVE_CURL_MULTI_SELECT)
+	add_definitions("-DHAVE_CURL_MULTI_SELECT")
+endif()
+if (HAVE_CURL_MULTI_WAIT)
+	add_definitions("-DHAVE_CURL_MULTI_WAIT")
+endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
 # LibXML2 checks
@@ -100,22 +156,16 @@ find_package(EXPAT REQUIRED)
 include_directories(${EXPAT_INCLUDE_DIRS})
 
 # SQLite3 + timelib are bundled in HPHP sources
-include_directories("${HPHP_HOME}/src/third_party/libsqlite3")
-include_directories("${HPHP_HOME}/src/third_party/timelib")
-include_directories("${HPHP_HOME}/src/third_party/libafdt/src")
-include_directories("${HPHP_HOME}/src/third_party/libmbfl")
-include_directories("${HPHP_HOME}/src/third_party/libmbfl/mbfl")
-include_directories("${HPHP_HOME}/src/third_party/libmbfl/filter")
-
-FIND_LIBRARY(XHP_LIB xhp)
-FIND_PATH(XHP_INCLUDE_DIR xhp_preprocess.hpp)
-
-if (XHP_LIB AND XHP_INCLUDE_DIR)
-	include_directories(${XHP_INCLUDE_DIR})
-	set(SKIP_BUNDLED_XHP ON)
-else()
-	include_directories("${HPHP_HOME}/src/third_party/xhp/xhp")
-endif()
+include_directories("${HPHP_HOME}/hphp/third_party/libsqlite3")
+include_directories("${HPHP_HOME}/hphp/third_party/timelib")
+include_directories("${HPHP_HOME}/hphp/third_party/libafdt/src")
+include_directories("${HPHP_HOME}/hphp/third_party/libmbfl")
+include_directories("${HPHP_HOME}/hphp/third_party/libmbfl/mbfl")
+include_directories("${HPHP_HOME}/hphp/third_party/libmbfl/filter")
+include_directories("${HPHP_HOME}/hphp/third_party/lz4")
+include_directories("${HPHP_HOME}/hphp/third_party/double-conversion/src")
+include_directories("${HPHP_HOME}/hphp/third_party/folly")
+include_directories("${HPHP_HOME}/hphp/third_party/libzip")
 
 # ICU
 find_package(ICU REQUIRED)
@@ -128,9 +178,6 @@ if (ICU_FOUND)
 	endif ()
 	include_directories(${ICU_INCLUDE_DIRS})
 endif (ICU_FOUND)
-
-# (google heap OR cpu profiler) AND libunwind 
-FIND_LIBRARY(UNWIND_LIB unwind)
 
 # jemalloc/tmalloc and profiler
 if (USE_GOOGLE_HEAP_PROFILER OR USE_GOOGLE_CPU_PROFILER)
@@ -156,25 +203,35 @@ if (USE_GOOGLE_HEAP_PROFILER AND GOOGLE_PROFILER_LIB)
 	endif()
 endif()
 
-if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED
-		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
-	FIND_LIBRARY(JEMALLOC_LIB jemalloc)
-	if (JEMALLOC_LIB)
-		CHECK_LIBRARY_EXISTS(jemalloc mallctl "" HAVE_JEMALLOC_FUN)
-		if (HAVE_JEMALLOC_FUN)
+if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
+	FIND_LIBRARY(JEMALLOC_LIB NAMES jemalloc)
+	FIND_PATH(JEMALLOC_INCLUDE_DIR NAMES jemalloc/jemalloc.h)
+
+	if (JEMALLOC_INCLUDE_DIR AND JEMALLOC_LIB)
+		include_directories(${JEMALLOC_INCLUDE_DIR})
+
+		set (CMAKE_REQUIRED_INCLUDES ${JEMALLOC_INCLUDE_DIR})
+		INCLUDE(CheckCXXSourceCompiles)
+		CHECK_CXX_SOURCE_COMPILES("
+#include <jemalloc/jemalloc.h>
+int main(void) {
+#if !defined(JEMALLOC_VERSION_MAJOR) || (JEMALLOC_VERSION_MAJOR < 3)
+# error \"jemalloc version >= 3.0.0 required\"
+#endif
+	return 0;
+}" JEMALLOC_VERSION_3)
+		set (CMAKE_REQUIRED_INCLUDES)
+
+		if (JEMALLOC_VERSION_3)
 			message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
 			set(JEMALLOC_ENABLED 1)
 		else()
-			message(STATUS "Found jemalloc at ${JEMALLOC_LIB}, but unable to find its API "
-			               "(maybe the library was configured with a non-empty function prefix?)")
+			message(STATUS "Found jemalloc, but it was too old")
 		endif()
-	else()
-		message(STATUS "Can't find jemalloc")
 	endif()
 endif()
 
-if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED
-		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED)
 	FIND_LIBRARY(GOOGLE_TCMALLOC_MIN_LIB tcmalloc_minimal)
 	if (GOOGLE_TCMALLOC_MIN_LIB)
 		message(STATUS "Found minimal tcmalloc: ${GOOGLE_TCMALLOC_MIN_LIB}")
@@ -203,11 +260,11 @@ endif()
 
 # tbb libs
 find_package(TBB REQUIRED)
-if (${TBB_INTERFACE_VERSION} LESS 3016)
+if (${TBB_INTERFACE_VERSION} LESS 5005)
 	unset(TBB_FOUND CACHE)
 	unset(TBB_INCLUDE_DIRS CACHE)
 	unset(TBB_LIBRARIES CACHE)
-	message(FATAL_ERROR "TBB is too old, please install a newer version")
+	message(FATAL_ERROR "TBB is too old, please install at least 3.0(5005), preferably 4.0(6000) or higher")
 endif()
 include_directories(${TBB_INCLUDE_DIRS})
 link_directories(${TBB_LIBRARY_DIRS})
@@ -241,11 +298,36 @@ include_directories(${LDAP_INCLUDE_DIR})
 find_package(Ncurses REQUIRED)
 include_directories(${NCURSES_INCLUDE_PATH})
 
-find_package(Readline REQUIRED)
-include_directories(${READLINE_INCLUDE_DIR})
+# libpthreads
+find_package(PThread REQUIRED)
+include_directories(${LIBPTHREAD_INCLUDE_DIRS})
+
+# Either Readline or Editline (for hphpd)
+find_package(Readline)
+find_package(Editline)
+if (READLINE_INCLUDE_DIR)
+	include_directories(${READLINE_INCLUDE_DIR})
+elseif (EDITLINE_INCLUDE_DIRS)
+	add_definitions("-DUSE_EDITLINE")
+	include_directories(${EDITLINE_INCLUDE_DIRS})
+else()
+	message(FATAL_ERROR "Could not find Readline or Editline")
+endif()
 
 find_package(CClient REQUIRED)
 include_directories(${CCLIENT_INCLUDE_PATH})
+
+find_package(LibDwarf REQUIRED)
+include_directories(${LIBDWARF_INCLUDE_DIRS})
+if (LIBDWARF_HAVE_ENCODE_LEB128)
+	add_definitions("-DHAVE_LIBDWARF_20130729")
+endif()
+
+find_package(LibElf REQUIRED)
+include_directories(${LIBELF_INCLUDE_DIRS})
+if (ELF_GETSHDRSTRNDX)
+        add_definitions("-DHAVE_ELF_GETSHDRSTRNDX")
+endif()
 
 CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/utf8.h" U8T_DECOMPOSE RECENT_CCLIENT)
 if (NOT RECENT_CCLIENT)
@@ -253,29 +335,35 @@ if (NOT RECENT_CCLIENT)
 	message(FATAL_ERROR "Your version of c-client is too old, you need 2007")
 endif()
 
-CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" auth_gss CCLIENT_NEEDS_PAM)
+
+if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
+	CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" auth_gss CCLIENT_HAS_GSS)
+elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
+    CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" auth_gss CCLIENT_HAS_GSS)
+endif()
+
+find_package(Libpam)
+if (PAM_INCLUDE_PATH)
+	include_directories(${PAM_INCLUDE_PATH})
+endif()
+
+if (NOT CCLIENT_HAS_GSS)
+	add_definitions(-DSKIP_IMAP_GSS=1)
+endif()
 
 if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
 	CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" ssl_onceonlyinit CCLIENT_HAS_SSL)
-endif()
-
-if (CCLIENT_NEEDS_PAM)
-	find_package(Libpam REQUIRED)
-	include_directories(${PAM_INCLUDE_PATH})
-else()
-	add_definitions(-DSKIP_IMAP_GSS=1)
+elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
+	CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" ssl_onceonlyinit CCLIENT_HAS_SSL)
 endif()
 
 if (NOT CCLIENT_HAS_SSL)
 	add_definitions(-DSKIP_IMAP_SSL=1)
 endif()
 
+FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)
-	FIND_LIBRARY (CRYPT_LIB NAMES xcrypt crypt)
 	FIND_LIBRARY (RT_LIB rt)
-elseif (APPLE)
-	FIND_LIBRARY (CRYPT_LIB crypto)
-	FIND_LIBRARY (ICONV_LIB iconv)
 endif()
 
 if (LINUX)
@@ -304,6 +392,17 @@ endif()
 
 if (FREEBSD)
 	FIND_LIBRARY (EXECINFO_LIB execinfo)
+	if (NOT EXECINFO_LIB)
+		message(FATAL_ERROR "You need to install libexecinfo")
+	endif()
+endif()
+
+if (APPLE)
+	find_library(LIBINTL_LIBRARIES NAMES intl libintl)
+	if (LIBINTL_INCLUDE_DIR)
+		include_directories(${LIBINTL_INCLUDE_DIR})
+	endif()
+	find_library(KERBEROS_LIB NAMES gssapi_krb5)
 endif()
 
 #find_package(BISON REQUIRED)
@@ -313,10 +412,14 @@ endif()
 #	message(FATAL_ERROR "Flex is too old, found ${FLEX_VERSION} and we need 2.5.33")
 #endif()
 
-include_directories(${HPHP_HOME}/src)
-include_directories(${HPHP_HOME}/src/system/gen)
+include_directories(${HPHP_HOME}/hphp)
+include_directories(${HPHP_HOME}/hphp/system/gen)
 
 macro(hphp_link target)
+	if (LIBDL_LIBRARIES)
+		target_link_libraries(${target} ${LIBDL_LIBRARIES})
+	endif ()
+
 	if (GOOGLE_HEAP_PROFILER_ENABLED OR GOOGLE_CPU_PROFILER_ENABLED)
 		target_link_libraries(${target} ${GOOGLE_PROFILER_LIB})
 	endif()
@@ -334,9 +437,23 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${Boost_LIBRARIES})
 	target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
 	target_link_libraries(${target} ${PCRE_LIBRARY})
-	target_link_libraries(${target} ${ICU_LIBRARIES} ${ICU_I18N_LIBRARIES})
+	target_link_libraries(${target} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
+	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
+
+if (LibXed_LIBRARY)
+	target_link_libraries(${target} ${LibXed_LIBRARY})
+endif()
+
+if (LIBINOTIFY_LIBRARY)
+	target_link_libraries(${target} ${LIBINOTIFY_LIBRARY})
+endif()
+
+if (LIBICONV_LIBRARY)
+	target_link_libraries(${target} ${LIBICONV_LIBRARY})
+endif()
+
 
 if (LINUX)
 	target_link_libraries(${target} ${CAP_LIB})
@@ -351,9 +468,16 @@ if (FREEBSD)
 	target_link_libraries(${target} ${EXECINFO_LIB})
 endif()
 
+if (APPLE)
+	target_link_libraries(${target} ${LIBINTL_LIBRARIES})
+	target_link_libraries(${target} ${KERBEROS_LIB})
+endif()
+
 	target_link_libraries(${target} ${BFD_LIB})
 	target_link_libraries(${target} ${BINUTIL_LIB})
-	target_link_libraries(${target} pthread)
+if (${LIBPTHREAD_LIBRARIES})
+	target_link_libraries(${target} ${LIBPTHREAD_LIBRARIES})
+endif()
 	target_link_libraries(${target} ${TBB_LIBRARIES})
 	target_link_libraries(${target} ${OPENSSL_LIBRARIES})
 	target_link_libraries(${target} ${ZLIB_LIBRARIES})
@@ -364,38 +488,55 @@ endif()
 	target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
 	target_link_libraries(${target} ${Mcrypt_LIB})
 	target_link_libraries(${target} ${GD_LIBRARY})
-
+if (FREETYPE_LIBRARIES)
+	target_link_libraries(${target} ${FREETYPE_LIBRARIES})
+endif()
+if (LIBJPEG_LIBRARIES)
+	target_link_libraries(${target} ${LIBJPEG_LIBRARIES})
+endif()
+if (LIBPNG_LIBRARIES)
+	target_link_libraries(${target} ${LIBPNG_LIBRARIES})
+endif()
+if (LIBVPX_LIBRARIES)
+	target_link_libraries(${target} ${LIBVPX_LIBRARIES})
+endif()
+if (LIBUODBC_LIBRARIES)
+	target_link_libraries(${target} ${LIBUODBC_LIBRARIES})
+endif()
 	target_link_libraries(${target} ${LDAP_LIBRARIES})
 	target_link_libraries(${target} ${LBER_LIBRARIES})
 
 	target_link_libraries(${target} ${LIBMEMCACHED_LIBRARY})
 
+	target_link_libraries(${target} ${CRYPT_LIB})
 	if (LINUX OR FREEBSD)
-		target_link_libraries(${target} ${CRYPT_LIB})
 		target_link_libraries(${target} ${RT_LIB})
-	elseif (APPLE)
-		target_link_libraries(${target} ${CRYPTO_LIB})
-		target_link_libraries(${target} ${ICONV_LIB})
 	endif()
 
 	target_link_libraries(${target} timelib)
 	target_link_libraries(${target} sqlite3)
-
-	if (SKIP_BUNDLED_XHP)
-		target_link_libraries(${target} ${XHP_LIB})
-	else()
-		target_link_libraries(${target} xhp)
-	endif()
+	target_link_libraries(${target} lz4)
+	target_link_libraries(${target} double-conversion)
+	target_link_libraries(${target} folly)
+	target_link_libraries(${target} zip_static)
 
 	target_link_libraries(${target} afdt)
 	target_link_libraries(${target} mbfl)
 
-	target_link_libraries(${target} ${READLINE_LIBRARY})
+	if (READLINE_LIBRARY)
+		target_link_libraries(${target} ${READLINE_LIBRARY})
+	elseif (EDITLINE_LIBRARIES)
+		target_link_libraries(${target} ${EDITLINE_LIBRARIES})
+	endif()
+
 	target_link_libraries(${target} ${NCURSES_LIBRARY})
 	target_link_libraries(${target} ${CCLIENT_LIBRARY})
 
-	if (CCLIENT_NEEDS_PAM)
+	if (PAM_LIBRARY)
 		target_link_libraries(${target} ${PAM_LIBRARY})
 	endif()
+
+        target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
+        target_link_libraries(${target} ${LIBELF_LIBRARIES})
 
 endmacro()

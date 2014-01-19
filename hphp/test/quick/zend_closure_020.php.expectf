@@ -1,0 +1,12 @@
+object(foo)#1 (2) {
+  ["test":"foo":private]=>
+  int(3)
+  ["a"]=>
+  object(Closure$foo::x)#2 (1) {
+    ["a":"Closure$foo::x":private]=>
+    *RECURSION*
+  }
+}
+bool(true)
+bool(true)
+HipHop Fatal error: Cannot access private property foo::$test in %s on line 19

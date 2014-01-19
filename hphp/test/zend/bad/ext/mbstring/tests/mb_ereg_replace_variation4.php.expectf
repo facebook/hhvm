@@ -1,0 +1,75 @@
+*** Testing mb_ereg_replace() : usage variations ***
+
+-- Iteration 1 --
+string(10) "str1n1_v1l"
+
+-- Iteration 2 --
+string(10) "str1n1_v1l"
+
+-- Iteration 3 --
+string(10) "str1n1_v1l"
+
+-- Iteration 4 --
+string(10) "str1n1_v1l"
+
+-- Iteration 5 --
+string(10) "str1n1_v1l"
+
+-- Iteration 6 --
+string(10) "str1n1_v1l"
+
+-- Iteration 7 --
+string(10) "str1n1_v1l"
+
+-- Iteration 8 --
+string(10) "str1n1_v1l"
+
+-- Iteration 9 --
+string(10) "str1n1_v1l"
+
+-- Iteration 10 --
+string(10) "str1n1_v1l"
+
+-- Iteration 11 --
+string(10) "str1n1_v1l"
+
+-- Iteration 12 --
+string(10) "str1n1_v1l"
+
+-- Iteration 13 --
+string(10) "str1n1_v1l"
+
+-- Iteration 14 --
+string(10) "str1n1_v1l"
+
+-- Iteration 15 --
+string(10) "str1n1_v1l"
+
+-- Iteration 16 --
+string(10) "str1n1_v1l"
+
+-- Iteration 17 --
+string(10) "str1n1_v1l"
+
+-- Iteration 18 --
+string(10) "str1n1_v1l"
+
+-- Iteration 19 --
+string(10) "str1n1_v1l"
+
+-- Iteration 20 --
+string(10) "str1n1_v1l"
+
+-- Iteration 21 --
+string(10) "str1n1_v1l"
+
+-- Iteration 22 --
+string(10) "str1n1_v1l"
+
+-- Iteration 23 --
+string(10) "str1n1_v1l"
+
+-- Iteration 24 --
+HipHop Warning: %s
+bool(false)
+Done

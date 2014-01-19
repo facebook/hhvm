@@ -1,0 +1,2 @@
+copy palette 255 colors: ok
+copy palette 1 color and alpha: ok

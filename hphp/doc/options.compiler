@@ -1,0 +1,293 @@
+<h2>Configurable Options for Compiler</h2>
+
+Compiler has a --config option to take a configuration file in HDF format, and
+it has a --config-value to take ad-hoc configurable options in HDF format.
+This documentation describes what's available for both of them.
+
+When in doubt, look for how these options are parsed in compiler/options.cpp.
+
+= AllDynamic
+
+Default is false. When turned on, all functions and methods can be invoked
+dynamically even without a literal string. When turned off, some dynamic
+function calls may fail, if compiler is not able to tell that function may be
+invoked dynamically. Recommend to turn on this switch.
+
+= AllVolatile
+
+Default is false. When turned on, order-dependent function or class declaration
+vs. existence testing can work. When turned off, some function_exists(),
+class_exists(), get_defined_functions() or get_declared_classes() may return
+different results than PHP does. Most programs don't have dependencies on their
+behaviors, so this is recommended to leave as off.
+
+= EnableEval
+
+Default is 0, eval() will throw a fatal error. When 1, eval() is supported in
+a limited way, mixed together with compiled program. When 2, eval() is fully
+supported as an interpreter mode.
+
+= IncludeRoots
+
+Only needed when --input-list is not used, and --parse-on-demand is turned on.
+In this case, compiler needs to understand every single include. Currently it
+only understands these formats (compiler/analysis/dependency_graph.cpp),
+
+  include 'literal_file_path';
+  include $SOME_VARIABLE . 'literal_file_path';
+
+IncludeRoots is designed to look up $SOME_VARIABLE in the second case, so to
+resolve file paths at compilation time. It will look like this,
+
+  IncludeRoots {
+    * {
+      root = $SOME_VARIABLE
+      path = lib/
+    }
+    * {
+      root = $SOME_OTHER_ROOT
+      path = lib/another
+    }
+  }
+
+= AutoloadRoots
+
+Only needed when --input-list is not used, and --parse-on-demand is turned on.
+In this case, compiler needs to understand all autoloads to find a class file.
+It will look like this,
+
+  AutoloadRoots {
+    * {
+      root = $GLOBALS['THRIFT_AUTOLOAD']
+      path = lib/thrift/packages
+    }
+  }
+
+With the above configuration, whenever a class name is added to the array,
+
+  $GLOBALS['THRIFT_AUTOLOAD'][] = 'myclass';
+
+It will be searched against the specified path. Please note that, this is
+not a good way to work around the problem. --include-list is recommended to
+specify all class files explicitly. Then this option isn't needed.
+
+= IncludeSearchPaths
+
+Only needed when --input-list is not used, and --parse-on-demand is turned on.
+Specifies more paths to search for include files. For example,
+
+  IncludeSearchPaths {
+    * = lib/thrift/packages
+    * = lib/common
+  }
+
+= PackageDirectories
+
+Add all PHP files under these directories. For example,
+
+  PackageDirectories {
+    * = lib/thrift/packages
+    * = lib/common
+  }
+
+= PackageExcludeDirs
+
+Exclude file under these directories. Same as --exclude-dir command line
+option. For example,
+
+  PackageExcludeDirs {
+    * = scripts/
+    * = tests/
+  }
+
+= PackageExcludeFiles
+
+Exclude these files. Same as --exclude-file command line option. For example,
+
+  PackageExcludeFiles {
+    * = scripts/delete_user.php
+    * = tests/create_database.php
+  }
+
+= PackageExcludeStaticFiles
+
+Exclude files matching these patterns from static file content cache. A static
+content cache creates one single file from all static contents, including
+css, js, html, images and other MIME format files. When building static
+content cache, the compiler will look for all non-PHP files to try to include
+them. This option allows one to exclude certain files. Same as
+--exclude-static-pattern command line option. For example,
+
+  PackageExcludeStaticFiles {
+    * = .*\\.js
+    * = .*\\.css
+  }
+
+= CachePHPFile
+
+Default is false. Whether to include PHP files in static content cache.
+
+= ScalarArrayFileCount
+
+Default is 1. Scalar arrays are arrays with scalar values, including literal
+strings, numbers and scalar arrays as keys and values, so their values are
+entirely determined at compilation time. We pre-generate these arrays during
+program startup time just once to avoid initialization costs. These scalar
+arrays are groups into their own files. This option specifies how many files
+to generate or split up scalar arrays, so we can compile them faster. For
+large project with a lot of scalar arrays, use a higher value. Then each file
+is smaller. When using distcc, normally it finishes compilation faster.
+
+= ScalarArrayOverflowLimit
+
+Default is 2000. Some scalar arrays can become extremely large when nested
+with lots of elements and levels. This option controls how to split them up
+into small ones, having sub-arrays defined by their own, so to flatten array
+data structure for faster compilation.
+
+= LiteralStringFileCount
+
+Default is 1. Similar to scalar arrays, we have literal strings pre-generated
+in files. This option specifies how many of these files are generated for
+faster compilation.
+
+= EnableHipHopSyntax
+
+Default is false. Enables new syntax, including yield, new type names for
+function parameter, function return and class variable type hints (string,
+int, boolean, etc..), new array types (vector, map, set).
+
+= EnableHipHopExperimentalSyntax
+
+Default is false. Enables experimental syntax, including type hints for local
+variables and global variables.
+
+= EnableShortTags
+
+Default is true. Is &lt;? allowed with PHP code?
+
+= EnableAspTags
+
+Default is false. Is &lt;% %&gt; allowed with PHP code?
+
+= EnableXHP
+
+Whether to enable XHP extension. XHP adds some syntax sugar to allow better and
+safer HTML templating. For more information, search XHP.
+
+= NativeXHP
+
+Whether to use HPHP to directly handle XHP.
+
+= ParserThreadCount
+
+How many threads to use when parsing PHP files. By default, it's 2x CPU count.
+
+= FlibDirectory
+
+Facebook specific. Ignore.
+
+= GenerateDocComments
+
+Default is true. Whether to store doc comments in class map, so they can be
+queried from reflection.
+
+= PregenerateCPP
+
+Default is false. In case clustering of output files has been requested and this
+option is set to true, the files are pre-generated in memory in order to perform
+a more precise partitioning.
+
+= GCCOptimization
+
+Default is disabled. This option allows to selectively decrease the compiler
+optimization level for long functions. It is specified as:
+
+  GCCOptimization {
+    O2 = X
+    O1 = Y
+    O0 = Z
+  }
+
+where X, Y, Z are the minimum length functions must have (measured as line
+count) for their optimization level to be decreased respectively to O2, O1,
+O0. Note that all these parameters are optional, so it is possible for example
+to only specify O1 and O0 but not O2, meaning that O2 will never be used as an
+optimization level. In general it is expected that if specified, the minimum
+line counts will be increasing for a decreasing optimization level.
+
+= DynamicFunctionPrefix
+
+Deprecating. These are options for specifying which functions may be called
+dynamically. This turned out to be hard to configure, and it's replaced by
+AllDynamics.
+
+= DynamicFunctionPostfix
+
+Deprecating. These are options for specifying which functions may be called
+dynamically. This turned out to be hard to configure, and it's replaced by
+AllDynamics.
+
+= DynamicMethodPrefix
+
+Deprecating. These are options for specifying which methods may be called
+dynamically. This turned out to be hard to configure, and it's replaced by
+AllDynamics.
+
+= DynamicInvokeFunctions
+
+Deprecating. These are options for specifying which functions may be called
+dynamically. This turned out to be hard to configure, and it's replaced by
+AllDynamics.
+
+= CodeGeneration
+
+Under "CodeGeneration", one can specify alternative name prefixes that are
+used in different places of code generation.
+
+- IdPrefix
+- LabelEscape
+- LambdaPrefix
+- FunctionPrefix
+- BuiltinFunctionPrefix
+- InvokePrefix
+- CreateObjectPrefix
+- PseudoMainPrefix
+- VariablePrefix
+- GlobalVariablePrefix
+- StaticVariablePrefix
+- ScalarArrayName
+- SystemScalarArrayName
+- ClassPrefix
+- ClassStaticsPrefix
+- ClassStaticsObjectPrefix
+- ClassStaticsCallbackPrefix
+- ClassStaticsIdGetterPrefix
+- ClassStaticInitializerPrefix
+- ClassStaticInitializerFlagPrefix
+- ClassWrapperFunctionPrefix
+- ObjectPrefix
+- ObjectStaticPrefix
+- SmartPtrPrefix
+- MethodPrefix
+- MethodWrapperPrefix
+- MethodImplPrefix
+- PropertyPrefix
+- StaticPropertyPrefix
+- ConstantPrefix
+- ClassConstantPrefix
+- ExceptionPrefix
+- TempVariablePrefix
+- EvalOrderTempPrefix
+- SilencerPrefix
+- EvalInvokePrefix
+- TempPrefix
+- MapPrefix
+- IterPrefix
+- InitPrefix
+- FFIFnPrefix
+- SystemFilePrefix
+- UserFilePrefix
+- ClassHeaderPrefix
+- ClusterPrefix
+- FFIFilePrefix

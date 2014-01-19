@@ -1,0 +1,8 @@
+HipHop Warning: %s
+ in %s on line %d
+HipHop Warning: %s
+ in %s on line %d
+HipHop Warning: %s
+ in %s on line %d
+leak? penultimate iteration: %d, last one: %d
+bool(true)

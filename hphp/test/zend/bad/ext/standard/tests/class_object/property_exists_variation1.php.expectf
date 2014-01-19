@@ -1,0 +1,8 @@
+*** Testing property_exists() : class auto loading ***
+
+testing property in autoloaded class
+bool(true)
+
+testing __get magic method
+bool(false)
+===DONE===

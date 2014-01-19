@@ -1,0 +1,14 @@
+HipHop Notice: %s
+object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(1) {
+    ["d1"]=>
+    array(2) {
+      ["d2"]=>
+      string(5) "hello"
+      ["d3"]=>
+      string(5) "world"
+    }
+  }
+}
+NULL

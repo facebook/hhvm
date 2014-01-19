@@ -1,0 +1,4 @@
+my_handler called
+int(4096)
+string(49) "Method C::__toString() must return a string value"
+Result: string(0) ""

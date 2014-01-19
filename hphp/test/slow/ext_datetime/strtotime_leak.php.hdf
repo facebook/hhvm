@@ -1,0 +1,3 @@
+# test/config.hdf has something in it to make this test fail
+
+Eval.JitPGOThreshold=100000

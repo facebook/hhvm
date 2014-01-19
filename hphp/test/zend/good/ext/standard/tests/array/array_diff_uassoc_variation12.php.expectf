@@ -1,0 +1,26 @@
+*** Testing array_diff_uassoc() : usage variation ***
+
+--null indexed--
+array(1) {
+  [10]=>
+  string(2) "10"
+}
+array(0) {
+}
+
+--undefined indexed--
+array(1) {
+  [10]=>
+  string(2) "10"
+}
+array(0) {
+}
+
+--unset indexed--
+array(1) {
+  [10]=>
+  string(2) "10"
+}
+array(0) {
+}
+===DONE===

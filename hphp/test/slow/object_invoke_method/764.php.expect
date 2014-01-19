@@ -1,0 +1,60 @@
+string(2) "C1"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "D2"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "D2"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "D2"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "D2"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "D2"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "C1"
+int(0)
+int(1)
+string(2) "D2"
+int(0)
+int(1)
+array(2) {
+  [2]=>
+  int(11)
+  [3]=>
+  int(13)
+}

@@ -1,0 +1,9 @@
+[callback:1]All of the following calls will fail to clean/remove the topmost buffer:
+HipHop Notice: %s
+bool(false)
+HipHop Notice: %s
+bool(false)
+HipHop Notice: %s
+bool(false)
+The OB nesting will still be 1 level deep:
+int(1)

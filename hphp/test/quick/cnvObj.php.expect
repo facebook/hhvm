@@ -1,0 +1,34 @@
+object(stdClass)#1 (0) {
+}
+object(stdClass)#1 (1) {
+  ["scalar"]=>
+  bool(false)
+}
+object(stdClass)#1 (1) {
+  ["scalar"]=>
+  bool(true)
+}
+object(stdClass)#1 (1) {
+  ["scalar"]=>
+  int(1)
+}
+object(stdClass)#1 (1) {
+  ["scalar"]=>
+  float(1.1)
+}
+object(stdClass)#1 (1) {
+  ["scalar"]=>
+  string(3) "abc"
+}
+object(stdClass)#1 (1) {
+  [0]=>
+  int(123)
+}
+object(C)#1 (0) {
+}
+object(stdClass)#1 (1) {
+  ["scalar"]=>
+  string(1) "1"
+}
+object(stdClass)#1 (0) {
+}

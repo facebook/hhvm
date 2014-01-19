@@ -1,0 +1,49 @@
+array(3) {
+  [0]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(8)
+    ["function"]=>
+    string(10) "__destruct"
+    ["class"]=>
+    string(6) "Tracer"
+    ["object"]=>
+    object(Tracer)#2 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(6) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(19)
+    ["function"]=>
+    string(2) "hi"
+    ["class"]=>
+    string(3) "Foo"
+    ["type"]=>
+    string(2) "::"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(21)
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}

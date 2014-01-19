@@ -1,0 +1,237 @@
+# Tests unwinding with dirty callee-saved registers that are mapped to
+# execution stack locations.
+
+.main {
+  FPushFuncD 1 "set_error_handler"
+    String "thrower"
+    FPassC 0
+  FCall 1
+  PopR
+
+  .try_catch (Exception handler) {
+    FPushFuncD 0 "test_unwind_dirty_stack_regs"
+    FCall 0
+    UnboxR
+    RetC
+  }
+
+handler:
+  String "Received exception:  "
+  Catch
+  FPushObjMethodD 0 "getMessage"
+  FCall 0
+  UnboxR
+  Concat
+  String "\n"
+  Concat
+  Print
+  PopC
+  Int 1
+  RetC
+}
+
+.function thrower() {
+  FPushCtorD 1 "Exception"
+    String "hi"
+    FPassC 0
+  FCall 1
+  PopR
+  Throw
+}
+
+.class DtorPrinter {
+  .method [public] __construct($id) {
+    String "ctor: "
+    CGetL $id
+    Concat
+    String "\n"
+    Concat
+    Print
+    PopC
+
+    This
+    CGetL $id
+    SetM <C PT:"x">
+    PopC
+    Int 1
+    RetC
+  }
+
+  .method [public] __destruct() {
+    String "dtor: "
+    This
+    CGetM <C PT:"x">
+    Concat
+    String "\n"
+    Concat
+    Print
+    RetC
+  }
+
+  .property [private] x;
+}
+
+.function make_obj($id) {
+  FPushCtorD 1 "DtorPrinter"
+    FPassL 0 $id
+  FCall 1
+  PopR
+  RetC
+}
+
+# This test is dependent on the register allocator implementation, but
+# probably better than nothing and unlikely to significantly change.
+# It seems fairly hard to get a EMIT_CALL to happen while a Stack
+# location is in a dirty callee-saved register with our normal php
+# emitter, but this accomplishes it by CGetL'ing everything to the
+# stack.
+
+.function test_unwind_dirty_stack_regs() {
+  FPushFuncD 1 "make_obj"
+    Int 0
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_0
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 1
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_1
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 2
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_2
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 3
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_3
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 4
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_4
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 5
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_5
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 6
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_6
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 7
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_7
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 8
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_8
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 9
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_9
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 10
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_10
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 11
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_11
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 12
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_12
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 13
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_13
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 14
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_14
+  PopC
+
+  CGetL $k_0
+  CGetL $k_1
+  CGetL $k_2
+  CGetL $k_3
+  CGetL $k_4
+  CGetL $k_5
+  CGetL $k_6
+  CGetL $k_7
+  CGetL $k_8
+  CGetL $k_9
+  CGetL $k_10
+  CGetL $k_11
+  CGetL $k_12
+  CGetL $k_13
+  CGetL $k_14
+
+  CGetL $k_99  # undefined variable
+  PopC
+
+  # This code isn't reached---but let's Pop this junk just so
+  # theoretically we could pass verification some day.
+  PopC # k_0
+  PopC
+  PopC
+  PopC
+  PopC # k_4
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC # k_9
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC # k_14
+
+  Int 1
+  RetC
+}

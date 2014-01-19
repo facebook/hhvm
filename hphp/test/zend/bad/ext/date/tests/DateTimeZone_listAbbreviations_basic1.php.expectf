@@ -1,0 +1,44 @@
+*** Testing DateTimeZone::listAbbreviations() : basic functionality ***
+string(5) "array"
+int(%d)
+
+-- Format a sample entry --
+array(4) {
+  [0]=>
+  array(3) {
+    ["dst"]=>
+    bool(true)
+    ["offset"]=>
+    int(-14400)
+    ["timezone_id"]=>
+    string(18) "America/Porto_Acre"
+  }
+  [1]=>
+  array(3) {
+    ["dst"]=>
+    bool(true)
+    ["offset"]=>
+    int(-14400)
+    ["timezone_id"]=>
+    string(16) "America/Eirunepe"
+  }
+  [2]=>
+  array(3) {
+    ["dst"]=>
+    bool(true)
+    ["offset"]=>
+    int(-14400)
+    ["timezone_id"]=>
+    string(18) "America/Rio_Branco"
+  }
+  [3]=>
+  array(3) {
+    ["dst"]=>
+    bool(true)
+    ["offset"]=>
+    int(-14400)
+    ["timezone_id"]=>
+    string(11) "Brazil/Acre"
+  }
+}
+===DONE===

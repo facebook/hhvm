@@ -1,0 +1,22 @@
+array(2) {
+  ["color"]=>
+  array(1) {
+    ["favoritte"]=>
+    string(3) "red"
+  }
+  [0]=>
+  array(2) {
+    [0]=>
+    int(10)
+    [1]=>
+    array(1) {
+      ["color"]=>
+      array(2) {
+        ["favorite"]=>
+        string(5) "green"
+        [0]=>
+        string(4) "blue"
+      }
+    }
+  }
+}

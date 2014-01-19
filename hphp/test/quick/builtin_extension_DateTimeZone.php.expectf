@@ -1,0 +1,53 @@
+DateTimeZone
+HipHop Warning: DateTimeZone::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+object(DateTimeZone)#1 (0) {
+}
+string(97) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:12:"DateTimeZone";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(12) "DateTimeZone"
+}
+array(7) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(11) "getLocation"
+  [2]=>
+  string(7) "getName"
+  [3]=>
+  string(9) "getOffset"
+  [4]=>
+  string(14) "getTransitions"
+  [5]=>
+  string(17) "listAbbreviations"
+  [6]=>
+  string(15) "listIdentifiers"
+}
+================
+A_DateTimeZone
+HipHop Warning: DateTimeZone::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+object(A_DateTimeZone)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(99) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:14:"A_DateTimeZone";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(14) "A_DateTimeZone"
+}
+array(7) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(11) "getLocation"
+  [2]=>
+  string(7) "getName"
+  [3]=>
+  string(9) "getOffset"
+  [4]=>
+  string(14) "getTransitions"
+  [5]=>
+  string(17) "listAbbreviations"
+  [6]=>
+  string(15) "listIdentifiers"
+}

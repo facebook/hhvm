@@ -1,0 +1,41 @@
+<?php /* $Id$ */
+	$a = mktime(0, 0, 0, 4, 4, 2004, 0);
+	$b = mktime(0, 0, 0, 4, 4, 2004, 1);
+	$c = mktime(0, 0, 0, 4, 4, 2004, -1);
+	echo "$a ".date("m/d/y h:i:s\n",$a);
+	echo "$b ".date("m/d/y h:i:s\n",$b);
+	echo "$c ".date("m/d/y h:i:s\n",$c);
+	echo "\n";
+	date_default_timezone_set('EST5EDT');  // DST not in effect
+	$a = mktime(0, 0, 0, 2, 4, 2004, 0);
+	$b = mktime(0, 0, 0, 2, 4, 2004, 1);
+	$c = mktime(0, 0, 0, 2, 4, 2004, -1);
+	echo "$a ".date("m/d/y h:i:s\n",$a);
+	echo "$b ".date("m/d/y h:i:s\n",$b);
+	echo "$c ".date("m/d/y h:i:s\n",$c);
+	echo "\n";
+	date_default_timezone_set('EST5EDT');
+	$a = mktime(0, 0, 0, 4, 4, 2004, 0);
+	$b = mktime(0, 0, 0, 4, 4, 2004, 1);
+	$c = mktime(0, 0, 0, 4, 4, 2004, -1);
+	echo "$a ".date("m/d/y h:i:s\n",$a);
+	echo "$b ".date("m/d/y h:i:s\n",$b);
+	echo "$c ".date("m/d/y h:i:s\n",$c);
+	echo "\n";
+	date_default_timezone_set('EST5EDT');
+	$a = mktime(3, 0, 0, 4, 4, 2004, 0);
+	$b = mktime(3, 0, 0, 4, 4, 2004, 1);
+	$c = mktime(3, 0, 0, 4, 4, 2004, -1);
+	echo "$a ".date("m/d/y h:i:s\n",$a);
+	echo "$b ".date("m/d/y h:i:s\n",$b);
+	echo "$c ".date("m/d/y h:i:s\n",$c);
+	echo "\n";
+	date_default_timezone_set('EST5EDT');
+	$a = mktime(0, 0, 0, 6, 4, 2004, 0);
+	$b = mktime(0, 0, 0, 6, 4, 2004, 1);
+	$c = mktime(0, 0, 0, 6, 4, 2004, -1);
+	echo "$a ".date("m/d/y h:i:s\n",$a);
+	echo "$b ".date("m/d/y h:i:s\n",$b);
+	echo "$c ".date("m/d/y h:i:s\n",$c);
+	echo "\n";
+?>

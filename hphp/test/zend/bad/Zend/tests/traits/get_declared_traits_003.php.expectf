@@ -1,0 +1,10 @@
+%astring(1) "a"
+  [%d]=>
+  string(1) "d"
+  [%d]=>
+  string(1) "e"
+}
+array(1) {
+  [0]=>
+  string(1) "c"
+}

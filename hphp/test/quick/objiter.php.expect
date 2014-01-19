@@ -1,0 +1,52 @@
+
+Base context, Base object
+basePub => 10
+baseProt => 20
+basePriv => 30
+baseDynamic => base dynamic
+
+Anonymous context, Base object
+basePub => 10
+baseDynamic => base dynamic
+
+Child context, Child object
+childPub => 40
+childProt => 50
+childPriv => 60
+basePriv => child's basePriv
+basePub => 10
+baseProt => 20
+childDynamic => child dynamic
+
+Base context, Child object
+childPub => 40
+childProt => 50
+basePriv => 30
+basePub => 10
+baseProt => 20
+childDynamic => child dynamic
+
+Anonymous context, Child object
+childPub => 40
+basePub => 10
+childDynamic => child dynamic
+
+Anonymous context, Child object, strong foreach
+object(Child)#3 (8) {
+  ["childPub"]=>
+  string(5) "BLARK"
+  ["childProt":protected]=>
+  int(50)
+  ["childPriv":"Child":private]=>
+  int(60)
+  ["basePriv":"Child":private]=>
+  string(16) "child's basePriv"
+  ["basePub"]=>
+  string(5) "BLARK"
+  ["baseProt":protected]=>
+  int(20)
+  ["basePriv":"Base":private]=>
+  int(30)
+  ["dynamic"]=>
+  &string(5) "BLARK"
+}

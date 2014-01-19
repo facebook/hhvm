@@ -1,0 +1,28 @@
+string(14) "5.4.999-hiphop"
+string(11) "PHP_VERSION"
+string(1) "c"
+string(1) "B"
+array(1) {
+  [0]=>
+  string(14) "5.4.999-hiphop"
+}
+string(18) "array(PHP_VERSION)"
+array(1) {
+  [0]=>
+  string(1) "c"
+}
+string(%d) "array%w(%a)"
+string(14) "5.4.999-hiphop"
+string(11) "PHP_VERSION"
+string(1) "c"
+string(1) "B"
+array(1) {
+  [0]=>
+  string(14) "5.4.999-hiphop"
+}
+string(18) "array(PHP_VERSION)"
+array(1) {
+  [0]=>
+  string(1) "c"
+}
+string(%d) "array%w(%a)"

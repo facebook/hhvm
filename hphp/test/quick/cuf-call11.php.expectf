@@ -1,0 +1,10 @@
+D1::foo true
+D1::foo true
+D2::foo false
+D2::foo false
+D3::foo false
+D3::foo false
+D4::foo false
+D4::foo false
+HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 97
+HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 98

@@ -1,0 +1,5 @@
+E::__call
+E::__call
+E::__call
+E::__call
+HipHop Fatal error: Call to undefined method E::foo from anonymous context in %s on line 30

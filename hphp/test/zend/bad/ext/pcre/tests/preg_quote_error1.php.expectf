@@ -1,0 +1,11 @@
+*** Testing preg_quote() : error conditions ***
+
+Arg value is: this is a string
+string(16) "this is a string"
+
+Arg value is: Array
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

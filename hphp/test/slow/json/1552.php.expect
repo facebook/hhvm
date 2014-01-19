@@ -1,0 +1,8 @@
+array(3) {
+  [0]=>
+  float(1.23456789E+34)
+  [1]=>
+  float(INF)
+  [2]=>
+  float(NAN)
+}

@@ -1,0 +1,34 @@
+
+Log {
+  AlwaysLogUnhandledExceptions = false
+}
+
+Server {
+  AllowedFiles {
+    * = hello.php
+    * = hphpd.php
+  }
+}
+
+Eval {
+  Debugger {
+    EnableDebugger = true
+    EnableDebuggerServer = true
+    StartupDocument = hphpd_startup.php
+    SignalTimeout = 5
+  }
+}
+
+Sandbox {
+  SandboxMode = true
+  ConfFile = sandbox_conf
+  # only match hphpd.<user>.sth.sth, not any requests
+  Pattern = hphpd\.([a-z0-9_-]+)\.[a-z0-9_-]+\.[a-z0-9_-]+
+}
+
+Repo {
+  Local.Mode = --
+  Eval.Mode = readonly
+  Commit = true
+  DebugInfo = true
+}

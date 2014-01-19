@@ -1,0 +1,8 @@
+object(A)#1 (1) {
+  ["a":"A":private]=>
+  array(1) {
+    [0]=>
+    string(5) "apple"
+  }
+}
+string(1) "a"

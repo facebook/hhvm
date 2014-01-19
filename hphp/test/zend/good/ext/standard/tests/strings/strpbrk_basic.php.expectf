@@ -1,0 +1,10 @@
+*** Testing strpbrk() : basic functionality ***
+string(20) "is is a Simple text."
+string(12) "Simple text."
+bool(false)
+bool(false)
+bool(false)
+string(12) "  aaa aaaSLR"
+string(1) "5"
+string(1) "5"
+===DONE===

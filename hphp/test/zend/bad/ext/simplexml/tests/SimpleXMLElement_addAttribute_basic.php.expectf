@@ -1,0 +1,8 @@
+object(SimpleXMLElement)#2 (1) {
+  ["@attributes"]=>
+  array(1) {
+    ["type"]=>
+    string(6) "novels"
+  }
+}
+Done

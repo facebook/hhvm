@@ -1,0 +1,1 @@
+%s: MongoBinData::__construct(): The default value for type will change to 0 in the future. Please pass in '2' explicitly. in %sbug00407.php on line %d

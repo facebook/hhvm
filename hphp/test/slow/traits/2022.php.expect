@@ -1,0 +1,17 @@
+*** Testing get_declared_traits() : basic functionality ***
+
+-- Testing get_declared_traits() function with Zero arguments --
+array(1) {
+  [0]=>
+  string(7) "MyTrait"
+}
+
+-- Ensure trait is listed --
+bool(true)
+
+-- Ensure userspace interfaces are not listed --
+bool(false)
+
+-- Ensure userspace classes are not listed --
+bool(false)
+Done

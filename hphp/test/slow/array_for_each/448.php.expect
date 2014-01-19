@@ -1,0 +1,12 @@
+key=0 val=1
+key=1 val=2
+key=2 val=3
+key=3 val=4
+array(3) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(0)
+  [3]=>
+  &int(5)
+}

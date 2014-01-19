@@ -1,0 +1,10 @@
+*** Testing strftime() : usage variation ***
+
+--Newline character--
+bool(false)
+bool(false)
+
+--Tab character--
+bool(false)
+bool(false)
+===DONE===

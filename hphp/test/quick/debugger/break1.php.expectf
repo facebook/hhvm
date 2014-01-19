@@ -1,0 +1,237 @@
+Program %s/break1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+break1.php loaded
+Program %s/break1.php exited normally.
+break break1.php:6
+Breakpoint 1 set on line 6 of break1.php
+@ foo('test_break1')
+Breakpoint 1 reached at foo() on line 6 of %s/break1.php
+   5 function foo($x) {
+   6*  $y = $x.'_suffix';
+   7   error_log($y);
+
+break list
+  1	ALWAYS    on line 6 of break1.php
+continue
+test_break1_suffix
+break clear all
+All breakpoints are cleared.
+break break1.php:7
+Breakpoint 1 set on line 7 of break1.php
+break break1.php:3
+Breakpoint 2 not set on line 3 of break1.php
+Because the line does not exist or is not executable code.
+break break1.php:77
+Breakpoint 2 not set on line 77 of break1.php
+Because the line does not exist or is not executable code.
+break list
+  1	ALWAYS    on line 7 of break1.php
+@ foo('test_break1')
+Breakpoint 1 reached at foo() on line 7 of %s/break1.php
+   6   $y = $x.'_suffix';
+   7*  error_log($y);
+   8 }
+
+variable
+$x = "test_break1"
+$y = "test_break1_suffix"
+break start
+Breakpoint 2 set start of request
+But wont break until connected to a server.
+break end
+Breakpoint 3 set end of request or start of psp
+But wont break until connected to a server.
+break psp
+Breakpoint 4 set end of psp
+But wont break until connected to a server.
+break list
+  1	ALWAYS    on line 7 of break1.php
+  2	ALWAYS    start of request (unbound)
+  3	ALWAYS    end of request or start of psp (unbound)
+  4	ALWAYS    end of psp (unbound)
+break clear all
+All breakpoints are cleared.
+continue
+test_break1_suffix
+break foo()
+Breakpoint 1 set upon entering foo()
+@ foo('test_break2')
+Breakpoint 1 reached at foo() on line 6 of %s/break1.php
+   5 function foo($x) {
+   6*  $y = $x.'_suffix';
+   7   error_log($y);
+
+variable
+$x = "test_break2"
+break clear all
+All breakpoints are cleared.
+continue
+test_break2_suffix
+break cls::pubObj()
+Breakpoint 1 set upon entering cls::pubObj()
+@ $break3=new cls()
+@ $break3->pubObj('test_break3')
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12*    error_log("pubObj:".$x);
+  13   }
+
+variable
+$x = "test_break3"
+break clear all
+All breakpoints are cleared.
+break break3->pubObj()
+Breakpoint was not set in right format.
+continue
+pubObj:test_break3
+break cls::pubCls()
+Breakpoint 1 set upon entering cls::pubCls()
+@ cls::pubCls('test_break4')
+Breakpoint 1 reached at cls::pubCls() on line 15 of %s/break1.php
+  14   public static function pubCls($x) {
+  15*    error_log("pubCls:".$x);
+  16   }
+
+variable
+$x = "test_break4"
+break clear all
+All breakpoints are cleared.
+break cls::break4->pubCls()
+Breakpoint was not set in right format.
+continue
+pubCls:test_break4
+@ $break5=new cls()
+@ $break5->pubHardBreak('test_break5')
+pubHardBreak:test_break5
+Break at cls::pubHardBreak() on line 19 of %s/break1.php
+  18     error_log("pubHardBreak:".$x);
+  19*    hphpd_break();
+  20     error_log("pubHardBreak:done");
+
+continue
+pubHardBreak:done
+break clear all
+There is no breakpoint to clear or toggle.
+break cls::nosuchMethod()
+Breakpoint 1 not set upon entering cls::nosuchMethod()
+Because method cls::nosuchMethod does not exist.
+break list
+break noSuchFunction()
+Breakpoint 1 set upon entering noSuchFunction()
+But wont break until function noSuchFunction has been loaded.
+break list
+  1	ALWAYS    upon entering noSuchFunction() (unbound)
+break clear all
+All breakpoints are cleared.
+break derived::pubObj()
+Breakpoint 1 set upon entering derived::pubObj()
+break list
+  1	ALWAYS    upon entering derived::pubObj()
+@ $break6 = new derived()
+@ $break6->pubObj('test_break6')
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12*    error_log("pubObj:".$x);
+  13   }
+
+continue
+pubObj:test_break6
+break clear all
+All breakpoints are cleared.
+b cls::pubObj() if $x == 'yes'
+Breakpoint 1 set upon entering cls::pubObj() if $x == 'yes'
+@ $break7 = new cls()
+@ $break7->pubObj('yes');
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12*    error_log("pubObj:".$x);
+  13   }
+
+break list
+  1	ALWAYS    upon entering cls::pubObj() if $x == 'yes'
+b 12 if $x == 'yes sir'
+Breakpoint 2 set on line 12 of %s/break1.php if $x == 'yes sir'
+@ $this->pubObj('yes sir');
+Breakpoint 2 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12*    error_log("pubObj:".$x);
+  13   }
+
+break list
+  1	ALWAYS    upon entering cls::pubObj() if $x == 'yes'
+  2	ALWAYS    on line 12 of %s/break1.php if $x == 'yes sir'
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:yes sir
+break derived::callPubObj=>cls::pubObj()
+Breakpoint 1 set upon entering cls::pubObj() called by derived::callPubObj()
+break list
+  1	ALWAYS    upon entering cls::pubObj() called by derived::callPubObj()
+@ $break8 = new derived();
+@ $break8->pubObj('no')
+pubObj:no
+@ $break8->callPubObj('yes')
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12*    error_log("pubObj:".$x);
+  13   }
+
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:yes
+break derived::callCallPubObj=>derived::callPubObj=>cls::pubObj()
+Breakpoint 1 set upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
+break list
+  1	ALWAYS    upon entering cls::pubObj() called by derived::callPubObj() called by derived::callCallPubObj()
+@ $break9 = new derived();
+@ $break9->callPubObj('no')
+pubObj:no
+@ $break9->callCallPubObj('yes')
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12*    error_log("pubObj:".$x);
+  13   }
+
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:yes
+break derived::callCallPubObj=>cls::pubObj()
+Breakpoint 1 set upon entering cls::pubObj() called by derived::callCallPubObj()
+break list
+  1	ALWAYS    upon entering cls::pubObj() called by derived::callCallPubObj()
+@ $break10 = new derived();
+@ $break10->callPubObj('no')
+pubObj:no
+@ $break10->callCallPubObj('yes')
+Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
+  11   public function pubObj($x) {
+  12*    error_log("pubObj:".$x);
+  13   }
+
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:yes
+break foo()
+Breakpoint 1 set upon entering foo()
+break break1.php:6
+Breakpoint 2 set on line 6 of break1.php
+@ foo('test_break7')
+Breakpoint 1 reached at foo() on line 6 of %s/break1.php
+   5 function foo($x) {
+   6*  $y = $x.'_suffix';
+   7   error_log($y);
+
+Breakpoint 2 reached at foo() on line 6 of %s/break1.php
+   5 function foo($x) {
+   6*  $y = $x.'_suffix';
+   7   error_log($y);
+
+continue
+test_break7_suffix
+break clear all
+All breakpoints are cleared.
+quit

@@ -1,0 +1,39 @@
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(5)
+}
+int(5)
+int(1)
+object(foo)#2 (0) {
+}
+array(3) {
+  [0]=>
+  int(3)
+  [1]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(5)
+  }
+  [2]=>
+  object(foo)#3 (0) {
+  }
+}
+int(3)
+object(foo)#3 (0) {
+}
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(5)
+}
+int(1)
+NULL
+HipHop Notice: %s
+NULL
+HipHop Notice: %s
+HipHop Fatal error: %s

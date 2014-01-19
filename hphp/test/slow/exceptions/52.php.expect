@@ -1,0 +1,27 @@
+array(2) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(6) "string"
+    ["line"]=>
+    int(21)
+    ["function"]=>
+    string(3) "foo"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  &array(4) {
+    ["file"]=>
+    string(6) "string"
+    ["line"]=>
+    int(31)
+    ["function"]=>
+    string(3) "bar"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+int(16)

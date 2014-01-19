@@ -1,0 +1,4 @@
+*** Testing DateTime::setTimezone() : basic functionality ***
+Default timezone: Europe/London
+New timezone: America/Los_Angeles
+===DONE===

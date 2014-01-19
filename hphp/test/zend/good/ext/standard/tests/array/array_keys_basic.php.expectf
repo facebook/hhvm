@@ -1,0 +1,14 @@
+*** Testing array_keys() on basic array operation ***
+array(5) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  int(2)
+  [3]=>
+  int(-23)
+  [4]=>
+  int(3)
+}
+Done

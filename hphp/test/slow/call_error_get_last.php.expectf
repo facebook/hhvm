@@ -1,0 +1,8 @@
+HipHop Notice: %s
+Array
+(
+    [type] => 8
+    [message] => Undefined variable: a
+    [file] => %s/call_error_get_last.php
+    [line] => 2
+)

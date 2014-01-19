@@ -1,0 +1,2 @@
+test1HipHop Warning: fb_rename_function(test2, test3) failed: test3 already exists! in %s/test/slow/rename_function/1190.php on line 12
+test1

@@ -1,0 +1,301 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "iconv_mime_encode",
+            "desc": "Composes and returns a string that represents a valid MIME header field, which looks like the following: Subject: =?ISO-8859-1?Q?Pr=FCfung_f=FCr?= Entwerfen von einer MIME kopfzeile In the above example, \"Subject\" is the field name and the portion that begins with \"=?ISO-8859-1?...\" is the field value.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an encoded MIME field on success, or FALSE if an error occurs during the encoding."
+            },
+            "args": [
+                {
+                    "name": "field_name",
+                    "type": "String",
+                    "desc": "The field name."
+                },
+                {
+                    "name": "field_value",
+                    "type": "String",
+                    "desc": "The field value."
+                },
+                {
+                    "name": "preferences",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": null
+                }
+            ]
+        },
+        {
+            "name": "iconv_mime_decode",
+            "desc": "Decodes a MIME header field.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a decoded MIME field on success, or FALSE if an error occurs during the decoding."
+            },
+            "args": [
+                {
+                    "name": "encoded_string",
+                    "type": "String",
+                    "desc": "The encoded header, as a string."
+                },
+                {
+                    "name": "mode",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": null
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The optional charset parameter specifies the character set to represent the result by. If omitted, iconv.internal_encoding will be used."
+                }
+            ]
+        },
+        {
+            "name": "iconv_mime_decode_headers",
+            "desc": "Decodes multiple MIME header fields at once.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an associative array that holds a whole set of MIME header fields specified by encoded_headers on success, or FALSE if an error occurs during the decoding.\n\nEach key of the return value represents an individual field name and the corresponding element represents a field value. If more than one field of the same name are present, iconv_mime_decode_headers() automatically incorporates them into a numerically indexed array in the order of occurrence."
+            },
+            "args": [
+                {
+                    "name": "encoded_headers",
+                    "type": "String",
+                    "desc": "The encoded headers, as a string."
+                },
+                {
+                    "name": "mode",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": null
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "The optional charset parameter specifies the character set to represent the result by. If omitted, iconv.internal_encoding will be used."
+                }
+            ]
+        },
+        {
+            "name": "iconv_get_encoding",
+            "desc": "Retrieve internal configuration variables of iconv extension.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the current value of the internal configuration variable if successful or FALSE on failure.\n\nIf type is omitted or set to \"all\", iconv_get_encoding() returns an array that stores all these variables."
+            },
+            "args": [
+                {
+                    "name": "type",
+                    "type": "String",
+                    "value": "\"all\"",
+                    "desc": "The value of the optional type can be: all input_encoding output_encoding internal_encoding"
+                }
+            ]
+        },
+        {
+            "name": "iconv_set_encoding",
+            "desc": "Changes the value of the internal configuration variable specified by type to charset.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "type",
+                    "type": "String",
+                    "desc": "The value of type can be any one of those: input_encoding output_encoding internal_encoding"
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "desc": "The character set."
+                }
+            ]
+        },
+        {
+            "name": "iconv",
+            "desc": "Performs a character set conversion on the string str from in_charset to out_charset.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the converted string or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "in_charset",
+                    "type": "String",
+                    "desc": "The input charset."
+                },
+                {
+                    "name": "out_charset",
+                    "type": "String",
+                    "desc": "The output charset.\n\nIf you append the string \/\/TRANSLIT to out_charset transliteration is activated. This means that when a character can't be represented in the target charset, it can be approximated through one or several similarly looking characters. If you append the string \/\/IGNORE, characters that cannot be represented in the target charset are silently discarded. Otherwise, str is cut from the first illegal character and an E_NOTICE is generated."
+                },
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string to be converted."
+                }
+            ]
+        },
+        {
+            "name": "iconv_strlen",
+            "desc": "In contrast to strlen(), iconv_strlen() counts the occurrences of characters in the given byte sequence str on the basis of the specified character set, the result of which is not necessarily identical to the length of the string in byte.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the character count of str, as an integer."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The string."
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "If charset parameter is omitted, str is assumed to be encoded in iconv.internal_encoding."
+                }
+            ]
+        },
+        {
+            "name": "iconv_strpos",
+            "desc": "Finds position of first occurrence of a needle within a haystack.\n\nIn contrast to strpos(), the return value of iconv_strpos() is the number of characters that appear before the needle, rather than the offset in bytes to the position where the needle has been found. The characters are counted on the basis of the specified character set charset.\nIf haystack or needle is not a string, it is converted to a string and applied as the ordinal value of a character.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the numeric position of the first occurrence of needle in haystack.\n\nIf needle is not found, iconv_strpos() will return FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The entire string."
+                },
+                {
+                    "name": "needle",
+                    "type": "String",
+                    "desc": "The searched substring."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "The optional offset parameter specifies the position from which the search should be performed."
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "If charset parameter is omitted, string are assumed to be encoded in iconv.internal_encoding."
+                }
+            ]
+        },
+        {
+            "name": "iconv_strrpos",
+            "desc": "In contrast to strpos(), the return value of iconv_strrpos() is the number of characters that appear before the needle, rather than the offset in bytes to the position where the needle has been found.\nIf haystack or needle is not a string, it is converted to a string and applied as the ordinal value of a character.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the numeric position of the last occurrence of needle in haystack. The characters are counted on the basis of the specified character set charset.\n\nIf needle is not found, iconv_strrpos() will return FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function."
+            },
+            "args": [
+                {
+                    "name": "haystack",
+                    "type": "String",
+                    "desc": "The entire string."
+                },
+                {
+                    "name": "needle",
+                    "type": "String",
+                    "desc": "The searched substring."
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "If charset parameter is omitted, string are assumed to be encoded in iconv.internal_encoding."
+                }
+            ]
+        },
+        {
+            "name": "iconv_substr",
+            "desc": "Cuts a portion of str specified by the offset and length parameters.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the portion of str specified by the offset and length parameters.\n\nIf str is shorter than offset characters long, FALSE will be returned."
+            },
+            "args": [
+                {
+                    "name": "str",
+                    "type": "String",
+                    "desc": "The original string."
+                },
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "desc": "If offset is non-negative, iconv_substr() cuts the portion out of str beginning at offset'th character, counting from zero.\n\nIf offset is negative, iconv_substr() cuts out the portion beginning at the position, offset characters away from the end of str."
+                },
+                {
+                    "name": "length",
+                    "type": "Int32",
+                    "value": "INT_MAX",
+                    "desc": "If length is given and is positive, the return value will contain at most length characters of the portion that begins at offset (depending on the length of string).\n\nIf negative length is passed, iconv_substr() cuts the portion out of str from the offset'th character up to the character that is length characters away from the end of the string. In case offset is also negative, the start position is calculated beforehand according to the rule explained above."
+                },
+                {
+                    "name": "charset",
+                    "type": "String",
+                    "value": "null_string",
+                    "desc": "If charset parameter is omitted, string are assumed to be encoded in iconv.internal_encoding.\n\nNote that offset and length parameters are always deemed to represent offsets that are calculated on the basis of the character set determined by charset, whilst the counterpart substr() always takes these for byte offsets."
+                }
+            ]
+        },
+        {
+            "name": "ob_iconv_handler",
+            "desc": "Converts the string encoded in internal_encoding to output_encoding.\n\ninternal_encoding and output_encoding should be defined in the php.ini file or in iconv_set_encoding().\nSee ob_start() for information about this handler parameters.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "See ob_start() for information about this handler return values."
+            },
+            "args": [
+                {
+                    "name": "contents",
+                    "type": "String"
+                },
+                {
+                    "name": "status",
+                    "type": "Int32"
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

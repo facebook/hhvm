@@ -1,0 +1,64 @@
+object(MealIterator)#%d (2) {
+  ["pos":"MealIterator":private]=>
+  int(0)
+  ["myContent":"MealIterator":private]=>
+  array(3) {
+    [0]=>
+    string(9) "breakfast"
+    [1]=>
+    string(5) "lunch"
+    [2]=>
+    string(6) "dinner"
+  }
+}
+-----( Simple iteration: )-----
+--> MealIterator::rewind (0)
+--> MealIterator::valid (0)
+--> MealIterator::current (0)
+--> MealIterator::key (0)
+meal 0 => breakfast
+--> MealIterator::next (0)
+--> MealIterator::valid (1)
+--> MealIterator::current (1)
+--> MealIterator::key (1)
+meal 1 => lunch
+--> MealIterator::next (1)
+--> MealIterator::valid (2)
+--> MealIterator::current (2)
+--> MealIterator::key (2)
+meal 2 => dinner
+--> MealIterator::next (2)
+--> MealIterator::valid (3)
+--> MealIterator::rewind (3)
+
+
+
+-----( Nested iteration: )-----
+ --> MealIterator::rewind (0)
+ --> MealIterator::valid (0)
+ --> MealIterator::current (0)
+ --> MealIterator::key (0)
+
+Top level 1: 
+meal 0 => breakfast
+     --> MealIterator::rewind (0)
+     --> MealIterator::valid (0)
+     --> MealIterator::current (0)
+     --> MealIterator::key (0)
+     meal 0 => breakfast
+     --> MealIterator::next (0)
+     --> MealIterator::valid (1)
+     --> MealIterator::current (1)
+     --> MealIterator::key (1)
+     meal 1 => lunch
+     --> MealIterator::next (1)
+     --> MealIterator::valid (2)
+     --> MealIterator::current (2)
+     --> MealIterator::key (2)
+     meal 2 => dinner
+     --> MealIterator::next (2)
+     --> MealIterator::valid (3)
+ --> MealIterator::next (3)
+HipHop Notice: %s
+ --> MealIterator::valid (4)
+===DONE===

@@ -1,0 +1,24 @@
+*** Testing array_rand() : with invalid values for 'req_num' ***
+
+-- With default num_req value --
+int(%d)
+
+-- With num_req = 1 --
+int(%d)
+
+-- With num_req = 0 --
+HipHop Warning: %s
+NULL
+
+-- With num_req = -1 --
+HipHop Warning: %s
+NULL
+
+-- With num_req = -2 --
+HipHop Warning: %s
+NULL
+
+-- With num_req more than number of members in 'input' array --
+HipHop Warning: %s
+NULL
+Done

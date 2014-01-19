@@ -1,0 +1,18 @@
+*** Testing printf() : basic functionality - using char format ***
+
+-- Calling printf() with no arguments --
+format
+int(6)
+
+-- Calling printf() with one arguments --
+A
+int(1)
+
+-- Calling printf() with two arguments --
+A B
+int(3)
+
+-- Calling printf() with three arguments --
+A B C
+int(5)
+===DONE===

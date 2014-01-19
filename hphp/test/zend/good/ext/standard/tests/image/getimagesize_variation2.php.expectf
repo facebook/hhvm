@@ -1,0 +1,79 @@
+*** Testing getimagesize() : usage variations ***
+Error: 8 - Undefined variable: undefined_var, %s(%d)
+Error: 8 - Undefined variable: unset_var, %s(%d)
+
+-- Arg value 0 --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value 1 --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value 12345 --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value -2345 --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value 10.5 --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value -10.5 --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value 10.1234567e5 --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value 10.7654321e-5 --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value 12346 --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value array() --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value array(0) --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value array(1) --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value array(1, 2) --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value array('color' => 'red', 'item' => 'pen') --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value NULL --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value null --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value true --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value false --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value TRUE --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value FALSE --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value "" --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value '' --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value new stdclass() --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value undefined_var --
+string(28) "4a46494600010201006000600000"
+
+-- Arg value unset_var --
+string(28) "4a46494600010201006000600000"
+===DONE===

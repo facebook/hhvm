@@ -1,0 +1,15 @@
+int(9)
+array(0) {
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+int(5)
+int(1)
+string(1) "5"
+string(1) "6"

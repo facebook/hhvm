@@ -1,0 +1,40 @@
+ = test_destructor =
+Dtor::f
+Dtor::f
+Dtor::__destruct
+done: test_destructor
+ = test_inheritance =
+Base::blah
+Base::blah
+Base::blah
+ = test_invocation_syntaxes =
+* call_user_func ********************
+int(10)
+int(10)
+int(10)
+int(10)
+int(10)
+int(10)
+int(10)
+intval called statically
+int(10)
+intval called statically
+int(10)
+intval called statically
+int(10)
+inst_intval called on instance
+int(10)
+* ()-invoke ********************
+int(10)
+int(10)
+int(10)
+int(10)
+int(10)
+int(10)
+intval called statically
+int(10)
+intval called statically
+int(10)
+inst_intval called on instance
+int(10)
+HipHop Fatal error: Invalid callable (array) in %s on line %d

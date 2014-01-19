@@ -1,0 +1,16 @@
+int(2)
+int(1)
+HipHop Notice: %s
+NULL
+HipHop Notice: %s
+NULL
+int(2)
+int(1)
+
+Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+int(%d)
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

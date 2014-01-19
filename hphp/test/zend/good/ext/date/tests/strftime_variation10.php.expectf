@@ -1,0 +1,10 @@
+*** Testing strftime() : usage variation ***
+
+--The ISO 8601:1988 week number--
+string(%d) "%d"
+string(2) "32"
+
+--Weekday as decimal--
+string(%d) "%d"
+string(1) "5"
+===DONE===

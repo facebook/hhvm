@@ -1,0 +1,20 @@
+key=a val=1
+key=b val=2
+key=d val=4
+key=e val=5
+key=f val=6
+key=c val=333
+array(6) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["d"]=>
+  int(4)
+  ["e"]=>
+  int(5)
+  ["f"]=>
+  int(6)
+  ["c"]=>
+  &int(333)
+}

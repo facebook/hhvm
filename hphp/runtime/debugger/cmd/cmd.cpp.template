@@ -1,0 +1,57 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+
+#include <runtime/eval/debugger/cmd/cmd_machine.h>
+
+namespace HPHP { namespace Eval {
+///////////////////////////////////////////////////////////////////////////////
+
+void CmdMachine::sendImpl(DebuggerThriftBuffer &thrift) {
+  DebuggerCommand::sendImpl(thrift);
+}
+
+void CmdMachine::recvImpl(DebuggerThriftBuffer &thrift) {
+  DebuggerCommand::recvImpl(thrift);
+}
+
+void CmdMachine::list(DebuggerClient &client) {
+}
+
+bool CmdMachine::help(DebuggerClient &client) {
+  client.error("not implemented yet"); return true;
+
+  client.helpTitle("Machine Command");
+  client.help("machine: ");
+  client.helpBody(
+    ""
+  );
+}
+
+void CmdMachine::onClientImpl(DebuggerClient &client) {
+  if (DebuggerCommand::displayedHelp(client)) return true;
+
+  //TODO
+
+  help(client);
+}
+
+bool CmdMachine::onServer(DebuggerProxy &proxy) {
+  assert(false); // this command is processed entirely locally
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}}

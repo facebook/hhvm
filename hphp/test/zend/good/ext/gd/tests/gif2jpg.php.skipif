@@ -1,0 +1,2 @@
+<?php
+if (!gd_info()['JPEG Support']) echo 'skip';

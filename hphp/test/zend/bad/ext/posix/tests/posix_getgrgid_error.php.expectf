@@ -1,0 +1,13 @@
+*** Testing posix_getgrgid() : error conditions ***
+
+-- Testing posix_getgrgid() function with Zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing posix_getgrgid() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing posix_getgrgid() function with a negative group id --
+bool(false)
+Done

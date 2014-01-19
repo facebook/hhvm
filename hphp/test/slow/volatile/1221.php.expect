@@ -1,0 +1,40 @@
+string(13) "autoload cNew"
+string(15) "autoload cNew_r"
+string(15) "autoload cNew_d"
+string(12) "autoload csm"
+int(1)
+string(14) "autoload csm_r"
+int(1)
+string(13) "autoload CcOn"
+int(2)
+string(15) "autoload CcOn_r"
+int(2)
+string(15) "autoload CcOn_d"
+int(2)
+string(15) "autoload csmeth"
+1
+string(17) "autoload csmeth_r"
+1string(17) "autoload csmeth_d"
+1string(13) "autoload cpar"
+string(15) "autoload cpar_r"
+string(13) "autoload cref"
+string(12) "autoload cex"
+bool(true)
+string(14) "autoload cex_r"
+bool(true)
+string(10) "__autoload"
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)

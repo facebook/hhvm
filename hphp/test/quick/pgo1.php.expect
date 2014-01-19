@@ -1,0 +1,6 @@
+object(Repro)#1 (2) {
+  ["propStr":"Repro":private]=>
+  string(4) "proj"
+  ["propInt":"Repro":private]=>
+  int(5)
+}

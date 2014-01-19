@@ -1,0 +1,656 @@
+*** Testing is_callable() on objects ***
+
+** Testing behavior of is_callable() on static methods **
+bool(true)
+bool(false)
+
+** Testing normal operations of is_callable() on objects **
+--- Outerloop iteration 1 ---
+-- Innerloop iteration 1 of Outerloop iteration 1 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+-- Innerloop iteration 2 of Outerloop iteration 1 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::foo2
+bool(false)
+object_class::foo2
+-- Innerloop iteration 3 of Outerloop iteration 1 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::foo3
+bool(false)
+object_class::foo3
+-- Innerloop iteration 4 of Outerloop iteration 1 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::x123
+bool(true)
+object_class::x123
+-- Innerloop iteration 5 of Outerloop iteration 1 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::null
+bool(true)
+object_class::null
+-- Innerloop iteration 6 of Outerloop iteration 1 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::TRUE
+bool(true)
+object_class::TRUE
+-- Innerloop iteration 7 of Outerloop iteration 1 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::123
+bool(false)
+object_class::123
+-- Innerloop iteration 8 of Outerloop iteration 1 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 9 of Outerloop iteration 1 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::func
+bool(false)
+object_class::func
+-- Innerloop iteration 10 of Outerloop iteration 1 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+--- Outerloop iteration 2 ---
+-- Innerloop iteration 1 of Outerloop iteration 2 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::foo1
+bool(false)
+no_member_class::foo1
+-- Innerloop iteration 2 of Outerloop iteration 2 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::foo2
+bool(false)
+no_member_class::foo2
+-- Innerloop iteration 3 of Outerloop iteration 2 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::foo3
+bool(false)
+no_member_class::foo3
+-- Innerloop iteration 4 of Outerloop iteration 2 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::x123
+bool(false)
+no_member_class::x123
+-- Innerloop iteration 5 of Outerloop iteration 2 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::null
+bool(false)
+no_member_class::null
+-- Innerloop iteration 6 of Outerloop iteration 2 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::TRUE
+bool(false)
+no_member_class::TRUE
+-- Innerloop iteration 7 of Outerloop iteration 2 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::123
+bool(false)
+no_member_class::123
+-- Innerloop iteration 8 of Outerloop iteration 2 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 9 of Outerloop iteration 2 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::func
+bool(false)
+no_member_class::func
+-- Innerloop iteration 10 of Outerloop iteration 2 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+--- Outerloop iteration 3 ---
+-- Innerloop iteration 1 of Outerloop iteration 3 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::foo1
+bool(false)
+contains_object_class::foo1
+-- Innerloop iteration 2 of Outerloop iteration 3 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::foo2
+bool(false)
+contains_object_class::foo2
+-- Innerloop iteration 3 of Outerloop iteration 3 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::foo3
+bool(false)
+contains_object_class::foo3
+-- Innerloop iteration 4 of Outerloop iteration 3 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::x123
+bool(false)
+contains_object_class::x123
+-- Innerloop iteration 5 of Outerloop iteration 3 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::null
+bool(false)
+contains_object_class::null
+-- Innerloop iteration 6 of Outerloop iteration 3 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::TRUE
+bool(false)
+contains_object_class::TRUE
+-- Innerloop iteration 7 of Outerloop iteration 3 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::123
+bool(false)
+contains_object_class::123
+-- Innerloop iteration 8 of Outerloop iteration 3 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 9 of Outerloop iteration 3 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+contains_object_class::func
+bool(true)
+contains_object_class::func
+-- Innerloop iteration 10 of Outerloop iteration 3 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+--- Outerloop iteration 4 ---
+-- Innerloop iteration 1 of Outerloop iteration 4 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::foo1
+bool(false)
+contains_object_class::foo1
+-- Innerloop iteration 2 of Outerloop iteration 4 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::foo2
+bool(false)
+contains_object_class::foo2
+-- Innerloop iteration 3 of Outerloop iteration 4 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::foo3
+bool(false)
+contains_object_class::foo3
+-- Innerloop iteration 4 of Outerloop iteration 4 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::x123
+bool(false)
+contains_object_class::x123
+-- Innerloop iteration 5 of Outerloop iteration 4 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::null
+bool(false)
+contains_object_class::null
+-- Innerloop iteration 6 of Outerloop iteration 4 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::TRUE
+bool(false)
+contains_object_class::TRUE
+-- Innerloop iteration 7 of Outerloop iteration 4 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+contains_object_class::123
+bool(false)
+contains_object_class::123
+-- Innerloop iteration 8 of Outerloop iteration 4 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 9 of Outerloop iteration 4 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+contains_object_class::func
+bool(true)
+contains_object_class::func
+-- Innerloop iteration 10 of Outerloop iteration 4 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+--- Outerloop iteration 5 ---
+-- Innerloop iteration 1 of Outerloop iteration 5 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+-- Innerloop iteration 2 of Outerloop iteration 5 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::foo2
+bool(false)
+object_class::foo2
+-- Innerloop iteration 3 of Outerloop iteration 5 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::foo3
+bool(false)
+object_class::foo3
+-- Innerloop iteration 4 of Outerloop iteration 5 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::x123
+bool(true)
+object_class::x123
+-- Innerloop iteration 5 of Outerloop iteration 5 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::null
+bool(true)
+object_class::null
+-- Innerloop iteration 6 of Outerloop iteration 5 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::TRUE
+bool(true)
+object_class::TRUE
+-- Innerloop iteration 7 of Outerloop iteration 5 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::123
+bool(false)
+object_class::123
+-- Innerloop iteration 8 of Outerloop iteration 5 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 9 of Outerloop iteration 5 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::func
+bool(false)
+object_class::func
+-- Innerloop iteration 10 of Outerloop iteration 5 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+--- Outerloop iteration 6 ---
+-- Innerloop iteration 1 of Outerloop iteration 6 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::foo1
+bool(false)
+no_member_class::foo1
+-- Innerloop iteration 2 of Outerloop iteration 6 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::foo2
+bool(false)
+no_member_class::foo2
+-- Innerloop iteration 3 of Outerloop iteration 6 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::foo3
+bool(false)
+no_member_class::foo3
+-- Innerloop iteration 4 of Outerloop iteration 6 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::x123
+bool(false)
+no_member_class::x123
+-- Innerloop iteration 5 of Outerloop iteration 6 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::null
+bool(false)
+no_member_class::null
+-- Innerloop iteration 6 of Outerloop iteration 6 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::TRUE
+bool(false)
+no_member_class::TRUE
+-- Innerloop iteration 7 of Outerloop iteration 6 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::123
+bool(false)
+no_member_class::123
+-- Innerloop iteration 8 of Outerloop iteration 6 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 9 of Outerloop iteration 6 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+no_member_class::func
+bool(false)
+no_member_class::func
+-- Innerloop iteration 10 of Outerloop iteration 6 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+--- Outerloop iteration 7 ---
+-- Innerloop iteration 1 of Outerloop iteration 7 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+-- Innerloop iteration 2 of Outerloop iteration 7 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::foo2
+bool(false)
+object_class::foo2
+-- Innerloop iteration 3 of Outerloop iteration 7 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::foo3
+bool(false)
+object_class::foo3
+-- Innerloop iteration 4 of Outerloop iteration 7 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::x123
+bool(true)
+object_class::x123
+-- Innerloop iteration 5 of Outerloop iteration 7 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::null
+bool(true)
+object_class::null
+-- Innerloop iteration 6 of Outerloop iteration 7 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::TRUE
+bool(true)
+object_class::TRUE
+-- Innerloop iteration 7 of Outerloop iteration 7 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::123
+bool(false)
+object_class::123
+-- Innerloop iteration 8 of Outerloop iteration 7 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 9 of Outerloop iteration 7 --
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+object_class::func
+bool(false)
+object_class::func
+-- Innerloop iteration 10 of Outerloop iteration 7 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+--- Outerloop iteration 8 ---
+-- Innerloop iteration 1 of Outerloop iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 2 of Outerloop iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 3 of Outerloop iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 4 of Outerloop iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 5 of Outerloop iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 6 of Outerloop iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 7 of Outerloop iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 8 of Outerloop iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 9 of Outerloop iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Array
+bool(false)
+Array
+-- Innerloop iteration 10 of Outerloop iteration 8 --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object_class::foo1
+bool(true)
+object_class::foo1
+===DONE===

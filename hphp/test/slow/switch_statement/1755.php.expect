@@ -1,0 +1,21 @@
+"""""0""0"default"0""0""0""123""0""4abc""4abc"default"Evil4"int(1)
+  goes to:1int(2)
+  goes to:2.0float(2)
+  goes to:2.0bool(true)
+  goes to:foobool(false)
+  goes to:0NULL
+  goes to:{empty str}object(stdClass)#1 (0) {
+}
+  goes to:defaultarray(0) {
+}
+  goes to:defaultfloat(3.212)
+  goes to:3.212int(0)
+  goes to:{empty str}NULL
+  goes to:{empty str}bool(false)
+  goes to:{empty str}bool(true)
+  goes to:defaultstring(1) "3"
+  goes to:3.0string(4) "3abc"
+  goes to:string(2) "3a"
+  goes to:int(3)
+  goes to:3.0float(3)
+  goes to:3.0foobazbarfoobazbazdefaultbarfoobaz

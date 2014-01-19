@@ -1,0 +1,29 @@
+int(0)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+array(0) {
+}
+int(0)
+int(0)
+int(0)
+int(1)
+string(0) ""
+string(8) "50000000"
+string(2) "30"
+string(2) "40"
+string(14) "5.4.999-hiphop"
+string(3) "1.0"
+string(7) "2.2.0b1"
+string(8) "1.4 $Id$"
+string(4) "$Id$"
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)

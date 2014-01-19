@@ -1,0 +1,57 @@
+SQLite3Stmt
+HipHop Warning: SQLite3Stmt::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+object(SQLite3Stmt)#1 (0) {
+}
+string(96) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:11:"SQLite3Stmt";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(11) "SQLite3Stmt"
+}
+array(8) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "paramcount"
+  [2]=>
+  string(5) "close"
+  [3]=>
+  string(5) "reset"
+  [4]=>
+  string(5) "clear"
+  [5]=>
+  string(9) "bindparam"
+  [6]=>
+  string(9) "bindvalue"
+  [7]=>
+  string(7) "execute"
+}
+================
+A_SQLite3Stmt
+HipHop Warning: SQLite3Stmt::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+object(A_SQLite3Stmt)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(98) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:13:"A_SQLite3Stmt";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(13) "A_SQLite3Stmt"
+}
+array(8) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "paramcount"
+  [2]=>
+  string(5) "close"
+  [3]=>
+  string(5) "reset"
+  [4]=>
+  string(5) "clear"
+  [5]=>
+  string(9) "bindparam"
+  [6]=>
+  string(9) "bindvalue"
+  [7]=>
+  string(7) "execute"
+}

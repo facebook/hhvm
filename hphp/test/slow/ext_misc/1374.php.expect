@@ -1,0 +1,10 @@
+array(4) {
+  ["frist"]=>
+  int(4660)
+  ["second"]=>
+  int(22136)
+  ["chars1"]=>
+  int(65)
+  ["chars2"]=>
+  int(66)
+}

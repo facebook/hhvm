@@ -1,0 +1,32 @@
+string(%d) "phar://*/027.phar.php/"
+string(6) "/a.php"
+bool(false)
+string(2) "/b"
+bool(true)
+string(%d) "phar://*/027.phar.php/b"
+string(8) "/b/c.php"
+bool(false)
+string(8) "/b/d.php"
+bool(false)
+string(6) "/b.php"
+bool(false)
+string(6) "/e.php"
+bool(false)
+fseek on dir handle
+int(0)
+int(4)
+int(-1)
+int(4)
+int(0)
+int(1)
+fwrite on dir handle
+int(0)
+bool(false)
+opendir edge cases
+HipHop Warning: %s
+phar url "phar://" is unknown in %s027.php on line %d
+bool(false)
+HipHop Warning: %s
+phar url "phar://foo.phar/hi" is unknown in %s027.php on line %d
+bool(false)
+===DONE===

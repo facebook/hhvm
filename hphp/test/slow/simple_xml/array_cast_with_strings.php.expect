@@ -1,0 +1,21 @@
+array(5) {
+  ["hello"]=>
+  string(5) "world"
+  ["how"]=>
+  object(SimpleXMLElement)#3 (1) {
+    ["are"]=>
+    string(3) "you"
+  }
+  ["hi"]=>
+  object(SimpleXMLElement)#5 (0) {
+  }
+  ["ho"]=>
+  object(SimpleXMLElement)#6 (0) {
+  }
+  ["test"]=>
+  string(4) "best"
+}
+array(1) {
+  ["world"]=>
+  int(1)
+}

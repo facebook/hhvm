@@ -1,0 +1,16 @@
+int(42)
+string(3) "Hi!"
+string(107) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:22:"StaticResultWaitHandle";}"
+string(110) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:25:"StaticExceptionWaitHandle";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(25) "StaticExceptionWaitHandle"
+}
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(22) "StaticResultWaitHandle"
+}
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(12) "Continuation"
+}

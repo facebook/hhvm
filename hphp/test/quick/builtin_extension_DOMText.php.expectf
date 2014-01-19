@@ -1,0 +1,135 @@
+DOMText
+object(DOMText)#1 (0) {
+}
+string(91) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:7:"DOMText";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(7) "DOMText"
+}
+array(28) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(28) "isWhitespaceInElementContent"
+  [5]=>
+  string(9) "splitText"
+  [6]=>
+  string(10) "appendData"
+  [7]=>
+  string(10) "deleteData"
+  [8]=>
+  string(10) "insertData"
+  [9]=>
+  string(11) "replaceData"
+  [10]=>
+  string(13) "substringData"
+  [11]=>
+  string(11) "appendChild"
+  [12]=>
+  string(9) "cloneNode"
+  [13]=>
+  string(9) "getLineNo"
+  [14]=>
+  string(13) "hasAttributes"
+  [15]=>
+  string(13) "hasChildNodes"
+  [16]=>
+  string(12) "insertBefore"
+  [17]=>
+  string(18) "isDefaultNamespace"
+  [18]=>
+  string(10) "isSameNode"
+  [19]=>
+  string(11) "isSupported"
+  [20]=>
+  string(18) "lookupNamespaceUri"
+  [21]=>
+  string(12) "lookupPrefix"
+  [22]=>
+  string(9) "normalize"
+  [23]=>
+  string(11) "removeChild"
+  [24]=>
+  string(12) "replaceChild"
+  [25]=>
+  string(4) "c14n"
+  [26]=>
+  string(8) "c14nfile"
+  [27]=>
+  string(11) "getNodePath"
+}
+================
+A_DOMText
+object(A_DOMText)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"A_DOMText";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(9) "A_DOMText"
+}
+array(28) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(28) "isWhitespaceInElementContent"
+  [5]=>
+  string(9) "splitText"
+  [6]=>
+  string(10) "appendData"
+  [7]=>
+  string(10) "deleteData"
+  [8]=>
+  string(10) "insertData"
+  [9]=>
+  string(11) "replaceData"
+  [10]=>
+  string(13) "substringData"
+  [11]=>
+  string(11) "appendChild"
+  [12]=>
+  string(9) "cloneNode"
+  [13]=>
+  string(9) "getLineNo"
+  [14]=>
+  string(13) "hasAttributes"
+  [15]=>
+  string(13) "hasChildNodes"
+  [16]=>
+  string(12) "insertBefore"
+  [17]=>
+  string(18) "isDefaultNamespace"
+  [18]=>
+  string(10) "isSameNode"
+  [19]=>
+  string(11) "isSupported"
+  [20]=>
+  string(18) "lookupNamespaceUri"
+  [21]=>
+  string(12) "lookupPrefix"
+  [22]=>
+  string(9) "normalize"
+  [23]=>
+  string(11) "removeChild"
+  [24]=>
+  string(12) "replaceChild"
+  [25]=>
+  string(4) "c14n"
+  [26]=>
+  string(8) "c14nfile"
+  [27]=>
+  string(11) "getNodePath"
+}

@@ -1,0 +1,78 @@
+NumericArrayIterator::__construct
+NumericArrayIterator::rewind
+NumericArrayIterator::valid(true)
+NumericArrayIterator::next
+NumericArrayIterator::valid(true)
+NumericArrayIterator::valid(true)
+NumericArrayIterator::current
+NumericArrayIterator::key
+NumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
+2 is less than or equal 2
+NumericArrayIterator::next
+NumericArrayIterator::valid(true)
+NumericArrayIterator::current
+NumericArrayIterator::key
+NumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
+3 is greater than 2
+NumericArrayIterator::next
+NumericArrayIterator::valid(true)
+NumericArrayIterator::current
+NumericArrayIterator::key
+NumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
+4 is greater than 2
+NumericArrayIterator::next
+===SEEKABLE===
+NumericArrayIterator::__construct
+NumericArrayIterator::rewind
+SeekableNumericArrayIterator::seek(1)
+NumericArrayIterator::valid(true)
+NumericArrayIterator::current
+NumericArrayIterator::key
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
+2 is less than or equal 2
+NumericArrayIterator::next
+NumericArrayIterator::valid(true)
+NumericArrayIterator::current
+NumericArrayIterator::key
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
+3 is greater than 2
+NumericArrayIterator::next
+NumericArrayIterator::valid(true)
+NumericArrayIterator::current
+NumericArrayIterator::key
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
+4 is greater than 2
+NumericArrayIterator::next
+===STACKED===
+Shows '2 is greater than 2' because the test is actually done with the current value which is 3.
+NumericArrayIterator::__construct
+NumericArrayIterator::rewind
+SeekableNumericArrayIterator::seek(1)
+NumericArrayIterator::valid(true)
+NumericArrayIterator::current
+NumericArrayIterator::key
+NumericArrayIterator::next
+NumericArrayIterator::valid(true)
+NumericArrayIterator::current
+NumericArrayIterator::key
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
+2 is greater than 2
+NumericArrayIterator::next
+NumericArrayIterator::valid(true)
+NumericArrayIterator::current
+NumericArrayIterator::key
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
+3 is greater than 2
+NumericArrayIterator::next
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
+4 is greater than 2
+===DONE===

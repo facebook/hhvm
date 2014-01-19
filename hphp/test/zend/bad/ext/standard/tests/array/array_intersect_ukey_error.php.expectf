@@ -1,0 +1,14 @@
+*** Testing array_intersect_ukey() : error conditions ***
+
+-- Testing array_intersect_ukey() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing array_intersect_ukey() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing array_intersect_ukey() function with no arguments --
+HipHop Warning: %s
+NULL
+===DONE===

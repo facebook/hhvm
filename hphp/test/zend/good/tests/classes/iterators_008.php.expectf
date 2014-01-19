@@ -1,0 +1,8 @@
+D::rewind(2)
+D::valid(2)
+D::current(2)
+D::next(1)
+D::valid(1)
+D::current(1)
+D::next(0)
+D::valid(0)

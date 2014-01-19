@@ -1,0 +1,12 @@
+*** Testing sub-arrays with array_search() ***
+int(4)
+string(5) "three"
+int(5)
+
+*** Testing objects with array_search() ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+int(1)
+Done

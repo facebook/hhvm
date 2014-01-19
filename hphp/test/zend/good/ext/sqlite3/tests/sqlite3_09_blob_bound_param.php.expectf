@@ -1,0 +1,20 @@
+Creating Table
+bool(true)
+PREPARING insert
+Opening blob stream
+resource(%d) of type (stream)
+BINDING Parameter
+bool(true)
+bool(true)
+Closing statement
+bool(true)
+SELECTING results
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(23) "X'61626364656667006869'"
+}
+Closing database
+bool(true)
+Done

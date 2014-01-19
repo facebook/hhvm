@@ -1,0 +1,56 @@
+*** Testing json_encode() : basic functionality ***
+-- Iteration 1 --
+string(1) "0"
+-- Iteration 2 --
+string(3) "123"
+-- Iteration 3 --
+string(4) "-123"
+-- Iteration 4 --
+string(10) "2147483647"
+-- Iteration 5 --
+string(11) "-2147483648"
+-- Iteration 6 --
+string(7) "123.456"
+-- Iteration 7 --
+string(4) "1230"
+-- Iteration 8 --
+string(5) "-1230"
+-- Iteration 9 --
+string(4) "true"
+-- Iteration 10 --
+string(4) "true"
+-- Iteration 11 --
+string(5) "false"
+-- Iteration 12 --
+string(5) "false"
+-- Iteration 13 --
+string(4) "null"
+-- Iteration 14 --
+string(4) "null"
+-- Iteration 15 --
+string(5) ""abc""
+-- Iteration 16 --
+string(5) ""abc""
+-- Iteration 17 --
+string(18) ""Hello\t\tWorld\n""
+-- Iteration 18 --
+string(2) "[]"
+-- Iteration 19 --
+string(11) "[1,2,3,4,5]"
+-- Iteration 20 --
+string(72) "{"1":"Sun","2":"Mon","3":"Tue","4":"Wed","5":"Thur","6":"Fri","7":"Sat"}"
+-- Iteration 21 --
+string(58) "{"Jan":31,"Feb":29,"Mar":31,"April":30,"May":31,"June":30}"
+-- Iteration 22 --
+string(2) """"
+-- Iteration 23 --
+string(2) """"
+-- Iteration 24 --
+string(4) "null"
+-- Iteration 25 --
+string(4) "null"
+-- Iteration 26 --
+bool(false)
+-- Iteration 27 --
+string(82) "{"MyInt":99,"MyFloat":123.45,"MyBool":true,"MyNull":null,"MyString":"Hello World"}"
+===Done===

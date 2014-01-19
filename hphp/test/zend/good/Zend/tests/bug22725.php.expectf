@@ -1,0 +1,3 @@
+Bar::aPublicMethod() called.
+Foo::aProtectedMethod() called.
+Foo::aPrivateMethod() called.

@@ -1,0 +1,6 @@
+Method - Foo\Foo::__construct
+Func   - Foo\Bar
+Method - Foo\Foo::__construct
+Method - Foo\Foo::Bar
+Func   - Foo\Bar
+HipHop Fatal error: %s

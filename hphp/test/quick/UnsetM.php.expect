@@ -1,0 +1,22 @@
+array(2) {
+  [0]=>
+  int(10)
+  ["bye"]=>
+  string(3) "BYE"
+}
+array(3) {
+  [0]=>
+  int(10)
+  ["bye"]=>
+  string(3) "BYE"
+  ["foo"]=>
+  int(29311)
+}
+array(2) {
+  [0]=>
+  int(10)
+  ["bye"]=>
+  string(3) "BYE"
+}
+array(0) {
+}

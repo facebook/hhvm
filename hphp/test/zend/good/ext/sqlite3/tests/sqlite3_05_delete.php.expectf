@@ -1,0 +1,30 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+SELECTING results
+array(2) {
+  [0]=>
+  int(%d)
+  [1]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  int(%d)
+  [1]=>
+  string(1) "b"
+}
+DELETING a row
+bool(true)
+Checking results
+array(2) {
+  [0]=>
+  int(%d)
+  [1]=>
+  string(1) "b"
+}
+Closing database
+bool(true)
+Done

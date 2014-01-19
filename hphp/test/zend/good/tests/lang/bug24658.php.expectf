@@ -1,0 +1,22 @@
+object(foo)#%d (0) {
+}
+object(foo)#%d (0) {
+}
+object(foo)#%d (0) {
+}
+object(foo)#%d (0) {
+}
+===no_typehint===
+object(foo)#%d (0) {
+}
+int(1)
+int(2)
+===no_typehint_ref===
+object(foo)#%d (0) {
+}
+int(1)
+int(2)
+===typehint===
+object(foo)#%d (0) {
+}
+HipHop Fatal error: %s

@@ -1,0 +1,346 @@
+Program %s/flow_small.php loaded. Type '[r]un' or '[c]ontinue' to go.
+set SmallStep on
+SmallStep(ss) set to on.
+
+break cls::pub()
+Breakpoint 1 set upon entering cls::pub()
+But wont break until class cls has been loaded.
+run
+flow_small.php loaded
+Program %s/flow_small.php exited normally.
+@test(1)
+test 1
+Breakpoint 1 reached at cls::pub() on line 12 of %s/flow_small.php
+  11   public function pub($x) {
+  12*    error_log("in pub:".$x);
+  13     $this->pri($x);
+
+next
+in pub:1
+Break at cls::pub() on line 13 of %s/flow_small.php
+  12     error_log("in pub:".$x);
+  13*    $this->pri($x);
+  14     error_log("out pub:".$x);
+
+variable
+$x = 1
+next
+in pri:1
+foo:1
+out pri:1
+Break at cls::pub() on line 14 of %s/flow_small.php
+  13     $this->pri($x);
+  14*    error_log("out pub:".$x);
+  15   }
+
+next
+out pub:1
+Break at cls::pub() on line 15 of %s/flow_small.php
+  14     error_log("out pub:".$x);
+  15*  }
+  16   private function pri($x) {
+
+next
+Break at test() on line 62 of %s/flow_small.php
+  61   $obj = new cls();
+  62*  $obj->pub($x);
+  63   error_log("test done ".$x);
+
+next
+Break at test() on line 63 of %s/flow_small.php
+  62   $obj->pub($x);
+  63*  error_log("test done ".$x);
+  64 }
+
+break clear all
+All breakpoints are cleared.
+continue
+test done 1
+break flow_small.php:18
+Breakpoint 1 set on line 18 of flow_small.php
+@test(2)
+test 2
+in pub:2
+in pri:2
+Breakpoint 1 reached at cls::pri() on line 18 of %s/flow_small.php
+  17     error_log("in pri:".$x);
+  18*    $y = $x + 3; $z = $x * 5;
+  19     foo($y, $z);
+
+step
+Break at cls::pri() on line 18 of %s/flow_small.php
+  17     error_log("in pri:".$x);
+  18*    $y = $x + 3; $z = $x * 5;
+  19     foo($y, $z);
+
+step
+Break at cls::pri() on line 18 of %s/flow_small.php
+  17     error_log("in pri:".$x);
+  18*    $y = $x + 3; $z = $x * 5;
+  19     foo($y, $z);
+
+step
+Break at cls::pri() on line 18 of %s/flow_small.php
+  17     error_log("in pri:".$x);
+  18*    $y = $x + 3; $z = $x * 5;
+  19     foo($y, $z);
+
+step
+Break at cls::pri() on line 18 of %s/flow_small.php
+  17     error_log("in pri:".$x);
+  18*    $y = $x + 3; $z = $x * 5;
+  19     foo($y, $z);
+
+step
+Break at cls::pri() on line 18 of %s/flow_small.php
+  17     error_log("in pri:".$x);
+  18*    $y = $x + 3; $z = $x * 5;
+  19     foo($y, $z);
+
+step
+Break at cls::pri() on line 18 of %s/flow_small.php
+  17     error_log("in pri:".$x);
+  18*    $y = $x + 3; $z = $x * 5;
+  19     foo($y, $z);
+
+step
+Break at cls::pri() on line 18 of %s/flow_small.php
+  17     error_log("in pri:".$x);
+  18*    $y = $x + 3; $z = $x * 5;
+  19     foo($y, $z);
+
+step
+Break at cls::pri() on line 19 of %s/flow_small.php
+  18     $y = $x + 3; $z = $x * 5;
+  19*    foo($y, $z);
+  20     if ($x == 3) {
+
+variable
+$x = 2
+$y = 5
+$z = 10
+step
+Break at foo() on line 6 of %s/flow_small.php
+   5 function foo($a, $b) {
+   6*  $c = $b - $a;
+   7   error_log("foo:".$c);
+
+variable
+$a = 5
+$b = 10
+step
+Break at foo() on line 6 of %s/flow_small.php
+   5 function foo($a, $b) {
+   6*  $c = $b - $a;
+   7   error_log("foo:".$c);
+
+step
+Break at foo() on line 6 of %s/flow_small.php
+   5 function foo($a, $b) {
+   6*  $c = $b - $a;
+   7   error_log("foo:".$c);
+
+step
+Break at foo() on line 7 of %s/flow_small.php
+   6   $c = $b - $a;
+   7*  error_log("foo:".$c);
+   8 }
+
+variable
+$a = 5
+$b = 10
+$c = 5
+next
+foo:5
+Break at foo() on line 8 of %s/flow_small.php
+   7   error_log("foo:".$c);
+   8*}
+   9 
+
+next
+Break at cls::pri() on line 19 of %s/flow_small.php
+  18     $y = $x + 3; $z = $x * 5;
+  19*    foo($y, $z);
+  20     if ($x == 3) {
+
+step
+Break at cls::pri() on line 20 of %s/flow_small.php
+  19     foo($y, $z);
+  20*    if ($x == 3) {
+  21       hphpd_break();
+
+break clear all
+All breakpoints are cleared.
+continue
+out pri:2
+out pub:2
+test done 2
+break flow_small.php:6
+Breakpoint 1 set on line 6 of flow_small.php
+@test(3)
+test 3
+in pub:3
+in pri:3
+Breakpoint 1 reached at foo() on line 6 of %s/flow_small.php
+   5 function foo($a, $b) {
+   6*  $c = $b - $a;
+   7   error_log("foo:".$c);
+
+continue
+foo:9
+Break at cls::pri() on line 21 of %s/flow_small.php
+  20     if ($x == 3) {
+  21*      hphpd_break();
+  22     }
+
+break clear all
+All breakpoints are cleared.
+continue
+out pri:3
+out pub:3
+test done 3
+break flow_small.php:7
+Breakpoint 1 set on line 7 of flow_small.php
+@test(4)
+test 4
+in pub:4
+in pri:4
+Breakpoint 1 reached at foo() on line 7 of %s/flow_small.php
+   6   $c = $b - $a;
+   7*  error_log("foo:".$c);
+   8 }
+
+break clear all
+All breakpoints are cleared.
+out
+foo:13
+Break at cls::pri() on line 20 of %s/flow_small.php
+  19     foo($y, $z);
+  20*    if ($x == 3) {
+  21       hphpd_break();
+
+out
+out pri:4
+Break at cls::pub() on line 14 of %s/flow_small.php
+  13     $this->pri($x);
+  14*    error_log("out pub:".$x);
+  15   }
+
+out
+out pub:4
+Break at test() on line 63 of %s/flow_small.php
+  62   $obj->pub($x);
+  63*  error_log("test done ".$x);
+  64 }
+
+continue
+test done 4
+break flow_small.php:46
+Breakpoint 1 set on line 46 of flow_small.php
+test(5)
+test 5
+in pub:5
+in pri:5
+foo:17
+Breakpoint 1 reached at thrower() on line 46 of %s/flow_small.php
+  45 function thrower($a) {
+  46*  throw new Exception();
+  47 }
+
+break clear all
+All breakpoints are cleared.
+next
+Break at baz() on line 50 of %s/flow_small.php
+  49 function baz($a) {
+  50*  try {
+  51*    $a = thrower($a);
+  52*  } catch (Exception $e) {
+  53*    $a = 0;
+  54*  }
+  55 
+
+next
+Break at baz() on line 53 of %s/flow_small.php
+  52   } catch (Exception $e) {
+  53*    $a = 0;
+  54   }
+
+out
+Break at cls::pri() on line 29 of %s/flow_small.php
+  28     }
+  29*    error_log("out pri:".$x);
+  30   }
+
+continue
+out pri:5
+out pub:5
+test done 5
+break flow_small.php:46
+Breakpoint 1 set on line 46 of flow_small.php
+test(6)
+test 6
+in pub:6
+in pri:6
+foo:21
+Breakpoint 1 reached at thrower() on line 46 of %s/flow_small.php
+  45 function thrower($a) {
+  46*  throw new Exception();
+  47 }
+
+break clear all
+All breakpoints are cleared.
+out
+Break at baz() on line 50 of %s/flow_small.php
+  49 function baz($a) {
+  50*  try {
+  51*    $a = thrower($a);
+  52*  } catch (Exception $e) {
+  53*    $a = 0;
+  54*  }
+  55 
+
+next
+Break at baz() on line 53 of %s/flow_small.php
+  52   } catch (Exception $e) {
+  53*    $a = 0;
+  54   }
+
+out
+Break at cls::pri() on line 29 of %s/flow_small.php
+  28     }
+  29*    error_log("out pri:".$x);
+  30   }
+
+continue
+out pri:6
+out pub:6
+test done 6
+break flow_small.php:7
+Breakpoint 1 set on line 7 of flow_small.php
+@test(7)
+test 7
+in pub:7
+in pri:7
+Breakpoint 1 reached at foo() on line 7 of %s/flow_small.php
+   6   $c = $b - $a;
+   7*  error_log("foo:".$c);
+   8 }
+
+break clear all
+All breakpoints are cleared.
+break flow_small.php:62
+Breakpoint 1 set on line 62 of flow_small.php
+continue
+foo:25
+out pri:7
+out pub:7
+Breakpoint 1 reached at test() on line 62 of %s/flow_small.php
+  61   $obj = new cls();
+  62*  $obj->pub($x);
+  63   error_log("test done ".$x);
+
+break clear all
+All breakpoints are cleared.
+continue
+test done 7
+quit

@@ -1,0 +1,12 @@
+HipHop Warning: %s
+NULL
+string(0) ""
+string(4) "test"
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+string(1) "1"
+string(0) ""
+string(0) ""
+Done

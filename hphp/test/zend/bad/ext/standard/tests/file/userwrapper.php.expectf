@@ -1,0 +1,36 @@
+Unlinking file: test://example.com/path/to/file
+Renaming test://example.com/path/to/from to test://example.com/path/to/to
+Making directory: test://example.com/path/to/directory as 755
+Removing directory: test://example.com/path/to/directory
+Stating file: test://example.com/path/to/file
+Array
+(
+    [0] => 1
+    [1] => 2
+    [2] => 420
+    [3] => 3
+    [4] => 100
+    [5] => 1000
+    [6] => -1
+    [7] => 31337
+    [8] => 1234567890
+    [9] => 1231231231
+    [10] => 1234564564
+    [11] => -1
+    [12] => -1
+    [dev] => 1
+    [ino] => 2
+    [mode] => 420
+    [nlink] => 3
+    [uid] => 100
+    [gid] => 1000
+    [rdev] => -1
+    [size] => 31337
+    [atime] => 1234567890
+    [mtime] => 1231231231
+    [ctime] => 1234564564
+    [blksize] => -1
+    [blocks] => -1
+)
+Filesize = 31337
+filemtime = 1231231231

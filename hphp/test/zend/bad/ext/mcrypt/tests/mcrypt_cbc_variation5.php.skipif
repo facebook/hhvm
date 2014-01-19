@@ -1,0 +1,5 @@
+<?php 
+if (!extension_loaded("mcrypt")) {
+	print "skip - mcrypt extension not loaded"; 
+}	 
+?> 

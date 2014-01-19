@@ -1,0 +1,8 @@
+<form><input type="hidden" name="PHPSESSID" value="abtest" />
+<fieldset><input type="hidden" name="PHPSESSID" value="abtest" />
+<form><input type="hidden" name="PHPSESSID" value="abtest" />
+<fieldset>
+<form><input type="hidden" name="PHPSESSID" value="abtest" />
+<fieldset>
+<form>
+<fieldset><input type="hidden" name="PHPSESSID" value="abtest" />

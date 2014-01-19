@@ -1,0 +1,7 @@
+0 entry1.txt
+1 entry2.txt
+2 dir/entry2.txt
+
+0 ren_entry1.txt
+1 entry2.txt
+2 dir3/ren_entry2.txt

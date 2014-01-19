@@ -1,0 +1,32 @@
+array(7) {
+  [0]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "foo"
+  [2]=>
+  string(4) "foo2"
+  [3]=>
+  string(5) "ifoo2"
+  [4]=>
+  string(5) "ifoo1"
+  [5]=>
+  string(5) "ifoo4"
+  [6]=>
+  string(5) "ifoo3"
+}
+array(7) {
+  [0]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "foo"
+  [2]=>
+  string(4) "foo2"
+  [3]=>
+  string(5) "ifoo4"
+  [4]=>
+  string(5) "ifoo3"
+  [5]=>
+  string(5) "ifoo2"
+  [6]=>
+  string(5) "ifoo1"
+}

@@ -1,0 +1,9 @@
+Calling main()
+Entering try
+Creating first c
+Creating second c
+c 0 destructing
+Caught: whoops
+Returning from main
+c 1 destructing
+Back from main()

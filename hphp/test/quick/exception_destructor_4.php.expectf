@@ -1,0 +1,12 @@
+Calling main()
+main() starting
+Calling foo()
+Calling bar()
+Throwing in bar()
+In ExitDestruct::__destruct()
+HipHop Fatal error: Uncaught exception 'Exception' with message 'Exception from bar()' in %s/test/quick/exception_destructor_4.php:40
+Stack trace:
+#0 %s/test/quick/exception_destructor_4.php(46): bar()
+#1 %s/test/quick/exception_destructor_4.php(63): foo()
+#2 %s/test/quick/exception_destructor_4.php(75): main()
+#3 {main}

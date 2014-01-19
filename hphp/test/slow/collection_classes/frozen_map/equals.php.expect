@@ -1,0 +1,21 @@
+= literal / variable equality =
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+= equality with other mapping types =
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+= inequality =
+bool(false)
+bool(false)
+= recursive equality =
+bool(false)
+bool(false)
+bool(true)
+bool(true)

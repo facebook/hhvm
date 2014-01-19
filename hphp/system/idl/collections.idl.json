@@ -1,0 +1,4300 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "HH\\Vector",
+            "ifaces": [
+                "MutableVector"
+            ],
+            "desc": "An ordered collection where values are keyed using integers 0 thru n-1 in order.",
+            "flags": [
+                "IsFinal",
+                "IsCppSerializable",
+                "NoDefaultSweep"
+            ],
+            "footer": "\n private:\n  TypedValue* m_data;\n  int size;\n  int capacity;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values produced by the specified Iterable.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "isEmpty",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the Vector is empty, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "flags": [
+                    ],
+                    "desc": "Returns the number of values in the Vector.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "items",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the values from this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "keys",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the keys of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a clone of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "kvzip",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the key\/value pairs from this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "at",
+                    "flags": [
+                    ],
+                    "desc": "Returns the value at the specified key. If the key is not present, an exception is thrown.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "get",
+                    "flags": [
+                    ],
+                    "desc": "Returns the value at the specified key. If the key is not present, null is returned.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "set",
+                    "flags": [
+                    ],
+                    "desc": "Stores a value into the Vector with the specified key, overwriting any previous value that was associated with the key; if the key is outside the bounds of the Vector, an exception is thrown.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "setAll",
+                    "flags": [
+                    ],
+                    "desc": "Stores each value produced by the specified KeyedIterable into the Vector using its corresponding key, overwriting any previous value that was associated with that key; if the key is outside the bounds of the Vector, an exception is thrown.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "clear",
+                    "flags": [
+                    ],
+                    "desc": "Removes all values from the Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "contains",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified key is present in the Vector, returns false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "containsKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified key is present in the Vector, returns false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "removeKey",
+                    "flags": [
+                    ],
+                    "desc": "Removes the element with the specified key from this Vector and renumbers the keys of all subsequent elements.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "append",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "add",
+                    "flags": [
+                    ],
+                    "desc": "Adds the specified value to the end of this Vector using the next available integer key.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "addAll",
+                    "flags": [
+                    ],
+                    "desc": "Adds the values produced by the specified Iterable to the end of this Vector using the next available integer keys.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "pop",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "resize",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "sz",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "reserve",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "sz",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "toArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Vector.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenSet built from the values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this Vector.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Vector.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "desc": "Returns an iterator that points to beginning of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "map",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filter",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of all the values from this Vector for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of all the values from this Vector for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "zip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a KeyedIterable produced by combined the specified Iterables pair-wise.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "reverse",
+                    "flags": [
+                    ],
+                    "desc": "Reverses the values of the Vector in place.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "splice",
+                    "flags": [
+                    ],
+                    "desc": "Splices the values of the Vector in place (see the documentation for array_splice() on php.net for more details.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "offset",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "len",
+                            "type": "Variant",
+                            "value": "null"
+                        },
+                        {
+                            "name": "replacement",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "linearSearch",
+                    "flags": [
+                    ],
+                    "desc": "Returns index of the specified value if it is present, -1 otherwise.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                        {
+                            "name": "search_value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "shuffle",
+                    "flags": [
+                    ],
+                    "desc": "Shuffles the values of the Vector randomly in place.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromItems",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a Vector built from the values produced by the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromArray",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a Vector built from the values from the specified array.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "arr",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "slice",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a Vector built from the specified slice of values from the specified Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "vec",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "offset",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "len",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+          "name": "HH\\FrozenVector",
+          "ifaces": [
+            "ConstVector"
+          ],
+          "flags": [
+            "IsFinal",
+            "IsCppSerializable",
+            "NoDefaultSweep"
+          ],
+          "funcs": [
+            {
+                "name": "__construct",
+                "flags": [
+                ],
+                "desc": "Returns a FrozenVector built from the values produced by the specified Iterable.",
+                "return": {
+                    "type": null
+                },
+                "args": [
+                    {
+                        "name": "iterable",
+                        "type": "Variant",
+                        "value": "null"
+                    }
+                ]
+            },
+            {
+                  "name": "isEmpty",
+                  "flags": [
+                  ],
+                  "desc": "Returns true if the FrozenVector is empty, false otherwise.",
+                  "return": {
+                      "type": "Boolean"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "count",
+                  "flags": [
+                  ],
+                  "desc": "Returns the number of values in the FrozenVector.",
+                  "return": {
+                      "type": "Int64"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "items",
+                  "flags": [
+                  ],
+                  "desc": "Returns an Iterable that produces the values from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "containsKey",
+                  "flags": [
+                  ],
+                  "desc": "Returns true if the specified key is present in the FrozenVector, returns false otherwise.",
+                  "return": {
+                      "type": "Boolean"
+                  },
+                  "args": [
+                      {
+                          "name": "key",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "at",
+                  "flags": [
+                  ],
+                  "desc": "Returns the value at the specified key. If the key is not present, an exception is thrown.",
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "key",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "get",
+                  "flags": [
+                  ],
+                  "desc": "Returns the value at the specified key. If the key is not present, null is returned.",
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "key",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "getIterator",
+                  "flags": [
+                  ],
+                  "desc": "Returns an iterator that points to beginning of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "map",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "callback",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                 "name": "mapWithKey",
+                 "flags": [
+                  ],
+                  "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "callback",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "filter",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector of all the values from this FrozenVector for which the specified callback returns true.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                    {
+                        "name": "callback",
+                        "type": "Variant"
+                    }
+                  ]
+              },
+              {
+                  "name": "filterWithKey",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector of all the values from this FrozenVector for which the specified callback returns true.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "callback",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "zip",
+                  "flags": [
+                  ],
+                  "desc": "Returns a KeyedIterable produced by combined the specified Iterables pair-wise.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "iterable",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "kvzip",
+                  "flags": [
+                  ],
+                  "desc": "Returns an Iterable that produces the key\/value pairs from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "keys",
+                  "flags": [
+                  ],
+                  "desc": "Returns an Iterable that produces the keys from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "__toString",
+                  "return": {
+                      "type": "String"
+                  },
+                  "flags": [
+                  ],
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "__get",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "__set",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      },
+                      {
+                          "name": "value",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "__isset",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Boolean"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "__unset",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "toVector",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector built from the values of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toFrozenVector",
+                  "flags": [
+                  ],
+                  "desc": "Returns a copy of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toMap",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Map built from the keys and values of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toStableMap",
+                  "flags": [
+                  ],
+                  "desc": "Returns a StableMap built from the keys and values of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toSet",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Set built from the values of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+             },
+             {
+                 "name": "toFrozenSet",
+                 "flags": [
+                 ],
+                  "desc": "Returns a FrozenSet built from the values of this FrozenVector.",
+                 "return": {
+                     "type": "Object"
+                 },
+                 "args": [
+                 ]
+             },
+             {
+                 "name": "values",
+                 "flags": [
+                 ],
+                 "desc": "Returns a clone of this FrozenVector.",
+                 "return": {
+                     "type": "Object"
+                 },
+                 "args": [
+                 ]
+             },
+             {
+                 "name": "lazy",
+                 "flags": [
+                 ],
+                 "desc": "Returns a lazy iterable view of this FrozenVector.",
+                 "return": {
+                     "type": "Object"
+                 },
+                 "args": [
+                 ]
+             },
+             {
+                 "name": "toArray",
+                  "flags": [
+                  ],
+                  "desc": "Returns an array built from the values from this FrozenVector.",
+                  "return": {
+                      "type": "VariantMap"
+                  },
+                  "args": [
+                  ]
+             },
+             {
+                  "name": "toKeysArray",
+                  "flags": [
+                  ],
+                  "desc": "Returns an array built from the keys from this FrozenVector.",
+                  "return": {
+                      "type": "VariantMap"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toValuesArray",
+                  "flags": [
+                  ],
+                  "desc": "Returns an array built from the values from this FrozenVector.",
+                  "return": {
+                      "type": "VariantMap"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "linearSearch",
+                  "flags": [
+                  ],
+                  "desc": "Returns index of the specified value if it is present, -1 otherwise.",
+                  "return": {
+                      "type": "Int64"
+                  },
+                  "args": [
+                      {
+                          "name": "search_value",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "slice",
+                  "flags": [
+                      "IsStatic"
+                  ],
+                  "desc": "Returns a FrozenVector built from the specified slice of values from the specified FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "vec",
+                          "type": "Variant"
+                      },
+                      {
+                          "name": "offset",
+                          "type": "Variant"
+                      },
+                      {
+                          "name": "len",
+                          "type": "Variant",
+                          "value": "null"
+                      }
+                  ]
+              }
+            ]
+        },
+        {
+            "name": "VectorIterator",
+            "ifaces": [
+                "KeyedIterator"
+            ],
+            "desc": "An iterator implementation for iterating over a Vector\/FrozenVector.",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "desc": "Returns the current value that the iterator points to.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "desc": "Returns the current key that the iterator points to.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "desc": "Returns true if the iterator points to a valid value, returns false otherwise.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "desc": "Advance this iterator forward one position.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "desc": "Move this iterator back to the first position.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "Map",
+            "ifaces": [
+                "MutableMap"
+            ],
+            "desc": "An ordered dictionary-style collection.",
+            "flags": [
+                "IsFinal",
+                "IsCppSerializable",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values produced by the specified KeyedIterable.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "isEmpty",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the Map is empty, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "flags": [
+                    ],
+                    "desc": "Returns the number of key\/value pairs in the Map.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "items",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the key\/value Pairs from this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "keys",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the keys of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "kvzip",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the key\/value pairs from this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "at",
+                    "flags": [
+                    ],
+                    "desc": "Returns the value at the specified key. If the key is not present, an exception is thrown.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "get",
+                    "flags": [
+                    ],
+                    "desc": "Returns the value at the specified key. If the key is not present, null is returned.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "set",
+                    "flags": [
+                    ],
+                    "desc": "Stores a value into the Map with the specified key, overwriting any previous value that was associated with the key.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "setAll",
+                    "flags": [
+                    ],
+                    "desc": "Stores each value produced by the specified KeyedIterable into the Map using its corresponding key, overwriting any previous value that was associated with that key.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "clear",
+                    "flags": [
+                    ],
+                    "desc": "Removes all key\/value pairs from the Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "contains",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified key is present in the Map, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "containsKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified key is present in the Map, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "remove",
+                    "flags": [
+                    ],
+                    "desc": "Removes the specified key from this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "removeKey",
+                    "flags": [
+                    ],
+                    "desc": "Removes the specified key from this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "add",
+                    "flags": [
+                    ],
+                    "desc": "Adds the specified key\/value Pair to this Map. If an element with the same key is already present, an exception is thrown.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "addAll",
+                    "flags": [
+                    ],
+                    "desc": "Adds the key\/value Pairs produced by the specified Iterable to this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "toArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys and values from this Map.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                     "desc": "Returns a FrozenSet built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this Map.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Map.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "differenceByKey",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "it",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "desc": "Returns an iterator that points to beginning of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "map",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map of the keys/values produced by applying the specified callback on each value from this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map of the keys/values produced by applying the specified callback on each key and value from this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filter",
+                    "flags": [
+                    ],
+                    "desc": "Returns a new Map of all the keys/values from this Map for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a new Map of all the keys/values from this Map for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "retain",
+                    "flags": [
+                    ],
+                    "desc": "Ensures that this Map contains only keys/values for which the specified callback returns true when passed the value.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "retainWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Ensures that this Map contains only keys/values for which the specified callback returns true when passed the key and the value.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "zip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a KeyedIterable produced by combined the specified Iterables pair-wise.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromItems",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a Map built from the key\/value Pairs produced by the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromArray",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a Map built from the keys and values from the specified array.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "mp",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "HH\\FrozenMap",
+            "ifaces": [
+                "ConstMap"
+            ],
+            "desc": "An immutable dictionary-style collection.",
+            "flags": [
+                "IsFinal",
+                "IsCppSerializable",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenMap built from the keys and values produced by the specified KeyedIterable.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "isEmpty",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the FrozenMap is empty, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "flags": [
+                    ],
+                    "desc": "Returns the number of key\/value pairs in the FrozenMap.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "items",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the key\/value Pairs from this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "keys",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the keys of this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "kvzip",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the key\/value pairs from this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "at",
+                    "flags": [
+                    ],
+                    "desc": "Returns the value at the specified key. If the key is not present, an exception is thrown.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "get",
+                    "flags": [
+                    ],
+                    "desc": "Returns the value at the specified key. If the key is not present, null is returned.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "contains",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified key is present in the FrozenMap, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "containsKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified key is present in the FrozenMap, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "toArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys and values from this FrozenMap.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values of this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                     "desc": "Returns a FrozenSet built from the values of this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this FrozenMap.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this FrozenMap.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "differenceByKey",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "it",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "desc": "Returns an iterator that points to beginning of this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "map",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenMap of the keys/values produced by applying the specified callback on each value from this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenMap of the keys/values produced by applying the specified callback on each key and value from this FrozenMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filter",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenMap of all the keys/values from this FrozenMap for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenMap of all the keys/values from this FrozenMap for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "zip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a KeyedIterable produced by combined the specified Iterables pair-wise.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromItems",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a FrozenMap built from the key\/value Pairs produced by the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "MapIterator",
+            "ifaces": [
+                "KeyedIterator"
+            ],
+            "desc": "An iterator implementation for iterating over a Map/StableMap.",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "desc": "Returns the current value that the iterator points to.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "desc": "Returns the current key that the iterator points to.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "desc": "Returns true if the iterator points to a valid value, returns false otherwise.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "desc": "Advance this iterator forward one position.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "desc": "Move this iterator back to the first position.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "StableMap",
+            "ifaces": [
+                "MutableMap"
+            ],
+            "desc": "An ordered dictionary-style collection. Since Map is also ordered, it should be preferred.",
+            "flags": [
+                "IsFinal",
+                "IsCppSerializable",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values produced by the specified KeyedIterable.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "isEmpty",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the StableMap is empty, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "flags": [
+                    ],
+                    "desc": "Returns the number of key\/value pairs in the StableMap.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "items",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the key\/value Pairs from this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "keys",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the keys of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "kvzip",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the key\/value pairs from this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "at",
+                    "flags": [
+                    ],
+                    "desc": "Returns the value at the specified key. If the key is not present, an exception is thrown.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "get",
+                    "flags": [
+                    ],
+                    "desc": "Returns the value at the specified key. If the key is not present, null is returned.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "set",
+                    "flags": [
+                    ],
+                    "desc": "Stores a value into the StableMap with the specified key, overwriting any previous value that was associated with the key.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "setAll",
+                    "flags": [
+                    ],
+                    "desc": "Stores each value produced by the specified KeyedIterable into the StableMap using its corresponding key, overwriting any previous value that was associated with that key.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "clear",
+                    "flags": [
+                    ],
+                    "desc": "Removes all key\/value pairs from the StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "contains",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified key is present in the StableMap, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "containsKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified key is present in the StableMap, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "remove",
+                    "flags": [
+                    ],
+                    "desc": "Removes the specified key from this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "removeKey",
+                    "flags": [
+                    ],
+                    "desc": "Removes the specified key from this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "add",
+                    "flags": [
+                    ],
+                    "desc": "Adds the specified key\/value Pair to this StableMap. If an element with the same key is already present, an exception is thrown.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "addAll",
+                    "flags": [
+                    ],
+                    "desc": "Adds the key\/value Pairs produced by the specified Iterable to the end of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "toArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys and values from this StableMap.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                     "desc": "Returns a FrozenSet built from the values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this StableMap.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this StableMap.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "differenceByKey",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "it",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "desc": "Returns an iterator that points to beginning of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "map",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap of the keys/values produced by applying the specified callback on each value from this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap of the keys/values produced by applying the specified callback on each key and value from this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filter",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap of all the keys/values from this StableMap for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap of all the keys/values from this StableMap for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "retain",
+                    "flags": [
+                    ],
+                    "desc": "Ensures that this StableMap contains only keys/values for which the specified callback returns true when passed the value.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "retainWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Ensures that this StableMap contains only keys/values for which the specified callback returns true when passed the key and the value.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "zip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a KeyedIterable produced by combined the specified Iterables pair-wise.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromItems",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a StableMap built from the key\/value Pairs produced by the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "fromArray",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values from the specified array.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "mp",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "HH\\Set",
+            "ifaces": [
+                "MutableSet"
+            ],
+            "desc": "An unordered set-style collection.",
+            "flags": [
+                "IsFinal",
+                "IsCppSerializable",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values produced by the specified Iterable.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "isEmpty",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the Set is empty, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "flags": [
+                    ],
+                    "desc": "Returns the number of values in the Set.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "items",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the values from this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "clear",
+                    "flags": [
+                    ],
+                    "desc": "Removes all values from the Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "contains",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified value is present in the Set, returns false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "remove",
+                    "flags": [
+                    ],
+                    "desc": "Removes the specified value from this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "add",
+                    "flags": [
+                    ],
+                    "desc": "Adds the specified value to this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "addAll",
+                    "flags": [
+                    ],
+                    "desc": "Adds the values produced by the specified Iterable to this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "toArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Set, array(val1 => val1, val2 => val2, ...). This maintains set-like semantics in array() land: O(1) membership test with `array_has_key($a['key'])` and iteration with `foreach($a as $member)`. Int-like strings end up with numerical array keys.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                     "desc": "Returns a FrozenSet built from the values of this Set.",
+                     "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Set.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Set.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "desc": "Returns an iterator that points to beginning of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "map",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set of the values produced by applying the specified callback on each value from this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filter",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set of all the values from this Set for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "zip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Iterable produced by combined the specified Iterables pair-wise.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "removeAll",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "difference",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromItems",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a Set built from the values produced by the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromArray",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a Set built from the values from the specified array.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "arr",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromArrays",
+                    "flags": [
+                        "IsStatic",
+                        "VariableArguments"
+                    ],
+                    "desc": "Returns a Set built from the values from the specified arrays.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "HH\\FrozenSet",
+            "ifaces": [
+                "ConstSet"
+            ],
+            "desc": "An unordered immutable set-style collection.",
+            "flags": [
+                "IsFinal",
+                "IsCppSerializable",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenSet built from the values produced by the specified Iterable.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "isEmpty",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the FrozenSet is empty, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "flags": [
+                    ],
+                    "desc": "Returns the number of values in the FrozenSet.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "items",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the values from this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "contains",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified value is present in the FrozenSet, returns false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "toArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this FrozenSet, array(val1 => val1, val2 => val2, ...). This maintains set-like semantics in array() land: O(1) membership test with `array_has_key($a['key'])` and iteration with `foreach($a as $member)`. Int-like strings end up with numerical array keys.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this FrozenSet.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this FrozenSet.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "desc": "Returns an iterator that points to beginning of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "map",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenSet of the values produced by applying the specified callback on each value from this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filter",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenSet of all the values from this FrozenSet for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "zip",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable produced by combining the specified Iterables pair-wise.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromItems",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a FrozenSet built from the values produced by the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromArrays",
+                    "flags": [
+                        "IsStatic",
+                        "VariableArguments"
+                    ],
+                    "desc": "Returns a FrozenSet built from the values from the specified arrays.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SetIterator",
+            "ifaces": [
+                "HH\\Iterator"
+            ],
+            "desc": "An iterator implementation for iterating over a Set.",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "desc": "Returns the current value that the iterator points to.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "desc": "Returns true if the iterator points to a valid value, returns false otherwise.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "desc": "Advance this iterator forward one position.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "desc": "Move this iterator back to the first position.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "Pair",
+            "ifaces": [
+                "ConstVector"
+            ],
+            "desc": "An ordered fixed-sized container.",
+            "flags": [
+                "IsFinal",
+                "IsCppSerializable",
+                "NoDefaultSweep"
+            ],
+            "footer": "\n private:\n  int size;\n  int capacity;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isEmpty",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if this Pair is empty, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "flags": [
+                    ],
+                    "desc": "Returns the number of values in the Pair.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "items",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the values from this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "keys",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the keys of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "kvzip",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the key\/value pairs from this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Pair.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector build from the values from this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map built from the keys and values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toStableMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a StableMap built from the keys and values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                   "name": "toFrozenSet",
+                   "flags": [
+                   ],
+                    "desc": "Returns a FrozenSet built from the values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the keys from this Pair.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this Pair.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "desc": "Returns an iterator that points to beginning of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "map",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "mapWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filter",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of all the values from this Pair for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filterWithKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector of all the values from this Pair for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "zip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a KeyedIterable produced by combined the specified Iterables pair-wise.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "at",
+                    "flags": [
+                    ],
+                    "desc": "Returns the value at the specified key. If the key is not present, an exception is thrown.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "get",
+                    "flags": [
+                    ],
+                    "desc": "Returns the value at the specified key. If the key is not present, null is returned.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "containsKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified key is present in the Pair, returns false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "PairIterator",
+            "ifaces": [
+                "KeyedIterator"
+            ],
+            "desc": "An iterator implementation for iterating over a Pair.",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "desc": "Returns the current value that the iterator points to.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "desc": "Returns the current key that the iterator points to.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "desc": "Returns true if the iterator points to a valid value, returns false otherwise.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "desc": "Advance this iterator forward one position.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "desc": "Move this iterator back to the first position.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

@@ -1,0 +1,4 @@
+*** Testing clearstatcache() function: error conditions ***
+HipHop Warning: %s
+NULL
+*** Done ***

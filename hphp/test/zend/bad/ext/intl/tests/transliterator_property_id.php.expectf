@@ -1,0 +1,7 @@
+Katakana-Latin
+Latin-Katakana
+object(Transliterator)#%d (%d) {
+  ["id"]=>
+  string(%d) "Latin-Katakana"
+}
+Done.

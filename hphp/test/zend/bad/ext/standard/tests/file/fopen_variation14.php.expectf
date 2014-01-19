@@ -1,0 +1,28 @@
+*** Testing fopen() : variation ***
+--- READ: file://fopen14.tmpDir/fopen_variation14.tmp ---
+HipHop Warning: %s
+HipHop Warning: %s
+--- WRITE: file://fopen14.tmpDir/fopen_variation14.tmp ---
+HipHop Warning: %s
+HipHop Warning: %s
+--- READ: file://./fopen14.tmpDir/fopen_variation14.tmp ---
+HipHop Warning: %s
+HipHop Warning: %s
+--- WRITE: file://./fopen14.tmpDir/fopen_variation14.tmp ---
+HipHop Warning: %s
+HipHop Warning: %s
+--- READ: file:///%s/fopen14.tmpDir/fopen_variation14.tmp ---
+test passed
+--- WRITE: file:///%s/fopen14.tmpDir/fopen_variation14.tmp ---
+test passed
+--- READ: file://../fopen14.tmpDir/fopen_variation14.tmp ---
+HipHop Warning: %s
+HipHop Warning: %s
+--- WRITE: file://../fopen14.tmpDir/fopen_variation14.tmp ---
+HipHop Warning: %s
+HipHop Warning: %s
+--- READ: file:///%s/fopen14.tmpDir/fopen_variation14.tmp ---
+test passed
+--- WRITE: file:///%s/fopen14.tmpDir/fopen_variation14.tmp ---
+test passed
+===DONE===

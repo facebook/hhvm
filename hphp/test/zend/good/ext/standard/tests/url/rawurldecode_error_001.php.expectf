@@ -1,0 +1,10 @@
+*** Testing rawurldecode() : error conditions ***
+
+-- Testing rawurldecode() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing rawurldecode() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

@@ -1,0 +1,12 @@
+*** Testing imap_fetchbody() : error conditions ***
+
+-- Testing imap_fetchbody() function with more than expected no. of arguments --
+Create a temporary mailbox and add 1 msgs
+.. mailbox '{%s}%s' created
+HipHop Warning: %s
+NULL
+
+-- Testing imap_fetchbody() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

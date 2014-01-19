@@ -1,0 +1,24 @@
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function main() {
+  NewArray
+  String "asd"
+  AddNewElemC
+  SetL $foo
+  PopC
+
+  FPushFuncD 1 "var_dump"
+  FPassL 0 $foo
+  FCall 1
+  PopR
+
+  Int 1
+  RetC
+}

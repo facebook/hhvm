@@ -1,0 +1,10 @@
+*** Testing prev() : error conditions ***
+
+-- Testing prev() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing prev() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

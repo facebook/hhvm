@@ -1,0 +1,69 @@
+A::__get y
+string(1) "y"
+A::__get x
+string(1) "x"
+A::__get y
+string(1) "y"
+A::__get x
+string(1) "x"
+A::__get x
+A::__set x, 1
+A::__get y
+A::__set y, 2
+object(A)#1 (0) {
+}
+A::__get x
+A::__set x, y
+A::__get y
+A::__set y, z
+object(A)#1 (0) {
+}
+B::__get x
+B::__get y
+object(B)#2 (2) {
+  ["x":"B":private]=>
+  int(1)
+  ["y"]=>
+  int(2)
+}
+B::__get x
+B::__get y
+object(B)#2 (2) {
+  ["x":"B":private]=>
+  string(1) "y"
+  ["y"]=>
+  string(1) "z"
+}
+object(C)#3 (2) {
+  ["x":"C":private]=>
+  int(1)
+  ["y"]=>
+  int(2)
+}
+object(C)#3 (2) {
+  ["x":"C":private]=>
+  int(1)
+  ["y"]=>
+  int(1)
+}
+HipHop Notice: Undefined property: D::$y in %s on line 187
+NULL
+NULL
+object(D)#4 (2) {
+  ["x":"D":private]=>
+  int(1)
+  ["y"]=>
+  int(2)
+}
+object(D)#4 (2) {
+  ["x":"D":private]=>
+  int(1)
+  ["y"]=>
+  int(2)
+}
+object(D)#4 (2) {
+  ["x":"D":private]=>
+  int(1)
+  ["y"]=>
+  int(1)
+}

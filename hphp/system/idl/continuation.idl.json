@@ -1,0 +1,161 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "Continuation",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep",
+                "CppCustomDelete"
+            ],
+            "ifaces": [
+                "HH\\Iterator"
+            ],
+            "footer": "",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "update",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "label",
+                            "type": "Int64"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "getLabel",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "send",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "v",
+                            "type": "Variant"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "raise",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "v",
+                            "type": "Variant"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "getOrigFuncName",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getCalledClass",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

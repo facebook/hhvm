@@ -1,0 +1,31 @@
+HipHop Warning: %s
+string(0) ""
+string(5) "foo%c%c"
+string(4) "foo%c"
+string(4) "foo%c"
+string(4) "foo%c"
+array(1) {
+  [1]=>
+  string(3) "foo"
+}
+array(1) {
+  [1]=>
+  string(3) "foo"
+}
+bool(false)
+array(1) {
+  [1]=>
+  string(0) ""
+}
+array(1) {
+  [1]=>
+  string(1) "A"
+}
+array(1) {
+  [1]=>
+  string(2) "AB"
+}
+array(1) {
+  [1]=>
+  string(2) "AB"
+}

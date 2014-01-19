@@ -1,0 +1,10 @@
+*** Testing session_destroy() : variation ***
+bool(true)
+string(%d) "%s"
+bool(true)
+string(0) ""
+bool(true)
+string(%d) "%s"
+bool(true)
+string(0) ""
+Done

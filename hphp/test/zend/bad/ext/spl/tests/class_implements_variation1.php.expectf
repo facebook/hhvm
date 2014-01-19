@@ -1,0 +1,106 @@
+*** Testing class_implements() : variation ***
+
+--int 0--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--int 1--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--int 12345--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--int -12345--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--float 10.5--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--float -10.5--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--float 12.3456789000e10--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--float -12.3456789000e10--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--float .5--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--empty array--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--int indexed array--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--associative array--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--nested arrays--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--uppercase NULL--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--lowercase null--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--lowercase true--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--lowercase false--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--uppercase TRUE--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--uppercase FALSE--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--empty string DQ--
+Error: 2 - class_implements(): Class  does not exist and could not be loaded, %s(%d)
+bool(false)
+
+--empty string SQ--
+Error: 2 - class_implements(): Class  does not exist and could not be loaded, %s(%d)
+bool(false)
+
+--instance of classWithToString--
+array(0) {
+}
+
+--instance of classWithoutToString--
+array(0) {
+}
+
+--undefined var--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--unset var--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+
+--resource--
+Error: 2 - class_implements(): object or string expected, %s(%d)
+bool(false)
+===DONE===

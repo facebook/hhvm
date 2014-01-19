@@ -1,0 +1,9 @@
+stream_open: yes
+url_stat: yes
+dir_opendir: yes
+rmdir: yes
+mkdir: yes
+rename: yes
+unlink: yes
+touch: yes
+==DONE==

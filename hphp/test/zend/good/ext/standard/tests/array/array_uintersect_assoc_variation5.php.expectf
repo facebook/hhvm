@@ -1,0 +1,16 @@
+*** Testing array_uintersect_assoc() : usage variation - differing comparison functions***
+
+-- comparison function with an incorrect return value --
+array(0) {
+}
+
+-- comparison function taking too many parameters --
+HipHop Warning: %s
+array(0) {
+}
+
+-- comparison function taking too few parameters --
+array(0) {
+}
+
+===DONE===

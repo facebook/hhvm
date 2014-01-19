@@ -1,0 +1,85 @@
+*** Testing strcspn() : with unexpected values of len argument ***
+
+-- Iteration with len value as "10.5" --
+int(0)
+
+-- Iteration with len value as "-10.5" --
+int(0)
+
+-- Iteration with len value as "101234567000" --
+int(0)
+
+-- Iteration with len value as "1.07654321E-9" --
+int(0)
+
+-- Iteration with len value as "0.5" --
+int(0)
+
+-- Iteration with len value as "Array" --
+HipHop Warning: %s
+NULL
+
+-- Iteration with len value as "Array" --
+HipHop Warning: %s
+NULL
+
+-- Iteration with len value as "Array" --
+HipHop Warning: %s
+NULL
+
+-- Iteration with len value as "Array" --
+HipHop Warning: %s
+NULL
+
+-- Iteration with len value as "Array" --
+HipHop Warning: %s
+NULL
+
+-- Iteration with len value as "" --
+int(0)
+
+-- Iteration with len value as "" --
+int(0)
+
+-- Iteration with len value as "1" --
+int(0)
+
+-- Iteration with len value as "" --
+int(0)
+
+-- Iteration with len value as "1" --
+int(0)
+
+-- Iteration with len value as "" --
+int(0)
+
+-- Iteration with len value as "" --
+HipHop Warning: %s
+NULL
+
+-- Iteration with len value as "" --
+HipHop Warning: %s
+NULL
+
+-- Iteration with len value as "string" --
+HipHop Warning: %s
+NULL
+
+-- Iteration with len value as "string" --
+HipHop Warning: %s
+NULL
+
+-- Iteration with len value as "object" --
+HipHop Warning: %s
+NULL
+
+-- Iteration with len value as "" --
+int(0)
+
+-- Iteration with len value as "" --
+int(0)
+
+-- Iteration with len value as "Resource id #%d" --
+HipHop Warning: %s
+NULL
+Done

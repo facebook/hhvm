@@ -1,0 +1,15 @@
+Write some data:
+
+
+Read a line from the client:
+string(6) "line1
+"
+
+
+Read another line from the client:
+string(6) "line2
+"
+
+
+Close the server side socket and read the remaining data from the client
+done

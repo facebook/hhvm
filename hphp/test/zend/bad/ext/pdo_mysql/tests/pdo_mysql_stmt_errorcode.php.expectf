@@ -1,0 +1,6 @@
+Testing emulated PS...
+HipHop Warning: %s
+string(5) "42S02"
+Testing native PS...
+HipHop Warning: %s
+HipHop Fatal error: %s

@@ -1,0 +1,16 @@
+*** Testing rsort() : error conditions ***
+
+-- Testing rsort() function with Zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing rsort() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+Done

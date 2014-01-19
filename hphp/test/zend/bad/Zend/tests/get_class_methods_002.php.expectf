@@ -1,0 +1,17 @@
+Strict Standards: Redefining already defined constructor for class B in %s on line %d
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(11) "__construct"
+  [3]=>
+  string(10) "__destruct"
+}

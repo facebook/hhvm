@@ -1,0 +1,39 @@
+
+Log {
+  AlwaysLogUnhandledExceptions = false
+}
+
+Server {
+  AllowedFiles {
+    * = hello.php
+    * = hphpd.php
+  }
+}
+
+Eval {
+  Debugger {
+    EnableDebugger = true
+    EnableDebuggerServer = true
+    StartupDocument = hphpd_startup.php
+    SignalTimeout = 3
+  }
+}
+
+Log {
+  File = /tmp/hphpd_test_error.log
+}
+
+Sandbox {
+  SandboxMode = true
+  ConfFile = sandbox_conf
+  # only match hphpd.<user>.sth.sth, not any requests
+  Pattern = hphpd\.([a-z0-9_-]+)\.[a-z0-9_-]+\.[a-z0-9_-]+
+}
+
+Repo {
+  Local.Mode = r-
+  Central.Path = /var/facebook/hhvm/cli_%{schema}.hhbc
+  Eval.Mode = readonly
+  Commit = true
+  DebugInfo = true
+}

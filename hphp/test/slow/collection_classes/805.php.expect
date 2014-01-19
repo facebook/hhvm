@@ -1,0 +1,10 @@
+get throws, i = int(0)
+isset: bool(false)
+set throws, i = int(0)
+get throws, i = int(1)
+isset: bool(false)
+set throws, i = int(1)
+get throws, i = int(2)
+isset: bool(false)
+set throws, i = int(2)
+Done

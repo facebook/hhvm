@@ -1,0 +1,6 @@
+*** Testing array_diff_ukey() : usage variation ***
+Error: 2 - array_diff_ukey() expects parameter 3 to be a valid callback, no array or string given, %s(%d)
+NULL
+Error: 2 - array_diff_ukey() expects parameter 4 to be a valid callback, no array or string given, %s(%d)
+NULL
+===DONE===

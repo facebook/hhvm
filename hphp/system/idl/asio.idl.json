@@ -1,0 +1,881 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "asio_get_current_context_idx",
+            "desc": "Get index of the current scheduler context, or 0 if there is none",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int32",
+                "desc": "An index of the current scheduler context"
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "asio_get_running_in_context",
+            "desc": "Get currently running wait handle in a context specified by its index",
+            "flags": [
+            ],
+            "return": {
+                "type": "Object",
+                "desc": "An AsyncFunctionWaitHandle that is running in a specified context"
+            },
+            "args": [
+                {
+                    "name": "ctx_idx",
+                    "type": "Int32",
+                    "desc": "An index of a specified context"
+                }
+            ]
+        },
+        {
+            "name": "asio_get_running",
+            "desc": "Get currently running wait handle, or null if there is none",
+            "flags": [
+            ],
+            "return": {
+                "type": "Object",
+                "desc": "An AsyncFunctionWaitHandle that is running in the current context"
+            },
+            "args": [
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "WaitHandle",
+            "desc": "A wait handle representing asynchronous operation",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "NoDefaultSweep"
+            ],
+            "ifaces": [
+                "Awaitable"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "setOnJoinCallback",
+                    "desc": "Set callback for when join() is called",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_join_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on join()"
+                        }
+                    ]
+                },
+                {
+                    "name": "getWaitHandle",
+                    "desc": "Return this wait handle (for Awaitable interface)",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "import",
+                    "desc": "Import this wait handle to the current scheduler context",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "join",
+                    "desc": "Wait until this wait handle is finished and return its result (operates in a new scheduler context)",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A result of the operation represented by given wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isFinished",
+                    "desc": "Check if this wait handle finished (succeeded or failed)",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "A boolean indicating whether this wait handle finished"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isSucceeded",
+                    "desc": "Check if this wait handle succeeded",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "A boolean indicating whether this wait handle succeeded"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isFailed",
+                    "desc": "Check if this wait handle failed",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "A boolean indicating whether this wait handle failed"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getID",
+                    "desc": "Get unique ID of this wait handle (amongst existing ones)",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "An integer representing unique ID of this wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getName",
+                    "desc": "Get name of the operation behind this wait handle",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "A name of the operation behind this wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getExceptionIfFailed",
+                    "desc": "Get exception if this wait handle has failed, or null",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "An exception if this wait handle has failed, or null"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "StaticWaitHandle",
+            "parent": "WaitHandle",
+            "desc": "A wait handle that is always finished",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "StaticResultWaitHandle",
+            "parent": "StaticWaitHandle",
+            "desc": "A wait handle representing static result",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "StaticExceptionWaitHandle",
+            "parent": "StaticWaitHandle",
+            "desc": "A wait handle representing statically failed operation",
+            "flags": [
+                     "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "WaitableWaitHandle",
+            "parent": "WaitHandle",
+            "desc": "A wait handle that can be waited upon",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getContextIdx",
+                    "desc": "Get index of the scheduler context this wait handle operates in",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int32",
+                        "desc": "An index of scheduler context this wait handle operates in"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getCreator",
+                    "desc": "Get wait handle that created this wait handle",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "An AsyncFunctionWaitHandle that was being executed when this wait handle was constructed"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getParents",
+                    "desc": "Get wait handles blocked on this wait handle",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "VariantVec",
+                        "desc": "An array of BlockableWaitHandles blocked on this wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getDependencyStack",
+                    "desc": "Get the dependency stack for this wait handle",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "VariantVec",
+                        "desc": "A representation of the call stack of wait handles, starting with this wait handle. Each element in the array is a wait handle, or null which represents crossing a context boundary."
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "BlockableWaitHandle",
+            "parent": "WaitableWaitHandle",
+            "desc": "A wait handle that can be blocked on a dependency",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "AsyncFunctionWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle representing asynchronous execution of async function",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback to be called when an AsyncFunctionWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_create_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when an AsyncFunctionWaitHandle is created"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnAwaitCallback",
+                    "desc": "Set callback to be called when an async function blockingly awaits",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_await_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when an async function blockingly await"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnSuccessCallback",
+                    "desc": "Set callback to be called when an async function finishes successfully",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_success_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when an async function finishes"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnFailCallback",
+                    "desc": "Set callback to be called when an async function fails",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_fail_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called when an async function fails"
+                        }
+                    ]
+                },
+                {
+                    "name": "getPrivData",
+                    "desc": "Get user's private data",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "An Object with user's private data"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "setPrivData",
+                    "desc": "Set user's private data",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "data",
+                            "type": "Object",
+                            "desc": "An Object with user's private data"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "GenArrayWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle representing an array of asynchronous operations",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that waits for a given array of dependencies",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a given array of dependencies and return their results"
+                    },
+                    "args": [
+                        {
+                            "name": "dependencies",
+                            "type": "VariantMap",
+                            "desc": "An Array of dependencies to wait for"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a GenArrayWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_create_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "GenMapWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle representing a map of asynchronous operations",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that waits for a given map of dependencies",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a given map of dependencies and return their results"
+                    },
+                    "args": [
+                        {
+                            "name": "dependencies",
+                            "type": "Variant",
+                            "desc": "A map of dependencies to wait for"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a GenMapWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_create_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "GenVectorWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle representing a vector of asynchronous operations",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that waits for a given vector of dependencies",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a given vector of dependencies and return their results"
+                    },
+                    "args": [
+                        {
+                            "name": "dependencies",
+                            "type": "Variant",
+                            "desc": "A Vector of dependencies to wait for"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a GenVectorWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_create_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SetResultToRefWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle proxy that sets result to a given reference",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that stores result of a dependency to a given reference",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will store the result of a dependency to a given reference"
+                    },
+                    "args": [
+                        {
+                            "name": "wait_handle",
+                            "type": "Object",
+                            "desc": "A wait handle to wait for"
+                        },
+                        {
+                            "name": "ref",
+                            "type": "Variant",
+                            "desc": "A reference to set the result to",
+                            "ref": true
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a SetResultToRefWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "on_create_cb",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "RescheduleWaitHandle",
+            "parent": "WaitableWaitHandle",
+            "desc": "A wait handle that succeeds with null once desired scheduling priority is eligible for execution",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that succeeds once desired scheduling priority is eligible for execution",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A RescheduleWaitHandle that succeeds once desired scheduling priority is eligible for execution"
+                    },
+                    "args": [
+                        {
+                            "name": "queue",
+                            "type": "Int64",
+                            "desc": "A scheduling queue to use (defined by QUEUE_* constants)"
+                        },
+                        {
+                            "name": "priority",
+                            "type": "Int32",
+                            "desc": "A non-negative number indicating scheduling priority (0 runs first)"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+                {
+                    "name": "QUEUE_DEFAULT",
+                    "type": "Int64",
+                    "desc": "A queue that is run whenever there is nothing else to do"
+                },
+                {
+                    "name": "QUEUE_NO_PENDING_IO",
+                    "type": "Int64",
+                    "desc": "A queue that is run only once there is no pending I\/O operation"
+                }
+            ]
+        },
+        {
+            "name": "SessionScopedWaitHandle",
+            "parent": "WaitableWaitHandle",
+            "desc": "A wait handle whose execution is session-managed",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SleepWaitHandle",
+            "parent": "SessionScopedWaitHandle",
+            "desc": "A wait handle that succeeds with null after the desired timeout expires",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that succeeds after the desired timeout expires",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A SleepWaitHandle that succeeds after the desired timeout expires"
+                    },
+                    "args": [
+                        {
+                            "name": "usecs",
+                            "type": "Int64",
+                            "desc": "Non-negative number of microseconds to sleep for"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "ExternalThreadEventWaitHandle",
+            "parent": "SessionScopedWaitHandle",
+            "desc": "A wait handle that synchronizes against C++ operation in external thread",
+            "bases": [
+                "Sweepable"
+            ],
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ]
+        }
+    ]
+}

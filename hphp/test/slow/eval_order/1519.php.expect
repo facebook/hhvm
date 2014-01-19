@@ -1,0 +1,8 @@
+class C
+f()
+set C
+class C
+set C
+f()
+get C
+set C

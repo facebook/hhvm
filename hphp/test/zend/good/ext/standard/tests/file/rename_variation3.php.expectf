@@ -1,0 +1,10 @@
+*** Testing rename() on hard links ***
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+Done

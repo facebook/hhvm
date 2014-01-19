@@ -1,0 +1,10 @@
+Read class constant.
+string(5) "hello"
+
+Fail to read class constant from instance.
+HipHop Notice: %s
+NULL
+
+Class constant not visible in object var_dump.
+object(aclass)#%d (0) {
+}

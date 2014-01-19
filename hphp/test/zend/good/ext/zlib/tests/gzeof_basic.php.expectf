@@ -1,0 +1,18 @@
+-- test 1 --
+bool(false)
+When you're taught through feelings
+Destiny flying high above
+all I know is that you can realize it
+Destiny who cares
+as it turns around
+and I know that it descends down on me
+bool(true)
+
+-- test 2 --
+reading 50 characters. eof should be false
+bool(false)
+reading 250 characters. eof should be true
+bool(true)
+reading 20 characters. eof should be true still
+bool(true)
+===DONE===

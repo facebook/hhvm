@@ -1,0 +1,28 @@
+bool(true)
+int(5)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+string(7) "goodbye"
+object(X)#2 (4) {
+  ["b":"X":private]=>
+  bool(true)
+  ["i":"X":private]=>
+  int(5)
+  ["a":"X":private]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["s":"X":private]=>
+  string(7) "goodbye"
+}

@@ -1,0 +1,17 @@
+key=0 val=1
+key=1 val=2
+key=2 val=3
+key=3 val=4
+key=a val=7
+array(5) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(0)
+  [2]=>
+  int(3)
+  [3]=>
+  int(5)
+  ["a"]=>
+  &int(8)
+}

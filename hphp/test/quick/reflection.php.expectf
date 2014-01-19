@@ -1,0 +1,342 @@
+Test begin
+--- getDocComment("f") ---
+string(35) "/**
+ * This is f's doc comment.
+ */"
+
+--- getStartLine("f") ---
+int(13)
+
+--- getEndLine("f") ---
+int(20)
+
+--- getFileName("f") ---
+string(%d) "%s/test/quick/reflection.php"
+
+--- getName("f") ---
+string(1) "f"
+
+--- getNumberOfParameters("f") ---
+int(4)
+
+--- getNumberOfRequiredParameters("f") ---
+int(2)
+
+--- getParameters("f") ---
+array(4) {
+  [0]=>
+  object(ReflectionParameter)#5 (2) {
+    ["info"]=>
+    array(7) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(1) "a"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["attributes"]=>
+      array(0) {
+      }
+    }
+    ["name"]=>
+    string(1) "a"
+  }
+  [1]=>
+  object(ReflectionParameter)#6 (2) {
+    ["info"]=>
+    array(8) {
+      ["index"]=>
+      int(1)
+      ["name"]=>
+      string(1) "b"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["ref"]=>
+      bool(true)
+      ["attributes"]=>
+      array(0) {
+      }
+    }
+    ["name"]=>
+    string(1) "b"
+  }
+  [2]=>
+  object(ReflectionParameter)#7 (2) {
+    ["info"]=>
+    array(9) {
+      ["index"]=>
+      int(2)
+      ["name"]=>
+      string(1) "c"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["default"]=>
+      NULL
+      ["defaultText"]=>
+      string(4) "NULL"
+      ["attributes"]=>
+      array(0) {
+      }
+    }
+    ["name"]=>
+    string(1) "c"
+  }
+  [3]=>
+  object(ReflectionParameter)#8 (2) {
+    ["info"]=>
+    array(9) {
+      ["index"]=>
+      int(3)
+      ["name"]=>
+      string(1) "d"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["default"]=>
+      array(3) {
+        [0]=>
+        int(1)
+        [1]=>
+        int(2)
+        [2]=>
+        string(11) "some string"
+      }
+      ["defaultText"]=>
+      string(26) "array(1, 2, SOME_CONSTANT)"
+      ["attributes"]=>
+      array(0) {
+      }
+    }
+    ["name"]=>
+    string(1) "d"
+  }
+}
+
+--- getStaticVariables("f") ---
+array(2) {
+  ["staticX"]=>
+  string(1) "4"
+  ["staticY"]=>
+  string(4) "null"
+}
+
+--- isInternal("f") ---
+bool(false)
+
+--- isUserDefined("f") ---
+bool(true)
+
+--- returnsReference("f") ---
+bool(true)
+
+--- export("f") ---
+string(0) ""
+
+--- invokeArgs("f") ---
+In f()
+int(5)
+In f()
+int(6)
+
+--- invoke("g") ---
+In g(a, b, some string)
+NULL
+In g(a, b, some string)
+NULL
+
+--- export("g") ---
+string(0) ""
+
+--- export() ---
+string(0) ""
+
+--- getConstant() ---
+string(5) "B::C0"
+string(5) "B::C1"
+
+--- getConstants() ---
+array(2) {
+  ["C0"]=>
+  string(5) "B::C0"
+  ["C1"]=>
+  string(5) "B::C1"
+}
+
+--- getConstructor() ---
+NULL
+
+--- getDocComment() ---
+string(35) "/**
+ * This is B's doc comment.
+ */"
+
+--- getStartLine() ---
+int(126)
+
+--- getEndLine() ---
+int(142)
+
+--- getFileName() ---
+string(%d) "%s/test/quick/reflection.php"
+
+--- getInterfaceNames() ---
+array(4) {
+  [0]=>
+  string(1) "I"
+  [1]=>
+  string(1) "K"
+  [2]=>
+  string(1) "J"
+  [3]=>
+  string(1) "H"
+}
+
+--- getInterfaces() ---
+
+--- getMethod() ---
+
+--- getMethods() ---
+
+--- getModifiers() ---
+int(0)
+
+--- getName() ---
+string(1) "B"
+
+--- getParentClass() ---
+object(ReflectionClass)#23 (3) {
+  ["name"]=>
+  string(1) "A"
+  ["info":"ReflectionClass":private]=>
+  NULL
+  ["obj":"ReflectionClass":private]=>
+  NULL
+}
+
+--- getProperties() ---
+
+--- getProperty() ---
+
+--- getStaticProperties() ---
+
+--- setStaticPropertyValue() ---
+NULL
+
+--- getStaticPropertyValue() ---
+string(16) "new value for s0"
+NULL
+
+--- hasConstant() ---
+bool(true)
+bool(false)
+
+--- hasMethod() ---
+bool(true)
+bool(false)
+
+--- hasProperty() ---
+bool(true)
+bool(false)
+
+--- implementsInterface() ---
+bool(true)
+bool(false)
+
+--- isAbstract() ---
+bool(false)
+
+--- isFinal() ---
+bool(false)
+
+--- isInstance() ---
+bool(true)
+bool(false)
+
+--- isInstantiable() ---
+bool(true)
+
+--- isInterface() ---
+bool(false)
+
+--- isInternal() ---
+bool(false)
+
+--- isIterateable() ---
+bool(false)
+
+--- isSubclassOf() ---
+bool(true)
+bool(false)
+
+--- isUserDefined() ---
+bool(true)
+
+--- newInstance() ---
+object(B)#51 (4) {
+  ["p0":"B":private]=>
+  int(1)
+  ["p1":protected]=>
+  int(2)
+  ["p2"]=>
+  int(3)
+  ["p3"]=>
+  NULL
+}
+
+--- newInstanceArgs() ---
+object(B)#51 (4) {
+  ["p0":"B":private]=>
+  int(1)
+  ["p1":protected]=>
+  int(2)
+  ["p2"]=>
+  int(3)
+  ["p3"]=>
+  NULL
+}
+
+--- get_defined_functions() ---
+array(2) {
+  [0]=>
+  string(1) "f"
+  [1]=>
+  string(1) "g"
+}
+--- get_defined_constants() ---
+SOME_CONSTANT: some string
+SOME_CONSTANT: some string
+ANOTHER_CONSTANT: some other string
+--- get_declared_classes() ---
+Found class A
+Found class B
+Found class C
+--- get_declared_interfaces() ---
+Found interface H
+Found interface I
+Found interface J
+Found interface K
+Found interface L
+Test end

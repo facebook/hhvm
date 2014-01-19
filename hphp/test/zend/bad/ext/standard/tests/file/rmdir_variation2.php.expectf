@@ -1,0 +1,122 @@
+*** Testing rmdir() : usage variation ***
+
+--int 0--
+Error: 2 - rmdir() expects parameter 2 to be resource, integer given, %s(%d)
+bool(false)
+
+--int 1--
+Error: 2 - rmdir() expects parameter 2 to be resource, integer given, %s(%d)
+bool(false)
+
+--int 12345--
+Error: 2 - rmdir() expects parameter 2 to be resource, integer given, %s(%d)
+bool(false)
+
+--int -12345--
+Error: 2 - rmdir() expects parameter 2 to be resource, integer given, %s(%d)
+bool(false)
+
+--float 10.5--
+Error: 2 - rmdir() expects parameter 2 to be resource, double given, %s(%d)
+bool(false)
+
+--float -10.5--
+Error: 2 - rmdir() expects parameter 2 to be resource, double given, %s(%d)
+bool(false)
+
+--float 12.3456789000e10--
+Error: 2 - rmdir() expects parameter 2 to be resource, double given, %s(%d)
+bool(false)
+
+--float -12.3456789000e10--
+Error: 2 - rmdir() expects parameter 2 to be resource, double given, %s(%d)
+bool(false)
+
+--float .5--
+Error: 2 - rmdir() expects parameter 2 to be resource, double given, %s(%d)
+bool(false)
+
+--empty array--
+Error: 2 - rmdir() expects parameter 2 to be resource, array given, %s(%d)
+bool(false)
+
+--int indexed array--
+Error: 2 - rmdir() expects parameter 2 to be resource, array given, %s(%d)
+bool(false)
+
+--associative array--
+Error: 2 - rmdir() expects parameter 2 to be resource, array given, %s(%d)
+bool(false)
+
+--nested arrays--
+Error: 2 - rmdir() expects parameter 2 to be resource, array given, %s(%d)
+bool(false)
+
+--uppercase NULL--
+Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
+bool(false)
+
+--lowercase null--
+Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
+bool(false)
+
+--lowercase true--
+Error: 2 - rmdir() expects parameter 2 to be resource, boolean given, %s(%d)
+bool(false)
+
+--lowercase false--
+Error: 2 - rmdir() expects parameter 2 to be resource, boolean given, %s(%d)
+bool(false)
+
+--uppercase TRUE--
+Error: 2 - rmdir() expects parameter 2 to be resource, boolean given, %s(%d)
+bool(false)
+
+--uppercase FALSE--
+Error: 2 - rmdir() expects parameter 2 to be resource, boolean given, %s(%d)
+bool(false)
+
+--empty string DQ--
+Error: 2 - rmdir() expects parameter 2 to be resource, string given, %s(%d)
+bool(false)
+
+--empty string SQ--
+Error: 2 - rmdir() expects parameter 2 to be resource, string given, %s(%d)
+bool(false)
+
+--string DQ--
+Error: 2 - rmdir() expects parameter 2 to be resource, string given, %s(%d)
+bool(false)
+
+--string SQ--
+Error: 2 - rmdir() expects parameter 2 to be resource, string given, %s(%d)
+bool(false)
+
+--mixed case string--
+Error: 2 - rmdir() expects parameter 2 to be resource, string given, %s(%d)
+bool(false)
+
+--heredoc--
+Error: 2 - rmdir() expects parameter 2 to be resource, string given, %s(%d)
+bool(false)
+
+--instance of classWithToString--
+Error: 2 - rmdir() expects parameter 2 to be resource, object given, %s(%d)
+bool(false)
+
+--instance of classWithoutToString--
+Error: 2 - rmdir() expects parameter 2 to be resource, object given, %s(%d)
+bool(false)
+
+--undefined var--
+Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
+bool(false)
+
+--unset var--
+Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
+bool(false)
+
+--0--
+Error: 2 - rmdir(): supplied resource is not a valid Stream-Context resource, %s(%d)
+bool(true)
+===DONE===

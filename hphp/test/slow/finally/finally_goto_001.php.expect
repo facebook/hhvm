@@ -1,0 +1,24 @@
+outer loop
+try
+inside inner loop
+inside inner loop
+inside inner loop
+inside inner loop
+finally
+inside outer loop
+outer loop
+try
+inside inner loop
+inside inner loop
+inside inner loop
+inside inner loop
+finally
+inside outer loop
+outer loop
+try
+inside inner loop
+inside inner loop
+before goto
+finally
+after label
+after if

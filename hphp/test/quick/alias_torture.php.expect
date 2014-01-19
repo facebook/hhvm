@@ -1,0 +1,207 @@
+string(3) "the"
+string(7) "123duke"
+string(2) "of"
+int(123)
+string(7) "123moot"
+string(4) "hoof"
+string(3) "foo"
+string(3) "bar"
+string(3) "baz"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+0 <
+ --------> 
+int(84)
+string(4) "YJSZ"
+object(C)#9 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "EQOQ"
+    [1]=>
+    string(4) "QGWB"
+    [2]=>
+    string(4) "CYEN"
+    [3]=>
+    string(4) "GWHJ"
+  }
+}
+>
+1 <
+ --------> 
+object(C)#12 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "ZVVQ"
+    [1]=>
+    string(4) "R[ZI"
+    [2]=>
+    string(4) "XPRU"
+    [3]=>
+    string(4) "UVHQ"
+  }
+}
+object(C)#13 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "EVXX"
+    [1]=>
+    string(4) "RLQQ"
+    [2]=>
+    string(4) "ROEP"
+    [3]=>
+    string(4) "ASNW"
+  }
+}
+object(C)#14 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "DNNB"
+    [1]=>
+    string(4) "VKRM"
+    [2]=>
+    string(4) "DLGK"
+    [3]=>
+    string(4) "ATPV"
+  }
+}
+>
+2 <
+ --------> 
+int(80)
+string(4) "MOU["
+int(22)
+>
+3 <
+ --------> 
+int(248)
+object(C)#25 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "AFHQ"
+    [1]=>
+    string(4) "HUAT"
+    [2]=>
+    string(4) "JXHO"
+    [3]=>
+    string(4) "SZQR"
+  }
+}
+object(C)#26 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "A[JY"
+    [1]=>
+    string(4) "CHVH"
+    [2]=>
+    string(4) "FTKA"
+    [3]=>
+    string(4) "SYAX"
+  }
+}
+>
+4 <
+ --------> 
+int(219)
+string(4) "Z[PT"
+int(29)
+>
+5 <
+ --------> 
+int(65)
+array(4) {
+  [0]=>
+  string(4) "DPVL"
+  [1]=>
+  string(4) "QMYI"
+  [2]=>
+  string(4) "AEUJ"
+  [3]=>
+  string(4) "TWWK"
+}
+array(4) {
+  [0]=>
+  string(4) "DKZJ"
+  [1]=>
+  string(4) "NBYP"
+  [2]=>
+  string(4) "DBJD"
+  [3]=>
+  string(4) "ICGX"
+}
+>
+6 <
+ --------> 
+string(4) "TAUO"
+string(4) "MCDZ"
+object(C)#30 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "SUOK"
+    [1]=>
+    string(4) "[OLT"
+    [2]=>
+    string(4) "PLAU"
+    [3]=>
+    string(4) "MRAV"
+  }
+}
+>
+7 <
+ --------> 
+int(167)
+int(201)
+object(C)#37 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "CDW["
+    [1]=>
+    string(4) "IYGE"
+    [2]=>
+    string(4) "ESWC"
+    [3]=>
+    string(4) "IIZG"
+  }
+}
+>
+8 <
+ --------> 
+object(C)#42 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "UCPM"
+    [1]=>
+    string(4) "HDXK"
+    [2]=>
+    string(4) "OQMW"
+    [3]=>
+    string(4) "DRYO"
+  }
+}
+string(4) "ESBY"
+array(4) {
+  [0]=>
+  string(4) "WPQQ"
+  [1]=>
+  string(4) "ZMJK"
+  [2]=>
+  string(4) "UMKA"
+  [3]=>
+  string(4) "Q[EB"
+}
+>
+9 <
+ --------> 
+string(4) "PFXS"
+int(31)
+int(135)
+>

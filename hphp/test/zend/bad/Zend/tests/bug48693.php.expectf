@@ -1,0 +1,8 @@
+Parse error: %s in %s(%d) : runtime-created function on line 1
+
+Parse error: %s %s(%d) : runtime-created function on line 1
+bool(false)
+int(2)
+bool(false)
+int(3)
+bool(true)

@@ -1,0 +1,12 @@
+string(3) "CET"
+int(3600000)
+string(13) "Europe/Berlin"
+int(3600)
+string(16) "Europe/Amsterdam"
+int(3600000)
+string(16) "Europe/Amsterdam"
+int(3600)
+string(%s) "GMT+04%s5"
+int(14700000)
+string(6) "+04:05"
+int(14700)

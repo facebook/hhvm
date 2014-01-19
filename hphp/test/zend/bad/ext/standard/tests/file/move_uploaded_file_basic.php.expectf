@@ -1,0 +1,15 @@
+Valid move
+bool(true)
+bool(true)
+
+Original name of uploaded file
+bool(false)
+Non-uploaded source file
+bool(false)
+Valid move to existing file
+bool(true)
+Wrong parameters
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL

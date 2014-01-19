@@ -1,0 +1,30 @@
+*** Testing timezone_offset_get() : error conditions ***
+
+-- Testing timezone_offset_get() function with zero arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing timezone_offset_get() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing timezone_offset_get() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing timezone_offset_get() function with an invalid values for $object argument --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- Testing timezone_offset_get() function with an invalid values for $datetime argument --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+===DONE===

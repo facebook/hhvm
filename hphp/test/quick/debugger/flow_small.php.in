@@ -1,0 +1,68 @@
+set SmallStep on
+break cls::pub()
+run
+@test(1)
+next
+variable
+next
+next
+next
+next
+break clear all
+continue
+break flow_small.php:18
+@test(2)
+step
+step
+step
+step
+step
+step
+step
+step
+variable
+step
+variable
+step
+step
+step
+variable
+next
+next
+step
+break clear all
+continue
+break flow_small.php:6
+@test(3)
+continue
+break clear all
+continue
+break flow_small.php:7
+@test(4)
+break clear all
+out
+out
+out
+continue
+break flow_small.php:46
+test(5)
+break clear all
+next
+next
+out
+continue
+break flow_small.php:46
+test(6)
+break clear all
+out
+next
+out
+continue
+break flow_small.php:7
+@test(7)
+break clear all
+break flow_small.php:62
+continue
+break clear all
+continue
+quit

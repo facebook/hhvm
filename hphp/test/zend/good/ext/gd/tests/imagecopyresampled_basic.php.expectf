@@ -1,0 +1,4 @@
+Simple test of imagecopyresampled() function
+Size of original: width=400 height=300
+Size of copy: width=200 height=150
+Done

@@ -1,0 +1,7 @@
+*** Testing round() : error conditions ***
+
+-- Wrong nmumber of arguments --
+HipHop Warning: %s
+NULL
+float(500)
+===Done===

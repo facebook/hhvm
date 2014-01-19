@@ -1,0 +1,10 @@
+This is class foo
+a = 2
+b = 5
+10
+-----
+This is class bar
+a = 4
+b = 3
+c = 12
+12

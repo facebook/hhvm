@@ -1,0 +1,1052 @@
+{
+    "preamble": "",
+    "consts": [
+        {
+            "name": "OAUTH_SIG_METHOD_HMACSHA1",
+            "value": "HMAC-SHA1"
+        },
+        {
+            "name": "OAUTH_SIG_METHOD_HMACSHA256",
+            "value": "HMAC-SHA256"
+        },
+        {
+            "name": "OAUTH_SIG_METHOD_RSASHA1",
+            "value": "RSA-SHA1"
+        },
+        {
+            "name": "OAUTH_SIG_METHOD_PLAINTEXT",
+            "value": "PLAINTEXT"
+        },
+        {
+            "name": "OAUTH_AUTH_TYPE_URI",
+            "value": 1
+        },
+        {
+            "name": "OAUTH_AUTH_TYPE_FORM",
+            "value": 2
+        },
+        {
+            "name": "OAUTH_AUTH_TYPE_AUTHORIZATION",
+            "value": 3
+        },
+        {
+            "name": "OAUTH_AUTH_TYPE_NONE",
+            "value": 4
+        },
+        {
+            "name": "OAUTH_HTTP_METHOD_GET",
+            "value": "GET"
+        },
+        {
+            "name": "OAUTH_HTTP_METHOD_POST",
+            "value": "POST"
+        },
+        {
+            "name": "OAUTH_HTTP_METHOD_PUT",
+            "value": "PUT"
+        },
+        {
+            "name": "OAUTH_HTTP_METHOD_HEAD",
+            "value": "HEAD"
+        },
+        {
+            "name": "OAUTH_HTTP_METHOD_DELETE",
+            "value": "DELETE"
+        },
+        {
+            "name": "OAUTH_REQENGINE_STREAMS",
+            "value": 1
+        },
+        {
+            "name": "OAUTH_REQENGINE_CURL",
+            "value": 2
+        },
+        {
+            "name": "OAUTH_SSLCHECK_NONE",
+            "value": 0
+        },
+        {
+            "name": "OAUTH_SSLCHECK_HOST",
+            "value": 1
+        },
+        {
+            "name": "OAUTH_SSLCHECK_PEER",
+            "value": 2
+        },
+        {
+            "name": "OAUTH_SSLCHECK_BOTH",
+            "value": 3
+        },
+        {
+            "name": "OAUTH_OK",
+            "value": 1
+        },
+        {
+            "name": "OAUTH_BAD_NONCE",
+            "value": 4
+        },
+        {
+            "name": "OAUTH_BAD_TIMESTAMP",
+            "value": 8
+        },
+        {
+            "name": "OAUTH_CONSUMER_KEY_UNKNOWN",
+            "value": 16
+        },
+        {
+            "name": "OAUTH_CONSUMER_KEY_REFUSED",
+            "value": 32
+        },
+        {
+            "name": "OAUTH_INVALID_SIGNATURE",
+            "value": 64
+        },
+        {
+            "name": "OAUTH_TOKEN_USED",
+            "value": 128
+        },
+        {
+            "name": "OAUTH_TOKEN_EXPIRED",
+            "value": 256
+        },
+        {
+            "name": "OAUTH_TOKEN_REVOKED",
+            "value": 512
+        },
+        {
+            "name": "OAUTH_TOKEN_REJECTED",
+            "value": 1024
+        },
+        {
+            "name": "OAUTH_VERIFIER_INVALID",
+            "value": 2048
+        },
+        {
+            "name": "OAUTH_PARAMETER_ABSENT",
+            "value": 4096
+        },
+        {
+            "name": "OAUTH_SIGNATURE_METHOD_REJECTED",
+            "value": 8192
+        }
+    ],
+    "funcs": [
+        {
+            "name": "oauth_get_sbs",
+            "desc": "Generates a Signature Base String according to pecl\/oauth.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a Signature Base String."
+            },
+            "args": [
+                {
+                    "name": "http_method",
+                    "type": "Variant",
+                    "desc": "The HTTP method."
+                },
+                {
+                    "name": "uri",
+                    "type": "Variant",
+                    "desc": "URI to encode."
+                },
+                {
+                    "name": "request_parameters",
+                    "type": "Variant",
+                    "desc": "Array of request parameters."
+                }
+            ]
+        },
+        {
+            "name": "oauth_urlencode",
+            "desc": "Encodes a URI to RFC 3986.",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an RFC 3986 encoded string."
+            },
+            "args": [
+                {
+                    "name": "uri",
+                    "type": "Variant",
+                    "desc": "URI to encode."
+                }
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "oauth",
+            "desc": "The OAuth extension provides a simple interface to interact with data providers using the OAuth HTTP specification to protect private resources.",
+            "flags": [
+                "ZendCompat"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "desc": "Creates a new OAuth object",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "consumer_key",
+                            "type": "Variant",
+                            "desc": "The consumer key provided by the service provider."
+                        },
+                        {
+                            "name": "consumer_secret",
+                            "type": "Variant",
+                            "desc": "The consumer secret provided by the service provider."
+                        },
+                        {
+                            "name": "signature_method",
+                            "type": "Variant",
+                            "desc": "This optional parameter defines which signature method to use, by default it is OAUTH_SIG_METHOD_HMACSHA1 (HMAC-SHA1).",
+                            "value": "k_OAUTH_SIG_METHOD_HMACSHA1"
+                        },
+                        {
+                            "name": "auth_type",
+                            "type": "Variant",
+                            "desc": "This optional parameter defines how to pass the OAuth parameters to a consumer, by default it is OAUTH_AUTH_TYPE_AUTHORIZATION (in the Authorization header).",
+                            "value": "0"
+                        }
+                    ]
+                },
+                {
+                    "name": "__destruct",
+                    "desc": "The destructor. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "disableDebug",
+                    "desc": "Turns off verbose request information (off by default). Alternatively, the debug property can be set to a FALSE value to turn debug off.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "disableRedirects",
+                    "desc": "Disable redirects from being followed automatically, thus allowing the request to be manually redirected. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "disableSSLChecks",
+                    "desc": "Turns off the usual SSL peer certificate and host checks, this is not for production environments. Alternatively, the sslChecks member can be set to FALSE to turn SSL checks off.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "enableDebug",
+                    "desc": "Turns on verbose request information useful for debugging, the debug information is stored in the debugInfo member. Alternatively, the debug member can be set to a non-FALSE value to turn debug on.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "enableRedirects",
+                    "desc": "Follow and sign redirects automatically, which is enabled by default. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "enableSSLChecks",
+                    "desc": "Turns on the usual SSL peer certificate and host checks (enabled by default). Alternatively, the sslChecks member can be set to a non-FALSE value to turn SSL checks off.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "fetch",
+                    "desc": "Fetch a resource.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "protected_resource_url",
+                            "type": "Variant",
+                            "desc": "URL to the OAuth protected resource."
+                        },
+                        {
+                            "name": "extra_parameters",
+                            "type": "Variant",
+                            "desc": "Extra parameters to send with the request for the resource."
+                        },
+                        {
+                            "name": "http_method",
+                            "type": "Variant",
+                            "desc": "One of the OAUTH_HTTP_METHOD_* OAUTH constants, which includes GET, POST, PUT, HEAD, or DELETE.\n\nHEAD (OAUTH_HTTP_METHOD_HEAD) can be useful for discovering information prior to the request (if OAuth credentials are in the Authorization header)."
+                        },
+                        {
+                            "name": "http_headers",
+                            "type": "Variant",
+                            "desc": "HTTP client headers (such as User-Agent, Accept, etc.)"
+                        }
+                    ]
+                },
+                {
+                    "name": "generateSignature",
+                    "desc": "Generate a signature based on the final HTTP method, URL and a string\/array of parameters.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A string containing the generated signature or FALSE on failure"
+                    },
+                    "args": [
+                        {
+                            "name": "http_method",
+                            "type": "Variant",
+                            "desc": "HTTP method for request"
+                        },
+                        {
+                            "name": "url",
+                            "type": "Variant",
+                            "desc": "URL for request"
+                        },
+                        {
+                            "name": "extra_parameters",
+                            "type": "Variant",
+                            "desc": "String or array of additional parameters."
+                        }
+                    ]
+                },
+                {
+                    "name": "getAccessToken",
+                    "desc": "Fetch an access token, secret and any additional response parameters from the service provider.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns an array containing the parsed OAuth response on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "access_token_url",
+                            "type": "Variant",
+                            "desc": "URL to the access token API."
+                        },
+                        {
+                            "name": "auth_session_handle",
+                            "type": "Variant",
+                            "desc": "Authorization session handle, this parameter does not have any citation in the core OAuth 1.0 specification but may be implemented by large providers. See ScalableOAuth for more information."
+                        },
+                        {
+                            "name": "verifier_token",
+                            "type": "Variant",
+                            "desc": "For service providers which support 1.0a, a verifier_token must be passed while exchanging the request token for the access token. If the verifier_token is present in $_GET or $_POST it is passed automatically and the caller does not need to specify a verifier_token (usually if the access token is exchanged at the oauth_callback URL). See ScalableOAuth for more information."
+                        }
+                    ]
+                },
+                {
+                    "name": "getCAPath",
+                    "desc": "Gets the Certificate Authority information, which includes the ca_path and ca_info set by OAuth::setCaPath(). Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "An array of Certificate Authority information, specifically as ca_path and ca_info keys within the returned associative array."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getLastResponse",
+                    "desc": "Get the raw response of the most recent request.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns a string containing the last response."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getLastResponseHeaders",
+                    "desc": "Get headers for last response.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A string containing the last response's headers or FALSE on failure"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getLastResponseInfo",
+                    "desc": "Get HTTP information about the last response.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns an array containing the response information for the last request. Constants from curl_getinfo() may be used."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getRequestHeader",
+                    "desc": "Generate OAuth header string signature based on the final HTTP method, URL and a string\/array of parameters",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A string containing the generated request header or FALSE on failure"
+                    },
+                    "args": [
+                        {
+                            "name": "http_method",
+                            "type": "Variant",
+                            "desc": "HTTP method for request."
+                        },
+                        {
+                            "name": "url",
+                            "type": "Variant",
+                            "desc": "URL for request."
+                        },
+                        {
+                            "name": "extra_parameters",
+                            "type": "Variant",
+                            "desc": "String or array of additional parameters."
+                        }
+                    ]
+                },
+                {
+                    "name": "getRequestToken",
+                    "desc": "Fetch a request token, secret and any additional response parameters from the service provider.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns an array containing the parsed OAuth response on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "request_token_url",
+                            "type": "Variant",
+                            "desc": "URL to the request token API."
+                        },
+                        {
+                            "name": "callback_url",
+                            "type": "Variant",
+                            "desc": "OAuth callback URL. If callback_url is passed and is an empty value, it is set to \"oob\" to address the OAuth 2009.1 advisory.",
+                            "value": "null_variant"
+                        },
+                        {
+                            "name": "http_method",
+                            "type": "Variant",
+                            "desc": "",
+                            "value": "null_variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "setAuthType",
+                    "desc": "Set where the OAuth parameters should be passed.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE if a parameter is correctly set, otherwise FALSE (e.g., if an invalid auth_type is passed in.)"
+                    },
+                    "args": [
+                        {
+                            "name": "auth_type",
+                            "type": "Variant",
+                            "desc": "auth_type can be one of the following flags (in order of decreasing preference as per OAuth 1.0 section 5.2): OAUTH_AUTH_TYPE_AUTHORIZATION Pass the OAuth parameters in the HTTP Authorization header."
+                        }
+                    ]
+                },
+                {
+                    "name": "setCAPath",
+                    "desc": "Sets the Certificate Authority (CA), both for path and info. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success, or FALSE if either ca_path or ca_info are considered invalid."
+                    },
+                    "args": [
+                        {
+                            "name": "ca_path",
+                            "type": "Variant",
+                            "desc": "The CA Path being set."
+                        },
+                        {
+                            "name": "ca_info",
+                            "type": "Variant",
+                            "desc": "The CA Info being set."
+                        }
+                    ]
+                },
+                {
+                    "name": "setNonce",
+                    "desc": "Sets the nonce for all subsequent requests.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success, or FALSE if the nonce is considered invalid."
+                    },
+                    "args": [
+                        {
+                            "name": "nonce",
+                            "type": "Variant",
+                            "desc": "The value for oauth_nonce."
+                        }
+                    ]
+                },
+                {
+                    "name": "setRequestEngine",
+                    "desc": "Sets the Request Engine, that will be sending the HTTP requests. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "reqengine",
+                            "type": "Variant",
+                            "desc": "The desired request engine. Set to OAUTH_REQENGINE_STREAMS to use PHP Streams, or OAUTH_REQENGINE_CURL to use Curl."
+                        }
+                    ]
+                },
+                {
+                    "name": "setRSACertificate",
+                    "desc": "Sets the RSA certificate. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success, or FALSE on failure (e.g., the RSA certificate cannot be parsed.)"
+                    },
+                    "args": [
+                        {
+                            "name": "cert",
+                            "type": "Variant",
+                            "desc": "The RSA certificate."
+                        }
+                    ]
+                },
+                {
+                    "name": "setSSLChecks",
+                    "desc": "Tweak specific SSL checks for requests. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "sslcheck",
+                            "type": "Variant",
+                            "desc": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "setTimestamp",
+                    "desc": "Sets the OAuth timestamp for subsequent requests. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE, unless the timestamp is invalid, in which case FALSE is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "timestamp",
+                            "type": "Variant",
+                            "desc": "The timestamp."
+                        }
+                    ]
+                },
+                {
+                    "name": "setToken",
+                    "desc": "Set the token and secret for subsequent requests.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE"
+                    },
+                    "args": [
+                        {
+                            "name": "token",
+                            "type": "Variant",
+                            "desc": "The OAuth token."
+                        },
+                        {
+                            "name": "token_secret",
+                            "type": "Variant",
+                            "desc": "The OAuth token secret."
+                        }
+                    ]
+                },
+                {
+                    "name": "setVersion",
+                    "desc": "Sets the OAuth version for subsequent requests",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "version",
+                            "type": "Variant",
+                            "desc": "OAuth version, default value is always \"1.0\""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "oauthprovider",
+            "desc": "Manages an OAuth provider class.\n\nSee also an external in-depth tutorial titled Writing an OAuth Provider Service, which takes a hands-on approach to providing this service. There are also OAuth provider examples within the OAuth extensions sources.",
+            "flags": [
+                "ZendCompat"
+            ],
+            "funcs": [
+                {
+                    "name": "addRequiredParameter",
+                    "desc": "Add required oauth provider parameters. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "req_params",
+                            "type": "Variant",
+                            "desc": "The required parameters."
+                        }
+                    ]
+                },
+                {
+                    "name": "callconsumerHandler",
+                    "desc": "Calls the registered consumer handler callback function, which is set with OAuthProvider::consumerHandler(). Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "callTimestampNonceHandler",
+                    "desc": "Calls the registered timestamp handler callback function, which is set with OAuthProvider::timestampNonceHandler(). Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "calltokenHandler",
+                    "desc": "Calls the registered token handler callback function, which is set with OAuthProvider::tokenHandler(). Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "checkOAuthRequest",
+                    "desc": "Checks an OAuth request. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "uri",
+                            "type": "Variant",
+                            "desc": "The optional URI, or endpoint."
+                        },
+                        {
+                            "name": "method",
+                            "type": "Variant",
+                            "desc": "The HTTP method. Optionally pass in one of the OAUTH_HTTP_METHOD_* OAuth constants."
+                        }
+                    ]
+                },
+                {
+                    "name": "__construct",
+                    "desc": "Initiates a new OAuthProvider object. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "An OAuthProvider object."
+                    },
+                    "args": [
+                        {
+                            "name": "params_array",
+                            "type": "Variant",
+                            "desc": "Setting these optional parameters is limited to the CLI SAPI."
+                        }
+                    ]
+                },
+                {
+                    "name": "consumerHandler",
+                    "desc": "Sets the consumer handler callback, which will later be called with OAuthProvider::callConsumerHandler(). Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "callback_function",
+                            "type": "Variant",
+                            "desc": "The callable functions name."
+                        }
+                    ]
+                },
+                {
+                    "name": "generateToken",
+                    "desc": "Generates a string of pseudo-random bytes.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The generated token, as a string of bytes."
+                    },
+                    "args": [
+                        {
+                            "name": "size",
+                            "type": "Variant",
+                            "desc": "The desired token length, in terms of bytes."
+                        },
+                        {
+                            "name": "strong",
+                            "type": "Variant",
+                            "desc": "Setting to TRUE means \/dev\/random will be used for entropy, as otherwise the non-blocking \/dev\/urandom is used. This parameter is ignored on Windows."
+                        }
+                    ]
+                },
+                {
+                    "name": "is2LeggedEndpoint",
+                    "desc": "The 2-legged flow, or request signing. It does not require a token. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "An OAuthProvider object."
+                    },
+                    "args": [
+                        {
+                            "name": "params_array",
+                            "type": "Variant",
+                            "desc": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "isRequestTokenEndpoint",
+                    "desc": "Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "will_issue_request_token",
+                            "type": "Variant",
+                            "desc": "Sets whether or not it will issue a request token, thus determining if OAuthProvider::tokenHandler() needs to be called."
+                        }
+                    ]
+                },
+                {
+                    "name": "removeRequiredParameter",
+                    "desc": "Removes a required parameter. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "req_params",
+                            "type": "Variant",
+                            "desc": "The required parameter to be removed."
+                        }
+                    ]
+                },
+                {
+                    "name": "reportProblem",
+                    "desc": "Pass in a problem as an OAuthException, with possible problems listed in the OAuth constants section. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "oauthexception",
+                            "type": "Variant",
+                            "desc": "The OAuthException."
+                        }
+                    ]
+                },
+                {
+                    "name": "setParam",
+                    "desc": "Sets a parameter. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "param_key",
+                            "type": "Variant",
+                            "desc": "The parameter key."
+                        },
+                        {
+                            "name": "param_val",
+                            "type": "Variant",
+                            "desc": "The optional parameter value."
+                        }
+                    ]
+                },
+                {
+                    "name": "setRequestTokenPath",
+                    "desc": "Sets the request tokens path. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE"
+                    },
+                    "args": [
+                        {
+                            "name": "path",
+                            "type": "Variant",
+                            "desc": "The path."
+                        }
+                    ]
+                },
+                {
+                    "name": "timestampNonceHandler",
+                    "desc": "Sets the timestamp nonce handler callback, which will later be called with OAuthProvider::callTimestampNonceHandler(). Errors related to timestamp\/nonce are thrown to this callback. Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "callback_function",
+                            "type": "Variant",
+                            "desc": "The callable functions name."
+                        }
+                    ]
+                },
+                {
+                    "name": "tokenHandler",
+                    "desc": "Sets the token handler callback, which will later be called with OAuthProvider::callTokenHandler(). Warning: This function is currently not documented; only its argument list is available.",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "No value is returned."
+                    },
+                    "args": [
+                        {
+                            "name": "callback_function",
+                            "type": "Variant",
+                            "desc": "The callable functions name."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "oauthexception",
+            "desc": "This exception is thrown when exceptional errors occur while using the OAuth extension and contains useful debugging information.",
+            "flags": [
+                "ZendCompat"
+            ],
+            "parent": "Exception",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "desc": "",
+                    "flags": [
+                        "ZendCompat",
+                        "NeedsActRec"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ]
+        }
+    ]
+}

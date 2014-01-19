@@ -1,0 +1,182 @@
+Program %s/async_stack.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break async_stack.php:8
+Breakpoint 1 set on line 8 of async_stack.php
+But wont break until file async_stack.php has been loaded.
+break async_stack.php:9
+Breakpoint 2 set on line 9 of async_stack.php
+But wont break until file async_stack.php has been loaded.
+break async_stack.php:15
+Breakpoint 3 set on line 15 of async_stack.php
+But wont break until file async_stack.php has been loaded.
+break async_stack.php:24
+Breakpoint 4 set on line 24 of async_stack.php
+But wont break until file async_stack.php has been loaded.
+break async_stack.php:31
+Breakpoint 5 set on line 31 of async_stack.php
+But wont break until file async_stack.php has been loaded.
+break async_stack.php:39
+Breakpoint 6 set on line 39 of async_stack.php
+But wont break until file async_stack.php has been loaded.
+continue
+In genFoo
+int(42)
+Breakpoint 5 reached at genFoo() on line 31 of %s/async_stack.php
+  30   var_dump($a);
+  31*  $a++;
+  32   list($x, $y) = await GenArrayWaitHandle::Create(
+
+w
+#0   ()
+    at %s/async_stack.php:31
+#1  genFoo (42)
+    at %s/async_stack.php:46
+#2  main (42)
+    at %s/async_stack.php:50
+wa
+Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
+(no async stacktrace to display)
+c
+In genBar
+int(43)
+In genBar
+int(44)
+In gen2
+Breakpoint 4 reached at genBar() on line 24 of %s/async_stack.php
+  23   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  24*  error_log('Finished in genBar');
+  25   return $a + 2;
+
+w
+switching stack contexts (async->sync) resetting stack state
+#0   ()
+    at %s/async_stack.php:24
+#1  genBar ()
+#2  Continuation::send (null)
+#3  WaitHandle::join ()
+    at %s/async_stack.php:46
+#4  main (42)
+    at %s/async_stack.php:50
+wa
+Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
+#0  genBar [%d]
+#1  <gen-array> [%d]
+#2  genFoo [%d]
+    at %s/async_stack.php:38
+#3  <<join>>
+c
+Finished in genBar
+Breakpoint 4 reached at genBar() on line 24 of %s/async_stack.php
+  23   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  24*  error_log('Finished in genBar');
+  25   return $a + 2;
+
+w
+switching stack contexts (async->sync) resetting stack state
+#0   ()
+    at %s/async_stack.php:24
+#1  genBar ()
+#2  Continuation::send (null)
+#3  WaitHandle::join ()
+    at %s/async_stack.php:46
+#4  main (42)
+    at %s/async_stack.php:50
+wa
+Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
+#0  genBar [%d]
+#1  <gen-array> [%d]
+#2  genFoo [%d]
+    at %s/async_stack.php:38
+#3  <<join>>
+c
+Finished in genBar
+Breakpoint 3 reached at gen2() on line 15 of %s/async_stack.php
+  14   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  15*  $x = gen1($a)->join();
+  16   error_log('Finished in gen2');
+
+w
+switching stack contexts (async->sync) resetting stack state
+#0   ()
+    at %s/async_stack.php:15
+#1  gen2 ()
+#2  Continuation::send (null)
+#3  WaitHandle::join ()
+    at %s/async_stack.php:46
+#4  main (42)
+    at %s/async_stack.php:50
+wa
+Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
+#0  gen2 [%d]
+#1  <gen-array> [%d]
+#2  genFoo [%d]
+    at %s/async_stack.php:38
+#3  <<join>>
+c
+In gen1
+Finished in gen1
+Breakpoint 1 reached at gen1() on line 8 of %s/async_stack.php
+   7   error_log('Finished in gen1');
+   8*  await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   9   return $a + 1;
+
+w
+switching stack contexts (async->sync) resetting stack state
+#0   ()
+    at %s/async_stack.php:8
+#1  gen1 (45)
+    at %s/async_stack.php:15
+#2  gen2 ()
+#3  Continuation::send (null)
+#4  WaitHandle::join ()
+    at %s/async_stack.php:46
+#5  main (42)
+    at %s/async_stack.php:50
+w a
+Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
+#0  gen2 [%d]
+#1  <gen-array> [%d]
+#2  genFoo [%d]
+    at %s/async_stack.php:38
+#3  <<join>>
+c
+Breakpoint 1 reached at gen1() on line 8 of %s/async_stack.php
+   7   error_log('Finished in gen1');
+   8*  await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   9   return $a + 1;
+
+w
+switching stack contexts (async->sync) resetting stack state
+#0   ()
+    at %s/async_stack.php:8
+#1  gen1 ()
+#2  Continuation::send (null)
+#3  WaitHandle::join ()
+    at %s/async_stack.php:15
+#4  gen2 ()
+#5  Continuation::send (null)
+#6  WaitHandle::join ()
+    at %s/async_stack.php:46
+#7  main (42)
+    at %s/async_stack.php:50
+wa
+Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
+#0  gen1 [%d]
+#1  <<join>>
+#2  gen2 [%d]
+#3  <gen-array> [%d]
+#4  genFoo [%d]
+    at %s/async_stack.php:38
+#5  <<join>>
+c
+Breakpoint 2 reached at gen1() on line 9 of %s/async_stack.php
+   8   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   9*  return $a + 1;
+  10 }
+
+quit

@@ -1,0 +1,8 @@
+*** Testing array_key_exists() : usage variations ***
+
+-- Attempt to match key in sub-array --
+bool(false)
+
+-- $search arg points to sub-array --
+bool(true)
+Done

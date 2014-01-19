@@ -1,0 +1,4 @@
+string(7) "runTest"
+string(17) "in object context"
+string(7) "runTest"
+string(17) "in static context"

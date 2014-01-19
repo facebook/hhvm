@@ -1,0 +1,10 @@
+object(SplDoublyLinkedList)#%d (2) {
+  ["flags":"SplDoublyLinkedList":private]=>
+  int(0)
+  ["dllist":"SplDoublyLinkedList":private]=>
+  array(1) {
+    [0]=>
+    *RECURSION*
+  }
+}
+===DONE===

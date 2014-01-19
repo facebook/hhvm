@@ -1,0 +1,4 @@
+twofish
+cbc
+cbc
+cipher=twofish mode1=cbc mode2=MCRYPT_CBC

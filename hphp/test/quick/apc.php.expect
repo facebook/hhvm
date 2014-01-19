@@ -1,0 +1,74 @@
+array(3) {
+  [0]=>
+  int(7)
+  [1]=>
+  int(4)
+  [2]=>
+  int(1776)
+}
+int(7)
+int(4)
+int(1776)
+int(7)
+int(4)
+int(1776)
+array(4) {
+  [0]=>
+  int(7)
+  [1]=>
+  int(4)
+  [2]=>
+  int(1776)
+  ["newKey"]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+array(2) {
+  [0]=>
+  string(3) "sv0"
+  [1]=>
+  string(3) "sv1"
+}
+string(3) "sv0"
+string(3) "sv1"
+string(3) "sv0"
+string(3) "sv1"
+array(3) {
+  [0]=>
+  string(3) "sv0"
+  [1]=>
+  string(3) "sv1"
+  ["newKey"]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+array(2) {
+  ["sk0"]=>
+  string(3) "sv0"
+  ["sk1"]=>
+  string(3) "sv1"
+}
+string(3) "sv0"
+string(3) "sv1"
+string(3) "sv0"
+string(3) "sv1"
+array(3) {
+  ["sk0"]=>
+  string(3) "sv0"
+  ["sk1"]=>
+  string(3) "sv1"
+  ["newKey"]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+string(1) "A"
+string(3) "two"
+string(5) "three"
+string(3) "two"
+string(5) "three"

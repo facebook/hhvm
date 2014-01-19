@@ -1,0 +1,11 @@
+*** Testing mb_substitute_character() : basic functionality ***
+int(63)
+bool(true)
+int(66)
+bool(true)
+int(1234)
+bool(true)
+string(4) "none"
+HipHop Warning: %s
+bool(false)
+===DONE===

@@ -1,0 +1,27 @@
+LibXMLError
+object(LibXMLError)#1 (0) {
+}
+string(96) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:11:"LibXMLError";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(11) "LibXMLError"
+}
+array(1) {
+  [0]=>
+  string(11) "__construct"
+}
+================
+A_LibXMLError
+object(A_LibXMLError)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(98) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:13:"A_LibXMLError";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(13) "A_LibXMLError"
+}
+array(1) {
+  [0]=>
+  string(11) "__construct"
+}

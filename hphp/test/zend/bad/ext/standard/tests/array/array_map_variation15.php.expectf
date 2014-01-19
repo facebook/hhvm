@@ -1,0 +1,4 @@
+*** Testing array_map() : non existent 'callback' function ***
+HipHop Warning: %s
+NULL
+Done

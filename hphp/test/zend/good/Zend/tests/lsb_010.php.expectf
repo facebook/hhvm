@@ -1,0 +1,6 @@
+Foo::__construct
+FooChild::__construct
+Foo::__destruct
+FooChild::__destruct
+Foo::bar
+FooChild::bar

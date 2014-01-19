@@ -1,0 +1,4 @@
+*** curl_setopt() call with CURLOPT_RETURNTRANSFER set to 1
+string(%d) "%a"
+*** curl_setopt() call with CURLOPT_RETURNTRANSFER set to 0
+bool(true)

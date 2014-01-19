@@ -1,0 +1,14 @@
+To: example@example.com
+Subject: %s
+MIME-Version: 1.0
+Content-Type: text/plain; charset=%s
+Content-Transfer-Encoding: %s
+
+%s
+To: example@example.com
+Subject: test neutral
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: BASE64
+
+dGVzdA==

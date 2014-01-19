@@ -1,0 +1,22 @@
+From: joe@example.com
+To: foo@example.com
+cc: bar@example.com
+MIME-Version: 1.0
+Content-Type: MULTIPART/mixed; BOUNDARY="%s"
+
+--%s
+Content-Type: APPLICATION/octet-stream
+Content-Transfer-Encoding: BASE64
+Content-Description: a.txt
+
+
+
+--%s
+Content-Type: TEXT/plain; CHARSET=US-ASCII
+Content-Description: description3
+
+contents.data3
+
+
+	
+--%s--

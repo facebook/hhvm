@@ -1,0 +1,17 @@
+--> swapIn:  array(1) {
+  ["b"]=>
+  string(25) "adding element to $swapIn"
+}
+
+--> cowRef:  array(0) {
+}
+
+--> ao:  object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(2) {
+    ["a"]=>
+    string(21) "adding element to $ao"
+    ["c"]=>
+    string(29) "adding another element to $ao"
+  }
+}

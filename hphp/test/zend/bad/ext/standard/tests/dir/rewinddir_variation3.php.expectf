@@ -1,0 +1,10 @@
+*** Testing rewinddir() : usage variations ***
+
+-- Open a file using fopen --
+resource(%d) of type (stream)
+HipHop Warning: %s
+bool(false)
+
+-- Check if rewinddir() has repositioned the file pointer --
+rewinddir() does not work on file pointers
+===DONE===

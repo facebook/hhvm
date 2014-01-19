@@ -1,0 +1,107 @@
+Memcache
+object(Memcache)#1 (0) {
+}
+string(92) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:8:"Memcache";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(8) "Memcache"
+}
+array(21) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "connect"
+  [2]=>
+  string(8) "pconnect"
+  [3]=>
+  string(3) "add"
+  [4]=>
+  string(3) "set"
+  [5]=>
+  string(7) "replace"
+  [6]=>
+  string(3) "get"
+  [7]=>
+  string(6) "delete"
+  [8]=>
+  string(9) "increment"
+  [9]=>
+  string(9) "decrement"
+  [10]=>
+  string(10) "getversion"
+  [11]=>
+  string(5) "flush"
+  [12]=>
+  string(12) "setoptimeout"
+  [13]=>
+  string(5) "close"
+  [14]=>
+  string(15) "getserverstatus"
+  [15]=>
+  string(20) "setcompressthreshold"
+  [16]=>
+  string(8) "getstats"
+  [17]=>
+  string(16) "getextendedstats"
+  [18]=>
+  string(15) "setserverparams"
+  [19]=>
+  string(9) "addserver"
+  [20]=>
+  string(10) "__destruct"
+}
+================
+A_Memcache
+object(A_Memcache)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"A_Memcache";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "A_Memcache"
+}
+array(21) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "connect"
+  [2]=>
+  string(8) "pconnect"
+  [3]=>
+  string(3) "add"
+  [4]=>
+  string(3) "set"
+  [5]=>
+  string(7) "replace"
+  [6]=>
+  string(3) "get"
+  [7]=>
+  string(6) "delete"
+  [8]=>
+  string(9) "increment"
+  [9]=>
+  string(9) "decrement"
+  [10]=>
+  string(10) "getversion"
+  [11]=>
+  string(5) "flush"
+  [12]=>
+  string(12) "setoptimeout"
+  [13]=>
+  string(5) "close"
+  [14]=>
+  string(15) "getserverstatus"
+  [15]=>
+  string(20) "setcompressthreshold"
+  [16]=>
+  string(8) "getstats"
+  [17]=>
+  string(16) "getextendedstats"
+  [18]=>
+  string(15) "setserverparams"
+  [19]=>
+  string(9) "addserver"
+  [20]=>
+  string(10) "__destruct"
+}

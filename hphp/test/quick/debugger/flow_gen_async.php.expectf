@@ -1,0 +1,219 @@
+Program %s/flow_gen_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+flow_gen_async.php loaded
+Program %s/flow_gen_async.php exited normally.
+break flow_gen_async.php:8
+Breakpoint 1 set on line 8 of flow_gen_async.php
+@test(1)
+Breakpoint 1 reached at genBar() on line 8 of %s/flow_gen_async.php
+   7 async function genBar($a) {
+   8*  var_dump($a);
+   9   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+
+next
+Break at genBar() on line 9 of %s/flow_gen_async.php
+   8   var_dump($a);
+   9*  await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  10   error_log('Finished in genBar');
+
+next
+Break at genBar() on line 10 of %s/flow_gen_async.php
+   9   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  10*  error_log('Finished in genBar');
+  11   return $a + 2;
+
+next
+Finished in genBar
+Break at genBar() on line 11 of %s/flow_gen_async.php
+  10   error_log('Finished in genBar');
+  11*  return $a + 2;
+  12 }
+
+next
+Finished in genFoo
+Break at foo() on line 24 of %s/flow_gen_async.php
+  23 function foo($a) {
+  24*  $result = genFoo($a)->join();
+  25   var_dump($result);
+
+next
+Break at foo() on line 25 of %s/flow_gen_async.php
+  24   $result = genFoo($a)->join();
+  25*  var_dump($result);
+  26 }
+
+next
+Break at foo() on line 26 of %s/flow_gen_async.php
+  25   var_dump($result);
+  26*}
+  27 
+
+next
+Break at test() on line 29 of %s/flow_gen_async.php
+  28 function test($a) {
+  29*  foo($a);
+  30 }
+
+continue
+int(1)
+int(2)
+int(4)
+int(4)
+
+@test(2)
+Breakpoint 1 reached at genBar() on line 8 of %s/flow_gen_async.php
+   7 async function genBar($a) {
+   8*  var_dump($a);
+   9   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+
+out
+Break at genFoo() on line 17 of %s/flow_gen_async.php
+  16   $a++;
+  17*  $a = await genBar($a);
+  18   var_dump($a);
+
+next
+Finished in genBar
+Break at genFoo() on line 18 of %s/flow_gen_async.php
+  17   $a = await genBar($a);
+  18*  var_dump($a);
+  19   error_log('Finished in genFoo');
+
+continue
+Finished in genFoo
+int(2)
+int(3)
+int(5)
+int(5)
+
+break clear all
+All breakpoints are cleared.
+break flow_gen_async.php:10
+Breakpoint 1 set on line 10 of flow_gen_async.php
+@test(3)
+Breakpoint 1 reached at genBar() on line 10 of %s/flow_gen_async.php
+   9   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  10*  error_log('Finished in genBar');
+  11   return $a + 2;
+
+out
+Finished in genBar
+Finished in genFoo
+Break at foo() on line 24 of %s/flow_gen_async.php
+  23 function foo($a) {
+  24*  $result = genFoo($a)->join();
+  25   var_dump($result);
+
+next
+Break at foo() on line 25 of %s/flow_gen_async.php
+  24   $result = genFoo($a)->join();
+  25*  var_dump($result);
+  26 }
+
+continue
+int(3)
+int(4)
+int(6)
+int(6)
+
+break clear all
+All breakpoints are cleared.
+break flow_gen_async.php:15
+Breakpoint 1 set on line 15 of flow_gen_async.php
+@test(4)
+Breakpoint 1 reached at genFoo() on line 15 of %s/flow_gen_async.php
+  14 async function genFoo($a) {
+  15*  var_dump($a);
+  16   $a++;
+
+next
+Break at genFoo() on line 16 of %s/flow_gen_async.php
+  15   var_dump($a);
+  16*  $a++;
+  17   $a = await genBar($a);
+
+next
+Break at genFoo() on line 17 of %s/flow_gen_async.php
+  16   $a++;
+  17*  $a = await genBar($a);
+  18   var_dump($a);
+
+next
+Finished in genBar
+Break at genFoo() on line 18 of %s/flow_gen_async.php
+  17   $a = await genBar($a);
+  18*  var_dump($a);
+  19   error_log('Finished in genFoo');
+
+next
+Break at genFoo() on line 19 of %s/flow_gen_async.php
+  18   var_dump($a);
+  19*  error_log('Finished in genFoo');
+  20   return $a;
+
+next
+Finished in genFoo
+Break at genFoo() on line 20 of %s/flow_gen_async.php
+  19   error_log('Finished in genFoo');
+  20*  return $a;
+  21 }
+
+next
+Break at foo() on line 24 of %s/flow_gen_async.php
+  23 function foo($a) {
+  24*  $result = genFoo($a)->join();
+  25   var_dump($result);
+
+next
+Break at foo() on line 25 of %s/flow_gen_async.php
+  24   $result = genFoo($a)->join();
+  25*  var_dump($result);
+  26 }
+
+next
+Break at foo() on line 26 of %s/flow_gen_async.php
+  25   var_dump($result);
+  26*}
+  27 
+
+next
+Break at test() on line 29 of %s/flow_gen_async.php
+  28 function test($a) {
+  29*  foo($a);
+  30 }
+
+continue
+int(4)
+int(5)
+int(7)
+int(7)
+
+@test(5)
+Breakpoint 1 reached at genFoo() on line 15 of %s/flow_gen_async.php
+  14 async function genFoo($a) {
+  15*  var_dump($a);
+  16   $a++;
+
+out
+Break at foo() on line 24 of %s/flow_gen_async.php
+  23 function foo($a) {
+  24*  $result = genFoo($a)->join();
+  25   var_dump($result);
+
+next
+Finished in genBar
+Finished in genFoo
+Break at foo() on line 25 of %s/flow_gen_async.php
+  24   $result = genFoo($a)->join();
+  25*  var_dump($result);
+  26 }
+
+break clear all
+All breakpoints are cleared.
+continue
+int(5)
+int(6)
+int(8)
+int(8)
+
+quit

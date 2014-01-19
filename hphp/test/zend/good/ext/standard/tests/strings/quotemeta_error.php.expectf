@@ -1,0 +1,10 @@
+*** Testing quotemeta() : error conditions ***
+
+-- Testing quotemeta() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing quotemeta() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

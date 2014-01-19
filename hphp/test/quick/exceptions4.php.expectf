@@ -1,0 +1,8 @@
+HipHop Warning: Destructor threw an object exception: exception 'Exception' with message '' in %s/test/quick/exceptions4.php:11
+Stack trace:
+#0 %s/test/quick/exceptions4.php(21): B->__destruct()
+#1 {main} in %s/test/quick/exceptions4.php on line 21
+HipHop Fatal error: Uncaught exception 'Exception' with message '' in %s/test/quick/exceptions4.php:5
+Stack trace:
+#0 %s/test/quick/exceptions4.php(21): A->__construct()
+#1 {main}

@@ -1,0 +1,188 @@
+*** Testing arsort() : usage variations ***
+
+-- Testing arsort() by supplying various string arrays --
+
+-- Iteration 1 --
+- With default sort_flag -
+bool(true)
+array(12) {
+  ["\xhh"]=>
+  string(4) "\xhh"
+  ["\ddd"]=>
+  string(4) "\ddd"
+  ["\cx"]=>
+  string(3) "\cx"
+  ["\a"]=>
+  string(2) "\a"
+  [""]=>
+  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
+  ["	"]=>
+  string(1) "	"
+  ["null"]=>
+  NULL
+  ["NULL"]=>
+  NULL
+}
+- Sort_flag = SORT_REGULAR -
+bool(true)
+array(12) {
+  ["\xhh"]=>
+  string(4) "\xhh"
+  ["\ddd"]=>
+  string(4) "\ddd"
+  ["\cx"]=>
+  string(3) "\cx"
+  ["\a"]=>
+  string(2) "\a"
+  [""]=>
+  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
+  ["	"]=>
+  string(1) "	"
+  ["null"]=>
+  NULL
+  ["NULL"]=>
+  NULL
+}
+- Sort_flag = SORT_STRING -
+bool(true)
+array(12) {
+  ["\xhh"]=>
+  string(4) "\xhh"
+  ["\ddd"]=>
+  string(4) "\ddd"
+  ["\cx"]=>
+  string(3) "\cx"
+  ["\a"]=>
+  string(2) "\a"
+  [""]=>
+  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
+  ["	"]=>
+  string(1) "	"
+  ["null"]=>
+  NULL
+  ["NULL"]=>
+  NULL
+}
+
+-- Iteration 2 --
+- With default sort_flag -
+bool(true)
+array(12) {
+  ["x"]=>
+  string(1) "x"
+  ["w"]=>
+  string(2) "ww"
+  ["t"]=>
+  string(3) "ttt"
+  ["o"]=>
+  string(6) "oraNGe"
+  ["l"]=>
+  string(5) "lemoN"
+  ["b"]=>
+  string(6) "banana"
+  ["a"]=>
+  string(5) "apple"
+  ["X"]=>
+  string(1) "X"
+  ["Te"]=>
+  string(4) "Test"
+  ["T"]=>
+  string(4) "TTTT"
+  ["O"]=>
+  string(6) "Orange"
+  ["B"]=>
+  string(6) "BANANA"
+}
+- Sort_flag = SORT_REGULAR -
+bool(true)
+array(12) {
+  ["x"]=>
+  string(1) "x"
+  ["w"]=>
+  string(2) "ww"
+  ["t"]=>
+  string(3) "ttt"
+  ["o"]=>
+  string(6) "oraNGe"
+  ["l"]=>
+  string(5) "lemoN"
+  ["b"]=>
+  string(6) "banana"
+  ["a"]=>
+  string(5) "apple"
+  ["X"]=>
+  string(1) "X"
+  ["Te"]=>
+  string(4) "Test"
+  ["T"]=>
+  string(4) "TTTT"
+  ["O"]=>
+  string(6) "Orange"
+  ["B"]=>
+  string(6) "BANANA"
+}
+- Sort_flag = SORT_STRING -
+bool(true)
+array(12) {
+  ["x"]=>
+  string(1) "x"
+  ["w"]=>
+  string(2) "ww"
+  ["t"]=>
+  string(3) "ttt"
+  ["o"]=>
+  string(6) "oraNGe"
+  ["l"]=>
+  string(5) "lemoN"
+  ["b"]=>
+  string(6) "banana"
+  ["a"]=>
+  string(5) "apple"
+  ["X"]=>
+  string(1) "X"
+  ["Te"]=>
+  string(4) "Test"
+  ["T"]=>
+  string(4) "TTTT"
+  ["O"]=>
+  string(6) "Orange"
+  ["B"]=>
+  string(6) "BANANA"
+}
+Done

@@ -1,0 +1,88 @@
+*** Testing atan2() : basic functionality ***
+
+-- Iteration 1 --
+float(1.570796327)
+
+-- Iteration 2 --
+float(1.527345431)
+
+-- Iteration 3 --
+float(1.089909047)
+
+-- Iteration 4 --
+float(2.051683607)
+
+-- Iteration 5 --
+float(1.071020961E-8)
+
+-- Iteration 6 --
+float(1.142532174)
+
+-- Iteration 7 --
+float(1.99906048)
+
+-- Iteration 8 --
+float(0.1841885846)
+
+-- Iteration 9 --
+float(1.570259559)
+
+-- Iteration 10 --
+float(1.54906062)
+
+-- Iteration 11 --
+float(1.570796327)
+
+-- Iteration 12 --
+float(1.570796327)
+
+-- Iteration 13 --
+float(1.527345431)
+
+-- Iteration 14 --
+float(1.570796327)
+
+-- Iteration 15 --
+float(1.527345431)
+
+-- Iteration 16 --
+float(1.570796327)
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 23 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 24 --
+float(1.570796327)
+
+-- Iteration 25 --
+float(1.570796327)
+
+-- Iteration 26 --
+HipHop Warning: %s
+NULL
+===Done===

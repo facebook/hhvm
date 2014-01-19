@@ -1,0 +1,32 @@
+*** Testing array_intersect_key() : usage variation ***
+
+--null indexed--
+array(1) {
+  [""]=>
+  string(4) "null"
+}
+array(1) {
+  [""]=>
+  string(6) "null 2"
+}
+
+--undefined indexed--
+array(1) {
+  [""]=>
+  string(4) "null"
+}
+array(1) {
+  [""]=>
+  string(9) "undefined"
+}
+
+--unset  indexed--
+array(1) {
+  [""]=>
+  string(4) "null"
+}
+array(1) {
+  [""]=>
+  string(5) "unset"
+}
+===DONE===

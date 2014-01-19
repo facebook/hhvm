@@ -1,0 +1,32 @@
+object(HH\Vector)#1 (0) {
+}
+object(Map)#1 (0) {
+}
+object(HH\Vector)#1 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(StableMap)#1 (2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+}
+object(HH\Vector)#1 (0) {
+}
+object(Map)#1 (0) {
+}
+object(HH\Vector)#1 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(StableMap)#1 (2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+}

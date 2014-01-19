@@ -1,0 +1,38 @@
+*** Testing date_sunset() : usage variation ***
+
+--Pacific/Samoa--
+string(5) "18:13"
+string(5) "18:13"
+
+--US/Alaska--
+string(5) "21:00"
+string(5) "20:57"
+
+--America/Chicago--
+string(5) "19:51"
+string(5) "19:50"
+
+--America/Montevideo--
+string(5) "18:08"
+string(5) "18:09"
+
+--Africa/Casablanca--
+string(5) "19:17"
+string(5) "19:16"
+
+--Europe/Moscow--
+string(5) "21:09"
+string(5) "21:07"
+
+--Asia/Hong_Kong--
+string(5) "18:55"
+string(5) "18:54"
+
+--Australia/Brisbane--
+string(5) "17:21"
+string(5) "17:21"
+
+--Pacific/Wallis--
+string(5) "17:36"
+string(5) "17:36"
+===DONE===

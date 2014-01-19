@@ -1,0 +1,10 @@
+*** Testing sha1() : error conditions ***
+
+-- Testing sha1() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing sha1() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

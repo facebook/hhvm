@@ -1,0 +1,17 @@
+Access static members
+NULL
+int(0)
+Create x and y
+int(1)
+int(1)
+int(1)
+int(1)
+Destruct x
+int(1)
+int(1)
+int(1)
+Destruct y
+int(1)
+int(1)
+Done
+HipHop Warning: %s

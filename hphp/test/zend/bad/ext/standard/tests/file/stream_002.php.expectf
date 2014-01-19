@@ -1,0 +1,25 @@
+HipHop Warning: %s
+bool(false)
+int(0)
+string(26) "Failed to parse address """
+HipHop Warning: %s
+bool(false)
+int(0)
+string(27) "Failed to parse address "[""
+HipHop Warning: %s
+bool(false)
+int(0)
+string(%d) "Failed to parse%saddress "[ ""
+HipHop Warning: %s
+bool(false)
+int(0)
+string(27) "Failed to parse address ".""
+HipHop Warning: %s
+bool(false)
+int(0)
+string(27) "Failed to parse address "1""
+HipHop Warning: %s
+bool(false)
+int(0)
+string(27) "Failed to parse address "1""
+Done

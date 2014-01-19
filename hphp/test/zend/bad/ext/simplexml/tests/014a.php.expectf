@@ -1,0 +1,24 @@
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  string(3) "Joe"
+}
+NULL
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  string(3) "XXX"
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  string(2) "30"
+}
+---Unset:---
+---Unset?---
+NULL
+bool(false)
+---Unsupported---
+NULL
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  string(1) "5"
+}
+===DONE===

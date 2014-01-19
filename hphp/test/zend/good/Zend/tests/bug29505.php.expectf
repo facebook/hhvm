@@ -1,0 +1,16 @@
+array(2) {
+  ["empty"]=>
+  array(0) {
+  }
+  ["three"]=>
+  array(3) {
+    [0]=>
+    int(1)
+    ["b"]=>
+    string(1) "c"
+    [3]=>
+    array(0) {
+    }
+  }
+}
+===DONE===

@@ -1,0 +1,48 @@
+*** Testing str_pad() function: with unexpected inputs for 'input' argument ***
+-- Iteration 1 --
+string(20) "0                   "
+-- Iteration 2 --
+string(20) "1                   "
+-- Iteration 3 --
+string(20) "-2                  "
+-- Iteration 4 --
+string(20) "2147483647          "
+-- Iteration 5 --
+string(20) "-2147483648         "
+-- Iteration 6 --
+string(20) "10.5                "
+-- Iteration 7 --
+string(20) "-20.5               "
+-- Iteration 8 --
+string(20) "101234567000        "
+-- Iteration 9 --
+HipHop Warning: %s
+NULL
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+-- Iteration 11 --
+HipHop Warning: %s
+NULL
+-- Iteration 12 --
+string(20) "1                   "
+-- Iteration 13 --
+string(20) "                    "
+-- Iteration 14 --
+string(20) "1                   "
+-- Iteration 15 --
+string(20) "                    "
+-- Iteration 16 --
+string(20) "                    "
+-- Iteration 17 --
+string(20) "                    "
+-- Iteration 18 --
+string(20) "sample object       "
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+-- Iteration 20 --
+string(20) "                    "
+-- Iteration 21 --
+string(20) "                    "
+===DONE===

@@ -1,0 +1,397 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "get_declared_classes",
+            "desc": "Gets the declared classes.",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Returns an array of the names of the declared classes in the current script.\n\nNote that depending on what extensions you have compiled or loaded into PHP, additional classes could be present. This means that you will not be able to define your own classes using these names. There is a list of predefined classes in the Predefined Classes section of the appendices."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "get_declared_interfaces",
+            "desc": "Gets the declared interfaces.",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Returns an array of the names of the declared interfaces in the current script."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "get_declared_traits",
+            "desc": "Gets the declared traits.",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Returns an array of the names of the declared traits in the current script."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "class_alias",
+            "desc": "Creates an alias named alias based on the defined class original. The aliased class is exactly the same as the original class.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "original",
+                    "type": "String",
+                    "desc": "The original class."
+                },
+                {
+                    "name": "alias",
+                    "type": "String",
+                    "desc": "The alias name for the class."
+                },
+                {
+                    "name": "autoload",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether do autoload if the original class is not found."
+                }
+            ]
+        },
+        {
+            "name": "class_exists",
+            "desc": "This function checks whether or not the given class has been defined.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if class_name is a defined class, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "class_name",
+                    "type": "String",
+                    "desc": "The class name. The name is matched in a case-insensitive manner."
+                },
+                {
+                    "name": "autoload",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether or not to call __autoload by default."
+                }
+            ]
+        },
+        {
+            "name": "interface_exists",
+            "desc": "Checks if the given interface has been defined.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the interface given by interface_name has been defined, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "interface_name",
+                    "type": "String",
+                    "desc": "The interface name"
+                },
+                {
+                    "name": "autoload",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to call __autoload or not by default."
+                }
+            ]
+        },
+        {
+            "name": "trait_exists",
+            "desc": "Checks if the given trait has been defined.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the trait given by trait_name has been defined, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "trait_name",
+                    "type": "String",
+                    "desc": "The trait name"
+                },
+                {
+                    "name": "autoload",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to call __autoload or not by default."
+                }
+            ]
+        },
+        {
+            "name": "get_class_methods",
+            "desc": "Gets the class methods names.",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Returns an array of method names defined for the class specified by class_name. In case of an error, it returns NULL."
+            },
+            "args": [
+                {
+                    "name": "class_or_object",
+                    "type": "Variant",
+                    "desc": "The class name or an object instance"
+                }
+            ]
+        },
+        {
+            "name": "get_class_vars",
+            "desc": "Get the default properties of the given class.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an associative array of declared properties visible from the current scope, with their default value. The resulting array elements are in the form of varname => value. In case of an error, it returns false."
+            },
+            "args": [
+                {
+                    "name": "class_name",
+                    "type": "String",
+                    "desc": "The class name"
+                }
+            ]
+        },
+        {
+            "name": "get_class_constants",
+            "desc": "Get the constants of the given class.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Returns an associative array of constants with their values."
+            },
+            "args": [
+                {
+                    "name": "class_name",
+                    "type": "String",
+                    "desc": "The class name"
+                }
+            ]
+        },
+        {
+            "name": "get_class",
+            "desc": "Gets the name of the class of the given object.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the name of the class of which object is an instance. Returns FALSE if object is not an object.\n\nIf object is omitted when inside a class, the name of that class is returned."
+            },
+            "args": [
+                {
+                    "name": "object",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The tested object. This parameter may be omitted when inside a class."
+                }
+            ]
+        },
+        {
+            "name": "get_parent_class",
+            "desc": "Retrieves the parent class name for object or class.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the name of the parent class of the class of which object is an instance or the name.\n\nIf the object does not have a parent FALSE will be returned.\n\nIf called without parameter outside object, this function returns FALSE."
+            },
+            "args": [
+                {
+                    "name": "object",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The tested object or class name"
+                }
+            ]
+        },
+        {
+            "name": "is_a",
+            "desc": "Checks if the given object is of this class or has this class as one of its parents.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the object is of this class or has this class as one of its parents, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "class_or_object",
+                    "type": "Variant",
+                    "desc": "The tested object"
+                },
+                {
+                    "name": "class_name",
+                    "type": "String",
+                    "desc": "The class name"
+                },
+                {
+                    "name": "allow_string",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "If this parameter set to false (default), string class name as object is not allowed. This also prevents from calling autoloader if the class doesn't exist."
+                }
+            ]
+        },
+        {
+            "name": "is_subclass_of",
+            "desc": "Checks if the given object has the class class_name as one of its parents.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "This function returns TRUE if the object object, belongs to a class which is a subclass of class_name, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "class_or_object",
+                    "type": "Variant",
+                    "desc": "A class name or an object instance"
+                },
+                {
+                    "name": "class_name",
+                    "type": "String",
+                    "desc": "The class name"
+                },
+                {
+                    "name": "allow_string",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "If this parameter set to false, string class name as object is not allowed. This also prevents from calling autoloader if the class doesn't exist."
+                }
+            ]
+        },
+        {
+            "name": "method_exists",
+            "desc": "Checks if the class method exists in the given object.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the method given by method_name has been defined for the given object, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "class_or_object",
+                    "type": "Variant",
+                    "desc": "An object instance or a class name"
+                },
+                {
+                    "name": "method_name",
+                    "type": "String",
+                    "desc": "The method name"
+                }
+            ]
+        },
+        {
+            "name": "property_exists",
+            "desc": "This function checks if the given property exists in the specified class.\n\nAs opposed with isset(), property_exists() returns TRUE even if the property has the value NULL.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE if the property exists, FALSE if it doesn't exist or NULL in case of an error.",
+                "predicted_type": 1
+            },
+            "args": [
+                {
+                    "name": "class_or_object",
+                    "type": "Variant",
+                    "desc": "The class name or an object of the class to test for"
+                },
+                {
+                    "name": "property",
+                    "type": "String",
+                    "desc": "The name of the property"
+                }
+            ]
+        },
+        {
+            "name": "get_object_vars",
+            "desc": "Gets the accessible non-static properties of the given object according to scope.",
+            "flags": [
+                "ZendParamModeNull"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an associative array of defined object accessible non-static properties for the specified object in scope. If a property have not been assigned a value, it will be returned with a NULL value."
+            },
+            "args": [
+                {
+                    "name": "object",
+                    "type": "Object",
+                    "desc": "An object instance."
+                }
+            ]
+        },
+        {
+            "name": "call_user_method_array",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "method_name",
+                    "type": "String",
+                    "desc": "The method name being called."
+                },
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "The object that method_name is being called on.",
+                    "ref": true
+                },
+                {
+                    "name": "paramarr",
+                    "type": "Variant",
+                    "desc": "An array of parameters."
+                }
+            ]
+        },
+        {
+            "name": "call_user_method",
+            "flags": [
+                "VariableArguments"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "method_name",
+                    "type": "String",
+                    "desc": "The method name being called."
+                },
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "The object that method_name is being called on.",
+                    "ref": true
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

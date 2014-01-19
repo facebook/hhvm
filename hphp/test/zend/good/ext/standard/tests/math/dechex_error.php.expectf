@@ -1,0 +1,6 @@
+*** Testing dechex() : error conditions ***
+
+Incorrect number of arguments
+HipHop Warning: %s
+HipHop Warning: %s
+===Done===

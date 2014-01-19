@@ -1,0 +1,49 @@
+invoking f
+in $f
+
+invoking g
+in $g; passed hello
+in $g; passed goodbye
+
+invoking add
+x + y = 3
+x + y = 10000000000
+
+showing f
+string(9) "{closure}"
+bool(true)
+int(3)
+int(5)
+bool(false)
+bool(true)
+parameters => array(0) {
+}
+int(0)
+int(0)
+
+showing g
+string(9) "{closure}"
+bool(true)
+int(6)
+int(8)
+bool(false)
+bool(true)
+parameters => array(1) {
+  name => a
+}
+int(1)
+int(0)
+
+showing add
+string(9) "{closure}"
+bool(true)
+int(11)
+int(14)
+string(54) "/** This doc comment is so helpful and descriptive. */"
+bool(true)
+parameters => array(2) {
+  name => x
+  name => y
+}
+int(2)
+int(2)

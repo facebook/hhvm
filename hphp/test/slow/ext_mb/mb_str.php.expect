@@ -1,0 +1,55 @@
+string(5) "value"
+string(3) "baz"
+string(2) "04"
+string(2) "30"
+string(4) "1973"
+string(5) "bcdef"
+string(3) "bcd"
+string(4) "abcd"
+string(6) "abcdef"
+string(1) "f"
+string(5) "bcdef"
+string(3) "bcd"
+bool(true)
+bool(true)
+string(1) "f"
+string(6) "lon..>"
+string(7) "Ülo..>"
+int(7)
+int(7)
+bool(false)
+int(4)
+int(8)
+int(7)
+int(7)
+bool(false)
+string(7) "
+Line 3"
+bool(true)
+bool(true)
+string(6) "Line 3"
+int(7)
+int(7)
+int(7)
+int(7)
+string(12) "@example.com"
+string(42) "mary had a little lamb and she loved it so"
+string(3) "abc"
+string(42) "MARY HAD A LITTLE LAMB AND SHE LOVED IT SO"
+string(3) "ABC"
+int(7)
+bool(true)
+string(4) "long"
+int(2)
+int(2)
+bool(true)
+string(5) "bcdef"
+string(3) "bcd"
+string(4) "abcd"
+string(6) "abcdef"
+string(1) "f"
+string(5) "bcdef"
+string(3) "bcd"
+bool(true)
+bool(true)
+string(1) "f"

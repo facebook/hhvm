@@ -1,0 +1,1 @@
+HipHop Fatal error: Argument 1 passed to wat() must be an instance of string, int given in %s/test/slow/ir_inlining/failing_param.php on line 5

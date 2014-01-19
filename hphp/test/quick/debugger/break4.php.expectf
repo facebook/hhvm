@@ -1,0 +1,19 @@
+Program %s/break4.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break :fb:my:thing::doIt()
+Breakpoint 1 set upon entering xhp_fb__my__thing::doIt()
+But wont break until class xhp_fb__my__thing has been loaded.
+continue
+break4.php loaded
+Program %s/break4.php exited normally.
+@ :fb:my:thing::doIt()
+Breakpoint 1 reached at xhp_fb__my__thing::doIt() on line 8 of %s/break4.php
+   7   function doIt() {
+   8*    echo "doing my thing\n";
+   9   }
+
+break clear all
+All breakpoints are cleared.
+continue
+doing my thing
+
+quit

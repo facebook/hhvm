@@ -1,0 +1,208 @@
+Program %s/flow2.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+flow2.php done
+Program %s/flow2.php exited normally.
+break test()
+Breakpoint 1 set upon entering test()
+@test(1)
+Breakpoint 1 reached at test() on line 53 of %s/flow2.php
+  52 function test($a) {
+  53*  foo($a);
+  54 }
+
+step
+Break at foo() on line 36 of %s/flow2.php
+  35 function foo($a) {
+  36*  $c = new C1(5);
+  37 
+
+next
+Constructor
+Break at foo() on line 38 of %s/flow2.php
+  37 
+  38*  $i = 0;
+  39   foreach (genFoo($a) as $x) {
+
+next
+Break at foo() on line 39 of %s/flow2.php
+  38   $i = 0;
+  39*  foreach (genFoo($a) as $x) {
+  40     $i++;
+
+next
+Break at foo() on line 40 of %s/flow2.php
+  39   foreach (genFoo($a) as $x) {
+  40*    $i++;
+  41     var_dump($x);
+
+next
+Break at foo() on line 41 of %s/flow2.php
+  40     $i++;
+  41*    var_dump($x);
+  42   }
+
+next
+Break at foo() on line 40 of %s/flow2.php
+  39   foreach (genFoo($a) as $x) {
+  40*    $i++;
+  41     var_dump($x);
+
+next
+Break at foo() on line 41 of %s/flow2.php
+  40     $i++;
+  41*    var_dump($x);
+  42   }
+
+next
+Finished in genFoo
+Break at foo() on line 44 of %s/flow2.php
+  43 
+  44*  $c = new C1(6); // Runs a destructor
+  45   $d = $c;
+
+next
+Constructor
+Destructor
+Break at foo() on line 45 of %s/flow2.php
+  44   $c = new C1(6); // Runs a destructor
+  45*  $d = $c;
+  46   $e = new C1(7);
+
+next
+Break at foo() on line 46 of %s/flow2.php
+  45   $d = $c;
+  46*  $e = new C1(7);
+  47   $c = null;
+
+next
+Constructor
+Break at foo() on line 47 of %s/flow2.php
+  46   $e = new C1(7);
+  47*  $c = null;
+  48 
+
+next
+Break at foo() on line 49 of %s/flow2.php
+  48 
+  49*  var_dump($d);
+  50 } // Ret runs two destructors
+
+next
+Break at foo() on line 50 of %s/flow2.php
+  49   var_dump($d);
+  50*} // Ret runs two destructors
+  51 
+
+next
+Destructor
+Destructor
+Break at test() on line 53 of %s/flow2.php
+  52 function test($a) {
+  53*  foo($a);
+  54 }
+
+break clear all
+All breakpoints are cleared.
+continue
+int(8)
+int(1)
+object(C1)#2 (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+
+break flow2.php:10
+Breakpoint 1 set on line 10 of flow2.php
+break flow2.php:12
+Breakpoint 2 set on line 12 of flow2.php
+@test(2)
+Constructor
+Breakpoint 1 reached at genFoo() on line 10 of %s/flow2.php
+   9 function genFoo($a) {
+  10*  $a = bar($a);
+  11   $z = yield $a+5;
+
+out
+Break at foo() on line 40 of %s/flow2.php
+  39   foreach (genFoo($a) as $x) {
+  40*    $i++;
+  41     var_dump($x);
+
+continue
+Breakpoint 2 reached at genFoo() on line 12 of %s/flow2.php
+  11   $z = yield $a+5;
+  12*  yield $z+1;
+  13   error_log('Finished in genFoo');
+
+out
+Break at foo() on line 40 of %s/flow2.php
+  39   foreach (genFoo($a) as $x) {
+  40*    $i++;
+  41     var_dump($x);
+
+break clear all
+All breakpoints are cleared.
+continue
+Finished in genFoo
+Constructor
+Destructor
+Constructor
+Destructor
+Destructor
+int(9)
+int(1)
+object(C1)#3 (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+
+break flow2.php:26
+Breakpoint 1 set on line 26 of flow2.php
+@test(3)
+Constructor
+Finished in genFoo
+Constructor
+Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
+  25   public function __destruct() {
+  26*    error_log('Destructor');
+  27   }
+
+out
+Destructor
+Break at foo() on line 44 of %s/flow2.php
+  43 
+  44*  $c = new C1(6); // Runs a destructor
+  45   $d = $c;
+
+continue
+Constructor
+Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
+  25   public function __destruct() {
+  26*    error_log('Destructor');
+  27   }
+
+out
+Destructor
+Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
+  25   public function __destruct() {
+  26*    error_log('Destructor');
+  27   }
+
+out
+Destructor
+Break at test() on line 54 of %s/flow2.php
+  53   foo($a);
+  54*}
+  55 
+
+break clear all
+All breakpoints are cleared.
+continue
+int(10)
+int(1)
+object(C1)#4 (1) {
+  ["x":"C1":private]=>
+  int(0)
+}
+
+quit

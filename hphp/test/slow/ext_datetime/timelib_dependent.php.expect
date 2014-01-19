@@ -1,0 +1,13 @@
+string(2) "28"
+string(2) "14"
+string(10) "2010-08-02"
+array(4) {
+  ["country_code"]=>
+  string(2) "CZ"
+  ["latitude"]=>
+  float(50.08333)
+  ["longitude"]=>
+  float(14.43333)
+  ["comments"]=>
+  string(0) ""
+}

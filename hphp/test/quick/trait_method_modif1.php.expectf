@@ -1,0 +1,1 @@
+HipHop Fatal error: Access level to Bar::f() must be public (as in class Foo) or weaker in %s on line 12

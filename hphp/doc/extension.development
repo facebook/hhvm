@@ -1,0 +1,130 @@
+
+<h2>How to modify existing extension functions/classes</h2>
+
+All commands and directories are from src/ in this guide.
+
+1. Update IDL
+
+Change the function/class prototypes in the corresponding IDL file.
+Follow existing ones for formats. Most of them are straightforward.
+Possible types are listed in idl/base.php.
+
+NOTE regarding the "NeedsActRec" flag:
+
+A function that examines the state of the current or previous
+frames in its call stack must have the "NeedsActRec" flag set
+in its "flags" field. Examples of use of the frame state include
+examining the arguments of the function, looking up the invocation
+context for the function (e.g., for permissions check), etc.
+
+2. Update headers and implementation.
+
+Edit runtime/ext/ext_[name].h and runtime/ext/ext_[name].cpp to
+reflect the desired modifications in signature and behavior.
+
+3. Auto-generate files from IDL
+
+Run
+
+  EXT=[name] make -C idl update
+
+For example,
+
+  EXT=string make -C idl update
+
+This will modify several files with the new signatures.
+
+4. Unit tests
+
+The "EXT=name make -C idl update" does the following for test files:
+  creates  test/ext/test_ext_[name].h -- entry points for this unit test, don't modify
+  updates  test/ext/test_ext.inc      -- to invoke the test, don't modify
+  creates  idl/test_ext_[name].cpp -- A template to be modified.
+
+You can probably delete these and modify the existing unit tests.
+
+5. Compile the php to c compiler (so that we can use it to bootstrap hhvm)
+
+  make -j (if you compile using make) (unset USE_HHVM)
+    or
+  fbconfig -r hphp (if you haven't done so already)
+  fbmake --fast dbg -j (if you compile using fbmake)
+
+6. Compile hhvm
+
+  make -j (if you compile using make) (export USE_HHVM=1)
+    or
+  fbmake --fast dbg -j (if you compile using fbmake)
+
+<h2>How to add new non-separable extension functions/classes</h2>
+
+All commands and directories are from hphp/ in this guide.
+
+1. Find the right extension name
+
+Find the best "extension" under idl/*.idl.php to add your function(s) to.
+runtime/ext/README has a good list of categorized extension names. If nothing
+fits, create a new IDL file with a good name.
+
+2. Update IDL
+
+Add function/class prototypes to the IDL file. Follow existing ones for
+formats. Most of them are straightforward. Possible types are listed in
+idl/base.php.
+
+NOTE regarding the "NeedsActRec" flag:
+
+A function that examines the state of the current or previous
+frames in its call stack must have the "NeedsActRec" flag set
+in its "flags" field. Examples of use of the frame state include
+examining the arguments of the function, looking up the invocation
+context for the function (e.g., for permissions check), etc.
+
+3. Auto-generate files from IDL
+
+If it is a new IDL file, run
+
+  EXT=[new extension name] make -C idl install
+
+For example,
+
+  EXT=my_extension make -C idl install
+
+This will add several files to different places.
+
+Otherwise, run
+
+  EXT=[existing extension name] make -C idl update
+
+For example,
+
+  EXT=string make -C idl update
+
+This will modify several files with the new function/classes.
+
+4. Manual editing
+
+Some files are not automatically updated, including
+
+  runtime/ext/ext_[name].h
+  runtime/ext/ext_[name].cpp
+
+They are created under idl/ to serve as templates that one can copy portions
+of them manually. These are the two files that you will add implementation to.
+
+5. Unit tests
+
+The "EXT=name make update" does the following for test files:
+  creates  test/ext/test_ext_[name].h -- entry points for this unit test, don't modify
+  updates  test/ext/test_ext.inc      -- to invoke the test, don't modify
+  creates  idl/test_ext_[name].cpp -- A template to be modified.
+
+You will have to add new unit tests to
+
+  test/ext/test_ext_[name].cpp
+
+into both the list of RUN_TEST() at top portion of the file and a real
+unit test function like this,
+
+  void TestExt[Name]::test_ext_[function] () { ... }
+

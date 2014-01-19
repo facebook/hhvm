@@ -1,0 +1,28 @@
+    randObj: A
+    randObj: C
+C::__call dubiousArgs
+--------A::__call noSuchMethodBoyeee
+--------A::__call noSuchMethodBoyeee
+    randObj: B
+    randObj: A
+T2::dubiousArgs 1
+--B has this method.
+--B has this method.
+    randObj: C
+    randObj: B
+T1::dubiousArgs 2, 2
+--HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 0 given in %s on line 41
+C also has this method with params: HipHop Notice: Undefined variable: d in %s on line 41
+ HipHop Notice: Undefined variable: e in %s on line 41
+
+--C also has this method with params: 3 4
+    randObj: A
+    randObj: C
+C::__call dubiousArgs
+--------A::__call noSuchMethodBoyeee
+--------A::__call noSuchMethodBoyeee
+    randObj: B
+    randObj: A
+T2::dubiousArgs 4
+--B has this method.
+--B has this method.

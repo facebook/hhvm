@@ -1,0 +1,54 @@
+*** Testing rsort() : variation ***
+
+-- 'flag' value is defualt --
+bool(true)
+array(4) {
+  [0]=>
+  bool(true)
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  bool(false)
+}
+
+-- 'flag' value is SORT_REGULAR --
+bool(true)
+array(4) {
+  [0]=>
+  bool(true)
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  bool(false)
+}
+
+-- 'flag' value is SORT_NUMERIC  --
+bool(true)
+array(4) {
+  [0]=>
+  bool(true)
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  bool(false)
+}
+
+-- 'flag' value is SORT_STRING --
+bool(true)
+array(4) {
+  [0]=>
+  bool(true)
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  bool(false)
+}
+Done

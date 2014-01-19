@@ -1,0 +1,90 @@
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+array(1) {
+  ["test"]=>
+  string(0) ""
+}
+HipHop Warning: %s
+ in %sparse_ini_file.php on line 20
+bool(false)
+HipHop Warning: %s
+ in %sparse_ini_file.php on line 26
+bool(false)
+array(1) {
+  ["test"]=>
+  string(8) "new
+line"
+}
+array(1) {
+  ["test"]=>
+  string(16) "test const value"
+}
+array(1) {
+  ["section"]=>
+  array(1) {
+    ["test"]=>
+    string(5) "hello"
+  }
+}
+array(1) {
+  ["test"]=>
+  string(5) "hello"
+}
+array(1) {
+  ["section.test"]=>
+  string(5) "hello"
+}
+array(1) {
+  ["section"]=>
+  array(1) {
+    ["section.test"]=>
+    string(5) "hello"
+  }
+}
+array(1) {
+  ["section"]=>
+  array(1) {
+    [1]=>
+    string(1) "2"
+  }
+}
+array(1) {
+  [1]=>
+  string(1) "2"
+}
+array(1) {
+  ["test"]=>
+  string(5) "test4"
+}
+array(1) {
+  ["section1"]=>
+  array(1) {
+    ["name"]=>
+    string(5) "value"
+  }
+}
+array(3) {
+  ["foo"]=>
+  string(4) "bar1"
+  ["_foo"]=>
+  string(4) "bar2"
+  ["foo_"]=>
+  string(4) "bar3"
+}
+
+Deprecated: Comments starting with '#' are deprecated in %s
+array(3) {
+  ["foo"]=>
+  string(4) "bar1"
+  ["_foo"]=>
+  string(4) "bar2"
+  ["foo_"]=>
+  string(4) "bar3"
+}
+Done

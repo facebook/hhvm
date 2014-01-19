@@ -1,0 +1,10 @@
+*** Testing reset() : error conditions ***
+
+-- Testing reset() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing reset() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

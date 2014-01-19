@@ -1,0 +1,4 @@
+string(20) "C:3:"bar":6:{foobar}"
+string(6) "foobar"
+object(bar)#%d (0) {
+}

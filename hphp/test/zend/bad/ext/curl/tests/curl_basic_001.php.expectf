@@ -1,0 +1,4 @@
+*** Testing curl_exec() : basic functionality ***
+string(25) "Hello World!
+Hello World!"
+===DONE===

@@ -1,0 +1,33 @@
+HipHop Warning: %s
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+HipHop Warning: %s
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+HipHop Warning: %s
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+HipHop Warning: %s
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+HipHop Warning: %s
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+HipHop Warning: %s
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+HipHop Warning: %s
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+HipHop Warning: %s
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+HipHop Warning: %s
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
+'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
+'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
+'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
+'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
+'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
+'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
+'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
+'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'

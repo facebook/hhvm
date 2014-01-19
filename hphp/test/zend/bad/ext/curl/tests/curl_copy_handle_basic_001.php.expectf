@@ -1,0 +1,11 @@
+*** Testing curl copy handle with simple GET ***
+string(106) "array(2) {
+  ["test"]=>
+  string(7) "getpost"
+  ["get_param"]=>
+  string(11) "Hello World"
+}
+array(0) {
+}
+"
+===DONE===

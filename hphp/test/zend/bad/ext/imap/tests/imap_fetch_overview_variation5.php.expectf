@@ -1,0 +1,88 @@
+*** Testing imap_fetch_overview() : usage variations ***
+Create a temporary mailbox and add 3 msgs
+.. mailbox '{%s}%s' created
+
+-- $msg_no is 0 --
+Sequence out of range
+
+-- $msg_no is 4 --
+Sequence out of range
+
+-- $msg_no is 4 --
+Sequence out of range
+
+-- $msg_no is 2 --
+
+size is %d
+uid is %d
+msgno is 2
+recent is %d
+flagged is 0
+answered is 0
+deleted is 0
+seen is 0
+draft is 0
+udate is OK
+
+-- $msg_no is 1,3 --
+
+size is %d
+uid is %d
+msgno is 1
+recent is %d
+flagged is 0
+answered is 0
+deleted is 0
+seen is 0
+draft is 0
+udate is OK
+
+size is %d
+uid is %d
+msgno is 3
+recent is %d
+flagged is 0
+answered is 0
+deleted is 0
+seen is 0
+draft is 0
+udate is OK
+
+-- $msg_no is 1, 2 --
+Syntax error in sequence
+
+-- $msg_no is 1:3 --
+
+size is %d
+uid is %d
+msgno is 1
+recent is %d
+flagged is 0
+answered is 0
+deleted is 0
+seen is 0
+draft is 0
+udate is OK
+
+size is %d
+uid is %d
+msgno is 2
+recent is %d
+flagged is 0
+answered is 0
+deleted is 0
+seen is 0
+draft is 0
+udate is OK
+
+size is %d
+uid is %d
+msgno is 3
+recent is %d
+flagged is 0
+answered is 0
+deleted is 0
+seen is 0
+draft is 0
+udate is OK
+===DONE===

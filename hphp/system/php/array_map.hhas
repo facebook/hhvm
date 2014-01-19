@@ -1,0 +1,68 @@
+.function array_map($func = no_args, $arr = one_arg, $res = one_array, ...) {
+          .numiters 2;
+
+# If we get here, a value was supplied for $res
+# so we bail out to the c++ implementation
+call_cpp_impl:
+          FPushFuncD   1   "__builtin_array_map"
+          FCallBuiltin 0 0 "func_get_args"
+          UnboxR
+          FPassC       0
+          FCallArray
+          UnboxR
+          RetC
+
+no_args:  String "array_map() expects at least 2 parameters, 0 given"
+          Jmp warning
+
+one_arg:  String "array_map() expects at least 2 parameters, 1 given"
+          Jmp warning
+
+bad_func: String "array_map() expects parameter 1 to be a valid callback"
+          Jmp warning
+warning:  Cns "E_USER_WARNING"
+          FCallBuiltin 2 2 "trigger_error"
+          PopR
+          Null
+          RetC
+
+# but if we get here, there was only one array,
+# so we use the fast, php version
+
+one_array:
+          IsTypeL $arr Arr
+          JmpZ call_cpp_impl
+          IssetL $func
+          JmpZ ident
+          CGetL $func
+          DecodeCufIter 0 bad_func
+.try_fault kill_iter_0 {
+            NewArray
+            SetL $res
+            PopC
+
+            CGetL $arr
+            WIterInitK 1 endloop $v $k
+
+  .try_fault kill_iter_1 1 {
+    loop_x:   FPushCufIter 1 0
+              FPassL 0 $v
+              FCall 1
+              SetWithRefRM <L:$res EL:$k>
+              WIterNextK 1 loop_x $v $k
+  }
+}
+endloop:  CIterFree 0
+          CGetL $res
+          RetC
+
+ident:    CGetL $arr
+          RetC
+
+kill_iter_0:
+          CIterFree 0
+          Unwind
+kill_iter_1:
+          IterFree 1
+          Unwind
+}

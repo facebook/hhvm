@@ -1,0 +1,100 @@
+*** Testing imap_fetch_overview() : usage variations ***
+
+-- Testing with first argument value: int(0)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: int(1)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: int(12345)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: int(-2345)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: float(10.5)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: float(-10.5)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: float(123456789000)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: float(1.23456789E-9)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: float(0.5)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: NULL
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: NULL
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: bool(true)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: bool(false)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: bool(true)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: bool(false)
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: %string|unicode%(0) ""
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: %string|unicode%(0) ""
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: array(0) {
+}
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: %string|unicode%(6) "string"
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: %string|unicode%(6) "string"
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: %string|unicode%(11) "hello world"
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: object(classA)#1 (0) {
+}
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: NULL
+HipHop Warning: %s
+NULL
+
+-- Testing with first argument value: NULL
+HipHop Warning: %s
+NULL
+===DONE===

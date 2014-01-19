@@ -1,0 +1,10 @@
+*** Testing mb_strstr() : error conditions ***
+
+-- Testing mb_strstr() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing mb_strstr() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+===DONE===

@@ -1,0 +1,17 @@
+*** Testing curl sending through GET an POST ***
+string(208) "array(2) {
+  ["test"]=>
+  string(7) "getpost"
+  ["get_param"]=>
+  string(11) "Hello World"
+}
+array(3) {
+  ["Hello"]=>
+  string(5) "World"
+  ["Foo"]=>
+  string(3) "Bar"
+  ["Person"]=>
+  string(8) "John Doe"
+}
+"
+===DONE===

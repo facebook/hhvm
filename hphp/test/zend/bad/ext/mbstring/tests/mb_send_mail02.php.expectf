@@ -1,0 +1,14 @@
+To: example@example.com
+Subject: %s
+MIME-Version: 1.0
+Content-Type: text/plain; charset=%s
+Content-Transfer-Encoding: %s
+
+%s
+To: example@example.com
+Subject: =?ISO-2022-JP?B?GyRCJUYlOSVIGyhCIEphcGFuZXNl?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: 7bit
+
+テスト

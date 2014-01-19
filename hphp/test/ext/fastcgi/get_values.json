@@ -1,0 +1,61 @@
+[
+  {
+    "command": "send",
+    "message": "01010001000800??000101??????????"
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "transaction_exists",
+      "request_id": 1,
+      "result": true
+    }
+  },
+  {
+    "command": "send",
+    "message": "01090000001000??0e00464347495f4d41585f434f4e4e53"
+  },
+  {
+    "command": "send",
+    "message": "01090000000f00??0d00464347495f4d41585f52455153"
+  },
+  {
+    "command": "send",
+    "message": "01090000001000??0e00464347495f424c41485f424c4148"
+  },
+  {
+    "command": "send",
+    "message": "01090000001100??0f00464347495f4d5058535f434f4e4e53"
+  },
+  {
+    "command": "send",
+    "message": "01090000001000??0e00626c616168626c65626c65626c65"
+  },
+  {
+    "command": "recv",
+    "message": "010a0000001206??0e02464347495f4d41585f434f4e4e533530????????????"
+  },
+  {
+    "command": "recv",
+    "message": "010a0000001305??0d04464347495f4d41585f5245515331303030??????????"
+  },
+  {
+    "command": "recv",
+    "message": "010a0000001206??0f01464347495f4d5058535f434f4e4e5331????????????"
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "session_closed",
+      "result": false
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "session_error",
+      "result": false
+    }
+  }
+]
+

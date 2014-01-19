@@ -1,0 +1,12 @@
+array(5) {
+  ["DYNAMIC_VAL"]=>
+  int(2)
+  ["STRING_VAL"]=>
+  string(3) "zzz"
+  ["INT_VAL"]=>
+  int(105)
+  ["FP_VAL"]=>
+  float(3.14)
+  ["NULL_VAL"]=>
+  NULL
+}

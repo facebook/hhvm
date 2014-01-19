@@ -1,0 +1,33 @@
+long
+  2147483647
+    <param1 xsi:type="xsd:long">2147483647</param1>
+    2147483647
+  2147483648
+    <param1 xsi:type="xsd:long">2147483648</param1>
+    2147483648
+  4294967296
+    <param1 xsi:type="xsd:long">4294967296</param1>
+    4294967296
+  8589934592
+    <param1 xsi:type="xsd:long">8589934592</param1>
+    8589934592
+  17179869184
+    <param1 xsi:type="xsd:long">17179869184</param1>
+    17179869184
+
+unsignedLong
+  2147483647
+    <param1 xsi:type="xsd:unsignedLong">2147483647</param1>
+    2147483647
+  2147483648
+    <param1 xsi:type="xsd:unsignedLong">2147483648</param1>
+    2147483648
+  4294967296
+    <param1 xsi:type="xsd:unsignedLong">4294967296</param1>
+    4294967296
+  8589934592
+    <param1 xsi:type="xsd:unsignedLong">8589934592</param1>
+    8589934592
+  17179869184
+    <param1 xsi:type="xsd:unsignedLong">17179869184</param1>
+    17179869184

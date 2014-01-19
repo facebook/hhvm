@@ -1,0 +1,28 @@
+HipHop Warning: %s
+NULL
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+array(3) {
+  [0]=>
+  int(%d)
+  [1]=>
+  int(%d)
+  [2]=>
+  int(%d)
+}
+array(2) {
+  [0]=>
+  int(%d)
+  [1]=>
+  int(%d)
+}
+Done

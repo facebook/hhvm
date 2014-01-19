@@ -1,0 +1,35 @@
+-- Offset is 20 --
+--Multibyte String:--
+int(20)
+--ASCII String:--
+int(20)
+
+-- Offset is 21 --
+--Multibyte String:--
+bool(false)
+--ASCII String:--
+bool(false)
+
+-- Offset is 22 --
+--Multibyte String:--
+HipHop Warning: %s
+bool(false)
+--ASCII String:--
+HipHop Warning: %s
+bool(false)
+
+-- Offset is 53 --
+--Multibyte String:--
+HipHop Warning: %s
+bool(false)
+--ASCII String:--
+HipHop Warning: %s
+bool(false)
+
+-- Offset is 54 --
+--Multibyte String:--
+HipHop Warning: %s
+bool(false)
+--ASCII String:--
+HipHop Warning: %s
+bool(false)

@@ -1,0 +1,8 @@
+*** Testing array_sum() : error conditions ***
+-- Testing array_sum() function with zero arguments --
+HipHop Warning: %s
+NULL
+-- Testing array_sum() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

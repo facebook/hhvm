@@ -1,0 +1,92 @@
+Missing static method 'ThrowException'
+Array
+(
+    [0] => Array
+        (
+            [file] => %s
+            [line] => 13
+            [function] => __callStatic
+            [class] => myClass
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => ThrowException
+                    [1] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [1] => Array
+        (
+            [file] => %s
+            [line] => 13
+            [function] => ThrowException
+            [class] => myClass
+            [type] => ::
+            [args] => Array
+                (
+                )
+
+        )
+
+    [2] => Array
+        (
+            [file] => %s
+            [line] => 21
+            [function] => thrower
+            [args] => Array
+                (
+                )
+
+        )
+
+)
+Missing method 'foo'
+Array
+(
+    [0] => Array
+        (
+            [file] => %s
+            [line] => 17
+            [function] => __call
+            [class] => myClass
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => foo
+                    [1] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [1] => Array
+        (
+            [file] => %s
+            [line] => 17
+            [function] => foo
+            [class] => myClass
+            [type] => ->
+            [args] => Array
+                (
+                )
+
+        )
+
+    [2] => Array
+        (
+            [file] => %s
+            [line] => 28
+            [function] => thrower2
+            [args] => Array
+                (
+                )
+
+        )
+
+)

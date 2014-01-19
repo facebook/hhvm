@@ -1,0 +1,31 @@
+Program %s/break5.php loaded. Type '[r]un' or '[c]ontinue' to go.
+b 12 if bad()
+Breakpoint 1 set on line 12 of %s/break5.php if bad()
+But wont break until file %s/break5.php has been loaded.
+continue
+Breakpoint 1 reached on line 12 of %s/break5.php
+  11 $x = 1;
+  12*echo $x."\n";
+  13 echo $x."\n";
+
+p $x
+11
+s
+11
+Break on line 13 of %s/break5.php
+  12 echo $x."\n";
+  13*echo $x."\n";
+  14 $x = 1;
+
+p $x
+11
+s
+11
+Break on line 14 of %s/break5.php
+  13 echo $x."\n";
+  14*$x = 1;
+  15 (END)
+
+p $x
+11
+quit

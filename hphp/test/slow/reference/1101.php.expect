@@ -1,0 +1,6 @@
+object(X)#1 (1) {
+  ["x"]=>
+  int(10)
+}
+int(1)
+string(8) "destruct"

@@ -1,0 +1,51 @@
+SQLite3Result
+object(SQLite3Result)#1 (0) {
+}
+string(98) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:13:"SQLite3Result";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(13) "SQLite3Result"
+}
+array(7) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "numcolumns"
+  [2]=>
+  string(10) "columnname"
+  [3]=>
+  string(10) "columntype"
+  [4]=>
+  string(10) "fetcharray"
+  [5]=>
+  string(5) "reset"
+  [6]=>
+  string(8) "finalize"
+}
+================
+A_SQLite3Result
+object(A_SQLite3Result)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(100) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:15:"A_SQLite3Result";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(15) "A_SQLite3Result"
+}
+array(7) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(10) "numcolumns"
+  [2]=>
+  string(10) "columnname"
+  [3]=>
+  string(10) "columntype"
+  [4]=>
+  string(10) "fetcharray"
+  [5]=>
+  string(5) "reset"
+  [6]=>
+  string(8) "finalize"
+}

@@ -1,0 +1,14 @@
+HipHop Warning: %s
+HipHop Warning: %s
+%A
+Ok for CURLOPT_STDERR
+%AHipHop Warning: %s
+HipHop Warning: %s
+Ok for CURLOPT_WRITEHEADER
+HipHop Warning: %s
+HipHop Warning: %s
+%A
+Ok for CURLOPT_FILE
+HipHop Warning: %s
+HipHop Warning: %s
+Ok for CURLOPT_INFILE

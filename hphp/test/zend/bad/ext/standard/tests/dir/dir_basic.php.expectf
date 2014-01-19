@@ -1,0 +1,30 @@
+*** Testing dir() : basic functionality ***
+Get Directory instance:
+object(Directory)#%d (2) {
+  ["path"]=>
+  string(%d) "%s/dir_basic"
+  ["handle"]=>
+  resource(%d) of type (stream)
+}
+
+Read and rewind:
+string(%d) "%s"
+string(%d) "%s"
+NULL
+
+Test using handle directly:
+string(%d) "%s"
+string(%d) "%s"
+
+Close directory:
+NULL
+object(Directory)#%d (2) {
+  ["path"]=>
+  string(%d) "%s/dir_basic"
+  ["handle"]=>
+  resource(%d) of type (Unknown)
+}
+
+Test read after closing the dir:HipHop Warning: %s
+bool(false)
+Done

@@ -1,0 +1,5 @@
+*** Test copy() function: Trying to create a copy of file in a dir which doesn't have write permissions ***HipHop Warning: %s
+bool(false)
+bool(false)
+int(300)
+*** Done ***

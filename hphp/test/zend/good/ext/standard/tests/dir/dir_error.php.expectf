@@ -1,0 +1,8 @@
+*** Testing dir() : error conditions ***
+
+-- Testing dir() function with zero arguments --HipHop Warning: %s
+NULL
+
+-- Testing dir() function with one more than expected number of arguments --HipHop Warning: %s
+NULL
+Done

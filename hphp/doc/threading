@@ -1,0 +1,60 @@
+
+<h2> Multi-Tasking and Multi-Threading Support</h2>
+
+To perform parallel execution in PHP without forking a new process, you may
+take advantage of one of these new facilities:
+
+1. Pagelet Server
+
+The pagelet server is similar to a CURL call to localhost. Look for "Pagelet
+Server" in compiled program's options for how to set it up. The new pagelet
+server functions work like this:
+
+  // This starts a pagelet server thread to process the URL just as if
+  // it's a new web request with specified headers and post data.
+  // The request method would be GET if the post data is empty.
+  $task = <b>pagelet_server_task_start</b>($url, $headers, $post_data);
+  // Main thread can now do extra work while pagelet server is processing.
+  ...
+  // Optionally make this non-blocking call any time to check status.
+  $status = <b>pagelet_server_task_status</b>($task);
+  ...
+  // Finally, we make a blocking call to wait for pagelet server's result,
+  // which is the entire output of the web page, with response headers and
+  // status code. The status code is set to 0 if a flushed partial response is
+  // successfully returned and the pagelet server is still active.
+  //
+  // A timeout of 0 is interpreted as an infinite timeout. The status code is
+  // set to -1 in the event of a timeout.
+  $headers = array(); $code = 0;
+  $result = <b>pagelet_server_task_result</b>($task, $headers, $code,
+                                              $timeout_ms);
+
+2. Xbox Tasks
+
+The xbox task system is designed to provide cross-box messaging as described in
+"server.xbox_server" documentation. The xbox task system may also be used to
+execute a task on the local machine in a separate thread. Here is an example:
+
+  // We start an xbox task by sending to localhost a message.
+  $task = <b>xbox_task_start</b>($message);
+  // Main thread can now do extra work while xbox task is processing.
+  ...
+  // Optionally make this non-blocking call any time to check status.
+  $status = <b>xbox_task_status</b>($task);
+  ...
+  // Finally, we make a blocking call to check message processing returns.
+  $ret = null;
+  $code = <b>xbox_task_result</b>($task, $timeout_ms, $ret);
+
+On the message processing side, one has to implement a PHP function like this:
+
+  function <b>xbox_process_message</b>($msg) {
+    ...
+    return $ret;
+  }
+
+Note that an xbox thread starts its execution with its own global state without
+sharing anything with main thread, other than $msg and $ret that are passed
+between these threads at enter and exit points.
+

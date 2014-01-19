@@ -1,0 +1,9 @@
+string(6) "aThrow"
+string(6) "aThrow"
+string(6) "bThrow"
+string(6) "bThrow"
+---
+string(6) "aThrow"
+string(6) "aThrow"
+string(6) "bThrow"
+string(6) "bThrow"

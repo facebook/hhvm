@@ -1,0 +1,4 @@
+*** Testing sleep() : basic functionality ***
+Thread slept for %f seconds
+TEST PASSED
+===DONE===

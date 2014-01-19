@@ -1,0 +1,13 @@
+1
+2
+3
+4
+5
+6
+7
+8
+9
+HipHop Fatal error: Uncaught exception 'Exception' with message '10' in %s/test/slow/finally/new_try_catch_005.php:11
+Stack trace:
+#0 %s/test/slow/finally/new_try_catch_005.php(%s): blah()
+#1 {main}

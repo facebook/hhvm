@@ -1,0 +1,89 @@
+*** Testing timezone_name_from_abbr() : usage variation -  unexpected values to first argument $abbr***
+
+-- int 0 --
+string(13) "Europe/London"
+
+-- int 12345 --
+string(13) "Europe/London"
+
+-- int -12345 --
+string(13) "Europe/London"
+
+-- float 10.5 --
+string(13) "Europe/London"
+
+-- float -10.5 --
+string(13) "Europe/London"
+
+-- float .5 --
+string(13) "Europe/London"
+
+-- empty array --
+HipHop Warning: %s
+bool(false)
+
+-- int indexed array --
+HipHop Warning: %s
+bool(false)
+
+-- associative array --
+HipHop Warning: %s
+bool(false)
+
+-- nested arrays --
+HipHop Warning: %s
+bool(false)
+
+-- uppercase NULL --
+string(13) "Europe/London"
+
+-- lowercase null --
+string(13) "Europe/London"
+
+-- lowercase true --
+string(13) "Europe/London"
+
+-- lowercase false --
+string(13) "Europe/London"
+
+-- uppercase TRUE --
+string(13) "Europe/London"
+
+-- uppercase FALSE --
+string(13) "Europe/London"
+
+-- empty string DQ --
+string(13) "Europe/London"
+
+-- empty string SQ --
+string(13) "Europe/London"
+
+-- string DQ --
+string(13) "Europe/London"
+
+-- string SQ --
+string(13) "Europe/London"
+
+-- mixed case string --
+string(13) "Europe/London"
+
+-- heredoc --
+string(13) "Europe/London"
+
+-- instance of classWithToString --
+string(13) "Europe/London"
+
+-- instance of classWithoutToString --
+HipHop Warning: %s
+bool(false)
+
+-- undefined var --
+string(13) "Europe/London"
+
+-- unset var --
+string(13) "Europe/London"
+
+-- resource --
+HipHop Warning: %s
+bool(false)
+===DONE===

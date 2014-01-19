@@ -1,0 +1,27 @@
+run
+break bar()
+@ test(1, 0)
+break clear all
+set sa on
+where
+out
+where
+out
+where
+set sa off
+out
+where
+set sa on
+continue
+break stack1.php:9
+@ test(2, 2)
+where
+frame 6
+variable
+up
+down
+@ $x=3
+continue
+where
+variable
+quit

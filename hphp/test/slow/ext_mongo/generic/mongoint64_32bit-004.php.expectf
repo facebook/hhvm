@@ -1,0 +1,4 @@
+float(9.2233720368548E+18)
+MongoCursorException: Can not natively represent the long 9223372036854775807 on this platform
+MongoInt64(9223372036854775807)
+MongoInt64(9223372036854775807)

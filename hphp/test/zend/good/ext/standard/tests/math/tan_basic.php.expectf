@@ -1,0 +1,4 @@
+tan 60 = float(%f)
+Pass
+tan 30 = float(%f)
+Pass

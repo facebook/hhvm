@@ -1,0 +1,88 @@
+*** Testing hypot() : usage variations ***
+
+-- Iteration 1 --
+float(5)
+
+-- Iteration 2 --
+float(5.0990195135928)
+
+-- Iteration 3 --
+float(12345.001012556)
+
+-- Iteration 4 --
+float(2345.0053304843)
+
+-- Iteration 5 --
+float(2147483647)
+
+-- Iteration 6 --
+float(11.629703349613)
+
+-- Iteration 7 --
+float(11.629703349613)
+
+-- Iteration 8 --
+float(123456789000)
+
+-- Iteration 9 --
+float(5)
+
+-- Iteration 10 --
+float(5.0249378105604)
+
+-- Iteration 11 --
+float(5)
+
+-- Iteration 12 --
+float(5)
+
+-- Iteration 13 --
+float(5.0990195135928)
+
+-- Iteration 14 --
+float(5)
+
+-- Iteration 15 --
+float(5.0990195135928)
+
+-- Iteration 16 --
+float(5)
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 23 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 24 --
+float(5)
+
+-- Iteration 25 --
+float(5)
+
+-- Iteration 26 --
+HipHop Warning: %s
+NULL
+===Done===

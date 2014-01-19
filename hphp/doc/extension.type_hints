@@ -1,0 +1,24 @@
+
+<h2>Richer type hints</h2>
+
+This feature requires the [[index.php?file=options.compiler | compiler option]]
+EnableHipHopSyntax=true, or interpreter option Eval.EnableHipHopSyntax=true.
+
+HipHop extends the support of type hints to primitive types, like bool, int, and
+double. It also supports string for type hints.
+
+For example, the following code would only allow passing an integer to the
+function foo():
+
+  function foo(int $a) {
+    return $a + 1;
+  }
+
+The main purposes for type hinting are (1) more efficient execution, (2) more
+explicit contract for functions.
+
+As in vanilla PHP, HipHop allows type-hinted parameters to have null as the
+default value, even if the type hint is a primitive type.
+
+  function foo(int $a = null) { ... }
+  foo(null); // then passing null is allowed

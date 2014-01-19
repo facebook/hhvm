@@ -1,0 +1,67 @@
+T1:
+array(0) {
+}
+array(0) {
+}
+
+T3:
+array(1) {
+  ["T2"]=>
+  string(2) "T2"
+}
+array(1) {
+  [0]=>
+  string(2) "T2"
+}
+
+C1:
+array(0) {
+}
+array(0) {
+}
+
+C2:
+array(1) {
+  ["T1"]=>
+  string(2) "T1"
+}
+array(1) {
+  [0]=>
+  string(2) "T1"
+}
+
+C3:
+array(2) {
+  ["T1"]=>
+  string(2) "T1"
+  ["T2"]=>
+  string(2) "T2"
+}
+array(2) {
+  [0]=>
+  string(2) "T1"
+  [1]=>
+  string(2) "T2"
+}
+
+C4:
+array(1) {
+  ["T3"]=>
+  string(2) "T3"
+}
+array(1) {
+  [0]=>
+  string(2) "T3"
+}
+
+C5:
+array(0) {
+}
+array(0) {
+}
+
+I1:
+array(0) {
+}
+array(0) {
+}

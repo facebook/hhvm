@@ -1,0 +1,37 @@
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+array(4) {
+  [1]=>
+  int(1)
+  ["value"]=>
+  int(1)
+  [0]=>
+  int(0)
+  ["key"]=>
+  int(0)
+}
+array(4) {
+  [1]=>
+  int(1)
+  ["value"]=>
+  int(1)
+  [0]=>
+  string(1) "a"
+  ["key"]=>
+  string(1) "a"
+}
+array(4) {
+  [1]=>
+  int(1)
+  ["value"]=>
+  int(1)
+  [0]=>
+  int(0)
+  ["key"]=>
+  int(0)
+}
+Done

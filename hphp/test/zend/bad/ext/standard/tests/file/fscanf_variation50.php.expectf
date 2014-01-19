@@ -1,0 +1,172 @@
+*** Test fscanf(): different scientific format types with boolean data ***
+
+-- iteration 1 --
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+bool(false)
+
+-- iteration 2 --
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+bool(false)
+
+-- iteration 3 --
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+bool(false)
+
+-- iteration 4 --
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+bool(false)
+
+-- iteration 5 --
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+bool(false)
+
+-- iteration 6 --
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+bool(false)
+
+-- iteration 7 --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+bool(false)
+
+-- iteration 8 --
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+bool(false)
+
+-- iteration 9 --
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+bool(false)
+
+-- iteration 10 --
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+bool(false)
+
+-- iteration 11 --
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+array(1) {
+  [0]=>
+  float(1)
+}
+NULL
+bool(false)
+
+-- iteration 12 --
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+array(1) {
+  [0]=>
+  NULL
+}
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+array(1) {
+  [0]=>
+  NULL
+}
+bool(false)
+
+-- iteration 13 --
+array(0) {
+}
+NULL
+array(0) {
+}
+NULL
+bool(false)
+
+*** Done ***

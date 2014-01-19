@@ -1,0 +1,9 @@
+$date1 at init: 2009-03-27
+$date2 at init: 2009-03-01
+$date1 after first diff: 2009-03-27
+$diff->days after first diff: 26
+$date1 after sub: 2009-03-25
+$date1 after second diff (called at $date1): 2009-03-25
+$diff->days after second diff: 24
+$date1 after third diff (called at $date2): 2009-03-25
+$diff->days after third diff: 24

@@ -1,0 +1,35 @@
+*** Testing arsort() :usage variations  ***
+
+-- Testing arsort() by supplying reference variable array, 'flag' value is defualt --
+bool(true)
+array(3) {
+  [3]=>
+  &int(555)
+  [1]=>
+  &int(100)
+  [2]=>
+  &int(33)
+}
+
+-- Testing arsort() by supplying reference variable array, 'flag' = SORT_REGULAR --
+bool(true)
+array(3) {
+  [3]=>
+  &int(555)
+  [1]=>
+  &int(100)
+  [2]=>
+  &int(33)
+}
+
+-- Testing arsort() by supplying reference variable array, 'flag' = SORT_NUMERIC --
+bool(true)
+array(3) {
+  [3]=>
+  &int(555)
+  [1]=>
+  &int(100)
+  [2]=>
+  &int(33)
+}
+Done

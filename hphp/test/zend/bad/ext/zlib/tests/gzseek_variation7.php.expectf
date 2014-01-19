@@ -1,0 +1,10 @@
+tell=int(23)
+move to the end of the file
+HipHop Warning: %s
+int(-1)
+tell=int(23)
+tell=int(47)
+
+reading the output file
+This is the first line.This is the second line.
+===DONE===

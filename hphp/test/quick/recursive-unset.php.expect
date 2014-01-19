@@ -1,0 +1,10 @@
+string(3) "foo"
+string(3) "bar"
+--
+string(3) "bar"
+string(3) "foo"
+--
+string(3) "bar"
+string(3) "Bar"
+string(3) "foo"
+--

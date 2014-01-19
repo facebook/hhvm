@@ -1,0 +1,43 @@
+SpoofChecker
+object(SpoofChecker)#1 (0) {
+}
+string(97) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:12:"SpoofChecker";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(12) "SpoofChecker"
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "isSuspicious"
+  [2]=>
+  string(13) "areConfusable"
+  [3]=>
+  string(17) "setAllowedLocales"
+  [4]=>
+  string(9) "setChecks"
+}
+================
+A_SpoofChecker
+object(A_SpoofChecker)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(99) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:14:"A_SpoofChecker";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(14) "A_SpoofChecker"
+}
+array(5) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "isSuspicious"
+  [2]=>
+  string(13) "areConfusable"
+  [3]=>
+  string(17) "setAllowedLocales"
+  [4]=>
+  string(9) "setChecks"
+}

@@ -1,0 +1,306 @@
+frap claptrap
+----HANDLER----
+string(4) "frap"
+NULL
+array(1) {
+  [0]=>
+  string(8) "claptrap"
+}
+string(4) "data"
+bool(true)
+---------------
+----HANDLER----
+string(4) "frap"
+NULL
+array(1) {
+  [0]=>
+  string(8) "callfunc"
+}
+string(4) "data"
+bool(true)
+---------------
+----HANDLER----
+string(4) "frap"
+NULL
+array(1) {
+  [0]=>
+  string(8) "claptrap"
+}
+NULL
+bool(true)
+---------------
+frap claptrap
+----HANDLER----
+string(4) "frap"
+NULL
+array(1) {
+  [0]=>
+  string(8) "callfunc"
+}
+NULL
+bool(true)
+---------------
+frap callfunc
+Closure! wooooo
+magic call! string(12) "i_dont_exist"
+array(5) {
+  [0]=>
+  string(4) "frap"
+  [1]=>
+  NULL
+  [2]=>
+  array(1) {
+    [0]=>
+    string(8) "claptrap"
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+
+frap claptrap
+static frap Blark
+static frap Blark
+static frap SubBlark
+static frap SubBlark
+static frap SubBlark2
+static frap SubBlark2
+----HANDLER----
+string(12) "Blark::sfrap"
+string(5) "Blark"
+array(0) {
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(12) "Blark::sfrap"
+string(5) "Blark"
+array(0) {
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(12) "Blark::sfrap"
+string(8) "SubBlark"
+array(0) {
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(12) "Blark::sfrap"
+string(8) "SubBlark"
+array(0) {
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(12) "Blark::sfrap"
+string(9) "SubBlark2"
+array(0) {
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(12) "Blark::sfrap"
+string(9) "SubBlark2"
+array(0) {
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(12) "Blark::sfrap"
+string(5) "Blark"
+array(0) {
+}
+NULL
+bool(true)
+---------------
+static frap Blark
+----HANDLER----
+string(12) "Blark::sfrap"
+string(5) "Blark"
+array(0) {
+}
+NULL
+bool(true)
+---------------
+static frap Blark
+magic call! string(19) "i_dont_exist_either"
+array(5) {
+  [0]=>
+  string(12) "Blark::sfrap"
+  [1]=>
+  string(5) "Blark"
+  [2]=>
+  array(0) {
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+
+magic call! string(19) "i_dont_exist_either"
+array(5) {
+  [0]=>
+  string(12) "Blark::sfrap"
+  [1]=>
+  string(5) "Blark"
+  [2]=>
+  array(0) {
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+
+----HANDLER----
+string(11) "Blark::frap"
+object(Blark)#4 (0) {
+}
+array(0) {
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(11) "Blark::frap"
+object(Blark)#4 (0) {
+}
+array(0) {
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(11) "Blark::frap"
+object(Blark)#4 (0) {
+}
+array(0) {
+}
+NULL
+bool(true)
+---------------
+non-static frap
+----HANDLER----
+string(11) "Blark::frap"
+object(Blark)#4 (0) {
+}
+array(0) {
+}
+NULL
+bool(true)
+---------------
+non-static frap
+magic call! string(19) "i_dont_exist_either"
+array(5) {
+  [0]=>
+  string(11) "Blark::frap"
+  [1]=>
+  object(Blark)#4 (0) {
+  }
+  [2]=>
+  array(0) {
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+
+magic call! string(19) "i_dont_exist_either"
+array(5) {
+  [0]=>
+  string(11) "Blark::frap"
+  [1]=>
+  object(Blark)#4 (0) {
+  }
+  [2]=>
+  array(0) {
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+
+----HANDLER----
+string(7) "handler"
+NULL
+array(5) {
+  [0]=>
+  string(4) "frap"
+  [1]=>
+  NULL
+  [2]=>
+  array(1) {
+    [0]=>
+    string(8) "claptrap"
+  }
+  [3]=>
+  NULL
+  [4]=>
+  &bool(true)
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(4) "frap"
+NULL
+array(1) {
+  [0]=>
+  string(8) "claptrap"
+}
+NULL
+bool(true)
+---------------
+frap claptrap
+static frap Blark
+non-static frap
+----HANDLER----
+string(17) "MagicCall::__call"
+object(MagicCall)#3 (0) {
+}
+array(2) {
+  [0]=>
+  string(5) "blark"
+  [1]=>
+  array(1) {
+    [0]=>
+    string(2) "hi"
+  }
+}
+NULL
+bool(true)
+---------------
+----HANDLER----
+string(17) "MagicCall::__call"
+object(MagicCall)#3 (0) {
+}
+array(2) {
+  [0]=>
+  string(5) "blark"
+  [1]=>
+  array(1) {
+    [0]=>
+    string(2) "ho"
+  }
+}
+NULL
+bool(true)
+---------------
+magic call! string(5) "blark"
+array(1) {
+  [0]=>
+  string(2) "ho"
+}
+

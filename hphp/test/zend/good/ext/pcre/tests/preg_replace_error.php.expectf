@@ -1,0 +1,14 @@
+*** Testing preg_replace() : error conditions ***
+
+-- Testing preg_replace() function with zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing preg_replace() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing preg_replace() function with less than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

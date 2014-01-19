@@ -1,0 +1,14 @@
+int(0)
+int(1)
+int(2)
+string(1) "a"
+int(2)
+string(1) "z"
+object(HH\Vector)#3 (3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(2)
+  [2]=>
+  string(1) "z"
+}

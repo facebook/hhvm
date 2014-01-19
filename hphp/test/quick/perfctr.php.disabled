@@ -1,0 +1,52 @@
+<?php
+
+function foo() {
+  $i = 0;
+  while($i < 100000) {
+    $i++;
+  }
+}
+
+$events = array("cpu-cycles",
+                "cache-references",
+                "cache-misses",
+                "branches",
+                "branch-misses",
+                "bus-cycles",
+                "L1-dcache-loads",
+                "L1-dcache-load-misses",
+                "L1-dcache-stores",
+                "L1-dcache-store-misses",
+                "L1-dcache-prefetches",
+                "L1-dcache-prefetch-misses",
+                "L1-icache-loads",
+                "L1-icache-load-misses",
+                "L1-icache-prefetches",
+                "L1-icache-prefetch-misses",
+                "LLC-loads",
+                "LLC-load-misses",
+                "LLC-stores",
+                "LLC-store-misses",
+                "LLC-prefetches",
+                "LLC-prefetch-misses",
+                "dTLB-loads",
+                "dTLB-load-misses",
+                "dTLB-stores",
+                "dTLB-store-misses",
+                "dTLB-prefetches",
+                "dTLB-prefetch-misses",
+                "iTLB-loads",
+                "iTLB-load-misses",
+                "branch-loads",
+                "branch-load-misses",
+                );
+
+var_dump(function_exists("hphp_set_hardware_events"));
+var_dump(function_exists("hphp_clear_hardware_events"));
+
+foreach($events as $e) {
+  hphp_set_hardware_events("$e");
+  foo();
+  var_dump(hphp_get_hardware_counters());
+  hphp_clear_hardware_events();
+}

@@ -1,0 +1,34 @@
+string(34) "V:9:"HH\Vector":2:{i:7;s:3:"foo";}"
+------------------------
+object(HH\Vector)#1 (2) {
+  [0]=>
+  int(7)
+  [1]=>
+  string(3) "foo"
+}
+HH\Vector Object
+(
+    [0] => 7
+    [1] => foo
+)
+[7,"foo"]
+HH\Vector {
+  7,
+  'foo',
+}
+object(HH\Vector)#2 (2) {
+  [0]=>
+  int(7)
+  [1]=>
+  string(3) "foo"
+}
+HH\Vector Object
+(
+    [0] => 7
+    [1] => foo
+)
+[7,"foo"]
+HH\Vector {
+  7,
+  'foo',
+}

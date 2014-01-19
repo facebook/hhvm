@@ -1,0 +1,76 @@
+*** Testing clone on DateTime objects ***
+
+-- Create a DateTime object --
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2009-02-03 12:34:41"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "GMT"
+}
+
+-- Add some properties --
+object(DateTime)#%d (5) {
+  ["date"]=>
+  string(19) "2009-02-03 12:34:41"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "GMT"
+  ["property1"]=>
+  int(99)
+  ["property2"]=>
+  string(5) "Hello"
+}
+
+-- clone it --
+object(DateTime)#%d (5) {
+  ["date"]=>
+  string(19) "2009-02-03 12:34:41"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "GMT"
+  ["property1"]=>
+  int(99)
+  ["property2"]=>
+  string(5) "Hello"
+}
+
+-- Add some more properties --
+object(DateTime)#%d (7) {
+  ["date"]=>
+  string(19) "2009-02-03 12:34:41"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "GMT"
+  ["property1"]=>
+  int(99)
+  ["property2"]=>
+  string(5) "Hello"
+  ["property3"]=>
+  bool(true)
+  ["property4"]=>
+  float(10.5)
+}
+
+-- clone it --
+object(DateTime)#%d (7) {
+  ["date"]=>
+  string(19) "2009-02-03 12:34:41"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "GMT"
+  ["property1"]=>
+  int(99)
+  ["property2"]=>
+  string(5) "Hello"
+  ["property3"]=>
+  bool(true)
+  ["property4"]=>
+  float(10.5)
+}
+===DONE===

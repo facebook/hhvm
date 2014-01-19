@@ -1,0 +1,3 @@
+<?php
+// TODO(#3312202) probably shouldn't need to do this
+if ($_ENV['HHVM_ARCH'] == 'arm') echo 'skip';

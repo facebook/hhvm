@@ -1,0 +1,280 @@
+{
+    "preamble": "",
+    "consts": [
+        {
+            "name": "INPUT_POST",
+            "type": "Int64"
+        },
+        {
+            "name": "INPUT_GET",
+            "type": "Int64"
+        },
+        {
+            "name": "INPUT_COOKIE",
+            "type": "Int64"
+        },
+        {
+            "name": "INPUT_ENV",
+            "type": "Int64"
+        },
+        {
+            "name": "INPUT_SERVER",
+            "type": "Int64"
+        },
+        {
+            "name": "INPUT_SESSION",
+            "type": "Int64"
+        },
+        {
+            "name": "INPUT_REQUEST",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_NONE",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_REQUIRE_SCALAR",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_REQUIRE_ARRAY",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FORCE_ARRAY",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_NULL_ON_FAILURE",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_VALIDATE_INT",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_VALIDATE_BOOLEAN",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_VALIDATE_FLOAT",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_VALIDATE_REGEXP",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_VALIDATE_URL",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_VALIDATE_EMAIL",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_VALIDATE_IP",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_VALIDATE_MAC",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_DEFAULT",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_UNSAFE_RAW",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_SANITIZE_STRING",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_SANITIZE_STRIPPED",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_SANITIZE_ENCODED",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_SANITIZE_SPECIAL_CHARS",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_SANITIZE_FULL_SPECIAL_CHARS",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_SANITIZE_EMAIL",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_SANITIZE_URL",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_SANITIZE_NUMBER_INT",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_SANITIZE_NUMBER_FLOAT",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_SANITIZE_MAGIC_QUOTES",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_CALLBACK",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_ALLOW_OCTAL",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_ALLOW_HEX",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_STRIP_LOW",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_STRIP_HIGH",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_ENCODE_LOW",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_ENCODE_HIGH",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_ENCODE_AMP",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_NO_ENCODE_QUOTES",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_EMPTY_STRING_NULL",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_STRIP_BACKTICK",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_ALLOW_FRACTION",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_ALLOW_THOUSAND",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_ALLOW_SCIENTIFIC",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_SCHEME_REQUIRED",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_HOST_REQUIRED",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_PATH_REQUIRED",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_QUERY_REQUIRED",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_IPV4",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_IPV6",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_NO_RES_RANGE",
+            "type": "Int64"
+        },
+        {
+            "name": "FILTER_FLAG_NO_PRIV_RANGE",
+            "type": "Int64"
+        }
+    ],
+    "funcs": [
+        {
+            "name": "filter_list",
+            "desc": "Returns a list of all supported filters",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array of names of all supported filters, empty array if there are no such filters. Indexes of this array are not filter IDs, they can be obtained with filter_id() from a name instead."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "filter_id",
+            "desc": "Returns the filter ID belonging to a named filter",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "ID of a filter on success or FALSE if filter doesn't exist."
+            },
+            "args": [
+                {
+                    "name": "filtername",
+                    "type": "String",
+                    "desc": "Name of a filter to get."
+                }
+            ]
+        },
+        {
+            "name": "filter_var",
+            "desc": "Filters a variable with a specified filter",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the filtered data, or FALSE if the filter fails."
+            },
+            "args": [
+                {
+                    "name": "variable",
+                    "type": "Variant"
+                },
+                {
+                    "name": "filter",
+                    "type": "Int64",
+                    "value": "516"
+                },
+                {
+                    "name": "options",
+                    "type": "Variant",
+                    "value": "empty_array"
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

@@ -1,0 +1,30 @@
+array(4) {
+  ["a"]=>
+  string(6) "orange"
+  ["d"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
+  ["c"]=>
+  string(5) "apple"
+}
+array(4) {
+  ["a"]=>
+  string(6) "orange"
+  ["b"]=>
+  string(6) "banana"
+  ["c"]=>
+  string(5) "apple"
+  ["d"]=>
+  string(5) "lemon"
+}
+array(4) {
+  ["d"]=>
+  string(5) "lemon"
+  ["c"]=>
+  string(5) "apple"
+  ["b"]=>
+  string(6) "banana"
+  ["a"]=>
+  string(6) "orange"
+}

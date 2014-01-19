@@ -1,0 +1,117 @@
+HipHop Warning: File not supported in %s/test/slow/ext_image/1794.php on line 4
+HipHop Warning: File not supported in %s/test/slow/ext_image/1794.php on line 8
+Array
+(
+    [FileName] => simpletext.jpg
+    [FileDateTime] => 1234567890
+    [FileSize] => 1298
+    [FileType] => 2
+    [MimeType] => image/jpeg
+    [SectionsFound] => COMMENT
+    [COMPUTED] => Array
+        (
+            [html] => width="120" height="20"
+            [Height] => 20
+            [Width] => 120
+            [IsColor] => 1
+        )
+
+    [COMMENT] => Array
+        (
+            [0] => CREATOR: gd-jpeg v1.0 (using IJG JPEG v62), default quality
+
+        )
+
+)
+HipHop Warning: File not supported in %s/test/slow/ext_image/1794.php on line 16
+Array
+(
+    [FileName] => test1pix.jpg
+    [FileDateTime] => 1234567890
+    [FileSize] => 523
+    [FileType] => 2
+    [MimeType] => image/jpeg
+    [SectionsFound] => 
+    [COMPUTED] => Array
+        (
+            [html] => width="1" height="1"
+            [Height] => 1
+            [Width] => 1
+            [IsColor] => 1
+        )
+
+)
+Array
+(
+    [FileName] => test2.jpg
+    [FileDateTime] => 1234567890
+    [FileSize] => 122298
+    [FileType] => 2
+    [MimeType] => image/jpeg
+    [SectionsFound] => ANY_TAG, IFD0, EXIF, GPS
+    [COMPUTED] => Array
+        (
+            [html] => width="800" height="600"
+            [Height] => 600
+            [Width] => 800
+            [IsColor] => 1
+            [ByteOrderMotorola] => 1
+            [ApertureFNumber] => f/2.8
+        )
+
+    [Make] => Apple
+    [Model] => iPhone 3GS
+    [XResolution] => 72/1
+    [YResolution] => 72/1
+    [ResolutionUnit] => 2
+    [Software] => 3.1.3
+    [DateTime] => 2010:06:29 13:52:57
+    [YCbCrPositioning] => 1
+    [Exif_IFD_Pointer] => 194
+    [GPS_IFD_Pointer] => 520
+    [ExposureTime] => 1/30
+    [FNumber] => 14/5
+    [ExposureProgram] => 2
+    [ISOSpeedRatings] => 83
+    [ExifVersion] => 0221
+    [DateTimeOriginal] => 2010:06:29 13:52:57
+    [DateTimeDigitized] => 2010:06:29 13:52:57
+    [ShutterSpeedValue] => 4058/827
+    [ApertureValue] => 4281/1441
+    [MeteringMode] => 1
+    [Flash] => 32
+    [FocalLength] => 77/20
+    [FlashPixVersion] => 0100
+    [ColorSpace] => 1
+    [ExifImageWidth] => 800
+    [ExifImageLength] => 600
+    [SensingMethod] => 2
+    [ExposureMode] => 0
+    [WhiteBalance] => 0
+    [Sharpness] => 1
+    [GPSLatitudeRef] => N
+    [GPSLatitude] => Array
+        (
+            [0] => 37/1
+            [1] => 2498/100
+            [2] => 0/1
+        )
+
+    [GPSLongitudeRef] => W
+    [GPSLongitude] => Array
+        (
+            [0] => 122/1
+            [1] => 912/100
+            [2] => 0/1
+        )
+
+    [GPSTimeStamp] => Array
+        (
+            [0] => 13/1
+            [1] => 52/1
+            [2] => 4255/100
+        )
+
+    [GPSImgDirectionRef] => T
+    [GPSImgDirection] => 27992/715
+)

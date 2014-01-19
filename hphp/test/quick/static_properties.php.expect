@@ -1,0 +1,268 @@
+Test begin
+In A::aFunc():
+  A::a: A::a
+  A::b: A::b
+  A::c: A::c
+  A::d: A::CD
+  A::e: B::CE
+  A::f: C::CG
+
+  B::a: A::a
+  B::b: B::b
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: C::h
+In A::aFunc():
+  A::a: A::a
+  A::b: A::b
+  A::c: A::c
+  A::d: A::CD
+  A::e: B::CE
+  A::f: C::CG
+
+  B::a: A::a
+  B::b: B::b
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: C::h
+In B::bFunc():
+  A::a: A::a
+  A::b: A::b
+  A::d: A::CD
+  A::e: B::CE
+
+  B::a: A::a
+  B::b: B::b
+  B::c: B::c
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: C::h
+In A::aFunc():
+  A::a: A::a
+  A::b: A::b
+  A::c: A::c
+  A::d: A::CD
+  A::e: B::CE
+  A::f: C::CG
+
+  B::a: A::a
+  B::b: B::b
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: C::h
+In B::bFunc():
+  A::a: A::a
+  A::b: A::b
+  A::d: A::CD
+  A::e: B::CE
+
+  B::a: A::a
+  B::b: B::b
+  B::c: B::c
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: C::h
+In C::cFunc():
+  A::a: A::a
+  A::b: A::b
+  A::d: A::CD
+  A::e: B::CE
+
+  B::a: A::a
+  B::b: B::b
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: C::h
+isset(C::$h): true
+empty(C::$h): false
+isset(C::$i): false
+empty(C::$i): true
+C::$h: C::h
+C::$h: 42
+C::$h: 84
+C::$h: 85
+C::$h: 85
+C::$h: 86
+C::$h: 84
+C::$h: 1234
+C::$h: 1235
+x: 5678
+$y: 1
+$y: 42
+Test end
+In A::aFunc():
+  A::a: A::a
+  A::b: A::b
+  A::c: A::c
+  A::d: A::CD
+  A::e: B::CE
+  A::f: C::CG
+
+  B::a: A::a
+  B::b: B::b
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: Array
+In A::aFunc():
+  A::a: A::a
+  A::b: A::b
+  A::c: A::c
+  A::d: A::CD
+  A::e: B::CE
+  A::f: C::CG
+
+  B::a: A::a
+  B::b: B::b
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: Array
+In B::bFunc():
+  A::a: A::a
+  A::b: A::b
+  A::d: A::CD
+  A::e: B::CE
+
+  B::a: A::a
+  B::b: B::b
+  B::c: B::c
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: Array
+In A::aFunc():
+  A::a: A::a
+  A::b: A::b
+  A::c: A::c
+  A::d: A::CD
+  A::e: B::CE
+  A::f: C::CG
+
+  B::a: A::a
+  B::b: B::b
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: Array
+In B::bFunc():
+  A::a: A::a
+  A::b: A::b
+  A::d: A::CD
+  A::e: B::CE
+
+  B::a: A::a
+  B::b: B::b
+  B::c: B::c
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: Array
+In C::cFunc():
+  A::a: A::a
+  A::b: A::b
+  A::d: A::CD
+  A::e: B::CE
+
+  B::a: A::a
+  B::b: B::b
+  B::d: B::CD
+  B::e: B::CE
+  B::g: B::g
+
+  C::a: A::a
+  C::b: C::b
+  C::d: B::CD
+  C::e: B::CE
+  C::g: B::g
+  C::h: Array
+isset(C::$h): true
+empty(C::$h): false
+isset(C::$i): false
+empty(C::$i): true
+C::$h: Array
+C::$h: 42
+C::$h: 84
+C::$h: 85
+C::$h: 85
+C::$h: 86
+C::$h: 84
+C::$h: 1234
+C::$h: 1235
+x: 5678
+$y: 1
+$y: 42
+C::$h: 5
+Test end

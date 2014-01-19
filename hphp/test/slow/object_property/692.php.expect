@@ -1,0 +1,19 @@
+string(1) "a"
+string(1) "b"
+object(B)#1 (3) {
+  ["a"]=>
+  int(100)
+  ["b":protected]=>
+  &int(100)
+  ["c":"A":private]=>
+  int(3)
+}
+string(1) "a"
+object(B)#2 (3) {
+  ["a"]=>
+  &int(100)
+  ["b":protected]=>
+  int(2)
+  ["c":"A":private]=>
+  int(3)
+}

@@ -1,0 +1,47 @@
+array(2) {
+  [0]=>
+  array(3) {
+    ["class"]=>
+    string(1) "C"
+    ["function"]=>
+    string(1) "g"
+    ["type"]=>
+    string(2) "->"
+  }
+  [1]=>
+  array(3) {
+    ["class"]=>
+    string(1) "C"
+    ["function"]=>
+    string(1) "f"
+    ["type"]=>
+    string(2) "->"
+  }
+}
+------------------------
+array(2) {
+  [0]=>
+  array(4) {
+    ["class"]=>
+    string(1) "C"
+    ["function"]=>
+    string(1) "g"
+    ["object"]=>
+    object(C)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+  }
+  [1]=>
+  array(4) {
+    ["class"]=>
+    string(1) "C"
+    ["function"]=>
+    string(1) "f"
+    ["object"]=>
+    object(C)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+  }
+}

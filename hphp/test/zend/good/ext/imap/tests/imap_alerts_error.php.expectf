@@ -1,0 +1,6 @@
+*** Testing imap_alerts() : error conditions ***
+
+-- Testing imap_alerts() function with one argument --
+HipHop Warning: %s
+NULL
+===DONE===

@@ -1,0 +1,3 @@
+After changing $a directly, $v@0 is: changed.0
+After changing $a directly, $v@1 is: changed.1
+After changing $a directly, $v@2 is: changed.2

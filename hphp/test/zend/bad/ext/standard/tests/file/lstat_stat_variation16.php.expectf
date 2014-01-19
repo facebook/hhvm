@@ -1,0 +1,7 @@
+*** Testing lstat() on a file after changing its access permission ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+--- Done ---

@@ -1,0 +1,2078 @@
+Twig_Test_EscapingTest::testCssEscapingConvertsSpecialChars
+.
+Twig_Test_EscapingTest::testCssEscapingEscapesOwaspRecommendedRanges
+.
+Twig_Test_EscapingTest::testCssEscapingReturnsStringIfContainsOnlyDigits
+.
+Twig_Test_EscapingTest::testCssEscapingReturnsStringIfZeroLength
+.
+Twig_Test_EscapingTest::testHtmlAttributeEscapingConvertsSpecialChars
+.
+Twig_Test_EscapingTest::testHtmlAttributeEscapingEscapesOwaspRecommendedRanges
+.
+Twig_Test_EscapingTest::testHtmlEscapingConvertsSpecialChars
+.
+Twig_Test_EscapingTest::testJavascriptEscapingConvertsSpecialChars
+.
+Twig_Test_EscapingTest::testJavascriptEscapingEscapesOwaspRecommendedRanges
+.
+Twig_Test_EscapingTest::testJavascriptEscapingReturnsStringIfContainsOnlyDigits
+.
+Twig_Test_EscapingTest::testJavascriptEscapingReturnsStringIfZeroLength
+.
+Twig_Test_EscapingTest::testUnicodeCodepointConversionToUtf8
+.
+Twig_Test_EscapingTest::testUrlEscapingConvertsSpecialChars
+.
+Twig_Tests_AutoloaderTest::testAutoload
+.
+Twig_Tests_CompilerTest::testReprNumericValueWithLocale
+.
+Twig_Tests_EnvironmentTest::testAddExtension
+.
+Twig_Tests_EnvironmentTest::testAutoescapeOption
+.
+Twig_Tests_EnvironmentTest::testExtensionsAreNotInitializedWhenRenderingACompiledTemplate
+.
+Twig_Tests_EnvironmentTest::testGlobals
+.
+Twig_Tests_EnvironmentTest::testRemoveExtension
+.
+Twig_Tests_EnvironmentTest::testRenderNoLoader
+.
+Twig_Tests_ErrorTest::testErrorWithArrayFilename
+.
+Twig_Tests_ErrorTest::testErrorWithObjectFilename
+.
+Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLine with data set #0 
+.
+Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLine with data set #1 
+.
+Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLine with data set #2 
+.
+Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLine with data set #3 
+.
+Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLineWhenMissingWithInheritanceOnDisk
+.
+Twig_Tests_ExpressionParserTest::testArrayExpression with data set #0 
+.
+Twig_Tests_ExpressionParserTest::testArrayExpression with data set #1 
+.
+Twig_Tests_ExpressionParserTest::testArrayExpression with data set #2 
+.
+Twig_Tests_ExpressionParserTest::testArrayExpression with data set #3 
+.
+Twig_Tests_ExpressionParserTest::testArrayExpression with data set #4 
+.
+Twig_Tests_ExpressionParserTest::testArrayExpression with data set #5 
+.
+Twig_Tests_ExpressionParserTest::testArraySyntaxError with data set #0 
+.
+Twig_Tests_ExpressionParserTest::testArraySyntaxError with data set #1 
+.
+Twig_Tests_ExpressionParserTest::testAttributeCallDoesNotSupportNamedArguments
+.
+Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #0 
+.
+Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #1 
+.
+Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #2 
+.
+Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #3 
+.
+Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #4 
+.
+Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #5 
+.
+Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #6 
+.
+Twig_Tests_ExpressionParserTest::testMacroCallDoesNotSupportNamedArguments
+.
+Twig_Tests_ExpressionParserTest::testMacroDefinitionDoesNotSupportNonConstantDefaultValues with data set #0 
+.
+Twig_Tests_ExpressionParserTest::testMacroDefinitionDoesNotSupportNonConstantDefaultValues with data set #1 
+.
+Twig_Tests_ExpressionParserTest::testMacroDefinitionDoesNotSupportNonNameVariableName
+.
+Twig_Tests_ExpressionParserTest::testMacroDefinitionSupportsConstantDefaultValues with data set #0 
+.
+Twig_Tests_ExpressionParserTest::testMacroDefinitionSupportsConstantDefaultValues with data set #1 
+.
+Twig_Tests_ExpressionParserTest::testMacroDefinitionSupportsConstantDefaultValues with data set #2 
+.
+Twig_Tests_ExpressionParserTest::testMacroDefinitionSupportsConstantDefaultValues with data set #3 
+.
+Twig_Tests_ExpressionParserTest::testMacroDefinitionSupportsConstantDefaultValues with data set #4 
+.
+Twig_Tests_ExpressionParserTest::testMacroDefinitionSupportsConstantDefaultValues with data set #5 
+.
+Twig_Tests_ExpressionParserTest::testMacroDefinitionSupportsConstantDefaultValues with data set #6 
+.
+Twig_Tests_ExpressionParserTest::testStringExpression with data set #0 
+.
+Twig_Tests_ExpressionParserTest::testStringExpression with data set #1 
+.
+Twig_Tests_ExpressionParserTest::testStringExpression with data set #2 
+.
+Twig_Tests_ExpressionParserTest::testStringExpression with data set #3 
+.
+Twig_Tests_ExpressionParserTest::testStringExpressionDoesNotConcatenateTwoConsecutiveStrings
+.
+Twig_Tests_ExpressionParserTest::testUnknownFilter
+.
+Twig_Tests_ExpressionParserTest::testUnknownFunction
+.
+Twig_Tests_ExpressionParserTest::testUnknownTest
+.
+Twig_Tests_Extension_CoreTest::testCustomEscaper
+.
+Twig_Tests_Extension_CoreTest::testRandomFunction with data set #0 
+.
+Twig_Tests_Extension_CoreTest::testRandomFunction with data set #1 
+.
+Twig_Tests_Extension_CoreTest::testRandomFunction with data set #2 
+.
+Twig_Tests_Extension_CoreTest::testRandomFunction with data set #3 
+.
+Twig_Tests_Extension_CoreTest::testRandomFunction with data set #4 
+.
+Twig_Tests_Extension_CoreTest::testRandomFunction with data set #5 
+.
+Twig_Tests_Extension_CoreTest::testRandomFunction with data set #6 
+.
+Twig_Tests_Extension_CoreTest::testRandomFunctionOfEmptyArrayThrowsException
+.
+Twig_Tests_Extension_CoreTest::testRandomFunctionOnNonUTF8String
+.
+Twig_Tests_Extension_CoreTest::testRandomFunctionReturnsAsIs
+.
+Twig_Tests_Extension_CoreTest::testRandomFunctionWithoutParameter
+.
+Twig_Tests_Extension_CoreTest::testReverseFilterOnNonUTF8String
+.
+Twig_Tests_Extension_CoreTest::testUnknownCustomEscaper
+.
+Twig_Tests_Extension_SandboxTest::testMacrosInASandbox
+.
+Twig_Tests_Extension_SandboxTest::testSandboxGloballySet
+.
+Twig_Tests_Extension_SandboxTest::testSandboxLocallySetForAnInclude
+.
+Twig_Tests_Extension_SandboxTest::testSandboxWithInheritance
+.
+Twig_Tests_FileCachingTest::testClearingCacheFiles
+.
+Twig_Tests_FileCachingTest::testWritingCacheFiles
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #0 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #1 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #10 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #100 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #101 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #102 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #103 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #104 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #105 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #106 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #107 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #108 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #109 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #11 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #110 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #111 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #112 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #113 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #114 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #115 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #116 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #117 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #118 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #119 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #12 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #120 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #121 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #122 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #123 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #124 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #125 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #126 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #127 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #128 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #129 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #13 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #130 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #131 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #132 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #133 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #134 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #135 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #136 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #137 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #138 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #139 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #14 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #140 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #141 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #142 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #143 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #144 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #145 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #146 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #147 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #148 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #149 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #15 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #150 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #151 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #152 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #153 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #154 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #155 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #156 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #157 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #158 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #159 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #16 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #160 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #161 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #162 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #163 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #164 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #165 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #166 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #167 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #168 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #169 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #17 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #170 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #171 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #172 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #173 
+S
+Twig_Tests_IntegrationTest::testIntegration with data set #174 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #175 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #176 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #177 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #178 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #179 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #18 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #180 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #181 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #182 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #183 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #184 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #185 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #186 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #187 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #188 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #189 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #19 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #190 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #191 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #192 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #193 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #194 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #195 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #196 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #197 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #198 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #199 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #2 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #20 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #200 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #201 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #202 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #203 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #204 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #205 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #206 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #207 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #21 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #22 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #23 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #24 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #25 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #26 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #27 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #28 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #29 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #3 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #30 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #31 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #32 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #33 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #34 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #35 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #36 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #37 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #38 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #39 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #4 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #40 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #41 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #42 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #43 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #44 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #45 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #46 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #47 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #48 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #49 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #5 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #50 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #51 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #52 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #53 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #54 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #55 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #56 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #57 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #58 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #59 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #6 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #60 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #61 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #62 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #63 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #64 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #65 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #66 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #67 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #68 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #69 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #7 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #70 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #71 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #72 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #73 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #74 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #75 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #76 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #77 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #78 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #79 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #8 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #80 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #81 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #82 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #83 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #84 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #85 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #86 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #87 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #88 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #89 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #9 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #90 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #91 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #92 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #93 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #94 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #95 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #96 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #97 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #98 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #99 
+.
+Twig_Tests_LexerTest::testBigNumbers
+S
+Twig_Tests_LexerTest::testBracketsNesting
+.
+Twig_Tests_LexerTest::testLineDirective
+.
+Twig_Tests_LexerTest::testLineDirectiveInline
+.
+Twig_Tests_LexerTest::testLongBlock
+.
+Twig_Tests_LexerTest::testLongComments
+.
+Twig_Tests_LexerTest::testLongRaw
+.
+Twig_Tests_LexerTest::testLongVar
+.
+Twig_Tests_LexerTest::testNameLabelForFunction
+.
+Twig_Tests_LexerTest::testNameLabelForTag
+.
+Twig_Tests_LexerTest::testOperatorEndingWithALetterAtTheEndOfALine
+.
+Twig_Tests_LexerTest::testStringWithEscapedDelimiter
+.
+Twig_Tests_LexerTest::testStringWithEscapedInterpolation
+.
+Twig_Tests_LexerTest::testStringWithHash
+.
+Twig_Tests_LexerTest::testStringWithInterpolation
+.
+Twig_Tests_LexerTest::testStringWithNestedInterpolations
+.
+Twig_Tests_LexerTest::testStringWithNestedInterpolationsInBlock
+.
+Twig_Tests_LexerTest::testStringWithUnterminatedInterpolation
+.
+Twig_Tests_LexerTest::testUnterminatedBlock
+.
+Twig_Tests_LexerTest::testUnterminatedVariable
+.
+Twig_Tests_Loader_ArrayTest::testGetCacheKey
+.
+Twig_Tests_Loader_ArrayTest::testGetCacheKeyWhenTemplateDoesNotExist
+.
+Twig_Tests_Loader_ArrayTest::testGetSource
+.
+Twig_Tests_Loader_ArrayTest::testGetSourceWhenTemplateDoesNotExist
+.
+Twig_Tests_Loader_ArrayTest::testIsFresh
+.
+Twig_Tests_Loader_ArrayTest::testIsFreshWhenTemplateDoesNotExist
+.
+Twig_Tests_Loader_ArrayTest::testSetTemplate
+.
+Twig_Tests_Loader_ArrayTest::testTemplateReference
+.
+Twig_Tests_Loader_ChainTest::testAddLoader
+.
+Twig_Tests_Loader_ChainTest::testExists
+.
+Twig_Tests_Loader_ChainTest::testGetCacheKey
+.
+Twig_Tests_Loader_ChainTest::testGetCacheKeyWhenTemplateDoesNotExist
+.
+Twig_Tests_Loader_ChainTest::testGetSource
+.
+Twig_Tests_Loader_ChainTest::testGetSourceWhenTemplateDoesNotExist
+.
+Twig_Tests_Loader_FilesystemTest::testEmptyConstructor
+.
+Twig_Tests_Loader_FilesystemTest::testFindTemplateExceptionNamespace
+.
+Twig_Tests_Loader_FilesystemTest::testFindTemplateWithCache
+.
+Twig_Tests_Loader_FilesystemTest::testGetNamespaces
+.
+Twig_Tests_Loader_FilesystemTest::testLoadTemplateAndRenderBlockWithCache
+.
+Twig_Tests_Loader_FilesystemTest::testPaths
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #0 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #1 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #10 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #11 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #12 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #13 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #14 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #15 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #16 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #17 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #18 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #2 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #3 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #4 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #5 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #6 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #7 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #8 
+.
+Twig_Tests_Loader_FilesystemTest::testSecurity with data set #9 
+.
+Twig_Tests_NativeExtensionTest::testGetProperties
+S
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #0 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #1 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #10 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #11 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #2 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #3 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #4 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #5 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #6 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #7 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #8 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #9 
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testRenderBlockOptimizer
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testRenderParentBlockOptimizer
+.
+Twig_Tests_NodeVisitor_OptimizerTest::testRenderVariableBlockOptimizer
+.
+Twig_Tests_Node_AutoEscapeTest::testCompile with data set #0 
+.
+Twig_Tests_Node_AutoEscapeTest::testConstructor
+.
+Twig_Tests_Node_BlockReferenceTest::testCompile with data set #0 
+.
+Twig_Tests_Node_BlockReferenceTest::testConstructor
+.
+Twig_Tests_Node_BlockTest::testCompile with data set #0 
+.
+Twig_Tests_Node_BlockTest::testConstructor
+.
+Twig_Tests_Node_DoTest::testCompile with data set #0 
+.
+Twig_Tests_Node_DoTest::testConstructor
+.
+Twig_Tests_Node_Expression_ArrayTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_ArrayTest::testConstructor
+.
+Twig_Tests_Node_Expression_AssignNameTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_AssignNameTest::testConstructor
+.
+Twig_Tests_Node_Expression_Binary_AddTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Binary_AddTest::testConstructor
+.
+Twig_Tests_Node_Expression_Binary_AndTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Binary_AndTest::testConstructor
+.
+Twig_Tests_Node_Expression_Binary_ConcatTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Binary_ConcatTest::testConstructor
+.
+Twig_Tests_Node_Expression_Binary_DivTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Binary_DivTest::testConstructor
+.
+Twig_Tests_Node_Expression_Binary_FloorDivTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Binary_FloorDivTest::testConstructor
+.
+Twig_Tests_Node_Expression_Binary_ModTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Binary_ModTest::testConstructor
+.
+Twig_Tests_Node_Expression_Binary_MulTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Binary_MulTest::testConstructor
+.
+Twig_Tests_Node_Expression_Binary_OrTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Binary_OrTest::testConstructor
+.
+Twig_Tests_Node_Expression_Binary_SubTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Binary_SubTest::testConstructor
+.
+Twig_Tests_Node_Expression_CallTest::testGetArguments
+.
+Twig_Tests_Node_Expression_CallTest::testGetArgumentsWhenArgumentIsDefinedTwice
+.
+Twig_Tests_Node_Expression_CallTest::testGetArgumentsWhenPositionalArgumentsAfterNamedArguments
+.
+Twig_Tests_Node_Expression_CallTest::testGetArgumentsWithWrongNamedArgumentName
+.
+Twig_Tests_Node_Expression_CallTest::testGetArgumentsWithWrongNamedArgumentNames
+.
+Twig_Tests_Node_Expression_ConditionalTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_ConditionalTest::testConstructor
+.
+Twig_Tests_Node_Expression_ConstantTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_ConstantTest::testConstructor
+.
+Twig_Tests_Node_Expression_FilterTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_FilterTest::testCompile with data set #1 
+.
+Twig_Tests_Node_Expression_FilterTest::testCompile with data set #2 
+.
+Twig_Tests_Node_Expression_FilterTest::testCompile with data set #3 
+.
+Twig_Tests_Node_Expression_FilterTest::testCompile with data set #4 
+.
+Twig_Tests_Node_Expression_FilterTest::testCompile with data set #5 
+.
+Twig_Tests_Node_Expression_FilterTest::testCompileWithMissingNamedArgument
+.
+Twig_Tests_Node_Expression_FilterTest::testCompileWithWrongNamedArgumentName
+.
+Twig_Tests_Node_Expression_FilterTest::testConstructor
+.
+Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #1 
+.
+Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #2 
+.
+Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #3 
+.
+Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #4 
+.
+Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #5 
+.
+Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #6 
+.
+Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #7 
+.
+Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #8 
+.
+Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #9 
+.
+Twig_Tests_Node_Expression_FunctionTest::testConstructor
+.
+Twig_Tests_Node_Expression_GetAttrTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_GetAttrTest::testCompile with data set #1 
+.
+Twig_Tests_Node_Expression_GetAttrTest::testCompile with data set #2 
+.
+Twig_Tests_Node_Expression_GetAttrTest::testConstructor
+.
+Twig_Tests_Node_Expression_NameTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_NameTest::testCompile with data set #1 
+.
+Twig_Tests_Node_Expression_NameTest::testCompile with data set #2 
+.
+Twig_Tests_Node_Expression_NameTest::testCompile with data set #3 
+.
+Twig_Tests_Node_Expression_NameTest::testConstructor
+.
+Twig_Tests_Node_Expression_ParentTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_ParentTest::testConstructor
+.
+Twig_Tests_Node_Expression_TestTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_TestTest::testCompile with data set #1 
+.
+Twig_Tests_Node_Expression_TestTest::testConstructor
+.
+Twig_Tests_Node_Expression_Unary_NegTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Unary_NegTest::testConstructor
+.
+Twig_Tests_Node_Expression_Unary_NotTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Unary_NotTest::testConstructor
+.
+Twig_Tests_Node_Expression_Unary_PosTest::testCompile with data set #0 
+.
+Twig_Tests_Node_Expression_Unary_PosTest::testConstructor
+.
+Twig_Tests_Node_ForTest::testCompile with data set #0 
+.
+Twig_Tests_Node_ForTest::testCompile with data set #1 
+.
+Twig_Tests_Node_ForTest::testCompile with data set #2 
+.
+Twig_Tests_Node_ForTest::testCompile with data set #3 
+.
+Twig_Tests_Node_ForTest::testConstructor
+.
+Twig_Tests_Node_IfTest::testCompile with data set #0 
+.
+Twig_Tests_Node_IfTest::testCompile with data set #1 
+.
+Twig_Tests_Node_IfTest::testCompile with data set #2 
+.
+Twig_Tests_Node_IfTest::testConstructor
+.
+Twig_Tests_Node_ImportTest::testCompile with data set #0 
+.
+Twig_Tests_Node_ImportTest::testConstructor
+.
+Twig_Tests_Node_IncludeTest::testCompile with data set #0 
+.
+Twig_Tests_Node_IncludeTest::testCompile with data set #1 
+.
+Twig_Tests_Node_IncludeTest::testCompile with data set #2 
+.
+Twig_Tests_Node_IncludeTest::testCompile with data set #3 
+.
+Twig_Tests_Node_IncludeTest::testCompile with data set #4 
+.
+Twig_Tests_Node_IncludeTest::testConstructor
+.
+Twig_Tests_Node_MacroTest::testCompile with data set #0 
+.
+Twig_Tests_Node_MacroTest::testConstructor
+.
+Twig_Tests_Node_ModuleTest::testCompile with data set #0 
+.
+Twig_Tests_Node_ModuleTest::testCompile with data set #1 
+.
+Twig_Tests_Node_ModuleTest::testCompile with data set #2 
+.
+Twig_Tests_Node_ModuleTest::testConstructor
+.
+Twig_Tests_Node_PrintTest::testCompile with data set #0 
+.
+Twig_Tests_Node_PrintTest::testConstructor
+.
+Twig_Tests_Node_SandboxTest::testCompile with data set #0 
+.
+Twig_Tests_Node_SandboxTest::testConstructor
+.
+Twig_Tests_Node_SandboxedModuleTest::testCompile with data set #0 
+.
+Twig_Tests_Node_SandboxedModuleTest::testCompile with data set #1 
+.
+Twig_Tests_Node_SandboxedModuleTest::testConstructor
+.
+Twig_Tests_Node_SandboxedPrintTest::testCompile with data set #0 
+.
+Twig_Tests_Node_SandboxedPrintTest::testConstructor
+.
+Twig_Tests_Node_SetTest::testCompile with data set #0 
+.
+Twig_Tests_Node_SetTest::testCompile with data set #1 
+.
+Twig_Tests_Node_SetTest::testCompile with data set #2 
+.
+Twig_Tests_Node_SetTest::testCompile with data set #3 
+.
+Twig_Tests_Node_SetTest::testConstructor
+.
+Twig_Tests_Node_SpacelessTest::testCompile with data set #0 
+.
+Twig_Tests_Node_SpacelessTest::testConstructor
+.
+Twig_Tests_Node_TextTest::testCompile with data set #0 
+.
+Twig_Tests_Node_TextTest::testConstructor
+.
+Twig_Tests_ParserTest::testFilterBodyNodes with data set #0 
+.
+Twig_Tests_ParserTest::testFilterBodyNodes with data set #1 
+.
+Twig_Tests_ParserTest::testFilterBodyNodes with data set #2 
+.
+Twig_Tests_ParserTest::testFilterBodyNodesThrowsException with data set #0 
+.
+Twig_Tests_ParserTest::testFilterBodyNodesThrowsException with data set #1 
+.
+Twig_Tests_ParserTest::testFilterBodyNodesWithBOM
+.
+Twig_Tests_ParserTest::testGetVarName
+.
+Twig_Tests_ParserTest::testParseIsReentrant
+.
+Twig_Tests_ParserTest::testSetMacroThrowsExceptionOnReservedMethods
+.
+Twig_Tests_ParserTest::testUnknownTag
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #0 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #1 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #10 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #100 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #101 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #102 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #103 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #104 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #105 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #106 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #107 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #108 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #109 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #11 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #110 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #111 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #112 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #113 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #114 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #115 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #116 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #117 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #118 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #119 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #12 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #120 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #121 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #122 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #123 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #124 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #125 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #126 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #127 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #128 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #129 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #13 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #130 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #14 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #15 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #16 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #17 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #18 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #19 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #2 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #20 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #21 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #22 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #23 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #24 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #25 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #26 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #27 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #28 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #29 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #3 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #30 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #31 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #32 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #33 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #34 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #35 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #36 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #37 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #38 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #39 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #4 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #40 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #41 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #42 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #43 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #44 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #45 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #46 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #47 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #48 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #49 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #5 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #50 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #51 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #52 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #53 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #54 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #55 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #56 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #57 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #58 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #59 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #6 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #60 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #61 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #62 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #63 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #64 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #65 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #66 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #67 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #68 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #69 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #7 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #70 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #71 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #72 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #73 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #74 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #75 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #76 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #77 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #78 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #79 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #8 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #80 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #81 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #82 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #83 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #84 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #85 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #86 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #87 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #88 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #89 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #9 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #90 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #91 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #92 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #93 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #94 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #95 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #96 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #97 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #98 
+.
+Twig_Tests_TemplateTest::testGetAttribute with data set #99 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #0 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #1 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #10 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #100 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #101 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #102 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #103 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #104 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #105 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #106 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #107 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #108 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #109 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #11 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #110 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #111 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #112 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #113 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #114 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #115 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #116 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #117 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #118 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #119 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #12 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #120 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #121 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #122 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #123 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #124 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #125 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #126 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #127 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #128 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #129 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #13 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #130 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #14 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #15 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #16 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #17 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #18 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #19 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #2 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #20 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #21 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #22 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #23 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #24 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #25 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #26 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #27 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #28 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #29 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #3 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #30 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #31 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #32 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #33 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #34 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #35 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #36 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #37 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #38 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #39 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #4 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #40 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #41 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #42 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #43 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #44 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #45 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #46 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #47 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #48 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #49 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #5 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #50 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #51 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #52 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #53 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #54 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #55 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #56 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #57 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #58 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #59 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #6 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #60 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #61 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #62 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #63 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #64 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #65 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #66 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #67 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #68 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #69 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #7 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #70 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #71 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #72 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #73 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #74 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #75 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #76 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #77 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #78 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #79 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #8 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #80 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #81 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #82 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #83 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #84 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #85 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #86 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #87 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #88 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #89 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #9 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #90 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #91 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #92 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #93 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #94 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #95 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #96 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #97 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #98 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefined with data set #99 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #0 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #1 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #10 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #100 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #101 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #102 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #103 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #104 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #105 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #106 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #107 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #108 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #109 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #11 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #110 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #111 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #112 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #113 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #114 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #115 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #116 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #117 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #118 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #119 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #12 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #120 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #121 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #122 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #123 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #124 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #125 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #126 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #127 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #128 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #129 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #13 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #130 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #14 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #15 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #16 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #17 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #18 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #19 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #2 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #20 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #21 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #22 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #23 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #24 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #25 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #26 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #27 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #28 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #29 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #3 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #30 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #31 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #32 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #33 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #34 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #35 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #36 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #37 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #38 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #39 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #4 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #40 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #41 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #42 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #43 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #44 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #45 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #46 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #47 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #48 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #49 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #5 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #50 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #51 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #52 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #53 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #54 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #55 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #56 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #57 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #58 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #59 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #6 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #60 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #61 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #62 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #63 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #64 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #65 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #66 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #67 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #68 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #69 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #7 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #70 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #71 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #72 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #73 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #74 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #75 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #76 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #77 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #78 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #79 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #8 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #80 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #81 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #82 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #83 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #84 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #85 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #86 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #87 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #88 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #89 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #9 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #90 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #91 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #92 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #93 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #94 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #95 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #96 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #97 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #98 
+.
+Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #99 
+.
+Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #0 
+.
+Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #1 
+.
+Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #2 
+.
+Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #3 
+.
+Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #4 
+.
+Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #5 
+.
+Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #6 
+.
+Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #7 
+.
+Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #8 
+.
+Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #9 
+.
+Twig_Tests_TemplateTest::testGetAttributeOnArrayWithConfusableKey with data set #0 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #0 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #1 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #10 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #100 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #101 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #102 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #103 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #104 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #105 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #106 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #107 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #108 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #109 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #11 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #110 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #111 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #112 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #113 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #114 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #115 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #116 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #117 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #118 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #119 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #12 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #120 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #121 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #122 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #123 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #124 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #125 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #126 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #127 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #128 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #129 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #13 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #130 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #14 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #15 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #16 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #17 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #18 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #19 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #2 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #20 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #21 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #22 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #23 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #24 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #25 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #26 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #27 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #28 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #29 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #3 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #30 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #31 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #32 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #33 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #34 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #35 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #36 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #37 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #38 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #39 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #4 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #40 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #41 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #42 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #43 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #44 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #45 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #46 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #47 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #48 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #49 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #5 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #50 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #51 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #52 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #53 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #54 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #55 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #56 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #57 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #58 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #59 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #6 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #60 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #61 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #62 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #63 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #64 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #65 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #66 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #67 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #68 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #69 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #7 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #70 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #71 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #72 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #73 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #74 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #75 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #76 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #77 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #78 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #79 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #8 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #80 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #81 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #82 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #83 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #84 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #85 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #86 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #87 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #88 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #89 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #9 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #90 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #91 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #92 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #93 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #94 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #95 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #96 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #97 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #98 
+.
+Twig_Tests_TemplateTest::testGetAttributeStrict with data set #99 
+.
+Twig_Tests_TemplateTest::testGetAttributeWithSandbox with data set #0 
+.
+Twig_Tests_TemplateTest::testGetAttributeWithSandbox with data set #1 
+.
+Twig_Tests_TemplateTest::testGetAttributeWithSandbox with data set #2 
+.
+Twig_Tests_TemplateTest::testGetAttributeWithSandbox with data set #3 
+.
+Twig_Tests_TemplateTest::testGetAttributeWithTemplateAsObject with data set #0 
+.
+Twig_Tests_TokenStreamTest::testEndOfTemplateLook
+.
+Twig_Tests_TokenStreamTest::testEndOfTemplateNext
+.
+Twig_Tests_TokenStreamTest::testNext
+.

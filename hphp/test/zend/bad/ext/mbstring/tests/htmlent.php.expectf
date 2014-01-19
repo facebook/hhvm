@@ -1,0 +1,6 @@
+HTML-ENTITIES>UTF-8>HTML-ENTITIES
+Array
+(
+    [test] => &@AB&#128;&#129;&#130;&auml;&ouml;&uuml;&euro;&lang;&rang;
+)
+===DONE===

@@ -1,0 +1,111 @@
+DOMDocumentFragment
+object(DOMDocumentFragment)#1 (0) {
+}
+string(104) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:19:"DOMDocumentFragment";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(19) "DOMDocumentFragment"
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(9) "appendXML"
+  [2]=>
+  string(11) "appendChild"
+  [3]=>
+  string(9) "cloneNode"
+  [4]=>
+  string(9) "getLineNo"
+  [5]=>
+  string(13) "hasAttributes"
+  [6]=>
+  string(13) "hasChildNodes"
+  [7]=>
+  string(12) "insertBefore"
+  [8]=>
+  string(18) "isDefaultNamespace"
+  [9]=>
+  string(10) "isSameNode"
+  [10]=>
+  string(11) "isSupported"
+  [11]=>
+  string(18) "lookupNamespaceUri"
+  [12]=>
+  string(12) "lookupPrefix"
+  [13]=>
+  string(9) "normalize"
+  [14]=>
+  string(11) "removeChild"
+  [15]=>
+  string(12) "replaceChild"
+  [16]=>
+  string(4) "c14n"
+  [17]=>
+  string(8) "c14nfile"
+  [18]=>
+  string(11) "getNodePath"
+  [19]=>
+  string(5) "__get"
+  [20]=>
+  string(5) "__set"
+  [21]=>
+  string(7) "__isset"
+}
+================
+A_DOMDocumentFragment
+object(A_DOMDocumentFragment)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(106) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:21:"A_DOMDocumentFragment";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(21) "A_DOMDocumentFragment"
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(9) "appendXML"
+  [2]=>
+  string(11) "appendChild"
+  [3]=>
+  string(9) "cloneNode"
+  [4]=>
+  string(9) "getLineNo"
+  [5]=>
+  string(13) "hasAttributes"
+  [6]=>
+  string(13) "hasChildNodes"
+  [7]=>
+  string(12) "insertBefore"
+  [8]=>
+  string(18) "isDefaultNamespace"
+  [9]=>
+  string(10) "isSameNode"
+  [10]=>
+  string(11) "isSupported"
+  [11]=>
+  string(18) "lookupNamespaceUri"
+  [12]=>
+  string(12) "lookupPrefix"
+  [13]=>
+  string(9) "normalize"
+  [14]=>
+  string(11) "removeChild"
+  [15]=>
+  string(12) "replaceChild"
+  [16]=>
+  string(4) "c14n"
+  [17]=>
+  string(8) "c14nfile"
+  [18]=>
+  string(11) "getNodePath"
+  [19]=>
+  string(5) "__get"
+  [20]=>
+  string(5) "__set"
+  [21]=>
+  string(7) "__isset"
+}

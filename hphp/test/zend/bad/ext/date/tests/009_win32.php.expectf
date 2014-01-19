@@ -1,0 +1,13 @@
+HipHop Warning: %s
+bool(false)
+bool(false)
+string(%d) "Tue Tuesday Jun June 06/27/06 00:00:00 27 00 12 178 06 00 AM 00 26 26 2 06/27/06 00:00:00 06 2006 %s"
+string(5) "%q %a"
+string(4) "blah"
+HipHop Warning: %s
+bool(false)
+bool(false)
+string(%d) "Mon Monday Jun June 06/26/06 21:00:00 26 21 09 177 06 00 PM 00 26 26 1 06/26/06 21:00:00 06 2006 %s"
+string(5) "%q %a"
+string(4) "blah"
+Done

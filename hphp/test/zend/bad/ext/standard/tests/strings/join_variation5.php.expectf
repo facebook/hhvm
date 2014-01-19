@@ -1,0 +1,12 @@
+*** Testing implode() : usage variations - sub arrays ***
+HipHop Notice: %s
+HipHop Notice: %s
+string(27) "ArrayTESTArrayTESTPHPTEST50"
+HipHop Notice: %s
+string(19) "1Array2Array3Array4"
+HipHop Notice: %s
+HipHop Notice: %s
+string(18) "Array2Array2PHP250"
+string(10) "1, 2, 3, 4"
+string(8) "one, two"
+Done

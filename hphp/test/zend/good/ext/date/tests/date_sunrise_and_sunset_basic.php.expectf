@@ -1,0 +1,4 @@
+Basic test for date_sunrise() and date_sunset()
+%s %s %d %d, sunrise time : %d:%d
+%s %s %d %d, sunset time : %d:%d
+===Done===

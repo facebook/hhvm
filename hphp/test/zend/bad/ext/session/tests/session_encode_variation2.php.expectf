@@ -1,0 +1,6 @@
+*** Testing session_encode() : variation ***
+bool(false)
+bool(true)
+HipHop Warning: %s
+bool(false)
+Done

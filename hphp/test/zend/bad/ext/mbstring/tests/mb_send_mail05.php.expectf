@@ -1,0 +1,15 @@
+To: example@example.com
+Subject: %s
+MIME-Version: 1.0
+Content-Type: text/plain; charset=%s
+Content-Transfer-Encoding: %s
+
+%s
+To: example@example.com
+Subject: =?HZ-GB-2312?B?fnsyYlFpfn0gU2ltcGxpZmllZCBD?=
+ =?HZ-GB-2312?B?aGluZXNl?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=HZ-GB-2312
+Content-Transfer-Encoding: 7bit
+
+~{2bQi~}

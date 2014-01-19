@@ -1,0 +1,42 @@
+c::getIterator
+c_iter::__construct
+c_iter::rewind
+c_iter::valid = true
+c_iter::current
+continue outer
+c_iter::next
+c_iter::valid = true
+c_iter::current
+c::getIterator
+c_iter::__construct
+c_iter::rewind
+c_iter::valid = true
+c_iter::current
+double:1:0
+c_iter::next
+c_iter::valid = true
+c_iter::current
+continue inner
+c_iter::next
+c_iter::valid = true
+c_iter::current
+break inner
+c_iter::next
+c_iter::valid = true
+c_iter::current
+c::getIterator
+c_iter::__construct
+c_iter::rewind
+c_iter::valid = true
+c_iter::current
+double:2:0
+c_iter::next
+c_iter::valid = true
+c_iter::current
+continue inner
+c_iter::next
+c_iter::valid = true
+c_iter::current
+break inner
+break outer
+Done

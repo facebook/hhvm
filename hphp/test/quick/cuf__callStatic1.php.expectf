@@ -1,0 +1,10 @@
+In A::__callStatic
+In A::__callStatic
+In A::__callStatic
+In A::__callStatic
+In A::__callStatic
+In A::__callStatic
+HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 33
+In A::__callStatic
+In A::__callStatic
+HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 22

@@ -1,0 +1,29 @@
+-- Iteration 1 --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 2 --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 3 --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 4 --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+-- Iteration 5 --
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)

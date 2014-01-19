@@ -1,0 +1,4 @@
+string(23) "This is an ascii string"
+string(12) "Espa%C3%B1ol"
+string(11) "Stra%C3%9Fa"
+string(4) "d094"

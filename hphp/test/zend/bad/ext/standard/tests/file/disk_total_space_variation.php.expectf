@@ -1,0 +1,50 @@
+*** Testing with a directory ***
+float(%d)
+
+Testing for the return type ***
+bool(true)
+
+*** Testing with different directory combinations ***
+-- Iteration 1 --
+float(%d)
+
+-- Iteration 2 --
+float(%d)
+
+-- Iteration 3 --
+float(%d)
+
+-- Iteration 4 --
+float(%d)
+
+-- Iteration 5 --
+float(%d)
+
+-- Iteration 6 --
+float(%d)
+
+-- Iteration 7 --
+float(%d)
+
+-- Iteration 8 --
+float(%d)
+
+-- Iteration 9 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 11 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 12 --
+HipHop Warning: %s
+NULL
+*** Testing with Binary Input ***
+float(%d)
+
+--- Done ---

@@ -1,0 +1,40 @@
+array(3) {
+  [0]=>
+  string(5) "final"
+  [1]=>
+  string(6) "public"
+  [2]=>
+  string(6) "static"
+}
+array(1) {
+  [0]=>
+  string(6) "public"
+}
+array(2) {
+  [0]=>
+  string(8) "abstract"
+  [1]=>
+  string(7) "private"
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(2) {
+  [0]=>
+  string(6) "public"
+  [1]=>
+  string(7) "private"
+}
+array(2) {
+  [0]=>
+  string(8) "abstract"
+  [1]=>
+  string(5) "final"
+}
+array(1) {
+  [0]=>
+  string(5) "final"
+}

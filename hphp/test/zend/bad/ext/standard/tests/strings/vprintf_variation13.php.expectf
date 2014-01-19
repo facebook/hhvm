@@ -1,0 +1,34 @@
+*** Testing vprintf() : hexa formats with hexa values ***
+
+-- Iteration 1 --
+0
+int(1)
+
+-- Iteration 2 --
+ffffffff 1 22
+int(13)
+
+-- Iteration 3 --
+7fffffff x, 7000000 80000000
+int(28)
+
+-- Iteration 4 --
+                      ffed2979 0000
+int(35)
+
+-- Iteration 5 --
+#1 2222 1b6db bbbbbbbc
+int(22)
+
+-- Iteration 6 --
+123b fab 0 a
+int(12)
+
+-- Iteration 7 --
+%34 x
+int(5)
+
+-- Iteration 8 --
+1 2 3 4
+int(7)
+===DONE===

@@ -1,0 +1,1 @@
+HipHop Fatal error: Argument 1 passed to bar() must be an instance of foo, string given in %s on line 4

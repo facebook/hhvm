@@ -1,0 +1,14 @@
+wTimeout only
+- Found option 'wTimeout' ('wTimeoutMS'): 1
+wTimeout and wTimeoutMS
+- Found option 'wTimeout' ('wTimeoutMS'): 2
+- Replacing previously set value for 'wTimeoutMS' (2)
+- Found option 'wTimeoutMS': 3
+wTimeoutMS only
+- Found option 'wTimeoutMS': 4
+wTimeoutMS and wTimeout
+- Found option 'wTimeoutMS': 5
+- Replacing previously set value for 'wTimeoutMS' (5)
+- Found option 'wTimeout' ('wTimeoutMS'): 6
+wtimeoutms lowercased
+- Found option 'wTimeoutMS': 7

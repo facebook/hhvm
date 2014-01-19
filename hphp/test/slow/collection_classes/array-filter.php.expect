@@ -1,0 +1,101 @@
+array(5) {
+  [1]=>
+  int(0)
+  [2]=>
+  string(0) ""
+  [3]=>
+  string(1) "0"
+  [6]=>
+  bool(false)
+  [7]=>
+  object(HH\Vector)#1 (0) {
+  }
+}
+array(5) {
+  [22]=>
+  int(0)
+  [33]=>
+  string(0) ""
+  [44]=>
+  string(1) "0"
+  [77]=>
+  bool(false)
+  [88]=>
+  object(HH\Vector)#1 (0) {
+  }
+}
+array(1) {
+  [22]=>
+  string(1) "0"
+}
+array(1) {
+  [0]=>
+  string(1) "0"
+}
+array(1) {
+  [1]=>
+  string(0) ""
+}
+array(1) {
+  [0]=>
+  string(1) "0"
+}
+array(1) {
+  [0]=>
+  object(HH\Vector)#1 (0) {
+  }
+}
+========
+array(4) {
+  [0]=>
+  int(7)
+  [4]=>
+  string(3) "foo"
+  [5]=>
+  bool(true)
+  [8]=>
+  object(HH\Vector)#2 (1) {
+    [0]=>
+    int(1)
+  }
+}
+array(4) {
+  [11]=>
+  int(7)
+  [55]=>
+  string(3) "foo"
+  [66]=>
+  bool(true)
+  [99]=>
+  object(HH\Vector)#2 (1) {
+    [0]=>
+    int(1)
+  }
+}
+array(1) {
+  [11]=>
+  int(7)
+}
+array(1) {
+  [7]=>
+  int(7)
+}
+array(1) {
+  ["foo"]=>
+  string(3) "foo"
+}
+array(1) {
+  [0]=>
+  int(7)
+}
+array(1) {
+  [1]=>
+  string(3) "foo"
+}
+array(1) {
+  [1]=>
+  object(HH\Vector)#2 (1) {
+    [0]=>
+    int(1)
+  }
+}

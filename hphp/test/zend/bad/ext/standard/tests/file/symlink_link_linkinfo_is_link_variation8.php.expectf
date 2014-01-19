@@ -1,0 +1,10 @@
+*** Create hard link in different directory with same filename ***
+HipHop Warning: %s
+bool(false)
+bool(true)
+
+*** Create soft link in different directory with same filename ***
+HipHop Warning: %s
+bool(false)
+bool(true)
+Done

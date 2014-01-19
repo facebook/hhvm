@@ -1,0 +1,57 @@
+*** Testing stripos() function with unexpected values for offset ***
+-- Iteration 1 --
+int(6)
+-- Iteration 2 --
+HipHop Warning: %s
+bool(false)
+-- Iteration 3 --
+HipHop Warning: %s
+bool(false)
+-- Iteration 4 --
+int(6)
+-- Iteration 5 --
+int(6)
+-- Iteration 6 --
+HipHop Warning: %s
+NULL
+-- Iteration 7 --
+HipHop Warning: %s
+NULL
+-- Iteration 8 --
+HipHop Warning: %s
+NULL
+-- Iteration 9 --
+HipHop Warning: %s
+NULL
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+-- Iteration 11 --
+int(6)
+-- Iteration 12 --
+int(6)
+-- Iteration 13 --
+int(6)
+-- Iteration 14 --
+int(6)
+-- Iteration 15 --
+HipHop Warning: %s
+NULL
+-- Iteration 16 --
+HipHop Warning: %s
+NULL
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+-- Iteration 18 --
+int(6)
+-- Iteration 19 --
+int(6)
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+-- Iteration 21 --
+int(6)
+-- Iteration 22 --
+int(6)
+*** Done ***

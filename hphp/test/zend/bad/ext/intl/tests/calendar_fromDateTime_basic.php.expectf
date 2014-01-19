@@ -1,0 +1,13 @@
+float(1325372400000)
+float(1325372400000)
+string(11) "Europe/Rome"
+string(5) "nl_NL"
+
+float(1325404800000)
+float(1325404800000)
+string(3) "PST"
+string(5) "pt_PT"
+
+float(1325362800000)
+float(1325362800000)
+string(%d) "GMT+03%S40"

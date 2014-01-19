@@ -1,0 +1,231 @@
+string(5) "func1"
+bool(false)
+bool(true)
+bool(false)
+int(1)
+bool(true)
+bool(true)
+int(3)
+int(2)
+int(0)
+string(2) "p1"
+bool(false)
+NULL
+string(4) "cls1"
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+int(0)
+int(1)
+string(2) "p2"
+bool(true)
+NULL
+NULL
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+int(1)
+int(2)
+string(2) "p3"
+bool(false)
+NULL
+NULL
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+int(2)
+string(7) "invoked"
+bool(true)
+string(4) "cls1"
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+string(7) "method1"
+bool(false)
+bool(true)
+bool(false)
+int(0)
+bool(false)
+bool(false)
+int(1)
+int(1)
+int(0)
+string(6) "param1"
+bool(false)
+string(4) "cls1"
+NULL
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+int(0)
+string(5) "prop1"
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+int(512)
+string(4) "cls1"
+string(2) "i1"
+string(2) "i2"
+bool(false)
+bool(false)
+bool(false)
+int(0)
+NULL
+bool(true)
+int(23)
+int(45)
+int(45)
+bool(false)
+bool(true)
+int(0)
+string(5) "prop1"
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+int(512)
+string(4) "cls1"
+int(1)
+string(5) "prop2"
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+int(257)
+int(45)
+int(45)
+string(4) "cls1"
+int(0)
+string(7) "method1"
+bool(false)
+bool(true)
+bool(false)
+int(0)
+bool(false)
+bool(false)
+int(1)
+int(1)
+int(0)
+string(6) "param1"
+bool(false)
+string(4) "cls1"
+NULL
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+int(0)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+int(256)
+string(4) "cls1"
+invokedbool(true)
+string(4) "cls2"
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+string(7) "method1"
+bool(false)
+bool(true)
+bool(false)
+int(0)
+bool(false)
+bool(false)
+int(1)
+int(1)
+int(0)
+string(6) "param1"
+bool(false)
+string(4) "cls1"
+NULL
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+int(0)
+string(5) "prop1"
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+int(512)
+string(4) "cls1"
+string(2) "i1"
+string(2) "i2"
+bool(false)
+bool(false)
+bool(false)
+int(0)
+string(4) "cls1"
+bool(true)
+int(45)
+int(45)
+int(45)
+bool(false)
+bool(true)
+int(0)
+string(5) "prop1"
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+int(512)
+string(4) "cls1"
+int(1)
+string(5) "prop2"
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+int(257)
+int(45)
+int(45)
+string(4) "cls1"
+int(0)
+string(7) "method1"
+bool(false)
+bool(true)
+bool(false)
+int(0)
+bool(false)
+bool(false)
+int(1)
+int(1)
+int(0)
+string(6) "param1"
+bool(false)
+string(4) "cls1"
+NULL
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+int(0)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+int(256)
+string(4) "cls1"
+invoked

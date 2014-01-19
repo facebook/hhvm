@@ -1,0 +1,5 @@
+string(3) "Foo"
+HipHop Warning: %s
+HipHop Notice: %s
+string(3) "Baz"
+===DONE===

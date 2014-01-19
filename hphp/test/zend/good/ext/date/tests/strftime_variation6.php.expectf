@@ -1,0 +1,22 @@
+*** Testing strftime() : usage variation ***
+
+--Hour as decimal by 24-hour format--
+string(%d) "%d"
+string(2) "18"
+
+--Hour as decimal by 12-hour format--
+string(%d) "%d"
+string(2) "06"
+
+--Minute as decimal number--
+string(%d) "%d"
+string(2) "08"
+
+--AM/PM format for a time--
+string(%d) "%s"
+string(2) "PM"
+
+--Second as decimal number--
+string(%d) "%d"
+string(2) "08"
+===DONE===

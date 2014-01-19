@@ -1,0 +1,130 @@
+bool(true)
+bool(true)
+array(2) {
+  ["instructions"]=>
+  ["cpu-cycles"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["cache-references"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["cache-misses"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["branches"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["branch-misses"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["bus-cycles"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["L1-dcache-loads"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["L1-dcache-load-misses"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["L1-dcache-stores"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["L1-dcache-store-misses"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["L1-dcache-prefetches"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["L1-dcache-prefetch-misses"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["L1-icache-loads"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["L1-icache-load-misses"]=>
+}
+failed to set perf event: L1-icache-prefetches
+array(1) {
+  ["instructions"]=>
+}
+failed to set perf event: L1-icache-prefetch-misses
+array(1) {
+  ["instructions"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["LLC-loads"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["LLC-load-misses"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["LLC-stores"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["LLC-store-misses"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["LLC-prefetches"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["LLC-prefetch-misses"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["dTLB-loads"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["dTLB-load-misses"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["dTLB-stores"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["dTLB-store-misses"]=>
+}
+failed to set perf event: dTLB-prefetches
+array(1) {
+  ["instructions"]=>
+}
+failed to set perf event: dTLB-prefetch-misses
+array(1) {
+  ["instructions"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["iTLB-loads"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["iTLB-load-misses"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["branch-loads"]=>
+}
+array(2) {
+  ["instructions"]=>
+  ["branch-load-misses"]=>
+}

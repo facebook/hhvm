@@ -1,0 +1,26 @@
+array(1) {
+  [0]=>
+  string(22) "This is a file in dir2"
+}
+
+array(1) {
+  [0]=>
+  string(22) "This is a file in dir1"
+}
+
+array(1) {
+  [0]=>
+  string(22) "This is a file in dir1"
+}
+
+array(1) {
+  [0]=>
+  string(29) "This is a file in working dir"
+}
+
+array(1) {
+  [0]=>
+  string(28) "This is a file in script dir"
+}
+
+===DONE===

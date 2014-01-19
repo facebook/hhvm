@@ -1,0 +1,14 @@
+Simple testcase for set_magic_quotes_runtime()  - error test
+
+-- Testing set_magic_quotes_runtime() function with less than expected no. of arguments --
+
+Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
+HipHop Warning: %s
+NULL
+
+-- Testing set_magic_quotes_runtime() function with more than expected no. of arguments --
+
+Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
+HipHop Warning: %s
+NULL
+===DONE===

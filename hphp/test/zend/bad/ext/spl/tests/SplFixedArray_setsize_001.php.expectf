@@ -1,0 +1,6 @@
+object(SplFixedArray)#1 (2) {
+  [0]=>
+  %string|unicode%(3) "one"
+  [1]=>
+  %string|unicode%(3) "two"
+}

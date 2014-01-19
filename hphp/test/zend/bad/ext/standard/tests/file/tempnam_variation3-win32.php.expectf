@@ -1,0 +1,25 @@
+*** Testing tempnam() with obscure prefixes ***
+-- Iteration 0 --
+OK
+-- Iteration 1 --
+OK
+-- Iteration 2 --
+OK
+-- Iteration 3 --
+OK
+-- Iteration 4 --
+OK
+-- Iteration 5 --
+Failed, not created in the correct directory %s vs %s
+0
+-- Iteration 6 --
+OK
+-- Iteration 7 --
+HipHop Warning: %s
+OK
+-- Iteration 8 --
+OK
+-- Iteration 9 --
+OK
+
+*** Done. ***

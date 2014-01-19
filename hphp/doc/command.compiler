@@ -1,0 +1,213 @@
+<h2>Compiler Command Line Options</h2>
+
+= --help
+
+Displays the list of command line options with short descriptions.
+
+= -t, --target=TARGET
+
+This sets the mode of operation for hphp. TARGET is one of <b>lint</b>,
+<b>analyze</b>, <b>php</b>, <b>cpp</b>, <b>filecache</b>, and <b>run</b>
+(default).
+
+lint: only parses the input files.
+analyze: runs the analysis phases of hphp but does not generate output files.
+php: runs analysis on the input files and generates php source files as output.
+cpp: runs analysis on the input files, generates c++ source files as output and optionally builds the program. See format options for cpp.
+run: is the same as cpp but also builds and executes the program.
+filecache: only builds the static file cache.
+
+= -f, --format=FORMAT
+
+The possible values of FORMAT depends on the chosen target.
+
+If the target is <b>lint</b> or <b>analyze</b>, the format option is unused.
+
+If the target is <b>php</b>, FORMAT is a comma separated list of the following:
+
+pickled: This outputs php code in a canonicalized format and stripped of comments.
+trimmed: This is the same as pickled, but also does not output functions that are never used.
+inlined: The same as pickled but generates a single file where all includes are inlined.
+typeinfo: The same as pickled, but also runs type inference on the php code and outputs the inferred types in comments.
+
+If the target is <b>cpp</b>, FORMAT is one of the following:
+
+cluster: (default) The generated C++ code is divided up among a fixed number of files. The number is set by the cluster-count option.
+file: There is one C++ source file generated for each input PHP file. The paths to generated C++ files mirror the paths to the PHP files.
+sys: This is used to generate the C++ used for the system library.
+exe: This is the same as cluster but also compiles the generated C++ into an executable.
+lib: The same as cluster but compiles the generated C++ into a library.
+
+If the target is <b>run</b>, FORMAT can be either cluster or file. These behave
+the same as the corresponding formats for cpp. However, with run the generated
+sources are always compiled into executables and run.
+
+= --cluster-count=COUNT
+
+COUNT is an integer and determines the number of output C++ files to generate
+when using the cluster format for cpp or run targets.
+
+= --input-dir=PATH
+
+PATH is the path to the root directory of the PHP sources.
+
+= --program=NAME
+
+When using the exe format or run target, NAME will be the name of the compiled
+executable.
+
+= --args=ARGUMENTS
+
+When using the run target, the executable will be run with arguments ARGUMENTS.
+
+= -i, --inputs=FILE
+
+FILE is added to the list of input PHP files.
+
+= --input-list=FILE
+
+FILE is the path to a file with a list of PHP sources to add to the input
+list. The format is one path per line.
+
+= --module=DIR
+
+DIR is a path to a directory. All PHP sources in that directory, including
+subdirectories, are added to the input list.
+
+= --exclude-dir=DIR
+
+DIR is the path to a directory. All PHP sources in that directory, including
+subdirectories, are excluded from the input list with the exception of
+forced inputs.
+
+= --fmodule=DIR
+
+--fmodule is the same as --module, except it will override any --exclude-dir
+commands that would affect inclusion of the PHP files.
+
+= --ffile=FILE
+
+FILE is included, overriding exclusion commands.
+
+= --exclude-file=FILE
+
+FILE is excluded from the input list, except where overridden by --ffile.
+
+= --cfile=FILE
+
+FILE is included in the file cache. It is not affected by exclusion commands.
+
+= --cmodule=DIR
+
+All static resources in DIR, including subdirectories, are added to the file
+cache. It is not affected by exclusion commands.
+
+= --parse-on-demand=BOOL (default: true)
+
+If BOOL is true, then include statements in PHP sources will add files to
+the input list as they are encountered when the filename is statically
+knowable.
+
+= --branch=STRING
+
+This specifies the SVN branch for logging purposes.
+
+= --revision=NUMBER
+
+This specifies the SVN revision for logging purposes.
+
+= -o, --output-dir=DIR
+
+The compiler will place the generated sources in DIR. If this parameter is
+not specified, the compiler will use a new directory in /tmp.
+
+= --sync-dir=DIR
+
+If this parameter is set, the compiler will first output to DIR, and then
+only copy over files that have changed to the output directory. This is to
+preserve their timestamps so that a make will not recompile unchanged files.
+
+= --optimize-level=INT (default: 1)
+
+This sets the severity of optimizations performed on the PHP code before
+being translated into C++. Currently, there are two levels of optimization.
+0 performs no optimizations, and 1 performs some optimizations.
+
+= --gen-stats=BOOL (default: false)
+
+If BOOL is true, then detected errors in the code and code statistics will
+be output to CodeError.js and Stats.js respectively in the output directory.
+
+= --keep-tempdir=BOOL (default: false)
+
+If no output directory is specified, the compiler will place generated sources
+into a directory in /tmp. If BOOL is true, then this directory will not be
+deleted after the program is compiled and, optionally, run.
+
+= --static-method-autofix=BOOL (default: true)
+
+If a method is found to be called statically but not declared static and BOOL
+is true, then it will be treated as a static method.
+
+= --db-stats=STRING
+
+If this parameter is given, and --gen-stats also set, the dependency graph
+and code errors will be stored in the database specified by STRING.
+The format is <username>:<password>@<host>:<port>/<db>.
+
+= --no-type-inference=BOOL (default: false)
+
+If BOOL is true, then no type inference will be performed before outputting
+the translated sources.
+
+= --no-min-include=BOOL (default: false)
+
+If BOOL is true, then minimum include analysis will not be performed for an
+analyze target.
+
+= --no-meta-info=BOOL (default: false)
+
+If BOOL is true, then generated C++ code will not include a class map, jump
+tables, or use macros. This is intended to produce readable but non-functional
+code.
+
+= --config=FILE
+
+This reads in a configuration file to set options. FILE should be in HDF
+format.
+
+= --db-config=STRING
+
+This reads configuration from a database. STRING is of the format
+<username>:<password>@<host>:<port>/<db>.
+
+= --config-dir=DIR (default: --input-dir)
+
+This sets the root directory for configuration purposes to be DIR. All
+relative paths passed as options will be treated as relative from this
+directory.
+
+= -v, --config-value=STRING
+
+This sets a configuration option on the command line. STRING should be
+a line of HDF, e.g. Section.Name=Value. The options settable are the same
+as those set by --config or --db-config.
+
+= -l, --log=INT (default: -1)
+
+This sets the level of logging output to standard out. The Levels are:
+-1: If the target is run, then none, else the same as 3.
+0: No logging
+1: Only errors
+2: The same as 1 plus warnings.
+3: The same as 2 plus extra information.
+4: All log messages.
+
+= --force=BOOL (default: true)
+
+Forces the compiler to generate output even if there are code errors
+encountered.
+
+= --filecache=FILE
+
+If this argument is given, a static file cache will be created with path FILE.

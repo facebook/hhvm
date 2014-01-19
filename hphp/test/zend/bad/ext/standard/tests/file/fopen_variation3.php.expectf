@@ -1,0 +1,95 @@
+*** Testing fopen() : usage variation ***
+
+--int 0--
+ok
+
+--int 1--
+ok
+
+--int 12345--
+ok
+
+--int -12345--
+ok
+
+--float 10.5--
+ok
+
+--float -10.5--
+ok
+
+--float 12.3456789000e10--
+ok
+
+--float -12.3456789000e10--
+ok
+
+--float .5--
+ok
+
+--empty array--
+Error: 2 - fopen() expects parameter 3 to be boolean, array given, %s(%d)
+bool(false)
+
+--int indexed array--
+Error: 2 - fopen() expects parameter 3 to be boolean, array given, %s(%d)
+bool(false)
+
+--associative array--
+Error: 2 - fopen() expects parameter 3 to be boolean, array given, %s(%d)
+bool(false)
+
+--nested arrays--
+Error: 2 - fopen() expects parameter 3 to be boolean, array given, %s(%d)
+bool(false)
+
+--uppercase NULL--
+ok
+
+--lowercase null--
+ok
+
+--lowercase true--
+ok
+
+--lowercase false--
+ok
+
+--uppercase TRUE--
+ok
+
+--uppercase FALSE--
+ok
+
+--empty string DQ--
+ok
+
+--empty string SQ--
+ok
+
+--string DQ--
+ok
+
+--string SQ--
+ok
+
+--mixed case string--
+ok
+
+--heredoc--
+ok
+
+--instance of classWithToString--
+Error: 2 - fopen() expects parameter 3 to be boolean, object given, %s(%d)
+bool(false)
+
+--instance of classWithoutToString--
+Error: 2 - fopen() expects parameter 3 to be boolean, object given, %s(%d)
+bool(false)
+
+--undefined var--
+ok
+
+--unset var--
+ok
+===DONE===

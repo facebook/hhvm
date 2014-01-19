@@ -1,0 +1,14 @@
+in __destruct()
+object(Evil)#2 (0) {
+}
+in __destruct()
+NULL
+in __destruct()
+object(Evil)#3 (0) {
+}
+Caught: Continuation is already running
+in __destruct()
+NULL
+Caught: Continuation is already finished
+Finished!
+Returned from main safely

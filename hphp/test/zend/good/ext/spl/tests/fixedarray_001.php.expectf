@@ -1,0 +1,12 @@
+Exception: Index invalid or out of range
+Exception: Index invalid or out of range
+Exception: Index invalid or out of range
+string(6) "value0"
+string(6) "value2"
+string(6) "value3"
+string(6) "value4"
+int(10)
+int(10)
+bool(true)
+string(6) "value0"
+===DONE===

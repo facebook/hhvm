@@ -1,0 +1,13 @@
+array(1) {
+  [1]=>
+  string(3) "bar"
+}
+array(1) {
+  [1]=>
+  string(3) "bar"
+}
+string(13) "X::__destruct"
+int(42)
+int(42)
+string(3) "bar"
+string(3) "bar"

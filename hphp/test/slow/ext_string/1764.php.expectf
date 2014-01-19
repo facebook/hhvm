@@ -1,0 +1,2 @@
+HipHop Notice: Deprecated: preg_replace(): The /e modifier is deprecated, use preg_replace_callback instead in %s/test/slow/ext_string/1764.php on line 3
+string(2) """"

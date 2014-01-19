@@ -1,0 +1,95 @@
+*** Testing strval() : usage variations ***
+
+-- Iteration 1 --
+string(1) "0"
+
+-- Iteration 2 --
+string(1) "1"
+
+-- Iteration 3 --
+string(5) "12345"
+
+-- Iteration 4 --
+string(6) "-12345"
+
+-- Iteration 5 --
+string(1) "2"
+
+-- Iteration 6 --
+string(1) "8"
+
+-- Iteration 7 --
+string(5) "12345"
+
+-- Iteration 8 --
+string(6) "-12345"
+
+-- Iteration 9 --
+string(1) "0"
+
+-- Iteration 10 --
+string(1) "1"
+
+-- Iteration 11 --
+string(5) "43981"
+
+-- Iteration 12 --
+string(6) "-43981"
+
+-- Iteration 13 --
+string(5) "100.5"
+
+-- Iteration 14 --
+string(6) "-100.5"
+
+-- Iteration 15 --
+string(13) "1001234567000"
+
+-- Iteration 16 --
+string(14) "1.007654321E-8"
+
+-- Iteration 17 --
+string(3) "0.5"
+
+-- Iteration 18 --
+string(5) "Array"
+
+-- Iteration 19 --
+string(5) "Array"
+
+-- Iteration 20 --
+string(0) ""
+
+-- Iteration 21 --
+string(0) ""
+
+-- Iteration 22 --
+string(1) "1"
+
+-- Iteration 23 --
+string(0) ""
+
+-- Iteration 24 --
+string(1) "1"
+
+-- Iteration 25 --
+string(0) ""
+
+-- Iteration 26 --
+string(0) ""
+
+-- Iteration 27 --
+string(0) ""
+
+-- Iteration 28 --
+string(7) "MyClass"
+
+-- Iteration 29 --
+string(%d) "Resource id #%d"
+
+-- Iteration 30 --
+string(0) ""
+
+-- Iteration 31 --
+string(0) ""
+===DONE===

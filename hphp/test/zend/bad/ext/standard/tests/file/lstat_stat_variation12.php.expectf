@@ -1,0 +1,7 @@
+*** Testing stat() on a link after using is_link() on it ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+--- Done ---

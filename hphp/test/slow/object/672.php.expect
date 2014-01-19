@@ -1,0 +1,14 @@
+FOo::exclAIM
+FOo::teST
+FOo::__FUNcTION__
+FOo::__CLAsS__
+array(4) {
+  ["ExclAim"]=>
+  int(1)
+  ["TesT"]=>
+  int(2)
+  ["__ClASS__"]=>
+  int(4)
+  ["__FuNCTION__"]=>
+  int(3)
+}

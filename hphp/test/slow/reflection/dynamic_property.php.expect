@@ -1,0 +1,50 @@
+object(ReflectionProperty)#4 (4) {
+  ["info"]=>
+  array(7) {
+    ["name"]=>
+    string(1) "a"
+    ["access"]=>
+    string(6) "public"
+    ["accessible"]=>
+    bool(true)
+    ["modifiers"]=>
+    int(256)
+    ["class"]=>
+    string(8) "stdClass"
+    ["doc"]=>
+    bool(false)
+    ["type"]=>
+    bool(false)
+  }
+  ["name"]=>
+  string(1) "a"
+  ["class"]=>
+  string(8) "stdClass"
+  ["forceAccessible":"ReflectionProperty":private]=>
+  bool(false)
+}
+object(ReflectionProperty)#4 (4) {
+  ["info"]=>
+  array(7) {
+    ["name"]=>
+    string(1) "a"
+    ["access"]=>
+    string(6) "public"
+    ["accessible"]=>
+    bool(true)
+    ["modifiers"]=>
+    int(256)
+    ["class"]=>
+    string(8) "stdClass"
+    ["doc"]=>
+    bool(false)
+    ["type"]=>
+    bool(false)
+  }
+  ["name"]=>
+  string(1) "a"
+  ["class"]=>
+  string(8) "stdClass"
+  ["forceAccessible":"ReflectionProperty":private]=>
+  bool(false)
+}

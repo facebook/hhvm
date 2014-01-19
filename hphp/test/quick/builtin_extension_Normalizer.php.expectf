@@ -1,0 +1,35 @@
+Normalizer
+object(Normalizer)#1 (0) {
+}
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"Normalizer";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "Normalizer"
+}
+array(3) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "isnormalized"
+  [2]=>
+  string(9) "normalize"
+}
+================
+A_Normalizer
+object(A_Normalizer)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(97) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:12:"A_Normalizer";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(12) "A_Normalizer"
+}
+array(3) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(12) "isnormalized"
+  [2]=>
+  string(9) "normalize"
+}

@@ -1,0 +1,11 @@
+HipHop Warning: %s
+NULL
+array(3) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+}
+Done

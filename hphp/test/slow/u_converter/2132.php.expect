@@ -1,0 +1,6 @@
+string(23) "This is an ascii string"
+string(12) "Snowman: (?)"
+Error: ucnv_setSubstChars() returned error 1: U_ILLEGAL_ARGUMENT_ERROR
+Error: ucnv_setSubstChars() returned error 1: U_ILLEGAL_ARGUMENT_ERROR
+Error: ucnv_setSubstChars() returned error 1: U_ILLEGAL_ARGUMENT_ERROR
+Error: ucnv_setSubstChars() returned error 1: U_ILLEGAL_ARGUMENT_ERROR

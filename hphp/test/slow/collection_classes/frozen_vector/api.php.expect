@@ -1,0 +1,42 @@
+object(HH\FrozenVector)#2 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(3) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+int(1)
+int(-1)
+object(HH\FrozenVector)#2 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+object(HH\FrozenVector)#2 (0) {
+}

@@ -1,0 +1,9 @@
+HipHop Notice: %s
+NULL
+object(hariCow)#%d (2) {
+  ["x"]=>
+  string(1) "x"
+  ["y"]=>
+  string(1) "y"
+}
+===DONE===

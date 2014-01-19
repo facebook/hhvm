@@ -1,0 +1,80 @@
+*** Testing mb_substr() : usage variations ***
+
+**-- Offset is: -60 --**
+-- ASCII String --
+string(8) "K0lzIA=="
+--Multibyte String --
+string(16) "5pel5pys6Kqe44OG"
+
+**-- Offset is: -50 --**
+-- ASCII String --
+string(8) "K0lzIA=="
+--Multibyte String --
+string(16) "5pel5pys6Kqe44OG"
+
+**-- Offset is: -40 --**
+-- ASCII String --
+string(8) "K0lzIA=="
+--Multibyte String --
+string(16) "5pel5pys6Kqe44OG"
+
+**-- Offset is: -30 --**
+-- ASCII String --
+string(8) "K0lzIA=="
+--Multibyte String --
+string(16) "5pel5pys6Kqe44OG"
+
+**-- Offset is: -20 --**
+-- ASCII String --
+string(8) "SXMgYQ=="
+--Multibyte String --
+string(16) "5pys6Kqe44OG44Kt"
+
+**-- Offset is: -10 --**
+-- ASCII String --
+string(8) "aXNoIA=="
+--Multibyte String --
+string(8) "MTIzNA=="
+
+**-- Offset is: 0 --**
+-- ASCII String --
+string(8) "K0lzIA=="
+--Multibyte String --
+string(16) "5pel5pys6Kqe44OG"
+
+**-- Offset is: 10 --**
+-- ASCII String --
+string(8) "bGlzaA=="
+--Multibyte String --
+string(8) "MDEyMw=="
+
+**-- Offset is: 20 --**
+-- ASCII String --
+string(4) "Zw=="
+--Multibyte String --
+string(4) "44CC"
+
+**-- Offset is: 30 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: 40 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: 50 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: 60 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+Done

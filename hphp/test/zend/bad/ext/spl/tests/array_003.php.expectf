@@ -1,0 +1,24 @@
+test Object
+(
+    [pub] => public
+    [pro:protected] => protected
+    [pri:test:private] => private
+    [imp] => implicit
+    [dyn] => dynamic
+)
+ArrayObject Object
+(
+    [storage:ArrayObject:private] => test Object
+        (
+            [pub] => public
+            [pro:protected] => protected
+            [pri:test:private] => private
+            [imp] => implicit
+            [dyn] => dynamic
+        )
+
+)
+pub => public
+imp => implicit
+dyn => dynamic
+===DONE===

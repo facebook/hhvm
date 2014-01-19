@@ -1,0 +1,19 @@
+array(2) {
+  ["key1"]=>
+  array(2) {
+    ["subkey1"]=>
+    array(2) {
+      [0]=>
+      string(8) "value1-1"
+      [1]=>
+      string(8) "value1-2"
+    }
+    ["subkey2"]=>
+    string(6) "value1"
+  }
+  ["key2"]=>
+  array(1) {
+    [0]=>
+    string(6) "value2"
+  }
+}

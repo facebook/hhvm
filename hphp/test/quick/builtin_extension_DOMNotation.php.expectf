@@ -1,0 +1,107 @@
+DOMNotation
+object(DOMNotation)#1 (0) {
+}
+string(96) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:11:"DOMNotation";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(11) "DOMNotation"
+}
+array(21) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(11) "appendChild"
+  [5]=>
+  string(9) "cloneNode"
+  [6]=>
+  string(9) "getLineNo"
+  [7]=>
+  string(13) "hasAttributes"
+  [8]=>
+  string(13) "hasChildNodes"
+  [9]=>
+  string(12) "insertBefore"
+  [10]=>
+  string(18) "isDefaultNamespace"
+  [11]=>
+  string(10) "isSameNode"
+  [12]=>
+  string(11) "isSupported"
+  [13]=>
+  string(18) "lookupNamespaceUri"
+  [14]=>
+  string(12) "lookupPrefix"
+  [15]=>
+  string(9) "normalize"
+  [16]=>
+  string(11) "removeChild"
+  [17]=>
+  string(12) "replaceChild"
+  [18]=>
+  string(4) "c14n"
+  [19]=>
+  string(8) "c14nfile"
+  [20]=>
+  string(11) "getNodePath"
+}
+================
+A_DOMNotation
+object(A_DOMNotation)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(98) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:13:"A_DOMNotation";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(13) "A_DOMNotation"
+}
+array(21) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(11) "appendChild"
+  [5]=>
+  string(9) "cloneNode"
+  [6]=>
+  string(9) "getLineNo"
+  [7]=>
+  string(13) "hasAttributes"
+  [8]=>
+  string(13) "hasChildNodes"
+  [9]=>
+  string(12) "insertBefore"
+  [10]=>
+  string(18) "isDefaultNamespace"
+  [11]=>
+  string(10) "isSameNode"
+  [12]=>
+  string(11) "isSupported"
+  [13]=>
+  string(18) "lookupNamespaceUri"
+  [14]=>
+  string(12) "lookupPrefix"
+  [15]=>
+  string(9) "normalize"
+  [16]=>
+  string(11) "removeChild"
+  [17]=>
+  string(12) "replaceChild"
+  [18]=>
+  string(4) "c14n"
+  [19]=>
+  string(8) "c14nfile"
+  [20]=>
+  string(11) "getNodePath"
+}

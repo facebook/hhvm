@@ -1,0 +1,3 @@
+class Y extends X {
+public function f($x1, $x2 = NULL, $x3 = 123, string $x4, string $x5 = NULL, string $x6 = "abc", array $x7, array $x8 = NULL, C $x9, D $x10 = NULL, bool $x11, boolean $x12 = true, int $x13, integer $x14 = 73, real $x15, double $x16 = 1.5, float $x17) {}
+}

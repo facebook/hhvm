@@ -1,0 +1,54 @@
+fd1 2010-03-14 03:00:00 EDT America/New_York - 2010-03-14 01:59:59 EST America/New_York = PT0H0M1S
+fd2 2010-03-14 04:30:00 EDT America/New_York - 2010-03-13 04:30:00 EST America/New_York = P1DT0H
+fd3 2010-03-14 03:30:00 EDT America/New_York - 2010-03-13 04:30:00 EST America/New_York = P0DT22H
+fd4 2010-03-14 01:30:00 EST America/New_York - 2010-03-13 04:30:00 EST America/New_York = P0DT21H
+fd5 2010-03-14 01:30:00 EST America/New_York - 2010-03-13 01:30:00 EST America/New_York = P1DT0H
+fd6 2010-03-14 03:30:00 EDT America/New_York - 2010-03-13 03:30:00 EST America/New_York = P1DT0H
+fd7 2010-03-14 03:30:00 EDT America/New_York - 2010-03-13 02:30:00 EST America/New_York = P1DT1H
+
+fa1 2010-03-14 01:59:59 EST America/New_York + PT1S = 2010-03-14 03:00:00 EDT America/New_York
+fa2 2010-03-13 04:30:00 EST America/New_York + P1D = 2010-03-14 04:30:00 EDT America/New_York
+fa3 2010-03-13 04:30:00 EST America/New_York + PT22H = 2010-03-14 03:30:00 EDT America/New_York
+fa4 2010-03-13 04:30:00 EST America/New_York + PT21H = 2010-03-14 01:30:00 EST America/New_York
+fa5 2010-03-13 01:30:00 EST America/New_York + P1D = 2010-03-14 01:30:00 EST America/New_York
+fa6 2010-03-13 02:30:00 EST America/New_York + P1D = 2010-03-14 03:30:00 EDT America/New_York
+
+fs1 2010-03-14 03:00:00 EDT America/New_York - PT1S = 2010-03-14 01:59:59 EST America/New_York
+fs2 2010-03-14 04:30:00 EDT America/New_York - P1D = 2010-03-13 04:30:00 EST America/New_York
+fs3 2010-03-14 03:30:00 EDT America/New_York - PT22H = 2010-03-13 04:30:00 EST America/New_York
+fs4 2010-03-14 01:30:00 EST America/New_York - PT21H = 2010-03-13 04:30:00 EST America/New_York
+fs5 2010-03-14 01:30:00 EST America/New_York - P1D = 2010-03-13 01:30:00 EST America/New_York
+fs6 2010-03-15 03:30:00 EDT America/New_York - P1D = 2010-03-14 03:30:00 EDT America/New_York
+fs7 2010-03-15 03:30:00 EDT America/New_York - P1D = 2010-03-14 03:30:00 EDT America/New_York
+
+bd1 2010-11-07 01:00:00 EST America/New_York - 2010-11-07 01:59:59 EDT America/New_York = PT0H0M1S
+bd2 2010-11-07 04:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P1DT0H
+bd3 2010-11-07 03:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P0DT24H
+bd4 2010-11-07 02:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P0DT23H
+bd5 2010-11-07 01:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P0DT22H
+bd6 2010-11-07 01:30:00 EDT America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P0DT21H
+bd7 2010-11-07 01:30:00 EDT America/New_York - 2010-11-06 01:30:00 EDT America/New_York = P1DT0H
+bd8 2010-11-07 01:30:00 EST America/New_York - 2010-11-06 01:30:00 EDT America/New_York = P1DT1H
+
+ba1 2010-11-07 01:59:59 EDT America/New_York + PT1S = 2010-11-07 01:00:00 EST America/New_York
+ba2 2010-11-06 04:30:00 EDT America/New_York + P1D = 2010-11-07 04:30:00 EST America/New_York
+ba3 2010-11-06 04:30:00 EDT America/New_York + PT24H = 2010-11-07 03:30:00 EST America/New_York
+ba4 2010-11-06 04:30:00 EDT America/New_York + PT23H = 2010-11-07 02:30:00 EST America/New_York
+ba5 2010-11-06 04:30:00 EDT America/New_York + PT22H = 2010-11-07 01:30:00 EST America/New_York
+ba6 2010-11-06 04:30:00 EDT America/New_York + PT21H = 2010-11-07 01:30:00 EDT America/New_York
+ba7 2010-11-06 01:30:00 EDT America/New_York + P1D = 2010-11-07 01:30:00 EDT America/New_York
+ba8 2010-11-06 01:30:00 EDT America/New_York + P1DT1H = 2010-11-07 01:30:00 EST America/New_York
+ba9 2010-11-06 04:30:00 EDT America/New_York + PT25H = 2010-11-07 04:30:00 EST America/New_York
+ba10 2010-11-06 03:30:00 EDT America/New_York + P1D = 2010-11-07 03:30:00 EST America/New_York
+ba11 2010-11-06 02:30:00 EDT America/New_York + P1D = 2010-11-07 02:30:00 EST America/New_York
+
+bs1 2010-11-07 01:00:00 EST America/New_York - PT1S = 2010-11-07 01:59:59 EDT America/New_York
+bs2 2010-11-07 04:30:00 EST America/New_York - P1D = 2010-11-06 04:30:00 EDT America/New_York
+bs3 2010-11-07 03:30:00 EST America/New_York - PT24H = 2010-11-06 04:30:00 EDT America/New_York
+bs4 2010-11-07 02:30:00 EST America/New_York - PT23H = 2010-11-06 04:30:00 EDT America/New_York
+bs5 2010-11-07 01:30:00 EST America/New_York - PT22H = 2010-11-06 04:30:00 EDT America/New_York
+bs6 2010-11-07 01:30:00 EDT America/New_York - PT21H = 2010-11-06 04:30:00 EDT America/New_York
+bs7 2010-11-07 01:30:00 EDT America/New_York - P1D = 2010-11-06 01:30:00 EDT America/New_York
+bs8 2010-11-07 01:30:00 EST America/New_York - P1DT1H = 2010-11-06 00:30:00 EDT America/New_York
+bs9 2010-11-07 03:30:00 EST America/New_York - P1D = 2010-11-06 03:30:00 EDT America/New_York
+bs10 2010-11-07 02:30:00 EST America/New_York - P1D = 2010-11-06 02:30:00 EDT America/New_York

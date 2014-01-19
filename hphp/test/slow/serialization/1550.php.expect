@@ -1,0 +1,8 @@
+object(X)#2 (3) {
+  ["str":"X":private]=>
+  NULL
+  ["arr":"X":private]=>
+  NULL
+  ["obj":"X":private]=>
+  NULL
+}

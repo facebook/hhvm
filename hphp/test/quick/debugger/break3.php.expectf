@@ -1,0 +1,95 @@
+Program %s/break3.php loaded. Type '[r]un' or '[c]ontinue' to go.
+continue
+break3.php loaded
+Program %s/break3.php exited normally.
+break \TestNs\foo()
+Breakpoint 1 set upon entering TestNs\foo()
+@ \TestNs\foo('test_break1')
+Breakpoint 1 reached at TestNs\foo() on line 7 of %s/break3.php
+   6 function foo($x) {
+   7*  $y = $x.'_TestNs';
+   8   \error_log($y);
+
+variable
+$x = "test_break1"
+break clear all
+All breakpoints are cleared.
+continue
+test_break1_TestNs
+break TestNs\cls::pubObj()
+Breakpoint 1 set upon entering TestNs\cls::pubObj()
+@ $break8=new \TestNs\cls()
+@ $break8->pubObj('test_break2')
+Breakpoint 1 reached at TestNs\cls::pubObj() on line 13 of %s/break3.php
+  12   public function pubObj($x) {
+  13*    \error_log("pubObj:".$x);
+  14   }
+
+variable
+$x = "test_break2"
+break clear all
+All breakpoints are cleared.
+break \TestNs\break8->pubObj()
+Breakpoint was not set in right format.
+break TestNs\cls::break8->pubObj()
+Breakpoint was not set in right format.
+continue
+pubObj:test_break2
+break \TestNs\cls::pubCls()
+Breakpoint 1 set upon entering TestNs\cls::pubCls()
+@ \TestNs\cls::pubCls('test_break3')
+Breakpoint 1 reached at TestNs\cls::pubCls() on line 16 of %s/break3.php
+  15   public static function pubCls($x) {
+  16*    \error_log("pubCls:".$x);
+  17   }
+
+variable
+$x = "test_break3"
+break clear all
+All breakpoints are cleared.
+continue
+pubCls:test_break3
+break \TestNs\Nested\foo()
+Breakpoint 1 set upon entering TestNs\Nested\foo()
+@ \TestNs\Nested\foo('test_break4')
+Breakpoint 1 reached at TestNs\Nested\foo() on line 23 of %s/break3.php
+  22 function foo($x) {
+  23*  $y = $x.'_TestNs\Nested';
+  24   \error_log($y);
+
+variable
+$x = "test_break4"
+break clear all
+All breakpoints are cleared.
+continue
+test_break4_TestNs\Nested
+break TestNs\Nested\cls::pubObj()
+Breakpoint 1 set upon entering TestNs\Nested\cls::pubObj()
+@ $break8=new \TestNs\Nested\cls()
+@ $break8->pubObj('test_break5')
+Breakpoint 1 reached at TestNs\Nested\cls::pubObj() on line 29 of %s/break3.php
+  28   public function pubObj($x) {
+  29*    \error_log("pubObj:".$x.'_TestNs\Nested');
+  30   }
+
+variable
+$x = "test_break5"
+break clear all
+All breakpoints are cleared.
+continue
+pubObj:test_break5_TestNs\Nested
+break \TestNs\Nested\cls::pubCls()
+Breakpoint 1 set upon entering TestNs\Nested\cls::pubCls()
+@ \TestNs\Nested\cls::pubCls('test_break6')
+Breakpoint 1 reached at TestNs\Nested\cls::pubCls() on line 32 of %s/break3.php
+  31   public static function pubCls($x) {
+  32*    \error_log("pubCls:".$x.'_TestNs\Nested');
+  33   }
+
+variable
+$x = "test_break6"
+break clear all
+All breakpoints are cleared.
+continue
+pubCls:test_break6_TestNs\Nested
+quit

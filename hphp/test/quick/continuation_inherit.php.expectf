@@ -1,0 +1,2 @@
+bool(true)
+HipHop Fatal error: Class HerpDerp may not inherit from final class (Continuation) in %s on line 4

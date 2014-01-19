@@ -1,0 +1,155 @@
+Program %s/flow_gen.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+flow_gen.php loaded
+Program %s/flow_gen.php exited normally.
+break flow_gen.php:12
+Breakpoint 1 set on line 12 of flow_gen.php
+@test(1)
+Breakpoint 1 reached at genFoo() on line 12 of %s/flow_gen.php
+  11 function genFoo($a) {
+  12*  $a = bar($a);
+  13   $z = yield $a+5;
+
+next
+Break at genFoo() on line 13 of %s/flow_gen.php
+  12   $a = bar($a);
+  13*  $z = yield $a+5;
+  14   yield $z+1;
+
+next
+Break at foo() on line 20 of %s/flow_gen.php
+  19   $gen1 = genFoo($a);
+  20*  $gen1->next();
+  21   while ($gen1->valid()) {
+
+next
+Break at foo() on line 21 of %s/flow_gen.php
+  20   $gen1->next();
+  21*  while ($gen1->valid()) {
+  22     $val = $gen1->current();
+
+next
+Break at foo() on line 22 of %s/flow_gen.php
+  21   while ($gen1->valid()) {
+  22*    $val = $gen1->current();
+  23     var_dump($val);
+
+next
+Break at foo() on line 23 of %s/flow_gen.php
+  22     $val = $gen1->current();
+  23*    var_dump($val);
+  24     $gen1->send($a);
+
+next
+Break at foo() on line 24 of %s/flow_gen.php
+  23     var_dump($val);
+  24*    $gen1->send($a);
+  25   }
+
+step
+Break at genFoo() on line 11 of %s/flow_gen.php
+  10 
+  11*function genFoo($a) {
+  12*  $a = bar($a);
+  13*  $z = yield $a+5;
+  14*  yield $z+1;
+  15*  error_log('Finished in genFoo');
+  16*}
+  17 
+
+step
+Break at genFoo() on line 13 of %s/flow_gen.php
+  12   $a = bar($a);
+  13*  $z = yield $a+5;
+  14   yield $z+1;
+
+next
+Break at genFoo() on line 14 of %s/flow_gen.php
+  13   $z = yield $a+5;
+  14*  yield $z+1;
+  15   error_log('Finished in genFoo');
+
+next
+Break at foo() on line 24 of %s/flow_gen.php
+  23     var_dump($val);
+  24*    $gen1->send($a);
+  25   }
+
+next
+Break at foo() on line 21 of %s/flow_gen.php
+  20   $gen1->next();
+  21*  while ($gen1->valid()) {
+  22     $val = $gen1->current();
+
+next
+Break at foo() on line 22 of %s/flow_gen.php
+  21   while ($gen1->valid()) {
+  22*    $val = $gen1->current();
+  23     var_dump($val);
+
+next
+Break at foo() on line 23 of %s/flow_gen.php
+  22     $val = $gen1->current();
+  23*    var_dump($val);
+  24     $gen1->send($a);
+
+next
+Break at foo() on line 24 of %s/flow_gen.php
+  23     var_dump($val);
+  24*    $gen1->send($a);
+  25   }
+
+step
+Break at genFoo() on line 11 of %s/flow_gen.php
+  10 
+  11*function genFoo($a) {
+  12*  $a = bar($a);
+  13*  $z = yield $a+5;
+  14*  yield $z+1;
+  15*  error_log('Finished in genFoo');
+  16*}
+  17 
+
+step
+Break at genFoo() on line 14 of %s/flow_gen.php
+  13   $z = yield $a+5;
+  14*  yield $z+1;
+  15   error_log('Finished in genFoo');
+
+next
+Break at genFoo() on line 15 of %s/flow_gen.php
+  14   yield $z+1;
+  15*  error_log('Finished in genFoo');
+  16 }
+
+next
+Finished in genFoo
+Break at genFoo() on line 11 of %s/flow_gen.php
+  10 
+  11*function genFoo($a) {
+  12*  $a = bar($a);
+  13*  $z = yield $a+5;
+  14*  yield $z+1;
+  15*  error_log('Finished in genFoo');
+  16*}
+  17 
+
+next
+Break at foo() on line 24 of %s/flow_gen.php
+  23     var_dump($val);
+  24*    $gen1->send($a);
+  25   }
+
+next
+Break at foo() on line 21 of %s/flow_gen.php
+  20   $gen1->next();
+  21*  while ($gen1->valid()) {
+  22     $val = $gen1->current();
+
+break clear all
+All breakpoints are cleared.
+continue
+int(8)
+int(2)
+
+quit

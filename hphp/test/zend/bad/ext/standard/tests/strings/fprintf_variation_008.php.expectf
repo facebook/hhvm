@@ -1,0 +1,11 @@
+*** Testing fprintf() for hexadecimals ***
+
+0
+1
+ffffffff
+2
+fffffffe
+16409d5
+fe9bf62b
+4d2
+Done

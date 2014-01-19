@@ -1,0 +1,15 @@
+IntlTimeZone Object
+(
+    [valid] => 1
+    [id] => GMT+01:00
+    [rawOffset] => 3600000
+    [currentOffset] => 3600000
+)
+IntlTimeZone Object
+(
+    [valid] => 1
+    [id] => GMT+01:00
+    [rawOffset] => 3600000
+    [currentOffset] => 3600000
+)
+==DONE==

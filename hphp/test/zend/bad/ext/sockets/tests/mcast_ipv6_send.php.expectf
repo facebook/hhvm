@@ -1,0 +1,17 @@
+Setting IPV6_MULTICAST_TTL
+bool(true)
+int(9)
+
+Setting IPV6_MULTICAST_LOOP
+bool(true)
+int(0)
+bool(true)
+int(1)
+
+Setting IPV6_MULTICAST_IF
+interface 0:
+bool(true)
+int(0)
+interface 1:
+bool(true)
+int(1)

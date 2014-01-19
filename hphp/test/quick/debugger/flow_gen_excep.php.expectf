@@ -1,0 +1,108 @@
+Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+int(8)
+Caught Exception given to continuation 8 in genFoo()
+int(4)
+Caught Exception given to continuation 4 in foo()
+Program %s/flow_gen_excep.php exited normally.
+break foo()
+Breakpoint 1 set upon entering foo()
+next
+Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+next
+Break on line 40 of %s/flow_gen_excep.php
+  39 
+  40*main(1);
+  41 
+
+next
+Breakpoint 1 reached at foo() on line 23 of %s/flow_gen_excep.php
+  22 function foo($a) {
+  23*  $gen1 = genFoo($a);
+  24   $gen1->next();
+
+next
+Break at foo() on line 24 of %s/flow_gen_excep.php
+  23   $gen1 = genFoo($a);
+  24*  $gen1->next();
+  25   while ($gen1->valid()) {
+
+next
+Break at foo() on line 25 of %s/flow_gen_excep.php
+  24   $gen1->next();
+  25*  while ($gen1->valid()) {
+  26     $val = $gen1->current();
+
+next
+Break at foo() on line 26 of %s/flow_gen_excep.php
+  25   while ($gen1->valid()) {
+  26*    $val = $gen1->current();
+  27     var_dump($val);
+
+next
+Break at foo() on line 27 of %s/flow_gen_excep.php
+  26     $val = $gen1->current();
+  27*    var_dump($val);
+  28     try {
+
+next
+int(8)
+Break at foo() on line 29 of %s/flow_gen_excep.php
+  28     try {
+  29*      $gen1->raise(new Exception('Exception given to continuation '.$val));
+  30     } catch (Exception $e) {
+
+next
+Caught Exception given to continuation 8 in genFoo()
+Break at foo() on line 25 of %s/flow_gen_excep.php
+  24   $gen1->next();
+  25*  while ($gen1->valid()) {
+  26     $val = $gen1->current();
+
+next
+Break at foo() on line 26 of %s/flow_gen_excep.php
+  25   while ($gen1->valid()) {
+  26*    $val = $gen1->current();
+  27     var_dump($val);
+
+next
+Break at foo() on line 27 of %s/flow_gen_excep.php
+  26     $val = $gen1->current();
+  27*    var_dump($val);
+  28     try {
+
+next
+int(4)
+Break at foo() on line 29 of %s/flow_gen_excep.php
+  28     try {
+  29*      $gen1->raise(new Exception('Exception given to continuation '.$val));
+  30     } catch (Exception $e) {
+
+next
+Break at foo() on line 28 of %s/flow_gen_excep.php
+  27     var_dump($val);
+  28*    try {
+  29*      $gen1->raise(new Exception('Exception given to continuation '.$val));
+  30*    } catch (Exception $e) {
+  31*      printf("Caught %s in foo()\n", $e->getMessage());
+  32*    }
+  33   }
+
+next
+Break at foo() on line 31 of %s/flow_gen_excep.php
+  30     } catch (Exception $e) {
+  31*      printf("Caught %s in foo()\n", $e->getMessage());
+  32     }
+
+next
+Caught Exception given to continuation 4 in foo()
+Break at foo() on line 25 of %s/flow_gen_excep.php
+  24   $gen1->next();
+  25*  while ($gen1->valid()) {
+  26     $val = $gen1->current();
+
+break clear all
+All breakpoints are cleared.
+continue
+Program %s/flow_gen_excep.php exited normally.
+quit

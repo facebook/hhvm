@@ -1,0 +1,34 @@
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(5) "green"
+    [1]=>
+    string(3) "red"
+  }
+  [1]=>
+  float(4)
+  [2]=>
+  string(3) "php"
+}
+array(3) {
+  [2]=>
+  array(2) {
+    [0]=>
+    string(5) "green"
+    [1]=>
+    string(3) "red"
+  }
+  [1]=>
+  float(4)
+  [0]=>
+  string(3) "php"
+}
+array(3) {
+  ["blab"]=>
+  string(1) "b"
+  [0]=>
+  float(5)
+  ["php"]=>
+  float(4)
+}

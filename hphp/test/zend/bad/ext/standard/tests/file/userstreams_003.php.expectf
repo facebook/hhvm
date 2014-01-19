@@ -1,0 +1,94 @@
+bool(true)
+bool(true)
+
+------ stream_set_blocking - 1: -------
+value:
+int(0)
+ptrparam:
+NULL
+$option === 1 === 1:
+bool(true)
+$value === 0 === 0:
+bool(true)
+bool(true)
+
+------ stream_set_blocking - 2: -------
+value:
+int(1)
+ptrparam:
+NULL
+$option === 1 === 1:
+bool(true)
+$value === 1 === 1:
+bool(true)
+bool(false)
+
+------ stream_set_blocking - 3: -------
+value:
+int(0)
+ptrparam:
+NULL
+$option === 1 === 1:
+bool(true)
+$value === 0 === 0:
+bool(true)
+bool(true)
+
+------ stream_set_blocking - 4: -------
+HipHop Warning: %s
+bool(false)
+
+------ stream_set_write_buffer - 1: -------
+value:
+int(0)
+ptrparam:
+int(%d)
+$option === 3 === 3:
+bool(true)
+$value === 0 === 0:
+bool(true)
+int(0)
+
+------ stream_set_write_buffer - 2: -------
+value:
+int(2)
+ptrparam:
+int(4096)
+$option === 3 === 3:
+bool(true)
+$value === 2 === 2:
+bool(true)
+int(0)
+
+------ stream_set_write_buffer - 3: -------
+value:
+int(2)
+ptrparam:
+int(8192)
+$option === 3 === 3:
+bool(true)
+$value === 2 === 2:
+bool(true)
+int(-1)
+
+------ stream_set_timeout - 1: -------
+value:
+int(10)
+ptrparam:
+int(11)
+$option === 4 === 4:
+bool(true)
+$value === 10 === 10:
+bool(true)
+bool(true)
+
+------ stream_set_timeout - 2: -------
+value:
+int(11)
+ptrparam:
+int(12)
+$option === 4 === 4:
+bool(true)
+$value === 11 === 11:
+bool(true)
+bool(false)

@@ -1,0 +1,76 @@
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+array(1) {
+  [%u|b%"test"]=>
+  %unicode|string%(0) ""
+}
+HipHop Warning: %s
+ in %s
+bool(false)
+HipHop Warning: %s
+ in %s
+bool(false)
+array(1) {
+  [%u|b%"test"]=>
+  %unicode|string%(8) "new
+line"
+}
+array(1) {
+  [%u|b%"test"]=>
+  %unicode|string%(16) "test const value"
+}
+array(1) {
+  [%u|b%"section"]=>
+  array(1) {
+    [%u|b%"test"]=>
+    %unicode|string%(5) "hello"
+  }
+}
+array(1) {
+  [%u|b%"test"]=>
+  %unicode|string%(5) "hello"
+}
+array(1) {
+  [%u|b%"section.test"]=>
+  %unicode|string%(5) "hello"
+}
+array(1) {
+  [%u|b%"section"]=>
+  array(1) {
+    [%u|b%"section.test"]=>
+    %unicode|string%(5) "hello"
+  }
+}
+array(1) {
+  [%u|b%"section"]=>
+  array(1) {
+    [1]=>
+    %unicode|string%(1) "2"
+  }
+}
+array(1) {
+  [1]=>
+  %unicode|string%(1) "2"
+}
+array(1) {
+  [%u|b%"test"]=>
+  %unicode|string%(5) "test4"
+}
+array(1) {
+  [%u|b%"section1"]=>
+  array(1) {
+    [%u|b%"name"]=>
+    %unicode|string%(5) "value"
+  }
+}
+array(3) {
+  [%u|b%"foo"]=>
+  %unicode|string%(4) "bar1"
+  [%u|b%"_foo"]=>
+  %unicode|string%(4) "bar2"
+  [%u|b%"foo_"]=>
+  %unicode|string%(4) "bar3"
+}
+Done

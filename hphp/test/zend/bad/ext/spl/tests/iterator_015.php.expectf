@@ -1,0 +1,20 @@
+<ul>
+  0=>a
+  <ul>
+    0=>ba
+    <ul>
+      0=>bba
+      1=>bbb
+    </ul>
+    <ul>
+      <ul>
+        0=>bcaa
+      </ul>
+    </ul>
+  </ul>
+  <ul>
+    0=>ca
+  </ul>
+  3=>d
+<ul>
+===DONE===

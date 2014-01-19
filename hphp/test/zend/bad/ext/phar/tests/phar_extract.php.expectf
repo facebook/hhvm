@@ -1,0 +1,21 @@
+%sextract%cfile1.txt
+%sextract%cfile2.txt
+%sextract%cone
+%sextract%csubdir
+%sextract%csubdir%cectory
+%sextract%csubdir%cectory%cfile.txt
+string(2) "hi"
+string(3) "hi3"
+string(3) "hi2"
+bool(false)
+Invalid argument, expected a filename (string) or array of filenames
+HipHop Warning: %s
+Invalid argument, extraction path must be non-zero length
+Unable to use path "%soops" for extraction, it is a file, must be a directory
+Invalid argument, array of filenames to extract contains non-string value
+Extraction from phar "%stempmanifest1.phar.php" failed: Cannot extract "file1.txt" to "%sextract/file1.txt", path already exists
+string(5) "first"
+string(2) "hi"
+Cannot extract to "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...", destination directory is too long for filesystem
+Extraction from phar "%stempmanifest1.phar.php" failed: Cannot extract "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..." to "%s...", extracted filename is too long for filesystem
+===DONE===

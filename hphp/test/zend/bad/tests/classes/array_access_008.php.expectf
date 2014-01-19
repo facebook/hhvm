@@ -1,0 +1,12 @@
+string(3) "Foo"
+string(6) "FooBar"
+string(9) "FooBarBaz"
+===ArrayOverloading===
+string(3) "Foo"
+HipHop Notice: %s
+string(3) "Foo"
+HipHop Notice: %s
+string(3) "Foo"
+HipHop Notice: %s
+string(3) "Foo"
+===DONE===

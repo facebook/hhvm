@@ -1,0 +1,7 @@
+string(17) "test_ext_file.tmp"
+string(13) "test_ext_file"
+bool(true)
+array(1) {
+  [0]=>
+  string(%d) "%s/test/slow/ext_file/test_ext_file.txt"
+}

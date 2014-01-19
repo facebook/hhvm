@@ -1,0 +1,12 @@
+*** Testing the basic functionality with file ***
+%d:%s:%s:%d:%d:%d
+%d:%s:%s:%d:%d:%d
+%d:%s:%s:%d:%d:%d
+%d:%s:%s:%d:%d:%d
+*** Testing the basic functionality with dir ***
+%d:%s:%s:%d:%d:%d
+%d:%s:%s:%d:%d:%d
+%d:%s:%s:%d:%d:%d
+%d:%s:%s:%d:%d:%d
+
+*** Done ***

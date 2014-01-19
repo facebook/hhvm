@@ -1,0 +1,69 @@
+Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
+Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+MyCachingIterator::testSet()
+set(0,25)
+set(1,42)
+set(3,FooBar)
+MyCachingIterator::show()
+array(3) {
+  [0]=>
+  int(25)
+  [1]=>
+  int(42)
+  [3]=>
+  string(6) "FooBar"
+}
+MyCachingIterator::testUnset()
+unset(0)
+unset(2)
+MyCachingIterator::show()
+array(2) {
+  [1]=>
+  int(42)
+  [3]=>
+  string(6) "FooBar"
+}
+MyCachingIterator::fill()
+MyCachingIterator::show()
+array(4) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+}
+MyCachingIterator::testSet()
+set(0,25)
+set(1,42)
+set(3,FooBar)
+MyCachingIterator::show()
+array(4) {
+  [0]=>
+  int(25)
+  [1]=>
+  int(42)
+  [2]=>
+  int(2)
+  [3]=>
+  string(6) "FooBar"
+}
+MyCachingIterator::testUnset()
+unset(0)
+unset(2)
+MyCachingIterator::show()
+array(2) {
+  [1]=>
+  int(42)
+  [3]=>
+  string(6) "FooBar"
+}
+===DONE===

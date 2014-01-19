@@ -1,0 +1,4 @@
+The following line rightly shows the correct date time:
+04/04/04 2345
+But the following line fails to show the correct date time:
+04/04/04 0045

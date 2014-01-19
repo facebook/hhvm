@@ -1,0 +1,160 @@
+*** Testing basic functionalities ***
+-- Iteration 1 --
+bool(true)
+-- Iteration 2 --
+bool(false)
+-- Iteration 3 --
+bool(true)
+-- Iteration 4 --
+bool(false)
+-- Iteration 5 --
+bool(true)
+-- Iteration 6 --
+bool(true)
+-- Iteration 7 --
+bool(true)
+-- Iteration 8 --
+bool(true)
+
+*** Testing possible variations ***
+
+** Variation loop 1 **
+-- Iteration 1 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+-- Iteration 2 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+-- Iteration 3 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+-- Iteration 4 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+-- Iteration 5 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+-- Iteration 6 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+-- Iteration 7 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+-- Iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+
+** Variation loop 2 **
+-- Iteration 1 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+-- Iteration 2 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+-- Iteration 3 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+-- Iteration 4 --
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+-- Iteration 5 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+
+*** Testing error conditions ***
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+bool(false)
+
+*** Testing operation on objects ***
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+HipHop Warning: %s
+bool(false)
+Done

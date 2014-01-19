@@ -1,0 +1,35 @@
+Same variable used as static and non static.
+---------
+0
+10
+---------
+0
+11
+---------
+0
+12
+
+Lots of initialisations in the same statement.
+------------- Call 0 --------------
+Unitialised      : 
+Initialised to 10: 10
+Initialised to 20: 20
+Unitialised      : 
+Initialised to 30: 30
+------------- Call 1 --------------
+Unitialised      : 1
+Initialised to 10: 11
+Initialised to 20: 21
+Unitialised      : 1
+Initialised to 30: 31
+------------- Call 2 --------------
+Unitialised      : 2
+Initialised to 10: 12
+Initialised to 20: 22
+Unitialised      : 2
+Initialised to 30: 32
+
+Using static keyword at global scope
+ 10
+1 11
+2 12

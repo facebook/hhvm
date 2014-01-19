@@ -1,0 +1,9 @@
+Calling a
+Hello from a
+Calling b
+I am b
+Calling a
+I am b
+Calling b
+Hello from a
+HipHop Warning: fb_rename_function(extract, a) failed: rename of extract not allowed! in %s/test/quick/rename_dyn_function.php on line 23

@@ -1,0 +1,12 @@
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
+array(2) {
+  [0]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "foo"
+}
+NULL
+NULL

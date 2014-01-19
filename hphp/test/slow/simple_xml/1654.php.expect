@@ -1,0 +1,14 @@
+string(4) "root"
+string(2) "c1"
+string(2) "c2"
+string(2) "c3"
+string(2) "b1"
+int(1)
+string(2) "c1"
+string(2) "c1"
+string(2) "c1"
+int(2)
+string(2) "c2"
+string(2) "c3"
+string(2) "c2"
+string(2) "c3"

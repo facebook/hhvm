@@ -1,0 +1,119 @@
+==
+Array
+(
+    [warning_count] => 0
+    [warnings] => Array
+        (
+        )
+
+    [error_count] => 1
+    [errors] => Array
+        (
+            [8] => Trailing data
+        )
+
+)
+==
+DateTime Object
+(
+    [date] => 2004-06-08 00:00:00
+    [timezone_type] => 3
+    [timezone] => UTC
+)
+Array
+(
+    [warning_count] => 1
+    [warnings] => Array
+        (
+            [8] => Trailing data
+        )
+
+    [error_count] => 0
+    [errors] => Array
+        (
+        )
+
+)
+==
+DateTime Object
+(
+    [date] => 2004-06-08 00:00:00
+    [timezone_type] => 3
+    [timezone] => UTC
+)
+Array
+(
+    [warning_count] => 1
+    [warnings] => Array
+        (
+            [8] => Trailing data
+        )
+
+    [error_count] => 0
+    [errors] => Array
+        (
+        )
+
+)
+==
+DateTime Object
+(
+    [date] => 2004-06-08 00:00:00
+    [timezone_type] => 3
+    [timezone] => UTC
+)
+Array
+(
+    [warning_count] => 1
+    [warnings] => Array
+        (
+            [8] => Trailing data
+        )
+
+    [error_count] => 0
+    [errors] => Array
+        (
+        )
+
+)
+==
+DateTime Object
+(
+    [date] => 2004-06-08 00:00:00
+    [timezone_type] => 3
+    [timezone] => UTC
+)
+Array
+(
+    [warning_count] => 0
+    [warnings] => Array
+        (
+        )
+
+    [error_count] => 0
+    [errors] => Array
+        (
+        )
+
+)
+==
+DateTime Object
+(
+    [date] => 2004-06-08 00:00:00
+    [timezone_type] => 3
+    [timezone] => UTC
+)
+Array
+(
+    [warning_count] => 0
+    [warnings] => Array
+        (
+        )
+
+    [error_count] => 0
+    [errors] => Array
+        (
+        )
+
+)
+==

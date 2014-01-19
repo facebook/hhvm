@@ -1,0 +1,6 @@
+HipHop Warning: Attempt to increment/decrement property of non-object in %s/test/slow/object_property/707.php on line 4
+NULL
+HipHop Warning: Attempt to increment/decrement property of non-object in %s/test/slow/object_property/707.php on line 4
+NULL
+HipHop Warning: Creating default object from empty value in %s/test/slow/object_property/707.php on line 4
+HipHop Fatal error: Cannot access empty property in %s/test/slow/object_property/707.php on line 4

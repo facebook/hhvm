@@ -1,0 +1,72 @@
+-- Testing array_replace() --
+array(5) {
+  [0]=>
+  string(11) "dontclobber"
+  [1]=>
+  string(9) "clobbered"
+  ["test2"]=>
+  float(0)
+  ["test3"]=>
+  array(1) {
+    ["testarray2"]=>
+    bool(false)
+  }
+  ["test4"]=>
+  array(1) {
+    ["clobbered3"]=>
+    array(3) {
+      [0]=>
+      int(0)
+      [1]=>
+      int(1)
+      [2]=>
+      int(2)
+    }
+  }
+}
+ -- Testing array_replace_recursive() --
+array(5) {
+  [0]=>
+  string(11) "dontclobber"
+  [1]=>
+  string(9) "clobbered"
+  ["test2"]=>
+  float(0)
+  ["test3"]=>
+  array(2) {
+    ["testarray2"]=>
+    bool(false)
+    [1]=>
+    array(2) {
+      ["testsubarray1"]=>
+      string(12) "dontclobber2"
+      ["testsubarray2"]=>
+      string(12) "dontclobber3"
+    }
+  }
+  ["test4"]=>
+  array(1) {
+    ["clobbered3"]=>
+    array(3) {
+      [0]=>
+      int(0)
+      [1]=>
+      int(1)
+      [2]=>
+      int(2)
+    }
+  }
+}
+ -- Testing array_replace_recursive() w/ endless recusrsion --
+HipHop Warning: %s
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(0) {
+      }
+    }
+  }
+}

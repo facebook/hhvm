@@ -1,0 +1,12 @@
+array(4) {
+  ["file1.txt"]=>
+  string(%d) "%stestdir%cfile1.txt"
+  ["file2.txt"]=>
+  string(%d) "%stestdir%cfile2.txt"
+  ["file3.txt"]=>
+  string(%d) "%stestdir%cfile3.txt"
+  ["file4.txt"]=>
+  string(%d) "%stestdir%cfile4.txt"
+}
+bool(true)
+===DONE===

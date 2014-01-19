@@ -1,0 +1,4 @@
+%s: Function MongoDB::authenticate() is deprecated in %s on line %d
+HipHop Warning: %s
+Failed to connect to: %s:%d: Authentication failed on database 'test2' with username 'user': auth fails
+DONE

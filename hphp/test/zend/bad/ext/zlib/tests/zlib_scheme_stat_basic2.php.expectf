@@ -1,0 +1,12 @@
+file_exists=bool(false)
+is_file=bool(false)
+is_dir=bool(false)
+is_readable=bool(false)
+
+filesize=HipHop Warning: %s
+bool(false)
+filetype=HipHop Warning: %s
+bool(false)
+fileatime=HipHop Warning: %s
+bool(false)
+===DONE===

@@ -1,0 +1,10 @@
+array(0) {
+}
+HipHop Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s/test/slow/get_object_vars/1538.php on line 6
+NULL
+HipHop Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s/test/slow/get_object_vars/1538.php on line 7
+NULL
+HipHop Warning: get_object_vars() expects parameter 1 to be object, string given in %s/test/slow/get_object_vars/1538.php on line 8
+NULL
+HipHop Warning: get_object_vars() expects parameter 1 to be object, integer given in %s/test/slow/get_object_vars/1538.php on line 9
+NULL

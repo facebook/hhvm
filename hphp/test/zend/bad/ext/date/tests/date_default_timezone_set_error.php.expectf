@@ -1,0 +1,14 @@
+*** Testing date_default_timezone_set() : error variations ***
+
+-- Testing date_default_timezone_set() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing date_default_timezone_set() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing date_default_timezone_set() function with invalid timezone identifier  --
+HipHop Notice: %s
+bool(false)
+===Done===

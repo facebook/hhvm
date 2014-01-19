@@ -1,0 +1,36 @@
+int(1)
+int(2)
+bool(false)
+=========
+int(3)
+int(3)
+bool(true)
+=========
+int(1)
+int(2)
+bool(false)
+string(9) "HH\Vector"
+=========
+bool(false)
+int(2)
+int(3)
+bool(false)
+=========
+bool(true)
+int(2)
+int(3)
+bool(false)
+=========
+int(2)
+int(1)
+int(2)
+int(1)
+=========
+string(4) "blah"
+string(2) "yo"
+int(2)
+string(4) "blah"
+string(2) "yo"
+=========
+bool(true)
+bool(false)

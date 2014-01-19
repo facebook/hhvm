@@ -1,0 +1,81 @@
+*** Testing octdec() : usage variations ***
+
+-- Iteration 1 --
+int(0)
+
+-- Iteration 2 --
+int(1)
+
+-- Iteration 3 --
+int(5349)
+
+-- Iteration 4 --
+int(1253)
+
+-- Iteration 5 --
+int(1134037)
+
+-- Iteration 6 --
+int(1134038)
+
+-- Iteration 7 --
+int(69)
+
+-- Iteration 8 --
+int(69)
+
+-- Iteration 9 --
+int(175304192)
+
+-- Iteration 10 --
+int(342391)
+
+-- Iteration 11 --
+int(5)
+
+-- Iteration 12 --
+int(0)
+
+-- Iteration 13 --
+int(0)
+
+-- Iteration 14 --
+int(1)
+
+-- Iteration 15 --
+int(0)
+
+-- Iteration 16 --
+int(1)
+
+-- Iteration 17 --
+int(0)
+
+-- Iteration 18 --
+int(0)
+
+-- Iteration 19 --
+int(0)
+
+-- Iteration 20 --
+HipHop Notice: %s
+int(0)
+
+-- Iteration 21 --
+int(0)
+
+-- Iteration 22 --
+int(0)
+
+-- Iteration 23 --
+int(0)
+
+-- Iteration 24 --
+int(0)
+
+-- Iteration 25 --
+int(0)
+
+-- Iteration 26 --
+int(%d)
+---Done---

@@ -1,0 +1,6 @@
+*** Testing is_dir() error conditions ***HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+bool(false)
+*** Done ***

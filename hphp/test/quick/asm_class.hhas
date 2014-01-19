@@ -1,0 +1,202 @@
+#
+# Basic test of classes for hip hop assembler.
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  True
+  RetC
+}
+
+.class Base {
+  .method [public] __construct {
+    String "default constructor\n"
+    Print
+    PopC
+
+    Null
+    RetC
+  }
+
+  .method [public static] print_it($x) {
+    CGetL $x
+    String "\n"
+    Concat
+    Print
+    PopC
+
+    True
+    RetC
+  }
+
+  .method [protected] prot_method() {
+    String "In protected method\n"
+    Print
+    RetC
+  }
+
+  .method [public] overriden() {
+    String "Base::overriden\n"
+    Print
+    RetC
+  }
+}
+
+.class [interface] IDunno {
+  .default_ctor;
+  .method [public abstract] abs_method {
+    String "Pure virtual method called"
+    Fatal RuntimeOmitFrame
+  }
+}
+
+.class [interface] IDunno2 { .default_ctor; }
+
+.class Derived extends Base implements(IDunno IDunno2) {
+  .method [public] some_junk {
+    This
+    FPushObjMethodD 0 "prot_method"
+    FCall 0
+    PopR
+
+    Null
+    RetC
+  }
+
+  .method [public] overriden() {
+    String "Derived::overriden\n"
+    Print
+    RetC
+  }
+
+  .method [public] abs_method() {
+    String "in an abstract method\n"
+    Print
+    RetC
+  }
+}
+
+.class WithProps {
+  .method [public] 86ctor {
+    Null
+    RetC
+  }
+
+  .property [public] funk;
+
+  .method [public] print_funk {
+    String "funk"
+    SetL $name
+    PopC
+
+    This
+    CGetM <C PL:$name>
+    String "\n"
+    Concat
+    Print
+    RetC
+  }
+
+  .property [private] defaulted = """s:3:"heh";""";
+  .property [private] badstring =
+    """s:30:"bad string\"""has triple quotes";""";
+
+  .method [public] print_defaulted {
+    This
+    CGetM <C PT:"defaulted">
+    String "\n"
+    Concat
+    Print
+    PopC
+
+    This
+    CGetM <C PT:"badstring">
+    String "bad string\"\"\"has triple quotes"
+    Eq
+    JmpZ broken
+    True
+    RetC
+
+    broken: String "string escaping is broken\n"
+            Print
+            RetC
+  }
+}
+
+.function prop_test {
+  FPushCtorD 0 "WithProps"
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+
+  String "funk"
+  String "value of funk"
+  SetM <L:$obj PC>
+  PopC
+
+  CGetL $obj
+  FPushObjMethodD 0 "print_funk"
+  FCall 0
+  PopR
+
+  CGetL $obj
+  FPushObjMethodD 0 "print_defaulted"
+  FCall 0
+  PopR
+
+  True
+  RetC
+}
+
+.function main {
+  FPushCtorD 0 "Base"
+  FCall 0
+  PopR
+  SetL $base
+  PopC
+
+  String "print_it"
+  String "Base"
+  AGetC
+  FPushClsMethod 1
+  String "printing this string"
+  FPassC 0
+  FCall 1
+  PopR
+
+  FPushCtorD 0 "Derived"
+  FCall 0
+  PopR
+  SetL $derived
+  PopC
+
+  CGetL $derived
+  FPushObjMethodD 0 "some_junk"
+  FCall 0
+  PopR
+
+  CGetL $base
+  FPushObjMethodD 0 "overriden"
+  FCall 0
+  PopR
+
+  CGetL $derived
+  FPushObjMethodD 0 "overriden"
+  FCall 0
+  PopR
+
+  CGetL $derived
+  FPushObjMethodD 0 "abs_method"
+  FCall 0
+  PopR
+
+  FPushFuncD 0 "prop_test"
+  FCall 0
+  PopR
+
+  Int 1
+  RetC
+}

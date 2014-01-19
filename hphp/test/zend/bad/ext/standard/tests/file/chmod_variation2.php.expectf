@@ -1,0 +1,27 @@
+chmod() on a path containing .. and .
+bool(true)
+bool(true)
+755
+
+chmod() on a path containing .. with invalid directories
+bool(true)
+HipHop Warning: %s
+bool(false)
+777
+
+chmod() on a linked file
+bool(true)
+bool(true)
+bool(true)
+755
+bool(true)
+
+chmod() on a relative path from a different working directory
+bool(true)
+bool(true)
+755
+
+chmod() on a directory with a trailing /
+bool(true)
+bool(true)
+755

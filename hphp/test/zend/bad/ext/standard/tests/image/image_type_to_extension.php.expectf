@@ -1,0 +1,59 @@
+Constant: IMAGETYPE_GIF
+	With dot: .gif
+	Without dot: gif
+Constant: IMAGETYPE_JPEG
+	With dot: .jpeg
+	Without dot: jpeg
+Constant: IMAGETYPE_PNG
+	With dot: .png
+	Without dot: png
+Constant: IMAGETYPE_SWF
+	With dot: .swf
+	Without dot: swf
+Constant: IMAGETYPE_PSD
+	With dot: .psd
+	Without dot: psd
+Constant: IMAGETYPE_BMP
+	With dot: .bmp
+	Without dot: bmp
+Constant: IMAGETYPE_TIFF_II
+	With dot: .tiff
+	Without dot: tiff
+Constant: IMAGETYPE_TIFF_MM
+	With dot: .tiff
+	Without dot: tiff
+Constant: IMAGETYPE_JPC
+	With dot: .jpc
+	Without dot: jpc
+Constant: IMAGETYPE_JP2
+	With dot: .jp2
+	Without dot: jp2
+Constant: IMAGETYPE_JPX
+	With dot: .jpx
+	Without dot: jpx
+Constant: IMAGETYPE_JB2
+	With dot: .jb2
+	Without dot: jb2
+Constant: IMAGETYPE_IFF
+	With dot: .iff
+	Without dot: iff
+Constant: IMAGETYPE_WBMP
+	With dot: .bmp
+	Without dot: bmp
+Constant: IMAGETYPE_JPEG2000
+	With dot: .jpc
+	Without dot: jpc
+Constant: IMAGETYPE_XBM
+	With dot: .xbm
+	Without dot: xbm
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+bool(false)
+HipHop Warning: %s
+bool(false)
+bool(false)
+HipHop Warning: %s
+bool(false)
+Done

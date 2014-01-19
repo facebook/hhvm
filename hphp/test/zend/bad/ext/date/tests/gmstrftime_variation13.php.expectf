@@ -1,0 +1,18 @@
+*** Testing gmstrftime() : usage variation ***
+
+--Century number--
+bool(false)
+bool(false)
+
+--Month Date Year--
+bool(false)
+bool(false)
+
+--Year with century--
+bool(false)
+bool(false)
+
+--Year without century--
+bool(false)
+bool(false)
+===DONE===

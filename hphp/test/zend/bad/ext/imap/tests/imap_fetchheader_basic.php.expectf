@@ -1,0 +1,39 @@
+*** Testing imap_fetchheader() : basic functionality ***
+Create a temporary mailbox and add 1 msgs
+.. mailbox '%s.phpttest' created
+
+-- All possible arguments --
+-- Option is FT_UID --
+string(%d) "From: foo@anywhere.com
+Subject: Test msg 1
+To: %s
+MIME-Version: 1.0
+Content-Type: %s; %s
+
+"
+-- Option is FT_INTERNAL --
+string(%d) "From: foo@anywhere.com
+Subject: Test msg 1
+To: %s
+MIME-Version: 1.0
+Content-Type: %s; %s
+
+"
+-- Option is FT_PREFETCHTEXT --
+string(%d) "From: foo@anywhere.com
+Subject: Test msg 1
+To: %s
+MIME-Version: 1.0
+Content-Type: %s; %s
+
+"
+
+-- Mandatory arguments --
+string(%d) "From: foo@anywhere.com
+Subject: Test msg 1
+To: %s
+MIME-Version: 1.0
+Content-Type: %s; %s
+
+"
+===DONE===

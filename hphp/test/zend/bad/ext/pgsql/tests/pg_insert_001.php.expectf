@@ -1,0 +1,11 @@
+HipHop Warning: %s
+string(55) "INSERT INTO "phptests"."foo" ("id","id2") VALUES (1,2);"
+array(1) {
+  [0]=>
+  array(2) {
+    ["id"]=>
+    string(1) "1"
+    ["id2"]=>
+    string(1) "2"
+  }
+}

@@ -1,0 +1,44 @@
+Program %s/flow_break_interference.php loaded. Type '[r]un' or '[c]ontinue' to go.
+b flow_break_interference.php:15
+Breakpoint 1 set on line 15 of flow_break_interference.php
+But wont break until file flow_break_interference.php has been loaded.
+b flow_break_interference.php:27
+Breakpoint 2 set on line 27 of flow_break_interference.php
+But wont break until file flow_break_interference.php has been loaded.
+c
+int(8)
+Breakpoint 1 reached at genFoo() on line 15 of %s/flow_break_interference.php
+  14   // then we'll execute that opcode (load $a) before stopping.
+  15*  yield $z+1;
+  16   error_log('Finished in genFoo');
+
+b c 1
+Breakpoint 1 cleared on line 15 of flow_break_interference.php
+o
+Break at main() on line 23 of %s/flow_break_interference.php
+  22   foreach (genFoo(1) as $x) {
+  23*    var_dump($x);
+  24   }
+
+c
+int(1)
+Finished in genFoo
+Breakpoint 2 reached at main() on line 27 of %s/flow_break_interference.php
+  26   // chaning $a will show in $z.
+  27*  $z = $a;
+  28   var_dump($z);
+
+p $a
+42
+$a = 7
+n
+Break at main() on line 28 of %s/flow_break_interference.php
+  27   $z = $a;
+  28*  var_dump($z);
+  29 }
+
+p $z
+7
+p $a
+7
+q

@@ -1,0 +1,1 @@
+HipHop Fatal error: Call to undefined method A::foo from context B in %s on line 10

@@ -1,0 +1,23 @@
+object(HH\Vector)#1 (4) {
+  [0]=>
+  int(42)
+  [1]=>
+  float(123.456)
+  [2]=>
+  string(4) "blah"
+  [3]=>
+  array(3) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(5)
+    [2]=>
+    int(7)
+  }
+}
+object(Map)#1 (2) {
+  ["foo"]=>
+  int(1)
+  [2]=>
+  string(3) "bar"
+}

@@ -1,0 +1,31 @@
+string(26) "{"a":1,"b":2.3,"3":"test"}"
+string(23) "["a",1,true,false,null]"
+string(4) "null"
+string(4) ""a?""
+string(18) "["apple","banana"]"
+string(15) "[{"a":"apple"}]"
+string(36) "[
+    {
+        "a": "apple"
+    }
+]"
+string(68) "[
+    1,
+    2,
+    3,
+    [
+        1,
+        2,
+        3
+    ]
+]"
+string(87) "{
+    "a": 1,
+    "b": [
+        1,
+        2
+    ],
+    "c": {
+        "d": 42
+    }
+}"

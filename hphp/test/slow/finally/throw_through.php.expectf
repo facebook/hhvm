@@ -1,0 +1,5 @@
+string(9) "me first!"
+HipHop Fatal error: Uncaught exception 'Exception' with message 'foo' in %s:5
+Stack trace:
+#0 %s(10): foo()
+#1 {main}

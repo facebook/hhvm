@@ -1,0 +1,26 @@
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+array(2) {
+  [0]=>
+  string(1) "a"
+  ["?column?"]=>
+  string(1) "a"
+}
+array(1) {
+  ["?column?"]=>
+  string(1) "a"
+}
+object(stdClass)#1 (1) {
+  ["?column?"]=>
+  string(1) "a"
+}
+array(1) {
+  [0]=>
+  string(1) "a"
+}

@@ -1,0 +1,14 @@
+HipHop Warning: %s
+HipHop Warning: %s
+array(5) {
+  ["n"]=>
+  int(0)
+  ["connectionId"]=>
+  int(%d)
+  ["waited"]=>
+  int(%d)
+  ["err"]=>
+  NULL
+  ["ok"]=>
+  float(1)
+}

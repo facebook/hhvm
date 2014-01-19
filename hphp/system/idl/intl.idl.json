@@ -1,0 +1,852 @@
+{
+    "preamble": "#include <runtime\/base\/zend\/zend-collator.h>\n#include <unicode\/ucol.h> \/\/ icu\nnamespace HPHP {\nextern const int64_t q_Collator$$SORT_REGULAR;\n}",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "intl_get_error_code",
+            "desc": "Useful to handle errors occurred in static methods when there's no object to get error code from.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Error code returned by the last API function call."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "intl_get_error_message",
+            "desc": "Get error message from last internationalization function called.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Description of an error occurred in the last API function call."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "intl_error_name",
+            "desc": "Return ICU error code name.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "The returned string will be the same as the name of the error code constant."
+            },
+            "args": [
+                {
+                    "name": "error_code",
+                    "type": "Int64",
+                    "desc": "ICU error code."
+                }
+            ]
+        },
+        {
+            "name": "intl_is_failure",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if it the code indicates some failure, and FALSE in case of success or a warning."
+            },
+            "args": [
+                {
+                    "name": "error_code",
+                    "type": "Int64",
+                    "desc": "is a value that returned by functions: intl_get_error_code(), collator_get_error_code() ."
+                }
+            ]
+        },
+        {
+            "name": "collator_asort",
+            "desc": "Procedural style bool collator_asort ( Collator $coll , array &$arr [, int $sort_flag ] ) This function sorts an array such that array indices maintain their correlation with the array elements they are associated with. This is used mainly when sorting associative arrays where the actual element order is significant. Array elements will have sort order according to current locale rules.\n\nEquivalent to standard PHP asort().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "Collator object."
+                },
+                {
+                    "name": "arr",
+                    "type": "Variant",
+                    "ref": true
+                },
+                {
+                    "name": "sort_flag",
+                    "type": "Int64",
+                    "value": "q_Collator$$SORT_REGULAR",
+                    "desc": "Optional sorting type, one of the following:\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\n\nCollator::SORT_NUMERIC - compare items numerically\n\nCollator::SORT_STRING - compare items as strings\n\nDefault $sort_flag value is Collator::SORT_REGULAR. It is also used if an invalid $sort_flag value has been specified."
+                }
+            ]
+        },
+        {
+            "name": "collator_compare",
+            "desc": "Procedural style int collator_compare ( Collator $coll , string $str1 , string $str2 ) Compare two Unicode strings according to collation rules.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "1 if str1 is greater than str2 ;\n\n0 if str1 is equal to str2;\n\n-1 if str1 is less than str2 . On error boolean FALSE is returned. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "Collator object."
+                },
+                {
+                    "name": "str1",
+                    "type": "String",
+                    "desc": "The first string to compare."
+                },
+                {
+                    "name": "str2",
+                    "type": "String",
+                    "desc": "The second string to compare."
+                }
+            ]
+        },
+        {
+            "name": "collator_create",
+            "desc": "Procedural style Collator collator_create ( string $locale ) The strings will be compared using the options already specified.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Return new instance of Collator object, or NULL on error."
+            },
+            "args": [
+                {
+                    "name": "locale",
+                    "type": "String",
+                    "desc": "The locale containing the required collation rules. Special values for locales can be passed in - if null is passed for the locale, the default locale collation rules will be used. If empty string (\"\") or \"root\" are passed, UCA rules will be used."
+                }
+            ]
+        },
+        {
+            "name": "collator_get_attribute",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "attr",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "collator_get_error_code",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "collator_get_error_message",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "collator_get_locale",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "type",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "collator_get_strength",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "collator_set_attribute",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "attr",
+                    "type": "Int64"
+                },
+                {
+                    "name": "val",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "collator_set_strength",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "strength",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "collator_sort_with_sort_keys",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "arr",
+                    "type": "Variant",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "collator_sort",
+            "desc": "Procedural style bool collator_sort ( Collator $coll , array &$arr [, int $sort_flag ] ) This function sorts an array according to current locale rules.\n\nEquivalent to standard PHP sort() .",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant",
+                    "desc": "Collator object."
+                },
+                {
+                    "name": "arr",
+                    "type": "Variant",
+                    "desc": "Array of strings to sort.",
+                    "ref": true
+                },
+                {
+                    "name": "sort_flag",
+                    "type": "Int64",
+                    "value": "q_Collator$$SORT_REGULAR",
+                    "desc": "Optional sorting type, one of the following:\n\n\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\n\nCollator::SORT_NUMERIC - compare items numerically\n\nCollator::SORT_STRING - compare items as strings Default sorting type is Collator::SORT_REGULAR."
+                }
+            ]
+        },
+        {
+            "name": "idn_to_ascii",
+            "desc": "This function converts Unicode domain name to IDNA ASCII-compatible format.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Domain name encoded in ASCII-compatible form."
+            },
+            "args": [
+                {
+                    "name": "domain",
+                    "type": "String",
+                    "desc": "Domain to convert. In PHP 5 must be UTF-8 encoded."
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Conversion options - combination of IDNA_* constants (except IDNA_ERROR_* constants). "
+                },
+                {
+                    "name": "variant",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Either INTL_IDNA_VARIANT_2003 for IDNA 2003 or INTL_IDNA_VARIANT_UTS46 for UTS #46."
+                },
+                {
+                    "name": "idna_info",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "This parameter can be used only if INTL_IDNA_VARIANT_UTS46 was used for variant. In that case, it will be filled with an array with the keys 'result', the possibly illegal result of the transformation, 'isTransitionalDifferent', a boolean indicating whether the usage of the transitional mechanisms of UTS #46 either has or would have changed the result and 'errors', which is an int representing a bitset of the error constants IDNA_ERROR_*. ",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "idn_to_unicode",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "domain",
+                    "type": "String"
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Conversion options - combination of IDNA_* constants (except IDNA_ERROR_* constants). "
+                },
+                {
+                    "name": "variant",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Either INTL_IDNA_VARIANT_2003 for IDNA 2003 or INTL_IDNA_VARIANT_UTS46 for UTS #46."
+                },
+                {
+                    "name": "idna_info",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "This parameter can be used only if INTL_IDNA_VARIANT_UTS46 was used for variant. In that case, it will be filled with an array with the keys 'result', the possibly illegal result of the transformation, 'isTransitionalDifferent', a boolean indicating whether the usage of the transitional mechanisms of UTS #46 either has or would have changed the result and 'errors', which is an int representing a bitset of the error constants IDNA_ERROR_*. ",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "idn_to_utf8",
+            "desc": "This function converts Unicode domain name from IDNA ASCII-compatible format to plain Unicode.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Domain name in Unicode. In PHP5, domain name will be in UTF-8."
+            },
+            "args": [
+                {
+                    "name": "domain",
+                    "type": "String",
+                    "desc": "Domain to convert in IDNA ASCII-compatible format."
+                },
+                {
+                    "name": "options",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Conversion options - combination of IDNA_* constants (except IDNA_ERROR_* constants). "
+                },
+                {
+                    "name": "variant",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Either INTL_IDNA_VARIANT_2003 for IDNA 2003 or INTL_IDNA_VARIANT_UTS46 for UTS #46."
+                },
+                {
+                    "name": "idna_info",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "This parameter can be used only if INTL_IDNA_VARIANT_UTS46 was used for variant. In that case, it will be filled with an array with the keys 'result', the possibly illegal result of the transformation, 'isTransitionalDifferent', a boolean indicating whether the usage of the transitional mechanisms of UTS #46 either has or would have changed the result and 'errors', which is an int representing a bitset of the error constants IDNA_ERROR_*. ",
+                    "ref": true
+                }
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "Collator",
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "Provides string comparison capability with support for appropriate locale-sensitive sort orderings.",
+            "flags": [
+            ],
+            "footer": "\n private:\n  String     m_locale;\n  UCollator *m_ucoll;\n  intl_error m_errcode;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "locale",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "asort",
+                    "desc": "Procedural style bool collator_asort ( Collator $coll , array &$arr [, int $sort_flag ] ) This function sorts an array such that array indices maintain their correlation with the array elements they are associated with. This is used mainly when sorting associative arrays where the actual element order is significant. Array elements will have sort order according to current locale rules.\n\nEquivalent to standard PHP asort().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "arr",
+                            "type": "Variant",
+                            "desc": "Collator object.",
+                            "ref": true
+                        },
+                        {
+                            "name": "sort_flag",
+                            "type": "Int64",
+                            "value": "q_Collator$$SORT_REGULAR"
+                        }
+                    ]
+                },
+                {
+                    "name": "compare",
+                    "desc": "Procedural style int collator_compare ( Collator $coll , string $str1 , string $str2 ) Compare two Unicode strings according to collation rules.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "1 if str1 is greater than str2 ;\n\n0 if str1 is equal to str2;\n\n-1 if str1 is less than str2 . On error boolean FALSE is returned. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function."
+                    },
+                    "args": [
+                        {
+                            "name": "str1",
+                            "type": "String",
+                            "desc": "Collator object."
+                        },
+                        {
+                            "name": "str2",
+                            "type": "String",
+                            "desc": "The first string to compare."
+                        }
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Procedural style Collator collator_create ( string $locale ) The strings will be compared using the options already specified.",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Return new instance of Collator object, or NULL on error."
+                    },
+                    "args": [
+                        {
+                            "name": "locale",
+                            "type": "String",
+                            "desc": "The locale containing the required collation rules. Special values for locales can be passed in - if null is passed for the locale, the default locale collation rules will be used. If empty string (\"\") or \"root\" are passed, UCA rules will be used."
+                        }
+                    ]
+                },
+                {
+                    "name": "getattribute",
+                    "desc": "Procedural style int collator_get_attribute ( Collator $coll , int $attr ) Get a value of an integer collator attribute.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Attribute value, or boolean FALSE on error."
+                    },
+                    "args": [
+                        {
+                            "name": "attr",
+                            "type": "Int64",
+                            "desc": "Collator object."
+                        }
+                    ]
+                },
+                {
+                    "name": "geterrorcode",
+                    "desc": "Procedural style int collator_get_error_code ( Collator $coll )",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Error code returned by the last Collator API function call."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "geterrormessage",
+                    "desc": "Procedural style string collator_get_error_message ( Collator $coll ) Retrieves the message for the last error.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Description of an error occurred in the last Collator API function call."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getlocale",
+                    "desc": "Procedural style string collator_get_locale ( Collator $coll , int $type ) Get collector locale name.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Real locale name from which the collation data comes. If the collator was instantiated from rules or an error occurred, returns boolean FALSE."
+                    },
+                    "args": [
+                        {
+                            "name": "type",
+                            "type": "Int64",
+                            "value": "0",
+                            "desc": "Collator object."
+                        }
+                    ]
+                },
+                {
+                    "name": "getstrength",
+                    "desc": "Procedural style int collator_get_strength ( Collator $coll )",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns current collation strength, or boolean FALSE on error."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "setattribute",
+                    "desc": "Procedural style bool collator_set_attribute ( Collator $coll , int $attr , int $val )",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "attr",
+                            "type": "Int64",
+                            "desc": "Collator object."
+                        },
+                        {
+                            "name": "val",
+                            "type": "Int64"
+                        }
+                    ]
+                },
+                {
+                    "name": "setstrength",
+                    "desc": "Procedural style bool collator_set_strength ( Collator $coll , int $strength ) The ICU Collation Service supports many levels of comparison (named \"Levels\", but also known as \"Strengths\"). Having these categories enables ICU to sort strings precisely according to local conventions. However, by allowing the levels to be selectively employed, searching for a string in text can be performed with various matching conditions.\n\n\n\nPrimary Level: Typically, this is used to denote differences between base characters (for example, \"a\" < \"b\"). It is the strongest difference. For example, dictionaries are divided into different sections by base character. This is also called the level1 strength.\n\nSecondary Level: Accents in the characters are considered secondary differences. Other differences between letters can also be considered secondary differences, depending on the language. A secondary difference is ignored when there is a primary difference anywhere in the strings. This is also called the level2 strength.\n\nNote: In some languages (such as Danish), certain accented letters are considered to be separate base characters. In most languages, however, an accented letter only has a secondary difference from the unaccented version of that letter.\n\nTertiary Level: Upper and lower case differences in characters are distinguished at the tertiary level. In addition, a variant of a letter differs from the base form on the tertiary level (such as \"A\" and \" \"). Another example is the difference between large and small Kana. A tertiary difference is ignored when there is a primary or secondary difference anywhere in the strings. This is also called the level3 strength.\n\nQuaternary Level: When punctuation is ignored (see Ignoring Punctuations ) at level 13, an additional level can be used to distinguish words with and without punctuation (for example, \"ab\" < \"a-b\" < \"aB\"). This difference is ignored when there is a primary, secondary or tertiary difference. This is also known as the level4 strength. The quaternary level should only be used if ignoring punctuation is required or when processing Japanese text (see Hiragana processing).\n\nIdentical Level: When all other levels are equal, the identical level is used as a tiebreaker. The Unicode code point values of the NFD form of each string are compared at this level, just in case there is no difference at levels 14. For example, Hebrew cantillation marks are only distinguished at this level. This level should be used sparingly, as only code point values differences between two strings is an extremely rare occurrence. Using this level substantially decreases the performance for both incremental comparison and sort key generation (as well as increasing the sort key length). It is also known as level 5 strength.\n\nFor example, people may choose to ignore accents or ignore accents and case when searching for text. Almost all characters are distinguished by the first three levels, and in most locales the default value is thus Tertiary. However, if Alternate is set to be Shifted, then the Quaternary strength can be used to break ties among whitespace, punctuation, and symbols that would otherwise be ignored. If very fine distinctions among characters are required, then the Identical strength can be used (for example, Identical Strength distinguishes between the Mathematical Bold Small A and the Mathematical Italic Small A.). However, using levels higher than Tertiary the Identical strength result in significantly longer sort keys, and slower string comparison performance for equal strings.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "strength",
+                            "type": "Int64",
+                            "desc": "Collator object."
+                        }
+                    ]
+                },
+                {
+                    "name": "sortwithsortkeys",
+                    "desc": "Procedural style bool collator_sort_with_sort_keys ( Collator $coll , array &$arr ) Similar to collator_sort() but uses ICU sorting keys produced by ucol_getSortKey() to gain more speed on large arrays.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "arr",
+                            "type": "Variant",
+                            "desc": "Collator object.",
+                            "ref": true
+                        }
+                    ]
+                },
+                {
+                    "name": "sort",
+                    "desc": "Procedural style bool collator_sort ( Collator $coll , array &$arr [, int $sort_flag ] ) This function sorts an array according to current locale rules.\n\nEquivalent to standard PHP sort() .",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "arr",
+                            "type": "Variant",
+                            "desc": "Collator object.",
+                            "ref": true
+                        },
+                        {
+                            "name": "sort_flag",
+                            "type": "Int64",
+                            "value": "q_Collator$$SORT_REGULAR",
+                            "desc": "Array of strings to sort."
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+                {
+                    "name": "SORT_REGULAR",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SORT_NUMERIC",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SORT_STRING",
+                    "type": "Int64"
+                },
+                {
+                    "name": "FRENCH_COLLATION",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ALTERNATE_HANDLING",
+                    "type": "Int64"
+                },
+                {
+                    "name": "CASE_FIRST",
+                    "type": "Int64"
+                },
+                {
+                    "name": "CASE_LEVEL",
+                    "type": "Int64"
+                },
+                {
+                    "name": "NORMALIZATION_MODE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "STRENGTH",
+                    "type": "Int64"
+                },
+                {
+                    "name": "HIRAGANA_QUATERNARY_MODE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "NUMERIC_COLLATION",
+                    "type": "Int64"
+                },
+                {
+                    "name": "DEFAULT_VALUE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "PRIMARY",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SECONDARY",
+                    "type": "Int64"
+                },
+                {
+                    "name": "TERTIARY",
+                    "type": "Int64"
+                },
+                {
+                    "name": "DEFAULT_STRENGTH",
+                    "type": "Int64"
+                },
+                {
+                    "name": "QUATERNARY",
+                    "type": "Int64"
+                },
+                {
+                    "name": "IDENTICAL",
+                    "type": "Int64"
+                },
+                {
+                    "name": "OFF",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ON",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SHIFTED",
+                    "type": "Int64"
+                },
+                {
+                    "name": "NON_IGNORABLE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LOWER_FIRST",
+                    "type": "Int64"
+                },
+                {
+                    "name": "UPPER_FIRST",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "Normalizer",
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "Normalization is a process that involves transforming characters and sequences of characters into a formally-defined underlying representation. This process is most important when text needs to be compared for sorting and searching, but it is also used when storing text to ensure that the text is stored in a consistent representation.\n\nThe Unicode Consortium has defined a number of normalization forms reflecting the various needs of applications: Normalization Form D (NFD) - Canonical Decomposition Normalization Form C (NFC) - Canonical Decomposition followed by Canonical Composition Normalization Form KD (NFKD) - Compatibility Decomposition Normalization Form KC (NFKC) - Compatibility Decomposition followed by Canonical Composition The different forms are defined in terms of a set of transformations on the text, transformations that are expressed by both an algorithm and a set of data files.",
+            "flags": [
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isnormalized",
+                    "desc": "Procedural style bool normalizer_is_normalized ( string $input [, string $form = Normalizer::FORM_C ] ) Checks if the provided string is already in the specified normalization form.",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE if normalized, FALSE otherwise or if there an error"
+                    },
+                    "args": [
+                        {
+                            "name": "input",
+                            "type": "String"
+                        },
+                        {
+                            "name": "form",
+                            "type": "Int64",
+                            "value": "q_Normalizer$$FORM_C",
+                            "desc": "One of the normalization forms."
+                        }
+                    ]
+                },
+                {
+                    "name": "normalize",
+                    "desc": "Procedural style string normalizer_normalize ( string $input [, string $form = Normalizer::FORM_C ] ) Normalizes the input provided and returns the normalized string",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "NULL if an error occurred."
+                    },
+                    "args": [
+                        {
+                            "name": "input",
+                            "type": "String"
+                        },
+                        {
+                            "name": "form",
+                            "type": "Int64",
+                            "value": "q_Normalizer$$FORM_C"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+                {
+                    "name": "NONE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "FORM_D",
+                    "type": "Int64"
+                },
+                {
+                    "name": "NFD",
+                    "type": "Int64"
+                },
+                {
+                    "name": "FORM_KD",
+                    "type": "Int64"
+                },
+                {
+                    "name": "NFKD",
+                    "type": "Int64"
+                },
+                {
+                    "name": "FORM_C",
+                    "type": "Int64"
+                },
+                {
+                    "name": "NFC",
+                    "type": "Int64"
+                },
+                {
+                    "name": "FORM_KC",
+                    "type": "Int64"
+                },
+                {
+                    "name": "NFKC",
+                    "type": "Int64"
+                }
+            ]
+        }
+    ]
+}

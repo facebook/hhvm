@@ -1,0 +1,10 @@
+array(4) {
+  ["country_code"]=>
+  string(2) "NO"
+  ["latitude"]=>
+  float(59.91666)
+  ["longitude"]=>
+  float(10.75)
+  ["comments"]=>
+  string(0) ""
+}

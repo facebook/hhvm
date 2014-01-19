@@ -1,0 +1,22 @@
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+int(0)
+array(2) {
+  ["bar"]=>
+  string(3) "ABC"
+  [0]=>
+  string(3) "ABC"
+}
+int(1)
+array(2) {
+  ["bar"]=>
+  string(3) "DEF"
+  [0]=>
+  string(3) "DEF"
+}

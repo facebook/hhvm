@@ -1,0 +1,24 @@
+Some tests are known to fail with HHBBC:
+
+----------------------------------------------------------------------
+Slow:
+----------------------------------------------------------------------
+
+This test is sensitive to how much data the JIT allocates using the
+smart allocator, which appears to be perturbed by this stuff right
+now.
+
+  hphp/test/slow/ext_datetime/strtotime_leak.php (jit only)
+
+This test is failing (only with HardConstProp) because this propagates
+a class constant that hphpc doesn't propagate and autoload order
+changes.  This one might be ok (this optimization is allowed to break
+autoload order in hphpc too).
+
+  hphp/test/slow/volatile/1221.php
+
+If type assertions are on, this one will notice that HardTypeHints was
+true by asserting in bytecode.cpp.  To fix this we need to support
+setting options from hphp_opts files.
+
+  slow/invalid_argument/1383.php

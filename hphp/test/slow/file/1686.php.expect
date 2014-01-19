@@ -1,0 +1,3 @@
+From file, without Maxlen: <s:11:"hello world";>.
+From file, using Maxlen null: <s:0:"";>.
+From file, using Maxlen -1: <s:11:"hello world";>.

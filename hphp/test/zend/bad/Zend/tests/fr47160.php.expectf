@@ -1,0 +1,47 @@
+Strict Standards: Non-static method Hello::world() should not be called statically in %s on line %d
+Hello, you
+HipHop Notice: %s
+NULL
+
+Strict Standards: call_user_func() expects parameter 1 to be a valid callback, non-static method Hello::world() should not be called statically in %s on line %d
+Hello, you
+HipHop Notice: %s
+NULL
+-----
+Hello, again
+object(Hello)#1 (0) {
+}
+Hello, again
+object(Hello)#1 (0) {
+}
+-----
+Hello, there
+object(Hello)#2 (0) {
+}
+Hello, there
+object(Hello)#2 (0) {
+}
+-----
+Hello, devs
+object(Hello)#4 (0) {
+}
+Hello, devs
+object(Hello)#4 (0) {
+}
+-----
+Magic::__call called (foo)!
+Magic::__call called (foo)!
+-----
+Magic2::__callStatic called (foo)!
+Magic2::__callStatic called (foo)!
+-----
+Magic3::__callStatic called (foo)!
+Magic3::__callStatic called (foo)!
+-----
+Magic3::__call called (foo)!
+Magic3::__call called (foo)!
+-----
+Hello, you
+NULL
+Hello, you
+NULL

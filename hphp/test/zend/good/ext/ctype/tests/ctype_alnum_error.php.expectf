@@ -1,0 +1,10 @@
+*** Testing ctype_alnum() : error conditions ***
+
+-- Testing ctype_alnum() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing ctype_alnum() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

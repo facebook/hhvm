@@ -1,0 +1,33 @@
+array(1) {
+  ["f1"]=>
+  string(3) "foo"
+}
+array(1) {
+  ["f1"]=>
+  string(3) "foo"
+}
+HipHop Warning: %s
+array(3) {
+  [0]=>
+  string(5) "42000"
+  [1]=>
+  int(1064)
+  [2]=>
+  string(149) "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '--'' at line 1"
+}
+array(1) {
+  ["f1"]=>
+  string(3) "foo"
+}
+array(1) {
+  ["f1"]=>
+  string(3) "foo"
+}
+array(1) {
+  ["f1"]=>
+  string(3) "foo"
+}
+array(1) {
+  ["f1"]=>
+  string(3) "foo"
+}

@@ -1,0 +1,1680 @@
+Framework_AssertTest::testAssertAncestorContentAttributes
+F
+Framework_AssertTest::testAssertArrayContainsObject
+.
+Framework_AssertTest::testAssertArrayContainsOnlyIntegers
+.
+Framework_AssertTest::testAssertArrayContainsOnlyStdClass
+.
+Framework_AssertTest::testAssertArrayContainsString
+.
+Framework_AssertTest::testAssertArrayHasIntegerKey
+.
+Framework_AssertTest::testAssertArrayHasKeyAcceptsArrayAccessValue
+.
+Framework_AssertTest::testAssertArrayHasKeyAcceptsArrayObjectValue
+.
+Framework_AssertTest::testAssertArrayHasKeyProperlyFailsWithArrayAccessValue
+.
+Framework_AssertTest::testAssertArrayHasKeyProperlyFailsWithArrayObjectValue
+.
+Framework_AssertTest::testAssertArrayHasKeyThrowsException
+.
+Framework_AssertTest::testAssertArrayHasStringKey
+.
+Framework_AssertTest::testAssertArrayNotContainsObject
+.
+Framework_AssertTest::testAssertArrayNotContainsOnlyIntegers
+.
+Framework_AssertTest::testAssertArrayNotContainsOnlyStdClass
+.
+Framework_AssertTest::testAssertArrayNotContainsString
+.
+Framework_AssertTest::testAssertArrayNotHasIntegerKey
+.
+Framework_AssertTest::testAssertArrayNotHasKeyAcceptsArrayAccessValue
+.
+Framework_AssertTest::testAssertArrayNotHasKeyPropertlyFailsWithArrayAccessValue
+.
+Framework_AssertTest::testAssertArrayNotHasKeyThrowsException
+.
+Framework_AssertTest::testAssertArrayNotHasStringKey
+.
+Framework_AssertTest::testAssertAttributeEmpty
+.
+Framework_AssertTest::testAssertAttributeNotEmpty
+.
+Framework_AssertTest::testAssertChildContentAttributes
+F
+Framework_AssertTest::testAssertChildSubChildren
+F
+Framework_AssertTest::testAssertChildrenContentAttributes
+F
+Framework_AssertTest::testAssertClassHasAttributeThrowsException
+.
+Framework_AssertTest::testAssertClassHasAttributeThrowsException2
+.
+Framework_AssertTest::testAssertClassHasStaticAttributeThrowsException
+.
+Framework_AssertTest::testAssertClassHasStaticAttributeThrowsException2
+.
+Framework_AssertTest::testAssertClassNotHasAttributeThrowsException
+.
+Framework_AssertTest::testAssertClassNotHasAttributeThrowsException2
+.
+Framework_AssertTest::testAssertClassNotHasStaticAttributeThrowsException
+.
+Framework_AssertTest::testAssertClassNotHasStaticAttributeThrowsException2
+.
+Framework_AssertTest::testAssertContainsOnlyInstancesOf
+.
+Framework_AssertTest::testAssertContainsOnlyInstancesOfThrowsException
+.
+Framework_AssertTest::testAssertContainsOnlyThrowsException
+.
+Framework_AssertTest::testAssertContainsThrowsException
+.
+Framework_AssertTest::testAssertCount
+.
+Framework_AssertTest::testAssertCountThrowsExceptionIfElementIsNotCountable
+.
+Framework_AssertTest::testAssertCountThrowsExceptionIfExpectedCountIsNoInteger
+.
+Framework_AssertTest::testAssertDescendantContentAttributes
+F
+Framework_AssertTest::testAssertEmpty
+.
+Framework_AssertTest::testAssertEqualsFails with data set #0 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #1 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #10 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #11 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #12 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #13 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #14 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #15 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #16 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #17 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #18 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #19 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #2 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #20 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #21 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #22 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #23 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #24 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #25 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #26 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #27 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #28 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #29 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #3 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #30 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #31 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #32 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #33 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #34 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #35 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #36 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #4 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #5 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #6 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #7 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #8 
+.
+Framework_AssertTest::testAssertEqualsFails with data set #9 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #0 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #1 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #10 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #11 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #12 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #13 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #14 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #15 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #16 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #17 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #18 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #19 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #2 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #20 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #21 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #22 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #23 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #24 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #25 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #26 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #27 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #28 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #29 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #3 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #30 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #31 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #32 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #33 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #34 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #35 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #36 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #4 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #5 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #6 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #7 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #8 
+.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #9 
+.
+Framework_AssertTest::testAssertFalse
+.
+Framework_AssertTest::testAssertFileEquals
+.
+Framework_AssertTest::testAssertFileExists
+.
+Framework_AssertTest::testAssertFileExistsThrowsException
+.
+Framework_AssertTest::testAssertFileNotEquals
+.
+Framework_AssertTest::testAssertFileNotExists
+.
+Framework_AssertTest::testAssertFileNotExistsThrowsException
+.
+Framework_AssertTest::testAssertIteratorContainsObject
+.
+Framework_AssertTest::testAssertIteratorContainsString
+.
+Framework_AssertTest::testAssertJsonFileEqualsJsonFile
+.
+Framework_AssertTest::testAssertJsonFileNotEqualsJsonFile
+.
+Framework_AssertTest::testAssertJsonStringEqualsJsonFile
+.
+Framework_AssertTest::testAssertJsonStringEqualsJsonFileExpectingException
+.
+Framework_AssertTest::testAssertJsonStringEqualsJsonFileExpectingExpectationFailedException
+.
+Framework_AssertTest::testAssertJsonStringEqualsJsonString
+.
+Framework_AssertTest::testAssertJsonStringEqualsJsonStringErrorRaised with data set "error UTF-8 in actual JSON"
+.
+Framework_AssertTest::testAssertJsonStringEqualsJsonStringErrorRaised with data set "error syntax in expected JSON"
+.
+Framework_AssertTest::testAssertJsonStringNotEqualsJsonFile
+.
+Framework_AssertTest::testAssertJsonStringNotEqualsJsonFileExpectingException
+.
+Framework_AssertTest::testAssertJsonStringNotEqualsJsonString
+.
+Framework_AssertTest::testAssertJsonStringNotEqualsJsonStringErrorRaised with data set "error UTF-8 in actual JSON"
+.
+Framework_AssertTest::testAssertJsonStringNotEqualsJsonStringErrorRaised with data set "error syntax in expected JSON"
+.
+Framework_AssertTest::testAssertNotContainsThrowsException
+.
+Framework_AssertTest::testAssertNotEmpty
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #0 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #1 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #10 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #11 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #12 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #13 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #14 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #15 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #16 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #17 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #18 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #19 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #2 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #20 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #21 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #22 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #23 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #24 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #25 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #26 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #27 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #28 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #29 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #3 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #30 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #31 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #32 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #33 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #34 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #35 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #36 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #4 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #5 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #6 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #7 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #8 
+.
+Framework_AssertTest::testAssertNotEqualsFails with data set #9 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #0 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #1 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #10 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #11 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #12 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #13 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #14 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #15 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #16 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #17 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #18 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #19 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #2 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #20 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #21 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #22 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #23 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #24 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #25 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #26 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #27 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #28 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #29 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #3 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #30 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #31 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #32 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #33 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #34 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #35 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #36 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #4 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #5 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #6 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #7 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #8 
+.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #9 
+.
+Framework_AssertTest::testAssertNotNull
+.
+Framework_AssertTest::testAssertNotRegExp
+.
+Framework_AssertTest::testAssertNotRegExpThrowsException
+.
+Framework_AssertTest::testAssertNotRegExpThrowsException2
+.
+Framework_AssertTest::testAssertNotSame
+.
+Framework_AssertTest::testAssertNotSame2
+.
+Framework_AssertTest::testAssertNotSameFails with data set #0 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #1 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #10 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #11 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #2 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #3 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #4 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #5 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #6 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #7 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #8 
+.
+Framework_AssertTest::testAssertNotSameFails with data set #9 
+.
+Framework_AssertTest::testAssertNotSameFailsNull
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #0 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #1 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #10 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #11 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #12 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #13 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #14 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #15 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #16 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #17 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #18 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #19 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #2 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #20 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #21 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #22 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #23 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #24 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #25 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #26 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #27 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #28 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #29 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #3 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #30 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #31 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #32 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #33 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #34 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #35 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #36 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #37 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #38 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #39 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #4 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #40 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #41 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #42 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #43 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #44 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #45 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #46 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #47 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #48 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #49 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #5 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #50 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #51 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #52 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #53 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #54 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #55 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #56 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #57 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #58 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #59 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #6 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #60 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #61 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #7 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #8 
+.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #9 
+.
+Framework_AssertTest::testAssertNotTagContentAttributes
+.
+Framework_AssertTest::testAssertNotTagTypeIdFalse
+.
+Framework_AssertTest::testAssertNull
+.
+Framework_AssertTest::testAssertObjectHasAttribute
+.
+Framework_AssertTest::testAssertObjectHasAttributeThrowsException
+.
+Framework_AssertTest::testAssertObjectHasAttributeThrowsException2
+.
+Framework_AssertTest::testAssertObjectNotHasAttribute
+.
+Framework_AssertTest::testAssertObjectNotHasAttributeThrowsException
+.
+Framework_AssertTest::testAssertObjectNotHasAttributeThrowsException2
+.
+Framework_AssertTest::testAssertParentContentAttributes
+F
+Framework_AssertTest::testAssertPrivateAttributeContains
+.
+Framework_AssertTest::testAssertPrivateAttributeEquals
+.
+Framework_AssertTest::testAssertPrivateAttributeNotContains
+.
+Framework_AssertTest::testAssertPrivateAttributeNotEquals
+.
+Framework_AssertTest::testAssertPrivateStaticAttributeEquals
+.
+Framework_AssertTest::testAssertPrivateStaticAttributeNotEquals
+.
+Framework_AssertTest::testAssertProtectedAttributeContains
+.
+Framework_AssertTest::testAssertProtectedAttributeEquals
+.
+Framework_AssertTest::testAssertProtectedAttributeNotContains
+.
+Framework_AssertTest::testAssertProtectedAttributeNotEquals
+.
+Framework_AssertTest::testAssertProtectedStaticAttributeEquals
+.
+Framework_AssertTest::testAssertProtectedStaticAttributeNotEquals
+.
+Framework_AssertTest::testAssertPublicAttributeContains
+.
+Framework_AssertTest::testAssertPublicAttributeContainsOnly
+.
+Framework_AssertTest::testAssertPublicAttributeEquals
+.
+Framework_AssertTest::testAssertPublicAttributeNotContains
+.
+Framework_AssertTest::testAssertPublicAttributeNotContainsOnly
+.
+Framework_AssertTest::testAssertPublicAttributeNotEquals
+.
+Framework_AssertTest::testAssertPublicAttributeNotSame
+.
+Framework_AssertTest::testAssertPublicAttributeSame
+.
+Framework_AssertTest::testAssertPublicStaticAttributeEquals
+.
+Framework_AssertTest::testAssertPublicStaticAttributeNotEquals
+.
+Framework_AssertTest::testAssertRegExp
+.
+Framework_AssertTest::testAssertRegExpThrowsException
+.
+Framework_AssertTest::testAssertRegExpThrowsException2
+.
+Framework_AssertTest::testAssertSame
+.
+Framework_AssertTest::testAssertSame2
+.
+Framework_AssertTest::testAssertSameFails with data set #0 
+.
+Framework_AssertTest::testAssertSameFails with data set #1 
+.
+Framework_AssertTest::testAssertSameFails with data set #10 
+.
+Framework_AssertTest::testAssertSameFails with data set #11 
+.
+Framework_AssertTest::testAssertSameFails with data set #12 
+.
+Framework_AssertTest::testAssertSameFails with data set #13 
+.
+Framework_AssertTest::testAssertSameFails with data set #14 
+.
+Framework_AssertTest::testAssertSameFails with data set #15 
+.
+Framework_AssertTest::testAssertSameFails with data set #16 
+.
+Framework_AssertTest::testAssertSameFails with data set #17 
+.
+Framework_AssertTest::testAssertSameFails with data set #18 
+.
+Framework_AssertTest::testAssertSameFails with data set #19 
+.
+Framework_AssertTest::testAssertSameFails with data set #2 
+.
+Framework_AssertTest::testAssertSameFails with data set #20 
+.
+Framework_AssertTest::testAssertSameFails with data set #21 
+.
+Framework_AssertTest::testAssertSameFails with data set #22 
+.
+Framework_AssertTest::testAssertSameFails with data set #23 
+.
+Framework_AssertTest::testAssertSameFails with data set #24 
+.
+Framework_AssertTest::testAssertSameFails with data set #25 
+.
+Framework_AssertTest::testAssertSameFails with data set #26 
+.
+Framework_AssertTest::testAssertSameFails with data set #27 
+.
+Framework_AssertTest::testAssertSameFails with data set #28 
+.
+Framework_AssertTest::testAssertSameFails with data set #29 
+.
+Framework_AssertTest::testAssertSameFails with data set #3 
+.
+Framework_AssertTest::testAssertSameFails with data set #30 
+.
+Framework_AssertTest::testAssertSameFails with data set #31 
+.
+Framework_AssertTest::testAssertSameFails with data set #32 
+.
+Framework_AssertTest::testAssertSameFails with data set #33 
+.
+Framework_AssertTest::testAssertSameFails with data set #34 
+.
+Framework_AssertTest::testAssertSameFails with data set #35 
+.
+Framework_AssertTest::testAssertSameFails with data set #36 
+.
+Framework_AssertTest::testAssertSameFails with data set #37 
+.
+Framework_AssertTest::testAssertSameFails with data set #38 
+.
+Framework_AssertTest::testAssertSameFails with data set #39 
+.
+Framework_AssertTest::testAssertSameFails with data set #4 
+.
+Framework_AssertTest::testAssertSameFails with data set #40 
+.
+Framework_AssertTest::testAssertSameFails with data set #41 
+.
+Framework_AssertTest::testAssertSameFails with data set #42 
+.
+Framework_AssertTest::testAssertSameFails with data set #43 
+.
+Framework_AssertTest::testAssertSameFails with data set #44 
+.
+Framework_AssertTest::testAssertSameFails with data set #45 
+.
+Framework_AssertTest::testAssertSameFails with data set #46 
+.
+Framework_AssertTest::testAssertSameFails with data set #47 
+.
+Framework_AssertTest::testAssertSameFails with data set #48 
+.
+Framework_AssertTest::testAssertSameFails with data set #49 
+.
+Framework_AssertTest::testAssertSameFails with data set #5 
+.
+Framework_AssertTest::testAssertSameFails with data set #50 
+.
+Framework_AssertTest::testAssertSameFails with data set #51 
+.
+Framework_AssertTest::testAssertSameFails with data set #52 
+.
+Framework_AssertTest::testAssertSameFails with data set #53 
+.
+Framework_AssertTest::testAssertSameFails with data set #54 
+.
+Framework_AssertTest::testAssertSameFails with data set #55 
+.
+Framework_AssertTest::testAssertSameFails with data set #56 
+.
+Framework_AssertTest::testAssertSameFails with data set #57 
+.
+Framework_AssertTest::testAssertSameFails with data set #58 
+.
+Framework_AssertTest::testAssertSameFails with data set #59 
+.
+Framework_AssertTest::testAssertSameFails with data set #6 
+.
+Framework_AssertTest::testAssertSameFails with data set #60 
+.
+Framework_AssertTest::testAssertSameFails with data set #61 
+.
+Framework_AssertTest::testAssertSameFails with data set #7 
+.
+Framework_AssertTest::testAssertSameFails with data set #8 
+.
+Framework_AssertTest::testAssertSameFails with data set #9 
+.
+Framework_AssertTest::testAssertSameSize
+.
+Framework_AssertTest::testAssertSameSizeThrowsExceptionIfActualIsNotCountable
+.
+Framework_AssertTest::testAssertSameSizeThrowsExceptionIfExpectedIsNotCoutable
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #0 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #1 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #10 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #11 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #2 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #3 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #4 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #5 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #6 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #7 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #8 
+.
+Framework_AssertTest::testAssertSameSucceeds with data set #9 
+.
+Framework_AssertTest::testAssertSelectCountChildFalse
+.
+Framework_AssertTest::testAssertSelectCountChildTrue
+F
+Framework_AssertTest::testAssertSelectCountDescendantFalse
+.
+Framework_AssertTest::testAssertSelectCountDescendantTrue
+F
+Framework_AssertTest::testAssertSelectCountGreaterThanEqualToFalse
+.
+Framework_AssertTest::testAssertSelectCountGreaterThanEqualToTrue
+F
+Framework_AssertTest::testAssertSelectCountGreaterThanFalse
+.
+Framework_AssertTest::testAssertSelectCountGreaterThanTrue
+F
+Framework_AssertTest::testAssertSelectCountLessThanEqualToFalse
+F
+Framework_AssertTest::testAssertSelectCountLessThanEqualToTrue
+.
+Framework_AssertTest::testAssertSelectCountLessThanFalse
+F
+Framework_AssertTest::testAssertSelectCountLessThanTrue
+.
+Framework_AssertTest::testAssertSelectCountNotPresentTrue
+.
+Framework_AssertTest::testAssertSelectCountPresentFalse
+.
+Framework_AssertTest::testAssertSelectCountPresentTrue
+.
+Framework_AssertTest::testAssertSelectCountRangeFalse
+.
+Framework_AssertTest::testAssertSelectCountRangeTrue
+F
+Framework_AssertTest::testAssertSelectEqualsContentNotPresentFalse
+.
+Framework_AssertTest::testAssertSelectEqualsContentNotPresentTrue
+.
+Framework_AssertTest::testAssertSelectEqualsContentPresentFalse
+.
+Framework_AssertTest::testAssertSelectEqualsContentPresentTrue
+.
+Framework_AssertTest::testAssertSelectNotPresentFalse
+.
+Framework_AssertTest::testAssertSelectRegExpContentPresentFalse
+.
+Framework_AssertTest::testAssertSelectRegExpContentPresentTrue
+.
+Framework_AssertTest::testAssertSplObjectStorageContainsObject
+.
+Framework_AssertTest::testAssertSplObjectStorageNotContainsObject
+.
+Framework_AssertTest::testAssertStringContainsString
+.
+Framework_AssertTest::testAssertStringEndsNotWith
+.
+Framework_AssertTest::testAssertStringEndsNotWithThrowsException
+.
+Framework_AssertTest::testAssertStringEndsNotWithThrowsException2
+.
+Framework_AssertTest::testAssertStringEndsWith
+.
+Framework_AssertTest::testAssertStringEndsWithThrowsException
+.
+Framework_AssertTest::testAssertStringEndsWithThrowsException2
+.
+Framework_AssertTest::testAssertStringEqualsFile
+.
+Framework_AssertTest::testAssertStringEqualsNumeric
+.
+Framework_AssertTest::testAssertStringEqualsNumeric2
+.
+Framework_AssertTest::testAssertStringMatchesFormat
+.
+Framework_AssertTest::testAssertStringMatchesFormatFailure
+.
+Framework_AssertTest::testAssertStringNotContainsString
+.
+Framework_AssertTest::testAssertStringNotEqualsFile
+.
+Framework_AssertTest::testAssertStringNotMatchesFormat
+.
+Framework_AssertTest::testAssertStringStartsNotWith
+.
+Framework_AssertTest::testAssertStringStartsNotWithThrowsException
+.
+Framework_AssertTest::testAssertStringStartsNotWithThrowsException2
+.
+Framework_AssertTest::testAssertStringStartsWith
+.
+Framework_AssertTest::testAssertStringStartsWithThrowsException
+.
+Framework_AssertTest::testAssertStringStartsWithThrowsException2
+.
+Framework_AssertTest::testAssertTagAncestorFalse
+.
+Framework_AssertTest::testAssertTagAncestorTrue
+F
+Framework_AssertTest::testAssertTagAttributesFalse
+.
+Framework_AssertTest::testAssertTagAttributesMultiPartClassFalse
+.
+Framework_AssertTest::testAssertTagAttributesMultiPartClassTrueA
+.
+Framework_AssertTest::testAssertTagAttributesMultiPartClassTrueB
+.
+Framework_AssertTest::testAssertTagAttributesRegexpFalse
+.
+Framework_AssertTest::testAssertTagAttributesRegexpModifierFalse
+.
+Framework_AssertTest::testAssertTagAttributesRegexpModifierTrue
+.
+Framework_AssertTest::testAssertTagAttributesRegexpTrueA
+.
+Framework_AssertTest::testAssertTagAttributesRegexpTrueB
+.
+Framework_AssertTest::testAssertTagAttributesTrueA
+.
+Framework_AssertTest::testAssertTagAttributesTrueB
+.
+Framework_AssertTest::testAssertTagCdataContentTrue
+.
+Framework_AssertTest::testAssertTagCdataontentFalse
+.
+Framework_AssertTest::testAssertTagChildFalse
+.
+Framework_AssertTest::testAssertTagChildTrue
+F
+Framework_AssertTest::testAssertTagChildrenCountFalse
+.
+Framework_AssertTest::testAssertTagChildrenCountTrue
+.
+Framework_AssertTest::testAssertTagChildrenGreaterThanFalse
+.
+Framework_AssertTest::testAssertTagChildrenGreaterThanTrue
+.
+Framework_AssertTest::testAssertTagChildrenLessThanFalse
+.
+Framework_AssertTest::testAssertTagChildrenLessThanTrue
+.
+Framework_AssertTest::testAssertTagChildrenOnlyFalse
+.
+Framework_AssertTest::testAssertTagChildrenOnlyTrue
+F
+Framework_AssertTest::testAssertTagContentAttributes
+.
+Framework_AssertTest::testAssertTagDescendantFalse
+.
+Framework_AssertTest::testAssertTagDescendantTrue
+F
+Framework_AssertTest::testAssertTagIdFalse
+.
+Framework_AssertTest::testAssertTagIdTrue
+.
+Framework_AssertTest::testAssertTagMultiplePossibleChildren
+F
+Framework_AssertTest::testAssertTagParentFalse
+.
+Framework_AssertTest::testAssertTagParentTrue
+F
+Framework_AssertTest::testAssertTagRegexpContentFalse
+.
+Framework_AssertTest::testAssertTagRegexpContentTrue
+.
+Framework_AssertTest::testAssertTagRegexpModifierContentTrue
+.
+Framework_AssertTest::testAssertTagStringContentFalse
+.
+Framework_AssertTest::testAssertTagStringContentTrue
+.
+Framework_AssertTest::testAssertTagTypeFalse
+.
+Framework_AssertTest::testAssertTagTypeIdFalse
+.
+Framework_AssertTest::testAssertTagTypeIdTrueA
+.
+Framework_AssertTest::testAssertTagTypeIdTrueB
+.
+Framework_AssertTest::testAssertTagTypeIdTrueC
+.
+Framework_AssertTest::testAssertTagTypeTrue
+.
+Framework_AssertTest::testAssertThatAnything
+.
+Framework_AssertTest::testAssertThatAnythingAndAnything
+.
+Framework_AssertTest::testAssertThatAnythingOrAnything
+.
+Framework_AssertTest::testAssertThatAnythingXorNotAnything
+.
+Framework_AssertTest::testAssertThatArrayHasKey
+.
+Framework_AssertTest::testAssertThatAttributeEqualTo
+.
+Framework_AssertTest::testAssertThatAttributeEquals
+.
+Framework_AssertTest::testAssertThatAttributeEquals2
+.
+Framework_AssertTest::testAssertThatClassHasAttribute
+.
+Framework_AssertTest::testAssertThatClassHasStaticAttribute
+.
+Framework_AssertTest::testAssertThatContains
+.
+Framework_AssertTest::testAssertThatContainsOnly
+.
+Framework_AssertTest::testAssertThatContainsOnlyInstancesOf
+.
+Framework_AssertTest::testAssertThatEqualTo
+.
+Framework_AssertTest::testAssertThatFileExists
+.
+Framework_AssertTest::testAssertThatGreaterThan
+.
+Framework_AssertTest::testAssertThatGreaterThanOrEqual
+.
+Framework_AssertTest::testAssertThatIdenticalTo
+.
+Framework_AssertTest::testAssertThatIsInstanceOf
+.
+Framework_AssertTest::testAssertThatIsType
+.
+Framework_AssertTest::testAssertThatLessThan
+.
+Framework_AssertTest::testAssertThatLessThanOrEqual
+.
+Framework_AssertTest::testAssertThatMatchesRegularExpression
+.
+Framework_AssertTest::testAssertThatObjectHasAttribute
+.
+Framework_AssertTest::testAssertThatStringContains
+.
+Framework_AssertTest::testAssertTrue
+.
+Framework_AssertTest::testAssertXmlFileEqualsXmlFile
+.
+Framework_AssertTest::testAssertXmlFileNotEqualsXmlFile
+.
+Framework_AssertTest::testAssertXmlStringEqualsXmlFile
+.
+Framework_AssertTest::testAssertXmlStringEqualsXmlString
+.
+Framework_AssertTest::testAssertXmlStringNotEqualsXmlString
+.
+Framework_AssertTest::testAttributeGreaterThan
+.
+Framework_AssertTest::testAttributeGreaterThanOrEqual
+.
+Framework_AssertTest::testAttributeLessThan
+.
+Framework_AssertTest::testAttributeLessThanOrEqual
+.
+Framework_AssertTest::testClassHasPublicAttribute
+.
+Framework_AssertTest::testClassHasPublicStaticAttribute
+.
+Framework_AssertTest::testClassNotHasPublicAttribute
+.
+Framework_AssertTest::testClassNotHasPublicStaticAttribute
+.
+Framework_AssertTest::testFail
+.
+Framework_AssertTest::testGreaterThan
+.
+Framework_AssertTest::testGreaterThanOrEqual
+.
+Framework_AssertTest::testLessThan
+.
+Framework_AssertTest::testLessThanOrEqual
+.
+Framework_AssertTest::testMarkTestIncomplete
+.
+Framework_AssertTest::testMarkTestSkipped
+.
+Framework_AssertTest::testObjectHasOnTheFlyAttribute
+.
+Framework_AssertTest::testObjectHasPrivateAttribute
+.
+Framework_AssertTest::testObjectHasProtectedAttribute
+.
+Framework_AssertTest::testObjectHasPublicAttribute
+.
+Framework_AssertTest::testObjectNotHasOnTheFlyAttribute
+.
+Framework_AssertTest::testObjectNotHasPrivateAttribute
+.
+Framework_AssertTest::testObjectNotHasProtectedAttribute
+.
+Framework_AssertTest::testObjectNotHasPublicAttribute
+.
+Framework_AssertTest::testReadAttribute
+.
+Framework_AssertTest::testReadAttribute2
+.
+Framework_AssertTest::testReadAttribute3
+.
+Framework_AssertTest::testReadAttribute4
+.
+Framework_AssertTest::testReadAttribute5
+.
+Framework_AssertTest::testXMLStructureAttributesAreSameButValuesAreNot
+.
+Framework_AssertTest::testXMLStructureIgnoreTextNodes
+.
+Framework_AssertTest::testXMLStructureIsSame
+.
+Framework_AssertTest::testXMLStructureIsSameButDataIsNot
+.
+Framework_AssertTest::testXMLStructureWrongNumberOfAttributes
+.
+Framework_AssertTest::testXMLStructureWrongNumberOfNodes
+.
+Framework_AssertTest::testXmlStringNotEqualsXmlFile
+.
+Framework_Assert_FunctionsTest::testLogicalAnd
+.
+Framework_Assert_FunctionsTest::testLogicalOr
+.
+Framework_Assert_FunctionsTest::testLogicalXor
+.
+Framework_ComparatorTest::testGetInstance with data set #0 
+.
+Framework_ComparatorTest::testGetInstance with data set #1 
+.
+Framework_ComparatorTest::testGetInstance with data set #10 
+.
+Framework_ComparatorTest::testGetInstance with data set #11 
+.
+Framework_ComparatorTest::testGetInstance with data set #12 
+.
+Framework_ComparatorTest::testGetInstance with data set #13 
+.
+Framework_ComparatorTest::testGetInstance with data set #14 
+.
+Framework_ComparatorTest::testGetInstance with data set #15 
+.
+Framework_ComparatorTest::testGetInstance with data set #16 
+.
+Framework_ComparatorTest::testGetInstance with data set #17 
+.
+Framework_ComparatorTest::testGetInstance with data set #18 
+.
+Framework_ComparatorTest::testGetInstance with data set #19 
+.
+Framework_ComparatorTest::testGetInstance with data set #2 
+.
+Framework_ComparatorTest::testGetInstance with data set #20 
+.
+Framework_ComparatorTest::testGetInstance with data set #21 
+.
+Framework_ComparatorTest::testGetInstance with data set #22 
+.
+Framework_ComparatorTest::testGetInstance with data set #23 
+.
+Framework_ComparatorTest::testGetInstance with data set #24 
+.
+Framework_ComparatorTest::testGetInstance with data set #25 
+.
+Framework_ComparatorTest::testGetInstance with data set #26 
+.
+Framework_ComparatorTest::testGetInstance with data set #27 
+.
+Framework_ComparatorTest::testGetInstance with data set #28 
+.
+Framework_ComparatorTest::testGetInstance with data set #29 
+.
+Framework_ComparatorTest::testGetInstance with data set #3 
+.
+Framework_ComparatorTest::testGetInstance with data set #30 
+.
+Framework_ComparatorTest::testGetInstance with data set #31 
+.
+Framework_ComparatorTest::testGetInstance with data set #32 
+.
+Framework_ComparatorTest::testGetInstance with data set #33 
+.
+Framework_ComparatorTest::testGetInstance with data set #34 
+.
+Framework_ComparatorTest::testGetInstance with data set #35 
+.
+Framework_ComparatorTest::testGetInstance with data set #36 
+.
+Framework_ComparatorTest::testGetInstance with data set #4 
+.
+Framework_ComparatorTest::testGetInstance with data set #5 
+.
+Framework_ComparatorTest::testGetInstance with data set #6 
+.
+Framework_ComparatorTest::testGetInstance with data set #7 
+.
+Framework_ComparatorTest::testGetInstance with data set #8 
+.
+Framework_ComparatorTest::testGetInstance with data set #9 
+.
+Framework_ComparatorTest::testRegister
+.
+Framework_ComparatorTest::testUnregister
+.
+Framework_ConstraintTest::testAttributeEqualTo
+.
+Framework_ConstraintTest::testAttributeEqualTo2
+.
+Framework_ConstraintTest::testAttributeNotEqualTo
+.
+Framework_ConstraintTest::testAttributeNotEqualTo2
+.
+Framework_ConstraintTest::testConstraintArrayContains
+.
+Framework_ConstraintTest::testConstraintArrayContains2
+.
+Framework_ConstraintTest::testConstraintArrayHasKey
+.
+Framework_ConstraintTest::testConstraintArrayHasKey2
+.
+Framework_ConstraintTest::testConstraintArrayNotContains
+.
+Framework_ConstraintTest::testConstraintArrayNotContains2
+.
+Framework_ConstraintTest::testConstraintArrayNotHasKey
+.
+Framework_ConstraintTest::testConstraintArrayNotHasKey2
+.
+Framework_ConstraintTest::testConstraintCallback
+.
+Framework_ConstraintTest::testConstraintCallbackFailure
+.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithBadArray
+.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithClassname
+.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithEmptyArray
+.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithObject
+.
+Framework_ConstraintTest::testConstraintCallbackInvalidFunctionArgument
+.
+Framework_ConstraintTest::testConstraintClassHasAttribute
+.
+Framework_ConstraintTest::testConstraintClassHasAttribute2
+.
+Framework_ConstraintTest::testConstraintClassHasStaticAttribute
+.
+Framework_ConstraintTest::testConstraintClassHasStaticAttribute2
+.
+Framework_ConstraintTest::testConstraintClassNotHasAttribute
+.
+Framework_ConstraintTest::testConstraintClassNotHasAttribute2
+.
+Framework_ConstraintTest::testConstraintClassNotHasStaticAttribute
+.
+Framework_ConstraintTest::testConstraintClassNotHasStaticAttribute2
+.
+Framework_ConstraintTest::testConstraintCountFailing
+.
+Framework_ConstraintTest::testConstraintCountWithAnArray
+.
+Framework_ConstraintTest::testConstraintCountWithAnIteratorWhichDoesNotImplementCountable
+.
+Framework_ConstraintTest::testConstraintCountWithAnObjectImplementingCountable
+.
+Framework_ConstraintTest::testConstraintFileExists
+.
+Framework_ConstraintTest::testConstraintFileExists2
+.
+Framework_ConstraintTest::testConstraintFileNotExists
+.
+Framework_ConstraintTest::testConstraintFileNotExists2
+.
+Framework_ConstraintTest::testConstraintGreaterThan
+.
+Framework_ConstraintTest::testConstraintGreaterThan2
+.
+Framework_ConstraintTest::testConstraintGreaterThanOrEqual
+.
+Framework_ConstraintTest::testConstraintGreaterThanOrEqual2
+.
+Framework_ConstraintTest::testConstraintIsAnything
+.
+Framework_ConstraintTest::testConstraintIsEmpty
+.
+Framework_ConstraintTest::testConstraintIsEmpty2
+.
+Framework_ConstraintTest::testConstraintIsEqual
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #0 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #1 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #10 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #11 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #12 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #13 
+F
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #14 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #2 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #3 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #4 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #5 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #6 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #7 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #8 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #9 
+.
+Framework_ConstraintTest::testConstraintIsIdentical
+.
+Framework_ConstraintTest::testConstraintIsIdentical2
+.
+Framework_ConstraintTest::testConstraintIsIdentical3
+.
+Framework_ConstraintTest::testConstraintIsInstanceOf
+.
+Framework_ConstraintTest::testConstraintIsInstanceOf2
+.
+Framework_ConstraintTest::testConstraintIsNotEqual
+.
+Framework_ConstraintTest::testConstraintIsNotEqual2
+.
+Framework_ConstraintTest::testConstraintIsNotIdentical
+.
+Framework_ConstraintTest::testConstraintIsNotIdentical2
+.
+Framework_ConstraintTest::testConstraintIsNotIdentical3
+.
+Framework_ConstraintTest::testConstraintIsNotInstanceOf
+.
+Framework_ConstraintTest::testConstraintIsNotInstanceOf2
+.
+Framework_ConstraintTest::testConstraintIsNotNull
+.
+Framework_ConstraintTest::testConstraintIsNotNull2
+.
+Framework_ConstraintTest::testConstraintIsNotType
+.
+Framework_ConstraintTest::testConstraintIsNotType2
+.
+Framework_ConstraintTest::testConstraintIsNull
+.
+Framework_ConstraintTest::testConstraintIsNull2
+.
+Framework_ConstraintTest::testConstraintIsType
+.
+Framework_ConstraintTest::testConstraintIsType2
+.
+Framework_ConstraintTest::testConstraintLessThan
+.
+Framework_ConstraintTest::testConstraintLessThan2
+.
+Framework_ConstraintTest::testConstraintLessThanOrEqual
+.
+Framework_ConstraintTest::testConstraintLessThanOrEqual2
+.
+Framework_ConstraintTest::testConstraintNotCountFailing
+.
+Framework_ConstraintTest::testConstraintNotGreaterThan
+.
+Framework_ConstraintTest::testConstraintNotGreaterThan2
+.
+Framework_ConstraintTest::testConstraintNotGreaterThanOrEqual
+.
+Framework_ConstraintTest::testConstraintNotGreaterThanOrEqual2
+.
+Framework_ConstraintTest::testConstraintNotIsAnything
+.
+Framework_ConstraintTest::testConstraintNotLessThan
+.
+Framework_ConstraintTest::testConstraintNotLessThan2
+.
+Framework_ConstraintTest::testConstraintNotLessThanOrEqual
+.
+Framework_ConstraintTest::testConstraintNotLessThanOrEqual2
+.
+Framework_ConstraintTest::testConstraintNotSameSizeFailing
+.
+Framework_ConstraintTest::testConstraintObjectHasAttribute
+.
+Framework_ConstraintTest::testConstraintObjectHasAttribute2
+.
+Framework_ConstraintTest::testConstraintObjectNotHasAttribute
+.
+Framework_ConstraintTest::testConstraintObjectNotHasAttribute2
+.
+Framework_ConstraintTest::testConstraintPCREMatch
+.
+Framework_ConstraintTest::testConstraintPCREMatch2
+.
+Framework_ConstraintTest::testConstraintPCRENotMatch
+.
+Framework_ConstraintTest::testConstraintPCRENotMatch2
+.
+Framework_ConstraintTest::testConstraintSameSizeFailing
+.
+Framework_ConstraintTest::testConstraintSameSizeWithAnArray
+.
+Framework_ConstraintTest::testConstraintSameSizeWithAnIteratorWhichDoesNotImplementCountable
+.
+Framework_ConstraintTest::testConstraintSameSizeWithAnObjectImplementingCountable
+.
+Framework_ConstraintTest::testConstraintSplObjectStorageContains
+.
+Framework_ConstraintTest::testConstraintSplObjectStorageContains2
+.
+Framework_ConstraintTest::testConstraintStringContains
+.
+Framework_ConstraintTest::testConstraintStringContains2
+.
+Framework_ConstraintTest::testConstraintStringEndsNotWith
+.
+Framework_ConstraintTest::testConstraintStringEndsNotWith2
+.
+Framework_ConstraintTest::testConstraintStringEndsWith
+.
+Framework_ConstraintTest::testConstraintStringEndsWith2
+.
+Framework_ConstraintTest::testConstraintStringMatches
+.
+Framework_ConstraintTest::testConstraintStringMatches2
+.
+Framework_ConstraintTest::testConstraintStringMatches3
+.
+Framework_ConstraintTest::testConstraintStringMatches4
+.
+Framework_ConstraintTest::testConstraintStringMatches5
+.
+Framework_ConstraintTest::testConstraintStringMatches6
+.
+Framework_ConstraintTest::testConstraintStringNotContains
+.
+Framework_ConstraintTest::testConstraintStringNotContains2
+.
+Framework_ConstraintTest::testConstraintStringStartsNotWith
+.
+Framework_ConstraintTest::testConstraintStringStartsNotWith2
+.
+Framework_ConstraintTest::testConstraintStringStartsWith
+.
+Framework_ConstraintTest::testConstraintStringStartsWith2
+.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error UTF-8"
+.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error syntax"
+.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "invalid JSON in class instantiation"
+.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "valid JSON"
+.
+Framework_Constraint_JsonMatchesTest::testToString
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "Invalid error indicator"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_CTRL_CHAR"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_DEPTH"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_NONE"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_STATE_MISMatch"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_SYNTAX"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_UTF8`"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "prefixed JSON_ERROR_DEPTH"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "actual"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "default"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "expected"
+.
+Framework_SuiteTest::testAddTestSuite
+.
+Framework_SuiteTest::testInheritedTests
+.
+Framework_SuiteTest::testNoTestCaseClass
+.
+Framework_SuiteTest::testNoTestCases
+.
+Framework_SuiteTest::testNotExistingTestCase
+.
+Framework_SuiteTest::testNotPublicTestCase
+.
+Framework_SuiteTest::testNotVoidTestCase
+.
+Framework_SuiteTest::testOneTestCase
+.
+Framework_SuiteTest::testShadowedTests
+.
+Framework_TestFailureTest::testToString
+.
+Framework_TestImplementorTest::testSuccessfulRun
+.
+Runner_BaseTestRunnerTest::testInvokeNonStaticSuite
+.
+Util_ClassTest::testGetObjectAttributeCanHandleDynamicVariables
+.
+Util_DiffTest::testComparisonErrorEndSame
+.
+Util_DiffTest::testComparisonErrorEndSameComplete
+.
+Util_DiffTest::testComparisonErrorEndSameComplete_toArray
+.
+Util_DiffTest::testComparisonErrorEndSame_toArray
+.
+Util_DiffTest::testComparisonErrorMessage
+.
+Util_DiffTest::testComparisonErrorMessage_toArray
+.
+Util_DiffTest::testComparisonErrorOverlapingMatches
+.
+Util_DiffTest::testComparisonErrorOverlapingMatches2
+.
+Util_DiffTest::testComparisonErrorOverlapingMatches2_toArray
+.
+Util_DiffTest::testComparisonErrorOverlapingMatches_toArray
+.
+Util_DiffTest::testComparisonErrorStartAndEndSame
+.
+Util_DiffTest::testComparisonErrorStartAndEndSame_toArray
+.
+Util_DiffTest::testComparisonErrorStartSame
+.
+Util_DiffTest::testComparisonErrorStartSameComplete
+.
+Util_DiffTest::testComparisonErrorStartSameComplete_toArray
+.
+Util_DiffTest::testComparisonErrorStartSame_toArray
+.
+Util_TestDox_NamePrettifierTest::testCaterForUserDefinedPrefix
+.
+Util_TestDox_NamePrettifierTest::testCaterForUserDefinedSuffix
+.
+Util_TestDox_NamePrettifierTest::testTestNameIsConvertedToASentence
+.
+Util_TestDox_NamePrettifierTest::testTestNameIsNotGroupedWhenNotInSequence
+.
+Util_TestDox_NamePrettifierTest::testTitleHasSensibleDefaults
+.
+Util_TypeTest::testExport with data set #0 
+.
+Util_TypeTest::testExport with data set #1 
+.
+Util_TypeTest::testExport with data set #10 
+.
+Util_TypeTest::testExport with data set #11 
+.
+Util_TypeTest::testExport with data set #12 
+.
+Util_TypeTest::testExport with data set #13 
+.
+Util_TypeTest::testExport with data set #14 
+.
+Util_TypeTest::testExport with data set #2 
+.
+Util_TypeTest::testExport with data set #3 
+.
+Util_TypeTest::testExport with data set #4 
+.
+Util_TypeTest::testExport with data set #5 
+.
+Util_TypeTest::testExport with data set #6 
+.
+Util_TypeTest::testExport with data set #7 
+.
+Util_TypeTest::testExport with data set #8 
+.
+Util_TypeTest::testExport with data set #9 
+.
+Util_TypeTest::testNonBinaryStringExport with data set #0 
+.
+Util_TypeTest::testNonBinaryStringExport with data set #1 
+.
+Util_TypeTest::testNonBinaryStringExport with data set #2 
+.
+Util_TypeTest::testShortenedExport with data set #0 
+.
+Util_TypeTest::testShortenedExport with data set #1 
+.
+Util_TypeTest::testShortenedExport with data set #10 
+.
+Util_TypeTest::testShortenedExport with data set #2 
+.
+Util_TypeTest::testShortenedExport with data set #3 
+.
+Util_TypeTest::testShortenedExport with data set #4 
+.
+Util_TypeTest::testShortenedExport with data set #5 
+.
+Util_TypeTest::testShortenedExport with data set #6 
+.
+Util_TypeTest::testShortenedExport with data set #7 
+.
+Util_TypeTest::testShortenedExport with data set #8 
+.
+Util_TypeTest::testShortenedExport with data set #9 
+.
+Util_XMLTest::testAssertValidKeysDefaultValuesA
+.
+Util_XMLTest::testAssertValidKeysDefaultValuesB
+.
+Util_XMLTest::testAssertValidKeysInvalidKey
+.
+Util_XMLTest::testAssertValidKeysInvalidKeys
+.
+Util_XMLTest::testAssertValidKeysValidKeys
+.
+Util_XMLTest::testAssertValidKeysValidKeysEmpty
+.
+Util_XMLTest::testConvertAssertAttribute
+.
+Util_XMLTest::testConvertAssertAttributeMultipleSpaces
+.
+Util_XMLTest::testConvertAssertAttributeSpaces
+.
+Util_XMLTest::testConvertAssertClass
+.
+Util_XMLTest::testConvertAssertId
+.
+Util_XMLTest::testConvertAssertNumber
+.
+Util_XMLTest::testConvertAssertRange
+.
+Util_XMLTest::testConvertAssertSelect
+.
+Util_XMLTest::testConvertAssertSelectContent
+.
+Util_XMLTest::testConvertAssertSelectElt
+.
+Util_XMLTest::testConvertAssertSelectEltAttrContains
+.
+Util_XMLTest::testConvertAssertSelectEltAttrEqual
+.
+Util_XMLTest::testConvertAssertSelectEltAttrHasOne
+.
+Util_XMLTest::testConvertAssertSelectEltChild
+.
+Util_XMLTest::testConvertAssertSelectEltClass
+.
+Util_XMLTest::testConvertAssertSelectEltDescendant
+.
+Util_XMLTest::testConvertAssertSelectEltId
+.
+Util_XMLTest::testConvertAssertSelectEltMultiAttrEqual
+.
+Util_XMLTest::testConvertAssertSelectFalse
+.
+Util_XMLTest::testConvertAssertSelectTrue
+.
+Util_XMLTest::testPrepareStringEscapesChars
+.

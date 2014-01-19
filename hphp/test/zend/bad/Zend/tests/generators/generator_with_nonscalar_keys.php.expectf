@@ -1,0 +1,32 @@
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(3) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(5)
+  [2]=>
+  int(6)
+}
+object(stdClass)#3 (1) {
+  ["a"]=>
+  string(1) "b"
+}
+object(stdClass)#4 (1) {
+  ["b"]=>
+  string(1) "a"
+}
+float(3.14)
+float(2.73)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+NULL
+NULL

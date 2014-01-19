@@ -1,0 +1,28 @@
+array(12) {
+  ["year"]=>
+  int(2006)
+  ["month"]=>
+  int(12)
+  ["day"]=>
+  int(12)
+  ["hour"]=>
+  int(10)
+  ["minute"]=>
+  int(0)
+  ["second"]=>
+  int(0)
+  ["fraction"]=>
+  float(0.5)
+  ["warning_count"]=>
+  int(0)
+  ["warnings"]=>
+  array(0) {
+  }
+  ["error_count"]=>
+  int(0)
+  ["errors"]=>
+  array(0) {
+  }
+  ["is_localtime"]=>
+  bool(false)
+}

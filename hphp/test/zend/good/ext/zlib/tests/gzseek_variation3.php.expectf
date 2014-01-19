@@ -1,0 +1,16 @@
+move to the 50th byte
+int(0)
+tell=50
+string(10) " high abov"
+
+move forward to the 94th byte
+int(0)
+tell=94
+string(10) "ze it
+Dest"
+
+move backward to the 77th byte
+int(0)
+tell=77
+string(10) "hat you ca"
+===DONE===

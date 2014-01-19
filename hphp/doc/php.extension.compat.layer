@@ -1,0 +1,238 @@
+
+*************************************
+* PHP Extension Compatibility Layer *
+*************************************
+
+
+Introduction
+------------
+
+HHVM has experimental support for PHP extensions that were originally written
+to target the Zend PHP execution engine.
+
+PHP extensions are written in C and make use of a number of APIs and macros
+provided by the Zend PHP engine to read and manipulate PHP program values.
+Documentation for these APIs and macros can be found here:
+
+  http://php.net/manual/en/internals2.ze1.zendapi.php
+
+The goal of HHVM's PHP Extension Compatibility Layer is to offer equivalent
+implementations of these Zend engine APIs to allow PHP extensions to work
+together with the HHVM runtime with minimal changes to the PHP extensions'
+source code.
+
+To make a PHP extension work with HHVM, the PHP extension needs to be compiled
+from source code using HHVM's implementations of the APIs and macros instead of
+the Zend engine's implementations. Also, the PHP extensions' source code must
+be compiled as C++, and this may require making small changes to the source
+code to make the code compile correctly with a C++ compiler (as C++ compilers
+are stricter than C compilers with respect to implicit casts and a few other
+issues).
+
+Once the appropriate modifications have been made the PHP extensions' source,
+HHVM must be updated with the appropriate definitions so that it knows about
+the PHP extension (documentation for this coming soon), and then HHVM needs to
+be compiled together with the PHP extension source code.
+
+
+Representing zvals
+------------------
+
+One of the core issues that the PHP Extension Compatibility Layer must address
+is how to reconcile PHP's way and HHVM's way of representing program values and
+operating on program values. This includes the shape of the object graph in the
+heap (what points to what), how refcounting is done and how "reffiness" is
+handled, how copy-on-write semantics are honored, how values are stored into
+arrays, and so forth.
+
+One of the core ideas here is that HHVM supports "boxing" a program value via
+the RefData type and that there's a reasonably clean mapping between PHP's
+object graph and HHVM's object graph (when HHVM program values are "boxed")
+that maps PHP "zval" objects onto HHVM RefData objects. The diagram below
+compares how values are represent in PHP vs. HHVM (where a "value slot" can be
+a local variable slot, an array slot, an object property slot, etc):
+
+                 PHP            HHVM "unboxed"    HHVM "boxed"
+                 ---            --------------    ------------
+
+                zval*             TypedValue       TypedValue
+               +-----+           +---+------+     +---+------+
+  Value slot:  |  *  |           | * | ARR  |     | * | REF  |
+               +--|--+           +-|-+------+     +-|-+------+
+                  |                |                |
+                  V                V                V
+                zval              ArrayData        RefData
+               +---+-----+---+   +-----+---+      +---+-----+---+
+               | * | ARR | 1 |   | ... | 1 |      | * | ARR | 1 |
+               +-|-+-----+---+   +-----+---+      +-|-+-----+---+
+                 |                                  |
+                 V                                  V
+                Hashtable                          ArrayData
+               +---------+                        +-----+---+
+               | ...     |                        | ... | 1 |
+               +---------+                        +-----+---+
+
+For the purposes of the PHP extension compatibility layer, it makes sense to
+use RefData to represent "zvals". PHP extensions assume that zvals are
+heap-allocated and refcounted and that it is valid to hold a pointer to zval
+for the duration of the request (as long as the zval's refcount has been
+incremented), and RefData fits in with these assumptions nicely. Of course, it
+is unreasonable to box every program variable in HHVM since this would hurt
+performance. Luckily, it is unnecessary to box all program values; instead we
+can just box program values lazily as needed in the right places to ensure that
+Zend PHP extensions only deal with boxed values.
+
+
+Dealing with "reffiness"
+------------------------
+
+In PHP, zvals can be shared amongst multiple value slots "by value" or "by
+reference". zvals have an "is_ref" flag which is set to 1 if the zval is being
+shared by reference, otherwise is_ref is set to 0. Note that the is_ref flag is
+independent of the zval's refcount. We will refer to the state of the zval's
+is_ref flag as the zval's "reffiness", and we will say a zval is "reffy" if its
+is_ref flag is set to 1.
+
+Under HHVM, historically RefData have been considered to be "reffy" when their
+refcount was 2 or greater. This did not jive well with PHP extensions, which
+can set multiple value slots to point to the same zval with is_ref=0 (i.e. a
+zval can be shared "by value" between multiple value slots). To make this work,
+we need to change RefData somehow so that we can keep track of when the RefData
+is being shared "by value" by 2 or more value slots vs. when it is being shared
+by reference. Adding an "is_ref" flag directly poses some challenges in terms
+of performance, because it means that when a value's refcount decreases from 2
+to 1 we'll need to make sure the "is_ref" flag gets cleared. Instead, add two
+new flags "m_cow" and "m_z", and we employ a scheme that maps the 3-tuple
+(m_count, m_cow, m_z) to the 2-tuple (realRefcount, reffy). Under this scheme
+decRef continues to work as it does today, decrementing the m_count field and
+calling a helper m_count reaches zero. Another neat thing about this scheme is
+that m_cow is set to 1 iff the RefData is being shared by 2 or more value slots
+"by value".
+
+We should be able to avoid situations where a local variable slot points to a
+RefData with m_cow=1, which will keep codegen for manipulating local variables
+simple. We should be able to avoid such situations because (1) PHP extensions
+do not have direct access to local variables; (2) because a RefData pointed to
+by a local variable can only get passed into a PHP extension when a parameter
+is passed by reference (in which case its refcount is 2 or greater and it is
+being shared by reference); (3) a PHP extension is not allowed to toggle the
+state of a zval's is_ref flag when the zval's refcount is 2 or greater; and (4)
+if the PHP extension decrements the zval's refcount down to 1 it is no longer
+allowed to operate on the zval since it has relinquished all of the references
+it owned (since the last reference is owned by the local variable).
+
+
+Copy-on-write
+-------------
+
+Another issue that must be addressed is how to reconcile PHP's way and HHVM's
+way of honoring copy-on-write semantics. The diagram below compares how two
+value slots share an array "by value" under PHP vs. HHVM:
+
+        PHP               HHVM "unboxed"                HHVM "boxed"
+        ---               --------------                ------------
+
+   zval*    zval*    TypedValue    TypedValue    TypedValue      TypedValue
+  +-----+  +-----+  +---+------+  +---+------+  +---+------+    +---+------+
+  |  *  |  |  *  |  | * | ARR  |  | * | ARR  |  | * | REF  |    | * | REF  |
+  +--|--+  +--|--+  +-|-+------+  +-|-+------+  +-|-+------+    +-|-+------+
+     |        |       |     +-------+             |               |
+     V        |       V     V                     V               V
+   zval       V      ArrayData                   RefData         RefData
+  +---+-----+----+  +-----+---+                 +---+-----+---+ +---+-----+---+
+  |   | ARR | 2  |  | ... | 2 |                 | * | ARR | 1 | | * | ARR | 1 |
+  | * +-----+----+  +-----+---+                 +-|-+-----+---+ +-|-+-----+---+
+  | | | is_ref=0 |                                |     +---------+
+  +-|-+----------+                                V     V
+    |                                            ArrayData
+    V                                           +-----+---+
+   Hashtable                                    | ... | 2 |
+  +---------+                                   +-----+---+
+  | ...     |
+  +---------+
+
+Under PHP, a zval exclusively "owns" the array it points to, and the array
+itself does not have a refcount field. Instead of having multiple things point
+to the same array, sharing "by value" is achieved by having multiple things
+point to the zval that exclusively owns the array (with the zval's is_ref flag
+set to 0). When the PHP runtime or a PHP extension wants to mutate an array,
+the SEPARATE_ZVAL_IF_NOT_REF() macro is used, which makes a copy of the zval
+and the array it points to iff the zval's refcount is 2 or greater and the
+zval's is_ref flag is set to 0. This is how PHP honors copy-on-write semantics.
+
+HHVM, on the other hand, allows multiple things to point to the same array, and
+the array has a refcount field to keep track of how many things are pointing at
+it. When the HHVM runtime or an HHVM extension wants to mutate an array, it
+checks the refcount of the array and makes a copy of the array's refcount is 2
+or greater.
+
+PHP extensions simply assume that a zval exclusively owns its array, so if the
+zval's refcount is 1 or the zval's is_ref flag is 1 a PHP extension will assume
+that the array does not need to be copied before mutating it. Thus, the PHP
+extension compatibility layer must assure that all arrays that are exposed to
+PHP extensions have a refcount of 1. This can be achieved by making copies of
+arrays at the right places for arrays with a refcount of 2 or greater.
+
+
+Objects and resources
+---------------------
+
+Under PHP, a zval does not directly point to an object or a resource. Instead,
+the zval contains either an object ID or a resource ID, which can be looked up
+in a request-local tables to retrieve the object or resource. The digram below
+shows an example:
+
+                Table of                               Table of
+   zval         objects                   zval         resources
+  +---+-----+  +----+----+               +---+-----+  +----+----+
+  | 4 | OBJ |  | .. | .. |    Object     | 7 | RES |  | .. | .. |    Resource
+  +-|-+-----+  +----+----+   +------+    +-|-+-----+  +----+----+   +--------+
+    +--------->| 4  | *--+-->| ...  |      +--------->| 7  | *--+-->| ...    |
+               +----+----+   +------+                 +----+----+   +--------+
+               | .. | .. |                            | .. | .. |
+               +----+----+                            +----+----+
+
+It is quite common for PHP extensions to use an ID to refer to an object or
+resource instead of using a pointer to the object/resource. Also, there are a
+number of APIs and macros provided by the Zend engine which are able to
+retrieve an object or resource using an ID alone.
+
+HHVM, on the other hand, does not have request-local tables for looking up
+objects and resources by ID. The problem that must be solved here is how HHVM's
+PHP Extension Compatibility Layer will represent object IDs and resource IDs,
+and how it will convert an object/resource IDs to a pointer as needed. One of
+two approaches may prevail:
+
+ (1) It may be possible for HHVM to simply use the object/resource pointer as
+     the ID, casting the pointer to a sufficiently large integer type. The Zend
+     engine uses C's "long" type for resource IDs and the "zend_object_handle"
+     type (a typedef for C's "unsigned int" type) to represent object IDs. The
+     "long" type is pointer-sized on most platforms, and HHVM may be able to
+     define "zend_object_handle" as typedef for "uintptr_t", so this scheme
+     could possibly work out.
+
+ (2) A more conservative solution would be for HHVM to maintain request-local
+     tables of objects and resources and to populate these tables lazily and
+     individual objects and resources are exposed to PHP extensions via the
+     relevant APIs.
+
+
+Other challenges
+----------------
+
+There are some other challenges that need to be solved if we want HHVM's PHP
+Extension Compatibility Layer to support most PHP extensions:
+
+ (1) Some PHP extensions create strings by assigning to Z_STRVAL_P(zval),
+     Z_STRLEN_P(zval), and Z_TYPE_P(zval) in no particular order, sometimes
+     performing other operations in between.
+
+ (2) PHP extensions assume that Z_STRVAL_P(zval) returns a smart-malloc'd
+     buffer of characters that can be passed to efree() or detached from the
+     zval (provided the PHP extension owns the only reference to the zval),
+     and it assumes that smart-malloc'd buffers of characters can be assigned
+     to Z_STRVAL_P(zval).
+
+ (3) PHP extensions assign to Z_LVAL_P(zval) and Z_TYPE_P(zval) in no
+     particular order for both integers values and resource IDs.
+

@@ -1,0 +1,138 @@
+.function array_filter($arr = no_args, $func = start("""null"""), $res = start) {
+          .numiters 2;
+
+# if we get here, a value was supplied for $res
+          String "array_filter() expects at most 2 parameters"
+          Jmp warning
+no_args:  String "array_filter() expects at least 1 parameter, 0 given"
+          Jmp warning
+not_array:
+          CGetL $arr
+          InstanceOfD "KeyedTraversable"
+          JmpNZ start_kt
+          CGetL $arr
+          InstanceOfD "HH\\Set"
+          JmpNZ start_kt
+          CGetL $arr
+          InstanceOfD "FrozenSet"
+          JmpNZ start_kt
+          String "array_filter() expects parameter 1 to be an array or collection"
+          Jmp warning
+bad_param2:
+          String "array_filter() expects parameter 2 to be a valid callback"
+          Jmp warning
+warning:  Cns "E_USER_WARNING"
+          FCallBuiltin 2 2 "trigger_error"
+          PopR
+          Null
+          RetC
+
+start:    IsTypeL $arr Arr
+          JmpZ not_array
+
+          IssetL $func
+          JmpZ no_func
+
+          CGetL $func
+          DecodeCufIter 0 bad_param2
+.try_fault kill_iter_0 {
+            NewArray
+            SetL $res
+            PopC
+
+            CGetL $arr
+            WIterInitK 1 endloop_a $v $k
+  .try_fault kill_iter_1 1 {
+    loop_a:   FPushCufIter 1 0
+              FPassL 0 $v
+              FCall 1
+              UnboxR
+              JmpZ skip_a
+              SetWithRefLM <L:$res EL:$k> $v
+    skip_a:   WIterNextK 1 loop_a $v $k
+  }
+}
+endloop_a:CIterFree 0
+endloop_n:CGetL $res
+          RetC
+
+no_func:  NewArray
+          SetL $res
+          PopC
+          CGetL $arr
+          WIterInitK 1 endloop_n $v $k
+.try_fault kill_iter_1_only 1 {
+loop_n:   CGetL $v
+          JmpZ skip_n
+          SetWithRefLM <L:$res EL:$k> $v
+skip_n:   WIterNextK 1 loop_n $v $k
+}
+          Jmp endloop_n
+
+start_kt: IssetL $func
+          JmpZ no_func_kt
+
+          CGetL $func
+          DecodeCufIter 0 bad_param2
+.try_fault kill_iter_0_kt {
+            NewArray
+            SetL $res
+            PopC
+
+            CGetL $arr
+            IterInitK 1 endloop_a_kt $v $k
+  .try_fault kill_iter_1_kt 1 {
+    loop_a_kt: FPushCufIter 1 0
+               FPassL 0 $v
+               FCall 1
+               UnboxR
+               JmpZ skip_a_kt
+               CGetL $v
+               SetM <L:$res EL:$k>
+               PopC
+    skip_a_kt: IterNextK 1 loop_a_kt $v $k
+  }
+}
+endloop_a_kt:CIterFree 0
+endloop_n_kt:CGetL $res
+             RetC
+
+no_func_kt:  NewArray
+             SetL $res
+             PopC
+             CGetL $arr
+             IterInitK 1 endloop_n_kt $v $k
+.try_fault kill_iter_1_only_kt 1 {
+loop_n_kt:   CGetL $v
+             JmpZ skip_n_kt
+             CGetL $v
+             SetM <L:$res EL:$k>
+             PopC
+skip_n_kt:   IterNextK 1 loop_n_kt $v $k
+}
+          Jmp endloop_n_kt
+
+kill_iter_0:
+          CIterFree 0
+          Unwind
+kill_iter_1:
+          IterFree 1
+          Unwind
+# Needed for the verifier. Otherwise it complains
+# because from in one fault region iter 0 is live
+# and in the other its not.
+kill_iter_1_only:
+          IterFree 1
+          Unwind
+
+kill_iter_0_kt:
+          CIterFree 0
+          Unwind
+kill_iter_1_kt:
+          IterFree 1
+          Unwind
+kill_iter_1_only_kt:
+          IterFree 1
+          Unwind
+
+}

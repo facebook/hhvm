@@ -1,0 +1,9 @@
+*** Testing stripcslashes() : unexpected number of arguments ***
+-- Testing stripcslashes() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing stripcslashes() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

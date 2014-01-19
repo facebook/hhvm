@@ -1,0 +1,71 @@
+set priv 1234
+get priv
+int(1234)
+int(123)
+object(C)#1 (2) {
+  ["priv":"C":private]=>
+  int(1234)
+  ["pub"]=>
+  int(123)
+}
+set priv 6789
+get priv
+int(6789)
+int(678)
+object(C)#2 (2) {
+  ["priv":"C":private]=>
+  int(6789)
+  ["pub"]=>
+  int(678)
+}
+
+******************************
+
+__set foo
+object(D)#3 (1) {
+  ["foo":protected]=>
+  NULL
+}
+__get foo
+__set foo
+object(D)#3 (1) {
+  ["foo":protected]=>
+  NULL
+}
+__get foo
+__set foo
+object(D)#3 (1) {
+  ["foo":protected]=>
+  NULL
+}
+
+******************************
+
+object(E)#3 (1) {
+  ["foo"]=>
+  int(1)
+}
+__get foo
+object(E)#3 (1) {
+  ["foo"]=>
+  int(1)
+}
+__get foo
+object(E)#3 (1) {
+  ["foo"]=>
+  int(1)
+}
+
+******************************
+
+__set foo
+object(F)#3 (0) {
+}
+object(F)#3 (1) {
+  ["foo"]=>
+  int(1)
+}
+object(F)#3 (1) {
+  ["foo"]=>
+  int(1)
+}

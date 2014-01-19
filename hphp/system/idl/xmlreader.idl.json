@@ -1,0 +1,468 @@
+{
+    "preamble": "#include <libxml\/tree.h>\n#include <libxml\/xmlreader.h>\n#include <libxml\/uri.h>\n#include <runtime\/base\/file\/file.h>\n\ntypedef int (*xmlreader_read_int_t)(xmlTextReaderPtr reader);\ntypedef unsigned char *(*xmlreader_read_char_t)(xmlTextReaderPtr reader);\ntypedef const unsigned char *(*xmlreader_read_const_char_t)(xmlTextReaderPtr reader);\ntypedef unsigned char *(*xmlreader_read_one_char_t)(xmlTextReaderPtr reader, const unsigned char *);",
+    "consts": [
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "XMLReader",
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "",
+            "flags": [
+            ],
+            "footer": "\n  private: String read_string_func(xmlreader_read_char_t internal_function);\n  private: bool bool_func_no_arg(xmlreader_read_int_t internal_function);\n  private: Variant string_func_string_arg(String value, xmlreader_read_one_char_t internal_function);\n  private: bool set_relaxng_schema(String source, int type);\n\n public:\n  SmartObject<File>  m_uri;\n private:\n  xmlTextReaderPtr        m_ptr;\n  xmlParserInputBufferPtr m_input;\n  void*                   m_schema;\n  void close_impl();",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "open",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "uri",
+                            "type": "String"
+                        },
+                        {
+                            "name": "encoding",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0"
+                        }
+                    ]
+                },
+                {
+                    "name": "XML",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "source",
+                            "type": "String"
+                        },
+                        {
+                            "name": "encoding",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0"
+                        }
+                    ]
+                },
+                {
+                    "name": "close",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "read",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "localname",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "readString",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "readInnerXML",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "readOuterXML",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "moveToNextAttribute",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getAttribute",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "getAttributeNo",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Int64"
+                        }
+                    ]
+                },
+                {
+                    "name": "getAttributeNs",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String"
+                        },
+                        {
+                            "name": "namespaceURI",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "moveToAttribute",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "moveToAttributeNo",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Int64"
+                        }
+                    ]
+                },
+                {
+                    "name": "moveToAttributeNs",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String"
+                        },
+                        {
+                            "name": "namespaceURI",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "moveToElement",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "moveToFirstAttribute",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isValid",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "getParserProperty",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "property",
+                            "type": "Int64"
+                        }
+                    ]
+                },
+                {
+                    "name": "lookupNamespace",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "prefix",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "setSchema",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "source",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "setParserProperty",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "property",
+                            "type": "Int64"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Boolean"
+                        }
+                    ]
+                },
+                {
+                    "name": "setRelaxNGSchema",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "setRelaxNGSchemaSource",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "source",
+                            "type": "String"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+                {
+                    "name": "NONE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ELEMENT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ATTRIBUTE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "TEXT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "CDATA",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ENTITY_REF",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ENTITY",
+                    "type": "Int64"
+                },
+                {
+                    "name": "PI",
+                    "type": "Int64"
+                },
+                {
+                    "name": "COMMENT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "DOC",
+                    "type": "Int64"
+                },
+                {
+                    "name": "DOC_TYPE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "DOC_FRAGMENT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "NOTATION",
+                    "type": "Int64"
+                },
+                {
+                    "name": "WHITESPACE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SIGNIFICANT_WHITESPACE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "END_ELEMENT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "END_ENTITY",
+                    "type": "Int64"
+                },
+                {
+                    "name": "XML_DECLARATION",
+                    "type": "Int64"
+                },
+                {
+                    "name": "LOADDTD",
+                    "type": "Int64"
+                },
+                {
+                    "name": "DEFAULTATTRS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "VALIDATE",
+                    "type": "Int64"
+                },
+                {
+                    "name": "SUBST_ENTITIES",
+                    "type": "Int64"
+                }
+            ]
+        }
+    ]
+}

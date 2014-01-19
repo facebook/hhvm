@@ -1,0 +1,150 @@
+*** Testing strspn() : with different unexpected values of mask argument ***
+
+-- Iteration with mask value as "0" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "1" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "12345" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "-2345" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "10.5" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "-10.5" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "101234567000" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "1.07654321E-9" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "0.5" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "Array" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with mask value as "Array" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with mask value as "Array" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with mask value as "Array" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with mask value as "Array" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+-- Iteration with mask value as "" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "1" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "1" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "object" --
+int(0)
+int(1)
+int(1)
+
+-- Iteration with mask value as "" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "" --
+int(0)
+int(0)
+int(0)
+
+-- Iteration with mask value as "Resource id #%d" --
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+Done

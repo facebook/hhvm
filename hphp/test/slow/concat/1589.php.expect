@@ -1,0 +1,16 @@
+ FOO  hello  foo 
+ GET  hello  get  GET  hello  get 
+ GET  hello  get  GET  hello  get 
+set C
+set C
+get C
+ hello aaaaget C
+ hello bbbb
+get C
+ hello aaaaget C
+ hello bbbb
+get C
+get C
+get C
+get C
+ hello aaaa bbbb aaaa bbbb

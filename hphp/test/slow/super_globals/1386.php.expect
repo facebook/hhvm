@@ -1,0 +1,11 @@
+string(4) "test"
+string(1) "X"
+string(7) "X::test"
+array(3) {
+  [0]=>
+  string(21) "this_is_function_test"
+  [1]=>
+  string(15) "this_is_class_x"
+  [2]=>
+  string(22) "this_is_method_test::x"
+}

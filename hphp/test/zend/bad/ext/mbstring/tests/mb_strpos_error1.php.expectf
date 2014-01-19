@@ -1,0 +1,10 @@
+*** Testing mb_strpos() : error conditions ***
+
+-- Testing mb_strpos() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing mb_strpos() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+Done

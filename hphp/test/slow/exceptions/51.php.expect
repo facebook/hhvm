@@ -1,0 +1,15 @@
+array(1) {
+  [0]=>
+  &array(4) {
+    ["file"]=>
+    string(6) "string"
+    ["line"]=>
+    int(11)
+    ["function"]=>
+    string(7) "thrower"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+int(8)

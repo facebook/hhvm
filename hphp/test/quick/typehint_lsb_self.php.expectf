@@ -1,0 +1,5 @@
+A accepts param from subclass C
+B accepts param from subclass C
+A accepts param from subclass C
+C accepts param from subclass C
+HipHop Fatal error: Argument 1 passed to D::test() must be an instance of D, C given in %s on line 26

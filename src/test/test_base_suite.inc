@@ -1,9 +1,0 @@
-#include <test/test.h>
-#include <test/test_parser_expr.h>
-#include <test/test_parser_stmt.h>
-#include <test/test_code_error.h>
-#include <test/test_performance.h>
-#include <test/test_cpp_base.h>
-#include <test/test_util.h>
-#include <test/test_ext.h>
-#include <test/test_server.h>

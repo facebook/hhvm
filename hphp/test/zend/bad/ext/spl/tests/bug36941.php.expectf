@@ -1,0 +1,15 @@
+===ArrayObject===
+int(1)
+int(1)
+int(1)
+int(2)
+int(1)
+int(3)
+===ArrayIterator===
+int(1)
+int(1)
+int(2)
+int(2)
+int(3)
+int(3)
+===DONE===

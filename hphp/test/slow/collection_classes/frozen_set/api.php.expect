@@ -1,0 +1,156 @@
+
+empty...
+bool(false)
+bool(true)
+
+count...
+int(3)
+int(0)
+
+items...
+int(1)
+int(2)
+int(3)
+
+values...
+object(HH\FrozenVector)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\FrozenVector)#4 (0) {
+}
+
+lazy...
+int(1)
+int(2)
+int(3)
+
+contains...
+bool(true)
+bool(false)
+bool(false)
+
+toArray...
+array(3) {
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+}
+
+toKeysArray...
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+toValuesArray...
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+toVector...
+object(HH\Vector)#6 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+toFrozenVector...
+object(HH\FrozenVector)#6 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+toSet...
+object(HH\Set)#6 (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+__toString...
+FrozenSet
+
+__get...
+Cannot access a property on a collection
+
+__set...
+Cannot access a property on a collection
+
+__isSet...
+bool(false)
+
+__unset...
+Cannot access a property on a collection
+
+fromItems...
+----
+int(1)
+int(2)
+int(3)
+----
+----
+int(4)
+int(5)
+int(6)
+----
+
+fromArrays...
+----
+int(1)
+int(2)
+int(3)
+int(4)
+int(5)
+int(6)
+----
+
+constructors
+----
+int(1)
+int(2)
+int(3)
+----
+----
+int(1)
+int(2)
+int(3)
+----
+----
+int(1)
+int(2)
+int(3)
+----
+----
+int(1)
+int(2)
+int(3)
+----
+----
+int(1)
+int(2)
+int(3)
+----

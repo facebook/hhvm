@@ -1,0 +1,36 @@
+bar 0
+caught 1
+bar 1
+bar 2
+caught 2
+before
+caught
+caught exception
+string(%d) "#0 %s/test/quick/exceptions.php(91): c()
+#1 %s/test/quick/exceptions.php(88): b()
+#2 %s/test/quick/exceptions.php(99): a()
+#3 %s/test/quick/exceptions.php(111): main3()
+#4 {main}"
+string(16) "hello, exception"
+string(%d) "#0 %s/test/quick/exceptions.php(91): c()
+#1 %s/test/quick/exceptions.php(88): b()
+#2 %s/test/quick/exceptions.php(99): a()
+#3 %s/test/quick/exceptions.php(111): main3()
+#4 {main}"
+Exception from %s/test/quick/exceptions.php:96
+string(%d) "#0 %s/test/quick/exceptions.php(91): c()
+#1 %s/test/quick/exceptions.php(88): b()
+#2 %s/test/quick/exceptions.php(99): a()
+#3 %s/test/quick/exceptions.php(111): main3()
+#4 {main}"
+bar 3
+caught 3
+HipHop Fatal error: Uncaught exception 'Ex3' with message '' in %s/test/quick/exceptions.php:21
+Stack trace:
+#0 %s/test/quick/exceptions.php(28): bar()
+#1 %s/test/quick/exceptions.php(35): foo2()
+#2 %s/test/quick/exceptions.php(39): foo1()
+#3 (): foo()
+#4 %s/test/quick/exceptions.php(105): array_map()
+#5 %s/test/quick/exceptions.php(111): main3()
+#6 {main}

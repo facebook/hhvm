@@ -1,0 +1,8 @@
+*** Testing gmmktime() : usage variation ***
+
+-- Testing gmmktime() function with supplying octal values to arguments --
+int(1218182888)
+
+-- Testing gmmktime() function with supplying hexa decimal values to arguments --
+int(1218182888)
+===DONE===

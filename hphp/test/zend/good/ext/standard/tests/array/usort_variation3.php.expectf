@@ -1,0 +1,37 @@
+*** Testing usort() : usage variation ***
+bool(true)
+
+-- Sorted array after usort() function call --
+array(15) {
+  [0]=>
+  int(200)
+  [1]=>
+  int(100)
+  [2]=>
+  int(75)
+  [3]=>
+  int(45)
+  [4]=>
+  int(35)
+  [5]=>
+  int(30)
+  [6]=>
+  int(25)
+  [7]=>
+  int(9)
+  [8]=>
+  int(8)
+  [9]=>
+  int(7)
+  [10]=>
+  int(6)
+  [11]=>
+  int(5)
+  [12]=>
+  int(4)
+  [13]=>
+  int(1)
+  [14]=>
+  int(0)
+}
+===DONE===

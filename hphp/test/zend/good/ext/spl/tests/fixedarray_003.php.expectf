@@ -1,0 +1,35 @@
+==Direct instance==
+0 => a
+1 => c
+2 => d
+3 => e
+4 => f
+==Child instance==
+A::rewind
+A::valid
+A::current
+A::key
+0 => a
+A::next
+A::valid
+A::current
+A::key
+1 => c
+A::next
+A::valid
+A::current
+A::key
+2 => d
+A::next
+A::valid
+A::current
+A::key
+3 => e
+A::next
+A::valid
+A::current
+A::key
+4 => f
+A::next
+A::valid
+===DONE===

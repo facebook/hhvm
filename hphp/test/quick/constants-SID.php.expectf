@@ -1,0 +1,44 @@
+Begin f(1)
+--null--
+bool(true)
+NULL
+--NULL--
+bool(true)
+NULL
+--SID--
+bool(false)
+NULL
+null: NULL
+NULL: NULL
+SID: HipHop Notice: Use of undefined constant SID - assumed 'SID' in %s/test/quick/constants-SID.php on line 11
+string(3) "SID"
+End f(1)
+Begin f(2)
+--null--
+bool(true)
+NULL
+--NULL--
+bool(true)
+NULL
+--SID--
+bool(true)
+string(%d) "%s"
+null: NULL
+NULL: NULL
+SID: string(%d) "%s"
+End f(2)
+Begin f(3)
+--null--
+bool(true)
+NULL
+--NULL--
+bool(true)
+NULL
+--SID--
+bool(true)
+string(%d) "%s"
+null: NULL
+NULL: NULL
+SID: string(%d) "%s"
+End f(3)
+bool(false)

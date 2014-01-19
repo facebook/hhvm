@@ -1,0 +1,93 @@
+Program %s/flow_gen_async_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+int(1)
+int(2)
+Caught Thrown from genThrowAndCatch 2 in genThrowAndCatch()
+Finished in genThrowAndCatch
+int(4)
+int(4)
+Caught Thrown from genThrowAndCatch 4 in genFoo()
+Finished in genFoo
+int(4)
+Program %s/flow_gen_async_excep.php exited normally.
+break flow_gen_async_excep.php:27
+Breakpoint 1 set on line 27 of flow_gen_async_excep.php
+run
+Breakpoint 1 reached at genFoo() on line 27 of %s/flow_gen_async_excep.php
+  26 async function genFoo($a) {
+  27*  var_dump($a);
+  28   $a++;
+
+next
+int(1)
+Break at genFoo() on line 28 of %s/flow_gen_async_excep.php
+  27   var_dump($a);
+  28*  $a++;
+  29   $a = await genThrowAndCatch($a);
+
+next
+Break at genFoo() on line 29 of %s/flow_gen_async_excep.php
+  28   $a++;
+  29*  $a = await genThrowAndCatch($a);
+  30   var_dump($a);
+
+next
+int(2)
+Caught Thrown from genThrowAndCatch 2 in genThrowAndCatch()
+Finished in genThrowAndCatch
+Break at genFoo() on line 30 of %s/flow_gen_async_excep.php
+  29   $a = await genThrowAndCatch($a);
+  30*  var_dump($a);
+  31   try {
+
+next
+int(4)
+Break at genFoo() on line 32 of %s/flow_gen_async_excep.php
+  31   try {
+  32*    $a = await genThrowNoCatch($a);
+  33     var_dump($a);
+
+next
+int(4)
+Break at genFoo() on line 31 of %s/flow_gen_async_excep.php
+  30   var_dump($a);
+  31*  try {
+  32*    $a = await genThrowNoCatch($a);
+  33*    var_dump($a);
+  34*  } catch (Exception $e) {
+  35*    printf("Caught %s in genFoo()\n", $e->getMessage());
+  36*  }
+  37   printf("Finished in genFoo\n");
+
+next
+Break at genFoo() on line 35 of %s/flow_gen_async_excep.php
+  34   } catch (Exception $e) {
+  35*    printf("Caught %s in genFoo()\n", $e->getMessage());
+  36   }
+
+next
+Caught Thrown from genThrowAndCatch 4 in genFoo()
+Break at genFoo() on line 37 of %s/flow_gen_async_excep.php
+  36   }
+  37*  printf("Finished in genFoo\n");
+  38   return $a;
+
+next
+Finished in genFoo
+Break at genFoo() on line 38 of %s/flow_gen_async_excep.php
+  37   printf("Finished in genFoo\n");
+  38*  return $a;
+  39 }
+
+next
+Break at foo() on line 42 of %s/flow_gen_async_excep.php
+  41 function foo($a) {
+  42*  $result = genFoo($a)->join();
+  43   var_dump($result);
+
+break clear all
+All breakpoints are cleared.
+continue
+int(4)
+Program %s/flow_gen_async_excep.php exited normally.
+quit

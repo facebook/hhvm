@@ -1,0 +1,22 @@
+bool(true)
+array(2) {
+  ["count"]=>
+  int(1)
+  [0]=>
+  array(4) {
+    ["description"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(6) "user X"
+    }
+    [0]=>
+    string(11) "description"
+    ["count"]=>
+    int(1)
+    ["dn"]=>
+    string(28) "cn=userA,dc=my-domain,dc=com"
+  }
+}
+===DONE===

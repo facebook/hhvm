@@ -1,0 +1,13 @@
+b foo()
+c
+@ foo(1)
+= $x
+c
+= $x
+$_ = "don't want to see this"
+= throwSomething()
+p $_
+= bad syntax
+= printSomething()
+
+

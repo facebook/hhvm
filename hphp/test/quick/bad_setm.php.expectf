@@ -1,0 +1,15 @@
+HipHop Warning: Illegal offset type in %s/test/quick/bad_setm.php on line 6
+HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/test/quick/bad_setm.php on line 7
+HipHop Notice: Array to string conversion in %s/test/quick/bad_setm.php on line 7
+HipHop Notice: Undefined index: Array in %s/test/quick/bad_setm.php on line 7
+HipHop Warning: Illegal offset type in %s/test/quick/bad_setm.php on line 7
+HipHop Warning: Illegal offset type in %s/test/quick/bad_setm.php on line 6
+HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/test/quick/bad_setm.php on line 7
+HipHop Notice: Array to string conversion in %s/test/quick/bad_setm.php on line 7
+HipHop Notice: Undefined index: Array in %s/test/quick/bad_setm.php on line 7
+HipHop Warning: Illegal offset type in %s/test/quick/bad_setm.php on line 7
+HipHop Warning: Illegal offset type in %s/test/quick/bad_setm.php on line 6
+HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/test/quick/bad_setm.php on line 7
+HipHop Notice: Array to string conversion in %s/test/quick/bad_setm.php on line 7
+HipHop Notice: Undefined index: Array in %s/test/quick/bad_setm.php on line 7
+HipHop Warning: Illegal offset type in %s/test/quick/bad_setm.php on line 7

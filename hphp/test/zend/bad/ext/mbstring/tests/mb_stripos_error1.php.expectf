@@ -1,0 +1,10 @@
+*** Testing mb_stripos() : error conditions ***
+
+-- Testing mb_stripos() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+
+-- Testing mb_stripos() function with less than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+Done

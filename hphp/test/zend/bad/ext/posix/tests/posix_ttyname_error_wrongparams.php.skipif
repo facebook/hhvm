@@ -1,0 +1,11 @@
+<?php 
+	if (!extension_loaded('posix')) { 
+        die('SKIP - POSIX extension not available');
+    }
+	if (!extension_loaded('gd')) { 
+        die('SKIP - GD extension not available');
+    }
+    if (!function_exists('imagecreate')) {
+        die('SKIP - Function imagecreate() not available');
+    }
+?>

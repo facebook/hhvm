@@ -1,0 +1,44 @@
+run
+print function_exists('test1')
+@ function test1($x){error_log($x);return $x+1;}
+print function_exists('test1')
+@ $eval1=test1(4)
+print $eval1
+print class_exists('test2')
+<?php
+class test2 {
+  public $a;
+  private $b;
+  public function ab() {
+    return $this->a . ":" . $this->b;
+  }
+  public function callCls() {
+    $obj = new cls();
+    return $obj->meth($this);
+  }
+  private function seven() {
+    return 7;
+  }
+}
+?>
+print class_exists('test2')
+set bac off
+@ $eval2 = new test2()
+@ $eval2->a = 3
+@ $eval2->b = 4
+print $eval2->ab()
+set bac on
+@ $eval2->b = 4
+print $eval2->ab()
+break eval1.php:12
+print $eval2->callCls()
+break clear all
+set bac off
+@ $this->pub = 21
+@ $this->pri = 22
+next
+@ $this->pub = $x->seven()
+set bac on
+@ $this->pub = $x->seven()
+continue
+quit

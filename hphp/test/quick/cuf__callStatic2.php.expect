@@ -1,0 +1,12 @@
+my_class1::__call: nonexistent(1,2)
+my_class1::__callStatic: nonexistent(1,2)
+my_class1::__callStatic: nonexistent(1,2)
+my_class1::__callStatic: nonexistent(1,2)
+my_class1::__call: __call_static(1,2)
+my_class1::__callStatic: __call_static(1,2)
+my_base::test
+test_self:   my_class1::__call: nonexistent(a,b)
+test_parent: my_class1::__call: nonexistent(a,b)
+my_base::__call: nonexistent(1,2)
+my_base::__callStatic: nonexistent(1,2)
+my_base::__callStatic: nonexistent(1,2)

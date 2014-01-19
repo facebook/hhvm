@@ -1,0 +1,93 @@
+*** Testing get_parent_class() : usage variations ***
+Error: 8 - Undefined variable: undefined_var, %s(68)
+Error: 8 - Undefined variable: unset_var, %s(71)
+
+Arg value 0 
+bool(false)
+
+Arg value 1 
+bool(false)
+
+Arg value 12345 
+bool(false)
+
+Arg value -2345 
+bool(false)
+
+Arg value 10.5 
+bool(false)
+
+Arg value -10.5 
+bool(false)
+
+Arg value 101234567000 
+bool(false)
+
+Arg value 1.07654321E-9 
+bool(false)
+
+Arg value 0.5 
+bool(false)
+Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+
+Arg value Array 
+bool(false)
+Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+
+Arg value Array 
+bool(false)
+Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+
+Arg value Array 
+bool(false)
+Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+
+Arg value Array 
+bool(false)
+Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+
+Arg value Array 
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value 1 
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value 1 
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value string 
+In __autoload(string)
+bool(false)
+
+Arg value String 
+In __autoload(String)
+bool(false)
+Error: 4096 - Object of class stdClass could not be converted to string, %s(77)
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+Done

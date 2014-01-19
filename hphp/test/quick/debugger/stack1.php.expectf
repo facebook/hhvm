@@ -1,0 +1,193 @@
+Program %s/stack1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+stack1.php loaded
+Program %s/stack1.php exited normally.
+break bar()
+Breakpoint 1 set upon entering bar()
+@ test(1, 0)
+test 1 0
+in pub:1 0
+in pri:1 0
+foo:1 0
+Breakpoint 1 reached at bar() on line 6 of %s/stack1.php
+   5 function bar($x, $y) {
+   6*  $obj = new cls();
+   7   error_log("bar:".$x." ".$y);
+
+break clear all
+All breakpoints are cleared.
+set sa on
+StackArgs(sa) set to on.
+
+where
+#0   ()
+    at %s/stack1.php:6
+#1  bar (1, 0)
+    at %s/stack1.php:16
+#2  foo (1, 0)
+    at %s/stack1.php:28
+#3  cls::pri (1, 0)
+    at %s/stack1.php:22
+#4  cls::pub (1, 0)
+    at %s/stack1.php:39
+#5  test (1, 0)
+    at :1
+#6  include ("")
+    at :1
+out
+bar:1 0
+Break at foo() on line 16 of %s/stack1.php
+  15   error_log("foo:".$x." ".$y);
+  16*  return bar($x, $y);
+  17 }
+
+where
+#0   ()
+    at %s/stack1.php:16
+#1  foo (1, 0)
+    at %s/stack1.php:28
+#2  cls::pri (1, 0)
+    at %s/stack1.php:22
+#3  cls::pub (1, 0)
+    at %s/stack1.php:39
+#4  test (1, 0)
+    at :1
+#5  include ("")
+    at :1
+out
+Break at cls::pri() on line 29 of %s/stack1.php
+  28     foo($x, $y);
+  29*    if ($x == 3) {
+  30       hphpd_break();
+
+where
+#0   ()
+    at %s/stack1.php:29
+#1  cls::pri (1, 0)
+    at %s/stack1.php:22
+#2  cls::pub (1, 0)
+    at %s/stack1.php:39
+#3  test (1, 0)
+    at :1
+#4  include ("")
+    at :1
+set sa off
+StackArgs(sa) set to off
+out
+out pri:1 0
+Break at cls::pub() on line 22 of %s/stack1.php
+  21     error_log("in pub:".$x." ".$y);
+  22*    $v = $this->pri($x, $y);
+  23     error_log("out pub:".$x." ".$y);
+
+where
+#0   ()
+    at %s/stack1.php:22
+#1  cls::pub ()
+    at %s/stack1.php:39
+#2  test ()
+    at :1
+#3  include ()
+    at :1
+set sa on
+StackArgs(sa) set to on.
+
+continue
+out pub:1 0
+test done 1 0
+break stack1.php:9
+Breakpoint 1 set on line 9 of stack1.php
+@ test(2, 2)
+test 2 2
+in pub:2 2
+in pri:2 2
+foo:2 2
+bar:2 2
+in pub:2 1
+in pri:2 1
+foo:2 1
+bar:2 1
+in pub:2 0
+in pri:2 0
+foo:2 0
+bar:2 0
+Breakpoint 1 reached at bar() on line 9 of %s/stack1.php
+   8   if ($y <= 0) {
+   9*    return $x;
+  10   }
+
+where
+#0   ()
+    at %s/stack1.php:9
+#1  bar (2, 0)
+    at %s/stack1.php:16
+#2  foo (2, 0)
+    at %s/stack1.php:28
+#3  cls::pri (2, 0)
+    at %s/stack1.php:22
+#4  cls::pub (2, 0)
+    at %s/stack1.php:11
+#5  bar (2, 1)
+    at %s/stack1.php:16
+#6  foo (2, 1)
+    at %s/stack1.php:28
+#7  cls::pri (2, 1)
+    at %s/stack1.php:22
+#8  cls::pub (2, 1)
+    at %s/stack1.php:11
+#9  bar (2, 2)
+    at %s/stack1.php:16
+#10  foo (2, 2)
+     at %s/stack1.php:28
+#11  cls::pri (2, 2)
+     at %s/stack1.php:22
+#12  cls::pub (2, 2)
+     at %s/stack1.php:39
+#13  test (2, 2)
+     at :1
+#14  include ("")
+     at :1
+frame 6
+#6  foo (2, 1)
+    at %s/stack1.php:28
+variable
+$x = 2
+$y = 1
+up
+#7  cls::pri (2, 1)
+    at %s/stack1.php:22
+down
+#6  foo (2, 1)
+    at %s/stack1.php:28
+@ $x=3
+continue
+out pri:2 0
+out pub:2 0
+Break at cls::pri() on line 30 of %s/stack1.php
+  29     if ($x == 3) {
+  30*      hphpd_break();
+  31     }
+
+where
+#0  hphpd_break ()
+    at %s/stack1.php:30
+#1  cls::pri (3, 1)
+    at %s/stack1.php:22
+#2  cls::pub (2, 1)
+    at %s/stack1.php:11
+#3  bar (2, 2)
+    at %s/stack1.php:16
+#4  foo (2, 2)
+    at %s/stack1.php:28
+#5  cls::pri (2, 2)
+    at %s/stack1.php:22
+#6  cls::pub (2, 2)
+    at %s/stack1.php:39
+#7  test (2, 2)
+    at :1
+#8  include ("")
+    at :1
+variable
+$y = 1
+$x = 3
+quit

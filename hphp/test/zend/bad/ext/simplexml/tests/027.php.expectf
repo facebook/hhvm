@@ -1,0 +1,36 @@
+<people>
+</people>
+<people>
+  <person gender="male">Joe
+  </person>
+</people>
+<people>
+  <person gender="male">Jane
+  </person>
+</people>
+<people>
+  <person gender="female">Jane
+  </person>
+  <person gender="male">Joe
+  </person>
+</people>
+HipHop Warning: %s
+<people>
+  <person gender="female">Jane
+  </person>
+  <person gender="male">Joe
+  </person>
+  <person gender="male">Minni-me
+  </person>
+</people>
+<people>
+  <person gender="female">Jane
+  </person>
+  <person gender="male">Joe
+  </person>
+  <person gender="male">Minni-me
+  </person>
+  <person gender="error">
+  </person>
+</people>
+===DONE===

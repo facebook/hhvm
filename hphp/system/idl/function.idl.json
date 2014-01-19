@@ -1,0 +1,412 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "get_defined_functions",
+            "desc": "Gets an array of all defined functions.",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Returns an multidimensional array containing a list of all defined functions, both built-in (internal) and user-defined. The internal functions will be accessible via $arr[\"internal\"], and the user defined ones using $arr[\"user\"] (see example below)."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "function_exists",
+            "desc": "Checks the list of defined functions, both built-in (internal) and user-defined, for function_name.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if function_name exists and is a function, FALSE otherwise.\n\nThis function will return FALSE for constructs, such as include_once() and echo()."
+            },
+            "args": [
+                {
+                    "name": "function_name",
+                    "type": "String",
+                    "desc": "The function name, as a string."
+                },
+                {
+                    "name": "autoload",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to try to autoload."
+                }
+            ]
+        },
+        {
+            "name": "is_callable",
+            "desc": "Verify that the contents of a variable can be called as a function. This can check that a simple variable contains the name of a valid function, or that an array contains a properly encoded object and function name.",
+            "flags": [
+                "HasOptFunction",
+                "ContextSensitive"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if name is callable, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "v",
+                    "type": "Any",
+                    "desc": "Can be either the name of a function stored in a string variable, or an object and the name of a method within the object, like this: array($SomeObject, 'MethodName')"
+                },
+                {
+                    "name": "syntax",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "If set to TRUE the function only verifies that name might be a function or method. It will only reject simple variables that are not strings, or an array that does not have a valid structure to be used as a callback. The valid ones are supposed to have only 2 entries, the first of which is an object or a string, and the second a string."
+                },
+                {
+                    "name": "name",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Receives the \"callable name\". In the example below it is \"someClass::someMethod\". Note, however, that despite the implication that someClass::SomeMethod() is a callable static method, this is not the case.",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "call_user_func_array",
+            "desc": "Call a user defined function with the parameters in params.",
+            "flags": [
+                "HasOptFunction",
+                "NoProfile",
+                "ContextSensitive"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the function result, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The function to be called."
+                },
+                {
+                    "name": "params",
+                    "type": "Variant",
+                    "desc": "The parameters to be passed to the function, as an indexed array."
+                }
+            ]
+        },
+        {
+            "name": "call_user_func",
+            "desc": "Call a user defined function given by the function parameter.",
+            "flags": [
+                "VariableArguments",
+                "HasOptFunction",
+                "NoProfile",
+                "ContextSensitive"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the function result, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The function to be called. Class methods may also be invoked statically using this function by passing array($classname, $methodname) to this parameter. Additionally class methods of an object instance may be called by passing array($objectinstance, $methodname) to this parameter."
+                }
+            ]
+        },
+        {
+            "name": "call_user_func_serialized",
+            "desc": "Invoke a function with serialized function and parameters by calling serialize(array(\"func\" => $func, \"params\" => $params)), and returns function return in serialized format of array(\"ret\" => $ret, \"exception\" => $exception). Useful for over-network invocation.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Serialized return."
+            },
+            "args": [
+                {
+                    "name": "input",
+                    "type": "String",
+                    "desc": "Serialized callback and parameters."
+                }
+            ]
+        },
+        {
+            "name": "call_user_func_array_rpc",
+            "desc": "Same as call_user_func_array(), but executes on a remote HipHop RPC server",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the function result, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "host",
+                    "type": "String",
+                    "desc": "Remote RPC server's address."
+                },
+                {
+                    "name": "port",
+                    "type": "Int32",
+                    "desc": "Remote RPC server's port."
+                },
+                {
+                    "name": "auth",
+                    "type": "String",
+                    "desc": "Remote RPC server's authentication password."
+                },
+                {
+                    "name": "timeout",
+                    "type": "Int32",
+                    "desc": "How many seconds to wait for response."
+                },
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The function to be called, same as in call_user_func_array()."
+                },
+                {
+                    "name": "params",
+                    "type": "VariantVec",
+                    "desc": "Parameters, same as in call_user_func_array()."
+                }
+            ]
+        },
+        {
+            "name": "call_user_func_rpc",
+            "desc": "Same as call_user_func(), but executes on a remote HipHop RPC server",
+            "flags": [
+                "HipHopSpecific",
+                "MixedVariableArguments"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the function result, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "host",
+                    "type": "String",
+                    "desc": "Remote RPC server's address."
+                },
+                {
+                    "name": "port",
+                    "type": "Int32",
+                    "desc": "Remote RPC server's port."
+                },
+                {
+                    "name": "auth",
+                    "type": "String",
+                    "desc": "Remote RPC server's authentication password."
+                },
+                {
+                    "name": "timeout",
+                    "type": "Int32",
+                    "desc": "How many seconds to wait for response."
+                },
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The function to be called, same as in call_user_func_array()."
+                }
+            ]
+        },
+        {
+            "name": "forward_static_call_array",
+            "desc": "Calls a user defined function or method given by the function parameter. This function must be called within a method context, it can't be used outside a class. All arguments of the forwarded method are passed as values, and as an array, similarly to call_user_func_array().",
+            "flags": [
+                "ContextSensitive"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the function result, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The function or method to be called. This parameter may be an array, with the name of the class, and the method, or a string, with a function name."
+                },
+                {
+                    "name": "params",
+                    "type": "VariantVec",
+                    "desc": "One parameter, gathering all the method parameter in one array.\n\nNote that the parameters for forward_static_call_array() are not passed by reference."
+                }
+            ]
+        },
+        {
+            "name": "forward_static_call",
+            "desc": "Calls a user defined function or method given by the function parameter, with the following arguments. This function must be called within a method context, it can't be used outside a class.",
+            "flags": [
+                "VariableArguments",
+                "ContextSensitive"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the function result, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The function or method to be called. This parameter may be an array, with the name of the class, and the method, or a string, with a function name."
+                }
+            ]
+        },
+        {
+            "name": "get_called_class",
+            "desc": "Gets the name of the class the static method is called in.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the class name. Returns FALSE if called from outside a class."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "create_function",
+            "desc": "Creates an anonymous function from the parameters passed, and returns a unique name for it.\nUsually these parameters will be passed as single quote delimited strings. The reason for using single quoted strings, is to protect the variable names from parsing, otherwise, if you use double quotes there will be a need to escape the variable names, e.g. \\$avar.",
+            "flags": [
+            ],
+            "return": {
+                "type": "String",
+                "desc": "Returns a unique function name as a string, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "args",
+                    "type": "String",
+                    "desc": "The function arguments."
+                },
+                {
+                    "name": "code",
+                    "type": "String",
+                    "desc": "The function code."
+                }
+            ]
+        },
+        {
+            "name": "func_get_arg",
+            "desc": "Gets the specified argument from a user-defined function's argument list.\n\nThis function may be used in conjunction with func_get_args() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the specified argument, or FALSE on error."
+            },
+            "args": [
+                {
+                    "name": "arg_num",
+                    "type": "Int32",
+                    "desc": "The argument offset. Function arguments are counted starting from zero."
+                }
+            ]
+        },
+        {
+            "name": "func_get_args",
+            "desc": "Gets an array of the function's argument list.\n\nThis function may be used in conjunction with func_get_arg() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array in which each element is a copy of the corresponding member of the current user-defined function's argument list.",
+                "predicted_type": 10
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "hphp_func_slice_args",
+            "desc": "For internal use only, used to merge array_slice() with func_get_args() while avoiding unnecessary copies and allocations. This should not be called directly.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array in which each element is a copy of the request corresponding members of the current user-defined function's argument list.",
+                "predicted_type": 10
+            },
+            "args": [
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "desc": "The offset into the function arguments at which to start."
+                }
+            ]
+        },
+        {
+            "name": "func_num_args",
+            "desc": "Gets the number of arguments passed to the function.\n\nThis function may be used in conjunction with func_get_arg() and func_get_args() to allow user-defined functions to accept variable-length argument lists.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the number of arguments passed into the current user-defined function."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "register_postsend_function",
+            "desc": "Registers functions to call after HTTP response is completely sent to browser.",
+            "flags": [
+                "HipHopSpecific",
+                "VariableArguments"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The callback to register."
+                }
+            ]
+        },
+        {
+            "name": "register_shutdown_function",
+            "desc": "Registers the function named by function to be executed when script processing is complete or when exit() is called.\n\nMultiple calls to register_shutdown_function() can be made, and each will be called in the same order as they were registered. If you call exit() within one registered shutdown function, processing will stop completely and no other registered shutdown functions will be called.",
+            "flags": [
+                "VariableArguments"
+            ],
+            "return": {
+                "type": null,
+                "desc": "No value is returned."
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The shutdown function to register.\n\nThe shutdown functions are called as the part of the request so that it's possible to send the output from them. There is currently no way to process the data with output buffering functions in the shutdown function.\n\nShutdown functions are called after closing all opened output buffers thus, for example, its output will not be compressed if zlib.output_compression is enabled."
+                }
+            ]
+        },
+        {
+            "name": "register_cleanup_function",
+            "desc": "Registers functions to call at very end of a web page to clean up and free system resources.",
+            "flags": [
+                "HipHopSpecific",
+                "VariableArguments"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant",
+                    "desc": "The callback to register."
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

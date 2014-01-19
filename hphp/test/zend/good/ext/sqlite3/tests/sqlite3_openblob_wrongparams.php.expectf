@@ -1,0 +1,10 @@
+Creating table: true
+PREPARING insert
+BINDING Parameters:
+bool(true)
+bool(true)
+Closing statement: true
+Open BLOB with wrong parameter count
+HipHop Warning: %s
+NULL
+Done

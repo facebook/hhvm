@@ -1,0 +1,10 @@
+*** Testing count_chars() : error conditions ***
+
+-- Testing count_chars() function with no arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing count_chars() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

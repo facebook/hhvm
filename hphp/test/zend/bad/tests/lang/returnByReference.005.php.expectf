@@ -1,0 +1,14 @@
+---> 1. Trying to assign by reference the return value of a function that returns by value:
+
+Strict Standards: Only variables should be assigned by reference in %s on line 20
+int(5)
+int(100)
+
+---> 2. Trying to assign by reference the return value of a function that returns a constant by ref:
+HipHop Notice: %s
+int(5)
+int(100)
+
+---> 3. Trying to assign by reference the return value of a function that returns by ref:
+int(5)
+int(5)

@@ -1,0 +1,12 @@
+C::foo
+string(1) "C"
+D::foo
+string(1) "D"
+E::foo
+string(1) "E"
+C::bar
+string(1) "C"
+D::bar
+string(1) "D"
+E::bar
+string(1) "E"

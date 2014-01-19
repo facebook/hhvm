@@ -1,0 +1,30 @@
+Extracted:int(0)
+Array
+(
+    [c] => 0
+)
+Extracted:int(1)
+Array
+(
+    [a] => 1
+    [prefix_a] => 1
+    [c] => 1
+)
+Extracted:int(1)
+Array
+(
+    [a] => 1
+    [prefix_a] => 1
+    [c] => 1
+)
+Extracted:int(0)
+Array
+(
+    [c] => 0
+)
+Extracted:int(1)
+Array
+(
+    [prefix_111] => 1
+    [c] => 1
+)

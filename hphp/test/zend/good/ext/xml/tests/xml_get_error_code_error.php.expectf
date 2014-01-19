@@ -1,0 +1,10 @@
+*** Testing xml_get_error_code() : error conditions ***
+
+-- Testing xml_get_error_code() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing xml_get_error_code() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

@@ -1,0 +1,58 @@
+Locale is: en_US
+array (
+  0 => 4560,
+  1 => 123,
+  2 => 37.073,
+)
+array (
+  0 => 4560,
+  1 => 123,
+  2 => 37.073,
+)
+
+Locale is: ru_UA
+array (
+  0 => 4560,
+  1 => 123,
+  2 => 37.073,
+)
+array (
+  0 => 4560,
+  1 => 123,
+  2 => 37.073,
+)
+
+Locale is: de
+array (
+  0 => 4560,
+  1 => 123,
+  2 => 37.073,
+)
+array (
+  0 => 4560,
+  1 => 123,
+  2 => 37.073,
+)
+
+Locale is: en_UK
+array (
+  0 => 4560,
+  1 => 123,
+  2 => 37.073,
+)
+array (
+  0 => 4560,
+  1 => 123,
+  2 => 37.073,
+)
+
+Locale is: root
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+
+Locale is: fr
+array (
+  0 => 42,
+)
+array (
+  0 => 42,
+)

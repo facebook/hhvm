@@ -1,0 +1,17 @@
+Standard sorting
+Array
+(
+    [0] => img1.png
+    [1] => img10.png
+    [2] => img12.png
+    [3] => img2.png
+)
+
+Natural order sorting
+Array
+(
+    [3] => img1.png
+    [2] => img2.png
+    [1] => img10.png
+    [0] => img12.png
+)

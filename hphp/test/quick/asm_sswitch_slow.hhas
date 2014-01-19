@@ -1,0 +1,105 @@
+# SSwitch with integer-like strings uses a different translator
+# implementation.
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  UnboxR
+  RetC
+}
+
+.function get_three() {
+  String "3"
+  RetC
+}
+
+.function sswitch_on($foo) {
+  CGetL $foo
+  SSwitch <"1":label_1
+           "2":label_2
+           "3":label_3
+             -:fail>
+
+label_1:
+  String "1\n"
+  Jmp done
+
+label_2:
+  String "2\n"
+  Jmp done
+
+label_3:
+  String "3\n"
+
+done:
+  Print
+  RetC
+
+fail:
+  String "default case\n"
+  Print
+  RetC
+}
+
+.function case_three() {
+  FPushFuncD 0 "get_three"
+  FCall 0
+  UnboxR
+  SetL $foo
+  PopC
+
+  FPushFuncD 1 "sswitch_on"
+  FPassL 0 $foo
+  FCall 1
+  UnboxR
+  RetC
+}
+
+.class Obj {
+  .default_ctor;
+  .method [public] __toString() {
+    String "2"
+    RetC
+  }
+}
+
+.function with_obj() {
+  FPushCtorD 0 "Obj"
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+
+  FPushFuncD 1 "sswitch_on"
+  FPassL 0 $obj
+  FCall 1
+  UnboxR
+  RetC
+}
+
+.function case_default() {
+  FPushFuncD 1 "sswitch_on"
+  String "kujhasekguheku"
+  FPassC 0
+  FCall 1
+  UnboxR
+  RetC
+}
+
+.function main() {
+  FPushFuncD 0 "case_three"
+  FCall 0
+  PopR
+
+  FPushFuncD 0 "with_obj"
+  FCall 0
+  PopR
+
+  FPushFuncD 0 "case_default"
+  FCall 0
+  PopR
+
+  String "Done\n"
+  Print
+  RetC
+}

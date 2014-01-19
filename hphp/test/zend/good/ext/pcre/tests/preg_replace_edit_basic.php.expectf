@@ -1,0 +1,7 @@
+string(54) "123456789 - Hello, world -           This is a string."
+string(54) "123456789 - Hello, world -           This is a string."
+string(54) "444444789 - Hello, world -           This is a string."
+int(5)
+string(56) "123456789 - Bonjour, world -           This is a string."
+string(42) "123456789. Hello, world. This is a string."
+string(30) "josmessa at uk dot ibm dot com"

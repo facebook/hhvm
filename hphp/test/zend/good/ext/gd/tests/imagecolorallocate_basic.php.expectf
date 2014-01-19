@@ -1,0 +1,6 @@
+*** Testing imagecolorallocate() : basic functionality ***
+int(16711680)
+int(65280)
+int(255)
+int(16777215)
+===DONE===

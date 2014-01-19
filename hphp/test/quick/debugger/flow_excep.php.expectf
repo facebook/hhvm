@@ -1,0 +1,470 @@
+Program %s/flow_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break main()
+Breakpoint 1 set upon entering main()
+But wont break until function main has been loaded.
+run
+Breakpoint 1 reached at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+next
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+Break at main() on line 56 of %s/flow_excep.php
+  55   $x = throwFromCallee(1);
+  56*  var_dump($x);
+  57 
+
+next
+int(3)
+Break at main() on line 58 of %s/flow_excep.php
+  57 
+  58*  $x = foo(2);
+  59   var_dump($x);
+
+next
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+Break at main() on line 59 of %s/flow_excep.php
+  58   $x = foo(2);
+  59*  var_dump($x);
+  60 }
+
+continue
+int(10)
+Program %s/flow_excep.php exited normally.
+run
+Breakpoint 1 reached at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+step
+Break at throwFromCallee() on line 30 of %s/flow_excep.php
+  29 function throwFromCallee($a) {
+  30*  $x = $a + 1;
+  31   try {
+
+out
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+Break at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+next 2
+int(3)
+Break at main() on line 58 of %s/flow_excep.php
+  57 
+  58*  $x = foo(2);
+  59   var_dump($x);
+
+step
+Break at foo() on line 41 of %s/flow_excep.php
+  40 function foo($a) {
+  41*  $x = $a + 1;
+  42   $x = throwAndCatch($x);
+
+next
+Break at foo() on line 42 of %s/flow_excep.php
+  41   $x = $a + 1;
+  42*  $x = throwAndCatch($x);
+  43   try {
+
+step
+Break at throwAndCatch() on line 13 of %s/flow_excep.php
+  12 function throwAndCatch($a) {
+  13*  $x = $a + 1;
+  14   try {
+
+out
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Break at foo() on line 42 of %s/flow_excep.php
+  41   $x = $a + 1;
+  42*  $x = throwAndCatch($x);
+  43   try {
+
+out
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+Break at main() on line 58 of %s/flow_excep.php
+  57 
+  58*  $x = foo(2);
+  59   var_dump($x);
+
+continue
+int(10)
+Program %s/flow_excep.php exited normally.
+run
+Breakpoint 1 reached at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+step
+Break at throwFromCallee() on line 30 of %s/flow_excep.php
+  29 function throwFromCallee($a) {
+  30*  $x = $a + 1;
+  31   try {
+
+next
+Break at throwFromCallee() on line 32 of %s/flow_excep.php
+  31   try {
+  32*    throwNoCatch($x);
+  33   } catch (Ex1 $e) {
+
+next
+Break at throwFromCallee() on line 31 of %s/flow_excep.php
+  30   $x = $a + 1;
+  31*  try {
+  32*    throwNoCatch($x);
+  33*  } catch (Ex1 $e) {
+  34*    printf("Caught %s in throwFromCallee()\n", $e->getMessage());
+  35*    $x++;
+  36*  }
+  37   return $x;
+
+next
+Break at throwFromCallee() on line 34 of %s/flow_excep.php
+  33   } catch (Ex1 $e) {
+  34*    printf("Caught %s in throwFromCallee()\n", $e->getMessage());
+  35     $x++;
+
+next
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+Break at throwFromCallee() on line 35 of %s/flow_excep.php
+  34     printf("Caught %s in throwFromCallee()\n", $e->getMessage());
+  35*    $x++;
+  36   }
+
+continue
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
+run
+Breakpoint 1 reached at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+step
+Break at throwFromCallee() on line 30 of %s/flow_excep.php
+  29 function throwFromCallee($a) {
+  30*  $x = $a + 1;
+  31   try {
+
+next
+Break at throwFromCallee() on line 32 of %s/flow_excep.php
+  31   try {
+  32*    throwNoCatch($x);
+  33   } catch (Ex1 $e) {
+
+step
+Break at throwNoCatch() on line 24 of %s/flow_excep.php
+  23 function throwNoCatch($a) {
+  24*  $x = $a + 1;
+  25   $e = new Ex1('Thrown from throwNoCatch '.$x);
+
+out
+Break at throwFromCallee() on line 31 of %s/flow_excep.php
+  30   $x = $a + 1;
+  31*  try {
+  32*    throwNoCatch($x);
+  33*  } catch (Ex1 $e) {
+  34*    printf("Caught %s in throwFromCallee()\n", $e->getMessage());
+  35*    $x++;
+  36*  }
+  37   return $x;
+
+next
+Break at throwFromCallee() on line 34 of %s/flow_excep.php
+  33   } catch (Ex1 $e) {
+  34*    printf("Caught %s in throwFromCallee()\n", $e->getMessage());
+  35     $x++;
+
+out
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+Break at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+continue
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
+run
+Breakpoint 1 reached at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+step
+Break at throwFromCallee() on line 30 of %s/flow_excep.php
+  29 function throwFromCallee($a) {
+  30*  $x = $a + 1;
+  31   try {
+
+next
+Break at throwFromCallee() on line 32 of %s/flow_excep.php
+  31   try {
+  32*    throwNoCatch($x);
+  33   } catch (Ex1 $e) {
+
+step
+Break at throwNoCatch() on line 24 of %s/flow_excep.php
+  23 function throwNoCatch($a) {
+  24*  $x = $a + 1;
+  25   $e = new Ex1('Thrown from throwNoCatch '.$x);
+
+next
+Break at throwNoCatch() on line 25 of %s/flow_excep.php
+  24   $x = $a + 1;
+  25*  $e = new Ex1('Thrown from throwNoCatch '.$x);
+  26   throw $e;
+
+next
+Break at throwNoCatch() on line 26 of %s/flow_excep.php
+  25   $e = new Ex1('Thrown from throwNoCatch '.$x);
+  26*  throw $e;
+  27 }
+
+step
+Break at throwFromCallee() on line 31 of %s/flow_excep.php
+  30   $x = $a + 1;
+  31*  try {
+  32*    throwNoCatch($x);
+  33*  } catch (Ex1 $e) {
+  34*    printf("Caught %s in throwFromCallee()\n", $e->getMessage());
+  35*    $x++;
+  36*  }
+  37   return $x;
+
+step
+Break at throwFromCallee() on line 34 of %s/flow_excep.php
+  33   } catch (Ex1 $e) {
+  34*    printf("Caught %s in throwFromCallee()\n", $e->getMessage());
+  35     $x++;
+
+continue
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+int(10)
+Program %s/flow_excep.php exited normally.
+run
+Breakpoint 1 reached at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+next 2
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Break at main() on line 58 of %s/flow_excep.php
+  57 
+  58*  $x = foo(2);
+  59   var_dump($x);
+
+step
+Break at foo() on line 41 of %s/flow_excep.php
+  40 function foo($a) {
+  41*  $x = $a + 1;
+  42   $x = throwAndCatch($x);
+
+next 2
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Break at foo() on line 44 of %s/flow_excep.php
+  43   try {
+  44*    $x = throwAndCatch($x);
+  45     throw new Ex1('Thrown from foo '.$x);
+
+step
+Break at throwAndCatch() on line 13 of %s/flow_excep.php
+  12 function throwAndCatch($a) {
+  13*  $x = $a + 1;
+  14   try {
+
+next
+Break at throwAndCatch() on line 15 of %s/flow_excep.php
+  14   try {
+  15*    throw new Ex2('Thrown from throwAndCatch '.$x);
+  16   } catch (Ex2 $e) {
+
+next
+Break at throwAndCatch() on line 14 of %s/flow_excep.php
+  13   $x = $a + 1;
+  14*  try {
+  15*    throw new Ex2('Thrown from throwAndCatch '.$x);
+  16*  } catch (Ex2 $e) {
+  17*    printf("Caught %s in throwAndCatch()\n", $e->getMessage());
+  18*    $x++;
+  19*  }
+  20   return $x;
+
+next
+Break at throwAndCatch() on line 17 of %s/flow_excep.php
+  16   } catch (Ex2 $e) {
+  17*    printf("Caught %s in throwAndCatch()\n", $e->getMessage());
+  18     $x++;
+
+out
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Break at foo() on line 44 of %s/flow_excep.php
+  43   try {
+  44*    $x = throwAndCatch($x);
+  45     throw new Ex1('Thrown from foo '.$x);
+
+next
+Break at foo() on line 45 of %s/flow_excep.php
+  44     $x = throwAndCatch($x);
+  45*    throw new Ex1('Thrown from foo '.$x);
+  46   } catch (Exception $e) {
+
+next
+Break at foo() on line 43 of %s/flow_excep.php
+  42   $x = throwAndCatch($x);
+  43*  try {
+  44*    $x = throwAndCatch($x);
+  45*    throw new Ex1('Thrown from foo '.$x);
+  46*  } catch (Exception $e) {
+  47*    printf("Caught %s in foo()\n", $e->getMessage());
+  48*    $x = throwAndCatch($x);
+  49*    $x++;
+  50*  }
+  51   return $x;
+
+next
+Break at foo() on line 47 of %s/flow_excep.php
+  46   } catch (Exception $e) {
+  47*    printf("Caught %s in foo()\n", $e->getMessage());
+  48     $x = throwAndCatch($x);
+
+out
+Caught Thrown from foo 7 in foo()
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+Break at main() on line 58 of %s/flow_excep.php
+  57 
+  58*  $x = foo(2);
+  59   var_dump($x);
+
+continue
+int(10)
+Program %s/flow_excep.php exited normally.
+run
+Breakpoint 1 reached at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+next 2
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Break at main() on line 58 of %s/flow_excep.php
+  57 
+  58*  $x = foo(2);
+  59   var_dump($x);
+
+step
+Break at foo() on line 41 of %s/flow_excep.php
+  40 function foo($a) {
+  41*  $x = $a + 1;
+  42   $x = throwAndCatch($x);
+
+next 6
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Break at foo() on line 48 of %s/flow_excep.php
+  47     printf("Caught %s in foo()\n", $e->getMessage());
+  48*    $x = throwAndCatch($x);
+  49     $x++;
+
+next
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+Break at foo() on line 49 of %s/flow_excep.php
+  48     $x = throwAndCatch($x);
+  49*    $x++;
+  50   }
+
+continue
+int(10)
+Program %s/flow_excep.php exited normally.
+run
+Breakpoint 1 reached at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+next 2
+Caught Thrown from throwNoCatch 3 in throwFromCallee()
+int(3)
+Break at main() on line 58 of %s/flow_excep.php
+  57 
+  58*  $x = foo(2);
+  59   var_dump($x);
+
+step
+Break at foo() on line 41 of %s/flow_excep.php
+  40 function foo($a) {
+  41*  $x = $a + 1;
+  42   $x = throwAndCatch($x);
+
+next 6
+Caught Thrown from throwAndCatch 4 in throwAndCatch()
+Caught Thrown from throwAndCatch 6 in throwAndCatch()
+Caught Thrown from foo 7 in foo()
+Break at foo() on line 48 of %s/flow_excep.php
+  47     printf("Caught %s in foo()\n", $e->getMessage());
+  48*    $x = throwAndCatch($x);
+  49     $x++;
+
+step
+Break at throwAndCatch() on line 13 of %s/flow_excep.php
+  12 function throwAndCatch($a) {
+  13*  $x = $a + 1;
+  14   try {
+
+next
+Break at throwAndCatch() on line 15 of %s/flow_excep.php
+  14   try {
+  15*    throw new Ex2('Thrown from throwAndCatch '.$x);
+  16   } catch (Ex2 $e) {
+
+out
+Caught Thrown from throwAndCatch 8 in throwAndCatch()
+Break at foo() on line 48 of %s/flow_excep.php
+  47     printf("Caught %s in foo()\n", $e->getMessage());
+  48*    $x = throwAndCatch($x);
+  49     $x++;
+
+next
+Break at foo() on line 49 of %s/flow_excep.php
+  48     $x = throwAndCatch($x);
+  49*    $x++;
+  50   }
+
+continue
+int(10)
+Program %s/flow_excep.php exited normally.
+run
+Breakpoint 1 reached at main() on line 55 of %s/flow_excep.php
+  54 function main() {
+  55*  $x = throwFromCallee(1);
+  56   var_dump($x);
+
+quit

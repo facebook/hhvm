@@ -1,0 +1,32 @@
+object(HH\Vector)#1 (4) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(73)
+  [2]=>
+  NULL
+  [3]=>
+  NULL
+}
+object(HH\Vector)#1 (4) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+  [2]=>
+  int(73)
+  [3]=>
+  int(42)
+}
+object(StableMap)#1 (2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(73)
+}
+object(StableMap)#1 (2) {
+  [3]=>
+  int(42)
+  [2]=>
+  int(73)
+}

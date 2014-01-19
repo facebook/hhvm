@@ -1,0 +1,51 @@
+*** Testing ceil() : usage variations ***
+
+-- Iteration 1 --
+float(0)
+
+-- Iteration 2 --
+float(0)
+
+-- Iteration 3 --
+float(1)
+
+-- Iteration 4 --
+float(0)
+
+-- Iteration 5 --
+float(1)
+
+-- Iteration 6 --
+float(0)
+
+-- Iteration 7 --
+float(0)
+
+-- Iteration 8 --
+float(0)
+
+-- Iteration 9 --
+bool(false)
+
+-- Iteration 10 --
+float(0)
+
+-- Iteration 11 --
+float(0)
+
+-- Iteration 12 --
+float(0)
+
+-- Iteration 13 --
+HipHop Notice: %s
+float(1)
+
+-- Iteration 14 --
+float(0)
+
+-- Iteration 15 --
+float(0)
+
+-- Iteration 16 --
+float(%d)
+===Done===

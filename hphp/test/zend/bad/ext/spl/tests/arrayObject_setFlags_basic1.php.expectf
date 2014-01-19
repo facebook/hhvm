@@ -1,0 +1,16 @@
+--> Access the real property:
+bool(true)
+string(15) "object property"
+string(23) "object property.changed"
+
+--> Remove the real property and access the array element:
+bool(true)
+string(13) "array element"
+string(21) "array element.changed"
+
+--> Remove the array element and try access again:
+bool(false)
+HipHop Notice: %s
+NULL
+HipHop Notice: %s
+string(8) ".changed"

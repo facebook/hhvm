@@ -1,0 +1,29 @@
+*** Testing idate() : usage variation ***
+
+--Day of the month--
+int(%d)
+
+--Leap Year--
+int(%d)
+
+--Month number--
+int(%d)
+
+--Days in the month--
+int(%d)
+
+--Day of the week--
+int(%d)
+
+--ISO-8601 week number--
+int(%d)
+
+--Year (1 or 2 digits)--
+int(%d)
+
+--Year 4 digits--
+int(%d)
+
+--Day of the year--
+int(%d)
+===DONE===

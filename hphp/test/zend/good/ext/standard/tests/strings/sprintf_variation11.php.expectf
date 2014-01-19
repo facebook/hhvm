@@ -1,0 +1,32 @@
+*** Testing sprintf() : float formats with resource values ***
+
+-- Iteration 1 --
+string(%d) "%d.000000"
+string(1) "f"
+string(%d) "%d.000000"
+string(1) "f"
+string(%d) " %d.000000"
+string(%d) "%d.000000 "
+string(%d) "	%d.000000"
+string(%d) "
+%d.000000"
+string(%d) "%d.000000"
+string(30) "%s%d.000000"
+string(4) "0-9]"
+string(1) "f"
+
+-- Iteration 2 --
+string(%d) "%d.000000"
+string(1) "f"
+string(%d) "%d.000000"
+string(1) "f"
+string(%d) " %d.000000"
+string(%d) "%d.000000 "
+string(%d) "	%d.000000"
+string(%d) "
+%d.000000"
+string(%d) "%d.000000"
+string(30) "%s%d.000000"
+string(4) "0-9]"
+string(1) "f"
+Done

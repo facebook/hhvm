@@ -1,0 +1,11 @@
+*** Testing DateTime::modify() : basic functionality ***
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+
+Deprecated: mktime(): The is_dst parameter is deprecated in %s on line %d
+int(%i)
+===DONE===

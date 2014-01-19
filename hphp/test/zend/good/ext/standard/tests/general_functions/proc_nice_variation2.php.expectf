@@ -1,0 +1,5 @@
+*** Test substituting argument 1 with boolean values ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)

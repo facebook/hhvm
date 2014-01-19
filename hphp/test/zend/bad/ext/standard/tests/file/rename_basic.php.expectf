@@ -1,0 +1,6 @@
+*** Testing rename() on non-existing file ***
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+===Done===

@@ -1,0 +1,6 @@
+*** Testing posix_uname() : error conditions ***
+
+-- Testing posix_uname() function with one argument --
+HipHop Warning: %s
+NULL
+Done

@@ -1,0 +1,9 @@
+string(91) "bool = false
+string = asd
+num = 12345
+arr {
+  bool = false
+  string = blah
+  num2 = 6789
+}
+"

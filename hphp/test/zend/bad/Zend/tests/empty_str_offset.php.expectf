@@ -1,0 +1,38 @@
+- empty ---
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+- string ---
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+- bool ---
+bool(false)
+bool(false)
+bool(true)
+- null ---
+bool(false)
+- double ---
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+- array ---
+bool(true)
+bool(true)
+- object ---
+bool(true)
+- resource ---
+bool(true)
+done

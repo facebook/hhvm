@@ -1,0 +1,17 @@
+*** Testing rename() on non-existing file ***
+HipHop Warning: %s
+bool(false)
+bool(false)
+bool(false)
+
+*** Testing rename() on existing directory ***
+bool(true)
+bool(false)
+bool(true)
+
+*** Testing rename() on non-existing directory ***
+HipHop Warning: %s
+bool(false)
+bool(false)
+bool(false)
+Done

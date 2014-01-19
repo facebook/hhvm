@@ -1,0 +1,39 @@
+<?php
+/* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
+ * Description: Apply a user function to every member of an array 
+ * Source code: ext/standard/array.c
+*/
+
+/*
+ * Testing array_walk() with an array having subarrays as elements 
+*/
+
+echo "*** Testing array_walk() : array with subarray ***\n";
+
+// callback function
+/* Prototype : callback(mixed $value, mixed $key)
+ * Parameters : $value - values in given 'input' array
+ *              $key - keys in given 'input' array
+ * Description : It prints the count of an array elements, passed as argument
+ */
+function callback($value, $key)
+{
+   // dump the arguments to check that they are passed
+   // with proper type
+   var_dump($key);  // key
+   var_dump($value); // value
+   echo "\n"; // new line to separate the output between each element
+}
+
+$input = array(
+  array(),
+  array(1),
+  array(1,2,3),
+  array("Mango", "Orange"),
+  array(array(1, 2, 3))
+);
+
+var_dump( array_walk( $input, "callback"));
+
+echo "Done"
+?>

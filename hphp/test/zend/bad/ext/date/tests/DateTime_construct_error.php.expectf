@@ -1,0 +1,8 @@
+*** Testing date_create() : error conditions ***
+
+-- Testing new DateTime() with more than expected no. of arguments --
+HipHop Fatal error: %s
+Stack trace:
+#0 %s(%d): DateTime->__construct('GMT', Object(DateTimeZone), 99)
+#1 {main}
+  thrown in %s on line %d

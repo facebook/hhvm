@@ -1,0 +1,18 @@
+*** Testing stream_get_meta_data() : error conditions ***
+
+-- Testing stream_get_meta_data() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing stream_get_meta_data() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing stream_get_meta_data() function with invalid stream resource --
+HipHop Warning: %s
+NULL
+
+-- Testing stream_get_meta_data() function with closed stream resource --
+HipHop Warning: %s
+bool(false)
+Done

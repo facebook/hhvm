@@ -1,0 +1,10 @@
+*** Testing array_sum() : different integer array ***
+-- Sum of Integer array --
+int(-573)
+-- Sum of Octal array --
+int(35)
+-- Sum of Hex array --
+int(-198)
+-- Sum of mixed integer values --
+int(58)
+Done

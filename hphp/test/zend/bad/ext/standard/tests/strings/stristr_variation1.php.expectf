@@ -1,0 +1,46 @@
+*** Testing stristr() function: with unexpected inputs for 'string' argument ***
+-- Iteration 1 --
+bool(false)
+-- Iteration 2 --
+bool(false)
+-- Iteration 3 --
+bool(false)
+-- Iteration 4 --
+bool(false)
+-- Iteration 5 --
+bool(false)
+-- Iteration 6 --
+bool(false)
+-- Iteration 7 --
+bool(false)
+-- Iteration 8 --
+HipHop Warning: %s
+NULL
+-- Iteration 9 --
+HipHop Warning: %s
+NULL
+-- Iteration 10 --
+HipHop Warning: %s
+NULL
+-- Iteration 11 --
+bool(false)
+-- Iteration 12 --
+bool(false)
+-- Iteration 13 --
+bool(false)
+-- Iteration 14 --
+bool(false)
+-- Iteration 15 --
+bool(false)
+-- Iteration 16 --
+bool(false)
+-- Iteration 17 --
+string(7) " object"
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+-- Iteration 19 --
+bool(false)
+-- Iteration 20 --
+bool(false)
+===DONE===

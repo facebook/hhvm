@@ -1,0 +1,17 @@
+Starting
+c 0 constructing
+c 1 constructing
+c 2 constructing
+c 1 destructing
+c 3 constructing
+c 2 destructing
+c 4 constructing
+c 3 destructing
+c 5 constructing
+c 4 destructing
+c 6 constructing
+Returning from main
+c 6 destructing
+c 5 destructing
+c 0 destructing
+Done

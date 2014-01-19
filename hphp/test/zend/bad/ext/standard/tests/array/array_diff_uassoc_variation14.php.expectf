@@ -1,0 +1,4 @@
+*** Testing array_diff_uassoc() : usage variation ***
+Error: 2 - array_diff_uassoc() expects parameter 3 to be a valid callback, no array or string given, %s(%d)
+NULL
+===DONE===

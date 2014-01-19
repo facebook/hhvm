@@ -1,0 +1,10 @@
+*** Testing strnatcmp() : error conditions ***
+-- Testing strnatcmp() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+
+-- Testing strnatcmp() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+===DONE===

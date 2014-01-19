@@ -1,0 +1,8 @@
+HipHop Fatal error: Uncaught exception 'Exception' with message 'throwing first' in %s/test/quick/exception_handler.php:9
+Stack trace:
+#0 %s/test/quick/exception_handler.php(11): main()
+#1 {main}
+Exception handler threw an object exception: exception 'Exception' with message 'throwing second' in %s/test/quick/exception_handler.php:4
+Stack trace:
+#0 (): exn_throw()
+#1 {main}

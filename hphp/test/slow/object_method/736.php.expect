@@ -1,0 +1,14 @@
+600 == 600
+1 1 13 34 12 == 1 1  13 34 12
+1 1 13 34 12 == 1 1  13 34 12
+Calling G object 'f4missing' 3 == static parent method B::f4, 16 == 16
+1 1 == 1 1
+1 1 == 1 1
+dynamic call $g->'f' <G::f(5)>, 20 == 20
+dynamic call $g->'G::f' <G::f(5)>, 21 == 21
+31 == 31
+dynamic call $g->'missing' <G::f(5)>, Calling G object method 'missing' 2 = Calling G object method 'missing' 2
+
+dynamic call 'missing(2)' <G::f(5)>, FAIL =
+Calling object method 'missing' 3 = Calling object method 'missing' 3
+done

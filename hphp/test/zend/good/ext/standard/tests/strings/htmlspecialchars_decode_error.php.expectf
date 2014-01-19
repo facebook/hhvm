@@ -1,0 +1,10 @@
+*** Testing htmlspecialchars_decode() : error conditions ***
+
+-- Testing htmlspecialchars_decode() function with Zero arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing htmlspecialchars_decode() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+Done

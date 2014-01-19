@@ -1,0 +1,8 @@
+array(1) {
+  ["test"]=>
+  &int(10)
+}
+array(1) {
+  ["test"]=>
+  &int(20)
+}

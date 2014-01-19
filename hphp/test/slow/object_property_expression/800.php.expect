@@ -1,0 +1,4 @@
+object(X)#1 (1) {
+  ["q"]=>
+  string(5) "hello"
+}

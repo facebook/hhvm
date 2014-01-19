@@ -1,0 +1,127 @@
+# Tests unwinding with dirty callee-saved registers that are mapped to
+# execution stack locations.
+
+.main {
+  FPushFuncD 1 "set_error_handler"
+    String "thrower"
+    FPassC 0
+  FCall 1
+  PopR
+
+  .try_catch (Exception handler) {
+    FPushFuncD 0 "test_unwind_dirty_stack_regs"
+    FCall 0
+    UnboxR
+    RetC
+  }
+
+handler:
+  String "Received exception:  "
+  Catch
+  FPushObjMethodD 0 "getMessage"
+  FCall 0
+  UnboxR
+  Concat
+  String "\n"
+  Concat
+  Print
+  PopC
+  Int 1
+  RetC
+}
+
+.function thrower() {
+  FPushCtorD 1 "Exception"
+    String "hi"
+    FPassC 0
+  FCall 1
+  PopR
+  Throw
+}
+
+.class DtorPrinter {
+  .method [public] __construct($id) {
+    String "ctor: "
+    CGetL $id
+    Concat
+    String "\n"
+    Concat
+    Print
+    PopC
+
+    This
+    CGetL $id
+    SetM <C PT:"x">
+    PopC
+    Int 1
+    RetC
+  }
+
+  .method [public] __destruct() {
+    String "dtor: "
+    This
+    CGetM <C PT:"x">
+    Concat
+    String "\n"
+    Concat
+    Print
+    RetC
+  }
+
+  .property [private] x;
+}
+
+.function make_obj($id) {
+  FPushCtorD 1 "DtorPrinter"
+    FPassL 0 $id
+  FCall 1
+  PopR
+  RetC
+}
+
+# This test is dependent on the register allocator implementation, but
+# probably better than nothing and unlikely to significantly change.
+# It seems fairly hard to get a EMIT_CALL to happen while a Stack
+# location is in a dirty callee-saved register with our normal php
+# emitter, but this accomplishes it by CGetL'ing everything to the
+# stack.
+
+.function test_unwind_dirty_stack_regs() {
+  FPushFuncD 1 "make_obj"
+    Int 0
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_0
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 1
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_1
+  PopC
+  FPushFuncD 1 "make_obj"
+    Int 2
+    FPassC 0
+  FCall 1
+  UnboxR
+  SetL $k_2
+  PopC
+
+  CGetL $k_0
+  CGetL $k_1
+  CGetL $k_2
+
+  CGetL $k_99  # undefined variable
+  PopC
+
+  # This code isn't reached---but let's Pop this junk just so
+  # theoretically we could pass verification some day.
+  PopC # k_0
+  PopC
+  PopC
+
+  Int 1
+  RetC
+}

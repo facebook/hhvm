@@ -1,0 +1,49 @@
+*** Testing open_basedir configuration [dir] ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+object(Directory)#%d (2) {
+  ["path"]=>
+  string(%d) "%s/test/ok/"
+  ["handle"]=>
+  resource(%d) of type (stream)
+}
+object(Directory)#%d (2) {
+  ["path"]=>
+  string(%d) "%s/test/ok"
+  ["handle"]=>
+  resource(%d) of type (stream)
+}
+object(Directory)#%d (2) {
+  ["path"]=>
+  string(%d) "%s/test/ok/../ok"
+  ["handle"]=>
+  resource(%d) of type (stream)
+}
+*** Finished testing open_basedir configuration [dir] ***

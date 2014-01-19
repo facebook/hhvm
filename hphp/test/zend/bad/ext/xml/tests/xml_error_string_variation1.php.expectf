@@ -1,0 +1,81 @@
+*** Testing xml_error_string() : usage variations ***
+
+Arg value 10.5 
+string(22) "XML_ERR_CHARREF_AT_EOF"
+
+Arg value -10.5 
+string(7) "Unknown"
+
+Arg value 101234567000 
+string(7) "Unknown"
+
+Arg value 1.07654321E-9 
+string(8) "No error"
+
+Arg value 0.5 
+string(8) "No error"
+
+Arg value Array 
+HipHop Warning: %s
+NULL
+
+Arg value Array 
+HipHop Warning: %s
+NULL
+
+Arg value Array 
+HipHop Warning: %s
+NULL
+
+Arg value Array 
+HipHop Warning: %s
+NULL
+
+Arg value Array 
+HipHop Warning: %s
+NULL
+
+Arg value  
+string(8) "No error"
+
+Arg value  
+string(8) "No error"
+
+Arg value 1 
+string(9) "No memory"
+
+Arg value  
+string(8) "No error"
+
+Arg value 1 
+string(9) "No memory"
+
+Arg value  
+string(8) "No error"
+
+Arg value  
+HipHop Warning: %s
+NULL
+
+Arg value  
+HipHop Warning: %s
+NULL
+
+Arg value string 
+HipHop Warning: %s
+NULL
+
+Arg value string 
+HipHop Warning: %s
+NULL
+
+Arg value Some Ascii Data 
+HipHop Warning: %s
+NULL
+
+Arg value  
+string(8) "No error"
+
+Arg value  
+string(8) "No error"
+Done

@@ -1,0 +1,11 @@
+*** Testing number_format() : error conditions ***
+
+-- Testing number_format() function with less than expected no. of arguments --
+HipHop Warning: %s
+
+-- Testing number_format() function with 3 arguments --
+HipHop Warning: %s
+
+-- Testing number_format() function with more than 4 arguments --
+HipHop Warning: %s
+===DONE===

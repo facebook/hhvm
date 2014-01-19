@@ -1,0 +1,113 @@
+DOMAttr
+HipHop Warning: DOMAttr::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+object(DOMAttr)#1 (0) {
+}
+string(91) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:7:"DOMAttr";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(7) "DOMAttr"
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(4) "isId"
+  [5]=>
+  string(11) "appendChild"
+  [6]=>
+  string(9) "cloneNode"
+  [7]=>
+  string(9) "getLineNo"
+  [8]=>
+  string(13) "hasAttributes"
+  [9]=>
+  string(13) "hasChildNodes"
+  [10]=>
+  string(12) "insertBefore"
+  [11]=>
+  string(18) "isDefaultNamespace"
+  [12]=>
+  string(10) "isSameNode"
+  [13]=>
+  string(11) "isSupported"
+  [14]=>
+  string(18) "lookupNamespaceUri"
+  [15]=>
+  string(12) "lookupPrefix"
+  [16]=>
+  string(9) "normalize"
+  [17]=>
+  string(11) "removeChild"
+  [18]=>
+  string(12) "replaceChild"
+  [19]=>
+  string(4) "c14n"
+  [20]=>
+  string(8) "c14nfile"
+  [21]=>
+  string(11) "getNodePath"
+}
+================
+A_DOMAttr
+HipHop Warning: DOMAttr::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+object(A_DOMAttr)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"A_DOMAttr";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(9) "A_DOMAttr"
+}
+array(22) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(5) "__get"
+  [2]=>
+  string(5) "__set"
+  [3]=>
+  string(7) "__isset"
+  [4]=>
+  string(4) "isId"
+  [5]=>
+  string(11) "appendChild"
+  [6]=>
+  string(9) "cloneNode"
+  [7]=>
+  string(9) "getLineNo"
+  [8]=>
+  string(13) "hasAttributes"
+  [9]=>
+  string(13) "hasChildNodes"
+  [10]=>
+  string(12) "insertBefore"
+  [11]=>
+  string(18) "isDefaultNamespace"
+  [12]=>
+  string(10) "isSameNode"
+  [13]=>
+  string(11) "isSupported"
+  [14]=>
+  string(18) "lookupNamespaceUri"
+  [15]=>
+  string(12) "lookupPrefix"
+  [16]=>
+  string(9) "normalize"
+  [17]=>
+  string(11) "removeChild"
+  [18]=>
+  string(12) "replaceChild"
+  [19]=>
+  string(4) "c14n"
+  [20]=>
+  string(8) "c14nfile"
+  [21]=>
+  string(11) "getNodePath"
+}

@@ -1,0 +1,30 @@
+Program %s/printThis.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break printThis.php:5
+Breakpoint 1 set on line 5 of printThis.php
+But wont break until file printThis.php has been loaded.
+run
+Breakpoint 1 reached at Foo::method() on line 5 of %s/printThis.php
+   4   function method() {
+   5*    $other = $this;
+   6   }
+
+print $this
+Foo Object
+(
+    [prop] => "Hello\n"
+)
+
+continue
+Breakpoint 1 reached at Foo::method() on line 5 of %s/printThis.php
+   4   function method() {
+   5*    $other = $this;
+   6   }
+
+print $this
+Foo Object
+(
+    [prop] => "Hello\n"
+    [prop2] => "\tThere"
+)
+
+quit

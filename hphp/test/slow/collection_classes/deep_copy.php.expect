@@ -1,0 +1,100 @@
+
+Vector...
+HH\Vector Object
+(
+    [0] => HH\Vector Object
+        (
+            [0] => 1
+            [1] => 2
+            [2] => HH\Vector Object
+                (
+                    [0] => 1
+                )
+
+        )
+
+    [1] => 3
+)
+HH\Vector Object
+(
+    [0] => HH\Vector Object
+        (
+            [0] => 1
+            [1] => 2
+        )
+
+    [1] => 3
+)
+
+Set...
+bool(false)
+
+Map...
+bool(false)
+
+StableMap...
+StableMap Object
+(
+    [0] => StableMap Object
+        (
+            [0] => 1
+        )
+
+    [1] => 2
+    [2] => 3
+    [3] => 4
+)
+StableMap Object
+(
+    [0] => StableMap Object
+        (
+            [0] => 1
+        )
+
+    [1] => 2
+    [2] => 3
+)
+
+Pair...
+Pair Object
+(
+    [0] => Pair Object
+        (
+            [0] => 1
+            [1] => 2
+        )
+
+    [1] => 3
+)
+Pair Object
+(
+    [0] => Pair Object
+        (
+            [0] => 1
+            [1] => 2
+        )
+
+    [1] => 3
+)
+
+FrozenVector...
+HH\FrozenVector Object
+(
+    [0] => HH\FrozenVector Object
+        (
+            [0] => 1
+            [1] => 2
+        )
+
+    [1] => 3
+)
+HH\FrozenVector Object
+(
+    [0] => HH\FrozenVector Object
+        (
+            [0] => 1
+            [1] => 2
+        )
+
+    [1] => 3
+)

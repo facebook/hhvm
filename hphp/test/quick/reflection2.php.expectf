@@ -1,0 +1,320 @@
+array(6) {
+  [0]=>
+  object(ReflectionMethod)#2 (4) {
+    ["name"]=>
+    string(17) "my_other_override"
+    ["class"]=>
+    string(8) "my_child"
+    ["originalClass"]=>
+    string(8) "my_child"
+    ["info"]=>
+    array(17) {
+      ["name"]=>
+      string(17) "my_other_override"
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(8) "my_child"
+      ["return_type"]=>
+      bool(false)
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_async"]=>
+      bool(false)
+      ["is_closure"]=>
+      bool(false)
+      ["is_generator"]=>
+      bool(false)
+      ["file"]=>
+      string(%d) "%s"
+      ["line1"]=>
+      int(20)
+      ["line2"]=>
+      int(20)
+      ["prototype"]=>
+      array(2) {
+        ["class"]=>
+        string(8) "my_class"
+        ["name"]=>
+        string(17) "my_other_override"
+      }
+    }
+  }
+  [1]=>
+  object(ReflectionMethod)#3 (4) {
+    ["name"]=>
+    string(15) "my_child_method"
+    ["class"]=>
+    string(8) "my_child"
+    ["originalClass"]=>
+    string(8) "my_child"
+    ["info"]=>
+    array(16) {
+      ["name"]=>
+      string(15) "my_child_method"
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(8) "my_child"
+      ["return_type"]=>
+      bool(false)
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_async"]=>
+      bool(false)
+      ["is_closure"]=>
+      bool(false)
+      ["is_generator"]=>
+      bool(false)
+      ["file"]=>
+      string(%d) "%s"
+      ["line1"]=>
+      int(21)
+      ["line2"]=>
+      int(21)
+    }
+  }
+  [2]=>
+  object(ReflectionMethod)#4 (4) {
+    ["name"]=>
+    string(9) "my_method"
+    ["class"]=>
+    string(8) "my_class"
+    ["originalClass"]=>
+    string(8) "my_child"
+    ["info"]=>
+    array(16) {
+      ["name"]=>
+      string(9) "my_method"
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(8) "my_class"
+      ["return_type"]=>
+      bool(false)
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_async"]=>
+      bool(false)
+      ["is_closure"]=>
+      bool(false)
+      ["is_generator"]=>
+      bool(false)
+      ["file"]=>
+      string(%d) "%s"
+      ["line1"]=>
+      int(13)
+      ["line2"]=>
+      int(13)
+    }
+  }
+  [3]=>
+  object(ReflectionMethod)#5 (4) {
+    ["name"]=>
+    string(18) "my_override_method"
+    ["class"]=>
+    string(8) "my_class"
+    ["originalClass"]=>
+    string(8) "my_child"
+    ["info"]=>
+    array(17) {
+      ["name"]=>
+      string(18) "my_override_method"
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(8) "my_class"
+      ["return_type"]=>
+      bool(false)
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_async"]=>
+      bool(false)
+      ["is_closure"]=>
+      bool(false)
+      ["is_generator"]=>
+      bool(false)
+      ["file"]=>
+      string(%d) "%s"
+      ["line1"]=>
+      int(15)
+      ["line2"]=>
+      int(15)
+      ["prototype"]=>
+      array(2) {
+        ["class"]=>
+        string(7) "my_base"
+        ["name"]=>
+        string(18) "my_override_method"
+      }
+    }
+  }
+  [4]=>
+  object(ReflectionMethod)#6 (4) {
+    ["name"]=>
+    string(15) "my_trait_method"
+    ["class"]=>
+    string(8) "my_class"
+    ["originalClass"]=>
+    string(8) "my_child"
+    ["info"]=>
+    array(16) {
+      ["name"]=>
+      string(15) "my_trait_method"
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(8) "my_class"
+      ["return_type"]=>
+      bool(false)
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_async"]=>
+      bool(false)
+      ["is_closure"]=>
+      bool(false)
+      ["is_generator"]=>
+      bool(false)
+      ["file"]=>
+      string(%d) "%s"
+      ["line1"]=>
+      int(4)
+      ["line2"]=>
+      int(4)
+    }
+  }
+  [5]=>
+  object(ReflectionMethod)#7 (4) {
+    ["name"]=>
+    string(14) "my_base_method"
+    ["class"]=>
+    string(7) "my_base"
+    ["originalClass"]=>
+    string(8) "my_child"
+    ["info"]=>
+    array(16) {
+      ["name"]=>
+      string(14) "my_base_method"
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(7) "my_base"
+      ["return_type"]=>
+      bool(false)
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_async"]=>
+      bool(false)
+      ["is_closure"]=>
+      bool(false)
+      ["is_generator"]=>
+      bool(false)
+      ["file"]=>
+      string(%d) "%s"
+      ["line1"]=>
+      int(8)
+      ["line2"]=>
+      int(8)
+    }
+  }
+}
+object(ReflectionParameter)#9 (2) {
+  ["info"]=>
+  array(7) {
+    ["index"]=>
+    int(0)
+    ["name"]=>
+    string(1) "c"
+    ["type"]=>
+    string(7) "MyClass"
+    ["type_hint"]=>
+    string(7) "MyClass"
+    ["function"]=>
+    string(1) "f"
+    ["class"]=>
+    string(1) "I"
+    ["attributes"]=>
+    array(0) {
+    }
+  }
+  ["name"]=>
+  string(1) "c"
+}

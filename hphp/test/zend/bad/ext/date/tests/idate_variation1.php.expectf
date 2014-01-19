@@ -1,0 +1,152 @@
+*** Testing idate() : usage variation ***
+
+--int 0--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--int 1--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--int 12345--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--int -12345--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--float 10.5--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--float -10.5--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--float 12.3456789000e10--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--float -12.3456789000e10--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--float .5--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--empty array--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--int indexed array--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--associative array--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--nested arrays--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--uppercase NULL--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--lowercase null--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--lowercase true--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--lowercase false--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--uppercase TRUE--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--uppercase FALSE--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--empty string DQ--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--empty string SQ--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithToString--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--instance of classWithoutToString--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--undefined var--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+
+--unset var--
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+===DONE===

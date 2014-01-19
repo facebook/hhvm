@@ -1,0 +1,3 @@
+EnableXHP = true
+EnableHipHopSyntax = true
+JitEnableRenameFunction = true

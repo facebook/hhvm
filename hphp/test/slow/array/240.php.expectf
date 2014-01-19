@@ -1,0 +1,19 @@
+int(1)
+int(2)
+int(3)
+int(3)
+int(2)
+HipHop Notice: Undefined index: 1 in %s/test/slow/array/240.php on line 22
+NULL
+HipHop Notice: Undefined index: hi in %s/test/slow/array/240.php on line 23
+NULL
+array(4) {
+  [0]=>
+  int(5)
+  [2]=>
+  int(0)
+  [3]=>
+  bool(true)
+  [4]=>
+  bool(true)
+}

@@ -1,0 +1,4 @@
+*** Testing mb_strtolower() : error conditions***
+HipHop Warning: %s
+bool(false)
+===DONE===

@@ -1,0 +1,6 @@
+*** Testing ob_flush() : error conditions ***
+
+-- Testing ob_flush() function with one argument --
+HipHop Warning: %s
+NULL
+Done

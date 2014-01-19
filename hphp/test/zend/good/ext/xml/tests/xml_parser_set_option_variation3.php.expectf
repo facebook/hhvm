@@ -1,0 +1,86 @@
+*** Testing xml_parser_set_option() : usage variations ***
+
+Arg value 0 
+bool(true)
+
+Arg value 1 
+bool(true)
+
+Arg value 12345 
+bool(true)
+
+Arg value -2345 
+bool(true)
+
+Arg value 10.5 
+bool(true)
+
+Arg value -10.5 
+bool(true)
+
+Arg value 101234567000 
+bool(true)
+
+Arg value 1.07654321E-9 
+bool(true)
+
+Arg value 0.5 
+bool(true)
+
+Arg value Array 
+bool(true)
+
+Arg value Array 
+bool(true)
+
+Arg value Array 
+bool(true)
+
+Arg value Array 
+bool(true)
+
+Arg value Array 
+bool(true)
+
+Arg value  
+bool(true)
+
+Arg value  
+bool(true)
+
+Arg value 1 
+bool(true)
+
+Arg value  
+bool(true)
+
+Arg value 1 
+bool(true)
+
+Arg value  
+bool(true)
+
+Arg value  
+bool(true)
+
+Arg value  
+bool(true)
+
+Arg value string 
+bool(true)
+
+Arg value string 
+bool(true)
+
+Arg value Some Ascii Data 
+bool(true)
+
+Arg value Resource id %s
+bool(true)
+
+Arg value  
+bool(true)
+
+Arg value  
+bool(true)
+Done

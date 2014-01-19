@@ -1,0 +1,22 @@
+*** Testing imap_fetch_overview() : usage variations ***
+Create a temporary mailbox and add 1 msgs
+.. mailbox '{%s}%s' created
+
+Testing with option value:%string|unicode%(1) "1"
+imap_fetch_overview() returns an object
+
+Testing with option value:bool(true)
+imap_fetch_overview() returns an object
+
+Testing with option value:float(1)
+imap_fetch_overview() returns an object
+
+Testing with option value:float(1)
+imap_fetch_overview() returns an object
+
+Testing with option value:int(%d)
+HipHop Warning: %s
+
+Testing with option value:int(-%d)
+HipHop Warning: %s
+===DONE===

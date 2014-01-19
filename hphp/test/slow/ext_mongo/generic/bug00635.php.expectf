@@ -1,0 +1,13 @@
+object(MongoCollection)#%d (%d) {
+  ["w"]=>
+  int(0)
+  ["wtimeout"]=>
+  int(10000)
+}
+object(MongoCollection)#%d (%d) {
+  ["w"]=>
+  int(0)
+  ["wtimeout"]=>
+  int(10000)
+}
+bool(true)

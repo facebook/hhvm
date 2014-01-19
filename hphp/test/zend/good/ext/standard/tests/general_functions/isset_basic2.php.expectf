@@ -1,0 +1,18 @@
+*** Testing isset() : basic functionality ***
+Test multiple scalar variables in a group
+bool(true)
+bool(false)
+Unset a few
+Test again
+bool(false)
+
+
+Array test:
+bool(false)
+bool(false)
+bool(false)
+..now set
+bool(true)
+bool(true)
+bool(true)
+===DONE===

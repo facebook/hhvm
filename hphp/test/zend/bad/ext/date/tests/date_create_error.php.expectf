@@ -1,0 +1,6 @@
+*** Testing date_create() : error conditions ***
+
+-- Testing date_create() function with more than expected no. of arguments --
+HipHop Warning: %s
+bool(false)
+===DONE===

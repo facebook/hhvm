@@ -1,0 +1,14 @@
+float(1)
+string(5) "hello"
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+string(5) "world"
+object(stdClass)#2 (0) {
+}
+string(6) "foobar"

@@ -1,0 +1,14 @@
+*.errors
+*.fatals
+*.out
+*.round_trip.hhas
+*.repo
+*.stats
+*.testfiles
+*.tests
+*.tmp
+/frameworks/composer.json.md5
+/frameworks/composer.lock
+/frameworks/composer.phar
+/frameworks/frameworks
+/frameworks/vendor

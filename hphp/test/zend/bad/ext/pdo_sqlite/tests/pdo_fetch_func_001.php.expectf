@@ -1,0 +1,48 @@
+object(PDOStatement)#%d (1) {
+  [%u|b%"queryString"]=>
+  %string|unicode%(21) "SELECT * FROM testing"
+}
+data: 1, php
+object(PDOStatement)#%d (1) {
+  [%u|b%"queryString"]=>
+  %string|unicode%(21) "SELECT * FROM testing"
+}
+data: 2, 
+array(2) {
+  [0]=>
+  %string|unicode%(3) "PHP"
+  [1]=>
+  %string|unicode%(0) ""
+}
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+array(2) {
+  [0]=>
+  %string|unicode%(9) "--- 1 ---"
+  [1]=>
+  %string|unicode%(9) "--- 2 ---"
+}
+array(2) {
+  [0]=>
+  %string|unicode%(7) "1---php"
+  [1]=>
+  %string|unicode%(4) "2---"
+}
+HipHop Warning: %s
+bool(false)
+array(2) {
+  [0]=>
+  %string|unicode%(7) "1===php"
+  [1]=>
+  %string|unicode%(4) "2==="
+}
+HipHop Warning: %s
+bool(false)

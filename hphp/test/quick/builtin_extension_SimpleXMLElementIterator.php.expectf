@@ -1,0 +1,47 @@
+SimpleXMLElementIterator
+object(SimpleXMLElementIterator)#1 (0) {
+}
+string(109) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:24:"SimpleXMLElementIterator";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(24) "SimpleXMLElementIterator"
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "current"
+  [2]=>
+  string(3) "key"
+  [3]=>
+  string(4) "next"
+  [4]=>
+  string(6) "rewind"
+  [5]=>
+  string(5) "valid"
+}
+================
+A_SimpleXMLElementIterator
+object(A_SimpleXMLElementIterator)#3 (1) {
+  ["___x"]=>
+  NULL
+}
+string(111) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:26:"A_SimpleXMLElementIterator";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(26) "A_SimpleXMLElementIterator"
+}
+array(6) {
+  [0]=>
+  string(11) "__construct"
+  [1]=>
+  string(7) "current"
+  [2]=>
+  string(3) "key"
+  [3]=>
+  string(4) "next"
+  [4]=>
+  string(6) "rewind"
+  [5]=>
+  string(5) "valid"
+}

@@ -1,0 +1,182 @@
+array(0) {
+}
+array(1) {
+  [0]=>
+  NULL
+}
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(1) {
+  [0]=>
+  int(42)
+}
+array(1) {
+  [0]=>
+  float(12.34)
+}
+array(1) {
+  [0]=>
+  string(5) "hello"
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+array(6) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  int(42)
+  [3]=>
+  float(12.34)
+  [4]=>
+  string(5) "hello"
+  [5]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    array(2) {
+      [0]=>
+      int(2)
+      [1]=>
+      array(1) {
+        [0]=>
+        int(3)
+      }
+    }
+  }
+}
+array(6) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  int(42)
+  [3]=>
+  float(12.34)
+  [4]=>
+  string(5) "hello"
+  [5]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    array(2) {
+      [0]=>
+      int(2)
+      [1]=>
+      array(1) {
+        [0]=>
+        int(3)
+      }
+    }
+  }
+}
+array(1) {
+  [""]=>
+  string(4) "null"
+}
+array(1) {
+  [0]=>
+  string(5) "false"
+}
+array(1) {
+  [1]=>
+  string(4) "true"
+}
+array(1) {
+  [0]=>
+  string(1) "0"
+}
+array(1) {
+  [42]=>
+  string(2) "42"
+}
+array(1) {
+  [12]=>
+  string(5) "12.34"
+}
+array(1) {
+  ["hello"]=>
+  string(5) "world"
+}
+array(4) {
+  [0]=>
+  string(1) "0"
+  [1]=>
+  string(1) "1"
+  ["hello"]=>
+  string(5) "world"
+  [12]=>
+  array(0) {
+  }
+}
+array(1) {
+  [0]=>
+  NULL
+}
+array(1) {
+  [0]=>
+  string(1) "0"
+}
+array(1) {
+  [0]=>
+  string(1) "0"
+}
+array(1) {
+  ["hello"]=>
+  string(5) "world"
+}
+array(1) {
+  ["hello"]=>
+  string(5) "world"
+}
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+}
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+}
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+}
+HipHop Warning: Invalid operand type was used: Invalid type used as key in %s on line 88
+array(0) {
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [-9223372036854775808]=>
+  int(0)
+}

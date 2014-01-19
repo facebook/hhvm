@@ -1,0 +1,45 @@
+#
+# Test some jumps
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function main {
+
+  Jmp real_function
+
+exit_at_top:  True
+              RetC
+
+real_function:
+  Int 0
+  SetL $x
+  PopC
+
+        # do { echo $x; echo "\n"; } while ($x < 22);
+loop:   CGetL $x
+        Print
+        PopC
+        String "\n"
+        Print
+        PopC
+
+        IncDecL $x PreInc
+        PopC
+
+        CGetL $x
+        Int 22
+        Lt
+        JmpNZ loop
+
+  String "Done with loop\n"
+  Print
+  PopC
+  Jmp exit_at_top
+}

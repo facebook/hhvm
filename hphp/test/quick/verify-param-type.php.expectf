@@ -1,0 +1,39 @@
+array(6) {
+  [0]=>
+  int(4096)
+  [1]=>
+  string(72) "Argument 1 passed to main() must be an instance of integer, double given"
+  [2]=>
+  string(%d) "%s"
+  [3]=>
+  int(16)
+  [4]=>
+  string(0) ""
+  [5]=>
+  array(2) {
+    [0]=>
+    array(2) {
+      ["file"]=>
+      string(%d) "%s"
+      ["line"]=>
+      int(16)
+    }
+    [1]=>
+    array(4) {
+      ["file"]=>
+      string(%d) "%s"
+      ["line"]=>
+      int(18)
+      ["function"]=>
+      string(4) "main"
+      ["args"]=>
+      array(1) {
+        [0]=>
+        float(0)
+      }
+    }
+  }
+}
+in main
+bool(false)
+done with main

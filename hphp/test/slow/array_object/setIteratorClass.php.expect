@@ -1,0 +1,12 @@
+MyArrayIterator Object
+(
+    [storage:ArrayIterator:private] => Array
+        (
+            [lemons] => 1
+            [oranges] => 4
+            [bananas] => 5
+            [apples] => 10
+        )
+
+    [flags:ArrayIterator:private] => 0
+)

@@ -1,0 +1,2 @@
+private function
+HipHop Fatal error: Call to private method c::blah from context t in %s on line 5

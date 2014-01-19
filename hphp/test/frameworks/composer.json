@@ -1,0 +1,9 @@
+{
+    "require-dev": {
+        "phpunit/phpunit": "3.7.x-dev#236f65cc97d6beaa8fcb8a27b19bd278f3912677",
+        "phpunit/php-invoker": "1.1.3",
+        "phpunit/dbunit": "1.2.3",
+        "phpunit/phpunit-selenium": "1.3.2",
+        "phpunit/phpunit-story": "1.0.2"
+    }
+}

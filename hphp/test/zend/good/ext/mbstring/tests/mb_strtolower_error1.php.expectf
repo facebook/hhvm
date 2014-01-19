@@ -1,0 +1,10 @@
+*** Testing mb_strtolower() : error conditions***
+
+-- Testing mb_strtolower() function with more than expected no. of arguments --
+HipHop Warning: %s
+NULL
+
+-- Testing mb_strtolower() function with zero arguments --
+HipHop Warning: %s
+NULL
+Done

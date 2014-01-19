@@ -1,0 +1,8 @@
+*** Testing mb_substr_count() : usage variations ***
+
+-- ASCII String --
+int(1)
+
+-- Multibyte String --
+int(1)
+Done

@@ -1,0 +1,78 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "hphp_is_service_thread",
+            "desc": "Returns an indication of whether the current thread is a service thread or not.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if the current thread is a service thread, FALSE otherwise."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "hphp_service_thread_started",
+            "desc": "A function to call to tell system a service thread has completed its startup.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "hphp_service_thread_stopped",
+            "desc": "A function to call to ask system whether a service thread should stop.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if HTTP server is stopping and service thread should stop, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "timeout",
+                    "type": "Int32",
+                    "desc": "How many seconds to wait for system to tell us."
+                }
+            ]
+        },
+        {
+            "name": "hphp_get_thread_id",
+            "desc": "Gets current thread's ID.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "The pthread_self() return."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "hphp_gettid",
+            "desc": "Gets the kernel thread id of the current running thread.",
+            "flags": [
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "The tid of the current running thread. In Linux, this is gettid()"
+            },
+            "args": [
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

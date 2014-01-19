@@ -1,0 +1,7 @@
+bool(false)
+string(1) "A"
+array(1) {
+  ["B"]=>
+  string(1) "B"
+}
+bool(true)

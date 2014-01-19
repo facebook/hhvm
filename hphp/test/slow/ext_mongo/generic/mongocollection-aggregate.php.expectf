@@ -1,0 +1,72 @@
+bool(true)
+array(2) {
+  ["result"]=>
+  array(2) {
+    [0]=>
+    array(2) {
+      ["_id"]=>
+      array(1) {
+        ["tags"]=>
+        string(4) "good"
+      }
+      ["authors"]=>
+      array(1) {
+        [0]=>
+        string(3) "bob"
+      }
+    }
+    [1]=>
+    array(2) {
+      ["_id"]=>
+      array(1) {
+        ["tags"]=>
+        string(3) "fun"
+      }
+      ["authors"]=>
+      array(1) {
+        [0]=>
+        string(3) "bob"
+      }
+    }
+  }
+  ["ok"]=>
+  float(1)
+}
+array(2) {
+  ["result"]=>
+  array(2) {
+    [0]=>
+    array(2) {
+      ["_id"]=>
+      array(1) {
+        ["tags"]=>
+        string(4) "good"
+      }
+      ["authors"]=>
+      array(1) {
+        [0]=>
+        string(3) "bob"
+      }
+    }
+    [1]=>
+    array(2) {
+      ["_id"]=>
+      array(1) {
+        ["tags"]=>
+        string(3) "fun"
+      }
+      ["authors"]=>
+      array(1) {
+        [0]=>
+        string(3) "bob"
+      }
+    }
+  }
+  ["ok"]=>
+  float(1)
+}
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+===DONE===

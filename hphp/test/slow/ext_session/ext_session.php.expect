@@ -1,0 +1,14 @@
+array(5) {
+  ["lifetime"]=>
+  int(10240)
+  ["path"]=>
+  string(3) "ppp"
+  ["domain"]=>
+  string(3) "ddd"
+  ["secure"]=>
+  bool(true)
+  ["httponly"]=>
+  bool(true)
+}
+string(9) "PHPSESSID"
+string(5) "name1"

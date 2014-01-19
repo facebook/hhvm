@@ -1,0 +1,65 @@
+object(A)#1 (5) {
+  ["foo"]=>
+  string(3) "foo"
+  ["fooref"]=>
+  &int(8)
+  ["foopriv":"A":private]=>
+  int(2)
+  ["dyn"]=>
+  string(3) "dyn"
+  ["dynref"]=>
+  &int(9)
+}
+clone
+object(A)#1 (5) {
+  ["foo"]=>
+  string(3) "foo"
+  ["fooref"]=>
+  &int(8)
+  ["foopriv":"A":private]=>
+  int(2)
+  ["dyn"]=>
+  string(3) "dyn"
+  ["dynref"]=>
+  &int(9)
+}
+object(A)#2 (5) {
+  ["foo"]=>
+  string(3) "foo"
+  ["fooref"]=>
+  &int(8)
+  ["foopriv":"A":private]=>
+  int(2)
+  ["dyn"]=>
+  string(3) "dyn"
+  ["dynref"]=>
+  &int(9)
+}
+object(A)#1 (5) {
+  ["foo"]=>
+  string(3) "foo"
+  ["fooref"]=>
+  &string(8) "a2fooref"
+  ["foopriv":"A":private]=>
+  int(2)
+  ["dyn"]=>
+  string(3) "dyn"
+  ["dynref"]=>
+  &string(8) "a2dynref"
+}
+object(A)#2 (6) {
+  ["foo"]=>
+  string(5) "a2foo"
+  ["fooref"]=>
+  &string(8) "a2fooref"
+  ["foopriv":"A":private]=>
+  int(2)
+  ["dyn"]=>
+  string(5) "a2dyn"
+  ["dynref"]=>
+  &string(8) "a2dynref"
+  ["dynref2"]=>
+  string(7) "dynref2"
+}
+string(8) "a2fooref"
+string(8) "a2dynref"

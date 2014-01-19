@@ -1,0 +1,25 @@
+array(1) {
+  [0]=>
+  array(3) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(1)
+    [2]=>
+    int(2)
+  }
+}
+string(3) "abc"
+HipHop Notice: Undefined index: 0 in %s/test/slow/array_cse/538.php on line 17
+array(1) {
+  [0]=>
+  int(10)
+}
+int(10)
+string(12) "first/second"
+string(12) "first/second"
+string(3) "A/B"
+string(3) "A/B"
+string(2) "e1"
+string(2) "e1"
+HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/array_cse/538.php on line 38

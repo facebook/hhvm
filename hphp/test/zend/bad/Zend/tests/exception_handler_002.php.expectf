@@ -1,0 +1,6 @@
+string(12) "test thrown!"
+HipHop Fatal error: %s
+Stack trace:
+#0 [internal function]: foo(Object(test))
+#1 {main}
+  thrown in %sexception_handler_002.php on line %d

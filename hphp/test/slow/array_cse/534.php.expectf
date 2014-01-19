@@ -1,0 +1,70 @@
+HipHop Notice: Undefined index: baz in %s/test/slow/array_cse/534.php on line 5
+array(1) {
+  ["e"]=>
+  array(2) {
+    ["foo"]=>
+    int(30)
+    ["bar"]=>
+    int(50)
+  }
+}
+NULL
+HipHop Notice: Undefined index: baz in %s/test/slow/array_cse/534.php on line 5
+array(1) {
+  ["e"]=>
+  array(2) {
+    ["foo"]=>
+    int(30)
+    ["bar"]=>
+    int(50)
+  }
+}
+NULL
+array(1) {
+  ["e"]=>
+  array(3) {
+    ["baz"]=>
+    int(40)
+    ["foo"]=>
+    int(30)
+    ["bar"]=>
+    int(50)
+  }
+}
+int(40)
+HipHop Notice: Undefined index: baz in %s/test/slow/array_cse/534.php on line 5
+array(1) {
+  ["y"]=>
+  array(2) {
+    ["foo"]=>
+    int(30)
+    ["bar"]=>
+    int(50)
+  }
+}
+NULL
+NULL
+HipHop Notice: Undefined index: baz in %s/test/slow/array_cse/534.php on line 5
+array(1) {
+  ["y"]=>
+  array(2) {
+    ["foo"]=>
+    int(30)
+    ["bar"]=>
+    int(50)
+  }
+}
+NULL
+NULL
+HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/test/slow/array_cse/534.php on line 4
+HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/test/slow/array_cse/534.php on line 5
+HipHop Notice: Array to string conversion in %s/test/slow/array_cse/534.php on line 5
+HipHop Notice: Undefined index: Array in %s/test/slow/array_cse/534.php on line 5
+HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/test/slow/array_cse/534.php on line 6
+array(0) {
+}
+NULL
+NULL
+HipHop Notice: Undefined index: 0 in %s/test/slow/array_cse/534.php on line 24
+NULL
+int(30)

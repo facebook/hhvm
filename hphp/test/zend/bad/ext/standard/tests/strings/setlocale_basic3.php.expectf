@@ -1,0 +1,6 @@
+*** Testing setlocale() by passing multiple locales as argument ***
+-- Testing setlocale() by giving 'category' as LC_ALL & multiple locales(en_US.utf8, Ko_KR.utf8, zh_CN.utf8) --
+string(%d) "%s"
+Checking currency settings in the new locale, expected: %s, Found: %s
+Test PASSED.
+Done

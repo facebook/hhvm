@@ -441,6 +441,11 @@ class ReflectionParameter implements Reflector {
     return $this->getTypeText() === 'callable';
   }
 
+  // Prevent cloning
+  public function __clone() {
+    throw new BadMethodCallException('Trying to clone an uncloneable object of class ReflectionParameter');
+  }
+
   private static function collectAttributes(&$attrs, $class, $function_name,
                                             $index) {
     if ($class->hasMethod($function_name)) {
@@ -754,6 +759,11 @@ class ReflectionFunctionAbstract {
       return new ReflectionClass($this->info['closure_scope_class']);
     }
     return null;
+  }
+
+  // Prevent cloning
+  public function __clone() {
+    throw new BadMethodCallException('Trying to clone an uncloneable object of class '.get_class($this)); 
   }
 }
 
@@ -1890,6 +1900,10 @@ class ReflectionClass implements Reflector {
     return substr($this->getName(), $pos + 1);
   }
 
+  // Prevent cloning
+  public function __clone() {
+    throw new BadMethodCallException('Trying to clone an uncloneable object of class ReflectionClass');
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2239,6 +2253,11 @@ class ReflectionProperty implements Reflector {
       return $this->info['type'];
     }
     return '';
+  }
+
+  // Prevent cloning
+  public function __clone() {
+    throw new BadMethodCallException('Trying to clone an uncloneable object of class ReflectionProperty');
   }
 }
 
@@ -2809,5 +2828,10 @@ class ReflectionExtension implements Reflector {
    */
   public function info() {
     return $this->info['info'];
+  }
+
+  // Prevent cloning
+  public function __clone() {
+    throw new BadMethodCallException('Trying to clone an uncloneable object of class ReflectionExtension');
   }
 }

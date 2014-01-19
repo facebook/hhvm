@@ -132,11 +132,6 @@ class NormalizedInstruction {
    */
   bool inlineReturn:1;
 
-  // For returns, this tracks local ids that are statically known not
-  // to be reference counted at this point (i.e. won't require guards
-  // or decrefs).
-  boost::dynamic_bitset<> nonRefCountedLocals;
-
   Op op() const;
   Op mInstrOp() const;
   PC pc() const;

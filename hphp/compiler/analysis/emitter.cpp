@@ -3146,12 +3146,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                       false, 0, 0);
         }
 
-        // XXX: disabled until static analysis is more reliable: t2225399
-        /*for (auto& l : r->nonRefcountedLocals()) {
-          auto v = m_curFunc->lookupVarId(makeStaticString(l));
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NonRefCounted,
-                         false, 0, v);
-        }*/
         emitReturn(e, retSym, r);
         return false;
       }

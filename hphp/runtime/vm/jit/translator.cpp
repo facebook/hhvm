@@ -1430,10 +1430,6 @@ void preInputApplyMetaData(Unit::MetaHandle metaHand,
   Unit::MetaInfo info;
   while (metaHand.nextArg(info)) {
     switch (info.m_kind) {
-    case Unit::MetaInfo::Kind::NonRefCounted:
-      ni->nonRefCountedLocals.resize(ni->func()->numLocals());
-      ni->nonRefCountedLocals[info.m_data] = 1;
-      break;
     case Unit::MetaInfo::Kind::GuardedThis:
       ni->guardedThis = true;
       break;
@@ -1854,7 +1850,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       }
 
       case Unit::MetaInfo::Kind::GuardedThis:
-      case Unit::MetaInfo::Kind::NonRefCounted:
         // fallthrough; these are handled in preInputApplyMetaData.
       case Unit::MetaInfo::Kind::None:
         break;
@@ -2093,14 +2088,9 @@ void getInputsImpl(SrcKey startSk,
     if (tx64->numTranslations(startSk) >= kTooPolyRet && localCount > 0) {
       return false;
     }
-    ni->nonRefCountedLocals.resize(localCount);
     int numRefCounted = 0;
     for (int i = 0; i < localCount; ++i) {
-      auto curType = localType(i);
-      if (ni->nonRefCountedLocals[i]) {
-        assert(curType.notCounted() && "Static analysis was wrong");
-      }
-      if (curType.maybeCounted()) {
+      if (localType(i).maybeCounted()) {
         numRefCounted++;
       }
     }
@@ -2112,9 +2102,7 @@ void getInputsImpl(SrcKey startSk,
     ni->ignoreInnerType = true;
     int n = ni->func()->numLocals();
     for (int i = 0; i < n; ++i) {
-      if (!ni->nonRefCountedLocals[i]) {
-        inputs.emplace_back(Location(Location::Local, i));
-      }
+      inputs.emplace_back(Location(Location::Local, i));
     }
   }
 
@@ -3988,7 +3976,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       }
 
       case Unit::MetaInfo::Kind::GuardedThis:
-      case Unit::MetaInfo::Kind::NonRefCounted:
         // fallthrough; these are handled in preInputApplyMetaData.
       case Unit::MetaInfo::Kind::None:
         break;

@@ -1693,9 +1693,6 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
           case Unit::MetaInfo::Kind::GuardedCls:
             out << " GuardedCls";
             break;
-          case Unit::MetaInfo::Kind::NonRefCounted:
-            out << " :nrc=" << info.m_data;
-            break;
           case Unit::MetaInfo::Kind::None:
             assert(false);
             break;

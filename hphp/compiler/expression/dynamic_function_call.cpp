@@ -78,13 +78,18 @@ ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
     if (m_nameExp->getScalarValue(v) &&
         v.isString()) {
       string name = v.toString().c_str();
-      ExpressionPtr cls = m_class;
-      if (!cls && !m_className.empty()) {
-        cls = makeScalarExpression(ar, m_className);
+      // if the name starts with a '\' give up any early optimizations and
+      // let FPushFunc manage the namespace normalizations at runtime
+      // (some static analyzer may still be able to optimize it - e.g. HHBBC)
+      if (name[0] != '\\') {
+        ExpressionPtr cls = m_class;
+        if (!cls && !m_className.empty()) {
+          cls = makeScalarExpression(ar, m_className);
+        }
+        return ExpressionPtr(NewSimpleFunctionCall(
+          getScope(), getLocation(),
+          name, false, m_params, cls));
       }
-      return ExpressionPtr(NewSimpleFunctionCall(
-        getScope(), getLocation(),
-        name, false, m_params, cls));
     }
   }
   return ExpressionPtr();

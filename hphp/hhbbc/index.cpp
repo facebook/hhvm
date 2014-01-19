@@ -32,6 +32,7 @@
 
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -513,6 +514,7 @@ Index::~Index() {}
 
 folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
+  clsName = normalizeNS(clsName);
   auto name_only = [&] () -> folly::Optional<res::Class> {
     // We know it has to name a class only if there's no type alias
     // with this name.
@@ -651,6 +653,7 @@ folly::Optional<res::Func> Index::resolve_ctor(Context ctx,
 }
 
 res::Func Index::resolve_func(Context ctx, SString name) const {
+  name = normalizeNS(name);
   auto name_only = [&] {
     return res::Func { this, SStringOr<FuncInfo>(name) };
   };

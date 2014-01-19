@@ -20,6 +20,7 @@
 #include "folly/experimental/Gen.h"
 
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/cfg.h"
 
 namespace HPHP { namespace HHBBC { namespace php {
@@ -167,12 +168,17 @@ bool checkExnTree(const php::Func& f) {
   return true;
 }
 
+bool checkName(SString name) {
+  return isNSNormalized(name);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
 
 bool check(const php::Func& f) {
   assert(checkParams(f));
+  assert(checkName(f.name));
   for (DEBUG_ONLY auto& block : f.blocks) assert(checkBlock(*block));
 
   /*
@@ -205,6 +211,7 @@ bool check(const php::Func& f) {
 }
 
 bool check(const php::Class& c) {
+  assert(checkName(c.name));
   for (DEBUG_ONLY auto& m : c.methods) assert(check(*m));
   return true;
 }

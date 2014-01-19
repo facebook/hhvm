@@ -227,7 +227,7 @@ Type eval_cell(Pred p) {
         }
         break;
       default:
-        always_assert(0 && "Impossible constant evaluation occured");
+        always_assert(0 && "Impossible constant evaluation occurred");
       }
     }
     return from_cell(c);
@@ -1233,14 +1233,17 @@ struct InterpStepper : boost::static_visitor<void> {
     auto const t1 = topC();
     auto const v1 = tv(t1);
     if (v1 && v1->m_type == KindOfStaticString) {
-      return reduce(bc::PopC {},
-                    bc::FPushFuncD { op.arg1, v1->m_data.pstr });
+      auto const name = normalizeNS(v1->m_data.pstr);
+      if (isNSNormalized(name)) {
+        return reduce(bc::PopC {},
+                      bc::FPushFuncD { op.arg1, name });
+      }
     }
     popC();
     fpiPush(ActRec { FPIKind::Func });
   }
 
-  void operator()(const bc::FPushFuncU&) {
+  void operator()(const bc::FPushFuncU& op) {
     fpiPush(ActRec { FPIKind::Func });
   }
 

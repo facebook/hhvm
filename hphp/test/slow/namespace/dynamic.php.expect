@@ -4,6 +4,7 @@ object(A\B)#1 (0) {
 }
 object(A\B)#1 (0) {
 }
+string(3) "A/f"
 string(1) "C"
 string(1) "C"
 string(1) "C"

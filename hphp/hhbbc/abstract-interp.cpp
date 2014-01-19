@@ -3391,14 +3391,15 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
   /*
    * 86pinit is a special function that runs to initialize instance
-   * properties that depend on class constants.  We don't currently
-   * handle this, so for any class with these types of initializers,
-   * just merge InitUnc into each property.  (Class constants are all
-   * subtypes of InitUnc.)
+   * properties that depend on class constants, or have collection
+   * literals.
+   *
+   * We don't handle this yet, so for any class with these types of
+   * initializers put the properties up to TInitCell for now.
    */
   if (has_86pinit(ctx.cls)) {
     for (auto& p : clsAnalysis.privateProperties) {
-      p.second = union_of(p.second, TInitUnc);
+      p.second = union_of(p.second, TInitCell);
     }
   }
 

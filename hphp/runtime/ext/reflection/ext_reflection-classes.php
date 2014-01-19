@@ -1502,8 +1502,14 @@ class ReflectionClass implements Reflector {
   public function getConstant($name) {
     $constants = $this->fetch('constants');
     if (!isset($constants[$name])) {
-      $class = $this->info['name'];
-      throw new ReflectionException("Class constant $class::$name does not exist");
+
+      // This sucks: PHP returns false instead of throwing an exception, which would
+      // be better, and we'd be able to distinguish here from the case where a class
+      // constant carries the value FALSE. Nevertheless, be compliant.
+      //
+      // $class = $this->info['name'];
+      // throw new ReflectionException("Class constant $class::$name does not exist");
+      return false;
     }
     return $constants[$name];
   }

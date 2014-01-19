@@ -88,20 +88,25 @@ class ReflectionParameter implements Reflector {
       );
     }
 
-    if (is_string($param)) {
+    if (is_int($param)) {
+      if (!isset($params[$param])) {
+        throw new ReflectionException("The parameter specified by its offset could not be found");
+      }
+      $p = $params[$param];
+      $this->info = $p->info;
+      $this->name = $p->name;
+    } else {
+      $name = (string)$param;
       foreach ($params as $p) {
-        if ($p->name === $param) {
+        if ($p->name === $name) {
           $this->info = $p->info;
           $this->name = $p->name;
           break;
         }
       }
-    } else if (is_int($param) && $param < count($params)) {
-      $p = $params[$param];
-      $this->info = $p->info;
-      $this->name = $p->name;
-    } else {
-      throw new Exception("No param named $param found");
+      if (!isset($this->info)) {
+        throw new ReflectionException("The parameter specified by its name could not be found");
+      }
     }
   }
 

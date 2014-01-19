@@ -121,7 +121,8 @@ class FastCGIServer : public Server,
 public:
   FastCGIServer(const std::string &address,
                 int port,
-                int workers);
+                int workers,
+                bool useFileSocket);
   ~FastCGIServer() {
     if (!m_done) {
       waitForEnd();

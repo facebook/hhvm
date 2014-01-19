@@ -238,18 +238,9 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
 void (*Class::MethodCreateHook)(Class* cls, MethodMap::Builder& builder);
 
 Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
-  : m_preClass(PreClassPtr(preClass))
-  , m_parent(parent)
-  , m_numDeclInterfaces(0)
-  , m_traitsBeginIdx(0)
-  , m_traitsEndIdx(0)
-  , m_clsInfo(nullptr)
+  : m_parent(parent)
+  , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(classVecLen)
-  , m_cachedClass(RDS::kInvalidHandle)
-  , m_propDataCache(RDS::kInvalidHandle)
-  , m_propSDataCache(RDS::kInvalidHandle)
-  , m_nonScalarConstantCache(RDS::kInvalidHandle)
-  , m_nextClass(nullptr)
 {
   setParent();
   setUsedTraits();

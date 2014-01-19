@@ -419,17 +419,7 @@ void LitstrTable::insert(RepoTxn& txn, UnitOrigin uo) {
 //=============================================================================
 // Unit.
 
-Unit::Unit()
-    : m_sn(-1), m_bc(nullptr), m_bclen(0),
-      m_bc_meta(nullptr), m_bc_meta_len(0), m_filepath(nullptr),
-      m_dirpath(nullptr), m_md5(),
-      m_mergeInfo(nullptr),
-      m_cacheOffset(0),
-      m_repoId(-1),
-      m_mergeState(UnitMergeStateUnmerged),
-      m_cacheMask(0),
-      m_mergeOnly(false),
-      m_pseudoMainCache(nullptr) {
+Unit::Unit() {
   tvWriteUninit(&m_mainReturn);
 }
 

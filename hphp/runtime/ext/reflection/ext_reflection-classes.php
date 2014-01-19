@@ -1867,7 +1867,8 @@ class ReflectionClass implements Reflector {
    *                     or FALSE for user-defined classes.
    */
   public function getExtensionName() {
-    return $this->fetch('extension')->getName();
+    $ext = $this->fetch('extension');
+    return $ext ? $ext->getName() : false;
   }
 
   public function getAttribute($name) {

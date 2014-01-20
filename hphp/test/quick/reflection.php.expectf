@@ -153,7 +153,24 @@ bool(true)
 bool(true)
 
 --- export("f") ---
-string(0) ""
+string(368) "/**
+ * This is f's doc comment.
+ */
+Function [ <user> function &f ] {
+  @@ %s/reflection.php 13 - 20
+
+  - Parameters [4] {
+    Parameter #0 [ <required> $a ]
+    Parameter #1 [ <required> &$b ]
+    Parameter #2 [ <optional> $c = NULL ]
+    Parameter #3 [ <optional> $d = array (
+  0 => 1,
+  1 => 2,
+  2 => 'some string',
+) ]
+  }
+}
+"
 
 --- invokeArgs("f") ---
 In f()
@@ -168,7 +185,23 @@ In g(a, b, some string)
 NULL
 
 --- export("g") ---
-string(0) ""
+string(335) "/**
+ * This is g's doc comment.
+ */
+Function [ <user> function g ] {
+  @@ %sreflection.php 87 - 89
+
+  - Parameters [3] {
+    Parameter #0 [ <optional> $a = NULL ]
+    Parameter #1 [ <optional> $b = array (
+  0 => 1,
+  1 => 2,
+  2 => 3,
+) ]
+    Parameter #2 [ <optional> $c = 'some string' ]
+  }
+}
+"
 
 --- export() ---
 string(0) ""
@@ -227,7 +260,7 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass)#23 (3) {
+object(ReflectionClass)#%d (3) {
   ["name"]=>
   string(1) "A"
   ["info":"ReflectionClass":private]=>
@@ -295,7 +328,7 @@ bool(false)
 bool(true)
 
 --- newInstance() ---
-object(B)#51 (4) {
+object(B)#%d (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -307,7 +340,7 @@ object(B)#51 (4) {
 }
 
 --- newInstanceArgs() ---
-object(B)#51 (4) {
+object(B)#%d (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>

@@ -243,6 +243,8 @@ void optimize(Index& index, php::Program& program) {
       case WorkType::Class:
         index.refine_private_props(result->cls.ctx.cls,
                                    result->cls.privateProperties);
+        index.refine_private_statics(result->cls.ctx.cls,
+                                     result->cls.privateStatics);
         for (auto& fa : result->cls.methods) update_func(fa);
         break;
       }

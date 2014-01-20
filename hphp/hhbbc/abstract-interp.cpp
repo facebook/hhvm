@@ -86,7 +86,6 @@ std::string state_string(const php::Func& f, const State& st) {
   }
 
   ret = "state:\n";
-  if (st.thisAvailable) { ret += "$this is not null\n"; }
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
     ret += folly::format("${: <8} :: {}\n",
       f.locals[i]->name
@@ -103,8 +102,15 @@ std::string state_string(const php::Func& f, const State& st) {
     ).str();
   }
 
+  if (st.thisAvailable) { ret += "$this is not null\n"; }
   for (auto& kv : st.privateProperties) {
     ret += folly::format("$this->{: <14} :: {}\n",
+      kv.first->data(),
+      show(kv.second)
+    ).str();
+  }
+  for (auto& kv : st.privateStatics) {
+    ret += folly::format("self::${: <14} :: {}\n",
       kv.first->data(),
       show(kv.second)
     ).str();
@@ -183,6 +189,9 @@ bool merge_into(State& dst, const State& src) {
   if (merge_into(dst.privateProperties, src.privateProperties)) {
     changed = true;
   }
+  if (merge_into(dst.privateStatics, src.privateStatics)) {
+    changed = true;
+  }
 
   return changed;
 }
@@ -195,6 +204,7 @@ State without_stacks(State const& src) {
   ret.thisAvailable     = src.thisAvailable;
   ret.locals            = src.locals;
   ret.privateProperties = src.privateProperties;
+  ret.privateStatics    = src.privateStatics;
   return ret;
 }
 
@@ -860,7 +870,23 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::CGetG&) { popC(); push(TInitCell); }
-  void operator()(const bc::CGetS&) { popA(); popC(); push(TInitCell); }
+
+  void operator()(const bc::CGetS&) {
+    auto const tcls  = popA();
+    auto const tname = popC();
+    auto const vname = tv(tname);
+    auto const self  = selfCls();
+    if (vname && vname->m_type == KindOfStaticString &&
+        self && tcls.subtypeOf(*self)) {
+      if (auto const ty = selfPropAsCell(vname->m_data.pstr)) {
+        // Only nothrow when we know it's a private declared property
+        // (and thus accessible here).
+        nothrow();
+        return push(*ty);
+      }
+    }
+    push(TInitCell);
+  }
 
   void operator()(const bc::VGetL& op) {
     throw_oom_only();
@@ -882,7 +908,21 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::VGetG&) { popC(); push(TRef); }
-  void operator()(const bc::VGetS&) { popA(); popC(); push(TRef); }
+
+  void operator()(const bc::VGetS&) {
+    auto const tcls  = popA();
+    auto const tname = popC();
+    auto const vname = tv(tname);
+    auto const self  = selfCls();
+    if (!self || tcls.couldBe(*self)) {
+      if (vname && vname->m_type == KindOfStaticString) {
+        boxSelfProp(vname->m_data.pstr);
+      } else {
+        killSelfProps();
+      }
+    }
+    push(TRef);
+  }
 
   void aGetImpl(Type t1) {
     if (t1.subtypeOf(TObj)) {
@@ -902,8 +942,8 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::AGetC& op) { aGetImpl(popC()); }
 
   void operator()(const bc::AKExists& op) {
-    auto const t1 = popC();
-    auto const t2 = popC();
+    auto const t1   = popC();
+    auto const t2   = popC();
     auto const t1Ok = t1.subtypeOf(TObj) || t1.subtypeOf(TArr);
     auto const t2Ok = t2.subtypeOf(TInt) || t2.subtypeOf(TNull) ||
                       t2.subtypeOf(TStr);
@@ -931,6 +971,27 @@ struct InterpStepper : boost::static_visitor<void> {
     push(TBool);
   }
 
+  void operator()(const bc::EmptyS&) {
+    popA();
+    popC();
+    push(TBool);
+  }
+
+  void operator()(const bc::IssetS&) {
+    auto const tcls  = popA();
+    auto const tname = popC();
+    auto const vname = tv(tname);
+    auto const self  = selfCls();
+    if (self && tcls.subtypeOf(*self) &&
+        vname && vname->m_type == KindOfStaticString) {
+      if (auto const t = selfPropAsCell(vname->m_data.pstr)) {
+        if (t->subtypeOf(TNull))  { constprop(); return push(TFalse); }
+        if (!t->couldBe(TNull))   { constprop(); return push(TTrue); }
+      }
+    }
+    push(TBool);
+  }
+
   template<class ReduceOp>
   void issetEmptyNImpl() {
     auto const t1 = topC();
@@ -950,11 +1011,8 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::IssetN&) { issetEmptyNImpl<bc::IssetL>(); }
   void operator()(const bc::EmptyN&) { issetEmptyNImpl<bc::EmptyL>(); }
-
   void operator()(const bc::EmptyG&) { popC(); push(TBool); }
-  void operator()(const bc::EmptyS&) { popA(); popC(); push(TBool); }
   void operator()(const bc::IssetG&) { popC(); push(TBool); }
-  void operator()(const bc::IssetS&) { popA(); popC(); push(TBool); }
 
   void isTypeImpl(Type locOrCell, Type test) {
     constprop();
@@ -1052,9 +1110,19 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::SetS&) {
-    auto const t1 = popC();
-    popA();
-    popC();
+    auto const t1    = popC();
+    auto const tcls  = popA();
+    auto const tname = popC();
+    auto const vname = tv(tname);
+    auto const self  = selfCls();
+    if (!self || tcls.couldBe(*self)) {
+      if (vname && vname->m_type == KindOfStaticString) {
+        nothrow();
+        mergeSelfProp(vname->m_data.pstr, t1);
+      } else {
+        mergeUnknownSelfProp(t1);
+      }
+    }
     push(t1);
   }
 
@@ -1099,8 +1167,22 @@ struct InterpStepper : boost::static_visitor<void> {
     popC(); popC();
     push(TInitCell);
   }
+
   void operator()(const bc::SetOpS&) {
-    popC(); popA(); popC();
+    popC();
+    auto const tcls  = popA();
+    auto const tname = popC();
+    auto const vname = tv(tname);
+    auto const self  = selfCls();
+
+    if (!self || tcls.couldBe(*self)) {
+      if (vname && vname->m_type == KindOfStaticString) {
+        mergeSelfProp(vname->m_data.pstr, TInitCell);
+      } else {
+        loseNonRefSelfPropTypes();
+      }
+    }
+
     push(TInitCell);
   }
 
@@ -1152,7 +1234,22 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::IncDecG&) { popC(); push(TInitCell); }
-  void operator()(const bc::IncDecS&) { popA(); popC(); push(TInitCell); }
+
+  void operator()(const bc::IncDecS&) {
+    auto const tcls  = popA();
+    auto const tname = popC();
+    auto const vname = tv(tname);
+    auto const self  = selfCls();
+
+    if (!self || tcls.couldBe(*self)) {
+      if (vname && vname->m_type == KindOfStaticString) {
+        mergeSelfProp(vname->m_data.pstr, TInitCell);
+      } else {
+        loseNonRefSelfPropTypes();
+      }
+    }
+    push(TInitCell);
+  }
 
   void operator()(const bc::BindL& op) {
     throw_oom_only();
@@ -1185,10 +1282,21 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::BindS&) {
-    auto const t1 = popV();
-    popA();
-    popC();
-    push(t1);
+    popV();
+    auto const tcls  = popA();
+    auto const tname = popC();
+    auto const vname = tv(tname);
+    auto const self  = selfCls();
+
+    if (!self || tcls.couldBe(*self)) {
+      if (vname && vname->m_type == KindOfStaticString) {
+        boxSelfProp(vname->m_data.pstr);
+      } else {
+        killSelfProps();
+      }
+    }
+
+    push(TRef);
   }
 
   void operator()(const bc::EmptyM& op)       { minstr(op); }
@@ -1376,7 +1484,22 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::FPassS& op) {
     switch (prepKind(op.arg1)) {
-    case PrepKind::Unknown: popA(); popC(); return push(TGen);
+    case PrepKind::Unknown:
+      {
+        auto const tcls  = popA();
+        auto const self  = selfCls();
+        auto const tname = popC();
+        auto const vname = tv(tname);
+        if (!self || tcls.couldBe(*self)) {
+          if (vname && vname->m_type == KindOfStaticString) {
+            // May or may not be boxing it, depending on the refiness.
+            mergeSelfProp(vname->m_data.pstr, TInitGen);
+          } else {
+            killSelfProps();
+          }
+        }
+      }
+      return push(TGen);
     case PrepKind::Val:     return impl(bc::CGetS {});
     case PrepKind::Ref:     return impl(bc::VGetS {});
     }
@@ -1560,6 +1683,7 @@ struct InterpStepper : boost::static_visitor<void> {
     popC();
     killLocals();
     killThisProps();
+    killSelfProps();
     push(TInitCell);
   }
 
@@ -1586,7 +1710,8 @@ struct InterpStepper : boost::static_visitor<void> {
 
   // TODO_5: can we propagate our class type if unique?
   void operator()(const bc::LateBoundCls&) { push(TCls); }
-  void operator()(const bc::CheckThis&)    {
+
+  void operator()(const bc::CheckThis&) {
     if (thisAvailable()) {
       reduce(bc::Nop {});
     }
@@ -1665,9 +1790,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Parent&) { push(TCls); }
 
   void operator()(const bc::CreateCl& op) {
-    // Closures can access properties on $this, but we don't yet know
-    // how to analyze this.
+    // Closures can access properties on $this or self, but we don't
+    // yet know how to analyze this.
     killThisProps();
+    killSelfProps();
 
     auto const nargs = op.arg1;
     for (auto i = uint32_t{0}; i < nargs; ++i) popT();
@@ -1793,6 +1919,7 @@ private:
 
     killLocals();
     killThisProps();
+    killSelfProps();
 
     // If this instruction has taken edges, we need to propagate the
     // state to them.
@@ -1815,7 +1942,8 @@ private: // member instructions
   enum class BaseLoc {
     InArr,         // An element in an array.
     ObjProp,       // A property in an object.
-    StaticObjProp, // A static property on an object.
+    StaticObjProp, // A static property on an object.  This is only
+                   // possible as an initial base.
     Frame,         // Contained in the current frame as a local.
     FrameThis,     // Contained in the current frame as $this.
     EvalStack,     // Contained by the evaluation stack (eval temporary).
@@ -1824,6 +1952,19 @@ private: // member instructions
   struct Base {
     Type type;
     BaseLoc loc;
+
+    /*
+     * We also need to track effects of intermediate dims on the type
+     * of the base.  So we have a type and name for the location of
+     * the base.
+     *
+     * For StaticObjProp, locName this is the name of the property if
+     * known, or nullptr, and locTy is the type of the class
+     * containing the static property.  ObjProp will do the same
+     * eventually but not yet implemented.
+     */
+    Type locTy;
+    SString locName;
   };
 
   struct MInstrState {
@@ -1873,6 +2014,54 @@ private: // member instructions
     if (auto const ty = thisType())   return b->type.subtypeOf(*ty);
     return false;
   }
+
+  // Returns whether the base could be a private static property on
+  // the current context class.
+  bool couldBeInSelf(const folly::Optional<Base>& b) const {
+    if (!b) return true;
+    if (b->loc == BaseLoc::StaticObjProp) {
+      auto const selfTy = selfCls();
+      return !selfTy || b->locTy.couldBe(*selfTy);
+    }
+    return false;
+  }
+
+  // Returns nullptr if unknown.  Pre: couldBeInSelf(b)
+  SString baseSelfPropName(const folly::Optional<Base>& b) const {
+    assert(couldBeInSelf(b));
+    if (b && b->loc == BaseLoc::StaticObjProp) {
+      return b->locName;
+    }
+    return nullptr;
+  }
+
+  //////////////////////////////////////////////////////////////////////
+
+  // Handle effects on properties in self:: that could occur based on
+  // the base.  This is only for final ops or intermediate ops that
+  // can define.
+  void conservativeSelfBaseEffects(MInstrState& state) {
+    if (couldBeInSelf(state.base)) {
+      if (auto const name = baseSelfPropName(state.base)) {
+        killSelfProp(name);
+      } else {
+        loseNonRefSelfPropTypes();
+      }
+    }
+  }
+
+  void handleSelfBaseProp(MInstrState& x) {
+    conservativeSelfBaseEffects(x);
+  }
+  void handleSelfBaseElem(MInstrState& x) {
+    conservativeSelfBaseEffects(x);
+  }
+  void handleSelfBaseNewElem(MInstrState& x) {
+    conservativeSelfBaseEffects(x);
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  // base ops
 
   /*
    * Local bases are a mild pain, because they can change type
@@ -1963,9 +2152,17 @@ private: // member instructions
       }
     case LSC:
       {
-        UNUSED auto const cls  = topA(state.info.valCount());
-        UNUSED auto const prop = topC(--state.stackIdx);
-        return folly::none;
+        auto const cls  = topA(state.info.valCount());
+        auto const prop = tv(topC(--state.stackIdx));
+        auto const self = selfCls();
+        if (self && cls.subtypeOf(*self) &&
+            prop && prop->m_type == KindOfStaticString) {
+          if (auto const ty = selfPropAsCell(prop->m_data.pstr)) {
+            return Base { *ty, BaseLoc::StaticObjProp, cls,
+              prop->m_data.pstr };
+          }
+        }
+        return Base { TCell, BaseLoc::StaticObjProp, cls, nullptr };
       }
 
     case NumLocationCodes:
@@ -2020,13 +2217,27 @@ private: // member instructions
     auto const name = mcodeStringKey(state);
     bool const isDefine = state.info.getAttr(state.mcode()) & MIA_define;
 
-    // Before we can track bases through intermediate dims we need to
-    // handle type effects on the properties.  (For example, if we
-    // have $this->foo[][] = 2; when $this->foo is null, it needs to
-    // merge TArr.)
+    /*
+     * Before we can track bases through intermediate dims we need to
+     * handle type effects on the properties.  (For example, if we
+     * have $this->foo[][] = 2; when $this->foo is null, it needs to
+     * merge TArr.)
+     *
+     * Note, this assignment of the base to none is happening before
+     * the below tests on the base on purpose for now (so both of the
+     * below cases always have conservative effects).  TODO(#3343813)
+     */
     state.base = folly::none;
 
     if (!isDefine) return;
+
+    /*
+     * TODO(#3343813): the effects on "name" here are working for now,
+     * but only because we're throwing all the information away.  To
+     * do this better, we need to move the name into the new tracked
+     * base (like self props, below) so the following intermediate
+     * dims can have the appropriate effects on it.
+     */
     if (couldBeThisObj(state.base)) {
       // We could just merge stdClass into each one, but for now it's
       // conservative.
@@ -2036,16 +2247,20 @@ private: // member instructions
         loseNonRefThisPropTypes();
       }
     }
+
+    handleSelfBaseProp(state);
   }
 
   void miElem(MInstrState& state) {
     mcodeKey(state);
     bool const isDefine = state.info.getAttr(state.mcode()) & MIA_define;
-    state.base = folly::none;
+    state.base = folly::none; // eventually needs to happen *after* using it
     if (!isDefine) return;
     // We could merge TArr into each one, but for now just being
-    // conservative.
+    // conservative.  TODO(#3343813): we should only need to do this
+    // for the name it could be (handleSelfBaseElem, etc).
     loseNonRefThisPropTypes();
+    loseNonRefSelfPropTypes();
   }
 
   void miNewElem(MInstrState& state) {
@@ -2054,6 +2269,13 @@ private: // member instructions
       state.base = folly::none;
       return;
     }
+
+    // TODO(#3343813): we need a case for whether the base could be
+    // inside $this after we change the other intermediates above to
+    // not always do killThisProp on the next dim's name.
+
+    handleSelfBaseNewElem(state);
+
     state.base = folly::none;
   }
 
@@ -2090,6 +2312,7 @@ private: // member instructions
   void miFinalVGetProp(MInstrState& state) {
     auto const name = mcodeStringKey(state);
     miPop(state);
+    handleSelfBaseProp(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         boxThisProp(name);
@@ -2104,6 +2327,7 @@ private: // member instructions
     auto const name = mcodeStringKey(state);
     auto const t1 = popC();
     miPop(state);
+    handleSelfBaseProp(state);
     if (couldBeThisObj(state.base)) {
       if (!name) {
         // We could just merge t1 into every thisProp, but not for
@@ -2126,6 +2350,7 @@ private: // member instructions
     auto const name = mcodeStringKey(state);
     popC();
     miPop(state);
+    handleSelfBaseProp(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         mergeThisProp(name, TInitCell);
@@ -2139,6 +2364,7 @@ private: // member instructions
   void miFinalIncDecProp(MInstrState& state) {
     auto const name = mcodeStringKey(state);
     miPop(state);
+    handleSelfBaseProp(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         mergeThisProp(name, TInitCell);
@@ -2153,6 +2379,7 @@ private: // member instructions
     auto const name = mcodeStringKey(state);
     popV();
     miPop(state);
+    handleSelfBaseProp(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         boxThisProp(name);
@@ -2166,6 +2393,7 @@ private: // member instructions
   void miFinalUnsetProp(MInstrState& state) {
     auto const name = mcodeStringKey(state);
     miPop(state);
+    handleSelfBaseProp(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         unsetThisProp(name);
@@ -2182,6 +2410,8 @@ private: // member instructions
     mcodeKey(state);
     auto const t1 = popC();
     miPop(state);
+    handleSelfBaseElem(state);
+    // ArrayAccess on $this will always push the rhs.
     push(mustBeThisObj(state.base) ? t1 : TInitCell);
   }
 
@@ -2189,12 +2419,14 @@ private: // member instructions
     mcodeKey(state);
     popC();
     miPop(state);
+    handleSelfBaseElem(state);
     push(TInitCell);
   }
 
   void miFinalIncDecElem(MInstrState& state) {
     mcodeKey(state);
     miPop(state);
+    handleSelfBaseElem(state);
     push(TInitCell);
   }
 
@@ -2202,6 +2434,7 @@ private: // member instructions
     mcodeKey(state);
     popV();
     miPop(state);
+    handleSelfBaseElem(state);
     push(TRef);
   }
 
@@ -2211,23 +2444,28 @@ private: // member instructions
   void miFinalSetNewElem(MInstrState& state) {
     auto const t1 = popC();
     miPop(state);
+    handleSelfBaseNewElem(state);
+    // ArrayAccess on $this will always push the rhs.
     push(mustBeThisObj(state.base) ? t1 : TInitCell);
   }
 
   void miFinalSetOpNewElem(MInstrState& state) {
     popC();
     miPop(state);
+    handleSelfBaseNewElem(state);
     push(TInitCell);
   }
 
   void miFinalIncDecNewElem(MInstrState& state) {
     miPop(state);
+    handleSelfBaseNewElem(state);
     push(TInitCell);
   }
 
   void miFinalBindNewElem(MInstrState& state) {
     popV();
     miPop(state);
+    handleSelfBaseNewElem(state);
     push(TRef);
   }
 
@@ -2262,6 +2500,11 @@ private: // member instructions
     // Elem and MW case:
     if (state.mcode() != MemberCode::MW) mcodeKey(state);
     miPop(state);
+    if (state.mcode() != MemberCode::MW) {
+      handleSelfBaseElem(state);
+    } else {
+      handleSelfBaseNewElem(state);
+    }
     push(TRef);
   }
 
@@ -2301,6 +2544,7 @@ private: // member instructions
   // really be supported for much ...
   void miDiscard(MInstrState& state) {
     killThisProps();
+    killSelfProps();
     state.base = folly::none;
     if (state.mcode() != MemberCode::MW) mcodeKey(state);
   }
@@ -2356,6 +2600,9 @@ private:
    * It's not entirely clear whether we need to propagate state for a
    * potential OOM, so for now we're annotating the instructions that
    * can only throw OOM separately.
+   *
+   * TODO(#3367943): we don't throw on oom until a surprise flag
+   * check, so this should be removable.
    */
   void throw_oom_only() {
     FTRACE(2, "    throw_oom_only\n");
@@ -2665,6 +2912,14 @@ private: // $this
     return folly::none;
   }
 
+  folly::Optional<Type> selfCls() const {
+    if (!m_ctx.cls) return folly::none;
+    if (auto const rcls = m_index.resolve_class(m_ctx, m_ctx.cls->name)) {
+      return subCls(*rcls);
+    }
+    return folly::none;
+  }
+
 private: // properties on $this
   /*
    * Note: we are only tracking control-flow insensitive types for
@@ -2676,20 +2931,7 @@ private: // properties on $this
    * here actually just union the new type into what we already had.
    */
 
-  void killThisProps() {
-    FTRACE(2, "    killThisProps\n");
-    for (auto& kv : m_state.privateProperties) kv.second = TGen;
-  }
-
-  void killThisProp(SString name) {
-    FTRACE(2, "    killThisProp {}\n", name->data());
-    auto it = m_state.privateProperties.find(name);
-    if (it != end(m_state.privateProperties)) {
-      it->second = TGen;
-    }
-  }
-
-  Type* thisPropRaw(SString name) {
+  Type* thisPropRaw(SString name) const {
     auto const it = m_state.privateProperties.find(name);
     if (it != end(m_state.privateProperties)) {
       return &it->second;
@@ -2697,7 +2939,17 @@ private: // properties on $this
     return nullptr;
   }
 
-  folly::Optional<Type> thisPropAsCell(SString name) {
+  void killThisProps() {
+    FTRACE(2, "    killThisProps\n");
+    for (auto& kv : m_state.privateProperties) kv.second = TGen;
+  }
+
+  void killThisProp(SString name) {
+    FTRACE(2, "    killThisProp {}\n", name->data());
+    if (auto t = thisPropRaw(name)) *t = TGen;
+  }
+
+  folly::Optional<Type> thisPropAsCell(SString name) const {
     auto const t = thisPropRaw(name);
     if (!t) return folly::none;
     if (t->subtypeOf(TInitCell)) return *t;
@@ -2741,6 +2993,64 @@ private: // properties on $this
   void loseNonRefThisPropTypes() {
     FTRACE(2, "    loseNonRefThisPropTypes\n");
     for (auto& kv : m_state.privateProperties) {
+      if (kv.second.subtypeOf(TCell)) kv.second = TCell;
+    }
+  }
+
+private: // properties on self::
+  // Similar to $this properties above, we only track control-flow
+  // insensitive types for these.
+
+  Type* selfPropRaw(SString name) const {
+    auto it = m_state.privateStatics.find(name);
+    if (it != end(m_state.privateStatics)) {
+      return &it->second;
+    }
+    return nullptr;
+  }
+
+  void killSelfProps() {
+    FTRACE(2, "    killSelfProps\n");
+    for (auto& kv : m_state.privateStatics) kv.second = TGen;
+  }
+
+  void killSelfProp(SString name) const {
+    FTRACE(2, "    killSelfProp {}\n", name->data());
+    if (auto t = selfPropRaw(name)) *t = TGen;
+  }
+
+  folly::Optional<Type> selfPropAsCell(SString name) const {
+    auto const t = selfPropRaw(name);
+    if (!t) return folly::none;
+    if (t->subtypeOf(TInitCell)) return *t;
+    if (t->subtypeOf(TUninit))   return TInitNull;
+    return TInitCell;
+  }
+
+  /*
+   * Merges a type into tracked static properties on self, in the
+   * sense of tvSet (i.e. setting the inner type on possible refs).
+   */
+  void mergeSelfProp(SString name, Type type) {
+    auto const t = selfPropRaw(name);
+    if (!t) return;
+    *t = union_of(*t, type);
+  }
+
+  void mergeUnknownSelfProp(Type t) {
+    for (auto& kv : m_state.privateStatics) {
+      kv.second = union_of(t, kv.second);
+    }
+  }
+
+  void boxSelfProp(SString name) { mergeSelfProp(name, TRef); }
+
+  // Forces non-ref static properties up to TCell.  This is used when
+  // an operation affects an unknown static property on self::, but
+  // can't change its reffiness.
+  void loseNonRefSelfPropTypes() {
+    FTRACE(2, "    loseNonRefSelfPropTypes\n");
+    for (auto& kv : m_state.privateStatics) {
       if (kv.second.subtypeOf(TCell)) kv.second = TCell;
     }
   }
@@ -2797,7 +3107,7 @@ struct Interpreter {
       }
     }
 
-    mergePrivates(m_state.privateProperties);
+    mergePrivates(m_state.privateProperties, m_state.privateStatics);
 
     FTRACE(2, "  <end block>\n");
     if (m_blk.fallthrough) propagate(*m_blk.fallthrough, m_state);
@@ -3211,7 +3521,10 @@ State entry_state(const Index& index,
     clsAnalysis ? clsAnalysis->privateProperties :
     ctx.cls     ? index.lookup_private_props(ctx.cls)
                 : PropState{};
-
+  ret.privateStatics =
+    clsAnalysis ? clsAnalysis->privateStatics :
+    ctx.cls     ? index.lookup_private_statics(ctx.cls)
+                : PropState{};
 
   return ret;
 }
@@ -3300,9 +3613,11 @@ FuncAnalysis do_analyze(const Index& index,
       ai.inferredReturn = union_of(ai.inferredReturn, type);
     };
 
-    auto mergePrivates = [&] (const PropState& privateProperties) {
+    auto mergePrivates = [&] (const PropState& props,
+                              const PropState& statics) {
       if (!clsAnalysis) return;
-      merge_into(clsAnalysis->privateProperties, privateProperties);
+      merge_into(clsAnalysis->privateProperties, props);
+      merge_into(clsAnalysis->privateStatics, statics);
     };
 
     auto stateOut = ai.bdata[blk->id].stateIn;
@@ -3371,7 +3686,8 @@ bool operator==(const State& a, const State& b) {
     a.locals == b.locals &&
     a.stack == b.stack &&
     a.fpiStack == b.fpiStack &&
-    a.privateProperties == b.privateProperties;
+    a.privateProperties == b.privateProperties &&
+    a.privateStatics == b.privateStatics;
 }
 
 bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
@@ -3408,33 +3724,49 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
    * Initialize inferred private property types to their in-class
    * initializers.
    *
-   * We need to loosen_statics and loosen_values because the class
-   * could be unserialized, which we don't guarantee preserves those
-   * aspects of the type.
+   * We need to loosen_statics and loosen_values on instance
+   * properties, because the class could be unserialized, which we
+   * don't guarantee preserves those aspects of the type.
    */
   for (auto& prop : ctx.cls->properties) {
-    if ((prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic)) {
+    if (!(prop.attrs & AttrPrivate)) continue;
+
+    if (!(prop.attrs & AttrStatic)) {
       clsAnalysis.privateProperties[prop.name] =
         loosen_statics(loosen_values(from_cell(prop.val)));
+    } else {
+      clsAnalysis.privateStatics[prop.name] = from_cell(prop.val);
     }
   }
 
   /*
-   * 86pinit is a special function that runs to initialize instance
-   * properties that depend on class constants, or have collection
-   * literals.
+   * Skip trying to do smart things with 86{p,s}init for now.
+   *
+   * These are special functions that run to initialize static or
+   * instance properties that depend on class constants, or have
+   * collection literals.
    *
    * We don't handle this yet, so for any class with these types of
    * initializers put the properties up to TInitCell for now.
+   *
+   * TODO(#3567661, #3562690): we want to analyze these.
    */
-  if (has_86pinit(ctx.cls)) {
+  auto const specials = find_special_methods(ctx.cls);
+  if (contains(specials, MethodMask::Internal_86pinit)) {
     for (auto& p : clsAnalysis.privateProperties) {
+      p.second = union_of(p.second, TInitCell);
+    }
+  }
+  if (contains(specials, MethodMask::Internal_86sinit)) {
+    for (auto& p : clsAnalysis.privateStatics) {
       p.second = union_of(p.second, TInitCell);
     }
   }
 
   for (;;) {
-    auto const previousState = clsAnalysis.privateProperties;
+    auto const previousProps   = clsAnalysis.privateProperties;
+    auto const previousStatics = clsAnalysis.privateStatics;
+
     std::vector<FuncAnalysis> methodResults;
 
     // Analyze every method in the class until we reach a fixed point on
@@ -3450,7 +3782,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     }
 
     // Check if we've reached a fixed point yet.
-    if (previousState == clsAnalysis.privateProperties) {
+    if (previousProps == clsAnalysis.privateProperties &&
+        previousStatics == clsAnalysis.privateStatics) {
       clsAnalysis.methods = std::move(methodResults);
       break;
     }
@@ -3468,6 +3801,13 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     for (auto& kv : clsAnalysis.privateProperties) {
       ret += folly::format(
         "private ${: <14} :: {}\n",
+        kv.first->data(),
+        show(kv.second)
+      ).str();
+    }
+    for (auto& kv : clsAnalysis.privateStatics) {
+      ret += folly::format(
+        "private static ${: <14} :: {}\n",
         kv.first->data(),
         show(kv.second)
       ).str();

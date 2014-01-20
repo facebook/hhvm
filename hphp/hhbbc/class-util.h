@@ -38,9 +38,20 @@ bool is_collection(res::Class);
 bool could_have_magic_bool_conversion(Type);
 
 /*
- * Returns whether a php::Class contains an 86pinit method.
+ * A mask of which types of special functions a class has.
  */
-bool has_86pinit(borrowed_ptr<const php::Class>);
+enum class MethodMask : uint32_t {
+  Internal_86pinit = 0x1,
+  Internal_86sinit = 0x2,
+};
+inline bool contains(MethodMask mask, MethodMask val) {
+  return static_cast<uint32_t>(mask) & static_cast<uint32_t>(val);
+}
+
+/*
+ * Returns a mask that indicates special methods a class has.
+ */
+MethodMask find_special_methods(borrowed_ptr<const php::Class>);
 
 /*
  * Returns a collection type name given a Collection::Type.

@@ -35,7 +35,8 @@ const StaticString
   s_FrozenVector("HH\\FrozenVector"),
   s_FrozenSet("HH\\FrozenSet"),
   s_FrozenMap("HH\\FrozenMap"),
-  s_86pinit("86pinit");
+  s_86pinit("86pinit"),
+  s_86sinit("86sinit");
 
 bool has_magic_bool_conversion(res::Class cls) {
   return is_collection(cls) || cls.name()->isame(s_SimpleXMLElement.get());
@@ -66,11 +67,23 @@ bool could_have_magic_bool_conversion(Type t) {
   return true;
 }
 
-bool has_86pinit(borrowed_ptr<const php::Class> cls) {
-  for (auto& m : cls->methods) {
-    if (m->name->isame(s_86pinit.get())) return true;
+MethodMask find_special_methods(borrowed_ptr<const php::Class> cls) {
+  auto ret = uint32_t{};
+
+#define X(str, mask)                            \
+  if (m->name->isame(str.get())) {              \
+    ret |= static_cast<uint32_t>(mask);         \
+    continue;                                   \
   }
-  return false;
+
+  for (auto& m : cls->methods) {
+    X(s_86sinit, MethodMask::Internal_86sinit);
+    X(s_86pinit, MethodMask::Internal_86pinit);
+  }
+
+#undef X
+
+  return static_cast<MethodMask>(ret);
 }
 
 SString collectionTypeToString(uint32_t ctype) {

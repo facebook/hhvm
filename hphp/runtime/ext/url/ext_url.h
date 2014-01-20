@@ -43,7 +43,8 @@ Array HHVM_FUNCTION(get_meta_tags, const String& filename,
 Variant HHVM_FUNCTION(http_build_query, CVarRef formdata,
                            const String& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */);
-Variant HHVM_FUNCTION(parse_url, const String& url, int component /* = -1 */);
+Variant HHVM_FUNCTION(parse_url, const String& url,
+                                 int64_t component /* = -1 */);
 
 String HHVM_FUNCTION(rawurldecode, const String& str);
 String HHVM_FUNCTION(rawurlencode, const String& str);

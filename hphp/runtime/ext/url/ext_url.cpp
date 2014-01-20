@@ -239,7 +239,8 @@ const StaticString
     resource.name = NULL;                                               \
   }                                                                     \
 
-Variant HHVM_FUNCTION(parse_url, const String& url, int component /* = -1 */) {
+Variant HHVM_FUNCTION(parse_url, const String& url,
+                                 int64_t component /* = -1 */) {
   Url resource;
   if (!url_parse(resource, url.data(), url.size())) {
     return false;
@@ -260,7 +261,7 @@ Variant HHVM_FUNCTION(parse_url, const String& url, int component /* = -1 */) {
       }
       break;
     default:
-      throw_invalid_argument("component: %d", component);
+      raise_warning("parse_url(): Invalid URL component identifier %ld", component);
       return false;
     }
     return uninit_null();

@@ -201,7 +201,7 @@ Variant HHVM_FUNCTION(http_build_query, CVarRef formdata,
   }
 
   String arg_sep;
-  if (arg_separator.isNull()) {
+  if (arg_separator.empty()) {
     arg_sep = f_ini_get(s_arg_separator_output);
   } else {
     arg_sep = arg_separator;

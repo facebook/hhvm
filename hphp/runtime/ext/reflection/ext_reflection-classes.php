@@ -902,6 +902,8 @@ implements Reflector {
     } else {
       $ret = $this->info['doc']."\n";
     }
+
+    // Header
     if (isset($this->info['internal'])) {
       $ret .= "{$type} [ <internal> function {$ref}{$this->name} ] {\n";
     } else {
@@ -916,12 +918,23 @@ implements Reflector {
       );
     }
 
+    // Parameters
     if (!empty($this->info['params'])) {
       $ret .= "\n  - Parameters [".count($this->info['params'])."] {\n";
       foreach ($this->getParameters() as $_) {
         $ret .= "    $_\n";
       }
       $ret .= "  }\n";
+    }
+
+    // Closures: Bound variables
+    if ($this->info['is_closure'] && !empty($this->info['static_variables'])) {
+      $ret .= "\n  - Bound Variables [".count($this->info['static_variables'])."] {\n";
+      $i = 0;
+      foreach ($this->info['static_variables'] as $name => $value) {
+        $ret .= "    Variable #".($i++)." [ \$$name ]\n";
+      }
+      $ret .= "  }\n"; 
     }
 
     return $ret."}\n";

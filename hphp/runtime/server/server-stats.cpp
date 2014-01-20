@@ -928,6 +928,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
 
     w->beginObject("thread");
     w->writeEntry("id", (int64_t)ts.m_threadId);
+    w->writeEntry("tid", (int64_t)ts.m_threadPid);
     w->writeEntry("req", ts.m_requestCount);
     w->writeEntry("bytes", ts.m_writeBytes);
     w->writeEntry("start", DateTime(ts.m_start.tv_sec).
@@ -1010,6 +1011,7 @@ ServerStats::ThreadStatus::ThreadStatus()
     : m_requestCount(0), m_writeBytes(0), m_mode(ThreadMode::Idling),
       m_ioInProcess(false) {
   m_threadId = Process::GetThreadId();
+  m_threadPid = Process::GetThreadPid();
   memset(&m_start, 0, sizeof(m_start));
   memset(&m_done, 0, sizeof(m_done));
   memset(m_ioName, 0, sizeof(m_ioName));

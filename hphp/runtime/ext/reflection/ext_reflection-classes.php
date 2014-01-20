@@ -896,17 +896,18 @@ implements Reflector {
    */
   public function __toString() {
     $ref = isset($this->info['ref']) ? '&' : '';
+    $type = $this->info['is_closure'] ? 'Closure' : 'Function';
     if ($this->info['doc'] === false) {
       $ret = '';
     } else {
       $ret = $this->info['doc']."\n";
     }
-
     if (isset($this->info['internal'])) {
-      $ret .= "Function [ <internal> function {$ref}{$this->name} ] {\n";
+      $ret .= "{$type} [ <internal> function {$ref}{$this->name} ] {\n";
     } else {
       $ret .= sprintf(
-        "Function [ <user> function %s%s ] {\n  @@ %s %d - %d\n",
+        "%s [ <user> function %s%s ] {\n  @@ %s %d - %d\n",
+        $type,
         $ref,
         $this->name,
         $this->info['file'],

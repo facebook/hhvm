@@ -756,6 +756,8 @@ def walk(filename, source_dir):
 
         if '/ext/standard/tests/file/tempnam_variation5.php' in full_dest_filename:
             exp = exp.replace('tempnam_variation6', 'tempnam_variation5')
+        if '/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename:
+            exp = exp.replace('to be long', 'to be integer')
 
         file(full_dest_filename+'.expectf', 'w').write(exp)
     else:

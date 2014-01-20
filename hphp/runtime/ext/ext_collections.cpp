@@ -442,6 +442,22 @@ void BaseVector::addFront(TypedValue* val) {
   ++m_size;
 }
 
+Variant BaseVector::popFront() {
+  ++m_version;
+  if (m_size) {
+    mutate();
+    Variant ret = tvAsCVarRef(&m_data[0]);
+    tvRefcountedDecRef(&m_data[0]);
+    --m_size;
+    memmove(m_data, m_data+1, m_size * sizeof(TypedValue));
+    return ret;
+  } else {
+    Object e(SystemLib::AllocRuntimeExceptionObject(
+      "Cannot pop empty Vector"));
+    throw e;
+  }
+}
+
 void BaseVector::reserve(int64_t sz) {
   if (sz <= 0) return;
 
@@ -2113,6 +2129,31 @@ void BaseMap::add(TypedValue* val) {
   }
 }
 
+Variant BaseMap::popFront() {
+  ++m_version;
+  if (m_size) {
+    Elm* e = data();
+    for (;; ++e) {
+      assert(e != data() + iterLimit());
+      if (!isTombstone(e->data.m_type)) break;
+    }
+    Variant ret = tvAsCVarRef(&e->data);
+    int32_t* ei;
+    if (e->hasIntKey()) {
+      ei = findForInsert(e->ikey);
+    } else {
+      assert(e->hasStrKey());
+      ei = findForInsert(e->skey, e->skey->hash());
+    }
+    erase(ei);
+    return ret;
+  } else {
+    Object e(SystemLib::AllocRuntimeExceptionObject(
+      "Cannot pop empty Map"));
+    throw e;
+  }
+}
+
 void BaseMap::remove(int64_t key) {
   ++m_version;
   auto* p = findForInsert(key);
@@ -3014,6 +3055,31 @@ void BaseSet::addFront(StringData *key) {
   auto& e = allocElmFront(p);
   e.setStr(key, h);
   ++m_version;
+}
+
+Variant BaseSet::popFront() {
+  ++m_version;
+  if (m_size) {
+    Elm* e = data();
+    for (;; ++e) {
+      assert(e != data() + iterLimit());
+      if (!isTombstone(e->data.m_type)) break;
+    }
+    Variant ret = tvAsCVarRef(&e->data);
+    int32_t* ei;
+    if (e->hasInt()) {
+      ei = findForInsert(e->data.m_data.num);
+    } else {
+      auto* key = e->data.m_data.pstr;
+      ei = findForInsert(key, key->hash());
+    }
+    erase(ei);
+    return ret;
+  } else {
+    Object e(SystemLib::AllocRuntimeExceptionObject(
+      "Cannot pop empty Set"));
+    throw e;
+  }
 }
 
 void BaseSet::throwOOB(int64_t val) {

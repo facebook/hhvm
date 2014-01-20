@@ -257,6 +257,8 @@ class BaseVector : public ExtCollectionObjectData {
 
   void addFront(TypedValue* val);
 
+  Variant popFront();
+
  protected:
 
   explicit BaseVector(Class* cls);
@@ -671,6 +673,7 @@ class BaseMap : public ExtCollectionObjectData {
     update(key, val);
   }
   void add(TypedValue* val);
+  Variant popFront();
   void remove(int64_t key);
   void remove(StringData* key);
   bool contains(int64_t key) const;
@@ -1315,6 +1318,8 @@ class BaseSet : public ExtCollectionObjectData {
   }
   void addFront(int64_t h);
   void addFront(StringData* key);
+
+  Variant popFront();
 
   void remove(int64_t key) {
     ++m_version;

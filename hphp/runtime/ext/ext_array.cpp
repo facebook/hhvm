@@ -640,7 +640,42 @@ Variant f_array_reverse(CVarRef input, bool preserve_keys /* = false */) {
 }
 
 Variant f_array_shift(VRefParam array) {
-  return array.dequeue();
+  const auto* cell_array = array->asCell();
+  if (UNLIKELY(!isContainer(*cell_array))) {
+    raise_warning(
+      "%s() expects parameter 1 to be an array or mutable collection",
+      __FUNCTION__+2 /* remove the "f_" prefix */);
+    return uninit_null();
+  }
+  if (cell_array->m_type == KindOfArray) {
+    return array.dequeue();
+  }
+  assert(cell_array->m_type == KindOfObject);
+  auto* obj = cell_array->m_data.pobj;
+  assert(obj->isCollection());
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: {
+      auto* vec = static_cast<c_Vector*>(obj);
+      if (!vec->size()) return uninit_null();
+      return vec->popFront();
+    }
+    case Collection::MapType: {
+      auto* mp = static_cast<BaseMap*>(obj);
+      if (!mp->size()) return uninit_null();
+      return mp->popFront();
+    }
+    case Collection::SetType: {
+      auto* st = static_cast<c_Set*>(obj);
+      if (!st->size()) return uninit_null();
+      return st->popFront();
+    }
+    default: {
+      raise_warning(
+        "%s() expects parameter 1 to be an array or mutable collection",
+        __FUNCTION__+2 /* remove the "f_" prefix */);
+      return uninit_null();
+    }
+  }
 }
 
 Variant f_array_slice(CVarRef input, int offset,

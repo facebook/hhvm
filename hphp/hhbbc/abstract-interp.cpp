@@ -1799,14 +1799,19 @@ private:
 
 private: // member instructions
   /*
-   * Tag indicating what sort of thing contains the current base.  If
-   * the Type of the container is known more precisely, baseLocTy will
-   * contain that information.
+   * Tag indicating what sort of thing contains the current base.
+   *
+   * The base is always the unboxed version of the type, and its
+   * location could be inside of a Ref.  So, for example, a base with
+   * BaseLoc::Frame could be located inside of a Ref that is pointed
+   * to by the Frame.  (We may want to distinguish these two cases at
+   * some point if we start trying to track real information about
+   * Refs, but not yet.)
    */
   enum class BaseLoc {
     InArr,         // An element in an array.
-    ObjProp,       // A property in an object (of type baseLocTy).
-    StaticObjProp, // A static property on an object (of type baseLocTy).
+    ObjProp,       // A property in an object.
+    StaticObjProp, // A static property on an object.
     Frame,         // Contained in the current frame as a local.
     FrameThis,     // Contained in the current frame as $this.
     EvalStack,     // Contained by the evaluation stack (eval temporary).
@@ -1815,7 +1820,6 @@ private: // member instructions
   struct Base {
     Type type;
     BaseLoc loc;
-    folly::Optional<Type> locType;
   };
 
   struct MInstrState {
@@ -1854,16 +1858,16 @@ private: // member instructions
   };
 
   bool couldBeThisObj(const folly::Optional<Base>& b) const {
-    // Super conservative for now.
-    // TODO: use couldBe with subObj of the res::Class for $this.
-    return !b || b->type.couldBe(TObj);
+    if (!b) return true;
+    auto const thisTy = thisType();
+    return b->type.couldBe(thisTy ? *thisTy : TObj);
   }
 
   bool mustBeThisObj(const folly::Optional<Base>& b) const {
-    // TODO: should also check if it is a subtype of the current
-    // resolve obj type.  Returning false in a lot of unnecessary
-    // cases for now.
-    return b && b->loc == BaseLoc::FrameThis;
+    if (!b) return false;
+    if (b->loc == BaseLoc::FrameThis) return true;
+    if (auto const ty = thisType())   return b->type.subtypeOf(*ty);
+    return false;
   }
 
   /*
@@ -1927,7 +1931,11 @@ private: // member instructions
     case LC:
       return Base { topC(--state.stackIdx), BaseLoc::EvalStack };
     case LR:
-      return Base { topR(--state.stackIdx), BaseLoc::EvalStack };
+      {
+        auto const t = topR(--state.stackIdx);
+        return Base { t.subtypeOf(TInitCell) ? t : TInitCell,
+                      BaseLoc::EvalStack };
+      }
     case LH:
       return Base { TObj /* TODO(#3430315) */, BaseLoc::FrameThis };
     case LGL:
@@ -2007,7 +2015,13 @@ private: // member instructions
   void miProp(MInstrState& state) {
     auto const name = mcodeStringKey(state);
     bool const isDefine = state.info.getAttr(state.mcode()) & MIA_define;
+
+    // Before we can track bases through intermediate dims we need to
+    // handle type effects on the properties.  (For example, if we
+    // have $this->foo[][] = 2; when $this->foo is null, it needs to
+    // merge TArr.)
     state.base = folly::none;
+
     if (!isDefine) return;
     if (couldBeThisObj(state.base)) {
       // We could just merge stdClass into each one, but for now it's
@@ -2524,22 +2538,10 @@ private: // eval stack
     return topT(i);
   }
 
-  void pushThis(Type t) {
-    push(t);
-    setThisAvailable();
-  }
-
   void push(Type t) {
     FTRACE(2, "    push: {}\n", show(t));
     m_state.stack.push_back(t);
   }
-
-  void setThisAvailable() {
-    FTRACE(2, "    setThisAvailable\n");
-    m_state.thisAvailable = true;
-  }
-
-  bool thisAvailable() const { return m_state.thisAvailable; }
 
 private: // fpi
   void fpiPush(ActRec ar) {
@@ -2636,6 +2638,27 @@ private: // locals
     readLocals();
     assert(id < m_ctx.func->locals.size());
     return borrow(m_ctx.func->locals[id]);
+  }
+
+private: // $this
+  void pushThis(Type t) {
+    push(t);
+    setThisAvailable();
+  }
+
+  void setThisAvailable() {
+    FTRACE(2, "    setThisAvailable\n");
+    m_state.thisAvailable = true;
+  }
+
+  bool thisAvailable() const { return m_state.thisAvailable; }
+
+  folly::Optional<Type> thisType() const {
+    if (!m_ctx.cls) return folly::none;
+    if (auto const rcls = m_index.resolve_class(m_ctx, m_ctx.cls->name)) {
+      return subObj(*rcls);
+    }
+    return folly::none;
   }
 
 private: // properties on $this

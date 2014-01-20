@@ -430,6 +430,18 @@ void BaseVector::grow() {
   m_data = (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
 }
 
+void BaseVector::addFront(TypedValue* val) {
+  assert(val->m_type != KindOfRef);
+  ++m_version;
+  mutate();
+  if (m_capacity <= m_size) {
+    grow();
+  }
+  memmove(m_data+1, m_data, m_size * sizeof(TypedValue));
+  cellDup(*val, m_data[0]);
+  ++m_size;
+}
+
 void BaseVector::reserve(int64_t sz) {
   if (sz <= 0) return;
 
@@ -2916,17 +2928,16 @@ void BaseSet::add(int64_t h) {
   assert(p);
   if (validPos(*p)) {
     // When there is a conflict, the add() API is supposed to replace the
-    // existing element with the new element. However since Sets currently
-    // only support integer and string elements, there is no way user code
-    // can really tell whether the existing element was replaced or not so
-    // for efficiency we do nothing.
+    // existing element with the new element in place. However since Sets
+    // currently only support integer and string elements, there is no way
+    // user code can really tell whether the existing element was replaced
+    // so for efficiency we do nothing.
     return;
   }
   if (UNLIKELY(isFull())) {
     makeRoom();
     p = findForInsert(h);
   }
-  assert(p);
   auto& e = allocElm(p);
   e.setInt(h);
   ++m_version;
@@ -2943,8 +2954,64 @@ void BaseSet::add(StringData *key) {
     makeRoom();
     p = findForInsert(key, h);
   }
-  assert(p);
   auto& e = allocElm(p);
+  e.setStr(key, h);
+  ++m_version;
+}
+
+BaseSet::Elm& BaseSet::allocElmFront(int32_t* ei) {
+  assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
+  // Move the existing elements to make element slot 0 available.
+  memmove(data() + 1, data(), m_used * sizeof(Elm));
+  ++m_used;
+  // Update the hashtable to reflect the fact that everything was moved
+  // over one position
+  auto* hash = hashTab();
+  auto* hashEnd = hash + hashSize();
+  for (; hash != hashEnd; ++hash) {
+    if (validPos(*hash)) {
+      ++(*hash);
+    }
+  }
+  // Set the hash entry we found to point to element slot 0.
+  (*ei) = 0;
+  // Store the value into element slot 0.
+  ++m_size;
+  return data()[0];
+}
+
+void BaseSet::addFront(int64_t h) {
+  auto* p = findForInsert(h);
+  assert(p);
+  if (validPos(*p)) {
+    // When there is a conflict, the addFront() API is supposed to replace
+    // the existing element with the new element in place. However since
+    // Sets currently only support integer and string elements, there is
+    // no way user code can really tell whether the existing element was
+    // replaced so for efficiency we do nothing.
+    return;
+  }
+  if (UNLIKELY(isFull())) {
+    makeRoom();
+    p = findForInsert(h);
+  }
+  auto& e = allocElmFront(p);
+  e.setInt(h);
+  ++m_version;
+}
+
+void BaseSet::addFront(StringData *key) {
+  strhash_t h = key->hash();
+  auto* p = findForInsert(key, h);
+  assert(p);
+  if (validPos(*p)) {
+    return;
+  }
+  if (UNLIKELY(isFull())) {
+    makeRoom();
+    p = findForInsert(key, h);
+  }
+  auto& e = allocElmFront(p);
   e.setStr(key, h);
   ++m_version;
 }

@@ -255,6 +255,8 @@ class BaseVector : public ExtCollectionObjectData {
     return offsetof(BaseVector, m_frozenCopy);
   }
 
+  void addFront(TypedValue* val);
+
  protected:
 
   explicit BaseVector(Class* cls);
@@ -784,7 +786,7 @@ class BaseMap : public ExtCollectionObjectData {
   void compactIfNecessary();
 
   BaseMap::Elm& allocElm(int32_t* ei) {
-    assert(!validPos(*ei) && m_size <= m_used && m_used < m_cap);
+    assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
     size_t i = m_used;
     (*ei) = i;
     m_used = i + 1;
@@ -1233,13 +1235,15 @@ class BaseSet : public ExtCollectionObjectData {
   void compact();
 
   BaseSet::Elm& allocElm(int32_t* ei) {
-    assert(!validPos(*ei) && m_size <= m_used && m_used < m_cap);
+    assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
     size_t i = m_used;
     (*ei) = i;
     m_used = i + 1;
     ++m_size;
     return data()[i];
   }
+
+  BaseSet::Elm& allocElmFront(int32_t* ei);
 
  public:
   ssize_t iter_begin() const {
@@ -1300,6 +1304,18 @@ class BaseSet : public ExtCollectionObjectData {
 
   void add(int64_t h);
   void add(StringData* key);
+
+  void addFront(TypedValue* val) {
+    if (val->m_type == KindOfInt64) {
+      addFront(val->m_data.num);
+    } else if (IS_STRING_TYPE(val->m_type)) {
+      addFront(val->m_data.pstr);
+    } else {
+      throwBadValueType();
+    }
+  }
+  void addFront(int64_t h);
+  void addFront(StringData* key);
 
   void remove(int64_t key) {
     ++m_version;

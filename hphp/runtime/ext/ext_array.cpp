@@ -711,43 +711,84 @@ Variant f_array_sum(CVarRef array) {
   }
 }
 
-int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
-  if (array.toArray()->isVectorData()) {
-    if (!_argv.empty()) {
-      for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
-        pos = _argv->iter_rewind(pos)) {
-        array.prepend(_argv->getValueRef(pos));
-      }
-    }
-    array.prepend(var);
-  } else {
-    {
-      Array newArray;
-      newArray.append(var);
+Variant f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
+  const auto* cell_array = array->asCell();
+  if (UNLIKELY(!isContainer(*cell_array))) {
+    raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
+                  __FUNCTION__+2 /* remove the "f_" prefix */);
+    return uninit_null();
+  }
+  if (cell_array->m_type == KindOfArray) {
+    if (array.toArray()->isVectorData()) {
       if (!_argv.empty()) {
-        for (ssize_t pos = _argv->iter_begin();
-             pos != ArrayData::invalid_index;
-             pos = _argv->iter_advance(pos)) {
-          newArray.append(_argv->getValueRef(pos));
+        for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
+          pos = _argv->iter_rewind(pos)) {
+          array.prepend(_argv->getValueRef(pos));
         }
       }
-      for (ArrayIter iter(array.toArray()); iter; ++iter) {
-        Variant key(iter.first());
-        CVarRef value(iter.secondRef());
-        if (key.isInteger()) {
-          newArray.appendWithRef(value);
-        } else {
-          newArray.setWithRef(key, value, true);
+      array.prepend(var);
+    } else {
+      {
+        Array newArray;
+        newArray.append(var);
+        if (!_argv.empty()) {
+          for (ssize_t pos = _argv->iter_begin();
+               pos != ArrayData::invalid_index;
+               pos = _argv->iter_advance(pos)) {
+            newArray.append(_argv->getValueRef(pos));
+          }
         }
+        for (ArrayIter iter(array.toArray()); iter; ++iter) {
+          Variant key(iter.first());
+          CVarRef value(iter.secondRef());
+          if (key.isInteger()) {
+            newArray.appendWithRef(value);
+          } else {
+            newArray.setWithRef(key, value, true);
+          }
+        }
+        array = newArray;
       }
-      array = newArray;
+      // Reset the array's internal pointer
+      if (array.is(KindOfArray)) {
+        f_reset(array);
+      }
     }
-    // Reset the array's internal pointer
-    if (array.is(KindOfArray)) {
-      f_reset(array);
+    return array.toArray().size();
+  }
+  // Handle collections
+  assert(cell_array->m_type == KindOfObject);
+  auto* obj = cell_array->m_data.pobj;
+  assert(obj->isCollection());
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: {
+      auto* vec = static_cast<c_Vector*>(obj);
+      if (!_argv.empty()) {
+        for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
+             pos = _argv->iter_rewind(pos)) {
+          vec->addFront(cvarToCell(&_argv->getValueRef(pos)));
+        }
+      }
+      vec->addFront(cvarToCell(&var));
+      return vec->size();
+    }
+    case Collection::SetType: {
+      auto* st = static_cast<c_Set*>(obj);
+      if (!_argv.empty()) {
+        for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
+             pos = _argv->iter_rewind(pos)) {
+          st->addFront(cvarToCell(&_argv->getValueRef(pos)));
+        }
+      }
+      st->addFront(cvarToCell(&var));
+      return st->size();
+    }
+    default: {
+      raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
+                    __FUNCTION__+2 /* remove the "f_" prefix */);
+      return uninit_null();
     }
   }
-  return array.toArray().size();
 }
 
 Variant f_array_values(CVarRef input) {

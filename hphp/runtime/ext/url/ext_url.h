@@ -33,18 +33,18 @@ extern const int64_t k_PHP_URL_QUERY;
 extern const int64_t k_PHP_URL_FRAGMENT;
 
 Variant HHVM_FUNCTION(base64_decode, const String& data,
-                                     bool strict /* = false */);
+                                     bool strict = false);
 Variant HHVM_FUNCTION(base64_encode, const String& data);
 
-Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */);
+Variant HHVM_FUNCTION(get_headers, const String& url, int format = 0);
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,
-                                   bool use_include_path /* = false */);
+                                   bool use_include_path = false);
 
 Variant HHVM_FUNCTION(http_build_query, CVarRef formdata,
-                           const String& numeric_prefix /* = null_string */,
-                           const String& arg_separator /* = null_string */);
+                           const String& numeric_prefix = null_string,
+                           const String& arg_separator = null_string);
 Variant HHVM_FUNCTION(parse_url, const String& url,
-                                 int64_t component /* = -1 */);
+                                 int64_t component = -1);
 
 String HHVM_FUNCTION(rawurldecode, const String& str);
 String HHVM_FUNCTION(rawurlencode, const String& str);

@@ -895,11 +895,19 @@ implements Reflector {
    *                     the function.
    */
   public function __toString() {
-    if (isset($this->info['internal'])) {
-      $ret = "Function [ <internal> function {$this->name} ] {\n";
+    $ref = isset($this->info['ref']) ? '&' : '';
+    if ($this->info['doc'] === false) {
+      $ret = '';
     } else {
-      $ret = sprintf(
-        "Function [ <user> function %s ] {\n  @@ %s %d - %d\n",
+      $ret = $this->info['doc']."\n";
+    }
+
+    if (isset($this->info['internal'])) {
+      $ret .= "Function [ <internal> function {$ref}{$this->name} ] {\n";
+    } else {
+      $ret .= sprintf(
+        "Function [ <user> function %s%s ] {\n  @@ %s %d - %d\n",
+        $ref,
         $this->name,
         $this->info['file'],
         $this->info['line1'],

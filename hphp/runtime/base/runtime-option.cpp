@@ -395,11 +395,8 @@ static inline std::string regionSelectorDefault() {
 }
 
 static inline bool pgoDefault() {
-#ifdef HHVM_REGION_SELECTOR_HOTTRACE
-  return true;
-#else
-  return false;
-#endif
+  // TODO(3496304)
+  return !RuntimeOption::EvalSimulateARM;
 }
 
 static inline bool hhirRelaxGuardsDefault() {

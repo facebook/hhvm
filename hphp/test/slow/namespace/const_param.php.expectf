@@ -1,28 +1,30 @@
-string(14) "5.4.999-hiphop"
+HipHop Notice: Use of undefined constant B - assumed 'B'
+HipHop Notice: Use of undefined constant B - assumed 'B'
+string(14) "5.%s-hiphop"
 string(11) "PHP_VERSION"
-string(1) "c"
+string(1) "B"
 string(1) "B"
 array(1) {
   [0]=>
   string(14) "5.4.999-hiphop"
 }
-string(18) "array(PHP_VERSION)"
+NULL
 array(1) {
   [0]=>
-  string(1) "c"
+  string(1) "B"
 }
-string(%d) "array%w(%a)"
-string(14) "5.4.999-hiphop"
+NULL
+string(14) "5.%s-hiphop"
 string(11) "PHP_VERSION"
-string(1) "c"
 string(1) "B"
+string(3) "A\B"
 array(1) {
   [0]=>
-  string(14) "5.4.999-hiphop"
+  string(14) "5.%s-hiphop"
 }
-string(18) "array(PHP_VERSION)"
+NULL
 array(1) {
   [0]=>
-  string(1) "c"
+  string(1) "B"
 }
-string(%d) "array%w(%a)"
+NULL

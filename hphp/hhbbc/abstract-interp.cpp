@@ -807,7 +807,11 @@ struct InterpStepper : boost::static_visitor<void> {
     killLocals();
     if (m_ctx.func->nativeInfo) {
       auto const dt = m_ctx.func->nativeInfo->returnType;
-      if (dt != KindOfInvalid) return doRet(from_DataType(dt));
+      if (dt != KindOfInvalid) {
+        // TODO(#3568043): adding TInitNull, because HNI doesn't know
+        // about nullability.
+        return doRet(union_of(from_DataType(dt), TInitNull));
+      }
     }
     doRet(TInitGen);
   }

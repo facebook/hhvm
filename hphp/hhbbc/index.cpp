@@ -339,7 +339,10 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
     // (NativeImpl) for the HNI function, but just initializing it
     // here saves on whole-program iterations.
     if (f->nativeInfo->returnType != KindOfInvalid) {
-      ret.returnTy = from_DataType(f->nativeInfo->returnType);
+      // TODO(#3568043): always add TInitNull, because HNI doesn't
+      // know about nullability.
+      auto const t = from_DataType(f->nativeInfo->returnType);
+      ret.returnTy = union_of(t, TInitNull);
     }
   }
   return &ret;

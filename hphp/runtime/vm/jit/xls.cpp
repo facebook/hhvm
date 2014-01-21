@@ -80,8 +80,8 @@ LiveRange closedRange(unsigned first, unsigned last);
 
 // An Interval stores the lifetime of an SSATmp as a sorted list of disjoint
 // ranges, and a sorted list of use positions.  If this interval was split,
-// then children contains the split intervals in start-order, and each child's
-// parent points to this interval.
+// then the first interval is deemed "parent" and the rest are "children",
+// and they're all connected as a singly linked list sorted by start.
 struct Interval {
   Interval() {}
   explicit Interval(Interval* parent);
@@ -115,14 +115,14 @@ struct Interval {
 public:
   bool blocked { false }; // cannot be spilled
   bool scratch { false }; // used as scratch or arg, cannot be spilled
-  int need { 0 }; // number of required registers (exactly 1 or 2)
+  uint8_t need { 0 }; // number of required registers (exactly 1 or 2)
   RegSet allow;
   RegSet prefer;
   SSATmp* tmp { nullptr };
   Interval* parent { nullptr }; // if this is a split-off child
+  Interval* next { nullptr }; // next split child or nullptr
   smart::vector<LiveRange> ranges;
   smart::vector<Use> uses;
-  smart::list<Interval> children; // if parent was split
   PhysLoc loc;  // current location assigned to this interval
   PhysLoc spill; // spill location (parent only)
 };
@@ -247,17 +247,17 @@ void Interval::setStart(unsigned start) {
 
 // Return true if one of the ranges in this interval includes pos
 bool Interval::covers(unsigned pos) const {
-  if (pos >= start() && pos < end()) {
-    for (auto r : ranges) {
-      if (pos < r.start) return false;
-      if (pos < r.end) return true;
-    }
+  if (pos < start() || pos >= end()) return false;
+  for (auto r : ranges) {
+    if (pos < r.start) return false;
+    if (pos < r.end) return true;
   }
   return false;
 }
 
 // Return true if there is a use position at pos
 bool Interval::usedAt(unsigned pos) const {
+  if (pos < start() || pos >= end()) return false;
   for (auto& u : uses) if (u.pos == pos) return true;
   return false;
 }
@@ -265,10 +265,9 @@ bool Interval::usedAt(unsigned pos) const {
 // Return the interval which includes pos (this one or a child)
 Interval* Interval::childAt(unsigned pos) {
   assert(!isChild());
-  if (covers(pos)) return this;
-  for (auto& child : children) {
-    if (child.start() > pos) break;
-    if (child.covers(pos)) return &child;
+  for (auto ivl = this; ivl; ivl = ivl->next) {
+    if (pos < ivl->start()) return nullptr;
+    if (ivl->covers(pos)) return ivl;
   }
   return nullptr;
 }
@@ -297,12 +296,9 @@ unsigned Interval::nextIntersect(Interval* ivl) const {
 Interval* Interval::split(unsigned pos) {
   assert(pos > start() && pos < end());
   auto leader = this->leader();
-  auto iter = leader->children.begin();
-  while (iter != leader->children.end() && pos > iter->start()) {
-    iter++;
-  }
-  iter = leader->children.emplace(iter, leader);
-  Interval* child = &(*iter);
+  Interval* child = smart_new<Interval>(leader);
+  child->next = next;
+  next = child;
   // advance r1 to the first range we want in child; maybe split a range.
   auto r1 = ranges.begin(), r2 = ranges.end();
   while (r1->end <= pos) r1++;
@@ -318,7 +314,7 @@ Interval* Interval::split(unsigned pos) {
   while (u1 != u2 && u1->pos < pos) u1++;
   child->uses.insert(child->uses.end(), u1, u2);
   uses.erase(u1, u2);
-  assert(leader->checkInvariants() && child->checkInvariants());
+  assert(checkInvariants() && child->checkInvariants());
   return child;
 }
 
@@ -371,7 +367,10 @@ XLS::XLS(IRUnit& unit, RegAllocInfo& regs, const Abi& abi)
 
 XLS::~XLS() {
   for (auto ivl : m_intervals) {
-    if (ivl) smart_delete(ivl);
+    for (Interval* next; ivl; ivl = next) {
+      next = ivl->next;
+      smart_delete(ivl);
+    }
   }
 }
 
@@ -455,7 +454,7 @@ void dstConstraints(IRInstruction& inst, int i, SSATmp* dst, Interval* ivl,
 // they use/define tmps in the expected locations.
 void XLS::buildIntervals() {
   assert(checkBlockOrder(m_unit, m_blocks));
-  size_t stress = 0;
+  unsigned stress = 0;
   for (auto blockIt = m_blocks.end(); blockIt != m_blocks.begin();) {
     auto block = *--blockIt;
     // compute initial live set from liveIn[succsessors]
@@ -472,7 +471,7 @@ void XLS::buildIntervals() {
       auto& inst = *--instIt;
       auto spos = m_posns[inst]; // position where srcs are read
       auto dpos = spos + 1;     // position where dsts are written
-      size_t dst_need = 0;
+      unsigned dst_need = 0;
       for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
         auto d = inst.dst(i);
         auto dest = m_intervals[d];
@@ -507,7 +506,7 @@ void XLS::buildIntervals() {
         }
       }
       // add live ranges for tmps used by this inst
-      size_t src_need = 0;
+      unsigned src_need = 0;
       for (unsigned i = 0, n = inst.numSrcs(); i < n; ++i) {
         auto s = inst.src(i);
         if (s->inst()->op() == DefConst) continue;
@@ -988,19 +987,18 @@ void XLS::resolveSplits() {
   for (auto i1 : m_intervals) {
     if (!i1) continue;
     if (i1->spill.spilled()) insertSpill(i1);
-    for (auto& i2 : i1->children) {
+    for (auto i2 = i1->next; i2; i1 = i2, i2 = i2->next) {
       auto pos1 = i1->end();
-      auto pos2 = i2.start();
-      if (!i2.loc.spilled() && pos1 == pos2 && i1->loc != i2.loc) {
+      auto pos2 = i2->start();
+      if (!i2->loc.spilled() && pos1 == pos2 && i1->loc != i2->loc) {
         auto inst = m_insts[pos2 / 2];
         auto block = inst->block();
         if (inst != skipShuffle(block)) {
           assert(pos2 % 2 == 0);
           insertCopy(block, block->iteratorTo(inst), m_between[inst], i1->tmp,
-                     i1->loc, i2.loc);
+                     i1->loc, i2->loc);
         }
       }
-      i1 = &i2;
     }
   }
 }
@@ -1124,10 +1122,8 @@ void XLS::dumpIntervals() {
     if (!ivl) continue;
     HPHP::Trace::traceRelease("i%-2d %s\n", ivl->tmp->id(),
                               ivl->toString().c_str());
-    if (!ivl->children.empty()) {
-      for (auto& c : ivl->children) {
-        HPHP::Trace::traceRelease("    %s\n", c.toString().c_str());
-      }
+    for (ivl = ivl->next; ivl; ivl = ivl->next) {
+      HPHP::Trace::traceRelease("    %s\n", ivl->toString().c_str());
     }
   }
 }
@@ -1261,7 +1257,7 @@ bool XLS::checkEdgeShuffles() {
 // 3. every use position must be inside a live range
 // 4. parent and children must all be sorted and disjoint
 bool Interval::checkInvariants() const {
-  assert(!parent || children.empty()); // 1: no crazy nesting
+  assert(!parent || !parent->parent); // 1: no crazy nesting
   DEBUG_ONLY auto pos = 0;
   for (auto r : ranges) {
     assert(r.start <= r.end); // valid range
@@ -1270,16 +1266,6 @@ bool Interval::checkInvariants() const {
   }
   for (DEBUG_ONLY auto u : uses) {
     assert(covers(u.pos)); // 3: every use must be in a live range
-  }
-  if (!parent && !children.empty()) {
-    // this is the parent, and there are children.
-    DEBUG_ONLY auto pos = end();
-    for (auto& c : children) {
-      c.checkInvariants();
-      assert(!c.empty());
-      assert(pos <= c.start()); // 4: children are sorted
-      pos = c.end(); // 4: and disjoint
-    }
   }
   return true;
 }

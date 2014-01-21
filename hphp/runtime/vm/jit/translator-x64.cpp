@@ -170,15 +170,6 @@ TranslatorX64* tx64;
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = VMRegState::CLEAN;
 
-// stubBlock --
-//   Used to emit a bunch of outlined code that is unconditionally jumped to.
-template <typename L>
-void stubBlock(X64Assembler& hot, X64Assembler& cold, const L& body) {
-  hot.  jmp(cold.frontier());
-  guardDiamond(cold, body);
-  cold. jmp(hot.frontier());
-}
-
 JIT::CppCall TranslatorX64::getDtorCall(DataType type) {
   switch (type) {
   case BitwiseKindOfString:

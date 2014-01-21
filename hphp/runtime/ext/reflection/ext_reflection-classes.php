@@ -809,10 +809,20 @@ class ReflectionFunctionAbstract {
    */
   public function getParameters() {
     $ret = array();
+
+    // Search for last required parameter
+    $numRequired = -1;
+    foreach ($this->info['params'] as $name => $info) {
+      if (!isset($info['defaultText'])) $numRequired = $info['index'];
+    }
+
     foreach ($this->info['params'] as $name => $info) {
       $param = new ReflectionParameter(null, null);
       $param->info = $info;
       $param->name = $info['name'];
+      if ($info['index'] <= $numRequired) {
+        unset($param->info['defaultText'], $param->info['default']);
+      }
       $ret[] = $param;
     }
     return $ret;

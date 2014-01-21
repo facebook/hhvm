@@ -18,13 +18,17 @@ env:
   - TEST_RUN_MODE="-m jit zend"
   - TEST_RUN_MODE="-m jit -r quick"
   - TEST_RUN_MODE="-m jit -r slow"
-  - TEST_RUN_MODE="-m jit -r zend"
+  - TEST_RUN_MODE="-m jit -r zend/ext"
+  - TEST_RUN_MODE="-m jit -r zend/tests"
+  - TEST_RUN_MODE="-m jit -r zend/Zend"
   - TEST_RUN_MODE="-m interp quick"
   - TEST_RUN_MODE="-m interp slow"
   - TEST_RUN_MODE="-m interp zend"
   - TEST_RUN_MODE="-m interp -r quick"
   - TEST_RUN_MODE="-m interp -r slow"
-  - TEST_RUN_MODE="-m interp -r zend"
+  - TEST_RUN_MODE="-m interp -r zend/ext"
+  - TEST_RUN_MODE="-m interp -r zend/tests"
+  - TEST_RUN_MODE="-m interp -r zend/Zend"
 
 script: time hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
 

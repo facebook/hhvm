@@ -424,6 +424,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case Ceil:          return simplifyCeil(inst);
   case Unbox:         return simplifyUnbox(inst);
   case UnboxPtr:      return simplifyUnboxPtr(inst);
+  case BoxPtr:        return simplifyBoxPtr(inst);
   case IsType:
   case IsNType:       return simplifyIsType(inst);
   case IsScalarType:  return simplifyIsScalarType(inst);
@@ -1929,7 +1930,13 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
   if (inst->src(0)->isA(Type::PtrToCell)) {
-    // Nothing to unbox
+    return inst->src(0);
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyBoxPtr(IRInstruction* inst) {
+  if (inst->src(0)->isA(Type::PtrToBoxedCell)) {
     return inst->src(0);
   }
   return nullptr;

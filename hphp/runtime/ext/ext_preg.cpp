@@ -37,6 +37,14 @@ public:
     Native::registerConstant<KindOfString>(
       s_PCRE_VERSION.get(), makeStaticString(pcre_version())
     );
+    IniSetting::Bind(this, "pcre.backtrack_limit",
+                     std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),
+                     ini_on_update_long, ini_get_long,
+                     &g_context->m_preg_backtrace_limit);
+    IniSetting::Bind(this, "pcre.recursion_limit",
+                     std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
+                     ini_on_update_long, ini_get_long,
+                     &g_context->m_preg_recursion_limit);
   }
 } s_pcre_extension;
 ///////////////////////////////////////////////////////////////////////////////

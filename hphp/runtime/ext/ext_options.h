@@ -54,6 +54,7 @@ bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec);
 int64_t f_cpu_get_count();
 String f_cpu_get_model();
 String f_ini_get(const String& varname);
+Array f_ini_get_all(const String& extension, bool detailed);
 void f_ini_restore(const String& varname);
 String f_ini_set(const String& varname, const String& newvalue);
 int64_t f_memory_get_allocation();

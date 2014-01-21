@@ -69,10 +69,10 @@ ThreadInfo::ThreadInfo()
   RDS::threadInit();
   onSessionInit();
 
-  IniSetting::Bind("max_execution_time",
+  IniSetting::Bind(IniSetting::CORE, "max_execution_time",
                    ini_on_update_max_execution_time,
                    ini_get_max_execution_time);
-  IniSetting::Bind("maximum_execution_time",
+  IniSetting::Bind(IniSetting::CORE, "maximum_execution_time",
                    ini_on_update_max_execution_time,
                    ini_get_max_execution_time);
 

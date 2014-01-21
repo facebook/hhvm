@@ -22,8 +22,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class Extension;
+
 class IniSetting {
 public:
+  static const Extension* CORE;
   enum ScannerMode {
     NormalScanner,
     RawScanner,
@@ -47,11 +50,14 @@ public:
 
   static bool Get(const String& name, String &value);
   static bool Set(const String& name, const String& value);
+  static Array GetAll(const String& extension, bool details);
 
-  static void Bind(const char *name, const char *value,
+  static void Bind(const Extension* extension,
+                   const char *name, const char *value,
                    UpdateCallback updateCallback, GetCallback getCallback,
                    void *p = nullptr);
-  static void Bind(const char *name,
+  static void Bind(const Extension* extension,
+                   const char *name,
                    UpdateCallback updateCallback, GetCallback getCallback,
                    void *p = nullptr);
   static void Unbind(const char *name);
@@ -60,7 +66,7 @@ public:
 
 };
 
-bool ini_on_update_fail(const String& value, void *p);
+#define ini_on_update_fail HPHP::IniSetting::UpdateCallback()
 bool ini_on_update_int(const String& value, void *p);
 bool ini_on_update_bool(const String& value, void *p);
 bool ini_on_update_long(const String& value, void *p);

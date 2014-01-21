@@ -28,14 +28,23 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/lock.h"
 
+#define PHP_INI_USER 1
+#define PHP_INI_PERDIR (1<<1)
+#define PHP_INI_SYSTEM (1<<2)
+#define PHP_INI_ALL (PHP_INI_USER|PHP_INI_PERDIR|PHP_INI_SYSTEM)
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_1("1"), s_0("0");
+const Extension* IniSetting::CORE = (Extension*)(-1);
 
-bool ini_on_update_fail(const String&, void* p) {
-  return false;
-}
+const StaticString
+  s_1("1"),
+  s_0("0"),
+  s_global_value("global_value"),
+  s_local_value("local_value"),
+  s_access("access"),
+  s_core("core");
 
 bool ini_on_update_bool(const String& value, void *p) {
   if (p) {
@@ -213,6 +222,7 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
 }
 
 struct IniCallbackData {
+  const Extension* extension;
   IniSetting::UpdateCallback updateCallback;
   IniSetting::GetCallback getCallback;
   void *p;
@@ -232,22 +242,25 @@ void IniSetting::SetGlobalDefault(const char *name, const char *value) {
   s_global_ini[name] = value;
 }
 
-void IniSetting::Bind(const char *name, const char *value,
+void IniSetting::Bind(const Extension* extension,
+                      const char *name, const char *value,
                       UpdateCallback updateCallback, GetCallback getCallback,
                       void *p /* = NULL */) {
   assert(value);
 
-  Bind(name, updateCallback, getCallback, p);
+  Bind(extension, name, updateCallback, getCallback, p);
 
   updateCallback(value, p);
 }
 
-void IniSetting::Bind(const char *name,
+void IniSetting::Bind(const Extension* extension,
+                      const char *name,
                       UpdateCallback updateCallback, GetCallback getCallback,
                       void *p /* = NULL */) {
   assert(name && *name);
 
   auto &data = (*s_callbacks)[name];
+  data.extension = extension;
   data.updateCallback = updateCallback;
   data.getCallback = getCallback;
   data.p = p;
@@ -277,11 +290,56 @@ bool IniSetting::Get(const String& name, String &value) {
 bool IniSetting::Set(const String& name, const String& value) {
   CallbackMap::iterator iter = s_callbacks->find(name.data());
   if (iter != s_callbacks->end()) {
-    return iter->second.updateCallback(value, iter->second.p);
+    if (iter->second.updateCallback) {
+      return iter->second.updateCallback(value, iter->second.p);
+    }
   }
 
   return false;
 }
+
+Array IniSetting::GetAll(const String& ext_name, bool details) {
+  Array r = Array::Create();
+
+  const Extension* ext = nullptr;
+  if (!ext_name.empty()) {
+    if (ext_name == s_core) {
+      ext = IniSetting::CORE;
+    } else {
+      ext = Extension::GetExtension(ext_name);
+      if (!ext) {
+        raise_warning("Unable to find extension '%s'",
+                      ext_name.toCppString().c_str());
+        return r;
+      }
+    }
+  }
+
+  for (auto& iter: (*s_callbacks)) {
+    if (ext && ext != iter.second.extension) {
+      continue;
+    }
+
+    if (details) {
+      Array item = Array::Create();
+      String value(iter.second.getCallback(iter.second.p));
+      item.add(s_global_value, value);
+      item.add(s_local_value, value);
+      // HHVM doesn't support varying access levels, but we can at least
+      // indicate if ini_set() should work
+      if (iter.second.updateCallback) {
+        item.add(s_access, Variant(PHP_INI_ALL));
+      } else {
+        item.add(s_access, Variant(PHP_INI_SYSTEM | PHP_INI_PERDIR));
+      }
+      r.add(String(iter.first), item);
+    } else {
+      r.add(String(iter.first), iter.second.getCallback(iter.second.p));
+    }
+  }
+  return r;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

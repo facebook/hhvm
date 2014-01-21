@@ -286,8 +286,6 @@ public:
   static bool EnableStats;
   static bool EnableWebStats;
   static bool EnableMemoryStats;
-  static bool EnableAPCStats;
-  static bool EnableAPCKeyStats;
   static bool EnableMemcacheStats;
   static bool EnableMemcacheKeyStats;
   static bool EnableSQLStats;
@@ -298,16 +296,6 @@ public:
   static int StatsSlotDuration;
   static int StatsMaxSlot;
 
-  static bool EnableAPCSizeStats;
-  static bool EnableAPCSizeGroup;
-  static std::vector<std::string> APCSizeSpecialPrefix;
-  static std::vector<std::string> APCSizePrefixReplace;
-  static std::vector<std::string> APCSizeSpecialMiddle;
-  static std::vector<std::string> APCSizeMiddleReplace;
-  static std::vector<std::string> APCSizeSkipPrefix;
-  static bool EnableAPCSizeDetail;
-  static bool EnableAPCFetchStats;
-  static bool APCSizeCountPrime;
   static bool EnableHotProfiler;
   static int32_t ProfilerTraceBuffer;
   static double ProfilerTraceExpansion;

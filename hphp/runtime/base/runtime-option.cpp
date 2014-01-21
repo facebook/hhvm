@@ -291,8 +291,6 @@ bool RuntimeOption::MemcacheReadOnly = false;
 bool RuntimeOption::EnableStats = false;
 bool RuntimeOption::EnableWebStats = false;
 bool RuntimeOption::EnableMemoryStats = false;
-bool RuntimeOption::EnableAPCStats = false;
-bool RuntimeOption::EnableAPCKeyStats = false;
 bool RuntimeOption::EnableMemcacheStats = false;
 bool RuntimeOption::EnableMemcacheKeyStats = false;
 bool RuntimeOption::EnableSQLStats = false;
@@ -302,17 +300,6 @@ std::string RuntimeOption::StatsXSL;
 std::string RuntimeOption::StatsXSLProxy;
 int RuntimeOption::StatsSlotDuration = 10 * 60; // 10 minutes
 int RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
-
-bool RuntimeOption::EnableAPCSizeStats = false;
-bool RuntimeOption::EnableAPCSizeGroup = false;
-std::vector<std::string> RuntimeOption::APCSizeSpecialPrefix;
-std::vector<std::string> RuntimeOption::APCSizePrefixReplace;
-std::vector<std::string> RuntimeOption::APCSizeSpecialMiddle;
-std::vector<std::string> RuntimeOption::APCSizeMiddleReplace;
-std::vector<std::string> RuntimeOption::APCSizeSkipPrefix;
-bool RuntimeOption::EnableAPCSizeDetail = false;
-bool RuntimeOption::EnableAPCFetchStats = false;
-bool RuntimeOption::APCSizeCountPrime = false;
 
 int64_t RuntimeOption::MaxRSS = 0;
 int64_t RuntimeOption::MaxRSSPollingCycle = 0;
@@ -1082,8 +1069,6 @@ void RuntimeOption::Load(Hdf &config,
 
     EnableWebStats = stats["Web"].getBool();
     EnableMemoryStats = stats["Memory"].getBool();
-    EnableAPCStats = stats["APC"].getBool();
-    EnableAPCKeyStats = stats["APCKey"].getBool();
     EnableMemcacheStats = stats["Memcache"].getBool();
     EnableMemcacheKeyStats = stats["MemcacheKey"].getBool();
     EnableSQLStats = stats["SQL"].getBool();
@@ -1095,30 +1080,6 @@ void RuntimeOption::Load(Hdf &config,
 
     StatsSlotDuration = stats["SlotDuration"].getInt32(10 * 60); // 10 minutes
     StatsMaxSlot = stats["MaxSlot"].getInt32(12 * 6); // 12 hours
-
-    {
-      Hdf apcSize = stats["APCSize"];
-      EnableAPCSizeStats = apcSize["Enable"].getBool();
-      EnableAPCSizeGroup = apcSize["Group"].getBool();
-      apcSize["SpecialPrefix"].get(APCSizeSpecialPrefix);
-      for (unsigned int i = 0; i < APCSizeSpecialPrefix.size(); i++) {
-        string &prefix = APCSizeSpecialPrefix[i];
-        string prefixReplace = prefix + "{A}";
-        APCSizePrefixReplace.push_back(prefixReplace);
-      }
-      apcSize["SpecialMiddle"].get(APCSizeSpecialMiddle);
-      for (unsigned int i = 0; i < APCSizeSpecialMiddle.size(); i++) {
-        string &middle = APCSizeSpecialMiddle[i];
-        string middleReplace = "{A}" + middle + "{A}";
-        APCSizeMiddleReplace.push_back(middleReplace);
-      }
-      apcSize["SkipPrefix"].get(APCSizeSkipPrefix);
-      EnableAPCSizeDetail = apcSize["Individual"].getBool();
-      EnableAPCFetchStats = apcSize["FetchStats"].getBool();
-      if (EnableAPCFetchStats) EnableAPCSizeDetail = true;
-      if (EnableAPCSizeDetail) EnableAPCSizeGroup = true;
-      APCSizeCountPrime = apcSize["CountPrime"].getBool();
-    }
 
     EnableHotProfiler = stats["EnableHotProfiler"].getBool(true);
     ProfilerTraceBuffer = stats["ProfilerTraceBuffer"].getInt32(2000000);

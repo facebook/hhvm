@@ -1,9 +1,20 @@
-Next release
+"Coolio" 21-Jan-2014
+  - Turn on Region JIT
+  - FastCGI fixes, perf improvements
+  - ext_zend_compat fixes
+  - Turn on XLS Register Allocator by default
+  - Fix server stats reporting
+  - 'num' scalar typehint that accepts both ints and floats
+  - fix support for typedef'd namespaces
+  - don't swallow fatals when autoloading
+  - Map collections learned the in-place retain() and retainWithKey()
+  - rename Set::difference() to Set::removeAll()
+  - Update Set to retain element insertion order
+  - remove APC stats
+  - Fixes for ARM mode
   - FrozenMap collection
   - Deprecated Vector|Set|Map::put() method removed
   - == between Frozen{Vector|Set|Map} and {Vector|Set|Map} now can return true
-  - Map collections learned the in-place retain() and retainWithKey()
-  - 'num' scalar typehint that accepts both ints and floats
 
 "Beastie Boys" 6-Jan-2014
   - Support lex-time binary constants (eg. 0b10111)

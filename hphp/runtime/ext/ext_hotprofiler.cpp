@@ -79,6 +79,8 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(xhprof, 0.9.4);
 using std::vector;
 using std::string;
 
+const StaticString s_hotprofiler("hotprofiler");
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -1017,7 +1019,9 @@ class TraceProfiler : public Profiler {
     } else {
       char buf[20];
       sprintf(buf, "%d", RuntimeOption::ProfilerMaxTraceBuffer);
-      IniSetting::Bind("profiler.max_trace_buffer", buf,
+      Extension* ext = Extension::GetExtension(s_hotprofiler);
+      assert(ext);
+      IniSetting::Bind(ext, "profiler.max_trace_buffer", buf,
                        ini_on_update_long, ini_get_long,
                        &m_maxTraceBuffer);
     }

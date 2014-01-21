@@ -728,6 +728,10 @@ String f_ini_get(const String& varname) {
   return value;
 }
 
+Array f_ini_get_all(const String& extension, bool detailed) {
+  return IniSetting::GetAll(extension, detailed);
+}
+
 void f_ini_restore(const String& varname) {
 }
 

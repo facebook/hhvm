@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_apache.h"
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-note.h"
@@ -24,10 +24,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_apache_note(const String& note_name,
+Variant HHVM_FUNCTION(apache_note, const String& note_name,
                       const String& note_value /* = null_string */) {
   String prev = ServerNote::Get(note_name);
-  if (!note_value.isNull()) {
+  if (!note_value.empty()) {
     ServerNote::Add(note_name, note_value);
   }
   if (!prev.isNull()) {
@@ -36,7 +36,7 @@ Variant f_apache_note(const String& note_name,
   return false;
 }
 
-Array f_apache_request_headers() {
+Array HHVM_FUNCTION(apache_request_headers) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     HeaderMap headers;
@@ -51,7 +51,7 @@ Array f_apache_request_headers() {
   return Array();
 }
 
-Array f_apache_response_headers() {
+Array HHVM_FUNCTION(apache_response_headers) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     HeaderMap headers;
@@ -66,13 +66,13 @@ Array f_apache_response_headers() {
   return Array();
 }
 
-bool f_apache_setenv(const String& variable, const String& value,
+bool HHVM_FUNCTION(apache_setenv, const String& variable, const String& value,
                      bool walk_to_top /* = false */) {
   return false;
 }
 
-Array f_getallheaders() {
-  return f_apache_request_headers();
+Array HHVM_FUNCTION(getallheaders) {
+  return HHVM_FN(apache_request_headers)();
 }
 
 const StaticString
@@ -82,7 +82,7 @@ const StaticString
   s_queued_requests("queued_requests"),
   s_child_status("child_status");
 
-Variant f_apache_get_config() {
+Array HHVM_FUNCTION(apache_get_config) {
   int workers = 0, queued = 0;
   if (HttpServer::Server) {
     workers = HttpServer::Server->getPageServer()->getActiveWorker();
@@ -96,7 +96,7 @@ Variant f_apache_get_config() {
   return ret.create();
 }
 
-Variant f_apache_get_scoreboard() {
+Array HHVM_FUNCTION(apache_get_scoreboard) {
   Array child_status;
   for (int i = 0; i < RuntimeOption::ServerThreadCount; i++) {
     child_status.set(i, 2);
@@ -105,6 +105,24 @@ Variant f_apache_get_scoreboard() {
   ret.set(s_child_status, child_status);
   return ret.create();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+class ApacheExtension : public Extension {
+ public:
+  ApacheExtension() : Extension("apache") {}
+  virtual void moduleInit() {
+    HHVM_FE(apache_note);
+    HHVM_FE(apache_request_headers);
+    HHVM_FE(apache_response_headers);
+    HHVM_FE(apache_setenv);
+    HHVM_FE(getallheaders);
+    HHVM_FE(apache_get_config);
+    HHVM_FE(apache_get_scoreboard);
+
+    loadSystemlib();
+  }
+} s_apache_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

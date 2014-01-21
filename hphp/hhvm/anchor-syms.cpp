@@ -21,27 +21,29 @@ namespace HPHP {
  * Prevent over-eager linkers from stripping seemingly unused
  * symbols from the resulting binary by linking them from here.
  */
-extern Extension s_zip_extension;
+extern Extension s_apache_extension;
+extern Extension s_bcmath_extension;
+extern Extension s_bz2_extension;
 extern Extension s_fileinfo_extension;
 extern Extension s_intl_extension;
-extern Extension s_bcmath_extension;
-extern Extension s_phar_extension;
-extern Extension s_bz2_extension;
-extern Extension s_reflection_extension;
 #ifdef HAVE_UODBC
 extern Extension s_odbc_extension;
 #endif
+extern Extension s_phar_extension;
+extern Extension s_reflection_extension;
+extern Extension s_zip_extension;
 const Extension *g_anchor_extensions[] = {
-  &s_zip_extension,
+  &s_apache_extension,
+  &s_bcmath_extension,
+  &s_bz2_extension,
   &s_fileinfo_extension,
   &s_intl_extension,
-  &s_bcmath_extension,
-  &s_phar_extension,
-  &s_bz2_extension,
-  &s_reflection_extension,
 #ifdef HAVE_UODBC
   &s_odbc_extension,
 #endif
+  &s_phar_extension,
+  &s_reflection_extension,
+  &s_zip_extension,
 };
 
 } // HPHP

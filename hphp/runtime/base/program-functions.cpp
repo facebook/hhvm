@@ -1048,6 +1048,7 @@ static int execute_program_impl(int argc, char** argv) {
      "unique identifier of server instance")
     ("xhprof-flags", value<int>(&po.xhprofFlags)->default_value(0),
      "Set XHProf flags")
+    ("php", "Execute PHP code from STDIN")
     ;
 
   positional_options_description p;

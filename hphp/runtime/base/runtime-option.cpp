@@ -482,6 +482,9 @@ bool RuntimeOption::HHProfServerAllocationProfile = false;
 int RuntimeOption::HHProfServerFilterMinAllocPerReq = 2;
 int RuntimeOption::HHProfServerFilterMinBytesPerReq = 128;
 
+// TODO (t3610856): Change the default to false once dependent code is fixed
+bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = true;
+
 bool RuntimeOption::EnableHotProfiler = true;
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
 double RuntimeOption::ProfilerTraceExpansion = 1.2;
@@ -1272,6 +1275,12 @@ void RuntimeOption::Load(Hdf &config,
       hhprofFilter["MinAllocPerReq"].getInt64(2);
     HHProfServerFilterMinBytesPerReq =
       hhprofFilter["MinBytesPerReq"].getInt64(128);
+  }
+  {
+    Hdf simplexml = config["SimpleXML"];
+    // TODO (t3610856): Change the default to false once dependent code is fixed
+    SimpleXMLEmptyNamespaceMatchesAll =
+      simplexml["EmptyNamespaceMatchesAll"].getBool(true);
   }
 #ifdef FACEBOOK
   {

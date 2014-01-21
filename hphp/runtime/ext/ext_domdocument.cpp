@@ -5831,7 +5831,7 @@ Variant f_dom_xpath_register_php_functions(CVarRef obj,
 Variant f_dom_import_simplexml(CObjRef node) {
 
   c_SimpleXMLElement *elem = node.getTyped<c_SimpleXMLElement>();
-  xmlNodePtr nodep = elem->m_node;
+  xmlNodePtr nodep = elem->node;
 
   if (nodep && (nodep->type == XML_ELEMENT_NODE ||
                 nodep->type == XML_ATTRIBUTE_NODE)) {

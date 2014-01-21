@@ -532,6 +532,9 @@ public:
   static int HHProfServerFilterMinAllocPerReq;
   static int HHProfServerFilterMinBytesPerReq;
 
+  // SimpleXML options
+  static bool SimpleXMLEmptyNamespaceMatchesAll;
+
 #ifdef FACEBOOK
   // fb303 server
   static bool EnableFb303Server;

@@ -65,6 +65,8 @@ struct CodeGenerator {
 
   const Func* curFunc() { return m_curInst->marker().func; }
 
+  void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc);
+
   CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
   CallDest callDest(SSATmp* dst) const;
   CallDest callDestTV(SSATmp* dst) const;
@@ -128,6 +130,8 @@ struct CodeGenerator {
   CodegenState&               m_state;
   IRInstruction*              m_curInst;
 };
+
+void patchJumps(CodeBlock& cb, CodegenState& state, Block* block);
 
 }}}
 

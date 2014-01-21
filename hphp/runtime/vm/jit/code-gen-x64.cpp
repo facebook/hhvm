@@ -6482,7 +6482,11 @@ void genCodeImpl(CodeBlock& mainCode,
 
     auto const aStart      = cb.frontier();
     auto const astubsStart = stubsCode.frontier();
-    patchJumps(cb, state, block);
+    if (arch() == Arch::ARM) {
+      ARM::patchJumps(cb, state, block);
+    } else {
+      patchJumps(cb, state, block);
+    }
     state.addresses[block] = aStart;
 
     // If the block ends with a Jmp and the next block is going to be

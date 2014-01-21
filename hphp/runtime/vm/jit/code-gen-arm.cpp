@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
+#include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
@@ -60,6 +61,7 @@ NOOP_OPCODE(DbgAssertRetAddr)
 #define CALL_OPCODE(name) \
   void CodeGenerator::cg##name(IRInstruction* i) { cgCallNative(m_as, i); }
 
+CALL_OPCODE(Box);
 CALL_OPCODE(ConvIntToStr)
 
 //////////////////////////////////////////////////////////////////////
@@ -81,7 +83,6 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
 
 PUNT_OPCODE(CheckType)
 PUNT_OPCODE(CheckTypeMem)
-PUNT_OPCODE(CheckStk)
 PUNT_OPCODE(CheckLoc)
 PUNT_OPCODE(CastStk)
 PUNT_OPCODE(CoerceStk)
@@ -229,7 +230,6 @@ PUNT_OPCODE(VectorDoCow)
 PUNT_OPCODE(CheckNonNull)
 PUNT_OPCODE(AssertNonNull)
 PUNT_OPCODE(Unbox)
-PUNT_OPCODE(Box)
 PUNT_OPCODE(UnboxPtr)
 PUNT_OPCODE(BoxPtr)
 PUNT_OPCODE(LdVectorBase)
@@ -310,7 +310,6 @@ PUNT_OPCODE(StMem)
 PUNT_OPCODE(StMemNT)
 PUNT_OPCODE(StProp)
 PUNT_OPCODE(StPropNT)
-PUNT_OPCODE(StLoc)
 PUNT_OPCODE(StLocNT)
 PUNT_OPCODE(StRef)
 PUNT_OPCODE(StRefNT)
@@ -477,6 +476,61 @@ PUNT_OPCODE(GenericIdx)
 PUNT_OPCODE(DbgAssertType)
 
 #undef PUNT_OPCODE
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::emitJumpToBlock(CodeBlock& cb,
+                                    Block* target,
+                                    ConditionCode cc) {
+  vixl::MacroAssembler as { cb };
+
+  if (auto addr = m_state.addresses[target]) {
+    not_implemented();
+    // Direct jumps are encoded as offsets in instructions, not bytes.
+    auto instrOffset = (cb.frontier() - addr) << vixl::kInstructionSizeLog2;
+    if (cc != CC_None && vixl::is_int19(instrOffset)) {
+      as.  b  (instrOffset, convertCC(cc));
+    } else if (cc == CC_None && vixl::is_int26(instrOffset)) {
+      as.  b  (instrOffset);
+    } else {
+      not_implemented();
+    }
+    return;
+  }
+
+  // The block hasn't been emitted yet. Record the location in CodegenState.
+  // CodegenState holds a map from Block* to the head of a linked list, where
+  // the jump instructions themselves are the list nodes.
+  auto next = reinterpret_cast<TCA>(m_state.patches[target]);
+  auto here = cb.frontier();
+
+  // This will never actually be executed as a jump to "next". It's just a
+  // pointer to the next jump instruction to retarget.
+  emitSmashableJump(cb, next, cc);
+  m_state.patches[target] = here;
+}
+
+void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
+  auto dest = cb.frontier();
+  auto jump = reinterpret_cast<TCA>(state.patches[block]);
+
+  while (jump) {
+    auto nextIfJmp = jmpTarget(jump);
+    auto nextIfJcc = jccTarget(jump);
+
+    // Exactly one of them must be non-nullptr
+    assert(!(nextIfJmp && nextIfJcc));
+    assert(nextIfJmp || nextIfJcc);
+
+    if (nextIfJmp) {
+      smashJmp(jump, dest);
+      jump = nextIfJmp;
+    } else {
+      smashJcc(jump, dest);
+      jump = nextIfJcc;
+    }
+  }
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1001,6 +1055,19 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
     });
 }
 
+void CodeGenerator::cgCheckStk(IRInstruction* inst) {
+  auto const rSP = x2a(curOpd(inst->src(0)).reg());
+  auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset);
+  emitTypeTest(
+    inst->typeParam(),
+    rSP[baseOff + TVOFF(m_type)],
+    rSP[baseOff + TVOFF(m_data)],
+    [&] (ConditionCode cc) {
+      emitJumpToBlock(m_tx64->code.main(), inst->taken(), ccNegate(cc));
+    }
+  );
+}
+
 void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
   auto const sp = x2a(curOpd(inst->src(0)).reg());
   auto const extra = inst->extra<SideExitGuardStk>();
@@ -1254,6 +1321,12 @@ void CodeGenerator::cgLdLoc(IRInstruction* inst) {
   auto baseReg = x2a(curOpd(inst->src(0)).reg());
   auto offset = localOffset(inst->extra<LdLoc>()->locId);
   emitLoad(inst->dst(), baseReg, offset);
+}
+
+void CodeGenerator::cgStLoc(IRInstruction* inst) {
+  auto baseReg = x2a(curOpd(inst->src(0)).reg());
+  auto offset = localOffset(inst->extra<StLoc>()->locId);
+  emitStore(baseReg, offset, inst->src(1), true /* store type */);
 }
 
 void CodeGenerator::cgLdStack(IRInstruction* inst) {

@@ -837,17 +837,21 @@ void emit_class(EmitUnitState& state,
     emit_finish_func(*m, *fe, info);
   }
 
-  auto const inferredProps = state.index.lookup_private_props(&cls);
+  auto const privateProps   = state.index.lookup_private_props(&cls);
+  auto const privateStatics = state.index.lookup_private_statics(&cls);
   for (auto& prop : cls.properties) {
-    auto it = inferredProps.find(prop.name);
+    auto const repoTy = [&] (const PropState& ps) {
+      auto it = ps.find(prop.name);
+      return it == end(ps) ? RepoAuthType{} : make_repo_type(ue, it->second);
+    };
+
     pce->addProperty(
       prop.name,
       prop.attrs,
       prop.typeConstraint,
       prop.docComment,
       &prop.val,
-      it != end(inferredProps)
-        ? make_repo_type(ue, it->second) : RepoAuthType{}
+      (prop.attrs & AttrStatic) ? repoTy(privateStatics) : repoTy(privateProps)
     );
   }
 

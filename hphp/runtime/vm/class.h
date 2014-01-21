@@ -464,6 +464,7 @@ struct Class : AtomicCountable {
     const StringData* m_docComment;
     Class* m_class; // Most derived class that declared this property.
     TypedValue m_val; // Used if (m_class == this).
+    RepoAuthType m_repoAuthType;
   };
 
   struct Const {
@@ -787,6 +788,11 @@ struct Class : AtomicCountable {
 
   RepoAuthType declPropRepoAuthType(Slot index) const {
     auto& prop = m_declProperties[index];
+    return prop.m_repoAuthType;
+  }
+
+  RepoAuthType staticPropRepoAuthType(Slot index) const {
+    auto& prop = m_staticProperties[index];
     return prop.m_repoAuthType;
   }
 

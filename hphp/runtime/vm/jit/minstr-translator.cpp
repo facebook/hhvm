@@ -827,7 +827,14 @@ void HhbcTranslator::MInstrTranslator::emitBaseS() {
   const int kClassIdx = m_ni.inputs.size() - 1;
   SSATmp* key = getKey();
   SSATmp* clsRef = getInput(kClassIdx, DataTypeGeneric /* will be a Cls */);
-  m_base = gen(LdClsPropAddr, makeCatch(), clsRef, key, CTX());
+
+  /*
+   * Note, the base may be a pointer to a boxed type after this.  We
+   * don't unbox here, because we never are going to generate a
+   * special translation unless we know it's not boxed, and the C++
+   * helpers for generic dims currently always conditionally unbox.
+   */
+  m_base = m_ht.ldClsPropAddr(makeCatch(), clsRef, key);
 }
 
 void HhbcTranslator::MInstrTranslator::emitBaseOp() {

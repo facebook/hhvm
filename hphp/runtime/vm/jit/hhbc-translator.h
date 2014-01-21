@@ -20,6 +20,7 @@
 #include <vector>
 #include <memory>
 #include <stack>
+#include <utility>
 
 #include "folly/Optional.h"
 
@@ -691,8 +692,6 @@ private:
   void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Block* exit);
   void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
                             bool& checkForInt);
-  SSATmp* emitLdClsPropAddrCached(const StringData* propName,
-                                  Block* block);
   Type assertObjType(const StringData*);
 
   /*
@@ -709,10 +708,7 @@ private:
   void emitEmpty(uint32_t stackOff, EmitLdAddrFn);
   SSATmp* emitLdGblAddr(Block* block, SSATmp* name);
   SSATmp* emitLdGblAddrDef(Block* block, SSATmp* name);
-  SSATmp* emitLdClsPropAddr(SSATmp* name) {
-    return emitLdClsPropAddrOrExit(nullptr, name);
-  }
-  SSATmp* emitLdClsPropAddrOrExit(Block* block, SSATmp* name);
+  SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls, SSATmp* name);
 
   void emitUnboxRAux();
   void emitAGet(SSATmp* src, Block* catchBlock);

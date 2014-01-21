@@ -1634,7 +1634,7 @@ void Class::setProperties() {
     }
   }
 
-  assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate);
+  static_assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate, "");
   for (Slot slot = 0; slot < m_preClass->numProperties(); ++slot) {
     const PreClass::Prop* preProp = &m_preClass->properties()[slot];
 
@@ -1765,7 +1765,7 @@ void Class::setProperties() {
       }
     } else { // Static property.
       // Prohibit non-static-->static redeclaration.
-      PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
+      auto const it2 = curPropMap.find(preProp->name());
       if (it2 != curPropMap.end()) {
         // Find class that declared non-static property.
         Class* ancestor;
@@ -1780,7 +1780,7 @@ void Class::setProperties() {
                     preProp->name()->data());
       }
       // Get parent's equivalent property, if one exists.
-      SPropMap::Builder::iterator it3 = curSPropMap.find(preProp->name());
+      auto const it3 = curSPropMap.find(preProp->name());
       Slot sPropInd = kInvalidSlot;
       // Prohibit strengthening.
       if (it3 != curSPropMap.end()) {
@@ -1802,13 +1802,14 @@ void Class::setProperties() {
         sPropInd = curSPropMap.size();
         curSPropMap.add(sProp.m_name, sProp);
       }
-      SProp& sProp = curSPropMap[sPropInd];
       // Finish initializing.
-      sProp.m_attrs = preProp->attrs();
+      auto& sProp = curSPropMap[sPropInd];
+      sProp.m_attrs          = preProp->attrs();
       sProp.m_typeConstraint = preProp->typeConstraint();
-      sProp.m_docComment = preProp->docComment();
-      sProp.m_class = this;
-      sProp.m_val = m_preClass->lookupProp(preProp->name())->val();
+      sProp.m_docComment     = preProp->docComment();
+      sProp.m_class          = this;
+      sProp.m_val            = m_preClass->lookupProp(preProp->name())->val();
+      sProp.m_repoAuthType   = preProp->repoAuthType();
     }
   }
 

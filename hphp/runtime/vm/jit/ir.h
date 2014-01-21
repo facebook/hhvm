@@ -431,7 +431,7 @@ O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                C|PRc) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),     B|C|E|N|Er) \
-O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),  B|C|E|N|Er) \
+O(LdClsPropAddrCached,          DParam, S(Cls) CStr CStr C(Cls),  B|C|E|N|Er) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),        E|N|Er) \
 O(LdObjInvoke,                 D(Func), S(Cls),                            B) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                          E|N) \

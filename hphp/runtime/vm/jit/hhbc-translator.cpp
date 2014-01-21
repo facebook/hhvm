@@ -920,18 +920,6 @@ SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
   return res;
 }
 
-void HhbcTranslator::emitIncDecMem(bool pre,
-                                   bool inc,
-                                   SSATmp* propAddr,
-                                   Block* exit) {
-  // Handle only integer inc/dec for now
-  SSATmp* src = gen(LdMem, Type::Int, exit, propAddr, cns(0));
-  // do the add and store back
-  SSATmp* res = emitIncDec(pre, inc, src);
-  // don't gen a dec ref or type store
-  gen(StMemNT, propAddr, cns(0), res);
-}
-
 static bool areBinaryArithTypesSupported(Opcode opc, Type t1, Type t2) {
   switch (opc) {
   case Add:
@@ -1840,15 +1828,6 @@ void HhbcTranslator::emitIncProfCounter(TransID transId) {
 
 void HhbcTranslator::emitCheckCold(TransID transId) {
   m_tb->gen(CheckCold, makeExitOpt(transId), TransIDData(transId));
-}
-
-void HhbcTranslator::emitIncDecS(bool pre, bool inc) {
-  auto exit = makeExitSlow();
-
-  auto name = checkSupportedName(0);
-  auto ptr = emitLdClsPropAddr(name);
-  destroyName(name);
-  emitIncDecMem(pre, inc, ptr, exit);
 }
 
 void HhbcTranslator::emitMInstr(const NormalizedInstruction& ni) {

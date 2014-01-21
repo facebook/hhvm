@@ -237,11 +237,9 @@ struct HhbcTranslator {
   // The subOpc param can be one of either
   // Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor
   void emitSetOpL(Opcode subOpc, uint32_t id);
-  void emitSetOpS(Opcode subOpc);
   // the pre & inc params encode the 4 possible sub opcodes:
   // PreInc, PostInc, PreDec, PostDec
   void emitIncDecL(bool pre, bool inc, uint32_t id);
-  void emitIncDecS(bool pre, bool inc);
   void emitPopA();
   void emitPopC();
   void emitPopV();

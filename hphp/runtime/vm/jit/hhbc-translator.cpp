@@ -2594,11 +2594,11 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
 
   if (!func) {
     if (baseClass && !(baseClass->attrs() & AttrInterface)) {
-      MethodLookup::LookupResult res =
+      LookupResult res =
         g_vmContext->lookupObjMethod(func, baseClass, methodName, curClass(),
                                      false);
-      if ((res == MethodLookup::LookupResult::MethodFoundWithThis ||
-           res == MethodLookup::LookupResult::MethodFoundNoThis) &&
+      if ((res == LookupResult::MethodFoundWithThis ||
+           res == LookupResult::MethodFoundNoThis) &&
           !func->isAbstract()) {
         /*
          * If we found the func in baseClass, then either:
@@ -2616,7 +2616,7 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
           SSATmp* funcTmp = gen(
             LdClsMethod, clsTmp, cns(func->methodSlot())
           );
-          if (res == MethodLookup::LookupResult::MethodFoundNoThis) {
+          if (res == LookupResult::MethodFoundNoThis) {
             gen(DecRef, obj);
             objOrCls = clsTmp;
           }
@@ -2774,7 +2774,6 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
      * generated code for this case is pretty different, since we
      * don't need the pre-live ActRec trick.
      */
-    using namespace MethodLookup;
     auto const cls = curClass();
     const Func* func;
     auto res =

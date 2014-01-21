@@ -3696,9 +3696,9 @@ const Func* loadClassCtor(Class* cls) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
     VMRegAnchor _;
-    UNUSED MethodLookup::LookupResult res =
+    UNUSED LookupResult res =
       g_vmContext->lookupCtorMethod(f, cls, true /*raise*/);
-    assert(res == MethodLookup::LookupResult::MethodFoundWithThis);
+    assert(res == LookupResult::MethodFoundWithThis);
   }
   return f;
 }

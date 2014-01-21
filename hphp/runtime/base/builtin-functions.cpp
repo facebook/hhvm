@@ -45,8 +45,6 @@
 
 #include <limits>
 
-using namespace HPHP::MethodLookup;
-
 namespace HPHP {
 
 using std::string;

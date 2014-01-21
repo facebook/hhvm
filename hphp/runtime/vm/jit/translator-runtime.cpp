@@ -533,7 +533,6 @@ void lookupClsMethodHelper(Class* cls,
                            ActRec* ar,
                            ActRec* fp) {
   try {
-    using namespace MethodLookup;
     const Func* f;
     ObjectData* obj = fp->hasThis() ? fp->getThis() : nullptr;
     Class* ctx = fp->m_func->cls();
@@ -734,7 +733,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
       inst->getVMClass(),
       elem1->m_data.pstr,
       fp->m_func->cls(),
-      MethodLookup::CallType::ObjMethod
+      CallType::ObjMethod
     );
     if (UNLIKELY(!func || (func->attrs() & AttrStatic))) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);

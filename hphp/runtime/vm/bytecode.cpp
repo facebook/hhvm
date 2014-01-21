@@ -895,7 +895,6 @@ __thread VarEnvArenaStorage s_varEnvArenaStorage;
 // ExecutionContext.
 
 using namespace HPHP;
-using namespace HPHP::MethodLookup;
 
 ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
   ActRec* prevFrame = (ActRec*)ar->m_savedRbp;

@@ -56,7 +56,7 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
 
   using namespace vixl;
   auto fixupAddr = a.frontier();
-  a.   HostCall(5);
+  a.   HostCall(6);
 
   // Note that the fixup address for a HostCall is directly *before* the
   // HostCall, not after as in the native case. This is because, in simulation

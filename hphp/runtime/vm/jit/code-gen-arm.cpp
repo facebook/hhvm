@@ -92,7 +92,6 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
 #define CG_PUNT(instr) \
     cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff, curFunc())
 
-PUNT_OPCODE(CheckType)
 PUNT_OPCODE(CheckTypeMem)
 PUNT_OPCODE(CheckLoc)
 PUNT_OPCODE(CastStk)
@@ -310,7 +309,6 @@ PUNT_OPCODE(Clone)
 PUNT_OPCODE(FreeActRec)
 PUNT_OPCODE(Call)
 PUNT_OPCODE(CallArray)
-PUNT_OPCODE(CallBuiltin)
 PUNT_OPCODE(NativeImpl)
 PUNT_OPCODE(RetCtrl)
 PUNT_OPCODE(StRetVal)
@@ -329,7 +327,6 @@ PUNT_OPCODE(LdStaticLocCached)
 PUNT_OPCODE(CheckStaticLocInit)
 PUNT_OPCODE(ClosureStaticLocInit)
 PUNT_OPCODE(StaticLocInitCached)
-PUNT_OPCODE(SpillFrame)
 PUNT_OPCODE(CufIterSpillFrame)
 PUNT_OPCODE(ReqRetranslateOpt)
 PUNT_OPCODE(ReqRetranslate)
@@ -477,23 +474,15 @@ PUNT_OPCODE(DbgAssertType)
 
 //////////////////////////////////////////////////////////////////////
 
+static TCA kEndOfTargetChain = reinterpret_cast<TCA>(0xf00ffeeffaaff11f);
+
 void CodeGenerator::emitJumpToBlock(CodeBlock& cb,
                                     Block* target,
                                     ConditionCode cc) {
   vixl::MacroAssembler as { cb };
 
-  if (auto addr = m_state.addresses[target]) {
+  if (m_state.addresses[target]) {
     not_implemented();
-    // Direct jumps are encoded as offsets in instructions, not bytes.
-    auto instrOffset = (cb.frontier() - addr) << vixl::kInstructionSizeLog2;
-    if (cc != CC_None && vixl::is_int19(instrOffset)) {
-      as.  b  (instrOffset, convertCC(cc));
-    } else if (cc == CC_None && vixl::is_int26(instrOffset)) {
-      as.  b  (instrOffset);
-    } else {
-      not_implemented();
-    }
-    return;
   }
 
   // The block hasn't been emitted yet. Record the location in CodegenState.
@@ -501,6 +490,11 @@ void CodeGenerator::emitJumpToBlock(CodeBlock& cb,
   // the jump instructions themselves are the list nodes.
   auto next = reinterpret_cast<TCA>(m_state.patches[target]);
   auto here = cb.frontier();
+
+  // To avoid encoding 0x0 as the jump target. That would conflict with the use
+  // of nullptr as a sentinel return value from jmpTarget() and jccTarget().
+  // Consider switching those to use folly::Optional or something?
+  if (!next) next = kEndOfTargetChain;
 
   // This will never actually be executed as a jump to "next". It's just a
   // pointer to the next jump instruction to retarget.
@@ -512,7 +506,7 @@ void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
   auto dest = cb.frontier();
   auto jump = reinterpret_cast<TCA>(state.patches[block]);
 
-  while (jump) {
+  while (jump && jump != kEndOfTargetChain) {
     auto nextIfJmp = jmpTarget(jump);
     auto nextIfJcc = jccTarget(jump);
 
@@ -975,54 +969,65 @@ CallDest CodeGenerator::callDest2(SSATmp* ssa) const {
 
 //////////////////////////////////////////////////////////////////////
 
+static vixl::Register enregister(vixl::MacroAssembler& a,
+                                 vixl::MemOperand memRef,
+                                 vixl::Register scratch) {
+  a.  Ldr  (scratch, memRef);
+  return scratch;
+}
+
+static vixl::Register enregister(vixl::MacroAssembler& a,
+                                 vixl::Register reg,
+                                 vixl::Register scratch) {
+  return reg;
+}
+
 template<class Loc, class JmpFn>
-void CodeGenerator::emitTypeTest(Type type, Loc typeSrc, Loc dataSrc,
+void CodeGenerator::emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
                                  JmpFn doJcc) {
   assert(!(type <= Type::Cls));
+  assert(typeReg.Is32Bits());
 
   if (type.equals(Type::Gen)) {
     return;
   }
-
-  // You can't compare against memory. Load the type into scratch.
-  m_as.     Ldrb  (rAsm.W(), typeSrc);
 
   ConditionCode cc;
   if (type.isString()) {
     // Note: ARM can actually do better here; it has a fused test-and-branch
     // instruction. The way this code is factored makes it difficult to use,
     // though; the jump instruction will be written by some other code.
-    m_as.   Tst   (rAsm.W(), KindOfStringBit);
+    m_as.   Tst   (typeReg, KindOfStringBit);
     cc = CC_NE;
   } else if (type.equals(Type::UncountedInit)) {
-    m_as.   Tst   (rAsm.W(), KindOfUncountedInitBit);
+    m_as.   Tst   (typeReg, KindOfUncountedInitBit);
     cc = CC_NE;
   } else if (type.equals(Type::Uncounted)) {
-    m_as.   Cmp   (rAsm.W(), KindOfRefCountThreshold);
+    m_as.   Cmp   (typeReg, KindOfRefCountThreshold);
     cc = CC_LE;
   } else if (type.equals(Type::Cell)) {
-    m_as.   Cmp   (rAsm.W(), KindOfRef);
+    m_as.   Cmp   (typeReg, KindOfRef);
     cc = CC_L;
   } else {
     assert(type.isKnownDataType());
     DataType dataType = type.toDataType();
     assert(dataType == KindOfRef ||
            (dataType >= KindOfUninit && dataType <= KindOfResource));
-    m_as.   Cmp   (rAsm.W(), dataType);
+    m_as.   Cmp   (typeReg, dataType);
     cc = CC_E;
   }
   doJcc(cc);
   if (type < Type::Obj) {
     assert(type.getClass()->attrs() & AttrFinal);
-    m_as.   Ldr   (rAsm, dataSrc);
-    m_as.   Ldr   (rAsm, rAsm[ObjectData::getVMClassOffset()]);
+    auto dataReg = enregister(m_as, dataSrc, rAsm);
+    m_as.   Ldr   (rAsm, dataReg[ObjectData::getVMClassOffset()]);
     m_as.   Cmp   (rAsm, reinterpret_cast<int64_t>(type.getClass()));
     doJcc(CC_E);
   } else if (type < Type::Res) {
     CG_PUNT(TypeTest-on-Resource);
   } else if (type <= Type::Arr && type.hasArrayKind()) {
-    m_as.   Ldr   (rAsm, dataSrc);
-    m_as.   Ldrb  (rAsm.W(), rAsm[ArrayData::offsetofKind()]);
+    auto dataReg = enregister(m_as, dataSrc, rAsm);
+    m_as.   Ldrb  (rAsm.W(), dataReg[ArrayData::offsetofKind()]);
     m_as.   Cmp   (rAsm.W(), type.getArrayKind());
     doJcc(CC_E);
   }
@@ -1031,9 +1036,10 @@ void CodeGenerator::emitTypeTest(Type type, Loc typeSrc, Loc dataSrc,
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
   auto const rFP = x2a(curOpd(inst->src(0)).reg());
   auto const baseOff = localOffset(inst->extra<GuardLoc>()->locId);
+  m_as.  Ldrb  (rAsm.W(), rFP[baseOff + TVOFF(m_type)]);
   emitTypeTest(
     inst->typeParam(),
-    rFP[baseOff + TVOFF(m_type)],
+    rAsm.W(),
     rFP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
@@ -1045,9 +1051,10 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
   auto const rSP = x2a(curOpd(inst->src(0)).reg());
   auto const baseOff = cellsToBytes(inst->extra<GuardStk>()->offset);
+  m_as.  Ldrb  (rAsm.W(), rSP[baseOff + TVOFF(m_type)]);
   emitTypeTest(
     inst->typeParam(),
-    rSP[baseOff + TVOFF(m_type)],
+    rAsm.W(),
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
@@ -1059,9 +1066,10 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
 void CodeGenerator::cgCheckStk(IRInstruction* inst) {
   auto const rSP = x2a(curOpd(inst->src(0)).reg());
   auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset);
+  m_as.  Ldrb  (rAsm.W(), rSP[baseOff + TVOFF(m_type)]);
   emitTypeTest(
     inst->typeParam(),
-    rSP[baseOff + TVOFF(m_type)],
+    rAsm.W(),
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       emitJumpToBlock(m_tx64->code.main(), inst->taken(), ccNegate(cc));
@@ -1069,13 +1077,52 @@ void CodeGenerator::cgCheckStk(IRInstruction* inst) {
   );
 }
 
+void CodeGenerator::cgCheckType(IRInstruction* inst) {
+  auto const src   = inst->src(0);
+  auto const rVal  = x2a(curOpd(src).reg(0));
+  auto const rType = x2a(curOpd(src).reg(1));
+
+  auto doMov = [&] {
+    auto const valDst = x2a(curOpd(inst->dst()).reg(0));
+    auto const typeDst = x2a(curOpd(inst->dst()).reg(1));
+    if (valDst.IsValid() && !valDst.Is(rVal)) m_as.Mov(valDst, rVal);
+    if (typeDst.IsValid() && !typeDst.Is(rType)) m_as.Mov(typeDst, rType);
+  };
+
+  auto doJcc = [&] (ConditionCode cc) {
+    emitJumpToBlock(m_tx64->code.main(), inst->taken(), ccNegate(cc));
+  };
+
+  Type typeParam = inst->typeParam();
+  if (src->isA(typeParam)) {
+    doMov();
+    return;
+  }
+  if (src->type().not(typeParam)) {
+    emitJumpToBlock(m_tx64->code.main(), inst->taken(), CC_None);
+    return;
+  }
+
+  if (rType.IsValid()) {
+    emitTypeTest(typeParam, rType.W(), rVal, doJcc);
+  } else {
+    if (src->type().isBoxed() && typeParam.isBoxed()) {
+      // nothing
+    } else {
+      CG_PUNT(CheckType-known-SrcType);
+    }
+  }
+  doMov();
+}
+
 void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
   auto const sp = x2a(curOpd(inst->src(0)).reg());
   auto const extra = inst->extra<SideExitGuardStk>();
 
+  m_as.  Ldrb  (rAsm.W(), sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_type)]);
   emitTypeTest(
     inst->typeParam(),
-    sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_type)],
+    rAsm.W(),
     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), extra->taken);
@@ -1213,6 +1260,177 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   );
 }
 
+void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
+  auto const sp       = inst->src(0);
+  auto const fp       = inst->src(1);
+  auto const func     = inst->src(2);
+  auto const objOrCls = inst->src(3);
+  auto const invName  = inst->extra<SpillFrame>()->invName;
+  auto const nArgs    = inst->extra<SpillFrame>()->numArgs;
+
+  auto spOff = -kNumActRecCells * sizeof(Cell);
+  auto spReg = x2a(curOpd(sp).reg());
+
+  // Saved rbp.
+  m_as.    Str  (x2a(curOpd(fp).reg()), spReg[spOff + AROFF(m_savedRbp)]);
+
+  // Num args. Careful here: nArgs is 32 bits and the high bit may be set. Mov's
+  // immediate argument is intptr_t, and the implicit int32->intptr conversion
+  // will sign-extend, which isn't what we want.
+  m_as.    Mov  (rAsm.W(), (uint32_t)nArgs);
+  m_as.    Str  (rAsm.W(), spReg[spOff + AROFF(m_numArgsAndCtorFlag)]);
+
+  // Magic-call name.
+  if (invName) {
+    auto bits = reinterpret_cast<uintptr_t>(invName) | ActRec::kInvNameBit;
+    m_as.  Mov  (rAsm, bits);
+    m_as.  Str  (rAsm, spReg[spOff + AROFF(m_invName)]);
+  } else {
+    m_as.  Str  (vixl::xzr, spReg[spOff + AROFF(m_invName)]);
+  }
+
+  // Func and this/class are slightly tricky. The func may be a tuple of a Func*
+  // and context.
+  DEBUG_ONLY bool setThis = true;
+
+  if (objOrCls->isA(Type::Cls)) {
+    if (objOrCls->isConst()) {
+      m_as.Mov  (rAsm, uintptr_t(objOrCls->getValClass()) | 1);
+      m_as.Str  (rAsm, spReg[spOff + AROFF(m_this)]);
+    } else {
+      auto clsReg = x2a(curOpd(objOrCls).reg());
+      m_as.Orr  (rAsm, clsReg, 1);
+      m_as.Str  (rAsm, spReg[spOff + AROFF(m_this)]);
+    }
+  } else if (objOrCls->isA(Type::Obj) || objOrCls->isA(Type::Ctx)) {
+    auto objReg = x2a(curOpd(objOrCls).reg());
+    m_as.  Str  (objReg, spReg[spOff + AROFF(m_this)]);
+  } else {
+    assert(objOrCls->isA(Type::InitNull));
+    if (!func->isConst() && func->isA(Type::FuncCtx)) {
+      setThis = false;
+    } else {
+      m_as.Str  (vixl::xzr, spReg[spOff + AROFF(m_this)]);
+    }
+  }
+
+  // Now set func, and possibly this/cls
+  if (func->type().isNull()) {
+    // Do nothing
+    assert(func->isConst());
+  } else if (func->isConst()) {
+    if (func->isA(Type::FuncCtx)) {
+      // x64 punts on this too
+      CG_PUNT(cgSpillFrame_ConstFuncCtx);
+    }
+    m_as.  Mov  (rAsm, func->getValFunc());
+    m_as.  Str  (rAsm, spReg[spOff + AROFF(m_func)]);
+  } else {
+    auto reg0 = x2a(curOpd(func).reg(0));
+    m_as.  Str  (reg0, spReg[spOff + AROFF(m_func)]);
+    if (func->isA(Type::FuncCtx)) {
+      auto reg1 = x2a(curOpd(func).reg(1));
+      m_as.Str  (reg1, spReg[spOff + AROFF(m_cls)]);
+      setThis = true;
+    }
+  }
+
+  assert(setThis);
+
+  // Adjust stack pointer
+  emitRegGetsRegPlusImm(m_as, x2a(curOpd(inst->dst()).reg()), spReg, spOff);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
+  auto func = inst->src(0)->getValFunc();
+  auto args = inst->srcs().subpiece(2);
+  auto numArgs = args.size();
+  auto dst  = inst->dst();
+
+  DataType funcReturnType = func->returnType();
+  ptrdiff_t returnOffset = MISOFF(tvBuiltinReturn);
+
+  if (FixupMap::eagerRecord(func)) {
+    // Save VM registers
+    auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff;
+    m_as.Str  (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
+    m_as.Str  (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+                                   Stack::topOfStackOffset()]);
+    m_as.Mov  (rAsm, pc);
+    m_as.Str  (rAsm, rGContextReg[offsetof(VMExecutionContext, m_pc)]);
+  }
+
+  // The stack pointer currently points to the MInstrState we need to use.
+  auto misReg = rAsm;
+  m_as.  Mov  (rAsm, vixl::sp);
+
+  ArgGroup callArgs(curOpds());
+  if (isCppByRef(funcReturnType)) {
+    if (isSmartPtrRef(funcReturnType)) {
+      // first arg is pointer to storage for the return value
+      returnOffset += TVOFF(m_data);
+    }
+    callArgs.addr(misReg, returnOffset);
+  }
+
+  for (int i = 0; i < numArgs; ++i) {
+    auto const& pi = func->params()[i];
+    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType())) {
+      callArgs.addr(curOpd(args[i]).reg(), TVOFF(m_data));
+    } else {
+      callArgs.ssa(args[i]);
+    }
+  }
+
+  misReg = vixl::sp;
+
+  auto dstReg = x2a(curOpd(dst).reg(0));
+  auto dstTypeReg = x2a(curOpd(dst).reg(1));
+
+  cgCallHelper(m_as,
+               CppCall((TCA)func->nativeFuncPtr()),
+               isCppByRef(funcReturnType) ? kVoidDest : callDest(dstReg),
+               SyncOptions::kSyncPoint,
+               callArgs);
+
+  auto returnType = inst->typeParam();
+  if (!dstReg.IsValid() || returnType.isSimpleType()) {
+    return;
+  }
+
+  if (returnType.isReferenceType()) {
+    assert(isCppByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
+    vixl::Label notNullptr;
+    vixl::Label done;
+    m_as.  Ldr  (dstReg, misReg[returnOffset + TVOFF(m_data)]);
+    m_as.  Cbnz (dstReg, &notNullptr);
+    m_as.  Mov  (dstTypeReg, KindOfNull);
+    m_as.  B    (&done);
+    m_as.  bind (&notNullptr);
+    m_as.  Mov  (dstTypeReg, returnType.toDataType());
+    m_as.  bind (&done);
+    return;
+  }
+
+  if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
+    assert(isCppByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
+    vixl::Label notUninit;
+    vixl::Label done;
+    m_as.  Ldrb (dstTypeReg.W(), misReg[returnOffset + TVOFF(m_type)]);
+    m_as.  Cbnz (dstTypeReg, &notUninit);
+    m_as.  Mov  (dstTypeReg, KindOfNull);
+    m_as.  B    (&done);
+    m_as.  bind (&notUninit);
+    m_as.  Ldr  (dstReg, misReg[returnOffset + TVOFF(m_data)]);
+    m_as.  bind (&done);
+    return;
+  }
+
+  always_assert(false);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
@@ -1314,6 +1532,10 @@ void CodeGenerator::emitStore(vixl::Register base,
     m_as.    Mov  (rAsm, val);
     m_as.    Str  (rAsm, base[offset + TVOFF(m_data)]);
   } else {
+    auto reg = x2a(curOpd(src).reg());
+    if (src->isA(Type::Bool)) {
+      m_as.  Uxtb (reg.W(), reg.W());
+    }
     m_as.    Str  (x2a(curOpd(src).reg()), base[offset + TVOFF(m_data)]);
   }
 }

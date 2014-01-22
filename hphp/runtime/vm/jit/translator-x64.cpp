@@ -1169,6 +1169,12 @@ TranslatorX64::enterTC(TCA start, void* data) {
       sim.   set_xreg(JIT::ARM::rVmTl.code(), RDS::tl_base);
       sim.   set_xreg(JIT::ARM::rStashedAR.code(), info.saved_rStashedAr);
 
+      // Leave space for register spilling and MInstrState.
+      sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
+      assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
+
+      DEBUG_ONLY auto spOnEntry = sim.sp();
+
       // Push the link register onto the stack. The link register is technically
       // caller-saved; what this means in practice is that non-leaf functions
       // push it at the very beginning and pop it just before returning (as
@@ -1179,6 +1185,8 @@ TranslatorX64::enterTC(TCA start, void* data) {
       std::cout.flush();
       sim.RunFrom(vixl::Instruction::Cast(start));
       std::cout.flush();
+
+      assert(sim.sp() == spOnEntry);
 
       info.requestNum = sim.xreg(0);
       info.args[0] = sim.xreg(1);

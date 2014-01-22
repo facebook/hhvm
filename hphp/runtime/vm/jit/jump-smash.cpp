@@ -280,7 +280,7 @@ JIT::TCA jccTarget(JIT::TCA jmp) {
     Instruction* br = Instruction::Cast(jmp + 8);
     if (br->Bits(31, 10) != 0x3587C0 || br->Bits(4, 0) != 0) return nullptr;
 
-    uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 8);
+    uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 12);
     if ((dest & 7) != 0) {
       dest += 4;
       assert((dest & 7) == 0);

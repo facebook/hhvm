@@ -29,7 +29,7 @@ class IRUnit;
 // This value must be consistent with the number of pre-allocated
 // bytes for spill locations in __enterTCHelper in translator-x64.cpp.
 // Be careful when changing this value.
-const size_t NumPreAllocatedSpillLocs = X64::kReservedRSPSpillSpace /
+const size_t NumPreAllocatedSpillLocs = kReservedRSPSpillSpace /
                                         sizeof(uint64_t);
 
 struct RegAllocInfo {

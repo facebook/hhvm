@@ -35,7 +35,7 @@ namespace JIT{
 
 using namespace JIT::reg;
 
-static_assert(X64::kReservedRSPSpillSpace ==
+static_assert(kReservedRSPSpillSpace ==
               NumPreAllocatedSpillLocs * sizeof(void*),
               "kReservedRSPSpillSpace changes require updates in "
               "LinearScan");

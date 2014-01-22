@@ -90,7 +90,8 @@ struct CodeGenerator {
   void emitDecRefMem(Type type, vixl::Register baseReg, ptrdiff_t offset);
 
   template<class Loc, class JmpFn>
-  void emitTypeTest(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);
+  void emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
+                    JmpFn doJcc);
 
   void emitLoadTypedValue(SSATmp* dst, vixl::Register base, ptrdiff_t offset,
                           Block* label);

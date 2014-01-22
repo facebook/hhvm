@@ -206,17 +206,6 @@ const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
 #define AROFF(nm) offsetof(ActRec, nm)
 #define CONTOFF(nm) offsetof(c_Continuation, nm)
 
-/* MInstrState is stored right above the reserved spill space on the C++
- * stack. */
-#define MISOFF(nm)                                         \
-  (offsetof(JIT::MInstrState, nm) + X64::kReservedRSPSpillSpace)
-
-//////////////////////////////////////////////////////////////////////
-
-const size_t kReservedRSPMInstrStateSpace = RESERVED_STACK_MINSTR_STATE_SPACE;
-const size_t kReservedRSPSpillSpace       = RESERVED_STACK_SPILL_SPACE;
-const size_t kReservedRSPTotalSpace       = RESERVED_STACK_TOTAL_SPACE;
-
 //////////////////////////////////////////////////////////////////////
 
 }}}

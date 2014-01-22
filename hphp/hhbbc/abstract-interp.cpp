@@ -292,9 +292,6 @@ struct StepFlags {
    * computing the value which was pushed.  This means the instruction
    * can be replaced with pops of its inputs followed by a push of the
    * constant.
-   *
-   * TODO_3: canConstProp should imply it can't throw when it is
-   * actually a constant.
    */
   bool canConstProp = false;
 
@@ -3223,10 +3220,23 @@ private:
     // Make a copy of the state (except stacks) in case we need to
     // propagate across factored exits (if it's a PEI).
     auto const stateBefore = without_stacks(m_state);
+    auto const numPushed   = iter->numPush();
     interpStep(stepper, iter, stop);
     if (flags.wasPEI) {
-      FTRACE(2, "   PEI.\n");
-      propagateThrow(stateBefore);
+      auto outputs_constant = [&] {
+        auto const size = m_state.stack.size();
+        for (auto i = size_t{0}; i < numPushed; ++i) {
+          if (!tv(m_state.stack[size - i - 1])) return false;
+        }
+        return true;
+      };
+
+      if (flags.canConstProp && outputs_constant()) {
+        FTRACE(2, "   nothrow (due to constprop)\n");
+      } else {
+        FTRACE(2, "   PEI.\n");
+        propagateThrow(stateBefore);
+      }
     }
     return flags;
   }

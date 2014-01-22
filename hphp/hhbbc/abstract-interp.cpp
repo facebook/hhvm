@@ -1697,12 +1697,13 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::DefCns&)       { popC(); push(TBool); }
   void operator()(const bc::DefTypeAlias&) {}
 
-  // TODO_5: can we propagate our object type if unique?
   void operator()(const bc::This&) {
     if (thisAvailable()) {
-      return reduce(bc::BareThis {BareThisOp::NeverNull});
+      return reduce(bc::BareThis { BareThisOp::NeverNull });
     }
-    pushThis(TObj);
+    auto const ty = thisType();
+    push(ty ? *ty : TObj);
+    setThisAvailable();
   }
 
   // TODO_5: can we propagate our class type if unique?
@@ -1718,17 +1719,24 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::BareThis& op) {
     if (thisAvailable()) {
       if (op.subop != BareThisOp::NeverNull) {
-        return reduce(bc::BareThis {BareThisOp::NeverNull});
+        return reduce(bc::BareThis { BareThisOp::NeverNull });
       }
     }
+
+    auto const ty = thisType();
     switch (op.subop) {
-    case BareThisOp::Notice:    break;
-    case BareThisOp::NoNotice:  nothrow(); break;
+    case BareThisOp::Notice:
+      break;
+    case BareThisOp::NoNotice:
+      nothrow();
+      break;
     case BareThisOp::NeverNull:
       nothrow();
-      return pushThis(TObj);
+      setThisAvailable();
+      return push(ty ? *ty : TObj);
     }
-    push(TOptObj);
+
+    push(ty ? opt(*ty) : TOptObj);
   }
 
   void operator()(const bc::InitThisLoc& op) {
@@ -2127,7 +2135,10 @@ private: // member instructions
                       BaseLoc::EvalStack };
       }
     case LH:
-      return Base { TObj /* TODO(#3430315) */, BaseLoc::FrameThis };
+      {
+        auto const ty = thisType();
+        return Base { ty ? *ty : TObj, BaseLoc::FrameThis };
+      }
     case LGL:
       return folly::none;
     case LGC:
@@ -2889,11 +2900,6 @@ private: // locals
   }
 
 private: // $this
-  void pushThis(Type t) {
-    push(t);
-    setThisAvailable();
-  }
-
   void setThisAvailable() {
     FTRACE(2, "    setThisAvailable\n");
     m_state.thisAvailable = true;
@@ -2901,8 +2907,13 @@ private: // $this
 
   bool thisAvailable() const { return m_state.thisAvailable; }
 
+  // Returns the type $this would have if it's not null.  Generally
+  // you have to check thisIsAvailable() before assuming it can't be
+  // null.
   folly::Optional<Type> thisType() const {
     if (!m_ctx.cls) return folly::none;
+    // TODO(#3584175): we should be able to push a real type for closures
+    if (m_ctx.func->isClosureBody) return folly::none;
     if (auto const rcls = m_index.resolve_class(m_ctx, m_ctx.cls->name)) {
       return subObj(*rcls);
     }
@@ -2911,6 +2922,8 @@ private: // $this
 
   folly::Optional<Type> selfCls() const {
     if (!m_ctx.cls) return folly::none;
+    // TODO(#3584175): we should be able to push a real type for closures
+    if (m_ctx.func->isClosureBody) return folly::none;
     if (auto const rcls = m_index.resolve_class(m_ctx, m_ctx.cls->name)) {
       return subCls(*rcls);
     }

@@ -32,18 +32,6 @@ public:
   // Compositions.
 
   /**
-   * Create an array using the elements of the first parameter as keys
-   * each initialized to value.
-   */
-  static Variant CreateArray(CArrRef keys, CVarRef value);
-
-  /**
-   * Create an array containing num elements starting with index start_key
-   * each initialized to value.
-   */
-  static Variant CreateArray(int start_index, int num, CVarRef value);
-
-  /**
    * Split array into chunks.
    */
   static Variant Chunk(CArrRef input, int size, bool preserve_keys = false);

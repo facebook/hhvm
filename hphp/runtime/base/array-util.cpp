@@ -29,28 +29,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // compositions
 
-Variant ArrayUtil::CreateArray(CArrRef keys, CVarRef value) {
-  ArrayInit ai(keys.size());
-  for (ArrayIter iter(keys); iter; ++iter) {
-    ai.set(iter.secondRef(), value);
-  }
-  return ai.create();
-}
-
-Variant ArrayUtil::CreateArray(int start_index, int num, CVarRef value) {
-  if (num <= 0) {
-    throw_invalid_argument("num: [non-positive]");
-    return false;
-  }
-
-  Array ret;
-  ret.set(start_index, value);
-  for (int i = num - 1; i > 0; i--) {
-    ret.append(value);
-  }
-  return ret;
-}
-
 Variant ArrayUtil::Chunk(CArrRef input, int size,
                          bool preserve_keys /* = false */) {
   if (size < 1) {

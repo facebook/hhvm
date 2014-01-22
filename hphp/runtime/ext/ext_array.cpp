@@ -169,12 +169,35 @@ Variant f_array_count_values(CVarRef input) {
 }
 
 Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
-  getCheckedArray(keys);
-  return ArrayUtil::CreateArray(arr_keys, value);
+  const auto& cell_keys = *keys.asCell();
+  if (UNLIKELY(!isContainer(cell_keys))) {
+    raise_warning("Invalid operand type was used: array_fill_keys expects "
+                  "an array or collection");
+    return uninit_null();
+  }
+
+  auto size = getContainerSize(cell_keys);
+  if (!size) return empty_array;
+
+  ArrayInit ai(size);
+  for (ArrayIter iter(cell_keys); iter; ++iter) {
+    ai.set(iter.secondRefPlus(), value);
+  }
+  return ai.create();
 }
 
 Variant f_array_fill(int start_index, int num, CVarRef value) {
-  return ArrayUtil::CreateArray(start_index, num, value);
+  if (num <= 0) {
+    throw_invalid_argument("num: [non-positive]");
+    return false;
+  }
+
+  Array ret;
+  ret.set(start_index, value);
+  for (int i = num - 1; i > 0; i--) {
+    ret.append(value);
+  }
+  return ret;
 }
 
 Variant f_array_flip(CVarRef trans) {

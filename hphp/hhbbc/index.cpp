@@ -738,9 +738,7 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   case TypeConstraint::MetaType::Callable:
     break;
   case TypeConstraint::MetaType::Number:
-    // TODO(#3553967): a concept of TInt | TDbl is necessary to
-    // capture this case and the results of integer division
-    return TInitCell;
+    return TNum;
   }
 
   return TCell;

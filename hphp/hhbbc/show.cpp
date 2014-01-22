@@ -383,6 +383,7 @@ std::string show(Type t) {
   case BRef:         ret = "Ref";      break;
 
   case BNull:        ret = "Null";     break;
+  case BNum:         ret = "Num";      break;
   case BBool:        ret = "Bool";     break;
   case BStr:         ret = "Str";      break;
   case BArr:         ret = "Arr";      break;
@@ -391,6 +392,7 @@ std::string show(Type t) {
   case BOptFalse:    ret = "?False";   break;
   case BOptInt:      ret = "?Int";     break;
   case BOptDbl:      ret = "?Dbl";     break;
+  case BOptNum:      ret = "?Num";     break;
   case BOptBool:     ret = "?Bool";    break;
   case BOptSStr:     ret = "?SStr";    break;
   case BOptCStr:     ret = "?CStr";    break;

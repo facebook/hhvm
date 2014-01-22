@@ -604,16 +604,6 @@ bool Array::valueExists(CVarRef search_value,
   return false;
 }
 
-Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
-  for (ArrayIter iter(*this); iter; ++iter) {
-    if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
-        (!strict && HPHP::equal(iter.secondRef(), search_value))) {
-      return iter.first();
-    }
-  }
-  return false; // PHP uses "false" over null in many places
-}
-
 Array Array::values() const {
   PackedArrayInit ai(size());
   for (ArrayIter iter(*this); iter; ++iter) {

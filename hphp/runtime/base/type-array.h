@@ -136,7 +136,6 @@ public:
     return m_px == nullptr;
   }
   bool valueExists(CVarRef search_value, bool strict = false) const;
-  Variant key(CVarRef search_value, bool strict = false) const;
   Array values() const;
 
   /*

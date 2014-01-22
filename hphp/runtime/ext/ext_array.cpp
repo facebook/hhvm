@@ -263,20 +263,20 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
                      bool strict /* = false */) {
   const auto& cell_input = *input.asCell();
   if (UNLIKELY(!isContainer(cell_input))) {
-    goto warn;
+    raise_warning("array_keys() expects parameter 1 to be an array "
+                  "or collection");
+    return uninit_null();
   }
-  {
-    ArrayIter iter(cell_input);
-    if (LIKELY(!search_value.isInitialized())) {
-      PackedArrayInit ai(getContainerSize(cell_input));
-      for (; iter; ++iter) {
-        ai.append(iter.first());
-      }
-      return ai.toArray();
-    }
 
+  if (LIKELY(!search_value.isInitialized())) {
+    PackedArrayInit ai(getContainerSize(cell_input));
+    for (ArrayIter iter(cell_input); iter; ++iter) {
+      ai.append(iter.first());
+    }
+    return ai.toArray();
+  } else {
     Array ai = Array::attach(HphpArray::MakeReserve(0));
-    for (; iter; ++iter) {
+    for (ArrayIter iter(cell_input); iter; ++iter) {
       if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
           (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
         ai.append(iter.first());
@@ -284,10 +284,6 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
     }
     return ai;
   }
-warn:
-  raise_warning("array_keys() expects parameter 1 to be an array "
-                "or collection");
-  return uninit_null();
 }
 
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
@@ -617,12 +613,6 @@ Variant f_array_reverse(CVarRef array, bool preserve_keys /* = false */) {
   return ArrayUtil::Reverse(arr_array, preserve_keys);
 }
 
-Variant f_array_search(CVarRef needle, CVarRef haystack,
-                       bool strict /* = false */) {
-  getCheckedArrayRet(haystack, false);
-  return arr_haystack.key(needle, strict);
-}
-
 Variant f_array_shift(VRefParam array) {
   return array.dequeue();
 }
@@ -912,8 +902,54 @@ Variant f_end(VRefParam refParam) {
 }
 
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict /* = false */) {
-  getCheckedArrayRet(haystack, false);
-  return arr_haystack.valueExists(needle, strict);
+  const auto& cell_haystack = *haystack.asCell();
+  if (UNLIKELY(!isContainer(cell_haystack))) {
+    raise_warning("in_array() expects parameter 2 to be an array "
+                  "or collection");
+    return false;
+  }
+
+  ArrayIter iter(cell_haystack);
+  if (strict) {
+    for (; iter; ++iter) {
+      if (HPHP::same(iter.secondRefPlus(), needle)) {
+        return true;
+      }
+    }
+  } else {
+    for (; iter; ++iter) {
+      if (HPHP::equal(iter.secondRefPlus(), needle)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+Variant f_array_search(CVarRef needle, CVarRef haystack,
+                       bool strict /* = false */) {
+  const auto& cell_haystack = *haystack.asCell();
+  if (UNLIKELY(!isContainer(cell_haystack))) {
+    raise_warning("array_search() expects parameter 2 to be an array "
+                  "or collection");
+    return uninit_null();
+  }
+
+  ArrayIter iter(cell_haystack);
+  if (strict) {
+    for (; iter; ++iter) {
+      if (HPHP::same(iter.secondRefPlus(), needle)) {
+        return iter.first();
+      }
+    }
+  } else {
+    for (; iter; ++iter) {
+      if (HPHP::equal(iter.secondRefPlus(), needle)) {
+        return iter.first();
+      }
+    }
+  }
+  return false;
 }
 
 Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {

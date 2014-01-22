@@ -95,6 +95,20 @@ std::string Util::GetPrimaryIP() {
   return safe_inet_ntoa(in);
 }
 
+static std::string normalizeIPv6Address(const std::string& address) {
+  struct in6_addr addr;
+  if (inet_pton(AF_INET6, address.c_str(), &addr) <= 0) {
+    return std::string();
+  }
+
+  char ipPresentation[INET6_ADDRSTRLEN];
+  if (inet_ntop(AF_INET6, &addr, ipPresentation, INET6_ADDRSTRLEN) == nullptr) {
+    return std::string();
+  }
+
+  return ipPresentation;
+}
+
 Util::HostURL::HostURL(const std::string &hosturl, int port) :
   m_ipv6(false), m_port(port) {
 
@@ -122,8 +136,16 @@ Util::HostURL::HostURL(const std::string &hosturl, int port) :
     }
 
     // IPv6 address between '[' and ']'
-    m_host = hosturl.substr(bpos + 1, epos - bpos - 1);
-    m_hosturl += hosturl.substr(bpos, epos - bpos);
+    auto v6h = normalizeIPv6Address(hosturl.substr(bpos + 1, epos - bpos - 1));
+    if (v6h.empty()) {
+      m_valid = false;
+      m_hosturl = hosturl;
+      return;
+    }
+    m_host = v6h;
+    m_hosturl += '[';
+    m_hosturl += v6h;
+    m_hosturl += ']';
 
     // Colon for port.  Start after ']';
     auto cpos = hosturl.find(':', epos);

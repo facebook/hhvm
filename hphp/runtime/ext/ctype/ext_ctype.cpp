@@ -15,11 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_ctype.h"
+#include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
-
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(ctype, NO_EXTENSION_VERSION_YET);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -56,49 +54,71 @@ static bool ctype(CVarRef v, int (*iswhat)(int)) {
 // Use lambdas wrapping the ctype.h functions because of linker weirdness on
 // OS X Mavericks.
 
-bool f_ctype_alnum(CVarRef text) {
+bool HHVM_FUNCTION(ctype_alnum, CVarRef text) {
   return ctype(text, [] (int i) -> int { return isalnum(i); });
 }
 
-bool f_ctype_alpha(CVarRef text) {
+bool HHVM_FUNCTION(ctype_alpha, CVarRef text) {
   return ctype(text, [] (int i) -> int { return isalpha(i); });
 }
 
-bool f_ctype_cntrl(CVarRef text) {
+bool HHVM_FUNCTION(ctype_cntrl, CVarRef text) {
   return ctype(text, [] (int i) -> int { return iscntrl(i); });
 }
 
-bool f_ctype_digit(CVarRef text) {
+bool HHVM_FUNCTION(ctype_digit, CVarRef text) {
   return ctype(text, [] (int i) -> int { return isdigit(i); });
 }
 
-bool f_ctype_graph(CVarRef text) {
+bool HHVM_FUNCTION(ctype_graph, CVarRef text) {
   return ctype(text, [] (int i) -> int { return isgraph(i); });
 }
 
-bool f_ctype_lower(CVarRef text) {
+bool HHVM_FUNCTION(ctype_lower, CVarRef text) {
   return ctype(text, [] (int i) -> int { return islower(i); });
 }
 
-bool f_ctype_print(CVarRef text) {
+bool HHVM_FUNCTION(ctype_print, CVarRef text) {
   return ctype(text, [] (int i) -> int { return isprint(i); });
 }
 
-bool f_ctype_punct(CVarRef text) {
+bool HHVM_FUNCTION(ctype_punct, CVarRef text) {
   return ctype(text, [] (int i) -> int { return ispunct(i); });
 }
 
-bool f_ctype_space(CVarRef text) {
+bool HHVM_FUNCTION(ctype_space, CVarRef text) {
   return ctype(text, [] (int i) -> int { return isspace(i); });
 }
 
-bool f_ctype_upper(CVarRef text) {
+bool HHVM_FUNCTION(ctype_upper, CVarRef text) {
   return ctype(text, [] (int i) -> int { return isupper(i); });
 }
 
-bool f_ctype_xdigit(CVarRef text) {
+bool HHVM_FUNCTION(ctype_xdigit, CVarRef text) {
   return ctype(text, [] (int i) -> int { return isxdigit(i); });
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+class CtypeExtension : public Extension {
+ public:
+  CtypeExtension() : Extension("ctype") {}
+  virtual void moduleInit() {
+    HHVM_FE(ctype_alnum);
+    HHVM_FE(ctype_alpha);
+    HHVM_FE(ctype_cntrl);
+    HHVM_FE(ctype_digit);
+    HHVM_FE(ctype_graph);
+    HHVM_FE(ctype_lower);
+    HHVM_FE(ctype_print);
+    HHVM_FE(ctype_punct);
+    HHVM_FE(ctype_space);
+    HHVM_FE(ctype_upper);
+    HHVM_FE(ctype_xdigit);
+
+    loadSystemlib();
+  }
+} s_ctype_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

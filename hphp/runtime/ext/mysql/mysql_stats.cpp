@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/mysql_stats.h"
+#include "hphp/runtime/ext/mysql/mysql_stats.h"
 
 #include <sstream>
 

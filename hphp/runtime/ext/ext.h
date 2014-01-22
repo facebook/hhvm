@@ -54,7 +54,6 @@
 #include "hphp/runtime/ext/ext_memcache.h"
 #include "hphp/runtime/ext/ext_memcached.h"
 #include "hphp/runtime/ext/ext_misc.h"
-#include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/ext_openssl.h"
 #include "hphp/runtime/ext/ext_options.h"
@@ -81,5 +80,6 @@
 #include "hphp/runtime/ext/ext_xmlwriter.h"
 #include "hphp/runtime/ext/ext_zlib.h"
 #include "hphp/runtime/ext/gd/ext_image.h"
+#include "hphp/runtime/ext/mysql/ext_mysql.h"
 
 #endif // incl_EXT_LIST_EXT_H_

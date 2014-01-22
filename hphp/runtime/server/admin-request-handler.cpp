@@ -40,7 +40,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/shared-store-base.h"
-#include "hphp/runtime/ext/mysql_stats.h"
+#include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/base/rds.h"

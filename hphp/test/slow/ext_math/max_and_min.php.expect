@@ -1,0 +1,73 @@
+ === Single Array ===
+int(7)
+int(1)
+int(5)
+int(2)
+string(10) "1236150163"
+string(10) "1236150163"
+ === Single Collection ===
+int(7)
+int(1)
+int(5)
+int(2)
+string(10) "1236150163"
+string(10) "1236150163"
+ === Multiple Arguments ===
+array(1) {
+  [0]=>
+  string(5) "hello"
+}
+bool(true)
+int(0)
+bool(true)
+array(1) {
+  [0]=>
+  int(0)
+}
+bool(true)
+string(5) "hello"
+bool(true)
+array(1) {
+  [0]=>
+  int(-1)
+}
+bool(true)
+string(5) "hello"
+bool(true)
+array(3) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(4)
+  [2]=>
+  int(8)
+}
+bool(true)
+array(1) {
+  [0]=>
+  array(3) {
+    [0]=>
+    int(2)
+    [1]=>
+    int(5)
+    [2]=>
+    int(1)
+  }
+}
+bool(true)
+array(2) {
+  [0]=>
+  array(3) {
+    [0]=>
+    int(2)
+    [1]=>
+    int(5)
+    [2]=>
+    int(7)
+  }
+  [1]=>
+  int(42)
+}
+bool(true)
+string(6) "string"
+bool(true)

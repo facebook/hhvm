@@ -1191,18 +1191,22 @@ bool AutoloadHandler::invokeHandler(const String& className,
       if (res != Failure) return res == Success;
     }
   }
-  // If we end up in a recursive autoload loop where we try to load the same
-  // class twice, just fail the load to mimic PHP as many frameworks rely on it
-  // unless we are forcing a restart (due to spl_autoload_call) in which case
-  // it's allowed to re-enter. This means we can still overflow the stack if
-  // there is a loop when using spl_autoload_call directly but this is parity.
-  if (!forceSplStack && m_loading.valueExists(className)) {
-    return false;
+  // If we end up in a recursive autoload loop where we try to load the
+  // same class twice, just fail the load to mimic PHP as many frameworks
+  // rely on it unless we are forcing a restart (due to spl_autoload_call)
+  // in which case autoload is allowed to be reentrant.
+  if (!forceSplStack) {
+    if (m_loading.exists(className)) { return false; }
+    m_loading.add(className, className);
+  } else {
+    // We can still overflow the stack if there is a loop when using
+    // spl_autoload_call directly, but this behavior matches the reference
+    // implementation.
+    m_loading.append(className);
   }
 
-  m_loading.append(className);
-
-  // The below code can throw so make sure we clean up the state from this load
+  // Make sure state is cleaned up from this load; autoloading of arbitrary
+  // code below can throw
   SCOPE_EXIT {
     String l_className = m_loading.pop();
     assert(l_className == className);

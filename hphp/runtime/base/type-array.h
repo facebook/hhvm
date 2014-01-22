@@ -135,7 +135,6 @@ public:
   bool isNull() const {
     return m_px == nullptr;
   }
-  bool valueExists(CVarRef search_value, bool strict = false) const;
   Array values() const;
 
   /*

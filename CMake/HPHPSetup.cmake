@@ -123,6 +123,10 @@ if(ENABLE_FASTCGI)
 	add_definitions(-DENABLE_FASTCGI=1)
 endif ()
 
+if(DISABLE_HARDWARE_COUNTERS)
+	add_definitions(-DNO_HARDWARE_COUNTERS=1)
+endif ()
+
 # enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)
 

@@ -30,7 +30,6 @@
 #include <poll.h>
 #include <pwd.h>
 #include <signal.h>
-#include <unistd.h>
 
 #include "folly/String.h"
 

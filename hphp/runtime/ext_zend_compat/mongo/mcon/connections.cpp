@@ -26,7 +26,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include <errno.h>
 
 #define INT_32  4

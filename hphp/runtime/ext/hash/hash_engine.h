@@ -22,7 +22,6 @@
 #include <memory>
 #include <cstring>
 #include <string>
-#include <map>
 #include <cassert>
 
 namespace HPHP {

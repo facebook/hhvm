@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-qsort.h"
 #include "hphp/runtime/base/zend-printf.h"

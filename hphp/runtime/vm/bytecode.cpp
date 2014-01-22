@@ -90,7 +90,6 @@
 
 #include <iostream>
 #include <iomanip>
-#include <algorithm>
 #include <boost/format.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 

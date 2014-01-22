@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 #include <elf.h>
 #include <gelf.h>
-#include <elf.h>
 #include <string>
 #include <vector>
 #include <stdio.h>

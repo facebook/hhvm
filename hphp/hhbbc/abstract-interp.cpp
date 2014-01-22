@@ -1706,8 +1706,10 @@ struct InterpStepper : boost::static_visitor<void> {
     setThisAvailable();
   }
 
-  // TODO_5: can we propagate our class type if unique?
-  void operator()(const bc::LateBoundCls&) { push(TCls); }
+  void operator()(const bc::LateBoundCls&) {
+    auto const ty = selfCls();
+    push(ty ? *ty : TCls);
+  }
 
   void operator()(const bc::CheckThis&) {
     if (thisAvailable()) {

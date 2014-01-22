@@ -173,6 +173,7 @@ private:
   template<class Oper> SSATmp* simplifyRoundCommon(IRInstruction*, Oper);
 
   SSATmp* simplifyCheckPackedArrayBounds(IRInstruction*);
+  SSATmp* simplifyLdPackedArrayElem(IRInstruction*);
 
 private: // tracebuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);

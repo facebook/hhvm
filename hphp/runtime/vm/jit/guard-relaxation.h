@@ -30,7 +30,7 @@ struct SSATmp;
 struct IRUnit;
 
 IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp);
-bool relaxGuards(IRUnit&, const GuardConstraints& guards);
+bool relaxGuards(IRUnit&, const GuardConstraints& guards, bool simple = false);
 
 typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
 void visitGuards(IRUnit&, const VisitGuardFn& func);

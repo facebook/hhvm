@@ -186,10 +186,10 @@ private:
                                 bool& isResolved);
 
   template<class Loc1, class Loc2, class JmpFn>
-  void emitTypeTest(Type type,
-                    Loc1 typeSrc,
-                    Loc2 dataSrc,
-                    JmpFn doJcc);
+  void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, JmpFn doJcc);
+
+  template<class DataLoc, class JmpFn>
+  void emitSpecializedTypeTest(Type type, DataLoc data, JmpFn doJcc);
 
   template<class Loc>
   void emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc, Block* taken);

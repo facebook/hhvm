@@ -3268,7 +3268,7 @@ void HhbcTranslator::setThisAvailable() {
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
   gen(GuardLoc, type, LocalId(locId), m_tb->fp());
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
-    gen(LdRef, type.unbox(), makeExit(), ldLoc(locId, DataTypeGeneric));
+    gen(LdRef, type.unbox(), makeExit(), ldLoc(locId, DataTypeSpecific));
   }
 }
 
@@ -3321,6 +3321,7 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
   gen(GuardStk, type, stackOff, m_tb->sp());
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
     auto stk = gen(LdStack, Type::BoxedCell, stackOff, m_tb->sp());
+    m_tb->constrainValue(stk, DataTypeSpecific);
     gen(LdRef, type.unbox(), makeExit(), stk);
   }
 }

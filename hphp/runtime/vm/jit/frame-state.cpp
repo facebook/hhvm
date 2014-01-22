@@ -620,8 +620,10 @@ void FrameState::refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {
 
 void FrameState::refineLocalType(uint32_t id, Type type) {
   always_assert(id < m_locals.size());
-  assert(type <= m_locals[id].type);
-  m_locals[id].type = type;
+  auto& local = m_locals[id];
+  assert((type.maybeBoxed() && local.type.maybeBoxed()) ||
+         type <= m_locals[id].type);
+  local.type = type;
 }
 
 void FrameState::setLocalType(uint32_t id, Type type) {

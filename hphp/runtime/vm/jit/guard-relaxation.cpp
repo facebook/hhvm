@@ -155,9 +155,11 @@ Type previousGuardType(const IRInstruction* guard) {
  * For all guard instructions in trace, check to see if we can relax the
  * destination type to something less specific. The GuardConstraints map
  * contains information about what properties of the guarded type matter for
- * each instruction. Returns true iff any changes were made to the trace.
+ * each instruction. If simple is true, guards will not be relaxed past
+ * DataTypeSpecific except guards which are relaxed all the way to
+ * DataTypeGeneric. Returns true iff any changes were made to the trace.
  */
-bool relaxGuards(IRUnit& unit, const GuardConstraints& guards) {
+bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
   auto blocks = rpoSortCfg(unit);
   auto changed = false;
 
@@ -167,6 +169,11 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& guards) {
 
       auto it = guards.find(&inst);
       auto constraint = it == guards.end() ? TypeConstraint() : it->second;
+
+      if (simple && constraint.category > DataTypeGeneric &&
+          constraint.category < DataTypeSpecific) {
+        constraint.category = DataTypeSpecific;
+      }
 
       // TODO(t2598894): Support relaxing inner types
       auto const oldType = inst.typeParam();

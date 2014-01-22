@@ -1896,16 +1896,29 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     cc = CC_E;
   }
   doJcc(cc);
+
+  if (type.isSpecialized()) {
+    emitSpecializedTypeTest(type, dataSrc, doJcc);
+  }
+}
+
+template<class DataLoc, class JmpFn>
+void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc,
+                                            JmpFn doJcc) {
+  assert(type.isSpecialized());
+  if (type < Type::Res) {
+    // No cls field in Resource
+    CG_PUNT(TypeTest-on-Resource);
+  }
+
   if (type < Type::Obj) {
     // emit the specific class test
     assert(type.getClass()->attrs() & AttrFinal);
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
     m_as.cmpq(type.getClass(), reg[ObjectData::getVMClassOffset()]);
     doJcc(CC_E);
-  } else if (type < Type::Res) {
-    // No cls field in Resource
-    CG_PUNT(TypeTest-on-Resource);
-  } else if (type <= Type::Arr && type.hasArrayKind()) {
+  } else {
+    assert(type < Type::Arr);
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
     m_as.cmpb(type.getArrayKind(), reg[ArrayData::offsetofKind()]);
     doJcc(CC_E);
@@ -4555,8 +4568,12 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   assert(label);
   SSATmp* arr = inst->src(0);
   assert(arr->type().getArrayKind() == ArrayData::kPackedKind);
-  auto arrReg = curOpd(arr).reg();
   auto idx = inst->src(1);
+  auto arrReg = curOpd(arr).reg();
+  if (arr->isConst()) {
+    m_as.movq(arr->getValBits(), m_rScratch);
+    arrReg = m_rScratch;
+  }
 
   if (idx->isConst()) {
     auto const val = idx->getValInt();
@@ -4609,6 +4626,12 @@ static void emitLoadPackedArrayElemAddr(Asm& a,
 }
 
 void CodeGenerator::cgLdPackedArrayElem(IRInstruction* inst) {
+  if (inst->src(0)->isConst()) {
+    // This would require two scratch registers and should be very
+    // rare. t3626251
+    CG_PUNT(LdPackedArrayElem-ConstArray);
+  }
+
   auto arrReg = curOpd(inst->src(0)).reg();
   auto idx = inst->src(1);
   if (idx->isConst()) {
@@ -4624,6 +4647,12 @@ void CodeGenerator::cgLdPackedArrayElem(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
+  if (inst->src(0)->isConst()) {
+    // This would require two scratch registers and should be very
+    // rare. t3626251
+    CG_PUNT(LdPackedArrayElemAddr-ConstArray);
+  }
+
   auto arrReg = curOpd(inst->src(0)).reg();
   auto idx = inst->src(1);
   if (idx->isConst()) {
@@ -4928,10 +4957,22 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     Type srcType = src->type();
     if (srcType.isBoxed() && typeParam.isBoxed()) {
       // Nothing to do here, since we check the inner type at the uses
+    } else if (typeParam.isSpecialized()) {
+      // We're just checking the array kind or object class of a value with a
+      // mostly-known type.
+      auto testReg = rData;
+      if (src->isConst()) {
+        // In rare cases we can have a const array src here.
+        m_as.movq(src->getValBits(), m_rScratch);
+        testReg = m_rScratch;
+      }
+
+      emitSpecializedTypeTest(typeParam, rData, doJcc);
     } else {
       CG_PUNT(CheckType-known-srcType);
     }
   }
+
   doMov();
 }
 

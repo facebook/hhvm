@@ -78,7 +78,6 @@ struct TraceBuilder {
   ~TraceBuilder();
 
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
-  bool inReoptimize() const              { return m_inReoptimize; }
   bool typeMightRelax(SSATmp* val = nullptr) const;
   bool shouldElideAssertType(Type oldType, Type newType, SSATmp* oldVal) const;
 
@@ -93,7 +92,14 @@ struct TraceBuilder {
   bool thisAvailable() const { return m_state.thisAvailable(); }
   void setThisAvailable() { m_state.setThisAvailable(); }
 
-  bool shouldConstrainGuards() const;
+  /*
+   * Support for guard relaxation. Whenever the semantics of an hhir operation
+   * depends on the type of one of its input values, that value's type must be
+   * constrained using one of these methods. This happens automatically for
+   * most values, when obtained through HhbcTranslator::popC (and friends).
+   */
+  void setConstrainGuards(bool constrain) { m_constrainGuards = constrain; }
+  bool shouldConstrainGuards()      const { return m_constrainGuards; }
   bool constrainGuard(IRInstruction* inst, TypeConstraint tc);
   bool constrainValue(SSATmp* const val, TypeConstraint tc);
   bool constrainLocal(uint32_t id, TypeConstraint tc,
@@ -360,11 +366,10 @@ private:
   Block* m_curBlock;
   boost::optional<Block::iterator> m_curWhere;
 
-  bool       m_enableSimplification;
-  bool       m_inReoptimize;
+  bool m_enableSimplification;
+  bool m_constrainGuards;
 
   GuardConstraints m_guardConstraints;
-
 };
 
 /*

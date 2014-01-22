@@ -1201,7 +1201,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
       Unit::MetaHandle metaHand;
       for (auto* ni = i.calleeTrace->m_instrStream.first;
            ni; ni = ni->next) {
-        readMetaData(metaHand, *ni, m_hhbcTrans, MetaMode::Legacy);
+        readMetaData(metaHand, *ni, m_hhbcTrans, false, MetaMode::Legacy);
         translateInstr(*ni);
       }
       return;

@@ -33,6 +33,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/biased-coin.h"
 #include "hphp/util/map-walker.h"
+#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
@@ -3484,7 +3485,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
   fcall->calleeTrace = std::move(subTrace);
 }
 
-static bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
+bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
   return (instrIsNonCallControlFlow(instr->op()) ||
           instr->outputPredicted ||
           instr->op() == OpClsCnsD); // side exits if misses in the RDS
@@ -3898,7 +3899,8 @@ const char* Translator::translateResultName(TranslateResult r) {
  * eventually replace applyInputMetaData.
  */
 void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
-                  HhbcTranslator& hhbcTrans, MetaMode metaMode /* = Normal */) {
+                  HhbcTranslator& hhbcTrans, bool profiling,
+                  MetaMode metaMode /* = Normal */) {
   if (isAlwaysNop(inst.op())) {
     inst.noOp = true;
     return;
@@ -3964,8 +3966,8 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         // necessary (and they caused a perf regression). HHIR guard relaxation
         // is capable of eliminating unnecessary predictions and the
         // information added here is valuable to it.
-        if (metaMode == MetaMode::Legacy &&
-            !RuntimeOption::EvalHHIRRelaxGuards) {
+        if ((metaMode == MetaMode::Legacy &&
+             !RuntimeOption::EvalHHIRRelaxGuards) || profiling) {
           break;
         }
         auto const loc = stackFilter(inst.inputs[arg]->location).
@@ -4069,6 +4071,12 @@ void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
          color(ANSI_COLOR_END));
 
   m_irTrans.reset(new JIT::IRTranslator(initBcOffset, initSpOffset, func));
+
+  // XXX t3582470: TransOptimize translations don't work with hhir guard
+  // relaxation yet.
+  if (m_mode == TransOptimize) {
+    m_irTrans->hhbcTrans().traceBuilder().setConstrainGuards(false);
+  }
 }
 
 void Translator::traceEnd() {
@@ -4093,6 +4101,7 @@ Translator::translateRegion(const RegionDesc& region,
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   assert(!region.blocks.empty());
   const SrcKey startSk = region.blocks.front()->start();
+  auto profilingFunc = false;
 
   for (auto b = 0; b < region.blocks.size(); b++) {
     auto const& block = region.blocks[b];
@@ -4113,6 +4122,8 @@ Translator::translateRegion(const RegionDesc& region,
       // region the guards will go to a retranslate request. Otherwise, they'll
       // go to a side exit.
       bool isFirstRegionInstr = block == region.blocks.front() && i == 0;
+      if (isFirstRegionInstr) ht.emitRB(Trace::RBTypeTraceletGuards, sk);
+
       while (typePreds.hasNext(sk)) {
         auto const& pred = typePreds.next();
         auto type = pred.type;
@@ -4137,8 +4148,21 @@ Translator::translateRegion(const RegionDesc& region,
         ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
       }
 
-      if (RuntimeOption::EvalJitTransCounters && isFirstRegionInstr) {
-        ht.emitIncTransCounter();
+      if (isFirstRegionInstr) {
+        if (RuntimeOption::EvalJitTransCounters) {
+          ht.emitIncTransCounter();
+        }
+
+        if (m_mode == TransProfile) {
+          if (block->func()->isEntry(block->start().offset())) {
+            ht.emitCheckCold(m_profData->curTransID());
+            profilingFunc = true;
+          } else {
+            ht.emitIncProfCounter(m_profData->curTransID());
+          }
+        }
+
+        ht.emitRB(Trace::RBTypeTraceletBody, sk);
       }
 
       // Update the current funcd, if we have a new one.
@@ -4211,7 +4235,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Apply the remaining metadata. This may change the types of some of
       // inst's inputs.
-      readMetaData(metaHand, inst, ht);
+      readMetaData(metaHand, inst, ht, m_mode == TransProfile);
       if (!inst.noOp && inputInfos.needsRefCheck) {
         assert(byRefs.hasNext(sk));
         inst.preppedByRef = byRefs.next();
@@ -4257,6 +4281,7 @@ Translator::translateRegion(const RegionDesc& region,
   traceEnd();
   try {
     traceCodeGen();
+    if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
   } catch (const JIT::FailedCodeGen& exn) {
     FTRACE(1, "code generation failed with {}\n", exn.what());
     SrcKey sk{exn.vmFunc, exn.bcOff};

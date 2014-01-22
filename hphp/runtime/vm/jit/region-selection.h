@@ -328,32 +328,39 @@ struct RegionContext::PreLiveAR {
  * Select a compilation region corresponding to the given context.
  * The shape of the region selected is controlled by
  * RuntimeOption::EvalJitRegionSelector.  If the specified shape is
- * 'tracelet', then the input argument t is used to build the region.
+ * 'legacy', then the input argument t is used to build the region.
  *
  * This function may return nullptr.
  *
  * For now this is hooked up in TranslatorX64::translateWork, and
  * returning nullptr causes it to use the current level 0 tracelet
- * analyzer.  Eventually we'd like analyze to occur underneath this as
- * well.
+ * analyzer.  Eventually we'd like this to completely replace analyze.
  */
 RegionDescPtr selectRegion(const RegionContext& context,
-                           const JIT::Tracelet* t);
+                           const Tracelet* t,
+                           TransKind kind);
 
 /*
  * Select a compilation region based on profiling information.  This
  * is used in JitPGO mode.  Argument transId specifies the profiling
  * translation that triggered the profiling-based region selection.
  */
-RegionDescPtr selectHotRegion(JIT::TransID transId,
-                              JIT::TranslatorX64* tx64);
+RegionDescPtr selectHotRegion(TransID transId,
+                              TranslatorX64* tx64);
+
+/*
+ * Select a compilation region using roughly the same heuristics as the old
+ * analyze() framework.
+ */
+RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
+                             bool profiling);
 
 /*
  * Create a compilation region corresponding to a tracelet created by
  * the old analyze() framework.
  */
 RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
-                                   const JIT::Tracelet& tlet);
+                                   const Tracelet& tlet);
 
 /*
  * Checks whether the type predictions at the beginning of block
@@ -366,9 +373,9 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
  * Creates regions covering all existing profile translations for
  * func, and returns them in the regions vector.
  */
-void regionizeFunc(const Func*            func,
-                   JIT::TranslatorX64* tx64,
-                   RegionVec&             regions);
+void regionizeFunc(const Func*    func,
+                   TranslatorX64* tx64,
+                   RegionVec&     regions);
 
 /*
  * Debug stringification for various things.

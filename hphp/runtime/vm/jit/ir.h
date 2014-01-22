@@ -963,7 +963,28 @@ inline Type typeForConst(const StringData* sd) {
 }
 inline Type typeForConst(const ArrayData* ad) {
   assert(ad->isStatic());
-  return Type::StaticArr;
+  return Type::StaticArr.specialize(ad->kind());
+}
+inline Type typeForConst(const TypedValue& tv) {
+  switch (tv.m_type) {
+    case KindOfClass:
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfStaticString:
+      return Type(tv.m_type);
+
+    case KindOfString:
+      return typeForConst(tv.m_data.pstr);
+
+    case KindOfArray:
+      return typeForConst(tv.m_data.parr);
+
+    default:
+      always_assert(false && "Invalid KindOf for constant TypedValue");
+  }
 }
 
 /*
@@ -1004,6 +1025,10 @@ uintptr_t constToBits(T input) {
   const auto toCopy = constToBits_detail::promoteIfNeeded(input);
   std::memcpy(&ret, &toCopy, sizeof toCopy);
   return ret;
+}
+
+inline uintptr_t constToBits(const TypedValue& tv) {
+  return tv.m_data.num;
 }
 
 class RawMemSlot {

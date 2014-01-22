@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_HHIR_OPT_H_
 #define incl_HPHP_HHIR_OPT_H_
 
+#include "hphp/runtime/vm/jit/types.h"
+
 namespace HPHP {  namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
@@ -37,7 +39,7 @@ void eliminateDeadCode(IRUnit&);
 /*
  * Run all the optimization passes.
  */
-void optimize(IRUnit& unit, TraceBuilder& builder);
+void optimize(IRUnit& unit, TraceBuilder& builder, TransKind kind);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -582,10 +582,8 @@ public:
   }
 
   bool canRunDtor() const {
-    return
-      (*this & (CountedArr | BoxedCountedArr | Obj | BoxedObj |
-                Res | BoxedRes))
-      != Type::Bottom;
+    return maybe(CountedArr | BoxedCountedArr | Obj | BoxedObj |
+                 Res | BoxedRes);
   }
 
   /*

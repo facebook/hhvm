@@ -622,7 +622,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
       SSATmp* box = getBase(DataTypeSpecific);
       assert(box->isA(Type::BoxedCell));
       assert(baseType.innerType().isKnownDataType() ||
-             baseType.innerType().equals(Type::InitCell));
+             baseType.innerType().equals(Type::Cell));
 
       // Guard that the inner type hasn't changed. Even though we don't use the
       // unboxed value, some emit* methods change their behavior based on the

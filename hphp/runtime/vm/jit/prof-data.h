@@ -197,8 +197,7 @@ public:
   PrologueCallersRec*     prologueCallers(const Func* func, int nArgs) const;
   int                     prologueArgs(TransID id)    const;
 
-  TransID                 addTransProfile(const Tracelet&       tracelet,
-                                          Offset                initSpOffset,
+  TransID                 addTransProfile(const RegionDescPtr&  region,
                                           const PostConditions& pconds);
   TransID                 addTransNonProf(TransKind kind,
                                           const SrcKey& sk);

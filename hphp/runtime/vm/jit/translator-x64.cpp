@@ -1830,32 +1830,29 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     assert(srcRec.inProgressTailJumps().empty());
   };
 
-  JIT::PostConditions pconds;
+  PostConditions pconds;
+  RegionDescPtr region;
   if (!args.m_interp && !reachedTranslationLimit(sk, srcRec)) {
     // Attempt to create a region at this SrcKey
-    JIT::RegionDescPtr region;
-    if (RuntimeOption::EvalJitPGO) {
-      if (m_mode == TransOptimize) {
-        region = args.m_region;
-        if (region) {
-          assert(region->blocks.size() > 0);
-        } else {
-          TransID transId = args.m_transId;
-          assert(transId != InvalidID);
-          region = JIT::selectHotRegion(transId, this);
-          assert(region);
-          if (region && region->blocks.size() == 0) region = nullptr;
-        }
+    if (m_mode == TransOptimize) {
+      assert(RuntimeOption::EvalJitPGO);
+      region = args.m_region;
+      if (region) {
+        assert(region->blocks.size() > 0);
       } else {
-        assert(m_mode == TransProfile || m_mode == TransLive);
-        tp = analyze(sk);
+        TransID transId = args.m_transId;
+        assert(transId != InvalidID);
+        region = JIT::selectHotRegion(transId, this);
+        assert(region);
+        if (region && region->blocks.size() == 0) region = nullptr;
       }
     } else {
+      assert(m_mode == TransProfile || m_mode == TransLive);
       tp = analyze(sk);
-      JIT::RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
+      RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
-      region = JIT::selectRegion(rContext, tp.get());
+      region = selectRegion(rContext, tp.get(), m_mode);
     }
 
     TranslateResult result = Retry;
@@ -1931,9 +1928,9 @@ TranslatorX64::translateWork(const TranslArgs& args) {
 
   if (transKind == TransInterp) {
     assertCleanState();
-    TRACE(1,
-          "emitting %d-instr interp request for failed translation\n",
-          int(tp->m_numOpcodes));
+    auto interpOps = tp ? tp->m_numOpcodes : 1;
+    FTRACE(1, "emitting {}-instr interp request for failed translation\n",
+           interpOps);
     if (JIT::arch() == JIT::Arch::X64) {
       Asm a { code.main() };
       // Add a counter for the translation if requested
@@ -1941,7 +1938,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         JIT::X64::emitTransCounterInc(a);
       }
       a.    jmp(emitServiceReq(code.stubs(), JIT::REQ_INTERPRET,
-                               sk.offset(), tp ? tp->m_numOpcodes : 1));
+                               sk.offset(), interpOps));
     } else if (JIT::arch() == JIT::Arch::ARM) {
       if (RuntimeOption::EvalJitTransCounters) {
         vixl::MacroAssembler a { code.main() };
@@ -1952,7 +1949,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
       JIT::emitSmashableJump(
         code.main(),
         emitServiceReq(code.stubs(), JIT::REQ_INTERPRET,
-                       sk.offset(), tp ? tp->m_numOpcodes : 1),
+                       sk.offset(), interpOps),
         CC_None
       );
     }
@@ -1978,7 +1975,11 @@ TranslatorX64::translateWork(const TranslArgs& args) {
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
     if (transKind == TransProfile) {
-      m_profData->addTransProfile(*tp, liveSpOff(), pconds);
+      if (!region) {
+        assert(tp);
+        region = selectTraceletLegacy(liveSpOff(), *tp);
+      }
+      m_profData->addTransProfile(region, pconds);
     } else {
       m_profData->addTransNonProf(transKind, sk);
     }
@@ -2026,8 +2027,9 @@ TranslatorX64::translateTracelet(Tracelet& t) {
         }
       }
 
-      m_irTrans->hhbcTrans().emitRB(RBTypeTraceletBody, t.m_sk);
+      ht.emitRB(RBTypeTraceletBody, t.m_sk);
       Stats::emitInc(code.main(), Stats::Instr_TC, t.m_numOpcodes);
+
     }
 
     // Profiling on function entry.
@@ -2058,7 +2060,8 @@ TranslatorX64::translateTracelet(Tracelet& t) {
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
       ht.setBcOff(ni->source.offset(), ni->breaksTracelet && !ht.isInlining());
-      readMetaData(metaHand, *ni, m_irTrans->hhbcTrans(), MetaMode::Legacy);
+      readMetaData(metaHand, *ni, m_irTrans->hhbcTrans(),
+                   m_mode == TransProfile, MetaMode::Legacy);
 
       try {
         SKTRACE(1, ni->source, "HHIR: translateInstr\n");
@@ -2137,7 +2140,7 @@ void TranslatorX64::traceCodeGen() {
 
   finishPass(" after initial translation ", kIRLevel);
 
-  optimize(unit, ht.traceBuilder());
+  optimize(unit, ht.traceBuilder(), m_mode);
   finishPass(" after optimizing ", kOptLevel);
 
   auto regs = allocateRegs(unit);

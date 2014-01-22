@@ -445,6 +445,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
 
   case CheckPackedArrayBounds: return simplifyCheckPackedArrayBounds(inst);
+  case LdPackedArrayElem:      return simplifyLdPackedArrayElem(inst);
 
   default:
     return nullptr;
@@ -2144,13 +2145,39 @@ SSATmp* Simplifier::simplifyAssertNonNull(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyCheckPackedArrayBounds(IRInstruction* inst) {
+  auto* array = inst->src(0);
   auto* idx = inst->src(1);
+
   if (idx->isConst()) {
-    if ((uint64_t)idx->getValInt() >= 0xffffffffull) {
+    auto const idxVal = (uint64_t)idx->getValInt();
+    if (idxVal >= 0xffffffffull) {
       // ArrayData can't hold more than 2^32 - 1 elements, so this is always
       // going to fail.
       inst->convertToJmp();
+    } else if (array->isConst()) {
+      if (idxVal >= array->getValArr()->size()) {
+        inst->convertToJmp();
+      } else {
+        // We should convert inst to a nop here but that exposes t3626113
+      }
     }
+  }
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyLdPackedArrayElem(IRInstruction* inst) {
+  auto* arrayTmp = inst->src(0);
+  auto* idxTmp   = inst->src(1);
+  if (arrayTmp->isConst() && idxTmp->isConst()) {
+    auto* value = arrayTmp->getValArr()->nvGet(idxTmp->getValInt());
+    if (!value) {
+      // The index doesn't exist. This code should be unreachable at runtime.
+      return nullptr;
+    }
+
+    if (value->m_type == KindOfRef) value = value->m_data.pref->tv();
+    return cns(*value);
   }
 
   return nullptr;

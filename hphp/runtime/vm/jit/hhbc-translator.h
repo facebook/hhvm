@@ -693,23 +693,8 @@ private:
   void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
                             bool& checkForInt);
   Type assertObjType(const StringData*);
-
-  /*
-   * Helpers for (CGet|VGet|Bind|Set|Isset|Empty)(G|S)
-   */
-  SSATmp* checkSupportedName(uint32_t stackIdx);
   void destroyName(SSATmp* name);
-  typedef SSATmp* (HhbcTranslator::*EmitLdAddrFn)(Block*, SSATmp* name);
-  void emitCGet(uint32_t stackIdx, bool exitOnFailure, EmitLdAddrFn);
-  void emitVGet(uint32_t stackIdx, EmitLdAddrFn);
-  void emitBind(uint32_t stackIdx, EmitLdAddrFn);
-  void emitSet(uint32_t stackIdx, EmitLdAddrFn);
-  void emitIsset(uint32_t stackIdx, EmitLdAddrFn);
-  void emitEmpty(uint32_t stackOff, EmitLdAddrFn);
-  SSATmp* emitLdGblAddr(Block* block, SSATmp* name);
-  SSATmp* emitLdGblAddrDef(Block* block, SSATmp* name);
   SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls, SSATmp* name);
-
   void emitUnboxRAux();
   void emitAGet(SSATmp* src, Block* catchBlock);
   void emitRetFromInlined(Type type);

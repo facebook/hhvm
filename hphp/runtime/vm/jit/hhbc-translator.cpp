@@ -3836,12 +3836,6 @@ void HhbcTranslator::emitEmptyMem(SSATmp* ptr) {
   push(gen(Not, gen(ConvCellToBool, ld)));
 }
 
-SSATmp* HhbcTranslator::checkSupportedName(uint32_t stackIdx) {
-  auto name = topC(stackIdx);
-  if (!name->isA(Type::Str)) PUNT(Non-string-name);
-  return name;
-}
-
 void HhbcTranslator::destroyName(SSATmp* name) {
   assert(name == topC());
   popDecRef(name->type());
@@ -4015,123 +4009,79 @@ void HhbcTranslator::emitEmptyS() {
   push(ret);
 }
 
-SSATmp* HhbcTranslator::emitLdGblAddr(Block* block, SSATmp* name) {
-  return gen(LdGblAddr, block, name);
-}
-
-SSATmp* HhbcTranslator::emitLdGblAddrDef(Block* block, SSATmp* name) {
-  return gen(LdGblAddrDef, name);
-}
-
-// CGetG
-void HhbcTranslator::emitCGet(uint32_t stackIdx,
-                              bool exitOnFailure,
-                              EmitLdAddrFn emitLdAddr) {
-  auto name = checkSupportedName(stackIdx);
-  SSATmp* ptr = (this->*emitLdAddr)(exitOnFailure ? makeExitSlow()
-                                                  : nullptr,
-                                    name);
+void HhbcTranslator::emitCGetG() {
+  auto const exit = makeExitSlow();
+  auto const name = topC();
+  if (!name->isA(Type::Str)) PUNT(CGetG-NonStrName);
+  auto const ptr = gen(LdGblAddr, exit, name);
   destroyName(name);
   pushIncRef(gen(LdMem, Type::Cell, gen(UnboxPtr, ptr), cns(0)));
 }
 
-void HhbcTranslator::emitCGetG() {
-  emitCGet(0, true, &HhbcTranslator::emitLdGblAddr);
-}
-
-// VGetG
-void HhbcTranslator::emitVGet(uint32_t stackIdx,
-                              EmitLdAddrFn emitLdAddr) {
-  auto name = checkSupportedName(stackIdx);
-  auto ptr = (this->*emitLdAddr)(nullptr, name);
+void HhbcTranslator::emitVGetG() {
+  auto const name = topC();
+  if (!name->isA(Type::Str)) PUNT(VGetG-NonStrName);
+  auto const ptr = gen(LdGblAddrDef, name);
   destroyName(name);
   pushIncRef(gen(LdMem, Type::BoxedCell, gen(BoxPtr, ptr), cns(0)));
 }
 
-void HhbcTranslator::emitVGetG() {
-  emitVGet(0, &HhbcTranslator::emitLdGblAddrDef);
-}
-
-// Bind(G|S)
-void HhbcTranslator::emitBind(uint32_t stackIdx,
-                              EmitLdAddrFn emitLdAddr) {
-  auto name = checkSupportedName(stackIdx);
-  auto* catchBlock = makeCatch();
-  auto box = popV();
-  auto ptr = (this->*emitLdAddr)(catchBlock, name);
+void HhbcTranslator::emitBindG() {
+  auto const name = topC(1);
+  if (!name->isA(Type::Str)) PUNT(BindG-NameNotStr);
+  auto const box = popV();
+  auto const ptr = gen(LdGblAddrDef, name);
   destroyName(name);
   emitBindMem(ptr, box);
 }
 
-void HhbcTranslator::emitBindG() {
-  emitBind(1, &HhbcTranslator::emitLdGblAddrDef);
-}
-
-// SetG
-void HhbcTranslator::emitSet(uint32_t stackIdx,
-                             EmitLdAddrFn emitLdAddr) {
-  auto name = checkSupportedName(stackIdx);
-  auto* catchBlock = makeCatch();
-  auto value = popC(DataTypeCountness);
-  auto ptr = gen(UnboxPtr, (this->*emitLdAddr)(catchBlock, name));
-  destroyName(name);
-  emitBindMem(ptr, value);
-}
-
 void HhbcTranslator::emitSetG() {
-  emitSet(1, &HhbcTranslator::emitLdGblAddrDef);
-}
-
-// IssetG
-void HhbcTranslator::emitIsset(uint32_t stackIdx,
-                               EmitLdAddrFn emitLdAddr) {
-  auto name = checkSupportedName(stackIdx);
-  SSATmp* result = m_tb->cond(
-                        [&] (Block* taken) { // branch
-                          return (this->*emitLdAddr)(taken, name);
-                        },
-                        [&] (SSATmp* ptr) { // Next: property or global exists
-                          return gen(IsNTypeMem, Type::Null,
-                                     gen(UnboxPtr, ptr));
-                        },
-                        [&] { // Taken
-                          return cns(false);
-                        }
-  );
+  auto const name = topC(1);
+  if (!name->isA(Type::Str)) PUNT(SetG-NameNotStr);
+  auto const value   = popC(DataTypeCountness);
+  auto const unboxed = gen(UnboxPtr, gen(LdGblAddrDef, name));
   destroyName(name);
-  push(result);
+  emitBindMem(unboxed, value);
 }
 
 void HhbcTranslator::emitIssetG() {
-  emitIsset(0, &HhbcTranslator::emitLdGblAddr);
-}
+  auto const name = topC(0);
+  if (!name->isA(Type::Str)) PUNT(IssetG-NameNotStr);
 
-// Empty(G|S)
-void HhbcTranslator::emitEmpty(uint32_t stackIdx, EmitLdAddrFn emitLdAddr) {
-  auto name = checkSupportedName(stackIdx);
-  SSATmp* result = m_tb->cond(
-                        [&] (Block* taken) {
-                          return (this->*emitLdAddr)(taken, name);
-                        },
-                        [&] (SSATmp* ptr) { // Next: property or global exists
-                          SSATmp* ld = gen(
-                            LdMem,
-                            Type::Cell,
-                            gen(UnboxPtr, ptr),
-                            cns(0)
-                          );
-                          return gen(Not, gen(ConvCellToBool, ld));
-                        },
-                        [&] { // Taken
-                          return cns(true);
-                        }
+  auto const ret = m_tb->cond(
+    [&] (Block* taken) {
+      return gen(LdGblAddr, taken, name);
+    },
+    [&] (SSATmp* ptr) { // Next: global exists
+      return gen(IsNTypeMem, Type::Null, gen(UnboxPtr, ptr));
+    },
+    [&] { // Taken: global doesn't exist
+      return cns(false);
+    }
   );
   destroyName(name);
-  push(result);
+  push(ret);
 }
 
 void HhbcTranslator::emitEmptyG() {
-  emitEmpty(0, &HhbcTranslator::emitLdGblAddr);
+  auto const name = topC();
+  if (!name->isA(Type::Str)) PUNT(EmptyG-NameNotStr);
+
+  auto const ret = m_tb->cond(
+    [&] (Block* taken) {
+      return gen(LdGblAddr, taken, name);
+    },
+    [&] (SSATmp* ptr) { // Next: global exists
+      auto const unboxed = gen(UnboxPtr, ptr);
+      auto const val     = gen(LdMem, Type::Cell, unboxed, cns(0));
+      return gen(Not, gen(ConvCellToBool, val));
+    },
+    [&] { // Taken: global doesn't exist
+      return cns(true);
+    }
+  );
+  destroyName(name);
+  push(ret);
 }
 
 void HhbcTranslator::emitBinaryArith(Opcode opc) {

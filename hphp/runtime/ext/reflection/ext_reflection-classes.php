@@ -207,7 +207,7 @@ class ReflectionParameter implements Reflector {
    * available.
    *
    * @return     mixed   Returns TRUE if the parameter can be passed by value, 
-                         FALSE otherwise. Returns NULL in case of an error.  
+   *                     FALSE otherwise. Returns NULL in case of an error.  
    */
   public function canBePassedByValue() {
     return !isset($this->info['ref']);
@@ -387,7 +387,7 @@ class ReflectionParameter implements Reflector {
       $default[0] == '"' ||                  // dq-string
       $default[0] == "'" ||                  // sq-string
       strncmp($default, 'array', 5) == 0 ||  // an array
-      strspn($default, '-01234456789') > 0   // a number      
+      strspn($default, '-0123456789') > 0    // a number
     );
   }
 
@@ -446,7 +446,7 @@ class ReflectionParameter implements Reflector {
       $default[0] == '"' ||                  // dq-string
       $default[0] == "'" ||                  // sq-string
       strncmp($default, 'array', 5) == 0 ||  // an array
-      strspn($default, '-01234456789') > 0   // a number
+      strspn($default, '-0123456789') > 0    // a number
     ) return null;
 
     // Now we either have "Fixture::CONSTANT", or "CONSTANT". The first is

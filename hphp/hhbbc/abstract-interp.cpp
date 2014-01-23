@@ -36,9 +36,11 @@
 
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/type-arith.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -211,52 +213,6 @@ State without_stacks(State const& src) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * When constant-evaluating certain operations, it's possible they
- * will return non-static objects, or throw exceptions (e.g. cellAdd()
- * with an array and an int).  This routine converts these things back
- * to types.
- */
-template<class Pred>
-Type eval_cell(Pred p) {
-  try {
-    Cell c = p();
-    if (IS_REFCOUNTED_TYPE(c.m_type)) {
-      switch (c.m_type) {
-      case KindOfString:
-        {
-          auto const sstr = makeStaticString(c.m_data.pstr);
-          tvDecRef(&c);
-          c = make_tv<KindOfStaticString>(sstr);
-        }
-        break;
-      case KindOfArray:
-        {
-          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRef(&c);
-          c = make_tv<KindOfArray>(sarr);
-        }
-        break;
-      default:
-        always_assert(0 && "Impossible constant evaluation occurred");
-      }
-    }
-    return from_cell(c);
-  } catch (const std::exception&) {
-    /*
-     * Not currently trying to set the nothrow() flag based on whether
-     * or not this catch block is hit.  To do it correctly, it will
-     * require checking whether the non-exceptioning cases above
-     * possibly entered the error handler by running a raise_notice or
-     * similar.
-     */
-    FTRACE(2, "    <constant eval_cell throws exception>\n");
-    return TInitCell;
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-/*
  * Each single-instruction step of the abstract interpreter sends
  * various information back to the caller in this structure.
  */
@@ -415,7 +371,7 @@ struct InterpStepper : boost::static_visitor<void> {
     auto collName = collectionTypeToString(op.arg1);
     auto const collCls = m_index.resolve_class(m_ctx, collName);
     always_assert(collCls &&
-                  "Collection names thorugh NewCol must alwasy resolve");
+                  "Collection names in NewCol must always resolve");
     push(objExact(*collCls));
   }
 
@@ -486,68 +442,40 @@ struct InterpStepper : boost::static_visitor<void> {
 
   template<class Op, class Fun>
   void arithImpl(const Op& op, Fun fun) {
+    constprop();
     auto const t1 = popC();
     auto const t2 = popC();
-    auto const v1 = tv(t1);
-    auto const v2 = tv(t2);
-    if (v1 && v2) {
-      constprop();
-      return push(eval_cell([&] { return fun(*v2, *v1); }));
-    }
-    // TODO_4: op-specific type manipulations; only doing constant
-    // propagation right now.  (E.g. Shl always returns an int.)
-    push(TInitCell);
+    push(fun(t2, t1));
   }
+
+  void operator()(const bc::Add& op)    { arithImpl(op, typeAdd); }
+  void operator()(const bc::Sub& op)    { arithImpl(op, typeSub); }
+  void operator()(const bc::Mul& op)    { arithImpl(op, typeMul); }
+  void operator()(const bc::Div& op)    { arithImpl(op, typeDiv); }
+  void operator()(const bc::Mod& op)    { arithImpl(op, typeMod); }
+  void operator()(const bc::BitAnd& op) { arithImpl(op, typeBitAnd); }
+  void operator()(const bc::BitOr& op)  { arithImpl(op, typeBitOr); }
+  void operator()(const bc::BitXor& op) { arithImpl(op, typeBitXor); }
 
   template<class Op, class Fun>
-  void divModImpl(const Op& op, Fun fun) {
-    auto const t1 = popC();
-    auto const t2 = popC();
-    auto const v1 = tv(t1);
-    auto const v2 = tv(t2);
-    if (v1 && v2 && cellToInt(*v1) != 0 && cellToDouble(*v1) != 0.0) {
-      constprop();
-      return push(eval_cell([&] { return fun(*v2, *v1); }));
+  void shiftImpl(const Op& op, Fun fop) {
+    constprop();
+    auto const v1 = tv(typeToInt(popC()));
+    auto const v2 = tv(typeToInt(popC()));
+    if (v1 && v2) {
+      return push(eval_cell([&] {
+        return make_tv<KindOfInt64>(fop(cellToInt(*v2), cellToInt(*v1)));
+      }));
     }
-    push(TInitCell);
-  }
-
-  void operator()(const bc::Add& op) {
-    arithImpl(op, [&] (Cell c1, Cell c2) { return cellAdd(c1, c2); });
-  }
-  void operator()(const bc::Sub& op) {
-    arithImpl(op, [&] (Cell c1, Cell c2) { return cellSub(c1, c2); });
-  }
-  void operator()(const bc::Mul& op) {
-    arithImpl(op, [&] (Cell c1, Cell c2) { return cellMul(c1, c2); });
-  }
-  void operator()(const bc::Div& op) {
-    divModImpl(op, [&] (Cell c1, Cell c2) { return cellDiv(c1, c2); });
-  }
-  void operator()(const bc::Mod& op) {
-    divModImpl(op, [&] (Cell c1, Cell c2) { return cellMod(c1, c2); });
-  }
-
-  void operator()(const bc::BitAnd& op) {
-    arithImpl(op, [&] (Cell c1, Cell c2) { return cellBitAnd(c1, c2); });
-  }
-  void operator()(const bc::BitOr& op) {
-    arithImpl(op, [&] (Cell c1, Cell c2) { return cellBitOr(c1, c2); });
-  }
-  void operator()(const bc::BitXor& op) {
-    arithImpl(op, [&] (Cell c1, Cell c2) { return cellBitXor(c1, c2); });
+    push(TInt);
   }
 
   void operator()(const bc::Shl& op) {
-    arithImpl(op, [&] (Cell c1, Cell c2) {
-      return make_tv<KindOfInt64>(cellToInt(c1) << cellToInt(c2));
-    });
+    shiftImpl(op, [&] (int64_t a, int64_t b) { return a << b; });
   }
 
   void operator()(const bc::Shr& op) {
-    arithImpl(op, [&] (Cell c1, Cell c2) {
-      return make_tv<KindOfInt64>(cellToInt(c1) >> cellToInt(c2));
-    });
+    shiftImpl(op, [&] (int64_t a, int64_t b) { return a >> b; });
   }
 
   void operator()(const bc::BitNot& op) {

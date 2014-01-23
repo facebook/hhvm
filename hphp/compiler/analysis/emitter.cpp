@@ -3978,9 +3978,15 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           // will set cc->originalClassName to the trait's name for
           // the isSelf and isParent cases, but self and parent must
           // be resolved dynamically when used inside of traits.
-          assert(!cc->isColonColonClass());
           auto nCls = getOriginalClassName();
-          e.ClsCnsD(nName, nCls);
+          if (cc->isColonColonClass()) {
+            std::ostringstream s;
+            s << "Cannont access " << nCls->data() << "::" << nName->data() <<
+                 " when no class scope is active";
+            throw IncludeTimeFatalException(e.getNode(), s.str().c_str());
+          } else {
+            e.ClsCnsD(nName, nCls);
+          }
         }
         return true;
       }

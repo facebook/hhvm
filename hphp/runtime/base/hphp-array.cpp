@@ -284,8 +284,11 @@ HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
 }
 
 // for internal use by nonSmartCopy() and copyPacked()
+template<class CopyElem>
 ALWAYS_INLINE
-HphpArray* HphpArray::CopyPacked(const HphpArray& other, AllocationMode mode) {
+HphpArray* HphpArray::CopyPacked(const HphpArray& other,
+                                 AllocationMode mode,
+                                 CopyElem copyElem) {
   assert(other.isPacked());
 
   auto const cap  = other.m_cap;
@@ -307,7 +310,7 @@ HphpArray* HphpArray::CopyPacked(const HphpArray& other, AllocationMode mode) {
   // Copy the elements and bump up refcounts as needed.
   auto const elms = other.data();
   for (uint32_t i = 0, limit = ad->m_used; i < limit; ++i) {
-    tvDupFlattenVars(&elms[i].data, &targetElms[i].data, &other);
+    copyElem(&elms[i].data, &targetElms[i].data, &other);
   }
 
   assert(ad->m_kind == kPackedKind);
@@ -322,9 +325,12 @@ HphpArray* HphpArray::CopyPacked(const HphpArray& other, AllocationMode mode) {
   return ad;
 }
 
-// For internal use by nonSmartCopy() and copyMixed()
+// for internal use by nonSmartCopy() and copyPacked()
+template<class CopyKeyValue>
 ALWAYS_INLINE
-HphpArray* HphpArray::CopyMixed(const HphpArray& other, AllocationMode mode) {
+HphpArray* HphpArray::CopyMixed(const HphpArray& other,
+                                AllocationMode mode,
+                                CopyKeyValue copyKeyValue) {
   assert(other.m_kind == kMixedKind);
 
   auto const cap  = other.m_cap;
@@ -353,11 +359,7 @@ HphpArray* HphpArray::CopyMixed(const HphpArray& other, AllocationMode mode) {
     auto const& e = elms[i];
     auto& te = data[i];
     if (!isTombstone(e.data.m_type)) {
-      te.key = e.key;
-      te.data.hash() = e.data.hash();
-      if (te.hasStrKey()) te.key->incRefCount();
-      tvDupFlattenVars(&e.data, &te.data, &other);
-      assert(te.hash() == e.hash()); // ensure not clobbered.
+      copyKeyValue(e, te, &other);
     } else {
       // Tombstone.
       te.data.m_type = KindOfInvalid;
@@ -387,18 +389,38 @@ NEVER_INLINE ArrayData* HphpArray::NonSmartCopy(const ArrayData* in) {
   auto a = asHphpArray(in);
   assert(a->checkInvariants());
   return a->isPacked()
-    ? CopyPacked(*a, AllocationMode::nonSmart)
-    : CopyMixed(*a, AllocationMode::nonSmart);
+    ? CopyPacked(*a, AllocationMode::nonSmart,
+        [&](const TypedValue* fr, TypedValue* to, const ArrayData* container) {
+          tvDupFlattenVars(fr, to, container);
+        })
+    : CopyMixed(*a, AllocationMode::nonSmart,
+        [&](const Elm& from, Elm& to, const ArrayData* container) {
+          to.key = from.key;
+          to.data.hash() = from.data.hash();
+          if (to.hasStrKey()) to.key->incRefCount();
+          tvDupFlattenVars(&from.data, &to.data, container);
+          assert(to.hash() == from.hash()); // ensure not clobbered.
+        });
 }
 
 NEVER_INLINE HphpArray* HphpArray::copyPacked() const {
   assert(checkInvariants());
-  return CopyPacked(*this, AllocationMode::smart);
+  return CopyPacked(*this, AllocationMode::smart,
+      [&](const TypedValue* fr, TypedValue* to, const ArrayData* container) {
+        tvDupFlattenVars(fr, to, container);
+      });
 }
 
 NEVER_INLINE HphpArray* HphpArray::copyMixed() const {
   assert(checkInvariants());
-  return CopyMixed(*this, AllocationMode::smart);
+  return CopyMixed(*this, AllocationMode::smart,
+      [&](const Elm& from, Elm& to, const ArrayData* container) {
+        to.key = from.key;
+        to.data.hash() = from.data.hash();
+        if (to.hasStrKey()) to.key->incRefCount();
+        tvDupFlattenVars(&from.data, &to.data, container);
+        assert(to.hash() == from.hash()); // ensure not clobbered.
+      });
 }
 
 ALWAYS_INLINE
@@ -440,6 +462,71 @@ HphpArray* HphpArray::copyMixedAndResizeIfNeededSlow() const {
   auto const ret = copy->resize();
   if (copy != ret) Release(copy);
   return ret;
+}
+
+namespace {
+
+Variant CreateVarForUncountedArray(CVarRef source) {
+  auto type = source.getType(); // this gets rid of the ref, if it was one
+  switch (type) {
+    case KindOfBoolean:
+      return source.getBoolean();
+    case KindOfInt64:
+      return source.getInt64();
+    case KindOfDouble:
+      return source.getDouble();
+    case KindOfUninit:
+    case KindOfNull:
+      return null_variant;
+    case KindOfStaticString:
+      return source.getStringData();
+
+    case KindOfString: {
+      auto const st = lookupStaticString(source.getStringData());
+      if (st != nullptr) return st;
+      return StringData::MakeUncounted(source.getStringData()->slice());
+    }
+
+    case KindOfArray:
+      return HphpArray::MakeUncounted(source.getArrayData());
+
+    default:
+      assert(false); // type not allowed
+  }
+  return null_variant;
+}
+
+}
+
+HphpArray* HphpArray::MakeUncounted(ArrayData* array) {
+  auto a = asHphpArray(array);
+  assert(a->checkInvariants());
+  if (array->isVectorData()) {
+    auto packed = CopyPacked(*a, AllocationMode::nonSmart,
+        [&](const TypedValue* fr, TypedValue* to, const ArrayData* container) {
+          tvCopy(*CreateVarForUncountedArray(tvAsCVarRef(fr)).asTypedValue(),
+                 *to);
+        });
+    packed->setUncounted();
+    return packed;
+  }
+  auto mixed = CopyMixed(*a, AllocationMode::nonSmart,
+      [&](const Elm& fr, Elm& to, const ArrayData* container) {
+        to.data.hash() = fr.data.hash();
+        if (to.hasStrKey()) {
+          auto const st = lookupStaticString(fr.key);
+          to.key = (st != nullptr) ? st :
+                          StringData::MakeUncounted(fr.key->slice());
+        } else {
+          to.key = fr.key;
+        }
+        tvCopy(
+            *CreateVarForUncountedArray(tvAsCVarRef(&fr.data)).asTypedValue(),
+            to.data);
+        assert(to.hash() == fr.hash()); // ensure not clobbered.
+      });
+  mixed->setUncounted();
+  return mixed;
 }
 
 //=============================================================================

@@ -215,7 +215,7 @@ function is_equal($obj1, $obj2) {
 }
 
 foreach ($tests as $test) {
-  $output = json_decode($test['input'], true, $test['options']);
+  $output = json_decode($test['input'], true, 512, $test['options']);
   if (!is_equal($output, $test['expected'])) {
     report("", $output, $test['expected']);
     break;

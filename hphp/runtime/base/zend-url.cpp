@@ -150,9 +150,13 @@ bool url_parse(Url &output, const char *str, int length) {
       } else {
         return false;
       }
+    } else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+      s += 2;
     } else {
       goto just_path;
     }
+  } else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+    s += 2;
   } else {
     just_path:
     ue = s + length;

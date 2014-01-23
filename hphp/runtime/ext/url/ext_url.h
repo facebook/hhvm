@@ -32,24 +32,24 @@ extern const int64_t k_PHP_URL_PATH;
 extern const int64_t k_PHP_URL_QUERY;
 extern const int64_t k_PHP_URL_FRAGMENT;
 
-Variant f_base64_decode(const String& data, bool strict = false);
-String f_base64_encode(const String& data);
+Variant HHVM_FUNCTION(base64_decode, const String& data,
+                                     bool strict = false);
+Variant HHVM_FUNCTION(base64_encode, const String& data);
 
-Variant f_get_headers(const String& url, int format = 0);
-Array f_get_meta_tags(const String& filename, bool use_include_path = false);
+Variant HHVM_FUNCTION(get_headers, const String& url, int format = 0);
+Array HHVM_FUNCTION(get_meta_tags, const String& filename,
+                                   bool use_include_path = false);
 
-Variant f_http_build_query(CVarRef formdata,
+Variant HHVM_FUNCTION(http_build_query, CVarRef formdata,
                            const String& numeric_prefix = null_string,
                            const String& arg_separator = null_string);
-Variant f_parse_url(const String& url, int component = -1);
+Variant HHVM_FUNCTION(parse_url, const String& url,
+                                 int64_t component = -1);
 
-String f_rawurldecode(const String& str);
-
-String f_rawurlencode(const String& str);
-
-String f_urldecode(const String& str);
-
-String f_urlencode(const String& str);
+String HHVM_FUNCTION(rawurldecode, const String& str);
+String HHVM_FUNCTION(rawurlencode, const String& str);
+String HHVM_FUNCTION(urldecode, const String& str);
+String HHVM_FUNCTION(urlencode, const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

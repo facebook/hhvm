@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_url.h"
+#include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -37,7 +37,8 @@ const int64_t k_PHP_URL_QUERY = 6;
 const int64_t k_PHP_URL_FRAGMENT = 7;
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_base64_decode(const String& data, bool strict /* = false */) {
+Variant HHVM_FUNCTION(base64_decode, const String& data,
+                                     bool strict /* = false */) {
   String decoded = StringUtil::Base64Decode(data, strict);
   if (decoded.isNull()) {
     return false;
@@ -45,7 +46,7 @@ Variant f_base64_decode(const String& data, bool strict /* = false */) {
   return decoded;
 }
 
-String f_base64_encode(const String& data) {
+Variant HHVM_FUNCTION(base64_encode, const String& data) {
   String encoded = StringUtil::Base64Encode(data);
   if (encoded.isNull()) {
     return false;
@@ -53,7 +54,7 @@ String f_base64_encode(const String& data) {
   return encoded;
 }
 
-Variant f_get_headers(const String& url, int format /* = 0 */) {
+Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */) {
   Variant c = f_curl_init();
   f_curl_setopt(c.toResource(), k_CURLOPT_URL, url);
   f_curl_setopt(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
@@ -84,7 +85,7 @@ Variant f_get_headers(const String& url, int format /* = 0 */) {
     }
   }
   return assoc;
-}
+ }
 
 static String normalize_variable_name(const String& name) {
   StringBuffer sb;
@@ -103,7 +104,8 @@ static String normalize_variable_name(const String& name) {
   return sb.detach();
 }
 
-Array f_get_meta_tags(const String& filename, bool use_include_path /* = false */) {
+Array HHVM_FUNCTION(get_meta_tags, const String& filename,
+                                   bool use_include_path /* = false */) {
   String f = f_file_get_contents(filename);
 
   Variant matches;
@@ -190,7 +192,7 @@ static void url_encode_array(StringBuffer &ret, CVarRef varr,
 
 const StaticString s_arg_separator_output("arg_separator.output");
 
-Variant f_http_build_query(CVarRef formdata,
+Variant HHVM_FUNCTION(http_build_query, CVarRef formdata,
                            const String& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */) {
   if (!formdata.is(KindOfArray) && !formdata.is(KindOfObject)) {
@@ -199,7 +201,7 @@ Variant f_http_build_query(CVarRef formdata,
   }
 
   String arg_sep;
-  if (arg_separator.isNull()) {
+  if (arg_separator.empty()) {
     arg_sep = f_ini_get(s_arg_separator_output);
   } else {
     arg_sep = arg_separator;
@@ -237,7 +239,8 @@ const StaticString
     resource.name = NULL;                                               \
   }                                                                     \
 
-Variant f_parse_url(const String& url, int component /* = -1 */) {
+Variant HHVM_FUNCTION(parse_url, const String& url,
+                                 int64_t component /* = -1 */) {
   Url resource;
   if (!url_parse(resource, url.data(), url.size())) {
     return false;
@@ -258,7 +261,7 @@ Variant f_parse_url(const String& url, int component /* = -1 */) {
       }
       break;
     default:
-      throw_invalid_argument("component: %d", component);
+      raise_warning("parse_url(): Invalid URL component identifier %ld", component);
       return false;
     }
     return uninit_null();
@@ -278,21 +281,75 @@ Variant f_parse_url(const String& url, int component /* = -1 */) {
   return ret.create();
 }
 
-String f_rawurldecode(const String& str) {
+String HHVM_FUNCTION(rawurldecode, const String& str) {
   return StringUtil::UrlDecode(str, false);
 }
 
-String f_rawurlencode(const String& str) {
+String HHVM_FUNCTION(rawurlencode, const String& str) {
   return StringUtil::UrlEncode(str, false);
 }
 
-String f_urldecode(const String& str) {
+String HHVM_FUNCTION(urldecode, const String& str) {
   return StringUtil::UrlDecode(str, true);
 }
 
-String f_urlencode(const String& str) {
+String HHVM_FUNCTION(urlencode, const String& str) {
   return StringUtil::UrlEncode(str, true);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_PHP_URL_SCHEME("PHP_URL_SCHEME");
+const StaticString s_PHP_URL_HOST("PHP_URL_HOST");
+const StaticString s_PHP_URL_PORT("PHP_URL_PORT");
+const StaticString s_PHP_URL_USER("PHP_URL_USER");
+const StaticString s_PHP_URL_PASS("PHP_URL_PASS");
+const StaticString s_PHP_URL_PATH("PHP_URL_PATH");
+const StaticString s_PHP_URL_QUERY("PHP_URL_QUERY");
+const StaticString s_PHP_URL_FRAGMENT("PHP_URL_FRAGMENT");
+
+class StandardURLExtension : public Extension {
+ public:
+  StandardURLExtension() : Extension("url") {}
+  virtual void moduleInit() {
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_URL_SCHEME.get(), k_PHP_URL_SCHEME
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_URL_HOST.get(), k_PHP_URL_HOST
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_URL_PORT.get(), k_PHP_URL_PORT
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_URL_USER.get(), k_PHP_URL_USER
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_URL_PASS.get(), k_PHP_URL_PASS
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_URL_PATH.get(), k_PHP_URL_PATH
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_URL_QUERY.get(), k_PHP_URL_QUERY
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_URL_FRAGMENT.get(), k_PHP_URL_FRAGMENT
+    );
+    HHVM_FE(base64_decode);
+    HHVM_FE(base64_encode);
+    HHVM_FE(get_headers);
+    HHVM_FE(get_meta_tags);
+    HHVM_FE(http_build_query);
+    HHVM_FE(parse_url);
+    HHVM_FE(rawurldecode);
+    HHVM_FE(rawurlencode);
+    HHVM_FE(urldecode);
+    HHVM_FE(urlencode);
+
+    loadSystemlib();
+  }
+} s_standardurl_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

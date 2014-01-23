@@ -8,6 +8,11 @@ before_script:
 # for some tests  
   - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - time HPHP_HOME=`pwd` make -j 6
+# mysql configuration for unit-tests
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS hhvm;'
+  - export PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=hhvm"
+  - export PDO_MYSQL_TEST_USER="travis"
+  - export PDO_MYSQL_TEST_PASS=""
 
 # The larger test suites (slow, zend) take longer than 50 miuntes to run. Since
 # we have no way to change the timeout, we subdivide the jit/interp repo/normal

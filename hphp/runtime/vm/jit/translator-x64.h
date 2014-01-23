@@ -344,13 +344,9 @@ TCA fcallHelper(ActRec* ar, void* sp);
 TCA funcBodyHelper(ActRec* ar, void* sp);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
-// These could be static but are used in hopt/codegen.cpp
-void raiseUndefVariable(StringData* nm);
-void defFuncHelper(Func *f);
-
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
-                       int propInput,
-                       int objInput);
+                            int propInput,
+                            int objInput);
 
 bool mInstrHasUnknownOffsets(const NormalizedInstruction& i,
                              Class* contextClass);

@@ -116,6 +116,7 @@ StringData* convCellToStrHelper(TypedValue tv);
 
 void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
+void raiseUndefVariable(StringData* nm);
 void VerifyParamTypeFail(int param);
 void VerifyParamTypeCallable(TypedValue value, int param);
 void VerifyParamTypeSlow(const Class* cls,

@@ -1591,13 +1591,6 @@ TranslatorX64::syncWork() {
   Stats::inc(Stats::TC_Sync);
 }
 
-// could be static but used in hopt/codegen.cpp
-void raiseUndefVariable(StringData* nm) {
-  raise_notice(Strings::UNDEFINED_VARIABLE, nm->data());
-  // FIXME: do we need to decref the string if an exception is propagating?
-  decRefStr(nm);
-}
-
 TCA
 TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   auto& trampolines = code.trampolines();

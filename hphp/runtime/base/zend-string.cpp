@@ -480,7 +480,7 @@ int string_rfind(const char *input, int len, const char *s, int s_len,
     if (pos >= 0) {
       ptr = bstrrstr(input + pos, len - pos, s, s_len);
     } else {
-      ptr = bstrrstr(input, len + pos + 1, s, s_len);
+      ptr = bstrrstr(input, len + pos + s_len, s, s_len);
     }
   } else {
     if (pos >= 0) {

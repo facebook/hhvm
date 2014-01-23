@@ -50,6 +50,10 @@
             "type": "Int64"
         },
         {
+            "name": "JSON_BIGINT_AS_STRING",
+            "type": "Int64"
+        },
+        {
             "name": "JSON_FB_COLLECTIONS",
             "type": "Int64"
         },
@@ -146,6 +150,12 @@
                     "type": "Boolean",
                     "value": "false",
                     "desc": "When TRUE, returned objects will be converted into associative arrays."
+                },
+                {
+                    "name": "depth",
+                    "type": "Int32",
+                    "value": "512",
+                    "desc": "User specified recursion depth."
                 },
                 {
                     "name": "options",

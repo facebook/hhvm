@@ -13,23 +13,23 @@ $obj = json_decode("[\"a\",1,true,false,null]");
 var_dump($obj);
 
 var_dump(json_decode("{z:1}",     true));
-var_dump(json_decode("{z:1}",     true, JSON_FB_LOOSE));
+var_dump(json_decode("{z:1}",     true, 512, JSON_FB_LOOSE));
 var_dump(json_decode("{z:\"z\"}", true));
-var_dump(json_decode("{z:\"z\"}", true, JSON_FB_LOOSE));
+var_dump(json_decode("{z:\"z\"}", true, 512, JSON_FB_LOOSE));
 var_dump(json_decode("{'x':1}",   true));
-var_dump(json_decode("{'x':1}",   true, JSON_FB_LOOSE));
+var_dump(json_decode("{'x':1}",   true, 512, JSON_FB_LOOSE));
 var_dump(json_decode("{y:1,}",    true));
-var_dump(json_decode("{y:1,}",    true, JSON_FB_LOOSE));
+var_dump(json_decode("{y:1,}",    true, 512, JSON_FB_LOOSE));
 var_dump(json_decode("{,}",       true));
-var_dump(json_decode("{,}",       true, JSON_FB_LOOSE));
+var_dump(json_decode("{,}",       true, 512, JSON_FB_LOOSE));
 var_dump(json_decode("[1,2,3,]",  true));
-var_dump(json_decode("[1,2,3,]",  true, JSON_FB_LOOSE));
+var_dump(json_decode("[1,2,3,]",  true, 512, JSON_FB_LOOSE));
 var_dump(json_decode("[,]",       true));
-var_dump(json_decode("[,]",       true, JSON_FB_LOOSE));
+var_dump(json_decode("[,]",       true, 512, JSON_FB_LOOSE));
 var_dump(json_decode("[]",        true));
-var_dump(json_decode("[]",        true, JSON_FB_LOOSE));
+var_dump(json_decode("[]",        true, 512, JSON_FB_LOOSE));
 var_dump(json_decode("{}",        true));
-var_dump(json_decode("{}",        true, JSON_FB_LOOSE));
+var_dump(json_decode("{}",        true, 512, JSON_FB_LOOSE));
 
 var_dump(json_decode("[{\"a\":\"apple\"},{\"b\":\"banana\"}]", true));
 

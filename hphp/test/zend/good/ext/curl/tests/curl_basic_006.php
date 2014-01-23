@@ -8,19 +8,19 @@
   $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
 
   // start testing
-  echo '*** Testing curl setting referer ***' . "\n";
+  echo '*** Testing curl_setopt($ch, CURLOPT_WRITEFUNCTION, <closure>); ***' . "\n";
 
-  $url = "{$host}/get.php?test=referer";
+  $url = "{$host}/get.php?test=get";
   $ch = curl_init();
 
   ob_start(); // start output buffering
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_REFERER, 'http://www.refer.er');
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
-  $curl_content = curl_exec($ch);
-  curl_close($ch);
+  curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) {
+    echo 'Data: '.$data;
+    return strlen ($data);
+  });
 
-  var_dump( $curl_content );
+  curl_exec($ch);
+  curl_close($ch);
 ?>
 ===DONE===

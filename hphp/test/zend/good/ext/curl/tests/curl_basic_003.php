@@ -8,16 +8,17 @@
   $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
 
   // start testing
-  echo '*** Testing curl with HTTP/1.1 ***' . "\n";
+  echo '*** Testing curl sending through GET an POST ***' . "\n";
 
-  $url = "{$host}/get.php?test=httpversion";
+  $url = "{$host}/get.php?test=getpost&get_param=Hello%20World";
   $ch = curl_init();
 
   ob_start(); // start output buffering
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+  curl_setopt($ch, CURLOPT_POST, 1);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, "Hello=World&Foo=Bar&Person=John%20Doe");
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
+
   $curl_content = curl_exec($ch);
   curl_close($ch);
 

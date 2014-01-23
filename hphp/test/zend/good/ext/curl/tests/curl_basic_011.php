@@ -8,17 +8,16 @@
   $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
 
   // start testing
-  echo '*** Testing curl sending through GET an POST ***' . "\n";
+  echo '*** Testing curl with cookie ***' . "\n";
 
-  $url = "{$host}/get.php?test=getpost&get_param=Hello%20World";
+  $url = "{$host}/get.php?test=cookie";
   $ch = curl_init();
 
   ob_start(); // start output buffering
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_POST, 1);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, "Hello=World&Foo=Bar&Person=John%20Doe");
+  curl_setopt($ch, CURLOPT_COOKIE, 'foo=bar');
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
+
   $curl_content = curl_exec($ch);
   curl_close($ch);
 

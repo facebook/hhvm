@@ -27,7 +27,11 @@ namespace HPHP {
 
 Variant f_simplexml_import_dom(CObjRef node,
                                const String& class_name = "SimpleXMLElement");
-Variant f_simplexml_load_string(const String& data, const String& class_name = "SimpleXMLElement", int64_t options = 0, const String& ns = "", bool is_prefix = false);
+Variant f_simplexml_load_string(const String& data,
+                                const String& class_name = "SimpleXMLElement",
+                                int64_t options = 0,
+                                const String& ns = "",
+                                bool is_prefix = false);
 Variant f_simplexml_load_file(const String& filename, const String& class_name = "SimpleXMLElement", int64_t options = 0, const String& ns = "", bool is_prefix = false);
 Variant f_libxml_get_errors();
 Variant f_libxml_get_last_error();

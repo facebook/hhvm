@@ -8,16 +8,15 @@
   $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
 
   // start testing
-  echo '*** Testing curl with cookie ***' . "\n";
+  echo '*** Testing curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); ***' . "\n";
 
-  $url = "{$host}/get.php?test=cookie";
+  $url = "{$host}/get.php?test=get";
   $ch = curl_init();
 
   ob_start(); // start output buffering
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_COOKIE, 'foo=bar');    
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
+
   $curl_content = curl_exec($ch);
   curl_close($ch);
 

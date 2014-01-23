@@ -8,19 +8,19 @@
   $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
 
   // start testing
-  echo '*** Testing curl_setopt($ch, CURLOPT_WRITEFUNCTION, <closure>); ***' . "\n";
+  echo '*** Testing curl with HTTP/1.1 ***' . "\n";
 
-  $url = "{$host}/get.php?test=get";
+  $url = "{$host}/get.php?test=httpversion";
   $ch = curl_init();
 
   ob_start(); // start output buffering
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) {
-    echo 'Data: '.$data;
-    return strlen ($data);
-  });
-  
-  curl_exec($ch);
+
+  $curl_content = curl_exec($ch);
   curl_close($ch);
+
+  var_dump( $curl_content );
 ?>
 ===DONE===

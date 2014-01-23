@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-init-fini.h"
@@ -343,6 +344,9 @@ void HttpServer::waitForServers() {
   }
   if (RuntimeOption::AdminServerPort) {
     m_adminServer->waitForEnd();
+  }
+  if (RuntimeOption::HHProfServerEnabled) {
+    HeapProfileServer::Server.reset();
   }
   // all other servers invoke waitForEnd on stop
 }

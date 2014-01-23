@@ -8,6 +8,11 @@ before_script:
 # for some tests  
   - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - time HPHP_HOME=`pwd` make -j 6
+# mysql configuration for unit-tests
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS hhvm;'
+  - export PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=hhvm"
+  - export PDO_MYSQL_TEST_USER="travis"
+  - export PDO_MYSQL_TEST_PASS=""
 
 # Test suites take longer to run in RepoAuthoritative mode (-r) than normal so
 # split out the -r from normal runs and further split the -r runs by suite to

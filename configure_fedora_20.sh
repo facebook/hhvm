@@ -22,7 +22,7 @@ fi
 export CMAKE_PREFIX_PATH=`/bin/pwd`/..
 
 # install the actual dependencies
-sudo yum groupinstall "Fedora Packager"
+sudo yum groupinstall "Fedora Packager" -y
 sudo yum install -y git wget make \
     autoconf \
     binutils-devel \

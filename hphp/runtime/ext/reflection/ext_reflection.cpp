@@ -535,7 +535,7 @@ static void set_function_info(Array &ret, const Func* func) {
     const Func::SVInfoVec& staticVars = func->staticVars();
     for (unsigned int i = 0; i < staticVars.size(); i++) {
       const Func::SVInfo &sv = staticVars[i];
-      arr.set(VarNR(sv.name), VarNR(sv.phpCode));
+      arr.set(VarNR(sv.name), g_vmContext->getEvaledArg(sv.phpCode, empty_string)); 
     }
     ret.set(s_static_variables, VarNR(arr));
   }

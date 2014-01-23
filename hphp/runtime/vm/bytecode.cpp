@@ -3724,14 +3724,6 @@ OPTBLD_INLINE void VMExecutionContext::iopClsCns(IOP_ARGS) {
   assert(tv->m_type == KindOfClass);
   Class* class_ = tv->m_data.pcls;
   assert(class_ != nullptr);
-  if (clsCnsName->isame(s_class.get())) {
-    // Doesn't decref tv since Classes aren't refcounted
-    auto name = const_cast<StringData*>(class_->name());
-    assert(name->isStatic());
-    tv->m_type = KindOfStaticString;
-    tv->m_data.pstr = name;
-    return;
-  }
   auto const clsCns = class_->clsCnsGet(clsCnsName);
   if (clsCns.m_type == KindOfUninit) {
     raise_error("Couldn't find constant %s::%s",

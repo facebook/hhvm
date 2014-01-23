@@ -1613,7 +1613,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
     if (type != Type::Gen) m_hhbcTrans.assertTypeStack(i, type);
   }
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
     ht.emitDbgAssertRetAddr();
   }
 

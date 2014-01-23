@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_preg.h"
-#include "hphp/runtime/ext/ext_url.h"
+#include "hphp/runtime/ext/url/ext_url.h"
 
 namespace HPHP {
 

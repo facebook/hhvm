@@ -73,7 +73,6 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_thread.h"
 #include "hphp/runtime/ext/ext_thrift.h"
-#include "hphp/runtime/ext/ext_url.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_xml.h"
 #include "hphp/runtime/ext/ext_xmlreader.h"

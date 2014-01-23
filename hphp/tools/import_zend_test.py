@@ -315,6 +315,7 @@ norepo_tests = (
     '/ext/standard/tests/strings/bug44242.php',
     '/ext/standard/tests/strings/trim.php',
     '/ext/standard/tests/strings/wordwrap.php',
+    '/ext/standard/tests/url/base64_encode_variation_001.php',
     '/ext/standard/tests/url/parse_url_basic_001.php',
     '/ext/standard/tests/url/parse_url_basic_002.php',
     '/ext/standard/tests/url/parse_url_basic_003.php',
@@ -324,6 +325,12 @@ norepo_tests = (
     '/ext/standard/tests/url/parse_url_basic_007.php',
     '/ext/standard/tests/url/parse_url_basic_008.php',
     '/ext/standard/tests/url/parse_url_basic_009.php',
+    '/ext/standard/tests/url/parse_url_variation_001.php',
+    '/ext/standard/tests/url/parse_url_variation_002_64bit.php',
+    '/ext/standard/tests/url/rawurldecode_variation_001.php',
+    '/ext/standard/tests/url/rawurlencode_variation_001.php',
+    '/ext/standard/tests/url/urldecode_variation_001.php',
+    '/ext/standard/tests/url/urlencode_variation_001.php',
     '/ext/zip/tests/bug53579.php',
     '/ext/zip/tests/bug64342_1.php',
     '/ext/zip/tests/bug7658.php',
@@ -759,6 +766,8 @@ def walk(filename, source_dir):
 
         if '/ext/standard/tests/file/tempnam_variation5.php' in full_dest_filename:
             exp = exp.replace('tempnam_variation6', 'tempnam_variation5')
+        if '/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename:
+            exp = exp.replace('to be long', 'to be integer')
 
         file(full_dest_filename+'.expectf', 'w').write(exp)
     else:

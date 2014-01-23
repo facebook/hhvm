@@ -686,7 +686,7 @@ static void set_method_prototype_info(Array &ret, const Func *func) {
   }
 }
 
-static void set_method_info(Array &ret, const Func* func) {
+static void set_method_info(Array &ret, const Func* func, const Class* cls) {
   if (RuntimeOption::EvalRuntimeTypeProfile && !ret.exists(s_type_profiling)) {
     ret.set(s_type_profiling, Array());
   }
@@ -702,7 +702,11 @@ static void set_method_info(Array &ret, const Func* func) {
   set_function_info(ret, func);
   set_source_info(ret, func->unit()->filepath()->data(),
                   func->line1(), func->line2());
-  set_method_prototype_info(ret, func);
+  // If Func* is from a PreClass, it doesn't know about base classes etc.
+  // Swap it out for the full version if possible.
+  auto resolved_func = cls->lookupMethod(func->name());
+  set_method_prototype_info(ret,
+                            resolved_func ? resolved_func : func);
 }
 
 static Array get_method_info(const ClassInfo *cls, CVarRef name) {
@@ -741,7 +745,7 @@ Array HHVM_FUNCTION(hphp_get_method_info, CVarRef class_or_object,
     if (!func) return Array();
   }
   Array ret;
-  set_method_info(ret, func);
+  set_method_info(ret, func, cls);
   return ret;
 }
 
@@ -995,18 +999,14 @@ Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name) {
     Func* const* methods = cls->preClass()->methods();
     size_t const numMethods = cls->preClass()->numMethods();
     for (Slot i = 0; i < numMethods; ++i) {
-      const Func* pcm = methods[i];
-      if (pcm->isGenerated()) continue;
-      // ... but the PreClass doesn't have the full base class information
-      // required for a ReflectionMethod::getPrototype()
-      const Func* m = cls->lookupMethod(pcm->name());
+      const Func* m = methods[i];
+      if (m->isGenerated()) continue;
 
-      assert(m != nullptr);
       Array info = Array::Create();
       if (RuntimeOption::EvalRuntimeTypeProfile) {
-        set_type_profiling_info(info, cls, pcm);
+        set_type_profiling_info(info, cls, m);
       }
-      set_method_info(info, m);
+      set_method_info(info, m, cls);
       arr.set(f_strtolower(m->nameRef()), VarNR(info));
     }
 
@@ -1017,7 +1017,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name) {
       const Func* m = clsMethods[i];
       if (m->isGenerated()) continue;
       Array info = Array::Create();
-      set_method_info(info, m);
+      set_method_info(info, m, cls);
       arr.set(f_strtolower(m->nameRef()), VarNR(info));
     }
     ret.set(s_methods, VarNR(arr));

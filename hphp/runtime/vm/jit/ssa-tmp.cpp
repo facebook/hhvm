@@ -21,10 +21,14 @@
 namespace HPHP { namespace JIT {
 
 SSATmp::SSATmp(uint32_t opndId, IRInstruction* i, int dstId /* = 0 */)
-  : m_inst(i)
-  , m_type(outputType(i, dstId))
-  , m_id(opndId)
+  : m_id(opndId)
 {
+  setInstruction(i, dstId);
+}
+
+void SSATmp::setInstruction(IRInstruction* inst, int dstId) {
+  m_inst = inst;
+  m_type = outputType(inst, dstId);
 }
 
 bool SSATmp::isConst() const {
@@ -54,11 +58,11 @@ int typeNeededWords(Type t) {
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assert(IMPLIES(t <= Type::Gen, t.isKnownDataType()));
+    assert(IMPLIES(t <= Type::StackElem, t.isKnownDataType()));
     return 1;
   }
 
-  assert(t <= Type::Gen);
+  assert(t <= Type::StackElem);
   return t.needsReg() ? 2 : 1;
 }
 }

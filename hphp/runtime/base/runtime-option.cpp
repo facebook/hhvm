@@ -389,6 +389,11 @@ static inline bool hhbcRelaxGuardsDefault() {
   return !RuntimeOption::EvalHHIRRelaxGuards;
 }
 
+static inline bool hhirRefcountOptsDefault() {
+  // TODO(t3091846)
+  return !RuntimeOption::EvalSimulateARM;
+}
+
 static inline bool simulateARMDefault() {
 #ifdef HHVM_SIMULATE_ARM_BY_DEFAULT
   return true;

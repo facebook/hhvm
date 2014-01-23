@@ -93,7 +93,8 @@ private:
  */
 struct LocalStateHook {
   virtual void setLocalValue(uint32_t id, SSATmp* value) {}
-  virtual void refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {}
+  virtual void refineLocalValue(uint32_t id, unsigned inlineIdx,
+                                SSATmp* oldVal, SSATmp* newVal) {}
   virtual void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) {}
   virtual void updateLocalRefValue(uint32_t id, unsigned inlineIdx,
                                    SSATmp* oldRef, SSATmp* newRef) {}
@@ -263,7 +264,8 @@ struct FrameState : private LocalStateHook {
 
   /* LocalStateHook overrides */
   void setLocalValue(uint32_t id, SSATmp* value) override;
-  void refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) override;
+  void refineLocalValue(uint32_t id, unsigned inlineIdx,
+                        SSATmp* oldVal, SSATmp* newVal) override;
   void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) override;
   void updateLocalRefValue(uint32_t id, unsigned inlineIdx, SSATmp* oldRef,
                            SSATmp* newRef) override;

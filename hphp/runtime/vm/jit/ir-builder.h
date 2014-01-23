@@ -79,7 +79,6 @@ struct IRBuilder {
 
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
   bool typeMightRelax(SSATmp* val = nullptr) const;
-  bool shouldElideAssertType(Type oldType, Type newType, SSATmp* oldVal) const;
 
   IRUnit& unit() { return m_unit; }
   FrameState& state() { return m_state; }

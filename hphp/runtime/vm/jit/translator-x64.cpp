@@ -85,6 +85,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/runtime-option-guard.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -1852,6 +1853,21 @@ TranslatorX64::translateWork(const TranslArgs& args) {
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
       region = selectRegion(rContext, tp.get(), m_mode);
+
+      if (RuntimeOption::EvalJitCompareRegions &&
+          RuntimeOption::EvalJitRegionSelector == "tracelet") {
+        // Re-analyze with guard relaxation on
+        OPTION_GUARD(EvalHHBCRelaxGuards, 1);
+        OPTION_GUARD(EvalHHIRRelaxGuards, 0);
+        auto legacyRegion = selectTraceletLegacy(rContext.spOffset,
+                                                 *analyze(sk));
+        if (!region) {
+          Trace::ftraceRelease("{:-^60}\nCouldn't select tracelet region "
+                               "for:\n{}", "", show(*legacyRegion));
+        } else {
+          diffRegions(*region, *legacyRegion);
+        }
+      }
     }
 
     TranslateResult result = Retry;
@@ -2101,7 +2117,16 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       // problem, flag it to be interpreted, and retranslate the tracelet.
       for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
         if (ni->source.offset() == fcg.bcOff) {
-          always_assert(!ni->interp);
+          always_assert_log(
+            !ni->interp,
+            [&] {
+              std::ostringstream oss;
+              oss << folly::format("code generation failed with {}\n",
+                                   fcg.what());
+              print(oss, m_irTrans->hhbcTrans().unit());
+              return oss.str();
+            });
+
           ni->interp = true;
           FTRACE(1, "HHIR: RETRY Translation {}: will interpOne BC instr {} "
                  "after failing to code-gen \n\n",

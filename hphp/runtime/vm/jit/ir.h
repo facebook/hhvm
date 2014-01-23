@@ -138,8 +138,8 @@ class FailedCodeGen : public std::runtime_error {
  *     DUnbox(N) single dst has unboxed type of src N
  *     DBox(N)   single dst has boxed type of src N
  *     DParam    single dst has type of the instruction's type parameter
- *     DLdRef    single dst has type of the instruction's type parameter, with
- *               any specialization removed
+ *     DLdRef    single dst has type of the instruction's type parameter,
+ *               loosened to allow efficient type checks
  *     DAllocObj single dst has a type of a newly allocated object; may be a
  *               specialized object type if the class is known
  *     DThis     single dst has type Obj<ctx>, where ctx is the

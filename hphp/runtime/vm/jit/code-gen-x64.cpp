@@ -3138,6 +3138,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
+  assert(m_unit.bcOff() == inst->marker().bcOff);
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
   auto const destSR = m_tx64->getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);

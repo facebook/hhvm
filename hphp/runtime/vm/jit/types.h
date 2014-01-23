@@ -19,6 +19,7 @@
 
 #include <vector>
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
@@ -75,6 +76,15 @@ enum TransKind {
   TRANS_KINDS
 #undef DO
 };
+
+inline std::string show(TransKind k) {
+  switch (k) {
+#   define DO(name) case Trans##name: return "Trans" #name;
+TRANS_KINDS
+#   undef DO
+  }
+  not_reached();
+}
 
 }}
 

@@ -794,12 +794,12 @@ private:
    * Eval stack helpers.
    */
   SSATmp* push(SSATmp* tmp);
-  SSATmp* pushIncRef(SSATmp* tmp) { gen(IncRef, tmp); return push(tmp); }
+  SSATmp* pushIncRef(SSATmp* tmp, TypeConstraint tc = DataTypeCountness);
   SSATmp* pop(Type type, TypeConstraint tc = DataTypeSpecific);
   void    popDecRef(Type type, TypeConstraint tc = DataTypeCountness);
   void    discard(unsigned n);
   SSATmp* popC(TypeConstraint tc = DataTypeSpecific) {
-    return pop(Type::Cell, {tc.category, std::min(Type::Cell, tc.knownType)});
+    return pop(Type::Cell, tc);
   }
   SSATmp* popV() { return pop(Type::BoxedCell); }
   SSATmp* popR() { return pop(Type::Gen);       }

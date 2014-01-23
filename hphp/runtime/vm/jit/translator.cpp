@@ -365,7 +365,6 @@ static uint32_t get_random()
     return (m_z << 16) + m_w;  /* 32-bit result */
 }
 
-static const int kTooPolyPred = 2;
 static const int kTooPolyRet = 6;
 
 bool
@@ -679,11 +678,6 @@ predictOutputs(SrcKey startSk,
   auto const op = ni->op();
   static const double kAccept = 1.0;
   std::pair<DataType, double> pred = std::make_pair(KindOfAny, 0.0);
-  // Type predictions grow tracelets, and can have a side effect of making
-  // them combinatorially explode if they bring in precondtions that vary a
-  // lot. Get more conservative as evidence mounts that this is a
-  // polymorphic tracelet.
-  if (tx64->numTranslations(startSk) >= kTooPolyPred) return KindOfAny;
   if (op == OpCGetS) {
     const StringData* propName = ni->inputs[1]->rtt.valueStringOrNull();
     if (propName) {
@@ -780,7 +774,9 @@ getDynLocType(const SrcKey startSk,
       StringData* sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
       assert(sd);
       const TypedValue* tv = Unit::lookupPersistentCns(sd);
-      if (tv) {
+      // KindOfUninit means this is a dynamic system constant so we don't know
+      // the type. <img src="clowntown.jpg">
+      if (tv && tv->m_type != KindOfUninit) {
         return RuntimeType(tv->m_type);
       }
     } // Fall through
@@ -2949,6 +2945,9 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       return DataTypeSpecific;
     }
 
+    case OpUnsetL:
+      return DataTypeCountness;
+
     case OpCGetL:
       return DataTypeCountnessInit;
 
@@ -2999,9 +2998,14 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
     //
     // Collections and Iterator related specializations
     //
+    case OpFPassM:
+      if (instr->preppedByRef) {
+        // This is equivalent to a VGetM.
+        return DataTypeSpecific;
+      }
+      // fallthrough
     case OpCGetM:
     case OpIssetM:
-    case OpFPassM:
       if (specType.getOuterType() == KindOfArray) {
         if (instr->inputs.size() == 2 && opndIdx == 0) {
           if (specType.hasArrayKind() &&
@@ -3023,7 +3027,9 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       if (specType.getOuterType() == KindOfObject) {
         if (instr->inputs.size() == 3 && opndIdx == 1) {
           const Class* klass = specType.getSpecializedClass();
-          if (klass != nullptr && isOptimizableCollectionClass(klass)) {
+          // Pairs are immutable so special case that here.
+          if (klass != nullptr && isOptimizableCollectionClass(klass) &&
+              klass != c_Pair::classof()) {
             return DataTypeSpecialized;
           }
         }
@@ -3803,6 +3809,9 @@ breakBB:
 
   if (RuntimeOption::EvalHHBCRelaxGuards && m_mode == TransLive) {
     relaxDeps(t, tas);
+  } else {
+    FTRACE(3, "Not relaxing deps. HHBCRelax: {}, mode: {}\n",
+           RuntimeOption::EvalHHBCRelaxGuards, show(m_mode));
   }
 
   // Mark the last instruction appropriately
@@ -3979,10 +3988,14 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         auto const offset = inst.source.offset();
 
         // These 'predictions' mean the type is InitNull or the predicted type,
-        // so we assert InitNull | t, then guard t. This allows certain
-        // optimizations in the IR.
+        // so we assert InitNull | t, then guard t if the location isn't known
+        // to be null. This allows certain optimizations in the IR.
         hhbcTrans.assertType(loc, Type::InitNull | t);
-        hhbcTrans.checkType(loc, t, offset);
+        auto oldType = hhbcTrans.rttFromLocation(
+          stackFilter(inst.inputs[arg]->location)).valueType();
+        if (!IS_NULL_TYPE(oldType)) {
+          hhbcTrans.checkType(loc, t, offset);
+        }
         updateType();
         break;
       }

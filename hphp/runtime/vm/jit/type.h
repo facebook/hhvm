@@ -241,6 +241,7 @@ public:
   }
 
   bool notBoxed() const {
+    assert(subtypeOf(Gen));
     return subtypeOf(Cell);
   }
 
@@ -289,11 +290,11 @@ public:
    * TODO(#3390819): this function should return false for Str and
    * Null.
    *
-   * Pre: subtypeOf(Gen | Cls) || equals(None)
+   * Pre: subtypeOf(StackElem) || equals(None)
    */
   bool isKnownDataType() const {
     if (subtypeOf(Type::None)) return false;
-    assert(subtypeOf(Gen | Cls));
+    assert(subtypeOf(StackElem));
 
     // Some unions that correspond to single KindOfs.  And Type::Str
     // and Type::Null for now for historical reasons.
@@ -317,7 +318,7 @@ public:
    * runtime.
    */
   bool needsReg() const {
-    return subtypeOf(Gen) && !isKnownDataType();
+    return subtypeOf(StackElem) && !isKnownDataType();
   }
 
   bool needsStaticBitCheck() const {
@@ -481,8 +482,8 @@ public:
     not_reached();
   }
 
-  Type innerType() const {
-    assert(isBoxed());
+ Type innerType() const {
+    assert(isBoxed() || equals(Bottom));
     return Type(m_bits >> kBoxShift, m_extra);
   }
 
@@ -653,10 +654,12 @@ Type convertToType(RepoAuthType ty);
 
 struct TypeConstraint {
   /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric,
-                                Type type = Type::Gen)
+                                Type aType = Type::Gen,
+                                DataTypeCategory inner = DataTypeGeneric)
     : category(cat)
+    , innerCat(inner)
     , weak(false)
-    , knownType(type)
+    , assertedType(aType)
   {}
 
   std::string toString() const;
@@ -670,21 +673,20 @@ struct TypeConstraint {
   // by consumers of the type.
   DataTypeCategory category;
 
-  // if innerCat is set, this object represents a constraint on the inner type
-  // of the current value. It is set and cleared when the constraint code
-  // traces through an operation that unboxes or boxes an operand,
-  // respectively.
-  folly::Optional<DataTypeCategory> innerCat;
+  // When a value is boxed, innerCat is used to determine how we can relax the
+  // inner type.
+  DataTypeCategory innerCat;
 
   // If weak is true, the consumer of the value being constrained doesn't
   // actually want to constrain the guard (if found). Most often used to figure
   // out if a type can be used without further constraining guards.
   bool weak;
 
-  // knownType represents an upper bound for the type of the guard, which is
-  // known from static analysis or other guards that have been appropriately
-  // constrained. It can be used to convert some guards into asserts.
-  Type knownType;
+  // It's fairly common to emit an AssertType op with a type that is less
+  // specific than the current guard type, but more specific than the type the
+  // guard will eventually be relaxed to. We want to simplify these
+  // instructions away, and when we do, we remember their type in assertedType.
+  Type assertedType;
 };
 
 }}

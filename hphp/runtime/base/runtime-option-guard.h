@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,30 +14,46 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_JIT_GUARD_RELAXATION_H_
-#define incl_HPHP_RUNTIME_VM_JIT_GUARD_RELAXATION_H_
+#ifndef incl_HPHP_RUNTIME_BASE_OPTION_GUARD
+#define incl_HPHP_RUNTIME_BASE_OPTION_GUARD
 
-#include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/type.h"
+#include <type_traits>
 
-#include "hphp/runtime/vm/jit/block.h"
+#include "folly/Preprocessor.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP {
 
-struct SSATmp;
-struct IRUnit;
+/*
+ * RAII helper to temporarily set a runtime option to a new value. Use with
+ * OPTION_GUARD:
+ *
+ * {
+ *   OPTION_GUARD(EvalHHIRRefcountOpts, 0);
+ *   // do stuff
+ * }
+ */
+template<typename T>
+struct OptionGuard {
+  OptionGuard(T& option, T newVal)
+    : m_option(option)
+    , m_oldValue(option)
+  {
+    m_option = newVal;
+  }
 
-IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp);
-bool relaxGuards(IRUnit&, const GuardConstraints& guards, bool simple = false);
+  ~OptionGuard() {
+    m_option = m_oldValue;
+  }
 
-typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
-void visitGuards(IRUnit&, const VisitGuardFn& func);
+private:
+  T& m_option;
+  T const m_oldValue;
+};
 
-bool typeFitsConstraint(Type t, TypeConstraint cat);
-Type relaxType(Type t, TypeConstraint cat);
+#define OPTION_GUARD(name, newVal)                                      \
+  OptionGuard<std::remove_reference<decltype(RuntimeOption::name)>::type> \
+  FB_ANONYMOUS_VARIABLE(RUNTIME_OPT_GUARD)(RuntimeOption::name, (newVal))
 
-} }
+}
 
 #endif

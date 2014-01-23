@@ -79,8 +79,9 @@ void init_stack_limits(pthread_attr_t* attr) {
   // Get the guard page's size, because the stack address returned
   // above starts at the guard page, so the thread's stack limit is
   // stackaddr + guardsize.
-  if (pthread_attr_getguardsize(attr, &guardsize) != 0)
+  if (pthread_attr_getguardsize(attr, &guardsize) != 0) {
     guardsize = 0;
+  }
 
   assert(stackaddr != nullptr);
   assert(stacksize >= PTHREAD_STACK_MIN);

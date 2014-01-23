@@ -203,7 +203,6 @@ PUNT_OPCODE(JmpInstanceOfBitmask)
 PUNT_OPCODE(JmpNInstanceOfBitmask)
 PUNT_OPCODE(JmpZero)
 PUNT_OPCODE(JmpNZero)
-PUNT_OPCODE(Jmp)
 PUNT_OPCODE(ReqBindJmpGt)
 PUNT_OPCODE(ReqBindJmpGte)
 PUNT_OPCODE(ReqBindJmpLt)
@@ -351,7 +350,6 @@ PUNT_OPCODE(ClosureStaticLocInit)
 PUNT_OPCODE(StaticLocInitCached)
 PUNT_OPCODE(CufIterSpillFrame)
 PUNT_OPCODE(ReqRetranslateOpt)
-PUNT_OPCODE(ReqRetranslate)
 PUNT_OPCODE(Mov)
 PUNT_OPCODE(LdAddr)
 PUNT_OPCODE(IncRefCtx)
@@ -558,6 +556,10 @@ void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgJmp(IRInstruction* inst) {
+  emitJumpToBlock(m_tx64->code.main(), inst->taken(), CC_None);
+}
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   vixl::Label done;
@@ -1318,6 +1320,13 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
     m_stubsCode,
     SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset)
   );
+}
+
+void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
+  assert(m_unit.bcOff() == inst->marker().bcOff);
+  auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+  auto const destSR = m_tx64->getSrcRec(destSK);
+  destSR->emitFallbackJump(m_mainCode);
 }
 
 void CodeGenerator::cgSpillFrame(IRInstruction* inst) {

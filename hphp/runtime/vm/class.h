@@ -107,6 +107,10 @@ using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);
  *    unit is required) is not known at parse time.  This leads to the
  *    Maybe/Always split below.
  *
+ *    Closures have a special kind of hoistability, ClosureHoistable,
+ *    that requires them to be defined first, to avoid races if other
+ *    threads are trying to load the same unit.
+ *
  */
 class PreClass : public AtomicCountable {
   friend class PreClassEmitter;

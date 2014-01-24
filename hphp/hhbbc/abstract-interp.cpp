@@ -1725,20 +1725,31 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Parent&) { push(TCls); }
 
   void operator()(const bc::CreateCl& op) {
-    // Closures can access properties on $this or self, but we don't
-    // yet know how to analyze this.
-    killThisProps();
-    killSelfProps();
-
     auto const nargs = op.arg1;
-    for (auto i = uint32_t{0}; i < nargs; ++i) popT();
+    for (auto i = uint32_t{0}; i < nargs; ++i) {
+      // TODO(#3599292): propagate these types into closure analysis
+      // information.
+      popT();
+    }
     if (auto const rcls = m_index.resolve_class(m_ctx, op.str2)) {
       return push(objExact(*rcls));
     }
     push(TObj);
   }
 
-  void operator()(const bc::CreateCont&)  { killLocals(); push(TObj); }
+  void operator()(const bc::CreateCont&) {
+    killLocals();
+    if (m_ctx.func->isClosureBody) {
+      // Generator closures create functions *outside* the class that
+      // the closure is in, and we haven't hooked that up to be part
+      // of the class-at-a-time analysis.  So we need to kill
+      // everything on $this/self.
+      killThisProps();
+      killSelfProps();
+    }
+    push(TObj); // TODO
+  }
+
   void operator()(const bc::ContEnter&)   { popC(); }
   void operator()(const bc::UnpackCont&)  { readUnknownLocals();
                                             push(TInitCell); push(TInt); }
@@ -2842,8 +2853,6 @@ private: // $this
   // null.
   folly::Optional<Type> thisType() const {
     if (!m_ctx.cls) return folly::none;
-    // TODO(#3584175): we should be able to push a real type for closures
-    if (m_ctx.func->isClosureBody) return folly::none;
     if (auto const rcls = m_index.resolve_class(m_ctx, m_ctx.cls->name)) {
       return subObj(*rcls);
     }
@@ -2852,8 +2861,6 @@ private: // $this
 
   folly::Optional<Type> selfCls() const {
     if (!m_ctx.cls) return folly::none;
-    // TODO(#3584175): we should be able to push a real type for closures
-    if (m_ctx.func->isClosureBody) return folly::none;
     if (auto const rcls = m_index.resolve_class(m_ctx, m_ctx.cls->name)) {
       return subCls(*rcls);
     }
@@ -3439,12 +3446,13 @@ State entry_state(const Index& index,
   /*
    * Closures have a hidden local that's always the first local, which
    * stores the closure itself.
-   *
-   * TODO_4: make this a TObj=ClosureType.
    */
   if (ctx.func->isClosureBody) {
     assert(locId < ret.locals.size());
-    ret.locals[locId++] = TObj;
+    assert(ctx.func->cls);
+    auto const rcls = index.resolve_class(ctx, ctx.func->cls->name);
+    assert(rcls && "Closure classes must always be unique and must resolve");
+    ret.locals[locId++] = objExact(*rcls);
   }
 
   for (; locId < ctx.func->locals.size(); ++locId) {
@@ -3482,13 +3490,29 @@ State entry_state(const Index& index,
   return ret;
 }
 
+/*
+ * Closures inside of classes are analyzed in the context they are
+ * created in (this affects accessibility rules, access to privates,
+ * etc).
+ *
+ * Note that in the interpreter code, ctx.func->cls is not
+ * necessarily the same as ctx.cls because of closures.
+ */
+Context adjust_closure_context(Context ctx) {
+  if (ctx.cls && ctx.cls->closureContextCls) {
+    ctx.cls = ctx.cls->closureContextCls;
+  }
+  return ctx;
+}
+
 FuncAnalysis do_analyze(const Index& index,
-                        Context const ctx,
+                        Context const inputCtx,
                         ClassAnalysis* clsAnalysis) {
-  assert(ctx.func != ctx.unit->pseudomain.get() &&
+  assert(inputCtx.func != inputCtx.unit->pseudomain.get() &&
          "pseudomains not supported");
   FTRACE(2, "{:-^70}\n", "Analyze");
 
+  auto const ctx = adjust_closure_context(inputCtx);
   FuncAnalysis ai(ctx);
 
   auto rpoId = [&] (borrowed_ptr<php::Block> blk) {
@@ -3644,7 +3668,7 @@ bool operator==(const State& a, const State& b) {
 }
 
 bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
-bool operator!=(const State& a, const State& b) { return !(a == b); }
+bool operator!=(const State& a, const State& b)   { return !(a == b); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -3672,6 +3696,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   FTRACE(2, "{:#^70}\n", "Class");
 
   ClassAnalysis clsAnalysis(ctx);
+  auto const associatedClosures = index.lookup_closures(ctx.cls);
 
   /*
    * Initialize inferred private property types to their in-class
@@ -3721,9 +3746,10 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     auto const previousStatics = clsAnalysis.privateStatics;
 
     std::vector<FuncAnalysis> methodResults;
+    std::vector<FuncAnalysis> closureResults;
 
-    // Analyze every method in the class until we reach a fixed point on
-    // the private property states.
+    // Analyze every method in the class until we reach a fixed point
+    // on the private property states.
     for (auto& f : ctx.cls->methods) {
       methodResults.push_back(
         do_analyze(
@@ -3734,10 +3760,22 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       );
     }
 
+    for (auto& c : associatedClosures) {
+      auto const invoke = borrow(c->methods[0]);
+      closureResults.push_back(
+        do_analyze(
+          index,
+          Context { ctx.unit, invoke, c },
+          &clsAnalysis
+        )
+      );
+    }
+
     // Check if we've reached a fixed point yet.
-    if (previousProps == clsAnalysis.privateProperties &&
+    if (previousProps   == clsAnalysis.privateProperties &&
         previousStatics == clsAnalysis.privateStatics) {
-      clsAnalysis.methods = std::move(methodResults);
+      clsAnalysis.methods  = std::move(methodResults);
+      clsAnalysis.closures = std::move(closureResults);
       break;
     }
   }

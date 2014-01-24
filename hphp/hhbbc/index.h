@@ -231,6 +231,13 @@ struct Index {
   ~Index();
 
   /*
+   * Find all the closures created inside the context of a given
+   * php::Class.
+   */
+  std::vector<borrowed_ptr<php::Class>>
+    lookup_closures(borrowed_ptr<const php::Class>) const;
+
+  /*
    * Try to resolve which class will be the class named `name' from a
    * given context, if we can resolve it to a single class.
    *

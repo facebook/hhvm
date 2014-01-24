@@ -127,6 +127,21 @@ std::string show(const Block& block) {
 std::string show(const Func& func) {
   std::string ret;
 
+#define X(what) if (func.what) folly::toAppend(#what "\n", &ret)
+  X(isClosureBody);
+  X(isGeneratorFromClosure);
+  X(isPairGenerator);
+  X(isGeneratorBody);
+  X(isAsync);
+#undef X
+
+  if (auto const f = func.innerGeneratorFunc) {
+    ret += folly::format("innerGeneratorFunc: {}\n", f->name->data()).str();
+  }
+  if (auto const f = func.outerGeneratorFunc) {
+    ret += folly::format("outerGeneratorFunc: {}\n", f->name->data()).str();
+  }
+
   for (auto& blk : func.blocks) {
     ret += folly::format(
       "block #{}\n{}",

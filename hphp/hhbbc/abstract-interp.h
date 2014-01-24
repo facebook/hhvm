@@ -87,10 +87,16 @@ struct FuncAnalysis {
   FuncAnalysis(FuncAnalysis&&) = default;
   FuncAnalysis& operator=(FuncAnalysis&&) = default;
 
-  // FuncAnalysis carries the Context it was created for because using
-  // the wrong FuncAnalysis is a pretty bad thing to do.  (Yes I did
-  // it.)  And any function that wants to look at a FuncAnalysis is
-  // going to need the source Context.
+  /*
+   * FuncAnalysis carries the Context it was created for because
+   * generally you'll need it again when you look at the analysis
+   * results.
+   *
+   * Note that the Context is adjusted to account for the fact that
+   * Closure __invoke methods run in the context of a class other than
+   * their declaring class.  So ctx.func->cls will not be the same as
+   * ctx->cls in this case.
+   */
   Context ctx;
 
   // Blocks in a reverse post order, with DV initializers.
@@ -113,8 +119,10 @@ struct ClassAnalysis {
   // The context that describes the class we did this analysis for.
   Context ctx;
 
-  // FuncAnalysis results for each of the methods on the class.
+  // FuncAnalysis results for each of the methods on the class, and
+  // for each closure allocated in the class's context.
   std::vector<FuncAnalysis> methods;
+  std::vector<FuncAnalysis> closures;
 
   // Inferred types for private instance and static properties.
   PropState privateProperties;

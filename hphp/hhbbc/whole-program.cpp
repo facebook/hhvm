@@ -148,6 +148,11 @@ std::vector<WorkItem> initial_work(const php::Program& program) {
 
   for (auto& u : program.units) {
     for (auto& c : u->classes) {
+      if (c->closureContextCls) {
+        // For class-at-a-time analysis, closures that are associated
+        // with a class context are analyzed as part of that context.
+        continue;
+      }
       ret.emplace_back(WorkType::Class,
                        Context { borrow(u), nullptr, borrow(c) });
     }
@@ -245,7 +250,8 @@ void optimize(Index& index, php::Program& program) {
                                    result->cls.privateProperties);
         index.refine_private_statics(result->cls.ctx.cls,
                                      result->cls.privateStatics);
-        for (auto& fa : result->cls.methods) update_func(fa);
+        for (auto& fa : result->cls.methods)  update_func(fa);
+        for (auto& fa : result->cls.closures) update_func(fa);
         break;
       }
     }

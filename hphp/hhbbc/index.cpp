@@ -33,6 +33,7 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/class-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -327,6 +328,13 @@ struct IndexData {
   ISStringToMany<php::Func>      funcs;
   ISStringToMany<php::TypeAlias> typeAliases;
 
+  // Map from each class to all the closures that are allocated in
+  // functions of that class.
+  std::unordered_map<
+    borrowed_ptr<const php::Class>,
+    std::unordered_set<borrowed_ptr<php::Class>>
+  > classClosureMap;
+
   std::mutex classInfoLock;
   std::unordered_map<
     borrowed_ptr<const php::Class>,
@@ -506,27 +514,36 @@ bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-//////////////////////////////////////////////////////////////////////
-
-static void add_unit_to_index(IndexData& index, const php::Unit& unit) {
+void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   for (auto& c : unit.classes) {
     index.classes.insert({c->name, borrow(c)});
+
     for (auto& m : c->methods) {
       index.methods.insert({m->name, borrow(m)});
     }
+
+    if (c->closureContextCls) {
+      index.classClosureMap[c->closureContextCls].insert(borrow(c));
+    }
   }
+
   for (auto& f : unit.funcs) {
     if (options.InterceptableFunctions.count(std::string{f->name->data()})) {
       f->attrs = f->attrs | AttrDynamicInvoke;
     }
     index.funcs.insert({f->name, borrow(f)});
   }
+
   for (auto& ta : unit.typeAliases) {
     index.typeAliases.insert({ta->name, borrow(ta)});
   }
 }
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
 
 Index::Index(borrowed_ptr<php::Program> program)
   : m_data(folly::make_unique<IndexData>())
@@ -545,6 +562,18 @@ Index::Index(borrowed_ptr<php::Unit> unit)
 // Defined here so IndexData is a complete type for the unique_ptr
 // destructor.
 Index::~Index() {}
+
+//////////////////////////////////////////////////////////////////////
+
+std::vector<borrowed_ptr<php::Class>>
+Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
+  std::vector<borrowed_ptr<php::Class>> ret;
+  auto const it = m_data->classClosureMap.find(cls);
+  if (it != end(m_data->classClosureMap)) {
+    ret.assign(begin(it->second), end(it->second));
+  }
+  return ret;
+}
 
 //////////////////////////////////////////////////////////////////////
 

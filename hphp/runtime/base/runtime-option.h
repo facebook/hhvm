@@ -409,7 +409,7 @@ public:
   F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
   F(bool, HHIRExtraOptPass,            true)                            \
-  F(uint32_t, HHIRNumFreeRegs,         -1)                              \
+  F(uint32_t, HHIRNumFreeRegs,         64)                              \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
   F(uint32_t, HHIRInliningMaxCost,     13)                              \
   F(uint32_t, HHIRAlwaysInlineMaxCost, 10)                              \

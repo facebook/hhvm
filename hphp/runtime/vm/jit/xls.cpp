@@ -534,6 +534,7 @@ void XLS::buildIntervals() {
   }
   // Implement stress mode by blocking more registers.
   stress += RuntimeOption::EvalHHIRNumFreeRegs;
+  assert(stress >= RuntimeOption::EvalHHIRNumFreeRegs); // no wraparound.
   for (auto r : m_blocked) {
     auto& blocked = m_blocked[r];
     if (blocked.empty() || blocked.start() == 0) continue;

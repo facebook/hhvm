@@ -512,6 +512,20 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
     return init_null();
   }
 
+  if (num_req == 1) {
+    // Iterating through the counter is correct but a bit inefficient
+    // compared to being able to access the right offset into array data,
+    // but necessary for this code to be agnostic to the array's internal
+    // representation.  Assuming uniform distribution, we'll expect to
+    // iterate through half of the array's data.
+    ssize_t index = f_rand(0, count-1);
+    ssize_t pos = input->iter_begin();
+    while (index--) {
+      pos = input->iter_advance(pos);
+    }
+    return input->getKey(pos);
+  }
+
   std::vector<ssize_t> indices;
   indices.reserve(count);
   for (ssize_t pos = input->iter_begin(); pos != ArrayData::invalid_index;
@@ -519,10 +533,6 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
     indices.push_back(pos);
   }
   php_array_data_shuffle(indices);
-
-  if (num_req == 1) {
-    return input->getKey(indices[0]);
-  }
 
   Array ret = Array::Create();
   for (int i = 0; i < num_req; i++) {

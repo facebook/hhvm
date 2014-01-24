@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_CLASS_UTIL_H_
-#define incl_HPHP_CLASS_UTIL_H_
+#ifndef incl_HHBBC_CLASS_UTIL_H_
+#define incl_HHBBC_CLASS_UTIL_H_
 
 #include "hphp/hhbbc/misc.h"
 

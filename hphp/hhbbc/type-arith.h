@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_HHBBC_TYPE_ARITH_H_
-#define incl_HPHP_HHBBC_TYPE_ARITH_H_
+#ifndef incl_HHBBC_TYPE_ARITH_H_
+#define incl_HHBBC_TYPE_ARITH_H_
 
 namespace HPHP { namespace HHBBC {
 

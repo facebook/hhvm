@@ -44,7 +44,7 @@ T ProfCounters<T>::get(uint32_t id) const {
 template<typename T>
 T* ProfCounters<T>::getAddr(uint32_t id) {
   // allocate a new chunk of counters if necessary
-  if (id >= m_chunks.size() * kCountersPerChunk) {
+  while (id >= m_chunks.size() * kCountersPerChunk) {
     uint32_t size = sizeof(T) * kCountersPerChunk;
     T* chunk = (T*)malloc(size);
     std::fill_n(chunk, kCountersPerChunk, m_initVal);

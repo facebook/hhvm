@@ -1290,16 +1290,14 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
           JIT::smashCall(toSmash, dest);
           smashed = true;
-          // For functions to be PGO'ed, if their prologues haven't been
-          // regenerated yet, then save toSmash as a caller to the
-          // prologue, so that it can later be smashed to call a new
-          // prologue when it's generated.
+          // For functions to be PGO'ed, if their current prologues
+          // are still profiling ones (living in code.prof()), then
+          // save toSmash as a caller to the prologue, so that it can
+          // later be smashed to call a new prologue when it's generated.
           int calleeNumParams = func->numParams();
           int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                                      nArgs :  calleeNumParams + 1);
-          SrcKey calleeSK = {func,
-                             func->getEntryForNumArgs(calledPrologNumArgs)};
-          if (profileSrcKey(calleeSK)) {
+          if (code.prof().contains(dest)) {
             if (isImmutable) {
               m_profData->addPrologueMainCaller(func, calledPrologNumArgs,
                                                 toSmash);

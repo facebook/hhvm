@@ -1103,7 +1103,6 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
                                                      bool toLower,
                                                      const T &checkExists) {
   assert(!m_map.isNull());
-  JIT::VMRegAnchor _;
   while (true) {
     CVarRef &type_map = m_map.get()->get(kind);
     auto const typeMapCell = type_map.asCell();
@@ -1118,31 +1117,33 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
           fName = m_map_root + fName;
         }
       }
-
-      bool initial;
-      VMExecutionContext* ec = g_vmContext;
-      Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
-      if (u) {
-        if (initial) {
-          TypedValue retval;
-          ec->invokeFunc(&retval, u->getMain(), init_null_variant,
-                         nullptr, nullptr, nullptr, nullptr,
-                         ExecutionContext::InvokePseudoMain);
-          tvRefcountedDecRef(&retval);
+      try {
+        JIT::VMRegAnchor _;
+        bool initial;
+        VMExecutionContext* ec = g_vmContext;
+        Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
+        if (u) {
+          if (initial) {
+            TypedValue retval;
+            ec->invokeFunc(&retval, u->getMain(), init_null_variant,
+                           nullptr, nullptr, nullptr, nullptr,
+                           ExecutionContext::InvokePseudoMain);
+            tvRefcountedDecRef(&retval);
+          }
+          ok = true;
         }
-        ok = true;
-      }
+      } catch (...) {}
     }
     if (ok && checkExists(name)) {
       return Success;
     }
-    CVarRef &onFail = m_map.get()->get(s_failure);
-    if (onFail.isNull()) return Failure;
+    CVarRef &func = m_map.get()->get(s_failure);
+    if (func.isNull()) return Failure;
     // can throw, otherwise
     //  - true means the map was updated. try again
     //  - false means we should stop applying autoloaders (only affects classes)
     //  - anything else means keep going
-    Variant action = vm_call_user_func(onFail, make_packed_array(kind, name));
+    Variant action = vm_call_user_func(func, make_packed_array(kind, name));
     auto const actionCell = action.asCell();
     if (actionCell->m_type == KindOfBoolean) {
       if (actionCell->m_data.num) continue;

@@ -4,7 +4,7 @@ compiler:
   - gcc
 
 before_script: 
-  - time TRAVIS=1 ./configure_ubuntu_12.04.sh
+  - time TRAVIS=1 ./configure_generic.sh
 # for some tests  
   - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - time HPHP_HOME=`pwd` make -j 6

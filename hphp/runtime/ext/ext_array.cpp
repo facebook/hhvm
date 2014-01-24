@@ -619,7 +619,9 @@ Variant f_array_reverse(CVarRef input, bool preserve_keys /* = false */) {
 
   const auto& cell_input = *input.asCell();
   if (UNLIKELY(!isContainer(cell_input))) {
-    throw_expected_array_or_collection_exception();
+    raise_warning("Invalid operand type was used: %s expects "
+                  "an array or collection as argument 1",
+                  __FUNCTION__+2);
     return uninit_null();
   }
 
@@ -641,13 +643,54 @@ Variant f_array_shift(VRefParam array) {
   return array.dequeue();
 }
 
-Variant f_array_slice(CVarRef array, int offset,
+Variant f_array_slice(CVarRef input, int offset,
                       CVarRef length /* = null_variant */,
                       bool preserve_keys /* = false */) {
-  getCheckedArray(array);
+  const auto& cell_input = *input.asCell();
+  if (UNLIKELY(!isContainer(cell_input))) {
+    raise_warning("Invalid operand type was used: %s expects "
+                  "an array or collection as argument 1",
+                  __FUNCTION__+2);
+    return uninit_null();
+  }
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
-  return ArrayUtil::Slice(arr_array, offset, len, preserve_keys);
+
+  int num_in = getContainerSize(cell_input);
+  if (offset > num_in) {
+    offset = num_in;
+  } else if (offset < 0 && (offset = (num_in + offset)) < 0) {
+    offset = 0;
+  }
+
+  if (len < 0) {
+    len = num_in - offset + len;
+  } else if (((unsigned)offset + (unsigned)len) > (unsigned)num_in) {
+    len = num_in - offset;
+  }
+
+  if (len <= 0) {
+    return empty_array;
+  }
+
+  // PackedArrayInit can't be used because non-numeric keys are preserved
+  // even when preserve_keys is false
+  Array ret = Array::attach(HphpArray::MakeReserve(len));
+  int pos = 0;
+  ArrayIter iter(input);
+  for (; pos < offset && iter; ++pos, ++iter) {}
+  for (; pos < (offset + len) && iter; ++pos, ++iter) {
+    Variant key(iter.first());
+    bool doAppend = !preserve_keys && key.isNumeric();
+    CVarRef v = iter.secondRefPlus();
+    if (doAppend) {
+      ret.appendWithRef(v);
+    } else {
+      ret.setWithRef(key, v, true);
+    }
+  }
+  return ret;
 }
+
 Variant f_array_splice(VRefParam input, int offset,
                        CVarRef length /* = null_variant */,
                        CVarRef replacement /* = null_variant */) {

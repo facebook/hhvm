@@ -313,25 +313,6 @@ Variant f_func_get_arg(int arg_num) {
   return false;
 }
 
-Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos) {
-  if (num_args <= params.size()) {
-    if (pos >= 0 && pos < num_args) {
-      return params.rvalAt(pos);
-    }
-  } else {
-    if (pos >= 0) {
-      int index = pos - params.size();
-      if (index < 0) {
-        return params.rvalAt(pos);
-      }
-      if (index < args.size()) {
-        return args.rvalAt(index);
-      }
-    }
-  }
-  return false;
-}
-
 Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   if (ar == NULL) {
     return Array();
@@ -373,26 +354,6 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
 
 Variant f_func_get_args() {
   FUNC_GET_ARGS_IMPL(0);
-}
-
-Array func_get_args(int num_args, CArrRef params, CArrRef args) {
-  if (params.empty() && args.empty()) return Array::Create();
-  if (args.empty()) {
-    if (num_args < params.size()) {
-      return params.slice(0, num_args, false);
-    }
-    return params;
-  }
-
-  Array derefArgs;
-  for (ArrayIter iter(args); iter; ++iter) {
-    derefArgs.append(iter.second());
-  }
-
-  if (params.empty()) return derefArgs;
-  assert(num_args > params.size());
-  Array ret = Array(params).merge(derefArgs);
-  return ret;
 }
 
 Variant f_hphp_func_slice_args(int offset) {

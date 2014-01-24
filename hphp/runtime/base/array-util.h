@@ -37,14 +37,6 @@ public:
   static Variant Chunk(CArrRef input, int size, bool preserve_keys = false);
 
   /**
-   * Taking a slice. When "preserve_keys" is true, a vector will turn
-   * into numerically keyed map. When "preserve_keys" is false, a map will
-   * turn into vectors, unless keys are not numeric.
-   */
-  static Variant Slice(CArrRef input, int offset, int64_t length,
-                       bool preserve_keys);
-
-  /**
    * Removes the elements designated by offset and length and replace them
    * with supplied array.
    */

@@ -200,7 +200,6 @@ public:
    * into numerically keyed map.
    */
   Array& merge(CArrRef arr);
-  Array  slice(int offset, int length, bool preserve_keys) const;
 
   /*
    * Sorting.

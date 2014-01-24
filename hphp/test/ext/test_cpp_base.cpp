@@ -452,28 +452,6 @@ bool TestCppBase::TestArray() {
     VS(arr, make_map_array("n0", "s2", "n1", "s3"));
   }
 
-  // slice
-  {
-    Array arr = make_packed_array("test1", "test2");
-    Array sub = arr.slice(1, 1, true);
-    VS(sub, make_map_array(1, "test2"));
-  }
-  {
-    Array arr = make_packed_array("test1", "test2");
-    Array sub = arr.slice(1, 1, false);
-    VS(sub, make_packed_array("test2"));
-  }
-  {
-    Array arr = make_map_array("n1", "test1", "n2", "test2");
-    Array sub = arr.slice(1, 1, true);
-    VS(sub, make_map_array("n2", "test2"));
-  }
-  {
-    Array arr = make_map_array("n1", "test1", "n2", "test2");
-    Array sub = arr.slice(1, 1, false);
-    VS(sub, make_map_array("n2", "test2"));
-  }
-
   // escalation
   {
     Array arr;

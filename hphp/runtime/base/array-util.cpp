@@ -57,38 +57,6 @@ Variant ArrayUtil::Chunk(CArrRef input, int size,
   return ret;
 }
 
-Variant ArrayUtil::Slice(CArrRef input, int offset, int64_t length,
-                         bool preserve_keys) {
-  int num_in = input.size();
-  if (offset > num_in) {
-    offset = num_in;
-  } else if (offset < 0 && (offset = (num_in + offset)) < 0) {
-    offset = 0;
-  }
-
-  if (length < 0) {
-    length = num_in - offset + length;
-  } else if (((unsigned)offset + (unsigned)length) > (unsigned)num_in) {
-    length = num_in - offset;
-  }
-
-  Array out_hash = Array::Create();
-  int pos = 0;
-  ArrayIter iter(input);
-  for (; pos < offset && iter; ++pos, ++iter) {}
-  for (; pos < offset + length && iter; ++pos, ++iter) {
-    Variant key(iter.first());
-    bool doAppend = !preserve_keys && key.isNumeric();
-    CVarRef v = iter.secondRef();
-    if (doAppend) {
-      out_hash.appendWithRef(v);
-    } else {
-      out_hash.setWithRef(key, v, true);
-    }
-  }
-  return out_hash;
-}
-
 Variant ArrayUtil::Splice(CArrRef input, int offset, int64_t length /* = 0 */,
                           CVarRef replacement /* = null_variant */,
                           Array *removed /* = NULL */) {

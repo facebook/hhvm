@@ -296,11 +296,6 @@ Array &Array::mergeImpl(ArrayData *data) {
   return *this;
 }
 
-Array Array::slice(int offset, int length, bool preserve_keys) const {
-  if (m_px == nullptr) return Array();
-  return ArrayUtil::Slice(m_px, offset, length, preserve_keys).toArray();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
 

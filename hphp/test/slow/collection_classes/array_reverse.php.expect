@@ -1,0 +1,291 @@
+--------------------
+input: array(3) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  [0]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  [2]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "bar"
+  [0]=>
+  string(3) "foo"
+}
+bool(true)
+--------------------
+input: array(3) {
+  ["a"]=>
+  string(3) "foo"
+  ["b"]=>
+  string(3) "bar"
+  ["c"]=>
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  ["c"]=>
+  string(3) "baz"
+  ["b"]=>
+  string(3) "bar"
+  ["a"]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  ["c"]=>
+  string(3) "baz"
+  ["b"]=>
+  string(3) "bar"
+  ["a"]=>
+  string(3) "foo"
+}
+bool(true)
+--------------------
+input: array(3) {
+  [10]=>
+  string(3) "foo"
+  [20]=>
+  string(3) "bar"
+  [30]=>
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  [0]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  [30]=>
+  string(3) "baz"
+  [20]=>
+  string(3) "bar"
+  [10]=>
+  string(3) "foo"
+}
+bool(true)
+--------------------
+input: object(HH\Vector)#1 (3) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  [0]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  [2]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "bar"
+  [0]=>
+  string(3) "foo"
+}
+bool(true)
+--------------------
+input: object(HH\Set)#1 (3) {
+  string(3) "foo"
+  string(3) "bar"
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  ["baz"]=>
+  string(3) "baz"
+  ["bar"]=>
+  string(3) "bar"
+  ["foo"]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  ["baz"]=>
+  string(3) "baz"
+  ["bar"]=>
+  string(3) "bar"
+  ["foo"]=>
+  string(3) "foo"
+}
+bool(true)
+--------------------
+input: object(Map)#1 (3) {
+  ["a"]=>
+  string(3) "foo"
+  ["b"]=>
+  string(3) "bar"
+  ["c"]=>
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  ["c"]=>
+  string(3) "baz"
+  ["b"]=>
+  string(3) "bar"
+  ["a"]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  ["c"]=>
+  string(3) "baz"
+  ["b"]=>
+  string(3) "bar"
+  ["a"]=>
+  string(3) "foo"
+}
+bool(true)
+--------------------
+input: object(Map)#1 (3) {
+  [10]=>
+  string(3) "foo"
+  [20]=>
+  string(3) "bar"
+  [30]=>
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  [0]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  [30]=>
+  string(3) "baz"
+  [20]=>
+  string(3) "bar"
+  [10]=>
+  string(3) "foo"
+}
+bool(true)
+--------------------
+input: object(HH\FrozenVector)#1 (3) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  [0]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  [2]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "bar"
+  [0]=>
+  string(3) "foo"
+}
+bool(true)
+--------------------
+input: object(HH\FrozenSet)#1 (3) {
+  string(3) "foo"
+  string(3) "bar"
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  ["baz"]=>
+  string(3) "baz"
+  ["bar"]=>
+  string(3) "bar"
+  ["foo"]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  ["baz"]=>
+  string(3) "baz"
+  ["bar"]=>
+  string(3) "bar"
+  ["foo"]=>
+  string(3) "foo"
+}
+bool(true)
+--------------------
+input: object(HH\FrozenMap)#1 (3) {
+  ["a"]=>
+  string(3) "foo"
+  ["b"]=>
+  string(3) "bar"
+  ["c"]=>
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  ["c"]=>
+  string(3) "baz"
+  ["b"]=>
+  string(3) "bar"
+  ["a"]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  ["c"]=>
+  string(3) "baz"
+  ["b"]=>
+  string(3) "bar"
+  ["a"]=>
+  string(3) "foo"
+}
+bool(true)
+--------------------
+input: object(HH\FrozenMap)#1 (3) {
+  [10]=>
+  string(3) "foo"
+  [20]=>
+  string(3) "bar"
+  [30]=>
+  string(3) "baz"
+}
+reverse discard keys: array(3) {
+  [0]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "foo"
+}
+bool(true)
+reverse preserve keys: array(3) {
+  [30]=>
+  string(3) "baz"
+  [20]=>
+  string(3) "bar"
+  [10]=>
+  string(3) "foo"
+}
+bool(true)

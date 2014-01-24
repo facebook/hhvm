@@ -608,9 +608,26 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
   return ArrayUtil::Reduce(arr_input, reduce_func, &ctx, initial);
 }
 
-Variant f_array_reverse(CVarRef array, bool preserve_keys /* = false */) {
-  getCheckedArray(array);
-  return ArrayUtil::Reverse(arr_array, preserve_keys);
+Variant f_array_reverse(CVarRef input, bool preserve_keys /* = false */) {
+
+  const auto& cell_input = *input.asCell();
+  if (UNLIKELY(!isContainer(cell_input))) {
+    throw_expected_array_or_collection_exception();
+    return uninit_null();
+  }
+
+  if (LIKELY(cell_input.m_type == KindOfArray)) {
+    ArrNR arrNR(cell_input.m_data.parr);
+    CArrRef arr = arrNR.asArray();
+    return ArrayUtil::Reverse(arr, preserve_keys);
+  }
+
+  // For collections, we convert to their array representation and then
+  // reverse it, rather than building a reversed version of ArrayIter
+  assert(cell_input.m_type == KindOfObject);
+  ObjectData* obj = cell_input.m_data.pobj;
+  assert(obj && obj->isCollection());
+  return ArrayUtil::Reverse(obj->o_toArray(), preserve_keys);
 }
 
 Variant f_array_shift(VRefParam array) {

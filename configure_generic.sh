@@ -51,11 +51,11 @@ if [ "x${TRAVIS}" != "x" ]; then
   CPUS=`expr ${CPUS} + 1`
   echo "Travis Mode    : YES"
   echo "# CPUs         : ${CPUS}"
+  echo ""
 else
   echo "Travis Mode    : NO"
   echo ""
 fi
-exit;
 
 # Place to save all the binaries/libraries/headers from the ext packages
 export CMAKE_PREFIX_PATH=`/bin/pwd`/..

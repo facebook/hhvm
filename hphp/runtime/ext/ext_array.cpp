@@ -201,10 +201,17 @@ Variant f_array_fill(int start_index, int num, CVarRef value) {
 }
 
 Variant f_array_flip(CVarRef trans) {
-  getCheckedArrayRet(trans, false);
-  ArrayInit ret(arr_trans.size());
-  for (ArrayIter iter(arr_trans); iter; ++iter) {
-    CVarRef value(iter.secondRef());
+
+  auto const& transCell = *trans.asCell();
+  if (UNLIKELY(!isContainer(transCell))) {
+    raise_warning("Invalid operand type was used: %s expects "
+                  "an array or collection", __FUNCTION__+2);
+    return uninit_null();
+  }
+
+  ArrayInit ret(getContainerSize(transCell));
+  for (ArrayIter iter(transCell); iter; ++iter) {
+    CVarRef value(iter.secondRefPlus());
     if (value.isString() || value.isInteger()) {
       ret.set(value, iter.first());
     } else {

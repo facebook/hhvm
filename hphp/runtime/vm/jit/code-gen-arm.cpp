@@ -61,8 +61,19 @@ NOOP_OPCODE(DbgAssertRetAddr)
 #define CALL_OPCODE(name) \
   void CodeGenerator::cg##name(IRInstruction* i) { cgCallNative(m_as, i); }
 
-CALL_OPCODE(Box);
+CALL_OPCODE(Box)
 CALL_OPCODE(ConvIntToStr)
+
+CALL_OPCODE(AllocObj)
+CALL_OPCODE(NewPackedArray)
+
+CALL_OPCODE(ConcatStrStr)
+CALL_OPCODE(ConcatIntStr)
+CALL_OPCODE(ConcatStrInt)
+
+CALL_OPCODE(PrintStr)
+CALL_OPCODE(PrintInt)
+CALL_OPCODE(PrintBool)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -284,7 +295,6 @@ PUNT_OPCODE(LdSwitchDblIndex)
 PUNT_OPCODE(LdSwitchStrIndex)
 PUNT_OPCODE(LdSwitchObjIndex)
 PUNT_OPCODE(JmpSwitchDest)
-PUNT_OPCODE(AllocObj)
 PUNT_OPCODE(AllocObjFast)
 PUNT_OPCODE(LdClsCtor)
 PUNT_OPCODE(LdArrFuncCtx)
@@ -294,7 +304,6 @@ PUNT_OPCODE(StClosureFunc)
 PUNT_OPCODE(StClosureArg)
 PUNT_OPCODE(StClosureCtx)
 PUNT_OPCODE(NewArray)
-PUNT_OPCODE(NewPackedArray)
 PUNT_OPCODE(NewStructArray)
 PUNT_OPCODE(NewCol)
 PUNT_OPCODE(Clone)
@@ -347,17 +356,11 @@ PUNT_OPCODE(RaiseUninitLoc)
 PUNT_OPCODE(WarnNonObjProp)
 PUNT_OPCODE(ThrowNonObjProp)
 PUNT_OPCODE(RaiseUndefProp)
-PUNT_OPCODE(PrintStr)
-PUNT_OPCODE(PrintInt)
-PUNT_OPCODE(PrintBool)
 PUNT_OPCODE(AddElemStrKey)
 PUNT_OPCODE(AddElemIntKey)
 PUNT_OPCODE(AddNewElem)
 PUNT_OPCODE(ColAddElemC)
 PUNT_OPCODE(ColAddNewElemC)
-PUNT_OPCODE(ConcatStrStr)
-PUNT_OPCODE(ConcatIntStr)
-PUNT_OPCODE(ConcatStrInt)
 PUNT_OPCODE(ConcatCellCell)
 PUNT_OPCODE(ArrayAdd)
 PUNT_OPCODE(AKExists)
@@ -803,8 +806,9 @@ static void shuffleArgs(vixl::MacroAssembler& a,
           emitRegGetsRegPlusImm(a, dstReg, srcReg, argDesc->imm().q());
         } else {
           if (argDesc->isZeroExtend()) {
-            // "Unsigned eXTend Byte"
-            a.Uxtb (dstReg, srcReg.W());
+            // "Unsigned eXTend Byte". The dest reg is a 32-bit reg but this
+            // zeroes the top 32 bits, so the intended effect is achieved.
+            a.Uxtb (dstReg.W(), srcReg.W());
           } else {
             a.Mov  (dstReg, srcReg);
           }
@@ -826,6 +830,8 @@ static void shuffleArgs(vixl::MacroAssembler& a,
       auto dstReg = x2a(args[i].dstReg());
       if (kind == ArgDesc::Kind::Imm) {
         a.  Mov  (dstReg, args[i].imm().q());
+      } else if (kind == ArgDesc::Kind::Reg) {
+        // Should have already been done
       } else {
         not_implemented();
       }

@@ -81,7 +81,6 @@
 #include "hphp/runtime/ext/ext_xml.h"
 #include "hphp/runtime/ext/ext_xmlreader.h"
 #include "hphp/runtime/ext/ext_xmlwriter.h"
-#include "hphp/runtime/ext/ext_zlib.h"
 #include "hphp/runtime/ext/gd/ext_image.h"
 
 #endif // incl_EXT_LIST_EXT_H_

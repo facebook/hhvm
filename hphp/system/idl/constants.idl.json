@@ -1668,14 +1668,6 @@
             "value": 4
         },
         {
-            "name": "FORCE_DEFLATE",
-            "value": 2
-        },
-        {
-            "name": "FORCE_GZIP",
-            "value": 1
-        },
-        {
             "name": "FT_INTERNAL",
             "value": 8
         },

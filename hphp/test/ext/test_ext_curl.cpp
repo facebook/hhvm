@@ -17,7 +17,7 @@
 #include "hphp/test/ext/test_ext_curl.h"
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_output.h"
-#include "hphp/runtime/ext/ext_zlib.h"
+#include "hphp/runtime/ext/zlib/ext_zlib.h"
 #include "hphp/runtime/server/libevent-server.h"
 
 #define PORT_MIN 7100

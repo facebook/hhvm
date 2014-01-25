@@ -483,7 +483,8 @@ void print(std::ostream& os, const Block* block,
   }
 
   os << std::string(kIndent - 2, ' ');
-  if (auto next = block->next()) {
+  auto next = block->empty() ? nullptr : block->next();
+  if (next) {
     os << punc("-> ");
     printLabel(os, next);
     os << '\n';

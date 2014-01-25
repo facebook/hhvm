@@ -119,10 +119,10 @@ function match_return_type(string $php, string $cpp): bool {
 }
 
 function match_arg_type(string $php, string $cpp): bool {
-  if ($php[0] == '?' || $php[0] == '@') {
-    $expected = 'CVarRef';
-  } else if($php[strlen($php)-1] == '&') {
+  if($php[strlen($php)-1] == '&') {
     $expected = 'VRefParam';
+  } else if ($php[0] == '?' || $php[0] == '@') {
+    $expected = 'CVarRef';
   } else {
     switch (strtolower($php)) {
       case 'bool':

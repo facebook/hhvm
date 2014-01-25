@@ -27,7 +27,7 @@
 #include <locale.h>
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-protocol.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/math/ext_math.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "folly/Unicode.h"
 
@@ -314,7 +314,7 @@ String f_str_shuffle(const String& str) {
   int left   = ret->size();
 
   while (--left) {
-    int idx = f_rand(0, left);
+    int idx = HHVM_FN(rand)(0, left);
     if (idx != left) {
       char temp = buf[left];
       buf[left] = buf[idx];

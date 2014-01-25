@@ -1,6 +1,4 @@
 <?php
-ini_set('precision ',  14);
-
 /* Prototype  : number pow  ( number $base  , number $exp  )
  * Description: Exponential expression.
  * Source code: ext/standard/math.c

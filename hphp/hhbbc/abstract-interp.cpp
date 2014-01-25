@@ -32,7 +32,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/vm/runtime.h"
 
-#include "hphp/runtime/ext/ext_math.h" // f_abs
+#include "hphp/runtime/ext/math/ext_math.h" // f_abs
 
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/type-system.h"

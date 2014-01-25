@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 $values = array(23,
 				-23,
 				2.345e1,

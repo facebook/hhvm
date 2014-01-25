@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 /* Prototype  : string dechex  ( int $number  )
  * Description: Returns a string containing a hexadecimal representation of the given number  argument.
  * Source code: ext/standard/math.c

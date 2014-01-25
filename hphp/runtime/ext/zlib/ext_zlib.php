@@ -346,7 +346,7 @@ function lz4compress(string $uncompressed): mixed;
  * @return string - The compressed data, or FALSE on error
  */
 <<__Native, __HipHopSpecific>>
-function lz4hcompress(string $uncompressed): mixed;
+function lz4hccompress(string $uncompressed): mixed;
 
 /**
  * This function uncompresses the given string given that it is in the lz4lib

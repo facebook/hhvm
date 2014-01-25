@@ -644,7 +644,7 @@ Variant HHVM_FUNCTION(lz4compress, const String& uncompressed) {
   return s.setSize(bufsize);
 }
 
-Variant HHVM_FUNCTION(lz4hcompress, const String& uncompressed) {
+Variant HHVM_FUNCTION(lz4hccompress, const String& uncompressed) {
   int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
@@ -733,7 +733,7 @@ class ZlibExtension : public Extension {
     HHVM_FE(nzcompress);
     HHVM_FE(nzuncompress);
     HHVM_FE(lz4compress);
-    HHVM_FE(lz4hcompress);
+    HHVM_FE(lz4hccompress);
     HHVM_FE(lz4uncompress);
 
     loadSystemlib();

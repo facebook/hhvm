@@ -54,7 +54,7 @@ Variant HHVM_FUNCTION(snuncompress, const String& data);
 Variant HHVM_FUNCTION(nzcompress, const String& uncompressed);
 Variant HHVM_FUNCTION(nzuncompress, const String& compressed);
 Variant HHVM_FUNCTION(lz4compress, const String& uncompressed);
-Variant HHVM_FUNCTION(lz4hcompress, const String& uncompressed);
+Variant HHVM_FUNCTION(lz4hccompress, const String& uncompressed);
 Variant HHVM_FUNCTION(lz4uncompress, const String& compressed);
 
 ///////////////////////////////////////////////////////////////////////////////

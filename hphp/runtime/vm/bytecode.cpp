@@ -90,7 +90,6 @@
 
 #include <iostream>
 #include <iomanip>
-#include <algorithm>
 #include <boost/format.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
@@ -896,7 +895,6 @@ __thread VarEnvArenaStorage s_varEnvArenaStorage;
 // ExecutionContext.
 
 using namespace HPHP;
-using namespace HPHP::MethodLookup;
 
 ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
   ActRec* prevFrame = (ActRec*)ar->m_savedRbp;

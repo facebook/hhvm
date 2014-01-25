@@ -315,7 +315,6 @@ struct Unit {
    public:
     enum class Kind {
       None,
-      String,
       Class,
 
       /*
@@ -345,13 +344,6 @@ struct Unit {
        * an object of the supplied class type (or a null).
        */
       MVecPropClass,
-
-      /*
-       * At a Ret{C,V} site, indicates which locals are known not to
-       * be reference counted.  m_data is the id of the local variable
-       * that cannot be reference counted at this point.
-       */
-      NonRefCounted,
     };
 
     /*

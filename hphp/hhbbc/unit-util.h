@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_UNIT_UTIL_H_
 #define incl_HPHP_UNIT_UTIL_H_
 
+#include "hphp/hhbbc/misc.h"
+
 namespace HPHP { namespace HHBBC {
 namespace php { struct Unit; }
 
@@ -25,6 +27,18 @@ namespace php { struct Unit; }
  * Returns true if a unit repesents a portion of systemlib.
  */
 bool is_systemlib_part(const php::Unit&);
+
+/*
+ * Returns true if the class or function name is normalized wrt namespaces.
+ */
+bool isNSNormalized(SString name);
+
+/*
+ * Normalizes a given class or function name removing the leading '\'.
+ * Leaves the name unchanged if more than one '\' is leading.
+ * So '\name' becomes 'name' but '\\name' stays '\\name'.
+ */
+SString normalizeNS(SString);
 
 //////////////////////////////////////////////////////////////////////
 

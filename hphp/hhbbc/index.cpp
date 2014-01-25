@@ -32,6 +32,7 @@
 
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -513,6 +514,7 @@ Index::~Index() {}
 
 folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
+  clsName = normalizeNS(clsName);
   auto name_only = [&] () -> folly::Optional<res::Class> {
     // We know it has to name a class only if there's no type alias
     // with this name.
@@ -533,7 +535,14 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
       auto const cls = it->second;
 
       if (cls->attrs & AttrUnique) {
-        assert(++it == end(classes));
+        if (debug && boost::next(it) != end(classes)) {
+          std::fprintf(stderr, "non unique \"unique\" class: %s\n",
+            cls->name->data());
+          for (; it != end(classes); ++it) {
+            std::fprintf(stderr, "   and %s\n", it->second->name->data());
+          }
+          assert(0);
+        }
         return cls;
       }
 
@@ -644,6 +653,7 @@ folly::Optional<res::Func> Index::resolve_ctor(Context ctx,
 }
 
 res::Func Index::resolve_func(Context ctx, SString name) const {
+  name = normalizeNS(name);
   auto name_only = [&] {
     return res::Func { this, SStringOr<FuncInfo>(name) };
   };
@@ -664,16 +674,17 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   if (!tc.hasConstraint()) return TCell;
 
   /*
-   * Currently, nullable extended hints (?Foo) are ignored at runtime
-   * except raising a warning.
-   */
-  if (tc.isNullable() && tc.isExtended()) return TCell;
-
-  /*
    * Type variable constraints are not used at runtime to enforce
    * anything.
    */
   if (tc.isTypeVar()) return TCell;
+
+  /*
+   * Currently, nullable extended hints (?Foo) are runtime enforced,
+   * except that failing to pass a parameter doesn't fail the type
+   * hint, so we can't assume it's TInitCell yet.
+   */
+  if (tc.isNullable() && tc.isExtended()) return TCell;
 
   /*
    * Soft hints (@Foo) are not checked.
@@ -681,17 +692,17 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   if (tc.isSoft()) return TCell;
 
   switch (tc.metaType()) {
-    case TypeConstraint::MetaType::Precise:
+  case TypeConstraint::MetaType::Precise:
     {
       auto const mainType = [&]() -> const Type {
         switch (tc.underlyingDataType()) {
-          case KindOfString:        return TStr;
-          case KindOfStaticString:  return TStr;
-          case KindOfArray:         return TArr;
-          case KindOfInt64:         return TInt;
-          case KindOfBoolean:       return TBool;
-          case KindOfDouble:        return TDbl;
-          case KindOfObject:
+        case KindOfString:        return TStr;
+        case KindOfStaticString:  return TStr;
+        case KindOfArray:         return TArr;
+        case KindOfInt64:         return TInt;
+        case KindOfBoolean:       return TBool;
+        case KindOfDouble:        return TDbl;
+        case KindOfObject:
           /*
            * Type constraints only imply an object of a particular
            * type for unique classes.
@@ -707,9 +718,9 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
            * still use TObj.
            */
           return TInitCell;
-          case KindOfResource: // Note, some day we may have resource hints.
+        case KindOfResource: // Note, some day we may have resource hints.
           break;
-          default:
+        default:
           break;
         }
         return TInitCell;
@@ -717,14 +728,14 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
       return mainType == TInitCell || !tc.isNullable() ? mainType
         : opt(mainType);
     }
-    case TypeConstraint::MetaType::Self:
-    case TypeConstraint::MetaType::Parent:
-    case TypeConstraint::MetaType::Callable:
-      break;
-    case TypeConstraint::MetaType::Number:
-      // FIXME: a concept of TInt | TDbl is necessary
-      // to capture this case and the results of integer division
-      return TInitCell;
+  case TypeConstraint::MetaType::Self:
+  case TypeConstraint::MetaType::Parent:
+  case TypeConstraint::MetaType::Callable:
+    break;
+  case TypeConstraint::MetaType::Number:
+    // TODO(#3553967): a concept of TInt | TDbl is necessary to
+    // capture this case and the results of integer division
+    return TInitCell;
   }
 
   return TCell;

@@ -2594,11 +2594,11 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
 
   if (!func) {
     if (baseClass && !(baseClass->attrs() & AttrInterface)) {
-      MethodLookup::LookupResult res =
+      LookupResult res =
         g_vmContext->lookupObjMethod(func, baseClass, methodName, curClass(),
                                      false);
-      if ((res == MethodLookup::LookupResult::MethodFoundWithThis ||
-           res == MethodLookup::LookupResult::MethodFoundNoThis) &&
+      if ((res == LookupResult::MethodFoundWithThis ||
+           res == LookupResult::MethodFoundNoThis) &&
           !func->isAbstract()) {
         /*
          * If we found the func in baseClass, then either:
@@ -2616,7 +2616,7 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
           SSATmp* funcTmp = gen(
             LdClsMethod, clsTmp, cns(func->methodSlot())
           );
-          if (res == MethodLookup::LookupResult::MethodFoundNoThis) {
+          if (res == LookupResult::MethodFoundNoThis) {
             gen(DecRef, obj);
             objOrCls = clsTmp;
           }
@@ -2774,7 +2774,6 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
      * generated code for this case is pretty different, since we
      * don't need the pre-live ActRec trick.
      */
-    using namespace MethodLookup;
     auto const cls = curClass();
     const Func* func;
     auto res =
@@ -3379,33 +3378,6 @@ void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
     gen(AssertStk, type,
         StackOffset(idx - m_evalStack.size() + m_stackDeficit),
         m_tb->sp());
-  }
-}
-
-void HhbcTranslator::assertString(const RegionDesc::Location& loc,
-                                  const StringData* str) {
-  typedef RegionDesc::Location::Tag T;
-  switch (loc.tag()) {
-    case T::Stack: {
-      auto idx = loc.stackOffset();
-      if (idx < m_evalStack.size()) {
-        // We're asserting a new type so we don't care about the previous type.
-        DEBUG_ONLY SSATmp* oldStr = m_evalStack.top(DataTypeGeneric, idx);
-        assert(oldStr->type().maybe(Type::Str));
-        m_evalStack.replace(idx, cns(str));
-      } else {
-        gen(AssertStkVal,
-            StackOffset(idx - m_evalStack.size() + m_stackDeficit),
-            m_tb->sp(), cns(str));
-      }
-    }
-    break;
-
-    case T::Local:
-      // We're asserting a new type so we don't care about the previous type.
-      assert(m_tb->localType(loc.localId(), DataTypeGeneric).maybe(Type::Str));
-      gen(OverrideLocVal, LocalId(loc.localId()), m_tb->fp(), cns(str));
-      break;
   }
 }
 

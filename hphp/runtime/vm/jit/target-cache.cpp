@@ -34,8 +34,6 @@
 
 namespace HPHP { namespace JIT {
 
-using namespace HPHP::MethodLookup;
-
 TRACE_SET_MOD(targetcache);
 
 //////////////////////////////////////////////////////////////////////
@@ -160,7 +158,7 @@ static void methodCacheFatal(ActRec* ar,
       cls,
       name,
       ctx,
-      MethodLookup::CallType::ObjMethod,
+      CallType::ObjMethod,
       true /* raise error */
     );
     not_reached();
@@ -195,7 +193,7 @@ static void methodCacheSlowerPath(MethodCache* mce,
     cls,
     name,
     ctx,
-    MethodLookup::CallType::ObjMethod,
+    CallType::ObjMethod,
     false /* raise error */
   );
 

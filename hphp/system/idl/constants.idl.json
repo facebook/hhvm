@@ -5099,7 +5099,7 @@
         },
         {
             "name": "PHP_VERSION",
-            "value": "5.4.999-hiphop"
+            "value": "5.4.99-hiphop"
         },
         {
             "name": "PHP_MAJOR_VERSION",
@@ -5115,7 +5115,7 @@
         },
         {
             "name": "PHP_VERSION_ID",
-            "value": 504999
+            "value": 50499
         },
         {
             "name": "PHP_EXTRA_VERSION",

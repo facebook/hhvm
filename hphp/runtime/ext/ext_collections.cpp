@@ -2392,6 +2392,10 @@ void BaseMap::eraseNoCompact(int32_t* pos) {
   auto& e = elms[*pos];
   // Mark the hash slot as a tombstone.
   *pos = Tombstone;
+  // Decref the key if it's a string.
+  if (e.hasStrKey()) {
+    decRefStr(e.skey);
+  }
   // Mark the Elm as a tombstone.
   TypedValue* tv = &e.data;
   DataType oldType = tv->m_type;

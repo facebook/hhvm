@@ -295,16 +295,19 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
 
   auto const givenType = describe_actual_type(tv);
 
-  if (isExtended()) {
-    // Extended type hints raise warnings instead of recoverable
-    // errors for now, to ease migration (we used to not check these
-    // at all at runtime).
-    assert(
-      (isSoft() || isNullable()) &&
-      "Only nullable and soft extended type hints are currently implemented");
+  if (isExtended() && isSoft()) {
+    // Soft extended type hints raise warnings instead of recoverable
+    // errors, to ease migration.
     raise_debugging(
       "Argument %d to %s() must be of type %s, %s given",
       paramNum + 1, func->fullName()->data(), fullName().c_str(), givenType);
+  } else if (isExtended() && isNullable()) {
+    raise_typehint_error(
+      folly::format(
+        "Argument {} to {}() must be of type {}, {} given",
+        paramNum + 1, func->fullName()->data(), fullName(), givenType
+      ).str()
+    );
   } else {
     raise_typehint_error(
       folly::format(

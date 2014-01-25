@@ -422,7 +422,7 @@ void SystemlibSessionModule::lookupClass() {
                                       s_SessionHandlerInterface.data());
   }
 
-  if (MethodLookup::LookupResult::MethodFoundWithThis !=
+  if (LookupResult::MethodFoundWithThis !=
       g_vmContext->lookupCtorMethod(m_ctor, cls)) {
     throw InvalidArgumentException(0, "Unable to call %s's constructor",
                                    m_classname);

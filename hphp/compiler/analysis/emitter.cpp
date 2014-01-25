@@ -3146,12 +3146,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                       false, 0, 0);
         }
 
-        // XXX: disabled until static analysis is more reliable: t2225399
-        /*for (auto& l : r->nonRefcountedLocals()) {
-          auto v = m_curFunc->lookupVarId(makeStaticString(l));
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NonRefCounted,
-                         false, 0, v);
-        }*/
         emitReturn(e, retSym, r);
         return false;
       }
@@ -5173,13 +5167,6 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
 
     if (const StringData* name = m_evalStack.getName(i)) {
       strid = m_ue.mergeLitstr(name);
-      // If this string is an m-vector litstr it will be stored in the
-      // m-vector later on in this function. Don't duplicate it in the
-      // metadata table.
-      if (symFlavor != StackSym::T) {
-        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::String,
-                       true, metaI, strid);
-      }
     }
     if (const StringData* cls = m_evalStack.getClsName(i)) {
       const int mcodeNum = i - (iFirst + 1);

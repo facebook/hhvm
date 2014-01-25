@@ -1430,10 +1430,6 @@ void preInputApplyMetaData(Unit::MetaHandle metaHand,
   Unit::MetaInfo info;
   while (metaHand.nextArg(info)) {
     switch (info.m_kind) {
-    case Unit::MetaInfo::Kind::NonRefCounted:
-      ni->nonRefCountedLocals.resize(ni->func()->numLocals());
-      ni->nonRefCountedLocals[info.m_data] = 1;
-      break;
     case Unit::MetaInfo::Kind::GuardedThis:
       ni->guardedThis = true;
       break;
@@ -1811,20 +1807,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       }
 
-      case Unit::MetaInfo::Kind::String: {
-        const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
-        assert((unsigned)arg < inputInfos.size());
-        InputInfo& ii = inputInfos[arg];
-        ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii, KindOfString);
-        assert(!dl->rtt.isString() || !dl->rtt.valueString() ||
-               dl->rtt.valueString() == sd);
-        SKTRACE(1, ni->source, "MetaInfo on input %d; old type = %s\n",
-                arg, dl->pretty().c_str());
-        dl->rtt = RuntimeType(sd);
-        break;
-      }
-
       case Unit::MetaInfo::Kind::Class: {
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
@@ -1868,7 +1850,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       }
 
       case Unit::MetaInfo::Kind::GuardedThis:
-      case Unit::MetaInfo::Kind::NonRefCounted:
         // fallthrough; these are handled in preInputApplyMetaData.
       case Unit::MetaInfo::Kind::None:
         break;
@@ -2107,14 +2088,9 @@ void getInputsImpl(SrcKey startSk,
     if (tx64->numTranslations(startSk) >= kTooPolyRet && localCount > 0) {
       return false;
     }
-    ni->nonRefCountedLocals.resize(localCount);
     int numRefCounted = 0;
     for (int i = 0; i < localCount; ++i) {
-      auto curType = localType(i);
-      if (ni->nonRefCountedLocals[i]) {
-        assert(curType.notCounted() && "Static analysis was wrong");
-      }
-      if (curType.maybeCounted()) {
+      if (localType(i).maybeCounted()) {
         numRefCounted++;
       }
     }
@@ -2126,9 +2102,7 @@ void getInputsImpl(SrcKey startSk,
     ni->ignoreInnerType = true;
     int n = ni->func()->numLocals();
     for (int i = 0; i < n; ++i) {
-      if (!ni->nonRefCountedLocals[i]) {
-        inputs.emplace_back(Location(Location::Local, i));
-      }
+      inputs.emplace_back(Location(Location::Local, i));
     }
   }
 
@@ -3956,13 +3930,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         updateType();
         break;
       }
-      case Unit::MetaInfo::Kind::String: {
-        hhbcTrans.assertString(
-          stackFilter(inst.inputs[arg]->location).toLocation(inst.stackOffset),
-          inst.unit()->lookupLitstrId(info.m_data));
-        updateType();
-        break;
-      }
       case Unit::MetaInfo::Kind::Class: {
         auto& rtt = inst.inputs[arg]->rtt;
         auto const& location = inst.inputs[arg]->location;
@@ -4009,7 +3976,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       }
 
       case Unit::MetaInfo::Kind::GuardedThis:
-      case Unit::MetaInfo::Kind::NonRefCounted:
         // fallthrough; these are handled in preInputApplyMetaData.
       case Unit::MetaInfo::Kind::None:
         break;
@@ -4516,21 +4482,21 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   }
 
   const Func* func;
-  MethodLookup::LookupResult res = staticLookup ?
+  LookupResult res = staticLookup ?
     g_vmContext->lookupClsMethod(func, cls, name, nullptr, ctx, false) :
     g_vmContext->lookupObjMethod(func, cls, name, ctx, false);
 
-  if (res == MethodLookup::LookupResult::MethodNotFound) return nullptr;
+  if (res == LookupResult::MethodNotFound) return nullptr;
 
-  assert(res == MethodLookup::LookupResult::MethodFoundWithThis ||
-         res == MethodLookup::LookupResult::MethodFoundNoThis ||
+  assert(res == LookupResult::MethodFoundWithThis ||
+         res == LookupResult::MethodFoundNoThis ||
          (staticLookup ?
-          res == MethodLookup::LookupResult::MagicCallStaticFound :
-          res == MethodLookup::LookupResult::MagicCallFound));
+          res == LookupResult::MagicCallStaticFound :
+          res == LookupResult::MagicCallFound));
 
   magicCall =
-    res == MethodLookup::LookupResult::MagicCallStaticFound ||
-    res == MethodLookup::LookupResult::MagicCallFound;
+    res == LookupResult::MagicCallStaticFound ||
+    res == LookupResult::MagicCallFound;
 
   if ((privateOnly && (!(func->attrs() & AttrPrivate) || magicCall)) ||
       func->isAbstract() ||

@@ -1766,6 +1766,9 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   Otherwise this instruction pushes a new entry on the FPI stack, initializing
   it with the number of parameters being passed (given by %1) and a reference
   to the FPI structure for the function named x.
+  With FPushFuncD the litstr in %2 must not start with a '\' character. 
+  Function names should be normalized with respect to namespace and never start
+  with a '\'.
 
   If x is an object, this instruction checks if the object has an __invoke
   method. If the object does not have an __invoke method, this instruction
@@ -1781,6 +1784,7 @@ FPushFuncU <num params> <litstr id> <litstr fallback> []  ->  []
   FPI push function unqualified. Identical to FPushFuncD except first tries to
   lookup the function named %2 and if it isn't defined calls the function named
   %3.
+  As for FPushFuncD the litstr in %2 and %3 must not start with a '\' character.
 
 FPushObjMethod <num params>                 [C C]  ->  []
 FPushObjMethodD <num params> <litstr id>    [C]  ->  []

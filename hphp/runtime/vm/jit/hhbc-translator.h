@@ -145,7 +145,6 @@ struct HhbcTranslator {
   void assertType(const RegionDesc::Location& loc, Type type);
   void checkType(const RegionDesc::Location& loc, Type type,
                          Offset dest);
-  void assertString(const RegionDesc::Location& loc, const StringData* sd);
   void assertClass(const RegionDesc::Location& loc, const Class* cls);
 
   RuntimeType rttFromLocation(const Location& loc);

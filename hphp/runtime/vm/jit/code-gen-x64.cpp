@@ -238,9 +238,7 @@ NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
 NOOP_OPCODE(AssertLoc)
-NOOP_OPCODE(OverrideLocVal)
 NOOP_OPCODE(AssertStk)
-NOOP_OPCODE(AssertStkVal)
 NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(ExceptionBarrier)
@@ -3698,9 +3696,9 @@ const Func* loadClassCtor(Class* cls) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
     VMRegAnchor _;
-    UNUSED MethodLookup::LookupResult res =
+    UNUSED LookupResult res =
       g_vmContext->lookupCtorMethod(f, cls, true /*raise*/);
-    assert(res == MethodLookup::LookupResult::MethodFoundWithThis);
+    assert(res == LookupResult::MethodFoundWithThis);
   }
   return f;
 }

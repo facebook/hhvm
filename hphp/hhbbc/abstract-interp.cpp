@@ -227,7 +227,7 @@ Type eval_cell(Pred p) {
         }
         break;
       default:
-        always_assert(0 && "Impossible constant evaluation occured");
+        always_assert(0 && "Impossible constant evaluation occurred");
       }
     }
     return from_cell(c);
@@ -1233,14 +1233,17 @@ struct InterpStepper : boost::static_visitor<void> {
     auto const t1 = topC();
     auto const v1 = tv(t1);
     if (v1 && v1->m_type == KindOfStaticString) {
-      return reduce(bc::PopC {},
-                    bc::FPushFuncD { op.arg1, v1->m_data.pstr });
+      auto const name = normalizeNS(v1->m_data.pstr);
+      if (isNSNormalized(name)) {
+        return reduce(bc::PopC {},
+                      bc::FPushFuncD { op.arg1, name });
+      }
     }
     popC();
     fpiPush(ActRec { FPIKind::Func });
   }
 
-  void operator()(const bc::FPushFuncU&) {
+  void operator()(const bc::FPushFuncU& op) {
     fpiPush(ActRec { FPIKind::Func });
   }
 
@@ -3391,14 +3394,15 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
   /*
    * 86pinit is a special function that runs to initialize instance
-   * properties that depend on class constants.  We don't currently
-   * handle this, so for any class with these types of initializers,
-   * just merge InitUnc into each property.  (Class constants are all
-   * subtypes of InitUnc.)
+   * properties that depend on class constants, or have collection
+   * literals.
+   *
+   * We don't handle this yet, so for any class with these types of
+   * initializers put the properties up to TInitCell for now.
    */
   if (has_86pinit(ctx.cls)) {
     for (auto& p : clsAnalysis.privateProperties) {
-      p.second = union_of(p.second, TInitUnc);
+      p.second = union_of(p.second, TInitCell);
     }
   }
 

@@ -1,0 +1,15 @@
+HipHop Warning: Creating default object from empty value in %s/test/slow/hhbbc/private_props_016.php on line 8
+object(stdClass)#2 (1) {
+  ["prop"]=>
+  int(2)
+}
+string(6) "foofoo"
+object(Foo)#1 (2) {
+  ["foo":"Foo":private]=>
+  object(stdClass)#2 (1) {
+    ["prop"]=>
+    int(2)
+  }
+  ["bar":"Foo":private]=>
+  string(6) "foofoo"
+}

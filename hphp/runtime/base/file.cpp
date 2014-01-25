@@ -137,7 +137,7 @@ Variant File::Open(const String& filename, const String& mode,
                    int options /* = 0 */,
                    CVarRef context /* = null */) {
   Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
-  File *file = wrapper->open(filename, mode, options, context);
+  File *file = wrapper->open(filename, mode, options, context.isNull() ? g_context->getStreamContext() : context);
   if (file != nullptr) {
     file->m_name = filename.data();
     file->m_mode = mode.data();

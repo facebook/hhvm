@@ -28,6 +28,39 @@
             ]
         },
         {
+            "name": "stream_context_set_default",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the default stream context."
+            },
+            "args": [
+                {
+                    "name": "options",
+                    "type": "VariantMap",
+                    "desc": "The options to set for the default context.\n\noptions must be an associative array of associative arrays in the format $arr['wrapper']['option'] = $value.\n\nRefer to context options and parameters for a listing of stream options."
+                }
+            ]
+        },
+        {
+            "name": "stream_context_get_default",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the default stream context."
+            },
+            "args": [
+                {
+                    "name": "options",
+                    "type": "VariantMap",
+                    "value": "null_array",
+                    "desc": "The options to set for the default context.\n\noptions must be an associative array of associative arrays in the format $arr['wrapper']['option'] = $value.\n\nRefer to context options and parameters for a listing of stream options."
+                }
+            ]
+        },
+        {
             "name": "stream_context_get_options",
             "flags": [
             ],

@@ -331,6 +331,9 @@ public:
   void setExitCallback(Variant f) { m_exitCallback = f; }
   Variant getExitCallback() { return m_exitCallback; }
 
+  void setStreamContext(Resource &context) { m_streamContext = context; }
+  Resource &getStreamContext() { return m_streamContext; }
+
   void restoreIncludePath();
   void setIncludePath(const String& path);
   String getIncludePath() const;
@@ -388,6 +391,7 @@ private:
   String m_timezoneDefault;
   String m_argSeparatorOutput;
   bool m_throwAllErrors;
+  Resource m_streamContext;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;

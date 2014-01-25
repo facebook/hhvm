@@ -7649,6 +7649,7 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
 }
 
 static RepoAuthType repoAuthTypeForHphpcType(DataType dtype) {
+  if (!Option::WholeProgram) return RepoAuthType{};
   switch (dtype) {
   case KindOfBoolean:
     return RepoAuthType{RepoAuthType::Tag::OptBool};

@@ -87,8 +87,12 @@ Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(preg_quote, const String& str,
-                                 const String& delimiter /* = null_string */) {
-  return preg_quote(str, delimiter);
+                                 CVarRef delimiter /* = null_string */) {
+  if (delimiter.isNull()) {
+    return preg_quote(str, null_string);
+  } else {
+    return preg_quote(str, delimiter.toString());
+  }
 }
 
 int64_t HHVM_FUNCTION(preg_last_error) {

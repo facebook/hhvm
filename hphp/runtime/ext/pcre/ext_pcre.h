@@ -42,7 +42,7 @@ Variant HHVM_FUNCTION(preg_replace_callback, CVarRef pattern, CVarRef callback,
 Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
                                   int limit = -1, int flags = 0);
 String HHVM_FUNCTION(preg_quote, const String& str,
-                                 const String& delimiter = null_string);
+                                 CVarRef = null_string);
 int64_t HHVM_FUNCTION(preg_last_error);
 
 ///////////////////////////////////////////////////////////////////////////////

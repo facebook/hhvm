@@ -148,7 +148,7 @@ public:
   }
 
   /*
-   * return true if the offset of this index is 16-byte aligned
+   * return true if the offset of this slot is 16-byte aligned
    */
   static bool isAligned(uint32_t slot) {
     return slot % 2 == 1;

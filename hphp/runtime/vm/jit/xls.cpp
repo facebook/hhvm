@@ -583,8 +583,13 @@ void XLS::spill(Interval* ivl) {
   assert(ivl->need == 1 || ivl->need == 2);
   auto leader = ivl->leader();
   if (!leader->spill.spilled()) {
-    leader->spill.setSlot(0, m_nextSpill++);
-    if (ivl->need == 2) leader->spill.setSlot(1, m_nextSpill++);
+    if (ivl->need == 1) {
+      leader->spill.setSlot(0, m_nextSpill++);
+    } else {
+      if (!PhysLoc::isAligned(m_nextSpill)) m_nextSpill++;
+      leader->spill.setSlot(0, m_nextSpill++);
+      leader->spill.setSlot(1, m_nextSpill++);
+    }
     if (m_nextSpill > NumPreAllocatedSpillLocs) {
       PUNT(LinearScan_TooManySpills);
     }

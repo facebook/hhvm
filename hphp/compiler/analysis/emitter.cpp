@@ -6518,35 +6518,29 @@ void EmitterVisitor::emitPostponedMeths() {
     if (funcScope->isGenerator()) {
       // emit the outer 'create generator' function
       m_curFunc = fe;
-      fe->setGeneratorBodyName(makeStaticString(meth->getGeneratorName()));
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitGeneratorCreate(meth);
 
       // emit the generator body
-      bool needsEmit;
-      std::tie(m_curFunc, needsEmit) =
-        createFuncEmitterForGeneratorBody(meth, fe, top_fes);
-      if (needsEmit) {
-        emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
-        emitGeneratorBody(meth);
-      }
+      auto const bodyFe = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      fe->setGeneratorBodyName(bodyFe->name());
+      m_curFunc = bodyFe;
+      emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
+      emitGeneratorBody(meth);
     } else if (funcScope->isAsync()) {
       // emit the outer function (which creates continuation if blocked)
       m_curFunc = fe;
-      fe->setGeneratorBodyName(makeStaticString(meth->getGeneratorName()));
       fe->setIsAsync(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitAsyncMethod(meth);
 
       // emit the generator body
-      bool needsEmit;
-      std::tie(m_curFunc, needsEmit) =
-        createFuncEmitterForGeneratorBody(meth, fe, top_fes);
-      if (needsEmit) {
-        m_curFunc->setIsAsync(true);
-        emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
-        emitGeneratorBody(meth);
-      }
+      auto const bodyFe = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      fe->setGeneratorBodyName(bodyFe->name());
+      m_curFunc = bodyFe;
+      m_curFunc->setIsAsync(true);
+      emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
+      emitGeneratorBody(meth);
     } else {
       m_curFunc = fe;
       if (funcScope->isNative()) {
@@ -6925,34 +6919,40 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
   emitMethodDVInitializers(e, meth, topOfBody);
 }
 
-std::pair<FuncEmitter*,bool>
-EmitterVisitor::createFuncEmitterForGeneratorBody(
+FuncEmitter* EmitterVisitor::createFuncEmitterForGeneratorBody(
                                MethodStatementPtr meth,
                                FuncEmitter* fe,
                                vector<FuncEmitter*>& top_fes) {
   FuncEmitter* genFe;
-  string genName = meth->getGeneratorName();
+  auto genName = meth->getGeneratorName();
   if (fe->isMethod() && !fe->isClosureBody()) {
     genFe = m_ue.newMethodEmitter(
       makeStaticString(genName), fe->pce());
     bool UNUSED added = fe->pce()->addMethod(genFe);
     assert(added);
   } else {
-    auto it = m_generatorEmitted.find(genName);
-    if (it != end(m_generatorEmitted)) {
-      // Generator body already emitted.  This can happen because in
-      // traits, we emit only a single generator body, but one
-      // generator creator function per use of the trait.
-      return std::make_pair(it->second, false);
+    auto& emitCount = m_generatorEmitted[genName];
+    ++emitCount;
+    if (emitCount > 1) {
+      /*
+       * Generator body already emitted.  This can happen because of
+       * repo-mode trait flattening.
+       *
+       * In order to preserve the bytecode invariant that every inner
+       * generator function is uniquely identified to an outer
+       * generator function, we need to bump a counter on the names in
+       * this case (similar to what we do for closure class names).
+       */
+      genName = folly::format("{}_{}", genName, emitCount).str();
     }
+
     genFe = new FuncEmitter(m_ue, -1, -1, makeStaticString(genName));
-    m_generatorEmitted[genName] = genFe;
     top_fes.push_back(genFe);
     genFe->setTop(true);
   }
   genFe->setIsGeneratorFromClosure(fe->isClosureBody());
   genFe->setIsGenerator(true);
-  return std::make_pair(genFe, true);
+  return genFe;
 }
 
 void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {

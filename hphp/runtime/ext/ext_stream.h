@@ -109,8 +109,8 @@ Array f_stream_get_transports();
 
 Array f_stream_get_wrappers();
 bool f_stream_is_local(CVarRef stream_or_url);
-bool f_stream_register_wrapper(const String& protocol, const String& classname);
-bool f_stream_wrapper_register(const String& protocol, const String& classname);
+bool f_stream_register_wrapper(const String& protocol, const String& classname, int flags);
+bool f_stream_wrapper_register(const String& protocol, const String& classname, int flags);
 bool f_stream_wrapper_restore(const String& protocol);
 bool f_stream_wrapper_unregister(const String& protocol);
 

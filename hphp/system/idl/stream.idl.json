@@ -304,6 +304,12 @@
                 {
                     "name": "classname",
                     "type": "String"
+                },
+                {
+                    "name": "flags",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "This function is an alias of: stream_wrapper_register()."
                 }
             ]
         },
@@ -326,6 +332,12 @@
                     "name": "classname",
                     "type": "String",
                     "desc": "The classname which implements the protocol."
+                },
+                {
+                    "name": "flags",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Should be set to STREAM_IS_URL if protocol is a URL protocol. Default is 0, local stream."
                 }
             ]
         },

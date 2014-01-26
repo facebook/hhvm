@@ -78,6 +78,31 @@ struct RegAllocInfo {
   RegMap& operator[](const IRInstruction& i) { return m_regs[i]; }
   const RegMap& operator[](const IRInstruction* i) const { return m_regs[i]; }
   const RegMap& operator[](const IRInstruction& i) const { return m_regs[i]; }
+
+  RegSet srcRegs(IRInstruction& inst) const {
+    auto regs = RegSet();
+    auto& map = m_regs[inst];
+    for (auto src : inst.srcs()) {
+      regs |= map[src].regs();
+    }
+    return regs;
+  }
+
+  RegSet dstRegs(IRInstruction& inst) const {
+    auto regs = RegSet();
+    if (inst.is(Shuffle)) {
+      for (auto const& dest : *inst.extra<Shuffle>()) {
+        regs |= dest.regs();
+      }
+    } else {
+      auto& map = m_regs[inst];
+      for (auto& dst : inst.dsts()) {
+        regs |= map[dst].regs();
+      }
+    }
+    return regs;
+  }
+
 private:
   StateVector<IRInstruction,RegMap> m_regs;
 };

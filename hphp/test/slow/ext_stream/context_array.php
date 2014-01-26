@@ -4,7 +4,7 @@ $opts = array(
   'http' => array(
     'header' => array(
       "Accept-Encoding: gzip",
-      "User-Agent: Composer/source PHP 5.4.999)",
+      "User-Agent: Composer/source PHP 5.4.99)",
     )
   )
 );

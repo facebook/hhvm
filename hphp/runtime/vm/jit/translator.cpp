@@ -1430,10 +1430,6 @@ void preInputApplyMetaData(Unit::MetaHandle metaHand,
   Unit::MetaInfo info;
   while (metaHand.nextArg(info)) {
     switch (info.m_kind) {
-    case Unit::MetaInfo::Kind::NonRefCounted:
-      ni->nonRefCountedLocals.resize(ni->func()->numLocals());
-      ni->nonRefCountedLocals[info.m_data] = 1;
-      break;
     case Unit::MetaInfo::Kind::GuardedThis:
       ni->guardedThis = true;
       break;
@@ -1446,6 +1442,19 @@ void preInputApplyMetaData(Unit::MetaHandle metaHand,
 static bool isTypeAssert(Op op) {
   return op == Op::AssertTL || op == Op::AssertTStk ||
          op == Op::AssertObjL || op == Op::AssertObjStk;
+}
+
+static bool isNullableAssertObj(const NormalizedInstruction& i) {
+  if (i.op() != Op::AssertObjStk && i.op() != Op::AssertObjL) return false;
+  switch (static_cast<AssertObjOp>(i.imm[2].u_OA)) {
+  case AssertObjOp::Exact:
+  case AssertObjOp::Sub:
+    return false;
+  case AssertObjOp::OptExact:
+  case AssertObjOp::OptSub:
+    return true;
+  }
+  not_reached();
 }
 
 static bool isTypePredict(Op op) {
@@ -1488,24 +1497,23 @@ void Translator::handleAssertionEffects(Tracelet& t,
   }();
   if (loc.isInvalid()) return;
 
-  auto const rt = [&]() -> folly::Optional<RuntimeType> {
+  auto const assertTy = [&]() -> folly::Optional<RuntimeType> {
     if (ni.op() == Op::AssertObjStk || ni.op() == Op::AssertObjL) {
       /*
        * Even though the class must be defined at the point of the
-       * AssertObj, we might not have defined it yet in this tracelet,
-       * or it might not be unique.  For now just restrict this to
-       * unique classes (we could also check parent of current
-       * context).
+       * AssertObj (unless it's optional), we might not have defined
+       * it yet in this tracelet, or it might not be unique.  For now
+       * just restrict this to unique classes (we could also check
+       * parent of current context).
        *
-       * There's nothing we can do with the 'exact' bit right now.
+       * There's nothing we can do with the 'exact' bit right now,
+       * since neither analyze() nor the IR typesystem tracks that.
        */
       auto const cls = Unit::lookupUniqueClass(
-        ni.m_unit->lookupLitstrId(ni.imm[2].u_SA)
+        ni.m_unit->lookupLitstrId(ni.imm[1].u_SA)
       );
-      if (cls && (cls->attrs() & AttrUnique)) {
-        return RuntimeType{KindOfObject, KindOfNone, cls};
-      }
-      return folly::none;
+      if (!cls || !(cls->attrs() & AttrUnique)) return folly::none;
+      return RuntimeType{KindOfObject, KindOfNone, cls};
     }
 
     switch (static_cast<AssertTOp>(ni.imm[1].u_OA)) {
@@ -1560,43 +1568,107 @@ void Translator::handleAssertionEffects(Tracelet& t,
     }
     not_reached();
   }();
-  if (!rt) return;
+  if (!assertTy) return;
 
-  auto const dl = t.newDynLocation(loc, *rt);
+  FTRACE(1, "examining assertion for {}\n", loc.pretty());
 
-  // No need for m_resolvedDeps---because we're in the bytecode stream
-  // we don't need to tell hhbc-translator about it out of band.
-  auto& curVal = tas.m_currentMap[dl->location];
-  if (curVal && !curVal->rtt.isVagueValue()) {
-    if (curVal->rtt.outerType() != dl->rtt.outerType()) {
+  /*
+   * Nullable object assertions are slightly special: we have extra
+   * information, but it's conditional on previously guarding that the
+   * object wasn't null.  And if it is null in this tracelet, the
+   * assertion should have no effects.
+   *
+   * We need to do a recordRead without setting dontGuard, so we'll
+   * still leave a guard.  (Guard relaxation will remove it if nothing
+   * ends up using it.)
+   *
+   * We also shouldn't try to remove predictions like the code below:
+   * a prediction guard might be the reason we know it's not null
+   * here.
+   */
+  if (isNullableAssertObj(ni)) {
+    auto const dl = tas.recordRead(InputInfo{loc});
+    if (dl->rtt.isNull()) {
+      FTRACE(1, "assertion leaving live KindOfNull alone for ?Obj type\n");
+      return;
+    }
+    if (!dl->isObject()) {
+      // We're about to fail a VerifyParamType or something similar.
+      FTRACE(1, "not adjusting {} since it's not an object\n",
+             dl->pretty());
+      return;
+    }
+    dl->rtt = *assertTy;
+    return;
+  }
+
+  InputInfo ii{loc};
+  ii.dontGuard = true;
+  auto const dl = tas.recordRead(ii, assertTy->outerType());
+
+  if (dl->rtt.outerType() != assertTy->outerType() &&
+      !(dl->rtt.isString() && assertTy->isString())) {
+    if (!dl->rtt.isVagueValue()) {
       /*
-       * The tracked type disagrees with ahead of time analysis.  A
-       * similar case occurs in applyInputMetaData.
+       * The live or tracked type disagrees with ahead of time analysis.
+       * A similar case occurs in applyInputMetaData.
        *
-       * Either static analysis is wrong, this was a mispredicted type
-       * from warmup profiling, or the code is unreachable because we're
-       * about to fatal (e.g. a VerifyParamType is about to throw).
-       *
-       * Punt this opcode to end the trace.
+       * Either static analysis is wrong (bug), this was a mispredicted
+       * type from warmup profiling, or the code is unreachable because
+       * we're about to fatal earlier in this tracelet.  (e.g. a
+       * VerifyParamType is about to throw.)
        */
+      if (tas.m_changeSet.count(dl->location)) {
+        auto const src = findInputSrc(tas.m_t->m_instrStream.last, dl);
+        if (src && src->outputPredicted) {
+          FTRACE(1, "correcting mispredicted type for {}\n", loc.pretty());
+          src->outputPredicted = false;
+          return;
+        }
+      }
       FTRACE(1, "punting for {}\n", loc.pretty());
       punt();
     }
+  } else {
+    /*
+     * Static inference confirmed a type we already have, but if the
+     * type we have came from profiling we want to clear outputPredicted
+     * to avoid unnecessary guards.
+     */
+    if (tas.m_changeSet.count(dl->location)) {
+      auto const src = findInputSrc(tas.m_t->m_instrStream.last, dl);
+      if (src->outputPredicted) src->outputPredicted = false;
+    }
+  }
 
-    auto const isSpecializedObj =
-      rt->outerType() == KindOfObject && rt->valueClass();
-    if (!isSpecializedObj || curVal->rtt.valueClass()) {
-      // Otherwise, we may have more information in the curVal
-      // RuntimeType than would come from the AssertT if we were
-      // tracking a literal value or something.
-      FTRACE(1, "assertion leaving curVal alone {}\n", curVal->pretty());
+  /*
+   * The valueClass fields we track on KindOfObject types basically
+   * all come from static analysis, but they can also come from being
+   * inside of an analyzeCallee situation and knowing more specific
+   * argument types.  It's also possible in principle for a tracelet
+   * to extend through a join point, and thereby propagate a better
+   * type than one of the type assertions we get from static analysis.
+   *
+   * So, sometimes we may know a more derived type here dynamically,
+   * in which case we don't want to modify the RuntimeType and make it
+   * worse.
+   */
+  auto const assertIsSpecializedObj =
+    assertTy->isObject() && assertTy->valueClass() != nullptr;
+  auto const liveIsSpecializedObj =
+    dl->rtt.isObject() && dl->rtt.valueClass() != nullptr;
+  if (assertIsSpecializedObj && liveIsSpecializedObj) {
+    auto const assertCls = assertTy->valueClass();
+    auto const liveCls = dl->rtt.valueClass();
+    if (assertCls != liveCls && !assertCls->classof(liveCls)) {
+      // liveCls must be more specialized than assertCls.
+      FTRACE(1, "assertion leaving curVal alone {}\n", loc.pretty());
       return;
     }
   }
-  FTRACE(1, "assertion effects {} -> {}\n",
-    curVal ? curVal->pretty() : std::string{},
-    dl->pretty());
-  curVal = dl;
+
+  FTRACE(1, "assertion effects {} -> {}\n", loc.pretty(), assertTy->pretty());
+  dl->rtt = *assertTy;
 }
 
 bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
@@ -1735,20 +1807,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       }
 
-      case Unit::MetaInfo::Kind::String: {
-        const StringData* sd = ni->unit()->lookupLitstrId(info.m_data);
-        assert((unsigned)arg < inputInfos.size());
-        InputInfo& ii = inputInfos[arg];
-        ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii, KindOfString);
-        assert(!dl->rtt.isString() || !dl->rtt.valueString() ||
-               dl->rtt.valueString() == sd);
-        SKTRACE(1, ni->source, "MetaInfo on input %d; old type = %s\n",
-                arg, dl->pretty().c_str());
-        dl->rtt = RuntimeType(sd);
-        break;
-      }
-
       case Unit::MetaInfo::Kind::Class: {
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
@@ -1792,7 +1850,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       }
 
       case Unit::MetaInfo::Kind::GuardedThis:
-      case Unit::MetaInfo::Kind::NonRefCounted:
         // fallthrough; these are handled in preInputApplyMetaData.
       case Unit::MetaInfo::Kind::None:
         break;
@@ -2031,14 +2088,9 @@ void getInputsImpl(SrcKey startSk,
     if (tx64->numTranslations(startSk) >= kTooPolyRet && localCount > 0) {
       return false;
     }
-    ni->nonRefCountedLocals.resize(localCount);
     int numRefCounted = 0;
     for (int i = 0; i < localCount; ++i) {
-      auto curType = localType(i);
-      if (ni->nonRefCountedLocals[i]) {
-        assert(curType.notCounted() && "Static analysis was wrong");
-      }
-      if (curType.maybeCounted()) {
+      if (localType(i).maybeCounted()) {
         numRefCounted++;
       }
     }
@@ -2050,9 +2102,7 @@ void getInputsImpl(SrcKey startSk,
     ni->ignoreInnerType = true;
     int n = ni->func()->numLocals();
     for (int i = 0; i < n; ++i) {
-      if (!ni->nonRefCountedLocals[i]) {
-        inputs.emplace_back(Location(Location::Local, i));
-      }
+      inputs.emplace_back(Location(Location::Local, i));
     }
   }
 
@@ -2969,8 +3019,9 @@ void Translator::constrainDep(const DynLocation* loc,
   if (relxType.isEqual(specType)) return; // can't contrain it any further
 
   FTRACE(3, "\nconstraining dep {}\n", loc->pretty());
-  for (NormalizedInstruction* instr = firstInstr; instr; instr = instr->next) {
+  for (auto instr = firstInstr; instr; instr = instr->next) {
     if (instr->noOp) continue;
+
     auto opc = instr->op();
     size_t nInputs = instr->inputs.size();
     for (size_t i = 0; i < nInputs; i++) {
@@ -3879,13 +3930,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         updateType();
         break;
       }
-      case Unit::MetaInfo::Kind::String: {
-        hhbcTrans.assertString(
-          stackFilter(inst.inputs[arg]->location).toLocation(inst.stackOffset),
-          inst.unit()->lookupLitstrId(info.m_data));
-        updateType();
-        break;
-      }
       case Unit::MetaInfo::Kind::Class: {
         auto& rtt = inst.inputs[arg]->rtt;
         auto const& location = inst.inputs[arg]->location;
@@ -3932,7 +3976,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       }
 
       case Unit::MetaInfo::Kind::GuardedThis:
-      case Unit::MetaInfo::Kind::NonRefCounted:
         // fallthrough; these are handled in preInputApplyMetaData.
       case Unit::MetaInfo::Kind::None:
         break;
@@ -4439,21 +4482,21 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   }
 
   const Func* func;
-  MethodLookup::LookupResult res = staticLookup ?
+  LookupResult res = staticLookup ?
     g_vmContext->lookupClsMethod(func, cls, name, nullptr, ctx, false) :
     g_vmContext->lookupObjMethod(func, cls, name, ctx, false);
 
-  if (res == MethodLookup::LookupResult::MethodNotFound) return nullptr;
+  if (res == LookupResult::MethodNotFound) return nullptr;
 
-  assert(res == MethodLookup::LookupResult::MethodFoundWithThis ||
-         res == MethodLookup::LookupResult::MethodFoundNoThis ||
+  assert(res == LookupResult::MethodFoundWithThis ||
+         res == LookupResult::MethodFoundNoThis ||
          (staticLookup ?
-          res == MethodLookup::LookupResult::MagicCallStaticFound :
-          res == MethodLookup::LookupResult::MagicCallFound));
+          res == LookupResult::MagicCallStaticFound :
+          res == LookupResult::MagicCallFound));
 
   magicCall =
-    res == MethodLookup::LookupResult::MagicCallStaticFound ||
-    res == MethodLookup::LookupResult::MagicCallFound;
+    res == LookupResult::MagicCallStaticFound ||
+    res == LookupResult::MagicCallFound;
 
   if ((privateOnly && (!(func->attrs() & AttrPrivate) || magicCall)) ||
       func->isAbstract() ||

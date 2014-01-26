@@ -78,20 +78,15 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  *    BeginCatch.
  * 2. DefLabel and BeginCatch may not appear anywhere in a block other than
  *    where specified in #1.
- * 3. If the optional BeginCatch is present, the block must belong to an exit
- *    trace and must be the first block in its Trace's block list.
+ * 3. If this block is a catch block, it must have at most one predecessor.
  * 4. The last instruction must be isBlockEnd() and the middle instructions
  *    must not be isBlockEnd().  Therefore, blocks cannot be empty.
  * 5. If the last instruction isTerminal(), block->next() must be null.
- * 6. If the DefLabel produces a value, all of its incoming edges must be from
- *    blocks listed in the block list for this block's Trace.
+ * 6. Every instruction must have a catch block attached to it if and only if it
+ *    has the MayRaiseError flag.
  * 7. Any path from this block to a Block that expects values must be
  *    from a Jmp instruciton.
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
- * 9. If this block is a catch block, it must have at most one predecessor
- *    and the trace containing it must contain exactly this block.
- * 10.Every instruction with the MayRaiseError flag must have a catch trace
- *    attached to it.
  */
 bool checkBlock(Block* b) {
   auto it = b->begin();
@@ -101,11 +96,9 @@ bool checkBlock(Block* b) {
   // Invariant #1
   if (it->op() == DefLabel) ++it;
 
-  // Invariant #1, #3
+  // Invariant #1
   if (it != end && it->op() == BeginCatch) {
     ++it;
-    assert(!b->trace()->isMain());
-    assert(b == b->trace()->front());
   }
 
   // Invariants #2, #4
@@ -120,10 +113,9 @@ bool checkBlock(Block* b) {
     // Invariant #8
     assert(inst.marker().valid());
     assert(inst.block() == b);
-    // Invariant #10
-    assert_log(IMPLIES(inst.mayRaiseError() && b->trace()->isMain() &&
-                       !inst.is(CoerceStk), // CoerceStk is special: t3213636
-                       inst.taken() && inst.taken()->isCatch()),
+    // Invariant #6. CoerceStk is special: t3213636
+    assert_log((inst.mayRaiseError() && !inst.is(CoerceStk)) ==
+               (inst.taken() && inst.taken()->isCatch()),
                [&]{ return inst.toString(); });
   }
 
@@ -138,21 +130,9 @@ bool checkBlock(Block* b) {
     assert(numBlockParams(b->taken()) == numArgs);
   }
 
-  // Invariant #6
-  if (b->front().op() == DefLabel) {
-    for (int i = 0; i < b->front().numDsts(); ++i) {
-      DEBUG_ONLY auto const& traceBlocks = b->trace()->blocks();
-      b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*) {
-        assert(std::find(traceBlocks.begin(), traceBlocks.end(),
-                         inst->block()) != traceBlocks.end());
-      });
-    }
-  }
-
-  // Invariant #9
+  // Invariant #3
   if (b->isCatch()) {
     // keyed off a tca, so there needs to be exactly one
-    assert(b->trace()->blocks().size() == 1);
     assert(b->preds().size() <= 1);
   }
 

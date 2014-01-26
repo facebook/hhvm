@@ -61,7 +61,6 @@ bool instructionsAreSinkable(InputIterator first, InputIterator last) {
  * can specialize code earlier and avoid generic operations.
  */
 void optimizePredictions(IRUnit& unit) {
-  auto const trace = unit.main();
   FTRACE(5, "PredOpts:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -95,7 +94,7 @@ void optimizePredictions(IRUnit& unit) {
 
     if (mainBlock != checkType->block()) return false;
     if (exit->numPreds() != 1) return false;
-    if (exit->isMain()) return false;
+    if (!exit->isExit()) return false;
 
     auto const sinkFirst = mainBlock->iteratorTo(ldMem);
     auto const sinkLast  = mainBlock->iteratorTo(checkType);
@@ -156,9 +155,8 @@ void optimizePredictions(IRUnit& unit) {
    * unlink the block containing the CheckType instruction they are
    * visiting.
    */
-  assert(trace->isMain());
   bool needsReflow = false;
-  for (Block* b : trace->blocks()) {
+  postorderWalk(unit, [&](Block* b) {
     for (auto& inst : *b) {
       if (inst.op() == CheckType &&
           inst.src(0)->type().equals(Type::Cell)) {
@@ -168,7 +166,7 @@ void optimizePredictions(IRUnit& unit) {
         }
       }
     }
-  }
+  });
 
   if (needsReflow) {
     reflowTypes(unit);

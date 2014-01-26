@@ -525,6 +525,13 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         error("invalid operation for AssertT*: %d\n", op);
         ok = false;
         break;
+      case Op::AssertObjL: case Op::AssertObjStk:
+#define ASSERTOBJ_OP(x) if (op == static_cast<uint8_t>(AssertObjOp::x)) break;
+        ASSERTOBJ_OPS
+#undef ASSERTOBJ_OP
+        error("invalid operator for AssertObj*: %d\n", op);
+        ok = false;
+        break;
       case Op::IsTypeC: case Op::IsTypeL:
 #define ISTYPE_OP(x)  if (op == static_cast<uint8_t>(IsTypeOp::x)) break;
         ISTYPE_OPS
@@ -549,7 +556,11 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         ok = false;
         break;
       case OpBareThis:
-        if (op > 1) ok = false;
+#define BARETHIS_OP(x) if (op == static_cast<uint8_t>(BareThisOp::x)) break;
+        BARETHIS_OPS
+#undef BARETHIS_OP
+        error("invalid BareThisOp: %d\n", op);
+        ok = false;
         break;
       case OpFatal:
 #define FATAL_OP(x)   if (op == static_cast<uint8_t>(FatalOp::x)) break;

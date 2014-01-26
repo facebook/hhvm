@@ -60,6 +60,7 @@ static folly::fbstring escape_for_json(const char* s) {
   auto opts = folly::json::serialization_opts{};
   opts.skip_invalid_utf8 = true;
   opts.encode_non_ascii = true;
+  // NB: escapeString prepends and appends double quotes
   folly::json::escapeString(folly::StringPiece{s}, ret, opts);
   return ret;
 }
@@ -503,7 +504,7 @@ protected:
       m_out << ", ";
     }
     if (m_namelessContextStack.size() != 0 && !m_namelessContextStack.top()) {
-      m_out << '"' << escape_for_json(name) << "\": ";
+      m_out << escape_for_json(name) << ": ";
     }
     m_justIndented = false;
   }
@@ -547,7 +548,7 @@ public:
     beginEntity(name);
 
     // Now write the actual value
-    m_out << "\"" << escape_for_json(value.c_str()) << "\"\n";
+    m_out << escape_for_json(value.c_str()) << "\n";
   }
 
   virtual void writeEntry(const char *name, int64_t value) {
@@ -767,9 +768,8 @@ void ServerStats::Report(string &output, Format format,
           } else {
             out << ", ";
           }
-          out << '"'
-              << escape_for_json((key + viter->first->getString()).c_str())
-              << "\": " << viter->second;
+          out << escape_for_json((key + viter->first->getString()).c_str())
+              << ": " << viter->second;
         }
       }
       out << "}\n";
@@ -928,6 +928,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
 
     w->beginObject("thread");
     w->writeEntry("id", (int64_t)ts.m_threadId);
+    w->writeEntry("tid", (int64_t)ts.m_threadPid);
     w->writeEntry("req", ts.m_requestCount);
     w->writeEntry("bytes", ts.m_writeBytes);
     w->writeEntry("start", DateTime(ts.m_start.tv_sec).
@@ -1010,6 +1011,7 @@ ServerStats::ThreadStatus::ThreadStatus()
     : m_requestCount(0), m_writeBytes(0), m_mode(ThreadMode::Idling),
       m_ioInProcess(false) {
   m_threadId = Process::GetThreadId();
+  m_threadPid = Process::GetThreadPid();
   memset(&m_start, 0, sizeof(m_start));
   memset(&m_done, 0, sizeof(m_done));
   memset(m_ioName, 0, sizeof(m_ioName));

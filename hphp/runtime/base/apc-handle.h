@@ -35,8 +35,6 @@
 
 namespace HPHP {
 
-class APCHandleStats;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -100,6 +98,7 @@ class APCHandleStats;
  * API when appropriate. It is however something we may want to revisit.
  */
 struct APCHandle {
+
   /*
    * Create an instance of an APC object according to the type of source and
    * the various flags. This is the only entry point to create APC entities.
@@ -117,14 +116,60 @@ struct APCHandle {
   Variant toLocal();
 
   //
+  // Memory management API.
+  // APC data can be treated in a counted or uncounted way and it is
+  // important to hide ref count operations.
+  // Using the reference/unreference model we are hiding the details of
+  // which data is ref counted vs uncounted.
+  // The idea is that for counted data the API turns into a normal
+  // inc/dec ref while for uncounted it is a no-op.
+  // Final release from the data-store (and generally root releases)
+  // are performed by calling unreferenceRoot. That either performs a
+  // decRef (counted object) or adds the object to the treadmill for
+  // delayed release.
+  //
+  void reference() {
+    if (!getUncounted()) {
+      realIncRef();
+    }
+  }
+
+  void unreference() {
+    if (!getUncounted()) {
+      realDecRef();
+    }
+  }
+
+  void unreferenceRoot();
+
+
+  //
+  // Type info API
+  //
+  bool is(DataType d) const { return m_type == d; }
+  DataType getType() const { return m_type; }
+
+  // TODO: those methods should go back to private once we sort out
+  //       the object creation story a bit better.
+  //       The concurrent store tries to change the serialization format
+  //       of an object on the fly and it needs those 2 methods.
+  //       Right now that is still too intrusive but we need a bit more work
+  //       before we can remove it
+  //       TASK #3166547
+  bool getIsObj() const { return m_flags & IsObj; }
+  bool getObjAttempted() const { return m_flags & ObjAttempted; }
+  bool getUncounted() const { return m_flags & Uncounted; }
+
+private:
+  //
   // Memory management API
   //
-  void incRef() {
+  void realIncRef() {
     assert(IS_REFCOUNTED_TYPE(m_type));
     ++m_count;
   }
 
-  void decRef() {
+  void realDecRef() {
     assert(m_count.load());
     if (m_count > 1) {
       assert(IS_REFCOUNTED_TYPE(m_type));
@@ -134,30 +179,6 @@ struct APCHandle {
       deleteShared();
     }
   }
-
-  //
-  // Type info API
-  //
-  bool is(DataType d) const { return m_type == d; }
-  DataType getType() const { return m_type; }
-
-  // TODO: those 2 methods should go back to private once we sort out
-  //       the object creation story a bit better.
-  //       The concurrent store tries to change the serialization format
-  //       of an object on the fly and it needs those 2 methods.
-  //       Right now that is still too intrusive but we need a bit more work
-  //       before we can remove it
-  //       TASK #3166547
-  bool getIsObj() const { return m_flags & IsObj; }
-  bool getObjAttempted() const { return m_flags & ObjAttempted; }
-
-  //
-  // Stats API
-  //
-  void getStats(APCHandleStats *stats) const;
-  int32_t getSpaceUsage() const;
-
-private:
 
   explicit APCHandle(DataType type)
       : m_type(type)
@@ -174,6 +195,7 @@ private:
                                      bool serialized,
                                      bool inner,
                                      bool unserializeObj);
+  static APCHandle* CreateUncounted(CVarRef source);
 
   bool shouldCache() const { return m_shouldCache; }
   void mustCache() { m_shouldCache = true; }
@@ -193,7 +215,8 @@ private:
     // The following flag is set once that change of format is attempted so
     // that, if the format change is not possible (internal references), we do
     // not try to change the format over and over again.
-    ObjAttempted = (1<<3);
+    ObjAttempted = (1<<3),
+    Uncounted = (1<<4);
 
   bool getSerializedArray() const { return m_flags & SerializedArray; }
   void setSerializedArray() { m_flags |= SerializedArray; }
@@ -201,6 +224,7 @@ private:
   void setPacked() { m_flags |= IsPacked; }
   void setIsObj() { m_flags |= IsObj; }
   void setObjAttempted() { m_flags |= ObjAttempted; }
+  void setUncounted() { m_flags |= Uncounted; }
 
 #if PACKED_TV
   bool m_shouldCache{false};
@@ -213,37 +237,6 @@ private:
   uint8_t m_flags;
   std::atomic<uint32_t> m_count;
 #endif
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-class APCHandleStats {
- public:
-  int32_t dataSize;
-  int32_t dataTotalSize;
-  int32_t variantCount;
-
-  void initStats() {
-    variantCount = 0;
-    dataSize = 0;
-    dataTotalSize = 0;
-  }
-
-  APCHandleStats() {
-    initStats();
-  }
-
-  void addChildStats(const APCHandleStats *childStats) {
-    dataSize += childStats->dataSize;
-    dataTotalSize += childStats->dataTotalSize;
-    variantCount += childStats->variantCount;
-  }
-
-  void removeChildStats(const APCHandleStats *childStats) {
-    dataSize -= childStats->dataSize;
-    dataTotalSize -= childStats->dataTotalSize;
-    variantCount -= childStats->variantCount;
-  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

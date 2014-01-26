@@ -82,7 +82,6 @@ struct TraceBuilder {
   bool typeMightRelax(SSATmp* val = nullptr) const;
   bool shouldElideAssertType(Type oldType, Type newType, SSATmp* oldVal) const;
 
-  IRTrace* trace() const { return m_curTrace; }
   IRUnit& unit() { return m_unit; }
   FrameState& state() { return m_state; }
   const Func* curFunc() const { return m_state.func(); }
@@ -118,36 +117,34 @@ struct TraceBuilder {
   void setMarker(BCMarker marker);
 
   /*
-   * To emit code to a trace other than the main trace, call pushTrace(), emit
-   * instructions as usual with gen(...), then, call popTrace(). This is best
-   * done using the TracePusher struct:
+   * To emit code to a block other than the current block, call pushBlock(),
+   * emit instructions as usual with gen(...), then call popBlock(). This is
+   * best done using the BlockPusher struct:
    *
-   * gen(CodeForMainTrace, ...);
+   * gen(CodeForMainBlock, ...);
    * {
-   *   TracePusher tp(m_tb, exitTrace, marker);
-   *   gen(CodeForExitTrace, ...);
+   *   BlockPusher bp(m_tb, marker, exitBlock);
+   *   gen(CodeForExitBlock, ...);
    * }
-   * gen(CodeForMainTrace, ...);
+   * gen(CodeForMainBlock, ...);
    *
-   * b and where may be supplied to emit code to a specific location in the
-   * trace. b must be nullptr iff where is boost::none, and where (if present)
-   * must be an iterator to somewhere in b's InstructionList. Instructions will
-   * be inserted at where, before the instruction it currently points to.
+   * Where may be supplied to emit code to a specific location in the block,
+   * otherwise code will be appended to the block.
    */
-  void pushTrace(IRTrace* t, BCMarker marker, Block* b,
+  void pushBlock(BCMarker marker, Block* b,
                  const boost::optional<Block::iterator>& where);
-  void popTrace();
+  void popBlock();
 
   /*
    * Run another pass of TraceBuilder-managed optimizations on this
-   * trace.
+   * unit.
    */
   void reoptimize();
 
   /*
-   * Create an IRInstruction attached to the current IRTrace, and
-   * allocate a destination SSATmp for it.  Uses the same argument
-   * list format as IRUnit::gen.
+   * Create an IRInstruction at the end of the current Block, and allocate a
+   * destination SSATmp for it.  Uses the same argument list format as
+   * IRUnit::gen.
    */
   template<class... Args>
   SSATmp* gen(Opcode op, Args&&... args) {
@@ -199,7 +196,7 @@ struct TraceBuilder {
 
   // hint the execution frequency of the current block
   void hint(Block::Hint h) const {
-    m_curTrace->back()->setHint(h);
+    m_curBlock->setHint(h);
   }
 
  private:
@@ -248,14 +245,14 @@ struct TraceBuilder {
     Block* done_block = m_unit.defBlock();
     DisableCseGuard guard(*this);
     branch(taken_block);
-    Block* last = m_curTrace->back();
+    Block* last = m_curBlock;
     assert(!last->next());
     last->back().setNext(done_block);
     appendBlock(taken_block);
     taken();
     // patch the last block added by the Taken lambda to jump to
     // the done block.  Note that last might not be taken_block.
-    last = m_curTrace->back();
+    last = m_curBlock;
     if (last->empty() || !last->back().isBlockEnd()) {
       gen(Jmp, done_block);
     } else {
@@ -278,7 +275,7 @@ struct TraceBuilder {
     next();
     // patch the last block added by the Next lambda to jump to
     // the done block.
-    auto last = m_curTrace->back();
+    auto last = m_curBlock;
     if (last->empty() || !last->back().isBlockEnd()) {
       gen(Jmp, done_block);
     } else {
@@ -288,11 +285,15 @@ struct TraceBuilder {
   }
 
   /*
-   * Create a new "exit trace".  This is a Trace that is assumed to be
+   * Create a new "exit block". This is a Block that is assumed to be
    * a cold path, which always exits the tracelet without control flow
    * rejoining the main line.
    */
-  Block* makeExit() { return m_unit.addExit(); }
+  Block* makeExit() {
+    auto* exit = m_unit.defBlock();
+    exit->setHint(Block::Hint::Unlikely);
+    return exit;
+  }
 
   /*
    * Get all typed locations in current translation.
@@ -337,7 +338,6 @@ private:
   SSATmp*   optimizeInst(IRInstruction* inst, CloneFlag doclone);
 
 private:
-  void      appendInstruction(IRInstruction* inst, Block* block);
   void      appendInstruction(IRInstruction* inst);
   void      appendBlock(Block* block);
   enum      CloneInstMode { kCloneInst, kUseInst };
@@ -348,18 +348,16 @@ private:
   FrameState m_state;
 
   /*
-   * m_savedTraces will be nonempty iff we're emitting code to a trace other
-   * than the main trace. m_curTrace, m_curMarker, m_curBlock, m_curWhere are
-   * all set from the most recent call to pushTrace() or popTrace().
+   * m_savedBlocks will be nonempty iff we're emitting code to a block other
+   * than the main block. m_curMarker, m_curBlock, m_curWhere are
+   * all set from the most recent call to pushBlock() or popBlock().
    */
-  struct TraceState {
-    IRTrace* trace;
+  struct BlockState {
     Block* block;
     BCMarker marker;
     boost::optional<Block::iterator> where;
   };
-  smart::stack<TraceState> m_savedTraces;
-  IRTrace* m_curTrace;
+  smart::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
   boost::optional<Block::iterator> m_curWhere;
 
@@ -395,19 +393,17 @@ template<> struct TraceBuilder::BranchImpl<SSATmp*> {
  * RAII helper for emitting code to exit traces. See TraceBuilder::pushTrace
  * for usage.
  */
-struct TracePusher {
-  template<typename... Args>
-  TracePusher(TraceBuilder& tb, IRTrace* trace, BCMarker marker,
-              Block* block = nullptr,
+struct BlockPusher {
+  BlockPusher(TraceBuilder& tb, BCMarker marker, Block* block,
               const boost::optional<Block::iterator>& where =
                 boost::optional<Block::iterator>())
     : m_tb(tb)
   {
-    tb.pushTrace(trace, marker, block, where);
+    tb.pushBlock(marker, block, where);
   }
 
-  ~TracePusher() {
-    m_tb.popTrace();
+  ~BlockPusher() {
+    m_tb.popBlock();
   }
 
  private:

@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/ir-trace.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace JIT {
@@ -165,22 +164,6 @@ void forPreorderDoms(Block* block, const DomChildren& children,
   body(block, state);
   for (Block* child : children[block]) {
     forPreorderDoms(child, children, state, body);
-  }
-}
-
-template <class Body>
-void forEachTrace(IRUnit& unit, Body body) {
-  body(unit.main());
-  for (auto* exit : unit.exits()) {
-    body(exit);
-  }
-}
-
-template <class Body>
-void forEachTrace(const IRUnit& unit, Body body) {
-  body(unit.main());
-  for (auto* exit : unit.exits()) {
-    body(exit);
   }
 }
 

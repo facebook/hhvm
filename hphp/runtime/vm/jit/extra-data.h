@@ -696,6 +696,9 @@ struct ShuffleData : IRExtraData {
 
   std::string show() const;
 
+  PhysLoc* begin() const { return dests; }
+  PhysLoc* end()   const { return dests + size; }
+
   PhysLoc* dests; // array of up to [cap] PhysLocs
   uint32_t size; // number of valid dests
   uint32_t cap; // available slots for more dests & srcs
@@ -736,7 +739,6 @@ X(LdSSwitchDestSlow,            LdSSwitchData);
 X(GuardLoc,                     LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
-X(OverrideLocVal,               LocalId);
 X(LdLocAddr,                    LocalData);
 X(LdLoc,                        LocalData);
 X(DecRefLoc,                    LocalId);
@@ -757,7 +759,6 @@ X(CheckStk,                     StackOffset);
 X(CastStk,                      StackOffset);
 X(CoerceStk,                    StackOffset);
 X(AssertStk,                    StackOffset);
-X(AssertStkVal,                 StackOffset);
 X(ReDefSP,                      ReDefSPData);
 X(ReDefGeneratorSP,             ReDefGeneratorSPData);
 X(DefSP,                        StackOffset);

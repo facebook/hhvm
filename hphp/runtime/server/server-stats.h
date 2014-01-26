@@ -164,6 +164,7 @@ private:
     ThreadStatus();
 
     pthread_t m_threadId;
+    pid_t m_threadPid;
 
     MemoryManager* m_mm;
 

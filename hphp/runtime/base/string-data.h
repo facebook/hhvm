@@ -157,6 +157,13 @@ struct StringData {
   static StringData* MakeStatic(StringSlice);
 
   /*
+   * Same as MakeStatic but the string alloated will *not* be in the static
+   * string table and will be deleted once the root goes out of scope.
+   * Currently only used by APC.
+   */
+  static StringData* MakeUncounted(StringSlice);
+
+  /*
    * Offset accessor for the JIT compiler.
    */
   static std::ptrdiff_t sizeOffset() { return offsetof(StringData, m_len); }
@@ -423,6 +430,7 @@ private:
   };
 
 private:
+  static StringData* MakeShared(StringSlice sl, bool trueStatic);
   static StringData* MakeSVSlowPath(APCString*, uint32_t len);
 
   StringData(const StringData&) = delete;

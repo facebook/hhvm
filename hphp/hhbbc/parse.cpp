@@ -707,7 +707,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   /*
    * HNI-style native functions get some extra information.
    */
-  if (fe.getReturnType() != KindOfInvalid) {
+  if (fe.isHNINative()) {
     ret->nativeInfo             = folly::make_unique<php::NativeInfo>();
     ret->nativeInfo->returnType = fe.getReturnType();
   }

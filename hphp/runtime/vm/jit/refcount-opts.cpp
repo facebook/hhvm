@@ -501,7 +501,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
                                block->id()).str();
           ret += show(m_state);
           ret += folly::format("{:-^80}\n{}{:-^80}\n",
-                               " trace ", m_unit.main()->toString(), "").str();
+                               " unit ", m_unit.toString(), "").str();
           return ret;
         };
 
@@ -818,7 +818,13 @@ struct SinkPointAnalyzer : private LocalStateHook {
                (!m_block->taken() && !m_block->next()) &&
                (!m_inst->is(RetCtrl) ||
                 bcOp == OpContSuspend || bcOp == OpContSuspendK ||
-                bcOp == OpContRetC)) {
+                bcOp == OpContRetC) &&
+               // The EndCatch in FunctionExitSurpriseHook's catch block is
+               // special: it happens after locals and $this have been
+               // decreffed, so we don't want to do the normal cleanup
+               !(m_inst->is(EndCatch) && isRet(bcOp) &&
+                 m_block->preds().front().inst()->is(
+                   FunctionExitSurpriseHook))) {
       // When leaving a trace, we need to account for all live references in
       // locals and $this pointers.
       consumeAllLocals();
@@ -1137,7 +1143,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
                            *m_inst, *value, what).str();
       ret += show(m_state);
       ret += folly::format("{:-^80}\n{}{:-^80}\n",
-                           " trace ", m_unit.main()->toString(), "").str();
+                           " unit ", m_unit.toString(), "").str();
       return ret;
     };
 

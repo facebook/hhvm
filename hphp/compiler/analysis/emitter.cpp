@@ -3146,12 +3146,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                       false, 0, 0);
         }
 
-        // XXX: disabled until static analysis is more reliable: t2225399
-        /*for (auto& l : r->nonRefcountedLocals()) {
-          auto v = m_curFunc->lookupVarId(makeStaticString(l));
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NonRefCounted,
-                         false, 0, v);
-        }*/
         emitReturn(e, retSym, r);
         return false;
       }
@@ -5173,13 +5167,6 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
 
     if (const StringData* name = m_evalStack.getName(i)) {
       strid = m_ue.mergeLitstr(name);
-      // If this string is an m-vector litstr it will be stored in the
-      // m-vector later on in this function. Don't duplicate it in the
-      // metadata table.
-      if (symFlavor != StackSym::T) {
-        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::String,
-                       true, metaI, strid);
-      }
     }
     if (const StringData* cls = m_evalStack.getClsName(i)) {
       const int mcodeNum = i - (iFirst + 1);
@@ -8968,11 +8955,10 @@ static void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   }
 }
 
-static void commitLitstrs() {
-  Repo& repo = Repo::get();
-  RepoTxn txn(repo);
-  repo.insertLitstrs(txn, UnitOrigin::File);
-  txn.commit();
+static void commitGlobalData() {
+  auto gd = Repo::GlobalData{};
+  gd.HardTypeHints = Option::HardTypeHints;
+  Repo::get().saveGlobalData(gd);
 }
 
 /*
@@ -9036,7 +9022,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
       }
     }
 
-    if (!Option::UseHHBBC) commitLitstrs();
+    if (!Option::UseHHBBC) commitGlobalData();
   } else {
     dispatcher.waitEmpty();
   }
@@ -9045,7 +9031,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   if (Option::UseHHBBC) {
     ues = HHBBC::whole_program(std::move(ues));
     batchCommit(std::move(ues));
-    commitLitstrs();
+    commitGlobalData();
   }
 }
 

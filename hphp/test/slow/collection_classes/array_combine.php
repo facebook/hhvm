@@ -35,8 +35,8 @@ function main() {
   $map2 = Map {0 => 'a', 1 => 'b', 2 => 'c', 3 => 'd'};
   $stablemap1 = StableMap {0 => 11, 1 => 22, 2 => 33, 3 => '22'};
   $stablemap2 = StableMap {0 => 'a', 1 => 'b', 2 => 'c', 3 => 'd'};
-  $set1 = Set {11, 22, 33, '22'};
-  $set2 = Set {'a', 'b', 'c', 'd'};
+  $set1 = Set {33, 11, '22', 22};
+  $set2 = Set {'d', 'a', 'b', 'c'};
 
   dump(array_combine($array1, $array2));
   dump(array_combine($array1, $vector2));

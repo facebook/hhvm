@@ -929,7 +929,7 @@ int64_t f_fb_utf8_strlen_deprecated(const String& input) {
 /**
  * Private helper; requires non-negative firstCodePoint and desiredCodePoints.
  */
-static Variant fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
+static String fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
                                      int32_t numDesiredCodePoints) {
   const char* const srcBuf = str.data();
   int32_t srcLenBytes = str.size(); // May truncate; checked before use below.
@@ -939,7 +939,7 @@ static Variant fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
   if (str.size() <= 0 ||
       str.size() > INT_MAX ||
       firstCodePoint >= srcLenBytes) {
-    return false;
+    return String("");
   }
 
   // Cannot be more code points than bytes in input.  This typically reduces
@@ -960,7 +960,7 @@ static Variant fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
                             (uint64_t)numDesiredCodePoints *
                             U8_LENGTH(SUBSTITUTION_CHARACTER));
   if (dstMaxLenBytes > INT_MAX) {
-    return false; // Too long.
+    return String(""); // Too long.
   }
   String dstStr(dstMaxLenBytes, ReserveString);
   char* dstBuf = dstStr.bufferSlice().ptr;
@@ -990,10 +990,11 @@ static Variant fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
   if (dstPosBytes > 0) {
     return dstStr.setSize(dstPosBytes);
   }
-  return false;
+  return String("");
 }
 
-Variant f_fb_utf8_substr(const String& str, int start, int length /* = INT_MAX */) {
+String f_fb_utf8_substr(const String& str, int start,
+                        int length /* = INT_MAX */) {
   // For negative start or length, calculate start and length values
   // based on total code points.
   if (start < 0 || length < 0) {
@@ -1013,7 +1014,7 @@ Variant f_fb_utf8_substr(const String& str, int start, int length /* = INT_MAX *
   }
 
   if (start < 0 || length <= 0) {
-    return false; // Empty result
+    return String(""); // Empty result
   }
 
   return fb_utf8_substr_simple(str, start, length);

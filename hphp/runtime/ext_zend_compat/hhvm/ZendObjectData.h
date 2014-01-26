@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/zend_hphp_class_to_class_entry.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
 
 namespace HPHP {

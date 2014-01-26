@@ -49,6 +49,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_extract("extract");
+const StaticString s_Exception("Exception");
 const StaticString s_unreachable("static analysis error: supposedly "
                                  "unreachable code was reached");
 const StaticString s_noreturn("static analysis error: function "
@@ -85,6 +86,7 @@ std::string state_string(const php::Func& f, const State& st) {
   }
 
   ret = "state:\n";
+  if (st.thisAvailable) { ret += "$this is not null\n"; }
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
     ret += folly::format("${: <8} :: {}\n",
       f.locals[i]->name
@@ -148,6 +150,12 @@ bool merge_into(State& dst, const State& src) {
 
   auto changed = false;
 
+  auto const available = dst.thisAvailable && src.thisAvailable;
+  if (available != dst.thisAvailable) {
+    changed = true;
+    dst.thisAvailable = available;
+  }
+
   for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
     auto const newT = union_of(dst.stack[i], src.stack[i]);
     if (dst.stack[i] != newT) {
@@ -184,6 +192,7 @@ bool merge_into(State& dst, const State& src) {
 State without_stacks(State const& src) {
   auto ret = State{};
   ret.initialized       = src.initialized;
+  ret.thisAvailable     = src.thisAvailable;
   ret.locals            = src.locals;
   ret.privateProperties = src.privateProperties;
   return ret;
@@ -218,7 +227,7 @@ Type eval_cell(Pred p) {
         }
         break;
       default:
-        always_assert(0 && "Impossible constant evaluation occured");
+        always_assert(0 && "Impossible constant evaluation occurred");
       }
     }
     return from_cell(c);
@@ -395,12 +404,24 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::AddNewElemC&) { popC(); popC(); push(TArr); }
   void operator()(const bc::AddNewElemV&) { popV(); popC(); push(TArr); }
 
-  void operator()(const bc::NewCol&)      { push(TObj); }
-  void operator()(const bc::ColAddElemC&) {
-    popC(); popC(); popC();
-    push(TObj);
+  void operator()(const bc::NewCol& op) {
+    auto collName = collectionTypeToString(op.arg1);
+    auto const collCls = m_index.resolve_class(m_ctx, collName);
+    always_assert(collCls &&
+                  "Collection names thorugh NewCol must alwasy resolve");
+    push(objExact(*collCls));
   }
-  void operator()(const bc::ColAddNewElemC&) { popC(); popC(); push(TObj); }
+
+  void operator()(const bc::ColAddElemC&) {
+    popC(); popC();
+    auto const coll = popC();
+    push(coll);
+  }
+  void operator()(const bc::ColAddNewElemC&) {
+    popC();
+    auto const coll = popC();
+    push(coll);
+  }
 
   // Note: unlike class constants, these can be dynamic system
   // constants, so this doesn't have to be TInitUnc.
@@ -629,8 +650,9 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::Clone& op) {
     auto const val = popC();
-    if (val.subtypeOf(TObj)) return push(val);
-    return push(TObj);
+    push(val.subtypeOf(TObj) ? val :
+         is_opt(val)         ? unopt(val) :
+         TObj);
   }
 
   void operator()(const bc::Exit&)  { popC(); push(TInitNull); }
@@ -772,8 +794,23 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::RetV& op)    { doRet(popV()); }
   void operator()(const bc::Unwind& op)  {}
   void operator()(const bc::Throw& op)   { popC(); }
-  void operator()(const bc::Catch&)      { push(TObj); }
-  void operator()(const bc::NativeImpl&) { killLocals(); doRet(TInitGen); }
+
+  void operator()(const bc::Catch&) {
+    nothrow();
+    auto const rcls = m_index.resolve_class(m_ctx, s_Exception.get());
+    always_assert(rcls &&
+      "You can't override the name Exception, so this must always resolve");
+    return push(subObj(*rcls));
+  }
+
+  void operator()(const bc::NativeImpl&) {
+    killLocals();
+    if (m_ctx.func->nativeInfo) {
+      auto const dt = m_ctx.func->nativeInfo->returnType;
+      if (dt != KindOfInvalid) return doRet(from_DataType(dt));
+    }
+    doRet(TInitGen);
+  }
 
   void operator()(const bc::CGetL& op) {
     if (!locCouldBeUninit(op.loc1)) { nothrow(); constprop(); }
@@ -1196,14 +1233,17 @@ struct InterpStepper : boost::static_visitor<void> {
     auto const t1 = topC();
     auto const v1 = tv(t1);
     if (v1 && v1->m_type == KindOfStaticString) {
-      return reduce(bc::PopC {},
-                    bc::FPushFuncD { op.arg1, v1->m_data.pstr });
+      auto const name = normalizeNS(v1->m_data.pstr);
+      if (isNSNormalized(name)) {
+        return reduce(bc::PopC {},
+                      bc::FPushFuncD { op.arg1, name });
+      }
     }
     popC();
     fpiPush(ActRec { FPIKind::Func });
   }
 
-  void operator()(const bc::FPushFuncU&) {
+  void operator()(const bc::FPushFuncU& op) {
     fpiPush(ActRec { FPIKind::Func });
   }
 
@@ -1534,19 +1574,33 @@ struct InterpStepper : boost::static_visitor<void> {
 
   // TODO_5: can we propagate our object type if unique?
   void operator()(const bc::This&) {
-    // TODO: This instruction will fatal if $this is null.  We could
-    // track that this is available starting now.
-    push(TObj);
+    if (thisAvailable()) {
+      return reduce(bc::BareThis {BareThisOp::NeverNull});
+    }
+    pushThis(TObj);
   }
 
   // TODO_5: can we propagate our class type if unique?
   void operator()(const bc::LateBoundCls&) { push(TCls); }
-  void operator()(const bc::CheckThis&)    {}
+  void operator()(const bc::CheckThis&)    {
+    if (thisAvailable()) {
+      reduce(bc::Nop {});
+    }
+    setThisAvailable();
+  }
 
   void operator()(const bc::BareThis& op) {
+    if (thisAvailable()) {
+      if (op.subop != BareThisOp::NeverNull) {
+        return reduce(bc::BareThis {BareThisOp::NeverNull});
+      }
+    }
     switch (op.subop) {
-    case BareThisOp::Notice:   break;
-    case BareThisOp::NoNotice: nothrow(); break;
+    case BareThisOp::Notice:    break;
+    case BareThisOp::NoNotice:  nothrow(); break;
+    case BareThisOp::NeverNull:
+      nothrow();
+      return pushThis(TObj);
     }
     push(TOptObj);
   }
@@ -1607,6 +1661,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Parent&) { push(TCls); }
 
   void operator()(const bc::CreateCl& op) {
+    // Closures can access properties on $this, but we don't yet know
+    // how to analyze this.
+    killThisProps();
+
     auto const nargs = op.arg1;
     for (auto i = uint32_t{0}; i < nargs; ++i) popT();
     if (auto const rcls = m_index.resolve_class(m_ctx, op.str2)) {
@@ -2269,7 +2327,12 @@ private:
   void constprop()     { m_flags.canConstProp = true; }
   void nofallthrough() { m_flags.tookBranch = true; }
   void readLocals()    { m_flags.mayReadLocals = true; }
-  void doRet(Type t)   { assert(m_state.stack.empty()); m_flags.returned = t; }
+
+  void doRet(Type t) {
+    readLocals();
+    assert(m_state.stack.empty());
+    m_flags.returned = t;
+  }
 
   /*
    * It's not entirely clear whether we need to propagate state for a
@@ -2461,10 +2524,22 @@ private: // eval stack
     return topT(i);
   }
 
+  void pushThis(Type t) {
+    push(t);
+    setThisAvailable();
+  }
+
   void push(Type t) {
     FTRACE(2, "    push: {}\n", show(t));
     m_state.stack.push_back(t);
   }
+
+  void setThisAvailable() {
+    FTRACE(2, "    setThisAvailable\n");
+    m_state.thisAvailable = true;
+  }
+
+  bool thisAvailable() const { return m_state.thisAvailable; }
 
 private: // fpi
   void fpiPush(ActRec ar) {
@@ -2840,8 +2915,15 @@ template<class ObjBC, class TyBC, class ArgType>
 folly::Optional<Bytecode> makeAssert(ArgType arg, Type t) {
   if (t.strictSubtypeOf(TObj)) {
     auto const dobj = dobj_of(t);
-    auto const exact = dobj.type == DObj::Exact;
-    return Bytecode { ObjBC { arg, exact, dobj.cls.name() } };
+    auto const op = dobj.type == DObj::Exact ? AssertObjOp::Exact
+                                             : AssertObjOp::Sub;
+    return Bytecode { ObjBC { arg, dobj.cls.name(), op } };
+  }
+  if (is_opt(t) && t.strictSubtypeOf(TOptObj)) {
+    auto const dobj = dobj_of(t);
+    auto const op = dobj.type == DObj::Exact ? AssertObjOp::OptExact
+                                             : AssertObjOp::OptSub;
+    return Bytecode { ObjBC { arg, dobj.cls.name(), op } };
   }
 
   if (auto const op = assertTOpFor(t)) {
@@ -3053,6 +3135,7 @@ State entry_state(const Index& index,
                   ClassAnalysis* clsAnalysis) {
   State ret;
   ret.initialized = true;
+  ret.thisAvailable = false;
   ret.locals.resize(ctx.func->locals.size());
 
   uint32_t locId = 0;
@@ -3257,6 +3340,7 @@ bool operator==(const ActRec& a, const ActRec& b) {
 
 bool operator==(const State& a, const State& b) {
   return a.initialized == b.initialized &&
+    a.thisAvailable == b.thisAvailable &&
     a.locals == b.locals &&
     a.stack == b.stack &&
     a.fpiStack == b.fpiStack &&
@@ -3310,14 +3394,15 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
   /*
    * 86pinit is a special function that runs to initialize instance
-   * properties that depend on class constants.  We don't currently
-   * handle this, so for any class with these types of initializers,
-   * just merge InitUnc into each property.  (Class constants are all
-   * subtypes of InitUnc.)
+   * properties that depend on class constants, or have collection
+   * literals.
+   *
+   * We don't handle this yet, so for any class with these types of
+   * initializers put the properties up to TInitCell for now.
    */
   if (has_86pinit(ctx.cls)) {
     for (auto& p : clsAnalysis.privateProperties) {
-      p.second = union_of(p.second, TInitUnc);
+      p.second = union_of(p.second, TInitCell);
     }
   }
 

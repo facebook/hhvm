@@ -41,6 +41,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
@@ -52,6 +53,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -64,6 +66,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_result_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
@@ -87,7 +90,6 @@
 
 #include <iostream>
 #include <iomanip>
-#include <algorithm>
 #include <boost/format.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
@@ -893,7 +895,6 @@ __thread VarEnvArenaStorage s_varEnvArenaStorage;
 // ExecutionContext.
 
 using namespace HPHP;
-using namespace HPHP::MethodLookup;
 
 ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
   ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
@@ -2564,6 +2565,33 @@ VMExecutionContext::pushLocalsAndIterators(const Func* func,
   // Push iterators.
   for (int i = 0; i < func->numIterators(); i++) {
     m_stack.allocI();
+  }
+}
+
+void VMExecutionContext::enqueueAPCHandle(APCHandle* handle) {
+  assert(handle->getUncounted());
+  assert(handle->getType() == KindOfString ||
+         handle->getType() == KindOfArray);
+  m_apcHandles.push_back(handle);
+}
+
+// Treadmill solution for the SharedVariant memory management
+class FreedAPCHandle : public Treadmill::WorkItem {
+  std::vector<APCHandle*> m_apcHandles;
+public:
+  explicit FreedAPCHandle(std::vector<APCHandle*>&& shandles)
+      : m_apcHandles(std::move(shandles)) {}
+  virtual void operator()() {
+    for (auto handle: m_apcHandles) {
+      APCTypedValue::fromHandle(handle)->deleteUncounted();
+    }
+  }
+};
+
+void VMExecutionContext::manageAPCHandle() {
+  assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
+  if (apcExtension::UseUncounted) {
+    Treadmill::WorkItem::enqueue(new FreedAPCHandle(std::move(m_apcHandles)));
   }
 }
 
@@ -4858,34 +4886,58 @@ OPTBLD_INLINE void VMExecutionContext::iopPredictTStk(IOP_ARGS) {
 }
 
 OPTBLD_INLINE static void implAssertObj(TypedValue* tv,
-                                        bool exact,
-                                        const StringData* str) {
+                                        const StringData* str,
+                                        AssertObjOp subop) {
   DEBUG_ONLY auto const cls = Unit::lookupClass(str);
-  assert(cls && "asserted class was not defined at AssertObj{L,Stk}");
-  assert(tv->m_type == KindOfObject);
-  if (exact) {
+  auto cls_defined = [&] {
+    assert(cls && "asserted class was not defined at AssertObj{L,Stk}");
+  };
+
+  switch (subop) {
+  case AssertObjOp::Exact:
+    assert(tv->m_type == KindOfObject);
+    cls_defined();
     assert(tv->m_data.pobj->getVMClass() == cls);
-  } else {
+    return;
+  case AssertObjOp::Sub:
+    assert(tv->m_type == KindOfObject);
+    cls_defined();
     assert(tv->m_data.pobj->getVMClass()->classof(cls));
+    return;
+  case AssertObjOp::OptExact:
+    assert(tv->m_type == KindOfObject || tv->m_type == KindOfNull);
+    if (tv->m_type == KindOfObject) {
+      cls_defined();
+      assert(tv->m_data.pobj->getVMClass() == cls);
+    }
+    return;
+  case AssertObjOp::OptSub:
+    assert(tv->m_type == KindOfObject || tv->m_type == KindOfNull);
+    if (tv->m_type == KindOfObject) {
+      cls_defined();
+      assert(tv->m_data.pobj->getVMClass()->classof(cls));
+    }
+    return;
   }
+  not_reached();
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopAssertObjL(IOP_ARGS) {
   NEXT();
   DECODE_LA(localId);
-  DECODE_IVA(exact);
   DECODE(Id, strId);
+  DECODE_OA(AssertObjOp, subop);
   auto const str = m_fp->m_func->unit()->lookupLitstrId(strId);
-  implAssertObj(frame_local(m_fp, localId), exact, str);
+  implAssertObj(frame_local(m_fp, localId), str, subop);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopAssertObjStk(IOP_ARGS) {
   NEXT();
   DECODE_IVA(stkSlot);
-  DECODE_IVA(exact);
   DECODE(Id, strId);
+  DECODE_OA(AssertObjOp, subop);
   auto const str = m_fp->m_func->unit()->lookupLitstrId(strId);
-  implAssertObj(m_stack.indTV(stkSlot), exact, str);
+  implAssertObj(m_stack.indTV(stkSlot), str, subop);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopBreakTraceHint(IOP_ARGS) {
@@ -6690,6 +6742,9 @@ OPTBLD_INLINE void VMExecutionContext::iopBareThis(IOP_ARGS) {
     switch (bto) {
     case BareThisOp::Notice:   raise_notice(Strings::WARN_NULL_THIS); break;
     case BareThisOp::NoNotice: break;
+    case BareThisOp::NeverNull:
+      assert(!"$this cannot be null in BareThis with NeverNull option");
+      break;
     }
   }
 }
@@ -7597,6 +7652,7 @@ void VMExecutionContext::requestInit() {
 void VMExecutionContext::requestExit() {
   MemoryProfile::finishProfiling();
 
+  manageAPCHandle();
   syncGdbState();
   tx64->requestExit();
   m_stack.requestExit();

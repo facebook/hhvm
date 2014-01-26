@@ -22,7 +22,6 @@
 #include "hphp/compiler/construct.h"
 #include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/util/hash-map-typedefs.h"
 
 #define EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS                          \
   BlockScopePtr scope, LocationPtr loc, Expression::KindOf kindOf

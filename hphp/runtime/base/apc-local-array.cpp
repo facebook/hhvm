@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -57,7 +58,7 @@ ALWAYS_INLINE APCLocalArray::~APCLocalArray() {
     }
     smart_free(m_localCache);
   }
-  m_arr->getHandle()->decRef();
+  m_arr->getHandle()->unreference();
 }
 
 void APCLocalArray::Release(ArrayData* ad) {

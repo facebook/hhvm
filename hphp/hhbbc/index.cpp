@@ -32,6 +32,7 @@
 
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -166,9 +167,6 @@ struct FuncInfo {
    * The best-known return type of the function, if we have any
    * information.  May be TBottom if the function is known to never
    * return (e.g. always throws).
-   *
-   * TODO(#3519344): we should use NativeInfo on the func for this if
-   * we have it.
    */
   Type returnTy = TInitGen;
 };
@@ -334,7 +332,16 @@ void add_dependency(IndexData& data,
 borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
                                         borrowed_ptr<const php::Func> f) {
   auto& ret = data.funcInfo[f];
-  if (!ret.func) ret.func = f;
+  if (ret.func) return &ret;
+  ret.func = f;
+  if (f->nativeInfo) {
+    // We'd infer this anyway when we look at the bytecode body
+    // (NativeImpl) for the HNI function, but just initializing it
+    // here saves on whole-program iterations.
+    if (f->nativeInfo->returnType != KindOfInvalid) {
+      ret.returnTy = from_DataType(f->nativeInfo->returnType);
+    }
+  }
   return &ret;
 }
 
@@ -507,6 +514,7 @@ Index::~Index() {}
 
 folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
+  clsName = normalizeNS(clsName);
   auto name_only = [&] () -> folly::Optional<res::Class> {
     // We know it has to name a class only if there's no type alias
     // with this name.
@@ -527,7 +535,14 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
       auto const cls = it->second;
 
       if (cls->attrs & AttrUnique) {
-        assert(++it == end(classes));
+        if (debug && boost::next(it) != end(classes)) {
+          std::fprintf(stderr, "non unique \"unique\" class: %s\n",
+            cls->name->data());
+          for (; it != end(classes); ++it) {
+            std::fprintf(stderr, "   and %s\n", it->second->name->data());
+          }
+          assert(0);
+        }
         return cls;
       }
 
@@ -638,6 +653,7 @@ folly::Optional<res::Func> Index::resolve_ctor(Context ctx,
 }
 
 res::Func Index::resolve_func(Context ctx, SString name) const {
+  name = normalizeNS(name);
   auto name_only = [&] {
     return res::Func { this, SStringOr<FuncInfo>(name) };
   };
@@ -658,16 +674,17 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   if (!tc.hasConstraint()) return TCell;
 
   /*
-   * Currently, nullable extended hints (?Foo) are ignored at runtime
-   * except raising a warning.
-   */
-  if (tc.isNullable() && tc.isExtended()) return TCell;
-
-  /*
    * Type variable constraints are not used at runtime to enforce
    * anything.
    */
   if (tc.isTypeVar()) return TCell;
+
+  /*
+   * Currently, nullable extended hints (?Foo) are runtime enforced,
+   * except that failing to pass a parameter doesn't fail the type
+   * hint, so we can't assume it's TInitCell yet.
+   */
+  if (tc.isNullable() && tc.isExtended()) return TCell;
 
   /*
    * Soft hints (@Foo) are not checked.
@@ -692,8 +709,8 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
            */
           if (auto const rcls = resolve_class(ctx, tc.typeName())) {
             return interface_supports_non_objects(rcls->name())
-                ? TInitCell // none of these interfaces support Uninits
-                : subObj(*rcls);
+              ? TInitCell // none of these interfaces support Uninits
+              : subObj(*rcls);
           }
           /*
            * TODO: if the class isn't unique, but there's no type
@@ -709,14 +726,16 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
         return TInitCell;
       }();
       return mainType == TInitCell || !tc.isNullable() ? mainType
-                                                       : opt(mainType);
+        : opt(mainType);
     }
   case TypeConstraint::MetaType::Self:
-    // fallthrough
   case TypeConstraint::MetaType::Parent:
-    // fallthrough
   case TypeConstraint::MetaType::Callable:
     break;
+  case TypeConstraint::MetaType::Number:
+    // TODO(#3553967): a concept of TInt | TDbl is necessary to
+    // capture this case and the results of integer division
+    return TInitCell;
   }
 
   return TCell;
@@ -808,4 +827,3 @@ res::Func Index::do_resolve(borrowed_ptr<const php::Func> f) const {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

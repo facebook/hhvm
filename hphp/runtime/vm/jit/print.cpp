@@ -26,7 +26,6 @@
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/ir-trace.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -328,19 +327,9 @@ void print(const SSATmp* tmp) {
   std::cerr << std::endl;
 }
 
-void print(const IRTrace* trace) {
-  print(std::cout, trace->unit(), trace);
-}
-
 std::string Block::toString() const {
   std::ostringstream out;
   print(out, this);
-  return out.str();
-}
-
-std::string IRTrace::toString() const {
-  std::ostringstream out;
-  print(out, unit(), this, nullptr);
   return out.str();
 }
 
@@ -348,33 +337,6 @@ std::string IRUnit::toString() const {
   std::ostringstream out;
   print(out, *this);
   return out.str();
-}
-
-// Print unlikely blocks at the end in normal generation.  If we have
-// asmInfo, order the blocks based on how they were layed out.
-static BlockList blocks(const IRUnit& unit,
-                        const IRTrace* trace,
-                        const AsmInfo* asmInfo) {
-  if (!asmInfo) {
-    return layoutBlocks(unit).blocks;
-  }
-
-  smart::vector<Block*> blocks;
-  blocks.assign(trace->blocks().begin(), trace->blocks().end());
-  if (trace->isMain()) {
-    for (auto* exit : unit.exits()) {
-      blocks.insert(blocks.end(), exit->blocks().begin(), exit->blocks().end());
-    }
-  }
-  std::sort(
-    blocks.begin(),
-    blocks.end(),
-    [&] (Block* a, Block* b) {
-      return asmInfo->asmRanges[a].begin() < asmInfo->asmRanges[b].begin();
-    }
-  );
-
-  return blocks;
 }
 
 static constexpr auto kIndent = 4;
@@ -406,19 +368,21 @@ void print(std::ostream& os, const Block* block,
   BCMarker dummy;
   BCMarker& curMarker = markerPtr ? *markerPtr : dummy;
 
-  if (!block->isMain()) {
-    os << "\n" << color(ANSI_COLOR_GREEN)
-       << "    -------  Exit Trace  -------"
-       << color(ANSI_COLOR_END) << '\n';
-    curMarker = BCMarker();
-  }
-
   TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
     TcaRange(nullptr, nullptr);
 
   os << '\n' << std::string(kIndent - 3, ' ');
   printLabel(os, block);
-  os << punc(":") << "\n";
+  os << punc(":");
+  auto& preds = block->preds();
+  if (!preds.empty()) {
+    os << " (preds";
+    for (auto const& edge : preds) {
+      os << " B" << edge.inst()->block()->id();
+    }
+    os << ')';
+  }
+  os << "\n";
 
   const char* markerEndl = "";
   for (auto it = block->begin(); it != block->end();) {
@@ -533,12 +497,12 @@ void print(const Block* block) {
   std::cerr << std::endl;
 }
 
-void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
+void print(std::ostream& os, const IRUnit& unit,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime,
            const AsmInfo* asmInfo, const GuardConstraints* guards) {
   // For nice-looking dumps, we want to remember curMarker between blocks.
   BCMarker curMarker;
-  for (Block* block : blocks(unit, trace, asmInfo)) {
+  for (Block* block : layoutBlocks(unit).blocks) {
     print(os, block, regs, lifetime, asmInfo, guards, &curMarker);
   }
 }
@@ -555,7 +519,7 @@ void dumpTrace(int level, const IRUnit& unit, const char* caption,
         << folly::format(bannerFmt, caption)
         << color(ANSI_COLOR_END)
         ;
-    print(str, unit, unit.main(), regs, lifetime, ai, guards);
+    print(str, unit, regs, lifetime, ai, guards);
     str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
         << folly::format(bannerFmt, "")
         << color(ANSI_COLOR_END)

@@ -9,22 +9,31 @@ before_script:
   - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - time HPHP_HOME=`pwd` make -j 6
 
-# Test suites take longer to run in RepoAuthoritative mode (-r) than normal so
-# split out the -r from normal runs and further split the -r runs by suite to
-# avoid the possibility of slower machines exceeding the 50 minute test timeout
+# The larger test suites (slow, zend) take longer than 50 miuntes to run. Since
+# we have no way to change the timeout, we subdivide the jit/interp repo/normal
+# matrix and then further split the large suites using an experimental cut
+# which divides the number of tests in each sub-run roughly in two.
 env:
   - TEST_RUN_MODE="-m jit quick"
-  - TEST_RUN_MODE="-m jit slow"
-  - TEST_RUN_MODE="-m jit zend"
+  - TEST_RUN_MODE="-m jit slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m jit slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m jit zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m jit zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/'
   - TEST_RUN_MODE="-m jit -r quick"
-  - TEST_RUN_MODE="-m jit -r slow"
-  - TEST_RUN_MODE="-m jit -r zend"
+  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m jit -r slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m jit -r zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
   - TEST_RUN_MODE="-m interp quick"
-  - TEST_RUN_MODE="-m interp slow"
-  - TEST_RUN_MODE="-m interp zend"
+  - TEST_RUN_MODE="-m interp slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m interp slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m interp zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m interp zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
   - TEST_RUN_MODE="-m interp -r quick"
-  - TEST_RUN_MODE="-m interp -r slow"
-  - TEST_RUN_MODE="-m interp -r zend"
+  - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m interp -r slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m interp -r zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
 
 script: time hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
 

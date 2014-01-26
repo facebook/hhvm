@@ -4,6 +4,7 @@ namespace A {
   class B {}
   const C = 'C';
   define(__NAMESPACE__.'\D', 'D');
+  function f() { return 'A/f'; }
 }
 
 namespace D {
@@ -17,6 +18,9 @@ namespace D {
 
     $name = '\\A\B';
     var_dump(new $name);
+
+    $name = '\A\f';
+    var_dump($name());
 
     var_dump(\A\C);
 

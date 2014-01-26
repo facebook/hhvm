@@ -92,20 +92,21 @@ typedef StateVector<IRInstruction, DceFlags> DceState;
 typedef smart::hash_map<SSATmp*, uint32_t> UseCounts;
 typedef smart::list<const IRInstruction*> WorkList;
 
-void removeDeadInstructions(IRTrace* trace, const DceState& state) {
-  auto& blocks = trace->blocks();
-  for (auto it = blocks.begin(), end = blocks.end(); it != end;) {
-    auto cur = it; ++it;
-    Block* block = *cur;
+void removeDeadInstructions(IRUnit& unit, const DceState& state) {
+  postorderWalk(unit, [&](Block* block) {
     block->remove_if([&] (const IRInstruction& inst) {
       ONTRACE(7,
               if (state[inst].isDead()) {
                 FTRACE(3, "Removing dead instruction {}\n", inst.toString());
               });
+
+      // For now, all control flow instructions are essential. If we ever
+      // change this, we'll need to be careful about unlinking dead CF
+      // instructions here.
+      assert(IMPLIES(inst.isControlFlow(), !state[inst].isDead()));
       return state[inst].isDead();
     });
-    if (block->empty()) trace->unlink(cur);
-  }
+  });
 }
 
 bool isUnguardedLoad(IRInstruction* inst) {
@@ -455,18 +456,8 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
 // Publicly exported functions:
 
 void eliminateDeadCode(IRUnit& unit) {
-  auto removeEmptyExitTraces = [&] {
-    auto& exits = unit.exits();
-    auto isEmpty = [](IRTrace* exit) {
-      return exit->blocks().empty();
-    };
-    exits.erase(std::remove_if(exits.begin(), exits.end(), isEmpty),
-                exits.end());
-  };
-
   // kill unreachable code and remove any traces that are now empty
   BlockList blocks = prepareBlocks(unit);
-  removeEmptyExitTraces();
 
   // mark the essential instructions and add them to the initial
   // work list; this will also mark reachable exit traces. All
@@ -507,12 +498,7 @@ void eliminateDeadCode(IRUnit& unit) {
   }
 
   // now remove instructions whose id == DEAD
-  forEachTrace(unit, [&](IRTrace* t) {
-    removeDeadInstructions(t, state);
-  });
-
-  // and remove empty exit traces
-  removeEmptyExitTraces();
+  removeDeadInstructions(unit, state);
 }
 
 } }

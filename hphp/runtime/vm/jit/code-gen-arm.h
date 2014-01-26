@@ -72,11 +72,20 @@ struct CodeGenerator {
 
   void cgCallNative(vixl::MacroAssembler& as, IRInstruction* inst);
   void cgCallHelper(vixl::MacroAssembler& a,
-                    CppCall& call,
+                    CppCall call,
                     const CallDest& dstInfo,
                     SyncOptions sync,
                     ArgGroup& args,
                     RegSet toSave);
+  void cgCallHelper(vixl::MacroAssembler& a,
+                    CppCall call,
+                    const CallDest& dstInfo,
+                    SyncOptions sync,
+                    ArgGroup& args);
+
+  void emitDecRefDynamicType(vixl::Register baseReg, ptrdiff_t offset);
+  void emitDecRefStaticType(Type type, vixl::Register reg);
+  void emitDecRefMem(Type type, vixl::Register baseReg, ptrdiff_t offset);
 
   template<class Loc, class JmpFn>
   void emitTypeTest(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);

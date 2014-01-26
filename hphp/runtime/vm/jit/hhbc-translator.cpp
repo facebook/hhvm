@@ -493,16 +493,21 @@ void HhbcTranslator::emitCheckThis() {
   gen(LdThis, makeExitSlow(), m_tb->fp());
 }
 
-void HhbcTranslator::emitRB(Trace::RingBufferType t, SrcKey sk) {
-  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) return;
+void HhbcTranslator::emitRB(Trace::RingBufferType t, SrcKey sk, int level) {
+  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, level)) return;
 
   gen(RBTrace, RBTraceData(t, sk));
 }
 
-void HhbcTranslator::emitRB(Trace::RingBufferType t, const StringData* msg) {
-  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) return;
+void HhbcTranslator::emitRB(Trace::RingBufferType t, const StringData* msg,
+                            int level) {
+  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, level)) return;
 
   gen(RBTrace, RBTraceData(t, msg));
+}
+
+void HhbcTranslator::emitDbgAssertRetAddr() {
+  gen(DbgAssertRetAddr);
 }
 
 void HhbcTranslator::emitBareThis(int notice) {
@@ -515,6 +520,9 @@ void HhbcTranslator::emitBareThis(int notice) {
   if (!curClass()) {
     emitInterpOne(Type::InitNull, 0); // will raise notice and push null
     return;
+  }
+  if (notice == static_cast<int>(BareThisOp::NeverNull)) {
+    setThisAvailable();
   }
   pushIncRef(gen(LdThis, makeExitSlow(), m_tb->fp()));
 }
@@ -1142,9 +1150,11 @@ void HhbcTranslator::emitIterInit(uint32_t iterId,
                                   bool invertCond) {
   constrainIterLocals(*m_tb, valLocalId);
 
+  auto catchBlock = makeCatch();
   emitIterInitCommon(offset, [&] (SSATmp* src) {
       return gen(IterInit,
                  Type::Bool,
+                 catchBlock,
                  src,
                  m_tb->fp(),
                  cns(iterId),
@@ -1160,9 +1170,11 @@ void HhbcTranslator::emitIterInitK(uint32_t iterId,
                                    bool invertCond) {
   constrainIterLocals(*m_tb, valLocalId, keyLocalId);
 
+  auto catchBlock = makeCatch();
   emitIterInitCommon(offset, [&] (SSATmp* src) {
       return gen(IterInitK,
                  Type::Bool,
+                 catchBlock,
                  src,
                  m_tb->fp(),
                  cns(iterId),
@@ -1181,6 +1193,7 @@ void HhbcTranslator::emitIterNext(uint32_t iterId,
   SSATmp* res = gen(
     IterNext,
     Type::Bool,
+    makeCatch(),
     m_tb->fp(),
     cns(iterId),
     cns(valLocalId)
@@ -1198,6 +1211,7 @@ void HhbcTranslator::emitIterNextK(uint32_t iterId,
   SSATmp* res = gen(
     IterNextK,
     Type::Bool,
+    makeCatch(),
     m_tb->fp(),
     cns(iterId),
     cns(valLocalId),
@@ -1212,10 +1226,12 @@ void HhbcTranslator::emitWIterInit(uint32_t iterId,
                                    bool invertCond) {
   constrainIterLocals(*m_tb, valLocalId);
 
+  auto catchBlock = makeCatch();
   emitIterInitCommon(
     offset, [&] (SSATmp* src) {
       return gen(WIterInit,
                  Type::Bool,
+                 catchBlock,
                  src,
                  m_tb->fp(),
                  cns(iterId),
@@ -1231,10 +1247,12 @@ void HhbcTranslator::emitWIterInitK(uint32_t iterId,
                                     bool invertCond) {
   constrainIterLocals(*m_tb, valLocalId, keyLocalId);
 
+  auto catchBlock = makeCatch();
   emitIterInitCommon(
     offset, [&] (SSATmp* src) {
       return gen(WIterInitK,
                  Type::Bool,
+                 catchBlock,
                  src,
                  m_tb->fp(),
                  cns(iterId),
@@ -1253,6 +1271,7 @@ void HhbcTranslator::emitWIterNext(uint32_t iterId,
   SSATmp* res = gen(
     WIterNext,
     Type::Bool,
+    makeCatch(),
     m_tb->fp(),
     cns(iterId),
     cns(valLocalId)
@@ -1270,6 +1289,7 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
   SSATmp* res = gen(
     WIterNextK,
     Type::Bool,
+    makeCatch(),
     m_tb->fp(),
     cns(iterId),
     cns(valLocalId),
@@ -1283,10 +1303,12 @@ void HhbcTranslator::emitMIterInit(uint32_t iterId,
                                   uint32_t valLocalId) {
   constrainIterLocals(*m_tb, valLocalId);
 
+  auto catchBlock = makeCatch();
   emitMIterInitCommon(offset, [&] (SSATmp* src) {
     return gen(
       MIterInit,
       Type::Bool,
+      catchBlock,
       src,
       m_tb->fp(),
       cns(iterId),
@@ -1301,10 +1323,12 @@ void HhbcTranslator::emitMIterInitK(uint32_t iterId,
                                    uint32_t keyLocalId) {
   constrainIterLocals(*m_tb, valLocalId, keyLocalId);
 
+  auto catchBlock = makeCatch();
   emitMIterInitCommon(offset, [&] (SSATmp* src) {
     return gen(
       MIterInitK,
       Type::Bool,
+      catchBlock,
       src,
       m_tb->fp(),
       cns(iterId),
@@ -1446,6 +1470,10 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
     LdRaw, Type::TCA, cont, cns(RawMemSlot::ContEntry)
   );
 
+  // The top of the stack will be consumed by the callee, so discard
+  // it without decreffing.
+  popC(DataTypeGeneric);
+
   gen(
     ContEnter,
     contAR,
@@ -1453,11 +1481,6 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
     cns(returnBcOffset),
     m_tb->fp()
   );
-  assert(m_stackDeficit == 0);
-
-  // The top of the stack was consumed by the callee, so discard it without
-  // decreffing.
-  popC(DataTypeGeneric);
 }
 
 void HhbcTranslator::emitContReturnControl() {
@@ -1985,10 +2008,11 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId,
 
   // If we have to side exit, do the RDS lookup before chaining to
   // another Tracelet so forward progress still happens.
+  auto catchBlock = makeCatchNoSpill();
   auto const sideExit = makeSideExit(
     nextBcOff(),
     [&] {
-      return gen(LookupClsCns, clsCnsName);
+      return gen(LookupClsCns, catchBlock, clsCnsName);
     }
   );
 
@@ -2570,11 +2594,11 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
 
   if (!func) {
     if (baseClass && !(baseClass->attrs() & AttrInterface)) {
-      MethodLookup::LookupResult res =
+      LookupResult res =
         g_vmContext->lookupObjMethod(func, baseClass, methodName, curClass(),
                                      false);
-      if ((res == MethodLookup::LookupResult::MethodFoundWithThis ||
-           res == MethodLookup::LookupResult::MethodFoundNoThis) &&
+      if ((res == LookupResult::MethodFoundWithThis ||
+           res == LookupResult::MethodFoundNoThis) &&
           !func->isAbstract()) {
         /*
          * If we found the func in baseClass, then either:
@@ -2592,7 +2616,7 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
           SSATmp* funcTmp = gen(
             LdClsMethod, clsTmp, cns(func->methodSlot())
           );
-          if (res == MethodLookup::LookupResult::MethodFoundNoThis) {
+          if (res == LookupResult::MethodFoundNoThis) {
             gen(DecRef, obj);
             objOrCls = clsTmp;
           }
@@ -2750,7 +2774,6 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
      * generated code for this case is pretty different, since we
      * don't need the pre-live ActRec trick.
      */
-    using namespace MethodLookup;
     auto const cls = curClass();
     const Func* func;
     auto res =
@@ -3109,6 +3132,7 @@ void HhbcTranslator::emitJmpSurpriseCheck() {
 
 void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
+  auto catchBlock = makeCatch();
 
   m_tb->ifThen([&](Block* taken) {
                  gen(CheckSurpriseFlags, taken);
@@ -3116,7 +3140,7 @@ void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator) {
                [&] {
                  m_tb->hint(Block::Hint::Unlikely);
                  gen(FunctionExitSurpriseHook, InGeneratorData(inGenerator),
-                     m_tb->fp(), m_tb->sp(), retVal);
+                     catchBlock, m_tb->fp(), m_tb->sp(), retVal);
                });
 
 }
@@ -3357,33 +3381,6 @@ void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
   }
 }
 
-void HhbcTranslator::assertString(const RegionDesc::Location& loc,
-                                  const StringData* str) {
-  typedef RegionDesc::Location::Tag T;
-  switch (loc.tag()) {
-    case T::Stack: {
-      auto idx = loc.stackOffset();
-      if (idx < m_evalStack.size()) {
-        // We're asserting a new type so we don't care about the previous type.
-        DEBUG_ONLY SSATmp* oldStr = m_evalStack.top(DataTypeGeneric, idx);
-        assert(oldStr->type().maybe(Type::Str));
-        m_evalStack.replace(idx, cns(str));
-      } else {
-        gen(AssertStkVal,
-            StackOffset(idx - m_evalStack.size() + m_stackDeficit),
-            m_tb->sp(), cns(str));
-      }
-    }
-    break;
-
-    case T::Local:
-      // We're asserting a new type so we don't care about the previous type.
-      assert(m_tb->localType(loc.localId(), DataTypeGeneric).maybe(Type::Str));
-      gen(OverrideLocVal, LocalId(loc.localId()), m_tb->fp(), cns(str));
-      break;
-  }
-}
-
 void HhbcTranslator::assertClass(const RegionDesc::Location& loc,
                                  const Class* cls) {
   Type curType;
@@ -3523,7 +3520,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
     assert_log(false,
     [&] {
       return folly::format("Bad type {} for local {}:\n\n{}\n",
-                           locType, paramId, m_tb->trace()->toString()).str();
+                           locType, paramId, m_tb->unit().toString()).str();
     });
     emitInterpOne(Type::None, 0);
     return;
@@ -4187,12 +4184,28 @@ Type HhbcTranslator::assertObjType(const StringData* name) {
   return classIsUniqueOrCtxParent(cls) ? Type::Obj.specialize(cls) : Type::Obj;
 }
 
-void HhbcTranslator::emitAssertObjL(int32_t loc, bool exact, Id id) {
-  assertTypeLocal(loc, assertObjType(lookupStringId(id)));
+static bool is_nullable(AssertObjOp op) {
+  switch (op) {
+  case AssertObjOp::Exact:
+  case AssertObjOp::Sub:
+    return false;
+  case AssertObjOp::OptExact:
+  case AssertObjOp::OptSub:
+    return true;
+  }
+  not_reached();
 }
 
-void HhbcTranslator::emitAssertObjStk(int32_t offset, bool exact, Id id) {
-  assertTypeStack(offset, assertObjType(lookupStringId(id)));
+void HhbcTranslator::emitAssertObjL(int32_t loc, Id id, AssertObjOp op) {
+  auto ty = assertObjType(lookupStringId(id));
+  if (is_nullable(op)) ty = ty | Type::InitNull;
+  assertTypeLocal(loc, ty);
+}
+
+void HhbcTranslator::emitAssertObjStk(int32_t offset, Id id, AssertObjOp op) {
+  auto ty = assertObjType(lookupStringId(id));
+  if (is_nullable(op)) ty = ty | Type::InitNull;
+  assertTypeStack(offset, ty);
 }
 
 void HhbcTranslator::emitAbs() {
@@ -4896,7 +4909,7 @@ Block* HhbcTranslator::makeExitWarn(Offset targetBcOff,
   assert(targetBcOff != -1);
   return makeExitImpl(targetBcOff, ExitFlag::JIT, spillValues,
     [&]() -> SSATmp* {
-      gen(RaiseWarning, cns(warning));
+      gen(RaiseWarning, makeCatchNoSpill(), cns(warning));
       return nullptr;
     }
   );
@@ -4923,7 +4936,7 @@ Block* HhbcTranslator::makeExitOpt(TransID transId) {
   exitMarker.spOff = m_tb->spOffset() + spillValues.size() - m_stackDeficit;
   exitMarker.func  = curFunc();
 
-  TracePusher tracePusher(*m_tb, exit->trace(), exitMarker);
+  BlockPusher blockPusher(*m_tb, exitMarker, exit);
 
   SSATmp* stack = nullptr;
   if (m_stackDeficit != 0 || !spillValues.empty()) {
@@ -4952,8 +4965,9 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   BCMarker currentMarker = makeMarker(bcOff());
 
   auto const exit = m_tb->makeExit();
-  TracePusher tp(*m_tb, exit->trace(),
-                 flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker);
+  BlockPusher tp(*m_tb,
+                 flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker,
+                 exit);
 
   // The value we use for stack is going to depend on whether we have
   // to spillstack or what.
@@ -5001,7 +5015,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
 
     // Blindly using None as the output type here might seem bogus, but since
     // this trace is about to end, it doesn't matter for downstream analysis.
-    gen(interpOp, Type::None, idata, stack, m_tb->fp());
+    gen(interpOp, Type::None, idata, makeCatchNoSpill(), stack, m_tb->fp());
 
     if (!changesPC) {
       // If the op changes PC, InterpOneCF handles getting to the right place
@@ -5023,28 +5037,45 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
 }
 
 /*
- * Create a catch trace for the current state of the eval stack. This is a
- * trace intended to be invoked by the unwinder while unwinding a frame
- * containing a call to C++ from translated code. When attached to an
- * instruction as its taken field, code will be generated and the trace will be
- * registered with the unwinder automatically.
- *
- * The incoming value of spillVals will be the top of the spilled stack: values
- * in m_evalStack will be appended to spillVals to form the sources for the
+ * Create a catch block with a user-defined body (usually empty or a
+ * SpillStack). Regardless of what body() does, it must return the current
+ * stack pointer. This is a block to be invoked by the unwinder while unwinding
+ * through a call to C++ from translated code. When attached to an instruction
+ * as its taken field, code will be generated and the block will be registered
+ * with the unwinder automatically.
+ */
+template<typename Body>
+Block* HhbcTranslator::makeCatchImpl(Body body) {
+  auto exit = m_tb->makeExit();
+
+  BlockPusher bp(*m_tb, makeMarker(bcOff()), exit);
+  gen(BeginCatch);
+  auto sp = body();
+  gen(EndCatch, m_tb->fp(), sp);
+
+  return exit;
+}
+
+/*
+ * Create a catch block that spills the current state of the eval stack. The
+ * incoming value of spillVals will be the top of the spilled stack: values in
+ * m_evalStack will be appended to spillVals to form the sources for the
  * SpillStack.
  */
 Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals) {
-  auto exit = m_tb->makeExit();
-  assert(exit->trace()->blocks().size() == 1);
+  return makeCatchImpl([&] {
+    for (auto* val : peekSpillValues()) spillVals.push_back(val);
+    return emitSpillStack(m_tb->sp(), spillVals);
+  });
+}
 
-  TracePusher tp(*m_tb, exit->trace(), makeMarker(bcOff()));
-  gen(BeginCatch);
-  for (auto* val : peekSpillValues()) spillVals.push_back(val);
-  auto sp = emitSpillStack(m_tb->sp(), spillVals);
-  gen(EndCatch, m_tb->fp(), sp);
-
-  assert(exit->trace()->blocks().size() == 1);
-  return exit;
+/*
+ * Create a catch block with no SpillStack. Some of our optimizations rely on
+ * the ability to insert code on *every* path out of a trace, so we can't
+ * simply elide the catch block in the cases that want an empty body.
+ */
+Block* HhbcTranslator::makeCatchNoSpill() {
+  return makeCatchImpl([&] { return m_tb->sp(); });
 }
 
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,

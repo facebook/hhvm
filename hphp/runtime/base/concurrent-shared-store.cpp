@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/concurrent-shared-store.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/logger.h"
@@ -70,7 +71,7 @@ bool ConcurrentTableSharedStore::clear() {
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
        ++iter) {
     if (iter->second.inMem()) {
-      iter->second.var->decRef();
+      iter->second.var->unreferenceRoot();
     }
     free((void *)iter->first);
   }
@@ -100,7 +101,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const String& key, bool expired) {
       return false;
     }
     if (acc->second.inMem()) {
-      acc->second.var->decRef();
+      acc->second.var->unreferenceRoot();
     } else {
       assert(acc->second.inFile());
       assert(acc->second.expiry == 0);
@@ -177,7 +178,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
     if (!m_vars.find(acc, tagStringData(key.get()))) {
       // There is a chance another thread deletes the key when this thread is
       // converting the object. In that case, we just bail
-      converted->decRef();
+      converted->unreferenceRoot();
       return false;
     }
     // A write lock was acquired during find
@@ -187,10 +188,10 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
     // updated it already, check before updating
     if (sv == svar && !sv->getIsObj()) {
       sval->var = converted;
-      sv->decRef();
+      sv->unreferenceRoot();
       return true;
     }
-    converted->decRef();
+    converted->unreferenceRoot();
   }
   return false;
 }
@@ -249,7 +250,7 @@ bool ConcurrentTableSharedStore::get(const String& key, Variant &value) {
         if (apcExtension::AllowObj && svar->is(KindOfObject) &&
             !svar->getObjAttempted()) {
           // Hold ref here for later promoting the object
-          svar->incRef();
+          svar->reference();
           promoteObj = true;
         }
         value = svar->toLocal();
@@ -264,7 +265,7 @@ bool ConcurrentTableSharedStore::get(const String& key, Variant &value) {
   if (promoteObj)  {
     handlePromoteObj(key, svar, value);
     // release the extra ref
-    svar->decRef();
+    svar->unreference();
   }
   return true;
 }
@@ -294,7 +295,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
       if (!sval->expired()) {
         ret = get_int64_value(sval) + step;
         APCHandle *svar = construct(Variant(ret));
-        sval->var->decRef();
+        sval->var->unreferenceRoot();
         sval->var = svar;
         found = true;
       }
@@ -315,7 +316,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
       sval = &acc->second;
       if (!sval->expired() && get_int64_value(sval) == old) {
         APCHandle *var = construct(Variant(val));
-        sval->var->decRef();
+        sval->var->unreferenceRoot();
         sval->var = var;
         success = true;
       }
@@ -380,14 +381,14 @@ bool ConcurrentTableSharedStore::store(const String& key, CVarRef value,
         // if ApcTTLLimit is set, then only primed keys can have expiry == 0
         overwritePrime = (sval->expiry == 0);
         if (sval->inMem()) {
-          sval->var->decRef();
+          sval->var->unreferenceRoot();
         } else {
           // mark the inFile copy invalid since we are updating the key
           sval->sAddr = nullptr;
           sval->sSize = 0;
         }
       } else {
-        svar->decRef();
+        svar->unreferenceRoot();
         return false;
       }
     }

@@ -59,7 +59,7 @@ StringData* StringData::MakeSVSlowPath(APCString* shared, uint32_t len) {
 
   sd->sharedPayload()->shared = shared;
   sd->enlist();
-  shared->incRef();
+  shared->getHandle()->reference();
 
   assert(sd->m_len == len);
   assert(sd->m_count == 0);

@@ -13,10 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/type-constraint.h"
 
 #include "folly/MapUtil.h"
+#include "folly/Format.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -75,6 +75,9 @@ void TypeConstraint::init() {
                                                    MetaType::Parent }},
       { makeStaticString("callable"), { KindOfObject,
                                                    MetaType::Callable }},
+      { makeStaticString("num"),      { KindOfDouble,
+                                                   MetaType::Number }},
+
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
       s_typeNamesToTypes[pairs[i].name] = pairs[i].type;
@@ -173,7 +176,11 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
-  if (isNullable() && IS_NULL_TYPE(tv->m_type)) return true;
+  if (isNullable() && IS_NULL_TYPE(tv->m_type)) { return true; }
+
+  if (isNumber()) {
+    return IS_INT_TYPE(tv->m_type) || IS_DOUBLE_TYPE(tv->m_type);
+  }
 
   if (tv->m_type == KindOfObject) {
     if (!isObjectOrTypeAlias()) return false;
@@ -249,7 +256,8 @@ bool
 TypeConstraint::checkPrimitive(DataType dt) const {
   assert(m_type.dt != KindOfObject);
   assert(dt != KindOfRef);
-  if (isNullable() && IS_NULL_TYPE(dt)) return true;
+  if (isNullable() && IS_NULL_TYPE(dt)) { return true; }
+  if (isNumber()) { return IS_INT_TYPE(dt) || IS_DOUBLE_TYPE(dt); }
   return equivDataTypes(m_type.dt, dt);
 }
 
@@ -277,8 +285,7 @@ static const char* describe_actual_type(const TypedValue* tv) {
 void TypeConstraint::verifyFail(const Func* func, int paramNum,
                                 const TypedValue* tv) const {
   JIT::VMRegAnchor _;
-  std::ostringstream fname;
-  fname << func->fullName()->data() << "()";
+
   const StringData* tn = typeName();
   if (isSelf()) {
     selfToTypeName(func, &tn);
@@ -288,20 +295,26 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
 
   auto const givenType = describe_actual_type(tv);
 
-  if (isExtended()) {
-    // Extended type hints raise warnings instead of recoverable
-    // errors for now, to ease migration (we used to not check these
-    // at all at runtime).
-    assert(
-      (isSoft() || isNullable()) &&
-      "Only nullable and soft extended type hints are currently implemented");
+  if (isExtended() && isSoft()) {
+    // Soft extended type hints raise warnings instead of recoverable
+    // errors, to ease migration.
     raise_debugging(
-      "Argument %d to %s must be of type %s, %s given",
-      paramNum + 1, fname.str().c_str(), fullName().c_str(), givenType);
+      "Argument %d to %s() must be of type %s, %s given",
+      paramNum + 1, func->fullName()->data(), fullName().c_str(), givenType);
+  } else if (isExtended() && isNullable()) {
+    raise_typehint_error(
+      folly::format(
+        "Argument {} to {}() must be of type {}, {} given",
+        paramNum + 1, func->fullName()->data(), fullName(), givenType
+      ).str()
+    );
   } else {
-    raise_recoverable_error(
-      "Argument %d passed to %s must be an instance of %s, %s given",
-      paramNum + 1, fname.str().c_str(), tn->data(), givenType);
+    raise_typehint_error(
+      folly::format(
+        "Argument {} passed to {}() must be an instance of {}, {} given",
+        paramNum + 1, func->fullName()->data(), tn->data(), givenType
+      ).str()
+    );
   }
 }
 

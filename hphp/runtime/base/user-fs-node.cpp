@@ -26,7 +26,7 @@ UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
   JIT::VMRegAnchor _;
   const Func *ctor;
   m_cls = cls;
-  if (MethodLookup::LookupResult::MethodFoundWithThis !=
+  if (LookupResult::MethodFoundWithThis !=
       g_vmContext->lookupCtorMethod(ctor, m_cls)) {
     throw InvalidArgumentException(0, "Unable to call %s's constructor",
                                    m_cls->name()->data());
@@ -66,7 +66,7 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
   HPHP::JIT::CallerFrame cf;
   Class* ctx = arGetContextClass(cf());
   switch(g_vmContext->lookupObjMethod(func, m_cls, name.get(), ctx)) {
-    case MethodLookup::LookupResult::MethodFoundWithThis:
+    case LookupResult::MethodFoundWithThis:
     {
       Variant ret;
       g_vmContext->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
@@ -74,7 +74,7 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
       return ret;
     }
 
-    case MethodLookup::LookupResult::MagicCallFound:
+    case LookupResult::MagicCallFound:
     {
       Variant ret;
       g_vmContext->invokeFunc(ret.asTypedValue(), func,
@@ -83,17 +83,17 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
       return ret;
     }
 
-    case MethodLookup::LookupResult::MethodNotFound:
+    case LookupResult::MethodNotFound:
       // There's a method somewhere in the hierarchy, but none
       // which are accessible.
       /* fallthrough */
-    case MethodLookup::LookupResult::MagicCallStaticFound:
+    case LookupResult::MagicCallStaticFound:
       // We're not calling statically, so this result is unhelpful
       // Also, it's never produced by lookupObjMethod, so it'll
       // never happen, but we must handle all enums
       return uninit_null();
 
-    case MethodLookup::LookupResult::MethodFoundNoThis:
+    case LookupResult::MethodFoundNoThis:
       // Should never happen (Attr::Static check in ctor)
       assert(false);
       raise_error("%s::%s() must not be declared static",

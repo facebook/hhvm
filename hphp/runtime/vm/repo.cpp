@@ -13,12 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/repo.h"
+
+#include "folly/Format.h"
+
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/assertions.h"
+#include "hphp/runtime/vm/blob-helper.h"
 
 namespace HPHP {
 
@@ -29,6 +32,7 @@ const char* Repo::kMagicProduct =
 const char* Repo::kSchemaPlaceholder = "%{schema}";
 const char* Repo::kDbs[RepoIdCount] = { "main",   // Central.
                                         "local"}; // Local.
+Repo::GlobalData Repo::s_globalData;
 
 void initialize_repo() {
   if (!sqlite3_threadsafe()) {
@@ -113,8 +117,73 @@ void Repo::setCliFile(const std::string& cliFile) {
   s_cliFile = cliFile;
 }
 
-void Repo::loadLitstrs() {
+void Repo::loadGlobalData() {
   m_lsrp.load();
+
+  if (!RuntimeOption::RepoAuthoritative) return;
+
+  std::vector<std::string> failures;
+
+  /*
+   * This should probably just go to the Local repo always, except
+   * that our unit test suite is currently running RepoAuthoritative
+   * tests with the compiled repo as the Central repo.
+   */
+  for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+    try {
+      RepoStmt stmt(*this);
+      stmt.prepare(
+        folly::format(
+          "SELECT data from {};", table(repoId, "GlobalData")
+        ).str()
+      );
+      RepoTxn txn(*this);
+      RepoTxnQuery query(txn, stmt);
+      query.step();
+      if (!query.row()) continue;
+      BlobDecoder decoder = query.getBlob(0);
+      decoder(s_globalData);
+
+      txn.commit();
+    } catch (RepoExc& e) {
+      failures.push_back(e.msg());
+      continue;
+    }
+
+    return;
+  }
+
+  // We should always have a global data section in RepoAuthoritative
+  // mode, or the repo is messed up.
+  std::fprintf(stderr, "failed to load Repo::GlobalData:\n");
+  for (auto& f : failures) {
+    std::fprintf(stderr, "  %s\n", f.c_str());
+  }
+  std::abort();
+}
+
+void Repo::saveGlobalData(GlobalData newData) {
+  s_globalData = newData;
+
+  auto const repoId = repoIdForNewUnit(UnitOrigin::File);
+  RepoStmt stmt(*this);
+  stmt.prepare(
+    folly::format(
+      "INSERT INTO {} VALUES(@data);", table(repoId, "GlobalData")
+    ).str()
+  );
+  RepoTxn txn(*this);
+  RepoTxnQuery query(txn, stmt);
+  BlobEncoder encoder;
+  encoder(s_globalData);
+  query.bindBlob("@data", encoder, /* static */ true);
+  query.exec();
+
+  // TODO(#3521039): we could just put the litstr table in the same
+  // blob as the above and delete LitstrRepoProxy.
+  LitstrTable::get().insert(txn, UnitOrigin::File);
+
+  txn.commit();
 }
 
 Unit* Repo::loadUnit(const std::string& name, const MD5& md5) {
@@ -336,10 +405,6 @@ void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
              e.what());
     assert(false);
   }
-}
-
-void Repo::insertLitstrs(RepoTxn& txn, UnitOrigin unitOrigin) {
-  LitstrTable::get().insert(txn, unitOrigin);
 }
 
 void Repo::connect() {
@@ -687,6 +752,8 @@ bool Repo::createSchema(int repoId) {
                << "(path TEXT, md5 BLOB, UNIQUE(path, md5));";
       txn.exec(ssCreate.str());
     }
+    txn.exec(folly::format("CREATE TABLE {} (data BLOB);",
+                           table(repoId, "GlobalData")).str());
     m_urp.createSchema(repoId, txn);
     m_pcrp.createSchema(repoId, txn);
     m_frp.createSchema(repoId, txn);

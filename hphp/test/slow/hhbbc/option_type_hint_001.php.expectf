@@ -1,0 +1,3 @@
+HipHop Warning: foo() expects exactly 1 parameter, 0 given in %s/hhbbc/option_type_hint_001.php on line 6
+HipHop Notice: Undefined variable: x in %s/hhbbc/option_type_hint_001.php on line 5
+NULL

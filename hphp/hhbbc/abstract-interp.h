@@ -49,6 +49,7 @@ struct ActRec {
  */
 struct State {
   bool initialized = false;
+  bool thisAvailable = false;
   std::vector<Type> locals;
   std::vector<Type> stack;
   std::vector<ActRec> fpiStack;

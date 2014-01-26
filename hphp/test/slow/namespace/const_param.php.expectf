@@ -1,12 +1,12 @@
 HipHop Notice: Use of undefined constant B - assumed 'B'
 HipHop Notice: Use of undefined constant B - assumed 'B'
-string(14) "5.%s-hiphop"
+string(%d) "5.%s-hiphop"
 string(11) "PHP_VERSION"
 string(1) "B"
 string(1) "B"
 array(1) {
   [0]=>
-  string(14) "5.4.999-hiphop"
+  string(%d) "5.%s-hiphop"
 }
 NULL
 array(1) {
@@ -14,13 +14,13 @@ array(1) {
   string(1) "B"
 }
 NULL
-string(14) "5.%s-hiphop"
+string(%d) "5.%s-hiphop"
 string(11) "PHP_VERSION"
 string(1) "B"
 string(3) "A\B"
 array(1) {
   [0]=>
-  string(14) "5.%s-hiphop"
+  string(%d) "5.%s-hiphop"
 }
 NULL
 array(1) {

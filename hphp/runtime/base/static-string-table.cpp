@@ -243,12 +243,13 @@ RDS::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
 
 const StaticString s_user("user");
 const StaticString s_Core("Core");
+
 Array lookupDefinedConstants(bool categorize /*= false */) {
   assert(s_stringDataMap);
   Array usr(RDS::s_constants());
   Array sys;
 
-  for (StringDataMap::const_iterator it = s_stringDataMap->begin();
+  for (auto it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
     if (it->second.bound()) {
       Array *tbl = (categorize &&
@@ -277,6 +278,23 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
     return ret;
   } else {
     return usr;
+  }
+}
+
+void refineStaticStringTableSize() {
+  if (RuntimeOption::EvalInitialStaticStringTableSize ==
+      kDefaultInitialStaticStringTableSize) {
+    return;
+  }
+  auto oldStringTable = s_stringDataMap;
+  if (!oldStringTable) return;
+
+  s_stringDataMap = nullptr;
+  create_string_data_map();
+  SCOPE_EXIT { delete oldStringTable; };
+
+  for (auto& kv : *oldStringTable) {
+    s_stringDataMap->insert(kv.first, kv.second);
   }
 }
 

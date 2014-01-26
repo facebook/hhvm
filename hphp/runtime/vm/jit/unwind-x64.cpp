@@ -21,6 +21,7 @@
 #include <cxxabi.h>
 #include <boost/mpl/identity.hpp>
 
+#include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/base/rds.h"
@@ -79,10 +80,34 @@ void sync_regstate(_Unwind_Context* context) {
 
 bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
                          InvalidSetMException* ism) {
-  const CTCA rip = (CTCA)_Unwind_GetIP(ctx);
-  TCA catchTrace = tx64->getCatchTrace(rip);
-  assert(IMPLIES(ism, catchTrace));
-  if (!catchTrace) return false;
+  auto const rip = (TCA)_Unwind_GetIP(ctx);
+  auto catchTraceOpt = tx64->getCatchTrace(rip);
+  if (!catchTraceOpt) return false;
+
+  auto catchTrace = *catchTraceOpt;
+  if (!catchTrace) {
+    // A few of our optimization passes must be aware of every path out of the
+    // trace, so throwing through jitted code without a catch block is very
+    // bad. This is indicated with a present but nullptr entry in the catch
+    // trace map.
+    const size_t kCallSize = 5;
+    const uint8_t kCallOpcode = 0xe8;
+
+    auto callAddr = rip - kCallSize;
+    TCA helperAddr = nullptr;
+    std::string helperName;
+    if (*callAddr == kCallOpcode) {
+      helperAddr = rip + *reinterpret_cast<int32_t*>(callAddr + 1);
+    }
+
+    always_assert_log(false,
+      [&] {
+        return folly::format("Translated call to {} threw without catch block, "
+                             "return address: {}\n",
+                             getNativeFunctionName(helperAddr), rip).str();
+      });
+    return false;
+  }
 
   FTRACE(1, "installing catch trace {} for call {} with ism {}, "
          "returning _URC_INSTALL_CONTEXT\n",
@@ -160,7 +185,7 @@ tc_unwind_personality(int version,
    * During the cleanup phase, we can either use a landing pad to perform
    * cleanup (with _Unwind_SetIP and _URC_INSTALL_CONTEXT), or we can do it
    * here. We sync the VM registers here, then optionally use a landing pad,
-   * which is an exit traces from hhir with a few special instructions.
+   * which is an exit trace from hhir with a few special instructions.
    */
   else if (actions & _UA_CLEANUP_PHASE) {
     if (tl_regState == VMRegState::DIRTY) {
@@ -186,6 +211,7 @@ void deregister_unwind_region(std::vector<char>* p) {
 
 UnwindInfoHandle
 register_unwind_region(unsigned char* startAddr, size_t size) {
+  FTRACE(1, "register_unwind_region: base {}, size {}\n", startAddr, size);
   // The first time we're called, this will dynamically link the data
   // we need in the request data segment.  All future JIT translations
   // of catch traces may use offsets based on this handle.

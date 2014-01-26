@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -248,7 +248,7 @@ struct _zend_executor_globals {
 
   HashTable *ini_directives;
   HashTable *modified_ini_directives;
-  zend_ini_entry *error_reporting_ini_entry;                  
+  zend_ini_entry *error_reporting_ini_entry;
 
   zend_objects_store objects_store;
   zval *exception, *prev_exception;
@@ -261,7 +261,7 @@ struct _zend_executor_globals {
 
   zend_property_info std_property_info;
 
-  zend_bool active; 
+  zend_bool active;
 
   zend_op *start_op;
 
@@ -306,7 +306,7 @@ struct _zend_php_scanner_globals {
   int yy_state;
   zend_stack state_stack;
   zend_ptr_stack heredoc_label_stack;
-  
+
   /* original (unfiltered) script */
   unsigned char *script_org;
   size_t script_org_size;
@@ -322,15 +322,37 @@ struct _zend_php_scanner_globals {
 };
 
 #ifdef HHVM
-zval& EG_uninitialized_zval();
-zval*& EG_exception();
-zval*& EG_prev_exception();
-HashTable& EG_regular_list();
-HashTable& EG_persistent_list();
-zend_error_handling_t& EG_error_handling();
-HashTable* EG_function_table();
+
+#define EG_DEFAULT                          \
+  G(zval, uninitialized_zval)               \
+  G(zval*, exception)                       \
+  G(zval*, prev_exception)                  \
+  G(zend_error_handling_t, error_handling)  \
+  G(HashTable*, function_table)             \
+  G(int64_t, precision)                     \
+  G(int, error_reporting)                   \
+  G(HashTable*, active_symbol_table)        \
+  G(zend_class_entry*, scope)               \
+  G(zval**, return_value_ptr_ptr)           \
+  G(zend_class_entry*, exception_class)     \
+  G(zend_bool, in_execution)                \
+  G(zend_objects_store, objects_store)      \
+  G(zend_op**, opline_ptr)                  \
+  G(zend_op_array*, active_op_array)        \
+  G(zend_bool, no_extensions)               \
+  G(jmp_buf*, bailout)                      \
+
+#define G(TYPE, MEMBER) \
+  std::add_lvalue_reference<TYPE>::type EG_ ## MEMBER();
+EG_DEFAULT
+#undef G
+
 zend_vm_stack& EG_argument_stack();
 _zend_execute_data*& EG_current_execute_data();
+HashTable& EG_symbol_table();
+HashTable& EG_regular_list();
+HashTable& EG_persistent_list();
+
 #endif
 
 #endif /* ZEND_GLOBALS_H */

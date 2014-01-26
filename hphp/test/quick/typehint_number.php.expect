@@ -1,0 +1,7 @@
+int(10)
+float(10)
+float(10.5)
+Argument 1 passed to takes_num() must be an instance of num, string given
+Argument 1 passed to takes_num() must be an instance of num, string given
+Argument 1 passed to takes_num() must be an instance of num, NumericallyStringable given
+Argument 1 passed to takes_num() must be an instance of num, stdClass given

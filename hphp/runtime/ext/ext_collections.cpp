@@ -115,7 +115,6 @@ void triggerCow(c_Vector* vec) {
 ///////////////////////////////////////////////////////////////////////////////
 
 // ConstCollection
-
 bool BaseVector::isempty() {
   return !toBoolImpl();
 }
@@ -129,7 +128,6 @@ Object BaseVector::items() {
 }
 
 // ConstIndexAccess
-
 bool BaseVector::containskey(CVarRef key) {
   if (key.isInteger()) {
     return contains(key.toInt64());
@@ -160,7 +158,6 @@ Variant BaseVector::get(CVarRef key) {
 }
 
 // KeyedIterable
-
 Object BaseVector::getiterator() {
   c_VectorIterator* it = NEWOBJ(c_VectorIterator)();
   it->m_obj = this;
@@ -2395,6 +2392,10 @@ void BaseMap::eraseNoCompact(int32_t* pos) {
   auto& e = elms[*pos];
   // Mark the hash slot as a tombstone.
   *pos = Tombstone;
+  // Decref the key if it's a string.
+  if (e.hasStrKey()) {
+    decRefStr(e.skey);
+  }
   // Mark the Elm as a tombstone.
   TypedValue* tv = &e.data;
   DataType oldType = tv->m_type;
@@ -2894,6 +2895,8 @@ void BaseMap::Unserialize(ObjectData* obj,
     if (k.isInteger()) {
       auto h = k.toInt64();
       p = mp->findForInsert(h);
+      // Check to be robust against manually crafted inputs with conflicting
+      // elements
       if (UNLIKELY(validPos(*p))) goto do_unserialize;
       e = &mp->allocElm(p);
       e->setIntKey(h);
@@ -2901,6 +2904,8 @@ void BaseMap::Unserialize(ObjectData* obj,
       auto key = k.getStringData();
       auto h = key->hash();
       p = mp->findForInsert(key, h);
+      // Check to be robust against manually crafted inputs with conflicting
+      // elements
       if (UNLIKELY(validPos(*p))) goto do_unserialize;
       e = &mp->allocElm(p);
       e->setStrKey(key, h);
@@ -3015,40 +3020,41 @@ void BaseSet::init(CVarRef t) {
 }
 
 void BaseSet::add(int64_t h) {
-  Bucket* p = findForInsert(h);
+  auto* p = findForInsert(h);
   assert(p);
-  if (p->validValue()) {
+  if (validPos(*p)) {
+    // When there is a conflict, the add() API is supposed to replace the
+    // existing element with the new element. However since Sets currently
+    // only support integer and string elements, there is no way user code
+    // can really tell whether the existing element was replaced or not so
+    // for efficiency we do nothing.
     return;
   }
-  ++m_version;
-  ++m_size;
-  if (!p->tombstone()) {
-    if (UNLIKELY(++m_load >= computeMaxLoad())) {
-      adjustCapacity();
-      p = findForInsert(h);
-      assert(p);
-    }
+  if (UNLIKELY(isFull())) {
+    makeRoom();
+    p = findForInsert(h);
   }
-  p->setInt(h);
+  assert(p);
+  auto& e = allocElm(p);
+  e.setInt(h);
+  ++m_version;
 }
 
 void BaseSet::add(StringData *key) {
   strhash_t h = key->hash();
-  Bucket* p = findForInsert(key->data(), key->size(), h);
+  auto* p = findForInsert(key, h);
   assert(p);
-  if (p->validValue()) {
+  if (validPos(*p)) {
     return;
   }
-  ++m_version;
-  ++m_size;
-  if (!p->tombstone()) {
-    if (UNLIKELY(++m_load >= computeMaxLoad())) {
-      adjustCapacity();
-      p = findForInsert(key->data(), key->size(), h);
-      assert(p);
-    }
+  if (UNLIKELY(isFull())) {
+    makeRoom();
+    p = findForInsert(key, h);
   }
-  p->setStr(key, h);
+  assert(p);
+  auto& e = allocElm(p);
+  e.setStr(key, h);
+  ++m_version;
 }
 
 void BaseSet::throwOOB(int64_t val) {
@@ -3063,6 +3069,100 @@ void BaseSet::throwNoIndexAccess() {
   Object e(SystemLib::AllocRuntimeExceptionObject(
     "[] operator not supported for accessing elements of Sets"));
   throw e;
+}
+
+NEVER_INLINE void BaseSet::makeRoom() {
+  assert(isFull());
+  // erase() guarantees that element density will never drop below ~50%,
+  // so we always grow to make room here.
+  assert(!isDensityTooLow());
+  if (UNLIKELY(m_cap == MaxSize)) {
+    throwTooLarge();
+  }
+  // Double the current capacity
+  grow(m_cap ? m_cap*2 : SmallSize, m_cap ? m_tableMask*2+1 : SmallMask);
+}
+
+NEVER_INLINE void BaseSet::reserve(int64_t sz) {
+  assert(m_size <= m_used && m_used <= m_cap && !isDensityTooLow());
+  uint32_t newCap, newMask;
+  if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
+    throwReserveTooLarge();
+  }
+  // Compute the new capacity and new hash mask if we need to grow or bail
+  // out if there is nothing to do.
+  if (sz > int64_t(m_cap)) {
+    // The requested capacity is greater than the current capacity. Compute
+    // the smallest allowed capacity that is sufficient.
+    auto lgSize = BaseSet::SmallLgTableSize;
+    for (newCap = BaseSet::SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
+    newMask = (size_t(1U) << lgSize) - 1;
+    assert(lgSize <= MaxLgTableSize && newCap > m_cap);
+  } else {
+    // If sz <= m_size or if the Set can accommodate sz-m_size additional
+    // elements without growing or compacting, then there is nothing to do.
+    if (sz <= int64_t(m_size) ||
+        size_t(m_used) + size_t(sz - m_size) <= size_t(m_cap)) return;
+    // Otherwise prepare to double the current capacity
+    assert(0 < sz && sz <= int64_t(m_cap));
+    assert(m_cap < MaxSize && m_tableMask != 0);
+    newCap = m_cap * 2;
+    newMask = m_tableMask * 2 + 1;
+  }
+  // Perform the grow operation.
+  grow(newCap, newMask);
+}
+
+void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
+  assert(m_size <= m_used && m_used <= m_cap);
+  size_t newHashSize = size_t(newMask) + 1;
+  assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
+  assert(m_size <= newCap && newCap <= MaxSize);
+  auto* oldData = data();
+  auto* data = (Elm*)smart_malloc(size_t(newCap) * sizeof(Elm) +
+                                  newHashSize * sizeof(int32_t));
+  auto* table = (int32_t*)(data + size_t(newCap));
+  m_data = data;
+  m_hash = table;
+  m_tableMask = newMask;
+  initHash(table, newHashSize);
+  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
+    while (isTombstone(oldData[frPos].data.m_type)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
+    }
+    auto& toE = data[toPos];
+    toE = oldData[frPos];
+    auto ie = findForNewInsert(table, newMask,
+            toE.hasInt() ? toE.data.m_data.num : toE.data.m_data.pstr->hash());
+    *ie = toPos;
+  }
+  if (oldData) smart_free(oldData);
+  m_cap = newCap;
+  m_used = m_size;
+}
+
+void BaseSet::compact() {
+  auto* elms = data();
+  assert(elms);
+  auto mask = m_tableMask;
+  size_t tableSize = hashSize();
+  auto table = hashTab();
+  initHash(table, tableSize);
+  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
+    while (isTombstone(elms[frPos].data.m_type)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
+    }
+    auto& toE = elms[toPos];
+    if (toPos != frPos) {
+      toE = elms[frPos];
+    }
+    auto ie = findForNewInsert(table, mask,
+            toE.hasInt() ? toE.data.m_data.num : toE.data.m_data.pstr->hash());
+    *ie = toPos;
+  }
+  m_used = m_size;
 }
 
 Array BaseSet::ToArray(const ObjectData* obj) {
@@ -3102,17 +3202,18 @@ bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto st1 = static_cast<const BaseSet*>(obj1);
   auto st2 = static_cast<const BaseSet*>(obj2);
   if (st1->m_size != st2->m_size) return false;
-  for (uint i = 0; i <= st1->m_nLastSlot; ++i) {
-    BaseSet::Bucket& p = st1->m_data[i];
-    if (p.validValue()) {
-      if (p.hasInt()) {
-        int64_t key = p.data.m_data.num;
-        if (!st2->find(key)) return false;
-      } else {
-        assert(p.hasStr());
-        StringData* key = p.data.m_data.pstr;
-        if (!st2->find(key->data(), key->size(), key->hash())) return false;
-      }
+
+  Elm* p = st1->data();
+  Elm* pLimit = p + st1->iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    if (p->hasInt()) {
+      int64_t key = p->data.m_data.num;
+      if (!st2->contains(key)) return false;
+    } else {
+      assert(p->hasStr());
+      StringData* key = p->data.m_data.pstr;
+      if (!st2->contains(key)) return false;
     }
   }
   return true;
@@ -3132,34 +3233,83 @@ void BaseSet::Unserialize(const char* setType, ObjectData* obj,
     // This will make the unserializer to reserve an id for the element
     // but won't allow referencing the element via 'r' or 'R'.
     k.unserialize(uns, Uns::Mode::ColKey);
-    Bucket* p;
     if (k.isInteger()) {
       auto h = k.toInt64();
-      p = st->findForInsert(h);
-      if (UNLIKELY(p->validValue())) continue;
-      p->setInt(h);
+      auto p = st->findForInsert(h);
+      assert(p);
+      // Check to be robust against manually crafted inputs with conflicting
+      // elements
+      if (UNLIKELY(validPos(*p))) continue;
+      auto& e = st->allocElm(p);
+      e.setInt(h);
     } else if (k.isString()) {
       auto key = k.getStringData();
       auto h = key->hash();
-      p = st->findForInsert(key->data(), key->size(), h);
-      if (UNLIKELY(p->validValue())) continue;
-      p->setStr(key, h);
+      auto p = st->findForInsert(key, h);
+      assert(p);
+      // Check to be robust against manually crafted inputs with conflicting
+      // elements
+      if (UNLIKELY(validPos(*p))) continue;
+      auto& e = st->allocElm(p);
+      e.setStr(key, h);
     } else {
       throw Exception("%s values must be integers or strings", setType);
     }
-    ++st->m_size;
-    ++st->m_load;
   }
+}
+
+bool BaseSet::contains(int64_t key) const {
+  return find(key) != Empty;
+}
+
+bool BaseSet::contains(StringData* key) const {
+  return find(key, key->hash()) != Empty;
+}
+
+template<class TSet>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, TSet*>::type
+BaseSet::Clone(ObjectData* obj) {
+  auto thiz = static_cast<TSet*>(obj);
+  auto target = static_cast<TSet*>(obj->cloneImpl());
+
+  if (!thiz->m_size) return target;
+
+  assert(target->m_size == 0);
+  assert(thiz->m_used != 0);
+  target->m_capAndUsed = thiz->m_capAndUsed;
+  target->m_tableMask = thiz->m_tableMask;
+  target->m_size = thiz->m_size;
+  target->m_data =
+    (Elm*)smart_malloc(size_t(thiz->m_cap) * sizeof(Elm) +
+                       thiz->hashSize() * sizeof(int32_t));
+  target->m_hash = (int32_t*)(target->m_data + target->m_cap);
+  wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
+
+  for (ssize_t i = 0; i < thiz->iterLimit(); ++i) {
+    Elm& e = thiz->data()[i];
+    Elm& te = target->data()[i];
+    if (thiz->isTombstone(e.data.m_type)) {
+      te.data.m_type = e.data.m_type;
+      continue;
+    }
+    te.data.hash() = e.data.hash();
+    cellDup(e.data, te.data);
+    if (te.hasStr()) te.data.m_data.pstr->incRefCount();
+    assert(te.hash() == e.hash()); // ensure not clobbered.
+  }
+
+  return target;
 }
 
 // Protected (PHP-accesible methods)
 
-void BaseSet::phpConstruct(CVarRef iterable /* = null_variant */) {
+void BaseSet::php_construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
   init(iterable);
 }
 
-Object BaseSet::phpAddAll(CVarRef iterable) {
+Object BaseSet::php_addAll(CVarRef iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -3171,7 +3321,24 @@ Object BaseSet::phpAddAll(CVarRef iterable) {
   return this;
 }
 
-bool BaseSet::phpContains(CVarRef key) {
+static int32_t empty_set_hash_slot = BaseSet::Empty;
+
+Object BaseSet::php_clear() {
+  deleteElms();
+  freeData();
+  uint32_t used = 0;
+  uint32_t cap = 0;
+  uint32_t tableMask = 0;
+  int32_t version = m_version + 1;
+  m_size = 0;
+  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
+  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
+  m_data = nullptr;
+  m_hash = &empty_set_hash_slot;
+  return this;
+}
+
+bool BaseSet::php_contains(CVarRef key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     return contains(key.toInt64());
@@ -3183,7 +3350,7 @@ bool BaseSet::phpContains(CVarRef key) {
   return false;
 }
 
-Object BaseSet::phpRemove(CVarRef key) {
+Object BaseSet::php_remove(CVarRef key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
@@ -3195,18 +3362,18 @@ Object BaseSet::phpRemove(CVarRef key) {
   return this;
 }
 
-Array BaseSet::phpToValuesArray() {
+Array BaseSet::php_toValuesArray() {
   PackedArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (p.validValue()) {
-      ai.append(tvAsCVarRef(&p.data));
-    }
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    ai.append(tvAsCVarRef(&p->data));
   }
   return ai.create();
 }
 
-Object BaseSet::phpGetIterator() {
+Object BaseSet::php_getIterator() {
   c_SetIterator* it = NEWOBJ(c_SetIterator)();
   it->m_obj = this;
   it->m_pos = iter_begin();
@@ -3214,19 +3381,186 @@ Object BaseSet::phpGetIterator() {
   return it;
 }
 
-const char BaseSet::emptySetSlot[sizeof(BaseSet::Bucket)] = {0};
+template<class TSet>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_map(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback"));
+    throw e;
+  }
+  TSet* st;
+  Object obj = st = NEWOBJ(TSet)();
+  if (!m_size) return obj;
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    TypedValue tvCbRet;
+    int32_t pVer = m_version;
+    g_vmContext->invokeFuncFew(&tvCbRet, ctx, 1, &p->data);
+    // Now that tvCbRet is live, make sure to decref even if we throw.
+    SCOPE_EXIT { tvRefcountedDecRef(&tvCbRet); };
+    if (UNLIKELY(m_version != pVer)) throw_collection_modified();
+    st->add(&tvCbRet);
+  }
+  return obj;
+}
+
+template<class TSet>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_filter(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback"));
+    throw e;
+  }
+  TSet* st;
+  Object obj = st = NEWOBJ(TSet)();
+  if (!m_size) return obj;
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    Variant ret;
+    int32_t version = m_version;
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
+    if (UNLIKELY(version != m_version)) {
+      throw_collection_modified();
+    }
+    if (!ret.toBoolean()) continue;
+    if (p->hasInt()) {
+      st->add(p->data.m_data.num);
+    } else {
+      assert(p->hasStr());
+      st->add(p->data.m_data.pstr);
+    }
+  }
+  return obj;
+}
+
+template<class TSet>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_zip(CVarRef iterable) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  if (m_size && iter) {
+    // At present, BaseSets only support int values and string values,
+    // so if this BaseSet is non empty and the iterable is non empty
+    // the zip operation will always fail
+    throwBadValueType();
+  }
+  Object obj = NEWOBJ(TSet)();
+  return obj;
+}
+
+template<class TSet>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_fromItems(CVarRef iterable) {
+  if (iterable.isNull()) return NEWOBJ(TSet)();
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  TSet* target;
+  Object ret = target = NEWOBJ(TSet)();
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    if (v.isInteger()) {
+      target->add(v.toInt64());
+    } else if (v.isString()) {
+      target->add(v.getStringData());
+    } else {
+      throwBadValueType();
+    }
+  }
+  return ret;
+}
+
+template<class TSet>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_fromArray(CVarRef arr) {
+  if (!arr.isArray()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter arr must be an array"));
+    throw e;
+  }
+  TSet* st;
+  Object ret = st = NEWOBJ(TSet)();
+  ArrayData* ad = arr.getArrayData();
+  for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
+       pos = ad->iter_advance(pos)) {
+    CVarRef v = ad->getValueRef(pos);
+    if (v.isInteger()) {
+      st->add(v.toInt64());
+    } else if (v.isString()) {
+      st->add(v.getStringData());
+    } else {
+      throwBadValueType();
+    }
+  }
+  return ret;
+}
+
+template<class TSet>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_fromArrays(int _argc, CArrRef _argv /* = null_array */) {
+  TSet* st;
+  Object ret = st = NEWOBJ(TSet)();
+  for (ArrayIter iter(_argv); iter; ++iter) {
+    Variant arr = iter.second();
+    if (!arr.isArray()) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Parameters must be arrays"));
+      throw e;
+    }
+    ArrayData* ad = arr.getArrayData();
+    for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
+         pos = ad->iter_advance(pos)) {
+      st->php_add(ad->getValueRef(pos));
+    }
+  }
+  return ret;
+}
 
 // Protected (Internal)
 
-BaseSet::BaseSet(Class* cls)
-    : ExtCollectionObjectData(cls)
-    , m_size(0), m_data((Bucket*)emptySetSlot), m_load(0), m_nLastSlot(0)
-    , m_version(0) {
+BaseSet::BaseSet(Class* cls) : ExtCollectionObjectData(cls) {
+  uint32_t used = 0;
+  uint32_t cap = 0;
+  uint32_t tableMask = 0;
+  int32_t version = 0;
+  m_size = 0;
+  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
+  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
+  m_data = nullptr;
+  m_hash = &empty_set_hash_slot;
 }
 
 BaseSet::~BaseSet() {
-  deleteBuckets();
+  deleteElms();
   freeData();
+}
+
+void BaseSet::freeData() {
+  if (m_data) smart_free(m_data);
+}
+
+void BaseSet::deleteElms() {
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    tvRefcountedDecRef(&p->data);
+  }
 }
 
 // Private
@@ -3235,18 +3569,18 @@ NEVER_INLINE
 void BaseSet::warnOnStrIntDup() const {
   smart::hash_set<int64_t> seenVals;
 
-  for (uint32_t i = 0; i <= m_nLastSlot; i++) {
-    Bucket& p = m_data[i];
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
     int64_t newVal = 0;
 
-    if (!p.validValue()) continue;
-
-    if (p.hasInt()) {
-      newVal = p.data.m_data.num;
+    if (p->hasInt()) {
+      newVal = p->data.m_data.num;
     } else {
-      assert(p.hasStr());
+      assert(p->hasStr());
       // isStriclyInteger() puts the int value in newVal as a side effect.
-      if (!p.data.m_data.pstr->isStrictlyInteger(newVal)) continue;
+      if (!p->data.m_data.pstr->isStrictlyInteger(newVal)) continue;
     }
 
     if (seenVals.find(newVal) != seenVals.end()) {
@@ -3267,15 +3601,15 @@ void BaseSet::warnOnStrIntDup() const {
 
 Array BaseSet::toArrayImpl() const {
   ArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (p.validValue()) {
-      if (p.hasInt()) {
-        ai.set(p.data.m_data.num, tvAsCVarRef(&p.data));
-      } else {
-        assert(p.hasStr());
-        ai.set(p.data.m_data.pstr, tvAsCVarRef(&p.data));
-      }
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    if (p->hasInt()) {
+      ai.set(p->data.m_data.num, tvAsCVarRef(&p->data));
+    } else {
+      assert(p->hasStr());
+      ai.set(p->data.m_data.pstr, tvAsCVarRef(&p->data));
     }
   }
 
@@ -3286,213 +3620,186 @@ Array BaseSet::toArrayImpl() const {
   return arr;
 }
 
-#define STRING_HASH(x)   (int32_t(x) | 0x80000000)
-
-ALWAYS_INLINE
-bool hitString(const BaseSet::Bucket* p, const char* k,
-                         int len, int32_t hash) {
-  assert(p->validValue());
-  if (p->hasInt()) return false;
-  const char* data = p->data.m_data.pstr->data();
-  return data == k || (p->hash() == hash &&
-                       p->data.m_data.pstr->size() == len &&
-                       memcmp(data, k, len) == 0);
+NEVER_INLINE
+void BaseSet::throwTooLarge() {
+  static const size_t reserveSize = 130;
+  String msg(reserveSize, ReserveString);
+  char* buf = msg.bufferSlice().ptr;
+  int sz = sprintf(buf,
+                   "Set object has reached its maximum capacity of "
+                   "%u element slots and does not have room to add a "
+                   "new element",
+                   MaxSize);
+  assert(sz <= reserveSize);
+  msg.setSize(sz);
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
+  throw e;
 }
 
-ALWAYS_INLINE
-bool hitInt(const BaseSet::Bucket* p, int64_t ki) {
-  assert(p->validValue());
-  return p->hasInt() && p->data.m_data.num == ki;
+NEVER_INLINE
+void BaseSet::throwReserveTooLarge() {
+  static const size_t reserveSize = 80;
+  String msg(reserveSize, ReserveString);
+  char* buf = msg.bufferSlice().ptr;
+  int sz = sprintf(buf,
+                   "Set does not support reserving room for more than "
+                   "%u elements",
+                   MaxReserveSize);
+  assert(sz <= reserveSize);
+  msg.setSize(sz);
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
+  throw e;
 }
 
-#define FIND_BODY(h0, hit) \
-  size_t tableMask = m_nLastSlot; \
-  size_t probeIndex = size_t(h0) & tableMask; \
-  Bucket* p = fetchBucket(probeIndex); \
-  if (LIKELY(p->validValue() && (hit))) { \
-    return p; \
-  } \
-  if (LIKELY(p->empty())) { \
-    return nullptr; \
-  } \
-  for (size_t i = 1;; ++i) { \
-    assert(i <= tableMask); \
-    probeIndex = (probeIndex + i) & tableMask; \
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
-    p = fetchBucket(probeIndex); \
-    if (p->validValue() && (hit)) { \
-      return p; \
-    } \
-    if (p->empty()) { \
-      return nullptr; \
-    } \
+NEVER_INLINE
+int32_t* BaseSet::warnUnbalanced(size_t n, int32_t* ei) {
+  if (n > size_t(RuntimeOption::MaxArrayChain)) {
+    raise_error("Set is too unbalanced (%lu)", n);
   }
+  return ei;
+}
 
-#define FIND_FOR_INSERT_BODY(h0, hit) \
-  size_t tableMask = m_nLastSlot; \
-  size_t probeIndex = size_t(h0) & tableMask; \
-  Bucket* p = fetchBucket(h0 & tableMask); \
-  if (LIKELY((p->validValue() && (hit)) || \
-             p->empty())) { \
-    return p; \
-  } \
-  Bucket* ts = nullptr; \
-  for (size_t i = 1;; ++i) { \
-    if (UNLIKELY(p->tombstone() && !ts)) { \
-      ts = p; \
-    } \
-    assert(i <= tableMask); \
-    probeIndex = (probeIndex + i) & tableMask; \
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
-    p = fetchBucket(probeIndex); \
-    if (LIKELY(p->validValue() && (hit))) { \
-      return p; \
-    } \
-    if (LIKELY(p->empty())) { \
-      if (LIKELY(!ts)) { \
-        return p; \
-      } \
-      return ts; \
-    } \
+static bool hitString(const BaseSet::Elm& e, const StringData* s,
+                      int32_t hash) {
+  // hitString() should only be called on an Elm that is referenced by a
+  // hash table entry. c_Set guarantees that when it adds a hash table
+  // entry that it always sets it to refer to a valid element. Likewise when
+  // it removes an element it always removes the corresponding hash entry.
+  // Therefore the assertion below must hold.
+  assert(!BaseSet::isTombstone(e.data.m_type));
+  return hash == e.hash() && e.hasStr() &&
+         (s == e.data.m_data.pstr || s->same(e.data.m_data.pstr));
+}
+
+static bool hitInt(const BaseSet::Elm& e, int64_t ki) {
+  // hitInt() should only be called on an Elm that is referenced by a
+  // hash table entry. c_Set guarantees that when it adds a hash table
+  // entry that it always sets it to refer to a valid element. Likewise when
+  // it removes an element it always removes the corresponding hash entry.
+  // Therefore the assertion below must hold.
+  assert(!BaseSet::isTombstone(e.data.m_type));
+  return e.hasInt() && e.data.m_data.num == ki;
+}
+
+// Quadratic probe is:
+//
+//   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize
+//
+// Use 1/2 for c1 and c2. In combination with a table size that is a power of
+// 2, this guarantees a probe sequence of length tableSize that probes all
+// table elements exactly once.
+
+template <class Hit>
+ALWAYS_INLINE
+ssize_t BaseSet::findImpl(size_t h0, Hit hit) const {
+  size_t tableMask = m_tableMask;
+  auto* elms = data();
+  auto* hashtable = hashTab();
+  for (size_t probeIndex = h0, i = 1;; ++i) {
+    ssize_t pos = hashtable[probeIndex & tableMask];
+    if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
+      return pos;
+    }
+    probeIndex += i;
+    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
   }
-
-BaseSet::Bucket* BaseSet::find(int64_t h) const {
-  FIND_BODY(h, hitInt(p, h));
 }
 
-BaseSet::Bucket* BaseSet::find(const char* k, int len,
-    strhash_t prehash) const {
-  FIND_BODY(prehash, hitString(p, k, len, STRING_HASH(prehash)));
+ssize_t BaseSet::find(int64_t ki) const {
+  return findImpl(ki, [ki] (const Elm& e) {
+    return hitInt(e, ki);
+  });
 }
 
-BaseSet::Bucket* BaseSet::findForInsert(int64_t h) const {
-  FIND_FOR_INSERT_BODY(h, hitInt(p, h));
+ssize_t BaseSet::find(const StringData* s, strhash_t prehash) const {
+  auto h = prehash | STRHASH_MSB;
+  return findImpl(prehash, [s, h] (const Elm& e) {
+    return hitString(e, s, h);
+  });
 }
 
-BaseSet::Bucket* BaseSet::findForInsert(const char* k, int len,
-                                    strhash_t prehash) const {
-  FIND_FOR_INSERT_BODY(prehash, hitString(p, k, len, STRING_HASH(prehash)));
+template <class Hit>
+ALWAYS_INLINE
+int32_t* BaseSet::findForInsertImpl(size_t h0, Hit hit) const {
+  // mask, probe, and pos are explicitly 64-bit, because performance
+  // regressed when they were 32-bit types via auto. Test carefully.
+  size_t mask = m_tableMask;
+  auto* elms = data();
+  auto* hashtable = hashTab();
+  int32_t* ret = nullptr;
+  for (size_t probe = h0, i = 1;; ++i) {
+    auto ei = &hashtable[probe & mask];
+    ssize_t pos = *ei;
+    if (validPos(pos)) {
+      if (hit(elms[pos])) {
+        return ei;
+      }
+    } else {
+      if (!ret) ret = ei;
+      if (pos == Empty) {
+        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
+      }
+    }
+    probe += i;
+    assert(i <= mask && probe == h0 + (i + i*i) / 2);
+  }
+}
+
+int32_t* BaseSet::findForInsert(int64_t ki) const {
+  return findForInsertImpl(ki, [ki] (const Elm& e) {
+    return hitInt(e, ki);
+  });
+}
+
+int32_t* BaseSet::findForInsert(const StringData* s, strhash_t prehash) const {
+  auto h = prehash | STRHASH_MSB;
+  return findForInsertImpl(prehash, [s, h] (const Elm& e) {
+    return hitString(e, s, h);
+  });
 }
 
 // findForNewInsert() is only safe to use if you know for sure that the
-// value is not already present in the Set.
+// key is not already present in the Set.
+ALWAYS_INLINE int32_t*
+BaseSet::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
+  for (size_t i = 1, probe = h0;; ++i) {
+    auto ei = &table[probe & mask];
+    if (!validPos(*ei)) return ei;
+    probe += i;
+    assert(i <= mask && probe == h0 + (i + i*i) / 2);
+  }
+}
+
 ALWAYS_INLINE
-BaseSet::Bucket* BaseSet::findForNewInsert(size_t h0) const {
-  size_t tableMask = m_nLastSlot;
-  size_t probeIndex = h0 & tableMask;
-  Bucket* p = fetchBucket(probeIndex);
-  if (LIKELY(p->empty())) {
-    return p;
-  }
-  for (size_t i = 1;; ++i) {
-    assert(i <= tableMask);
-    probeIndex = (probeIndex + i) & tableMask;
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex);
-    p = fetchBucket(probeIndex);
-    if (LIKELY(p->empty())) {
-      return p;
-    }
-  }
+int32_t* BaseSet::findForNewInsert(size_t h0) const {
+  return findForNewInsert(hashTab(), m_tableMask, h0);
 }
 
-#undef STRING_HASH
-#undef FIND_BODY
-#undef FIND_FOR_INSERT_BODY
-
-void BaseSet::erase(Bucket* p) {
-  if (!p) {
-    return;
+void BaseSet::erase(int32_t* pos) {
+  assert(validPos(*pos) && !isTombstone(*pos));
+  assert(data());
+  Elm* elms = data();
+  auto& e = elms[*pos];
+  // Mark the hash slot as a tombstone.
+  *pos = Tombstone;
+  // Mark the Elm as a tombstone.
+  TypedValue* tv = &e.data;
+  DataType oldType = tv->m_type;
+  uint64_t oldDatum = tv->m_data.num;
+  tv->m_type = KindOfInvalid;
+  --m_size;
+  // Don't adjust m_used. This frees us from having to explicitly keep track
+  // of hash load, since we can instead rely on the isFull() condition to
+  // trigger a grow/compact before hash load gets too high.
+  assert(m_used <= m_cap);
+  // Finally, decref the old value
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+  // Compact in order to keep elms from being overly sparse. Other parts
+  // of Set's implementation rely on the fact that erase() does not allow
+  // the Elm density to drop below ~50%.
+  if (isDensityTooLow()) {
+    compact();
   }
-  if (p->validValue()) {
-    m_size--;
-    tvRefcountedDecRef(&p->data);
-    p->data.m_type = (DataType)KindOfTombstone;
-    if (m_size < computeMinElements() && m_size) {
-      adjustCapacity();
-    }
-  }
-}
-
-void BaseSet::adjustCapacityImpl(int64_t sz) {
-  ++m_version;
-  if (sz < 2) {
-    if (sz <= 0) return;
-    sz = 2;
-  }
-  if (m_nLastSlot == 0) {
-    assert(m_data == (Bucket*)emptySetSlot);
-    m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
-    m_data = (Bucket*)smart_calloc(numSlots(), sizeof(Bucket));
-    return;
-  }
-  size_t oldNumSlots = numSlots();
-  m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
-  m_load = m_size;
-  Bucket* oldBuckets = m_data;
-  m_data = (Bucket*)smart_calloc(numSlots(), sizeof(Bucket));
-  for (uint i = 0; i < oldNumSlots; ++i) {
-    Bucket* p = &oldBuckets[i];
-    if (p->validValue()) {
-      Bucket* np =
-        findForNewInsert(p->hasInt() ? p->data.m_data.num : p->hash());
-      memcpy(np, p, sizeof(Bucket));
-    }
-  }
-  smart_free(oldBuckets);
-}
-
-void BaseSet::deleteBuckets() {
-  if (!m_size) return;
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (p.validValue()) {
-      tvRefcountedDecRef(&p.data);
-    }
-  }
-}
-
-ssize_t BaseSet::iter_next(ssize_t pos) const {
-  if (pos == 0) {
-    return 0;
-  }
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  Bucket* pLast = fetchBucket(m_nLastSlot);
-  ++p;
-  while (p <= pLast) {
-    if (p->validValue()) {
-      return reinterpret_cast<ssize_t>(p);
-    }
-    ++p;
-  }
-  return 0;
-}
-
-ssize_t BaseSet::iter_prev(ssize_t pos) const {
-  if (pos == 0) {
-    return 0;
-  }
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  Bucket* pStart = m_data;
-  --p;
-  while (p >= pStart) {
-    if (p->validValue()) {
-      return reinterpret_cast<ssize_t>(p);
-    }
-    --p;
-  }
-  return 0;
-}
-
-Variant BaseSet::iter_key(ssize_t pos) const {
-  assert(pos);
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  return tvAsVariant(&p->data);
-}
-
-const TypedValue* BaseSet::iter_value(ssize_t pos) const {
-  assert(pos);
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  return &p->data;
 }
 
 void BaseSet::throwBadValueType() {
@@ -3509,75 +3816,75 @@ c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
 }
 
 void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
-  BaseSet::phpConstruct(iterable);
+  BaseSet::php_construct(iterable);
 }
 
 Object c_Set::t_add(CVarRef val) {
-  return BaseSet::phpAdd(val);
+  return BaseSet::php_add(val);
 }
 
 Object c_Set::t_addall(CVarRef iterable) {
-  return BaseSet::phpAddAll(iterable);
+  return BaseSet::php_addAll(iterable);
 }
 
 Object c_Set::t_clear() {
-  return BaseSet::phpClear();
+  return BaseSet::php_clear();
 }
 
 bool c_Set::t_isempty() {
-  return BaseSet::phpIsEmpty();
+  return BaseSet::php_isEmpty();
 }
 
 int64_t c_Set::t_count() {
-  return BaseSet::phpCount();
+  return BaseSet::php_count();
 }
 
 Object c_Set::t_items() {
-  return BaseSet::phpItems();
+  return BaseSet::php_items();
 }
 
 Object c_Set::t_values() {
-  return BaseSet::phpValues<c_Vector>();
+  return BaseSet::php_values<c_Vector>();
 }
 
 Object c_Set::t_lazy() {
-  return BaseSet::phpLazy();
+  return BaseSet::php_lazy();
 }
 
 bool c_Set::t_contains(CVarRef key) {
-  return BaseSet::phpContains(key);
+  return BaseSet::php_contains(key);
 }
 
 Object c_Set::t_remove(CVarRef key) {
-  return BaseSet::phpRemove(key);
+  return BaseSet::php_remove(key);
 }
 
 Array c_Set::t_toarray() {
-  return BaseSet::phpToArray();
+  return BaseSet::php_toArray();
 }
 
 Array c_Set::t_tokeysarray() {
-  return BaseSet::phpToKeysArray();
+  return BaseSet::php_toKeysArray();
 }
 
 Array c_Set::t_tovaluesarray() {
-  return BaseSet::phpToValuesArray();
+  return BaseSet::php_toValuesArray();
 }
 
 Object c_Set::t_getiterator() {
-  return BaseSet::phpGetIterator();
+  return BaseSet::php_getIterator();
 }
 
 Object c_Set::t_map(CVarRef callback) {
-  return BaseSet::phpMap<c_Set>(callback);
+  return BaseSet::php_map<c_Set>(callback);
 }
 
 Object c_Set::t_filter(CVarRef callback) {
-  return BaseSet::phpFilter<c_Set>(callback);
+  return BaseSet::php_filter<c_Set>(callback);
 }
 
 Object c_Set::t_zip(CVarRef iterable) {
-  return BaseSet::phpZip<c_Set>(iterable);
+  return BaseSet::php_zip<c_Set>(iterable);
 }
 
 Object c_Set::t_removeall(CVarRef iterable) {
@@ -3585,7 +3892,7 @@ Object c_Set::t_removeall(CVarRef iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   for (; iter; ++iter) {
-    phpRemove(iter.second());
+    php_remove(iter.second());
   }
   return this;
 }
@@ -3595,15 +3902,15 @@ Object c_Set::t_difference(CVarRef iterable) {
 }
 
 Object c_Set::ti_fromitems(CVarRef iterable) {
-  return BaseSet::phpFromItems<c_Set>(iterable);
+  return BaseSet::php_fromItems<c_Set>(iterable);
 }
 
 Object c_Set::ti_fromarray(CVarRef arr) {
-  return BaseSet::phpFromArray<c_Set>(arr);
+  return BaseSet::php_fromArray<c_Set>(arr);
 }
 
 Object c_Set::ti_fromarrays(int _argc, CArrRef _argv /* = null_array */) {
-  return BaseSet::phpFromArrays<c_Set>(_argc, _argv);
+  return BaseSet::php_fromArrays<c_Set>(_argc, _argv);
 }
 
 void c_Set::Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -3620,67 +3927,67 @@ c_Set* c_Set::Clone(ObjectData* obj) {
 // FrozenSet
 
 void c_FrozenSet::t___construct(CVarRef iterable /* = null_variant */) {
-  BaseSet::phpConstruct(iterable);
+  BaseSet::php_construct(iterable);
 }
 
 bool c_FrozenSet::t_isempty() {
-  return BaseSet::phpIsEmpty();
+  return BaseSet::php_isEmpty();
 }
 
 int64_t c_FrozenSet::t_count() {
-  return BaseSet::phpCount();
+  return BaseSet::php_count();
 }
 
 Object c_FrozenSet::t_items() {
-  return BaseSet::phpItems();
+  return BaseSet::php_items();
 }
 
 Object c_FrozenSet::t_values() {
-  return BaseSet::phpValues<c_FrozenVector>();
+  return BaseSet::php_values<c_FrozenVector>();
 }
 
 Object c_FrozenSet::t_lazy() {
-  return BaseSet::phpLazy();
+  return BaseSet::php_lazy();
 }
 
 bool c_FrozenSet::t_contains(CVarRef key) {
-  return BaseSet::phpContains(key);
+  return BaseSet::php_contains(key);
 }
 
 Array c_FrozenSet::t_toarray() {
-  return BaseSet::phpToArray();
+  return BaseSet::php_toArray();
 }
 
 Array c_FrozenSet::t_tokeysarray() {
-  return BaseSet::phpToKeysArray();
+  return BaseSet::php_toKeysArray();
 }
 
 Array c_FrozenSet::t_tovaluesarray() {
-  return BaseSet::phpToValuesArray();
+  return BaseSet::php_toValuesArray();
 }
 
 Object c_FrozenSet::t_getiterator() {
-  return BaseSet::phpGetIterator();
+  return BaseSet::php_getIterator();
 }
 
 Object c_FrozenSet::t_map(CVarRef callback) {
-  return BaseSet::phpMap<c_FrozenSet>(callback);
+  return BaseSet::php_map<c_FrozenSet>(callback);
 }
 
 Object c_FrozenSet::t_filter(CVarRef callback) {
-  return BaseSet::phpFilter<c_FrozenSet>(callback);
+  return BaseSet::php_filter<c_FrozenSet>(callback);
 }
 
 Object c_FrozenSet::t_zip(CVarRef iterable) {
-  return BaseSet::phpZip<c_FrozenSet>(iterable);
+  return BaseSet::php_zip<c_FrozenSet>(iterable);
 }
 
 Object c_FrozenSet::ti_fromitems(CVarRef iterable) {
-  return BaseSet::phpFromItems<c_FrozenSet>(iterable);
+  return BaseSet::php_fromItems<c_FrozenSet>(iterable);
 }
 
 Object c_FrozenSet::ti_fromarrays(int _argc, CArrRef _argv) {
-  return BaseSet::phpFromArrays<c_FrozenSet>(_argc, _argv);
+  return BaseSet::php_fromArrays<c_FrozenSet>(_argc, _argv);
 }
 
 c_FrozenSet::c_FrozenSet(Class* cls) : BaseSet(cls) {

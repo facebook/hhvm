@@ -1024,6 +1024,12 @@ static const char* AssertTOp_names[] = {
 #undef ASSERTT_OP
 };
 
+static const char* AssertObjOp_names[] = {
+#define ASSERTOBJ_OP(op) #op,
+  ASSERTOBJ_OPS
+#undef ASSERTOBJ_OP
+};
+
 static const char* FatalOp_names[] = {
 #define FATAL_OP(op) #op,
   FATAL_OPS
@@ -1090,6 +1096,7 @@ template<class T> folly::Optional<T> nameToSubop(const char* str) {
 
 X(IsTypeOp)
 X(AssertTOp)
+X(AssertObjOp)
 X(FatalOp)
 X(SetOpOp)
 X(IncDecOp)

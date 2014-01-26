@@ -3,10 +3,10 @@
 // Test that Set::toArray() raises a warning on a int/string collition.
 
 function should_warn() {
-  var_dump((Set {1, 13, '1', 'hello', 'world', 42})->toArray());
+  var_dump((Set {1, 42, 13, '1', 'hello', 'world'})->toArray());
   var_dump((Set {0, '0'})->toArray());
 
-  var_dump((Set {PHP_INT_MAX, strval(PHP_INT_MAX)})->toArray());
+  var_dump((Set {strval(PHP_INT_MAX), PHP_INT_MAX})->toArray());
 
   $minInt = -PHP_INT_MAX - 1;
   var_dump((Set {$minInt, strval($minInt)})->toArray());

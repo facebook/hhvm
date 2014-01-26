@@ -107,7 +107,7 @@ struct Interval {
   Interval* split(unsigned pos);
   // register/spill assignment
   RegPair regs() const;
-  bool handled() const { return info.hasReg(0) || info.spilled(); }
+  bool handled() const { return loc.hasReg(0) || loc.spilled(); }
   // debugging
   std::string toString();
   bool checkInvariants() const;
@@ -123,7 +123,7 @@ public:
   smart::vector<LiveRange> ranges;
   smart::vector<Use> uses;
   smart::list<Interval> children; // if parent was split
-  PhysLoc info;  // current location assigned to this interval
+  PhysLoc loc;  // current location assigned to this interval
   PhysLoc spill; // spill location (parent only)
 };
 
@@ -339,7 +339,7 @@ unsigned Interval::firstRegUse() const {
 
 // Return the register(s) assigned to this interval as a pair.
 RegPair Interval::regs() const {
-  return RegPair(info.reg(0), info.reg(1));
+  return RegPair(loc.reg(0), loc.reg(1));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -358,14 +358,14 @@ XLS::XLS(IRUnit& unit, RegAllocInfo& regs, const Abi& abi)
   for (auto r : m_blocked) {
     m_blocked[r].blocked = true;
     m_blocked[r].need = 1;
-    m_blocked[r].info.setReg(r, 0);
+    m_blocked[r].loc.setReg(r, 0);
     if (!all.contains(r)) {
       // r is never available
       m_blocked[r].add(LiveRange(0, kMaximalPos));
     }
     m_scratch[r].scratch = true;
     m_scratch[r].need = 1;
-    m_scratch[r].info.setReg(r, 0);
+    m_scratch[r].loc.setReg(r, 0);
   }
 }
 
@@ -589,7 +589,7 @@ void XLS::spill(Interval* ivl) {
       PUNT(LinearScan_TooManySpills);
     }
   }
-  ivl->info = leader->spill;
+  ivl->loc = leader->spill;
 }
 
 // Assign one or both of the registers in r to this interval.
@@ -598,16 +598,16 @@ void XLS::assign(Interval* ivl, RegPair r) {
   auto r0 = PhysReg(r.first);
   auto r1 = PhysReg(r.second);
   if (ivl->need == 1) {
-    ivl->info.setReg(r0, 0);
+    ivl->loc.setReg(r0, 0);
   } else {
     if (r0.isSIMD()) {
-      ivl->info.setRegFullSIMD(r0);
+      ivl->loc.setRegFullSIMD(r0);
     } else if (r1.isSIMD()) {
-      ivl->info.setRegFullSIMD(r1);
+      ivl->loc.setRegFullSIMD(r1);
     } else {
       assert(r0 != r1);
-      ivl->info.setReg(r0, 0);
-      ivl->info.setReg(r1, 1);
+      ivl->loc.setReg(r0, 0);
+      ivl->loc.setReg(r1, 1);
     }
   }
 }
@@ -639,11 +639,11 @@ RegPair RegPositions::max2Reg(const RegSet regs) const {
 // Update the position associated with the registers assigned to ivl,
 // to the minimum of pos and the existing position.
 void RegPositions::setPos(Interval* ivl, unsigned pos) {
-  assert(ivl->info.numAllocated() >= 1);
-  auto r0 = ivl->info.reg(0);
+  assert(ivl->loc.numAllocated() >= 1);
+  auto r0 = ivl->loc.reg(0);
   posns[r0] = std::min(pos, posns[r0]);
-  if (ivl->info.numAllocated() == 2) {
-    auto r1 = ivl->info.reg(1);
+  if (ivl->loc.numAllocated() == 2) {
+    auto r1 = ivl->loc.reg(1);
     posns[r1] = std::min(pos, posns[r1]);
   }
 }
@@ -892,7 +892,7 @@ void XLS::walkIntervals() {
     m_pending.pop();
     update(current->start());
     allocOne(current);
-    assert(current->handled() && current->info.numWords() == current->need);
+    assert(current->handled() && current->loc.numWords() == current->need);
   }
   if (dumpIREnabled(kRegAllocLevel)) {
     if (m_numSplits) dumpIntervals();
@@ -907,11 +907,11 @@ void XLS::assignLocations() {
       auto spos = m_posns[inst];
       for (auto s : inst.srcs()) {
         if (!m_intervals[s]) continue;
-        m_regs[inst][s] = m_intervals[s]->childAt(spos)->info;
+        m_regs[inst][s] = m_intervals[s]->childAt(spos)->loc;
       }
       for (auto& d : inst.dsts()) {
         if (!m_intervals[d]) continue;
-        m_regs[inst][d] = m_intervals[d]->info;
+        m_regs[inst][d] = m_intervals[d]->loc;
       }
     }
   }
@@ -951,13 +951,13 @@ void XLS::insertSpill(Interval* ivl) {
   if (inst->isBlockEnd()) {
     auto succ = inst->next();
     auto pos = succ->skipHeader();
-    insertCopy(succ, pos, m_before[succ], ivl->tmp, ivl->info, ivl->spill);
+    insertCopy(succ, pos, m_before[succ], ivl->tmp, ivl->loc, ivl->spill);
   } else {
     auto block = inst->block();
     auto pos = block->iteratorTo(inst);
     auto& shuffle = (++pos) != block->end() ? m_between[*pos] :
                     m_after[block];
-    insertCopy(block, pos, shuffle, ivl->tmp, ivl->info, ivl->spill);
+    insertCopy(block, pos, shuffle, ivl->tmp, ivl->loc, ivl->spill);
   }
 }
 
@@ -991,13 +991,13 @@ void XLS::resolveSplits() {
     for (auto& i2 : i1->children) {
       auto pos1 = i1->end();
       auto pos2 = i2.start();
-      if (!i2.info.spilled() && pos1 == pos2 && i1->info != i2.info) {
+      if (!i2.loc.spilled() && pos1 == pos2 && i1->loc != i2.loc) {
         auto inst = m_insts[pos2 / 2];
         auto block = inst->block();
         if (inst != skipShuffle(block)) {
           assert(pos2 % 2 == 0);
           insertCopy(block, block->iteratorTo(inst), m_between[inst], i1->tmp,
-                     i1->info, i2.info);
+                     i1->loc, i2.loc);
         }
       }
       i1 = &i2;
@@ -1023,8 +1023,8 @@ void XLS::resolveEdges() {
           auto i2 = m_intervals[inst2.dst(i)];
           if (i1) i1 = i1->childAt(pos1);
           insertCopy(pred, it1, m_after[pred], inst1.src(i),
-                     i1 ? i1->info : invalid_loc,
-                     i2 ? i2->info : invalid_loc);
+                     i1 ? i1->loc : invalid_loc,
+                     i2 ? i2->loc : invalid_loc);
         }
       }
       m_liveIn[succ].forEach([&](uint32_t id) {
@@ -1032,15 +1032,15 @@ void XLS::resolveEdges() {
         auto i1 = ivl->childAt(pos1 + 1);
         auto i2 = ivl->childAt(pos2);
         assert(i1 && i2);
-        if (i2->info.spilled()) return; // we did spill store after def.
+        if (i2->loc.spilled()) return; // we did spill store after def.
         if (pred->taken() && pred->next()) {
           // insert copy at start of succesor
           insertCopy(succ, succ->skipHeader(), m_before[succ],
-                     i1->tmp, i1->info, i2->info);
+                     i1->tmp, i1->loc, i2->loc);
         } else {
           // insert copy at end of predecessor
           auto pos = inst1.op() == Jmp ? it1 : pred->end();
-          insertCopy(pred, pos, m_after[pred], i1->tmp, i1->info, i2->info);
+          insertCopy(pred, pos, m_after[pred], i1->tmp, i1->loc, i2->loc);
         }
       });
     });
@@ -1215,7 +1215,7 @@ void XLS::print(const char* caption) {
 std::string Interval::toString() {
   std::ostringstream out;
   auto delim = "";
-  out << info << " [";
+  out << loc << " [";
   for (auto r : ranges) {
     out << delim << folly::format("{}-{}", r.start, r.end);
     delim = ",";

@@ -44,22 +44,13 @@ struct Block : boost::noncopyable {
   enum class Hint { Neither, Likely, Unlikely };
 
   explicit Block(unsigned id)
-    : m_trace(nullptr)
-    , m_id(id)
+    : m_id(id)
     , m_hint(Hint::Neither)
   {}
 
   uint32_t    id() const           { return m_id; }
-  IRTrace*    trace() const        { return m_trace; }
-  void        setTrace(IRTrace* t) { m_trace = t; }
   Hint        hint() const         { return m_hint; }
   void        setHint(Hint hint)   { m_hint = hint; }
-
-  void        addEdge(IRInstruction* jmp);
-  void        removeEdge(IRInstruction* jmp);
-
-  // Returns true if this block is part of the main trace.
-  bool isMain() const;
 
   // Returns true if this block has no successors.
   bool isExit() const { return !taken() && !next(); }
@@ -70,8 +61,8 @@ struct Block : boost::noncopyable {
   // Returns whether this block starts with BeginCatch
   bool isCatch() const;
 
-  // return the fallthrough block.  Should be nullptr if the last
-  // instruction is a Terminal.
+  // return the fallthrough block.  Should be nullptr if the last instruction
+  // is a Terminal.
   Block* next() const { return back().next(); }
   Edge*  nextEdge()   { return back().nextEdge(); }
 
@@ -152,7 +143,6 @@ struct Block : boost::noncopyable {
 
  private:
   InstructionList m_instrs; // instructions in this block
-  IRTrace* m_trace;         // owner of this block.
   const unsigned m_id;      // unit-assigned unique id of this block
   unsigned m_postid;        // postorder number of this block
   EdgeList m_preds;         // Edges that point to this block

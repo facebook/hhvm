@@ -118,7 +118,6 @@ struct HhbcTranslator {
                  const Func* func);
 
   // Accessors.
-  IRTrace* trace() const { return m_tb->trace(); }
   TraceBuilder& traceBuilder() const { return *m_tb.get(); }
   IRUnit& unit() { return m_unit; }
 
@@ -146,7 +145,6 @@ struct HhbcTranslator {
   void assertType(const RegionDesc::Location& loc, Type type);
   void checkType(const RegionDesc::Location& loc, Type type,
                          Offset dest);
-  void assertString(const RegionDesc::Location& loc, const StringData* sd);
   void assertClass(const RegionDesc::Location& loc, const Class* cls);
 
   RuntimeType rttFromLocation(const Location& loc);
@@ -338,8 +336,8 @@ struct HhbcTranslator {
   void emitCeil();
   void emitAssertTL(int32_t id, AssertTOp);
   void emitAssertTStk(int32_t offset, AssertTOp);
-  void emitAssertObjL(int32_t id, bool exact, Id);
-  void emitAssertObjStk(int32_t offset, bool exact, Id);
+  void emitAssertObjL(int32_t id, Id, AssertObjOp);
+  void emitAssertObjStk(int32_t offset, Id, AssertObjOp);
   void emitPredictTL(int32_t id, AssertTOp);
   void emitPredictTStk(int32_t offset, AssertTOp);
 
@@ -453,11 +451,12 @@ struct HhbcTranslator {
   void emitIncTransCounter();
   void emitIncProfCounter(JIT::TransID transId);
   void emitCheckCold(JIT::TransID transId);
-  void emitRB(Trace::RingBufferType t, SrcKey sk);
-  void emitRB(Trace::RingBufferType t, std::string msg) {
-    emitRB(t, makeStaticString(msg));
+  void emitRB(Trace::RingBufferType t, SrcKey sk, int level = 1);
+  void emitRB(Trace::RingBufferType t, std::string msg, int level = 1) {
+    emitRB(t, makeStaticString(msg), level);
   }
-  void emitRB(Trace::RingBufferType t, const StringData* msg);
+  void emitRB(Trace::RingBufferType t, const StringData* msg, int level = 1);
+  void emitDbgAssertRetAddr();
   void emitIdx();
   void emitIdxCommon(Opcode opc, Block* catchBlock = nullptr);
   void emitArrayIdx();
@@ -779,8 +778,11 @@ private: // Exit trace creation routines.
   Block* makeExitSlow();
   Block* makeExitOpt(JIT::TransID transId);
 
+  template<typename Body>
+  Block* makeCatchImpl(Body body);
   Block* makeCatch(std::vector<SSATmp*> extraSpill =
                    std::vector<SSATmp*>());
+  Block* makeCatchNoSpill();
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,

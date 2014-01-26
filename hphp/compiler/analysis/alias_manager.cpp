@@ -28,12 +28,10 @@
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
-#include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/compiler/expression/object_method_expression.h"
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/include_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
@@ -3570,25 +3568,6 @@ public:
         int id = m_gidMap["v:this"];
         if (id && m_block->getBit(DataFlow::AvailOut, id)) {
           cp->setGuarded();
-        }
-      }
-    }
-
-    if (auto rs = dynamic_pointer_cast<ReturnStatement>(cp)) {
-      std::vector<std::string> lnames;
-      VariableTableConstPtr vars = cp->getFunctionScope()->getVariables();
-      vars->getLocalVariableNames(lnames);
-      for (auto& l : lnames) {
-        int id = m_gidMap["v:" + l];
-        if (id && !m_block->getBit(DataFlow::PInitOut, id)) {
-          rs->addNonRefcounted(l);
-        } else {
-          auto sym = vars->getSymbol(l);
-          auto dt = vars->getFinalType(l)->getDataType();
-          if (!sym->isStatic() && dt != KindOfUnknown &&
-              !IS_REFCOUNTED_TYPE(dt)) {
-            rs->addNonRefcounted(l);
-          }
         }
       }
     }

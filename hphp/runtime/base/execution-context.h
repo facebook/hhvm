@@ -131,7 +131,6 @@ class ClassInfoVM : public ClassInfo,
   friend class HPHP::Class;
 };
 
-namespace MethodLookup {
 enum class CallType {
   ClsMethod,
   ObjMethod,
@@ -144,7 +143,6 @@ enum class LookupResult {
   MagicCallStaticFound,
   MethodNotFound,
 };
-}
 
 enum InclOpFlags {
   InclOpDefault = 0,
@@ -432,8 +430,12 @@ public:
   static void fillContinuationVars(
     ActRec* origFp, const Func* origFunc, ActRec* genFp, const Func* genFunc);
   void pushLocalsAndIterators(const HPHP::Func* f, int nparams = 0);
+  void enqueueAPCHandle(APCHandle* handle);
 
 private:
+  std::vector<APCHandle*> m_apcHandles;
+  void manageAPCHandle();
+
   enum class VectorLeaveCode {
     ConsumeAll,
     LeaveLast
@@ -505,22 +507,22 @@ public:
   const HPHP::Func* lookupMethodCtx(const HPHP::Class* cls,
                                         const StringData* methodName,
                                         const HPHP::Class* pctx,
-                                        MethodLookup::CallType lookupType,
+                                        CallType lookupType,
                                         bool raise = false);
-  MethodLookup::LookupResult lookupObjMethod(const HPHP::Func*& f,
-                                             const HPHP::Class* cls,
-                                             const StringData* methodName,
-                                             const Class* ctx,
-                                             bool raise = false);
-  MethodLookup::LookupResult lookupClsMethod(const HPHP::Func*& f,
-                                             const HPHP::Class* cls,
-                                             const StringData* methodName,
-                                             ObjectData* this_,
-                                             const Class* ctx,
-                                             bool raise = false);
-  MethodLookup::LookupResult lookupCtorMethod(const HPHP::Func*& f,
-                                              const HPHP::Class* cls,
-                                              bool raise = false);
+  LookupResult lookupObjMethod(const HPHP::Func*& f,
+                               const HPHP::Class* cls,
+                               const StringData* methodName,
+                               const Class* ctx,
+                               bool raise = false);
+  LookupResult lookupClsMethod(const HPHP::Func*& f,
+                               const HPHP::Class* cls,
+                               const StringData* methodName,
+                               ObjectData* this_,
+                               const Class* ctx,
+                               bool raise = false);
+  LookupResult lookupCtorMethod(const HPHP::Func*& f,
+                                const HPHP::Class* cls,
+                                bool raise = false);
   ObjectData* createObject(StringData* clsName,
                            CVarRef params,
                            bool init = true);

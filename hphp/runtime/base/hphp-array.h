@@ -242,6 +242,7 @@ public:
   static void OnSetEvalScalarPacked(ArrayData*);
   static void ReleasePacked(ArrayData*);
   static void Release(ArrayData*);
+  static void ReleaseUncounted(ArrayData*);
 
   // overrides ArrayData
   static bool ValidFullPos(const ArrayData*, const FullPos &fp);

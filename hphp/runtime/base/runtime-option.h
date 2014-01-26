@@ -38,6 +38,8 @@ struct SatelliteServerInfo;
 struct FilesMatch;
 struct Hdf;
 
+constexpr int kDefaultInitialStaticStringTableSize = 500000;
+
 /**
  * Configurable options set from command line or configurable file at startup
  * time.
@@ -432,7 +434,7 @@ public:
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   /* Register allocation flags */                                       \
-  F(bool, HHIRXls,                     xlsDefault())                    \
+  F(bool, HHIRXls,                     true)                            \
   F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
@@ -462,7 +464,8 @@ public:
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
-  F(uint32_t, InitialStaticStringTableSize, 100000)                     \
+  F(uint32_t, InitialStaticStringTableSize,                             \
+                        kDefaultInitialStaticStringTableSize)           \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \

@@ -33,7 +33,6 @@
 #include <sys/resource.h>
 
 #ifdef __FreeBSD__
-#include <sys/resource.h>
 #include <sys/param.h>
 #include <sys/cpuset.h>
 #define cpu_set_t cpuset_t

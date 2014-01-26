@@ -42,6 +42,11 @@ bool could_have_magic_bool_conversion(Type);
  */
 bool has_86pinit(borrowed_ptr<const php::Class>);
 
+/*
+ * Returns a collection type name given a Collection::Type.
+ */
+SString collectionTypeToString(uint32_t ctype);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

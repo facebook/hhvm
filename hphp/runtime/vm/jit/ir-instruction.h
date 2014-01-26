@@ -275,7 +275,6 @@ struct IRInstruction {
    * inserting it in any blocks.
    */
   bool       isTransient() const       { return m_id == kTransient; }
-  IRTrace* trace() const;
 
   /*
    * block() and setBlock() keep track of the block that contains this

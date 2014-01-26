@@ -80,6 +80,8 @@ void apcExtension::moduleLoad(Hdf config) {
   KeyFrequencyUpdatePeriod = apc["KeyFrequencyUpdatePeriod"].getInt32(1000);
 
   apc["NoTTLPrefix"].get(NoTTLPrefix);
+
+  UseUncounted = apc["MemModelTreadmill"].getBool(false);
 }
 
 void apcExtension::moduleInit() {
@@ -128,6 +130,7 @@ std::string apcExtension::FileStorageFlagKey;
 bool apcExtension::ConcurrentTableLockFree = false;
 bool apcExtension::FileStorageKeepFileLinked = false;
 std::vector<std::string> apcExtension::NoTTLPrefix;
+bool apcExtension::UseUncounted = false;
 
 static apcExtension s_apc_extension;
 

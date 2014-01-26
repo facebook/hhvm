@@ -86,7 +86,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -170,15 +169,6 @@ TranslatorX64* tx64;
 
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = VMRegState::CLEAN;
-
-// stubBlock --
-//   Used to emit a bunch of outlined code that is unconditionally jumped to.
-template <typename L>
-void stubBlock(X64Assembler& hot, X64Assembler& cold, const L& body) {
-  hot.  jmp(cold.frontier());
-  guardDiamond(cold, body);
-  cold. jmp(hot.frontier());
-}
 
 JIT::CppCall TranslatorX64::getDtorCall(DataType type) {
   switch (type) {
@@ -2072,11 +2062,11 @@ TranslatorX64::translateTracelet(Tracelet& t) {
     fa.print();
     StackTraceNoHeap::AddExtraLogging(
       "Assertion failure",
-      folly::format("{}\n\nActive Trace:\n{}\n",
-                    fa.summary, ht.trace()->toString()).str());
+      folly::format("{}\n\nActive Unit:\n{}\n",
+                    fa.summary, ht.unit().toString()).str());
     abort();
   } catch (const JIT::FailedTraceGen& e) {
-    FTRACE(1, "HHIR: FAILED to translate whole trace: {}\n",
+    FTRACE(1, "HHIR: FAILED to translate whole unit: {}\n",
            e.what());
   }
   return Failure;
@@ -2135,9 +2125,9 @@ void TranslatorX64::initUniqueStubs() {
   }
 }
 
-void TranslatorX64::registerCatchTrace(CTCA ip, TCA trace) {
-  FTRACE(1, "registerCatchTrace: afterCall: {} trace: {}\n", ip, trace);
-  m_pendingCatchTraces.emplace_back(ip, trace);
+void TranslatorX64::registerCatchBlock(CTCA ip, TCA block) {
+  FTRACE(1, "registerCatchBlock: afterCall: {} block: {}\n", ip, block);
+  m_pendingCatchTraces.emplace_back(ip, block);
 }
 
 void TranslatorX64::processPendingCatchTraces() {
@@ -2147,9 +2137,10 @@ void TranslatorX64::processPendingCatchTraces() {
   m_pendingCatchTraces.clear();
 }
 
-TCA TranslatorX64::getCatchTrace(CTCA ip) const {
+folly::Optional<TCA> TranslatorX64::getCatchTrace(CTCA ip) const {
   TCA* found = m_catchTraceMap.find(ip);
-  return found ? *found : nullptr;
+  if (found) return *found;
+  return folly::none;
 }
 
 void

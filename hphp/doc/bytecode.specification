@@ -1766,6 +1766,9 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   Otherwise this instruction pushes a new entry on the FPI stack, initializing
   it with the number of parameters being passed (given by %1) and a reference
   to the FPI structure for the function named x.
+  With FPushFuncD the litstr in %2 must not start with a '\' character. 
+  Function names should be normalized with respect to namespace and never start
+  with a '\'.
 
   If x is an object, this instruction checks if the object has an __invoke
   method. If the object does not have an __invoke method, this instruction
@@ -1781,6 +1784,7 @@ FPushFuncU <num params> <litstr id> <litstr fallback> []  ->  []
   FPI push function unqualified. Identical to FPushFuncD except first tries to
   lookup the function named %2 and if it isn't defined calls the function named
   %3.
+  As for FPushFuncD the litstr in %2 and %3 must not start with a '\' character.
 
 FPushObjMethod <num params>                 [C C]  ->  []
 FPushObjMethodD <num params> <litstr id>    [C]  ->  []
@@ -3767,7 +3771,9 @@ This    []  ->  [C:Obj]
 BareThis <notice>   []  ->  [C:Obj|Null]
 
   This. This instruction pushes the current instance onto the stack. If %1 is
-  BareThisOp::Notice, and the current instance is null, emits a notice.
+  BareThisOp::Notice, and the current instance is null, emits a notice. If %1
+  is BareThisOp::NeverNull the current value of $this is guaranteed to be
+  available and can be loaded with no null check.
 
 CheckThis    []  ->  []
 
@@ -3804,6 +3810,7 @@ StaticLocInit <local variable id> <litstr id>    [C]  ->  []
 Catch    []  ->  [C:Obj]
 
   Catch. Retrieves the current exception object and pushes it onto the stack.
+  The exception object must be a subclass of the builtin Exception class.
   This instruction may only be used at the beginning of a catch entry point.
 
 ClassExists        [C C]  ->  [C:Bool]
@@ -3895,20 +3902,29 @@ AssertTStk <stack offset> <op>   []  ->  []
   have a particular type.  The sub opcodes should be used to indicate
   the type, in an unspecified way.
 
-AssertObjL    <local id>     <exact> <class name>   []  ->  []
-AssertObjStk  <stack offset> <exact> <class name>   []  ->  []
+AssertObjL    <local id>     <class name> <op>   []  ->  []
+AssertObjStk  <stack offset> <class name> <op>   []  ->  []
 
   These opcodes may be used to communicate the results of ahead of
-  time static analysis to the runtime.  They indicate that the value
-  in the specified local or stack offset must be statically known to
-  be an object of a particular class or interface type, or an object
-  that is a non-strict subtype of a particular class or interface
-  type.
+  time static analysis to the runtime.
 
-  %3 is a litstr id of a class or interface name.  If %2 is 1, the
-  type is asserted to be exactly an object of the class with the name
-  %3.  Otherwise, the type is asserted to be some non-strict subtype
-  of the specified class or interface.
+  Depending on the value of %3, they indicate that the value in the specified
+  local or stack offset must be statically known to be an object of a
+  particular class or interface type, or an object that is a non-strict
+  subtype of a particular class or interface type, or either of those cases
+  with nullability.
+
+  %2 is a litstr id of a class or interface name.  %3 has the following
+  semantics regarding what it asserts about the type of the local or stack
+  slot:
+
+        Subop                    Semantics
+      -----------------------+------------------------------------
+      AssertObjOp::Exact     |  exactly the type named in %2
+      AssertObjOp::Sub       |  non-strict subtype of %2
+      AssertObjOp::OptExact  |  null, or exactly the type in %2
+      AssertObjOp::OptSub    |  null, or non-strict subtype of %2
+
 
 PredictTL   <local id>     <op>   []  ->  []
 PredictTStk <stack offset> <op>   []  ->  []

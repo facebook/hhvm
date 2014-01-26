@@ -34,15 +34,18 @@
 namespace HPHP {
 
 class Repo : public RepoProxy {
- private:
   static SimpleMutex s_lock;
   static unsigned s_nRepos;
- public:
+
+public:
+  struct GlobalData;
+
   // Do not directly instantiate this class; a thread-local creates one per
   // thread on demand when Repo::get() is called.
   static Repo& get();
   static bool prefork();
   static void postfork(pid_t pid);
+
   Repo();
   ~Repo();
 
@@ -77,11 +80,37 @@ class Repo : public RepoProxy {
 
   static void setCliFile(const std::string& cliFile);
 
-  void loadLitstrs();
   Unit* loadUnit(const std::string& name, const MD5& md5);
   bool findFile(const char* path, const std::string& root, MD5& md5);
   bool insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
   void commitMd5(UnitOrigin unitOrigin, UnitEmitter *ue);
+
+  /*
+   * Load the repo-global metadata table, including the global litstr
+   * table.  Normally called during process initialization.
+   */
+  void loadGlobalData();
+
+  /*
+   * Access to global data.
+   *
+   * Pre: loadGlobalData() already called, and
+   * RuntimeOption::RepoAuthoritative.
+   */
+  static const GlobalData& global() {
+    assert(RuntimeOption::RepoAuthoritative);
+    return s_globalData;
+  }
+
+  /*
+   * Used during repo creation to associate the supplied GlobalData
+   * with the repo that was being built.  Also saves the global litstr
+   * table.
+   *
+   * No other threads may be reading or writing the repo GlobalData
+   * when this is called.
+   */
+  void saveGlobalData(GlobalData newData);
 
 #define RP_IOP(o) RP_OP(Insert##o, insert##o)
 #define RP_GOP(o) RP_OP(Get##o, get##o)
@@ -121,7 +150,6 @@ class Repo : public RepoProxy {
   bool insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
                   RepoTxn& txn); // nothrow
   void commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin); // nothrow
-  void insertLitstrs(RepoTxn& txn, UnitOrigin unitOrigin);
 
   // All database table names use the schema ID (md5 checksum based on the
   // source code) as a suffix.  For example, if the schema ID is
@@ -159,7 +187,10 @@ class Repo : public RepoProxy {
   bool createSchema(int repoId);
   bool writable(int repoId);
 
+private:
   static std::string s_cliFile;
+  static GlobalData s_globalData;
+
   std::string m_localRepo;
   std::string m_centralRepo;
   sqlite3* m_dbc; // Database connection, shared by multiple attached databases.
@@ -176,6 +207,30 @@ class Repo : public RepoProxy {
   FuncRepoProxy m_frp;
   LitstrRepoProxy m_lsrp;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Global repo metadata.
+ *
+ * Only used in RepoAuthoritative mode.  See loadGlobalData().
+ */
+struct Repo::GlobalData {
+  /*
+   * Indicates whether a repo was compiled with HardTypeHints.
+   *
+   * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
+   * raise if you violate a typehint, because doing so would allow
+   * violating assumptions from the optimizer.
+   */
+  bool HardTypeHints = false;
+
+  template<class SerDe> void serde(SerDe& sd) {
+    sd(HardTypeHints);
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
 
 }
 

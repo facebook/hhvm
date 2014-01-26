@@ -58,12 +58,6 @@ struct APCObject {
 
   APCHandle* getHandle() { return &m_handle; }
 
-  //
-  // Stats API
-  //
-  void getSizeStats(APCHandleStats* stats) const;
-  int32_t getSpaceUsage() const;
-
 private:
   friend struct APCHandle;
 

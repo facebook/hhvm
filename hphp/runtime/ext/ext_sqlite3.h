@@ -55,7 +55,7 @@ class c_SQLite3 : public ExtObjectData {
   public: bool t_busytimeout(int64_t msecs);
   public: bool t_close();
   public: bool t_exec(const String& sql);
-  public: Array t_version();
+  public: static Array ti_version();
   public: int64_t t_lastinsertrowid();
   public: int64_t t_lasterrorcode();
   public: String t_lasterrormsg();

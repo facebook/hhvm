@@ -38,7 +38,6 @@
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
@@ -438,11 +437,13 @@ void IRTranslator::translateAssertTStk(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateAssertObjL(const NormalizedInstruction& i) {
-  HHIR_EMIT(AssertObjL, i.imm[0].u_LA, i.imm[1].u_IVA, i.imm[2].u_SA);
+  HHIR_EMIT(AssertObjL, i.imm[0].u_LA, i.imm[1].u_SA,
+    static_cast<AssertObjOp>(i.imm[2].u_OA));
 }
 
 void IRTranslator::translateAssertObjStk(const NormalizedInstruction& i) {
-  HHIR_EMIT(AssertObjStk, i.imm[0].u_IVA, i.imm[1].u_IVA, i.imm[2].u_SA);
+  HHIR_EMIT(AssertObjStk, i.imm[0].u_IVA, i.imm[1].u_SA,
+    static_cast<AssertObjOp>(i.imm[2].u_OA));
 }
 
 void IRTranslator::translatePredictTL(const NormalizedInstruction& i) {
@@ -1604,11 +1605,16 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
     ht.emitIncStat(Stats::opcodeToIRPostStatCounter(ni.op()),
                             1, true);
   }
+  ht.emitRB(RBTypeBytecodeStart, ni.source, 2);
 
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     auto const type = flavorToType(instrInputFlavor(pc, i));
     if (type != Type::Gen) m_hhbcTrans.assertTypeStack(i, type);
+  }
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    ht.emitDbgAssertRetAddr();
   }
 
   if (instrMustInterp(ni) || ni.interp) {

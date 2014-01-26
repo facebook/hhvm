@@ -32,6 +32,8 @@ namespace HPHP {
  */
 class APCTypedValue {
 public:
+  static APCHandle* MakeSharedArray(ArrayData* array);
+
   APCTypedValue(DataType type, int64_t data) : m_handle(type) {
     m_data.num = data;
   }
@@ -42,6 +44,16 @@ public:
 
   APCTypedValue(DataType type, StringData* data) : m_handle(type) {
     m_data.str = data;
+  }
+
+  explicit APCTypedValue(StringData* data) : m_handle(KindOfString) {
+    m_handle.setUncounted();
+    m_data.str = data;
+  }
+
+  explicit APCTypedValue(ArrayData* data) : m_handle(KindOfArray) {
+    m_handle.setUncounted();
+    m_data.arr = data;
   }
 
   explicit APCTypedValue(DataType type) : m_handle(type) {
@@ -78,8 +90,14 @@ public:
   }
 
   StringData *getStringData() const {
-    assert(m_handle.is(KindOfStaticString));
+    assert(m_handle.is(KindOfStaticString) ||
+           (m_handle.getUncounted() && m_handle.is(KindOfString)));
     return m_data.str;
+  }
+
+  ArrayData *getArrayData() const {
+    assert(m_handle.getUncounted() && m_handle.is(KindOfArray));
+    return m_data.arr;
   }
 
   CVarRef asCVarRef() const {
@@ -90,7 +108,11 @@ public:
     return tvAsCVarRef(reinterpret_cast<const TypedValue*>(this));
   }
 
+  void deleteUncounted();
+
 private:
+  friend struct APCHandle;
+
   APCTypedValue(const APCTypedValue&) = delete;
   APCTypedValue& operator=(const APCTypedValue&) = delete;
 
@@ -108,7 +130,8 @@ private:
   union SharedData {
     int64_t num;
     double dbl;
-    StringData *str;
+    StringData* str;
+    ArrayData* arr;
   };
 
 #if PACKED_TV

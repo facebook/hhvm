@@ -30,7 +30,6 @@
 #include "zend.h"
 
 #include "zend_globals.h"
-#include "php_globals.h"
 #include "SAPI.h"
 
 #include "hphp/runtime/ext/ext_misc.h"

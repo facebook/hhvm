@@ -28,12 +28,14 @@ namespace {
 
 const StaticString
   s_SimpleXMLElement("SimpleXMLElement"),
-  s_Vector("Vector"),
+  s_Vector("HH\\Vector"),
   s_Map("Map"),
   s_StableMap("StableMap"),
-  s_Set("Set"),
-  s_FrozenVector("FrozenVector"),
-  s_FrozenSet("FrozenSet"),
+  s_Set("HH\\Set"),
+  s_Pair("Pair"),
+  s_FrozenVector("HH\\FrozenVector"),
+  s_FrozenSet("HH\\FrozenSet"),
+  s_FrozenMap("HH\\FrozenMap"),
   s_86pinit("86pinit");
 
 bool has_magic_bool_conversion(res::Class cls) {
@@ -70,6 +72,29 @@ bool has_86pinit(borrowed_ptr<const php::Class> cls) {
     if (m->name->isame(s_86pinit.get())) return true;
   }
   return false;
+}
+
+SString collectionTypeToString(uint32_t ctype) {
+  switch (ctype) {
+  case Collection::VectorType:
+    return s_Vector.get();
+  case Collection::MapType:
+    return s_Map.get();
+  case Collection::StableMapType:
+    return s_StableMap.get();
+  case Collection::SetType:
+    return s_Set.get();
+  case Collection::PairType:
+    return s_Pair.get();
+  case Collection::FrozenVectorType:
+    return s_FrozenVector.get();
+  case Collection::FrozenSetType:
+    return s_FrozenSet.get();
+  case Collection::FrozenMapType:
+    return s_FrozenMap.get();
+  }
+  assert(!"Unknown Collection Type");
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

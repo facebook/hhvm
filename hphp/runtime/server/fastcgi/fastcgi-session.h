@@ -20,7 +20,7 @@
 #include "hphp/runtime/server/fastcgi/protocol-session.h"
 #include "folly/io/IOBuf.h"
 #include "folly/io/Cursor.h"
-#include <map>
+#include <unordered_map>
 
 namespace HPHP {
 
@@ -172,9 +172,8 @@ protected:
   static const std::string k_getValueMaxRequestsKey;
   static const std::string k_getValueMultiplexConnsKey;
 
-  typedef std::map<RequestId, std::unique_ptr<Transaction>> TransactionMap;
-  typedef std::map<std::unique_ptr<folly::IOBuf>,
-                   std::unique_ptr<folly::IOBuf>> ParamMap;
+  typedef std::unordered_map<RequestId,
+                             std::unique_ptr<Transaction>> TransactionMap;
 
   bool parseRecordBegin(folly::io::Cursor& cursor, size_t& available);
   bool parseRecordBody(folly::io::Cursor& cursor, size_t& available);

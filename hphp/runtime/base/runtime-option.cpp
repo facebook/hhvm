@@ -49,6 +49,7 @@
 #include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/crash-reporter.h"
+#include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -395,11 +396,8 @@ static inline std::string regionSelectorDefault() {
 }
 
 static inline bool pgoDefault() {
-#ifdef HHVM_REGION_SELECTOR_HOTTRACE
-  return true;
-#else
-  return false;
-#endif
+  // TODO(3496304)
+  return !RuntimeOption::EvalSimulateARM;
 }
 
 static inline bool hhirRelaxGuardsDefault() {
@@ -416,10 +414,6 @@ static inline bool simulateARMDefault() {
 #else
   return false;
 #endif
-}
-
-static inline bool xlsDefault() {
-  return RuntimeOption::EvalSimulateARM;
 }
 
 static inline bool hugePagesSoundNice() {
@@ -1328,6 +1322,8 @@ void RuntimeOption::Load(Hdf &config,
     Fb303ServerPoolThreads = fb303Server["PoolThreads"].getInt16(1);
   }
 #endif
+
+  refineStaticStringTableSize();
 
   Extension::LoadModules(config);
   if (overwrites) Loaded = true;

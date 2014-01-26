@@ -497,6 +497,7 @@ public:
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad);
 
+  static ArrayData* GetUncountedArray(ArrayData *arr);
   static ArrayData* GetScalarArray(ArrayData *arr);
   static ArrayData* GetScalarArray(ArrayData *arr, const std::string& key);
 

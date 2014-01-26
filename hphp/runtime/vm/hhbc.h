@@ -379,6 +379,18 @@ enum class AssertTOp : uint8_t {
 #undef ASSERTT_OP
 };
 
+#define ASSERTOBJ_OPS                           \
+  ASSERTOBJ_OP(Exact)                           \
+  ASSERTOBJ_OP(Sub)                             \
+  ASSERTOBJ_OP(OptExact)                        \
+  ASSERTOBJ_OP(OptSub)
+
+enum class AssertObjOp : uint8_t {
+#define ASSERTOBJ_OP(op) op,
+  ASSERTOBJ_OPS
+#undef ASSERTOBJ_OP
+};
+
 enum IterKind {
   KindOfIter  = 0,
   KindOfMIter = 1,
@@ -421,7 +433,8 @@ enum class SetOpOp : uint8_t {
 
 #define BARETHIS_OPS    \
   BARETHIS_OP(Notice)   \
-  BARETHIS_OP(NoNotice)
+  BARETHIS_OP(NoNotice) \
+  BARETHIS_OP(NeverNull)
 
 enum class BareThisOp : uint8_t {
 #define BARETHIS_OP(x) x,
@@ -550,8 +563,12 @@ enum class BareThisOp : uint8_t {
                        OA(AssertTOp)), NOV,             NOV,        NF) \
   O(AssertTStk,      TWO(IVA,                                           \
                        OA(AssertTOp)), NOV,             NOV,        NF) \
-  O(AssertObjL,      THREE(LA,IVA,SA), NOV,             NOV,        NF) \
-  O(AssertObjStk,    THREE(IVA,IVA,SA),NOV,             NOV,        NF) \
+  O(AssertObjL,      THREE(LA,SA,                                       \
+                       OA(AssertObjOp)),                                \
+                                       NOV,             NOV,        NF) \
+  O(AssertObjStk,    THREE(IVA,SA,                                      \
+                       OA(AssertObjOp)),                                \
+                                       NOV,             NOV,        NF) \
   O(PredictTL,       TWO(LA,                                            \
                        OA(AssertTOp)), NOV,             NOV,        NF) \
   O(PredictTStk,     TWO(IVA,                                           \
@@ -908,6 +925,7 @@ void staticArrayStreamer(ArrayData*, std::ostream&);
 const char* opcodeToName(Op op);
 const char* subopToName(IsTypeOp);
 const char* subopToName(AssertTOp);
+const char* subopToName(AssertObjOp);
 const char* subopToName(FatalOp);
 const char* subopToName(SetOpOp);
 const char* subopToName(IncDecOp);

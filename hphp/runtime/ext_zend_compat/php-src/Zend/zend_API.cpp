@@ -27,7 +27,7 @@
 
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/thread-local.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/zend_hphp_class_to_class_entry.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"

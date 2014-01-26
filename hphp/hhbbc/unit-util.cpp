@@ -16,6 +16,7 @@
 #include "hphp/hhbbc/unit-util.h"
 
 #include "hphp/hhbbc/representation.h"
+#include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -24,6 +25,17 @@ namespace HPHP { namespace HHBBC {
 bool is_systemlib_part(const php::Unit& unit) {
   static const char prefix[] = "/:systemlib";
   return !strncmp(unit.filename->data(), prefix, sizeof prefix - 1);
+}
+
+bool isNSNormalized(SString name) {
+  return name->data()[0] != '\\';
+}
+
+SString normalizeNS(SString name) {
+  if (name->data()[0] == '\\' && name->data()[1] != '\\') {
+    return makeStaticString(StringSlice(name->data() + 1, name->size() - 1));
+  }
+  return name;
 }
 
 //////////////////////////////////////////////////////////////////////

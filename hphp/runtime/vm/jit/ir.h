@@ -63,7 +63,6 @@ using HPHP::JIT::ConditionCode;
 
 class IRUnit;
 struct IRInstruction;
-struct IRTrace;
 class SSATmp;
 struct LocalStateHook;
 
@@ -212,7 +211,6 @@ O(CheckStk,                  D(StkPtr), S(StkPtr),                       B|E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                      N|Er) \
 O(CoerceStk,                 D(StkPtr), S(StkPtr),                    B|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
-O(AssertStkVal,              D(StkPtr), S(StkPtr) S(Gen),                  E) \
 O(CheckDefinedClsEq,                ND, NA,                              B|E) \
 O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
@@ -220,7 +218,6 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
                                           S(Int),                          E) \
 O(AssertLoc,               D(FramePtr), S(FramePtr),                       E) \
-O(OverrideLocVal,                   ND, S(FramePtr) S(Gen),                E) \
 O(BeginCatch,                       ND, NA,                                E) \
 O(EndCatch,                         ND, S(FramePtr) S(StkPtr),           E|T) \
 O(TryEndCatch,                      ND, S(FramePtr) S(StkPtr),             E) \
@@ -362,7 +359,7 @@ O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(CheckSurpriseFlags,               ND, NA,                              B|E) \
 O(SurpriseHook,                     ND, NA,                           Er|N|E) \
-O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(StkPtr) S(Gen),    N|E) \
+O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(StkPtr) S(Gen), Er|N|E) \
 O(ExitOnVarEnv,                     ND, S(FramePtr),                     B|E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
@@ -607,38 +604,38 @@ O(CreateSEWH,                   D(Obj), S(Obj),                    N|CRc|PRc) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr)                         \
                                           C(Int)                              \
-                                          C(Int),                    E|N|CRc) \
+                                          C(Int),                 Er|E|N|CRc) \
 O(IterInitK,                   D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr)                         \
                                           C(Int)                              \
                                           C(Int)                              \
-                                          C(Int),                    E|N|CRc) \
+                                          C(Int),                 Er|E|N|CRc) \
 O(IterNext,                    D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),                 E|N) \
+                                          C(Int) C(Int),              Er|E|N) \
 O(IterNextK,                   D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int),          E|N) \
+                                          C(Int) C(Int) C(Int),       Er|E|N) \
 O(WIterInit,                   D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr)                         \
                                           C(Int)                              \
-                                          C(Int),                    E|N|CRc) \
+                                          C(Int),                 Er|E|N|CRc) \
 O(WIterInitK,                  D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr)                         \
                                           C(Int)                              \
                                           C(Int)                              \
-                                          C(Int),                    E|N|CRc) \
+                                          C(Int),                 Er|E|N|CRc) \
 O(WIterNext,                   D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),                 E|N) \
+                                          C(Int) C(Int),              Er|E|N) \
 O(WIterNextK,                  D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int),          E|N) \
+                                          C(Int) C(Int) C(Int),       Er|E|N) \
 O(MIterInit,                   D(Bool), S(BoxedCell)                          \
                                           S(FramePtr)                         \
                                           C(Int)                              \
-                                          C(Int),                        E|N) \
+                                          C(Int),                     Er|E|N) \
 O(MIterInitK,                  D(Bool), S(BoxedCell)                          \
                                           S(FramePtr)                         \
                                           C(Int)                              \
                                           C(Int)                              \
-                                          C(Int),                        E|N) \
+                                          C(Int),                     Er|E|N) \
 O(MIterNext,                   D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int),                 E|N) \
 O(MIterNextK,                  D(Bool), S(FramePtr)                           \
@@ -839,6 +836,7 @@ O(GenericIdx,                  D(Cell), S(Cell)                               \
 O(DbgAssertRefCount,                ND, S(Counted,StaticStr,StaticArr),  N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(DbgAssertType,                    ND, S(Cell),                           E) \
+O(DbgAssertRetAddr,                 ND, NA,                                E) \
 O(Nop,                              ND, NA,                               NF) \
 /* */
 

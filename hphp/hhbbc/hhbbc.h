@@ -100,12 +100,9 @@ struct Options {
    * constraint.
    *
    * This changes program behavior because parameter type hint
-   * validation is a recoverable fatal.  If the error handler doesn't
-   * throw at runtime, the parameter may not have the inferred type.
-   *
-   * Currently hhvm handles this by ignoring the problem and
-   * potentially segfaulting at runtime.  We want to change this to
-   * require the error handler to throw in this case.  TODO(#3038582).
+   * validation is normally a recoverable fatal.  When this option is
+   * on, hhvm will fatal if the error handler tries to recover in this
+   * situation.
    */
   bool HardTypeHints = true;
 

@@ -103,7 +103,7 @@ SrcKey NormalizedInstruction::nextSk() const {
 
 NormalizedInstruction::OutputUse
 NormalizedInstruction::getOutputUsage(const DynLocation* output) const {
-  for (NormalizedInstruction* succ = next; succ; succ = succ->next) {
+  for (auto succ = next; succ; succ = succ->next) {
     if (succ->noOp) continue;
     for (size_t i = 0; i < succ->inputs.size(); ++i) {
       if (succ->inputs[i] == output) {

@@ -99,6 +99,18 @@ RDS::Handle makeCnsHandle(const StringData* cnsName, bool persistent);
  */
 Array lookupDefinedConstants(bool categorize = false);
 
+/*
+ * The static string table is generally initially created before main
+ * by global constructors (StaticString objects).  After we've parsed
+ * options, we may find out a different size was requested for the
+ * table.
+ *
+ * This function is called after runtime option parsing to
+ * conditionally resize the table if its size was wrong.  We must
+ * still be in a single-threaded environment.
+ */
+void refineStaticStringTableSize();
+
 //////////////////////////////////////////////////////////////////////
 
 }

@@ -199,25 +199,26 @@ std::string FastCGITransport::getHeader(const char *name) {
  * Passed a FastCGI mangled header like "HTTP_COOKIE" or "HTTP_CACHE_CONTROL"
  **/
 std::string FastCGITransport::getRawHeader(const std::string& name) {
-  if (m_requestHeaders.count(name) && m_requestHeaders[name].size()) {
-    return m_requestHeaders[name][0];
-  } else {
+  assert(boost::to_upper_copy(name) == name);
+  auto it = m_requestHeaders.find(name);
+  if (it == m_requestHeaders.end()) {
     return "";
   }
+  return it->second;
 }
 
 void FastCGITransport::getHeaders(HeaderMap &headers) {
   for (auto& pair : m_requestHeaders) {
     auto key = unmangleHeader(pair.first);
     if (!key.empty()) {
-      headers[key] = pair.second;
+      headers[key] = { pair.second };
     }
   }
 }
 
 void FastCGITransport::getTransportParams(HeaderMap &serverParams) {
   for (auto& pair : m_requestHeaders) {
-    serverParams[pair.first] = pair.second;
+    serverParams[pair.first] = { pair.second };
   }
 }
 
@@ -306,110 +307,77 @@ void FastCGITransport::onBodyComplete() {
   m_monitor.unlock();
 }
 
-const std::string FastCGITransport::k_requestURIKey = "REQUEST_URI";
-const std::string FastCGITransport::k_remoteHostKey = "REMOTE_HOST";
-const std::string FastCGITransport::k_remoteAddrKey = "REMOTE_ADDR";
-const std::string FastCGITransport::k_remotePortKey = "REMOTE_PORT";
-const std::string FastCGITransport::k_methodKey = "REQUEST_METHOD";
-const std::string FastCGITransport::k_httpVersionKey = "HTTP_VERSION";
-const std::string FastCGITransport::k_contentLengthKey = "CONTENT_LENGTH";
-const std::string FastCGITransport::k_documentRoot = "DOCUMENT_ROOT";
-const std::string FastCGITransport::k_serverNameKey = "SERVER_NAME";
-const std::string FastCGITransport::k_serverPortKey = "SERVER_PORT";
-const std::string FastCGITransport::k_serverAddrKey = "SERVER_ADDR";
-const std::string FastCGITransport::k_httpsKey = "HTTPS";
-
 void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
                                 std::unique_ptr<folly::IOBuf> value_chain) {
   Cursor cursor(key_chain.get());
   std::string key = cursor.readFixedString(key_chain->computeChainDataLength());
+  // HTTP has case insensitive header keys
+  boost::to_upper(key);
   cursor = Cursor(value_chain.get());
   std::string value = cursor.readFixedString(
                                value_chain->computeChainDataLength());
-  handleHeader(key, value);
-}
-
-bool FastCGITransport::compareKeys(const std::string& key,
-                                   const std::string& other_key) {
-  return strcasecmp(key.c_str(), other_key.c_str()) == 0;
-}
-
-bool FastCGITransport::compareValues(const std::string& value,
-                                     const std::string& other_value) {
-  return value == other_value;
-}
-
-void FastCGITransport::handleHeader(const std::string& key,
-                                    const std::string& value) {
-  m_requestHeaders.insert(std::make_pair(key,
-                                         std::vector<std::string>(1, value)));
-  if (compareKeys(key, k_requestURIKey)) {
-    m_requestURI = value;
-  } else if (compareKeys(key, k_remoteHostKey)) {
-    m_remoteHost = value;
-  } else if (compareKeys(key, k_remoteAddrKey)) {
-    m_remoteAddr = value;
-  } else if (compareKeys(key, k_remotePortKey)) {
-    try {
-      int remote_port = std::stoi(value);
-      if (remote_port < std::numeric_limits<decltype(m_remotePort)>::min() ||
-          remote_port > std::numeric_limits<decltype(m_remotePort)>::max()) {
-        m_remotePort = 0;
-      }
-      m_remotePort = remote_port;
-    } catch (std::invalid_argument&) {
-      m_remotePort = 0;
-    } catch (std::out_of_range&) {
-      m_remotePort = 0;
-    }
-  } else if (compareKeys(key, k_serverNameKey)) {
-    m_serverName = value;
-  } else if (compareKeys(key, k_httpsKey)) {
-    if (!value.empty()) {
-      std::string lValue(value);
-      boost::to_lower(lValue);
-      // IIS sets this value but sets it to off when SSL is off.
-      if (lValue.compare("off") != 0) {
-        setSSL();
-      }
-    }
-  } else if (compareKeys(key, k_serverAddrKey)) {
-    m_serverAddr = value;
-  } else if (compareKeys(key, k_serverPortKey)) {
-    try {
-      m_serverPort = std::stoi(value);
-    } catch (std::invalid_argument&) {
-      m_serverPort = 0;
-    } catch (std::out_of_range&) {
-      m_serverPort = 0;
-    }
-  } else if (compareKeys(key, k_methodKey)) {
-    m_extendedMethod = value;
-    if (compareValues(value, "GET")) {
-      m_method = Method::GET;
-    } else if (compareValues(value, "POST")) {
-      m_method = Method::POST;
-    } else if (compareValues(value, "HEAD")) {
-      m_method = Method::HEAD;
-    } else {
-      m_method = Method::Unknown;
-    }
-  } else if (compareKeys(key, k_httpVersionKey)) {
-    m_httpVersion = value;
-  } else if (compareKeys(key, k_contentLengthKey)) {
-    try {
-      m_requestSize = std::stoi(value);
-    } catch (std::invalid_argument&) {
-      m_requestSize = 0;
-    } catch (std::out_of_range&) {
-      m_requestSize = 0;
-    }
-  } else if (compareKeys(key, k_documentRoot)) {
-    m_documentRoot = value + "/";
-  }
+  m_requestHeaders.insert(std::make_pair(key, value));
 }
 
 void FastCGITransport::onHeadersComplete() {
+  m_requestURI = getRawHeader("REQUEST_URI");
+  m_remoteHost = getRawHeader("REMOTE_HOST");
+  m_remoteAddr = getRawHeader("REMOTE_ADDR");
+  m_serverName = getRawHeader("SERVER_NAME");
+  m_serverAddr = getRawHeader("SERVER_ADDR");
+  m_extendedMethod = getRawHeader("REQUEST_METHOD");
+  m_httpVersion = getRawHeader("HTTP_VERSION");
+  m_documentRoot = getRawHeader("DOCUMENT_ROOT") + "/";
+
+  try {
+    int remote_port = std::stoi(getRawHeader("REMOTE_PORT"));
+    if (remote_port < std::numeric_limits<decltype(m_remotePort)>::min() ||
+        remote_port > std::numeric_limits<decltype(m_remotePort)>::max()) {
+      m_remotePort = 0;
+    }
+    m_remotePort = remote_port;
+  } catch (std::invalid_argument&) {
+    m_remotePort = 0;
+  } catch (std::out_of_range&) {
+    m_remotePort = 0;
+  }
+
+  auto value = getRawHeader("HTTPS");
+  if (!value.empty()) {
+    std::string lValue(value);
+    boost::to_lower(lValue);
+    // IIS sets this value but sets it to off when SSL is off.
+    if (lValue.compare("off") != 0) {
+      setSSL();
+    }
+  }
+
+  try {
+    m_serverPort = std::stoi(getRawHeader("SERVER_PORT"));
+  } catch (std::invalid_argument&) {
+    m_serverPort = 0;
+  } catch (std::out_of_range&) {
+    m_serverPort = 0;
+  }
+
+  if (m_extendedMethod == "GET") {
+    m_method = Method::GET;
+  } else if (m_extendedMethod == "POST") {
+    m_method = Method::POST;
+  } else if (m_extendedMethod == "HEAD") {
+    m_method = Method::HEAD;
+  } else {
+    m_method = Method::Unknown;
+  }
+
+  try {
+    m_requestSize = std::stoi(getRawHeader("CONTENT_LENGTH"));
+  } catch (std::invalid_argument&) {
+    m_requestSize = 0;
+  } catch (std::out_of_range&) {
+    m_requestSize = 0;
+  }
+
   std::string pathTranslated = getRawHeader("PATH_TRANSLATED");
   std::string documentRoot = getRawHeader("DOCUMENT_ROOT");
   // use PATH_TRANSLATED - DOCUMENT_ROOT if it is valid instead of SCRIPT_NAME
@@ -420,10 +388,12 @@ void FastCGITransport::onHeadersComplete() {
   } else {
     m_serverObject = getRawHeader("SCRIPT_NAME");
   }
+
   std::string queryString = getRawHeader("QUERY_STRING");
   if (!queryString.empty()) {
     m_serverObject += "?" + queryString;
   }
+
   m_connection->handleRequest(m_id);
 }
 

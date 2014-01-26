@@ -43,6 +43,12 @@ static_assert(
 typedef tbb::concurrent_hash_map<std::string, ArrayData*> ArrayDataMap;
 static ArrayDataMap s_arrayDataMap;
 
+ArrayData* ArrayData::GetUncountedArray(ArrayData* arr) {
+  ArrayData *ad = arr->nonSmartCopy();
+  ad->setUncounted();
+  return ad;
+}
+
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
   auto key = f_serialize(arr).toCppString();
   return GetScalarArray(arr, key);

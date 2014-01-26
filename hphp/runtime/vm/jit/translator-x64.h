@@ -183,12 +183,12 @@ private:
 
   void drawCFG(std::ofstream& out) const;
 
-  static JIT::CppCall getDtorCall(DataType type);
-
   void invalidateSrcKey(SrcKey sk);
   void invalidateFuncProfSrcKeys(const Func* func);
 
 public:
+  static JIT::CppCall getDtorCall(DataType type);
+
   FixupMap& fixupMap() { return m_fixupMap; }
 
   DataBlock& globalData() { return code.data(); }
@@ -196,9 +196,9 @@ public:
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
 
-  void registerCatchTrace(CTCA ip, TCA trace);
+  void registerCatchBlock(CTCA ip, TCA block);
   void processPendingCatchTraces();
-  TCA getCatchTrace(CTCA ip) const;
+  folly::Optional<TCA> getCatchTrace(CTCA ip) const;
 
   TCA getTranslatedCaller() const;
 

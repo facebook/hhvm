@@ -83,6 +83,13 @@ void raise_param_type_warning(
     DataType expected_type,
     DataType actual_type);
 
+/*
+ * Raise typehint error is the same as raise_recoverable_error, except
+ * when compiled in RepoAuthoritative mode with HardTypeHints the
+ * error handler is not allowed to recover.
+ */
+void raise_typehint_error(const std::string& msg);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

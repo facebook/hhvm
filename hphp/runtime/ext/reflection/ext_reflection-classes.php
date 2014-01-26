@@ -92,7 +92,7 @@ class ReflectionParameter implements Reflector {
 
     if (is_int($param)) {
       if (!isset($params[$param])) {
-        throw new ReflectionException("The parameter specified by its offset could not be found");
+        throw new ReflectionException("The parameter specified by its offset #$param could not be found");
       }
       $p = $params[$param];
       $this->info = $p->info;
@@ -107,7 +107,7 @@ class ReflectionParameter implements Reflector {
         }
       }
       if (!isset($this->info)) {
-        throw new ReflectionException("The parameter specified by its name could not be found");
+        throw new ReflectionException("The parameter specified by its name '$name' could not be found");
       }
     }
   }

@@ -8,7 +8,6 @@ require_once __DIR__.'/utils.php';
 require_once __DIR__.'/ProxyInformation.php';
 
 class Runner {
-  public Framework $framework;
   // Name could be the name of the single test file for a given framework,
   // or the actual framework name if we are running in serial, for example
   public string $name;
@@ -23,13 +22,8 @@ class Runner {
   private resource $process = null;
   private string $actual_test_command = "";
 
-  public function __construct(Framework $f, string $p = "") {
-    $this->framework = $f;
-    if ($p === "") {
-      $this->name = $this->framework->getName();
-    } else {
-      $this->name = $p;
-    }
+  public function __construct(public Framework $framework, string $p = "") {
+    $this->name = $p === "" ? $this->framework->getName() : $p;
   }
 
   public function run(): int {
@@ -61,10 +55,8 @@ class Runner {
         if ($pretest_data) {
           if ($this->checkForWarnings($line)) {
             $this->error_information .= "PRETEST WARNING FOR ".
-                                        $this->name.PHP_EOL.$line.PHP_EOL;
-            $this->error_information .= $this->getTestRunStr($this->name,
-                                                             "RUN TEST FILE: ").
-                                        PHP_EOL;
+              $this->name.PHP_EOL.$line.PHP_EOL.
+              $this->getTestRunStr($this->name, "RUN TEST FILE: ").PHP_EOL;
           }
           continue;
         }
@@ -93,10 +85,9 @@ class Runner {
             // The Xdebug extension is not loaded. No code coverage will be gen
             // HipHop Notice: Use of undefined constant DRIZZLE_CON_NONE
             $line = remove_string_from_text($line, __DIR__, "");
-            $this->error_information .= PHP_EOL.$line.PHP_EOL;
-            $this->error_information .= $this->getTestRunStr($this->name,
-                                                             "RUN TEST FILE: ").
-                                        PHP_EOL.PHP_EOL;
+            $this->error_information .= PHP_EOL.$line.PHP_EOL.
+              $this->getTestRunStr($this->name,"RUN TEST FILE: ").
+              PHP_EOL.PHP_EOL;
             continue;
           } else if ($this->checkForFatals($line)) {
             // We have a fatal after the tests have supposedly started
@@ -107,10 +98,9 @@ class Runner {
             // HipHop Fatal error: Undefined function: mysqli_report
             $line = remove_string_from_text($line, __DIR__, "");
             $this->fatal_information .= PHP_EOL.$this->name.
-              PHP_EOL.$line.PHP_EOL.PHP_EOL;
-            $this->fatal_information .= $this->getTestRunStr($this->name,
-                                                             "RUN TEST FILE: ").
-                                        PHP_EOL.PHP_EOL;
+              PHP_EOL.$line.PHP_EOL.PHP_EOL.
+              $this->getTestRunStr($this->name, "RUN TEST FILE: ").
+              PHP_EOL.PHP_EOL;
             break;
           }
         }
@@ -141,26 +131,20 @@ class Runner {
       }
       if ($status === null) {
         $status = Statuses::UNKNOWN;
-        $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL;
-        $this->fatal_information .= $this->getTestRunStr($test,
-                                                         "RUN TEST FILE: ").
-                                    PHP_EOL.PHP_EOL;
+        $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL.
+          $this->getTestRunStr($test, "RUN TEST FILE: ").PHP_EOL.PHP_EOL;
         $this->stat_information = $this->name.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
       } else if ($status === Statuses::TIMEOUT) {
-        $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL;
-        $this->fatal_information .= $this->getTestRunStr($test,
-                                                         "RUN TEST FILE: ").
-                                    PHP_EOL.PHP_EOL;
+        $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL.
+          $this->getTestRunStr($test, "RUN TEST FILE: ").PHP_EOL.PHP_EOL;
         $this->stat_information = $this->name.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
       } else if ($this->checkForFatals($status)) {
-        $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
-        $this->fatal_information .= $this->getTestRunStr($test,
-                                                         "RUN TEST FILE: ").
-                                    PHP_EOL.PHP_EOL;
+        $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL.
+          $this->getTestRunStr($test, "RUN TEST FILE: ").PHP_EOL.PHP_EOL;
         $status = Statuses::FATAL;
         $this->stat_information = $this->name.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
@@ -168,10 +152,8 @@ class Runner {
       } else if ($this->checkForWarnings($status)) {
         // Warnings are special. We may get one or more warnings, but then
         // a real test status will come afterwards.
-        $this->error_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
-        $this->error_information .= $this->getTestRunStr($test,
-                                                         "RUN TEST FILE: ").
-                                    PHP_EOL.PHP_EOL;
+        $this->error_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL.
+          $this->getTestRunStr($test, "RUN TEST FILE: ").PHP_EOL.PHP_EOL;
         continue;
       }
     } while (!feof($this->pipes[1]) &&
@@ -226,15 +208,12 @@ class Runner {
                 " for test ".$test." was ".
                 $this->framework->getCurrentTestStatuses()[$test].
                 " and now is ".$status.PHP_EOL, !Options::$csv_only);
-        $this->diff_information .= "----------------------".PHP_EOL;
-        $this->diff_information .= $test.PHP_EOL.PHP_EOL;
-        $this->diff_information .= $this->getTestRunStr($test,
-                                                        "RUN TEST FILE: ").
-                                   PHP_EOL.PHP_EOL;
-        $this->diff_information .= "EXPECTED: ".$this->framework->
-                                   getCurrentTestStatuses()[$test].PHP_EOL;
-        $this->diff_information .= ">>>>>>>".PHP_EOL;
-        $this->diff_information .= "ACTUAL: ".$status.PHP_EOL.PHP_EOL;
+        $this->diff_information .= "----------------------".PHP_EOL.
+          $test.PHP_EOL.PHP_EOL.
+          $this->getTestRunStr($test, "RUN TEST FILE: ").PHP_EOL.PHP_EOL.
+          "EXPECTED: ".$this->framework->getCurrentTestStatuses()[$test].
+          PHP_EOL.">>>>>>>".PHP_EOL.
+          "ACTUAL: ".$status.PHP_EOL.PHP_EOL;
       }
     } else {
       // This is either the first time we run the unit tests, and all pass
@@ -246,12 +225,9 @@ class Runner {
                 !Options::$csv_only);
         verbose(PHP_EOL."Different status in ".$this->framework->getName().
                 " for test ".$test.PHP_EOL,!Options::$csv_only);
-        $this->diff_information .= "----------------------".PHP_EOL;
-        $this->diff_information .= "Maybe haven't see this test before: ".
-                                   $test.PHP_EOL.PHP_EOL;
-        $this->diff_information .= $this->getTestRunStr($test,
-                                                        "RUN TEST FILE: ").
-                                   PHP_EOL.PHP_EOL;
+        $this->diff_information .= "----------------------".PHP_EOL.
+          "Maybe haven't see this test before: ".$test.PHP_EOL.PHP_EOL.
+          $this->getTestRunStr($test, "RUN TEST FILE: ").PHP_EOL.PHP_EOL;
       } else {
         verbose(Colors::GRAY.Statuses::PASS.Colors::NONE, !Options::$csv_only);
       }
@@ -377,11 +353,9 @@ class Runner {
 
     if ($post_stat_fatal) {
       $this->fatal_information .= "POST-TEST FATAL/WARNING FOR ".
-                                  $this->name.PHP_EOL;
-      $this->fatal_information .= PHP_EOL.
-                                  $this->getTestRunStr($this->name,
-                                                       "RUN TEST FILE: ").
-                                  PHP_EOL.PHP_EOL;
+        $this->name.PHP_EOL.PHP_EOL.
+        $this->getTestRunStr($this->name, "RUN TEST FILE: ").
+        PHP_EOL.PHP_EOL;
       while ($line !== null) {
         $this->fatal_information .= $line.PHP_EOL;
         $line = $this->getLine();
@@ -406,26 +380,17 @@ class Runner {
   }
 
   private function isStop(string $line) {
-    if (preg_match(PHPUnitPatterns::$stop_parsing_pattern, $line) === 1) {
-      return true;
-    }
-    return false;
+    return preg_match(PHPUnitPatterns::$stop_parsing_pattern, $line) === 1;
   }
 
   private function isPrologue(string $line) {
-    if (preg_match(PHPUnitPatterns::$header_pattern, $line) === 1 ||
+    return preg_match(PHPUnitPatterns::$header_pattern, $line) === 1 ||
         preg_match(PHPUnitPatterns::$config_file_pattern, $line) === 1 ||
-        preg_match(PHPUnitPatterns::$xdebug_pattern, $line) === 1) {
-      return true;
-    }
-    return false;
+        preg_match(PHPUnitPatterns::$xdebug_pattern, $line) === 1;
   }
 
   private function isBlankLine(string $line): bool {
-    if ($line === "" || $line === PHP_EOL) {
-      return true;
-    }
-    return false;
+    return $line === "" || $line === PHP_EOL;
   }
 
   private function initialize(): bool {
@@ -455,11 +420,7 @@ class Runner {
     fclose($this->pipes[1]);
     fclose($this->pipes[2]);
 
-    if (proc_close($this->process) === -1) {
-      return -1;
-    }
-
-    return 0;
+    return proc_close($this->process) === -1 ? -1 : 0;
   }
 
   private function checkReadStream(): bool {
@@ -469,10 +430,7 @@ class Runner {
     $s = stream_select($r, $w, $e, Options::$timeout);
     // If stream_select returns 0, then there is no more data or we have
     // timed out. If it returns false, then something else bad happened.
-    if ($s === 0 || $s === false) {
-      return false;
-    }
-    return true;
+    return !($s === 0 || $s === false);
   }
 
   private function outputData(): void {
@@ -490,27 +448,19 @@ class Runner {
   }
 
   private function checkForFatals(string $line): bool {
-    if (preg_match(PHPUnitPatterns::$hhvm_fatal_pattern, $line) === 1) {
-      return true;
-    }
-    return false;
+    return preg_match(PHPUnitPatterns::$hhvm_fatal_pattern, $line) === 1;
   }
 
   private function checkForWarnings(string $line): bool {
-    if (preg_match(PHPUnitPatterns::$hhvm_warning_pattern, $line) === 1) {
-      return true;
-    }
-    if (preg_match(PHPUnitPatterns::$phpunit_exception_with_hhvm_warning,
-                   $line) === 1) {
-      return true;
-    }
-    return false;
+    return preg_match(PHPUnitPatterns::$hhvm_warning_pattern, $line) === 1 ||
+      preg_match(PHPUnitPatterns::$phpunit_exception_with_hhvm_warning,
+                 $line) === 1;
   }
 
   private function getTestRunStr(string $test, string $prologue = "",
                                  string $epilogue = ""): string {
-    $test_run = $prologue;
-    $test_run .= " cd ".$this->framework->getTestPath()." && ";
+    $test_run = $prologue.
+      " cd ".$this->framework->getTestPath()." && ";
     // If the test that is coming in to this function is an individual test,
     // as opposed to a file, then we can use the --filter option to make the
     // run string have even more specificity.
@@ -547,12 +497,9 @@ class Runner {
       // Pear is a current example of this behavior.
         $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
         // Re-add __DIR__ if not there so we have a full test path to run
-        if (strpos($test, __DIR__) !== 0) {
-          $test_run .= " ".__DIR__."/".$test;
-        } else {
-          $test_run .= " ".$test;
-        }
-
+        $test_run .= strpos($test, __DIR__) !== 0
+          ? " ".__DIR__."/".$test
+          : " ".$test;
       } else {
         $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
       }
@@ -561,7 +508,6 @@ class Runner {
     // part of the actual_test_comand
       $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
     }
-    $test_run .= $epilogue;
-    return $test_run;
+    return $test_run.$epilogue;
   }
 }

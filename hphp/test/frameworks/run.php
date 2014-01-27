@@ -7,7 +7,7 @@
  * Key features:
  *
  *   - Autodownload of frameworks, so we don't have to add 3 GB of frameworks to
- *     our official repo. This can be a bit flakey due to our proxy; so we
+ *     our official repo. This can be a bit flaky due to our proxy; so we
  *     we will see how this works out moving forward. If the framework does not
  *     exist in your local repo, it gets downloaded to your dev box. The
  *     .gitignore will ensure that the frameworks aren't added to the official
@@ -71,7 +71,7 @@
  *
  * Future enhancements:
  *
- *   - Integreate the testing with our current "test/run" style infrastructure
+ *   - Integrate the testing with our current "test/run" style infrastructure
  *     for official pass/fail statistics when we have diffs.
  *
  *   - Special case frameworks that don't use PHPUnit (e.g. Thinkup).
@@ -106,9 +106,9 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
   } else if (Options::$allexcept) {
     // Run all the frameworks, but the ones we listed.
     $passed_frameworks  = Vector::fromItems(array_diff(
-                                              $available_frameworks->toVector(),
-                                              $passed_frameworks));
-  } else if (count($passed_frameworks) === 0) {
+                                            $available_frameworks->toVector(),
+                                            $passed_frameworks));
+  } else if ($passed_frameworks->isEmpty()) {
     error_and_exit(usage());
   }
 
@@ -123,12 +123,11 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
     $name = trim(strtolower($name));
     if ($available_frameworks->contains($name)) {
       $uname = ucfirst($name);
-      $framework = new $uname($name);
-      $frameworks[] = $framework;
+      $frameworks[] = new $uname($name);
     }
   }
 
-  if (count($frameworks) === 0) {
+  if ($frameworks->isEmpty()) {
     error_and_exit(usage());
   }
 
@@ -169,7 +168,7 @@ function fork_buckets(Traversable $data, Callable $callback): int {
 }
 
 function run_tests(Vector $frameworks): void {
-  if (count($frameworks) === 0) {
+  if ($frameworks->isEmpty()) {
     error_and_exit("No frameworks available on which to run tests");
   }
 
@@ -188,19 +187,19 @@ function run_tests(Vector $frameworks): void {
       verbose(Colors::YELLOW.$framework->getName().Colors::NONE.": running. ".
               "Comparing against ".count($framework->getCurrentTestStatuses()).
               " tests\n", !Options::$csv_only);
-      $run_msg = "Comparing test suite with previous run. ";
-      $run_msg .= Colors::GREEN."Green . (dot) ".Colors::NONE;
-      $run_msg .= "means test result same as previous. ";
-      $run_msg .= "A ".Colors::GREEN." green F ".Colors::NONE;
-      $run_msg .= "means we have gone from fail to pass. ";
-      $run_msg .= "A ".Colors::RED." red F ".Colors::NONE;
-      $run_msg .= "means we have gone from pass to fail. ";
-      $run_msg .= "A ".Colors::BLUE." blue F ".Colors::NONE;
-      $run_msg .= "means we have gone from one type of fail to another type ";
-      $run_msg .= "of fail (e.g., F to E, or I to F). ";
-      $run_msg .= "A ".Colors::LIGHTBLUE." light blue F ".Colors::NONE;
-      $run_msg .= "means we are having trouble accessing the tests from the ";
-      $run_msg .= "expected run and can't get a proper status".PHP_EOL;
+      $run_msg = "Comparing test suite with previous run. ".
+        Colors::GREEN."Green . (dot) ".Colors::NONE.
+        "means test result same as previous. ".
+        "A ".Colors::GREEN." green F ".Colors::NONE.
+        "means we have gone from fail to pass. ".
+        "A ".Colors::RED." red F ".Colors::NONE.
+        "means we have gone from pass to fail. ".
+        "A ".Colors::BLUE." blue F ".Colors::NONE.
+        "means we have gone from one type of fail to another type ".
+        "of fail (e.g., F to E, or I to F). ".
+        "A ".Colors::LIGHTBLUE." light blue F ".Colors::NONE.
+        "means we are having trouble accessing the tests from the ".
+        "expected run and can't get a proper status".PHP_EOL;
       verbose($run_msg, Options::$verbose);
     } else {
       verbose("Establishing baseline statuses for ".$framework->getName().
@@ -227,16 +226,11 @@ function run_tests(Vector $frameworks): void {
    * Run the test suite
    ************************************/
   verbose("Beginning the unit tests.....\n", !Options::$csv_only);
-  if (count($all_tests) === 0) {
+  if ($all_tests->isEmpty()) {
     error_and_exit("No tests found to run");
   }
 
-  fork_buckets(
-    $all_tests,
-    function($bucket) {
-      return run_test_bucket($bucket);
-    }
-  );
+  fork_buckets($all_tests, ($bucket) ==> run_test_bucket($bucket));
 
   /****************************************
   * All tests complete. Create results for
@@ -273,7 +267,10 @@ function run_tests(Vector $frameworks): void {
   }
 
   if ($all_tests_success) {
-    $msg = "\nAll tests ran as expected.\n\n".<<<THUMBSUP
+    $msg = <<<THUMBSUP
+All tests ran as expected.
+
+
           _
          /(|
         (  :
@@ -282,13 +279,16 @@ function run_tests(Vector $frameworks): void {
     (____)|   |
      (____).__|
       (___)__.|_____
-THUMBSUP
-."\n";
+
+THUMBSUP;
    verbose($msg, !Options::$csv_only);
   } else {
-    $msg = "\nAll tests did not run as expected. Either some statuses were ".
-           "different or the number of tests run didn't match the number of ".
-           "tests expected to run\n\n".<<<THUMBSDOWN
+    $msg = <<<THUMBSDOWN
+All tests did not run as expected. Either some statuses were
+different or the number of tests run didn't match the number of
+tests expected to run
+
+
       ______
      (( ____ \-
      (( _____
@@ -296,8 +296,8 @@ THUMBSUP
      ((____   ----
           /  /
          (_((
-THUMBSDOWN
-."\n";
+
+THUMBSDOWN;
     verbose($msg, !Options::$csv_only);
   }
 
@@ -352,8 +352,7 @@ function get_unit_testing_infra_dependencies(): void {
   $json_file = __DIR__."/composer.json";
   $vendor_dir = __DIR__."/vendor";
   $lock_file = __DIR__."/composer.lock";
-  if (!file_exists($md5_file) ||
-      file_get_contents($md5_file) !== md5($json_file)) {
+  if (file_get_contents($md5_file) !== md5($json_file)) {
     verbose("\nUpdated composer.json found. Updating phpunit binary.\n",
             !Options::$csv_only);
     if (file_exists($vendor_dir)) {
@@ -399,8 +398,7 @@ function print_diffs(Framework $framework): void {
 function print_summary_information(string $summary_file): void {
   if (file_exists($summary_file)
       && ($contents = file_get_contents($summary_file)) !== "") {
-    $file_data = file_get_contents($summary_file);
-    $decoded_results = json_decode($file_data, true);
+    $decoded_results = json_decode($contents, true);
     ksort($decoded_results);
 
     if (Options::$csv_only) {
@@ -409,21 +407,13 @@ function print_summary_information(string $summary_file): void {
         foreach ($decoded_results as $key => $value) {
           $print_str .= str_pad($key.",", 20);
         }
-        // Get rid of the the last spaces and comma
-        $print_str = rtrim($print_str);
-        $print_str = rtrim($print_str, ",");
-        $print_str .= PHP_EOL;
-        print $print_str;
+        print rtrim($print_str, [" ", ","]) . PHP_EOL;
       }
       $print_str = str_pad(date("Y/m/d-G:i:s").",", 20);
       foreach ($decoded_results as $key => $value) {
         $print_str .= str_pad($value.",", 20);
       }
-      // Get rid of the the last spaces and comma
-      $print_str = rtrim($print_str);
-      $print_str = rtrim($print_str, ",");
-      $print_str .= PHP_EOL;
-      print $print_str;
+      print rtrim($print_str, [" ", ","]) . PHP_EOL;
     } else {
       print PHP_EOL."ALL TESTS COMPLETE!".PHP_EOL;
       print "SUMMARY:".PHP_EOL;

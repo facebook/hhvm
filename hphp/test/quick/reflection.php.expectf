@@ -153,7 +153,7 @@ bool(true)
 bool(true)
 
 --- export("f") ---
-string(368) "/**
+string(%d) "/**
  * This is f's doc comment.
  */
 Function [ <user> function &f ] {
@@ -185,7 +185,7 @@ In g(a, b, some string)
 NULL
 
 --- export("g") ---
-string(335) "/**
+string(%d) "/**
  * This is g's doc comment.
  */
 Function [ <user> function g ] {

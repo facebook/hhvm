@@ -1787,7 +1787,14 @@ static Variant domnode_ownerdocument_read(CObjRef obj) {
       nodep->type == XML_HTML_DOCUMENT_NODE) {
     return uninit_null();
   }
-  return create_node_object((xmlNodePtr)nodep->doc, domnode->doc());
+  if ((xmlNodePtr) nodep->doc == domnode->doc()->m_node) {
+    return domnode->doc();
+  } else {
+    // The node wasn't created by this extension, so doesn't already have
+    // a DOMDocument - make one. dom_import_xml() is one way for this to
+    // happen.
+    return create_node_object((xmlNodePtr) nodep->doc, domnode->doc());
+  }
 }
 
 static Variant domnode_namespaceuri_read(CObjRef obj) {

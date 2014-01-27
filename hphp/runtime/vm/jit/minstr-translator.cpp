@@ -1143,6 +1143,7 @@ void HhbcTranslator::MInstrTranslator::emitElem() {
       m_ht.exceptionBarrier();
       gen(
         RaiseError,
+        makeCatch(),
         cns(makeStaticString(Strings::OP_NOT_SUPPORTED_STRING))
       );
       m_base = uninit;

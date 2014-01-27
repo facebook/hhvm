@@ -1099,12 +1099,10 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
 template<class Lambda>
 SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc,
                                            bool invertCond) {
-  SSATmp* src = popC();
-  Type type = src->type();
-  if (!type.isArray() && type != Type::Obj) {
-    PUNT(IterInit);
-  }
-  SSATmp* res = genFunc(src);
+  auto const src = popC();
+  auto const type = src->type();
+  if (!type.subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInit);
+  auto const res = genFunc(src);
   return emitJmpCondHelper(offset, !invertCond, res);
 }
 

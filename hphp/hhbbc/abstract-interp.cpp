@@ -50,13 +50,12 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_empty("");
 const StaticString s_extract("extract");
 const StaticString s_Exception("Exception");
+const StaticString s_Continuation("Continuation");
 const StaticString s_unreachable("static analysis error: supposedly "
                                  "unreachable code was reached");
-const StaticString s_noreturn("static analysis error: function "
-                              "returned that was inferred to be noreturn");
-const StaticString s_empty("");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1761,7 +1760,9 @@ struct InterpStepper : boost::static_visitor<void> {
       killThisProps();
       killSelfProps();
     }
-    push(TObj); // TODO
+    auto const rcls = m_index.resolve_class(m_ctx, s_Continuation.get());
+    always_assert(rcls && "The builtin class Continuation must resolve");
+    push(objExact(*rcls));
   }
 
   void operator()(const bc::ContEnter&)   { popC(); }

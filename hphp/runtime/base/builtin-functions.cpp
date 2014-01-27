@@ -1321,8 +1321,10 @@ void AutoloadHandler::removeHandler(CVarRef handler) {
   // Use find_if instead of remove_if since we know there can only be one match
   // in the vector.
   auto const& compareBundles = CompareBundles(cufIter.get());
-  m_handlers.erase(
-    std::find_if(m_handlers.begin(), m_handlers.end(), compareBundles));
+  auto it = std::find_if(m_handlers.begin(), m_handlers.end(), compareBundles);
+  if (it != m_handlers.end()) {
+    m_handlers.erase(it);
+  }
 }
 
 void AutoloadHandler::removeAllHandlers() {

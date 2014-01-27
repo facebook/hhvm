@@ -1035,7 +1035,7 @@ static xmlNodePtr php_dom_free_xinclude_node(xmlNodePtr cur) {
   xincnode = cur;
   cur = cur->next;
   xmlUnlinkNode(xincnode);
-  php_libxml_node_free_resource(xincnode);
+  xmlFreeNode(xincnode);
   return cur;
 }
 

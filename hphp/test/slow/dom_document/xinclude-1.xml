@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <xi:include
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    href="xinclude-2.xml"
+    parse="xml"
+  />
+</root>

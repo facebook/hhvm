@@ -989,8 +989,9 @@ static int execute_program_impl(int argc, char** argv) {
   desc.add_options()
     ("help", "display this message")
     ("version", "display version number")
-    ("compiler-id", "display the git hash for the compiler id")
-    ("repo-schema", "display the repo schema id used by this app")
+    ("php", "emulate the standard php command line")
+    ("compiler-id", "display the git hash for the compiler")
+    ("repo-schema", "display the repository schema id")
     ("mode,m", value<string>(&po.mode)->default_value("run"),
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
     ("config,c", value<string>(&po.config),

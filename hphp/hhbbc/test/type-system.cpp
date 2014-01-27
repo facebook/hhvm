@@ -34,6 +34,20 @@ namespace {
 
 const StaticString s_test("test");
 const StaticString s_TestClass("TestClass");
+const StaticString s_Base("Base");
+const StaticString s_A("A");
+const StaticString s_AA("AA");
+const StaticString s_AB("AB");
+const StaticString s_B("B");
+const StaticString s_BA("BA");
+const StaticString s_BB("BB");
+const StaticString s_BAA("BAA");
+const StaticString s_IBase("IBase");
+const StaticString s_IA("IA");
+const StaticString s_IAA("IAA");
+const StaticString s_IB("IB");
+const StaticString s_NonUnique("NonUnique");
+const StaticString s_NonUniqueA("NonUniqueA");
 
 // A test program so we can actually test things involving object or
 // class types.
@@ -45,7 +59,59 @@ std::unique_ptr<php::Unit> make_test_unit() {
       RetC
     }
 
+    .class [interface unique] IBase {
+    }
+
+    .class [interface unique] IA implements (IBase) {
+    }
+
+    .class [interface unique] IB implements (IBase) {
+    }
+
+    .class [interface unique] IAA implements (IA) {
+    }
+
+    .class [unique] Base {
+      .default_ctor;
+    }
+
+    .class [unique] A extends Base implements (IA) {
+      .default_ctor;
+    }
+
+    .class [no_override unique] AA extends A implements (IAA) {
+      .default_ctor;
+    }
+
+    .class [no_override unique] AB extends A {
+      .default_ctor;
+    }
+
+    .class [unique] B extends Base {
+      .default_ctor;
+    }
+
+    .class [unique] BA extends B {
+      .default_ctor;
+    }
+
+    .class [no_override unique] BB extends B {
+      .default_ctor;
+    }
+
+    .class [no_override unique] BAA extends BA {
+      .default_ctor;
+    }
+
     .class [unique] TestClass {
+      .default_ctor;
+    }
+
+    .class NonUnique {
+      .default_ctor;
+    }
+
+    .class NonUniqueA extends NonUnique {
       .default_ctor;
     }
 
@@ -453,13 +519,18 @@ TEST(Type, IndexBased) {
 
   auto const ctx = Context { unit, func };
   Index idx{borrow(program)};
+
   auto const cls = idx.resolve_class(ctx, s_TestClass.get());
   if (!cls) EXPECT_TRUE(false);
+  auto const clsBase = idx.resolve_class(ctx, s_Base.get());
+  if (!clsBase) EXPECT_TRUE(false);
 
   auto const objExactTy = objExact(*cls);
   auto const subObjTy   = subObj(*cls);
   auto const clsExactTy = clsExact(*cls);
   auto const subClsTy   = subCls(*cls);
+  auto const objExactBaseTy = objExact(*clsBase);
+  auto const subObjBaseTy   = subObj(*clsBase);
 
   // Basic relationship between the class types and object types.
   EXPECT_EQ(objcls(objExactTy), clsExactTy);
@@ -523,6 +594,355 @@ TEST(Type, IndexBased) {
   // Obj<= couldBe ?Obj= and vice versa.
   EXPECT_TRUE(subObjTy.couldBe(opt(objExactTy)));
   EXPECT_TRUE(opt(objExactTy).couldBe(subObjTy));
+
+  // ?Obj<=, ?Obj=, ?Foo<= and ?Foo= couldBe each other
+  EXPECT_TRUE(opt(subObjTy).couldBe(opt(objExactBaseTy)));
+  EXPECT_TRUE(opt(objExactBaseTy).couldBe(opt(subObjTy)));
+  EXPECT_TRUE(opt(subObjTy).couldBe(opt(subObjBaseTy)));
+  EXPECT_TRUE(opt(subObjBaseTy).couldBe(opt(subObjTy)));
+  EXPECT_TRUE(opt(objExactTy).couldBe(opt(objExactBaseTy)));
+  EXPECT_TRUE(opt(objExactBaseTy).couldBe(opt(objExactTy)));
+  EXPECT_TRUE(opt(objExactTy).couldBe(opt(subObjBaseTy)));
+  EXPECT_TRUE(opt(subObjBaseTy).couldBe(opt(objExactTy)));
+}
+
+TEST(Type, Hierarchies) {
+  auto const program = folly::make_unique<php::Program>();
+  program->units.push_back(make_test_unit());
+  auto const unit = borrow(program->units.back());
+  auto const func = [&]() -> borrowed_ptr<php::Func> {
+    for (auto& f : unit->funcs) {
+      if (f->name->isame(s_test.get())) return borrow(f);
+    }
+    return nullptr;
+  }();
+  EXPECT_TRUE(func != nullptr);
+
+  auto const ctx = Context { unit, func };
+  Index idx{borrow(program)};
+
+  // load classes in hierarchy
+  auto const clsBase = idx.resolve_class(ctx, s_Base.get());
+  if (!clsBase) EXPECT_TRUE(false);
+  auto const clsA = idx.resolve_class(ctx, s_A.get());
+  if (!clsA) EXPECT_TRUE(false);
+  auto const clsB = idx.resolve_class(ctx, s_B.get());
+  if (!clsB) EXPECT_TRUE(false);
+  auto const clsAA = idx.resolve_class(ctx, s_AA.get());
+  if (!clsAA) EXPECT_TRUE(false);
+  auto const clsAB = idx.resolve_class(ctx, s_AB.get());
+  if (!clsAB) EXPECT_TRUE(false);
+  auto const clsBA = idx.resolve_class(ctx, s_BA.get());
+  if (!clsBA) EXPECT_TRUE(false);
+  auto const clsBB = idx.resolve_class(ctx, s_BB.get());
+  if (!clsBB) EXPECT_TRUE(false);
+  auto const clsBAA = idx.resolve_class(ctx, s_BAA.get());
+  if (!clsBAA) EXPECT_TRUE(false);
+
+  // make *exact type* and *sub type* types and objects for all loaded classes
+  auto const objExactBaseTy = objExact(*clsBase);
+  auto const subObjBaseTy   = subObj(*clsBase);
+  auto const clsExactBaseTy = clsExact(*clsBase);
+  auto const subClsBaseTy   = subCls(*clsBase);
+
+  auto const objExactATy    = objExact(*clsA);
+  auto const subObjATy      = subObj(*clsA);
+  auto const clsExactATy    = clsExact(*clsA);
+  auto const subClsATy      = subCls(*clsA);
+
+  auto const objExactAATy    = objExact(*clsAA);
+  auto const subObjAATy      = subObj(*clsAA);
+  auto const clsExactAATy    = clsExact(*clsAA);
+  auto const subClsAATy      = subCls(*clsAA);
+
+  auto const objExactABTy    = objExact(*clsAB);
+  auto const subObjABTy      = subObj(*clsAB);
+  auto const clsExactABTy    = clsExact(*clsAB);
+  auto const subClsABTy      = subCls(*clsAB);
+
+  auto const objExactBTy    = objExact(*clsB);
+  auto const subObjBTy      = subObj(*clsB);
+  auto const clsExactBTy    = clsExact(*clsB);
+  auto const subClsBTy      = subCls(*clsB);
+
+  auto const objExactBATy    = objExact(*clsBA);
+  auto const subObjBATy      = subObj(*clsBA);
+  auto const clsExactBATy    = clsExact(*clsBA);
+  auto const subClsBATy      = subCls(*clsBA);
+
+  auto const objExactBBTy    = objExact(*clsBB);
+  auto const subObjBBTy      = subObj(*clsBB);
+  auto const clsExactBBTy    = clsExact(*clsBB);
+  auto const subClsBBTy      = subCls(*clsBB);
+
+  auto const objExactBAATy    = objExact(*clsBAA);
+  auto const subObjBAATy      = subObj(*clsBAA);
+  auto const clsExactBAATy    = clsExact(*clsBAA);
+  auto const subClsBAATy      = subCls(*clsBAA);
+
+  // check that type from object and type are the same (obnoxious test)
+  EXPECT_EQ(objcls(objExactBaseTy), clsExactBaseTy);
+  EXPECT_EQ(objcls(subObjBaseTy), subClsBaseTy);
+  EXPECT_EQ(objcls(objExactATy), clsExactATy);
+  EXPECT_EQ(objcls(subObjATy), subClsATy);
+  EXPECT_EQ(objcls(objExactAATy), clsExactAATy);
+  EXPECT_EQ(objcls(subObjAATy), subClsAATy);
+  EXPECT_EQ(objcls(objExactABTy), clsExactABTy);
+  EXPECT_EQ(objcls(subObjABTy), subClsABTy);
+  EXPECT_EQ(objcls(objExactBTy), clsExactBTy);
+  EXPECT_EQ(objcls(subObjBTy), subClsBTy);
+  EXPECT_EQ(objcls(objExactBATy), clsExactBATy);
+  EXPECT_EQ(objcls(subObjBATy), subClsBATy);
+  EXPECT_EQ(objcls(objExactBBTy), clsExactBBTy);
+  EXPECT_EQ(objcls(subObjBBTy), subClsBBTy);
+  EXPECT_EQ(objcls(objExactBAATy), clsExactBAATy);
+  EXPECT_EQ(objcls(subObjBAATy), subClsBAATy);
+
+  // a T= is a subtype of itself but not a strict subtype
+  // also a T= is in a "could be" relationship with itself.
+  EXPECT_TRUE(objcls(objExactBaseTy).subtypeOf(clsExactBaseTy));
+  EXPECT_FALSE(objcls(objExactBaseTy).strictSubtypeOf(objcls(objExactBaseTy)));
+  EXPECT_TRUE(objcls(objExactBAATy).subtypeOf(clsExactBAATy));
+  EXPECT_FALSE(clsExactBAATy.strictSubtypeOf(objcls(objExactBAATy)));
+  EXPECT_TRUE(clsExactBAATy.couldBe(clsExactBAATy));
+
+  // Given the hierarchy A <- B <- C where A is the base then:
+  // B= is not in any subtype relationshipt with a A= or C=.
+  // Neither they are in "could be" relationships.
+  // Overall T= sets are always disjoint.
+  EXPECT_FALSE(objcls(objExactBATy).subtypeOf(clsExactBaseTy));
+  EXPECT_FALSE(objcls(objExactBATy).subtypeOf(clsExactBTy));
+  EXPECT_FALSE(objcls(objExactBATy).subtypeOf(clsExactBAATy));
+  EXPECT_FALSE(clsExactBATy.strictSubtypeOf(objcls(objExactBaseTy)));
+  EXPECT_FALSE(clsExactBATy.strictSubtypeOf(objcls(objExactBTy)));
+  EXPECT_FALSE(clsExactBATy.strictSubtypeOf(objcls(objExactBAATy)));
+  EXPECT_FALSE(clsExactBATy.couldBe(objcls(objExactBaseTy)));
+  EXPECT_FALSE(objcls(objExactBATy).couldBe(clsExactBTy));
+  EXPECT_FALSE(clsExactBATy.couldBe(objcls(objExactBAATy)));
+
+  // any T= is both a subtype and strict subtype of T<=.
+  // Given the hierarchy A <- B <- C where A is the base then:
+  // C= is a subtype and a strict subtype of B<=, ?B<=, A<= and ?A<=.
+  // The "could be" relationship also holds.
+  EXPECT_TRUE(objcls(objExactATy).subtypeOf(subClsATy));
+  EXPECT_TRUE(objcls(objExactBAATy).subtypeOf(subClsBaseTy));
+  EXPECT_TRUE(objExactBAATy.subtypeOf(opt(subObjBaseTy)));
+  EXPECT_TRUE(objcls(objExactBAATy).subtypeOf(subClsBTy));
+  EXPECT_TRUE(objExactBAATy.subtypeOf(opt(subObjBTy)));
+  EXPECT_TRUE(clsExactBAATy.subtypeOf(objcls(subObjBATy)));
+  EXPECT_TRUE(objExactBAATy.subtypeOf(opt(subObjBATy)));
+  EXPECT_TRUE(clsExactBAATy.subtypeOf(objcls(subObjBAATy)));
+  EXPECT_TRUE(objExactBAATy.subtypeOf(opt(subObjBAATy)));
+  EXPECT_TRUE(objcls(objExactATy).strictSubtypeOf(subClsATy));
+  EXPECT_TRUE(objcls(objExactBAATy).strictSubtypeOf(subClsBaseTy));
+  EXPECT_TRUE(objExactBAATy.strictSubtypeOf(opt(subObjBaseTy)));
+  EXPECT_TRUE(objcls(objExactBAATy).strictSubtypeOf(subClsBTy));
+  EXPECT_TRUE(objExactBAATy.strictSubtypeOf(opt(subObjBTy)));
+  EXPECT_TRUE(clsExactBAATy.strictSubtypeOf(objcls(subObjBATy)));
+  EXPECT_TRUE(objExactBAATy.strictSubtypeOf(opt(subObjBATy)));
+  EXPECT_TRUE(clsExactBAATy.strictSubtypeOf(objcls(subObjBAATy)));
+  EXPECT_TRUE(objExactBAATy.strictSubtypeOf(opt(subObjBAATy)));
+  EXPECT_TRUE(objcls(objExactATy).couldBe(subClsATy));
+  EXPECT_TRUE(objcls(objExactBAATy).couldBe(subClsBaseTy));
+  EXPECT_TRUE(objExactBAATy.couldBe(opt(subObjBaseTy)));
+  EXPECT_TRUE(objcls(objExactBAATy).couldBe(subClsBTy));
+  EXPECT_TRUE(objExactBAATy.couldBe(opt(subObjBTy)));
+  EXPECT_TRUE(clsExactBAATy.couldBe(objcls(subObjBATy)));
+  EXPECT_TRUE(objExactBAATy.couldBe(opt(subObjBATy)));
+  EXPECT_TRUE(clsExactBAATy.couldBe(objcls(subObjBAATy)));
+  EXPECT_TRUE(objExactBAATy.couldBe(opt(subObjBAATy)));
+
+  // a T<= is a subtype of itself but not a strict subtype
+  // also a T<= is in a "could be" relationship with itself
+  EXPECT_TRUE(objcls(subObjBaseTy).subtypeOf(subClsBaseTy));
+  EXPECT_FALSE(objcls(subObjBaseTy).strictSubtypeOf(objcls(subObjBaseTy)));
+  EXPECT_TRUE(objcls(subObjBAATy).subtypeOf(subClsBAATy));
+  EXPECT_FALSE(subClsBAATy.strictSubtypeOf(objcls(subObjBAATy)));
+  EXPECT_TRUE(subClsBAATy.couldBe(subClsBAATy));
+
+  // a T<= type is in no subtype relationship with T=.
+  // However a T<= is in a "could be" relationship with T=.
+  EXPECT_FALSE(objcls(subObjAATy).subtypeOf(clsExactAATy));
+  EXPECT_FALSE(objcls(subObjAATy).strictSubtypeOf(clsExactAATy));
+  EXPECT_TRUE(clsExactAATy.couldBe(objcls(subObjAATy)));
+
+  // Given 2 types A and B in no inheritance relationship then
+  // A<= and B<= are in no subtype or "could be" relationship.
+  // Same if one of the 2 types is an optional type
+  EXPECT_FALSE(objcls(subObjATy).subtypeOf(clsExactBTy));
+  EXPECT_FALSE(objcls(subObjATy).strictSubtypeOf(clsExactBTy));
+  EXPECT_FALSE(subObjATy.subtypeOf(opt(objExactBTy)));
+  EXPECT_FALSE(subObjATy.strictSubtypeOf(opt(objExactBTy)));
+  EXPECT_FALSE(clsExactATy.couldBe(objcls(subObjBTy)));
+  EXPECT_FALSE(objExactATy.couldBe(opt(subObjBTy)));
+  EXPECT_FALSE(objcls(subObjBTy).subtypeOf(clsExactATy));
+  EXPECT_FALSE(subObjBTy.subtypeOf(opt(objExactATy)));
+  EXPECT_FALSE(objcls(subObjBTy).strictSubtypeOf(clsExactATy));
+  EXPECT_FALSE(subObjBTy.strictSubtypeOf(opt(objExactATy)));
+  EXPECT_FALSE(clsExactBTy.couldBe(objcls(subObjATy)));
+  EXPECT_FALSE(objExactBTy.couldBe(opt(subObjATy)));
+
+  // Given the hierarchy A <- B <- C where A is the base then:
+  // C<= is a subtype and a strict subtype of B<=, ?B<=, A<= and ?A<=.
+  // It is also in a "could be" relationship with all its ancestors
+  // (including optional)
+  EXPECT_TRUE(objcls(subObjBAATy).subtypeOf(subClsBaseTy));
+  EXPECT_TRUE(subObjBAATy.subtypeOf(opt(subObjBaseTy)));
+  EXPECT_TRUE(objcls(subObjBAATy).subtypeOf(subClsBTy));
+  EXPECT_TRUE(subObjBAATy.subtypeOf(opt(subObjBTy)));
+  EXPECT_TRUE(subClsBAATy.subtypeOf(objcls(subObjBATy)));
+  EXPECT_TRUE(subObjBAATy.subtypeOf(opt(subObjBATy)));
+  EXPECT_TRUE(objcls(subObjBAATy).strictSubtypeOf(subClsBaseTy));
+  EXPECT_TRUE(subObjBAATy.strictSubtypeOf(opt(subObjBaseTy)));
+  EXPECT_TRUE(objcls(subObjBAATy).strictSubtypeOf(subClsBTy));
+  EXPECT_TRUE(subObjBAATy.strictSubtypeOf(opt(subObjBTy)));
+  EXPECT_TRUE(subClsBAATy.strictSubtypeOf(objcls(subObjBATy)));
+  EXPECT_TRUE(subObjBAATy.strictSubtypeOf(opt(subObjBATy)));
+  EXPECT_TRUE(objcls(subObjBAATy).couldBe(subClsBaseTy));
+  EXPECT_TRUE(subObjBAATy.couldBe(opt(subObjBaseTy)));
+  EXPECT_TRUE(objcls(subObjBAATy).couldBe(subClsBTy));
+  EXPECT_TRUE(subObjBAATy.couldBe(opt(subObjBTy)));
+  EXPECT_TRUE(subClsBAATy.couldBe(objcls(subObjBATy)));
+  EXPECT_TRUE(subObjBAATy.couldBe(opt(subObjBATy)));
+
+  // Given the hierarchy A <- B <- C where A is the base then:
+  // A<= is not in a subtype neither a strict subtype with B<=, ?B<=, A<=
+  // ?A<=. However A<= is in a "could be" relationship with all its
+  // children (including optional)
+  EXPECT_FALSE(objcls(subObjBaseTy).subtypeOf(subClsATy));
+  EXPECT_FALSE(subObjBaseTy.subtypeOf(opt(subObjATy)));
+  EXPECT_FALSE(objcls(subObjBaseTy).subtypeOf(subClsBTy));
+  EXPECT_FALSE(subObjBaseTy.subtypeOf(opt(subObjBTy)));
+  EXPECT_FALSE(subClsBaseTy.subtypeOf(objcls(subObjAATy)));
+  EXPECT_FALSE(subObjBaseTy.subtypeOf(opt(subObjAATy)));
+  EXPECT_FALSE(subClsBaseTy.subtypeOf(objcls(subObjABTy)));
+  EXPECT_FALSE(subObjBaseTy.subtypeOf(opt(subObjABTy)));
+  EXPECT_FALSE(objcls(subObjBaseTy).subtypeOf(subClsBATy));
+  EXPECT_FALSE(subObjBaseTy.subtypeOf(opt(subObjBATy)));
+  EXPECT_FALSE(subClsBaseTy.subtypeOf(objcls(subObjBBTy)));
+  EXPECT_FALSE(subObjBaseTy.subtypeOf(opt(subObjBBTy)));
+  EXPECT_FALSE(subClsBaseTy.subtypeOf(objcls(subObjBAATy)));
+  EXPECT_FALSE(subObjBaseTy.subtypeOf(opt(subObjBAATy)));
+  EXPECT_FALSE(objcls(subObjBaseTy).strictSubtypeOf(subClsATy));
+  EXPECT_FALSE(subObjBaseTy.strictSubtypeOf(opt(subObjATy)));
+  EXPECT_FALSE(objcls(subObjBaseTy).strictSubtypeOf(subClsBTy));
+  EXPECT_FALSE(subObjBaseTy.strictSubtypeOf(opt(subObjBTy)));
+  EXPECT_FALSE(subClsBaseTy.strictSubtypeOf(objcls(subObjAATy)));
+  EXPECT_FALSE(subObjBaseTy.strictSubtypeOf(opt(subObjAATy)));
+  EXPECT_FALSE(subClsBaseTy.strictSubtypeOf(objcls(subObjABTy)));
+  EXPECT_FALSE(subObjBaseTy.strictSubtypeOf(opt(subObjABTy)));
+  EXPECT_FALSE(objcls(subObjBaseTy).strictSubtypeOf(subClsBATy));
+  EXPECT_FALSE(subObjBaseTy.strictSubtypeOf(opt(subObjBATy)));
+  EXPECT_FALSE(subClsBaseTy.strictSubtypeOf(objcls(subObjBBTy)));
+  EXPECT_FALSE(subObjBaseTy.strictSubtypeOf(opt(subObjBBTy)));
+  EXPECT_FALSE(subClsBaseTy.strictSubtypeOf(objcls(subObjBAATy)));
+  EXPECT_FALSE(subObjBaseTy.strictSubtypeOf(opt(subObjBAATy)));
+  EXPECT_TRUE(objcls(subObjBaseTy).couldBe(subClsATy));
+  EXPECT_TRUE(subObjBaseTy.couldBe(opt(subObjATy)));
+  EXPECT_TRUE(objcls(subObjBaseTy).couldBe(subClsBTy));
+  EXPECT_TRUE(subObjBaseTy.couldBe(opt(subObjBTy)));
+  EXPECT_TRUE(subClsBaseTy.couldBe(objcls(subObjAATy)));
+  EXPECT_TRUE(subObjBaseTy.couldBe(opt(subObjAATy)));
+  EXPECT_TRUE(subClsBaseTy.couldBe(objcls(subObjABTy)));
+  EXPECT_TRUE(subObjBaseTy.couldBe(opt(subObjABTy)));
+  EXPECT_TRUE(objcls(subObjBaseTy).couldBe(subClsBATy));
+  EXPECT_TRUE(subObjBaseTy.couldBe(opt(subObjBATy)));
+  EXPECT_TRUE(subClsBaseTy.couldBe(objcls(subObjBBTy)));
+  EXPECT_TRUE(subObjBaseTy.couldBe(opt(subObjBBTy)));
+  EXPECT_TRUE(subClsBaseTy.couldBe(objcls(subObjBAATy)));
+  EXPECT_TRUE(subObjBaseTy.couldBe(opt(subObjBAATy)));
+}
+
+TEST(Type, Interface) {
+  auto const program = folly::make_unique<php::Program>();
+  program->units.push_back(make_test_unit());
+  auto const unit = borrow(program->units.back());
+  auto const func = [&]() -> borrowed_ptr<php::Func> {
+    for (auto& f : unit->funcs) {
+      if (f->name->isame(s_test.get())) return borrow(f);
+    }
+    return nullptr;
+  }();
+  EXPECT_TRUE(func != nullptr);
+
+  auto const ctx = Context { unit, func };
+  Index idx{borrow(program)};
+
+  // load classes in hierarchy
+  auto const clsIA = idx.resolve_class(ctx, s_IA.get());
+  if (!clsIA) EXPECT_TRUE(false);
+  auto const clsIAA = idx.resolve_class(ctx, s_IAA.get());
+  if (!clsIAA) EXPECT_TRUE(false);
+  auto const clsA = idx.resolve_class(ctx, s_A.get());
+  if (!clsA) EXPECT_TRUE(false);
+  auto const clsAA = idx.resolve_class(ctx, s_AA.get());
+  if (!clsAA) EXPECT_TRUE(false);
+
+  // make sometypes and objects
+  auto const subObjIATy   = subObj(*clsIA);
+  auto const subClsIATy   = subCls(*clsIA);
+  auto const subObjIAATy   = subObj(*clsIAA);
+  auto const subClsIAATy   = subCls(*clsIAA);
+  auto const subObjATy   = subObj(*clsA);
+  auto const clsExactATy = clsExact(*clsA);
+  auto const subClsATy   = subCls(*clsA);
+  auto const subObjAATy   = subObj(*clsAA);
+  auto const subClsAATy   = subCls(*clsAA);
+
+  // we don't support interfaces quite yet so let's put few tests
+  // that will fail once interfaces are supported
+
+  // first 2 are "not precise" - should be true
+  EXPECT_FALSE(subClsATy.subtypeOf(objcls(subObjIATy)));
+  EXPECT_FALSE(objcls(subObjATy).strictSubtypeOf(subClsIATy));
+  EXPECT_TRUE(subClsATy.couldBe(objcls(subObjIATy)));
+
+  // first 2 are "not precise" - should be true
+  EXPECT_FALSE(subClsAATy.subtypeOf(objcls(subObjIAATy)));
+  EXPECT_FALSE(objcls(subObjAATy).strictSubtypeOf(objcls(subObjIAATy)));
+  EXPECT_TRUE(subClsAATy.couldBe(objcls(subObjIAATy)));
+
+  // 3rd one is not precise - should be false
+  EXPECT_FALSE(subClsATy.subtypeOf(objcls(subObjIAATy)));
+  EXPECT_FALSE(objcls(subObjATy).strictSubtypeOf(objcls(subObjIAATy)));
+  EXPECT_TRUE(clsExactATy.couldBe(objcls(subObjIAATy)));
+}
+
+TEST(Type, NonUnique) {
+  auto const program = folly::make_unique<php::Program>();
+  program->units.push_back(make_test_unit());
+  auto const unit = borrow(program->units.back());
+  auto const func = [&]() -> borrowed_ptr<php::Func> {
+    for (auto& f : unit->funcs) {
+      if (f->name->isame(s_test.get())) return borrow(f);
+    }
+    return nullptr;
+  }();
+  EXPECT_TRUE(func != nullptr);
+
+  auto const ctx = Context { unit, func };
+  Index idx{borrow(program)};
+
+  auto const clsA = idx.resolve_class(ctx, s_A.get());
+  if (!clsA) EXPECT_TRUE(false);
+  auto const clssNonUnique = idx.resolve_class(ctx, s_NonUnique.get());
+  if (!clssNonUnique) EXPECT_TRUE(false);
+  auto const clssNonUniqueA = idx.resolve_class(ctx, s_NonUniqueA.get());
+  if (!clssNonUniqueA) EXPECT_TRUE(false);
+
+  // non unique types are funny because we cannot really make any conclusion
+  // about them so they resolve to "non precise" subtype relationship
+  auto const subObjATy   = subObj(*clsA);
+  auto const subClsATy   = subCls(*clsA);
+  auto const subObjNonUniqueTy   = subObj(*clssNonUnique);
+  auto const subClsNonUniqueTy   = subCls(*clssNonUnique);
+  auto const subObjNonUniqueATy   = subObj(*clssNonUniqueA);
+  auto const subClsNonUniqueATy   = subCls(*clssNonUniqueA);
+
+  // all are obviously "non precise" but what can you do?....
+  EXPECT_FALSE(subClsNonUniqueATy.subtypeOf(objcls(subObjNonUniqueTy)));
+  EXPECT_FALSE(objcls(subObjNonUniqueATy).strictSubtypeOf(subClsNonUniqueTy));
+  EXPECT_TRUE(subClsATy.couldBe(objcls(subObjNonUniqueTy)));
 }
 
 //////////////////////////////////////////////////////////////////////

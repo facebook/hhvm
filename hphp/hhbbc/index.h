@@ -119,16 +119,19 @@ struct Class {
   bool same(const Class&) const;
 
   /*
-   * Returns true if this class is definitely going to be a subclass
+   * Returns true if this class is definitely going to be a subtype
    * of `o' at runtime.  If this function returns false, this may
    * still be a subtype of `o' at runtime, it just may not be known.
+   * A typical example is with "non unique" classes.
    */
   bool subtypeOf(const Class& o) const;
 
   /*
-   * Returns true if this class could be a subclass of `o' at runtime.
    * If this function return false, it is known that this class
-   * definitely is not a subclass of `o'.
+   * is in no subtype relationship with the argument Class 'o'.
+   * Returns true if this class could be a subtype of `o' at runtime.
+   * When true is returned the two classes may still be unrelated but it is
+   * not possible to tell. A typical example is with "non unique" classes.
    */
   bool couldBe(const Class& o) const;
 

@@ -216,6 +216,11 @@ struct ClassInfo {
    * The constructor for this class, if we know what it is.
    */
   borrowed_ptr<const php::Func> ctor = nullptr;
+
+  /*
+   * A vector of ClassInfo that encodes the inheritance hierarchy.
+   */
+  std::vector<borrowed_ptr<const ClassInfo>> baseList;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -235,11 +240,36 @@ bool Class::same(const Class& o) const {
 }
 
 bool Class::subtypeOf(const Class& o) const {
-  return same(o);
+  auto s1 = val.str();
+  auto s2 = o.val.str();
+  if (s1 || s2) return s1 == s2;
+  auto c1 = val.other();
+  auto c2 = o.val.other();
+  if (c1->baseList.size() >= c2->baseList.size()) {
+    return c1->baseList[c2->baseList.size() - 1] == c2;
+  }
+  return false;
 }
 
 bool Class::couldBe(const Class& o) const {
-  return true;
+  // If either types are not unique return true
+  if (val.str() || o.val.str()) return true;
+
+  auto c1 = val.other();
+  auto c2 = o.val.other();
+  // if one or the other is an interface return true for now.
+  // TODO: TASK #3621433
+  if (c1->cls->attrs & AttrInterface || c2->cls->attrs & AttrInterface) {
+    return true;
+  }
+
+  // Both types are unique classes so they "could be" if they are in an
+  // inheritance relationship
+  if (c1->baseList.size() >= c2->baseList.size()) {
+    return c1->baseList[c2->baseList.size() - 1] == c2;
+  } else {
+    return c2->baseList[c1->baseList.size() - 1] == c1;
+  }
 }
 
 SString Class::name() const {
@@ -599,9 +629,11 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
       return name_only();
     }
     cinfo->parent = parent->val.other();
+    cinfo->baseList = cinfo->parent->baseList;
   } else {
     cinfo->parent = nullptr;
   }
+  cinfo->baseList.push_back(borrow(cinfo));
 
   for (auto& ifaceName : cls->interfaceNames) {
     auto const iface = resolve_class(ctx, ifaceName);

@@ -218,23 +218,54 @@ bool Type::subtypeData(Type o) const {
 
   switch (m_bits) {
   case BOptObj: case BObj:
-    if (m_data->dobj.type == o.m_data->dobj.type) {
-      return m_data->dobj.cls.same(o.m_data->dobj.cls);
+    if (m_data->dobj.type == o.m_data->dobj.type &&
+        m_data->dobj.cls.same(o.m_data->dobj.cls)) {
+      return true;
     }
-    if (m_data->dobj.type == DObj::Exact) {
+    if (o.m_data->dobj.type == DObj::Sub) {
       return m_data->dobj.cls.subtypeOf(o.m_data->dobj.cls);
     }
     return false;
   case BCls:
-    if (m_data->dcls.type == o.m_data->dcls.type) {
-      return m_data->dcls.cls.same(o.m_data->dcls.cls);
+    if (m_data->dcls.type == o.m_data->dcls.type &&
+        m_data->dcls.cls.same(o.m_data->dcls.cls)) {
+      return true;
     }
-    if (m_data->dcls.type == DCls::Exact) {
+    if (o.m_data->dcls.type == DObj::Sub) {
       return m_data->dcls.cls.subtypeOf(o.m_data->dcls.cls);
     }
     return false;
   default:
     return equivData(o);
+  }
+}
+
+bool Type::couldBeData(Type o) const {
+  assert(m_data.hasValue());
+  assert(o.m_data.hasValue());
+  assert(m_bits == o.m_bits);
+
+  switch (m_bits) {
+  case BOptObj: case BObj:
+    if (m_data->dobj.type == o.m_data->dobj.type &&
+        m_data->dobj.cls.same(o.m_data->dobj.cls)) {
+      return true;
+    }
+    if (m_data->dobj.type == DObj::Sub || o.m_data->dobj.type == DObj::Sub) {
+      return m_data->dcls.cls.couldBe(o.m_data->dcls.cls);
+    }
+    return false;
+  case BCls:
+    if (m_data->dcls.type == o.m_data->dcls.type &&
+        m_data->dcls.cls.same(o.m_data->dcls.cls)) {
+      return true;
+    }
+    if (m_data->dcls.type == DObj::Sub || o.m_data->dcls.type == DObj::Sub) {
+      return m_data->dcls.cls.couldBe(o.m_data->dcls.cls);
+    }
+    return false;
+  default:
+    return true;
   }
 }
 
@@ -301,23 +332,11 @@ bool Type::couldBe(Type o) const {
    * TInitNull was the overlapping part would already be handled
    * above, because !mayHaveData(TInitNull).)
    */
-  if (is_opt(*this)) return unopt(*this).couldBe(o);
+  if (is_opt(*this)) return is_opt(o) ? true : unopt(*this).couldBe(o);
   if (is_opt(o))     return unopt(o).couldBe(*this);
 
-  /*
-   * For objects or classes, we have to assume any object or class
-   * could be another object/class, because we currently don't look at
-   * the inheritance chain.  (We already handled the trivial cases of
-   * Obj=Foo <: Obj<=Foo in the subtype check above.)
-   *
-   * TODO(#3343798): use res::Class::couldBe
-   */
-  if (isPredefined(isect)) {
-    if (Type(isect).subtypeOf(TObj)) return true;
-    if (Type(isect).subtypeOf(TCls)) return true;
-  }
-
-  return !m_data && !o.m_data;
+  if (m_data && o.m_data) return couldBeData(Type(isect, *o.m_data));
+  return true;
 }
 
 bool Type::checkInvariants() const {

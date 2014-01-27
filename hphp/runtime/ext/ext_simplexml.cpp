@@ -139,6 +139,11 @@ static inline bool match_ns(c_SimpleXMLElement* sxe, xmlNodePtr node,
     return true;
   }
 
+  if (RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll && 
+     (name == nullptr || *name == '\0')) {
+    return true;
+  }
+
   if (node->ns && 
       !xmlStrcmp(prefix ? node->ns->prefix : node->ns->href, name)) {
     return true;

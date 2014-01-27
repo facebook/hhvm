@@ -58,17 +58,17 @@ class Options {
       $framework_names->removeKey(0);
     }
 
-    // Can't be both summary and verbose.
-    if ($options->containsKey('csv') && $options->containsKey('verbose')) {
-      error_and_exit("Cannot be --csv and --verbose together");
-    }
-    else if ($options->containsKey('csv')) {
+
+    if ($options->containsKey('csv')) {
+        if ($options->containsKey('verbose')) {
+          // Can't be both summary and verbose.
+          error_and_exit("Cannot be --csv and --verbose together");
+        }
       self::$csv_only = true;
       // $tests[0] may not even be "summary", but it doesn't matter, we are
       // just trying to make the count right for $frameworks
       $framework_names->removeKey(0);
-    }
-    else if ($options->containsKey('verbose')) {
+    } else if ($options->containsKey('verbose')) {
       self::$verbose = true;
       $framework_names->removeKey(0);
     }
@@ -78,17 +78,18 @@ class Options {
       $framework_names->removeKey(0);
     }
 
-    // Can't run framework tests both by file and single test
-    if ($options->containsKey('by-file') &&
-        $options->containsKey('by-single-test')) {
+
+   if ($options->contains('by-single-test')) {
+    if ($options->containsKey('by-file')) {
+      // Can't run framework tests both by file and single test
       error_and_exit("Cannot specify both by-file or by-single-test");
-    } else if ($options->contains('by-single-test')) {
-      self::$test_by_single_test = true;
-      $framework_names->removeKey(0);
-    } else if ($options->contains('by-file')) {
-      // Nothing to set here since this is the default, but remove the key
-      $framework_names->removeKey(0);
     }
+    self::$test_by_single_test = true;
+    $framework_names->removeKey(0);
+  } else if ($options->contains('by-file')) {
+    // Nothing to set here since this is the default, but remove the key
+    $framework_names->removeKey(0);
+  }
 
     verbose("Script running...Be patient as some frameworks take a while with ".
             "a debug build of HHVM\n", self::$verbose);
@@ -115,13 +116,13 @@ class Options {
       $framework_names->removeKey(0);
     }
 
-    if ($options->containsKey('redownload') &&
-        $options->containsKey('latest')) {
-      error_and_exit("Cannot use --redownload and --latest together");
-    } else if ($options->containsKey('redownload') &&
-               $options->containsKey('latest-record')) {
-      error_and_exit("Cannot use --redownload and --latest-record together");
-    } else if ($options->containsKey('redownload')) {
+    if ($options->containsKey('redownload')) {
+      if ($options->containsKey('latest')) {
+        error_and_exit("Cannot use --redownload and --latest together");
+      }
+      if ($options->containsKey('latest-record')) {
+        error_and_exit("Cannot use --redownload and --latest-record together");
+      }
       self::$force_redownload = true;
       $framework_names->removeKey(0);
     } else if ($options->containsKey('latest')) {
@@ -147,5 +148,12 @@ class Options {
     // (e.g. --all may have been passed, in which case the Vector will be
     // empty)
     return $framework_names;
+  }
+
+  public static function getFrameworkInfo(string $framework, string $key)
+    : ?string {
+    return array_key_exists($key, self::$framework_info[$framework])
+      ? self::$framework_info[$framework][$key]
+      : null;
   }
 }

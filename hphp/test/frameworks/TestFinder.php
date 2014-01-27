@@ -63,11 +63,7 @@ class TestFinder {
   }
 
   public function findTestsPHPT(): void {
-    $test_files = "";
-    foreach ($this->test_files as $test_file) {
-      $test_files .= $test_file.PHP_EOL;
-    }
-    file_put_contents($this->tests_file, $test_files);
+    file_put_contents($this->tests_file, implode(PHP_EOL, $this->test_files));
   }
 
   public function findTestMethodsViaTokens(): void {
@@ -159,11 +155,9 @@ class TestFinder {
       foreach($suite->directory as $dir) {
         $search_dirs = null;
         // If config doesn't provide a test suffix, assume the default
-        if ($dir->attributes()->count() === 0) {
-          $pattern = $this->test_file_pattern;
-        } else {
-          $pattern = "/".$dir->attributes()->suffix."/";
-        }
+        $pattern = $dir->attributes()->count() === 0
+          ? $this->test_file_pattern
+          : "/".$dir->attributes()->suffix."/";
         $search_path = $this->test_path."/".$dir;
         // Gotta make sure these dirs don't contain wildcards (Looking at you
         // Symfony)
@@ -247,12 +241,15 @@ function main(array $argv): void {
   // Mediawiki and others are clowntown when it comes to autoloading stuff
   // for reflection. Or I am a clown. Either way, workaround it.
   // May try spl_autoload_register() to workaround some clowniness, if possible.
-  if ($mode === TestFindModes::TOKEN) {
-    $tf->findTestMethodsViaTokens();
-  } else if ($mode === TestFindModes::PHPT) {
-    $tf->findTestsPHPT();
-  } else {
-    $tf->findTestMethods();
+  switch ($mode) {
+    case TestFindModes::TOKEN:
+      $tf->findTestMethodsViaTokens();
+      break;
+    case $mode === TestFindModes::PHPT:
+      $tf->findTestsPHPT();
+      break;
+    default:
+      $tf->findTestMethods();
   }
   exit(0);
 }

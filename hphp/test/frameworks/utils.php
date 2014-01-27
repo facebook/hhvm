@@ -147,7 +147,7 @@ function idx(array $array, mixed $key, mixed $default = null): mixed {
 
 function command_exists(string $cmd): bool {
     $ret = shell_exec("which $cmd");
-    return (empty($ret) ? false : true);
+    return !empty($ret);
 }
 
 function verbose(string $msg, bool $verbose): void {
@@ -215,11 +215,7 @@ function get_runtime_build(bool $with_jit = true,
     // See if we are using an internal development build
     if ((file_exists($fbcode_root_dir."/_bin"))) {
       $build .= $fbcode_root_dir;
-      if (!$use_php) {
-        $build .= "/_bin/hphp/hhvm/hhvm";
-      } else {
-        $build .= "/_bin/hphp/hhvm/php";
-      }
+      $build .= $use_php ? "/_bin/hphp/hhvm/php" : "/_bin/hphp/hhvm/hhvm";
     // Maybe we are in OSS land trying this script
     } else if (file_exists($oss_root_dir."/hhvm")) {
       // Pear won't run correctly unless a 'php' executable exists.
@@ -229,20 +225,16 @@ function get_runtime_build(bool $with_jit = true,
       symlink($oss_root_dir."/hhvm/hhvm", $oss_root_dir."/hhvm/php");
 
       $build .= $oss_root_dir."/hhvm";
-      if (!$use_php) {
-        $build .= "/hhvm";
-      } else {
-        $build .= "/php";
-      }
+      $build .= $use_php ? "/php" : "/hhvm";
     } else {
       error_and_exit("HHVM build doesn't exist. Did you build yet?");
     }
     if (!$use_php) {
       $repo_loc = tempnam('/tmp', 'framework-test');
       $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
-      $build .= $repo_args;
-      $build .= " --config ".__DIR__."/config.hdf";
-      $build .= " -v Server.IniFile=".__DIR__."/php.ini";
+      $build .= $repo_args.
+        " --config ".__DIR__."/config.hdf".
+        " -v Server.IniFile=".__DIR__."/php.ini";
     }
     if ($with_jit) {
       $build .= " -v Eval.Jit=true";
@@ -263,8 +255,7 @@ function error_and_exit(string $message, bool $to_file = false): void {
 
 // Include all PHP files in a directory
 function include_all_php($folder){
-  foreach (glob("{$folder}/*.php") as $filename)
-  {
+  foreach (glob("{$folder}/*.php") as $filename) {
     include_once $filename;
   }
 }

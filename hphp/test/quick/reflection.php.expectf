@@ -204,7 +204,58 @@ Function [ <user> function g ] {
 "
 
 --- export() ---
-string(0) ""
+string(%d) "Class [ <user> class B ] {
+  @@ %s/reflection.php %d-%d
+
+  - Constants [2] {
+    Constant [ string C0 ] { B::C0 }
+    Constant [ string C1 ] { B::C1 }
+  }
+
+  - Static properties [3] {
+    Property [ public static $s0 ]
+    Property [ public static $s1 ]
+    Property [ public static $s2 ]
+  }
+
+  - Static methods [2] {
+    Method [ <user> static public method smethB0 ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> static private method smethB1 ] {
+      @@ %s/reflection.php %d - %d
+    }
+  }
+
+  - Properties [4] {
+    Property [ <default> protected $p1 ]
+    Property [ <default> public $p2 ]
+    Property [ <default> public $p3 ]
+    Property [ <default> private $p0 ]
+  }
+
+  - Methods [6] {
+    Method [ <user> public method methI ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> public method methJ ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> public method methK ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> private method methB ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> public method methH ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> protected method methA ] {
+      @@ %s/reflection.php %d - %d
+    }
+  }
+}
+"
 
 --- getConstant() ---
 string(5) "B::C0"

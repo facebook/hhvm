@@ -71,6 +71,7 @@ class FastCGITransport;
 class FastCGIConnection
   : public SocketConnection,
     public apache::thrift::async::TAsyncTransport::ReadCallback,
+    public apache::thrift::async::TAsyncTransport::WriteCallback,
     public ProtocolSession::Callback {
 friend class FastCGITransport;
 public:
@@ -91,6 +92,10 @@ public:
   virtual std::shared_ptr<ProtocolSessionHandler>
     newSessionHandler(int handler_id) override;
   virtual void onSessionEgress(std::unique_ptr<folly::IOBuf> chain) override;
+  virtual void writeError(size_t bytes,
+    const apache::thrift::transport::TTransportException& ex) 
+    noexcept override;
+  virtual void writeSuccess() noexcept override;
   virtual void onSessionError() override;
   virtual void onSessionClose() override;
 
@@ -113,6 +118,8 @@ private:
   FastCGIServer* m_server;
   FastCGISession m_session;
   folly::IOBufQueue m_readBuf;
+  bool m_shutdown{false};
+  uint32_t m_writeCount{0};
 };
 
 

@@ -137,7 +137,20 @@ FastCGIConnection::newSessionHandler(int transport_id) {
 }
 
 void FastCGIConnection::onSessionEgress(std::unique_ptr<IOBuf> chain) {
-  m_sock->writeChain(nullptr, std::move(chain));
+  ++m_writeCount;
+  m_sock->writeChain(this, std::move(chain));
+}
+
+void FastCGIConnection::writeError(size_t bytes,
+    const apache::thrift::transport::TTransportException& ex) noexcept {
+  writeSuccess();
+}
+
+void FastCGIConnection::writeSuccess() noexcept {
+  --m_writeCount;
+  if (m_writeCount == 0 && m_shutdown) {
+    delete this;
+  }
 }
 
 void FastCGIConnection::onSessionError() {
@@ -146,7 +159,10 @@ void FastCGIConnection::onSessionError() {
 
 void FastCGIConnection::onSessionClose() {
   shutdownTransport();
-  delete this;
+  m_shutdown = true;
+  if (m_writeCount == 0) {
+    delete this;
+  }
 }
 
 void FastCGIConnection::setMaxConns(int max_conns) {

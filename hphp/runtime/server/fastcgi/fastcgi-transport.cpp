@@ -273,20 +273,20 @@ void FastCGITransport::sendImpl(const void *data, int size, int code,
     chain_wrapper(queue.move());
   Callback* callback = m_callback;
   std::function<void()> fn = [callback, chain_wrapper]() mutable {
-      if (callback) {
-        callback->onStdOut(std::move(*chain_wrapper));
-      }
-    };
+    if (callback) {
+      callback->onStdOut(std::move(*chain_wrapper));
+    }
+  };
   m_connection->getEventBase()->runInEventBaseThread(fn);
 }
 
 void FastCGITransport::onSendEndImpl() {
   Callback* callback = m_callback;
   std::function<void()> fn = [callback]() mutable {
-      if (callback) {
-        callback->onComplete();
-      }
-    };
+    if (callback) {
+      callback->onComplete();
+    }
+  };
   m_connection->getEventBase()->runInEventBaseThread(fn);
 }
 

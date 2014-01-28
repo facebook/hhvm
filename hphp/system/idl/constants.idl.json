@@ -1972,6 +1972,10 @@
             "value": 6
         },
         {
+            "name": "IMAGETYPE_COUNT",
+            "value": 18
+        },
+        {
             "name": "IMAGETYPE_GIF",
             "value": 1
         },
@@ -2026,6 +2030,10 @@
         {
             "name": "IMAGETYPE_TIFF_MM",
             "value": 8
+        },
+        {
+            "name": "IMAGETYPE_UNKNOWN",
+            "value": 0
         },
         {
             "name": "IMAGETYPE_WBMP",

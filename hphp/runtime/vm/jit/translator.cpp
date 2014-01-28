@@ -1070,7 +1070,7 @@ static const struct {
   { OpInstanceOfD, {Stack1,           Stack1,       OutBoolean,        0 }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64,          0 }},
   { OpClone,       {Stack1,           Stack1,       OutObject,         0 }},
-  { OpExit,        {Stack1,           None,         OutNone,          -1 }},
+  { OpExit,        {Stack1,           Stack1,       OutNull,           0 }},
   { OpFatal,       {Stack1,           None,         OutNone,          -1 }},
 
   /*** 4. Control flow instructions ***/

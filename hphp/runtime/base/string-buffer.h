@@ -37,6 +37,9 @@ public:
 
 /*
  * Efficient string concatenation.
+ *
+ * StringBuffer is designed not to contain any malloc()d memory (only
+ * per-request smart allocated memory) based on sweeping-related assumptions.
  */
 struct StringBuffer {
   static const int kDefaultOutputLimit = StringData::MaxSize;

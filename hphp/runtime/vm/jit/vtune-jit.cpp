@@ -19,6 +19,11 @@
 #include "vtune-jit.h"
 #include "jitapi/jitprofiling.h"
 
+// Method ids reported to Vtune JIT API should not be less than 1000
+// (see the comment in iJIT_Method_Load structure definition). We use 
+// id == 1000 for trampolines and larger values for normal functions
+static const int min_method_id = 1000;
+
 namespace HPHP {
 namespace JIT {
 
@@ -29,7 +34,7 @@ void reportTraceletToVtune(const Unit* unit, const Func* func, const TransRec& t
 
     if (!unit) return;
 
-    methodInfo.method_id = transRec.src.getFuncId() + 1000;
+    methodInfo.method_id = transRec.src.getFuncId() + min_method_id;
 
     if (func && func->fullName())
     {
@@ -54,6 +59,8 @@ void reportTraceletToVtune(const Unit* unit, const Func* func, const TransRec& t
 
         info.LineNumber = unit->getLineNumber(transRec.bcMapping[i].bcStart);
 
+        // Note that main code may be generated in stubs code range (see how emitBlock lambda is used in
+        // genCodeImpl() in code-gen-x64.cpp, so we need to explicitly check aStart value
         if (transRec.bcMapping[i].aStart >= transRec.aStart &&
             transRec.bcMapping[i].aStart < transRec.aStart + transRec.aLen)
         {
@@ -125,7 +132,7 @@ void reportTrampolineToVtune(void* begin, size_t size)
     iJIT_Method_Load methodInfo;
     memset(&methodInfo, 0, sizeof(methodInfo));
 
-    methodInfo.method_id = 1000;
+    methodInfo.method_id = min_method_id;
 
     methodInfo.method_name = const_cast<char *>("Trampoline");
 

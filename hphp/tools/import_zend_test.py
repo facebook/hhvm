@@ -188,9 +188,12 @@ bad_tests = (
     '/ext/standard/tests/file/file_exists_variation1.php',
 
     # flaky: t3552849
-    '/ext/session/tests/013.php'
-    '/ext/session/tests/014.php'
-    '/ext/session/tests/027.php'
+    '/ext/session/tests/013.php',
+    '/ext/session/tests/014.php',
+    '/ext/session/tests/027.php',
+
+    # flaky: t3619770
+    '/ext/zlib/tests/gzfile_basic.php',
 )
 
 # Tests that work but not in repo mode

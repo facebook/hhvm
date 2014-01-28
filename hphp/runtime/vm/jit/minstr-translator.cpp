@@ -307,6 +307,41 @@ SSATmp* HhbcTranslator::MInstrTranslator::genMisPtr() {
   }
 }
 
+
+namespace {
+bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
+                              PropInfo propInfo) {
+  auto const objAttr = (mia & Define) ? ObjectData::UseSet : ObjectData::UseGet;
+  auto const clsHasMagicMethod = !cls || (cls->getODAttrs() & objAttr);
+
+  return clsHasMagicMethod &&
+    convertToType(propInfo.repoAuthType).maybe(Type::Uninit);
+}
+
+bool
+mInstrHasUnknownOffsets(const NormalizedInstruction& ni, Class* context) {
+  const MInstrInfo& mii = getMInstrInfo(ni.mInstrOp());
+  unsigned mi = 0;
+  unsigned ii = mii.valCount() + 1;
+  for (; mi < ni.immVecM.size(); ++mi) {
+    MemberCode mc = ni.immVecM[mi];
+    if (mcodeIsProp(mc)) {
+      const Class* cls = nullptr;
+      auto propInfo = getPropertyOffset(ni, context, cls, mii, mi, ii);
+      if (propInfo.offset == -1 ||
+          mightCallMagicPropMethod(mii.getAttr(mc), cls, propInfo)) {
+        return true;
+      }
+      ++ii;
+    } else {
+      return true;
+    }
+  }
+
+  return false;
+}
+}
+
 // Inspect the instruction we're about to translate and determine if
 // it can be executed without using an MInstrState struct.
 void HhbcTranslator::MInstrTranslator::checkMIState() {
@@ -320,11 +355,13 @@ void HhbcTranslator::MInstrTranslator::checkMIState() {
   // about the operation, this function doesn't care what the type is.
   auto baseVal = getBase(DataTypeGeneric);
   Type baseType = baseVal->type();
+  const bool baseArr = baseType <= Type::Arr;
   const bool isCGetM = m_ni.mInstrOp() == OpCGetM;
   const bool isSetM = m_ni.mInstrOp() == OpSetM;
   const bool isIssetM = m_ni.mInstrOp() == OpIssetM;
   const bool isUnsetM = m_ni.mInstrOp() == OpUnsetM;
   const bool isSingle = m_ni.immVecM.size() == 1;
+  const bool unknownOffsets = mInstrHasUnknownOffsets(m_ni, contextClass());
 
   if (baseType.maybeBoxed() && !baseType.isBoxed()) {
     // We don't need to bother with weird base types.
@@ -332,48 +369,40 @@ void HhbcTranslator::MInstrTranslator::checkMIState() {
   }
   baseType = baseType.unbox();
 
+
   // CGetM or SetM with no unknown property offsets
-  const bool simpleProp = !mInstrHasUnknownOffsets(m_ni, contextClass()) &&
-    (isCGetM || isSetM);
+  const bool simpleProp = !unknownOffsets && (isCGetM || isSetM);
 
-  // SetM with only one element
-  const bool singlePropSet = isSingle && isSetM &&
-    mcodeIsProp(m_ni.immVecM[0]);
+  // SetM with only one vector element, for props and elems
+  const bool singleSet = isSingle && isSetM;
 
-  // Array access with one element in the vector
+  // Element access with one element in the vector
   const bool singleElem = isSingle && mcodeIsElem(m_ni.immVecM[0]);
 
-  // SetM with one vector array element
-  const bool simpleArraySet = isSetM && singleElem;
-
   // IssetM with one vector array element and an Arr base
-  const bool simpleArrayIsset = isIssetM && singleElem &&
-    baseType <= Type::Arr;
+  const bool simpleArrayIsset = isIssetM && singleElem && baseArr;
+
   // IssetM with one vector array element and a collection type
   const bool simpleCollectionIsset = isIssetM && singleElem &&
-    baseType.strictSubtypeOf(Type::Obj) &&
-    isOptimizableCollectionClass(baseType.getClass());
+    baseType < Type::Obj && isOptimizableCollectionClass(baseType.getClass());
 
   // UnsetM on an array with one vector element
-  const bool simpleArrayUnset = isUnsetM && singleElem;
-
-  // UnsetM on a non-standard base. Always a noop or fatal.
-  const bool badUnset = isUnsetM && baseType.not(Type::Arr | Type::Obj);
+  const bool simpleArrayUnset = isUnsetM && singleElem &&
+    baseType <= Type::Arr;
 
   // CGetM on an array with a base that won't use MInstrState. Str
   // will use tvScratch and Obj will fatal or use tvRef.
   const bool simpleArrayGet = isCGetM && singleElem &&
     baseType.not(Type::Str | Type::Obj);
   const bool simpleCollectionGet = isCGetM && singleElem &&
-    baseType.strictSubtypeOf(Type::Obj) &&
-    isOptimizableCollectionClass(baseType.getClass());
+    baseType < Type::Obj && isOptimizableCollectionClass(baseType.getClass());
   const bool simpleStringOp = (isCGetM || isIssetM) && isSingle &&
     isSimpleBase() && mcodeMaybeArrayIntKey(m_ni.immVecM[0]) &&
     baseType <= Type::Str;
 
-  if (simpleProp || singlePropSet ||
-      simpleArraySet || simpleArrayGet || simpleCollectionGet ||
-      simpleArrayUnset || badUnset || simpleCollectionIsset ||
+  if (simpleProp || singleSet ||
+      simpleArrayGet || simpleCollectionGet ||
+      simpleArrayUnset || simpleCollectionIsset ||
       simpleArrayIsset || simpleStringOp) {
     setNoMIState();
     if (simpleCollectionGet || simpleCollectionIsset) {
@@ -861,14 +890,14 @@ void HhbcTranslator::MInstrTranslator::emitIntermediateOp() {
   }
 }
 
-
 void HhbcTranslator::MInstrTranslator::emitProp() {
   const Class* knownCls = nullptr;
   const auto propInfo   = getPropertyOffset(m_ni, contextClass(),
                                             knownCls, m_mii,
                                             m_mInd, m_iInd);
   auto mia = m_mii.getAttr(m_ni.immVecM[m_mInd]);
-  if (propInfo.offset == -1 || (mia & Unset)) {
+  if (propInfo.offset == -1 || (mia & Unset) ||
+      mightCallMagicPropMethod(mia, knownCls, propInfo)) {
     emitPropGeneric();
   } else {
     emitPropSpecialized(mia, propInfo);
@@ -1338,7 +1367,9 @@ void HhbcTranslator::MInstrTranslator::emitCGetProp() {
   const Class* knownCls = nullptr;
   const auto propInfo   = getPropertyOffset(m_ni, contextClass(), knownCls,
                                             m_mii, m_mInd, m_iInd);
-  if (propInfo.offset != -1) {
+
+  if (propInfo.offset != -1 &&
+      !mightCallMagicPropMethod(None, knownCls, propInfo)) {
     emitPropSpecialized(MIA_warn, propInfo);
     SSATmp* cellPtr = gen(UnboxPtr, m_base);
     m_result = gen(LdMem, Type::Cell, cellPtr, cns(0));
@@ -1463,7 +1494,8 @@ void HhbcTranslator::MInstrTranslator::emitSetProp() {
   const Class* knownCls = nullptr;
   const auto propInfo   = getPropertyOffset(m_ni, contextClass(), knownCls,
                                             m_mii, m_mInd, m_iInd);
-  if (propInfo.offset != -1) {
+  if (propInfo.offset != -1 &&
+      !mightCallMagicPropMethod(Define, knownCls, propInfo)) {
     emitPropSpecialized(MIA_define, propInfo);
     SSATmp* cellPtr = gen(UnboxPtr, m_base);
     SSATmp* oldVal = gen(LdMem, Type::Cell, cellPtr, cns(0));

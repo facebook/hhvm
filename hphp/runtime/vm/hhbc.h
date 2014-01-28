@@ -251,12 +251,12 @@ struct MInstrInfo {
     return m_instr;
   }
 
-  const MInstrAttr& getAttr(LocationCode lc) const {
+  MInstrAttr getAttr(LocationCode lc) const {
     assert(lc < NumLocationCodes);
     return m_baseOps[lc];
   }
 
-  const MInstrAttr& getAttr(MemberCode mc) const {
+  MInstrAttr getAttr(MemberCode mc) const {
     assert(mc < NumMemberCodes);
     return m_intermediateOps[mc];
   }

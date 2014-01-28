@@ -1249,7 +1249,10 @@ BaseMap::~BaseMap() {
 }
 
 void BaseMap::freeData() {
-  if (m_data) smart_free(m_data);
+  if (m_data) {
+    MM().objFreeLogged(
+      m_data, size_t(m_cap) * sizeof(Elm) + hashSize() * sizeof(int32_t));
+  }
 }
 
 void BaseMap::deleteElms() {
@@ -1302,9 +1305,9 @@ BaseMap::Clone(ObjectData* obj) {
   target->m_capAndUsed = thiz->m_capAndUsed;
   target->m_tableMask = thiz->m_tableMask;
   target->m_size = thiz->m_size;
-  target->m_data =
-    (Elm*)smart_malloc(size_t(thiz->m_cap) * sizeof(Elm) +
-                       thiz->hashSize() * sizeof(int32_t));
+  auto needed =
+    size_t(thiz->m_cap) * sizeof(Elm) + thiz->hashSize() * sizeof(int32_t);
+  target->m_data = (Elm*)MM().objMallocLogged(needed);
   target->m_hash = (int32_t*)(target->m_data + target->m_cap);
   wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
 
@@ -1740,8 +1743,9 @@ BaseMap::php_map(CVarRef callback, MakeArgs makeArgs) const {
   mp->m_cap = m_cap;
   mp->m_tableMask = m_tableMask;
   mp->m_size = m_size;
-  mp->m_data = (Elm*)smart_malloc(size_t(mp->m_cap) * sizeof(Elm) +
-                                  mp->hashSize() * sizeof(int32_t));
+  auto needed =
+    size_t(mp->m_cap) * sizeof(Elm) + mp->hashSize() * sizeof(int32_t);
+  mp->m_data = (Elm*)MM().objMallocLogged(needed);
   mp->m_hash = (int32_t*)(mp->m_data + mp->m_cap);
   wordcpy(mp->hashTab(), hashTab(), hashSize());
   uint32_t used = iterLimit();
@@ -2422,8 +2426,9 @@ void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
   assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
-  auto* data = (Elm*)smart_malloc(size_t(newCap) * sizeof(Elm) +
-                                  newHashSize * sizeof(int32_t));
+  auto oldHashSize = oldData ? hashSize() : 0;
+  auto needed = size_t(newCap) * sizeof(Elm) + newHashSize * sizeof(int32_t);
+  auto* data = (Elm*)MM().objMallocLogged(needed);
   auto* table = (int32_t*)(data + size_t(newCap));
   m_data = data;
   m_hash = table;
@@ -2440,7 +2445,10 @@ void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
                                toE.hasIntKey() ? toE.ikey : toE.hash());
     *ie = toPos;
   }
-  if (oldData) smart_free(oldData);
+  if (oldData) {
+    MM().objFreeLogged(
+      oldData, size_t(m_cap) * sizeof(Elm) + oldHashSize * sizeof(int32_t));
+  }
   m_cap = newCap;
   m_used = m_size;
 }
@@ -3144,8 +3152,9 @@ void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
   assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
-  auto* data = (Elm*)smart_malloc(size_t(newCap) * sizeof(Elm) +
-                                  newHashSize * sizeof(int32_t));
+  auto oldHashSize = oldData ? hashSize() : 0;
+  auto needed = size_t(newCap) * sizeof(Elm) + newHashSize * sizeof(int32_t);
+  auto* data = (Elm*)MM().objMallocLogged(needed);
   auto* table = (int32_t*)(data + size_t(newCap));
   m_data = data;
   m_hash = table;
@@ -3162,7 +3171,10 @@ void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
             toE.hasInt() ? toE.data.m_data.num : toE.data.m_data.pstr->hash());
     *ie = toPos;
   }
-  if (oldData) smart_free(oldData);
+  if (oldData) {
+    MM().objFreeLogged(
+      oldData, size_t(m_cap) * sizeof(Elm) + oldHashSize * sizeof(int32_t));
+  }
   m_cap = newCap;
   m_used = m_size;
 }
@@ -3305,9 +3317,9 @@ BaseSet::Clone(ObjectData* obj) {
   target->m_capAndUsed = thiz->m_capAndUsed;
   target->m_tableMask = thiz->m_tableMask;
   target->m_size = thiz->m_size;
-  target->m_data =
-    (Elm*)smart_malloc(size_t(thiz->m_cap) * sizeof(Elm) +
-                       thiz->hashSize() * sizeof(int32_t));
+  auto needed =
+    size_t(thiz->m_cap) * sizeof(Elm) + thiz->hashSize() * sizeof(int32_t);
+  target->m_data = (Elm*)MM().objMallocLogged(needed);
   target->m_hash = (int32_t*)(target->m_data + target->m_cap);
   wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
 
@@ -3576,7 +3588,10 @@ BaseSet::~BaseSet() {
 }
 
 void BaseSet::freeData() {
-  if (m_data) smart_free(m_data);
+  if (m_data) {
+    MM().objFreeLogged(
+      m_data, size_t(m_cap) * sizeof(Elm) + hashSize() * sizeof(int32_t));
+  }
 }
 
 void BaseSet::deleteElms() {

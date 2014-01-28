@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-local.h"
@@ -233,8 +234,8 @@ String f_set_include_path(const String& new_include_path) {
 Array f_get_included_files() {
   Array included_files = Array::Create();
   int idx = 0;
-  for (auto& ent : g_vmContext->m_evaledFiles) {
-    included_files.set(idx++, ent.first);
+  for (auto& file: g_vmContext->m_evaledFilesOrder) {
+    included_files.set(idx++, file->getFileName());
   }
   return included_files;
 }

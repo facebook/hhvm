@@ -1936,15 +1936,20 @@ private: // member instructions
     StaticObjProp,
 
     /*
-     * Known to be contained in the current frame as a local, as
-     * $this, or known to be contained by the evaluation stack.  Only
+     * Known to be contained in the current frame as a local, as the
+     * frame $this, by the evaluation stack, or inside $GLOBALS.  Only
      * possible as initial bases.
      */
     Frame,
     FrameThis,
     EvalStack,
+    Global,
 
-    // TODO: global
+    /*
+     * If we've execute an operation that's known to fatal, we use
+     * this BaseLoc.
+     */
+    Fataled,
   };
 
   struct Base {
@@ -1969,25 +1974,26 @@ private: // member instructions
     SString locName;
   };
 
-  static std::string base_string(const folly::Optional<Base>& b) {
-    if (!b) return "[none]";
+  static std::string base_string(const Base& b) {
     auto const locStr = [&]() -> const char* {
-      switch (b->loc) {
+      switch (b.loc) {
       case BaseLoc::PostElem:      return "PostElem";
       case BaseLoc::PostProp:      return "PostProp";
       case BaseLoc::StaticObjProp: return "StaticObjProp";
       case BaseLoc::Frame:         return "Frame";
       case BaseLoc::FrameThis:     return "FrameThis";
       case BaseLoc::EvalStack:     return "EvalStack";
+      case BaseLoc::Global:        return "Global";
+      case BaseLoc::Fataled:       return "Fataled";
       }
       not_reached();
     }();
     return folly::format(
       "{: <8}  ({: <14} {: <8} @ {})",
-      show(b->type),
+      show(b.type),
       locStr,
-      show(b->locTy),
-      b->locName ? b->locName->data() : "?"
+      show(b.locTy),
+      b.locName ? b.locName->data() : "?"
     ).str();
   }
 
@@ -1999,23 +2005,23 @@ private: // member instructions
       , stackIdx(info->valCount() + numVecPops(mvec))
     {}
 
-    // Return the current MElem.  Only valid after the base has been
-    // processed.
+    // Return the current MElem.  Only valid after the first base has
+    // been processed.
     const MElem& melem() const {
       assert(mInd < mvec.mcodes.size());
       return mvec.mcodes[mInd];
     }
 
-    // Return the current MemberCode.  Only valid after the base has
-    // been processed.
+    // Return the current MemberCode.  Only valid after the first base
+    // has been processed.
     MemberCode mcode() const { return melem().mcode; }
 
     const MInstrInfo& info;
     const MVector& mvec;
 
-    // Current base.  folly::none if we know nothing about the current
-    // base.
-    folly::Optional<Base> base;
+    // The current base.  Updated as we move through the vector
+    // instruction.
+    Base base;
 
     // Current index in mcodes vector (or 0 if we still haven't done
     // the base).
@@ -2061,46 +2067,33 @@ private: // member instructions
    * miFinal op functions.
    */
 
-  bool couldBeThisObj(const folly::Optional<Base>& b) const {
-    if (!b) return true;
+  bool couldBeThisObj(const Base& b) const {
+    if (b.loc == BaseLoc::Fataled) return false;
     auto const thisTy = thisType();
-    return b->type.couldBe(thisTy ? *thisTy : TObj);
+    return b.type.couldBe(thisTy ? *thisTy : TObj);
   }
 
-  bool mustBeThisObj(const folly::Optional<Base>& b) const {
-    if (!b) return false;
-    if (b->loc == BaseLoc::FrameThis) return true;
-    if (auto const ty = thisType())   return b->type.subtypeOf(*ty);
+  bool mustBeThisObj(const Base& b) const {
+    if (b.loc == BaseLoc::FrameThis) return true;
+    if (auto const ty = thisType())  return b.type.subtypeOf(*ty);
     return false;
   }
 
-  bool couldBeInThis(const folly::Optional<Base>& b) const {
-    if (!b) return true;
-    if (b->loc == BaseLoc::PostProp) {
-      auto const thisTy = thisType();
-      if (!thisTy) return true;
-      if (!b->locTy.couldBe(*thisTy)) return false;
-      if (b->locName) {
-        return isTrackedThisProp(b->locName);
-      }
-      return true;
+  bool couldBeInThis(const Base& b) const {
+    if (b.loc != BaseLoc::PostProp) return false;
+    auto const thisTy = thisType();
+    if (!thisTy) return true;
+    if (!b.locTy.couldBe(*thisTy)) return false;
+    if (b.locName) {
+      return isTrackedThisProp(b.locName);
     }
-    return false;
+    return true;
   }
 
-  bool couldBeInSelf(const folly::Optional<Base>& b) const {
-    if (!b) return true;
-    if (b->loc == BaseLoc::StaticObjProp) {
-      auto const selfTy = selfCls();
-      return !selfTy || b->locTy.couldBe(*selfTy);
-    }
-    return false;
-  }
-
-  // This helper can probably go away once we have enough coverage to
-  // make the base not be Optional<Base>.
-  SString baseLocName(const folly::Optional<Base>& b) const {
-    return b ? b->locName : nullptr;
+  bool couldBeInSelf(const Base& b) const {
+    if (b.loc != BaseLoc::StaticObjProp) return false;
+    auto const selfTy = selfCls();
+    return !selfTy || b.locTy.couldBe(*selfTy);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -2108,7 +2101,7 @@ private: // member instructions
   void handleInThisPropD(MInstrState& state) {
     if (!couldBeInThis(state.base)) return;
 
-    if (auto const name = baseLocName(state.base)) {
+    if (auto const name = state.base.locName) {
       auto const ty = thisPropAsCell(name);
       if (ty && propCouldPromoteToObj(*ty)) {
         // Note: we could merge Obj=stdClass here, but aren't doing so
@@ -2126,7 +2119,7 @@ private: // member instructions
   void handleInThisElemD(MInstrState& state) {
     if (!couldBeInThis(state.base)) return;
 
-    if (auto const name = baseLocName(state.base)) {
+    if (auto const name = state.base.locName) {
       auto const ty = thisPropAsCell(name);
       if (ty && elemCouldPromoteToArr(*ty)) {
         mergeThisProp(name, TArr);
@@ -2142,7 +2135,7 @@ private: // member instructions
   void handleInSelfPropD(MInstrState& state) {
     if (!couldBeInSelf(state.base)) return;
 
-    if (auto const name = baseLocName(state.base)) {
+    if (auto const name = state.base.locName) {
       auto const ty = thisPropAsCell(name);
       if (ty && propCouldPromoteToObj(*ty)) {
         // Note: similar to handleInThisPropD, logically this could be
@@ -2158,7 +2151,7 @@ private: // member instructions
   void handleInSelfElemD(MInstrState& state) {
     if (!couldBeInSelf(state.base)) return;
 
-    if (auto const name = baseLocName(state.base)) {
+    if (auto const name = state.base.locName) {
       if (auto const ty = selfPropAsCell(name)) {
         if (elemCouldPromoteToArr(*ty)) {
           mergeSelfProp(name, TArr);
@@ -2178,7 +2171,7 @@ private: // member instructions
   void handleInSelfElemU(MInstrState& state) {
     if (!couldBeInSelf(state.base)) return;
 
-    if (auto const name = baseLocName(state.base)) {
+    if (auto const name = state.base.locName) {
       auto const ty = selfPropAsCell(name);
       if (ty) mergeSelfProp(name, loosen_statics(*ty));
     } else {
@@ -2241,7 +2234,20 @@ private: // member instructions
     return Base { locAsCell(mvec.locBase), BaseLoc::Frame };
   }
 
-  folly::Optional<Base> miBase(MInstrState& state) {
+  Base miBaseSProp(Type cls, Type tprop) {
+    auto const self = selfCls();
+    auto const prop = tv(tprop);
+    auto const name = prop && prop->m_type == KindOfStaticString
+                        ? prop->m_data.pstr : nullptr;
+    if (self && cls.subtypeOf(*self) && name) {
+      if (auto const ty = selfPropAsCell(prop->m_data.pstr)) {
+        return Base { *ty, BaseLoc::StaticObjProp, cls, name };
+      }
+    }
+    return Base { TInitCell, BaseLoc::StaticObjProp, cls, name };
+  }
+
+  Base miBase(MInstrState& state) {
     auto& mvec = state.mvec;
     switch (mvec.lcode) {
     case LL:
@@ -2260,43 +2266,31 @@ private: // member instructions
         return Base { ty ? *ty : TObj, BaseLoc::FrameThis };
       }
     case LGL:
-      // TODO: return global bases so these don't kill object
-      // properties.
-      return folly::none;
+      locAsCell(state.mvec.locBase);
+      return Base { TInitCell, BaseLoc::Global };
     case LGC:
       topC(--state.stackIdx);
-      return folly::none;
+      return Base { TInitCell, BaseLoc::Global };
 
     case LNL:
-      // TODO: return frame bases so these don't always kill object
-      // properties.
-      killLocals();
-      return folly::none;
+      loseNonRefLocalTypes();
+      return Base { TInitCell, BaseLoc::Frame };
     case LNC:
-      killLocals();
+      loseNonRefLocalTypes();
       topC(--state.stackIdx);
-      return folly::none;
+      return Base { TInitCell, BaseLoc::Frame };
 
     case LSL:
       {
-        // TODO: return StaticObjProp bases so these don't always kill
-        // object properties.
-        UNUSED auto const cls = topA(state.info.valCount());
-        return folly::none;
+        auto const cls  = topA(state.info.valCount());
+        auto const prop = locAsCell(state.mvec.locBase);
+        return miBaseSProp(cls, prop);
       }
     case LSC:
       {
         auto const cls  = topA(state.info.valCount());
-        auto const prop = tv(topC(--state.stackIdx));
-        auto const self = selfCls();
-        if (self && cls.subtypeOf(*self) &&
-            prop && prop->m_type == KindOfStaticString) {
-          if (auto const ty = selfPropAsCell(prop->m_data.pstr)) {
-            return Base { *ty, BaseLoc::StaticObjProp, cls,
-              prop->m_data.pstr };
-          }
-        }
-        return Base { TCell, BaseLoc::StaticObjProp, cls, nullptr };
+        auto const prop = topC(--state.stackIdx);
+        return miBaseSProp(cls, prop);
       }
 
     case NumLocationCodes:
@@ -2401,13 +2395,11 @@ private: // member instructions
       return;
     }
 
-    if (!state.base) return;
-
     // We know for sure we're going to be in an object property.
-    if (state.base->type.subtypeOf(TObj)) {
+    if (state.base.type.subtypeOf(TObj)) {
       state.base = Base { TInitCell,
                           BaseLoc::PostProp,
-                          state.base->type,
+                          state.base.type,
                           name };
       return;
     }
@@ -2450,13 +2442,11 @@ private: // member instructions
       handleInSelfElemD(state);
     }
 
-    if (!state.base) return;
-
-    if (state.base->type.subtypeOf(TArr)) {
-      state.base = Base { TInitCell, BaseLoc::PostElem, state.base->type };
+    if (state.base.type.subtypeOf(TArr)) {
+      state.base = Base { TInitCell, BaseLoc::PostElem, state.base.type };
       return;
     }
-    if (state.base->type.subtypeOf(TStr)) {
+    if (state.base.type.subtypeOf(TStr)) {
       state.base = Base { TStr, BaseLoc::PostElem };
       return;
     }
@@ -2474,16 +2464,14 @@ private: // member instructions
 
   void miNewElem(MInstrState& state) {
     if (!state.info.newElem()) {
-      // This path is about to fatal.
-      state.base = folly::none;
+      state.base = Base { TInitCell, BaseLoc::Fataled };
       return;
     }
+
     handleInThisNewElem(state);
     handleInSelfNewElem(state);
 
-    if (!state.base) return;
-
-    if (state.base->type.subtypeOf(TArr)) {
+    if (state.base.type.subtypeOf(TArr)) {
       /*
        * Inside of an array, this appears to create a TUninit and let
        * the next operation turn it into a real null (or stdClass or
@@ -2495,7 +2483,7 @@ private: // member instructions
        * nice if Elem dims didn't have to have KindOfUninit in their
        * switches), and a wider type is never wrong.
        */
-      state.base = Base { TNull, BaseLoc::PostElem, state.base->type };
+      state.base = Base { TNull, BaseLoc::PostElem, state.base.type };
       return;
     }
 
@@ -2787,23 +2775,17 @@ private: // member instructions
     miPop(state);
   }
 
-  // "Do" a final op in the dim but throw away anything we know so
-  // far.  This is used to allow the SetWithRef final ops to not
-  // really be supported for much ...
-  void miDiscard(MInstrState& state) {
+  void miFinal(MInstrState& state, const bc::SetWithRefLM& op) {
     killThisProps();
     killSelfProps();
-    state.base = folly::none;
     if (state.mcode() != MemberCode::MW) mcodeKey(state);
-  }
-
-  void miFinal(MInstrState& state, const bc::SetWithRefLM& op) {
-    miDiscard(state);
     miPop(state);
   }
 
   void miFinal(MInstrState& state, const bc::SetWithRefRM& op) {
-    miDiscard(state);
+    killThisProps();
+    killSelfProps();
+    if (state.mcode() != MemberCode::MW) mcodeKey(state);
     popR();
     miPop(state);
   }
@@ -2946,6 +2928,7 @@ private:
     for (auto& l : m_state.locals) l = union_of(l, TUninit);
   }
 
+private:
   void specialFunctionEffects(SString name) {
     // extract() trashes the local variable environment.
     if (name->isame(s_extract.get())) {

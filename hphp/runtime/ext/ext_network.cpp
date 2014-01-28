@@ -500,7 +500,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
       memcpy(tp + ll , cp + ll + 1, n);
       ll = ll + n + 1;
     }
-    s.setSize(dlen);
+    s.setSize(dlen > 0 ? dlen - 1 : 0);
     cp += dlen;
 
     subarray.set(s_txt, s);

@@ -464,6 +464,7 @@ struct Unit {
   static Array getClassesInfo();
   static Array getInterfacesInfo();
   static Array getTraitsInfo();
+  static Array getClassesWithAttrInfo(HPHP::Attr attrs, bool inverse = false);
 
   size_t numLitstrs() const {
     return m_namedInfo.size();

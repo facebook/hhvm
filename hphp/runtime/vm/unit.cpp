@@ -291,49 +291,40 @@ public:
   }
 };
 
-Array Unit::getClassesInfo() {
-  // Return an array of all defined class names.  This method is used to
-  // support get_declared_classes().
+Array Unit::getClassesWithAttrInfo(Attr attrs, bool inverse) {
   Array a = Array::Create();
   if (s_namedDataMap) {
     for (AllCachedClasses ac; !ac.empty();) {
       Class* c = ac.popFront();
-      if (!(c->attrs() & (AttrInterface|AttrTrait))) {
-        a.append(c->nameRef());
+      if ((c->attrs() & attrs) ? !inverse : inverse) {
+        if (c->isBuiltin()) {
+          a.prepend(c->nameRef());
+        } else {
+          a.append(c->nameRef());
+        }
       }
     }
   }
   return a;
+}
+
+Array Unit::getClassesInfo() {
+  // Return an array of all defined class names.  This method is used to
+  // support get_declared_classes().
+  return getClassesWithAttrInfo(AttrInterface | AttrTrait,
+                                 /* inverse = */ true);
 }
 
 Array Unit::getInterfacesInfo() {
   // Return an array of all defined interface names.  This method is used to
   // support get_declared_interfaces().
-  Array a = Array::Create();
-  if (s_namedDataMap) {
-    for (AllCachedClasses ac; !ac.empty();) {
-      Class* c = ac.popFront();
-      if (c->attrs() & AttrInterface) {
-        a.append(c->nameRef());
-      }
-    }
-  }
-  return a;
+  return getClassesWithAttrInfo(AttrInterface);
 }
 
 Array Unit::getTraitsInfo() {
   // Returns an array with all defined trait names.  This method is used to
   // support get_declared_traits().
-  Array array = Array::Create();
-  if (s_namedDataMap) {
-    for (AllCachedClasses ac; !ac.empty(); ) {
-      Class* c = ac.popFront();
-      if (c->attrs() & AttrTrait) {
-        array.append(c->nameRef());
-      }
-    }
-  }
-  return array;
+  return getClassesWithAttrInfo(AttrTrait);
 }
 
 bool Unit::checkStringId(Id id) const {

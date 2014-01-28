@@ -315,12 +315,6 @@ void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
                                 std::unique_ptr<folly::IOBuf> value_chain) {
   Cursor cursor(key_chain.get());
   std::string key = cursor.readFixedString(key_chain->computeChainDataLength());
-
-  // HTTP has case insensitive header keys
-  for (auto& c : key) {
-    c = std::toupper(c);
-  }
-
   cursor = Cursor(value_chain.get());
   std::string value = cursor.readFixedString(
                                value_chain->computeChainDataLength());

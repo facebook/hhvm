@@ -221,6 +221,16 @@ void HttpProtocol::PrepareEnv(Variant& env,
     env.set(s_HPHP_HOTPROFILER, 1);
 #endif
   }
+
+  // Do this last so it can overwrite all the previous settings
+  HeaderMap transportParams;
+  transport->getTransportParams(transportParams);
+  for (auto const& header : transportParams) {
+    String key(header.first);
+    String value(header.second.back());
+    g_context->setenv(key, value);
+    env.set(key, value);
+  }
 }
 
 void HttpProtocol::PrepareRequestVariables(Variant& request,
@@ -404,25 +414,16 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
 }
 
 void HttpProtocol::CopyTransportParams(Variant& server,
-                                    Transport *transport) {
+                                       Transport *transport) {
   HeaderMap transportParams;
   // Get additional server params from the transport if it has any. In the case
   // of fastcgi this is basically a full header list from apache/nginx.
   transport->getTransportParams(transportParams);
   for (auto const& header : transportParams) {
-    auto const& key = header.first;
-    auto const& values = header.second;
-    auto normalizedKey = string_replace(f_strtoupper(key), s_dash,
-                                        s_underscore);
-
-    // Be careful here to not overwrite any _SERVER variable
-    // that has already been set elsewhere and make sure it has a value.
-    if (!values.empty() && !server.asArrRef().exists(normalizedKey)) {
-      // When a header has multiple values, we always take the last one.
-      server.set(normalizedKey, String(values.back()));
-    }
+    // These overwrite anything already set in the $_SERVER
+    // When a header has multiple values, we always take the last one.
+    server.set(String(header.first), String(header.second.back()));
   }
-
 }
 
 void HttpProtocol::CopyServerInfo(Variant& server,
@@ -665,7 +666,7 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
        iter != vServerVars.end(); ++iter) {
     server.set(String(iter->first), String(iter->second));
   }
-  // Do this last as to not overwrite any existing server variables.
+  // Do this last so it can overwrite all the previous settings
   CopyTransportParams(server, transport);
   sri.setServerVariables(server);
 

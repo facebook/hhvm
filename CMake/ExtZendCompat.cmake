@@ -1,4 +1,4 @@
-option(ENABLE_ZEND_COMPAT "Enable Zend source compatibility (beta)" OFF)
+option(ENABLE_ZEND_COMPAT "Enable Zend source compatibility (beta)" ON)
 
 set(ZEND_COMPAT_PROJECTS)
 set(ZEND_COMPAT_BUILD_DIRS)

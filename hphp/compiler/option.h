@@ -105,6 +105,12 @@ public:
   static bool AnalyzePerfectVirtuals;
   static bool HardTypeHints;
 
+  /*
+   * Flags that only affect HHBBC right now.  See hhbbc/hhbbc.h for
+   * description.
+   */
+  static bool HardConstProp;
+
   /**
    * Separate compilation
    */

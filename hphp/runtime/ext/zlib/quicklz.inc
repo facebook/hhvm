@@ -780,7 +780,7 @@ size_t qlz_compress(const void *source, char *destination, size_t size, qlz_stat
 		memcpy(src, source, size);
 		r = base + qlz_compress_core(src, (unsigned char*)destination + base, size, state);
 
- 		if(r == base)
+		if(r == base)
 		{
 			memcpy(destination + base, src, size);
 			r = size + base;
@@ -856,4 +856,3 @@ size_t qlz_decompress(const char *source, void *destination, qlz_state_decompres
 #endif
 	return dsiz;
 }
-

@@ -350,9 +350,6 @@ bool isNormalPropertyAccess(const NormalizedInstruction& i,
                             int propInput,
                             int objInput);
 
-bool mInstrHasUnknownOffsets(const NormalizedInstruction& i,
-                             Class* contextClass);
-
 struct PropInfo {
   PropInfo()
     : offset(-1)

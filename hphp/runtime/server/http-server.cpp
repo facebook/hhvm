@@ -76,9 +76,11 @@ HttpServer::HttpServer()
 
   auto serverFactory = ServerFactoryRegistry::getInstance()->getFactory
       (RuntimeOption::ServerType);
-  ServerOptions options
-    (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-     startingThreadCount);
+  const std::string address = RuntimeOption::ServerFileSocket.empty()
+    ? RuntimeOption::ServerIP : RuntimeOption::ServerFileSocket;
+  ServerOptions options(
+      address, RuntimeOption::ServerPort, startingThreadCount);
+  options.m_useFileSocket = !RuntimeOption::ServerFileSocket.empty();
   options.m_serverFD = RuntimeOption::ServerPortFd;
   options.m_sslFD = RuntimeOption::SSLPortFd;
   options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
@@ -494,7 +496,12 @@ bool HttpServer::startServer(bool pageServer) {
       }
 
       if (errno == EACCES) {
-        Logger::Error("Permission denied listening on port %d", port);
+        if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
+          Logger::Error("Permission denied opening socket at %s",
+                        RuntimeOption::ServerFileSocket.c_str());
+        } else {
+          Logger::Error("Permission denied listening on port %d", port);
+        }
         return false;
       }
 
@@ -507,6 +514,22 @@ bool HttpServer::startServer(bool pageServer) {
       StringBuffer response;
       http.get(url.c_str(), response);
 
+      if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
+        if (i == 0) {
+          Logger::Info("Unlinking unused socket at %s",
+                       RuntimeOption::ServerFileSocket.c_str());
+        }
+        struct stat stat_buf;
+        if (stat(RuntimeOption::ServerFileSocket.c_str(), &stat_buf) == 0
+            && S_ISSOCK(stat_buf.st_mode)) {
+          std::string cmd = "bash -c '! fuser ";
+          cmd += RuntimeOption::ServerFileSocket;
+          cmd += "'";
+          if (Util::ssystem(cmd.c_str()) == 0) {
+            unlink(RuntimeOption::ServerFileSocket.c_str());
+          }
+        }
+      }
       sleep(1);
     }
   }
@@ -542,15 +565,27 @@ bool HttpServer::startServer(bool pageServer) {
         }
         return true;
       } catch (FailedToListenException &e) {
-        if (i == 0) {
-          Logger::Info("killing anything listening on port %d", port);
+        if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
+          if (i == 0) {
+            Logger::Info("unlinking socket at %s",
+                         RuntimeOption::ServerFileSocket.c_str());
+          }
+
+          struct stat stat_buf;
+          if (stat(RuntimeOption::ServerFileSocket.c_str(), &stat_buf) == 0
+              && S_ISSOCK(stat_buf.st_mode)) {
+            unlink(RuntimeOption::ServerFileSocket.c_str());
+          }
+        } else {
+          if (i == 0) {
+            Logger::Info("killing anything listening on port %d", port);
+          }
+
+          std::string cmd = "lsof -t -i :";
+          cmd += lexical_cast<std::string>(port);
+          cmd += " | xargs kill -9";
+          Util::ssystem(cmd.c_str());
         }
-
-        std::string cmd = "lsof -t -i :";
-        cmd += lexical_cast<std::string>(port);
-        cmd += " | xargs kill -9";
-        Util::ssystem(cmd.c_str());
-
         sleep(1);
       }
     }

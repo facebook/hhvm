@@ -111,6 +111,24 @@ bool f_stream_context_set_option(CVarRef stream_or_context,
   }
 }
 
+Variant f_stream_context_get_default(CArrRef options /* = null_array */) {
+  Resource &resource = g_context->getStreamContext();
+  if (resource.isNull()) {
+    resource = Resource(NEWOBJ(StreamContext)(Array::Create(),
+                                              Array::Create()));
+    g_context->setStreamContext(resource);
+  }
+  StreamContext *context = resource.getTyped<StreamContext>();
+  if (!options.isNull() && !f_stream_context_set_option0(context, options)) {
+    return false;
+  }
+  return resource;
+}
+
+Variant f_stream_context_set_default(CArrRef options) {
+  return f_stream_context_get_default(options);
+}
+
 Variant f_stream_context_get_params(CResRef stream_or_context) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context) {

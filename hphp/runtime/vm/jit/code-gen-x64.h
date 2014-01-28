@@ -315,7 +315,6 @@ private:
   RDS::Handle cgLdClsCachedCommon(IRInstruction* inst);
   void emitFwdJcc(ConditionCode cc, Block* target);
   void emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
-  void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
   const Func* curFunc() const;
   Class*      curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }

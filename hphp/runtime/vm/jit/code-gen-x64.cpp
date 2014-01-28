@@ -5854,20 +5854,6 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   m_as.  call   (curOpd(addr).reg());
 }
 
-void CodeGenerator::emitContVarEnvHelperCall(SSATmp* fp, TCA helper) {
-  auto scratch = m_rScratch;
-
-  m_as.  loadq (curOpd(fp).reg()[AROFF(m_varEnv)], scratch);
-  m_as.  testq (scratch, scratch);
-  unlikelyIfBlock(CC_NZ, [&] (Asm& a) {
-    cgCallHelper(a,
-                 CppCall(helper),
-                 kVoidDest,
-                 SyncOptions::kNoSyncPoint,
-                 ArgGroup(curOpds()).ssa(fp));
-  });
-}
-
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg = curOpd(inst->src(0)).reg();
 

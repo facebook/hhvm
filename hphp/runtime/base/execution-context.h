@@ -55,6 +55,7 @@ class PCFilter;
 
 typedef hphp_hash_map<StringData*, HPHP::Eval::PhpFile*, string_data_hash,
                       string_data_same> EvaledFilesMap;
+typedef std::vector<HPHP::Eval::PhpFile*> EvaledFilesVec;
 
 /**
  * Mainly designed for extensions to perform initialization and shutdown
@@ -553,6 +554,7 @@ public:
   VarEnv* m_globalVarEnv;
 
   EvaledFilesMap m_evaledFiles;
+  EvaledFilesVec m_evaledFilesOrder;
   typedef std::vector<HPHP::Unit*> EvaledUnitsVec;
   EvaledUnitsVec m_createdFuncs;
 

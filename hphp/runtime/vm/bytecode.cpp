@@ -2368,6 +2368,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
           // return the unit.
           efile = it->second;
           m_evaledFiles[spath.get()] = efile;
+          m_evaledFilesOrder.push_back(efile);
           spath.get()->incRefCount();
           initial = false;
           return efile;
@@ -2386,6 +2387,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
     }
     // if parsing was successful, update the mappings for spath and
     // rpath (if it exists).
+    m_evaledFilesOrder.push_back(efile);
     m_evaledFiles[spath.get()] = efile;
     spath.get()->incRefCount();
     // Don't incRef efile; checkoutFile() already counted it.

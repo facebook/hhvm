@@ -107,6 +107,7 @@ std::string RuntimeOption::Host;
 std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
+std::string RuntimeOption::ServerFileSocket;
 std::string RuntimeOption::ServerPrimaryIP;
 int RuntimeOption::ServerPort;
 int RuntimeOption::ServerPortFd = -1;
@@ -718,6 +719,7 @@ void RuntimeOption::Load(Hdf &config,
     DefaultServerNameSuffix = server["DefaultServerNameSuffix"].getString();
     ServerType = server["Type"].getString(ServerType);
     ServerIP = server["IP"].getString();
+    ServerFileSocket = server["FileSocket"].getString();
     ServerPrimaryIP = Util::GetPrimaryIP();
     ServerPort = server["Port"].getUInt16(80);
     ServerBacklog = server["Backlog"].getInt16(128);

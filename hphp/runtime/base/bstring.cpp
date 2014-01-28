@@ -17,6 +17,8 @@
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/util/util.h"
 
+#include "folly/Portability.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -30,14 +32,16 @@ bool bstrcaseeq(const char* left, const char* right, size_t n) {
   if (left == right) return true;
 
   // Fast case sensitive comparison, unrolled to do 8 bytes at a time.
-  typedef uint64_t widecmp_t;
   size_t i = 0;
+#ifndef FOLLY_SANITIZE_ADDRESS
+  typedef uint64_t widecmp_t;
   if (n >= sizeof(widecmp_t)) {
     while (*(const widecmp_t*)(&left[i]) == *(const widecmp_t*)(&right[i])) {
       i += sizeof(widecmp_t);
       if (i >= (n - (sizeof(widecmp_t) - 1))) break;
     }
   }
+#endif
 
   // Finish whatever is left over.
   for (; i < n; ++i) {

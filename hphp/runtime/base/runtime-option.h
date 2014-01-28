@@ -109,6 +109,7 @@ public:
   static std::string DefaultServerNameSuffix;
   static std::string ServerType;
   static std::string ServerIP;
+  static std::string ServerFileSocket;
   static std::string ServerPrimaryIP;
   static int ServerPort;
   static int ServerPortFd;

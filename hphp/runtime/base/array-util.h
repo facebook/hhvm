@@ -32,11 +32,6 @@ public:
   // Compositions.
 
   /**
-   * Split array into chunks.
-   */
-  static Variant Chunk(CArrRef input, int size, bool preserve_keys = false);
-
-  /**
    * Removes the elements designated by offset and length and replace them
    * with supplied array.
    */

@@ -29,34 +29,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // compositions
 
-Variant ArrayUtil::Chunk(CArrRef input, int size,
-                         bool preserve_keys /* = false */) {
-  if (size < 1) {
-    throw_invalid_argument("size: %d", size);
-    return init_null();
-  }
-
-  Array ret = Array::Create();
-  Array chunk;
-  int current = 0;
-  for (ArrayIter iter(input); iter; ++iter) {
-    if (preserve_keys) {
-      chunk.setWithRef(iter.first(), iter.secondRef(), true);
-    } else {
-      chunk.appendWithRef(iter.secondRef());
-    }
-    if ((++current % size) == 0) {
-      ret.append(chunk);
-      chunk.clear();
-    }
-  }
-
-  if (!chunk.empty()) {
-    ret.append(chunk);
-  }
-  return ret;
-}
-
 Variant ArrayUtil::Splice(CArrRef input, int offset, int64_t length /* = 0 */,
                           CVarRef replacement /* = null_variant */,
                           Array *removed /* = NULL */) {

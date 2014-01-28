@@ -80,10 +80,41 @@ Variant f_array_change_key_case(CVarRef input, bool upper /* = false */) {
   getCheckedArrayRet(input, false);
   return ArrayUtil::ChangeKeyCase(arr_input, !upper);
 }
-Variant f_array_chunk(CVarRef input, int size,
+
+Variant f_array_chunk(CVarRef input, int chunkSize,
                       bool preserve_keys /* = false */) {
-  getCheckedArray(input);
-  return ArrayUtil::Chunk(arr_input, size, preserve_keys);
+
+  const auto& cellInput = *input.asCell();
+  if (UNLIKELY(!isContainer(cellInput))) {
+    raise_warning("Invalid operand type was used: %s expects "
+                  "an array or collection as argument 1", __FUNCTION__+2);
+    return init_null();
+  }
+
+  if (chunkSize < 1) {
+    throw_invalid_argument("size: %d", chunkSize);
+    return init_null();
+  }
+
+  Array ret = Array::Create();
+  Array chunk;
+  int current = 0;
+  for (ArrayIter iter(cellInput); iter; ++iter) {
+    if (preserve_keys) {
+      chunk.setWithRef(iter.first(), iter.secondRefPlus(), true);
+    } else {
+      chunk.appendWithRef(iter.secondRefPlus());
+    }
+    if ((++current % chunkSize) == 0) {
+      ret.append(chunk);
+      chunk.clear();
+    }
+  }
+  if (!chunk.empty()) {
+    ret.append(chunk);
+  }
+
+  return ret;
 }
 
 static inline bool array_column_coerce_key(Variant &key, const char *name) {

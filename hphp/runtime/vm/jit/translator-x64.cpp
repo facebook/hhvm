@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/vtune-jit.h"
 
 #include "folly/MapUtil.h"
 
@@ -436,8 +437,13 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
   size_t stubsize = code.stubs().frontier() - stubstart;
   assert(asize == 0);
   if (stubsize && RuntimeOption::EvalDumpTCAnchors) {
-    addTranslation(TransRec(sk, sk.unit()->md5(), TransAnchor,
-                            astart, asize, stubstart, stubsize));
+    TransRec tr(sk, sk.unit()->md5(), TransAnchor,
+                astart, asize, stubstart, stubsize);
+    addTranslation(tr);
+    if (RuntimeOption::EvalJitUseVtuneAPI) {
+      reportTraceletToVtune(sk.unit(), sk.func(), tr);
+    }
+
     if (m_profData) {
       m_profData->addTransNonProf(TransAnchor, sk);
     }
@@ -691,9 +697,13 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   func->setPrologue(paramIndex, start);
 
   assert(m_mode == TransPrologue || m_mode == TransProflogue);
-  addTranslation(TransRec(skFuncBody, func->unit()->md5(),
-                          m_mode, aStart, code.main().frontier() - aStart,
-                          stubStart, code.stubs().frontier() - stubStart));
+  TransRec tr(skFuncBody, func->unit()->md5(),
+              m_mode, aStart, code.main().frontier() - aStart,
+              stubStart, code.stubs().frontier() - stubStart);
+  addTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(func->unit(), func, tr);
+  }
 
   if (m_profData) {
     m_profData->addTransPrologue(m_mode, skFuncBody, paramIndex);
@@ -1643,6 +1653,10 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
 
   trampolineMap[helperAddr] = trampAddr;
   recordBCInstr(OpNativeTrampoline, trampolines, trampAddr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTrampolineToVtune(trampAddr, trampolines.frontier() - trampAddr);
+  }
+
   return trampAddr;
 }
 
@@ -1935,10 +1949,14 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   m_fixupMap.processPendingFixups();
   processPendingCatchTraces();
 
-  addTranslation(TransRec(sk, sk.unit()->md5(), transKind, tp.get(), start,
-                          code.main().frontier() - start, stubStart,
-                          code.stubs().frontier() - stubStart,
-                          m_bcMap));
+  TransRec tr(sk, sk.unit()->md5(), transKind, tp.get(), start,
+              code.main().frontier() - start, stubStart,
+              code.stubs().frontier() - stubStart,
+              m_bcMap);
+  addTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(sk.unit(), sk.func(), tr);
+  }
   m_bcMap.clear();
 
   recordGdbTranslation(sk, sk.func(), code.main(), start,

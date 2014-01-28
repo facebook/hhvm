@@ -6386,7 +6386,8 @@ void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
     // If we're on the first instruction of the block or we have a new
     // marker since the last instruction, update the bc mapping.
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
-        m_tx64->isTransDBEnabled() && bcMap) {
+        (m_tx64->isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) &&
+        bcMap) {
       bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
                                       inst->marker().bcOff,
                                       m_as.frontier(),

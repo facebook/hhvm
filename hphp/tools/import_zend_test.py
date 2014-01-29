@@ -251,6 +251,7 @@ norepo_tests = (
     '/Zend/tests/unset_cv01.php',
     '/ext/bz2/tests/with_strings.php',
     '/ext/pcre/tests/preg_replace.php',
+    '/ext/pdo_mysql/tests/pdo_mysql_connect_charset.php',
     '/ext/pdo_sqlite/tests/bug33841.php',
     '/ext/pdo_sqlite/tests/bug46139.php',
     '/ext/pdo_sqlite/tests/bug52487.php',

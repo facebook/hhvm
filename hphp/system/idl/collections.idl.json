@@ -1122,7 +1122,7 @@
         {
             "name": "VectorIterator",
             "ifaces": [
-                "KeyedIterator"
+                "HH\\KeyedIterator"
             ],
             "desc": "An iterator implementation for iterating over a Vector\/FrozenVector.",
             "flags": [
@@ -2239,7 +2239,7 @@
         {
             "name": "MapIterator",
             "ifaces": [
-                "KeyedIterator"
+                "HH\\KeyedIterator"
             ],
             "desc": "An iterator implementation for iterating over a Map.",
             "flags": [
@@ -3559,7 +3559,7 @@
         {
             "name": "PairIterator",
             "ifaces": [
-                "KeyedIterator"
+                "HH\\KeyedIterator"
             ],
             "desc": "An iterator implementation for iterating over a Pair.",
             "flags": [

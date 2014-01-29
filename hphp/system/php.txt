@@ -7,9 +7,9 @@ hphp/system/php/lang/resource.php
 
 hphp/system/php/lang/Traversable.ns.php
 hphp/system/php/lang/Iterator.ns.php
-hphp/system/php/lang/IteratorAggregate.php
-hphp/system/php/lang/KeyedIterator.php
-hphp/system/php/lang/KeyedIterable.php
+hphp/system/php/lang/IteratorAggregate.ns.php
+hphp/system/php/lang/KeyedIterator.ns.php
+hphp/system/php/lang/KeyedIterable.ns.php
 hphp/system/php/lang/Exception.php
 hphp/system/php/spl/exceptions/exceptions.php
 hphp/system/php/spl/interfaces/Countable.php

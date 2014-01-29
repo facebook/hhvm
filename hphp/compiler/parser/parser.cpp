@@ -2051,7 +2051,11 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
 
   std::vector<AliasEntry> aliases {
     (AliasEntry){"Traversable", "HH\\Traversable"},
+    (AliasEntry){"KeyedTraversable", "HH\\KeyedTraversable"},
     (AliasEntry){"Iterator", "HH\\Iterator"},
+    (AliasEntry){"KeyedIterator", "HH\\KeyedIterator"},
+    (AliasEntry){"Iterable", "HH\\Iterable"},
+    (AliasEntry){"KeyedIterable", "HH\\KeyedIterable"},
     (AliasEntry){"Collection", "HH\\Collection"},
     (AliasEntry){"Vector", "HH\\Vector"},
     (AliasEntry){"Set", "HH\\Set"},

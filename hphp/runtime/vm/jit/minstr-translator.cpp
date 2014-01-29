@@ -1685,7 +1685,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
     },
     [&] { // Taken:
       m_tb.hint(Block::Hint::Unlikely);
-      gen(RaiseArrayIndexNotice, key);
+      gen(RaiseArrayIndexNotice, makeCatch(), key);
       return m_tb.genDefInitNull();
     }
   );

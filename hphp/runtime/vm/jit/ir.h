@@ -367,7 +367,7 @@ O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
 O(RaiseWarning,                     ND, S(Str),                       E|N|Er) \
 O(RaiseNotice,                      ND, S(Str),                       E|N|Er) \
-O(RaiseArrayIndexNotice,            ND, S(Int),                          E|N) \
+O(RaiseArrayIndexNotice,            ND, S(Int),                       E|N|Er) \
 O(CheckInit,                        ND, S(Gen),                            B) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),                B) \
 O(CheckCold,                        ND, NA,                              B|E) \

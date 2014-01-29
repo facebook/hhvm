@@ -12,8 +12,6 @@ var_dump($all_short['arg_separator.output']);
 var_dump(ini_get_all('pcre'));
 var_dump(ini_get_all('pcre', false));
 
-var_dump(ini_get_all('pcre_zend_compat', false));
-
 $core = ini_get_all('core');
 var_dump(array(
   'core: allow_url_fopen' => isset($core['allow_url_fopen']),

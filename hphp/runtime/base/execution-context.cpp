@@ -119,6 +119,9 @@ BaseExecutionContext::BaseExecutionContext() :
                    ini_on_update_fail,
                    ini_get_stdstring,
                    &RuntimeOption::BuildId);
+  IniSetting::Bind(IniSetting::CORE, "hhvm.ext_zend_compat",
+                   ini_on_update_fail, ini_get_bool,
+                   &RuntimeOption::EnableZendCompat),
   IniSetting::Bind(IniSetting::CORE, "file_uploads",
                    ini_on_update_fail, ini_get_bool_as_int,
                    &RuntimeOption::EnableFileUploads);

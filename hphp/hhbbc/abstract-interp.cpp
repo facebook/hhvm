@@ -61,11 +61,13 @@ const StaticString s_unreachable("static analysis error: supposedly "
 
 std::string fpiKindStr(FPIKind k) {
   switch (k) {
-  case FPIKind::Unknown: return "unk";
-  case FPIKind::Func:    return "func";
-  case FPIKind::Ctor:    return "ctor";
-  case FPIKind::ObjMeth: return "objm";
-  case FPIKind::ClsMeth: return "clsm";
+  case FPIKind::Unknown:     return "unk";
+  case FPIKind::CallableArr: return "arr";
+  case FPIKind::Func:        return "func";
+  case FPIKind::Ctor:        return "ctor";
+  case FPIKind::ObjMeth:     return "objm";
+  case FPIKind::ClsMeth:     return "clsm";
+  case FPIKind::ObjInvoke:   return "invoke";
   }
   not_reached();
 }
@@ -144,6 +146,18 @@ bool merge_into(PropState& dst, const PropState& src) {
   return changed;
 }
 
+bool merge_into(ActRec& dst, const ActRec& src) {
+  if (dst.kind != src.kind) {
+    dst = ActRec { FPIKind::Unknown };
+    return true;
+  }
+  if (dst != src) {
+    dst = ActRec { src.kind };
+    return true;
+  }
+  return false;
+}
+
 // Returns whether anything changed in the dst state.
 bool merge_into(State& dst, const State& src) {
   if (!dst.initialized) {
@@ -181,10 +195,8 @@ bool merge_into(State& dst, const State& src) {
   }
 
   for (auto i = size_t{0}; i < dst.fpiStack.size(); ++i) {
-    if (dst.fpiStack[i] != src.fpiStack[i]) {
-      always_assert(dst.fpiStack[i].kind == src.fpiStack[i].kind);
+    if (merge_into(dst.fpiStack[i], src.fpiStack[i])) {
       changed = true;
-      dst.fpiStack[i] = ActRec { src.fpiStack[i].kind };
     }
   }
 
@@ -1290,7 +1302,10 @@ struct InterpStepper : boost::static_visitor<void> {
       }
     }
     popC();
-    fpiPush(ActRec { FPIKind::Func });
+    if (t1.subtypeOf(TObj)) return fpiPush(ActRec { FPIKind::ObjInvoke });
+    if (t1.subtypeOf(TArr)) return fpiPush(ActRec { FPIKind::CallableArr });
+    if (t1.subtypeOf(TStr)) return fpiPush(ActRec { FPIKind::Func });
+    fpiPush(ActRec { FPIKind::Unknown });
   }
 
   void operator()(const bc::FPushFuncU& op) {
@@ -2963,6 +2978,8 @@ private:
     case FPIKind::Ctor:
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
+    case FPIKind::ObjInvoke:
+    case FPIKind::CallableArr:
       break;
     }
   }

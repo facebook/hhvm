@@ -31,7 +31,7 @@ const StaticString
   s_Vector("HH\\Vector"),
   s_Map("HH\\Map"),
   s_Set("HH\\Set"),
-  s_Pair("Pair"),
+  s_Pair("HH\\Pair"),
   s_FrozenVector("HH\\FrozenVector"),
   s_FrozenSet("HH\\FrozenSet"),
   s_FrozenMap("HH\\FrozenMap"),

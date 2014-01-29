@@ -3164,7 +3164,7 @@
             ]
         },
         {
-            "name": "Pair",
+            "name": "HH\\Pair",
             "ifaces": [
                 "ConstVector"
             ],

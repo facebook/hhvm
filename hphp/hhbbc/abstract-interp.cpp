@@ -54,6 +54,7 @@ const StaticString s_empty("");
 const StaticString s_extract("extract");
 const StaticString s_Exception("Exception");
 const StaticString s_Continuation("Continuation");
+const StaticString s_stdClass("stdClass");
 const StaticString s_unreachable("static analysis error: supposedly "
                                  "unreachable code was reached");
 
@@ -293,8 +294,16 @@ bool couldBeEmptyish(Type ty) {
          ty.couldBe(TFalse);
 }
 
+bool mustBeEmptyish(Type ty) {
+  return ty.subtypeOf(TNull) ||
+         ty.subtypeOf(sval(s_empty.get())) ||
+         ty.subtypeOf(TFalse);
+}
+
 bool elemCouldPromoteToArr(Type ty) { return couldBeEmptyish(ty); }
 bool propCouldPromoteToObj(Type ty) { return couldBeEmptyish(ty); }
+bool elemMustPromoteToArr(Type ty)  { return mustBeEmptyish(ty); }
+bool propMustPromoteToObj(Type ty)  { return mustBeEmptyish(ty); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -2104,9 +2113,8 @@ private: // member instructions
     if (auto const name = state.base.locName) {
       auto const ty = thisPropAsCell(name);
       if (ty && propCouldPromoteToObj(*ty)) {
-        // Note: we could merge Obj=stdClass here, but aren't doing so
-        // yet.
-        mergeThisProp(name, TObj);
+        mergeThisProp(name,
+          objExact(m_index.builtin_class(m_ctx, s_stdClass.get())));
       }
       return;
     }
@@ -2114,6 +2122,21 @@ private: // member instructions
     mergeEachThisPropRaw([&] (Type t) {
       return propCouldPromoteToObj(t) ? TObj : TBottom;
     });
+  }
+
+  void handleInSelfPropD(MInstrState& state) {
+    if (!couldBeInSelf(state.base)) return;
+
+    if (auto const name = state.base.locName) {
+      auto const ty = thisPropAsCell(name);
+      if (ty && propCouldPromoteToObj(*ty)) {
+        mergeSelfProp(name,
+          objExact(m_index.builtin_class(m_ctx, s_stdClass.get())));
+      }
+      return;
+    }
+
+    loseNonRefSelfPropTypes();
   }
 
   void handleInThisElemD(MInstrState& state) {
@@ -2130,22 +2153,6 @@ private: // member instructions
     mergeEachThisPropRaw([&] (Type t) {
       return elemCouldPromoteToArr(t) ? TArr : TBottom;
     });
-  }
-
-  void handleInSelfPropD(MInstrState& state) {
-    if (!couldBeInSelf(state.base)) return;
-
-    if (auto const name = state.base.locName) {
-      auto const ty = thisPropAsCell(name);
-      if (ty && propCouldPromoteToObj(*ty)) {
-        // Note: similar to handleInThisPropD, logically this could be
-        // merging Obj=stdClass.
-        mergeSelfProp(name, TObj);
-      }
-      return;
-    }
-
-    loseNonRefSelfPropTypes();
   }
 
   void handleInSelfElemD(MInstrState& state) {
@@ -2182,53 +2189,58 @@ private: // member instructions
   //////////////////////////////////////////////////////////////////////
   // base ops
 
+  void handleLocBasePropD(const MInstrState& state) {
+    auto const locTy = locAsCell(state.mvec.locBase);
+    if (propMustPromoteToObj(locTy)) {
+      auto const ty = objExact(m_index.builtin_class(m_ctx, s_stdClass.get()));
+      setLoc(state.mvec.locBase, ty);
+      return;
+    }
+    if (propCouldPromoteToObj(locTy)) {
+      setLoc(state.mvec.locBase, union_of(locTy, TObj));
+    }
+  }
+
+  void handleLocBaseElemD(const MInstrState& state) {
+    auto const locTy = locAsCell(state.mvec.locBase);
+    if (locTy.subtypeOf(TArr) || elemMustPromoteToArr(locTy)) {
+      // We need to do this even if it was already an array, because
+      // we may modify it if it was an SArr or SArr=.
+      setLoc(state.mvec.locBase, TArr);
+      return;
+    }
+    if (elemCouldPromoteToArr(locTy)) {
+      setLoc(state.mvec.locBase, union_of(locTy, TArr));
+    }
+  }
+
   /*
    * Local bases can change the type of the local depending on the
-   * mvector, and the next dim.  The current behavior here is very
-   * conservative.
-   *
-   * Basically for now, if we're about to do property dims and it's
-   * not an Obj, we give up, and if we're about to do elem dims and
-   * it's not an Arr or Obj, we give up.
-   *
-   * TODO(#3343813): make this more precise.
+   * mvector, and the next dim.  This function updates the types as
+   * well as calling the appropriate handler to compute effects on
+   * local types.
    */
   Base miBaseLoc(const MInstrState& state) {
     auto& info = state.info;
     auto& mvec = state.mvec;
     bool const isDefine = info.getAttr(mvec.lcode) & MIA_define;
 
-    if (isDefine) ensureInit(mvec.locBase);
-
-    auto const locTy = derefLoc(mvec.locBase);
     if (info.m_instr == MI_UnsetM) {
       // Unsetting can turn static strings and arrays non-static.
-      auto const loose = loosen_statics(locTy);
+      auto const loose = loosen_statics(derefLoc(mvec.locBase));
       setLoc(mvec.locBase, loose);
       return Base { loose, BaseLoc::Frame };
     }
 
-    if (!isDefine) {
-      return Base { locTy, BaseLoc::Frame };
-    }
+    if (!isDefine) return Base { derefLoc(mvec.locBase), BaseLoc::Frame };
+
+    ensureInit(mvec.locBase);
 
     auto const firstDim = mvec.mcodes[0].mcode;
     if (mcodeIsProp(firstDim)) {
-      if (!locTy.subtypeOf(TObj)) {
-        setLoc(mvec.locBase, TInitCell);
-      }
-    }
-
-    if (mcodeIsElem(firstDim) || firstDim == MemberCode::MW) {
-      if (locTy.strictSubtypeOf(TArr)) {
-        // We're potentially about to mutate any constant or static
-        // array, so raise it to TArr for now.
-        setLoc(mvec.locBase, TArr);
-      } else if (!locTy.subtypeOfAny(TArr, TObj)) {
-        // We're not handling things other than TArr and TObj subtypes
-        // so far.
-        setLoc(mvec.locBase, TInitCell);
-      }
+      handleLocBasePropD(state);
+    } else if (mcodeIsElem(firstDim) || firstDim == MemberCode::MW) {
+      handleLocBaseElemD(state);
     }
 
     return Base { locAsCell(mvec.locBase), BaseLoc::Frame };
@@ -2403,9 +2415,6 @@ private: // member instructions
                           name };
       return;
     }
-    // TODO(#3343813): if it must be null, false, or "" we could use a
-    // exact PostProp of Obj=stdclass to avoid future dims returning
-    // couldBeThisObj.
 
     /*
      * Otherwise, intermediate props with define can promote a null,
@@ -2414,10 +2423,17 @@ private: // member instructions
      * The base may also legitimately be an object and our next base
      * is in an object property.
      *
-     * We conservatively treat all these cases as "possibly" being
-     * inside of an object property with "PostProp" with locType TTop.
+     * If we know for sure we're promoting to stdClass, we can put the
+     * locType pointing at that.  Otherwise we conservatively treat
+     * all these cases as "possibly" being inside of an object
+     * property with "PostProp" with locType TTop.
      */
-    state.base = Base { TInitCell, BaseLoc::PostProp, TTop, name };
+    auto const newBaseLocTy =
+      propMustPromoteToObj(state.base.type)
+        ? objExact(m_index.builtin_class(m_ctx, s_stdClass.get()))
+        : TTop;
+
+    state.base = Base { TInitCell, BaseLoc::PostProp, newBaseLocTy, name };
   }
 
   void miElem(MInstrState& state) {
@@ -2632,6 +2648,9 @@ private: // member instructions
   // Final elem ops
 
   void miFinalSetElem(MInstrState& state) {
+    // TODO(#3343813): we should push the type of the rhs when we can;
+    // SetM has some weird cases where it pushes null instead to
+    // handle.
     mcodeKey(state);
     auto const t1 = popC();
     miPop(state);
@@ -3090,7 +3109,7 @@ private: // locals
     auto v = locRaw(l);
     if (v.couldBe(TUninit)) {
       if (v.subtypeOf(TNull))    return setLocRaw(l, TInitNull);
-      if (v.subtypeOf(TUnc))     return setLocRaw(l, TUnc);
+      if (v.subtypeOf(TUnc))     return setLocRaw(l, TInitUnc);
       if (v.subtypeOf(TCell))    return setLocRaw(l, TInitCell);
       if (v.subtypeOf(TGen))     return setLocRaw(l, TInitGen);
     }

@@ -6,7 +6,6 @@ var_dump($all_detailed['allow_url_fopen']);
 var_dump($all_detailed['arg_separator.output']);
 
 $all_short = ini_get_all(null, false);
-var_dump($all_short['hphp.compiler_version']['access']);
 var_dump($all_short['allow_url_fopen']);
 var_dump($all_short['arg_separator.output']);
 

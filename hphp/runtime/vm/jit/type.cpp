@@ -146,9 +146,9 @@ RuntimeType Type::toRuntimeType() const {
   auto rtt = RuntimeType{outer, inner};
 
   if (isSpecialized()) {
-    if (isArray()) {
+    if (subtypeOf(Type::Arr)) {
       return rtt.setArrayKind(getArrayKind());
-    } else {
+    } else if (subtypeOf(Type::Obj)) {
       return rtt.setKnownClass(getClass());
     }
   }

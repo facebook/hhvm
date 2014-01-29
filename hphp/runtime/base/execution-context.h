@@ -378,7 +378,7 @@ private:
   std::vector<std::pair<Variant,int> > m_userErrorHandlers;
   std::vector<Variant> m_userExceptionHandlers;
   ErrorState m_errorState;
-  int m_errorReportingLevel;
+  int64_t m_errorReportingLevel;
   String m_lastError;
   int m_lastErrorNum;
   std::string m_errorPage;
@@ -410,7 +410,6 @@ private:
   // helper functions
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);
-  int64_t convertBytesToInt(const String& value) const;
 
   DECLARE_DBG_SETTING
 };

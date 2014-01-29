@@ -30,7 +30,8 @@ IMPLEMENT_REQUEST_LOCAL(RequestData, s_intl_request);
 const StaticString s_resdata("__resdata");
 
 void IntlExtension::bindIniSettings() {
-  IniSetting::Bind(this, "intl.default_locale", "",
+  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                   "intl.default_locale", "",
                    icu_on_update_default_locale, icu_get_default_locale,
                    nullptr);
 }

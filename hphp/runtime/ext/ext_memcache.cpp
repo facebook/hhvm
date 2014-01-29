@@ -55,10 +55,12 @@ class MemcacheExtension : public Extension {
   public:
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
     void moduleInit() override {
-      IniSetting::Bind(this, "memcache.hash_strategy", "standard",
+      IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                       "memcache.hash_strategy", "standard",
                        ini_on_update_hash_strategy, ini_get_hash_strategy,
                        &MEMCACHEG(hash_strategy));
-      IniSetting::Bind(this, "memcache.hash_function", "crc32",
+      IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                       "memcache.hash_function", "crc32",
                        ini_on_update_hash_function, ini_get_hash_function,
                        &MEMCACHEG(hash_function));
     }

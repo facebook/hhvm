@@ -91,8 +91,8 @@ public:
   static bool EnableHipHopErrors;
   static bool AssertActive;
   static bool AssertWarning;
-  static int NoticeFrequency; // output 1 out of NoticeFrequency notices
-  static int WarningFrequency;
+  static int64_t NoticeFrequency; // output 1 out of NoticeFrequency notices
+  static int64_t WarningFrequency;
   static int RaiseDebuggingFrequency;
   static int64_t SerializationSizeLimit;
   static int64_t StringOffsetLimit;
@@ -307,7 +307,7 @@ public:
   static int64_t DropCacheCycle;
   static int64_t MaxSQLRowCount;
   static int64_t MaxMemcacheKeyCount;
-  static int  SocketDefaultTimeout;
+  static int64_t SocketDefaultTimeout;
   static bool LockCodeMemory;
   static int MaxArrayChain;
   static bool WarnOnCollectionToArray;

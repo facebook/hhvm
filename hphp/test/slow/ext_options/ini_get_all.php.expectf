@@ -1,11 +1,11 @@
-int(6)
+int(0)
 array(3) {
   ["global_value"]=>
   string(1) "1"
   ["local_value"]=>
   string(1) "1"
   ["access"]=>
-  int(6)
+  int(4)
 }
 array(3) {
   ["global_value"]=>

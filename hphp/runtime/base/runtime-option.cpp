@@ -88,8 +88,8 @@ bool RuntimeOption::ThrowInvalidArguments = false;
 bool RuntimeOption::EnableHipHopErrors = true;
 bool RuntimeOption::AssertActive = false;
 bool RuntimeOption::AssertWarning = false;
-int RuntimeOption::NoticeFrequency = 1;
-int RuntimeOption::WarningFrequency = 1;
+int64_t RuntimeOption::NoticeFrequency = 1;
+int64_t RuntimeOption::WarningFrequency = 1;
 int RuntimeOption::RaiseDebuggingFrequency = 1;
 int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
 int64_t RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
@@ -307,7 +307,7 @@ int64_t RuntimeOption::MaxRSSPollingCycle = 0;
 int64_t RuntimeOption::DropCacheCycle = 0;
 int64_t RuntimeOption::MaxSQLRowCount = 10000;
 int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
-int RuntimeOption::SocketDefaultTimeout = 5;
+int64_t RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
@@ -694,8 +694,8 @@ void RuntimeOption::Load(Hdf &config,
     EnableHipHopErrors = error["EnableHipHopErrors"].getBool(true);
     AssertActive = error["AssertActive"].getBool();
     AssertWarning = error["AssertWarning"].getBool();
-    NoticeFrequency = error["NoticeFrequency"].getInt32(1);
-    WarningFrequency = error["WarningFrequency"].getInt32(1);
+    NoticeFrequency = error["NoticeFrequency"].getInt64(1);
+    WarningFrequency = error["WarningFrequency"].getInt64(1);
   }
   {
     Hdf rlimit = config["ResourceLimit"];
@@ -707,7 +707,7 @@ void RuntimeOption::Load(Hdf &config,
     setResourceLimit(RLIMIT_NOFILE, rlimit, "MaxSocket");
     setResourceLimit(RLIMIT_DATA,   rlimit, "RSS");
     MaxRSS = rlimit["MaxRSS"].getInt64(0);
-    SocketDefaultTimeout = rlimit["SocketDefaultTimeout"].getInt16(5);
+    SocketDefaultTimeout = rlimit["SocketDefaultTimeout"].getInt64(5);
     MaxRSSPollingCycle = rlimit["MaxRSSPollingCycle"].getInt64(0);
     DropCacheCycle = rlimit["DropCacheCycle"].getInt64(0);
     MaxSQLRowCount = rlimit["MaxSQLRowCount"].getInt64(0);

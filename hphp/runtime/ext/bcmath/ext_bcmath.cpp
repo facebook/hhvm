@@ -235,8 +235,8 @@ class bcmathExtension : public Extension {
  public:
   bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET) {}
   virtual void moduleInit() {
-    IniSetting::Bind(this, "bcmath.scale", "0",
-                     ini_on_update_long, ini_get_long,
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "bcmath.scale", "0",
                      &BCG(bc_precision));
 
     HHVM_FE(bcscale);

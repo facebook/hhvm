@@ -38,6 +38,17 @@ public:
     ParserPopEntry,
   };
 
+  enum Mode {
+    PHP_INI_NONE   = 0,
+    // These 3 match zend
+    PHP_INI_USER   = (1u << 0),
+    PHP_INI_PERDIR = (1u << 1),
+    PHP_INI_SYSTEM = (1u << 2),
+
+    PHP_INI_ONLY   = (1u << 3),
+    PHP_INI_ALL    = (1u << 4),
+  };
+
   typedef void (*PFN_PARSER_CALLBACK)(String *arg1, String *arg2, String *arg3,
                                       int callback_type, void *arg);
 
@@ -50,24 +61,50 @@ public:
 
   static bool Get(const String& name, String &value);
   static bool Set(const String& name, const String& value);
+  static bool SetUser(const String& name, const String& value);
   static Array GetAll(const String& extension, bool details);
 
-  static void Bind(const Extension* extension,
+  static void Bind(const Extension* extension, const Mode mode,
                    const char *name, const char *value,
                    UpdateCallback updateCallback, GetCallback getCallback,
                    void *p = nullptr);
-  static void Bind(const Extension* extension,
+  static void Bind(const Extension* extension, const Mode mode,
                    const char *name,
                    UpdateCallback updateCallback, GetCallback getCallback,
                    void *p = nullptr);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   std::string *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   std::string *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   String *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   String *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   bool *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   bool *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   int64_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   int64_t *p);
   static void Unbind(const char *name);
 
   static void SetGlobalDefault(const char *name, const char *value);
 
 };
 
+int64_t convert_bytes_to_long(const String& value);
+
 #define ini_on_update_fail HPHP::IniSetting::UpdateCallback()
-bool ini_on_update_int(const String& value, void *p);
 bool ini_on_update_bool(const String& value, void *p);
 bool ini_on_update_long(const String& value, void *p);
 bool ini_on_update_non_negative(const String& value, void *p);
@@ -75,7 +112,6 @@ bool ini_on_update_real(const String& value, void *p);
 bool ini_on_update_stdstring(const String& value, void *p);
 bool ini_on_update_string(const String& value, void *p);
 
-String ini_get_int(void *p);
 String ini_get_bool(void *p);
 String ini_get_bool_as_int(void *p);
 String ini_get_long(void *p);

@@ -68,20 +68,96 @@ BaseExecutionContext::BaseExecutionContext() :
   setRequestMemoryMaxBytes(String(RuntimeOption::RequestMemoryMaxBytes));
   restoreIncludePath();
 
-  IniSetting::Bind(IniSetting::CORE, "arg_separator.output", "&",
-                   ini_on_update_string, ini_get_string,
-                   &m_argSeparatorOutput);
-  IniSetting::Bind(IniSetting::CORE, "error_reporting",
-                   ini_on_update_int, ini_get_int,
-                   &m_errorReportingLevel);
-  IniSetting::Bind(IniSetting::CORE, "memory_limit",
+  // Language and Misc Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
+                   &RuntimeOption::ExposeHPHP);
+
+  // Resource Limits
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
                    [this](const String& value, void* p) {
                      this->setRequestMemoryMaxBytes(value);
                      return true;
                    },
                    ini_get_string,
                    &m_maxMemory);
-  IniSetting::Bind(IniSetting::CORE, "log_errors",
+
+  // Data Handling
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "arg_separator.output", "&",
+                   &m_argSeparatorOutput);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "post_max_size",
+                   ini_on_update_long,
+                   [](void*) {
+                     return String(VirtualHost::GetMaxPostSize());
+                   },
+                   &RuntimeOption::MaxPostSize);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "default_charset", &RuntimeOption::DefaultCharsetName);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "always_populate_raw_post_data",
+                   &RuntimeOption::AlwaysPopulateRawPostData);
+
+  // Paths and Directories
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "include_path",
+                   [this](const String& value, void* p) {
+                     this->setIncludePath(value);
+                     return true;
+                   },
+                   [this](void*) {
+                     return this->getIncludePath();
+                   });
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "doc_root", &RuntimeOption::SourceRoot);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "open_basedir",
+                   [](const String& value, void* p) {
+                     RuntimeOption::AllowedDirectories.clear();
+                     auto boom = f_explode(";", value).toCArrRef();
+                     for (ArrayIter iter(boom); iter; ++iter) {
+                       RuntimeOption::AllowedDirectories.push_back(
+                         iter.second().toCStrRef().toCppString()
+                       );
+                     }
+                     return true;
+                   },
+                   [](void*) {
+                     std::string out = "";
+                     for (auto& dir : RuntimeOption::AllowedDirectories) {
+                       if (!dir.empty()) {
+                         out += dir + ";";
+                       }
+                     }
+                     return out;
+                   });
+
+  // FastCGI
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "pid", &RuntimeOption::PidFile);
+
+  // File Uploads
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "file_uploads", "true",
+                   &RuntimeOption::EnableFileUploads);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "upload_max_filesize",
+                   ini_on_update_long,
+                   [](void*) {
+                     int uploadMaxFilesize =
+                       VirtualHost::GetUploadMaxFileSize() / (1 << 20);
+                     return String(uploadMaxFilesize) + "M";
+                   },
+                   &RuntimeOption::UploadMaxFileSize);
+
+  // Errors and Logging Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "error_reporting",
+                   &m_errorReportingLevel);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "log_errors",
                    [this](const String& value, void* p) {
                      bool log;
                      ini_on_update_bool(value, &log);
@@ -90,60 +166,45 @@ BaseExecutionContext::BaseExecutionContext() :
                    },
                    ini_get_bool_as_int,
                    &m_logErrors);
-  IniSetting::Bind(IniSetting::CORE, "error_log",
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "error_log",
                    [this](const String& value, void* p) {
                      this->setErrorLog(value);
                      return true;
                    },
                    ini_get_string,
                    &m_errorLog);
-  IniSetting::Bind(IniSetting::CORE, "include_path",
-                   [this](const String& value, void* p) {
-                     this->setIncludePath(value);
-                     return true;
-                   },
-                   [this](void*) {
-                     return this->getIncludePath();
-                   });
-  IniSetting::Bind(IniSetting::CORE, "hphp.compiler_id",
+
+  // Filesystem and Streams Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "allow_url_fopen",
+                   ini_on_update_fail, ini_get_static_string_1);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "default_socket_timeout",
+                   &RuntimeOption::SocketDefaultTimeout);
+
+  // HPHP specific
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.compiler_id",
                    ini_on_update_fail,
                    [](void*) {
                      return String(getHphpCompilerId());
                    });
-  IniSetting::Bind(IniSetting::CORE, "hphp.compiler_version",
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.compiler_version",
                    ini_on_update_fail,
                    [](void*) {
                      return String(getHphpCompilerVersion());
                    });
-  IniSetting::Bind(IniSetting::CORE, "hphp.build_id",
-                   ini_on_update_fail,
-                   ini_get_stdstring,
-                   &RuntimeOption::BuildId);
-  IniSetting::Bind(IniSetting::CORE, "file_uploads",
-                   ini_on_update_fail, ini_get_bool_as_int,
-                   &RuntimeOption::EnableFileUploads);
-  IniSetting::Bind(IniSetting::CORE, "upload_tmp_dir",
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.build_id",
                    ini_on_update_fail, ini_get_stdstring,
-                   &RuntimeOption::UploadTmpDir);
-  IniSetting::Bind(IniSetting::CORE, "upload_max_filesize",
-                   ini_on_update_fail,
-                   [](void*) {
-                     int uploadMaxFilesize =
-                       VirtualHost::GetUploadMaxFileSize() / (1 << 20);
-                     return String(uploadMaxFilesize) + "M";
-                   });
-  IniSetting::Bind(IniSetting::CORE, "post_max_size",
-                   ini_on_update_fail,
-                   [](void*) {
-                     return String(VirtualHost::GetMaxPostSize());
-                   });
-  IniSetting::Bind(IniSetting::CORE, "allow_url_fopen",
-                   ini_on_update_fail, ini_get_static_string_1);
-  IniSetting::Bind(IniSetting::CORE, "notice_frequency",
-                   ini_on_update_int, ini_get_int,
+                   &RuntimeOption::BuildId);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "notice_frequency",
                    &RuntimeOption::NoticeFrequency);
-  IniSetting::Bind(IniSetting::CORE, "warning_frequency",
-                   ini_on_update_int, ini_get_int,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "warning_frequency",
                    &RuntimeOption::WarningFrequency);
 }
 
@@ -257,24 +318,6 @@ void BaseExecutionContext::setContentType(const String& mimetype,
   }
 }
 
-int64_t BaseExecutionContext::convertBytesToInt(const String& value) const {
-  int64_t newInt = value.toInt64();
-  if (newInt <= 0) {
-    newInt = INT64_MAX;
-  } else {
-    char lastChar = value.charAt(value.size() - 1);
-    if (lastChar == 'K' || lastChar == 'k') {
-      newInt <<= 10;
-    } else if (lastChar == 'M' || lastChar == 'm') {
-      newInt <<= 20;
-    } else if (lastChar == 'G' || lastChar == 'g') {
-      newInt <<= 30;
-    }
-  }
-  return newInt;
-}
-
-
 void BaseExecutionContext::setRequestMemoryMaxBytes(const String& max) {
   int64_t newInt = max.toInt64();
   if (newInt <= 0) {
@@ -282,7 +325,10 @@ void BaseExecutionContext::setRequestMemoryMaxBytes(const String& max) {
     m_maxMemory = String(newInt);
   } else {
     m_maxMemory = max;
-    newInt = convertBytesToInt(max);
+    newInt = convert_bytes_to_long(max);
+    if (newInt <= 0) {
+      newInt = INT64_MAX;
+    }
   }
   MM().getStatsNoRefresh().maxBytes = newInt;
 }
@@ -889,7 +935,10 @@ void BaseExecutionContext::setErrorLog(const String& filename) {
 // IDebuggable
 
 void BaseExecutionContext::debuggerInfo(InfoVec &info) {
-  int64_t newInt = convertBytesToInt(m_maxMemory);
+  int64_t newInt = convert_bytes_to_long(m_maxMemory);
+  if (newInt <= 0) {
+    newInt = INT64_MAX;
+  }
   if (newInt == INT64_MAX) {
     Add(info, "Max Memory", "(unlimited)");
   } else {

@@ -738,7 +738,7 @@ void f_ini_restore(const String& varname) {
 
 String f_ini_set(const String& varname, const String& newvalue) {
   String oldvalue = f_ini_get(varname);
-  IniSetting::Set(varname, newvalue);
+  IniSetting::SetUser(varname, newvalue);
   return oldvalue;
 }
 

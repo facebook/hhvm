@@ -1130,14 +1130,9 @@ static int execute_program_impl(int argc, char** argv) {
     return 0;
   }
   if (vm.count("version")) {
-#ifdef HHVM_VERSION
-#undefine HHVM_VERSION
-#endif
-#define HHVM_VERSION(v) const char *version = #v;
-#include "../../version" // nolint
-
     cout << "HipHop VM";
-    cout << " " << version << " (" << (debug ? "dbg" : "rel") << ")\n";
+    cout << " " << k_HHVM_VERSION.c_str();
+    cout << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
     return 0;

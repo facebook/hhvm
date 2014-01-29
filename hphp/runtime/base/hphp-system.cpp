@@ -15,17 +15,13 @@
 */
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/system/constants.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifdef HHVM_VERSION
-#undef HHVM_VERSION
-#endif
-#define HHVM_VERSION(v) return #v;
 const char* getHphpCompilerVersion() {
-#include "../../version" // nolint
+  return k_HHVM_VERSION.c_str();
 }
 
 const char* getHphpCompilerId() {

@@ -532,14 +532,6 @@ std::string Process::GetAppName() {
   return progname;
 }
 
-std::string Process::GetAppVersion() {
-#ifdef HHVM_VERSION
-#undefine HHVM_VERSION
-#endif
-#define HHVM_VERSION(v) return #v;
-#include "../version" // nolint
-}
-
 std::string Process::GetHostName() {
   char hostbuf[128];
   hostbuf[0] = '\0'; // for cleaner valgrind output when gethostname() fails

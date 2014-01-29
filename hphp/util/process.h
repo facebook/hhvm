@@ -70,11 +70,6 @@ public:
   static std::string GetAppName();
 
   /**
-   * Current executable's version.
-   */
-  static std::string GetAppVersion();
-
-  /**
    * This machine'a name.
    */
   static std::string GetHostName();

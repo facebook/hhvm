@@ -16,7 +16,6 @@ array(3) {
   int(7)
 }
 string(1) "1"
-string(1) "1"
 string(1) "&"
 array(2) {
   ["pcre.backtrack_limit"]=>
@@ -56,4 +55,4 @@ array(2) {
   ["core: pcre.backtrack_limit"]=>
   bool(false)
 }
-HipHop Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s on line 24
+HipHop Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s on line %d

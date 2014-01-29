@@ -72,10 +72,10 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   m_originalURL = StringUtil::UrlDecode(m_originalURL, false);
   m_rewritten = false;
 
-  auto scriptFilename = transport->getScriptFilename();
-  if (!scriptFilename.empty()) {
+  auto pathTranslated = transport->getPathTranslated();
+  if (!pathTranslated.empty()) {
     // The transport is overriding everything and just handing us the filename
-    m_path = m_absolutePath = scriptFilename;
+    m_path = m_absolutePath = pathTranslated;
     processExt();
     return true;
   }

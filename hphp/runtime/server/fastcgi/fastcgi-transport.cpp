@@ -56,8 +56,8 @@ const char *FastCGITransport::getUrl() {
   return m_requestURI.c_str();
 }
 
-const std::string FastCGITransport::getScriptFilename() {
-  return m_scriptFilename;
+const std::string FastCGITransport::getPathTranslated() {
+  return m_pathTranslated;
 }
 
 const std::string FastCGITransport::getDocumentRoot() {
@@ -329,7 +329,8 @@ void FastCGITransport::onHeadersComplete() {
   m_serverAddr = getRawHeader("SERVER_ADDR");
   m_extendedMethod = getRawHeader("REQUEST_METHOD");
   m_httpVersion = getRawHeader("HTTP_VERSION");
-  m_scriptFilename = getRawHeader("SCRIPT_FILENAME");
+  m_serverObject = getRawHeader("SCRIPT_NAME");
+  m_pathTranslated = getRawHeader("PATH_TRANSLATED");
   m_documentRoot = getRawHeader("DOCUMENT_ROOT") + "/";
 
   try {
@@ -381,15 +382,10 @@ void FastCGITransport::onHeadersComplete() {
     m_requestSize = 0;
   }
 
-  std::string pathTranslated = getRawHeader("PATH_TRANSLATED");
-  std::string documentRoot = getRawHeader("DOCUMENT_ROOT");
-  // use PATH_TRANSLATED - DOCUMENT_ROOT if it is valid instead of SCRIPT_NAME
-  // for mod_fastcgi support
-  if (!pathTranslated.empty() && !documentRoot.empty() &&
-      pathTranslated.find(documentRoot) == 0) {
-    m_serverObject = pathTranslated.substr(documentRoot.length());
-  } else {
-    m_serverObject = getRawHeader("SCRIPT_NAME");
+  if (m_pathTranslated.empty()) {
+    // If someone follows http://wiki.nginx.org/HttpFastcgiModule they won't
+    // pass in PATH_TRANSLATED and instead will just send SCRIPT_FILENAME
+    m_pathTranslated = getRawHeader("SCRIPT_FILENAME");
   }
 
   std::string queryString = getRawHeader("QUERY_STRING");

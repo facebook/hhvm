@@ -197,6 +197,10 @@ BaseExecutionContext::BaseExecutionContext() :
                      return String(getHphpCompilerVersion());
                    });
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hhvm.ext_zend_compat",
+                   ini_on_update_fail, ini_get_bool,
+                   &RuntimeOption::EnableZendCompat),
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.build_id",
                    ini_on_update_fail, ini_get_stdstring,
                    &RuntimeOption::BuildId);

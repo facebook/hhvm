@@ -388,16 +388,15 @@ void FastCGITransport::onHeadersComplete() {
   }
 
   std::string pathTranslated = getRawHeader("PATH_TRANSLATED");
-  std::string documentRoot = getRawHeader("DOCUMENT_ROOT");
-  // use PATH_TRANSLATED - DOCUMENT_ROOT if it is valid instead of SCRIPT_NAME
-  // for mod_fastcgi support
-  if (!pathTranslated.empty() && !documentRoot.empty() &&
-      pathTranslated.find(documentRoot) == 0) {
-    m_serverObject = pathTranslated.substr(documentRoot.length());
-  } else {
-    m_serverObject = getRawHeader("SCRIPT_NAME");
+  std::string redirectUrl = getRawHeader("REDIRECT_URL");
+  // PATH_TRANSLATED is the full path to the script, pretty
+  // much apache mod_fastcgi specific.
+  // https://github.com/php/php-src/blob/PHP-5.5.8/sapi/fpm/fpm/fpm_main.c#L1145
+  if (!pathTranslated.empty() && !redirectUrl.empty()) {
+    m_scriptFilename = pathTranslated;
   }
 
+  m_serverObject = getRawHeader("SCRIPT_NAME");
   std::string queryString = getRawHeader("QUERY_STRING");
   if (!queryString.empty()) {
     m_serverObject += "?" + queryString;

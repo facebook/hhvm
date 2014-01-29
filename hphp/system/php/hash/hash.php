@@ -227,3 +227,34 @@ function hash_update_stream(mixed $context, mixed $handle,
  */
 <<__Native>>
 function hash_copy(resource $context): resource;
+
+/**
+ * hash_pbkdf2 - http://php.net/function.hash-pbkdf2.php
+ *
+ * @param string $algo     - Name of selected hashing algorithm
+ *                           (i.e. "md5", "sha256", "haval160,4", etc..)
+ * @param string $password - The password to use for the derivation.
+ * @param string $salt     - The salt to use for the derivation. This value
+ *                           should be generated randomly.
+ * @param int $iterations  - The number of internal iterations to perform
+ *                           for the derivation.
+ * @param int $length      - The length of the output string. If raw_output is
+ *                           TRUE this corresponds to the byte-length of the
+ *                           derived key, if raw_output is FALSE this
+ *                           corresponds to twice the byte-length of the
+ *                           derived key (as every byte of the key is returned
+ *                           as two hexits).
+ *                           If 0 is passed, the entire output of the supplied
+ *                           algorithm is used.
+ * @param bool $raw_output - When set to TRUE, outputs raw binary data.
+ *                           FALSE outputs lowercase hexits.
+ *
+ * @return string - A string containing the derived key as lowercase hexits
+ *                  unless raw_output is set to TRUE in which case the raw
+ *                  binary representation of the derived key is returned.
+ */
+function hash_pbkdf2(string $algo, string $password, string $salt, 
+                     int $iterations, int $length = 0, 
+                     bool $raw_output = false): string {
+  return "hello world";
+}

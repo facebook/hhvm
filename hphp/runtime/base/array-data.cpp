@@ -423,6 +423,7 @@ int ArrayData::compare(const ArrayData *v2) const {
 bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   assert(v2);
 
+  if (this == v2) return true;
   auto const count1 = size();
   auto const count2 = v2->size();
   if (count1 != count2) return false;

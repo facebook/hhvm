@@ -131,7 +131,7 @@ const StaticString
   s_HEAD("HEAD"),
   s_POST("POST"),
   s_HTTPS("HTTPS"),
-  s_1("1"),
+  s_on("on"),
   s_REQUEST_TIME("REQUEST_TIME"),
   s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
   s_QUERY_STRING("QUERY_STRING"),
@@ -598,7 +598,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   default:
     server.set(s_REQUEST_METHOD, empty_string); break;
   }
-  server.set(s_HTTPS, transport->isSSL() ? s_1 : empty_string);
+  server.set(s_HTTPS, transport->isSSL() ? s_on : empty_string);
   server.set(s_QUERY_STRING, r.queryString());
 
   server.set(s_argv, make_packed_array(r.queryString()));

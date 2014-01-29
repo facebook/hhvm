@@ -73,10 +73,7 @@ bool isNormalExit(Block* block) {
  * Returns whether `opc' is a within-tracelet conditional jump that
  * can be folded into a ReqBindJmpFoo instruction.
  */
-bool jccCanBeDirectExit(Opcode opc) {
-  return isQueryJmpOp(opc) && opc != JmpIsType && opc != JmpIsNType;
-  // TODO(#2404341)
-}
+bool jccCanBeDirectExit(Opcode opc) { return isQueryJmpOp(opc); }
 
 /*
  * Return true if jccInst is a conditional jump with no side effects

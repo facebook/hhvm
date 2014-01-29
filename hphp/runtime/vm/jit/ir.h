@@ -321,8 +321,6 @@ O(JmpSame,                     D(None), S(Gen) S(Gen),                   B|E) \
 O(JmpNSame,                    D(None), S(Gen) S(Gen),                   B|E) \
 O(JmpInstanceOfBitmask,        D(None), S(Cls) CStr,                     B|E) \
 O(JmpNInstanceOfBitmask,       D(None), S(Cls) CStr,                     B|E) \
-O(JmpIsType,                   D(None), SUnk,                            B|E) \
-O(JmpIsNType,                  D(None), SUnk,                            B|E) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(JmpZero,                     D(None), SNum,                            B|E) \
 O(JmpNZero,                    D(None), SNum,                            B|E) \

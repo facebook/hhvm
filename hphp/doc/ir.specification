@@ -635,8 +635,6 @@ JmpNSame
 JmpInstanceOf
 JmpInstanceOfBitmask
 JmpNInstanceOfBitmask
-JmpIsType
-JmpIsNType
 
   Fused jump instructions. These all operate exactly as their corresponding
   query op, but also take a label to jump to when the condition is true.

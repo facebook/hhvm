@@ -2046,16 +2046,6 @@ void CodeGenerator::cgIsNType(IRInstruction* inst) {
   cgIsTypeCommon(inst, true);
 }
 
-// TODO(#2404341): remove JmpIs{N,}Type
-
-void CodeGenerator::cgJmpIsType(IRInstruction* inst) {
-  cgJmpIsTypeCommon(inst, false);
-}
-
-void CodeGenerator::cgJmpIsNType(IRInstruction* inst) {
-  cgJmpIsTypeCommon(inst, true);
-}
-
 void CodeGenerator::cgIsTypeMem(IRInstruction* inst) {
   cgIsTypeMemCommon(inst, false);
 }

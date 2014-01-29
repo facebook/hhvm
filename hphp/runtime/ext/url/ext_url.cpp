@@ -261,7 +261,8 @@ Variant HHVM_FUNCTION(parse_url, const String& url,
       }
       break;
     default:
-      raise_warning("parse_url(): Invalid URL component identifier %ld", component);
+      raise_warning(
+        "parse_url(): Invalid URL component identifier %" PRId64, component);
       return false;
     }
     return uninit_null();

@@ -39,7 +39,11 @@
 #include <pthread.h>
 #include <dlfcn.h>
 #endif /* ITT_PLATFORM==ITT_PLATFORM_WIN */
+#if ITT_OS==ITT_OS_MAC
+#include <malloc/malloc.h>
+#else  /* ITT_OS==ITT_OS_MAC */
 #include <malloc.h>
+#endif /* ITT_OS==ITT_OS_MAC */
 #include <stdlib.h>
 
 #include "jitprofiling.h"

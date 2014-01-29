@@ -112,6 +112,26 @@ void triggerCow(c_Vector* vec) {
   vec->mutate();
 }
 
+namespace {
+
+ALWAYS_INLINE
+void* reallocHelper(void* ptr, size_t oldSize, size_t newSize) {
+  assert(oldSize > 0 || !ptr);
+  assert(newSize > 0);
+
+  auto retptr = MM().objMallocLogged(newSize);
+
+  if (ptr) {
+    auto const copySize = std::min(oldSize, newSize);
+    retptr = memcpy(retptr, ptr, copySize);
+    MM().objFreeLogged(ptr, oldSize);
+  }
+
+  return retptr;
+}
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // ConstCollection
@@ -422,12 +442,14 @@ Array BaseVector::toArrayImpl() const {
 void BaseVector::grow() {
   mutate();
 
+  auto const oldSize = m_capacity * sizeof(TypedValue);
   if (m_capacity) {
     m_capacity += m_capacity;
   } else {
     m_capacity = 8;
   }
-  m_data = (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
+  m_data = (TypedValue*)reallocHelper(m_data, oldSize,
+                                      m_capacity * sizeof(TypedValue));
 }
 
 void BaseVector::addFront(TypedValue* val) {
@@ -465,9 +487,9 @@ void BaseVector::reserve(int64_t sz) {
     ++m_version;
     mutate();
 
+    m_data = (TypedValue*)reallocHelper(m_data, m_capacity * sizeof(TypedValue),
+                                        sz * sizeof(TypedValue));
     m_capacity = sz;
-    m_data =
-      (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
   }
 }
 
@@ -487,7 +509,9 @@ BaseVector::~BaseVector() {
       tvRefcountedDecRef(&m_data[i]);
     }
 
-    smart_free(m_data);
+    if (m_data) {
+      MM().objFreeLogged(m_data, m_capacity * sizeof(TypedValue));
+    }
     m_data = nullptr;
   }
 }
@@ -513,7 +537,7 @@ void BaseVector::init(CVarRef t) {
 
 void BaseVector::cow() {
   TypedValue* newData =
-    (TypedValue*)smart_malloc(m_capacity * sizeof(TypedValue));
+    (TypedValue*)MM().objMallocLogged(m_capacity * sizeof(TypedValue));
 
   assert(newData);
 
@@ -544,9 +568,10 @@ void c_Vector::resize(int64_t sz, TypedValue* val) {
   assert(sz >= 0);
   uint requestedSize = (uint)sz;
   if (m_capacity < requestedSize) {
+    m_data = (TypedValue*)
+      reallocHelper(m_data, m_capacity * sizeof(TypedValue),
+                    requestedSize * sizeof(TypedValue));
     m_capacity = requestedSize;
-    m_data =
-      (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
   }
   if (m_size > requestedSize) {
     do {
@@ -641,7 +666,9 @@ Object c_Vector::t_clear() {
   for (int i = 0; i < sz; ++i) {
     tvRefcountedDecRef(&m_data[i]);
   }
-  if (m_data) smart_free(m_data);
+  if (m_data) {
+    MM().objFreeLogged(m_data, m_capacity * sizeof(TypedValue));
+  }
   m_data = nullptr;
   m_size = 0;
   m_capacity = 0;
@@ -906,7 +933,7 @@ Object c_Vector::ti_fromarray(CVarRef arr) {
   target->m_capacity = target->m_size = sz;
   TypedValue* data;
   target->m_data = data =
-    (TypedValue*)smart_malloc(size_t(sz) * sizeof(TypedValue));
+    (TypedValue*)MM().objMallocLogged(size_t(sz) * sizeof(TypedValue));
   ssize_t pos = ad->iter_begin();
   for (uint i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     assert(pos != ArrayData::invalid_index);
@@ -1600,7 +1627,7 @@ Object BaseMap::php_values() const {
   TypedValue* vecData;
   target->m_capacity = target->m_size = sz;
   target->m_data = vecData =
-    (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+    (TypedValue*)MM().objMallocLogged(sz * sizeof(TypedValue));
 
   int64_t j = 0;
   for (ssize_t i = 0; i < iterLimit(); ++i) {

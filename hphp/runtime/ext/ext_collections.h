@@ -167,7 +167,7 @@ class BaseVector : public ExtCollectionObjectData {
     TypedValue* data;
     target->m_capacity = target->m_size = targetSize;
     target->m_data = data =
-      (TypedValue*)smart_malloc(targetSize * sizeof(TypedValue));
+      (TypedValue*)MM().objMallocLogged(targetSize * sizeof(TypedValue));
     for (uint i = 0; i < targetSize; ++i, ++startPos) {
       cellDup(v->m_data[startPos], data[i]);
     }
@@ -186,7 +186,8 @@ class BaseVector : public ExtCollectionObjectData {
     }
     TypedValue* data;
     target->m_capacity = target->m_size = sz;
-    target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+    target->m_data = data =
+      (TypedValue*)MM().objMallocLogged(sz * sizeof(TypedValue));
     for (int i = 0; i < sz; ++i) {
       cellDup(thiz->m_data[i], data[i]);
     }

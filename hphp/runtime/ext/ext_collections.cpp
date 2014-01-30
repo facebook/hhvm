@@ -467,8 +467,8 @@ void BaseVector::addFront(TypedValue* val) {
 }
 
 Variant BaseVector::popFront() {
-  ++m_version;
   if (m_size) {
+    ++m_version;
     mutate();
     Variant ret = tvAsCVarRef(&m_data[0]);
     tvRefcountedDecRef(&m_data[0]);
@@ -615,8 +615,8 @@ Object c_Vector::t_append(CVarRef val) {
 }
 
 Variant c_Vector::t_pop() {
-  ++m_version;
   if (m_size) {
+    ++m_version;
     mutate();
     --m_size;
     Variant ret = tvAsCVarRef(&m_data[m_size]);
@@ -2162,9 +2162,34 @@ void BaseMap::add(TypedValue* val) {
   }
 }
 
-Variant BaseMap::popFront() {
-  ++m_version;
+Variant BaseMap::pop() {
   if (m_size) {
+    ++m_version;
+    Elm* e = data() + iterLimit() - 1;
+    for (;; --e) {
+      assert(e >= data());
+      if (!isTombstone(e->data.m_type)) break;
+    }
+    Variant ret = tvAsCVarRef(&e->data);
+    int32_t* ei;
+    if (e->hasIntKey()) {
+      ei = findForInsert(e->ikey);
+    } else {
+      assert(e->hasStrKey());
+      ei = findForInsert(e->skey, e->skey->hash());
+    }
+    erase(ei);
+    return ret;
+  } else {
+    Object e(SystemLib::AllocRuntimeExceptionObject(
+      "Cannot pop empty Map"));
+    throw e;
+  }
+}
+
+Variant BaseMap::popFront() {
+  if (m_size) {
+    ++m_version;
     Elm* e = data();
     for (;; ++e) {
       assert(e != data() + iterLimit());
@@ -3097,9 +3122,34 @@ void BaseSet::addFront(StringData *key) {
   ++m_version;
 }
 
-Variant BaseSet::popFront() {
-  ++m_version;
+Variant BaseSet::pop() {
   if (m_size) {
+    ++m_version;
+    Elm* e = data() + iterLimit() - 1;
+    for (;; --e) {
+      assert(e >= data());
+      if (!isTombstone(e->data.m_type)) break;
+    }
+    Variant ret = tvAsCVarRef(&e->data);
+    int32_t* ei;
+    if (e->hasInt()) {
+      ei = findForInsert(e->data.m_data.num);
+    } else {
+      auto* key = e->data.m_data.pstr;
+      ei = findForInsert(key, key->hash());
+    }
+    erase(ei);
+    return ret;
+  } else {
+    Object e(SystemLib::AllocRuntimeExceptionObject(
+      "Cannot pop empty Set"));
+    throw e;
+  }
+}
+
+Variant BaseSet::popFront() {
+  if (m_size) {
+    ++m_version;
     Elm* e = data();
     for (;; ++e) {
       assert(e != data() + iterLimit());

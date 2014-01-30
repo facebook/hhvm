@@ -143,10 +143,10 @@ enum Type : uint16_t { // stored in ObjectData::o_subclassData
   InvalidType = 0,
   VectorType = 1,
   MapType = 2,
-  FrozenMapType = 3,
-  SetType = 4,
-  PairType = 5,
-  FrozenVectorType = 6,
+  SetType = 3,
+  PairType = 4,
+  FrozenVectorType = 5,
+  FrozenMapType = 6,
   FrozenSetType = 7,
 };
 const size_t MaxNumTypes = 8;
@@ -182,20 +182,22 @@ inline bool isVectorType(Collection::Type ctype) {
   return (ctype == Collection::VectorType ||
           ctype == Collection::FrozenVectorType);
 }
-
 inline bool isMapType(Collection::Type ctype) {
   return (ctype == Collection::MapType ||
           ctype == Collection::FrozenMapType);
 }
-
 inline bool isSetType(Collection::Type ctype) {
   return (ctype == Collection::SetType ||
           ctype == Collection::FrozenSetType);
 }
-
 inline bool isInvalidType(Collection::Type ctype) {
-  return (ctype == Collection::MaxNumTypes ||
-          ctype == Collection::InvalidType);
+  return (ctype == Collection::InvalidType ||
+          ctype >= Collection::MaxNumTypes);
+}
+inline bool isMutableType(Collection::Type ctype) {
+  return (ctype == Collection::VectorType ||
+          ctype == Collection::MapType ||
+          ctype == Collection::SetType);
 }
 
 }

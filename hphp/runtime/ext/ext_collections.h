@@ -675,6 +675,7 @@ class BaseMap : public ExtCollectionObjectData {
     update(key, val);
   }
   void add(TypedValue* val);
+  Variant pop();
   Variant popFront();
   void remove(int64_t key);
   void remove(StringData* key);
@@ -1322,6 +1323,7 @@ class BaseSet : public ExtCollectionObjectData {
   void addFront(int64_t h);
   void addFront(StringData* key);
 
+  Variant pop();
   Variant popFront();
 
   void remove(int64_t key) {

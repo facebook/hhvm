@@ -134,7 +134,7 @@ class c_PDO : public ExtObjectData {
   public: Variant t_lastinsertid(const String& seqname = null_string);
   public: Variant t_errorcode();
   public: Array t_errorinfo();
-  public: Variant t_query(const String& sql);
+  public: Variant t_query(int _argc, const String& sql, CArrRef _argv);
   public: Variant t_quote(const String& str,
                           int64_t paramtype = q_PDO$$PARAM_STR);
   public: bool t_sqlitecreatefunction(const String& name, CVarRef callback,

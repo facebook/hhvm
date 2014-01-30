@@ -1398,7 +1398,7 @@ Array c_PDO::t_errorinfo() {
   return ret;
 }
 
-Variant c_PDO::t_query(const String& sql) {
+Variant c_PDO::t_query(int _argc, const String& sql, CArrRef _argv) {
   SYNC_VM_REGS_SCOPED();
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
@@ -1429,7 +1429,8 @@ Variant c_PDO::t_query(const String& sql) {
 
     // when we add support for varargs here, we only need to set the stmt if
     // the argument count is > 1
-    if (true || pdo_stmt_set_fetch_mode(stmt, 0, PDO_FETCH_BOTH, Array())) {
+    if (_argc == 1 || pdo_stmt_set_fetch_mode(stmt, 0, _argv.rvalAt(0).toInt64Val(),
+        _argv.slice(1, _argc - 2, false))) {
       /* now execute the statement */
       strcpy(stmt->error_code, PDO_ERR_NONE);
       if (stmt->executer()) {

@@ -99,7 +99,7 @@ std::unique_ptr<php::Unit> make_test_unit() {
       .default_ctor;
     }
 
-    .class [no_override unique] BAA extends BA {
+    .class [unique] BAA extends BA {
       .default_ctor;
     }
 
@@ -698,6 +698,10 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(objcls(objExactBAATy), clsExactBAATy);
   EXPECT_EQ(objcls(subObjBAATy), subClsBAATy);
 
+  // both subobj(A) and subcls(A) of no_override class A change to exact types
+  EXPECT_EQ(objcls(objExactABTy), subClsABTy);
+  EXPECT_EQ(objcls(subObjABTy), clsExactABTy);
+
   // a T= is a subtype of itself but not a strict subtype
   // also a T= is in a "could be" relationship with itself.
   EXPECT_TRUE(objcls(objExactBaseTy).subtypeOf(clsExactBaseTy));
@@ -762,9 +766,9 @@ TEST(Type, Hierarchies) {
 
   // a T<= type is in no subtype relationship with T=.
   // However a T<= is in a "could be" relationship with T=.
-  EXPECT_FALSE(objcls(subObjAATy).subtypeOf(clsExactAATy));
-  EXPECT_FALSE(objcls(subObjAATy).strictSubtypeOf(clsExactAATy));
-  EXPECT_TRUE(clsExactAATy.couldBe(objcls(subObjAATy)));
+  EXPECT_FALSE(objcls(subObjATy).subtypeOf(clsExactATy));
+  EXPECT_FALSE(objcls(subObjATy).strictSubtypeOf(clsExactATy));
+  EXPECT_TRUE(clsExactATy.couldBe(objcls(subObjATy)));
 
   // Given 2 types A and B in no inheritance relationship then
   // A<= and B<= are in no subtype or "could be" relationship.

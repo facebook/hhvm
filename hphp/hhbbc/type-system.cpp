@@ -378,7 +378,8 @@ Type aval(SArray val) {
 
 Type subObj(res::Class val) {
   Type::Data d;
-  d.dobj = DObj { DObj::Sub, val };
+  d.dobj = DObj { val.couldBeOverriden() ?
+                            DObj::Sub : DObj::Exact, val };
   return Type(BObj, d);
 }
 
@@ -390,7 +391,8 @@ Type objExact(res::Class val) {
 
 Type subCls(res::Class val) {
   Type::Data d;
-  d.dcls = DCls { DCls::Sub, val };
+  d.dcls = DCls { val.couldBeOverriden() ?
+                             DCls::Sub : DCls::Exact, val };
   return Type(BCls, d);
 }
 

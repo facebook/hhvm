@@ -276,6 +276,10 @@ SString Class::name() const {
   return val.str() ? val.str() : val.other()->cls->name;
 }
 
+bool Class::couldBeOverriden() const {
+  return val.str() ? true : !(val.other()->cls->attrs & AttrNoOverride);
+}
+
 std::string show(const Class& c) {
   if (auto s = c.val.str()) return s->data();
   return folly::format(

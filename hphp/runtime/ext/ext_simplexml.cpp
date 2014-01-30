@@ -395,7 +395,7 @@ static Object sxe_prop_dim_read(c_SimpleXMLElement* sxe, CVarRef member,
         }
         if (sxe->iter.type == SXE_ITER_NONE) {
           if (!member.isNull() && member.toInt64() > 0) {
-            raise_warning("Cannot add element %s number %ld when "
+            raise_warning("Cannot add element %s number %" PRId64 " when "
                           "only 0 such elements exist", mynode->name,
                           member.toInt64());
           }
@@ -409,7 +409,7 @@ static Object sxe_prop_dim_read(c_SimpleXMLElement* sxe, CVarRef member,
                                        sxe->iter.nsprefix, sxe->iter.isprefix);
         } else {
           if (!member.isNull() && cnt < member.toInt64()) {
-            raise_warning("Cannot add element %s number %ld when "
+            raise_warning("Cannot add element %s number %" PRId64 " when "
                           "only %ld such elements exist", mynode->name,
                           member.toInt64(), cnt);
           }
@@ -971,7 +971,7 @@ static bool sxe_prop_dim_write(c_SimpleXMLElement* sxe, CVarRef member,
           newnode = node;
           ++counter;
           if (!member.isNull() && member.toInt64() > 0) {
-            raise_warning("Cannot add element %s number %ld when "
+            raise_warning("Cannot add element %s number %" PRId64 " when "
                           "only 0 such elements exist", mynode->name,
                           member.toInt64());
             retval = false;
@@ -1029,7 +1029,7 @@ next_iter:
         }
       } else if (member.isNull() || member.isInteger()) {
         if (!member.isNull() && cnt < member.toInt64()) {
-          raise_warning("Cannot add element %s number %ld when "
+          raise_warning("Cannot add element %s number %" PRId64 " when "
                         "only %ld such elements exist", mynode->name,
                         member.toInt64(), cnt);
           retval = false;
@@ -1040,8 +1040,9 @@ next_iter:
       }
     } else if (attribs) {
       if (member.isInteger()) {
-        raise_warning("Cannot change attribute number %ld when "
-                      "only %ld attributes exist", member.toInt64(), nodendx);
+        raise_warning("Cannot change attribute number %" PRId64 " when "
+                      "only %" PRId64 " attributes exist", member.toInt64(),
+                      nodendx);
         retval = false;
       } else {
         newnode = (xmlNodePtr)xmlNewProp(node,

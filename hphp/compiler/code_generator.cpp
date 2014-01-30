@@ -506,6 +506,15 @@ void CodeGenerator::printTypeExpression(std::string value) {
   printObjectFooter();
 }
 
+void CodeGenerator::printTypeExpression(ExpressionPtr expression) {
+  printObjectHeader("TypeExpression", 2);
+  printPropertyHeader("name");
+  expression->outputCodeModel(*this);
+  printPropertyHeader("sourceLocation");
+  printLocation(expression->getLocation());
+  printObjectFooter();
+}
+
 void CodeGenerator::printExpression(ExpressionPtr expression, bool isRef) {
   if (isRef) {
     printObjectHeader("UnaryOpExpression", 3);
@@ -541,17 +550,32 @@ void CodeGenerator::printExpressionVector(ExpressionPtr e) {
   }
 }
 
-void CodeGenerator::printAsBlock(StatementPtr s) {
+void CodeGenerator::printTypeExpressionVector(ExpressionListPtr el) {
+  auto count = el == nullptr ? 0 : el->getCount();
+  printf("V:9:\"HH\\Vector\":%d:{", count);
+  for (int i = 0; i < count; i++) {
+    auto te = (*el)[i];
+    printTypeExpression(te);
+  }
+  printf("}");
+}
+
+void CodeGenerator::printAsBlock(StatementPtr s, bool isEnclosed) {
   if (s != nullptr && s->is(Statement::KindOfBlockStatement)) {
     s->outputCodeModel(*this);
   } else {
-    auto numProps = s == nullptr ? 1 : 2;
+    auto numProps = s == nullptr ? 0 : 2;
+    if (isEnclosed) numProps++;
     printObjectHeader("BlockStatement", numProps);
-    printPropertyHeader("statements");
-    printStatementVector(s);
     if (s != nullptr) {
+      printPropertyHeader("statements");
+      printStatementVector(s);
       printPropertyHeader("sourceLocation");
       printLocation(s->getLocation());
+    }
+    if (isEnclosed) {
+      printPropertyHeader("isEnclosed");
+      printBool(true);
     }
     printObjectFooter();
   }

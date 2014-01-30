@@ -1280,7 +1280,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 void SimpleFunctionCall::outputCodeModel(CodeGenerator &cg) {
   if (m_class || !m_className.empty()) {
     cg.printObjectHeader("ClassMethodCallExpression", 4);
-    cg.printPropertyHeader("className");
     StaticClassName::outputCodeModel(cg);
     cg.printPropertyHeader("methodName");
   } else {

@@ -930,7 +930,7 @@ void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
   if (m_op == T_COLLECTION) {
     cg.printObjectHeader("CollectionInitializerExpression", 3);
     cg.printPropertyHeader("collection");
-    m_exp1->outputCodeModel(cg);
+    cg.printTypeExpression(m_exp1);
     cg.printPropertyHeader("arguments");
     cg.printExpressionVector(static_pointer_cast<ExpressionList>(m_exp2));
     cg.printPropertyHeader("sourceLocation");
@@ -943,7 +943,11 @@ void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("expression1");
   m_exp1->outputCodeModel(cg);
   cg.printPropertyHeader("expression2");
-  m_exp2->outputCodeModel(cg);
+  if (m_op == T_INSTANCEOF) {
+    cg.printTypeExpression(m_exp2);
+  } else {
+    m_exp2->outputCodeModel(cg);
+  }
   cg.printPropertyHeader("operation");
 
   int op = 0;

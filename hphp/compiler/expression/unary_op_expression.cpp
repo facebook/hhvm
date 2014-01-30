@@ -610,7 +610,7 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
     case T_DIR:
     case T_CLASS:
     case T_FUNCTION: {
-      cg.printObjectHeader("SimpleVariableExpression", 2);
+      cg.printObjectHeader("SimpleConstantExpression", 2);
       std::string varName;
       switch (m_op) {
         case T_FILE: varName = "__FILE__"; break;
@@ -621,7 +621,7 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
           assert(false); //fishing expedition. Are these cases dead?
           break;
       }
-      cg.printPropertyHeader("variableName");
+      cg.printPropertyHeader("constantName");
       cg.printValue(varName);
       cg.printPropertyHeader("sourceLocation");
       cg.printLocation(this->getLocation());

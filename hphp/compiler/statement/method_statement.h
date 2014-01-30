@@ -134,6 +134,7 @@ protected:
   bool m_hasCallToGetArgs;
   int m_attribute;
   int m_cppLength;
+  int m_autoPropCount;
   ModifierExpressionPtr m_modifiers;
   std::string m_name;
   std::string m_originalName;

@@ -129,15 +129,12 @@ void TryStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void TryStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 1;
-  if (m_tryStmt != nullptr) numProps++;
+  auto numProps = 2;
   if (m_catches->getCount() > 0) numProps++;
   if (m_finallyStmt != nullptr) numProps++;
   cg.printObjectHeader("TryStatement", numProps);
-  if (m_tryStmt != nullptr) {
-    cg.printPropertyHeader("block");
-    cg.printAsBlock(m_tryStmt);
-  }
+  cg.printPropertyHeader("block");
+  cg.printAsEnclosedBlock(m_tryStmt);
   if (m_catches->getCount() > 0)  {
     cg.printPropertyHeader("catchStatements");
     cg.printStatementVector(m_catches);

@@ -121,18 +121,15 @@ void CaseStatement::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 ///////////////////////////////////////////////////////////////////////////////
 
 void CaseStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 1;
+  auto numProps = 2;
   if (m_condition != nullptr) numProps++;
-  if (m_stmt != nullptr) numProps++;
   cg.printObjectHeader("CaseStatement", numProps);
   if (m_condition != nullptr) {
     cg.printPropertyHeader("condition");
     m_condition->outputCodeModel(cg);
   }
-  if (m_stmt != nullptr) {
-    cg.printPropertyHeader("block");
-    cg.printAsBlock(m_stmt);
-  }
+  cg.printPropertyHeader("block");
+  cg.printAsBlock(m_stmt);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

@@ -31,6 +31,7 @@ ContinueStatement::ContinueStatement
 StatementPtr ContinueStatement::clone() {
   ContinueStatementPtr stmt(new ContinueStatement(*this));
   stmt->m_depth = m_depth;
+  stmt->m_name = "continue";
   return stmt;
 }
 

@@ -27,6 +27,7 @@ DECLARE_BOOST_TYPES(StatementList);
 class StatementList : public Statement {
 public:
   explicit StatementList(STATEMENT_CONSTRUCTOR_PARAMETERS);
+  StatementListPtr shallowClone();
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultConstPtr ar);

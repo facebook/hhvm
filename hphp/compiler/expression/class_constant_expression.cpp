@@ -224,10 +224,9 @@ bool ClassConstantExpression::canonCompare(ExpressionPtr e) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassConstantExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ClassPropertyExpression", 3);
-  cg.printPropertyHeader("className");
+  cg.printObjectHeader("ClassConstantExpression", 3);
   StaticClassName::outputCodeModel(cg);
-  cg.printPropertyHeader("propertyName");
+  cg.printPropertyHeader("constantName");
   cg.printValue(m_varName);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());

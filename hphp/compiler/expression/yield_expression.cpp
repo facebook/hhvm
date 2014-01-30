@@ -99,7 +99,6 @@ TypePtr YieldExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
 void YieldExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("YieldExpression", m_keyExp != nullptr ? 3 : 2);
-  cg.printPropertyHeader("expression");
   if (m_keyExp != nullptr) {
     cg.printPropertyHeader("key");
     m_keyExp->outputCodeModel(cg);

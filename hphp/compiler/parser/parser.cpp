@@ -1106,7 +1106,9 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
   // look for argument promotion in ctor
   ExpressionListPtr promote = NEW_EXP(ExpressionList);
   cls->checkArgumentsToPromote(promote, type);
-  for (int i = 0, count = promote->getCount(); i < count; i++) {
+  auto count = promote->getCount();
+  cls->setPromotedParameterCount(count);
+  for (int i = 0; i < count; i++) {
     auto param =
         dynamic_pointer_cast<ParameterExpression>((*promote)[i]);
     TokenID mod = param->getModifier();
@@ -1115,7 +1117,7 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
                                   param->getUserTypeHint() : "";
 
     // create the class variable and change the location to
-    // point to the paramenter location for error reporting
+    // point to the parameter location for error reporting
     LocationPtr location = param->getLocation();
     ModifierExpressionPtr modifier = NEW_EXP0(ModifierExpression);
     modifier->add(mod);

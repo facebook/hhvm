@@ -137,7 +137,8 @@ static void scalar_line(Parser *_p, Token &out) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// converting constant declartion to "define(name, value);"
+// converting constant declaration to "define(name, value);"
+// TODO: get rid of this, or pass in more info, task 3491019.
 
 static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
   Token sname;   _p->onScalar(sname, T_CONSTANT_ENCAPSED_STRING, name);

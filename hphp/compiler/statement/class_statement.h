@@ -39,6 +39,10 @@ public:
   virtual bool hasDecl() const { return true; }
   virtual bool hasImpl() const;
 
+  void setPromotedParameterCount(int count) {
+    m_promotedParameterCount = count;
+  }
+
   // implementing IParseHandler
   virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
   bool ignored() const { return m_ignored;}
@@ -51,6 +55,7 @@ public:
 
 private:
   int m_type;
+  int m_promotedParameterCount;
   std::string m_parent;
   std::string m_originalParent;
   bool m_ignored;

@@ -127,6 +127,12 @@
     clowns:
       - mediawiki-core/tests/phpunit/includes/HttpTest.php
       - mediawiki-core/tests/phpunit/includes/libs/CSSJanusTest.php
+  mockery:
+    url: https://github.com/padraic/mockery.git
+    branch: master
+    commit: cce505fe699d12bea3735eee2638d9955a908052
+    install_root: mockery
+    test_root: mockery
   monolog:
     url: https://github.com/Seldaek/monolog.git
     branch: master

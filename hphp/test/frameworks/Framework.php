@@ -632,7 +632,7 @@ abstract class Framework {
       $find_tests_command .= " --config-file ".$this->config_file;
       $find_tests_command .= " --test-find-mode ".$this->test_find_mode;
       if ($this->bootstrap_file !== null) {
-        $find_tests_command .= " --bfile ".$this->bootstrap_file;
+        $find_tests_command .= " --bootstrap-file ".$this->bootstrap_file;
       };
       $descriptorspec = array(
         0 => array("pipe", "r"),

@@ -31,9 +31,10 @@ class TestFinder {
   // faec990edc3e3e8f3b491070b0e8cd90e9df7a4d for the addition of the
   // new ext_reflection-classes.php class.
   public function findTestMethods(): void {
+    include_once $this->bootstrap_file;
+
     $current_classes = get_declared_classes();
     $tests = "";
-    include_once $this->bootstrap_file;
     foreach ($this->test_files as $tf) {
       if (strpos($tf, ".phpt") !== false) {
         $tests .= $tf.PHP_EOL;
@@ -140,7 +141,7 @@ class TestFinder {
     // Some framework phpunit.xml files do not have a <testsuites><testsuite>
     // element, just a single <testsuite> element
     $test_suite = $config_xml->testsuites->testsuite;
-    if ($test_suite->count() === 0) {
+    if ($test_suite === null || $test_suite->count() === 0) {
       $test_suite = $config_xml->testsuite;
     }
     foreach ($test_suite as $suite) {

@@ -21,6 +21,7 @@ namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
 BuiltinFunctionMap s_builtinFunctions;
+ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
 
 /**

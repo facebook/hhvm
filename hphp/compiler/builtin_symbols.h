@@ -80,6 +80,8 @@ private:
   static void ImportExtConstants(AnalysisResultPtr ar,
                                  ConstantTablePtr dest,
                                  ClassInfo *cls);
+  static void ImportNativeConstants(AnalysisResultPtr ar,
+                                    ConstantTablePtr dest);
   static ClassScopePtr ImportClassScopePtr(AnalysisResultPtr ar,
                                            ClassInfo *cls);
   static void ImportExtClasses(AnalysisResultPtr ar);

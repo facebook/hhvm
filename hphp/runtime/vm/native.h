@@ -206,9 +206,13 @@ inline BuiltinFunction GetBuiltinFunction(const char* fname,
 //////////////////////////////////////////////////////////////////////////////
 // Global constants
 
+typedef std::map<const StringData*,TypedValue> ConstantMap;
+extern ConstantMap s_constant_map;
+
 inline
 bool registerConstant(const StringData* cnsName, Cell cns) {
   assert(cellIsPlausible(cns));
+  s_constant_map[cnsName] = cns;
   return Unit::defCns(cnsName, &cns, true);
 }
 
@@ -229,11 +233,15 @@ registerConstant(const StringData* cnsName) {
   return registerConstant(cnsName, make_tv<DType>());
 }
 
+inline
+const ConstantMap& getConstants() {
+  return s_constant_map;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Class Constants
 
-typedef std::map<const StringData*,TypedValue> ClassConstantMap;
-typedef hphp_hash_map<const StringData*, ClassConstantMap,
+typedef hphp_hash_map<const StringData*, ConstantMap,
                       string_data_hash, string_data_isame> ClassConstantMapMap;
 extern ClassConstantMapMap s_class_constant_map;
 
@@ -268,7 +276,7 @@ registerClassConstant(const StringData* clsName,
 }
 
 inline
-const ClassConstantMap* getClassConstants(const StringData* clsName) {
+const ConstantMap* getClassConstants(const StringData* clsName) {
   auto clsit = s_class_constant_map.find(const_cast<StringData*>(clsName));
   if (clsit == s_class_constant_map.end()) {
     return nullptr;

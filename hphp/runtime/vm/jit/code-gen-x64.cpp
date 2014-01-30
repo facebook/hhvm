@@ -49,7 +49,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/layout.h"
@@ -345,7 +345,6 @@ CALL_STK_OPCODE(ElemUX)
 CALL_OPCODE(ArrayGet)
 CALL_OPCODE(StringGet)
 CALL_OPCODE(MapGet)
-CALL_OPCODE(StableMapGet)
 CALL_OPCODE(CGetElem)
 CALL_STK_OPCODE(VGetElem)
 CALL_STK_OPCODE(BindElem)
@@ -353,7 +352,6 @@ CALL_STK_OPCODE(SetWithRefElem)
 CALL_STK_OPCODE(SetWithRefNewElem)
 CALL_OPCODE(ArraySet)
 CALL_OPCODE(MapSet)
-CALL_OPCODE(StableMapSet)
 CALL_OPCODE(ArraySetRef)
 CALL_STK_OPCODE(SetElem)
 CALL_STK_OPCODE(UnsetElem)
@@ -366,7 +364,6 @@ CALL_OPCODE(ArrayIsset)
 CALL_OPCODE(VectorIsset)
 CALL_OPCODE(PairIsset)
 CALL_OPCODE(MapIsset)
-CALL_OPCODE(StableMapIsset)
 CALL_OPCODE(IssetElem)
 CALL_OPCODE(EmptyElem)
 
@@ -2994,20 +2991,6 @@ void emitReload(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
       emitLoadReg(as, reg::rsp[s.offset(i)], d.reg(i));
     }
   }
-}
-
-void CodeGenerator::cgSpill(IRInstruction* inst) {
-  SSATmp* dst   = inst->dst();
-  SSATmp* src   = inst->src(0);
-  assert(dst->numWords() == src->numWords());
-  emitSpill(m_as, curOpd(src), curOpd(dst), src->type());
-}
-
-void CodeGenerator::cgReload(IRInstruction* inst) {
-  SSATmp* dst   = inst->dst();
-  SSATmp* src   = inst->src(0);
-  assert(dst->numWords() == src->numWords());
-  emitReload(m_as, curOpd(src), curOpd(dst), src->type());
 }
 
 void CodeGenerator::cgShuffle(IRInstruction* inst) {
@@ -5871,20 +5854,6 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   m_as.  call   (curOpd(addr).reg());
 }
 
-void CodeGenerator::emitContVarEnvHelperCall(SSATmp* fp, TCA helper) {
-  auto scratch = m_rScratch;
-
-  m_as.  loadq (curOpd(fp).reg()[AROFF(m_varEnv)], scratch);
-  m_as.  testq (scratch, scratch);
-  unlikelyIfBlock(CC_NZ, [&] (Asm& a) {
-    cgCallHelper(a,
-                 CppCall(helper),
-                 kVoidDest,
-                 SyncOptions::kNoSyncPoint,
-                 ArgGroup(curOpds()).ssa(fp));
-  });
-}
-
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg = curOpd(inst->src(0)).reg();
 
@@ -6391,7 +6360,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
 }
 
 void CodeGenerator::print() const {
-  JIT::print(std::cout, m_unit, &m_state.regs, nullptr, m_state.asmInfo);
+  JIT::print(std::cout, m_unit, &m_state.regs, m_state.asmInfo);
 }
 
 static void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
@@ -6417,7 +6386,8 @@ void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
     // If we're on the first instruction of the block or we have a new
     // marker since the last instruction, update the bc mapping.
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
-        m_tx64->isTransDBEnabled() && bcMap) {
+        (m_tx64->isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) &&
+        bcMap) {
       bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
                                       inst->marker().bcOff,
                                       m_as.frontier(),
@@ -6482,7 +6452,11 @@ void genCodeImpl(CodeBlock& mainCode,
 
     auto const aStart      = cb.frontier();
     auto const astubsStart = stubsCode.frontier();
-    patchJumps(cb, state, block);
+    if (arch() == Arch::ARM) {
+      ARM::patchJumps(cb, state, block);
+    } else {
+      patchJumps(cb, state, block);
+    }
     state.addresses[block] = aStart;
 
     // If the block ends with a Jmp and the next block is going to be
@@ -6551,7 +6525,7 @@ void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
     genCodeImpl(main, stubs, unit, bcMap, tx64, regs, &ai);
-    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, nullptr, &ai);
+    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
   } else {
     genCodeImpl(main, stubs, unit, bcMap, tx64, regs, nullptr);
   }

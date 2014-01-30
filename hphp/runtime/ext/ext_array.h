@@ -96,7 +96,7 @@ Variant f_array_splice(VRefParam input, int offset,
 Variant f_array_sum(CVarRef array);
 Variant f_array_unique(CVarRef array, int sort_flags = 2);
 
-int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
+Variant f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
 
 Variant f_array_values(CVarRef input);
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,

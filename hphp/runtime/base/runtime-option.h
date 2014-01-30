@@ -109,6 +109,7 @@ public:
   static std::string DefaultServerNameSuffix;
   static std::string ServerType;
   static std::string ServerIP;
+  static std::string ServerFileSocket;
   static std::string ServerPrimaryIP;
   static int ServerPort;
   static int ServerPortFd;
@@ -286,8 +287,6 @@ public:
   static bool EnableStats;
   static bool EnableWebStats;
   static bool EnableMemoryStats;
-  static bool EnableAPCStats;
-  static bool EnableAPCKeyStats;
   static bool EnableMemcacheStats;
   static bool EnableMemcacheKeyStats;
   static bool EnableSQLStats;
@@ -298,16 +297,6 @@ public:
   static int StatsSlotDuration;
   static int StatsMaxSlot;
 
-  static bool EnableAPCSizeStats;
-  static bool EnableAPCSizeGroup;
-  static std::vector<std::string> APCSizeSpecialPrefix;
-  static std::vector<std::string> APCSizePrefixReplace;
-  static std::vector<std::string> APCSizeSpecialMiddle;
-  static std::vector<std::string> APCSizeMiddleReplace;
-  static std::vector<std::string> APCSizeSkipPrefix;
-  static bool EnableAPCSizeDetail;
-  static bool EnableAPCFetchStats;
-  static bool APCSizeCountPrime;
   static bool EnableHotProfiler;
   static int32_t ProfilerTraceBuffer;
   static double ProfilerTraceExpansion;
@@ -411,6 +400,7 @@ public:
   F(bool, JitStressLease,              false)                           \
   F(bool, JitKeepDbgFiles,             false)                           \
   F(bool, JitEnableRenameFunction,     false)                           \
+  F(bool, JitUseVtuneAPI,              false)                           \
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitTransCounters,            false)                           \
@@ -421,20 +411,21 @@ public:
   F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
   F(bool, HHIRExtraOptPass,            true)                            \
-  F(uint32_t, HHIRNumFreeRegs,         -1)                              \
+  F(uint32_t, HHIRNumFreeRegs,         64)                              \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
   F(uint32_t, HHIRInliningMaxCost,     13)                              \
   F(uint32_t, HHIRAlwaysInlineMaxCost, 10)                              \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
   F(bool, HHIRInlineFrameOpts,         false)                           \
-  F(bool, HHIRGenerateAsserts,         debug)                           \
+  /* 1 (the default) gives most asserts. 2 adds less commonly           \
+   * useful/more expensive asserts. */                                  \
+  F(uint32_t, HHIRGenerateAsserts,     debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   /* Register allocation flags */                                       \
-  F(bool, HHIRXls,                     true)                            \
   F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
@@ -541,6 +532,9 @@ public:
   static bool HHProfServerAllocationProfile;
   static int HHProfServerFilterMinAllocPerReq;
   static int HHProfServerFilterMinBytesPerReq;
+
+  // SimpleXML options
+  static bool SimpleXMLEmptyNamespaceMatchesAll;
 
 #ifdef FACEBOOK
   // fb303 server

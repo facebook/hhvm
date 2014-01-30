@@ -54,8 +54,9 @@ struct State {
   std::vector<Type> stack;
   std::vector<ActRec> fpiStack;
 
-  // Private property types on the current object.
+  // Private instance or static properties on the current object.
   PropState privateProperties;
+  PropState privateStatics;
 };
 
 /*
@@ -115,8 +116,9 @@ struct ClassAnalysis {
   // FuncAnalysis results for each of the methods on the class.
   std::vector<FuncAnalysis> methods;
 
-  // Inferred types for private properties.
+  // Inferred types for private instance and static properties.
   PropState privateProperties;
+  PropState privateStatics;
 };
 
 //////////////////////////////////////////////////////////////////////

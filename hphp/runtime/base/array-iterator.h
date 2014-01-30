@@ -284,7 +284,6 @@ class ArrayIter {
 
   static void VectorInit(ArrayIter* iter, ObjectData* obj);
   static void MapInit(ArrayIter* iter, ObjectData* obj);
-  static void StableMapInit(ArrayIter* iter, ObjectData* obj);
   static void FrozenMapInit(ArrayIter* iter, ObjectData* obj);
   static void SetInit(ArrayIter* iter, ObjectData* obj);
   static void PairInit(ArrayIter* iter, ObjectData* obj);

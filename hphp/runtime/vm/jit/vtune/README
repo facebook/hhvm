@@ -1,0 +1,2 @@
+The files in this directory are taken from Intel VTune Amplifier XE ( http://software.intel.com/en-us/intel-vtune-amplifier-xe ). They are required to
+map performance data for JIT compiled PHP code to source and assembly. See file headers for licensing information.

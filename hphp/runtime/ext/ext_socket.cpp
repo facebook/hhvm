@@ -1045,7 +1045,8 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
 
   std::string key;
   if (persistent) {
-    key = hosturl.getHostURL();
+    key = hosturl.getHostURL() + ":" +
+          boost::lexical_cast<std::string>(hosturl.getPort());
     Socket *sock =
       dynamic_cast<Socket*>(g_persistentObjects->get("socket", key.c_str()));
     if (sock) {

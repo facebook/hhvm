@@ -50,7 +50,6 @@ String f_create_function(const String& args, const String& code);
  * parameters to help the implementation.
  */
 Variant f_func_get_arg(int arg_num);
-Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos);
 
 /**
  * PHP's func_get_args() is transformed to this function with some extra
@@ -58,7 +57,6 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos);
  */
 Variant f_func_get_args();
 Array hhvm_get_frame_args(const ActRec* ar, int offset);
-Array func_get_args(int num_args, CArrRef params, CArrRef args);
 
 /**
  * HipHop extension that allows requesting only a subset of function arguments.

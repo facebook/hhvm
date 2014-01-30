@@ -93,6 +93,7 @@ auto const optionals = {
   TOptBool,
   TOptInt,
   TOptDbl,
+  TOptNum,
   TOptSStr,
   TOptCStr,
   TOptStr,
@@ -110,6 +111,7 @@ auto const non_opt_unions = {
   TGen,
   TNull,
   TBool,
+  TNum,
   TStr,
   TArr,
   TInitUnc,
@@ -204,6 +206,8 @@ TEST(Type, Unc) {
     { TUnc, TInt },
     { TUnc, TOptInt },
     { TUnc, opt(ival(2)) },
+    { TNum, TUnc },
+    { TNum, TInitUnc },
   };
   for (auto kv : pairs) {
     EXPECT_TRUE(kv.first.couldBe(kv.second))
@@ -292,6 +296,12 @@ TEST(Type, Option) {
   EXPECT_FALSE(is_opt(dval(2.0)));
 }
 
+TEST(Type, Num) {
+  EXPECT_EQ(union_of(TInt, TDbl), TNum);
+  EXPECT_EQ(union_of(ival(2), dval(1.0)), TNum);
+  EXPECT_EQ(union_of(TInt, dval(1.0)), TNum);
+}
+
 TEST(Type, OptUnionOf) {
   EXPECT_EQ(opt(ival(2)), union_of(ival(2), TInitNull));
   EXPECT_EQ(opt(dval(2.0)), union_of(TInitNull, dval(2.0)));
@@ -310,6 +320,9 @@ TEST(Type, OptUnionOf) {
 
   EXPECT_EQ(TInitUnc, union_of(TOptSArr, TSStr));
   EXPECT_EQ(TInitUnc, union_of(TSStr, TOptSArr));
+
+  EXPECT_EQ(TOptNum, union_of(TInitNull, TNum));
+  EXPECT_EQ(TOptNum, union_of(TInitNull, union_of(dval(1), ival(0))));
 }
 
 TEST(Type, OptTV) {
@@ -345,6 +358,14 @@ TEST(Type, OptCouldBe) {
 
     { opt(TTrue), TBool },
     { opt(TTrue), TTrue },
+
+    { opt(TDbl), opt(TNum) },
+    { TDbl, opt(TNum) },
+    { TNum, opt(TDbl) },
+
+    { opt(TInt), TNum },
+    { TInt, opt(TNum) },
+    { opt(TDbl), TNum },
   };
 
   auto false_cases = std::initializer_list<std::pair<Type,Type>> {
@@ -353,6 +374,7 @@ TEST(Type, OptCouldBe) {
     { opt(dval(2.0)), TInt },
     { opt(TFalse), TTrue },
     { opt(TTrue), TFalse },
+    { TFalse, opt(TNum) },
   };
 
   for (auto kv : true_cases) {

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/temp-file.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/output-file.h"
+#include "hphp/runtime/server/http-protocol.h"
 #include <memory>
 
 namespace HPHP {
@@ -82,15 +83,8 @@ File* PhpStreamWrapper::open(const String& filename, const String& mode,
   }
 
   if (!strcasecmp(req, "input")) {
-    Transport *transport = g_context->getTransport();
-    if (transport) {
-      int size = 0;
-      const void *data = transport->getPostData(size);
-      if (data && size) {
-        return NEWOBJ(MemFile)((const char *)data, size);
-      }
-    }
-    return NEWOBJ(MemFile)(nullptr, 0);
+    auto raw_post = g_context->getRawPostData();
+    return NEWOBJ(MemFile)(raw_post.c_str(), raw_post.size());
   }
 
   if (!strcasecmp(req, "output")) {

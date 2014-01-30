@@ -27,8 +27,6 @@
 
 namespace HPHP {
 
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(memcache, 3.0.8);
-
 static bool ini_on_update_hash_strategy(const String& value, void *p);
 static String ini_get_hash_strategy(void *p);
 static bool ini_on_update_hash_function(const String& value, void *p);
@@ -44,13 +42,6 @@ public:
   virtual void requestInit() {
     hash_strategy = "standard";
     hash_function = "crc32";
-
-    IniSetting::Bind("memcache.hash_strategy", "standard",
-                     ini_on_update_hash_strategy, ini_get_hash_strategy,
-                     &hash_strategy);
-    IniSetting::Bind("memcache.hash_function", "crc32",
-                     ini_on_update_hash_function, ini_get_hash_function,
-                     &hash_function);
   }
 
   virtual void requestShutdown() {
@@ -59,6 +50,19 @@ public:
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(MEMCACHEGlobals, s_memcache_globals);
 #define MEMCACHEG(name) s_memcache_globals->name
+
+class MemcacheExtension : public Extension {
+  public:
+    MemcacheExtension() : Extension("memcache", "3.0.8") {};
+    void moduleInit() override {
+      IniSetting::Bind(this, "memcache.hash_strategy", "standard",
+                       ini_on_update_hash_strategy, ini_get_hash_strategy,
+                       &MEMCACHEG(hash_strategy));
+      IniSetting::Bind(this, "memcache.hash_function", "crc32",
+                       ini_on_update_hash_function, ini_get_hash_function,
+                       &MEMCACHEG(hash_function));
+    }
+} s_memcache_extension;;
 
 static bool ini_on_update_hash_strategy(const String& value, void *p) {
   if (!strncasecmp(value.data(), "standard", sizeof("standard"))) {

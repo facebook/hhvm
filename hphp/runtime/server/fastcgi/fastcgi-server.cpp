@@ -137,7 +137,20 @@ FastCGIConnection::newSessionHandler(int transport_id) {
 }
 
 void FastCGIConnection::onSessionEgress(std::unique_ptr<IOBuf> chain) {
-  m_sock->writeChain(nullptr, std::move(chain));
+  ++m_writeCount;
+  m_sock->writeChain(this, std::move(chain));
+}
+
+void FastCGIConnection::writeError(size_t bytes,
+    const apache::thrift::transport::TTransportException& ex) noexcept {
+  writeSuccess();
+}
+
+void FastCGIConnection::writeSuccess() noexcept {
+  --m_writeCount;
+  if (m_writeCount == 0 && m_shutdown) {
+    delete this;
+  }
 }
 
 void FastCGIConnection::onSessionError() {
@@ -146,7 +159,10 @@ void FastCGIConnection::onSessionError() {
 
 void FastCGIConnection::onSessionClose() {
   shutdownTransport();
-  delete this;
+  m_shutdown = true;
+  if (m_writeCount == 0) {
+    delete this;
+  }
 }
 
 void FastCGIConnection::setMaxConns(int max_conns) {
@@ -167,7 +183,8 @@ void FastCGIConnection::handleRequest(int transport_id) {
 
 FastCGIServer::FastCGIServer(const std::string &address,
                              int port,
-                             int workers)
+                             int workers,
+                             bool useFileSocket)
   : Server(address, port, workers),
     m_worker(&m_eventBaseManager),
     m_dispatcher(workers,
@@ -179,7 +196,9 @@ FastCGIServer::FastCGIServer(const std::string &address,
                  RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
                  RequestPriority::k_numPriorities) {
   TSocketAddress sock_addr;
-  if (address.empty()) {
+  if (useFileSocket) {
+    sock_addr.setFromPath(address);
+  } else if (address.empty()) {
     sock_addr.setFromLocalPort(port);
   } else {
     sock_addr.setFromHostPort(address, port);
@@ -210,8 +229,12 @@ void FastCGIServer::start() {
     m_socket->bind(m_socketConfig.getAddress());
   } catch (const apache::thrift::transport::TTransportException& ex) {
     LOG(ERROR) << ex.what();
-    throw FailedToListenException(m_socketConfig.getAddress().getAddressStr(),
-                                  m_socketConfig.getAddress().getPort());
+    if (m_socketConfig.getAddress().getFamily() == AF_UNIX) {
+      throw FailedToListenException(m_socketConfig.getAddress().getPath());
+    } else {
+      throw FailedToListenException(m_socketConfig.getAddress().getAddressStr(),
+                                    m_socketConfig.getAddress().getPort());
+    }
   }
   m_acceptor.reset(new FastCGIAcceptor(m_socketConfig, this));
   m_acceptor->init(m_socket.get(), m_worker.getEventBase());

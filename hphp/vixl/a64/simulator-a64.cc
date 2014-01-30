@@ -911,6 +911,9 @@ uint8_t* Simulator::AddressModeHelper(unsigned addr_reg,
     // Misalignment will cause a stack alignment fault.
     ALIGNMENT_EXCEPTION();
   }
+  if (addr_reg == 31) {
+    assert(is_on_stack(reinterpret_cast<void*>(address + offset)));
+  }
   if ((addrmode == PreIndex) || (addrmode == PostIndex)) {
     assert(offset != 0);
     set_xreg(addr_reg, address + offset, Reg31IsStackPointer);
@@ -2094,7 +2097,7 @@ void Simulator::DoHostCall(Instruction* instr) {
   uint32_t argc;
   assert(sizeof(*instr) == 1);
   memcpy(&argc, instr + kHostCallCountOffset, sizeof(argc));
-  assert(argc < 6);
+  assert(argc < 7);
 
   typedef intptr_t(*Native0Ptr)(void);
   typedef intptr_t(*Native1Ptr)(intptr_t);
@@ -2103,6 +2106,8 @@ void Simulator::DoHostCall(Instruction* instr) {
   typedef intptr_t(*Native4Ptr)(intptr_t, intptr_t, intptr_t, intptr_t);
   typedef intptr_t(*Native5Ptr)(intptr_t, intptr_t, intptr_t, intptr_t,
                                 intptr_t);
+  typedef intptr_t(*Native6Ptr)(intptr_t, intptr_t, intptr_t, intptr_t,
+                                intptr_t, intptr_t);
 
   intptr_t result;
 
@@ -2128,6 +2133,10 @@ void Simulator::DoHostCall(Instruction* instr) {
       case 5:
         result = reinterpret_cast<Native5Ptr>(xreg(16))(
           xreg(0), xreg(1), xreg(2), xreg(3), xreg(4));
+        break;
+      case 6:
+        result = reinterpret_cast<Native6Ptr>(xreg(16))(
+          xreg(0), xreg(1), xreg(2), xreg(3), xreg(4), xreg(5));
         break;
       default:
         not_reached();

@@ -30,66 +30,64 @@ const int64_t k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
 double f_pi() { return k_M_PI;}
 
 Variant f_min(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
-  Variant ret;
-  if (_argv.empty() && value.is(KindOfArray)) {
-    Array v = value.toArray();
-    if (!v.empty()) {
-      ssize_t pos = v->iter_begin();
-      if (pos != ArrayData::invalid_index) {
-        ret = v->getValue(pos);
-        while (true) {
-          pos = v->iter_advance(pos);
-          if (pos == ArrayData::invalid_index) break;
-          Variant tmp = v->getValue(pos);
-          if (less(tmp, ret)) {
-            ret = tmp;
-          }
-        }
+  if (_argv.empty()) {
+    const auto& cell_value = *value.asCell();
+    if (UNLIKELY(!isContainer(cell_value))) {
+      return value;
+    }
+
+    ArrayIter iter(cell_value);
+    if (!iter) {
+      return uninit_null();
+    }
+    Variant ret = iter.secondRefPlus();
+    ++iter;
+    for (; iter; ++iter) {
+      Variant currVal = iter.secondRefPlus();
+      if (less(currVal, ret)) {
+        ret = currVal;
       }
     }
-  } else {
-    ret = value;
-    if (!_argv.empty()) {
-      for (ssize_t pos = _argv->iter_begin(); pos != ArrayData::invalid_index;
-           pos = _argv->iter_advance(pos)) {
-        Variant tmp = _argv->getValue(pos);
-        if (less(tmp, ret)) {
-          ret = tmp;
-        }
-      }
+    return ret;
+  }
+
+  Variant ret = value;
+  for (ArrayIter iter(_argv); iter; ++iter) {
+    Variant currVal = iter.secondRef();
+    if (less(currVal, ret)) {
+      ret = currVal;
     }
   }
   return ret;
 }
 
 Variant f_max(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
-  Variant ret;
-  if (_argv.empty() && value.is(KindOfArray)) {
-    Array v = value.toArray();
-    if (!v.empty()) {
-      ssize_t pos = v->iter_begin();
-      if (pos != ArrayData::invalid_index) {
-        ret = v->getValue(pos);
-        while (true) {
-          pos = v->iter_advance(pos);
-          if (pos == ArrayData::invalid_index) break;
-          Variant tmp = v->getValue(pos);
-          if (more(tmp, ret)) {
-            ret = tmp;
-          }
-        }
+  if (_argv.empty()) {
+    const auto& cell_value = *value.asCell();
+    if (UNLIKELY(!isContainer(cell_value))) {
+      return value;
+    }
+
+    ArrayIter iter(cell_value);
+    if (!iter) {
+      return uninit_null();
+    }
+    Variant ret = iter.secondRefPlus();
+    ++iter;
+    for (; iter; ++iter) {
+      Variant currVal = iter.secondRefPlus();
+      if (more(currVal, ret)) {
+        ret = currVal;
       }
     }
-  } else {
-    ret = value;
-    if (!_argv.empty()) {
-      for (ssize_t pos = _argv->iter_begin(); pos != ArrayData::invalid_index;
-           pos = _argv->iter_advance(pos)) {
-        Variant tmp = _argv->getValue(pos);
-        if (more(tmp, ret)) {
-          ret = tmp;
-        }
-      }
+    return ret;
+  }
+
+  Variant ret = value;
+  for (ArrayIter iter(_argv); iter; ++iter) {
+    Variant currVal = iter.secondRef();
+    if (more(currVal, ret)) {
+      ret = currVal;
     }
   }
   return ret;

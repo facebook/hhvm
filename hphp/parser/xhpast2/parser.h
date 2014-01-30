@@ -639,6 +639,10 @@ struct Parser : ParserBase {
       .setExtra(new OnClassConstEI(text));
   }
 
+  void onClassClass(Token &out, Token &cls, Token &name, bool text) {
+    onClassConst(out, cls, name, text);
+  }
+
   void fixStaticVars() { /* TODO */}
 
   void onFunctionStart(Token& name, bool doPushComment = true) {

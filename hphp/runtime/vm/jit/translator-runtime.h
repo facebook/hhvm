@@ -25,6 +25,18 @@
 
 namespace HPHP { namespace JIT {
 
+
+/* MInstrState is stored right above the reserved spill space on the C++
+ * stack. */
+#define MISOFF(nm)                                         \
+  (offsetof(MInstrState, nm) + kReservedRSPSpillSpace)
+
+const size_t kReservedRSPMInstrStateSpace = RESERVED_STACK_MINSTR_STATE_SPACE;
+const size_t kReservedRSPSpillSpace       = RESERVED_STACK_SPILL_SPACE;
+const size_t kReservedRSPTotalSpace       = RESERVED_STACK_TOTAL_SPACE;
+
+//////////////////////////////////////////////////////////////////////
+
 struct MInstrState {
   // Room for this structure is allocated on the stack before we
   // make a call into the tc, so this first element is padding for
@@ -48,7 +60,7 @@ struct MInstrState {
 static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,
               "MInstrState members require 16-byte alignment for SSE");
 static_assert(sizeof(MInstrState) - sizeof(uintptr_t) // return address
-              < X64::kReservedRSPTotalSpace,
+              < kReservedRSPTotalSpace,
               "MInstrState is too large for the rsp scratch space "
               "in enterTCHelper");
 
@@ -116,6 +128,7 @@ StringData* convCellToStrHelper(TypedValue tv);
 
 void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
+void raiseUndefVariable(StringData* nm);
 void VerifyParamTypeFail(int param);
 void VerifyParamTypeCallable(TypedValue value, int param);
 void VerifyParamTypeSlow(const Class* cls,

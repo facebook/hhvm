@@ -133,10 +133,12 @@ using DepMap =
 
 //////////////////////////////////////////////////////////////////////
 
-PropState unknown_private_props(borrowed_ptr<const php::Class> cls) {
+template<class Filter>
+PropState make_unknown_propstate(borrowed_ptr<const php::Class> cls,
+                                 Filter filter) {
   auto ret = PropState{};
   for (auto& prop : cls->properties) {
-    if ((prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic)) {
+    if (filter(prop)) {
       ret[prop.name] = TGen;
     }
   }
@@ -300,12 +302,17 @@ struct IndexData {
   std::mutex funcInfoLock;
   std::unordered_map<borrowed_ptr<const php::Func>,FuncInfo> funcInfo;
 
-  // Private property types are stored separately from ClassInfo,
-  // because you don't need to resolve a class to get at them.
+  // Private instance and static property types are stored separately
+  // from ClassInfo, because you don't need to resolve a class to get
+  // at them.
   std::unordered_map<
     borrowed_ptr<const php::Class>,
     PropState
   > privatePropInfo;
+  std::unordered_map<
+    borrowed_ptr<const php::Class>,
+    PropState
+  > privateStaticPropInfo;
 
   // For now we only need dependencies for function return types.
   DepMap dependencyMap;
@@ -339,7 +346,10 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
     // (NativeImpl) for the HNI function, but just initializing it
     // here saves on whole-program iterations.
     if (f->nativeInfo->returnType != KindOfInvalid) {
-      ret.returnTy = from_DataType(f->nativeInfo->returnType);
+      // TODO(#3568043): always add TInitNull, because HNI doesn't
+      // know about nullability.
+      auto const t = from_DataType(f->nativeInfo->returnType);
+      ret.returnTy = union_of(t, TInitNull);
     }
   }
   return &ret;
@@ -712,11 +722,6 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
               ? TInitCell // none of these interfaces support Uninits
               : subObj(*rcls);
           }
-          /*
-           * TODO: if the class isn't unique, but there's no type
-           * aliases or class_alias calls with that name, we could
-           * still use TObj.
-           */
           return TInitCell;
         case KindOfResource: // Note, some day we may have resource hints.
           break;
@@ -733,9 +738,7 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   case TypeConstraint::MetaType::Callable:
     break;
   case TypeConstraint::MetaType::Number:
-    // TODO(#3553967): a concept of TInt | TDbl is necessary to
-    // capture this case and the results of integer division
-    return TInitCell;
+    return TNum;
   }
 
   return TCell;
@@ -786,7 +789,24 @@ PropState
 Index::lookup_private_props(borrowed_ptr<const php::Class> cls) const {
   auto it = m_data->privatePropInfo.find(cls);
   if (it != end(m_data->privatePropInfo)) return it->second;
-  return unknown_private_props(cls);
+  return make_unknown_propstate(
+    cls,
+    [&] (const php::Prop& prop) {
+      return (prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic);
+    }
+  );
+}
+
+PropState
+Index::lookup_private_statics(borrowed_ptr<const php::Class> cls) const {
+  auto it = m_data->privateStaticPropInfo.find(cls);
+  if (it != end(m_data->privateStaticPropInfo)) return it->second;
+  return make_unknown_propstate(
+    cls,
+    [&] (const php::Prop& prop) {
+      return (prop.attrs & AttrPrivate) && (prop.attrs & AttrStatic);
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -802,11 +822,13 @@ Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
   return {};
 }
 
-void Index::refine_private_props(borrowed_ptr<const php::Class> cls,
-                                 const PropState& state) {
-  auto it = m_data->privatePropInfo.find(cls);
-  if (it == end(m_data->privatePropInfo)) {
-    m_data->privatePropInfo[cls] = state;
+template<class Container>
+void refine_propstate(Container& cont,
+                      borrowed_ptr<const php::Class> cls,
+                      const PropState& state) {
+  auto it = cont.find(cls);
+  if (it == end(cont)) {
+    cont[cls] = state;
     return;
   }
   for (auto& kv : state) {
@@ -814,6 +836,16 @@ void Index::refine_private_props(borrowed_ptr<const php::Class> cls,
     assert(kv.second.subtypeOf(target));
     target = kv.second;
   }
+}
+
+void Index::refine_private_props(borrowed_ptr<const php::Class> cls,
+                                 const PropState& state) {
+  refine_propstate(m_data->privatePropInfo, cls, state);
+}
+
+void Index::refine_private_statics(borrowed_ptr<const php::Class> cls,
+                                   const PropState& state) {
+  refine_propstate(m_data->privateStaticPropInfo, cls, state);
 }
 
 //////////////////////////////////////////////////////////////////////

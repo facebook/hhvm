@@ -32,31 +32,6 @@ public:
   // Compositions.
 
   /**
-   * Create an array using the elements of the first parameter as keys
-   * each initialized to value.
-   */
-  static Variant CreateArray(CArrRef keys, CVarRef value);
-
-  /**
-   * Create an array containing num elements starting with index start_key
-   * each initialized to value.
-   */
-  static Variant CreateArray(int start_index, int num, CVarRef value);
-
-  /**
-   * Split array into chunks.
-   */
-  static Variant Chunk(CArrRef input, int size, bool preserve_keys = false);
-
-  /**
-   * Taking a slice. When "preserve_keys" is true, a vector will turn
-   * into numerically keyed map. When "preserve_keys" is false, a map will
-   * turn into vectors, unless keys are not numeric.
-   */
-  static Variant Slice(CArrRef input, int offset, int64_t length,
-                       bool preserve_keys);
-
-  /**
    * Removes the elements designated by offset and length and replace them
    * with supplied array.
    */

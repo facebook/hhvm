@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $s1 = StableMap {'a' => 1, 'b' => 2};

@@ -67,7 +67,10 @@ public:
   LDAP *link;
   Variant rebindproc;
 };
-IMPLEMENT_OBJECT_ALLOCATION(LdapLink)
+
+void LdapLink::sweep() {
+  close();
+}
 
 class LdapResult : public SweepableResourceData {
 public:

@@ -340,7 +340,6 @@ private:
 private:
   void      appendInstruction(IRInstruction* inst);
   void      appendBlock(Block* block);
-  enum      CloneInstMode { kCloneInst, kUseInst };
 
 private:
   IRUnit& m_unit;

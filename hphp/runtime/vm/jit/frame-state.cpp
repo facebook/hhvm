@@ -388,6 +388,7 @@ void FrameState::startBlock(Block* block) {
   auto it = m_snapshots.find(block);
   if (it != m_snapshots.end()) {
     load(it->second);
+    FTRACE(4, "Loading state for B{}: {}\n", block->id(), show(*this));
     m_inlineSavedStates = it->second.inlineSavedStates;
     m_snapshots.erase(it);
   }
@@ -421,9 +422,11 @@ FrameState::Snapshot FrameState::createSnapshot() const {
  * existing snapshot.
  */
 void FrameState::save(Block* block) {
+  FTRACE(4, "Saving state for B{}: {}\n", block->id(), show(*this));
   auto it = m_snapshots.find(block);
   if (it != m_snapshots.end()) {
     merge(it->second);
+    FTRACE(4, "Merged state: {}\n", show(*this));
   } else {
     auto& snapshot = m_snapshots[block] = createSnapshot();
     snapshot.inlineSavedStates = m_inlineSavedStates;
@@ -663,6 +666,16 @@ void FrameState::dropLocalInnerType(uint32_t id, unsigned inlineIdx) {
   auto& local = locals(inlineIdx)[id];
   assert(local.type.isBoxed());
   local.type = Type::BoxedInitCell;
+}
+
+std::string show(const FrameState& state) {
+  return folly::format("func: {}, bcOff: {}, spOff: {}{}{}",
+                       state.func()->fullName()->data(),
+                       state.marker().bcOff,
+                       state.spOffset(),
+                       state.thisAvailable() ? ", thisAvailable" : "",
+                       state.frameSpansCall() ? ", frameSpansCall" : ""
+                      ).str();
 }
 
 } }

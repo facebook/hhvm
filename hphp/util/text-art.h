@@ -19,7 +19,7 @@
 
 namespace HPHP { namespace Util { namespace TextArt {
 ///////////////////////////////////////////////////////////////////////////////
-
+// comment only change
 #define BOX_H  get_box_drawing_char(LightHorizontal)
 #define BOX_V  get_box_drawing_char(LightVertical)
 #define BOX_UL get_box_drawing_char(LightDownAndRight)

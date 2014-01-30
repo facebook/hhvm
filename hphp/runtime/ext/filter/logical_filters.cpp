@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_url.h"
+#include "hphp/runtime/ext/url/ext_url.h"
 #include <arpa/inet.h>
 #include <pcre.h>
 

@@ -217,6 +217,11 @@ private:
  */
 struct Repo::GlobalData {
   /*
+   * Indicates whether a repo was compiled using HHBBC.
+   */
+  bool UsedHHBBC = false;
+
+  /*
    * Indicates whether a repo was compiled with HardTypeHints.
    *
    * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
@@ -225,8 +230,16 @@ struct Repo::GlobalData {
    */
   bool HardTypeHints = false;
 
+  /*
+   * Indicates whether a repo was compiled with HardPrivatePropInference.
+   */
+  bool HardPrivatePropInference = false;
+
   template<class SerDe> void serde(SerDe& sd) {
-    sd(HardTypeHints);
+    sd(UsedHHBBC)
+      (HardTypeHints)
+      (HardPrivatePropInference)
+      ;
   }
 };
 

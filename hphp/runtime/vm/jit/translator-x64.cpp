@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/vtune-jit.h"
 
 #include "folly/MapUtil.h"
 
@@ -436,8 +437,13 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
   size_t stubsize = code.stubs().frontier() - stubstart;
   assert(asize == 0);
   if (stubsize && RuntimeOption::EvalDumpTCAnchors) {
-    addTranslation(TransRec(sk, sk.unit()->md5(), TransAnchor,
-                            astart, asize, stubstart, stubsize));
+    TransRec tr(sk, sk.unit()->md5(), TransAnchor,
+                astart, asize, stubstart, stubsize);
+    addTranslation(tr);
+    if (RuntimeOption::EvalJitUseVtuneAPI) {
+      reportTraceletToVtune(sk.unit(), sk.func(), tr);
+    }
+
     if (m_profData) {
       m_profData->addTransNonProf(TransAnchor, sk);
     }
@@ -691,9 +697,13 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   func->setPrologue(paramIndex, start);
 
   assert(m_mode == TransPrologue || m_mode == TransProflogue);
-  addTranslation(TransRec(skFuncBody, func->unit()->md5(),
-                          m_mode, aStart, code.main().frontier() - aStart,
-                          stubStart, code.stubs().frontier() - stubStart));
+  TransRec tr(skFuncBody, func->unit()->md5(),
+              m_mode, aStart, code.main().frontier() - aStart,
+              stubStart, code.stubs().frontier() - stubStart);
+  addTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(func->unit(), func, tr);
+  }
 
   if (m_profData) {
     m_profData->addTransPrologue(m_mode, skFuncBody, paramIndex);
@@ -1144,6 +1154,10 @@ TranslatorX64::enterTC(TCA start, void* data) {
     }
 
     if (RuntimeOption::EvalSimulateARM) {
+      // This is a pseudo-copy of the logic in enterTCHelper: it sets up the
+      // simulator's registers and stack, runs the translation, and gets the
+      // necessary information out of the registers when it's done.
+
       vixl::PrintDisassembler disasm(std::cout);
       vixl::Decoder decoder;
       if (getenv("ARM_DISASM")) {
@@ -1163,15 +1177,39 @@ TranslatorX64::enterTC(TCA start, void* data) {
       g_vmContext->m_activeSims.push_back(&sim);
       SCOPE_EXIT { g_vmContext->m_activeSims.pop_back(); };
 
-      sim.   set_xreg(JIT::ARM::rGContextReg.code(), g_vmContext);
-      sim.   set_xreg(JIT::ARM::rVmFp.code(), vmfp());
-      sim.   set_xreg(JIT::ARM::rVmSp.code(), vmsp());
-      sim.   set_xreg(JIT::ARM::rVmTl.code(), RDS::tl_base);
-      sim.   set_xreg(JIT::ARM::rStashedAR.code(), info.saved_rStashedAr);
+      sim.   set_xreg(ARM::rGContextReg.code(), g_vmContext);
+      sim.   set_xreg(ARM::rVmFp.code(), vmfp());
+      sim.   set_xreg(ARM::rVmSp.code(), vmsp());
+      sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
+      sim.   set_xreg(ARM::rStashedAR.code(), info.saved_rStashedAr);
+
+      // Leave space for register spilling and MInstrState.
+      sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
+      assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
+
+      DEBUG_ONLY auto spOnEntry = sim.sp();
+
+      // Push the link register onto the stack. The link register is technically
+      // caller-saved; what this means in practice is that non-leaf functions
+      // push it at the very beginning and pop it just before returning (as
+      // opposed to just saving it around calls).
+      sim.   set_sp(sim.sp() - 16);
+      *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
+
+      // The handshake is different in the case of REQ_BIND_CALL. The code we're
+      // jumping to expects to find a return address in x30, and a saved return
+      // address on the stack.
+      if (info.requestNum == REQ_BIND_CALL) {
+        // Put the call's return address in the link register.
+        auto* ar = reinterpret_cast<ActRec*>(info.saved_rStashedAr);
+        sim.set_lr(ar->m_savedRip);
+      }
 
       std::cout.flush();
       sim.RunFrom(vixl::Instruction::Cast(start));
       std::cout.flush();
+
+      assert(sim.sp() == spOnEntry);
 
       info.requestNum = sim.xreg(0);
       info.args[0] = sim.xreg(1);
@@ -1179,9 +1217,9 @@ TranslatorX64::enterTC(TCA start, void* data) {
       info.args[2] = sim.xreg(3);
       info.args[3] = sim.xreg(4);
       info.args[4] = sim.xreg(5);
-      info.saved_rStashedAr = sim.xreg(JIT::ARM::rStashedAR.code());
+      info.saved_rStashedAr = sim.xreg(ARM::rStashedAR.code());
 
-      info.stubAddr = reinterpret_cast<TCA>(sim.xreg(JIT::ARM::rAsm.code()));
+      info.stubAddr = reinterpret_cast<TCA>(sim.xreg(ARM::rAsm.code()));
     } else {
       // We have to force C++ to spill anything that might be in a callee-saved
       // register (aside from rbp). enterTCHelper does not save them.
@@ -1280,16 +1318,14 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
           JIT::smashCall(toSmash, dest);
           smashed = true;
-          // For functions to be PGO'ed, if their prologues haven't been
-          // regenerated yet, then save toSmash as a caller to the
-          // prologue, so that it can later be smashed to call a new
-          // prologue when it's generated.
+          // For functions to be PGO'ed, if their current prologues
+          // are still profiling ones (living in code.prof()), then
+          // save toSmash as a caller to the prologue, so that it can
+          // later be smashed to call a new prologue when it's generated.
           int calleeNumParams = func->numParams();
           int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                                      nArgs :  calleeNumParams + 1);
-          SrcKey calleeSK = {func,
-                             func->getEntryForNumArgs(calledPrologNumArgs)};
-          if (profileSrcKey(calleeSK)) {
+          if (code.prof().contains(dest)) {
             if (isImmutable) {
               m_profData->addPrologueMainCaller(func, calledPrologNumArgs,
                                                 toSmash);
@@ -1584,13 +1620,6 @@ TranslatorX64::syncWork() {
   Stats::inc(Stats::TC_Sync);
 }
 
-// could be static but used in hopt/codegen.cpp
-void raiseUndefVariable(StringData* nm) {
-  raise_notice(Strings::UNDEFINED_VARIABLE, nm->data());
-  // FIXME: do we need to decref the string if an exception is propagating?
-  decRefStr(nm);
-}
-
 TCA
 TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   auto& trampolines = code.trampolines();
@@ -1624,6 +1653,10 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
 
   trampolineMap[helperAddr] = trampAddr;
   recordBCInstr(OpNativeTrampoline, trampolines, trampAddr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTrampolineToVtune(trampAddr, trampolines.frontier() - trampAddr);
+  }
+
   return trampAddr;
 }
 
@@ -1763,10 +1796,12 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   TransKind  transKind = TransInterp;
   UndoMarker undoA(code.main());
   UndoMarker undoAstubs(code.stubs());
+  UndoMarker undoGlobalData(code.data());
 
   auto resetState = [&] {
     undoA.undo();
     undoAstubs.undo();
+    undoGlobalData.undo();
     m_fixupMap.clearPendingFixups();
     m_pendingCatchTraces.clear();
     m_bcMap.clear();
@@ -1914,10 +1949,14 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   m_fixupMap.processPendingFixups();
   processPendingCatchTraces();
 
-  addTranslation(TransRec(sk, sk.unit()->md5(), transKind, tp.get(), start,
-                          code.main().frontier() - start, stubStart,
-                          code.stubs().frontier() - stubStart,
-                          m_bcMap));
+  TransRec tr(sk, sk.unit()->md5(), transKind, tp.get(), start,
+              code.main().frontier() - start, stubStart,
+              code.stubs().frontier() - stubStart,
+              m_bcMap);
+  addTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(sk.unit(), sk.func(), tr);
+  }
   m_bcMap.clear();
 
   recordGdbTranslation(sk, sk.func(), code.main(), start,
@@ -2078,7 +2117,7 @@ void TranslatorX64::traceCodeGen() {
   auto& unit = ht.unit();
 
   auto finishPass = [&](const char* msg, int level) {
-    dumpTrace(level, unit, msg, nullptr, nullptr, nullptr,
+    dumpTrace(level, unit, msg, nullptr, nullptr,
               ht.traceBuilder().guards());
     assert(checkCfg(unit));
   };
@@ -2088,8 +2127,7 @@ void TranslatorX64::traceCodeGen() {
   optimize(unit, ht.traceBuilder());
   finishPass(" after optimizing ", kOptLevel);
 
-  auto regs = RuntimeOption::EvalHHIRXls ? allocateRegs(unit) :
-              allocRegsForUnit(unit);
+  auto regs = allocateRegs(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
   recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier());

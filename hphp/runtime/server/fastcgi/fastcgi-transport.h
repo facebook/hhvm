@@ -49,6 +49,7 @@ public:
   virtual const char *getRemoteHost() override;
   virtual const char *getRemoteAddr() override;
   virtual uint16_t getRemotePort() override;
+  virtual const std::string getPathTranslated() override;
   virtual const std::string getDocumentRoot() override;
   virtual const char *getServerName() override;
   virtual const char *getServerAddr() override;
@@ -108,6 +109,7 @@ private:
   folly::IOBufQueue m_bodyQueue;
   std::unique_ptr<folly::IOBuf> m_currBody;
   std::unordered_map<std::string, std::string> m_requestHeaders;
+  std::string m_pathTranslated;
   std::string m_requestURI;
   std::string m_documentRoot;
   std::string m_remoteHost;

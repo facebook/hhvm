@@ -44,7 +44,7 @@ bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
 void prepareForSmash(CodeBlock& cb, int nBytes, int offset /* = 0 */) {
   if (arch() == Arch::X64) {
     if (!isSmashable(cb.frontier(), nBytes, offset)) {
-      JIT::X64Assembler a { cb };
+      X64Assembler a { cb };
       int gapSize = (~(uintptr_t(a.frontier()) + offset) &
                      kX64CacheLineMask) + 1;
       a.emitNop(gapSize);
@@ -104,7 +104,7 @@ static void smashX64JmpOrCall(TCA addr, TCA dest, bool isCall) {
 
   auto& cb = tx64->code.blockFor(addr);
   CodeCursor cursor { cb, addr };
-  JIT::X64Assembler a { cb };
+  X64Assembler a { cb };
   if (dest > addr && dest - addr <= X64::kJmpLen) {
     assert(!isCall);
     a.  emitNop(dest - addr);
@@ -118,13 +118,16 @@ static void smashX64JmpOrCall(TCA addr, TCA dest, bool isCall) {
 static void smashARMJmpOrCall(TCA addr, TCA dest, bool isCall) {
   // Assert that this is actually the instruction sequence we expect
   DEBUG_ONLY auto ldr = vixl::Instruction::Cast(addr);
-  DEBUG_ONLY auto br = vixl::Instruction::Cast(addr + 4);
+  DEBUG_ONLY auto branch = vixl::Instruction::Cast(addr + 4);
   assert(ldr->Bits(31, 24) == 0x58);
-  assert(br->Bits(31, 10) == 0x3587C0 && br->Bits(4, 0) == 0);
+  assert((branch->Bits(31, 10) == 0x3587C0 ||
+          branch->Bits(31, 10) == 0x358FC0) &&
+         branch->Bits(4, 0) == 0);
 
-  // This offset is asserted in emitSmashableJump. We wrote two instructions,
-  // and then the jump/call destination was written at the next 8-byte boundary.
-  auto dataPtr = addr + 8;
+  // These offsets are asserted in emitSmashableJump and emitSmashableCall. We
+  // wrote two instructions for an unconditional jump, or three for a call, and
+  // then the jump/call destination was written at the next 8-byte boundary.
+  auto dataPtr = (isCall ? addr + 12 : addr + 8);
   if ((uintptr_t(dataPtr) & 7) != 0) {
     dataPtr += 4;
     assert((uintptr_t(dataPtr) & 7) == 0);
@@ -151,6 +154,8 @@ void smashCall(TCA callAddr, TCA newDest) {
   FTRACE(2, "smashCall: {} -> {}\n", callAddr, newDest);
   if (arch() == Arch::X64) {
     smashX64JmpOrCall(callAddr, newDest, true);
+  } else if (arch() == Arch::ARM) {
+    smashARMJmpOrCall(callAddr, newDest, true);
   } else {
     not_implemented();
   }
@@ -187,10 +192,10 @@ void smashJcc(TCA jccAddr, TCA newDest) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitSmashableJump(CodeBlock& cb, JIT::TCA dest,
-                       JIT::ConditionCode cc) {
+void emitSmashableJump(CodeBlock& cb, TCA dest,
+                       ConditionCode cc) {
   if (arch() == Arch::X64) {
-    JIT::X64Assembler a { cb };
+    X64Assembler a { cb };
     if (cc == CC_None) {
       assert(isSmashable(cb.frontier(), X64::kJmpLen));
       a.  jmp(dest);
@@ -241,9 +246,38 @@ void emitSmashableJump(CodeBlock& cb, JIT::TCA dest,
   }
 }
 
+void emitSmashableCall(CodeBlock& cb, TCA dest) {
+  if (arch() == Arch::X64) {
+    X64Assembler a { cb };
+    assert(isSmashable(cb.frontier(), X64::kCallLen));
+    a.  call(dest);
+  } else {
+    vixl::MacroAssembler a { cb };
+    vixl::Label afterData;
+    vixl::Label targetData;
+    DEBUG_ONLY auto start = cb.frontier();
+
+    a.  Ldr  (ARM::rAsm, &targetData);
+    a.  Blr  (ARM::rAsm);
+    // When the call returns, jump over the data.
+    a.  B    (&afterData);
+    if (!cb.isFrontierAligned(8)) {
+      a.Nop  ();
+      assert(cb.isFrontierAligned(8));
+    }
+    a.  bind (&targetData);
+    a.  dc64 (reinterpret_cast<int64_t>(dest));
+    a.  bind (&afterData);
+
+    // If this assert breaks, you need to change smashCall
+    assert(targetData.target() == start + 12 ||
+           targetData.target() == start + 16);
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
-JIT::TCA jmpTarget(JIT::TCA jmp) {
+TCA jmpTarget(TCA jmp) {
   if (arch() == Arch::X64) {
     if (jmp[0] != 0xe9) return nullptr;
     return jmp + 5 + ((int32_t*)(jmp + 5))[-1];
@@ -268,7 +302,7 @@ JIT::TCA jmpTarget(JIT::TCA jmp) {
   }
 }
 
-JIT::TCA jccTarget(JIT::TCA jmp) {
+TCA jccTarget(TCA jmp) {
   if (arch() == Arch::X64) {
     if (jmp[0] != 0x0F || (jmp[1] & 0xF0) != 0x80) return nullptr;
     return jmp + 6 + ((int32_t*)(jmp + 6))[-1];
@@ -280,7 +314,7 @@ JIT::TCA jccTarget(JIT::TCA jmp) {
     Instruction* br = Instruction::Cast(jmp + 8);
     if (br->Bits(31, 10) != 0x3587C0 || br->Bits(4, 0) != 0) return nullptr;
 
-    uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 8);
+    uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 12);
     if ((dest & 7) != 0) {
       dest += 4;
       assert((dest & 7) == 0);
@@ -291,10 +325,24 @@ JIT::TCA jccTarget(JIT::TCA jmp) {
   }
 }
 
-JIT::TCA callTarget(JIT::TCA call) {
+TCA callTarget(TCA call) {
   if (arch() == Arch::X64) {
     if (call[0] != 0xE8) return nullptr;
     return call + 5 + ((int32_t*)(call + 5))[-1];
+  } else if (arch() == Arch::ARM) {
+    using namespace vixl;
+    Instruction* ldr = Instruction::Cast(call);
+    if (ldr->Bits(31, 24) != 0x58) return nullptr;
+
+    Instruction* blr = Instruction::Cast(call + 4);
+    if (blr->Bits(31, 10) != 0x358FC0 || blr->Bits(4, 0) != 0) return nullptr;
+
+    uintptr_t dest = reinterpret_cast<uintptr_t>(blr + 8);
+    if ((dest & 7) != 0) {
+      dest += 4;
+      assert((dest & 7) == 0);
+    }
+    return *reinterpret_cast<TCA*>(dest);
   } else {
     not_implemented();
   }

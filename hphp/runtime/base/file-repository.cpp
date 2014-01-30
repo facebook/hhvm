@@ -470,15 +470,17 @@ PhpFile *FileRepository::readHhbc(const std::string &name,
   return nullptr;
 }
 
-PhpFile *FileRepository::parseFile(const std::string &name,
-                                   const FileInfo &fileInfo) {
+PhpFile* FileRepository::parseFile(const std::string& name,
+                                   const FileInfo& fileInfo) {
   MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
   Unit* unit = compile_file(fileInfo.m_inputString->data(),
-                                fileInfo.m_inputString->size(),
-                                md5, name.c_str());
-  PhpFile *p = new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
-                           fileInfo.m_md5, unit);
-  return p;
+                            fileInfo.m_inputString->size(),
+                            md5, name.c_str());
+  always_assert(unit != nullptr &&
+                "failed to produce a unit; possibly due to corrupt hhbc repo");
+
+  return new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
+                     fileInfo.m_md5, unit);
 }
 
 bool FileRepository::fileStat(const std::string &name, struct stat *s) {

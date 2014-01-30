@@ -29,88 +29,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // compositions
 
-Variant ArrayUtil::CreateArray(CArrRef keys, CVarRef value) {
-  ArrayInit ai(keys.size());
-  for (ArrayIter iter(keys); iter; ++iter) {
-    ai.set(iter.secondRef(), value);
-  }
-  return ai.create();
-}
-
-Variant ArrayUtil::CreateArray(int start_index, int num, CVarRef value) {
-  if (num <= 0) {
-    throw_invalid_argument("num: [non-positive]");
-    return false;
-  }
-
-  Array ret;
-  ret.set(start_index, value);
-  for (int i = num - 1; i > 0; i--) {
-    ret.append(value);
-  }
-  return ret;
-}
-
-Variant ArrayUtil::Chunk(CArrRef input, int size,
-                         bool preserve_keys /* = false */) {
-  if (size < 1) {
-    throw_invalid_argument("size: %d", size);
-    return init_null();
-  }
-
-  Array ret = Array::Create();
-  Array chunk;
-  int current = 0;
-  for (ArrayIter iter(input); iter; ++iter) {
-    if (preserve_keys) {
-      chunk.setWithRef(iter.first(), iter.secondRef(), true);
-    } else {
-      chunk.appendWithRef(iter.secondRef());
-    }
-    if ((++current % size) == 0) {
-      ret.append(chunk);
-      chunk.clear();
-    }
-  }
-
-  if (!chunk.empty()) {
-    ret.append(chunk);
-  }
-  return ret;
-}
-
-Variant ArrayUtil::Slice(CArrRef input, int offset, int64_t length,
-                         bool preserve_keys) {
-  int num_in = input.size();
-  if (offset > num_in) {
-    offset = num_in;
-  } else if (offset < 0 && (offset = (num_in + offset)) < 0) {
-    offset = 0;
-  }
-
-  if (length < 0) {
-    length = num_in - offset + length;
-  } else if (((unsigned)offset + (unsigned)length) > (unsigned)num_in) {
-    length = num_in - offset;
-  }
-
-  Array out_hash = Array::Create();
-  int pos = 0;
-  ArrayIter iter(input);
-  for (; pos < offset && iter; ++pos, ++iter) {}
-  for (; pos < offset + length && iter; ++pos, ++iter) {
-    Variant key(iter.first());
-    bool doAppend = !preserve_keys && key.isNumeric();
-    CVarRef v = iter.secondRef();
-    if (doAppend) {
-      out_hash.appendWithRef(v);
-    } else {
-      out_hash.setWithRef(key, v, true);
-    }
-  }
-  return out_hash;
-}
-
 Variant ArrayUtil::Splice(CArrRef input, int offset, int64_t length /* = 0 */,
                           CVarRef replacement /* = null_variant */,
                           Array *removed /* = NULL */) {
@@ -534,6 +452,20 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
     return init_null();
   }
 
+  if (num_req == 1) {
+    // Iterating through the counter is correct but a bit inefficient
+    // compared to being able to access the right offset into array data,
+    // but necessary for this code to be agnostic to the array's internal
+    // representation.  Assuming uniform distribution, we'll expect to
+    // iterate through half of the array's data.
+    ssize_t index = f_rand(0, count-1);
+    ssize_t pos = input->iter_begin();
+    while (index--) {
+      pos = input->iter_advance(pos);
+    }
+    return input->getKey(pos);
+  }
+
   std::vector<ssize_t> indices;
   indices.reserve(count);
   for (ssize_t pos = input->iter_begin(); pos != ArrayData::invalid_index;
@@ -541,10 +473,6 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
     indices.push_back(pos);
   }
   php_array_data_shuffle(indices);
-
-  if (num_req == 1) {
-    return input->getKey(indices[0]);
-  }
 
   Array ret = Array::Create();
   for (int i = 0; i < num_req; i++) {

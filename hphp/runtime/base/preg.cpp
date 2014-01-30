@@ -157,18 +157,6 @@ static __thread int t_last_error_code;
 
 namespace {
 
-void preg_init_thread_locals() {
-  IniSetting::Bind("pcre.backtrack_limit",
-                   std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),
-                   ini_on_update_long, ini_get_long,
-                   &g_context->m_preg_backtrace_limit);
-  IniSetting::Bind("pcre.recursion_limit",
-                   std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
-                   ini_on_update_long, ini_get_long,
-                   &g_context->m_preg_recursion_limit);
-}
-InitFiniNode init(preg_init_thread_locals, InitFiniNode::When::ThreadInit);
-
 template<bool useSmartFree = false>
 struct FreeHelperImpl : private boost::noncopyable {
   explicit FreeHelperImpl(void* p) : p(p) {}

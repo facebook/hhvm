@@ -182,6 +182,100 @@ beginning of each instruction in the function must belong to exactly one of the
 ranges of bytecode in the line number table.
 
 
+Classes
+-------
+
+Functions may be grouped into metadata for classes.  Class metadata objects
+are used to describe several PHP-level language features including traits,
+interfaces, closures, and (of course) classes.
+
+Class metadata includes information about the properties on the class,
+special functions on the class such as constructors or internal property
+initialization routines (86sinit, 86pinit), class constants, list of used
+traits, list of extended classes, list of implemented interfaces, etc.
+
+Classes also include a flag indicating their "hoistability".  For now this
+isn't documented much here.  See class.h.
+
+
+Closures
+--------
+
+Closures are implemented in hhbc as subclassses of Closure, in conjunction
+with the CreateCl opcode.  It is legal hhbc to create other subclasses of
+Closure (to represent user code that attempts to do the same), but
+attempting to instantiate one will result in a fatal error.  The
+documentation of the CreateCl opcode below lists the requirements for a
+closure subclass to be usable with it.
+
+
+Continuations
+-------------
+
+The basic compilation strategy for continuations is to create two bytecode
+functions.  One is known as the "outer generator" function, and the other
+is known as the "inner generator function" or equivalently the "generator
+body".  HHBC metadata contains a link from the outer function to the inner
+function.  For the purposes of this spec, we will call functions in these
+configurations a "generator function pair".
+
+The outer generator function for a continuation must consist of a
+CreateCont opcode, followed by a RetC.  The CreateCont opcode uses the
+function metadata to determine which generator body to associate with the
+allocated continuation object.
+
+The "generator body" function is where the real user-level code of the
+generator should be placed.  It should operate by first using UnpackCont,
+and then doing a Switch to determine which portion of its code should run.
+See the description of the continuation instructions for more details.
+
+
+Async functions
+---------------
+
+Async functions are currently implemented as generator function pairs,
+where the outer function represents "eager execution" of the async
+function, and the inner function is used when "suspended execution" is
+necessary (i.e. if it does an await on something that is not yet
+available).
+
+Async function closures are implemented the same way, but importantly the
+"eager execution" function will be the __invoke function on a closure
+subclass.
+
+The async function implementation is still changing and may stop using
+generator function pairs soon, so this spec is staying light on details for
+now.
+
+
+Generator Function Pairs
+------------------------
+
+Whether they are being used to represent async functions or continuations,
+the following requirements apply to generator function pairs:
+
+   - All functions must either be part of only one generator function pair,
+     or must not be part of any generator function pair.  Inner and outer
+     generator functions are in a 1:1 relationship.
+
+   - An outer generator function must either consist of the opcode sequence
+     CreateCont; RetC, or be designated as an async function.
+
+   - Generator function pairs must always be defined in the same unit as
+     each other.
+
+   - If the outer function of a generator function pair is a class member
+     function, and it is not the __invoke function on a subclass of
+     closure, then the inner generator function must be a member of the
+     same class.
+
+   - If the outer function of a generator function pair is a closure
+     __invoke method, then the inner function must be a function that is
+     not a member of any class, and must have a unique name within its
+     compilation unit.  The bytecode metadata must designate this inner
+     function with the flag isGeneratorFromClosure.
+
+
 Entry points
 ------------
 
@@ -3875,10 +3969,25 @@ AKExists    [C C] -> [C:Bool]
 
 CreateCl <num args> <class name>  [C|V..C|V]  ->  [C]
 
-  Creates an instance of <class name> and pushes it on the stack.  The
-  class named by %2 must be a subclass of "Closure", and must be
-  defined at the point of the CreateCl opcode, or the behavior is
-  undefined.
+  Creates an instance of <class name> and pushes it on the stack.
+
+  The class named by %2 must be a subclass of "Closure", must have a single
+  public method named __invoke, must be defined at the point of the
+  CreateCl opcode, must be defined in the same unit as the CreateCl opcode,
+  and must always be tagged as "ClosureHoistable" (see comments near
+  PreClass---hoistability metadata is currently not covered by this spec).
+
+  If there is more than one CreateCl opcode in the unit for the Closure
+  subclass named by %2, all of the opcodes must be possible to associate
+  with the same class (or trait), or none if the closure will not inherit a
+  class context at runtime.  This is intended to mean that CreateCl opcodes
+  for a given closure may only occur in bytecode bodies of functions that
+  are generated to represent a single user-visible PHP function, async
+  function, async closure, generator, or generator closure.
+
+  Moreover, for normal (non-async, non-generator) functions and methods,
+  there must be at most a single CreateCl opcode in the unit for a given
+  Closure subclass contained in the unit.
 
 Idx         [C C C] -> [C]
 
@@ -3948,8 +4057,9 @@ CreateCont    []  ->  [C]
   Creates a Continuation object and pushes it on the stack.  The
   Continuation will capture all defined local variables in the current
   function, and marks them uninitialized on the current frame.  The
-  Continuation will store a reference to the generator body function
-  associated with the current function.
+  Continuation will wrap the "generator body" function associated with the
+  current function.  If no generator body is associated with this function,
+  the behavior of the CreateCont opcode is undefined.
 
 ContEnter [C]  ->  []
 
@@ -4165,6 +4275,7 @@ following details:
    is_null, get_class, strlen)
 7) High level description of how namespaces are dealt with and any relevant
    details
+8) Description of async function implementation
 
 
 Source code to HHBC examples

@@ -54,8 +54,6 @@ int64_t VMExecutionContext::s_threadIdxCounter = 0;
 Mutex VMExecutionContext::s_threadIdxLock;
 hphp_hash_map<pid_t, int64_t> VMExecutionContext::s_threadIdxMap;
 
-const StaticString BaseExecutionContext::s_amp("&");
-
 BaseExecutionContext::BaseExecutionContext() :
     m_fp(nullptr), m_pc(nullptr),
     m_transport(nullptr),
@@ -69,6 +67,84 @@ BaseExecutionContext::BaseExecutionContext() :
 
   setRequestMemoryMaxBytes(String(RuntimeOption::RequestMemoryMaxBytes));
   restoreIncludePath();
+
+  IniSetting::Bind(IniSetting::CORE, "arg_separator.output", "&",
+                   ini_on_update_string, ini_get_string,
+                   &m_argSeparatorOutput);
+  IniSetting::Bind(IniSetting::CORE, "error_reporting",
+                   ini_on_update_int, ini_get_int,
+                   &m_errorReportingLevel);
+  IniSetting::Bind(IniSetting::CORE, "memory_limit",
+                   [this](const String& value, void* p) {
+                     this->setRequestMemoryMaxBytes(value);
+                     return true;
+                   },
+                   ini_get_string,
+                   &m_maxMemory);
+  IniSetting::Bind(IniSetting::CORE, "log_errors",
+                   [this](const String& value, void* p) {
+                     bool log;
+                     ini_on_update_bool(value, &log);
+                     this->setLogErrors(log);
+                     return true;
+                   },
+                   ini_get_bool_as_int,
+                   &m_logErrors);
+  IniSetting::Bind(IniSetting::CORE, "error_log",
+                   [this](const String& value, void* p) {
+                     this->setErrorLog(value);
+                     return true;
+                   },
+                   ini_get_string,
+                   &m_errorLog);
+  IniSetting::Bind(IniSetting::CORE, "include_path",
+                   [this](const String& value, void* p) {
+                     this->setIncludePath(value);
+                     return true;
+                   },
+                   [this](void*) {
+                     return this->getIncludePath();
+                   });
+  IniSetting::Bind(IniSetting::CORE, "hphp.compiler_id",
+                   ini_on_update_fail,
+                   [](void*) {
+                     return String(getHphpCompilerId());
+                   });
+  IniSetting::Bind(IniSetting::CORE, "hphp.compiler_version",
+                   ini_on_update_fail,
+                   [](void*) {
+                     return String(getHphpCompilerVersion());
+                   });
+  IniSetting::Bind(IniSetting::CORE, "hphp.build_id",
+                   ini_on_update_fail,
+                   ini_get_stdstring,
+                   &RuntimeOption::BuildId);
+  IniSetting::Bind(IniSetting::CORE, "file_uploads",
+                   ini_on_update_fail, ini_get_bool_as_int,
+                   &RuntimeOption::EnableFileUploads);
+  IniSetting::Bind(IniSetting::CORE, "upload_tmp_dir",
+                   ini_on_update_fail, ini_get_stdstring,
+                   &RuntimeOption::UploadTmpDir);
+  IniSetting::Bind(IniSetting::CORE, "upload_max_filesize",
+                   ini_on_update_fail,
+                   [](void*) {
+                     int uploadMaxFilesize =
+                       VirtualHost::GetUploadMaxFileSize() / (1 << 20);
+                     return String(uploadMaxFilesize) + "M";
+                   });
+  IniSetting::Bind(IniSetting::CORE, "post_max_size",
+                   ini_on_update_fail,
+                   [](void*) {
+                     return String(VirtualHost::GetMaxPostSize());
+                   });
+  IniSetting::Bind(IniSetting::CORE, "allow_url_fopen",
+                   ini_on_update_fail, ini_get_static_string_1);
+  IniSetting::Bind(IniSetting::CORE, "notice_frequency",
+                   ini_on_update_int, ini_get_int,
+                   &RuntimeOption::NoticeFrequency);
+  IniSetting::Bind(IniSetting::CORE, "warning_frequency",
+                   ini_on_update_int, ini_get_int,
+                   &RuntimeOption::WarningFrequency);
 }
 
 VMExecutionContext::VMExecutionContext() :

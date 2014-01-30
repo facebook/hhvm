@@ -797,7 +797,7 @@
                 "VariableArguments"
             ],
             "return": {
-                "type": "Int64",
+                "type": "Variant",
                 "desc": "Returns the new number of elements in the array."
             },
             "args": [

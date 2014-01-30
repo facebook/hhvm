@@ -9,7 +9,7 @@ $q = from $o in $orders
      select $o;
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }
 
 $q2 = from $o in $orders
@@ -17,5 +17,5 @@ $q2 = from $o in $orders
      select $o;
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }

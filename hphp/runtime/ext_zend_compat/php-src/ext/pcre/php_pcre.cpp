@@ -125,8 +125,13 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 /* }}} */
 
 PHP_INI_BEGIN()
+#ifdef HHVM
+	STD_PHP_INI_ENTRY("pcre_zend_compat.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateLong, backtrack_limit, zend_pcre_globals, pcre_globals)
+	STD_PHP_INI_ENTRY("pcre_zend_compat.recursion_limit", "100000", PHP_INI_ALL, OnUpdateLong, recursion_limit, zend_pcre_globals, pcre_globals)
+#else
 	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateLong, backtrack_limit, zend_pcre_globals, pcre_globals)
 	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000", PHP_INI_ALL, OnUpdateLong, recursion_limit, zend_pcre_globals, pcre_globals)
+#endif
 PHP_INI_END()
 
 
@@ -1966,10 +1971,10 @@ static const zend_function_entry pcre_functions[] = {
 	PHP_FE_END
 };
 
-#ifdef HHVjM
+#ifdef HHVM
 zend_module_entry pcre_zend_compat_module_entry = {
 #else
-zend_module_entry pcre_zend_compat_module_entry = {
+zend_module_entry pcre_zend_module_entry = {
 #endif
 	STANDARD_MODULE_HEADER,
 #ifdef HHVM

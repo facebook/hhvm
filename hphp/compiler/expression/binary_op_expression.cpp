@@ -70,10 +70,9 @@ BinaryOpExpression::BinaryOpExpression
     Collection::Type cType = Collection::InvalidType;
     if (strcasecmp(s.c_str(), "vector") == 0) {
       cType = Collection::VectorType;
-    } else if (strcasecmp(s.c_str(), "map") == 0) {
+    } else if (strcasecmp(s.c_str(), "map") == 0 ||
+               strcasecmp(s.c_str(), "stablemmap") == 0) {
       cType = Collection::MapType;
-    } else if (strcasecmp(s.c_str(), "stablemap") == 0) {
-      cType = Collection::StableMapType;
     } else if (strcasecmp(s.c_str(), "set") == 0) {
       cType = Collection::SetType;
     } else if (strcasecmp(s.c_str(), "pair") == 0) {

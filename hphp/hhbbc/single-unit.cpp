@@ -53,7 +53,7 @@ std::unique_ptr<UnitEmitter> single_unit(std::unique_ptr<UnitEmitter> input) {
   }
 
   assert(check(*u));
-  return emit_unit(*u);
+  return emit_unit(index, *u);
 }
 
 //////////////////////////////////////////////////////////////////////

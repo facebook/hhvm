@@ -131,7 +131,7 @@ const StaticString
   s_HEAD("HEAD"),
   s_POST("POST"),
   s_HTTPS("HTTPS"),
-  s_1("1"),
+  s_on("on"),
   s_REQUEST_TIME("REQUEST_TIME"),
   s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
   s_QUERY_STRING("QUERY_STRING"),
@@ -220,6 +220,16 @@ void HttpProtocol::PrepareEnv(Variant& env,
 #ifdef HOTPROFILER
     env.set(s_HPHP_HOTPROFILER, 1);
 #endif
+  }
+
+  // Do this last so it can overwrite all the previous settings
+  HeaderMap transportParams;
+  transport->getTransportParams(transportParams);
+  for (auto const& header : transportParams) {
+    String key(header.first);
+    String value(header.second.back());
+    g_context->setenv(key, value);
+    env.set(key, value);
   }
 }
 
@@ -316,17 +326,19 @@ void HttpProtocol::PreparePostVariables(Variant& post,
       }
     }
 
-    if (needDelete) {
-      if (RuntimeOption::AlwaysPopulateRawPostData &&
-          uint32_t(size) <= StringData::MaxSize) {
-        raw_post = String((char*)data, size, AttachString);
-      } else {
-        free((void *)data);
+    if (uint32_t(size) > StringData::MaxSize) {
+      // Can't store it anywhere
+      if (needDelete) {
+        free((void*) data);
       }
     } else {
-      // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
-      if (uint32_t(size) <= StringData::MaxSize) {
-        raw_post = String((char*)data, size, CopyString);
+      auto string_data = needDelete ?
+        String((char*)data, size, AttachString) :
+        String((char*)data, size, CopyString);
+      g_context->setRawPostData(string_data);
+      if (RuntimeOption::AlwaysPopulateRawPostData || ! needDelete) {
+        // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
+        raw_post = string_data;
       }
     }
   }
@@ -402,25 +414,16 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
 }
 
 void HttpProtocol::CopyTransportParams(Variant& server,
-                                    Transport *transport) {
+                                       Transport *transport) {
   HeaderMap transportParams;
   // Get additional server params from the transport if it has any. In the case
   // of fastcgi this is basically a full header list from apache/nginx.
   transport->getTransportParams(transportParams);
   for (auto const& header : transportParams) {
-    auto const& key = header.first;
-    auto const& values = header.second;
-    auto normalizedKey = string_replace(f_strtoupper(key), s_dash,
-                                        s_underscore);
-
-    // Be careful here to not overwrite any _SERVER variable
-    // that has already been set elsewhere and make sure it has a value.
-    if (!values.empty() && !server.asArrRef().exists(normalizedKey)) {
-      // When a header has multiple values, we always take the last one.
-      server.set(normalizedKey, String(values.back()));
-    }
+    // These overwrite anything already set in the $_SERVER
+    // When a header has multiple values, we always take the last one.
+    server.set(String(header.first), String(header.second.back()));
   }
-
 }
 
 void HttpProtocol::CopyServerInfo(Variant& server,
@@ -595,7 +598,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   default:
     server.set(s_REQUEST_METHOD, empty_string); break;
   }
-  server.set(s_HTTPS, transport->isSSL() ? s_1 : empty_string);
+  server.set(s_HTTPS, transport->isSSL() ? s_on : empty_string);
   server.set(s_QUERY_STRING, r.queryString());
 
   server.set(s_argv, make_packed_array(r.queryString()));
@@ -663,7 +666,7 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
        iter != vServerVars.end(); ++iter) {
     server.set(String(iter->first), String(iter->second));
   }
-  // Do this last as to not overwrite any existing server variables.
+  // Do this last so it can overwrite all the previous settings
   CopyTransportParams(server, transport);
   sri.setServerVariables(server);
 

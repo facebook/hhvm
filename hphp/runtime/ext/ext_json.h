@@ -27,7 +27,7 @@ namespace HPHP {
 
 String f_json_encode(CVarRef value, CVarRef options = 0);
 Variant f_json_decode(const String& json, bool assoc = false,
-                      CVarRef options = 0);
+                      int depth = 512, CVarRef options = 0);
 int f_json_last_error();
 String f_json_last_error_msg();
 
@@ -45,6 +45,7 @@ extern const int64_t k_JSON_FB_EXTRA_ESCAPES;
 extern const int64_t k_JSON_FB_UNLIMITED;
 extern const int64_t k_JSON_FB_COLLECTIONS;
 extern const int64_t k_JSON_FB_STABLE_MAPS;
+extern const int64_t k_JSON_BIGINT_AS_STRING;
 
 // For json.idl.json registartion to use in PHP-land.
 // Duplicating values in the JSON_parser.h enum.

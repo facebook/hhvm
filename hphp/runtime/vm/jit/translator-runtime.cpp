@@ -252,6 +252,11 @@ void raiseUndefProp(ObjectData* base, const StringData* name) {
   base->raiseUndefProp(name);
 }
 
+void raiseUndefVariable(StringData* nm) {
+  raise_notice(Strings::UNDEFINED_VARIABLE, nm->data());
+  decRefStr(nm);
+}
+
 void raise_error_sd(const StringData *msg) {
   raise_error("%s", msg->data());
 }

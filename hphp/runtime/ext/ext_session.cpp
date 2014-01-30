@@ -129,6 +129,7 @@ public:
 const int64_t k_PHP_SESSION_DISABLED = Session::Disabled;
 const int64_t k_PHP_SESSION_NONE     = Session::None;
 const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
+const StaticString s_session_ext_name("session");
 
 class SessionRequestData : public RequestEventHandler, public Session {
 public:
@@ -157,71 +158,73 @@ public:
   String m_id;
 
   void threadInit() {
-    IniSetting::Bind("session.save_path",          "",
-                     ini_on_update_save_dir,       ini_get_string,
+    Extension* ext = Extension::GetExtension(s_session_ext_name);
+    assert(ext);
+    IniSetting::Bind(ext, "session.save_path",          "",
+                     ini_on_update_save_dir,            ini_get_stdstring,
                      &m_save_path);
-    IniSetting::Bind("session.name",               "PHPSESSID",
-                     ini_on_update_string,         ini_get_string,
+    IniSetting::Bind(ext, "session.name",               "PHPSESSID",
+                     ini_on_update_stdstring,           ini_get_stdstring,
                      &m_session_name);
-    IniSetting::Bind("session.save_handler",       "files",
-                     ini_on_update_save_handler,   ini_get_save_handler);
-    IniSetting::Bind("session.auto_start",         "0",
-                     ini_on_update_bool,           ini_get_bool,
+    IniSetting::Bind(ext, "session.save_handler",       "files",
+                     ini_on_update_save_handler,        ini_get_save_handler);
+    IniSetting::Bind(ext, "session.auto_start",         "0",
+                     ini_on_update_bool,                ini_get_bool,
                      &m_auto_start);
-    IniSetting::Bind("session.gc_probability",     "1",
-                     ini_on_update_long,           ini_get_long,
+    IniSetting::Bind(ext, "session.gc_probability",     "1",
+                     ini_on_update_long,                ini_get_long,
                      &m_gc_probability);
-    IniSetting::Bind("session.gc_divisor",         "100",
-                     ini_on_update_long,           ini_get_long,
+    IniSetting::Bind(ext, "session.gc_divisor",         "100",
+                     ini_on_update_long,                ini_get_long,
                      &m_gc_divisor);
-    IniSetting::Bind("session.gc_maxlifetime",     "1440",
-                     ini_on_update_long,           ini_get_long,
+    IniSetting::Bind(ext, "session.gc_maxlifetime",     "1440",
+                     ini_on_update_long,                ini_get_long,
                      &m_gc_maxlifetime);
-    IniSetting::Bind("session.serialize_handler",  "php",
-                     ini_on_update_serializer,     ini_get_serializer);
-    IniSetting::Bind("session.cookie_lifetime",    "0",
-                     ini_on_update_long,           ini_get_long,
+    IniSetting::Bind(ext, "session.serialize_handler",  "php",
+                     ini_on_update_serializer,          ini_get_serializer);
+    IniSetting::Bind(ext, "session.cookie_lifetime",    "0",
+                     ini_on_update_long,                ini_get_long,
                      &m_cookie_lifetime);
-    IniSetting::Bind("session.cookie_path",        "/",
-                     ini_on_update_string,         ini_get_string,
+    IniSetting::Bind(ext, "session.cookie_path",        "/",
+                     ini_on_update_stdstring,           ini_get_stdstring,
                      &m_cookie_path);
-    IniSetting::Bind("session.cookie_domain",      "",
-                     ini_on_update_string,         ini_get_string,
+    IniSetting::Bind(ext, "session.cookie_domain",      "",
+                     ini_on_update_stdstring,           ini_get_stdstring,
                      &m_cookie_domain);
-    IniSetting::Bind("session.cookie_secure",      "",
-                     ini_on_update_bool,           ini_get_bool,
+    IniSetting::Bind(ext, "session.cookie_secure",      "",
+                     ini_on_update_bool,                ini_get_bool,
                      &m_cookie_secure);
-    IniSetting::Bind("session.cookie_httponly",    "",
-                     ini_on_update_bool,           ini_get_bool,
+    IniSetting::Bind(ext, "session.cookie_httponly",    "",
+                     ini_on_update_bool,                ini_get_bool,
                      &m_cookie_httponly);
-    IniSetting::Bind("session.use_cookies",        "1",
-                     ini_on_update_bool,           ini_get_bool,
+    IniSetting::Bind(ext, "session.use_cookies",        "1",
+                     ini_on_update_bool,                ini_get_bool,
                      &m_use_cookies);
-    IniSetting::Bind("session.use_only_cookies",   "1",
-                     ini_on_update_bool,           ini_get_bool,
+    IniSetting::Bind(ext, "session.use_only_cookies",   "1",
+                     ini_on_update_bool,                ini_get_bool,
                      &m_use_only_cookies);
-    IniSetting::Bind("session.referer_check",      "",
-                     ini_on_update_string,         ini_get_string,
+    IniSetting::Bind(ext, "session.referer_check",      "",
+                     ini_on_update_stdstring,           ini_get_stdstring,
                      &m_extern_referer_chk);
-    IniSetting::Bind("session.entropy_file",       "",
-                     ini_on_update_string,         ini_get_string,
+    IniSetting::Bind(ext, "session.entropy_file",       "",
+                     ini_on_update_stdstring,           ini_get_stdstring,
                      &m_entropy_file);
-    IniSetting::Bind("session.entropy_length",     "0",
-                     ini_on_update_long,           ini_get_long,
+    IniSetting::Bind(ext, "session.entropy_length",     "0",
+                     ini_on_update_long,                ini_get_long,
                      &m_entropy_length);
-    IniSetting::Bind("session.cache_limiter",      "nocache",
-                     ini_on_update_string,         ini_get_string,
+    IniSetting::Bind(ext, "session.cache_limiter",      "nocache",
+                     ini_on_update_stdstring,           ini_get_stdstring,
                      &m_cache_limiter);
-    IniSetting::Bind("session.cache_expire",       "180",
-                     ini_on_update_long,           ini_get_long,
+    IniSetting::Bind(ext, "session.cache_expire",       "180",
+                     ini_on_update_long,                ini_get_long,
                      &m_cache_expire);
-    IniSetting::Bind("session.use_trans_sid",      "0",
-                     ini_on_update_trans_sid,      ini_get_trans_sid);
-    IniSetting::Bind("session.hash_function",      "0",
-                     ini_on_update_string,         ini_get_string,
+    IniSetting::Bind(ext, "session.use_trans_sid",      "0",
+                     ini_on_update_trans_sid,           ini_get_trans_sid);
+    IniSetting::Bind(ext, "session.hash_function",      "0",
+                     ini_on_update_stdstring,           ini_get_stdstring,
                      &m_hash_func);
-    IniSetting::Bind("session.hash_bits_per_character", "4",
-                     ini_on_update_long,           ini_get_long,
+    IniSetting::Bind(ext, "session.hash_bits_per_character", "4",
+                     ini_on_update_long,                ini_get_long,
                      &m_hash_bits_per_character);
   }
 };
@@ -1201,7 +1204,7 @@ static bool ini_on_update_save_dir(const String& value, void *p) {
   if (File::TranslatePath(path).empty()) {
     return false;
   }
-  return ini_on_update_string(value, p);
+  return ini_on_update_stdstring(value, p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

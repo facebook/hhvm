@@ -63,11 +63,13 @@ namespace HPHP { namespace HHBBC {
  *                       |        |
  *                       |      SStr=s
  *                       |
- *                       +----------+-------+
- *                       |          |       |
- *                      Bool       Int     Dbl
- *                      /  \        |       |
- *                    True False  Int=n   Dbl=n
+ *                       +----------+
+ *                       |          |
+ *                      Bool       Num
+ *                      /  \       |  \
+ *                   True  False  Int  Dbl
+ *                                 |    |
+ *                               Int=n Dbl=n
  *
  */
 
@@ -93,6 +95,7 @@ enum trep : uint32_t {
 
   BNull     = BUninit | BInitNull,
   BBool     = BFalse | BTrue,
+  BNum      = BInt | BDbl,
   BStr      = BSStr | BCStr,
   BArr      = BSArr | BCArr,
 
@@ -102,6 +105,7 @@ enum trep : uint32_t {
   BOptBool     = BInitNull | BBool,
   BOptInt      = BInitNull | BInt,       // may have value
   BOptDbl      = BInitNull | BDbl,       // may have value
+  BOptNum      = BInitNull | BNum,
   BOptSStr     = BInitNull | BSStr,      // may have value
   BOptCStr     = BInitNull | BCStr,
   BOptStr      = BInitNull | BStr,
@@ -234,6 +238,7 @@ X(Ref)
 
 X(Null)
 X(Bool)
+X(Num)
 X(Str)
 X(Arr)
 X(InitUnc)
@@ -244,6 +249,7 @@ X(OptFalse)
 X(OptBool)
 X(OptInt)
 X(OptDbl)
+X(OptNum)
 X(OptSStr)
 X(OptCStr)
 X(OptStr)

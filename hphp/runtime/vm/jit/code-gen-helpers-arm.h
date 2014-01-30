@@ -70,6 +70,12 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 void emitTransCounterInc(vixl::MacroAssembler& a);
 
 /*
+ * Immediately saves the VM sp, fp and pc (the latter two contingent on the
+ * flags argument) to the VMExecutionContext.
+ */
+void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags);
+
+/*
  * Emits an incref after checking only the static bit, not the type.
  */
 void emitIncRefKnownType(vixl::MacroAssembler& a,

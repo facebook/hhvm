@@ -640,7 +640,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
   }
 
   if (RuntimeOption::ExposeHPHP) {
-    addHeaderImpl("X-Powered-By", "HPHP");
+    addHeaderImpl("X-Powered-By", ("HHVM/" + k_HHVM_VERSION).c_str());
   }
 
   if ((RuntimeOption::ExposeXFBServer || RuntimeOption::ExposeXFBDebug) &&

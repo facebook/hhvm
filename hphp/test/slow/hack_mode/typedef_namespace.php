@@ -2,8 +2,6 @@
 
 namespace test;
 
-use Map;
-
 type HandlerFunction = (function(array, ?\string, Map<\string, \mixed>):mixed);
 
 function t(HandlerFunction $f) {

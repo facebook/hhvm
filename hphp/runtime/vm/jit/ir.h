@@ -365,7 +365,7 @@ O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
 O(RaiseWarning,                     ND, S(Str),                       E|N|Er) \
 O(RaiseNotice,                      ND, S(Str),                       E|N|Er) \
-O(RaiseArrayIndexNotice,            ND, S(Int),                          E|N) \
+O(RaiseArrayIndexNotice,            ND, S(Int),                       E|N|Er) \
 O(CheckInit,                        ND, S(Gen),                            B) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),                B) \
 O(CheckCold,                        ND, NA,                              B|E) \
@@ -431,7 +431,7 @@ O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                C|PRc) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),     B|C|E|N|Er) \
-O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),  B|C|E|N|Er) \
+O(LdClsPropAddrCached,          DParam, S(Cls) CStr CStr C(Cls),  B|C|E|N|Er) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),        E|N|Er) \
 O(LdObjInvoke,                 D(Func), S(Cls),                            B) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                          E|N) \
@@ -574,8 +574,6 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                       E|N|Er) \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
-O(Spill,                       DofS(0), SUnk,                             NF) \
-O(Reload,                      DofS(0), SUnk,                             NF) \
 O(Shuffle,                          ND, SUnk,                             NF) \
 O(CreateContFunc,               D(Obj), NA,                          E|N|PRc) \
 O(CreateContMeth,               D(Obj), S(Ctx),                      E|N|PRc) \
@@ -728,9 +726,6 @@ O(StringGet,              D(StaticStr), C(TCA)                                \
 O(MapGet,                      D(Cell), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str),             E|N|PRc|Er) \
-O(StableMapGet,                D(Cell), C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int,Str),             E|N|PRc|Er) \
 O(CGetElem,                    D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
@@ -750,10 +745,6 @@ O(ArraySet,                     D(Arr), C(TCA)                                \
                                           S(Int,Str)                          \
                                           S(Cell),             E|N|PRc|CRc|K) \
 O(MapSet,                           ND, C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int,Str)                          \
-                                          S(Cell),                    E|N|Er) \
-O(StableMapSet,                     ND, C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str)                          \
                                           S(Cell),                    E|N|Er) \
@@ -807,9 +798,6 @@ O(PairIsset,                   D(Bool), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int),                        E|N) \
 O(MapIsset,                    D(Bool), C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int,Str),                    E|N) \
-O(StableMapIsset,              D(Bool), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str),                    E|N) \
 O(IssetElem,                   D(Bool), C(TCA)                                \

@@ -23,6 +23,7 @@
 
 #include "hphp/util/data-block.h"
 
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/class.h"
 
@@ -646,6 +647,13 @@ Type liveTVType(const TypedValue* tv);
  * semantics and subtle implementation details.
  */
 Type boxType(Type);
+
+/*
+ * Create a Type from a RepoAuthType.
+ */
+Type convertToType(RepoAuthType ty);
+
+//////////////////////////////////////////////////////////////////////
 
 struct TypeConstraint {
   /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric,

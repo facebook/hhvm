@@ -21,8 +21,8 @@ $excluded = array(
   'util/cronoutils.h',
   'util/cronoutils.cpp',
   'vixl/',
-  'runtime/ext/quicklz.h',
-  'runtime/ext/quicklz.inc',
+  'runtime/ext/zlib/quicklz.h',
+  'runtime/ext/zlib/quicklz.inc',
   'facebook',
   'submodules',
 

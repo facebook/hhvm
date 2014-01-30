@@ -1111,7 +1111,7 @@ void MacroAssembler::HostCall(uint8_t argc) {
   always_assert(false);
 #else
 
-  assert(argc < 6);
+  assert(argc < 7);
 
   hlt(kHostCallOpcode);
   dc32(argc);

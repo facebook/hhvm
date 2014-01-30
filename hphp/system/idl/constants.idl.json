@@ -1668,14 +1668,6 @@
             "value": 4
         },
         {
-            "name": "FORCE_DEFLATE",
-            "value": 2
-        },
-        {
-            "name": "FORCE_GZIP",
-            "value": 1
-        },
-        {
             "name": "FT_INTERNAL",
             "value": 8
         },
@@ -1980,6 +1972,10 @@
             "value": 6
         },
         {
+            "name": "IMAGETYPE_COUNT",
+            "value": 18
+        },
+        {
             "name": "IMAGETYPE_GIF",
             "value": 1
         },
@@ -2034,6 +2030,10 @@
         {
             "name": "IMAGETYPE_TIFF_MM",
             "value": 8
+        },
+        {
+            "name": "IMAGETYPE_UNKNOWN",
+            "value": 0
         },
         {
             "name": "IMAGETYPE_WBMP",

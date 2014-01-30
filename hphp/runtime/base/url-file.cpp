@@ -19,11 +19,10 @@
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_preg.h"
-#include "hphp/runtime/ext/ext_url.h"
+#include "hphp/runtime/ext/url/ext_url.h"
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(UrlFile)
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_http_response_header("http_response_header");
@@ -41,6 +40,12 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
   m_maxRedirect = maxRedirect;
   m_timeout = timeout;
   m_isLocal = false;
+}
+
+void UrlFile::sweep() {
+  using std::string;
+  m_error.~string();
+  MemFile::sweep();
 }
 
 const StaticString

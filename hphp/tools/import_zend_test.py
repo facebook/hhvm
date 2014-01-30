@@ -101,25 +101,6 @@ bad_tests = (
     # "ls" sometimes prints on stderr
     '/ext/standard/tests/streams/bug64770.php',
 
-    # broken in contbuild
-    '/ext/standard/tests/strings/bug51059.php',
-    '/ext/standard/tests/strings/setlocale_variation1.php',
-    '/ext/standard/tests/strings/setlocale_basic1.php',
-    '/ext/standard/tests/strings/setlocale_basic2.php',
-    '/ext/standard/tests/strings/setlocale_basic3.php',
-    '/ext/standard/tests/file/filetype_variation2.php',
-    '/ext/standard/tests/file/filetype_variation3.php',
-    '/ext/sockets/tests/ipv4loop.php',
-    '/ext/posix/tests/posix_kill_basic.php',
-    '/ext/standard/tests/file/005_variation-win32.php',
-    '/ext/json/tests/fail001.php',
-    '/ext/standard/network/tests/getmxrr.php',
-    '/ext/standard/network/tests/gethostbyname_error004.php',
-    '/ext/standard/tests/file/fgets_socket_variation1.php',
-    '/ext/pcntl/tests/pcntl_wait.php',
-    '/tests/classes/unset_properties.php',
-    '/ext/spl/tests/RecursiveDirectoryIterator_getSubPath_basic.php',
-
     # our build machines have no members in group 0...
     '/ext/posix/tests/posix_getgrgid.php',
     '/ext/posix/tests/posix_getgroups_basic.php',
@@ -163,6 +144,13 @@ bad_tests = (
     '/Zend/tests/lsb_021.php',
     '/Zend/tests/lsb_022.php',
 
+    # broken in contbuild for unknown reasons
+    '/ext/standard/tests/strings/bug51059.php',
+    '/ext/posix/tests/posix_kill_basic.php',
+    '/ext/spl/tests/RecursiveDirectoryIterator_getSubPath_basic.php',
+    '/tests/classes/unset_properties.php',
+    '/ext/pcntl/tests/pcntl_wait.php',
+
     # flaky for various reasons
     '/ext/standard/tests/network/gethostbyname_error004.php',
     '/ext/standard/tests/network/getmxrr.php',
@@ -200,9 +188,12 @@ bad_tests = (
     '/ext/standard/tests/file/file_exists_variation1.php',
 
     # flaky: t3552849
-    '/ext/session/tests/013.php'
-    '/ext/session/tests/014.php'
-    '/ext/session/tests/027.php'
+    '/ext/session/tests/013.php',
+    '/ext/session/tests/014.php',
+    '/ext/session/tests/027.php',
+
+    # flaky: t3619770
+    '/ext/zlib/tests/gzfile_basic.php',
 )
 
 # Tests that work but not in repo mode
@@ -251,6 +242,7 @@ norepo_tests = (
     '/Zend/tests/unset_cv01.php',
     '/ext/bz2/tests/with_strings.php',
     '/ext/pcre/tests/preg_replace.php',
+    '/ext/pdo_mysql/tests/pdo_mysql_connect_charset.php',
     '/ext/pdo_sqlite/tests/bug33841.php',
     '/ext/pdo_sqlite/tests/bug46139.php',
     '/ext/pdo_sqlite/tests/bug52487.php',
@@ -315,6 +307,7 @@ norepo_tests = (
     '/ext/standard/tests/strings/bug44242.php',
     '/ext/standard/tests/strings/trim.php',
     '/ext/standard/tests/strings/wordwrap.php',
+    '/ext/standard/tests/url/base64_encode_variation_001.php',
     '/ext/standard/tests/url/parse_url_basic_001.php',
     '/ext/standard/tests/url/parse_url_basic_002.php',
     '/ext/standard/tests/url/parse_url_basic_003.php',
@@ -324,6 +317,12 @@ norepo_tests = (
     '/ext/standard/tests/url/parse_url_basic_007.php',
     '/ext/standard/tests/url/parse_url_basic_008.php',
     '/ext/standard/tests/url/parse_url_basic_009.php',
+    '/ext/standard/tests/url/parse_url_variation_001.php',
+    '/ext/standard/tests/url/parse_url_variation_002_64bit.php',
+    '/ext/standard/tests/url/rawurldecode_variation_001.php',
+    '/ext/standard/tests/url/rawurlencode_variation_001.php',
+    '/ext/standard/tests/url/urldecode_variation_001.php',
+    '/ext/standard/tests/url/urlencode_variation_001.php',
     '/ext/zip/tests/bug53579.php',
     '/ext/zip/tests/bug64342_1.php',
     '/ext/zip/tests/bug7658.php',
@@ -423,6 +422,7 @@ other_files = (
     '/ext/bz2/tests/004_1.txt.bz2',
     '/ext/bz2/tests/004_2.txt.bz2',
     '/ext/calendar/tests/skipif.inc',
+    '/ext/curl/tests/responder/get.php',
     '/ext/curl/tests/curl_testdata1.txt',
     '/ext/curl/tests/curl_testdata2.txt',
     '/ext/date/tests/DateTime_data-absolute.inc',
@@ -572,6 +572,9 @@ other_files = (
     '/ext/standard/tests/general_functions/004.data',
     '/ext/standard/tests/general_functions/bug49692.ini',
     '/ext/standard/tests/general_functions/bug52138.data',
+    '/ext/standard/tests/general_functions/get_included_files_inc1.inc',
+    '/ext/standard/tests/general_functions/get_included_files_inc2.inc',
+    '/ext/standard/tests/general_functions/get_included_files_inc3.inc',
     '/ext/standard/tests/general_functions/parse_ini_basic.data',
     '/ext/standard/tests/general_functions/parse_ini_booleans.data',
     '/ext/standard/tests/image/246x247.png',
@@ -758,6 +761,8 @@ def walk(filename, source_dir):
 
         if '/ext/standard/tests/file/tempnam_variation5.php' in full_dest_filename:
             exp = exp.replace('tempnam_variation6', 'tempnam_variation5')
+        if '/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename:
+            exp = exp.replace('to be long', 'to be integer')
 
         file(full_dest_filename+'.expectf', 'w').write(exp)
     else:

@@ -20,7 +20,6 @@
 #ifndef incl_EXT_LIST_EXT_H_
 #define incl_EXT_LIST_EXT_H_
 
-#include "hphp/runtime/ext/ext_apache.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_asio.h"
@@ -28,7 +27,6 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_continuation.h"
-#include "hphp/runtime/ext/ext_ctype.h"
 #include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/ext/ext_debugger.h"
@@ -56,7 +54,6 @@
 #include "hphp/runtime/ext/ext_memcache.h"
 #include "hphp/runtime/ext/ext_memcached.h"
 #include "hphp/runtime/ext/ext_misc.h"
-#include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/ext_openssl.h"
 #include "hphp/runtime/ext/ext_options.h"
@@ -76,12 +73,11 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_thread.h"
 #include "hphp/runtime/ext/ext_thrift.h"
-#include "hphp/runtime/ext/ext_url.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_xml.h"
 #include "hphp/runtime/ext/ext_xmlreader.h"
 #include "hphp/runtime/ext/ext_xmlwriter.h"
-#include "hphp/runtime/ext/ext_zlib.h"
 #include "hphp/runtime/ext/gd/ext_image.h"
+#include "hphp/runtime/ext/mysql/ext_mysql.h"
 
 #endif // incl_EXT_LIST_EXT_H_

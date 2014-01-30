@@ -25,7 +25,8 @@ public:
   virtual ServerPtr createServer(const ServerOptions& options) override {
     return std::make_shared<FastCGIServer>(options.m_address,
                                            options.m_port,
-                                           options.m_numThreads);
+                                           options.m_numThreads,
+                                           options.m_useFileSocket);
   }
 };
 

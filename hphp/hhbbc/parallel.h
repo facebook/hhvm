@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_PARALLEL_H_
-#define incl_HPHP_PARALLEL_H_
+#ifndef incl_HHBBC_PARALLEL_H_
+#define incl_HHBBC_PARALLEL_H_
 
 #include <stdexcept>
 #include <iterator>

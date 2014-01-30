@@ -3043,11 +3043,19 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     }
     if (rs.numAllocated() == 0) {
       assert(src->isConst());
-      if (src->type().needsValueReg()) {
-        m_as.emitImmReg(src->getValRawInt(), rd.reg(0));
-      } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-        // For values like Uninit and InitNull, the value register is ignored.
-        m_as.emitImmReg(0xdeadbeef, rd.reg(0));
+      auto r = rd.reg(0);
+      auto imm = src->type().needsValueReg() ? src->getValRawInt() :
+                 0xdeadbeef;
+      if (src->type().needsValueReg() ||
+          RuntimeOption::EvalHHIRGenerateAsserts) {
+        if (r.isGP()) {
+          m_as.emitImmReg(imm, r);
+        } else {
+          // load imm -> simd.  We could do this without a scratch
+          // using a pc-relative load.
+          m_as.emitImmReg(imm, rCgGP);
+          emitMovRegReg(m_as, rCgGP, r);
+        }
       }
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
@@ -4114,12 +4122,6 @@ void CodeGenerator::cgLdCctx(IRInstruction* inst) {
   return cgLdCtx(inst);
 }
 
-void CodeGenerator::cgLdConst(IRInstruction* inst) {
-  auto const dstReg   = dstLoc(0).reg();
-  auto const val      = inst->dst()->type().rawVal();
-  emitLoadImm(m_as, val, dstReg);
-}
-
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   assert(inst->src(1)->isConst());
   SSATmp* offset   = inst->src(1);
@@ -4958,14 +4960,12 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert(firstBitNumTmp->isConst(Type::Int));
   uint32_t firstBitNum = (uint32_t)(firstBitNumTmp->getValInt());
 
-  assert(mask64Tmp->isConst());
-  assert(mask64Reg != InvalidReg || mask64Tmp->inst()->op() != LdConst);
   uint64_t mask64 = mask64Tmp->getValInt();
+  assert(mask64Reg != InvalidReg || mask64 == uint32_t(mask64));
   assert(mask64);
 
-  assert(vals64Tmp->isConst());
-  assert(vals64Reg != InvalidReg || vals64Tmp->inst()->op() != LdConst);
   uint64_t vals64 = vals64Tmp->getValInt();
+  assert(vals64Reg != InvalidReg || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());

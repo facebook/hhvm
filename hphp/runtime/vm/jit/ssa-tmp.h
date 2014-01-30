@@ -45,9 +45,7 @@ public:
    * For SSATmps with a compile-time constant value, the following
    * functions allow accessing it.
    *
-   * Pre: inst() &&
-   *   (inst()->op() == DefConst ||
-   *    inst()->op() == LdConst)
+   * Pre: inst() && isConst()
    */
   bool               getValBool() const      { return type().boolVal(); }
   int64_t            getValInt() const       { return type().intVal(); }

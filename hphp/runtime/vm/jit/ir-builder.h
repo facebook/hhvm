@@ -227,11 +227,6 @@ struct IRBuilder {
     return m_unit.cns(std::forward<Args>(args)...);
   }
 
-  template<typename T>
-  SSATmp* genLdConst(T val) {
-    return gen(LdConst, Type::cns(val));
-  }
-
   //////////////////////////////////////////////////////////////////////
   // control flow
 

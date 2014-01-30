@@ -826,12 +826,6 @@ D:Func = LdClsCtor S0:Cls
   Loads into D the constructor of class S0. If the constructor cannot be called
   from the current context, raise an error.
 
-D:T = LdConst<T,value>
-
-  Load a constant value into D. This differs from DefConst in that D will be
-  allocated a register. It is currently used only for the GuardRefs
-  instruction.
-
 D:ConstT = DefConst<T>
 
   Define a constant value of type T. D is presumed to be globally available and

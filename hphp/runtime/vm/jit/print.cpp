@@ -114,15 +114,11 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
     if (hasExtra || isGuard) os << punc(",");
   }
 
-  if (inst->op() == LdConst) {
-    os << constToString(inst->typeParam());
-  } else {
-    if (hasExtra) {
-      os << color(ANSI_COLOR_GREEN)
-         << showExtra(inst->op(), inst->rawExtra())
-         << color(ANSI_COLOR_END);
-      if (isGuard) os << punc(",");
-    }
+  if (hasExtra) {
+    os << color(ANSI_COLOR_GREEN)
+       << showExtra(inst->op(), inst->rawExtra())
+       << color(ANSI_COLOR_END);
+    if (isGuard) os << punc(",");
   }
 
   if (isGuard) {
@@ -247,6 +243,7 @@ std::string ShuffleData::show() const {
 void print(std::ostream& os, const SSATmp* tmp, const PhysLoc* loc) {
   if (tmp->inst()->is(DefConst)) {
     os << constToString(tmp->type());
+    if (loc) printPhysLoc(os, *loc);
     return;
   }
   os << color(ANSI_COLOR_WHITE);

@@ -212,7 +212,7 @@ O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
 O(CheckDefinedClsEq,                ND, NA,                              B|E) \
 O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
-                                          S(Int)                              \
+                                          C(Int)                              \
                                           S(Int)                              \
                                           S(Int),                          E) \
 O(AssertLoc,               D(FramePtr), S(FramePtr),                       E) \
@@ -417,7 +417,6 @@ O(LdPackedArrayElem,            D(Gen), S(Arr) S(Int),                     E) \
 O(LdRef,                        DLdRef, S(BoxedCell),                      B) \
 O(LdThis,                        DThis, S(FramePtr),                     B|C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
-O(LdConst,                      DParam, NA,                                C) \
 O(DefConst,                     DParam, NA,                                C) \
 O(ConvClsToCctx,               D(Cctx), S(Cls),                            C) \
 O(LdCtx,                        D(Ctx), S(FramePtr),                       C) \
@@ -505,7 +504,7 @@ O(StRetVal,                         ND, S(FramePtr) S(Gen),            E|CRc) \
 O(RetAdjustStack,            D(StkPtr), S(FramePtr),                       E) \
 O(StMem,                            ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),               E|CRc) \
-O(StProp,                           ND, S(Obj) S(Int) S(Gen),          E|CRc) \
+O(StProp,                           ND, S(Obj) C(Int) S(Gen),          E|CRc) \
 O(StLoc,                            ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StLocNT,                          ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StRef,                       DBox(1), S(BoxedCell) S(Cell),        E|CRc|P) \
@@ -831,7 +830,7 @@ O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(DbgAssertType,                    ND, S(Cell),                           E) \
 O(DbgAssertRetAddr,                 ND, NA,                                E) \
 O(Nop,                              ND, NA,                               NF) \
-/* */
+/* END. Nop must be the last opcode. */
 
 enum class Opcode : uint16_t {
 #define O(name, ...) name,

@@ -1230,17 +1230,14 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert(nParamsReg.IsValid() || nParamsTmp->isConst());
 
   auto firstBitNum = static_cast<uint32_t>(firstBitNumTmp->getValInt());
-
-  assert(mask64Tmp->isConst());
   auto mask64Reg = x2a(mask64Loc.reg());
-  assert(mask64Reg.IsValid() || mask64Tmp->inst()->op() != LdConst);
   uint64_t mask64 = mask64Tmp->getValInt();
+  assert(mask64Reg.IsValid() || mask64 == uint32_t(mask64));
   assert(mask64);
 
-  assert(vals64Tmp->isConst());
   auto vals64Reg = x2a(vals64Loc.reg());
-  assert(vals64Reg.IsValid() || vals64Tmp->inst()->op() != LdConst);
   uint64_t vals64 = vals64Tmp->getValInt();
+  assert(vals64Reg.IsValid() || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
@@ -1265,31 +1262,21 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
     m_as.    Ldr  (bitsReg, bitsPtrReg[bitsOff]);
 
     // Mask the bits. There are restrictions on what can be encoded as an
-    // immediate in ARM's logical instructions, and if they're not met, we'll
-    // have to use a register.
-    if (vixl::Assembler::IsImmLogical(mask64, vixl::kXRegSize)) {
-      m_as.  And  (bitsReg, bitsReg, mask64);
+    // immediate in ARM's logical instructions, and if they're not met,
+    // the assembler will compensate using ip0 or ip1 as tmps.
+    if (mask64Reg.IsValid()) {
+      m_as.  And  (bitsReg, bitsReg, mask64Reg);
     } else {
-      if (mask64Reg.IsValid()) {
-        m_as.And  (bitsReg, bitsReg, mask64Reg);
-      } else {
-        m_as.Mov  (rAsm2, mask64);
-        m_as.And  (bitsReg, bitsReg, rAsm2);
-      }
+      m_as.  And  (bitsReg, bitsReg, mask64);
     }
 
     // Now do the compare. There are also restrictions on immediates in
     // arithmetic instructions (of which Cmp is one; it's just a subtract that
     // sets flags), so same deal as with the mask immediate above.
-    if (vixl::Assembler::IsImmArithmetic(vals64)) {
-      m_as.  Cmp  (bitsReg, vals64);
+    if (vals64Reg.IsValid()) {
+      m_as.  Cmp  (bitsReg, vals64Reg);
     } else {
-      if (vals64Reg.IsValid()) {
-        m_as.Cmp  (bitsReg, vals64Reg);
-      } else {
-        m_as.Mov  (rAsm2, vals64);
-        m_as.Cmp  (bitsReg, rAsm2);
-      }
+      m_as.  Cmp  (bitsReg, vals64);
     }
     destSR->emitFallbackJump(m_mainCode, cond);
   };
@@ -1649,14 +1636,6 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
   auto srcReg = x2a(srcLoc(0).reg());
   auto offset = cellsToBytes(inst->extra<LdStack>()->offset);
   emitLoad(inst->dst()->type(), dstLoc(0), srcReg, offset);
-}
-
-void CodeGenerator::cgLdConst(IRInstruction* inst) {
-  auto const dstReg = x2a(dstLoc(0).reg());
-  auto const val    = inst->dst()->type().rawVal();
-  if (dstReg.IsValid()) {
-    m_as.  Mov  (dstReg, val);
-  }
 }
 
 void CodeGenerator::cgLdRaw(IRInstruction* inst) {

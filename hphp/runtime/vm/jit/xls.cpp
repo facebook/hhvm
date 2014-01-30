@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 
 #include <unordered_set>
 #include <algorithm>
@@ -210,6 +211,10 @@ bool LiveRange::contains(LiveRange r) const {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+bool isDefConst(const Interval* ivl) {
+  return ivl->tmp->inst()->is(DefConst);
+}
 
 Interval::Interval(Interval* parent)
   : need(parent->need)
@@ -519,10 +524,11 @@ void XLS::buildIntervals() {
       unsigned src_need = 0;
       for (unsigned i = 0, n = inst.numSrcs(); i < n; ++i) {
         auto s = inst.src(i);
-        if (s->inst()->op() == DefConst) continue;
-        auto need = s->numWords();
-        if (need == 0) continue;
         auto constraint = srcConstraint(inst, i);
+        if (constraint == Constraint::IMM) continue;
+        if (s->isConst() && (constraint & Constraint::IMM)) continue;
+        auto need = s->numWords();
+        if (need == 0) continue; //XXX problematic for InitNull|UninitNull
         if (constraint.reg() != InvalidReg) {
           inst_regs.src(i).setReg(constraint.reg(), 0);
           continue;
@@ -861,7 +867,8 @@ void XLS::spill(Interval* ivl) {
     }
     enqueue(ivl->split(split_pos));
   }
-  assignSpill(ivl);
+  assert(ivl->uses.size() == 0);
+  if (!isDefConst(ivl)) assignSpill(ivl);
 }
 
 // Split and spill other intervals that conflict with current for
@@ -924,7 +931,12 @@ void XLS::update(unsigned pos) {
 void XLS::walkIntervals() {
   // fill the pending queue with nonempty intervals in order of start position
   for (auto ivl : m_intervals) {
-    if (ivl) enqueue(ivl);
+    if (!ivl) continue;
+    if (isDefConst(ivl)) {
+      spill(ivl);
+    } else {
+      enqueue(ivl);
+    }
   }
   for (auto r : m_scratch) {
     if (!m_scratch[r].empty()) m_inactive.push_back(&m_scratch[r]);
@@ -937,7 +949,8 @@ void XLS::walkIntervals() {
     m_pending.pop();
     update(current->start());
     allocOne(current);
-    assert(current->handled() && current->loc.numWords() == current->need);
+    assert(isDefConst(current) ||
+           (current->handled() && current->loc.numWords() == current->need));
   }
   if (dumpIREnabled(kRegAllocLevel)) {
     dumpIntervals();

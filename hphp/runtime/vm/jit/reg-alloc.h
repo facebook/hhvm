@@ -123,13 +123,14 @@ RegAllocInfo allocateRegs(IRUnit&);
  * is explicit.
  */
 struct Constraint {
-  enum ConstraintMask: uint8_t {
+  enum Mask: uint8_t {
     GP = 1,
     SIMD = 2,
     VOID = 4,   // used for unused dests that can be InvalidReg
+    IMM = 8
   };
 
-  /* implicit */ Constraint(ConstraintMask m)
+  /* implicit */ Constraint(Mask m)
     : m_mask(m)
     , m_reg(InvalidReg)
   {}
@@ -156,17 +157,17 @@ struct Constraint {
 
   Constraint operator|(Constraint c2) const {
     return (*this == c2) ? *this :
-           Constraint(ConstraintMask(m_mask | c2.m_mask));
+           Constraint(Mask(m_mask | c2.m_mask));
   }
 
   Constraint operator&(Constraint c2) const {
     return (*this == c2) ? *this :
-           Constraint(ConstraintMask(m_mask & c2.m_mask));
+           Constraint(Mask(m_mask & c2.m_mask));
   }
 
   Constraint operator-(Constraint c2) const {
     assert(m_reg == InvalidReg && c2.m_reg == InvalidReg);
-    return ConstraintMask(m_mask & ~c2.m_mask);
+    return Mask(m_mask & ~c2.m_mask);
   }
 
   Constraint& operator|=(Constraint c2) { return *this = *this | c2; }
@@ -176,12 +177,12 @@ struct Constraint {
   explicit operator bool() const { return m_mask != 0; }
 
 private:
-  static ConstraintMask maskFromReg(PhysReg r) {
+  static Mask maskFromReg(PhysReg r) {
     return r.isGP() ? GP : r.isSIMD() ? SIMD : VOID;
   }
 
 private:
-  ConstraintMask m_mask;
+  Mask m_mask;
   PhysReg m_reg; // if valid, force this register
 };
 

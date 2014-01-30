@@ -17,11 +17,13 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/native-calls.h"
 
 namespace HPHP {
 namespace JIT{
 
 using namespace JIT::reg;
+using NativeCalls::CallMap;
 
 TRACE_SET_MOD(hhir);
 
@@ -71,17 +73,213 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   return InvalidReg;
 }
 
+namespace {
+// This implements an array of arrays of bools, one for each declared
+// source operand of each instruction.  True means the operand must
+// be a const; i.e. it was declared with C(T) instead of S(T).
+struct ConstSrcTable {
+  auto static constexpr MaxSrc = 8;
+  bool table[int(Nop)+1][8];
+  ConstSrcTable() {
+    int op = 0;
+    int i;
+
+#define NA
+#define S(...)   i++;
+#define C(type)  table[op][i++] = true;
+#define CStr     table[op][i++] = true;
+#define SNumInt  i++;
+#define SNum     i++;
+#define SUnk     i++;
+#define SSpills
+#define O(opcode, dstinfo, srcinfo, flags) \
+    i = 0; \
+    srcinfo \
+    op++;
+
+    IR_OPCODES
+
+#undef O
+#undef NA
+#undef SAny
+#undef S
+#undef C
+#undef CStr
+#undef SNum
+#undef SUnk
+#undef SSpills
+
+  }
+  bool mustBeConst(int op, int i) const {
+    return i < MaxSrc ? table[op][i] : false;
+  }
+};
+const ConstSrcTable g_const_table;
+
+// Return true if the ith source operand must be a constant.  Most
+// of this information comes from the table above, but a few instructions
+// have complex signatures, so we handle them individually.
+bool mustUseConst(const IRInstruction& inst, int i) {
+  auto check = [&](bool b) {
+    assert(!b || inst.src(i)->isConst());
+    return b;
+  };
+  // handle special cases we can't derive from IR_OPCODES macro
+  switch (inst.op()) {
+  case LdAddr: return check(i == 1); // offset
+  case Call: return check(i == 1); // returnBcOffset
+  case CallBuiltin: return check(i == 0); // f
+  case StRaw: return check(i == 1); // offset
+  default: break;
+  }
+  return check(g_const_table.mustBeConst(int(inst.op()), i));
+}
+}
+
 namespace ARM {
+
+// Return true if the CodeGenerator method for this instruction can
+// handle an immediate for the ith source operand, usually by selecting
+// a special form of the necessary instruction.  The value of the immediate
+// can affect this decision; we look at the value here, and trust it
+// blindly in CodeGenerator.
+bool mayUseConst(const IRInstruction& inst, unsigned i) {
+  assert(inst.src(i)->isConst());
+  if (CallMap::hasInfo(inst.op())) {
+    // shuffleArgs() knows what to do with immediates.
+    // TODO: #3634984 ... but it needs a scratch register
+    return true;
+  }
+  union {
+    int64_t cint;
+    double cdouble;
+  };
+  auto type = inst.src(i)->type();
+  cint = type.hasRawVal() ? type.rawVal() : 0;
+  // (almost?) any instruction that accepts a GPR, can accept XZR in
+  // place of an immediate zero. TODO #3827905
+  switch (inst.op()) {
+  case GuardRefs:
+    if (i == 1) return inst.src(2)->getValInt() == 0; // nParams
+    if (i == 3) { // mask64
+      return vixl::Assembler::IsImmLogical(cint, vixl::kXRegSize);
+    }
+    if (i == 4) { // vals64
+      return vixl::Assembler::IsImmArithmetic(cint);
+    }
+    break;
+  default:
+    break;
+  }
+  return false;
+}
+
+Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
+  Constraint c { Constraint::GP };
+  if (inst.src(i)->isConst() && mayUseConst(inst, i)) {
+    c |= Constraint::IMM;
+  }
+  return c;
+}
+
 Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
   return Constraint::GP;
 }
 
-Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
-  return Constraint::GP;
-}
 }
 
 namespace X64 {
+
+bool isI32(int64_t c) { return c == int32_t(c); }
+bool isU32(int64_t c) { return c == uint32_t(c); }
+bool okStore(int64_t c) { return isI32(c); }
+bool okCmp(int64_t c) { return isI32(c); }
+
+// return true if CodeGenerator supports this operand as an
+// immediate value.
+// pre: the src must actually be a const
+bool mayUseConst(const IRInstruction& inst, unsigned i) {
+  assert(inst.src(i)->isConst());
+  if (CallMap::hasInfo(inst.op())) {
+    // shuffleArgs() knows what to do with immediates.
+    // TODO: #3634984 ... but it needs a scratch register for
+    // big constants, so handle big immediates here.
+    return true;
+  }
+  union {
+    int64_t cint;
+    double cdouble;
+  };
+  auto type = inst.src(i)->type();
+  cint = type.hasRawVal() ? type.rawVal() : 0;
+  switch (inst.op()) {
+  case GuardRefs:
+    if (i == 1) return inst.src(2)->getValInt() == 0; // nParams
+    if (i == 3) return isU32(cint); // mask64
+    if (i == 4) return isU32(cint); // vals64
+    break;
+  case LdPackedArrayElem:
+  case CheckPackedArrayElemNull:
+    if (i == 1) return true; // idx; can use reg+imm addressing mode
+    break;
+  case SpillStack:
+    if (i >= 2) return okStore(cint);
+    break;
+  case SpillFrame:
+    if (i == 2) return true; // func
+    if (i == 3) return type <= Type::Cls; // objOrCls
+    break;
+  case Call:
+    if (i == 2) return true; // func
+    if (i >= 3) return okStore(cint);
+    break;
+  case CallBuiltin:
+    if (i >= 2) return true; // args -> ArgGroup.ssa()
+    break;
+  case StLoc:
+  case StLocNT:
+    if (i == 1) return okStore(cint); // value
+    break;
+  case StProp:
+  case StMem:
+    if (i == 2) return okStore(cint); // value
+    break;
+  case StRaw:
+    if (i == 2) return true; // but, uses scratch register for big imms
+    break;
+  case Jmp:
+  case Shuffle:
+    // doRegMoves handles immediates.
+    // TODO: #3634984 ... but it needs a scratch register
+    return true;
+  case LdClsPropAddr:
+  case LdClsPropAddrCached:
+    if (i == 0) return true; // cls -> ArgGroup.ssa().
+    break;
+  case Same: case NSame:
+  case Eq:   case EqX:  case EqInt:
+  case Neq:  case NeqX: case NeqInt:
+  case Lt:   case LtX:  case LtInt:
+  case Gt:   case GtX:  case GtInt:
+  case Lte:  case LteX: case LteInt:
+  case Gte:  case GteX: case GteInt:
+  case JmpEqInt:  case SideExitJmpEqInt:  case ReqBindJmpEqInt:
+  case JmpNeqInt: case SideExitJmpNeqInt: case ReqBindJmpNeqInt:
+  case JmpGtInt:  case SideExitJmpGtInt:  case ReqBindJmpGtInt:
+  case JmpGteInt: case SideExitJmpGteInt: case ReqBindJmpGteInt:
+  case JmpLtInt:  case SideExitJmpLtInt:  case ReqBindJmpLtInt:
+  case JmpLteInt: case SideExitJmpLteInt: case ReqBindJmpLteInt:
+    if (i == 1) {
+      if (type <= Type::Str) return true; // rhs -> ArgGroup.ssa()
+      if (type <= Type::Bool) return true;
+      if (type <= Type::Int) return okCmp(cint);
+    }
+    break;
+  default:
+    break;
+  }
+  return false;
+}
 
 /*
  * Return true if this instruction can load a TypedValue using a 16-byte
@@ -165,6 +363,9 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
 Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
   Constraint c { Constraint::GP };
   auto src = inst.src(i);
+  if (src->isConst() && mayUseConst(inst, i)) {
+    c |= Constraint::IMM;
+  }
   if (src->type() <= Type::Dbl) {
     c |= Constraint::SIMD;
   } else if (!packed_tv && storesCell(inst, i) && src->numWords() == 2) {
@@ -232,6 +433,7 @@ Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
 Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
   auto r = forceAlloc(*inst.src(i));
   if (r != InvalidReg) return r;
+  if (mustUseConst(inst, i)) return Constraint::IMM;
   return arch() == Arch::X64 ? X64::srcConstraint(inst, i) :
          ARM::srcConstraint(inst, i);
 }
@@ -243,4 +445,4 @@ Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
          ARM::dstConstraint(inst, i);
 }
 
-}} // HPHP::JIT
+}}

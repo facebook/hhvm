@@ -1157,7 +1157,7 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
       gen(CheckStaticLocInit, taken, box);
     },
     [&] { // Next: the static local is already initialized
-      return m_irb->genLdConst(true);
+      return cns(true);
     },
     [&] { // Taken: need to initialize the static local
       /*
@@ -1171,7 +1171,7 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
        * initializes the static local).  TODO(#2894612).
        */
       gen(StaticLocInitCached, box, cns(Type::InitNull));
-      return m_irb->genLdConst(false);
+      return cns(false);
     }
   );
   gen(IncRef, box);
@@ -3547,15 +3547,13 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
         LdRaw, Type::Int, funcPtr, cns(RawMemSlot::FuncNumParams)
       );
     }
-    SSATmp* maskTmp = !(mask64>>32) ? cns(mask64) : m_irb->genLdConst(mask64);
-    SSATmp* valsTmp = !(vals64>>32) ? cns(vals64) : m_irb->genLdConst(vals64);
     gen(
       GuardRefs,
       funcPtr,
       nParams,
       cns(i),
-      maskTmp,
-      valsTmp
+      cns(mask64),
+      cns(vals64)
     );
   }
 }

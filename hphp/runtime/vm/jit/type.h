@@ -381,6 +381,10 @@ public:
     return Type(m_bits);
   }
 
+  bool hasRawVal() const {
+    return m_hasConstVal;
+  }
+
   uint64_t rawVal() const {
     assert(m_hasConstVal);
     return m_intVal;

@@ -352,7 +352,8 @@ function get_unit_testing_infra_dependencies(): void {
   $json_file = __DIR__."/composer.json";
   $vendor_dir = __DIR__."/vendor";
   $lock_file = __DIR__."/composer.lock";
-  if (file_get_contents($md5_file) !== md5($json_file)) {
+  if (file_exists($md5_file) &&
+      file_get_contents($md5_file) !== md5($json_file)) {
     verbose("\nUpdated composer.json found. Updating phpunit binary.\n",
             !Options::$csv_only);
     if (file_exists($vendor_dir)) {

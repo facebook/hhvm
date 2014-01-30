@@ -2743,8 +2743,8 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
   }
   bool voidReturn = false;
   if (builtinFunc) {
-    ref = (builtinFunc->methInfo()->attribute & ClassInfo::IsReference) != 0;
-    voidReturn = builtinFunc->methInfo()->returnType == KindOfNull;
+    ref = (builtinFunc->attrs() & AttrReference) != 0;
+    voidReturn = builtinFunc->returnType() == KindOfNull;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
     if (!(fn->getActualType()) && !fn->getFuncScope()->isNative()) {
@@ -2775,7 +2775,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     m_evalStack.setNotRef();
   } else if (!ref) {
     DataType dt = builtinFunc ?
-      builtinFunc->methInfo()->returnType :
+      builtinFunc->returnType() :
       getPredictedDataType(fn);
 
     if (dt != KindOfUnknown) {
@@ -7381,30 +7381,54 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
     }
   }
   Func* f = Unit::lookupFunc(makeStaticString(name));
-  if (!f || !f->methInfo() || f->numParams() > kMaxBuiltinArgs) return nullptr;
+  if (!f ||
+      !f->nativeFuncPtr() ||
+      (f->numParams() > kMaxBuiltinArgs) ||
+      (numParams > f->numParams()) ||
+      (f->returnType() == KindOfDouble)) return nullptr;
 
-  const ClassInfo::MethodInfo* info = f->methInfo();
-  if (info->attribute & (ClassInfo::NeedsActRec |
-                         ClassInfo::VariableArguments |
-                         ClassInfo::RefVariableArguments |
-                         ClassInfo::MixedVariableArguments)) {
+  if (f->methInfo()) {
+    // IDL style builtin
+    const ClassInfo::MethodInfo* info = f->methInfo();
+    if (info->attribute & (ClassInfo::NeedsActRec |
+                           ClassInfo::VariableArguments |
+                           ClassInfo::RefVariableArguments |
+                           ClassInfo::MixedVariableArguments)) {
+      return nullptr;
+    }
+  } else if (!(f->attrs() & AttrNative)) {
+    // HNI only enables Variable args via NeedsActRec which in turn
+    // is captured by the f->nativeFuncPtr() == nullptr,
+    // so there's nothing additional to check in the HNI case
     return nullptr;
   }
-  if (numParams > f->numParams()) return nullptr;
-
-  if (info->returnType == KindOfDouble) return nullptr;
 
   for (int i = 0; i < f->numParams(); i++) {
-    const ClassInfo::ParameterInfo* pi = f->methInfo()->parameters[i];
-    if (pi->argType == KindOfDouble) return nullptr;
-
+    if (f->params()[i].builtinType() == KindOfDouble) {
+      return nullptr;
+    }
     if (i >= numParams) {
-      if (!pi->valueLen) {
-        return nullptr;
+      if (f->methInfo()) {
+        // IDL-style
+        auto pi = f->methInfo()->parameters[i];
+        if (!pi->valueLen) {
+          return nullptr;
+        }
+        // unserializable default values such as TimeStamp::Current()
+        // are serialized as kUnserializableString ("\x01")
+        if (!strcmp(f->methInfo()->parameters[i]->value,
+                    kUnserializableString)) return nullptr;
+      } else {
+        // HNI style
+        auto &pi = f->params()[i];
+        if (!pi.hasDefaultValue()) {
+          return nullptr;
+        }
+        if (pi.defaultValue().m_type == KindOfUninit) {
+          // TODO: Resolve persistent constants
+          return nullptr;
+        }
       }
-      // unserializable default values such as TimeStamp::Current()
-      // are serialized as kUnserializableString ("\x01")
-      if (!strcmp(pi->value, kUnserializableString)) return nullptr;
     }
   }
 
@@ -7506,12 +7530,24 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       bool byRef = fcallBuiltin->byRef(i);
       emitBuiltinCallArg(e, (*params)[i], i, byRef);
     }
-    for (; i < fcallBuiltin->numParams(); i++) {
-      const ClassInfo::ParameterInfo* pi =
-        fcallBuiltin->methInfo()->parameters[i];
-      Variant v = unserialize_from_string(
-        String(pi->value, pi->valueLen, CopyString));
-      emitBuiltinDefaultArg(e, v, pi->argType, i);
+    if (fcallBuiltin->methInfo()) {
+      // IDL style
+      for (; i < fcallBuiltin->numParams(); i++) {
+        const ClassInfo::ParameterInfo* pi =
+          fcallBuiltin->methInfo()->parameters[i];
+        Variant v = unserialize_from_string(
+          String(pi->value, pi->valueLen, CopyString));
+        emitBuiltinDefaultArg(e, v, pi->argType, i);
+      }
+    } else {
+      // HNI style
+      for (; i < fcallBuiltin->numParams(); i++) {
+        auto &pi = fcallBuiltin->params()[i];
+        assert(pi.hasDefaultValue());
+        auto &def = pi.defaultValue();
+        emitBuiltinDefaultArg(e, tvAsVariant(const_cast<TypedValue*>(&def)),
+                              pi.builtinType(), i);
+      }
     }
     e.FCallBuiltin(fcallBuiltin->numParams(), numParams, nLiteral);
   } else {

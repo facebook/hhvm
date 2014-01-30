@@ -92,7 +92,8 @@ require_once __DIR__.'/Runner.php';
 require_once __DIR__.'/Options.php';
 require_once __DIR__.'/spyc/Spyc.php';
 
-function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
+function prepare(Set $available_frameworks, Set $framework_class_overrides,
+                 Vector $passed_frameworks): Vector {
   get_unit_testing_infra_dependencies();
 
   if (Options::$all) {
@@ -104,7 +105,7 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
     // Test all frameworks
     $passed_frameworks = $available_frameworks->toVector();
   } else if (Options::$allexcept) {
-    // Run all the frameworks, but the ones we listed.
+    // Run all the frameworks, except the ones we listed.
     $passed_frameworks  = Vector::fromItems(array_diff(
                                             $available_frameworks->toVector(),
                                             $passed_frameworks));
@@ -123,7 +124,11 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
     $name = trim(strtolower($name));
     if ($available_frameworks->contains($name)) {
       $uname = ucfirst($name);
-      $frameworks[] = new $uname($name);
+      if ($framework_class_overrides->contains($name)) {
+        $frameworks[] = new $uname($name);
+      } else {
+        $frameworks[] = new Framework($name);
+      }
     }
   }
 
@@ -584,11 +589,14 @@ function main(array $argv): void {
   if ($options->containsKey('help')) {
     return help();
   }
-  include_all_php(__DIR__."/frameworks");
-  $available_frameworks = get_subclasses_of("Framework")->toSet();
-  // Parse other possible options out in run()
+  // Parse all the options passed to run.php and come out with a list of
+  // frameworks passed into test (or --all or --allexcept)
   $passed_frameworks = Options::parse($options, $argv);
-  $frameworks = prepare($available_frameworks, $passed_frameworks);
+  $available_frameworks = new Set(array_keys(Options::$framework_info));
+  include_all_php(__DIR__."/framework_class_overrides");
+  $framework_class_overrides = get_subclasses_of("Framework")->toSet();
+  $frameworks = prepare($available_frameworks, $framework_class_overrides,
+                        $passed_frameworks);
   run_tests($frameworks);
 }
 

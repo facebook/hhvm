@@ -3,7 +3,7 @@ require_once __DIR__.'/Options.php';
 require_once __DIR__.'/utils.php';
 require_once __DIR__.'/TestFindModes.php';
 
-abstract class Framework {
+class Framework {
   private string $out_file;
   private string $expect_file;
   private string $diff_file;
@@ -35,13 +35,13 @@ abstract class Framework {
   // proven. Also assume that tests will be found by reflecting over the
   // framework. However, some require that we use php tokens or are found via
   // phpt files.
-  protected function __construct(private string $name,
-                                 private string $test_command = null,
-                                 private Map $env_vars = null,
-                                 private Map $args_for_tests = null,
-                                 private bool $parallel = true,
-                                 private string $test_find_mode =
-                                                TestFindModes::REFLECTION) {
+  public function __construct(private string $name,
+                              private string $test_command = null,
+                              private Map $env_vars = null,
+                              private Map $args_for_tests = null,
+                              private bool $parallel = true,
+                              private string $test_find_mode =
+                                TestFindModes::REFLECTION) {
 
     // Get framework information and set all needed properties. Beyond
     // the install root, git info, test roots, etc., the other

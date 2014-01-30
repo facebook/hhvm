@@ -35,6 +35,23 @@ void IntlExtension::bindIniSettings() {
                    nullptr);
 }
 
+const StaticString
+#ifdef U_ICU_DATA_VERSION
+  s_INTL_ICU_DATA_VERSION("INTL_ICU_DATA_VERSION"),
+  s_U_ICU_DATA_VERSION(U_ICU_DATA_VERSION),
+#endif
+  s_INTL_ICU_VERSION("INTL_ICU_VERSION"),
+  s_U_ICU_VERSION(U_ICU_VERSION);
+
+void IntlExtension::bindConstants() {
+#ifdef U_ICU_DATA_VERSION
+  Native::registerConstant<KindOfString>(s_INTL_ICU_DATA_VERSION.get(),
+                                         s_U_ICU_DATA_VERSION.get());
+#endif
+  Native::registerConstant<KindOfString>(s_INTL_ICU_VERSION.get(),
+                                         s_U_ICU_VERSION.get());
+}
+
 const String GetDefaultLocale() {
   String locale(s_intl_request->getDefaultLocale());
   if (locale.empty()) {

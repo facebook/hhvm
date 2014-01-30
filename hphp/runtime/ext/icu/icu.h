@@ -199,6 +199,7 @@ class IntlExtension : public Extension {
 
   void moduleInit() override {
     bindIniSettings();
+    bindConstants();
     initLocale();
     initNumberFormatter();
     initTimeZone();
@@ -216,6 +217,7 @@ class IntlExtension : public Extension {
   }
 
   void bindIniSettings();
+  void bindConstants();
   void initLocale();
   void initNumberFormatter();
   void initTimeZone();

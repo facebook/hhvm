@@ -194,6 +194,7 @@ bad_tests = (
 
     # flaky: t3619770
     '/ext/zlib/tests/gzfile_basic.php',
+    '/ext/zlib/tests/readgzfile_basic.php',
 )
 
 # Tests that work but not in repo mode

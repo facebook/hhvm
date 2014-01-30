@@ -253,8 +253,34 @@ function hash_copy(resource $context): resource;
  *                  unless raw_output is set to TRUE in which case the raw
  *                  binary representation of the derived key is returned.
  */
-function hash_pbkdf2(string $algo, string $password, string $salt, 
-                     int $iterations, int $length = 0, 
-                     bool $raw_output = false): string {
-  return "hello world";
+function hash_pbkdf2(?string $algo, ?string $password, ?string $salt, 
+                     ?int $iterations, ?int $length = 0, 
+                     ?bool $raw_output = false): mixed {
+  $args = func_num_args();
+  if ($args < 4) {
+    error_log("HipHop Warning: hash_pbkdf2() expects at least 4 parameters, ".$args." given");
+    return NULL;
+  } else if ($args > 6) {
+    error_log("HipHop Warning: hash_pbkdf2() expects at most 6 parameters, ".$args." given");
+    return NULL;
+  }
+
+  $algo = strtolower($algo);
+  if (!in_array($algo, hash_algos())) {
+    error_log("HipHop Warning: hash_pbkdf2(): Unknown hashing algorithm: ".$algo);
+    return false;
+  }
+
+  if ($iterations <= 0) {
+    error_log("HipHop Warning: hash_pbkdf2(): Iterations must be a positive integer: ".$iterations);
+    return false;
+  }
+
+  if ($length < 0) {
+    error_log("HipHop Warning: hash_pbkdf2(): Length must be greater than or equal to 0: ".$length);
+    return false;
+  }
+
+  // TODO:
+  return "hello world!";
 }

@@ -1931,7 +1931,8 @@ void HhbcTranslator::emitJmpNZ(Offset taken) {
 bool cmpOpTypesMayReenter(Type t0, Type t1) {
   assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
   return (t0.maybe(Type::Obj) && t1.maybe(Type::Str)) ||
-         (t0.maybe(Type::Str) && t1.maybe(Type::Obj));
+         (t0.maybe(Type::Str) && t1.maybe(Type::Obj)) ||
+         (t0.maybe(Type::Obj) && t1.maybe(Type::Obj));
 }
 
 Opcode matchReentrantCmp(Opcode opc) {

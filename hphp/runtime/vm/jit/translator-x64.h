@@ -210,6 +210,7 @@ public:
   void setJmpTransID(TCA jmp);
 
   bool profileSrcKey(const SrcKey& sk) const;
+  bool profilePrologue(const SrcKey& sk) const;
 
   TCA getTopTranslation(SrcKey sk) {
     return getSrcRec(sk)->getTopTranslation();

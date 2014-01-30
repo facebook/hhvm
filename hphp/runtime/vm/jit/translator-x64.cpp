@@ -219,6 +219,19 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
   return true;
 }
 
+bool TranslatorX64::profilePrologue(const SrcKey& sk) const {
+  if (!sk.func()->shouldPGO()) return false;
+
+  if (profData()->optimized(sk.getFuncId())) return false;
+
+  // Proflogues don't trigger retranslation, so only emit them if
+  // we've already generated a retranslation-triggering translation
+  // for its function or if we're about to generate one (which
+  // requires depends on requestCount(), see profileSrcKey()).
+  return profData()->profiling(sk.getFuncId()) ||
+         requestCount() <= RuntimeOption::EvalJitProfileRequests;
+}
+
 /*
  * Invalidate the SrcDB entries for func's SrcKeys that have any
  * Profile translation.
@@ -653,7 +666,7 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   // We're comming from a BIND_CALL service request, so enable
   // profiling if we haven't optimized the function entry yet.
   assert(m_mode == TransInvalid || m_mode == TransPrologue);
-  if (m_mode == TransInvalid && profileSrcKey(funcBody)) {
+  if (m_mode == TransInvalid && profilePrologue(funcBody)) {
     m_mode = TransProflogue;
   } else {
     m_mode = TransPrologue;

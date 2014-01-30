@@ -230,6 +230,7 @@ function hash_copy(resource $context): resource;
 
 /**
  * hash_pbkdf2 - http://php.net/function.hash-pbkdf2.php
+ * RFC 2898 - http://www.ietf.org/rfc/rfc2898.txt
  *
  * @param string $algo     - Name of selected hashing algorithm
  *                           (i.e. "md5", "sha256", "haval160,4", etc..)
@@ -258,29 +259,51 @@ function hash_pbkdf2(?string $algo, ?string $password, ?string $salt,
                      ?bool $raw_output = false): mixed {
   $args = func_num_args();
   if ($args < 4) {
-    error_log("HipHop Warning: hash_pbkdf2() expects at least 4 parameters, ".$args." given");
+    error_log("HipHop Warning: hash_pbkdf2() expects at least 4 parameters, ".
+              $args." given");
     return NULL;
   } else if ($args > 6) {
-    error_log("HipHop Warning: hash_pbkdf2() expects at most 6 parameters, ".$args." given");
+    error_log("HipHop Warning: hash_pbkdf2() expects at most 6 parameters, ".
+              $args." given");
     return NULL;
   }
 
   $algo = strtolower($algo);
   if (!in_array($algo, hash_algos())) {
-    error_log("HipHop Warning: hash_pbkdf2(): Unknown hashing algorithm: ".$algo);
+    error_log("HipHop Warning: hash_pbkdf2(): Unknown hashing algorithm: ".
+              $algo);
     return false;
   }
 
   if ($iterations <= 0) {
-    error_log("HipHop Warning: hash_pbkdf2(): Iterations must be a positive integer: ".$iterations);
+    error_log("HipHop Warning: hash_pbkdf2(): Iterations must be a positive".
+              " integer: ".$iterations);
     return false;
   }
 
   if ($length < 0) {
-    error_log("HipHop Warning: hash_pbkdf2(): Length must be greater than or equal to 0: ".$length);
+    error_log("HipHop Warning: hash_pbkdf2(): Length must be greater than or ".
+              "equal to 0: ".$length);
     return false;
   }
 
-  // TODO:
-  return "hello world!";
+  $result = "";
+  $hash_length = strlen(hash($algo, "", true));
+  $key_blocks = ceil($length / $hash_length);
+  for ($i = 1; $i <= $key_blocks; $i++) {
+    // Note: $salt encoded with most siginificant octet first.
+    $xor = hash_hmac($algo, $salt.pack("N", $i), $password, true);
+    $prev = $xor;
+    for ($j = 1; $j < $iterations; $j++) {
+      $prev = hash_hmac($algo, $prev, $password, true);
+      $xor ^= $prev;
+    }
+    $result .= $xor;
+  }
+
+  if ($raw_output) {
+    return substr($result, 0, $length);
+  } else {
+    return substr(bin2hex($result), 0, $length);
+  }
 }

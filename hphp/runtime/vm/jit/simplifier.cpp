@@ -154,16 +154,15 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     SSATmp* prevSp = inst->src(0);
     auto const& extra = *inst->extra<InterpOneData>();
     int64_t spAdjustment = extra.cellsPopped - extra.cellsPushed;
-    Type resultType = inst->typeParam();
     switch (extra.opcode) {
     // some instructions are kinda funny and mess with the stack
     // in places other than the top
     case Op::CGetL2:
-      if (index == 1) return StackValueInfo { inst, resultType };
+      if (index == 1) return StackValueInfo { inst, inst->typeParam() };
       if (index == 0) return getStackValue(prevSp, index);
       break;
     case Op::CGetL3:
-      if (index == 2) return StackValueInfo { inst, resultType };
+      if (index == 2) return StackValueInfo { inst, inst->typeParam() };
       if (index < 2)  return getStackValue(prevSp, index);
       break;
     case Op::UnpackCont:
@@ -184,8 +183,8 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
       break;
 
     default:
-      if (index == 0 && !resultType.equals(Type::None)) {
-        return StackValueInfo { inst, resultType };
+      if (index == 0 && inst->hasTypeParam()) {
+        return StackValueInfo { inst, inst->typeParam() };
       }
       break;
     }
@@ -1973,7 +1972,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
         inst->op() == JmpZero
           ? negateQueryOp(srcOpcode)
           : srcOpcode),
-      srcInst->typeParam(), // if it had a type param
+      srcInst->maybeTypeParam(), // if it had a type param
       inst->taken(),
       std::make_pair(ssas.size(), ssas.begin())
     );

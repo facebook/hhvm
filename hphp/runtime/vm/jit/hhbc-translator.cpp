@@ -488,7 +488,7 @@ void HhbcTranslator::emitThis() {
 
 void HhbcTranslator::emitCheckThis() {
   if (!curClass()) {
-    emitInterpOne(Type::None, 0); // will throw a fatal
+    emitInterpOne(0); // will throw a fatal
     return;
   }
   gen(LdThis, makeExitSlow(), m_irb->fp());
@@ -746,11 +746,11 @@ void HhbcTranslator::emitConcat() {
 }
 
 void HhbcTranslator::emitDefCls(int cid, Offset after) {
-  emitInterpOne(Type::None, 0);
+  emitInterpOne(0);
 }
 
 void HhbcTranslator::emitDefFunc(int fid) {
-  emitInterpOne(Type::None, 0);
+  emitInterpOne(0);
 }
 
 void HhbcTranslator::emitLateBoundCls() {
@@ -3503,7 +3503,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
       return folly::format("Bad type {} for local {}:\n\n{}\n",
                            locType, paramId, m_irb->unit().toString()).str();
     });
-    emitInterpOne(Type::None, 0);
+    emitInterpOne(0);
     return;
   }
 
@@ -3544,7 +3544,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
    * For now we just interp that case.
    */
   if (!locType.isObj()) {
-    emitInterpOne(Type::None, 0);
+    emitInterpOne(0);
     return;
   }
 
@@ -4558,7 +4558,7 @@ uint32_t localInputId(const NormalizedInstruction& inst) {
 
 }
 
-Type HhbcTranslator::interpOutputType(
+folly::Optional<Type> HhbcTranslator::interpOutputType(
     const NormalizedInstruction& inst,
     folly::Optional<Type>& checkTypeType) const {
   using namespace JIT::InstrFlags;
@@ -4597,7 +4597,7 @@ Type HhbcTranslator::interpOutputType(
     case OutThisObject:  return Type::Obj;
     case OutResource:    return Type::Res;
 
-    case OutFDesc:       return Type::None;
+    case OutFDesc:       return folly::none;
     case OutUnknown:     return Type::Gen;
     case OutPred:        return inst.outPred;
     case OutCns:         return Type::Cell;
@@ -4620,10 +4620,10 @@ Type HhbcTranslator::interpOutputType(
                                                            : Type::Cell;
     case OutStrlen:     return topType(0).isString() ? Type::Int : Type::Cell;
     case OutClassRef:   return Type::Cls;
-    case OutFPushCufSafe: return Type::None;
-    case OutAsyncAwait:   return Type::None; // custom in getStackValue
+    case OutFPushCufSafe: return folly::none;
+    case OutAsyncAwait:   return folly::none; // custom in getStackValue
 
-    case OutNone:       return Type::None;
+    case OutNone:       return folly::none;
 
     case OutCInput: {
       auto ttype = topType(0);
@@ -4651,7 +4651,7 @@ Type HhbcTranslator::interpOutputType(
 smart::vector<InterpOneData::LocalType>
 HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
                                    bool& smashesAllLocals,
-                                   Type pushedType) {
+                                   folly::Optional<Type> pushedType) {
   using namespace JIT::InstrFlags;
   if (!(getInstrInfo(inst.op()).out & Local)) return {};
 
@@ -4682,10 +4682,11 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
 
     case OpSetOpL:
     case OpIncDecL: {
+      assert(pushedType.hasValue());
       auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
       assert(locType < Type::Gen);
 
-      auto stackType = inst.outputPredicted ? inst.outPred : pushedType;
+      auto stackType = inst.outputPredicted ? inst.outPred : pushedType.value();
       setImmLocType(0, locType.isBoxed() ? stackType.box() : stackType);
       break;
     }
@@ -4707,8 +4708,9 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
     }
     case OpVGetL:
     case OpBindL: {
-      assert(pushedType.isBoxed());
-      setImmLocType(0, pushedType);
+      assert(pushedType.hasValue());
+      assert(pushedType->isBoxed());
+      setImmLocType(0, pushedType.value());
       break;
     }
 
@@ -4794,7 +4796,9 @@ void HhbcTranslator::emitInterpOne(const NormalizedInstruction& inst) {
   auto popped = getStackPopped(inst.pc());
   auto pushed = getStackPushed(inst.pc());
   FTRACE(1, "emitting InterpOne for {}, result = {}, popped {}, pushed {}\n",
-         inst.toString(), stackType.toString(), popped, pushed);
+         inst.toString(),
+         stackType.hasValue() ? stackType->toString() : "<none>",
+         popped, pushed);
 
   InterpOneData idata;
   auto locals = interpOutputLocals(inst, idata.smashesAllLocals, stackType);
@@ -4807,13 +4811,19 @@ void HhbcTranslator::emitInterpOne(const NormalizedInstruction& inst) {
   }
 }
 
-void HhbcTranslator::emitInterpOne(Type outType, int popped) {
+void HhbcTranslator::emitInterpOne(int popped) {
   InterpOneData idata;
-  emitInterpOne(outType, popped, outType.equals(Type::None) ? 0 : 1, idata);
+  emitInterpOne(folly::none, popped, 0, idata);
 }
 
-void HhbcTranslator::emitInterpOne(Type outType, int popped, int pushed,
-                                   InterpOneData& idata) {
+void HhbcTranslator::emitInterpOne(Type outType, int popped) {
+  InterpOneData idata;
+  assert(outType != Type::None);
+  emitInterpOne(outType, popped, 1, idata);
+}
+
+void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
+                                   int pushed, InterpOneData& idata) {
   auto unit = curFunc()->unit();
   auto sp = spillStack();
   auto op = unit->getOpcode(bcOff());
@@ -4831,6 +4841,7 @@ void HhbcTranslator::emitInterpOne(Type outType, int popped, int pushed,
   idata.opcode = op;
 
   auto const changesPC = opcodeChangesPC(idata.opcode);
+  assert(IMPLIES(outType.hasValue(), outType.value() != Type::None));
   gen(changesPC ? InterpOneCF : InterpOne, outType,
       makeCatch(), idata, sp, m_irb->fp());
   assert(m_stackDeficit == 0);
@@ -5052,9 +5063,9 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
     idata.cellsPushed = getStackPushed(pc);
     idata.opcode = toOp(*pc);
 
-    // Blindly using None as the output type here might seem bogus, but since
-    // this trace is about to end, it doesn't matter for downstream analysis.
-    gen(interpOp, Type::None, idata, makeCatchNoSpill(), stack, m_irb->fp());
+    // This is deliberately ignoring anything the opcode might output on the
+    // stack -- this Unit is about to end.
+    gen(interpOp, idata, makeCatchNoSpill(), stack, m_irb->fp());
 
     if (!changesPC) {
       // If the op changes PC, InterpOneCF handles getting to the right place

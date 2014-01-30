@@ -151,8 +151,7 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
      << color(ANSI_COLOR_END)
      ;
 
-  auto const typeParam = inst->typeParam();
-  auto const hasTypeParam = !typeParam.equals(Type::None);
+  auto const hasTypeParam = inst->hasTypeParam();
   auto const hasExtra = inst->hasExtra();
   auto const isGuard = guards && !inst->isTransient() && isGuardOp(inst->op());
 
@@ -161,7 +160,7 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
 
   if (hasTypeParam) {
     os << color(ANSI_COLOR_GREEN)
-       << typeParam.toString()
+       << inst->typeParam().toString()
        << color(ANSI_COLOR_END)
        ;
     if (hasExtra || isGuard) os << punc(",");

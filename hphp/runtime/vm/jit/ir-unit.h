@@ -110,6 +110,12 @@ private:
     inst->setTypeParam(t);
   }
 
+  void setter(IRInstruction* inst, folly::Optional<Type> t) {
+    if (t.hasValue()) {
+      inst->setTypeParam(t.value());
+    }
+  }
+
   template<typename T>
   typename std::enable_if<std::is_base_of<IRExtraData,T>::value, void>::type
   setter(IRInstruction* inst, const T& extra) {

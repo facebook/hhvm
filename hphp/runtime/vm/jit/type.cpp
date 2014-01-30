@@ -809,10 +809,12 @@ void assertOperandTypes(const IRInstruction* inst) {
   };
 
   auto requireTypeParam = [&] {
-    auto const t = inst->typeParam();
-    checkDst(t != Type::Bottom &&
-             (t != Type::None || inst->is(DefConst)),
+    checkDst(inst->hasTypeParam() || inst->is(DefConst),
              "Invalid paramType for DParam instruction");
+    if (inst->hasTypeParam()) {
+      checkDst(inst->typeParam() != Type::Bottom,
+             "Invalid paramType for DParam instruction");
+    }
   };
 
   auto checkSpills = [&] {
@@ -863,7 +865,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DLdRef      requireTypeParam();
 #define DAllocObj
 #define DThis
-#define DArith      checkDst(inst->typeParam() == Type::None, \
+#define DArith      checkDst(!inst->hasTypeParam(), \
                              "DArith should have no type parameter");
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
@@ -919,4 +921,3 @@ std::string TypeConstraint::toString() const {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

@@ -229,7 +229,7 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
   typedef RegionDesc::Location L;
 
   for (auto const& inst : *unit.entry()) {
-    if (inst.typeParam().equals(Type::Gen)) continue;
+    if (inst.hasTypeParam() && inst.typeParam().equals(Type::Gen)) continue;
 
     if (inst.op() == GuardLoc) {
       func(L::Local{inst.extra<LocalId>()->locId}, inst.typeParam());

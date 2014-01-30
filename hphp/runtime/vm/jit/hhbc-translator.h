@@ -164,8 +164,10 @@ struct HhbcTranslator {
   // Other public functions for irtranslator.
   void setThisAvailable();
   void emitInterpOne(const NormalizedInstruction&);
+  void emitInterpOne(int popped);
   void emitInterpOne(Type t, int popped);
-  void emitInterpOne(Type t, int popped, int pushed, InterpOneData& id);
+  void emitInterpOne(folly::Optional<Type> t, int popped, int pushed,
+                     InterpOneData& id);
   std::string showStack() const;
   bool hasExit() const {
     return m_hasExit;
@@ -715,11 +717,11 @@ private:
   void emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator);
   void classExistsImpl(ClassKind);
 
-  Type interpOutputType(const NormalizedInstruction&,
-                        folly::Optional<Type>&) const;
+  folly::Optional<Type> interpOutputType(const NormalizedInstruction&,
+                                         folly::Optional<Type>&) const;
   smart::vector<InterpOneData::LocalType>
   interpOutputLocals(const NormalizedInstruction&, bool& smashAll,
-                     Type pushedType);
+                     folly::Optional<Type> pushedType);
 
 private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff = -1);

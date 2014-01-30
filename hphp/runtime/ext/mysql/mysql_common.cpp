@@ -34,7 +34,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/ext/ext_network.h"
-#include "hphp/runtime/ext/ext_preg.h"
+#include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -826,7 +826,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
                                     bool async_mode) {
   SYNC_VM_REGS_SCOPED();
   if (mysqlExtension::ReadOnly &&
-      same(f_preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query), 0)) {
+      same(HHVM_FN(preg_match)("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query),
+           0)) {
     raise_notice("runtime/ext_mysql: write query not executed [%s]",
                     query.data());
     return MySQLQueryReturn::OK; // pretend it worked
@@ -841,16 +842,17 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
 
     // removing comments, which can be wrong actually if some string field's
     // value has /* or */ in it.
-    String q = f_preg_replace("/\\/\\*.*?\\*\\//", " ", query).toString();
+    String q =
+          HHVM_FN(preg_replace)("/\\/\\*.*?\\*\\//", " ", query).toString();
 
     Variant matches;
-    f_preg_match("/^(?:\\(|\\s)*(?:"
-                 "(insert).*?\\s+(?:into\\s+)?([^\\s\\(,]+)|"
-                 "(update|set|show)\\s+([^\\s\\(,]+)|"
-                 "(replace).*?\\s+into\\s+([^\\s\\(,]+)|"
-                 "(delete).*?\\s+from\\s+([^\\s\\(,]+)|"
-                 "(select).*?[\\s`]+from\\s+([^\\s\\(,]+))/is",
-                 q, ref(matches));
+    HHVM_FN(preg_match)("/^(?:\\(|\\s)*(?:"
+                        "(insert).*?\\s+(?:into\\s+)?([^\\s\\(,]+)|"
+                        "(update|set|show)\\s+([^\\s\\(,]+)|"
+                        "(replace).*?\\s+into\\s+([^\\s\\(,]+)|"
+                        "(delete).*?\\s+from\\s+([^\\s\\(,]+)|"
+                        "(select).*?[\\s`]+from\\s+([^\\s\\(,]+))/is",
+                        q, ref(matches));
     int size = matches.toArray().size();
     if (size > 2) {
       string verb = Util::toLower(matches[size - 2].toString().data());
@@ -862,8 +864,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
       if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
         MySqlStats::Record(verb, rconn->m_xaction_count, table);
         if (verb == "update") {
-          f_preg_match("([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]",
-                       q, ref(matches));
+          HHVM_FN(preg_match)("([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]",
+                              q, ref(matches));
           size = matches.toArray().size();
           if (size > 2 && same(matches[1], matches[2])) {
             MySqlStats::Record("incdec", rconn->m_xaction_count, table);
@@ -875,9 +877,9 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
         }
       }
     } else {
-      f_preg_match("/^(?:(?:\\/\\*.*?\\*\\/)|\\(|\\s)*"
-                   "(begin|commit|rollback)/is",
-                   query, ref(matches));
+      HHVM_FN(preg_match)("/^(?:(?:\\/\\*.*?\\*\\/)|\\(|\\s)*"
+                          "(begin|commit|rollback)/is",
+                          query, ref(matches));
       size = matches.toArray().size();
       if (size == 2) {
         string verb = Util::toLower(matches[1].toString().data());
@@ -927,8 +929,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
       unsigned int errcode = mysql_errno(conn);
       if (errcode == 2058 /* CR_NET_READ_INTERRUPTED */ ||
           errcode == 2059 /* CR_NET_WRITE_INTERRUPTED */) {
-        Variant ret = f_preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/is",
-                                   query);
+        Variant ret =
+          HHVM_FN(preg_match)("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/is", query);
         if (!same(ret, false)) {
           MYSQL *new_conn = create_new_conn();
           IOStatusHelper io("mysql::kill", rconn->m_host.c_str(),

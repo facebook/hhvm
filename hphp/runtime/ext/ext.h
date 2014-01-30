@@ -60,7 +60,6 @@
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/ext_pdo.h"
 #include "hphp/runtime/ext/ext_posix.h"
-#include "hphp/runtime/ext/ext_preg.h"
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/ext_server.h"
 #include "hphp/runtime/ext/ext_session.h"

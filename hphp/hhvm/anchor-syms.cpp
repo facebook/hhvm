@@ -32,6 +32,7 @@ extern Extension s_ctype_extension;
 extern Extension s_apache_extension;
 extern Extension s_standardurl_extension;
 extern Extension s_zlib_extension;
+extern Extension s_pcre_extension;
 #ifdef HAVE_UODBC
 extern Extension s_odbc_extension;
 #endif
@@ -47,6 +48,7 @@ const Extension *g_anchor_extensions[] = {
   &s_apache_extension,
   &s_standardurl_extension,
   &s_zlib_extension,
+  &s_pcre_extension,
 #ifdef HAVE_UODBC
   &s_odbc_extension,
 #endif

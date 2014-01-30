@@ -47,7 +47,7 @@ int preg_replace(Variant &result, CVarRef pattern, CVarRef replacement,
 int preg_replace_callback(Variant &result, CVarRef pattern, CVarRef callback,
                           CVarRef subject, int limit = -1);
 
-Variant preg_split(CVarRef pattern, CVarRef subject, int limit = -1,
+Variant preg_split(const String& pattern, const String& subject, int limit = -1,
                    int flags = 0);
 String preg_quote(const String& str, const String& delimiter = null_string);
 Variant php_split(const String& spliton, const String& str, int count,

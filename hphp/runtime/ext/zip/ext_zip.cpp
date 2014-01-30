@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_preg.h"
+#include "hphp/runtime/ext/pcre/ext_pcre.h"
 
 namespace HPHP {
 
@@ -634,7 +634,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, CArrRef options,
     }
 
     if (!glob) {
-      auto var = f_preg_match(pattern, source);
+      auto var = HHVM_FN(preg_match)(pattern, source);
       if (var.isInteger()) {
         if (var.asInt64Val() == 0) {
           continue;

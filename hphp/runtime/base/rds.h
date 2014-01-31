@@ -249,6 +249,13 @@ struct Link {
    */
   Handle handle() const;
 
+  /*
+   * For access from the JIT only.
+   */
+  static constexpr size_t handleOff() {
+    return offsetof(Link, m_handle);
+  }
+
 private:
   std::atomic<Handle> m_handle;
 };

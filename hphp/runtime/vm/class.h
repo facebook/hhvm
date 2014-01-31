@@ -642,7 +642,10 @@ struct Class : AtomicCountable {
 
   // We use the TypedValue::_count field to indicate whether a property
   // requires "deep" initialization (0 = no, 1 = yes)
-  const PropInitVec* getPropData() const;
+  PropInitVec* getPropData() const;
+  static constexpr size_t propdataOff() {
+    return offsetof(Class, m_propDataCache);
+  }
 
   bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }

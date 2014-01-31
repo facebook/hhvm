@@ -281,6 +281,8 @@ struct HhbcTranslator {
   // miscelaneous ops
   void emitFloor();
   void emitCeil();
+  void emitCheckProp(Id propId);
+  void emitInitProp(Id propId, InitPropOp op);
   void emitAssertTL(int32_t id, AssertTOp);
   void emitAssertTStk(int32_t offset, AssertTOp);
   void emitAssertObjL(int32_t id, Id, AssertObjOp);

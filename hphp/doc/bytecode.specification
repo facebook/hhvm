@@ -1846,6 +1846,20 @@ UnsetG    [C]  ->  []
   Unset global. This instruction breaks any bindings the global variable named
   (string)$1 may have and marks the global variable as undefined.
 
+CheckProp <propName> [] -> [C:Bool]
+
+  Check non-scalar property initializer. This instruction checks the
+  initializer for property named %1 in the context class, and pushes
+  true on the stack if it is initialized, and false otherwise.
+
+InitProp <propName> <op> [C] -> []
+
+  Initialize non-scalar property. This instruction sets the initializer for
+  the property named %1 in the context class to $1.
+
+  The CheckProp and InitProp opcodes should only be used in 86pinit methods.
+  86pinit methods are HHVM-internal property initialization methods that
+  cannot be called from user-land.
 
 8. Call instructions
 --------------------

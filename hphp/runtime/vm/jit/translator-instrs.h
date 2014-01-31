@@ -191,6 +191,8 @@
   CASE(Div) \
   CASE(Floor) \
   CASE(Ceil) \
+  CASE(CheckProp) \
+  CASE(InitProp) \
   CASE(AssertTL) \
   CASE(AssertTStk) \
   CASE(AssertObjL) \

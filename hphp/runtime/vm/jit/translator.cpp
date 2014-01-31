@@ -1271,6 +1271,8 @@ static const struct {
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown,       -2 }},
   { OpFloor,       {Stack1,           Stack1,       OutDouble,         0 }},
   { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
+  { OpCheckProp,   {None,             Stack1,       OutBoolean,        1 }},
+  { OpInitProp,    {Stack1,           None,         OutNone,          -1 }},
   { OpAssertTL,    {None,             None,         OutNone,           0 }},
   { OpAssertTStk,  {None,             None,         OutNone,           0 }},
   { OpAssertObjL,  {None,             None,         OutNone,           0 }},

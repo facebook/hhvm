@@ -10,3 +10,15 @@ class C extends B {
 }
 $o = new C;
 $o->dump_vars();
+
+class D {
+  public $x = NonExistantClass::FOO;
+}
+class E extends D {
+  public $x = 123;
+}
+function main() {
+  $d = new E();
+  echo "Done\n";
+}
+main();

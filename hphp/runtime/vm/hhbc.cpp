@@ -1018,6 +1018,12 @@ static const char* IsTypeOp_names[] = {
 #undef ISTYPE_OP
 };
 
+static const char* InitPropOp_names[] = {
+#define INITPROP_OP(x) #x,
+  INITPROP_OPS
+#undef INITPROP_OP
+};
+
 static const char* AssertTOp_names[] = {
 #define ASSERTT_OP(op) #op,
   ASSERTT_OPS
@@ -1094,6 +1100,7 @@ template<class T> folly::Optional<T> nameToSubop(const char* str) {
   }                                                         \
   template folly::Optional<subop> nameToSubop(const char*);
 
+X(InitPropOp)
 X(IsTypeOp)
 X(AssertTOp)
 X(AssertObjOp)

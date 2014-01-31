@@ -4157,6 +4157,34 @@ void HhbcTranslator::emitCeil() {
   push(gen(Ceil, dblVal));
 }
 
+void HhbcTranslator::emitCheckProp(Id propId) {
+  StringData* propName = lookupStringId(propId);
+
+  auto* cctx = gen(LdCctx, m_irb->fp());
+  auto* cls = gen(LdClsCtx, cctx);
+  auto* propInitVec = gen(LdClsInitData, cls);
+
+  auto* ctx = curClass();
+  auto idx = ctx->lookupDeclProp(propName);
+
+  auto* curVal = gen(LdElem, propInitVec, cns(idx * sizeof(TypedValue)));
+  push(gen(IsNType, Type::Uninit, curVal));
+}
+
+void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
+  StringData* propName = lookupStringId(propId);
+  SSATmp* val = popC();
+
+  auto* cctx = gen(LdCctx, m_irb->fp());
+  auto* cls = gen(LdClsCtx, cctx);
+  auto* propInitVec = gen(LdClsInitData, cls);
+
+  auto* ctx = curClass();
+  auto idx = ctx->lookupDeclProp(propName);
+
+  gen(StElem, propInitVec, cns(idx * sizeof(TypedValue)), val);
+}
+
 static folly::Optional<Type> assertOpToType(AssertTOp op) {
   switch (op) {
   case AssertTOp::Uninit:     return Type::Uninit;

@@ -428,6 +428,17 @@ IRTranslator::translateCeil(const NormalizedInstruction& i) {
   HHIR_EMIT(Ceil);
 }
 
+void
+IRTranslator::translateCheckProp(const NormalizedInstruction& i) {
+  HHIR_EMIT(CheckProp, i.imm[0].u_SA);
+}
+
+void
+IRTranslator::translateInitProp(const NormalizedInstruction& i) {
+  HHIR_EMIT(InitProp, i.imm[0].u_SA,
+            static_cast<InitPropOp>(i.imm[1].u_OA));
+}
+
 void IRTranslator::translateAssertTL(const NormalizedInstruction& i) {
   HHIR_EMIT(AssertTL, i.imm[0].u_LA, static_cast<AssertTOp>(i.imm[1].u_OA));
 }

@@ -7089,17 +7089,11 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
   StringData* methDoc = empty_string.get();
   const Location* sLoc = p.m_is->getLocation().get();
   p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
-  {
+  if (!pinit) {
     FuncEmitter::ParamInfo pi;
     pi.setRef(true);
     static const StringData* s_props = makeStaticString("props");
     p.m_fe->appendParam(s_props, pi);
-  }
-  if (pinit) {
-    static const StringData* s_sentinel =
-      makeStaticString("sentinel");
-    p.m_fe->appendParam(s_sentinel,
-                        FuncEmitter::ParamInfo());
   }
 
   Emitter e(p.m_is, m_ue, *this);
@@ -7107,20 +7101,7 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
 
   // Generate HHBC of the structure:
   //
-  //   private static function 86pinit(&$props, $sentinel) {
-  //     # Private instance properties.
-  //     props["\0C\0p0"] = <non-scalar initialization>;
-  //     props["\0C\0p1"] = <non-scalar initialization>;
-  //     # ...
-  //
-  //     if (props["q0"]) === $sentinel) {
-  //       props["q0"] = <non-scalar initialization>;
-  //     }
-  //     if (props["q1"] === $sentinel) {
-  //       props["q1"] = <non-scalar initialization>;
-  //     }
-  //     # ...
-  //   }
+  // Private instance properties are initialized using InitProp.
   //
   //   private static function 86sinit(&$props) {
   //     props["p0"] = <non-scalar initialization>;
@@ -7132,41 +7113,26 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
   for (size_t i = 0; i < nProps; ++i) {
     const StringData* propName =
       makeStaticString(((*p.m_vec)[i]).first);
-    Label isset;
 
-    bool conditional;
     if (pinit) {
+      Label isset;
       const PreClassEmitter::Prop& preProp =
         p.m_fe->pce()->lookupProp(propName);
-      if ((preProp.attrs() & (AttrPrivate|AttrStatic)) == AttrPrivate) {
-        conditional = false;
-        propName = preProp.mangledName();
-      } else {
-        conditional = true;
+      if ((preProp.attrs() & (AttrPrivate|AttrStatic)) != AttrPrivate) {
+        e.CheckProp(const_cast<StringData*>(propName));
+        e.JmpNZ(isset);
       }
+      visit((*p.m_vec)[i].second);
+      e.InitProp(const_cast<StringData*>(propName), InitPropOp::NonStatic);
+      isset.set(e);
     } else {
-      conditional = false;
-    }
-
-    if (conditional) {
       emitVirtualLocal(0);
       e.String((StringData*)propName);
       markElem(e);
-      emitCGet(e);
-      emitVirtualLocal(1);
-      emitCGet(e);
-      e.Same();
-      e.JmpZ(isset);
+      visit((*p.m_vec)[i].second);
+      emitSet(e);
+      e.PopC();
     }
-
-    emitVirtualLocal(0);
-    e.String((StringData*)propName);
-    markElem(e);
-    visit((*p.m_vec)[i].second);
-    emitSet(e);
-    e.PopC();
-
-    isset.set(e);
   }
   e.Null();
   e.RetC();

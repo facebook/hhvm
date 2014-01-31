@@ -539,6 +539,13 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         error("invalid operation for IsType*: %d\n", op);
         ok = false;
         break;
+      case Op::InitProp:
+#define INITPROP_OP(x) if (op == static_cast<uint8_t>(InitPropOp::x)) break;
+        INITPROP_OPS
+#undef INITPROP_OP
+        error("invalid operation for InitProp: %d\n", op);
+        ok = false;
+        break;
       case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS:
       case OpIncDecM:
 #define INCDEC_OP(x)   if (op == static_cast<uint8_t>(IncDecOp::x)) break;

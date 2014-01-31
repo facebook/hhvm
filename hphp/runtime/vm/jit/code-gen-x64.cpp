@@ -6388,6 +6388,20 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
                SyncOptions::kNoSyncPoint, args);
 }
 
+void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
+  auto* cls = inst->src(0);
+  auto clsReg = curOpd(cls).reg();
+  auto dstReg = curOpd(inst->dst()).reg();
+
+  if (dstReg == InvalidReg) return;
+
+  m_as.  loadl(clsReg[Class::propdataOff()
+                       + RDS::Link<Class::PropInitVec*>::handleOff()],
+               r32(dstReg));
+  m_as.  loadq(rVmTl[dstReg], dstReg);
+  m_as.  loadq(dstReg[Class::PropInitVec::dataOff()], dstReg);
+}
+
 void CodeGenerator::print() const {
   JIT::print(std::cout, m_unit, &m_state.regs, nullptr, m_state.asmInfo);
 }

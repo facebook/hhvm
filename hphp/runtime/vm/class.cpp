@@ -491,70 +491,15 @@ Class::PropInitVec* Class::initPropsImpl() const {
   // the new propVec.
   request_arena().beginFrame();
   PropInitVec* propVec = PropInitVec::allocInRequestArena(m_declPropInit);
-  size_t nProps = numDeclProperties();
 
-  Array args;
-  Variant arg0;
-  {
-    ArrayInit ainit(nProps);
-
-    Object sentinel(SystemLib::AllocPinitSentinel());
-
-    auto const tvSentinel = make_tv<KindOfObject>(sentinel.get());
-    for (size_t i = 0; i < nProps; ++i) {
-      TypedValue& prop = (*propVec)[i];
-
-      // We have to use m_originalMangledName here because the 86pinit
-      // methods for traits look up the properties with that name.
-      auto const* k = (m_declProperties[i].m_attrs & AttrPrivate)
-        ? m_declProperties[i].m_originalMangledName
-        : m_declProperties[i].m_name;
-
-      /*
-       * Note: initializing this array must use set() instead of add()
-       * because we can have duplicate names.  The reason for this is
-       * that we're using the m_originalMangledName (per the
-       * above)---if you get the same trait from multiple paths in the
-       * inheritance tree, whether it has a non-scalar initializer or
-       * not, we'll potentially see that name twice here.
-       *
-       * It's harmless to initialize it in the array more than once:
-       * if it's non-scalar, both attempts will be to set it to
-       * tvSentinel.  If it's scalar, both attempts will be to set it
-       * to the same value.
-       */
-
-      // Replace undefined values with tvSentinel, which acts as a
-      // unique sentinel for undefined properties in 86pinit().
-      if (prop.m_type == KindOfUninit) {
-        ainit.set(StrNR(k), tvAsCVarRef(&tvSentinel), true /* isKey */);
-      } else {
-        /*
-         * This may seem pointless, but if you don't populate all the keys,
-         * you'll get "undefined index" notices in the case where a
-         * scalar-initialized property overrides a parent's
-         * non-scalar-initialized property of the same name.
-         *
-         * TODO(#2923541): there's probably no reason to store the
-         * actual property value in here.  Why not just store null?
-         */
-        ainit.set(StrNR(k), tvAsCVarRef(&prop), true /* isKey */);
-      }
-    }
-
-    arg0 = ainit.toArray();
-    args = PackedArrayInit(2)
-             .appendRef(arg0)
-             .append(tvAsCVarRef(&tvSentinel))
-             .toArray();
-  }
+  setPropData(propVec);
 
   try {
     // Iteratively invoke 86pinit() methods upward
     // through the inheritance chain.
     for (auto it = m_pinitVec.rbegin(); it != m_pinitVec.rend(); ++it) {
       TypedValue retval;
-      g_vmContext->invokeFunc(&retval, *it, args, nullptr,
+      g_vmContext->invokeFunc(&retval, *it, init_null_variant, nullptr,
                               const_cast<Class*>(this));
       assert(retval.m_type == KindOfNull);
     }
@@ -562,28 +507,6 @@ Class::PropInitVec* Class::initPropsImpl() const {
     // Undo the allocation of propVec
     request_arena().endFrame();
     throw;
-  }
-
-  // Pull the values out of the populated array and put them in propVec
-  {
-    // It's safe to avoid reloading this ArrayData pointer, since
-    // we're only going reads from the array, nothing that can modify
-    // it.
-    auto const propArr = arg0.toArrRef().get();
-
-    for (size_t i = 0; i < nProps; ++i) {
-      auto& prop = (*propVec)[i];
-      if (prop.m_type == KindOfUninit) {
-        auto const* k = (m_declProperties[i].m_attrs & AttrPrivate)
-          ? m_declProperties[i].m_originalMangledName
-          : m_declProperties[i].m_name;
-
-        assert(arg0.toArrRef().get() == propArr);
-        auto const* value = propArr->nvGet(k);
-        assert(value);
-        cellDup(*value, prop);
-      }
-    }
   }
 
   // For properties that do not require deep initialization, promote strings
@@ -1939,10 +1862,21 @@ void Class::addTraitPropInitializers(bool staticProps) {
     InitVec& thisInitVec  = staticProps ? m_sinitVec : m_pinitVec;
     // Insert trait's 86[ps]init into the current class, avoiding repetitions.
     for (unsigned m = 0; m < traitInitVec.size(); m++) {
-      // Linear search, but these vectors shouldn't be big.
-      if (find(thisInitVec.begin(), thisInitVec.end(), traitInitVec[m]) ==
-          thisInitVec.end()) {
-        thisInitVec.push_back(traitInitVec[m]);
+      if (staticProps) {
+        // Linear search, but these vectors shouldn't be big.
+        if (find(thisInitVec.begin(), thisInitVec.end(), traitInitVec[m]) ==
+            thisInitVec.end()) {
+          thisInitVec.push_back(traitInitVec[m]);
+        }
+      } else {
+        // Clone 86pinit methods, and set the class to the current class.
+        // This allows 86pinit to determine the property offset for the
+        // initializer array corectly.
+        Func *f = traitInitVec[m]->clone(this);
+        f->setNewFuncId();
+        f->setBaseCls(this);
+        f->setHasPrivateAncestor(false);
+        thisInitVec.push_back(f);
       }
     }
   }
@@ -2467,7 +2401,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
   cellDup(v, m_data[m_size++]);
 }
 
-const Class::PropInitVec* Class::getPropData() const {
+Class::PropInitVec* Class::getPropData() const {
   return m_propDataCache.bound() ? *m_propDataCache : nullptr;
 }
 
@@ -2476,7 +2410,7 @@ void Class::initPropHandle() const {
 }
 
 void Class::initProps() const {
-  setPropData(initPropsImpl());
+  initPropsImpl();
 }
 
 void Class::setPropData(PropInitVec* propData) const {

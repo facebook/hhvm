@@ -343,6 +343,15 @@ enum class IsTypeOp : uint8_t {
 #undef ISTYPE_OP
 };
 
+#define INITPROP_OPS    \
+  INITPROP_OP(NonStatic)
+
+enum class InitPropOp : uint8_t {
+#define INITPROP_OP(op) op,
+  INITPROP_OPS
+#undef INITPROP_OP
+};
+
 // NB: right now hphp/hhbbc/abstract-interp.cpp depends on this enum
 // being in order from smaller types to larger ones.
 #define ASSERTT_OPS                             \
@@ -704,6 +713,9 @@ enum class BareThisOp : uint8_t {
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(Floor,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Ceil,            NA,               ONE(CV),         ONE(CV),    NF) \
+  O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(InitProp,        TWO(SA,                                            \
+                       OA(InitPropOp)),ONE(CV),         NOV,        NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF) \
 
 enum class Op : uint8_t {
@@ -924,6 +936,7 @@ void staticArrayStreamer(ArrayData*, std::ostream&);
  * Convert subopcodes or opcodes into strings.
  */
 const char* opcodeToName(Op op);
+const char* subopToName(InitPropOp);
 const char* subopToName(IsTypeOp);
 const char* subopToName(AssertTOp);
 const char* subopToName(AssertObjOp);

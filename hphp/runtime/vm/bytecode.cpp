@@ -7286,6 +7286,44 @@ OPTBLD_INLINE void VMExecutionContext::iopCeil(IOP_ARGS) {
   roundOpImpl(ceil);
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopCheckProp(IOP_ARGS) {
+  NEXT();
+  DECODE_LITSTR(propName);
+
+  auto* cls = m_fp->getClass();
+  auto* propVec = cls->getPropData();
+  always_assert(propVec);
+
+  auto* ctx = arGetContextClass(getFP());
+  auto idx = ctx->lookupDeclProp(propName);
+
+  auto& tv = (*propVec)[idx];
+  if (tv.m_type != KindOfUninit) {
+    m_stack.pushTrue();
+  } else {
+    m_stack.pushFalse();
+  }
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopInitProp(IOP_ARGS) {
+  NEXT();
+  DECODE_LITSTR(propName);
+  DECODE_OA(InitPropOp, propOp);
+
+  auto* cls = m_fp->getClass();
+  auto* propVec = cls->getPropData();
+  always_assert(propVec);
+
+  auto* ctx = arGetContextClass(getFP());
+  auto idx = ctx->lookupDeclProp(propName);
+
+  auto& tv = (*propVec)[idx];
+  auto* fr = m_stack.topC();
+
+  cellDup(*fr, *tvToCell(&tv));
+  m_stack.popC();
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopStrlen(IOP_ARGS) {
   NEXT();
   TypedValue* subj = m_stack.topTV();

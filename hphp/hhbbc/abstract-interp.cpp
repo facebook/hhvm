@@ -1913,6 +1913,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Ceil&)  { floatFnImpl(ceil,  TDbl); }
   void operator()(const bc::Sqrt&)  { floatFnImpl(sqrt,  TInitUnc); }
 
+  // TODO: Task to analyze 86pinit methods: #3562690
+  void operator()(const bc::CheckProp&) { push(TBool); }
+  void operator()(const bc::InitProp&) { popC(); }
+
   void operator()(const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
   void operator()(const bc::HighInvalid&) { always_assert(!"HighInvalid"); }
 

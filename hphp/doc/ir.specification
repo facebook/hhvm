@@ -8,100 +8,96 @@ Introduction
 ------------
 
 The HipHop Intermediate Representation (IR) is a typed, in-memory,
-static-single-assignment, intermediate-level representation of HHBC
-programs used for just in time compilation, with these goals:
+static-single-assignment, intermediate-level representation of HHBC programs
+used for just in time compilation, with these goals:
 
-  1. Complete.  The IR represents a program or program fragment
-     entirely, without reference to HHBC or other upstream forms of
-     the program.
+  1. Complete. The IR represents a program or program fragment entirely,
+     without reference to HHBC or other upstream forms of the program.
 
-  2. Type-Safe.  Since the IR deals directly with refined types and
-     internal VM types, all operations are typesafe.  All instruction
-     parameters have a parameter type P, and all variables have a type
-     S.  Given an instruction with source parameter type P and variable
-     type S, S must be equal to or more refined than P (S == P or S <: P).
+  2. Type-Safe. Since the IR deals directly with refined types and internal VM
+     types, all operations are typesafe. All instruction parameters have a
+     parameter type P, and all variables have a type S. Given an instruction
+     with source parameter type P and variable type S, S must be equal to or
+     more refined than P (S == P or S <: P).
 
-  3. Machine Independent.  Since this IR is intended to be used in a JIT
+  3. Machine Independent. Since this IR is intended to be used in a JIT
      compiler, it will always be used in a machine specific context.
      Nevertheless, we rely on machine independence in order to separate
-     concerns and increase portability of the VM.  Passes which manipulate
-     IR based on PHP or HHBC semantics should be portable.  Passes which deal
-     with machine specifics (such as register allocation) should be self
-     contained.  For example, register allocation may insert machine-specific
-     loads, stores, or swaps, according to a specific cpu model.  But those
-     instructions are still well behaved Instruction classes.  Types are
-     machine independent.
+     concerns and increase portability of the VM. Passes which manipulate IR
+     based on PHP or HHBC semantics should be portable. Passes which deal with
+     machine specifics (such as register allocation) should be self contained.
+     For example, register allocation may insert machine-specific loads,
+     stores, or swaps, according to a specific cpu model. But those
+     instructions are still well behaved Instruction classes. Types are machine
+     independent.
 
 The unit of compilation is the Trace, which is a sequence of Blocks of
-Instructions that produce and consume Variables.  Blocks are single-entry,
-single-exit sequences of instructions (i.e. basic blocks).  Instructions may
-be annotated with Type which modifies the instruction's behavior.  Each
-Variable has a Type which describes the set of values it may hold at
-the point it is defined.  Instructions may have side effects, which occur
-in execution order.
+Instructions that produce and consume Variables. Blocks are single-entry,
+single-exit sequences of instructions (i.e. basic blocks). Instructions may be
+annotated with Type which modifies the instruction's behavior. Each Variable
+has a Type which describes the set of values it may hold at the point it is
+defined. Instructions may have side effects, which occur in execution order.
 
-The static single assignment form guarantees the following two invariants
-for a well-formed Trace:
+The static single assignment form guarantees the following two invariants for a
+well-formed Trace:
 
   1. Each Variable is assigned to by exactly one Instruction.
 
-  2. Definitions dominate uses.  Every path to an Instruction using a Variable
+  2. Definitions dominate uses. Every path to an Instruction using a Variable
      first executes the Instruction defining the Variable.
 
 Any pass that generates or manipulates IR must preserve these invariants,
-however it is possible and expected for the invariants to be temporarily
-broken during trace creation or during an optimizer pass.
+however it is possible and expected for the invariants to be temporarily broken
+during trace creation or during an optimizer pass.
 
 
 Control Flow
 ------------
 
-Traces have one entry block and zero or more exit traces.  Blocks may branch
-within a trace or to an exit trace; blocks form a restricted control flow graph.
-This control flow may contain join points (two or more branches exiting
-at the same point, or two jumps within the trace to a target in the same trace),
-but may not form loops.
+Traces have one entry block and zero or more exit traces. Blocks may branch
+within a trace or to an exit trace; blocks form a restricted control flow
+graph. This control flow may contain join points (two or more branches exiting
+at the same point, or two jumps within the trace to a target in the same
+trace), but may not form loops.
 
 No Variables are defined on entry to the main Trace.
 
 Blocks which are join points may start with a DefLabel with destination
-Variables.  In that case, each predecessor must be a Jmp passing a matching
-number of source Variables.  In this case the Jmp acts as a tail-call, passing
+Variables. In that case, each predecessor must be a Jmp passing a matching
+number of source Variables. In this case the Jmp acts as a tail-call, passing
 arguments the same way a plain call would.
 
 Together, the sources of the Jmp instructions and the destinations of the
-DefLabel instructions act as traditional SSA Phi pseudo-functions; The type
-of the label's destination is the type-union of the corresponding sources.
-Because the Jmp sources are at the ends of blocks, they do not violate the
-SSA dominator rule (rule 2, above).
+DefLabel instructions act as traditional SSA Phi pseudo-functions; The type of
+the label's destination is the type-union of the corresponding sources.
+Because the Jmp sources are at the ends of blocks, they do not violate the SSA
+dominator rule (rule 2, above).
 
 Implementation note: The JIT's compilation unit ("Trace" in this spec) actually
-consists of one or more instances of the Trace class.  There is exactly one
-main trace, and zero or more exit traces which handle side exits.
-Instructions in exit traces may use Variables defined on the main trace,
-so these exits are not separate compilation units.
+consists of one or more instances of the Trace class. There is exactly one main
+trace, and zero or more exit traces which handle side exits. Instructions in
+exit traces may use Variables defined on the main trace, so these exits are not
+separate compilation units.
 
 
 Types
 -----
 
-Types in the IR are used in several contexts.  In all cases, a Type represents
-a set of runtime values, however, a Type's meaning depends on the context
-in which it appears.  A type which annotates an instruction (like IsType)
-modifies its behavior, extending its opcode.  The type of each source
-parameter restricts the type of any variable used by that parameter.
-A variable's type describes the set of values it may hold at the point it is
-defined.
+Types in the IR are used in several contexts. In all cases, a Type represents a
+set of runtime values, however, a Type's meaning depends on the context in
+which it appears. A type which annotates an instruction (like IsType) modifies
+its behavior, extending its opcode. The type of each source parameter restricts
+the type of any variable used by that parameter. A variable's type describes
+the set of values it may hold at the point it is defined.
 
 Since types represent sets of values, we define relations on types in terms of
-the sets of values they represent.  Two types S and T are equal (S == T) if they
-represent equal sets of values.  S is more refined than T (S <: T), or a
-subtype of T, if the set of values represented by S is a subset of the set of
-values represented by T.  S and T are not related if neither value set is
-a subtype of the other: (S <: T) and (T <: S) are both false.  A type U
-is a union of S and T (U = {S|T}) if it represents the union of S and T's
-value sets.  In that case, S and T are both subtypes of U (S <: U, T <: U),
-even if S and T are not related.
+the sets of values they represent. Two types S and T are equal (S == T) if they
+represent equal sets of values. S is more refined than T (S <: T), or a subtype
+of T, if the set of values represented by S is a subset of the set of values
+represented by T. S and T are not related if neither value set is a subtype of
+the other: (S <: T) and (T <: S) are both false. A type U is a union of S and T
+(U = {S|T}) if it represents the union of S and T's value sets. In that case, S
+and T are both subtypes of U (S <: U, T <: U), even if S and T are not related.
 
 Variables in the IR contain a mix of PHP-visible types and internal types. The
 following table describes types representing PHP values. Note that the types
@@ -130,9 +126,9 @@ StaticStr and CountedStr both appear as type String at the PHP level).
   Cell            {Null|Bool|Int|Dbl|Str|Arr|Obj}
 
 A PHP reference is implemented as a container object (RefData) which contains
-one value.  The contained value cannot be another PHP reference.  For every
-type T in the table above, there is a corresponding type BoxedT, which is a
-pointer to a RefData struct containing a value of type T.
+one value. The contained value cannot be another PHP reference. For every type
+T in the table above, there is a corresponding type BoxedT, which is a pointer
+to a RefData struct containing a value of type T.
 
   Type            HHVM representation
   ----            -------------------
@@ -169,35 +165,35 @@ above PHP-facing types.
   TCA             Machine code address
   Nullptr         Represents a null pointer
 
-There is also one special type which represents all the possible types that
-can be on the stack.
+There is also one special type which represents all the possible types that can
+be on the stack.
 
   StackElem       {Gen|Cls}
 
-In the instruction descriptions below, we also use a "Const" prefix on
-several types loosely, which means the operand must be the requested
-type and must be a compile-time constant.  The optimizer relies on
-accessing the value of those operands.
+In the instruction descriptions below, we also use a "Const" prefix on several
+types loosely, which means the operand must be the requested type and must be a
+compile-time constant. The optimizer relies on accessing the value of those
+operands.
 
 
 Variables
 ---------
 
 A Variable represents a storage location which takes on various concrete values
-at runtime.  Since HHIR uses SSA, a variable may only be assigned to by one
-instruction.  A variable's type represents the set of values it may hold at
-the point it is defined.  The type is invariant over the lifetime of the
-variable (from the definition point to the last use).
+at runtime. Since HHIR uses SSA, a variable may only be assigned to by one
+instruction. A variable's type represents the set of values it may hold at the
+point it is defined. The type is invariant over the lifetime of the variable
+(from the definition point to the last use).
 
-Implementation note: this the proposed semantics. The current implementation
-is not this strict; during IR generation, we overload instruction type
+Implementation note: this the proposed semantics. The current implementation is
+not this strict; during IR generation, we overload instruction type
 (IRInstruction::m_type), variable type (SSATmp::getType returns instr->type),
-and types known at points *after* definition, due to guards.  e.g.  after
-a guard, we change src->instr->type to the refined type, then propagate this
-backwards through copies.  This effectively uses IRInstruction::m_type as
-a scratch variable, which is only valid at certain times during construction).
-This is probably unsound in later passes; after such a refinement,
-instructions using the variable before the guard see the refined type.
+and types known at points *after* definition, due to guards. E.g. after a
+guard, we change src->instr->type to the refined type, then propagate this
+backwards through copies. This effectively uses IRInstruction::m_type as a
+scratch variable, which is only valid at certain times during construction).
+This is probably unsound in later passes; after such a refinement, instructions
+using the variable before the guard see the refined type.
 
 
 Instructions
@@ -205,7 +201,7 @@ Instructions
 
 An instruction is an executable operation with zero or more inputs (sources),
 zero or one result (destination), and possible side effects such as accessing
-memory, doing I/O, and which may branch or throw an exception.  Some
+memory, doing I/O, and which may branch or throw an exception. Some
 instructions have a Type parameter which modifies its behavior.
 
 Each instruction has a signature which describes its effect, parameter types,
@@ -214,44 +210,42 @@ and return type, for example:
   r:Bool = IsType<T> s:Gen
 
 By convention we use infix; destinations on the left, = represents assignment,
-then the opcode name, and source parameters.  Types are to the right of the
-entities they modify, separated by : for results, sources, and variables,
-or delimited by <> for instruction modifiers.
+then the opcode name, and source parameters. Types are to the right of the
+entities they modify, separated by : for results, sources, and variables, or
+delimited by <> for instruction modifiers.
 
 Instruction flags further describe their behavior:
 
 HasDest
 NaryDest
 
-  The instruction defines exactly one destination variable (HasDest) or
-  a varying number of destination variables (NaryDest).  These flags are
-  mutually exclusive.  An instruction with neither of these flags set has
-  zero destination variables.
+  The instruction defines exactly one destination variable (HasDest) or a
+  varying number of destination variables (NaryDest). These flags are mutually
+  exclusive. An instruction with neither of these flags set has zero
+  destination variables.
 
-  Note that an instruction's destination variable may sometimes be a
-  copy of one of the input variables.  (For example, AddElem returns the
-  array it took as an input.)
+  Note that an instruction's destination variable may sometimes be a copy of
+  one of the input variables. (For example, AddElem returns the array it took
+  as an input.)
 
 CanCSE
 
-  The instruction is safe to elide through common subexpression
-  elimination.
+  The instruction is safe to elide through common subexpression elimination.
 
 Essential
 
-  Whether the instruction is essential indicates whether it can be
-  elided through certain types of optimizations.
+  Whether the instruction is essential indicates whether it can be elided
+  through certain types of optimizations.
 
-  Currently this is just used to flag whether we are allowed to do
-  dead code elimination on it.
+  Currently this is just used to flag whether we are allowed to do dead code
+  elimination on it.
 
 CallsNative
 
   Indicates that the instruction will call a native helper.
 
-  The register allocator uses this to optimize register spills around
-  native calls and to bias register allocation toward arguments and
-  return values.
+  The register allocator uses this to optimize register spills around native
+  calls and to bias register allocation toward arguments and return values.
 
 ConsumesRC
 
@@ -272,19 +266,17 @@ ProducesRC
 
 MayRaiseError
 
-  The instruction may raise an error, and therefore has an implicit
-  exit edge.
+  The instruction may raise an error, and therefore has an implicit exit edge.
 
 Terminal
 
-  The instruction has no next instruction; it either jumps, returns,
-  or throws.
+  The instruction has no next instruction; it either jumps, returns, or throws.
 
 Branch
 
-  The instruction has a (sometimes optional) taken edge.  Instructions that
-  are conditional branches (i.e. a Branch that is not Terminal) will also
-  have a next edge.
+  The instruction has a (sometimes optional) taken edge. Instructions that are
+  conditional branches (i.e. a Branch that is not Terminal) will also have a
+  next edge.
 
 Passthrough
 
@@ -320,24 +312,23 @@ Instruction set
 
 1. Checks and Asserts
 
-Note: Instructions that guard or check boxed types only check that the
-operand is boxed, and they ignore the type of the value inside the box
-(the inner type).  The inner type is normally checked when the value
-within the box is loaded by a LdRef instruction (which takes box/ref
-values, and only checks the inner type).  The reasoning for this
-approach is that boxed values may alias.  Therefore, in lack of memory
-alias analysis, the inner types generally need to be rechecked before
-each use.
+Note: Instructions that guard or check boxed types only check that the operand
+is boxed, and they ignore the type of the value inside the box (the inner
+type). The inner type is normally checked when the value within the box is
+loaded by a LdRef instruction (which takes box/ref values, and only checks the
+inner type). The reasoning for this approach is that boxed values may alias.
+Therefore, in lack of memory alias analysis, the inner types generally need to
+be rechecked before each use.
 
 D:T = CheckType<T> S0:Gen -> B
 
-  Check that the type of the src S0 is T, and if so copy it to D.  If
-  S0 is not type T, branch to block B.
+  Check that the type of the src S0 is T, and if so copy it to D. If S0 is not
+  type T, branch to block B.
 
 CheckNullptr S0:{CountedStr|NullPtr} -> B
 
-  If S0 is a null pointer, branch to block B. This is used to check the
-  return value of a native helper that returns a potentially null StringData*.
+  If S0 is a null pointer, branch to block B. This is used to check the return
+  value of a native helper that returns a potentially null StringData*.
 
 D:T = AssertType<T> S0:{Gen|Nullptr}
 
@@ -349,65 +340,64 @@ CheckTypeMem<T> S0:PtrToGen -> B
 
 D:FramePtr = GuardLoc<T,localId> S0:FramePtr
 
-  Guard that type of the given localId on the frame S0 is a subtype of
-  the type T; if not, make a fallback jump.  (A jump to a service
-  request that chains to a retranslation for this tracelet.)
+  Guard that type of the given localId on the frame S0 is a subtype of the type
+  T; if not, make a fallback jump. (A jump to a service request that chains to
+  a retranslation for this tracelet.)
 
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the guarded local has type T.
 
 D:FramePtr = CheckLoc<T,localId> S0:FramePtr -> B
 
-  Check that type of the given localId on the frame S0 is T; if not,
-  branch to block B.
+  Check that type of the given localId on the frame S0 is T; if not, branch to
+  block B.
 
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the checked local has type T.
 
 D:FramePtr = AssertLoc<T,localId> S0:FramePtr
 
-  Asserts that type of the supplied local on the frame S0 is T.  This
-  is used as a hint for local type information, and is similar to
-  GuardLoc except it doesn't imply a runtime check and cannot cause
-  control flow.
+  Asserts that type of the supplied local on the frame S0 is T. This is used as
+  a hint for local type information, and is similar to GuardLoc except it
+  doesn't imply a runtime check and cannot cause control flow.
 
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the asserted local has type T.
 
 D:StkPtr = GuardStk<T,offset> S0:StkPtr
 
-  Guard that the type of the cell on the stack pointed to by S0 at
-  offset (in cells) is T.  If not, make a fallback jump.  (A jump to a
-  service request that chains to a retranslation for this tracelet.)
+  Guard that the type of the cell on the stack pointed to by S0 at offset (in
+  cells) is T. If not, make a fallback jump. (A jump to a service request that
+  chains to a retranslation for this tracelet.)
 
-  Returns a new StkPtr that represents the same stack but with the
-  knowledge that the slot at the index S1 has type T.
+  Returns a new StkPtr that represents the same stack but with the knowledge
+  that the slot at the index S1 has type T.
 
 D:StkPtr = CheckStk<T,offset> S0:StkPtr -> B
 
-  Check that the type of the cell on the stack pointed to by S0 at
-  offset (in cells) is T; if not, branch to block B.
+  Check that the type of the cell on the stack pointed to by S0 at offset (in
+  cells) is T; if not, branch to block B.
 
-  Returns a new StkPtr that represents the same stack but with the
-  knowledge that the slot at the index S1 has type T.
+  Returns a new StkPtr that represents the same stack but with the knowledge
+  that the slot at the index S1 has type T.
 
 D:StkPtr = AssertStk<T,offset> S0:StkPtr
 
-  Returns a new StkPtr that represents the same stack as S0, but with
-  the knowledge that the slot at offset (in cells) has type T.  This
-  is similar to a GuardStk except that it does not imply a runtime
-  check and cannot cause control flow.
+  Returns a new StkPtr that represents the same stack as S0, but with the
+  knowledge that the slot at offset (in cells) has type T. This is similar to a
+  GuardStk except that it does not imply a runtime check and cannot cause
+  control flow.
 
 D:StkPtr = CastStk<T,offset> S0:StkPtr
 
-  Returns a new StkPtr that represents the same stack as S0, but with
-  the slot at offset (in cells) converted to type T.
+  Returns a new StkPtr that represents the same stack as S0, but with the slot
+  at offset (in cells) converted to type T.
 
 D:StkPtr = CoerceStk<T,offset> S0:StkPtr -> B
 
-  Returns a new StkPtr that represents the same stack as S0, but with
-  the slot at offset (in cells) converted to type T. If the type conversion
-  can't be done then branches to block B.
+  Returns a new StkPtr that represents the same stack as S0, but with the slot
+  at offset (in cells) converted to type T. If the type conversion can't be
+  done then branches to block B.
 
 CheckInit S0:Gen -> B
 
@@ -419,19 +409,18 @@ CheckInitMem S0:PtrToGen S1:ConstInt -> B
 
 CheckDefinedClsEq<className,classPtr> -> B
 
-  Compare the currently defined class of name `className' with
-  `classPtr'; if they aren't equal or if `className' is not defined,
-  branch to block B.
+  Compare the currently defined class of name `className' with `classPtr'; if
+  they aren't equal or if `className' is not defined, branch to block B.
 
 CheckCold<TransID> -> B
 
-  Check if the counter associated with translation TransID is cold
-  (i.e. within a fixed threshold).  If it's not (i.e. such translation
-  has reached the "hotness threshold"), then branch to block B.
+  Check if the counter associated with translation TransID is cold (i.e. within
+  a fixed threshold). If it's not (i.e. such translation has reached the
+  "hotness threshold"), then branch to block B.
 
 GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int
 
-  Perform reffiness guard checks.  Operands:
+  Perform reffiness guard checks. Operands:
 
     S0 - function pointer for the frame
     S1 - num params expected in the func
@@ -439,8 +428,8 @@ GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int
     S3 - mask to check (RefDeps::Record::m_mask entires)
     S4 - values to check (RefDeps::Record::m_vals entires)
 
-  If any of the checks fail, make a fallback jump.  (Jump to a service
-  request that will chain to a retranslation of this tracelet.)
+  If any of the checks fail, make a fallback jump. (Jump to a service request
+  that will chain to a retranslation of this tracelet.)
 
 D:{Func} = CheckNonNull S0:{Nullptr|Func} -> B
 
@@ -453,8 +442,8 @@ D:{CountedStr|Func} = AssertNonNull S0:{Nullptr|CountedStr|Func}
 
 CheckStaticLocInit S0:BoxedCell -> B
 
-  Check if the static local (RDS) RefData represented by S0 is
-  initialized, and if not branch to block B.
+  Check if the static local (RDS) RefData represented by S0 is initialized, and
+  if not branch to block B.
 
 
 2. Arithmetic
@@ -476,31 +465,31 @@ D:Int            = Shr    S0:Int S1:Int
 D:Dbl            = Floor  S0:Dbl
 D:Dbl            = Ceil   S0:Dbl
 
-  Integer/boolean arithmetic.  Performs the operation described by the
-  opcode name on S0 and S1, and puts the result in D.
+  Integer/boolean arithmetic. Performs the operation described by the opcode
+  name on S0 and S1, and puts the result in D.
 
-  Undefined behavior occurs if OpMod is given a divisor of zero, or if
-  the divisor is -1 and the dividend is the minimum representable integer.
+  Undefined behavior occurs if OpMod is given a divisor of zero, or if the
+  divisor is -1 and the dividend is the minimum representable integer.
 
   AbsInt and AbsDbl compute the absolute value of an integer or double
   respectively.
 
-  DivDbl Will branch to block B when S1 is zero (signed or unsigned).  When
-  the result of the division is a real valued number DivDbl conforms to IEEE
-  754.  In particular should the result of a division be zero the sign will
-  follow normal sign rules for division.
+  DivDbl Will branch to block B when S1 is zero (signed or unsigned). When the
+  result of the division is a real valued number DivDbl conforms to IEEE 754.
+  In particular should the result of a division be zero the sign will follow
+  normal sign rules for division.
 
   Note that OpShr is an arithmetic right shift.
 
   OpFloor and OpCeil will return an integral value not greater, or not less
-  than their input respectively.  Their use requires SSE 4.1, availability
+  than their input respectively. Their use requires SSE 4.1, availability
   should be checked before they are emitted.
 
 D:Bool = LogicXor S0:Bool S1:Bool
 
   Logical XOR of the two sources. (Note that && and || do not have
-  corresponding opcodes because they're handled at the bytecode level,
-  to implement short-circuiting.)
+  corresponding opcodes because they're handled at the bytecode level, to
+  implement short-circuiting.)
 
 D:Bool = Not S0:Bool
 
@@ -545,13 +534,13 @@ D:Str  = ConvIntToStr S0:Int
 D:Str  = ConvObjToStr S0:Obj
 D:Str  = ConvCellToStr S0:Cell
 
-  Convert S0 from its current type to the destination type, according to the PHP
-  semantics of such a conversion.
+  Convert S0 from its current type to the destination type, according to the
+  PHP semantics of such a conversion.
 
 D:Cctx = ConvClsToCctx S0:Cls
 
-  Convert a class to a class context (i.e. the class with a 1 or'd
-  into the low bit).
+  Convert a class to a class context (i.e. the class with a 1 or'd into the low
+  bit).
 
 4. Boolean predicates
 
@@ -571,36 +560,36 @@ D:Bool = NeqX  S0:Gen S1:Gen
 D:Bool = Same  S0:Gen S1:Gen
 D:Bool = NSame S0:Gen S1:Gen
 
-  Perform comparisons with PHP semantics on S0 and S1, and put the
-  result in D.  The -X versions may re-enter the VM when comparing an
-  Object with a string, and therefore may throw exceptions.  The non-X
-  versions must not be passed (Object,String) pairs, and do not throw.
-  Note that Same and NSame never re-enter or throw, for any types.
+  Perform comparisons with PHP semantics on S0 and S1, and put the result in D.
+  The -X versions may re-enter the VM when comparing an Object with a string,
+  and therefore may throw exceptions. The non-X versions must not be passed
+  (Object,String) pairs, and do not throw. Note that Same and NSame never
+  re-enter or throw, for any types.
 
 D:Bool = InstanceOf S0:Cls S1:{Cls|Nullptr}
 
-  Sets D based on whether S0 is a descendant of the class, interface,
-  or trait in S1.  (Note that this is always false for a trait).  S1
-  may be null at runtime if the class is not defined.
+  Sets D based on whether S0 is a descendant of the class, interface, or trait
+  in S1. (Note that this is always false for a trait). S1 may be null at
+  runtime if the class is not defined.
 
 D:Bool = InstanceOfIface S0:Cls S1:Cls
 
-  Fast path for interface checks. Sets D based on whether S0 implements
-  S1, but S1 must be a unique interface. This should only be used in
-  repo-authoritative mode.
+  Fast path for interface checks. Sets D based on whether S0 implements S1, but
+  S1 must be a unique interface. This should only be used in repo-authoritative
+  mode.
 
 D:Bool = ExtendsClass S0:Cls S1:Cls
 
-  A fast-path for instanceof checks.  Sets D based on whether S0 is a
-  descendant of the class in S1, where S1 must be a unique class that
-  is not an interface or a trait.
+  A fast-path for instanceof checks. Sets D based on whether S0 is a descendant
+  of the class in S1, where S1 must be a unique class that is not an interface
+  or a trait.
 
 D:Bool =  InstanceOfBitmask S0:Cls S1:ConstStr
 D:Bool = NInstanceOfBitmask S0:Cls S1:ConstStr
 
-  A fast-path for instanceof checks.  Sets D based on whether S0 is a
-  descendant of the class named by S1, where S1 must have a bit
-  allocated for it in the fast instance check bitvector (see class.h).
+  A fast-path for instanceof checks. Sets D based on whether S0 is a descendant
+  of the class named by S1, where S1 must have a bit allocated for it in the
+  fast instance check bitvector (see class.h).
 
 D:Bool = InterfaceSupportsArr S0:Str
 D:Bool = InterfaceSupportsStr S0:Str
@@ -612,14 +601,13 @@ D:Bool = InterfaceSupportsDbl S0:Str
 D:Bool =  IsType<T> S0:Cell
 D:Bool = IsNType<T> S0:Cell
 
-  IsType (IsNType) sets D to true iff S0 holds a value that is (not)
-  of type T.
+  IsType (IsNType) sets D to true iff S0 holds a value that is (not) of type T.
 
 D:Bool =  IsTypeMem<T> S0:PtrToGen
 D:Bool = IsNTypeMem<T> S0:PtrToGen
 
-  IsTypeMem (IsNTypeMem) sets D to true iff the value referenced by S0
-  is (not) of type T.
+  IsTypeMem (IsNTypeMem) sets D to true iff the value referenced by S0 is (not)
+  of type T.
 
 D:Bool = IsScalarType S0:Cell
 
@@ -633,8 +621,8 @@ D:Bool = IsWaitHandle S0:Obj
 5. Branches
 
 
-There is a conditional branch instruction for each predicate above,
-to enable generating efficient compare-and-branch instruction sequences.
+There is a conditional branch instruction for each predicate above, to enable
+generating efficient compare-and-branch instruction sequences.
 
 JmpGt
 JmpGte
@@ -650,9 +638,8 @@ JmpNInstanceOfBitmask
 JmpIsType
 JmpIsNType
 
-  Fused jump instructions.  These all operate exactly as their
-  corresponding query op, but also take a label to jump to when the
-  condition is true.
+  Fused jump instructions. These all operate exactly as their corresponding
+  query op, but also take a label to jump to when the condition is true.
 
 D:None = JmpZero S0:{Bool|Int} L:Label
 D:None = JmpNZero S0:{Bool|Int} L:Label
@@ -661,8 +648,8 @@ D:None = JmpNZero S0:{Bool|Int} L:Label
 
 JmpSwitchDest<JmpSwitchData> S0:Int
 
-  Jump to the target of a switch statement using table metadata
-  <JmpSwitchData> and index S0.
+  Jump to the target of a switch statement using table metadata <JmpSwitchData>
+  and index S0.
 
 CheckSurpriseFlags -> B
 
@@ -681,24 +668,24 @@ FunctionExitSurpriseHook S0:FramePtr S1:StkPtr S2:Gen
 
 ExitOnVarEnv S0:FramePtr -> B
 
-  Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
-  non-zero, jumps to the exit-trace block B.
+  Loads the VarEnv slot off the ActRec pointed to by S0. If it is non-zero,
+  jumps to the exit-trace block B.
 
 Jmp -> B
 Jmp [S:T ...] -> B: DefLabel
 
-  Unconditional jump to block B.  In the second form, the target block must
-  start with a DefLabel with the same number of destinations as Jmp's number
-  of sources.  Jmp parallel-copies its sources to the DefLabel destinations.
+  Unconditional jump to block B. In the second form, the target block must
+  start with a DefLabel with the same number of destinations as Jmp's number of
+  sources. Jmp parallel-copies its sources to the DefLabel destinations.
 
 DefLabel
 D:T ... = DefLabel
 
-  DefLabel defines variables received from a previous Jmp.  A DefLabel with
-  zero destinations is a no-op, and the predecessor blocks may not necessarily
-  end in Jmp.  A DefLabel with one or more destinations may only be reached
-  by a Jmp instruction with the same number of sources.  Ordinary branch
-  instructions may not pass values to a DefLabel.
+  DefLabel defines variables received from a previous Jmp. A DefLabel with zero
+  destinations is a no-op, and the predecessor blocks may not necessarily end
+  in Jmp. A DefLabel with one or more destinations may only be reached by a Jmp
+  instruction with the same number of sources. Ordinary branch instructions may
+  not pass values to a DefLabel.
 
 
 6. Reference manipulation
@@ -714,38 +701,36 @@ D:BoxedCell = Box S0:Gen
 
 D:PtrToCell = UnboxPtr S0:PtrToGen
 
-  If S0 points to a cell that is KindOfRef, dereference the pointer in
-  the TypedValue and return a pointer to the inner-cell in D.
+  If S0 points to a cell that is KindOfRef, dereference the pointer in the
+  TypedValue and return a pointer to the inner-cell in D.
 
 D:PtrToBoxedCell = BoxPtr S0:PtrToGen
 
-  Boxes the TypeValue that S0 points to if it is not boxed. The result
-  D points to the same TypedValue as S0 but has a more refined type.
+  Boxes the TypeValue that S0 points to if it is not boxed. The result D points
+  to the same TypedValue as S0 but has a more refined type.
 
 
 7. Loads
 
 
-Some of the load instructions have an optional label parameter that
-make the load also perform a runtime type check. A load that has a
-label parameter present checks that the value it loads has the type T,
-where T is load instruction's type parameter, and branches to its
-label if the type check fails.
+Some of the load instructions have an optional label parameter that make the
+load also perform a runtime type check. A load that has a label parameter
+present checks that the value it loads has the type T, where T is load
+instruction's type parameter, and branches to its label if the type check
+fails.
 
-LdLoc and LdStack have corresponding GuardLoc and GuardStk
-instructions that allow the compiler to decouple type checks from the
-load operation. The type guards for locals and stacks are generated
-eagerly at the start of a tracelet, while other guards (typically
-generated due to type prediction) are generated at the point where the
-guarded value is loaded. Allowing the checks for locals and stack to
-be decoupled gives the compiler the flexibility to avoid partially
-dead loads of local and stack values and to avoid unnecessarily long
-live ranges due to eagerly loaded values at the start of the tracelet.
+LdLoc and LdStack have corresponding GuardLoc and GuardStk instructions that
+allow the compiler to decouple type checks from the load operation. The type
+guards for locals and stacks are generated eagerly at the start of a tracelet,
+while other guards (typically generated due to type prediction) are generated
+at the point where the guarded value is loaded. Allowing the checks for locals
+and stack to be decoupled gives the compiler the flexibility to avoid partially
+dead loads of local and stack values and to avoid unnecessarily long live
+ranges due to eagerly loaded values at the start of the tracelet.
 
 D:T = LdStack<T,offset> S0:StkPtr
 
-  Loads from S0 at offset (in cells), and puts the value in D as type
-  T.
+  Loads from S0 at offset (in cells), and puts the value in D as type T.
 
 TakeStack S0:Gen
 
@@ -764,8 +749,8 @@ D:T = LdLoc<T,localId,valSrc> S0:FramePtr
 
 D:PtrToGen = LdStackAddr<offset> S0:StkPtr
 
-  Loads the address of the stack slot given by the pointer in S0 at
-  the offset (in cells).
+  Loads the address of the stack slot given by the pointer in S0 at the offset
+  (in cells).
 
 D:T* = LdLocAddr<T,localId,valSrc> S0:FramePtr
 
@@ -780,81 +765,77 @@ D:PtrToCell = LdPairBase S0:Obj<Pair>
 
 D:T = LdMem<T> S0:PtrToGen S1:ConstInt [ -> B ]
 
-  Loads from S0 + S1 (in bytes) and puts the value in D. If the
-  optional target block B is specified and the loaded value's type does not
-  match T, this instruction does not load into D and branches to block B.
+  Loads from S0 + S1 (in bytes) and puts the value in D. If the optional target
+  block B is specified and the loaded value's type does not match T, this
+  instruction does not load into D and branches to block B.
 
 D:T = LdProp<T> S0:Obj S1:ConstInt [ -> B ]
 
-  Loads a property from the object referenced by S0 at the offset
-  given by S1 and puts the value in D. If the optional target B is
-  specified and the loaded value's type does not match T, this
-  instruction does not load into D and branches to block B.
+  Loads a property from the object referenced by S0 at the offset given by S1
+  and puts the value in D. If the optional target B is specified and the loaded
+  value's type does not match T, this instruction does not load into D and
+  branches to block B.
 
 D:Cell = LdElem S0:PtrToCell S1:Int
 
-  Loads the element at index S1 from the base pointer in S0.
-  The index in S1 is the number of bytes from the base in S0.
+  Loads the element at index S1 from the base pointer in S0. The index in S1 is
+  the number of bytes from the base in S0.
 
 D:T = LdRef<T> S0:Cell& [ -> B ]
 
-  Loads the value held in the box referenced by S0 and puts the value
-  in D.  If the optional target B is specified and the loaded value's
-  type does not match T, this instruction does not load into D and
-  branches to block B.
+  Loads the value held in the box referenced by S0 and puts the value in D. If
+  the optional target B is specified and the loaded value's type does not match
+  T, this instruction does not load into D and branches to block B.
 
 D:Obj = LdThis S0:FramePtr [ -> B ]
 
-  Loads the this pointer out of the ActRec pointed to by S0, and puts
-  it in D.  If the optional block B is supplied, if the this pointer
-  in S0 is null, this instruction does not load it into D and branches
-  to block B.
+  Loads the this pointer out of the ActRec pointed to by S0, and puts it in D.
+  If the optional block B is supplied, if the this pointer in S0 is null, this
+  instruction does not load it into D and branches to block B.
 
 D:Ctx = LdCtx<func> S0:FramePtr
 
-  Loads into D the value of the m_this/m_cls field out of the frame
-  pointer S0, which must be a frame of the function in the function
-  parameter. The result could be either an object representing the
-  this pointer or a class context.
+  Loads into D the value of the m_this/m_cls field out of the frame pointer S0,
+  which must be a frame of the function in the function parameter. The result
+  could be either an object representing the this pointer or a class context.
 
 D:Cctx = LdCctx S0:FramePtr
 
-  Loads into D the value of the m_cls field out of the frame pointer
-  S0. The compiler should generate this only if it can prove that the
-  frame does not contain a $this pointer.
+  Loads into D the value of the m_cls field out of the frame pointer S0. The
+  compiler should generate this only if it can prove that the frame does not
+  contain a $this pointer.
 
 D:Cls = LdClsCtx S0:Ctx
 
-  Loads into D the class representing the current context. Extracts
-  the class from the S0, which can be either the this pointer or the
-  context class.
+  Loads into D the class representing the current context. Extracts the class
+  from the S0, which can be either the this pointer or the context class.
 
 D:Cls = LdClsCctx S0:Cctx
 
-  Loads into D the class representing the current context. Extracts
-  the class from the S0, which is a context class.
+  Loads into D the class representing the current context. Extracts the class
+  from the S0, which is a context class.
 
 D:Func = LdClsCtor S0:Cls
 
-  Loads into D the constructor of class S0. If the constructor cannot
-  be called from the current context, raise an error.
+  Loads into D the constructor of class S0. If the constructor cannot be called
+  from the current context, raise an error.
 
 D:Home = LdHome S0:StkPtr S1:ConstInt
 
-  Logically packages the location of a pointer into the VM stack and
-  an offset.  S0 will usually be the output of a DefFP.
+  Logically packages the location of a pointer into the VM stack and an offset.
+  S0 will usually be the output of a DefFP.
 
 D:T = LdConst<T,value>
 
-  Load a constant value into D.  This differs from DefConst in that D
-  will be allocated a register.  It is currently used only for the
-  GuardRefs instruction.
+  Load a constant value into D. This differs from DefConst in that D will be
+  allocated a register. It is currently used only for the GuardRefs
+  instruction.
 
 D:ConstT = DefConst<T,value>
 
-  Define a constant value of type T.  D is presumed to be globally
-  available and the DefConst instruction will not actually appear in
-  the IR instruction stream.
+  Define a constant value of type T. D is presumed to be globally available and
+  the DefConst instruction will not actually appear in the IR instruction
+  stream.
 
 D:Cls = LdCls S0:Str S1:ConstCls
 
@@ -866,27 +847,26 @@ D:Cls = LdCls S0:Str S1:ConstCls
 
 D:Cls = LdClsCached S0:ConstStr
 
-  Loads the class named S0 via the RDS. Invokes autoload and may raise
-  an error if the class is not defined.
+  Loads the class named S0 via the RDS. Invokes autoload and may raise an error
+  if the class is not defined.
 
 D:Cls = LdClsCachedSafe S0:ConstStr [ -> B ]
 
-  Loads the class whose name is S0 out of the RDS. If the class is not
-  defined, returns null and optionally branches to block B.
+  Loads the class whose name is S0 out of the RDS. If the class is not defined,
+  returns null and optionally branches to block B.
 
 D:T = LdClsCns<T,className,constName> [ -> B ]
 
-  Loads the named class constant for a class via the RDS.  This
-  instruction should generally be followed by CheckInit, unless we
-  know the class is already loaded.
+  Loads the named class constant for a class via the RDS. This instruction
+  should generally be followed by CheckInit, unless we know the class is
+  already loaded.
 
-  If the optional block B is specified and the loaded value's type
-  does not match T, this instruction does not load into D and
-  branches to block B.
+  If the optional block B is specified and the loaded value's type does not
+  match T, this instruction does not load into D and branches to block B.
 
-  The result may be uninitialized if the class is not defined.  Note
-  that no decref of the result is necessary because class constants
-  will always be static.
+  The result may be uninitialized if the class is not defined. Note that no
+  decref of the result is necessary because class constants will always be
+  static.
 
 D:RDSHandle = LookupClsRDSHandle S0:Str
 
@@ -899,27 +879,26 @@ D:{Cls|nullptr} = DerefClsRDSHandle S0:RDSHandle
 D:T = LookupCns<T,constName>
 D:T = LookupCnsE<T,constName>
 
-  Load a constant via the RDS.  Raises an undefined constant notice if
-  the constant cannot be defined.  The E variant will instead throw a
-  fatal error if it cannot define the constant.
+  Load a constant via the RDS. Raises an undefined constant notice if the
+  constant cannot be defined. The E variant will instead throw a fatal error if
+  it cannot define the constant.
 
 D:T = LookupCnsU<T,constName,fallbackName>
 
-  Load an unqualified constant via the RDS, first by trying constName,
-  then by trying fallbackName.  Raises a notice if neither can be
-  found.
+  Load an unqualified constant via the RDS, first by trying constName, then by
+  trying fallbackName. Raises a notice if neither can be found.
 
 D:T = LookupClsCns<T,className,constName>
 
-  Load a class constant for a class via the RDS, invoking autoload if
-  it is not defined.  This instruction may raise an undefined constant
-  error if autoload cannot define the constant.
+  Load a class constant for a class via the RDS, invoking autoload if it is not
+  defined. This instruction may raise an undefined constant error if autoload
+  cannot define the constant.
 
 D:{Func|Nullptr} = LdClsMethodFCacheFunc<clsName, methodName>
 
-  Loads the target cache entry for a forwarding call to
-  clsName::methodName. May be Nullptr, if the method does not exist or the
-  cache hasn't been filled yet.
+  Loads the target cache entry for a forwarding call to clsName::methodName.
+  May be Nullptr, if the method does not exist or the cache hasn't been filled
+  yet.
 
 D:{Func|Nullptr} =
 LookupClsMethodFCache<clsName, methodName> S0:ConstCls S1:FramePtr
@@ -939,9 +918,9 @@ D:Ctx = GetCtxFwdCallDyn<clsName, methodName> S0:Ctx
 
 D:Ctx = GetCtxFwdCall S0:Ctx S1:Func
 
-  If S0 is an object and S1 is static, this opcode returns S0's
-  class. If S0 is an object and S1 is not static, this opcode increfs
-  S0 and returns it. If S0 is a Cctx, this opcode returns S0.
+  If S0 is an object and S1 is static, this opcode returns S0's class. If S0 is
+  an object and S1 is not static, this opcode increfs S0 and returns it. If S0
+  is a Cctx, this opcode returns S0.
 
 D:{Func|Nullptr} = LdClsMethodCacheFunc<clsName, methodName>
 
@@ -967,30 +946,30 @@ LookupClsMethodCache<clsName, methodName> S0:ConstNamedEntity*  S1:FramePtr
 
 D:Func = LdClsMethod S0:Cls S1:ConstInt
 
-  Load a Func* off of the class method table for S0, at offset S1 (in
-  method slots).
+  Load a Func* off of the class method table for S0, at offset S1 (in method
+  slots).
 
 LookupClsMethod S0:Cls S1:Str S2:StkPtr S3:FramePtr
 
-  Store a pointer to a class method into an activation record. S0
-  points to the class, S1 is the method name, S2 points to the
-  activation record, and S3 is a pointer to the current frame (used to
-  get the context).  May throw or fatal if method is not accessible.
+  Store a pointer to a class method into an activation record. S0 points to the
+  class, S1 is the method name, S2 points to the activation record, and S3 is a
+  pointer to the current frame (used to get the context). May throw or fatal if
+  method is not accessible.
 
 D:PtrToGen = LdPropAddr S0:Obj S1:ConstInt
 
-  Load the address of the object property for S0 at offset S1 (in
-  bytes) into D.
+  Load the address of the object property for S0 at offset S1 (in bytes) into
+  D.
 
 D:PtrToGen = LdGblAddr S0:Str -> B
 
-  Loads a pointer to a global. S0 is the global's name. Branches to B
-  if the global is not defined.
+  Loads a pointer to a global. S0 is the global's name. Branches to B if the
+  global is not defined.
 
 D:PtrToGen = LdGblAddrDef S0:Str
 
-  Loads a pointer to a global. S0 is the global's name. Defines the
-  global if it is not already defined.
+  Loads a pointer to a global. S0 is the global's name. Defines the global if
+  it is not already defined.
 
 D:PtrToGen = LdClsPropAddr S0:Cls S1:Str S2:ConstCls [ -> B ]
 
@@ -1003,39 +982,38 @@ D:PtrToGen = LdClsPropAddr S0:Cls S1:Str S2:ConstCls [ -> B ]
 D:PtrToGen = LdClsPropAddrCached S0:Cls S1:ConstStr S2:ConstStr
                                  S3:ConstCls [ -> B ]
 
-  Loads a pointer to a static class property via the RDS. S0
-  points to the class, S1 is the property name, S2 is the class name,
-  and S3 is the class representing the context of the code accessing
-  the property.  If class S0 does not have a visible and accessible
-  static property named S1, then this instruction will either (1)
-  throw a fatal error if the optional block B is not given, or (2)
-  jump to B if it is present.
+  Loads a pointer to a static class property via the RDS. S0 points to the
+  class, S1 is the property name, S2 is the class name, and S3 is the class
+  representing the context of the code accessing the property. If class S0 does
+  not have a visible and accessible static property named S1, then this
+  instruction will either (1) throw a fatal error if the optional block B is
+  not given, or (2) jump to B if it is present.
 
 LdObjMethod S0:Cls S1:ConstStr S2:StkPtr
 
-  Stores a pointer to an object's method into an activation record. S0
-  points to the object's class, S1 is the method name, and S3 points
-  to the activation record. Caches the mapping in the target
-  cache. Fatals if the class does not have an accessible method with
-  the given name and does not have a __call method.
+  Stores a pointer to an object's method into an activation record. S0 points
+  to the object's class, S1 is the method name, and S3 points to the activation
+  record. Caches the mapping in the target cache. Fatals if the class does not
+  have an accessible method with the given name and does not have a __call
+  method.
 
 D:Func = LdObjInvoke S0:Cls -> B
 
-  Try to load a cached non-static __invoke Func from the Class in S0,
-  or branch to block B if it is not present.
+  Try to load a cached non-static __invoke Func from the Class in S0, or branch
+  to block B if it is not present.
 
 LdArrFuncCtx S0:Arr S1:StkPtr S2:FramePtr
 
-  Try to load an array as a function context.  This is for use
-  translating FPushFunc when the callee is an array.  This instruction
-  attempts to populate a partially created ActRec pointed to by S1.
+  Try to load an array as a function context. This is for use translating
+  FPushFunc when the callee is an array. This instruction attempts to populate
+  a partially created ActRec pointed to by S1.
 
 LdArrFPushCuf S0:Arr S1:StkPtr S2:FramePtr
 LdStrFPushCuf S0:Str S1:StkPtr S2:FramePtr
 
-  Try to resolve a method target for FPushCuf when the callee is an
-  Arr or Str, respectively.  These instructions mutate a partially
-  created ActRec pointed to by S1.
+  Try to resolve a method target for FPushCuf when the callee is an Arr or Str,
+  respectively. These instructions mutate a partially created ActRec pointed to
+  by S1.
 
 D:Cls = LdObjClass S0:Obj
 
@@ -1043,45 +1021,42 @@ D:Cls = LdObjClass S0:Obj
 
 D:Func = LdFunc S0:Str
 
-  Loads the Func whose name is S0.  Fatal if the named function is
-  not defined, and the function autoloader fails to define it.
+  Loads the Func whose name is S0. Fatal if the named function is not defined,
+  and the function autoloader fails to define it.
 
 D:Func = LdFuncCached<funcName>
 
-  Loads the Func whose name is funcName from the RDS, invoking
-  autoload if it not defined yet.  Fatal if function autoloader fails
-  to define it.
+  Loads the Func whose name is funcName from the RDS, invoking autoload if it
+  not defined yet. Fatal if function autoloader fails to define it.
 
 D:Func = LdFuncCachedSafe<funcName> [ -> B ]
 
-  Try to load the Func named funcName from the RDS.  If the function
-  is not defined, returns null and optionally branches to B.
+  Try to load the Func named funcName from the RDS. If the function is not
+  defined, returns null and optionally branches to B.
 
 D:Func = LdFuncCachedU<funcName,fallbackName>
 
-  Try to load a Func named funcName from the RDS, if it isn't defined,
-  try to load a Func named fallbackName.  If that also isn't defined,
-  invoke autoload.  If this still doesn't result in a Func, raise a
-  fatal error.
+  Try to load a Func named funcName from the RDS, if it isn't defined, try to
+  load a Func named fallbackName. If that also isn't defined, invoke autoload.
+  If this still doesn't result in a Func, raise a fatal error.
 
 D:Func& = LdARFuncPtr S0:{StkPtr|FramePtr} S1:ConstInt
 
-  Loads the m_func member of an ActRec.  S0 is the base address, and
-  S1 is an offset, such that S0 + S1 points to the base of the ActRec.
+  Loads the m_func member of an ActRec. S0 is the base address, and S1 is an
+  offset, such that S0 + S1 points to the base of the ActRec.
 
 D:T = LdRaw<T> S0:?? S1:ConstInt
 
   "Raw" load from memory---i.e. outside of our type-system.
 
-  S0 is the base address, and is an untyped pointer.  S1 is a constant
-  from the RawMemSlot::Kind enum, which describes the offset from the
-  base, and the size.  The value in D is assumed to be of type T.
+  S0 is the base address, and is an untyped pointer. S1 is a constant from the
+  RawMemSlot::Kind enum, which describes the offset from the base, and the
+  size. The value in D is assumed to be of type T.
 
 D:BoxedCell = LdStaticLocCached<func,staticLocalName>
 
-  Load the address of the static local RefData from the targetcache
-  for function `func' with the static local variable named
-  `staticLocalName'.
+  Load the address of the static local RefData from the targetcache for
+  function `func' with the static local variable named `staticLocalName'.
 
 
 8. Allocation
@@ -1093,14 +1068,14 @@ D:Obj = AllocObj S1:Cls
 
 D:Obj = AllocObjFast<class>
 
-  Allocate a new object of the specified class, which must be
-  persistent and able to be instantiated (i.e., S1 is not an abstract
-  class, interface, or trait).  The class' constructor is also assumed
-  to be accessible in the current context.
+  Allocate a new object of the specified class, which must be persistent and
+  able to be instantiated (i.e., S1 is not an abstract class, interface, or
+  trait). The class' constructor is also assumed to be accessible in the
+  current context.
 
-  This instruction does not handle adding the object to the global
-  destructor list, so currently is not used when
-  RuntimeOption::EnableObjDestructCall is true.
+  This instruction does not handle adding the object to the global destructor
+  list, so currently is not used when RuntimeOption::EnableObjDestructCall is
+  true.
 
 D:Arr = NewArray S0:ConstInt
 
@@ -1108,14 +1083,14 @@ D:Arr = NewArray S0:ConstInt
 
 D:Arr = NewPackedArray S0:ConstInt S1:StkPtr
 
-  Allocate a new array by taking the top S0 elements off the stack
-  given by S1.  Note that this instruction assumes it can take the
-  values from the stack without increfing them.
+  Allocate a new array by taking the top S0 elements off the stack given by S1.
+  Note that this instruction assumes it can take the values from the stack
+  without increfing them.
 
 D:Arr = NewStructArray<keys...> S0:StkPtr
 
-  Allocate a new key/value array, given N immediate keys and taking the top
-  N elements off the stack given by S0.  This instruction assumes it can take the
+  Allocate a new key/value array, given N immediate keys and taking the top N
+  elements off the stack given by S0. This instruction assumes it can take the
   values from the stack without increfing them.
 
 D:Obj = NewCol S0:ConstInt S1:ConstInt
@@ -1140,11 +1115,11 @@ D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
      S0 - caller stack pointer
      S1 - caller frame pointer
      S2 - callee Func, context, FuncCls, FuncCtx, or null
-     S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
-          null (for FPushFunc*).
+     S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or null
+          (for FPushFunc*).
 
-  Defines the fields for an activation record and writes them to the
-  stack pointed to by S1.
+  Defines the fields for an activation record and writes them to the stack
+  pointed to by S1.
 
 D:StkPtr = CufIterSpillFrame<numArgs,iterId> S0:StkPtr
                                              S1:FramePtr
@@ -1154,34 +1129,32 @@ D:StkPtr = CufIterSpillFrame<numArgs,iterId> S0:StkPtr
      S0 - caller stack pointer
      S1 - caller frame pointer
 
-  Defines the fields for an activation record using data from
-  the iterator iterId, and writes them to the stack pointed to by S1
+  Defines the fields for an activation record using data from the iterator
+  iterId, and writes them to the stack pointed to by S1
 
 D:FramePtr = FreeActRec S0:FramePtr
 
-  Load the saved frame pointer from the activation record pointed to
-  by S0 into D.
+  Load the saved frame pointer from the activation record pointed to by S0 into
+  D.
 
 D:FramePtr = DefInlineFP<func,retBCOff,retSPOff> S0:StkPtr S1:StkPtr S2:FramePtr
 
-  Defines a frame pointer for an inlined function.  S0 is a StkPtr
-  that points to the ActRec for the callee (i.e. after parameters have
-  been popped).  S1 is a StkPtr that represents what the inlined
-  function will return to (i.e. it points to the stack after the
-  ActRec in S0 is popped).
+  Defines a frame pointer for an inlined function. S0 is a StkPtr that points
+  to the ActRec for the callee (i.e. after parameters have been popped). S1 is
+  a StkPtr that represents what the inlined function will return to (i.e. it
+  points to the stack after the ActRec in S0 is popped).
 
-  `func' is the function being inlined.  `retBCOff' and `retSPOff'
-  represent what the bytecode and stack offsets should be after the
-  FCall instruction in ther caller.
+  `func' is the function being inlined. `retBCOff' and `retSPOff' represent
+  what the bytecode and stack offsets should be after the FCall instruction in
+  ther caller.
 
-  This instruction is primarily used to represent a frame in the IR in
-  a way that allows us to eliminate it entirely.  When it cannot be
-  eliminated (or if it is pushed into an unlikely path) it performs
-  callee-side responsibilities for setting up an activation record
-  (i.e. setting the return ip and m_soff, storing the frame pointer
-  into D).
+  This instruction is primarily used to represent a frame in the IR in a way
+  that allows us to eliminate it entirely. When it cannot be eliminated (or if
+  it is pushed into an unlikely path) it performs callee-side responsibilities
+  for setting up an activation record (i.e. setting the return ip and m_soff,
+  storing the frame pointer into D).
 
-  The caller frame pointer is passed as S2.  This is used to keep track of the
+  The caller frame pointer is passed as S2. This is used to keep track of the
   call chain of inlined functions for simplification and dead code elimination.
 
 InlineReturn S0:FramePtr
@@ -1190,19 +1163,17 @@ InlineReturn S0:FramePtr
 
 D:StkPtr = CallArray S0:StkPtr
 
-  Invoke function corresponding to the current FPI with array args.
-  S0 points to the stack resulting after the ActRec for the function
-  and the array of its arguments is pushed. CallArray pops the array
-  off the stack, pushes the elements of the array as arguments, and
-  invokes the function in the ActRec.
+  Invoke function corresponding to the current FPI with array args. S0 points
+  to the stack resulting after the ActRec for the function and the array of its
+  arguments is pushed. CallArray pops the array off the stack, pushes the
+  elements of the array as arguments, and invokes the function in the ActRec.
 
 D:StkPtr = Call S0:StkPtr S1:ConstInt S2:Func S3...
 
   Invoke the function S2 with ActRec S0 and variadic arguments S3...
-  representing values to pass to the function.  A value of type None
-  means the value to be passed is already on the stack.  S1 is the
-  bytecode offset of the next instruction to execute when the call
-  returns.
+  representing values to pass to the function. A value of type None means the
+  value to be passed is already on the stack. S1 is the bytecode offset of the
+  next instruction to execute when the call returns.
 
 NativeImpl = S0:ConstFunc S1:FramePtr
 
@@ -1210,13 +1181,13 @@ NativeImpl = S0:ConstFunc S1:FramePtr
 
 D:T = CallBuiltin<T> S0:FuncPtr S1:StkPtr S2...SN
 
-  Call builtin function with N-1 arguments.  Operands:
+  Call builtin function with N-1 arguments. Operands:
 
     S0: callee Func
     S1..SN: arguments to builtin function
 
-  The source and destination types correspond to C++ parameter and return
-  types as follows:
+  The source and destination types correspond to C++ parameter and return types
+  as follows:
 
     C++ type            HHIR type         Position
     -----------------   ---------         --------
@@ -1235,44 +1206,41 @@ D:T = CallBuiltin<T> S0:FuncPtr S1:StkPtr S2...SN
 
 D:RetAddr = LdRetAddr S0:FramePtr
 
-  Load the return address off of the activation record pointed to by
-  S0.  The return address D is normally provided to a RetCtrl.
-  Between a LdRetAddr and a RetCtrl, a FreeActRec is normally emitted
-  to free the activation record S0.  This is the reason why LdRetAddr
-  is a separate instruction from RetCtrl.
+  Load the return address off of the activation record pointed to by S0. The
+  return address D is normally provided to a RetCtrl. Between a LdRetAddr and a
+  RetCtrl, a FreeActRec is normally emitted to free the activation record S0.
+  This is the reason why LdRetAddr is a separate instruction from RetCtrl.
 
 RetCtrl S0:StkPtr S1:FramePtr S2:RetAddr
 
-  Ensure that S0 is stored in rVmSp and S1 is stored in rVmFp and then
-  execute a hardware procedure-return using the return address
-  specified by S2.
+  Ensure that S0 is stored in rVmSp and S1 is stored in rVmFp and then execute
+  a hardware procedure-return using the return address specified by S2.
 
 StRetVal S0:FramePtr S1:Gen
 
-  Writes the value in S1 to the return value slot on the activation
-  record pointed to by S0.
+  Writes the value in S1 to the return value slot on the activation record
+  pointed to by S0.
 
 D:StkPtr = RetAdjustStack S0:FramePtr
 
-  Loads the new VM stack pointer into the destination.  S0 is a
-  pointer to the current activation record.
+  Loads the new VM stack pointer into the destination. S0 is a pointer to the
+  current activation record.
 
 ReleaseVVOrExit S0:FramePtr -> B
 
-  Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
-  null, does nothing.  If it is an ExtraArgs, deallocates the
-  ExtraArgs structure.  Otherwise jumps to block B.
+  Loads the VarEnv slot off the ActRec pointed to by S0. If it is null, does
+  nothing. If it is an ExtraArgs, deallocates the ExtraArgs structure.
+  Otherwise jumps to block B.
 
 D:StkPtr = GenericRetDecRefs S0:FramePtr
 
-  Does decrefs of all the current function's locals, where S0 is a
-  pointer to the relevant activation record.
+  Does decrefs of all the current function's locals, where S0 is a pointer to
+  the relevant activation record.
 
   Returns the adjusted VM stack pointer (pointing at the return value
   location).
 
-  Semantically similar to a series of DecRefLoc followed by
-  RetAdjustStack.
+  Semantically similar to a series of DecRefLoc followed by RetAdjustStack.
 
 
 10. Stores
@@ -1284,8 +1252,7 @@ StMem S0:PtrToGen S1:ConstInt S2:Gen
 
 StMemNT S0:PtrToGen S1:ConstInt S2:Gen
 
-  Store S2 into the location S0 + S1 (in bytes), without storing the
-  type tag.
+  Store S2 into the location S0 + S1 (in bytes), without storing the type tag.
 
 StProp S0:Obj S1:Int S2:Gen
 
@@ -1293,13 +1260,12 @@ StProp S0:Obj S1:Int S2:Gen
 
 StPropNT S0:Obj S1:Int S2:Gen
 
-  Store S2 into the location S0 + S1 (in bytes), without storing the
-  type tag.
+  Store S2 into the location S0 + S1 (in bytes), without storing the type tag.
 
 StElem S0:PtrToCell S1:Int S2:Cell
 
-  Store S2 into the location given by the index S1 from base pointer
-  S0. The index in S1 is the number of bytes from the base in S0.
+  Store S2 into the location given by the index S1 from base pointer S0. The
+  index in S1 is the number of bytes from the base in S0.
 
 StLoc<localId> S0:FramePtr S1:Gen
 
@@ -1307,46 +1273,44 @@ StLoc<localId> S0:FramePtr S1:Gen
 
 StLocNT<localId> S0:FramePtr S1:Gen
 
-  Store S1 to local number localId on the frame pointed to by S0,
-  without storing the type.
+  Store S1 to local number localId on the frame pointed to by S0, without
+  storing the type.
 
 D:BoxedCell = StRef S0:BoxedCell S1:Cell
 
-  Store the value in S1 into the RefData pointed to by S0.  Stores the
-  RefData::m_type also.  Returns a new value for S0, which will now
-  have the type of S1 after boxing.
+  Store the value in S1 into the RefData pointed to by S0. Stores the
+  RefData::m_type also. Returns a new value for S0, which will now have the
+  type of S1 after boxing.
 
 D:BoxedCell = StRefNT S0:BoxedCell S1:Cell
 
-  Store the value in S1 into the RefData pointed to by S0.  Does not
-  change RefData::m_type.  Returns a new value for S0, which will now
-  have the type of S1 after boxing.
+  Store the value in S1 into the RefData pointed to by S0. Does not change
+  RefData::m_type. Returns a new value for S0, which will now have the type of
+  S1 after boxing.
 
 StRaw S0:?? S1:ConstInt S2:??
 
   "Raw" store to memory---i.e. outside of our type-system.
 
-  S0 is the base address, and is an untyped pointer.  S1 is a constant
-  from the RawMemSlot::Kind enum, which describes the offset from the
-  base, and the size.  The value in S2 depends on the value of S1.
+  S0 is the base address, and is an untyped pointer. S1 is a constant from the
+  RawMemSlot::Kind enum, which describes the offset from the base, and the
+  size. The value in S2 depends on the value of S1.
 
 D:StkPtr = SpillStack S0:StkP S1:ConstInt, S2...
 
-  SpillStack synchronizes the virtual execution stack with the
-  physical stack by storing a variadic list of SSATmps to the physical
-  stack.
+  SpillStack synchronizes the virtual execution stack with the physical stack
+  by storing a variadic list of SSATmps to the physical stack.
 
   Operands:
 
      S0      - current stack pointer
 
-     S1      - stack deficit; indicates the number of elements that
-               need to be logically popped before the variadic list
-               is pushed
+     S1      - stack deficit; indicates the number of elements that need to be
+               logically popped before the variadic list is pushed
 
-     S2...   - variadic list of elements to spill, with values
-               representing cells.  A temp with type None means to
-               keep the previous value on the stack.
+     S2...   - variadic list of elements to spill, with values representing
+               cells. A temp with type None means to keep the previous value on
+               the stack.
 
 
 11. Trace exits
@@ -1354,38 +1318,35 @@ D:StkPtr = SpillStack S0:StkP S1:ConstInt, S2...
 
 SyncABIRegs S0:FramePtr S1:StkPtr
 
-  Ensures the cross-tracelet ABI registers are in a consistent state
-  in preparation for an instruction that may leave the trace.
+  Ensures the cross-tracelet ABI registers are in a consistent state in
+  preparation for an instruction that may leave the trace.
 
-  In practice this instruction currently doesn't do anything except
-  act as an essential instruction that prevents the current stack from
-  being dce'd.
+  In practice this instruction currently doesn't do anything except act as an
+  essential instruction that prevents the current stack from being dce'd.
 
 ReqBindJmp<bcOff>
 
-  Emit a jump to a REQ_BIND_JMP service request to the target offset
-  bcOff.
+  Emit a jump to a REQ_BIND_JMP service request to the target offset bcOff.
 
 ReqBindJmpNoIR<bcOff>
 
-  Emit a jump to a REQ_BIND_JMP_NO_IR service request to the target
-  offset bcOff.  This is used for unsupported situations, where we
-  need to leave the trace and want the "retranslation" to occur
-  without using HHIR (i.e. interp).
+  Emit a jump to a REQ_BIND_JMP_NO_IR service request to the target offset
+  bcOff. This is used for unsupported situations, where we need to leave the
+  trace and want the "retranslation" to occur without using HHIR (i.e. interp).
 
 ReqRetranslate
 
-  Emit a jump to a service request that will chain to a retranslation
-  of this tracelet.
+  Emit a jump to a service request that will chain to a retranslation of this
+  tracelet.
 
-  This instruction is used in exit traces for a type prediction that
-  occurs at the first bytecode offset of a tracelet.
+  This instruction is used in exit traces for a type prediction that occurs at
+  the first bytecode offset of a tracelet.
 
 ReqRetranslateOpt<transID,bcOff>
 
-  Emit a service request to retranslate, with a higher optimization
-  gear, translation transID, which starts at bcOff.  This instruction
-  is used in exit traces that trigger profile-guided optimizations.
+  Emit a service request to retranslate, with a higher optimization gear,
+  translation transID, which starts at bcOff. This instruction is used in exit
+  traces that trigger profile-guided optimizations.
 
 ReqBindJmpGt
 ReqBindJmpGte
@@ -1400,9 +1361,8 @@ ReqBindJmpNInstanceOfBitmask
 ReqBindJmpZero
 ReqBindJmpNZero
 
-  Test the condition based on the Jmp* op of similar name, and then
-  emit a pair of smashable jumps to a REQ_BIND_JMPCC_FIRST service
-  request.
+  Test the condition based on the Jmp* op of similar name, and then emit a pair
+  of smashable jumps to a REQ_BIND_JMPCC_FIRST service request.
 
 SideExitJmpGt
 SideExitJmpGte
@@ -1417,18 +1377,18 @@ SideExitJmpNInstanceOfBitmask
 SideExitJmpZero
 SideExitJmpNZero
 
-  Test the condition based on the Jmp* op of similar name, and then
-  emit a smashable jump to a REQ_BIND_SIDE_EXIT service request.
+  Test the condition based on the Jmp* op of similar name, and then emit a
+  smashable jump to a REQ_BIND_SIDE_EXIT service request.
 
 D:FramePtr = SideExitGuardLoc<T,locId,takenOff> S0:FramePtr
 
-  Test the type of a local, and if it fails jump to a side exit
-  service request.
+  Test the type of a local, and if it fails jump to a side exit service
+  request.
 
 D:StkPtr = SideExitGuardStk<T,stackOff,takenOff> S0:StkPtr
 
-  Test the type of a stack cell, and if it fails jump to a side exit
-  service request.
+  Test the type of a stack cell, and if it fails jump to a side exit service
+  request.
 
 
 12. Refcounting and copies
@@ -1436,9 +1396,8 @@ D:StkPtr = SideExitGuardStk<T,stackOff,takenOff> S0:StkPtr
 
 D:T = Mov S0:T
 
-  Defines D as S0.  May imply register-to-register moves at code
-  generation time.  Does not imply an incref or any other manipulation
-  of S0.
+  Defines D as S0. May imply register-to-register moves at code generation
+  time. Does not imply an incref or any other manipulation of S0.
 
 D:T* = LdAddr S0:T* S1:ConstInt
 
@@ -1462,30 +1421,30 @@ DecRefStack<T,offset> S0:StkPtr
 
 DecRefThis S0:FramePtr
 
-  DecRef the $this pointer in the ActRec S0, if it had one.  Does
-  nothing if there was a class context or null $this on the ActRec.
+  DecRef the $this pointer in the ActRec S0, if it had one. Does nothing if
+  there was a class context or null $this on the ActRec.
 
 DecRef S0:Gen
 
-  Decrease the reference count of S0 by one, and call a destructor for
-  types that require it if it goes to zero.
+  Decrease the reference count of S0 by one, and call a destructor for types
+  that require it if it goes to zero.
 
-  Note that although DecRef takes a Gen, we don't allow it to use
-  information about the inner types of a BoxedCell.  This is because
-  we don't guard on the inner types of a BoxedCell except when doing
-  LdRef.  For any S0 that is a strict subtype of BoxedCell, the DecRef
-  must just decref it as if it were a BoxedCell.
+  Note that although DecRef takes a Gen, we don't allow it to use information
+  about the inner types of a BoxedCell. This is because we don't guard on the
+  inner types of a BoxedCell except when doing LdRef. For any S0 that is a
+  strict subtype of BoxedCell, the DecRef must just decref it as if it were a
+  BoxedCell.
 
 DecRefMem S0:PtrToGen S1:ConstInt
 
-  Decref the value pointed to by S0 at offset S1 (in bytes), calling
-  any appropriate destructor if the refcount goes to zero.
+  Decref the value pointed to by S0 at offset S1 (in bytes), calling any
+  appropriate destructor if the refcount goes to zero.
 
 DecRefNZ S0:Gen
 
-  Decrease the reference count of S0 by one, do not check if it goes
-  to zero.  This instruction can be used for more efficient code when
-  it is provable that the reference count cannot go to zero.
+  Decrease the reference count of S0 by one, do not check if it goes to zero.
+  This instruction can be used for more efficient code when it is provable that
+  the reference count cannot go to zero.
 
 
 13. Misc
@@ -1497,61 +1456,60 @@ D:FramePtr = DefFP
 
 D:StkPtr = DefSP<stackOff> S0:StkPtr
 
-  Creates a temporary D representing the current vm stack pointer.  S0
-  is a pointer to the current frame.  The 'stackOff' is the logical
-  offset between S0 and the stack pointer, but in the case of
-  continuations this is not the physical offset at runtime.
+  Creates a temporary D representing the current vm stack pointer. S0 is a
+  pointer to the current frame. The 'stackOff' is the logical offset between S0
+  and the stack pointer, but in the case of continuations this is not the
+  physical offset at runtime.
 
-  This instruction is used at the beginning of tracelets to represent
-  the state of the stack on entry and does not emit code.
+  This instruction is used at the beginning of tracelets to represent the state
+  of the stack on entry and does not emit code.
 
 D:StkPtr = ReDefSP<offset,spansCall> S0:StkPtr S1:FramePtr
 
-  Re-define a stack in terms of a frame pointer S1 and an offset,
-  putting the resulting pointer in D.  The resulting stack is assumed
-  to give the same view as S1, which is a previous stack pointer.
-  (I.e. for getStackValue we just chain to S1.)  The S0 stack pointer is
-  only used for analysis.
+  Re-define a stack in terms of a frame pointer S1 and an offset, putting the
+  resulting pointer in D. The resulting stack is assumed to give the same view
+  as S1, which is a previous stack pointer. (I.e. for getStackValue we just
+  chain to S1.)  The S0 stack pointer is only used for analysis.
 
-  This instruction is used when entering or "returning" from an
-  inlined call.  The one used on entry will be DCE'd when the actrec
-  can be eliminated.  The one on exit is only needed until TODO(#2288359).
+  This instruction is used when entering or "returning" from an inlined call.
+  The one used on entry will be DCE'd when the actrec can be eliminated. The
+  one on exit is only needed until TODO(#2288359).
 
   The spansCall boolean indicates that the inlined frame spanned a procedure
-  call and that any SSATmps created before inlining are now invalid.  This is
+  call and that any SSATmps created before inlining are now invalid. This is
   required for several analysis steps including the simplifier.
 
 D:StkPtr = StashGeneratorSP<offset> S0:FramePtr S1:StkPtr
 
   Store a generator stack pointer, for later use.
 
-  The point of this is a bit of a hack to handle the fact that we
-  currently assign the same registers to frame (rVmFp) and stack
-  pointers (rVmSp) through the IR.  During an inline call, we want to
-  be able to have uses of the stack after the call, but we can't
-  restore it using a frame pointer like with ReDefSP, because the
-  values of rVmSp and rVmFp are not related like that in a generator.
+  The point of this is a bit of a hack to handle the fact that we currently
+  assign the same registers to frame (rVmFp) and stack pointers (rVmSp) through
+  the IR. During an inline call, we want to be able to have uses of the stack
+  after the call, but we can't restore it using a frame pointer like with
+  ReDefSP, because the values of rVmSp and rVmFp are not related like that in a
+  generator.
 
-  This instruction moves the value of rVmSp into a continuation object.  It
-  can be retrieved using ReDefGeneratorSP.
+  This instruction moves the value of rVmSp into a continuation object. It can
+  be retrieved using ReDefGeneratorSP.
 
   TODO(#2288359): this shouldn't be needed.
 
 D:StkPtr = ReDefGeneratorSP<offset,spansCall> S0:StkPtr S1:FramePtr
 
-  Restore a generator stack pointer.  See StashGeneratorSP.  The S0 stack
-  pointer refers to the stack pointer before inlining, it is used for stack
-  value analysis but never used outside of analysis (see ReDefSP).  The
-  spansCall boolean value indicates that the inlined frame spanned a function
-  call, this is important as it indicates to later analysis steps that SSATmps
-  created before the inlined frame have been invalidated.
+  Restore a generator stack pointer. See StashGeneratorSP. The S0 stack pointer
+  refers to the stack pointer before inlining, it is used for stack value
+  analysis but never used outside of analysis (see ReDefSP). The spansCall
+  boolean value indicates that the inlined frame spanned a function call, this
+  is important as it indicates to later analysis steps that SSATmps created
+  before the inlined frame have been invalidated.
 
 D:StkPtr PassSP S0:StkPtr
 
-  Indicates that every use of StkPtr D is actually an alias to S0.  This is a
+  Indicates that every use of StkPtr D is actually an alias to S0. This is a
   hack to make dead code elimination easier when removing callee frames from
-  inlined functions.  It is effectively the same as a nop as we currently use
-  a specialized register for every stack pointer (#2288359).
+  inlined functions. It is effectively the same as a nop as we currently use a
+  specialized register for every stack pointer (#2288359).
 
 D:FramePtr PassSP S0:FramePtr
 
@@ -1560,13 +1518,13 @@ D:FramePtr PassSP S0:FramePtr
 InlinedFPAnchor S0:FramePtr
 
   Indicates that an inlined frame cannot be elided during dead code elimination
-  because it is required by a either the VM for its ActRec or the routine itself
-  for local storage.  Is semantically equivalent to a Nop.
+  because it is required by a either the VM for its ActRec or the routine
+  itself for local storage. Is semantically equivalent to a Nop.
 
 Nop
 
-  Does nothing.  It's sometimes useful for the simplifier to insert
-  one of these in the instruction stream.
+  Does nothing. It's sometimes useful for the simplifier to insert one of these
+  in the instruction stream.
 
 
 14. Runtime helpers
@@ -1574,22 +1532,20 @@ Nop
 
 VerifyParamCls S0:Cls S1:Cls S2:ConstInt
 
-  Verify parameter type for classes or traits. If S0 does not extend
-  (if S1 is a class) or implement (if S1 is an interface) S1, this
-  instruction will raise a recoverable fatal error describing the type
-  mismatch.
+  Verify parameter type for classes or traits. If S0 does not extend (if S1 is
+  a class) or implement (if S1 is an interface) S1, this instruction will raise
+  a recoverable fatal error describing the type mismatch.
 
 VerifyParamCallable S0:Cell S1:ConstInt
 
-  If S0 is not callable, as defined by the php function is_callable,
-  this instruction will raise a recoverable fatal error describing the
-  type mismatch.
+  If S0 is not callable, as defined by the php function is_callable, this
+  instruction will raise a recoverable fatal error describing the type
+  mismatch.
 
 VerifyParamFail S0:ConstInt
 
-  Assumes that parameter number S0 in the current function has failed
-  its typehint and raises a recoverable fatal error describing the
-  type mismatch.
+  Assumes that parameter number S0 in the current function has failed its
+  typehint and raises a recoverable fatal error describing the type mismatch.
 
 RaiseUninitLoc<localId>
 
@@ -1630,15 +1586,14 @@ RaiseArrayIndexNotice S0:Int
 
 D:BoxedCell = ClosureStaticLocInit S0:ConstStr S1:FramePtr S2:Cell
 
-  Get boxed value to initialize static local named S0 in frame S1,
-  where S1 must be either a closure or generatorFromClosure function.
-  If the static local has not yet been initialized, its value will be
-  set to S2.
+  Get boxed value to initialize static local named S0 in frame S1, where S1
+  must be either a closure or generatorFromClosure function. If the static
+  local has not yet been initialized, its value will be set to S2.
 
 StaticLocInitCached S0:BoxedCell S1:Cell
 
-  Assuming S0 is an uninitialized static local RDS slot, initialize it
-  by setting it to the value of S1.
+  Assuming S0 is an uninitialized static local RDS slot, initialize it by
+  setting it to the value of S1.
 
 PrintStr S0:Str
 PrintInt S1:Int
@@ -1660,23 +1615,20 @@ D:Str = ConcatStrStr S0:Str S1:Str
 
 D:Str = ConcatCellCell S0:Cell S1:Cell
 
-  Concatenate S0 and S1 after converting them to strings in a way that
-  obeys php semantics.  (Calling object __toString methods, etc.)
+  Concatenate S0 and S1 after converting them to strings in a way that obeys
+  php semantics. (Calling object __toString methods, etc.)
 
 D:Arr = AddElemStrKey S0:Arr S1:Str S2:Cell
 
-  Add S2 to the array S0 for the key S1, and return the resulting
-  array.
+  Add S2 to the array S0 for the key S1, and return the resulting array.
 
 D:Arr = AddElemIntKey S0:Arr S1:Int S2:Cell
 
-  Add S2 to the array S0 for the key S1, and return the resulting
-  array.
+  Add S2 to the array S0 for the key S1, and return the resulting array.
 
 D:Arr = AddNewElem S0:Arr S1:Gen
 
-  Add S1 as a new element to the array S0.  TODO(#2437059): this is
-  broken.
+  Add S1 as a new element to the array S0. TODO(#2437059): this is broken.
 
 D:Arr = ArrayAdd S0:Arr S1:Arr
 
@@ -1684,30 +1636,29 @@ D:Arr = ArrayAdd S0:Arr S1:Arr
 
 D:Bool = AKExists S0:Cell S1:Cell
 
-  Has the effects of array_key_exists(S0, S1).  Note that S0 does not
-  need to be an array---if it is an Obj the ArrayAccess API will be
-  used, etc.
+  Has the effects of array_key_exists(S0, S1). Note that S0 does not need to be
+  an array---if it is an Obj the ArrayAccess API will be used, etc.
 
 D:Cell = ArrayIdx S0:ConstTCA S1:Arr S2:{Int,Str} S3:Cell
 
-  Checks if the array S1 contains the key S2, and returns the result
-  if found.  Otherwise S3 is returned.
+  Checks if the array S1 contains the key S2, and returns the result if found.
+  Otherwise S3 is returned.
 
 D:Cell = GenericIdx S0:ConstTCA S1:Cell S2:Cell S3:Cell
 
-  Checks if S1 contains the key S2, and returns the result if found.
-  Otherwise S3 is returned. S1 must support array or indexed access.
-  If S1 does not support array or indexed access S3 is returned.
+  Checks if S1 contains the key S2, and returns the result if found. Otherwise
+  S3 is returned. S1 must support array or indexed access. If S1 does not
+  support array or indexed access S3 is returned.
 
 D:Int LdSwitchDblIndex S0:Dbl S1:Int S2:Int
 D:Int LdSwitchStrIndex S0:Str S1:Int S2:Int
 D:Int LdSwitchObjIndex S0:Obj S1:Int S2:Int
 
-  These instructions are used to determine the target of a switch
-  statement with target range [S1:S1 + S2), when invoked with the value S0.
-  They call helper functions to check whether S0 is an numeric integer
-  in the range [S1:S1 + S2), and if so return the value S1 - (Int)S0.
-  Else, they return the target of the default target, S2 + 1.
+  These instructions are used to determine the target of a switch statement
+  with target range [S1:S1 + S2), when invoked with the value S0. They call
+  helper functions to check whether S0 is an numeric integer in the range
+  [S1:S1 + S2), and if so return the value S1 - (Int)S0. Else, they return the
+  target of the default target, S2 + 1.
 
 D:StkPtr InterpOne<T, bcOff, numPopped, numPushed> S0:StkPtr S1:FramePtr
 
@@ -1725,8 +1676,8 @@ D:StkPtr InterpOneCF<T, bcOff, numPopped, numPushed> S0:StkPtr S1:FramePtr
 
 D:Bool = ThingExists<class|interface|trait> S0:Str
 
-  Returns a bool indicating whether the class, interface, or trait
-  named by S0 exists.  Invokes autoload if it doesn't exist.
+  Returns a bool indicating whether the class, interface, or trait named by S0
+  exists. Invokes autoload if it doesn't exist.
 
 
 15. Register allocation
@@ -1734,13 +1685,13 @@ D:Bool = ThingExists<class|interface|trait> S0:Str
 
 Shuffle<d...> S...
 
-  Shuffle takes N source variables and N destination operands, and performs
-  a parallel copy from the source's currently assigned location to the
-  destination locations.  Destinations may be registers or spill slots.
-  Sources may be registers, spill slots, or constants.  Mem-Mem copies are
-  not supported. Each destination must be unique.  Shuffle is not an SSA
-  operation; destination registers are assigned at multiple positions in
-  the code, and may hold different variables at different positions.
+  Shuffle takes N source variables and N destination operands, and performs a
+  parallel copy from the source's currently assigned location to the
+  destination locations. Destinations may be registers or spill slots. Sources
+  may be registers, spill slots, or constants. Mem-Mem copies are not
+  supported. Each destination must be unique. Shuffle is not an SSA operation;
+  destination registers are assigned at multiple positions in the code, and may
+  hold different variables at different positions.
 
 
 16. Continuations & Closures
@@ -1748,26 +1699,25 @@ Shuffle<d...> S...
 
 D:Obj = CreateCl S0:ConstCls S1:ConstInt S2:FramePtr S3:StkPtr
 
-  Creates an object of class S0 (which must be a subclass of Closure),
-  copies S1 number of parameters from S2 into the properties on the
-  object.  Saves the $this and Func* from ActRec S2 into the object,
-  and returns the object.
+  Creates an object of class S0 (which must be a subclass of Closure), copies
+  S1 number of parameters from S2 into the properties on the object. Saves the
+  $this and Func* from ActRec S2 into the object, and returns the object.
 
 StClosureCtx S0:Obj<Closure> S1:{Ctx|Nullptr}
 
-  Store the context represented by S1 into the closure object S0.  S1
-  may be a Nullptr when there is no context (i.e. the closure is being
-  used in a non-method).
+  Store the context represented by S1 into the closure object S0. S1 may be a
+  Nullptr when there is no context (i.e. the closure is being used in a
+  non-method).
 
 StClosureFunc<func> S0:Obj<Closure>
 
-  Store the Func* clone that should be used for calling this closure
-  into the closure object S0.
+  Store the Func* clone that should be used for calling this closure into the
+  closure object S0.
 
 StClosureArg<offsetBytes> S0:Obj<Closure> S1:Gen
 
-  Store one of the closure environment arguments (i.e. from the
-  closure's use clause) from S1 into the closure object S0.
+  Store one of the closure environment arguments (i.e. from the closure's use
+  clause) from S1 into the closure object S0.
 
 D:Obj = CreateContFunc<origFunc,generatorFunc>
 
@@ -1775,60 +1725,58 @@ D:Obj = CreateContFunc<origFunc,generatorFunc>
 
 D:Obj = CreateContMeth<origFunc,generatorFunc> S0:Ctx
 
-  Create a continuation object for a generator method.  S0 is the
-  m_this/m_cls field of the current frame pointer.
+  Create a continuation object for a generator method. S0 is the m_this/m_cls
+  field of the current frame pointer.
 
 ContEnter S0:FramePtr S1:TCA S2:ConstInt S3:FramePtr
 
   Enters a generator body. S0 is the ActRec embedded in the Continuation
-  object. S1 is the address to jump to. S2 is the bytecode offset in the
-  caller to return to when the generator body yields. S3 is the current frame.
+  object. S1 is the address to jump to. S2 is the bytecode offset in the caller
+  to return to when the generator body yields. S3 is the current frame.
 
 ContPreNext S0:Obj -> B
 
-  Performs operations needed for the Continuation::next() method.  This
-  includes checking m_done and m_running---if either is not the case
-  branches to block B.
+  Performs operations needed for the Continuation::next() method. This includes
+  checking m_done and m_running---if either is not the case branches to block
+  B.
 
 ContStartedCheck S0:Obj -> B
 
-  Checks if the continuation object S0 has started, and if not
-  branches to block B.
+  Checks if the continuation object S0 has started, and if not branches to
+  block B.
 
 ContSetRunning S0:Obj S1:ConstBool
 
-  Sets the continuation object S0 to running if S1 is true, or
-  sets it as stopped otherwise.
+  Sets the continuation object S0 to running if S1 is true, or sets it as
+  stopped otherwise.
 
 ContArIncKey S0:FramePtr
 
-  Special-case key update for continuation, ActRec of which is S0,
-  which increments the key of a continuation if that continuation's key
-  is an Int. This will cause undefined behavior if the continuation's key
-  is not an Int.
+  Special-case key update for continuation, ActRec of which is S0, which
+  increments the key of a continuation if that continuation's key is an Int.
+  This will cause undefined behavior if the continuation's key is not an Int.
 
 ContArUpdateIdx S0:FramePtr S1:Int
 
-  Updates the internal index of continuation with S1 if necessary,  i.e. if
-  S1 is larger than the index. S0 is the pointer to the embedded ActRec.
+  Updates the internal index of continuation with S1 if necessary, i.e. if S1
+  is larger than the index. S0 is the pointer to the embedded ActRec.
 
 D:FramePtr LdContActRec S0:PtrToGen
 
-  Loads the Continuation object's ActRec, given a pointer to the
-  continuation object in S0.
+  Loads the Continuation object's ActRec, given a pointer to the continuation
+  object in S0.
 
 D:T LdContArRaw<T> S0:FramePtr S1:ConstInt
 
-  Loads raw data from the Continuation object ActRec of which is S0.
-  S1 is a constant from the RawMemSlot::Kind enum, which
-  describes the offset from the continuation base, and the size.
+  Loads raw data from the Continuation object ActRec of which is S0. S1 is a
+  constant from the RawMemSlot::Kind enum, which describes the offset from the
+  continuation base, and the size.
 
 StContArRaw S0:FramePtr S1:ConstInt S2:??
 
-  Stores raw data into the Continuation object ActRec of which is S0.
-  S1 is a constant from the RawMemSlow::Kind enum, which
-  describes the offset from the continutaion base, and the size.
-  S2 is the value.
+  Stores raw data into the Continuation object ActRec of which is S0. S1 is a
+  constant from the RawMemSlow::Kind enum, which describes the offset from the
+  continutaion base, and the size. S2 is the value.
 
 D:Cell LdContArValue S0:FramePtr
 
@@ -1836,8 +1784,8 @@ D:Cell LdContArValue S0:FramePtr
 
 StContArValue S0:FramePtr S1:Cell
 
-  Stores 'value' into the Continuation object ActRec of which is S0.
-  S1 is the new value.
+  Stores 'value' into the Continuation object ActRec of which is S0. S1 is the
+  new value.
 
 D:Cell LdContArKey S0:FramePtr
 
@@ -1845,20 +1793,19 @@ D:Cell LdContArKey S0:FramePtr
 
 StContArKey S0:FramePtr S1:Cell
 
-  Stores 'key' into the Continuation object ActRec of which is S0.
-  S1 is the new value.
+  Stores 'key' into the Continuation object ActRec of which is S0. S1 is the
+  new value.
 
 D:Int = LdWHState S0:Obj
 
-  Loads the state of the WaitHandle in S0, which is a value from the
-  wait handle states in ext_asio.h.  This instruction has undefined
-  behavior if S0 is not a WaitHandle.
+  Loads the state of the WaitHandle in S0, which is a value from the wait
+  handle states in ext_asio.h. This instruction has undefined behavior if S0 is
+  not a WaitHandle.
 
 D:Cell = LdWHResult S0:Obj
 
-  Loads the result of the WaitHandle in S0.  This instruction has
-  undefined behavior if S0 is not a WaitHandle, or if S0 is not
-  finished.
+  Loads the result of the WaitHandle in S0. This instruction has undefined
+  behavior if S0 is not a WaitHandle, or if S0 is not finished.
 
 
 17. Debugging, instrumentation, and profiling
@@ -1881,21 +1828,21 @@ IncProfCounter<TransID>
 
 DbgAssertRefCount S0:{Counted|StaticStr|StaticArr}
 
-  Assert that S0 has a valid refcount.  S0 must be a type with a valid
-  (counted or static) _count field.  If S0's count is implausible then
-  execute a hardware trap instruction (int3 on x64).
+  Assert that S0 has a valid refcount. S0 must be a type with a valid (counted
+  or static) _count field. If S0's count is implausible then execute a hardware
+  trap instruction (int3 on x64).
 
 DbgAssertPtr S0:PtrToGen
 
-  Assert that S0 points to plausible TypedValue.  If the TypedValue is a
-  type with a _count field, check that the count field is plausible using
-  the same logic as DbgAssertRefCount.  Internally this uses always_assert();
-  failures cause an abort (whatever always_assert does).
+  Assert that S0 points to plausible TypedValue. If the TypedValue is a type
+  with a _count field, check that the count field is plausible using the same
+  logic as DbgAssertRefCount. Internally this uses always_assert(); failures
+  cause an abort (whatever always_assert does).
 
 DbgAssertType<T> S0:Cell
 
-  Assert that S0 is of type T at runtime.  If the assertion fails,
-  execution is aborted via a hardware exception.
+  Assert that S0 is of type T at runtime. If the assertion fails, execution is
+  aborted via a hardware exception.
 
 DbgAssertRetAddr
 
@@ -1913,30 +1860,28 @@ D:Bool = MIterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
 D:Bool = MIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
 
   Initializes the iterator variable whose index is given by S2. This
-  instruction creates the appropriate iterator for the array or object
-  that S0 references, and rewinds the new iterator to its start.  S3
-  and S4 are local variable indices. S0 points to the stack frame
-  containing the iterator and local variables S2, S3, and S4.
+  instruction creates the appropriate iterator for the array or object that S0
+  references, and rewinds the new iterator to its start. S3 and S4 are local
+  variable indices. S0 points to the stack frame containing the iterator and
+  local variables S2, S3, and S4.
 
-  If the new iterator is at its end (i.e., has no elements to iterate
-  over), this instruction decrements the refcount of S0 and returns
-  false; otheriwse, it stores a reference to S0 in the new iterator
-  and returns true. If the iterator is not at its end, then this
-  instruction stores the iterator's first value (and key) into the
-  local variable S3 (and S4, respectively).
+  If the new iterator is at its end (i.e., has no elements to iterate over),
+  this instruction decrements the refcount of S0 and returns false; otheriwse,
+  it stores a reference to S0 in the new iterator and returns true. If the
+  iterator is not at its end, then this instruction stores the iterator's first
+  value (and key) into the local variable S3 (and S4, respectively).
 
-  The IterInit and IterInitK instructions always copy the array
-  element by value.
+  The IterInit and IterInitK instructions always copy the array element by
+  value.
 
-  The WIterInit and WIterInitK instructions copy referenced array
-  elements by reference, and non-referenced array elements by value.
+  The WIterInit and WIterInitK instructions copy referenced array elements by
+  reference, and non-referenced array elements by value.
 
-  The MIterInit and MIterInitK instructions always copy the array element
-  by reference.
+  The MIterInit and MIterInitK instructions always copy the array element by
+  reference.
 
-  This instruction has the ConsumesRC property because it either
-  decrements the reference count of s0 or stores a reference to S0
-  into the new iterator.
+  This instruction has the ConsumesRC property because it either decrements the
+  reference count of s0 or stores a reference to S0 into the new iterator.
 
 D:Bool = IterNext S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = IterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
@@ -1945,44 +1890,42 @@ D:Bool = WIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
 D:Bool = MIterNext S0:FramePtr S1:ConstInt S2:ConstInt
 D:Bool = MIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
 
-  Advances the iterator variable whose index is given by S1. S2 and S3
-  are local variable indices. S0 points to the stack frame containing
-  the iterator and local variables S1, S2, and S3.
+  Advances the iterator variable whose index is given by S1. S2 and S3 are
+  local variable indices. S0 points to the stack frame containing the iterator
+  and local variables S1, S2, and S3.
 
-  If the iterator has reached the end, this instruction frees the
-  iterator variable and returns false; otherwise, it returns true.  If
-  the iterator has not reached its end, then this instruction stores
-  the iterator's next value (and key) into the local variable S3 (and
-  S4, respectively).
+  If the iterator has reached the end, this instruction frees the iterator
+  variable and returns false; otherwise, it returns true. If the iterator has
+  not reached its end, then this instruction stores the iterator's next value
+  (and key) into the local variable S3 (and S4, respectively).
 
-  The IterInit and IterInitK instructions always copy the array
-  element by value.
-  The WIterInit and WIterInitK instructions copy referenced array
-  elements by reference, and non-referenced array elements by value.
-  The MIterNext and MIterNextK instructions always copy the array element
-  by reference.
+  The IterInit and IterInitK instructions always copy the array element by
+  value. The WIterInit and WIterInitK instructions copy referenced array
+  elements by reference, and non-referenced array elements by value. The
+  MIterNext and MIterNextK instructions always copy the array element by
+  reference.
 
 IterFree<IterId> S0:FramePtr
 MIterFree<IterId> S0:FramePtr
 
-  Free the iterator variable whose index is given by S1 in the stack
-  frame pointed to by S0.
+  Free the iterator variable whose index is given by S1 in the stack frame
+  pointed to by S0.
 
 D:Bool = DecodeCufIter<IterId> S0:{Arr|Obj|Str} S1:FramePtr
 
   Decode S0 as a callable, and write the decoded values to the iterator
-  specified by IterId. Returns true iff it successfully decoded the
-  callable. Does not raise warnings, or throw exceptions.
+  specified by IterId. Returns true iff it successfully decoded the callable.
+  Does not raise warnings, or throw exceptions.
 
 CIterFree<IterId> S0:FramePtr
 
-  Free the iterator variable whose index is given by IterId in the stack
-  frame pointed to by S0.
+  Free the iterator variable whose index is given by IterId in the stack frame
+  pointed to by S0.
 
 IterCopy S0:FramePtr S1:ConstInt S2:PtrToGen S3:ConstInt
 
-  Copy iterator from stack frame S0 at offset S1 to the continuation
-  frame given by S2 at offset S3. Used for copying iterators in CreateAsync.
+  Copy iterator from stack frame S0 at offset S1 to the continuation frame
+  given by S2 at offset S3. Used for copying iterators in CreateAsync.
 
 
 19. Member instruction support
@@ -1992,10 +1935,9 @@ D:PtrToCell = DefMIStateBase
 
   Declares a base register for MInstrState. Currently this is always %rsp.
 
-All of the remaining opcodes in this section are simple wrappers
-around helper functions (specified in S0) to perform the corresponding
-vector operation. If S1 is a ConstCls it represents the context class
-for the operation.
+All of the remaining opcodes in this section are simple wrappers around helper
+functions (specified in S0) to perform the corresponding vector operation. If
+S1 is a ConstCls it represents the context class for the operation.
 
 SetElem, SetProp, and SetNewElem are used to implement part of the SetM hhbc
 opcode, which almost always pushes its first stack input or a CountedStr as its
@@ -2032,8 +1974,8 @@ fields of that struct for holding intermediate values.
 
 D:PtrToGen = PropX S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
 
-  Lookup intermediate property in S2, with key S3. S4 should point to
-  an MInstrState struct.
+  Lookup intermediate property in S2, with key S3. S4 should point to an
+  MInstrState struct.
 
 D:PtrToGen = PropDX S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen
                     S4:PtrToCell
@@ -2045,8 +1987,7 @@ D:PtrToGen, D:StkPtr = PropDXStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen}
 
 D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
 
-  Get property with key S3 from S2. S4 should point to an MInstrState
-  struct.
+  Get property with key S3 from S2. S4 should point to an MInstrState struct.
 
 D:BoxedCell = VGetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrtoGen} S3:Gen
                        S4:PtrToCell
@@ -2099,19 +2040,20 @@ D:PtrToGen = ElemX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
 D:PtrToGen = ElemArray S0:ConstTCA S1:PtrToArr S2:{Int|Str}
 
-  Similar to ElemX, but assumes the base S1 is an array and the key S2 is an int/str.
+  Similar to ElemX, but assumes the base S1 is an array and the key S2 is an
+  int/str.
 
 D:PtrToGen = ElemDX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 D:PtrToGen, D:StkPtr = ElemDXStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
-  Like ElemX, but used for intermediate element lookups that may
-  modify the base.
+  Like ElemX, but used for intermediate element lookups that may modify the
+  base.
 
 D:PtrToGen = ElemUX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 D:PtrToGen, D:StkPtr = ElemUXStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
-  Like ElemX, but used for intermediate element lookups that may
-  modify the base as part of an unset operation.
+  Like ElemX, but used for intermediate element lookups that may modify the
+  base as part of an unset operation.
 
 D:Cell = ArrayGet S0:ConstTCA S1:Arr S2:{Int|Str}
 
@@ -2131,8 +2073,7 @@ D:Cell = MapGet S0:ConstTCA S1:Obj<Map> S2:{Int|Str}
 
 D:Cell = CGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
-  Get element with key S2 from S1. S3 should point to an MInstrState
-  struct.
+  Get element with key S2 from S1. S3 should point to an MInstrState struct.
 
 D:BoxedCell = VGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 D:BoxedCell, D:StkPtr = VGetElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
@@ -2148,8 +2089,8 @@ D:StkPtr = BindElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:BoxedCell S4:PtrToCell
 
 D:Arr = ArraySet S0:ConstTCA S1:Arr S2:{Int|Str} S3:Cell
 
-  Set element with key S2 in S1 to S3. The dest will be a new Array
-  that should replace S1.
+  Set element with key S2 in S1 to S3. The dest will be a new Array that should
+  replace S1.
 
 ArraySet S0:ConstTCA S1:Arr S2:{Int|Str} S3:Cell S4:BoxedArr
 
@@ -2162,15 +2103,17 @@ MapSet S0:ConstTCA S1:Obj<Map> S2:{Int|Str} S3:Cell
   Set element with key S2 in S1 to S3. S1 is a Map instance.
 
 D:{CountedStr|Nullptr} = SetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
-D:{CountedStr|Nullptr} D:StkPtr = SetElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
+D:{CountedStr|Nullptr} D:StkPtr = SetElemStk S0:ConstTCA S1:PtrToGen S2:Gen
+                                             S3:Cell
 
   Set element with key S2 in S1 to S3.
 
 SetWithRefElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToGen S4:PtrToCell
-D:StkPtr = SetWithRefElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToGen S4:PtrToCell
+D:StkPtr = SetWithRefElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToGen
+                             S4:PtrToCell
 
-  Set element with key S2 in S1 to S3. S4 should point to
-  an MInstrState struct.
+  Set element with key S2 in S1 to S3. S4 should point to an MInstrState
+  struct.
 
 UnsetElem S0:ConstTCA S1:PtrToGen S2:Gen
 D:StkPtr = UnsetElemStk S0:ConstTCA S1:PtrToGen S2:Gen
@@ -2204,7 +2147,8 @@ SetWithRefNewElem S0:ConstTCA S1:PtrToGen S2:PtrToGen S3:PtrToCell
 D:StkPtr = SetWithRefNewElemStk S0:ConstTCA S1:PtrToGen S2:PtrToGen
                                           S3:PtrToCell
 
-  AppendWithRef the value in S2 to S1. S3 should point to an MInstrState struct.
+  AppendWithRef the value in S2 to S1. S3 should point to an MInstrState
+  struct.
 
 BindNewElem S0:ConstTCA S0:PtrToGen S1:BoxedCell S2:PtrToCell
 D:StkPtr = BindNewElemStk S0:PtrToGen S1:BoxedCell S2:PtrToCell
@@ -2221,18 +2165,18 @@ D:Bool = StringIsset S0:Str S1:Int
 
 D:Bool = VectorIsset S0:ConstTCA S1:Obj<Vector> S2:{Int}
 
-  Returns true iff the element at key S2 in the base S1 is set. S1 is a
-  Vector instance.
+  Returns true iff the element at key S2 in the base S1 is set. S1 is a Vector
+  instance.
 
 D:Bool = PairIsset S0:ConstTCA S1:Obj<Pair> S2:{Int}
 
-  Returns true iff the element at key S2 in the base S1 is set. S1 is a
-  Pair instance.
+  Returns true iff the element at key S2 in the base S1 is set. S1 is a Pair
+  instance.
 
 D:Bool = MapIsset S0:ConstTCA S1:Obj<Map> S2:{Int|Str}
 
-  Returns true iff the element at key S2 in the base S1 is set. S1 is a
-  Map instance.
+  Returns true iff the element at key S2 in the base S1 is set. S1 is a Map
+  instance.
 
 D:Bool = IssetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
@@ -2240,8 +2184,8 @@ D:Bool = IssetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
 D:Bool = EmptyElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
-  Returns true iff the element at key S2 in S1 is set and not equal
-  (as defined by the hhbc Eq instruction) to false.
+  Returns true iff the element at key S2 in S1 is set and not equal (as defined
+  by the hhbc Eq instruction) to false.
 
 CheckBounds S0:Int S1:Int
 
@@ -2255,8 +2199,8 @@ CheckPackedArrayBounds S0:Arr S1:Int -> B
 
 D:Bool = CheckPackedArrayElemNull S0:Arr S1:Int
 
-  Returns true if the element at index S1 of the packed array in S0
-  is not null.
+  Returns true if the element at index S1 of the packed array in S0 is not
+  null.
 
 D:Cell = LdPackedArrayElem S0:Arr S1:Int
 
@@ -2268,8 +2212,8 @@ D:Int = LdVectorSize S0:Obj<Vector>
 
 VectorHasFrozenCopy S0:Obj<Vector> -> B
 
-  Checks if the Vector in S0 has live frozen vector copies and branches to
-  B if so.
+  Checks if the Vector in S0 has live frozen vector copies and branches to B if
+  so.
 
 VectorDoCow S0:Obj<Vector>
 
@@ -2283,8 +2227,8 @@ D:Obj = ColAddNewElemC S0:Obj S0:Cell
 
 D:Obj = ColAddElemC S0:Obj S1:Cell S2:Cell
 
-  Adds item to collection. Inserts item S2 into collection S0 at key S1. Throws
-  a fatal error if S0 is not a collection. Returns S0.
+  Adds item to collection. Inserts item S2 into collection S0 at key S1.
+  Throws a fatal error if S0 is not a collection. Returns S0.
 
 20. Exception/unwinding support
 
@@ -2313,5 +2257,5 @@ DeleteUnwinderException
 
 TypeProfileFunc<paramIndex, functionName> S0:Gen
 
-  Profiles that function's parameter/return value for a particular parameter index.
-  Calls into native c++ function.
+  Profiles that function's parameter/return value for a particular parameter
+  index. Calls into native c++ function.

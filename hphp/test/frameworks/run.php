@@ -354,18 +354,18 @@ function get_unit_testing_infra_dependencies(): void {
 
   // Quick hack to make sure we get the latest phpunit binary from composer
   $md5_file = __DIR__."/composer.json.md5";
-  $json_file = __DIR__."/composer.json";
+  $json_file_contents = file_get_contents(__DIR__."/composer.json");
   $vendor_dir = __DIR__."/vendor";
   $lock_file = __DIR__."/composer.lock";
-  if (file_exists($md5_file) &&
-      file_get_contents($md5_file) !== md5($json_file)) {
+  if (!file_exists($md5_file) ||
+      file_get_contents($md5_file) !== md5($json_file_contents)) {
     verbose("\nUpdated composer.json found. Updating phpunit binary.\n",
             !Options::$csv_only);
     if (file_exists($vendor_dir)) {
       remove_dir_recursive($vendor_dir);
     }
     unlink($lock_file);
-    file_put_contents($md5_file, md5($json_file));
+    file_put_contents($md5_file, md5($json_file_contents));
   }
 
   // Install phpunit from composer.json located in __DIR__

@@ -9218,9 +9218,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       fsp->analyzeProgram(ar);
 
       ue.reset(emitHHBCUnitEmitter(ar, fsp, md5));
-      if (Option::UseHHBBC && SystemLib::s_inited) {
-        ue = HHBBC::single_unit(std::move(ue));
-      }
     }
     Repo::get().commitUnit(ue.get(), unitOrigin);
 

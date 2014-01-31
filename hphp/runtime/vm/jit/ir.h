@@ -743,7 +743,7 @@ O_STK(BindElem,                     ND, C(TCA)                                \
 O(ArraySet,                     D(Arr), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
-                                          S(Cell),             E|N|PRc|CRc|K) \
+                                          S(Cell),          E|N|PRc|CRc|K|Er) \
 O(MapSet,                           ND, C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str)                          \

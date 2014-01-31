@@ -15,7 +15,16 @@
 */
 #include "hphp/compiler/analysis/emitter.h"
 
+#include <memory>
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <algorithm>
+#include <memory>
+
 #include "folly/MapUtil.h"
+#include "folly/Memory.h"
+#include "folly/ScopeGuard.h"
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -106,14 +115,6 @@
 #include "hphp/runtime/vm/preclass-emit.h"
 
 #include "hphp/system/systemlib.h"
-
-#include "folly/ScopeGuard.h"
-
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <algorithm>
-#include <memory>
 
 namespace HPHP {
 namespace Compiler {
@@ -8571,10 +8572,11 @@ struct Entry {
   const ClassInfo* ci;
 };
 
-static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
-                                    ssize_t numBuiltinFuncs) {
+static std::unique_ptr<UnitEmitter>
+emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
+                       ssize_t numBuiltinFuncs) {
   MD5 md5("11111111111111111111111111111111");
-  UnitEmitter* ue = new UnitEmitter(md5);
+  auto ue = folly::make_unique<UnitEmitter>(md5);
   ue->setFilepath(makeStaticString(""));
   ue->addTrivialPseudoMain();
 
@@ -8619,9 +8621,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     ue->recordFunction(fe);
   }
 
-  Unit* unit = ue->create();
-  delete ue;
-  return unit;
+  return ue;
 }
 
 enum ContinuationMethod {
@@ -8711,10 +8711,11 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
 }
 
 StaticString s_construct("__construct");
-static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
-                                     ssize_t numBuiltinClasses) {
+static std::unique_ptr<UnitEmitter>
+emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
+                        ssize_t numBuiltinClasses) {
   MD5 md5("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-  UnitEmitter* ue = new UnitEmitter(md5);
+  auto ue = folly::make_unique<UnitEmitter>(md5);
   ue->setFilepath(makeStaticString(""));
   ue->addTrivialPseudoMain();
 
@@ -8728,7 +8729,12 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
 
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors
-  assert(Class::s_extClassHash.size() == 0);
+  if (!Class::s_extClassHash.empty()) {
+    // For HHBBC we run this more than once in the process lifetime,
+    // but otherwise we shouldn't be doing that.
+    assert(Option::UseHHBBC);
+    Class::s_extClassHash.clear();
+  }
   for (long long i = 0; i < numBuiltinClasses; ++i) {
     const HhbcExtClassInfo* info = builtinClasses + i;
     StringData *s = makeStaticString(info->m_name);
@@ -8907,9 +8913,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   Peephole peephole(*ue, metaInfo);
   metaInfo.setForUnit(*ue);
 
-  Unit* unit = ue->create();
-  delete ue;
-  return unit;
+  return ue;
 }
 
 static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
@@ -9119,6 +9123,11 @@ void emitAllHHBC(AnalysisResultPtr ar) {
 
   assert(Option::UseHHBBC || ues.empty());
   if (Option::UseHHBBC) {
+    auto nfunc = emitHHBCNativeFuncUnit(hhbc_ext_funcs, hhbc_ext_funcs_count);
+    auto ncls  = emitHHBCNativeClassUnit(hhbc_ext_classes,
+                                         hhbc_ext_class_count);
+    ues.push_back(std::move(nfunc));
+    ues.push_back(std::move(ncls));
     ues = HHBBC::whole_program(std::move(ues));
     batchCommit(std::move(ues));
     commitGlobalData();
@@ -9242,12 +9251,12 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
 
 Unit* hphp_build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
                                   ssize_t numBuiltinFuncs) {
-  return emitHHBCNativeFuncUnit(builtinFuncs, numBuiltinFuncs);
+  return emitHHBCNativeFuncUnit(builtinFuncs, numBuiltinFuncs)->create();
 }
 
 Unit* hphp_build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
                                    ssize_t numBuiltinClasses) {
-  return emitHHBCNativeClassUnit(builtinClasses, numBuiltinClasses);
+  return emitHHBCNativeClassUnit(builtinClasses, numBuiltinClasses)->create();
 }
 
 } // extern "C"

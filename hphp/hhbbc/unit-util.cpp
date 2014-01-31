@@ -24,7 +24,8 @@ namespace HPHP { namespace HHBBC {
 
 bool is_systemlib_part(const php::Unit& unit) {
   static const char prefix[] = "/:systemlib";
-  return !strncmp(unit.filename->data(), prefix, sizeof prefix - 1);
+  return !*unit.filename->data() ||
+    !strncmp(unit.filename->data(), prefix, sizeof prefix - 1);
 }
 
 bool isNSNormalized(SString name) {

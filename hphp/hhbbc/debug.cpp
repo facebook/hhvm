@@ -43,6 +43,11 @@ void debug_dump_program(const php::Program& program) {
   parallel_for_each(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& u) {
+      if (!*u->filename->data()) {
+        // The native systemlibs: for now just skip.
+        return;
+      }
+
       auto const file = fs::path(dir) / fs::path(u->filename->data());
       fs::create_directories(fs::path(file).remove_filename());
       fs::ofstream out(file);

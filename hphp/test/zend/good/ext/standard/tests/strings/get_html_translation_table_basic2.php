@@ -4,29 +4,35 @@
  * Source code: ext/standard/html.c
 */
 
-/* test get_html_translation_table() when $table argument is specified as HTML_SPECIALCHARS */
+/* Test get_html_translation_table() when table is specified as HTML_ENTITIES */
+
+//set locale to en_US.UTF-8
+setlocale(LC_ALL, "en_US.UTF-8");
+
 
 echo "*** Testing get_html_translation_table() : basic functionality ***\n";
 
-// $table as HTML_SEPCIALCHARS and different quote style
-echo "-- with table = HTML_SPECIALCHARS & quote_style = ENT_COMPAT --\n";
-$table = HTML_SPECIALCHARS;
+// Calling get_html_translation_table() with all arguments
+// $table as HTML_ENTITIES and different quote style
+echo "-- with table = HTML_ENTITIES & quote_style = ENT_COMPAT --\n";
+$table = HTML_ENTITIES;
 $quote_style = ENT_COMPAT;
 $tt = get_html_translation_table($table, $quote_style, "UTF-8");
 asort( $tt );
 var_dump( $tt );
 
-echo "-- with table = HTML_SPECIALCHARS & quote_style = ENT_QUOTES --\n";
+echo "-- with table = HTML_ENTITIES & quote_style = ENT_QUOTES --\n";
 $quote_style = ENT_QUOTES;
 $tt = get_html_translation_table($table, $quote_style, "UTF-8");
 asort( $tt );
 var_dump( $tt );
 
-echo "-- with table = HTML_SPECIALCHARS & quote_style = ENT_NOQUOTES --\n";
+echo "-- with table = HTML_ENTITIES & quote_style = ENT_NOQUOTES --\n";
 $quote_style = ENT_NOQUOTES;
 $tt = get_html_translation_table($table, $quote_style, "UTF-8");
 asort( $tt );
 var_dump( $tt );
+
 
 echo "Done\n";
 ?>

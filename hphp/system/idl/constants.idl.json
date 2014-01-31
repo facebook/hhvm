@@ -1491,6 +1491,22 @@
             "name": "LIBXML_NOWARNING",
             "value": 64
         },
+                {
+            "name": "ENT_HTML401",
+            "value": 0
+        },
+        {
+            "name": "ENT_XML1",
+            "value": 16
+        },
+        {
+            "name": "ENT_XHTML",
+            "value": 32
+        },
+        {
+            "name": "ENT_HTML5",
+            "value": 48
+        },
         {
             "name": "LIBXML_NOXMLDECL",
             "value": 2

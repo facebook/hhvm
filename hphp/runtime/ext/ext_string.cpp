@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext/ext_variable.h"
 #include "folly/Unicode.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/zend/html-table.h"
 
 namespace HPHP {
 
@@ -1570,28 +1571,70 @@ String f_convert_cyr_string(const String& str, const String& from, const String&
   return String(ret, str.size(), AttachString);
 }
 
-#define ENT_HTML_QUOTE_NONE     0
-#define ENT_HTML_QUOTE_SINGLE   1
-#define ENT_HTML_QUOTE_DOUBLE   2
-
-static const HtmlBasicEntity basic_entities[] = {
-  { '"',  "&quot;",   6,  ENT_HTML_QUOTE_DOUBLE },
-  { '\'', "&#039;",   6,  ENT_HTML_QUOTE_SINGLE },
-  { '\'', "&#39;",    5,  ENT_HTML_QUOTE_SINGLE },
-  { '<',  "&lt;",     4,  0 },
-  { '>',  "&gt;",     4,  0 },
-  { 0, NULL, 0, 0 }
-};
 
 const StaticString
   s_amp("&"),
   s_ampsemi("&amp;");
 
+
+#define ENT_HTML_QUOTE_NONE     0
+#define ENT_HTML_QUOTE_SINGLE   1
+#define ENT_HTML_QUOTE_DOUBLE   2
+
+static const HtmlBasicEntity basic_entities_noapos[] = {
+  { '"',  "&quot;",   6,  ENT_HTML_QUOTE_DOUBLE },
+  { '\'', "&#039;",   6,  ENT_HTML_QUOTE_SINGLE },
+  { '<',  "&lt;",     4,  0 },
+  { '>',  "&gt;",     4,  0 },
+  { 0,    nullptr,    0,  0 }
+};
+
+static const HtmlBasicEntity basic_entities_apos[] = {
+  { '"',  "&quot;",   6,  ENT_HTML_QUOTE_DOUBLE },
+  { '\'', "&apos;",   6,  ENT_HTML_QUOTE_SINGLE },
+  { '<',  "&lt;",     4,  0 },
+  { '>',  "&gt;",     4,  0 },
+  { 0,     nullptr,   0,  0 }
+};
+
+const HtmlBasicEntity* get_basic_table(bool all, entity_doctype doctype) {
+  if (doctype == entity_doctype::xhtml) {
+    return all ? basic_entities_noapos : basic_entities_apos;
+  }
+
+  if (doctype == entity_doctype::html401) {
+    return basic_entities_noapos;
+  }
+
+  return basic_entities_apos;
+}
+
+#define ENT_HTML_DOC_TYPE_MASK  (16|32)
+#define ENT_HTML_DOC_HTML401    0
+#define ENT_HTML_DOC_XML1       16
+#define ENT_HTML_DOC_XHTML      32
+#define ENT_HTML_DOC_HTML5      (16|32)
+
+entity_doctype determine_doctype(int flags) {
+  int mask = flags & ENT_HTML_DOC_TYPE_MASK;
+  switch (mask) {
+    case ENT_HTML_DOC_HTML401: return entity_doctype::html401;
+    case ENT_HTML_DOC_XML1: return entity_doctype::xml1;
+    case ENT_HTML_DOC_XHTML: return entity_doctype::xhtml;
+    case ENT_HTML_DOC_HTML5: return entity_doctype::html5;
+  }
+  not_reached();
+}
+
+String encode_as_utf8(int code_point) {
+  auto res = folly::codePointToUtf8(code_point);
+  return String::FromCStr(res.data());
+}
+
 Array f_get_html_translation_table(int table /* = 0 */,
                                    int flags /* = k_ENT_COMPAT */,
                                    const String& encoding /* = "UTF-8" */) {
   using namespace entity_charset_enum;
-
   auto charset = determine_charset(encoding.data());
   if (charset == cs_unknown) {
     charset = cs_utf_8;
@@ -1600,48 +1643,59 @@ Array f_get_html_translation_table(int table /* = 0 */,
                     ", assuming utf-8", encoding.data());
     }
   }
+  auto doctype = determine_doctype(flags);
 
   const int HTML_SPECIALCHARS = 0;
   const int HTML_ENTITIES = 1;
+  bool all = (table == HTML_ENTITIES);
 
   Array ret;
   switch (table) {
   case HTML_ENTITIES: {
-    auto entity_map = html_get_entity_map();
+    if (charset == cs_utf_8) {
+      auto entity_map = get_doctype_entity_table(doctype);
+      for (const auto& item : *entity_map) {
+        auto key = encode_as_utf8(item.first);
 
-    for (int j = 0; entity_map[j].charset != cs_terminator; j++) {
-      const html_entity_map &em = entity_map[j];
-      if (em.charset != charset)
-        continue;
-
-      for (int i = 0; i <= em.endchar - em.basechar; i++) {
-        char buffer[16];
-
-        if (em.table[i] == NULL)
-          continue;
-        snprintf(buffer, sizeof(buffer), "&%s;", em.table[i]);
-        String key;
-        int code = em.basechar + i;
-        if (charset == cs_utf_8) {
-          auto keyAsString = folly::codePointToUtf8(code);
-          key = String::FromCStr(keyAsString.data());
-        } else {
-          key = String::FromChar(code);
-        }
-
+        char buffer[32];
+        snprintf(buffer, sizeof(buffer), "&%s;", item.second.c_str());
         ret.set(key, String(buffer, CopyString));
+      }
+      if (doctype == entity_doctype::html5) {
+        for (const auto& item: *get_multicode_table()) {
+          auto codes = item.first;
+          String key = encode_as_utf8(codes.first);
+          key += encode_as_utf8(codes.second);
+
+          char buffer[32];
+          snprintf(buffer, sizeof(buffer), "&%s", item.second.c_str());
+          ret.set(key, String(buffer, CopyString));
+        }
+      }
+    } else {
+      const auto& entity_map = get_doctype_entity_table(doctype);
+      auto charset_table = get_charset_table(charset);
+      for (const auto& item : *charset_table) {
+        const auto iter = entity_map->find(item.second);
+        if (iter != entity_map->end()) {
+          char buffer[16];
+          snprintf(buffer, sizeof(buffer), "&%s;", iter->second.c_str());
+
+          auto key = String::FromChar(item.first);
+          ret.set(key, String(buffer, CopyString));
+        }
       }
     }
     /* fall thru */
   }
   case HTML_SPECIALCHARS:
-    for (int j = 0; basic_entities[j].charcode != 0; j++) {
-      if (basic_entities[j].flags &&
-          (flags & basic_entities[j].flags) == 0)
+    const auto& basic_table = get_basic_table(all, doctype);
+    for (int j = 0; basic_table[j].charcode != 0; j++) {
+      const auto& item = basic_table[j];
+      if (item.flags && (flags & item.flags) == 0)
         continue;
 
-      ret.set(String::FromChar(basic_entities[j].charcode),
-              basic_entities[j].entity);
+      ret.set(String::FromChar(item.charcode), item.entity);
     }
     ret.set(s_amp, s_ampsemi);
     break;

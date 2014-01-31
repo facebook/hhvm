@@ -31,19 +31,19 @@ struct Block;
 struct AsmInfo;
 
 // IRInstruction
+void printInstr(std::ostream& ostream, const IRInstruction*,
+                const RegAllocInfo* regs = nullptr,
+                const GuardConstraints* guards = nullptr);
+void printOpcode(std::ostream& os, const IRInstruction* inst,
+                 const GuardConstraints* guards);
+void printSrcs(std::ostream& os, const IRInstruction* inst,
+               const RegAllocInfo* regs);
+void printDsts(std::ostream& os, const IRInstruction* inst,
+               const RegAllocInfo* regs);
 void print(std::ostream& ostream, const IRInstruction*,
            const RegAllocInfo* regs = nullptr,
            const GuardConstraints* guards = nullptr);
 void print(const IRInstruction*);
-void printInstr(std::ostream& ostream, const IRInstruction*,
-                const RegAllocInfo* regs = nullptr,
-                const GuardConstraints* guards = nullptr);
-void printDsts(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs);
-void printSrcs(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs);
-void printOpcode(std::ostream& os, const IRInstruction* inst,
-                 const GuardConstraints* guards);
 
 // SSATmp
 void print(std::ostream& ostream, const SSATmp*,
@@ -63,6 +63,7 @@ void print(std::ostream& ostream, const IRUnit&,
            const RegAllocInfo* regs = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr);
+void print(const IRUnit&);
 
 /*
  * Some utilities related to dumping. Rather than file-by-file control, we

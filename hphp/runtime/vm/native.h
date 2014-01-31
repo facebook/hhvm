@@ -218,16 +218,16 @@ bool registerConstant(const StringData* cnsName, Cell cns) {
 
 template<DataType DType>
 typename std::enable_if<
-  !std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  !std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
   bool>::type
 registerConstant(const StringData* cnsName,
-                 typename detail::DataTypeCPPType<DType>::type val) {
+                 typename DataTypeCPPType<DType>::type val) {
   return registerConstant(cnsName, make_tv<DType>(val));
 }
 
 template<DataType DType>
 typename std::enable_if<
-  std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
   bool>::type
 registerConstant(const StringData* cnsName) {
   return registerConstant(cnsName, make_tv<DType>());
@@ -258,17 +258,17 @@ bool registerClassConstant(const StringData *clsName,
 
 template<DataType DType>
 typename std::enable_if<
-  !std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  !std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
   bool>::type
 registerClassConstant(const StringData* clsName,
                       const StringData* cnsName,
-                      typename detail::DataTypeCPPType<DType>::type val) {
+                      typename DataTypeCPPType<DType>::type val) {
   return registerClassConstant(clsName, cnsName, make_tv<DType>(val));
 }
 
 template<DataType DType>
 typename std::enable_if<
-  std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
   bool>::type
 registerClassConstant(const StringData* clsName,
                       const StringData* cnsName) {

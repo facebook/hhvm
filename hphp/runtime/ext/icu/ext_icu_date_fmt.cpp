@@ -163,14 +163,17 @@ double IntlDateFormatter::getTimestamp(CVarRef arg) {
 //////////////////////////////////////////////////////////////////////////////
 // class IntlDateFormatter
 
-static void HHVM_METHOD(IntlDateFormatter, __construct_array, CArrRef args) {
-  auto data = NEWOBJ(IntlDateFormatter)(args[0].toString(), // locale
-                                        args[1].toInt64(), // datetype
-                                        args[2].toInt64(), // timetype
-                                        args[3], // timezone
-                                        args[4], // calendar
-                                        args[5].toString()); // pattern
-  this_->o_set(s_resdata, Resource(data), s_IntlDateFormatter.get());
+static TypedValue* HHVM_MN(IntlDateFormatter, __construct)(ActRec *ar) {
+  auto data = NEWOBJ(IntlDateFormatter)(
+    getArg<KindOfString>(ar, 0), // locale
+    getArg<KindOfInt64>(ar, 1), // datetype
+    getArg<KindOfInt64>(ar, 2), // timetype
+    getArg<KindOfAny>(ar, 3), // timezone
+    getArg<KindOfAny>(ar, 4), // calendar
+    getArg<KindOfString>(ar, 5, empty_string.get())); // pattern
+  ar->getThis()->o_set(s_resdata, Resource(data), s_IntlDateFormatter.get());
+  ar->m_r.m_type = KindOfNull;
+  return &ar->m_r;
 }
 
 static void HHVM_METHOD(IntlDateFormatter, __clone) {
@@ -460,7 +463,7 @@ void IntlExtension::initDateFormatter() {
   UCAL_CONST(GREGORIAN);
   UCAL_CONST(TRADITIONAL);
 
-  HHVM_ME(IntlDateFormatter, __construct_array);
+  HHVM_ME(IntlDateFormatter, __construct);
   HHVM_ME(IntlDateFormatter, __clone);
   HHVM_ME(IntlDateFormatter, format);
   HHVM_STATIC_ME(IntlDateFormatter, formatObject);

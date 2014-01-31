@@ -1130,6 +1130,7 @@ int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
       String userAttrStrVal = userAttrVal.toString();
       if (userAttrStrVal->isame(s_actrec.get())) {
         ret = ret | Native::AttrActRec;
+        attrs = attrs | AttrMayUseVV;
       }
       if (userAttrStrVal->isame(s_noinjection.get())) {
         attrs = attrs | AttrNoInjection;

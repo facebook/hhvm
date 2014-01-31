@@ -555,6 +555,34 @@ bool tvCoerceParamToResourceInPlace(TypedValue* tv);
 typedef void(*RawDestructor)(void*);
 extern const RawDestructor g_destructors[kDestrTableSize];
 
+inline void tvCastInPlace(TypedValue *tv, DataType DType) {
+#define X(kind) \
+  if (DType == KindOf##kind) { tvCastTo##kind##InPlace(tv); return; }
+  X(Boolean)
+  X(Int64)
+  X(Double)
+  X(String)
+  X(Array)
+  X(Object)
+  X(Resource)
+#undef X
+  not_reached();
+}
+
+inline bool tvCoerceParamInPlace(TypedValue* tv, DataType DType) {
+#define X(kind) \
+  if (DType == KindOf##kind) return tvCoerceParamTo##kind##InPlace(tv);
+  X(Boolean)
+  X(Int64)
+  X(Double)
+  X(String)
+  X(Array)
+  X(Object)
+  X(Resource)
+#undef X
+  not_reached();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

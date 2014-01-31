@@ -5032,20 +5032,27 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         emitConvertToCell(e);
         auto fpiStart = m_ue.bcPos();
         StringData* executeQuery = makeStaticString("executeQuery");
-        e.FPushObjMethodD(numArgs, executeQuery);
+        e.FPushObjMethodD(numArgs+1, executeQuery);
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
           e.String(query->getQueryString());
           emitFPass(e, 0, PassByRefKind::ErrorOnCell);
+          auto selectCallback = query->getSelectClosure();
+          if (selectCallback != nullptr) {
+            visit(selectCallback);
+            emitConvertToCell(e);
+          } else {
+            e.Null();
+          }
+          emitFPass(e, 1, PassByRefKind::ErrorOnCell);
           for (int i = 1; i < numArgs; i++) {
             visit(args[i]);
             emitConvertToCell(e);
-            emitFPass(e, i, PassByRefKind::ErrorOnCell);
+            emitFPass(e, i+1, PassByRefKind::ErrorOnCell);
           }
         }
-        e.FCall(numArgs);
+        e.FCall(numArgs+1);
         e.UnboxR();
-
         return true;
       }
       case Expression::KindOfFromClause:

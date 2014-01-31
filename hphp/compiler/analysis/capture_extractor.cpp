@@ -23,7 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Rewrites the construct rooted in cp so that it is in a form
+ * Rewrites the expression rooted in ep so that it is in a form
  * that a query processor can evaluate while referencing only
  * state that is contained in the query processor or supplied
  * to the query processor in the form of arguments to the query.

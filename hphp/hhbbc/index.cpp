@@ -18,6 +18,8 @@
 #include <unordered_map>
 #include <mutex>
 #include <map>
+#include <cstdio>
+#include <cstdlib>
 
 #include <boost/next_prior.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -690,6 +692,17 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
     if (!mapinfo) mapinfo = std::move(cinfo);
     return res::Class { this, SStringOr<ClassInfo>(borrow(mapinfo)) };
   }
+}
+
+res::Class Index::builtin_class(Context ctx, SString name) const {
+  auto const rcls = resolve_class(ctx, name);
+  if (!rcls) {
+    std::fprintf(stderr, "failed to resolve a builtin class: %s\n",
+      name->data());
+    std::abort();
+  }
+  assert(rcls->val.other() && (rcls->val.other()->cls->attrs & AttrBuiltin));
+  return *rcls;
 }
 
 folly::Optional<res::Func> Index::resolve_method(Context ctx,

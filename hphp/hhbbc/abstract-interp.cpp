@@ -393,11 +393,8 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::AddNewElemV&) { popV(); popC(); push(TArr); }
 
   void operator()(const bc::NewCol& op) {
-    auto collName = collectionTypeToString(op.arg1);
-    auto const collCls = m_index.resolve_class(m_ctx, collName);
-    always_assert(collCls &&
-                  "Collection names in NewCol must always resolve");
-    push(objExact(*collCls));
+    auto const name = collectionTypeToString(op.arg1);
+    push(objExact(m_index.builtin_class(m_ctx, name)));
   }
 
   void operator()(const bc::ColAddElemC&) {
@@ -757,10 +754,7 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::Catch&) {
     nothrow();
-    auto const rcls = m_index.resolve_class(m_ctx, s_Exception.get());
-    always_assert(rcls &&
-      "You can't override the name Exception, so this must always resolve");
-    return push(subObj(*rcls));
+    return push(subObj(m_index.builtin_class(m_ctx, s_Exception.get())));
   }
 
   void operator()(const bc::NativeImpl&) {
@@ -1775,9 +1769,7 @@ struct InterpStepper : boost::static_visitor<void> {
       killThisProps();
       killSelfProps();
     }
-    auto const rcls = m_index.resolve_class(m_ctx, s_Continuation.get());
-    always_assert(rcls && "The builtin class Continuation must resolve");
-    push(objExact(*rcls));
+    push(objExact(m_index.builtin_class(m_ctx, s_Continuation.get())));
   }
 
   void operator()(const bc::ContEnter&)   { popC(); }

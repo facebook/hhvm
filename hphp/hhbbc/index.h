@@ -251,6 +251,13 @@ struct Index {
   folly::Optional<res::Class> resolve_class(Context, SString name) const;
 
   /*
+   * Return a resolved class for a builtin class.
+   *
+   * Pre: `name' must be the name of a class defined in a systemlib.
+   */
+  res::Class builtin_class(Context, SString name) const;
+
+  /*
    * Try to resolve a function named `name' from a given context.
    *
    * Note, the returned function may or may not be defined at the

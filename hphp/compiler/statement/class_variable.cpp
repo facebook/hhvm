@@ -282,9 +282,14 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassVariable::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ClassVariableStatement", 3);
+  auto numProps = m_typeConstraint.empty() ? 3 : 4;
+  cg.printObjectHeader("ClassVariableStatement", numProps);
   cg.printPropertyHeader("modifiers");
   m_modifiers->outputCodeModel(cg);
+  if (!m_typeConstraint.empty()) {
+    cg.printPropertyHeader("typeAnnotation");
+    cg.printTypeExpression(m_typeConstraint);
+  }
   cg.printPropertyHeader("expressions");
   cg.printExpressionVector(m_declaration);
   cg.printPropertyHeader("sourceLocation");

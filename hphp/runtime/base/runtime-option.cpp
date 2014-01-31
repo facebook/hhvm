@@ -88,8 +88,8 @@ bool RuntimeOption::ThrowInvalidArguments = false;
 bool RuntimeOption::EnableHipHopErrors = true;
 bool RuntimeOption::AssertActive = false;
 bool RuntimeOption::AssertWarning = false;
-int RuntimeOption::NoticeFrequency = 1;
-int RuntimeOption::WarningFrequency = 1;
+int64_t RuntimeOption::NoticeFrequency = 1;
+int64_t RuntimeOption::WarningFrequency = 1;
 int RuntimeOption::RaiseDebuggingFrequency = 1;
 int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
 int64_t RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
@@ -107,6 +107,7 @@ std::string RuntimeOption::Host;
 std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
+std::string RuntimeOption::ServerFileSocket;
 std::string RuntimeOption::ServerPrimaryIP;
 int RuntimeOption::ServerPort;
 int RuntimeOption::ServerPortFd = -1;
@@ -291,8 +292,6 @@ bool RuntimeOption::MemcacheReadOnly = false;
 bool RuntimeOption::EnableStats = false;
 bool RuntimeOption::EnableWebStats = false;
 bool RuntimeOption::EnableMemoryStats = false;
-bool RuntimeOption::EnableAPCStats = false;
-bool RuntimeOption::EnableAPCKeyStats = false;
 bool RuntimeOption::EnableMemcacheStats = false;
 bool RuntimeOption::EnableMemcacheKeyStats = false;
 bool RuntimeOption::EnableSQLStats = false;
@@ -303,23 +302,12 @@ std::string RuntimeOption::StatsXSLProxy;
 int RuntimeOption::StatsSlotDuration = 10 * 60; // 10 minutes
 int RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
 
-bool RuntimeOption::EnableAPCSizeStats = false;
-bool RuntimeOption::EnableAPCSizeGroup = false;
-std::vector<std::string> RuntimeOption::APCSizeSpecialPrefix;
-std::vector<std::string> RuntimeOption::APCSizePrefixReplace;
-std::vector<std::string> RuntimeOption::APCSizeSpecialMiddle;
-std::vector<std::string> RuntimeOption::APCSizeMiddleReplace;
-std::vector<std::string> RuntimeOption::APCSizeSkipPrefix;
-bool RuntimeOption::EnableAPCSizeDetail = false;
-bool RuntimeOption::EnableAPCFetchStats = false;
-bool RuntimeOption::APCSizeCountPrime = false;
-
 int64_t RuntimeOption::MaxRSS = 0;
 int64_t RuntimeOption::MaxRSSPollingCycle = 0;
 int64_t RuntimeOption::DropCacheCycle = 0;
 int64_t RuntimeOption::MaxSQLRowCount = 10000;
 int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
-int RuntimeOption::SocketDefaultTimeout = 5;
+int64_t RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
@@ -376,21 +364,13 @@ static inline bool evalJitDefault() {
 }
 
 static inline std::string regionSelectorDefault() {
-  if (RuntimeOption::EvalJitPGO) {
-    return "hottrace";
-  }
-
 #ifdef HHVM_REGION_SELECTOR_TRACELET
   return "tracelet";
 #else
 #ifdef HHVM_REGION_SELECTOR_LEGACY
   return "legacy";
 #else
-#ifdef HHVM_REGION_SELECTOR_HOTTRACE
-  return "hottrace";
-#else
   return "";
-#endif
 #endif
 #endif
 }
@@ -494,6 +474,9 @@ bool RuntimeOption::HHProfServerProfileClientMode = true;
 bool RuntimeOption::HHProfServerAllocationProfile = false;
 int RuntimeOption::HHProfServerFilterMinAllocPerReq = 2;
 int RuntimeOption::HHProfServerFilterMinBytesPerReq = 128;
+
+// TODO (t3610856): Change the default to false once dependent code is fixed
+bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = true;
 
 bool RuntimeOption::EnableHotProfiler = true;
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
@@ -703,8 +686,8 @@ void RuntimeOption::Load(Hdf &config,
     EnableHipHopErrors = error["EnableHipHopErrors"].getBool(true);
     AssertActive = error["AssertActive"].getBool();
     AssertWarning = error["AssertWarning"].getBool();
-    NoticeFrequency = error["NoticeFrequency"].getInt32(1);
-    WarningFrequency = error["WarningFrequency"].getInt32(1);
+    NoticeFrequency = error["NoticeFrequency"].getInt64(1);
+    WarningFrequency = error["WarningFrequency"].getInt64(1);
   }
   {
     Hdf rlimit = config["ResourceLimit"];
@@ -716,7 +699,7 @@ void RuntimeOption::Load(Hdf &config,
     setResourceLimit(RLIMIT_NOFILE, rlimit, "MaxSocket");
     setResourceLimit(RLIMIT_DATA,   rlimit, "RSS");
     MaxRSS = rlimit["MaxRSS"].getInt64(0);
-    SocketDefaultTimeout = rlimit["SocketDefaultTimeout"].getInt16(5);
+    SocketDefaultTimeout = rlimit["SocketDefaultTimeout"].getInt64(5);
     MaxRSSPollingCycle = rlimit["MaxRSSPollingCycle"].getInt64(0);
     DropCacheCycle = rlimit["DropCacheCycle"].getInt64(0);
     MaxSQLRowCount = rlimit["MaxSQLRowCount"].getInt64(0);
@@ -731,6 +714,7 @@ void RuntimeOption::Load(Hdf &config,
     DefaultServerNameSuffix = server["DefaultServerNameSuffix"].getString();
     ServerType = server["Type"].getString(ServerType);
     ServerIP = server["IP"].getString();
+    ServerFileSocket = server["FileSocket"].getString();
     ServerPrimaryIP = Util::GetPrimaryIP();
     ServerPort = server["Port"].getUInt16(80);
     ServerBacklog = server["Backlog"].getInt16(128);
@@ -1082,8 +1066,6 @@ void RuntimeOption::Load(Hdf &config,
 
     EnableWebStats = stats["Web"].getBool();
     EnableMemoryStats = stats["Memory"].getBool();
-    EnableAPCStats = stats["APC"].getBool();
-    EnableAPCKeyStats = stats["APCKey"].getBool();
     EnableMemcacheStats = stats["Memcache"].getBool();
     EnableMemcacheKeyStats = stats["MemcacheKey"].getBool();
     EnableSQLStats = stats["SQL"].getBool();
@@ -1095,30 +1077,6 @@ void RuntimeOption::Load(Hdf &config,
 
     StatsSlotDuration = stats["SlotDuration"].getInt32(10 * 60); // 10 minutes
     StatsMaxSlot = stats["MaxSlot"].getInt32(12 * 6); // 12 hours
-
-    {
-      Hdf apcSize = stats["APCSize"];
-      EnableAPCSizeStats = apcSize["Enable"].getBool();
-      EnableAPCSizeGroup = apcSize["Group"].getBool();
-      apcSize["SpecialPrefix"].get(APCSizeSpecialPrefix);
-      for (unsigned int i = 0; i < APCSizeSpecialPrefix.size(); i++) {
-        string &prefix = APCSizeSpecialPrefix[i];
-        string prefixReplace = prefix + "{A}";
-        APCSizePrefixReplace.push_back(prefixReplace);
-      }
-      apcSize["SpecialMiddle"].get(APCSizeSpecialMiddle);
-      for (unsigned int i = 0; i < APCSizeSpecialMiddle.size(); i++) {
-        string &middle = APCSizeSpecialMiddle[i];
-        string middleReplace = "{A}" + middle + "{A}";
-        APCSizeMiddleReplace.push_back(middleReplace);
-      }
-      apcSize["SkipPrefix"].get(APCSizeSkipPrefix);
-      EnableAPCSizeDetail = apcSize["Individual"].getBool();
-      EnableAPCFetchStats = apcSize["FetchStats"].getBool();
-      if (EnableAPCFetchStats) EnableAPCSizeDetail = true;
-      if (EnableAPCSizeDetail) EnableAPCSizeGroup = true;
-      APCSizeCountPrime = apcSize["CountPrime"].getBool();
-    }
 
     EnableHotProfiler = stats["EnableHotProfiler"].getBool(true);
     ProfilerTraceBuffer = stats["ProfilerTraceBuffer"].getInt32(2000000);
@@ -1311,6 +1269,12 @@ void RuntimeOption::Load(Hdf &config,
       hhprofFilter["MinAllocPerReq"].getInt64(2);
     HHProfServerFilterMinBytesPerReq =
       hhprofFilter["MinBytesPerReq"].getInt64(128);
+  }
+  {
+    Hdf simplexml = config["SimpleXML"];
+    // TODO (t3610856): Change the default to false once dependent code is fixed
+    SimpleXMLEmptyNamespaceMatchesAll =
+      simplexml["EmptyNamespaceMatchesAll"].getBool(true);
   }
 #ifdef FACEBOOK
   {

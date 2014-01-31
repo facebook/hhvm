@@ -46,6 +46,7 @@ public:
   bool isValid() const { return m_valid; }
   bool isDynamic() const;
   bool hasClass() const { return m_defScope != 0; }
+  bool isColonColonClass() const { return m_varName == "class"; }
 private:
   std::string m_varName;
   BlockScope *m_defScope;

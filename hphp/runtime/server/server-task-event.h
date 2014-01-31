@@ -49,7 +49,7 @@ class ServerTaskEvent : public AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) const {
+  void unserialize(Cell& result) {
     if (UNLIKELY(!m_job)) {
       throw Object(SystemLib::AllocInvalidOperationExceptionObject(
         "The async operation was incorrectly initialized."));

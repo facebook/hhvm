@@ -95,11 +95,9 @@ void FinallyStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void FinallyStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("FinallyStatement", m_stmt == nullptr ? 1 : 2);
-  if (m_stmt != nullptr) {
-    cg.printPropertyHeader("block");
-    cg.printAsBlock(m_stmt);
-  }
+  cg.printObjectHeader("FinallyStatement", 2);
+  cg.printPropertyHeader("block");
+  cg.printAsEnclosedBlock(m_stmt);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

@@ -192,7 +192,7 @@ class AsioExternalThreadEvent {
      * If a result was already initialized, it must be uninitialized (decref
      * if needed) prior to throwing an exception.
      */
-    virtual void unserialize(Cell& result) const = 0;
+    virtual void unserialize(Cell& result) = 0;
 
   protected:
     /**

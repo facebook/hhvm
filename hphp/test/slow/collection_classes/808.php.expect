@@ -1,69 +1,69 @@
-string(48) "K:9:"StableMap":2:{i:3;s:3:"foo";s:3:"bar";i:7;}"
+string(45) "K:6:"HH\Map":2:{i:3;s:3:"foo";s:3:"bar";i:7;}"
 ------------------------
-object(StableMap)#1 (2) {
+object(HH\Map)#1 (2) {
   [3]=>
   string(3) "foo"
   ["bar"]=>
   int(7)
 }
-StableMap Object
+HH\Map Object
 (
     [3] => foo
     [bar] => 7
 )
 {"3":"foo","bar":7}
-StableMap {
+HH\Map {
   3 => 'foo',
   'bar' => 7,
 }
-object(StableMap)#2 (2) {
+object(HH\Map)#2 (2) {
   [3]=>
   string(3) "foo"
   ["bar"]=>
   int(7)
 }
-StableMap Object
+HH\Map Object
 (
     [3] => foo
     [bar] => 7
 )
 {"3":"foo","bar":7}
-StableMap {
+HH\Map {
   3 => 'foo',
   'bar' => 7,
 }
 ------------------------
-string(48) "K:9:"StableMap":2:{s:3:"bar";i:7;i:3;s:3:"foo";}"
+string(45) "K:6:"HH\Map":2:{s:3:"bar";i:7;i:3;s:3:"foo";}"
 ------------------------
-object(StableMap)#3 (2) {
+object(HH\Map)#3 (2) {
   ["bar"]=>
   int(7)
   [3]=>
   string(3) "foo"
 }
-StableMap Object
+HH\Map Object
 (
     [bar] => 7
     [3] => foo
 )
 {"bar":7,"3":"foo"}
-StableMap {
+HH\Map {
   'bar' => 7,
   3 => 'foo',
 }
-object(StableMap)#4 (2) {
+object(HH\Map)#4 (2) {
   ["bar"]=>
   int(7)
   [3]=>
   string(3) "foo"
 }
-StableMap Object
+HH\Map Object
 (
     [bar] => 7
     [3] => foo
 )
 {"bar":7,"3":"foo"}
-StableMap {
+HH\Map {
   'bar' => 7,
   3 => 'foo',
 }

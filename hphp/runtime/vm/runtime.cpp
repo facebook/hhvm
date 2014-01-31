@@ -77,7 +77,6 @@ void print_boolean(bool val) {
 
 NEW_COLLECTION_HELPER(Vector)
 NEW_COLLECTION_HELPER(Map)
-NEW_COLLECTION_HELPER(StableMap)
 NEW_COLLECTION_HELPER(Set)
 NEW_COLLECTION_HELPER(FrozenMap)
 NEW_COLLECTION_HELPER(FrozenVector)
@@ -282,20 +281,20 @@ void defClsHelper(PreClass* preClass) {
 
 const StaticString
   s_HH_Traversable("HH\\Traversable"),
-  s_KeyedTraversable("KeyedTraversable"),
+  s_HH_KeyedTraversable("HH\\KeyedTraversable"),
   s_Indexish("Indexish"),
   s_XHPChild("XHPChild");
 
 bool interface_supports_non_objects(const StringData* s) {
   return s->isame(s_HH_Traversable.get()) ||
-         s->isame(s_KeyedTraversable.get()) ||
+         s->isame(s_HH_KeyedTraversable.get()) ||
          s->isame(s_Indexish.get()) ||
          s->isame(s_XHPChild.get());
 }
 
 bool interface_supports_array(const StringData* s) {
   return (s->isame(s_HH_Traversable.get()) ||
-          s->isame(s_KeyedTraversable.get()) ||
+          s->isame(s_HH_KeyedTraversable.get()) ||
           s->isame(s_Indexish.get()) ||
           s->isame(s_XHPChild.get()));
 }
@@ -303,7 +302,7 @@ bool interface_supports_array(const StringData* s) {
 bool interface_supports_array(const std::string& n) {
   const char* s = n.c_str();
   return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
-          (n.size() == 16 && !strcasecmp(s, "KeyedTraversable")) ||
+          (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
           (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
           (n.size() == 8 && !strcasecmp(s, "XHPChild")));
 }

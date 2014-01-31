@@ -25,8 +25,9 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 namespace php { struct Unit; }
+struct Index;
 
-std::unique_ptr<UnitEmitter> emit_unit(const php::Unit&);
+std::unique_ptr<UnitEmitter> emit_unit(const Index&, const php::Unit&);
 
 //////////////////////////////////////////////////////////////////////
 

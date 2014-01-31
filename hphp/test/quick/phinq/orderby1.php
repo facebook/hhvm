@@ -14,7 +14,7 @@ $q = from $c in $customers
      select tuple($c->Name, $o->OrderID, $o->Total);
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }
 
 echo ascending();

@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannont access parent::class when no class scope is active in %s/test/slow/parser/colon_colon_class_include_parent.inc on line 2

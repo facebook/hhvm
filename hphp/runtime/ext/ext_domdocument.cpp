@@ -1035,7 +1035,7 @@ static xmlNodePtr php_dom_free_xinclude_node(xmlNodePtr cur) {
   xincnode = cur;
   cur = cur->next;
   xmlUnlinkNode(xincnode);
-  php_libxml_node_free_resource(xincnode);
+  xmlFreeNode(xincnode);
   return cur;
 }
 
@@ -1787,7 +1787,14 @@ static Variant domnode_ownerdocument_read(CObjRef obj) {
       nodep->type == XML_HTML_DOCUMENT_NODE) {
     return uninit_null();
   }
-  return create_node_object((xmlNodePtr)nodep->doc, domnode->doc());
+  if ((xmlNodePtr) nodep->doc == domnode->doc()->m_node) {
+    return domnode->doc();
+  } else {
+    // The node wasn't created by this extension, so doesn't already have
+    // a DOMDocument - make one. dom_import_xml() is one way for this to
+    // happen.
+    return create_node_object((xmlNodePtr) nodep->doc, domnode->doc());
+  }
 }
 
 static Variant domnode_namespaceuri_read(CObjRef obj) {
@@ -5824,7 +5831,7 @@ Variant f_dom_xpath_register_php_functions(CVarRef obj,
 Variant f_dom_import_simplexml(CObjRef node) {
 
   c_SimpleXMLElement *elem = node.getTyped<c_SimpleXMLElement>();
-  xmlNodePtr nodep = elem->m_node;
+  xmlNodePtr nodep = elem->node;
 
   if (nodep && (nodep->type == XML_ELEMENT_NODE ||
                 nodep->type == XML_ATTRIBUTE_NODE)) {

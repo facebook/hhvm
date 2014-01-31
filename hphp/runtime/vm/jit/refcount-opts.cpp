@@ -1283,7 +1283,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
         if (dst->type().notCounted() && src->type().maybeCounted()) {
           auto* src = canonical(dst);
           auto& valState = m_state.values[src];
-          assertHasUnconsumedReference(src);
 
           ITRACE(3, "consuming reference to {}: {} and dropping "
                  "opt delta of {}\n",
@@ -1354,7 +1353,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // "consume" the value on behalf of the CheckType.
       oldVal = canonical(oldVal);
       auto& valState = m_state.values[oldVal];
-      assertHasUnconsumedReference(oldVal);
+      ITRACE(2, "'consuming' reference to {} for refineLocalValue\n",
+             *oldVal->inst());
       if (valState.realCount) --valState.realCount;
     }
   }

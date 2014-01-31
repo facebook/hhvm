@@ -76,13 +76,13 @@ PreClass::Prop::Prop(PreClass* preClass,
                      const StringData* typeConstraint,
                      const StringData* docComment,
                      const TypedValue& val,
-                     DataType hphpcType)
+                     RepoAuthType repoAuthType)
   : m_preClass(preClass)
   , m_name(n)
   , m_attrs(attrs)
   , m_typeConstraint(typeConstraint)
   , m_docComment(docComment)
-  , m_hphpcType(hphpcType)
+  , m_repoAuthType{repoAuthType}
 {
   m_mangledName = manglePropName(preClass->name(), n, attrs);
   memcpy(&m_val, &val, sizeof(TypedValue));
@@ -196,7 +196,7 @@ void PreClass::prettyPrint(std::ostream &out) const {
 //=============================================================================
 // Class.
 
-static_assert(sizeof(Class) == 408, "Change this only on purpose");
+static_assert(sizeof(Class) == 368, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
@@ -1609,7 +1609,7 @@ void Class::setProperties() {
       prop.m_docComment = parentProp.m_docComment;
       prop.m_typeConstraint = parentProp.m_typeConstraint;
       prop.m_name = parentProp.m_name;
-      prop.m_hphpcType = parentProp.m_hphpcType;
+      prop.m_repoAuthType = parentProp.m_repoAuthType;
       if (!(parentProp.m_attrs & AttrPrivate)) {
         curPropMap.add(prop.m_name, prop);
       } else {
@@ -1634,7 +1634,7 @@ void Class::setProperties() {
     }
   }
 
-  assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate);
+  static_assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate, "");
   for (Slot slot = 0; slot < m_preClass->numProperties(); ++slot) {
     const PreClass::Prop* preProp = &m_preClass->properties()[slot];
 
@@ -1683,7 +1683,7 @@ void Class::setProperties() {
         prop.m_class = this;
         prop.m_typeConstraint = preProp->typeConstraint();
         prop.m_docComment = preProp->docComment();
-        prop.m_hphpcType = preProp->hphpcType();
+        prop.m_repoAuthType = preProp->repoAuthType();
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1716,7 +1716,7 @@ void Class::setProperties() {
         // This is the first class to declare this property
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
-        prop.m_hphpcType = preProp->hphpcType();
+        prop.m_repoAuthType = preProp->repoAuthType();
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1755,7 +1755,7 @@ void Class::setProperties() {
         // This is the first class to declare this property
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
-        prop.m_hphpcType = preProp->hphpcType();
+        prop.m_repoAuthType = preProp->repoAuthType();
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1765,7 +1765,7 @@ void Class::setProperties() {
       }
     } else { // Static property.
       // Prohibit non-static-->static redeclaration.
-      PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
+      auto const it2 = curPropMap.find(preProp->name());
       if (it2 != curPropMap.end()) {
         // Find class that declared non-static property.
         Class* ancestor;
@@ -1780,7 +1780,7 @@ void Class::setProperties() {
                     preProp->name()->data());
       }
       // Get parent's equivalent property, if one exists.
-      SPropMap::Builder::iterator it3 = curSPropMap.find(preProp->name());
+      auto const it3 = curSPropMap.find(preProp->name());
       Slot sPropInd = kInvalidSlot;
       // Prohibit strengthening.
       if (it3 != curSPropMap.end()) {
@@ -1802,13 +1802,14 @@ void Class::setProperties() {
         sPropInd = curSPropMap.size();
         curSPropMap.add(sProp.m_name, sProp);
       }
-      SProp& sProp = curSPropMap[sPropInd];
       // Finish initializing.
-      sProp.m_attrs = preProp->attrs();
+      auto& sProp = curSPropMap[sPropInd];
+      sProp.m_attrs          = preProp->attrs();
       sProp.m_typeConstraint = preProp->typeConstraint();
-      sProp.m_docComment = preProp->docComment();
-      sProp.m_class = this;
-      sProp.m_val = m_preClass->lookupProp(preProp->name())->val();
+      sProp.m_docComment     = preProp->docComment();
+      sProp.m_class          = this;
+      sProp.m_val            = m_preClass->lookupProp(preProp->name())->val();
+      sProp.m_repoAuthType   = preProp->repoAuthType();
     }
   }
 

@@ -560,7 +560,7 @@ enum class ControlFlowInfo {
   BreaksBB
 };
 
-static inline ControlFlowInfo
+inline ControlFlowInfo
 opcodeControlFlowInfo(const Op instr) {
   switch (instr) {
     case Op::Jmp:
@@ -617,7 +617,7 @@ opcodeControlFlowInfo(const Op instr) {
  *   Returns true if the instruction can potentially set PC to point
  *   to something other than the next instruction in the bytecode
  */
-static inline bool
+inline bool
 opcodeChangesPC(const Op instr) {
   return opcodeControlFlowInfo(instr) >= ControlFlowInfo::ChangesPC;
 }
@@ -629,10 +629,19 @@ opcodeChangesPC(const Op instr) {
  *   instructions that change PC will break the tracelet, though some
  *   do not (ex. FCall).
  */
-static inline bool
+inline bool
 opcodeBreaksBB(const Op instr) {
   return opcodeControlFlowInfo(instr) == ControlFlowInfo::BreaksBB;
 }
+
+/*
+ * instrBreaksProfileBB --
+ *
+ * Similar to opcodeBreaksBB but more strict. We break profiling blocks after
+ * any instruction that can side exit, including instructions with predicted
+ * output.
+ */
+bool instrBreaksProfileBB(const NormalizedInstruction* instr);
 
 /*
  * If this returns true, we dont generate guards for any of the inputs
@@ -669,7 +678,7 @@ enum class MetaMode {
   Legacy,
 };
 void readMetaData(Unit::MetaHandle&, NormalizedInstruction&, HhbcTranslator&,
-                  MetaMode m = MetaMode::Normal);
+                  bool profiling, MetaMode m = MetaMode::Normal);
 bool instrMustInterp(const NormalizedInstruction&);
 
 typedef std::function<Type(int)> LocalTypeFn;

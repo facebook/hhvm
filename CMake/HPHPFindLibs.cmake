@@ -380,14 +380,14 @@ if (LINUX OR APPLE)
 endif()
 
 FIND_LIBRARY (BFD_LIB bfd)
-FIND_LIBRARY (BINUTIL_LIB iberty)
+FIND_LIBRARY (LIBIBERTY_LIB iberty)
 
 if (NOT BFD_LIB)
 	message(FATAL_ERROR "You need to install binutils")
 endif()
 
-if (NOT BINUTIL_LIB)
-	message(FATAL_ERROR "You need to install binutils")
+if (NOT LIBIBERTY_LIB)
+	message(FATAL_ERROR "You need to install libiberty (usually bundled with binutils)")
 endif()
 
 if (FREEBSD)
@@ -474,7 +474,7 @@ if (APPLE)
 endif()
 
 	target_link_libraries(${target} ${BFD_LIB})
-	target_link_libraries(${target} ${BINUTIL_LIB})
+	target_link_libraries(${target} ${LIBIBERTY_LIB})
 if (${LIBPTHREAD_LIBRARIES})
 	target_link_libraries(${target} ${LIBPTHREAD_LIBRARIES})
 endif()

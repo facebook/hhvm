@@ -361,6 +361,21 @@
                     ]
                 },
                 {
+                    "name": "saveXML",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "value": "\"\""
+                        }
+                    ]
+                },
+                {
                     "name": "getNamespaces",
                     "flags": [
                     ],
@@ -387,6 +402,11 @@
                             "name": "recursive",
                             "type": "Boolean",
                             "value": "false"
+                        },
+                        {
+                            "name": "from_root",
+                            "type": "Boolean",
+                            "value": "true"
                         }
                     ]
                 },

@@ -157,18 +157,6 @@ static __thread int t_last_error_code;
 
 namespace {
 
-void preg_init_thread_locals() {
-  IniSetting::Bind("pcre.backtrack_limit",
-                   std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),
-                   ini_on_update_long, ini_get_long,
-                   &g_context->m_preg_backtrace_limit);
-  IniSetting::Bind("pcre.recursion_limit",
-                   std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
-                   ini_on_update_long, ini_get_long,
-                   &g_context->m_preg_recursion_limit);
-}
-InitFiniNode init(preg_init_thread_locals, InitFiniNode::When::ThreadInit);
-
 template<bool useSmartFree = false>
 struct FreeHelperImpl : private boost::noncopyable {
   explicit FreeHelperImpl(void* p) : p(p) {}
@@ -1269,10 +1257,9 @@ int preg_replace_callback(Variant &result, CVarRef pattern, CVarRef callback,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
-                   int flags /* = 0 */) {
-  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(
-    pattern.toString());
+Variant preg_split(const String& pattern, const String& subject,
+                   int limit /* = -1 */, int flags /* = 0 */) {
+  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
   if (pce == nullptr) {
     return false;
   }
@@ -1292,12 +1279,10 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
     return false;
   }
 
-  String ssubject = subject.toString();
-
   /* Start at the beginning of the string */
   int start_offset = 0;
   int next_offset = 0;
-  const char *last_match = ssubject.data();
+  const char *last_match = subject.data();
   t_last_error_code = PHP_PCRE_NO_ERROR;
   pcre_extra *extra = pce->extra;
 
@@ -1308,7 +1293,7 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
   pcre *re_bump = nullptr; /* Regex instance for empty matches */
   pcre_extra *extra_bump = nullptr; /* Almost dummy */
   while ((limit == -1 || limit > 1)) {
-    int count = pcre_exec(pce->re, extra, ssubject.data(), ssubject.size(),
+    int count = pcre_exec(pce->re, extra, subject.data(), subject.size(),
                           start_offset, g_notempty | utf8_check,
                           offsets, size_offsets);
 
@@ -1327,18 +1312,18 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
        * supply an invalid offset. */
       utf8_check = PCRE_NO_UTF8_CHECK;
 
-      if (!no_empty || ssubject.data() + offsets[0] != last_match) {
+      if (!no_empty || subject.data() + offsets[0] != last_match) {
         if (offset_capture) {
           /* Add (match, offset) pair to the return value */
           add_offset_pair(return_value,
                           String(last_match,
-                                 ssubject.data() + offsets[0] - last_match,
+                                 subject.data() + offsets[0] - last_match,
                                  CopyString),
                           next_offset, nullptr);
         } else {
           /* Add the piece to the return value */
           return_value.append(String(last_match,
-                                     ssubject.data() + offsets[0] - last_match,
+                                     subject.data() + offsets[0] - last_match,
                                      CopyString));
         }
 
@@ -1347,7 +1332,7 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
           limit--;
       }
 
-      last_match = ssubject.data() + offsets[1];
+      last_match = subject.data() + offsets[1];
       next_offset = offsets[1];
 
       if (delim_capture) {
@@ -1358,11 +1343,11 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
           if (!no_empty || match_len > 0) {
             if (offset_capture) {
               add_offset_pair(return_value,
-                              String(ssubject.data() + offsets[i<<1],
+                              String(subject.data() + offsets[i<<1],
                                      match_len, CopyString),
                               offsets[i<<1], nullptr);
             } else {
-              return_value.append(ssubject.substr(offsets[i<<1], match_len));
+              return_value.append(subject.substr(offsets[i<<1], match_len));
             }
           }
         }
@@ -1372,7 +1357,7 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
          this is not necessarily the end. We need to advance
          the start offset, and continue. Fudge the offset values
          to achieve this, unless we're already at the end of the string. */
-      if (g_notempty != 0 && start_offset < ssubject.size()) {
+      if (g_notempty != 0 && start_offset < subject.size()) {
         if (pce->compile_options & PCRE_UTF8) {
           if (re_bump == nullptr) {
             int dummy;
@@ -1381,18 +1366,17 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
               return false;
             }
           }
-          count = pcre_exec(re_bump, extra_bump, ssubject.data(),
-                            ssubject.size(), start_offset,
+          count = pcre_exec(re_bump, extra_bump, subject.data(),
+                            subject.size(), start_offset,
                             0, offsets, size_offsets);
           if (count < 1) {
             raise_warning("Unknown error");
             offsets[0] = start_offset;
             offsets[1] = start_offset + 1;
             if (pcre_need_log_error(count)) {
-              String spattern = pattern.toString();
               pcre_log_error(__FUNCTION__, __LINE__, count,
-                             spattern.data(), spattern.size(),
-                             ssubject.data(), ssubject.size(),
+                             pattern.data(), pattern.size(),
+                             subject.data(), subject.size(),
                              "", 0,
                              limit, flags, start_offset);
             }
@@ -1405,10 +1389,9 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
         break;
     } else {
       if (pcre_need_log_error(count)) {
-        String spattern = pattern.toString();
         pcre_log_error(__FUNCTION__, __LINE__, count,
-                       spattern.data(), spattern.size(),
-                       ssubject.data(), ssubject.size(),
+                       pattern.data(), pattern.size(),
+                       subject.data(), subject.size(),
                        "", 0,
                        limit, flags, start_offset, g_notempty);
       }
@@ -1426,20 +1409,20 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
     start_offset = offsets[1];
   }
 
-  start_offset = last_match - ssubject.data(); /* offset might have
+  start_offset = last_match - subject.data(); /* offset might have
                                                 * been incremented,
                                                 * but without further
                                                 * successful matches */
-  if (!no_empty || start_offset < ssubject.size()) {
+  if (!no_empty || start_offset < subject.size()) {
     if (offset_capture) {
       /* Add the last (match, offset) pair to the return value */
       add_offset_pair(return_value,
-                      ssubject.substr(start_offset),
+                      subject.substr(start_offset),
                       start_offset, nullptr);
     } else {
       /* Add the last piece to the return value */
       return_value.append
-        (String(last_match, ssubject.data() + ssubject.size() - last_match,
+        (String(last_match, subject.data() + subject.size() - last_match,
                 CopyString));
     }
   }

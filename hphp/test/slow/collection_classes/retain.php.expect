@@ -5,7 +5,7 @@ callback(3)
 callback(4)
 ========
 bool(true)
-Map[
+HH\Map[
 a => 1
 b => 2
 c => 3
@@ -18,7 +18,7 @@ callback(3)
 callback(4)
 ========
 bool(true)
-Map[
+HH\Map[
 a => 1
 c => 3
 ]
@@ -29,7 +29,7 @@ callback(3)
 callback(4)
 ========
 bool(true)
-StableMap[
+HH\Map[
 a => 1
 b => 2
 c => 3
@@ -42,7 +42,7 @@ callback(3)
 callback(4)
 ========
 bool(true)
-StableMap[
+HH\Map[
 a => 1
 c => 3
 ]

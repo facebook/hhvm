@@ -13,7 +13,7 @@ $q = from $c in $customers
      select Map { "Country" => $g->Key, "CustCount" => $g->Count() };
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }
 
 echo into();

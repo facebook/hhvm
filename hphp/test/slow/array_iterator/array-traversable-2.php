@@ -2,26 +2,26 @@
 
 interface IFoo {
 }
-function trav(Traversable $x) {
-  echo "Traversable " . $x . " \n";
+function trav(\HH\Traversable $x) {
+  echo "Traversable\n";
   var_dump($x);
 }
-function ktrav(KeyedTraversable $x) {
-  echo "KeyedTraversable " . $x . " \n";
+function ktrav(\HH\KeyedTraversable $x) {
+  echo "KeyedTraversable\n";
   var_dump($x);
 }
 function ind(Indexish $x) {
-  echo "Indexish " . $x . " \n";
+  echo "Indexish\n";
   var_dump($x);
 }
 function ifoo(IFoo $x) {
-  echo "IFoo " . $x . " \n";
+  echo "IFoo\n";
   var_dump($x);
 }
 function main() {
   $arr = array();
-  var_dump($arr instanceof Traversable);
-  var_dump($arr instanceof KeyedTraversable);
+  var_dump($arr instanceof \HH\Traversable);
+  var_dump($arr instanceof \HH\KeyedTraversable);
   var_dump($arr instanceof Indexish);
   var_dump($arr instanceof IFoo);
   trav($arr);

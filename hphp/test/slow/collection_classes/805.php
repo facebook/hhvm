@@ -1,36 +1,34 @@
-<?php
+<?hh
 
-$classes = array('HH\Vector','Map','StableMap');
-$i = 0;
+$collections = array(
+  'Vector' => new Vector(),
+  'Map' => new Map(),
+  'StableMap' => new StableMap(),
+  'Set' => new Set(),
+);
 try {
-  foreach ($classes as $cls) {
-    $obj = new $cls;
+  foreach ($collections as $cls => $obj) {
     try {
       $x = $obj->foo;
-      echo "get: ";
+      echo "$cls::get: ";
       var_dump($x);
     }
- catch (RuntimeException $e) {
-      echo "get throws, i = ";
-      var_dump($i);
+    catch (RuntimeException $e) {
+      echo "$cls::get throws\n";
     }
     try {
       $x = isset($obj->foo);
-      echo "isset: ";
+      echo "$cls::isset: ";
       var_dump($x);
     }
- catch (RuntimeException $e) {
-      echo "isset throws, i = ";
-      var_dump($i);
+    catch (RuntimeException $e) {
+      echo "$cls::isset throws\n";
     }
     try {
       $obj->foo = 123;
+    } catch (RuntimeException $e) {
+      echo "$cls::set throws\n";
     }
- catch (RuntimeException $e) {
-      echo "set throws, i = ";
-      var_dump($i);
-    }
-    ++$i;
   }
 }
  catch (Exception $e) {

@@ -256,10 +256,9 @@ void InterfaceStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void InterfaceStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 3;
+  auto numProps = 4;
   if (m_attrList != nullptr) numProps++;
   if (m_base != nullptr) numProps++;
-  if (m_stmt != nullptr) numProps++;
   if (!m_docComment.empty()) numProps++;
 
   cg.printObjectHeader("TypeStatement", numProps);
@@ -276,10 +275,8 @@ void InterfaceStatement::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("interfaces");
     cg.printExpressionVector(m_base);
   }
-  if (m_stmt != nullptr) {
-    cg.printPropertyHeader("block");
-    cg.printAsBlock(m_stmt);
-  }
+  cg.printPropertyHeader("block");
+  cg.printAsEnclosedBlock(m_stmt);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   if (!m_docComment.empty()) {

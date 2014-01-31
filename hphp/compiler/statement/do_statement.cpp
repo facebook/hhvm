@@ -93,11 +93,9 @@ void DoStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void DoStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("DoStatement", m_stmt != nullptr ? 3 : 2);
-  if (m_stmt != nullptr) {
-    cg.printPropertyHeader("block");
-    cg.printAsBlock(m_stmt);
-  }
+  cg.printObjectHeader("DoStatement", 3);
+  cg.printPropertyHeader("block");
+  cg.printAsBlock(m_stmt);
   cg.printPropertyHeader("condition");
   m_condition->outputCodeModel(cg);
   cg.printPropertyHeader("sourceLocation");

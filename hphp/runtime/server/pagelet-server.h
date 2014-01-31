@@ -173,7 +173,7 @@ public:
 
 protected:
 
-  void unserialize(Cell& result) const {
+  void unserialize(Cell& result) {
     // Main string responses from pagelet thread.
     Array responses = Array::Create();
 

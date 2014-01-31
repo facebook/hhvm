@@ -258,6 +258,11 @@ struct FrameState : private LocalStateHook {
   smart::hash_map<Block*, Snapshot> m_snapshots;
 };
 
+/*
+ * Debug stringification.
+ */
+std::string show(const FrameState&);
+
 } }
 
 #endif

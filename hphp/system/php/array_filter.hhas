@@ -8,13 +8,13 @@ no_args:  String "array_filter() expects at least 1 parameter, 0 given"
           Jmp warning
 not_array:
           CGetL $arr
-          InstanceOfD "KeyedTraversable"
+          InstanceOfD "HH\\KeyedTraversable"
           JmpNZ start_kt
           CGetL $arr
           InstanceOfD "HH\\Set"
           JmpNZ start_kt
           CGetL $arr
-          InstanceOfD "FrozenSet"
+          InstanceOfD "HH\\FrozenSet"
           JmpNZ start_kt
           String "array_filter() expects parameter 1 to be an array or collection"
           Jmp warning

@@ -110,12 +110,6 @@ void ArrayIter::MapInit(ArrayIter* iter, ObjectData* obj) {
   iter->m_pos = mp->iter_begin();
 }
 
-void ArrayIter::StableMapInit(ArrayIter* iter, ObjectData* obj) {
-  auto smp = static_cast<c_StableMap*>(obj);
-  iter->m_version = smp->getVersion();
-  iter->m_pos = smp->iter_begin();
-}
-
 void ArrayIter::FrozenMapInit(ArrayIter* iter, ObjectData* obj) {
   auto smp = static_cast<c_FrozenMap*>(obj);
   iter->m_version = smp->getVersion();
@@ -184,12 +178,11 @@ ArrayIter::initFuncTable[Collection::MaxNumTypes] = {
   &ArrayIter::IteratorObjInit,
   &ArrayIter::VectorInit,
   &ArrayIter::MapInit,
-  &ArrayIter::StableMapInit,
+  &ArrayIter::FrozenMapInit,
   &ArrayIter::SetInit,
   &ArrayIter::PairInit,
   &ArrayIter::FrozenVectorInit,
   &ArrayIter::FrozenSetInit,
-  &ArrayIter::FrozenMapInit,
 };
 
 template <bool incRef>
@@ -260,7 +253,6 @@ bool ArrayIter::endHelper() {
     case Collection::VectorType: {
       return m_pos >= getVector()->size();
     }
-    case Collection::StableMapType:
     case Collection::MapType:
     case Collection::FrozenMapType: {
       return m_pos == 0;
@@ -290,7 +282,6 @@ void ArrayIter::nextHelper() {
       return;
     }
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType: {
       BaseMap* mp = getMappish();
       if (UNLIKELY(m_version != mp->getVersion())) {
@@ -335,7 +326,6 @@ Variant ArrayIter::firstHelper() {
       return m_pos;
     }
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType: {
       BaseMap* mp = getMappish();
       if (UNLIKELY(m_version != mp->getVersion())) {
@@ -386,7 +376,6 @@ Variant ArrayIter::second() {
       return tvAsCVarRef(vec->at(m_pos));
     }
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType: {
       BaseMap* mp = getMappish();
       if (UNLIKELY(m_version != mp->getVersion())) {
@@ -451,7 +440,6 @@ CVarRef ArrayIter::secondRefPlus() {
       return tvAsCVarRef(vec->at(m_pos));
     }
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType: {
       BaseMap* mp = getMappish();
       if (UNLIKELY(m_version != mp->getVersion())) {
@@ -1217,7 +1205,6 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                                 dest, static_cast<c_Vector*>(obj),
                                 valOut, keyOut);
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return iterInit<BaseMap, ArrayIter::VersionableSparse>(
                                 dest,
@@ -1262,7 +1249,6 @@ static int64_t iter_next_collection(ArrayIter* ai,
       return iterNext<c_Vector, ArrayIter::Versionable>(
         ai, valOut, keyOut);
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return iterNext<BaseMap, ArrayIter::VersionableSparse>(
         ai, valOut, keyOut);

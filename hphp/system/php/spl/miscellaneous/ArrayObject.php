@@ -7,7 +7,7 @@
  * This class allows objects to work as arrays.
  *
  */
-class ArrayObject implements KeyedIterable, ArrayAccess,
+class ArrayObject implements \HH\KeyedIterable, ArrayAccess,
                              Serializable, Countable {
   use StrictKeyedIterable;
 

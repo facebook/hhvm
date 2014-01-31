@@ -177,7 +177,7 @@ function is_equal($obj1, $obj2) {
     report("Incorrect type", $type1, $type2);
     return false;
   }
-  if ($type1 !== "HH\Vector" && $type1 !== "Map" && $type1 !== "StableMap") {
+  if ($type1 !== "HH\Vector" && $type1 !== "HH\Map" && $type1 !== "StableMap") {
     return $obj1 === $obj2;
   }
   $n1 = count($obj1);
@@ -196,7 +196,7 @@ function is_equal($obj1, $obj2) {
   } else {
     $keys1 = $obj1->toKeysArray();
     $keys2 = $obj2->toKeysArray();
-    if ($type1 === "Map") {
+    if ($type1 === "HH\Map") {
       sort($keys1);
       sort($keys2);
     }
@@ -215,7 +215,7 @@ function is_equal($obj1, $obj2) {
 }
 
 foreach ($tests as $test) {
-  $output = json_decode($test['input'], true, $test['options']);
+  $output = json_decode($test['input'], true, 512, $test['options']);
   if (!is_equal($output, $test['expected'])) {
     report("", $output, $test['expected']);
     break;

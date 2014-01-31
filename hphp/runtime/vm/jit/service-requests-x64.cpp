@@ -72,8 +72,7 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
  * rVmSp should be adjusted, otherwise, it emits code to perform
  * the adjustment (this allows us to combine updates to rVmSp)
  */
-int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func,
-                       bool emitSavedRIPReturn) {
+int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
   if (false) { // typecheck
     ActRec* ar = nullptr;
@@ -112,11 +111,6 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func,
                                        // non-arg locals
   tx64->fixupMap().recordSyncPoint(mainCode.frontier(), pcOffset, stackOff);
 
-  if (emitSavedRIPReturn) {
-    // push the return address to get ready to ret.
-    a.   push  (rVmFp[AROFF(m_savedRip)]);
-  }
-
   /*
    * The native implementation already put the return value on the
    * stack for us, and handled cleaning up the arguments.  We have to
@@ -129,19 +123,9 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func,
    * reg-to-reg move.
    */
   int nLocalCells = func->numSlotsInFrame();
-  if (emitSavedRIPReturn) {
-    a. add_imm64_reg64(sizeof(ActRec) + cellsToBytes(nLocalCells-1), rVmSp);
-  }
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRbp), rVmFp);
 
   emitRB(a, Trace::RBTypeFuncExit, func->fullName()->data());
-  if (emitSavedRIPReturn) {
-    a. ret();
-    if (debug) {
-      a.ud2();
-    }
-    return 0;
-  }
   return sizeof(ActRec) + cellsToBytes(nLocalCells-1);
 }
 
@@ -171,10 +155,6 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& stubsCode,
   req->m_nArgs = numArgs;
   req->m_sourceInstr = srcKey;
   req->m_isImmutable = (bool)funcd;
-}
-
-bool isNativeImplCall(const Func* funcd, int numArgs) {
-  return funcd && funcd->methInfo() && numArgs == funcd->numParams();
 }
 
 } // anonymous namespace
@@ -304,8 +284,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
                                 Fixup(0, numArgs));
     // rVmSp is already correctly adjusted, because there's no locals
     // other than the arguments passed.
-    auto retval = emitNativeImpl(mainCode, funcd,
-                                 false /* don't jump to return */);
+    auto retval = emitNativeImpl(mainCode, funcd);
     patchIP.patch(uint64_t(mainCode.frontier()));
     return retval;
   }

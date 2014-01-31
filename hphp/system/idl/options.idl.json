@@ -493,6 +493,30 @@
             ]
         },
         {
+            "name": "ini_get_all",
+            "desc": "Gets all configuration options",
+            "flags": [
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Returns an associative array with directive names as the array key."
+            },
+            "args": [
+                {
+                    "name": "extension",
+                    "type": "String",
+                    "desc": "An optional extension name. If set, the function return only options specific for that extension.",
+                    "value": "null_string"
+                },
+                {
+                    "name": "details",
+                    "type": "Boolean",
+                    "desc": "Retrieve details settings or only the current value for each setting. Default is TRUE (retrieve details).",
+                    "value": "true"
+                }
+            ]
+        },
+        {
             "name": "ini_restore",
             "desc": "Restores a given configuration option to its original value.",
             "flags": [

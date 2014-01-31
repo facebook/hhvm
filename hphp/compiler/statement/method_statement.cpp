@@ -64,7 +64,7 @@ MethodStatement::MethodStatement
  ExpressionListPtr attrList, bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
     m_method(method), m_ref(ref), m_hasCallToGetArgs(false), m_attribute(attr),
-    m_cppLength(-1), m_modifiers(modifiers),
+    m_cppLength(-1), m_autoPropCount(0), m_modifiers(modifiers),
     m_originalName(name), m_params(params),
     m_retTypeAnnotation(retTypeAnnotation), m_stmt(stmt),
     m_docComment(docComment), m_attrList(attrList) {
@@ -76,14 +76,14 @@ MethodStatement::MethodStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ModifierExpressionPtr modifiers, bool ref, const string &name,
  ExpressionListPtr params, TypeAnnotationPtr retTypeAnnotation,
- StatementListPtr stmt,
- int attr, const string &docComment, ExpressionListPtr attrList,
- bool method /* = true */)
+ StatementListPtr stmt, int attr, const string &docComment,
+ ExpressionListPtr attrList, bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(MethodStatement)),
     m_method(method), m_ref(ref), m_hasCallToGetArgs(false), m_attribute(attr),
-    m_cppLength(-1), m_modifiers(modifiers), m_originalName(name),
-    m_params(params), m_retTypeAnnotation(retTypeAnnotation),
-    m_stmt(stmt), m_docComment(docComment), m_attrList(attrList) {
+    m_cppLength(-1), m_autoPropCount(0), m_modifiers(modifiers),
+    m_originalName(name), m_params(params),
+    m_retTypeAnnotation(retTypeAnnotation), m_stmt(stmt),
+    m_docComment(docComment), m_attrList(attrList) {
   m_name = Util::toLower(name);
   checkParameters();
 }
@@ -577,12 +577,12 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void MethodStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 3;
+  auto isAnonymous = ParserBase::IsClosureName(m_name);
+  auto numProps = 4;
   if (m_attrList != nullptr) numProps++;
   if (m_ref) numProps++;
   if (m_params != nullptr) numProps++;
   if (m_retTypeAnnotation != nullptr) numProps++;
-  if (m_stmt != nullptr) numProps++;
   if (!m_docComment.empty()) numProps++;
   cg.printObjectHeader("FunctionStatement", numProps);
   if (m_attrList != nullptr) {
@@ -593,10 +593,10 @@ void MethodStatement::outputCodeModel(CodeGenerator &cg) {
   m_modifiers->outputCodeModel(cg);
   if (m_ref) {
     cg.printPropertyHeader("returnsReference");
-    cg.printValue(m_ref);
+    cg.printBool(true);
   }
   cg.printPropertyHeader("name");
-  cg.printValue(m_originalName);
+  cg.printValue(isAnonymous ? "" : m_originalName);
   //TODO: type parameters (task 3262469)
   if (m_params != nullptr) {
     cg.printPropertyHeader("parameters");
@@ -606,9 +606,18 @@ void MethodStatement::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("returnType");
     m_retTypeAnnotation->outputCodeModel(cg);
   }
+  cg.printPropertyHeader("block");
   if (m_stmt != nullptr) {
-    cg.printPropertyHeader("block");
-    cg.printAsBlock(m_stmt);
+    auto stmt = m_stmt;
+    if (m_autoPropCount > 0) {
+      stmt = static_pointer_cast<StatementList>(stmt->clone());
+      for (int i = m_autoPropCount; i > 0; i--) {
+        stmt->removeElement(0);
+      }
+    }
+    cg.printAsEnclosedBlock(stmt);
+  } else {
+    cg.printAsBlock(nullptr);
   }
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
@@ -653,7 +662,7 @@ bool MethodStatement::hasRefParam() {
 }
 
 void MethodStatement::checkParameters() {
-  // only allow paramenter modifiers (public, private, protected)
+  // only allow parameter modifiers (public, private, protected)
   // on constructor for promotion
   if (!m_params) {
     return;
@@ -669,6 +678,7 @@ void MethodStatement::checkParameters() {
     case T_PRIVATE:
     case T_PROTECTED:
       if (isCtor) {
+        m_autoPropCount++;
         continue;
       }
     default:

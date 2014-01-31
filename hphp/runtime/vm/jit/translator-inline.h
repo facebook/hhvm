@@ -57,6 +57,10 @@ inline Offset liveSpOff() {
 
 namespace JIT {
 
+inline bool isNativeImplCall(const Func* funcd, int numArgs) {
+  return funcd && funcd->methInfo() && numArgs == funcd->numParams();
+}
+
 inline uintptr_t tlsBase() {
   uintptr_t retval;
 #if defined(__x86_64__)

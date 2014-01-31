@@ -65,6 +65,8 @@ struct CodeGenerator {
 
   const Func* curFunc() { return m_curInst->marker().func; }
 
+  void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc);
+
   CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
   CallDest callDest(SSATmp* dst) const;
   CallDest callDestTV(SSATmp* dst) const;
@@ -88,7 +90,8 @@ struct CodeGenerator {
   void emitDecRefMem(Type type, vixl::Register baseReg, ptrdiff_t offset);
 
   template<class Loc, class JmpFn>
-  void emitTypeTest(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);
+  void emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
+                    JmpFn doJcc);
 
   void emitLoadTypedValue(SSATmp* dst, vixl::Register base, ptrdiff_t offset,
                           Block* label);
@@ -128,6 +131,8 @@ struct CodeGenerator {
   CodegenState&               m_state;
   IRInstruction*              m_curInst;
 };
+
+void patchJumps(CodeBlock& cb, CodegenState& state, Block* block);
 
 }}}
 

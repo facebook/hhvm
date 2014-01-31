@@ -44,7 +44,7 @@ T ProfCounters<T>::get(uint32_t id) const {
 template<typename T>
 T* ProfCounters<T>::getAddr(uint32_t id) {
   // allocate a new chunk of counters if necessary
-  if (id >= m_chunks.size() * kCountersPerChunk) {
+  while (id >= m_chunks.size() * kCountersPerChunk) {
     uint32_t size = sizeof(T) * kCountersPerChunk;
     T* chunk = (T*)malloc(size);
     std::fill_n(chunk, kCountersPerChunk, m_initVal);
@@ -309,26 +309,25 @@ RegionDescPtr ProfData::transRegion(TransID id) const {
   return pTransRec.region();
 }
 
-TransID ProfData::addTransProfile(const Tracelet&       tracelet,
-                                  Offset                initSpOffset,
+TransID ProfData::addTransProfile(const RegionDescPtr&  region,
                                   const PostConditions& pconds) {
   TransID transId   = m_numTrans++;
-  Offset  lastBcOff = tracelet.m_instrStream.last->source.offset();
-  auto       region = selectTraceletLegacy(initSpOffset, tracelet);
+  Offset  lastBcOff = region->blocks.back()->last().offset();
 
   assert(region);
   DEBUG_ONLY size_t nBlocks = region->blocks.size();
   assert(nBlocks == 1 || (nBlocks > 1 && region->blocks[0]->inlinedCallee()));
 
   region->blocks.back()->setPostConditions(pconds);
+  auto const startSk = region->blocks.front()->start();
   m_transRecs.emplace_back(new ProfTransRec(transId, TransProfile, lastBcOff,
-                                            tracelet.m_sk, region));
+                                            startSk, region));
 
   // If the translation corresponds to a DV Funclet, then add an entry
   // into dvFuncletDB.
-  const Func* func = tracelet.m_sk.func();
+  const Func* func = startSk.func();
   FuncId    funcId = func->getFuncId();
-  Offset  bcOffset = tracelet.m_sk.offset();
+  Offset  bcOffset = startSk.offset();
   if (func->isDVEntry(bcOffset)) {
     int nParams = func->getDVEntryNumParams(bcOffset);
     // Normal DV funclets don't have type guards, and thus have a

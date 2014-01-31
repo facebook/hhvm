@@ -1706,7 +1706,6 @@ static const StringData* getAlternateName(const StringData* clsName) {
     static std::vector<SStringPair> mappings {
       std::make_pair(StaticString("Vector"), StaticString("HH\\Vector")),
       std::make_pair(StaticString("Map"), StaticString("HH\\Map")),
-      std::make_pair(StaticString("StableMap"), StaticString("HH\\StableMap")),
       std::make_pair(StaticString("Set"), StaticString("HH\\Set")),
       std::make_pair(StaticString("Pair"), StaticString("HH\\Pair"))
     };
@@ -1716,6 +1715,9 @@ static const StringData* getAlternateName(const StringData* clsName) {
       m[p.second.get()] = p.first.get();
     }
 
+    // As part of StableMap merging into Map, StableMap is an alias for HH\\Map,
+    // but Map is the sole alias for HH\\Map
+    m[StaticString("StableMap").get()] = StaticString("HH\\Map").get();
     return &m;
   };
 

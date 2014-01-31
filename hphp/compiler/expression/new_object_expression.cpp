@@ -158,10 +158,11 @@ void NewObjectExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("NewObjectExpression", m_params == nullptr ? 2 : 3);
   if (m_nameExp->is(Expression::KindOfScalarExpression)) {
     cg.printPropertyHeader("className");
+    cg.printValue(this->getOriginalName());
   } else {
     cg.printPropertyHeader("classExpression");
+    m_nameExp->outputCodeModel(cg);
   }
-  m_nameExp->outputCodeModel(cg);
   if (m_params != nullptr) {
     cg.printPropertyHeader("arguments");
     cg.printExpressionVector(m_params);

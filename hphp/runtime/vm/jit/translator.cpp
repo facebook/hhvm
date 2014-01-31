@@ -26,12 +26,14 @@
 #include <vector>
 #include <string>
 
+#include "folly/Optional.h"
 #include "folly/Conv.h"
 #include "folly/MapUtil.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/util/biased-coin.h"
 #include "hphp/util/map-walker.h"
+#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
@@ -448,7 +450,7 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
   // to be at the same offset
   return PropInfo(
     baseClass->declPropOffset(idx),
-    baseClass->declPropHphpcType(idx)
+    baseClass->declPropRepoAuthType(idx)
   );
 }
 
@@ -462,15 +464,72 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
   return getPropertyOffset(ni, context, cls, mii, mInd, iInd);
 }
 
+static folly::Optional<DataType>
+predictionForRepoAuthType(RepoAuthType repoTy) {
+  using T = RepoAuthType::Tag;
+  switch (repoTy.tag()) {
+  case T::OptBool:  return KindOfBoolean;
+  case T::OptInt:   return KindOfInt64;
+  case T::OptDbl:   return KindOfDouble;
+  case T::OptRes:   return KindOfResource;
+
+  case T::OptSArr:
+  case T::OptArr:
+    return KindOfArray;
+
+  case T::OptStr:
+  case T::OptSStr:
+    return KindOfString;
+
+  case T::OptSubObj:
+  case T::OptExactObj:
+  case T::OptObj:
+    return KindOfObject;
+
+  case T::Bool:
+  case T::Uninit:
+  case T::InitNull:
+  case T::Int:
+  case T::Dbl:
+  case T::Res:
+  case T::Str:
+  case T::Arr:
+  case T::Obj:
+  case T::Null:
+  case T::SStr:
+  case T::SArr:
+  case T::SubObj:
+  case T::ExactObj:
+  case T::Cell:
+  case T::Ref:
+  case T::InitUnc:
+  case T::Unc:
+  case T::InitCell:
+  case T::InitGen:
+  case T::Gen:
+    return folly::none;
+  }
+  not_reached();
+}
+
 static std::pair<DataType,double>
 predictMVec(const NormalizedInstruction* ni) {
   auto info = getFinalPropertyOffset(*ni,
                                      ni->func()->cls(),
                                      getMInstrInfo(ni->mInstrOp()));
-  if (info.offset != -1 && info.hphpcType != KindOfNone) {
-    FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
-           int(info.hphpcType));
-    return std::make_pair(info.hphpcType, 1.0);
+  if (info.offset != -1) {
+    auto const predTy = predictionForRepoAuthType(info.repoAuthType);
+    if (predTy) {
+      FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
+        static_cast<int>(*predTy));
+      return std::make_pair(*predTy, 1.0);
+    }
+    // If the RepoAuthType converts to an exact data type, there's no
+    // point in having a prediction because we know its type with 100%
+    // accuracy.  Disable it in that case here.
+    if (convertToDataType(info.repoAuthType)) {
+      return std::make_pair(KindOfAny, 0.0);
+    }
   }
 
   auto& immVec = ni->immVec;
@@ -1012,7 +1071,7 @@ static const struct {
   { OpInstanceOfD, {Stack1,           Stack1,       OutBoolean,        0 }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64,          0 }},
   { OpClone,       {Stack1,           Stack1,       OutObject,         0 }},
-  { OpExit,        {Stack1,           None,         OutNone,          -1 }},
+  { OpExit,        {Stack1,           Stack1,       OutNull,           0 }},
   { OpFatal,       {Stack1,           None,         OutNone,          -1 }},
 
   /*** 4. Control flow instructions ***/
@@ -3426,7 +3485,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
   fcall->calleeTrace = std::move(subTrace);
 }
 
-static bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
+bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
   return (instrIsNonCallControlFlow(instr->op()) ||
           instr->outputPredicted ||
           instr->op() == OpClsCnsD); // side exits if misses in the RDS
@@ -3840,7 +3899,8 @@ const char* Translator::translateResultName(TranslateResult r) {
  * eventually replace applyInputMetaData.
  */
 void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
-                  HhbcTranslator& hhbcTrans, MetaMode metaMode /* = Normal */) {
+                  HhbcTranslator& hhbcTrans, bool profiling,
+                  MetaMode metaMode /* = Normal */) {
   if (isAlwaysNop(inst.op())) {
     inst.noOp = true;
     return;
@@ -3906,8 +3966,8 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         // necessary (and they caused a perf regression). HHIR guard relaxation
         // is capable of eliminating unnecessary predictions and the
         // information added here is valuable to it.
-        if (metaMode == MetaMode::Legacy &&
-            !RuntimeOption::EvalHHIRRelaxGuards) {
+        if ((metaMode == MetaMode::Legacy &&
+             !RuntimeOption::EvalHHIRRelaxGuards) || profiling) {
           break;
         }
         auto const loc = stackFilter(inst.inputs[arg]->location).
@@ -4011,6 +4071,12 @@ void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
          color(ANSI_COLOR_END));
 
   m_irTrans.reset(new JIT::IRTranslator(initBcOffset, initSpOffset, func));
+
+  // XXX t3582470: TransOptimize translations don't work with hhir guard
+  // relaxation yet.
+  if (m_mode == TransOptimize) {
+    m_irTrans->hhbcTrans().traceBuilder().setConstrainGuards(false);
+  }
 }
 
 void Translator::traceEnd() {
@@ -4035,6 +4101,7 @@ Translator::translateRegion(const RegionDesc& region,
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   assert(!region.blocks.empty());
   const SrcKey startSk = region.blocks.front()->start();
+  auto profilingFunc = false;
 
   for (auto b = 0; b < region.blocks.size(); b++) {
     auto const& block = region.blocks[b];
@@ -4055,6 +4122,8 @@ Translator::translateRegion(const RegionDesc& region,
       // region the guards will go to a retranslate request. Otherwise, they'll
       // go to a side exit.
       bool isFirstRegionInstr = block == region.blocks.front() && i == 0;
+      if (isFirstRegionInstr) ht.emitRB(Trace::RBTypeTraceletGuards, sk);
+
       while (typePreds.hasNext(sk)) {
         auto const& pred = typePreds.next();
         auto type = pred.type;
@@ -4079,8 +4148,21 @@ Translator::translateRegion(const RegionDesc& region,
         ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
       }
 
-      if (RuntimeOption::EvalJitTransCounters && isFirstRegionInstr) {
-        ht.emitIncTransCounter();
+      if (isFirstRegionInstr) {
+        if (RuntimeOption::EvalJitTransCounters) {
+          ht.emitIncTransCounter();
+        }
+
+        if (m_mode == TransProfile) {
+          if (block->func()->isEntry(block->start().offset())) {
+            ht.emitCheckCold(m_profData->curTransID());
+            profilingFunc = true;
+          } else {
+            ht.emitIncProfCounter(m_profData->curTransID());
+          }
+        }
+
+        ht.emitRB(Trace::RBTypeTraceletBody, sk);
       }
 
       // Update the current funcd, if we have a new one.
@@ -4153,7 +4235,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Apply the remaining metadata. This may change the types of some of
       // inst's inputs.
-      readMetaData(metaHand, inst, ht);
+      readMetaData(metaHand, inst, ht, m_mode == TransProfile);
       if (!inst.noOp && inputInfos.needsRefCheck) {
         assert(byRefs.hasNext(sk));
         inst.preppedByRef = byRefs.next();
@@ -4199,6 +4281,7 @@ Translator::translateRegion(const RegionDesc& region,
   traceEnd();
   try {
     traceCodeGen();
+    if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
   } catch (const JIT::FailedCodeGen& exn) {
     FTRACE(1, "code generation failed with {}\n", exn.what());
     SrcKey sk{exn.vmFunc, exn.bcOff};

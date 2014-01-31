@@ -285,10 +285,13 @@ public:
   void printValue(std::string value);
   void printModifierVector(std::string value);
   void printTypeExpression(std::string value);
+  void printTypeExpression(ExpressionPtr expression);
   void printExpression(ExpressionPtr expression, bool isRef);
   void printExpressionVector(ExpressionListPtr el);
+  void printTypeExpressionVector(ExpressionListPtr el);
   void printExpressionVector(ExpressionPtr e);
-  void printAsBlock(StatementPtr s);
+  void printAsBlock(StatementPtr s, bool isEnclosed = false);
+  void printAsEnclosedBlock(StatementPtr s) { printAsBlock(s, true); }
   void printStatementVector(StatementListPtr sl);
   void printStatementVector(StatementPtr s);
   void printLocation(LocationPtr location);

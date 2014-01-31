@@ -104,7 +104,7 @@ static void insertAsserts(IRUnit& unit) {
     });
 }
 
-void optimize(IRUnit& unit, TraceBuilder& traceBuilder) {
+void optimize(IRUnit& unit, TraceBuilder& traceBuilder, TransKind kind) {
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, unit, folly::format("after {}", msg).str().c_str());
     assert(checkCfg(unit));
@@ -125,8 +125,11 @@ void optimize(IRUnit& unit, TraceBuilder& traceBuilder) {
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
 
-  if (RuntimeOption::EvalHHIRRelaxGuards) {
-    auto changed = relaxGuards(unit, *traceBuilder.guards());
+  // XXX t3582470. hhir guard relaxation doesn't support Optimize translations
+  // right now.
+  if (RuntimeOption::EvalHHIRRelaxGuards && kind != TransOptimize) {
+    auto const simpleRelax = kind == TransProfile;
+    auto changed = relaxGuards(unit, *traceBuilder.guards(), simpleRelax);
     if (changed) finishPass("guard relaxation");
   }
 

@@ -116,6 +116,7 @@ private:
   SSATmp* simplifyCeil(IRInstruction*);
   SSATmp* simplifyUnbox(IRInstruction*);
   SSATmp* simplifyUnboxPtr(IRInstruction*);
+  SSATmp* simplifyBoxPtr(IRInstruction*);
   SSATmp* simplifyCheckInit(IRInstruction* inst);
   SSATmp* simplifyPrint(IRInstruction* inst);
   SSATmp* simplifyDecRef(IRInstruction* inst);
@@ -172,6 +173,7 @@ private:
   template<class Oper> SSATmp* simplifyRoundCommon(IRInstruction*, Oper);
 
   SSATmp* simplifyCheckPackedArrayBounds(IRInstruction*);
+  SSATmp* simplifyLdPackedArrayElem(IRInstruction*);
 
 private: // tracebuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);
@@ -267,15 +269,6 @@ smart::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth);
  * More complicated copy-propagation is performed in the Simplifier.
  */
 void copyProp(IRInstruction*);
-
-/*
- * Checks if property propName of class clsTmp, called from context class ctx,
- * can be accessed via the static property cache.
- */
-bool canUseSPropCache(SSATmp* clsTmp,
-                      const StringData* propName,
-                      const Class* ctx);
-
 
 /*
  * Returns the canonical version of the given value by tracing through any

@@ -31,6 +31,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/index.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -45,6 +46,13 @@ const StaticString s_empty("");
 //////////////////////////////////////////////////////////////////////
 
 struct EmitUnitState {
+  explicit EmitUnitState(const Index& index) : index(index) {}
+
+  /*
+   * Access to the Index for this program.
+   */
+  const Index& index;
+
   /*
    * While emitting bytecode, we keep track of where the DefCls
    * opcodes for each class are.  The PreClass runtime structures
@@ -777,6 +785,25 @@ void emit_pseudomain(EmitUnitState& state,
   emit_finish_func(pm, *fe, info);
 }
 
+RepoAuthType make_repo_type(UnitEmitter& ue, const Type& t) {
+  using T = RepoAuthType::Tag;
+
+  if (t.strictSubtypeOf(TObj) || (is_opt(t) && t.strictSubtypeOf(TOptObj))) {
+    auto const dobj = dobj_of(t);
+    auto const tag =
+      is_opt(t)
+        ? (dobj.type == DObj::Exact ? T::OptExactObj : T::OptSubObj)
+        : (dobj.type == DObj::Exact ? T::ExactObj    : T::SubObj);
+    ue.mergeLitstr(dobj.cls.name());
+    return RepoAuthType { tag, dobj.cls.name() };
+  }
+
+#define ASSERTT_OP(x) if (t.subtypeOf(T##x)) return RepoAuthType{T::x};
+  ASSERTT_OPS
+#undef ASSERTT_OP
+  return RepoAuthType{};
+}
+
 void emit_class(EmitUnitState& state,
                 UnitEmitter& ue,
                 const php::Class& cls) {
@@ -795,11 +822,11 @@ void emit_class(EmitUnitState& state,
   );
   pce->setUserAttributes(cls.userAttributes);
 
-  for (auto& i : cls.interfaceNames)   pce->addInterface(i);
-  for (auto& ut : cls.usedTraitNames)  pce->addUsedTrait(ut);
-  for (auto& req : cls.traitRequirements) pce->addTraitRequirement(req);
-  for (auto& tp : cls.traitPrecRules)  pce->addTraitPrecRule(tp);
-  for (auto& ta : cls.traitAliasRules) pce->addTraitAliasRule(ta);
+  for (auto& x : cls.interfaceNames)     pce->addInterface(x);
+  for (auto& x : cls.usedTraitNames)     pce->addUsedTrait(x);
+  for (auto& x : cls.traitRequirements)  pce->addTraitRequirement(x);
+  for (auto& x : cls.traitPrecRules)     pce->addTraitPrecRule(x);
+  for (auto& x : cls.traitAliasRules)    pce->addTraitAliasRule(x);
 
   for (auto& m : cls.methods) {
     FTRACE(2, "    method: {}\n", m->name->data());
@@ -810,14 +837,21 @@ void emit_class(EmitUnitState& state,
     emit_finish_func(*m, *fe, info);
   }
 
+  auto const privateProps   = state.index.lookup_private_props(&cls);
+  auto const privateStatics = state.index.lookup_private_statics(&cls);
   for (auto& prop : cls.properties) {
+    auto const repoTy = [&] (const PropState& ps) {
+      auto it = ps.find(prop.name);
+      return it == end(ps) ? RepoAuthType{} : make_repo_type(ue, it->second);
+    };
+
     pce->addProperty(
       prop.name,
       prop.attrs,
       prop.typeConstraint,
       prop.docComment,
       &prop.val,
-      KindOfInvalid // hphpcType
+      (prop.attrs & AttrStatic) ? repoTy(privateStatics) : repoTy(privateProps)
     );
   }
 
@@ -835,7 +869,8 @@ void emit_class(EmitUnitState& state,
 
 }
 
-std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
+std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
+                                       const php::Unit& unit) {
   auto const is_systemlib = is_systemlib_part(unit);
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib};
 
@@ -843,7 +878,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->setFilepath(unit.filename);
 
-  EmitUnitState state;
+  EmitUnitState state { index };
   state.defClsMap.resize(unit.classes.size(), kInvalidOffset);
 
   /*

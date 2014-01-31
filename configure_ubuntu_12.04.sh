@@ -88,7 +88,7 @@ git checkout release-1.4.14b-stable
 cat ../hphp/third_party/libevent-1.4.14.fb-changes.diff | patch -p1
 ./autogen.sh
 ./configure --prefix=$CMAKE_PREFIX_PATH
-make
+make -j $CPUS
 make install
 cd ..
 
@@ -96,14 +96,14 @@ cd ..
 cd curl
 ./buildconf
 ./configure --prefix=$CMAKE_PREFIX_PATH
-make
+make -j $CPUS
 make install
 cd ..
 
 # glog
 cd google-glog
 ./configure --prefix=$CMAKE_PREFIX_PATH
-make
+make -j $CPUS
 make install
 cd ..
 
@@ -111,7 +111,7 @@ cd ..
 tar xjvf jemalloc-3.0.0.tar.bz2
 cd jemalloc-3.0.0
 ./configure --prefix=$CMAKE_PREFIX_PATH
-make
+make -j $CPUS
 make install
 cd ..
 

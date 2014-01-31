@@ -30,9 +30,27 @@ IMPLEMENT_REQUEST_LOCAL(RequestData, s_intl_request);
 const StaticString s_resdata("__resdata");
 
 void IntlExtension::bindIniSettings() {
-  IniSetting::Bind("intl.default_locale", "",
+  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                   "intl.default_locale", "",
                    icu_on_update_default_locale, icu_get_default_locale,
                    nullptr);
+}
+
+const StaticString
+#ifdef U_ICU_DATA_VERSION
+  s_INTL_ICU_DATA_VERSION("INTL_ICU_DATA_VERSION"),
+  s_U_ICU_DATA_VERSION(U_ICU_DATA_VERSION),
+#endif
+  s_INTL_ICU_VERSION("INTL_ICU_VERSION"),
+  s_U_ICU_VERSION(U_ICU_VERSION);
+
+void IntlExtension::bindConstants() {
+#ifdef U_ICU_DATA_VERSION
+  Native::registerConstant<KindOfString>(s_INTL_ICU_DATA_VERSION.get(),
+                                         s_U_ICU_DATA_VERSION.get());
+#endif
+  Native::registerConstant<KindOfString>(s_INTL_ICU_VERSION.get(),
+                                         s_U_ICU_VERSION.get());
 }
 
 const String GetDefaultLocale() {

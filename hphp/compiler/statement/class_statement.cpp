@@ -216,12 +216,11 @@ void ClassStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 3;
+  auto numProps = 4;
   if (m_attrList != nullptr) numProps++;
   if (m_type == T_ABSTRACT || m_type == T_FINAL) numProps++;
   if (!m_parent.empty()) numProps++;
   if (m_base != nullptr) numProps++;
-  if (m_stmt != nullptr) numProps++;
   if (!m_docComment.empty()) numProps++;
 
   cg.printObjectHeader("TypeStatement", numProps);
@@ -251,12 +250,17 @@ void ClassStatement::outputCodeModel(CodeGenerator &cg) {
   }
   if (m_base != nullptr) {
     cg.printPropertyHeader("interfaces");
-    cg.printExpressionVector(m_base);
+    cg.printTypeExpressionVector(m_base);
   }
-  if (m_stmt != nullptr) {
-    cg.printPropertyHeader("block");
-    cg.printAsBlock(m_stmt);
+  cg.printPropertyHeader("block");
+  auto stmt = m_stmt;
+  if (m_promotedParameterCount  > 0) {
+    stmt = m_stmt->shallowClone();
+    for (int i = 0; i < m_promotedParameterCount; i++) {
+      stmt->removeElement(stmt->getCount()-1);
+    }
   }
+  cg.printAsEnclosedBlock(stmt);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   if (!m_docComment.empty()) {

@@ -50,7 +50,7 @@ public:
   ExpressionPtr unneeded();
 
   /**
-   * This is purely for resolving a nasty case of intepreting
+   * This is purely for resolving a nasty case of interpreting
    * self::$a[1][2] correctly.
    */
   bool appendClass(ExpressionPtr cls,

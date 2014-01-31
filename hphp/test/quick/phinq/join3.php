@@ -11,5 +11,5 @@ $q = from $c in $customers
      select tuple($c->Name, $o->OrderDate, $p->ProductName);
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }

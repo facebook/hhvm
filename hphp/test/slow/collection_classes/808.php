@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $m = new StableMap;
 $m[3] = 'foo';

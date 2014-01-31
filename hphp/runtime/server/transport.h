@@ -116,6 +116,8 @@ public:
   virtual const char *getRemoteAddr() { return ""; }
   // The transport can override the virtualhosts' docroot
   virtual const std::string getDocumentRoot() { return ""; }
+  // The transport can say exactly what script to use
+  virtual const std::string getPathTranslated() { return ""; }
 
   /**
    * Server Headers

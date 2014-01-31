@@ -1,0 +1,11 @@
+string(5) "world"
+string(0) ""
+object(SimpleXMLElement)#%d (2) {
+  ["foobar"]=>
+  object(SimpleXMLElement)#%d (0) {
+  }
+  ["hello"]=>
+  string(5) "world"
+}
+string(0) ""
+string(5) "world"

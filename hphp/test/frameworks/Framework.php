@@ -61,34 +61,13 @@ abstract class Framework {
     $this->setGitCommit(Options::$framework_info[$name]['commit']);
     $this->setGitBranch(Options::$framework_info[$name]['branch']);
     $this->setTestPath(Options::$framework_info[$name]["test_root"]);
-    if (array_key_exists('pull_requests', Options::$framework_info[$name])) {
-      $this->setPullRequests(Options::$framework_info[$name]["pull_requests"]);
-    } else {
-      $this->setPullRequests(null);
-    }
-    // Get some more possible framework test information
-    if (array_key_exists('blacklist', Options::$framework_info[$name])) {
-      $this->setBlacklist(Options::$framework_info[$name]["blacklist"]);
-    } else {
-       $this->setBlacklist(null);
-    }
-    if (array_key_exists('clowns', Options::$framework_info[$name])) {
-      $this->setClownylist(Options::$framework_info[$name]["clowns"]);
-    } else {
-      $this->setClownylist(null);
-    }
-    if (array_key_exists('test_name_regex', Options::$framework_info[$name])) {
-      $this->setTestNamePattern(
-        Options::$framework_info[$name]["test_name_regex"]);
-    } else {
-      $this->setTestNamePattern(null);
-    }
-    if (array_key_exists('test_file_regex', Options::$framework_info[$name])) {
-      $this->setTestFilePattern(
-        Options::$framework_info[$name]["test_file_regex"]);
-    } else {
-      $this->setTestFilePattern(null);
-    }
+    $this->setPullRequests(Options::getFrameworkInfo($name, "pull_requests"));
+    $this->setBlacklist(Options::getFrameworkInfo($name, "blacklist"));
+    $this->setClownylist(Options::getFrameworkInfo($name, "clowns"));
+    $this->setTestNamePattern(Options::getFrameworkInfo($name,
+                                                        "test_name_regex"));
+    $this->setTestFilePattern(Options::getFrameworkInfo($name,
+                                                        "test_file_regex"));
 
     $this->prepareOutputFiles();
 
@@ -104,17 +83,8 @@ abstract class Framework {
 
     // Now that we have an install, we can safely set all possible
     // other framework information
-    if (array_key_exists('config_file', Options::$framework_info[$name])) {
-      $this->setConfigFile(Options::$framework_info[$name]["config_file"]);
-    } else {
-      $this->setConfigFile(null);
-    }
-    if (array_key_exists('bootstrap_file', Options::$framework_info[$name])) {
-      $this->setBootstrapFile(
-        Options::$framework_info[$name]["bootstrap_file"]);
-    } else {
-      $this->setBootstrapFile(null);
-    }
+    $this->setConfigFile(Options::getFrameworkInfo($name, "config_file"));
+    $this->setBootstrapFile(Options::getFrameworkInfo($name, "bootstrap_file"));
     $this->setTestCommand(true);
     $this->findTests();
   }
@@ -167,11 +137,9 @@ abstract class Framework {
   }
 
   public function getTests(): ?Set {
-    if (Options::$test_by_single_test) {
-      return $this->individual_tests;
-    } else {
-      return $this->test_files;
-    }
+    return Options::$test_by_single_test
+      ? $this->individual_tests
+      : $this->test_files;
   }
 
   public function getEnvVars(): ?Map {
@@ -268,7 +236,7 @@ abstract class Framework {
     }
   }
 
-  private function setBootstrapFile(?string $bootstrap_file = null): void {
+  private function setBootstrapFile(?string $bootstrap_file): void {
     $this->bootstrap_file = $bootstrap_file;
   }
 
@@ -280,8 +248,7 @@ abstract class Framework {
     $this->install_root = Options::$frameworks_root."/".$install_root;
   }
 
-  private function setTestNamePattern(?string $test_name_pattern = null):
-                                        void {
+  private function setTestNamePattern(?string $test_name_pattern): void {
     // Test name pattern can be different depending on the framework,
     // although most follow the default.
     $this->test_name_pattern = $test_name_pattern === null
@@ -301,7 +268,7 @@ abstract class Framework {
     }
     if ($this->parallel) {
       if (Options::$test_by_single_test) {
-         $this->test_command .= " --filter";
+        $this->test_command .= " --filter";
       }
       $this->test_command .= " '%test%'";
     }
@@ -665,7 +632,7 @@ abstract class Framework {
       $find_tests_command .= " --config-file ".$this->config_file;
       $find_tests_command .= " --test-find-mode ".$this->test_find_mode;
       if ($this->bootstrap_file !== null) {
-        $find_tests_command .= " --bfile ".$this->bootstrap_file;
+        $find_tests_command .= " --bootstrap-file ".$this->bootstrap_file;
       };
       $descriptorspec = array(
         0 => array("pipe", "r"),

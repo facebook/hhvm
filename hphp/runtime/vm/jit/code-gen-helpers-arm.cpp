@@ -55,10 +55,8 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   }
 
   using namespace vixl;
-  a.   Push    (x30, x29);
   auto fixupAddr = a.frontier();
-  a.   HostCall(5);
-  a.   Pop     (x29, x30);
+  a.   HostCall(6);
 
   // Note that the fixup address for a HostCall is directly *before* the
   // HostCall, not after as in the native case. This is because, in simulation
@@ -69,14 +67,11 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   return fixupAddr;
 }
 
-TCA emitCall(vixl::MacroAssembler& a, TCA call) {
+TCA emitCallWithinTC(vixl::MacroAssembler& a, TCA call) {
   a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call));
 
-  using namespace vixl;
-  a.   Push    (x30, x29);
   a.   Blr     (rHostCallReg);
   auto fixupAddr = a.frontier();
-  a.   Pop     (x29, x30);
 
   return fixupAddr;
 }
@@ -110,7 +105,8 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 
   astubs.  Mov  (argReg(0), rVmFp);
 
-  auto fixupAddr = emitCall(astubs, tx64->uniqueStubs.functionEnterHelper);
+  auto fixupAddr =
+    emitCallWithinTC(astubs, tx64->uniqueStubs.functionEnterHelper);
   if (inTracelet) {
     fixupMap.recordSyncPoint(fixupAddr,
                              fixup.m_pcOffset, fixup.m_spOffset);
@@ -121,6 +117,25 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
     fixupMap.recordFixup(fixupAddr, fixup);
   }
   emitSmashableJump(stubsCode, mainCode.frontier(), CC_None);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
+  a.    Str  (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+                                  Stack::topOfStackOffset()]);
+  if ((bool)(flags & RegSaveFlags::SaveFP)) {
+    a.  Str  (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
+  }
+
+  if ((bool)(flags & RegSaveFlags::SavePC)) {
+    // m_fp->m_func->m_unit->m_bc
+    a.  Ldr  (rAsm, rVmFp[AROFF(m_func)]);
+    a.  Ldr  (rAsm, rAsm[Func::unitOff()]);
+    a.  Ldr  (rAsm, rAsm[Unit::bcOff()]);
+    a.  Add  (rAsm, rAsm, vixl::Operand(argReg(0), vixl::UXTW));
+    a.  Str  (rAsm, rGContextReg[offsetof(VMExecutionContext, m_pc)]);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

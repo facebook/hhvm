@@ -193,7 +193,7 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
 void StaticStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("StaticStatement", 2);
   cg.printPropertyHeader("expressions");
-  m_exp->outputCodeModel(cg);
+  cg.printExpressionVector(m_exp);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

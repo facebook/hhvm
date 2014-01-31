@@ -124,7 +124,8 @@ bool EncapsListExpression::canonCompare(ExpressionPtr e) const {
 void EncapsListExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("EncapsListExpression", 3);
   cg.printPropertyHeader("delimiter");
-  cg.printValue(m_type);
+  std::string tstr(1, m_type);
+  cg.printValue(tstr);
   cg.printPropertyHeader("expressions");
   cg.printExpressionVector(m_exps);
   cg.printPropertyHeader("sourceLocation");

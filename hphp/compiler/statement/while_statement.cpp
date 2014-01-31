@@ -91,13 +91,11 @@ void WhileStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void WhileStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("WhileStatement", m_stmt != nullptr ? 3 : 2);
+  cg.printObjectHeader("WhileStatement", 3);
   cg.printPropertyHeader("condition");
   m_condition->outputCodeModel(cg);
-  if (m_stmt != nullptr) {
-    cg.printPropertyHeader("block");
-    cg.printAsBlock(m_stmt);
-  }
+  cg.printPropertyHeader("block");
+  cg.printAsBlock(m_stmt);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

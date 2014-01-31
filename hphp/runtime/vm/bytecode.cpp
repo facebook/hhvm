@@ -2366,6 +2366,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
           // return the unit.
           efile = it->second;
           m_evaledFiles[spath.get()] = efile;
+          m_evaledFilesOrder.push_back(efile);
           spath.get()->incRefCount();
           initial = false;
           return efile;
@@ -2384,6 +2385,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
     }
     // if parsing was successful, update the mappings for spath and
     // rpath (if it exists).
+    m_evaledFilesOrder.push_back(efile);
     m_evaledFiles[spath.get()] = efile;
     spath.get()->incRefCount();
     // Don't incRef efile; checkoutFile() already counted it.
@@ -3505,14 +3507,22 @@ OPTBLD_INLINE void VMExecutionContext::iopFalse(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopFile(IOP_ARGS) {
   NEXT();
-  const StringData* s = m_fp->m_func->unit()->filepath();
-  m_stack.pushStaticString(const_cast<StringData*>(s));
+  auto const s = m_fp->m_func->unit()->filepath();
+  assert(s->isStatic());
+
+  // iopDir and iopFile can both be used from 86pinit for deep
+  // property initializers.  That code path assumes the result of
+  // property initialization is a reference counted type, so we need
+  // to push KindOfString instead of KindOfStaticString.
+  m_stack.pushStringNoRc(const_cast<StringData*>(s));
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopDir(IOP_ARGS) {
   NEXT();
-  const StringData* s = m_fp->m_func->unit()->dirpath();
-  m_stack.pushStaticString(const_cast<StringData*>(s));
+  auto const s = m_fp->m_func->unit()->dirpath();
+  // See iopFile for why this isn't pushStaticString.
+  assert(s->isStatic());
+  m_stack.pushStringNoRc(const_cast<StringData*>(s));
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopInt(IOP_ARGS) {
@@ -3724,6 +3734,14 @@ OPTBLD_INLINE void VMExecutionContext::iopClsCns(IOP_ARGS) {
   assert(tv->m_type == KindOfClass);
   Class* class_ = tv->m_data.pcls;
   assert(class_ != nullptr);
+  if (clsCnsName->isame(s_class.get())) {
+    // Doesn't decref tv since Classes aren't refcounted
+    auto name = const_cast<StringData*>(class_->name());
+    assert(name->isStatic());
+    tv->m_type = KindOfStaticString;
+    tv->m_data.pstr = name;
+    return;
+  }
   auto const clsCns = class_->clsCnsGet(clsCnsName);
   if (clsCns.m_type == KindOfUninit) {
     raise_error("Couldn't find constant %s::%s",

@@ -133,7 +133,12 @@ void ClassConstant::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassConstant::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ConstantStatement", 2);
+  auto numProps = m_typeConstraint.empty() ? 2 : 3;
+  cg.printObjectHeader("ConstantStatement", numProps);
+  if (!m_typeConstraint.empty()) {
+    cg.printPropertyHeader("typeAnnotation");
+    cg.printTypeExpression(m_typeConstraint);
+  }
   cg.printPropertyHeader("expressions");
   cg.printExpressionVector(m_exp);
   cg.printPropertyHeader("sourceLocation");

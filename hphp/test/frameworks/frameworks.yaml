@@ -94,6 +94,12 @@
     commit: 925cb82ee989a3af6adf09e3285d0c4a67eaa306
     install_root: joomla-cms
     test_root: joomla-cms
+  klein:
+    url: https://github.com/chriso/klein.php.git
+    branch: master
+    commit: 376fd62813eb2008f3644e206d03002a3250122a
+    install_root: klein
+    test_root: klein
   laravel:
     url: https://github.com/laravel/framework.git
     branch: master
@@ -121,6 +127,12 @@
     clowns:
       - mediawiki-core/tests/phpunit/includes/HttpTest.php
       - mediawiki-core/tests/phpunit/includes/libs/CSSJanusTest.php
+  mockery:
+    url: https://github.com/padraic/mockery.git
+    branch: master
+    commit: cce505fe699d12bea3735eee2638d9955a908052
+    install_root: mockery
+    test_root: mockery
   monolog:
     url: https://github.com/Seldaek/monolog.git
     branch: master

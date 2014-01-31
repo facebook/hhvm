@@ -253,42 +253,6 @@ void copyProp(IRInstruction* inst) {
   }
 }
 
-/*
- * Checks if property propName of class clsTmp, called from context class ctx,
- * can be accessed via the static property cache.
- * Right now, this returns true for two cases:
- *   (a) the property is accessed from within the class containing it
- *   (b) the property belongs to a persistent class and it's accessible from ctx
- */
-bool canUseSPropCache(SSATmp* clsTmp,
-                      const StringData* propName,
-                      const Class* ctx) {
-  if (propName == nullptr) return false;
-
-  const StringData* clsName = findClassName(clsTmp);
-  if (ctx) {
-    const StringData* ctxName = ctx->preClass()->name();;
-    if (clsName && ctxName && clsName->isame(ctxName)) return true;
-  }
-
-  if (!clsTmp->isConst()) return false;
-
-  const Class* cls = clsTmp->getValClass();
-
-  if (!classHasPersistentRDS(cls)) return false;
-
-  // If the class requires initialization, it might not have been
-  // initialized yet.  getSProp() below will trigger initialization,
-  // but that's only valid to do earlier if it doesn't require any
-  // property initializer ([sp]init methods).
-  if (cls->hasInitMethods()) return false;
-
-  bool visible, accessible;
-  cls->getSProp(const_cast<Class*>(ctx), propName, visible, accessible);
-
-  return visible && accessible;
-}
-
 const SSATmp* canonical(const SSATmp* val) {
   return canonical(const_cast<SSATmp*>(val));
 }
@@ -396,7 +360,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConcatStrStr:  return simplifyConcatStrStr(src1, src2);
   case Mov:           return simplifyMov(src1);
   case Not:           return simplifyNot(src1);
-  case LdClsPropAddr: return simplifyLdClsPropAddr(inst);
   case ConvBoolToArr: return simplifyConvToArr(inst);
   case ConvDblToArr:  return simplifyConvToArr(inst);
   case ConvIntToArr:  return simplifyConvToArr(inst);
@@ -424,6 +387,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case Ceil:          return simplifyCeil(inst);
   case Unbox:         return simplifyUnbox(inst);
   case UnboxPtr:      return simplifyUnboxPtr(inst);
+  case BoxPtr:        return simplifyBoxPtr(inst);
   case IsType:
   case IsNType:       return simplifyIsType(inst);
   case IsScalarType:  return simplifyIsScalarType(inst);
@@ -481,6 +445,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
 
   case CheckPackedArrayBounds: return simplifyCheckPackedArrayBounds(inst);
+  case LdPackedArrayElem:      return simplifyLdPackedArrayElem(inst);
 
   default:
     return nullptr;
@@ -1888,28 +1853,6 @@ SSATmp* Simplifier::simplifyCeil(IRInstruction* inst) {
   return simplifyRoundCommon(inst, ceil);
 }
 
-SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
-  SSATmp* propName = inst->src(1);
-  if (!propName->isConst()) return nullptr;
-
-  SSATmp* cls = inst->src(0);
-  auto ctxCls = inst->src(2)->getValClass();
-
-  if (canUseSPropCache(cls, propName->getValStr(), ctxCls)) {
-
-    const StringData* clsNameStr = findClassName(cls);
-
-    return gen(LdClsPropAddrCached,
-               inst->taken(),
-               cls,
-               propName,
-               cns(clsNameStr),
-               inst->src(2));
-  }
-
-  return nullptr;
-}
-
 SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
   auto* src = inst->src(0);
   auto type = outputType(inst);
@@ -1929,7 +1872,13 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
   if (inst->src(0)->isA(Type::PtrToCell)) {
-    // Nothing to unbox
+    return inst->src(0);
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyBoxPtr(IRInstruction* inst) {
+  if (inst->src(0)->isA(Type::PtrToBoxedCell)) {
     return inst->src(0);
   }
   return nullptr;
@@ -2196,13 +2145,39 @@ SSATmp* Simplifier::simplifyAssertNonNull(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyCheckPackedArrayBounds(IRInstruction* inst) {
+  auto* array = inst->src(0);
   auto* idx = inst->src(1);
+
   if (idx->isConst()) {
-    if ((uint64_t)idx->getValInt() >= 0xffffffffull) {
+    auto const idxVal = (uint64_t)idx->getValInt();
+    if (idxVal >= 0xffffffffull) {
       // ArrayData can't hold more than 2^32 - 1 elements, so this is always
       // going to fail.
       inst->convertToJmp();
+    } else if (array->isConst()) {
+      if (idxVal >= array->getValArr()->size()) {
+        inst->convertToJmp();
+      } else {
+        // We should convert inst to a nop here but that exposes t3626113
+      }
     }
+  }
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyLdPackedArrayElem(IRInstruction* inst) {
+  auto* arrayTmp = inst->src(0);
+  auto* idxTmp   = inst->src(1);
+  if (arrayTmp->isConst() && idxTmp->isConst()) {
+    auto* value = arrayTmp->getValArr()->nvGet(idxTmp->getValInt());
+    if (!value) {
+      // The index doesn't exist. This code should be unreachable at runtime.
+      return nullptr;
+    }
+
+    if (value->m_type == KindOfRef) value = value->m_data.pref->tv();
+    return cns(*value);
   }
 
   return nullptr;

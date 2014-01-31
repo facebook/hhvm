@@ -265,7 +265,8 @@ public:
       m_numThreads(numThreads),
       m_serverFD(-1),
       m_sslFD(-1),
-      m_takeoverFilename() {
+      m_takeoverFilename(),
+      m_useFileSocket(false) {
   }
 
   std::string m_address;
@@ -274,6 +275,7 @@ public:
   int m_serverFD;
   int m_sslFD;
   std::string m_takeoverFilename;
+  bool m_useFileSocket;
 };
 
 /**
@@ -327,6 +329,9 @@ public:
 
 class FailedToListenException : public ServerException {
 public:
+  explicit FailedToListenException(const std::string &addr)
+    : ServerException("Failed to listen to unix socket at %s", addr.c_str()) {
+  }
   FailedToListenException(const std::string &addr, int port)
     : ServerException("Failed to listen on %s:%d", addr.c_str(), port) {
   }

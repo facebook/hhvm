@@ -52,7 +52,7 @@ const TransID InvalidID = -1LL;
  *
  *   - Anchor   : a service request for retranslating
  *   - Prologue : function prologue
- *   - Interp   : a service to interpret at least one instruction
+ *   - Interp   : a service request to interpret at least one instruction
  *   - Live     : translate one tracelet by inspecting live VM state
  *   - Profile  : translate one block by inspecting live VM state and
  *                inserting profiling counters

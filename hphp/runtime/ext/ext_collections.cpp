@@ -112,6 +112,26 @@ void triggerCow(c_Vector* vec) {
   vec->mutate();
 }
 
+namespace {
+
+ALWAYS_INLINE
+void* reallocHelper(void* ptr, size_t oldSize, size_t newSize) {
+  assert(oldSize > 0 || !ptr);
+  assert(newSize > 0);
+
+  auto retptr = MM().objMallocLogged(newSize);
+
+  if (ptr) {
+    auto const copySize = std::min(oldSize, newSize);
+    retptr = memcpy(retptr, ptr, copySize);
+    MM().objFreeLogged(ptr, oldSize);
+  }
+
+  return retptr;
+}
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // ConstCollection
@@ -422,12 +442,42 @@ Array BaseVector::toArrayImpl() const {
 void BaseVector::grow() {
   mutate();
 
+  auto const oldSize = m_capacity * sizeof(TypedValue);
   if (m_capacity) {
     m_capacity += m_capacity;
   } else {
     m_capacity = 8;
   }
-  m_data = (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
+  m_data = (TypedValue*)reallocHelper(m_data, oldSize,
+                                      m_capacity * sizeof(TypedValue));
+}
+
+void BaseVector::addFront(TypedValue* val) {
+  assert(val->m_type != KindOfRef);
+  ++m_version;
+  mutate();
+  if (m_capacity <= m_size) {
+    grow();
+  }
+  memmove(m_data+1, m_data, m_size * sizeof(TypedValue));
+  cellDup(*val, m_data[0]);
+  ++m_size;
+}
+
+Variant BaseVector::popFront() {
+  ++m_version;
+  if (m_size) {
+    mutate();
+    Variant ret = tvAsCVarRef(&m_data[0]);
+    tvRefcountedDecRef(&m_data[0]);
+    --m_size;
+    memmove(m_data, m_data+1, m_size * sizeof(TypedValue));
+    return ret;
+  } else {
+    Object e(SystemLib::AllocRuntimeExceptionObject(
+      "Cannot pop empty Vector"));
+    throw e;
+  }
 }
 
 void BaseVector::reserve(int64_t sz) {
@@ -437,9 +487,9 @@ void BaseVector::reserve(int64_t sz) {
     ++m_version;
     mutate();
 
+    m_data = (TypedValue*)reallocHelper(m_data, m_capacity * sizeof(TypedValue),
+                                        sz * sizeof(TypedValue));
     m_capacity = sz;
-    m_data =
-      (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
   }
 }
 
@@ -459,7 +509,9 @@ BaseVector::~BaseVector() {
       tvRefcountedDecRef(&m_data[i]);
     }
 
-    smart_free(m_data);
+    if (m_data) {
+      MM().objFreeLogged(m_data, m_capacity * sizeof(TypedValue));
+    }
     m_data = nullptr;
   }
 }
@@ -485,7 +537,7 @@ void BaseVector::init(CVarRef t) {
 
 void BaseVector::cow() {
   TypedValue* newData =
-    (TypedValue*)smart_malloc(m_capacity * sizeof(TypedValue));
+    (TypedValue*)MM().objMallocLogged(m_capacity * sizeof(TypedValue));
 
   assert(newData);
 
@@ -516,9 +568,10 @@ void c_Vector::resize(int64_t sz, TypedValue* val) {
   assert(sz >= 0);
   uint requestedSize = (uint)sz;
   if (m_capacity < requestedSize) {
+    m_data = (TypedValue*)
+      reallocHelper(m_data, m_capacity * sizeof(TypedValue),
+                    requestedSize * sizeof(TypedValue));
     m_capacity = requestedSize;
-    m_data =
-      (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
   }
   if (m_size > requestedSize) {
     do {
@@ -613,7 +666,9 @@ Object c_Vector::t_clear() {
   for (int i = 0; i < sz; ++i) {
     tvRefcountedDecRef(&m_data[i]);
   }
-  if (m_data) smart_free(m_data);
+  if (m_data) {
+    MM().objFreeLogged(m_data, m_capacity * sizeof(TypedValue));
+  }
   m_data = nullptr;
   m_size = 0;
   m_capacity = 0;
@@ -878,7 +933,7 @@ Object c_Vector::ti_fromarray(CVarRef arr) {
   target->m_capacity = target->m_size = sz;
   TypedValue* data;
   target->m_data = data =
-    (TypedValue*)smart_malloc(size_t(sz) * sizeof(TypedValue));
+    (TypedValue*)MM().objMallocLogged(size_t(sz) * sizeof(TypedValue));
   ssize_t pos = ad->iter_begin();
   for (uint i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     assert(pos != ArrayData::invalid_index);
@@ -1028,10 +1083,6 @@ Object c_Vector::t_tofrozenvector() {
 
 Object c_Vector::t_tomap() {
   return materializeDefaultImpl<c_Map>(this);
-}
-
-Object c_Vector::t_tostablemap() {
-  return materializeDefaultImpl<c_StableMap>(this);
 }
 
 Object c_Vector::t_tofrozenset() {
@@ -1225,7 +1276,10 @@ BaseMap::~BaseMap() {
 }
 
 void BaseMap::freeData() {
-  if (m_data) smart_free(m_data);
+  if (m_data) {
+    MM().objFreeLogged(
+      m_data, size_t(m_cap) * sizeof(Elm) + hashSize() * sizeof(int32_t));
+  }
 }
 
 void BaseMap::deleteElms() {
@@ -1278,9 +1332,9 @@ BaseMap::Clone(ObjectData* obj) {
   target->m_capAndUsed = thiz->m_capAndUsed;
   target->m_tableMask = thiz->m_tableMask;
   target->m_size = thiz->m_size;
-  target->m_data =
-    (Elm*)smart_malloc(size_t(thiz->m_cap) * sizeof(Elm) +
-                       thiz->hashSize() * sizeof(int32_t));
+  auto needed =
+    size_t(thiz->m_cap) * sizeof(Elm) + thiz->hashSize() * sizeof(int32_t);
+  target->m_data = (Elm*)MM().objMallocLogged(needed);
   target->m_hash = (int32_t*)(target->m_data + target->m_cap);
   wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
 
@@ -1333,8 +1387,6 @@ Object BaseMap::php_add(CVarRef val) {
 
 Object c_Map::t_add(CVarRef val) { return php_add(val); }
 
-Object c_StableMap::t_add(CVarRef val) { return php_add(val); }
-
 Object BaseMap::php_addAll(CVarRef iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
@@ -1349,8 +1401,6 @@ Object BaseMap::php_addAll(CVarRef iterable) {
 }
 
 Object c_Map::t_addall(CVarRef val) { return php_addAll(val); }
-
-Object c_StableMap::t_addall(CVarRef val) { return php_addAll(val); }
 
 Object BaseMap::php_clear() {
   deleteElms();
@@ -1369,25 +1419,17 @@ Object BaseMap::php_clear() {
 
 Object c_Map::t_clear() { return php_clear(); }
 
-Object c_StableMap::t_clear() { return php_clear(); }
-
 bool c_FrozenMap::t_isempty() { return php_isEmpty(); }
 
 bool c_Map::t_isempty() { return php_isEmpty();  }
-
-bool c_StableMap::t_isempty() { return php_isEmpty(); }
 
 int64_t c_FrozenMap::t_count() { return size(); }
 
 int64_t c_Map::t_count() { return size(); }
 
-int64_t c_StableMap::t_count() { return size(); }
-
 Object c_FrozenMap::t_items() { return php_items(); }
 
 Object c_Map::t_items() { return php_items(); }
-
-Object c_StableMap::t_items() { return php_items(); }
 
 Object BaseMap::php_keys() const {
   c_Vector* vec;
@@ -1419,13 +1461,9 @@ Object c_FrozenMap::t_keys() { return php_keys(); }
 
 Object c_Map::t_keys() { return php_keys(); }
 
-Object c_StableMap::t_keys() { return php_keys(); }
-
 Object c_FrozenMap::t_lazy() { return php_lazy(); }
 
 Object c_Map::t_lazy() { return php_lazy(); }
-
-Object c_StableMap::t_lazy() { return php_lazy(); }
 
 Object BaseMap::php_kvzip() const {
   c_Vector* vec;
@@ -1463,8 +1501,6 @@ Object c_FrozenMap::t_kvzip() { return php_kvzip(); }
 
 Object c_Map::t_kvzip() { return php_kvzip(); }
 
-Object c_StableMap::t_kvzip() { return php_kvzip(); }
-
 Variant BaseMap::php_at(CVarRef key) const {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
@@ -1478,8 +1514,6 @@ Variant BaseMap::php_at(CVarRef key) const {
 Variant c_FrozenMap::t_at(CVarRef key) { return php_at(key); }
 
 Variant c_Map::t_at(CVarRef key) { return php_at(key); }
-
-Variant c_StableMap::t_at(CVarRef key) { return php_at(key); }
 
 Variant BaseMap::php_get(CVarRef key) const {
   if (key.isInteger()) {
@@ -1505,8 +1539,6 @@ Variant c_FrozenMap::t_get(CVarRef key) { return php_get(key); }
 
 Variant c_Map::t_get(CVarRef key) { return php_get(key); }
 
-Variant c_StableMap::t_get(CVarRef key) { return php_get(key); }
-
 Object BaseMap::php_set(CVarRef key, CVarRef value) {
   TypedValue* val = cvarToCell(&value);
   if (key.isInteger()) {
@@ -1520,10 +1552,6 @@ Object BaseMap::php_set(CVarRef key, CVarRef value) {
 }
 
 Object c_Map::t_set(CVarRef key, CVarRef value) {
-  return php_set(key, value);
-}
-
-Object c_StableMap::t_set(CVarRef key, CVarRef value) {
   return php_set(key, value);
 }
 
@@ -1549,8 +1577,6 @@ Object BaseMap::php_setAll(CVarRef iterable) {
 
 Object c_Map::t_setall(CVarRef iterable) { return php_setAll(iterable); }
 
-Object c_StableMap::t_setall(CVarRef iterable) { return php_setAll(iterable); }
-
 bool BaseMap::php_contains(CVarRef key) const {
   DataType t = key.getType();
   if (t == KindOfInt64) {
@@ -1567,13 +1593,9 @@ bool c_FrozenMap::t_contains(CVarRef key) { return php_contains(key); }
 
 bool c_Map::t_contains(CVarRef key) { return php_contains(key); }
 
-bool c_StableMap::t_contains(CVarRef key) { return php_contains(key); }
-
 bool c_FrozenMap::t_containskey(CVarRef key) { return php_contains(key); }
 
 bool c_Map::t_containskey(CVarRef key) { return php_contains(key); }
-
-bool c_StableMap::t_containskey(CVarRef key) { return php_contains(key); }
 
 Object BaseMap::php_remove(CVarRef key) {
   DataType t = key.getType();
@@ -1589,17 +1611,11 @@ Object BaseMap::php_remove(CVarRef key) {
 
 Object c_Map::t_remove(CVarRef key) { return php_remove(key); }
 
-Object c_StableMap::t_remove(CVarRef key) { return php_remove(key); }
-
 Object c_Map::t_removekey(CVarRef key) { return php_remove(key); }
-
-Object c_StableMap::t_removekey(CVarRef key) { return php_remove(key); }
 
 Array c_FrozenMap::t_toarray() { return php_toArray(); }
 
 Array c_Map::t_toarray() { return php_toArray(); }
-
-Array c_StableMap::t_toarray() { return php_toArray(); }
 
 Object BaseMap::php_values() const {
   c_Vector* target;
@@ -1611,7 +1627,7 @@ Object BaseMap::php_values() const {
   TypedValue* vecData;
   target->m_capacity = target->m_size = sz;
   target->m_data = vecData =
-    (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+    (TypedValue*)MM().objMallocLogged(sz * sizeof(TypedValue));
 
   int64_t j = 0;
   for (ssize_t i = 0; i < iterLimit(); ++i) {
@@ -1626,8 +1642,6 @@ Object BaseMap::php_values() const {
 Object c_FrozenMap::t_values() { return php_values(); }
 
 Object c_Map::t_values() { return php_values(); }
-
-Object c_StableMap::t_values() { return php_values(); }
 
 Array BaseMap::php_toKeysArray() const {
   PackedArrayInit ai(m_size);
@@ -1647,8 +1661,6 @@ Array c_FrozenMap::t_tokeysarray() { return php_toKeysArray(); }
 
 Array c_Map::t_tokeysarray() { return php_toKeysArray(); }
 
-Array c_StableMap::t_tokeysarray() { return php_toKeysArray(); }
-
 Array BaseMap::php_toValuesArray() const {
   PackedArrayInit ai(m_size);
   for (ssize_t i = 0; i < iterLimit(); ++i) {
@@ -1662,8 +1674,6 @@ Array BaseMap::php_toValuesArray() const {
 Array c_FrozenMap::t_tovaluesarray() { return php_toValuesArray(); }
 
 Array c_Map::t_tovaluesarray() { return php_toValuesArray(); }
-
-Array c_StableMap::t_tovaluesarray() { return php_toValuesArray(); }
 
 template<typename TMap>
 typename std::enable_if<
@@ -1710,10 +1720,6 @@ Object c_Map::t_differencebykey(CVarRef it) {
   return php_differenceByKey<c_Map>(it);
 }
 
-Object c_StableMap::t_differencebykey(CVarRef it) {
-  return php_differenceByKey<c_StableMap>(it);
-}
-
 Object BaseMap::php_getIterator() {
   c_MapIterator* it = NEWOBJ(c_MapIterator)();
   it->m_obj = this;
@@ -1725,8 +1731,6 @@ Object BaseMap::php_getIterator() {
 Object c_FrozenMap::t_getiterator() { return php_getIterator(); }
 
 Object c_Map::t_getiterator() { return php_getIterator(); }
-
-Object c_StableMap::t_getiterator() { return php_getIterator(); }
 
 ALWAYS_INLINE
 static std::array<TypedValue, 2> makeArgsFromMapKeyAndValue(
@@ -1766,8 +1770,9 @@ BaseMap::php_map(CVarRef callback, MakeArgs makeArgs) const {
   mp->m_cap = m_cap;
   mp->m_tableMask = m_tableMask;
   mp->m_size = m_size;
-  mp->m_data = (Elm*)smart_malloc(size_t(mp->m_cap) * sizeof(Elm) +
-                                  mp->hashSize() * sizeof(int32_t));
+  auto needed =
+    size_t(mp->m_cap) * sizeof(Elm) + mp->hashSize() * sizeof(int32_t);
+  mp->m_data = (Elm*)MM().objMallocLogged(needed);
   mp->m_hash = (int32_t*)(mp->m_data + mp->m_cap);
   wordcpy(mp->hashTab(), hashTab(), hashSize());
   uint32_t used = iterLimit();
@@ -1804,20 +1809,12 @@ Object c_Map::t_map(CVarRef callback) {
   return php_map<c_Map>(callback, &makeArgsFromMapValue);
 }
 
-Object c_StableMap::t_map(CVarRef callback) {
-  return php_map<c_StableMap>(callback, &makeArgsFromMapValue);
-}
-
 Object c_FrozenMap::t_mapwithkey(CVarRef callback) {
   return php_map<c_FrozenMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 Object c_Map::t_mapwithkey(CVarRef callback) {
   return php_map<c_Map>(callback, &makeArgsFromMapKeyAndValue);
-}
-
-Object c_StableMap::t_mapwithkey(CVarRef callback) {
-  return php_map<c_StableMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 template<typename TMap, class MakeArgs>
@@ -1865,20 +1862,12 @@ Object c_Map::t_filter(CVarRef callback) {
   return php_filter<c_Map>(callback, &makeArgsFromMapValue);
 }
 
-Object c_StableMap::t_filter(CVarRef callback) {
-  return php_filter<c_StableMap>(callback, &makeArgsFromMapValue);
-}
-
 Object c_FrozenMap::t_filterwithkey(CVarRef callback) {
   return php_filter<c_FrozenMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 Object c_Map::t_filterwithkey(CVarRef callback) {
   return php_filter<c_Map>(callback, &makeArgsFromMapKeyAndValue);
-}
-
-Object c_StableMap::t_filterwithkey(CVarRef callback) {
-  return php_filter<c_StableMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 template<class MakeArgs>
@@ -1925,15 +1914,7 @@ Object c_Map::t_retain(CVarRef callback) {
   return php_retain(callback, &makeArgsFromMapValue);
 }
 
-Object c_StableMap::t_retain(CVarRef callback) {
-  return php_retain(callback, &makeArgsFromMapValue);
-}
-
 Object c_Map::t_retainwithkey(CVarRef callback) {
-  return php_retain(callback, &makeArgsFromMapKeyAndValue);
-}
-
-Object c_StableMap::t_retainwithkey(CVarRef callback) {
   return php_retain(callback, &makeArgsFromMapKeyAndValue);
 }
 
@@ -1977,10 +1958,6 @@ Object c_FrozenMap::t_zip(CVarRef iterable) {
 
 Object c_Map::t_zip(CVarRef iterable) {
   return php_zip<c_Map>(iterable);
-}
-
-Object c_StableMap::t_zip(CVarRef iterable) {
-  return php_zip<c_StableMap>(iterable);
 }
 
 template<typename TMap>
@@ -2028,10 +2005,6 @@ Object c_Map::ti_fromitems(CVarRef iterable) {
   return php_mapFromIterable<c_Map>(iterable);
 }
 
-Object c_StableMap::ti_fromitems(CVarRef iterable) {
-  return php_mapFromIterable<c_StableMap>(iterable);
-}
-
 template<typename TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
@@ -2062,10 +2035,6 @@ Object c_Map::ti_fromarray(CVarRef arr) {
   return php_mapFromArray<c_Map>(arr);
 }
 
-Object c_StableMap::ti_fromarray(CVarRef arr) {
-  return php_mapFromArray<c_StableMap>(arr);
-}
-
 template<typename TMap>
   typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, ObjectData*>::type
@@ -2087,10 +2056,6 @@ ObjectData* collectionDeepCopyFrozenMap(c_FrozenMap* map) {
 
 ObjectData* collectionDeepCopyMap(c_Map* map) {
   return collectionDeepCopyBaseMap<c_Map>(map);
-}
-
-ObjectData* collectionDeepCopyStableMap(c_StableMap* map) {
-  return collectionDeepCopyBaseMap<c_StableMap>(map);
 }
 
 NEVER_INLINE
@@ -2192,6 +2157,31 @@ void BaseMap::add(TypedValue* val) {
     update(tvKey->m_data.pstr, tvValue);
   } else {
     throwBadKeyType();
+  }
+}
+
+Variant BaseMap::popFront() {
+  ++m_version;
+  if (m_size) {
+    Elm* e = data();
+    for (;; ++e) {
+      assert(e != data() + iterLimit());
+      if (!isTombstone(e->data.m_type)) break;
+    }
+    Variant ret = tvAsCVarRef(&e->data);
+    int32_t* ei;
+    if (e->hasIntKey()) {
+      ei = findForInsert(e->ikey);
+    } else {
+      assert(e->hasStrKey());
+      ei = findForInsert(e->skey, e->skey->hash());
+    }
+    erase(ei);
+    return ret;
+  } else {
+    Object e(SystemLib::AllocRuntimeExceptionObject(
+      "Cannot pop empty Map"));
+    throw e;
   }
 }
 
@@ -2463,8 +2453,9 @@ void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
   assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
-  auto* data = (Elm*)smart_malloc(size_t(newCap) * sizeof(Elm) +
-                                  newHashSize * sizeof(int32_t));
+  auto oldHashSize = oldData ? hashSize() : 0;
+  auto needed = size_t(newCap) * sizeof(Elm) + newHashSize * sizeof(int32_t);
+  auto* data = (Elm*)MM().objMallocLogged(needed);
   auto* table = (int32_t*)(data + size_t(newCap));
   m_data = data;
   m_hash = table;
@@ -2481,7 +2472,10 @@ void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
                                toE.hasIntKey() ? toE.ikey : toE.hash());
     *ie = toPos;
   }
-  if (oldData) smart_free(oldData);
+  if (oldData) {
+    MM().objFreeLogged(
+      oldData, size_t(m_cap) * sizeof(Elm) + oldHashSize * sizeof(int32_t));
+  }
   m_cap = newCap;
   m_used = m_size;
 }
@@ -2973,20 +2967,6 @@ void c_MapIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_StableMap::c_StableMap(Class* cb) : BaseMap(cb) {
-  o_subclassData.u16 = Collection::StableMapType;
-}
-
-void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
-  php_construct(iterable);
-}
-
-c_StableMap* c_StableMap::Clone(ObjectData* obj) {
-  return BaseMap::Clone<c_StableMap>(obj);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 c_FrozenMap::c_FrozenMap(Class* cb) : BaseMap(cb) {
   o_subclassData.u16 = Collection::FrozenMapType;
 }
@@ -3024,17 +3004,16 @@ void BaseSet::add(int64_t h) {
   assert(p);
   if (validPos(*p)) {
     // When there is a conflict, the add() API is supposed to replace the
-    // existing element with the new element. However since Sets currently
-    // only support integer and string elements, there is no way user code
-    // can really tell whether the existing element was replaced or not so
-    // for efficiency we do nothing.
+    // existing element with the new element in place. However since Sets
+    // currently only support integer and string elements, there is no way
+    // user code can really tell whether the existing element was replaced
+    // so for efficiency we do nothing.
     return;
   }
   if (UNLIKELY(isFull())) {
     makeRoom();
     p = findForInsert(h);
   }
-  assert(p);
   auto& e = allocElm(p);
   e.setInt(h);
   ++m_version;
@@ -3051,10 +3030,91 @@ void BaseSet::add(StringData *key) {
     makeRoom();
     p = findForInsert(key, h);
   }
-  assert(p);
   auto& e = allocElm(p);
   e.setStr(key, h);
   ++m_version;
+}
+
+BaseSet::Elm& BaseSet::allocElmFront(int32_t* ei) {
+  assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
+  // Move the existing elements to make element slot 0 available.
+  memmove(data() + 1, data(), m_used * sizeof(Elm));
+  ++m_used;
+  // Update the hashtable to reflect the fact that everything was moved
+  // over one position
+  auto* hash = hashTab();
+  auto* hashEnd = hash + hashSize();
+  for (; hash != hashEnd; ++hash) {
+    if (validPos(*hash)) {
+      ++(*hash);
+    }
+  }
+  // Set the hash entry we found to point to element slot 0.
+  (*ei) = 0;
+  // Store the value into element slot 0.
+  ++m_size;
+  return data()[0];
+}
+
+void BaseSet::addFront(int64_t h) {
+  auto* p = findForInsert(h);
+  assert(p);
+  if (validPos(*p)) {
+    // When there is a conflict, the addFront() API is supposed to replace
+    // the existing element with the new element in place. However since
+    // Sets currently only support integer and string elements, there is
+    // no way user code can really tell whether the existing element was
+    // replaced so for efficiency we do nothing.
+    return;
+  }
+  if (UNLIKELY(isFull())) {
+    makeRoom();
+    p = findForInsert(h);
+  }
+  auto& e = allocElmFront(p);
+  e.setInt(h);
+  ++m_version;
+}
+
+void BaseSet::addFront(StringData *key) {
+  strhash_t h = key->hash();
+  auto* p = findForInsert(key, h);
+  assert(p);
+  if (validPos(*p)) {
+    return;
+  }
+  if (UNLIKELY(isFull())) {
+    makeRoom();
+    p = findForInsert(key, h);
+  }
+  auto& e = allocElmFront(p);
+  e.setStr(key, h);
+  ++m_version;
+}
+
+Variant BaseSet::popFront() {
+  ++m_version;
+  if (m_size) {
+    Elm* e = data();
+    for (;; ++e) {
+      assert(e != data() + iterLimit());
+      if (!isTombstone(e->data.m_type)) break;
+    }
+    Variant ret = tvAsCVarRef(&e->data);
+    int32_t* ei;
+    if (e->hasInt()) {
+      ei = findForInsert(e->data.m_data.num);
+    } else {
+      auto* key = e->data.m_data.pstr;
+      ei = findForInsert(key, key->hash());
+    }
+    erase(ei);
+    return ret;
+  } else {
+    Object e(SystemLib::AllocRuntimeExceptionObject(
+      "Cannot pop empty Set"));
+    throw e;
+  }
 }
 
 void BaseSet::throwOOB(int64_t val) {
@@ -3119,8 +3179,9 @@ void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
   assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
-  auto* data = (Elm*)smart_malloc(size_t(newCap) * sizeof(Elm) +
-                                  newHashSize * sizeof(int32_t));
+  auto oldHashSize = oldData ? hashSize() : 0;
+  auto needed = size_t(newCap) * sizeof(Elm) + newHashSize * sizeof(int32_t);
+  auto* data = (Elm*)MM().objMallocLogged(needed);
   auto* table = (int32_t*)(data + size_t(newCap));
   m_data = data;
   m_hash = table;
@@ -3137,7 +3198,10 @@ void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
             toE.hasInt() ? toE.data.m_data.num : toE.data.m_data.pstr->hash());
     *ie = toPos;
   }
-  if (oldData) smart_free(oldData);
+  if (oldData) {
+    MM().objFreeLogged(
+      oldData, size_t(m_cap) * sizeof(Elm) + oldHashSize * sizeof(int32_t));
+  }
   m_cap = newCap;
   m_used = m_size;
 }
@@ -3280,9 +3344,9 @@ BaseSet::Clone(ObjectData* obj) {
   target->m_capAndUsed = thiz->m_capAndUsed;
   target->m_tableMask = thiz->m_tableMask;
   target->m_size = thiz->m_size;
-  target->m_data =
-    (Elm*)smart_malloc(size_t(thiz->m_cap) * sizeof(Elm) +
-                       thiz->hashSize() * sizeof(int32_t));
+  auto needed =
+    size_t(thiz->m_cap) * sizeof(Elm) + thiz->hashSize() * sizeof(int32_t);
+  target->m_data = (Elm*)MM().objMallocLogged(needed);
   target->m_hash = (int32_t*)(target->m_data + target->m_cap);
   wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
 
@@ -3551,7 +3615,10 @@ BaseSet::~BaseSet() {
 }
 
 void BaseSet::freeData() {
-  if (m_data) smart_free(m_data);
+  if (m_data) {
+    MM().objFreeLogged(
+      m_data, size_t(m_cap) * sizeof(Elm) + hashSize() * sizeof(int32_t));
+  }
 }
 
 void BaseSet::deleteElms() {
@@ -4484,7 +4551,6 @@ void c_PairIterator::t_rewind() {
 COLLECTION_MAGIC_METHODS(Vector)
 COLLECTION_MAGIC_METHODS(FrozenVector)
 COLLECTION_MAGIC_METHODS(Map)
-COLLECTION_MAGIC_METHODS(StableMap)
 COLLECTION_MAGIC_METHODS(FrozenMap)
 COLLECTION_MAGIC_METHODS(Set)
 COLLECTION_MAGIC_METHODS(FrozenSet)
@@ -4525,16 +4591,8 @@ COLLECTION_MAGIC_METHODS(Pair)
     Object o = mp = NEWOBJ(c_Map)(); \
     mp->init(VarNR(this)); \
     return o; \
-  } \
-  Object c_##cls::t_tostablemap() { \
-    c_StableMap* smp; \
-    Object o = smp = NEWOBJ(c_StableMap)(); \
-    smp->init(VarNR(this)); \
-    return o; \
   }
-
 KEYEDITERABLE_MATERIALIZE_METHODS(Map)
-KEYEDITERABLE_MATERIALIZE_METHODS(StableMap)
 KEYEDITERABLE_MATERIALIZE_METHODS(FrozenMap)
 ITERABLE_MATERIALIZE_METHODS(Set)
 ITERABLE_MATERIALIZE_METHODS(FrozenSet)
@@ -4610,9 +4668,6 @@ void collectionDeepCopyTV(TypedValue* tv) {
           break;
         case Collection::FrozenMapType:
           obj = collectionDeepCopyFrozenMap(static_cast<c_FrozenMap*>(obj));
-          break;
-        case Collection::StableMapType:
-          obj = collectionDeepCopyStableMap(static_cast<c_StableMap*>(obj));
           break;
         case Collection::SetType:
           obj = collectionDeepCopySet(static_cast<c_Set*>(obj));
@@ -4763,7 +4818,6 @@ TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
     case Collection::VectorType:
       return c_Vector::OffsetGet(obj, key);
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return BaseMap::OffsetGet(obj, key);
     case Collection::SetType:
@@ -4800,7 +4854,6 @@ void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
       c_Vector::OffsetSet(obj, key, val);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
       BaseMap::OffsetSet(obj, key, val);
       break;
     case Collection::SetType:
@@ -4828,7 +4881,6 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
     case Collection::VectorType:
       return c_Vector::OffsetIsset(obj, key);
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return BaseMap::OffsetIsset(obj, key);
     case Collection::SetType:
@@ -4852,7 +4904,6 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
     case Collection::VectorType:
       return c_Vector::OffsetEmpty(obj, key);
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return BaseMap::OffsetEmpty(obj, key);
     case Collection::SetType:
@@ -4877,7 +4928,6 @@ void collectionUnset(ObjectData* obj, TypedValue* key) {
       c_Vector::OffsetUnset(obj, key);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
       BaseMap::OffsetUnset(obj, key);
       break;
     case Collection::SetType:
@@ -4910,8 +4960,7 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
       static_cast<c_Vector*>(obj)->add(val);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
-      static_cast<BaseMap*>(obj)->add(val);
+      static_cast<c_Map*>(obj)->add(val);
       break;
     case Collection::SetType:
       static_cast<c_Set*>(obj)->add(val);
@@ -4955,7 +5004,6 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
       static_cast<c_FrozenSet*>(obj)->add(val);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
     case Collection::InvalidType:
       assert(false);
@@ -4968,7 +5016,6 @@ Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
     case Collection::VectorType:
       return tvAsVariant(static_cast<c_Vector*>(obj)->at(offset));
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return tvAsVariant(static_cast<BaseMap*>(obj)->at(offset));
     case Collection::SetType:
@@ -4992,7 +5039,6 @@ Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
       collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return tvAsVariant(static_cast<BaseMap*>(obj)->at(key));
     case Collection::SetType:
@@ -5019,7 +5065,6 @@ Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
     case Collection::VectorType:
       return tvAsVariant(c_Vector::OffsetGet(obj, key));
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return tvAsVariant(BaseMap::OffsetGet(obj, key));
     case Collection::SetType:
@@ -5047,8 +5092,7 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
       static_cast<c_Vector*>(obj)->set(offset, tv);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
-      static_cast<BaseMap*>(obj)->set(offset, tv);
+      static_cast<c_Map*>(obj)->set(offset, tv);
       break;
     case Collection::SetType:
       c_Set::throwNoIndexAccess();
@@ -5082,8 +5126,7 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
       collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
-      static_cast<BaseMap*>(obj)->set(key, tv);
+      static_cast<c_Map*>(obj)->set(key, tv);
       break;
     case Collection::SetType:
     case Collection::FrozenSetType:
@@ -5115,8 +5158,7 @@ void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
       c_Vector::OffsetSet(obj, key, tv);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
-      BaseMap::OffsetSet(obj, key, tv);
+      c_Map::OffsetSet(obj, key, tv);
       break;
     case Collection::SetType:
       c_Set::OffsetSet(obj, key, tv);
@@ -5145,7 +5187,6 @@ bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
     case Collection::VectorType:
       return c_Vector::OffsetContains(obj, key);
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       return BaseMap::OffsetContains(obj, key);
     case Collection::SetType:
@@ -5169,7 +5210,6 @@ void collectionReserve(ObjectData* obj, int64_t sz) {
       static_cast<c_Vector*>(obj)->reserve(sz);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       static_cast<BaseMap*>(obj)->reserve(sz);
       break;
@@ -5199,7 +5239,6 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
       c_Vector::Unserialize(obj, uns, sz, type);
       break;
     case Collection::MapType:
-    case Collection::StableMapType:
     case Collection::FrozenMapType:
       BaseMap::Unserialize(obj, uns, sz, type);
       break;
@@ -5251,7 +5290,6 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
     case Collection::VectorType: obj = NEWOBJ(c_Vector)(); break;
     case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
     case Collection::FrozenMapType: obj = NEWOBJ(c_FrozenMap)(); break;
-    case Collection::StableMapType: obj = NEWOBJ(c_StableMap)(); break;
     case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
     case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;
     case Collection::FrozenVectorType: obj = NEWOBJ(c_FrozenVector)(); break;

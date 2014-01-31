@@ -15,7 +15,7 @@
 */
 
 #include "hphp/test/ext/test_ext_mysql.h"
-#include "hphp/runtime/ext/ext_mysql.h"
+#include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/test/ext/test_mysql_info.h"
 #include "errmsg.h"
 

@@ -20,6 +20,7 @@
 #include <vector>
 #include <memory>
 #include <stack>
+#include <utility>
 
 #include "folly/Optional.h"
 
@@ -237,11 +238,9 @@ struct HhbcTranslator {
   // The subOpc param can be one of either
   // Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor
   void emitSetOpL(Opcode subOpc, uint32_t id);
-  void emitSetOpS(Opcode subOpc);
   // the pre & inc params encode the 4 possible sub opcodes:
   // PreInc, PostInc, PreDec, PostDec
   void emitIncDecL(bool pre, bool inc, uint32_t id);
-  void emitIncDecS(bool pre, bool inc);
   void emitPopA();
   void emitPopC();
   void emitPopV();
@@ -530,9 +529,6 @@ private:
     void emitMapSet(SSATmp* key, SSATmp* value);
     void emitMapGet(SSATmp* key);
     void emitMapIsset();
-    void emitStableMapSet(SSATmp* key, SSATmp* value);
-    void emitStableMapGet(SSATmp* key);
-    void emitStableMapIsset();
 
     // Generate a catch trace that does not perform any final DecRef operations
     // on scratch space, and return its first block.
@@ -606,12 +602,10 @@ private:
       PackedArray,
       // simple opcode on String
       String,
-      // simple opcode on Vector* (c_Vector*)
+      // simple opcode on Vector* (c_Vector* or c_FrozenVector*)
       Vector,
       // simple opcode on Map* (c_Map*)
       Map,
-      // simple opcode on Map* (c_StableMap*)
-      StableMap,
       // simple opcode on Map* (c_Pair*)
       Pair
     };
@@ -698,29 +692,9 @@ private:
   void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Block* exit);
   void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
                             bool& checkForInt);
-  SSATmp* emitLdClsPropAddrCached(const StringData* propName,
-                                  Block* block);
   Type assertObjType(const StringData*);
-
-  /*
-   * Helpers for (CGet|VGet|Bind|Set|Isset|Empty)(G|S)
-   */
-  SSATmp* checkSupportedName(uint32_t stackIdx);
   void destroyName(SSATmp* name);
-  typedef SSATmp* (HhbcTranslator::*EmitLdAddrFn)(Block*, SSATmp* name);
-  void emitCGet(uint32_t stackIdx, bool exitOnFailure, EmitLdAddrFn);
-  void emitVGet(uint32_t stackIdx, EmitLdAddrFn);
-  void emitBind(uint32_t stackIdx, EmitLdAddrFn);
-  void emitSet(uint32_t stackIdx, EmitLdAddrFn);
-  void emitIsset(uint32_t stackIdx, EmitLdAddrFn);
-  void emitEmpty(uint32_t stackOff, EmitLdAddrFn);
-  SSATmp* emitLdGblAddr(Block* block, SSATmp* name);
-  SSATmp* emitLdGblAddrDef(Block* block, SSATmp* name);
-  SSATmp* emitLdClsPropAddr(SSATmp* name) {
-    return emitLdClsPropAddrOrExit(nullptr, name);
-  }
-  SSATmp* emitLdClsPropAddrOrExit(Block* block, SSATmp* name);
-
+  SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls, SSATmp* name);
   void emitUnboxRAux();
   void emitAGet(SSATmp* src, Block* catchBlock);
   void emitRetFromInlined(Type type);

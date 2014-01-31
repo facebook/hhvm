@@ -37,7 +37,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_state(unit, initialSpOffsetFromFp, func)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
-  , m_inReoptimize(false)
+  , m_constrainGuards(RuntimeOption::EvalHHIRRelaxGuards)
 {
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
@@ -54,8 +54,7 @@ TraceBuilder::~TraceBuilder() {
  * checked.
  */
 bool TraceBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
-  if (!RuntimeOption::EvalHHIRRelaxGuards) return false;
-  if (inReoptimize()) return false;
+  if (!shouldConstrainGuards()) return false;
   if (tmp && (tmp->isConst() || tmp->isA(Type::Cls))) return false;
 
   return true;
@@ -338,7 +337,7 @@ SSATmp* TraceBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
 SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
   // Guard relaxation might change the current local type, so don't try to
   // change to StLocNT until after relaxation happens.
-  if (!inReoptimize()) return nullptr;
+  if (typeMightRelax()) return nullptr;
 
   auto locId = inst->extra<StLoc>()->locId;
   auto const curType = localType(locId, DataTypeGeneric);
@@ -508,8 +507,7 @@ void TraceBuilder::reoptimize() {
   m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_state.enableCse() && !m_enableSimplification) return;
-  always_assert(!m_inReoptimize);
-  m_inReoptimize = true;
+  setConstrainGuards(false);
 
   BlockList sortedBlocks = rpoSortCfg(m_unit);
   auto const idoms = findDominators(m_unit, sortedBlocks);
@@ -563,11 +561,6 @@ void TraceBuilder::reoptimize() {
     assert(!block->empty());
     m_state.finishBlock(block);
   }
-}
-
-bool TraceBuilder::shouldConstrainGuards() const {
-  return RuntimeOption::EvalHHIRRelaxGuards &&
-    !inReoptimize();
 }
 
 /*

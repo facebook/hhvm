@@ -306,6 +306,7 @@ void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
   auto propCount = 2;
   if (m_attributeList) propCount++;
   if (m_modifier != 0) propCount++;
+  if (m_originalType) propCount++;
   if (m_ref) propCount++;
   if (m_defaultValue != nullptr) propCount++;
   cg.printObjectHeader("ParameterDeclaration", propCount);
@@ -315,18 +316,25 @@ void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
   }
   if (m_modifier != 0) {
     cg.printPropertyHeader("modifiers");
-    printf("V:9:\"HH\\Vector\":1:{");
+    cg.printf("V:9:\"HH\\Vector\":1:{");
+    cg.printObjectHeader("Modifier", 1);
+    cg.printPropertyHeader("name");
     switch (m_modifier) {
       case T_PUBLIC: cg.printValue("public"); break;
       case T_PROTECTED: cg.printValue("protected"); break;
       case T_PRIVATE: cg.printValue("private"); break;
       default: assert(false);
     }
-    printf("}");
+    cg.printObjectFooter();
+    cg.printf("}");
+  }
+  if (m_originalType) {
+    cg.printPropertyHeader("typeAnnotation");
+    m_originalType->outputCodeModel(cg);
   }
   if (m_ref) {
     cg.printPropertyHeader("isPassedByReference");
-    cg.printValue(true);
+    cg.printBool(true);
   }
   cg.printPropertyHeader("name");
   cg.printValue(m_name);

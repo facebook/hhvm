@@ -96,11 +96,13 @@ void BlockStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void BlockStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("BlockStatement", m_stmts != nullptr ? 2 : 1);
+  cg.printObjectHeader("BlockStatement", m_stmts != nullptr ? 3 : 2);
   if (m_stmts != nullptr) {
     cg.printPropertyHeader("statements");
     cg.printStatementVector(m_stmts);
   }
+  cg.printPropertyHeader("isEnclosed");
+  cg.printBool(true);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

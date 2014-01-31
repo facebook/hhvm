@@ -140,7 +140,7 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
 void GlobalStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("GlobalStatement", 2);
   cg.printPropertyHeader("expressions");
-  m_exp->outputCodeModel(cg);
+  cg.printExpressionVector(m_exp);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

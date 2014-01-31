@@ -296,11 +296,6 @@ Array &Array::mergeImpl(ArrayData *data) {
   return *this;
 }
 
-Array Array::slice(int offset, int length, bool preserve_keys) const {
-  if (m_px == nullptr) return Array();
-  return ArrayUtil::Slice(m_px, offset, length, preserve_keys).toArray();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
@@ -592,27 +587,6 @@ void Array::add(CVarRef key, CVarRef v, bool isKey /* = false */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // membership functions
-
-bool Array::valueExists(CVarRef search_value,
-                        bool strict /* = false */) const {
-  for (ArrayIter iter(*this); iter; ++iter) {
-    if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
-        (!strict && HPHP::equal(iter.secondRef(), search_value))) {
-      return true;
-    }
-  }
-  return false;
-}
-
-Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
-  for (ArrayIter iter(*this); iter; ++iter) {
-    if ((strict && HPHP::same(iter.secondRef(), search_value)) ||
-        (!strict && HPHP::equal(iter.secondRef(), search_value))) {
-      return iter.first();
-    }
-  }
-  return false; // PHP uses "false" over null in many places
-}
 
 Array Array::values() const {
   PackedArrayInit ai(size());

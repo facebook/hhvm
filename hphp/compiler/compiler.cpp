@@ -344,23 +344,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     return 1;
   }
   if (vm.count("version")) {
-#ifdef HHVM_VERSION
-#undef HHVM_VERSION
-#endif
-
-#ifdef HPHP_COMPILER_STR
-#undef HPHP_COMPILER_STR
-#endif
-
-#ifdef DEBUG
-#define HPHP_COMPILER_STR "HipHop Compiler (Debug Build) v"
-#else
-#define HPHP_COMPILER_STR "HipHop Compiler v"
-#endif
-
-#define HHVM_VERSION(v) cout << HPHP_COMPILER_STR #v << "\n";
-#include "../version" // nolint
-
+    cout << "HipHop Repo Compiler";
+    cout << " " << k_HHVM_VERSION.c_str();
+    cout << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
     return 1;

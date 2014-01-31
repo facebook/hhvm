@@ -222,6 +222,7 @@ struct ConstData : IRExtraData {
   template<class T>
   T as() const {
     T ret;
+    static_assert(sizeof ret <= sizeof m_dataBits, "Return type too big");
     std::memcpy(&ret, &m_dataBits, sizeof ret);
     return ret;
   }

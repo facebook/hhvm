@@ -135,8 +135,6 @@ public:
   bool isNull() const {
     return m_px == nullptr;
   }
-  bool valueExists(CVarRef search_value, bool strict = false) const;
-  Variant key(CVarRef search_value, bool strict = false) const;
   Array values() const;
 
   /*
@@ -202,7 +200,6 @@ public:
    * into numerically keyed map.
    */
   Array& merge(CArrRef arr);
-  Array  slice(int offset, int length, bool preserve_keys) const;
 
   /*
    * Sorting.

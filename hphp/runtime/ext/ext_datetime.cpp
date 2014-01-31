@@ -26,6 +26,7 @@ static class DateExtension : public Extension {
   DateExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
   void moduleInit() {
     IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
       "date.timezone",
       g_context->getDefaultTimeZone().c_str(),
       dateTimezoneIniUpdate, dateTimezoneIniGet,

@@ -38,7 +38,7 @@
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -1201,7 +1201,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
       Unit::MetaHandle metaHand;
       for (auto* ni = i.calleeTrace->m_instrStream.first;
            ni; ni = ni->next) {
-        readMetaData(metaHand, *ni, m_hhbcTrans, MetaMode::Legacy);
+        readMetaData(metaHand, *ni, m_hhbcTrans, false, MetaMode::Legacy);
         translateInstr(*ni);
       }
       return;
@@ -1613,7 +1613,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
     if (type != Type::Gen) m_hhbcTrans.assertTypeStack(i, type);
   }
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
     ht.emitDbgAssertRetAddr();
   }
 

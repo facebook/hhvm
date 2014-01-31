@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/server/virtual-host.h"
@@ -54,6 +55,7 @@ class PCFilter;
 
 typedef hphp_hash_map<StringData*, HPHP::Eval::PhpFile*, string_data_hash,
                       string_data_same> EvaledFilesMap;
+typedef std::vector<HPHP::Eval::PhpFile*> EvaledFilesVec;
 
 /**
  * Mainly designed for extensions to perform initialization and shutdown
@@ -263,6 +265,8 @@ public:
     m_out = sb;
     return current;
   }
+  String getRawPostData() const { return m_rawPostData; }
+  void setRawPostData(String& pd) { m_rawPostData = pd; }
 
   /**
    * Request sequences and program execution hooks.
@@ -321,15 +325,13 @@ public:
   void setTimeZone(const String& timezone) { m_timezone = timezone;}
   String getDefaultTimeZone() const { return m_timezoneDefault;}
   void setDefaultTimeZone(const String& s) { m_timezoneDefault = s;}
-  String getArgSeparatorOutput() const {
-    if (m_argSeparatorOutput.isNull()) return s_amp;
-    return m_argSeparatorOutput;
-  }
-  void setArgSeparatorOutput(const String& s) { m_argSeparatorOutput = s;}
   void setThrowAllErrors(bool f) { m_throwAllErrors = f; }
   bool getThrowAllErrors() const { return m_throwAllErrors; }
   void setExitCallback(Variant f) { m_exitCallback = f; }
   Variant getExitCallback() { return m_exitCallback; }
+
+  void setStreamContext(Resource &context) { m_streamContext = context; }
+  Resource &getStreamContext() { return m_streamContext; }
 
   void restoreIncludePath();
   void setIncludePath(const String& path);
@@ -365,6 +367,7 @@ private:
   int m_protectedLevel;
   PFUNC_STDOUT m_stdout;
   void *m_stdoutData;
+  String m_rawPostData;
 
   // request handlers
   std::set<RequestEventHandler*> m_requestEventHandlerSet;
@@ -375,7 +378,7 @@ private:
   std::vector<std::pair<Variant,int> > m_userErrorHandlers;
   std::vector<Variant> m_userExceptionHandlers;
   ErrorState m_errorState;
-  int m_errorReportingLevel;
+  int64_t m_errorReportingLevel;
   String m_lastError;
   int m_lastErrorNum;
   std::string m_errorPage;
@@ -388,6 +391,7 @@ private:
   String m_timezoneDefault;
   String m_argSeparatorOutput;
   bool m_throwAllErrors;
+  Resource m_streamContext;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;
@@ -406,7 +410,6 @@ private:
   // helper functions
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);
-  int64_t convertBytesToInt(const String& value) const;
 
   DECLARE_DBG_SETTING
 };
@@ -552,6 +555,7 @@ public:
   VarEnv* m_globalVarEnv;
 
   EvaledFilesMap m_evaledFiles;
+  EvaledFilesVec m_evaledFilesOrder;
   typedef std::vector<HPHP::Unit*> EvaledUnitsVec;
   EvaledUnitsVec m_createdFuncs;
 

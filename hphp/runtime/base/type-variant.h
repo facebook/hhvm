@@ -75,7 +75,6 @@ class Variant : private TypedValue {
   friend class VariantVectorBase;
   friend class c_Vector;
   friend class c_Map;
-  friend class c_StableMap;
 
   /**
    * setUninitNull occurs frequently; use this version where possible.

@@ -388,37 +388,65 @@ std::string ScalarExpression::getIdentifier() const {
 
 void ScalarExpression::outputCodeModel(CodeGenerator &cg) {
   switch (m_type) {
+    case T_COMPILER_HALT_OFFSET:
     case T_NS_C:
     case T_LINE:
     case T_TRAIT_C:
     case T_CLASS_C:
     case T_METHOD_C:
-    case T_FUNC_C: {
-      cg.printObjectHeader("SimpleVariableExpression", 2);
-      std::string varName;
-      switch (m_type) {
-        case T_NS_C: varName = "__NAMESPACE__"; break;
-        case T_LINE: varName = "__LINE__"; break;
-        case T_TRAIT_C: varName = "__TRAIT__"; break;
-        case T_CLASS_C: varName = "__CLASS__"; break;
-        case T_METHOD_C: varName = "__METHOD__"; break;
-        case T_FUNC_C: varName = "__FUNCTION__"; break;
-        default: break;
+    case T_FUNC_C:
+      {
+        cg.printObjectHeader("SimpleConstantExpression", 2);
+        std::string constName;
+        switch (m_type) {
+          case T_COMPILER_HALT_OFFSET:
+            constName = "__COMPILER_HALT_OFFSET__"; break;
+          case T_NS_C: constName = "__NAMESPACE__"; break;
+          case T_LINE: constName = "__LINE__"; break;
+          case T_TRAIT_C: constName = "__TRAIT__"; break;
+          case T_CLASS_C: constName = "__CLASS__"; break;
+          case T_METHOD_C: constName = "__METHOD__"; break;
+          case T_FUNC_C: constName = "__FUNCTION__"; break;
+          default: break;
+        }
+        cg.printPropertyHeader("constantName");
+        cg.printValue(constName);
+        cg.printPropertyHeader("sourceLocation");
+        cg.printLocation(this->getLocation());
+        cg.printObjectFooter();
       }
-      cg.printPropertyHeader("variableName");
-      cg.printValue(varName);
-      cg.printPropertyHeader("sourceLocation");
-      cg.printLocation(this->getLocation());
-      cg.printObjectFooter();
       return;
-    }
+    case T_STRING:
+      if (!m_quoted) {
+        // This is in fact an identifier, not a scalar value
+        cg.printValue(m_originalValue);
+        return;
+      }
+      break;
     default:
       break;
   }
 
   cg.printObjectHeader("ScalarExpression", 2);
   cg.printPropertyHeader("value");
-  cg.printValue(m_originalValue);
+  switch (m_type) {
+    case T_NUM_STRING:
+    case T_LNUMBER:
+      {
+        auto i = (int64_t)strtoll(m_value.c_str(), nullptr, 0);
+        cg.printValue(i);
+      }
+      break;
+    case T_DNUMBER:
+      {
+        auto d = String(m_value).toDouble();
+        cg.printValue(d);
+      }
+      break;
+    default:
+      cg.printValue(m_originalValue);
+      break;
+  }
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

@@ -137,7 +137,8 @@ static void scalar_line(Parser *_p, Token &out) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// converting constant declartion to "define(name, value);"
+// converting constant declaration to "define(name, value);"
+// TODO: get rid of this, or pass in more info, task 3491019.
 
 static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
   Token sname;   _p->onScalar(sname, T_CONSTANT_ENCAPSED_STRING, name);
@@ -2179,6 +2180,9 @@ static_class_constant:
   | T_XHP_LABEL T_DOUBLE_COLON
     ident                              { $1.xhpLabel();
                                          _p->onClassConst($$, $1, $3, 1);}
+  | class_namespace_string_typeargs
+    T_DOUBLE_COLON
+    T_CLASS                            { _p->onClassClass($$, $1, $3, 1);}
 ;
 
 scalar:
@@ -2571,8 +2575,10 @@ variable_list:
 ;
 
 class_constant:
-  static_class_name
-  T_DOUBLE_COLON ident                 { _p->onClassConst($$, $1, $3, 0);}
+    static_class_name
+    T_DOUBLE_COLON ident               { _p->onClassConst($$, $1, $3, 0);}
+  | static_class_name
+    T_DOUBLE_COLON T_CLASS             { _p->onClassClass($$, $1, $3, 0);}
 ;
 
 /* hack productions -- these allow some extra stuff in hack

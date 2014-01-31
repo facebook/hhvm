@@ -55,6 +55,15 @@ StatementPtr StatementList::clone() {
   return stmt;
 }
 
+StatementListPtr StatementList::shallowClone() {
+  StatementListPtr stmt(new StatementList(*this));
+  stmt->m_stmts.clear();
+  for (unsigned int i = 0; i < m_stmts.size(); i++) {
+    stmt->m_stmts.push_back(m_stmts[i]);
+  }
+  return stmt;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 

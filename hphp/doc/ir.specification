@@ -1732,16 +1732,6 @@ D:Bool = ThingExists<class|interface|trait> S0:Str
 15. Register allocation
 
 
-D:T = Spill S0:T
-D:T = Reload S0:T
-
-  Spill stores from S0's registers into the spill location assigned to D.
-  Reload loads from S0's spill slot into D's assigned registers.
-
-  Spill and Reload are SSA copies, equivalent to Mov.  The destination
-  will be the same value and type as the source.  Like all operations
-  in SSA, the definition of the source must dominate the operation.
-
 Shuffle<d...> S...
 
   Shuffle takes N source variables and N destination operands, and performs
@@ -2139,10 +2129,6 @@ D:Cell = MapGet S0:ConstTCA S1:Obj<Map> S2:{Int|Str}
 
   Get element with key S2 from base S1. S1 is a Map instance.
 
-D:Cell = StableMapGet S0:ConstTCA S1:Obj<StableMap> S2:{Int|Str}
-
-  Get element with key S2 from base S1. S1 is a StableMap instance.
-
 D:Cell = CGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
   Get element with key S2 from S1. S3 should point to an MInstrState
@@ -2174,10 +2160,6 @@ ArraySet S0:ConstTCA S1:Arr S2:{Int|Str} S3:Cell S4:BoxedArr
 MapSet S0:ConstTCA S1:Obj<Map> S2:{Int|Str} S3:Cell
 
   Set element with key S2 in S1 to S3. S1 is a Map instance.
-
-StableMapSet S0:ConstTCA S1:Obj<StableMap> S2:{Int|Str} S3:Cell
-
-  Set element with key S2 in S1 to S3. S1 is a StableMap instance.
 
 D:{CountedStr|Nullptr} = SetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
 D:{CountedStr|Nullptr} D:StkPtr = SetElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
@@ -2252,11 +2234,6 @@ D:Bool = MapIsset S0:ConstTCA S1:Obj<Map> S2:{Int|Str}
   Returns true iff the element at key S2 in the base S1 is set. S1 is a
   Map instance.
 
-D:Bool = StableMapIsset S0:ConstTCA S1:Obj<StableMap> S2:{Int|Str}
-
-  Returns true iff the element at key S2 in the base S1 is set. S1 is a
-  StableMap instance.
-
 D:Bool = IssetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
   Returns true iff the element at key S2 in S1 is set.
@@ -2272,12 +2249,12 @@ CheckBounds S0:Int S1:Int
   (excluded). Throws if out of bounds.
 
 CheckPackedArrayBounds S0:Arr S1:Int -> B
-  
+
   Checks that the index in S1 is within the bounds of the packed array in S0.
   Branches to B if the index is out of bounds.
 
 D:Bool = CheckPackedArrayElemNull S0:Arr S1:Int
-  
+
   Returns true if the element at index S1 of the packed array in S0
   is not null.
 
@@ -2290,12 +2267,12 @@ D:Int = LdVectorSize S0:Obj<Vector>
   Returns the size of the given Vector in S0.
 
 VectorHasFrozenCopy S0:Obj<Vector> -> B
-  
+
   Checks if the Vector in S0 has live frozen vector copies and branches to
   B if so.
 
 VectorDoCow S0:Obj<Vector>
-  
+
   Triggers a copy on write for a Vector that has a live FrozenVector sharing
   the same copy of the elements.
 

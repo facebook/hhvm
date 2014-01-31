@@ -22,7 +22,7 @@
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/soap/packet.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/ext/ext_zlib.h"
+#include "hphp/runtime/ext/zlib/ext_zlib.h"
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -2126,9 +2126,9 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
       String encoding = g->get(s__SERVER)[s_HTTP_CONTENT_ENCODING].toString();
       Variant ret;
       if (encoding == s_gzip || encoding == s_xgzip) {
-        ret = f_gzinflate(String(data, size, CopyString));
+        ret = HHVM_FN(gzinflate)(String(data, size, CopyString));
       } else if (encoding == s_deflate) {
-        ret = f_gzuncompress(String(data, size, CopyString));
+        ret = HHVM_FN(gzuncompress)(String(data, size, CopyString));
       } else {
         raise_warning("Request is encoded with unknown compression '%s'",
                         encoding.data());
@@ -2699,10 +2699,10 @@ Variant c_SoapClient::t___dorequest(const String& buf, const String& location, c
     if (level > 0) {
       Variant ret;
       if (m_compression & SOAP_COMPRESSION_DEFLATE) {
-        ret = f_gzcompress(buffer, level);
+        ret = HHVM_FN(gzcompress)(buffer, level);
         headers["Content-Encoding"].push_back("deflate");
       } else {
-        ret = f_gzencode(buffer, level);
+        ret = HHVM_FN(gzencode)(buffer, level);
         headers["Content-Encoding"].push_back("gzip");
       }
       if (!ret.isString()) return uninit_null();

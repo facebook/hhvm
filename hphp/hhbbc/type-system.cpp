@@ -78,6 +78,7 @@ bool isPredefined(trep bits) {
   case BCls:
   case BRef:
   case BNull:
+  case BNum:
   case BBool:
   case BStr:
   case BArr:
@@ -88,6 +89,7 @@ bool isPredefined(trep bits) {
   case BOptBool:
   case BOptInt:
   case BOptDbl:
+  case BOptNum:
   case BOptSStr:
   case BOptCStr:
   case BOptStr:
@@ -128,6 +130,7 @@ bool canBeOptional(trep bits) {
     return true;
 
   case BNull:
+  case BNum:
   case BBool:
   case BStr:
   case BArr:
@@ -142,6 +145,7 @@ bool canBeOptional(trep bits) {
   case BOptBool:
   case BOptInt:
   case BOptDbl:
+  case BOptNum:
   case BOptSStr:
   case BOptCStr:
   case BOptStr:
@@ -529,6 +533,7 @@ Type union_of(Type a, Type b) {
   X(TCls)
   X(TNull)
   X(TBool)
+  X(TNum)
   X(TStr)
   X(TArr)
 
@@ -544,6 +549,7 @@ Type union_of(Type a, Type b) {
   // (e.g. if we are merging TOptTrue and TOptFalse, we want TOptBool,
   // but neither was TInitNull).
   X(TOptBool)
+  X(TOptNum)
   X(TOptStr)
   X(TOptArr)
 

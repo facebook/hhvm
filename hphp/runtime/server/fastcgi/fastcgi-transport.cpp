@@ -56,6 +56,10 @@ const char *FastCGITransport::getUrl() {
   return m_requestURI.c_str();
 }
 
+const std::string FastCGITransport::getPathTranslated() {
+  return m_pathTranslated;
+}
+
 const std::string FastCGITransport::getDocumentRoot() {
   return m_documentRoot;
 }
@@ -269,20 +273,20 @@ void FastCGITransport::sendImpl(const void *data, int size, int code,
     chain_wrapper(queue.move());
   Callback* callback = m_callback;
   std::function<void()> fn = [callback, chain_wrapper]() mutable {
-      if (callback) {
-        callback->onStdOut(std::move(*chain_wrapper));
-      }
-    };
+    if (callback) {
+      callback->onStdOut(std::move(*chain_wrapper));
+    }
+  };
   m_connection->getEventBase()->runInEventBaseThread(fn);
 }
 
 void FastCGITransport::onSendEndImpl() {
   Callback* callback = m_callback;
   std::function<void()> fn = [callback]() mutable {
-      if (callback) {
-        callback->onComplete();
-      }
-    };
+    if (callback) {
+      callback->onComplete();
+    }
+  };
   m_connection->getEventBase()->runInEventBaseThread(fn);
 }
 
@@ -311,12 +315,10 @@ void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
                                 std::unique_ptr<folly::IOBuf> value_chain) {
   Cursor cursor(key_chain.get());
   std::string key = cursor.readFixedString(key_chain->computeChainDataLength());
-  // HTTP has case insensitive header keys
-  boost::to_upper(key);
   cursor = Cursor(value_chain.get());
   std::string value = cursor.readFixedString(
                                value_chain->computeChainDataLength());
-  m_requestHeaders.insert(std::make_pair(key, value));
+  m_requestHeaders.emplace(key, value);
 }
 
 void FastCGITransport::onHeadersComplete() {
@@ -327,6 +329,8 @@ void FastCGITransport::onHeadersComplete() {
   m_serverAddr = getRawHeader("SERVER_ADDR");
   m_extendedMethod = getRawHeader("REQUEST_METHOD");
   m_httpVersion = getRawHeader("HTTP_VERSION");
+  m_serverObject = getRawHeader("SCRIPT_NAME");
+  m_pathTranslated = getRawHeader("PATH_TRANSLATED");
   m_documentRoot = getRawHeader("DOCUMENT_ROOT") + "/";
 
   try {
@@ -378,15 +382,10 @@ void FastCGITransport::onHeadersComplete() {
     m_requestSize = 0;
   }
 
-  std::string pathTranslated = getRawHeader("PATH_TRANSLATED");
-  std::string documentRoot = getRawHeader("DOCUMENT_ROOT");
-  // use PATH_TRANSLATED - DOCUMENT_ROOT if it is valid instead of SCRIPT_NAME
-  // for mod_fastcgi support
-  if (!pathTranslated.empty() && !documentRoot.empty() &&
-      pathTranslated.find(documentRoot) == 0) {
-    m_serverObject = pathTranslated.substr(documentRoot.length());
-  } else {
-    m_serverObject = getRawHeader("SCRIPT_NAME");
+  if (m_pathTranslated.empty()) {
+    // If someone follows http://wiki.nginx.org/HttpFastcgiModule they won't
+    // pass in PATH_TRANSLATED and instead will just send SCRIPT_FILENAME
+    m_pathTranslated = getRawHeader("SCRIPT_FILENAME");
   }
 
   std::string queryString = getRawHeader("QUERY_STRING");

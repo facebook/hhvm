@@ -70,10 +70,9 @@ BinaryOpExpression::BinaryOpExpression
     Collection::Type cType = Collection::InvalidType;
     if (strcasecmp(s.c_str(), "vector") == 0) {
       cType = Collection::VectorType;
-    } else if (strcasecmp(s.c_str(), "map") == 0) {
+    } else if (strcasecmp(s.c_str(), "map") == 0 ||
+               strcasecmp(s.c_str(), "stablemmap") == 0) {
       cType = Collection::MapType;
-    } else if (strcasecmp(s.c_str(), "stablemap") == 0) {
-      cType = Collection::StableMapType;
     } else if (strcasecmp(s.c_str(), "set") == 0) {
       cType = Collection::SetType;
     } else if (strcasecmp(s.c_str(), "pair") == 0) {
@@ -931,7 +930,7 @@ void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
   if (m_op == T_COLLECTION) {
     cg.printObjectHeader("CollectionInitializerExpression", 3);
     cg.printPropertyHeader("collection");
-    m_exp1->outputCodeModel(cg);
+    cg.printTypeExpression(m_exp1);
     cg.printPropertyHeader("arguments");
     cg.printExpressionVector(static_pointer_cast<ExpressionList>(m_exp2));
     cg.printPropertyHeader("sourceLocation");
@@ -944,7 +943,11 @@ void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("expression1");
   m_exp1->outputCodeModel(cg);
   cg.printPropertyHeader("expression2");
-  m_exp2->outputCodeModel(cg);
+  if (m_op == T_INSTANCEOF) {
+    cg.printTypeExpression(m_exp2);
+  } else {
+    m_exp2->outputCodeModel(cg);
+  }
   cg.printPropertyHeader("operation");
 
   int op = 0;

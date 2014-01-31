@@ -243,6 +243,8 @@ void optimize(Index& index, php::Program& program) {
       case WorkType::Class:
         index.refine_private_props(result->cls.ctx.cls,
                                    result->cls.privateProperties);
+        index.refine_private_statics(result->cls.ctx.cls,
+                                     result->cls.privateStatics);
         for (auto& fa : result->cls.methods) update_func(fa);
         break;
       }
@@ -293,12 +295,12 @@ std::unique_ptr<php::Program> parse_program(const Container& units) {
 }
 
 std::vector<std::unique_ptr<UnitEmitter>>
-make_unit_emitters(const php::Program& program) {
+make_unit_emitters(const Index& index, const php::Program& program) {
   trace_time trace("make_unit_emitters");
   return parallel_map(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& unit) {
-      return emit_unit(*unit);
+      return emit_unit(index, *unit);
     }
   );
 }
@@ -328,7 +330,7 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   }
 
   LitstrTable::get().setWriting();
-  ues = make_unit_emitters(*program);
+  ues = make_unit_emitters(index, *program);
 
   return ues;
 }

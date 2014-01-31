@@ -291,15 +291,25 @@ struct Index {
   PrepKind lookup_param_prep(Context, res::Func, uint32_t paramId) const;
 
   /*
-   * Returns the control-flow insensitive inferred private property
-   * types for a Class.  The Class doesn't need to be fully resolved,
-   * because private properties don't depend on the inheritance
-   * hierarchy.
+   * Returns the control-flow insensitive inferred private instance
+   * property types for a Class.  The Class doesn't need to be
+   * resolved, because private properties don't depend on the
+   * inheritance hierarchy.
    *
    * The Index tracks the largest types for private properties that
    * are guaranteed to hold at any program point.
    */
   PropState lookup_private_props(borrowed_ptr<const php::Class>) const;
+
+  /*
+   * Returns the control-flow insensitive inferred private static
+   * property types for a Class.  The class doesn't need to be
+   * resolved for the same reasons as for instance properties.
+   *
+   * The Index tracks the largest types for private static properties
+   * that are guaranteed to hold at any program point.
+   */
+  PropState lookup_private_statics(borrowed_ptr<const php::Class>) const;
 
   /*
    * Refine the return type for a function, based on a round of
@@ -322,6 +332,16 @@ struct Index {
    */
   void refine_private_props(borrowed_ptr<const php::Class> cls,
                             const PropState&);
+
+  /*
+   * Refine the static private property types for a class, based on a
+   * round of analysis.
+   *
+   * No other threads should be calling functions on this Index when
+   * this function is called.
+   */
+  void refine_private_statics(borrowed_ptr<const php::Class> cls,
+                              const PropState&);
 
 private:
   Index(const Index&) = delete;

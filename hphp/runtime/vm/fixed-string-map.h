@@ -35,13 +35,16 @@ struct FixedStringMap {
   const FixedStringMap& operator=(const FixedStringMap&) = delete;
 
   void clear();
-  void init(int num);
+  void init(int num, uint32_t numExtraBytes = 0);
   void add(const StringData* s, const V& v);
   V* find(const StringData* s) const;
 
+  void* extraData() { return m_table; }
+  const void* extraData() const { return m_table; }
   ExtraType& extra() { return m_extra; }
   const ExtraType& extra() const { return m_extra; }
 
+  static ptrdiff_t tableOff() { return offsetof(FixedStringMap, m_table); }
 private:
   struct Elm {
     const StringData* sd;

@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/repo.h"
 
 // These files do ugly things with macros so include them last
 #include "hphp/util/assert-throw.h"
@@ -301,7 +302,7 @@ void HhbcTranslator::MInstrTranslator::emit() {
 // a null pointer if it's not needed.
 SSATmp* HhbcTranslator::MInstrTranslator::genMisPtr() {
   if (m_needMIS) {
-    return gen(LdAddr, m_misBase, cns(X64::kReservedRSPSpillSpace));
+    return gen(LdAddr, m_misBase, cns(kReservedRSPSpillSpace));
   } else {
     return gen(DefConst, Type::PtrToCell, ConstData(nullptr));
   }
@@ -621,7 +622,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
       SSATmp* box = getBase(DataTypeSpecific);
       assert(box->isA(Type::BoxedCell));
       assert(baseType.innerType().isKnownDataType() ||
-             baseType.innerType().equals(Type::InitCell));
+             baseType.innerType().equals(Type::Cell));
 
       // Guard that the inner type hasn't changed. Even though we don't use the
       // unboxed value, some emit* methods change their behavior based on the
@@ -694,7 +695,7 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
       auto const isVector    = klass == c_Vector::classof();
       auto const isPair      = klass == c_Pair::classof();
       auto const isMap       = klass == c_Map::classof();
-      auto const isStableMap = klass == c_StableMap::classof();
+      // TODO: Add Frozen collections
 
       if (isVector || isPair) {
         if (mcodeMaybeVectorKey(m_ni.immVecM[0])) {
@@ -706,11 +707,11 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
             return isVector ? SimpleOp::Vector : SimpleOp::Pair;
           }
         }
-      } else if (isMap || isStableMap) {
+      } else if (isMap) {
         if (mcodeIsElem(m_ni.immVecM[0])) {
           SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
           if (key->isA(Type::Int) || key->isA(Type::Str)) {
-            return isMap ? SimpleOp::Map : SimpleOp::StableMap;
+            return SimpleOp::Map;
           }
         }
       }
@@ -734,7 +735,6 @@ void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
     case SimpleOp::PackedArray:
     case SimpleOp::Vector:
     case SimpleOp::Map:
-    case SimpleOp::StableMap:
     case SimpleOp::Pair:
       constrainBase(DataTypeSpecialized);
       return;
@@ -827,7 +827,14 @@ void HhbcTranslator::MInstrTranslator::emitBaseS() {
   const int kClassIdx = m_ni.inputs.size() - 1;
   SSATmp* key = getKey();
   SSATmp* clsRef = getInput(kClassIdx, DataTypeGeneric /* will be a Cls */);
-  m_base = gen(LdClsPropAddr, makeCatch(), clsRef, key, CTX());
+
+  /*
+   * Note, the base may be a pointer to a boxed type after this.  We
+   * don't unbox here, because we never are going to generate a
+   * special translation unless we know it's not boxed, and the C++
+   * helpers for generic dims currently always conditionally unbox.
+   */
+  m_base = m_ht.ldClsPropAddr(makeCatch(), clsRef, key);
 }
 
 void HhbcTranslator::MInstrTranslator::emitBaseOp() {
@@ -948,7 +955,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::checkInitProp(
   assert(propAddr->type().isPtr());
 
   auto const needsCheck =
-    propInfo.hphpcType == KindOfInvalid &&
+    Type::Uninit <= convertToType(propInfo.repoAuthType) &&
     // The m_mInd check is to avoid initializing a property to
     // InitNull right before it's going to be set to something else.
     (doWarn || (doDefine && m_mInd < m_ni.immVecM.size() - 1));
@@ -1340,8 +1347,19 @@ void HhbcTranslator::MInstrTranslator::emitCGetProp() {
                                             m_mii, m_mInd, m_iInd);
   if (propInfo.offset != -1) {
     emitPropSpecialized(MIA_warn, propInfo);
-    SSATmp* cellPtr = gen(UnboxPtr, m_base);
-    m_result = gen(LdMem, Type::Cell, cellPtr, cns(0));
+    auto const ty = convertToType(propInfo.repoAuthType);
+    bool const hhbbcRepo = RuntimeOption::RepoAuthoritative &&
+                             Repo::get().global().UsedHHBBC;
+    if (!hhbbcRepo) {
+      // For hphpc we always need to unbox, since it gives some types
+      // ignoring refiness.
+      SSATmp* cellPtr = gen(UnboxPtr, m_base);
+      m_result = gen(LdMem, Type::Cell, cellPtr, cns(0));
+      gen(IncRef, m_result);
+      return;
+    }
+    auto const cellPtr = ty.maybeBoxed() ? gen(UnboxPtr, m_base) : m_base;
+    m_result = gen(LdMem, ty.unbox(), cellPtr, cns(0));
     gen(IncRef, m_result);
     return;
   }
@@ -1667,7 +1685,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
     },
     [&] { // Taken:
       m_tb.hint(Block::Hint::Unlikely);
-      gen(RaiseArrayIndexNotice, key);
+      gen(RaiseArrayIndexNotice, makeCatch(), key);
       return m_tb.genDefInitNull();
     }
   );
@@ -1770,7 +1788,7 @@ void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
 
 template<KeyType keyType>
 static inline TypedValue mapGetImpl(
-    c_Map* map, typename KeyTypeTraits<keyType>::rawType key) {
+  c_Map* map, typename KeyTypeTraits<keyType>::rawType key) {
   TypedValue* ret = map->at(key);
   tvRefcountedIncRef(ret);
   return *ret;
@@ -1797,38 +1815,6 @@ void HhbcTranslator::MInstrTranslator::emitMapGet(SSATmp* key) {
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
   BUILD_OPTAB(keyType);
   m_result = gen(MapGet, makeCatch(), cns((TCA)opFunc), m_base, key);
-}
-#undef HELPER_TABLE
-
-template<KeyType keyType>
-static inline TypedValue stableMapGetImpl(
-    c_StableMap* map, typename KeyTypeTraits<keyType>::rawType key) {
-  TypedValue* ret = map->at(key);
-  tvRefcountedIncRef(ret);
-  return *ret;
-}
-
-#define HELPER_TABLE(m)              \
-  /* name            keyType  */     \
-  m(stableMapGetS,   KeyType::Str)   \
-  m(stableMapGetI,   KeyType::Int)
-
-#define ELEM(nm, keyType)                                        \
-TypedValue nm(c_StableMap* map, TypedValue* key) {               \
-  return stableMapGetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
-}
-namespace MInstrHelpers {
-HELPER_TABLE(ELEM)
-}
-#undef ELEM
-
-void HhbcTranslator::MInstrTranslator::emitStableMapGet(SSATmp* key) {
-  assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
-
-  typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
-  BUILD_OPTAB(keyType);
-  m_result = gen(StableMapGet, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1883,9 +1869,6 @@ void HhbcTranslator::MInstrTranslator::emitCGetElem() {
     break;
   case SimpleOp::Map:
     emitMapGet(key);
-    break;
-  case SimpleOp::StableMap:
-    emitStableMapGet(key);
     break;
   case SimpleOp::None:
     typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
@@ -2097,38 +2080,6 @@ void HhbcTranslator::MInstrTranslator::emitMapIsset() {
 }
 #undef HELPER_TABLE
 
-template<KeyType keyType>
-static inline uint64_t stableMapIssetImpl(
-  c_StableMap* map, typename KeyTypeTraits<keyType>::rawType key) {
-  auto result = map->get(key);
-  return result ? !cellIsNull(result) : false;
-}
-
-#define HELPER_TABLE(m)                \
-  /* name              keyType  */     \
-  m(stableMapIssetS,   KeyType::Str)   \
-  m(stableMapIssetI,   KeyType::Int)
-
-#define ELEM(nm, keyType)                                          \
-uint64_t nm(c_StableMap* map, TypedValue* key) {                   \
-  return stableMapIssetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
-}
-namespace MInstrHelpers {
-HELPER_TABLE(ELEM)
-}
-#undef ELEM
-
-void HhbcTranslator::MInstrTranslator::emitStableMapIsset() {
-  SSATmp* key = getKey();
-  assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
-
-  typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
-  BUILD_OPTAB(keyType);
-  m_result = gen(StableMapIsset, cns((TCA)opFunc), m_base, key);
-}
-#undef HELPER_TABLE
-
 void HhbcTranslator::MInstrTranslator::emitIssetElem() {
   SimpleOp simpleOpType = simpleCollectionOp();
   switch (simpleOpType) {
@@ -2149,9 +2100,6 @@ void HhbcTranslator::MInstrTranslator::emitIssetElem() {
     break;
   case SimpleOp::Map:
     emitMapIsset();
-    break;
-  case SimpleOp::StableMap:
-    emitStableMapIsset();
     break;
   case SimpleOp::None:
     emitIssetEmptyElem(false);
@@ -2382,40 +2330,6 @@ void HhbcTranslator::MInstrTranslator::emitMapSet(
 }
 #undef HELPER_TABLE
 
-template<KeyType keyType>
-static inline void stableMapSetImpl(
-    c_StableMap* map,
-    typename KeyTypeTraits<keyType>::rawType key,
-    Cell value) {
-  map->set(key, &value);
-}
-
-#define HELPER_TABLE(m)              \
-  /* name            keyType  */     \
-  m(stableMapSetS,   KeyType::Str)   \
-  m(stableMapSetI,   KeyType::Int)
-
-#define ELEM(nm, keyType)                                           \
-void nm(c_StableMap* map, TypedValue* key, Cell value) {            \
-  stableMapSetImpl<keyType>(map, keyAsRaw<keyType>(key), value);    \
-}
-namespace MInstrHelpers {
-HELPER_TABLE(ELEM)
-}
-#undef ELEM
-
-void HhbcTranslator::MInstrTranslator::emitStableMapSet(
-    SSATmp* key, SSATmp* value) {
-  assert(key->isA(Type::Int) || key->isA(Type::Str));
-  KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
-
-  typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*, TypedValue*);
-  BUILD_OPTAB(keyType);
-  gen(StableMapSet, makeCatch(), cns((TCA)opFunc), m_base, key, value);
-  m_result = value;
-}
-#undef HELPER_TABLE
-
 template <KeyType keyType>
 static inline StringData* setElemImpl(TypedValue* base, TypedValue keyVal,
                                       Cell val) {
@@ -2459,9 +2373,6 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
     break;
   case SimpleOp::Map:
     emitMapSet(key, value);
-    break;
-  case SimpleOp::StableMap:
-    emitStableMapSet(key, value);
     break;
   case SimpleOp::Pair:
   case SimpleOp::None:

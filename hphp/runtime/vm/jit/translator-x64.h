@@ -19,6 +19,7 @@
 #include <memory>
 #include <boost/noncopyable.hpp>
 
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/asm-x64.h"
@@ -209,6 +210,7 @@ public:
   void setJmpTransID(TCA jmp);
 
   bool profileSrcKey(const SrcKey& sk) const;
+  bool profilePrologue(const SrcKey& sk) const;
 
   TCA getTopTranslation(SrcKey sk) {
     return getSrcRec(sk)->getTopTranslation();
@@ -344,13 +346,9 @@ TCA fcallHelper(ActRec* ar, void* sp);
 TCA funcBodyHelper(ActRec* ar, void* sp);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
-// These could be static but are used in hopt/codegen.cpp
-void raiseUndefVariable(StringData* nm);
-void defFuncHelper(Func *f);
-
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
-                       int propInput,
-                       int objInput);
+                            int propInput,
+                            int objInput);
 
 bool mInstrHasUnknownOffsets(const NormalizedInstruction& i,
                              Class* contextClass);
@@ -358,15 +356,15 @@ bool mInstrHasUnknownOffsets(const NormalizedInstruction& i,
 struct PropInfo {
   PropInfo()
     : offset(-1)
-    , hphpcType(KindOfInvalid)
+    , repoAuthType{}
   {}
-  explicit PropInfo(int offset, DataType hphpcType)
+  explicit PropInfo(int offset, RepoAuthType repoAuthType)
     : offset(offset)
-    , hphpcType(hphpcType)
+    , repoAuthType{repoAuthType}
   {}
 
   int offset;
-  DataType hphpcType;
+  RepoAuthType repoAuthType;
 };
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,

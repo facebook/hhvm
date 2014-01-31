@@ -52,6 +52,14 @@ bool instructionsAreSinkable(InputIterator first, InputIterator last) {
   return true;
 }
 
+/*
+ * Returns whether a type is generic enough to try hoisting a
+ * prediction in order to specialize it.
+ */
+bool typeSufficientlyGeneric(Type t) {
+  return t.needsReg();
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -84,7 +92,7 @@ void optimizePredictions(IRUnit& unit) {
     auto const ldMem = checkType->src(0)->inst();
     if (ldMem->op() != LdMem) return false;
     if (ldMem->src(1)->getValInt() != 0) return false;
-    if (!ldMem->typeParam().equals(Type::Cell)) return false;
+    if (!typeSufficientlyGeneric(ldMem->typeParam())) return false;
 
     FTRACE(5, "candidate: {}\n", ldMem->toString());
 
@@ -159,7 +167,7 @@ void optimizePredictions(IRUnit& unit) {
   postorderWalk(unit, [&](Block* b) {
     for (auto& inst : *b) {
       if (inst.op() == CheckType &&
-          inst.src(0)->type().equals(Type::Cell)) {
+          typeSufficientlyGeneric(inst.src(0)->type())) {
         if (optLdMem(&inst)) {
           needsReflow = true;
           break;

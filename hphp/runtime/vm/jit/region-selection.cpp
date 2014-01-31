@@ -40,7 +40,6 @@ TRACE_SET_MOD(region);
 
 extern RegionDescPtr selectMethod(const RegionContext&);
 extern RegionDescPtr selectOneBC(const RegionContext&);
-extern RegionDescPtr selectTracelet(const RegionContext&, int inlineDepth);
 extern RegionDescPtr selectHotBlock(TransID transId,
                                     const ProfData* profData,
                                     const TransCFG& cfg);
@@ -53,29 +52,35 @@ enum class RegionMode {
   None,      // empty region
 
   // Modes that create a region by inspecting live VM state
-  OneBC,     // region with a single bytecode instruction
   Method,    // region with a whole method
   Tracelet,  // single-entry, multiple-exits region that ends on conditional
              // branches or when an instruction consumes a value of unknown type
   Legacy,    // same as Tracelet, but using the legacy analyze() code
-
-  // Modes that create a region by leveraging profiling data
-  HotBlock,  // single-entry, single-exit region
-  HotTrace,  // single-entry, multiple-exits region
 };
 
 RegionMode regionMode() {
   auto& s = RuntimeOption::EvalJitRegionSelector;
   if (s == ""        ) return RegionMode::None;
-  if (s == "onebc"   ) return RegionMode::OneBC;
   if (s == "method"  ) return RegionMode::Method;
   if (s == "tracelet") return RegionMode::Tracelet;
   if (s == "legacy"  ) return RegionMode::Legacy;
-  if (s == "hotblock") return RegionMode::HotBlock;
-  if (s == "hottrace") return RegionMode::HotTrace;
   FTRACE(1, "unknown region mode {}: using none\n", s);
-  if (debug) abort();
+  assert(false);
   return RegionMode::None;
+}
+
+enum class PGORegionMode {
+  Hottrace, // Select a long region, using profile counters to guide the trace
+  Hotblock, // Select a single block
+};
+
+PGORegionMode pgoRegionMode() {
+  auto& s = RuntimeOption::EvalJitPGORegionSelector;
+  if (s == "hottrace") return PGORegionMode::Hottrace;
+  if (s == "hotblock") return PGORegionMode::Hotblock;
+  FTRACE(1, "unknown pgo region mode {}: using hottrace\n", s);
+  assert(false);
+  return PGORegionMode::Hottrace;
 }
 
 template<typename Container>
@@ -263,7 +268,7 @@ void RegionDesc::Block::checkMetadata() const {
 //////////////////////////////////////////////////////////////////////
 
 RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
-                                   const JIT::Tracelet& tlet) {
+                                   const Tracelet& tlet) {
   typedef RegionDesc::Block Block;
 
   auto region = std::make_shared<RegionDesc>();
@@ -359,13 +364,13 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
     };
 
     switch (dep.first.space) {
-      case JIT::Location::Stack: {
+      case Location::Stack: {
         uint32_t offsetFromSp = uint32_t(-dep.first.offset - 1);
         uint32_t offsetFromFp = initSpOffset - offsetFromSp;
         addPred(R::Location::Stack{offsetFromSp, offsetFromFp});
         break;
       }
-      case JIT::Location::Local:
+      case Location::Local:
         addPred(R::Location::Local{uint32_t(dep.first.offset)});
         break;
 
@@ -387,7 +392,8 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
 }
 
 RegionDescPtr selectRegion(const RegionContext& context,
-                           const JIT::Tracelet* t) {
+                           const Tracelet* t,
+                           TransKind kind) {
   auto const mode = regionMode();
 
   FTRACE(1,
@@ -399,15 +405,12 @@ RegionDescPtr selectRegion(const RegionContext& context,
     try {
       switch (mode) {
         case RegionMode::None:     return RegionDescPtr{nullptr};
-        case RegionMode::OneBC:    return selectOneBC(context);
         case RegionMode::Method:   return selectMethod(context);
-        case RegionMode::Tracelet: return selectTracelet(context, 0);
+        case RegionMode::Tracelet: return selectTracelet(context, 0,
+                                                         kind == TransProfile);
         case RegionMode::Legacy:
                  always_assert(t); return selectTraceletLegacy(context.spOffset,
                                                                *t);
-        case RegionMode::HotBlock:
-        case RegionMode::HotTrace: always_assert(0 &&
-                                                 "unsupported region mode");
       }
       not_reached();
     } catch (const std::exception& e) {
@@ -434,25 +437,18 @@ RegionDescPtr selectHotRegion(TransID transId,
   FuncId funcId = profData->transFuncId(transId);
   TransCFG cfg(funcId, profData, tx64->getSrcDB(), tx64->getJmpToTransIDMap());
   TransIDSet selectedTIDs;
-  RegionDescPtr region = nullptr;
-  RegionMode mode = regionMode();
-
-  switch (mode) {
-    case RegionMode::None:
-      region = RegionDescPtr{nullptr};
-      break;
-    case RegionMode::HotBlock:
-      region = selectHotBlock(transId, profData, cfg);
-      break;
-    case RegionMode::HotTrace:
+  assert(regionMode() != RegionMode::Method);
+  RegionDescPtr region;
+  switch (pgoRegionMode()) {
+    case PGORegionMode::Hottrace:
       region = selectHotTrace(transId, profData, cfg, selectedTIDs);
       break;
-    case RegionMode::OneBC:
-    case RegionMode::Method:
-    case RegionMode::Tracelet:
-    case RegionMode::Legacy:
-      always_assert(0 && "unsupported region mode");
+
+    case PGORegionMode::Hotblock:
+      region = selectHotBlock(transId, profData, cfg);
+      break;
   }
+  assert(region);
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     std::string dotFileName = std::string("/tmp/trans-cfg-") +

@@ -87,6 +87,7 @@
 #include "hphp/util/util.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/parser/hphp.tab.hpp"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
@@ -2742,8 +2743,8 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
   }
   bool voidReturn = false;
   if (builtinFunc) {
-    ref = (builtinFunc->methInfo()->attribute & ClassInfo::IsReference) != 0;
-    voidReturn = builtinFunc->methInfo()->returnType == KindOfNull;
+    ref = (builtinFunc->attrs() & AttrReference) != 0;
+    voidReturn = builtinFunc->returnType() == KindOfNull;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
     if (!(fn->getActualType()) && !fn->getFuncScope()->isNative()) {
@@ -2774,7 +2775,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     m_evalStack.setNotRef();
   } else if (!ref) {
     DataType dt = builtinFunc ?
-      builtinFunc->methInfo()->returnType :
+      builtinFunc->returnType() :
       getPredictedDataType(fn);
 
     if (dt != KindOfUnknown) {
@@ -3863,8 +3864,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               "Cannot use collection initialization for non-collection class");
           }
           bool kvPairs = cType == Collection::FrozenMapType
-            || cType == Collection::MapType
-            || cType == Collection::StableMapType;
+            || cType == Collection::MapType;
           e.NewCol(cType, nElms);
           if (kvPairs) {
             for (int i = 0; i < nElms; i++) {
@@ -3934,6 +3934,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ClassConstantExpressionPtr cc(
           static_pointer_cast<ClassConstantExpression>(node));
         StringData* nName = makeStaticString(cc->getConName());
+        auto const getOriginalClassName = [&] {
+          const std::string& clsName = cc->getOriginalClassName();
+          return makeStaticString(clsName);
+        };
         if (cc->isStatic()) {
           // static::Constant
           e.LateBoundCls();
@@ -3947,9 +3951,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         } else if (cc->getOriginalClass() &&
                    !cc->getOriginalClass()->isTrait()) {
           // C::Constant inside a class
-          const std::string& clsName = cc->getOriginalClassName();
-          StringData* nCls = makeStaticString(clsName);
-          e.ClsCnsD(nName, nCls);
+          auto nCls = getOriginalClassName();
+          if (cc->isColonColonClass()) {
+            e.String(nCls);
+          } else {
+            e.ClsCnsD(nName, nCls);
+          }
         } else if (cc->isSelf()) {
           // self::Constant inside trait or pseudomain
           e.Self();
@@ -3965,9 +3972,15 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           // will set cc->originalClassName to the trait's name for
           // the isSelf and isParent cases, but self and parent must
           // be resolved dynamically when used inside of traits.
-          const std::string& clsName = cc->getOriginalClassName();
-          StringData* nCls = makeStaticString(clsName);
-          e.ClsCnsD(nName, nCls);
+          auto nCls = getOriginalClassName();
+          if (cc->isColonColonClass()) {
+            std::ostringstream s;
+            s << "Cannont access " << nCls->data() << "::" << nName->data() <<
+                 " when no class scope is active";
+            throw IncludeTimeFatalException(e.getNode(), s.str().c_str());
+          } else {
+            e.ClsCnsD(nName, nCls);
+          }
         }
         return true;
       }
@@ -4877,7 +4890,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         tvWriteUninit(&uninit);
         for (auto& useVar : useVars) {
           pce->addProperty(useVar.first, AttrPrivate, nullptr, nullptr,
-                           &uninit, KindOfInvalid);
+                           &uninit, RepoAuthType{});
         }
 
         // The __invoke method. This is the body of the closure, preceded by
@@ -6505,35 +6518,29 @@ void EmitterVisitor::emitPostponedMeths() {
     if (funcScope->isGenerator()) {
       // emit the outer 'create generator' function
       m_curFunc = fe;
-      fe->setGeneratorBodyName(makeStaticString(meth->getGeneratorName()));
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitGeneratorCreate(meth);
 
       // emit the generator body
-      bool needsEmit;
-      std::tie(m_curFunc, needsEmit) =
-        createFuncEmitterForGeneratorBody(meth, fe, top_fes);
-      if (needsEmit) {
-        emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
-        emitGeneratorBody(meth);
-      }
+      auto const bodyFe = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      fe->setGeneratorBodyName(bodyFe->name());
+      m_curFunc = bodyFe;
+      emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
+      emitGeneratorBody(meth);
     } else if (funcScope->isAsync()) {
       // emit the outer function (which creates continuation if blocked)
       m_curFunc = fe;
-      fe->setGeneratorBodyName(makeStaticString(meth->getGeneratorName()));
       fe->setIsAsync(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitAsyncMethod(meth);
 
       // emit the generator body
-      bool needsEmit;
-      std::tie(m_curFunc, needsEmit) =
-        createFuncEmitterForGeneratorBody(meth, fe, top_fes);
-      if (needsEmit) {
-        m_curFunc->setIsAsync(true);
-        emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
-        emitGeneratorBody(meth);
-      }
+      auto const bodyFe = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      fe->setGeneratorBodyName(bodyFe->name());
+      m_curFunc = bodyFe;
+      m_curFunc->setIsAsync(true);
+      emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
+      emitGeneratorBody(meth);
     } else {
       m_curFunc = fe;
       if (funcScope->isNative()) {
@@ -6551,7 +6558,7 @@ void EmitterVisitor::emitPostponedMeths() {
         auto const str = makeStaticString(
           folly::format("86static_{}", sv.name->data()).str());
         fe->pce()->addProperty(str, AttrPrivate, nullptr, nullptr,
-                               &uninit, KindOfInvalid);
+                               &uninit, RepoAuthType{});
         if (m_curFunc != fe && !fe->isAsync()) {
           // In the case of a generator (these func emitters will be
           // different), we need to propagate the information about
@@ -6912,34 +6919,40 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
   emitMethodDVInitializers(e, meth, topOfBody);
 }
 
-std::pair<FuncEmitter*,bool>
-EmitterVisitor::createFuncEmitterForGeneratorBody(
+FuncEmitter* EmitterVisitor::createFuncEmitterForGeneratorBody(
                                MethodStatementPtr meth,
                                FuncEmitter* fe,
                                vector<FuncEmitter*>& top_fes) {
   FuncEmitter* genFe;
-  string genName = meth->getGeneratorName();
+  auto genName = meth->getGeneratorName();
   if (fe->isMethod() && !fe->isClosureBody()) {
     genFe = m_ue.newMethodEmitter(
       makeStaticString(genName), fe->pce());
     bool UNUSED added = fe->pce()->addMethod(genFe);
     assert(added);
   } else {
-    auto it = m_generatorEmitted.find(genName);
-    if (it != end(m_generatorEmitted)) {
-      // Generator body already emitted.  This can happen because in
-      // traits, we emit only a single generator body, but one
-      // generator creator function per use of the trait.
-      return std::make_pair(it->second, false);
+    auto& emitCount = m_generatorEmitted[genName];
+    ++emitCount;
+    if (emitCount > 1) {
+      /*
+       * Generator body already emitted.  This can happen because of
+       * repo-mode trait flattening.
+       *
+       * In order to preserve the bytecode invariant that every inner
+       * generator function is uniquely identified to an outer
+       * generator function, we need to bump a counter on the names in
+       * this case (similar to what we do for closure class names).
+       */
+      genName = folly::format("{}_{}", genName, emitCount).str();
     }
+
     genFe = new FuncEmitter(m_ue, -1, -1, makeStaticString(genName));
-    m_generatorEmitted[genName] = genFe;
     top_fes.push_back(genFe);
     genFe->setTop(true);
   }
   genFe->setIsGeneratorFromClosure(fe->isClosureBody());
   genFe->setIsGenerator(true);
-  return std::make_pair(genFe, true);
+  return genFe;
 }
 
 void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {
@@ -7368,30 +7381,54 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
     }
   }
   Func* f = Unit::lookupFunc(makeStaticString(name));
-  if (!f || !f->methInfo() || f->numParams() > kMaxBuiltinArgs) return nullptr;
+  if (!f ||
+      !f->nativeFuncPtr() ||
+      (f->numParams() > kMaxBuiltinArgs) ||
+      (numParams > f->numParams()) ||
+      (f->returnType() == KindOfDouble)) return nullptr;
 
-  const ClassInfo::MethodInfo* info = f->methInfo();
-  if (info->attribute & (ClassInfo::NeedsActRec |
-                         ClassInfo::VariableArguments |
-                         ClassInfo::RefVariableArguments |
-                         ClassInfo::MixedVariableArguments)) {
+  if (f->methInfo()) {
+    // IDL style builtin
+    const ClassInfo::MethodInfo* info = f->methInfo();
+    if (info->attribute & (ClassInfo::NeedsActRec |
+                           ClassInfo::VariableArguments |
+                           ClassInfo::RefVariableArguments |
+                           ClassInfo::MixedVariableArguments)) {
+      return nullptr;
+    }
+  } else if (!(f->attrs() & AttrNative)) {
+    // HNI only enables Variable args via NeedsActRec which in turn
+    // is captured by the f->nativeFuncPtr() == nullptr,
+    // so there's nothing additional to check in the HNI case
     return nullptr;
   }
-  if (numParams > f->numParams()) return nullptr;
-
-  if (info->returnType == KindOfDouble) return nullptr;
 
   for (int i = 0; i < f->numParams(); i++) {
-    const ClassInfo::ParameterInfo* pi = f->methInfo()->parameters[i];
-    if (pi->argType == KindOfDouble) return nullptr;
-
+    if (f->params()[i].builtinType() == KindOfDouble) {
+      return nullptr;
+    }
     if (i >= numParams) {
-      if (!pi->valueLen) {
-        return nullptr;
+      if (f->methInfo()) {
+        // IDL-style
+        auto pi = f->methInfo()->parameters[i];
+        if (!pi->valueLen) {
+          return nullptr;
+        }
+        // unserializable default values such as TimeStamp::Current()
+        // are serialized as kUnserializableString ("\x01")
+        if (!strcmp(f->methInfo()->parameters[i]->value,
+                    kUnserializableString)) return nullptr;
+      } else {
+        // HNI style
+        auto &pi = f->params()[i];
+        if (!pi.hasDefaultValue()) {
+          return nullptr;
+        }
+        if (pi.defaultValue().m_type == KindOfUninit) {
+          // TODO: Resolve persistent constants
+          return nullptr;
+        }
       }
-      // unserializable default values such as TimeStamp::Current()
-      // are serialized as kUnserializableString ("\x01")
-      if (!strcmp(pi->value, kUnserializableString)) return nullptr;
     }
   }
 
@@ -7493,12 +7530,24 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       bool byRef = fcallBuiltin->byRef(i);
       emitBuiltinCallArg(e, (*params)[i], i, byRef);
     }
-    for (; i < fcallBuiltin->numParams(); i++) {
-      const ClassInfo::ParameterInfo* pi =
-        fcallBuiltin->methInfo()->parameters[i];
-      Variant v = unserialize_from_string(
-        String(pi->value, pi->valueLen, CopyString));
-      emitBuiltinDefaultArg(e, v, pi->argType, i);
+    if (fcallBuiltin->methInfo()) {
+      // IDL style
+      for (; i < fcallBuiltin->numParams(); i++) {
+        const ClassInfo::ParameterInfo* pi =
+          fcallBuiltin->methInfo()->parameters[i];
+        Variant v = unserialize_from_string(
+          String(pi->value, pi->valueLen, CopyString));
+        emitBuiltinDefaultArg(e, v, pi->argType, i);
+      }
+    } else {
+      // HNI style
+      for (; i < fcallBuiltin->numParams(); i++) {
+        auto &pi = fcallBuiltin->params()[i];
+        assert(pi.hasDefaultValue());
+        auto &def = pi.defaultValue();
+        emitBuiltinDefaultArg(e, tvAsVariant(const_cast<TypedValue*>(&def)),
+                              pi.builtinType(), i);
+      }
     }
     e.FCallBuiltin(fcallBuiltin->numParams(), numParams, nLiteral);
   } else {
@@ -7597,6 +7646,28 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   record.nullable = nullable;
   Id id = m_ue.addTypeAlias(record);
   e.DefTypeAlias(id);
+}
+
+static RepoAuthType repoAuthTypeForHphpcType(DataType dtype) {
+  switch (dtype) {
+  case KindOfBoolean:
+    return RepoAuthType{RepoAuthType::Tag::OptBool};
+  case KindOfInt64:
+    return RepoAuthType{RepoAuthType::Tag::OptInt};
+  case KindOfDouble:
+    return RepoAuthType{RepoAuthType::Tag::OptDbl};
+  case KindOfArray:
+    return RepoAuthType{RepoAuthType::Tag::OptArr};
+  case KindOfObject:
+    return RepoAuthType{RepoAuthType::Tag::OptObj};
+  case KindOfString:
+  case KindOfStaticString:
+    return RepoAuthType{RepoAuthType::Tag::OptStr};
+  case KindOfResource:
+    return RepoAuthType{RepoAuthType::Tag::OptRes};
+  default:
+    return RepoAuthType{};
+  }
 }
 
 void EmitterVisitor::emitClass(Emitter& e,
@@ -7741,15 +7812,21 @@ void EmitterVisitor::emitClass(Emitter& e,
             var = static_pointer_cast<SimpleVariable>(exp);
           }
 
-          // A non-invalid HPHPC type for a property implies the
-          // property's type is !KindOfUninit, and always
-          // hphpcType|KindOfNull.
-          const auto hphpcType = var->getSymbol()
-            ? var->getSymbol()->getFinalType()->getDataType()
-            : KindOfInvalid;
+          /*
+           * Translate what hphpc can infer about a property type into
+           * a RepoAuthType for the runtime.  The type hphpc has
+           * implies non-uninit, but is always nullable.
+           *
+           * Note: for hphpc's types it appears this doesn't actually
+           * imply the type is unboxed, either.
+           */
+          auto const hphpcType = repoAuthTypeForHphpcType(
+            var->getSymbol()
+              ? var->getSymbol()->getFinalType()->getDataType()
+              : KindOfInvalid);
 
-          StringData* propName = makeStaticString(var->getName());
-          StringData* propDoc = Option::GenerateDocComments ?
+          auto const propName = makeStaticString(var->getName());
+          auto const propDoc = Option::GenerateDocComments ?
             makeStaticString(var->getDocComment()) : empty_string.get();
           TypedValue tvVal;
           // Some properties may need to be marked with the AttrDeepInit
@@ -8810,7 +8887,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           propInfo->docComment ?
           makeStaticString(propInfo->docComment) : nullptr,
           &tvNull,
-          KindOfInvalid
+          RepoAuthType{}
         );
       }
     }
@@ -8956,8 +9033,11 @@ static void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
 }
 
 static void commitGlobalData() {
-  auto gd = Repo::GlobalData{};
-  gd.HardTypeHints = Option::HardTypeHints;
+  auto gd                     = Repo::GlobalData{};
+  gd.HardTypeHints            = Option::HardTypeHints;
+  gd.UsedHHBBC                = Option::UseHHBBC;
+  gd.HardPrivatePropInference = Option::UseHHBBC;
+
   Repo::get().saveGlobalData(gd);
 }
 

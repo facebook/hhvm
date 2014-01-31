@@ -3,11 +3,17 @@ language: cpp
 compiler:
   - gcc
 
-before_script: 
+before_script:
   - time TRAVIS=1 ./configure_ubuntu_12.04.sh
-# for some tests  
+# for some tests
   - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - time HPHP_HOME=`pwd` make -j 6
+  - cd hphp/test/zend/good/ext/curl/tests/responder && ../../../../../../../hhvm/hhvm -m server -p 8444 &
+# mysql configuration for unit-tests
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS hhvm;'
+  - export PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=hhvm"
+  - export PDO_MYSQL_TEST_USER="travis"
+  - export PDO_MYSQL_TEST_PASS=""
 
 # The larger test suites (slow, zend) take longer than 50 miuntes to run. Since
 # we have no way to change the timeout, we subdivide the jit/interp repo/normal
@@ -35,7 +41,7 @@ env:
   - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
   - TEST_RUN_MODE="-m interp -r zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
 
-script: time hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
+script: time PHP_CURL_HTTP_REMOTE_SERVER="http://localhost:8444" hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
 
 notifications:
   email: false

@@ -36,8 +36,7 @@
 
 #define DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS()  \
   DECLARE_ITERABLE_MATERIALIZE_METHODS();            \
-  Object t_tomap();                                  \
-  Object t_tostablemap()
+  Object t_tomap()
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,7 +61,7 @@ using ExtCollectionObjectData = ExtObjectDataFlags<
 void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
 ///////////////////////////////////////////////////////////////////////////////
-// class BaseVector encapsulates functionality that is common to both
+// class BaseVector: encapsulates functionality that is common to both
 // c_Vector and c_FrozenVector. It doesn't map to any PHP-land class.
 
 class BaseVector : public ExtCollectionObjectData {
@@ -168,7 +167,7 @@ class BaseVector : public ExtCollectionObjectData {
     TypedValue* data;
     target->m_capacity = target->m_size = targetSize;
     target->m_data = data =
-      (TypedValue*)smart_malloc(targetSize * sizeof(TypedValue));
+      (TypedValue*)MM().objMallocLogged(targetSize * sizeof(TypedValue));
     for (uint i = 0; i < targetSize; ++i, ++startPos) {
       cellDup(v->m_data[startPos], data[i]);
     }
@@ -187,7 +186,8 @@ class BaseVector : public ExtCollectionObjectData {
     }
     TypedValue* data;
     target->m_capacity = target->m_size = sz;
-    target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+    target->m_data = data =
+      (TypedValue*)MM().objMallocLogged(sz * sizeof(TypedValue));
     for (int i = 0; i < sz; ++i) {
       cellDup(thiz->m_data[i], data[i]);
     }
@@ -255,6 +255,10 @@ class BaseVector : public ExtCollectionObjectData {
   static size_t frozenCopyOffset() {
     return offsetof(BaseVector, m_frozenCopy);
   }
+
+  void addFront(TypedValue* val);
+
+  Variant popFront();
 
  protected:
 
@@ -422,12 +426,10 @@ class c_Vector : public BaseVector {
   void initFvFields(c_FrozenVector* fv);
 
   // Friends
-
   friend void collectionAppend(ObjectData* obj, TypedValue* val);
   friend void triggerCow(c_Vector* vec);
 
   friend class BaseMap;
-  friend class c_StableMap;
   friend class c_Pair;
   friend class ArrayIter;
 };
@@ -672,6 +674,7 @@ class BaseMap : public ExtCollectionObjectData {
     update(key, val);
   }
   void add(TypedValue* val);
+  Variant popFront();
   void remove(int64_t key);
   void remove(StringData* key);
   bool contains(int64_t key) const;
@@ -786,7 +789,7 @@ class BaseMap : public ExtCollectionObjectData {
   void compactIfNecessary();
 
   BaseMap::Elm& allocElm(int32_t* ei) {
-    assert(!validPos(*ei) && m_size <= m_used && m_used < m_cap);
+    assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
     size_t i = m_used;
     (*ei) = i;
     m_used = i + 1;
@@ -871,7 +874,6 @@ class BaseMap : public ExtCollectionObjectData {
 
   friend class c_MapIterator;
   friend class c_Vector;
-  friend class c_StableMap;
   friend class c_FrozenMap;
   friend class ArrayIter;
   friend class c_GenMapWaitHandle;
@@ -1067,58 +1069,6 @@ class c_MapIterator : public ExtObjectData {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class StableMap
-
-FORWARD_DECLARE_CLASS(StableMap);
-class c_StableMap : public BaseMap {
-
- public:
-  DECLARE_CLASS_NO_SWEEP(StableMap)
-
- public:
-  explicit c_StableMap(Class* cls = c_StableMap::classof());
-
-  static c_StableMap* Clone(ObjectData* obj);
-
- public: // PHP API - No inlines (required by .idl.json linking)
-  void t___construct(CVarRef iterable = null_variant);
-  Object t_add(CVarRef val);
-  Object t_addall(CVarRef val);
-  Object t_clear();
-  bool t_isempty();
-  int64_t t_count();
-  Object t_items();
-  Object t_keys();
-  Object t_lazy();
-  Object t_kvzip(); // const
-  Variant t_at(CVarRef key); // const
-  Variant t_get(CVarRef key); // const
-  Object t_set(CVarRef key, CVarRef value);
-  Object t_setall(CVarRef iterable);
-  bool t_contains(CVarRef key); // const
-  bool t_containskey(CVarRef key); // const
-  Object t_remove(CVarRef key);
-  Object t_removekey(CVarRef key);
-  Array t_toarray(); // const
-  Array t_tokeysarray(); // const
-  Array t_tovaluesarray(); // const
-  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
-  Object t_values();
-  Object t_differencebykey(CVarRef it);
-  Object t_getiterator();
-  Object t_map(CVarRef callback); // const
-  Object t_mapwithkey(CVarRef callback); // const
-  Object t_filter(CVarRef callback); // const
-  Object t_filterwithkey(CVarRef callback); // const
-  Object t_retain(CVarRef callback);
-  Object t_retainwithkey(CVarRef callback);
-  Object t_zip(CVarRef iterable); // const
-  DECLARE_COLLECTION_MAGIC_METHODS();
-  static Object ti_fromitems(CVarRef iterable);
-  static Object ti_fromarray(CVarRef arr); // deprecated
-};
-
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * BaseSet is a hash-table implementation of the Set ADT. It doesn't represent
@@ -1288,13 +1238,15 @@ class BaseSet : public ExtCollectionObjectData {
   void compact();
 
   BaseSet::Elm& allocElm(int32_t* ei) {
-    assert(!validPos(*ei) && m_size <= m_used && m_used < m_cap);
+    assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
     size_t i = m_used;
     (*ei) = i;
     m_used = i + 1;
     ++m_size;
     return data()[i];
   }
+
+  BaseSet::Elm& allocElmFront(int32_t* ei);
 
  public:
   ssize_t iter_begin() const {
@@ -1355,6 +1307,20 @@ class BaseSet : public ExtCollectionObjectData {
 
   void add(int64_t h);
   void add(StringData* key);
+
+  void addFront(TypedValue* val) {
+    if (val->m_type == KindOfInt64) {
+      addFront(val->m_data.num);
+    } else if (IS_STRING_TYPE(val->m_type)) {
+      addFront(val->m_data.pstr);
+    } else {
+      throwBadValueType();
+    }
+  }
+  void addFront(int64_t h);
+  void addFront(StringData* key);
+
+  Variant popFront();
 
   void remove(int64_t key) {
     ++m_version;
@@ -1490,6 +1456,7 @@ private:
   friend class c_SetIterator;
   friend class c_Vector;
   friend class c_Set;
+  friend class c_Map;
   friend class ArrayIter;
 
   static void compileTimeAssertions() {
@@ -1798,7 +1765,6 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);
 ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec);
 ObjectData* collectionDeepCopyMap(c_Map* mp);
-ObjectData* collectionDeepCopyStableMap(c_StableMap* mp);
 ObjectData* collectionDeepCopyFrozenMap(c_FrozenMap* mp);
 ObjectData* collectionDeepCopySet(c_Set* mp);
 ObjectData* collectionDeepCopyFrozenSet(c_FrozenSet* st);
@@ -1838,7 +1804,7 @@ inline void collectionOffsetSet(ObjectData* obj, litstr offset, CVarRef val) {
 
 inline bool isOptimizableCollectionClass(const Class* klass) {
   return klass == c_Vector::classof() || klass == c_Map::classof() ||
-         klass == c_StableMap::classof() || klass == c_Pair::classof();
+    klass == c_Pair::classof();
 }
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);

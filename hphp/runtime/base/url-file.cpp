@@ -18,12 +18,11 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/ext/ext_preg.h"
-#include "hphp/runtime/ext/ext_url.h"
+#include "hphp/runtime/ext/pcre/ext_pcre.h"
+#include "hphp/runtime/ext/url/ext_url.h"
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(UrlFile)
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_http_response_header("http_response_header");
@@ -41,6 +40,12 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
   m_maxRedirect = maxRedirect;
   m_timeout = timeout;
   m_isLocal = false;
+}
+
+void UrlFile::sweep() {
+  using std::string;
+  m_error.~string();
+  MemFile::sweep();
 }
 
 const StaticString
@@ -72,7 +77,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   if (user.isString()) {
     Variant pass = f_parse_url(url, k_PHP_URL_PASS);
     http.auth(user.toString().c_str(), pass.toString().c_str());
-    url = f_preg_replace(
+    url = HHVM_FN(preg_replace)(
       s_remove_user_pass_pattern,
       s_remove_user_pass_replace,
       url,

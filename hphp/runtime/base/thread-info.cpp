@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
@@ -41,6 +42,19 @@ __thread char* ThreadInfo::t_stackbase = 0;
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
+String ini_get_max_execution_time(void*) {
+  int64_t timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+    m_reqInjectionData.getTimeout();
+  return String(timeout);
+}
+
+bool ini_on_update_max_execution_time(const String& value, void*) {
+  int64_t limit = value.toInt64();
+  ThreadInfo::s_threadInfo.getNoCheck()->
+    m_reqInjectionData.setTimeout(limit);
+  return true;
+}
+
 ThreadInfo::ThreadInfo()
     : m_stacklimit(0), m_executing(Idling) {
   assert(!t_stackbase);
@@ -54,6 +68,15 @@ ThreadInfo::ThreadInfo()
 
   RDS::threadInit();
   onSessionInit();
+
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "max_execution_time",
+                   ini_on_update_max_execution_time,
+                   ini_get_max_execution_time);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "maximum_execution_time",
+                   ini_on_update_max_execution_time,
+                   ini_get_max_execution_time);
 
   Lock lock(s_thread_info_mutex);
   s_thread_infos.insert(this);

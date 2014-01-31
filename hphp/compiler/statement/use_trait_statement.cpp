@@ -111,8 +111,8 @@ void UseTraitStatement::inferTypes(AnalysisResultPtr ar) {
 
 void UseTraitStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("UseTraitStatement", 3);
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exp);
+  cg.printPropertyHeader("typeExpressions");
+  cg.printTypeExpressionVector(m_exp);
   cg.printPropertyHeader("block");
   cg.printAsBlock(m_stmt);
   cg.printPropertyHeader("sourceLocation");

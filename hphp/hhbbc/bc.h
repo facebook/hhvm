@@ -191,7 +191,7 @@ namespace bc {
 
 #define POP_TWO(x, y)       uint32_t numPop() const { return 2; }   \
                             Flavor popFlavor(uint32_t i) const {    \
-                              POP_##x; --i; POP_##x; not_reached(); \
+                              POP_##x; --i; POP_##y; not_reached(); \
                             }
 
 #define POP_THREE(x, y, z)  uint32_t numPop() const { return 3; }   \

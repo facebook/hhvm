@@ -36,8 +36,9 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/ext/FBSerialize.h"
+#include "hphp/runtime/ext/mysql/ext_mysql.h"
+#include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/runtime/ext/VariantController.h"
 #include "hphp/runtime/vm/unwind.h"
 

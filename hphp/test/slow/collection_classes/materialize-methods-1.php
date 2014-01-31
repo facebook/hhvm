@@ -14,13 +14,12 @@ function dump_unordered($x) {
 function main() {
   $x = Vector {
     Vector {'a', 2},
-    StableMap {'A' => 'a', 1 => 2},
+    Map {'A' => 'a', 1 => 2},
     Pair {'a', 2},
   };
   foreach ($x as $v) {
     dump($v->toVector());
-    dump_unordered($v->toMap());
-    dump_unordered($v->toStableMap());
+    dump($v->toMap());
     dump($v->toSet());
   }
   $x = Vector {
@@ -31,7 +30,6 @@ function main() {
     dump_unordered($v->toVector());
     if (!($v instanceof Set)) {
       dump_unordered($v->toMap());
-      dump_unordered($v->toStableMap());
     }
     dump_unordered($v->toSet());
   }

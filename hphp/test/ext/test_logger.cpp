@@ -19,9 +19,9 @@
 #include <unistd.h>
 #include <sys/param.h>
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_mb.h"
-#include "hphp/runtime/ext/ext_url.h"
 #include "hphp/runtime/ext/ext_file.h"
 
 using namespace HPHP;
@@ -110,7 +110,7 @@ Array TestLogger::postData(Array arr) {
   Array data = make_map_array("method", "recordTestResults",
                            "args", f_json_encode(make_packed_array(arr)));
 
-  String str = f_http_build_query(data);
+  String str = HHVM_FN(http_build_query)(data, "", "");
 
   client.post(log_url, str.c_str(), str.length(), response);
 

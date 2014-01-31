@@ -797,6 +797,30 @@ void Parser::onClassConst(Token &out, Token &cls, Token &name, bool text) {
   out->exp = con;
 }
 
+void Parser::onClassClass(Token &out, Token &cls, Token &name,
+                          bool inStaticContext) {
+  if (inStaticContext) {
+    if (cls->same("parent") || cls->same("static")) {
+      PARSE_ERROR(
+        "%s::class cannot be used for compile-time class name resolution",
+        cls->text().c_str()
+      );
+      return;
+    }
+  }
+  if (cls->same("self") || cls->same("parent") || cls->same("static")) {
+    if (cls->same("self") && m_inTrait) {
+      // Sooo... self:: works dynamically for everything in a trait except
+      // for self::CLASS where it returns the trait name. Great...
+      onScalar(out, T_TRAIT_C, cls);
+    } else {
+      onClassConst(out, cls, name, inStaticContext);
+    }
+  } else {
+    onScalar(out, T_STRING, cls);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // function/method declaration
 
@@ -1082,7 +1106,9 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
   // look for argument promotion in ctor
   ExpressionListPtr promote = NEW_EXP(ExpressionList);
   cls->checkArgumentsToPromote(promote, type);
-  for (int i = 0, count = promote->getCount(); i < count; i++) {
+  auto count = promote->getCount();
+  cls->setPromotedParameterCount(count);
+  for (int i = 0; i < count; i++) {
     auto param =
         dynamic_pointer_cast<ParameterExpression>((*promote)[i]);
     TokenID mod = param->getModifier();
@@ -1091,7 +1117,7 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
                                   param->getUserTypeHint() : "";
 
     // create the class variable and change the location to
-    // point to the paramenter location for error reporting
+    // point to the parameter location for error reporting
     LocationPtr location = param->getLocation();
     ModifierExpressionPtr modifier = NEW_EXP0(ModifierExpression);
     modifier->add(mod);
@@ -2027,12 +2053,19 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
 
   std::vector<AliasEntry> aliases {
     (AliasEntry){"Traversable", "HH\\Traversable"},
+    (AliasEntry){"KeyedTraversable", "HH\\KeyedTraversable"},
     (AliasEntry){"Iterator", "HH\\Iterator"},
+    (AliasEntry){"KeyedIterator", "HH\\KeyedIterator"},
+    (AliasEntry){"Iterable", "HH\\Iterable"},
+    (AliasEntry){"KeyedIterable", "HH\\KeyedIterable"},
     (AliasEntry){"Collection", "HH\\Collection"},
     (AliasEntry){"Vector", "HH\\Vector"},
     (AliasEntry){"Set", "HH\\Set"},
     (AliasEntry){"FrozenVector", "HH\\FrozenVector"},
     (AliasEntry){"FrozenSet", "HH\\FrozenSet"},
+    (AliasEntry){"Pair", "HH\\Pair"},
+    (AliasEntry){"Map", "HH\\Map"},
+    (AliasEntry){"StableMap", "HH\\Map"}, // Merging with Map
     (AliasEntry){"FrozenMap", "HH\\FrozenMap"},
   };
 

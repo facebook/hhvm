@@ -35,6 +35,9 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
 {
 	const zend_ini_entry *p = ini_entry;
 
+  auto extension = ZendExtension::GetByModuleNumber(module_number);
+  assert(extension);
+
 	while (p->name) {
     auto updateCallback = [](const HPHP::String& value, void *p) -> bool {
       zend_ini_entry *entry = static_cast<zend_ini_entry*>(p);
@@ -50,7 +53,13 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
       zend_ini_entry *entry = static_cast<zend_ini_entry*>(p);
       return HPHP::String(entry->value, entry->value_length, HPHP::CopyString);
     };
+    HPHP::IniSetting::Mode mode =
+      p->modifiable == ZEND_INI_USER   ? HPHP::IniSetting::Mode::PHP_INI_USER :
+      p->modifiable == ZEND_INI_PERDIR ? HPHP::IniSetting::Mode::PHP_INI_PERDIR :
+      p->modifiable == ZEND_INI_SYSTEM ? HPHP::IniSetting::Mode::PHP_INI_SYSTEM :
+                                         HPHP::IniSetting::Mode::PHP_INI_NONE;
     HPHP::IniSetting::Bind(
+        extension, mode,
         p->name, p->value,
         updateCallback, getCallback,
         const_cast<zend_ini_entry*>(p));

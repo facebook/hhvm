@@ -21,8 +21,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/ip-block-map.h"
@@ -450,28 +450,6 @@ bool TestCppBase::TestArray() {
     Array arrX = make_map_array("n0", "s2", "n1", "s3");
     arr = arr.merge(arrX);
     VS(arr, make_map_array("n0", "s2", "n1", "s3"));
-  }
-
-  // slice
-  {
-    Array arr = make_packed_array("test1", "test2");
-    Array sub = arr.slice(1, 1, true);
-    VS(sub, make_map_array(1, "test2"));
-  }
-  {
-    Array arr = make_packed_array("test1", "test2");
-    Array sub = arr.slice(1, 1, false);
-    VS(sub, make_packed_array("test2"));
-  }
-  {
-    Array arr = make_map_array("n1", "test1", "n2", "test2");
-    Array sub = arr.slice(1, 1, true);
-    VS(sub, make_map_array("n2", "test2"));
-  }
-  {
-    Array arr = make_map_array("n1", "test1", "n2", "test2");
-    Array sub = arr.slice(1, 1, false);
-    VS(sub, make_map_array("n2", "test2"));
   }
 
   // escalation

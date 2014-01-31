@@ -262,7 +262,14 @@ class ReflectionParameter implements Reflector {
       return null;
     }
     $ltype = strtolower($this->info['type']);
-    if (hphp_scalar_typehints_enabled()) {
+
+    if ($ltype === 'array') {
+      return null;
+    } else if ($ltype === 'self') {
+      return new ReflectionClass($this->info['class']);
+    } else if ($ltype === 'parent') {
+      return new ReflectionClass(get_parent_class($this->info['class']));
+    } else if (hphp_scalar_typehints_enabled() || $this->getDeclaringFunction()->isInternal()) {
       $nonClassTypehints = array(
         'bool' => 1,
         'boolean' => 1,
@@ -277,12 +284,6 @@ class ReflectionParameter implements Reflector {
       if (isset($nonClassTypehints[$ltype])) {
         return null;
       }
-    } else if ($ltype === 'array') {
-      return null;
-    } else if ($ltype === 'self') {
-      return new ReflectionClass($this->info['class']);
-    } else if ($ltype === 'parent') {
-      return new ReflectionClass(get_parent_class($this->info['class']));
     }
     return new ReflectionClass($this->info['type']);
   }

@@ -599,14 +599,6 @@ Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * For now, both resolve_class and resolve_func only look up entities
- * that are globally unique.
- *
- * We could plausibly do something based on the source context, where
- * we can return things from the same unit.
- */
-
 folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
   clsName = normalizeNS(clsName);
@@ -616,6 +608,9 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
     //
     // TODO(#3519401): when we start unfolding type aliases, we could
     // look at whether it is an alias for a specific class here.
+    // (Note this might need to split into a different API: type
+    // aliases aren't allowed everywhere we're doing resolve_class
+    // calls.)
     if (!m_data->typeAliases.count(clsName)) {
       return res::Class { this, SStringOr<ClassInfo>(clsName) };
     }
@@ -638,26 +633,6 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
           }
           assert(0);
         }
-        return cls;
-      }
-
-      /*
-       * TODO_3: this isn't quite working in single_unit, because when
-       * not in whole program mode we're throwing away AlwaysHoistable
-       * and turning it into MaybeHoistable ...
-       */
-      if (false /* disabled for now */ && cls->unit == ctx.unit &&
-          cls->hoistability == PreClass::AlwaysHoistable) {
-        if (debug) {
-          // AlwaysHoistable should imply a unique name within this
-          // unit:
-          while (++it != end(classes)) {
-            always_assert(it->second->unit != ctx.unit);
-          }
-        }
-
-        // We used the unit information from the context, but not the
-        // current function, so it gets nulled out.
         return cls;
       }
     }

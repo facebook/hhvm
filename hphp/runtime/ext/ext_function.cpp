@@ -18,7 +18,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/base/class-info.h"
@@ -226,7 +226,7 @@ Variant f_call_user_func_rpc(int _argc, const String& host, int port,
 
   // This double decoding can be avoided by modifying RPC server to directly
   // take PHP serialization format.
-  Variant res = unserialize_from_string(f_json_decode(sresponse));
+  Variant res = unserialize_from_string(HHVM_FN(json_decode)(sresponse));
   if (!res.isArray()) {
     raise_error("Internal protocol error");
     return false;

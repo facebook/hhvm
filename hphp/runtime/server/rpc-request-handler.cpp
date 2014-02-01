@@ -24,7 +24,7 @@
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/server/request-uri.h"
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/server/satellite-server.h"
 
@@ -217,7 +217,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   Array params;
   std::string sparams = transport->getParam("params");
   if (!sparams.empty()) {
-    Variant jparams = f_json_decode(String(sparams), true);
+    Variant jparams = HHVM_FN(json_decode)(String(sparams), true);
     if (jparams.isArray()) {
       params = jparams.toArray();
     } else {
@@ -228,7 +228,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     transport->getArrayParam("p", sparams);
     if (!sparams.empty()) {
       for (unsigned int i = 0; i < sparams.size(); i++) {
-        Variant jparams = f_json_decode(String(sparams[i]), true);
+        Variant jparams = HHVM_FN(json_decode)(String(sparams[i]), true);
         if (same(jparams, false)) {
           error = true;
           break;
@@ -313,7 +313,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                  returnEncodeType == ReturnEncodeType::Serialize);
           try {
             response = (returnEncodeType == ReturnEncodeType::Json) ?
-                       f_json_encode(funcRet) :
+                       HHVM_FN(json_encode)(funcRet) :
                        f_serialize(funcRet);
           } catch (...) {
             serializeFailed = true;
@@ -323,9 +323,9 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         case 1: response = m_context->obDetachContents(); break;
         case 2:
           response =
-            f_json_encode(
+            HHVM_FN(json_encode)(
               make_map_array(s_output, m_context->obDetachContents(),
-                                      s_return, f_json_encode(funcRet)));
+                                      s_return, HHVM_FN(json_encode)(funcRet)));
           break;
         case 3: response = f_serialize(funcRet); break;
       }

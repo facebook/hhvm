@@ -31,7 +31,7 @@ $excluded = array(
   'runtime/base/utf8-decode.c',
   'runtime/base/utf8-to-utf16.c',
   'runtime/base/zend-strtod.cpp',
-  'runtime/ext/JSON_parser.cpp',
+  'runtime/ext/json/JSON_parser.cpp',
   'runtime/ext/php_unicode.h',
   'runtime/base/zend-ini.tab.cpp',
   'third_party/',

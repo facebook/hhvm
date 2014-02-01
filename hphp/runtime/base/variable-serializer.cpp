@@ -513,8 +513,7 @@ void VariableSerializer::write(CObjRef v) {
       if (v->isCollection()) {
         collectionSerialize(v.get(), this);
       } else {
-        Array props(ArrayData::Create());
-        v->o_getArray(props, true);
+        Array props = v->o_toArray(true);
         setObjectInfo(v->o_getClassName(), v->o_getId(), 'O');
         props.serialize(this);
       }

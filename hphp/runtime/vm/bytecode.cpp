@@ -3507,22 +3507,14 @@ OPTBLD_INLINE void VMExecutionContext::iopFalse(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopFile(IOP_ARGS) {
   NEXT();
-  auto const s = m_fp->m_func->unit()->filepath();
-  assert(s->isStatic());
-
-  // iopDir and iopFile can both be used from 86pinit for deep
-  // property initializers.  That code path assumes the result of
-  // property initialization is a reference counted type, so we need
-  // to push KindOfString instead of KindOfStaticString.
-  m_stack.pushStringNoRc(const_cast<StringData*>(s));
+  const StringData* s = m_fp->m_func->unit()->filepath();
+  m_stack.pushStaticString(const_cast<StringData*>(s));
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopDir(IOP_ARGS) {
   NEXT();
-  auto const s = m_fp->m_func->unit()->dirpath();
-  // See iopFile for why this isn't pushStaticString.
-  assert(s->isStatic());
-  m_stack.pushStringNoRc(const_cast<StringData*>(s));
+  const StringData* s = m_fp->m_func->unit()->dirpath();
+  m_stack.pushStaticString(const_cast<StringData*>(s));
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopInt(IOP_ARGS) {

@@ -82,6 +82,8 @@ bool isPredefined(trep bits) {
   case BBool:
   case BStr:
   case BArr:
+  case BInitPrim:
+  case BPrim:
   case BInitUnc:
   case BUnc:
   case BOptTrue:
@@ -156,6 +158,8 @@ bool canBeOptional(trep bits) {
   case BOptRes:
     return false;
 
+  case BInitPrim:
+  case BPrim:
   case BInitUnc:
   case BUnc:
   case BInitCell:
@@ -598,6 +602,8 @@ Type union_of(Type a, Type b) {
   X(TOptStr)
   X(TOptArr)
 
+  X(TInitPrim)
+  X(TPrim)
   X(TInitUnc)
   X(TUnc)
   X(TInitCell)

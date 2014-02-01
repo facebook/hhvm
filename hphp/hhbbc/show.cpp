@@ -418,6 +418,8 @@ std::string show(Type t) {
   case BOptObj:      ret = "?Obj";     break;
   case BOptRes:      ret = "?Res";     break;
 
+  case BInitPrim:    ret = "InitPrim"; break;
+  case BPrim:        ret = "Prim";     break;
   case BInitUnc:     ret = "InitUnc";  break;
   case BUnc:         ret = "Unc";      break;
   case BInitCell:    ret = "InitCell"; break;

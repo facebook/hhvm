@@ -3109,6 +3109,7 @@ private: // locals
     auto v = locRaw(l);
     if (v.couldBe(TUninit)) {
       if (v.subtypeOf(TNull))    return setLocRaw(l, TInitNull);
+      if (v.subtypeOf(TPrim))    return setLocRaw(l, TInitPrim);
       if (v.subtypeOf(TUnc))     return setLocRaw(l, TInitUnc);
       if (v.subtypeOf(TCell))    return setLocRaw(l, TInitCell);
       if (v.subtypeOf(TGen))     return setLocRaw(l, TInitGen);

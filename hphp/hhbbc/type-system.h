@@ -39,29 +39,35 @@ namespace HPHP { namespace HHBBC {
  *                       |
  *                 +-----+              InitGen :=  Gen - Uninit
  *                 |     |             InitCell := Cell - Uninit
- *                 |    Gen---+              ?X := X + InitNull
+ *                Cls   Gen---+              ?X := X + InitNull
  *                 |     |    |
- *                Cls  Cell  Ref
+ *              Cls<=c  Cell  Ref
  *                 |     |
- *              Cls<=c   +--------+--------+-------+-------+
- *                 |     |        |        |       |       |
- *              Cls=c   Unc       |        |      Obj     Res
- *                       |        |        |       |
- *                  +----+        |        |     Obj<=c
- *                 /     |        |        |       |
- *                /      |        |        |     Obj=c
- *             Null   InitUnc     |        |
- *             / |     / |\  \   Arr      Str
- *            /  |    /  | \  \  / \      / \
- *      Uninit  InitNull |  \  SArr CArr /  CStr
- *                       |   \   |      /
- *                       |    \ SArr=a /
- *                       |     \      /
- *                       |      \    /
- *                       |       \  /
- *                       |       SStr
- *                       |        |
- *                       |      SStr=s
+ *              Cls=c    +-------------+--------+-------+-------+
+ *                       |             |        |       |       |
+ *                      Unc            |        |      Obj     Res
+ *                       | \           |        |       |
+ *                       |  \          |        |     Obj<=c
+ *                     Prim  \         |        |       |
+ *                     / |   InitUnc   |        |     Obj=c
+ *                    /  |   /  | |    |        |
+ *                   /   |  /   | |    |        |
+ *                  /    | /    | |    |        |
+ *                 /     |/     | |    |        |
+ *              Null  InitPrim  | \    |        |
+ *             /  |    / |      |  \  Arr      Str
+ *            /   |   /  |      |   \ / \      / \
+ *      Uninit  InitNull |      |   SArr CArr /  CStr
+ *                       |      |     |      /
+ *                       |      |    SArr=a /
+ *                       |      |          /
+ *                       |      \         /
+ *                       |       \       /
+ *                       |        \     /
+ *                       |         \   /
+ *                       |          SStr
+ *                       |           |
+ *                       |         SStr=s
  *                       |
  *                       +----------+
  *                       |          |
@@ -115,7 +121,9 @@ enum trep : uint32_t {
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
 
-  BInitUnc  = BInitNull | BBool | BInt | BDbl | BSStr | BSArr,
+  BInitPrim = BInitNull | BBool | BNum,
+  BPrim     = BInitPrim | BUninit,
+  BInitUnc  = BInitPrim | BSStr | BSArr,
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes,
   BCell     = BUninit | BInitCell,
@@ -253,6 +261,8 @@ X(Bool)
 X(Num)
 X(Str)
 X(Arr)
+X(InitPrim)
+X(Prim)
 X(InitUnc)
 X(Unc)
 

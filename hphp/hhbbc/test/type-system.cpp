@@ -180,6 +180,8 @@ auto const non_opt_unions = {
   TNum,
   TStr,
   TArr,
+  TInitPrim,
+  TPrim,
   TInitUnc,
   TUnc,
   TTop,
@@ -252,6 +254,88 @@ TEST(Type, Relations) {
     for (auto& t2 : all) {
       EXPECT_TRUE(union_of(t1, t2) == union_of(t2, t1));
     }
+  }
+}
+
+TEST(Type, Prim) {
+  auto subtype_true = std::initializer_list<std::pair<Type,Type>> {
+    { TInt,      TPrim },
+    { TBool,     TPrim },
+    { TNum,      TPrim },
+    { TInitNull, TPrim },
+    { TDbl,      TPrim },
+    { dval(0.0), TPrim },
+    { ival(0),   TPrim },
+    { TNull,     TPrim },
+    { TInt,      TInitPrim },
+    { TBool,     TInitPrim },
+    { TNum,      TInitPrim },
+    { TInitNull, TInitPrim },
+    { TDbl,      TInitPrim },
+    { dval(0.0), TInitPrim },
+    { ival(0),   TInitPrim },
+  };
+
+  auto subtype_false = std::initializer_list<std::pair<Type,Type>> {
+    { sval(s_test.get()), TPrim },
+    { TSStr, TPrim },
+    { TSArr, TPrim },
+    { TNull, TInitPrim }, // TNull could be uninit
+    { TPrim, TBool },
+    { TPrim, TInt },
+    { TPrim, TNum },
+    { TInitPrim, TNum },
+    { TUnc, TPrim },
+    { TUnc, TInitPrim },
+    { TInitUnc, TPrim },
+    { TSStr, TInitPrim },
+    { TArr, TInitPrim },
+    { TSArr, TPrim },
+    { TPrim, dval(0.0) },
+  };
+
+  auto couldbe_true = std::initializer_list<std::pair<Type,Type>> {
+    { TPrim, TInt },
+    { TPrim, TBool },
+    { TPrim, TNum },
+    { TInitPrim, TNum },
+    { TInitPrim, TFalse },
+    { TPrim, TCell },
+    { TPrim, TInt },
+    { TPrim, TInt },
+    { TPrim, TOptObj },
+    { TPrim, TOptFalse },
+  };
+
+  auto couldbe_false = std::initializer_list<std::pair<Type,Type>> {
+    { TPrim, TSStr },
+    { TInitPrim, TSStr },
+    { TInitPrim, sval(s_test.get()) },
+    { TPrim, sval(s_test.get()) },
+    { TInitPrim, TUninit },
+    { TPrim, TRef },
+    { TPrim, TObj },
+  };
+
+  for (auto kv : subtype_true) {
+    EXPECT_TRUE(kv.first.subtypeOf(kv.second))
+      << show(kv.first) << " subtypeOf " << show(kv.second);
+  }
+  for (auto kv : subtype_false) {
+    EXPECT_FALSE(kv.first.subtypeOf(kv.second))
+      << show(kv.first) << " !subtypeOf " << show(kv.second);
+  }
+  for (auto kv : couldbe_true) {
+    EXPECT_TRUE(kv.first.couldBe(kv.second))
+      << show(kv.first) << " couldbe " << show(kv.second);
+    EXPECT_TRUE(kv.second.couldBe(kv.first))
+      << show(kv.first) << " couldbe " << show(kv.second);
+  }
+  for (auto kv : couldbe_false) {
+    EXPECT_TRUE(!kv.first.couldBe(kv.second))
+      << show(kv.first) << " !couldbe " << show(kv.second);
+    EXPECT_TRUE(!kv.second.couldBe(kv.first))
+      << show(kv.first) << " !couldbe " << show(kv.second);
   }
 }
 

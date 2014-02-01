@@ -28,7 +28,7 @@
 #include <stdlib.h>
 
 // has to be before zend_API since that defines getThis()
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/math/ext_math.h"
 #include "php.h"
 #include "php_rand.h"
 

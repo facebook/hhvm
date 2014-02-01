@@ -566,6 +566,10 @@ Variant f_date_create(const String& time /* = null_string */,
   Object ret(cdt);
   // Don't set the time here because it will throw if it is bad
   cdt->t___construct();
+  if (time.isNull()) {
+    // zend does this, so so do we
+    return ret;
+  }
   auto dt = c_DateTime::unwrap(ret);
   if (!dt->fromString(time, c_DateTimeZone::unwrap(timezone), nullptr, false)) {
     return false;

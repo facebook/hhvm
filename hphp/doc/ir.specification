@@ -818,11 +818,6 @@ D:Func = LdClsCtor S0:Cls
   Loads into D the constructor of class S0. If the constructor cannot be called
   from the current context, raise an error.
 
-D:Home = LdHome S0:StkPtr S1:ConstInt
-
-  Logically packages the location of a pointer into the VM stack and an offset.
-  S0 will usually be the output of a DefFP.
-
 D:T = LdConst<T,value>
 
   Load a constant value into D. This differs from DefConst in that D will be

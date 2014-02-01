@@ -88,6 +88,7 @@ using PropState = std::map<SString,Type>;
 
 // private types
 struct IndexData;
+struct FuncFamily;
 struct FuncInfo;
 struct ClassInfo;
 
@@ -166,16 +167,22 @@ private:
 };
 
 /*
- * Reference to a function in the program.  We may only know the name
- * of the function, or we may have a bunch of information about it.
+ * This is an abstraction layer to represent possible runtime function
+ * resolutions.
+ *
+ * Internally, this may only know the name of the function, or we may
+ * know exactly which source-code-level function it refers to, or we
+ * may only have ruled it down to one of a few functions in a class
+ * hierarchy.  The interpreter can treat all these cases the same way
+ * using this.
  */
 struct Func {
   /*
    * Returns whether two res::Funcs definitely mean the func at
    * runtime.
    *
-   * Explain how a res::Func can represent an unknown func but just
-   * the name.
+   * Note: this is potentially pessimistic for its use in ActRec state
+   * merging right now, but not incorrect.
    */
   bool same(const Func&) const;
 
@@ -185,13 +192,19 @@ struct Func {
   SString name() const;
 
 private:
-  Func(borrowed_ptr<const Index>, SStringOr<FuncInfo>);
+  friend struct ::HPHP::HHBBC::Index;
+  using Rep = boost::variant< SString
+                            , borrowed_ptr<FuncInfo>
+                            , borrowed_ptr<FuncFamily>
+                            >;
 
 private:
+  Func(borrowed_ptr<const Index>, Rep);
   friend std::string show(const Func&);
-  friend struct ::HPHP::HHBBC::Index;
+
+private:
   borrowed_ptr<const Index> index;
-  SStringOr<FuncInfo> val;
+  Rep val;
 };
 
 /*

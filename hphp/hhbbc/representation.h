@@ -421,6 +421,14 @@ struct Prop {
  */
 struct Const {
   SString name;
+
+  // The class that defined this constant.
+  borrowed_ptr<php::Class> cls;
+
+  /*
+   * The value will be KindOfUninit if the class constant is defined
+   * using an 86cinit method.
+   */
   Cell val;
 
   /*

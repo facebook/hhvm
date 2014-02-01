@@ -111,6 +111,7 @@ namespace Trace {
       TM(stats)       \
       TM(emitter)     \
       TM(hhbbc)       \
+      TM(hhbbc_index) \
       TM(hhbbc_time)  \
       TM(hhbbc_dump)  \
       TM(hhbc)        \

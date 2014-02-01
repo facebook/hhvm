@@ -34,9 +34,12 @@ const StaticString
   s_Pair("HH\\Pair"),
   s_FrozenVector("HH\\FrozenVector"),
   s_FrozenSet("HH\\FrozenSet"),
-  s_FrozenMap("HH\\FrozenMap"),
+  s_FrozenMap("HH\\FrozenMap");
+
+const StaticString
   s_86pinit("86pinit"),
-  s_86sinit("86sinit");
+  s_86sinit("86sinit"),
+  s_MockClass("__MockClass");
 
 bool has_magic_bool_conversion(res::Class cls) {
   return is_collection(cls) || cls.name()->isame(s_SimpleXMLElement.get());
@@ -51,6 +54,7 @@ bool is_collection(res::Class cls) {
   return name->isame(s_Vector.get()) ||
     name->isame(s_Map.get()) ||
     name->isame(s_Set.get()) ||
+    name->isame(s_Pair.get()) ||
     name->isame(s_FrozenVector.get()) ||
     name->isame(s_FrozenSet.get()) ||
     name->isame(s_FrozenMap.get());
@@ -60,6 +64,7 @@ bool could_have_magic_bool_conversion(Type t) {
   if (!t.couldBe(TObj)) return false;
   // TODO(#3499765): we need to handle interfaces that the collection
   // classes implement before we can ever return false here.
+  // Note: exclude s_Pair if we re-enable this.
   // if (t.strictSubtypeOf(TObj)) {
   //   return has_magic_bool_conversion(dobj_of(t).cls);
   // }
@@ -86,6 +91,15 @@ MethodMask find_special_methods(borrowed_ptr<const php::Class> cls) {
 #undef X
 
   return static_cast<MethodMask>(ret);
+}
+
+bool is_special_method_name(SString name) {
+  auto const p = name->data();
+  return p && p[0] == '8' && p[1] == '6';
+}
+
+bool is_mock_class(borrowed_ptr<const php::Class> cls) {
+  return cls->userAttributes.count(s_MockClass.get());
 }
 
 SString collectionTypeToString(uint32_t ctype) {

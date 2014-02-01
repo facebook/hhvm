@@ -81,6 +81,16 @@ struct Options {
    */
   bool StrengthReduceBC = true;
 
+  /*
+   * Whether to enable 'FuncFamily' method resolution.
+   *
+   * TODO(#3666741): This is guarded by a flag because currently
+   * turning it on seems to cause a performance regression, despite
+   * the fact that it also seems to infer a lot more types.  We'll
+   * probably remove the flag once that is figured out.
+   */
+  bool EnableFuncFamilies = false;
+
   //////////////////////////////////////////////////////////////////////
   // Flags below this line perform optimizations that intentionally
   // may have user-visible changes to program behavior.

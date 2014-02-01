@@ -107,10 +107,12 @@ std::unique_ptr<php::Unit> make_test_unit() {
       .default_ctor;
     }
 
-    .class NonUnique {
+    .class NonUnique { .default_ctor; }
+    .class NonUnique { .default_ctor; }
+
+    .class NonUniqueA extends NonUnique {
       .default_ctor;
     }
-
     .class NonUniqueA extends NonUnique {
       .default_ctor;
     }

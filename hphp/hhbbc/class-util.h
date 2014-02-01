@@ -54,6 +54,18 @@ inline bool contains(MethodMask mask, MethodMask val) {
 MethodMask find_special_methods(borrowed_ptr<const php::Class>);
 
 /*
+ * Returns true if `name' is the name of an internal VM special class
+ * method.  (Not callable directly by php code.)
+ */
+bool is_special_method_name(SString name);
+
+/*
+ * Returns true if a class has the __MockClass user attribute.  This
+ * attribute allows final methods and final classes to be overridden.
+ */
+bool is_mock_class(borrowed_ptr<const php::Class>);
+
+/*
  * Returns a collection type name given a Collection::Type.
  */
 SString collectionTypeToString(uint32_t ctype);

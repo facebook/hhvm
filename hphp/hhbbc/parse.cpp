@@ -882,6 +882,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     ret->constants.push_back(
       php::Const {
         cconst.name(),
+        borrow(ret),
         cconst.val(),
         cconst.phpCode(),
         cconst.typeConstraint()

@@ -924,6 +924,13 @@ public:
   }
 
   ALWAYS_INLINE
+  const Class* topA() {
+    assert(m_top != m_base);
+    assert(m_top->m_type == KindOfClass);
+    return m_top->m_data.pcls;
+  }
+
+  ALWAYS_INLINE
   TypedValue* topTV() {
     assert(m_top != m_base);
     return m_top;

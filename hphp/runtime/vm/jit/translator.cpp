@@ -1007,6 +1007,7 @@ static const struct {
   { OpClsCnsD,     {None,             Stack1,       OutPred,           1 }},
   { OpFile,        {None,             Stack1,       OutString,         1 }},
   { OpDir,         {None,             Stack1,       OutString,         1 }},
+  { OpNameA,       {Stack1,           Stack1,       OutString,         0 }},
 
   /*** 3. Operator instructions ***/
 

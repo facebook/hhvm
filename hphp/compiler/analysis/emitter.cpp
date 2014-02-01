@@ -3934,21 +3934,40 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Expression::KindOfClassConstantExpression: {
         ClassConstantExpressionPtr cc(
           static_pointer_cast<ClassConstantExpression>(node));
-        StringData* nName = makeStaticString(cc->getConName());
+        auto const nName = makeStaticString(cc->getConName());
         auto const getOriginalClassName = [&] {
           const std::string& clsName = cc->getOriginalClassName();
           return makeStaticString(clsName);
         };
+
+        // We treat ::class as a class constant in the AST and the
+        // parser, but at the bytecode and runtime level it isn't
+        // one.
+        auto const emitClsCns = [&] {
+          if (cc->isColonColonClass()) {
+            e.NameA();
+            return;
+          }
+          e.ClsCns(nName);
+        };
+        auto const noClassAllowed = [&] {
+          auto const nCls = getOriginalClassName();
+          std::ostringstream s;
+          s << "Cannot access " << nCls->data() << "::" << nName->data() <<
+               " when no class scope is active";
+          throw IncludeTimeFatalException(e.getNode(), s.str().c_str());
+        };
+
         if (cc->isStatic()) {
           // static::Constant
           e.LateBoundCls();
-          e.ClsCns(nName);
+          emitClsCns();
         } else if (cc->getClass()) {
           // $x::Constant
           ExpressionPtr cls(cc->getClass());
           visit(cls);
           emitAGet(e);
-          e.ClsCns(nName);
+          emitClsCns();
         } else if (cc->getOriginalClass() &&
                    !cc->getOriginalClass()->isTrait()) {
           // C::Constant inside a class
@@ -3961,11 +3980,19 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         } else if (cc->isSelf()) {
           // self::Constant inside trait or pseudomain
           e.Self();
-          e.ClsCns(nName);
+          if (cc->isColonColonClass() &&
+              cc->getFunctionScope()->inPseudoMain()) {
+            noClassAllowed();
+          }
+          emitClsCns();
         } else if (cc->isParent()) {
           // parent::Constant inside trait or pseudomain
           e.Parent();
-          e.ClsCns(nName);
+          if (cc->isColonColonClass() &&
+              cc->getFunctionScope()->inPseudoMain()) {
+            noClassAllowed();
+          }
+          emitClsCns();
         } else {
           // C::Constant inside a trait or pseudomain
           // Be careful to keep this case here after the isSelf and
@@ -3974,14 +4001,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           // the isSelf and isParent cases, but self and parent must
           // be resolved dynamically when used inside of traits.
           auto nCls = getOriginalClassName();
-          if (cc->isColonColonClass()) {
-            std::ostringstream s;
-            s << "Cannont access " << nCls->data() << "::" << nName->data() <<
-                 " when no class scope is active";
-            throw IncludeTimeFatalException(e.getNode(), s.str().c_str());
-          } else {
-            e.ClsCnsD(nName, nCls);
-          }
+          if (cc->isColonColonClass()) noClassAllowed();
+          e.ClsCnsD(nName, nCls);
         }
         return true;
       }

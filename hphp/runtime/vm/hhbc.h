@@ -482,6 +482,7 @@ enum class BareThisOp : uint8_t {
   O(CnsU,            TWO(SA,SA),       NOV,             ONE(CV),    NF) \
   O(ClsCns,          ONE(SA),          ONE(AV),         ONE(CV),    NF) \
   O(ClsCnsD,         TWO(SA,SA),       NOV,             ONE(CV),    NF) \
+  O(NameA,           NA,               ONE(AV),         ONE(CV),    NF) \
   O(File,            NA,               NOV,             ONE(CV),    NF) \
   O(Dir,             NA,               NOV,             ONE(CV),    NF) \
   O(Concat,          NA,               TWO(CV,CV),      ONE(CV),    NF) \

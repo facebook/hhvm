@@ -1150,11 +1150,15 @@ ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Static Str]
   class %2 onto the stack. If there is no class constant named %1 in class %2,
   this instruction throws a fatal error.
 
-File    []  ->  [C:Str]
-Dir     []  ->  [C:Str]
+File    []  ->  [C:Static Str]
+Dir     []  ->  [C:Static Str]
 
   Push string. File pushes __FILE__ onto the stack, and Dir pushes __DIR__ onto
   the stack.
+
+NameA   [A] ->  [C:Static Str]
+
+  Push the name of the class in $1 as a string.
 
 
 3. Operator instructions

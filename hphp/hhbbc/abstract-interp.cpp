@@ -447,8 +447,9 @@ struct InterpStepper : boost::static_visitor<void> {
     push(TInitUnc);
   }
 
-  void operator()(const bc::File&) { nothrow(); push(TSStr); }
-  void operator()(const bc::Dir&)  { nothrow(); push(TSStr); }
+  void operator()(const bc::File&)  { nothrow(); push(TSStr); }
+  void operator()(const bc::Dir&)   { nothrow(); push(TSStr); }
+  void operator()(const bc::NameA&) { nothrow(); popA(); push(TSStr); }
 
   void operator()(const bc::Concat& op) {
     auto const t1 = popC();

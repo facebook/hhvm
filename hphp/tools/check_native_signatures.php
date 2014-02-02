@@ -35,7 +35,7 @@ function parse_php_functions(string $file):
 
   // Don't handle methods yet, so function can't be indented
   static $function_regex =
-           "#<<[^>]*__Native([^>]*)>>\nfunction +([^(]+)\(([^)]+)\) *: *(.+?);#m";
+           "#<<[^>]*__Native([^>]*)>>\nfunction +([^(]*)\(([^)]+)\) *: *(.+?);#m";
 
   $functions = Map {};
 

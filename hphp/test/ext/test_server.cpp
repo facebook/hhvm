@@ -23,7 +23,7 @@
 #include "hphp/util/process.h"
 #include "hphp/compiler/option.h"
 #include "hphp/util/async-func.h"
-#include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/base/http-client.h"
@@ -92,22 +92,22 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
     actual = "<No response from server>";
     string err;
     for (int i = 0; i < 10; i++) {
-      Variant c = f_curl_init();
-      f_curl_setopt(c.toResource(), k_CURLOPT_URL, server);
-      f_curl_setopt(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
+      Variant c = HHVM_FN(curl_init)();
+      HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, server);
+      HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
       if (postdata) {
-        f_curl_setopt(c.toResource(), k_CURLOPT_POSTFIELDS, postdata);
-        f_curl_setopt(c.toResource(), k_CURLOPT_POST, true);
+        HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_POSTFIELDS, postdata);
+        HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_POST, true);
       }
       if (header) {
-        f_curl_setopt(c.toResource(), k_CURLOPT_HTTPHEADER,
+        HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_HTTPHEADER,
                       make_packed_array(header));
       }
       if (responseHeader) {
-        f_curl_setopt(c.toResource(), k_CURLOPT_HEADER, 1);
+        HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_HEADER, 1);
       }
 
-      Variant res = f_curl_exec(c.toResource());
+      Variant res = HHVM_FN(curl_exec)(c.toResource());
       if (!same(res, false)) {
         actual = (std::string) res.toString();
         break;
@@ -174,13 +174,13 @@ void TestServer::RunServer() {
 void TestServer::StopServer() {
   for (int i = 0; i < 10; i++) {
     string out, err;
-    Variant c = f_curl_init();
+    Variant c = HHVM_FN(curl_init)();
     String url = "http://";
     url += f_php_uname("n");
     url += ":" + lexical_cast<string>(s_admin_port) + "/stop";
-    f_curl_setopt(c.toResource(), k_CURLOPT_URL, url);
-    f_curl_setopt(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
-    Variant res = f_curl_exec(c.toResource());
+    HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, url);
+    HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
+    Variant res = HHVM_FN(curl_exec)(c.toResource());
     if (!same(res, false)) {
       break;
     }

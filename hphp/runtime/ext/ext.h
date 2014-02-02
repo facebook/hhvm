@@ -27,7 +27,6 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_continuation.h"
-#include "hphp/runtime/ext/ext_curl.h"
 #include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/ext/ext_debugger.h"
 #include "hphp/runtime/ext/ext_domdocument.h"

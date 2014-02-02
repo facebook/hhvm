@@ -8628,11 +8628,18 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
         !RuntimeOption::EnableZendCompat) {
       continue;
     }
-    if (Unit::lookupFunc(name)) {
-      // already provided by systemlib, rename to allow the php
-      // version to delegate if necessary
-      name = makeStaticString("__builtin_" + name->toCPPString());
+
+    // We already provide array_map by the hhas systemlib.  Rename
+    // because that hhas implementation delegates back to the C++
+    // implementation for some edge cases.  This works for any
+    // similarly defined function (already defined not as a builtin),
+    // and requires that the hhas systemlib is already loaded.
+    if (auto const existing = Unit::lookupFunc(name)) {
+      if (!existing->isCPPBuiltin()) {
+        name = makeStaticString("__builtin_" + name->toCPPString());
+      }
     }
+
     FuncEmitter* fe = ue->newFuncEmitter(name);
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, nif, base);

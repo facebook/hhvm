@@ -493,6 +493,21 @@ std::string Block::toString() const {
 void print(std::ostream& os, const IRUnit& unit,
            const RegAllocInfo* regs, const AsmInfo* asmInfo,
            const GuardConstraints* guards) {
+  // Print the block CFG above the actual code.
+  os << "digraph G {\n";
+  for (Block* block : layoutBlocks(unit).blocks) {
+    auto* next = block->next();
+    auto* taken = block->taken();
+    if (!next && !taken) continue;
+    if (next) {
+      os << folly::format("B{} -> B{}", block->id(), next->id());
+      if (taken) os << "; ";
+    }
+    if (taken) os << folly::format("B{} -> B{}", block->id(), taken->id());
+    os << "\n";
+  }
+  os << "}\n";
+
   // For nice-looking dumps, we want to remember curMarker between blocks.
   BCMarker curMarker;
   for (Block* block : layoutBlocks(unit).blocks) {

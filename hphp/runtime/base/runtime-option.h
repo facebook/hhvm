@@ -24,6 +24,7 @@
 #include <set>
 
 #include <boost/container/flat_set.hpp>
+#include "folly/dynamic.h"
 
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/functional.h"
@@ -32,11 +33,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class AccessLogFileData;
+class String;
 struct VirtualHost;
 struct IpBlockMap;
 struct SatelliteServerInfo;
 struct FilesMatch;
 struct Hdf;
+// Can we make sure this equals IniSetting::Map?
+typedef folly::dynamic IniSettingMap;
+typedef std::function<bool(const std::string& value, void*p)> UpdateCallback;
+typedef std::function<std::string(void* p)> GetCallback;
 
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
@@ -47,6 +53,7 @@ constexpr int kDefaultInitialStaticStringTableSize = 500000;
 class RuntimeOption {
 public:
   static void Load(Hdf& config,
+                   const IniSettingMap &ini,
                    std::vector<std::string>* overwrites = nullptr,
                    bool empty = false);
 
@@ -264,7 +271,6 @@ public:
   static std::set<std::string> ProxyURLs;
   static std::vector<std::string> ProxyPatterns;
   static bool AlwaysUseRelativePath;
-  static std::string IniFile;
 
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;
@@ -550,6 +556,86 @@ public:
   // Convenience switch to turn on/off code alternatives via command-line
   // Do not commit code guarded by this flag, for evaluation only.
   static int EnableAlternative;
+
+  static void Bind(std::string &a,
+                   const IniSettingMap &ini,
+                   const Hdf& config,
+                   const char* name);
+  static void Bind(bool &a,
+                   const IniSettingMap &ini,
+                   const Hdf& config,
+                   const char* name);
+  static void Bind(int16_t &a,
+                   const IniSettingMap &ini,
+                   const Hdf& config,
+                   const char* name);
+  static void Bind(int32_t &a,
+                   const IniSettingMap &ini,
+                   const Hdf& config,
+                   const char* name);
+  static void Bind(int64_t &a,
+                   const IniSettingMap &ini,
+                   const Hdf& config,
+                   const char* name);
+  static void Bind(uint16_t &a,
+                   const IniSettingMap &ini,
+                   const Hdf& config,
+                   const char* name);
+  static void Bind(uint32_t &a,
+                   const IniSettingMap &ini,
+                   const Hdf& config,
+                   const char* name);
+  static void Bind(uint64_t &a,
+                   const IniSettingMap &ini,
+                   const Hdf& config,
+                   const char* name);
+  static void Bind(double &a,
+                   const IniSettingMap &ini,
+                   const Hdf& config,
+                   const char* name);
+  template<class T>
+  static void Bind(T &a,
+                   const IniSettingMap &ini,
+                   const Hdf& config,
+                   const char* name);
+  static void Bind(const IniSettingMap &ini, const Hdf& config,
+                   const char *name, UpdateCallback updateCallback,
+                   GetCallback getCallback, void *p = nullptr);
+
+  ///////////////////////////////////////////////////////////////////////////
+  // These are used for temporary variables where you can't actually bind the
+  // ini setting to a static location for whatever reason. Please prefer to use
+  // Bind() functions over GetFoo()
+  static const char* Get(const IniSettingMap &ini,
+                         const Hdf& config,
+                         const char* name);
+  static bool GetBool(const IniSettingMap &ini,
+                      const Hdf& config,
+                      const char* name,
+                      bool defValue);
+  static int64_t GetInt(const IniSettingMap &ini,
+                        const Hdf& config,
+                        const char* name,
+                        int64_t defValue);
+  static std::string GetString(const IniSettingMap &ini,
+                               const Hdf& config,
+                               const char* name,
+                               std::string defValue);
+
+private:
+  template<class T>
+  static void Get(const IniSettingMap &ini,
+                  const Hdf& config,
+                  const char* name,
+                  T &data);
+
+  template<class T>
+  static void BindToIni(const Hdf& config, const char* name, T &location);
+
+  static std::string Normalize(const std::string &name);
+  static std::string IniName(const Hdf& hdf, const char* name);
+  static void SetResourceLimit(int resource, const IniSettingMap &ini,
+                               Hdf rlimit, const char *nodeName);
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
 

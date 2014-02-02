@@ -19,6 +19,7 @@
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/server/ip-block-map.h"
 
 namespace HPHP {
@@ -36,9 +37,9 @@ public:
   static void SortAllowedDirectories(std::vector<std::string>& dirs);
 public:
   VirtualHost();
-  explicit VirtualHost(Hdf vh);
+  explicit VirtualHost(Hdf vh, const IniSetting::Map &ini);
 
-  void init(Hdf vh);
+  void init(Hdf vh, const IniSetting::Map &ini);
   void addAllowedDirectories(const std::vector<std::string>& dirs);
   int getRequestTimeoutSeconds(int defaultTimeout) const;
 
@@ -77,15 +78,15 @@ private:
     };
     Type type;
     std::string pattern;
-    bool negate;
+    bool negate = false;
   };
 
   struct RewriteRule {
     std::string pattern;
     std::string to;
-    bool qsa;      // whether to append original query string
-    bool encode_backrefs;
-    int redirect;  // redirect status code (301 or 302) or 0 for no redirect
+    bool qsa = false; // whether to append original query string
+    bool encode_backrefs = false;
+    int redirect = 0;  // redirect status code (301 or 302) or 0 for no redirect
     std::vector<RewriteCond> rewriteConds;
   };
 
@@ -97,15 +98,15 @@ private:
 
   struct VhostRuntimeOption {
   public:
-    int requestTimeoutSeconds;
-    int64_t maxPostSize;
-    int64_t uploadMaxFileSize;
+    int requestTimeoutSeconds = -1;
+    int64_t maxPostSize = -1;
+    int64_t uploadMaxFileSize = -1;
     std::vector<std::string> allowedDirectories;
   };
 
-  void initRuntimeOption(Hdf overwrite);
-  bool m_disabled;
-  bool m_checkExistenceBeforeRewrite;
+  void initRuntimeOption(Hdf overwrite, const IniSetting::Map &ini);
+  bool m_disabled = false;
+  bool m_checkExistenceBeforeRewrite = true;
   std::string m_name;
   std::string m_prefix;
   std::string m_pattern;

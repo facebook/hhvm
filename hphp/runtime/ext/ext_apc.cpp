@@ -42,55 +42,66 @@ extern void const_load();
 
 typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 
-void apcExtension::moduleLoad(Hdf config) {
+void apcExtension::moduleLoad(Hdf config, const IniSetting::Map &ini) {
   Hdf apc = config["Server"]["APC"];
 
-  Enable = apc["EnableApc"].getBool(true);
-  EnableConstLoad = apc["EnableConstLoad"].getBool(false);
-  ForceConstLoadToAPC = apc["ForceConstLoadToAPC"].getBool(true);
-  PrimeLibrary = apc["PrimeLibrary"].getString();
-  LoadThread = apc["LoadThread"].getInt16(2);
-  apc["CompletionKeys"].get(CompletionKeys);
-  std::string tblType = apc["TableType"].getString("concurrent");
-  if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
-    TableType = TableTypes::ConcurrentTable;
-  } else {
-    throw InvalidArgumentException("apc table type", "Invalid table type");
-  }
-  EnableApcSerialize = apc["EnableApcSerialize"].getBool(true);
-  ExpireOnSets = apc["ExpireOnSets"].getBool();
-  PurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
-  PurgeRate = apc["PurgeRate"].getInt32(-1);
+  RuntimeOption::Bind(Enable, ini, apc, "EnableApc");
+  RuntimeOption::Bind(EnableConstLoad, ini, apc, "EnableConstLoad");
+  RuntimeOption::Bind(ForceConstLoadToAPC, ini, apc, "ForceConstLoadToAPC");
+  RuntimeOption::Bind(PrimeLibrary, ini, apc, "PrimeLibrary");
+  RuntimeOption::Bind(LoadThread, ini, apc, "LoadThread");
+  RuntimeOption::Bind(CompletionKeys, ini, apc, "CompletionKeys");
+  RuntimeOption::Bind(ini, apc, "TableType",
+    [](const std::string &value, void* p) {
+      if (strcasecmp(value.c_str(), "concurrent") == 0) {
+        *(TableTypes*)p = TableTypes::ConcurrentTable;
+        return true;
+      } else {
+        throw InvalidArgumentException("apc table type", "Invalid table type");
+      }
+    },
+    ini_get_int,
+    &TableType
+  );
+  RuntimeOption::Bind(EnableApcSerialize, ini, apc, "EnableApcSerialize");
+  RuntimeOption::Bind(ExpireOnSets, ini, apc, "ExpireOnSets");
+  RuntimeOption::Bind(PurgeFrequency, ini, apc, "PurgeFrequency");
+  RuntimeOption::Bind(PurgeRate, ini, apc, "PurgeRate");
 
-  AllowObj = apc["AllowObject"].getBool();
-  TTLLimit = apc["TTLLimit"].getInt32(-1);
+  RuntimeOption::Bind(AllowObj, ini, apc, "AllowObject");
+  RuntimeOption::Bind(TTLLimit, ini, apc, "TTLLimit");
 
   Hdf fileStorage = apc["FileStorage"];
-  UseFileStorage = fileStorage["Enable"].getBool();
-  FileStorageChunkSize = fileStorage["ChunkSize"].getInt64(1LL << 29);
-  FileStorageMaxSize = fileStorage["MaxSize"].getInt64(1LL << 32);
-  FileStoragePrefix = fileStorage["Prefix"].getString("/tmp/apc_store");
-  FileStorageFlagKey = fileStorage["FlagKey"].getString("_madvise_out");
-  FileStorageAdviseOutPeriod = fileStorage["AdviseOutPeriod"].getInt32(1800);
-  FileStorageKeepFileLinked = fileStorage["KeepFileLinked"].getBool();
+  RuntimeOption::Bind(UseFileStorage, ini, fileStorage, "Enable");
+  RuntimeOption::Bind(FileStorageChunkSize, ini, fileStorage, "ChunkSize");
+  RuntimeOption::Bind(FileStorageMaxSize, ini, fileStorage, "MaxSize");
+  RuntimeOption::Bind(FileStoragePrefix, ini, fileStorage, "Prefix");
+  RuntimeOption::Bind(FileStorageFlagKey, ini, fileStorage, "FlagKey");
+  RuntimeOption::Bind(FileStorageAdviseOutPeriod, ini, fileStorage,
+                      "AdviseOutPeriod");
+  RuntimeOption::Bind(FileStorageKeepFileLinked, ini, fileStorage,
+                      "KeepFileLinked");
 
-  ConcurrentTableLockFree = apc["ConcurrentTableLockFree"].getBool(false);
-  KeyMaturityThreshold = apc["KeyMaturityThreshold"].getInt32(20);
-  MaximumCapacity = apc["MaximumCapacity"].getInt64(0);
-  KeyFrequencyUpdatePeriod = apc["KeyFrequencyUpdatePeriod"].getInt32(1000);
+  RuntimeOption::Bind(ConcurrentTableLockFree, ini, apc,
+                      "ConcurrentTableLockFree");
+  RuntimeOption::Bind(KeyMaturityThreshold, ini, apc, "KeyMaturityThreshold");
+  RuntimeOption::Bind(MaximumCapacity, ini, apc, "MaximumCapacity");
+  RuntimeOption::Bind(KeyFrequencyUpdatePeriod, ini, apc,
+                      "KeyFrequencyUpdatePeriod");
 
-  apc["NoTTLPrefix"].get(NoTTLPrefix);
+  RuntimeOption::Bind(NoTTLPrefix, ini, apc, "NoTTLPrefix");
 
-  UseUncounted = apc["MemModelTreadmill"].getBool(
-      RuntimeOption::ServerExecutionMode());
+  UseUncounted = RuntimeOption::ServerExecutionMode;
+  RuntimeOption::Bind(UseUncounted, ini, apc, "MemModelTreadmill");
+
+  IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
+  IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",
+                   RuntimeOption::RepoAuthoritative ? "0" : "1", &Stat);
+  IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enable_cli",
+                   &EnableCLI);
 }
 
 void apcExtension::moduleInit() {
-  IniSetting::SetGlobalDefault("apc.enabled","1");
-  IniSetting::SetGlobalDefault("apc.stat",
-                               RuntimeOption::RepoAuthoritative
-                               ? "0" : "1");
-  IniSetting::SetGlobalDefault("apc.enable_cli", "1");
   if (UseFileStorage) {
     s_apc_file_storage.enable(FileStoragePrefix,
                               FileStorageChunkSize,
@@ -109,7 +120,7 @@ bool apcExtension::Enable = true;
 bool apcExtension::EnableConstLoad = false;
 bool apcExtension::ForceConstLoadToAPC = true;
 std::string apcExtension::PrimeLibrary;
-int apcExtension::LoadThread = 1;
+int apcExtension::LoadThread = 2;
 std::set<std::string> apcExtension::CompletionKeys;
 apcExtension::TableTypes apcExtension::TableType =
   TableTypes::ConcurrentTable;
@@ -125,13 +136,15 @@ int apcExtension::TTLLimit = -1;
 bool apcExtension::UseFileStorage = false;
 int64_t apcExtension::FileStorageChunkSize = int64_t(1LL << 29);
 int64_t apcExtension::FileStorageMaxSize = int64_t(1LL << 32);
-std::string apcExtension::FileStoragePrefix;
+std::string apcExtension::FileStoragePrefix = "/tmp/apc_store";
 int apcExtension::FileStorageAdviseOutPeriod = 1800;
-std::string apcExtension::FileStorageFlagKey;
+std::string apcExtension::FileStorageFlagKey = "_madvise_out";
 bool apcExtension::ConcurrentTableLockFree = false;
 bool apcExtension::FileStorageKeepFileLinked = false;
 std::vector<std::string> apcExtension::NoTTLPrefix;
 bool apcExtension::UseUncounted = false;
+bool apcExtension::Stat = true;
+bool apcExtension::EnableCLI = false;
 
 static apcExtension s_apc_extension;
 

@@ -18,6 +18,9 @@
 #define incl_HPHP_OPTION_H_
 
 #include "hphp/util/hdf.h"
+
+#include "folly/dynamic.h"
+
 #include "hphp/util/string-bag.h"
 #include "hphp/util/deprecated/base.h"
 #include "hphp/util/deprecated/declare-boost-types.h"
@@ -27,13 +30,16 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(BlockScope);
 DECLARE_BOOST_TYPES(FileScope);
 
+// Can we make sure this equals IniSetting::Map?
+typedef folly::dynamic IniSettingMap;
+
 class Option {
 public:
 
   /**
    * Load options from different sources.
    */
-  static void Load(Hdf &config);
+  static void Load(Hdf &config, const IniSettingMap &ini);
   static void Load(); // load default options
 
   /**

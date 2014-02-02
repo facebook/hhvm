@@ -131,21 +131,62 @@ public:
                    bool *p);
   static void Bind(const Extension* extension, const Mode mode,
                    const char *name,
+                   int16_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   int16_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   int32_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   int32_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
                    int64_t *p);
   static void Bind(const Extension* extension, const Mode mode,
                    const char *name, const char *value,
                    int64_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   uint16_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   uint16_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   uint32_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   uint32_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   uint64_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   uint64_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   double *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   double *p);
   static void Unbind(const char *name);
 
-  static void SetGlobalDefault(const char *name, const char *value);
-
+  // Please only use this if you know what you're doing
+  static bool s_pretendExtensionsHaveNotBeenLoaded;
 };
 
 int64_t convert_bytes_to_long(const std::string& value);
 
 #define ini_on_update_fail HPHP::IniSetting::UpdateCallback()
 bool ini_on_update_bool(const std::string& value, void *p);
+bool ini_on_update_short(const std::string& value, void *p);
+bool ini_on_update_int(const std::string& value, void *p);
 bool ini_on_update_long(const std::string& value, void *p);
+bool ini_on_update_ushort(const std::string& value, void *p);
+bool ini_on_update_uint(const std::string& value, void *p);
+bool ini_on_update_ulong(const std::string& value, void *p);
 bool ini_on_update_non_negative(const std::string& value, void *p);
 bool ini_on_update_real(const std::string& value, void *p);
 bool ini_on_update_stdstring(const std::string& value, void *p);
@@ -153,7 +194,12 @@ bool ini_on_update_string(const std::string& value, void *p);
 
 std::string ini_get_bool(void *p);
 std::string ini_get_bool_as_int(void *p);
+std::string ini_get_short(void *p);
+std::string ini_get_int(void *p);
 std::string ini_get_long(void *p);
+std::string ini_get_ushort(void *p);
+std::string ini_get_uint(void *p);
+std::string ini_get_ulong(void *p);
 std::string ini_get_real(void *p);
 std::string ini_get_string(void *p);
 std::string ini_get_stdstring(void *p);

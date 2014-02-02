@@ -58,8 +58,10 @@ class apcExtension : public Extension {
   static bool FileStorageKeepFileLinked;
   static std::vector<std::string> NoTTLPrefix;
   static bool UseUncounted;
+  static bool Stat;
+  static bool EnableCLI;
 
-  virtual void moduleLoad(Hdf config);
+  virtual void moduleLoad(Hdf config, const IniSetting::Map &ini);
   virtual void moduleInit();
   virtual void moduleShutdown();
 };

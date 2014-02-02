@@ -200,10 +200,10 @@ std::string Macro::desc(const char *indent) {
   return ret;
 }
 
-void Macro::load(Hdf node) {
+void Macro::load(const Hdf node, const IniSetting::Map &ini) {
   TRACE(2, "Macro::load\n");
-  m_name = node["name"].getString();
-  node["cmds"].get(m_cmds);
+  RuntimeOption::Bind(m_name, ini, node, "name");
+  RuntimeOption::Bind(m_cmds, ini, node, "cmds");
 }
 
 void Macro::save(Hdf node) {

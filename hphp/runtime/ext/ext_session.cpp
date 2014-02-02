@@ -1925,7 +1925,7 @@ static bool HHVM_METHOD(SessionHandler, hhgc, int maxlifetime) {
 static class SessionExtension : public Extension {
  public:
   SessionExtension() : Extension("session", NO_EXTENSION_VERSION_YET) { }
-  virtual void moduleLoad(Hdf config) {
+  virtual void moduleLoad(Hdf config, const IniSetting::Map &ini) {
     HHVM_ME(SessionHandler, hhopen);
     HHVM_ME(SessionHandler, hhclose);
     HHVM_ME(SessionHandler, hhread);

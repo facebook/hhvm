@@ -62,7 +62,8 @@ int main(int argc, char **argv) {
   // Initialize the runtime options with their default values
   {
     Hdf empty;
-    RuntimeOption::Load(empty);
+    IniSetting::Map empty_ini = IniSetting::Map::object;
+    RuntimeOption::Load(empty, empty_ini);
   }
 
   // Initialize compiler state

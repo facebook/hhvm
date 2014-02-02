@@ -20,6 +20,7 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,15 +57,18 @@ public:
   const std::string &getResponse() const { return m_response;}
 
 private:
-  Hdf m_hdf;
   std::string m_postData;
   HeaderMap m_requestHeaders;
   HeaderMap m_responseHeaders;
 
   int m_code;
   std::string m_response;
+  std::string m_url;
+  std::string m_remoteHost;
+  int m_remotePort;
+  uint32_t m_method;
 
-  void replayInputImpl();
+  void replayInputImpl(const Hdf &hdf);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -52,7 +52,8 @@ inline void init_for_unit_test() {
   initialize_repo();
   init_thread_locals();
   Hdf config;
-  RuntimeOption::Load(config);
+  IniSetting::Map ini = IniSetting::Map::object;
+  RuntimeOption::Load(config, ini);
   compile_file(0, 0, MD5(), 0);
   hphp_process_init();
 }

@@ -18,6 +18,7 @@
 
 #include <arpa/inet.h>
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -165,13 +166,14 @@ void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl, Hdf hdf, bool allow) {
   }
 }
 
-IpBlockMap::IpBlockMap(Hdf config) {
+IpBlockMap::IpBlockMap(Hdf config, const IniSetting::Map &ini) {
   for (Hdf hdf = config.firstChild(); hdf.exists(); hdf = hdf.next()) {
     auto acl = std::make_shared<Acl>();
     // sgrimm note: not sure AllowFirst is relevant with my implementation
     // since we always search for the narrowest matching rule -- it really
     // just sets whether we deny or allow by default, I think.
-    bool allow = hdf["AllowFirst"].getBool(false);
+    bool allow = false;
+    RuntimeOption::Bind(allow, ini, hdf, "AllowFirst");
     if (allow) {
       acl->m_networks.setAllowed(true);
       LoadIpList(acl, hdf["Ip.Deny"], false);
@@ -182,7 +184,8 @@ IpBlockMap::IpBlockMap(Hdf config) {
       LoadIpList(acl, hdf["Ip.Deny"], false);
     }
 
-    std::string location = hdf["Location"].getString();
+    std::string location;
+    RuntimeOption::Bind(location, ini, hdf, "Location");
     if (!location.empty() && location[0] == '/') {
       location = location.substr(1);
     }

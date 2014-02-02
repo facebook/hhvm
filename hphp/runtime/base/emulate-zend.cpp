@@ -163,7 +163,7 @@ int emulate_zend(int argc, char** argv){
 
   if (ini_fd != -1) {
     char arg[37];
-    sprintf(arg, "-vServer.IniFile=%s", ini_path);
+    sprintf(arg, "-c %s", ini_path);
     newargv.push_back(arg);
   }
 

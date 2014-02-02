@@ -58,6 +58,7 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/debug/debug.h"
 
+#include <boost/algorithm/string.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -100,7 +101,8 @@ void (*g_vmProcessInit)();
 
 struct ProgramOptions {
   string     mode;
-  string     config;
+  std::vector<std::string>
+             config;
   std::vector<std::string>
              confStrings;
   int        port;
@@ -186,13 +188,32 @@ void process_env_variables(Variant &variables) {
   }
 }
 
-void process_ini_settings() {
-  if (RuntimeOption::IniFile.empty()) {
-    return;
+static void process_ini_settings(const IniSetting::Map &ini) {
+  for (auto &pair : ini.items()) {
+    if (!pair.second.isString()) {
+      // TODO Allow ini_set(string, array);
+      continue;
+    }
+    IniSetting::Set(pair.first.asString().toStdString(),
+                    pair.second.asString().toStdString());
   }
-  auto settings = f_parse_ini_file(String(RuntimeOption::IniFile));
-  for (ArrayIter iter(settings); iter; ++iter) {
-    IniSetting::Set(iter.first(), iter.second());
+}
+
+static void parse_config(const std::vector<std::string> &config, Hdf &hdf,
+                         IniSetting::Map &ini) {
+  for (vector<string>::const_iterator it = config.begin();
+       it != config.end(); ++it) {
+    if (boost::ends_with(*it, "ini")) {
+      std::ifstream ifs(*it);
+      const std::string str((std::istreambuf_iterator<char>(ifs)),
+                            std::istreambuf_iterator<char>());
+      auto parsed_ini = IniSetting::FromStringAsMap(str, *it);
+      for (auto &pair : parsed_ini.items()) {
+        ini[pair.first] = pair.second;
+      }
+    } else {
+      hdf.append(*it);
+    }
   }
 }
 
@@ -590,7 +611,6 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 
   Extension::RequestInitModules();
-  process_ini_settings();
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -997,7 +1017,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("repo-schema", "display the repository schema id")
     ("mode,m", value<string>(&po.mode)->default_value("run"),
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
-    ("config,c", value<string>(&po.config),
+    ("config,c", value<vector<string> >(&po.config)->composing(),
      "load specified config file")
     ("config-value,v", value<std::vector<std::string>>(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
@@ -1113,10 +1133,10 @@ static int execute_program_impl(int argc, char** argv) {
       return -1;
     }
     if (po.config.empty()) {
-      auto default_config_file = "/etc/hhvm/config.hdf";
+      auto default_config_file = "/etc/hhvm/php.ini";
       if (access(default_config_file, R_OK) != -1) {
         Logger::Verbose("Using default config file: %s", default_config_file);
-        po.config = default_config_file;
+        po.config.push_back(default_config_file);
       }
     }
   } catch (error &e) {
@@ -1171,10 +1191,9 @@ static int execute_program_impl(int argc, char** argv) {
   pcre_init();
 
   Hdf config;
-  if (!po.config.empty()) {
-    config.open(po.config);
-  }
-  RuntimeOption::Load(config, &po.confStrings);
+  IniSetting::Map ini = IniSetting::Map::object;
+  parse_config(po.config, config, ini);
+  RuntimeOption::Load(config, ini, &po.confStrings);
   vector<string> badnodes;
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {
@@ -1307,13 +1326,16 @@ static int execute_program_impl(int argc, char** argv) {
       Repo::setCliFile(new_argv[0]);
     }
 
-    int ret = 0;
-    hphp_process_init();
-
     string file;
     if (new_argc > 0) {
       file = new_argv[0];
     }
+
+    int ret = 0;
+    hphp_process_init();
+
+    // Reparse the config before using it, since constants are now defined
+    parse_config(po.config, config, ini);
 
     if (po.mode == "debug") {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
@@ -1333,6 +1355,7 @@ static int execute_program_impl(int argc, char** argv) {
       while (true) {
         try {
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+          process_ini_settings(ini);
           // Set the proxy for this thread to be the localProxy we just
           // created. If we're script debugging, this will be the proxy that
           // does all of our work. If we're remote debugging, this proxy will
@@ -1365,6 +1388,7 @@ static int execute_program_impl(int argc, char** argv) {
       ret = 0;
       for (int i = 0; i < po.count; i++) {
         execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+        process_ini_settings(ini);
         ret = 255;
         if (hphp_invoke_simple(file)) {
           ret = ExitException::ExitCode;

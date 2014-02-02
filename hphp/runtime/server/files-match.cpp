@@ -23,9 +23,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FilesMatch::FilesMatch(Hdf vh) {
-  m_pattern = Util::format_pattern(vh["pattern"].get(""), true);
-  vh["headers"].get(m_headers);
+FilesMatch::FilesMatch(const Hdf &vh, const IniSetting::Map &ini) {
+  m_pattern = "";
+  RuntimeOption::Bind(m_pattern, ini, vh, "pattern");
+  m_pattern = Util::format_pattern(m_pattern, true);
+  RuntimeOption::Bind(m_headers, ini, vh, "headers");
 }
 
 bool FilesMatch::match(const std::string &filename) const {

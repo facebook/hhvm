@@ -18,6 +18,7 @@
 
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
+#include <boost/range/join.hpp>
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -34,6 +35,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 const Extension* IniSetting::CORE = (Extension*)(-1);
+
+bool IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
 
 const StaticString
   s_global_value("global_value"),
@@ -69,9 +72,64 @@ bool ini_on_update_bool(const std::string& value, void *p) {
   return true;
 }
 
+bool ini_on_update_short(const std::string& value, void *p) {
+  if (p) {
+    auto n = convert_bytes_to_long(value);
+    auto maxValue = 0x7FFFL;
+    if (n > maxValue || n < (- maxValue - 1)) {
+      return false;
+    }
+    *((int16_t*)p) = n;
+  }
+  return true;
+}
+
+bool ini_on_update_int(const std::string& value, void *p) {
+  if (p) {
+    auto n = convert_bytes_to_long(value);
+    auto maxValue = 0x7FFFFFFFL;
+    if (n > maxValue || n < (- maxValue - 1)) {
+      return false;
+    }
+    *((int32_t*)p) = n;
+  }
+  return true;
+}
+
 bool ini_on_update_long(const std::string& value, void *p) {
   if (p) {
     *((int64_t*)p) = convert_bytes_to_long(value);
+  }
+  return true;
+}
+
+bool ini_on_update_ushort(const std::string& value, void *p) {
+  if (p) {
+    auto n = convert_bytes_to_long(value);
+    auto mask = ~0xFFFFUL;
+    if (((uint64_t)n & mask)) {
+      return false;
+    }
+    *((uint16_t*)p) = n;
+  }
+  return true;
+}
+
+bool ini_on_update_uint(const std::string& value, void *p) {
+  if (p) {
+    auto n = convert_bytes_to_long(value);
+    auto mask = ~0x7FFFFFFFUL;
+    if (((uint64_t)n & mask)) {
+      return false;
+    }
+    *((uint32_t*)p) = n;
+  }
+  return true;
+}
+
+bool ini_on_update_ulong(const std::string& value, void *p) {
+  if (p) {
+    *((uint64_t*)p) = convert_bytes_to_long(value);
   }
   return true;
 }
@@ -116,8 +174,28 @@ std::string ini_get_bool_as_int(void* p) {
   return (*(bool*) p) ? "1" : "0";
 }
 
+std::string ini_get_short(void *p) {
+  return std::to_string(*((int16_t*)p));
+}
+
+std::string ini_get_int(void *p) {
+  return std::to_string(*((int32_t*)p));
+}
+
 std::string ini_get_long(void *p) {
   return std::to_string(*((int64_t*)p));
+}
+
+std::string ini_get_ushort(void *p) {
+  return std::to_string(*((uint16_t*)p));
+}
+
+std::string ini_get_uint(void *p) {
+  return std::to_string(*((uint32_t*)p));
+}
+
+std::string ini_get_ulong(void *p) {
+  return std::to_string(*((uint64_t*)p));
 }
 
 std::string ini_get_real(void *p) {
@@ -343,7 +421,10 @@ struct IniCallbackData {
 };
 
 typedef std::map<std::string, IniCallbackData> CallbackMap;
+// Things that the user can change go here
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_callbacks);
+// Things that are only settable at startup go here
+static CallbackMap s_global_ini;
 
 // This can't be the same as s_callbacks since some classes register callbacks
 // before g_context is ready to have the shutdown handler registered
@@ -354,17 +435,6 @@ public:
     s_callbacks->clear();
   }
 } s_ini_extension;
-
-typedef std::map<std::string, std::string> DefaultMap;
-static DefaultMap s_global_ini;
-
-void IniSetting::SetGlobalDefault(const char *name, const char *value) {
-  assert(name && *name);
-  assert(value);
-  assert(!Extension::ModulesInitialised());
-
-  s_global_ini[name] = value;
-}
 
 void IniSetting::Bind(const Extension* extension, const Mode mode,
                       const char *name, const char *value,
@@ -413,6 +483,26 @@ void IniSetting::Bind(const Extension* extension, const Mode mode,
 
 void IniSetting::Bind(const Extension* extension, const Mode mode,
                       const char *name,
+                      int16_t *p) {
+  Bind(extension, mode, name, ini_on_update_short, ini_get_short, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      int16_t *p) {
+  Bind(extension, mode, name, value, ini_on_update_short, ini_get_short, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
+                      int32_t *p) {
+  Bind(extension, mode, name, ini_on_update_int, ini_get_int, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      int32_t *p) {
+  Bind(extension, mode, name, value, ini_on_update_int, ini_get_int, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
                       int64_t *p) {
   Bind(extension, mode, name, ini_on_update_long, ini_get_long, p);
 }
@@ -421,6 +511,47 @@ void IniSetting::Bind(const Extension* extension, const Mode mode,
                       int64_t *p) {
   Bind(extension, mode, name, value, ini_on_update_long, ini_get_long, p);
 }
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
+                      uint16_t *p) {
+  Bind(extension, mode, name, ini_on_update_ushort, ini_get_ushort, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      uint16_t *p) {
+  Bind(extension, mode, name, value, ini_on_update_ushort, ini_get_ushort, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
+                      uint32_t *p) {
+  Bind(extension, mode, name, ini_on_update_uint, ini_get_uint, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      uint32_t *p) {
+  Bind(extension, mode, name, value, ini_on_update_uint, ini_get_uint, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
+                      uint64_t *p) {
+  Bind(extension, mode, name, ini_on_update_ulong, ini_get_ulong, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      uint64_t *p) {
+  Bind(extension, mode, name, value, ini_on_update_ulong, ini_get_ulong, p);
+}
+
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
+                      double *p) {
+  Bind(extension, mode, name, ini_on_update_real, ini_get_real, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      double *p) {
+  Bind(extension, mode, name, value, ini_on_update_real, ini_get_real, p);
+}
 
 void IniSetting::Bind(const Extension* extension, const Mode mode,
                       const char *name,
@@ -428,7 +559,18 @@ void IniSetting::Bind(const Extension* extension, const Mode mode,
                       void *p /* = NULL */) {
   assert(name && *name);
 
-  auto &data = (*s_callbacks)[name];
+  bool is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
+  // For now, we require the extensions to use their own thread local memory for
+  // user-changeable settings. This means you need to use the default field to
+  // Bind and can't statically initialize them. We could conceivably let you
+  // use static memory and have our own thread local here that users can change
+  // and then reset it back to the default, but we haven't built that yet.
+  auto &data = is_thread_local ? (*s_callbacks)[name] : s_global_ini[name];
+  // TODO I would love if I could verify p is thread local or not instead of
+  // this dumb hack
+  assert(is_thread_local || !Extension::ModulesInitialised() ||
+         s_pretendExtensionsHaveNotBeenLoaded);
+
   data.extension = extension;
   data.mode = mode;
   data.updateCallback = updateCallback;
@@ -442,17 +584,16 @@ void IniSetting::Unbind(const char *name) {
 }
 
 bool IniSetting::Get(const std::string& name, std::string &value) {
-  DefaultMap::iterator iter = s_global_ini.find(name.data());
-  if (iter != s_global_ini.end()) {
-    value = iter->second;
-    return true;
+  CallbackMap::iterator iter = s_global_ini.find(name.data());
+  if (iter == s_global_ini.end()) {
+    iter = s_callbacks->find(name.data());
+    if (iter == s_callbacks->end()) {
+      return false;
+    }
   }
-  CallbackMap::iterator cb_iter = s_callbacks->find(name.data());
-  if (cb_iter != s_callbacks->end()) {
-    value = cb_iter->second.getCallback(cb_iter->second.p);
-    return true;
-  }
-  return false;
+
+  value = iter->second.getCallback(iter->second.p);
+  return true;
 }
 
 bool IniSetting::Get(const String& name, String &value) {
@@ -502,7 +643,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     }
   }
 
-  for (auto& iter: (*s_callbacks)) {
+  for (auto& iter: boost::join(s_global_ini, *s_callbacks)) {
     if (ext && ext != iter.second.extension) {
       continue;
     }

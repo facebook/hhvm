@@ -69,10 +69,6 @@ BaseExecutionContext::BaseExecutionContext() :
   setRequestMemoryMaxBytes(max_mem);
   restoreIncludePath();
 
-  // Language and Misc Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
-                   &RuntimeOption::ExposeHPHP);
-
   // Resource Limits
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
                    [this](const std::string& value, void* p) {
@@ -86,19 +82,9 @@ BaseExecutionContext::BaseExecutionContext() :
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "arg_separator.output", "&",
                    &m_argSeparatorOutput);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "post_max_size",
-                   ini_on_update_long,
-                   [](void*) {
-                     return std::to_string(VirtualHost::GetMaxPostSize());
-                   },
-                   &RuntimeOption::MaxPostSize);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
                    &m_defaultCharset);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "always_populate_raw_post_data",
-                   &RuntimeOption::AlwaysPopulateRawPostData);
 
   // Paths and Directories
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
@@ -110,8 +96,6 @@ BaseExecutionContext::BaseExecutionContext() :
                    [this](void*) {
                      return this->getIncludePath().toCppString();
                    });
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "doc_root", &RuntimeOption::SourceRoot);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "open_basedir",
                    [](const std::string& value, void* p) {
@@ -133,26 +117,6 @@ BaseExecutionContext::BaseExecutionContext() :
                      }
                      return out;
                    });
-
-  // FastCGI
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
-                   "pid", &RuntimeOption::PidFile);
-
-  // File Uploads
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "file_uploads", "true",
-                   &RuntimeOption::EnableFileUploads);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "upload_max_filesize",
-                   ini_on_update_long,
-                   [](void*) {
-                     int uploadMaxFilesize =
-                       VirtualHost::GetUploadMaxFileSize() / (1 << 20);
-                     return std::to_string(uploadMaxFilesize) + "M";
-                   },
-                   &RuntimeOption::UploadMaxFileSize);
 
   // Errors and Logging Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
@@ -178,41 +142,10 @@ BaseExecutionContext::BaseExecutionContext() :
                    &m_errorLog);
 
   // Filesystem and Streams Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "allow_url_fopen",
-                   ini_on_update_fail, ini_get_static_string_1);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_socket_timeout",
                    std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
                    &m_socketDefaultTimeout);
-
-  // HPHP specific
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
-                   "hphp.compiler_id",
-                   ini_on_update_fail,
-                   [](void*) {
-                     return getHphpCompilerId();
-                   });
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
-                   "hphp.compiler_version",
-                   ini_on_update_fail,
-                   [](void*) {
-                     return getHphpCompilerVersion();
-                   });
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
-                   "hhvm.ext_zend_compat",
-                   ini_on_update_fail, ini_get_bool,
-                   &RuntimeOption::EnableZendCompat),
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
-                   "hphp.build_id",
-                   ini_on_update_fail, ini_get_stdstring,
-                   &RuntimeOption::BuildId);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "notice_frequency",
-                   &RuntimeOption::NoticeFrequency);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "warning_frequency",
-                   &RuntimeOption::WarningFrequency);
 }
 
 VMExecutionContext::VMExecutionContext() :

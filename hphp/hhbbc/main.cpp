@@ -202,7 +202,8 @@ int main(int argc, char** argv) try {
   }
 
   Hdf config;
-  RuntimeOption::Load(config);
+  IniSetting::Map ini = IniSetting::Map::object;
+  RuntimeOption::Load(config, ini);
   RuntimeOption::RepoLocalPath     = "/tmp/hhbbc.repo";
   RuntimeOption::RepoCentralPath   = input_repo;
   RuntimeOption::RepoLocalMode     = "--";

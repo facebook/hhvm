@@ -19,6 +19,7 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/db-query.h"
@@ -175,22 +176,26 @@ void Option::LoadRootHdf(const Hdf &roots, vector<string> &vec) {
   }
 }
 
-void Option::Load(Hdf &config) {
+void Option::Load(Hdf &config, const IniSetting::Map &ini) {
   LoadRootHdf(config["IncludeRoots"], IncludeRoots);
   LoadRootHdf(config["AutoloadRoots"], AutoloadRoots);
 
-  config["PackageFiles"].get(PackageFiles);
-  config["IncludeSearchPaths"].get(IncludeSearchPaths);
-  config["PackageDirectories"].get(PackageDirectories);
-  config["PackageExcludeDirs"].get(PackageExcludeDirs);
-  config["PackageExcludeFiles"].get(PackageExcludeFiles);
-  config["PackageExcludePatterns"].get(PackageExcludePatterns);
-  config["PackageExcludeStaticDirs"].get(PackageExcludeStaticDirs);
-  config["PackageExcludeStaticFiles"].get(PackageExcludeStaticFiles);
-  config["PackageExcludeStaticPatterns"].get(PackageExcludeStaticPatterns);
-  CachePHPFile = config["CachePHPFile"].getBool();
+  RuntimeOption::Bind(PackageFiles, ini, config, "PackageFiles");
+  RuntimeOption::Bind(IncludeSearchPaths, ini, config, "IncludeSearchPaths");
+  RuntimeOption::Bind(PackageDirectories, ini, config, "PackageDirectories");
+  RuntimeOption::Bind(PackageExcludeDirs, ini, config, "PackageExcludeDirs");
+  RuntimeOption::Bind(PackageExcludeFiles, ini, config, "PackageExcludeFiles");
+  RuntimeOption::Bind(PackageExcludePatterns, ini, config,
+                      "PackageExcludePatterns");
+  RuntimeOption::Bind(PackageExcludeStaticDirs, ini, config,
+                      "PackageExcludeStaticDirs");
+  RuntimeOption::Bind(PackageExcludeStaticFiles, ini, config,
+                      "PackageExcludeStaticFiles");
+  RuntimeOption::Bind(PackageExcludeStaticPatterns, ini, config,
+                      "PackageExcludeStaticPatterns");
+  RuntimeOption::Bind(CachePHPFile, ini, config, "CachePHPFile");
 
-  config["ParseOnDemandDirs"].get(ParseOnDemandDirs);
+  RuntimeOption::Bind(ParseOnDemandDirs, ini, config, "ParseOnDemandDirs");
 
   {
     Hdf cg = config["CodeGeneration"];
@@ -207,11 +212,15 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(LambdaPrefix);
   }
 
-  config["DynamicFunctionPrefix"].get(DynamicFunctionPrefixes);
-  config["DynamicFunctionPostfix"].get(DynamicFunctionPostfixes);
-  config["DynamicMethodPrefix"].get(DynamicMethodPrefixes);
-  config["DynamicInvokeFunctions"].get(DynamicInvokeFunctions);
-  config["VolatileClasses"].get(VolatileClasses);
+  RuntimeOption::Bind(DynamicFunctionPrefixes, ini, config,
+                      "DynamicFunctionPrefix");
+  RuntimeOption::Bind(DynamicFunctionPostfixes, ini, config,
+                      "DynamicFunctionPostfix");
+  RuntimeOption::Bind(DynamicMethodPrefixes, ini, config,
+                      "DynamicMethodPrefix");
+  RuntimeOption::Bind(DynamicInvokeFunctions, ini, config,
+                      "DynamicInvokeFunctions");
+  RuntimeOption::Bind(VolatileClasses, ini, config, "VolatileClasses");
 
   // build map from function names to sections
   for (Hdf hdf = config["FunctionSections"].firstChild(); hdf.exists();
@@ -226,32 +235,33 @@ void Option::Load(Hdf &config) {
     Hdf repo = config["Repo"];
     {
       Hdf repoCentral = repo["Central"];
-      RepoCentralPath = repoCentral["Path"].getString();
+      RuntimeOption::Bind(RepoCentralPath, ini, repoCentral, "Path");
     }
-    RepoDebugInfo = repo["DebugInfo"].getBool(false);
+    RuntimeOption::Bind(RepoDebugInfo, ini, repo, "DebugInfo");
   }
 
   {
     Hdf autoloadMap = config["AutoloadMap"];
-    autoloadMap["class"].get(AutoloadClassMap);
-    autoloadMap["function"].get(AutoloadFuncMap);
-    autoloadMap["constant"].get(AutoloadConstMap);
-    AutoloadRoot = autoloadMap["root"].getString();
+    RuntimeOption::Bind(AutoloadClassMap, ini, autoloadMap, "class");
+    RuntimeOption::Bind(AutoloadFuncMap, ini, autoloadMap, "function");
+    RuntimeOption::Bind(AutoloadConstMap, ini, autoloadMap, "constant");
+    RuntimeOption::Bind(AutoloadRoot, ini, autoloadMap, "root");
   }
 
-  HardTypeHints = config["HardTypeHints"].getBool(true);
-  HardConstProp = config["HardConstProp"].getBool(true);
+  RuntimeOption::Bind(HardTypeHints, ini, config, "HardTypeHints");
+  RuntimeOption::Bind(HardConstProp, ini, config, "HardConstProp");
 
-  EnableHipHopSyntax = config["EnableHipHopSyntax"].getBool();
-  EnableZendCompat = config["EnableZendCompat"].getBool();
-  JitEnableRenameFunction = config["JitEnableRenameFunction"].getBool();
-  EnableHipHopExperimentalSyntax =
-    config["EnableHipHopExperimentalSyntax"].getBool();
-  EnableShortTags = config["EnableShortTags"].getBool(true);
+  RuntimeOption::Bind(EnableHipHopSyntax, ini, config, "EnableHipHopSyntax");
+  RuntimeOption::Bind(EnableZendCompat, ini, config, "EnableZendCompat");
+  RuntimeOption::Bind(JitEnableRenameFunction, ini, config,
+                      "JitEnableRenameFunction");
+  RuntimeOption::Bind(EnableHipHopExperimentalSyntax, ini, config,
+                      "EnableHipHopExperimentalSyntax");
+  RuntimeOption::Bind(EnableShortTags, ini, config, "EnableShortTags");
 
-  EnableAspTags = config["EnableAspTags"].getBool();
+  RuntimeOption::Bind(EnableAspTags, ini, config, "EnableAspTags");
 
-  EnableXHP = config["EnableXHP"].getBool(false);
+  RuntimeOption::Bind(EnableXHP, ini, config, "EnableXHP");
 
   if (EnableHipHopSyntax) {
     // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -259,30 +269,40 @@ void Option::Load(Hdf &config) {
     EnableXHP = true;
   }
 
-  ParserThreadCount = config["ParserThreadCount"].getInt32(0);
+  RuntimeOption::Bind(ParserThreadCount, ini, config, "ParserThreadCount");
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
 
-  EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
-  AllDynamic = config["AllDynamic"].getBool(true);
-  AllVolatile = config["AllVolatile"].getBool();
+  RuntimeOption::Bind(
+    ini, config, "EnableEval",
+    [](const std::string value, void *p) {
+      *(EvalLevel*)p = (EvalLevel) strtoll(value.c_str(), nullptr, 0);
+      return true;
+    },
+    [](void *p) {
+      return std::to_string(*(int*)p);
+    },
+    &EnableEval);
+  RuntimeOption::Bind(AllDynamic, ini, config, "AllDynamic");
+  RuntimeOption::Bind(AllVolatile, ini, config, "AllVolatile");
 
-  GenerateDocComments      = config["GenerateDocComments"].getBool(true);
-  EliminateDeadCode        = config["EliminateDeadCode"].getBool(true);
-  CopyProp                 = config["CopyProp"].getBool(false);
-  LocalCopyProp            = config["LocalCopyProp"].getBool(true);
-  StringLoopOpts           = config["StringLoopOpts"].getBool(true);
-  AutoInline               = config["AutoInline"].getInt32(0);
-  ControlFlow              = config["ControlFlow"].getBool(true);
-  VariableCoalescing       = config["VariableCoalescing"].getBool(false);
-  ArrayAccessIdempotent    = config["ArrayAccessIdempotent"].getBool(false);
-  DumpAst                  = config["DumpAst"].getBool(false);
-  WholeProgram             = config["WholeProgram"].getBool(true);
-  UseHHBBC                 = config["UseHHBBC"].getBool(UseHHBBC);
+  RuntimeOption::Bind(GenerateDocComments, ini, config, "GenerateDocComments");
+  RuntimeOption::Bind(EliminateDeadCode, ini, config, "EliminateDeadCode");
+  RuntimeOption::Bind(CopyProp, ini, config, "CopyProp");
+  RuntimeOption::Bind(LocalCopyProp, ini, config, "LocalCopyProp");
+  RuntimeOption::Bind(StringLoopOpts, ini, config, "StringLoopOpts");
+  RuntimeOption::Bind(AutoInline, ini, config, "AutoInline");
+  RuntimeOption::Bind(ControlFlow, ini, config, "ControlFlow");
+  RuntimeOption::Bind(VariableCoalescing, ini, config, "VariableCoalescing");
+  RuntimeOption::Bind(ArrayAccessIdempotent, ini, config,
+                      "ArrayAccessIdempotent");
+  RuntimeOption::Bind(DumpAst, ini, config, "DumpAst");
+  RuntimeOption::Bind(WholeProgram, ini, config, "WholeProgram");
+  RuntimeOption::Bind(UseHHBBC, ini, config, "UseHHBBC");
 
   // Temporary, during file-cache migration.
-  FileCache::UseNewCache   = config["UseNewCache"].getBool(false);
+  RuntimeOption::Bind(FileCache::UseNewCache, ini, config, "UseNewCache");
 
   if (m_hookHandler) m_hookHandler(config);
 

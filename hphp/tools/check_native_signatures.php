@@ -157,9 +157,7 @@ function match_return_type(string $php, string $cpp): bool {
 }
 
 function match_arg_type(string $php, string $cpp): bool {
-  if($php[strlen($php)-1] == '&') {
-    $expected = 'VRefParam';
-  } else if ($php[0] == '?' || $php[0] == '@') {
+  if ($php[0] == '?' || $php[0] == '@') {
     $expected = 'CVarRef';
   } else {
     switch (strtolower($php)) {
@@ -198,6 +196,14 @@ function match_arg_type(string $php, string $cpp): bool {
       default:
         $expected = 'CObjRef';
         break;
+    }
+  }
+  // References must be a variant type
+  if ($php[strlen($php)-1] == '&') {
+    if ($expected != 'CVarRef') {
+      return false;
+    } else {
+      $expected = 'VRefParam';
     }
   }
   // Special case for ints

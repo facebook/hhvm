@@ -349,9 +349,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Unbox&)   { nothrow(); popV(); push(TInitCell); }
 
   void operator()(const bc::UnboxR&) {
+    auto const t = topR();
+    if (t.subtypeOf(TInitCell)) return reduce(bc::UnboxRNop {});
     nothrow();
-    auto const t = popR();
-    if (t.subtypeOf(TInitCell)) return push(t);
+    popT();
     push(TInitCell);
   }
 
@@ -1413,9 +1414,11 @@ struct InterpStepper : boost::static_visitor<void> {
       // is already TRef, we could try to leave it alone, but not for
       // now.
       setLocRaw(op.loc2, TGen);
-      return push(TGen);
-    case PrepKind::Val: return impl(bc::CGetL { op.loc2 });
-    case PrepKind::Ref: return impl(bc::VGetL { op.loc2 });
+      return push(TInitGen);
+    case PrepKind::Val: return reduce(bc::CGetL { op.loc2 },
+                                      bc::FPassC { op.arg1 });
+    case PrepKind::Ref: return reduce(bc::VGetL { op.loc2 },
+                                      bc::FPassVNop { op.arg1 });
     }
   }
 
@@ -1426,16 +1429,20 @@ struct InterpStepper : boost::static_visitor<void> {
       popC();
       killLocals();
       return push(TGen);
-    case PrepKind::Val: return impl(bc::CGetN {});
-    case PrepKind::Ref: return impl(bc::VGetN {});
+    case PrepKind::Val: return reduce(bc::CGetN {},
+                                      bc::FPassC { op.arg1 });
+    case PrepKind::Ref: return reduce(bc::VGetN {},
+                                      bc::FPassVNop { op.arg1 });
     }
   }
 
   void operator()(const bc::FPassG& op) {
     switch (prepKind(op.arg1)) {
-    case PrepKind::Unknown: popC(); return push(TGen);
-    case PrepKind::Val:     return impl(bc::CGetG {});
-    case PrepKind::Ref:     return impl(bc::VGetG {});
+    case PrepKind::Unknown: popC(); return push(TInitGen);
+    case PrepKind::Val:     return reduce(bc::CGetG {},
+                                          bc::FPassC { op.arg1 });
+    case PrepKind::Ref:     return reduce(bc::VGetG {},
+                                          bc::FPassVNop { op.arg1 });
     }
   }
 
@@ -1457,8 +1464,10 @@ struct InterpStepper : boost::static_visitor<void> {
         }
       }
       return push(TGen);
-    case PrepKind::Val:     return impl(bc::CGetS {});
-    case PrepKind::Ref:     return impl(bc::VGetS {});
+    case PrepKind::Val:
+      return reduce(bc::CGetS {}, bc::FPassC { op.arg1 });
+    case PrepKind::Ref:
+      return reduce(bc::VGetS {}, bc::FPassVNop { op.arg1 });
     }
   }
 
@@ -1466,12 +1475,10 @@ struct InterpStepper : boost::static_visitor<void> {
     nothrow();
     switch (prepKind(op.arg1)) {
     case PrepKind::Unknown: popV(); return push(TGen);
-    case PrepKind::Val:     return impl(bc::Unbox {});
+    case PrepKind::Val:     popV(); return push(TInitCell);
     case PrepKind::Ref:     assert(topT().subtypeOf(TRef)); return;
     }
   }
-
-  void operator()(const bc::FPassVNop&) { nothrow(); push(popV()); }
 
   void operator()(const bc::FPassR& op) {
     nothrow();
@@ -1485,7 +1492,9 @@ struct InterpStepper : boost::static_visitor<void> {
     }
   }
 
-  void operator()(const bc::FPassC& op)  { nothrow(); }
+  void operator()(const bc::FPassVNop&) { nothrow(); push(popV()); }
+  void operator()(const bc::FPassC& op) { nothrow(); }
+
   void operator()(const bc::FPassCW& op) { impl(bc::FPassCE { op.arg1 }); }
   void operator()(const bc::FPassCE& op) {
     switch (prepKind(op.arg1)) {
@@ -2873,6 +2882,8 @@ private:
    * reduction.  If they use impl themselves, the outer impl() should
    * only be chaining to a single bytecode (or flag effects can be
    * hard to reason about), and shouldn't set any flags prior to that.
+   *
+   * Note: nested reduce would probably be nice to have later for FPassR.
    *
    * constprop with impl() should only occur on the last thing in the
    * impl list.  This isn't checked, but we'll ignore a canConstProp

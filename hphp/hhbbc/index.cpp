@@ -1162,10 +1162,12 @@ PrepKind Index::lookup_param_prep(Context ctx,
                                   uint32_t paramId) const {
 
   auto finfo_prep = [&] (borrowed_ptr<const FuncInfo> finfo) {
-    // TODO(#3562731): there are some "variadic by ref" builtins,
-    // but we can't currently have a resolved func if it is a
-    // builtin.
-    if (paramId >= finfo->func->params.size()) return PrepKind::Val;
+    if (paramId >= finfo->func->params.size()) {
+      if (finfo->func->attrs & AttrVariadicByRef) {
+        return PrepKind::Ref;
+      }
+      return PrepKind::Val;
+    }
     return finfo->func->params[paramId].byRef ? PrepKind::Ref
                                               : PrepKind::Val;
   };

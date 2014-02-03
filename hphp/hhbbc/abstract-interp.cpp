@@ -344,8 +344,8 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::PredictTStk&)    {}
   void operator()(const bc::BreakTraceHint&) {}
 
-  void operator()(const bc::Box&)     { throw_oom_only(); popC(); push(TRef); }
-  void operator()(const bc::BoxR&)    { throw_oom_only(); popR(); push(TRef); }
+  void operator()(const bc::Box&)     { nothrow(); popC(); push(TRef); }
+  void operator()(const bc::BoxR&)    { nothrow(); popR(); push(TRef); }
   void operator()(const bc::Unbox&)   { nothrow(); popV(); push(TInitCell); }
 
   void operator()(const bc::UnboxR&) {
@@ -363,7 +363,7 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::BoxRNop&) {
-    throw_oom_only();
+    nothrow();
     auto const t = popR();
     push(t.subtypeOf(TRef) ? t : TRef);
   }
@@ -844,7 +844,7 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::VGetL& op) {
-    throw_oom_only();
+    nothrow();
     setLocRaw(op.loc1, TRef);
     push(TRef);
   }
@@ -1034,16 +1034,12 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::SetN&) {
-    // This might try to allocate a VarEnv, although that probably
-    // doesn't actually ever throw OOM ...
-    throw_oom_only();
-
     // This isn't trivial to strength reduce, without a "flip two top
     // elements of stack" opcode.
-
     auto const t1 = popC();
     auto const t2 = popC();
     auto const v2 = tv(t2);
+    // TODO(#3653110): could nothrow if t2 can't be an Obj or Res
 
     auto const knownLoc = v2 && v2->m_type == KindOfStaticString
       ? findLocal(v2->m_data.pstr)
@@ -1207,15 +1203,14 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::BindL& op) {
-    throw_oom_only();
+    nothrow();
     auto const t1 = popV();
     setLocRaw(op.loc1, t1);
     push(t1);
   }
 
   void operator()(const bc::BindN&) {
-    // Could throw_oom_only (except for OOM) if t2 can't be a TObj or
-    // TRes.
+    // TODO(#3653110): could nothrow if t2 can't be an Obj or Res
     auto const t1 = popV();
     auto const t2 = popC();
     auto const v2 = tv(t2);
@@ -2855,19 +2850,6 @@ private:
     readLocals();
     assert(m_state.stack.empty());
     m_flags.returned = t;
-  }
-
-  /*
-   * It's not entirely clear whether we need to propagate state for a
-   * potential OOM, so for now we're annotating the instructions that
-   * can only throw OOM separately.
-   *
-   * TODO(#3367943): we don't throw on oom until a surprise flag
-   * check, so this should be removable.
-   */
-  void throw_oom_only() {
-    FTRACE(2, "    throw_oom_only\n");
-    m_flags.wasPEI = false;
   }
 
   /*

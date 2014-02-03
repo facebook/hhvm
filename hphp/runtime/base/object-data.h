@@ -263,7 +263,7 @@ class ObjectData {
   bool o_toBooleanImpl() const noexcept;
   int64_t o_toInt64Impl() const noexcept;
   double o_toDoubleImpl() const noexcept;
-  Array o_toArray() const;
+  Array o_toArray(bool pubOnly = false) const;
 
   bool destruct();
 

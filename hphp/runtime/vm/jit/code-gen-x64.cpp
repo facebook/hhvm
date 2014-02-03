@@ -120,41 +120,38 @@ ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
     m_kind = Kind::None;
     return;
   }
-  if (tmp->inst()->op() == DefConst) {
+  if (tmp->inst()->op() == DefConst || tmp->type().isNull()) {
+    // tmp is a constant
     m_srcReg = InvalidReg;
     if (val) {
-      m_imm = tmp->getValBits();
+      m_imm = tmp->type().isNull() ? 0 : tmp->getValBits();
     } else {
       m_imm = toDataTypeForCall(tmp->type());
     }
     m_kind = Kind::Imm;
     return;
   }
-  if (tmp->type().isNull()) {
-    m_srcReg = InvalidReg;
-    if (val) {
-      m_imm = 0;
-    } else {
-      m_imm = toDataTypeForCall(tmp->type());
-    }
-    m_kind = Kind::Imm;
-    return;
-  }
-  if (val || tmp->numWords() > 1) {
-    auto reg = loc.reg(val ? 0 : 1);
-    assert(reg != InvalidReg);
+  if (val) {
+    assert(loc.reg(0) != InvalidReg);
+    m_srcReg = loc.reg(0);
     m_imm = 0;
-
-    // If val is false then we're passing tmp's type. TypeReg lets
-    // CodeGenerator know that the value might require some massaging
-    // to be in the right format for the call.
-    m_kind = val ? Kind::Reg : Kind::TypeReg;
+    m_kind = Kind::Reg;
     // zero extend any boolean value that we pass to the helper in case
     // the helper expects it (e.g., as TypedValue)
-    if (val && tmp->isA(Type::Bool)) m_zeroExtend = true;
-    m_srcReg = reg;
+    if (tmp->isA(Type::Bool)) m_zeroExtend = true;
     return;
   }
+  if (tmp->numWords() > 1) {
+    assert(loc.reg(1) != InvalidReg);
+    m_srcReg = loc.reg(1);
+    m_imm = 0;
+    // Since val is false then we're passing tmp's type. TypeReg lets
+    // CodeGenerator know that the value might require some massaging
+    // to be in the right format for the call.
+    m_kind = Kind::TypeReg;
+    return;
+  }
+  // arg is the (constant) type of a known-typed value.
   m_srcReg = InvalidReg;
   m_imm = toDataTypeForCall(tmp->type());
   m_kind = Kind::Imm;

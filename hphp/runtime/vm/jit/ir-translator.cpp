@@ -1119,6 +1119,14 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
 
     if (op == OpFCallArray) return refuse("FCallArray");
 
+    // These opcodes don't indicate any additional work in the callee,
+    // so they shouldn't count toward the inlining cost.
+    if (op == Op::AssertTL || op == Op::AssertTStk ||
+        op == Op::AssertObjL || op == Op::AssertObjStk ||
+        op == Op::PredictTL || op == Op::PredictTStk) {
+      continue;
+    }
+
     cost += 1;
 
     // Check for an immediate vector, and if it's present add its size to the

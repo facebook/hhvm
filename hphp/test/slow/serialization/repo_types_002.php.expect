@@ -1,0 +1,6 @@
+object(Foob)#1 (1) {
+  ["x":"Foob":private]=>
+  object(A)#2 (0) {
+  }
+}
+heh

@@ -462,11 +462,12 @@ public:
   F(bool, MapTCHuge,                   hugePagesSoundNice())            \
   F(bool, MapHotTextHuge,              hugePagesSoundNice())            \
   F(bool, MapTgtCacheHuge,             false)                           \
-  F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)   \
+  F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
   F(uint32_t, TCNumHugeHotMB,          16)                              \
   F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
+  F(bool, CheckRepoAuthDeserialize,    false)                           \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \
                         kDefaultInitialStaticStringTableSize)           \

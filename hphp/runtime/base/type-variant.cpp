@@ -33,9 +33,8 @@
 
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_variable.h"
-
 #include "hphp/runtime/vm/runtime.h"
-
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/abi-cxx.h"
@@ -765,7 +764,37 @@ static void unserializeProp(VariableUnserializer *uns,
     // when promoting kPackedKind -> kMixedKind.
     t = &obj->reserveProperties(nProp).lvalAt(realKey, AccessFlags::Key);
   }
+
   t->unserialize(uns);
+
+  if (!RuntimeOption::EvalCheckRepoAuthDeserialize) return;
+  if (!RuntimeOption::RepoAuthoritative) return;
+  if (!Repo::get().global().HardPrivatePropInference) return;
+
+  /*
+   * We assume for performance reasons in repo authoriative mode that
+   * we can see all the sets to private properties in a class.
+   *
+   * It's a hole in this if we don't check unserialization doesn't
+   * violate what we've seen, which we handle by throwing if the repo
+   * was built with this option.
+   */
+  auto const cls  = obj->getVMClass();
+  auto const slot = cls->lookupDeclProp(key.get());
+  if (UNLIKELY(slot == kInvalidSlot)) return;
+  auto const repoTy = obj->getVMClass()->declPropRepoAuthType(slot);
+  if (LIKELY(tvMatchesRepoAuthType(*t->asTypedValue(), repoTy))) {
+    return;
+  }
+
+  auto msg = folly::format(
+    "Property {} for class {} was deserialized with type ({}) that "
+    "didn't match what we inferred in static analysis",
+    key.data(),
+    obj->getVMClass()->name()->data(),
+    tname(t->asTypedValue()->m_type)
+  ).str();
+  throw Exception(msg);
 }
 
 /*

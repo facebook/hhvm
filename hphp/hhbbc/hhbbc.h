@@ -176,11 +176,9 @@ struct Options {
    * This is in the can-potentially-change-program-behavior section
    * because if you unserialize specially-constructed strings you
    * could create instances with private properties that don't follow
-   * the inferred types.
-   *
-   * Currently hhvm handles this by ignoring the problem and
-   * potentially segfaulting at runtime.  We want to change this to
-   * fatal at unserialize time.  TODO(#2516227).
+   * the inferred types.  HHVM tracks the types that were inferred,
+   * and if an unserialize happens that would violate what we've
+   * inferred, we'll raise a notice and unserialize() returns false.
    */
   bool HardPrivatePropInference = true;
 };

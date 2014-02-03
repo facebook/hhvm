@@ -9068,7 +9068,7 @@ static void commitGlobalData() {
   auto gd                     = Repo::GlobalData{};
   gd.HardTypeHints            = Option::HardTypeHints;
   gd.UsedHHBBC                = Option::UseHHBBC;
-  gd.HardPrivatePropInference = Option::UseHHBBC;
+  gd.HardPrivatePropInference = true;
 
   Repo::get().saveGlobalData(gd);
 }

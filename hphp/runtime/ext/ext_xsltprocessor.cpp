@@ -283,18 +283,20 @@ int64_t c_XSLTProcessor::t_transformtouri(CObjRef doc, const String& uri) {
     c_DOMDocument *domdoc = doc.getTyped<c_DOMDocument>();
     m_doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
 
-    xmlDocPtr res = apply_stylesheet ();
-    if (res == NULL) {
-      return false;
-    }
-
     String translated = xslt_get_valid_file_path(uri);
     if (translated.empty()) {
       raise_warning("Invalid URI");
       return false;
     }
 
+    xmlDocPtr res = apply_stylesheet ();
+    if (res == NULL) {
+      return false;
+    }
+
     int bytes = xmlSaveFile(translated.data(), res);
+    xmlFreeDoc(res);
+
     if (bytes == -1) {
       return false;
     }
@@ -318,6 +320,7 @@ String c_XSLTProcessor::t_transformtoxml(CObjRef doc) {
     xmlChar *mem;
     int size;
     xmlDocDumpFormatMemory(res, &mem, &size, /*format*/ 0);
+    xmlFreeDoc(res);
 
     if (!size) {
       if (mem) {

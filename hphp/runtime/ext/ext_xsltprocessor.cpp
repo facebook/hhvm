@@ -1,6 +1,7 @@
 
 #include "hphp/runtime/ext/ext_xsltprocessor.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
+#include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/thread-init-fini.h"
@@ -206,10 +207,24 @@ bool c_XSLTProcessor::t_hasexsltsupport() {
 }
 
 void c_XSLTProcessor::t_importstylesheet(CObjRef stylesheet) {
-  if (!stylesheet.isNull()) {
-    c_DOMDocument *domdoc = stylesheet.getTyped<c_DOMDocument>();
-    xmlDocPtr doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
+  xmlDocPtr doc = NULL;
 
+  if (stylesheet.instanceof(c_DOMDocument::classof())) {
+    c_DOMDocument *domdoc = stylesheet.getTyped<c_DOMDocument>();
+    doc = xmlCopyDoc((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
+  } else if (stylesheet.instanceof(c_SimpleXMLElement::classof())) {
+    c_SimpleXMLElement *elem = stylesheet.getTyped<c_SimpleXMLElement>();
+    doc = xmlNewDoc((const xmlChar *)"1.0");
+    xmlNodePtr node = xmlCopyNode(elem->node, /*extended*/ 1);
+    if (node == NULL) {
+      raise_error("Unable to import stylesheet");
+    }
+    xmlDocSetRootElement(doc, node);
+  } else {
+    raise_warning("Object should be an instance of DOMDocument or SimpleXMLElement");
+  }
+
+  if (doc) {
     m_stylesheet = xsltParseStylesheetDoc(doc);
     if (m_stylesheet == NULL) {
       raise_error("Unable to import stylesheet");
@@ -264,7 +279,7 @@ bool c_XSLTProcessor::t_setprofiling(const String& filename) {
 }
 
 Variant c_XSLTProcessor::t_transformtodoc(CObjRef doc) {
-  if (!doc.isNull()) {
+  if (doc.instanceof(c_DOMNode::classof())) {
     c_DOMNode *domnode = doc.getTyped<c_DOMNode>();
     m_doc = xmlCopyDoc ((xmlDocPtr)domnode->m_node, /*recursive*/ 1);
 
@@ -279,7 +294,7 @@ Variant c_XSLTProcessor::t_transformtodoc(CObjRef doc) {
 }
 
 int64_t c_XSLTProcessor::t_transformtouri(CObjRef doc, const String& uri) {
-  if (!doc.isNull()) {
+  if (doc.instanceof(c_DOMDocument::classof())) {
     c_DOMDocument *domdoc = doc.getTyped<c_DOMDocument>();
     m_doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
 
@@ -308,7 +323,7 @@ int64_t c_XSLTProcessor::t_transformtouri(CObjRef doc, const String& uri) {
 }
 
 String c_XSLTProcessor::t_transformtoxml(CObjRef doc) {
-  if (!doc.isNull()) {
+  if (doc.instanceof(c_DOMDocument::classof())) {
     c_DOMDocument *domdoc = doc.getTyped<c_DOMDocument>();
     m_doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
 

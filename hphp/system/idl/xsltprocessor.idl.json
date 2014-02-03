@@ -72,7 +72,7 @@
                         {
                             "name": "stylesheet",
                             "type": "Object",
-                            "desc": "The imported style sheet as a DOMDocument object."
+                            "desc": "The imported style sheet as a DOMDocument or SimpleXMLElement object."
                         }
                     ]
                 },

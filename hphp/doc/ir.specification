@@ -2262,3 +2262,9 @@ TypeProfileFunc<paramIndex, functionName> S0:Gen
 
   Profiles that function's parameter/return value for a particular parameter
   index. Calls into native c++ function.
+
+
+/* Local Variables: */
+/* fill-column: 79 */
+/* End: */
+vim:textwidth=80

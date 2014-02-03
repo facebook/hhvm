@@ -4251,3 +4251,9 @@ following details:
 7) High level description of how namespaces are dealt with and any relevant
    details
 8) Description of async function implementation
+
+
+/* Local Variables: */
+/* fill-column: 79 */
+/* End: */
+vim:textwidth=80

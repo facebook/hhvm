@@ -8,6 +8,7 @@
 #include <libxslt/variables.h>
 #include <libxslt/transform.h>
 #include <libxslt/xsltutils.h>
+#include <libexslt/exslt.h>
 
 #include "hphp/runtime/base/base-includes.h"
 

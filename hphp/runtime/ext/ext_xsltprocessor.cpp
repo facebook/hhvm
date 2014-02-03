@@ -202,8 +202,7 @@ String c_XSLTProcessor::t_getparameter(const String& namespaceURI, const String&
 }
 
 bool c_XSLTProcessor::t_hasexsltsupport() {
-  // TODO: add EXSLT support.
-  return false;
+  return true;
 }
 
 void c_XSLTProcessor::t_importstylesheet(CObjRef stylesheet) {
@@ -360,6 +359,8 @@ xmlDocPtr c_XSLTProcessor::apply_stylesheet() {
     raise_error("Unable to apply stylesheet");
     return NULL;
   }
+
+  exsltRegisterAll();
 
   xsltTransformContextPtr ctxt = xsltNewTransformContext (m_stylesheet, m_doc);
   ctxt->_private = this;

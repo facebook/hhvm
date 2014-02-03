@@ -463,8 +463,7 @@ public:
   enum Type {
     None = 0,
     Error = 1,
-    CheckExist = 2,
-    Key = 4,
+    Key = 2,
     Error_Key = Error | Key,
   };
   static Type IsKey(bool s) { return s ? Key : None; }

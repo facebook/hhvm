@@ -617,9 +617,6 @@ class Variant : private TypedValue {
   MutableArrayIter begin(Variant *key, Variant &val,
                          const String& context = null_string);
 
-  // Called before iteration to give array a chance to escalate.
-  void escalate();
-
   /*
    * Variant used to implicitly convert to all these types.  (It still
    * implicitly converts *from* most of them.)
@@ -746,23 +743,6 @@ class Variant : private TypedValue {
   Variant rvalAt(litstr offset, ACCESSPARAMS_DECL) const = delete;
   Variant rvalAt(const String& offset, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CVarRef offset, ACCESSPARAMS_DECL) const;
-
-  template <typename T>
-  CVarRef rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
-  CVarRef rvalRef(int offset, CVarRef tmp, ACCESSPARAMS_DECL) const {
-    return rvalRef((int64_t)offset, tmp, flags);
-  }
-
-  CVarRef rvalRef(int64_t offset, CVarRef tmp, ACCESSPARAMS_DECL) const {
-    if (m_type == KindOfArray) {
-      return m_data.parr->get(offset, flags & AccessFlags::Error);
-    }
-    return rvalRefHelper(offset, tmp, flags);
-  }
-  CVarRef rvalRef(double offset, CVarRef tmp, ACCESSPARAMS_DECL) const = delete;
-  CVarRef rvalRef(litstr offset, CVarRef tmp, ACCESSPARAMS_DECL) const = delete;
-  CVarRef rvalRef(const String& offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
-  CVarRef rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
 
   // for when we know its an array or null
   template <typename T>

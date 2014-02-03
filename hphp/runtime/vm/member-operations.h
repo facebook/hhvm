@@ -283,13 +283,22 @@ inline TypedValue* ElemString(TypedValue& tvScratch, TypedValue* base,
 /**
  * Elem when base is an Object
  */
-template <KeyType keyType>
+template <bool warn, KeyType keyType>
 inline TypedValue* ElemObject(TypedValue& tvRef, TypedValue* base,
                               TypedValue* key) {
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
   if (LIKELY(base->m_data.pobj->isCollection())) {
-    return collectionGet(base->m_data.pobj, key);
+    if (warn) {
+      return collectionAt(base->m_data.pobj, key);
+    } else {
+      auto* res = collectionGet(base->m_data.pobj, key);
+      if (!res) {
+        res = &tvRef;
+        tvWriteNull(res);
+      }
+      return res;
+    }
   }
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
 }
@@ -317,7 +326,7 @@ NEVER_INLINE TypedValue* ElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfArray:
     return ElemArray<warn, keyType>(base->m_data.parr, key);
   case KindOfObject:
-    return ElemObject<keyType>(tvRef, base, key);
+    return ElemObject<warn, keyType>(tvRef, base, key);
   default:
     assert(false);
     return nullptr;
@@ -434,7 +443,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
       raise_error("Collection elements cannot be taken by reference");
       return nullptr;
     }
-    return collectionGet(obj, key);
+    return collectionAt(obj, key);
   } else if (obj->getVMClass() == SystemLib::s_ArrayObjectClass) {
     auto storage = obj->o_realProp(s_storage, 0,
                                    SystemLib::s_ArrayObjectClass->nameRef());
@@ -509,7 +518,7 @@ inline TypedValue* ElemUObject(TypedValue& tvRef, TypedValue* base,
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
   if (LIKELY(base->m_data.pobj->isCollection())) {
-    return collectionGet(base->m_data.pobj, key);
+    return collectionAt(base->m_data.pobj, key);
   }
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
 }
@@ -1120,7 +1129,7 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfObject: {
     initScratchKey<keyType>(scratch, key);
     if (LIKELY(base->m_data.pobj->isCollection())) {
-      result = collectionGet(base->m_data.pobj, key);
+      result = collectionAt(base->m_data.pobj, key);
       SETOP_BODY(result, op, rhs);
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
@@ -1356,7 +1365,7 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     TypedValue* result;
     initScratchKey<keyType>(scratch, key);
     if (LIKELY(base->m_data.pobj->isCollection())) {
-      result = collectionGet(base->m_data.pobj, key);
+      result = collectionAt(base->m_data.pobj, key);
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
     }

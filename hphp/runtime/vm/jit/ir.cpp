@@ -216,6 +216,10 @@ bool isQueryOp(Opcode opc) {
   }
 }
 
+bool isFusableQueryOp(Opcode opc) {
+  return isQueryOp(opc) && opc != IsType && opc != IsNType;
+}
+
 bool isQueryJmpOp(Opcode opc) {
   switch (opc) {
   case JmpGt:
@@ -237,7 +241,7 @@ bool isQueryJmpOp(Opcode opc) {
 }
 
 Opcode queryToJmpOp(Opcode opc) {
-  assert(isQueryOp(opc));
+  assert(isFusableQueryOp(opc));
   switch (opc) {
   case Gt:                 return JmpGt;
   case Gte:                return JmpGte;

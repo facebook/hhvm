@@ -1966,7 +1966,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   }
 
   // Fuse jumps with query operators.
-  if (isQueryOp(srcOpcode)) {
+  if (isFusableQueryOp(srcOpcode)) {
     SrcRange ssas = srcInst->srcs();
     return gen(
       queryToJmpOp(

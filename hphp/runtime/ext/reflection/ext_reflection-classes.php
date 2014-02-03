@@ -2916,7 +2916,7 @@ implements Reflector {
    *
    * @return     mixed   Returns Closure. Returns NULL in case of an error.
    */
-  public function getClosure($object) {
+  public function getClosure($object= null) {
     if ($this->isStatic()) {
       return function() {
         return $this->invokeArgs(null, func_get_args());

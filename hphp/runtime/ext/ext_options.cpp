@@ -261,16 +261,20 @@ Variant f_getenv(const String& varname) {
   return false;
 }
 
-int64_t f_getlastmod() {
-  throw NotSupportedException(__func__, "page modified time not supported");
+Variant f_getlastmod() {
+  struct stat s;
+  int ret = ::stat(g_context->getContainingFileName().c_str(), &s);
+  return ret == 0 ? s.st_mtime : false;
 }
 
 int64_t f_getmygid() {
   return getgid();
 }
 
-int64_t f_getmyinode() {
-  throw NotSupportedException(__func__, "not exposing operating system info");
+Variant f_getmyinode() {
+  struct stat s;
+  int ret = ::stat(g_context->getContainingFileName().c_str(), &s);
+  return ret == 0 ? s.st_ino : false;
 }
 
 int64_t f_getmypid() {

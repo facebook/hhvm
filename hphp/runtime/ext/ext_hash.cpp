@@ -93,7 +93,15 @@ public:
 
     HashEngines["snefru"]     = HashEnginePtr(new hash_snefru());
     HashEngines["gost"]       = HashEnginePtr(new hash_gost());
+#ifdef FACEBOOK
+    // Temporarily leave adler32 algo inverting its hash output
+    // to retain BC pending conversion of user code to correct endianness
+    // sgolemon(2014-01-30)
+    HashEngines["adler32-fb"] = HashEnginePtr(new hash_adler32(true));
+    HashEngines["adler32"]    = HashEnginePtr(new hash_adler32(true));
+#else
     HashEngines["adler32"]    = HashEnginePtr(new hash_adler32());
+#endif
     HashEngines["crc32"]      = HashEnginePtr(new hash_crc32(false));
     HashEngines["crc32b"]     = HashEnginePtr(new hash_crc32(true));
     HashEngines["haval128,3"] = HashEnginePtr(new hash_haval(3,128));

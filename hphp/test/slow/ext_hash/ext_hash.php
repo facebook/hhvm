@@ -47,7 +47,8 @@ function brown_fox() {
 
   if (is_facebook()) {
     var_dump(
-      hash("tiger128,3-fb", $data) == '9370512795923aaeeb76fe3d8ea7433e'
+      hash("tiger128,3-fb", $data) == '9370512795923aaeeb76fe3d8ea7433e' &&
+      hash("adler32-fb", $data) == '5e10f17b'
     );
     var_dump(hash("adler32", $data) == '5e10f17b');
     var_dump(hash("crc32b", $data) == '4246a382');

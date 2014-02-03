@@ -25,12 +25,15 @@ namespace HPHP {
 
 class hash_adler32 : public HashEngine {
 public:
-  hash_adler32();
+  explicit hash_adler32(bool invert = false);
 
   virtual void hash_init(void *context);
   virtual void hash_update(void *context, const unsigned char *buf,
                            unsigned int count);
   virtual void hash_final(unsigned char *digest, void *context);
+
+private:
+  bool m_invert;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

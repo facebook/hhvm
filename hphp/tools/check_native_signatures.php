@@ -108,7 +108,10 @@ function parse_cpp_functions(string $file):
 }
 
 function match_return_type(string $php, string $cpp): bool {
-  if ($php[0] == '?' || $php[0] == '@') {
+  if ($php[0] == '@') {
+     $php = substr($php, 1);
+  }
+  if ($php[0] == '?') {
     $expected = 'Variant';
   } else {
     switch (strtolower($php)) {
@@ -157,7 +160,10 @@ function match_return_type(string $php, string $cpp): bool {
 }
 
 function match_arg_type(string $php, string $cpp): bool {
-  if ($php[0] == '?' || $php[0] == '@') {
+  if ($php[0] == '@') {
+     $php = substr($php, 1);
+  }
+  if ($php[0] == '?') {
     $expected = 'CVarRef';
   } else {
     switch (strtolower($php)) {

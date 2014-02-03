@@ -254,6 +254,70 @@ protected:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+class MySQLStmtVariables {
+public:
+  explicit MySQLStmtVariables(std::vector<Variant*> arr);
+  ~MySQLStmtVariables();
+
+  bool init_params(MYSQL_STMT *stmt, const String& types);
+  bool bind_result(MYSQL_STMT *stmt);
+  bool bind_params(MYSQL_STMT *stmt);
+  void update_result();
+
+private:
+  std::vector<Variant*>  m_arr;
+  std::vector<Variant>   m_value_arr;
+  MYSQL_BIND            *m_vars;
+  my_bool               *m_null;
+  unsigned long         *m_length;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class MySQLStmt : public SweepableResourceData {
+public:
+  DECLARE_RESOURCE_ALLOCATION(MySQLStmt);
+
+  explicit MySQLStmt(MYSQL *mysql);
+  virtual ~MySQLStmt();
+
+  CLASSNAME_IS("mysql stmt")
+
+  // overriding ResourceData
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
+
+  Variant close();
+
+  MYSQL_STMT *get() { return m_stmt; }
+
+  Variant affected_rows();
+  Variant attr_get(int64_t attr);
+  Variant attr_set(int64_t attr, int64_t value);
+  Variant bind_param(const String& types, std::vector<Variant*> vars);
+  Variant bind_result(std::vector<Variant*> vars);
+  Variant get_errno();
+  Variant get_error();
+  Variant execute();
+  Variant fetch();
+  Variant field_count();
+  Variant free_result();
+  Variant insert_id();
+  Variant num_rows();
+  Variant param_count();
+  Variant prepare(const String& query);
+  Variant reset();
+  Variant result_metadata();
+  Variant store_result();
+
+protected:
+  MYSQL_STMT *m_stmt;
+  bool m_prepared;
+  MySQLStmtVariables *m_param_vars;
+  MySQLStmtVariables *m_result_vars;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 // helper
 
 MySQLResult *php_mysql_extract_result(CVarRef result);

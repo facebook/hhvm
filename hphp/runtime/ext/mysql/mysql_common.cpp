@@ -130,8 +130,9 @@ String MySQL::GetDefaultSocket() {
   return MYSQL_UNIX_ADDR;
 }
 
-String MySQL::GetHash(const String& host, int port, const String& socket, const String& username,
-                      const String& password, int client_flags) {
+String MySQL::GetHash(const String& host, int port, const String& socket,
+                      const String& username, const String& password,
+                      int client_flags) {
   char buf[1024];
   snprintf(buf, sizeof(buf), "%s:%d:%s:%s:%s:%d",
            host.data(), port, socket.data(),
@@ -140,15 +141,16 @@ String MySQL::GetHash(const String& host, int port, const String& socket, const 
 }
 
 MySQL *MySQL::GetCachedImpl(const char *name, const String& host, int port,
-                            const String& socket, const String& username, const String& password,
-                            int client_flags) {
+                            const String& socket, const String& username,
+                            const String& password, int client_flags) {
   String key = GetHash(host, port, socket, username, password, client_flags);
   return dynamic_cast<MySQL*>(g_persistentObjects->get(name, key.data()));
 }
 
 void MySQL::SetCachedImpl(const char *name, const String& host, int port,
-                          const String& socket, const String& username, const String& password,
-                          int client_flags, MySQL *conn) {
+                          const String& socket, const String& username,
+                          const String& password, int client_flags,
+                          MySQL *conn) {
   String key = GetHash(host, port, socket, username, password, client_flags);
   g_persistentObjects->set(name, key.data(), conn);
 }
@@ -239,9 +241,10 @@ void MySQL::close() {
   m_conn = nullptr;
 }
 
-bool MySQL::connect(const String& host, int port, const String& socket, const String& username,
-                    const String& password, const String& database,
-                    int client_flags, int connect_timeout) {
+bool MySQL::connect(const String& host, int port, const String& socket,
+                    const String& username, const String& password,
+                    const String& database, int client_flags,
+                    int connect_timeout) {
   if (m_conn == NULL) {
     m_conn = create_new_conn();
   }
@@ -271,9 +274,10 @@ bool MySQL::connect(const String& host, int port, const String& socket, const St
   return ret;
 }
 
-bool MySQL::reconnect(const String& host, int port, const String& socket, const String& username,
-                      const String& password, const String& database,
-                      int client_flags, int connect_timeout) {
+bool MySQL::reconnect(const String& host, int port, const String& socket,
+                      const String& username, const String& password,
+                      const String& database, int client_flags,
+                      int connect_timeout) {
   if (m_conn == NULL) {
     m_conn = create_new_conn();
     if (connect_timeout >= 0) {
@@ -710,6 +714,390 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
   if (m_current_field < getFieldCount()) m_current_field++;
   return getFieldInfo(m_current_field);
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+// MySQLStmtVariables
+
+MySQLStmtVariables::MySQLStmtVariables(std::vector<Variant*> arr): m_arr(arr) {
+  int count = m_arr.size();
+  m_vars   = (MYSQL_BIND*)calloc(count, sizeof(MYSQL_BIND));
+  m_null   = (my_bool*)calloc(count, sizeof(my_bool));
+  m_length = (unsigned long*)calloc(count, sizeof(unsigned long));
+
+  for (int i = 0; i < count; i++) {
+    m_null[i] = false;
+    m_length[i] = 0;
+
+    MYSQL_BIND *b = &m_vars[i];
+    b->is_null = &m_null[i];
+    b->length  = &m_length[i];
+    b->buffer = nullptr;
+    b->buffer_length = 0;
+    b->buffer_type = MYSQL_TYPE_STRING;
+  }
+}
+
+MySQLStmtVariables::~MySQLStmtVariables() {
+  for (int i = 0; i < m_arr.size(); i++) {
+    free(m_vars[i].buffer);
+  }
+
+  free(m_vars);
+  free(m_null);
+  free(m_length);
+}
+
+bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
+  assert(m_arr.size() == mysql_stmt_field_count(stmt));
+
+  MYSQL_RES *res = mysql_stmt_result_metadata(stmt);
+  MYSQL_FIELD *fields = mysql_fetch_fields(res);
+  for(int i = 0; i < m_arr.size(); i++) {
+    MYSQL_BIND *b = &m_vars[i];
+    b->is_unsigned = (fields[i].flags & UNSIGNED_FLAG) ? 1 : 0;
+
+    switch (fields[i].type) {
+      case MYSQL_TYPE_NULL:
+        b->buffer_type = MYSQL_TYPE_NULL;
+      case MYSQL_TYPE_DOUBLE:
+      case MYSQL_TYPE_FLOAT:
+        b->buffer_type = MYSQL_TYPE_DOUBLE;
+        b->buffer_length = sizeof(double);
+        break;
+      case MYSQL_TYPE_LONGLONG:
+#if MYSQL_VERSION_ID > 50002
+      case MYSQL_TYPE_BIT:
+#endif
+      case MYSQL_TYPE_LONG:
+      case MYSQL_TYPE_INT24:
+      case MYSQL_TYPE_SHORT:
+      case MYSQL_TYPE_YEAR:
+      case MYSQL_TYPE_TINY:
+        b->buffer_type = MYSQL_TYPE_LONGLONG;
+        b->buffer_length = sizeof(int64_t);
+        break;
+      case MYSQL_TYPE_DATE:
+      case MYSQL_TYPE_DATETIME:
+      case MYSQL_TYPE_TIMESTAMP:
+      case MYSQL_TYPE_TIME:
+      case MYSQL_TYPE_STRING:
+      case MYSQL_TYPE_VARCHAR:
+      case MYSQL_TYPE_VAR_STRING:
+      case MYSQL_TYPE_ENUM:
+      case MYSQL_TYPE_SET:
+      case MYSQL_TYPE_LONG_BLOB:
+      case MYSQL_TYPE_MEDIUM_BLOB:
+      case MYSQL_TYPE_BLOB:
+      case MYSQL_TYPE_TINY_BLOB:
+      case MYSQL_TYPE_GEOMETRY:
+      case MYSQL_TYPE_DECIMAL:
+      case MYSQL_TYPE_NEWDECIMAL:
+        b->buffer_type = MYSQL_TYPE_STRING;
+        b->buffer_length = fields[i].max_length ?
+                             fields[i].max_length :
+                             fields[i].length;
+        break;
+      default:
+        // There exists some more types in this enum like MYSQL_TYPE_NEWDATE,
+        // MYSQL_TYPE_TIMESTAMP2, MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but
+        // they are just used on the server
+        assert(false);
+    }
+
+    if (b->buffer_length > 0) {
+      b->buffer = calloc(1, b->buffer_length);
+    }
+  }
+  mysql_free_result(res);
+
+  return !mysql_stmt_bind_result(stmt, m_vars);
+}
+
+void MySQLStmtVariables::update_result() {
+  for (int i = 0; i < m_arr.size(); i++) {
+    MYSQL_BIND *b = &m_vars[i];
+    Variant v;
+
+    if (!*b->is_null && b->buffer_type != MYSQL_TYPE_NULL) {
+      MYSQL_BIND *b = &m_vars[i];
+      switch (b->buffer_type) {
+        case MYSQL_TYPE_DOUBLE:
+          v = *(double*)b->buffer;
+          break;
+        case MYSQL_TYPE_LONGLONG:
+          v = *(int64_t*)b->buffer;
+          break;
+        case MYSQL_TYPE_STRING:
+          v = String((char *)b->buffer, *b->length, CopyString);
+          break;
+        default:
+          // We never ask for anything else than DOUBLE, LONGLONG and STRING
+          // so in the case we get something else back something is really wrong
+          assert(false);
+      }
+    }
+
+    *m_arr[i]->getRefData() = v;
+  }
+}
+
+bool MySQLStmtVariables::init_params(MYSQL_STMT *stmt, const String& types) {
+  assert(m_arr.size() == types.size());
+
+  for (int i = 0; i < types.size(); i++) {
+    MYSQL_BIND *b = &m_vars[i];
+    switch (types[i]) {
+      case 'i':
+        b->buffer_type = MYSQL_TYPE_LONGLONG;
+        break;
+      case 'd':
+        b->buffer_type = MYSQL_TYPE_DOUBLE;
+        break;
+      case 's':
+        b->buffer_type = MYSQL_TYPE_STRING;
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+  return !mysql_stmt_bind_param(stmt, m_vars);
+}
+
+bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
+  m_value_arr.clear();
+  for (int i = 0; i < m_arr.size(); i++) {
+    MYSQL_BIND *b = &m_vars[i];
+    const Variant& var = *m_arr[i];
+    Variant v;
+    if (var.isNull()) {
+      *b->is_null = 1;
+    } else {
+      switch (b->buffer_type) {
+        case MYSQL_TYPE_LONGLONG:
+          {
+            v = var.toInt64();
+            b->buffer = v.getInt64Data();
+          }
+          break;
+        case MYSQL_TYPE_DOUBLE:
+          {
+            v = var.toDouble();
+            b->buffer = v.getDoubleData();
+          }
+          break;
+        case MYSQL_TYPE_STRING:
+          {
+            v = var.toString();
+            StringData *sd = v.getStringData();
+            b->buffer = (void *)sd->data();
+            b->buffer_length = sd->size();
+            *b->length = sd->size();
+          }
+          break;
+        default:
+          assert(false);
+      }
+    }
+
+    m_value_arr.push_back(v);
+  }
+
+  return !mysql_stmt_bind_param(stmt, m_vars);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MySQLStmt
+
+#define VALIDATE_STMT                                                          \
+  if (!m_stmt) {                                                               \
+    raise_warning("Couldn't fetch mysqli_stmt");                               \
+    return Variant(Variant::NullInit());                                       \
+  }
+
+#define VALIDATE_PREPARED                                                      \
+  VALIDATE_STMT                                                                \
+  if (!m_prepared) {                                                           \
+    raise_warning("invalid object or resource");                               \
+    return Variant(Variant::NullInit());                                       \
+  }
+
+MySQLStmt::MySQLStmt(MYSQL *mysql)
+  : m_stmt(mysql_stmt_init(mysql)), m_prepared(false), m_param_vars(nullptr),
+    m_result_vars(nullptr)
+{}
+
+MySQLStmt::~MySQLStmt() {
+  close();
+}
+
+void MySQLStmt::sweep() {
+  close();
+  // Note that ~MySQLStmt is *not* going to run when we are swept.
+}
+
+Variant MySQLStmt::affected_rows() {
+  VALIDATE_PREPARED
+  return (int64_t)mysql_stmt_affected_rows(m_stmt);
+}
+
+Variant MySQLStmt::attr_get(int64_t attr) {
+  VALIDATE_PREPARED
+
+  int64_t value = 0;
+
+  if (mysql_stmt_attr_get(m_stmt, (enum_stmt_attr_type)attr, &value)) {
+    return false;
+  }
+
+#if MYSQL_VERSION_ID >= 50107
+  if ((enum_stmt_attr_type)attr == STMT_ATTR_UPDATE_MAX_LENGTH) {
+    value = *(my_bool *)&value;
+  }
+#endif
+
+  return value;
+}
+
+Variant MySQLStmt::attr_set(int64_t attr, int64_t value) {
+  VALIDATE_PREPARED
+
+#if MYSQL_VERSION_ID >= 50107
+  if ((enum_stmt_attr_type)attr == STMT_ATTR_UPDATE_MAX_LENGTH) {
+    value = (my_bool)value;
+  }
+#endif
+  return !mysql_stmt_attr_set(m_stmt, (enum_stmt_attr_type)attr, &value);
+}
+
+Variant MySQLStmt::bind_param(const String& types, std::vector<Variant*> vars) {
+  VALIDATE_PREPARED
+
+  delete m_param_vars;
+  m_param_vars = new MySQLStmtVariables(vars);
+  return m_param_vars->init_params(m_stmt, types);
+}
+
+Variant MySQLStmt::bind_result(std::vector<Variant*> vars) {
+  VALIDATE_PREPARED
+
+  delete m_result_vars;
+  m_result_vars = new MySQLStmtVariables(vars);
+  return m_result_vars->bind_result(m_stmt);
+}
+
+Variant MySQLStmt::get_errno() {
+  VALIDATE_STMT
+  return (int64_t)mysql_stmt_errno(m_stmt);
+}
+
+Variant MySQLStmt::get_error() {
+  VALIDATE_STMT
+  return String(mysql_stmt_error(m_stmt), CopyString);
+}
+
+Variant MySQLStmt::close() {
+  m_prepared = false;
+  if (m_stmt) {
+    bool ret = !mysql_stmt_close(m_stmt);
+    m_stmt = nullptr;
+    return ret;
+  }
+
+  delete m_param_vars;
+  delete m_result_vars;
+
+  return true;
+}
+
+Variant MySQLStmt::execute() {
+  VALIDATE_PREPARED
+
+  if (m_param_vars) {
+    m_param_vars->bind_params(m_stmt);
+  }
+
+  return !mysql_stmt_execute(m_stmt);
+}
+
+Variant MySQLStmt::fetch() {
+  VALIDATE_PREPARED
+
+  int64_t ret = mysql_stmt_fetch(m_stmt);
+
+  // We don't treat truncated as an error
+  if (ret && ret != MYSQL_DATA_TRUNCATED) {
+    return false;
+  }
+
+  if (m_result_vars) {
+    m_result_vars->update_result();
+  }
+
+  return true;
+}
+
+Variant MySQLStmt::field_count() {
+  VALIDATE_PREPARED
+  return (int64_t)mysql_stmt_field_count(m_stmt);
+}
+
+Variant MySQLStmt::free_result() {
+  VALIDATE_PREPARED
+  return mysql_stmt_free_result(m_stmt);
+}
+
+Variant MySQLStmt::insert_id() {
+  VALIDATE_PREPARED
+  return (int64_t)mysql_stmt_insert_id(m_stmt);
+}
+
+Variant MySQLStmt::num_rows() {
+  VALIDATE_PREPARED
+  return (int64_t)mysql_stmt_num_rows(m_stmt);
+}
+
+Variant MySQLStmt::param_count() {
+  VALIDATE_PREPARED
+  return mysql_stmt_param_count(m_stmt);
+}
+
+Variant MySQLStmt::prepare(const String& query) {
+  VALIDATE_STMT
+
+  // Cleaning up just in case they have been set before
+  delete m_param_vars;
+  delete m_result_vars;
+
+  m_prepared = !mysql_stmt_prepare(m_stmt, query.c_str(), query.size());
+  return m_prepared;
+}
+
+Variant MySQLStmt::reset() {
+  VALIDATE_STMT
+  return mysql_stmt_reset(m_stmt);
+}
+
+Variant MySQLStmt::store_result() {
+  VALIDATE_PREPARED
+  return !mysql_stmt_store_result(m_stmt);
+}
+
+Variant MySQLStmt::result_metadata() {
+  VALIDATE_PREPARED
+
+  MYSQL_RES *mysql_result = mysql_stmt_result_metadata(m_stmt);
+  if (!mysql_result) {
+    return false;
+  }
+
+  return Resource(NEWOBJ(MySQLResult)(mysql_result));
+  // TODO: This should return a mysqli_result and not a resource
+}
+
+#undef VALIDATE_STMT
+#undef VALIDATE_PREPARED
 
 ///////////////////////////////////////////////////////////////////////////////
 // query functions

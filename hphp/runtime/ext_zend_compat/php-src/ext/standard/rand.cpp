@@ -35,5 +35,5 @@
 #include "basic_functions.h"
 
 PHPAPI long php_rand(TSRMLS_D) {
-  return HPHP::f_rand();
+  return HPHP::hphp_rand();
 }

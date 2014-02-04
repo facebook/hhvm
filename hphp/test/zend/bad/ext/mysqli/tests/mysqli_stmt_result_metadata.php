@@ -11,7 +11,7 @@
 	if (NULL !== ($tmp = mysqli_stmt_result_metadata($stmt)))
 		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test"))
+	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test_mysqli_stmt_result_metadata_table_1"))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	if (!is_object(($res = mysqli_stmt_result_metadata($stmt))))

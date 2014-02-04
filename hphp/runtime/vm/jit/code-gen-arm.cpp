@@ -740,7 +740,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     }
     if (rs.numAllocated() == 0) {
       assert(src->inst()->op() == DefConst);
-      m_as.  Mov  (x2a(rd.reg(0)), src->getValBits());
+      m_as.  Mov  (x2a(rd.reg(0)), src->getValRawInt());
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
       // Move src known type to register
@@ -1567,7 +1567,7 @@ void CodeGenerator::emitStore(vixl::Register base,
     int64_t val = 0;
     if (type <= (Type::Bool | Type::Int | Type::Dbl |
                  Type::Arr | Type::StaticStr | Type::Cls)) {
-      val = src->getValBits();
+      val = src->getValRawInt();
     } else {
       not_reached();
     }

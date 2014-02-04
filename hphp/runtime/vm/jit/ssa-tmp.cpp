@@ -132,11 +132,6 @@ RDS::Handle SSATmp::getValRDSHandle() const {
   return m_inst->extra<ConstData>()->as<RDS::Handle>();
 }
 
-uintptr_t SSATmp::getValBits() const {
-  assert(isConst());
-  return m_inst->extra<ConstData>()->as<uintptr_t>();
-}
-
 Variant SSATmp::getValVariant() const {
   switch (m_inst->typeParam().toDataType()) {
   case KindOfUninit:

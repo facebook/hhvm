@@ -124,7 +124,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
     // tmp is a constant
     m_srcReg = InvalidReg;
     if (val) {
-      m_imm = tmp->type().isNull() ? 0 : tmp->getValBits();
+      m_imm = tmp->type().isNull() ? 0 : tmp->getValRawInt();
     } else {
       m_imm = toDataTypeForCall(tmp->type());
     }
@@ -3055,7 +3055,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     }
     if (rs.numAllocated() == 0) {
       assert(src->inst()->op() == DefConst);
-      m_as.emitImmReg(src->getValBits(), rd.reg(0));
+      m_as.emitImmReg(src->getValRawInt(), rd.reg(0));
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
       // move a src known type to a dest register
@@ -4369,7 +4369,7 @@ void CodeGenerator::cgStore(BaseRef dst,
     int64_t val = 0;
     if (type <= (Type::Bool | Type::Int | Type::Dbl |
                  Type::Arr | Type::StaticStr | Type::Cls)) {
-        val = src->getValBits();
+        val = src->getValRawInt();
     } else {
       not_reached();
     }
@@ -4572,7 +4572,7 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   auto idx = inst->src(1);
   auto arrReg = curOpd(arr).reg();
   if (arr->isConst()) {
-    m_as.movq(arr->getValBits(), m_rScratch);
+    m_as.movq(arr->getValRawInt(), m_rScratch);
     arrReg = m_rScratch;
   }
 
@@ -4972,7 +4972,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       auto testReg = rData;
       if (src->isConst()) {
         // In rare cases we can have a const array src here.
-        m_as.movq(src->getValBits(), m_rScratch);
+        m_as.movq(src->getValRawInt(), m_rScratch);
         testReg = m_rScratch;
       }
 
@@ -5672,7 +5672,7 @@ void CodeGenerator::emitTestZero(SSATmp* src) {
    */
   if (reg == InvalidReg) {
     reg = m_rScratch;
-    a.    movq   (src->getValBits(), reg);
+    a.    movq   (src->getValRawInt(), reg);
   }
 
   if (src->isA(Type::Bool)) {

@@ -37,7 +37,7 @@ namespace HPHP {  namespace JIT {
  *   with a pointer to it, returning the result.
  *
  *   Normally IRInstruction creation should go through either
- *   IRUnit::gen or TraceBuilder::gen.  This utility is used to
+ *   IRUnit::gen or IRBuilder::gen.  This utility is used to
  *   implement those.  The lambda must not escape the IRInstruction*.
  */
 

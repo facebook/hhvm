@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
-#include "hphp/runtime/vm/jit/trace-builder.h"
+#include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -305,17 +305,17 @@ IRInstruction* frameRoot(IRInstruction* fpInst) {
 //////////////////////////////////////////////////////////////////////
 
 template<class... Args> SSATmp* Simplifier::cns(Args&&... cns) {
-  return m_tb.cns(std::forward<Args>(cns)...);
+  return m_irb.cns(std::forward<Args>(cns)...);
 }
 
 template<class... Args> SSATmp* Simplifier::gen(Opcode op, Args&&... args) {
   assert(!m_insts.empty());
-  return m_tb.gen(op, m_insts.top()->marker(), std::forward<Args>(args)...);
+  return m_irb.gen(op, m_insts.top()->marker(), std::forward<Args>(args)...);
 }
 
 template<class... Args> SSATmp* Simplifier::gen(Opcode op, BCMarker marker,
                                                 Args&&... args) {
-  return m_tb.gen(op, marker, std::forward<Args>(args)...);
+  return m_irb.gen(op, marker, std::forward<Args>(args)...);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -479,7 +479,7 @@ SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
     // we don't need to spill it.
     if (srcInst->op() == LdStack && srcInst->src(0) == sp &&
         srcInst->extra<LdStack>()->offset == offset) {
-      spillVals[i] = m_tb.genDefNone();
+      spillVals[i] = m_irb.genDefNone();
     }
   }
 
@@ -563,7 +563,7 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   auto const oldType = src->type();
   auto const newType = inst->typeParam();
 
-  if (m_tb.typeMightRelax(src)) return nullptr;
+  if (m_irb.typeMightRelax(src)) return nullptr;
 
   if (oldType.not(newType)) {
     /* This guard will always fail. Probably an incorrect prediction from the
@@ -620,12 +620,12 @@ SSATmp* Simplifier::simplifyAssertType(IRInstruction* inst) {
     TRACE_PUNT("Invalid AssertType");
   }
 
-  if (m_tb.shouldElideAssertType(oldType, newType, src)) {
+  if (m_irb.shouldElideAssertType(oldType, newType, src)) {
     return src;
   }
 
   if (filterAssertType(inst, oldType)) {
-    m_tb.constrainValue(src, categoryForType(src->type()));
+    m_irb.constrainValue(src, categoryForType(src->type()));
   }
   return nullptr;
 }
@@ -1882,7 +1882,7 @@ SSATmp* Simplifier::simplifyPrint(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyDecRef(IRInstruction* inst) {
   auto src = inst->src(0);
-  if (!m_tb.typeMightRelax(src) && !isRefCounted(src)) {
+  if (!m_irb.typeMightRelax(src) && !isRefCounted(src)) {
     inst->convertToNop();
   }
   return nullptr;
@@ -1890,7 +1890,7 @@ SSATmp* Simplifier::simplifyDecRef(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyIncRef(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
-  if (!m_tb.typeMightRelax(src) && !isRefCounted(src)) {
+  if (!m_irb.typeMightRelax(src) && !isRefCounted(src)) {
     inst->convertToNop();
   }
   return nullptr;
@@ -1900,7 +1900,7 @@ SSATmp* Simplifier::simplifyIncRefCtx(IRInstruction* inst) {
   auto* ctx = inst->src(0);
   if (ctx->isA(Type::Obj)) {
     inst->setOpcode(IncRef);
-  } else if (!m_tb.typeMightRelax(ctx) && ctx->type().notCounted()) {
+  } else if (!m_irb.typeMightRelax(ctx) && ctx->type().notCounted()) {
     inst->convertToNop();
   }
 
@@ -2013,12 +2013,12 @@ SSATmp* Simplifier::simplifyAssertStk(IRInstruction* inst) {
     TRACE_PUNT("Invalid AssertStk");
   }
 
-  if (m_tb.shouldElideAssertType(oldType, newType, info.value)) {
+  if (m_irb.shouldElideAssertType(oldType, newType, info.value)) {
     return inst->src(0);
   }
 
   if (filterAssertType(inst, oldType)) {
-    m_tb.constrainStack(idx, categoryForType(oldType));
+    m_irb.constrainStack(idx, categoryForType(oldType));
   }
 
   return nullptr;
@@ -2039,7 +2039,7 @@ SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
     // value that isn't from another raw load, we need to leave something in
     // its place to preserve that information.
     if (!value->inst()->isRawLoad() &&
-        (value->type().maybeCounted() || m_tb.typeMightRelax(info.value))) {
+        (value->type().maybeCounted() || m_irb.typeMightRelax(info.value))) {
       gen(TakeStack, info.value);
     }
     return info.value;
@@ -2051,7 +2051,8 @@ SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyTakeStack(IRInstruction* inst) {
-  if (inst->src(0)->type().notCounted() && !m_tb.typeMightRelax(inst->src(0))) {
+  if (inst->src(0)->type().notCounted() &&
+      !m_irb.typeMightRelax(inst->src(0))) {
     inst->convertToNop();
   }
 
@@ -2059,9 +2060,9 @@ SSATmp* Simplifier::simplifyTakeStack(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyDecRefLoc(IRInstruction* inst) {
-  auto const localValue = m_tb.localValue(inst->extra<DecRefLoc>()->locId,
+  auto const localValue = m_irb.localValue(inst->extra<DecRefLoc>()->locId,
                                           DataTypeGeneric);
-  if (!m_tb.typeMightRelax(localValue) && inst->typeParam().notCounted()) {
+  if (!m_irb.typeMightRelax(localValue) && inst->typeParam().notCounted()) {
     inst->convertToNop();
   }
   return nullptr;
@@ -2099,13 +2100,13 @@ SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<StackOffset>()->offset);
   if (info.value && !info.spansCall) {
-    if (info.value->type().maybeCounted() || m_tb.typeMightRelax(info.value)) {
+    if (info.value->type().maybeCounted() || m_irb.typeMightRelax(info.value)) {
       gen(TakeStack, info.value);
     }
     inst->convertToNop();
     return gen(DecRef, info.value);
   }
-  if (m_tb.typeMightRelax(info.value)) {
+  if (m_irb.typeMightRelax(info.value)) {
     return nullptr;
   }
 

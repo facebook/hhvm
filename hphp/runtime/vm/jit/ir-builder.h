@@ -46,7 +46,7 @@ namespace HPHP {  namespace JIT {
  *
  *   - preOptimize pass
  *
- *      Before an instruction is linked into the trace, TraceBuilder
+ *      Before an instruction is linked into the trace, IRBuilder
  *      internally runs preOptimize() on it, which can do some
  *      tracelet-state related modifications to the instruction.  For
  *      example, it can eliminate redundant guards.
@@ -61,7 +61,7 @@ namespace HPHP {  namespace JIT {
  *
  *   - simplification pass
  *
- *      After the preOptimize pass, TraceBuilder calls out to
+ *      After the preOptimize pass, IRBuilder calls out to
  *      Simplifier to perform state-independent optimizations, like
  *      copy propagation and strength reduction.  (See simplifier.h.)
  *
@@ -70,12 +70,12 @@ namespace HPHP {  namespace JIT {
  * be used to perform a second round of the above two optimizations via the
  * reoptimize() entry point.
  */
-struct TraceBuilder {
-  TraceBuilder(Offset initialBcOffset,
-               Offset initialSpOffsetFromFp,
-               IRUnit&,
-               const Func* func);
-  ~TraceBuilder();
+struct IRBuilder {
+  IRBuilder(Offset initialBcOffset,
+            Offset initialSpOffsetFromFp,
+            IRUnit&,
+            const Func* func);
+  ~IRBuilder();
 
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
   bool typeMightRelax(SSATmp* val = nullptr) const;
@@ -129,7 +129,7 @@ struct TraceBuilder {
    *
    * gen(CodeForMainBlock, ...);
    * {
-   *   BlockPusher bp(m_tb, marker, exitBlock);
+   *   BlockPusher bp(m_irb, marker, exitBlock);
    *   gen(CodeForExitBlock, ...);
    * }
    * gen(CodeForMainBlock, ...);
@@ -142,7 +142,7 @@ struct TraceBuilder {
   void popBlock();
 
   /*
-   * Run another pass of TraceBuilder-managed optimizations on this
+   * Run another pass of IRBuilder-managed optimizations on this
    * unit.
    */
   void reoptimize();
@@ -310,8 +310,8 @@ private:
   // RAII disable of CSE; only restores if it used to be on.  Used for
   // control flow, where we currently don't allow CSE.
   struct DisableCseGuard {
-    explicit DisableCseGuard(TraceBuilder& tb)
-      : m_state(tb.m_state)
+    explicit DisableCseGuard(IRBuilder& irb)
+      : m_state(irb.m_state)
       , m_oldEnable(m_state.enableCse())
     {
       m_state.setEnableCse(false);
@@ -373,10 +373,10 @@ private:
 };
 
 /*
- * BranchImpl is used by TraceBuilder::cond to support branch and next lambdas
+ * BranchImpl is used by IRBuilder::cond to support branch and next lambdas
  * with different signatures. See cond for details.
  */
-template<> struct TraceBuilder::BranchImpl<void> {
+template<> struct IRBuilder::BranchImpl<void> {
   template<typename Branch, typename Next>
   static SSATmp* go(Branch branch, Block* taken, Next next) {
     branch(taken);
@@ -384,7 +384,7 @@ template<> struct TraceBuilder::BranchImpl<void> {
   }
 };
 
-template<> struct TraceBuilder::BranchImpl<SSATmp*> {
+template<> struct IRBuilder::BranchImpl<SSATmp*> {
   template<typename Branch, typename Next>
   static SSATmp* go(Branch branch, Block* taken, Next next) {
     return next(branch(taken));
@@ -394,24 +394,24 @@ template<> struct TraceBuilder::BranchImpl<SSATmp*> {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * RAII helper for emitting code to exit traces. See TraceBuilder::pushTrace
+ * RAII helper for emitting code to exit traces. See IRBuilder::pushTrace
  * for usage.
  */
 struct BlockPusher {
-  BlockPusher(TraceBuilder& tb, BCMarker marker, Block* block,
+  BlockPusher(IRBuilder& irb, BCMarker marker, Block* block,
               const boost::optional<Block::iterator>& where =
                 boost::optional<Block::iterator>())
-    : m_tb(tb)
+    : m_irb(irb)
   {
-    tb.pushBlock(marker, block, where);
+    irb.pushBlock(marker, block, where);
   }
 
   ~BlockPusher() {
-    m_tb.popBlock();
+    m_irb.popBlock();
   }
 
  private:
-  TraceBuilder& m_tb;
+  IRBuilder& m_irb;
 };
 
 }}

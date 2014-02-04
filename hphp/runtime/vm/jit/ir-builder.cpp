@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/trace-builder.h"
+#include "hphp/runtime/vm/jit/ir-builder.h"
 
 #include "folly/ScopeGuard.h"
 
@@ -28,10 +28,10 @@ namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-TraceBuilder::TraceBuilder(Offset initialBcOffset,
-                           Offset initialSpOffsetFromFp,
-                           IRUnit& unit,
-                           const Func* func)
+IRBuilder::IRBuilder(Offset initialBcOffset,
+                     Offset initialSpOffsetFromFp,
+                     IRUnit& unit,
+                     const Func* func)
   : m_unit(unit)
   , m_simplifier(*this)
   , m_state(unit, initialSpOffsetFromFp, func)
@@ -45,7 +45,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   }
 }
 
-TraceBuilder::~TraceBuilder() {
+IRBuilder::~IRBuilder() {
 }
 
 /*
@@ -53,7 +53,7 @@ TraceBuilder::~TraceBuilder() {
  * relaxation. If tmp is null, only conditions that apply to all values are
  * checked.
  */
-bool TraceBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
+bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
   if (!shouldConstrainGuards()) return false;
   if (tmp && (tmp->isConst() || tmp->isA(Type::Cls))) return false;
 
@@ -65,8 +65,8 @@ bool TraceBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
  * around an Assert(Type|Stk|Loc) instruction that doesn't provide a more
  * specific type than its source.
  */
-bool TraceBuilder::shouldElideAssertType(Type oldType, Type newType,
-                                         SSATmp* oldVal) const {
+bool IRBuilder::shouldElideAssertType(Type oldType, Type newType,
+                                      SSATmp* oldVal) const {
   assert(oldType.maybe(newType));
 
   if (!typeMightRelax(oldVal)) return newType >= oldType;
@@ -75,31 +75,31 @@ bool TraceBuilder::shouldElideAssertType(Type oldType, Type newType,
   return newType > oldType;
 }
 
-SSATmp* TraceBuilder::genDefUninit() {
+SSATmp* IRBuilder::genDefUninit() {
   return gen(DefConst, Type::Uninit, ConstData(0));
 }
 
-SSATmp* TraceBuilder::genDefInitNull() {
+SSATmp* IRBuilder::genDefInitNull() {
   return gen(DefConst, Type::InitNull, ConstData(0));
 }
 
-SSATmp* TraceBuilder::genDefNull() {
+SSATmp* IRBuilder::genDefNull() {
   return gen(DefConst, Type::Null, ConstData(0));
 }
 
-SSATmp* TraceBuilder::genPtrToInitNull() {
+SSATmp* IRBuilder::genPtrToInitNull() {
   return gen(DefConst, Type::PtrToInitNull, ConstData(&init_null_variant));
 }
 
-SSATmp* TraceBuilder::genPtrToUninit() {
+SSATmp* IRBuilder::genPtrToUninit() {
   return gen(DefConst, Type::PtrToUninit, ConstData(&null_variant));
 }
 
-SSATmp* TraceBuilder::genDefNone() {
+SSATmp* IRBuilder::genDefNone() {
   return gen(DefConst, Type::None, ConstData(0));
 }
 
-void TraceBuilder::appendInstruction(IRInstruction* inst) {
+void IRBuilder::appendInstruction(IRInstruction* inst) {
   auto defaultWhere = m_curBlock->end();
   auto& where = m_curWhere ? m_curWhere.get() : defaultWhere;
 
@@ -144,7 +144,7 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
   }
 }
 
-void TraceBuilder::appendBlock(Block* block) {
+void IRBuilder::appendBlock(Block* block) {
   assert(m_savedBlocks.empty()); // TODO(t2982555): Don't require this
 
   m_state.finishBlock(m_curBlock);
@@ -155,7 +155,7 @@ void TraceBuilder::appendBlock(Block* block) {
   m_curBlock = block;
 }
 
-std::vector<RegionDesc::TypePred> TraceBuilder::getKnownTypes() const {
+std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() const {
   std::vector<RegionDesc::TypePred> result;
   auto const curFunc  = m_state.func();
   auto const sp       = m_state.sp();
@@ -179,7 +179,7 @@ std::vector<RegionDesc::TypePred> TraceBuilder::getKnownTypes() const {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const locId = inst->extra<CheckLoc>()->locId;
   Type typeParam = inst->typeParam();
 
@@ -215,7 +215,7 @@ SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const locId = inst->extra<AssertLoc>()->locId;
 
   auto const prevType = localType(locId, DataTypeGeneric);
@@ -236,7 +236,7 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimizeLdThis(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeLdThis(IRInstruction* inst) {
   if (m_state.thisAvailable()) {
     auto fpInst = frameRoot(inst->src(0)->inst());
 
@@ -255,12 +255,12 @@ SSATmp* TraceBuilder::preOptimizeLdThis(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimizeLdCtx(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   if (m_state.thisAvailable()) return gen(LdThis, m_state.fp());
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
   /*
    * If $this is available, convert to an instruction sequence that
    * doesn't need to test if it's already live.
@@ -274,7 +274,7 @@ SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   auto const locId = inst->extra<DecRefLoc>()->locId;
 
   /*
@@ -312,7 +312,7 @@ SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimizeLdLoc(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   auto const locId = inst->extra<LdLoc>()->locId;
   if (auto tmp = localValue(locId, DataTypeGeneric)) {
     return tmp;
@@ -326,7 +326,7 @@ SSATmp* TraceBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
   auto const locId = inst->extra<LdLocAddr>()->locId;
   auto const type = localType(locId, DataTypeGeneric);
   assert(inst->typeParam().deref() >= type);
@@ -334,7 +334,7 @@ SSATmp* TraceBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
   // Guard relaxation might change the current local type, so don't try to
   // change to StLocNT until after relaxation happens.
   if (typeMightRelax()) return nullptr;
@@ -374,7 +374,7 @@ SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst)
   switch (inst->op()) {
     X(CheckLoc);
@@ -395,8 +395,8 @@ SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
-                                   const folly::Optional<IdomVector>& idoms) {
+SSATmp* IRBuilder::optimizeWork(IRInstruction* inst,
+                                const folly::Optional<IdomVector>& idoms) {
   // Since some of these optimizations inspect tracked state, we don't
   // perform any of them on non-main traces.
   if (m_savedBlocks.size() > 0) return nullptr;
@@ -461,7 +461,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
   return result;
 }
 
-SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
+SSATmp* IRBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
   if (auto const tmp = optimizeWork(inst, folly::none)) {
     return tmp;
   }
@@ -477,7 +477,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
 }
 
 /*
- * reoptimize() runs a trace through a second pass of TraceBuilder
+ * reoptimize() runs a trace through a second pass of IRBuilder
  * optimizations, like this:
  *
  *   reset state.
@@ -498,7 +498,7 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
  *     if the last conditional branch was turned into a jump, remove the
  *     fall-through edge to the next block.
  */
-void TraceBuilder::reoptimize() {
+void IRBuilder::reoptimize() {
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
   assert(m_savedBlocks.empty());
@@ -568,8 +568,8 @@ void TraceBuilder::reoptimize() {
  * than the guard's existing constraint. Note that this doesn't necessarily
  * mean that the guard was constrained: tc.weak might be true.
  */
-bool TraceBuilder::constrainGuard(IRInstruction* inst,
-                                  TypeConstraint tc) {
+bool IRBuilder::constrainGuard(IRInstruction* inst,
+                               TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
 
   auto& guard = m_guardConstraints[inst];
@@ -616,8 +616,8 @@ bool TraceBuilder::constrainGuard(IRInstruction* inst,
  * DataTypeCategory. Returns true iff one or more guard instructions
  * were constrained.
  */
-bool TraceBuilder::constrainValue(SSATmp* const val,
-                                  TypeConstraint tc) {
+bool IRBuilder::constrainValue(SSATmp* const val,
+                               TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
 
   if (!val) {
@@ -690,14 +690,14 @@ bool TraceBuilder::constrainValue(SSATmp* const val,
   // TODO(t2598894): Should be able to do something with LdMem<T> here
 }
 
-bool TraceBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
-                                  const std::string& why) {
+bool IRBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
+                               const std::string& why) {
   return constrainLocal(locId, localValueSource(locId), tc, why);
 }
 
-bool TraceBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
-                                  TypeConstraint tc,
-                                  const std::string& why) {
+bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
+                               TypeConstraint tc,
+                               const std::string& why) {
   if (!shouldConstrainGuards()) return false;
 
   FTRACE(1, "constrainLocal({}, {}, {}, {})\n",
@@ -733,12 +733,12 @@ bool TraceBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
   return false;
 }
 
-bool TraceBuilder::constrainStack(int32_t idx, TypeConstraint tc) {
+bool IRBuilder::constrainStack(int32_t idx, TypeConstraint tc) {
   return constrainStack(sp(), idx, tc);
 }
 
-bool TraceBuilder::constrainStack(SSATmp* sp, int32_t idx,
-                                  TypeConstraint tc) {
+bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
+                               TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
 
   FTRACE(1, "constrainStack({}, {}, {})\n", *sp->inst(), idx, tc);
@@ -759,29 +759,29 @@ bool TraceBuilder::constrainStack(SSATmp* sp, int32_t idx,
   }
 }
 
-Type TraceBuilder::localType(uint32_t id, TypeConstraint tc) {
+Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
   constrainLocal(id, tc, "localType");
   return m_state.localType(id);
 }
 
-SSATmp* TraceBuilder::localValue(uint32_t id, TypeConstraint tc) {
+SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
   constrainLocal(id, tc, "localValue");
   return m_state.localValue(id);
 }
 
-void TraceBuilder::setMarker(BCMarker marker) {
+void IRBuilder::setMarker(BCMarker marker) {
   auto const oldMarker = m_state.marker();
 
   if (marker == oldMarker) return;
-  FTRACE(2, "TraceBuilder changing current marker from {} to {}\n",
+  FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
          oldMarker.func ? oldMarker.show() : "<invalid>", marker.show());
   assert(marker.valid());
   m_state.setMarker(marker);
 }
 
-void TraceBuilder::pushBlock(BCMarker marker, Block* b,
-                             const boost::optional<Block::iterator>& where) {
-  FTRACE(2, "TraceBuilder saving {}@{} and using {}@{}\n",
+void IRBuilder::pushBlock(BCMarker marker, Block* b,
+                          const boost::optional<Block::iterator>& where) {
+  FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
          m_curBlock, m_state.marker().show(), b, marker.show());
   assert(b);
 
@@ -799,11 +799,11 @@ void TraceBuilder::pushBlock(BCMarker marker, Block* b,
   }
 }
 
-void TraceBuilder::popBlock() {
+void IRBuilder::popBlock() {
   assert(!m_savedBlocks.empty());
 
   auto const& top = m_savedBlocks.back();
-  FTRACE(2, "TraceBuilder popping {}@{} to restore {}@{}\n",
+  FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
          m_curBlock, m_state.marker().show(), top.block, top.marker.show());
   m_curBlock = top.block;
   setMarker(top.marker);

@@ -29,8 +29,8 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
+#include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
-#include "hphp/runtime/vm/jit/trace-builder.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -43,8 +43,8 @@ namespace JIT {
 //////////////////////////////////////////////////////////////////////
 
 struct EvalStack {
-  explicit EvalStack(TraceBuilder& tb)
-    : m_tb(tb)
+  explicit EvalStack(IRBuilder& irb)
+    : m_irb(irb)
   {}
 
   void push(SSATmp* tmp) {
@@ -57,7 +57,7 @@ struct EvalStack {
     }
     SSATmp* tmp = m_vector.back();
     m_vector.pop_back();
-    m_tb.constrainValue(tmp, tc);
+    m_irb.constrainValue(tmp, tc);
     return tmp;
   }
 
@@ -66,7 +66,7 @@ struct EvalStack {
       return nullptr;
     }
     uint32_t index = m_vector.size() - 1 - offset;
-    m_tb.constrainValue(m_vector[index], tc);
+    m_irb.constrainValue(m_vector[index], tc);
     return m_vector[index];
   }
 
@@ -90,7 +90,7 @@ struct EvalStack {
 
 private:
   std::vector<SSATmp*> m_vector;
-  TraceBuilder& m_tb;
+  IRBuilder& m_irb;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -119,7 +119,7 @@ struct HhbcTranslator {
                  const Func* func);
 
   // Accessors.
-  TraceBuilder& traceBuilder() const { return *m_tb.get(); }
+  IRBuilder& traceBuilder() const { return *m_irb.get(); }
   IRUnit& unit() { return m_unit; }
 
   // In between each emit* call, irtranslator indicates the new
@@ -581,7 +581,7 @@ private:
     Class* contextClass() const;
 
     /*
-     * genStk is a wrapper around TraceBuilder::gen() to deal with instructions
+     * genStk is a wrapper around IRBuilder::gen() to deal with instructions
      * that may modify the stack. It inspects the opcode and the types of the
      * inputs, replacing the opcode with the version that returns a new StkPtr
      * if appropriate.
@@ -625,12 +625,12 @@ private:
 
     template<class... Args>
     SSATmp* gen(Args&&... args) {
-      return m_tb.gen(std::forward<Args>(args)...);
+      return m_irb.gen(std::forward<Args>(args)...);
     }
 
     const NormalizedInstruction& m_ni;
     HhbcTranslator& m_ht;
-    TraceBuilder& m_tb;
+    IRBuilder& m_irb;
     IRUnit& m_irf;
     const MInstrInfo& m_mii;
     const BCMarker m_marker;
@@ -680,7 +680,7 @@ private: // tracebuilder forwarding utilities
 
   template<class... Args>
   SSATmp* gen(Args&&... args) {
-    return m_tb->gen(std::forward<Args>(args)...);
+    return m_irb->gen(std::forward<Args>(args)...);
   }
 
 private:
@@ -890,7 +890,7 @@ private:
 
 private:
   IRUnit m_unit;
-  std::unique_ptr<TraceBuilder> const m_tb;
+  std::unique_ptr<IRBuilder> const m_irb;
 
   std::vector<BcState> m_bcStateStack;
 

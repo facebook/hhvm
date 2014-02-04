@@ -24,7 +24,7 @@ namespace HPHP { namespace JIT {
 
 class IRInstruction;
 class IRUnit;
-class TraceBuilder;
+class IRBuilder;
 
 class SSATmp {
 public:
@@ -83,7 +83,7 @@ public:
 
 private:
   friend class IRUnit;
-  friend class TraceBuilder;
+  friend class IRBuilder;
 
   // May only be created via IRUnit.  Note that this class is never
   // destructed, so don't add complex members.

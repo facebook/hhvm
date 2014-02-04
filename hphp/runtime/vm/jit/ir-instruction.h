@@ -75,7 +75,7 @@ struct IRInstruction {
    * Create an IRInstruction for the opcode `op'.
    *
    * IRInstruction creation is usually done through IRUnit or
-   * TraceBuilder rather than directly.
+   * IRBuilder rather than directly.
    */
   explicit IRInstruction(Opcode op,
                          BCMarker marker,

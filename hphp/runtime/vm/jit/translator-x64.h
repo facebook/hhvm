@@ -41,7 +41,7 @@ namespace HPHP { namespace JIT {
 class HhbcTranslator;
 class IRUnit;
 class CSEHash;
-class TraceBuilder;
+class IRBuilder;
 class CodeGenerator;
 }}
 

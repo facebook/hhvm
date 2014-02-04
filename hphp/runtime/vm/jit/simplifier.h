@@ -25,7 +25,7 @@ namespace HPHP {  namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
-class TraceBuilder;
+class IRBuilder;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -37,18 +37,18 @@ class TraceBuilder;
  * can be modified in place or replaced with new instructions as
  * needed.
  *
- * The Simplifier recursively invokes TraceBuilder, which can call
+ * The Simplifier recursively invokes IRBuilder, which can call
  * back into it.  It's used both during our initial gen-time
- * optimizations and in the TraceBuilder::reoptimize pass.
+ * optimizations and in the IRBuilder::reoptimize pass.
  *
  * The line of separation between these two modules is essentially
  * about who needs to know about tracked state.  If an optimization is
  * completely stateless (e.g. strength reduction, constant folding,
- * etc) it goes in here, otherwise it goes in TraceBuilder or some
+ * etc) it goes in here, otherwise it goes in IRBuilder or some
  * other pass.
  */
 struct Simplifier {
-  explicit Simplifier(TraceBuilder& t) : m_tb(t) {}
+  explicit Simplifier(IRBuilder& irb) : m_irb(irb) {}
 
   /*
    * Simplify performs a number of optimizations.
@@ -180,7 +180,7 @@ private: // tracebuilder forwarders
   template<class... Args> SSATmp* gen(Opcode op, BCMarker marker, Args&&...);
 
 private:
-  TraceBuilder& m_tb;
+  IRBuilder& m_irb;
 
   // The current instruction being simplified is always at
   // m_insts.top(). This has to be a stack instead of just a pointer

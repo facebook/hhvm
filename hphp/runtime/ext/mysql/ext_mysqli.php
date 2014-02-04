@@ -11,50 +11,54 @@ class mysqli {
 
   private ?resource $__connection = null;
 
-  private function __getConnection(): resource {
-    $c = $this->__connection;
-    if ($c == null) {
-      throw new Exception('You need to connect first by calling real_connect');
-    }
-    return $c;
-  }
+  <<__Native>>
+  private function hh_get_connection(int $state = 0): ?resource;
 
   public function __get(string $name): mixed {
     switch ($name) {
-      case 'affected_rows':
-        return mysql_affected_rows($this->__getConnection());
       case 'client_info':
         return mysqli_get_client_info();
       case 'client_version':
         return mysqli_get_client_version();
       case 'connect_errno':
-        return self::__connection_errno;
+        return self::$__connection_errno;
       case 'connect_error':
-        return self::__connection_error;
+        return self::$__connection_error;
+    }
+
+    // The following properties only work if we are connected
+    $conn = $this->hh_get_connection(1);
+    if (!$conn) {
+      return null;
+    }
+
+    switch ($name) {
+      case 'affected_rows':
+        return mysql_affected_rows($conn);
       case 'error':
-        return mysql_error($this->__getConnection());
+        return mysql_error($conn);
       case 'errno':
-        return mysql_errno($this->__getConnection());
+        return mysql_errno($conn);
       case 'field_count':
         return $this->hh_field_count();
       case 'host_info':
-        return mysql_get_host_info($this->__getConnection());
+        return mysql_get_host_info($conn);
       case 'info':
-        return mysql_info($this->__getConnection());
+        return mysql_info($conn);
       case 'insert_id':
-        return mysql_insert_id($this->__getConnection());
+        return mysql_insert_id($conn);
       case 'protocol_version':
-        return mysql_get_proto_info($this->__getConnection());
+        return mysql_get_proto_info($conn);
       case 'server_info':
-        return mysql_get_server_info($this->__getConnection());
+        return mysql_get_server_info($conn);
       case 'server_version':
         return $this->hh_server_version();
       case 'sqlstate':
         return $this->hh_sqlstate();
       case 'thread_id':
-        return mysql_thread_id($this->__getConnection());
+        return mysql_thread_id($conn);
       case 'warning_count':
-        return mysql_warning_count($this->__getConnection());
+        return mysql_warning_count($conn);
       case 'error_list':
         throw new Exception('Property '. $name .' is not implemented yet');
     }
@@ -102,7 +106,8 @@ class mysqli {
                               ?string $dbname = null,
                               ?int $port = null,
                               ?string $socket = null): void {
-    // If the user don't pass in any arguments this is treated as mysqli_init();
+    $this->hh_init();
+
     if (func_num_args() == 0) {
       return;
     }
@@ -110,6 +115,28 @@ class mysqli {
     // Connect
     $this->real_connect($host, $username, $passwd, $dbname, $port, $socket);
   }
+
+  /**
+   * Alias for __construct
+   */
+  public function connect(?string $host = null,
+                          ?string $username = null,
+                          ?string $passwd = null,
+                          ?string $dbname = null,
+                          ?int $port = null,
+                          ?string $socket = null): void {
+    $this->hh_init();
+
+    if (func_num_args() == 0) {
+      return;
+    }
+
+    // Connect
+    $this->real_connect($host, $username, $passwd, $dbname, $port, $socket);
+  }
+
+  <<__Native>>
+  private function hh_init(): void;
 
   /**
    * Turns on or off auto-committing database modifications
@@ -170,8 +197,7 @@ class mysqli {
    * @return bool -
    */
   <<__Native>>
-  public function change_user(string $user,
-                              string $password,
+  public function change_user(string $user, string $password,
                               string $database): mixed;
 
   /**
@@ -308,7 +334,8 @@ class mysqli {
    * @return mysqli - Returns an object.
    */
   public function init(): mysqli {
-    return mysqli_init();
+    $this->hh_init();
+    return $this;
   }
 
   /**
@@ -327,8 +354,12 @@ class mysqli {
    * @return bool - Returns TRUE if one or more result sets are available
    *   from a previous call to mysqli_multi_query(), otherwise FALSE.
    */
-  public function more_results(): bool {
-    return mysql_more_results($this->__getConnection());
+  public function more_results(): mixed {
+    $conn = $this->hh_get_connection(2);
+    if (!$conn) {
+      return null;
+    }
+    return mysql_more_results($conn);
   }
 
   /**
@@ -341,7 +372,7 @@ class mysqli {
    *   retrieve subsequent errors from other statements you have to call
    *   mysqli_next_result() first.
    */
-  public function multi_query(string $query): bool {
+  public function multi_query(string $query): ?bool {
     return $this->real_query($query);
   }
 
@@ -350,8 +381,12 @@ class mysqli {
    *
    * @return bool -
    */
-  public function next_result(): bool {
-    return mysql_next_result($this->__getConnection());
+  public function next_result(): ?bool {
+    $conn = $this->hh_get_connection(2);
+    if (!$conn) {
+      return null;
+    }
+    return mysql_next_result($conn);
   }
 
   /**
@@ -381,8 +416,12 @@ class mysqli {
    *
    * @return bool -
    */
-  public function ping(): bool {
-    return mysql_ping($this->__getConnection());
+  public function ping(): ?bool {
+    $conn = $this->hh_get_connection(2);
+    if (!$conn) {
+      return null;
+    }
+    return mysql_ping($conn);
   }
 
   /**
@@ -433,7 +472,7 @@ class mysqli {
    * @return mysqli_stmt - mysqli_prepare() returns a statement object or
    *   FALSE if an error occurred.
    */
-  public function prepare(string $query): mixed {
+  public function prepare(string $query): ?mysqli_stmt {
     $stmt = new mysqli_stmt($this, $query);
     if ($stmt->error) {
       return false;
@@ -461,18 +500,24 @@ class mysqli {
    *   will return TRUE.
    */
   public function query(string $query,
-                        int $resultmode = MYSQLI_STORE_RESULT): mixed {
-    $result = $this->hh_real_query($this->__getConnection(), $query);
+                        int $resultmode = MYSQLI_STORE_RESULT): ?mixed {
+    if ($resultmode !== MYSQLI_STORE_RESULT &&
+        $resultmode !== MYSQLI_USE_RESULT) {
+      trigger_error("Invalid value for resultmode", E_USER_WARNING);
+      return false;
+    }
+
+    $result = $this->hh_real_query($query);
+    if ($result === null) {
+      return null;
+    }
 
     if ($result == 2) {
-      switch ($resultmode) {
-        case MYSQLI_STORE_RESULT:
-          return $this->store_result();
-        case MYSQLI_USE_RESULT:
-          return $this->use_result();
+      if ($resultmode == MYSQLI_STORE_RESULT) {
+        return $this->store_result();
+      } else {
+        return $this->use_result();
       }
-
-      throw new Exception('Invalid value of $resultmode %d', $resultmode);
     }
 
     return $result !== 0;
@@ -516,12 +561,12 @@ class mysqli {
    * @return bool -
    */
   public function real_connect(?string $host = null,
-                        ?string $username = null,
-                        ?string $passwd = null,
-                        ?string $dbname = null,
-                        ?int $port = null,
-                        ?string $socket = null,
-                        int $flags = 0): bool {
+                               ?string $username = null,
+                               ?string $passwd = null,
+                               ?string $dbname = null,
+                               ?int $port = null,
+                               ?string $socket = null,
+                               int $flags = 0): bool {
     $server = null;
     if ($host) {
       $server = $host;
@@ -532,10 +577,9 @@ class mysqli {
       $server = ':'. $socket;
     }
 
-    $this->__connection = mysql_connect($server, $username, $passwd, false,
-                                        $flags);
+    $ret = $this->hh_real_connect($server, $username, $passwd, $dbname, $flags);
 
-    if ($this->__connection === false) {
+    if (!$ret) {
       self::$__connection_errno = mysql_errno();
       self::$__connection_error = mysql_error();
       return false;
@@ -544,12 +588,15 @@ class mysqli {
     self::$__connection_errno = 0;
     self::$__connection_error = null;
 
-    if (!$dbname) {
-      return true;
-    }
-
-    return $this->select_db($dbname);
+    return true;
   }
+
+  <<__Native>>
+  private function hh_real_connect(?string $server,
+                                   ?string $username,
+                                   ?string $passwd,
+                                   ?string $dbname,
+                                   int $flags): bool;
 
   /**
    * Escapes special characters in a string for use in an SQL statement,
@@ -560,8 +607,12 @@ class mysqli {
    *
    * @return string - Returns an escaped string.
    */
-  public function real_escape_string(string $escapestr): string {
-    return mysql_real_escape_string($escapestr, $this->__getConnection());
+  public function real_escape_string(string $escapestr): ?string {
+    $conn = $this->hh_get_connection(2);
+    if (!$conn) {
+      return null;
+    }
+    return mysql_real_escape_string($escapestr, $conn);
   }
 
   /**
@@ -572,13 +623,16 @@ class mysqli {
    *
    * @return bool -
    */
-  public function real_query(string $query): bool {
-    $result = $this->hh_real_query($this->__getConnection(), $query);
+  public function real_query(string $query): ?bool {
+    $result = $this->hh_real_query($query);
+    if ($result === null) {
+      return null;
+    }
     return $result !== 0;
   }
 
   <<__Native>>
-  private function hh_real_query(mixed $connection, string $query): int;
+  private function hh_real_query(string $query): ?int;
 
   /**
    * Get result from async query
@@ -608,7 +662,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function release_savepoint(string $name): bool {
+  public function release_savepoint(string $name): ?bool {
     return $this->real_query('RELEASE SAVEPOINT `'. $name .'`');
   }
 
@@ -620,7 +674,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function rollback(int $flags = 0, ?string $name = null): bool {
+  public function rollback(int $flags = 0, ?string $name = null): ?bool {
     return $this->__end_transaction(false, $flags, $name);
   }
 
@@ -631,7 +685,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function savepoint(string $name): bool {
+  public function savepoint(string $name): ?bool {
     return $this->real_query('SAVEPOINT `'. $name .'`');
   }
 
@@ -642,8 +696,12 @@ class mysqli {
    *
    * @return bool -
    */
-  public function select_db(string $dbname): bool {
-    return mysql_select_db($dbname, $this->__getConnection());
+  public function select_db(string $dbname): ?bool {
+    $conn = $this->hh_get_connection(2);
+    if (!$conn) {
+      return null;
+    }
+    return mysql_select_db($dbname, $conn);
   }
 
   /**
@@ -654,7 +712,11 @@ class mysqli {
    * @return bool -
    */
   public function set_charset(string $charset): bool {
-    return mysql_set_charset($charset, $this->__getConnection());
+    $conn = $this->hh_get_connection(2);
+    if (!$conn) {
+      return null;
+    }
+    return mysql_set_charset($charset, $conn);
   }
 
   /**
@@ -695,11 +757,11 @@ class mysqli {
    *   attempt to connect.
    */
   <<__Native>>
-  public function ssl_set(string $key,
-                          string $cert,
-                          string $ca,
-                          string $capath,
-                          string $cipher): mixed;
+  public function ssl_set(?string $key,
+                          ?string $cert,
+                          ?string $ca,
+                          ?string $capath,
+                          ?string $cipher): mixed;
 
   /**
    * Gets the current system status
@@ -707,8 +769,12 @@ class mysqli {
    * @return string - A string describing the server status. FALSE if an
    *   error occurred.
    */
-  public function stat(): string {
-    return mysql_stat($this->__getConnection());
+  public function stat(): ?string {
+    $conn = $this->hh_get_connection(2);
+    if (!$conn) {
+      return null;
+    }
+    return mysql_stat($conn);
   }
 
   /**
@@ -722,7 +788,7 @@ class mysqli {
   }
 
   <<__Native>>
-  private function hh_get_result(mixed $connection, bool $use_store): mixed;
+  private function hh_get_result(bool $use_store): ?mixed;
 
   /**
    * Transfers a result set from the last query
@@ -740,8 +806,11 @@ class mysqli {
    *   allocated). If mysqli_field_count() returns a non-zero value, the
    *   statement should have produced a non-empty result set.
    */
-  public function store_result(): mysqli_result {
-    $result = $this->hh_get_result($this->__getConnection(), true);
+  public function store_result(): ?mixed {
+    $result = $this->hh_get_result(true);
+    if ($result === null) {
+      return null;
+    }
     if (is_bool($result)) {
       return $result;
     }
@@ -755,8 +824,11 @@ class mysqli {
    * @return mysqli_result - Returns an unbuffered result object or FALSE
    *   if an error occurred.
    */
-  public function use_result(): mysqli_result {
-    $result = $this->hh_get_result($this->__getConnection(), false);
+  public function use_result(): ?mixed {
+    $result = $this->hh_get_result(false);
+    if ($result === null) {
+      return null;
+    }
     if (is_bool($result)) {
       return $result;
     }
@@ -829,12 +901,11 @@ class mysqli_result {
   private resource $__result;
   private int $__resulttype;
   private bool $__done = false;
-  private int $__currentfield = 0;
 
   public function __get(string $name): mixed {
     switch ($name) {
       case 'current_field':
-        return $this->__currentfield;
+        return $this->hh_field_tell();
       case 'field_count':
         return mysql_num_fields($this->__result);
       case 'lengths':
@@ -852,6 +923,9 @@ class mysqli_result {
     return null;
   }
 
+  <<__Native>>
+  private function hh_field_tell(): mixed;
+
   public function __construct(resource $result,
                               int $resulttype = MYSQLI_STORE_RESULT) {
     $this->__result = $result;
@@ -866,7 +940,7 @@ class mysqli_result {
     return $row;
   }
 
-  private function hh_mysqli_to_mysql_resulttype(int $resulttype): int {
+  private function __mysqli_to_mysql_resulttype(int $resulttype): mixed {
     switch ($resulttype) {
       case MYSQLI_NUM:
         return MYSQL_NUM;
@@ -876,9 +950,9 @@ class mysqli_result {
         return MYSQL_BOTH;
     }
 
-    throw new Exception(
-      'Mode can be only MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH'
-    );
+    trigger_error('Mode can be only MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH',
+                  E_USER_WARNING);
+    return null;
   }
 
   /**
@@ -946,7 +1020,7 @@ class mysqli_result {
     return $this->__checkRow(
       mysql_fetch_array(
         $this->__result,
-        $this->hh_mysqli_to_mysql_resulttype($resulttype),
+        $this->__mysqli_to_mysql_resulttype($resulttype),
       )
     );
   }
@@ -1011,7 +1085,6 @@ class mysqli_result {
    *   used (for integer fields)
    */
   public function fetch_field(): mixed {
-    $this->__currentfield++;
     return mysql_fetch_field($this->__result);
   }
 
@@ -1088,7 +1161,6 @@ class mysqli_result {
       return false;
     }
 
-    $this->__currentfield = $fieldnr;
     return true;
   }
 
@@ -2187,14 +2259,14 @@ function mysqli_sqlstate(mysqli $link): string {
  *   is incorrect mysqli_real_connect() will return an error when you
  *   attempt to connect.
  */
-//function mysqli_ssl_set(mysqli $link,
-//                        string $key,
-//                        string $cert,
-//                        string $ca,
-//                        string $capath,
-//                        string $cipher): bool {
-//  return $link->ssl_set($key, $cert, $ca, $capath, $cipher);
-//}
+function mysqli_ssl_set(mysqli $link,
+                        ?string $key,
+                        ?string $cert,
+                        ?string $ca,
+                        ?string $capath,
+                        ?string $cipher): bool {
+  return $link->ssl_set($key, $cert, $ca, $capath, $cipher);
+}
 
 /**
  * Gets the current system status
@@ -2306,7 +2378,7 @@ function mysqli_report(int $flags): bool {
  * Alias of mysqli_options
  */
 function mysqli_set_opt(mysqli $link, int $option, mixed $value): bool {
-  return mysqli_options($link, $ooption, $value);
+  return mysqli_options($link, $option, $value);
 }
 
 /**

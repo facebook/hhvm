@@ -33,6 +33,8 @@
 
 namespace HPHP {
 
+enum MySQLState { CLOSED = 0, INITED = 1, CONNECTED = 2 };
+
 class MySQL : public SweepableResourceData {
 public:
   /**
@@ -117,6 +119,8 @@ public:
                  const String& password, const String& database, int client_flags,
                  int connect_timeout);
 
+  MySQLState getState() { return m_state; }
+
   MYSQL *get() { return m_conn;}
   MYSQL *eject_mysql() {
     auto ret = m_conn;
@@ -140,6 +144,7 @@ public:
   int m_xaction_count;
   bool m_multi_query;
   String m_async_query;
+  MySQLState m_state;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -231,6 +236,7 @@ public:
   }
 
   bool seekField(int64_t field);
+  int64_t tellField();
 
   MySQLFieldInfo *fetchFieldInfo();
 
@@ -332,8 +338,14 @@ enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };
 #define PHP_MYSQL_FIELD_FLAGS 5
 
 Variant php_mysql_field_info(CVarRef result, int field, int entry_type);
-Variant php_mysql_do_connect(String server, String username,
-                             String password, String database,
+Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
+                                     String username, String password,
+                                     String database, int client_flags,
+                                     bool persistent, bool async,
+                                     int connect_timeout_ms,
+                                     int query_timeout_ms);
+Variant php_mysql_do_connect(const String& server, const String& username,
+                             const String& password, const String& database,
                              int client_flags, bool persistent,
                              bool async,
                              int connect_timeout_ms,

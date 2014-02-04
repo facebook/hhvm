@@ -1190,6 +1190,7 @@ def walk(filename, dest_subdir):
                 'mysqli_stmt_insert_id': ['test'],
                 'mysqli_stmt_num_rows': [re.compile('(?<!run_)test')],
                 'mysqli_stmt_param_count': ['test'],
+                'mysqli_stmt_result_metadata': ['test'],
                 'mysqli_stmt_send_long_data': [re.compile('(?<!=we )test')],
                 'mysqli_stmt_store_result':
                     [re.compile('(?<=(INTO|FROM) )test')],

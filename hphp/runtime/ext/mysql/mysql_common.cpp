@@ -739,10 +739,6 @@ MySQLStmtVariables::MySQLStmtVariables(std::vector<Variant*> arr): m_arr(arr) {
 }
 
 MySQLStmtVariables::~MySQLStmtVariables() {
-  for (int i = 0; i < m_arr.size(); i++) {
-    free(m_vars[i].buffer);
-  }
-
   free(m_vars);
   free(m_null);
   free(m_length);
@@ -935,6 +931,13 @@ MySQLStmt::MySQLStmt(MYSQL *mysql)
 
 MySQLStmt::~MySQLStmt() {
   close();
+
+  if (m_param_vars) {
+    delete m_param_vars;
+  }
+  if (m_result_vars) {
+    delete m_result_vars;
+  }
 }
 
 void MySQLStmt::sweep() {
@@ -979,7 +982,9 @@ Variant MySQLStmt::attr_set(int64_t attr, int64_t value) {
 Variant MySQLStmt::bind_param(const String& types, std::vector<Variant*> vars) {
   VALIDATE_PREPARED
 
-  delete m_param_vars;
+  if (m_param_vars) {
+    delete m_param_vars;
+  }
   m_param_vars = new MySQLStmtVariables(vars);
   return m_param_vars->init_params(m_stmt, types);
 }
@@ -987,7 +992,9 @@ Variant MySQLStmt::bind_param(const String& types, std::vector<Variant*> vars) {
 Variant MySQLStmt::bind_result(std::vector<Variant*> vars) {
   VALIDATE_PREPARED
 
-  delete m_result_vars;
+  if (m_result_vars) {
+    delete m_result_vars;
+  }
   m_result_vars = new MySQLStmtVariables(vars);
   return m_result_vars->bind_result(m_stmt);
 }
@@ -1009,9 +1016,6 @@ Variant MySQLStmt::close() {
     m_stmt = nullptr;
     return ret;
   }
-
-  delete m_param_vars;
-  delete m_result_vars;
 
   return true;
 }
@@ -1072,8 +1076,14 @@ Variant MySQLStmt::prepare(const String& query) {
   VALIDATE_STMT
 
   // Cleaning up just in case they have been set before
-  delete m_param_vars;
-  delete m_result_vars;
+  if (m_param_vars) {
+    delete m_param_vars;
+    m_param_vars = nullptr;
+  }
+  if (m_result_vars) {
+    delete m_result_vars;
+    m_result_vars = nullptr;
+  }
 
   m_prepared = !mysql_stmt_prepare(m_stmt, query.c_str(), query.size());
   return m_prepared;

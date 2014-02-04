@@ -638,6 +638,10 @@ TEST(Type, Hierarchies) {
   if (!clsBB) EXPECT_TRUE(false);
   auto const clsBAA = idx.resolve_class(ctx, s_BAA.get());
   if (!clsBAA) EXPECT_TRUE(false);
+  auto const clsTestClass = idx.resolve_class(ctx, s_TestClass.get());
+  if (!clsTestClass) EXPECT_TRUE(false);
+  auto const clsNonUnique = idx.resolve_class(ctx, s_NonUnique.get());
+  if (!clsNonUnique) EXPECT_TRUE(false);
 
   // make *exact type* and *sub type* types and objects for all loaded classes
   auto const objExactBaseTy = objExact(*clsBase);
@@ -679,6 +683,16 @@ TEST(Type, Hierarchies) {
   auto const subObjBAATy      = subObj(*clsBAA);
   auto const clsExactBAATy    = clsExact(*clsBAA);
   auto const subClsBAATy      = subCls(*clsBAA);
+
+  auto const objExactTestClassTy = objExact(*clsTestClass);
+  auto const subObjTestClassTy   = subObj(*clsTestClass);
+  auto const clsExactTestClassTy = clsExact(*clsTestClass);
+  auto const subClsTestClassTy   = subCls(*clsTestClass);
+
+  auto const objExactNonUniqueTy = objExact(*clsNonUnique);
+  auto const subObjNonUniqueTy   = subObj(*clsNonUnique);
+  auto const clsExactNonUniqueTy = clsExact(*clsNonUnique);
+  auto const subClsNonUniqueTy   = subCls(*clsNonUnique);
 
   // check that type from object and type are the same (obnoxious test)
   EXPECT_EQ(objcls(objExactBaseTy), clsExactBaseTy);
@@ -855,6 +869,98 @@ TEST(Type, Hierarchies) {
   EXPECT_TRUE(subObjBaseTy.couldBe(opt(subObjBBTy)));
   EXPECT_TRUE(subClsBaseTy.couldBe(objcls(subObjBAATy)));
   EXPECT_TRUE(subObjBaseTy.couldBe(opt(subObjBAATy)));
+
+  // check union_of and commonAncestor API
+  EXPECT_TRUE((*(*clsA).commonAncestor(*clsB)).same(*clsBase));
+  EXPECT_TRUE((*(*clsB).commonAncestor(*clsA)).same(*clsBase));
+  EXPECT_TRUE((*(*clsAA).commonAncestor(*clsAB)).same(*clsA));
+  EXPECT_TRUE((*(*clsAB).commonAncestor(*clsAA)).same(*clsA));
+  EXPECT_TRUE((*(*clsA).commonAncestor(*clsBAA)).same(*clsBase));
+  EXPECT_TRUE((*(*clsBAA).commonAncestor(*clsA)).same(*clsBase));
+  EXPECT_TRUE((*(*clsBAA).commonAncestor(*clsB)).same(*clsB));
+  EXPECT_TRUE((*(*clsB).commonAncestor(*clsBAA)).same(*clsB));
+  EXPECT_TRUE((*(*clsBAA).commonAncestor(*clsBB)).same(*clsB));
+  EXPECT_TRUE((*(*clsBB).commonAncestor(*clsBAA)).same(*clsB));
+  EXPECT_TRUE((*(*clsAA).commonAncestor(*clsBase)).same(*clsBase));
+  EXPECT_TRUE((*(*clsBase).commonAncestor(*clsAA)).same(*clsBase));
+  EXPECT_FALSE((*clsAA).commonAncestor(*clsTestClass));
+  EXPECT_FALSE((*clsTestClass).commonAncestor(*clsAA));
+  EXPECT_FALSE((*clsBAA).commonAncestor(*clsNonUnique));
+  EXPECT_FALSE((*clsNonUnique).commonAncestor(*clsBAA));
+
+  // check union_of
+  // union of subCls
+  EXPECT_EQ(union_of(subClsATy, subClsBTy), subClsBaseTy);
+  EXPECT_EQ(union_of(subClsAATy, subClsABTy), subClsATy);
+  EXPECT_EQ(union_of(subClsATy, subClsBAATy), subClsBaseTy);
+  EXPECT_EQ(union_of(subClsBAATy, subClsBTy), subClsBTy);
+  EXPECT_EQ(union_of(subClsBAATy, subClsBBTy), subClsBTy);
+  EXPECT_EQ(union_of(subClsAATy, subClsBaseTy), subClsBaseTy);
+  EXPECT_EQ(union_of(subClsAATy, subClsTestClassTy), TCls);
+  EXPECT_EQ(union_of(subClsBAATy, subClsNonUniqueTy), TCls);
+  // union of subCls and clsExact mixed
+  EXPECT_EQ(union_of(clsExactATy, subClsBTy), subClsBaseTy);
+  EXPECT_EQ(union_of(subClsAATy, clsExactABTy), subClsATy);
+  EXPECT_EQ(union_of(clsExactATy, subClsBAATy), subClsBaseTy);
+  EXPECT_EQ(union_of(subClsBAATy, clsExactBTy), subClsBTy);
+  EXPECT_EQ(union_of(clsExactBAATy, subClsBBTy), subClsBTy);
+  EXPECT_EQ(union_of(subClsAATy, clsExactBaseTy), subClsBaseTy);
+  EXPECT_EQ(union_of(clsExactAATy, subClsTestClassTy), TCls);
+  EXPECT_EQ(union_of(subClsBAATy, clsExactNonUniqueTy), TCls);
+  // union of clsExact
+  EXPECT_EQ(union_of(clsExactATy, clsExactBTy), subClsBaseTy);
+  EXPECT_EQ(union_of(clsExactAATy, clsExactABTy), subClsATy);
+  EXPECT_EQ(union_of(clsExactATy, clsExactBAATy), subClsBaseTy);
+  EXPECT_EQ(union_of(clsExactBAATy, clsExactBTy), subClsBTy);
+  EXPECT_EQ(union_of(clsExactBAATy, clsExactBBTy), subClsBTy);
+  EXPECT_EQ(union_of(clsExactAATy, clsExactBaseTy), subClsBaseTy);
+  EXPECT_EQ(union_of(clsExactAATy, subClsTestClassTy), TCls);
+  EXPECT_EQ(union_of(clsExactBAATy, clsExactNonUniqueTy), TCls);
+  // union of subObj
+  EXPECT_EQ(union_of(subObjATy, subObjBTy), subObjBaseTy);
+  EXPECT_EQ(union_of(subObjAATy, subObjABTy), subObjATy);
+  EXPECT_EQ(union_of(subObjATy, subObjBAATy), subObjBaseTy);
+  EXPECT_EQ(union_of(subObjBAATy, subObjBTy), subObjBTy);
+  EXPECT_EQ(union_of(subObjBAATy, subObjBBTy), subObjBTy);
+  EXPECT_EQ(union_of(subObjAATy, subObjBaseTy), subObjBaseTy);
+  EXPECT_EQ(union_of(subObjAATy, subObjTestClassTy), TObj);
+  EXPECT_EQ(union_of(subObjBAATy, subObjNonUniqueTy), TObj);
+  // union of subObj and objExact mixed
+  EXPECT_EQ(union_of(objExactATy, subObjBTy), subObjBaseTy);
+  EXPECT_EQ(union_of(subObjAATy, objExactABTy), subObjATy);
+  EXPECT_EQ(union_of(objExactATy, subObjBAATy), subObjBaseTy);
+  EXPECT_EQ(union_of(subObjBAATy, objExactBTy), subObjBTy);
+  EXPECT_EQ(union_of(objExactBAATy, subObjBBTy), subObjBTy);
+  EXPECT_EQ(union_of(subObjAATy, objExactBaseTy), subObjBaseTy);
+  EXPECT_EQ(union_of(objExactAATy, subObjTestClassTy), TObj);
+  EXPECT_EQ(union_of(subObjBAATy, objExactNonUniqueTy), TObj);
+  // union of objExact
+  EXPECT_EQ(union_of(objExactATy, objExactBTy), subObjBaseTy);
+  EXPECT_EQ(union_of(objExactAATy, objExactABTy), subObjATy);
+  EXPECT_EQ(union_of(objExactATy, objExactBAATy), subObjBaseTy);
+  EXPECT_EQ(union_of(objExactBAATy, objExactBTy), subObjBTy);
+  EXPECT_EQ(union_of(objExactBAATy, objExactBBTy), subObjBTy);
+  EXPECT_EQ(union_of(objExactAATy, objExactBaseTy), subObjBaseTy);
+  EXPECT_EQ(union_of(objExactAATy, objExactTestClassTy), TObj);
+  EXPECT_EQ(union_of(objExactBAATy, objExactNonUniqueTy), TObj);
+  // optional sub obj
+  EXPECT_EQ(union_of(opt(subObjATy), opt(subObjBTy)), opt(subObjBaseTy));
+  EXPECT_EQ(union_of(subObjAATy, opt(subObjABTy)), opt(subObjATy));
+  EXPECT_EQ(union_of(opt(subObjATy), subObjBAATy), opt(subObjBaseTy));
+  EXPECT_EQ(union_of(opt(subObjBAATy), opt(subObjBTy)), opt(subObjBTy));
+  EXPECT_EQ(union_of(opt(subObjBAATy), subObjBBTy), opt(subObjBTy));
+  EXPECT_EQ(union_of(opt(subObjAATy), opt(subObjBaseTy)), opt(subObjBaseTy));
+  EXPECT_EQ(union_of(subObjAATy, opt(subObjTestClassTy)), opt(TObj));
+  EXPECT_EQ(union_of(subObjBAATy, opt(subObjNonUniqueTy)), opt(TObj));
+  // optional sub and exact obj mixed
+  EXPECT_EQ(union_of(opt(objExactATy), subObjBTy), opt(subObjBaseTy));
+  EXPECT_EQ(union_of(subObjAATy, opt(objExactABTy)), opt(subObjATy));
+  EXPECT_EQ(union_of(opt(objExactATy), objExactBAATy), opt(subObjBaseTy));
+  EXPECT_EQ(union_of(subObjBAATy, opt(objExactBTy)), opt(subObjBTy));
+  EXPECT_EQ(union_of(opt(subObjBAATy), objExactBBTy), opt(subObjBTy));
+  EXPECT_EQ(union_of(objExactAATy, opt(objExactBaseTy)), opt(subObjBaseTy));
+  EXPECT_EQ(union_of(opt(subObjAATy), objExactTestClassTy), opt(TObj));
+  EXPECT_EQ(union_of(subObjBAATy, opt(objExactNonUniqueTy)), opt(TObj));
 }
 
 TEST(Type, Interface) {

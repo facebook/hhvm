@@ -223,7 +223,7 @@ struct ClassInfo {
   /*
    * A vector of ClassInfo that encodes the inheritance hierarchy.
    */
-  std::vector<borrowed_ptr<const ClassInfo>> baseList;
+  std::vector<borrowed_ptr<ClassInfo>> baseList;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -281,6 +281,26 @@ SString Class::name() const {
 
 bool Class::couldBeOverriden() const {
   return val.str() ? true : !(val.other()->cls->attrs & AttrNoOverride);
+}
+
+folly::Optional<Class> Class::commonAncestor(const Class& o) const {
+  if (val.str() || o.val.str()) return folly::none;
+  auto c1 = val.other();
+  auto c2 = o.val.other();
+  // walk the arrays of base classes until they match. For common ancestors
+  // to exist they must be on both sides of the baseList at the same positions
+  ClassInfo* ancestor = nullptr;
+  auto it1 = c1->baseList.begin();
+  auto it2 = c2->baseList.begin();
+  while (it1 != c1->baseList.end() && it2 != c2->baseList.end()) {
+    if (*it1 != *it2) break;
+    ancestor = *it1;
+    it1++; it2++;
+  }
+  if (ancestor == nullptr) {
+    return folly::none;
+  }
+  return res::Class { index, SStringOr<ClassInfo>(ancestor) };
 }
 
 std::string show(const Class& c) {

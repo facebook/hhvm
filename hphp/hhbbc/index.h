@@ -149,6 +149,12 @@ struct Class {
    */
   bool couldBeOverriden() const;
 
+  /*
+   * Returns the Class that is the first common ancestor between 'this' and 'o'.
+   * If there is no common ancestor folly::none is returned
+   */
+  folly::Optional<Class> commonAncestor(const Class& o) const;
+
 private:
   Class(borrowed_ptr<const Index>, SStringOr<ClassInfo>);
 

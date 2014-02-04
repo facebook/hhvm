@@ -113,14 +113,35 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
         xmlFree(str);
       } else if (type == 2) {
         arg = Array::Create();
-        // TODO: pass node args to function.
+        if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
+          for (int j = 0; j < obj->nodesetval->nodeNr; j++) {
+            // TODO: not sure this is the right thing to do.
+            xmlNodePtr node = obj->nodesetval->nodeTab[j];
+
+            if (node->type == XML_ELEMENT_NODE) {
+              c_DOMNode *nodeobj = NEWOBJ(c_DOMNode)();
+              nodeobj->m_node = xmlCopyNode(node, /*extended*/ 1);
+              arg.append(nodeobj);
+            } else if (node->type == XML_ATTRIBUTE_NODE) {
+              c_DOMAttr *attrobj = NEWOBJ(c_DOMAttr)();
+              attrobj->m_node = (xmlNodePtr)xmlCopyProp(NULL, (xmlAttrPtr)node);
+              arg.append(attrobj);
+            } else if (node->type == XML_TEXT_NODE) {
+              c_DOMText *textobj = NEWOBJ(c_DOMText)();
+              textobj->m_node = (xmlNodePtr)xmlNewText(xmlNodeGetContent(node));
+              arg.append(textobj);
+            } else {
+              raise_warning("Unhandled node type '%d'", node->type);
+            }
+          }
+        }
       }
       break;
     default:
       arg = String((char *)xmlXPathCastToString(obj), CopyString);
     }
     xmlXPathFreeObject(obj);
-    args.set(i, arg);
+    args.prepend(arg);
   }
 
   obj = valuePop(ctxt);

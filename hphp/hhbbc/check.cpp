@@ -22,6 +22,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/class-util.h"
 
 namespace HPHP { namespace HHBBC { namespace php {
 
@@ -237,7 +238,7 @@ bool check(const php::Class& c) {
   for (DEBUG_ONLY auto& m : c.methods) assert(check(*m));
 
   // Some invariants about Closure classes.
-  auto const isClo = c.parentName && c.parentName->isame(s_Closure.get());
+  auto const isClo = is_closure(c);
   if (c.closureContextCls) {
     assert(c.closureContextCls->unit == c.unit);
     assert(isClo);

@@ -58,6 +58,7 @@ const StaticString s_Continuation("Continuation");
 const StaticString s_stdClass("stdClass");
 const StaticString s_unreachable("static analysis error: supposedly "
                                  "unreachable code was reached");
+const StaticString s_86pinit("86pinit"), s_86sinit("86sinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1954,9 +1955,11 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Ceil&)  { floatFnImpl(ceil,  TDbl); }
   void operator()(const bc::Sqrt&)  { floatFnImpl(sqrt,  TInitUnc); }
 
-  // TODO: Task to analyze 86pinit methods: #3562690
   void operator()(const bc::CheckProp&) { push(TBool); }
-  void operator()(const bc::InitProp&) { popC(); }
+  void operator()(const bc::InitProp& op) {
+    auto const t = popC();
+    mergeThisProp(op.str1, t);
+  }
 
   void operator()(const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
   void operator()(const bc::HighInvalid&) { always_assert(!"HighInvalid"); }
@@ -4194,40 +4197,63 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
    * We need to loosen_statics and loosen_values on instance
    * properties, because the class could be unserialized, which we
    * don't guarantee preserves those aspects of the type.
+   *
+   * Also, set Uninit properties to TBottom, so that analysis
+   * of 86pinit methods sets them to the correct type.
    */
   for (auto& prop : ctx.cls->properties) {
     if (!(prop.attrs & AttrPrivate)) continue;
 
     if (!(prop.attrs & AttrStatic)) {
-      clsAnalysis.privateProperties[prop.name] =
-        loosen_statics(loosen_values(from_cell(prop.val)));
+      auto t = loosen_statics(loosen_values(from_cell(prop.val)));
+      if (!is_closure(*ctx.cls) && t.subtypeOf(TUninit)) {
+        // For non-closure classes, a property of type KindOfUninit
+        // means that it has non-scalar initializer which will be set by
+        // a 86pinit method. For these classes, we want the initial type
+        // of the property to be the type set by the 86pinit method, so
+        // we set the type to TBottom.
+        // closures will not have an 86pinit body, but still may have
+        // a property of kind KindOfUninit. We don't want to touch those.
+        t = TBottom;
+      }
+      clsAnalysis.privateProperties[prop.name] = t;
     } else {
       clsAnalysis.privateStatics[prop.name] = from_cell(prop.val);
     }
   }
 
   /*
-   * Skip trying to do smart things with 86{p,s}init for now.
+   * Skip trying to do smart things with 86sinit for now.
    *
-   * These are special functions that run to initialize static or
-   * instance properties that depend on class constants, or have
+   * These are special functions that run to initialize static
+   * properties that depend on class constants, or have
    * collection literals.
    *
    * We don't handle this yet, so for any class with these types of
    * initializers put the properties up to TInitCell for now.
    *
-   * TODO(#3567661, #3562690): we want to analyze these.
+   * TODO(#3567661): we want to analyze these.
    */
-  auto const specials = find_special_methods(ctx.cls);
-  if (contains(specials, MethodMask::Internal_86pinit)) {
-    for (auto& p : clsAnalysis.privateProperties) {
-      p.second = union_of(p.second, TInitCell);
-    }
-  }
-  if (contains(specials, MethodMask::Internal_86sinit)) {
+  if (find_method(ctx.cls, s_86sinit.get())) {
     for (auto& p : clsAnalysis.privateStatics) {
       p.second = union_of(p.second, TInitCell);
     }
+  }
+
+  /*
+   * For classes with non-scalar initializers, the 86pinit method
+   * is guaranteed to run before any other method is called, and
+   * is never called afterwards. Thus, we can analyze the 86pinit
+   * method first to determine the initial types of properties with
+   * non-scalar initializers, and these need not be be run again as part
+   * of the fixedpoint computation.
+   */
+  if (auto f = find_method(ctx.cls, s_86pinit.get())) {
+    do_analyze(
+      index,
+      Context { ctx.unit, f, ctx.cls },
+      &clsAnalysis
+    );
   }
 
   for (;;) {
@@ -4249,6 +4275,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
          */
         continue;
       }
+      // no need to run 86pinit as part of fixed point computation.
+      if (f->name->isame(s_86pinit.get())) continue;
 
       methodResults.push_back(
         do_analyze(
@@ -4276,6 +4304,14 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       clsAnalysis.methods  = std::move(methodResults);
       clsAnalysis.closures = std::move(closureResults);
       break;
+    }
+  }
+
+  // Verify that none of the class properties are TBottom, i.e.
+  // any property of type KindOfUninit has been initialized (by 86pinit).
+  for (auto& prop : ctx.cls->properties) {
+    if ((prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic)) {
+      assert(!clsAnalysis.privateProperties[prop.name].subtypeOf(TBottom));
     }
   }
 

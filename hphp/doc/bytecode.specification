@@ -1861,7 +1861,8 @@ InitProp <propName> <op> [C] -> []
 
   The CheckProp and InitProp opcodes should only be used in 86pinit methods.
   86pinit methods are HHVM-internal property initialization methods that
-  cannot be called from user-land.
+  cannot be called from user-land. After 86pinit runs, no declared properties
+  of the class can be of type NullUninit.
 
 8. Call instructions
 --------------------

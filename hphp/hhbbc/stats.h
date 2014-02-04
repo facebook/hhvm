@@ -13,44 +13,24 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_DEBUG_H_
-#define incl_HHBBC_DEBUG_H_
-
-#include "hphp/util/trace.h"
-
-#include "hphp/hhbbc/misc.h"
-#include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/unit-util.h"
+#ifndef incl_HHBBC_STATS_H_
+#define incl_HHBBC_STATS_H_
 
 namespace HPHP { namespace HHBBC {
+
+namespace php {
+struct Program;
+}
+struct Index;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * If the hhbbc_dump trace module is on, dump the entire program to a
- * temporary directory as readable text.
+ * If Trace::hhbbc_time >= 2, print some stats about the program to
+ * stdout, and also dump it to a temporary file and print the
+ * filename.
  */
-void debug_dump_program(const Index&, const php::Program&);
-
-/*
- * Utilities for printing the state of the program after various
- * transformations.
- */
-
-inline void banner(const char* what) {
-  TRACE_SET_MOD(hhbbc);
-  FTRACE(2, "{:-^70}\n", what);
-}
-
-inline void state_after(const char* when, const php::Program& program) {
-  TRACE_SET_MOD(hhbbc);
-  banner(when);
-  for (auto& u : program.units) {
-    Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(*u)};
-    FTRACE(4, "{}", show(*u));
-  }
-  banner("");
-}
+void print_stats(const Index&, const php::Program&);
 
 //////////////////////////////////////////////////////////////////////
 

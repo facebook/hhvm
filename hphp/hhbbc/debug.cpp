@@ -127,6 +127,8 @@ void dump_index(fs::path dir,
 //////////////////////////////////////////////////////////////////////
 
 void debug_dump_program(const Index& index, const php::Program& program) {
+  if (!Trace::moduleEnabledRelease(Trace::hhbbc_dump, 1)) return;
+
   trace_time tracer("debug dump");
 
   char dirBuf[] = "/tmp/hhbbcXXXXXX";

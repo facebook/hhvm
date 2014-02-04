@@ -35,7 +35,7 @@
 
 namespace HPHP { namespace HHBBC {
 
-TRACE_SET_MOD(hhbbc);
+TRACE_SET_MOD(hhbbc_emit);
 
 namespace {
 

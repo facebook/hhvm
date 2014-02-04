@@ -29,6 +29,7 @@
 #include "hphp/hhbbc/debug.h"
 #include "hphp/hhbbc/abstract-interp.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/stats.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace HHBBC {
@@ -331,9 +332,8 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   Index index{borrow(program)};
   optimize(index, *program);
 
-  if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 1)) {
-    debug_dump_program(index, *program);
-  }
+  debug_dump_program(index, *program);
+  print_stats(index, *program);
 
   LitstrTable::get().setWriting();
   ues = make_unit_emitters(index, *program);

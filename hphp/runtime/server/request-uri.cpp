@@ -75,8 +75,10 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   auto pathTranslated = transport->getPathTranslated();
   if (!pathTranslated.empty()) {
     // The transport is overriding everything and just handing us the filename
-    m_path = m_absolutePath = pathTranslated;
-    processExt();
+    m_originalURL = pathTranslated;
+    if (!resolveURL(vhost, pathTranslation, sourceRoot)) {
+      return false;
+    }
     return true;
   }
 
@@ -235,6 +237,14 @@ bool RequestURI::resolveURL(const VirtualHost *vhost,
     }
     m_resolvedURL = startURL.substr(0, pos);
     m_origPathInfo = startURL.substr(pos);
+  }
+  if (!m_resolvedURL.empty() &&
+      m_resolvedURL.charAt(0) != '/') {
+    m_resolvedURL = "/" + m_resolvedURL;
+  }
+  if (!m_originalURL.empty() &&
+      m_originalURL.charAt(0) != '/') {
+    m_originalURL = "/" + m_originalURL;
   }
   m_pathInfo = String(
       Util::canonicalize(m_origPathInfo.c_str(), m_origPathInfo.size()),

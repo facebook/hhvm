@@ -388,6 +388,14 @@ void FastCGITransport::onHeadersComplete() {
     m_pathTranslated = getRawHeader("SCRIPT_FILENAME");
   }
 
+  // RequestURI needs path_translated to not include the document root
+  // and if the document root isnt in the url set document root to / as its outside.
+  if (!m_pathTranslated.empty() && m_pathTranslated.find(m_documentRoot) == 0) {
+    m_pathTranslated = m_pathTranslated.substr(m_documentRoot.length());
+  } else {
+    m_documentRoot = "/";
+  }
+
   std::string queryString = getRawHeader("QUERY_STRING");
   if (!queryString.empty()) {
     m_serverObject += "?" + queryString;

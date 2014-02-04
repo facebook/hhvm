@@ -1090,7 +1090,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       if (rVal.IsValid()) {
         if (!valDst.Is(rVal)) m_as.Mov(valDst, rVal);
       } else {
-        if (src->isConst()) m_as.Mov(valDst, src->getValBits());
+        if (src->isConst()) m_as.Mov(valDst, src->getValRawInt());
       }
     }
     if (typeDst.IsValid()) {

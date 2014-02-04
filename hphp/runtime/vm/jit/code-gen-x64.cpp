@@ -4939,7 +4939,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     // allowed, and if not, assign a register.
     if (valDst != InvalidReg) {
       if (rData != InvalidReg) emitMovRegReg(m_as, rData, valDst);
-      else if (src->isConst()) m_as.emitImmReg(src->getValBits(), valDst);
+      else if (src->isConst()) m_as.emitImmReg(src->getValRawInt(), valDst);
     }
     if (typeDst != InvalidReg) {
       if (rType != InvalidReg) emitMovRegReg(m_as, rType, typeDst);

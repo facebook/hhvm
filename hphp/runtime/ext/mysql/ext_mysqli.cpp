@@ -92,7 +92,8 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
 
   std::vector<Variant*> vars;
   for (int i = 0; i < type_size; i++) {
-    if (types[i] != 'i' && types[i] != 'd' && types[i] != 's') {
+    char t = types[i];
+    if (t != 'i' && t != 'd' && t != 's' && t != 'b') {
       raise_warning("Undefined fieldtype %c (parameter %d)", types[i],
                     i + 2 + start_index);
       ar->m_r = *Variant(false).asTypedValue();
@@ -455,10 +456,10 @@ static Variant HHVM_METHOD(mysqli_stmt, result_metadata) {
   return getStmt(this_)->result_metadata();
 }
 
-//static bool HHVM_METHOD(mysqli_stmt, send_long_data, int64_t param_nr,
-//                        const String& data) {
-//  throw NotImplementedException(__FUNCTION__);
-//}
+static Variant HHVM_METHOD(mysqli_stmt, send_long_data, int64_t param_nr,
+                           const String& data) {
+  return getStmt(this_)->send_long_data(param_nr, data);
+}
 
 static Variant HHVM_METHOD(mysqli_stmt, store_result) {
   return getStmt(this_)->store_result();
@@ -552,7 +553,7 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli_stmt, prepare);
     HHVM_ME(mysqli_stmt, reset);
     HHVM_ME(mysqli_stmt, result_metadata);
-    //HHVM_ME(mysqli_stmt, send_long_data);
+    HHVM_ME(mysqli_stmt, send_long_data);
     HHVM_ME(mysqli_stmt, store_result);
 
     // mysqli_warning

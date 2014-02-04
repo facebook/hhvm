@@ -308,6 +308,7 @@ public:
   Variant prepare(const String& query);
   Variant reset();
   Variant result_metadata();
+  Variant send_long_data(int64_t param_idx, const String& data);
   Variant store_result();
 
 protected:

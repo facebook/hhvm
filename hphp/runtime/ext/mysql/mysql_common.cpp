@@ -857,6 +857,9 @@ bool MySQLStmtVariables::init_params(MYSQL_STMT *stmt, const String& types) {
       case 's':
         b->buffer_type = MYSQL_TYPE_STRING;
         break;
+      case 'b':
+        b->buffer_type = MYSQL_TYPE_LONG_BLOB;
+        break;
       default:
         assert(false);
     }
@@ -895,6 +898,10 @@ bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
             b->buffer_length = sd->size();
             *b->length = sd->size();
           }
+          break;
+        case MYSQL_TYPE_LONG_BLOB:
+          // The value are set using send_long_data so we don't have to do
+          // anything here
           break;
         default:
           assert(false);
@@ -1080,6 +1087,12 @@ Variant MySQLStmt::reset() {
 Variant MySQLStmt::store_result() {
   VALIDATE_PREPARED
   return !mysql_stmt_store_result(m_stmt);
+}
+
+Variant MySQLStmt::send_long_data(int64_t param_idx, const String& data) {
+  VALIDATE_PREPARED
+  return !mysql_stmt_send_long_data(m_stmt, param_idx, data.c_str(),
+                                    data.size());
 }
 
 Variant MySQLStmt::result_metadata() {

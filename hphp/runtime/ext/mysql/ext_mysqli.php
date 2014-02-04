@@ -1378,8 +1378,8 @@ class mysqli_stmt {
    *
    * @return bool -
    */
-  //<<__Native>>
-  //public function send_long_data(int $param_nr, string $data): bool;
+  <<__Native>>
+  public function send_long_data(int $param_nr, string $data): mixed;
 
   /**
    * Transfers a result set from a prepared statement
@@ -2900,11 +2900,11 @@ function mysqli_stmt_result_metadata(mysqli_stmt $stmt): mixed {
  *
  * @return bool -
  */
-//function mysqli_stmt_send_long_data(mysqli_stmt $stmt,
-//                                    int $param_nr,
-//                                    string $data): bool {
-//  return $stmt->send_long_data($param_nr, $data);
-//}
+function mysqli_stmt_send_long_data(mysqli_stmt $stmt,
+                                    int $param_nr,
+                                    string $data): mixed {
+  return $stmt->send_long_data($param_nr, $data);
+}
 
 /**
  * Returns SQLSTATE error from previous statement operation

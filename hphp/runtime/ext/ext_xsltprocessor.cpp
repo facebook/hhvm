@@ -165,6 +165,7 @@ c_XSLTProcessor::c_XSLTProcessor(Class *cb) :
   ExtObjectData(cb),
   m_stylesheet(NULL), m_doc(NULL), m_secprefs(k_XSL_SECPREF_NONE),
   m_registerPhpFunctions(0) {
+  exsltRegisterAll();
 }
 
 c_XSLTProcessor::~c_XSLTProcessor() {
@@ -372,8 +373,6 @@ xmlDocPtr c_XSLTProcessor::apply_stylesheet() {
     raise_error("Unable to apply stylesheet");
     return NULL;
   }
-
-  exsltRegisterAll();
 
   xsltTransformContextPtr ctxt = xsltNewTransformContext (m_stylesheet, m_doc);
   ctxt->_private = this;

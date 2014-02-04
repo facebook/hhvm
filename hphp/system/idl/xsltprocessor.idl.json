@@ -1,5 +1,29 @@
 {
     "consts": [
+        {
+            "name": "XSL_SECPREF_NONE",
+            "value": 0
+        },
+        {
+            "name": "XSL_SECPREF_READ_FILE",
+            "value": 2
+        },
+        {
+            "name": "XSL_SECPREF_WRITE_FILE",
+            "value": 4
+        },
+        {
+            "name": "XSL_SECPREF_CREATE_DIRECTORY",
+            "value": 8
+        },
+        {
+            "name": "XSL_SECPREF_READ_NETWORK",
+            "value": 16
+        },
+        {
+            "name": "XSL_SECPREF_WRITE_NETWORK",
+            "value": 32
+        }
     ],
     "funcs": [
     ],
@@ -46,6 +70,18 @@
                             "type": "String",
                             "desc": "The local name of the XSLT parameter."
                         }
+                    ]
+                },
+                {
+                    "name": "getSecurityPrefs",
+                    "desc": "Get security preferences.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Security preferences."
+                    },
+                    "args": [
                     ]
                 },
                 {
@@ -155,6 +191,23 @@
                             "name": "filename",
                             "type": "String",
                             "desc": "Path to the file to dump profiling information."
+                        }
+                    ]
+                },
+                {
+                    "name": "setSecurityPrefs",
+                    "desc": "Set security preferences.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Previous security preferences."
+                    },
+                    "args": [
+                        {
+                            "name": "securityPrefs",
+                            "type": "Int64",
+                            "desc": "Security preferences."
                         }
                     ]
                 },

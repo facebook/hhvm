@@ -163,7 +163,8 @@ static void xslt_ext_function_object_php(xmlXPathParserContextPtr ctxt, int narg
 
 c_XSLTProcessor::c_XSLTProcessor(Class *cb) :
   ExtObjectData(cb),
-  m_stylesheet(NULL), m_doc(NULL), m_registerPhpFunctions(0) {
+  m_stylesheet(NULL), m_doc(NULL), m_secprefs(k_XSL_SECPREF_NONE),
+  m_registerPhpFunctions(0) {
 }
 
 c_XSLTProcessor::~c_XSLTProcessor() {
@@ -199,6 +200,10 @@ String c_XSLTProcessor::t_getparameter(const String& namespaceURI, const String&
   }
 
   return false;
+}
+
+int64_t c_XSLTProcessor::t_getsecurityprefs() {
+  return m_secprefs;
 }
 
 bool c_XSLTProcessor::t_hasexsltsupport() {
@@ -262,6 +267,14 @@ bool c_XSLTProcessor::t_setparameter(const String& namespaceURI, const String& l
   m_params.add(localName, value);
 
   return true;
+}
+
+int64_t c_XSLTProcessor::t_setsecurityprefs(int64_t securityPrefs) {
+  int64_t previous = m_secprefs;
+
+  m_secprefs = securityPrefs;
+
+  return previous;
 }
 
 bool c_XSLTProcessor::t_setprofiling(const String& filename) {
@@ -365,6 +378,51 @@ xmlDocPtr c_XSLTProcessor::apply_stylesheet() {
   xsltTransformContextPtr ctxt = xsltNewTransformContext (m_stylesheet, m_doc);
   ctxt->_private = this;
 
+  xsltSecurityPrefsPtr prefs = NULL;
+  if (m_secprefs != k_XSL_SECPREF_NONE) {
+    prefs = xsltNewSecurityPrefs();
+    int error = 0;
+
+    if (m_secprefs & k_XSL_SECPREF_READ_FILE) {
+      if (xsltSetSecurityPrefs(prefs, XSLT_SECPREF_READ_FILE, xsltSecurityForbid) != 0) {
+        error = 1;
+      }
+    }
+
+    if (m_secprefs & k_XSL_SECPREF_WRITE_FILE) {
+      if (xsltSetSecurityPrefs(prefs, XSLT_SECPREF_WRITE_FILE, xsltSecurityForbid) != 0) {
+        error = 1;
+      }
+    }
+
+    if (m_secprefs & k_XSL_SECPREF_CREATE_DIRECTORY) {
+      if (xsltSetSecurityPrefs(prefs, XSLT_SECPREF_CREATE_DIRECTORY, xsltSecurityForbid) != 0) {
+        error = 1;
+      }
+    }
+
+    if (m_secprefs & k_XSL_SECPREF_READ_NETWORK) {
+      if (xsltSetSecurityPrefs(prefs, XSLT_SECPREF_READ_NETWORK, xsltSecurityForbid) != 0) {
+        error = 1;
+      }
+    }
+
+    if (m_secprefs & k_XSL_SECPREF_WRITE_NETWORK) {
+      if (xsltSetSecurityPrefs(prefs, XSLT_SECPREF_WRITE_NETWORK, xsltSecurityForbid) != 0) {
+        error = 1;
+      }
+    }
+
+    if (xsltSetCtxtSecurityPrefs(prefs, ctxt) != 0) {
+      error = 1;
+    }
+
+    if (error == 1) {
+      raise_error("Can't set libxslt security properties, not doing transformation for security reasons");
+      return NULL;
+    }
+  }
+
   xsltRegisterExtFunction(ctxt,
     (const xmlChar *) "functionString",
     (const xmlChar *) "http://php.net/xsl",
@@ -402,6 +460,10 @@ xmlDocPtr c_XSLTProcessor::apply_stylesheet() {
   }
 
   xsltFreeTransformContext(ctxt);
+
+  if (prefs) {
+    xsltFreeSecurityPrefs(prefs);
+  }
 
   return res;
 }

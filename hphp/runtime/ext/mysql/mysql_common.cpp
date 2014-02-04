@@ -877,20 +877,20 @@ bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
       switch (b->buffer_type) {
         case MYSQL_TYPE_LONGLONG:
           {
-            v = var.toInt64();
-            b->buffer = v.getInt64Data();
+            m_value_arr.push_back(var.toInt64());
+            b->buffer = m_value_arr.back().getInt64Data();
           }
           break;
         case MYSQL_TYPE_DOUBLE:
           {
-            v = var.toDouble();
-            b->buffer = v.getDoubleData();
+            m_value_arr.push_back(var.toDouble());
+            b->buffer = m_value_arr.back().getDoubleData();
           }
           break;
         case MYSQL_TYPE_STRING:
           {
-            v = var.toString();
-            StringData *sd = v.getStringData();
+            m_value_arr.push_back(var.toString());
+            StringData *sd = m_value_arr.back().getStringData();
             b->buffer = (void *)sd->data();
             b->buffer_length = sd->size();
             *b->length = sd->size();
@@ -900,8 +900,6 @@ bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
           assert(false);
       }
     }
-
-    m_value_arr.push_back(v);
   }
 
   return !mysql_stmt_bind_param(stmt, m_vars);
@@ -1305,8 +1303,10 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
 
   if (mysql_real_query(conn, query.data(), query.size())) {
 #ifdef HHVM_MYSQL_TRACE_MODE
-    raise_notice("runtime/ext_mysql: failed executing [%s] [%s]", query.data(),
-                 mysql_error(conn));
+    if (RuntimeOption::EnableHipHopSyntax) {
+      raise_notice("runtime/ext_mysql: failed executing [%s] [%s]",
+                   query.data(), mysql_error(conn));
+    }
 #endif
 
     // When we are timed out, and we're SELECT-ing, we're potentially

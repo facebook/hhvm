@@ -137,9 +137,9 @@ class mysqli {
 
     if ($flags) {
       $option_strings = Map {
-        1 => 'WITH CONSISTENT SNAPSHOT',
-        2 => 'READ WRITE',
-        4 => 'READ ONLY',
+        MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT => 'WITH CONSISTENT SNAPSHOT',
+        MYSQLI_TRANS_START_READ_WRITE => 'READ WRITE',
+        MYSQLI_TRANS_START_READ_ONLY => 'READ ONLY',
       };
 
       $options = array();
@@ -197,27 +197,27 @@ class mysqli {
     return true;
   }
 
-  private function __end_transaction(bool $commit, int $flags,
-                                     string $name): bool {
+  private function __end_transaction(bool $commit, int $flags = 0,
+                                     ?string $name = null): bool {
     $query = ($commit) ? 'COMMIT' : 'ROLLBACK';
     if ($name) {
       $query .= '/*'. $name .'*/';
     }
 
     if ($flags) {
-      switch ($flags & 3) {
-        case 1:
+      switch ($flags & (MYSQLI_TRANS_COR_AND_CHAIN | MYSQLI_TRANS_COR_AND_NO_CHAIN)) {
+        case MYSQLI_TRANS_COR_AND_CHAIN:
           $query .= ' AND CHAIN';
-        case 2:
+        case MYSQLI_TRANS_COR_AND_NO_CHAIN:
           $query .= ' AND NO CHAIN';
         default:
           // Do nothing to mimic Zend
           break;
       }
-      switch ($flags & 12) {
-        case 4:
+      switch ($flags & (MYSQLI_TRANS_COR_RELEASE | MYSQLI_TRANS_COR_NO_RELEASE)) {
+        case MYSQLI_TRANS_COR_RELEASE:
           $query .= ' RELEASE';
-        case 8:
+        case MYSQLI_TRANS_COR_NO_RELEASE:
           $query .= ' AND NO RELEASE';
         default:
           // Do nothing to mimic Zend
@@ -236,7 +236,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function commit(int $flags, string $name): bool {
+  public function commit(int $flags = 0, ?string $name = null): bool {
     return $this->__end_transaction(true, $flags, $name);
   }
 
@@ -620,7 +620,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function rollback(int $flags, string $name): bool {
+  public function rollback(int $flags = 0, ?string $name = null): bool {
     return $this->__end_transaction(false, $flags, $name);
   }
 
@@ -852,7 +852,8 @@ class mysqli_result {
     return null;
   }
 
-  public function __construct(resource $result, int $resulttype) {
+  public function __construct(resource $result,
+                              int $resulttype = MYSQLI_STORE_RESULT) {
     $this->__result = $result;
     $this->__resulttype = $resulttype;
   }
@@ -1506,9 +1507,9 @@ function mysqli_change_user(mysqli $link,
  *
  * @return string - The default character set for the current connection
  */
-//function mysqli_character_set_name(mysqli $link): string {
-//  return $link->character_set_name();
-//}
+function mysqli_character_set_name(mysqli $link): string {
+  return $link->character_set_name();
+}
 
 /**
  * Get MySQL client info
@@ -1556,9 +1557,10 @@ function mysqli_close(mysqli $link): bool {
  *
  * @return bool -
  */
-//function mysqli_commit(mysqli $link, int $flags, string $name): bool {
-//  return $link->commit($flags, $name);
-//}
+function mysqli_commit(mysqli $link, int $flags = 0,
+                       ?string $name = null): bool {
+  return $link->commit($flags, $name);
+}
 
 /**
  * Returns the error code from last connect call
@@ -2062,9 +2064,9 @@ function mysqli_refresh(mysqli $link, int $options): int {
  *
  * @return bool -
  */
-//function mysqli_release_savepoint(mysqli $link, string $name): bool {
-//  return $link->release_savepoint($name);
-//}
+function mysqli_release_savepoint(mysqli $link, string $name): bool {
+  return $link->release_savepoint($name);
+}
 
 /**
  * Rolls back current transaction
@@ -2075,11 +2077,10 @@ function mysqli_refresh(mysqli $link, int $options): int {
  *
  * @return bool -
  */
-//function mysqli_rollback(mysqli $link,
-//                         int $flags,
-//                         string $name): bool {
-//  return $link->rollback($flags, $name);
-//}
+function mysqli_rollback(mysqli $link, int $flags = 0,
+                         ?string $name = null): bool {
+  return $link->rollback($flags, $name);
+}
 
 /**
  * Set a named transaction savepoint
@@ -2089,9 +2090,9 @@ function mysqli_refresh(mysqli $link, int $options): int {
  *
  * @return bool -
  */
-//function mysqli_savepoint(mysqli $link, string $name): bool {
-//  return $link->savepoint($name);
-//}
+function mysqli_savepoint(mysqli $link, string $name): bool {
+  return $link->savepoint($name);
+}
 
 /**
  * Selects the default database for database queries
@@ -2734,9 +2735,9 @@ function mysqli_stmt_execute(mysqli_stmt $stmt): bool {
  *   fetched   FALSE Error occurred   NULL No more rows/data exists or data
  *   truncation occurred
  */
-//function mysqli_stmt_fetch(mysqli_stmt $stmt): bool {
-//  return $stmt->fetch();
-//}
+function mysqli_stmt_fetch(mysqli_stmt $stmt): bool {
+  return $stmt->fetch();
+}
 
 /**
  * Returns the number of field in the given statement

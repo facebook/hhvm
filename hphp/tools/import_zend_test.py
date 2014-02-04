@@ -511,6 +511,7 @@ other_files = (
     '/ext/mcrypt/tests/vectors.txt',
     '/ext/mysql/tests/connect.inc',
     '/ext/mysql/tests/table.inc',
+    '/ext/mysqli/tests/clean_table.inc',
     '/ext/mysqli/tests/connect.inc',
     '/ext/mysqli/tests/skipif.inc',
     '/ext/mysqli/tests/skipifconnectfailure.inc',
@@ -1187,6 +1188,8 @@ def walk(filename, dest_subdir):
                     [re.compile('test(?!( is broken|s))')],
                 'mysqli_stmt_get_result2': [re.compile('(?<=FROM )test')],
                 'mysqli_stmt_insert_id': ['test'],
+                'mysqli_stmt_num_rows': [re.compile('(?<!run_)test')],
+                'mysqli_stmt_param_count': ['test'],
                 'mysqli_stmt_send_long_data': [re.compile('(?<!=we )test')],
                 'mysqli_stmt_store_result':
                     [re.compile('(?<=(INTO|FROM) )test')],
@@ -1213,6 +1216,13 @@ def walk(filename, dest_subdir):
             }
         }
 
+        # This remove the ZendParamMode checks that is usually in the beginning
+        # of the tests. Remove this when we have ZendParamMode working for PHP
+        # methods
+        r = re.compile('^\s*if \(.*@.*\)[\s\r\n]*.*Expecting.*[\r\n]+',
+                       re.MULTILINE)
+        test = r.sub('', test)
+
         for t, t_replace_config in replace_configs.iteritems():
             for i, replace_id in enumerate(t_replace_config.get(testname, [])):
                 new_id = 'test_%s_%s_%d' % (testname, t, i + 1)
@@ -1222,7 +1232,7 @@ def walk(filename, dest_subdir):
                     test = replace_id.sub(new_id, test)
 
         new_id = 'test_%s_table_1' % (testname, )
-        test = re.sub('(require(_once)*\([\'"]table.inc[\'"]\))',
+        test = re.sub('(require(_once)*\([\'"](clean_)?table.inc[\'"]\))',
                       '$test_table_name = \'%s\'; \\1' % (new_id, ), test)
 
     file(full_dest_filename, 'w').write(test)

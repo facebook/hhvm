@@ -270,8 +270,10 @@ Variant f_mysql_multi_query(const String& query, CVarRef link_identifier /* = nu
 
   if (mysql_real_query(conn, query.data(), query.size())) {
 #ifdef HHVM_MYSQL_TRACE_MODE
-    raise_notice("runtime/ext_mysql: failed executing [%s] [%s]", query.data(),
-                  mysql_error(conn));
+    if (RuntimeOption::EnableHipHopSyntax) {
+      raise_notice("runtime/ext_mysql: failed executing [%s] [%s]",
+                   query.data(), mysql_error(conn));
+    }
 #endif
       // turning this off clears the errors
       if (!mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_OFF)) {

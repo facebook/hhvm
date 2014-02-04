@@ -961,14 +961,14 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
   }
 
   auto const exitBlock  = makeExit();
-  auto const catchBlock = makeCatch();
-  auto const loc        = ldLocInnerWarn(id, exitBlock, DataTypeSpecific,
-                                         catchBlock);
+  auto const loc        = ldLocInnerWarn(id, exitBlock, DataTypeSpecific);
+
   if (subOpc == ConcatCellCell) {
     /*
      * The concat helpers incref their results, which will be consumed by
      * the stloc. We need an extra incref for the push onto the stack.
      */
+    auto const catchBlock = makeCatch();
     auto const val    = popC();
     auto const result = gen(ConcatCellCell, catchBlock, loc, val);
     pushIncRef(stLocNRC(id, nullptr, result));

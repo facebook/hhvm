@@ -42,7 +42,7 @@ class c_XSLTProcessor : public ExtObjectData, public Sweepable {
   public: void t_importstylesheet(CObjRef stylesheet);
   public: void t_registerphpfunctions(CVarRef funcs = null_variant);
   public: bool t_removeparameter(const String& namespaceURI, const String& localName);
-  public: bool t_setparameter(const String& namespaceURI, const String& localName, const String& value);
+  public: bool t_setparameter(const String& namespaceURI, CVarRef localName, CVarRef value = null_variant);
   public: bool t_setprofiling(const String& filename);
   public: int64_t t_setsecurityprefs(int64_t securityPrefs);
   public: Variant t_transformtodoc(CObjRef doc);

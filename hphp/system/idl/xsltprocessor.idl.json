@@ -157,7 +157,7 @@
                 },
                 {
                     "name": "setParameter",
-                    "desc": "Sets the value of one parameter to be used in subsequent transformations with XSLTProcessor. If the parameter doesn't exist in the stylesheet it will be ignored.",
+                    "desc": "Sets the value of one or more parameters to be used in subsequent transformations with XSLTProcessor. If the parameter doesn't exist in the stylesheet it will be ignored.",
                     "flags": [
                     ],
                     "return": {
@@ -172,12 +172,13 @@
                         },
                         {
                             "name": "localName",
-                            "type": "String",
-                            "desc": "The local name of the XSLT parameter."
+                            "type": "Variant",
+                            "desc": "The local name of the XSLT parameter, or an array of name => value pairs."
                         },
                         {
                             "name": "value",
-                            "type": "String",
+                            "type": "Variant",
+                            "value": "null_variant",
                             "desc": "The new value of the XSLT parameter."
                         }
                     ]

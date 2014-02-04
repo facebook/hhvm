@@ -294,15 +294,40 @@ void c_XSLTProcessor::t_registerphpfunctions(CVarRef funcs /* = null_variant */)
   }
 }
 
-bool c_XSLTProcessor::t_setparameter(const String& namespaceURI, const String& localName, const String& value) {
+bool c_XSLTProcessor::t_setparameter(const String& namespaceURI, CVarRef localName, CVarRef value /* = null_variant */) {
   // namespaceURI argument is unused in Zend PHP XSL extension.
-  if (m_params.exists(localName)) {
-    m_params.set(localName, value);
-  } else {
-    m_params.add(localName, value);
+
+  if (localName.isString() && value.isString()) {
+    if (m_params.exists(localName)) {
+      m_params.set(localName, value);
+    } else {
+      m_params.add(localName, value);
+    }
+
+    return true;
+  } else if (localName.isArray() && value.isNull()) {
+    int ret = true;
+
+    for (ArrayIter iter(localName); iter; ++iter) {
+      if (iter.first().isString() && iter.second().isString()) {
+        if (m_params.exists(iter.first().toString())) {
+          m_params.set(iter.first().toString(), iter.second().toString());
+        } else {
+          m_params.add(iter.first().toString(), iter.second().toString());
+        }
+      } else {
+        ret = false;
+      }
+    }
+
+    if (ret == false) {
+      raise_warning("Invalid parameter array");
+    }
+    return ret;
   }
 
-  return true;
+  raise_warning ("Invalid parameters");
+  return false;
 }
 
 int64_t c_XSLTProcessor::t_setsecurityprefs(int64_t securityPrefs) {

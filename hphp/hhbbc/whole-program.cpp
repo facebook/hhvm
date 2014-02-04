@@ -332,7 +332,7 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   optimize(index, *program);
 
   if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 1)) {
-    debug_dump_program(*program);
+    debug_dump_program(index, *program);
   }
 
   LitstrTable::get().setWriting();

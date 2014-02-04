@@ -29,7 +29,7 @@ namespace HPHP { namespace HHBBC {
 /*
  * Dump the entire program to a temporary directory as readable text.
  */
-void debug_dump_program(const php::Program&);
+void debug_dump_program(const Index&, const php::Program&);
 
 /*
  * Utilities for printing the state of the program after various

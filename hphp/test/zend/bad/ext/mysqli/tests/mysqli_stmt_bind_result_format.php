@@ -319,5 +319,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_stmt_bind_result_format_table_1'; require_once("clean_table.inc");
 ?>

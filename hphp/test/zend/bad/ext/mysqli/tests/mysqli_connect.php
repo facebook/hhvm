@@ -11,9 +11,6 @@
 	$exptype = ($anon_allow) ? "mysqli_object" : "false";
 
 	$obj = new stdClass();
-	if (!is_null($tmp = @mysqli_connect($obj)))
-		printf("[001] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
-
 	$tmp = @mysqli_connect($link);
 	if (($anon_allow && gettype($tmp) != "object") || (!$anon_allow && $tmp != false)) {
 		printf("[002] Expecting %s, got %s/%s\n", $exptype, gettype($tmp), $tmp);

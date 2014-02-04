@@ -26,9 +26,6 @@
 			mysqli_free_result($res);
 			break;
 	}
-
-	if (@mysqli_query($link, "SELECT id FROM test_mysqli_fork_table_1 WHERE id = 1"))
-		printf("[003] Expecting error and closed connection, child exit should have closed connection\n");
 	else if ((($errno = mysqli_errno($link)) == 0) || ('' == ($error = mysqli_error($link))))
 		printf("[004] Expecting error string and error code from MySQL, got errno = %s/%s, error = %s/%s\n",
 			gettype($errno), $errno, gettype($error), $error);

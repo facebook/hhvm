@@ -3,16 +3,6 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (NULL !== ($tmp = @mysqli_data_seek()))
-		printf("[001] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_data_seek($link)))
-		printf("[002] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_data_seek($link, $link)))
-		printf("[003] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_data_seek_table_1'; require('table.inc');
 	if (!$res = mysqli_query($link, 'SELECT * FROM test_mysqli_data_seek_table_1 ORDER BY id LIMIT 4', MYSQLI_STORE_RESULT))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -55,5 +45,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_data_seek_table_1'; require_once("clean_table.inc");
 ?>

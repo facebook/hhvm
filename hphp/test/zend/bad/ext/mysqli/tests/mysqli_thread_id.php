@@ -3,13 +3,6 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_thread_id()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_thread_id($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_thread_id_table_1'; require('table.inc');
 
 	if (!is_int($tmp = mysqli_thread_id($link)) || (0 === $tmp))
@@ -27,5 +20,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_thread_id_table_1'; require_once("clean_table.inc");
 ?>

@@ -104,12 +104,8 @@
 		printf("[029] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
 	$mysqli->close();
-
-	if (NULL !== ($tmp = @$mysqli->autocommit( false)))
-		printf("[030] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_autocommit_oo_table_1'; require_once("clean_table.inc");
 ?>

@@ -7,17 +7,10 @@
 	// Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
 	$mysqli = new mysqli();
 	$res = @new mysqli_result($mysqli);
-	if (!is_null($tmp = @$res->fetch_assoc()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_fetch_assoc_oo_table_1'; require('table.inc');
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
-
-	if (!is_null($tmp = @$res->fetch_assoc($link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$res = $mysqli->query("SELECT id, label FROM test_mysqli_fetch_assoc_oo_table_1 ORDER BY id LIMIT 1")) {
 		printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
@@ -46,5 +39,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_fetch_assoc_oo_table_1'; require_once("clean_table.inc");
 ?>

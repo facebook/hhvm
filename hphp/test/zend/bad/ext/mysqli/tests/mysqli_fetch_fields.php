@@ -5,12 +5,6 @@
 	$link   = NULL;
 
 	// Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
-	if (!is_null($tmp = @mysqli_fetch_fields()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_fetch_fields($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_fetch_fields_table_1'; require('table.inc');
 
 	// Make sure that client, connection and result charsets are all the
@@ -53,5 +47,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_fetch_fields_table_1'; require_once("clean_table.inc");
 ?>

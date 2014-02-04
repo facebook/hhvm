@@ -3,18 +3,7 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_warning_count()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_warning_count($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_warning_count_table_1'; require('table.inc');
-
-	if (NULL !== ($tmp = @mysqli_warning_count($link, "too_many")))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$res = mysqli_query($link, "SELECT id, label FROM test"))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
@@ -35,5 +24,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_warning_count_table_1'; require_once("clean_table.inc");
 ?>

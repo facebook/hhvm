@@ -4,20 +4,9 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_select_db()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_select_db($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
-
-	if (!is_null($tmp = @mysqli_select_db($link, $db, "foo")))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	/* does not make too much sense, unless we have access to at least one more database than $db */
 	if (!mysqli_select_db($link, $db))
 		printf("[005] Cannot select DB %s, [%d] %s\n", $db, mysqli_errno($link), mysqli_error($link));
@@ -96,4 +85,4 @@
 
 	print "done!\n";
 ?>
-<?php require_once("clean_table.inc"); ?>
+<?php $test_table_name = 'test_mysqli_select_db_table_1'; require_once("clean_table.inc"); ?>

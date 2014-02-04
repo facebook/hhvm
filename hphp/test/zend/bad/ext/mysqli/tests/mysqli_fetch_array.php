@@ -2,13 +2,6 @@
 	require_once("connect.inc");
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_fetch_array()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_fetch_array($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_fetch_array_table_1'; require('table.inc');
 	if (!$res = mysqli_query($link, "SELECT * FROM test_mysqli_fetch_array_table_1 ORDER BY id LIMIT 5")) {
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

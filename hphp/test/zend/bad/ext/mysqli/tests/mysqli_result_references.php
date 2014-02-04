@@ -68,5 +68,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_result_references_table_1'; require_once("clean_table.inc");
 ?>

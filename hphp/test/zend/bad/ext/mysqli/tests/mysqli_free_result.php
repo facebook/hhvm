@@ -3,13 +3,6 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_free_result()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_free_result($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_free_result_table_1'; require('table.inc');
 	if (!$res = mysqli_query($link, "SELECT id FROM test_mysqli_free_result_table_1 ORDER BY id LIMIT 1")) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -42,5 +35,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_free_result_table_1'; require_once("clean_table.inc");
 ?>

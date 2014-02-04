@@ -3,19 +3,6 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_attr_set()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_attr_set($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_attr_set($link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_attr_set($link, $link, $link)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_stmt_attr_set_table_1'; require('table.inc');
 
 	$valid_attr = array(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
@@ -32,9 +19,6 @@
 
 
 	$stmt = mysqli_stmt_init($link);
-	if (!is_null($tmp = @mysqli_stmt_attr_set($stmt, 0, 0)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$stmt->prepare("SELECT * FROM test");
 
 	mt_srand(microtime(true));
@@ -137,10 +121,6 @@
 
 		$stmt = mysqli_stmt_init($link);
 		$stmt->prepare("SELECT id, label FROM test");
-
-		if (false !== ($tmp = @$stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, $invalid_cursor_type)))
-			printf("[010] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-
 		if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_FOR_UPDATE)))
 			printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
@@ -261,5 +241,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_stmt_attr_set_table_1'; require_once("clean_table.inc");
 ?>

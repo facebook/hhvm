@@ -49,13 +49,6 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_field_seek()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_field_seek($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_field_seek_table_1'; require('table.inc');
 
 	// Make sure that client, connection and result charsets are all the
@@ -91,10 +84,6 @@
 	var_dump(mysqli_field_seek($res, 2));
 	var_dump(mysqli_fetch_field($res));
 	var_dump(mysqli_field_seek($res, PHP_INT_MAX + 1));
-
-	if (!is_null($tmp = @mysqli_field_seek($res, 0, "too many")))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	mysqli_free_result($res);
 
 	if (!$res = mysqli_query($link, "SELECT NULL as _null", MYSQLI_STORE_RESULT)) {
@@ -111,5 +100,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_field_seek_table_1'; require_once("clean_table.inc");
 ?>

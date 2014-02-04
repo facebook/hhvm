@@ -3,32 +3,7 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (NULL !== ($tmp = @mysqli_real_connect($link)))
-		printf("[001a] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_real_connect($link, $link)))
-		printf("[001b] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_real_connect($link, $link, $link)))
-		printf("[001c] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_real_connect($link, $link, $link, $link)))
-		printf("[001d] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_real_connect($link, $link, $link, $link, $link)))
-		printf("[001e] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_real_connect($link, $link, $link, $link, $link, $link)))
-		printf("[001f] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_real_connect($link, $link, $link, $link, $link, $link, $link)))
-		printf("[001g] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	//  ( mysqli link [, string hostname [, string username [, string passwd [, string dbname [, int port [, string socket [, int flags]]]]]]]
-	if (NULL !== ($tmp = @mysqli_real_connect($link, $link, $link, $link, $link, $link, $link, $link)))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$link = mysqli_init())
 		printf("[002] mysqli_init() failed\n");
 
@@ -162,5 +137,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_real_connect_table_1'; require_once("clean_table.inc");
 ?>

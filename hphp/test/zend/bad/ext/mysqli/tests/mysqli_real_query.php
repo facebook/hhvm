@@ -3,18 +3,7 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_real_query()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_real_query($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_real_query_table_1'; require('table.inc');
-
-	if (NULL !== ($tmp = @mysqli_real_query($link, "SELECT 1 AS a", MYSQLI_USE_RESULT, "foo")))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (false !== ($tmp = mysqli_real_query($link, 'THIS IS NOT SQL')))
 		printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 

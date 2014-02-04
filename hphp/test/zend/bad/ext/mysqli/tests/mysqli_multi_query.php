@@ -8,13 +8,6 @@
 	}
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_multi_query()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_multi_query($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_multi_query_table_1'; require('table.inc');
 
 	if (false !== ($tmp = mysqli_multi_query($link, "")))
@@ -138,5 +131,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_multi_query_table_1'; require_once("clean_table.inc");
 ?>

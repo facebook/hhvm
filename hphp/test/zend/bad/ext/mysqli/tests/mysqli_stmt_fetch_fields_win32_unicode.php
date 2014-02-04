@@ -38,5 +38,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_stmt_fetch_fields_win32_unicode_table_1'; require_once("clean_table.inc");
 ?>

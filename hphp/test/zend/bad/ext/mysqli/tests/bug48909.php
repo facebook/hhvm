@@ -31,5 +31,5 @@
 	echo "done";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_bug48909_table_1'; require_once("clean_table.inc");
 ?>

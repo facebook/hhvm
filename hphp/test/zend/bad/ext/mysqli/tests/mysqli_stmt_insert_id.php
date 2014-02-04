@@ -3,20 +3,10 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_insert_id()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$stmt = @new mysqli_stmt($link);
-	if (!is_null($tmp = @mysqli_insert_id($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_stmt_insert_id_table_1'; require('table.inc');
 
 	$stmt = mysqli_stmt_init($link);
-	if (NULL !== ($tmp = @mysqli_stmt_insert_id($stmt)))
-		printf("[003] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test_mysqli_stmt_insert_id_table_1 ORDER BY id LIMIT 1") ||
 		!mysqli_stmt_execute($stmt)) {
 		printf("[004] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -59,5 +49,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_stmt_insert_id_table_1'; require_once("clean_table.inc");
 ?>

@@ -7,9 +7,6 @@
 
 	$mysqli = new mysqli();
 	$res = @new mysqli_result($mysqli);
-	if (!is_null($tmp = @$res->fetch_object()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_fetch_object_oo_table_1'; require('table.inc');
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -18,16 +15,6 @@
 	if (!$res = $mysqli->query("SELECT id AS ID, label FROM test_mysqli_fetch_object_oo_table_1 AS TEST ORDER BY id LIMIT 5")) {
 		printf("[003] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
-
-	if (!is_null($tmp = @$res->fetch_object($link)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @$res->fetch_object($link, $link)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @$res->fetch_object($link, $link, $link)))
-		printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$obj = mysqli_fetch_object($res);
 	if (($obj->ID !== "1") || ($obj->label !== "a") || (get_class($obj) != 'stdClass')) {
 		printf("[007] Object seems wrong. [%d] %s\n", $mysqli->errno, $mysqli->error);
@@ -98,5 +85,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_fetch_object_oo_table_1'; require_once("clean_table.inc");
 ?>

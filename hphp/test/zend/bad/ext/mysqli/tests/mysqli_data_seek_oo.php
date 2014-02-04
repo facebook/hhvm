@@ -11,21 +11,8 @@
 		$host, $user, $db, $port, $socket);
 
 	$res = new mysqli_result($mysqli);
-	if (NULL !== ($tmp = @$res->data_seek(0)))
-		printf("[002] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$res = $mysqli->query('SELECT * FROM test_mysqli_data_seek_oo_table_1 ORDER BY id LIMIT 4', MYSQLI_STORE_RESULT))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-	if (NULL !== ($tmp = @$res->data_seek()))
-		printf("[004] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @$res->data_seek($link)))
-		printf("[005] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @$res->data_seek($link, $link)))
-		printf("[006] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (true !== ($tmp = $res->data_seek(3)))
 		printf("[007] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
@@ -64,5 +51,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_data_seek_oo_table_1'; require_once("clean_table.inc");
 ?>

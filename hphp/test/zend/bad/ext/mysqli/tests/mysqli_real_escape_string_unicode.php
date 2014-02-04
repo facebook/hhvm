@@ -3,18 +3,7 @@
 
 	$tmp	= NULL;
 	$link	= NULL;
-
-	if (NULL !== ($tmp = @mysqli_real_escape_string()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_real_escape_string($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_real_escape_string_unicode_table_1'; require('table.inc');
-
-	if (NULL !== ($tmp =@mysqli_real_escape_string($link, "фуу", "бар")))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if ('фу\\\\бар' !== ($tmp = mysqli_real_escape_string($link, 'фу\\бар')))
 		printf("[004] Expecting фу\\\\бар, got %s\n", $tmp);
 
@@ -71,5 +60,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_real_escape_string_unicode_table_1'; require_once("clean_table.inc");
 ?>

@@ -3,16 +3,6 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_autocommit()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_autocommit($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_autocommit($link, $link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[004] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
@@ -115,12 +105,8 @@
 		printf("[032] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	mysqli_close($link);
-
-	if (NULL !== ($tmp = @mysqli_autocommit($link, false)))
-		printf("[033] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_autocommit_table_1'; require_once("clean_table.inc");
 ?>

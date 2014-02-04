@@ -5,22 +5,11 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_bind_result()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_bind_result($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_stmt_bind_result_table_1'; require('table.inc');
 
 	$stmt = mysqli_stmt_init($link);
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test_mysqli_stmt_bind_result_table_1 ORDER BY id LIMIT 1"))
 		printf("[002a] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-
-	if (!is_null($tmp = @mysqli_stmt_bind_result($stmt)))
-		printf("[002b] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
@@ -290,9 +279,6 @@
 
 	/* Check that the function alias exists. It's a deprecated function,
 	but we have not announce the removal so far, therefore we need to check for it */
-	if (!is_null($tmp = @mysqli_stmt_bind_result()))
-		printf("[3000] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$stmt = mysqli_stmt_init($link);
 	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_bind_result_table_1(id, label) VALUES (1000, 'z')"))
 		printf("[3001] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -307,5 +293,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_stmt_bind_result_table_1'; require_once("clean_table.inc");
 ?>

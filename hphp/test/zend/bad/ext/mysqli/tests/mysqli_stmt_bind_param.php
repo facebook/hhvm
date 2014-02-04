@@ -12,16 +12,6 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_bind_param()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_bind_param($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_bind_param($link, $link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_stmt_bind_param_table_1'; require('table.inc');
 
 	$stmt = mysqli_stmt_init($link);
@@ -35,12 +25,6 @@
 	libmysql gives a less descriptive error message but mysqlnd,
 	we did not unify the error messages but ignore this slight difference silently
 	*/
-	if (!false === ($tmp = @mysqli_stmt_bind_param($stmt, " ", $tmp)))
-		printf("[003d] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!false === ($tmp = @mysqli_stmt_bind_param($stmt, "", $id, $label)))
-		printf("[003a] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-
 	/* TODO: somehwhat undocumented syntax! */
 	$param = array($id);
 	if (!false === ($tmp = mysqli_stmt_bind_param($stmt, "is", $param)))
@@ -372,10 +356,8 @@
 
 	/* Check that the function alias exists. It's a deprecated function,
 	but we have not announce the removal so far, therefore we need to check for it */
-	if (!is_null($tmp = @mysqli_stmt_bind_param()))
-			printf("[021] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_stmt_bind_param_table_1'; require_once("clean_table.inc");
 ?>

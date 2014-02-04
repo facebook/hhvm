@@ -103,10 +103,6 @@
 	printf("\nConstructor:\n");
 	if (!is_object($res = new mysqli_result($link)))
 		printf("[001] Expecting object/mysqli_result got %s/%s\n", gettye($res), $res);
-
-	if (null !== ($tmp = @$res->num_rows))
-		printf("[002] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!mysqli_query($link, "SELECT id FROM test_mysqli_class_mysqli_result_interface_table_1 ORDER BY id"))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 

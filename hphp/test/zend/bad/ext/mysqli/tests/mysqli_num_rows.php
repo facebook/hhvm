@@ -3,13 +3,6 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_num_rows()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_num_rows($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_num_rows_table_1'; require('table.inc');
 
 	function func_test_mysqli_num_rows($link, $query, $expected, $offset, $test_free = false) {
@@ -65,5 +58,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_num_rows_table_1'; require_once("clean_table.inc");
 ?>

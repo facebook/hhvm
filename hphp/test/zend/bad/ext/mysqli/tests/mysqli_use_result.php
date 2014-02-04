@@ -3,13 +3,6 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_use_result()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_use_result($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_use_result_table_1'; require('table.inc');
 
 	if (!$res = mysqli_real_query($link, "SELECT id, label FROM test_mysqli_use_result_table_1 ORDER BY id"))
@@ -47,5 +40,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_use_result_table_1'; require_once("clean_table.inc");
 ?>

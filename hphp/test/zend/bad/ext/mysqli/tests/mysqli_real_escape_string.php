@@ -3,18 +3,7 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (NULL !== ($tmp = @mysqli_real_escape_string()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_real_escape_string($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_real_escape_string_table_1'; require('table.inc');
-
-	if (NULL !== ($tmp =@mysqli_real_escape_string($link, "foo", "foo")))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if ('\\\\' !== ($tmp = mysqli_real_escape_string($link, '\\')))
 		printf("[004] Expecting \\\\, got %s\n", $tmp);
 
@@ -39,8 +28,5 @@
 		printf("[010] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	/* Make sure that the function alias exists */
-	if (NULL !== ($tmp = @mysqli_escape_string()))
-		printf("[011] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	print "done!";
 ?>

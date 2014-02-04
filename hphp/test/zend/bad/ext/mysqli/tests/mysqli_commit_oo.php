@@ -5,9 +5,6 @@
 	$link   = NULL;
 
 	$mysqli = new mysqli();
-	if (!is_null($tmp = @$mysqli->commit()))
-		printf("[013] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
@@ -45,12 +42,8 @@
 		printf("[011] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
 	$mysqli->close();
-
-	if (NULL !== ($tmp = @$mysqli->commit()))
-		printf("[012] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_commit_oo_table_1'; require_once("clean_table.inc");
 ?>

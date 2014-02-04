@@ -45,5 +45,5 @@ mysqli_error($link));
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_real_escape_string_eucjpms_table_1'; require_once("clean_table.inc");
 ?>

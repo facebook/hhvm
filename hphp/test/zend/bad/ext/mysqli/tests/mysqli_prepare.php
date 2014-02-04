@@ -3,18 +3,7 @@
 
 	$tmp    = NULL;
 	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_prepare()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_prepare($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_prepare_table_1'; require('table.inc');
-
-	if (false !== ($tmp = @mysqli_prepare($link, false)))
-		printf("[003] Expecting boolean/false, got %s\n", gettype($tmp));
-
 	if (!$res = mysqli_query($link, "SELECT id, label FROM test_mysqli_prepare_table_2", MYSQLI_USE_RESULT))
 		printf("[004] [%d] %s, next test will fail\n", mysqli_errno($link), mysqli_error($link));
 
@@ -96,15 +85,7 @@
 	var_dump(mysqli_stmt_prepare($stmt, 'SELECT 1; SELECT 2'));
 
 	mysqli_stmt_close($stmt);
-
-	if (!is_null($tmp = @mysqli_stmt_prepare($link, 'SELECT id FROM test_mysqli_prepare_table_2', 'foo')))
-		printf("[023] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	mysqli_close($link);
-
-	if (!is_null($tmp = @mysqli_stmt_prepare($link, 'SELECT id FROM test_mysqli_prepare_table_2')))
-		printf("[024] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	print "done!";
 ?>
 <?php

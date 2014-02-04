@@ -6,9 +6,6 @@
 
 	$mysqli = new mysqli();
 	$res = @new mysqli_result($mysqli);
-	if (!is_null($tmp = @$res->fetch_field_direct()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$test_table_name = 'test_mysqli_fetch_field_direct_oo_table_1'; require('table.inc');
 
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
@@ -18,16 +15,6 @@
 	if (!$res = $mysqli->query("SELECT id AS ID, label FROM test_mysqli_fetch_field_direct_oo_table_1 AS TEST ORDER BY id LIMIT 1")) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
-
-	if (!is_null($tmp = @$res->fetch_field_direct()))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @$res->fetch_field_direct($link)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @$res->fetch_field_direct($link, $link)))
-		printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	var_dump($res->fetch_field_direct(-1));
 	var_dump($res->fetch_field_direct(0));
 	var_dump($res->fetch_field_direct(2));
@@ -41,5 +28,5 @@
 	print "done!";
 ?>
 <?php
-	require_once("clean_table.inc");
+	$test_table_name = 'test_mysqli_fetch_field_direct_oo_table_1'; require_once("clean_table.inc");
 ?>

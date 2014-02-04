@@ -149,7 +149,11 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
     /* If there's a dval, do the conversion; else continue checking
      * the digits if we need to check for a full match */
     if (dval) {
-      local_dval = strtod(str, (char **)&ptr);
+      /* This section can be called while static strings are initialized.
+       * Creating the bigint pool is usually done on thread initialization,
+       * but this happens even before then. */
+      zend_get_bigint_data();
+      local_dval = zend_strtod(str, (const char **)&ptr);
     } else if (allow_errors != 1 && dp_or_e != -1) {
       dp_or_e = (*ptr++ == '.') ? 1 : 2;
       goto check_digits;

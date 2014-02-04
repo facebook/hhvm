@@ -84,6 +84,7 @@ private:
 
 class PDOMySqlStatement : public PDOStatement {
 public:
+  DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement);
   PDOMySqlStatement(PDOMySqlConnection *conn, MYSQL *server);
   virtual ~PDOMySqlStatement();
 
@@ -474,7 +475,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
 
 bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
                                   CVarRef options) {
-  PDOMySqlStatement *s = new PDOMySqlStatement(this, m_server);
+  PDOMySqlStatement *s = NEWOBJ(PDOMySqlStatement)(this, m_server);
   *stmt = s;
 
   if (m_emulate_prepare) {
@@ -808,6 +809,10 @@ PDOMySqlStatement::PDOMySqlStatement(PDOMySqlConnection *conn, MYSQL *server)
 }
 
 PDOMySqlStatement::~PDOMySqlStatement() {
+  sweep();
+}
+
+void PDOMySqlStatement::sweep() {
   if (m_result) {
     /* free the resource */
     mysql_free_result(m_result);
@@ -1001,7 +1006,7 @@ bool PDOMySqlStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Resource(new PDOColumn()));
+      columns.set(i, Resource(NEWOBJ(PDOColumn)));
     }
   }
 
@@ -1276,6 +1281,7 @@ PDOMySql::PDOMySql() : PDODriver("mysql") {
 }
 
 PDOConnection *PDOMySql::createConnectionObject() {
+  // Doesn't use NEWOBJ because PDOConnection is malloced
   return new PDOMySqlConnection();
 }
 

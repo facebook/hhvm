@@ -1,0 +1,50 @@
+exception 'Exception' with message 'Test exception.' in %s:%d
+Stack trace:
+#0 (): testFunction()
+#1 %s(%d): XSLTProcessor->transformToDoc()
+#2 {main}
+exception 'Exception' with message 'Test exception.' in %s:%d
+Stack trace:
+#0 (): testFunction()
+#1 %s(%d): XSLTProcessor->transformToDoc()
+#2 {main}
+exception 'Exception' with message 'Test exception.' in %s:%d
+Stack trace:
+#0 (): testFunction()
+#1 %s(%d): XSLTProcessor->transformToDoc()
+#2 {main}
+exception 'Exception' with message 'Test exception.' in %s:%d
+Stack trace:
+#0 (): testFunction()
+#1 %s(%d): XSLTProcessor->transformToDoc()
+#2 {main}
+exception 'Exception' with message 'Test exception.' in %s:%d
+Stack trace:
+#0 (): testFunction()
+#1 %s(%d): XSLTProcessor->transformToDoc()
+#2 {main}
+exception 'Exception' with message 'Test exception.' in %s:%d
+Stack trace:
+#0 (): testFunction()
+#1 %s(%d): XSLTProcessor->transformToDoc()
+#2 {main}
+exception 'Exception' with message 'Test exception.' in %s:%d
+Stack trace:
+#0 (): testFunction()
+#1 %s(%d): XSLTProcessor->transformToDoc()
+#2 {main}
+exception 'Exception' with message 'Test exception.' in %s:%d
+Stack trace:
+#0 (): testFunction()
+#1 %s(%d): XSLTProcessor->transformToDoc()
+#2 {main}
+exception 'Exception' with message 'Test exception.' in %s:%d
+Stack trace:
+#0 (): testFunction()
+#1 %s(%d): XSLTProcessor->transformToDoc()
+#2 {main}
+exception 'Exception' with message 'Test exception.' in %s:%d
+Stack trace:
+#0 (): testFunction()
+#1 %s(%d): XSLTProcessor->transformToDoc()
+#2 {main}

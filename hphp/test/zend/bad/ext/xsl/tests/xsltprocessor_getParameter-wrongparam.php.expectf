@@ -1,0 +1,8 @@
+HipHop Warning: XSLTProcessor::getParameter() expects exactly 2 parameters, 0 given in %s on line %d
+bool(false)
+
+HipHop Warning: XSLTProcessor::getParameter() expects parameter 1 to be %binary_string_optional%, array given in %s on line %d
+bool(false)
+
+HipHop Warning: XSLTProcessor::getParameter() expects parameter 2 to be %binary_string_optional%, array given in %s on line %d
+bool(false)

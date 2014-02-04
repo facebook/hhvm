@@ -1,0 +1,8 @@
+Test 11: php:function Support
+HipHop Warning: A PHP Object cannot be converted to an XPath-string in %s on line 16
+<?xml version="1.0"?>
+foobar - secondArg
+foobar - 
+this is from an external DomDocument
+from the Input Document
+static

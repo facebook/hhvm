@@ -10,6 +10,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(xsl, 0.1);
+
 void php_libxml_ctx_error(void *ctx,
                           const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
 

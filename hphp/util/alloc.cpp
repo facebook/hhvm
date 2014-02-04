@@ -37,13 +37,16 @@ namespace HPHP { namespace Util {
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   if (mallctl) {
-    unsigned arena;
-    size_t usz = sizeof(unsigned);
-    if (mallctl("tcache.flush", nullptr, nullptr, nullptr, 0)
-        || mallctl("thread.arena", &arena, &usz, nullptr, 0)
-        || mallctl("arenas.purge", nullptr, nullptr, &arena, usz)) {
-      // Error; do nothing.
+    int err = mallctl("thread.tcache.flush", nullptr, nullptr, nullptr, 0);
+    if (UNLIKELY(err != 0)) {
+      Logger::Warning("mallctl thread.tcache.flush failed with error %d", err);
     }
+
+    // hhvm uses only 1 jemalloc arena per numa node, instead of the
+    // jemalloc default of 4 per cpu, avoiding arena thrashing by pinning
+    // threads.  This means purging the arena assigned to the thread is
+    // unnecessary (and probably actively harmful).  Compare this code to
+    // folly::detail::MemoryIdler
   }
 #endif
 #ifdef USE_TCMALLOC

@@ -1,3 +1,5 @@
+  - reenabled jemalloc tcache flush for idle threads
+
 "Donald Glover" 3-Feb-2014
   - Support for "::class"
   - Enable FCallBuiltin for HNI functions

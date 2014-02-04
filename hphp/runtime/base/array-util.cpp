@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_string.h"
 
 namespace HPHP {

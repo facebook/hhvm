@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_output.h"
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/util/lock.h"
@@ -113,7 +113,7 @@ int64_t f_hphp_get_stats(const String& name) {
 Array f_hphp_get_status() {
   std::string out;
   ServerStats::ReportStatus(out, ServerStats::Format::JSON);
-  return f_json_decode(String(out)).toArray();
+  return HHVM_FN(json_decode)(String(out)).toArray();
 }
 Array f_hphp_get_iostatus() {
   return ServerStats::GetThreadIOStatuses();

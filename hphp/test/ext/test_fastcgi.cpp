@@ -27,7 +27,7 @@
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/ext/ext_options.h"
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
@@ -270,7 +270,7 @@ bool TestFastCGIServer::LoadExchangeFromJson(const std::string& path,
   }
   std::string json_str((std::istreambuf_iterator<char>(f)),
                         std::istreambuf_iterator<char>());
-  Variant json = f_json_decode(json_str, true);
+  Variant json = HHVM_FN(json_decode)(json_str, true);
   if (!result.fromJson(json)) {
     printf("Error loading message exchange file: %s\n", path.c_str());
     return false;

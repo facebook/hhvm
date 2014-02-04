@@ -45,7 +45,6 @@
 #include "hphp/runtime/ext/ext_imap.h"
 #include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/ext/ext_ipc.h"
-#include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_ldap.h"
 #include "hphp/runtime/ext/ext_mailparse.h"
 #include "hphp/runtime/ext/ext_math.h"

@@ -354,14 +354,10 @@ String c_XSLTProcessor::t_transformtoxml(CObjRef doc) {
 
     xmlChar *mem;
     int size;
-    xmlDocDumpFormatMemory(res, &mem, &size, /*format*/ 0);
-    xmlFreeDoc(res);
-
-    if (!size) {
+    if (xsltSaveResultToString(&mem, &size, res, m_stylesheet) < 0) {
       if (mem) {
         xmlFree(mem);
       }
-
       return false;
     }
 

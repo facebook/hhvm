@@ -195,6 +195,7 @@ void c_XSLTProcessor::t___construct() {
 }
 
 String c_XSLTProcessor::t_getparameter(const String& namespaceURI, const String& localName) {
+  // namespaceURI argument is unused in Zend PHP XSL extension.
   if (m_params.exists(localName)) {
     assert(m_params[localName].isString());
     return m_params[localName].toString();
@@ -238,6 +239,7 @@ void c_XSLTProcessor::t_importstylesheet(CObjRef stylesheet) {
 }
 
 bool c_XSLTProcessor::t_removeparameter(const String& namespaceURI, const String& localName) {
+  // namespaceURI argument is unused in Zend PHP XSL extension.
   if (m_params.exists(localName)) {
     assert(m_params[localName].isString());
     m_params.remove(localName);
@@ -265,7 +267,12 @@ void c_XSLTProcessor::t_registerphpfunctions(CVarRef funcs) {
 }
 
 bool c_XSLTProcessor::t_setparameter(const String& namespaceURI, const String& localName, const String& value) {
-  m_params.add(localName, value);
+  // namespaceURI argument is unused in Zend PHP XSL extension.
+  if (m_params.exists(localName)) {
+    m_params.set(localName, value);
+  } else {
+    m_params.add(localName, value);
+  }
 
   return true;
 }

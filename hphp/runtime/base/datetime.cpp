@@ -943,19 +943,11 @@ Variant DateTime::getSunInfo(SunInfoFormat retformat,
                     "SUNFUNCS_RET_DOUBLE");
     return false;
   }
-  bool error;
   double altitude = 90 - zenith;
-  if (utc_offset == -99999.0) {
-    if (utc()) {
-      utc_offset = 0;
-    } else {
-      utc_offset = m_tz->offset(toTimeStamp(error)) / 3600;
-    }
-  }
-
-  double h_rise, h_set; timelib_sll sunrise, sunset, transit;
+  double h_rise, h_set;
+  timelib_sll sunrise, sunset, transit;
   int rs = timelib_astro_rise_set_altitude(m_time.get(), longitude, latitude,
-                                           altitude, altitude > -1 ? 1 : 0,
+                                           altitude, 1,
                                            &h_rise, &h_set, &sunrise, &sunset,
                                            &transit);
   if (rs != 0) {

@@ -279,15 +279,25 @@ Object f_date_sub(CObjRef datetime, CObjRef interval);
 ///////////////////////////////////////////////////////////////////////////////
 // sun
 
+double get_date_default_latitude();
+double get_date_default_longitude();
+double get_date_default_sunset_zenith();
+double get_date_default_sunrise_zenith();
+double get_date_default_gmt_offset();
+
 Array f_date_sun_info(int64_t ts, double latitude, double longitude);
-Variant f_date_sunrise(int64_t timestamp, int format = 0,
-                       double latitude = 0.0, double longitude = 0.0,
-                       double zenith = 0.0,
-                       double gmt_offset = 99999.0);
-Variant f_date_sunset(int64_t timestamp, int format = 0,
-                      double latitude = 0.0, double longitude = 0.0,
-                      double zenith = 0.0,
-                      double gmt_offset = 99999.0);
+Variant f_date_sunrise(int64_t timestamp,
+                       int format,
+                       double latitude,
+                       double longitude,
+                       double zenith,
+                       double gmt_offset);
+Variant f_date_sunset(int64_t timestamp,
+                      int format,
+                      double latitude,
+                      double longitude,
+                      double zenith,
+                      double gmt_offset);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

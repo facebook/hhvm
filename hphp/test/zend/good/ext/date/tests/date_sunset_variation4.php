@@ -1,17 +1,18 @@
 <?php
-/* Prototype  : mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
- * Description: Returns time of sunrise for a given day and location 
+/* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
+ * Description: Returns time of sunset for a given day and location
  * Source code: ext/date/php_date.c
+ * Alias to functions:
  */
 
-echo "*** Testing date_sunrise() : usage variation ***\n";
+echo "*** Testing date_sunset() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 date_default_timezone_set("Asia/Calcutta");
 $time = mktime(8, 8, 8, 8, 8, 2008);
-$longitude = -9;
+$latitude = 22.34;
 $zenith = 90;
-$gmt_offset = -5.5;
+$gmt_offset = 5.5;
 
 //get an unset variable
 $unset_var = 10;
@@ -20,9 +21,9 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+  public function __toString() {
+    return "Class A object";
+  }
 }
 
 class classWithoutToString
@@ -45,7 +46,7 @@ $inputs = array(
       'int 0' => 0,
       'int 1' => 1,
       'int 12345' => 12345,
-      'int -12345' => -12345,
+      'int -12345' => -2345,
 
       // array data
       'empty array' => array(),
@@ -84,13 +85,14 @@ $inputs = array(
       'unset var' => @$unset_var,
 );
 
-// loop through each element of the array for latitude
+// loop through each element of the array for longitude
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( date_sunrise($time, SUNFUNCS_RET_STRING, $value, $longitude, $zenith, $gmt_offset) );
-      var_dump( date_sunrise($time, SUNFUNCS_RET_DOUBLE, $value, $longitude, $zenith, $gmt_offset) );
-      var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $value, $longitude, $zenith, $gmt_offset) );
+      var_dump( date_sunset($time, SUNFUNCS_RET_STRING, $latitude, $value, $zenith, $gmt_offset) );
+      var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE, $latitude, $value, $zenith, $gmt_offset) );
+      var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $value, $zenith, $gmt_offset) );
 };
+
 ?>
 ===DONE===

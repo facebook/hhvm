@@ -329,7 +329,7 @@ int64_t c_XSLTProcessor::t_transformtouri(CObjRef doc, const String& uri) {
       return false;
     }
 
-    int bytes = xmlSaveFile(translated.data(), res);
+    int bytes = xsltSaveResultToFilename(translated.data(), res, m_stylesheet, /*compression*/ 0);
     xmlFreeDoc(res);
 
     if (bytes == -1) {

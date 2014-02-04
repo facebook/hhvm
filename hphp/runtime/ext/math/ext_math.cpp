@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/math/ext_math.h"
-#include "hphp/runtime/vm/native.cpp"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/base/zend-multiply.h"
 #include "hphp/runtime/base/zend-string.h"

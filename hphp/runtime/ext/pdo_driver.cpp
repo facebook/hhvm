@@ -180,6 +180,10 @@ PDOBoundParam::PDOBoundParam()
 }
 
 PDOBoundParam::~PDOBoundParam() {
+  sweep();
+}
+
+void PDOBoundParam::sweep() {
   /* tell the driver that it is going away */
   if (stmt && stmt->support(PDOStatement::MethodParamHook)) {
     stmt->paramHook(this, PDO_PARAM_EVT_FREE);
@@ -201,6 +205,10 @@ PDOStatement::~PDOStatement() {
   if (dbh.get() && dbh->query_stmt == this) {
     dbh->query_stmt = NULL;
   }
+}
+
+void PDOStatement::sweep() {
+  // nothing, but kids can overwrite
 }
 
 bool PDOStatement::support(SupportedMethod method) {

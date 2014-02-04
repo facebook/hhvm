@@ -929,7 +929,7 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
   if (m_op == T_COLLECTION) {
     cg.printObjectHeader("CollectionInitializerExpression", 3);
-    cg.printPropertyHeader("collection");
+    cg.printPropertyHeader("class");
     cg.printTypeExpression(m_exp1);
     cg.printPropertyHeader("arguments");
     cg.printExpressionVector(static_pointer_cast<ExpressionList>(m_exp2));

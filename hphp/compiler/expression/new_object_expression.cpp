@@ -157,8 +157,8 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 void NewObjectExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("NewObjectExpression", m_params == nullptr ? 2 : 3);
   if (m_nameExp->is(Expression::KindOfScalarExpression)) {
-    cg.printPropertyHeader("className");
-    cg.printValue(this->getOriginalName());
+    cg.printPropertyHeader("class");
+    cg.printTypeExpression(this->getOriginalName());
   } else {
     cg.printPropertyHeader("classExpression");
     m_nameExp->outputCodeModel(cg);

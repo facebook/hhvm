@@ -1084,8 +1084,22 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto doMov = [&] {
     auto const valDst = x2a(curOpd(inst->dst()).reg(0));
     auto const typeDst = x2a(curOpd(inst->dst()).reg(1));
-    if (valDst.IsValid() && !valDst.Is(rVal)) m_as.Mov(valDst, rVal);
-    if (typeDst.IsValid() && !typeDst.Is(rType)) m_as.Mov(typeDst, rType);
+    // TODO: #3626251: XLS: Let Uses say whether a constant is
+    // allowed, and if not, assign a register.
+    if (valDst.IsValid()) {
+      if (rVal.IsValid()) {
+        if (!valDst.Is(rVal)) m_as.Mov(valDst, rVal);
+      } else {
+        if (src->isConst()) m_as.Mov(valDst, src->getValBits());
+      }
+    }
+    if (typeDst.IsValid()) {
+      if (rType.IsValid()) {
+        if (!typeDst.Is(rType)) m_as.Mov(typeDst, rType);
+      } else {
+        m_as.Mov(typeDst, src->type().toDataType());
+      }
+    }
   };
 
   auto doJcc = [&] (ConditionCode cc) {

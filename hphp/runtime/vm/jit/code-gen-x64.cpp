@@ -4935,8 +4935,16 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto doMov = [&]() {
     auto const valDst = curOpd(inst->dst()).reg(0);
     auto const typeDst = curOpd(inst->dst()).reg(1);
-    if (valDst != InvalidReg) emitMovRegReg(m_as, rData, valDst);
-    if (typeDst != InvalidReg) emitMovRegReg(m_as, rType, typeDst);
+    // TODO: #3626251: XLS: Let Uses say whether a constant is
+    // allowed, and if not, assign a register.
+    if (valDst != InvalidReg) {
+      if (rData != InvalidReg) emitMovRegReg(m_as, rData, valDst);
+      else if (src->isConst()) m_as.emitImmReg(src->getValBits(), valDst);
+    }
+    if (typeDst != InvalidReg) {
+      if (rType != InvalidReg) emitMovRegReg(m_as, rType, typeDst);
+      else m_as.emitImmReg(src->type().toDataType(), typeDst);
+    }
   };
 
   Type typeParam = inst->typeParam();

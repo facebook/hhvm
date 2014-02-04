@@ -1,0 +1,13 @@
+API: %d, SQL: %d
+Dumping table contents before INSERT...SELECT experiments...
+id = %d, label = 'b'
+id = %d, label = 'a'
+id = %d, label = 'c'
+Dumping table contents after INSERT...SELECT...
+id = %d, label = 'b'
+id = %d, label = 'a'
+id = %d, label = 'c'
+id = %d, label = 'a%d'
+id = %d, label = 'c%d'
+id = 101, label = 'b%d'
+done!

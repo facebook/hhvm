@@ -1,0 +1,4 @@
+HipHop Warning: %s
+... and now Exceptions
+Access denied for user '%s'@'%s' (using password: %s)
+done!

@@ -22,6 +22,7 @@ extern const int64_t k_XSL_SECPREF_WRITE_FILE;
 extern const int64_t k_XSL_SECPREF_CREATE_DIRECTORY;
 extern const int64_t k_XSL_SECPREF_READ_NETWORK;
 extern const int64_t k_XSL_SECPREF_WRITE_NETWORK;
+extern const int64_t k_XSL_SECPREF_DEFAULT;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class XSLTProcessor
@@ -35,18 +36,18 @@ class c_XSLTProcessor : public ExtObjectData, public Sweepable {
   public: c_XSLTProcessor(Class* cls = c_XSLTProcessor::classof());
   public: ~c_XSLTProcessor();
   public: void t___construct();
-  public: String t_getparameter(const String& namespaceURI, const String& localName);
+  public: Variant t_getparameter(const String& namespaceURI, const String& localName);
   public: int64_t t_getsecurityprefs();
   public: bool t_hasexsltsupport();
   public: void t_importstylesheet(CObjRef stylesheet);
-  public: void t_registerphpfunctions(CVarRef funcs);
+  public: void t_registerphpfunctions(CVarRef funcs = null_variant);
   public: bool t_removeparameter(const String& namespaceURI, const String& localName);
   public: bool t_setparameter(const String& namespaceURI, const String& localName, const String& value);
   public: bool t_setprofiling(const String& filename);
   public: int64_t t_setsecurityprefs(int64_t securityPrefs);
   public: Variant t_transformtodoc(CObjRef doc);
-  public: int64_t t_transformtouri(CObjRef doc, const String& uri);
-  public: String t_transformtoxml(CObjRef doc);
+  public: Variant t_transformtouri(CObjRef doc, const String& uri);
+  public: Variant t_transformtoxml(CObjRef doc);
 
   public:
     xsltStylesheetPtr m_stylesheet;

@@ -10,6 +10,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+void php_libxml_ctx_error(void *ctx,
+                          const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+
 static xmlChar *xslt_string_to_xpathexpr(const char *str) {
   const xmlChar *string = (const xmlChar *)str;
   int str_len = xmlStrlen(string) + 3;
@@ -17,7 +20,7 @@ static xmlChar *xslt_string_to_xpathexpr(const char *str) {
   xmlChar *value;
   if (xmlStrchr(string, '"')) {
     if (xmlStrchr(string, '\'')) {
-      raise_error("Cannot create XPath expression (string contains both quote and double-quotes)");
+      raise_warning("Cannot create XPath expression (string contains both quote and double-quotes)");
       return NULL;
     }
 
@@ -122,8 +125,9 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
 
   obj = valuePop(ctxt);
   if (obj->stringval == NULL) {
-    xmlXPathFreeObject(obj);
     raise_warning("Handler name must be a string");
+    xmlXPathFreeObject(obj);
+    valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
     return;
   }
   String handler((char*)obj->stringval, CopyString);
@@ -131,11 +135,11 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
 
   if (!f_is_callable(handler)) {
     raise_warning("Unable to call handler %s()", handler.data());
+    valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
   } else if (intern->m_registerPhpFunctions == 2 &&
              !intern->m_registered_phpfunctions.exists(handler)) {
-    // Push an empty string, so that we at least have an xslt result...
+    raise_warning("Not allowed to call handler '%s()'", handler.data());
     valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
-    raise_warning("Not allowed to call handler '%s()'.", handler.data());
   } else {
     Variant retval = vm_call_user_func(handler, args);
     if (retval.instanceof(c_DOMNode::classof())) {
@@ -144,8 +148,8 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
     } else if (retval.is(KindOfBoolean)) {
       valuePush(ctxt, xmlXPathNewBoolean(retval.toBoolean()));
     } else if (retval.isObject()) {
-      valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
       raise_warning("A PHP Object cannot be converted to an XPath-string");
+      valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
     } else {
       String sretval = retval.toString();
       valuePush(ctxt, xmlXPathNewString((xmlChar*)sretval.data()));
@@ -163,9 +167,10 @@ static void xslt_ext_function_object_php(xmlXPathParserContextPtr ctxt, int narg
 
 c_XSLTProcessor::c_XSLTProcessor(Class *cb) :
   ExtObjectData(cb),
-  m_stylesheet(NULL), m_doc(NULL), m_secprefs(k_XSL_SECPREF_NONE),
+  m_stylesheet(NULL), m_doc(NULL), m_secprefs(k_XSL_SECPREF_DEFAULT),
   m_registerPhpFunctions(0) {
   exsltRegisterAll();
+  xsltSetGenericErrorFunc(NULL, php_libxml_ctx_error);
 }
 
 c_XSLTProcessor::~c_XSLTProcessor() {
@@ -194,7 +199,7 @@ void c_XSLTProcessor::t___construct() {
   }
 }
 
-String c_XSLTProcessor::t_getparameter(const String& namespaceURI, const String& localName) {
+Variant c_XSLTProcessor::t_getparameter(const String& namespaceURI, const String& localName) {
   // namespaceURI argument is unused in Zend PHP XSL extension.
   if (m_params.exists(localName)) {
     assert(m_params[localName].isString());
@@ -250,14 +255,16 @@ bool c_XSLTProcessor::t_removeparameter(const String& namespaceURI, const String
   return false;
 }
 
-void c_XSLTProcessor::t_registerphpfunctions(CVarRef funcs) {
+void c_XSLTProcessor::t_registerphpfunctions(CVarRef funcs /* = null_variant */) {
   if (funcs.isArray()) {
     Array arr = funcs.toArray();
     for (ArrayIter iter(arr); iter; ++iter) {
       m_registered_phpfunctions.set(iter.second(), "1");
     }
     m_registerPhpFunctions = 2;
+    return;
   }
+
   if (funcs.isString()) {
     m_registered_phpfunctions.set(funcs, "1");
     m_registerPhpFunctions = 2;
@@ -313,7 +320,7 @@ Variant c_XSLTProcessor::t_transformtodoc(CObjRef doc) {
   return false;
 }
 
-int64_t c_XSLTProcessor::t_transformtouri(CObjRef doc, const String& uri) {
+Variant c_XSLTProcessor::t_transformtouri(CObjRef doc, const String& uri) {
   if (doc.instanceof(c_DOMDocument::classof())) {
     c_DOMDocument *domdoc = doc.getTyped<c_DOMDocument>();
     m_doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
@@ -342,7 +349,7 @@ int64_t c_XSLTProcessor::t_transformtouri(CObjRef doc, const String& uri) {
   return false;
 }
 
-String c_XSLTProcessor::t_transformtoxml(CObjRef doc) {
+Variant c_XSLTProcessor::t_transformtoxml(CObjRef doc) {
   if (doc.instanceof(c_DOMDocument::classof())) {
     c_DOMDocument *domdoc = doc.getTyped<c_DOMDocument>();
     m_doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);

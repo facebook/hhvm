@@ -23,6 +23,10 @@
         {
             "name": "XSL_SECPREF_WRITE_NETWORK",
             "value": 32
+        },
+        {
+            "name": "XSL_SECPREF_DEFAULT",
+            "value": 44
         }
     ],
     "funcs": [
@@ -56,7 +60,7 @@
                     "flags": [
                     ],
                     "return": {
-                        "type": "String",
+                        "type": "Variant",
                         "desc": "The value of the parameter (as a string), or FALSE if it's not set."
                     },
                     "args": [
@@ -124,6 +128,7 @@
                         {
                             "name": "funcs",
                             "type": "Variant",
+                            "value": "null_variant",
                             "desc": "Use this parameter to only allow certain functions to be called from XSLT. This parameter can be either a string (a function name) or an array of functions."
                         }
                     ]
@@ -234,7 +239,7 @@
                     "flags": [
                     ],
                     "return": {
-                        "type": "Int64",
+                        "type": "Variant",
                         "desc": "Returns the number of bytes written or FALSE if an error occurred."
                     },
                     "args": [
@@ -256,7 +261,7 @@
                     "flags": [
                     ],
                     "return": {
-                        "type": "String",
+                        "type": "Variant",
                         "desc": "The result of the transformation as a string or FALSE on error."
                     },
                     "args": [

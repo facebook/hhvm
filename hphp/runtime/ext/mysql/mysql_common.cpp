@@ -937,14 +937,14 @@ bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
 #define VALIDATE_STMT                                                          \
   if (!m_stmt) {                                                               \
     raise_warning("Couldn't fetch mysqli_stmt");                               \
-    return Variant(Variant::NullInit());                                       \
+    return init_null();                                                        \
   }
 
 #define VALIDATE_PREPARED                                                      \
   VALIDATE_STMT                                                                \
   if (!m_prepared) {                                                           \
     raise_warning("invalid object or resource");                               \
-    return Variant(Variant::NullInit());                                       \
+    return init_null();                                                        \
   }
 
 MySQLStmt::MySQLStmt(MYSQL *mysql)
@@ -1058,8 +1058,11 @@ Variant MySQLStmt::fetch() {
 
   int64_t ret = mysql_stmt_fetch(m_stmt);
 
-  // We don't treat truncated as an error
-  if (ret && ret != MYSQL_DATA_TRUNCATED) {
+  if (ret == MYSQL_DATA_TRUNCATED || ret == MYSQL_NO_DATA) {
+    return init_null();
+  }
+
+  if (ret) {
     return false;
   }
 

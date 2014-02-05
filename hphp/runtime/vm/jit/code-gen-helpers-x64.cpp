@@ -403,8 +403,6 @@ ConditionCode opToConditionCode(Opcode opc) {
   case JmpNSame:              return CC_NE;
   case JmpInstanceOfBitmask:  return CC_NZ;
   case JmpNInstanceOfBitmask: return CC_Z;
-  case JmpIsType:             return CC_NZ;
-  case JmpIsNType:            return CC_Z;
   case JmpZero:               return CC_Z;
   case JmpNZero:              return CC_NZ;
   case ReqBindJmpGt:                 return CC_G;

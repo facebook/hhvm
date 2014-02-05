@@ -156,7 +156,9 @@ struct Type {
   bool operator!=(Type o) const { return !(*this == o); }
 
   /*
-   * Subtype and strict subtype.
+   * Returns true if this type is definitely going to be a subtype or a strict
+   * subtype of `o' at runtime.  If this function returns false, this may
+   * still be a subtype of `o' at runtime, it just may not be known.
    */
   bool subtypeOf(Type o) const;
   bool strictSubtypeOf(Type o) const;
@@ -173,6 +175,12 @@ struct Type {
   /*
    * Returns whether there are any values of this type that are also
    * values of the type `o'.
+   * When this function returns false, it is known that this type
+   * must not be in any subtype relationship with the argument Type 'o'.
+   * When true is returned the two types may still be unrelated but it is
+   * not possible to tell.
+   * Essentially this function can conservatively return true but must be
+   * precise when returning false.
    */
   bool couldBe(Type o) const;
 
@@ -210,6 +218,7 @@ private:
   Type(trep t, Data d);
   bool equivData(Type o) const;
   bool subtypeData(Type o) const;
+  bool couldBeData(Type o) const;
   bool checkInvariants() const;
 
 private:

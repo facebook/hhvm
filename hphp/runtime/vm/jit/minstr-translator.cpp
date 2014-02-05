@@ -1143,6 +1143,7 @@ void HhbcTranslator::MInstrTranslator::emitElem() {
       m_ht.exceptionBarrier();
       gen(
         RaiseError,
+        makeCatch(),
         cns(makeStaticString(Strings::OP_NOT_SUPPORTED_STRING))
       );
       m_base = uninit;
@@ -2181,7 +2182,8 @@ void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
     // Unlike the non-ref case, we don't need to do anything to the stack
     // because any load of the box will be guarded.
   } else {
-    SSATmp* newArr = gen(ArraySet, cns((TCA)opFunc), m_base, key, value);
+    SSATmp* newArr = gen(ArraySet, makeCatch(), cns((TCA)opFunc), m_base, key,
+                         value);
 
     // Update the base's value with the new array
     if (base.location.space == Location::Local) {

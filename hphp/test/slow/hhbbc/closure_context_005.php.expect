@@ -1,0 +1,14 @@
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(Closure$Foo::f)#3 (0) {
+}
+NULL
+object(Closure$Foo::f)#3 (0) {
+}
+NULL

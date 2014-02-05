@@ -79,11 +79,15 @@ function hash_final(resource $context, bool $raw_output = false): string;
  *                  returned.
  *                  On error, FALSE is returned.
  */
-function hash_hmac(?string $algo, ?string $data, ?string $key,
+function hash_hmac(?string $algo = null,
+                   ?string $data = null,
+                   ?string $key = null,
                    ?bool $raw_output = false): mixed {
   // Behave like a builtin function so that we pass Zend's tests
   $args = func_num_args();
   if ($args < 3) {
+    error_log("HipHop Warning: hash_hmac() expects 3 parameters, ".
+              "$args given");
     return null;
   } else if ($args > 4) {
     error_log("HipHop Warning: hash_hmac() expects at most 4 parameters, ".
@@ -116,9 +120,14 @@ function hash_hmac(?string $algo, ?string $data, ?string $key,
  *                  returned.
  *                  On error, FALSE is returned.
  */
-function hash_hmac_file(?string $algo, ?string $filename, ?string $key,
+function hash_hmac_file(?string $algo = null,
+                        ?string $filename = null,
+                        ?string $key = null,
                         ?bool $raw_output = false): mixed {
-  if (func_num_args() < 3) {
+  $args = func_num_args();
+  if ($args < 3) {
+    error_log("HipHop Warning: hash_hmac_file() expects 3 parameters, ".
+              "$args given");
     return null;
   }
 
@@ -219,7 +228,7 @@ function hash_update_stream(mixed $context, mixed $handle,
 }
 
 /**
- * hash_copy - hash_copy — Copy hashing context
+ * hash_copy - hash_copy - Copy hashing context
  *
  * @param resource $context - Hashing context returned by hash_init().
  *

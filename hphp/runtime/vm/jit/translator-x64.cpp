@@ -2321,8 +2321,12 @@ void TranslatorX64::recordGdbStub(const CodeBlock& cb,
 
 std::string TranslatorX64::getUsage() {
   std::string usage;
+  size_t totalBlockSize = 0;
+  size_t totalBlockCapacity = 0;
 
   auto addRow = [&](const std::string& name, size_t used, size_t capacity) {
+    totalBlockSize += used;
+    totalBlockCapacity += capacity;
     auto percent = capacity ? 100 * used / capacity : 0;
     usage += folly::format("tx64: {:9} bytes ({}%) in {}\n",
                            used, percent, name).str();
@@ -2335,6 +2339,11 @@ std::string TranslatorX64::getUsage() {
          RuntimeOption::EvalJitTargetCacheSize * 3 / 4);
   addRow("persistentRDS", RDS::usedPersistentBytes(),
          RuntimeOption::EvalJitTargetCacheSize / 4);
+  addRow("total",
+         totalBlockSize + code.data().used() +
+         RDS::usedBytes() + RDS::usedPersistentBytes(),
+         totalBlockCapacity + code.data().capacity() +
+         RuntimeOption::EvalJitTargetCacheSize);
 
   return usage;
 }

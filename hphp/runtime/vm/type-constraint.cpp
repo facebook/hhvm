@@ -153,7 +153,7 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
 
   auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
   if (!td) return false;
-  if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
+  if (td->nullable && tv->m_type == KindOfNull) return true;
   return td->kind == KindOfAny || equivDataTypes(td->kind, tv->m_type);
 }
 
@@ -163,7 +163,7 @@ bool TypeConstraint::checkTypeAliasObj(const TypedValue* tv) const {
 
   auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
   if (!td) return false;
-  if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
+  if (td->nullable && tv->m_type == KindOfNull) return true;
   if (td->kind != KindOfObject) return td->kind == KindOfAny;
   return td->klass && tv->m_data.pobj->instanceof(td->klass);
 }
@@ -176,7 +176,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
-  if (isNullable() && IS_NULL_TYPE(tv->m_type)) { return true; }
+  if (isNullable() && tv->m_type == KindOfNull) return true;
 
   if (isNumber()) {
     return IS_INT_TYPE(tv->m_type) || IS_DOUBLE_TYPE(tv->m_type);
@@ -256,7 +256,7 @@ bool
 TypeConstraint::checkPrimitive(DataType dt) const {
   assert(m_type.dt != KindOfObject);
   assert(dt != KindOfRef);
-  if (isNullable() && IS_NULL_TYPE(dt)) { return true; }
+  if (isNullable() && dt == KindOfNull) return true;
   if (isNumber()) { return IS_INT_TYPE(dt) || IS_DOUBLE_TYPE(dt); }
   return equivDataTypes(m_type.dt, dt);
 }

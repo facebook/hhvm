@@ -3,7 +3,9 @@
 class Queryable {
 
   public function executeQuery() {
-    return func_get_args();
+    $args = func_get_args();
+    $args[1] = "closure";
+    return $args;
   }
 }
 

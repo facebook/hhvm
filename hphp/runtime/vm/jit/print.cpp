@@ -137,6 +137,9 @@ void printLabel(std::ostream& os, const Block* block) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * IRInstruction
+ */
 void printOpcode(std::ostream& os, const IRInstruction* inst,
                  const GuardConstraints* guards) {
   os << color(ANSI_COLOR_CYAN)
@@ -210,6 +213,14 @@ void printDsts(std::ostream& os, const IRInstruction* inst,
   }
 }
 
+void printInstr(std::ostream& ostream, const IRInstruction* inst,
+                const RegAllocInfo* regs, const GuardConstraints* guards) {
+  printDsts(ostream, inst, regs);
+  if (inst->numDsts()) ostream << punc(" = ");
+  printOpcode(ostream, inst, guards);
+  printSrcs(ostream, inst, regs);
+}
+
 void print(std::ostream& ostream, const IRInstruction* inst,
            const RegAllocInfo* regs, const GuardConstraints* guards) {
   if (!inst->isTransient()) {
@@ -224,19 +235,16 @@ void print(std::ostream& ostream, const IRInstruction* inst,
   }
 }
 
-void printInstr(std::ostream& ostream, const IRInstruction* inst,
-                const RegAllocInfo* regs, const GuardConstraints* guards) {
-  printDsts(ostream, inst, regs);
-  if (inst->numDsts()) ostream << punc(" = ");
-  printOpcode(ostream, inst, guards);
-  printSrcs(ostream, inst, regs);
-}
-
 void print(const IRInstruction* inst) {
   print(std::cerr, inst);
   std::cerr << std::endl;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * SSATmp
+ */
 std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
   auto sz = loc.numAllocated();
   if (!sz) return os;
@@ -309,18 +317,11 @@ void print(const SSATmp* tmp) {
   std::cerr << std::endl;
 }
 
-std::string Block::toString() const {
-  std::ostringstream out;
-  print(out, this);
-  return out.str();
-}
+//////////////////////////////////////////////////////////////////////
 
-std::string IRUnit::toString() const {
-  std::ostringstream out;
-  print(out, *this);
-  return out.str();
-}
-
+/*
+ * Block
+ */
 static constexpr auto kIndent = 4;
 
 static void disasmRange(std::ostream& os, TCA begin, TCA end) {
@@ -340,7 +341,6 @@ static void disasmRange(std::ostream& os, TCA begin, TCA end) {
       dec.Decode(Instruction::Cast(begin));
     }
   }
-
 }
 
 void print(std::ostream& os, const Block* block,
@@ -479,14 +479,51 @@ void print(const Block* block) {
   std::cerr << std::endl;
 }
 
+std::string Block::toString() const {
+  std::ostringstream out;
+  print(out, this);
+  return out.str();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Unit
+ */
 void print(std::ostream& os, const IRUnit& unit,
            const RegAllocInfo* regs, const AsmInfo* asmInfo,
            const GuardConstraints* guards) {
+  // Print the block CFG above the actual code.
+  os << "digraph G {\n";
+  for (Block* block : layoutBlocks(unit).blocks) {
+    auto* next = block->next();
+    auto* taken = block->taken();
+    if (!next && !taken) continue;
+    if (next) {
+      os << folly::format("B{} -> B{}", block->id(), next->id());
+      if (taken) os << "; ";
+    }
+    if (taken) os << folly::format("B{} -> B{}", block->id(), taken->id());
+    os << "\n";
+  }
+  os << "}\n";
+
   // For nice-looking dumps, we want to remember curMarker between blocks.
   BCMarker curMarker;
   for (Block* block : layoutBlocks(unit).blocks) {
     print(os, block, regs, asmInfo, guards, &curMarker);
   }
+}
+
+void print(const IRUnit& unit) {
+  print(std::cerr, unit);
+  std::cerr << std::endl;
+}
+
+std::string IRUnit::toString() const {
+  std::ostringstream out;
+  print(out, *this);
+  return out.str();
 }
 
 // Suggested captions: "before jiffy removal", "after goat saturation",

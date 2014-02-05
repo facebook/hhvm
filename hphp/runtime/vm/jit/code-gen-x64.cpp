@@ -2046,16 +2046,6 @@ void CodeGenerator::cgIsNType(IRInstruction* inst) {
   cgIsTypeCommon(inst, true);
 }
 
-// TODO(#2404341): remove JmpIs{N,}Type
-
-void CodeGenerator::cgJmpIsType(IRInstruction* inst) {
-  cgJmpIsTypeCommon(inst, false);
-}
-
-void CodeGenerator::cgJmpIsNType(IRInstruction* inst) {
-  cgJmpIsTypeCommon(inst, true);
-}
-
 void CodeGenerator::cgIsTypeMem(IRInstruction* inst) {
   cgIsTypeMemCommon(inst, false);
 }
@@ -6110,7 +6100,7 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
   SSATmp*          src = inst->src(0);
   ArgGroup args(curOpds());
   args.addr(fpReg, iterOffset).ssa(src);
-  if (src->isArray()) {
+  if (src->isA(Type::Arr)) {
     args.addr(fpReg, valLocalOffset);
     if (isInitK) {
       args.addr(fpReg, localOffset(inst->src(4)->getValInt()));
@@ -6122,7 +6112,6 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
     cgCallHelper(m_as, CppCall(helperAddr), callDest(inst->dst()),
       SyncOptions::kSyncPoint, args);
   } else {
-    assert(src->type() == Type::Obj);
     args.imm(uintptr_t(curClass())).addr(fpReg, valLocalOffset);
     if (isInitK) {
       args.addr(fpReg, localOffset(inst->src(4)->getValInt()));

@@ -1879,7 +1879,9 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
 }
 
 void Parser::onQuery(Token &out, Token &head, Token &body) {
-  out->exp = NEW_EXP(QueryExpression, head.exp, body.exp);
+  auto qe = NEW_EXP(QueryExpression, head.exp, body.exp);
+  qe->doRewrites(m_ar, m_file);
+  out->exp = qe;
 }
 
 void appendList(ExpressionListPtr expList, Token *exps) {

@@ -98,6 +98,7 @@ bool Option::SeparateCompilation = false;
 bool Option::SeparateCompLib = false;
 bool Option::AnalyzePerfectVirtuals = true;
 bool Option::HardTypeHints = true;
+bool Option::HardConstProp = true;
 
 bool Option::KeepStatementsWithNoEffect = false;
 
@@ -239,6 +240,7 @@ void Option::Load(Hdf &config) {
   }
 
   HardTypeHints = config["HardTypeHints"].getBool(true);
+  HardConstProp = config["HardConstProp"].getBool(true);
 
   EnableHipHopSyntax = config["EnableHipHopSyntax"].getBool();
   EnableZendCompat = config["EnableZendCompat"].getBool();
@@ -384,6 +386,7 @@ void Option::FilterFiles(std::vector<std::string> &files,
 void initialize_hhbbc_options() {
   if (!Option::UseHHBBC) return;
   HHBBC::options.InterceptableFunctions = Option::DynamicInvokeFunctions;
+  HHBBC::options.HardConstProp          = Option::HardConstProp;
   HHBBC::options.HardTypeHints          = Option::HardTypeHints;
 }
 

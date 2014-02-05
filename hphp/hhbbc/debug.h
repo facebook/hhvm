@@ -17,7 +17,10 @@
 #define incl_HHBBC_DEBUG_H_
 
 #include "hphp/util/trace.h"
+
+#include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -41,7 +44,10 @@ inline void banner(const char* what) {
 inline void state_after(const char* when, const php::Program& program) {
   TRACE_SET_MOD(hhbbc);
   banner(when);
-  FTRACE(4, "{}", show(program));
+  for (auto& u : program.units) {
+    Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(*u)};
+    FTRACE(4, "{}", show(*u));
+  }
   banner("");
 }
 

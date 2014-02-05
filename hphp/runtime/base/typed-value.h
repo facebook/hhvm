@@ -162,6 +162,24 @@ typedef TypedValue TypedNum;
 
 //////////////////////////////////////////////////////////////////////
 
+template<DataType> struct DataTypeCPPType;
+#define X(dt, cpp) \
+template<> struct DataTypeCPPType<dt> { typedef cpp type; }
+
+X(KindOfUninit,       void);
+X(KindOfNull,         void);
+X(KindOfBoolean,      bool);
+X(KindOfInt64,        int64_t);
+X(KindOfDouble,       double);
+X(KindOfArray,        ArrayData*);
+X(KindOfObject,       ObjectData*);
+X(KindOfResource,     ResourceData*);
+X(KindOfRef,          RefData*);
+X(KindOfString,       StringData*);
+X(KindOfStaticString, const StringData*);
+
+#undef X
+
 /*
  * make_value and make_tv are helpers for creating TypedValues and
  * Values as temporaries, without messing up the conversions.
@@ -185,33 +203,17 @@ typename std::enable_if<
 
 inline Value make_value(double d) { Value v; v.dbl = d; return v; }
 
-namespace detail {
-
-  template<DataType> struct DataTypeCPPType;
-#define X(dt, cpp) \
-  template<> struct DataTypeCPPType<dt> { typedef cpp type; }
-
-  X(KindOfUninit,       void);
-  X(KindOfNull,         void);
-  X(KindOfBoolean,      bool);
-  X(KindOfInt64,        int64_t);
-  X(KindOfDouble,       double);
-  X(KindOfArray,        ArrayData*);
-  X(KindOfObject,       ObjectData*);
-  X(KindOfResource,     ResourceData*);
-  X(KindOfRef,          RefData*);
-  X(KindOfString,       StringData*);
-  X(KindOfStaticString, const StringData*);
-
-#undef X
-
-}
-
+/**
+ * Pack a base data element into a TypedValue for use
+ * elsewhere in the runtime.
+ *
+ * TypedValue tv = make_tv<KindOfInt64>(123);
+ */
 template<DataType DType>
 typename std::enable_if<
-  !std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  !std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
   TypedValue
->::type make_tv(typename detail::DataTypeCPPType<DType>::type val) {
+>::type make_tv(typename DataTypeCPPType<DType>::type val) {
   TypedValue ret;
   ret.m_data = make_value(val);
   ret.m_type = DType;
@@ -220,12 +222,46 @@ typename std::enable_if<
 
 template<DataType DType>
 typename std::enable_if<
-  std::is_same<typename detail::DataTypeCPPType<DType>::type,void>::value,
+  std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
   TypedValue
 >::type make_tv() {
   TypedValue ret;
   ret.m_type = DType;
   return ret;
+}
+
+/**
+ * Extract the underlying data element for the TypedValue
+ *
+ * int64_t val = unpack_tv<KindOfInt64>(tv);
+ */
+template <DataType DType>
+typename std::enable_if<
+  std::is_same<typename DataTypeCPPType<DType>::type,double>::value,
+  double
+>::type unpack_tv(TypedValue *tv) {
+  assert(DType == tv->m_type);
+  return tv->m_data.dbl;
+}
+
+template <DataType DType>
+typename std::enable_if<
+  std::is_integral<typename DataTypeCPPType<DType>::type>::value,
+  typename DataTypeCPPType<DType>::type
+>::type unpack_tv(TypedValue *tv) {
+  assert(DType == tv->m_type);
+  return tv->m_data.num;
+}
+
+template <DataType DType>
+typename std::enable_if<
+  std::is_pointer<typename DataTypeCPPType<DType>::type>::value,
+  typename DataTypeCPPType<DType>::type
+>::type unpack_tv(TypedValue *tv) {
+  assert((DType == tv->m_type) ||
+         (IS_STRING_TYPE(DType) && IS_STRING_TYPE(tv->m_type)));
+  return reinterpret_cast<typename DataTypeCPPType<DType>::type>
+           (tv->m_data.pstr);
 }
 
 //////////////////////////////////////////////////////////////////////

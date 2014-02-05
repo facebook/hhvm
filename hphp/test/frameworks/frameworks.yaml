@@ -19,9 +19,11 @@
 # config_file: a specific phpunit config file to use beyond phpunit.xml[.dist]
 # bootstrap_file: a specific bootstrap file to use
 #
-# Then add the class to run.php (e.g. class Assetic extends Framework {}),
-# passing in values to constructors and overriding any methods you need to get
-# your particular framework to run.
+# If you need to override the default constructed implementation of the
+# Framework class, then add the class to the framework_class_overrides
+# directory (e.g., FacebookPhpSdk.php or Mediawiki.php), passing in values to
+# constructors and overriding any methods you need to get your particular
+# framework to run.
 ---
   assetic:
     url: https://github.com/kriswallsmith/assetic.git

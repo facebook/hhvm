@@ -33,6 +33,7 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/class-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -216,6 +217,11 @@ struct ClassInfo {
    * The constructor for this class, if we know what it is.
    */
   borrowed_ptr<const php::Func> ctor = nullptr;
+
+  /*
+   * A vector of ClassInfo that encodes the inheritance hierarchy.
+   */
+  std::vector<borrowed_ptr<const ClassInfo>> baseList;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -235,15 +241,44 @@ bool Class::same(const Class& o) const {
 }
 
 bool Class::subtypeOf(const Class& o) const {
-  return same(o);
+  auto s1 = val.str();
+  auto s2 = o.val.str();
+  if (s1 || s2) return s1 == s2;
+  auto c1 = val.other();
+  auto c2 = o.val.other();
+  if (c1->baseList.size() >= c2->baseList.size()) {
+    return c1->baseList[c2->baseList.size() - 1] == c2;
+  }
+  return false;
 }
 
 bool Class::couldBe(const Class& o) const {
-  return true;
+  // If either types are not unique return true
+  if (val.str() || o.val.str()) return true;
+
+  auto c1 = val.other();
+  auto c2 = o.val.other();
+  // if one or the other is an interface return true for now.
+  // TODO: TASK #3621433
+  if (c1->cls->attrs & AttrInterface || c2->cls->attrs & AttrInterface) {
+    return true;
+  }
+
+  // Both types are unique classes so they "could be" if they are in an
+  // inheritance relationship
+  if (c1->baseList.size() >= c2->baseList.size()) {
+    return c1->baseList[c2->baseList.size() - 1] == c2;
+  } else {
+    return c2->baseList[c1->baseList.size() - 1] == c1;
+  }
 }
 
 SString Class::name() const {
   return val.str() ? val.str() : val.other()->cls->name;
+}
+
+bool Class::couldBeOverriden() const {
+  return val.str() ? true : !(val.other()->cls->attrs & AttrNoOverride);
 }
 
 std::string show(const Class& c) {
@@ -292,6 +327,13 @@ struct IndexData {
   ISStringToMany<php::Func>      methods;
   ISStringToMany<php::Func>      funcs;
   ISStringToMany<php::TypeAlias> typeAliases;
+
+  // Map from each class to all the closures that are allocated in
+  // functions of that class.
+  std::unordered_map<
+    borrowed_ptr<const php::Class>,
+    std::unordered_set<borrowed_ptr<php::Class>>
+  > classClosureMap;
 
   std::mutex classInfoLock;
   std::unordered_map<
@@ -472,27 +514,36 @@ bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-//////////////////////////////////////////////////////////////////////
-
-static void add_unit_to_index(IndexData& index, const php::Unit& unit) {
+void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   for (auto& c : unit.classes) {
     index.classes.insert({c->name, borrow(c)});
+
     for (auto& m : c->methods) {
       index.methods.insert({m->name, borrow(m)});
     }
+
+    if (c->closureContextCls) {
+      index.classClosureMap[c->closureContextCls].insert(borrow(c));
+    }
   }
+
   for (auto& f : unit.funcs) {
     if (options.InterceptableFunctions.count(std::string{f->name->data()})) {
       f->attrs = f->attrs | AttrDynamicInvoke;
     }
     index.funcs.insert({f->name, borrow(f)});
   }
+
   for (auto& ta : unit.typeAliases) {
     index.typeAliases.insert({ta->name, borrow(ta)});
   }
 }
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
 
 Index::Index(borrowed_ptr<php::Program> program)
   : m_data(folly::make_unique<IndexData>())
@@ -511,6 +562,18 @@ Index::Index(borrowed_ptr<php::Unit> unit)
 // Defined here so IndexData is a complete type for the unique_ptr
 // destructor.
 Index::~Index() {}
+
+//////////////////////////////////////////////////////////////////////
+
+std::vector<borrowed_ptr<php::Class>>
+Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
+  std::vector<borrowed_ptr<php::Class>> ret;
+  auto const it = m_data->classClosureMap.find(cls);
+  if (it != end(m_data->classClosureMap)) {
+    ret.assign(begin(it->second), end(it->second));
+  }
+  return ret;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -599,9 +662,11 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
       return name_only();
     }
     cinfo->parent = parent->val.other();
+    cinfo->baseList = cinfo->parent->baseList;
   } else {
     cinfo->parent = nullptr;
   }
+  cinfo->baseList.push_back(borrow(cinfo));
 
   for (auto& ifaceName : cls->interfaceNames) {
     auto const iface = resolve_class(ctx, ifaceName);
@@ -688,13 +753,6 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
    * anything.
    */
   if (tc.isTypeVar()) return TCell;
-
-  /*
-   * Currently, nullable extended hints (?Foo) are runtime enforced,
-   * except that failing to pass a parameter doesn't fail the type
-   * hint, so we can't assume it's TInitCell yet.
-   */
-  if (tc.isNullable() && tc.isExtended()) return TCell;
 
   /*
    * Soft hints (@Foo) are not checked.

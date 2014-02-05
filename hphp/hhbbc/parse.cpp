@@ -15,9 +15,12 @@
 */
 #include "hphp/hhbbc/parse.h"
 
-#include <boost/next_prior.hpp>
 #include <thread>
 #include <mutex>
+#include <unordered_map>
+#include <map>
+
+#include <boost/next_prior.hpp>
 
 #include "folly/experimental/Gen.h"
 #include "folly/experimental/StringGen.h"
@@ -40,6 +43,10 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_Closure("Closure");
+
+//////////////////////////////////////////////////////////////////////
+
 struct ParseUnitState {
   /*
    * This is computed once for each unit and stashed here.
@@ -50,8 +57,56 @@ struct ParseUnitState {
    * Map from class id to the function containing its DefCls
    * instruction.  We use this to compute whether classes are defined
    * at top-level.
+   *
+   * TODO_4: if we don't end up with a use for this, remove it.
    */
   std::vector<borrowed_ptr<php::Func>> defClsMap;
+
+  /*
+   * Map from Closure names to the function(s) containing their
+   * associated CreateCl opcode(s).
+   */
+  std::unordered_map<
+    SString,
+    std::unordered_set<borrowed_ptr<php::Func>>,
+    string_data_hash,
+    string_data_isame
+  > createClMap;
+
+  /*
+   * Generators come as two functions, "inner" and "outer".  Part of
+   * our representation requires that we have the two linked uniquely
+   * by pointer.  (See representation.h.)
+   *
+   * However, hhbc metadata only loosely connects these with the
+   * "outer" function having a name to the inner function.  The
+   * context this name should be looked up in depends on what type of
+   * generator it was---if it is a method, but not a generator from a
+   * closure, it'll be on the class that contains the "outer"
+   * function.  These get linked together as part of parse_class.
+   *
+   * In the other cases, we need to link them after the whole unit has
+   * been viewed, with information tracked here.
+   *
+   * Invariant: we are assuming that generator bodies that aren't on
+   * classes have unique names within a unit (this is asserted as we
+   * add to this map).  This should not be hard to maintain, but
+   * there's nowhere to document this invariant in
+   * bytecode.specification right now, which doesn't specify how
+   * generators work.
+   *
+   * Right now, multiple definitions of non-top-level generator
+   * functions simply don't work (see #2906383), so this is definitely
+   * true.  If we fix that task, we will need to ensure it doesn't
+   * break this invariant.
+   */
+  std::vector<std::pair<borrowed_ptr<php::Func>,SString>> generatorsToLink;
+  std::unordered_map<
+    SString,
+    borrowed_ptr<php::Func>,
+    string_data_hash,
+    string_data_isame
+  > innerGenerators;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -423,6 +478,9 @@ void populate_block(ParseUnitState& puState,
   auto nopdefcls = [&] (const Bytecode& b) {
     puState.defClsMap[b.NopDefCls.arg1] = &func;
   };
+  auto createcl = [&] (const Bytecode& b) {
+    puState.createClMap[b.CreateCl.str2].insert(&func);
+  };
 
 #define IMM_MA(n)      auto mvec = decode_minstr();
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
@@ -475,8 +533,9 @@ void populate_block(ParseUnitState& puState,
       b.srcLoc = srcLoc;                              \
       IMM_##imms                                      \
       new (&b.opcode) bc::opcode { IMM_ARG_##imms };  \
-      if (Op::opcode == Op::DefCls) defcls(b);        \
+      if (Op::opcode == Op::DefCls)    defcls(b);     \
       if (Op::opcode == Op::NopDefCls) nopdefcls(b);  \
+      if (Op::opcode == Op::CreateCl)  createcl(b);   \
       blk.hhbcs.push_back(std::move(b));              \
       assert(pc == next);                             \
     }                                                 \
@@ -702,7 +761,25 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isGeneratorFromClosure = fe.isGeneratorFromClosure();
   ret->isPairGenerator        = fe.isPairGenerator();
   ret->isAsync                = fe.isAsync();
-  ret->generatorBodyName      = fe.getGeneratorBodyName();
+  ret->innerGeneratorFunc     = nullptr;
+  ret->outerGeneratorFunc     = nullptr;
+
+  /*
+   * Generators that aren't inside classes (includes generators from
+   * closures) end up with inner generator bodies living as free
+   * functions, not on a class.  We track them here to link them after
+   * we've finished parsing the whole unit.  parse_methods handles the
+   * within-class generator linking cases.
+   */
+  if (auto const innerName = fe.getGeneratorBodyName()) {
+    if (!ret->cls || ret->isClosureBody) {
+      puState.generatorsToLink.emplace_back(borrow(ret), innerName);
+    }
+  }
+  if (ret->isGeneratorBody && !cls) {
+    always_assert(!puState.innerGenerators.count(ret->name));
+    puState.innerGenerators[ret->name] = borrow(ret);
+  }
 
   /*
    * HNI-style native functions get some extra information.
@@ -718,33 +795,72 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   return ret;
 }
 
+void parse_methods(ParseUnitState& puState,
+                   borrowed_ptr<php::Class> ret,
+                   borrowed_ptr<php::Unit> unit,
+                   const PreClassEmitter& pce) {
+  std::unordered_map<
+    SString,
+    borrowed_ptr<php::Func>,
+    string_data_hash,
+    string_data_isame
+  > innerGenerators;
+  std::vector<std::pair<borrowed_ptr<php::Func>,SString>> generatorsToLink;
+
+  for (auto& me : pce.methods()) {
+    auto f = parse_func(puState, unit, ret, *me);
+
+    if (f->isGeneratorBody) {
+      always_assert(!innerGenerators.count(f->name));
+      innerGenerators[f->name] = borrow(f);
+    }
+    if (me->getGeneratorBodyName() && !f->isClosureBody) {
+      generatorsToLink.emplace_back(borrow(f), me->getGeneratorBodyName());
+    }
+
+    ret->methods.push_back(std::move(f));
+  }
+
+  for (auto kv : generatorsToLink) {
+    auto const it = innerGenerators.find(kv.second);
+    assert(it != end(innerGenerators));
+    auto const outer = kv.first;
+    auto const inner = it->second;
+    assert(inner->isGeneratorBody);
+    assert(!inner->innerGeneratorFunc && !inner->outerGeneratorFunc);
+    assert(!outer->innerGeneratorFunc && !outer->outerGeneratorFunc);
+    inner->outerGeneratorFunc = outer;
+    outer->innerGeneratorFunc = inner;
+  }
+}
+
 std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
                                         borrowed_ptr<php::Unit> unit,
                                         const PreClassEmitter& pce) {
   FTRACE(2, "  class: {}\n", pce.name()->data());
 
-  auto ret            = folly::make_unique<php::Class>();
-  ret->name           = pce.name();
-  ret->srcInfo        = php::SrcInfo { pce.getLocation(),
-                                       pce.docComment() };
-  ret->unit           = unit;
-  ret->parentName     = pce.parentName()->empty() ? nullptr : pce.parentName();
-  ret->attrs          = pce.attrs();
-  ret->hoistability   = pce.hoistability();
-  ret->userAttributes = pce.userAttributes();
+  auto ret               = folly::make_unique<php::Class>();
+  ret->name              = pce.name();
+  ret->srcInfo           = php::SrcInfo { pce.getLocation(),
+                                          pce.docComment() };
+  ret->unit              = unit;
+  ret->closureContextCls = nullptr;
+  ret->parentName        = pce.parentName()->empty() ? nullptr
+                                                     : pce.parentName();
+  ret->attrs             = pce.attrs();
+  ret->hoistability      = pce.hoistability();
+  ret->userAttributes    = pce.userAttributes();
 
   for (auto& iface : pce.interfaces()) {
     ret->interfaceNames.push_back(iface);
   }
 
-  ret->usedTraitNames  = pce.usedTraits();
-  ret->traitPrecRules  = pce.traitPrecRules();
-  ret->traitAliasRules = pce.traitAliasRules();
+  ret->usedTraitNames    = pce.usedTraits();
+  ret->traitPrecRules    = pce.traitPrecRules();
+  ret->traitAliasRules   = pce.traitAliasRules();
   ret->traitRequirements = pce.traitRequirements();
 
-  for (auto& me : pce.methods()) {
-    ret->methods.push_back(parse_func(puState, unit, borrow(ret), *me));
-  }
+  parse_methods(puState, borrow(ret), unit, pce);
 
   auto& propMap = pce.propMap();
   for (size_t idx = 0; idx < propMap.size(); ++idx) {
@@ -778,6 +894,98 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
 
 //////////////////////////////////////////////////////////////////////
 
+void assign_closure_context(const ParseUnitState&, borrowed_ptr<php::Class>);
+
+borrowed_ptr<php::Class>
+find_closure_context(const ParseUnitState& puState,
+                     borrowed_ptr<php::Func> createClFunc) {
+  if (auto const cls = createClFunc->cls) {
+    if (cls->parentName &&
+        cls->parentName->isame(s_Closure.get())) {
+      // We have a closure created by a closure's invoke method, which
+      // means it should inherit the outer closure's context, so we
+      // have to know that first.
+      assign_closure_context(puState, cls);
+      return cls->closureContextCls;
+    }
+    return cls;
+  }
+
+  // If the creating function wasn't in a class, either we have a
+  // closure with no lexical class context, or a CreateCl site for a
+  // generator body that is not part of the class.  If it's a
+  // generator from a closure, this could still result in a closure
+  // context.
+  return !createClFunc->isGeneratorBody
+    ? nullptr
+    : find_closure_context(puState, createClFunc->outerGeneratorFunc);
+}
+
+void assign_closure_context(const ParseUnitState& puState,
+                            borrowed_ptr<php::Class> clo) {
+  if (clo->closureContextCls) return;
+
+  auto clIt = puState.createClMap.find(clo->name);
+  if (clIt == end(puState.createClMap)) {
+    // Unused closure class.  Technically not prohibited by the spec.
+    return;
+  }
+
+  /*
+   * Any route to the closure context must yield the same class, or
+   * things downstream won't understand.  We try every route and
+   * assert they are all the same here.
+   *
+   * See bytecode.specification for CreateCl for the relevant
+   * invariants.
+   */
+  always_assert(!clIt->second.empty());
+  auto it = begin(clIt->second);
+  auto const representative = find_closure_context(puState, *it);
+  if (debug) {
+    ++it;
+    for (; it != end(clIt->second); ++it) {
+      assert(find_closure_context(puState, *it) == representative);
+    }
+  }
+  clo->closureContextCls = representative;
+}
+
+void find_additional_metadata(const ParseUnitState& puState,
+                              borrowed_ptr<php::Unit> unit) {
+  /*
+   * Before we can assign closure contexts, we need to finish linking
+   * all inner-and-outer generators to each other for a few cases to
+   * work.
+   *
+   * Essentially these cases boil down to the fact that a closure in a
+   * class context that is also a generator (including async function
+   * closures) has a generator body that is not part of any class.
+   * The links need to be there so find_context can chase the
+   * non-class-member "inner" generatorFromClosure function to its
+   * outer generator function (__invoke on the Closure subclass), and
+   * from there to the actual class that is the closure class context.
+   */
+  for (auto kv : puState.generatorsToLink) {
+    auto const outer = kv.first;
+    always_assert(puState.innerGenerators.count(kv.second));
+    auto const inner = puState.innerGenerators.find(kv.second)->second;
+    assert(!inner->outerGeneratorFunc && !inner->innerGeneratorFunc);
+    assert(!outer->outerGeneratorFunc && !outer->innerGeneratorFunc);
+    inner->outerGeneratorFunc = outer;
+    outer->innerGeneratorFunc = inner;
+  }
+
+  for (auto& c : unit->classes) {
+    if (!c->parentName || !c->parentName->isame(s_Closure.get())) {
+      continue;
+    }
+    assign_closure_context(puState, borrow(c));
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
@@ -807,16 +1015,13 @@ std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
     }
   }
 
-  // TODO_2: remove this or use it.  (Includes defClsMap.)
-  // for (size_t id = 0; id < ret->classes.size(); ++id) {
-  //   ret->classes[id]->definingFunc = puState.defClsMap[id];
-  // }
-
   for (auto& ta : ue.typeAliases()) {
     ret->typeAliases.push_back(
       folly::make_unique<php::TypeAlias>(ta)
     );
   }
+
+  find_additional_metadata(puState, borrow(ret));
 
   return ret;
 }

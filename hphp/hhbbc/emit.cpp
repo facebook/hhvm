@@ -743,9 +743,10 @@ void emit_finish_func(const php::Func& func,
   fe.setIsGenerator(func.isGeneratorBody);
   fe.setIsGeneratorFromClosure(func.isGeneratorFromClosure);
   fe.setIsPairGenerator(func.isPairGenerator);
-  fe.setGeneratorBodyName(func.generatorBodyName);
   fe.setIsAsync(func.isAsync);
-
+  if (func.innerGeneratorFunc) {
+    fe.setGeneratorBodyName(func.innerGeneratorFunc->name);
+  }
   if (func.nativeInfo) {
     fe.setReturnType(func.nativeInfo->returnType);
   }

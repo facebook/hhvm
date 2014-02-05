@@ -358,12 +358,16 @@ struct Func {
   UserAttributeMap userAttributes;
 
   /*
-   * This is the name of "inner" function for a generator.  When compiling
-   * a generator, we generate two funtions.  The "outer" one stores (with
-   * this field set) allocates the continuation object and returns it.  The
-   * "inner" one named here will have isGeneratorBody set.
+   * These pointers link "inner" functions for a generator to their
+   * associated outer function.
+   *
+   * When compiling a generator, hhbc makes use of two functions.  The
+   * "outer" one allocates the continuation object and returns it.
+   * The "inner" one contains the body of the function, and will
+   * always have isGeneratorBody set.
    */
-  SString generatorBodyName;
+  borrowed_ptr<php::Func> innerGeneratorFunc;
+  borrowed_ptr<php::Func> outerGeneratorFunc;
 
   /*
    * User-visible return type specification as a string.  This is only
@@ -450,15 +454,15 @@ struct Class {
   PreClass::Hoistable hoistability;
 
   /*
-   * The function that contains the DefCls for this class, or nullptr
-   * in the case of classes that do not have a DefCls (e.g. closure
-   * classes).
+   * If this class represents a closure, this points to the class that
+   * lexically contains the closure, if there was one.  If this class
+   * doesn't represent a closure, this will be nullptr.
    *
-   * The plan was to use this information in part to compute
-   * hoistability at emit time, but it's unused right now.  (Using
-   * hphpc's hoistability notions.)
+   * The significance of this is that closures created lexically
+   * inside of a class run as if they were part of that class context
+   * (with regard to access checks, etc).
    */
-  // borrowed_ptr<php::Func> definingFunc;
+  borrowed_ptr<php::Class> closureContextCls;
 
   /*
    * Name of the parent class.

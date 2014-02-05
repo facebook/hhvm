@@ -374,14 +374,14 @@ template <bool warn, KeyType keyType>
 inline TypedValue* ElemDEmptyish(TypedValue* base, TypedValue* key) {
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
-  Array a = Array::Create();
-  TypedValue* result = const_cast<TypedValue*>(a.lvalAt(cellAsCVarRef(*key))
-                                               .asTypedValue());
+  tvAsVariant(base) = Array::Create();
+  auto const result = const_cast<TypedValue*>(
+    tvAsVariant(base).asArrRef().lvalAt(cellAsCVarRef(*key)).asTypedValue()
+  );
   if (warn) {
     raise_notice(Strings::UNDEFINED_INDEX,
                  tvAsCVarRef(key).toString().data());
   }
-  tvAsVariant(base) = a;
   return result;
 }
 
@@ -640,9 +640,8 @@ inline void SetElemEmptyish(TypedValue* base, TypedValue* key,
                             Cell* value) {
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
-  Array a = Array::Create();
-  a.set(tvAsCVarRef(key), tvAsCVarRef(value));
-  tvAsVariant(base) = a;
+  tvAsVariant(base) = Array::Create();
+  tvAsVariant(base).asArrRef().set(tvAsCVarRef(key), tvAsCVarRef(value));
 }
 
 /**

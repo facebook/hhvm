@@ -407,10 +407,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpNSame:
     return simplifyQueryJmp(inst);
 
-  case JmpIsType:
-  case JmpIsNType:
-    return simplifyJmpIsType(inst);
-
   case PrintStr:
   case PrintInt:
   case PrintBool:    return simplifyPrint(inst);
@@ -1466,26 +1462,11 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyJmpIsType(IRInstruction* inst) {
-  SSATmp* res = simplifyIsType(inst);
-  if (res == nullptr) return nullptr;
-  assert(res->isConst());
-  if (res->getValBool()) {
-    // Taken jump
-    return gen(Jmp, inst->taken());
-  } else {
-    // Not taken jump; turn jump into a nop
-    inst->convertToNop();
-  }
-  return nullptr;
-}
-
 SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
-  bool trueSense =
-    inst->op() == IsType || inst->op() == JmpIsType;
-  auto    type = inst->typeParam();
-  auto    src  = inst->src(0);
-  auto srcType = src->type();
+  bool trueSense = inst->op() == IsType;
+  auto type      = inst->typeParam();
+  auto src       = inst->src(0);
+  auto srcType   = src->type();
 
   // The comparisons below won't work for these cases covered by this
   // assert, and we currently don't generate these types.

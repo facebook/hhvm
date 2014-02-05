@@ -41,22 +41,10 @@ class IntlDateFormatter {
    * @return IntlDateFormatter - The created IntlDateFormatter or FALSE
    *   in case of failure.
    */
-  public function __construct($locale, $datetype, $timetype,
-                              $timezone = NULL, $calendar = NULL,
-                              $pattern = ''): void {
-    $this->__construct_array([$locale, $datetype, $timetype,
-                              $timezone, $calendar, $pattern]);
-  }
-
-  /**
-   * Native func/method calls are limited to five args,
-   * use this helper to pack them into a single array arg
-   * as a workaround.
-   *
-   * TODO: Use <<__Native("ActRec")>> once that API is sorted out.
-   */
-  <<__Native>>
-  private function __construct_array(array $arg): void;
+  <<__Native("ActRec")>>
+  public function __construct(string $locale, int $datetype, int $timetype,
+                              mixed $timezone = NULL, mixed $calendar = NULL,
+                              string $pattern = ''): void;
 
   public static function create($locale, $datetype, $timetype,
                                 $timezone = NULL, $calendar = NULL,

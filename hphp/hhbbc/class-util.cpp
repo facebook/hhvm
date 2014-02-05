@@ -58,12 +58,14 @@ bool is_collection(res::Class cls) {
 
 bool could_have_magic_bool_conversion(Type t) {
   if (!t.couldBe(TObj)) return false;
-  if (t.strictSubtypeOf(TObj)) {
-    return has_magic_bool_conversion(dobj_of(t).cls);
-  }
-  if (is_opt(t) && unopt(t).strictSubtypeOf(TObj)) {
-    return has_magic_bool_conversion(dobj_of(t).cls);
-  }
+  // TODO(#3499765): we need to handle interfaces that the collection
+  // classes implement before we can ever return false here.
+  // if (t.strictSubtypeOf(TObj)) {
+  //   return has_magic_bool_conversion(dobj_of(t).cls);
+  // }
+  // if (is_opt(t) && unopt(t).strictSubtypeOf(TObj)) {
+  //   return has_magic_bool_conversion(dobj_of(t).cls);
+  // }
   return true;
 }
 

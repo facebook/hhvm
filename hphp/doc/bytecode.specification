@@ -102,17 +102,16 @@ stack and they may read and write values to the current frame's local
 variables. Values come in three flavors: cells, refs, and classrefs.
 
 A "cell" is a structure that contains a type identifier and either data (for
-non-refcounted types) or a pointer to data (for refcounted types). When a
-cell containing a pointer is duplicated, the new cell will point to the same
-data as the original cell. When a cell containing a pointer is duplicated or
-discarded, the execution engine is responsible for honoring the data's refcount
-logic.
+non-refcounted types) or a pointer to data (for refcounted types). When a cell
+containing a pointer is duplicated, the new cell will point to the same data as
+the original cell. When a cell containing a pointer is duplicated or discarded,
+the execution engine is responsible for honoring the data's refcount logic.
 
-A "ref" is a structure that contains a pointer to a cell container. When a
-ref is duplicated, the new ref will point to the same container as the
-original ref. When a ref is duplicated or destroyed, the execution engine is
-responsible for honoring the container's refcount logic.  When the container
-is destroyed, the cell it contains is also destroyed.
+A "ref" is a structure that contains a pointer to a cell container. When a ref
+is duplicated, the new ref will point to the same container as the original
+ref. When a ref is duplicated or destroyed, the execution engine is responsible
+for honoring the container's refcount logic. When the container is destroyed,
+the cell it contains is also destroyed.
 
 A "classref" is a structure that contains a reference to a class. When a
 classref is pushed onto the stack or popped of the stack, no refcounting is
@@ -185,63 +184,61 @@ ranges of bytecode in the line number table.
 Classes
 -------
 
-Functions may be grouped into metadata for classes.  Class metadata objects
-are used to describe several PHP-level language features including traits,
+Functions may be grouped into metadata for classes. Class metadata objects are
+used to describe several PHP-level language features including traits,
 interfaces, closures, and (of course) classes.
 
-Class metadata includes information about the properties on the class,
-special functions on the class such as constructors or internal property
-initialization routines (86sinit, 86pinit), class constants, list of used
-traits, list of extended classes, list of implemented interfaces, etc.
+Class metadata includes information about the properties on the class, special
+functions on the class such as constructors or internal property initialization
+routines (86sinit, 86pinit), class constants, list of used traits, list of
+extended classes, list of implemented interfaces, etc.
 
-Classes also include a flag indicating their "hoistability".  For now this
-isn't documented much here.  See class.h.
+Classes also include a flag indicating their "hoistability". For now this isn't
+documented much here. See class.h.
 
 
 Closures
 --------
 
-Closures are implemented in hhbc as subclassses of Closure, in conjunction
-with the CreateCl opcode.  It is legal hhbc to create other subclasses of
-Closure (to represent user code that attempts to do the same), but
-attempting to instantiate one will result in a fatal error.  The
-documentation of the CreateCl opcode below lists the requirements for a
-closure subclass to be usable with it.
+Closures are implemented in hhbc as subclassses of Closure, in conjunction with
+the CreateCl opcode. It is legal hhbc to create other subclasses of Closure (to
+represent user code that attempts to do the same), but attempting to
+instantiate one will result in a fatal error. The documentation of the CreateCl
+opcode below lists the requirements for a closure subclass to be usable with
+it.
 
 
 Continuations
 -------------
 
 The basic compilation strategy for continuations is to create two bytecode
-functions.  One is known as the "outer generator" function, and the other
-is known as the "inner generator function" or equivalently the "generator
-body".  HHBC metadata contains a link from the outer function to the inner
-function.  For the purposes of this spec, we will call functions in these
-configurations a "generator function pair".
+functions. One is known as the "outer generator" function, and the other is
+known as the "inner generator function" or equivalently the "generator body".
+HHBC metadata contains a link from the outer function to the inner function.
+For the purposes of this spec, we will call functions in these configurations a
+"generator function pair".
 
-The outer generator function for a continuation must consist of a
-CreateCont opcode, followed by a RetC.  The CreateCont opcode uses the
-function metadata to determine which generator body to associate with the
-allocated continuation object.
+The outer generator function for a continuation must consist of a CreateCont
+opcode, followed by a RetC. The CreateCont opcode uses the function metadata to
+determine which generator body to associate with the allocated continuation
+object.
 
 The "generator body" function is where the real user-level code of the
-generator should be placed.  It should operate by first using UnpackCont,
-and then doing a Switch to determine which portion of its code should run.
-See the description of the continuation instructions for more details.
+generator should be placed. It should operate by first using UnpackCont, and
+then doing a Switch to determine which portion of its code should run. See the
+description of the continuation instructions for more details.
 
 
 Async functions
 ---------------
 
-Async functions are currently implemented as generator function pairs,
-where the outer function represents "eager execution" of the async
-function, and the inner function is used when "suspended execution" is
-necessary (i.e. if it does an await on something that is not yet
-available).
+Async functions are currently implemented as generator function pairs, where
+the outer function represents "eager execution" of the async function, and the
+inner function is used when "suspended execution" is necessary (i.e. if it does
+an await on something that is not yet available).
 
 Async function closures are implemented the same way, but importantly the
-"eager execution" function will be the __invoke function on a closure
-subclass.
+"eager execution" function will be the __invoke function on a closure subclass.
 
 The async function implementation is still changing and may stop using
 generator function pairs soon, so this spec is staying light on details for
@@ -251,29 +248,28 @@ now.
 Generator Function Pairs
 ------------------------
 
-Whether they are being used to represent async functions or continuations,
-the following requirements apply to generator function pairs:
+Whether they are being used to represent async functions or continuations, the
+following requirements apply to generator function pairs:
 
-   - All functions must either be part of only one generator function pair,
-     or must not be part of any generator function pair.  Inner and outer
-     generator functions are in a 1:1 relationship.
+   - All functions must either be part of only one generator function pair, or
+     must not be part of any generator function pair. Inner and outer generator
+     functions are in a 1:1 relationship.
 
    - An outer generator function must either consist of the opcode sequence
      CreateCont; RetC, or be designated as an async function.
 
-   - Generator function pairs must always be defined in the same unit as
-     each other.
+   - Generator function pairs must always be defined in the same unit as each
+     other.
 
    - If the outer function of a generator function pair is a class member
-     function, and it is not the __invoke function on a subclass of
-     closure, then the inner generator function must be a member of the
-     same class.
+     function, and it is not the __invoke function on a subclass of closure,
+     then the inner generator function must be a member of the same class.
 
-   - If the outer function of a generator function pair is a closure
-     __invoke method, then the inner function must be a function that is
-     not a member of any class, and must have a unique name within its
-     compilation unit.  The bytecode metadata must designate this inner
-     function with the flag isGeneratorFromClosure.
+   - If the outer function of a generator function pair is a closure __invoke
+     method, then the inner function must be a function that is not a member of
+     any class, and must have a unique name within its compilation unit. The
+     bytecode metadata must designate this inner function with the flag
+     isGeneratorFromClosure.
 
 
 Entry points
@@ -288,17 +284,17 @@ either (1) the function does not have any optional parameters or (2) the caller
 provides values for all of the optional parameters.
 
 DV entry points are normally used to handle initializing optional parameters
-that the caller did not provide.  Generally the DV entries contain blocks that
+that the caller did not provide. Generally the DV entries contain blocks that
 initialize parameters, and then fall through directly into one another, with
-the last block ending with a jump to the main entry point.  This is not a
-requirement, however.  The dispatcher selects the appropriate DV entry point
+the last block ending with a jump to the main entry point. This is not a
+requirement, however. The dispatcher selects the appropriate DV entry point
 based on the number of arguments passed into the function.
 
 The main entry point and DV entry points are used by the dispatcher when
 handling a function call. Each function's metadata provides an "entry point
-table".  Each row in the entry point table consists of a number of arguments
-and the bytecode offset of the entry point that should be used by the
-dispatcher (either the main entry point or a DV entry point).
+table". Each row in the entry point table consists of a number of arguments and
+the bytecode offset of the entry point that should be used by the dispatcher
+(either the main entry point or a DV entry point).
 
 Fault entry points are used by the unwinder to enter fault funclets as
 appropriate to perform necessary cleanup when a region of code exits abnormally
@@ -322,11 +318,11 @@ Every compilation unit has a litstr table, a scalar array table, a function
 table, and a class table.
 
 The litstr table maps litstr ids to literal strings. Bytecodes that refer to
-literal strings do so by litstr id.  Litstr ids are signed 32-bit integer
-values, which must be between 0 and 2^31 - 2 inclusive.  In addition to the
+literal strings do so by litstr id. Litstr ids are signed 32-bit integer
+values, which must be between 0 and 2^31 - 2 inclusive. In addition to the
 per-unit litstr tables, a global table is built when generating an
 "authoritative" repo (one in which all the PHP code is known at bytecode
-generation time, and is guaranteed not to change).  Global litstr ids can be
+generation time, and is guaranteed not to change). Global litstr ids can be
 used in any unit, and are encoded in the range [2^30..2^31-2].
 
 The scalar array table maps scalar array ids to a description of the contents
@@ -337,8 +333,8 @@ arrays may not recurse infinitely. Each scalar array id must be between 0 and
 2^31 - 2 inclusive.
 
 Each row in the function table contains a unique function id, a function name
-specified by a litstr id, the bytecode offset for the corresponding function,
-a flag that indicates if the function is unconditionally declared in the
+specified by a litstr id, the bytecode offset for the corresponding function, a
+flag that indicates if the function is unconditionally declared in the
 outermost scope, and the function metadata. Note that there may be multiple
 rows in the function table with same function name. However, there may not be
 multiple rows that are marked as being unconditionally declared in the
@@ -376,13 +372,13 @@ function (the callee), transfers the parameters from the evaluation stack to
 the callee, pops the current FPI off of the FPI stack, and then invokes the
 dispatcher to call the function.
 
-Calls to builtin functions may be optimized to avoid pushing an entry on the FPI
-stack if it is known that the builtin function does not need access to the call
-stack. In this case, the arguments to the builtin are pushed on stack as Cells
-and Vars, and the builtin can be invoked with the FCallBuiltin instruction.
-Unless otherwise noted, subsequent references to FCall* instructions should be
-meant to refer to non-optimized FCall instructions, i.e. all FCall instructions
-other than FCallBuiltin.
+Calls to builtin functions may be optimized to avoid pushing an entry on the
+FPI stack if it is known that the builtin function does not need access to the
+call stack. In this case, the arguments to the builtin are pushed on stack as
+Cells and Vars, and the builtin can be invoked with the FCallBuiltin
+instruction. Unless otherwise noted, subsequent references to FCall*
+instructions should be meant to refer to non-optimized FCall instructions, i.e.
+all FCall instructions other than FCallBuiltin.
 
 
 Calling convention
@@ -411,8 +407,8 @@ Exception handler (EH) table
 ----------------------------
 
 The metadata for each function provides an "exception handler (EH) table".
-Each row in the EH table (called an "EH entry") consists of a kind ("fault"
-or "catch"), a non-negative integer "region depth", a set of non-overlapping
+Each row in the EH table (called an "EH entry") consists of a kind ("fault" or
+"catch"), a non-negative integer "region depth", a set of non-overlapping
 ranges of bytecode that compose the "protected region", and an offset of a
 fault funclet (if it's a "fault" EH entry) or a list of [class name, catch
 entry point] pairs (if it's a "catch" EH entry).
@@ -486,14 +482,14 @@ Step 1) Consult the EH table of the current exception info's function. Check if
         EH entry with the greatest region depth and continue on to step 2. If
         no matching EH entries are found go to step 5.
 
-Step 2) Let E be the EH entry found in step 1, and let D be the region depth
-        of E. Set the current exception info's region depth to D (overwriting
-        the previous value). Continue on to step 3.
+Step 2) Let E be the EH entry found in step 1, and let D be the region depth of
+        E. Set the current exception info's region depth to D (overwriting the
+        previous value). Continue on to step 3.
 
 Step 3) If E is a fault EH entry, transfer control to E's fault funclet's entry
         point; eventually control will be transferred back to the unwinder,
-        either via the Unwind instruction or via another exception being
-        thrown with the Throw instruction. Otherwise continue on to step 4.
+        either via the Unwind instruction or via another exception being thrown
+        with the Throw instruction. Otherwise continue on to step 4.
 
 Step 4) E is a catch EH entry. Consult E's list of [class name, catch entry
         point] pairs. Check if there are any pairs in the list where the
@@ -504,8 +500,8 @@ Step 4) E is a catch EH entry. Consult E's list of [class name, catch entry
         popping the current exception info off of the exception stack. If no
         matching pair is found, go to step 1.
 
-Step 5) Check if the current exception info's PC is in a fault funclet. If
-        it's not, continue to step 6. If it is, read the exception X from the
+Step 5) Check if the current exception info's PC is in a fault funclet. If it's
+        not, continue to step 6. If it is, read the exception X from the
         current exception info and then pop the current exception info off of
         the exception stack. Then, read the new current exception info's
         exception Y, update exception X so that it's "previous" property chains
@@ -536,12 +532,12 @@ responsible for following certain rules to honor each property's accessibility
 and visibility.
 
 The accessibility and visibility of a property in a given class is determined
-by that class's definition and the definitions of all of that class's ancestors.
-When a property is declared in a class definition (a "declared property") it
-may be specified as being "public", "protected", or "private". Accessibility
-and visibility are two related but distinct concepts. Depending on the current
-context, a property may be visible and accessible, visible but inaccessible, or
-invisible and inaccessible.
+by that class's definition and the definitions of all of that class's
+ancestors. When a property is declared in a class definition (a "declared
+property") it may be specified as being "public", "protected", or "private".
+Accessibility and visibility are two related but distinct concepts. Depending
+on the current context, a property may be visible and accessible, visible but
+inaccessible, or invisible and inaccessible.
 
 If a property P is declared with the "public" qualifier in the definition of
 class C, for instances of class C and descendent classes the property P will be
@@ -631,9 +627,9 @@ engine is responsible for following certain rules to honor each static
 property's accessibility and visibility.
 
 The accessibility and visibility of a static property in a given class is
-determined by that class's definition and the definitions of all of that class's
-ancestors. When a static property is declared in a class definition it may be
-specified as being "public", "protected", or "private". Depending on the
+determined by that class's definition and the definitions of all of that
+class's ancestors. When a static property is declared in a class definition it
+may be specified as being "public", "protected", or "private". Depending on the
 current context, a static property may be visible and accessible, visible but
 inaccessible, or invisible and inaccessible.
 
@@ -694,9 +690,9 @@ An FPI region is a contiguous range of bytecode that constitutes a call site.
 Each FPI region begins immediately after an FPush* instruction that pushes an
 FPI structure onto the FPI stack and must end with the corresponding FCall*
 instruction that pops that FPI structure off of the FPI stack. If two FPI
-regions overlap, one of the FPI regions must be completely enclosed by the other
-FPI region. An FPI region may not contain backward jumps, nor may it contain
-forward jumps that jump past the end of the FPI region.
+regions overlap, one of the FPI regions must be completely enclosed by the
+other FPI region. An FPI region may not contain backward jumps, nor may it
+contain forward jumps that jump past the end of the FPI region.
 
 Each function has an "FPI region table". Each row in the FPI region table
 consists of the starting offset of the FPI region (the bytecode offset
@@ -724,13 +720,13 @@ Here is a description of each flavor descriptor:
   V - ref; specifies that the value must be a ref at run time
   A - classref; specifies that the value must be a classref at run time
   R - return value; specifies that the value may be a cell or a ref at run
-        time; this flavor descriptor is used for return values from function
-        calls
+      time; this flavor descriptor is used for return values from function
+      calls
   F - function argument; specifies that the value may be a cell or a ref at run
-        time; this flavor descriptor is used for parameter values that are
-        about to be passed into a function
+      time; this flavor descriptor is used for parameter values that are about
+      to be passed into a function
   U - uninit; specifies that the value must be an uninitialized null at run
-        time; this is only used for FCallBuiltin
+      time; this is only used for FCallBuiltin
 
 
 Verifiability
@@ -750,9 +746,9 @@ At bytecode generation time, what is known about the state of the evaluation
 stack at a given instruction boundary can be precisely described using flavor
 descriptors.
 
-In addition to being flavor-safe, there are other invariants that valid
-HHBC programs must uphold with respect to metadata and how certain instructions
-are used.
+In addition to being flavor-safe, there are other invariants that valid HHBC
+programs must uphold with respect to metadata and how certain instructions are
+used.
 
 Below is the complete list of verifiability rules. If the bytecode to be
 executed does not come from a trusted source, it is the responsibility of the
@@ -768,8 +764,8 @@ available at that given point in the bytecode. Likewise, the flavor descriptor
 of each slot on the evaluation stack must be compatible with the instruction's
 inputs' flavor descriptors.
 
-3) The evaluation stack must be empty at any offset listed as a catch
-entry point.
+3) The evaluation stack must be empty at any offset listed as a catch entry
+point.
 
 4) If a given instruction is not the target of a forward branch and it follows
 a Jmp, Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, NativeImpl, or
@@ -793,7 +789,7 @@ another funclet.
 7) Any bytecode instruction inside the primary function body or a fault funclet
 that is immediately followed by an instruction not inside the same primary
 function body or fault funclet must be one of the following instructions: Jmp,
-Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, NativeImpl, or ContHandle. 
+Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, NativeImpl, or ContHandle.
 
 8) The primary function body may not contain the Unwind instruction, and fault
 funclets may not contain the Ret* instructions. Also, each catch entry point
@@ -835,10 +831,10 @@ which an iterator variable i is initialized must be protected by a fault
 funclet that unsets i by calling IterFree, MIterFree, or CIterFree.
 
 14) The iterator variable referenced by IterInit* or MIterInit* or
-DecodeCufIter must be in the uninitialized state when the instruction
-executes. An iterator variable referenced by IterNext* and IterFree must be
-in the "iter-initialized" state, an iterator variable referenced by MIterNext*
-or MIterFree must be in the "miter-initialized" state, and an iterator variable
+DecodeCufIter must be in the uninitialized state when the instruction executes.
+An iterator variable referenced by IterNext* and IterFree must be in the
+"iter-initialized" state, an iterator variable referenced by MIterNext* or
+MIterFree must be in the "miter-initialized" state, and an iterator variable
 referenced by FPushCufIter or CIterFree must be in the citer-initialized state.
 Note that IterInit* and MIterInit* conditionally initialize the iterator
 variable, and IterNext* and MIterNext* conditionally free the iterator
@@ -907,9 +903,9 @@ location descriptors is given below:
       a classref and whose name is given by value of a cell.
   C - cell; location is a temporary value given by a cell.
   R - return value; location is a temporary value given by a cell or a ref
-  H - $this; location is the $this pointer in the current frame. Must
-      only be used in a frame that is known to have a non-null $this
-      pointer; CheckThis is most commonly used to ensure this.
+  H - $this; location is the $this pointer in the current frame. Must only be
+      used in a frame that is known to have a non-null $this pointer; CheckThis
+      is most commonly used to ensure this.
 
 There are several groups of similarly named instructions where the name of each
 instruction ends with a different location descriptor (for example, Set*). Each
@@ -921,15 +917,15 @@ properties. These instructions incorporate an immediate argument vector which
 specifies a location descriptor (defined above) followed by one or more member
 descriptors:
 
-  EC      - consume a cell from the evaluation stack as an element
-  EL:<id> - consume a local given by an immediate id as an element
-  ET:<id> - consume a litstr given by an immediate id as an element
-  EI:<int>- consume a immediate integer as an element
-  PC      - consume a cell from the evaluation stack as a property
-  PL:<id> - consume a local given by an immediate id as a property
-  PT:<id> - consume a litstr given by an immediate id as a property
-  W       - synthesize a new element (no corresponding local variable or
-            evaluation stack slot)
+  EC       - consume a cell from the evaluation stack as an element
+  EL:<id>  - consume a local given by an immediate id as an element
+  ET:<id>  - consume a litstr given by an immediate id as an element
+  EI:<int> - consume a immediate integer as an element
+  PC       - consume a cell from the evaluation stack as a property
+  PL:<id>  - consume a local given by an immediate id as a property
+  PT:<id>  - consume a litstr given by an immediate id as a property
+  W        - synthesize a new element (no corresponding local variable or
+             evaluation stack slot)
 
 For example, the following correspondence exists (ignoring setup bytecode):
 
@@ -946,8 +942,9 @@ number of cells from the stack. In most cases the immediate vector arguments
 are ordered such that the loc-desc comes first (deepest in the stack), with the
 last M-vector element last (shallowest in the stack). However, classrefs that
 are part of the BaseSC and BaseSL loc-desc inputs always come last (the cell
-input to BaseSC comes first though).  Instructions accepting an immediate vector
-containing a list of iterators and iterator types use the notation "<iter-vec>".
+input to BaseSC comes first though). Instructions accepting an immediate vector
+containing a list of iterators and iterator types use the notation
+"<iter-vec>".
 
 In addition to describing each instruction, this instruction set documentation
 also describes several operations that encapsulate fundamental, but non-trivial
@@ -1007,7 +1004,7 @@ BoxR    [R:<T>]  ->  [V:<T>]
 
 BoxRNop   [R:<T>]  ->  [C:<T>]
 
-  Box, no op.  $1 must be statically known to be boxed.
+  Box, no op. $1 must be statically known to be boxed.
 
 UnboxR    [R:<T>]  ->  [C:<T>]
 
@@ -1018,8 +1015,8 @@ UnboxR    [R:<T>]  ->  [C:<T>]
 
 UnboxRNop   [R:<T>]  ->  [C:<T>]
 
-  UnboxR, no op.  $1 must be statically known to be unboxed.  This
-  instruction pushes $1 on the stack as a cell.
+  UnboxR, no op. $1 must be statically known to be unboxed. This instruction
+  pushes $1 on the stack as a cell.
 
 2. Literal and constant instructions
 ------------------------------------
@@ -1028,8 +1025,8 @@ Null     []  ->  [C:Null]
 True     []  ->  [C:Bool]
 False    []  ->  [C:Bool]
 
-  Push constant. Null pushes null onto the stack, True pushes true onto
-  the stack, and False pushes false onto the stack.
+  Push constant. Null pushes null onto the stack, True pushes true onto the
+  stack, and False pushes false onto the stack.
 
 NullUninit                      []  ->  [U]
 
@@ -1048,26 +1045,25 @@ NewArray    []  ->  [C:Arr]
 
 NewArrayReserve <capacity hint>    []  ->  [C:Arr]
 
-  New array, with capacity hint.  Creates a new array and pushes it
-  onto the stack.  The implementation may make use of the hint in %1
-  to pre-size the array.
+  New array, with capacity hint. Creates a new array and pushes it onto the
+  stack. The implementation may make use of the hint in %1 to pre-size the
+  array.
 
 NewPackedArray <num elems>    [C..C]  ->  [C]
 
-  New array. Creates a new array from the top %1 cells on the stack,
-  pops those cells, then pushes the new array onto the stack. Elements
-  are pushed on the stack in array insertion order and are implicitly
-  numbered from 0 to %1 - 1.  $1 is at index %i - 1, $2 at %1-2, and
-  so on; $(%1) is at index 0.
+  New array. Creates a new array from the top %1 cells on the stack, pops those
+  cells, then pushes the new array onto the stack. Elements are pushed on the
+  stack in array insertion order and are implicitly numbered from 0 to %1 - 1.
+  $1 is at index %i - 1, $2 at %1-2, and so on; $(%1) is at index 0.
 
 NewStructArray <litstr id vector>    [C..C]  ->  [C]
 
-  New array.  Creates a new array from the names given in %1 and values
-  from the stack.  The vector of litstr ids gives the element names,
-  one value for each name is popped from the stack.  Names are in array
-  insertion order, and values were pushed onto the stack in insertion
-  order, so are added to the array in reverse order (the topmost value
-  will become the last element in the array).  For example:
+  New array. Creates a new array from the names given in %1 and values from the
+  stack. The vector of litstr ids gives the element names, one value for each
+  name is popped from the stack. Names are in array insertion order, and values
+  were pushed onto the stack in insertion order, so are added to the array in
+  reverse order (the topmost value will become the last element in the array).
+  For example:
 
     NewStructArray < "a" "b" >  [ 1 2 ]  ->  [ array("a"=>1, "b"=>2) ]
 
@@ -1170,7 +1166,7 @@ Concat    [C C]  ->  [C:Str]
 
 Abs    [C] -> [C:Int|Dbl|Bool]
 
-  Absolute value.  Computes the absolute value of $1 and pushes the result onto
+  Absolute value. Computes the absolute value of $1 and pushes the result onto
   the stack.
 
 Add    [C:Arr C:Arr]  ->  [C:Arr]
@@ -1209,20 +1205,20 @@ Mod    [C C]  ->  [C:Bool|Int]
 
 Sqrt   [C]    ->  [C:Null|Dbl]
 
-  Square root. Computes the square root of $1 and pushes the result onto
-  the stack. If $1 is not null, a bool, an int, a double, or a numeric
-  string, it raises a warning and pushes null onto the stack.
+  Square root. Computes the square root of $1 and pushes the result onto the
+  stack. If $1 is not null, a bool, an int, a double, or a numeric string, it
+  raises a warning and pushes null onto the stack.
 
-  If $1 is a negative number, this instruction pushes a floating-point
-  value representing NAN onto the stack.
+  If $1 is a negative number, this instruction pushes a floating-point value
+  representing NAN onto the stack.
 
 Strlen  [C] -> [C:Null|Int]
 
-  String length.  If $1 is a string push the length of the string on the
-  stack.  If $1 is an object with a __toString method, call this method and
-  push the length of the resulting string on the stack.  If $1 is an array
-  or resource, raise a warning and push null on the stack.  Otherwise
-  convert $1 to a string and push the length of that string on the stack.
+  String length. If $1 is a string push the length of the string on the stack.
+  If $1 is an object with a __toString method, call this method and push the
+  length of the resulting string on the stack. If $1 is an array or resource,
+  raise a warning and push null on the stack. Otherwise convert $1 to a string
+  and push the length of that string on the stack.
 
 Xor    [C C]  ->  [C:Bool]
 
@@ -1300,13 +1296,13 @@ Shr    [C C]  ->  [C:Int]
 
 Floor    [C]  ->  [C:Dbl]
 
-  Round $1 to nearest integer value not greater than $1.  Converts $1 to
-  numeric as appropriate and then takes floor of resulting numeric value.
+  Round $1 to nearest integer value not greater than $1. Converts $1 to numeric
+  as appropriate and then takes floor of resulting numeric value.
 
 Ceil    [C]  ->  [C:Dbl]
 
-  Round $1 to nearest integer value not less than $1.  Converts $1 to numeric
-  as appropriate and then takes ceil of resulting numeric value.
+  Round $1 to nearest integer value not less than $1. Converts $1 to numeric as
+  appropriate and then takes ceil of resulting numeric value.
 
 CastBool    [C]  ->  [C:Bool]
 
@@ -1375,11 +1371,10 @@ Fatal <fatal subop>  [C]  ->  []
 
   Fatal. This instruction throws a fatal error using $1 as the error message.
   If $1 is not a string, this instruction throws a fatal error with an error
-  message that indicates that the error message was not a string.
-  Setting %1 to 0 will throw a runtime fatal error with a full backtrace.
-  Setting %1 to 1 will throw a parse fatal error with a full backtrace.
-  Setting %1 to 2 will throw a runtime fatal error with the
-    backtrace omitting the top frame.
+  message that indicates that the error message was not a string. Setting %1 to
+  0 will throw a runtime fatal error with a full backtrace. Setting %1 to 1
+  will throw a parse fatal error with a full backtrace. Setting %1 to 2 will
+  throw a runtime fatal error with the backtrace omitting the top frame.
 
 
 4. Control flow instructions
@@ -1391,7 +1386,7 @@ Jmp <rel offset>    []  ->  []
 
 JmpNS <rel offset>   []  ->  []
 
-  Jump, with no surprise flag checks.  This behaves identically to the Jmp
+  Jump, with no surprise flag checks. This behaves identically to the Jmp
   instruction, except that internal VM checks for things like OOM do not need
   to be performed even if the offset is negative.
 
@@ -1409,14 +1404,14 @@ Switch <offset vector> <base> <bounded>    [C]  ->  []
 
   Switch over integer case values. If bounded == 0, the implementation will
   assume that $1 is an integer in the range [0, length(vector)) and
-  unconditionally transfer control to the location specified by
-  vector[$1]. Undefined behavior will result if $1 is not an integer inside
-  this range. If bounded != 0, the following rules take over:
+  unconditionally transfer control to the location specified by vector[$1].
+  Undefined behavior will result if $1 is not an integer inside this range. If
+  bounded != 0, the following rules take over:
 
   For a bounded Switch, the last two elements of the offset vector are special:
-  they represent the first non-zero case and the default case,
-  respectively. base + length(vector) - 2 must not be greater than 2^63-1. If
-  $1 === true, control will be transferred to the location specified by
+  they represent the first non-zero case and the default case, respectively.
+  base + length(vector) - 2 must not be greater than 2^63-1. If $1 === true,
+  control will be transferred to the location specified by
   vector[length(vector) - 2]. If $1 is equal (as defined by Eq) to any integer
   $n in the range [base, base + length(vector) - 2), control will be
   transferred to the location specified by vector[$n - base]. Otherwise,
@@ -1462,8 +1457,8 @@ CGetL <local variable id>    []  ->  [C]
 CGetL2 <local variable id>    [<F>:<T>]  ->  [C <F>:<T>]
 
   Get local as cell. If the local variable given by %1 is defined, this
-  instruction gets the value of the local variable, pushes it onto the stack
-  as a cell, and then pushes $1 onto the stack.
+  instruction gets the value of the local variable, pushes it onto the stack as
+  a cell, and then pushes $1 onto the stack.
 
   If the local variable is not defined, this instruction raises a warning,
   pushes null onto the stack, and then pushes $1 onto the stack.
@@ -1471,8 +1466,8 @@ CGetL2 <local variable id>    [<F>:<T>]  ->  [C <F>:<T>]
 CGetL3 <local variable id>    [<F2>:<T2> <F1>:<T1>]  ->  [C <F2>:<T1> <F1>:<T1>]
 
   Get local as cell. If the local variable given by %1 is defined, this
-  instruction gets the value of the local variable, pushes it onto the stack
-  as a cell, then pushes $2 onto the stack, and then pushes $1 onto the stack.
+  instruction gets the value of the local variable, pushes it onto the stack as
+  a cell, then pushes $2 onto the stack, and then pushes $1 onto the stack.
 
   If the local variable given by %1 is not defined, this instruction raises a
   warning, pushes null onto the stack, then pushes $2 onto the stack, and then
@@ -1627,8 +1622,8 @@ EmptyS    [C A]  ->  [C:Bool]
 
 IsTypeC  <op>                     [C]  ->  [C:Bool]
 
-  Is type. This instruction first loads a type into t based on the operand
-  op, according to the following table:
+  Is type. This instruction first loads a type into t based on the operand op,
+  according to the following table:
 
     operand        t
     -----------+------
@@ -1641,8 +1636,8 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       Obj      |  Obj
       Scalar   | Int or Dbl or Str or Bool
 
-  If $1 is of type t, this instruction pushes true onto the stack,
-  otherwise it pushes false.
+  If $1 is of type t, this instruction pushes true onto the stack, otherwise it
+  pushes false.
 
 IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
 
@@ -1712,9 +1707,9 @@ SetOpN <op>    [C C]  ->  [C]
   variable named n is not defined, this instruction marks it as defined, sets
   it to null, and raises a warning.
 
-  Next, this instruction reads the local variable named x into y, executes
-  z = y <op> $1, assigns z into the local variable named x, and then pushes z
-  onto the stack as a cell. The immediate value must be one of the following
+  Next, this instruction reads the local variable named x into y, executes z =
+  y <op> $1, assigns z into the local variable named x, and then pushes z onto
+  the stack as a cell. The immediate value must be one of the following
   opcodes:
     Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
 
@@ -1724,9 +1719,9 @@ SetOpG <op>    [C C]  ->  [C]
   variable named n is not defined, this instruction marks it as defined, sets
   it to null, and raises a warning.
 
-  Next, this instruction reads the global variable named x into y, executes
-  z = y <op> $1, assigns z into the global variable named x, and then pushes z
-  onto the stack as a cell. The immediate value must be one of the following
+  Next, this instruction reads the global variable named x into y, executes z =
+  y <op> $1, assigns z into the global variable named x, and then pushes z onto
+  the stack as a cell. The immediate value must be one of the following
   opcodes:
     Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
 
@@ -1784,8 +1779,8 @@ IncDecG <op>    [C]  ->  [C]
 
 IncDecS <op>    [C A]  ->  [C]
 
-  Increment/decrement static property. This instruction first computes
-  x = (string)$2. Next it checks if class $1 has an accessible static property
+  Increment/decrement static property. This instruction first computes x =
+  (string)$2. Next it checks if class $1 has an accessible static property
   named x. If it doesn't, this instruction throws a fatal error.
 
   Where s is the static property named x, this instruction performs the
@@ -1859,10 +1854,9 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   no function named x is defined, this instruction throws a fatal error.
   Otherwise this instruction pushes a new entry on the FPI stack, initializing
   it with the number of parameters being passed (given by %1) and a reference
-  to the FPI structure for the function named x.
-  With FPushFuncD the litstr in %2 must not start with a '\' character. 
-  Function names should be normalized with respect to namespace and never start
-  with a '\'.
+  to the FPI structure for the function named x. With FPushFuncD the litstr in
+  %2 must not start with a '\' character. Function names should be normalized
+  with respect to namespace and never start with a '\'.
 
   If x is an object, this instruction checks if the object has an __invoke
   method. If the object does not have an __invoke method, this instruction
@@ -1877,8 +1871,8 @@ FPushFuncU <num params> <litstr id> <litstr fallback> []  ->  []
 
   FPI push function unqualified. Identical to FPushFuncD except first tries to
   lookup the function named %2 and if it isn't defined calls the function named
-  %3.
-  As for FPushFuncD the litstr in %2 and %3 must not start with a '\' character.
+  %3. As for FPushFuncD the litstr in %2 and %3 must not start with a '\'
+  %character.
 
 FPushObjMethod <num params>                 [C C]  ->  []
 FPushObjMethodD <num params> <litstr id>    [C]  ->  []
@@ -1895,7 +1889,8 @@ FPushObjMethodD <num params> <litstr id>    [C]  ->  []
   fatal error. Next, this instruction checks if object x has an accessible
   method named y. If it does, this instruction pushes a new entry on the FPI
   stack, initializing it with the number of parameters being passed (given by
-  %1) and a reference to the FPI structure for the method named y from object x.
+  %1) and a reference to the FPI structure for the method named y from object
+  %x.
 
   If object x does not have an accessible method named y, this instruction
   checks if object x has a __call method. If a __call method is found, this
@@ -1931,14 +1926,14 @@ FPushClsMethodD <num params> <litstr id> <litstr id>    []  ->  []
   x.
 
   If class x does not have an accessible method named y, this instruction
-  checks if the current function's $this is non-null, if the class of $this
-  is the same or derived from class x, and if $this has a __call method. If no
+  checks if the current function's $this is non-null, if the class of $this is
+  the same or derived from class x, and if $this has a __call method. If no
   suitable __call method is found, this instruction will check if class x has a
   __callStatic method. If a suitable __call method or a __callStatic method is
   found, this instruction pushes a new entry on the FPI stack, initializing it
   with the number of parameters being passed (given by %1) and a reference to
-  the FPI structure for the __call or __callStatic method that was found,
-  and stores the original name y in the FPI stack entry.
+  the FPI structure for the __call or __callStatic method that was found, and
+  stores the original name y in the FPI stack entry.
 
   If class x does not have an accessible method named y, and if a suitable
   __call method or a __callStatic method could not be found, this instruction
@@ -1959,22 +1954,21 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
   AGetC instruction to convert the name given by %2 into a classref.
 
   This instruction pushes an uninitialized object onto the stack (to be
-  initialized during FCall*) prior to entering the FPI region, then pushes a new
-  entry on the FPI stack, initializing it with the number of parameters being
-  passed (given by %1) and a reference to the FPI structure for the constructor
-  for class x.
+  initialized during FCall*) prior to entering the FPI region, then pushes a
+  new entry on the FPI stack, initializing it with the number of parameters
+  being passed (given by %1) and a reference to the FPI structure for the
+  constructor for class x.
 
 DecodeCufIter <iterator id>    [C]  ->  []
 
-  This instruction looks up $1 as a callable, and writes enough
-  information to iterator %1 for FPushCufIter to be able to push an
-  actrec, as if it had been given the callable.  If the function is
-  not successfully decoded, sets up iter to call a function that does
-  nothing and returns Null.  No warning is raised.
+  This instruction looks up $1 as a callable, and writes enough information to
+  iterator %1 for FPushCufIter to be able to push an actrec, as if it had been
+  given the callable. If the function is not successfully decoded, sets up iter
+  to call a function that does nothing and returns Null. No warning is raised.
 
 FPushCufIter <num params> <iterator id>   []  ->  []
 
-  FPI push the result of a previous DecodeCufIter.  No warning is raised.
+  FPI push the result of a previous DecodeCufIter. No warning is raised.
 
 FPushCuf <num params>     [C]   ->  []
 FPushCufF <num params>    [C]   ->  []
@@ -1986,22 +1980,20 @@ FPushCufF <num params>    [C]   ->  []
 
 FPushCufSafe <num params> [C C] ->  [C C:Bool]
 
-  FPI push call user function. This instruction pops $1 and $2, then pushes
-  $1 back onto the stack. It then looks up $2 as a callable, and pushes a
-  new entry onto the FPI stack. If $2 is not callable, it pushes an entry
+  FPI push call user function. This instruction pops $1 and $2, then pushes $1
+  back onto the stack. It then looks up $2 as a callable, and pushes a new
+  entry onto the FPI stack. If $2 is not callable, it pushes an entry
   representing a function which does nothing, takes no argument, and returns
   null, and in addition pushes boolean false onto the evaluation stack;
   otherwise it pushes true onto the evaluation stack.
 
 CufSafeArray   [C C R] -> [C]
 
-  Pops 3 elements from the stack, and pushes array($2, $1), preserving
-  refs.
+  Pops 3 elements from the stack, and pushes array($2, $1), preserving refs.
 
 CufSafeReturn  [C C R] -> [R]
 
-  Pops 3 elements from the stack, and pushes $2 ? $1 : $3, preserving
-  refs.
+  Pops 3 elements from the stack, and pushes $2 ? $1 : $3, preserving refs.
 
 FPassC <param id>     [C]  ->  [F]
 FPassCW <param id>    [C]  ->  [F]
@@ -2023,8 +2015,8 @@ FPassV <param id>    [V]  ->  [F]
 
 FPassVNop <param id> [V]  ->  [F]
 
-  FPI pass parameter, no op.  Parameter %1 must be statically known to be
-  pass by reference.  This instruction pushes $1 onto the stack as a ref.
+  FPI pass parameter, no op. Parameter %1 must be statically known to be pass
+  by reference. This instruction pushes $1 onto the stack as a ref.
 
 FPassR <param id>    [R]  ->  [F]
 
@@ -2066,22 +2058,22 @@ FCall <num params>    [F..F]  ->  [R]
 FCallArray    [F]  ->  [R]
 
   FPI call with array. This instruction gets the bytecode address of the
-  function associated with the current FPI (the callee), transfers the
-  elements of $1 (which must be an array) to the callee as parameters, pops
-  the current FPI off of the FPI stack, and then invokes the dispatcher to
-  call the callee. When the callee returns, it will transfer the return value
-  onto the caller's evaluation stack using the R flavor.
+  function associated with the current FPI (the callee), transfers the elements
+  of $1 (which must be an array) to the callee as parameters, pops the current
+  FPI off of the FPI stack, and then invokes the dispatcher to call the callee.
+  When the callee returns, it will transfer the return value onto the caller's
+  evaluation stack using the R flavor.
 
 FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [R]
 
-  Optimized builtin call without an ActRec. This instruction attempts to
-  lookup a builtin function named %3. If no function named %3 is defined,
-  this instruction throws a fatal error. Otherwise, this function gets
-  address of the builtin function named %3, transfers the top %1 values
-  from the stack to the callee as parameters, and then invokes the dispatcher
-  to call the callee. %2 denotes the number of non-default parameters pushed
-  onto stack by user level code. When the callee returns, it will transfer
-  the return value onto the caller's evaluation stack using the R flavor.
+  Optimized builtin call without an ActRec. This instruction attempts to lookup
+  a builtin function named %3. If no function named %3 is defined, this
+  instruction throws a fatal error. Otherwise, this function gets address of
+  the builtin function named %3, transfers the top %1 values from the stack to
+  the callee as parameters, and then invokes the dispatcher to call the callee.
+  %2 denotes the number of non-default parameters pushed onto stack by user
+  level code. When the callee returns, it will transfer the return value onto
+  the caller's evaluation stack using the R flavor.
 
 
 9. Member operations
@@ -2105,8 +2097,8 @@ When a base that contains a cell is destroyed, if the cell points to data then
 the execution engine is responsible for honoring the data's refcount logic.
 Likewise when a base that contains a ref is destroyed, the execution engine is
 responsible for honoring the refcount logic of the cell container pointed to by
-the ref. When a base that contains a reference to a memory location occupied
-by a cell or a ref is destroyed, no refcounting is required.
+the ref. When a base that contains a reference to a memory location occupied by
+a cell or a ref is destroyed, no refcounting is required.
 
 Some operations that take a base as input can modify that base as part of the
 work performed by the operation. Such operations are said to "set" the base to
@@ -2255,67 +2247,63 @@ ElemL <local variable id>    [B]  ->  [B]
          ElemC   | $2 | $1
          ElemL   | %1 | $1
 
-  Then, if y is an array, this operation outputs a base that
-  references the element at index x from array y. If there is no
-  element at index x, this operation outputs a base that contains
-  null.
+  Then, if y is an array, this operation outputs a base that references the
+  element at index x from array y. If there is no element at index x, this
+  operation outputs a base that contains null.
 
   If y is an object that implements the ArrayAccess interface, this operation
   outputs a base that contains the result of y->offsetGet(x).
 
-  If y is an object that does not implement the ArrayAccess interface,
-  this operation throws a fatal error.
+  If y is an object that does not implement the ArrayAccess interface, this
+  operation throws a fatal error.
 
-  If y is a string, this operation computes z = (int)x. If z >= 0 and
-  z < strlen(z), this operation builds a new string consisting of the
-  character at offset z from y and outputs a base that contains the new
-  string. Otherwise, this operation outputs a base that contains the
-  empty string.
+  If y is a string, this operation computes z = (int)x. If z >= 0 and z <
+  strlen(z), this operation builds a new string consisting of the character at
+  offset z from y and outputs a base that contains the new string. Otherwise,
+  this operation outputs a base that contains the empty string.
 
-  If y is not a string, array, or object, this operation will output a
-  null base.
+  If y is not a string, array, or object, this operation will output a null
+  base.
 
 ElemCW                        [C B]  ->  [B]
 ElemLW <local variable id>    [B]  ->  [B]
 
   Fetch element; warn if it doesn't exist.
 
-  First, these operations load a value into x and a base into y, as
-  given by the following table:
+  First, these operations load a value into x and a base into y, as given by
+  the following table:
 
        operation    x    y
        ----------+----+-----
          ElemCW  | $2 | $1
          ElemLW  | %1 | $1
 
-  If y is an array, this operation outputs a base that references the
-  element at index x from array y. If there is no element at index x,
-  this operation outputs a base that contains null and raises a
-  warning.
+  If y is an array, this operation outputs a base that references the element
+  at index x from array y. If there is no element at index x, this operation
+  outputs a base that contains null and raises a warning.
 
-  If y is an object that implements the ArrayAccess interface, this
-  operation outputs a base that contains the result of
-  y->offsetGet(x).
+  If y is an object that implements the ArrayAccess interface, this operation
+  outputs a base that contains the result of y->offsetGet(x).
 
-  If y is an object that does not implement the ArrayAccess interface,
-  this operation throws a fatal error.
+  If y is an object that does not implement the ArrayAccess interface, this
+  operation throws a fatal error.
 
-  If y is a string, this operation continues to compute z = (int)x.
-  If z >= 0 and z < strlen(z), this operation builds a new
-  string consisting of the character at offset z from y and outputs a
-  base that contains the new string. Otherwise, this operation raises
-  a warning and outputs a base that contains the empty string.
+  If y is a string, this operation continues to compute z = (int)x. If z >= 0
+  and z < strlen(z), this operation builds a new string consisting of the
+  character at offset z from y and outputs a base that contains the new string.
+  Otherwise, this operation raises a warning and outputs a base that contains
+  the empty string.
 
-  If y is not a string, array, or object, this operation will output
-  a null base.
+  If y is not a string, array, or object, this operation will output a null
+  base.
 
 ElemCD                        [C B]  ->  [B]
 ElemLD <local variable id>    [B]  ->  [B]
 
   Fetch element; define it if it doesn't exist.
 
-  First, these operations load a value into x and a base into y, as
-  given by the following table:
+  First, these operations load a value into x and a base into y, as given by
+  the following table:
 
        operation    x    y
        ----------+----+-----
@@ -2329,12 +2317,12 @@ ElemLD <local variable id>    [B]  ->  [B]
   If y is an object that implements the ArrayAccess interface, this operation
   outputs a base that contains the result of y->offsetGet(x).
 
-  If y is non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
+  If y is non-empty string or an object that does not implement the ArrayAccess
+  interface, this operation throws a fatal error.
 
-  If y is null, the empty string, or false, this operation will set y to a
-  new empty array, create an element at index x, and output a base that
-  references the element.
+  If y is null, the empty string, or false, this operation will set y to a new
+  empty array, create an element at index x, and output a base that references
+  the element.
 
   If y is true, integer, double, this operation raises a warning and outputs a
   base that contains null.
@@ -2344,40 +2332,39 @@ ElemLWD <local variable id>    [B]  ->  [B]
 
   Fetch element; warn and define it if it doesn't exist.
 
-  First, these operations load a value into x and a base into y, as
-  given by the following table:
+  First, these operations load a value into x and a base into y, as given by
+  the following table:
 
        operation    x    y
        ----------+----+-----
          ElemCWD | $2 | $1
          ElemLWD | %1 | $1
 
-  If y is an array, this operation outputs a base that references the
-  element at index x. If there is no element at index x, this
-  operation creates an element at index x, raises a warning, and
-  outputs a base that references the element.
+  If y is an array, this operation outputs a base that references the element
+  at index x. If there is no element at index x, this operation creates an
+  element at index x, raises a warning, and outputs a base that references the
+  element.
 
-  If y is an object that implements the ArrayAccess interface, this
-  operation outputs a base that contains the result of
-  y->offsetGet(x).
+  If y is an object that implements the ArrayAccess interface, this operation
+  outputs a base that contains the result of y->offsetGet(x).
 
-  If y is non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
+  If y is non-empty string or an object that does not implement the ArrayAccess
+  interface, this operation throws a fatal error.
 
-  If y is null, the empty string, or false, this operation will set y
-  to a new empty array, create an element at index x, and output a
-  base that references the element.
+  If y is null, the empty string, or false, this operation will set y to a new
+  empty array, create an element at index x, and output a base that references
+  the element.
 
-  If y is true, integer, or double, this operation raises a warning
-  and outputs a base that contains null.
+  If y is true, integer, or double, this operation raises a warning and outputs
+  a base that contains null.
 
 ElemCU                        [C B]  ->  [B]
 ElemLU <local variable id>    [B]  ->  [B]
 
   Fetch element for unset.
 
-  First, these operations load a value into x and a base into y, as
-  given by the following table:
+  First, these operations load a value into x and a base into y, as given by
+  the following table:
 
        operation    x    y
        ----------+----+-----
@@ -2396,8 +2383,8 @@ ElemLU <local variable id>    [B]  ->  [B]
 
   If y is a string, this operation throws a fatal error.
 
-  If y is not a string, array, or object, this operation will output a
-  null base.
+  If y is not a string, array, or object, this operation will output a null
+  base.
 
 NewElem    [B]  ->  [B]
 
@@ -2423,8 +2410,8 @@ PropL <local variable id>    [B]  ->  [B]
 
   Fetch property if it exists.
 
-  First, these operations load a value into x and a base into y, as
-  given by the following table:
+  First, these operations load a value into x and a base into y, as given by
+  the following table:
 
        operation    x    y
        ----------+----+-----
@@ -2453,8 +2440,8 @@ PropLW <local variable id>    [B]  ->  [B]
 
   Fetch property; warn if it doesn't exist.
 
-  First, these operations load a value into x and a base into y, as
-  given by the following table:
+  First, these operations load a value into x and a base into y, as given by
+  the following table:
 
        operation    x    y
        ----------+----+-----
@@ -2483,8 +2470,8 @@ PropLD <local variable id>    [B]  ->  [B]
 
   Fetch property; define it if it doesn't exist.
 
-  First, these operations load a value into x and a base into y, as
-  given by the following table:
+  First, these operations load a value into x and a base into y, as given by
+  the following table:
 
        operation    x    y
        ----------+----+-----
@@ -2515,8 +2502,8 @@ PropLWD <local variable id>    [B]  ->  [B]
 
   Fetch property; warn and define it if it doesn't exist.
 
-  First, these operations load a value into x and a base into y, as
-  given by the following table:
+  First, these operations load a value into x and a base into y, as given by
+  the following table:
 
        operation    x    y
        ----------+----+-----
@@ -2548,8 +2535,8 @@ PropLU <local variabld id>    [B]  ->  [B]
 
   Fetch property for unset.
 
-  First, these operations load a value into x and a base into y, as
-  given by the following table:
+  First, these operations load a value into x and a base into y, as given by
+  the following table:
 
        operation    x    y
        ----------+----+-----
@@ -2575,17 +2562,17 @@ CGetElemL <local variable id>    [B]  ->  [C]
 
   Get element as cell.
 
-  These instructions first load a value into x and a base into y, as
-  given by the following table:
+  These instructions first load a value into x and a base into y, as given by
+  the following table:
 
          operation    x    y
        ------------+----+-----
         CGetElemC  | $2 | $1
         CGetElemL  | %1 | $1
 
-  If y is an array, this operation retrieves the element at index x from
-  array y and pushes it onto the stack as a cell. If there is no element at
-  index x, this operation raises a warning and pushes null onto the stack.
+  If y is an array, this operation retrieves the element at index x from array
+  y and pushes it onto the stack as a cell. If there is no element at index x,
+  this operation raises a warning and pushes null onto the stack.
 
   If y is an object that implements the ArrayAccess interface, this operation
   pushes x->offsetGet($2) onto the stack.
@@ -2594,9 +2581,9 @@ CGetElemL <local variable id>    [B]  ->  [C]
   operation throws a fatal error.
 
   If y is a string, this operation continues to compute z = (int)x. If z >= 0
-  and z < strlen(z), this operation builds a new string consisting of the character
-  at offset z from y and pushes it onto the stack. Otherwise, this operation
-  raises a warning and pushes the empty string onto the stack.
+  and z < strlen(z), this operation builds a new string consisting of the
+  character at offset z from y and pushes it onto the stack. Otherwise, this
+  operation raises a warning and pushes the empty string onto the stack.
 
   If y is not a string, array, or object, this operation will push null onto
   the stack.
@@ -2606,18 +2593,18 @@ VGetElemL <local variable id>    [B]  ->  [V]
 
   Get element as ref.
 
-  These instructions first load a value into x and a base into y, as
-  given by the following table:
+  These instructions first load a value into x and a base into y, as given by
+  the following table:
 
          operation    x    y
        ------------+----+-----
         VGetElemC  | $2 | $1
         VGetElemL  | %1 | $1
 
-  If y is an array, this operation retrieves the element at index x from
-  array y and pushes it onto the stack as a ref. If there is no element at
-  index x, this operation creates a new element at index x, and pushes it
-  onto the stack as a ref.
+  If y is an array, this operation retrieves the element at index x from array
+  y and pushes it onto the stack as a ref. If there is no element at index x,
+  this operation creates a new element at index x, and pushes it onto the stack
+  as a ref.
 
   If y is an object that implements the ArrayAccess interface, this operation
   pushes y->offsetGet(x) onto the stack as a ref.
@@ -2628,19 +2615,19 @@ VGetElemL <local variable id>    [B]  ->  [V]
   If y is null, false, or the empty string, this operation sets y to a new
   empty array. Then this operation retrieves the element at index x from array
   y and pushes it onto the stack as a ref. If there is no element at index x,
-  this operation creates a new element at index x, and pushes it onto the
-  stack as a ref.
+  this operation creates a new element at index x, and pushes it onto the stack
+  as a ref.
 
-  If y is true, integer, or double, this operation raises a warning and
-  pushes null onto the stack.
+  If y is true, integer, or double, this operation raises a warning and pushes
+  null onto the stack.
 
 IssetElemC                        [C B]  ->  [C:Bool]
 IssetElemL <local variable id>    [B]  ->  [C:Bool]
 
   Isset element.
 
-  These instructions first load a value into x and a base into y, as
-  given by the following table:
+  These instructions first load a value into x and a base into y, as given by
+  the following table:
 
          operation    x    y
        ------------+----+-----
@@ -2655,8 +2642,8 @@ IssetElemL <local variable id>    [B]  ->  [C:Bool]
   If y is an object that does not implement the ArrayAccess interface, this
   operation throws a fatal error.
 
-  If y is a string, this operation computes x = (int)x and then it pushes
-  (x >= 0 && x < strlen(y)) onto the stack.
+  If y is a string, this operation computes x = (int)x and then it pushes (x >=
+  0 && x < strlen(y)) onto the stack.
 
   If y is a not a string, array, or object, this operation pushes false onto
   the stack.
@@ -2666,8 +2653,8 @@ EmptyElemL <local variable id>    [B]  ->  [C]
 
   Empty element.
 
-  These instructions first load a value into x and a base into y, as
-  given by the following table:
+  These instructions first load a value into x and a base into y, as given by
+  the following table:
 
          operation    x    y
        ------------+----+-----
@@ -2683,11 +2670,11 @@ EmptyElemL <local variable id>    [B]  ->  [C]
   If y is an object that does not implement the ArrayAccess interface, this
   operation throws a fatal error.
 
-  If y is a string, this operation computes z = (int)x, then pushes true if
-  (z < 0 || z >= strlen(y)), !(y[z]) otherwise.
+  If y is a string, this operation computes z = (int)x, then pushes true if (z
+  < 0 || z >= strlen(y)), !(y[z]) otherwise.
 
-  If y is, not an array, object, or string, this operation pushes true onto
-  the stack.
+  If y is, not an array, object, or string, this operation pushes true onto the
+  stack.
 
 SetElemC    [C C B]  ->  [C]
 
@@ -2741,45 +2728,45 @@ SetElemL <local variable id>    [C B]  ->  [C]
 
 SetOpElemC <op>    [C C B]  ->  [C]
 
-  Set element op. If $1 is an array, this operation first checks $1 contains
-  an element at offset $2. If it does not, this operation creates an element
-  at offset $2, sets it to null, and raises a warning. Next, this operation
+  Set element op. If $1 is an array, this operation first checks $1 contains an
+  element at offset $2. If it does not, this operation creates an element at
+  offset $2, sets it to null, and raises a warning. Next, this operation
   executes x = $1[$3], y = x <op> $2, and $1[$3] = y, and then it pushes y onto
   the stack as a cell.
 
-  If $1 is null, false, or the empty string, this operation first sets $1 to
-  a new empty array. Then it follows the rules described in the case above.
+  If $1 is null, false, or the empty string, this operation first sets $1 to a
+  new empty array. Then it follows the rules described in the case above.
 
-  If $1 is an object that implements the ArrayAccess interface, this
-  operation executes x = $1->offsetGet($3), y = x <op> $2, and
-  $1->offsetSet($3, y), and then it pushes y onto the stack as a cell.
+  If $1 is an object that implements the ArrayAccess interface, this operation
+  executes x = $1->offsetGet($3), y = x <op> $2, and $1->offsetSet($3, y), and
+  then it pushes y onto the stack as a cell.
 
   If $1 is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
 
-  If $1 is true, integer, or double, this operation raises a warning and
-  pushes null onto the stack.
+  If $1 is true, integer, or double, this operation raises a warning and pushes
+  null onto the stack.
 
 SetOpElemL <op> <local variable id>    [C B]  ->  [C]
 
-  Set element op. If $1 is an array, this operation first checks $1 contains
-  an element at offset $2. If it does not, this operation creates an element
-  at offset $2, sets it to null, and raises a warning. Next, this operation
+  Set element op. If $1 is an array, this operation first checks $1 contains an
+  element at offset $2. If it does not, this operation creates an element at
+  offset $2, sets it to null, and raises a warning. Next, this operation
   executes x = $1[%1], y = x <op> $2, and $1[%1] = y, and then it pushes y onto
   the stack as a cell.
 
-  If $1 is null, false, or the empty string, this operation first sets $1 to
-  a new empty array. Then it follows the rules described in the case above.
+  If $1 is null, false, or the empty string, this operation first sets $1 to a
+  new empty array. Then it follows the rules described in the case above.
 
-  If $1 is an object that implements the ArrayAccess interface, this
-  operation executes x = $1->offsetGet(%1), y = x <op> $2, and
-  $1->offsetSet(%1, y), and then it pushes y onto the stack as a cell.
+  If $1 is an object that implements the ArrayAccess interface, this operation
+  executes x = $1->offsetGet(%1), y = x <op> $2, and $1->offsetSet(%1, y), and
+  then it pushes y onto the stack as a cell.
 
   If $1 is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
 
-  If $1 is true, integer, or double, this operation raises a warning and
-  pushes null onto the stack.
+  If $1 is true, integer, or double, this operation raises a warning and pushes
+  null onto the stack.
 
 IncDecElemC <op>    [C B]  ->  [C]
 
@@ -2787,23 +2774,23 @@ IncDecElemC <op>    [C B]  ->  [C]
   contains an element at offset $2. If it does not, this operation creates an
   element at offset $2, sets it to null, and raises a warning. Next, this
   operation executes x = $1[$2], y = x, and either ++y (if op is PreInc or
-  PostInc) or --y (if op is PreDec or PostDec). Then it assigns y to $1[$2]
-  and pushes either y (if op is PreInc or PreDec) or x (if op is PostInc or
+  PostInc) or --y (if op is PreDec or PostDec). Then it assigns y to $1[$2] and
+  pushes either y (if op is PreInc or PreDec) or x (if op is PostInc or
   PostDec) onto the stack.
 
-  If $1 is null, false, or the empty string, this operation first sets $1 to
-  an empty array. Then it follows the rules described in the case above.
+  If $1 is null, false, or the empty string, this operation first sets $1 to an
+  empty array. Then it follows the rules described in the case above.
 
   If $1 is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
 
-  If $1 is an object that implements ArrayAccess, this operation executes
-  x = $1->offsetGet($2), y = x, and either ++y (if op is PreInc or PostInc) or
-  --y (if op is PreDec or PostDec). Then it pushes either y (if op is PreInc or
+  If $1 is an object that implements ArrayAccess, this operation executes x =
+  $1->offsetGet($2), y = x, and either ++y (if op is PreInc or PostInc) or --y
+  (if op is PreDec or PostDec). Then it pushes either y (if op is PreInc or
   PreDec) or x (if op is PostInc or PostDec) onto the stack.
 
-  If $1 is true, integer, or double, this operation raises a warning and
-  pushes null onto the stack.
+  If $1 is true, integer, or double, this operation raises a warning and pushes
+  null onto the stack.
 
 IncDecElemL <op> <local variable id>    [B]  ->  [C]
 
@@ -2811,34 +2798,34 @@ IncDecElemL <op> <local variable id>    [B]  ->  [C]
   contains an element at offset %1. If it does not, this operation creates an
   element at offset %1, sets it to null, and raises a warning. Next, this
   operation executes x = $1[%1], y = x, and either ++y (if op is PreInc or
-  PostInc) or --y (if op is PreDec or PostDec). Then it assigns y to $1[%1]
-  and pushes either y (if op is PreInc or PreDec) or x (if op is PostInc or
+  PostInc) or --y (if op is PreDec or PostDec). Then it assigns y to $1[%1] and
+  pushes either y (if op is PreInc or PreDec) or x (if op is PostInc or
   PostDec) onto the stack.
 
-  If $1 is null, false, or the empty string, this operation first sets $1 to
-  an empty array. Then it follows the rules described in the case above.
+  If $1 is null, false, or the empty string, this operation first sets $1 to an
+  empty array. Then it follows the rules described in the case above.
 
   If $1 is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
 
-  If $1 is an object that implements ArrayAccess, this operation executes
-  x = $1->offsetGet(%1), y = x, and either ++y (if op is PreInc or PostInc) or
-  --y (if op is PreDec or PostDec). Then it pushes either y (if op is PreInc or
+  If $1 is an object that implements ArrayAccess, this operation executes x =
+  $1->offsetGet(%1), y = x, and either ++y (if op is PreInc or PostInc) or --y
+  (if op is PreDec or PostDec). Then it pushes either y (if op is PreInc or
   PreDec) or x (if op is PostInc or PostDec) onto the stack.
 
-  If $1 is true, integer, or double, this operation raises a warning and
-  pushes null onto the stack.
+  If $1 is true, integer, or double, this operation raises a warning and pushes
+  null onto the stack.
 
 BindElemC                        [C V B]  ->  [V]
 BindElemL <local variable id>    [V B]  ->  [V]
 
   Bind element.
 
-  This instruction first loads a value into x, from $3 or the local
-  referred to by %1.
+  This instruction first loads a value into x, from $3 or the local referred to
+  by %1.
 
-  If $1 is an array, this operation executes $1[x] =& $2 and pushes $2
-  onto the stack as a ref.
+  If $1 is an array, this operation executes $1[x] =& $2 and pushes $2 onto the
+  stack as a ref.
 
   If $1 is an object, this operation throws a fatal error.
 
@@ -2854,16 +2841,15 @@ UnsetElemL <local variable id>    [B]  ->  []
 
   Unset element.
 
-  These instructions first load a value into x and a base into y, as
-  given by the following table:
+  These instructions first load a value into x and a base into y, as given by
+  the following table:
 
          operation    x    y
        ------------+----+-----
         UnsetElemL | %1 | $1
         UnsetElemC | $2 | $1
 
-  If y is an array, this operation removes the element at index x
-  from array y.
+  If y is an array, this operation removes the element at index x from array y.
 
   If y is an object that implements ArrayAccess interface, this operation
   executes y->offsetUnset(x).
@@ -2892,8 +2878,8 @@ VGetNewElem    [B]  ->  [V]
   new empty array. Then it creates a new element with the next available
   numeric key in array $1 and pushes it onto the stack as a ref.
 
-  If $1 is true, integer, or double, this operation raises a warning and
-  pushes null onto the stack.
+  If $1 is true, integer, or double, this operation raises a warning and pushes
+  null onto the stack.
 
 SetNewElem    [C B]  ->  [C]
 
@@ -2909,8 +2895,8 @@ SetNewElem    [C B]  ->  [C]
   If $1 is an object that implements the ArrayAccess interface, this operation
   executes $1->offsetSet(null, $2) and then pushes $2 onto the stack.
 
-  If $1 is true, integer, or double, this operation raises a warning and
-  pushes null onto the stack.
+  If $1 is true, integer, or double, this operation raises a warning and pushes
+  null onto the stack.
 
 SetOpNewElem <op>    [C B]  ->  [C]
 
@@ -2919,18 +2905,18 @@ SetOpNewElem <op>    [C B]  ->  [C]
   $1[k] = null, x = $1[k], and y = x <op> $2. Then it assigns y to $1[k] and
   pushes y onto the stack.
 
-  If $1 is null, false, or the empty string, this operation first sets $1 to
-  an empty array. Then it follows the rules described in the case above.
+  If $1 is null, false, or the empty string, this operation first sets $1 to an
+  empty array. Then it follows the rules described in the case above.
 
   If $1 is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
 
-  If $1 is an object that implements ArrayAccess, this operation executes
-  x = $1->offsetGet(null), y = x <op> $2, and $1->offsetSet(null, y). Then it
+  If $1 is an object that implements ArrayAccess, this operation executes x =
+  $1->offsetGet(null), y = x <op> $2, and $1->offsetSet(null, y). Then it
   pushes y onto the stack.
 
-  If $1 is true, integer, or double, this operation raises a warning and
-  pushes null onto the stack.
+  If $1 is true, integer, or double, this operation raises a warning and pushes
+  null onto the stack.
 
 IncDecNewElem <op>    [B]  ->  [C]
 
@@ -2941,8 +2927,8 @@ IncDecNewElem <op>    [B]  ->  [C]
   $1[k] and pushes either y (if op is PreInc or PreDec) or x (if op is PostInc
   or PostDec) onto the stack.
 
-  If $1 is null, false, or the empty string, this operation first sets $1 to
-  an empty array. Then it follows the rules described in the case above.
+  If $1 is null, false, or the empty string, this operation first sets $1 to an
+  empty array. Then it follows the rules described in the case above.
 
   If $1 is a non-empty string or an object that does not implement the
   ArrayAccess interface, this operation throws a fatal error.
@@ -2952,8 +2938,8 @@ IncDecNewElem <op>    [B]  ->  [C]
   --y (if op is PreDec or PostDec). Then it pushes either y (if op is PreInc or
   PreDec) or x (if op is PostInc or PostDec) onto the stack.
 
-  If $1 is true, integer, or double, this operation raises a warning and
-  pushes null onto the stack.
+  If $1 is true, integer, or double, this operation raises a warning and pushes
+  null onto the stack.
 
 BindNewElem    [V B]  ->  [V]
 
@@ -2966,67 +2952,65 @@ BindNewElem    [V B]  ->  [V]
   If $1 is a non-empty string or an object, this operation throws a fatal
   error.
 
-  If $1 is true, integer, or double, this operation raises a warning and
-  pushes null onto the stack.
+  If $1 is true, integer, or double, this operation raises a warning and pushes
+  null onto the stack.
 
 CGetPropC                        [C B]  ->  [C]
 CGetPropL <local variable id>    [B]  ->  [C]
 
   Get property as cell.
 
-  These instructions first load a value into x and a base into y, as
-  given by the following table:
+  These instructions first load a value into x and a base into y, as given by
+  the following table:
 
          operation    x    y
        ------------+----+-----
         CGetPropC  | $2 | $1
         CGetPropL  | %1 | $1
 
-  If y is an object that does not have an eligible __get method, this
-  operation first checks if y has a visible property named x. If it
-  does not, this operation raises a warning and pushes
-  null. Otherwise, this operation continues to check if the property
-  named x is accessible. If the property named x is accessible this
-  operation pushes it onto the stack as a cell, otherwise this
-  operation throws a fatal error.
+  If y is an object that does not have an eligible __get method, this operation
+  first checks if y has a visible property named x. If it does not, this
+  operation raises a warning and pushes null. Otherwise, this operation
+  continues to check if the property named x is accessible. If the property
+  named x is accessible this operation pushes it onto the stack as a cell,
+  otherwise this operation throws a fatal error.
 
-  If y is an object that has an eligible __get method, this operation
-  checks if y has a visible and accessible property named x. If it
-  does, this operation pushes the property onto the stack. Otherwise,
-  this operation pushes y->__get(x) onto the stack.
+  If y is an object that has an eligible __get method, this operation checks if
+  y has a visible and accessible property named x. If it does, this operation
+  pushes the property onto the stack. Otherwise, this operation pushes
+  y->__get(x) onto the stack.
 
-  If y is not an object, this operation will raise a warning and push
-  null onto the stack.
+  If y is not an object, this operation will raise a warning and push null onto
+  the stack.
 
 VGetPropC                        [C B]  ->  [V]
 VGetPropL <local variable id>    [B]  ->  [V]
 
   Get property as ref.
 
-  These instructions first load a value into x and a base into y, as
-  given by the following table:
+  These instructions first load a value into x and a base into y, as given by
+  the following table:
 
          operation    x    y
        ------------+----+-----
         VGetPropC  | $2 | $1
         VGetPropL  | %1 | $1
 
-  If y is an object that does not have an eligible __get method, this
-  operation first checks if y has a visible property named x. If it
-  does not, this operation will create a new property named x and push
-  it onto the stack as a ref. Otherwise this operation continues to
-  check if the property named x is accessible. If it the property
-  named x is accessible this operation pushes it onto the stack as a
-  ref, otherwise this operation throws a fatal error.
+  If y is an object that does not have an eligible __get method, this operation
+  first checks if y has a visible property named x. If it does not, this
+  operation will create a new property named x and push it onto the stack as a
+  ref. Otherwise this operation continues to check if the property named x is
+  accessible. If it the property named x is accessible this operation pushes it
+  onto the stack as a ref, otherwise this operation throws a fatal error.
 
-  If y is an object has an eligible __get method, this operation
-  checks if y has a visible and accessible property named x. If it
-  does, this operation pushes the property onto the stack. Otherwise,
-  this operation pushes y->__get(x) onto the stack.
+  If y is an object has an eligible __get method, this operation checks if y
+  has a visible and accessible property named x. If it does, this operation
+  pushes the property onto the stack. Otherwise, this operation pushes
+  y->__get(x) onto the stack.
 
-  If y is null, false, or the empty string, this operation will set y
-  to a new object of type stdclass, create a new property named x, and
-  pushes it onto the stack.
+  If y is null, false, or the empty string, this operation will set y to a new
+  object of type stdclass, create a new property named x, and pushes it onto
+  the stack.
 
   If y is true, integer, double, a non-empty string, or an array, this
   operation raises a warning and pushes null.
@@ -3036,18 +3020,18 @@ IssetPropL <local variable id>    [B]  ->  [C:Bool]
 
   Isset property.
 
-  These instructions first load a value into x and a base into y, as
-  given by the following table:
+  These instructions first load a value into x and a base into y, as given by
+  the following table:
 
          operation     x    y
        -------------+----+-----
         IssetPropC  | $2 | $1
         IssetPropL  | %1 | $1
 
-  If y is an object that does not have an eligible __isset method,
-  this operation checks if y has a visible accessible property named
-  x. If it does, this operation pushes !is_null(y->x) onto the
-  stack. Otherwise this operation pushes false onto the stack.
+  If y is an object that does not have an eligible __isset method, this
+  operation checks if y has a visible accessible property named x. If it does,
+  this operation pushes !is_null(y->x) onto the stack. Otherwise this operation
+  pushes false onto the stack.
 
   If y is an object that has an eligible __isset method, this operation checks
   if y has a visible and accessible property named x. If it does, this
@@ -3063,8 +3047,8 @@ EmptyPropL <local variable id>    [B]  ->  [C:Bool]
 
   Empty property.
 
-  These instructions first load a value into x and a base into y, as
-  given by the following table:
+  These instructions first load a value into x and a base into y, as given by
+  the following table:
 
          operation     x    y
        -------------+----+-----
@@ -3076,8 +3060,8 @@ EmptyPropL <local variable id>    [B]  ->  [C:Bool]
   If it does, this operation pushes !(y->x) onto the stack. Otherwise this
   operation pushes true onto the stack.
 
-  If y is an object that has an eligible __isset method but it does not have
-  an eligible __get method, this operation checks if y has a visible and
+  If y is an object that has an eligible __isset method but it does not have an
+  eligible __get method, this operation checks if y has a visible and
   accessible property named x. If it does, this operation pushes !(y->x) onto
   the stack. Otherwise this operation pushes !(y->__isset(x)) onto the stack.
 
@@ -3097,8 +3081,8 @@ SetPropL <local variable id>    [C B]  ->  [C]
 
   Set property. Perform one of the following actions:
 
-  First, these operations load values into k and x, and a base into y,
-  as given by the following table:
+  First, these operations load values into k and x, and a base into y, as given
+  by the following table:
 
        operation    k    x    y
        ----------+----+----+----
@@ -3152,8 +3136,8 @@ SetOpPropC <op>    [C C B]  ->  [C]
 
 SetOpPropL <op> <local variable id>    [C B]  ->  [C]
 
-  Set op property. Perform one of the following actions, where k is
-  the value of the local given by %2.
+  Set op property. Perform one of the following actions, where k is the value
+  of the local given by %2.
 
     $1 is an object
      $1 is null/false/""
@@ -3211,8 +3195,8 @@ IncDecPropC <op>    [C B]  ->  [C]
 
 IncDecPropL <op> <local variable id>    [B]  ->  [C]
 
-  Increment/decrement property. Perform one of the following actions,
-  where k is the value of the local variable given by %2.
+  Increment/decrement property. Perform one of the following actions, where k
+  is the value of the local variable given by %2.
 
     $1 is an object
      $1 is null/false/""
@@ -3244,11 +3228,11 @@ IncDecPropL <op> <local variable id>    [B]  ->  [C]
 
 BindPropC    [C V B]  ->  [V]
 
-  Bind property. If $1 is an object that does not have an eligible __set method,
-  this operation first checks if $1 has a visible property named $3. If it does
-  not, this operation creates a new property named $3, executes $1->$3 =& $2,
-  and pushes $2 onto the stack. Otherwise, this operation continues to check if
-  the property named $3 is accessible. If the property named $3 is not
+  Bind property. If $1 is an object that does not have an eligible __set
+  method, this operation first checks if $1 has a visible property named $3. If
+  it does not, this operation creates a new property named $3, executes $1->$3
+  =& $2, and pushes $2 onto the stack. Otherwise, this operation continues to
+  check if the property named $3 is accessible. If the property named $3 is not
   accessible, this operation throws a fatal error. Otherwise, this operation
   executes $1->$3 =& $2 and pushes $2 onto the stack.
 
@@ -3267,13 +3251,13 @@ BindPropL <local variable id>    [V B]  ->  [V]
 
   Bind property. Where k is the value of the local variable given by %1:
 
-  If $1 is an object that does not have an eligible __set method,
-  this operation first checks if $1 has a visible property named k. If it does
-  not, this operation creates a new property named k, executes $1->k =& $2,
-  and pushes $2 onto the stack. Otherwise, this operation continues to check if
-  the property named k is accessible. If the property named k is not
-  accessible, this operation throws a fatal error. Otherwise, this operation
-  executes $1->k =& $2 and pushes $2 onto the stack.
+  If $1 is an object that does not have an eligible __set method, this
+  operation first checks if $1 has a visible property named k. If it does not,
+  this operation creates a new property named k, executes $1->k =& $2, and
+  pushes $2 onto the stack. Otherwise, this operation continues to check if the
+  property named k is accessible. If the property named k is not accessible,
+  this operation throws a fatal error. Otherwise, this operation executes $1->k
+  =& $2 and pushes $2 onto the stack.
 
   If $1 is an object that has an eligible __set method, this operation checks
   if $1 has a visible and accessible property named k. If it does, this
@@ -3291,8 +3275,8 @@ UnsetPropL <local variable id>    [B]  ->  []
 
   Unset property.
 
-  These instructions first load a value into x and a base into y, as
-  given by the following table:
+  These instructions first load a value into x and a base into y, as given by
+  the following table:
 
          operation     x    y
        -------------+----+-----
@@ -3368,9 +3352,9 @@ VGetM <loc-desc/M-vector>    [C..C]  ->  [V]
 
 FPassM <param id> <loc-desc/M-vector>    [C..C]  ->  [F]
 
-  FPI pass parameter. This instruction behaves as CGetM if parameter
-  %1 is pass by value, or it behaves like VGetM if parameter %1 is
-  pass by reference. Then it passes the value produced to the callee.
+  FPI pass parameter. This instruction behaves as CGetM if parameter %1 is pass
+  by value, or it behaves like VGetM if parameter %1 is pass by reference. Then
+  it passes the value produced to the callee.
 
 IssetM <loc-desc/M-vector>    [C..C]  ->  [C:Bool]
 
@@ -3559,8 +3543,8 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
   If $1 is an object that implements the Iterator interface, these instructions
   create an user class iterator, call $1->rewind(), and store the user class
   iterator in the iterator variable %1. Then these instructions check if
-  $1->valid() returns false, and if it does these instructions free the iterator
-  and transfer control to the location specified by %2.
+  $1->valid() returns false, and if it does these instructions free the
+  iterator and transfer control to the location specified by %2.
 
   If $1 is an object that implements the IteratorAggregate interface, these
   instructions call $1->getIterator() and inspect the object x that is
@@ -3585,15 +3569,14 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
   should receive the value (in %3) and key (in %4) for the iteration, in
   accordance with the type of iterator initialized in %1.
 
-  For the non-W* flavors of these instructions, the locals are stored to
-  with the same semantics as SetL (non-binding assignment).  The W* flavors
-  of these instructions do a binding assignment to %3 if the rhs was a
-  reference, or if not they unset the old value of the local and then do a
-  non-binding assignment.  The W* flavors still do a non-binding assignment
-  to %4.
+  For the non-W* flavors of these instructions, the locals are stored to with
+  the same semantics as SetL (non-binding assignment). The W* flavors of these
+  instructions do a binding assignment to %3 if the rhs was a reference, or if
+  not they unset the old value of the local and then do a non-binding
+  assignment. The W* flavors still do a non-binding assignment to %4.
 
-  The logical value is computed differently depending on the iterator type
-  that is initialized in %1:
+  The logical value is computed differently depending on the iterator type that
+  is initialized in %1:
 
     If the iterator specified by %1 is a non-mutable array iterator or an
     extension class iterator, these instructions of the current value in %3.
@@ -3610,12 +3593,11 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
     If the iterator specified by %1 is an array iterator or an extension class
     iterator, this instruction stores a copy of the current key in %4.
 
-    If the iterator specified by %1 is a user class iterator for object $x, this
-    instruction stores the return value of $x->key() in %4.
+    If the iterator specified by %1 is a user class iterator for object $x,
+    this instruction stores the return value of $x->key() in %4.
 
-    If the iterator specified by %1 is a non-mutable default class
-    iterator, this instruction stores a copy of the name of the current
-    property in %4.
+    If the iterator specified by %1 is a non-mutable default class iterator,
+    this instruction stores a copy of the name of the current property in %4.
 
 MIterInit  <iterator id> <rel offset> <local id>               [V]  ->  []
 MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
@@ -3654,11 +3636,11 @@ MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
 
   For the MIterInitK version, the following also happens:
 
-  If the iterator specified by %1 is an array iterator, this instruction
-  stores a copy of the current key in %4 as a cell.
+  If the iterator specified by %1 is an array iterator, this instruction stores
+  a copy of the current key in %4 as a cell.
 
-  If the iterator specified by %1 is a mutable default class iterator,
-  this instruction stores a copy of the name of the current property in %4 as a
+  If the iterator specified by %1 is a mutable default class iterator, this
+  instruction stores a copy of the name of the current property in %4 as a
   cell.
 
 IterNext  <iterator id> <rel offset> <local id>               []  ->  []
@@ -3666,8 +3648,8 @@ IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
 WIterNext  <iterator id> <rel offset> <local id>              []  ->  []
 WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
 
-  Iterator next. If the specified iterator is a non-mutable array iterator
-  or an extension class iterator, advance the iterator to point to the next
+  Iterator next. If the specified iterator is a non-mutable array iterator or
+  an extension class iterator, advance the iterator to point to the next
   element. If the iterator is not at the end, these instructions transfer
   control to the location specified by %2.
 
@@ -3677,15 +3659,15 @@ WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
   location specified by %2.
 
   If the specified iterator is a non-mutable default class iterator, advance
-  the iterator to point to the next accessible property in the object.
-  If the iterator is not at the end, these instructions transfer control
-  to the location specified by %2.
+  the iterator to point to the next accessible property in the object. If the
+  iterator is not at the end, these instructions transfer control to the
+  location specified by %2.
 
-  If the specified iterator is at the end, free the iterator variable with
-  an implicit IterFree, then fall through to the next instruction.
+  If the specified iterator is at the end, free the iterator variable with an
+  implicit IterFree, then fall through to the next instruction.
 
-  If the specified iterator is not at the end, the local ids in %3 (and %4,
-  for the *K variants) represent the locals that should receive the value (in
+  If the specified iterator is not at the end, the local ids in %3 (and %4, for
+  the *K variants) represent the locals that should receive the value (in
   %3) and key (in %4) for the iteration, in accordance with the type of
   iterator initialized in %1.
 
@@ -3700,18 +3682,17 @@ WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
 MIterNext  <iterator id> <rel offset> <local id>               []  ->  []
 MIterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
 
-  Iterator next. If the specified iterator is a mutable array iterator,
-  advance the iterator to point to the next element. If the iterator
-  is not at the end, these instructions transfer control to the
+  Iterator next. If the specified iterator is a mutable array iterator, advance
+  the iterator to point to the next element. If the iterator is not at the end,
+  these instructions transfer control to the location specified by %2.
+
+  If the specified iterator is a mutable default class iterator, advance the
+  iterator to point to the next accessible property in the object. If the
+  iterator is not at the end, these instructions transfer control to the
   location specified by %2.
 
-  If the specified iterator is a mutable default class iterator, advance
-  the iterator to point to the next accessible property in the object.
-  If the iterator is not at the end, these instructions transfer control
-  to the location specified by %2.
-
-  If the specified iterator is at the end, free the iterator variable with
-  an implicit MIterFree, then fall through to the next instruction.
+  If the specified iterator is at the end, free the iterator variable with an
+  implicit MIterFree, then fall through to the next instruction.
 
   If the specified iterator is not at the end, retrieve the key and value:
 
@@ -3723,39 +3704,38 @@ MIterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
 
   For the MIterNextK version, the following also happens:
 
-  If the iterator specified by %1 is an array iterator, this instruction
-  stores a copy of the new current key in %4 as a cell.
+  If the iterator specified by %1 is an array iterator, this instruction stores
+  a copy of the new current key in %4 as a cell.
 
-  If the iterator specified by %1 is a mutable default class iterator,
-  this instruction stores a copy of the name of the new current property in %4
-  as a cell.
+  If the iterator specified by %1 is a mutable default class iterator, this
+  instruction stores a copy of the name of the new current property in %4 as a
+  cell.
 
 IterFree <iterator id>    []  ->  []
 
   Iterator free. This instruction frees the specified iterator variable.
-  Typically an iterator gets freed by IterNext, so IterFree is only needed
-  for guarding against exceptions and implementing break and return control
-  flow statements inside iterator loops.
+  Typically an iterator gets freed by IterNext, so IterFree is only needed for
+  guarding against exceptions and implementing break and return control flow
+  statements inside iterator loops.
 
 MIterFree <iterator id>    []  ->  []
 
   Mutable iterator free. This instruction frees the specified iterator
   variable. Typically an iterator gets freed by MIterNext*, so MIterFree is
-  only needed for guarding against exceptions and implementing break and
-  return control flow statements inside iterator loops.
+  only needed for guarding against exceptions and implementing break and return
+  control flow statements inside iterator loops.
 
 CIterFree <iterator id>    []  ->  []
 
-  Cuf iterator free. This instruction frees the specified iterator
-  variable.
+  Cuf iterator free. This instruction frees the specified iterator variable.
 
 IterBreak <iter-vec> <rel offset>   []  ->  []
 
-  Iterator break.  Frees vectors in %1 in left to right order then transfers
-  control to the location specified by %2.  Surprise checks are performed
-  before iterators are freed so that in the event of an exception iterators
-  are not double freed.  Note that as with normal jumps surprise checks will
-  only be performed if %2 is negative.
+  Iterator break. Frees vectors in %1 in left to right order then transfers
+  control to the location specified by %2. Surprise checks are performed before
+  iterators are freed so that in the event of an exception iterators are not
+  double freed. Note that as with normal jumps surprise checks will only be
+  performed if %2 is negative.
 
 
 12. Include, eval, and define instructions
@@ -3829,11 +3809,10 @@ DefCls <class id>    []  ->  []
 
 NopDefCls <class id>  []  ->  []
 
-  For always-hoistable classes (which are automatically defined when the
-  unit is loaded).  This instruction is used as a marker for the location
-  in a pseudo-main where a DefCls would've existed, but doesn't need to be.
-  (It is used as a place to raise errors from if the class fails to
-  define.)
+  For always-hoistable classes (which are automatically defined when the unit
+  is loaded). This instruction is used as a marker for the location in a
+  pseudo-main where a DefCls would've existed, but doesn't need to be. (It is
+  used as a place to raise errors from if the class fails to define.)
 
 DefCns <litstr id>    [C]  ->  [C]
 
@@ -3844,13 +3823,12 @@ DefCns <litstr id>    [C]  ->  [C]
 
 DefTypeAlias <litstr id>   []  ->  []
 
-  Define type alias.  Type aliases are a hhvm extension to PHP that allow
-  declaring new names for existing types.  The unit contains a table of the
-  type aliases it was compiled with.  This instruction looks up the type
-  alias given by %1 in the table.  If there is an existing class or type
-  alias defined with the same name as %1, this function checks whether it
-  is compatible with the type alias given by %1, and if it isn't it raises
-  a fatal error.
+  Define type alias. Type aliases are a hhvm extension to PHP that allow
+  declaring new names for existing types. The unit contains a table of the type
+  aliases it was compiled with. This instruction looks up the type alias given
+  by %1 in the table. If there is an existing class or type alias defined with
+  the same name as %1, this function checks whether it is compatible with the
+  type alias given by %1, and if it isn't it raises a fatal error.
 
 
 13. Miscellaneous instructions
@@ -3878,8 +3856,8 @@ InitThisLoc <local variable id>    []  ->  []
 
   Initialize this local variable. This instruction checks the current instance,
   and if it is not null this instruction stores it to the specified local
-  variable. If the current instance is null, or if this bytecode appears in
-  a function body that is not a class method, this instruction does nothing.
+  variable. If the current instance is null, or if this bytecode appears in a
+  function body that is not a class method, this instruction does nothing.
 
 StaticLoc <local variable id> <litstr id>    []  ->  [C:Bool]
 
@@ -3904,24 +3882,24 @@ StaticLocInit <local variable id> <litstr id>    [C]  ->  []
 Catch    []  ->  [C:Obj]
 
   Catch. Retrieves the current exception object and pushes it onto the stack.
-  The exception object must be a subclass of the builtin Exception class.
-  This instruction may only be used at the beginning of a catch entry point.
+  The exception object must be a subclass of the builtin Exception class. This
+  instruction may only be used at the beginning of a catch entry point.
 
 ClassExists        [C C]  ->  [C:Bool]
 InterfaceExists    [C C]  ->  [C:Bool]
 TraitExists        [C C]  ->  [C:Bool]
 
-  Check for class/interface/trait existence. If $1 cannot be cast to a
-  bool or $2 cannot be cast to a string, this instruction will throw a
-  fatal error. Otherwise, it will check for existence of the entity
-  named by $2, invoking the autoloader if needed and if $1 is
-  true. The result of the existence check will be pushed on the stack.
+  Check for class/interface/trait existence. If $1 cannot be cast to a bool or
+  $2 cannot be cast to a string, this instruction will throw a fatal error.
+  Otherwise, it will check for existence of the entity named by $2, invoking
+  the autoloader if needed and if $1 is true. The result of the existence check
+  will be pushed on the stack.
 
 VerifyParamType <parameter id>    []  ->  []
 
-  Verify parameter type. Functions and methods can optionally specify the
-  types of arguments they will accept. These type constraints are memoized
-  into each function's FPI structure.
+  Verify parameter type. Functions and methods can optionally specify the types
+  of arguments they will accept. These type constraints are memoized into each
+  function's FPI structure.
 
   VerifyParamTypes checks the specified parameter against the enclosing
   function's corresponding parameter constraints. In case of a mismatch, a
@@ -3929,18 +3907,17 @@ VerifyParamType <parameter id>    []  ->  []
 
 Self    []  ->  [A]
 
-  Creates a classref that refers to the class in which the current
-  function is defined. This instruction throws a fatal error if the
-  current method is defined outside of a class, otherwise it pushes a
-  classref on the stack.
+  Creates a classref that refers to the class in which the current function is
+  defined. This instruction throws a fatal error if the current method is
+  defined outside of a class, otherwise it pushes a classref on the stack.
 
 Parent    []  ->  [A]
 
-  Creates a classref that refers to the parent of the class in which
-  the current method is defined. This instruction throws a fatal
-  error if the current method is defined outside of a class or if the
-  class in which the current method is defined has no parent,
-  otherwise it pushes a classref on the stack.
+  Creates a classref that refers to the parent of the class in which the
+  current method is defined. This instruction throws a fatal error if the
+  current method is defined outside of a class or if the class in which the
+  current method is defined has no parent, otherwise it pushes a classref on
+  the stack.
 
 LateBoundCls    []  ->  [A]
 
@@ -3955,46 +3932,45 @@ NativeImpl    []  ->  []
 
 IncStat <counter id> <value>    []  ->  []
 
-  Increment stat counter. If stats are enabled, this instruction adds
-  <value> to the counter specified by <counter id>. The meaning of the
-  <counter id> immediate is implementation defined
+  Increment stat counter. If stats are enabled, this instruction adds <value>
+  to the counter specified by <counter id>. The meaning of the <counter id>
+  immediate is implementation defined
 
 AKExists    [C C] -> [C:Bool]
 
-  Checks if array (object) in $1 contains key (property) in $2 and
-  pushes the resulting boolean onto the stack.  If $2 is null, uses
-  the empty string as key. Throws a fatal error if $1 is not an array
-  or object, and raises a warning if $2 is not a string, integer, or
-  null.
+  Checks if array (object) in $1 contains key (property) in $2 and pushes the
+  resulting boolean onto the stack. If $2 is null, uses the empty string as
+  key. Throws a fatal error if $1 is not an array or object, and raises a
+  warning if $2 is not a string, integer, or null.
 
 CreateCl <num args> <class name>  [C|V..C|V]  ->  [C]
 
   Creates an instance of <class name> and pushes it on the stack.
 
   The class named by %2 must be a subclass of "Closure", must have a single
-  public method named __invoke, must be defined at the point of the
-  CreateCl opcode, must be defined in the same unit as the CreateCl opcode,
-  and must always be tagged as "ClosureHoistable" (see comments near
+  public method named __invoke, must be defined at the point of the CreateCl
+  opcode, must be defined in the same unit as the CreateCl opcode, and must
+  always be tagged as "ClosureHoistable" (see comments near
   PreClass---hoistability metadata is currently not covered by this spec).
 
   If there is more than one CreateCl opcode in the unit for the Closure
-  subclass named by %2, all of the opcodes must be possible to associate
-  with the same class (or trait), or none if the closure will not inherit a
-  class context at runtime.  This is intended to mean that CreateCl opcodes
-  for a given closure may only occur in bytecode bodies of functions that
-  are generated to represent a single user-visible PHP function, async
-  function, async closure, generator, or generator closure.
+  subclass named by %2, all of the opcodes must be possible to associate with
+  the same class (or trait), or none if the closure will not inherit a class
+  context at runtime. This is intended to mean that CreateCl opcodes for a
+  given closure may only occur in bytecode bodies of functions that are
+  generated to represent a single user-visible PHP function, async function,
+  async closure, generator, or generator closure.
 
-  Moreover, for normal (non-async, non-generator) functions and methods,
-  there must be at most a single CreateCl opcode in the unit for a given
-  Closure subclass contained in the unit.
+  Moreover, for normal (non-async, non-generator) functions and methods, there
+  must be at most a single CreateCl opcode in the unit for a given Closure
+  subclass contained in the unit.
 
 Idx         [C C C] -> [C]
 
-  Checks if object in $3 contains key in $2 and pushes the result onto the stack
-  if found. Otherwise, $1 is pushed onto the stack. $3 must be an object that
-  supports array or indexed access (e.g. arrays, collections, implementations of
-  ArrayAccess).
+  Checks if object in $3 contains key in $2 and pushes the result onto the
+  stack if found. Otherwise, $1 is pushed onto the stack. $3 must be an object
+  that supports array or indexed access (e.g. arrays, collections,
+  implementations of ArrayAccess).
 
 ArrayIdx    [C C C] -> [C]
 
@@ -4005,25 +3981,24 @@ ArrayIdx    [C C C] -> [C]
 AssertTL   <local id>     <op>   []  ->  []
 AssertTStk <stack offset> <op>   []  ->  []
 
-  These opcodes may be used to communicate the results of ahead of
-  time static analysis to the runtime.  They indicate that the value
-  in the specified local or stack offset must be statically known to
-  have a particular type.  The sub opcodes should be used to indicate
-  the type, in an unspecified way.
+  These opcodes may be used to communicate the results of ahead of time static
+  analysis to the runtime. They indicate that the value in the specified local
+  or stack offset must be statically known to have a particular type. The sub
+  opcodes should be used to indicate the type, in an unspecified way.
 
 AssertObjL    <local id>     <class name> <op>   []  ->  []
 AssertObjStk  <stack offset> <class name> <op>   []  ->  []
 
-  These opcodes may be used to communicate the results of ahead of
-  time static analysis to the runtime.
+  These opcodes may be used to communicate the results of ahead of time static
+  analysis to the runtime.
 
   Depending on the value of %3, they indicate that the value in the specified
   local or stack offset must be statically known to be an object of a
-  particular class or interface type, or an object that is a non-strict
-  subtype of a particular class or interface type, or either of those cases
-  with nullability.
+  particular class or interface type, or an object that is a non-strict subtype
+  of a particular class or interface type, or either of those cases with
+  nullability.
 
-  %2 is a litstr id of a class or interface name.  %3 has the following
+  %2 is a litstr id of a class or interface name. %3 has the following
   semantics regarding what it asserts about the type of the local or stack
   slot:
 
@@ -4044,22 +4019,22 @@ PredictTStk <stack offset> <op>   []  ->  []
 
 BreakTraceHint   []  ->  []
 
-  This opcode has no effects, but is a hint that code immediately
-  following it is probably not worth including in the same compilation
-  unit as the code in front of it.  In HHVM, this is used to tell the
-  JIT to break a Tracelet when it sees this opcode.
+  This opcode has no effects, but is a hint that code immediately following it
+  is probably not worth including in the same compilation unit as the code in
+  front of it. In HHVM, this is used to tell the JIT to break a Tracelet when
+  it sees this opcode.
 
 14. Continuation creation and execution
 ---------------------------------------
 
 CreateCont    []  ->  [C]
 
-  Creates a Continuation object and pushes it on the stack.  The
-  Continuation will capture all defined local variables in the current
-  function, and marks them uninitialized on the current frame.  The
-  Continuation will wrap the "generator body" function associated with the
-  current function.  If no generator body is associated with this function,
-  the behavior of the CreateCont opcode is undefined.
+  Creates a Continuation object and pushes it on the stack. The Continuation
+  will capture all defined local variables in the current function, and marks
+  them uninitialized on the current frame. The Continuation will wrap the
+  "generator body" function associated with the current function. If no
+  generator body is associated with this function, the behavior of the
+  CreateCont opcode is undefined.
 
 ContEnter [C]  ->  []
 
@@ -4070,28 +4045,28 @@ ContEnter [C]  ->  []
 
 ContSuspend  <label id>   [C]  ->  []
 
-  Suspend continuation. This instruction may only appear in continuation bodies.
-  Packs all defined local variables into the Continuation object in local 0.
-  Store $1 in the continuation as the result of the current iteration and
-  set the continuation's label to <label id>. Transfer control flow to the
+  Suspend continuation. This instruction may only appear in continuation
+  bodies. Packs all defined local variables into the Continuation object in
+  local 0. Store $1 in the continuation as the result of the current iteration
+  and set the continuation's label to <label id>. Transfer control flow to the
   caller of the continuation body, which must be a non-static method of the
   Continuation class.
 
 ContSuspendK  <label id>    [C C]  ->  []
 
-  Suspend continuation. This instruction may only appear in continuation bodies.
-  Packs all defined local variables into the Continuation object in local 0.
-  Store $1 in the continuation as the result of the current iteration,
-  store $2 as the key of the current iteration, and set the continuation's label
-  to <label id>. Transfer control flow to the caller of the continuation body,
-  which must be a non-static method of the Continuation class.
+  Suspend continuation. This instruction may only appear in continuation
+  bodies. Packs all defined local variables into the Continuation object in
+  local 0. Store $1 in the continuation as the result of the current iteration,
+  store $2 as the key of the current iteration, and set the continuation's
+  label to <label id>. Transfer control flow to the caller of the continuation
+  body, which must be a non-static method of the Continuation class.
 
 UnpackCont    []  ->  [C C:Int]
 
   Unpack continuation. Unpacks variables from the Continuation object in local
-  0 into the containing environment. The stack will contain the current label of
-  the continuation in $1 and the value sent to the continuation in $2. The value
-  will be no longer referenced by the Continuation object.
+  0 into the containing environment. The stack will contain the current label
+  of the continuation in $1 and the value sent to the continuation in $2. The
+  value will be no longer referenced by the Continuation object.
 
 ContRetC    [C]  ->  []
 
@@ -4132,30 +4107,30 @@ ContStopped    []  ->  []
 
 ContHandle    [C]  ->  []
 
-  Handle exception from continuation body. $this must be a Continuation
-  object. Marks the continuation as no longer running and finished and rethrows
-  the exception on the top of the stack.
+  Handle exception from continuation body. $this must be a Continuation object.
+  Marks the continuation as no longer running and finished and rethrows the
+  exception on the top of the stack.
 
 15. Async functions
 -------------------
 
 AsyncAwait   [C]  ->  [C C:Bool]
 
-  Perform an await operation on a wait handle.  If $1 is not a subclass of
-  WaitHandle, raises a fatal error.  If $1 is not finished, this instruction
-  pushes $1, and pushes False.  Otherwise, if $1 succeeded, this instruction
-  pushes the result value from the WaitHandle, and then pushes true.  If $1
+  Perform an await operation on a wait handle. If $1 is not a subclass of
+  WaitHandle, raises a fatal error. If $1 is not finished, this instruction
+  pushes $1, and pushes False. Otherwise, if $1 succeeded, this instruction
+  pushes the result value from the WaitHandle, and then pushes true. If $1
   failed, this instruction throws the exception from the WaitHandle.
 
 AsyncESuspend <label id> <number of iterators>   [C:Obj]  ->  [C:Obj]
 
   Suspends an eagerly executed async function into an AsyncFunctionWaitHandle
-  object.  The AsyncFunctionWaitHandle object will capture all defined local
+  object. The AsyncFunctionWaitHandle object will capture all defined local
   variables and the first %2 iterators in the current eagerly executed async
-  function, and mark them uninitialized on the current frame.  The object will
+  function, and mark them uninitialized on the current frame. The object will
   store a reference to the associated resumable async function and a label %1
   to be used to resume the execution once the WaitHandle object given by $1 is
-  finished.  If the $1 is not a WaitHandle, or is a WaitHandle that is already
+  finished. If the $1 is not a WaitHandle, or is a WaitHandle that is already
   finished, the behavior is undefined.
 
 AsyncWrapResult   [C]  ->  [C:Obj]
@@ -4164,7 +4139,7 @@ AsyncWrapResult   [C]  ->  [C:Obj]
 
 AsyncWrapException   [C:Obj]  ->  [C:Obj]
 
-  Wraps $1 into a StaticExceptionWaitHandle object.  If $1 is not an Exception,
+  Wraps $1 into a StaticExceptionWaitHandle object. If $1 is not an Exception,
   the behavior is undefined.
 
 Basic statement transformations
@@ -4187,10 +4162,10 @@ ensure that the iterator variable is freed when a foreach loop exits abnormally
 through an exception.
 
 Simple break statements and continue statements are implemented using the Jmp*,
-IterFree, MIterFree and CIterFree instructions. Dynamic break is implemented using
-an unnamed local (to store the 'break count') and a chain of basic blocks, where
-each block decrements the unnamed local variable and compares it with 0, and
-then decides where to jump next.
+IterFree, MIterFree and CIterFree instructions. Dynamic break is implemented
+using an unnamed local (to store the 'break count') and a chain of basic
+blocks, where each block decrements the unnamed local variable and compares it
+with 0, and then decides where to jump next.
 
 
 Basic expression transformations
@@ -4200,17 +4175,17 @@ To reduce the size of the instruction set, certain types of expressions are
 transformed:
 
 1) Unary plus and negation
-Unary plus and negation "+(<expression>)" gets converted to
-"(0 + (<expression>))", and "-(<expression>)" gets converted to
-"(0 - (<expression>))".
+Unary plus and negation "+(<expression>)" gets converted to "(0 +
+(<expression>))", and "-(<expression>)" gets converted to "(0 -
+(<expression>))".
 
 2) Assignment-by operators (+=, -=, etc)
 Assignment-by operators are converted to use the SetOp* instructions.
 
 3) List assignment (list)
 List assignments are converted to use an unnamed local variable and the SetM
-and VGet* instructions. If the function contains any catch funclets, then
-list assignment requires a fault funclet as well.
+and VGet* instructions. If the function contains any catch funclets, then list
+assignment requires a fault funclet as well.
 
 4) Logical and and logical or operators (and/&&, or/||)
 If any of the operands side-effect, these operators are implemented using Jmp*
@@ -4240,10 +4215,10 @@ base of a property expression or a method call expression, the This instruction
 is used.
 
 A bare $this expression within an instance method is handled one of two ways:
-general or BareThis-optimized (optional). The general solution accesses a
-local variable named "this", which is initialized at the beginning of the
-method using the InitThisLoc instruction. The BareThis optimization applies to
-bare $this access as long as $this is not passed by reference and there are no
+general or BareThis-optimized (optional). The general solution accesses a local
+variable named "this", which is initialized at the beginning of the method
+using the InitThisLoc instruction. The BareThis optimization applies to bare
+$this access as long as $this is not passed by reference and there are no
 dynamic method variables. In such cases, the BareThis instruction can be used
 to directly access $this, and the InitThisLoc instruction is not needed.
 
@@ -4276,572 +4251,3 @@ following details:
 7) High level description of how namespaces are dealt with and any relevant
    details
 8) Description of async function implementation
-
-
-Source code to HHBC examples
-----------------------------
-
-function f() { return $a = $b; }
-
-CGetL 1
-SetL 0
-RetC
-
-function f() { g($a, $b); }
-
-FPushFuncD 2 "g"
-FPassL 0 0
-FPassL 1 1
-FCall 2
-PopR
-Null
-RetC
-
-function f() { return $a + $b; }
-
-CGetL 1
-CGetL2 0
-Add
-RetC
-
-function f() { echo "Hello world\n"; }
-
-String "Hello world\n"
-Print
-PopC
-Null
-RetC
-
-function f($a) { return $a[0]++; }
-
-Int 0
-IncDecM PostInc <L:0 EC>
-RetC
-
-function f($a, $b) { $a[4] = $b; }
-
-Int 4
-CGetL 1
-SetM <L:0 EC>
-PopC
-Null
-RetC
-
-function f($a, $b, $i) { $a[$i] = $b; }
-
-CGetL 1
-SetM <L:0 EL:2>
-PopC
-Null
-RetC
-
-function f($a, $b) { return $a[4] = $b; }
-
-Int 4
-CGetL 1
-SetM <L:0 EC>
-RetC
-
-function f($a, $b) { return $a[4][5] = $b[6]; }
-
-Int 4
-Int 5
-Int 6
-CGetM <L:1 EC>
-SetM <L:0 EC EC>
-RetC
-
-function f($a, $b, $i) { return $a[$i][5] = $b[6]; }
-
-Int 5
-Int 6
-CGetM <L:1 EC>
-SetM <L:0 EL:2 EC>
-RetC
-
-function f($a, $b) { $a->prop = $b; }
-
-String "prop"
-CGetL 1
-SetM <L:0 PC>
-PopC
-Null
-RetC
-
-function f() { return FOO; }
-
-Cns "FOO"
-RetC
-
-function f() { return c::FOO; }
-
-ClsCnsD "FOO" "c"
-RetC
-
-function f($cls) { return $cls::FOO; }
-
-AGetL 0
-ClsCns "FOO"
-RetC
-
-class c { public function f($a) { $this->prop = $a; return $this; } }
-
-// The emitter emits the InitThisLoc instruction at the top of an instance
-// method if and only if the function contains a use of "$this" that is not
-// part of a property expression or a method call expression. The emitter never
-// emits the InitThisLoc instruction for static methods.
-InitThisLoc 1
-// Evaluate "$this->prop = $a". The This instruction will throw a fatal error
-// if the current instance is null.
-This
-String "prop"
-CGetL 0
-SetM <C PC>
-PopC
-// Return the local variable named "this"
-CGetL 1
-RetC
-
-class c { static public function f($a) { $this->prop = $a; return $this; } }
-
-// Evaluate "$this->prop = $a". The This instruction will throw a fatal error
-// because this is a static method.
-This
-String "prop"
-CGetL 0
-SetM <C PC>
-PopC
-// Return the local variable named "this"
-CGetL 1
-RetC
-
-function f($a, $b, $c, $d) {
-  static $foo = array(array());
-  return $foo[0][$c + $d] += $a + $b;
-}
-
-// Bind static variable named "foo" to local variable named "foo"
-Array array(0=>array())
-StaticLocInit 4 "foo"
-// Evaluate $foo[0][$c + $d]
-Int 0
-CGetL 3
-CGetL2 2
-Add
-// Evaluate ($a + $b)
-CGetL 1
-CGetL2 0
-Add
-// Execute $foo[0][$c + $d] += $a + $b
-SetOpM OpAdd <L:4 EC EC>
-RetC
-
-function f($a) { list($x, $y, $z) = $a[7]; return $x + $y + $z; }
-
-// Evaluate $a[7] and store it in an unnamed local
-CGetM <L:0 EI:7>
-SetL 4
-PopC
-// Read the unnamed local, get the value at index 2, and store it in $z
-CGetM <L:4 EI:2>
-SetL 3
-PopC
-// Read the unnamed local, get the value at index 1, and store it in $y
-CGetM <L:4 EI:1>
-SetL 2
-PopC
-// Read the unnamed local, get the value at index 0, and store it in $x
-CGetM <L:4 EI:0>
-SetL 1
-PopC
-// Unset the unnamed local
-UnsetL 4
-// Evaluate $x + $y + $z and return the result
-CGetL 2
-CGetL2 1
-Add
-CGetL 3
-Add
-RetC
-
-function f(&$a, $b) {
-  $r = array();
-  $r[v()] = (list(list($a[w()], $a[x()]), list($a[y()], $a[z()])) = $b[100]);
-  return $r;
-}
-
-// Evaluate $r = array()
-Array array()
-SetL 2
-PopC
-// Do the first pass of evaluation for $r[v()]
-FPushFuncD 0 "v"
-FCall 0
-UnboxR
-// Do the first pass of evaluation for $a[w()]
-FPushFuncD 0 "w"
-FCall 0
-UnboxR
-// Do the first pass of evaluation for $a[x()]
-FPushFuncD 0 "x"
-FCall 0
-UnboxR
-// Do the first pass of evaluation for $a[y()]
-FPushFuncD 0 "y"
-FCall 0
-UnboxR
-// Do the first pass of evaluation for $a[z()]
-FPushFuncD 0 "z"
-FCall 0
-UnboxR
-// Evaluate $b[100] and store it in an unnamed local t
-CGetM <L:1 EI:100>
-SetL 3
-PopC
-// Read t[1][1] and store it in $a[z()]
-CGetM <L:3 EI:1 EI:1>
-SetM <L:0 EC>
-PopC
-// Read t[1][0] and store it in $a[y()]
-CGetM <L:3 EI:1 EI:0>
-SetM <L:0 EC>
-PopC
-// Read t[0][1] and store it in $a[x()]
-CGetM <L:3 EI:0 EI:1>
-SetM <L:0 EC>
-PopC
-// Read t[0][0] and store it in $a[w()]
-CGetM <L:3 EI:0 EI:0>
-SetM <L:0 EC>
-PopC
-// Read t and leave the value on the stack
-CGetL 3
-// Unset the unnamed local t
-UnsetL 3
-// Assign the output of the outer list assignment expression into $r[v()]
-SetM <L:2 EC>
-PopC
-// Return $r
-CGetL 2
-RetC
-
-function f() {
-  $arr1 = array(0 => 1, 2 => 5, 7 => 'foo', 'bar' => 888);
-  $arr2 = array(0 => 6, 2 => 8, 5 => 'yar', 'baz' => 333);
-  $arr3 = array_merge((list($a, , $b) = $arr1), (list($c, , $d) = $arr2));
-  var_dump($a, $b, $c, $d, $arr3);
-}
-
-// Evaluate $arr1 = array(0 => 1, 2 => 5, 7 => 'foo', 'bar' => 888)
-Array array(0=>1,2=>5,7=>"foo","bar"=>888)
-SetL 0
-PopC
-// Evaluate $arr2 = array(0 => 6, 2 => 8, 5 => 'yar', 'baz' => 333)
-Array array(0=>6,2=>8,5=>"yar","baz"=>333)
-SetL 1
-PopC
-// Prepare to call array_merge
-FPushFuncD 2 "array_merge"
-// Evaluate (list($a, , $b) = $arr1)
-CGetM <L:0 EI:2>
-SetL 4
-PopC
-CGetM <L:0 EI:0>
-SetL 3
-PopC
-// Pass the result as the first parameter
-FPassL 0 0
-// Evaluate (list($c, , $d) = $arr2)
-CGetM <L:1 EI:2>
-SetL 6
-PopC
-CGetM <L:1 EI:0>
-SetL 5
-PopC
-// Pass the result as the second parameter
-FPassL 1 1
-// Call array_merge
-FCall 2
-// Store the result in $arr3
-UnboxR
-SetL 2
-PopC
-// Evaluate var_dump($a, $b, $c, $d, $arr3)
-FPushFuncD 5 "var_dump"
-FPassL 0 3
-FPassL 1 4
-FPassL 2 5
-FPassL 3 6
-FPassL 4 2
-FCall 5
-PopR
-// Return null
-Null
-RetC
-
-function f() { global $foo; return ++$foo; }
-
-// Bind global variable named "foo" to local variable named "foo"
-String "foo"
-VGetG
-BindL 0
-PopV
-// Evaluate "++$foo" and return the result
-IncDecL 0 PreInc
-RetC
-
-function f($name) { global $$name; return $$name++; }
-
-// Bind global variable named $name to a local variable named $name
-CGetL 0
-Dup
-VGetG
-BindN
-PopV
-// Evaluate "$$name++" and return the result
-CGetL 0
-IncDecN PostInc
-RetC
-
-function f() { $GLOBALS['blah'] = array(2, "foo" => "bar"); }
-
-// If a global variable is superglobal, don't bind it to a local; instead we
-// access it directly
-String "blah"
-Array array(0=>2,"foo"=>"bar")
-SetG
-PopC
-Null
-RetC
-
-function &f(&$x) { return $x; }
-
-VGetL 0
-RetV
-
-function f($x) { return $x[0]->h()->prop[1]; }
-
-Int 0
-CGetM <L:0 EC>
-FPushObjMethodD 0 "h"
-FCall 0
-String "prop"
-Int 1
-CGetM <R PC EC>
-RetC
-
-function f($x, $y) { return $y($x[0]->h()->prop[1]); }
-
-CGetL 1
-FPushFunc 1
-Int 0
-CGetM <L:0 EC>
-FPushObjMethodD 0 "h"
-FCall 0
-String "prop"
-Int 1
-FPassM 0 <R PC EC>
-FCall 1
-UnboxR
-RetC
-
-function f() { return new c; }
-
-FPushCtorD 0 "c"
-FCall 0
-PopR
-RetC
-
-function f() { return c::$d; }
-
-String "d"
-String "c"
-AGetC
-CGetS
-RetC
-
-function f() { return c::$d[0]; }
-
-String "d"
-Int 0
-String "c"
-AGetC
-CGetM <SC EC>
-RetC
-
-function f($cls, $name) { $cls::$$name = g(); }
-
-AGetL 0
-FPushFuncD 0 "g"
-FCall 0
-UnboxR
-CGetL3 1
-SetS
-PopC
-Null
-RetC
-
-function f($cls, $name, $index) { $cls::${$name}[$index] = g(); }
-
-AGetL 0
-FPushFuncD 0 "g"
-FCall 0
-UnboxR
-SetM <SL:1 EL:2>
-PopC
-Null
-RetC
-
-function f($cls, $name, $index) { $cls::$$name[$index] = g(); }
-
-CGetM <L:1 EL:2>
-AGetL 0
-FPushFuncD 0 "g"
-FCall 0
-UnboxR
-SetS
-PopC
-Null
-RetC
-
-function f() {
-  if (empty(c::$foo)) {
-    c::$foo = null;
-    c::$foo[0]->prop = 3;
-  }
-  h(c::$foo[0]->prop);
-}
-
-String "foo"
-String "c"
-AGetC
-EmptyS
-JmpZ 66
-String "foo"
-String "c"
-AGetC
-Null
-SetS
-PopC
-String "foo"
-Int 0
-String "prop"
-String "c"
-AGetC
-Int 3
-SetM <SC EC PC>
-PopC
-FPushFuncD 1 "h"
-String "foo"
-Int 0
-String "prop"
-String "c"
-AGetC
-FPassM 0 <SC EC PC>
-FCall 1
-PopR
-Null
-RetC
-
-function f($cls, $spropName) {
-  if (!isset($cls::$$spropName)){
-    $cls::$$spropName = g();
-  }
-  h($cls::$$spropName);
-}
-
-AGetL 0
-CGetL2 1
-IssetS
-JmpNZ 20
-AGetL 0
-FPushFuncD 0 "g"
-FCall 0
-UnboxR
-CGetL3 1
-SetS
-PopC
-FPushFuncD 1 "h"
-AGetL 0
-CGetL2 1
-FPassS 0
-FCall 1
-PopR
-Null
-RetC
-
-class c { public static function f() { return c::g(); } }
-
-FPushClsMethodD 0 "g" "c"
-FCall 0
-UnboxR
-RetC
-
-class c { public static function f() { return static::g(); } }
-
-String "g"
-LateBoundCls
-FPushClsMethod 0
-FCall 0
-UnboxR
-RetC
-
-function f() { self::x(); }
-
-String "x"
-Self
-FPushClsMethodF 0
-FCall 0
-PopR
-Null
-RetC
-
-class c { public static function f() { return self::$x; } }
-
-String "x"
-Self
-CGetS
-RetC
-
-function f() { return new parent(); }
-
-Parent
-FPushCtor 0
-FCall 0
-PopR
-RetC
-
-class B extends A { public static function f() { return parent::x; } }
-
-ClsCnsD "x" "A"
-RetC
-
-foreach ($arr1 as $v1) {
-  foreach($arr2 as $v2) {
-    if ($v1 == $v2) {
-      break 2;
-    }
-  }
-}
-
-CGetL $arr1
-IterInit 0 endFor1 $v1
-startFor1:
-
-CGetL $arr2
-IterInit 1 endFor2 $v2
-startFor2:
-
-CGetL $v1
-CGetL $v2
-Eq
-
-JmpNZ notEqual
-IterBreak <(Iter) 1, (Iter) 2> endFor1
-notEqual:
-
-IterNext 1 startFor2 $v2
-endFor2:
-
-IterNext 1 startFor1 $v1
-endFor1:

@@ -50,12 +50,12 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_empty("");
 const StaticString s_extract("extract");
 const StaticString s_Exception("Exception");
+const StaticString s_Continuation("Continuation");
 const StaticString s_unreachable("static analysis error: supposedly "
                                  "unreachable code was reached");
-const StaticString s_noreturn("static analysis error: function "
-                              "returned that was inferred to be noreturn");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -270,6 +270,19 @@ struct StepFlags {
    */
   folly::Optional<Type> returned;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+// Some member instruction type-system predicates.
+
+bool couldBeEmptyish(Type ty) {
+  return ty.couldBe(TNull) ||
+         ty.couldBe(sval(s_empty.get())) ||
+         ty.couldBe(TFalse);
+}
+
+bool elemCouldPromoteToArr(Type ty) { return couldBeEmptyish(ty); }
+bool propCouldPromoteToObj(Type ty) { return couldBeEmptyish(ty); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1045,7 +1058,7 @@ struct InterpStepper : boost::static_visitor<void> {
         nothrow();
         mergeSelfProp(vname->m_data.pstr, t1);
       } else {
-        mergeUnknownSelfProp(t1);
+        mergeEachSelfPropRaw([&] (Type) { return t1; });
       }
     }
     push(t1);
@@ -1725,20 +1738,33 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Parent&) { push(TCls); }
 
   void operator()(const bc::CreateCl& op) {
-    // Closures can access properties on $this or self, but we don't
-    // yet know how to analyze this.
-    killThisProps();
-    killSelfProps();
-
     auto const nargs = op.arg1;
-    for (auto i = uint32_t{0}; i < nargs; ++i) popT();
+    for (auto i = uint32_t{0}; i < nargs; ++i) {
+      // TODO(#3599292): propagate these types into closure analysis
+      // information.
+      popT();
+    }
     if (auto const rcls = m_index.resolve_class(m_ctx, op.str2)) {
       return push(objExact(*rcls));
     }
     push(TObj);
   }
 
-  void operator()(const bc::CreateCont&)  { killLocals(); push(TObj); }
+  void operator()(const bc::CreateCont&) {
+    killLocals();
+    if (m_ctx.func->isClosureBody) {
+      // Generator closures create functions *outside* the class that
+      // the closure is in, and we haven't hooked that up to be part
+      // of the class-at-a-time analysis.  So we need to kill
+      // everything on $this/self.
+      killThisProps();
+      killSelfProps();
+    }
+    auto const rcls = m_index.resolve_class(m_ctx, s_Continuation.get());
+    always_assert(rcls && "The builtin class Continuation must resolve");
+    push(objExact(*rcls));
+  }
+
   void operator()(const bc::ContEnter&)   { popC(); }
   void operator()(const bc::UnpackCont&)  { readUnknownLocals();
                                             push(TInitCell); push(TInt); }
@@ -1875,13 +1901,43 @@ private: // member instructions
    * Refs, but not yet.)
    */
   enum class BaseLoc {
-    InArr,         // An element in an array.
-    ObjProp,       // A property in an object.
-    StaticObjProp, // A static property on an object.  This is only
-                   // possible as an initial base.
-    Frame,         // Contained in the current frame as a local.
-    FrameThis,     // Contained in the current frame as $this.
-    EvalStack,     // Contained by the evaluation stack (eval temporary).
+    /*
+     * Base is in a number of possible places after an Elem op.  It
+     * cannot possibly be in an object property (although it certainly
+     * may alias one).  See miElem for details.
+     *
+     * If it is definitely in an array, the locTy in the Base will be
+     * a subtype of TArr.
+     */
+    PostElem,
+
+    /*
+     * Base is in possible locations after a Prop op.  This means it
+     * possibly lives in a property on an object, but possibly not
+     * (e.g. it could be a null in tvScratch).  See miProp for
+     * details.
+     *
+     * If it is definitely known to be a property in an object, the
+     * locTy in the Base will be a subtype of TObj.
+     */
+    PostProp,
+
+    /*
+     * Known to be a static property on an object.  This is only
+     * possible as an initial base.
+     */
+    StaticObjProp,
+
+    /*
+     * Known to be contained in the current frame as a local, as
+     * $this, or known to be contained by the evaluation stack.  Only
+     * possible as initial bases.
+     */
+    Frame,
+    FrameThis,
+    EvalStack,
+
+    // TODO: global
   };
 
   struct Base {
@@ -1890,17 +1946,43 @@ private: // member instructions
 
     /*
      * We also need to track effects of intermediate dims on the type
-     * of the base.  So we have a type and name for the location of
-     * the base.
+     * of the base.  So we have a type and name information about the
+     * base's container..
      *
      * For StaticObjProp, locName this is the name of the property if
      * known, or nullptr, and locTy is the type of the class
-     * containing the static property.  ObjProp will do the same
-     * eventually but not yet implemented.
+     * containing the static property.
+     *
+     * Similarly, if loc is PostProp, locName is the name of the
+     * property if it was known, and locTy gives as much information
+     * about the object type it is in.  (If we actually *know* it is
+     * in an object, locTy will be a subtype of TObj.)
      */
     Type locTy;
     SString locName;
   };
+
+  static std::string base_string(const folly::Optional<Base>& b) {
+    if (!b) return "[none]";
+    auto const locStr = [&]() -> const char* {
+      switch (b->loc) {
+      case BaseLoc::PostElem:      return "PostElem";
+      case BaseLoc::PostProp:      return "PostProp";
+      case BaseLoc::StaticObjProp: return "StaticObjProp";
+      case BaseLoc::Frame:         return "Frame";
+      case BaseLoc::FrameThis:     return "FrameThis";
+      case BaseLoc::EvalStack:     return "EvalStack";
+      }
+      not_reached();
+    }();
+    return folly::format(
+      "{: <8}  ({: <14} {: <8} @ {})",
+      show(b->type),
+      locStr,
+      show(b->locTy),
+      b->locName ? b->locName->data() : "?"
+    ).str();
+  }
 
   struct MInstrState {
     explicit MInstrState(const MInstrInfo* info,
@@ -1937,6 +2019,41 @@ private: // member instructions
     int32_t stackIdx;
   };
 
+  //////////////////////////////////////////////////////////////////////
+
+  /*
+   * A note about bases.
+   *
+   * Generally inference needs to know two kinds of things about the
+   * base to handle effects on tracked locations:
+   *
+   *   - Could the base be a location we're tracking deeper structure
+   *     on, so the next operation actually affects something inside
+   *     of it.  (For example, could the base be an object with the
+   *     same type as $this.)
+   *
+   *   - Could the base be something (regardless of type) that is
+   *     inside one of the things we're tracking.  I.e., the base
+   *     might be whatever (an array or a bool or something), but
+   *     living inside a property inside an object with the same type
+   *     as $this.
+   *
+   * The first cases apply because final operations are going to
+   * directly affect the type of these elements.  The second case is
+   * because vector operations may change the base at each step if it
+   * is a defining instruction.
+   *
+   * Note that both of these cases can apply to the same base: you
+   * might have an object property on $this that could be an object of
+   * the type of $this.
+   *
+   * The functions below with names "couldBeIn*" detect the second
+   * case.  The effects on the tracked location in the second case are
+   * handled in the functions with names "handleIn*{Prop,Elem,..}".
+   * The effects for the first case are generally handled in the
+   * miFinal op functions.
+   */
+
   bool couldBeThisObj(const folly::Optional<Base>& b) const {
     if (!b) return true;
     auto const thisTy = thisType();
@@ -1950,8 +2067,20 @@ private: // member instructions
     return false;
   }
 
-  // Returns whether the base could be a private static property on
-  // the current context class.
+  bool couldBeInThis(const folly::Optional<Base>& b) const {
+    if (!b) return true;
+    if (b->loc == BaseLoc::PostProp) {
+      auto const thisTy = thisType();
+      if (!thisTy) return true;
+      if (!b->locTy.couldBe(*thisTy)) return false;
+      if (b->locName) {
+        return isTrackedThisProp(b->locName);
+      }
+      return true;
+    }
+    return false;
+  }
+
   bool couldBeInSelf(const folly::Optional<Base>& b) const {
     if (!b) return true;
     if (b->loc == BaseLoc::StaticObjProp) {
@@ -1961,54 +2090,108 @@ private: // member instructions
     return false;
   }
 
-  // Returns nullptr if unknown.  Pre: couldBeInSelf(b)
-  SString baseSelfPropName(const folly::Optional<Base>& b) const {
-    assert(couldBeInSelf(b));
-    if (b && b->loc == BaseLoc::StaticObjProp) {
-      return b->locName;
-    }
-    return nullptr;
+  // This helper can probably go away once we have enough coverage to
+  // make the base not be Optional<Base>.
+  SString baseLocName(const folly::Optional<Base>& b) const {
+    return b ? b->locName : nullptr;
   }
 
   //////////////////////////////////////////////////////////////////////
 
-  // Handle effects on properties in self:: that could occur based on
-  // the base.  This is only for final ops or intermediate ops that
-  // can define.
-  void conservativeSelfBaseEffects(MInstrState& state) {
-    if (couldBeInSelf(state.base)) {
-      if (auto const name = baseSelfPropName(state.base)) {
-        killSelfProp(name);
-      } else {
-        loseNonRefSelfPropTypes();
+  void handleInThisPropD(MInstrState& state) {
+    if (!couldBeInThis(state.base)) return;
+
+    if (auto const name = baseLocName(state.base)) {
+      auto const ty = thisPropAsCell(name);
+      if (ty && propCouldPromoteToObj(*ty)) {
+        // Note: we could merge Obj=stdClass here, but aren't doing so
+        // yet.
+        mergeThisProp(name, TObj);
       }
+      return;
     }
+
+    mergeEachThisPropRaw([&] (Type t) {
+      return propCouldPromoteToObj(t) ? TObj : TBottom;
+    });
   }
 
-  void handleSelfBaseProp(MInstrState& x) {
-    conservativeSelfBaseEffects(x);
+  void handleInThisElemD(MInstrState& state) {
+    if (!couldBeInThis(state.base)) return;
+
+    if (auto const name = baseLocName(state.base)) {
+      auto const ty = thisPropAsCell(name);
+      if (ty && elemCouldPromoteToArr(*ty)) {
+        mergeThisProp(name, TArr);
+      }
+      return;
+    }
+
+    mergeEachThisPropRaw([&] (Type t) {
+      return elemCouldPromoteToArr(t) ? TArr : TBottom;
+    });
   }
-  void handleSelfBaseElem(MInstrState& x) {
-    conservativeSelfBaseEffects(x);
+
+  void handleInSelfPropD(MInstrState& state) {
+    if (!couldBeInSelf(state.base)) return;
+
+    if (auto const name = baseLocName(state.base)) {
+      auto const ty = thisPropAsCell(name);
+      if (ty && propCouldPromoteToObj(*ty)) {
+        // Note: similar to handleInThisPropD, logically this could be
+        // merging Obj=stdClass.
+        mergeSelfProp(name, TObj);
+      }
+      return;
+    }
+
+    loseNonRefSelfPropTypes();
   }
-  void handleSelfBaseNewElem(MInstrState& x) {
-    conservativeSelfBaseEffects(x);
+
+  void handleInSelfElemD(MInstrState& state) {
+    if (!couldBeInSelf(state.base)) return;
+
+    if (auto const name = baseLocName(state.base)) {
+      if (auto const ty = selfPropAsCell(name)) {
+        if (elemCouldPromoteToArr(*ty)) {
+          mergeSelfProp(name, TArr);
+        }
+        mergeSelfProp(name, loosen_statics(*ty));
+      }
+      return;
+    }
+    loseNonRefSelfPropTypes();
+  }
+
+  // Currently NewElem and Elem InFoo effects don't need to do
+  // anything different from each other.
+  void handleInThisNewElem(MInstrState& state) { handleInThisElemD(state); }
+  void handleInSelfNewElem(MInstrState& state) { handleInSelfElemD(state); }
+
+  void handleInSelfElemU(MInstrState& state) {
+    if (!couldBeInSelf(state.base)) return;
+
+    if (auto const name = baseLocName(state.base)) {
+      auto const ty = selfPropAsCell(name);
+      if (ty) mergeSelfProp(name, loosen_statics(*ty));
+    } else {
+      mergeEachSelfPropRaw(loosen_statics);
+    }
   }
 
   //////////////////////////////////////////////////////////////////////
   // base ops
 
   /*
-   * Local bases are a mild pain, because they can change type
-   * depending on the mvector.  The current behavior here is very
+   * Local bases can change the type of the local depending on the
+   * mvector, and the next dim.  The current behavior here is very
    * conservative.
    *
    * Basically for now, if we're about to do property dims and it's
    * not an Obj, we give up, and if we're about to do elem dims and
    * it's not an Arr or Obj, we give up.
    *
-   * Also, return UnkBase no matter what---tracking local bases isn't
-   * implemented yet.
+   * TODO(#3343813): make this more precise.
    */
   Base miBaseLoc(const MInstrState& state) {
     auto& info = state.info;
@@ -2070,12 +2253,16 @@ private: // member instructions
         return Base { ty ? *ty : TObj, BaseLoc::FrameThis };
       }
     case LGL:
+      // TODO: return global bases so these don't kill object
+      // properties.
       return folly::none;
     case LGC:
       topC(--state.stackIdx);
       return folly::none;
 
     case LNL:
+      // TODO: return frame bases so these don't always kill object
+      // properties.
       killLocals();
       return folly::none;
     case LNC:
@@ -2085,6 +2272,8 @@ private: // member instructions
 
     case LSL:
       {
+        // TODO: return StaticObjProp bases so these don't always kill
+        // object properties.
         UNUSED auto const cls = topA(state.info.valCount());
         return folly::none;
       }
@@ -2152,69 +2341,158 @@ private: // member instructions
   // intermediate ops
 
   void miProp(MInstrState& state) {
-    auto const name = mcodeStringKey(state);
+    auto const name     = mcodeStringKey(state);
     bool const isDefine = state.info.getAttr(state.mcode()) & MIA_define;
+    bool const isUnset  = state.info.getAttr(state.mcode()) & MIA_unset;
 
     /*
-     * Before we can track bases through intermediate dims we need to
-     * handle type effects on the properties.  (For example, if we
-     * have $this->foo[][] = 2; when $this->foo is null, it needs to
-     * merge TArr.)
+     * MIA_unset Props doesn't promote "emptyish" things to stdClass,
+     * or affect arrays, however it can define a property on an object
+     * base.  This means we don't need any couldBeInFoo logic, but if
+     * the base could actually be $this, and a declared property could
+     * be Uninit, we need to merge InitNull.
      *
-     * Note, this assignment of the base to none is happening before
-     * the below tests on the base on purpose for now (so both of the
-     * below cases always have conservative effects).  TODO(#3343813)
+     * We're trying to handle this case correctly as far as the type
+     * inference here is concerned, but the runtime doesn't actually
+     * behave this way right now for declared properties.  Note that
+     * it never hurts to merge more types than a thisProp could
+     * actually be, so this is fine.
+     *
+     * See TODO(#3602740): unset with intermediate dims on previously
+     * declared properties doesn't define them to null.
      */
-    state.base = folly::none;
-
-    if (!isDefine) return;
-
-    /*
-     * TODO(#3343813): the effects on "name" here are working for now,
-     * but only because we're throwing all the information away.  To
-     * do this better, we need to move the name into the new tracked
-     * base (like self props, below) so the following intermediate
-     * dims can have the appropriate effects on it.
-     */
-    if (couldBeThisObj(state.base)) {
-      // We could just merge stdClass into each one, but for now it's
-      // conservative.
+    if (isUnset && couldBeThisObj(state.base)) {
       if (name) {
-        killThisProp(name);
+        auto const ty = thisPropRaw(name);
+        if (ty && ty->couldBe(TUninit)) {
+          mergeThisProp(name, TInitNull);
+        }
       } else {
-        loseNonRefThisPropTypes();
+        mergeEachThisPropRaw([&] (Type ty) {
+          return ty.couldBe(TUninit) ? TInitNull : TBottom;
+        });
       }
     }
 
-    handleSelfBaseProp(state);
+    if (isDefine) {
+      handleInThisPropD(state);
+      handleInSelfPropD(state);
+    }
+
+    if (mustBeThisObj(state.base)) {
+      auto const optThisTy = thisType();
+      auto const thisTy    = optThisTy ? *optThisTy : TObj;
+      if (name) {
+        auto const propTy = thisPropAsCell(name);
+        state.base = Base { propTy ? *propTy : TInitCell,
+                            BaseLoc::PostProp,
+                            thisTy,
+                            name };
+      } else {
+        state.base = Base { TInitCell, BaseLoc::PostProp, thisTy };
+      }
+      return;
+    }
+
+    if (!state.base) return;
+
+    // We know for sure we're going to be in an object property.
+    if (state.base->type.subtypeOf(TObj)) {
+      state.base = Base { TInitCell,
+                          BaseLoc::PostProp,
+                          state.base->type,
+                          name };
+      return;
+    }
+    // TODO(#3343813): if it must be null, false, or "" we could use a
+    // exact PostProp of Obj=stdclass to avoid future dims returning
+    // couldBeThisObj.
+
+    /*
+     * Otherwise, intermediate props with define can promote a null,
+     * false, or "" to stdClass.  Those cases, and others, if it's not
+     * MIA_define, will set the base to a null value in tvScratch.
+     * The base may also legitimately be an object and our next base
+     * is in an object property.
+     *
+     * We conservatively treat all these cases as "possibly" being
+     * inside of an object property with "PostProp" with locType TTop.
+     */
+    state.base = Base { TInitCell, BaseLoc::PostProp, TTop, name };
   }
 
   void miElem(MInstrState& state) {
     mcodeKey(state);
     bool const isDefine = state.info.getAttr(state.mcode()) & MIA_define;
-    state.base = folly::none; // eventually needs to happen *after* using it
-    if (!isDefine) return;
-    // We could merge TArr into each one, but for now just being
-    // conservative.  TODO(#3343813): we should only need to do this
-    // for the name it could be (handleSelfBaseElem, etc).
-    loseNonRefThisPropTypes();
-    loseNonRefSelfPropTypes();
+    bool const isUnset  = state.info.getAttr(state.mcode()) & MIA_unset;
+
+    /*
+     * Elem dims with MIA_unset can change a base from a static array
+     * into a reference counted array.  It never promotes emptyish
+     * types, however.
+     *
+     * We only need to handle this for self props, because we don't
+     * track static-ness on this props.  The similar effect on local
+     * bases is handled in miBase.
+     */
+    if (isUnset) {
+      handleInSelfElemU(state);
+    }
+    if (isDefine) {
+      handleInThisElemD(state);
+      handleInSelfElemD(state);
+    }
+
+    if (!state.base) return;
+
+    if (state.base->type.subtypeOf(TArr)) {
+      state.base = Base { TInitCell, BaseLoc::PostElem, state.base->type };
+      return;
+    }
+    if (state.base->type.subtypeOf(TStr)) {
+      state.base = Base { TStr, BaseLoc::PostElem };
+      return;
+    }
+
+    /*
+     * Other cases could leave the base as anything (if nothing else,
+     * via ArrayAccess on an object).
+     *
+     * The resulting BaseLoc is either inside an array, is the global
+     * init_null_variant, or inside tvScratch.  We represent this with
+     * the PostElem base location with locType TTop.
+     */
+    state.base = Base { TInitCell, BaseLoc::PostElem, TTop };
   }
 
   void miNewElem(MInstrState& state) {
     if (!state.info.newElem()) {
-      // We're about to fatal ...
+      // This path is about to fatal.
       state.base = folly::none;
       return;
     }
+    handleInThisNewElem(state);
+    handleInSelfNewElem(state);
 
-    // TODO(#3343813): we need a case for whether the base could be
-    // inside $this after we change the other intermediates above to
-    // not always do killThisProp on the next dim's name.
+    if (!state.base) return;
 
-    handleSelfBaseNewElem(state);
+    if (state.base->type.subtypeOf(TArr)) {
+      /*
+       * Inside of an array, this appears to create a TUninit and let
+       * the next operation turn it into a real null (or stdClass or
+       * whatever).  The lvalBlackhole case explicitly unsets the
+       * blackhole before making it the base.
+       *
+       * We're representing it as TNull because it doesn't really seem
+       * like we should be using Uninit in these cases (it would be
+       * nice if Elem dims didn't have to have KindOfUninit in their
+       * switches), and a wider type is never wrong.
+       */
+      state.base = Base { TNull, BaseLoc::PostElem, state.base->type };
+      return;
+    }
 
-    state.base = folly::none;
+    state.base = Base { TInitCell, BaseLoc::PostElem, TTop };
   }
 
   void miIntermediate(MInstrState& state) {
@@ -2250,7 +2528,8 @@ private: // member instructions
   void miFinalVGetProp(MInstrState& state) {
     auto const name = mcodeStringKey(state);
     miPop(state);
-    handleSelfBaseProp(state);
+    handleInThisPropD(state);
+    handleInSelfPropD(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         boxThisProp(name);
@@ -2265,7 +2544,8 @@ private: // member instructions
     auto const name = mcodeStringKey(state);
     auto const t1 = popC();
     miPop(state);
-    handleSelfBaseProp(state);
+    handleInThisPropD(state);
+    handleInSelfPropD(state);
     if (couldBeThisObj(state.base)) {
       if (!name) {
         // We could just merge t1 into every thisProp, but not for
@@ -2288,7 +2568,8 @@ private: // member instructions
     auto const name = mcodeStringKey(state);
     popC();
     miPop(state);
-    handleSelfBaseProp(state);
+    handleInThisPropD(state);
+    handleInSelfPropD(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         mergeThisProp(name, TInitCell);
@@ -2302,7 +2583,8 @@ private: // member instructions
   void miFinalIncDecProp(MInstrState& state) {
     auto const name = mcodeStringKey(state);
     miPop(state);
-    handleSelfBaseProp(state);
+    handleInThisPropD(state);
+    handleInSelfPropD(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         mergeThisProp(name, TInitCell);
@@ -2317,7 +2599,8 @@ private: // member instructions
     auto const name = mcodeStringKey(state);
     popV();
     miPop(state);
-    handleSelfBaseProp(state);
+    handleInThisPropD(state);
+    handleInSelfPropD(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         boxThisProp(name);
@@ -2331,7 +2614,16 @@ private: // member instructions
   void miFinalUnsetProp(MInstrState& state) {
     auto const name = mcodeStringKey(state);
     miPop(state);
-    handleSelfBaseProp(state);
+
+    /*
+     * Unset does define intermediate dims but with slightly different
+     * rules than sets.  It only applies to object properties.
+     *
+     * Note that this can't affect self props, because static
+     * properties can never be unset.
+     */
+    handleInThisPropD(state);
+
     if (couldBeThisObj(state.base)) {
       if (name) {
         unsetThisProp(name);
@@ -2348,7 +2640,8 @@ private: // member instructions
     mcodeKey(state);
     auto const t1 = popC();
     miPop(state);
-    handleSelfBaseElem(state);
+    handleInThisElemD(state);
+    handleInSelfElemD(state);
     // ArrayAccess on $this will always push the rhs.
     push(mustBeThisObj(state.base) ? t1 : TInitCell);
   }
@@ -2357,14 +2650,16 @@ private: // member instructions
     mcodeKey(state);
     popC();
     miPop(state);
-    handleSelfBaseElem(state);
+    handleInThisElemD(state);
+    handleInSelfElemD(state);
     push(TInitCell);
   }
 
   void miFinalIncDecElem(MInstrState& state) {
     mcodeKey(state);
     miPop(state);
-    handleSelfBaseElem(state);
+    handleInThisElemD(state);
+    handleInSelfElemD(state);
     push(TInitCell);
   }
 
@@ -2372,7 +2667,8 @@ private: // member instructions
     mcodeKey(state);
     popV();
     miPop(state);
-    handleSelfBaseElem(state);
+    handleInThisElemD(state);
+    handleInSelfElemD(state);
     push(TRef);
   }
 
@@ -2382,7 +2678,8 @@ private: // member instructions
   void miFinalSetNewElem(MInstrState& state) {
     auto const t1 = popC();
     miPop(state);
-    handleSelfBaseNewElem(state);
+    handleInThisNewElem(state);
+    handleInSelfNewElem(state);
     // ArrayAccess on $this will always push the rhs.
     push(mustBeThisObj(state.base) ? t1 : TInitCell);
   }
@@ -2390,20 +2687,23 @@ private: // member instructions
   void miFinalSetOpNewElem(MInstrState& state) {
     popC();
     miPop(state);
-    handleSelfBaseNewElem(state);
+    handleInThisNewElem(state);
+    handleInSelfNewElem(state);
     push(TInitCell);
   }
 
   void miFinalIncDecNewElem(MInstrState& state) {
     miPop(state);
-    handleSelfBaseNewElem(state);
+    handleInThisNewElem(state);
+    handleInSelfNewElem(state);
     push(TInitCell);
   }
 
   void miFinalBindNewElem(MInstrState& state) {
     popV();
     miPop(state);
-    handleSelfBaseNewElem(state);
+    handleInThisNewElem(state);
+    handleInSelfNewElem(state);
     push(TRef);
   }
 
@@ -2439,9 +2739,11 @@ private: // member instructions
     if (state.mcode() != MemberCode::MW) mcodeKey(state);
     miPop(state);
     if (state.mcode() != MemberCode::MW) {
-      handleSelfBaseElem(state);
+      handleInThisElemD(state);
+      handleInSelfElemD(state);
     } else {
-      handleSelfBaseNewElem(state);
+      handleInThisNewElem(state);
+      handleInSelfNewElem(state);
     }
     push(TRef);
   }
@@ -2474,6 +2776,7 @@ private: // member instructions
     if (mcodeIsProp(state.mcode())) return miFinalUnsetProp(state);
     // Elem and MW case:
     if (state.mcode() != MemberCode::MW) mcodeKey(state);
+    handleInSelfElemU(state);
     miPop(state);
   }
 
@@ -2506,9 +2809,11 @@ private: // member instructions
     // The m_state before miBase is propagated across factored edges
     // because wasPEI will be true---no need for miThrow.
     state.base = miBase(state);
+    FTRACE(4, "   base: {}\n", base_string(state.base));
     miThrow();
     for (; state.mInd < mvec.mcodes.size() - 1; ++state.mInd) {
       miIntermediate(state);
+      FTRACE(4, "   base: {}\n", base_string(state.base));
       // Note: this one might not be necessary: review whether member
       // instructions can ever modify local types on itermediate dims.
       miThrow();
@@ -2842,8 +3147,6 @@ private: // $this
   // null.
   folly::Optional<Type> thisType() const {
     if (!m_ctx.cls) return folly::none;
-    // TODO(#3584175): we should be able to push a real type for closures
-    if (m_ctx.func->isClosureBody) return folly::none;
     if (auto const rcls = m_index.resolve_class(m_ctx, m_ctx.cls->name)) {
       return subObj(*rcls);
     }
@@ -2852,8 +3155,6 @@ private: // $this
 
   folly::Optional<Type> selfCls() const {
     if (!m_ctx.cls) return folly::none;
-    // TODO(#3584175): we should be able to push a real type for closures
-    if (m_ctx.func->isClosureBody) return folly::none;
     if (auto const rcls = m_index.resolve_class(m_ctx, m_ctx.cls->name)) {
       return subCls(*rcls);
     }
@@ -2879,14 +3180,11 @@ private: // properties on $this
     return nullptr;
   }
 
+  bool isTrackedThisProp(SString name) const { return thisPropRaw(name); }
+
   void killThisProps() {
     FTRACE(2, "    killThisProps\n");
     for (auto& kv : m_state.privateProperties) kv.second = TGen;
-  }
-
-  void killThisProp(SString name) {
-    FTRACE(2, "    killThisProp {}\n", name->data());
-    if (auto t = thisPropRaw(name)) *t = TGen;
   }
 
   folly::Optional<Type> thisPropAsCell(SString name) const {
@@ -2914,6 +3212,20 @@ private: // properties on $this
     *t = union_of(*t, loosen_statics(loosen_values(type)));
   }
 
+  /*
+   * Merge something into each this prop.  Usually MapFn will be a
+   * predicate that returns TBottom when some condition doesn't hold.
+   *
+   * The types given to the map function are the raw tracked types
+   * (i.e. could be TRef or TUninit).
+   */
+  template<class MapFn>
+  void mergeEachThisPropRaw(MapFn fn) {
+    for (auto& kv : m_state.privateProperties) {
+      mergeThisProp(kv.first, fn(kv.second));
+    }
+  }
+
   void unsetThisProp(SString name) { mergeThisProp(name, TUninit); }
   void unsetUnknownThisProp() {
     for (auto& kv : m_state.privateProperties) {
@@ -2927,9 +3239,12 @@ private: // properties on $this
     *t = union_of(*t, TRef);
   }
 
-  // Forces non-ref property types up to TCell.  This is used when an
-  // operation affects an unknown property on $this, but can't change
-  // its reffiness.
+  /*
+   * Forces non-ref property types up to TCell.  This is used when an
+   * operation affects an unknown property on $this, but can't change
+   * its reffiness.  This could only do TInitCell, but we're just
+   * going to gradually get rid of the callsites of this.
+   */
   void loseNonRefThisPropTypes() {
     FTRACE(2, "    loseNonRefThisPropTypes\n");
     for (auto& kv : m_state.privateProperties) {
@@ -2977,21 +3292,31 @@ private: // properties on self::
     *t = union_of(*t, type);
   }
 
-  void mergeUnknownSelfProp(Type t) {
+  /*
+   * Similar to mergeEachThisPropRaw, but for self props.
+   */
+  template<class MapFn>
+  void mergeEachSelfPropRaw(MapFn fn) {
     for (auto& kv : m_state.privateStatics) {
-      kv.second = union_of(t, kv.second);
+      mergeSelfProp(kv.first, fn(kv.second));
     }
   }
 
   void boxSelfProp(SString name) { mergeSelfProp(name, TRef); }
 
-  // Forces non-ref static properties up to TCell.  This is used when
-  // an operation affects an unknown static property on self::, but
-  // can't change its reffiness.
+  /*
+   * Forces non-ref static properties up to TCell.  This is used when
+   * an operation affects an unknown static property on self::, but
+   * can't change its reffiness.
+   *
+   * This could only do TInitCell because static properties can never
+   * be unset.  We're just going to get rid of the callers of this
+   * function over a few more changes, though.
+   */
   void loseNonRefSelfPropTypes() {
     FTRACE(2, "    loseNonRefSelfPropTypes\n");
     for (auto& kv : m_state.privateStatics) {
-      if (kv.second.subtypeOf(TCell)) kv.second = TCell;
+      if (kv.second.subtypeOf(TInitCell)) kv.second = TCell;
     }
   }
 
@@ -3439,12 +3764,13 @@ State entry_state(const Index& index,
   /*
    * Closures have a hidden local that's always the first local, which
    * stores the closure itself.
-   *
-   * TODO_4: make this a TObj=ClosureType.
    */
   if (ctx.func->isClosureBody) {
     assert(locId < ret.locals.size());
-    ret.locals[locId++] = TObj;
+    assert(ctx.func->cls);
+    auto const rcls = index.resolve_class(ctx, ctx.func->cls->name);
+    assert(rcls && "Closure classes must always be unique and must resolve");
+    ret.locals[locId++] = objExact(*rcls);
   }
 
   for (; locId < ctx.func->locals.size(); ++locId) {
@@ -3482,13 +3808,29 @@ State entry_state(const Index& index,
   return ret;
 }
 
+/*
+ * Closures inside of classes are analyzed in the context they are
+ * created in (this affects accessibility rules, access to privates,
+ * etc).
+ *
+ * Note that in the interpreter code, ctx.func->cls is not
+ * necessarily the same as ctx.cls because of closures.
+ */
+Context adjust_closure_context(Context ctx) {
+  if (ctx.cls && ctx.cls->closureContextCls) {
+    ctx.cls = ctx.cls->closureContextCls;
+  }
+  return ctx;
+}
+
 FuncAnalysis do_analyze(const Index& index,
-                        Context const ctx,
+                        Context const inputCtx,
                         ClassAnalysis* clsAnalysis) {
-  assert(ctx.func != ctx.unit->pseudomain.get() &&
+  assert(inputCtx.func != inputCtx.unit->pseudomain.get() &&
          "pseudomains not supported");
   FTRACE(2, "{:-^70}\n", "Analyze");
 
+  auto const ctx = adjust_closure_context(inputCtx);
   FuncAnalysis ai(ctx);
 
   auto rpoId = [&] (borrowed_ptr<php::Block> blk) {
@@ -3644,7 +3986,7 @@ bool operator==(const State& a, const State& b) {
 }
 
 bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
-bool operator!=(const State& a, const State& b) { return !(a == b); }
+bool operator!=(const State& a, const State& b)   { return !(a == b); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -3672,6 +4014,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   FTRACE(2, "{:#^70}\n", "Class");
 
   ClassAnalysis clsAnalysis(ctx);
+  auto const associatedClosures = index.lookup_closures(ctx.cls);
 
   /*
    * Initialize inferred private property types to their in-class
@@ -3721,9 +4064,10 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     auto const previousStatics = clsAnalysis.privateStatics;
 
     std::vector<FuncAnalysis> methodResults;
+    std::vector<FuncAnalysis> closureResults;
 
-    // Analyze every method in the class until we reach a fixed point on
-    // the private property states.
+    // Analyze every method in the class until we reach a fixed point
+    // on the private property states.
     for (auto& f : ctx.cls->methods) {
       methodResults.push_back(
         do_analyze(
@@ -3734,10 +4078,22 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       );
     }
 
+    for (auto& c : associatedClosures) {
+      auto const invoke = borrow(c->methods[0]);
+      closureResults.push_back(
+        do_analyze(
+          index,
+          Context { ctx.unit, invoke, c },
+          &clsAnalysis
+        )
+      );
+    }
+
     // Check if we've reached a fixed point yet.
-    if (previousProps == clsAnalysis.privateProperties &&
+    if (previousProps   == clsAnalysis.privateProperties &&
         previousStatics == clsAnalysis.privateStatics) {
-      clsAnalysis.methods = std::move(methodResults);
+      clsAnalysis.methods  = std::move(methodResults);
+      clsAnalysis.closures = std::move(closureResults);
       break;
     }
   }

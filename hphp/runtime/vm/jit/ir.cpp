@@ -228,8 +228,6 @@ bool isQueryJmpOp(Opcode opc) {
   case JmpNSame:
   case JmpInstanceOfBitmask:
   case JmpNInstanceOfBitmask:
-  case JmpIsType:
-  case JmpIsNType:
   case JmpZero:
   case JmpNZero:
     return true;
@@ -251,8 +249,6 @@ Opcode queryToJmpOp(Opcode opc) {
   case NSame:              return JmpNSame;
   case InstanceOfBitmask:  return JmpInstanceOfBitmask;
   case NInstanceOfBitmask: return JmpNInstanceOfBitmask;
-  case IsType:             return JmpIsType;
-  case IsNType:            return JmpIsNType;
   default:                 always_assert(0);
   }
 }
@@ -270,8 +266,6 @@ Opcode queryJmpToQueryOp(Opcode opc) {
   case JmpNSame:              return NSame;
   case JmpInstanceOfBitmask:  return InstanceOfBitmask;
   case JmpNInstanceOfBitmask: return NInstanceOfBitmask;
-  case JmpIsType:             return IsType;
-  case JmpIsNType:            return IsNType;
   default:                    always_assert(0);
   }
 }

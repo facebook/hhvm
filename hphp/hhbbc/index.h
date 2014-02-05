@@ -119,16 +119,19 @@ struct Class {
   bool same(const Class&) const;
 
   /*
-   * Returns true if this class is definitely going to be a subclass
+   * Returns true if this class is definitely going to be a subtype
    * of `o' at runtime.  If this function returns false, this may
    * still be a subtype of `o' at runtime, it just may not be known.
+   * A typical example is with "non unique" classes.
    */
   bool subtypeOf(const Class& o) const;
 
   /*
-   * Returns true if this class could be a subclass of `o' at runtime.
    * If this function return false, it is known that this class
-   * definitely is not a subclass of `o'.
+   * is in no subtype relationship with the argument Class 'o'.
+   * Returns true if this class could be a subtype of `o' at runtime.
+   * When true is returned the two classes may still be unrelated but it is
+   * not possible to tell. A typical example is with "non unique" classes.
    */
   bool couldBe(const Class& o) const;
 
@@ -136,6 +139,15 @@ struct Class {
    * Returns the name of this class.  Non-null guarantee.
    */
   SString name() const;
+
+  /*
+   * Returns whether this type has the no override attribute, that is, if it
+   * is a final class (explicitly marked by the user or known by the static
+   * analysis).
+   * When returning false the class is guaranteed to be final. When returning
+   * true the system cannot tell though the class may still be final.
+   */
+  bool couldBeOverriden() const;
 
 private:
   Class(borrowed_ptr<const Index>, SStringOr<ClassInfo>);
@@ -217,6 +229,13 @@ struct Index {
    * php::Program.
    */
   ~Index();
+
+  /*
+   * Find all the closures created inside the context of a given
+   * php::Class.
+   */
+  std::vector<borrowed_ptr<php::Class>>
+    lookup_closures(borrowed_ptr<const php::Class>) const;
 
   /*
    * Try to resolve which class will be the class named `name' from a

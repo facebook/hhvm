@@ -1288,8 +1288,9 @@ ServerStatsHelper::~ServerStatsHelper() {
 #endif
 
     if (m_track & TRACK_MEMORY) {
-      int64_t mem = MM().getStats().peakUsage;
-      ServerStats::Log(string("mem.") + m_section, mem);
+      auto const& stats = MM().getStats();
+      ServerStats::Log(string("mem.") + m_section, stats.peakUsage);
+      ServerStats::Log(string("mem.allocated.") + m_section, stats.peakAlloc);
     }
 
     if (m_track & TRACK_HWINST) {

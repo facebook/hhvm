@@ -17,7 +17,7 @@
 #include "folly/Conv.h"
 #include "folly/Format.h"
 #include "folly/MapUtil.h"
-#include "folly/experimental/Gen.h"
+#include "folly/gen/Base.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"

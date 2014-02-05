@@ -17,7 +17,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/next_prior.hpp>
 
-#include "folly/experimental/Gen.h"
+#include "folly/gen/Base.h"
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"

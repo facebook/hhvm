@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/zend-string.h"
 #include <math.h>
 
+const double k_M_PI = 3.1415926535898;
+
 #if defined(__APPLE__)
 #ifndef isnan
 #define isnan(x)  \
@@ -45,85 +47,6 @@ const int64_t k_PHP_ROUND_HALF_UP =   PHP_ROUND_HALF_UP;
 const int64_t k_PHP_ROUND_HALF_DOWN = PHP_ROUND_HALF_DOWN;
 const int64_t k_PHP_ROUND_HALF_EVEN = PHP_ROUND_HALF_EVEN;
 const int64_t k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
-
-double HHVM_FUNCTION(pi) { return k_M_PI;}
-
-Variant HHVM_FUNCTION(min, int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
-  if (_argv.empty()) {
-    const auto& cell_value = *value.asCell();
-    if (UNLIKELY(!isContainer(cell_value))) {
-      return value;
-    }
-
-    ArrayIter iter(cell_value);
-    if (!iter) {
-      return uninit_null();
-    }
-    Variant ret = iter.secondRefPlus();
-    ++iter;
-    for (; iter; ++iter) {
-      Variant currVal = iter.secondRefPlus();
-      if (less(currVal, ret)) {
-        ret = currVal;
-      }
-    }
-    return ret;
-  }
-
-  Variant ret = value;
-  for (ArrayIter iter(_argv); iter; ++iter) {
-    Variant currVal = iter.secondRef();
-    if (less(currVal, ret)) {
-      ret = currVal;
-    }
-  }
-  return ret;
-}
-
-//Variant HHVM_FUNCTION(max, int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
-TypedValue* HHVM_FUNCTION(max, ActRec *ar) {
-  TypedValue* rv;
-  Variant ret;
-  int32_t count = ar->numArgs();
-
-  if (LIKELY(count >= 1)) {
-    Variant value(getArg<KindOfAny>(ar, 1));
-    if (count == 1) {
-      if (LIKELY(isContainer(value))) {
-        ArrayIter iter(value);
-        if (!iter) {
-          ret = uninit_null();
-        } else {
-          ret = iter.secondRefPlus();
-          ++iter;
-          for (; iter; ++iter) {
-            Variant currVal = iter.secondRefPlus();
-            if (more(currVal, ret)) {
-              ret = currVal;
-            }
-          }
-        }
-      } else {
-        ret = value;
-      }
-    } else {
-      for (int32_t i = 1; i < count; ++i) {
-        Variant currVal(getArg<KindOfAny>(ar, i));
-        if (more(currVal, ret)) {
-          ret = currVal;
-        }
-      }
-    }
-    rv = ret.asTypedValue();
-  } else {
-    TypedValue rvSpace;
-    rv = &rvSpace;
-    throw_missing_arguments_nr("min", 1, count, 1, rv);
-  }
-
-  ar->m_r = *rv;
-  return &ar->m_r;
-}
 
 /* Logic based on zend_operators.c::convert_scalar_to_number() */
 static DataType zend_convert_scalar_to_number(CVarRef num,
@@ -426,6 +349,7 @@ const StaticString s_PHP_ROUND_HALF_UP("PHP_ROUND_HALF_UP");
 const StaticString s_PHP_ROUND_HALF_DOWN("PHP_ROUND_HALF_DOWN");
 const StaticString s_PHP_ROUND_HALF_EVEN("PHP_ROUND_HALF_EVEN");
 const StaticString s_PHP_ROUND_HALF_ODD("PHP_ROUND_HALF_ODD");
+const StaticString s_M_PI("M_PI");
 
 class StandardMathExtension : public Extension {
  public:
@@ -443,10 +367,10 @@ class StandardMathExtension : public Extension {
     Native::registerConstant<KindOfInt64>(
       s_PHP_ROUND_HALF_ODD.get(), k_PHP_ROUND_HALF_ODD
     );
+    Native::registerConstant<KindOfDouble>(
+      s_M_PI.get(), k_M_PI
+    );
 
-    HHVM_FE(pi);
-    HHVM_FE(min);
-    HHVM_FE(max);
     HHVM_FE(abs);
     HHVM_FE(is_finite);
     HHVM_FE(is_infinite);

@@ -31,8 +31,6 @@ extern const int64_t k_PHP_ROUND_HALF_ODD;
 
 double HHVM_FUNCTION(pi);
 
-Variant HHVM_FUNCTION(min, int _argc, CVarRef value, CArrRef _argv = null_array);
-TypedValue* HHVM_FUNCTION(max, ActRec *ar);
 Variant HHVM_FUNCTION(abs, CVarRef number);
 bool HHVM_FUNCTION(is_finite, double val);
 bool HHVM_FUNCTION(is_infinite, double val);

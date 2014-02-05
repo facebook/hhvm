@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <iterator>
 #include <cmath>
+#include <bitset>
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -265,11 +266,14 @@ struct StepFlags {
   bool canConstProp = false;
 
   /*
-   * If an instruction may read or write to locals, this flag is set.
-   * It is only used to try to leave out unnecessary type assertions
-   * on locals (for options.FilterAssertions).
+   * If an instruction may read or write to locals, these flags
+   * indicate which ones.  We don't track this information for local
+   * ids past 64.
+   *
+   * This is currently only used to try to leave out unnecessary type
+   * assertions on locals (for options.FilterAssertions).
    */
-  bool mayReadLocals = false;
+  std::bitset<64> mayReadLocalSet;
 
   /*
    * If the instruction on this step could've been replaced with
@@ -1733,8 +1737,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::TraitExists&)     { clsExistsImpl(AttrTrait); }
 
   void operator()(const bc::VerifyParamType& op) {
-    readLocals();
+    auto loc = findLocalById(op.arg1);
+    locAsCell(loc);
     if (!options.HardTypeHints) return;
+
     /*
      * In HardTypeHints mode, we assume that if this opcode doesn't
      * throw, the parameter was of the specified type (although it may
@@ -1750,8 +1756,7 @@ struct InterpStepper : boost::static_visitor<void> {
     auto const constraint = m_ctx.func->params[op.arg1].typeConstraint;
     if (constraint.hasConstraint() && !constraint.isTypeVar()) {
       FTRACE(2, "     {}\n", constraint.fullName());
-      setLoc(borrow(m_ctx.func->locals[op.arg1]),
-             m_index.lookup_constraint(m_ctx, constraint));
+      setLoc(loc, m_index.lookup_constraint(m_ctx, constraint));
     }
   }
 
@@ -2844,10 +2849,9 @@ private:
   void calledNoReturn(){ m_flags.calledNoReturn = true; }
   void constprop()     { m_flags.canConstProp = true; }
   void nofallthrough() { m_flags.tookBranch = true; }
-  void readLocals()    { m_flags.mayReadLocals = true; }
 
   void doRet(Type t) {
-    readLocals();
+    readAllLocals();
     assert(m_state.stack.empty());
     m_flags.returned = t;
   }
@@ -2910,7 +2914,9 @@ private:
   }
 
 private:
-  void readUnknownLocals() { readLocals(); }
+  void readUnknownLocals() { m_flags.mayReadLocalSet.set(); }
+  void readAllLocals()     { m_flags.mayReadLocalSet.set(); }
+
   void killLocals() {
     FTRACE(2, "    killLocals\n");
     readUnknownLocals();
@@ -3068,13 +3074,19 @@ private: // fpi
   }
 
 private: // locals
+  void mayReadLocal(uint32_t id) {
+    if (id < m_flags.mayReadLocalSet.size()) {
+      m_flags.mayReadLocalSet.set(id);
+    }
+  }
+
   Type locRaw(borrowed_ptr<const php::Local> l) {
-    readLocals();
+    mayReadLocal(l->id);
     return m_state.locals[l->id];
   }
 
   void setLocRaw(borrowed_ptr<const php::Local> l, Type t) {
-    readLocals();
+    mayReadLocal(l->id);
     m_state.locals[l->id] = t;
   }
 
@@ -3082,7 +3094,6 @@ private: // locals
   // TInitNull, and potentially reffy types return the "inner" type,
   // which is always a subtype of InitCell.)
   Type locAsCell(borrowed_ptr<const php::Local> l) {
-    readLocals();
     auto v = locRaw(l);
     if (v.subtypeOf(TInitCell)) return v;
     if (v.subtypeOf(TUninit))   return TInitNull;
@@ -3092,14 +3103,12 @@ private: // locals
   // Read a local type, dereferencing refs, but without converting
   // potential TUninits to TInitNull.
   Type derefLoc(borrowed_ptr<const php::Local> l) {
-    readLocals();
     auto v = locRaw(l);
     if (v.subtypeOf(TCell)) return v;
     return v.couldBe(TUninit) ? TCell : TInitCell;
   }
 
   void ensureInit(borrowed_ptr<const php::Local> l) {
-    readLocals();
     auto v = locRaw(l);
     if (v.couldBe(TUninit)) {
       if (v.subtypeOf(TNull))    return setLocRaw(l, TInitNull);
@@ -3111,7 +3120,6 @@ private: // locals
   }
 
   bool locCouldBeUninit(borrowed_ptr<const php::Local> l) {
-    readLocals();
     return locRaw(l).couldBe(TUninit);
   }
 
@@ -3121,22 +3129,23 @@ private: // locals
    * to set locals to types that include Uninit.
    */
   void setLoc(borrowed_ptr<const php::Local> l, Type t) {
-    readLocals();
     auto v = locRaw(l);
     if (v.subtypeOf(TCell)) m_state.locals[l->id] = t;
   }
 
   borrowed_ptr<php::Local> findLocal(SString name) {
-    readLocals();
     for (auto& l : m_ctx.func->locals) {
-      if (l->name->same(name)) return borrow(l);
+      if (l->name->same(name)) {
+        mayReadLocal(l->id);
+        return borrow(l);
+      }
     }
     return nullptr;
   }
 
   borrowed_ptr<php::Local> findLocalById(int32_t id) {
-    readLocals();
     assert(id < m_ctx.func->locals.size());
+    mayReadLocal(id);
     return borrow(m_ctx.func->locals[id]);
   }
 
@@ -3557,28 +3566,39 @@ template<class Gen>
 void insert_assertions(const php::Func& func,
                        const Bytecode& bcode,
                        const State& state,
-                       bool mayReadLocals,
+                       std::bitset<64> mayReadLocalSet,
+                       bool lastStackOutputObvious,
                        Gen gen) {
-  if (!options.FilterAssertions || mayReadLocals) {
-    for (size_t i = 0; i < state.locals.size(); ++i) {
-      auto const realT = state.locals[i];
-      auto const op = makeAssert<bc::AssertObjL,bc::AssertTL>(
-        borrow(func.locals[i]), realT
-      );
-      if (op) gen(*op);
+  for (size_t i = 0; i < state.locals.size(); ++i) {
+    if (options.FilterAssertions) {
+      if (i < mayReadLocalSet.size() && !mayReadLocalSet.test(i)) {
+        continue;
+      }
     }
+    auto const realT = state.locals[i];
+    auto const op = makeAssert<bc::AssertObjL,bc::AssertTL>(
+      borrow(func.locals[i]), realT
+    );
+    if (op) gen(*op);
   }
 
   if (!options.InsertStackAssertions) return;
+
+  // Skip asserting the top of the stack if it just came immediately
+  // out of an 'obvious' instruction.  (See hasObviousStackOutput.)
+  assert(state.stack.size() >= bcode.numPop());
+  auto i = size_t{0};
+  auto stackIdx = state.stack.size() - 1;
+  if (lastStackOutputObvious) {
+    ++i, --stackIdx;
+  }
 
   /*
    * This doesn't need to account for ActRecs on the fpiStack, because
    * no instruction in an FPI region can ever consume a stack value
    * from above the pre-live ActRec.
    */
-  assert(state.stack.size() >= bcode.numPop());
-  auto stackIdx = state.stack.size() - 1;
-  for (auto i = size_t{0}; i < bcode.numPop(); ++i, --stackIdx) {
+  for (; i < bcode.numPop(); ++i, --stackIdx) {
     auto const realT = state.stack[stackIdx];
 
     if (options.FilterAssertions &&
@@ -3665,12 +3685,98 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * When filter assertions is on, we use this to avoid putting stack
+ * assertions on some "obvious" instructions.
+ *
+ * These are instructions that push an output type that is always the
+ * same, i.e. where an AssertT is never going to add information.
+ * (E.g. "Int 3" obviously pushes an Int, and the JIT has no trouble
+ * figuring that out, so there's no reason to assert about it.)
+ *
+ * TODO(#3676101): It turns out many hhbc opcodes have known output
+ * types---there are some super polymorphic ones, but many always do
+ * bools or objects, etc.  We might consider making stack flavors have
+ * subtypes and adding this to the opcode table.
+ */
+bool hasObviousStackOutput(Op op) {
+  switch (op) {
+  case Op::Box:
+  case Op::BoxR:
+  case Op::Null:
+  case Op::NullUninit:
+  case Op::True:
+  case Op::False:
+  case Op::Int:
+  case Op::Double:
+  case Op::String:
+  case Op::Array:
+  case Op::NewArray:
+  case Op::NewArrayReserve:
+  case Op::NewPackedArray:
+  case Op::NewStructArray:
+  case Op::AddElemC:
+  case Op::AddElemV:
+  case Op::AddNewElemC:
+  case Op::AddNewElemV:
+  case Op::NameA:
+  case Op::File:
+  case Op::Dir:
+  case Op::Concat:
+  case Op::Not:
+  case Op::Xor:
+  case Op::Same:
+  case Op::NSame:
+  case Op::Eq:
+  case Op::Neq:
+  case Op::Lt:
+  case Op::Gt:
+  case Op::Lte:
+  case Op::Gte:
+  case Op::Shl:
+  case Op::Shr:
+  case Op::CastBool:
+  case Op::CastInt:
+  case Op::CastDouble:
+  case Op::CastString:
+  case Op::CastArray:
+  case Op::CastObject:
+  case Op::InstanceOfD:
+  case Op::InstanceOf:
+  case Op::Print:
+  case Op::Exit:
+  case Op::AKExists:
+  case Op::IssetL:
+  case Op::IssetN:
+  case Op::IssetG:
+  case Op::IssetS:
+  case Op::IssetM:
+  case Op::EmptyL:
+  case Op::EmptyN:
+  case Op::EmptyG:
+  case Op::EmptyS:
+  case Op::EmptyM:
+  case Op::IsTypeC:
+  case Op::IsTypeL:
+  case Op::ClassExists:
+  case Op::InterfaceExists:
+  case Op::TraitExists:
+  case Op::Floor:
+  case Op::Ceil:
+    return true;
+  default:
+    return false;
+  }
+}
+
 std::vector<Bytecode> optimize_block(const Index& index,
                                      const Context ctx,
                                      php::Block* const blk,
                                      State state) {
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
+
+  auto lastStackOutputObvious = false;
 
   Interpreter interp { &index, ctx, blk, state };
   for (auto& op : blk->hhbcs) {
@@ -3680,6 +3786,9 @@ std::vector<Bytecode> optimize_block(const Index& index,
       newBCs.push_back(newb);
       newBCs.back().srcLoc = op.srcLoc;
       FTRACE(2, "   + {}\n", show(newBCs.back()));
+
+      lastStackOutputObvious =
+        newb.numPush() != 0 && hasObviousStackOutput(newb.op);
     };
 
     auto const preState = state;
@@ -3697,7 +3806,8 @@ std::vector<Bytecode> optimize_block(const Index& index,
     }
 
     if (options.InsertAssertions) {
-      insert_assertions(*ctx.func, op, preState, flags.mayReadLocals, gen);
+      insert_assertions(*ctx.func, op, preState, flags.mayReadLocalSet,
+        lastStackOutputObvious, gen);
     }
 
     if (options.RemoveDeadBlocks && flags.tookBranch) {

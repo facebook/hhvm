@@ -81,7 +81,8 @@ void apcExtension::moduleLoad(Hdf config) {
 
   apc["NoTTLPrefix"].get(NoTTLPrefix);
 
-  UseUncounted = apc["MemModelTreadmill"].getBool(false);
+  UseUncounted = apc["MemModelTreadmill"].getBool(
+      RuntimeOption::ServerExecutionMode());
 }
 
 void apcExtension::moduleInit() {

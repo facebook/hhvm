@@ -287,6 +287,13 @@ class mysqli {
   public function dump_debug_info(): mixed;
 
   /**
+   * Alias for real_escape_string
+   */
+  public function escape_string(string $escapestr): ?string {
+    return $this->real_escape_string($escapestr);
+  }
+
+  /**
    * Returns a character set object
    *
    * @return object - The function returns a character set object with

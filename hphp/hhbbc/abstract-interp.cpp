@@ -3705,9 +3705,16 @@ std::vector<Bytecode> optimize_block(const Index& index,
       case Op::JmpNZ:  blk->fallthrough = op.JmpNZ.target; break;
       case Op::JmpZ:   blk->fallthrough = op.JmpZ.target;  break;
       default:
-        // No switch, etc support.
+        // No support for switch, etc, right now.
         always_assert(0 && "unsupported tookBranch case");
       }
+      /*
+       * We need to pop the cell that was on the stack for the
+       * conditional jump.  Note: this also conceptually needs to
+       * execute any side effects a conversion to bool can have.
+       * (Currently that is none.)
+       */
+      gen(bc::PopC {});
       continue;
     }
 

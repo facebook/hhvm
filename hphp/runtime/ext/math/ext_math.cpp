@@ -80,36 +80,49 @@ Variant HHVM_FUNCTION(min, int _argc, CVarRef value, CArrRef _argv /* = null_arr
   return ret;
 }
 
-Variant HHVM_FUNCTION(max, int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
-  if (_argv.empty()) {
-    const auto& cell_value = *value.asCell();
-    if (UNLIKELY(!isContainer(cell_value))) {
-      return value;
-    }
+//Variant HHVM_FUNCTION(max, int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
+TypedValue* HHVM_FUNCTION(max, ActRec *ar) {
+  TypedValue* rv;
+  Variant ret;
+  int32_t count = ar->numArgs();
 
-    ArrayIter iter(cell_value);
-    if (!iter) {
-      return uninit_null();
-    }
-    Variant ret = iter.secondRefPlus();
-    ++iter;
-    for (; iter; ++iter) {
-      Variant currVal = iter.secondRefPlus();
-      if (more(currVal, ret)) {
-        ret = currVal;
+  if (LIKELY(count >= 1)) {
+    Variant value(getArg<KindOfAny>(ar, 1));
+    if (count == 1) {
+      if (LIKELY(isContainer(value))) {
+        ArrayIter iter(value);
+        if (!iter) {
+          ret = uninit_null();
+        } else {
+          ret = iter.secondRefPlus();
+          ++iter;
+          for (; iter; ++iter) {
+            Variant currVal = iter.secondRefPlus();
+            if (more(currVal, ret)) {
+              ret = currVal;
+            }
+          }
+        }
+      } else {
+        ret = value;
+      }
+    } else {
+      for (int32_t i = 1; i < count; ++i) {
+        Variant currVal(getArg<KindOfAny>(ar, i));
+        if (more(currVal, ret)) {
+          ret = currVal;
+        }
       }
     }
-    return ret;
+    rv = ret.asTypedValue();
+  } else {
+    TypedValue rvSpace;
+    rv = &rvSpace;
+    throw_missing_arguments_nr("min", 1, count, 1, rv);
   }
 
-  Variant ret = value;
-  for (ArrayIter iter(_argv); iter; ++iter) {
-    Variant currVal = iter.secondRef();
-    if (more(currVal, ret)) {
-      ret = currVal;
-    }
-  }
-  return ret;
+  ar->m_r = *rv;
+  return &ar->m_r;
 }
 
 /* Logic based on zend_operators.c::convert_scalar_to_number() */

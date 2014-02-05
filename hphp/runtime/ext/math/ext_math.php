@@ -370,9 +370,8 @@ function log1p(float $number): float;
  *   value.   When given a string it will be cast as an integer when
  *   comparing.
  */
-<<__Native>>
-function max(mixed $value1,
-             ...): mixed;
+<<__Native("ActRec")>>
+function max(mixed $value1, ...): mixed;
 
 /**
  * Find lowest value
@@ -384,8 +383,7 @@ function max(mixed $value1,
  *   values.
  */
 <<__Native>>
-function min(mixed $value1,
-             ...): mixed;
+function min(mixed $value1, ...): mixed;
 
 /**
  * Show largest possible random value

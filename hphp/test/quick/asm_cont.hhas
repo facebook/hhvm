@@ -1,0 +1,59 @@
+#
+# Basic test of continuations in HH assembler.
+#
+
+.main {
+  .numiters 1;
+  FPushFuncD 0 "R"
+  FCall 0
+  UnboxR
+  IterInit 0 L0 $i
+  .try_fault F2 {
+  L1:
+    String "\n"
+    CGetL2 $i
+    Concat
+    Print
+    PopC
+    IterNext 0 L1 $i
+  }
+L0:
+  Int 1
+  RetC
+F2:
+  IterFree 0
+  Unwind
+}
+
+.function R() hasGeneratorBody("R$continuation") {
+  CreateCont
+  RetC
+}
+
+.function R$continuation() isGenerator {
+  UnpackCont
+  Switch <L0 L1 L2 L3 L4 L5 L6> 0 0
+L0:
+  PopC
+  Int 1
+  ContSuspend 2
+L1:
+  Throw
+L2:
+  PopC
+  Int 2
+  ContSuspend 4
+L3:
+  Throw
+L4:
+  PopC
+  Int 3
+  ContSuspend 6
+L5:
+  Throw
+L6:
+  PopC
+  Null
+  ContRetC
+}
+

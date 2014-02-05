@@ -354,7 +354,7 @@ struct Input {
 private:
   struct is_bareword {
     bool operator()(int i) const {
-      return isalnum(i) || i == '_' || i == '.';
+      return isalnum(i) || i == '_' || i == '.' || i == '$';
     }
   };
 
@@ -1570,8 +1570,35 @@ void parse_parameter_list(AsmState& as) {
   }
 }
 
+void parse_function_flags(AsmState& as) {
+  as.in.skipWhitespace();
+  std::string flag;
+  for (;;) {
+    if (as.in.peek() == '{') break;
+    if (!as.in.readword(flag)) break;
+
+    if (flag == "hasGeneratorBody") {
+      as.in.expectWs('(');
+      as.fe->setGeneratorBodyName(read_litstr(as));
+      as.in.expectWs(')');
+    } else if (flag == "isGenerator") {
+      as.fe->setIsGenerator(true);
+    } else if (flag == "isGeneratorFromClosure") {
+      as.fe->setIsGeneratorFromClosure(true);
+    } else if (flag == "isAsync") {
+      as.fe->setIsAsync(true);
+    } else if (flag == "isClosureBody") {
+      as.fe->setIsClosureBody(true);
+    } else if (flag == "isPairGenerator") {
+      as.fe->setIsPairGenerator(true);
+    } else {
+      as.error("Unexpected function flag \"" + flag + "\"");
+    }
+  }
+}
+
 /*
- * directive-function : attribute-list identifier parameter-list
+ * directive-function : attribute-list identifier parameter-list function-flags
  *                        '{' function-body
  *                    ;
  */
@@ -1591,6 +1618,8 @@ void parse_function(AsmState& as) {
               as.ue->bcPos(), attrs, true, 0);
 
   parse_parameter_list(as);
+  parse_function_flags(as);
+
   as.in.expectWs('{');
 
   parse_function_body(as);

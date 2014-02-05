@@ -1964,8 +1964,18 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
     return gen(inst->op(), inst->taken(), srcInst->src(0));
   }
 
+  auto canCompareFused = [&]() {
+    auto src1Type = srcInst->src(0)->type();
+    auto src2Type = srcInst->src(1)->type();
+    return ((src1Type == Type::Int && src2Type == Type::Int) ||
+            ((src1Type == Type::Int || src1Type == Type::Dbl) &&
+             (src2Type == Type::Int || src2Type == Type::Dbl)) ||
+            (src1Type == Type::Bool && src2Type == Type::Bool) ||
+            (src1Type == Type::Cls && src2Type == Type::Cls));
+  };
+
   // Fuse jumps with query operators.
-  if (isFusableQueryOp(srcOpcode)) {
+  if (isFusableQueryOp(srcOpcode) && canCompareFused()) {
     SrcRange ssas = srcInst->srcs();
     return gen(
       queryToJmpOp(

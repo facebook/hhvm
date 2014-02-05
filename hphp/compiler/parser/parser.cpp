@@ -1470,14 +1470,14 @@ void Parser::onBreakContinue(Token &out, bool isBreak, Token* expr) {
 
 void Parser::onReturn(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
-  if (!m_funcContexts.empty()) {
+  if (!m_funcContexts.empty() && expr) {
     FunctionContext& fc = m_funcContexts.back();
     if (fc.isGenerator) {
       Compiler::Error(InvalidYield, out->stmt);
-      PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
+      PARSE_ERROR("Generators cannot return values using 'return'");
       return;
     }
-    fc.hasReturn = true;
+    fc.hasReturnValue = true;
   }
 }
 
@@ -1523,9 +1523,9 @@ bool Parser::setIsGenerator() {
   }
 
   FunctionContext& fc = m_funcContexts.back();
-  if (fc.hasReturn) {
+  if (fc.hasReturnValue) {
     invalidYield();
-    PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
+    PARSE_ERROR("Generators cannot return values using 'return'");
     return false;
   }
   if (fc.isAsync) {

@@ -341,16 +341,16 @@ public:
 private:
   struct FunctionContext {
     FunctionContext()
-      : hasReturn(false)
+      : hasReturnValue(false)
       , isGenerator(false)
       , isAsync(false)
     {}
 
     void checkFinalAssertions() {
-      assert((isGenerator && !isAsync && !hasReturn) || !isGenerator);
+      assert((isGenerator && !isAsync && !hasReturnValue) || !isGenerator);
     }
 
-    bool hasReturn;       // function contains a return statement
+    bool hasReturnValue;       // function contains a return statement with value
     bool isGenerator;     // function determined to be a generator
     bool isAsync;         // function determined to be async
   };

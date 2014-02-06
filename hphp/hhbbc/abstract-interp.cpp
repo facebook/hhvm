@@ -1144,7 +1144,11 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::IncDecL& op) {
     auto const loc = locAsCell(op.loc1);
     auto const val = tv(loc);
-    if (!val) return push(TInitCell); // Only constants for now
+    if (!val) {
+      // Only tracking IncDecL for constants for now.
+      setLoc(op.loc1, TInitCell);
+      return push(TInitCell);
+    }
 
     auto const subop = op.subop;
     auto const pre = subop == IncDecOp::PreInc || subop == IncDecOp::PreDec;
@@ -3094,10 +3098,10 @@ private: // locals
   // TInitNull, and potentially reffy types return the "inner" type,
   // which is always a subtype of InitCell.)
   Type locAsCell(borrowed_ptr<const php::Local> l) {
-    auto v = locRaw(l);
-    if (v.subtypeOf(TInitCell)) return v;
-    if (v.subtypeOf(TUninit))   return TInitNull;
-    return TInitCell;
+    auto t = locRaw(l);
+    return !t.subtypeOf(TCell) ? TInitCell :
+            t.subtypeOf(TUninit) ? TInitNull :
+            remove_uninit(t);
   }
 
   // Read a local type, dereferencing refs, but without converting
@@ -3109,13 +3113,11 @@ private: // locals
   }
 
   void ensureInit(borrowed_ptr<const php::Local> l) {
-    auto v = locRaw(l);
-    if (v.couldBe(TUninit)) {
-      if (v.subtypeOf(TNull))    return setLocRaw(l, TInitNull);
-      if (v.subtypeOf(TPrim))    return setLocRaw(l, TInitPrim);
-      if (v.subtypeOf(TUnc))     return setLocRaw(l, TInitUnc);
-      if (v.subtypeOf(TCell))    return setLocRaw(l, TInitCell);
-      if (v.subtypeOf(TGen))     return setLocRaw(l, TInitGen);
+    auto t = locRaw(l);
+    if (t.couldBe(TUninit)) {
+      if (t.subtypeOf(TUninit)) return setLocRaw(l, TInitNull);
+      if (t.subtypeOf(TCell))   return setLocRaw(l, remove_uninit(t));
+      setLocRaw(l, TInitGen);
     }
   }
 
@@ -3202,11 +3204,25 @@ private: // properties on $this
     for (auto& kv : m_state.privateProperties) kv.second = TGen;
   }
 
+  /*
+   * This function returns a type that includes all the possible types
+   * that could result from reading a property $this->name.
+   *
+   * Note that this may include types that the property itself cannot
+   * actually contain, due to the effects of a possible __get
+   * function.  For now we handle that case by just returning
+   * InitCell, rather than detecting if $this could have a magic
+   * getter.  TODO(#3669480).
+   */
   folly::Optional<Type> thisPropAsCell(SString name) const {
     auto const t = thisPropRaw(name);
     if (!t) return folly::none;
-    if (t->subtypeOf(TInitCell)) return *t;
-    if (t->subtypeOf(TUninit))   return TInitNull;
+
+    if (t->couldBe(TUninit)) {
+      // Could come out of __get.
+      return TInitCell;
+    }
+    if (t->subtypeOf(TCell)) return *t;
     return TInitCell;
   }
 
@@ -3289,12 +3305,14 @@ private: // properties on self::
     if (auto t = selfPropRaw(name)) *t = TGen;
   }
 
+  // TODO(#3684136): self::$foo can't actually ever be uninit.  Right
+  // now uninits may find their way into here though.
   folly::Optional<Type> selfPropAsCell(SString name) const {
     auto const t = selfPropRaw(name);
     if (!t) return folly::none;
-    if (t->subtypeOf(TInitCell)) return *t;
-    if (t->subtypeOf(TUninit))   return TInitNull;
-    return TInitCell;
+    return !t->subtypeOf(TCell) ? TInitCell :
+            t->subtypeOf(TUninit) ? TInitNull :
+            remove_uninit(*t);
   }
 
   /*

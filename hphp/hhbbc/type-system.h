@@ -422,6 +422,15 @@ Type loosen_statics(Type);
  */
 Type loosen_values(Type);
 
+/*
+ * If t contains TUninit, returns the best type we can that contains
+ * at least everything t contains, but doesn't contain TUninit.  Note
+ * that this function will return TBottom for TUninit.
+ *
+ * Pre: t.subtypeOf(TCell)
+ */
+Type remove_uninit(Type t);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

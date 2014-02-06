@@ -640,6 +640,16 @@ Type loosen_values(Type a) {
          a;
 }
 
+Type remove_uninit(Type t) {
+  assert(t.subtypeOf(TCell));
+  if (!t.couldBe(TUninit))  return t;
+  if (t.subtypeOf(TUninit)) return TBottom;
+  if (t.subtypeOf(TNull))   return TInitNull;
+  if (t.subtypeOf(TPrim))   return TInitPrim;
+  if (t.subtypeOf(TUnc))    return TInitUnc;
+  return TInitCell;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

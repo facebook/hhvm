@@ -1474,11 +1474,16 @@ void Parser::onBreakContinue(Token &out, bool isBreak, Token* expr) {
 
 void Parser::onReturn(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
-  if (!m_funcContexts.empty()) {
+  // When HipHopSyntax is enabled, "yield break" is the only supported method
+  // for early termination of a generator.
+  if (!m_funcContexts.empty() &&
+      (expr || (Scanner::AllowHipHopSyntax & Option::GetScannerType()))) {
     FunctionContext& fc = m_funcContexts.back();
     if (fc.isGenerator) {
       Compiler::Error(InvalidYield, out->stmt);
-      PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
+      PARSE_ERROR((Scanner::AllowHipHopSyntax & Option::GetScannerType()) ?
+        "Cannot mix 'return' and 'yield' in the same function" :
+        "Generators cannot return values using \"return\"");
       return;
     }
     fc.hasReturn = true;
@@ -1529,7 +1534,9 @@ bool Parser::setIsGenerator() {
   FunctionContext& fc = m_funcContexts.back();
   if (fc.hasReturn) {
     invalidYield();
-    PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
+    PARSE_ERROR((Scanner::AllowHipHopSyntax & Option::GetScannerType()) ?
+      "Cannot mix 'return' and 'yield' in the same function" :
+      "Generators cannot return values using \"return\"");
     return false;
   }
   if (fc.isAsync) {

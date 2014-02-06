@@ -1,6 +1,6 @@
 <?php
 class myHeap extends SplHeap {
-    public function compare($a, $b) {
+    protected function compare($a, $b) {
         throw new exception("foo");
     }
 }

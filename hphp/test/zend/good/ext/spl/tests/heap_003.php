@@ -1,6 +1,6 @@
 <?php
 class myHeap extends SplHeap {
-    public function compare($a, $b) {
+    protected function compare($a, $b) {
         if ($a > $b) {
             $result = 1;
         } else if ($a < $b) {

@@ -4,7 +4,7 @@ class myHeap extends SplHeap
 {
 	public $allow_compare = true;
 	
-	public function compare($v1, $v2)
+	protected function compare($v1, $v2)
 	{
 		if ($this->allow_compare == true)
 		{

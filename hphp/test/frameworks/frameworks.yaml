@@ -290,9 +290,11 @@
     install_root: twig
     test_root: twig
   yii:
-    url: https://github.com/yiisoft/yii.git
+    # Until PHPUnit 3.8 pull request is accepted
+    # https://github.com/yiisoft/yii/pull/3211
+    url: https://github.com/JoelMarcey/yii.git
     branch: master
-    commit: 32b8f82e58d1e8465fc04f74562f6a2e0f6c62c9
+    commit: 3739ba8696a51b4817a9bb26a88c1ff7fc1a0925
     install_root: yii
     test_root: yii/tests
     clowns:

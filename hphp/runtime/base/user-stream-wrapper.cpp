@@ -15,20 +15,20 @@
 */
 
 #include "hphp/runtime/base/user-stream-wrapper.h"
+#include "hphp/system/constants.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 UserStreamWrapper::UserStreamWrapper(const String& name,
-                                     const String& clsname)
+                                     const String& clsname,
+                                     int flags)
     : m_name(name) {
   m_cls = Unit::loadClass(clsname.get());
   if (!m_cls) {
     throw InvalidArgumentException(0, "Undefined class '%s'", clsname.data());
   }
-  // There is a third param in Zend to stream_wrapper_register() which could
-  // affect that when we add that param
-  m_isLocal = true;
+  m_isLocal = !(flags & k_STREAM_IS_URL);
 }
 
 File* UserStreamWrapper::open(const String& filename, const String& mode,

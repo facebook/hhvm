@@ -268,9 +268,7 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
     return sr->getTopTranslation();
   }
   SKTRACE(1, args.m_sk, "retranslate\n");
-  if (m_mode == TransInvalid) {
-    m_mode = profileSrcKey(args.m_sk) ? TransProfile : TransLive;
-  }
+  m_mode = profileSrcKey(args.m_sk) ? TransProfile : TransLive;
   return translate(args);
 }
 
@@ -775,8 +773,8 @@ TCA TranslatorX64::regeneratePrologue(TransID prologueTransId,
       TransID funcletTransId = m_profData->dvFuncletTransId(func, nArgs);
       if (funcletTransId != InvalidID) {
         invalidateSrcKey(funcletSK);
-        TCA dvStart = retranslate(TranslArgs(funcletSK, false).
-                                  transId(funcletTransId));
+        TCA dvStart = translate(TranslArgs(funcletSK, false).
+                                transId(funcletTransId));
         if (dvStart && !triggerSkStart && funcletSK == triggerSk) {
           triggerSkStart = dvStart;
         }
@@ -787,7 +785,7 @@ TCA TranslatorX64::regeneratePrologue(TransID prologueTransId,
     }
   }
 
-  return triggerSkStart;;
+  return triggerSkStart;
 }
 
 /**

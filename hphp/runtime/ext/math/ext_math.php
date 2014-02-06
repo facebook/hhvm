@@ -389,7 +389,7 @@ function log1p(float $number): float;
  */
 function max(mixed $value1, ...): mixed {
   if (func_num_args() == 1) {
-    if (!is_array($value1) && !$value instanceof Collection) {
+    if (!is_array($value1) && !$value1 instanceof Collection) {
       return $value;
     }
     $args = (array)$value1;
@@ -416,7 +416,7 @@ function max(mixed $value1, ...): mixed {
  */
 function min(mixed $value1, ...): mixed {
   if (func_num_args() == 1) {
-    if (!is_array($value1) && !$value instanceof Collection) {
+    if (!is_array($value1) && !$value1 instanceof Collection) {
       return $value;
     }
     $args = (array)$value1;

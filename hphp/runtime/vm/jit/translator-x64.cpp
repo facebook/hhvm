@@ -1866,6 +1866,14 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         try {
           assertCleanState();
           result = translateRegion(*region, regionInterps);
+
+          // If we're profiling, grab the postconditions so we can
+          // use them in region selection whenever we decide to retranslate.
+          if (m_mode == TransProfile && result == Success &&
+              RuntimeOption::EvalJitPGOUsePostConditions) {
+            pconds = m_irTrans->hhbcTrans().traceBuilder().getKnownTypes();
+          }
+
           FTRACE(2, "translateRegion finished with result {}\n",
                  translateResultName(result));
         } catch (const std::exception& e) {

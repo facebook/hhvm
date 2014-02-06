@@ -114,7 +114,7 @@ function curl_getinfo(resource $ch,
  * @return resource - Returns a cURL handle on success, FALSE on errors.
  */
 <<__Native>>
-function curl_init(string $url = NULL): mixed;
+function curl_init(?string $url = null): mixed;
 
 /**
  * Add a normal cURL handle to a cURL multi handle
@@ -182,7 +182,7 @@ function curl_multi_getcontent(resource $ch): ?string;
  */
 <<__Native>>
 function curl_multi_info_read(resource $mh,
-                              int &$msgs_in_queue = NULL): mixed;
+                              mixed &$msgs_in_queue = NULL): mixed;
 
 /**
  * Returns a new cURL multi handle
@@ -291,7 +291,7 @@ function evhttp_set_cache(string $address, int $max_conn, int $port = 80): void;
  * @return mixed - HTTP response. FALSE if any failure.
  */
 <<__Native, __HipHopSpecific>>
-function evhttp_get(string $url, array<string> $headers = null,
+function evhttp_get(string $url, ?array<string> $headers = null,
                     int $port = 80): mixed;
 
 /**
@@ -305,7 +305,7 @@ function evhttp_get(string $url, array<string> $headers = null,
  * @return mixed - HTTP response. FALSE if any failure.
  */
 <<__Native, __HipHopSpecific>>
-function evhttp_post(string $url, string $data, array<string> $headers = null,
+function evhttp_post(string $url, string $data, ?array<string> $headers = null,
                     int $port = 80): mixed;
 
 /**
@@ -320,7 +320,7 @@ function evhttp_post(string $url, string $data, array<string> $headers = null,
  *    response. FALSE if there was any failure.
  */
 <<__Native, __HipHopSpecific>>
-function evhttp_async_get(string $url, array<string> $headers = null,
+function evhttp_async_get(string $url, ?array<string> $headers = null,
                           int $timeout = 5): mixed;
 
 /**
@@ -337,7 +337,7 @@ function evhttp_async_get(string $url, array<string> $headers = null,
  */
 <<__Native, __HipHopSpecific>>
 function evhttp_async_post(string $url, string $data,
-                           array<string> $headers = null,
+                           ?array<string> $headers = null,
                            int $timeout = 5): mixed;
 
 /**
@@ -377,6 +377,6 @@ function fb_curl_getopt(resource $ch, int $opt = 0): mixed;
  * @return mixed - Returns 0 on success, or one of the CURLM_XXX errors code.
  */
 <<__Native, __HipHopSpecific>>
-function fb_curl_multi_fdset(resource $mh, array &$read_fd_set,
-                             array &$write_fd_set, array &$exc_fd_set,
-                             int &$max_fd = null): mixed;
+function fb_curl_multi_fdset(resource $mh, mixed &$read_fd_set,
+                             mixed &$write_fd_set, mixed &$exc_fd_set,
+                             ?int &$max_fd = null): mixed;

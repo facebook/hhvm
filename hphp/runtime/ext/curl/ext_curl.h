@@ -259,7 +259,7 @@ extern const int64_t k_CURL_VERSION_KERBEROS4;
 extern const int64_t k_CURL_VERSION_LIBZ;
 extern const int64_t k_CURL_VERSION_SSL;
 
-Variant HHVM_FUNCTION(curl_init, const String& url = null_string);
+Variant HHVM_FUNCTION(curl_init, CVarRef url = null_string);
 Variant HHVM_FUNCTION(curl_copy_handle, CResRef ch);
 Variant HHVM_FUNCTION(curl_version, int uversion = k_CURLVERSION_NOW);
 bool HHVM_FUNCTION(curl_setopt, CResRef ch, int option, CVarRef value);
@@ -287,13 +287,13 @@ Variant HHVM_FUNCTION(curl_multi_close, CResRef mh);
 void HHVM_FUNCTION(evhttp_set_cache, const String& address, int max_conn,
                         int port = 80);
 Variant HHVM_FUNCTION(evhttp_get, const String& url,
-                                CArrRef headers = null_array, int timeout = 5);
+                                CVarRef headers = null_array, int timeout = 5);
 Variant HHVM_FUNCTION(evhttp_post, const String& url, const String& data,
-                      CArrRef headers = null_array, int timeout = 5);
+                      CVarRef headers = null_array, int timeout = 5);
 Variant HHVM_FUNCTION(evhttp_async_get, const String& url,
-                           CArrRef headers = null_array, int timeout = 5);
+                           CVarRef headers = null_array, int timeout = 5);
 Variant HHVM_FUNCTION(evhttp_async_post, const String& url, const String& data,
-                            CArrRef headers = null_array, int timeout = 5);
+                            CVarRef headers = null_array, int timeout = 5);
 Variant HHVM_FUNCTION(evhttp_recv, CResRef handle);
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,14 +27,14 @@ SOFTWARE.
 */
 
 
-#include "hphp/runtime/ext/JSON_parser.h"
+#include "hphp/runtime/ext/json/JSON_parser.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/thread-init-fini.h"
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 #define MAX_LENGTH_OF_LONG 20

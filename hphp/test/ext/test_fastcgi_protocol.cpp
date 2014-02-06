@@ -18,7 +18,7 @@
 #include "hphp/test/ext/test_fastcgi.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/runtime/server/fastcgi/protocol-session-handler.h"
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -157,7 +157,7 @@ bool TestFastCGIProtocol::LoadExchangeFromJson(const std::string& path,
   }
   std::string json_str((std::istreambuf_iterator<char>(f)),
                         std::istreambuf_iterator<char>());
-  Variant json = f_json_decode(json_str, true);
+  Variant json = HHVM_FN(json_decode)(json_str, true);
   if (!result.fromJson(json)) {
     printf("Error loading message exchange file: %s\n", path.c_str());
     return false;

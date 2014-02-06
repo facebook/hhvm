@@ -25,7 +25,6 @@
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/ext_json.h"
 
 #include "hphp/util/alloc.h"
 

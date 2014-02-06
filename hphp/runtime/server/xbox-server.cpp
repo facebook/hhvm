@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/server-task-event.h"
-#include "hphp/runtime/ext/ext_json.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"

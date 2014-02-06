@@ -54,7 +54,6 @@ namespace Eval {
   x(ArrayObject)                                \
   x(Iterator)                                   \
   x(IteratorAggregate)                          \
-  x(JsonSerializable)                           \
   x(Traversable)                                \
   x(Countable)                                  \
   x(LazyKVZipIterable)                          \

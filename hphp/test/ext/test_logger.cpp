@@ -20,7 +20,7 @@
 #include <sys/param.h>
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/ext/url/ext_url.h"
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_file.h"
 
@@ -108,13 +108,13 @@ Array TestLogger::postData(Array arr) {
   StringBuffer response;
 
   Array data = make_map_array("method", "recordTestResults",
-                           "args", f_json_encode(make_packed_array(arr)));
+                           "args", HHVM_FN(json_encode)(make_packed_array(arr)));
 
   String str = HHVM_FN(http_build_query)(data, "", "");
 
   client.post(log_url, str.c_str(), str.length(), response);
 
-  return f_json_decode(response.detach(), true).toArray();
+  return HHVM_FN(json_decode)(response.detach(), true).toArray();
 }
 
 std::string TestLogger::getRepoRoot() {

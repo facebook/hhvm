@@ -1,6 +1,6 @@
 <?php
 class SplMinHeap2 extends SplMinHeap {
-    public function compare($a, $b) {
+    protected function compare($a, $b) {
         return -parent::compare($a,$b);
     }
 }
@@ -12,7 +12,7 @@ $h->insert(2);
 var_dump($h->top());
 
 class SplMaxHeap2 extends SplMaxHeap {
-    public function compare($a, $b) {
+    protected function compare($a, $b) {
         return -parent::compare($a,$b);
     }
 }

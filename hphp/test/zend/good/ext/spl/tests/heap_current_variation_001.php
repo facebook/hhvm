@@ -2,7 +2,7 @@
 
 class myHeap extends SplHeap
 {
-	public function compare($v1, $v2)
+	protected function compare($v1, $v2)
 	{
 		throw new Exception('');
 	}

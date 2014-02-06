@@ -390,16 +390,22 @@ function log1p(float $number): float;
 function max(mixed $value1, ...): mixed {
   if (func_num_args() == 1) {
     if (!is_array($value1) && !$value1 instanceof Collection) {
-      return $value;
+      return $value1;
     }
     $args = (array)$value1;
   } else {
     $args = func_get_args();
   }
-  $ret = array_shift($args);
-  foreach($args as $arg) {
-    if ($arg > $ret) {
-      $ret = $arg;
+  if (count($args) == 0) {
+    user_error('max(): Array must contain at least one element',
+               E_USER_WARNING);
+    return false;
+  }
+  reset($args);
+  list($_, $ret) = each($args);
+  while (list($_, $value) = each($args)) {
+    if ($value > $ret) {
+      $ret = $value;
     }
   }
   return $ret;
@@ -417,16 +423,22 @@ function max(mixed $value1, ...): mixed {
 function min(mixed $value1, ...): mixed {
   if (func_num_args() == 1) {
     if (!is_array($value1) && !$value1 instanceof Collection) {
-      return $value;
+      return $value1;
     }
     $args = (array)$value1;
   } else {
     $args = func_get_args();
   }
-  $ret = array_shift($args);
-  foreach($args as $arg) {
-    if ($arg < $ret) {
-      $ret = $arg;
+  if (count($args) == 0) {
+    user_error('min(): Array must contain at least one element',
+               E_USER_WARNING);
+    return false;
+  }
+  reset($args);
+  list($_, $ret) = each($args);
+  while (list($_, $value) = each($args)) {
+    if ($value < $ret) {
+      $ret = $value;
     }
   }
   return $ret;

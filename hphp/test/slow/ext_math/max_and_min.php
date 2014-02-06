@@ -29,6 +29,10 @@ function single_arg() {
   min_max_single(Vector {3, 1, 6, 7});
   min_max_single(Set {2, 4, 5});
   min_max_single(Map {1 => "1236150163"});
+
+  echo ' === Single Value ===', "\n";
+  min_max_single(1);
+  min_max_single("hello");
 }
 
 function multi_arg() {

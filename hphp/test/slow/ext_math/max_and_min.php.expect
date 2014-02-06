@@ -12,6 +12,11 @@ int(5)
 int(2)
 string(10) "1236150163"
 string(10) "1236150163"
+ === Single Value ===
+int(1)
+int(1)
+string(5) "hello"
+string(5) "hello"
  === Multiple Arguments ===
 array(1) {
   [0]=>

@@ -416,7 +416,7 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   }
 }
 
-Array ObjectData::o_toArray() const {
+Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
   if (isCollection()) {
@@ -447,7 +447,7 @@ Array ObjectData::o_toArray() const {
     return ArrayObject_toArray(this);
   } else {
     Array ret(ArrayData::Create());
-    o_getArray(ret, false);
+    o_getArray(ret, pubOnly);
     return ret;
   }
 }

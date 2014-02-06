@@ -41,11 +41,13 @@ Variant preg_match_all(const String& pattern, const String& subject,
 
 Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
                           CVarRef subject, int limit, Variant &count,
-                          bool is_callable);
+                          bool is_callable, bool is_filter);
 int preg_replace(Variant &result, CVarRef pattern, CVarRef replacement,
                  CVarRef subject, int limit = -1);
 int preg_replace_callback(Variant &result, CVarRef pattern, CVarRef callback,
                           CVarRef subject, int limit = -1);
+int preg_filter(Variant &result, CVarRef pattern, CVarRef replacement,
+                CVarRef subject, int limit = -1);
 
 Variant preg_split(const String& pattern, const String& subject, int limit = -1,
                    int flags = 0);

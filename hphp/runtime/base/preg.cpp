@@ -1216,7 +1216,8 @@ static Variant php_replace_in_subject(CVarRef regex, CVarRef replace,
 
 Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
                           CVarRef subject, int limit, Variant &count,
-                          bool is_callable) {
+                          bool is_callable, bool is_filter) {
+  assert(!(is_callable && is_filter));
   if (!is_callable &&
       replacement.is(KindOfArray) && !pattern.is(KindOfArray)) {
     raise_warning("Parameter mismatch, pattern is a string while "
@@ -1232,7 +1233,11 @@ Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
 
     if (ret.isString()) {
       count = replace_count;
-      return ret.asStrRef();
+      if (is_filter && replace_count == 0) {
+        return null_variant;
+      } else {
+        return ret.asStrRef();
+      }
     }
 
     return ret;
@@ -1241,11 +1246,13 @@ Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
   Array return_value = Array::Create();
   Array arrSubject = subject.toArray();
   for (ArrayIter iter(arrSubject); iter; ++iter) {
+    auto old_replace_count = replace_count;
     String subject_entry = iter.second().toString();
     Variant ret = php_replace_in_subject(pattern, replacement, subject_entry,
                                          limit, is_callable, &replace_count);
 
-    if (ret.isString() && !ret.isNull()) {
+    if (ret.isString() && !ret.isNull() &&
+        (!is_filter || replace_count > old_replace_count)) {
       return_value.set(iter.first(), ret.asStrRef());
     }
   }
@@ -1256,14 +1263,24 @@ Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
 int preg_replace(Variant &result, CVarRef pattern, CVarRef replacement,
                  CVarRef subject, int limit /* = -1 */) {
   Variant count;
-  result = preg_replace_impl(pattern, replacement, subject, limit, count, false);
+  result = preg_replace_impl(pattern, replacement, subject,
+                             limit, count, false, false);
   return count.toInt32();
 }
 
 int preg_replace_callback(Variant &result, CVarRef pattern, CVarRef callback,
                           CVarRef subject, int limit /* = -1 */) {
   Variant count;
-  result = preg_replace_impl(pattern, callback, subject, limit, count, true);
+  result = preg_replace_impl(pattern, callback, subject,
+                             limit, count, true, false);
+  return count.toInt32();
+}
+
+int preg_filter(Variant &result, CVarRef pattern, CVarRef replacement,
+                CVarRef subject, int limit /* = -1 */) {
+  Variant count;
+  result = preg_replace_impl(pattern, replacement, subject,
+                             limit, count, false, true);
   return count.toInt32();
 }
 

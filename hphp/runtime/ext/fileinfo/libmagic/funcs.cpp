@@ -449,7 +449,8 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
   opts |= PCRE_MULTILINE;
   convert_libmagic_pattern(patt, opts);
 
-  auto ret = HPHP::preg_replace_impl(patt, rep, ms->o.buf, -1, rep_cnt, 0);
+  auto ret = HPHP::preg_replace_impl(patt, rep, ms->o.buf,
+                                     -1, rep_cnt, false, false);
   if (!ret.isString()) {
     return -1;
   }

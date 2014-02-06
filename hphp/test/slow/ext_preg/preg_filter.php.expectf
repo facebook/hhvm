@@ -1,0 +1,60 @@
+array(6) {
+  [0]=>
+  string(5) "A:C:1"
+  [1]=>
+  string(5) "B:C:a"
+  [2]=>
+  string(3) "A:2"
+  [3]=>
+  string(3) "B:b"
+  [4]=>
+  string(3) "A:3"
+  [7]=>
+  string(3) "A:4"
+}
+array(6) {
+  [0]=>
+  string(5) "A:C:1"
+  [1]=>
+  string(5) "B:C:a"
+  [2]=>
+  string(3) "A:2"
+  [3]=>
+  string(3) "B:b"
+  [4]=>
+  string(3) "A:3"
+  [7]=>
+  string(3) "A:4"
+}
+array(6) {
+  [0]=>
+  string(5) "A:C:1"
+  [1]=>
+  string(5) "B:C:a"
+  [2]=>
+  string(3) "A:2"
+  [3]=>
+  string(3) "B:b"
+  [4]=>
+  string(3) "A:3"
+  [7]=>
+  string(3) "A:4"
+}
+int(8)
+string(14) "A:C:1A:0A:2A:4"
+int(5)
+NULL
+int(0)
+array(5) {
+  [0]=>
+  string(3) "A:0"
+  [1]=>
+  string(6) "A:0A:0"
+  [2]=>
+  string(9) "A:0A:0A:0"
+  [3]=>
+  string(10) "A:0A:0A:00"
+  [4]=>
+  string(11) "A:0A:0A:000"
+}
+int(12)

@@ -65,7 +65,8 @@ Variant HHVM_FUNCTION(preg_match_all, const String& pattern,
 Variant HHVM_FUNCTION(preg_replace, CVarRef pattern, CVarRef replacement,
                                     CVarRef subject, int limit /* = -1 */,
                                     VRefParam count /* = null */) {
-  return preg_replace_impl(pattern, replacement, subject, limit, count, false);
+  return preg_replace_impl(pattern, replacement, subject,
+                           limit, count, false, false);
 }
 
 Variant HHVM_FUNCTION(preg_replace_callback, CVarRef pattern, CVarRef callback,
@@ -77,7 +78,15 @@ Variant HHVM_FUNCTION(preg_replace_callback, CVarRef pattern, CVarRef callback,
         callback.toString().data());
     return empty_string;
   }
-  return preg_replace_impl(pattern, callback, subject, limit, count, true);
+  return preg_replace_impl(pattern, callback, subject,
+                           limit, count, true, false);
+}
+
+Variant HHVM_FUNCTION(preg_filter, CVarRef pattern, CVarRef callback,
+                                   CVarRef subject, int limit /* = -1 */,
+                                   VRefParam count /* = null */) {
+  return preg_replace_impl(pattern, callback, subject,
+                           limit, count, false, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -185,6 +194,7 @@ public:
                      ini_on_update_long, ini_get_long,
                      &g_context->m_preg_recursion_limit);
 
+    HHVM_FE(preg_filter);
     HHVM_FE(preg_grep);
     HHVM_FE(preg_match);
     HHVM_FE(preg_match_all);

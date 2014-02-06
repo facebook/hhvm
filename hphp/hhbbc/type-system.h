@@ -145,7 +145,10 @@ using DObj = DCls;
 //////////////////////////////////////////////////////////////////////
 
 struct Type {
-  explicit Type(trep t = BTop) : m_bits(t) {
+  Type() : m_bits(BTop) {
+    assert(checkInvariants());
+  }
+  explicit Type(trep t) : m_bits(t) {
     assert(checkInvariants());
   }
 

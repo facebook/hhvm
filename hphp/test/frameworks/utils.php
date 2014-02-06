@@ -245,11 +245,12 @@ function get_runtime_build(bool $with_jit = true,
 
 function error_and_exit(string $message, bool $to_file = false): void {
   if ($to_file) {
-    file_put_contents(Options::$script_errors_file, basename(__FILE__).": ".
-                      $message.PHP_EOL, FILE_APPEND);
+    $target = Options::$script_errors_file;
   } else {
-    echo basename(__FILE__).": ".$message.PHP_EOL;
+    $target = 'php://stderr';
   }
+  file_put_contents($target, basename(__FILE__).": ".
+                    $message.PHP_EOL, FILE_APPEND);
   exit(1);
 }
 

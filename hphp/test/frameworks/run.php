@@ -413,13 +413,13 @@ function print_summary_information(string $summary_file): void {
         foreach ($decoded_results as $key => $value) {
           $print_str .= str_pad($key.",", 20);
         }
-        print rtrim($print_str, [" ", ","]) . PHP_EOL;
+        print rtrim($print_str, " ,") . PHP_EOL;
       }
       $print_str = str_pad(date("Y/m/d-G:i:s").",", 20);
       foreach ($decoded_results as $key => $value) {
         $print_str .= str_pad($value.",", 20);
       }
-      print rtrim($print_str, [" ", ","]) . PHP_EOL;
+      print rtrim($print_str, " ,") . PHP_EOL;
     } else {
       print PHP_EOL."ALL TESTS COMPLETE!".PHP_EOL;
       print "SUMMARY:".PHP_EOL;

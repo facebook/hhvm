@@ -16,7 +16,7 @@ void php_libxml_ctx_error(void *ctx,
                           const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
 
 static xmlChar *xslt_string_to_xpathexpr(const char *str) {
-  const xmlChar *string = (const xmlChar *)str;
+  const xmlChar *string = (const xmlChar*)str;
   int str_len = xmlStrlen(string) + 3;
 
   xmlChar *value;
@@ -26,11 +26,11 @@ static xmlChar *xslt_string_to_xpathexpr(const char *str) {
       return NULL;
     }
 
-    value = (xmlChar *)malloc(str_len * sizeof(xmlChar));
-    snprintf((char *)value, str_len, "'%s'", string);
+    value = (xmlChar*)malloc(str_len * sizeof(xmlChar));
+    snprintf((char*)value, str_len, "'%s'", string);
   } else {
-    value = (xmlChar *)malloc(str_len * sizeof(xmlChar));
-    snprintf((char *)value, str_len, "\"%s\"", string);
+    value = (xmlChar*)malloc(str_len * sizeof(xmlChar));
+    snprintf((char*)value, str_len, "\"%s\"", string);
   }
 
   return value;
@@ -68,7 +68,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
     );
     error = 1;
   } else {
-    intern = (c_XSLTProcessor *)tctxt->_private;
+    intern = (c_XSLTProcessor*)tctxt->_private;
     if (intern == NULL) {
       xsltGenericError(xsltGenericErrorContext,
         "xsltExtFunctionTest: failed to get the internal object\n"
@@ -100,7 +100,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
     obj = valuePop(ctxt);
     switch (obj->type) {
     case XPATH_STRING:
-      arg = String((char *)obj->stringval, CopyString);
+      arg = String((char*)obj->stringval, CopyString);
       break;
     case XPATH_BOOLEAN:
       arg = (bool)obj->boolval;
@@ -110,7 +110,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
       break;
     case XPATH_NODESET:
       if (type == 1) {
-        char *str = (char *)xmlXPathCastToString(obj);
+        char *str = (char*)xmlXPathCastToString(obj);
         arg = String(str, CopyString);
         xmlFree(str);
       } else if (type == 2) {
@@ -144,7 +144,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
       }
       break;
     default:
-      arg = String((char *)xmlXPathCastToString(obj), CopyString);
+      arg = String((char*)xmlXPathCastToString(obj), CopyString);
     }
     xmlXPathFreeObject(obj);
     args.prepend(arg);
@@ -154,7 +154,8 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
   if (obj->stringval == NULL) {
     raise_warning("Handler name must be a string");
     xmlXPathFreeObject(obj);
-    valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
+    // Push an empty string to get an xslt result.
+    valuePush(ctxt, xmlXPathNewString((xmlChar*)""));
     return;
   }
   String handler((char*)obj->stringval, CopyString);
@@ -162,11 +163,13 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
 
   if (!f_is_callable(handler)) {
     raise_warning("Unable to call handler %s()", handler.data());
-    valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
+    // Push an empty string to get an xslt result.
+    valuePush(ctxt, xmlXPathNewString((xmlChar*)""));
   } else if (intern->m_registerPhpFunctions == 2 &&
              !intern->m_registered_phpfunctions.exists(handler)) {
     raise_warning("Not allowed to call handler '%s()'", handler.data());
-    valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
+    // Push an empty string to get an xslt result.
+    valuePush(ctxt, xmlXPathNewString((xmlChar*)""));
   } else {
     Variant retval = vm_call_user_func(handler, args);
     if (retval.instanceof(c_DOMNode::classof())) {
@@ -176,7 +179,8 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
       valuePush(ctxt, xmlXPathNewBoolean(retval.toBoolean()));
     } else if (retval.isObject()) {
       raise_warning("A PHP Object cannot be converted to an XPath-string");
-      valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
+      // Push an empty string to get an xslt result.
+      valuePush(ctxt, xmlXPathNewString((xmlChar*)""));
     } else {
       String sretval = retval.toString();
       valuePush(ctxt, xmlXPathNewString((xmlChar*)sretval.data()));
@@ -196,8 +200,8 @@ c_XSLTProcessor::c_XSLTProcessor(Class *cb) :
   ExtObjectData(cb),
   m_stylesheet(NULL), m_doc(NULL), m_secprefs(k_XSL_SECPREF_DEFAULT),
   m_registerPhpFunctions(0) {
-  exsltRegisterAll();
   xsltSetGenericErrorFunc(NULL, php_libxml_ctx_error);
+  exsltRegisterAll();
 }
 
 c_XSLTProcessor::~c_XSLTProcessor() {
@@ -249,17 +253,22 @@ void c_XSLTProcessor::t_importstylesheet(CObjRef stylesheet) {
 
   if (stylesheet.instanceof(c_DOMDocument::classof())) {
     c_DOMDocument *domdoc = stylesheet.getTyped<c_DOMDocument>();
+    // This doc will be freed by xsltFreeStylesheet.
     doc = xmlCopyDoc((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
+    if (doc == NULL) {
+      raise_error("Unable to import stylesheet");
+    }
   } else if (stylesheet.instanceof(c_SimpleXMLElement::classof())) {
     c_SimpleXMLElement *elem = stylesheet.getTyped<c_SimpleXMLElement>();
-    doc = xmlNewDoc((const xmlChar *)"1.0");
+    // This doc will be freed by xsltFreeStylesheet.
+    doc = xmlNewDoc((const xmlChar*)"1.0");
     xmlNodePtr node = xmlCopyNode(elem->node, /*extended*/ 1);
-    if (node == NULL) {
+    if (doc == NULL || node == NULL) {
       raise_error("Unable to import stylesheet");
     }
     xmlDocSetRootElement(doc, node);
   } else {
-    raise_warning("Object should be an instance of DOMDocument or SimpleXMLElement");
+    raise_error("Object must be an instance of DOMDocument or SimpleXMLElement");
   }
 
   if (doc) {
@@ -283,26 +292,31 @@ bool c_XSLTProcessor::t_removeparameter(const String& namespaceURI, const String
 }
 
 void c_XSLTProcessor::t_registerphpfunctions(CVarRef funcs /* = null_variant */) {
-  if (funcs.isArray()) {
+  if (funcs.isNull()) {
+    // Register all available PHP functions.
+    m_registerPhpFunctions = 1;
+  } else if (funcs.isArray()) {
     Array arr = funcs.toArray();
     for (ArrayIter iter(arr); iter; ++iter) {
-      m_registered_phpfunctions.set(iter.second(), "1");
+      if (iter.second().isString()) {
+        m_registered_phpfunctions.set(iter.second(), "1");
+      } else {
+        raise_warning("PHP function name must be a string");
+      }
     }
+    // Register PHP functions given in array argument.
     m_registerPhpFunctions = 2;
-    return;
-  }
-
-  if (funcs.isString()) {
+  } else if (funcs.isString()) {
     m_registered_phpfunctions.set(funcs, "1");
+    // Register PHP function given in string argument.
     m_registerPhpFunctions = 2;
   } else {
-    m_registerPhpFunctions = 1;
+    raise_warning("PHP function name must be a string");
   }
 }
 
 bool c_XSLTProcessor::t_setparameter(const String& namespaceURI, CVarRef localName, CVarRef value /* = null_variant */) {
   // namespaceURI argument is unused in Zend PHP XSL extension.
-
   if (localName.isString() && value.isString()) {
     if (m_params.exists(localName)) {
       m_params.set(localName, value);
@@ -313,7 +327,6 @@ bool c_XSLTProcessor::t_setparameter(const String& namespaceURI, CVarRef localNa
     return true;
   } else if (localName.isArray() && value.isNull()) {
     int ret = true;
-
     for (ArrayIter iter(localName); iter; ++iter) {
       if (iter.first().isString() && iter.second().isString()) {
         if (m_params.exists(iter.first().toString())) {
@@ -332,13 +345,17 @@ bool c_XSLTProcessor::t_setparameter(const String& namespaceURI, CVarRef localNa
     return ret;
   }
 
-  raise_warning ("Invalid parameters");
+  if (localName.isString()) {
+    raise_warning ("Invalid parameter '%s': value must be a string", localName.toString().c_str());
+  } else {
+    raise_warning ("Invalid parameter: localName and value must be strings");
+  }
+
   return false;
 }
 
 int64_t c_XSLTProcessor::t_setsecurityprefs(int64_t securityPrefs) {
   int64_t previous = m_secprefs;
-
   m_secprefs = securityPrefs;
 
   return previous;
@@ -485,14 +502,14 @@ xmlDocPtr c_XSLTProcessor::apply_stylesheet() {
   }
 
   xsltRegisterExtFunction(ctxt,
-    (const xmlChar *) "functionString",
-    (const xmlChar *) "http://php.net/xsl",
+    (const xmlChar*) "functionString",
+    (const xmlChar*) "http://php.net/xsl",
     xslt_ext_function_string_php
   );
 
   xsltRegisterExtFunction(ctxt,
-    (const xmlChar *) "function",
-    (const xmlChar *) "http://php.net/xsl",
+    (const xmlChar*) "function",
+    (const xmlChar*) "http://php.net/xsl",
     xslt_ext_function_object_php
   );
 
@@ -501,12 +518,14 @@ xmlDocPtr c_XSLTProcessor::apply_stylesheet() {
     assert(iter.second().isString());
 
     xmlChar *value = xslt_string_to_xpathexpr(iter.second().toString().c_str());
-    xsltEvalOneUserParam(ctxt,
-      (const xmlChar*)iter.first().toString().c_str(),
-      (const xmlChar*)value
-    );
+    if (value) {
+      xsltEvalOneUserParam(ctxt,
+        (const xmlChar*)iter.first().toString().c_str(),
+        (const xmlChar*)value
+      );
 
-    free(value);
+      xmlFree(value);
+    }
   }
 
   FILE *profile = NULL;

@@ -504,8 +504,9 @@ void pmethodCacheMissPath(MethodCache* mce,
     imm = fval << 32 | cval;
   }
   if (!smashMov(pdata->smashImmAddr, imm)) {
-    // someone beat us to it
-    return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
+    // Someone beat us to it.  Bail early so we don't double-free
+    // pdata.
+    return;
   }
 
   // Regardless of whether the inline cache was populated, smash the

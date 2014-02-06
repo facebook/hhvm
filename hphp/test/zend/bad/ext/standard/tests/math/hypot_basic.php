@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 
 /* Prototype  : float hypot  ( float $x  , float $y  )
  * Description: Calculate the length of the hypotenuse of a right-angle triangle.

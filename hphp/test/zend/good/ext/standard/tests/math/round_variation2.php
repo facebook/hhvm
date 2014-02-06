@@ -1,12 +1,12 @@
 <?php
-ini_set('precision', 14);
-
-/* Prototype  : number octdec  ( string $octal_string  )
- * Description: Returns the decimal equivalent of the octal number represented by the octal_string  argument. 
+/* Prototype  : float round  ( float $val  [, int $precision  ] )
+ * Description: Returns the rounded value of val  to specified precision (number of digits
+ * after the decimal point)
  * Source code: ext/standard/math.c
  */
 
-echo "*** Testing octdec() : usage variations ***\n";
+echo "*** Testing round() : usage variations ***\n";
+
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
@@ -17,6 +17,11 @@ abc
 xyz
 EOT;
 
+// get a class
+class classA
+{
+}
+
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
@@ -26,35 +31,37 @@ $inputs = array(
        1,
        12345,
        -2345,       
-       4294967295,  // largest decimal  
-       4294967296, 
+       2147483647,
 
        // float data
-/*7*/  10.5,
+/*6*/  10.5,
        -10.5,
-       12.3456789000e10,
-       12.3456789000E-10,
+       12.3456789000e5,
+       12.3456789000E-5,
        .5,
 
        // null data
-/*12*/ NULL,
+/*11*/ NULL,
        null,
 
        // boolean data
-/*14*/ true,
+/*13*/ true,
        false,
        TRUE,
        FALSE,
        
        // empty data
-/*18*/ "",
+/*17*/ "",
        '',
        array(),
 
        // string data
-/*21*/ "abcxyz",
+/*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
+       
+       // object data
+/*23*/ new classA(),       
        
        // undefined data
 /*24*/ @$undefined_var,
@@ -66,13 +73,13 @@ $inputs = array(
 /*26*/ $fp
 );
 
-// loop through each element of $inputs to check the behaviour of octdec()
+// loop through each element of $inputs to check the behaviour of round()
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(octdec($input));
+	var_dump(round(123.4456789, $input));
 	$iterator++;
 };
 fclose($fp);
 ?>
----Done---
+===Done===

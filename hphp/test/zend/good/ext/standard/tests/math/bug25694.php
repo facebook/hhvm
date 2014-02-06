@@ -1,6 +1,4 @@
 <?php
-ini_set('precision', 14);
-
 echo "round 0.045 = " . round(0.045, 2) . "\n";
 echo "number format 0.045 = " . number_format(0.045, 2) . "\n\n";
 echo "round 0.055 = " . round(0.055, 2) . "\n";

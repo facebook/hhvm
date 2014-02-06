@@ -121,9 +121,9 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
             xmlNodePtr node = obj->nodesetval->nodeTab[j];
 
             if (node->type == XML_ELEMENT_NODE) {
-              c_DOMNode *nodeobj = NEWOBJ(c_DOMNode)();
-              nodeobj->m_node = xmlCopyNode(node, /*extended*/ 1);
-              arg.append(nodeobj);
+              c_DOMElement *elemobj = NEWOBJ(c_DOMElement)();
+              elemobj->m_node = xmlCopyNode(node, /*extended*/ 1);
+              arg.append(elemobj);
             } else if (node->type == XML_ATTRIBUTE_NODE) {
               c_DOMAttr *attrobj = NEWOBJ(c_DOMAttr)();
               attrobj->m_node = (xmlNodePtr)xmlCopyProp(NULL, (xmlAttrPtr)node);
@@ -134,6 +134,10 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int 
               arg.append(textobj);
             } else {
               raise_warning("Unhandled node type '%d'", node->type);
+              // Use a generic DOMNode as fallback for now.
+              c_DOMNode *nodeobj = NEWOBJ(c_DOMNode)();
+              nodeobj->m_node = xmlCopyNode(node, /*extended*/ 1);
+              arg.append(nodeobj);
             }
           }
         }

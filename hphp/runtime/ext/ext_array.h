@@ -63,7 +63,8 @@ bool f_key_exists(CVarRef key, CVarRef search);
 
 Variant f_array_keys(CVarRef input, CVarRef search_value = null_variant,
                      bool strict = false);
-Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv = null_array);
+Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1,
+                    CArrRef _argv = null_array);
 
 Variant f_array_merge_recursive(int _argc, CVarRef array1, CArrRef _argv = null_array);
 

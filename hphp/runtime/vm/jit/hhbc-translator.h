@@ -43,30 +43,26 @@ namespace JIT {
 //////////////////////////////////////////////////////////////////////
 
 struct EvalStack {
-  explicit EvalStack(IRBuilder& irb)
-    : m_irb(irb)
-  {}
+  explicit EvalStack() {}
 
   void push(SSATmp* tmp) {
     m_vector.push_back(tmp);
   }
 
-  SSATmp* pop(TypeConstraint tc) {
+  SSATmp* pop() {
     if (m_vector.size() == 0) {
       return nullptr;
     }
     SSATmp* tmp = m_vector.back();
     m_vector.pop_back();
-    m_irb.constrainValue(tmp, tc);
     return tmp;
   }
 
-  SSATmp* top(TypeConstraint tc, uint32_t offset = 0) const {
+  SSATmp* top(uint32_t offset = 0) const {
     if (offset >= m_vector.size()) {
       return nullptr;
     }
     uint32_t index = m_vector.size() - 1 - offset;
-    m_irb.constrainValue(m_vector[index], tc);
     return m_vector[index];
   }
 
@@ -90,7 +86,6 @@ struct EvalStack {
 
 private:
   std::vector<SSATmp*> m_vector;
-  IRBuilder& m_irb;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -843,6 +838,7 @@ private:
   SSATmp* popF(TypeConstraint tc = DataTypeSpecific) {
     return pop(Type::Gen, tc);
   }
+  SSATmp* top(TypeConstraint tc, uint32_t offset = 0) const;
   SSATmp* top(Type type, uint32_t index = 0,
               TypeConstraint tc = DataTypeSpecific);
   SSATmp* topC(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {

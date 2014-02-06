@@ -79,7 +79,7 @@ HhbcTranslator::HhbcTranslator(Offset startOffset,
   , m_lastBcOff(false)
   , m_hasExit(false)
   , m_stackDeficit(0)
-  , m_evalStack(*m_irb)
+  , m_evalStack()
 {
   updateMarker();
   auto const fp = gen(DefFP);
@@ -164,7 +164,8 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
 }
 
 SSATmp* HhbcTranslator::pop(Type type, TypeConstraint tc) {
-  SSATmp* opnd = m_evalStack.pop(tc);
+  SSATmp* opnd = m_evalStack.pop();
+  m_irb->constrainValue(opnd, tc);
 
   if (opnd == nullptr) {
     uint32_t stackOff = m_stackDeficit;
@@ -191,7 +192,8 @@ void HhbcTranslator::discard(unsigned n) {
 
 // type is the type expected on the stack.
 void HhbcTranslator::popDecRef(Type type, TypeConstraint tc) {
-  if (SSATmp* src = m_evalStack.pop(tc)) {
+  if (SSATmp* src = m_evalStack.pop()) {
+    m_irb->constrainValue(src, tc);
     gen(DecRef, src);
     return;
   }
@@ -220,12 +222,19 @@ void HhbcTranslator::extendStack(uint32_t index, Type type) {
   push(tmp);
 }
 
+SSATmp* HhbcTranslator::top(TypeConstraint tc, uint32_t index) const {
+  SSATmp* tmp = m_evalStack.top(index);
+  if (!tmp) return nullptr;
+  m_irb->constrainValue(tmp, tc);
+  return tmp;
+}
+
 SSATmp* HhbcTranslator::top(Type type, uint32_t index,
                             TypeConstraint constraint) {
-  SSATmp* tmp = m_evalStack.top(constraint, index);
+  SSATmp* tmp = top(constraint, index);
   if (!tmp) {
     extendStack(index, type);
-    tmp = m_evalStack.top(constraint, index);
+    tmp = top(constraint, index);
   }
   assert(tmp);
   refineType(tmp, type);
@@ -239,7 +248,7 @@ void HhbcTranslator::replace(uint32_t index, SSATmp* tmp) {
 Type HhbcTranslator::topType(uint32_t idx, TypeConstraint constraint) const {
   FTRACE(5, "Asking for type of stack elem {}\n", idx);
   if (idx < m_evalStack.size()) {
-    return m_evalStack.top(constraint, idx)->type();
+    return top(constraint, idx)->type();
   } else {
     auto absIdx = idx - m_evalStack.size() + m_stackDeficit;
     auto stkVal = getStackValue(m_irb->sp(), absIdx);
@@ -3333,7 +3342,7 @@ void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
            idx, type.toString());
     // CheckType only cares about its input type if the simplifier does
     // something with it and that's handled if and when it happens.
-    SSATmp* tmp = m_evalStack.top(DataTypeGeneric, idx);
+    SSATmp* tmp = top(DataTypeGeneric, idx);
     assert(tmp);
     m_evalStack.replace(idx, gen(CheckType, type, exit, tmp));
   } else {
@@ -3352,7 +3361,7 @@ void HhbcTranslator::checkTypeTopOfStack(Type type, Offset nextByteCode) {
 void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
   if (idx < m_evalStack.size()) {
     // We're asserting a new type so we don't care about the previous type.
-    SSATmp* tmp = m_evalStack.top(DataTypeGeneric, idx);
+    SSATmp* tmp = top(DataTypeGeneric, idx);
     assert(tmp);
     m_evalStack.replace(idx, gen(AssertType, type, tmp));
   } else {
@@ -3401,7 +3410,7 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
       auto i = loc.offset;
       assert(i >= 0);
       if (i < m_evalStack.size()) {
-        val = m_evalStack.top(DataTypeGeneric, i);
+        val = top(DataTypeGeneric, i);
         t = val->type();
       } else {
         auto stackVal = getStackValue(m_irb->sp(),
@@ -4898,7 +4907,7 @@ std::string HhbcTranslator::showStack() const {
                        stackDepth).str());
   for (unsigned i = 0; i < m_evalStack.size(); ++i) {
     while (checkFpi());
-    SSATmp* value = m_evalStack.top(DataTypeGeneric, i); // debug-only
+    SSATmp* value = top(DataTypeGeneric, i); // debug-only
     elem(value->inst()->toString());
   }
 
@@ -4936,7 +4945,7 @@ std::vector<SSATmp*> HhbcTranslator::peekSpillValues() const {
   for (int i = 0; i < m_evalStack.size(); ++i) {
     // DataTypeGeneric is used here because SpillStack just teleports the
     // values to memory.
-    SSATmp* elem = m_evalStack.top(DataTypeGeneric, i);
+    SSATmp* elem = top(DataTypeGeneric, i);
     ret.push_back(elem);
   }
   return ret;

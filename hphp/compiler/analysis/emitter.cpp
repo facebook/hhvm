@@ -8347,6 +8347,7 @@ void EmitterVisitor::copyOverCatchAndFaultRegions(FuncEmitter* fe) {
     delete f;
   }
   m_funclets.clear();
+  m_memoizedFunclets.clear();
 }
 
 void EmitterVisitor::copyOverFPIRegions(FuncEmitter* fe) {

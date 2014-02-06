@@ -393,6 +393,7 @@ function max(mixed $value1, ...): mixed {
       return $value1;
     }
     $args = (array)$value1;
+    reset($args);
   } else {
     $args = func_get_args();
   }
@@ -401,7 +402,6 @@ function max(mixed $value1, ...): mixed {
                E_USER_WARNING);
     return false;
   }
-  reset($args);
   list($_, $ret) = each($args);
   while (list($_, $value) = each($args)) {
     if ($value > $ret) {
@@ -426,6 +426,7 @@ function min(mixed $value1, ...): mixed {
       return $value1;
     }
     $args = (array)$value1;
+    reset($args);
   } else {
     $args = func_get_args();
   }
@@ -434,7 +435,6 @@ function min(mixed $value1, ...): mixed {
                E_USER_WARNING);
     return false;
   }
-  reset($args);
   list($_, $ret) = each($args);
   while (list($_, $value) = each($args)) {
     if ($value < $ret) {

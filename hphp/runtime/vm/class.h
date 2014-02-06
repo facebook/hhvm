@@ -647,6 +647,11 @@ struct Class : AtomicCountable {
     return offsetof(Class, m_propDataCache);
   }
 
+  TypedValue* getSPropData() const;
+  static constexpr size_t spropdataOff() {
+    return offsetof(Class, m_propSDataCache);
+  }
+
   bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }
   bool hasInitMethods() const { return m_hasInitMethods; }
@@ -854,7 +859,6 @@ private:
   TypedValue* initSPropsImpl() const;
   void setPropData(PropInitVec* propData) const;
   void setSPropData(TypedValue* sPropData) const;
-  TypedValue* getSPropData() const;
 
   void importTraitMethod(const TraitMethod&  traitMethod,
                          const StringData*   methName,

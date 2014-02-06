@@ -1854,8 +1854,10 @@ CheckProp <propName> [] -> [C:Bool]
 
 InitProp <propName> <op> [C] -> []
 
-  Initialize non-scalar property. This instruction sets the initializer for
-  the property named %1 in the context class to $1.
+  Initialize non-scalar property. If %2 is 'NonStatic', this instruction sets
+  the initializer for the property named %1 in the context class to $1. If %2
+  is 'Static', this instruction sets the initializer for the static property
+  named %1 in the context class to $1.
 
   The CheckProp and InitProp opcodes should only be used in 86pinit methods.
   86pinit methods are HHVM-internal property initialization methods that

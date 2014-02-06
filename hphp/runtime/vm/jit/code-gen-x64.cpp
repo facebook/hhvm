@@ -6517,6 +6517,17 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   m_as.  loadq(dstReg[Class::PropInitVec::dataOff()], dstReg);
 }
 
+void CodeGenerator::cgLdClsStaticInitData(IRInstruction* inst) {
+  auto* cls = inst->src(0);
+  auto clsReg = curOpd(cls).reg();
+  auto dstReg = curOpd(inst->dst()).reg();
+
+  m_as.  loadl(clsReg[Class::spropdataOff()
+                       + RDS::Link<Class::PropInitVec*>::handleOff()],
+               r32(dstReg));
+  m_as.  loadq(rVmTl[dstReg], dstReg);
+}
+
 void CodeGenerator::print() const {
   JIT::print(std::cout, m_unit, &m_state.regs, nullptr, m_state.asmInfo);
 }

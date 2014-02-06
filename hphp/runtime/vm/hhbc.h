@@ -344,6 +344,7 @@ enum class IsTypeOp : uint8_t {
 };
 
 #define INITPROP_OPS    \
+  INITPROP_OP(Static)   \
   INITPROP_OP(NonStatic)
 
 enum class InitPropOp : uint8_t {

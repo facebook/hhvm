@@ -4180,10 +4180,20 @@ void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
 
   auto* cctx = gen(LdCctx, m_irb->fp());
   auto* cls = gen(LdClsCtx, cctx);
-  auto* propInitVec = gen(LdClsInitData, cls);
-
   auto* ctx = curClass();
-  auto idx = ctx->lookupDeclProp(propName);
+  SSATmp* propInitVec;
+  Slot idx;
+
+  switch(op) {
+    case InitPropOp::Static: {
+      propInitVec = gen(LdClsStaticInitData, cls);
+      idx = ctx->lookupSProp(propName);
+    } break;
+    case InitPropOp::NonStatic: {
+      propInitVec = gen(LdClsInitData, cls);
+      idx = ctx->lookupDeclProp(propName);
+    } break;
+  }
 
   gen(StElem, propInitVec, cns(idx * sizeof(TypedValue)), val);
 }

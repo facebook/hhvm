@@ -7311,16 +7311,28 @@ OPTBLD_INLINE void VMExecutionContext::iopInitProp(IOP_ARGS) {
   DECODE_OA(InitPropOp, propOp);
 
   auto* cls = m_fp->getClass();
-  auto* propVec = cls->getPropData();
-  always_assert(propVec);
+  TypedValue* tv;
+  Slot idx;
 
   auto* ctx = arGetContextClass(getFP());
-  auto idx = ctx->lookupDeclProp(propName);
-
-  auto& tv = (*propVec)[idx];
   auto* fr = m_stack.topC();
 
-  cellDup(*fr, *tvToCell(&tv));
+  switch (propOp) {
+    case InitPropOp::Static: {
+      auto* propVec = cls->getSPropData();
+      always_assert(propVec);
+      idx = ctx->lookupSProp(propName);
+      tv = &propVec[idx];
+    } break;
+    case InitPropOp::NonStatic: {
+      auto* propVec = cls->getPropData();
+      always_assert(propVec);
+      idx = ctx->lookupDeclProp(propName);
+      tv = &(*propVec)[idx];
+    } break;
+  }
+
+  cellDup(*fr, *tvToCell(tv));
   m_stack.popC();
 }
 

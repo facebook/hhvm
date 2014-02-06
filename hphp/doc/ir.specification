@@ -874,6 +874,10 @@ D:PtrToCell = LdClsInitData S0:Cls
 
   Loads the pointer to the property initializer array for class S0.
 
+D:PtrToCell = LdClsStaticInitData S0:Cls
+
+  Loads the pointer to the static property initializer array for class S0.
+
 D:RDSHandle = LookupClsRDSHandle S0:Str
 
   Look up the cached-class RDS handle for a given class name.

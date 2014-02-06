@@ -435,8 +435,7 @@ IRTranslator::translateCheckProp(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateInitProp(const NormalizedInstruction& i) {
-  HHIR_EMIT(InitProp, i.imm[0].u_SA,
-            static_cast<InitPropOp>(i.imm[1].u_OA));
+  HHIR_EMIT(InitProp, i.imm[0].u_SA, static_cast<InitPropOp>(i.imm[1].u_OA));
 }
 
 void IRTranslator::translateAssertTL(const NormalizedInstruction& i) {

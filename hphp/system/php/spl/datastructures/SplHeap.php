@@ -319,7 +319,7 @@ class SplMaxHeap extends SplHeap implements \HH\Iterator, Countable {
    *                     Heap is not recommended. They will end up in an
    *                     arbitrary relative position.
    */
-  function compare($value1, $value2) {
+  protected function compare($value1, $value2) {
     return $value1 - $value2;
   }
 }
@@ -350,7 +350,7 @@ class SplMinHeap extends SplHeap implements \HH\Iterator, Countable {
    *                     Heap is not recommended. They will end up in an
    *                     arbitrary relative position.
    */
-  function compare($value1, $value2) {
+  protected function compare($value1, $value2) {
     return $value2 - $value1;
   }
 }

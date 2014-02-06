@@ -440,9 +440,11 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     const string stripped = lastBackslash == string::npos
                             ? s
                             : s.substr(lastBackslash+1);
+    auto useStripped = false;
     if (stripped == "func_num_args" ||
         stripped == "func_get_args" ||
         stripped == "func_get_arg") {
+      useStripped = true;
       if (m_hasCallToGetArgs.size() > 0) {
         m_hasCallToGetArgs.back() = true;
       }
@@ -450,7 +452,9 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
 
     SimpleFunctionCallPtr call
       (new RealSimpleFunctionCall
-       (BlockScopePtr(), getLocation(), name->text(), name->num() & 2,
+       (BlockScopePtr(), getLocation(),
+        useStripped ? stripped : name->text(),
+        name->num() & 2,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     if (m_scanner.isHHSyntaxEnabled() && !(name->num() & 2)) {
       // If the function name is without any backslashes or

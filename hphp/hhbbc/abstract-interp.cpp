@@ -1958,7 +1958,14 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::CheckProp&) { push(TBool); }
   void operator()(const bc::InitProp& op) {
     auto const t = popC();
-    mergeThisProp(op.str1, t);
+    switch (op.subop) {
+      case InitPropOp::Static: {
+        mergeSelfProp(op.str1, t);
+      } break;
+      case InitPropOp::NonStatic: {
+        mergeThisProp(op.str1, t);
+      } break;
+    }
   }
 
   void operator()(const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
@@ -4218,33 +4225,23 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       }
       clsAnalysis.privateProperties[prop.name] = t;
     } else {
-      clsAnalysis.privateStatics[prop.name] = from_cell(prop.val);
+      auto t = from_cell(prop.val);
+      if (t.subtypeOf(TUninit)) {
+        // A property of type KindOfUninit means that it has non-scalar
+        // initializer which will be set by an 86spinit method. For these
+        // classes, we want the initial type of the property to be the
+        // type set by the 86sinit method, so we set the type to TBottom.
+        t = TBottom;
+      }
+      clsAnalysis.privateStatics[prop.name] = t;
     }
   }
 
   /*
-   * Skip trying to do smart things with 86sinit for now.
-   *
-   * These are special functions that run to initialize static
-   * properties that depend on class constants, or have
-   * collection literals.
-   *
-   * We don't handle this yet, so for any class with these types of
-   * initializers put the properties up to TInitCell for now.
-   *
-   * TODO(#3567661): we want to analyze these.
-   */
-  if (find_method(ctx.cls, s_86sinit.get())) {
-    for (auto& p : clsAnalysis.privateStatics) {
-      p.second = union_of(p.second, TInitCell);
-    }
-  }
-
-  /*
-   * For classes with non-scalar initializers, the 86pinit method
-   * is guaranteed to run before any other method is called, and
-   * is never called afterwards. Thus, we can analyze the 86pinit
-   * method first to determine the initial types of properties with
+   * For classes with non-scalar initializers, the 86pinit and 86sinit
+   * methods are guaranteed to run before any other method, and
+   * are never called afterwards. Thus, we can analyze these
+   * methods first to determine the initial types of properties with
    * non-scalar initializers, and these need not be be run again as part
    * of the fixedpoint computation.
    */
@@ -4255,6 +4252,14 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       &clsAnalysis
     );
   }
+  if (auto f = find_method(ctx.cls, s_86sinit.get())) {
+    do_analyze(
+      index,
+      Context { ctx.unit, f, ctx.cls },
+      &clsAnalysis
+    );
+  }
+
 
   for (;;) {
     auto const previousProps   = clsAnalysis.privateProperties;
@@ -4275,8 +4280,10 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
          */
         continue;
       }
-      // no need to run 86pinit as part of fixed point computation.
-      if (f->name->isame(s_86pinit.get())) continue;
+      // no need to run 86pinit or 86sinit as part of fixed point computation.
+      if (f->name->isame(s_86pinit.get()) || f->name->isame(s_86sinit.get())) {
+        continue;
+      }
 
       methodResults.push_back(
         do_analyze(
@@ -4308,10 +4315,15 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   }
 
   // Verify that none of the class properties are TBottom, i.e.
-  // any property of type KindOfUninit has been initialized (by 86pinit).
+  // any property of type KindOfUninit has been initialized (by
+  // 86pinit or 86sinit).
   for (auto& prop : ctx.cls->properties) {
-    if ((prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic)) {
-      assert(!clsAnalysis.privateProperties[prop.name].subtypeOf(TBottom));
+    if ((prop.attrs & AttrPrivate)) {
+      if ((prop.attrs & AttrStatic)) {
+        assert(!clsAnalysis.privateStatics[prop.name].subtypeOf(TBottom));
+      } else {
+        assert(!clsAnalysis.privateProperties[prop.name].subtypeOf(TBottom));
+      }
     }
   }
 

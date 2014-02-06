@@ -32,7 +32,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/vm/runtime.h"
 
-#include "hphp/runtime/ext/ext_math.h" // f_abs
+#include "hphp/runtime/ext/math/ext_math.h" // f_abs
 
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/type-system.h"
@@ -1818,7 +1818,7 @@ struct InterpStepper : boost::static_visitor<void> {
       constprop();
       return push(eval_cell([&] {
         auto const cell = *v1;
-        auto const ret = f_abs(tvAsCVarRef(&cell));
+        auto const ret = HHVM_FN(abs)(tvAsCVarRef(&cell));
         assert(!IS_REFCOUNTED_TYPE(ret.asCell()->m_type));
         return *ret.asCell();
       }));

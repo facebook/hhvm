@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_class.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/math/ext_math.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/class-info.h"
@@ -303,7 +303,7 @@ String f_uniqid(const String& prefix /* = null_string */,
   char uniqid[256];
   if (more_entropy) {
     snprintf(uniqid, sizeof(uniqid), "%s%08x%05x%.8F",
-             prefix.c_str(), sec, usec, math_combined_lcg() * 10);
+             prefix.c_str(), sec, usec, HHVM_FN(lcg_value)() * 10);
   } else {
     snprintf(uniqid, sizeof(uniqid), "%s%08x%05x",
              prefix.c_str(), sec, usec);

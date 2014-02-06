@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/math/ext_math.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_string.h"
 
@@ -412,7 +412,7 @@ static void php_array_data_shuffle(std::vector<ssize_t> &indices) {
   if (n_elems > 1) {
     int n_left = n_elems;
     while (--n_left) {
-      int rnd_idx = f_rand(0, n_left);
+      int rnd_idx = hphp_rand(0, n_left);
       if (rnd_idx != n_left) {
         ssize_t temp = indices[n_left];
         indices[n_left] = indices[rnd_idx];
@@ -458,7 +458,7 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
     // but necessary for this code to be agnostic to the array's internal
     // representation.  Assuming uniform distribution, we'll expect to
     // iterate through half of the array's data.
-    ssize_t index = f_rand(0, count-1);
+    ssize_t index = hphp_rand(0, count-1);
     ssize_t pos = input->iter_begin();
     while (index--) {
       pos = input->iter_advance(pos);

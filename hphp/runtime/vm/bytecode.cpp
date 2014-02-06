@@ -58,7 +58,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/math/ext_math.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -3780,7 +3780,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAbs(IOP_ARGS) {
   NEXT();
   auto c1 = m_stack.topC();
 
-  tvAsVariant(c1) = f_abs(tvAsCVarRef(c1));
+  tvAsVariant(c1) = HHVM_FN(abs)(tvAsCVarRef(c1));
 }
 
 template<class Op>
@@ -3908,9 +3908,9 @@ OPTBLD_INLINE void VMExecutionContext::iopSqrt(IOP_ARGS) {
 
   if (c1->m_type == KindOfInt64) {
     c1->m_type = KindOfDouble;
-    c1->m_data.dbl = f_sqrt(c1->m_data.num);
+    c1->m_data.dbl = HHVM_FN(sqrt)(c1->m_data.num);
   } else if (c1->m_type == KindOfDouble) {
-    c1->m_data.dbl = f_sqrt(c1->m_data.dbl);
+    c1->m_data.dbl = HHVM_FN(sqrt)(c1->m_data.dbl);
   }
 
   if (c1->m_type != KindOfDouble) {

@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/ext/ext_array.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/math/ext_math.h"
 #include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
@@ -840,7 +840,7 @@ int64_t c_Vector::t_linearsearch(CVarRef search_value) {
 void c_Vector::t_shuffle() {
   mutate();
   for (uint i = 1; i < m_size; ++i) {
-    uint j = f_mt_rand(0, i);
+    uint j = hphp_mt_rand(0, i);
     std::swap(m_data[i], m_data[j]);
   }
 }

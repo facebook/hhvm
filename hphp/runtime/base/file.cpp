@@ -137,12 +137,13 @@ Variant File::Open(const String& filename, const String& mode,
                    int options /* = 0 */,
                    CVarRef context /* = null */) {
   Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
-  File *file =
-    wrapper->open(filename, mode, options,
-                  context.isNull() ? g_context->getStreamContext() : context);
+  Resource rcontext =
+    context.isNull() ? g_context->getStreamContext() : context.toResource();
+  File *file = wrapper->open(filename, mode, options, rcontext);
   if (file != nullptr) {
     file->m_name = filename.data();
     file->m_mode = mode.data();
+    file->m_streamContext = rcontext;
     return Resource(file);
   }
   return false;

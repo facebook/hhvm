@@ -113,7 +113,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
     }
-    m_dynamic = cls->derivesFromRedeclaring();
+    m_dynamic = cls->derivesFromRedeclaring() == Derivation::Redeclaring;
     bool valid = true;
     FunctionScopePtr func = cls->findConstructor(ar, true);
     if (!func) {

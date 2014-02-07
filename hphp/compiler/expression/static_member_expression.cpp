@@ -77,7 +77,7 @@ bool StaticMemberExpression::findMember(AnalysisResultPtr ar, string &name,
   m_resolvedClass = resolveClass();
   if (!m_resolvedClass) return isRedeclared();
 
-  if (m_resolvedClass->derivesFromRedeclaring()) {
+  if (m_resolvedClass->derivesFromRedeclaring() == Derivation::Redeclaring) {
     m_dynamicClass = true;
   }
 

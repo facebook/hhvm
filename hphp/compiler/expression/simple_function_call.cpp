@@ -528,7 +528,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         (m_className.empty() ||
          (m_classScope &&
           !m_classScope->isTrait() &&
-          !m_classScope->derivesFromRedeclaring() &&
+          m_classScope->derivesFromRedeclaring() == Derivation::Normal &&
           !m_classScope->getAttribute(
             ClassScope::HasUnknownStaticMethodHandler) &&
           !m_classScope->getAttribute(
@@ -1355,7 +1355,7 @@ static int isObjCall(AnalysisResultPtr ar,
   if (!thisCls || !thisFunc || thisFunc->isStatic()) return 0;
   if (thisCls == methCls) return 1;
   if (thisCls->derivesFrom(ar, methClsName, true, false)) return 1;
-  if (thisCls->derivesFromRedeclaring() &&
+  if (thisCls->derivesFromRedeclaring() == Derivation::Redeclaring &&
       thisCls->derivesFrom(ar, methClsName, true, true)) {
     return -1;
   }
@@ -1502,7 +1502,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           string name = smethod.substr(0, c);
           if (cls->getName() != name) {
             if (!cls->derivesFrom(ar, name, true, false)) {
-              error = cls->derivesFromRedeclaring() == ClassScope::FromNormal;
+              error = cls->derivesFromRedeclaring() == Derivation::Normal;
               return SimpleFunctionCallPtr();
             }
           }

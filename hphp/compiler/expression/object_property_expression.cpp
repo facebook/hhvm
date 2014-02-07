@@ -278,7 +278,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   }
 
   TypePtr ret;
-  if (m_propSymValid && (!cls->derivesFromRedeclaring() ||
+  if (m_propSymValid && (cls->derivesFromRedeclaring() == Derivation::Normal ||
                          m_propSym->isPrivate())) {
     always_assert(m_symOwner);
     TypePtr t(m_propSym->getType());

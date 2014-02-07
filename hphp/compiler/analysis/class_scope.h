@@ -39,6 +39,11 @@ DECLARE_BOOST_TYPES(FileScope);
 
 class Symbol;
 
+enum class Derivation {
+  Normal,
+  Redeclaring,    // At least one ancestor class or interface is redeclared.
+};
+
 /**
  * A class scope corresponds to a class declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
@@ -89,11 +94,6 @@ public:
     Static = 8,
     Abstract = 16,
     Final = 32
-  };
-  enum Derivation {
-    FromNormal = 0,
-    DirectFromRedeclared,
-    IndirectFromRedeclared
   };
 
   enum JumpTableName {
@@ -205,8 +205,7 @@ public:
    */
   void collectMethods(AnalysisResultPtr ar,
                       StringToFunctionScopePtrMap &func,
-                      bool collectPrivate = true,
-                      bool forInvoke = false);
+                      bool collectPrivate);
 
   /**
    * Whether or not we can directly call ObjectData::o_invoke() when lookup

@@ -201,7 +201,7 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
   if (defScope) {
     m_valid = true;
     m_defScope = defScope;
-  } else if (cls->derivesFromRedeclaring()) {
+  } else if (cls->derivesFromRedeclaring() == Derivation::Redeclaring) {
     m_defScope = cls.get();
   }
 

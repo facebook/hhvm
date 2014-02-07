@@ -7724,7 +7724,7 @@ void EmitterVisitor::emitClass(Emitter& e,
                                      AttrNone;
   if (Option::WholeProgram) {
     if (!cNode->isRedeclaring() &&
-        !cNode->derivesFromRedeclaring()) {
+        cNode->derivesFromRedeclaring() == Derivation::Normal) {
       attr = attr | AttrUnique;
       if (!cNode->isVolatile()) {
         attr = attr | AttrPersistent;

@@ -780,7 +780,7 @@ TypePtr Type::InferredObject(AnalysisResultConstPtr ar,
     } else if (c2ok && cls2->derivesFrom(ar, type1->m_name, true, false)) {
       resultType = type2;
     } else if (c1ok && c2ok && cls1->derivedByDynamic() &&
-               cls2->derivesFromRedeclaring()) {
+               cls2->derivesFromRedeclaring() == Derivation::Redeclaring) {
       resultType = type2;
     } else {
       resultType = type1;

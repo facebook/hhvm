@@ -42,7 +42,7 @@ struct CallDest {
   PhysReg reg1;
 };
 
-const CallDest kVoidDest { DestType::None };
+const CallDest kVoidDest { DestType::None, InvalidReg, InvalidReg };
 
 //////////////////////////////////////////////////////////////////////
 

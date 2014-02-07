@@ -124,6 +124,8 @@ using EHInfo = boost::variant< EHFault
                              >;
 
 struct FuncInfo {
+  FuncInfo(const Unit* u, const Func* f) : unit(u), func(f) {}
+
   const Unit* unit;
   const Func* func;
 
@@ -139,7 +141,7 @@ struct FuncInfo {
 };
 
 FuncInfo find_func_info(const Func* func) {
-  auto finfo = FuncInfo { func->unit(), func };
+  auto finfo = FuncInfo(func->unit(), func);
 
   auto label_num = uint32_t{0};
   auto gen_label = [&] (const char* kind) {

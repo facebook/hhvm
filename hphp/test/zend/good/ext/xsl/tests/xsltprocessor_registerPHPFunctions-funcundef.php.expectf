@@ -1,3 +1,3 @@
 NULL
-HipHop Warning: Unable to call handler undefinedfunc() in %s on line %d
+HipHop Warning: %s
 NULL

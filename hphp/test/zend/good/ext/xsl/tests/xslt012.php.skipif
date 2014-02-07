@@ -1,1 +1,1 @@
-<?php include("skipif.inc"); ?>
+<?php require_once dirname(__FILE__) .'/skipif.inc'; ?>

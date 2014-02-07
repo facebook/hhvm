@@ -41,4 +41,3 @@ $dom = new domDocument();
     }
   }
   
-?>

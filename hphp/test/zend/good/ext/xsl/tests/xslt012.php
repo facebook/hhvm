@@ -35,4 +35,3 @@ print "\n";
 print $proc->transformToXml($dom);
 print "\n";
 
-?>

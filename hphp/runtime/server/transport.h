@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 #define incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 
-#include <map>
 #include <string>
+#include <unordered_map>
 
 #include "hphp/util/compression.h"
 #include "hphp/util/functional.h"
@@ -33,8 +33,12 @@ namespace HPHP {
 /**
  * For storing headers and cookies.
  */
-typedef std::map<std::string, std::vector<std::string>, stdltistr> HeaderMap;
-typedef std::map<std::string, std::string, stdltistr> CookieMap;
+template <typename V>
+using CaseInsenMap =
+  std::unordered_map<std::string, V, string_hash, string_eqstri>;
+
+using HeaderMap = CaseInsenMap<std::vector<std::string>>;
+using CookieMap = CaseInsenMap<std::string>;
 
 /**
  * A class defining an interface that request handler can use to query

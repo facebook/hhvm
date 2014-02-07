@@ -90,9 +90,13 @@ public:
   virtual void onHeadersComplete() override;
 
 private:
-  typedef std::map<std::string, std::vector<std::string>> ResponseHeaders;
+  using ResponseHeaders =
+    std::unordered_map<std::string, std::vector<std::string>>;
 
   std::string getRawHeader(const std::string& name);
+  std::string* getRawHeaderPtr(const std::string& name);
+  int getIntHeader(const std::string& name);
+
   /*
    * HTTP_IF_MODIFIED_SINCE -> If-Unmodified-Since
    */

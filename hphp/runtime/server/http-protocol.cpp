@@ -413,8 +413,7 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
   }
 }
 
-void HttpProtocol::CopyTransportParams(Variant& server,
-                                       Transport *transport) {
+void HttpProtocol::CopyTransportParams(Variant& server, Transport* transport) {
   HeaderMap transportParams;
   // Get additional server params from the transport if it has any. In the case
   // of fastcgi this is basically a full header list from apache/nginx.

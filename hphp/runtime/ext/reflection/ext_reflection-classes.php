@@ -2754,9 +2754,9 @@ implements Reflector {
       $modifiers= $this->info['access'];
     } else {
       if ($this->isStatic()) {
-        return hphp_invoke_method(null, $this->info['class'], $this->info['name'], array_values($args));
+        return hphp_invoke_method(null, $this->originalClass, $this->info['name'], array_values($args));
       } else if ($obj instanceof $this->info['class']) {
-        return hphp_invoke_method($obj, $this->info['class'], $this->info['name'], array_values($args));
+        return hphp_invoke_method($obj, $this->originalClass, $this->info['name'], array_values($args));
       } else if ($obj === null) {
         throw new ReflectionException(sprintf(
           'Trying to invoke non static method %s::%s without an object',

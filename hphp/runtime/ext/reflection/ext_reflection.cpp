@@ -755,7 +755,19 @@ Array HHVM_FUNCTION(hphp_get_method_info, CVarRef class_or_object,
 
 Array HHVM_FUNCTION(hphp_get_closure_info, CObjRef closure) {
   Array mi = HHVM_FN(hphp_get_method_info)(closure->o_getClassName(), s___invoke);
-  mi.set(s_name, s_closure_in_braces);
+  auto const cls = get_cls(closure);
+  auto const nameRef = cls->nameRef();
+  static const char c_prefix[] = "Closure$";
+
+  // Closures in global scope begin with '$' after the prefix
+  if (nameRef->data()[8] == '$') {
+    mi.set(s_name, s_closure_in_braces);
+  } else {
+    String namespaceName(nameRef->data() + sizeof c_prefix - 1,
+                         nameRef.rfind('\\') + 1 - sizeof c_prefix + 1,
+                         CopyString);
+    mi.set(s_name, namespaceName + s_closure_in_braces);
+  }
   mi.set(s_closureobj, closure);
   mi.set(s_closure, empty_string);
   mi.remove(s_access);
@@ -764,12 +776,11 @@ Array HHVM_FUNCTION(hphp_get_closure_info, CObjRef closure) {
   mi.remove(s_class);
 
   // grab the use variables and their values
-  auto const cls = get_cls(closure);
   Array static_vars = Array::Create();
   for (Slot i = 0; i < cls->numDeclProperties(); ++i) {
     auto const& prop = cls->declProperties()[i];
     auto val = closure.o_get(StrNR(prop.m_name), false /* error */,
-                             cls->nameRef());
+                             nameRef);
 
     // Closure static locals are represented as special instance
     // properties with a mangled name.

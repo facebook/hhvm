@@ -124,7 +124,8 @@ public:
   virtual Array getMetaData();
   virtual Array getWrapperMetaData() { return null_array; }
   virtual const char *getStreamType() const { return "";}
-  virtual StreamContext *getStreamContext() { return m_stream_context; }
+  Resource &getStreamContext() { return m_streamContext; }
+  void setStreamContext(Resource &context) { m_streamContext = context; }
 
   int64_t bufferedLen() { return m_writepos - m_readpos; }
 
@@ -186,7 +187,7 @@ protected:
   std::string m_name;
   std::string m_mode;
 
-  StreamContext *m_stream_context;
+  Resource m_streamContext;
 
   void closeImpl();
   virtual void sweep() FOLLY_OVERRIDE;

@@ -546,13 +546,18 @@ static StreamContext* get_stream_context(CVarRef stream_or_context) {
     return nullptr;
   }
   CResRef resource = stream_or_context.asCResRef();
-  StreamContext* context = resource.getTyped<StreamContext>();
+  StreamContext* context = resource.getTyped<StreamContext>(true/*nullOkay*/, true/*badTypeOkay*/);
   if (context != nullptr) {
     return context;
   }
-  File* file = resource.getTyped<File>();
+  File *file = resource.getTyped<File>(true/*nullOkay*/, true/*badTypeOkay*/);
   if (file != nullptr) {
-    return file->getStreamContext();
+    Resource resource = file->getStreamContext();
+    if (file->getStreamContext().isNull()) {
+      resource = Resource(NEWOBJ(StreamContext)(Array::Create(), Array::Create()));
+      file->setStreamContext(resource);
+    }
+    return resource.getTyped<StreamContext>();
   }
   return nullptr;
 }

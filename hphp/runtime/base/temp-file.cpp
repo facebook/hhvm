@@ -20,7 +20,6 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(TempFile)
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
@@ -41,6 +40,13 @@ TempFile::TempFile(bool autoDelete /* = true */) : m_autoDelete(autoDelete) {
 
 TempFile::~TempFile() {
   closeImpl();
+}
+
+void TempFile::sweep() {
+  closeImpl();
+  using std::string;
+  m_rawName.~string();
+  PlainFile::sweep();
 }
 
 bool TempFile::open(const String& filename, const String& mode) {

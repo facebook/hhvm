@@ -486,10 +486,6 @@ void FrameState::merge(Snapshot& state) {
     local.written = local.written || m_locals[i].written;
   }
 
-  // We should not be merging states that have different hhbc bytecode
-  // boundaries.
-  assert(m_marker.valid() && state.curMarker == m_marker);
-
   // For now, we shouldn't be merging states with different inline states.
   assert(m_inlineSavedStates == state.inlineSavedStates);
 }

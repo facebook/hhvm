@@ -331,7 +331,14 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::PopA&) { nothrow(); popA(); }
   void operator()(const bc::PopC&) { nothrow(); popC(); }
   void operator()(const bc::PopV&) { nothrow(); popV(); }
-  void operator()(const bc::PopR&) { nothrow(); popR(); }
+  void operator()(const bc::PopR&) {
+    auto t = topT(0);
+    if (t.subtypeOf(TCell)) {
+      return reduce(bc::UnboxRNop {},
+                    bc::PopC {});
+    }
+    nothrow(); popR();
+  }
 
   void operator()(const bc::Dup& op) {
     nothrow();

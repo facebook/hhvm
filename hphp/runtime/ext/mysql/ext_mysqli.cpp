@@ -253,7 +253,7 @@ static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
 static Variant HHVM_METHOD(mysqli, hh_server_version) {
   auto conn = get_connection(this_);
   VALIDATE_CONN_CONNECTED(conn);
-  return mysql_get_server_version(conn->get());
+  return (int64_t)mysql_get_server_version(conn->get());
 }
 
 static Variant HHVM_METHOD(mysqli, hh_sqlstate) {

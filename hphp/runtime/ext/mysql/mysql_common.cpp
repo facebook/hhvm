@@ -1095,7 +1095,7 @@ Variant MySQLStmt::num_rows() {
 
 Variant MySQLStmt::param_count() {
   VALIDATE_PREPARED
-  return mysql_stmt_param_count(m_stmt);
+  return (int64_t)mysql_stmt_param_count(m_stmt);
 }
 
 Variant MySQLStmt::prepare(const String& query) {

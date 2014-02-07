@@ -424,7 +424,7 @@ bool Transport::acceptEncoding(const char *encoding) {
 
   // This is testing a substring than a word match, but in practice, this
   // always works.
-  return header.find(encoding) != std::string::npos;
+  return strcasestr(header.c_str(), encoding) != nullptr;
 }
 
 bool Transport::cookieExists(const char *name) {

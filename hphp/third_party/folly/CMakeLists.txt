@@ -35,13 +35,16 @@ list(REMOVE_ITEM files
 	${FOLLY_DIR}/experimental/symbolizer/ElfCache.cpp
 	${FOLLY_DIR}/experimental/symbolizer/ElfUtil.cpp
 	${FOLLY_DIR}/experimental/symbolizer/SignalHandler.cpp
-    )
+	)
 
 # Remove non-portable items
 if (NOT LINUX)
-	list(REMOVE_ITEM files ${FOLLY_DIR}/experimental/symbolizer/Symbolizer.cpp)
-	list(REMOVE_ITEM files ${FOLLY_DIR}/experimental/symbolizer/Dwarf.cpp)
-	list(REMOVE_ITEM files ${FOLLY_DIR}/experimental/symbolizer/Elf.cpp)
+	list(REMOVE_ITEM files
+		${FOLLY_DIR}/detail/MemoryIdler.cpp
+		${FOLLY_DIR}/experimental/symbolizer/Symbolizer.cpp
+		${FOLLY_DIR}/experimental/symbolizer/Dwarf.cpp
+		${FOLLY_DIR}/experimental/symbolizer/Elf.cpp
+		)
 endif()
 
 # Subprocess requires flatmap from boost 1.48

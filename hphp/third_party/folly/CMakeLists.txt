@@ -32,6 +32,7 @@ list(REMOVE_ITEM files
 	${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
 	${FOLLY_DIR}/experimental/io/IOBufQueue.cpp
 	${FOLLY_DIR}/experimental/symbolizer/StackTrace.cpp
+	${FOLLY_DIR}/experimental/symbolizer/ElfCache.cpp
 	${FOLLY_DIR}/experimental/symbolizer/ElfUtil.cpp
 	${FOLLY_DIR}/experimental/symbolizer/SignalHandler.cpp
     )

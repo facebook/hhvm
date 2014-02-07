@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/ext_memcached.h"
 #include "hphp/runtime/ext/libmemcached_portability.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include <zlib.h>
 
 #include "hphp/system/systemlib.h"
@@ -930,7 +930,7 @@ void c_Memcached::toPayload(CVarRef value, std::vector<char> &payload,
   } else {
     switch (m_impl->serializer) {
     case q_Memcached$$SERIALIZER_JSON:
-      encoded = f_json_encode(value);
+      encoded = HHVM_FN(json_encode)(value);
       flags = MEMC_VAL_IS_JSON;
       break;
     default:
@@ -998,7 +998,7 @@ bool c_Memcached::toObject(Variant& value, const memcached_result_st &result) {
     value = decompPayload.toBoolean();
     break;
   case MEMC_VAL_IS_JSON:
-    value = f_json_decode(decompPayload);
+    value = HHVM_FN(json_decode)(decompPayload);
     break;
   case MEMC_VAL_IS_SERIALIZED:
     value = unserialize_from_string(decompPayload);

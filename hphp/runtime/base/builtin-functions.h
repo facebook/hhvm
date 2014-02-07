@@ -210,6 +210,16 @@ inline bool isContainerOrNull(CVarRef v) {
   return isContainerOrNull(*v.asCell());
 }
 
+inline bool isMutableContainer(const Cell& c) {
+  assert(cellIsPlausible(c));
+  return c.m_type == KindOfArray ||
+         (c.m_type == KindOfObject && c.m_data.pobj->isMutableCollection());
+}
+
+inline bool isMutableContainer(CVarRef v) {
+  return isMutableContainer(*v.asCell());
+}
+
 inline size_t getContainerSize(const Cell& c) {
   assert(isContainer(c));
   if (c.m_type == KindOfArray) {

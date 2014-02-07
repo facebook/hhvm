@@ -377,27 +377,6 @@ isNormalPropertyAccess(const NormalizedInstruction& i,
     i.inputs[objInput]->valueType() == KindOfObject;
 }
 
-bool
-mInstrHasUnknownOffsets(const NormalizedInstruction& ni, Class* context) {
-  const MInstrInfo& mii = getMInstrInfo(ni.mInstrOp());
-  unsigned mi = 0;
-  unsigned ii = mii.valCount() + 1;
-  for (; mi < ni.immVecM.size(); ++mi) {
-    MemberCode mc = ni.immVecM[mi];
-    if (mcodeIsProp(mc)) {
-      const Class* cls = nullptr;
-      if (getPropertyOffset(ni, context, cls, mii, mi, ii).offset == -1) {
-        return true;
-      }
-      ++ii;
-    } else {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
                            Class* ctx,
                            const Class*& baseClass,

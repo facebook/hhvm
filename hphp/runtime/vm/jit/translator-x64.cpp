@@ -268,9 +268,7 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
     return sr->getTopTranslation();
   }
   SKTRACE(1, args.m_sk, "retranslate\n");
-  if (m_mode == TransInvalid) {
-    m_mode = profileSrcKey(args.m_sk) ? TransProfile : TransLive;
-  }
+  m_mode = profileSrcKey(args.m_sk) ? TransProfile : TransLive;
   return translate(args);
 }
 
@@ -775,8 +773,8 @@ TCA TranslatorX64::regeneratePrologue(TransID prologueTransId,
       TransID funcletTransId = m_profData->dvFuncletTransId(func, nArgs);
       if (funcletTransId != InvalidID) {
         invalidateSrcKey(funcletSK);
-        TCA dvStart = retranslate(TranslArgs(funcletSK, false).
-                                  transId(funcletTransId));
+        TCA dvStart = translate(TranslArgs(funcletSK, false).
+                                transId(funcletTransId));
         if (dvStart && !triggerSkStart && funcletSK == triggerSk) {
           triggerSkStart = dvStart;
         }
@@ -787,7 +785,7 @@ TCA TranslatorX64::regeneratePrologue(TransID prologueTransId,
     }
   }
 
-  return triggerSkStart;;
+  return triggerSkStart;
 }
 
 /**
@@ -1868,6 +1866,14 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         try {
           assertCleanState();
           result = translateRegion(*region, regionInterps);
+
+          // If we're profiling, grab the postconditions so we can
+          // use them in region selection whenever we decide to retranslate.
+          if (m_mode == TransProfile && result == Success &&
+              RuntimeOption::EvalJitPGOUsePostConditions) {
+            pconds = m_irTrans->hhbcTrans().traceBuilder().getKnownTypes();
+          }
+
           FTRACE(2, "translateRegion finished with result {}\n",
                  translateResultName(result));
         } catch (const std::exception& e) {
@@ -2133,7 +2139,7 @@ void TranslatorX64::traceCodeGen() {
   auto& unit = ht.unit();
 
   auto finishPass = [&](const char* msg, int level) {
-    dumpTrace(level, unit, msg, nullptr, nullptr,
+    dumpTrace(level, unit, msg, nullptr, nullptr, nullptr,
               ht.traceBuilder().guards());
     assert(checkCfg(unit));
   };
@@ -2143,7 +2149,8 @@ void TranslatorX64::traceCodeGen() {
   optimize(unit, ht.traceBuilder(), m_mode);
   finishPass(" after optimizing ", kOptLevel);
 
-  auto regs = allocateRegs(unit);
+  auto regs = RuntimeOption::EvalHHIRXls ? allocateRegs(unit) :
+              allocRegsForUnit(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
   recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier());

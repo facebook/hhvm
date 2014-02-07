@@ -3,6 +3,10 @@ Eval {
   EnableZendCompat = true
 }
 
+MySQL {
+ TypedResults = false
+}
+
 Http {
   SlowQueryThreshold = 0
 }

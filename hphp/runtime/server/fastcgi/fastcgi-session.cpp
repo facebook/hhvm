@@ -484,9 +484,7 @@ void FastCGISession::handleAbortRequest() {
   }
   endTransaction(m_requestId);
   writeEndRequest(m_requestId, 1, ProtoStatus::REQUEST_COMPLETE);
-  if (!m_keepConn) {
-    handleClose();
-  }
+  handleClose();
 }
 
 void FastCGISession::handleStdIn(std::unique_ptr<IOBuf> chain) {
@@ -530,9 +528,7 @@ void FastCGISession::handleStdErr(RequestId request_id,
 void FastCGISession::handleComplete(RequestId request_id) {
   endTransaction(request_id);
   writeEndRequest(request_id, 0, ProtoStatus::REQUEST_COMPLETE);
-  if (!m_keepConn) {
-    handleClose();
-  }
+  handleClose();
 }
 
 const std::string FastCGISession::k_getValueMaxConnKey =
@@ -571,6 +567,7 @@ void FastCGISession::handleInvalidRecord() {
 }
 
 void FastCGISession::handleClose() {
+  //TODO if m_keepConn don't kill the connection but don't leak it either
   if (m_callback) {
     m_callback->onSessionClose();
   }

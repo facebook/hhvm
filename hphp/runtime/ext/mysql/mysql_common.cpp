@@ -45,6 +45,9 @@ namespace HPHP {
 
 using std::string;
 
+const StaticString
+  s_mysqli_result("mysqli_result");
+
 class MySQLStaticInitializer {
 public:
   MySQLStaticInitializer() {
@@ -130,8 +133,9 @@ String MySQL::GetDefaultSocket() {
   return MYSQL_UNIX_ADDR;
 }
 
-String MySQL::GetHash(const String& host, int port, const String& socket, const String& username,
-                      const String& password, int client_flags) {
+String MySQL::GetHash(const String& host, int port, const String& socket,
+                      const String& username, const String& password,
+                      int client_flags) {
   char buf[1024];
   snprintf(buf, sizeof(buf), "%s:%d:%s:%s:%s:%d",
            host.data(), port, socket.data(),
@@ -140,15 +144,16 @@ String MySQL::GetHash(const String& host, int port, const String& socket, const 
 }
 
 MySQL *MySQL::GetCachedImpl(const char *name, const String& host, int port,
-                            const String& socket, const String& username, const String& password,
-                            int client_flags) {
+                            const String& socket, const String& username,
+                            const String& password, int client_flags) {
   String key = GetHash(host, port, socket, username, password, client_flags);
   return dynamic_cast<MySQL*>(g_persistentObjects->get(name, key.data()));
 }
 
 void MySQL::SetCachedImpl(const char *name, const String& host, int port,
-                          const String& socket, const String& username, const String& password,
-                          int client_flags, MySQL *conn) {
+                          const String& socket, const String& username,
+                          const String& password, int client_flags,
+                          MySQL *conn) {
   String key = GetHash(host, port, socket, username, password, client_flags);
   g_persistentObjects->set(name, key.data(), conn);
 }
@@ -196,7 +201,7 @@ MySQL::MySQL(const char *host, int port, const char *username,
              const char *password, const char *database,
              MYSQL* raw_connection)
     : m_port(port), m_last_error_set(false), m_last_errno(0),
-      m_xaction_count(0), m_multi_query(false) {
+      m_xaction_count(0), m_multi_query(false), m_state(MySQLState::INITED) {
   if (host) m_host = host;
   if (username) m_username = username;
   if (password) m_password = password;
@@ -237,12 +242,14 @@ void MySQL::close() {
   m_last_error.clear();
   mysql_close(m_conn);
   m_conn = nullptr;
+  m_state = MySQLState::CLOSED;
 }
 
-bool MySQL::connect(const String& host, int port, const String& socket, const String& username,
-                    const String& password, const String& database,
-                    int client_flags, int connect_timeout) {
-  if (m_conn == NULL) {
+bool MySQL::connect(const String& host, int port, const String& socket,
+                    const String& username, const String& password,
+                    const String& database, int client_flags,
+                    int connect_timeout) {
+  if (m_conn == nullptr) {
     m_conn = create_new_conn();
   }
   if (connect_timeout >= 0) {
@@ -256,9 +263,9 @@ bool MySQL::connect(const String& host, int port, const String& socket, const St
   m_xaction_count = 0;
   bool ret = mysql_real_connect(m_conn, host.data(), username.data(),
                             password.data(),
-                            (database.empty() ? NULL : database.data()),
+                            (database.empty() ? nullptr : database.data()),
                             port,
-                            socket.empty() ? NULL : socket.data(),
+                            socket.empty() ? nullptr : socket.data(),
                             client_flags);
   if (ret && mysqlExtension::WaitTimeout > 0) {
     String query("set session wait_timeout=");
@@ -268,13 +275,16 @@ bool MySQL::connect(const String& host, int port, const String& socket, const St
                    mysql_error(m_conn));
     }
   }
+  m_state = (ret) ? MySQLState::CONNECTED : MySQLState::CLOSED;
   return ret;
 }
 
-bool MySQL::reconnect(const String& host, int port, const String& socket, const String& username,
-                      const String& password, const String& database,
-                      int client_flags, int connect_timeout) {
-  if (m_conn == NULL) {
+bool MySQL::reconnect(const String& host, int port, const String& socket,
+                      const String& username, const String& password,
+                      const String& database, int client_flags,
+                      int connect_timeout) {
+  bool ret = false;
+  if (m_conn == nullptr) {
     m_conn = create_new_conn();
     if (connect_timeout >= 0) {
       MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
@@ -284,13 +294,11 @@ bool MySQL::reconnect(const String& host, int port, const String& socket, const 
       ServerStats::Log("sql.reconn_new", 1);
     }
     IOStatusHelper io("mysql::connect", host.data(), port);
-    return mysql_real_connect(m_conn, host.data(), username.data(),
-                              password.data(),
-                              (database.empty() ? NULL : database.data()),
-                              port, socket.data(), client_flags);
-  }
-
-  if (!mysql_ping(m_conn)) {
+    ret = mysql_real_connect(m_conn, host.data(), username.data(),
+                             password.data(),
+                             (database.empty() ? nullptr : database.data()),
+                             port, socket.data(), client_flags);
+  } else if (m_state == MySQLState::CONNECTED && !mysql_ping(m_conn)) {
     if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
       ServerStats::Log("sql.reconn_ok", 1);
     }
@@ -298,21 +306,24 @@ bool MySQL::reconnect(const String& host, int port, const String& socket, const 
       mysql_select_db(m_conn, database.data());
     }
     return true;
+  } else {
+    if (connect_timeout >= 0) {
+      MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
+                                   connect_timeout);
+    }
+    if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+      ServerStats::Log("sql.reconn_old", 1);
+    }
+    IOStatusHelper io("mysql::connect", host.data(), port);
+    m_xaction_count = 0;
+    ret = mysql_real_connect(m_conn, host.data(), username.data(),
+                             password.data(),
+                             (database.empty() ? nullptr : database.data()),
+                             port, socket.data(), client_flags);
   }
 
-  if (connect_timeout >= 0) {
-    MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
-                                 connect_timeout);
-  }
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
-    ServerStats::Log("sql.reconn_old", 1);
-  }
-  IOStatusHelper io("mysql::connect", host.data(), port);
-  m_xaction_count = 0;
-  return mysql_real_connect(m_conn, host.data(), username.data(),
-                            password.data(),
-                            (database.empty() ? NULL : database.data()),
-                            port, socket.data(), client_flags);
+  m_state = (ret) ? MySQLState::CONNECTED : MySQLState::CLOSED;
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -472,12 +483,23 @@ Variant php_mysql_field_info(CVarRef result, int field, int entry_type) {
   return false;
 }
 
-Variant php_mysql_do_connect(String server, String username,
-                                    String password, String database,
-                                    int client_flags, bool persistent,
-                                    bool async,
-                                    int connect_timeout_ms,
-                                    int query_timeout_ms) {
+
+
+Variant php_mysql_do_connect(const String& server, const String& username,
+                             const String& password, const String& database,
+                             int client_flags, bool persistent, bool async,
+                             int connect_timeout_ms, int query_timeout_ms) {
+  return php_mysql_do_connect_on_link(nullptr, server, username, password,
+                                      database, client_flags, persistent, async,
+                                      connect_timeout_ms, query_timeout_ms);
+}
+
+Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
+                                     String username, String password,
+                                     String database, int client_flags,
+                                     bool persistent, bool async,
+                                     int connect_timeout_ms,
+                                     int query_timeout_ms) {
   if (connect_timeout_ms < 0) {
     connect_timeout_ms = mysqlExtension::ConnectTimeout;
   }
@@ -513,17 +535,17 @@ Variant php_mysql_do_connect(String server, String username,
     socket = MySQL::GetDefaultSocket();
   }
 
-  Resource ret;
-  MySQL *mySQL = NULL;
-  if (persistent) {
+  if (mySQL == nullptr && persistent) {
     mySQL = MySQL::GetPersistent(host, port, socket, username, password,
                                  client_flags);
   }
 
-  if (mySQL == NULL) {
+  if (mySQL == nullptr) {
     mySQL = new MySQL(host.c_str(), port, username.c_str(), password.c_str(),
                       database.c_str());
-    ret = mySQL;
+  }
+
+  if (mySQL->getState() == MySQLState::INITED) {
     if (async) {
 #ifdef FACEBOOK
       if (!mySQL->async_connect(host, port, socket, username, password,
@@ -544,7 +566,6 @@ Variant php_mysql_do_connect(String server, String username,
       }
     }
   } else {
-    ret = mySQL;
     if (!mySQL->reconnect(host, port, socket, username, password,
                           database, client_flags, connect_timeout_ms)) {
       MySQL::SetDefaultConn(mySQL); // so we can report errno by mysql_errno()
@@ -558,7 +579,7 @@ Variant php_mysql_do_connect(String server, String username,
                          client_flags, mySQL);
   }
   MySQL::SetDefaultConn(mySQL);
-  return ret;
+  return Resource(mySQL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -703,6 +724,13 @@ bool MySQLResult::seekField(int64_t field) {
   return true;
 }
 
+int64_t MySQLResult::tellField() {
+  if (!m_localized) {
+    return mysql_field_tell(m_res);
+  }
+  return m_current_field;
+}
+
 MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
   if (!m_localized) {
     mysql_fetch_field(m_res);
@@ -710,6 +738,424 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
   if (m_current_field < getFieldCount()) m_current_field++;
   return getFieldInfo(m_current_field);
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+// MySQLStmtVariables
+
+MySQLStmtVariables::MySQLStmtVariables(std::vector<Variant*> arr): m_arr(arr) {
+  int count = m_arr.size();
+  m_vars   = (MYSQL_BIND*)calloc(count, sizeof(MYSQL_BIND));
+  m_null   = (my_bool*)calloc(count, sizeof(my_bool));
+  m_length = (unsigned long*)calloc(count, sizeof(unsigned long));
+
+  for (int i = 0; i < count; i++) {
+    m_null[i] = false;
+    m_length[i] = 0;
+
+    MYSQL_BIND *b = &m_vars[i];
+    b->is_null = &m_null[i];
+    b->length  = &m_length[i];
+    b->buffer = nullptr;
+    b->buffer_length = 0;
+    b->buffer_type = MYSQL_TYPE_STRING;
+  }
+}
+
+MySQLStmtVariables::~MySQLStmtVariables() {
+  free(m_vars);
+  free(m_null);
+  free(m_length);
+}
+
+bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
+  assert(m_arr.size() == mysql_stmt_field_count(stmt));
+
+  MYSQL_RES *res = mysql_stmt_result_metadata(stmt);
+  MYSQL_FIELD *fields = mysql_fetch_fields(res);
+  for(int i = 0; i < m_arr.size(); i++) {
+    MYSQL_BIND *b = &m_vars[i];
+    b->is_unsigned = (fields[i].flags & UNSIGNED_FLAG) ? 1 : 0;
+
+    switch (fields[i].type) {
+      case MYSQL_TYPE_NULL:
+        b->buffer_type = MYSQL_TYPE_NULL;
+      case MYSQL_TYPE_DOUBLE:
+      case MYSQL_TYPE_FLOAT:
+        b->buffer_type = MYSQL_TYPE_DOUBLE;
+        b->buffer_length = sizeof(double);
+        break;
+      case MYSQL_TYPE_LONGLONG:
+#if MYSQL_VERSION_ID > 50002
+      case MYSQL_TYPE_BIT:
+#endif
+      case MYSQL_TYPE_LONG:
+      case MYSQL_TYPE_INT24:
+      case MYSQL_TYPE_SHORT:
+      case MYSQL_TYPE_YEAR:
+      case MYSQL_TYPE_TINY:
+        b->buffer_type = MYSQL_TYPE_LONGLONG;
+        b->buffer_length = sizeof(int64_t);
+        break;
+      case MYSQL_TYPE_DATE:
+      case MYSQL_TYPE_DATETIME:
+      case MYSQL_TYPE_TIMESTAMP:
+      case MYSQL_TYPE_TIME:
+      case MYSQL_TYPE_STRING:
+      case MYSQL_TYPE_VARCHAR:
+      case MYSQL_TYPE_VAR_STRING:
+      case MYSQL_TYPE_ENUM:
+      case MYSQL_TYPE_SET:
+      case MYSQL_TYPE_LONG_BLOB:
+      case MYSQL_TYPE_MEDIUM_BLOB:
+      case MYSQL_TYPE_BLOB:
+      case MYSQL_TYPE_TINY_BLOB:
+      case MYSQL_TYPE_GEOMETRY:
+      case MYSQL_TYPE_DECIMAL:
+      case MYSQL_TYPE_NEWDECIMAL:
+        b->buffer_type = MYSQL_TYPE_STRING;
+        b->buffer_length = fields[i].max_length ?
+                             fields[i].max_length :
+                             fields[i].length;
+        break;
+      default:
+        // There exists some more types in this enum like MYSQL_TYPE_NEWDATE,
+        // MYSQL_TYPE_TIMESTAMP2, MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but
+        // they are just used on the server
+        assert(false);
+    }
+
+    if (b->buffer_length > 0) {
+      b->buffer = calloc(1, b->buffer_length);
+    }
+  }
+  mysql_free_result(res);
+
+  return !mysql_stmt_bind_result(stmt, m_vars);
+}
+
+void MySQLStmtVariables::update_result() {
+  for (int i = 0; i < m_arr.size(); i++) {
+    MYSQL_BIND *b = &m_vars[i];
+    Variant v;
+
+    if (!*b->is_null && b->buffer_type != MYSQL_TYPE_NULL) {
+      switch (b->buffer_type) {
+        case MYSQL_TYPE_DOUBLE:
+          v = *(double*)b->buffer;
+          break;
+        case MYSQL_TYPE_LONGLONG:
+          v = *(int64_t*)b->buffer;
+          break;
+        case MYSQL_TYPE_STRING:
+          v = String((char *)b->buffer, *b->length, CopyString);
+          break;
+        default:
+          // We never ask for anything else than DOUBLE, LONGLONG and STRING
+          // so in the case we get something else back something is really wrong
+          assert(false);
+      }
+    }
+
+    *m_arr[i]->getRefData() = v;
+  }
+}
+
+bool MySQLStmtVariables::init_params(MYSQL_STMT *stmt, const String& types) {
+  assert(m_arr.size() == types.size());
+
+  for (int i = 0; i < types.size(); i++) {
+    MYSQL_BIND *b = &m_vars[i];
+    switch (types[i]) {
+      case 'i':
+        b->buffer_type = MYSQL_TYPE_LONGLONG;
+        break;
+      case 'd':
+        b->buffer_type = MYSQL_TYPE_DOUBLE;
+        break;
+      case 's':
+        b->buffer_type = MYSQL_TYPE_STRING;
+        break;
+      case 'b':
+        b->buffer_type = MYSQL_TYPE_LONG_BLOB;
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+  return !mysql_stmt_bind_param(stmt, m_vars);
+}
+
+bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
+  m_value_arr.clear();
+  for (int i = 0; i < m_arr.size(); i++) {
+    MYSQL_BIND *b = &m_vars[i];
+    const Variant& var = *m_arr[i];
+    Variant v;
+    if (var.isNull()) {
+      *b->is_null = 1;
+    } else {
+      switch (b->buffer_type) {
+        case MYSQL_TYPE_LONGLONG:
+          {
+            m_value_arr.push_back(var.toInt64());
+            b->buffer = m_value_arr.back().getInt64Data();
+          }
+          break;
+        case MYSQL_TYPE_DOUBLE:
+          {
+            m_value_arr.push_back(var.toDouble());
+            b->buffer = m_value_arr.back().getDoubleData();
+          }
+          break;
+        case MYSQL_TYPE_STRING:
+          {
+            m_value_arr.push_back(var.toString());
+            StringData *sd = m_value_arr.back().getStringData();
+            b->buffer = (void *)sd->data();
+            b->buffer_length = sd->size();
+            *b->length = sd->size();
+          }
+          break;
+        case MYSQL_TYPE_LONG_BLOB:
+          // The value are set using send_long_data so we don't have to do
+          // anything here
+          break;
+        default:
+          assert(false);
+      }
+    }
+  }
+
+  return !mysql_stmt_bind_param(stmt, m_vars);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MySQLStmt
+
+#define VALIDATE_STMT                                                          \
+  if (!m_stmt) {                                                               \
+    raise_warning("Couldn't fetch mysqli_stmt");                               \
+    return init_null();                                                        \
+  }
+
+#define VALIDATE_PREPARED                                                      \
+  VALIDATE_STMT                                                                \
+  if (!m_prepared) {                                                           \
+    raise_warning("invalid object or resource");                               \
+    return init_null();                                                        \
+  }
+
+MySQLStmt::MySQLStmt(MYSQL *mysql)
+  : m_stmt(mysql_stmt_init(mysql)), m_prepared(false), m_param_vars(nullptr),
+    m_result_vars(nullptr)
+{}
+
+MySQLStmt::~MySQLStmt() {
+  close();
+
+  if (m_param_vars) {
+    delete m_param_vars;
+  }
+  if (m_result_vars) {
+    delete m_result_vars;
+  }
+}
+
+void MySQLStmt::sweep() {
+  close();
+  // Note that ~MySQLStmt is *not* going to run when we are swept.
+}
+
+Variant MySQLStmt::affected_rows() {
+  VALIDATE_PREPARED
+  return (int64_t)mysql_stmt_affected_rows(m_stmt);
+}
+
+Variant MySQLStmt::attr_get(int64_t attr) {
+  VALIDATE_PREPARED
+
+  int64_t value = 0;
+
+  if (mysql_stmt_attr_get(m_stmt, (enum_stmt_attr_type)attr, &value)) {
+    return false;
+  }
+
+#if MYSQL_VERSION_ID >= 50107
+  if ((enum_stmt_attr_type)attr == STMT_ATTR_UPDATE_MAX_LENGTH) {
+    value = *(my_bool *)&value;
+  }
+#endif
+
+  return value;
+}
+
+Variant MySQLStmt::attr_set(int64_t attr, int64_t value) {
+  VALIDATE_PREPARED
+
+#if MYSQL_VERSION_ID >= 50107
+  if ((enum_stmt_attr_type)attr == STMT_ATTR_UPDATE_MAX_LENGTH) {
+    value = (my_bool)value;
+  }
+#endif
+  return !mysql_stmt_attr_set(m_stmt, (enum_stmt_attr_type)attr, &value);
+}
+
+Variant MySQLStmt::bind_param(const String& types, std::vector<Variant*> vars) {
+  VALIDATE_PREPARED
+
+  if (m_param_vars) {
+    delete m_param_vars;
+  }
+  m_param_vars = new MySQLStmtVariables(vars);
+  return m_param_vars->init_params(m_stmt, types);
+}
+
+Variant MySQLStmt::bind_result(std::vector<Variant*> vars) {
+  VALIDATE_PREPARED
+
+  if (m_result_vars) {
+    delete m_result_vars;
+  }
+  m_result_vars = new MySQLStmtVariables(vars);
+  return m_result_vars->bind_result(m_stmt);
+}
+
+Variant MySQLStmt::get_errno() {
+  VALIDATE_STMT
+  return (int64_t)mysql_stmt_errno(m_stmt);
+}
+
+Variant MySQLStmt::get_error() {
+  VALIDATE_STMT
+  return String(mysql_stmt_error(m_stmt), CopyString);
+}
+
+Variant MySQLStmt::close() {
+  m_prepared = false;
+  if (m_stmt) {
+    bool ret = !mysql_stmt_close(m_stmt);
+    m_stmt = nullptr;
+    return ret;
+  }
+
+  return true;
+}
+
+Variant MySQLStmt::execute() {
+  VALIDATE_PREPARED
+
+  if (m_param_vars) {
+    m_param_vars->bind_params(m_stmt);
+  }
+
+  return !mysql_stmt_execute(m_stmt);
+}
+
+Variant MySQLStmt::fetch() {
+  VALIDATE_PREPARED
+
+  int64_t ret = mysql_stmt_fetch(m_stmt);
+
+  if (ret == MYSQL_DATA_TRUNCATED || ret == MYSQL_NO_DATA) {
+    return init_null();
+  }
+
+  if (ret) {
+    return false;
+  }
+
+  if (m_result_vars) {
+    m_result_vars->update_result();
+  }
+
+  return true;
+}
+
+Variant MySQLStmt::field_count() {
+  VALIDATE_PREPARED
+  return (int64_t)mysql_stmt_field_count(m_stmt);
+}
+
+Variant MySQLStmt::free_result() {
+  VALIDATE_PREPARED
+  return mysql_stmt_free_result(m_stmt);
+}
+
+Variant MySQLStmt::insert_id() {
+  VALIDATE_PREPARED
+  return (int64_t)mysql_stmt_insert_id(m_stmt);
+}
+
+Variant MySQLStmt::num_rows() {
+  VALIDATE_PREPARED
+  return (int64_t)mysql_stmt_num_rows(m_stmt);
+}
+
+Variant MySQLStmt::param_count() {
+  VALIDATE_PREPARED
+  return mysql_stmt_param_count(m_stmt);
+}
+
+Variant MySQLStmt::prepare(const String& query) {
+  VALIDATE_STMT
+
+  // Cleaning up just in case they have been set before
+  if (m_param_vars) {
+    delete m_param_vars;
+    m_param_vars = nullptr;
+  }
+  if (m_result_vars) {
+    delete m_result_vars;
+    m_result_vars = nullptr;
+  }
+
+  m_prepared = !mysql_stmt_prepare(m_stmt, query.c_str(), query.size());
+  return m_prepared;
+}
+
+Variant MySQLStmt::reset() {
+  VALIDATE_STMT
+  return mysql_stmt_reset(m_stmt);
+}
+
+Variant MySQLStmt::store_result() {
+  VALIDATE_PREPARED
+  return !mysql_stmt_store_result(m_stmt);
+}
+
+Variant MySQLStmt::send_long_data(int64_t param_idx, const String& data) {
+  VALIDATE_PREPARED
+  return !mysql_stmt_send_long_data(m_stmt, param_idx, data.c_str(),
+                                    data.size());
+}
+
+Variant MySQLStmt::result_metadata() {
+  VALIDATE_PREPARED
+
+  MYSQL_RES *mysql_result = mysql_stmt_result_metadata(m_stmt);
+  if (!mysql_result) {
+    return false;
+  }
+
+  Resource res(NEWOBJ(MySQLResult)(mysql_result));
+
+  Array args;
+  args.append(res);
+
+  auto cls = Unit::lookupClass(s_mysqli_result.get());
+  Object obj = ObjectData::newInstance(cls);
+
+  TypedValue ret;
+  g_vmContext->invokeFunc(&ret, cls->getCtor(), args, obj.get());
+  tvRefcountedDecRef(&ret);
+
+  return obj;
+}
+
+#undef VALIDATE_STMT
+#undef VALIDATE_PREPARED
 
 ///////////////////////////////////////////////////////////////////////////////
 // query functions
@@ -917,8 +1363,10 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
 
   if (mysql_real_query(conn, query.data(), query.size())) {
 #ifdef HHVM_MYSQL_TRACE_MODE
-    raise_notice("runtime/ext_mysql: failed executing [%s] [%s]", query.data(),
-                 mysql_error(conn));
+    if (RuntimeOption::EnableHipHopSyntax) {
+      raise_notice("runtime/ext_mysql: failed executing [%s] [%s]",
+                   query.data(), mysql_error(conn));
+    }
 #endif
 
     // When we are timed out, and we're SELECT-ing, we're potentially
@@ -937,7 +1385,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
                             rconn->m_port);
           MYSQL *connected = mysql_real_connect
             (new_conn, rconn->m_host.c_str(), rconn->m_username.c_str(),
-             rconn->m_password.c_str(), NULL, rconn->m_port, NULL, 0);
+             rconn->m_password.c_str(), nullptr, rconn->m_port, nullptr, 0);
           if (connected) {
             string killsql = "KILL " + boost::lexical_cast<string>(tid);
             if (mysql_real_query(connected, killsql.c_str(), killsql.size())) {
@@ -1091,7 +1539,7 @@ const int64_t k_ASYNC_OP_QUERY = ASYNC_OP_QUERY;
 bool MySQL::async_connect(const String& host, int port, const String& socket,
                           const String& username, const String& password,
                           const String& database) {
-  if (m_conn == NULL) {
+  if (m_conn == nullptr) {
     m_conn = create_new_conn();
   }
   if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
@@ -1104,13 +1552,14 @@ bool MySQL::async_connect(const String& host, int port, const String& socket,
   m_password = static_cast<std::string>(password);
   m_socket = static_cast<std::string>(socket);
   m_database = static_cast<std::string>(database);
-  if (!mysql_real_connect_nonblocking_init(
-        m_conn, m_host.c_str(), m_username.c_str(), m_password.c_str(),
-        (m_database.empty() ? NULL : m_database.c_str()), port,
-        m_socket.empty() ? NULL : m_socket.c_str(), CLIENT_INTERACTIVE)) {
-    return false;
-  }
-  return true;
+  bool ret = mysql_real_connect_nonblocking_init(
+               m_conn, m_host.c_str(), m_username.c_str(), m_password.c_str(),
+               (m_database.empty() ? nullptr : m_database.c_str()), port,
+               m_socket.empty() ? nullptr : m_socket.c_str(),
+               CLIENT_INTERACTIVE);
+
+  m_state = (ret) ? MySQLState::CONNECTED : MySQLState::CLOSED;
+  return ret;
 }
 
 #else  // FACEBOOK

@@ -1113,9 +1113,11 @@ int FuncEmitter::parseUserAttributes(Attr &attrs) const {
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
  */
-static const StaticString s_native("__Native");
-static const StaticString s_actrec("ActRec");
-static const StaticString s_noinjection("NoInjection");
+static const StaticString
+  s_native("__Native"),
+  s_actrec("ActRec"),
+  s_variadicbyref("VariadicByRef"),
+  s_noinjection("NoInjection");
 
 int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
   int ret = Native::AttrNone;
@@ -1131,8 +1133,9 @@ int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
       if (userAttrStrVal->isame(s_actrec.get())) {
         ret = ret | Native::AttrActRec;
         attrs = attrs | AttrMayUseVV;
-      }
-      if (userAttrStrVal->isame(s_noinjection.get())) {
+      } else if (userAttrStrVal->isame(s_variadicbyref.get())) {
+        attrs = attrs | AttrVariadicByRef;
+      } else if (userAttrStrVal->isame(s_noinjection.get())) {
         attrs = attrs | AttrNoInjection;
       }
     }

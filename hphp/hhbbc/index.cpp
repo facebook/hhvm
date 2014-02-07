@@ -18,6 +18,8 @@
 #include <unordered_map>
 #include <mutex>
 #include <map>
+#include <cstdio>
+#include <cstdlib>
 
 #include <boost/next_prior.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -221,7 +223,7 @@ struct ClassInfo {
   /*
    * A vector of ClassInfo that encodes the inheritance hierarchy.
    */
-  std::vector<borrowed_ptr<const ClassInfo>> baseList;
+  std::vector<borrowed_ptr<ClassInfo>> baseList;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -279,6 +281,26 @@ SString Class::name() const {
 
 bool Class::couldBeOverriden() const {
   return val.str() ? true : !(val.other()->cls->attrs & AttrNoOverride);
+}
+
+folly::Optional<Class> Class::commonAncestor(const Class& o) const {
+  if (val.str() || o.val.str()) return folly::none;
+  auto c1 = val.other();
+  auto c2 = o.val.other();
+  // walk the arrays of base classes until they match. For common ancestors
+  // to exist they must be on both sides of the baseList at the same positions
+  ClassInfo* ancestor = nullptr;
+  auto it1 = c1->baseList.begin();
+  auto it2 = c2->baseList.begin();
+  while (it1 != c1->baseList.end() && it2 != c2->baseList.end()) {
+    if (*it1 != *it2) break;
+    ancestor = *it1;
+    it1++; it2++;
+  }
+  if (ancestor == nullptr) {
+    return folly::none;
+  }
+  return res::Class { index, SStringOr<ClassInfo>(ancestor) };
 }
 
 std::string show(const Class& c) {
@@ -690,6 +712,17 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
     if (!mapinfo) mapinfo = std::move(cinfo);
     return res::Class { this, SStringOr<ClassInfo>(borrow(mapinfo)) };
   }
+}
+
+res::Class Index::builtin_class(Context ctx, SString name) const {
+  auto const rcls = resolve_class(ctx, name);
+  if (!rcls) {
+    std::fprintf(stderr, "failed to resolve a builtin class: %s\n",
+      name->data());
+    std::abort();
+  }
+  assert(rcls->val.other() && (rcls->val.other()->cls->attrs & AttrBuiltin));
+  return *rcls;
 }
 
 folly::Optional<res::Func> Index::resolve_method(Context ctx,

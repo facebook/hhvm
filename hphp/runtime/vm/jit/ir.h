@@ -307,10 +307,10 @@ O(Floor,                        D(Dbl), S(Dbl),                            C) \
 O(Ceil,                         D(Dbl), S(Dbl),                            C) \
 O(InstanceOfBitmask,           D(Bool), S(Cls) CStr,                       C) \
 O(NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                       C) \
+  /* there is a conditional branch for each of the above fusable query ops */ \
 O(IsType,                      D(Bool), S(Cell),                           C) \
 O(IsNType,                     D(Bool), S(Cell),                           C) \
 O(IsScalarType,                D(Bool), S(Cell),                           C) \
-  /* there is a conditional branch for each of the above query ops */         \
 O(JmpGt,                       D(None), S(Gen) S(Gen),                   B|E) \
 O(JmpGte,                      D(None), S(Gen) S(Gen),                   B|E) \
 O(JmpLt,                       D(None), S(Gen) S(Gen),                   B|E) \
@@ -572,6 +572,8 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                       E|N|Er) \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
+O(Spill,                       DofS(0), SUnk,                             NF) \
+O(Reload,                      DofS(0), SUnk,                             NF) \
 O(Shuffle,                          ND, SUnk,                             NF) \
 O(CreateContFunc,               D(Obj), NA,                          E|N|PRc) \
 O(CreateContMeth,               D(Obj), S(Ctx),                      E|N|PRc) \
@@ -847,14 +849,20 @@ bool isGuardOp(Opcode opc);
 Opcode guardToAssert(Opcode opc);
 
 /*
- * A "query op" is any instruction returning Type::Bool that is both
- * branch-fusable and negateable.
+ * A "query op" is any instruction returning Type::Bool that is
+ * negateable.
  */
 bool isQueryOp(Opcode opc);
 
 /*
+ * A "fusable query op" is any instruction returning Type::Bool that
+ * has a corresponding "query jump op" for branch fusion.
+ */
+bool isFusableQueryOp(Opcode opc);
+
+/*
  * A "query jump op" is a conditional jump instruction that
- * corresponds to one of the query op instructions.
+ * corresponds to one of the fusable query op instructions.
  */
 bool isQueryJmpOp(Opcode opc);
 
@@ -862,7 +870,7 @@ bool isQueryJmpOp(Opcode opc);
  * Translate a query op into a conditional jump that does the same
  * test (a "query jump op").
  *
- * Pre: isQueryOp(opc)
+ * Pre: isFusableQueryOp(opc)
  */
 Opcode queryToJmpOp(Opcode opc);
 
@@ -894,6 +902,8 @@ Opcode negateQueryOp(Opcode opc);
 /*
  * Return the opcode that corresponds to commuting the arguments of
  * opc.
+ *
+ * Pre: opc is a 2-argument query op.
  */
 Opcode commuteQueryOp(Opcode opc);
 

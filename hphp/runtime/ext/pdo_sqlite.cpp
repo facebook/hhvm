@@ -30,6 +30,7 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_sqlite, 1.0.1);
 
 class PDOSqliteStatement : public PDOStatement {
 public:
+  DECLARE_RESOURCE_ALLOCATION(PDOSqliteStatement);
   PDOSqliteStatement(sqlite3 *db, sqlite3_stmt* stmt);
   virtual ~PDOSqliteStatement();
 
@@ -188,7 +189,7 @@ bool PDOSqliteConnection::preparer(const String& sql, sp_PDOStatement *stmt,
   if (sqlite3_prepare(m_db, sql.data(), sql.size(), &rawstmt, &tail)
       == SQLITE_OK) {
 
-    PDOSqliteStatement *s = new PDOSqliteStatement(m_db, rawstmt);
+    PDOSqliteStatement *s = NEWOBJ(PDOSqliteStatement)(m_db, rawstmt);
     *stmt = s;
     return true;
   }
@@ -317,6 +318,10 @@ PDOSqliteStatement::PDOSqliteStatement(sqlite3 *db, sqlite3_stmt* stmt)
 }
 
 PDOSqliteStatement::~PDOSqliteStatement() {
+  sweep();
+}
+
+void PDOSqliteStatement::sweep() {
   if (m_stmt) {
     sqlite3_finalize(m_stmt);
   }
@@ -406,7 +411,7 @@ bool PDOSqliteStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Resource(new PDOColumn()));
+      columns.set(i, Resource(NEWOBJ(PDOColumn)));
     }
   }
 
@@ -614,6 +619,7 @@ PDOSqlite::PDOSqlite() : PDODriver("sqlite") {
 }
 
 PDOConnection *PDOSqlite::createConnectionObject() {
+  // Doesn't use NEWOBJ because PDOConnection is malloced
   return new PDOSqliteConnection();
 }
 

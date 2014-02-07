@@ -138,8 +138,8 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
 
 void CatchStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("CatchStatement", 4);
-  cg.printPropertyHeader("className");
-  cg.printValue(m_origClassName);
+  cg.printPropertyHeader("class");
+  cg.printTypeExpression(m_origClassName);
   cg.printPropertyHeader("variableName");
   cg.printValue(m_variable->getName());
   cg.printPropertyHeader("block");

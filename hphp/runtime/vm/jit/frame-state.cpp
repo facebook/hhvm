@@ -621,9 +621,14 @@ void FrameState::refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {
 void FrameState::refineLocalType(uint32_t id, Type type) {
   always_assert(id < m_locals.size());
   auto& local = m_locals[id];
-  assert((type.maybeBoxed() && local.type.maybeBoxed()) ||
-         type <= m_locals[id].type);
-  local.type = type;
+  if (type.isBoxed() && local.type.isBoxed()) {
+    // It's OK for the old and new inner types of boxed values not to
+    // intersect, since the inner type is really just a prediction.
+    local.type = type;
+  } else {
+    always_assert((local.type & type) != Type::Bottom);
+    local.type = local.type & type;
+  }
 }
 
 void FrameState::setLocalType(uint32_t id, Type type) {

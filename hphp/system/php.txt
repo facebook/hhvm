@@ -74,7 +74,6 @@ hphp/system/php/file_system/Directory.php
 hphp/system/php/hash/furchash.php
 hphp/system/php/hash/hash.php
 hphp/system/php/hash/hphp_murmurhash.php
-hphp/system/php/json/JsonSerializable.php
 hphp/system/php/lang/ErrorException.php
 hphp/system/php/misc/highlight.php
 hphp/system/php/misc/php_strip_whitespace.php

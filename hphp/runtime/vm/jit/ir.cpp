@@ -33,7 +33,7 @@
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/reg-alloc.h"
+#include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -216,6 +216,10 @@ bool isQueryOp(Opcode opc) {
   }
 }
 
+bool isFusableQueryOp(Opcode opc) {
+  return isQueryOp(opc) && opc != IsType && opc != IsNType;
+}
+
 bool isQueryJmpOp(Opcode opc) {
   switch (opc) {
   case JmpGt:
@@ -237,7 +241,7 @@ bool isQueryJmpOp(Opcode opc) {
 }
 
 Opcode queryToJmpOp(Opcode opc) {
-  assert(isQueryOp(opc));
+  assert(isFusableQueryOp(opc));
   switch (opc) {
   case Gt:                 return JmpGt;
   case Gte:                return JmpGte;

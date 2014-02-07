@@ -1,5 +1,27 @@
-"D<something>"
-  - Deleted legacy register allocator and removed the -vEval.HHIRXls option
+"Donald Glover" 3-Feb-2014
+  - Support for "::class"
+  - Enable FCallBuiltin for HNI functions
+  - json_decode parity with PHP 5.4
+  - Fix race condition with profiling vs. non-profiling functions prologues
+  - Implement ini_get_all()
+  - Begin conversion of runtime options to INI
+  - Fix potential PGO-mode crash
+  - Fixes and enhancement in IR printing
+  - Vector and Set now supported by:
+    array_{shift,unshift,fill_keys,reverse,flip,size,chunk}, min, and max
+  - StableMap is now an alias for Map, which retains insertion order
+  - Map moved to HH namespace
+  - Fixes in XLS spilling of SIMD registers
+  - Support SCRIPT_FILENAME in FastCGI
+  - Implement stream_context_{get,set}_default
+  - Support for Intel VTune Amplifier XE
+  - Rewrite of SimpleXML
+  - Several HNI conversions, and a helper script
+  - Move Pair to HH namespace
+  - Fix get_included_files ordering
+  - Fix $_SERVER and $_ENV in FastCGI
+  - Update timelib to php 5.5.8
+  - Some dead code removal
 
 "Coolio" 21-Jan-2014
   - Turn on Region JIT

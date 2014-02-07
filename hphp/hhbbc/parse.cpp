@@ -22,8 +22,8 @@
 
 #include <boost/next_prior.hpp>
 
-#include "folly/experimental/Gen.h"
-#include "folly/experimental/StringGen.h"
+#include "folly/gen/Base.h"
+#include "folly/gen/String.h"
 #include "folly/ScopeGuard.h"
 #include "folly/Memory.h"
 

@@ -2025,7 +2025,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
 static int register_bound_param(CVarRef paramno, VRefParam param, int64_t type,
                                 int64_t max_value_len, CVarRef driver_params,
                                 sp_PDOStatement stmt, bool is_param) {
-  SmartResource<PDOBoundParam> p(new PDOBoundParam);
+  SmartResource<PDOBoundParam> p(NEWOBJ(PDOBoundParam));
   // need to make sure this is NULL, in case a fatal errors occurs before its set
   // inside really_register_bound_param
   p->stmt = NULL;
@@ -2640,7 +2640,7 @@ Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
   if (!params.empty()) {
     m_stmt->bound_params.reset();
     for (ArrayIter iter(params); iter; ++iter) {
-      SmartResource<PDOBoundParam> param(new PDOBoundParam);
+      SmartResource<PDOBoundParam> param(NEWOBJ(PDOBoundParam));
       param->param_type = PDO_PARAM_STR;
       param->parameter = iter.second();
       param->stmt = NULL;

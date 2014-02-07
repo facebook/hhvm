@@ -5,9 +5,6 @@ require_once __DIR__.'/SortedIterator.php';
 require_once __DIR__.'/utils.php';
 require_once __DIR__.'/TestFindModes.php';
 
-// For reflection in finding tests
-include_once __DIR__."/vendor/phpunit/phpunit/PHPUnit/Autoload.php";
-
 class TestFinder {
   private Set $test_files;
 
@@ -31,6 +28,22 @@ class TestFinder {
   // faec990edc3e3e8f3b491070b0e8cd90e9df7a4d for the addition of the
   // new ext_reflection-classes.php class.
   public function findTestMethods(): void {
+    // For reflection in finding tests
+    // Since PHPUnit 3.8, Autoload.php has gone away.
+    // And the main source directory 'PHPUnit' was changed to 'src'.
+    // So check for both and do the right thing
+    if (file_exists(__DIR__."/vendor/phpunit/phpunit/src/")) {
+      // For 3.8+
+      include_once __DIR__."/vendor/autoload.php";
+    } else if (file_exists(__DIR__."/vendor/phpunit/phpunit/PHPUnit/")) {
+      // For 3.7 and below
+      include_once __DIR__."/vendor/phpunit/phpunit/PHPUnit/Autoload.php";
+    } else {
+      // Fallback to token based test finding
+      findTestMethodsViaToken();
+      return;
+    }
+
     include_once $this->bootstrap_file;
 
     $current_classes = get_declared_classes();

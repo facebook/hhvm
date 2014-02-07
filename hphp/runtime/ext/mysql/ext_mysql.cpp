@@ -270,8 +270,10 @@ Variant f_mysql_multi_query(const String& query, CVarRef link_identifier /* = nu
 
   if (mysql_real_query(conn, query.data(), query.size())) {
 #ifdef HHVM_MYSQL_TRACE_MODE
-    raise_notice("runtime/ext_mysql: failed executing [%s] [%s]", query.data(),
-                  mysql_error(conn));
+    if (RuntimeOption::EnableHipHopSyntax) {
+      raise_notice("runtime/ext_mysql: failed executing [%s] [%s]",
+                   query.data(), mysql_error(conn));
+    }
 #endif
       // turning this off clears the errors
       if (!mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_OFF)) {
@@ -892,7 +894,7 @@ Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
   obj->o_set("unique_key",   info->flags & UNIQUE_KEY_FLAG? 1 : 0);
   obj->o_set("numeric",      IS_NUM(info->type)? 1 : 0);
   obj->o_set("blob",         IS_BLOB(info->flags)? 1 : 0);
-  obj->o_set("type",         php_mysql_get_field_name(info->type));
+  obj->o_set("type",         info->type);
   obj->o_set("unsigned",     info->flags & UNSIGNED_FLAG? 1 : 0);
   obj->o_set("zerofill",     info->flags & ZEROFILL_FLAG? 1 : 0);
   return obj;
@@ -901,8 +903,7 @@ Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
 bool f_mysql_field_seek(CVarRef result, int field /* = 0 */) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res == NULL) return false;
-  res->seekField(field);
-  return true;
+  return res->seekField(field);
 }
 
 Variant f_mysql_field_name(CVarRef result, int field /* = 0 */) {

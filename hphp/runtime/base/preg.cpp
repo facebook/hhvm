@@ -557,6 +557,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
   if (subpats) {
     *subpats = Array::Create();
   }
+  int exec_options = 0;
 
   int subpats_order = global ? PREG_PATTERN_ORDER : 0;
   bool offset_capture = false;
@@ -624,7 +625,12 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
   do {
     /* Execute the regular expression. */
     int count = pcre_exec(pce->re, extra, subject.data(), subject.size(),
-                          start_offset, g_notempty, offsets, size_offsets);
+                          start_offset,
+                          exec_options | g_notempty,
+                          offsets, size_offsets);
+
+    /* The string was already proved to be valid UTF-8 */
+    exec_options |= PCRE_NO_UTF8_CHECK;
 
     /* Check for too many substrings condition. */
     if (count == 0) {
@@ -903,17 +909,23 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
     set_extra_limits(extra);
 
     int result_len = 0;
-    int new_len;        // Length of needed storage
-    const char *walk;   // Used to walk the replacement string
-    char walk_last;     // Last walked character
-    char *walkbuf;      // Location of current replacement in the result
-    int match_len;      // Length of the current match
-    int backref;        // Backreference number
-    int g_notempty = 0; // If the match should not be empty
+    int new_len;          // Length of needed storage
+    const char *walk;     // Used to walk the replacement string
+    char walk_last;       // Last walked character
+    char *walkbuf;        // Location of current replacement in the result
+    int match_len;        // Length of the current match
+    int backref;          // Backreference number
+    int g_notempty = 0;   // If the match should not be empty
+    int exec_options = 0; // Options passed to pcre_exec
     while (1) {
       /* Execute the regular expression. */
       int count = pcre_exec(pce->re, extra, subject.data(), subject.size(),
-                            start_offset, g_notempty, offsets, size_offsets);
+                            start_offset,
+                            exec_options | g_notempty,
+                            offsets, size_offsets);
+
+      /* The string was already proved to be valid UTF-8 */
+      exec_options |= PCRE_NO_UTF8_CHECK;
 
       /* Check for too many substrings condition. */
       if (count == 0) {

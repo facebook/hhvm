@@ -35,7 +35,7 @@
 #if defined(HPHP_OSS)
 #define furc_hash furc_hash_internal
 #else
-#include "memcache/ch/hash.h"
+#include "memcache/ch/hash.h" // @nolint
 #endif
 
 namespace HPHP {
@@ -79,15 +79,12 @@ public:
     HashEngines["ripemd320"]  = HashEnginePtr(new hash_ripemd320());
     HashEngines["whirlpool"]  = HashEnginePtr(new hash_whirlpool());
 #ifdef FACEBOOK
+    // The original version of tiger got the endianness backwards
+    // This fb-specific version remains for backward compatibility
     HashEngines["tiger128,3-fb"]
                               = HashEnginePtr(new hash_tiger(true, 128, true));
-    // Temporarily leave tiger128,3 algo inverting its hash output
-    // to retain BC pending conversion of user code to correct endianness
-    // sgolemon(2013-04-30)
-    HashEngines["tiger128,3"] = HashEnginePtr(new hash_tiger(true, 128, true));
-#else
-    HashEngines["tiger128,3"] = HashEnginePtr(new hash_tiger(true, 128));
 #endif
+    HashEngines["tiger128,3"] = HashEnginePtr(new hash_tiger(true, 128));
     HashEngines["tiger160,3"] = HashEnginePtr(new hash_tiger(true, 160));
     HashEngines["tiger192,3"] = HashEnginePtr(new hash_tiger(true, 192));
     HashEngines["tiger128,4"] = HashEnginePtr(new hash_tiger(false, 128));
@@ -96,7 +93,15 @@ public:
 
     HashEngines["snefru"]     = HashEnginePtr(new hash_snefru());
     HashEngines["gost"]       = HashEnginePtr(new hash_gost());
+#ifdef FACEBOOK
+    // Temporarily leave adler32 algo inverting its hash output
+    // to retain BC pending conversion of user code to correct endianness
+    // sgolemon(2014-01-30)
+    HashEngines["adler32-fb"] = HashEnginePtr(new hash_adler32(true));
+    HashEngines["adler32"]    = HashEnginePtr(new hash_adler32(true));
+#else
     HashEngines["adler32"]    = HashEnginePtr(new hash_adler32());
+#endif
     HashEngines["crc32"]      = HashEnginePtr(new hash_crc32(false));
     HashEngines["crc32b"]     = HashEnginePtr(new hash_crc32(true));
     HashEngines["haval128,3"] = HashEnginePtr(new hash_haval(3,128));

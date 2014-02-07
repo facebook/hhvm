@@ -149,6 +149,12 @@ struct Class {
    */
   bool couldBeOverriden() const;
 
+  /*
+   * Returns the Class that is the first common ancestor between 'this' and 'o'.
+   * If there is no common ancestor folly::none is returned
+   */
+  folly::Optional<Class> commonAncestor(const Class& o) const;
+
 private:
   Class(borrowed_ptr<const Index>, SStringOr<ClassInfo>);
 
@@ -249,6 +255,13 @@ struct Index {
    * object type.  (E.g. if there are type aliases.)
    */
   folly::Optional<res::Class> resolve_class(Context, SString name) const;
+
+  /*
+   * Return a resolved class for a builtin class.
+   *
+   * Pre: `name' must be the name of a class defined in a systemlib.
+   */
+  res::Class builtin_class(Context, SString name) const;
 
   /*
    * Try to resolve a function named `name' from a given context.

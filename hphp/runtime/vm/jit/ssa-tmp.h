@@ -24,7 +24,7 @@ namespace HPHP { namespace JIT {
 
 class IRInstruction;
 class IRUnit;
-class TraceBuilder;
+class IRBuilder;
 
 class SSATmp {
 public:
@@ -60,7 +60,6 @@ public:
   const Class*       getValClass() const;
   const NamedEntity* getValNamedEntity() const;
   RDS::Handle        getValRDSHandle() const;
-  uintptr_t          getValBits() const;
   Variant            getValVariant() const;
   TCA                getValTCA() const;
   uintptr_t          getValCctx() const;
@@ -84,7 +83,7 @@ public:
 
 private:
   friend class IRUnit;
-  friend class TraceBuilder;
+  friend class IRBuilder;
 
   // May only be created via IRUnit.  Note that this class is never
   // destructed, so don't add complex members.

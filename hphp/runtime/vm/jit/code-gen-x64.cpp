@@ -49,7 +49,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/reg-alloc.h"
+#include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/layout.h"
@@ -120,41 +120,38 @@ ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
     m_kind = Kind::None;
     return;
   }
-  if (tmp->inst()->op() == DefConst) {
+  if (tmp->inst()->op() == DefConst || tmp->type().isNull()) {
+    // tmp is a constant
     m_srcReg = InvalidReg;
     if (val) {
-      m_imm = tmp->getValBits();
+      m_imm = tmp->type().isNull() ? 0 : tmp->getValRawInt();
     } else {
       m_imm = toDataTypeForCall(tmp->type());
     }
     m_kind = Kind::Imm;
     return;
   }
-  if (tmp->type().isNull()) {
-    m_srcReg = InvalidReg;
-    if (val) {
-      m_imm = 0;
-    } else {
-      m_imm = toDataTypeForCall(tmp->type());
-    }
-    m_kind = Kind::Imm;
-    return;
-  }
-  if (val || tmp->numWords() > 1) {
-    auto reg = loc.reg(val ? 0 : 1);
-    assert(reg != InvalidReg);
+  if (val) {
+    assert(loc.reg(0) != InvalidReg);
+    m_srcReg = loc.reg(0);
     m_imm = 0;
-
-    // If val is false then we're passing tmp's type. TypeReg lets
-    // CodeGenerator know that the value might require some massaging
-    // to be in the right format for the call.
-    m_kind = val ? Kind::Reg : Kind::TypeReg;
+    m_kind = Kind::Reg;
     // zero extend any boolean value that we pass to the helper in case
     // the helper expects it (e.g., as TypedValue)
-    if (val && tmp->isA(Type::Bool)) m_zeroExtend = true;
-    m_srcReg = reg;
+    if (tmp->isA(Type::Bool)) m_zeroExtend = true;
     return;
   }
+  if (tmp->numWords() > 1) {
+    assert(loc.reg(1) != InvalidReg);
+    m_srcReg = loc.reg(1);
+    m_imm = 0;
+    // Since val is false then we're passing tmp's type. TypeReg lets
+    // CodeGenerator know that the value might require some massaging
+    // to be in the right format for the call.
+    m_kind = Kind::TypeReg;
+    return;
+  }
+  // arg is the (constant) type of a known-typed value.
   m_srcReg = InvalidReg;
   m_imm = toDataTypeForCall(tmp->type());
   m_kind = Kind::Imm;
@@ -2996,6 +2993,20 @@ void emitReload(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
   }
 }
 
+void CodeGenerator::cgSpill(IRInstruction* inst) {
+  SSATmp* dst   = inst->dst();
+  SSATmp* src   = inst->src(0);
+  assert(dst->numWords() == src->numWords());
+  emitSpill(m_as, curOpd(src), curOpd(dst), src->type());
+}
+
+void CodeGenerator::cgReload(IRInstruction* inst) {
+  SSATmp* dst   = inst->dst();
+  SSATmp* src   = inst->src(0);
+  assert(dst->numWords() == src->numWords());
+  emitReload(m_as, curOpd(src), curOpd(dst), src->type());
+}
+
 void CodeGenerator::cgShuffle(IRInstruction* inst) {
   // Each destination is unique, there are no mem-mem copies, and
   // there are no cycles involving spill slots.  So do the shuffling
@@ -3044,7 +3055,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     }
     if (rs.numAllocated() == 0) {
       assert(src->inst()->op() == DefConst);
-      m_as.emitImmReg(src->getValBits(), rd.reg(0));
+      m_as.emitImmReg(src->getValRawInt(), rd.reg(0));
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
       // move a src known type to a dest register
@@ -4358,7 +4369,7 @@ void CodeGenerator::cgStore(BaseRef dst,
     int64_t val = 0;
     if (type <= (Type::Bool | Type::Int | Type::Dbl |
                  Type::Arr | Type::StaticStr | Type::Cls)) {
-        val = src->getValBits();
+        val = src->getValRawInt();
     } else {
       not_reached();
     }
@@ -4561,7 +4572,7 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   auto idx = inst->src(1);
   auto arrReg = curOpd(arr).reg();
   if (arr->isConst()) {
-    m_as.movq(arr->getValBits(), m_rScratch);
+    m_as.movq(arr->getValRawInt(), m_rScratch);
     arrReg = m_rScratch;
   }
 
@@ -4924,8 +4935,16 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto doMov = [&]() {
     auto const valDst = curOpd(inst->dst()).reg(0);
     auto const typeDst = curOpd(inst->dst()).reg(1);
-    if (valDst != InvalidReg) emitMovRegReg(m_as, rData, valDst);
-    if (typeDst != InvalidReg) emitMovRegReg(m_as, rType, typeDst);
+    // TODO: #3626251: XLS: Let Uses say whether a constant is
+    // allowed, and if not, assign a register.
+    if (valDst != InvalidReg) {
+      if (rData != InvalidReg) emitMovRegReg(m_as, rData, valDst);
+      else if (src->isConst()) m_as.emitImmReg(src->getValRawInt(), valDst);
+    }
+    if (typeDst != InvalidReg) {
+      if (rType != InvalidReg) emitMovRegReg(m_as, rType, typeDst);
+      else m_as.emitImmReg(src->type().toDataType(), typeDst);
+    }
   };
 
   Type typeParam = inst->typeParam();
@@ -4953,7 +4972,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       auto testReg = rData;
       if (src->isConst()) {
         // In rare cases we can have a const array src here.
-        m_as.movq(src->getValBits(), m_rScratch);
+        m_as.movq(src->getValRawInt(), m_rScratch);
         testReg = m_rScratch;
       }
 
@@ -5653,7 +5672,7 @@ void CodeGenerator::emitTestZero(SSATmp* src) {
    */
   if (reg == InvalidReg) {
     reg = m_rScratch;
-    a.    movq   (src->getValBits(), reg);
+    a.    movq   (src->getValRawInt(), reg);
   }
 
   if (src->isA(Type::Bool)) {
@@ -6390,7 +6409,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
 }
 
 void CodeGenerator::print() const {
-  JIT::print(std::cout, m_unit, &m_state.regs, m_state.asmInfo);
+  JIT::print(std::cout, m_unit, &m_state.regs, nullptr, m_state.asmInfo);
 }
 
 static void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
@@ -6555,7 +6574,7 @@ void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
     genCodeImpl(main, stubs, unit, bcMap, tx64, regs, &ai);
-    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
+    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, nullptr, &ai);
   } else {
     genCodeImpl(main, stubs, unit, bcMap, tx64, regs, nullptr);
   }

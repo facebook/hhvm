@@ -1,0 +1,11 @@
+Testing 273 columns with 240 rows...
+... table created
+... statement with 65520 parameters prepared
+Statement done
+bool(true)
+Testing 273 columns with 240 rows...
+... table created
+... statement with 65520 parameters prepared
+Statement done
+bool(true)
+done!

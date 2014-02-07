@@ -1,0 +1,36 @@
+bool(true)
+bool(true)
+object(mysqli_stmt)#%d (%d) {
+  [%u|b%"affected_rows"]=>
+  int(%i)
+  [%u|b%"insert_id"]=>
+  int(0)
+  [%u|b%"num_rows"]=>
+  int(0)
+  [%u|b%"param_count"]=>
+  int(0)
+  [%u|b%"field_count"]=>
+  int(1)
+  [%u|b%"errno"]=>
+  int(0)
+  [%u|b%"error"]=>
+  %unicode|string%(0) ""
+  [%u|b%"error_list"]=>
+  array(0) {
+  }
+  [%u|b%"sqlstate"]=>
+  %unicode|string%(5) "00000"
+  [%u|b%"id"]=>
+  int(3)
+}
+bool(true)
+bool(false)
+%unicode|string%(0) ""
+HipHop Warning: %s
+NULL
+Rows: 3
+array(1) {
+  [0]=>
+  %unicode|string%(1) "1"
+}
+done!

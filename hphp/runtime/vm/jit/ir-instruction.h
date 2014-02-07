@@ -75,7 +75,7 @@ struct IRInstruction {
    * Create an IRInstruction for the opcode `op'.
    *
    * IRInstruction creation is usually done through IRUnit or
-   * TraceBuilder rather than directly.
+   * IRBuilder rather than directly.
    */
   explicit IRInstruction(Opcode op,
                          BCMarker marker,
@@ -83,7 +83,7 @@ struct IRInstruction {
                          uint32_t numSrcs = 0,
                          SSATmp** srcs = nullptr)
     : m_op(op)
-    , m_typeParam(Type::None)
+    , m_typeParam(folly::none)
     , m_numSrcs(numSrcs)
     , m_numDsts(0)
     , m_id(kTransient)
@@ -228,8 +228,10 @@ struct IRInstruction {
 
   Opcode     op()   const       { return m_op; }
   void       setOpcode(Opcode newOpc);
-  Type       typeParam() const         { return m_typeParam; }
-  void       setTypeParam(Type t)      { m_typeParam = t; }
+  bool       hasTypeParam() const      { return m_typeParam.hasValue(); }
+  Type       typeParam() const         { return m_typeParam.value(); }
+  folly::Optional<Type> maybeTypeParam() const { return m_typeParam; }
+  void       setTypeParam(Type t)      { m_typeParam.assign(t); }
   uint32_t   numSrcs()  const          { return m_numSrcs; }
   SSATmp*    src(uint32_t i) const;
   void       setSrc(uint32_t i, SSATmp* newSrc);
@@ -384,7 +386,7 @@ private:
 
 private:
   Opcode            m_op;
-  Type              m_typeParam;
+  folly::Optional<Type> m_typeParam;
   uint16_t          m_numSrcs;
   uint16_t          m_numDsts;
   const Id          m_id;

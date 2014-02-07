@@ -41,7 +41,7 @@ namespace HPHP { namespace JIT {
 class HhbcTranslator;
 class IRUnit;
 class CSEHash;
-class TraceBuilder;
+class IRBuilder;
 class CodeGenerator;
 }}
 
@@ -349,9 +349,6 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
                             int propInput,
                             int objInput);
-
-bool mInstrHasUnknownOffsets(const NormalizedInstruction& i,
-                             Class* contextClass);
 
 struct PropInfo {
   PropInfo()

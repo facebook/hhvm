@@ -318,6 +318,12 @@ Type unopt(Type t);
 bool is_opt(Type t);
 
 /*
+ * Returns true if type 't' represents a specialized object, that is
+ * an object of a specific class. Returns true also for optional obj type.
+ */
+bool is_specialized_obj(Type t);
+
+/*
  * Returns the best known TCls subtype for an object type.
  *
  * Pre: t.subtypeOf(TObj)
@@ -343,8 +349,7 @@ Type type_of_istype(IsTypeOp op);
 /*
  * Return the DObj structure for a strict subtype of TObj or TOptObj.
  *
- * Pre: t.strictSubtypeOf(TObj) ||
- *        (t.subtypeOf(TOptObj) && unopt(t).strictSubtypeOf(TObj))
+ * Pre: is_specialized_obj(t)
  */
 DObj dobj_of(Type t);
 

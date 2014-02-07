@@ -368,7 +368,7 @@ void IRInstruction::convertToJmp() {
   assert(isControlFlow());
   assert(IMPLIES(block(), &block()->back() == this));
   m_op = Jmp;
-  m_typeParam = Type::None;
+  m_typeParam.clear();
   m_numSrcs = 0;
   m_numDsts = 0;
   m_srcs = nullptr;
@@ -386,7 +386,7 @@ void IRInstruction::convertToJmp(Block* target) {
 void IRInstruction::convertToMov() {
   assert(!isControlFlow());
   m_op = Mov;
-  m_typeParam = Type::None;
+  m_typeParam.clear();
   m_extra = nullptr;
   assert(m_numSrcs == 1);
   // Instructions in the simplifier don't have dests yet
@@ -492,7 +492,10 @@ size_t IRInstruction::cseHash() const {
     srcHash = CSEHash::hashCombine(srcHash,
       cseHashExtra(op(), m_extra));
   }
-  return CSEHash::hashCombine(srcHash, m_op, m_typeParam);
+  if (hasTypeParam()) {
+    srcHash = CSEHash::hashCombine(srcHash, m_typeParam.value());
+  }
+  return CSEHash::hashCombine(srcHash, m_op);
 }
 
 std::string IRInstruction::toString() const {

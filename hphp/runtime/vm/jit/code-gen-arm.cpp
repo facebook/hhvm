@@ -358,6 +358,8 @@ PUNT_OPCODE(ColAddNewElemC)
 PUNT_OPCODE(ConcatCellCell)
 PUNT_OPCODE(ArrayAdd)
 PUNT_OPCODE(AKExists)
+PUNT_OPCODE(Spill)
+PUNT_OPCODE(Reload)
 PUNT_OPCODE(CreateContFunc)
 PUNT_OPCODE(CreateContMeth)
 PUNT_OPCODE(ContEnter)
@@ -738,7 +740,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     }
     if (rs.numAllocated() == 0) {
       assert(src->inst()->op() == DefConst);
-      m_as.  Mov  (x2a(rd.reg(0)), src->getValBits());
+      m_as.  Mov  (x2a(rd.reg(0)), src->getValRawInt());
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
       // Move src known type to register
@@ -1082,8 +1084,22 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto doMov = [&] {
     auto const valDst = x2a(curOpd(inst->dst()).reg(0));
     auto const typeDst = x2a(curOpd(inst->dst()).reg(1));
-    if (valDst.IsValid() && !valDst.Is(rVal)) m_as.Mov(valDst, rVal);
-    if (typeDst.IsValid() && !typeDst.Is(rType)) m_as.Mov(typeDst, rType);
+    // TODO: #3626251: XLS: Let Uses say whether a constant is
+    // allowed, and if not, assign a register.
+    if (valDst.IsValid()) {
+      if (rVal.IsValid()) {
+        if (!valDst.Is(rVal)) m_as.Mov(valDst, rVal);
+      } else {
+        if (src->isConst()) m_as.Mov(valDst, src->getValRawInt());
+      }
+    }
+    if (typeDst.IsValid()) {
+      if (rType.IsValid()) {
+        if (!typeDst.Is(rType)) m_as.Mov(typeDst, rType);
+      } else {
+        m_as.Mov(typeDst, src->type().toDataType());
+      }
+    }
   };
 
   auto doJcc = [&] (ConditionCode cc) {
@@ -1551,7 +1567,7 @@ void CodeGenerator::emitStore(vixl::Register base,
     int64_t val = 0;
     if (type <= (Type::Bool | Type::Int | Type::Dbl |
                  Type::Arr | Type::StaticStr | Type::Cls)) {
-      val = src->getValBits();
+      val = src->getValRawInt();
     } else {
       not_reached();
     }

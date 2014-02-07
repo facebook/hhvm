@@ -558,8 +558,31 @@ Variant f_array_pad(CVarRef input, int pad_size, CVarRef pad_value) {
   return ArrayUtil::Pad(arr_input, pad_value, -pad_size, false);
 }
 
-Variant f_array_pop(VRefParam array) {
-  return array.pop();
+Variant f_array_pop(VRefParam containerRef) {
+  const auto* container = containerRef->asCell();
+  if (UNLIKELY(!isMutableContainer(*container))) {
+    raise_warning(
+      "%s() expects parameter 1 to be an array or mutable collection",
+      __FUNCTION__+2 /* remove the "f_" prefix */);
+    return uninit_null();
+  }
+  if (!getContainerSize(containerRef)) {
+    return uninit_null();
+  }
+  if (container->m_type == KindOfArray) {
+    return containerRef.pop();
+  }
+  assert(container->m_type == KindOfObject);
+  auto* obj = container->m_data.pobj;
+  assert(obj->isCollection());
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: return static_cast<c_Vector*>(obj)->t_pop();
+    case Collection::MapType:    return static_cast<c_Map*>(obj)->pop();
+    case Collection::SetType:    return static_cast<c_Set*>(obj)->pop();
+    default:                     break;
+  }
+  assert(false);
+  return uninit_null();
 }
 
 Variant f_array_product(CVarRef array) {

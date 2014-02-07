@@ -1,0 +1,3 @@
+run_tests.php don't fool me with your 'ungreedy' expression '.+?'!
+HipHop Warning: %s
+done!

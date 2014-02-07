@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/hphp-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -189,54 +190,9 @@ void APCHandle::deleteShared() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-ArrayData* CreateUncountedArray(ArrayData* array);
-
-Variant CreateVarForUncountedArray(CVarRef source) {
-  assert(apcExtension::UseUncounted);
-  auto type = source.getType(); // this gets rid of the ref, if it was one
-  switch (type) {
-    case KindOfBoolean:
-      return source.getBoolean();
-    case KindOfInt64:
-      return source.getInt64();
-    case KindOfDouble:
-      return source.getDouble();
-    case KindOfUninit:
-    case KindOfNull:
-      return null_variant;
-    case KindOfStaticString:
-      return source.getStringData();
-
-    case KindOfString: {
-      auto const st = lookupStaticString(source.getStringData());
-      if (st != nullptr) return st;
-      return StringData::MakeUncounted(source.getStringData()->slice());
-    }
-
-    case KindOfArray:
-      return CreateUncountedArray(source.getArrayData());
-
-    default:
-      assert(false); // type not allowed
-  }
-  return null_variant;
-}
-
-ArrayData* CreateUncountedArray(ArrayData* array) {
-  assert(apcExtension::UseUncounted);
-  Array temp = Array::Create();
-  for (ArrayIter it(array); !it.end(); it.next()) {
-    auto key = CreateVarForUncountedArray(it.first());
-    auto val = CreateVarForUncountedArray(it.secondRef());
-    temp.set(key, val);
-  }
-  return ArrayData::GetUncountedArray(temp.get());
-}
-}
-
 APCHandle* APCTypedValue::MakeSharedArray(ArrayData* array) {
-  auto value = new APCTypedValue(CreateUncountedArray(array));
+  assert(apcExtension::UseUncounted);
+  auto value = new APCTypedValue(HphpArray::MakeUncounted(array));
   return value->getHandle();
 }
 

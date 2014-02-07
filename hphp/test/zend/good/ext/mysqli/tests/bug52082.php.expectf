@@ -1,0 +1,25 @@
+array(2) {
+  [0]=>
+  string(20) "character_set_client"
+  [1]=>
+  string(6) "latin2"
+}
+array(2) {
+  [0]=>
+  string(24) "character_set_connection"
+  [1]=>
+  string(6) "latin2"
+}
+array(2) {
+  [0]=>
+  string(20) "character_set_client"
+  [1]=>
+  string(6) "latin2"
+}
+array(2) {
+  [0]=>
+  string(24) "character_set_connection"
+  [1]=>
+  string(6) "latin2"
+}
+done!

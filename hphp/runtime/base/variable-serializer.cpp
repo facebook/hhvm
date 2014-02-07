@@ -21,14 +21,13 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
-#include <math.h>
 #include <cmath>
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/utf8-decode.h"
-#include "hphp/runtime/ext/JSON_parser.h"
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/JSON_parser.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
@@ -498,7 +497,7 @@ void VariableSerializer::write(const String& v) {
 void VariableSerializer::write(CObjRef v) {
   if (!v.isNull() && m_type == Type::JSON) {
 
-    if (v.instanceof(SystemLib::s_JsonSerializableClass)) {
+    if (v.instanceof(s_JsonSerializable)) {
       assert(!v->isCollection());
       Variant ret = v->o_invoke_few_args(s_jsonSerialize, 0);
       // for non objects or when $this is returned
@@ -513,8 +512,7 @@ void VariableSerializer::write(CObjRef v) {
       if (v->isCollection()) {
         collectionSerialize(v.get(), this);
       } else {
-        Array props(ArrayData::Create());
-        v->o_getArray(props, true);
+        Array props = v->o_toArray(true);
         setObjectInfo(v->o_getClassName(), v->o_getId(), 'O');
         props.serialize(this);
       }

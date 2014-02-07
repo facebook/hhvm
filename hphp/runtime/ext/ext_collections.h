@@ -205,10 +205,11 @@ class BaseVector : public ExtCollectionObjectData {
     return static_cast<const BaseVector*>(obj)->toBoolImpl();
   }
 
+  template <bool throwOnMiss>
+  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
   Array toArrayImpl() const;
@@ -674,6 +675,7 @@ class BaseMap : public ExtCollectionObjectData {
     update(key, val);
   }
   void add(TypedValue* val);
+  Variant pop();
   Variant popFront();
   void remove(int64_t key);
   void remove(StringData* key);
@@ -701,7 +703,8 @@ class BaseMap : public ExtCollectionObjectData {
 
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
-  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
+  template <bool throwOnMiss>
+  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
@@ -1320,6 +1323,7 @@ class BaseSet : public ExtCollectionObjectData {
   void addFront(int64_t h);
   void addFront(StringData* key);
 
+  Variant pop();
   Variant popFront();
 
   void remove(int64_t key) {
@@ -1354,7 +1358,7 @@ class BaseSet : public ExtCollectionObjectData {
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
 
-  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
+  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
@@ -1668,7 +1672,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
 
   static c_Pair* Clone(ObjectData* obj);
   static Array ToArray(const ObjectData* obj);
-  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
+  template <bool throwOnMiss>
+  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
@@ -1739,16 +1744,20 @@ class c_PairIterator : public ExtObjectData {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedValue* collectionAt(ObjectData* obj, TypedValue* key);
 TypedValue* collectionGet(ObjectData* obj, TypedValue* key);
+void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val);
 // used for collection literal syntax only
 void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val);
-void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val);
 bool collectionIsset(ObjectData* obj, TypedValue* key);
 bool collectionEmpty(ObjectData* obj, TypedValue* key);
 void collectionUnset(ObjectData* obj, TypedValue* key);
 void collectionAppend(ObjectData* obj, TypedValue* val);
 // used for collection literal syntax only
 void collectionInitAppend(ObjectData* obj, TypedValue* val);
+Variant& collectionOffsetAt(ObjectData* obj, int64_t offset);
+Variant& collectionOffsetAt(ObjectData* obj, const String& offset);
+Variant& collectionOffsetAt(ObjectData* obj, CVarRef offset);
 Variant& collectionOffsetGet(ObjectData* obj, int64_t offset);
 Variant& collectionOffsetGet(ObjectData* obj, const String& offset);
 Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset);
@@ -1776,6 +1785,18 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size);
 
 inline TypedValue* cvarToCell(const Variant* v) {
   return const_cast<TypedValue*>(v->asCell());
+}
+
+inline Variant& collectionOffsetAt(ObjectData* obj, bool offset) {
+  return collectionOffsetAt(obj, Variant(offset));
+}
+
+inline Variant& collectionOffsetAt(ObjectData* obj, double offset) {
+  return collectionOffsetAt(obj, Variant(offset));
+}
+
+inline Variant& collectionOffsetAt(ObjectData* obj, litstr offset) {
+  return collectionOffsetAt(obj, Variant(offset));
 }
 
 inline Variant& collectionOffsetGet(ObjectData* obj, bool offset) {

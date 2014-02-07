@@ -359,6 +359,8 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 }
 
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
+  if (s0 == InvalidReg && s1 == InvalidReg &&
+      d0 == InvalidReg && d1 == InvalidReg) return;
   assert(s0 != s1);
   assert(!s0.isSIMD() || s1 == InvalidReg); // never 2 XMMs
   assert(!d0.isSIMD() || d1 == InvalidReg); // never 2 XMMs

@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include "folly/experimental/Gen.h"
+#include "folly/gen/Base.h"
 #include "folly/Conv.h"
 #include "folly/Optional.h"
 #include "folly/Memory.h"

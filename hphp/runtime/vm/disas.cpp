@@ -482,14 +482,35 @@ std::string func_param_list(const FuncInfo& finfo) {
   return ret;
 }
 
+std::string func_flag_list(const FuncInfo& finfo) {
+  auto const func = finfo.func;
+  std::vector<std::string> flags;
+
+  if (auto name = func->getGeneratorBodyName()) {
+    flags.push_back(
+        folly::format("hasGeneratorBody(\"{}\")", name->toCPPString()).str()
+    );
+  }
+  if (func->isGenerator()) flags.push_back("isGenerator");
+  if (func->isAsync()) flags.push_back("isAsync");
+  if (func->isGeneratorFromClosure()) flags.push_back("isGeneratorFromClosure");
+  if (func->isClosureBody()) flags.push_back("isClosureBody");
+  if (func->isPairGenerator()) flags.push_back("isPairGenerator");
+
+  std::string strflags = folly::join(" ", flags);
+  if (!strflags.empty()) return " " + strflags + " ";
+  return " ";
+}
+
+
 void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
 
   if (func->isPseudoMain()) {
     out.fmtln(".main {{");
   } else {
-    out.fmtln(".function {}({}) {{", func->name()->data(),
-      func_param_list(finfo));
+    out.fmtln(".function {}({}){}{{", func->name()->data(),
+      func_param_list(finfo), func_flag_list(finfo));
   }
   indented(out, [&] {
     print_func_directives(out, func);

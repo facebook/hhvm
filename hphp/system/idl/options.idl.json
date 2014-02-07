@@ -266,7 +266,7 @@
             "flags": [
             ],
             "return": {
-                "type": "Int64",
+                "type": "Variant",
                 "desc": "Returns the time of the last modification of the current page. The value returned is a Unix timestamp, suitable for feeding to date(). Returns FALSE on error."
             },
             "args": [
@@ -289,7 +289,7 @@
             "flags": [
             ],
             "return": {
-                "type": "Int64",
+                "type": "Variant",
                 "desc": "Returns the current script's inode as an integer, or FALSE on error."
             },
             "args": [

@@ -55,7 +55,6 @@ no_import = (
     '/ext/gmp',
     '/ext/interbase',
     '/ext/mssql',
-    '/ext/mysqli',
     '/ext/mysqlnd',
     '/ext/oci8',
     '/ext/odbc',
@@ -511,6 +510,15 @@ other_files = (
     '/ext/mbstring/tests/common.inc',
     '/ext/mcrypt/tests/vectors.txt',
     '/ext/mysql/tests/connect.inc',
+    '/ext/mysql/tests/table.inc',
+    '/ext/mysqli/tests/clean_table.inc',
+    '/ext/mysqli/tests/connect.inc',
+    '/ext/mysqli/tests/skipif.inc',
+    '/ext/mysqli/tests/skipifconnectfailure.inc',
+    '/ext/mysqli/tests/skipifemb.inc',
+    '/ext/mysqli/tests/skipifnotemb.inc',
+    '/ext/mysqli/tests/skipifunicode.inc',
+    '/ext/mysqli/tests/table.inc',
     '/ext/openssl/tests/005_crt.txt',
     '/ext/openssl/tests/bug28382cert.txt',
     '/ext/openssl/tests/bug37820cert.pem',
@@ -655,11 +663,9 @@ def mkdir_p(path):
     except OSError as exc: # Python >2.5
         pass
 
-def walk(filename, source_dir):
+def walk(filename, dest_subdir):
     dest_filename = os.path.basename(filename)
 
-    script_dir = os.path.dirname(__file__)
-    dest_subdir = os.path.join(script_dir, '../test/zend/all', source_dir)
     mkdir_p(dest_subdir)
     full_dest_filename = os.path.join(dest_subdir, dest_filename)
 
@@ -670,12 +676,32 @@ def walk(filename, source_dir):
     full_dest_filename = full_dest_filename.replace('.phpt', '.php')
 
     if not '.phpt' in filename:
-        def replace(find, replace):
-            data = file(full_dest_filename).read().replace(find, replace)
-            file(full_dest_filename, 'w').write(data)
+        data = file(full_dest_filename).read()
 
         if '/ext/ftp/tests/server.inc' in full_dest_filename:
-            replace('stream_socket_server', '@stream_socket_server')
+            data = data.replace('stream_socket_server', '@stream_socket_server')
+
+        if '/ext/mysqli/tests/table.inc' in full_dest_filename:
+            data = data.replace(
+                'DROP TABLE IF EXISTS test\'',
+                'DROP TABLE IF EXISTS \'.$test_table_name'
+            )
+            data = data.replace(
+                'CREATE TABLE test',
+                'CREATE TABLE \'.$test_table_name.\'',
+            )
+            data = data.replace(
+                'INSERT INTO test',
+                'INSERT INTO ".$test_table_name."',
+            )
+
+        if '/ext/mysqli/tests/clean_table.inc' in full_dest_filename:
+            data = data.replace(
+                'DROP TABLE IF EXISTS test\'',
+                'DROP TABLE IF EXISTS \'.$test_table_name'
+            )
+
+        file(full_dest_filename, 'w').write(data)
 
         if full_dest_filename.endswith('.php'):
             f = file(full_dest_filename.replace('.php', '.php.skipif'), 'w')
@@ -990,6 +1016,225 @@ def walk(filename, source_dir):
         test = test.replace('rename_variation.tmp', dest_filename+'.tmp')
         test = test.replace('rename_variation2.tmp', dest_filename+'2.tmp')
         test = test.replace('rename_variation_link.tmp', dest_filename+'_link.tmp')
+    if '/ext/mysqli/tests/' in full_dest_filename:
+
+        (testname, _) = os.path.splitext(os.path.basename(full_dest_filename))
+
+        replace_configs = {
+            'table': {
+                '002': ['test_fetch_null'],
+                '003': ['test_bind_result'],
+                '004': ['test_bind_fetch'],
+                '005': ['test_bind_fetch'],
+                '006': ['test_bind_fetch'],
+                '007': ['test_bind_fetch'],
+                '008': ['test_bind_fetch'],
+                '009': ['test_bind_fetch'],
+                '010': ['test_bind_fetch'],
+                '011': ['test_bind_result'],
+                '012': ['test_bind_result'],
+                '013': ['test_bind_result'],
+                '014': ['test'],
+                '015': ['test'],
+                '019': ['insert_read'],
+                '020': ['test_bind_result'],
+                '021': ['test_bind_fetch'],
+                '022': ['test_bind_fetch'],
+                '023': ['test_bind_fetch'],
+                '024': ['test_bind_fetch'],
+                '025': ['test_bind_fetch'],
+                '026': ['test_bind_fetch'],
+                '029': ['general_test'],
+                '030': ['non_exisiting_table'],
+                '031': ['non_exisiting_table'],
+                '032': ['general_test'],
+                '036': ['t036'],
+                '037': ['test_result'],
+                '038': ['test_result'],
+                '040': ['test_result'],
+                '041': ['test_warnings'],
+                '042': ['test_bind_fetch'],
+                '043': ['test_update'],
+                '046': ['test_affected'],
+                '047': ['test_affected'],
+                '048': ['test_fetch_null'],
+                '057': ['test_store_result'],
+                '058': ['mbind'],
+                '059': ['mbind'],
+                '060': ['test_fetch'],
+                '061': ['t_061'],
+                '062': ['DUAL'],
+                '063': ['DUAL'],
+                '064': ['DUAL'],
+                '066': ['test_warnings'],
+                '067': [re.compile('cursor(?=(%d|\$i))')],
+                '072': ['not_exists'],
+                'bug32405': ['test_users'],
+                'bug34810': ['test_warnings'],
+                'bug34785': ['DUAL'],
+                'bug35103': ['test_bint', 'test_buint'],
+                'bug35517': ['temp'],
+                'bug35759': ['test'],
+                'bug36745': ['litest'],
+                'bug36802': ['DUAL'],
+                'bug36949': ['DUAL'],
+                'bug42378': [re.compile('test(?!_format)')],
+                'bug44897': ['test'],
+                'bug45289': ['test'],
+                'bug48909': ['test'],
+                'bug49027': ['test'],
+                'bug49442': ['test'],
+                'bug52891': ['tuint', 'tsint'],
+                'bug53503': ['test'],
+                'bug54221': ['t54221'],
+                'mysqli_change_user_insert_id': ['test'],
+                'mysqli_change_user_locks_temporary':
+                    [re.compile('(?<= )test')],
+                'mysqli_change_user_rollback': ['test'],
+                'mysqli_character_set': [re.compile('test(?!!)')],
+                'mysqli_class_mysqli_result_interface': ['test'],
+                'mysqli_class_mysqli_stmt_interface': ['test'],
+                'mysqli_data_seek': ['test'],
+                'mysqli_data_seek_oo': ['test'],
+                'mysqli_expire_password': [re.compile('(?<= )test')],
+                'mysqli_explain_metadata': ['test'],
+                'mysqli_fetch_all': ['test'],
+                'mysqli_fetch_all_oo': ['test'],
+                'mysqli_fetch_array': ['test'],
+                'mysqli_fetch_array_assoc': ['test'],
+                'mysqli_fetch_array_many_rows': ['test'],
+                'mysqli_fetch_array_oo': ['test'],
+                'mysqli_fetch_assoc': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_assoc_bit': [re.compile('(?<= )test')],
+                'mysqli_fetch_assoc_oo': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_assoc_zerofill': ['test'],
+                'mysqli_fetch_field_direct': ['test'],
+                'mysqli_fetch_field_direct_oo': ['test'],
+                'mysqli_fetch_field_flags': ['test'],
+                'mysqli_fetch_field': [re.compile('(?<!type )test')],
+                'mysqli_fetch_field_oo': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_field_types': [re.compile('test(?!\w)')],
+                'mysqli_fetch_fields': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_lengths': ['test'],
+                'mysqli_fetch_lengths_oo': ['test'],
+                'mysqli_fetch_object': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_object_no_constructor':
+                    [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_object_no_object': ['test'],
+                'mysqli_fetch_object_oo': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_row': ['test'],
+                'mysqli_field_count': ['test'],
+                'mysqli_field_seek': ['test'],
+                'mysqli_field_tell': ['test'],
+                'mysqli_fork': [re.compile('test(?!s)'), 'messages'],
+                'mysqli_free_result': ['test'],
+                'mysqli_get_client_stats': [re.compile('(?<= )test')],
+                'mysqli_get_client_stats_skipped': ['test'],
+                'mysqli_insert_id': ['test'],
+                'mysqli_insert_packet_overflow': ['test'],
+                'mysqli_kill': [re.compile('test(?= )')],
+                'mysqli_last_insert_id': ['test', 'DUAL'],
+                'mysqli_max_links': ['test'],
+                'mysqli_more_results': ['test'],
+                'mysqli_multi_query': ['test'],
+                'mysqli_next_result': [re.compile('(?<= )test')],
+                'mysqli_num_rows': [re.compile('(?<= )test')],
+                'mysqli_options_init_command': [re.compile('test(?! more)')],
+                'mysqli_pconn_kill': ['test'],
+                'mysqli_poll_mixing_insert_select':
+                    [re.compile('test(?! may)'), 'bogus'],
+                'mysqli_prepare': ['test2', re.compile('(?<!next )test(?!_)')],
+                'mysqli_query': ['test'],
+                'mysqli_query_iterators': ['test'],
+                'mysqli_query_stored_proc': ['test'],
+                'mysqli_real_escape_string_big5': ['test'],
+                'mysqli_real_escape_string_eucjpms': ['test'],
+                'mysqli_real_escape_string_euckr': ['test'],
+                'mysqli_real_escape_string_gb2312': ['test'],
+                'mysqli_real_escape_string_gbk': ['test'],
+                'mysqli_real_escape_string_nobackslash': ['test'],
+                'mysqli_real_escape_string_sjis': ['test'],
+                'mysqli_report': [re.compile('(?<=(INTO|FROM) )test')],
+                'mysqli_result_references': ['test'],
+                'mysqli_result_references_mysqlnd': ['test'],
+                'mysqli_select_db': ['test'],
+                'mysqli_stmt_bind_param':
+                    [re.compile('(?<=(INTO|FROM|ISTS|ABLE) )test')],
+                'mysqli_stmt_bind_param_call_user_func': ['test'],
+                'mysqli_stmt_bind_param_references': ['test'],
+                'mysqli_stmt_bind_result': [re.compile('test(?!(s| is))')],
+                'mysqli_stmt_bind_result_bit': [re.compile('test(?!s)')],
+                'mysqli_stmt_bind_result_format':
+                    [re.compile('test(?!_format)'), 'DUAL'],
+                'mysqli_stmt_bind_result_references': ['test'],
+                'mysqli_stmt_bind_result_zerofill': [re.compile('test(?= )')],
+                'mysqli_stmt_data_seek': ['test'],
+                'mysqli_stmt_errno': ['test'],
+                'mysqli_stmt_error': ['test'],
+                'mysqli_stmt_execute': [re.compile('(?<=(INTO|FROM) )test')],
+                'mysqli_stmt_fetch': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_fetch_bit': [re.compile('test(?!s)')],
+                'mysqli_stmt_fetch_geom': ['test'],
+                'mysqli_stmt_free_result': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_get_result': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_get_result_bit': [re.compile('(?<= )test')],
+                'mysqli_stmt_get_result_field_count': ['test'],
+                'mysqli_stmt_get_result_geom': ['test'],
+                'mysqli_stmt_get_result_metadata':
+                    [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_get_result_metadata_fetch_field': ['test'],
+                'mysqli_stmt_get_result_seek': ['test'],
+                'mysqli_stmt_get_result_types':
+                    [re.compile('test(?!( is broken|s))')],
+                'mysqli_stmt_get_result2': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_insert_id': ['test'],
+                'mysqli_stmt_num_rows': [re.compile('(?<!run_)test')],
+                'mysqli_stmt_param_count': ['test'],
+                'mysqli_stmt_result_metadata': ['test'],
+                'mysqli_stmt_send_long_data': [re.compile('(?<!=we )test')],
+                'mysqli_stmt_store_result':
+                    [re.compile('(?<=(INTO|FROM) )test')],
+                'mysqli_store_result': ['test'],
+                'mysqli_use_result': ['test'],
+                'mysqli_warning_unclonable': ['test'],
+            },
+            'procedure': {
+                'bug42548': ['p1'],
+                'bug44897': [re.compile('p(?=[\'"(])')],
+                'mysqli_poll_mixing_insert_select': [re.compile('p(?=[\'"(])')],
+                'mysqli_query': [re.compile('(?<= )p(?=[\'"(])')],
+                'mysqli_query_stored_proc': [re.compile('(?<= )p(?=[\'"(])')],
+            },
+            'function': {
+                'mysqli_query': [re.compile('(?<= )f(?=[\'"(])')],
+            },
+            'lock': {
+                'mysqli_change_user_locks_temporary': ['phptest'],
+                'mysqli_prepare': ['testlock'],
+            },
+            'var': {
+                'mysqli_prepare': ['testvar'],
+            }
+        }
+
+        # This remove the ZendParamMode checks that is usually in the beginning
+        # of the tests. Remove this when we have ZendParamMode working for PHP
+        # methods
+        r = re.compile('^\s*if \(.*@.*\)[\s\r\n]*.*Expecting.*[\r\n]+',
+                       re.MULTILINE)
+        test = r.sub('', test)
+
+        for t, t_replace_config in replace_configs.iteritems():
+            for i, replace_id in enumerate(t_replace_config.get(testname, [])):
+                new_id = 'test_%s_%s_%d' % (testname, t, i + 1)
+                if isinstance(replace_id, basestring):
+                    test = test.replace(replace_id, new_id)
+                else:
+                    test = replace_id.sub(new_id, test)
+
+        new_id = 'test_%s_table_1' % (testname, )
+        test = re.sub('(require(_once)*\([\'"](clean_)?table.inc[\'"]\))',
+                      '$test_table_name = \'%s\'; \\1' % (new_id, ), test)
 
     file(full_dest_filename, 'w').write(test)
 
@@ -998,6 +1243,9 @@ def should_import(filename):
         if bad in filename:
             return False
     return True
+
+script_dir = os.path.dirname(__file__)
+all_dir = os.path.join(script_dir, '../test/zend/all')
 
 for root, dirs, files in os.walk(args.zend_path):
     for filename in files:
@@ -1015,10 +1263,11 @@ for root, dirs, files in os.walk(args.zend_path):
             return False
 
         if matches(args.only) and should_import(full_file):
-            walk(full_file, os.path.relpath(root, args.zend_path))
+            walk(
+                full_file,
+                os.path.join(all_dir, os.path.relpath(root, args.zend_path))
+            )
 
-script_dir = os.path.dirname(__file__)
-all_dir = os.path.join(script_dir, '../test/zend/all')
 if not os.path.isdir(all_dir):
     if args.only:
         print "No test/zend/all. Your --only arg didn't match any test that should be imported."

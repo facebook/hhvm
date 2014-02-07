@@ -20,6 +20,7 @@ function brown_fox() {
   var_dump(hash("ripemd256",  $data));
   var_dump(hash("ripemd320",  $data));
   var_dump(hash("whirlpool",  $data));
+  var_dump(hash("tiger128,3", $data));
   var_dump(hash("tiger160,3", $data));
   var_dump(hash("tiger192,3", $data));
   var_dump(hash("tiger128,4", $data));
@@ -47,14 +48,12 @@ function brown_fox() {
   if (is_facebook()) {
     var_dump(
       hash("tiger128,3-fb", $data) == '9370512795923aaeeb76fe3d8ea7433e' &&
-      hash("tiger128,3", $data) == '9370512795923aaeeb76fe3d8ea7433e'
+      hash("adler32-fb", $data) == '5e10f17b'
     );
     var_dump(hash("adler32", $data) == '5e10f17b');
     var_dump(hash("crc32b", $data) == '4246a382');
   } else {
-    var_dump(
-      hash("tiger128,3", $data) == 'ae3a9295275170933e43a78e3dfe76eb'
-    );
+    var_dump(true);
     var_dump(hash("adler32", $data) == '7bf1105e');
     var_dump(hash("crc32b", $data) == '82a34642');
   }

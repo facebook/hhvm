@@ -170,14 +170,14 @@ bool StaticClassName::checkPresent() {
 
 void StaticClassName::outputCodeModel(CodeGenerator &cg) {
   if (isStatic() || !m_origClassName.empty()) {
-    cg.printPropertyHeader("className");
+    cg.printPropertyHeader("class");
   } else {
     cg.printPropertyHeader("classExpression");
   }
   if (isStatic()) {
-    cg.printValue("static");
+    cg.printTypeExpression("static");
   } else if (!m_origClassName.empty()) {
-    cg.printValue(m_origClassName);
+    cg.printTypeExpression(m_origClassName);
   } else {
     m_class->outputCodeModel(cg);
   }

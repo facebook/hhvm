@@ -58,9 +58,18 @@ using SArray  = const ArrayData*;
 enum class Flavor { C, V, A, R, F, U };
 
 /*
- * Types of a FPI regions.  (What sort of function are we calling.)
+ * Types of a FPI regions.  (What sort of function call is being
+ * made.)
  */
-enum class FPIKind { Unknown, Func, Ctor, ObjMeth, ClsMeth };
+enum class FPIKind {
+  Unknown,     // Nothing is known.
+  CallableArr, // May be an ObjMeth or a ClsMeth.
+  Func,        // Definitely a non-member function.
+  Ctor,        // Definitely a constructor for an object.
+  ObjMeth,     // Definitely a method on an object (possibly __call).
+  ClsMeth,     // Definitely a static method on a class (possibly__callStatic).
+  ObjInvoke,   // Closure invoke or __invoke on an object.
+};
 
 /*
  * Types of parameter preparation (or unknown).

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/reg-alloc.h"
+#include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -1195,10 +1195,10 @@ void XLS::print(const char* caption) {
         str << folly::format(" {: <3} ", pos);
       }
       JIT::printOpcode(str, &i, nullptr);
-      JIT::printSrcs(str, &i, &m_regs);
+      JIT::printSrcs(str, &i, &m_regs, nullptr);
       if (i.numDsts()) {
         str << " => ";
-        JIT::printDsts(str, &i, &m_regs);
+        JIT::printDsts(str, &i, &m_regs, nullptr);
       }
       if (&i == &b->back()) {
         if (auto next = b->next()) {
@@ -1314,7 +1314,7 @@ RegAllocInfo allocateRegs(IRUnit& unit) {
   xls.allocate();
   if (dumpIREnabled()) {
     dumpTrace(kRegAllocLevel, unit, " after extended alloc ", &regs,
-              nullptr, nullptr);
+              nullptr, nullptr, nullptr);
   }
   return regs;
 }

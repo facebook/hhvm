@@ -2,14 +2,9 @@
 require_once __DIR__.'/../Framework.php';
 
 class FacebookPhpSdk extends Framework {
-  public function __construct(string $name) {
-    $tc =  get_runtime_build()." ".__DIR__.
-           "/../vendor/bin/phpunit --bootstrap tests/bootstrap.php";
-    parent::__construct($name, $tc);
-  }
   protected function install(): void {
     parent::install();
-    verbose("Creating a phpunit.xml for running the pear tests.\n",
+    verbose("Creating a phpunit.xml for running the Facebook PHP SDK tests.\n",
             Options::$verbose);
     $phpunit_xml = <<<XML
 <phpunit bootstrap="./tests/bootstrap.php">

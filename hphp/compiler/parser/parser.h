@@ -347,7 +347,7 @@ private:
     {}
 
     void checkFinalAssertions() {
-      assert((isGenerator && !isAsync && !hasReturn) || !isGenerator);
+      assert(!isGenerator || (!isAsync && !hasReturn));
     }
 
     bool hasReturn;       // function contains a return statement

@@ -178,10 +178,10 @@ ArrayIter::initFuncTable[Collection::MaxNumTypes] = {
   &ArrayIter::IteratorObjInit,
   &ArrayIter::VectorInit,
   &ArrayIter::MapInit,
-  &ArrayIter::FrozenMapInit,
   &ArrayIter::SetInit,
   &ArrayIter::PairInit,
   &ArrayIter::FrozenVectorInit,
+  &ArrayIter::FrozenMapInit,
   &ArrayIter::FrozenSetInit,
 };
 

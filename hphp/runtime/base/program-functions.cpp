@@ -45,7 +45,7 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -593,7 +593,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 
   if (xhprof) {
-    f_var_dump(f_json_encode(f_xhprof_disable()));
+    f_var_dump(HHVM_FN(json_encode)(f_xhprof_disable()));
   }
   hphp_context_exit(g_context.getNoCheck(), true, true, program);
   hphp_session_exit();

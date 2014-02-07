@@ -33,6 +33,8 @@
 
 namespace HPHP {
 
+enum MySQLState { CLOSED = 0, INITED = 1, CONNECTED = 2 };
+
 class MySQL : public SweepableResourceData {
 public:
   /**
@@ -117,6 +119,8 @@ public:
                  const String& password, const String& database, int client_flags,
                  int connect_timeout);
 
+  MySQLState getState() { return m_state; }
+
   MYSQL *get() { return m_conn;}
   MYSQL *eject_mysql() {
     auto ret = m_conn;
@@ -140,6 +144,7 @@ public:
   int m_xaction_count;
   bool m_multi_query;
   String m_async_query;
+  MySQLState m_state;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -231,6 +236,7 @@ public:
   }
 
   bool seekField(int64_t field);
+  int64_t tellField();
 
   MySQLFieldInfo *fetchFieldInfo();
 
@@ -254,6 +260,71 @@ protected:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+class MySQLStmtVariables {
+public:
+  explicit MySQLStmtVariables(std::vector<Variant*> arr);
+  ~MySQLStmtVariables();
+
+  bool init_params(MYSQL_STMT *stmt, const String& types);
+  bool bind_result(MYSQL_STMT *stmt);
+  bool bind_params(MYSQL_STMT *stmt);
+  void update_result();
+
+private:
+  std::vector<Variant*>  m_arr;
+  std::vector<Variant>   m_value_arr;
+  MYSQL_BIND            *m_vars;
+  my_bool               *m_null;
+  unsigned long         *m_length;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class MySQLStmt : public SweepableResourceData {
+public:
+  DECLARE_RESOURCE_ALLOCATION(MySQLStmt);
+
+  explicit MySQLStmt(MYSQL *mysql);
+  virtual ~MySQLStmt();
+
+  CLASSNAME_IS("mysql stmt")
+
+  // overriding ResourceData
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
+
+  Variant close();
+
+  MYSQL_STMT *get() { return m_stmt; }
+
+  Variant affected_rows();
+  Variant attr_get(int64_t attr);
+  Variant attr_set(int64_t attr, int64_t value);
+  Variant bind_param(const String& types, std::vector<Variant*> vars);
+  Variant bind_result(std::vector<Variant*> vars);
+  Variant get_errno();
+  Variant get_error();
+  Variant execute();
+  Variant fetch();
+  Variant field_count();
+  Variant free_result();
+  Variant insert_id();
+  Variant num_rows();
+  Variant param_count();
+  Variant prepare(const String& query);
+  Variant reset();
+  Variant result_metadata();
+  Variant send_long_data(int64_t param_idx, const String& data);
+  Variant store_result();
+
+protected:
+  MYSQL_STMT *m_stmt;
+  bool m_prepared;
+  MySQLStmtVariables *m_param_vars;
+  MySQLStmtVariables *m_result_vars;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 // helper
 
 MySQLResult *php_mysql_extract_result(CVarRef result);
@@ -267,8 +338,14 @@ enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };
 #define PHP_MYSQL_FIELD_FLAGS 5
 
 Variant php_mysql_field_info(CVarRef result, int field, int entry_type);
-Variant php_mysql_do_connect(String server, String username,
-                             String password, String database,
+Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
+                                     String username, String password,
+                                     String database, int client_flags,
+                                     bool persistent, bool async,
+                                     int connect_timeout_ms,
+                                     int query_timeout_ms);
+Variant php_mysql_do_connect(const String& server, const String& username,
+                             const String& password, const String& database,
                              int client_flags, bool persistent,
                              bool async,
                              int connect_timeout_ms,

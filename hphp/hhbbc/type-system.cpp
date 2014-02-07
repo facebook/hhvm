@@ -252,7 +252,7 @@ bool Type::couldBeData(Type o) const {
       return true;
     }
     if (m_data->dobj.type == DObj::Sub || o.m_data->dobj.type == DObj::Sub) {
-      return m_data->dcls.cls.couldBe(o.m_data->dcls.cls);
+      return m_data->dobj.cls.couldBe(o.m_data->dobj.cls);
     }
     return false;
   case BCls:
@@ -423,6 +423,11 @@ bool is_opt(Type t) {
   return isPredefined(nonNullBits) && canBeOptional(nonNullBits);
 }
 
+bool is_specialized_obj(Type t) {
+  return t.strictSubtypeOf(TObj) ||
+             (is_opt(t) && unopt(t).strictSubtypeOf(TObj));
+}
+
 Type objcls(Type t) {
   assert(t.subtypeOf(TObj));
   if (t.strictSubtypeOf(TObj)) {
@@ -478,8 +483,7 @@ Type type_of_istype(IsTypeOp op) {
 
 DObj dobj_of(Type t) {
   assert(t.checkInvariants());
-  assert(t.strictSubtypeOf(TObj) ||
-         (t.subtypeOf(TOptObj) && unopt(t).strictSubtypeOf(TOptObj)));
+  assert(is_specialized_obj(t));
   assert(t.m_data);
   return t.m_data->dobj;
 }
@@ -540,6 +544,29 @@ Type union_of(Type a, Type b) {
   if (a.subtypeOf(b)) return b;
   if (b.subtypeOf(a)) return a;
 
+  // when both types are strict subtypes of TObj or TOptObj or
+  // both are strict subtypes of TCls we look for a common ancestor
+  // if one exists
+  if (is_specialized_obj(a) && is_specialized_obj(b)) {
+    auto keepOpt = is_opt(a) || is_opt(b);
+    assert(a.m_data && b.m_data);
+    auto t = dobj_of(a).cls.commonAncestor(dobj_of(b).cls);
+    // we make no distinction from T<= and T= and always
+    // return an Ancestor<= because that is the single type
+    // that includes both children
+    if (t) return keepOpt ? opt(subObj(*t)) : subObj(*t);
+    return keepOpt ? TOptObj : TObj;
+  }
+  if (a.strictSubtypeOf(TCls) && b.strictSubtypeOf(TCls)) {
+    assert(a.m_data && b.m_data);
+    auto t = dcls_of(a).cls.commonAncestor(dcls_of(b).cls);
+    // we make no distinction from T<= and T= and always
+    // return an Ancestor<= because that is the single type
+    // that includes both children
+    if (t) return subCls(*t);
+    return TCls;
+  }
+
 #define X(y) if (a.subtypeOf(y) && b.subtypeOf(y)) return y;
   X(TInt)
   X(TDbl)
@@ -547,9 +574,6 @@ Type union_of(Type a, Type b) {
   X(TCStr)
   X(TSArr)
   X(TCArr)
-  // TODO(#3343798): TObj/TCls unions can be smarter if they both have
-  // data, and if res::Class provides enough info (least common
-  // ancestor, etc).
   X(TObj)
   X(TCls)
   X(TNull)

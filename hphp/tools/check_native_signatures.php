@@ -35,22 +35,37 @@ function parse_php_functions(string $file):
 
   // Don't handle methods yet, so function can't be indented
   static $function_regex =
-           "#<<[^>]*__Native[^>]*>>\nfunction +([^(]+)\(([^)]+)\) *: *(.+?);#m";
+    "#<<[^>]*__Native([^>]*)>>\nfunction +([^(]*)\(([^)]+)\) *: *(.+?);#m";
 
   $functions = Map {};
 
   if (preg_match_all($function_regex, $source, $matches, PREG_SET_ORDER)) {
     foreach($matches as $match) {
-      $name = $match[1];
-      $argList = $match[2];
-      $retType = explode('<', $match[3], 2)[0];
-      $argTypes = Vector {};
-      if ($argList) {
-        $args = preg_split('/\s*,\s*/', $argList);
-        foreach($args as $arg) {
-          $type = preg_split('/\s*\$/', $arg)[0];
-          $type = explode('<', $type, 2)[0];
-          $argTypes[] = $type;
+      $nativeArgs = $match[1];
+      $name = $match[2];
+      if (strpos($nativeArgs, '"ActRec"') !== false) {
+        // ActRec functions have a specific structure
+        $retType = 'actrec';
+        $argTypes = Vector {'actrec'};
+      } else {
+        $argList = $match[3];
+        $retType = explode('<', $match[4], 2)[0];
+        $argTypes = Vector {};
+        if ($argList) {
+          $args = preg_split('/\s*,\s*/', $argList);
+          foreach($args as $arg) {
+            $type = preg_split('/\s*\$/', $arg)[0];
+            $type = explode('<', $type, 2)[0];
+            if ($type == '...') {
+              // Special case varargs
+              $vargTypes = Vector {'int'};
+              $vargTypes->addAll($argTypes);
+              $vargTypes[] = 'array';
+              $argTypes = $vargTypes;
+            } else {
+              $argTypes[] = $type;
+            }
+          }
         }
       }
       $functions[$name] = Pair { $retType, $argTypes };
@@ -93,7 +108,7 @@ function parse_cpp_functions(string $file):
 }
 
 function match_return_type(string $php, string $cpp): bool {
-  if ($php[0] == '?' || $php[0] == '@') {
+  if ($php[0] == '?') {
     $expected = 'Variant';
   } else {
     switch (strtolower($php)) {
@@ -125,6 +140,9 @@ function match_return_type(string $php, string $cpp): bool {
       case 'callable':
         $expected = 'Variant';
         break;
+      case 'actrec':
+        $expected = 'TypedValue*';
+        break;
       case 'object':
       default:
         $expected = 'Object';
@@ -139,9 +157,10 @@ function match_return_type(string $php, string $cpp): bool {
 }
 
 function match_arg_type(string $php, string $cpp): bool {
-  if($php[strlen($php)-1] == '&') {
-    $expected = 'VRefParam';
-  } else if ($php[0] == '?' || $php[0] == '@') {
+  if ($php[0] == '@') {
+     $php = substr($php, 1);
+  }
+  if ($php[0] == '?') {
     $expected = 'CVarRef';
   } else {
     switch (strtolower($php)) {
@@ -173,10 +192,21 @@ function match_arg_type(string $php, string $cpp): bool {
       case 'callable':
         $expected = 'CVarRef';
         break;
+      case 'actrec':
+        $expected = 'ActRec*';
+        break;
       case 'object':
       default:
         $expected = 'CObjRef';
         break;
+    }
+  }
+  // References must be a variant type
+  if ($php[strlen($php)-1] == '&') {
+    if ($expected != 'CVarRef') {
+      return false;
+    } else {
+      $expected = 'VRefParam';
     }
   }
   // Special case for ints

@@ -18,11 +18,11 @@
 
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
+#include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/trace-builder.h"
 
 namespace HPHP { namespace JIT {
 
@@ -229,7 +229,7 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
   typedef RegionDesc::Location L;
 
   for (auto const& inst : *unit.entry()) {
-    if (inst.typeParam().equals(Type::Gen)) continue;
+    if (inst.hasTypeParam() && inst.typeParam().equals(Type::Gen)) continue;
 
     if (inst.op() == GuardLoc) {
       func(L::Local{inst.extra<LocalId>()->locId}, inst.typeParam());

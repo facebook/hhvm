@@ -201,12 +201,17 @@ class ObjectData {
     return getAttribute(Attribute::IsCollection);
   }
 
+  bool isMutableCollection() const {
+    return Collection::isMutableType(getCollectionType());
+  }
+
   Collection::Type getCollectionType() const {
     return isCollection() ? static_cast<Collection::Type>(o_subclassData.u16)
                           : Collection::Type::InvalidType;
   }
 
   size_t getCollectionSize() const {
+    assert(isCollection());
     return *(uint*)((char*)this + FAST_COLLECTION_SIZE_OFFSET);
   }
 
@@ -263,7 +268,7 @@ class ObjectData {
   bool o_toBooleanImpl() const noexcept;
   int64_t o_toInt64Impl() const noexcept;
   double o_toDoubleImpl() const noexcept;
-  Array o_toArray() const;
+  Array o_toArray(bool pubOnly = false) const;
 
   bool destruct();
 

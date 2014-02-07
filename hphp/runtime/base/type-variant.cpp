@@ -531,15 +531,6 @@ MutableArrayIter Variant::begin(Variant *key, Variant &val,
   return MutableArrayIter(this, key, val);
 }
 
-void Variant::escalate() {
-  auto const cell = asCell();
-  if (cell->m_type == KindOfArray) {
-    ArrayData *arr = cell->m_data.parr;
-    ArrayData *esc = arr->escalate();
-    if (arr != esc) set(esc);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
 
@@ -742,37 +733,6 @@ static void raise_bad_offset_notice() {
   }
 }
 
-#define IMPLEMENT_RVAL_INTEGRAL                                         \
-  if (m_type == KindOfArray) {                                          \
-    return m_data.parr->get(ToKey(offset), flags & AccessFlags::Error); \
-  }                                                                     \
-  switch (m_type) {                                                     \
-    case KindOfStaticString:                                            \
-    case KindOfString:                                                  \
-      return m_data.pstr->getChar((int)offset);                         \
-    case KindOfObject: {                                                \
-      ObjectData* obj = m_data.pobj;                                    \
-      if (obj->isCollection()) {                                        \
-        return collectionOffsetGet(obj, offset);                        \
-      } else {                                                          \
-        return getArrayAccess()->o_invoke_few_args(s_offsetGet,         \
-                                                   1, offset);          \
-      }                                                                 \
-      break;                                                            \
-    }                                                                   \
-    case KindOfRef:                                                     \
-      return m_data.pref->var()->rvalAt(offset, flags);                 \
-    case KindOfUninit:                                                  \
-    case KindOfNull:                                                    \
-      break;                                                            \
-    default:                                                            \
-      if (flags & AccessFlags::Error) {                                 \
-        raise_bad_offset_notice();                                      \
-      }                                                                 \
-      break;                                                            \
-  }                                                                     \
-  return null_variant;
-
 Variant Variant::rvalAtHelper(int64_t offset, ACCESSPARAMS_IMPL) const {
   switch (m_type) {
   case KindOfStaticString:
@@ -781,7 +741,11 @@ Variant Variant::rvalAtHelper(int64_t offset, ACCESSPARAMS_IMPL) const {
   case KindOfObject: {
     ObjectData* obj = m_data.pobj;
     if (LIKELY(obj->isCollection())) {
-      return collectionOffsetGet(obj, offset);
+      if (flags & AccessFlags::Error) {
+        return collectionOffsetAt(obj, offset);
+      } else {
+        return collectionOffsetGet(obj, offset);
+      }
     } else {
       return getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
     }
@@ -822,7 +786,11 @@ Variant Variant::rvalAt(const String& offset, ACCESSPARAMS_IMPL) const {
   case KindOfObject: {
     ObjectData* obj = m_data.pobj;
     if (LIKELY(obj->isCollection())) {
-      return collectionOffsetGet(obj, offset);
+      if (flags & AccessFlags::Error) {
+        return collectionOffsetAt(obj, offset);
+      } else {
+        return collectionOffsetGet(obj, offset);
+      }
     } else {
       return getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
     }
@@ -887,7 +855,11 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
   case KindOfObject: {
     ObjectData* obj = m_data.pobj;
     if (LIKELY(obj->isCollection())) {
-      return collectionOffsetGet(obj, offset);
+      if (flags & AccessFlags::Error) {
+        return collectionOffsetAt(obj, offset);
+      } else {
+        return collectionOffsetGet(obj, offset);
+      }
     } else {
       return getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
     }
@@ -905,98 +877,6 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
     break;
   }
   return null_variant;
-}
-
-template <typename T>
-CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
-  switch (m_type) {
-  case KindOfStaticString:
-  case KindOfString:
-    const_cast<Variant&>(tmp) = m_data.pstr->getChar(HPHP::toInt32(offset));
-    return tmp;
-  case KindOfObject: {
-    ObjectData* obj = m_data.pobj;
-    if (LIKELY(obj->isCollection())) {
-      return collectionOffsetGet(obj, offset);
-    } else {
-      const_cast<Variant&>(tmp) =
-        getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
-      return tmp;
-    }
-    break;
-  }
-  case KindOfRef:
-    return m_data.pref->var()->rvalRef(offset, tmp, flags);
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  default:
-    if (flags & AccessFlags::Error) {
-      raise_bad_offset_notice();
-    }
-    break;
-  }
-  return null_variant;
-}
-
-template CVarRef
-Variant::rvalRefHelper(int64_t offset, CVarRef tmp, ACCESSPARAMS_IMPL) const;
-
-CVarRef Variant::rvalRef(const String& offset, CVarRef tmp,
-                         ACCESSPARAMS_IMPL) const {
-  if (m_type == KindOfArray) {
-    bool error = flags & AccessFlags::Error;
-    if (flags & AccessFlags::Key) return m_data.parr->get(offset, error);
-    if (offset.isNull()) return m_data.parr->get(empty_string, error);
-    int64_t n;
-    if (!offset->isStrictlyInteger(n)) {
-      return m_data.parr->get(offset, error);
-    } else {
-      return m_data.parr->get(n, error);
-    }
-  }
-  return rvalRefHelper(offset, tmp, flags);
-}
-
-CVarRef Variant::rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
-  if (m_type == KindOfArray) {
-    // Fast path for KindOfArray
-    switch (offset.m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-      return m_data.parr->get(empty_string, flags & AccessFlags::Error);
-    case KindOfBoolean:
-    case KindOfInt64:
-      return m_data.parr->get(offset.m_data.num, flags & AccessFlags::Error);
-    case KindOfDouble:
-      return m_data.parr->get((int64_t)offset.m_data.dbl,
-                              flags & AccessFlags::Error);
-    case KindOfStaticString:
-    case KindOfString: {
-      int64_t n;
-      if (offset.m_data.pstr->isStrictlyInteger(n)) {
-        return m_data.parr->get(n, flags & AccessFlags::Error);
-      } else {
-        return m_data.parr->get(offset.asCStrRef(), flags & AccessFlags::Error);
-      }
-    }
-    case KindOfArray:
-      throw_bad_type_exception("Invalid type used as key");
-      break;
-    case KindOfObject:
-      throw_bad_type_exception("Invalid type used as key");
-      break;
-    case KindOfResource:
-      return m_data.parr->get(offset.toInt64(), flags & AccessFlags::Error);
-    case KindOfRef:
-      return rvalRef(*(offset.m_data.pref->var()), tmp, flags);
-    default:
-      assert(false);
-      break;
-    }
-    return null_variant;
-  }
-  return rvalRefHelper(offset, tmp, flags);
 }
 
 template <typename T>
@@ -1056,7 +936,6 @@ template<typename T>
 Variant& Variant::LvalAtImpl0(
     Variant *self, T key, Variant *tmp, bool blackHole, ACCESSPARAMS_IMPL) {
 head:
-  assert(!(flags & AccessFlags::CheckExist));
   if (self->m_type == KindOfArray) {
     ArrayData *arr = self->m_data.parr;
     ArrayData *escalated;
@@ -1089,7 +968,7 @@ head:
   }
   if (self->m_type == KindOfObject) {
     if (self->m_data.pobj->isCollection()) {
-      return collectionOffsetGet(self->m_data.pobj, Variant(key));
+      return collectionOffsetAt(self->m_data.pobj, Variant(key));
     }
     if (!blackHole) {
       *tmp = self->getArrayAccess()->offsetGet(key);

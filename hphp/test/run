@@ -411,10 +411,10 @@ class Status {
       case self::MODE_VERBOSE:
         if (self::hasColor()) {
           if ($reason !== null) {
-            print "$test \033[1;33mskipped\033[0m\n";
-          } else {
             print "$test \033[1;33mskipped\033[0m ";
             print "\033[1;31m$reason\033[0m\n";
+          } else {
+            print "$test \033[1;33mskipped\033[0m\n";
           }
         } else {
           if ($reason !== null) {
@@ -507,6 +507,8 @@ function run($options, $tests, $bad_test_file) {
       Status::skip($test);
     } else if ($status === 'skip-norepo') {
       Status::skip($test, 'norepo');
+    } else if ($status === 'skip-onlyrepo') {
+      Status::skip($test, 'onlyrepo');
     } else if ($status) {
       Status::pass($test);
     } else {
@@ -563,6 +565,10 @@ function run_test($options, $test) {
       $output .= shell_exec("$hphp 2>&1");
       $hhvm .= " -vRepo.Authoritative=true ".
                "-vRepo.Central.Path=$repodb";
+    }
+  } else {
+    if (file_exists($test.'.onlyrepo')) {
+      return 'skip-onlyrepo';
     }
   }
 

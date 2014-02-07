@@ -37,7 +37,7 @@ namespace HPHP {  namespace JIT {
  *   with a pointer to it, returning the result.
  *
  *   Normally IRInstruction creation should go through either
- *   IRUnit::gen or TraceBuilder::gen.  This utility is used to
+ *   IRUnit::gen or IRBuilder::gen.  This utility is used to
  *   implement those.  The lambda must not escape the IRInstruction*.
  */
 
@@ -108,6 +108,12 @@ private:
 
   void setter(IRInstruction* inst, Type t) {
     inst->setTypeParam(t);
+  }
+
+  void setter(IRInstruction* inst, folly::Optional<Type> t) {
+    if (t.hasValue()) {
+      inst->setTypeParam(t.value());
+    }
   }
 
   template<typename T>

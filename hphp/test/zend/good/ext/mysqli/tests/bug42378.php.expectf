@@ -1,0 +1,9 @@
+FLOAT
+FORMAT(col1, 0)
+FLOAT
+id AS order_by_col, FORMAT(col1, 0)
+FLOAT UNSIGNED
+id AS order_by_col, FORMAT(col1, 0)
+DECIMAL(5,0)
+id AS order_by_col, FORMAT(col1, 0)
+done!

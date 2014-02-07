@@ -46,7 +46,7 @@
   doctrine2:
     url: https://github.com/doctrine/doctrine2.git
     branch: master
-    commit: 93c110673521c18273b885fb9359d049b6676df4
+    commit: 626efdafd48a01cd9f54b6b94b158a5dfb4f8261
     install_root: doctrine2
     test_root: doctrine2
   drupal:
@@ -109,9 +109,11 @@
     install_root: laravel
     test_root: laravel
   magento2:
-    url: https://github.com/magento/magento2.git
+    # Until PHPUnit 3.8 pull request is accepted
+    # https://github.com/magento/magento2/pull/489
+    url: https://github.com/JoelMarcey/magento2.git
     branch: master
-    commit: fcc07ebc4b225abaae13bd93243733d0e1fc86a7
+    commit: 389668bca115e0fed4353664bd8c93d46a69da9e
     install_root: magento2
     test_root: magento2/dev/tests/unit
   # Changing from ptarjan to wikimedia causes a FATAL in the test
@@ -261,7 +263,7 @@
   silverstripe:
     url: https://github.com/silverstripe/silverstripe-installer.git
     branch: "3.1"
-    commit: 6ba883823987534c4e6984c037e5b1d5e25e47cf
+    commit: 16c9312f2995c9dab0d6a17b303b77e09b1ae43d
     install_root: silverstripe
     test_root: silverstripe
   slim:
@@ -297,9 +299,11 @@
       # Needs a local memcache server
       - yii/tests/framework/caching/CMemCacheTest.php
   zf2:
-    url: https://github.com/zendframework/zf2.git
+    # Until PHPUnit 3.8 pull request is accepted
+    # https://github.com/zendframework/zf2/pull/5781
+    url: https://github.com/JoelMarcey/zf2.git
     branch: master
-    commit: 5b510228f58539348daae42730cd8137606bb4b6
+    commit: c29404d8bfda2b0fe106ef1e73447a72ca37d80e
     install_root: zf2
     test_root: zf2/tests
     blacklist:

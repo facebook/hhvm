@@ -237,6 +237,9 @@ typedef SmartResource<PDOStatement> sp_PDOStatement;
 /* represents a connection to a database */
 class PDOConnection : public SweepableResourceData {
 public:
+  // This is special and doesn't use DECLARE_RESOURCE_ALLOCATION because it has
+  // to live across requests. It is also the weirdest SweepableResourceData
+  // as it can't use any PHP objects and deletes itself during sweep().
   static const char *PersistentKey;
 
   enum SupportedMethod {
@@ -391,6 +394,7 @@ typedef SmartResource<PDOConnection> sp_PDOConnection;
 /* describes a column */
 class PDOColumn : public ResourceData {
 public:
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(PDOColumn);
   PDOColumn();
   ~PDOColumn();
 
@@ -408,8 +412,9 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 /* describes a bound parameter */
-class PDOBoundParam : public ResourceData {
+class PDOBoundParam : public SweepableResourceData {
 public:
+  DECLARE_RESOURCE_ALLOCATION(PDOBoundParam);
   PDOBoundParam();
   ~PDOBoundParam();
 
@@ -441,8 +446,9 @@ class c_pdo;
 typedef SmartObject<c_pdo> sp_pdo;
 
 /* represents a prepared statement */
-class PDOStatement : public ResourceData {
+class PDOStatement : public SweepableResourceData {
 public:
+  DECLARE_RESOURCE_ALLOCATION(PDOStatement);
   enum SupportedMethod {
     MethodExecuter,
     MethodFetcher,

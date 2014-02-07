@@ -22,7 +22,7 @@ namespace HPHP {  namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
-class TraceBuilder;
+class IRBuilder;
 class IRUnit;
 class IRInstruction;
 
@@ -39,7 +39,7 @@ void eliminateDeadCode(IRUnit&);
 /*
  * Run all the optimization passes.
  */
-void optimize(IRUnit& unit, TraceBuilder& builder, TransKind kind);
+void optimize(IRUnit& unit, IRBuilder& builder, TransKind kind);
 
 //////////////////////////////////////////////////////////////////////
 

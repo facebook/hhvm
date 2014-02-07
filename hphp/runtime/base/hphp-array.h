@@ -126,6 +126,14 @@ public:
                                const TypedValue* values);
 
   /*
+   * Allocate an uncounted HphpArray and copy the values from the input 'array'
+   * into the uncounted one. All values copied are made uncounted as well.
+   * An uncounted array can only contain uncounted values (primitive values,
+   * uncounted or static strings and uncounted or static arrays).
+   */
+  static HphpArray* MakeUncounted(ArrayData* array);
+
+  /*
    * Return a pointer to the singleton static empty array.  This is
    * used for initial empty arrays (COW will cause it to escalate to a
    * request-local array if it is modified).
@@ -358,8 +366,14 @@ private:
   static void getElmKey(const Elm& e, TypedValue* out);
 
 private:
-  static HphpArray* CopyPacked(const HphpArray& other, AllocationMode);
-  static HphpArray* CopyMixed(const HphpArray& other, AllocationMode);
+  template<class CopyElem>
+  static HphpArray* CopyPacked(const HphpArray& other,
+                               AllocationMode,
+                               CopyElem);
+  template<class CopyKeyValue>
+  static HphpArray* CopyMixed(const HphpArray& other,
+                              AllocationMode,
+                              CopyKeyValue);
   static HphpArray* CopyReserve(const HphpArray* src, size_t expectedSize);
 
   HphpArray() = delete;

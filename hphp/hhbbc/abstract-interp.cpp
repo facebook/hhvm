@@ -3850,7 +3850,7 @@ std::vector<Bytecode> optimize_block(const Index& index,
       if (propagate_constants(op, state, gen)) continue;
     }
 
-    if (options.StrengthReduceBC && flags.strengthReduced) {
+    if (options.StrengthReduce && flags.strengthReduced) {
       for (auto& hh : *flags.strengthReduced) gen(hh);
       continue;
     }

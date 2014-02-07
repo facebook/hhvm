@@ -57,6 +57,10 @@ Repo& Repo::get() {
   return *t_dh.get();
 }
 
+void Repo::shutdown() {
+  t_dh.destroy();
+}
+
 SimpleMutex Repo::s_lock;
 unsigned Repo::s_nRepos = 0;
 
@@ -191,6 +195,37 @@ Unit* Repo::loadUnit(const std::string& name, const MD5& md5) {
     return nullptr;
   }
   return m_urp.load(name, md5);
+}
+
+std::vector<std::pair<std::string,MD5>> Repo::enumerateUnits() {
+  std::vector<std::pair<std::string,MD5>> ret;
+
+  try {
+    RepoStmt stmt(*this);
+    stmt.prepare(
+      folly::format(
+        "SELECT path, md5 FROM {};", table(RepoIdCentral, "FileMd5")
+      ).str()
+    );
+    RepoTxn txn(*this);
+    RepoTxnQuery query(txn, stmt);
+
+    for (query.step(); query.row(); query.step()) {
+      std::string path;
+      MD5 md5;
+
+      query.getStdString(0, path);
+      query.getMd5(1, md5);
+
+      ret.emplace_back(path, md5);
+    }
+
+    txn.commit();
+  } catch (RepoExc& e) {
+    fprintf(stderr, "failed to enumerate units: %s\n", e.what());
+  }
+
+  return ret;
 }
 
 void Repo::InsertFileHashStmt::insert(RepoTxn& txn, const StringData* path,
@@ -785,4 +820,36 @@ bool Repo::writable(int repoId) {
   return true;
 }
 
- } // HPHP::VM
+//////////////////////////////////////////////////////////////////////
+
+void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
+  auto& repo = Repo::get();
+
+  // Attempt batch commit.  This can legitimately fail due to multiple input
+  // files having identical contents.
+  bool err = false;
+  {
+    RepoTxn txn(repo);
+
+    for (auto& ue : ues) {
+      if (repo.insertUnit(ue.get(), UnitOrigin::File, txn)) {
+        err = true;
+        break;
+      }
+    }
+    if (!err) {
+      txn.commit();
+    }
+  }
+
+  // Commit units individually if an error occurred during batch commit.
+  if (err) {
+    for (auto& ue : ues) {
+      repo.commitUnit(ue.get(), UnitOrigin::File);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}

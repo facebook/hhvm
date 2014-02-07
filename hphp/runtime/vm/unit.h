@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_VM_UNIT_H_
 #define incl_HPHP_VM_UNIT_H_
 
+#include <memory>
+
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -999,6 +1001,8 @@ class UnitRepoProxy : public RepoProxy {
   ~UnitRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
   Unit* load(const std::string& name, const MD5& md5);
+  std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
+                                           const MD5& md5);
 
 #define URP_IOP(o) URP_OP(Insert##o, insert##o)
 #define URP_GOP(o) URP_OP(Get##o, get##o)
@@ -1104,6 +1108,10 @@ class UnitRepoProxy : public RepoProxy {
     GetBaseOffsetAfterPCLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     bool get(int64_t unitSn, Offset pc, Offset& offset);
   };
+
+private:
+  bool loadHelper(UnitEmitter& ue, const std::string&, const MD5&);
+
 #define URP_OP(c, o) \
  public: \
   c##Stmt& o(int repoId) { return *m_##o[repoId]; } \

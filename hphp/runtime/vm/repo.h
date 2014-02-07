@@ -17,11 +17,10 @@
 #ifndef incl_HPHP_VM_REPO_H_
 #define incl_HPHP_VM_REPO_H_
 
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/preclass-emit.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/litstr-repo-proxy.h"
+#include <vector>
+#include <utility>
+#include <string>
+#include <memory>
 
 #include <sqlite3.h>
 
@@ -30,6 +29,12 @@
 // For getpwuid_r(3).
 #include <sys/types.h>
 #include <pwd.h>
+
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/preclass-emit.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/litstr-repo-proxy.h"
 
 namespace HPHP {
 
@@ -45,6 +50,13 @@ public:
   static Repo& get();
   static bool prefork();
   static void postfork(pid_t pid);
+
+  /*
+   * In some command line programs that use the repo, it is necessary
+   * to shut it down at some point in the process.  (See hhbbc.)  This
+   * function accomplishes this.
+   */
+  static void shutdown();
 
   Repo();
   ~Repo();
@@ -84,6 +96,12 @@ public:
   bool findFile(const char* path, const std::string& root, MD5& md5);
   bool insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
   void commitMd5(UnitOrigin unitOrigin, UnitEmitter *ue);
+
+  /*
+   * Return a vector of (filepath, MD5) for every unit in central
+   * repo.
+   */
+  std::vector<std::pair<std::string,MD5>> enumerateUnits();
 
   /*
    * Load the repo-global metadata table, including the global litstr
@@ -242,6 +260,13 @@ struct Repo::GlobalData {
       ;
   }
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Try to commit a vector of unit emitters to the current repo.
+ */
+void batchCommit(std::vector<std::unique_ptr<UnitEmitter>>);
 
 //////////////////////////////////////////////////////////////////////
 

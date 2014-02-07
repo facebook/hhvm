@@ -228,6 +228,37 @@ inline bool moduleEnabledRelease(Module tm, int level = 1) {
   return levels[tm] + tl_levels[tm] >= level;
 }
 
+// Trace::Bump that is on for release tracing.
+struct BumpRelease {
+  BumpRelease(Module mod, int adjust, bool condition = true)
+    : m_live(condition)
+    , m_mod(mod)
+    , m_adjust(adjust)
+  {
+    if (m_live) tl_levels[m_mod] -= m_adjust;
+  }
+
+  BumpRelease(BumpRelease&& o)
+    : m_live(o.m_live)
+    , m_mod(o.m_mod)
+    , m_adjust(o.m_adjust)
+  {
+    o.m_live = false;
+  }
+
+  ~BumpRelease() {
+    if (m_live) tl_levels[m_mod] += m_adjust;
+  }
+
+  BumpRelease(const BumpRelease&) = delete;
+  BumpRelease& operator=(const BumpRelease&) = delete;
+
+private:
+  bool m_live;
+  Module m_mod;
+  int m_adjust;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #if (defined(DEBUG) || defined(USE_TRACE)) /* { */
@@ -283,35 +314,7 @@ struct Indent {
 };
 
 // See doc comment above for usage.
-struct Bump {
-  Bump(Module mod, int adjust, bool condition = true)
-    : m_live(condition)
-    , m_mod(mod)
-    , m_adjust(adjust)
-  {
-    if (m_live) tl_levels[m_mod] -= m_adjust;
-  }
-
-  Bump(Bump&& o)
-    : m_live(o.m_live)
-    , m_mod(o.m_mod)
-    , m_adjust(o.m_adjust)
-  {
-    o.m_live = false;
-  }
-
-  ~Bump() {
-    if (m_live) tl_levels[m_mod] += m_adjust;
-  }
-
-  Bump(const Bump&) = delete;
-  Bump& operator=(const Bump&) = delete;
-
-private:
-  bool m_live;
-  Module m_mod;
-  int m_adjust;
-};
+using Bump = BumpRelease;
 
 inline std::string indent() {
   return std::string(indentDepth, ' ');

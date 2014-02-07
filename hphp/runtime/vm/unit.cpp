@@ -21,6 +21,7 @@
 #include <tbb/concurrent_unordered_map.h>
 #include <boost/algorithm/string.hpp>
 
+#include "folly/Memory.h"
 #include "folly/ScopeGuard.h"
 
 #include "hphp/compiler/option.h"
@@ -1797,8 +1798,9 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   }
 }
 
-Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
-  UnitEmitter ue(md5);
+bool UnitRepoProxy::loadHelper(UnitEmitter& ue,
+                               const std::string& name,
+                               const MD5& md5) {
   ue.setFilepath(makeStaticString(name));
   // Look for a repo that contains a unit with matching MD5.
   int repoId;
@@ -1810,7 +1812,7 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   if (repoId < 0) {
     TRACE(3, "No repo contains '%s' (0x%016" PRIx64  "%016" PRIx64 ")\n",
              name.c_str(), md5.q[0], md5.q[1]);
-    return nullptr;
+    return false;
   }
   try {
     getUnitLitstrs(repoId).get(ue);
@@ -1824,10 +1826,23 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
           PRIx64 ") from '%s': %s\n",
           name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str(),
           re.msg().c_str());
-    return nullptr;
+    return false;
   }
   TRACE(3, "Repo loaded '%s' (0x%016" PRIx64 "%016" PRIx64 ") from '%s'\n",
            name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str());
+  return true;
+}
+
+std::unique_ptr<UnitEmitter>
+UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5) {
+  auto ue = folly::make_unique<UnitEmitter>(md5);
+  if (!loadHelper(*ue, name, md5)) ue.reset();
+  return ue;
+}
+
+Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
+  UnitEmitter ue(md5);
+  if (!loadHelper(ue, name, md5)) return nullptr;
   return ue.create();
 }
 

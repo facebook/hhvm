@@ -330,7 +330,7 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   state_after("parse", *program);
 
   Index index{borrow(program)};
-  optimize(index, *program);
+  if (!options.NoOptimizations) optimize(index, *program);
 
   debug_dump_program(index, *program);
   print_stats(index, *program);

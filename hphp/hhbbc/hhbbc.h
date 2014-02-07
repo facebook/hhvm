@@ -46,6 +46,12 @@ struct Options {
   //////////////////////////////////////////////////////////////////////
 
   /*
+   * If true, all optimizations are disabled, and analysis isn't even
+   * performed.
+   */
+  bool NoOptimizations = false;
+
+  /*
    * If true, completely remove jumps to blocks that are inferred to
    * be dead.  When false, dead blocks are replaced with Fatal
    * bytecodes.
@@ -79,7 +85,7 @@ struct Options {
    * Whether to replace bytecode with less expensive bytecodes when we
    * can.  E.g. InstanceOf -> InstanceOfD or FPushFunc -> FPushFuncD.
    */
-  bool StrengthReduceBC = true;
+  bool StrengthReduce = true;
 
   /*
    * Whether to enable 'FuncFamily' method resolution.
@@ -151,6 +157,13 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>>);
  * Perform single-unit optimizations.
  */
 std::unique_ptr<UnitEmitter> single_unit(std::unique_ptr<UnitEmitter>);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Main entry point when the program should behave like hhbbc.
+ */
+int main(int argc, char** argv);
 
 //////////////////////////////////////////////////////////////////////
 

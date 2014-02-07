@@ -8759,9 +8759,6 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors
   if (!Class::s_extClassHash.empty()) {
-    // For HHBBC we run this more than once in the process lifetime,
-    // but otherwise we shouldn't be doing that.
-    assert(Option::UseHHBBC);
     Class::s_extClassHash.clear();
   }
   for (long long i = 0; i < numBuiltinClasses; ++i) {
@@ -9046,35 +9043,6 @@ static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
   ((JobQueueDispatcher<EmitterWorker>*)data)->enqueue(sp->getFileScope());
 }
 
-static void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
-  assert(Option::GenerateBinaryHHBC);
-  Repo& repo = Repo::get();
-
-  // Attempt batch commit.  This can legitimately fail due to multiple input
-  // files having identical contents.
-  bool err = false;
-  {
-    RepoTxn txn(repo);
-
-    for (auto& ue : ues) {
-      if (repo.insertUnit(ue.get(), UnitOrigin::File, txn)) {
-        err = true;
-        break;
-      }
-    }
-    if (!err) {
-      txn.commit();
-    }
-  }
-
-  // Commit units individually if an error occurred during batch commit.
-  if (err) {
-    for (auto& ue : ues) {
-      repo.commitUnit(ue.get(), UnitOrigin::File);
-    }
-  }
-}
-
 static void commitGlobalData() {
   auto gd                     = Repo::GlobalData{};
   gd.HardTypeHints            = Option::HardTypeHints;
@@ -9151,16 +9119,24 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   }
 
   assert(Option::UseHHBBC || ues.empty());
-  if (Option::UseHHBBC) {
-    auto nfunc = emitHHBCNativeFuncUnit(hhbc_ext_funcs, hhbc_ext_funcs_count);
-    auto ncls  = emitHHBCNativeClassUnit(hhbc_ext_classes,
-                                         hhbc_ext_class_count);
-    ues.push_back(std::move(nfunc));
-    ues.push_back(std::move(ncls));
-    ues = HHBBC::whole_program(std::move(ues));
+
+  // We need to put the native func units in the repo so hhbbc can
+  // find them, even though they won't be used at runtime.  (We just
+  // regenerate them during process init.)
+  auto nfunc = emitHHBCNativeFuncUnit(hhbc_ext_funcs, hhbc_ext_funcs_count);
+  auto ncls  = emitHHBCNativeClassUnit(hhbc_ext_classes,
+                                       hhbc_ext_class_count);
+  ues.push_back(std::move(nfunc));
+  ues.push_back(std::move(ncls));
+
+  if (!Option::UseHHBBC) {
     batchCommit(std::move(ues));
-    commitGlobalData();
+    return;
   }
+
+  ues = HHBBC::whole_program(std::move(ues));
+  batchCommit(std::move(ues));
+  commitGlobalData();
 }
 
 extern "C" {

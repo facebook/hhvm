@@ -510,8 +510,8 @@ void IRBuilder::reoptimize() {
   if (!m_state.enableCse() && !m_enableSimplification) return;
   setConstrainGuards(false);
 
-  BlockList sortedBlocks = rpoSortCfg(m_unit);
-  auto const idoms = findDominators(m_unit, sortedBlocks);
+  auto blocksIds = rpoSortCfgWithIds(m_unit);
+  auto const idoms = findDominators(m_unit, blocksIds);
   m_state.clear();
 
   for (auto* block : rpoSortCfg(m_unit)) {

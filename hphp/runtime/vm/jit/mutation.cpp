@@ -31,8 +31,6 @@ void cloneToBlock(const BlockList& rpoBlocks,
                   Block::iterator const first,
                   Block::iterator const last,
                   Block* const target) {
-  assert(isRPOSorted(rpoBlocks));
-
   StateVector<SSATmp,SSATmp*> rewriteMap(unit, nullptr);
 
   auto rewriteSources = [&] (IRInstruction* inst) {
@@ -66,14 +64,17 @@ void cloneToBlock(const BlockList& rpoBlocks,
     targetIt = ++target->iteratorTo(newInst);
   }
 
-  auto it = rpoIteratorTo(rpoBlocks, target);
-  for (; it != rpoBlocks.end(); ++it) {
-    FTRACE(5, "cloneToBlock: rewriting block {}\n", (*it)->id());
-    for (auto& inst : **it) {
-      FTRACE(5, " rewriting {}\n", inst.toString());
-      rewriteSources(&inst);
-    }
-  }
+  postorderWalk(
+    unit,
+    [&](Block* block) {
+      FTRACE(5, "cloneToBlock: rewriting block {}\n", block->id());
+      for (auto& inst : *block) {
+        FTRACE(5, " rewriting {}\n", inst.toString());
+        rewriteSources(&inst);
+      }
+    },
+    target
+  );
 }
 
 void moveToBlock(Block::iterator const first,

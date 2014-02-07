@@ -28,31 +28,6 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-void postorderWalk(BlockList& out,
-                   StateVector<Block,bool>& visited,
-                   Block* block) {
-  if (visited[block]) return;
-  visited[block] = true;
-  if (auto t = block->taken()) postorderWalk(out, visited, t);
-  if (auto n = block->next())  postorderWalk(out, visited, n);
-  out.push_back(block);
-}
-
-BlockList rpoForCodegen(const IRUnit& unit) {
-  StateVector<Block,bool> visited(unit, false);
-  BlockList ret;
-  ret.reserve(unit.numBlocks());
-  postorderWalk(ret, visited, unit.entry());
-  std::reverse(ret.begin(), ret.end());
-  return ret;
-}
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * Currently we have very limited control flow in any given tracelet,
  * so this just selects an appropriate reverse post order on the
@@ -60,7 +35,7 @@ BlockList rpoForCodegen(const IRUnit& unit) {
  */
 LayoutInfo layoutBlocks(const IRUnit& unit) {
   LayoutInfo ret;
-  ret.blocks = rpoForCodegen(unit);
+  ret.blocks = rpoSortCfg(unit);
 
   // Optionally stress test by randomizing the positions.
   if (RuntimeOption::EvalHHIRStressCodegenBlocks) {

@@ -1008,8 +1008,9 @@ RegAllocInfo LinearScan::allocRegs() {
   // Pre: Ensure there are no existing Shuffle instructions
   assert(checkNoShuffles(m_unit));
 
-  m_blocks = rpoSortCfg(m_unit);
-  m_idoms = findDominators(m_unit, m_blocks);
+  auto blocksIds = rpoSortCfgWithIds(m_unit);
+  m_idoms = findDominators(m_unit, blocksIds);
+  m_blocks = std::move(blocksIds.blocks);
 
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
@@ -1052,8 +1053,7 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt) {
   size_t sz = m_slots.size();
   while (blockIt != m_blocks.end()) {
     Block* block = *blockIt;
-    FTRACE(5, "Block{}: {}\n",
-           (*blockIt)->id(), (*blockIt)->postId());
+    FTRACE(5, "Block{}\n", (*blockIt)->id());
 
     // clear remembered reloads that don't dominate this block
     for (SlotInfo& slot : m_slots) {

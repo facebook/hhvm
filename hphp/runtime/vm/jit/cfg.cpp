@@ -26,24 +26,26 @@ TRACE_SET_MOD(hhir);
 BlockList rpoSortCfg(const IRUnit& unit) {
   BlockList blocks;
   blocks.reserve(unit.numBlocks());
-  unsigned next_id = 0;
   postorderWalk(unit,
     [&](Block* block) {
-      block->setPostId(next_id++);
       blocks.push_back(block);
     });
+
   std::reverse(blocks.begin(), blocks.end());
   assert(blocks.size() <= unit.numBlocks());
-  assert(next_id <= unit.numBlocks());
   return blocks;
 }
 
-bool isRPOSorted(const BlockList& blocks) {
-  int id = 0;
-  for (auto it = blocks.rbegin(); it != blocks.rend(); ++it) {
-    if ((*it)->postId() != id++) return false;
+BlocksWithIds rpoSortCfgWithIds(const IRUnit& unit) {
+  auto ret = BlocksWithIds{rpoSortCfg(unit), {unit, 0xffffffff}};
+
+  auto id = ret.blocks.size();
+  for (auto* block : ret.blocks) {
+    ret.ids[block] = --id;
   }
-  return true;
+  assert(id == 0);
+
+  return ret;
 }
 
 namespace {
@@ -144,8 +146,9 @@ bool removeUnreachable(IRUnit& unit) {
  * dominator.  This is the case for the entry block and any blocks not
  * reachable from the entry block.
  */
-IdomVector findDominators(const IRUnit& unit, const BlockList& blocks) {
-  assert(isRPOSorted(blocks));
+IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
+  auto& blocks = blockIds.blocks;
+  auto& postIds = blockIds.ids;
 
   // Calculate immediate dominators with the iterative two-finger algorithm.
   // When it terminates, idom[post-id] will contain the post-id of the
@@ -173,8 +176,8 @@ IdomVector findDominators(const IRUnit& unit, const BlockList& blocks) {
         // find earliest common predecessor of p1 and p2
         // (higher postIds are earlier in flow and in dom-tree).
         do {
-          while (p1->postId() < p2->postId()) p1 = idom[p1];
-          while (p2->postId() < p1->postId()) p2 = idom[p2];
+          while (postIds[p1] < postIds[p2]) p1 = idom[p1];
+          while (postIds[p2] < postIds[p1]) p2 = idom[p2];
         } while (p1 != p2);
       }
       if (idom[block] != p1) {
@@ -187,10 +190,10 @@ IdomVector findDominators(const IRUnit& unit, const BlockList& blocks) {
   return idom;
 }
 
-DomChildren findDomChildren(const IRUnit& unit, const BlockList& blocks) {
+DomChildren findDomChildren(const IRUnit& unit, const BlocksWithIds& blocks) {
   IdomVector idom = findDominators(unit, blocks);
   DomChildren children(unit, BlockList());
-  for (Block* block : blocks) {
+  for (Block* block : blocks.blocks) {
     auto idomBlock = idom[block];
     if (idomBlock) children[idomBlock].push_back(block);
   }

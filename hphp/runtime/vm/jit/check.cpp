@@ -154,7 +154,8 @@ bool checkBlock(Block* b) {
  */
 bool checkCfg(const IRUnit& unit) {
   // Check valid successor/predecessor edges.
-  auto const blocks = rpoSortCfg(unit);
+  auto const blocksIds = rpoSortCfgWithIds(unit);
+  auto const& blocks = blocksIds.blocks;
   std::unordered_set<const Edge*> edges;
   for (Block* b : blocks) {
     auto checkEdge = [&] (const Edge* e) {
@@ -175,7 +176,7 @@ bool checkCfg(const IRUnit& unit) {
   }
 
   // visit dom tree in preorder, checking all tmps
-  auto const children = findDomChildren(unit, blocks);
+  auto const children = findDomChildren(unit, blocksIds);
   StateVector<SSATmp, bool> defined0(unit, false);
   forPreorderDoms(blocks.front(), children, defined0,
                   [] (Block* block, StateVector<SSATmp, bool>& defined) {

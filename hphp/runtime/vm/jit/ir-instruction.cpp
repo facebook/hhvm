@@ -236,13 +236,19 @@ bool IRInstruction::isRawLoad() const {
 }
 
 bool IRInstruction::storesCell(uint32_t srcIdx) const {
+  // If this function returns true for an operand, then the register
+  // allocator may give it an XMM register, and the instruction
+  // will store the whole 16 bytes into memory.  Therefore it's
+  // important *not* to return true if the TypedValue.m_aux field
+  // has important data.  This is the case for HphpArray elements,
+  // Map elements, and RefData inner values.  We don't have StMem
+  // in here since it sometimes stores to RefDatas.
   switch (m_op) {
     case StRetVal:
     case StLoc:
     case StLocNT:
       return srcIdx == 1;
 
-    case StMem:
     case StProp:
     case StElem:
       return srcIdx == 2;

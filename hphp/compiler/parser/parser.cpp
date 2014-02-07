@@ -2085,13 +2085,15 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
   return aliases;
 }
 
-void Parser::nns(int token) {
+void Parser::nns(int token, const std::string& text) {
   if (m_nsState == SeenNamespaceStatement && token != ';') {
     error("No code may exist outside of namespace {}: %s",
           getMessage().c_str());
     return;
   }
-  if (m_nsState == SeenNothing && token != T_DECLARE && token != ';') {
+
+  if (m_nsState == SeenNothing && !text.empty() && token != T_DECLARE &&
+      token != ';') {
     m_nsState = SeenNonNamespaceStatement;
   }
 }

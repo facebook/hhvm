@@ -737,7 +737,7 @@ top_statement_list:
   |                                    { }
 ;
 top_statement:
-    statement                          { _p->nns($1.num()); $$ = $1;}
+    statement                          { _p->nns($1.num(), $1.text()); $$ = $1;}
   | function_declaration_statement     { _p->nns(); $$ = $1;}
   | class_declaration_statement        { _p->nns(); $$ = $1;}
   | trait_declaration_statement        { _p->nns(); $$ = $1;}

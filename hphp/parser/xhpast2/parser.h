@@ -981,7 +981,7 @@ struct Parser : ParserBase {
   void onUse(const std::string &ns, const std::string &as) {
     // TODO
   }
-  void nns(bool declare = false) {
+  void nns(int token = 0, const std::string& text = std::string()) {
     // TODO
   }
   std::string nsDecl(const std::string &name) {

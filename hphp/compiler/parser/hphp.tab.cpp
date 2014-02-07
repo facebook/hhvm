@@ -6330,7 +6330,7 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 740 "hphp.y"
-    { _p->nns((yyvsp[(1) - (1)]).num()); (yyval) = (yyvsp[(1) - (1)]);}
+    { _p->nns((yyvsp[(1) - (1)]).num(), (yyvsp[(1) - (1)]).text()); (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 7:

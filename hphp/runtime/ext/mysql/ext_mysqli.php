@@ -979,7 +979,10 @@ class mysqli_result {
    *
    * @return bool -
    */
-  public function data_seek(int $offset): bool {
+  public function data_seek(int $offset): mixed {
+    if ($this->__result === null) {
+      return null;
+    }
     if ($this->__resulttype == MYSQLI_USE_RESULT) {
       return false;
     }

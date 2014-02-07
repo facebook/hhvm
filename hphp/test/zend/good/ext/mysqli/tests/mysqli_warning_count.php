@@ -4,7 +4,7 @@
 	$tmp    = NULL;
 	$link   = NULL;
 	$test_table_name = 'test_mysqli_warning_count_table_1'; require('table.inc');
-	if (!$res = mysqli_query($link, "SELECT id, label FROM test"))
+	if (!$res = mysqli_query($link, "SELECT id, label FROM test_mysqli_warning_count_table_1"))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (0 !== ($tmp = mysqli_warning_count($link)))

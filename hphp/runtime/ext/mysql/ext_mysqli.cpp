@@ -43,7 +43,8 @@ const StaticString
   s_mysqli_result("mysqli_result"),
   s_mysqli_sql_exception("mysqli_sql_exception"),
   s_mysqli_stmt("mysqli_stmt"),
-  s_mysqli_warning("mysqli_warning");
+  s_mysqli_warning("mysqli_warning"),
+  s_persistent_prefix("p:");
 
 //////////////////////////////////////////////////////////////////////////////
 // helper
@@ -232,14 +233,19 @@ static void HHVM_METHOD(mysqli, hh_init) {
 }
 
 static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
-                           const Variant& username, const Variant& password,
-                           const Variant& dbname, int client_flags) {
+                        const Variant& username, const Variant& password,
+                        const Variant& dbname, int client_flags) {
+  bool persistent = false;
+  String s = server.toString();
+  if (s.substr(0, 2).equal(s_persistent_prefix)) {
+    persistent = true;
+    s = s.substr(2);
+  }
   auto conn = get_connection(this_);
   assert(conn);
   Variant ret = php_mysql_do_connect_on_link(
-                  conn, server.toString(), username.toString(),
-                  password.toString(), dbname.toString(), client_flags, false,
-                  false, -1, -1);
+                  conn, s, username.toString(), password.toString(),
+                  dbname.toString(), client_flags, persistent, false, -1, -1);
   return ret.toBoolean();
 }
 

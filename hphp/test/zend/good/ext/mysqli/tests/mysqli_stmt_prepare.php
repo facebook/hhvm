@@ -16,12 +16,12 @@
 	if (false !== ($tmp = mysqli_stmt_prepare($stmt, '')))
 		printf("[005] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (true !== ($tmp = mysqli_stmt_prepare($stmt, 'SELECT id FROM test')))
+	if (true !== ($tmp = mysqli_stmt_prepare($stmt, 'SELECT id FROM test_mysqli_stmt_prepare_table_1')))
 		printf("[006] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_stmt_close($stmt);
 
-	if (NULL !== ($tmp = mysqli_stmt_prepare($stmt, "SELECT id FROM test")))
+	if (NULL !== ($tmp = mysqli_stmt_prepare($stmt, "SELECT id FROM test_mysqli_stmt_prepare_table_1")))
 		printf("[007] Expecting NULL, got %s/%s\n");
 
 	mysqli_close($link);

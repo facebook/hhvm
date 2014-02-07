@@ -1158,6 +1158,7 @@ def walk(filename, dest_subdir):
                 'mysqli_result_references': ['test'],
                 'mysqli_result_references_mysqlnd': ['test'],
                 'mysqli_select_db': ['test'],
+                'mysqli_stmt_attr_get': ['test'],
                 'mysqli_stmt_bind_param':
                     [re.compile('(?<=(INTO|FROM|ISTS|ABLE) )test')],
                 'mysqli_stmt_bind_param_call_user_func': ['test'],
@@ -1193,6 +1194,8 @@ def walk(filename, dest_subdir):
                 'mysqli_stmt_prepare': [re.compile('(?<=FROM )test')],
                 'mysqli_stmt_result_metadata': ['test'],
                 'mysqli_stmt_send_long_data': [re.compile('(?<!=we )test')],
+                'mysqli_stmt_send_long_data_packet_size_libmysql':
+                    [re.compile('(?<=(INTO|ISTS|ABLE) )test')],
                 'mysqli_stmt_store_result':
                     [re.compile('(?<=(INTO|FROM) )test')],
                 'mysqli_store_result': ['test'],

@@ -195,8 +195,8 @@ typedef struct {
   /* read buffer */
   char *buffer;
   char *buf_begin;
-  int  bufsize;
-  int  bytes_in_buffer;
+  uint32_t  bufsize;
+  int64_t   bytes_in_buffer; // signed to catch underflow errors
 
   /* boundary info */
   char *boundary;
@@ -205,20 +205,21 @@ typedef struct {
 
   /* post data */
   const char *post_data;
-  int post_size;
-  int throw_size;
+  uint64_t post_size;
+  uint64_t throw_size; // sum of all previously read chunks
   char *cursor;
-  int read_post_bytes;
+  uint64_t read_post_bytes;
 } multipart_buffer;
 
 typedef std::list<std::pair<std::string, std::string> > header_list;
 
-static int read_post(multipart_buffer *self, char *buf, int bytes_to_read) {
+static uint32_t read_post(multipart_buffer *self, char *buf,
+                          uint32_t bytes_to_read) {
   always_assert(bytes_to_read > 0);
   always_assert(self->post_data);
   always_assert(self->cursor >= self->post_data);
-  int bytes_remaining = (self->post_size - self->throw_size) -
-                        (self->cursor - self->post_data);
+  int64_t bytes_remaining = (self->post_size - self->throw_size) -
+                            (self->cursor - self->post_data);
   always_assert(bytes_remaining >= 0);
   if (bytes_to_read <= bytes_remaining) {
     memcpy(buf, self->cursor, bytes_to_read);
@@ -226,7 +227,7 @@ static int read_post(multipart_buffer *self, char *buf, int bytes_to_read) {
     return bytes_to_read;
   }
 
-  int bytes_read = bytes_remaining;
+  uint32_t bytes_read = bytes_remaining;
   memcpy(buf, self->cursor, bytes_remaining);
   bytes_to_read -= bytes_remaining;
   always_assert(self->cursor = (char *)self->post_data +
@@ -236,14 +237,13 @@ static int read_post(multipart_buffer *self, char *buf, int bytes_to_read) {
     const void *extra = self->transport->getMorePostData(extra_byte_read);
     if (extra_byte_read == 0) break;
     if (RuntimeOption::AlwaysPopulateRawPostData) {
+      // Possible overflow in buffer_append if post_size + extra_byte_read >=
+      // MAX INT
       self->post_data = (const char *)Util::buffer_append(
         self->post_data, self->post_size, extra, extra_byte_read);
       self->cursor = (char*)self->post_data + self->post_size;
     } else {
-      self->post_data =
-        (const char *)realloc((void *)self->post_data, extra_byte_read + 1);
-      memcpy((void *)self->post_data, extra, extra_byte_read);
-      ((char*)self->post_data)[extra_byte_read] = 0;
+      self->post_data = (const char *)extra;
       self->throw_size = self->post_size;
       self->cursor = (char*)self->post_data;
     }
@@ -265,8 +265,8 @@ static int read_post(multipart_buffer *self, char *buf, int bytes_to_read) {
   fill up the buffer with client data.
   returns number of bytes added to buffer.
 */
-static int fill_buffer(multipart_buffer *self) {
-  int bytes_to_read, total_read = 0, actual_read = 0;
+static uint32_t fill_buffer(multipart_buffer *self) {
+  uint32_t bytes_to_read, total_read = 0, actual_read = 0;
 
   /* shift the existing data if necessary */
   if (self->bytes_in_buffer > 0 && self->buf_begin != self->buffer) {

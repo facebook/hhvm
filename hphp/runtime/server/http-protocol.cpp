@@ -294,10 +294,21 @@ void HttpProtocol::PreparePostVariables(Variant& post,
           int delta = 0;
           transport->getMorePostData(delta);
         }
+        data = nullptr;
+        size = 0;
       } else {
+        bool invalidate = false;
         if (transport->hasMorePostData()) {
-          needDelete = true;
-          data = Util::buffer_duplicate(data, size);
+          // Calls to getMorePostData may invalidate data, so make a copy
+          // iff we're trying to coalesce the entire POST body.  Otherwise,
+          // data may be invalid when DecodeRfc1867 returns.  See
+          // upload.cpp:read_post.
+          if (RuntimeOption::AlwaysPopulateRawPostData) {
+            needDelete = true;
+            data = Util::buffer_duplicate(data, size);
+          } else {
+            invalidate = true;
+          }
         }
         DecodeRfc1867(transport,
                       post,
@@ -306,6 +317,10 @@ void HttpProtocol::PreparePostVariables(Variant& post,
                       data,
                       size,
                       boundary);
+        if (invalidate) {
+          data = nullptr;
+          size = 0;
+        }
       }
       assert(!transport->getFiles(files_str));
     } else {
@@ -327,6 +342,9 @@ void HttpProtocol::PreparePostVariables(Variant& post,
       }
     }
 
+    if (!data) {
+      return;
+    }
     if (uint32_t(size) > StringData::MaxSize) {
       // Can't store it anywhere
       if (needDelete) {

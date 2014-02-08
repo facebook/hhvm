@@ -333,8 +333,9 @@ MySQLResult *php_mysql_extract_result(CVarRef result) {
   MySQLResult *res = result.toResource().getTyped<MySQLResult>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
-  if (res == NULL || (res->get() == NULL && !res->isLocalized())) {
+  if (res == nullptr || (res->get() == nullptr && !res->isLocalized())) {
     raise_warning("supplied argument is not a valid MySQL result resource");
+    return nullptr;
   }
   return res;
 }

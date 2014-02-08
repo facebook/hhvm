@@ -1,5 +1,5 @@
 #########################################
-# 
+#
 # Install all the dependencies for HipHop
 #
 #########################################
@@ -73,8 +73,8 @@ case $DISTRO in
             libpng-devel libselinux-devel libsepol-devel libstdc++-devel libtool \
             libunwind-devel libvpx-devel libX11-devel libXau-devel libxcb-devel libxml2-devel \
             libxml++-devel libXpm-devel mysql-devel ncurses-devel oniguruma-devel openldap-devel \
-            openssl-devel pam-devel pcre-devel readline-devel systemtap-sdt tbb-devel unixODBC-devel \
-            uw-imap-devel xorg-x11-devel zlib zlib-devel
+            openssl-devel pam-devel pcre-devel readline-devel tbb-devel unixODBC-devel \
+            uw-imap-devel zlib zlib-devel
 
         # For patched stuff.
         git clone git://github.com/libevent/libevent.git --quiet &
@@ -130,7 +130,7 @@ then
 else
     echo "$FAIL errors while downloading!"
     exit 100
-fi 
+fi
 
 if [[ "x$DISTRO" == "xubuntu" ]];then
     # Leave this install till after the main parallel package install above
@@ -194,7 +194,7 @@ rm -rf libevent curl
 # hphp
 cmake .
 
-# all set 
+# all set
 echo "-------------------------------------------------------------------------"
 echo "Done. Now run:"
 echo "  CMAKE_PREFIX_PATH=\`pwd\`/.. make"

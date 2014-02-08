@@ -104,7 +104,7 @@ void JoinClause::outputCodeModel(CodeGenerator &cg) {
   auto numProps = 5;
   if (!m_group.empty()) numProps++;
   cg.printObjectHeader("JoinClause", numProps);
-  cg.printPropertyHeader("variable");
+  cg.printPropertyHeader("identifier");
   cg.printValue(m_var);
   cg.printPropertyHeader("collection");
   m_coll->outputCodeModel(cg);

@@ -30,15 +30,15 @@ class Ordering : public Expression {
 
 public:
   Ordering(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-    ExpressionPtr key, TokenID direction);
+    ExpressionPtr key, std::string direction);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   ExpressionPtr getKey() const { return m_key; }
-  TokenID getDirection() { return m_direction; }
+  int getDirection() { return m_direction; }
 private:
   ExpressionPtr m_key;
-  TokenID m_direction;
+  int m_direction;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

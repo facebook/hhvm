@@ -249,11 +249,12 @@ TypePtr QueryOrderby::inferTypes(AnalysisResultPtr ar, TypePtr type,
 void QueryOrderby::outputCodeModel(CodeGenerator &cg) {
   if (this->getKindOf() == Expression::KindOfOrderbyClause) {
     cg.printObjectHeader("OrderbyClause", 2);
+    cg.printPropertyHeader("orders");
   } else {
     cg.printObjectHeader("QueryExpression", 2);
+    cg.printPropertyHeader("clauses");
   }
-  cg.printPropertyHeader("clauses");
-  m_originalExpressions->outputCodeModel(cg);
+  cg.printExpressionVector(m_originalExpressions);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

@@ -1965,7 +1965,7 @@ void Parser::onOrdering(Token &out, Token *orderings, Token &ordering) {
 }
 
 void Parser::onOrderingExpr(Token &out, Token &expr, Token *direction) {
-  out->exp = NEW_EXP(Ordering, expr.exp, (direction) ? direction->num() : 0);
+  out->exp = NEW_EXP(Ordering, expr.exp, (direction) ? direction->text() : "");
 }
 
 void Parser::onSelectClause(Token &out, Token &expr) {

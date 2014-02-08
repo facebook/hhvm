@@ -1,5 +1,5 @@
 array(1) {
-  'Hello' =>
-  class Foo#1 (0) {
+  ["Hello"]=>
+  &object(Foo)#1 (0) {
   }
 }

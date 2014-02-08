@@ -1243,17 +1243,9 @@ StMem S0:PtrToGen S1:ConstInt S2:Gen
 
   Store S2 into the location S0 + S1 (in bytes).
 
-StMemNT S0:PtrToGen S1:ConstInt S2:Gen
-
-  Store S2 into the location S0 + S1 (in bytes), without storing the type tag.
-
 StProp S0:Obj S1:Int S2:Gen
 
   Store S2 into the location S0 + S1 (in bytes).
-
-StPropNT S0:Obj S1:Int S2:Gen
-
-  Store S2 into the location S0 + S1 (in bytes), without storing the type tag.
 
 StElem S0:PtrToCell S1:Int S2:Cell
 

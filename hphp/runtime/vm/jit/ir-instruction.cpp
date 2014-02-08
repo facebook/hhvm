@@ -109,10 +109,8 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 1;
 
     case StProp:
-    case StPropNT:
     case StMem:
-    case StMemNT:
-      // StProp[NT]|StMem[NT] <base>, <offset>, <value>
+      // StProp|StMem <base>, <offset>, <value>
       return srcNo == 2;
 
     case ArraySet:
@@ -245,9 +243,7 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
       return srcIdx == 1;
 
     case StMem:
-    case StMemNT:
     case StProp:
-    case StPropNT:
     case StElem:
       return srcIdx == 2;
 

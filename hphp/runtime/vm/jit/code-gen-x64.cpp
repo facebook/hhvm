@@ -3066,34 +3066,18 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgStPropWork(IRInstruction* inst, bool genTypeStore) {
+void CodeGenerator::cgStProp(IRInstruction* inst) {
   SSATmp* obj   = inst->src(0);
   SSATmp* prop  = inst->src(1);
   SSATmp* src   = inst->src(2);
-  cgStore(curOpd(obj).reg()[prop->getValInt()], src, genTypeStore);
-}
-
-void CodeGenerator::cgStProp(IRInstruction* inst) {
-  cgStPropWork(inst, true);
-}
-
-void CodeGenerator::cgStPropNT(IRInstruction* inst) {
-  cgStPropWork(inst, false);
-}
-
-void CodeGenerator::cgStMemWork(IRInstruction* inst, bool genStoreType) {
-  SSATmp* addr = inst->src(0);
-  SSATmp* offset  = inst->src(1);
-  SSATmp* src  = inst->src(2);
-  cgStore(curOpd(addr).reg()[offset->getValInt()], src, genStoreType);
+  cgStore(curOpd(obj).reg()[prop->getValInt()], src, true);
 }
 
 void CodeGenerator::cgStMem(IRInstruction* inst) {
-  cgStMemWork(inst, true);
-}
-
-void CodeGenerator::cgStMemNT(IRInstruction* inst) {
-  cgStMemWork(inst, false);
+  SSATmp* addr = inst->src(0);
+  SSATmp* offset  = inst->src(1);
+  SSATmp* src  = inst->src(2);
+  cgStore(curOpd(addr).reg()[offset->getValInt()], src, true);
 }
 
 void CodeGenerator::cgStRefWork(IRInstruction* inst, bool genStoreType) {

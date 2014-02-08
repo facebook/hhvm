@@ -103,9 +103,9 @@
     install_root: klein
     test_root: klein
   laravel:
-    url: https://github.com/laravel/framework.git
-    branch: master
-    commit: f59b8e834e0e6e91110c6179152335fb78a7a1ed
+    url: https://github.com/fredemmott/framework.git
+    branch: update-mockery-0.9
+    commit: 25827f6bbf63c96ae750d7d77574709056d62455
     install_root: laravel
     test_root: laravel
   magento2:

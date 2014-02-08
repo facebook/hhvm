@@ -267,7 +267,9 @@ inline TypedValue* ElemString(TypedValue& tvScratch, TypedValue* base,
   }
   if (x < 0 || x >= base->m_data.pstr->size()) {
     if (warn) {
-      raise_warning("Out of bounds");
+      if (RuntimeOption::EnableHipHopSyntax) {
+        raise_warning("Out of bounds");
+      }
     }
     static StringData* sd = makeStaticString("");
     tvScratch.m_data.pstr = sd;

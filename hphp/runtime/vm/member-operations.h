@@ -266,7 +266,7 @@ inline TypedValue* ElemString(TypedValue& tvScratch, TypedValue* base,
     x = cellAsCVarRef(*key).toInt64();
   }
   if (x < 0 || x >= base->m_data.pstr->size()) {
-    if (warn) {
+    if (warn && RuntimeOption::EnableHipHopSyntax) {
       raise_warning("Out of bounds");
     }
     static StringData* sd = makeStaticString("");

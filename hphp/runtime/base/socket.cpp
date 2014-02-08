@@ -208,6 +208,11 @@ int64_t Socket::writeImpl(const char *buffer, int64_t length) {
 }
 
 bool Socket::eof() {
+  char ch;
+  int64_t ret = recv(m_fd, &ch, 1, MSG_PEEK);
+  if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK)) {
+    m_eof = true;
+  }
   return m_eof;
 }
 

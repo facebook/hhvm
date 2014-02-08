@@ -59,6 +59,7 @@ public:
   virtual int64_t readImpl(char *buffer, int64_t length);
   virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool eof();
+  virtual const char *getStreamType() const;
   virtual Array getMetaData();
   virtual int64_t tell();
   virtual void sweep() FOLLY_OVERRIDE;
@@ -77,6 +78,7 @@ public:
 
   bool setBlocking(bool blocking);
 
+  
   std::string getAddress() const { return m_address; }
   int         getPort() const    { return m_port; }
 protected:

@@ -39,7 +39,7 @@ array(1) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string(87) "%s/hphp/test/slow/reflection/class_get_methods.php"
+      string(%d) "%s/hphp/test/slow/reflection/class_get_methods.php"
       ["line1"]=>
       int(3)
       ["line2"]=>

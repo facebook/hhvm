@@ -27,6 +27,7 @@ namespace HPHP {
 const StaticString
   s_mysqli("mysqli"),
   s_connection("__connection"),
+  s_link("__link"),
   s_result("__result"),
   s_stmt("__stmt"),
   s_charset("charset"),
@@ -52,7 +53,7 @@ static Resource get_connection_resource(Object obj) {
   auto res = obj->o_realProp(s_connection, ObjectData::RealPropUnchecked,
                              s_mysqli.get());
   if (!res || !res->isResource()) {
-    return Resource();
+    return null_resource;
   }
 
   return res->toResource();
@@ -64,10 +65,11 @@ static MySQL *get_connection(Object obj) {
 }
 
 static MySQLStmt *getStmt(Object obj) {
-  auto res = obj->o_get(s_stmt, false, s_mysqli_stmt.get());
-  assert(res.isResource());
+  auto res = obj->o_realProp(s_stmt, ObjectData::RealPropUnchecked,
+                             s_mysqli_stmt.get());
+  assert(res->isResource());
 
-  auto stmt = res.toResource().getTyped<MySQLStmt>(false, false);
+  auto stmt = res->asResRef().getTyped<MySQLStmt>(false, false);
   assert(stmt);
 
   return stmt;
@@ -249,7 +251,6 @@ static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
   return ret.toBoolean();
 }
 
-
 static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
   auto res = get_connection_resource(this_);
   VALIDATE_RESOURCE(res, MySQLState::CONNECTED)
@@ -266,6 +267,31 @@ static Variant HHVM_METHOD(mysqli, hh_sqlstate) {
   auto conn = get_connection(this_);
   VALIDATE_CONN_CONNECTED(conn);
   return String(mysql_sqlstate(conn->get()), CopyString);
+}
+
+static void HHVM_METHOD(mysqli, hh_update_last_error, Object stmt_obj) {
+  auto conn = get_connection(this_);
+  assert(conn);
+
+  auto stmt = getStmt(stmt_obj);
+  assert(stmt);
+
+  auto s = stmt->get();
+
+  auto last_errno = mysql_stmt_errno(s);
+  char last_error[MYSQL_ERRMSG_SIZE];
+  memcpy(last_error, mysql_stmt_error(s), MYSQL_ERRMSG_SIZE);
+
+  // This will clear the error both on the stmt and connection so we make sure
+  // it closed now. Otherwise it will happen when the object is swept later
+  stmt->close();
+
+  // The MySQL C API documentation say that you shouldn't touch the internals of
+  // the MySQL's datastructurs. But this is how Zend does it and there is no
+  // other good way
+  auto mysql = conn->get();
+  mysql->net.last_errno = last_errno;
+  memcpy(mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
 }
 
 static Variant HHVM_METHOD(mysqli, kill, int64_t processid) {
@@ -603,6 +629,7 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli, hh_real_query);
     HHVM_ME(mysqli, hh_server_version);
     HHVM_ME(mysqli, hh_sqlstate);
+    HHVM_ME(mysqli, hh_update_last_error);
     HHVM_ME(mysqli, kill);
     HHVM_ME(mysqli, options);
     //HHVM_STATIC_ME(mysqli, poll); // MYSQLND

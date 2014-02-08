@@ -289,7 +289,7 @@ class mysqli {
   /**
    * Alias for real_escape_string
    */
-  public function escape_string(string $escapestr): ?string {
+  public function escape_string($escapestr): ?string {
     return $this->real_escape_string($escapestr);
   }
 
@@ -480,13 +480,22 @@ class mysqli {
    *   FALSE if an error occurred.
    */
   public function prepare(string $query): ?mysqli_stmt {
-    $stmt = new mysqli_stmt($this, $query);
-    if ($stmt->error) {
+    $stmt = new mysqli_stmt($this);
+    $prepared = $stmt->prepare($query);
+
+    if (!$prepared) {
+      // If we failed to prepare we need to move the error messages that are on
+      // the mysqli_stmt object to the mysqli object otherwise the user will
+      // never be able to get them.
+      $this->hh_update_last_error($stmt);
       return false;
     }
 
     return $stmt;
   }
+
+  <<__Native>>
+  private function hh_update_last_error(mysqli_stmt $stmt): void;
 
   /**
    * Performs a query on the database
@@ -614,7 +623,7 @@ class mysqli {
    *
    * @return string - Returns an escaped string.
    */
-  public function real_escape_string(string $escapestr): ?string {
+  public function real_escape_string($escapestr): ?string {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -2081,7 +2090,7 @@ function mysqli_real_connect(mysqli $link,
 /**
  * Alias of mysqli_real_escape_string
  */
-function mysqli_escape_string(mysqli $link, string $escapestr): string {
+function mysqli_escape_string(mysqli $link, $escapestr): string {
   return mysqli_real_escape_string($link, $escapestr);
 }
 
@@ -2095,7 +2104,7 @@ function mysqli_escape_string(mysqli $link, string $escapestr): string {
  *
  * @return string - Returns an escaped string.
  */
-function mysqli_real_escape_string(mysqli $link, string $escapestr): string {
+function mysqli_real_escape_string(mysqli $link, $escapestr): string {
   return $link->real_escape_string($escapestr);
 }
 

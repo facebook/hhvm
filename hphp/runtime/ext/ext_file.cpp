@@ -417,19 +417,22 @@ Variant f_file_get_contents(const String& filename,
                             int64_t maxlen /* = -1 */) {
   Variant stream = f_fopen(filename, "rb", use_include_path, context);
   if (same(stream, false)) return false;
-  return f_stream_get_contents(stream.toResource(), maxlen, offset);
+  Variant ret = f_stream_get_contents(stream.toResource(), maxlen, offset);
+  Variant cret = f_fclose(stream);
+  return same(ret, false) ? ret : cret;
 }
 
 Variant f_file_put_contents(const String& filename, CVarRef data,
                             int flags /* = 0 */,
                             CVarRef context /* = null */) {
-  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb");
+  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb", flags, context);
   if (!fvar.toBoolean()) {
     return false;
   }
   File *f = fvar.asResRef().getTyped<File>();
 
   if ((flags & LOCK_EX) && flock(f->fd(), LOCK_EX)) {
+    f->close();
     return false;
   }
 
@@ -438,6 +441,7 @@ Variant f_file_put_contents(const String& filename, CVarRef data,
   case KindOfObject:
     {
       raise_warning("Not a valid stream resource");
+      f->close();
       return false;
     }
     break;
@@ -446,6 +450,7 @@ Variant f_file_put_contents(const String& filename, CVarRef data,
       File *fsrc = data.toResource().getTyped<File>(true, true);
       if (!fsrc) {
         raise_warning("Not a valid stream resource");
+        f->close();
         return false;
       }
       while (true) {
@@ -492,8 +497,14 @@ Variant f_file_put_contents(const String& filename, CVarRef data,
   }
 
   if (numbytes < 0) {
+    f->close();
     return false;
   }
+
+  if (!f->close()) {
+    return false;
+  }
+
   return numbytes;
 }
 

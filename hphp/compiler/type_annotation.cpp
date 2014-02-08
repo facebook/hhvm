@@ -83,6 +83,7 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
   if (!m_name.compare("bool"))     return KindOfBoolean;
   if (!m_name.compare("int"))      return KindOfInt64;
   if (!m_name.compare("float"))    return KindOfDouble;
+  if (!m_name.compare("num"))      return KindOfUnknown;
   if (!m_name.compare("string"))   return KindOfString;
   if (!m_name.compare("array"))    return KindOfArray;
   if (!m_name.compare("resource")) return KindOfResource;

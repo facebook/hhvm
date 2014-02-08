@@ -28,7 +28,7 @@
   assetic:
     url: https://github.com/kriswallsmith/assetic.git
     branch: master
-    commit: 5e519fd750ea54a035386562ae03716ffba7014c
+    commit: d013aae51baf893fe8d38b41f2d24db03e1cfbf7
     install_root: assetic
     test_root: assetic
   codeigniter:

@@ -1,0 +1,3 @@
+<?php
+extension_loaded("xsl") or die("skip need ext/xsl");
+?>

@@ -152,6 +152,11 @@ find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 add_definitions(${LIBXML2_DEFINITIONS})
 
+# LibXSLT
+find_package(LibXslt REQUIRED)
+include_directories(${LIBXSLT_INCLUDE_DIR})
+add_definitions(${LIBXSLT_DEFINITIONS})
+
 find_package(EXPAT REQUIRED)
 include_directories(${EXPAT_INCLUDE_DIRS})
 
@@ -484,6 +489,8 @@ endif()
 	target_link_libraries(${target} ${BZIP2_LIBRARIES})
 
 	target_link_libraries(${target} ${LIBXML2_LIBRARIES})
+	target_link_libraries(${target} ${LIBXSLT_LIBRARIES})
+	target_link_libraries(${target} ${LIBXSLT_EXSLT_LIBRARIES})
 	target_link_libraries(${target} ${EXPAT_LIBRARY})
 	target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
 	target_link_libraries(${target} ${Mcrypt_LIB})

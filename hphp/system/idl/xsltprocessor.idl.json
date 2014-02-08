@@ -1,0 +1,281 @@
+{
+    "consts": [
+        {
+            "name": "XSL_SECPREF_NONE",
+            "value": 0
+        },
+        {
+            "name": "XSL_SECPREF_READ_FILE",
+            "value": 2
+        },
+        {
+            "name": "XSL_SECPREF_WRITE_FILE",
+            "value": 4
+        },
+        {
+            "name": "XSL_SECPREF_CREATE_DIRECTORY",
+            "value": 8
+        },
+        {
+            "name": "XSL_SECPREF_READ_NETWORK",
+            "value": 16
+        },
+        {
+            "name": "XSL_SECPREF_WRITE_NETWORK",
+            "value": 32
+        },
+        {
+            "name": "XSL_SECPREF_DEFAULT",
+            "value": 44
+        }
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "XSLTProcessor",
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "The XSLTProcessor class.",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "desc": "Creates a new XSLTProcessor object.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getParameter",
+                    "desc": "Gets a parameter if previously set by XSLTProcessor::setParameter().",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The value of the parameter (as a string), or FALSE if it's not set."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceURI",
+                            "type": "String",
+                            "desc": "The namespace URI of the XSLT parameter."
+                        },
+                        {
+                            "name": "localName",
+                            "type": "String",
+                            "desc": "The local name of the XSLT parameter."
+                        }
+                    ]
+                },
+                {
+                    "name": "getSecurityPrefs",
+                    "desc": "Get security preferences.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Security preferences."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "hasExsltSupport",
+                    "desc": "This method determines if HHVM was built with the EXSLT library.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "importStylesheet",
+                    "desc": "This method imports the stylesheet into the XSLTProcessor for transformations.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "stylesheet",
+                            "type": "Object",
+                            "desc": "The imported style sheet as a DOMDocument or SimpleXMLElement object."
+                        }
+                    ]
+                },
+                {
+                    "name": "registerPHPFunctions",
+                    "desc": "This method enables the ability to use PHP functions as XSLT functions within XSL stylesheets.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "funcs",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "Use this parameter to only allow certain functions to be called from XSLT. This parameter can be either a string (a function name) or an array of functions."
+                        }
+                    ]
+                },
+                {
+                    "name": "removeParameter",
+                    "desc": "Removes a parameter, if set. This will make the processor use the default value for the parameter as specified in the stylesheet.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceURI",
+                            "type": "String",
+                            "desc": "The namespace URI of the XSLT parameter."
+                        },
+                        {
+                            "name": "localName",
+                            "type": "String",
+                            "desc": "The local name of the XSLT parameter."
+                        }
+                    ]
+                },
+                {
+                    "name": "setParameter",
+                    "desc": "Sets the value of one or more parameters to be used in subsequent transformations with XSLTProcessor. If the parameter doesn't exist in the stylesheet it will be ignored.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "namespaceURI",
+                            "type": "String",
+                            "desc": "The namespace URI of the XSLT parameter."
+                        },
+                        {
+                            "name": "localName",
+                            "type": "Variant",
+                            "desc": "The local name of the XSLT parameter, or an array of name => value pairs."
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant",
+                            "value": "null_variant",
+                            "desc": "The new value of the XSLT parameter."
+                        }
+                    ]
+                },
+                {
+                    "name": "setProfiling",
+                    "desc": "Sets the file to output profiling information when processing a stylesheet.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "desc": "Path to the file to dump profiling information."
+                        }
+                    ]
+                },
+                {
+                    "name": "setSecurityPrefs",
+                    "desc": "Set security preferences.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Previous security preferences."
+                    },
+                    "args": [
+                        {
+                            "name": "securityPrefs",
+                            "type": "Int64",
+                            "desc": "Security preferences."
+                        }
+                    ]
+                },
+                {
+                    "name": "transformToDoc",
+                    "desc": "Transforms the source node to a DOMDocument applying the stylesheet given by the XSLTProcessor::importStylesheet() method.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The resulting DOMDocument or FALSE on error."
+                    },
+                    "args": [
+                        {
+                            "name": "doc",
+                            "type": "Object",
+                            "desc": "The node to be transformed."
+                        }
+                    ]
+                },
+                {
+                    "name": "transformToURI",
+                    "desc": "Transforms the source node to an URI applying the stylesheet given by the XSLTProcessor::importStylesheet() method.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the number of bytes written or FALSE if an error occurred."
+                    },
+                    "args": [
+                        {
+                            "name": "doc",
+                            "type": "Object",
+                            "desc": "The document to transform."
+                        },
+                        {
+                            "name": "uri",
+                            "type": "String",
+                            "desc": "The target URI for the transformation."
+                        }
+                    ]
+                },
+                {
+                    "name": "transformToXML",
+                    "desc": "Transforms the source node to a string applying the stylesheet given by the XSLTProcessor::importStylesheet() method.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The result of the transformation as a string or FALSE on error."
+                    },
+                    "args": [
+                        {
+                            "name": "doc",
+                            "type": "Object",
+                            "desc": "The transformed document."
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

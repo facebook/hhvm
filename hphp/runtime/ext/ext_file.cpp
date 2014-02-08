@@ -123,13 +123,16 @@ static int statSyscall(
     bool useFileCache = false,
     bool isRelative = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  auto canUseFileCache = useFileCache && dynamic_cast<FileStreamWrapper*>(w);
   if (isRelative) {
     std::string realpath = StatCache::realpath(path.data());
     // realpath will return an empty string for nonexistent files
     if (realpath.empty()) return ENOENT;
-    return ::stat(File::TranslatePath(realpath).data(), buf);
+    auto translatedPath = canUseFileCache ? 
+      File::TranslatePathWithFileCache(path) : File::TranslatePath(path);
+    return ::stat(translatedPath.data(), buf);
   }
-  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
+  if (canUseFileCache) {
     return ::stat(File::TranslatePathWithFileCache(path).data(), buf);
   }
   return w->stat(path, buf);

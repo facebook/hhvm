@@ -801,7 +801,12 @@ def walk(filename, dest_subdir):
         file(full_dest_filename+'.ini', 'w').write(exp)
 
     if sections.has_key('SKIPIF'):
-        file(full_dest_filename + '.skipif', 'w').write(sections['SKIPIF'])
+        skipif = sections['SKIPIF']
+
+        if '/ext/standard/tests/strings/fprintf_' in full_dest_filename:
+            skipif = skipif.replace('dump.txt', dest_filename + '.txt')
+
+        file(full_dest_filename + '.skipif', 'w').write(skipif)
 
     test = sections['FILE']
 

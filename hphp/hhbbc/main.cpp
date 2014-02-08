@@ -21,9 +21,12 @@
 #include <string>
 #include <memory>
 #include <cstdint>
+#include <algorithm>
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+
+#include <unistd.h>
 
 #include "folly/ScopeGuard.h"
 
@@ -48,6 +51,9 @@ std::string input_repo;
 void parse_options(int argc, char** argv) {
   namespace po = boost::program_options;
 
+  auto const defaultThreadCount =
+    std::max<long>(sysconf(_SC_NPROCESSORS_ONLN) - 1, 1);
+
   po::options_description basic("Options");
   basic.add_options()
     ("help", "display help message")
@@ -60,6 +66,12 @@ void parse_options(int argc, char** argv) {
     ("no-optimizations",
       po::bool_switch(&options.NoOptimizations),
       "turn off all optimizations")
+    ("parallel-num-threads",
+      po::value(&parallel::num_threads)->default_value(defaultThreadCount),
+      "Number of threads to use for parallelism")
+    ("parallel-work-size",
+      po::value(&parallel::work_chunk)->default_value(120),
+      "Work unit size for parallelism")
     ;
 
   po::options_description oflags("Optimization Flags");
@@ -110,6 +122,11 @@ void parse_options(int argc, char** argv) {
 "in the code.\n";
     std::exit(0);
   }
+
+  if (parallel::work_chunk <= 10 || parallel::num_threads < 1) {
+    std::cerr << "Invalid parallelism configuration.\n";
+    std::exit(1);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -132,7 +149,7 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
       "optimized by hhbbc");
   }
 
-  return parallel_map(
+  return parallel::map(
     Repo::get().enumerateUnits(),
     [&] (const std::pair<std::string,MD5>& kv) {
       return Repo::get().urp().loadEmitter(kv.first, kv.second);

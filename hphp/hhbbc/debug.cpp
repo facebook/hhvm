@@ -55,7 +55,7 @@ void with_file(fs::path dir, borrowed_ptr<const php::Unit> u, Operation op) {
 }
 
 void dump_representation(fs::path dir, const php::Program& program) {
-  parallel_for_each(
+  parallel::for_each(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& u) {
       if (!*u->filename->data()) {
@@ -105,7 +105,7 @@ void dump_class_propstate(std::ostream& out,
 void dump_index(fs::path dir,
                 const Index& index,
                 const php::Program& program) {
-  parallel_for_each(
+  parallel::for_each(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& u) {
       if (!*u->filename->data()) {

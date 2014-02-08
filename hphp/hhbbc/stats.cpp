@@ -72,7 +72,7 @@ void count_opcodes(Stats& stats, const php::Program& program) {
     }
   };
 
-  parallel_for_each(
+  parallel::for_each(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& unit) {
       for (auto& c : unit->classes) {

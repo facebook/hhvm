@@ -31,14 +31,16 @@
 
 namespace HPHP { namespace HHBBC {
 
+namespace parallel {
+
 //////////////////////////////////////////////////////////////////////
 
 /*
- * TODO(#3343800): make options about this, and if inputs is small
- * enough don't use parallelism.
+ * Before using the parallel module, you can configure these to change
+ * how much parallelism is used.
  */
-constexpr size_t kNumThreads = 31;
-constexpr size_t kWorkChunk = 120;
+extern size_t num_threads;
+extern size_t work_chunk;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -49,20 +51,20 @@ constexpr size_t kWorkChunk = 120;
  * attempted.
  */
 template<class Func, class Item>
-void parallel_for_each(const std::vector<Item>& inputs, Func func) {
+void for_each(const std::vector<Item>& inputs, Func func) {
   std::atomic<bool> failed{false};
   std::atomic<size_t> index{0};
 
   std::vector<std::thread> workers;
-  for (auto worker = size_t{0}; worker < kNumThreads; ++worker) {
+  for (auto worker = size_t{0}; worker < num_threads; ++worker) {
     workers.push_back(std::thread([&] {
       try {
         hphp_session_init();
         SCOPE_EXIT { hphp_session_exit(); };
 
         for (;;) {
-          auto start = index.fetch_add(kWorkChunk);
-          auto const stop = std::min(start + kWorkChunk, inputs.size());
+          auto start = index.fetch_add(work_chunk);
+          auto const stop = std::min(start + work_chunk, inputs.size());
           if (start >= stop) break;
           for (auto i = start; i != stop; ++i) func(inputs[i]);
         }
@@ -76,7 +78,7 @@ void parallel_for_each(const std::vector<Item>& inputs, Func func) {
 
   for (auto& t : workers) t.join();
 
-  if (failed) throw std::runtime_error("parallel_for_each failed");
+  if (failed) throw std::runtime_error("parallel::for_each failed");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -93,7 +95,7 @@ void parallel_for_each(const std::vector<Item>& inputs, Func func) {
  */
 template<class Func, class Item>
 std::vector<typename std::result_of<Func (Item)>::type>
-parallel_map(const std::vector<Item>& inputs, Func func) {
+map(const std::vector<Item>& inputs, Func func) {
   using RetT = typename std::result_of<Func (Item)>::type;
 
   std::vector<RetT> retVec(inputs.size());
@@ -103,15 +105,15 @@ parallel_map(const std::vector<Item>& inputs, Func func) {
   std::atomic<size_t> index{0};
 
   std::vector<std::thread> workers;
-  for (auto worker = size_t{0}; worker < kNumThreads; ++worker) {
+  for (auto worker = size_t{0}; worker < num_threads; ++worker) {
     workers.push_back(std::thread([&] {
       try {
         hphp_session_init();
         SCOPE_EXIT { hphp_session_exit(); };
 
         for (;;) {
-          auto start = index.fetch_add(kWorkChunk);
-          auto const stop = std::min(start + kWorkChunk, inputs.size());
+          auto start = index.fetch_add(work_chunk);
+          auto const stop = std::min(start + work_chunk, inputs.size());
           if (start >= stop) break;
 
           std::transform(
@@ -129,12 +131,14 @@ parallel_map(const std::vector<Item>& inputs, Func func) {
   }
 
   for (auto& t : workers) t.join();
-  if (failed) throw std::runtime_error("parallel_map failed");
+  if (failed) throw std::runtime_error("parallel::map failed");
 
   return retVec;
 }
 
 //////////////////////////////////////////////////////////////////////
+
+}
 
 }}
 

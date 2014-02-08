@@ -406,6 +406,27 @@ void FastCGITransport::onHeadersComplete() {
     m_pathTranslated = getRawHeader(s_scriptFilename);
   }
 
+  // do a check for mod_proxy_cgi and remove the start portion of the string
+  const std::string modProxy = "proxy:fcgi://";
+  if (m_pathTranslated.find(modProxy) == 0) {
+    m_pathTranslated = m_pathTranslated.substr(modProxy.length());
+    // remove everything before the first / which is host:port
+    int slashPos = m_pathTranslated.find('/');
+    if (slashPos != String::npos) {
+      m_pathTranslated = m_pathTranslated.substr(slashPos);
+    }
+  }
+
+  // RequestURI needs path_translated to not include the document root
+  if (!m_pathTranslated.empty()) {
+    if (m_pathTranslated.find(m_documentRoot) == 0) {
+      m_pathTranslated = m_pathTranslated.substr(m_documentRoot.length());
+    } else {
+      // if the document root isn't in the url set document root to /
+      m_documentRoot = "/";
+    }
+  }
+
   auto* queryString = getRawHeaderPtr(s_queryString);
   if (queryString != nullptr && !queryString->empty()) {
     m_serverObject += "?" + *queryString;

@@ -742,10 +742,13 @@ Array f_ini_get_all(const String& extension, bool detailed) {
 void f_ini_restore(const String& varname) {
 }
 
-String f_ini_set(const String& varname, const String& newvalue) {
+Variant f_ini_set(const String& varname, const String& newvalue) {
   String oldvalue = f_ini_get(varname);
-  IniSetting::SetUser(varname, newvalue);
-  return oldvalue;
+  if (IniSetting::SetUser(varname, newvalue)) {
+    return oldvalue;
+  } else {
+    return false;
+  }
 }
 
 int64_t f_memory_get_allocation() {

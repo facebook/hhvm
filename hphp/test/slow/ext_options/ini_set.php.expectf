@@ -1,10 +1,10 @@
-string(5) "/tmp;"
-string(14) "/foo/a;/foo/b;"
-string(%d) "%s"
-string(%d) "%s"
+string(1) "&"
+string(3) "foo"
+bool(false)
+string(61) "heads/pull_1752.4-0-gf0b1aa11afb66834273bc11ead0562d62fc5d3c0"
+bool(false)
 string(1) "1"
+bool(false)
 string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
+bool(false)
 string(1) "1"

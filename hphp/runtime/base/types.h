@@ -314,6 +314,8 @@ public:
   bool m_logErrors;
   std::string m_errorLog;
   int64_t m_socketDefaultTimeout;
+  std::vector<std::string> m_allowedDirectories;
+  bool m_safeFileAccess;
 
  public:
   int getTimeout() const { return m_timeoutSeconds; }
@@ -349,6 +351,10 @@ public:
   int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
   void setErrorReportingLevel(int level) { m_errorReportingLevel = level; }
   int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
+  std::vector<std::string> getAllowedDirectories() const {
+    return m_allowedDirectories;
+  }
+  bool hasSafeFileAccess() const { return m_safeFileAccess; }
 
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
 

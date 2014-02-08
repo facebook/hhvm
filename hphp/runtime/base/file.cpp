@@ -54,8 +54,9 @@ String File::TranslatePathKeepRelative(const String& filename) {
       strlen(filename.data()) // canonicalize asserts that we don't have nulls
     ),
     AttachString);
-  if (RuntimeOption::SafeFileAccess) {
-    auto const& allowedDirectories = VirtualHost::GetAllowedDirectories();
+  if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
+    auto const& allowedDirectories = ThreadInfo::s_threadInfo->
+      m_reqInjectionData.getAllowedDirectories();
     auto it = std::upper_bound(allowedDirectories.begin(),
                                allowedDirectories.end(), canonicalized,
                                [](const String& val, const std::string& dir) {

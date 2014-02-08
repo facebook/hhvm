@@ -539,7 +539,7 @@
             "flags": [
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "Returns the old value on success, FALSE on failure."
             },
             "args": [

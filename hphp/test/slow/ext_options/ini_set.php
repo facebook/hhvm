@@ -1,8 +1,8 @@
 <?php
 
 // PHP_INI_ALL
-var_dump(ini_set('open_basedir', '/foo/a;/foo/b;'));
-var_dump(ini_get('open_basedir'));
+var_dump(ini_set('arg_separator.output', 'foo'));
+var_dump(ini_get('arg_separator.output'));
 
 // PHP_INI_NONE
 var_dump(ini_set('hphp.compiler_id', 'foo'));

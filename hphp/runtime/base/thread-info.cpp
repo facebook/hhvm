@@ -47,6 +47,8 @@ __thread char* ThreadInfo::t_stackbase = 0;
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
+const StaticString s_dot(".");
+
 static int64_t ini_get_max_execution_time() {
   return ThreadInfo::s_threadInfo.getNoCheck()->
     m_reqInjectionData.getTimeout();
@@ -214,25 +216,51 @@ void RequestInjectionData::threadInit() {
                    ));
 
   // Paths and Directories
+  m_allowedDirectories = RuntimeOption::AllowedDirectories;
+  m_safeFileAccess = RuntimeOption::SafeFileAccess;
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "open_basedir",
                    IniSetting::SetAndGet<std::string>(
-                     [](const std::string& value) {
-                       RuntimeOption::AllowedDirectories.clear();
+                     [this](const std::string& value) {
                        auto boom = f_explode(";", value).toCArrRef();
+
+                       std::vector<std::string> directories;
+                       directories.reserve(boom.size());
                        for (ArrayIter iter(boom); iter; ++iter) {
-                         RuntimeOption::AllowedDirectories.push_back(
-                           iter.second().toCStrRef().toCppString()
-                         );
+                         const auto& path = iter.second().toString();
+
+                         // Canonicalise the path
+                         if (!path.empty() &&
+                             File::TranslatePathKeepRelative(path).empty()) {
+                           return false;
+                         }
+
+                         if (path.equal(s_dot)) {
+                           auto cwd = g_context->getCwd().toCppString();
+                           directories.push_back(cwd);
+                         } else {
+                           directories.push_back(path.toCppString());
+                         }
                        }
+                       m_allowedDirectories = directories;
+                       m_safeFileAccess = !boom.empty();
                        return true;
                      },
-                     []() {
-                       std::string out = "";
-                       for (auto& dir : RuntimeOption::AllowedDirectories) {
-                         if (!dir.empty()) {
-                           out += dir + ";";
+                     [this]() -> std::string {
+                       if (!hasSafeFileAccess()) {
+                         return "";
+                       }
+
+                       std::string out;
+                       for (auto& directory: getAllowedDirectories()) {
+                         if (!directory.empty()) {
+                           out += directory + ";";
                          }
+                       }
+
+                       // Remove the trailing ;
+                       if (!out.empty()) {
+                         out.erase(std::end(out) - 1, std::end(out));
                        }
                        return out;
                      }

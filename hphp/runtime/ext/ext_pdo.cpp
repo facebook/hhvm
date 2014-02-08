@@ -25,6 +25,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_stream.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "ext_array.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -1430,7 +1431,7 @@ Variant c_PDO::t_query(int _argc, const String& sql, CArrRef _argv) {
     // when we add support for varargs here, we only need to set the stmt if
     // the argument count is > 1
     if (_argc == 1 || pdo_stmt_set_fetch_mode(stmt, 0, _argv.rvalAt(0).toInt64Val(),
-        _argv.slice(1, _argc - 2, false))) {
+        f_array_splice(_argv, 1).getArrayData())) {
       /* now execute the statement */
       strcpy(stmt->error_code, PDO_ERR_NONE);
       if (stmt->executer()) {

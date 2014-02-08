@@ -3526,6 +3526,11 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   if (tc.isNullable() && locType.subtypeOf(Type::InitNull)) {
     return;
   }
+  if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
+      (locType.isObj() || locVal->type().isBoxed())) {
+    PUNT(VerifyParamType-collectionToArray);
+    return;
+  }
   if (tc.isCallable()) {
     locVal = gen(Unbox, makeExit(), locVal);
     gen(VerifyParamCallable, makeCatch(), locVal, cns(paramId));
@@ -4713,10 +4718,11 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
   auto setImmLocType = [&](uint32_t id, Type t) {
     setLocType(inst.imm[id].u_LA, t);
   };
+  auto* func = curFunc();
 
   switch (inst.op()) {
     case OpCreateCont: case OpAsyncESuspend: {
-      auto numLocals = curFunc()->numLocals();
+      auto numLocals = func->numLocals();
       for (unsigned i = 0; i < numLocals; ++i) {
         setLocType(i, Type::Uninit);
       }
@@ -4833,6 +4839,17 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
     case OpWIterNext:
       setImmLocType(2, Type::Gen);
       break;
+
+    case OpVerifyParamType: {
+      auto paramId = inst.imm[0].u_LA;
+      auto const& tc = func->params()[paramId].typeConstraint();
+      auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
+      if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
+          (locType.isObj() || locType.maybeBoxed())) {
+        setImmLocType(0, locType.isBoxed() ? Type::BoxedCell : Type::Cell);
+      }
+      break;
+    }
 
     default:
       not_reached();

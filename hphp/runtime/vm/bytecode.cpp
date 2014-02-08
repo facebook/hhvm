@@ -6884,7 +6884,7 @@ OPTBLD_INLINE void VMExecutionContext::iopVerifyParamType(IOP_ARGS) {
   if (tc.isTypeVar()) {
     return;
   }
-  const TypedValue *tv = frame_local(m_fp, param);
+  auto* tv = frame_local(m_fp, param);
   tc.verify(tv, func, param);
 }
 

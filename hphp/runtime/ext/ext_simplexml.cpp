@@ -1633,7 +1633,7 @@ int64_t c_SimpleXMLElement::t_count() {
 // ArrayAccess
 
 bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
-  return sxe_prop_dim_exists(this, index, true, false, true);
+  return sxe_prop_dim_exists(this, index, false, false, true);
 }
 
 Variant c_SimpleXMLElement::t_offsetget(CVarRef index) {

@@ -745,7 +745,7 @@ class mysqli {
    * Alias of options()
    */
   public function set_opt(int $option, mixed $value): bool {
-    return $this->options($opions, $value);
+    return $this->options($option, $value);
   }
 
   /**

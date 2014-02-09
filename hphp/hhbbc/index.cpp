@@ -1155,6 +1155,12 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   );
 }
 
+Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
+  auto it = m_data->funcInfo.find(f);
+  if (it != end(m_data->funcInfo)) return it->second.returnTy;
+  return TInitGen;
+}
+
 // Parameter preparation modes never change during analysis, so
 // there's no need to register a dependency.
 PrepKind Index::lookup_param_prep(Context ctx,

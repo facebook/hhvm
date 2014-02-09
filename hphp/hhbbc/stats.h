@@ -26,9 +26,9 @@ struct Index;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * If Trace::hhbbc_time >= 2, print some stats about the program to
- * stdout, and also dump it to a temporary file and print the
- * filename.
+ * If Trace::hhbbc_time >= 1, print some stats about the program to a
+ * temporary file.  If it's greater than or equal to 2, also dump it
+ * to stdout.
  */
 void print_stats(const Index&, const php::Program&);
 

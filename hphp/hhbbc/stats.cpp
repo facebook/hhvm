@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "folly/Conv.h"
 #include "folly/String.h"
 #include "folly/Format.h"
 #include "folly/ScopeGuard.h"
@@ -42,9 +43,45 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+#define STAT_TYPES                              \
+  X(Gen)                                        \
+  X(InitGen)                                    \
+  X(Ref)                                        \
+  X(Cell)                                       \
+  X(InitCell)                                   \
+  X(Unc)                                        \
+  X(InitUnc)                                    \
+  X(Obj)                                        \
+  X(OptObj)                                     \
+  X(Null)                                       \
+  X(Bottom)
+
+struct TypeStat {
+#define X(x) std::atomic<uint64_t> sub_##x; \
+             std::atomic<uint64_t> eq_##x;
+  STAT_TYPES
+#undef X
+};
+
 struct Stats {
   std::array<std::atomic<uint64_t>,Op_count> op_counts;
+  TypeStat returns;
+  TypeStat privateProps;
+  TypeStat privateStatics;
 };
+
+std::string type_stat_string(const std::string& prefix, const TypeStat& st) {
+  auto ret = std::string{};
+#define X(x)                                      \
+  ret += folly::format("  {} = {: <9} {: >8}\n",  \
+    prefix, #x ":", st.eq_##x.load()).str();      \
+  ret += folly::format("  {} < {: <9} {: >8}\n",  \
+    prefix, #x ":", st.sub_##x.load()).str();
+  STAT_TYPES
+#undef X
+  ret += "\n";
+  return ret;
+}
 
 std::string show(const Stats& stats) {
   auto ret = std::string{};
@@ -57,33 +94,63 @@ std::string show(const Stats& stats) {
       stats.op_counts[i].load()
     ).str();
   }
+  ret += "\n";
+
+  ret += type_stat_string("ret", stats.returns);
+  ret += type_stat_string("priv prop", stats.privateProps);
+  ret += type_stat_string("priv static", stats.privateStatics);
 
   return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void count_opcodes(Stats& stats, const php::Program& program) {
-  auto count_func = [&] (const php::Func& func) {
-    for (auto& blk : func.blocks) {
-      for (auto& bc : blk->hhbcs) {
-        ++stats.op_counts[static_cast<uint64_t>(bc.op)];
-      }
-    }
-  };
+void add_type(TypeStat& stat, const Type& t) {
+#define X(x)                                    \
+  if (t.strictSubtypeOf(T##x)) ++stat.sub_##x;  \
+  if (t == T##x) ++stat.eq_##x;
+  STAT_TYPES
+#undef X
+}
 
+//////////////////////////////////////////////////////////////////////
+
+void collect_func(Stats& stats, const Index& index, const php::Func& func) {
+  auto const ty = index.lookup_return_type_raw(&func);
+  add_type(stats.returns, ty);
+
+  for (auto& blk : func.blocks) {
+    for (auto& bc : blk->hhbcs) {
+      ++stats.op_counts[static_cast<uint64_t>(bc.op)];
+    }
+  }
+}
+
+void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
+  for (auto& kv : index.lookup_private_props(&cls)) {
+    add_type(stats.privateProps, kv.second);
+  }
+  for (auto& kv : index.lookup_private_statics(&cls)) {
+    add_type(stats.privateStatics, kv.second);
+  }
+}
+
+void collect_stats(Stats& stats,
+                   const Index& index,
+                   const php::Program& program) {
   parallel::for_each(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& unit) {
       for (auto& c : unit->classes) {
+        collect_class(stats, index, *c);
         for (auto& m : c->methods) {
-          count_func(*m);
+          collect_func(stats, index, *m);
         }
       }
       for (auto& x : unit->funcs) {
-        count_func(*x);
+        collect_func(stats, index, *x);
       }
-      count_func(*unit->pseudomain);
+      collect_func(stats, index, *unit->pseudomain);
     }
   );
 }
@@ -94,16 +161,18 @@ void count_opcodes(Stats& stats, const php::Program& program) {
 
 //////////////////////////////////////////////////////////////////////
 
-void print_stats(const Index&, const php::Program& program) {
-  if (!Trace::moduleEnabledRelease(Trace::hhbbc_time, 2)) return;
+void print_stats(const Index& index, const php::Program& program) {
+  if (!Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) return;
 
   trace_time timer("stats");
 
   Stats stats{};
-  count_opcodes(stats, program);
+  collect_stats(stats, index, program);
 
   auto const str = show(stats);
-  std::cout << str;
+  if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 2)) {
+    std::cout << str;
+  }
 
   char fileBuf[] = "/tmp/hhbbcXXXXXX";
   int fd = mkstemp(fileBuf);

@@ -324,10 +324,20 @@ struct Index {
   Type lookup_class_constant(Context, res::Class, SString cns) const;
 
   /*
-   * Return the best known return type for a particular function.
+   * Return the best known return type for a resolved function.
    * Returns TInitGen at worst.
    */
   Type lookup_return_type(Context, res::Func) const;
+
+  /*
+   * Look up the return type for an unresolved function.  The
+   * interpreter should not use this routine---it's for stats or debug
+   * dumps.
+   *
+   * Nothing may be writing to the index when this function is used,
+   * but concurrent readers are allowed.
+   */
+  Type lookup_return_type_raw(borrowed_ptr<const php::Func>) const;
 
   /*
    * Returns the parameter preparation kind (if known) for parameter

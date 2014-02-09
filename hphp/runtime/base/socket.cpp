@@ -259,7 +259,7 @@ Array Socket::getMetaData() {
   Array ret = File::getMetaData();
   ret.set(s_timed_out, m_timedOut);
   ret.set(s_blocked, (bool)(fcntl(m_fd, F_GETFL, 0) & O_NONBLOCK));
-  ret.set(s_stream_type, StaticString(this->getStreamType()));
+  ret.set(s_stream_type, String(this->getStreamType()));
   return ret;
 }
 

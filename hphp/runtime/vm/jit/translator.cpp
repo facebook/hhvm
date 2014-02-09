@@ -1676,7 +1676,7 @@ void Translator::handleAssertionEffects(Tracelet& t,
      */
     if (tas.m_changeSet.count(dl->location)) {
       auto const src = findInputSrc(tas.m_t->m_instrStream.last, dl);
-      if (src->outputPredicted) src->outputPredicted = false;
+      if (src && src->outputPredicted) src->outputPredicted = false;
     }
   }
 

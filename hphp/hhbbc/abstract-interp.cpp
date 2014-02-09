@@ -1509,12 +1509,28 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::FPassM& op) {
     switch (prepKind(op.arg1)) {
-    case PrepKind::Unknown:  return conservative(op);
-    case PrepKind::Val:      return reduce(bc::CGetM { op.mvec },
-                                           bc::FPassC { op.arg1 });
-    case PrepKind::Ref:      return reduce(bc::VGetM { op.mvec },
-                                           bc::FPassVNop { op.arg1 });
+    case PrepKind::Unknown:
+      break;
+    case PrepKind::Val:
+      return reduce(bc::CGetM { op.mvec }, bc::FPassC { op.arg1 });
+    case PrepKind::Ref:
+      return reduce(bc::VGetM { op.mvec }, bc::FPassVNop { op.arg1 });
     }
+
+    /*
+     * FPassM with an unknown PrepKind either has the effects of CGetM
+     * or the effects of VGetM, but we don't know which statically.
+     * These are complicated instructions, so the easiest way to
+     * handle this is to run both and then merge their output states.
+     */
+    auto const start = m_state;
+    (*this)(bc::CGetM { op.mvec });
+    auto const cgetm = m_state;
+    m_state = start;
+    (*this)(bc::VGetM { op.mvec });
+    merge_into(m_state, cgetm);
+    assert(m_flags.wasPEI);
+    assert(!m_flags.canConstProp);
   }
 
   void operator()(const bc::FCall& op) {
@@ -1891,33 +1907,6 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
   void operator()(const bc::HighInvalid&) { always_assert(!"HighInvalid"); }
-
-private:
-  // This implements any opcode conservatively (throws away everything
-  // we know in the state).  You can forward to this for bytecodes
-  // that aren't really supported yet.
-  template<class T>
-  void conservative(const T& t) {
-    FTRACE(2, "    *** unknown op\n");
-
-    for (uint32_t i = 0; i < t.numPop(); ++i)  popT();
-    if (isFCallStar(T::op))                    fpiPop();
-    for (uint32_t i = 0; i < t.numPush(); ++i) push(t.pushType(i));
-
-    if (isFPush(T::op)) {
-      fpiPush(ActRec { FPIKind::Unknown });
-    }
-
-    killLocals();
-    killThisProps();
-    killSelfProps();
-
-    // If this instruction has taken edges, we need to propagate the
-    // state to them.
-    forEachTakenEdge(t, [&] (php::Block& blk) {
-      m_propagate(blk, m_state);
-    });
-  }
 
 private: // member instructions
   /*

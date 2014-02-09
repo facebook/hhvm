@@ -122,13 +122,18 @@ BaseExecutionContext::BaseExecutionContext() :
                          iter.second().toCStrRef().toCppString()
                        );
                      }
+
+                     RuntimeOption::SafeFileAccess = !boom.empty();
                      return true;
                    },
                    [](void*) {
                      std::string out = "";
-                     for (auto& dir : RuntimeOption::AllowedDirectories) {
-                       if (!dir.empty()) {
-                         out += dir + ";";
+
+                     if (RuntimeOption::SafeFileAccess) {
+                       for (auto& dir : RuntimeOption::AllowedDirectories) {
+                         if (!dir.empty()) {
+                           out += dir + ";";
+                         }
                        }
                      }
                      return out;

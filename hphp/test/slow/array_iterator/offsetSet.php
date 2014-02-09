@@ -5,9 +5,9 @@
     $it[] = "baz";
 
     foreach($it as $value) {
-        print_r($value);
+        var_dump($value);
     }
 
-    print_r(sizeof($it));
+    var_dump(sizeof($it));
 ?>
 

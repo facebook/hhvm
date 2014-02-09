@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/complex-types.h"
 
+#include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/type-system.h"
 
 namespace HPHP { namespace HHBBC {
@@ -58,7 +59,20 @@ Type eval_cell(Pred p) {
         always_assert(0 && "Impossible constant evaluation occurred");
       }
     }
-    return from_cell(c);
+
+    /*
+     * We need to get rid of statics if we're not actually going to do
+     * constant propagation.  When ConstantProp is on, the types we
+     * create here can reflect that we'll be changing bytecode later
+     * to actually make these into non-reference-counted SStr or
+     * SArrs.  If we leave the bytecode alone, though, it generally
+     * won't actually be static at runtime.
+     *
+     * TODO(#3696042): loosen_statics here should ideally not give up
+     * on the array or string value, just its staticness.
+     */
+    auto const t = from_cell(c);
+    return options.ConstantProp ? t : loosen_statics(t);
   } catch (const std::exception&) {
     /*
      * Not currently trying to set the nothrow() flag based on whether

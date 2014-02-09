@@ -383,6 +383,24 @@ norepo_tests = (
     '/tests/lang/018.php',
     '/tests/lang/bug21961.php',
     '/tests/lang/foreachLoop.012.php',
+
+    # These tests use create_function, which is basically eval.
+    '/Zend/tests/anonymous_func_001.php',
+    '/Zend/tests/anonymous_func_002.php',
+    '/Zend/tests/anonymous_func_003.php',
+    '/Zend/tests/closure_025.php',
+    '/Zend/tests/instanceof_001.php',
+    '/ext/spl/tests/bug61697.php',
+    '/ext/standard/tests/array/array_filter_variation7.php',
+    '/ext/standard/tests/array/array_map_variation10.php',
+    '/ext/standard/tests/array/array_walk_recursive_variation7.php',
+    '/ext/standard/tests/array/array_walk_variation7.php',
+    '/ext/standard/tests/array/uasort_variation7.php',
+    '/ext/standard/tests/array/usort_variation7.php',
+    '/ext/standard/tests/strings/bug37262.php',
+    '/tests/lang/bug17115.php',
+    '/tests/lang/bug22690.php',
+    '/tests/lang/bug24926.php',
 )
 
 # Random other files that zend wants

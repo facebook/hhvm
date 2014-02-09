@@ -2634,6 +2634,13 @@ Unit* VMExecutionContext::compileEvalString(
 }
 
 const String& VMExecutionContext::createFunction(const String& args, const String& code) {
+  if (UNLIKELY(RuntimeOption::RepoAuthoritative)) {
+    // Whole program optimizations need to assume they can see all the
+    // code.
+    raise_error("You can't use create_function in RepoAuthoritative mode; "
+                "use a closure instead");
+  }
+
   VMRegAnchor _;
   // It doesn't matter if there's a user function named __lambda_func; we only
   // use this name during parsing, and then change it to an impossible name

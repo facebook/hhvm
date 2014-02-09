@@ -1010,7 +1010,7 @@ class ReflectionClass implements Reflector {
   private function test($what, $name) {
     $v = $this->fetch($what);
 
-    //Special treatment for methods since method idntifiers are case insensitive.
+    // Special treatment for methods since method identifiers are case insensitive.
     if ($what === 'methods') {
       return $v && isset($v[$this->normalizeMethodName($name)]);
     } else {
@@ -1027,12 +1027,12 @@ class ReflectionClass implements Reflector {
       $this->getInfo();
     }
 
-    //Lowercase for searching.
+    // Lowercase for searching.
     $name = strtolower($name);
     if (array_key_exists($name, $this->caseInsensitiveMethodMap)) {
       return $this->caseInsensitiveMethodMap[$name];
     } else {
-      //Probably a reserved name (e.g. __construct)
+      // Probably a reserved name (e.g. __construct)
       return $name;
     }
   }

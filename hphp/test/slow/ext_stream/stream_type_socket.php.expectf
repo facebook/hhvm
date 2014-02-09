@@ -1,0 +1,4 @@
+string(%i) "tcp_socke%s"
+string(%i) "udp_socket"
+string(%i) "unix_socket"
+string(%i) "udg_socket"

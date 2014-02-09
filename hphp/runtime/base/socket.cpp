@@ -208,17 +208,57 @@ int64_t Socket::writeImpl(const char *buffer, int64_t length) {
 }
 
 bool Socket::eof() {
+  char ch;
+  int64_t ret = recv(m_fd, &ch, 1, MSG_PEEK);
+  if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK)) {
+    m_eof = true;
+  }
   return m_eof;
 }
 
 const StaticString
   s_timed_out("timed_out"),
-  s_blocked("blocked");
+  s_blocked("blocked"),
+  s_stream_type("stream_type");
+
+const char *Socket::getStreamType() const {
+  int result, type;
+  socklen_t len = sizeof(type);
+  result = getsockopt(m_fd, SOL_SOCKET, SO_TYPE, &type, &len);
+  if (result != 0) {
+    // getsockopt error.
+    return "";
+  }
+  switch (m_type) {
+    case AF_INET:
+    case AF_INET6:
+    switch (type) {
+      case SOCK_STREAM:
+      return "tcp_socket";
+
+      case SOCK_DGRAM:
+      return "udp_socket";
+    }
+    break;
+
+    case AF_UNIX:
+    switch (type) {
+      case SOCK_STREAM:
+      return "unix_socket";
+
+      case SOCK_DGRAM:
+      return "udg_socket";     
+    }
+    break;
+  }
+  return "generic_socket";
+}
 
 Array Socket::getMetaData() {
   Array ret = File::getMetaData();
   ret.set(s_timed_out, m_timedOut);
   ret.set(s_blocked, (bool)(fcntl(m_fd, F_GETFL, 0) & O_NONBLOCK));
+  ret.set(s_stream_type, StaticString(this->getStreamType()));
   return ret;
 }
 

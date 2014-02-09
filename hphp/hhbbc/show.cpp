@@ -414,8 +414,13 @@ std::string show(Type t) {
 
   assert(t.checkInvariants());
 
-  // Unknown union; just bits for now.
-  ret = folly::to<std::string>(t.m_bits);
+  if (is_specialized_wait_handle(t)) {
+    ret = folly::format("{}WaitH<{}>",
+      is_opt(t) ? "?" : "",
+      show(wait_handle_inner(t))
+    ).str();
+    return ret;
+  }
 
   switch (t.m_bits) {
   case BBottom:      ret = "Bottom";   break;

@@ -48,7 +48,8 @@ bool supported(ContextMask mask, AttrContext a) {
   X(AttrNoOverride,    C|F|T,   "no_override");     \
   X(AttrFinal,         C|F|T,   "final");           \
   X(AttrTrait,         C|F,     "trait");           \
-  X(AttrUnique,        C|F,     "unique");
+  X(AttrUnique,        C|F,     "unique");          \
+  X(AttrBuiltin,       C|F,     "builtin");
 
 }
 

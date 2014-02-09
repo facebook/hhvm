@@ -313,9 +313,9 @@ bool Class::couldBeOverriden() const {
 
 folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   if (val.str() || o.val.str()) return folly::none;
-  auto c1 = val.other();
-  auto c2 = o.val.other();
-  // walk the arrays of base classes until they match. For common ancestors
+  auto const c1 = val.other();
+  auto const c2 = o.val.other();
+  // Walk the arrays of base classes until they match. For common ancestors
   // to exist they must be on both sides of the baseList at the same positions
   ClassInfo* ancestor = nullptr;
   auto it1 = c1->baseList.begin();
@@ -323,7 +323,7 @@ folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   while (it1 != c1->baseList.end() && it2 != c2->baseList.end()) {
     if (*it1 != *it2) break;
     ancestor = *it1;
-    it1++; it2++;
+    ++it1; ++it2;
   }
   if (ancestor == nullptr) {
     return folly::none;
@@ -985,14 +985,15 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   return name_only();
 }
 
-res::Class Index::builtin_class(Context ctx, SString name) const {
-  auto const rcls = resolve_class(ctx, name);
+res::Class Index::builtin_class(SString name) const {
+  auto const rcls = resolve_class(Context {}, name);
   if (!rcls) {
     std::fprintf(stderr, "failed to resolve a builtin class: %s\n",
       name->data());
     std::abort();
   }
-  assert(rcls->val.other() && (rcls->val.other()->cls->attrs & AttrBuiltin));
+  assert(rcls->val.other() &&
+    (rcls->val.other()->cls->attrs & AttrBuiltin));
   return *rcls;
 }
 

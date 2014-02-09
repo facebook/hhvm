@@ -415,7 +415,7 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::NewCol& op) {
     auto const name = collectionTypeToString(op.arg1);
-    push(objExact(m_index.builtin_class(m_ctx, name)));
+    push(objExact(m_index.builtin_class(name)));
   }
 
   void operator()(const bc::ColAddElemC&) {
@@ -776,7 +776,7 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::Catch&) {
     nothrow();
-    return push(subObj(m_index.builtin_class(m_ctx, s_Exception.get())));
+    return push(subObj(m_index.builtin_class(s_Exception.get())));
   }
 
   void operator()(const bc::NativeImpl&) {
@@ -1814,7 +1814,7 @@ struct InterpStepper : boost::static_visitor<void> {
       killThisProps();
       killSelfProps();
     }
-    push(objExact(m_index.builtin_class(m_ctx, s_Continuation.get())));
+    push(objExact(m_index.builtin_class(s_Continuation.get())));
   }
 
   void operator()(const bc::ContEnter&)   { popC(); }
@@ -2129,7 +2129,7 @@ private: // member instructions
       auto const ty = thisPropAsCell(name);
       if (ty && propCouldPromoteToObj(*ty)) {
         mergeThisProp(name,
-          objExact(m_index.builtin_class(m_ctx, s_stdClass.get())));
+          objExact(m_index.builtin_class(s_stdClass.get())));
       }
       return;
     }
@@ -2146,7 +2146,7 @@ private: // member instructions
       auto const ty = thisPropAsCell(name);
       if (ty && propCouldPromoteToObj(*ty)) {
         mergeSelfProp(name,
-          objExact(m_index.builtin_class(m_ctx, s_stdClass.get())));
+          objExact(m_index.builtin_class(s_stdClass.get())));
       }
       return;
     }
@@ -2207,7 +2207,7 @@ private: // member instructions
   void handleLocBasePropD(const MInstrState& state) {
     auto const locTy = locAsCell(state.mvec.locBase);
     if (propMustPromoteToObj(locTy)) {
-      auto const ty = objExact(m_index.builtin_class(m_ctx, s_stdClass.get()));
+      auto const ty = objExact(m_index.builtin_class(s_stdClass.get()));
       setLoc(state.mvec.locBase, ty);
       return;
     }
@@ -2445,7 +2445,7 @@ private: // member instructions
      */
     auto const newBaseLocTy =
       propMustPromoteToObj(state.base.type)
-        ? objExact(m_index.builtin_class(m_ctx, s_stdClass.get()))
+        ? objExact(m_index.builtin_class(s_stdClass.get()))
         : TTop;
 
     state.base = Base { TInitCell, BaseLoc::PostProp, newBaseLocTy, name };

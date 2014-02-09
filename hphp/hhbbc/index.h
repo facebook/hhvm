@@ -274,7 +274,7 @@ struct Index {
    *
    * Pre: `name' must be the name of a class defined in a systemlib.
    */
-  res::Class builtin_class(Context, SString name) const;
+  res::Class builtin_class(SString name) const;
 
   /*
    * Try to resolve a function named `name' from a given context.

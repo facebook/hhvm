@@ -30,6 +30,8 @@ TRACE_SET_MOD(hhbbc);
 
 namespace {
 
+const StaticString s_WaitHandle("WaitHandle");
+
 // Legal to call with !isPredefined(bits)
 bool mayHaveData(trep bits) {
   switch (bits) {
@@ -200,7 +202,7 @@ bool Type::equivData(Type o) const {
     return m_data->ival == o.m_data->ival;
   case BOptDbl:
   case BDbl:
-    // For purposes of Type equivalence, NaNs are equal...
+    // For purposes of Type equivalence, NaNs are equal.
     return m_data->dval == o.m_data->dval ||
            (std::isnan(m_data->dval) && std::isnan(o.m_data->dval));
   case BOptObj:
@@ -235,7 +237,7 @@ bool Type::subtypeData(Type o) const {
         m_data->dcls.cls.same(o.m_data->dcls.cls)) {
       return true;
     }
-    if (o.m_data->dcls.type == DObj::Sub) {
+    if (o.m_data->dcls.type == DCls::Sub) {
       return m_data->dcls.cls.subtypeOf(o.m_data->dcls.cls);
     }
     return false;
@@ -264,7 +266,7 @@ bool Type::couldBeData(Type o) const {
         m_data->dcls.cls.same(o.m_data->dcls.cls)) {
       return true;
     }
-    if (m_data->dcls.type == DObj::Sub || o.m_data->dcls.type == DObj::Sub) {
+    if (m_data->dcls.type == DCls::Sub || o.m_data->dcls.type == DCls::Sub) {
       return m_data->dcls.cls.couldBe(o.m_data->dcls.cls);
     }
     return false;
@@ -285,6 +287,18 @@ bool Type::operator==(Type o) const {
 bool Type::subtypeOf(Type o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
+
+  if (m_whType) {
+    if (o.m_whType) {
+      return
+        wait_handle_inner(*this).subtypeOf(wait_handle_inner(o)) &&
+        Type(m_bits, *m_data).subtypeOf(Type(o.m_bits, *o.m_data));
+    }
+    return Type(m_bits, *m_data).subtypeOf(o);
+  }
+  if (o.m_whType) {
+    return subtypeOf(Type(o.m_bits, *o.m_data));
+  }
 
   auto const isect = static_cast<trep>(m_bits & o.m_bits);
   if (isect != m_bits) return false;
@@ -311,6 +325,16 @@ bool Type::strictSubtypeOf(Type o) const {
 bool Type::couldBe(Type o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
+
+  if (m_whType) {
+    if (o.m_whType) {
+      return wait_handle_inner(*this).couldBe(wait_handle_inner(o));
+    }
+    return o.couldBe(Type(m_bits, *m_data));
+  }
+  if (o.m_whType) {
+    return couldBe(Type(o.m_bits, *o.m_data));
+  }
 
   auto const isect = static_cast<trep>(m_bits & o.m_bits);
   if (isect == 0) return false;
@@ -350,10 +374,29 @@ bool Type::checkInvariants() const {
     if (m_bits == BSStr) assert(m_data->sval->isStatic());
     if (m_bits == BSArr) assert(m_data->aval->isStatic());
   }
+  if (auto t = m_whType.get()) {
+    t->checkInvariants();
+  }
   return true;
 }
 
 //////////////////////////////////////////////////////////////////////
+
+Type wait_handle(const Index& index, Type inner) {
+  auto const rwh = index.builtin_class(s_WaitHandle.get());
+  auto t = subObj(rwh);
+  t.m_whType = make_copy_ptr(std::move(inner));
+  return t;
+}
+
+bool is_specialized_wait_handle(const Type& t) {
+  return !!t.m_whType.get();
+}
+
+Type wait_handle_inner(const Type& t) {
+  assert(t.m_whType.get());
+  return *t.m_whType.get();
+}
 
 Type sval(SString val) {
   assert(val->isStatic());
@@ -485,7 +528,7 @@ Type type_of_istype(IsTypeOp op) {
   not_reached();
 }
 
-DObj dobj_of(Type t) {
+DObj dobj_of(const Type& t) {
   assert(t.checkInvariants());
   assert(is_specialized_obj(t));
   assert(t.m_data);
@@ -548,27 +591,36 @@ Type union_of(Type a, Type b) {
   if (a.subtypeOf(b)) return b;
   if (b.subtypeOf(a)) return a;
 
-  // when both types are strict subtypes of TObj or TOptObj or
-  // both are strict subtypes of TCls we look for a common ancestor
-  // if one exists
+  // We need to check the optional cases as part of this, because
+  // otherwise we'll go down the is_specialized_obj paths and lose the
+  // wait handle information.
+  if (is_specialized_wait_handle(a)) {
+    if (is_specialized_wait_handle(b)) {
+      *a.m_whType = union_of(*a.m_whType, *b.m_whType);
+      return a;
+    }
+    if (b == TInitNull) return opt(a);
+  }
+  if (is_specialized_wait_handle(b)) {
+    if (a == TInitNull) return opt(b);
+  }
+
+  // When both types are strict subtypes of TObj or TOptObj or both
+  // are strict subtypes of TCls we look for a common ancestor if one
+  // exists.
   if (is_specialized_obj(a) && is_specialized_obj(b)) {
     auto keepOpt = is_opt(a) || is_opt(b);
-    assert(a.m_data && b.m_data);
     auto t = dobj_of(a).cls.commonAncestor(dobj_of(b).cls);
-    // we make no distinction from T<= and T= and always
-    // return an Ancestor<= because that is the single type
-    // that includes both children
+    // We need not to distinguish between Obj<=T and Obj=T, and always
+    // return an Obj<=Ancestor, because that is the single type that
+    // includes both children.
     if (t) return keepOpt ? opt(subObj(*t)) : subObj(*t);
     return keepOpt ? TOptObj : TObj;
   }
   if (a.strictSubtypeOf(TCls) && b.strictSubtypeOf(TCls)) {
-    assert(a.m_data && b.m_data);
     auto t = dcls_of(a).cls.commonAncestor(dcls_of(b).cls);
-    // we make no distinction from T<= and T= and always
-    // return an Ancestor<= because that is the single type
-    // that includes both children
-    if (t) return subCls(*t);
-    return TCls;
+    // Similar to above, this must alway return an Obj<=Ancestor.
+    return t ? subCls(*t) : TCls;
   }
 
 #define X(y) if (a.subtypeOf(y) && b.subtypeOf(y)) return y;

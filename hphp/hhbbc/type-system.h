@@ -46,10 +46,10 @@ namespace HPHP { namespace HHBBC {
  *              Cls=c    +-------------+--------+-------+-------+
  *                       |             |        |       |       |
  *                      Unc            |        |      Obj     Res
- *                       | \           |        |       |
- *                       |  \          |        |     Obj<=c
- *                     Prim  \         |        |       |
- *                     / |   InitUnc   |        |     Obj=c
+ *                       | \           |        |      /  \
+ *                       |  \          |        |  Obj<=c Obj<=WaitHandle
+ *                     Prim  \         |        |    |       |
+ *                     / |   InitUnc   |        |  Obj=c   WaitH<T>
  *                    /  |   /  | |    |        |
  *                   /   |  /   | |    |        |
  *                  /    | /    | |    |        |
@@ -76,6 +76,24 @@ namespace HPHP { namespace HHBBC {
  *                   True  False  Int  Dbl
  *                                 |    |
  *                               Int=n Dbl=n
+ *
+ * Some description of the types here:
+ *
+ *   {Init,}Prim
+ *
+ *       "Primitive" types---these can be represented in a TypedValue
+ *       without a pointer to the heap.
+ *
+ *   {Init,}Unc
+ *
+ *       "Uncounted" types---values of these types don't require
+ *       reference counting.
+ *
+ *   WaitH<T>
+ *
+ *       A WaitHandle that is known will either return a value of type
+ *       T from its join() method (or AsyncAwait), or else throw an
+ *       exception.
  *
  */
 
@@ -147,8 +165,15 @@ struct DCls {
 /*
  * Information about a specific object type.  The class is either
  * exact or a subtype of the supplied class.
+ *
+ * If the class is WaitHandle, we can also carry a type that joining
+ * the wait handle will produce.  (This is hoisted into Type to keep
+ * DObj and Type::Data trivially copyable for now.)
  */
-using DObj = DCls;
+struct DObj {
+  enum { Exact, Sub } type;
+  res::Class cls;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -196,6 +221,9 @@ struct Type {
   bool couldBe(Type o) const;
 
 private:
+  friend Type wait_handle(const Index&, Type);
+  friend bool is_specialized_wait_handle(const Type&);
+  friend Type wait_handle_inner(const Type&);
   friend Type sval(SString);
   friend Type ival(int64_t);
   friend Type dval(double);
@@ -204,7 +232,7 @@ private:
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
   friend Type clsExact(res::Class);
-  friend DObj dobj_of(Type);
+  friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);
   friend Type opt(Type);
@@ -235,6 +263,7 @@ private:
 private:
   trep m_bits;
   folly::Optional<Data> m_data;
+  copy_ptr<Type> m_whType;
 };
 
 #define X(y) const Type T##y = Type(B##y);
@@ -293,6 +322,18 @@ X(Top)
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Return WaitH<T> for a type t.
+ */
+Type wait_handle(const Index&, Type t);
+
+/*
+ * Return T from a WaitH<T>.
+ *
+ * Pre: is_specialized_handle(t);
+ */
+Type wait_handle_inner(const Type& t);
+
+/*
  * Create Types that represent constant values.
  */
 Type sval(SString);
@@ -331,10 +372,18 @@ Type unopt(Type t);
 bool is_opt(Type t);
 
 /*
- * Returns true if type 't' represents a specialized object, that is
- * an object of a specific class. Returns true also for optional obj type.
+ * Returns true if type 't' represents a "specialized" object, that is
+ * an object of a known class, or an optional object of a known class.
  */
 bool is_specialized_obj(Type t);
+
+/*
+ * Returns whether `t' is a WaitH<T> or ?WaitH<T> for some T.
+ *
+ * Note that this function returns false for Obj<=WaitHandle with no
+ * tracked inner type.
+ */
+bool is_specialized_wait_handle(const Type& t);
 
 /*
  * Returns the best known TCls subtype for an object type.
@@ -364,7 +413,7 @@ Type type_of_istype(IsTypeOp op);
  *
  * Pre: is_specialized_obj(t)
  */
-DObj dobj_of(Type t);
+DObj dobj_of(const Type& t);
 
 /*
  * Return the DCls structure for a strict subtype of TCls.

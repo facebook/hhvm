@@ -1286,7 +1286,6 @@ struct InterpStepper : boost::static_visitor<void> {
     popC();
     if (!t1.couldBe(TObj) && !t1.couldBe(TRes)) nothrow();
     unsetUnknownLocal();
-    killLocals();
   }
 
   void operator()(const bc::UnsetG& op) {
@@ -1833,11 +1832,13 @@ struct InterpStepper : boost::static_visitor<void> {
     push(TInitCell);
     push(TBool);
   }
+
   void operator()(const bc::AsyncESuspend&) {
-    killLocals();
+    unsetAllLocals();
     popC();
     push(TObj);
   }
+
   void operator()(const bc::AsyncWrapResult&) { popC(); push(TObj); }
   void operator()(const bc::AsyncWrapException&) { popC(); push(TObj); }
 
@@ -2938,6 +2939,10 @@ private:
     readUnknownLocals();
     FTRACE(2, "  unsetUnknownLocal\n");
     for (auto& l : m_state.locals) l = union_of(l, TUninit);
+  }
+
+  void unsetAllLocals() {
+    for (auto& l : m_state.locals) l = TUninit;
   }
 
 private:
@@ -4199,6 +4204,16 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     // Analyze every method in the class until we reach a fixed point
     // on the private property states.
     for (auto& f : ctx.cls->methods) {
+      if (f->isAsync && f->isGeneratorBody) {
+        /*
+         * Inner-bodies of async functions don't need to have their
+         * inner body analyzed for class analysis, because it is
+         * required to do the same thing as the eager-execution
+         * version.
+         */
+        continue;
+      }
+
       methodResults.push_back(
         do_analyze(
           index,

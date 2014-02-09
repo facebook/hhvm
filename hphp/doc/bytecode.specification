@@ -237,6 +237,13 @@ the outer function represents "eager execution" of the async function, and the
 inner function is used when "suspended execution" is necessary (i.e. if it does
 an await on something that is not yet available).
 
+Both functions are required to 'have the same effects', except one works in a
+suspended mode. The inner body must start with UnpackCont, followed by a
+switch. Each switch target must exactly correspond to a section of the outer
+function that lies between two await points. Other than the bytecode used to
+compile await expressions, this switch, and returns, the bodies must consist of
+the same bytecode instructions.
+
 Async function closures are implemented the same way, but importantly the
 "eager execution" function will be the __invoke function on a closure subclass.
 

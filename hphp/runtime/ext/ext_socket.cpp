@@ -373,9 +373,15 @@ bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
     return false;
   }
 
+  // Force socket stream_type to "generic_socket" to match PHP's behavior.
+  Socket *sockA = new Socket(fds_array[0], domain);
+  sockA->forceStreamTypeGeneric();
+  Socket *sockB = new Socket(fds_array[1], domain);
+  sockB->forceStreamTypeGeneric();
+
   Array ret;
-  ret.set(0, Resource(new Socket(fds_array[0], domain)));
-  ret.set(1, Resource(new Socket(fds_array[1], domain)));
+  ret.set(0, Resource(sockA));
+  ret.set(1, Resource(sockB));
   fd = ret;
   return true;
 }

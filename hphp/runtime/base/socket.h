@@ -78,6 +78,8 @@ public:
 
   bool setBlocking(bool blocking);
 
+  // Forces getStreamType() to report "stream_type" as "generic_socket".
+  void forceStreamTypeGeneric();
   
   std::string getAddress() const { return m_address; }
   int         getPort() const    { return m_port; }
@@ -91,6 +93,8 @@ protected:
 
   int m_timeout; // in micro-seconds;
   bool m_timedOut;
+
+  bool m_generic;
 
   int64_t m_bytesSent;
 

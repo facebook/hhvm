@@ -930,8 +930,8 @@ class ReflectionClass implements Reflector {
       $this->info = self::fetch_recur($this->obj ?: $this->name);
       $this->info['properties'] += $this->info['private_properties'];
 
-      //Populate the case-insensitive list of methods, so that we can use
-      //getMethod with case-insensitive method identifiers.
+      // Populate the case-insensitive list of methods, so that we can use
+      // getMethod with case-insensitive method identifiers.
       $this->caseInsensitiveMethodMap = array();
       foreach ($this->info['methods'] as $key => $value) {
         $this->caseInsensitiveMethodMap[strtolower($key)] = $key;

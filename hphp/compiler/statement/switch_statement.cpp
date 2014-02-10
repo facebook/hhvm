@@ -74,7 +74,7 @@ void SwitchStatement::analyzeProgram(AnalysisResultPtr ar) {
       m_exp->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr exp = dynamic_pointer_cast<SimpleVariable>(m_exp);
     if (exp && exp->getSymbol() && exp->getSymbol()->isClassName()) {
-      // Mark some classes as volitle since the name is used in switch
+      // Mark some classes as volatile since the name is used in switch
       for (int i = 0; i < m_cases->getCount(); i++) {
         CaseStatementPtr stmt =
           dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);

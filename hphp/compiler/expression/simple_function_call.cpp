@@ -393,7 +393,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         (m_type == FunType::Define ||
          m_type == FunType::Defined ||
          m_type == FunType::FunctionExists ||
-         m_type == FunType::FBCallUserFuncSafe ||
          m_type == FunType::ClassExists ||
          m_type == FunType::InterfaceExists) &&
         m_params && m_params->getCount() >= 1) {
@@ -441,7 +440,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
               }
               break;
             }
-            case FunType::FBCallUserFuncSafe:
             case FunType::FunctionExists:
               {
                 FunctionScopePtr func = ar->findFunction(Util::toLower(symbol));
@@ -861,14 +859,12 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   if (!m_class && m_className.empty() &&
       (m_type == FunType::Define ||
        m_type == FunType::Defined ||
-       m_type == FunType::FBCallUserFuncSafe ||
        m_type == FunType::FunctionExists ||
        m_type == FunType::ClassExists ||
        m_type == FunType::InterfaceExists) &&
       m_params &&
       (m_type == FunType::Define ?
        unsigned(m_params->getCount() - 2) <= 1u :
-       m_type == FunType::FBCallUserFuncSafe ? m_params->getCount() >= 1 :
        m_params->getCount() == 1)) {
     ExpressionPtr value = (*m_params)[0];
     if (value->isScalar()) {
@@ -946,15 +942,13 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             }
             break;
           }
-          case FunType::FBCallUserFuncSafe:
           case FunType::FunctionExists: {
             const std::string &lname = Util::toLower(symbol);
             if (Option::DynamicInvokeFunctions.find(lname) ==
                 Option::DynamicInvokeFunctions.end()) {
               FunctionScopePtr func = ar->findFunction(lname);
               if (!func) {
-                if (m_type == FunType::FunctionExists &&
-                    Option::WholeProgram) {
+                if (Option::WholeProgram) {
                   return CONSTANT("false");
                 }
                 break;
@@ -962,7 +956,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
               if (func->isUserFunction()) {
                 func->setVolatile();
               }
-              if (!func->isVolatile() && m_type == FunType::FunctionExists) {
+              if (!func->isVolatile()) {
                 return CONSTANT("true");
               }
             }
@@ -1429,7 +1423,6 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
             error = !func;
             return SimpleFunctionCallPtr();
           }
-          if (func->isUserFunction()) func->setVolatile();
           if (testOnly < 0) return SimpleFunctionCallPtr();
           ExpressionListPtr p2;
           if (testOnly) {
@@ -1486,9 +1479,6 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           }
           if (cls->isRedeclaring()) {
             cls = call->getScope()->findExactClass(cls);
-          } else if (!cls->isVolatile() && cls->isUserClass() &&
-                     !ar->checkClassPresent(call, sclass)) {
-            cls->setVolatile();
           }
           if (!cls) {
             return SimpleFunctionCallPtr();

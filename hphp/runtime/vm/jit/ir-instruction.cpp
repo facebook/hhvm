@@ -178,42 +178,6 @@ bool IRInstruction::isPassthrough() const {
 }
 
 /*
- * Returns true if the instruction loads into a SSATmp representing a
- * PHP value (a subtype of Gen).  Note that this function returns
- * false for instructions that load internal meta-data, such as Func*,
- * Class*, etc.
- */
-bool IRInstruction::isLoad() const {
-  switch (m_op) {
-    case LdStack:
-    case LdLoc:
-    case LdMem:
-    case LdProp:
-    case LdElem:
-    case LdPackedArrayElem:
-    case LdRef:
-    case LdThis:
-    case LdStaticLocCached:
-    case LookupCns:
-    case LookupClsCns:
-    case CGetProp:
-    case VGetProp:
-    case VGetPropStk:
-    case ArrayGet:
-    case MapGet:
-    case CGetElem:
-    case VGetElem:
-    case VGetElemStk:
-    case ArrayIdx:
-    case GenericIdx:
-      return true;
-
-    default:
-      return false;
-  }
-}
-
-/*
  * Returns true if the instruction does nothing but load a PHP value from
  * memory, possibly with some straightforward computation beforehand to decide
  * where the load should come from. This specifically excludes opcodes such as
@@ -229,45 +193,6 @@ bool IRInstruction::isRawLoad() const {
     case LdPackedArrayElem:
     case Unbox:
       return true;
-
-    default:
-      return false;
-  }
-}
-
-bool IRInstruction::storesCell(uint32_t srcIdx) const {
-  // If this function returns true for an operand, then the register
-  // allocator may give it an XMM register, and the instruction
-  // will store the whole 16 bytes into memory.  Therefore it's
-  // important *not* to return true if the TypedValue.m_aux field
-  // has important data.  This is the case for HphpArray elements,
-  // Map elements, and RefData inner values.  We don't have StMem
-  // in here since it sometimes stores to RefDatas.
-  switch (m_op) {
-    case StRetVal:
-    case StLoc:
-    case StLocNT:
-      return srcIdx == 1;
-
-    case StProp:
-    case StElem:
-      return srcIdx == 2;
-
-    case ArraySet:
-    case MapSet:
-      return srcIdx == 3;
-
-    case SpillStack:
-      return srcIdx >= 2 && srcIdx < numSrcs();
-
-    case Call:
-      return srcIdx >= 3 && srcIdx < numSrcs();
-
-    case CallBuiltin:
-      return srcIdx >= 1 && srcIdx < numSrcs();
-
-    case FunctionExitSurpriseHook:
-      return srcIdx == 2;
 
     default:
       return false;

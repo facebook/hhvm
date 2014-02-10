@@ -418,7 +418,7 @@ void srcConstraints(IRInstruction& inst, int i, SSATmp* src, Interval* ivl,
       ivl->prefer &= abi.simd;
       return;
     }
-    if (inst.storesCell(i) && src->numWords() == 2) {
+    if (storesCell(inst, i) && src->numWords() == 2) {
       ivl->prefer &= abi.simd;
       return;
     }
@@ -435,7 +435,7 @@ void dstConstraints(IRInstruction& inst, int i, SSATmp* dst, Interval* ivl,
       ivl->prefer &= abi.simd;
       return;
     }
-    if (inst.isLoad() && !inst.isControlFlow() && dst->numWords() == 2) {
+    if (loadsCell(inst.op()) && !inst.isControlFlow() && dst->numWords() == 2) {
       ivl->prefer &= abi.simd;
       if (!(ivl->allow & ivl->prefer).empty()) {
         // we prefer simd, but allow gp and simd, so restrict allow to just

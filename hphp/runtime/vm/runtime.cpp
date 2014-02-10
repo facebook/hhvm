@@ -157,16 +157,27 @@ concat_is(int64_t v1, StringData* v2) {
  * concat_si will incRef the output string
  * and decref its first argument
  */
-StringData*
-concat_si(StringData* v1, int64_t v2) {
+StringData* concat_si(StringData* v1, int64_t v2) {
   char intbuf[21];
-  // Convert the int to a string
   auto const s2 = conv_10(v2, intbuf + sizeof(intbuf));
-  StringSlice s1 = v1->slice();
-  StringData* ret = StringData::Make(s1, s2);
-  ret->incRefCount();
-  decRefStr(v1);
-  return ret;
+  if (v1->hasMultipleRefs()) {
+    auto const s1 = v1->slice();
+    auto const ret = StringData::Make(s1, s2);
+    ret->setRefCount(1);
+    // Because v1->getCount() is greater than 1, we know we will never
+    // have to release the string here
+    v1->decRefCount();
+    return ret;
+  }
+
+  auto const newV1 = v1->append(s2);
+  if (UNLIKELY(newV1 != v1)) {
+    assert(v1->getCount() == 1);
+    v1->release();
+    newV1->incRefCount();
+    return newV1;
+  }
+  return v1;
 }
 
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,

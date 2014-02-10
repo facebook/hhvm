@@ -401,6 +401,10 @@ norepo_tests = (
     '/tests/lang/bug17115.php',
     '/tests/lang/bug22690.php',
     '/tests/lang/bug24926.php',
+
+    # This creates an interface with the same name as a builtin, which
+    # hphpc doesn't correctly support AttrUnique flags on.
+    '/Zend/tests/inter_06.php',
 )
 
 # Random other files that zend wants

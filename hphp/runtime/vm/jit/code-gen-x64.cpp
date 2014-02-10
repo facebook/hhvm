@@ -502,8 +502,7 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
   // can't generate CMP instructions correctly for anything that isn't
   // a bool or a numeric, and we can't mix bool/numerics because
   // -1 == true in PHP, but not in HHIR binary representation
-  if (!((src1Type == Type::Int && src2Type == Type::Int) ||
-        ((src1Type == Type::Int || src1Type == Type::Dbl) &&
+  if (!(((src1Type == Type::Int || src1Type == Type::Dbl) &&
          (src2Type == Type::Int || src2Type == Type::Dbl)) ||
         (src1Type == Type::Bool && src2Type == Type::Bool) ||
         (src1Type == Type::Cls && src2Type == Type::Cls))) {
@@ -524,7 +523,7 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
       // TODO: use compare with immediate or make sure simplifier
       // canonicalizes this so that constant is src2
       srcReg1 = m_rScratch;
-      m_as.      mov_imm64_reg(src1->getValRawInt(), srcReg1);
+      m_as.      movq (src1->getValRawInt(), srcReg1);
     }
     if (src2->isConst()) {
       if (src1Type <= Type::Bool) {
@@ -541,6 +540,28 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
         m_as.    cmpq (srcReg2, srcReg1);
       }
     }
+  }
+}
+
+void CodeGenerator::emitCompareI(SSATmp* src1, SSATmp* src2) {
+  assert(src1->type() <= Type::Int && src2->type() <= Type::Int);
+
+  auto srcReg1 = curOpd(src1).reg();
+  auto srcReg2 = curOpd(src2).reg();
+
+  // Note: when both src1 and src2 are constants, we should transform the
+  // branch into an unconditional jump earlier in the IR.
+  if (src1->isConst()) {
+    // TODO: #3626251 lets us remove this case.
+    srcReg1 = m_rScratch;
+    m_as.    movq(src1->getValRawInt(), srcReg1);
+  }
+  if (src2->isConst()) {
+    m_as.    cmpq(src2->getValRawInt(), srcReg1);
+  } else {
+    // Note the reverse syntax in the assembler.
+    // This cmp will compute srcReg1 - srcReg2
+    m_as.    cmpq(srcReg2, srcReg1);
   }
 }
 
@@ -669,6 +690,11 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
   emitFwdJcc(opToConditionCode(inst->op()), inst->taken());
 }
 
+void CodeGenerator::cgJccI(IRInstruction* inst) {
+  emitCompareI(inst->src(0), inst->src(1));
+  emitFwdJcc(opToConditionCode(inst->op()), inst->taken());
+}
+
 void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
   emitCompare(inst->src(0), inst->src(1));
@@ -676,20 +702,60 @@ void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
                  inst->extra<ReqBindJccData>());
 }
 
-#define X(x)                                                                \
-  void CodeGenerator::cgReqBind##x (IRInstruction* i) { cgReqBindJcc(i);  } \
-  void CodeGenerator::cgSideExit##x(IRInstruction* i) { cgSideExitJcc(i); } \
-  void CodeGenerator::cg##x        (IRInstruction* i) { cgJcc(i);         }
-X(JmpGt);
-X(JmpGte);
-X(JmpLt);
-X(JmpLte);
-X(JmpEq);
-X(JmpNeq);
-X(JmpSame);
-X(JmpNSame);
+void CodeGenerator::cgReqBindJccI(IRInstruction* inst) {
+  // TODO(#2404427): prepareForTestAndSmash?
+  emitCompareI(inst->src(0), inst->src(1));
+  emitReqBindJcc(opToConditionCode(inst->op()),
+                 inst->extra<ReqBindJccData>());
+}
 
-#undef X
+void CodeGenerator::cgJmpGt(IRInstruction* i)    { cgJcc(i); }
+void CodeGenerator::cgJmpGte(IRInstruction* i)   { cgJcc(i); }
+void CodeGenerator::cgJmpLt(IRInstruction* i)    { cgJcc(i); }
+void CodeGenerator::cgJmpLte(IRInstruction* i)   { cgJcc(i); }
+void CodeGenerator::cgJmpEq(IRInstruction* i)    { cgJcc(i); }
+void CodeGenerator::cgJmpNeq(IRInstruction* i)   { cgJcc(i); }
+void CodeGenerator::cgJmpSame(IRInstruction* i)  { cgJcc(i); }
+void CodeGenerator::cgJmpNSame(IRInstruction* i) { cgJcc(i); }
+
+void CodeGenerator::cgReqBindJmpGt(IRInstruction* i)    { cgReqBindJcc(i); }
+void CodeGenerator::cgReqBindJmpGte(IRInstruction* i)   { cgReqBindJcc(i); }
+void CodeGenerator::cgReqBindJmpLt(IRInstruction* i)    { cgReqBindJcc(i); }
+void CodeGenerator::cgReqBindJmpLte(IRInstruction* i)   { cgReqBindJcc(i); }
+void CodeGenerator::cgReqBindJmpEq(IRInstruction* i)    { cgReqBindJcc(i); }
+void CodeGenerator::cgReqBindJmpNeq(IRInstruction* i)   { cgReqBindJcc(i); }
+void CodeGenerator::cgReqBindJmpSame(IRInstruction* i)  { cgReqBindJcc(i); }
+void CodeGenerator::cgReqBindJmpNSame(IRInstruction* i) { cgReqBindJcc(i); }
+
+void CodeGenerator::cgSideExitJmpGt(IRInstruction* i)    { cgSideExitJcc(i); }
+void CodeGenerator::cgSideExitJmpGte(IRInstruction* i)   { cgSideExitJcc(i); }
+void CodeGenerator::cgSideExitJmpLt(IRInstruction* i)    { cgSideExitJcc(i); }
+void CodeGenerator::cgSideExitJmpLte(IRInstruction* i)   { cgSideExitJcc(i); }
+void CodeGenerator::cgSideExitJmpEq(IRInstruction* i)    { cgSideExitJcc(i); }
+void CodeGenerator::cgSideExitJmpNeq(IRInstruction* i)   { cgSideExitJcc(i); }
+void CodeGenerator::cgSideExitJmpSame(IRInstruction* i)  { cgSideExitJcc(i); }
+void CodeGenerator::cgSideExitJmpNSame(IRInstruction* i) { cgSideExitJcc(i); }
+
+void CodeGenerator::cgJmpGtI(IRInstruction* i)    { cgJccI(i); }
+void CodeGenerator::cgJmpGteI(IRInstruction* i)   { cgJccI(i); }
+void CodeGenerator::cgJmpLtI(IRInstruction* i)    { cgJccI(i); }
+void CodeGenerator::cgJmpLteI(IRInstruction* i)   { cgJccI(i); }
+void CodeGenerator::cgJmpEqI(IRInstruction* i)    { cgJccI(i); }
+void CodeGenerator::cgJmpNeqI(IRInstruction* i)   { cgJccI(i); }
+
+void CodeGenerator::cgReqBindJmpGtI(IRInstruction* i)    { cgReqBindJccI(i); }
+void CodeGenerator::cgReqBindJmpGteI(IRInstruction* i)   { cgReqBindJccI(i); }
+void CodeGenerator::cgReqBindJmpLtI(IRInstruction* i)    { cgReqBindJccI(i); }
+void CodeGenerator::cgReqBindJmpLteI(IRInstruction* i)   { cgReqBindJccI(i); }
+void CodeGenerator::cgReqBindJmpEqI(IRInstruction* i)    { cgReqBindJccI(i); }
+void CodeGenerator::cgReqBindJmpNeqI(IRInstruction* i)   { cgReqBindJccI(i); }
+
+void CodeGenerator::cgSideExitJmpGtI(IRInstruction* i)    { cgSideExitJccI(i); }
+void CodeGenerator::cgSideExitJmpGteI(IRInstruction* i)   { cgSideExitJccI(i); }
+void CodeGenerator::cgSideExitJmpLtI(IRInstruction* i)    { cgSideExitJccI(i); }
+void CodeGenerator::cgSideExitJmpLteI(IRInstruction* i)   { cgSideExitJccI(i); }
+void CodeGenerator::cgSideExitJmpEqI(IRInstruction* i)    { cgSideExitJccI(i); }
+void CodeGenerator::cgSideExitJmpNeqI(IRInstruction* i)   { cgSideExitJccI(i); }
 
 /**
  * Once the arg sources and dests are all assigned; emit moves and exchanges to
@@ -1652,6 +1718,7 @@ void CodeGenerator::cgCmpHelper(
   // If the types are the same and there is only one constant,
   // simplifyCmp has moved it to the right.
   if (src1->isConst()) {
+    // TODO: #3626251 will let us eliminate this punt.
     CG_PUNT(cgOpCmpHelper_const);
   }
 
@@ -1683,17 +1750,7 @@ void CodeGenerator::cgCmpHelper(
   //  or to a resource.
   // strings are canonicalized to the left, ints to the right
   else if (typeIsSON(type1) && typeIsSON(type2)) {
-    // the common case: int cmp int
-    if (type1 == Type::Int && type2 == Type::Int) {
-      if (src2->isConst()) {
-        m_as.cmpq (src2->getValInt(), src1Reg);
-      } else {
-        m_as.cmpq (src2Reg, src1Reg);
-      }
-      setFromFlags();
-    }
-
-    else if (type1 == Type::Dbl || type2 == Type::Dbl) {
+    if (type1 == Type::Dbl || type2 == Type::Dbl) {
       if ((type1 == Type::Dbl || type1 == Type::Int) &&
           (type2 == Type::Dbl || type2 == Type::Int)) {
         PhysReg srcReg1 = prepXMMReg(src1, m_as, curOpd(src1), rCgXMM0);
@@ -1743,8 +1800,9 @@ void CodeGenerator::cgCmpHelper(
         CG_PUNT(cgOpCmpHelper_ox);
       }
     }
-
-    else NOT_REACHED();
+    else {
+      CG_PUNT(cgOpCmpHelper_SON);
+    }
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1822,6 +1880,20 @@ void CodeGenerator::cgGte(IRInstruction* inst) {
 void CodeGenerator::cgGteX(IRInstruction* inst) {
   CG_OP_CMP(inst, setge, gte);
 }
+
+void CodeGenerator::emitCmpI(IRInstruction* inst, ConditionCode cc) {
+  auto dstReg = curOpd(inst->dst()).reg();
+  if (dstReg == InvalidReg) return;
+  emitCompareI(inst->src(0), inst->src(1));
+  m_as.setcc(cc, rbyte(dstReg));
+}
+
+void CodeGenerator::cgEqI(IRInstruction* inst)  { emitCmpI(inst, CC_E); }
+void CodeGenerator::cgNeqI(IRInstruction* inst) { emitCmpI(inst, CC_NE); }
+void CodeGenerator::cgLtI(IRInstruction* inst)  { emitCmpI(inst, CC_L); }
+void CodeGenerator::cgGtI(IRInstruction* inst)  { emitCmpI(inst, CC_G); }
+void CodeGenerator::cgLteI(IRInstruction* inst) { emitCmpI(inst, CC_LE); }
+void CodeGenerator::cgGteI(IRInstruction* inst) { emitCmpI(inst, CC_GE); }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Type check operators
@@ -4894,6 +4966,14 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
 void CodeGenerator::cgSideExitJcc(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
   emitCompare(inst->src(0), inst->src(1));
+  emitBindSideExit(m_mainCode, m_stubsCode,
+                   opToConditionCode(inst->op()),
+                   sk);
+}
+
+void CodeGenerator::cgSideExitJccI(IRInstruction* inst) {
+  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
+  emitCompareI(inst->src(0), inst->src(1));
   emitBindSideExit(m_mainCode, m_stubsCode,
                    opToConditionCode(inst->op()),
                    sk);

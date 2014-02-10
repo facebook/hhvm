@@ -351,6 +351,12 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case Lte:
   case Eq:
   case Neq:
+  case GtI:
+  case GteI:
+  case LtI:
+  case LteI:
+  case EqI:
+  case NeqI:
   case Same:
   case NSame:
     return simplifyCmp(opc, inst, src1, src2);
@@ -402,6 +408,12 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpLte:
   case JmpEq:
   case JmpNeq:
+  case JmpGtI:
+  case JmpGteI:
+  case JmpLtI:
+  case JmpLteI:
+  case JmpEqI:
+  case JmpNeqI:
   case JmpSame:
   case JmpNSame:
     return simplifyQueryJmp(inst);
@@ -1201,13 +1213,19 @@ SSATmp* Simplifier::simplifyShr(IRInstruction* inst) {
 template<class T, class U>
 static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   switch (opName) {
+  case GtI:
   case Gt:   return a > b;
+  case GteI:
   case Gte:  return a >= b;
+  case LtI:
   case Lt:   return a < b;
+  case LteI:
   case Lte:  return a <= b;
   case Same:
+  case EqI:
   case Eq:   return a == b;
   case NSame:
+  case NeqI:
   case Neq:  return a != b;
   default:
     not_reached();
@@ -1335,6 +1353,11 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
         return newInst(Eq, src1, cns(true));
       }
     }
+  }
+
+  // Lower to int-comparison if possible.
+  if (!isIntQueryOp(opName) && type1 <= Type::Int && type2 <= Type::Int) {
+    return newInst(queryToIntQueryOp(opName), src1, src2);
   }
 
   // ---------------------------------------------------------------------

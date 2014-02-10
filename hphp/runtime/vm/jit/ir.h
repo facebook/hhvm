@@ -165,7 +165,6 @@ class FailedCodeGen : public std::runtime_error {
  *     S(t1,...,tn)  source must be a subtype of {t1|..|tn}
  *     C(type)       source must be a constant, and subtype of type
  *     CStr          same as C(StaticStr)
- *     SNumInt       same as S(Int,Bool)
  *     SNum          same as S(Int,Bool,Dbl)
  *     SSpills       SpillStack's variadic source list
  *
@@ -303,6 +302,12 @@ O(Neq,                         D(Bool), S(Gen) S(Gen),                   C|N) \
 O(NeqX,                        D(Bool), S(Gen) S(Gen),                Er|C|N) \
 O(Same,                        D(Bool), S(Gen) S(Gen),                   C|N) \
 O(NSame,                       D(Bool), S(Gen) S(Gen),                   C|N) \
+O(GtI,                         D(Bool), S(Int) S(Int),                     C) \
+O(GteI,                        D(Bool), S(Int) S(Int),                     C) \
+O(LtI,                         D(Bool), S(Int) S(Int),                     C) \
+O(LteI,                        D(Bool), S(Int) S(Int),                     C) \
+O(EqI,                         D(Bool), S(Int) S(Int),                     C) \
+O(NeqI,                        D(Bool), S(Int) S(Int),                     C) \
 O(Floor,                        D(Dbl), S(Dbl),                            C) \
 O(Ceil,                         D(Dbl), S(Dbl),                            C) \
 O(InstanceOfBitmask,           D(Bool), S(Cls) CStr,                       C) \
@@ -319,11 +324,17 @@ O(JmpEq,                       D(None), S(Gen) S(Gen),                   B|E) \
 O(JmpNeq,                      D(None), S(Gen) S(Gen),                   B|E) \
 O(JmpSame,                     D(None), S(Gen) S(Gen),                   B|E) \
 O(JmpNSame,                    D(None), S(Gen) S(Gen),                   B|E) \
+O(JmpGtI,                      D(None), S(Int) S(Int),                   B|E) \
+O(JmpGteI,                     D(None), S(Int) S(Int),                   B|E) \
+O(JmpLtI,                      D(None), S(Int) S(Int),                   B|E) \
+O(JmpLteI,                     D(None), S(Int) S(Int),                   B|E) \
+O(JmpEqI,                      D(None), S(Int) S(Int),                   B|E) \
+O(JmpNeqI,                     D(None), S(Int) S(Int),                   B|E) \
 O(JmpInstanceOfBitmask,        D(None), S(Cls) CStr,                     B|E) \
 O(JmpNInstanceOfBitmask,       D(None), S(Cls) CStr,                     B|E) \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(JmpZero,                     D(None), SNum,                            B|E) \
-O(JmpNZero,                    D(None), SNum,                            B|E) \
+O(JmpZero,                     D(None), S(Int,Bool),                     B|E) \
+O(JmpNZero,                    D(None), S(Int,Bool),                     B|E) \
 O(Jmp,                         D(None), SUnk,                          B|T|E) \
 O(ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T|E) \
@@ -331,6 +342,12 @@ O(ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpLte,                    ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpEq,                     ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpNeq,                    ND, S(Gen) S(Gen),                   T|E) \
+O(ReqBindJmpGtI,                    ND, S(Int) S(Int),                   T|E) \
+O(ReqBindJmpGteI,                   ND, S(Int) S(Int),                   T|E) \
+O(ReqBindJmpLtI,                    ND, S(Int) S(Int),                   T|E) \
+O(ReqBindJmpLteI,                   ND, S(Int) S(Int),                   T|E) \
+O(ReqBindJmpEqI,                    ND, S(Int) S(Int),                   T|E) \
+O(ReqBindJmpNeqI,                   ND, S(Int) S(Int),                   T|E) \
 O(ReqBindJmpSame,                   ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpNSame,                  ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpInstanceOfBitmask,      ND, S(Cls) CStr,                     T|E) \
@@ -343,8 +360,14 @@ O(SideExitJmpLt,               D(None), S(Gen) S(Gen),                     E) \
 O(SideExitJmpLte,              D(None), S(Gen) S(Gen),                     E) \
 O(SideExitJmpEq,               D(None), S(Gen) S(Gen),                     E) \
 O(SideExitJmpNeq,              D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpSame,             D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpNSame,            D(None), S(Gen) S(Gen),                     E) \
+O(SideExitJmpGtI,              D(None), S(Int) S(Int),                     E) \
+O(SideExitJmpGteI,             D(None), S(Int) S(Int),                     E) \
+O(SideExitJmpLtI,              D(None), S(Int) S(Int),                     E) \
+O(SideExitJmpLteI,             D(None), S(Int) S(Int),                     E) \
+O(SideExitJmpEqI,              D(None), S(Int) S(Int),                     E) \
+O(SideExitJmpNeqI,             D(None), S(Int) S(Int),                     E) \
+O(SideExitJmpSame,             D(None), S(Int) S(Int),                     E) \
+O(SideExitJmpNSame,            D(None), S(Int) S(Int),                     E) \
 O(SideExitJmpInstanceOfBitmask,                                               \
                                D(None), S(Cls) CStr,                       E) \
 O(SideExitJmpNInstanceOfBitmask,                                              \
@@ -851,6 +874,16 @@ Opcode guardToAssert(Opcode opc);
  * negateable.
  */
 bool isQueryOp(Opcode opc);
+
+/*
+ * Return true if opc is an int comparison operator
+ */
+bool isIntQueryOp(Opcode opc);
+
+/*
+ * Return the int-query opcode for the given non-int-query opcode
+ */
+Opcode queryToIntQueryOp(Opcode opc);
 
 /*
  * A "fusable query op" is any instruction returning Type::Bool that

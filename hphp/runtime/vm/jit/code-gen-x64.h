@@ -244,6 +244,10 @@ private:
   void cgJcc(IRInstruction* inst);          // helper
   void cgReqBindJcc(IRInstruction* inst);   // helper
   void cgSideExitJcc(IRInstruction* inst);  // helper
+  void cgJccI(IRInstruction* inst);         // helper
+  void cgReqBindJccI(IRInstruction* inst);  // helper
+  void cgSideExitJccI(IRInstruction* inst); // helper
+  void emitCmpI(IRInstruction* inst, ConditionCode);
   void cgCmpHelper(IRInstruction* inst,
                    void (Asm::*setter)(Reg8),
                    int64_t (*str_cmp_str)(StringData*, StringData*),
@@ -259,6 +263,7 @@ private:
   void emitReqBindJcc(ConditionCode cc, const ReqBindJccData*);
 
   void emitCompare(SSATmp*, SSATmp*);
+  void emitCompareI(SSATmp*, SSATmp*);
   void emitTestZero(SSATmp*);
   bool emitIncDecHelper(SSATmp* dst, SSATmp* src1, SSATmp* src2,
                         void(Asm::*emitFunc)(Reg64));

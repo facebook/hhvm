@@ -2591,7 +2591,9 @@ public:
 void VMExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
   if (apcExtension::UseUncounted) {
-    Treadmill::WorkItem::enqueue(new FreedAPCHandle(std::move(m_apcHandles)));
+    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                  new FreedAPCHandle(std::move(m_apcHandles))));
+    m_apcHandles.clear();
   }
 }
 

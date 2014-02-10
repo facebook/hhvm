@@ -1042,7 +1042,7 @@ class FreeRequestStubTrigger : public Treadmill::WorkItem {
     if (tx64->freeRequestStub(m_stub) != true) {
       // If we can't free the stub, enqueue again to retry.
       TRACE(3, "FreeStubTrigger: write lease failed, requeueing %p\n", m_stub);
-      enqueue(new FreeRequestStubTrigger(m_stub));
+      enqueue(std::unique_ptr<WorkItem>(new FreeRequestStubTrigger(m_stub)));
     }
   }
 };
@@ -1505,7 +1505,8 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   }
 
   if (smashed && info.stubAddr) {
-    Treadmill::WorkItem::enqueue(new FreeRequestStubTrigger(info.stubAddr));
+    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                    new FreeRequestStubTrigger(info.stubAddr)));
   }
 
   return true;

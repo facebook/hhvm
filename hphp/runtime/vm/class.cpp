@@ -328,7 +328,8 @@ void Class::destroy() {
    * could call destroy
    */
   releaseRefs();
-  Treadmill::WorkItem::enqueue(new FreeClassTrigger(this));
+  Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                              new FreeClassTrigger(this)));
 }
 
 void Class::atomicRelease() {

@@ -4158,8 +4158,12 @@ AsyncESuspend <label id> <number of iterators>   [C:Obj]  ->  [C:Obj]
   function, and mark them uninitialized on the current frame. The object will
   store a reference to the associated resumable async function and a label %1
   to be used to resume the execution once the WaitHandle object given by $1 is
-  finished. If the $1 is not a WaitHandle, or is a WaitHandle that is already
-  finished, the behavior is undefined.
+  finished.
+
+  If $1 is not a WaitHandle, or is a WaitHandle that is already finished, the
+  behavior is undefined. This opcode must only occur in the outer functions of
+  generator body pairs used to implement async functions. The value this opcode
+  pushes on the stack must be passed to a RetC opcode.
 
 AsyncWrapResult   [C]  ->  [C:Obj]
 
@@ -4168,7 +4172,8 @@ AsyncWrapResult   [C]  ->  [C:Obj]
 AsyncWrapException   [C:Obj]  ->  [C:Obj]
 
   Wraps $1 into a StaticExceptionWaitHandle object. If $1 is not an Exception,
-  the behavior is undefined.
+  the behavior is undefined. The value this opcode pushes on the stack must be
+  passed to a RetC opcode.
 
 Basic statement transformations
 -------------------------------

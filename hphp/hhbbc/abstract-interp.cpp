@@ -706,6 +706,24 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::JmpNZ& op) { jmpImpl<true>(op); }
   void operator()(const bc::JmpZ& op)  { jmpImpl<false>(op); }
 
+  void group(const bc::AsyncAwait& await, const bc::JmpNZ& jmp) {
+    auto const t = topC();
+    if (!is_specialized_wait_handle(t) || is_opt(t)) {
+      return impl(await, jmp);
+    }
+    auto const inner = wait_handle_inner(t);
+    if (inner.subtypeOf(TBottom)) {
+      // It's always going to throw.
+      return impl(await, jmp);
+    }
+
+    popC();
+    push(wait_handle_inner(t));
+    m_propagate(*jmp.target, m_state);
+    popC();
+    push(t);
+  }
+
   template<class JmpOp>
   void group(const bc::IsTypeL& istype, const JmpOp& jmp) {
     if (istype.subop == IsTypeOp::Scalar) return impl(istype, jmp);
@@ -1876,20 +1894,38 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::ContStopped&) {}
   void operator()(const bc::ContHandle&)  { popC(); }
 
-  void operator()(const bc::AsyncAwait& op) {
+  void operator()(const bc::AsyncAwait&) {
+    // We handle this better if we manage to group the opcode.
     popC();
     push(TInitCell);
     push(TBool);
   }
 
-  void operator()(const bc::AsyncESuspend&) {
-    unsetAllLocals();
-    popC();
-    push(TObj);
+  void operator()(const bc::AsyncWrapResult&) {
+    auto const t = popC();
+    push(wait_handle(m_index, t));
   }
 
-  void operator()(const bc::AsyncWrapResult&) { popC(); push(TObj); }
-  void operator()(const bc::AsyncWrapException&) { popC(); push(TObj); }
+  void operator()(const bc::AsyncESuspend&) {
+    /*
+     * A suspended async function WaitHandle must end up returning
+     * whatever type we infer the eager function will return, so we
+     * don't want it to influence that type.  Using WaitH<Bottom>
+     * handles this, but note that it relies on the rule that the only
+     * thing you can do with the output of this opcode is pass it to
+     * RetC.
+     */
+    unsetAllLocals();
+    popC();
+    push(wait_handle(m_index, TBottom));
+  }
+
+  void operator()(const bc::AsyncWrapException&) {
+    // A wait handle which always throws when you join it is
+    // represented as a WaitH<Bottom>.
+    popC();
+    push(wait_handle(m_index, TBottom));
+  }
 
   void operator()(const bc::Strlen&) {
     auto const t1 = popC();
@@ -3552,6 +3588,18 @@ private:
       default: break;
       }
       break;
+    case Op::AsyncAwait:
+      switch (o2) {
+      /*
+       * Note: AsyncAwait is in practice always followed by JmpNZ with
+       * the current async function implementation.  We could support
+       * JmpZ, but this is not easy to test, and we'd rather hit an
+       * assert here if we change emission to start doing this.
+       */
+      case Op::JmpNZ:  return group(st, it, it[0].AsyncAwait, it[1].JmpNZ);
+      case Op::JmpZ:   always_assert(!"who is generating this code?");
+      default: break;
+      }
     default: break;
     }
 

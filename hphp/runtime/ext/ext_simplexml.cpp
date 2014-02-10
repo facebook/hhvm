@@ -1392,7 +1392,7 @@ Array c_SimpleXMLElement::t_getdocnamespaces(bool recursive /* = false */,
                                              bool from_root /* = true */) {
   xmlNodePtr node =
     from_root ? xmlDocGetRootElement(document.getTyped<XmlDocWrapper>()->doc) :
-                node;
+                this->node;
   Array ret = Array::Create();
   sxe_add_registered_namespaces(this, node, recursive, ret);
   return ret;

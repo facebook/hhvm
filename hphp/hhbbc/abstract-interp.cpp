@@ -1915,7 +1915,7 @@ struct InterpStepper : boost::static_visitor<void> {
      * thing you can do with the output of this opcode is pass it to
      * RetC.
      */
-    unsetAllLocals();
+    unsetNamedLocals();
     popC();
     push(wait_handle(m_index, TBottom));
   }
@@ -3039,8 +3039,12 @@ private:
     for (auto& l : m_state.locals) l = union_of(l, TUninit);
   }
 
-  void unsetAllLocals() {
-    for (auto& l : m_state.locals) l = TUninit;
+  void unsetNamedLocals() {
+    for (auto i = size_t{0}; i < m_state.locals.size(); ++i) {
+      if (m_ctx.func->locals[i]->name) {
+        m_state.locals[i] = TUninit;
+      }
+    }
   }
 
 private:

@@ -4153,12 +4153,12 @@ AsyncAwait   [C]  ->  [C C:Bool]
 AsyncESuspend <label id> <number of iterators>   [C:Obj]  ->  [C:Obj]
 
   Suspends an eagerly executed async function into an AsyncFunctionWaitHandle
-  object. The AsyncFunctionWaitHandle object will capture all defined local
+  object. The AsyncFunctionWaitHandle object will capture all named local
   variables and the first %2 iterators in the current eagerly executed async
-  function, and mark them uninitialized on the current frame. The object will
-  store a reference to the associated resumable async function and a label %1
-  to be used to resume the execution once the WaitHandle object given by $1 is
-  finished.
+  function, and mark them uninitialized on the current frame. Unnamed locals
+  are not affected. The object will store a reference to the associated
+  resumable async function and a label %1 to be used to resume the execution
+  once the WaitHandle object given by $1 is finished.
 
   If $1 is not a WaitHandle, or is a WaitHandle that is already finished, the
   behavior is undefined. This opcode must only occur in the outer functions of

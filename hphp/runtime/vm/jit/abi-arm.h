@@ -103,8 +103,8 @@ const RegSet kCallerSaved = RegSet()
   | RegSet(vixl::x13)
   | RegSet(vixl::x14)
   | RegSet(vixl::x15)
-  // x16 = rHostCallReg
-  | RegSet(vixl::x17)
+  // x16 = rHostCallReg, used as ip0/tmp0 by MacroAssembler
+  // x17 = used as ip1/tmp1 by MacroAssembler
   | RegSet(vixl::x18)
   ;
 

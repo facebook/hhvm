@@ -4090,13 +4090,9 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
 
   int64_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
   for (uint32_t i = 0; i < numSpillSrcs; ++i) {
+    assert(spillVals[i]->type() != Type::None);
     const int64_t offset = i * sizeof(Cell) + adjustment;
-    auto* val = spillVals[i];
-    if (val->type() == Type::None) {
-      // The simplifier detected that this store was redundnant.
-      continue;
-    }
-    cgStore(spReg[offset], val);
+    cgStore(spReg[offset], spillVals[i]);
   }
   emitAdjustSp(spReg, dstReg, adjustment);
 }

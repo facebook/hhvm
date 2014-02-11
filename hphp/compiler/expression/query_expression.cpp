@@ -100,7 +100,7 @@ void QueryExpression::doRewrites(AnalysisResultPtr ar,
   // into a query (unless already cached).
   std::ostringstream serialized;
   CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
-  cg.setAstClassPrefix("Code");
+  cg.setAstClassPrefix("HH\\CodeModel\\");
   qe->outputCodeModel(cg);
   std::string s(serialized.str().c_str(), serialized.str().length());
   m_querystr = makeStaticString(s);

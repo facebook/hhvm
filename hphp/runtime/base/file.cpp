@@ -144,7 +144,7 @@ Variant File::Open(const String& filename, const String& mode,
     file->m_name = filename.data();
     file->m_mode = mode.data();
     file->m_streamContext = rcontext;
-    return Resource(file);
+    return Variant(file);
   }
   return false;
 }

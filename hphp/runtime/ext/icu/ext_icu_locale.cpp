@@ -678,8 +678,17 @@ void Intl::IntlExtension::initLocale() {
   ULOC_CONST(GRANDFATHERED_LANG_TAG, GRANDFATHERED);
   ULOC_CONST(PRIVATE_TAG,            LOC_PRIVATE);
 
-
 #undef ULOC_CONST
+
+#define ULOC_LOCALE_CONST(cns) \
+  Native::registerConstant<KindOfInt64>\
+    (makeStaticString("ULOC_" #cns), ULOC_##cns); \
+  Native::registerClassConstant<KindOfInt64>\
+    (s_Locale.get(), makeStaticString(#cns), ULOC_##cns);
+
+  ULOC_LOCALE_CONST(ACTUAL_LOCALE);
+  ULOC_LOCALE_CONST(VALID_LOCALE);
+#undef ULOC_LOCALE_CONST
 
   loadSystemlib("icu_locale");
 }

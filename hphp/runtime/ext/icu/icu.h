@@ -132,7 +132,11 @@ class IntlResourceData : public SweepableResourceData {
   }
 
   String getErrorMessage() const {
-    return m_error.custom_error_message;
+    auto errorName = u_errorName(m_error.code);
+    if (m_error.custom_error_message.empty()) {
+      return errorName;
+    }
+    return m_error.custom_error_message + ": " + errorName;
   }
 
   intl_error m_error;
@@ -205,6 +209,7 @@ class IntlExtension : public Extension {
     initTimeZone();
     initIterator();
     initDateFormatter();
+    initCalendar();
   }
 
  private:
@@ -223,6 +228,7 @@ class IntlExtension : public Extension {
   void initTimeZone();
   void initIterator();
   void initDateFormatter();
+  void initCalendar();
 };
 
 } // namespace Intl

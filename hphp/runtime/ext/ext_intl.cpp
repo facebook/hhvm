@@ -229,7 +229,7 @@ String c_Collator::t_geterrormessage() {
 
 String c_Collator::t_getlocale(int64_t type /* = 0 */) {
   if (!m_ucoll) {
-    raise_warning("getlocale called on uninitialized Collator object");
+    raise_error("getlocale called on uninitialized Collator object");
     return "";
   }
   m_errcode.clear();

@@ -5634,14 +5634,6 @@
             "type": "Int64"
         },
         {
-            "name": "ULOC_ACTUAL_LOCALE",
-            "value": 0
-        },
-        {
-            "name": "ULOC_VALID_LOCALE",
-            "value": 1
-        },
-        {
             "name": "UNKNOWN_TYPE",
             "value": 999998
         },

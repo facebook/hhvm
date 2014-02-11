@@ -19,6 +19,10 @@ Object IntlIterator::wrap() {
     return def; \
   }
 
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
+UOBJECT_DEFINE_RTTI_IMPLEMENTATION(BugStringCharEnumeration)
+#endif
+
 //////////////////////////////////////////////////////////////////////////////
 // class IntlIterator
 
@@ -28,9 +32,8 @@ static Variant HHVM_METHOD(IntlIterator, current) {
 }
 
 static Variant HHVM_METHOD(IntlIterator, key) {
-  // Current uses of IntlIterator don't use key,
-  // but reserve the calling semantics for now.
-  return uninit_null();
+  II_GET(data, this_, false);
+  return data->key();
 }
 
 static Variant HHVM_METHOD(IntlIterator, next) {

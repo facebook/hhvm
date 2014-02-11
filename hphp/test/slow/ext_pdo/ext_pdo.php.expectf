@@ -1,0 +1,52 @@
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+int(0)
+array(2) {
+  ["bar"]=>
+  string(3) "ABC"
+  [0]=>
+  string(3) "ABC"
+}
+int(1)
+array(2) {
+  ["bar"]=>
+  string(3) "DEF"
+  [0]=>
+  string(3) "DEF"
+}
+int(0)
+array(2) {
+  ["bar"]=>
+  string(3) "ABC"
+  [0]=>
+  string(3) "ABC"
+}
+int(1)
+array(2) {
+  ["bar"]=>
+  string(3) "DEF"
+  [0]=>
+  string(3) "DEF"
+}
+array(2) {
+  [0]=>
+  string(3) "ABC"
+  [1]=>
+  string(3) "DEF"
+}
+object(MyShadyObject)#10 (1) {
+  ["bar"]=>
+  string(3) "ABC"
+}
+object(MyShadyObject)#11 (1) {
+  ["bar"]=>
+  string(3) "DEF"
+}
+HipHop Warning: SQLSTATE[HY000]: General error: fetch mode requires the object parameter in %s/ext_pdo/ext_pdo.php on line %d
+HipHop Warning: Invalid argument supplied for foreach() in %s/ext_pdo/ext_pdo.php on line %d

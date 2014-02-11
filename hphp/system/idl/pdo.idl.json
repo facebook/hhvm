@@ -212,6 +212,7 @@
                     "name": "query",
                     "desc": "PDO::query() executes an SQL statement in a single function call, returning the result set (if any) returned by the statement as a PDOStatement object.\n\nFor a query that you need to issue multiple times, you will realize better performance if you prepare a PDOStatement object using PDO::prepare() and issue the statement with multiple calls to PDOStatement::execute().\n\nIf you do not fetch all of the data in a result set before issuing your next call to PDO::query(), your call may fail. Call PDOStatement::closeCursor() to release the database resources associated with the PDOStatement object before issuing your next call to PDO::query().\n\nAlthough this function is only documented as having a single parameter, you may pass additional arguments to this function. They will be treated as though you called PDOStatement::setFetchMode() on the resultant statement object.",
                     "flags": [
+                        "VariableArguments"
                     ],
                     "return": {
                         "type": "Variant",

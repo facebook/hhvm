@@ -358,7 +358,7 @@ class PreClass : public AtomicCountable {
   }
 
   Func* lookupMethod(const StringData* methName) const {
-    Func* f = m_methods.lookupDefault(methName, 0);
+    Func* f = m_methods.lookupDefault(methName, nullptr);
     assert(f != nullptr);
     return f;
   }
@@ -692,7 +692,7 @@ struct Class : AtomicCountable {
   Slot traitsEndIdx() const   { return m_traitsEndIdx; }
 
   Func* lookupMethod(const StringData* methName) const {
-    return m_methods.lookupDefault(methName, 0);
+    return m_methods.lookupDefault(methName, nullptr);
   }
 
   bool isPersistent() const { return m_attrCopy & AttrPersistent; }

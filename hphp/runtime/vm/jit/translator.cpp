@@ -47,6 +47,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
@@ -4237,9 +4238,14 @@ Translator::translateRegion(const RegionDesc& region,
       try {
         m_irTrans->translateInstr(inst);
       } catch (const JIT::FailedIRGen& exn) {
-        FTRACE(1, "ir generation for {} failed with {}\n",
-               inst.toString(), exn.what());
-        always_assert(!toInterp.count(sk));
+        always_assert_log(
+          !toInterp.count(sk),
+          [&] {
+            std::ostringstream oss;
+            oss << folly::format("IR generation failed with {}\n", exn.what());
+            print(oss, m_irTrans->hhbcTrans().unit());
+            return oss.str();
+          });
         toInterp.insert(sk);
         return Retry;
       }
@@ -4263,9 +4269,15 @@ Translator::translateRegion(const RegionDesc& region,
     traceCodeGen();
     if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
   } catch (const JIT::FailedCodeGen& exn) {
-    FTRACE(1, "code generation failed with {}\n", exn.what());
     SrcKey sk{exn.vmFunc, exn.bcOff};
-    always_assert(!toInterp.count(sk));
+    always_assert_log(
+      !toInterp.count(sk),
+      [&] {
+        std::ostringstream oss;
+        oss << folly::format("code generation failed with {}\n", exn.what());
+        print(oss, m_irTrans->hhbcTrans().unit());
+        return oss.str();
+      });
     toInterp.insert(sk);
     return Retry;
   }

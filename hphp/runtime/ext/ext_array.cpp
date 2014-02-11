@@ -189,7 +189,12 @@ Variant f_array_combine(CVarRef keys, CVarRef values) {
   Array ret = ArrayData::Create();
   for (ArrayIter iter1(cell_keys), iter2(cell_values);
        iter1; ++iter1, ++iter2) {
-    ret.setWithRef(iter1.secondRefPlus(), iter2.secondRefPlus());
+    CVarRef key = iter1.secondRefPlus();
+    if (key.isInteger() || key.isString()) {
+      ret.setWithRef(key, iter2.secondRefPlus());
+    } else {
+      ret.setRef(key.toString(), iter2.secondRefPlus());
+    }
   }
   return ret;
 }

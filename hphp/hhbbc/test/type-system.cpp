@@ -1279,6 +1279,24 @@ TEST(Type, WaitH) {
   }
 }
 
+TEST(Type, FromHNIConstraint) {
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?resource")), TOptRes);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("resource")), TRes);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("bool")), TBool);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?bool")), TOptBool);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("int")), TInt);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("float")), TDbl);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?float")), TOptDbl);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("mixed")), TInitGen);
+
+  // These are conservative, but we're testing them that way.  If we
+  // make the function better later we'll remove the tests.
+  EXPECT_EQ(from_hni_constraint(makeStaticString("stdClass")), TGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?stdClass")), TGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("fooooo")), TGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("")), TGen);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

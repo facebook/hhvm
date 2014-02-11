@@ -4198,6 +4198,55 @@ FuncAnalysis do_analyze(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * In the case of HNI builtin classes, private properties are
+ * allowed to be mutated by native code, so we may not see all the
+ * modifications.
+ *
+ * We are allowed to assume the type annotation on the property is
+ * accurate, although nothing is currently checking that this is the
+ * case.  We handle this right now by doing inference as if it
+ * couldn't be affected by native code, then assert the inferred
+ * type is at least a subtype of the annotated type, and expanding
+ * it to be the annotated type if it is bigger.
+ */
+void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
+  auto relax_prop = [&] (const php::Prop& prop, PropState& propState) {
+    auto it = propState.find(prop.name);
+    if (it == end(propState)) return;
+
+    /*
+     * When HardTypeHints isn't on, we don't require the constraints
+     * to actually match, and relax all the HNI types to Gen.  (This
+     * is because extensions may wish to assign to properties after a
+     * typehint guard, which is going to fail without this flag on.)
+     */
+    auto const hniTy =
+      !options.HardTypeHints ? TGen : from_hni_constraint(prop.typeConstraint);
+    if (it->second.subtypeOf(hniTy)) {
+      it->second = hniTy;
+      return;
+    }
+
+    std::fprintf(
+      stderr,
+      "HNI class %s::%s inferred property type (%s) doesn't "
+        "match annotation\n",
+      clsAnalysis.ctx.cls->name->data(),
+      prop.name->data(),
+      show(it->second).c_str()
+    );
+    always_assert(!"HNI property type annotation was wrong");
+  };
+
+  for (auto& prop : clsAnalysis.ctx.cls->properties) {
+    relax_prop(prop, clsAnalysis.privateProperties);
+    relax_prop(prop, clsAnalysis.privateStatics);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -4248,6 +4297,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
   ClassAnalysis clsAnalysis(ctx);
   auto const associatedClosures = index.lookup_closures(ctx.cls);
+  auto const isHNIBuiltin       = ctx.cls->attrs & AttrBuiltin;
 
   /*
    * Initialize inferred private property types to their in-class
@@ -4263,21 +4313,37 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   for (auto& prop : ctx.cls->properties) {
     if (!(prop.attrs & AttrPrivate)) continue;
 
+    auto const cellTy = from_cell(prop.val);
+    if (isHNIBuiltin) {
+      auto const hniTy = from_hni_constraint(prop.typeConstraint);
+      if (!cellTy.subtypeOf(hniTy)) {
+        std::fprintf(stderr, "hni %s::%s has impossible type\n",
+                     ctx.cls->name->data(),
+                     prop.name->data());
+        always_assert(0 && "HNI systemlib has invalid type annotations");
+      }
+    }
+
     if (!(prop.attrs & AttrStatic)) {
-      auto t = loosen_statics(loosen_values(from_cell(prop.val)));
+      auto t = loosen_statics(loosen_values(cellTy));
       if (!is_closure(*ctx.cls) && t.subtypeOf(TUninit)) {
-        // For non-closure classes, a property of type KindOfUninit
-        // means that it has non-scalar initializer which will be set by
-        // a 86pinit method. For these classes, we want the initial type
-        // of the property to be the type set by the 86pinit method, so
-        // we set the type to TBottom.
-        // closures will not have an 86pinit body, but still may have
-        // a property of kind KindOfUninit. We don't want to touch those.
+        /*
+         * For non-closure classes, a property of type KindOfUninit
+         * means that it has non-scalar initializer which will be set
+         * by a 86pinit method.  For these classes, we want the
+         * initial type of the property to be the type set by the
+         * 86pinit method, so we set the type to TBottom.
+         *
+         * Closures will not have an 86pinit body, but still may have
+         * properties of kind KindOfUninit (they will later contain
+         * used variables or static locals for the closure body).  We
+         * don't want to touch those.
+         */
         t = TBottom;
       }
       clsAnalysis.privateProperties[prop.name] = t;
     } else {
-      auto t = from_cell(prop.val);
+      auto t = cellTy;
       if (t.subtypeOf(TUninit)) {
         // A property of type KindOfUninit means that it has non-scalar
         // initializer which will be set by an 86spinit method. For these
@@ -4378,6 +4444,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       }
     }
   }
+
+  if (isHNIBuiltin) expand_hni_prop_types(clsAnalysis);
 
   // For debugging, print the final state of the class analysis.
   FTRACE(2, "{}", [&] {

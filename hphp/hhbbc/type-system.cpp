@@ -587,6 +587,31 @@ Type from_DataType(DataType dt) {
   always_assert(0 && "dt in from_DataType didn't satisfy preconditions");
 }
 
+Type from_hni_constraint(SString s) {
+  if (!s) return TGen;
+
+  auto p   = s->data();
+  auto ret = TBottom;
+
+  if (*p == '?') {
+    ret = union_of(ret, TInitNull);
+    ++p;
+  }
+
+  if (!strcmp(p, "resource")) return union_of(ret, TRes);
+  if (!strcmp(p, "bool"))     return union_of(ret, TBool);
+  if (!strcmp(p, "int"))      return union_of(ret, TInt);
+  if (!strcmp(p, "float"))    return union_of(ret, TDbl);
+  if (!strcmp(p, "num"))      return union_of(ret, TNum);
+  if (!strcmp(p, "string"))   return union_of(ret, TStr);
+  if (!strcmp(p, "array"))    return union_of(ret, TArr);
+  if (!strcmp(p, "mixed"))    return TInitGen;
+
+  // It might be an object, or we might want to support type aliases
+  // in HNI at some point.  For now just be conservative.
+  return TGen;
+}
+
 Type union_of(Type a, Type b) {
   if (a.subtypeOf(b)) return b;
   if (b.subtypeOf(a)) return a;

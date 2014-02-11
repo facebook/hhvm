@@ -1109,7 +1109,7 @@ int FuncEmitter::parseUserAttributes(Attr &attrs) const {
  *  "ActRec": The internal function takes a fixed prototype
  *      TypedValue* funcname(ActRec *ar);
  *      Note that systemlib declaration must still be hack annotated
- *  "NoInjection": Do not include this fram in backtraces
+ *  "NoInjection": Do not include this frame in backtraces
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
  */

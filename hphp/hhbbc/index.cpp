@@ -1086,12 +1086,13 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
     {
       auto const mainType = [&]() -> const Type {
         switch (tc.underlyingDataType()) {
-        case KindOfString:        return TStr;
-        case KindOfStaticString:  return TStr;
-        case KindOfArray:         return TArr;
-        case KindOfInt64:         return TInt;
-        case KindOfBoolean:       return TBool;
-        case KindOfDouble:        return TDbl;
+        case KindOfString:       return TStr;
+        case KindOfStaticString: return TStr;
+        case KindOfArray:        return TArr;
+        case KindOfInt64:        return TInt;
+        case KindOfBoolean:      return TBool;
+        case KindOfDouble:       return TDbl;
+        case KindOfResource:     return TRes;
         case KindOfObject:
           /*
            * Type constraints only imply an object of a particular
@@ -1103,8 +1104,6 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
               : subObj(*rcls);
           }
           return TInitCell;
-        case KindOfResource: // Note, some day we may have resource hints.
-          break;
         default:
           break;
         }

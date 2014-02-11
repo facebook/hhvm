@@ -440,6 +440,14 @@ Type from_cell(Cell tv);
 Type from_DataType(DataType dt);
 
 /*
+ * Create a Type from a builtin type specification string.
+ *
+ * This is used for HNI class properties.  We assume that these are
+ * accurate.  s may be null.
+ */
+Type from_hni_constraint(SString s);
+
+/*
  * Make a type that represents values from either of the supplied
  * types.
  */

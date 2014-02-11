@@ -4967,7 +4967,26 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       m_as.cmpl(0, rData[FAST_REFCOUNT_OFFSET]);
       doJcc(CC_L);
     } else {
-      CG_PUNT(CheckType-known-srcType);
+      // We should only get here if this CheckType should've been simplified
+      // away but wasn't for some reason, so do a simple version of what it
+      // would've. Widen inner types first since CheckType ignores them.
+      if (srcType.maybeBoxed()) srcType |= Type::BoxedCell;
+      if (typeParam.maybeBoxed()) typeParam |= Type::BoxedCell;
+
+      if (srcType <= typeParam) {
+        // This will always succeed. Do nothing.
+      } else if (srcType.not(typeParam)) {
+        // This will always fail. Emit an unconditional jmp.
+        emitFwdJmp(m_as, inst->taken(), m_state);
+        return;
+      } else {
+        always_assert_log(
+          false,
+          [&] {
+            return folly::format("Bad src: {} and dst: {} types in '{}'",
+                                 srcType, typeParam, *inst).str();
+          });
+      }
     }
   }
 

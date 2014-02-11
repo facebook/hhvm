@@ -47,13 +47,13 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(SocketData, s_socket_data);
 
 Socket::Socket()
   : File(true), m_port(0), m_type(-1), m_error(0), m_eof(false), m_timeout(0),
-    m_timedOut(false), m_bytesSent(0) {
+    m_timedOut(false), m_bytesSent(0), m_generic(false) {
 }
 
 Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
                int port /* = 0 */, double timeout /* = 0 */)
   : File(true), m_port(port), m_type(type), m_error(0), m_eof(false),
-    m_timeout(0), m_timedOut(false), m_bytesSent(0) {
+    m_timeout(0), m_timedOut(false), m_bytesSent(0), m_generic(false) {
   if (address) m_address = address;
   m_fd = sockfd;
 
@@ -213,13 +213,58 @@ bool Socket::eof() {
 
 const StaticString
   s_timed_out("timed_out"),
-  s_blocked("blocked");
+  s_blocked("blocked"),
+  s_stream_type("stream_type");
+
+const char *Socket::getStreamType() const {
+  int result, type;
+  socklen_t len = sizeof(type);
+  result = getsockopt(m_fd, SOL_SOCKET, SO_TYPE, &type, &len);
+  if (result != 0) {
+    // getsockopt error.
+    return "";
+  }
+
+  // Work-around to match PHP's "generic_socket" for socketpair().
+  if (m_generic) {
+    return "generic_socket";
+  }
+
+  switch (m_type) {
+    case AF_INET:
+    case AF_INET6:
+    switch (type) {
+      case SOCK_STREAM:
+      return "tcp_socket";
+
+      case SOCK_DGRAM:
+      return "udp_socket";
+    }
+    break;
+
+    case AF_UNIX:
+    switch (type) {
+      case SOCK_STREAM:
+      return "unix_socket";
+
+      case SOCK_DGRAM:
+      return "udg_socket";     
+    }
+    break;
+  }
+  return "generic_socket";
+}
 
 Array Socket::getMetaData() {
   Array ret = File::getMetaData();
   ret.set(s_timed_out, m_timedOut);
   ret.set(s_blocked, (bool)(fcntl(m_fd, F_GETFL, 0) & O_NONBLOCK));
+  ret.set(s_stream_type, String(this->getStreamType()));
   return ret;
+}
+
+void Socket::forceStreamTypeGeneric() {
+  m_generic = true;
 }
 
 int64_t Socket::tell() {

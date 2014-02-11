@@ -1,0 +1,2 @@
+string(%i) "tcp_socke%s"
+string(%i) "udp_socket"

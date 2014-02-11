@@ -713,7 +713,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         String name = iter.second().toString();
         bool visible, accessible, unset;
         thiz->getProp(m_cls, name.get(), visible, accessible, unset);
-        if (accessible && !unset) {
+        if (!unset) {
           String propName = name;
           Slot propInd = m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
           if (accessible && propInd != kInvalidSlot) {

@@ -126,18 +126,18 @@ struct LocalId : IRExtraData {
 struct LocalData : LocalId {
   explicit LocalData(uint32_t id, SSATmp* src)
     : LocalId(id)
-    , valSrc(src)
+    , typeSrc(src)
   {}
 
   bool cseEquals(const LocalData& o) const {
-    return LocalId::cseEquals(o) && valSrc == o.valSrc;
+    return LocalId::cseEquals(o) && typeSrc == o.typeSrc;
   }
   size_t cseHash() const {
-    return hash_int64_pair(LocalId::cseHash(), int64_t(valSrc));
+    return hash_int64_pair(LocalId::cseHash(), int64_t(typeSrc));
   }
   std::string show() const;
 
-  SSATmp* valSrc;
+  SSATmp* typeSrc;
 };
 
 struct IterId : IRExtraData {

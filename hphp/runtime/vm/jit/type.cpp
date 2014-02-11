@@ -464,7 +464,10 @@ Type liveTVType(const TypedValue* tv) {
   assert(tv->m_type == KindOfClass || tvIsPlausible(*tv));
 
   if (tv->m_type == KindOfObject) {
-    return Type::Obj.specialize(tv->m_data.pobj->getVMClass());
+    Class* cls = tv->m_data.pobj->getVMClass();
+    // We only allow specialization on final classes for now.
+    if (cls && !(cls->attrs() & AttrFinal)) cls = nullptr;
+    return Type::Obj.specialize(cls);
   }
   if (tv->m_type == KindOfArray) {
     return Type::Arr.specialize(tv->m_data.parr->kind());

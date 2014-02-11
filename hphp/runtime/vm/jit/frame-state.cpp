@@ -228,7 +228,8 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
     case AssertLoc:
     case GuardLoc:
     case CheckLoc:
-      hook.refineLocalType(inst->extra<LocalId>()->locId, inst->typeParam());
+      hook.refineLocalType(inst->extra<LocalId>()->locId, inst->typeParam(),
+                           inst->dst());
       break;
 
     case CheckType: {
@@ -338,8 +339,7 @@ void FrameState::walkAllInlinedLocals(L body, bool skipThisFrame) const {
 void FrameState::forEachLocal(LocalFunc body) const {
   walkAllInlinedLocals(
   [&](uint32_t i, unsigned inlineIdx, const LocalState& local) {
-    auto* value = local.unsafe ? nullptr : local.value;
-    body(i, value);
+    body(i, local.value);
   });
 }
 
@@ -353,7 +353,7 @@ void FrameState::killLocalsForCall(LocalStateHook& hook,
   walkAllInlinedLocals(
   [&](uint32_t i, unsigned inlineIdx, const LocalState& local) {
     auto* value = local.value;
-    if (local.unsafe || !value || value->inst()->is(DefConst)) return;
+    if (!value || value->inst()->is(DefConst)) return;
 
     hook.killLocalForCall(i, inlineIdx, value);
   },
@@ -496,10 +496,9 @@ void FrameState::merge(Snapshot& state) {
     // This would be the place to insert phi nodes (jmps+deflabels) if we want
     // to avoid clearing state, which triggers a downstream reload.
     if (local.value != m_locals[i].value) local.value = nullptr;
+    if (local.typeSource != m_locals[i].typeSource) local.typeSource = nullptr;
 
     local.type = Type::unionOf(local.type, m_locals[i].type);
-    local.unsafe = local.unsafe || m_locals[i].unsafe;
-    local.written = local.written || m_locals[i].written;
   }
 
   // For now, we shouldn't be merging states with different inline states.
@@ -597,16 +596,16 @@ void FrameState::clear() {
 
 SSATmp* FrameState::localValue(uint32_t id) const {
   always_assert(id < m_locals.size());
-  return m_locals[id].unsafe ? nullptr : m_locals[id].value;
+  return m_locals[id].value;
 }
 
-SSATmp* FrameState::localValueSource(uint32_t id) const {
+SSATmp* FrameState::localTypeSource(uint32_t id) const {
   always_assert(id < m_locals.size());
   auto const& local = m_locals[id];
 
-  if (local.value) return local.value;
-  if (local.written) return nullptr;
-  return fp();
+  always_assert(!local.value || local.value == local.typeSource ||
+                local.typeSource->isA(Type::FramePtr));
+  return local.typeSource;
 }
 
 Type FrameState::localType(uint32_t id) const {
@@ -619,8 +618,7 @@ void FrameState::setLocalValue(uint32_t id, SSATmp* value) {
   always_assert(id < m_locals.size());
   m_locals[id].value = value;
   m_locals[id].type = value ? value->type() : Type::Gen;
-  m_locals[id].written = true;
-  m_locals[id].unsafe = false;
+  m_locals[id].typeSource = value;
 }
 
 void FrameState::refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {
@@ -628,9 +626,10 @@ void FrameState::refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {
   auto& local = m_locals[id];
   local.value = newVal;
   local.type = newVal->type();
+  local.typeSource = newVal;
 }
 
-void FrameState::refineLocalType(uint32_t id, Type type) {
+void FrameState::refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {
   always_assert(id < m_locals.size());
   auto& local = m_locals[id];
   if (type.isBoxed() && local.type.isBoxed()) {
@@ -638,17 +637,20 @@ void FrameState::refineLocalType(uint32_t id, Type type) {
     // intersect, since the inner type is really just a prediction.
     local.type = type;
   } else {
-    always_assert((local.type & type) != Type::Bottom);
+    if (local.type.not(type)) {
+      // Task #3705371: find out and fix whatever is triggering this.
+      TRACE_PUNT("Incompatible types in refineLocalType");
+    }
     local.type = local.type & type;
   }
+  local.typeSource = typeSource;
 }
 
 void FrameState::setLocalType(uint32_t id, Type type) {
   always_assert(id < m_locals.size());
   m_locals[id].value = nullptr;
   m_locals[id].type = type;
-  m_locals[id].written = true;
-  m_locals[id].unsafe = false;
+  m_locals[id].typeSource = nullptr;
 }
 
 /*
@@ -669,16 +671,16 @@ void FrameState::killLocalForCall(uint32_t id, unsigned inlineIdx,
                                   SSATmp* val) {
   auto& locs = locals(inlineIdx);
   always_assert(id < locs.size());
-  locs[id].unsafe = true;
+  locs[id].value = nullptr;
 }
 
 void FrameState::updateLocalRefValue(uint32_t id, unsigned inlineIdx,
                                      SSATmp* oldRef, SSATmp* newRef) {
   auto& local = locals(inlineIdx)[id];
-  assert(!local.unsafe);
   assert(local.value == oldRef);
   local.value = newRef;
   local.type  = newRef->type();
+  local.typeSource = newRef;
 }
 
 void FrameState::dropLocalInnerType(uint32_t id, unsigned inlineIdx) {

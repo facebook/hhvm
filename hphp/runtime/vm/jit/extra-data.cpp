@@ -22,7 +22,7 @@ namespace HPHP { namespace JIT {
 
 std::string LocalData::show() const {
   return folly::to<std::string>(LocalId::show(), ',',
-                                valSrc ? valSrc->toString() : "null");
+                                typeSrc ? typeSrc->toString() : "null");
 }
 
 std::string NewStructData::show() const {

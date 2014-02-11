@@ -268,7 +268,10 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
     return sr->getTopTranslation();
   }
   SKTRACE(1, args.m_sk, "retranslate\n");
+
   m_mode = profileSrcKey(args.m_sk) ? TransProfile : TransLive;
+  SCOPE_EXIT{ m_mode = TransInvalid; };
+
   return translate(args);
 }
 

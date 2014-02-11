@@ -114,8 +114,8 @@ struct IRBuilder {
 
   Type localType(uint32_t id, TypeConstraint tc);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
-  SSATmp* localValueSource(uint32_t id) const {
-    return m_state.localValueSource(id);
+  SSATmp* localTypeSource(uint32_t id) const {
+    return m_state.localTypeSource(id);
   }
   bool inlinedFrameSpansCall() const { return m_state.frameSpansCall(); }
 

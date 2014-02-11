@@ -1500,7 +1500,7 @@ D:StkPtr PassSP S0:StkPtr
   inlined functions. It is effectively the same as a nop as we currently use a
   specialized register for every stack pointer (#2288359).
 
-D:FramePtr PassSP S0:FramePtr
+D:FramePtr PassFP S0:FramePtr
 
   Alias a frame pointer to a different SSATmp (see PassSP).
 

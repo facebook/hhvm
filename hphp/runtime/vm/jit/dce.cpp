@@ -477,7 +477,8 @@ void eliminateDeadCode(IRUnit& unit) {
         continue;
       }
 
-      if (src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
+      if (RuntimeOption::EvalHHIRInlineFrameOpts &&
+          src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
         auto* root = frameRoot(srcInst);
         if (root->is(DefInlineFP)) {
           FTRACE(4, "adding use to {} from {}\n", *src, *inst);

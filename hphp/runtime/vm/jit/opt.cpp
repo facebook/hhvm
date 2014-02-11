@@ -125,9 +125,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
 
-  // XXX t3582470. hhir guard relaxation doesn't support Optimize translations
-  // right now.
-  if (RuntimeOption::EvalHHIRRelaxGuards && kind != TransOptimize) {
+  if (RuntimeOption::EvalHHIRRelaxGuards) {
     auto const simpleRelax = kind == TransProfile;
     auto changed = relaxGuards(unit, *irBuilder.guards(), simpleRelax);
     if (changed) finishPass("guard relaxation");

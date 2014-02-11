@@ -99,7 +99,7 @@ struct LocalStateHook {
                                    SSATmp* oldRef, SSATmp* newRef) {}
   virtual void dropLocalInnerType(uint32_t id, unsigned inlineIdx) {}
 
-  virtual void refineLocalType(uint32_t id, Type type) {}
+  virtual void refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {}
   virtual void setLocalType(uint32_t id, Type type) {}
 };
 
@@ -172,7 +172,7 @@ struct FrameState : private LocalStateHook {
 
   Type localType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
-  SSATmp* localValueSource(uint32_t id) const;
+  SSATmp* localTypeSource(uint32_t id) const;
 
   typedef std::function<void(SSATmp*, int32_t)> FrameFunc;
   // Call func for all enclosing frames, starting with the current one and
@@ -196,21 +196,19 @@ struct FrameState : private LocalStateHook {
     LocalState()
       : value(nullptr)
       , type(Type::Gen)
-      , unsafe(false)
-      , written(false)
+      , typeSource(nullptr)
     {}
 
     SSATmp* value; // The current value of the local. nullptr if unknown
     Type type;     // The current type of the local.
-    bool unsafe;   // true iff value is not safe to use at runtime. Currently
-                   // this only happens across a Call or CallArray instruction.
-    bool written;  // true iff the local has been written in this trace
+    SSATmp* typeSource; // The source of the currently known type: either the
+                        // current value, a FramePtr with a guard, or nullptr
+                        // if the value is new and unknown.
 
     bool operator==(const LocalState& b) const {
       return value == b.value &&
         type == b.type &&
-        unsafe == b.unsafe &&
-        written == b.written;
+        typeSource == b.typeSource;
     }
   };
   typedef smart::vector<LocalState> LocalVec;
@@ -227,7 +225,7 @@ struct FrameState : private LocalStateHook {
     bool thisAvailable;
     uint32_t stackDeficit;
     EvalStack evalStack;
-    smart::vector<LocalState> locals;
+    LocalVec locals;
     bool frameSpansCall;
     BCMarker curMarker;
     smart::vector<Snapshot> inlineSavedStates;
@@ -255,7 +253,7 @@ struct FrameState : private LocalStateHook {
   void updateLocalRefValue(uint32_t id, unsigned inlineIdx, SSATmp* oldRef,
                            SSATmp* newRef) override;
   void dropLocalInnerType(uint32_t id, unsigned inlineIdx) override;
-  void refineLocalType(uint32_t id, Type type) override;
+  void refineLocalType(uint32_t id, Type type, SSATmp* typeSource) override;
   void setLocalType(uint32_t id, Type type) override;
 
   LocalVec& locals(unsigned inlineIdx);
@@ -333,7 +331,7 @@ struct FrameState : private LocalStateHook {
   /*
    * m_locals tracks the current types and values of locals.
    */
-  smart::vector<LocalState> m_locals;
+  LocalVec m_locals;
 
   /*
    * m_inlineSavedStates holds snapshots of the caller(s)'s state while in an

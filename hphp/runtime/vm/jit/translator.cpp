@@ -229,7 +229,7 @@ Translator::liveType(const Cell* outer, const Location& l, bool specialize) {
   RuntimeType retval = RuntimeType(outerType, innerType);
   const Class *klass = nullptr;
   if (specialize) {
-    // Only infer the class/array kind if specialization requested
+    // Only record the class/array kind if specialization requested
     if (valueType == KindOfObject) {
       klass = valCell->m_data.pobj->getVMClass();
       if (klass != nullptr && (klass->attrs() & AttrFinal)) {
@@ -237,7 +237,10 @@ Translator::liveType(const Cell* outer, const Location& l, bool specialize) {
       }
     } else if (valueType == KindOfArray) {
       ArrayData::ArrayKind arrayKind = valCell->m_data.parr->kind();
-      retval = retval.setArrayKind(arrayKind);
+      // We currently only benefit from array specialization for packed arrays.
+      if (arrayKind == ArrayData::ArrayKind::kPackedKind) {
+        retval = retval.setArrayKind(arrayKind);
+      }
     }
   }
   return retval;
@@ -2629,11 +2632,12 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
         m_resolvedDeps[l] = dl;
       }
     } else {
-      // TODO: Once the region translator supports guard relaxation
-      //       (task #2598894), we can enable specialization for all modes.
-      const bool specialize = (RuntimeOption::EvalHHBCRelaxGuards ||
-                               RuntimeOption::EvalHHIRRelaxGuards) &&
-                              tx64->mode() == TransLive;
+      const bool specialize =
+        (tx64->mode() == TransLive    && (RuntimeOption::EvalHHBCRelaxGuards ||
+                                          RuntimeOption::EvalHHIRRelaxGuards))
+        ||
+        (tx64->mode() == TransProfile &&  RuntimeOption::EvalHHIRRelaxGuards);
+
       RuntimeType rtt = tx64->liveType(l, *liveUnit(), specialize);
       assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the
@@ -3779,9 +3783,7 @@ breakBB:
     }
   }
 
-  // translateRegion doesn't support guard relaxation/specialization yet
-  if (RuntimeOption::EvalHHBCRelaxGuards &&
-      m_mode != TransProfile && m_mode != TransOptimize) {
+  if (RuntimeOption::EvalHHBCRelaxGuards && m_mode == TransLive) {
     relaxDeps(t, tas);
   }
 
@@ -4054,12 +4056,6 @@ void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
          color(ANSI_COLOR_END));
 
   m_irTrans.reset(new JIT::IRTranslator(initBcOffset, initSpOffset, func));
-
-  // XXX t3582470: TransOptimize translations don't work with hhir guard
-  // relaxation yet.
-  if (m_mode == TransOptimize) {
-    m_irTrans->hhbcTrans().traceBuilder().setConstrainGuards(false);
-  }
 }
 
 void Translator::traceEnd() {

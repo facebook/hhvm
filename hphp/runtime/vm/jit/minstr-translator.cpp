@@ -649,14 +649,15 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
     // unboxing here, since all the generic helpers understand boxed bases.
     if (baseType.isBoxed()) {
       SSATmp* box = getBase(DataTypeSpecific);
+      Type innerType = baseType.innerType();
       assert(box->isA(Type::BoxedCell));
-      assert(baseType.innerType().isKnownDataType() ||
-             baseType.innerType().equals(Type::Cell));
+      assert(innerType.isKnownDataType() ||
+             innerType == Type::Cell || innerType == Type::InitCell);
 
       // Guard that the inner type hasn't changed. Even though we don't use the
       // unboxed value, some emit* methods change their behavior based on the
       // inner type.
-      auto inner = gen(LdRef, baseType.innerType(), failedRef, box);
+      auto inner = gen(LdRef, innerType, failedRef, box);
 
       // TODO(t2598894): We do this for consistency with the old guard
       // relaxation code, but may change it in the future.

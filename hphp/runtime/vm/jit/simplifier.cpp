@@ -562,8 +562,6 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   auto const oldType = src->type();
   auto const newType = inst->typeParam();
 
-  if (m_irb.typeMightRelax(src)) return nullptr;
-
   if (oldType.not(newType)) {
     /* This guard will always fail. Probably an incorrect prediction from the
      * frontend. We can't convert it to a Jmp because people may be relying on
@@ -581,6 +579,7 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
     return src;
   }
   if (newType < oldType) {
+    assert(!src->isConst());
     return nullptr;
   }
 

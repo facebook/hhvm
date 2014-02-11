@@ -78,7 +78,7 @@ void print(std::ostream& ostream, const IRUnit&,
            const LifetimeInfo* lifetime = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr);
-void print(const IRUnit&);
+void print(const IRUnit& unit);
 
 /*
  * Some utilities related to dumping. Rather than file-by-file control, we

@@ -4949,14 +4949,23 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     } else if (typeParam.isSpecialized()) {
       // We're just checking the array kind or object class of a value with a
       // mostly-known type.
+      assert(rData != InvalidReg);
       auto testReg = rData;
       if (src->isConst()) {
         // In rare cases we can have a const array src here.
         m_as.movq(src->getValRawInt(), m_rScratch);
         testReg = m_rScratch;
       }
-
       emitSpecializedTypeTest(typeParam, rData, doJcc);
+    } else if (typeParam <= Type::Uncounted &&
+               ((srcType == Type::Str && typeParam.maybe(Type::StaticStr)) ||
+                (srcType == Type::Arr && typeParam.maybe(Type::StaticArr)))) {
+      // We carry Str and Arr operands around without a type register,
+      // even though they're union types.  The static and non-static
+      // subtypes are distinguised by the refcount field.
+      assert(rData != InvalidReg);
+      m_as.cmpl(0, rData[FAST_REFCOUNT_OFFSET]);
+      doJcc(CC_L);
     } else {
       CG_PUNT(CheckType-known-srcType);
     }
@@ -6111,6 +6120,7 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
     cgCallHelper(m_as, CppCall(helperAddr), callDest(inst->dst()),
       SyncOptions::kSyncPoint, args);
   } else {
+    assert(src->type() <= Type::Obj);
     args.imm(uintptr_t(curClass())).addr(fpReg, valLocalOffset);
     if (isInitK) {
       args.addr(fpReg, localOffset(inst->src(4)->getValInt()));

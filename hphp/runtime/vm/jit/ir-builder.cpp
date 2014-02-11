@@ -634,10 +634,10 @@ bool IRBuilder::constrainValue(SSATmp* const val,
     // a FramePtr, it's a real value that was killed by a Call. The value won't
     // be live but it's ok to use it to track down the guard.
 
-    auto source = inst->extra<LocalData>()->valSrc;
+    auto source = inst->extra<LocalData>()->typeSrc;
     if (!source) {
       // val was newly created in this trace. Nothing to constrain.
-      FTRACE(2, "  - valSrc is null, bailing\n");
+      FTRACE(2, "  - typeSrc is null, bailing\n");
       return false;
     }
 
@@ -693,7 +693,7 @@ bool IRBuilder::constrainValue(SSATmp* const val,
 
 bool IRBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
                                const std::string& why) {
-  return constrainLocal(locId, localValueSource(locId), tc, why);
+  return constrainLocal(locId, localTypeSource(locId), tc, why);
 }
 
 bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
@@ -724,7 +724,7 @@ bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
       if (typeFitsConstraint(guard->typeParam(), tc.category)) return false;
       guard = guardForLocal(locId, guard->src(0));
     } else {
-      assert(guard->is(GuardLoc, AssertLoc));
+      assert(guard->is(GuardLoc, CheckLoc));
       FTRACE(2, "    - found guard to constrain\n");
       return constrainGuard(guard, tc);
     }

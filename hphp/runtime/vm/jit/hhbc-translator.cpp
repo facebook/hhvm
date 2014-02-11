@@ -3593,8 +3593,11 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
    */
   if (locType.strictSubtypeOf(Type::Obj)) {
     auto const cls = locType.getClass();
-    if (knownConstraint && cls->classof(knownConstraint)) return;
-    if (cls->name()->isame(clsName)) return;
+    if ((knownConstraint && cls->classof(knownConstraint)) ||
+        (cls->name()->isame(clsName))) {
+      m_irb->constrainValue(locVal, DataTypeSpecialized);
+      return;
+    }
   }
 
   InstanceBits::init();
@@ -5206,14 +5209,14 @@ SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, TypeConstraint tc) {
 SSATmp* HhbcTranslator::ldLoc(uint32_t locId, TypeConstraint tc) {
   m_irb->constrainLocal(locId, tc, "LdLoc");
   return gen(LdLoc, Type::Gen,
-             LocalData(locId, m_irb->localValueSource(locId)),
+             LocalData(locId, m_irb->localTypeSource(locId)),
              m_irb->fp());
 }
 
 SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId, TypeConstraint tc) {
   m_irb->constrainLocal(locId, tc, "LdLocAddr");
   return gen(LdLocAddr, Type::PtrToGen,
-             LocalData(locId, m_irb->localValueSource(locId)),
+             LocalData(locId, m_irb->localTypeSource(locId)),
              m_irb->fp());
 }
 

@@ -28,27 +28,27 @@ extern int ini_debug;
 #endif
 int ini_parse();
 void ini_error(const char *msg);
-int ini_lex(HPHP::String *ini_lval, void *loc);
+int ini_lex(std::string *ini_lval, void *loc);
 
-void zend_ini_scan(const HPHP::String& str,
+void zend_ini_scan(const std::string& str,
                    int scanner_mode,
-                   const HPHP::String& filename,
+                   const std::string& filename,
                    HPHP::IniSetting::PFN_PARSER_CALLBACK callback,
                    void *arg);
 
 void zend_ini_scan_cleanup();
 
-void zend_ini_callback(HPHP::String *arg1,
-                       HPHP::String *arg2,
-                       HPHP::String *arg3,
+void zend_ini_callback(std::string *arg1,
+                       std::string *arg2,
+                       std::string *arg3,
                        int callback_type);
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // defined in zend-ini.y
 
-bool zend_parse_ini_string(const HPHP::String& str,
-                           const HPHP::String& filename,
+bool zend_parse_ini_string(const std::string& str,
+                           const std::string& filename,
                            int scanner_mode,
                            HPHP::IniSetting::PFN_PARSER_CALLBACK callback,
                            void *arg);

@@ -227,7 +227,7 @@ public:
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
   String getRequestMemoryMaxBytes() const { return m_maxMemory; }
-  void setRequestMemoryMaxBytes(const String& max);
+  void setRequestMemoryMaxBytes(const std::string& max);
   String getCwd() const { return m_cwd;}
   void setCwd(const String& cwd) { m_cwd = cwd;}
 
@@ -360,7 +360,7 @@ private:
   static const StaticString s_amp;
   // system settings
   Transport *m_transport;
-  String m_maxMemory;
+  std::string m_maxMemory;
   String m_cwd;
 
   // output buffering

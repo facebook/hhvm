@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/ini-parser/zend-ini.h"
+#include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/lock.h"
 
@@ -34,16 +35,14 @@ namespace HPHP {
 const Extension* IniSetting::CORE = (Extension*)(-1);
 
 const StaticString
-  s_1("1"),
-  s_0("0"),
   s_global_value("global_value"),
   s_local_value("local_value"),
   s_access("access"),
   s_core("core");
 
-int64_t convert_bytes_to_long(const String& value) {
-  int64_t newInt = value.toInt64();
-  char lastChar = value.charAt(value.size() - 1);
+int64_t convert_bytes_to_long(const std::string& value) {
+  int64_t newInt = strtoll(value.c_str(), nullptr, 10);
+  char lastChar = value.at(value.size() - 1);
   if (lastChar == 'K' || lastChar == 'k') {
     newInt <<= 10;
   } else if (lastChar == 'M' || lastChar == 'm') {
@@ -54,27 +53,29 @@ int64_t convert_bytes_to_long(const String& value) {
   return newInt;
 }
 
-bool ini_on_update_bool(const String& value, void *p) {
+bool ini_on_update_bool(const std::string& value, void *p) {
   if (p) {
-    if ((value.size() == 2 && strcasecmp("on", value.data()) == 0) ||
-        (value.size() == 3 && strcasecmp("yes", value.data()) == 0) ||
-        (value.size() == 4 && strcasecmp("true", value.data()) == 0)) {
-      *((bool*)p) = true;
+    if ((value.size() == 0) ||
+        (value.size() == 1 && value == "0") ||
+        (value.size() == 2 && strcasecmp("no", value.data()) == 0) ||
+        (value.size() == 3 && strcasecmp("off", value.data()) == 0) ||
+        (value.size() == 5 && strcasecmp("false", value.data()) == 0)) {
+      *((bool*)p) = false;
     } else {
-      *((bool*)p) = value.toBoolean();
+      *((bool*)p) = true;
     }
   }
   return true;
 }
 
-bool ini_on_update_long(const String& value, void *p) {
+bool ini_on_update_long(const std::string& value, void *p) {
   if (p) {
     *((int64_t*)p) = convert_bytes_to_long(value);
   }
   return true;
 }
 
-bool ini_on_update_non_negative(const String& value, void *p) {
+bool ini_on_update_non_negative(const std::string& value, void *p) {
   int64_t v = convert_bytes_to_long(value);
   if (v < 0) {
     return false;
@@ -85,81 +86,114 @@ bool ini_on_update_non_negative(const String& value, void *p) {
   return true;
 }
 
-bool ini_on_update_real(const String& value, void *p) {
+bool ini_on_update_real(const std::string& value, void *p) {
   if (p) {
-    *((double*)p) = value.toDouble();
+    *((double*)p) = zend_strtod(value.c_str(), nullptr);
   }
   return true;
 }
 
-bool ini_on_update_stdstring(const String& value, void *p) {
+bool ini_on_update_stdstring(const std::string& value, void *p) {
   if (p) {
-    *((std::string*)p) = std::string(value.data(), value.size());
+    *((std::string*)p) = value;
   }
   return true;
 }
 
-bool ini_on_update_string(const String& value, void *p) {
+bool ini_on_update_string(const std::string& value, void *p) {
   if (p) {
-    *((String*)p) = value;
+    *((String*)p) = String(value);
   }
   return true;
 }
 
-String ini_get_bool(void *p) {
-  return *(bool*) p;
+std::string ini_get_bool(void *p) {
+  return (*(bool*) p) ? "1" : "";
 }
 
-String ini_get_bool_as_int(void* p) {
-  if (*((bool*)p)) {
-    return s_1;
-  }
-  return s_0;
+std::string ini_get_bool_as_int(void* p) {
+  return (*(bool*) p) ? "1" : "0";
 }
 
-String ini_get_long(void *p) {
-  return *((int64_t*)p);
+std::string ini_get_long(void *p) {
+  return std::to_string(*((int64_t*)p));
 }
 
-String ini_get_real(void *p) {
-  return *((double*)p);
+std::string ini_get_real(void *p) {
+  return std::to_string(*((double*)p));
 }
 
-String ini_get_string(void *p) {
-  return *((String*)p);
+std::string ini_get_string(void *p) {
+  return ((String*)p)->toCppString();
 }
 
-String ini_get_stdstring(void *p) {
+std::string ini_get_stdstring(void *p) {
   return *((std::string*)p);
 }
 
-String ini_get_static_string_1(void* p) {
-  return s_1;
+std::string ini_get_static_string_1(void* p) {
+  return "1";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // callbacks for creating arrays out of ini
 
-static void php_simple_ini_parser_cb
-(String *arg1, String *arg2, String *arg3, int callback_type, void *arg) {
+static void php_simple_ini_parser_cb (std::string *arg1, std::string *arg2,
+                                      std::string *arg3, int callback_type,
+                                      void *arg) {
   assert(arg1);
   if (!arg1 || !arg2) return;
 
   Variant *arr = (Variant*)arg;
   switch (callback_type) {
   case IniSetting::ParserEntry:
-    arr->set(*arg1, *arg2);
+    arr->set(String(*arg1), String(*arg2));
     break;
   case IniSetting::ParserPopEntry:
     {
-      Variant &hash = arr->lvalAt(*arg1);
+      Variant &hash = arr->lvalAt(String(*arg1));
       if (!hash.isArray()) {
         hash = Array::Create();
       }
       if (arg3 && !arg3->empty()) {
-        hash.set(*arg3, *arg2);
+        hash.set(String(*arg3), String(*arg2));
       } else {
         hash.append(*arg2);
+      }
+    }
+    break;
+  }
+}
+
+static void php_simple_ini_parser_map_cb (std::string *arg1, std::string *arg2,
+                                          std::string *arg3, int callback_type,
+                                          void *arg) {
+  assert(arg1);
+  if (!arg1 || !arg2) return;
+
+  auto& arr = *(IniSetting::Map*)arg;
+  switch (callback_type) {
+  case IniSetting::ParserEntry:
+    arr[*arg1] = *arg2;
+    break;
+  case IniSetting::ParserPopEntry:
+    {
+      auto* ptr = arr.get_ptr(*arg1);
+      if (!ptr || !ptr->isArray()) {
+        arr[*arg1] = IniSetting::Map::object;
+        ptr = arr.get_ptr(*arg1);
+      }
+      if (arg3 && !arg3->empty()) {
+        (*ptr)[*arg3] = *arg2;
+      } else {
+        // Find the highest index
+        auto max = 0;
+        for (auto &a : ptr->keys()) {
+          if (a.isInt() && a > max) {
+            max = a.asInt();
+          }
+        }
+        (*ptr)[max] = *arg2;
       }
     }
     break;
@@ -171,8 +205,10 @@ struct CallbackData {
   Variant arr;
 };
 
-static void php_ini_parser_cb_with_sections
-(String *arg1, String *arg2, String *arg3, int callback_type, void *arg) {
+static void php_ini_parser_cb_with_sections(std::string *arg1,
+                                            std::string *arg2,
+                                            std::string *arg3,
+                                            int callback_type, void *arg) {
   assert(arg1);
   if (!arg1) return;
 
@@ -181,7 +217,7 @@ static void php_ini_parser_cb_with_sections
   if (callback_type == IniSetting::ParserSection) {
     data->active_section.unset(); // break ref() from previous section
     data->active_section = Array::Create();
-    arr->set(*arg1, ref(data->active_section));
+    arr->set(String(*arg1), ref(data->active_section));
   } else if (arg2) {
     Variant *active_arr;
     if (!data->active_section.isNull()) {
@@ -204,18 +240,30 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
     CallbackData data;
     data.arr = Array::Create();
     if (zend_parse_ini_string
-        (ini, filename, scanner_mode, php_ini_parser_cb_with_sections, &data)){
+        (ini.toCppString(), filename.toCppString(), scanner_mode,
+         php_ini_parser_cb_with_sections, &data)){
       return data.arr;
     }
   } else {
     Variant ret = Array::Create();
     if (zend_parse_ini_string
-        (ini, filename, scanner_mode, php_simple_ini_parser_cb, &ret)) {
+        (ini.toCppString(), filename.toCppString(), scanner_mode,
+         php_simple_ini_parser_cb, &ret)) {
       return ret;
     }
   }
 
   return false;
+}
+
+IniSetting::Map IniSetting::FromStringAsMap(const std::string& ini,
+                                            const std::string& filename) {
+  Lock lock(s_mutex); // ini parser is not thread-safe
+  Map ret = IniSetting::Map::object;
+  zend_parse_ini_string(
+    ini, filename, NormalScanner, php_simple_ini_parser_map_cb, &ret
+  );
+  return ret;
 }
 
 struct IniCallbackData {
@@ -325,20 +373,25 @@ void IniSetting::Unbind(const char *name) {
   s_callbacks->erase(name);
 }
 
-bool IniSetting::Get(const String& name, String &value) {
+bool IniSetting::Get(const std::string& name, std::string &value) {
   DefaultMap::iterator iter = s_global_ini.find(name.data());
   if (iter != s_global_ini.end()) {
     value = iter->second;
     return true;
   }
-
   CallbackMap::iterator cb_iter = s_callbacks->find(name.data());
   if (cb_iter != s_callbacks->end()) {
     value = cb_iter->second.getCallback(cb_iter->second.p);
     return true;
   }
-
   return false;
+}
+
+bool IniSetting::Get(const String& name, String &value) {
+  std::string b;
+  auto ret = Get(name.toCppString(), b);
+  value = b;
+  return ret;
 }
 
 static bool ini_set(const String& name, const String& value,
@@ -346,7 +399,7 @@ static bool ini_set(const String& name, const String& value,
   CallbackMap::iterator iter = s_callbacks->find(name.data());
   if (iter != s_callbacks->end()) {
     if ((iter->second.mode & mode) && iter->second.updateCallback) {
-      return iter->second.updateCallback(value, iter->second.p);
+      return iter->second.updateCallback(value.toCppString(), iter->second.p);
     }
   }
   return false;
@@ -388,7 +441,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
 
     if (details) {
       Array item = Array::Create();
-      String value(iter.second.getCallback(iter.second.p));
+      auto value = iter.second.getCallback(iter.second.p);
       item.add(s_global_value, value);
       item.add(s_local_value, value);
       if (iter.second.mode == PHP_INI_ALL) {
@@ -408,7 +461,6 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
   }
   return r;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -220,7 +220,7 @@ class IntlExtension : public Extension {
     s_intl_request->setDefaultLocale(value->data());
     return true;
   }
-  static String icu_get_default_locale(void *p) {
+  static std::string icu_get_default_locale(void *p) {
     return s_intl_request->getDefaultLocale();
   }
 

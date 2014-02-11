@@ -28,9 +28,9 @@
 namespace HPHP {
 
 static bool ini_on_update_hash_strategy(const String& value, void *p);
-static String ini_get_hash_strategy(void *p);
+static std::string ini_get_hash_strategy(void *p);
 static bool ini_on_update_hash_function(const String& value, void *p);
-static String ini_get_hash_function(void *p);
+static std::string ini_get_hash_function(void *p);
 
 class MEMCACHEGlobals : public RequestEventHandler {
 public:
@@ -75,7 +75,7 @@ static bool ini_on_update_hash_strategy(const String& value, void *p) {
   return false;
 }
 
-static String ini_get_hash_strategy(void *p) {
+static std::string ini_get_hash_strategy(void *p) {
   return MEMCACHEG(hash_strategy);
 }
 
@@ -88,7 +88,7 @@ static bool ini_on_update_hash_function(const String& value, void *p) {
   return false;
 }
 
-static String ini_get_hash_function(void *p) {
+static std::string ini_get_hash_function(void *p) {
   return MEMCACHEG(hash_strategy);
 }
 

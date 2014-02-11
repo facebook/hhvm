@@ -94,7 +94,7 @@
 */
 
 #define YYERROR_VERBOSE
-#define YYSTYPE String
+#define YYSTYPE std::string
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -106,10 +106,10 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-static void zend_ini_do_op(char type, String &result,
-                           const String& op1, const String& op2 = String()) {
-  int i_op1 = op1.toInt32();
-  int i_op2 = op2.toInt32();
+static void zend_ini_do_op(char type, std::string &result,
+                           const std::string& op1, const std::string& op2 = std::string()) {
+  int i_op1 = strtoll(op1.c_str(), nullptr, 10);
+  int i_op2 = strtoll(op2.c_str(), nullptr, 10);
 
   int i_result = 0;
   switch (type) {
@@ -120,19 +120,19 @@ static void zend_ini_do_op(char type, String &result,
     case '!': i_result = !i_op1;        break;
   }
 
-  result = String((int64_t)i_result);
+  result = std::to_string((int64_t)i_result);
 }
 
-static void zend_ini_get_constant(String &result, const String& name) {
+static void zend_ini_get_constant(std::string &result, const std::string& name) {
   if (f_defined(name)) {
-    result = f_constant(name);
+    result = f_constant(name).toString().toCppString();
   } else {
     result = name;
   }
 }
 
-static void zend_ini_get_var(String &result, const String& name) {
-  String curval;
+static void zend_ini_get_var(std::string &result, const std::string& name) {
+  std::string curval;
   if (IniSetting::Get(name, curval)) {
     result = curval;
     return;
@@ -140,7 +140,7 @@ static void zend_ini_get_var(String &result, const String& name) {
 
   char *value = getenv(name.data());
   if (value) {
-    result = String(value, CopyString);
+    result = std::string(value);
     return;
   }
 
@@ -1591,7 +1591,7 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 126 "zend-ini.y"
-    { (yyval) = empty_string;}
+    { (yyval) = "";}
     break;
 
   case 11:
@@ -1619,7 +1619,7 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 133 "zend-ini.y"
-    { (yyval) = empty_string;}
+    { (yyval) = "";}
     break;
 
   case 15:
@@ -1654,7 +1654,7 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 144 "zend-ini.y"
-    { (yyval) = empty_string;}
+    { (yyval) = "";}
     break;
 
   case 20:
@@ -2037,7 +2037,7 @@ yyreturn:
 ///////////////////////////////////////////////////////////////////////////////
 // exposed to runtime/base/ini-setting.cpp
 
-bool zend_parse_ini_string(const String& str, const String& filename,
+bool zend_parse_ini_string(const std::string& str, const std::string& filename,
                            int scanner_mode,
                            IniSetting::PFN_PARSER_CALLBACK callback,
                            void *arg) {

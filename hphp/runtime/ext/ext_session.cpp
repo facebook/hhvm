@@ -50,13 +50,13 @@ namespace HPHP {
 
 using std::string;
 
-static bool ini_on_update_save_handler(const String& value, void *p);
-static String ini_get_save_handler(void *p);
-static bool ini_on_update_serializer(const String& value, void *p);
-static String ini_get_serializer(void *p);
-static bool ini_on_update_trans_sid(const String& value, void *p);
-static String ini_get_trans_sid(void *p);
-static bool ini_on_update_save_dir(const String& value, void *p);
+static bool ini_on_update_save_handler(const std::string& value, void *p);
+static std::string ini_get_save_handler(void *p);
+static bool ini_on_update_serializer(const std::string& value, void *p);
+static std::string ini_get_serializer(void *p);
+static bool ini_on_update_trans_sid(const std::string& value, void *p);
+static std::string ini_get_trans_sid(void *p);
+static bool ini_on_update_save_dir(const std::string& value, void *p);
 static bool mod_is_open();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1164,41 +1164,41 @@ static bool mod_is_open() {
   return PS(mod_data) || PS(mod_user_implemented);
 }
 
-static bool ini_on_update_save_handler(const String& value, void *p) {
+static bool ini_on_update_save_handler(const std::string& value, void *p) {
   SESSION_CHECK_ACTIVE_STATE;
-  PS(mod) = SessionModule::Find(value.data());
+  PS(mod) = SessionModule::Find(value.c_str());
   return true;
 }
 
-static String ini_get_save_handler(void *p) {
+static std::string ini_get_save_handler(void *p) {
   return PS(mod)->getName();
 }
 
-static bool ini_on_update_serializer(const String& value, void *p) {
+static bool ini_on_update_serializer(const std::string& value, void *p) {
   SESSION_CHECK_ACTIVE_STATE;
   PS(serializer) = SessionSerializer::Find(value.data());
   return true;
 }
 
-static String ini_get_serializer(void *p) {
+static std::string ini_get_serializer(void *p) {
   return PS(serializer)->getName();
 }
 
-static bool ini_on_update_trans_sid(const String& value, void *p) {
+static bool ini_on_update_trans_sid(const std::string& value, void *p) {
   SESSION_CHECK_ACTIVE_STATE;
   if (!strncasecmp(value.data(), "on", sizeof("on"))) {
     PS(use_trans_sid) = true;
   } else {
-    PS(use_trans_sid) = value.toBoolean();
+    ini_on_update_bool(value, &PS(use_trans_sid));
   }
   return true;
 }
 
-static String ini_get_trans_sid(void *p) {
-  return PS(use_trans_sid);
+static std::string ini_get_trans_sid(void *p) {
+  return std::to_string(PS(use_trans_sid));
 }
 
-static bool ini_on_update_save_dir(const String& value, void *p) {
+static bool ini_on_update_save_dir(const std::string& value, void *p) {
   if (value.find('\0') >= 0) {
     return false;
   }

@@ -64,16 +64,16 @@ static ZendINIGlobals s_zend_ini;
 #define EAT_TRAILING_WHITESPACE()  EAT_TRAILING_WHITESPACE_EX('X')
 
 #define RETURN_TOKEN(type, str, len) {            \
-  *ini_lval = String(str, len, CopyString);       \
+  *ini_lval = std::string(str, len);              \
   return type;                                    \
 }
 
-static void zend_ini_escape_string(String &lval, char *str, int len,
+static void zend_ini_escape_string(std::string &lval, char *str, int len,
                                    char quote_type) {
   register char *s, *t;
   char *end;
 
-  lval = String(str, len, CopyString);
+  lval = std::string(str, len);
 
   /* convert escape sequences */
   s = t = (char*)lval.data();
@@ -117,17 +117,17 @@ static void zend_ini_escape_string(String &lval, char *str, int len,
   *t = 0;
 
   if (length != lval.size()) {
-    lval.setSize(length);
+    lval.resize(length);
   }
 }
 
 #define YY_USE_PROTOS
-#define YY_DECL int ini_lex_impl(String *ini_lval, void *loc)
+#define YY_DECL int ini_lex_impl(std::string *ini_lval, void *loc)
 
 #define GOTO_RESTART 9999
 
-int ini_lex_impl(String *ini_lval, void *loc);
-int ini_lex(String *ini_lval, void *loc) {
+int ini_lex_impl(std::string *ini_lval, void *loc);
+int ini_lex(std::string *ini_lval, void *loc) {
 restart:
   int ret = ini_lex_impl(ini_lval, loc);
   if (ret == GOTO_RESTART) goto restart;
@@ -238,7 +238,7 @@ DOUBLE_QUOTES_CHARS (("\\"{ANY_CHAR}|"$"[^{\"]|[^$\"\\])+|"$")
 
 <INITIAL,ST_VALUE>(?i:"false"|"off"|"no"|"none"|"null"){TABS_AND_SPACES}* {
 /* FALSE value (when used outside option value/offset this causes error!)*/
-  RETURN_TOKEN(BOOL_FALSE, "", 0);
+  RETURN_TOKEN(BOOL_FALSE, "", (size_t) 0);
 }
 
 <INITIAL>{LABEL} {
@@ -400,7 +400,7 @@ suppress_defined_but_not_used_warnings() {
   yy_top_state();
 }
 
-void zend_ini_scan(const String& str, int scanner_mode, const String& filename,
+void zend_ini_scan(const std::string& str, int scanner_mode, const std::string& filename,
                    IniSetting::PFN_PARSER_CALLBACK callback, void *arg) {
   SCNG(scanner_mode) = scanner_mode;
   SCNG(filename) = filename.data();
@@ -423,7 +423,7 @@ void zend_ini_scan_cleanup() {
   SCNG(state) = nullptr;
 }
 
-void zend_ini_callback(String *arg1, String *arg2, String *arg3,
+void zend_ini_callback(std::string *arg1, std::string *arg2, std::string *arg3,
                        int callback_type) {
   SCNG(callback)(arg1, arg2, arg3, callback_type, SCNG(arg));
 }

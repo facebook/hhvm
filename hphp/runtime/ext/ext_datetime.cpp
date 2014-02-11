@@ -94,12 +94,12 @@ static class DateExtension : public Extension {
     return f_date_default_timezone_set(value);
   }
 
-  static String dateTimezoneIniGet(void* p) {
+  static std::string dateTimezoneIniGet(void* p) {
     auto ret = g_context->getTimeZone();
     if (ret.isNull()) {
-      return empty_string;
+      return "";
     }
-    return ret;
+    return ret.toCppString();
   }
 
   double m_date_default_latitude;

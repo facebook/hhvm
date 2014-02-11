@@ -42,10 +42,10 @@ __thread char* ThreadInfo::t_stackbase = 0;
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
-String ini_get_max_execution_time(void*) {
+std::string ini_get_max_execution_time(void*) {
   int64_t timeout = ThreadInfo::s_threadInfo.getNoCheck()->
     m_reqInjectionData.getTimeout();
-  return String(timeout);
+  return std::to_string(timeout);
 }
 
 bool ini_on_update_max_execution_time(const String& value, void*) {

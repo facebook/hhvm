@@ -583,6 +583,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 
   Extension::RequestInitModules();
+  process_ini_settings();
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -1601,8 +1602,6 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_vmContext->requestInit();
-
-  process_ini_settings();
 }
 
 ExecutionContext *hphp_context_init() {

@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/util/timer.h"
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -43,7 +44,7 @@ HttpClient::HttpClient(int timeout /* = 5 */, int maxRedirect /* = 1 */,
     m_decompress(decompress), m_response(nullptr), m_responseHeaders(nullptr),
     m_proxyPort(0) {
   if (m_timeout <= 0) {
-    m_timeout = RuntimeOption::SocketDefaultTimeout;
+    m_timeout = g_context->getSocketDefaultTimeout();
   }
 }
 

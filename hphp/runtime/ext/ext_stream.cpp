@@ -443,7 +443,7 @@ Variant f_stream_socket_accept(CResRef server_socket,
   p.revents = 0;
   IOStatusHelper io("socket_accept");
   if (timeout == -1) {
-    timeout = RuntimeOption::SocketDefaultTimeout;
+    timeout = g_context->getSocketDefaultTimeout();
   }
   n = poll(&p, 1, (uint64_t)(timeout * 1000.0));
   if (n > 0) {

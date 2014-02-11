@@ -202,7 +202,6 @@ class IntlExtension : public Extension {
   IntlExtension() : Extension("intl.not-done", "1.1.0") {}
 
   void moduleInit() override {
-    bindIniSettings();
     bindConstants();
     initLocale();
     initNumberFormatter();
@@ -210,6 +209,10 @@ class IntlExtension : public Extension {
     initIterator();
     initDateFormatter();
     initCalendar();
+  }
+
+  void requestInit() override {
+    bindIniSettings();
   }
 
  private:

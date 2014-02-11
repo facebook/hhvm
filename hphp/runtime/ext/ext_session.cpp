@@ -133,31 +133,17 @@ const StaticString s_session_ext_name("session");
 
 class SessionRequestData : public RequestEventHandler, public Session {
 public:
-  SessionRequestData() : m_threadInited(false) {}
+  SessionRequestData() {}
 
-  virtual void requestInit() {
-    if (!m_threadInited) {
-      m_threadInited = true;
-      threadInit();
-    }
+  void destroy() {
     m_id.reset();
     m_session_status = Session::None;
     m_ps_session_handler = nullptr;
   }
 
-  virtual void requestShutdown() {
-    // We don't actually want to do our requestShutdownImpl here---it
-    // is run explicitly from the execution context, because it could
-    // run user code.
-  }
+  virtual void requestInit() {
+    destroy();
 
-  void requestShutdownImpl();
-
-public:
-  bool m_threadInited;
-  String m_id;
-
-  void threadInit() {
     Extension* ext = Extension::GetExtension(s_session_ext_name);
     assert(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
@@ -231,6 +217,18 @@ public:
                      "session.hash_bits_per_character", "4",
                      &m_hash_bits_per_character);
   }
+
+  virtual void requestShutdown() {
+    // We don't actually want to do our requestShutdownImpl here---it
+    // is run explicitly from the execution context, because it could
+    // run user code.
+  }
+
+  void requestShutdownImpl();
+
+public:
+  String m_id;
+
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(SessionRequestData, s_session);
 #define PS(name) s_session->m_ ## name
@@ -1227,7 +1225,7 @@ static int php_session_destroy() {
   }
 
   s_session->requestShutdownImpl();
-  s_session->requestInit();
+  s_session->destroy();
 
   return retval;
 }
@@ -1844,7 +1842,7 @@ bool f_session_destroy() {
   }
 
   s_session->requestShutdownImpl();
-  s_session->requestInit();
+  s_session->destroy();
 
   return retval;
 }

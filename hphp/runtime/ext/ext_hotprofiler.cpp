@@ -1016,12 +1016,11 @@ class TraceProfiler : public Profiler {
       // one in the process at any time.
       m_successful = false;
     } else {
-      char buf[20];
-      sprintf(buf, "%d", RuntimeOption::ProfilerMaxTraceBuffer);
+      m_maxTraceBuffer = RuntimeOption::ProfilerMaxTraceBuffer;
       Extension* ext = Extension::GetExtension(s_hotprofiler);
       assert(ext);
       IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                       "profiler.max_trace_buffer", buf,
+                       "profiler.max_trace_buffer",
                        &m_maxTraceBuffer);
     }
   }

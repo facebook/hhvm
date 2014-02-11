@@ -551,6 +551,7 @@ public:
   // Do not commit code guarded by this flag, for evaluation only.
   static int EnableAlternative;
 };
+static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -69,15 +69,6 @@ ThreadInfo::ThreadInfo()
   RDS::threadInit();
   onSessionInit();
 
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "max_execution_time",
-                   ini_on_update_max_execution_time,
-                   ini_get_max_execution_time);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "maximum_execution_time",
-                   ini_on_update_max_execution_time,
-                   ini_get_max_execution_time);
-
   Lock lock(s_thread_info_mutex);
   s_thread_infos.insert(this);
 }
@@ -122,6 +113,15 @@ void ThreadInfo::onSessionInit() {
     m_stacklimit = (char *)Util::s_stackLimit + StackSlack;
     assert(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));
   }
+
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "max_execution_time",
+                   ini_on_update_max_execution_time,
+                   ini_get_max_execution_time);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "maximum_execution_time",
+                   ini_on_update_max_execution_time,
+                   ini_get_max_execution_time);
 }
 
 void ThreadInfo::clearPendingException() {

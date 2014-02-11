@@ -333,6 +333,9 @@ public:
   void setStreamContext(Resource &context) { m_streamContext = context; }
   Resource &getStreamContext() { return m_streamContext; }
 
+  String getDefaultCharset() const { return m_defaultCharset; }
+  int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
+
   void restoreIncludePath();
   void setIncludePath(const String& path);
   String getIncludePath() const;
@@ -392,6 +395,8 @@ private:
   String m_argSeparatorOutput;
   bool m_throwAllErrors;
   Resource m_streamContext;
+  String m_defaultCharset;
+  int64_t m_socketDefaultTimeout;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;

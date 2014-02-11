@@ -635,7 +635,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
   if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end() &&
       m_responseCode != 304) {
     std::string contentType = "text/html; charset="
-                         + RuntimeOption::DefaultCharsetName;
+                              + g_context->getDefaultCharset().toCppString();
     addHeaderImpl("Content-Type", contentType.c_str());
   }
 

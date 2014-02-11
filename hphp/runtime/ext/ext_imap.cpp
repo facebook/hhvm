@@ -192,7 +192,7 @@ public:
 
     /* set default timeout values */
     void *timeout = reinterpret_cast<void *>
-                      (RuntimeOption::SocketDefaultTimeout);
+                      (g_context->getSocketDefaultTimeout());
 
     mail_parameters(NIL, SET_OPENTIMEOUT,  timeout);
     mail_parameters(NIL, SET_READTIMEOUT,  timeout);

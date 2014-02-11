@@ -229,6 +229,16 @@ struct IniCallbackData {
 typedef std::map<std::string, IniCallbackData> CallbackMap;
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_callbacks);
 
+// This can't be the same as s_callbacks since some classes register callbacks
+// before g_context is ready to have the shutdown handler registered
+class IniSettingExtension : public Extension {
+public:
+  IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
+  void requestShutdown() {
+    s_callbacks->clear();
+  }
+} s_ini_extension;
+
 typedef std::map<std::string, std::string> DefaultMap;
 static DefaultMap s_global_ini;
 

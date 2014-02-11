@@ -93,7 +93,8 @@ BaseExecutionContext::BaseExecutionContext() :
                    },
                    &RuntimeOption::MaxPostSize);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "default_charset", &RuntimeOption::DefaultCharsetName);
+                   "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
+                   &m_defaultCharset);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
                    "always_populate_raw_post_data",
                    &RuntimeOption::AlwaysPopulateRawPostData);
@@ -181,7 +182,8 @@ BaseExecutionContext::BaseExecutionContext() :
                    ini_on_update_fail, ini_get_static_string_1);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_socket_timeout",
-                   &RuntimeOption::SocketDefaultTimeout);
+                   std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
+                   &m_socketDefaultTimeout);
 
   // HPHP specific
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
@@ -204,10 +206,10 @@ BaseExecutionContext::BaseExecutionContext() :
                    "hphp.build_id",
                    ini_on_update_fail, ini_get_stdstring,
                    &RuntimeOption::BuildId);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "notice_frequency",
                    &RuntimeOption::NoticeFrequency);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "warning_frequency",
                    &RuntimeOption::WarningFrequency);
 }

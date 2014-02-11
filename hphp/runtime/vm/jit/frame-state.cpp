@@ -57,7 +57,13 @@ FrameState::~FrameState() {
 
 void FrameState::update(const IRInstruction* inst) {
   if (auto* taken = inst->taken()) {
-    save(taken);
+    // When we're building the IR, we append a conditional jump after
+    // generating its target block: see emitJmpCondHelper, where we
+    // call makeExit() before gen(JmpZero).  It doesn't make sense to
+    // update the target block state at this point, so don't.  The
+    // state doesn't have this problem during optimization passes,
+    // because we'll always process the jump before the target block.
+    if (!m_building || taken->empty()) save(taken);
   }
 
   auto const opc = inst->op();
@@ -404,6 +410,10 @@ void FrameState::finishBlock(Block* block) {
   }
 }
 
+void FrameState::pauseBlock(Block* block) {
+  save(block);
+}
+
 FrameState::Snapshot FrameState::createSnapshot() const {
   Snapshot state;
   state.spValue = m_spValue;
@@ -411,6 +421,8 @@ FrameState::Snapshot FrameState::createSnapshot() const {
   state.curFunc = m_curFunc;
   state.spOffset = m_spOffset;
   state.thisAvailable = m_thisAvailable;
+  state.stackDeficit = m_stackDeficit;
+  state.evalStack = m_evalStack;
   state.locals = m_locals;
   state.curMarker = m_marker;
   state.frameSpansCall = m_frameSpansCall;
@@ -441,6 +453,8 @@ void FrameState::load(Snapshot& state) {
   m_spOffset = state.spOffset;
   m_curFunc = state.curFunc;
   m_thisAvailable = state.thisAvailable;
+  m_stackDeficit = state.stackDeficit;
+  m_evalStack = std::move(state.evalStack);
   m_locals = std::move(state.locals);
   m_marker = state.curMarker;
   m_frameSpansCall = m_frameSpansCall || state.frameSpansCall;

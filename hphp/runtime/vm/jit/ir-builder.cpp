@@ -39,6 +39,7 @@ IRBuilder::IRBuilder(Offset initialBcOffset,
   , m_enableSimplification(false)
   , m_constrainGuards(RuntimeOption::EvalHHIRRelaxGuards)
 {
+  m_state.setBuilding(true);
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
@@ -787,6 +788,8 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b,
 
   m_savedBlocks.push_back(
     BlockState{ m_curBlock, m_state.marker(), m_curWhere });
+  m_state.pauseBlock(m_curBlock);
+  m_state.startBlock(b);
   m_curBlock = b;
   setMarker(marker);
   m_curWhere = where ? where : b->end();
@@ -805,6 +808,8 @@ void IRBuilder::popBlock() {
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
          m_curBlock, m_state.marker().show(), top.block, top.marker.show());
+  m_state.pauseBlock(m_curBlock);
+  m_state.startBlock(top.block);
   m_curBlock = top.block;
   setMarker(top.marker);
   m_curWhere = top.where;

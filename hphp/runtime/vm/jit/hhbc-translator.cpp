@@ -4988,25 +4988,21 @@ Block* HhbcTranslator::makeExitSlow() {
 }
 
 Block* HhbcTranslator::makeExitOpt(TransID transId) {
-  auto spillValues = peekSpillValues();
   Offset targetBcOff = bcOff();
   auto const exit = m_irb->makeExit();
 
   BCMarker exitMarker;
   exitMarker.bcOff = targetBcOff;
   exitMarker.spOff = m_irb->spOffset()
-    + spillValues.size()
+    + m_irb->evalStack().size()
     - m_irb->stackDeficit();
   exitMarker.func  = curFunc();
 
   BlockPusher blockPusher(*m_irb, exitMarker, exit);
 
   SSATmp* stack = nullptr;
-  if (m_irb->stackDeficit() != 0 || !spillValues.empty()) {
-    spillValues.insert(spillValues.begin(),
-                       { m_irb->sp(), cns(int64_t(m_irb->stackDeficit())) });
-    stack = gen(SpillStack,
-                std::make_pair(spillValues.size(), &spillValues[0]));
+  if (m_irb->stackDeficit() != 0 || !m_irb->evalStack().empty()) {
+    stack = spillStack();
   } else {
     stack = m_irb->sp();
   }
@@ -5039,13 +5035,15 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   auto stack = m_irb->sp();
 
   // TODO(#2404447) move this conditional to the simplifier?
-  if (m_irb->stackDeficit() != 0 || !stackValues.empty()) {
+  if (!stackValues.empty()) {
     stackValues.insert(
       stackValues.begin(),
       { m_irb->sp(), cns(int64_t(m_irb->stackDeficit())) }
     );
     stack = gen(SpillStack,
       std::make_pair(stackValues.size(), &stackValues[0]));
+  } else if (m_irb->stackDeficit() != 0 || m_irb->evalStack().size() > 0) {
+    stack = spillStack();
   }
 
   if (customFn) {

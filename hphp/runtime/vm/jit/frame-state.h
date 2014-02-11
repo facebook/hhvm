@@ -132,10 +132,25 @@ struct FrameState : private LocalStateHook {
   ~FrameState();
 
   void update(const IRInstruction* inst);
-
-  void startBlock(Block*);
-  void finishBlock(Block*);
   void clear();
+
+  /*
+   * Starts tracking state for a block and reloads any previously
+   * saved state.
+   */
+  void startBlock(Block*);
+
+  /*
+   * Finish tracking state for a block and save the current state to
+   * any successors.
+   */
+  void finishBlock(Block*);
+
+  /*
+   * Save current state of a block so we can resume processing it
+   * after working on another.
+   */
+  void pauseBlock(Block*);
 
   const Func* func() const { return m_curFunc; }
   Offset spOffset() const { return m_spOffset; }
@@ -149,6 +164,7 @@ struct FrameState : private LocalStateHook {
   bool enableCse() const { return m_enableCse; }
   void setEnableCse(bool e) { m_enableCse = e; }
   unsigned inlineDepth() const { return m_inlineSavedStates.size(); }
+  void setBuilding(bool b) { m_building = b; }
   uint32_t stackDeficit() const { return m_stackDeficit; }
   void incStackDeficit() { m_stackDeficit++; }
   void clearStackDeficit() { m_stackDeficit = 0; }
@@ -209,6 +225,8 @@ struct FrameState : private LocalStateHook {
     const Func* curFunc;
     int32_t spOffset;
     bool thisAvailable;
+    uint32_t stackDeficit;
+    EvalStack evalStack;
     smart::vector<LocalState> locals;
     bool frameSpansCall;
     BCMarker curMarker;
@@ -289,6 +307,12 @@ struct FrameState : private LocalStateHook {
    * definition of the current frame pointer.
    */
   bool m_frameSpansCall;
+
+  /*
+   * m_building is true if we're using FrameState to build the IR,
+   * since some state updates are conditional in that case.
+   */
+  bool m_building = false;
 
   /*
    * Tracking of the state of the virtual execution stack:

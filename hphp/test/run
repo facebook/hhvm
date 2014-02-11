@@ -748,8 +748,64 @@ function print_commands($tests, $options) {
   }
 }
 
-function main($argv) {
 
+function print_success($tests, $options) {
+  print "\nAll tests passed.\n\n".<<<SHIP
+              |    |    |
+             )_)  )_)  )_)
+            )___))___))___)\
+           )____)____)_____)\\
+         _____|____|____|____\\\__
+---------\      SHIP IT      /---------
+  ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
+    ^^^^      ^^^^     ^^^    ^^
+         ^^^^      ^^^
+SHIP
+."\n";
+  if (isset($options['verbose'])) {
+    print_commands($tests, $options);
+  }
+}
+
+function print_failure($argv, $results, $options) {
+  $failed = array();
+  foreach ($results as $result) {
+    if ($result['status'] == 'failed') {
+      $failed[] = $result['name'];
+    }
+  }
+  asort($failed);
+  print "\n".count($failed)." tests failed\n";
+
+  print make_header("See the diffs:").
+    implode("\n", array_map(
+      function($test) { return 'cat '.$test.'.diff'; },
+    $failed))."\n";
+
+  $failing_tests_file = !empty($options['failure-file'])
+    ? $options['failure-file']
+    : tempnam('/tmp', 'test-failures');
+  file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
+  print make_header('For xargs, list of failures is available using:').
+    'cat '.$failing_tests_file."\n";
+
+  print_commands($failed, $options);
+
+  print make_header("Re-run just the failing tests:").
+        $argv[0].' '.implode(' ', $failed)."\n";
+
+  if (idx($options, 'mode') == 'automain') {
+    print make_header(
+      'Automain caveat: wrapper script may change semantics');
+    print 'The automain wrapper script ('.__DIR__.'/pseudomain_wrapper.php)'
+      .' may have changed behavior'."\n"
+      .'(e.g. extra frames in backtraces) by moving code from '
+      .'pseudo-main to file top-level and adding a wrapper function.'
+      ."\n";
+  }
+}
+
+function main($argv) {
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
   list($options, $files) = get_options($argv);
@@ -810,64 +866,18 @@ function main($argv) {
     }
     $results = array_merge($results, $json);
   }
+
   if (isset($options['fbmake'])) {
     Status::say(array('op' => 'all_done', 'results' => $results));
-  } else {
-    if (!$return_value) {
-      print "\nAll tests passed.\n\n".<<<SHIP
-              |    |    |
-             )_)  )_)  )_)
-            )___))___))___)\
-           )____)____)_____)\\
-         _____|____|____|____\\\__
----------\      SHIP IT      /---------
-  ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
-    ^^^^      ^^^^     ^^^    ^^
-         ^^^^      ^^^
-SHIP
-."\n";
-      if (isset($options['verbose'])) {
-        print_commands($tests, $options);
-      }
-    } else {
-      $failed = array();
-      foreach ($results as $result) {
-        if ($result['status'] == 'failed') {
-          $failed[] = $result['name'];
-        }
-      }
-      asort($failed);
-      print "\n".count($failed)." tests failed\n";
-
-      print make_header("See the diffs:").
-        implode("\n", array_map(
-          function($test) { return 'cat '.$test.'.diff'; },
-        $failed))."\n";
-
-      $failing_tests_file = !empty($options['failure-file'])
-        ? $options['failure-file']
-        : tempnam('/tmp', 'test-failures');
-      file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
-      print make_header('For xargs, list of failures is available using:').
-        'cat '.$failing_tests_file."\n";
-
-      print_commands($failed, $options);
-
-      print make_header("Re-run just the failing tests:").
-            $argv[0].' '.implode(' ', $failed)."\n";
-
-      if (idx($options, 'mode') == 'automain') {
-        print make_header(
-          'Automain caveat: wrapper script may change semantics');
-        print 'The automain wrapper script ('.__DIR__.'/pseudomain_wrapper.php)'
-          .' may have changed behavior'."\n"
-          .'(e.g. extra frames in backtraces) by moving code from '
-          .'pseudo-main to file top-level and adding a wrapper function.'
-          ."\n";
-      }
-    }
+    return $return_value;
   }
 
+  if (!$return_value) {
+    print_success($tests, $options);
+    return $return_value;
+  }
+
+  print_failure($argv, $results, $options);
   return $return_value;
 }
 

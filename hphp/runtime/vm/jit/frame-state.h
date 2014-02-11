@@ -34,6 +34,56 @@ namespace JIT {
 struct IRInstruction;
 struct SSATmp;
 
+//////////////////////////////////////////////////////////////////////
+
+struct EvalStack {
+  explicit EvalStack() {}
+
+  void push(SSATmp* tmp) {
+    m_vector.push_back(tmp);
+  }
+
+  SSATmp* pop() {
+    if (m_vector.size() == 0) {
+      return nullptr;
+    }
+    SSATmp* tmp = m_vector.back();
+    m_vector.pop_back();
+    return tmp;
+  }
+
+  SSATmp* top(uint32_t offset = 0) const {
+    if (offset >= m_vector.size()) {
+      return nullptr;
+    }
+    uint32_t index = m_vector.size() - 1 - offset;
+    return m_vector[index];
+  }
+
+  void replace(uint32_t offset, SSATmp* tmp) {
+    assert(offset < m_vector.size());
+    uint32_t index = m_vector.size() - 1 - offset;
+    m_vector[index] = tmp;
+  }
+
+  uint32_t numCells() const {
+    uint32_t ret = 0;
+    for (auto& t : m_vector) {
+      ret += t->type() == Type::ActRec ? kNumActRecCells : 1;
+    }
+    return ret;
+  }
+
+  bool empty() const { return m_vector.empty(); }
+  int  size()  const { return m_vector.size(); }
+  void clear()       { m_vector.clear(); }
+
+private:
+  std::vector<SSATmp*> m_vector;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * LocalStateHook is used to separate the acts of determining which locals are
  * affected by an instruction and recording those changes. It allows consumers
@@ -52,6 +102,8 @@ struct LocalStateHook {
   virtual void refineLocalType(uint32_t id, Type type) {}
   virtual void setLocalType(uint32_t id, Type type) {}
 };
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * FrameState tracks state about the VM stack frame in the function currently
@@ -97,6 +149,10 @@ struct FrameState : private LocalStateHook {
   bool enableCse() const { return m_enableCse; }
   void setEnableCse(bool e) { m_enableCse = e; }
   unsigned inlineDepth() const { return m_inlineSavedStates.size(); }
+  uint32_t stackDeficit() const { return m_stackDeficit; }
+  void incStackDeficit() { m_stackDeficit++; }
+  void clearStackDeficit() { m_stackDeficit = 0; }
+  EvalStack& evalStack() { return m_evalStack; }
 
   Type localType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
@@ -233,6 +289,22 @@ struct FrameState : private LocalStateHook {
    * definition of the current frame pointer.
    */
   bool m_frameSpansCall;
+
+  /*
+   * Tracking of the state of the virtual execution stack:
+   *
+   *   During HhbcTranslator's run over the bytecode, these stacks
+   *   contain SSATmp values representing the execution stack state
+   *   since the last SpillStack.
+   *
+   *   The EvalStack contains cells and ActRecs that need to be
+   *   spilled in order to materialize the stack.
+   *
+   *   m_stackDeficit represents the number of cells we've popped off
+   *   the virtual stack since the last sync.
+   */
+  uint32_t m_stackDeficit;
+  EvalStack m_evalStack;
 
   /*
    * m_locals tracks the current types and values of locals.

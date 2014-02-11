@@ -1225,7 +1225,7 @@ struct InterpStepper : boost::static_visitor<void> {
 
     // We can't constprop with this eval_cell, because of the effects
     // on locals.
-    auto resultTy = eval_cell([&] {
+    auto resultTy = eval_cell([inc,val] {
       auto c = *val;
       if (inc) {
         cellInc(c);

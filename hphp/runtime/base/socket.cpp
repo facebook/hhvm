@@ -79,6 +79,8 @@ Socket::~Socket() {
 
 void Socket::sweep() {
   Socket::closeImpl();
+  using std::string;
+  m_address.~string();
   File::sweep();
   Socket::operator delete(this);
 }

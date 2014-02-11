@@ -141,7 +141,7 @@ bool url_parse(Url &output, const char *str, int length) {
       pp++;
     }
 
-    if (pp-p < 6 && (*pp == '/' || *pp == '\0')) {
+    if (pp - p > 0 && pp-p < 6 && (*pp == '/' || *pp == '\0')) {
       memcpy(port_buf, p, (pp-p));
       port_buf[pp-p] = '\0';
       auto port = atoi(port_buf);
@@ -150,6 +150,8 @@ bool url_parse(Url &output, const char *str, int length) {
       } else {
         return false;
       }
+    } else if (p == pp && *pp == '\0') {
+      return false;
     } else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
       s += 2;
     } else {

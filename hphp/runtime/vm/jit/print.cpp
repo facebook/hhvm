@@ -46,7 +46,14 @@ static std::string constToString(Type t, const ConstData* c) {
   if (t == Type::Int) {
     os << c->as<int64_t>();
   } else if (t == Type::Dbl) {
-    os << c->as<double>();
+    // don't format doubles as integers.
+    auto d = c->as<double>();
+    auto s = folly::format("{}", d).str();
+    if (!strchr(s.c_str(), '.') && !strchr(s.c_str(), 'e')) {
+      os << folly::format("{:.1f}", d);
+    } else {
+      os << s;
+    }
   } else if (t == Type::Bool) {
     os << (c->as<bool>() ? "true" : "false");
   } else if (t.isString()) {

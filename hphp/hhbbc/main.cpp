@@ -45,6 +45,7 @@ namespace {
 
 std::string output_repo;
 std::string input_repo;
+bool logging = true;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -53,6 +54,9 @@ void parse_options(int argc, char** argv) {
 
   auto const defaultThreadCount =
     std::max<long>(sysconf(_SC_NPROCESSORS_ONLN) - 1, 1);
+
+  std::vector<std::string> interceptable;
+  bool no_logging = false;
 
   po::options_description basic("Options");
   basic.add_options()
@@ -66,12 +70,18 @@ void parse_options(int argc, char** argv) {
     ("no-optimizations",
       po::bool_switch(&options.NoOptimizations),
       "turn off all optimizations")
+    ("no-logging",
+      po::bool_switch(&no_logging),
+      "turn off logging")
     ("parallel-num-threads",
       po::value(&parallel::num_threads)->default_value(defaultThreadCount),
       "Number of threads to use for parallelism")
     ("parallel-work-size",
       po::value(&parallel::work_chunk)->default_value(120),
       "Work unit size for parallelism")
+    ("interceptable",
+      po::value(&interceptable)->composing(),
+      "Add an interceptable function")
     ;
 
   po::options_description oflags("Optimization Flags");
@@ -129,6 +139,10 @@ void parse_options(int argc, char** argv) {
     std::cerr << "Invalid parallelism configuration.\n";
     std::exit(1);
   }
+
+  options.InterceptableFunctions.insert(begin(interceptable),
+                                        end(interceptable));
+  logging = !no_logging;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -175,7 +189,9 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues) {
 
 void compile_repo() {
   auto ues = load_input();
-  std::cout << folly::format("{} units\n", ues.size());
+  if (logging) {
+    std::cout << folly::format("{} units\n", ues.size());
+  }
 
   ues = whole_program(std::move(ues));
 
@@ -216,7 +232,7 @@ int main(int argc, char** argv) try {
 
   hphp_process_init();
 
-  Trace::BumpRelease bumper(Trace::hhbbc_time, -1);
+  Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
   compile_repo();
   return 0;
 }

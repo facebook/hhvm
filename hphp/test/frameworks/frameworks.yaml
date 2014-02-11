@@ -116,21 +116,15 @@
     commit: 389668bca115e0fed4353664bd8c93d46a69da9e
     install_root: magento2
     test_root: magento2/dev/tests/unit
-  # Changing from ptarjan to wikimedia causes a FATAL in the test
-  # script. So some code change in wikimedia between Paul's forked
-  # change and the time it was pulled into wikimedia master on
-  # Nov 22, 2013 is causing problems.
   mediawiki:
-    url: https://github.com/ptarjan/mediawiki-core.git
-    branch: master
-    commit: 2a280fcfccfd48fe5bf9479ca02d986367fa33e9
+    url: https://github.com/fredemmott/mediawiki-core.git
+    # Bad test data in wikimedia/mediawiki-core at the moment
+    branch: fix-old-dates
+    commit: 10a7426639664a9222e430d6775e68b299e657f4
     install_root: mediawiki-core
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/
     config_file: mediawiki-core/tests/phpunit/suite.xml
-    clowns:
-      - mediawiki-core/tests/phpunit/includes/HttpTest.php
-      - mediawiki-core/tests/phpunit/includes/libs/CSSJanusTest.php
   mockery:
     url: https://github.com/padraic/mockery.git
     branch: master

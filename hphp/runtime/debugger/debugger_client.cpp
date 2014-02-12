@@ -1147,7 +1147,11 @@ void DebuggerClient::console() {
     } else if (!NoPrompt && RuntimeOption::EnableDebuggerPrompt) {
       print("%s%s", getPrompt().c_str(), line);
     }
-    if (*line && !m_macroPlaying) {
+    if (*line && !m_macroPlaying &&
+        strcasecmp(line, "QUIT") != 0 &&
+        strcasecmp(line, "QUI") != 0 &&
+        strcasecmp(line, "QU") != 0 &&
+        strcasecmp(line, "Q") != 0) {
       // even if line is bad command, we still want to remember it, so
       // people can go back and fix typos
       add_history(line);

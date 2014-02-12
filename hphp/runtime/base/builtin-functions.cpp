@@ -324,6 +324,11 @@ vm_decode_function(CVarRef function,
       cls = this_->getVMClass();
       this_ = nullptr;
     }
+    if (warn && f == nullptr) {
+      raise_warning("call_user_func() expects parameter 1 to be a valid "
+                    "callback, object of class %s given (no __invoke "
+                    "method found)", this_->getVMClass()->name()->data());
+    }
     return f;
   }
   if (warn) {

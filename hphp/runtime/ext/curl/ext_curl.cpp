@@ -188,6 +188,10 @@ public:
     close();
   }
 
+  virtual bool isInvalid() const {
+    return !m_cp;
+  }
+
   void closeForSweep() {
     assert(!m_exception);
     if (m_cp) {

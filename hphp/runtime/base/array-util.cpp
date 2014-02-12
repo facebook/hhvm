@@ -197,61 +197,6 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
   return ret;
 }
 
-const StaticString s_default("(default)");
-
-Variant ArrayUtil::FromHdf(const Hdf &hdf) {
-  if (hdf.firstChild().exists()) {
-    Array ret = Array::Create();
-
-    const char *value = hdf.get();
-    if (value) {
-      ret.set(s_default, String(value, CopyString));
-    }
-
-    for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
-      ret.set(String(child.getName()), FromHdf(child));
-    }
-    return ret;
-  }
-
-  const char *value = hdf.get("");
-  if (strcasecmp(value, "false") == 0 ||
-      strcasecmp(value, "no") == 0 ||
-      strcasecmp(value, "off") == 0) {
-    return false;
-  }
-  if (strcasecmp(value, "true") == 0 ||
-      strcasecmp(value, "yes") == 0 ||
-      strcasecmp(value, "on") == 0) {
-    return true;
-  }
-
-  int64_t lval; double dval;
-  int len = strlen(value);
-  DataType ret = is_numeric_string(value, len, &lval, &dval, 0);
-  switch (ret) {
-  case KindOfInt64:  return lval;
-  case KindOfDouble: return dval;
-  default: break;
-  }
-  return String(value, len, CopyString);
-}
-
-void ArrayUtil::ToHdf(const Array &arr, Hdf &hdf) {
-  for (ArrayIter iter(arr); iter; ++iter) {
-    CVarRef value(iter.secondRef());
-    if (value.isArray()) {
-      Hdf child = hdf[iter.first().toString().data()];
-      ToHdf(iter.secondRef().toArray(), child);
-    } else if (value.isBoolean()) {
-      hdf[iter.first().toString().data()] =
-        iter.secondRef().toBoolean() ? "true" : "false";
-    } else {
-      hdf[iter.first().toString().data()] = iter.secondRef().toString().data();
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // information and calculations
 

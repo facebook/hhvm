@@ -611,33 +611,6 @@ Variant f_parse_ini_string(const String& ini,
   return IniSetting::FromString(ini, "", process_sections, scanner_mode);
 }
 
-Variant f_parse_hdf_file(const String& filename) {
-  Variant content = f_file_get_contents(filename);
-  if (same(content, false)) return false;
-  return f_parse_hdf_string(content.toString());
-}
-
-Variant f_parse_hdf_string(const String& input) {
-  Hdf hdf;
-  hdf.fromString(input.data());
-  return ArrayUtil::FromHdf(hdf);
-}
-
-bool f_write_hdf_file(CArrRef data, const String& filename) {
-  Hdf hdf;
-  ArrayUtil::ToHdf(data, hdf);
-  const char *str = hdf.toString();
-  Variant ret = f_file_put_contents(filename, str);
-  return !same(ret, false);
-}
-
-String f_write_hdf_string(CArrRef data) {
-  Hdf hdf;
-  ArrayUtil::ToHdf(data, hdf);
-  const char *str = hdf.toString();
-  return String(str, CopyString);
-}
-
 Variant f_md5_file(const String& filename, bool raw_output /* = false */) {
   return HHVM_FN(hash_file)("md5", filename, raw_output);
 }

@@ -53,12 +53,6 @@ public:
   static Variant Range(double low, double high, double step = 1.0);
   static Variant Range(double low, double high, int64_t step = 1);
 
-  /**
-   * Conversion between HDF and array.
-   */
-  static Variant FromHdf(const Hdf &hdf);
-  static void ToHdf(const Array &arr, Hdf &hdf);
-
   /////////////////////////////////////////////////////////////////////////////
   // Information and calculations.
 

@@ -1,5 +1,5 @@
 object(SplObjectStorage)#%d (1) {
-  ["__storage":"SplObjectStorage":private]=>
+  ["storage":"SplObjectStorage":private]=>
   array(1) {
     ["%s"]=>
     array(2) {

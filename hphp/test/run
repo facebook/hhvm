@@ -391,11 +391,20 @@ function hhbbc_cmd($options, $test) {
 class Status {
   private static $results = array();
   private static $mode = 0;
+
   private static $use_color = false;
+
+  private static $queue = null;
+  public static $key;
 
   const MODE_NORMAL = 0;
   const MODE_VERBOSE = 1;
   const MODE_FBMAKE = 2;
+
+  const MSG_EXIT = 1;
+  const MSG_TEST_PASS = 2;
+  const MSG_TEST_FAIL = 3;
+  const MSG_TEST_SKIP = 4;
 
   public static function setMode($mode) {
     self::$mode = $mode;
@@ -405,89 +414,29 @@ class Status {
     self::$use_color = $use;
   }
 
+  public static function getMode() {
+    return self::$mode;
+  }
+
   public static function pass($test) {
     array_push(self::$results, array('name' => $test, 'status' => 'passed'));
-    switch (self::$mode) {
-      case self::MODE_NORMAL:
-        if (self::hasColor()) {
-          print "\033[1;32m.\033[0m";
-        } else {
-          print '.';
-        }
-        break;
-      case self::MODE_VERBOSE:
-        if (self::hasColor()) {
-          print "$test \033[1;32mpassed\033[0m\n";
-        } else {
-          print "$test passed\n";
-        }
-        break;
-      case self::MODE_FBMAKE:
-        self::sayFBMake($test, 'passed');
-        break;
-    }
+    msg_send(self::getQueue(), self::MSG_TEST_PASS, $test);
   }
 
   public static function skip($test, $reason = null) {
-    switch (self::$mode) {
-      case self::MODE_NORMAL:
-        if (self::hasColor()) {
-          print "\033[1;33ms\033[0m";
-        } else {
-          print 's';
-        }
-        break;
-      case self::MODE_VERBOSE:
-        if (self::hasColor()) {
-          if ($reason !== null) {
-            print "$test \033[1;33mskipped\033[0m ";
-            print "\033[1;31m$reason\033[0m\n";
-          } else {
-            print "$test \033[1;33mskipped\033[0m\n";
-          }
-        } else {
-          if ($reason !== null) {
-            print "$test skipped\n";
-          } else {
-            print "$test skipped - $reason\n";
-          }
-        }
-        break;
-      case self::MODE_FBMAKE:
-        // Say nothing...
-        break;
-    }
+    msg_send(self::getQueue(), self::MSG_TEST_SKIP, [$test,$reason]);
   }
 
   public static function fail($test) {
     array_push(self::$results, array(
-        'name' => $test,
-        'status' => 'failed',
-        'details' => (string)@file_get_contents("$test.diff")
+      'name' => $test,
+      'status' => 'failed',
+      'details' => (string)@file_get_contents("$test.diff")
     ));
-    switch (self::$mode) {
-      case self::MODE_NORMAL:
-        $diff = (string)@file_get_contents($test.'.diff');
-        if (self::hasColor()) {
-          print "\n\033[0;31m$test\033[0m\n$diff";
-        } else {
-          print "\nFAILED: $test\n$diff";
-        }
-        break;
-      case self::MODE_VERBOSE:
-        if (self::hasColor()) {
-          print "$test \033[0;31mFAILED\033[0m\n";
-        } else {
-          print "$test FAILED\n";
-        }
-        break;
-      case self::MODE_FBMAKE:
-        self::sayFBMake($test, 'failed');
-        break;
-    }
+    msg_send(self::getQueue(), self::MSG_TEST_FAIL, $test);
   }
 
-  private static function sayFBMake($test, $status) {
+  public static function sayFBMake($test, $status) {
     $start = array('op' => 'start', 'test' => $test);
     $end = array('op' => 'test_done', 'test' => $test, 'status' => $status);
     if ($status == 'failed') {
@@ -508,8 +457,12 @@ class Status {
     fwrite(STDERR, implode("", $data));
   }
 
-  private static function hasColor() {
+  public static function hasColor() {
     return self::$use_color;
+  }
+
+  public static function hasCursorControl() {
+    return !getenv("TRAVIS");
   }
 
   public static function jsonEncode($data) {
@@ -520,6 +473,17 @@ class Status {
 
     $json = json_encode($data);
     return str_replace('\\/', '/', $json);
+  }
+
+  private static function getQueue() {
+    if (!self::$queue)
+      self::$queue = msg_get_queue(self::$key);
+    return self::$queue;
+  }
+
+  public static function doExit($code) {
+    msg_send(self::getQueue(), self::MSG_EXIT, [$code,posix_getpid()]);
+    exit($code);
   }
 }
 
@@ -807,6 +771,142 @@ function print_commands($tests, $options) {
   }
 }
 
+function msg_loop($num_tests, $children, $queue) {
+  $return_value = 0;
+
+  $passed = 0;
+  $skipped = 0;
+  $failed = 0;
+
+  preg_match_all("/columns.([0-9]+);/", strtolower(exec('stty -a |grep columns')), $output);
+  $cols = $output[1][0];
+
+  while (count($children) > 0) {
+    msg_receive($queue, 0, $type, 1024, $message);
+    switch ($type) {
+    case Status::MSG_EXIT:
+      list($code, $pid) = $message;
+      pcntl_waitpid($pid, $status);
+      $return_value |= pcntl_wexitstatus($status);
+      unset($children[$pid]);
+      break;
+    case Status::MSG_TEST_PASS:
+      $passed++;
+      $test = $message;
+      switch (Status::getMode()) {
+      case Status::MODE_NORMAL:
+        if (!Status::hasCursorControl()) {
+          if (Status::hasColor()) {
+            print "\033[1;32m.\033[0m";
+          } else {
+            print ".";
+          }
+        }
+        break;
+      case Status::MODE_VERBOSE:
+        if (Status::hasColor()) {
+          print "$test \033[1;32mpassed\033[0m\n";
+        } else {
+          print "$test passed\n";
+        }
+        break;
+      case Status::MODE_FBMAKE:
+        Status::sayFBMake($test, 'passed');
+        break;
+      }
+      break;
+      case Status::MSG_TEST_SKIP:
+        $skipped++;
+        list($test, $reason) = $message;
+
+        switch (Status::getMode()) {
+        case Status::MODE_NORMAL:
+          if (!Status::hasCursorControl()) {
+            if (Status::hasColor()) {
+              print "\033[1;33ms\033[0m";
+            } else {
+              print 's';
+            }
+          }
+          break;
+        case Status::MODE_VERBOSE:
+          if (Status::hasColor()) {
+            if ($reason !== null) {
+              print "$test \033[1;33mskipped\033[0m ";
+              print "\033[1;31m$reason\033[0m\n";
+            } else {
+              print "$test \033[1;33mskipped\033[0m\n";
+            }
+          } else {
+            if ($reason !== null) {
+              print "$test skipped\n";
+            } else {
+              print "$test skipped - $reason\n";
+            }
+          }
+          break;
+        }
+        break;
+      case Status::MSG_TEST_FAIL:
+        $failed++;
+        $test = $message;
+        switch (Status::getMode()) {
+        case Status::MODE_NORMAL:
+          $diff = (string)@file_get_contents($test.'.diff');
+          if (Status::hasColor()) {
+            if (Status::hasCursorControl())
+              print "\033[2K\033[1G";
+            print "\n\033[0;31m$test\033[0m\n$diff";
+          } else {
+            print "\nFAILED: $test\n$diff";
+          }
+          break;
+        case Status::MODE_VERBOSE:
+          if (Status::hasColor()) {
+            print "$test \033[0;31mFAILED\033[0m\n";
+          } else {
+            print "$test FAILED\n";
+          }
+          break;
+        case Status::MODE_FBMAKE:
+          Status::sayFBMake($test, 'failed');
+          break;
+        }
+        break;
+    }
+    if (Status::getMode() == Status::MODE_NORMAL && Status::hasCursorControl()) {
+      $total_run = ($skipped + $failed + $passed);
+      $bar_cols = ($cols - 45);
+
+      $passed_ticks  = round($bar_cols * ($passed  / $num_tests));
+      $skipped_ticks = round($bar_cols * ($skipped / $num_tests));
+      $failed_ticks  = round($bar_cols * ($failed  / $num_tests));
+
+      $fill = $bar_cols - ($passed_ticks + $skipped_ticks + $failed_ticks);
+      if ($fill < 0) $fill = 0;
+
+      $fill = str_repeat('-', $fill);
+
+      $passed_ticks = str_repeat('#',  $passed_ticks);
+      $skipped_ticks = str_repeat('#', $skipped_ticks);
+      $failed_ticks = str_repeat('#',  $failed_ticks);
+
+      print "\033[2K\033[1G[".
+        "\033[0;32m$passed_ticks".
+        "\033[33m$skipped_ticks".
+        "\033[31m$failed_ticks".
+        "\033[0m$fill] ($total_run/$num_tests) ($skipped skipped, $failed failed)";
+    }
+  }
+
+  if (Status::getMode() == Status::MODE_NORMAL && Status::hasCursorControl()) {
+    print "\033[2K\033[1G";
+    if ($skipped > 0) {
+      print "$skipped tests \033[1;33mskipped\033[0m\n";
+    }
+  }
+  return $return_value;
+}
 
 function print_success($tests, $options) {
   print "\nAll tests passed.\n\n".<<<SHIP
@@ -835,6 +935,7 @@ function print_failure($argv, $results, $options) {
   }
   asort($failed);
   print "\n".count($failed)." tests failed\n";
+  print "(╯°□°）╯︵ ┻━┻)\n";
 
   print make_header("See the diffs:").
     implode("\n", array_map(
@@ -890,6 +991,14 @@ function main($argv) {
     $i = ($i + 1) % $threads;
   }
 
+  if (isset($options['verbose'])) {
+    Status::setMode(Status::MODE_VERBOSE);
+  }
+  if (isset($options['fbmake'])) {
+    Status::setMode(Status::MODE_FBMAKE);
+  }
+  Status::$key = ftok(__FILE__, 't');
+
   // Spawn off worker threads
   $children = array();
   // A poor man's shared memory
@@ -901,18 +1010,16 @@ function main($argv) {
     if ($pid == -1) {
       error('could not fork');
     } else if ($pid) {
-      $children[] = $pid;
+      $children[$pid] = $pid;
     } else {
-      exit(run($options, $test_buckets[$i], $bad_test_file));
+      Status::doExit(run($options, $test_buckets[$i], $bad_test_file));
     }
   }
 
-  // Wait for the kids
-  $return_value = 0;
-  foreach ($children as $child) {
-    pcntl_waitpid($child, $status);
-    $return_value |= pcntl_wexitstatus($status);
-  }
+
+  $queue = msg_get_queue(Status::$key);
+  $return_value = msg_loop(count($tests), $children, $queue);
+  msg_remove_queue($queue);
 
   $results = array();
   foreach ($bad_test_files as $bad_test_file) {

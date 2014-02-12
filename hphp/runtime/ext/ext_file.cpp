@@ -52,7 +52,7 @@
 #include <pwd.h>
 #include <fnmatch.h>
 
-#define CHECK_HANDLE_BASE(handle, f, ret) \
+#define CHECK_HANDLE_BASE(handle, f, ret)               \
   File *f = handle.getTyped<File>(true, true);          \
   if (f == nullptr || f->isClosed()) {                  \
     raise_warning("Not a valid stream resource");       \
@@ -423,7 +423,8 @@ Variant f_file_get_contents(const String& filename,
 Variant f_file_put_contents(const String& filename, CVarRef data,
                             int flags /* = 0 */,
                             CVarRef context /* = null */) {
-  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb");
+  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb",
+                            flags, context);
   if (!fvar.toBoolean()) {
     return false;
   }
@@ -494,7 +495,10 @@ Variant f_file_put_contents(const String& filename, CVarRef data,
   if (numbytes < 0) {
     return false;
   }
-  return numbytes;
+
+  // Since streams (ex. buffered files) often do the real work in close() we
+  // call it here and check the result instead of out-of-band in the destructor.
+  return f->close() ? numbytes : false;
 }
 
 Variant f_file(const String& filename, int flags /* = 0 */,

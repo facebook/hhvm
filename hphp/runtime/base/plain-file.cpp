@@ -219,6 +219,11 @@ bool PlainFile::rewind() {
   return true;
 }
 
+bool PlainFile::stat(struct stat *sb) {
+  assert(valid());
+  return ::fstat(m_fd, sb) == 0;
+}
+
 bool PlainFile::flush() {
   if (m_stream) {
     return fflush(m_stream) == 0;

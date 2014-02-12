@@ -52,6 +52,7 @@ public:
   virtual bool rewind();
   virtual bool flush();
   virtual bool truncate(int64_t size);
+  virtual bool stat(struct stat *sb);
 
   FILE *getStream() { return m_stream;}
   virtual const char *getStreamType() const { return "STDIO";}

@@ -71,7 +71,7 @@ UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
 }
 
 UserFile::~UserFile() {
-  if (m_opened) {
+  if (m_opened && !m_closed) {
     close();
   }
 }
@@ -117,6 +117,7 @@ bool UserFile::close() {
 
   // void stream_close()
   invoke(m_StreamClose, s_stream_close, Array::Create());
+  m_closed = true;
   return true;
 }
 

@@ -34,7 +34,7 @@ int SatelliteServerInfo::DanglingServerPort = 0;
 
 SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   m_name = hdf.getName();
-  m_port = hdf["Port"].getInt16(0);
+  m_port = hdf["Port"].getUInt16(0);
   m_threadCount = hdf["ThreadCount"].getInt32(5);
   m_maxRequest = hdf["MaxRequest"].getInt32(500);
   m_maxDuration = hdf["MaxDuration"].getInt32(120);

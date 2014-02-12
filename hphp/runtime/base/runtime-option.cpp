@@ -1009,7 +1009,7 @@ void RuntimeOption::Load(Hdf &config,
   }
   {
     Hdf admin = config["AdminServer"];
-    AdminServerPort = admin["Port"].getInt16(0);
+    AdminServerPort = admin["Port"].getUInt16(0);
     AdminThreadCount = admin["ThreadCount"].getInt32(1);
     AdminPassword = admin["Password"].getString();
     admin["Passwords"].get(AdminPasswords);
@@ -1255,7 +1255,7 @@ void RuntimeOption::Load(Hdf &config,
   {
     Hdf hhprofServer = config["HHProfServer"];
     HHProfServerEnabled = hhprofServer["Enabled"].getBool(false);
-    HHProfServerPort = hhprofServer["Port"].getInt16(4327);
+    HHProfServerPort = hhprofServer["Port"].getUInt16(4327);
     HHProfServerThreads = hhprofServer["Threads"].getInt16(2);
     HHProfServerTimeoutSeconds =
       hhprofServer["TimeoutSeconds"].getInt64(30);
@@ -1281,7 +1281,7 @@ void RuntimeOption::Load(Hdf &config,
   {
     Hdf fb303Server = config["Fb303Server"];
     EnableFb303Server = fb303Server["Enable"].getBool(true);
-    Fb303ServerPort = fb303Server["Port"].getInt16(0);
+    Fb303ServerPort = fb303Server["Port"].getUInt16(0);
     Fb303ServerThreadStackSizeMb = fb303Server["ThreadStackSizeMb"].getInt16(8);
     Fb303ServerWorkerThreads = fb303Server["WorkerThreads"].getInt16(1);
     Fb303ServerPoolThreads = fb303Server["PoolThreads"].getInt16(1);

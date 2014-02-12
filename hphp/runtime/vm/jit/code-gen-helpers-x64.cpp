@@ -72,7 +72,7 @@ void moveToAlign(CodeBlock& cb,
   }
 }
 
-void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc, const Offset spDiff) {
+void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc) {
   static COff spOff = offsetof(VMExecutionContext, m_stack) +
     Stack::topOfStackOffset();
   static COff fpOff = offsetof(VMExecutionContext, m_fp);
@@ -85,12 +85,7 @@ void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc, const Offset spDiff) {
   as.  push(rEC);
   emitGetGContext(as, rEC);
   as.  storeq(rVmFp, rEC[fpOff]);
-  if (spDiff) {
-    as.  lea(rVmSp[spDiff], rAsm);
-    as.  storeq(rAsm, rEC[spOff]);
-  } else {
-    as.  storeq(rVmSp, rEC[spOff]);
-  }
+  as.  storeq(rVmSp, rEC[spOff]);
   as.  storeq(pc, rEC[pcOff]);
   as.  pop(rEC);
 }

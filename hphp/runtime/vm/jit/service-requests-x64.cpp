@@ -89,7 +89,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   Asm a { mainCode };
   a.   mov_reg64_reg64(rVmFp, argNumToRegName[0]);
   if (tx64->fixupMap().eagerRecord(func)) {
-    emitEagerSyncPoint(a, func->getEntry(), 0);
+    emitEagerSyncPoint(a, func->getEntry());
   }
   emitCall(a, (TCA)builtinFuncPtr);
 

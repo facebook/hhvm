@@ -11,12 +11,27 @@ function highlight_file($filename, $return = false) {
 
 function highlight_string($data, $return = false) {
   $colors = [
-    'html' => '#000000',
-    'comment' => '#FF8000',
-    'default' => '#0000BB',
-    'string' => '#DD0000',
-    'keyword' => '#007700',
+    'html' => ini_get('highlight.html'),
+    'comment' => ini_get('highlight.comment'),
+    'default' => ini_get('highlight.default'),
+    'string' => ini_get('highlight.string'),
+    'keyword' => ini_get('highlight.keyword'),
   ];
+  if (empty($colors['html'])) {
+    $colors['html'] = "#000000";
+  }
+  if (empty($colors['comment'])) {
+    $colors['comment'] = "#FF8000";
+  }
+  if (empty($colors['default'])) {
+    $colors['default'] = "#0000BB";
+  }
+  if (empty($colors['string'])) {
+    $colors['string'] = "#DD0000";
+  }
+  if (empty($colors['keyword'])) {
+    $colors['keyword'] = "#007700";
+  }
 
   $output = '';
   $last_color = $colors['html'];

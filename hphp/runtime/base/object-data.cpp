@@ -709,6 +709,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       auto thiz = const_cast<ObjectData*>(this);
       Array wanted = Array::Create();
       Array props = ret.toArray();
+      Array vals = o_toArray();
       for (ArrayIter iter(props); iter; ++iter) {
         String name = iter.second().toString();
         bool visible, accessible, unset;
@@ -724,7 +725,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
               propName = concat4(s_zero, s_star, s_zero, name);
             }
           }
-          wanted.set(propName, o_toArray().lvalAt(propName));
+          wanted.set(propName, vals.lvalAt(propName));
         } else {
           raise_warning("\"%s\" returned as member variable from "
               "__sleep() but does not exist", name.data());

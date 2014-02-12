@@ -1846,8 +1846,8 @@ public:
   }
 
   // Segment register prefixes.
-  void fs()           { byte(0x64); }
-  void gs()           { byte(0x65); }
+  X64Assembler& fs()  { byte(0x64); return *this; }
+  X64Assembler& gs()  { byte(0x65); return *this; }
 
 public:
   /*

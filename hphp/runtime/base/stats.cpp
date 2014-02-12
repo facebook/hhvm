@@ -41,21 +41,6 @@ __thread StatGroupMap* tl_stat_groups = nullptr;
 
 std::atomic<const char*> helperNames[kMaxNumTrampolines];
 
-void
-emitInc(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
-  if (!force && !enabled()) return;
-  uintptr_t virtualAddress = uintptr_t(&tl_table[index]) - tlsBase();
-  X64Assembler a { cb };
-
-  a.    pushf ();
-  a.    push  (reg::rAsm);
-  a.    movq  (virtualAddress, reg::rAsm);
-  a.    fs();
-  a.    addq  (n, *reg::rAsm);
-  a.    pop   (reg::rAsm);
-  a.    popf  ();
-}
-
 void init() {
   if (!enabledAny()) return;
   assert(tl_stat_groups == nullptr);

@@ -239,17 +239,6 @@ inline StatCounter opcodeToIRPostStatCounter(Op opc) {
                      STATS_PER_OPCODE * uint8_t(opc));
 }
 
-// Both emitIncs use r10.
-extern void emitInc(CodeBlock& cb,
-                    uint64_t* tl_table,
-                    uint index,
-                    int n = 1,
-                    bool force = false);
-inline void emitInc(CodeBlock& cb, StatCounter stat, int n = 1,
-                    bool force = false) {
-  emitInc(cb, &tl_counters[0], stat, n, force);
-}
-
 extern void init();
 extern void dump();
 extern void clear();

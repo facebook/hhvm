@@ -646,7 +646,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
 
   m_tx64->registerCatchBlock(info.afterCall, m_as.frontier());
 
-  Stats::emitInc(m_mainCode, Stats::TC_CatchTrace);
+  emitIncStat(m_mainCode, Stats::TC_CatchTrace);
 
   // We want to restore state as though the call had completed
   // successfully, so skip over any stack arguments and pop any
@@ -677,7 +677,7 @@ void CodeGenerator::cgTryEndCatch(IRInstruction* inst) {
   unlikelyIfBlock(CC_E, callUnwindResumeHelper);
 
   // doSideExit == true, so fall through to the side exit code
-  Stats::emitInc(m_mainCode, Stats::TC_CatchSideExit);
+  emitIncStat(m_mainCode, Stats::TC_CatchSideExit);
 }
 
 void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
@@ -6406,10 +6406,10 @@ void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIncStat(IRInstruction *inst) {
-  Stats::emitInc(m_mainCode,
-                 Stats::StatCounter(inst->src(0)->getValInt()),
-                 inst->src(1)->getValInt(),
-                 inst->src(2)->getValBool());
+  emitIncStat(m_mainCode,
+              Stats::StatCounter(inst->src(0)->getValInt()),
+              inst->src(1)->getValInt(),
+              inst->src(2)->getValBool());
 }
 
 void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {

@@ -1649,7 +1649,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   uint32_t index = m_numNativeTrampolines++;
   TCA trampAddr = trampolines.frontier();
   if (Stats::enabled()) {
-    Stats::emitInc(trampolines, &Stats::tl_helper_counters[0], index);
+    emitIncStat(trampolines, &Stats::tl_helper_counters[0], index);
     auto name = getNativeFunctionName(helperAddr);
     const size_t limit = 50;
     if (name.size() > limit) {
@@ -1729,7 +1729,7 @@ TranslatorX64::emitGuardChecks(SrcKey sk,
                                const RefDeps& refDeps,
                                SrcRec& fail) {
   if (Trace::moduleEnabled(Trace::stats, 2)) {
-    Stats::emitInc(code.main(), Stats::TraceletGuard_enter);
+    emitIncStat(code.main(), Stats::TraceletGuard_enter);
   }
 
   m_irTrans->hhbcTrans().emitRB(RBTypeTraceletGuards, sk);
@@ -1741,7 +1741,7 @@ TranslatorX64::emitGuardChecks(SrcKey sk,
   checkRefs(sk, refDeps, fail);
 
   if (Trace::moduleEnabled(Trace::stats, 2)) {
-    Stats::emitInc(code.main(), Stats::TraceletGuard_execute);
+    emitIncStat(code.main(), Stats::TraceletGuard_execute);
   }
 }
 
@@ -2037,8 +2037,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       }
 
       ht.emitRB(RBTypeTraceletBody, t.m_sk);
-      Stats::emitInc(code.main(), Stats::Instr_TC, t.m_numOpcodes);
-
+      emitIncStat(code.main(), Stats::Instr_TC, t.m_numOpcodes);
     }
 
     // Profiling on function entry.
@@ -2543,6 +2542,18 @@ void TranslatorX64::setJmpTransID(TCA jmp) {
   TransID transId = m_profData->curTransID();
   FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);
   m_jmpToTransID[jmp] = transId;
+}
+
+void
+emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
+  if (!force && !Stats::enabled()) return;
+  intptr_t disp = uintptr_t(&tl_table[index]) - tlsBase();
+  X64Assembler a { cb };
+
+  a.    pushf ();
+  //    addq $n, [%fs:disp]
+  a.    fs().add_imm64_index_scale_disp_reg64(n, noreg, 1, disp, noreg);
+  a.    popf  ();
 }
 
 } // HPHP::JIT

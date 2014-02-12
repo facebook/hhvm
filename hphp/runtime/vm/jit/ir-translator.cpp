@@ -712,7 +712,7 @@ void IRTranslator::translateStrlen(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateIncStat(const NormalizedInstruction& i) {
-  HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA);
+  HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA, false);
 }
 
 void IRTranslator::translateIdx(const NormalizedInstruction& i) {
@@ -1615,14 +1615,13 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   }
 
   if (moduleEnabled(HPHP::Trace::stats, 2)) {
-    ht.emitIncStat(Stats::opcodeToIRPreStatCounter(ni.op()), 1);
+    ht.emitIncStat(Stats::opcodeToIRPreStatCounter(ni.op()), 1, false);
   }
   if (RuntimeOption::EnableInstructionCounts ||
       moduleEnabled(HPHP::Trace::stats, 3)) {
     // If the instruction takes a slow exit, the exit trace will
     // decrement the post counter for that opcode.
-    ht.emitIncStat(Stats::opcodeToIRPostStatCounter(ni.op()),
-                            1, true);
+    ht.emitIncStat(Stats::opcodeToIRPostStatCounter(ni.op()), 1, true);
   }
   ht.emitRB(RBTypeBytecodeStart, ni.source, 2);
 

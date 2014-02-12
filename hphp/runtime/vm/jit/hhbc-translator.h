@@ -396,7 +396,7 @@ struct HhbcTranslator {
   void emitAsyncWrapException();
 
   void emitStrlen();
-  void emitIncStat(int32_t counter, int32_t value, bool force = false);
+  void emitIncStat(int32_t counter, int32_t value, bool force);
   void emitIncTransCounter();
   void emitIncProfCounter(TransID transId);
   void emitCheckCold(TransID transId);

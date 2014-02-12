@@ -108,8 +108,7 @@ inline void
 emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
             RegNumber reg) {
   uintptr_t virtualAddress = uintptr_t(&datum.m_node.m_p) - tlsBase();
-  a.    fs();
-  a.    load_disp32_reg64(virtualAddress, reg);
+  a.    fs().load_disp32_reg64(virtualAddress, reg);
 }
 
 #else // USE_GCC_FAST_TLS

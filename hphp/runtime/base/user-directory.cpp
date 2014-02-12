@@ -56,7 +56,7 @@ Variant UserDirectory::read() {
   // String dir_readdir()
   bool success = false;
   auto ret = invoke(m_DirRead, s_dir_readdir,
-                    make_packed_array(), success);
+                    Array::Create(), success);
   if (!success) {
     raise_warning("%s::dir_readdir is not implemented",
                   m_cls->name()->data());
@@ -68,7 +68,7 @@ Variant UserDirectory::read() {
 void UserDirectory::rewind() {
   // String dir_rewinddir()
   bool success = false;
-  invoke(m_DirRewind, s_dir_rewinddir, make_packed_array(), success);
+  invoke(m_DirRewind, s_dir_rewinddir, Array::Create(), success);
   if (!success) {
     raise_warning("%s::dir_rewinddir is not implemented",
                   m_cls->name()->data());

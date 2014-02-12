@@ -1905,7 +1905,7 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc,
   assert(type.isSpecialized());
   if (type < Type::Res) {
     // No cls field in Resource
-    CG_PUNT(TypeTest-on-Resource);
+    always_assert(0 && "unexpected guard on specialized Resource");
   }
 
   if (type < Type::Obj) {

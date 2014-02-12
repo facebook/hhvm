@@ -1077,6 +1077,7 @@ void CodeGenerator::cgCheckStk(IRInstruction* inst) {
 
 void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto const src   = inst->src(0);
+  Type   srcType   = src->type();
   auto const rVal  = x2a(curOpd(src).reg(0));
   auto const rType = x2a(curOpd(src).reg(1));
 
@@ -1096,7 +1097,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       if (rType.IsValid()) {
         if (!typeDst.Is(rType)) m_as.Mov(typeDst, rType);
       } else {
-        m_as.Mov(typeDst, src->type().toDataType());
+        m_as.Mov(typeDst, srcType.toDataType());
       }
     }
   };
@@ -1106,23 +1107,36 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   };
 
   Type typeParam = inst->typeParam();
-  if (src->isA(typeParam)) {
+  if (src->isA(typeParam) ||
+      // Boxed types are checked lazily, so there's nothing to be done here.
+      (srcType.isBoxed() && typeParam.isBoxed())) {
     doMov();
     return;
   }
-  if (src->type().not(typeParam)) {
+  if (srcType.not(typeParam)) {
     emitJumpToBlock(m_tx64->code.main(), inst->taken(), CC_None);
     return;
   }
 
   if (rType.IsValid()) {
     emitTypeTest(typeParam, rType.W(), rVal, doJcc);
+  } else if (typeParam <= Type::Uncounted &&
+             ((srcType == Type::Str && typeParam.maybe(Type::StaticStr)) ||
+              (srcType == Type::Arr && typeParam.maybe(Type::StaticArr)))) {
+    // We carry Str and Arr operands around without a type register,
+    // even though they're union types.  The static and non-static
+    // subtypes are distinguised by the refcount field.
+    assert(rVal.IsValid());
+    m_as.  Ldr  (rAsm.W(), rVal[FAST_REFCOUNT_OFFSET]);
+    m_as.  Cmp  (rAsm, 0);
+    doJcc(CC_L);
   } else {
-    if (src->type().isBoxed() && typeParam.isBoxed()) {
-      // nothing
-    } else {
-      CG_PUNT(CheckType-known-SrcType);
-    }
+    always_assert_log(
+      false,
+      [&] {
+        return folly::format("Bad src: {} and dst: {} types in '{}'",
+                             srcType, typeParam, *inst).str();
+      });
   }
   doMov();
 }

@@ -2021,17 +2021,6 @@ public:
     emitIM(instr_ ## name, rdest, reg::noreg, sz::byte,                 \
            disp, imm);                                                  \
   }                                                                     \
-  /* op imm64, rdest */                                                 \
-  /* NOTE: This will emit multiple x64 instructions and use the */      \
-  /* scratch register if the immediate does not fit in 32 bits. */      \
-  inline void name ## _imm64_reg64(int64_t imm, RegNumber rdest) { \
-    if (deltaFits(imm, sz::dword)) {                                    \
-      name ## _imm32_reg64(imm, rdest);                                 \
-      return;                                                           \
-    }                                                                   \
-    mov_imm64_reg(imm, reg::rAsm);                                      \
-    name ## _reg64_reg64(reg::rAsm, rdest);                             \
-  }                                                                     \
   /* opq rsrc, disp(rdest) */                                           \
   inline void name ## _reg64_disp_reg64(RegNumber rsrc, int disp, \
                                         RegNumber rdest) {        \

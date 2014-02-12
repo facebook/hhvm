@@ -530,7 +530,7 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
       if (src1Type <= Type::Bool) {
         m_as.    cmpb (src2->getValRawInt(), rbyte(srcReg1));
       } else {
-        m_as.    cmp_imm64_reg64(src2->getValRawInt(), srcReg1);
+        m_as.    cmpq (src2->getValRawInt(), srcReg1);
       }
     } else {
       // Note the reverse syntax in the assembler.
@@ -538,7 +538,7 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
       if (src1Type <= Type::Bool) {
         m_as.    cmpb (rbyte(srcReg2), rbyte(srcReg1));
       } else {
-        m_as.    cmp_reg64_reg64(srcReg2, srcReg1);
+        m_as.    cmpq (srcReg2, srcReg1);
       }
     }
   }
@@ -1686,9 +1686,9 @@ void CodeGenerator::cgCmpHelper(
     // the common case: int cmp int
     if (type1 == Type::Int && type2 == Type::Int) {
       if (src2->isConst()) {
-        m_as.cmp_imm64_reg64(src2->getValInt(), src1Reg);
+        m_as.cmpq (src2->getValInt(), src1Reg);
       } else {
-        m_as.cmp_reg64_reg64(src2Reg, src1Reg);
+        m_as.cmpq (src2Reg, src1Reg);
       }
       setFromFlags();
     }

@@ -316,6 +316,8 @@ struct Type::Intersect {
   static Type combineSame(bits_t bits, bits_t typeMask,
                           folly::Optional<T> aOpt,
                           folly::Optional<T> bOpt) {
+    if (!bits) return Type::Bottom;
+
     // We shouldn't get here if neither is specialized.
     assert(aOpt || bOpt);
 

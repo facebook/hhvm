@@ -53,10 +53,6 @@ struct State {
   std::vector<Type> locals;
   std::vector<Type> stack;
   std::vector<ActRec> fpiStack;
-
-  // Private instance or static properties on the current object.
-  PropState privateProperties;
-  PropState privateStatics;
 };
 
 /*

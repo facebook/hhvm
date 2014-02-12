@@ -340,6 +340,12 @@ struct Index {
   Type lookup_return_type_raw(borrowed_ptr<const php::Func>) const;
 
   /*
+   * Return the availability of $this on entry to the provided method.
+   * If the Func provided is not a method of a class false is returned.
+   */
+  bool lookup_this_available(borrowed_ptr<const php::Func>) const;
+
+  /*
    * Returns the parameter preparation kind (if known) for parameter
    * `paramId' on the given resolved Func.
    */

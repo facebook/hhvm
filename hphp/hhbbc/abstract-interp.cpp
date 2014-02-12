@@ -92,6 +92,9 @@ std::string state_string(const php::Func& f, const State& st) {
   }
 
   ret = "state:\n";
+  if (f.cls) {
+    ret += folly::format("thisAvailable({})\n", st.thisAvailable).str();
+  }
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
     ret += folly::format("${: <8} :: {}\n",
       f.locals[i]->name
@@ -105,20 +108,6 @@ std::string state_string(const php::Func& f, const State& st) {
     ret += folly::format("stk[{:02}] :: {}\n",
       i,
       show(st.stack[i])
-    ).str();
-  }
-
-  if (st.thisAvailable) { ret += "$this is not null\n"; }
-  for (auto& kv : st.privateProperties) {
-    ret += folly::format("$this->{: <14} :: {}\n",
-      kv.first->data(),
-      show(kv.second)
-    ).str();
-  }
-  for (auto& kv : st.privateStatics) {
-    ret += folly::format("self::${: <14} :: {}\n",
-      kv.first->data(),
-      show(kv.second)
     ).str();
   }
 
@@ -202,13 +191,6 @@ bool merge_into(State& dst, const State& src) {
     }
   }
 
-  if (merge_into(dst.privateProperties, src.privateProperties)) {
-    changed = true;
-  }
-  if (merge_into(dst.privateStatics, src.privateStatics)) {
-    changed = true;
-  }
-
   return changed;
 }
 
@@ -219,8 +201,6 @@ State without_stacks(State const& src) {
   ret.initialized       = src.initialized;
   ret.thisAvailable     = src.thisAvailable;
   ret.locals            = src.locals;
-  ret.privateProperties = src.privateProperties;
-  ret.privateStatics    = src.privateStatics;
   return ret;
 }
 
@@ -288,6 +268,65 @@ struct StepFlags {
   folly::Optional<Type> returned;
 };
 
+/*
+ * PropertiesInfo returns the PropState for private instance and static
+ * properties.
+ *
+ * During analysis the ClassAnalysis* is available and the PropState is
+ * retrieved from there. However during optimization the ClassAnalysis is
+ * not available and the PropState has to be retrieved off the Class in
+ * the Index. In that case cls is nullptr and the PropState fields are
+ * populated.
+ */
+struct PropertiesInfo {
+  PropertiesInfo(const Index& index, Context const ctx, ClassAnalysis* cls)
+      : m_cls(cls) {
+    if (m_cls == nullptr && ctx.cls != nullptr) {
+      m_privateProperties = index.lookup_private_props(ctx.cls);
+      m_privateStatics = index.lookup_private_statics(ctx.cls);
+    }
+  }
+
+  PropState& privateProperties() {
+    if (m_cls != nullptr) {
+      return m_cls->privateProperties;
+    }
+    return m_privateProperties;
+  }
+
+  PropState& privateStatics() {
+    if (m_cls != nullptr) {
+      return m_cls->privateStatics;
+    }
+    return m_privateStatics;
+  }
+
+private:
+  ClassAnalysis* const m_cls;
+  PropState m_privateProperties;
+  PropState m_privateStatics;
+};
+
+std::string property_state_string(PropertiesInfo& props) {
+  std::string ret;
+
+  ret += "properties:\n";
+  for (auto& kv : props.privateProperties()) {
+    ret += folly::format("$this->{: <14} :: {}\n",
+      kv.first->data(),
+      show(kv.second)
+    ).str();
+  }
+  for (auto& kv : props.privateStatics()) {
+    ret += folly::format("self::${: <14} :: {}\n",
+      kv.first->data(),
+      show(kv.second)
+    ).str();
+  }
+
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // Some member instruction type-system predicates.
@@ -315,12 +354,14 @@ template<class Propagate, class PropagateThrow>
 struct InterpStepper : boost::static_visitor<void> {
   explicit InterpStepper(const Index* index,
                          Context ctx,
+                         PropertiesInfo& props,
                          State& st,
                          StepFlags& flags,
                          Propagate propagate,
                          PropagateThrow propagateThrow)
     : m_index(*index)
     , m_ctx(ctx)
+    , m_props(props)
     , m_state(st)
     , m_flags(flags)
     , m_propagate(propagate)
@@ -3195,8 +3236,9 @@ private: // properties on $this
    */
 
   Type* thisPropRaw(SString name) const {
-    auto const it = m_state.privateProperties.find(name);
-    if (it != end(m_state.privateProperties)) {
+    auto& privateProperties = m_props.privateProperties();
+    auto const it = privateProperties.find(name);
+    if (it != end(privateProperties)) {
       return &it->second;
     }
     return nullptr;
@@ -3206,7 +3248,7 @@ private: // properties on $this
 
   void killThisProps() {
     FTRACE(2, "    killThisProps\n");
-    for (auto& kv : m_state.privateProperties) kv.second = TGen;
+    for (auto& kv : m_props.privateProperties()) kv.second = TGen;
   }
 
   /*
@@ -3257,14 +3299,14 @@ private: // properties on $this
    */
   template<class MapFn>
   void mergeEachThisPropRaw(MapFn fn) {
-    for (auto& kv : m_state.privateProperties) {
+    for (auto& kv : m_props.privateProperties()) {
       mergeThisProp(kv.first, fn(kv.second));
     }
   }
 
   void unsetThisProp(SString name) { mergeThisProp(name, TUninit); }
   void unsetUnknownThisProp() {
-    for (auto& kv : m_state.privateProperties) {
+    for (auto& kv : m_props.privateProperties()) {
       mergeThisProp(kv.first, TUninit);
     }
   }
@@ -3283,7 +3325,7 @@ private: // properties on $this
    */
   void loseNonRefThisPropTypes() {
     FTRACE(2, "    loseNonRefThisPropTypes\n");
-    for (auto& kv : m_state.privateProperties) {
+    for (auto& kv : m_props.privateProperties()) {
       if (kv.second.subtypeOf(TCell)) kv.second = TCell;
     }
   }
@@ -3293,8 +3335,9 @@ private: // properties on self::
   // insensitive types for these.
 
   Type* selfPropRaw(SString name) const {
-    auto it = m_state.privateStatics.find(name);
-    if (it != end(m_state.privateStatics)) {
+    auto& privateStatics = m_props.privateStatics();
+    auto it = privateStatics.find(name);
+    if (it != end(privateStatics)) {
       return &it->second;
     }
     return nullptr;
@@ -3302,7 +3345,7 @@ private: // properties on self::
 
   void killSelfProps() {
     FTRACE(2, "    killSelfProps\n");
-    for (auto& kv : m_state.privateStatics) kv.second = TGen;
+    for (auto& kv : m_props.privateStatics()) kv.second = TGen;
   }
 
   void killSelfProp(SString name) const {
@@ -3335,7 +3378,7 @@ private: // properties on self::
    */
   template<class MapFn>
   void mergeEachSelfPropRaw(MapFn fn) {
-    for (auto& kv : m_state.privateStatics) {
+    for (auto& kv : m_props.privateStatics()) {
       mergeSelfProp(kv.first, fn(kv.second));
     }
   }
@@ -3353,7 +3396,7 @@ private: // properties on self::
    */
   void loseNonRefSelfPropTypes() {
     FTRACE(2, "    loseNonRefSelfPropTypes\n");
-    for (auto& kv : m_state.privateStatics) {
+    for (auto& kv : m_props.privateStatics()) {
       if (kv.second.subtypeOf(TInitCell)) kv.second = TCell;
     }
   }
@@ -3361,6 +3404,7 @@ private: // properties on self::
 private:
   const Index& m_index;
   const Context m_ctx;
+  PropertiesInfo& m_props;
   State& m_state;
   StepFlags& m_flags;
   Propagate m_propagate;
@@ -3372,10 +3416,12 @@ private:
 struct Interpreter {
   Interpreter(const Index* index,
               Context ctx,
+              PropertiesInfo& props,
               const php::Block* blk,
               State& state)
     : m_index(*index)
     , m_ctx(ctx)
+    , m_props(props)
     , m_blk(*blk)
     , m_state(state)
   {}
@@ -3384,10 +3430,9 @@ struct Interpreter {
    * Run the interpreter on a whole block, propagating states using
    * the propagate function.
    */
-  template<class Propagate, class MergeReturn, class MergePrivates>
+  template<class Propagate, class MergeReturn>
   void run(Propagate propagate,
-           MergeReturn mergeReturn,
-           MergePrivates mergePrivates) {
+           MergeReturn mergeReturn) {
     SCOPE_EXIT {
       FTRACE(2, "out {}\n", state_string(*m_ctx.func, m_state));
     };
@@ -3410,8 +3455,6 @@ struct Interpreter {
       }
     }
 
-    mergePrivates(m_state.privateProperties, m_state.privateStatics);
-
     FTRACE(2, "  <end block>\n");
     if (m_blk.fallthrough) propagate(*m_blk.fallthrough, m_state);
   }
@@ -3429,6 +3472,7 @@ struct Interpreter {
     InterpStepper<decltype(propagate),decltype(propagateThrow)> stepper(
       &m_index,
       m_ctx,
+      m_props,
       m_state,
       flags,
       propagate,
@@ -3517,6 +3561,7 @@ private:
     InterpStepper<Propagate,decltype(propagateThrow)> stepper(
       &m_index,
       m_ctx,
+      m_props,
       m_state,
       flags,
       propagate,
@@ -3550,6 +3595,7 @@ private:
 private:
   const Index& m_index;
   const Context m_ctx;
+  PropertiesInfo& m_props;
   const php::Block& m_blk;
   State& m_state;
 };
@@ -3801,7 +3847,8 @@ std::vector<Bytecode> optimize_block(const Index& index,
 
   auto lastStackOutputObvious = false;
 
-  Interpreter interp { &index, ctx, blk, state };
+  PropertiesInfo props(index, ctx, nullptr);
+  Interpreter interp { &index, ctx, props, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
 
@@ -3896,7 +3943,7 @@ State entry_state(const Index& index,
                   ClassAnalysis* clsAnalysis) {
   State ret;
   ret.initialized = true;
-  ret.thisAvailable = false;
+  ret.thisAvailable = index.lookup_this_available(ctx.func);
   ret.locals.resize(ctx.func->locals.size());
 
   uint32_t locId = 0;
@@ -3936,20 +3983,6 @@ State entry_state(const Index& index,
     ret.locals[locId] =
       ctx.func->isGeneratorBody || ctx.func->isClosureBody ? TGen : TUninit;
   }
-
-  /*
-   * Get private properties into the entry state.  If there is a
-   * clsAnalysis object, we should use the state from there.
-   * Otherwise use the best known information in the index.
-   */
-  ret.privateProperties =
-    clsAnalysis ? clsAnalysis->privateProperties :
-    ctx.cls     ? index.lookup_private_props(ctx.cls)
-                : PropState{};
-  ret.privateStatics =
-    clsAnalysis ? clsAnalysis->privateStatics :
-    ctx.cls     ? index.lookup_private_statics(ctx.cls)
-                : PropState{};
 
   return ret;
 }
@@ -4032,10 +4065,11 @@ FuncAnalysis do_analyze(const Index& index,
   while (!incompleteQ.empty()) {
     auto blk = ai.rpoBlocks[*begin(incompleteQ)];
     incompleteQ.erase(begin(incompleteQ));
+    PropertiesInfo props(index, inputCtx, clsAnalysis);
 
-    FTRACE(2, "block #{}\nin {}", blk->id,
-      state_string(*ctx.func, ai.bdata[blk->id].stateIn));
-
+    FTRACE(2, "block #{}\nin {}\n{}", blk->id,
+      state_string(*ctx.func, ai.bdata[blk->id].stateIn),
+      property_state_string(props));
     ++interp_counter;
 
     auto propagate = [&] (php::Block& target, const State& st) {
@@ -4054,16 +4088,9 @@ FuncAnalysis do_analyze(const Index& index,
       ai.inferredReturn = union_of(ai.inferredReturn, type);
     };
 
-    auto mergePrivates = [&] (const PropState& props,
-                              const PropState& statics) {
-      if (!clsAnalysis) return;
-      merge_into(clsAnalysis->privateProperties, props);
-      merge_into(clsAnalysis->privateStatics, statics);
-    };
-
     auto stateOut = ai.bdata[blk->id].stateIn;
-    Interpreter interp { &index, ctx, blk, stateOut };
-    interp.run(propagate, mergeReturn, mergePrivates);
+    Interpreter interp { &index, ctx, props, blk, stateOut };
+    interp.run(propagate, mergeReturn);
   }
 
   /*
@@ -4126,9 +4153,7 @@ bool operator==(const State& a, const State& b) {
     a.thisAvailable == b.thisAvailable &&
     a.locals == b.locals &&
     a.stack == b.stack &&
-    a.fpiStack == b.fpiStack &&
-    a.privateProperties == b.privateProperties &&
-    a.privateStatics == b.privateStatics;
+    a.fpiStack == b.fpiStack;
 }
 
 bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }

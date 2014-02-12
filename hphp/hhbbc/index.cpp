@@ -177,6 +177,12 @@ struct FuncInfo {
    * return (e.g. always throws).
    */
   Type returnTy = TInitGen;
+
+  /*
+   * Whether $this can be null or not on entry to the method. Only applies
+   * to method and it's always false for functions.
+   */
+  bool thisAvailalble = false;
 };
 
 /*
@@ -470,6 +476,7 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
       ret.returnTy = union_of(t, TInitNull);
     }
   }
+  ret.thisAvailalble = false;
   return &ret;
 }
 
@@ -1160,6 +1167,11 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
   auto it = m_data->funcInfo.find(f);
   if (it != end(m_data->funcInfo)) return it->second.returnTy;
   return TInitGen;
+}
+
+bool Index::lookup_this_available(borrowed_ptr<const php::Func> f) const {
+  auto it = m_data->funcInfo.find(f);
+  return (it != end(m_data->funcInfo)) ? it->second.thisAvailalble : false;
 }
 
 // Parameter preparation modes never change during analysis, so

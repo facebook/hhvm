@@ -19,7 +19,7 @@
 
 
 	$stmt = mysqli_stmt_init($link);
-	$stmt->prepare("SELECT * FROM test");
+	$stmt->prepare("SELECT * FROM test_mysqli_stmt_attr_set_table_1");
 
 	mt_srand(microtime(true));
 
@@ -49,7 +49,7 @@
 
 	// expecting max_length not to be set and be 0 in all cases
 	$stmt = mysqli_stmt_init($link);
-	$stmt->prepare("SELECT label FROM test");
+	$stmt->prepare("SELECT label FROM test_mysqli_stmt_attr_set_table_1");
 	$stmt->execute();
 	$stmt->store_result();
 	$res = $stmt->result_metadata();
@@ -65,7 +65,7 @@
 
 	// expecting max_length to _be_ set
 	$stmt = mysqli_stmt_init($link);
-	$stmt->prepare("SELECT label FROM test");
+	$stmt->prepare("SELECT label FROM test_mysqli_stmt_attr_set_table_1");
 	$stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1);
 	$res = $stmt->attr_get(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
 	if ($res !== 1)
@@ -85,7 +85,7 @@
 
 	// expecting max_length not to be set
 	$stmt = mysqli_stmt_init($link);
-	$stmt->prepare("SELECT label FROM test");
+	$stmt->prepare("SELECT label FROM test_mysqli_stmt_attr_set_table_1");
 	$stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 0);
 	$res = $stmt->attr_get(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
 	if ($res !== 0)
@@ -120,7 +120,7 @@
 		} while (in_array($invalid_cursor_type, $cursor_types));
 
 		$stmt = mysqli_stmt_init($link);
-		$stmt->prepare("SELECT id, label FROM test");
+		$stmt->prepare("SELECT id, label FROM test_mysqli_stmt_attr_set_table_1");
 		if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_FOR_UPDATE)))
 			printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
@@ -136,7 +136,7 @@
 		$stmt->close();
 
 		$stmt = mysqli_stmt_init($link);
-		$stmt->prepare("SELECT id, label FROM test");
+		$stmt->prepare("SELECT id, label FROM test_mysqli_stmt_attr_set_table_1");
 		$stmt->execute();
 		$id = $label = NULL;
 		$stmt->bind_result($id, $label);
@@ -148,7 +148,7 @@
 			printf("[015] Results should not be empty, subsequent tests will probably fail!\n");
 
 		$stmt = mysqli_stmt_init($link);
-		$stmt->prepare("SELECT id, label FROM test");
+		$stmt->prepare("SELECT id, label FROM test_mysqli_stmt_attr_set_table_1");
 		if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_NO_CURSOR)))
 			printf("[016] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 		$stmt->execute();
@@ -165,7 +165,7 @@
 		}
 
 		$stmt = mysqli_stmt_init($link);
-		$stmt->prepare("SELECT id, label FROM test");
+		$stmt->prepare("SELECT id, label FROM test_mysqli_stmt_attr_set_table_1");
 		if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_READ_ONLY)))
 			printf("[018] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 		$stmt->execute();
@@ -191,7 +191,7 @@
 	if (mysqli_get_client_version() > 50007) {
 
 		$stmt = mysqli_stmt_init($link);
-		$stmt->prepare("SELECT id, label FROM test");
+		$stmt->prepare("SELECT id, label FROM test_mysqli_stmt_attr_set_table_1");
 		if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 1)))
 			printf("[020] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 		$stmt->execute();
@@ -206,19 +206,19 @@
 
 		/* prefetch is not supported
 		$stmt = mysqli_stmt_init($link);
-		$stmt->prepare("SELECT label FROM test");
+		$stmt->prepare("SELECT label FROM test_mysqli_stmt_attr_set_table_1");
 		if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, -1)))
 			printf("[022] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 		$stmt->close();
 
 		$stmt = mysqli_stmt_init($link);
-		$stmt->prepare("SELECT label FROM test");
+		$stmt->prepare("SELECT label FROM test_mysqli_stmt_attr_set_table_1");
 		if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, PHP_INT_MAX)))
 				printf("[023] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 		$stmt->close();
 
 		$stmt = mysqli_stmt_init($link);
-		$stmt->prepare("SELECT id, label FROM test");
+		$stmt->prepare("SELECT id, label FROM test_mysqli_stmt_attr_set_table_1");
 		if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 2)))
 			printf("[024] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 		$stmt->execute();

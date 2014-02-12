@@ -5,7 +5,7 @@
 
 		/* we are aiming for maximum compression to test MYSQLI_CLIENT_COMPRESS */
 		$random_char = str_repeat('a', 255);
-		$sql = "INSERT INTO test(label) VALUES ";
+		$sql = "INSERT INTO test_mysqli_fetch_array_large_table_1(label) VALUES ";
 
 		while (strlen($sql) < ($package_size - 259))
 			$sql .= sprintf("('%s'), ", $random_char);
@@ -27,7 +27,7 @@
 		}
 
 		/* buffered result set - let's hope we do not run into PHP memory limit... */
-		if (!$res = mysqli_query($link, "SELECT id, label FROM test")) {
+		if (!$res = mysqli_query($link, "SELECT id, label FROM test_mysqli_fetch_array_large_table_1")) {
 			printf("[%03d + 2] len = %d, [%d] %s\n", $offset, $len, mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
@@ -41,7 +41,7 @@
 		}
 		mysqli_free_result($res);
 
-		if (!$stmt = mysqli_prepare($link, "SELECT id, label FROM test")) {
+		if (!$stmt = mysqli_prepare($link, "SELECT id, label FROM test_mysqli_fetch_array_large_table_1")) {
 			printf("[%03d + 4] len = %d, [%d] %s\n", $offset, $len, mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
@@ -101,8 +101,8 @@
 			return false;
 		}
 
-		if (!mysqli_query($link, "DROP TABLE IF EXISTS test") ||
-			!mysqli_query($link, sprintf("CREATE TABLE test(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, label VARCHAR(255)) ENGINE = %s", $engine))) {
+		if (!mysqli_query($link, "DROP TABLE IF EXISTS test_mysqli_fetch_array_large_table_1") ||
+			!mysqli_query($link, sprintf("CREATE TABLE test_mysqli_fetch_array_large_table_1(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, label VARCHAR(255)) ENGINE = %s", $engine))) {
 			printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 			return false;
 		}

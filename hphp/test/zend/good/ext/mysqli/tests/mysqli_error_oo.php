@@ -13,13 +13,13 @@
 	if (!is_string($tmp) || ('' !== $tmp))
 		printf("[003] Expecting string/empty, got %s/%s. [%d] %s\n", gettype($tmp), $tmp, $mysqli->errno, $mysqli->error);
 
-	if (!$mysqli->query('DROP TABLE IF EXISTS test')) {
+	if (!$mysqli->query('DROP TABLE IF EXISTS test_mysqli_error_oo_table_1')) {
 		printf("[004] Failed to drop old test table: [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
 
-	$mysqli->query('SELECT * FROM test');
+	$mysqli->query('SELECT * FROM test_mysqli_error_oo_table_1');
 	$tmp = $mysqli->error;
-	if (!is_string($tmp) || !preg_match("/Table '\w*\.test' doesn't exist/su", $tmp))
+	if (!is_string($tmp) || !preg_match("/Table '\w*\.test_mysqli_error_oo_table_1' doesn't exist/su", $tmp))
 		printf("[006] Expecting string/[Table... doesn't exit], got %s/%s. [%d] %s\n", gettype($tmp), $tmp, $mysqli->errno, $mysqli->error);
 
 	$mysqli->close();

@@ -919,6 +919,12 @@ class mysqli_result {
   private bool $__done = false;
 
   public function __get(string $name): mixed {
+    if ($this->__result === null) {
+      trigger_error("supplied argument is not a valid MySQL result resource",
+                    E_USER_WARNING);
+      return null;
+    }
+
     switch ($name) {
       case 'current_field':
         return $this->hh_field_tell();
@@ -1352,8 +1358,8 @@ class mysqli_stmt {
    *
    * @return void -
    */
-  //<<__Native>>
-  //public function data_seek(int $offset): void;
+  <<__Native>>
+  public function data_seek(int $offset): void;
 
   /**
    * Executes a prepared Query
@@ -2767,9 +2773,9 @@ function mysqli_stmt_close(mysqli_stmt $stmt): bool {
  *
  * @return void -
  */
-//function mysqli_stmt_data_seek(mysqli_stmt $stmt, int $offset): void {
-//  $stmt->data_seek($offset);
-//}
+function mysqli_stmt_data_seek(mysqli_stmt $stmt, int $offset): void {
+  $stmt->data_seek($offset);
+}
 
 /**
  * Returns the error code for the most recent statement call

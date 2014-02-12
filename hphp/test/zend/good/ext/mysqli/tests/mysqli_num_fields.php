@@ -24,9 +24,9 @@
 	}
 
 	func_test_mysqli_num_fields($link, "SELECT 1 AS a", 1, 5);
-	func_test_mysqli_num_fields($link, "SELECT id, label FROM test", 2, 10);
+	func_test_mysqli_num_fields($link, "SELECT id, label FROM test_mysqli_num_fields_table_1", 2, 10);
 	func_test_mysqli_num_fields($link, "SELECT 1 AS a, NULL AS b, 'foo' AS c", 3, 15);
-	func_test_mysqli_num_fields($link, "SELECT id FROM test", 1, 20, true);
+	func_test_mysqli_num_fields($link, "SELECT id FROM test_mysqli_num_fields_table_1", 1, 20, true);
 
 	mysqli_close($link);
 

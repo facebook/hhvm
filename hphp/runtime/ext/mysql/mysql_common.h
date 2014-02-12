@@ -302,6 +302,7 @@ public:
   Variant attr_set(int64_t attr, int64_t value);
   Variant bind_param(const String& types, std::vector<Variant*> vars);
   Variant bind_result(std::vector<Variant*> vars);
+  Variant data_seek(int64_t offset);
   Variant get_errno();
   Variant get_error();
   Variant execute();

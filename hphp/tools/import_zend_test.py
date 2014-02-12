@@ -1114,21 +1114,42 @@ def walk(filename, dest_subdir):
                 'bug52891': ['tuint', 'tsint'],
                 'bug53503': ['test'],
                 'bug54221': ['t54221'],
+                'mysqli_affected_rows': ['test'],
+                'mysqli_affected_rows_oo': ['test'],
+                'mysqli_autocommit':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_autocommit_oo':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
                 'mysqli_change_user_insert_id': ['test'],
                 'mysqli_change_user_locks_temporary':
                     [re.compile('(?<= )test')],
                 'mysqli_change_user_rollback': ['test'],
                 'mysqli_character_set': [re.compile('test(?!!)')],
+                'mysqli_class_mysqli_properties_no_conn': ['test'],
                 'mysqli_class_mysqli_result_interface': ['test'],
                 'mysqli_class_mysqli_stmt_interface': ['test'],
+                'mysqli_commit':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_commit_oo':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
                 'mysqli_data_seek': ['test'],
                 'mysqli_data_seek_oo': ['test'],
+                'mysqli_errno':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_errno_oo':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_error':
+                    [re.compile('test(?! )')],
+                'mysqli_error_oo':
+                    [re.compile('test(?! )')],
                 'mysqli_expire_password': [re.compile('(?<= )test')],
                 'mysqli_explain_metadata': ['test'],
                 'mysqli_fetch_all': ['test'],
                 'mysqli_fetch_all_oo': ['test'],
                 'mysqli_fetch_array': ['test'],
                 'mysqli_fetch_array_assoc': ['test'],
+                'mysqli_fetch_array_large':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
                 'mysqli_fetch_array_many_rows': ['test'],
                 'mysqli_fetch_array_oo': ['test'],
                 'mysqli_fetch_assoc': [re.compile('(?<= )test(?= )')],
@@ -1157,6 +1178,7 @@ def walk(filename, dest_subdir):
                 'mysqli_free_result': ['test'],
                 'mysqli_get_client_stats': [re.compile('(?<= )test')],
                 'mysqli_get_client_stats_skipped': ['test'],
+                'mysqli_info': ['test'],
                 'mysqli_insert_id': ['test'],
                 'mysqli_insert_packet_overflow': ['test'],
                 'mysqli_kill': [re.compile('test(?= )')],
@@ -1165,6 +1187,7 @@ def walk(filename, dest_subdir):
                 'mysqli_more_results': ['test'],
                 'mysqli_multi_query': ['test'],
                 'mysqli_next_result': [re.compile('(?<= )test')],
+                'mysqli_num_fields': [re.compile('(?<= )test')],
                 'mysqli_num_rows': [re.compile('(?<= )test')],
                 'mysqli_options_init_command': [re.compile('test(?! more)')],
                 'mysqli_pconn_kill': ['test'],
@@ -1181,28 +1204,41 @@ def walk(filename, dest_subdir):
                 'mysqli_real_escape_string_gbk': ['test'],
                 'mysqli_real_escape_string_nobackslash': ['test'],
                 'mysqli_real_escape_string_sjis': ['test'],
+                'mysqli_real_query': ['test'],
                 'mysqli_report': [re.compile('(?<=(INTO|FROM) )test')],
                 'mysqli_result_references': ['test'],
                 'mysqli_result_references_mysqlnd': ['test'],
+                'mysqli_rollback':
+                    [re.compile('(?<=(INTO|FROM|ISTS|ABLE) )test')],
                 'mysqli_select_db': ['test'],
+                'mysqli_sqlstate': ['test'],
+                'mysqli_stmt_affected_rows':
+                    [re.compile('(?<=(INTO|FROM|ISTS|ABLE) )test')],
                 'mysqli_stmt_attr_get': ['test'],
+                'mysqli_stmt_attr_set': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_bind_limits': ['test'],
                 'mysqli_stmt_bind_param':
                     [re.compile('(?<=(INTO|FROM|ISTS|ABLE) )test')],
                 'mysqli_stmt_bind_param_call_user_func': ['test'],
                 'mysqli_stmt_bind_param_references': ['test'],
+                'mysqli_stmt_bind_param_type_juggling':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
                 'mysqli_stmt_bind_result': [re.compile('test(?!(s| is))')],
                 'mysqli_stmt_bind_result_bit': [re.compile('test(?!s)')],
                 'mysqli_stmt_bind_result_format':
                     [re.compile('test(?!_format)'), 'DUAL'],
                 'mysqli_stmt_bind_result_references': ['test'],
                 'mysqli_stmt_bind_result_zerofill': [re.compile('test(?= )')],
+                'mysqli_stmt_close': ['test'],
                 'mysqli_stmt_data_seek': ['test'],
                 'mysqli_stmt_errno': ['test'],
                 'mysqli_stmt_error': ['test'],
                 'mysqli_stmt_execute': [re.compile('(?<=(INTO|FROM) )test')],
                 'mysqli_stmt_fetch': [re.compile('(?<=FROM )test')],
                 'mysqli_stmt_fetch_bit': [re.compile('test(?!s)')],
+                'mysqli_stmt_fetch_fields_win32_unicode': ['test'],
                 'mysqli_stmt_fetch_geom': ['test'],
+                'mysqli_stmt_field_count': ['test'],
                 'mysqli_stmt_free_result': [re.compile('(?<=FROM )test')],
                 'mysqli_stmt_get_result': [re.compile('(?<=FROM )test')],
                 'mysqli_stmt_get_result_bit': [re.compile('(?<= )test')],
@@ -1219,10 +1255,13 @@ def walk(filename, dest_subdir):
                 'mysqli_stmt_num_rows': [re.compile('(?<!run_)test')],
                 'mysqli_stmt_param_count': ['test'],
                 'mysqli_stmt_prepare': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_reset':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
                 'mysqli_stmt_result_metadata': ['test'],
                 'mysqli_stmt_send_long_data': [re.compile('(?<!=we )test')],
                 'mysqli_stmt_send_long_data_packet_size_libmysql':
                     [re.compile('(?<=(INTO|ISTS|ABLE) )test')],
+                'mysqli_stmt_sqlstate': ['test'],
                 'mysqli_stmt_store_result':
                     [re.compile('(?<=(INTO|FROM) )test')],
                 'mysqli_store_result': ['test'],

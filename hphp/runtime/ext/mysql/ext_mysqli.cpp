@@ -277,10 +277,13 @@ static void HHVM_METHOD(mysqli, hh_update_last_error, Object stmt_obj) {
   assert(stmt);
 
   auto s = stmt->get();
+  auto mysql = conn->get();
 
   auto last_errno = mysql_stmt_errno(s);
   char last_error[MYSQL_ERRMSG_SIZE];
+  char sqlstate[SQLSTATE_LENGTH + 1];
   memcpy(last_error, mysql_stmt_error(s), MYSQL_ERRMSG_SIZE);
+  memcpy(sqlstate, mysql->net.sqlstate, SQLSTATE_LENGTH + 1);
 
   // This will clear the error both on the stmt and connection so we make sure
   // it closed now. Otherwise it will happen when the object is swept later
@@ -289,9 +292,9 @@ static void HHVM_METHOD(mysqli, hh_update_last_error, Object stmt_obj) {
   // The MySQL C API documentation say that you shouldn't touch the internals of
   // the MySQL's datastructurs. But this is how Zend does it and there is no
   // other good way
-  auto mysql = conn->get();
   mysql->net.last_errno = last_errno;
   memcpy(mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
+  memcpy(mysql->net.sqlstate, sqlstate, SQLSTATE_LENGTH + 1);
 }
 
 static Variant HHVM_METHOD(mysqli, kill, int64_t processid) {
@@ -490,9 +493,9 @@ static Variant HHVM_METHOD(mysqli_stmt, close) {
   return getStmt(this_)->close();
 }
 
-//static void HHVM_METHOD(mysqli_stmt, data_seek, int64_t offset) {
-//  throw NotImplementedException(__FUNCTION__);
-//}
+static void HHVM_METHOD(mysqli_stmt, data_seek, int64_t offset) {
+  getStmt(this_)->data_seek(offset);
+}
 
 static Variant HHVM_METHOD(mysqli_stmt, execute) {
   return getStmt(this_)->execute();
@@ -647,7 +650,7 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli_stmt, bind_param);
     HHVM_ME(mysqli_stmt, bind_result);
     HHVM_ME(mysqli_stmt, close);
-    //HHVM_ME(mysqli_stmt, data_seek);
+    HHVM_ME(mysqli_stmt, data_seek);
     HHVM_ME(mysqli_stmt, execute);
     HHVM_ME(mysqli_stmt, fetch);
     HHVM_ME(mysqli_stmt, free_result);

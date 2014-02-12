@@ -12,7 +12,7 @@
 	if (!is_null($tmp = mysqli_stmt_close($stmt)))
 		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test"))
+	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test_mysqli_stmt_close_table_1"))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	if (true !== ($tmp = mysqli_stmt_close($stmt)))
@@ -24,7 +24,7 @@
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (?, ?)"))
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_close_table_1(id, label) VALUES (?, ?)"))
 		printf("[009] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	$id = $label = null;
@@ -46,7 +46,7 @@
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test"))
+	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test_mysqli_stmt_close_table_1"))
 		printf("[014] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	$id = $label = null;

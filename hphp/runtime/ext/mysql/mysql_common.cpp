@@ -1023,6 +1023,13 @@ Variant MySQLStmt::bind_result(std::vector<Variant*> vars) {
   return m_result_vars->bind_result(m_stmt);
 }
 
+Variant MySQLStmt::data_seek(int64_t offset) {
+  VALIDATE_PREPARED
+
+  mysql_stmt_data_seek(m_stmt, offset);
+  return init_null();
+}
+
 Variant MySQLStmt::get_errno() {
   VALIDATE_STMT
   return (int64_t)mysql_stmt_errno(m_stmt);
@@ -1117,8 +1124,8 @@ Variant MySQLStmt::prepare(const String& query) {
 }
 
 Variant MySQLStmt::reset() {
-  VALIDATE_STMT
-  return mysql_stmt_reset(m_stmt);
+  VALIDATE_PREPARED
+  return !mysql_stmt_reset(m_stmt);
 }
 
 Variant MySQLStmt::store_result() {

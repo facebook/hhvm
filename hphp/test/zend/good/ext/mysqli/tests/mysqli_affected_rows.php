@@ -11,61 +11,61 @@
 		printf("[005] Expecting int/0, got %s/%s. [%d] %s\n",
 			gettype($tmp), $tmp, mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, 'DROP TABLE IF EXISTS test'))
+	if (!mysqli_query($link, 'DROP TABLE IF EXISTS test_mysqli_affected_rows_table_1'))
 		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, 'CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE = ' . $engine))
+	if (!mysqli_query($link, 'CREATE TABLE test_mysqli_affected_rows_table_1(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE = ' . $engine))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES (1, 'a')"))
+	if (!mysqli_query($link, "INSERT INTO test_mysqli_affected_rows_table_1(id, label) VALUES (1, 'a')"))
 		printf("[008] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
 	if (1 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[010] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
 	// ignore INSERT error, NOTE: command line returns 0, affected_rows returns -1 as documented
-	mysqli_query($link, "INSERT INTO test(id, label) VALUES (1, 'a')");
+	mysqli_query($link, "INSERT INTO test_mysqli_affected_rows_table_1(id, label) VALUES (1, 'a')");
 	if (-1 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[011] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES (1, 'a') ON DUPLICATE KEY UPDATE id = 4"))
+	if (!mysqli_query($link, "INSERT INTO test_mysqli_affected_rows_table_1(id, label) VALUES (1, 'a') ON DUPLICATE KEY UPDATE id = 4"))
 		printf("[012] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
 	if (2 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[013] Expecting int/2, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES (2, 'b'), (3, 'c')"))
+	if (!mysqli_query($link, "INSERT INTO test_mysqli_affected_rows_table_1(id, label) VALUES (2, 'b'), (3, 'c')"))
 		printf("[014] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
 	if (2 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[015] Expecting int/2, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_query($link, "INSERT IGNORE INTO test(id, label) VALUES (1, 'a')")) {
+	if (!mysqli_query($link, "INSERT IGNORE INTO test_mysqli_affected_rows_table_1(id, label) VALUES (1, 'a')")) {
 		printf("[016] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 	}
 
 	if (1 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[017] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_query($link, "INSERT INTO test(id, label) SELECT id + 10, label FROM test"))
+	if (!mysqli_query($link, "INSERT INTO test_mysqli_affected_rows_table_1(id, label) SELECT id + 10, label FROM test_mysqli_affected_rows_table_1"))
 		printf("[018] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
 	if (4 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[019] Expecting int/4, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_query($link, "REPLACE INTO test(id, label) values (4, 'd')"))
+	if (!mysqli_query($link, "REPLACE INTO test_mysqli_affected_rows_table_1(id, label) values (4, 'd')"))
 		printf("[020] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
 	if (2 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[021] Expecting int/2, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_query($link, "REPLACE INTO test(id, label) values (5, 'e')"))
+	if (!mysqli_query($link, "REPLACE INTO test_mysqli_affected_rows_table_1(id, label) values (5, 'e')"))
 		printf("[022] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
 	if (1 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[023] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_query($link, "UPDATE test SET label = 'a' WHERE id = 2"))
+	if (!mysqli_query($link, "UPDATE test_mysqli_affected_rows_table_1 SET label = 'a' WHERE id = 2"))
 		printf("[024] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
 	if (1 !== ($tmp = mysqli_affected_rows($link)))
@@ -83,21 +83,21 @@
 			printf("[027] Expecting int/0 got %s/%s\n", gettype($tmp), $tmp);
 	}
 
-	if (!mysqli_query($link, "UPDATE test SET label = 'a' WHERE id = 2")) {
+	if (!mysqli_query($link, "UPDATE test_mysqli_affected_rows_table_1 SET label = 'a' WHERE id = 2")) {
 		printf("[028] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 	}
 
 	if (0 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[029] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_query($link, "UPDATE test SET label = 'a' WHERE id = 100")) {
+	if (!mysqli_query($link, "UPDATE test_mysqli_affected_rows_table_1 SET label = 'a' WHERE id = 100")) {
 		printf("[030] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 	}
 
 	if (0 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[031] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_query($link, 'DROP TABLE IF EXISTS test'))
+	if (!mysqli_query($link, 'DROP TABLE IF EXISTS test_mysqli_affected_rows_table_1'))
 		printf("[032] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 

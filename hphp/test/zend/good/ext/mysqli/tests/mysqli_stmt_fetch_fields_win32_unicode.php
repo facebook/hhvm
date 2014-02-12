@@ -4,7 +4,7 @@
 
 	$bind_res = $id = null;
 	if (!($stmt = mysqli_stmt_init($link)) ||
-		!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test") ||
+		!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test_mysqli_stmt_fetch_fields_win32_unicode_table_1") ||
 		!mysqli_stmt_execute($stmt) ||
 		!($result = mysqli_stmt_result_metadata($stmt)) ||
 		!mysqli_stmt_bind_result($stmt, $id, $bind_res) ||
@@ -18,7 +18,7 @@
 	mysqli_stmt_close($stmt);
 
 	if (!($stmt = mysqli_stmt_init($link)) ||
-		!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test") ||
+		!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test_mysqli_stmt_fetch_fields_win32_unicode_table_1") ||
 		!mysqli_stmt_execute($stmt) ||
 		!($result = mysqli_stmt_result_metadata($stmt)) ||
 		!mysqli_stmt_bind_result($stmt, $id, $bind_res)) {

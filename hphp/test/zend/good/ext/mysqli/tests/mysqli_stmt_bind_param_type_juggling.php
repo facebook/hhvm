@@ -3,13 +3,13 @@
 
 	function bind_twice($link, $engine, $sql_type1, $sql_type2, $bind_type1, $bind_type2, $bind_value1, $bind_value2, $offset) {
 
-		if (!mysqli_query($link, "DROP TABLE IF EXISTS test")) {
+		if (!mysqli_query($link, "DROP TABLE IF EXISTS test_mysqli_stmt_bind_param_type_juggling_table_1")) {
 			printf("[%03d + 1] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
 		mysqli_autocommit($link, true);
 
-		$sql = sprintf("CREATE TABLE test(col1 %s, col2 %s) ENGINE=%s", $sql_type1, $sql_type2, $engine);
+		$sql = sprintf("CREATE TABLE test_mysqli_stmt_bind_param_type_juggling_table_1(col1 %s, col2 %s) ENGINE=%s", $sql_type1, $sql_type2, $engine);
 		if (!mysqli_query($link, $sql)) {
 			printf("[%03d + 2] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
 			return false;
@@ -20,7 +20,7 @@
 			return false;
 		}
 
-		if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(col1, col2) VALUES (?, ?)")) {
+		if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_bind_param_type_juggling_table_1(col1, col2) VALUES (?, ?)")) {
 			printf("[%03d + 4] [%d] %s\n", $offset, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 			return false;
 		}
@@ -45,7 +45,7 @@
 		}
 
 		mysqli_stmt_close($stmt);
-		if (!$res = mysqli_query($link, "SELECT col1, col2 FROM test")) {
+		if (!$res = mysqli_query($link, "SELECT col1, col2 FROM test_mysqli_stmt_bind_param_type_juggling_table_1")) {
 			printf("[%03d + 9] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
 			return false;
 		}

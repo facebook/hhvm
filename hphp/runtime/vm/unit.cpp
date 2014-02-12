@@ -2490,11 +2490,10 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
       urp.insertUnitArray(repoId).insert(txn, usn, i, m_arrays[i].serialized);
     }
-    for (FeVec::const_iterator it = m_fes.begin(); it != m_fes.end(); ++it) {
+    for (auto it = m_fes.begin(); it != m_fes.end(); ++it) {
       (*it)->commit(txn);
     }
-    for (PceVec::const_iterator it = m_pceVec.begin(); it != m_pceVec.end();
-         ++it) {
+    for (auto it = m_pceVec.begin(); it != m_pceVec.end(); ++it) {
       (*it)->commit(txn);
     }
 

@@ -90,12 +90,10 @@ struct Options {
   /*
    * Whether to enable 'FuncFamily' method resolution.
    *
-   * TODO(#3666741): This is guarded by a flag because currently
-   * turning it on seems to cause a performance regression, despite
-   * the fact that it also seems to infer a lot more types.  We'll
-   * probably remove the flag once that is figured out.
+   * This allows possible overrides of a method to be resolved as a
+   * set of candidates when we aren't sure which one it would be.
    */
-  bool EnableFuncFamilies = false;
+  bool FuncFamilies = false;
 
   //////////////////////////////////////////////////////////////////////
   // Flags below this line perform optimizations that intentionally

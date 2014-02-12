@@ -82,7 +82,7 @@ void parse_options(int argc, char** argv) {
     ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
     ("filter-assertions",       po::value(&options.FilterAssertions))
     ("strength-reduce",         po::value(&options.StrengthReduce))
-    ("enable-func-families",    po::value(&options.EnableFuncFamilies))
+    ("func-families",           po::value(&options.FuncFamilies))
 
     ("hard-const-prop",         po::value(&options.HardConstProp))
     ("hard-type-hints",         po::value(&options.HardTypeHints))

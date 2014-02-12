@@ -1032,7 +1032,7 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
       return do_resolve(it->second);
     }
 
-    if (!options.EnableFuncFamilies) return folly::none;
+    if (!options.FuncFamilies) return folly::none;
 
     {
       auto const famIt = cinfo->methodFamilies.find(name);

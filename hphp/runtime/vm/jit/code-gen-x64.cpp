@@ -1464,28 +1464,31 @@ void CodeGenerator::cgMul(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgMod(IRInstruction* inst) {
+  static_assert(rCgGP != rax && rCgGP != rdx, "");
   auto const src0 = inst->src(0);
   auto const src1 = inst->src(1);
   auto const dstReg = curOpd(inst->dst()).reg();
   auto& a = m_as;
 
   // spill rax and/or rdx
-  bool spillRax = dstReg != reg::rax && m_rScratch != reg::rax;
-  bool spillRdx = dstReg != reg::rdx && m_rScratch != reg::rdx;
+  bool spillRax = dstReg != reg::rax;
+  bool spillRdx = dstReg != reg::rdx;
   if (spillRax) {
     a.  push   (reg::rax);
   }
   if (spillRdx) {
     a.  push   (reg::rdx);
   }
-  // put divisor in rAsm
+  // put divisor in rCgGP
   if (src1->isConst()) {
-    a.  movq   (src1->getValInt(), rAsm);
+    // TODO: #3626251 would let us avoid this.
+    a.  movq   (src1->getValInt(), rCgGP);
   } else {
-    a.  movq   (curOpd(src1).reg(), rAsm);
+    a.  movq   (curOpd(src1).reg(), rCgGP);
   }
   // put dividend in rax
   if (src0->isConst()) {
+    // TODO: #3626251 would let us avoid this.
     a.  movq   (src0->getValInt(), reg::rax);
   } else if (curOpd(src0).reg() != reg::rax) {
     a.  movq   (curOpd(src0).reg(), reg::rax);
@@ -1493,7 +1496,7 @@ void CodeGenerator::cgMod(IRInstruction* inst) {
   // sign-extend rax to rdx:rax
   a.    cqo    ();
   // divide
-  a.    idiv   (rAsm);
+  a.    idiv   (rCgGP);
   if (dstReg != reg::rdx) {
     a.  movq   (reg::rdx, dstReg);
   }

@@ -326,7 +326,7 @@ String SessionModule::create_sid() {
   }
 
   if (PS(entropy_length) > 0) {
-    int fd = open(PS(entropy_file).c_str(), O_RDONLY);
+    int fd = ::open(PS(entropy_file).c_str(), O_RDONLY);
     if (fd >= 0) {
       unsigned char rbuf[2048];
       int n;

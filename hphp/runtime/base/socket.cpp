@@ -210,6 +210,17 @@ int64_t Socket::writeImpl(const char *buffer, int64_t length) {
 }
 
 bool Socket::eof() {
+  if (!m_eof && valid()) {
+    // Test if stream is EOF if the flag is not already set.
+    // Attempt to peek at one byte from the stream, checking for:
+    // i)  recv() closing gracefully, or
+    // ii) recv() failed due to no waiting data on non-blocking socket.
+    char ch;
+    int64_t ret = recv(m_fd, &ch, 1, MSG_PEEK);
+    if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK)) {
+      m_eof = true;
+    }
+  }
   return m_eof;
 }
 

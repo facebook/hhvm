@@ -845,7 +845,8 @@ bool f_is_dir(const String& filename) {
   }
 
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, false, isRelative));
+  String path = isRelative ? cwd + String::FromChar('/') + filename : filename;
+  CHECK_SYSTEM(statSyscall(path, &sb, false, isRelative));
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 

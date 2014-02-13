@@ -637,10 +637,7 @@ void FrameState::refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {
     // intersect, since the inner type is really just a prediction.
     local.type = type;
   } else {
-    if (local.type.not(type)) {
-      // Task #3705371: find out and fix whatever is triggering this.
-      TRACE_PUNT("Incompatible types in refineLocalType");
-    }
+    always_assert((local.type & type) != Type::Bottom);
     local.type = local.type & type;
   }
   local.typeSource = typeSource;

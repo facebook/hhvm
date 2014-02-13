@@ -4892,12 +4892,12 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
 
 std::string HhbcTranslator::showStack() const {
   if (isInlining()) {
-    return folly::format("{:*^60}\n",
+    return folly::format("{:*^*80}\n",
                          " I don't understand inlining stacks yet ").str();
   }
   std::ostringstream out;
   auto header = [&](const std::string& str) {
-    out << folly::format("+{:-^62}+\n", str);
+    out << folly::format("+{:-^82}+\n", str);
   };
 
   const int32_t frameCells =
@@ -4907,7 +4907,7 @@ std::string HhbcTranslator::showStack() const {
     - m_irb->stackDeficit() - frameCells;
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
-    out << folly::format("| {:<60} |\n",
+    out << folly::format("| {:<80} |\n",
                          folly::format("{:>2}: {}",
                                        stackDepth - spOffset, str));
     assert(spOffset > 0);
@@ -4960,7 +4960,18 @@ std::string HhbcTranslator::showStack() const {
 
     ++i;
   }
+  header("");
+  out << "\n";
 
+  header(folly::format(" {} local(s) ", curFunc()->numLocals()).str());
+  for (unsigned i = 0; i < curFunc()->numLocals(); ++i) {
+    auto localValue = m_irb->localValue(i, DataTypeGeneric);
+    auto str = localValue
+      ? localValue->inst()->toString()
+      : m_irb->localType(i, DataTypeGeneric).toString();
+    out << folly::format("| {:<80} |\n",
+                         folly::format("{:>2}: {}", i, str));
+  }
   header("");
   return out.str();
 }

@@ -6519,8 +6519,8 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
 
 void CodeGenerator::cgLdClsStaticInitData(IRInstruction* inst) {
   auto* cls = inst->src(0);
-  auto clsReg = curOpd(cls).reg();
-  auto dstReg = curOpd(inst->dst()).reg();
+  auto clsReg = curPhysLoc(cls).reg();
+  auto dstReg = curPhysLoc(inst->dst()).reg();
 
   m_as.  loadl(clsReg[Class::spropdataOff()
                        + RDS::Link<Class::PropInitVec*>::handleOff()],

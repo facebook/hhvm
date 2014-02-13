@@ -725,7 +725,15 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
               propName = concat4(s_zero, s_star, s_zero, name);
             }
           }
-          wanted.set(propName, vals.lvalAt(propName));
+          if (accessible) {
+            wanted.set(propName, const_cast<ObjectData*>(this)->
+                o_getImpl(name, RealPropUnchecked, true, o_getClassName())));
+          } else if (vals.exists(propName)) {
+            wanted.set(propName, vals.lvalAt(propName));
+          } else {
+            raise_warning("\"%s\" returned as member variable from "
+                "__sleep() but does not exist", name.data());
+          }
         } else {
           raise_warning("\"%s\" returned as member variable from "
               "__sleep() but does not exist", name.data());

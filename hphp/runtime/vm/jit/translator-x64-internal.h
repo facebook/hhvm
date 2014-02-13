@@ -164,7 +164,7 @@ locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
 
 // Common code emission patterns.
 
-static_assert(sizeof(DataType) == 4 || sizeof(DataType) == 1,
+static_assert(sizeof(DataType) == 1,
               "Your DataType has an unsupported size.");
 static inline Reg8 toByte(const Reg32& x)   { return rbyte(x); }
 static inline Reg8 toByte(const Reg64& x)   { return rbyte(x); }
@@ -193,42 +193,26 @@ static inline void verifyTVOff(const MemoryRef& mr) {
 template<typename SrcType, typename OpndType>
 static inline void
 emitTestTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
-  if (sizeof(DataType) == 4) {
-    a.  testl(src, toReg32(tvOp));
-  } else {
-    a.  testb(src, toByte(tvOp));
-  }
+  a.  testb(src, toByte(tvOp));
 }
 
 template<typename SrcType, typename OpndType>
 static inline void
 emitLoadTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
-  if (sizeof(DataType) == 4) {
-    a.  loadl(src, toReg32(tvOp));
-  } else {
-    // Zero extend the type, just in case.
-    a.  loadzbl(src, toReg32(tvOp));
-  }
+  // Zero extend the type, just in case.
+  a.  loadzbl(src, toReg32(tvOp));
 }
 
 template<typename SrcType, typename OpndType>
 static inline void
 emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
-  if (sizeof(DataType) == 4) {
-    a.  cmpl(src, toReg32(tvOp));
-  } else {
-    a.  cmpb(src, toByte(tvOp));
-  }
+  a.  cmpb(src, toByte(tvOp));
 }
 
 template<typename DestType, typename OpndType>
 static inline void
 emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {
-  if (sizeof(DataType) == 4) {
-    a.  storel(toReg32(tvOp), dest);
-  } else {
-    a.  storeb(toByte(tvOp), dest);
-  }
+  a.  storeb(toByte(tvOp), dest);
 }
 
 // emitDeref --

@@ -2108,12 +2108,10 @@ void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
   static_assert(KindOfObject > KindOfString, "fix checks for IsScalar");
   static_assert(KindOfResource > KindOfString, "fix checks for IsScalar");
 
-  if (sizeof(DataType) == 4) {
-    m_as. lea(typeReg[-KindOfBoolean], dstReg);
-  } else {
-    m_as. movzbl(rbyte(typeReg), r32(dstReg));
-    m_as. subl(KindOfBoolean, r32(dstReg));
-  }
+  static_assert(sizeof(DataType) == 1, "");
+
+  m_as.   movzbl(rbyte(typeReg), r32(dstReg));
+  m_as.   subl(KindOfBoolean, r32(dstReg));
   m_as.   subl(KindOfString - KindOfBoolean + 1, r32(dstReg));
   m_as.   sbbl(r32(dstReg), r32(dstReg));
   m_as.   neg(dstReg);

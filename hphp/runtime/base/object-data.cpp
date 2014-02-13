@@ -727,7 +727,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
           }
           if (accessible) {
             wanted.set(propName, const_cast<ObjectData*>(this)->
-                o_getImpl(name, RealPropUnchecked, true, o_getClassName())));
+                o_getImpl(name, RealPropUnchecked, true, o_getClassName()));
           } else if (vals.exists(propName)) {
             wanted.set(propName, vals.lvalAt(propName));
           } else {

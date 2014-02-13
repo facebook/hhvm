@@ -1104,8 +1104,10 @@ bool f_copy(const String& source, const String& dest,
       return false;
     }
 
-    return f_stream_copy_to_stream(sfile.toResource(),
-      dfile.toResource()).toBoolean();
+    if (!f_stream_copy_to_stream(sfile.toResource(), dfile.toResource()).toBoolean())
+      return false;
+
+    return f_fclose(dfile.toResource());
   } else {
     int ret =
       RuntimeOption::UseDirectCopy ?

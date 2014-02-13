@@ -4902,7 +4902,7 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
 
 std::string HhbcTranslator::showStack() const {
   if (isInlining()) {
-    return folly::format("{:*^*80}\n",
+    return folly::format("{:*^80}\n",
                          " I don't understand inlining stacks yet ").str();
   }
   std::ostringstream out;

@@ -7,7 +7,7 @@ class foo
 
     public function __sleep()
     {
-        return array('private', 'protected', 'public');
+        return array("\0foo\0private", "\0*\0protected", 'public');
     }
 }
 

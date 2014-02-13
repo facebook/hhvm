@@ -105,13 +105,13 @@ struct CodeGenerator {
 
   Address cgInst(IRInstruction* inst);
 
-  const PhysLoc curOpd(const SSATmp* t) const {
+  const PhysLoc curPhysLoc(const SSATmp* t) const {
     return m_state.regs[m_curInst][t];
   }
-  const PhysLoc curOpd(const SSATmp& t) const {
-    return curOpd(&t);
+  const PhysLoc curPhysLoc(const SSATmp& t) const {
+    return curPhysLoc(&t);
   }
-  const RegAllocInfo::RegMap& curOpds() const {
+  const RegAllocInfo::RegMap& curPhysLocs() const {
     return m_state.regs[m_curInst];
   }
 

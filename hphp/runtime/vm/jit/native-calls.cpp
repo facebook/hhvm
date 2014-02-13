@@ -357,9 +357,9 @@ static CallMap s_callMap {
                                {{SSA, 0}}},
 };
 
-ArgGroup CallInfo::toArgGroup(const RegAllocInfo::RegMap& curOpds,
+ArgGroup CallInfo::toArgGroup(const RegAllocInfo::RegMap& curPhysLocs,
                               IRInstruction* inst) const {
-  ArgGroup argGroup{curOpds};
+  ArgGroup argGroup{curPhysLocs};
 
   for (auto const& arg : args) {
     switch (arg.type) {

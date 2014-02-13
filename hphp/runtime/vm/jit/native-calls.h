@@ -90,7 +90,7 @@ struct CallInfo {
   SyncOptions sync;
   std::vector<Arg> args;
 
-  ArgGroup toArgGroup(const RegAllocInfo::RegMap& curOpds,
+  ArgGroup toArgGroup(const RegAllocInfo::RegMap& curPhysLocs,
                       IRInstruction* inst) const;
 };
 

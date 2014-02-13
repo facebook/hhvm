@@ -4,13 +4,16 @@ HHVM (aka the HipHop Virtual Machine) is a new open-source virtual machine desig
 
 HHVM can be run as a standalone webserver (i.e. without the Apache webserver and the "modphp" extension). HHVM can also be used together with a FastCGI-based webserver, and work is in progress to make HHVM work smoothly with Apache.
 
+
 ## FAQ
 
 Our [FAQ](https://github.com/facebook/hhvm/wiki/FAQ) has answers to many common questions about HHVM, from [general questions](https://github.com/facebook/hhvm/wiki/FAQ#general) to questions geared towards those that want to [use](https://github.com/facebook/hhvm/wiki/FAQ#users) or [contribute](https://github.com/facebook/hhvm/wiki/FAQ#contributors) to HHVM.
 
+
 ## Installing
 
 You can install a [prebuilt package](https://github.com/facebook/hhvm/wiki#installing-pre-built-packages-for-hhvm) or [compile from source](https://github.com/facebook/hhvm/wiki#building-hhvm).
+
 
 ## Running
 
@@ -24,9 +27,10 @@ sudo hhvm -m server
 
 For anything more complicated, you'll want to make a [config.hdf](https://github.com/facebook/hhvm/wiki/Runtime-options#server) and run `sudo hhvm -m server -c config.hdf`.
 
+
 ## Contributing
 
-We'd love to have your help in making HHVM better. 
+We'd love to have your help in making HHVM better.
 
 Before changes can be accepted a [Contributor License Agreement](http://developers.facebook.com/opensource/cla) ([pdf](https://github.com/facebook/hhvm/raw/master/hphp/doc/FB_Individual_CLA.pdf) - print, sign, scan, link) must be signed.
 

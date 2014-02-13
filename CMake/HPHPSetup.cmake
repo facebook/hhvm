@@ -4,7 +4,7 @@ include(Options)
 INCLUDE(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("
 #ifndef __AARCH64EL__
-#error Not ARMv8  
+#error Not ARMv8
 #endif
 int main() { return 0; }" IS_AARCH64)
 
@@ -112,7 +112,7 @@ if(APPLE)
 	# We have to be a little more permissive in some cases.
 	add_definitions(-fpermissive)
 
-	# Skip deprecation warnings in OpenSSL. 
+	# Skip deprecation warnings in OpenSSL.
 	add_definitions(-DMAC_OS_X_VERSION_MIN_REQUIRED=MAC_OS_X_VERSION_10_6)
 
 	# Just assume we have sched.h

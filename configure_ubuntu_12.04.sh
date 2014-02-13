@@ -1,5 +1,5 @@
 #########################################
-# 
+#
 # Install all the dependencies for HipHop
 #
 #########################################
@@ -64,7 +64,7 @@ then
 else
     echo "$FAIL errors while downloading!"
     exit 100
-fi 
+fi
 
 # Leave this install till after the main parallel package install above
 # since it adds a non-12.04 package repo and we don't want to

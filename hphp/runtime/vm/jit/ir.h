@@ -508,8 +508,7 @@ O(StMem,                            ND, S(PtrToGen)                           \
 O(StProp,                           ND, S(Obj) S(Int) S(Gen),          E|CRc) \
 O(StLoc,                            ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StLocNT,                          ND, S(FramePtr) S(Gen),            E|CRc) \
-O(StRef,                       DBox(1), S(BoxedCell) S(Cell),                 \
-                                                                     E|CRc|P) \
+O(StRef,                       DBox(1), S(BoxedCell) S(Cell),        E|CRc|P) \
 O(StRefNT,                     DBox(1), S(BoxedCell) S(Cell),        E|CRc|P) \
 O(StRaw,                            ND, SUnk,                              E) \
 O(StElem,                           ND, S(PtrToCell)                          \

@@ -160,10 +160,9 @@ private:
                               ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
+  enum class Width { Value, Full };
   template<class MemRef>
-  void cgStore(MemRef dst,
-               SSATmp* src, PhysLoc src_loc,
-               bool genStoreType = true);
+  void cgStore(MemRef dst, SSATmp* src, PhysLoc src_loc, Width);
   template<class MemRef>
   void cgStoreTypedValue(MemRef dst, SSATmp* src, PhysLoc src_loc);
 
@@ -198,7 +197,7 @@ private:
   template<class Loc>
   void emitTypeGuard(Type type, Loc typeLoc, Loc dataLoc);
 
-  void cgStRefWork(IRInstruction* inst, bool genStoreType);
+  void cgStRefWork(IRInstruction* inst, Width);
   void cgIncRefWork(Type type, SSATmp* src, PhysLoc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
@@ -327,7 +326,7 @@ private:
   Class*      curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }
   void recordSyncPoint(Asm& as, SyncOptions sync = SyncOptions::kSyncPoint);
-  int iterOffset(SSATmp* tmp);
+  int iterOffset(SSATmp* tmp) { return iterOffset(tmp->getValInt()); }
   int iterOffset(uint32_t id);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
@@ -437,27 +436,27 @@ void genCode(CodeBlock&              mainCode,
              const RegAllocInfo&     regs);
 
 // Helpers to compute a reference to a TypedValue type and data
-inline MemoryRef loadTVType(PhysReg reg) {
+inline MemoryRef refTVType(PhysReg reg) {
   return reg[TVOFF(m_type)];
 }
 
-inline MemoryRef loadTVData(PhysReg reg) {
+inline MemoryRef refTVData(PhysReg reg) {
   return reg[TVOFF(m_data)];
 }
 
-inline MemoryRef loadTVType(MemoryRef ref) {
+inline MemoryRef refTVType(MemoryRef ref) {
   return *(ref.r + TVOFF(m_type));
 }
 
-inline MemoryRef loadTVData(MemoryRef ref) {
+inline MemoryRef refTVData(MemoryRef ref) {
   return *(ref.r + TVOFF(m_data));
 }
 
-inline IndexedMemoryRef loadTVType(IndexedMemoryRef ref) {
+inline IndexedMemoryRef refTVType(IndexedMemoryRef ref) {
   return *(ref.r + TVOFF(m_type));
 }
 
-inline IndexedMemoryRef loadTVData(IndexedMemoryRef ref) {
+inline IndexedMemoryRef refTVData(IndexedMemoryRef ref) {
   return *(ref.r + TVOFF(m_data));
 }
 

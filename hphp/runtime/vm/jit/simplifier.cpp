@@ -2109,6 +2109,9 @@ SSATmp* Simplifier::simplifyLdLoc(IRInstruction* inst) {
 // Replace StRef with StRefNT when we know we aren't going to change
 // its m_type field.
 SSATmp* Simplifier::simplifyStRef(IRInstruction* inst) {
+  // Guard relaxation might change the ref type, so don't try to
+  // change to StRefNT until after relaxation happens.
+  if (m_irb.typeMightRelax()) return nullptr;
   auto const oldUnbox = inst->src(0)->type().unbox();
   auto const newType = inst->src(1)->type();
   if (oldUnbox.isKnownDataType() &&

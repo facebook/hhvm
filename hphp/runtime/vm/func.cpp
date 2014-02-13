@@ -1246,7 +1246,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
                                           f->isStatic());
     if (nif) {
       Attr dummy = AttrNone;
-      if (parseNativeAttributes(dummy) && Native::AttrActRec) {
+      if (parseNativeAttributes(dummy) & Native::AttrActRec) {
         f->shared()->m_builtinFuncPtr = nif;
         f->shared()->m_nativeFuncPtr = nullptr;
       } else {

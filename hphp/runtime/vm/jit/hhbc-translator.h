@@ -509,7 +509,7 @@ private:
 
     void prependToTraces(IRInstruction* inst) {
       for (auto b : m_failedVec) {
-        b->prepend(m_irf.cloneInstruction(inst));
+        b->prepend(m_unit.cloneInstruction(inst));
       }
     }
 
@@ -570,7 +570,7 @@ private:
 
     template<class... Args>
     SSATmp* cns(Args&&... args) {
-      return m_irf.cns(std::forward<Args>(args)...);
+      return m_unit.cns(std::forward<Args>(args)...);
     }
 
     template<class... Args>
@@ -581,7 +581,7 @@ private:
     const NormalizedInstruction& m_ni;
     HhbcTranslator& m_ht;
     IRBuilder& m_irb;
-    IRUnit& m_irf;
+    IRUnit& m_unit;
     const MInstrInfo& m_mii;
     const BCMarker m_marker;
     hphp_hash_map<unsigned, unsigned> m_stackInputs;

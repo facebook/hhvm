@@ -249,7 +249,7 @@ HhbcTranslator::MInstrTranslator::MInstrTranslator(
     : m_ni(ni)
     , m_ht(ht)
     , m_irb(*m_ht.m_irb)
-    , m_irf(m_ht.m_unit)
+    , m_unit(m_ht.m_unit)
     , m_mii(getMInstrInfo(ni.mInstrOp()))
     , m_marker(ht.makeMarker(ht.bcOff()))
     , m_iInd(m_mii.valCount())
@@ -2671,7 +2671,7 @@ void HhbcTranslator::MInstrTranslator::emitMPost() {
   // it will be stored in tvRef.
   static const size_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(), 2U); ++i) {
-    IRInstruction* inst = m_irf.gen(DecRefMem, m_marker, Type::Gen, m_misBase,
+    IRInstruction* inst = m_unit.gen(DecRefMem, m_marker, Type::Gen, m_misBase,
                                     cns(refOffs[m_failedSetBlock ? 1 - i : i]));
     m_irb.add(inst);
     prependToTraces(inst);
@@ -2721,7 +2721,7 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
     auto toSpill = m_ht.peekSpillValues();
     assert(toSpill.size());
     assert(toSpill[0] == m_result);
-    SSATmp* str = m_irf.gen(AssertNonNull, m_marker, m_strTestResult)->dst();
+    SSATmp* str = m_unit.gen(AssertNonNull, m_marker, m_strTestResult)->dst();
     toSpill[0] = str;
 
     auto exit = m_ht.makeExit(nextOff, toSpill);

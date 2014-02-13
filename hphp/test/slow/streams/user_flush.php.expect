@@ -1,0 +1,45 @@
+open
+write
+close
+bool(false)
+
+open
+write
+flush did something
+close
+bool(false)
+
+open
+write
+flush succeeded
+close
+bool(true)
+
+open
+write
+flush failed
+close
+bool(false)
+
+open
+write
+close
+bool(false)
+
+open
+write
+flush did something
+close
+bool(false)
+
+open
+write
+flush succeeded
+close
+int(16)
+
+open
+write
+flush failed
+close
+bool(false)

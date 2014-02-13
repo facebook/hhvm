@@ -115,12 +115,12 @@ bool UserFile::close() {
   // PHP's streams layer explicitly flushes on close
   // Mimick that for user-wrappers by pushing the flush here
   // without impacting other HPHP stream types.
-  flush();
+  bool ret = flush();
 
   // void stream_close()
   invoke(m_StreamClose, s_stream_close, Array::Create());
   m_closed = true;
-  return true;
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

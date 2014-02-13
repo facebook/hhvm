@@ -295,11 +295,9 @@
       # Needs a local memcache server
       - yii/tests/framework/caching/CMemCacheTest.php
   zf2:
-    # Until PHPUnit 3.8 pull request is accepted
-    # https://github.com/zendframework/zf2/pull/5781
-    url: https://github.com/JoelMarcey/zf2.git
+    url: https://github.com/zendframework/zf2.git
     branch: master
-    commit: c29404d8bfda2b0fe106ef1e73447a72ca37d80e
+    commit: 2b718e20cfc22cd388ef3aeff0bc66302379ae02
     install_root: zf2
     test_root: zf2/tests
     blacklist:

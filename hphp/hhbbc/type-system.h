@@ -58,8 +58,8 @@ namespace HPHP { namespace HHBBC {
  *             /  |    / |      |  \  Arr      Str
  *            /   |   /  |      |   \ / \      / \
  *      Uninit  InitNull |      |   SArr CArr /  CStr
- *                       |      |     |      /
- *                       |      |    SArr=a /
+ *                       |      |    |       /
+ *                       |      |   SArr=a  /
  *                       |      |          /
  *                       |      \         /
  *                       |       \       /

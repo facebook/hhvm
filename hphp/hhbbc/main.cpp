@@ -78,6 +78,7 @@ void parse_options(int argc, char** argv) {
   oflags.add_options()
     ("remove-dead-blocks",      po::value(&options.RemoveDeadBlocks))
     ("constant-prop",           po::value(&options.ConstantProp))
+    ("local-dce",               po::value(&options.LocalDCE))
     ("insert-assertions",       po::value(&options.InsertAssertions))
     ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
     ("filter-assertions",       po::value(&options.FilterAssertions))

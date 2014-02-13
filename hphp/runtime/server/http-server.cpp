@@ -281,6 +281,11 @@ void HttpServer::runOrExitProcess() {
     }
   }
 
+  if (RuntimeOption::HHProfServerEnabled) {
+    Logger::Info("Starting up profiling server");
+    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
+  }
+
   if (!Eval::Debugger::StartServer()) {
     Logger::Error("Unable to start debugger server");
     startupFailure();
@@ -509,6 +514,7 @@ bool HttpServer::startServer(bool pageServer) {
         return false;
       }
 
+      // TODO: fix /stop (t3725397)
       HttpClient http;
       std::string url = "http://";
       url += RuntimeOption::ServerIP;

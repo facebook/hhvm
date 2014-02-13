@@ -762,11 +762,6 @@ static int start_server(const std::string &username) {
   // initialize the process
   HttpServer::Server = std::make_shared<HttpServer>();
 
-  if (RuntimeOption::HHProfServerEnabled) {
-    Logger::Info("Starting up profiling server");
-    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
-  }
-
   // If we have any warmup requests, replay them before listening for
   // real connections
   for (auto& file : RuntimeOption::ServerWarmupRequests) {

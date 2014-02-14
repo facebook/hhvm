@@ -841,29 +841,6 @@ bool Transport::isUploadedFile(const String& filename) {
   return is_uploaded_file(filename.c_str());
 }
 
-// Move a file if and only if it was created by an upload
-bool Transport::moveUploadedFileHelper(const String& filename, const String& destination) {
-  // Do access check.
-  String dest = File::TranslatePath(destination);
-  if (Util::rename(filename.c_str(), dest.c_str()) < 0) {
-    Logger::Error("Unable to move uploaded file %s to %s: %s.",
-                  filename.c_str(), dest.c_str(),
-                  folly::errnoStr(errno).c_str());
-    return false;
-  }
-  Logger::Verbose("Successfully moved uploaded file %s to %s.",
-                  filename.c_str(), dest.c_str());
-  return true;
-}
-
-bool Transport::moveUploadedFile(const String& filename, const String& destination) {
-  if (!is_uploaded_file(filename.c_str())) {
-    Logger::Error("%s is not an uploaded file.", filename.c_str());
-    return false;
-  }
-  return moveUploadedFileHelper(filename, destination);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // IDebuggable
 

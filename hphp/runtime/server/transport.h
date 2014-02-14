@@ -363,7 +363,6 @@ public:
 
   // TODO: support rfc1867
   virtual bool isUploadedFile(const String& filename);
-  virtual bool moveUploadedFile(const String& filename, const String& destination);
 
   int getResponseSize() const { return m_responseSize; }
   int getResponseCode() const { return m_responseCode; }
@@ -462,7 +461,6 @@ protected:
 
   String prepareResponse(const void *data, int size, bool &compressed,
                          bool last);
-  bool moveUploadedFileHelper(const String& filename, const String& destination);
 
 private:
   void prepareHeaders(bool compressed, bool chunked, const String &response,

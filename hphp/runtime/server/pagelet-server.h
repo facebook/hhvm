@@ -102,8 +102,6 @@ public:
                         bool chunked);
   virtual void onSendEndImpl();
   virtual bool isUploadedFile(const String& filename);
-  virtual bool moveUploadedFile(const String& filename,
-    const String& destination);
   virtual bool getFiles(std::string &files);
 
   // task interface

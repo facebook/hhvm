@@ -147,15 +147,6 @@ bool PageletTransport::isUploadedFile(const String& filename) {
          m_rfc1867UploadedFiles.end();
 }
 
-bool PageletTransport::moveUploadedFile(const String& filename,
-    const String& destination) {
-  if (!isUploadedFile(filename.c_str())) {
-    Logger::Error("%s is not an uploaded file.", filename.c_str());
-    return false;
-  }
-  return moveUploadedFileHelper(filename, destination);
-}
-
 bool PageletTransport::getFiles(std::string &files) {
   files = m_files;
   return true;

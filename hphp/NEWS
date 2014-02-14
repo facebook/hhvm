@@ -1,3 +1,5 @@
+  - Remove legacy linear-scan register allocator and Eval.HHIRXls option
+
 "Eminem" 18-Feb-2014
   - reenabled jemalloc tcache flush for idle threads
   - array_combine now performs __toString conversion on objects in $keys

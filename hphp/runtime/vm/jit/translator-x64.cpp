@@ -2141,8 +2141,7 @@ void TranslatorX64::traceCodeGen() {
   auto& unit = ht.unit();
 
   auto finishPass = [&](const char* msg, int level) {
-    dumpTrace(level, unit, msg, nullptr, nullptr, nullptr,
-              ht.traceBuilder().guards());
+    dumpTrace(level, unit, msg, nullptr, nullptr, ht.traceBuilder().guards());
     assert(checkCfg(unit));
   };
 
@@ -2151,8 +2150,7 @@ void TranslatorX64::traceCodeGen() {
   optimize(unit, ht.traceBuilder(), m_mode);
   finishPass(" after optimizing ", kOptLevel);
 
-  auto regs = RuntimeOption::EvalHHIRXls ? allocateRegs(unit) :
-              allocRegsForUnit(unit);
+  auto regs = allocateRegs(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
   recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier());

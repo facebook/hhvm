@@ -268,6 +268,10 @@ class BaseVector : public ExtCollectionObjectData {
 
   void grow();
 
+  static constexpr uint64_t MaxCapacity() {
+    return std::numeric_limits<decltype(m_capacity)>::max();
+  }
+
   void add(TypedValue* val) {
     assert(val->m_type != KindOfRef);
 
@@ -425,6 +429,7 @@ class c_Vector : public BaseVector {
   SortFlavor preSort(const AccessorT& acc);
 
   void initFvFields(c_FrozenVector* fv);
+  int64_t checkRequestedCapacity(CVarRef sz);
 
   // Friends
   friend void collectionAppend(ObjectData* obj, TypedValue* val);

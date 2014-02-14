@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/ini-parser/zend-ini.h"
 #include "hphp/runtime/base/zend-strtod.h"
+#include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/lock.h"
 
@@ -138,94 +139,144 @@ std::string ini_get_static_string_1(void* p) {
 ///////////////////////////////////////////////////////////////////////////////
 // callbacks for creating arrays out of ini
 
-static void php_simple_ini_parser_cb (std::string *arg1, std::string *arg2,
-                                      std::string *arg3, int callback_type,
-                                      void *arg) {
-  assert(arg1);
-  if (!arg1 || !arg2) return;
-
+void IniSetting::ParserCallback::onSection(const std::string &name, void *arg) {
+  // do nothing
+}
+void IniSetting::ParserCallback::onLabel(const std::string &name, void *arg) {
+  // do nothing
+}
+void IniSetting::ParserCallback::onEntry(
+    const std::string &key, const std::string &value, void *arg) {
   Variant *arr = (Variant*)arg;
-  switch (callback_type) {
-  case IniSetting::ParserEntry:
-    arr->set(String(*arg1), String(*arg2));
-    break;
-  case IniSetting::ParserPopEntry:
-    {
-      Variant &hash = arr->lvalAt(String(*arg1));
-      if (!hash.isArray()) {
-        hash = Array::Create();
-      }
-      if (arg3 && !arg3->empty()) {
-        hash.set(String(*arg3), String(*arg2));
-      } else {
-        hash.append(*arg2);
-      }
-    }
-    break;
+  arr->set(String(key), String(value));
+}
+void IniSetting::ParserCallback::onPopEntry(
+    const std::string &key, const std::string &value, const std::string &offset,
+    void *arg) {
+  Variant *arr = (Variant*)arg;
+  Variant &hash = arr->lvalAt(String(key));
+  if (!hash.isArray()) {
+    hash = Array::Create();
+  }
+  if (!offset.empty()) {
+    hash.set(String(offset), String(value));
+  } else {
+    hash.append(value);
+  }
+}
+void IniSetting::ParserCallback::onConstant(std::string &result,
+                                            const std::string &name) {
+  if (f_defined(name)) {
+    result = f_constant(name).toString().toCppString();
+  } else {
+    result = name;
   }
 }
 
-static void php_simple_ini_parser_map_cb (std::string *arg1, std::string *arg2,
-                                          std::string *arg3, int callback_type,
-                                          void *arg) {
-  assert(arg1);
-  if (!arg1 || !arg2) return;
-
-  auto& arr = *(IniSetting::Map*)arg;
-  switch (callback_type) {
-  case IniSetting::ParserEntry:
-    arr[*arg1] = *arg2;
-    break;
-  case IniSetting::ParserPopEntry:
-    {
-      auto* ptr = arr.get_ptr(*arg1);
-      if (!ptr || !ptr->isArray()) {
-        arr[*arg1] = IniSetting::Map::object;
-        ptr = arr.get_ptr(*arg1);
-      }
-      if (arg3 && !arg3->empty()) {
-        (*ptr)[*arg3] = *arg2;
-      } else {
-        // Find the highest index
-        auto max = 0;
-        for (auto &a : ptr->keys()) {
-          if (a.isInt() && a > max) {
-            max = a.asInt();
-          }
-        }
-        (*ptr)[max] = *arg2;
-      }
-    }
-    break;
+void IniSetting::ParserCallback::onVar(std::string &result,
+                                       const std::string& name) {
+  std::string curval;
+  if (IniSetting::Get(name, curval)) {
+    result = curval;
+    return;
   }
+  char *value = getenv(name.data());
+  if (value) {
+    result = std::string(value);
+    return;
+  }
+  result.clear();
 }
 
-struct CallbackData {
-  Variant active_section;
-  Variant arr;
-};
+void IniSetting::ParserCallback::onOp(
+    std::string &result, char type, const std::string& op1,
+    const std::string& op2) {
+  int i_op1 = strtoll(op1.c_str(), nullptr, 10);
+  int i_op2 = strtoll(op2.c_str(), nullptr, 10);
+  int i_result = 0;
+  switch (type) {
+    case '|': i_result = i_op1 | i_op2; break;
+    case '&': i_result = i_op1 & i_op2; break;
+    case '^': i_result = i_op1 ^ i_op2; break;
+    case '~': i_result = ~i_op1;        break;
+    case '!': i_result = !i_op1;        break;
+  }
+  result = std::to_string((int64_t)i_result);
+}
 
-static void php_ini_parser_cb_with_sections(std::string *arg1,
-                                            std::string *arg2,
-                                            std::string *arg3,
-                                            int callback_type, void *arg) {
-  assert(arg1);
-  if (!arg1) return;
-
+void IniSetting::SectionParserCallback::onSection(
+    const std::string &name, void *arg) {
   CallbackData *data = (CallbackData*)arg;
-  Variant *arr = &data->arr;
-  if (callback_type == IniSetting::ParserSection) {
-    data->active_section.unset(); // break ref() from previous section
-    data->active_section = Array::Create();
-    arr->set(String(*arg1), ref(data->active_section));
-  } else if (arg2) {
-    Variant *active_arr;
-    if (!data->active_section.isNull()) {
-      active_arr = &data->active_section;
-    } else {
-      active_arr = arr;
+  data->active_section.unset(); // break ref() from previous section
+  data->active_section = Array::Create();
+  data->arr.set(String(name), ref(data->active_section));
+}
+Variant* IniSetting::SectionParserCallback::activeArray(CallbackData* data) {
+  if (!data->active_section.isNull()) {
+    return &data->active_section;
+  } else {
+    return &data->arr;
+  }
+}
+void IniSetting::SectionParserCallback::onLabel(const std::string &name,
+                                                void *arg) {
+  IniSetting::ParserCallback::onLabel(name, activeArray((CallbackData*)arg));
+}
+void IniSetting::SectionParserCallback::onEntry(
+    const std::string &key, const std::string &value, void *arg) {
+  IniSetting::ParserCallback::onEntry(key, value,
+                                      activeArray((CallbackData*)arg));
+}
+void IniSetting::SectionParserCallback::onPopEntry(
+    const std::string &key, const std::string &value, const std::string &offset,
+    void *arg) {
+  IniSetting::ParserCallback::onPopEntry(key, value, offset,
+                                         activeArray((CallbackData*)arg));
+}
+
+void IniSetting::SystemParserCallback::onSection(const std::string &name,
+                                                 void *arg) {
+  // do nothing
+}
+void IniSetting::SystemParserCallback::onLabel(const std::string &name,
+                                               void *arg) {
+  // do nothing
+}
+void IniSetting::SystemParserCallback::onEntry(
+    const std::string &key, const std::string &value, void *arg) {
+  assert(!key.empty());
+  auto& arr = *(IniSetting::Map*)arg;
+  arr[key] = value;
+}
+void IniSetting::SystemParserCallback::onPopEntry(
+    const std::string &key, const std::string &value, const std::string &offset,
+    void *arg) {
+  assert(!key.empty());
+  auto& arr = *(IniSetting::Map*)arg;
+  auto* ptr = arr.get_ptr(key);
+  if (!ptr || !ptr->isArray()) {
+    arr[key] = IniSetting::Map::object;
+    ptr = arr.get_ptr(key);
+  }
+  if (!offset.empty()) {
+    (*ptr)[offset] = value;
+  } else {
+    // Find the highest index
+    auto max = 0;
+    for (auto &a : ptr->keys()) {
+      if (a.isInt() && a > max) {
+        max = a.asInt();
+      }
     }
-    php_simple_ini_parser_cb(arg1, arg2, arg3, callback_type, active_arr);
+    (*ptr)[max] = value;
+  }
+}
+void IniSetting::SystemParserCallback::onConstant(std::string &result,
+                                                  const std::string &name) {
+  if (f_defined(name, false)) {
+    result = f_constant(name).toString().toCppString();
+  } else {
+    result = name;
   }
 }
 
@@ -235,20 +286,19 @@ static Mutex s_mutex;
 Variant IniSetting::FromString(const String& ini, const String& filename,
                                bool process_sections, int scanner_mode) {
   Lock lock(s_mutex); // ini parser is not thread-safe
-
+  auto ini_cpp = ini.toCppString();
+  auto filename_cpp = filename.toCppString();
   if (process_sections) {
-    CallbackData data;
+    SectionParserCallback::CallbackData data;
+    SectionParserCallback cb;
     data.arr = Array::Create();
-    if (zend_parse_ini_string
-        (ini.toCppString(), filename.toCppString(), scanner_mode,
-         php_ini_parser_cb_with_sections, &data)){
+    if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &data)) {
       return data.arr;
     }
   } else {
+    ParserCallback cb;
     Variant ret = Array::Create();
-    if (zend_parse_ini_string
-        (ini.toCppString(), filename.toCppString(), scanner_mode,
-         php_simple_ini_parser_cb, &ret)) {
+    if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &ret)) {
       return ret;
     }
   }
@@ -259,10 +309,9 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
 IniSetting::Map IniSetting::FromStringAsMap(const std::string& ini,
                                             const std::string& filename) {
   Lock lock(s_mutex); // ini parser is not thread-safe
+  SystemParserCallback cb;
   Map ret = IniSetting::Map::object;
-  zend_parse_ini_string(
-    ini, filename, NormalScanner, php_simple_ini_parser_map_cb, &ret
-  );
+  zend_parse_ini_string(ini, filename, NormalScanner, cb, &ret);
   return ret;
 }
 

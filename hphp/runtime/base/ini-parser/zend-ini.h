@@ -33,26 +33,28 @@ int ini_lex(std::string *ini_lval, void *loc);
 void zend_ini_scan(const std::string& str,
                    int scanner_mode,
                    const std::string& filename,
-                   HPHP::IniSetting::PFN_PARSER_CALLBACK callback,
+                   HPHP::IniSetting::ParserCallback &callback,
                    void *arg);
 
 void zend_ini_scan_cleanup();
 
-void zend_ini_callback(std::string *arg1,
-                       std::string *arg2,
-                       std::string *arg3,
-                       int callback_type);
-
+void zend_ini_on_section(const std::string &name);
+void zend_ini_on_label(const std::string &name);
+void zend_ini_on_entry(const std::string &key, const std::string &value);
+void zend_ini_on_pop_entry(const std::string &key, const std::string &value,
+                           const std::string &offset);
+void zend_ini_on_constant(std::string &result, const std::string &name);
+void zend_ini_on_var(std::string &result, const std::string &name);
+void zend_ini_on_op(std::string &result, char type, const std::string& op1,
+                    const std::string& op2 = std::string());
 
 ///////////////////////////////////////////////////////////////////////////////
 // defined in zend-ini.y
 
-bool zend_parse_ini_string(const std::string& str,
-                           const std::string& filename,
+bool zend_parse_ini_string(const std::string &str,
+                           const std::string &filename,
                            int scanner_mode,
-                           HPHP::IniSetting::PFN_PARSER_CALLBACK callback,
+                           HPHP::IniSetting::ParserCallback &callback,
                            void *arg);
-
-
 
 #endif // incl_HPHP_RUNTIME_BASE_ZENDINI_H_

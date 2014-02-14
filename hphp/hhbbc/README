@@ -147,10 +147,11 @@ Type Inference
 
 Local analysis of a function is done as a data-flow analysis on the
 types of locals and eval stack locations.  The code for this is in
-abstract-interp.cpp, which contains a block-at-a-time abstract
-interpreter for HHBC, and functions that drive it either to do
-analysis or optimization.  The same abstract interpreter that
-implements the analysis is also used to perform some optimizations.
+interp.h, with state structures in interp-state.h, which contains a
+block-at-a-time abstract interpreter for HHBC.  Functions that drive
+it either to do analysis or optimization are in analyze.cpp and
+optimize.cpp---the same abstract interpreter that implements the
+analysis is also used during optimizations.
 
 Type inference on HHBC is treated as an iterative forward dataflow
 problem.  Because of the presence of dynamic calls, we assume that

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,56 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_ABSTRACT_INTERP_H_
-#define incl_HHBBC_ABSTRACT_INTERP_H_
+#ifndef incl_HHBBC_ANALYZE_H_
+#define incl_HHBBC_ANALYZE_H_
 
 #include <vector>
-#include <map>
 
-#include "folly/Optional.h"
-
+#include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/representation.h"
 
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * Information about a pre-live ActRec.  Part of state tracked in
- * State.
- */
-struct ActRec {
-  explicit ActRec(FPIKind kind, folly::Optional<res::Func> f = folly::none)
-    : kind(kind)
-    , func(f)
-  {}
-
-  FPIKind kind;
-  folly::Optional<res::Func> func;
-};
-
-/*
- * A program state at a position in a php::Block.  Only the block
- * entry states are saved for the FuncAnalysis result structure.
- */
-struct State {
-  bool initialized = false;
-  bool thisAvailable = false;
-  std::vector<Type> locals;
-  std::vector<Type> stack;
-  std::vector<ActRec> fpiStack;
-};
-
-/*
- * States are EqualityComparible (provided they are in-states for the
- * same block).
- */
-bool operator==(const ActRec&, const ActRec&);
-bool operator!=(const ActRec&, const ActRec&);
-bool operator==(const State&, const State&);
-bool operator!=(const State&, const State&);
 
 /*
  * The result of a function-at-a-time type analysis.
@@ -106,6 +69,9 @@ struct FuncAnalysis {
   Type inferredReturn;
 };
 
+/*
+ * The result of a class-at-a-time analysis.
+ */
 struct ClassAnalysis {
   explicit ClassAnalysis(Context ctx) : ctx(ctx) {}
 
@@ -143,24 +109,6 @@ FuncAnalysis analyze_func(const Index&, Context);
  * and inferring some whole-class information at the same time.
  */
 ClassAnalysis analyze_class(const Index&, Context);
-
-/*
- * Use information from an analyze call to perform various
- * optimizations on a function.
- *
- * The Index should be unchanged since the one that was provided to
- * the corresponding analyze_func call.
- *
- * This routine may modify the php::Blocks attached to the passed-in
- * php::Func, but it won't modify the top-level meta-data in the
- * php::Func itself.
- */
-void optimize_func(const Index&, const FuncAnalysis&);
-
-/*
- * Combine the above two routines.  Convenient for single_unit.
- */
-void analyze_and_optimize_func(const Index&, Context);
 
 //////////////////////////////////////////////////////////////////////
 

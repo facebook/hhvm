@@ -16,6 +16,10 @@
 #ifndef incl_HPHP_UTIL_MATCH_H_
 #define incl_HPHP_UTIL_MATCH_H_
 
+#include <utility>
+
+#include <boost/variant.hpp>
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

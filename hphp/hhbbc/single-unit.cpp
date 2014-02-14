@@ -21,11 +21,22 @@
 #include "hphp/hhbbc/parse.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/emit.h"
-#include "hphp/hhbbc/abstract-interp.h"
+#include "hphp/hhbbc/analyze.h"
+#include "hphp/hhbbc/optimize.h"
 
 namespace HPHP { namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc);
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+void analyze_and_optimize_func(const Index& index, Context ctx) {
+  optimize_func(index, analyze_func(index, ctx));
+}
+
+}
 
 //////////////////////////////////////////////////////////////////////
 

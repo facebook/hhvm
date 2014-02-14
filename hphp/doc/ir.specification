@@ -1288,12 +1288,6 @@ D:BoxedCell = StRef S0:BoxedCell S1:Cell
   RefData::m_type also. Returns a new value for S0, which will now have the
   type of S1 after boxing.
 
-D:BoxedCell = StRefNT S0:BoxedCell S1:Cell
-
-  Store the value in S1 into the RefData pointed to by S0. Does not change
-  RefData::m_type. Returns a new value for S0, which will now have the type of
-  S1 after boxing.
-
 StRaw S0:?? S1:ConstInt S2:??
 
   "Raw" store to memory---i.e. outside of our type-system.

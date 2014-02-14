@@ -3131,21 +3131,13 @@ void CodeGenerator::cgStMem(IRInstruction* inst) {
   cgStore(ptr[offset], inst->src(2), srcLoc(2), Width::Full);
 }
 
-void CodeGenerator::cgStRefWork(IRInstruction* inst, Width width) {
+void CodeGenerator::cgStRef(IRInstruction* inst) {
   always_assert(!srcLoc(1).isFullSIMD());
   auto destReg = dstLoc(0).reg();
   auto ptr = srcLoc(0).reg();
   auto off = RefData::tvOffset();
-  cgStore(ptr[off], inst->src(1), srcLoc(1), width);
+  cgStore(ptr[off], inst->src(1), srcLoc(1), Width::Full);
   if (destReg != InvalidReg) emitMovRegReg(m_as, ptr, destReg);
-}
-
-void CodeGenerator::cgStRef(IRInstruction* inst) {
-  cgStRefWork(inst, Width::Full);
-}
-
-void CodeGenerator::cgStRefNT(IRInstruction* inst) {
-  cgStRefWork(inst, Width::Value);
 }
 
 int CodeGenerator::iterOffset(uint32_t id) {

@@ -450,7 +450,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case DecRefStack:  return simplifyDecRefStack(inst);
   case DecRefLoc:    return simplifyDecRefLoc(inst);
   case LdLoc:        return simplifyLdLoc(inst);
-  case StRef:        return simplifyStRef(inst);
 
   case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
 
@@ -2120,21 +2119,6 @@ SSATmp* Simplifier::simplifyLdLoc(IRInstruction* inst) {
   // Ideally we'd replace LdLoc<Null,...> with a constant value of that type,
   // but that prevents the guard relaxation code from tracing the source of
   // values.
-  return nullptr;
-}
-
-// Replace StRef with StRefNT when we know we aren't going to change
-// its m_type field.
-SSATmp* Simplifier::simplifyStRef(IRInstruction* inst) {
-  // Guard relaxation might change the ref type, so don't try to
-  // change to StRefNT until after relaxation happens.
-  if (m_irb.typeMightRelax()) return nullptr;
-  auto const oldUnbox = inst->src(0)->type().unbox();
-  auto const newType = inst->src(1)->type();
-  if (oldUnbox.isKnownDataType() &&
-      oldUnbox.equals(newType) && !oldUnbox.isString()) {
-    inst->setOpcode(StRefNT);
-  }
   return nullptr;
 }
 

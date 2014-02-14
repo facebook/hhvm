@@ -197,7 +197,6 @@ private:
   template<class Loc>
   void emitTypeGuard(Type type, Loc typeLoc, Loc dataLoc);
 
-  void cgStRefWork(IRInstruction* inst, Width);
   void cgIncRefWork(Type type, SSATmp* src, PhysLoc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 

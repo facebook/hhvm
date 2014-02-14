@@ -207,7 +207,6 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
       killLocalsForCall(hook, killedCallLocals);
       break;
 
-    case StRefNT:
     case StRef: {
       SSATmp* newRef = inst->dst();
       SSATmp* prevRef = inst->src(0);

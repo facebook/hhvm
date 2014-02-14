@@ -659,11 +659,11 @@ bool IRBuilder::constrainValue(SSATmp* const val,
       changed = constrainValue(inst->src(0), tc) || changed;
     }
     return changed;
-  } else if (inst->is(StRef, StRefNT, Box, BoxPtr)) {
+  } else if (inst->is(StRef, Box, BoxPtr)) {
     // If our caller cares about the inner type, propagate that through.
     // Otherwise we're done.
     if (tc.innerCat) {
-      auto src = inst->src(inst->is(StRef, StRefNT) ? 1 : 0);
+      auto src = inst->src(inst->is(StRef) ? 1 : 0);
       tc.innerCat.clear();
       return constrainValue(src, tc);
     }

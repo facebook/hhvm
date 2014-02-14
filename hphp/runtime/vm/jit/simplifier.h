@@ -148,7 +148,6 @@ private:
   SSATmp* simplifyDecRefStack(IRInstruction*);
   SSATmp* simplifyDecRefLoc(IRInstruction*);
   SSATmp* simplifyLdLoc(IRInstruction*);
-  SSATmp* simplifyStRef(IRInstruction*);
   SSATmp* simplifyAssertNonNull(IRInstruction*);
 
 

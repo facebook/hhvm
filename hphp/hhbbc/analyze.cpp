@@ -350,12 +350,12 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       }
       clsAnalysis.privateProperties[prop.name] = t;
     } else {
+      // Same thing as the above regarding TUninit and TBottom.
+      // Static properties don't need to exclude closures for this,
+      // though---we use instance properties for the closure
+      // 86static_* properties.
       auto t = cellTy;
       if (t.subtypeOf(TUninit)) {
-        // A property of type KindOfUninit means that it has non-scalar
-        // initializer which will be set by an 86spinit method. For these
-        // classes, we want the initial type of the property to be the
-        // type set by the 86sinit method, so we set the type to TBottom.
         t = TBottom;
       }
       clsAnalysis.privateStatics[prop.name] = t;
@@ -383,6 +383,18 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       Context { ctx.unit, f, ctx.cls },
       &clsAnalysis
     );
+  }
+
+  // Verify that none of the class properties are TBottom, i.e.
+  // any property of type KindOfUninit has been initialized (by
+  // 86pinit or 86sinit).
+  for (auto& prop : ctx.cls->properties) {
+    if (!(prop.attrs & AttrPrivate)) continue;
+    if (prop.attrs & AttrStatic) {
+      assert(!clsAnalysis.privateStatics[prop.name].subtypeOf(TBottom));
+    } else {
+      assert(!clsAnalysis.privateProperties[prop.name].subtypeOf(TBottom));
+    }
   }
 
   for (;;) {
@@ -435,19 +447,6 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       clsAnalysis.methods  = std::move(methodResults);
       clsAnalysis.closures = std::move(closureResults);
       break;
-    }
-  }
-
-  // Verify that none of the class properties are TBottom, i.e.
-  // any property of type KindOfUninit has been initialized (by
-  // 86pinit or 86sinit).
-  for (auto& prop : ctx.cls->properties) {
-    if ((prop.attrs & AttrPrivate)) {
-      if ((prop.attrs & AttrStatic)) {
-        assert(!clsAnalysis.privateStatics[prop.name].subtypeOf(TBottom));
-      } else {
-        assert(!clsAnalysis.privateProperties[prop.name].subtypeOf(TBottom));
-      }
     }
   }
 

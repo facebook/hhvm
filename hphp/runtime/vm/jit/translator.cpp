@@ -4109,11 +4109,14 @@ Translator::translateRegion(const RegionDesc& region,
     auto byRefs     = makeMapWalker(block->paramByRefs());
     auto refPreds   = makeMapWalker(block->reffinessPreds());
     auto knownFuncs = makeMapWalker(block->knownFuncs());
+    bool maybeStartNewBlock = true;
 
+    ht.traceBuilder().recordOffset(sk.offset());
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
-      ht.setBcOff(sk.offset(), false);
+      ht.setBcOff(sk.offset(), false, maybeStartNewBlock);
+      maybeStartNewBlock = false;
 
       // Emit prediction guards. If this is the first instruction in the
       // region the guards will go to a retranslate request. Otherwise, they'll
@@ -4182,7 +4185,22 @@ Translator::translateRegion(const RegionDesc& region,
       }
       inst.outputPredicted = false;
       populateImmediates(inst);
-
+      if (inst.op() == OpJmpZ || inst.op() == OpJmpNZ) {
+        // TODO(t3730617): Could extend this logic to other
+        // conditional control flow ops, e.g., IterNext, etc.
+        inst.includeBothPaths = [&] {
+          if (!RuntimeOption::EvalHHIRBytecodeControlFlow) return false;
+          Offset takenOffset = inst.offset() + inst.imm[0].u_BA;
+          Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));
+          bool takenIncluded = false;
+          bool fallthruIncluded = false;
+          for (auto& b : region.blocks) {
+            if (b->start().offset() == takenOffset) takenIncluded = true;
+            if (b->start().offset() == fallthruOffset) fallthruIncluded = true;
+          }
+          return takenIncluded && fallthruIncluded;
+        }();
+      }
       // If this block ends with an inlined FCall, we don't emit anything for
       // the FCall and instead set up HhbcTranslator for inlining. Blocks from
       // the callee will be next in the region.
@@ -4264,6 +4282,16 @@ Translator::translateRegion(const RegionDesc& region,
           });
         toInterp.insert(sk);
         return Retry;
+      }
+
+      // Insert a fallthrough jump
+      if (RuntimeOption::EvalHHIRBytecodeControlFlow
+          && i == block->length() - 1
+          && block != region.blocks.back()
+          && instrAllowsFallThru(inst.op())
+          && !(inst.op() == OpJmpZ || inst.op() == OpJmpNZ)) {
+        auto fallthru = inst.offset() + instrLen((Op*)(inst.pc()));
+        ht.endBlock(fallthru);
       }
 
       // Check the prediction. If the predicted type is less specific than what

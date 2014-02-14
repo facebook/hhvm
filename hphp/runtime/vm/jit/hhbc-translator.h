@@ -70,7 +70,11 @@ struct HhbcTranslator {
 
   // In between each emit* call, irtranslator indicates the new
   // bytecode offset (or whether we're finished) using this API.
-  void setBcOff(Offset newOff, bool lastBcOff);
+  void setBcOff(Offset newOff, bool lastBcOff, bool maybeStartBlock = false);
+
+  // End a bytecode block and do the right thing with fallthrough.
+  void endBlock(Offset next);
+
   void end();
   void end(Offset nextPc);
 
@@ -195,8 +199,8 @@ struct HhbcTranslator {
   void emitPopR();
   void emitDup();
   void emitUnboxR();
-  void emitJmpZ(Offset taken);
-  void emitJmpNZ(Offset taken);
+  void emitJmpZ(Offset taken, Offset next, bool bothPaths);
+  void emitJmpNZ(Offset taken, Offset next, bool bothPaths);
   void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise);
   void emitGt()    { emitCmp(Gt);    }
   void emitGte()   { emitCmp(Gte);   }
@@ -652,6 +656,8 @@ private:
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
+  void emitJmpHelper(int32_t taken, int32_t next, bool negate,
+                     bool bothPaths, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);
@@ -712,6 +718,11 @@ private: // Exit trace creation routines.
   Block* makeCatch(std::vector<SSATmp*> extraSpill =
                    std::vector<SSATmp*>());
   Block* makeCatchNoSpill();
+
+  /*
+   * Create a block for a branch target that will be generated later.
+   */
+  Block* makeBlock(Offset);
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,

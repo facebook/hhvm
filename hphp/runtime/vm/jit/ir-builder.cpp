@@ -774,6 +774,58 @@ void IRBuilder::setMarker(BCMarker marker) {
   m_state.setMarker(marker);
 }
 
+void IRBuilder::startBlock() {
+  assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
+  auto marker = m_state.marker();
+  auto it = m_offsetToBlockMap.find(marker.bcOff);
+  if (it != m_offsetToBlockMap.end() && it->second->empty()) {
+    auto block = it->second;
+    if (block != m_curBlock) {
+      if (m_state.compatible(block)) {
+        m_state.pauseBlock(block);
+      } else {
+        m_state.clearCse();
+      }
+      assert(m_curBlock);
+      auto& prev = m_curBlock->back();
+      if (!prev.isTerminal()) {
+        prev.setNext(block);
+      }
+      m_curBlock = block;
+      m_state.startBlock(m_curBlock);
+      FTRACE(2, "TraceBuilder switching to block B{}: {}\n", block->id(),
+             show(m_state));
+    }
+  }
+}
+
+Block* IRBuilder::makeBlock(Offset offset) {
+  auto it = m_offsetToBlockMap.find(offset);
+  if (it == m_offsetToBlockMap.end()) {
+    auto* block = m_unit.defBlock();
+    m_offsetToBlockMap.insert(std::make_pair(offset, block));
+    return block;
+  }
+  return it->second;
+}
+
+bool IRBuilder::blockExists(Offset offset) {
+  return m_offsetToBlockMap.count(offset);
+}
+
+bool IRBuilder::blockIsIncompatible(Offset offset) {
+  if (m_offsetSeen.count(offset)) return true;
+  auto it = m_offsetToBlockMap.find(offset);
+  if (it == m_offsetToBlockMap.end()) return true;
+  auto* block = it->second;
+  if (!it->second->empty()) return true;
+  return !m_state.compatible(block);
+}
+
+void IRBuilder::recordOffset(Offset offset) {
+  m_offsetSeen.insert(offset);
+}
+
 void IRBuilder::pushBlock(BCMarker marker, Block* b,
                           const folly::Optional<Block::iterator>& where) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",

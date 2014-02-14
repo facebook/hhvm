@@ -434,11 +434,21 @@ void HhbcTranslator::profileFailedInlShape(const std::string& str) {
   );
 }
 
-void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
+void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff,
+                              bool maybeStartBlock) {
   if (isInlining()) assert(!lastBcOff);
 
   m_bcStateStack.back().bcOff = newOff;
   updateMarker();
+  // TODO(t3729627): Instead of passing maybeStartBlock, see if it's
+  // possible to lift this and the DefSP conditional into their own
+  // API function to be called after setBcOff where we would have
+  // passed in true.
+  if (maybeStartBlock) m_irb->startBlock();
+
+  if (m_irb->sp() == nullptr) {
+    gen(DefSP, StackOffset(spOffset()), m_irb->fp());
+  }
   m_lastBcOff = lastBcOff;
 }
 
@@ -1988,6 +1998,18 @@ void HhbcTranslator::emitJmp(int32_t offset,
   if (backward && !noSurprise) {
     emitJmpSurpriseCheck();
   }
+  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+    // TODO(t3730057): Optimize away spillstacks and fallthrough
+    // jumps, either by doing something clever here or adding to
+    // jumpopts.
+    exceptionBarrier();
+    auto target = (breakTracelet
+                   || m_irb->blockIsIncompatible(offset))
+      ? makeExit(offset)
+      : makeBlock(offset);
+    gen(Jmp, target);
+    return;
+  }
   if (!breakTracelet) return;
   gen(Jmp, makeExit(offset));
 }
@@ -2003,14 +2025,37 @@ SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
   return gen(negate ? JmpZero : JmpNZero, target, boolSrc);
 }
 
-void HhbcTranslator::emitJmpZ(Offset taken) {
-  auto const src = popC();
-  emitJmpCondHelper(taken, true, src);
+void HhbcTranslator::emitJmpHelper(int32_t taken,
+                                   int32_t next,
+                                   bool negate,
+                                   bool bothPaths,
+                                   SSATmp* src) {
+  spillStack();
+
+  auto const target  = (!bothPaths
+                        || m_irb->blockIsIncompatible(taken))
+    ? makeExit(taken)
+    : makeBlock(taken);
+  auto const boolSrc = gen(ConvCellToBool, src);
+  gen(DecRef, src);
+  gen(negate ? JmpZero : JmpNZero, target, boolSrc);
+
+  // TODO(t3730079): This block is probably redundant with the
+  // fallthrough logic in translateRegion.  Try removing the guards
+  // against conditional jumps there as well as this.
+  if (bothPaths && m_irb->blockIsIncompatible(next)) {
+    gen(Jmp, makeExit(next));
+  }
 }
 
-void HhbcTranslator::emitJmpNZ(Offset taken) {
+void HhbcTranslator::emitJmpZ(Offset taken, Offset next, bool bothPaths) {
   auto const src = popC();
-  emitJmpCondHelper(taken, false, src);
+  emitJmpHelper(taken, next, true, bothPaths, src);
+}
+
+void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, bool bothPaths) {
+  auto const src = popC();
+  emitJmpHelper(taken, next, false, bothPaths, src);
 }
 
 // Objects compared with strings may involve calling a user-defined
@@ -4999,8 +5044,6 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
   gen(changesPC ? InterpOneCF : InterpOne, outType,
       makeCatch(), idata, sp, m_irb->fp());
   assert(m_irb->stackDeficit() == 0);
-
-  if (changesPC) m_hasExit = true;
 }
 
 std::string HhbcTranslator::showStack() const {
@@ -5296,6 +5339,13 @@ Block* HhbcTranslator::makeCatchNoSpill() {
   return makeCatchImpl([&] { return m_irb->sp(); });
 }
 
+/*
+ * Create a block corresponding to bytecode control flow.
+ */
+Block* HhbcTranslator::makeBlock(Offset targetBcOff) {
+  return m_irb->makeBlock(targetBcOff);
+}
+
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
                                        const std::vector<SSATmp*>& spillVals) {
   std::vector<SSATmp*> ssaArgs{ sp, cns(int64_t(m_irb->stackDeficit())) };
@@ -5472,6 +5522,13 @@ void HhbcTranslator::end(Offset nextPc) {
   gen(ReqBindJmp, BCOffset(nextPc));
 }
 
+void HhbcTranslator::endBlock(Offset next) {
+  if (m_irb->blockExists(next)) {
+    emitJmp(next,
+            false /* breakTracelet */,
+            true  /* noSurprise */ );
+  }
+}
 
 void HhbcTranslator::checkStrictlyInteger(
     SSATmp*& key, KeyType& keyType, bool& checkForInt) {

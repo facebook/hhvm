@@ -110,6 +110,17 @@ FuncAnalysis analyze_func(const Index&, Context);
  */
 ClassAnalysis analyze_class(const Index&, Context);
 
+/*
+ * Propagate a block input State to each instruction in the block.
+ *
+ * Returns a State array that is parallel to the instruction array in
+ * blk->hhbcs.
+ */
+std::vector<State> locally_propagated_states(const Index&,
+                                             Context,
+                                             borrowed_ptr<const php::Block>,
+                                             State);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

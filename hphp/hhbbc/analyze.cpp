@@ -484,4 +484,26 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
+std::vector<State>
+locally_propagated_states(const Index& index,
+                          const Context ctx,
+                          borrowed_ptr<const php::Block> blk,
+                          State state) {
+  Trace::Bump bumper{Trace::hhbbc, 10};
+
+  std::vector<State> ret;
+  ret.reserve(blk->hhbcs.size());
+
+  PropertiesInfo props(index, ctx, nullptr);
+  Interpreter interp { &index, ctx, props, blk, state };
+  for (auto& op : blk->hhbcs) {
+    ret.push_back(state);
+    interp.step(op);
+  }
+
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

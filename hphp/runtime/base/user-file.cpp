@@ -87,7 +87,7 @@ void UserFile::sweep() {
 bool UserFile::openImpl(const String& filename, const String& mode,
                         int options) {
   // bool stream_open($path, $mode, $options, &$opened_path)
-  bool success = false;
+  bool invoked = false;
   Variant opened_path;
   Variant ret = invoke(
     m_StreamOpen,
@@ -98,9 +98,9 @@ bool UserFile::openImpl(const String& filename, const String& mode,
       .append(options)
       .appendRef(opened_path)
       .toArray(),
-    success
+    invoked
   );
-  if (success && (ret.toBoolean() == true)) {
+  if (invoked && (ret.toBoolean() == true)) {
     m_opened = true;
     return true;
   }
@@ -125,10 +125,10 @@ bool UserFile::close() {
 
 int64_t UserFile::readImpl(char *buffer, int64_t length) {
   // String stread_read($count)
-  bool success = false;
+  bool invoked = false;
   String str = invoke(m_StreamRead, s_stream_read,
-                      make_packed_array(length), success);
-  if (!success) {
+                      make_packed_array(length), invoked);
+  if (!invoked) {
     raise_warning("%s::stream_read is not implemented",
                   m_cls->name()->data());
     return 0;
@@ -150,14 +150,14 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
   int64_t orig_length = length;
   // stream_write($data)
   while (length > 0) {
-    bool success = false;
+    bool invoked = false;
     int64_t didWrite = invoke(
       m_StreamWrite,
       s_stream_write,
       make_packed_array(String(buffer, length, CopyString)),
-      success
+      invoked
     ).toInt64();
-    if (!success) {
+    if (!invoked) {
       raise_warning("%s::stream_write is not implemented",
                     m_cls->name()->data());
       return 0;
@@ -184,11 +184,11 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
 bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   assert(seekable());
   // bool stream_seek($offset, $whence)
-  bool success = false;
+  bool invoked = false;
   bool sought  = invoke(
-    m_StreamSeek, s_stream_seek, make_packed_array(offset, whence), success
+    m_StreamSeek, s_stream_seek, make_packed_array(offset, whence), invoked
   ).toBoolean();
-  if (!success) {
+  if (!invoked) {
     always_assert("No seek method? But I found one earlier?");
   }
 
@@ -203,8 +203,8 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   }
 
   // int stream_tell()
-  Variant ret = invoke(m_StreamTell, s_stream_tell, Array::Create(), success);
-  if (!success) {
+  Variant ret = invoke(m_StreamTell, s_stream_tell, Array::Create(), invoked);
+  if (!invoked) {
     raise_warning("%s::stream_tell is not implemented!", m_cls->name()->data());
     return false;
   }
@@ -223,9 +223,9 @@ bool UserFile::eof() {
   }
 
   // bool stream_eof()
-  bool success = false;
-  Variant ret = invoke(m_StreamEof, s_stream_eof, Array::Create(), success);
-  if (!success) {
+  bool invoked = false;
+  Variant ret = invoke(m_StreamEof, s_stream_eof, Array::Create(), invoked);
+  if (!invoked) {
     return false;
   }
   return ret.isBoolean() ? ret.toBoolean() : true;
@@ -233,10 +233,10 @@ bool UserFile::eof() {
 
 bool UserFile::flush() {
   // bool stream_flush()
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(m_StreamFlush, s_stream_flush,
-                       Array::Create(), success);
-  if (!success) {
+                       Array::Create(), invoked);
+  if (!invoked) {
     return false;
   }
   return ret.isBoolean() ? ret.toBoolean() : false;
@@ -244,10 +244,10 @@ bool UserFile::flush() {
 
 bool UserFile::truncate(int64_t size) {
   // bool stream_truncate()
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(m_StreamTruncate, s_stream_truncate,
-                       make_packed_array(size), success);
-  if (!success) {
+                       make_packed_array(size), invoked);
+  if (!invoked) {
     return false;
   }
   return ret.isBoolean() ? ret.toBoolean() : false;
@@ -265,10 +265,10 @@ bool UserFile::lock(int operation, bool &wouldBlock) {
   }
 
   // bool stream_lock(int $operation)
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(m_StreamLock, s_stream_lock,
-                       make_packed_array(op), success);
-  if (!success) {
+                       make_packed_array(op), invoked);
+  if (!invoked) {
     if (operation) {
       raise_warning("%s::stream_lock is not implemented!",
                     m_cls->name()->data());
@@ -295,9 +295,9 @@ const StaticString
 int UserFile::statImpl(const String& path, struct stat* stat_sb,
                        int flags /* = 0 */) {
   // array url_stat ( string $path , int $flags )
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(m_UrlStat, s_url_stat,
-                       make_packed_array(path, flags), success);
+                       make_packed_array(path, flags), invoked);
   if (!ret.isArray()) {
     return -1;
   }
@@ -339,16 +339,16 @@ int UserFile::stat(const String& path, struct stat* buf) {
 
 bool UserFile::unlink(const String& filename) {
   // bool unlink($path)
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(
     m_Unlink,
     s_unlink,
     PackedArrayInit(1)
       .append(filename)
       .toArray(),
-    success
+    invoked
   );
-  if (success && (ret.toBoolean() == true)) {
+  if (invoked && (ret.toBoolean() == true)) {
     return true;
   }
 
@@ -358,7 +358,7 @@ bool UserFile::unlink(const String& filename) {
 
 bool UserFile::rename(const String& oldname, const String& newname) {
   // bool rename($oldname, $newname);
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(
     m_Rename,
     s_rename,
@@ -366,9 +366,9 @@ bool UserFile::rename(const String& oldname, const String& newname) {
       .append(oldname)
       .append(newname)
       .toArray(),
-    success
+    invoked
   );
-  if (success && (ret.toBoolean() == true)) {
+  if (invoked && (ret.toBoolean() == true)) {
     return true;
   }
 
@@ -378,7 +378,7 @@ bool UserFile::rename(const String& oldname, const String& newname) {
 
 bool UserFile::mkdir(const String& filename, int mode, int options) {
   // bool mkdir($path, $mode, $options)
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(
     m_Mkdir,
     s_mkdir,
@@ -387,9 +387,9 @@ bool UserFile::mkdir(const String& filename, int mode, int options) {
       .append(mode)
       .append(options)
       .toArray(),
-    success
+    invoked
   );
-  if (success && (ret.toBoolean() == true)) {
+  if (invoked && (ret.toBoolean() == true)) {
     return true;
   }
 
@@ -399,7 +399,7 @@ bool UserFile::mkdir(const String& filename, int mode, int options) {
 
 bool UserFile::rmdir(const String& filename, int options) {
   // bool rmdir($path, $options)
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(
     m_Rmdir,
     s_rmdir,
@@ -407,9 +407,9 @@ bool UserFile::rmdir(const String& filename, int options) {
       .append(filename)
       .append(options)
       .toArray(),
-    success
+    invoked
   );
-  if (success && (ret.toBoolean() == true)) {
+  if (invoked && (ret.toBoolean() == true)) {
     return true;
   }
 

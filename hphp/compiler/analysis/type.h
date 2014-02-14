@@ -119,6 +119,25 @@ public:
                          const std::string &clsname = "");
 
   /**
+   * Map Runtime DataType to analysis Type
+   */
+  static TypePtr FromDataType(DataType dt) {
+    switch (dt) {
+      case DataType::KindOfNull:     return Type::Null;
+      case DataType::KindOfBoolean:  return Type::Boolean;
+      case DataType::KindOfInt64:    return Type::Int64;
+      case DataType::KindOfDouble:   return Type::Double;
+      case DataType::KindOfStaticString:
+      case DataType::KindOfString:   return Type::String;
+      case DataType::KindOfArray:    return Type::Array;
+      case DataType::KindOfObject:   return Type::Object;
+      case DataType::KindOfResource: return Type::Resource;
+      default:
+        return Type::Any;
+    }
+  }
+
+  /**
    * Whether a type can be used as another type.
    */
   static bool IsLegalCast(AnalysisResultConstPtr ar, TypePtr from, TypePtr to);

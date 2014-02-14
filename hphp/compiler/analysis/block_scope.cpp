@@ -155,7 +155,7 @@ bool BlockScope::hasUser(BlockScopeRawPtr user, int useKinds) const {
 }
 
 void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
-  if ((is(ClassScope) || is(FunctionScope)) && getStmt()) {
+  if ((is(ClassScope) || is(FunctionScope)) && !isBuiltin()) {
 
     if (user.get() == this) {
       m_selfUser |= useKinds;

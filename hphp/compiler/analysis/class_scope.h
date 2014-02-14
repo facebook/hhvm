@@ -141,6 +141,7 @@ public:
   bool isExtensionClass() const { return getAttribute(Extension); }
   bool isDynamic() const { return m_dynamic; }
   bool isBaseClass() const { return m_bases.empty(); }
+  bool isBuiltin() const { return !getStmt(); }
 
   /**
    * Whether this class name was declared twice or more.

@@ -172,6 +172,7 @@ public:
   const std::string &getName() const { return m_name;}
   void setName(const std::string name) { m_name = name;}
   virtual std::string getId() const;
+  virtual bool isBuiltin() const { return false; }
   StatementPtr getStmt() const { return m_stmt;}
   VariableTableConstPtr getVariables() const { return m_variables;}
   ConstantTableConstPtr getConstants() const { return m_constants;}

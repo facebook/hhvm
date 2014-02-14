@@ -460,7 +460,7 @@ static void getFuncScopesSet(BlockScopeRawPtrQueue &v,
                              const StringToFunctionScopePtrMap &funcMap) {
   for (const auto& iter : funcMap) {
     FunctionScopePtr f = iter.second;
-    if (f->getStmt()) {
+    if (!f->isBuiltin()) {
       v.push_back(f);
     }
   }

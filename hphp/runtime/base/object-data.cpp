@@ -709,11 +709,13 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       auto thiz = const_cast<ObjectData*>(this);
       Array wanted = Array::Create();
       Array props = ret.toArray();
+      Array vals = nullptr;
+      bool hasInaccessibleProperties = false;
       for (ArrayIter iter(props); iter; ++iter) {
         String name = iter.second().toString();
         bool visible, accessible, unset;
         thiz->getProp(m_cls, name.get(), visible, accessible, unset);
-        if (accessible && !unset) {
+        if (!unset) {
           String propName = name;
           Slot propInd = m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
           if (accessible && propInd != kInvalidSlot) {
@@ -724,8 +726,21 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
               propName = concat4(s_zero, s_star, s_zero, name);
             }
           }
-          wanted.set(propName, const_cast<ObjectData*>(this)->
-              o_getImpl(name, RealPropUnchecked, true, o_getClassName()));
+          if (accessible) {
+            wanted.set(propName, const_cast<ObjectData*>(this)->
+                o_getImpl(name, RealPropUnchecked, true, o_getClassName()));
+          } else {
+            if (!hasInaccessibleProperties) {
+              hasInaccessibleProperties = true;
+              vals = o_toArray();
+            }
+            if (vals.exists(propName)) {
+              wanted.set(propName, vals.lvalAt(propName));
+            } else {
+              raise_warning("\"%s\" returned as member variable from "
+                  "__sleep() but does not exist", name.data());
+            }
+          }
         } else {
           raise_warning("\"%s\" returned as member variable from "
               "__sleep() but does not exist", name.data());

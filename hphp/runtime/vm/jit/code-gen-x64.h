@@ -245,11 +245,11 @@ private:
 
   void cgJcc(IRInstruction* inst);          // helper
   void cgReqBindJcc(IRInstruction* inst);   // helper
-  void cgSideExitJcc(IRInstruction* inst);  // helper
-  void cgJccI(IRInstruction* inst);         // helper
-  void cgReqBindJccI(IRInstruction* inst);  // helper
-  void cgSideExitJccI(IRInstruction* inst); // helper
-  void emitCmpI(IRInstruction* inst, ConditionCode);
+  void cgExitJcc(IRInstruction* inst);      // helper
+  void cgJccInt(IRInstruction* inst);         // helper
+  void cgReqBindJccInt(IRInstruction* inst);  // helper
+  void cgExitJccInt(IRInstruction* inst); // helper
+  void emitCmpInt(IRInstruction* inst, ConditionCode);
   void cgCmpHelper(IRInstruction* inst,
                    void (Asm::*setter)(Reg8),
                    int64_t (*str_cmp_str)(StringData*, StringData*),
@@ -265,7 +265,7 @@ private:
   void emitReqBindJcc(ConditionCode cc, const ReqBindJccData*);
 
   void emitCompare(IRInstruction* inst, unsigned s1, unsigned s2);
-  void emitCompareI(IRInstruction* inst, unsigned s1, unsigned s2);
+  void emitCompareInt(IRInstruction* inst, unsigned s1, unsigned s2);
   void emitTestZero(SSATmp*, PhysLoc);
   bool emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
                         SSATmp* src2, PhysLoc loc2,

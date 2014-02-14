@@ -566,12 +566,12 @@ D:Bool = NSame S0:Gen S1:Gen
   (Object,String) pairs, and do not throw. Note that Same and NSame never
   re-enter or throw, for any types.
 
-D:Bool = GtI   S0:{Int} S1:{Int}
-D:Bool = GteI  S0:{Int} S1:{Int}
-D:Bool = LtI   S0:{Int} S1:{Int}
-D:Bool = LteI  S0:{Int} S1:{Int}
-D:Bool = EqI   S0:{Int} S1:{Int}
-D:Bool = NeqI  S0:{Int} S1:{Int}
+D:Bool = GtInt   S0:{Int} S1:{Int}
+D:Bool = GteInt  S0:{Int} S1:{Int}
+D:Bool = LtInt   S0:{Int} S1:{Int}
+D:Bool = LteInt  S0:{Int} S1:{Int}
+D:Bool = EqInt   S0:{Int} S1:{Int}
+D:Bool = NeqInt  S0:{Int} S1:{Int}
 
   Perform 64-bit integer comparisons.
 
@@ -633,12 +633,12 @@ D:Bool = IsWaitHandle S0:Obj
 There is a conditional branch instruction for each predicate above, to enable
 generating efficient compare-and-branch instruction sequences.
 
-JmpGt   JmpGtI
-JmpGte  JmpGteI
-JmpLt   JmpLtI
-JmpLte  JmpLteI
-JmpEq   JmpEqI
-JmpNeq  JmpNeqI
+JmpGt   JmpGtInt
+JmpGte  JmpGteInt
+JmpLt   JmpLtInt
+JmpLte  JmpLteInt
+JmpEq   JmpEqInt
+JmpNeq  JmpNeqInt
 JmpSame
 JmpNSame
 JmpInstanceOf
@@ -1350,12 +1350,12 @@ ReqRetranslateOpt<transID,bcOff>
   translation transID, which starts at bcOff. This instruction is used in exit
   traces that trigger profile-guided optimizations.
 
-ReqBindJmpGt   ReqBindJmpGtI
-ReqBindJmpGte  ReqBindJmpGteI
-ReqBindJmpLt   ReqBindJmpLtI
-ReqBindJmpLte  ReqBindJmpLteI
-ReqBindJmpEq   ReqBindJmpEqI
-ReqBindJmpNeq  ReqBindJmpNeqI
+ReqBindJmpGt   ReqBindJmpGtInt
+ReqBindJmpGte  ReqBindJmpGteInt
+ReqBindJmpLt   ReqBindJmpLtInt
+ReqBindJmpLte  ReqBindJmpLteInt
+ReqBindJmpEq   ReqBindJmpEqInt
+ReqBindJmpNeq  ReqBindJmpNeqInt
 ReqBindJmpSame
 ReqBindJmpNSame
 ReqBindJmpInstanceOfBitmask
@@ -1366,12 +1366,12 @@ ReqBindJmpNZero
   Test the condition based on the Jmp* op of similar name, and then emit a pair
   of smashable jumps to a REQ_BIND_JMPCC_FIRST service request.
 
-SideExitJmpGt   SideExitJmpGtI
-SideExitJmpGte  SideExitJmpGteI
-SideExitJmpLt   SideExitJmpLtI
-SideExitJmpLte  SideExitJmpLteI
-SideExitJmpEq   SideExitJmpEqI
-SideExitJmpNeq  SideExitJmpNeqI
+SideExitJmpGt   SideExitJmpGtInt
+SideExitJmpGte  SideExitJmpGteInt
+SideExitJmpLt   SideExitJmpLtInt
+SideExitJmpLte  SideExitJmpLteInt
+SideExitJmpEq   SideExitJmpEqInt
+SideExitJmpNeq  SideExitJmpNeqInt
 SideExitJmpSame
 SideExitJmpNSame
 SideExitJmpInstanceOfBitmask

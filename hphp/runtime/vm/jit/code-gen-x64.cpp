@@ -547,7 +547,7 @@ void CodeGenerator::emitCompare(IRInstruction* inst, unsigned s1, unsigned s2) {
 }
 
 void
-CodeGenerator::emitCompareI(IRInstruction* inst, unsigned s1, unsigned s2) {
+CodeGenerator::emitCompareInt(IRInstruction* inst, unsigned s1, unsigned s2) {
   assert(inst->src(s1)->type() <= Type::Int);
   assert(inst->src(s2)->type() <= Type::Int);
   auto srcReg1 = srcLoc(s1).reg();
@@ -694,8 +694,8 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
   emitFwdJcc(opToConditionCode(inst->op()), inst->taken());
 }
 
-void CodeGenerator::cgJccI(IRInstruction* inst) {
-  emitCompareI(inst, 0, 1);
+void CodeGenerator::cgJccInt(IRInstruction* inst) {
+  emitCompareInt(inst, 0, 1);
   emitFwdJcc(opToConditionCode(inst->op()), inst->taken());
 }
 
@@ -706,9 +706,9 @@ void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
                  inst->extra<ReqBindJccData>());
 }
 
-void CodeGenerator::cgReqBindJccI(IRInstruction* inst) {
+void CodeGenerator::cgReqBindJccInt(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
-  emitCompareI(inst, 0, 1);
+  emitCompareInt(inst, 0, 1);
   emitReqBindJcc(opToConditionCode(inst->op()),
                  inst->extra<ReqBindJccData>());
 }
@@ -731,35 +731,35 @@ void CodeGenerator::cgReqBindJmpNeq(IRInstruction* i)   { cgReqBindJcc(i); }
 void CodeGenerator::cgReqBindJmpSame(IRInstruction* i)  { cgReqBindJcc(i); }
 void CodeGenerator::cgReqBindJmpNSame(IRInstruction* i) { cgReqBindJcc(i); }
 
-void CodeGenerator::cgSideExitJmpGt(IRInstruction* i)    { cgSideExitJcc(i); }
-void CodeGenerator::cgSideExitJmpGte(IRInstruction* i)   { cgSideExitJcc(i); }
-void CodeGenerator::cgSideExitJmpLt(IRInstruction* i)    { cgSideExitJcc(i); }
-void CodeGenerator::cgSideExitJmpLte(IRInstruction* i)   { cgSideExitJcc(i); }
-void CodeGenerator::cgSideExitJmpEq(IRInstruction* i)    { cgSideExitJcc(i); }
-void CodeGenerator::cgSideExitJmpNeq(IRInstruction* i)   { cgSideExitJcc(i); }
-void CodeGenerator::cgSideExitJmpSame(IRInstruction* i)  { cgSideExitJcc(i); }
-void CodeGenerator::cgSideExitJmpNSame(IRInstruction* i) { cgSideExitJcc(i); }
+void CodeGenerator::cgSideExitJmpGt(IRInstruction* i)    { cgExitJcc(i); }
+void CodeGenerator::cgSideExitJmpGte(IRInstruction* i)   { cgExitJcc(i); }
+void CodeGenerator::cgSideExitJmpLt(IRInstruction* i)    { cgExitJcc(i); }
+void CodeGenerator::cgSideExitJmpLte(IRInstruction* i)   { cgExitJcc(i); }
+void CodeGenerator::cgSideExitJmpEq(IRInstruction* i)    { cgExitJcc(i); }
+void CodeGenerator::cgSideExitJmpNeq(IRInstruction* i)   { cgExitJcc(i); }
+void CodeGenerator::cgSideExitJmpSame(IRInstruction* i)  { cgExitJcc(i); }
+void CodeGenerator::cgSideExitJmpNSame(IRInstruction* i) { cgExitJcc(i); }
 
-void CodeGenerator::cgJmpGtI(IRInstruction* i)    { cgJccI(i); }
-void CodeGenerator::cgJmpGteI(IRInstruction* i)   { cgJccI(i); }
-void CodeGenerator::cgJmpLtI(IRInstruction* i)    { cgJccI(i); }
-void CodeGenerator::cgJmpLteI(IRInstruction* i)   { cgJccI(i); }
-void CodeGenerator::cgJmpEqI(IRInstruction* i)    { cgJccI(i); }
-void CodeGenerator::cgJmpNeqI(IRInstruction* i)   { cgJccI(i); }
+void CodeGenerator::cgJmpGtInt(IRInstruction* i)    { cgJccInt(i); }
+void CodeGenerator::cgJmpGteInt(IRInstruction* i)   { cgJccInt(i); }
+void CodeGenerator::cgJmpLtInt(IRInstruction* i)    { cgJccInt(i); }
+void CodeGenerator::cgJmpLteInt(IRInstruction* i)   { cgJccInt(i); }
+void CodeGenerator::cgJmpEqInt(IRInstruction* i)    { cgJccInt(i); }
+void CodeGenerator::cgJmpNeqInt(IRInstruction* i)   { cgJccInt(i); }
 
-void CodeGenerator::cgReqBindJmpGtI(IRInstruction* i)    { cgReqBindJccI(i); }
-void CodeGenerator::cgReqBindJmpGteI(IRInstruction* i)   { cgReqBindJccI(i); }
-void CodeGenerator::cgReqBindJmpLtI(IRInstruction* i)    { cgReqBindJccI(i); }
-void CodeGenerator::cgReqBindJmpLteI(IRInstruction* i)   { cgReqBindJccI(i); }
-void CodeGenerator::cgReqBindJmpEqI(IRInstruction* i)    { cgReqBindJccI(i); }
-void CodeGenerator::cgReqBindJmpNeqI(IRInstruction* i)   { cgReqBindJccI(i); }
+void CodeGenerator::cgReqBindJmpGtInt(IRInstruction* i)  { cgReqBindJccInt(i); }
+void CodeGenerator::cgReqBindJmpGteInt(IRInstruction* i) { cgReqBindJccInt(i); }
+void CodeGenerator::cgReqBindJmpLtInt(IRInstruction* i)  { cgReqBindJccInt(i); }
+void CodeGenerator::cgReqBindJmpLteInt(IRInstruction* i) { cgReqBindJccInt(i); }
+void CodeGenerator::cgReqBindJmpEqInt(IRInstruction* i)  { cgReqBindJccInt(i); }
+void CodeGenerator::cgReqBindJmpNeqInt(IRInstruction* i) { cgReqBindJccInt(i); }
 
-void CodeGenerator::cgSideExitJmpGtI(IRInstruction* i)    { cgSideExitJccI(i); }
-void CodeGenerator::cgSideExitJmpGteI(IRInstruction* i)   { cgSideExitJccI(i); }
-void CodeGenerator::cgSideExitJmpLtI(IRInstruction* i)    { cgSideExitJccI(i); }
-void CodeGenerator::cgSideExitJmpLteI(IRInstruction* i)   { cgSideExitJccI(i); }
-void CodeGenerator::cgSideExitJmpEqI(IRInstruction* i)    { cgSideExitJccI(i); }
-void CodeGenerator::cgSideExitJmpNeqI(IRInstruction* i)   { cgSideExitJccI(i); }
+void CodeGenerator::cgSideExitJmpGtInt(IRInstruction* i)  { cgExitJccInt(i); }
+void CodeGenerator::cgSideExitJmpGteInt(IRInstruction* i) { cgExitJccInt(i); }
+void CodeGenerator::cgSideExitJmpLtInt(IRInstruction* i)  { cgExitJccInt(i); }
+void CodeGenerator::cgSideExitJmpLteInt(IRInstruction* i) { cgExitJccInt(i); }
+void CodeGenerator::cgSideExitJmpEqInt(IRInstruction* i)  { cgExitJccInt(i); }
+void CodeGenerator::cgSideExitJmpNeqInt(IRInstruction* i) { cgExitJccInt(i); }
 
 /**
  * Once the arg sources and dests are all assigned; emit moves and exchanges to
@@ -1889,19 +1889,19 @@ void CodeGenerator::cgGteX(IRInstruction* inst) {
   CG_OP_CMP(inst, setge, gte);
 }
 
-void CodeGenerator::emitCmpI(IRInstruction* inst, ConditionCode cc) {
+void CodeGenerator::emitCmpInt(IRInstruction* inst, ConditionCode cc) {
   auto dstReg = dstLoc(0).reg();
   if (dstReg == InvalidReg) return;
-  emitCompareI(inst, 0, 1);
+  emitCompareInt(inst, 0, 1);
   m_as.setcc(cc, rbyte(dstReg));
 }
 
-void CodeGenerator::cgEqI(IRInstruction* inst)  { emitCmpI(inst, CC_E); }
-void CodeGenerator::cgNeqI(IRInstruction* inst) { emitCmpI(inst, CC_NE); }
-void CodeGenerator::cgLtI(IRInstruction* inst)  { emitCmpI(inst, CC_L); }
-void CodeGenerator::cgGtI(IRInstruction* inst)  { emitCmpI(inst, CC_G); }
-void CodeGenerator::cgLteI(IRInstruction* inst) { emitCmpI(inst, CC_LE); }
-void CodeGenerator::cgGteI(IRInstruction* inst) { emitCmpI(inst, CC_GE); }
+void CodeGenerator::cgEqInt(IRInstruction* inst)  { emitCmpInt(inst, CC_E); }
+void CodeGenerator::cgNeqInt(IRInstruction* inst) { emitCmpInt(inst, CC_NE); }
+void CodeGenerator::cgLtInt(IRInstruction* inst)  { emitCmpInt(inst, CC_L); }
+void CodeGenerator::cgGtInt(IRInstruction* inst)  { emitCmpInt(inst, CC_G); }
+void CodeGenerator::cgLteInt(IRInstruction* inst) { emitCmpInt(inst, CC_LE); }
+void CodeGenerator::cgGteInt(IRInstruction* inst) { emitCmpInt(inst, CC_GE); }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Type check operators
@@ -4925,7 +4925,7 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
                     extra->taken);
 }
 
-void CodeGenerator::cgSideExitJcc(IRInstruction* inst) {
+void CodeGenerator::cgExitJcc(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
   emitCompare(inst, 0, 1);
   emitBindSideExit(m_mainCode, m_stubsCode,
@@ -4933,9 +4933,9 @@ void CodeGenerator::cgSideExitJcc(IRInstruction* inst) {
                    sk);
 }
 
-void CodeGenerator::cgSideExitJccI(IRInstruction* inst) {
+void CodeGenerator::cgExitJccInt(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
-  emitCompareI(inst, 0, 1);
+  emitCompareInt(inst, 0, 1);
   emitBindSideExit(m_mainCode, m_stubsCode,
                    opToConditionCode(inst->op()),
                    sk);

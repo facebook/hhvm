@@ -562,7 +562,9 @@ Variant f_thrift_protocol_read_binary(CObjRef transportobj,
     // Check for correct version number
     int32_t version = sz & VERSION_MASK;
     if (version != VERSION_1) {
-      throw_tprotocolexception("Bad version identifier", BAD_VERSION);
+      char errbuf[128];
+      sprintf(errbuf, "Bad version identifier, sz=%d", sz);
+      throw_tprotocolexception(String(errbuf, CopyString), BAD_VERSION);
     }
     messageType = (sz & 0x000000ff);
     int32_t namelen = transport.readI32();
@@ -570,7 +572,9 @@ Variant f_thrift_protocol_read_binary(CObjRef transportobj,
     transport.skip(namelen + 4);
   } else {
     if (strict_read) {
-      throw_tprotocolexception("No version identifier... old protocol client in strict mode?", BAD_VERSION);
+      char errbuf[128];
+      sprintf(errbuf, "No version identifier... old protocol client in strict mode? sz=%d", sz);
+      throw_tprotocolexception(String(errbuf, CopyString), BAD_VERSION);
     } else {
       // Handle pre-versioned input
       transport.skip(sz); // skip string body

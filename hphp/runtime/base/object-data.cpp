@@ -709,7 +709,8 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       auto thiz = const_cast<ObjectData*>(this);
       Array wanted = Array::Create();
       Array props = ret.toArray();
-      Array vals = o_toArray();
+      Array vals = nullptr;
+      bool hasInaccessibleProperties = false;
       for (ArrayIter iter(props); iter; ++iter) {
         String name = iter.second().toString();
         bool visible, accessible, unset;
@@ -728,11 +729,17 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
           if (accessible) {
             wanted.set(propName, const_cast<ObjectData*>(this)->
                 o_getImpl(name, RealPropUnchecked, true, o_getClassName()));
-          } else if (vals.exists(propName)) {
-            wanted.set(propName, vals.lvalAt(propName));
           } else {
-            raise_warning("\"%s\" returned as member variable from "
-                "__sleep() but does not exist", name.data());
+            if (!hasInaccessibleProperties) {
+              hasInaccessibleProperties = true;
+              vals = o_toArray();
+            }
+            if (vals.exists(propName)) {
+              wanted.set(propName, vals.lvalAt(propName));
+            } else {
+              raise_warning("\"%s\" returned as member variable from "
+                  "__sleep() but does not exist", name.data());
+            }
           }
         } else {
           raise_warning("\"%s\" returned as member variable from "

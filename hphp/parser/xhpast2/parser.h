@@ -944,10 +944,10 @@ struct Parser : ParserBase {
   void onWhereClause(Token &out, Token &expr) {
     out.setNodeType(ONWHERECLAUSE).appendChild(&expr);
   }
-  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
-      Token &right) {
-    out.setNodeType(ONJOINCLAUSE).appendChild(&var).appendChild(&coll)
-      .appendChild(&left).appendChild(&right);
+  void onJoinClause(Token &out, Token *var, Token &coll, Token *left,
+      Token *right) {
+    out.setNodeType(ONJOINCLAUSE).appendChild(var).appendChild(&coll)
+      .appendChild(left).appendChild(right);
   }
   void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
       Token &right, Token &group) {

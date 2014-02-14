@@ -823,8 +823,8 @@ class CodeModelFactory {
   }
 
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    *
    * @param @comments
    * Zero or more code comments that immediately preceded this code node
@@ -835,10 +835,10 @@ class CodeModelFactory {
    *
    */
   public function makeJoinClause(
-    /*string*/ $identifier,
+    /*?string*/ $identifier,
     /*IExpression*/ $collection,
-    /*IExpression*/ $left,
-    /*IExpression*/ $right,
+    /*?IExpression*/ $left,
+    /*?IExpression*/ $right,
     /*?string*/ $group,
     /*Vector<string>*/ $comments,
     /*?ISourceLocation*/ $source_location

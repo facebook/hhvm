@@ -282,8 +282,8 @@ public:
   void onFromClause(Token &out, Token &var, Token &coll);
   void onLetClause(Token &out, Token &var, Token &expr);
   void onWhereClause(Token &out, Token &expr);
-  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
-    Token &right);
+  void onJoinClause(Token &out, Token *var, Token &coll, Token *left,
+    Token *right);
   void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
     Token &right, Token &group);
   void onOrderbyClause(Token &out, Token &orderings);

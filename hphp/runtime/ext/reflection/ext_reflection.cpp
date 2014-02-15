@@ -863,7 +863,7 @@ static Array get_class_info(const ClassInfo *cls) {
     for (auto const& meth : cls->getMethodsVec()) {
       Array info = Array::Create();
       set_method_info(info, meth, cls);
-      arr.set(f_strtolower(meth->name), info);
+      arr.set(meth->name, info);
     }
     ret.set(s_methods, VarNR(arr));
   }
@@ -1007,7 +1007,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name) {
         set_type_profiling_info(info, cls, m);
       }
       set_method_info(info, m, cls);
-      arr.set(f_strtolower(m->nameRef()), VarNR(info));
+      arr.set(m->nameRef(), VarNR(info));
     }
 
     Func* const* clsMethods = cls->methods();
@@ -1018,7 +1018,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name) {
       if (m->isGenerated()) continue;
       Array info = Array::Create();
       set_method_info(info, m, cls);
-      arr.set(f_strtolower(m->nameRef()), VarNR(info));
+      arr.set(m->nameRef(), VarNR(info));
     }
     ret.set(s_methods, VarNR(arr));
   }

@@ -17,22 +17,7 @@ function highlight_string($data, $return = false) {
     'string' => ini_get('highlight.string'),
     'keyword' => ini_get('highlight.keyword'),
   ];
-  if (empty($colors['html'])) {
-    $colors['html'] = "#000000";
-  }
-  if (empty($colors['comment'])) {
-    $colors['comment'] = "#FF8000";
-  }
-  if (empty($colors['default'])) {
-    $colors['default'] = "#0000BB";
-  }
-  if (empty($colors['string'])) {
-    $colors['string'] = "#DD0000";
-  }
-  if (empty($colors['keyword'])) {
-    $colors['keyword'] = "#007700";
-  }
-
+  
   $output = '';
   $last_color = $colors['html'];
   $next_color = null;

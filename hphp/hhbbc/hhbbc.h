@@ -68,8 +68,11 @@ struct Options {
   /*
    * Whether to perform local dead code elimination.  This removes
    * unnecessary instructions within a single block.
+   *
+   * Note: this is off for now because it is a bit of a work in
+   * progress (needs more testing).
    */
-  bool LocalDCE = true;
+  bool LocalDCE = false;
 
   /*
    * If true, insert opcodes that assert inferred types, so we can

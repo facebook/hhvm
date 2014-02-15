@@ -141,10 +141,7 @@ struct DceVisitor : boost::static_visitor<void> {
     popCond(u1, u2);
   }
 
-  void operator()(const bc::CGetL&) {
-    auto const u = push();
-    popCond(u);
-  }
+  void operator()(const bc::CGetL&) { pushRemovable(); }
 
   void operator()(const bc::CGetL2&) {
     auto const u1 = push();
@@ -156,6 +153,7 @@ struct DceVisitor : boost::static_visitor<void> {
     auto const u1 = push();
     auto const u2 = push();
     auto const u3 = push();
+    popCond(u1, u2, u3);
     popCond(u1, u2, u3);
   }
 
@@ -320,6 +318,11 @@ std::vector<Bytecode> local_dce(const Index& index,
   for (auto idx = blk->hhbcs.size(); idx-- > 0;) {
     if (!dceState.marks.test(idx)) continue;
     blk->hhbcs.erase(begin(blk->hhbcs) + idx);
+  }
+
+  // Blocks must be non-empty.
+  if (blk->hhbcs.empty()) {
+    blk->hhbcs.push_back(bc::Nop {});
   }
 
   return blk->hhbcs;

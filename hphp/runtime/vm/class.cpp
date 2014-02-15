@@ -560,7 +560,9 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
         // private property with this name.
         accessible = false;
       } else {
-        if (ctx->classof(baseClass)) {
+        if (ctx == (Class*)-1 || ctx->classof(baseClass)) {
+          // the special ctx (Class*)-1 is used by unserialization to
+          // mean that protected properties are ok. Otherwise,
           // ctx is derived from baseClass, so we know this protected
           // property is accessible and we know ctx cannot have private
           // property with the same name, so we're done.
@@ -600,7 +602,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
   }
   // If ctx is an ancestor of this, check if ctx has a private property
   // with the same name.
-  if (ctx && classof(ctx)) {
+  if (ctx && ctx != (Class*)-1 && classof(ctx)) {
     Slot ctxPropInd = ctx->lookupDeclProp(key);
     if (ctxPropInd != kInvalidSlot &&
         ctx->m_declProperties[ctxPropInd].m_class == ctx &&

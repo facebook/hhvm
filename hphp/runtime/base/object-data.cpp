@@ -611,7 +611,7 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
 
 const StaticString
   s_zero("\0", 1),
-  s_star("*");
+  s_protected_prefix("\0*\0", 3);
 
 void ObjectData::serialize(VariableSerializer* serializer) const {
   if (UNLIKELY(serializer->incNestedLevel((void*)this, true))) {
@@ -706,38 +706,71 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   if (UNLIKELY(handleSleep)) {
     assert(!isCollection());
     if (ret.isArray()) {
-      auto thiz = const_cast<ObjectData*>(this);
       Array wanted = Array::Create();
-      Array props = ret.toArray();
+      assert(ret.getRawType() == KindOfArray); // can't be KindOfRef
+      const Array &props = ret.asCArrRef();
       for (ArrayIter iter(props); iter; ++iter) {
-        String name = iter.second().toString();
-        bool visible, accessible, unset;
-        thiz->getProp(m_cls, name.get(), visible, accessible, unset);
-        if (accessible && !unset) {
-          String propName = name;
-          Slot propInd = m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
-          if (accessible && propInd != kInvalidSlot) {
-            auto attrs = m_cls->declProperties()[propInd].m_attrs;
-            if (attrs & AttrPrivate) {
-              propName = concat4(s_zero, o_getClassName(), s_zero, name);
-            } else if (attrs & AttrProtected) {
-              propName = concat4(s_zero, s_star, s_zero, name);
+        String memberName = iter.second().toString();
+        String propName = memberName;
+        Class* ctx = m_cls;
+        auto attrMask = AttrNone;
+        if (memberName.data()[0] == 0) {
+          int subLen = memberName.find('\0', 1) + 1;
+          if (subLen > 2) {
+            if (subLen == 3 && memberName.data()[1] == '*') {
+              attrMask = AttrProtected;
+              memberName = memberName.substr(subLen);
+            } else {
+              attrMask = AttrPrivate;
+              String cls = memberName.substr(1, subLen - 2);
+              ctx = Unit::lookupClass(cls.get());
+              if (ctx) {
+                memberName = memberName.substr(subLen);
+              } else {
+                ctx = m_cls;
+              }
             }
           }
-          wanted.set(propName, const_cast<ObjectData*>(this)->
-              o_getImpl(name, RealPropUnchecked, true, o_getClassName()));
-        } else {
-          raise_warning("\"%s\" returned as member variable from "
-              "__sleep() but does not exist", name.data());
-          wanted.set(name, uninit_null());
         }
+
+        bool accessible;
+        Slot propInd = m_cls->getDeclPropIndex(ctx, memberName.get(),
+                                               accessible);
+        if (propInd != kInvalidSlot) {
+          if (accessible) {
+            const TypedValue* prop = &propVec()[propInd];
+            if (prop->m_type != KindOfUninit) {
+              auto attrs = m_cls->declProperties()[propInd].m_attrs;
+              if (attrs & AttrPrivate) {
+                memberName = concat4(s_zero, ctx->nameRef(),
+                                     s_zero, memberName);
+              } else if (attrs & AttrProtected) {
+                memberName = concat(s_protected_prefix, memberName);
+              }
+              if (!attrMask || (attrMask & attrs) == attrMask) {
+                wanted.set(memberName, tvAsCVarRef(prop));
+                continue;
+              }
+            }
+          }
+        }
+        if (!attrMask && UNLIKELY(getAttribute(HasDynPropArr))) {
+          const TypedValue* prop = dynPropArray()->nvGet(propName.get());
+          if (prop) {
+            wanted.set(propName, tvAsCVarRef(prop));
+            continue;
+          }
+        }
+        raise_notice("serialize(): \"%s\" returned as member variable from "
+                     "__sleep() but does not exist", propName.data());
+        wanted.set(propName, init_null());
       }
       serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
       wanted.serialize(serializer, true);
     } else {
-      raise_warning("serialize(): __sleep should return an array only "
-                    "containing the names of instance-variables to "
-                    "serialize");
+      raise_notice("serialize(): __sleep should return an array only "
+                   "containing the names of instance-variables to "
+                   "serialize");
       uninit_null().serialize(serializer);
     }
   } else {

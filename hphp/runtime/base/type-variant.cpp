@@ -47,7 +47,7 @@ const VarNR NAN_varNR(std::numeric_limits<double>::quiet_NaN());
 
 static void unserializeProp(VariableUnserializer *uns,
                             ObjectData *obj, const String& key,
-                            const String& context, const String& realKey,
+                            Class* ctx, const String& realKey,
                             int nProp) NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1544,25 +1544,21 @@ void Variant::serialize(VariableSerializer *serializer,
 
 static void unserializeProp(VariableUnserializer *uns,
                             ObjectData *obj, const String& key,
-                            const String& context, const String& realKey,
+                            Class* ctx, const String& realKey,
                             int nProp) {
   // Do a two-step look up
-  int flags = 0;
-  Variant* t = obj->o_realProp(key, flags, context);
-  if (!t) {
+  bool visible, accessible, unset;
+  auto t = &tvAsVariant(obj->getProp(ctx, key.get(),
+                                     visible, accessible, unset));
+  assert(!unset);
+  if (!t || !accessible) {
     // Dynamic property. If this is the first, and we're using HphpArray,
     // we need to pre-allocate space in the array to ensure the elements
     // dont move during unserialization.
     //
     // TODO(#2881866): this assumption means we can't do reallocations
     // when promoting kPackedKind -> kMixedKind.
-    obj->reserveProperties(nProp);
-    t = obj->o_realProp(realKey, ObjectData::RealPropCreate, context);
-    if (!t) {
-      // When accessing protected/private property from wrong context,
-      // we could get NULL for o_realProp.
-      throw Exception("Error in accessing property");
-    }
+    t = &obj->reserveProperties(nProp).lvalAt(realKey, AccessFlags::Key);
   }
   t->unserialize(uns);
 }
@@ -1842,15 +1838,14 @@ void Variant::unserialize(VariableUnserializer *uns,
                 }
               }
               String k(kdata + subLen, ksize - subLen, CopyString);
-              if (kdata[1] == '*') {
-                unserializeProp(uns, obj.get(), k, clsName, key, i + 1);
-              } else {
-                unserializeProp(uns, obj.get(), k,
-                                String(kdata + 1, subLen - 2, CopyString),
-                                key, i + 1);
+              Class* ctx = (Class*)-1;
+              if (kdata[1] != '*') {
+                ctx = Unit::lookupClass(
+                  String(kdata + 1, subLen - 2, CopyString).get());
               }
+              unserializeProp(uns, obj.get(), k, ctx, key, i + 1);
             } else {
-              unserializeProp(uns, obj.get(), key, empty_string, key, i + 1);
+              unserializeProp(uns, obj.get(), key, nullptr, key, i + 1);
             }
           }
         } else {

@@ -193,7 +193,7 @@ Variant f_array_combine(CVarRef keys, CVarRef values) {
     if (key.isInteger() || key.isString()) {
       ret.setWithRef(key, iter2.secondRefPlus());
     } else {
-      ret.setRef(key.toString(), iter2.secondRefPlus());
+      ret.setWithRef(key.toString(), iter2.secondRefPlus());
     }
   }
   return ret;

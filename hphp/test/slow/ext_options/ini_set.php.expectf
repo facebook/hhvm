@@ -1,4 +1,4 @@
-string(5) "/tmp;"
+string(5) ""
 string(14) "/foo/a;/foo/b;"
 string(%d) "%s"
 string(%d) "%s"

@@ -811,6 +811,11 @@ bool f_is_dir(const String& filename) {
   if (filename.empty()) {
     return false;
   }
+  
+  filename =
+  !strncmp(filename.data(), "file://", sizeof("file://") - 1)
+  ? filename.substr(sizeof("file://") - 1) : filename;
+
   bool isRelative = (filename.charAt(0) != '/');
   if (isRelative) cwd = g_context->getCwd();
   if (!isRelative || cwd == String(RuntimeOption::SourceRoot)) {

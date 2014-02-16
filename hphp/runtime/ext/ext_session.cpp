@@ -1933,6 +1933,11 @@ static class SessionExtension : public Extension {
     HHVM_ME(SessionHandler, hhdestroy);
     HHVM_ME(SessionHandler, hhgc);
   }
+
+  virtual void requestInit() {
+    // warm up the session data
+    s_session->requestInit();
+  }
 } s_session_extension;
 
 ///////////////////////////////////////////////////////////////////////////////

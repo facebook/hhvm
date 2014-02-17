@@ -519,4 +519,16 @@ std::string show(Type t) {
 
 //////////////////////////////////////////////////////////////////////
 
+std::string show(Context ctx) {
+  auto ret = std::string{};
+  if (ctx.cls) {
+    ret = ctx.cls->name->data();
+    ret += "::";
+  }
+  ret += ctx.func->name->data();
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

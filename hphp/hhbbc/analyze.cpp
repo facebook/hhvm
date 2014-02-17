@@ -153,7 +153,7 @@ FuncAnalysis do_analyze(const Index& index,
    * means less iterations.
    */
   while (!incompleteQ.empty()) {
-    auto blk = ai.rpoBlocks[*begin(incompleteQ)];
+    auto const blk = ai.rpoBlocks[*begin(incompleteQ)];
     incompleteQ.erase(begin(incompleteQ));
     PropertiesInfo props(index, inputCtx, clsAnalysis);
 
@@ -198,11 +198,9 @@ FuncAnalysis do_analyze(const Index& index,
     auto const bsep = std::string(60, '=') + "\n";
     auto const sep = std::string(60, '-') + "\n";
     auto ret = folly::format(
-      "{}function {}{} ({} block interps):\n{}",
+      "{}function {} ({} block interps):\n{}",
       bsep,
-      ctx.cls ? folly::format("{}::", ctx.cls->name->data()).str()
-              : std::string(),
-      ctx.func->name->data(),
+      show(ctx),
       interp_counter,
       bsep
     ).str();
@@ -484,23 +482,24 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<State>
+std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index& index,
                           const Context ctx,
                           borrowed_ptr<const php::Block> blk,
                           State state) {
   Trace::Bump bumper{Trace::hhbbc, 10};
 
-  std::vector<State> ret;
-  ret.reserve(blk->hhbcs.size());
+  std::vector<std::pair<State,StepFlags>> ret;
+  ret.reserve(blk->hhbcs.size() + 1);
 
   PropertiesInfo props(index, ctx, nullptr);
   Interpreter interp { &index, ctx, props, blk, state };
   for (auto& op : blk->hhbcs) {
-    ret.push_back(state);
-    interp.step(op);
+    ret.emplace_back(state, StepFlags{});
+    ret.back().second = interp.step(op);
   }
 
+  ret.emplace_back(std::move(state), StepFlags{});
   return ret;
 }
 

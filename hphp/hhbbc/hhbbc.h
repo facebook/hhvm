@@ -66,13 +66,15 @@ struct Options {
   bool ConstantProp = true;
 
   /*
-   * Whether to perform local dead code elimination.  This removes
-   * unnecessary instructions within a single block.
+   * Whether to perform local or global dead code elimination.  This
+   * removes unnecessary instructions within a single block, or across
+   * blocks, respectively.
    *
    * Note: this is off for now because it is a bit of a work in
    * progress (needs more testing).
    */
   bool LocalDCE = false;
+  bool GlobalDCE = false;
 
   /*
    * If true, insert opcodes that assert inferred types, so we can

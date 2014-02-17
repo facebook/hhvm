@@ -79,6 +79,7 @@ void parse_options(int argc, char** argv) {
     ("remove-dead-blocks",      po::value(&options.RemoveDeadBlocks))
     ("constant-prop",           po::value(&options.ConstantProp))
     ("local-dce",               po::value(&options.LocalDCE))
+    ("global-dce",              po::value(&options.GlobalDCE))
     ("insert-assertions",       po::value(&options.InsertAssertions))
     ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
     ("filter-assertions",       po::value(&options.FilterAssertions))

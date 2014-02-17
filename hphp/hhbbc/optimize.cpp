@@ -20,6 +20,7 @@
 #include <set>
 #include <utility>
 #include <algorithm>
+#include <cassert>
 
 #include "folly/Optional.h"
 
@@ -45,6 +46,11 @@ TRACE_SET_MOD(hhbbc);
 //////////////////////////////////////////////////////////////////////
 
 namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+const StaticString s_unreachable("static analysis error: supposedly "
+                                 "unreachable code was reached");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -81,7 +87,7 @@ template<class Gen>
 void insert_assertions_step(const php::Func& func,
                             const Bytecode& bcode,
                             const State& state,
-                            std::bitset<64> mayReadLocalSet,
+                            std::bitset<kMaxTrackedLocals> mayReadLocalSet,
                             bool lastStackOutputObvious,
                             Gen gen) {
   for (size_t i = 0; i < state.locals.size(); ++i) {
@@ -212,10 +218,10 @@ bool hasObviousStackOutput(Op op) {
   }
 }
 
-std::vector<Bytecode> insert_assertions(const Index& index,
-                                        const Context ctx,
-                                        borrowed_ptr<php::Block> const blk,
-                                        State state) {
+void insert_assertions(const Index& index,
+                       const Context ctx,
+                       borrowed_ptr<php::Block> const blk,
+                       State state) {
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
@@ -244,7 +250,7 @@ std::vector<Bytecode> insert_assertions(const Index& index,
     gen(op);
   }
 
-  return newBCs;
+  blk->hhbcs = std::move(newBCs);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -319,10 +325,10 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<Bytecode> optimize_block(const Index& index,
-                                     const Context ctx,
-                                     borrowed_ptr<php::Block> const blk,
-                                     State state) {
+void first_pass(const Index& index,
+                const Context ctx,
+                borrowed_ptr<php::Block> const blk,
+                State state) {
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
@@ -380,7 +386,7 @@ std::vector<Bytecode> optimize_block(const Index& index,
     gen(op);
   }
 
-  return newBCs;
+  blk->hhbcs = std::move(newBCs);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -401,23 +407,28 @@ void visit_blocks(const char* what,
     // TODO(#3732260): this should probably spend an extra interp pass
     // in debug builds to check that no transformation to the bytecode
     // was made that changes the block output state.
-    blk->hhbcs = fun(index, ainfo.ctx, blk, state);
+    fun(index, ainfo.ctx, blk, state);
   }
+  assert(check(*ainfo.ctx.func));
 }
+
+//////////////////////////////////////////////////////////////////////
 
 void do_optimize(const Index& index, const FuncAnalysis& ainfo) {
   FTRACE(2, "{:-^70}\n", "Optimize Func");
 
-  visit_blocks("first pass", index, ainfo, optimize_block);
-  if (options.LocalDCE) {
-    visit_blocks("local DCE", index, ainfo, local_dce);
-  }
-  if (options.InsertAssertions) {
-    visit_blocks("insert assertions", index, ainfo, insert_assertions);
-  }
+  visit_blocks("first pass", index, ainfo, first_pass);
 
-  // If we didn't remove jumps to dead blocks, we replace all
-  // supposedly unreachable blocks with fatal instructions.
+  /*
+   * Note, it's useful to do dead block removal before DCE, so it can
+   * remove code relating to the branch to the dead block.
+   *
+   * If we didn't remove jumps to dead blocks, we replace all
+   * supposedly unreachable blocks with fatal instructions.
+   *
+   * TODO(#3751005): removedeadblocks doesn't remove the contents of
+   * the blocks which it should.
+   */
   if (!options.RemoveDeadBlocks) {
     for (auto& blk : ainfo.rpoBlocks) {
       auto const& state = ainfo.bdata[blk->id].stateIn;
@@ -429,6 +440,26 @@ void do_optimize(const Index& index, const FuncAnalysis& ainfo) {
       };
       blk->fallthrough = nullptr;
     }
+  }
+
+  if (options.LocalDCE) {
+    visit_blocks("local DCE", index, ainfo, local_dce);
+  }
+  if (options.GlobalDCE) {
+    global_dce(index, ainfo);
+    assert(check(*ainfo.ctx.func));
+  }
+
+  if (options.InsertAssertions) {
+    /*
+     * Global DCE can change types of locals across blocks.  See
+     * dce.cpp for an explanation.
+     *
+     * We need to perform a final type analysis before we insert type
+     * assertions.
+     */
+    auto const ainfo2 = analyze_func(index, ainfo.ctx);
+    visit_blocks("insert assertions", index, ainfo2, insert_assertions);
   }
 }
 

@@ -494,11 +494,11 @@ void CodeGenerator::doubleCmp(Asm& a,
   asm_label(a, notPF);
 }
 
-void CodeGenerator::emitCompare(IRInstruction* inst, unsigned s1, unsigned s2) {
-  auto src1 = inst->src(s1);
-  auto src2 = inst->src(s2);
-  auto loc1 = srcLoc(s1);
-  auto loc2 = srcLoc(s2);
+void CodeGenerator::emitCompare(IRInstruction* inst) {
+  auto src1 = inst->src(0);
+  auto src2 = inst->src(1);
+  auto loc1 = srcLoc(0);
+  auto loc2 = srcLoc(1);
   auto const src1Type = src1->type();
   auto const src2Type = src2->type();
 
@@ -547,13 +547,13 @@ void CodeGenerator::emitCompare(IRInstruction* inst, unsigned s1, unsigned s2) {
 }
 
 void
-CodeGenerator::emitCompareInt(IRInstruction* inst, unsigned s1, unsigned s2) {
-  assert(inst->src(s1)->type() <= Type::Int);
-  assert(inst->src(s2)->type() <= Type::Int);
-  auto srcReg1 = srcLoc(s1).reg();
-  auto srcReg2 = srcLoc(s2).reg();
-  auto src1 = inst->src(s1);
-  auto src2 = inst->src(s2);
+CodeGenerator::emitCompareInt(IRInstruction* inst) {
+  assert(inst->src(0)->type() <= Type::Int);
+  assert(inst->src(1)->type() <= Type::Int);
+  auto srcReg1 = srcLoc(0).reg();
+  auto srcReg2 = srcLoc(1).reg();
+  auto src1 = inst->src(0);
+  auto src2 = inst->src(1);
 
   // Note: when both src1 and src2 are constants, we should transform the
   // branch into an unconditional jump earlier in the IR.
@@ -690,25 +690,25 @@ void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJcc(IRInstruction* inst) {
-  emitCompare(inst, 0, 1);
+  emitCompare(inst);
   emitFwdJcc(opToConditionCode(inst->op()), inst->taken());
 }
 
 void CodeGenerator::cgJccInt(IRInstruction* inst) {
-  emitCompareInt(inst, 0, 1);
+  emitCompareInt(inst);
   emitFwdJcc(opToConditionCode(inst->op()), inst->taken());
 }
 
 void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
-  emitCompare(inst, 0, 1);
+  emitCompare(inst);
   emitReqBindJcc(opToConditionCode(inst->op()),
                  inst->extra<ReqBindJccData>());
 }
 
 void CodeGenerator::cgReqBindJccInt(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
-  emitCompareInt(inst, 0, 1);
+  emitCompareInt(inst);
   emitReqBindJcc(opToConditionCode(inst->op()),
                  inst->extra<ReqBindJccData>());
 }
@@ -1892,7 +1892,7 @@ void CodeGenerator::cgGteX(IRInstruction* inst) {
 void CodeGenerator::emitCmpInt(IRInstruction* inst, ConditionCode cc) {
   auto dstReg = dstLoc(0).reg();
   if (dstReg == InvalidReg) return;
-  emitCompareInt(inst, 0, 1);
+  emitCompareInt(inst);
   m_as.setcc(cc, rbyte(dstReg));
 }
 
@@ -4910,7 +4910,7 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
 
 void CodeGenerator::cgExitJcc(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
-  emitCompare(inst, 0, 1);
+  emitCompare(inst);
   emitBindSideExit(m_mainCode, m_stubsCode,
                    opToConditionCode(inst->op()),
                    sk);
@@ -4918,7 +4918,7 @@ void CodeGenerator::cgExitJcc(IRInstruction* inst) {
 
 void CodeGenerator::cgExitJccInt(IRInstruction* inst) {
   auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
-  emitCompareInt(inst, 0, 1);
+  emitCompareInt(inst);
   emitBindSideExit(m_mainCode, m_stubsCode,
                    opToConditionCode(inst->op()),
                    sk);

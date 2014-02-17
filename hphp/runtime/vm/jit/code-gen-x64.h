@@ -263,8 +263,8 @@ private:
                          Loc dataLoc, Offset taken);
   void emitReqBindJcc(ConditionCode cc, const ReqBindJccData*);
 
-  void emitCompare(IRInstruction* inst, unsigned s1, unsigned s2);
-  void emitCompareInt(IRInstruction* inst, unsigned s1, unsigned s2);
+  void emitCompare(IRInstruction* inst);
+  void emitCompareInt(IRInstruction* inst);
   void emitTestZero(SSATmp*, PhysLoc);
   bool emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
                         SSATmp* src2, PhysLoc loc2,

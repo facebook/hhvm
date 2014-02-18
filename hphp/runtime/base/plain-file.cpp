@@ -29,7 +29,7 @@ namespace HPHP {
 // constructor and destructor
 
 PlainFile::PlainFile(FILE *stream, bool nonblocking)
-  : File(nonblocking), m_stream(stream), m_eof(false), m_buffer(nullptr) {
+  : File(nonblocking), m_stream(stream), m_buffer(nullptr) {
   if (stream) {
     m_fd = fileno(stream);
     m_buffer = (char *)malloc(BUFSIZ);
@@ -40,7 +40,7 @@ PlainFile::PlainFile(FILE *stream, bool nonblocking)
 }
 
 PlainFile::PlainFile(int fd, bool nonblocking)
-  : File(nonblocking), m_stream(nullptr), m_eof(false), m_buffer(nullptr) {
+  : File(nonblocking), m_stream(nullptr), m_buffer(nullptr) {
   m_fd = fd;
 }
 

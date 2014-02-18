@@ -85,7 +85,6 @@ protected:
 
   int m_type;
   int m_error;
-  bool m_eof;
 
   int m_timeout; // in micro-seconds;
   bool m_timedOut;

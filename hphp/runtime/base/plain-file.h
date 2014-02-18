@@ -58,7 +58,6 @@ public:
 
 protected:
   FILE *m_stream;
-  bool m_eof;
   char *m_buffer;       // For setbuffer.  Needed to reduce mmap
                         // contention due to how glibc allocates memory
                         // for buffered io.

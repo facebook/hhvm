@@ -183,6 +183,7 @@ protected:
 
   // fields useful for both reads and writes
   int64_t m_position; // the current cursor position
+  bool m_eof;
 
   std::string m_name;
   std::string m_mode;

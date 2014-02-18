@@ -50,7 +50,6 @@ public:
 private:
   BZFILE * m_bzFile;
   PlainFile * m_innerFile;
-  bool m_eof;
   bool closeImpl();
 };
 

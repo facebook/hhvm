@@ -848,8 +848,6 @@ void assertOperandTypes(const IRInstruction* inst) {
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)
-#define SNumInt  S(Int, Bool)
-#define SNum     S(Int, Bool, Dbl)
 #define SUnk     return;
 #define SSpills  checkSpills();
 #define ND
@@ -888,7 +886,6 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef S
 #undef C
 #undef CStr
-#undef SNum
 #undef SUnk
 #undef SSpills
 

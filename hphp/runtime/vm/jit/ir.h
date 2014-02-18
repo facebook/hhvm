@@ -165,7 +165,6 @@ class FailedCodeGen : public std::runtime_error {
  *     S(t1,...,tn)  source must be a subtype of {t1|..|tn}
  *     C(type)       source must be a constant, and subtype of type
  *     CStr          same as C(StaticStr)
- *     SNum          same as S(Int,Bool,Dbl)
  *     SSpills       SpillStack's variadic source list
  *
  * flags:
@@ -352,8 +351,8 @@ O(ReqBindJmpSame,                   ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpNSame,                  ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpInstanceOfBitmask,      ND, S(Cls) CStr,                     T|E) \
 O(ReqBindJmpNInstanceOfBitmask,     ND, S(Cls) CStr,                     T|E) \
-O(ReqBindJmpZero,                   ND, SNum,                            T|E) \
-O(ReqBindJmpNZero,                  ND, SNum,                            T|E) \
+O(ReqBindJmpZero,                   ND, S(Int,Bool),                     T|E) \
+O(ReqBindJmpNZero,                  ND, S(Int,Bool),                     T|E) \
 O(SideExitJmpGt,               D(None), S(Gen) S(Gen),                     E) \
 O(SideExitJmpGte,              D(None), S(Gen) S(Gen),                     E) \
 O(SideExitJmpLt,               D(None), S(Gen) S(Gen),                     E) \
@@ -372,8 +371,8 @@ O(SideExitJmpInstanceOfBitmask,                                               \
                                D(None), S(Cls) CStr,                       E) \
 O(SideExitJmpNInstanceOfBitmask,                                              \
                                D(None), S(Cls) CStr,                       E) \
-O(SideExitJmpZero,             D(None), SNum,                              E) \
-O(SideExitJmpNZero,            D(None), SNum,                              E) \
+O(SideExitJmpZero,             D(None), S(Int,Bool),                       E) \
+O(SideExitJmpNZero,            D(None), S(Int,Bool),                       E) \
 O(SideExitGuardLoc,        D(FramePtr), S(FramePtr),                       E) \
 O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 /*    name                      dstinfo srcinfo                      flags */ \

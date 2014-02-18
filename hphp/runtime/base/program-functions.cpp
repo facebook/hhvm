@@ -330,6 +330,13 @@ static void bump_counter_and_rethrow() {
     static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
       "requests_memory_exceeded", {ServiceData::StatsType::COUNT});
     requestMemoryExceededCounter->addValue(1);
+
+#ifdef USE_JEMALLOC
+    // Capture a pprof (C++) dump when we OOM a request
+    // TODO: (t3753133) Should dump a PHP-instrumented pprof dump here as well
+    Util::jemalloc_pprof_dump("", false);
+#endif
+
     throw;
   }
 }

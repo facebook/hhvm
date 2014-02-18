@@ -406,6 +406,39 @@ void low_malloc_skip_huge(void* start, void* end) {}
 
 #endif // USE_JEMALLOC
 
+#ifdef USE_JEMALLOC
+
+int jemalloc_pprof_enable() {
+  bool active = true;
+  return mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+}
+
+int jemalloc_pprof_disable() {
+  bool active = false;
+  return mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+}
+
+int jemalloc_pprof_dump(const std::string& prefix, bool force) {
+  if (!force) {
+    bool active = false;
+    size_t activeSize = sizeof(active);
+    // Check if profiling has been enabled before trying to dump.
+    int err = mallctl("opt.prof", &active, &activeSize, nullptr, 0);
+    if (err || !active) {
+      return 0; // nothing to do
+    }
+  }
+
+  if (prefix != "") {
+    const char *s = prefix.c_str();
+    return mallctl("prof.dump", nullptr, nullptr, (void *)&s, sizeof(char *));
+  } else {
+    return mallctl("prof.dump", nullptr, nullptr, nullptr, 0);
+  }
+}
+
+#endif // USE_JEMALLOC
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

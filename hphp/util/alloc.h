@@ -228,6 +228,17 @@ void numa_local(void* start, size_t size);
  */
 void numa_bind_to(void* start, size_t size, int node);
 
+#ifdef USE_JEMALLOC
+
+/**
+ * jemalloc pprof utility functions.
+ */
+int jemalloc_pprof_enable();
+int jemalloc_pprof_disable();
+int jemalloc_pprof_dump(const std::string& prefix, bool force);
+
+#endif // USE_JEMALLOC
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

@@ -899,14 +899,16 @@ Variant f_realpath(const String& path) {
       StaticContentCache::TheFileCache->exists(translated.data(), false)) {
     return translated;
   }
-  if (accessSyscall(path, F_OK) == 0) {
-    char resolved_path[PATH_MAX];
-    if (!realpath(translated.c_str(), resolved_path)) {
-      return false;
-    }
-    return String(resolved_path, CopyString);
+  // Zend doesn't support streams in realpath
+  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  if (!dynamic_cast<FileStreamWrapper*>(w)) {
+    return false;
   }
-  return false;
+  char resolved_path[PATH_MAX];
+  if (!realpath(translated.c_str(), resolved_path)) {
+    return false;
+  }
+  return String(resolved_path, CopyString);
 }
 
 #define PHP_PATHINFO_DIRNAME    1

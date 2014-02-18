@@ -451,6 +451,114 @@ static void init_entity_table() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+inline static bool decode_entity(char *entity, int *len,
+                                 bool decode_double_quote,
+                                 bool decode_single_quote,
+                                 entity_charset charset, bool all,
+                                 bool xhp = false) {
+  // entity is 16 bytes, allocated statically below
+  // default in PHP
+  assert(entity && *entity);
+  if (entity[0] == '#') {
+    int code;
+    if (entity[1] == 'x' || entity[1] == 'X') {
+      code = strtol(entity + 2, nullptr, 16);
+    } else {
+      code = strtol(entity + 1, nullptr, 10);
+    }
+
+    // since we don't support multibyte chars other than utf-8
+    int l = 1;
+
+    if (code == 39 && decode_single_quote) {
+      entity[0] = code;
+      entity[1] = '\0';
+      *len = l;
+      return true;
+    }
+
+    switch (charset) {
+      case cs_utf_8:
+      {
+        unsigned char buf[10];
+        int size = utf32_to_utf8(buf, code);
+        memcpy(entity, buf, size + 1);
+        l = size;
+        break;
+      }
+
+      case cs_8859_1:
+      case cs_8859_5:
+      case cs_8859_15:
+        if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
+          return false;
+        } else {
+          if (code == 39) {
+            return false;
+          }
+          entity[0] = code;
+          entity[1] = '\0';
+        }
+        break;
+
+      case cs_cp1252:
+      case cs_cp1251:
+      case cs_cp866:
+        if (code > 0xff) {
+          return false;
+        }
+        entity[0] = code;
+        entity[1] = '\0';
+        break;
+
+      case cs_big5:
+      case cs_big5hkscs:
+      case cs_sjis:
+      case cs_eucjp:
+        if (code >= 0x80) {
+          return false;
+        }
+        entity[0] = code;
+        entity[1] = '\0';
+        break;
+
+      case cs_gb2312:
+        if (code >= 0x81) {
+          return false;
+        }
+        entity[0] = code;
+        entity[1] = '\0';
+        break;
+
+      default:
+        return false;
+        break;
+    }
+    *len = l;
+    return true;
+  } else {
+    HtmlEntityMap *entityMap;
+
+    if (strncasecmp(entity, "quot", 4) == 0 && !decode_double_quote) {
+      return false;
+    }
+
+    if (all) {
+      entityMap = xhp ? &XHPEntityMap[charset] : &EntityMap[charset];
+    } else {
+      entityMap = xhp ? &XHPEntityMap[cs_terminator]
+                      : &EntityMap[cs_terminator];
+    }
+    HtmlEntityMap::const_iterator iter = entityMap->find(entity);
+    if (iter != entityMap->end()) {
+      memcpy(entity, iter->second.c_str(), iter->second.length() + 1);
+      *len = iter->second.length();
+      return true;
+    }
+  }
+
+  return false;
+}
 
 char *string_html_encode(const char *input, int &len,
                          const int64_t qsBitmask, bool utf8, bool nbsp) {
@@ -498,7 +606,52 @@ char *string_html_encode(const char *input, int &len,
       *q++ = '&'; *q++ = 'g'; *q++ = 't'; *q++ = ';';
       break;
     case '&':
-      *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';';
+      if(!nbsp){
+        p++;
+        if (!EntityMapInited) {
+          Lock lock(EntityMapMutex);
+          if (!EntityMapInited) {
+            init_entity_table();
+            EntityMapInited = true;
+          }
+        }
+        bool found = false;
+        for (const char *t = p; *t; t++) {
+          if (*t == ';') {
+            int l = t - p;
+            if (l > 0) {
+              char sbuf[16] = {0};
+              char *buf;
+              if (l > 10) {
+                buf = (char* )malloc(l + 1);
+              } else {
+                buf = sbuf;
+              }
+              memcpy(buf, p, l);
+              buf[l] = '\0';
+              if (decode_entity(buf, &l, true, true,
+                cs_8859_15, true,false)) {
+                found = true;
+                *q++ = '&';
+                for(const char *s = p; s <= t; s++){
+                  *q++ = *s;
+                }
+                p = t;
+              }
+              if (buf != sbuf) {
+                free(buf);
+              }
+            }
+            break;
+          }
+        }
+        if (!found) {
+          p--;
+          *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';'; 
+        }
+	    } else {
+        *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';'; 
+      }
       break;
     case static_cast<unsigned char>('\xc2'):
       if (nbsp && utf8 && p != end && *(p+1) == '\xa0') {
@@ -700,115 +853,6 @@ char *string_html_encode_extra(const char *input, int &len,
   return ret;
 }
 
-inline static bool decode_entity(char *entity, int *len,
-                                 bool decode_double_quote,
-                                 bool decode_single_quote,
-                                 entity_charset charset, bool all,
-                                 bool xhp = false) {
-  // entity is 16 bytes, allocated statically below
-  // default in PHP
-  assert(entity && *entity);
-  if (entity[0] == '#') {
-    int code;
-    if (entity[1] == 'x' || entity[1] == 'X') {
-      code = strtol(entity + 2, nullptr, 16);
-    } else {
-      code = strtol(entity + 1, nullptr, 10);
-    }
-
-    // since we don't support multibyte chars other than utf-8
-    int l = 1;
-
-    if (code == 39 && decode_single_quote) {
-      entity[0] = code;
-      entity[1] = '\0';
-      *len = l;
-      return true;
-    }
-
-    switch (charset) {
-      case cs_utf_8:
-      {
-        unsigned char buf[10];
-        int size = utf32_to_utf8(buf, code);
-        memcpy(entity, buf, size + 1);
-        l = size;
-        break;
-      }
-
-      case cs_8859_1:
-      case cs_8859_5:
-      case cs_8859_15:
-        if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
-          return false;
-        } else {
-          if (code == 39) {
-            return false;
-          }
-          entity[0] = code;
-          entity[1] = '\0';
-        }
-        break;
-
-      case cs_cp1252:
-      case cs_cp1251:
-      case cs_cp866:
-        if (code > 0xff) {
-          return false;
-        }
-        entity[0] = code;
-        entity[1] = '\0';
-        break;
-
-      case cs_big5:
-      case cs_big5hkscs:
-      case cs_sjis:
-      case cs_eucjp:
-        if (code >= 0x80) {
-          return false;
-        }
-        entity[0] = code;
-        entity[1] = '\0';
-        break;
-
-      case cs_gb2312:
-        if (code >= 0x81) {
-          return false;
-        }
-        entity[0] = code;
-        entity[1] = '\0';
-        break;
-
-      default:
-        return false;
-        break;
-    }
-    *len = l;
-    return true;
-  } else {
-    HtmlEntityMap *entityMap;
-
-    if (strncasecmp(entity, "quot", 4) == 0 && !decode_double_quote) {
-      return false;
-    }
-
-    if (all) {
-      entityMap = xhp ? &XHPEntityMap[charset] : &EntityMap[charset];
-    } else {
-      entityMap = xhp ? &XHPEntityMap[cs_terminator]
-                      : &EntityMap[cs_terminator];
-    }
-    HtmlEntityMap::const_iterator iter = entityMap->find(entity);
-    if (iter != entityMap->end()) {
-      memcpy(entity, iter->second.c_str(), iter->second.length() + 1);
-      *len = iter->second.length();
-      return true;
-    }
-  }
-
-  return false;
-}
-
 char *string_html_decode(const char *input, int &len,
                          bool decode_double_quote, bool decode_single_quote,
                          const char *charset_hint, bool all,
@@ -889,3 +933,4 @@ const html_entity_map* html_get_entity_map() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+

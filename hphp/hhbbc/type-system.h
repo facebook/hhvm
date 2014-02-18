@@ -28,6 +28,8 @@
 namespace HPHP { struct TypeConstraint; }
 namespace HPHP { namespace HHBBC {
 
+struct Type;
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -151,6 +153,17 @@ enum trep : uint32_t {
   BTop      = static_cast<uint32_t>(-1),
 };
 
+// Tag for what kind of specialized data a Type object has.
+enum class DataTag : uint8_t {
+  None,
+  Str,
+  Arr,
+  Obj,
+  Int,
+  Dbl,
+  Cls,
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -167,12 +180,19 @@ struct DCls {
  * exact or a subtype of the supplied class.
  *
  * If the class is WaitHandle, we can also carry a type that joining
- * the wait handle will produce.  (This is hoisted into Type to keep
- * DObj and Type::Data trivially copyable for now.)
+ * the wait handle will produce.
  */
 struct DObj {
-  enum { Exact, Sub } type;
+  enum Tag { Exact, Sub };
+
+  explicit DObj(Tag type, res::Class cls)
+    : type(type)
+    , cls(cls)
+  {}
+
+  Tag type;
   res::Class cls;
+  copy_ptr<Type> whType;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -184,6 +204,12 @@ struct Type {
   explicit Type(trep t) : m_bits(t) {
     assert(checkInvariants());
   }
+
+  Type(const Type&) noexcept;
+  Type(Type&&) noexcept;
+  Type& operator=(const Type&) noexcept;
+  Type& operator=(Type&&) noexcept;
+  ~Type() noexcept;
 
   /*
    * Exact equality or inequality of types.
@@ -243,7 +269,8 @@ private:
 
 private:
   union Data {
-    Data() : sval(nullptr) {}
+    Data() {}
+    ~Data() {}
 
     SString sval;
     int64_t ival;
@@ -254,17 +281,19 @@ private:
   };
 
 private:
-  static Type make(trep t, const Data& d);
-  bool equivData(Type o) const;
-  bool subtypeData(Type o) const;
-  bool couldBeData(Type o) const;
+  static Type wait_handle_outer(const Type&);
+
+private:
+  bool hasData() const;
+  bool equivData(const Type& o) const;
+  bool subtypeData(const Type& o) const;
+  bool couldBeData(const Type& o) const;
   bool checkInvariants() const;
 
 private:
   trep m_bits;
-  bool m_hasData = false;
+  DataTag m_dataTag = DataTag::None;
   Data m_data;
-  copy_ptr<Type> m_whType;
 };
 
 #define X(y) const Type T##y = Type(B##y);

@@ -472,46 +472,47 @@ std::string show(Type t) {
   case BTop:         ret = "Top";      break;
   }
 
-  if (t.m_hasData) {
-    if (t.m_bits != BObj && t.m_bits != BCls &&
-        t.m_bits != BOptObj) {
-      folly::toAppend("=", &ret);
-    }
+  switch (t.m_dataTag) {
+  case DataTag::None:
+    return ret;
+  case DataTag::Obj:
+  case DataTag::Cls:
+    break;
+  case DataTag::Str:
+  case DataTag::Arr:
+  case DataTag::Int:
+  case DataTag::Dbl:
+    folly::toAppend("=", &ret);
+    break;
+  }
 
-    switch (t.m_bits) {
-    case BOptInt:   // fallthrough
-    case BInt:      folly::toAppend(t.m_data.ival, &ret); break;
-    case BOptDbl:   // fallthrough
-    case BDbl:      folly::toAppend(t.m_data.dval, &ret); break;
-    case BOptSStr:  // fallthrough
-    case BSStr:     ret += escaped_string(t.m_data.sval); break;
-    case BOptSArr:  // fallthrough
-    case BSArr:     ret += array_string(t.m_data.aval);   break;
-    case BOptObj:
-      // fallthrough
-    case BCls:
-      switch (t.m_data.dobj.type) {
-      case DObj::Exact:
-        folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
-        break;
-      case DObj::Sub:
-        folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
-        break;
-      }
+  switch (t.m_dataTag) {
+  case DataTag::Int: folly::toAppend(t.m_data.ival, &ret); break;
+  case DataTag::Dbl: folly::toAppend(t.m_data.dval, &ret); break;
+  case DataTag::Str: ret += escaped_string(t.m_data.sval); break;
+  case DataTag::Arr: ret += array_string(t.m_data.aval);   break;
+  case DataTag::Obj:
+    switch (t.m_data.dobj.type) {
+    case DObj::Exact:
+      folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
       break;
-    case BObj:
-      switch (t.m_data.dobj.type) {
-      case DObj::Exact:
-        folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
-        break;
-      case DObj::Sub:
-        folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
-        break;
-      }
+    case DObj::Sub:
+      folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
       break;
-    default:
-      always_assert(0 && "invalid type with value");
     }
+    break;
+  case DataTag::Cls:
+    switch (t.m_data.dcls.type) {
+    case DCls::Exact:
+      folly::toAppend("=", show(t.m_data.dcls.cls), &ret);
+      break;
+    case DCls::Sub:
+      folly::toAppend("<=", show(t.m_data.dcls.cls), &ret);
+      break;
+    }
+    break;
+  case DataTag::None:
+    break;
   }
 
   return ret;

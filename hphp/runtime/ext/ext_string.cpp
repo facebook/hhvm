@@ -1331,7 +1331,7 @@ String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
   return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyleBitmask(flags),
-                                scharset, false);
+                                scharset, double_encode);
 }
 
 String f_fb_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,

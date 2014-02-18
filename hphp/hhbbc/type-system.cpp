@@ -178,67 +178,98 @@ bool canBeOptional(trep bits) {
 
 //////////////////////////////////////////////////////////////////////
 
-Type::Type(trep bits, Data d)
-  : m_bits(bits)
-  , m_data(d)
-{
-  assert(checkInvariants());
+Type Type::make(trep bits, const Data& d) {
+  assert(mayHaveData(bits));
+
+  auto ret = Type{bits};
+  ret.m_hasData = true;
+
+  switch (bits) {
+  case BOptSStr:
+  case BSStr:
+    ret.m_data.sval = d.sval;
+    break;
+  case BOptSArr:
+  case BSArr:
+    ret.m_data.aval = d.aval;
+    break;
+  case BOptObj:
+  case BObj:
+    new (&ret.m_data.dobj) DObj(d.dobj);
+    break;
+  case BOptInt:
+  case BInt:
+    ret.m_data.ival = d.ival;
+    break;
+  case BOptDbl:
+  case BDbl:
+    ret.m_data.dval = d.dval;
+    break;
+  case BCls:
+    new (&ret.m_data.dcls) DCls(d.dcls);
+    break;
+  default:
+    not_reached();
+  }
+
+  assert(ret.checkInvariants());
+  return ret;
 }
 
 bool Type::equivData(Type o) const {
-  assert(m_data.hasValue());
-  assert(o.m_data.hasValue());
+  assert(m_hasData);
+  assert(o.m_hasData);
   assert(m_bits == o.m_bits);
 
   switch (m_bits) {
   case BOptSStr:
   case BSStr:
-    return m_data->sval == o.m_data->sval;
+    return m_data.sval == o.m_data.sval;
   case BOptSArr:
   case BSArr:
-    return m_data->aval == o.m_data->aval;
+    return m_data.aval == o.m_data.aval;
   case BOptInt:
   case BInt:
-    return m_data->ival == o.m_data->ival;
+    return m_data.ival == o.m_data.ival;
   case BOptDbl:
   case BDbl:
     // For purposes of Type equivalence, NaNs are equal.
-    return m_data->dval == o.m_data->dval ||
-           (std::isnan(m_data->dval) && std::isnan(o.m_data->dval));
+    return m_data.dval == o.m_data.dval ||
+           (std::isnan(m_data.dval) && std::isnan(o.m_data.dval));
   case BOptObj:
   case BObj:
-    return m_data->dobj.type == o.m_data->dobj.type &&
-           m_data->dobj.cls.same(o.m_data->dobj.cls);
+    return m_data.dobj.type == o.m_data.dobj.type &&
+           m_data.dobj.cls.same(o.m_data.dobj.cls);
   case BCls:
-    return m_data->dcls.type == o.m_data->dcls.type &&
-           m_data->dcls.cls.same(o.m_data->dcls.cls);
+    return m_data.dcls.type == o.m_data.dcls.type &&
+           m_data.dcls.cls.same(o.m_data.dcls.cls);
   default:
     always_assert(0 && "invalid type with value");
   }
 }
 
 bool Type::subtypeData(Type o) const {
-  assert(m_data.hasValue());
-  assert(o.m_data.hasValue());
+  assert(m_hasData);
+  assert(o.m_hasData);
   assert(m_bits == o.m_bits);
 
   switch (m_bits) {
   case BOptObj: case BObj:
-    if (m_data->dobj.type == o.m_data->dobj.type &&
-        m_data->dobj.cls.same(o.m_data->dobj.cls)) {
+    if (m_data.dobj.type == o.m_data.dobj.type &&
+        m_data.dobj.cls.same(o.m_data.dobj.cls)) {
       return true;
     }
-    if (o.m_data->dobj.type == DObj::Sub) {
-      return m_data->dobj.cls.subtypeOf(o.m_data->dobj.cls);
+    if (o.m_data.dobj.type == DObj::Sub) {
+      return m_data.dobj.cls.subtypeOf(o.m_data.dobj.cls);
     }
     return false;
   case BCls:
-    if (m_data->dcls.type == o.m_data->dcls.type &&
-        m_data->dcls.cls.same(o.m_data->dcls.cls)) {
+    if (m_data.dcls.type == o.m_data.dcls.type &&
+        m_data.dcls.cls.same(o.m_data.dcls.cls)) {
       return true;
     }
-    if (o.m_data->dcls.type == DCls::Sub) {
-      return m_data->dcls.cls.subtypeOf(o.m_data->dcls.cls);
+    if (o.m_data.dcls.type == DCls::Sub) {
+      return m_data.dcls.cls.subtypeOf(o.m_data.dcls.cls);
     }
     return false;
   default:
@@ -247,27 +278,27 @@ bool Type::subtypeData(Type o) const {
 }
 
 bool Type::couldBeData(Type o) const {
-  assert(m_data.hasValue());
-  assert(o.m_data.hasValue());
+  assert(m_hasData);
+  assert(o.m_hasData);
   assert(m_bits == o.m_bits);
 
   switch (m_bits) {
   case BOptObj: case BObj:
-    if (m_data->dobj.type == o.m_data->dobj.type &&
-        m_data->dobj.cls.same(o.m_data->dobj.cls)) {
+    if (m_data.dobj.type == o.m_data.dobj.type &&
+        m_data.dobj.cls.same(o.m_data.dobj.cls)) {
       return true;
     }
-    if (m_data->dobj.type == DObj::Sub || o.m_data->dobj.type == DObj::Sub) {
-      return m_data->dobj.cls.couldBe(o.m_data->dobj.cls);
+    if (m_data.dobj.type == DObj::Sub || o.m_data.dobj.type == DObj::Sub) {
+      return m_data.dobj.cls.couldBe(o.m_data.dobj.cls);
     }
     return false;
   case BCls:
-    if (m_data->dcls.type == o.m_data->dcls.type &&
-        m_data->dcls.cls.same(o.m_data->dcls.cls)) {
+    if (m_data.dcls.type == o.m_data.dcls.type &&
+        m_data.dcls.cls.same(o.m_data.dcls.cls)) {
       return true;
     }
-    if (m_data->dcls.type == DCls::Sub || o.m_data->dcls.type == DCls::Sub) {
-      return m_data->dcls.cls.couldBe(o.m_data->dcls.cls);
+    if (m_data.dcls.type == DCls::Sub || o.m_data.dcls.type == DCls::Sub) {
+      return m_data.dcls.cls.couldBe(o.m_data.dcls.cls);
     }
     return false;
   default:
@@ -279,8 +310,8 @@ bool Type::operator==(Type o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
   if (m_bits != o.m_bits) return false;
-  if (m_data.hasValue() != o.m_data.hasValue()) return false;
-  if (!m_data && !o.m_data) return true;
+  if (m_hasData != o.m_hasData) return false;
+  if (!m_hasData && !o.m_hasData) return true;
   return equivData(o);
 }
 
@@ -292,12 +323,12 @@ bool Type::subtypeOf(Type o) const {
     if (o.m_whType) {
       return
         wait_handle_inner(*this).subtypeOf(wait_handle_inner(o)) &&
-        Type(m_bits, *m_data).subtypeOf(Type(o.m_bits, *o.m_data));
+        make(m_bits, m_data).subtypeOf(make(o.m_bits, o.m_data));
     }
-    return Type(m_bits, *m_data).subtypeOf(o);
+    return make(m_bits, m_data).subtypeOf(o);
   }
   if (o.m_whType) {
-    return subtypeOf(Type(o.m_bits, *o.m_data));
+    return subtypeOf(make(o.m_bits, o.m_data));
   }
 
   auto const isect = static_cast<trep>(m_bits & o.m_bits);
@@ -305,15 +336,15 @@ bool Type::subtypeOf(Type o) const {
   if (!mayHaveData(isect)) return true;
 
   // No data is always more general.
-  if (!m_data && !o.m_data) return true;
-  if (!o.m_data) {
-    assert(m_data.hasValue());
+  if (!m_hasData && !o.m_hasData) return true;
+  if (!o.m_hasData) {
+    assert(m_hasData);
     return true;
   }
 
   // Both have data, and the intersection allows it, so it depends on
   // what the data says.
-  return m_data.hasValue() && subtypeData(Type(isect, *o.m_data));
+  return m_hasData && subtypeData(make(isect, o.m_data));
 }
 
 bool Type::strictSubtypeOf(Type o) const {
@@ -330,10 +361,10 @@ bool Type::couldBe(Type o) const {
     if (o.m_whType) {
       return wait_handle_inner(*this).couldBe(wait_handle_inner(o));
     }
-    return o.couldBe(Type(m_bits, *m_data));
+    return o.couldBe(make(m_bits, m_data));
   }
   if (o.m_whType) {
-    return couldBe(Type(o.m_bits, *o.m_data));
+    return couldBe(make(o.m_bits, o.m_data));
   }
 
   auto const isect = static_cast<trep>(m_bits & o.m_bits);
@@ -363,16 +394,18 @@ bool Type::couldBe(Type o) const {
   if (is_opt(*this)) return is_opt(o) ? true : unopt(*this).couldBe(o);
   if (is_opt(o))     return unopt(o).couldBe(*this);
 
-  if (m_data && o.m_data) return couldBeData(Type(isect, *o.m_data));
+  if (m_hasData && o.m_hasData) {
+    return couldBeData(make(isect, o.m_data));
+  }
   return true;
 }
 
 bool Type::checkInvariants() const {
   assert(isPredefined(m_bits));
-  assert(!m_data || mayHaveData(m_bits));
-  if (m_data) {
-    if (m_bits == BSStr) assert(m_data->sval->isStatic());
-    if (m_bits == BSArr) assert(m_data->aval->isStatic());
+  assert(!m_hasData || mayHaveData(m_bits));
+  if (m_hasData) {
+    if (m_bits == BSStr) assert(m_data.sval->isStatic());
+    if (m_bits == BSArr) assert(m_data.aval->isStatic());
   }
   if (auto t = m_whType.get()) {
     t->checkInvariants();
@@ -400,53 +433,66 @@ Type wait_handle_inner(const Type& t) {
 
 Type sval(SString val) {
   assert(val->isStatic());
-  Type::Data d;
-  d.sval = val;
-  return Type(BSStr, d);
+  auto r        = Type { BSStr };
+  r.m_hasData   = true;
+  r.m_data.sval = val;
+  return r;
 }
 
 Type ival(int64_t val) {
-  Type::Data d;
-  d.ival = val;
-  return Type(BInt, d);
+  auto r        = Type { BInt };
+  r.m_hasData   = true;
+  r.m_data.ival = val;
+  return r;
 }
 
 Type dval(double val) {
-  Type::Data d;
-  d.dval = val;
-  return Type(BDbl, d);
+  auto r        = Type { BDbl };
+  r.m_hasData   = true;
+  r.m_data.dval = val;
+  return r;
 }
 
 Type aval(SArray val) {
-  Type::Data d;
-  d.aval = val;
-  return Type(BSArr, d);
+  assert(val->isStatic());
+  auto r        = Type { BSArr };
+  r.m_hasData   = true;
+  r.m_data.aval = val;
+  return r;
 }
 
 Type subObj(res::Class val) {
-  Type::Data d;
-  d.dobj = DObj { val.couldBeOverriden() ?
-                            DObj::Sub : DObj::Exact, val };
-  return Type(BObj, d);
+  auto r        = Type { BObj };
+  r.m_hasData   = true;
+  r.m_data.dobj = DObj {
+    val.couldBeOverriden() ? DObj::Sub : DObj::Exact,
+    val
+  };
+  return r;
 }
 
 Type objExact(res::Class val) {
-  Type::Data d;
-  d.dobj = DObj { DObj::Exact, val };
-  return Type(BObj, d);
+  auto r        = Type { BObj };
+  r.m_hasData   = true;
+  r.m_data.dobj = DObj { DObj::Exact, val };
+  return r;
 }
 
 Type subCls(res::Class val) {
-  Type::Data d;
-  d.dcls = DCls { val.couldBeOverriden() ?
-                             DCls::Sub : DCls::Exact, val };
-  return Type(BCls, d);
+  auto r        = Type { BCls };
+  r.m_hasData   = true;
+  r.m_data.dcls = DCls {
+    val.couldBeOverriden() ? DCls::Sub : DCls::Exact,
+    val
+  };
+  return r;
 }
 
 Type clsExact(res::Class val) {
-  Type::Data d;
-  d.dcls = DCls { DCls::Exact, val };
-  return Type(BCls, d);
+  auto r        = Type { BCls };
+  r.m_hasData   = true;
+  r.m_data.dcls = DCls { DCls::Exact, val };
+  return r;
 }
 
 Type opt(Type t) {
@@ -495,14 +541,14 @@ folly::Optional<Cell> tv(Type t) {
   case BTrue:        return make_tv<KindOfBoolean>(true);
   case BFalse:       return make_tv<KindOfBoolean>(false);
   default:
-    if (!t.m_data)   break;
-    if (is_opt(t))   break;
+    if (!t.m_hasData) break;
+    if (is_opt(t))    break;
     switch (t.m_bits) {
-    case BInt:   return make_tv<KindOfInt64>(t.m_data->ival);
-    case BDbl:   return make_tv<KindOfDouble>(t.m_data->dval);
-    case BSStr:  return make_tv<KindOfStaticString>(t.m_data->sval);
+    case BInt:   return make_tv<KindOfInt64>(t.m_data.ival);
+    case BDbl:   return make_tv<KindOfDouble>(t.m_data.dval);
+    case BSStr:  return make_tv<KindOfStaticString>(t.m_data.sval);
     case BSArr:  return make_tv<KindOfArray>(
-                   const_cast<ArrayData*>(t.m_data->aval)
+                   const_cast<ArrayData*>(t.m_data.aval)
                  );
     case BObj:
       break;
@@ -531,15 +577,15 @@ Type type_of_istype(IsTypeOp op) {
 DObj dobj_of(const Type& t) {
   assert(t.checkInvariants());
   assert(is_specialized_obj(t));
-  assert(t.m_data);
-  return t.m_data->dobj;
+  assert(t.m_hasData);
+  return t.m_data.dobj;
 }
 
 DCls dcls_of(Type t) {
   assert(t.checkInvariants());
   assert(t.strictSubtypeOf(TCls));
-  assert(t.m_data);
-  return t.m_data->dcls;
+  assert(t.m_hasData);
+  return t.m_data.dcls;
 }
 
 Type from_cell(Cell cell) {

@@ -254,7 +254,7 @@ private:
   };
 
 private:
-  Type(trep t, Data d);
+  static Type make(trep t, const Data& d);
   bool equivData(Type o) const;
   bool subtypeData(Type o) const;
   bool couldBeData(Type o) const;
@@ -262,7 +262,8 @@ private:
 
 private:
   trep m_bits;
-  folly::Optional<Data> m_data;
+  bool m_hasData = false;
+  Data m_data;
   copy_ptr<Type> m_whType;
 };
 

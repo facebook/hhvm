@@ -472,7 +472,7 @@ std::string show(Type t) {
   case BTop:         ret = "Top";      break;
   }
 
-  if (t.m_data) {
+  if (t.m_hasData) {
     if (t.m_bits != BObj && t.m_bits != BCls &&
         t.m_bits != BOptObj) {
       folly::toAppend("=", &ret);
@@ -480,32 +480,32 @@ std::string show(Type t) {
 
     switch (t.m_bits) {
     case BOptInt:   // fallthrough
-    case BInt:      folly::toAppend(t.m_data->ival, &ret); break;
+    case BInt:      folly::toAppend(t.m_data.ival, &ret); break;
     case BOptDbl:   // fallthrough
-    case BDbl:      folly::toAppend(t.m_data->dval, &ret); break;
+    case BDbl:      folly::toAppend(t.m_data.dval, &ret); break;
     case BOptSStr:  // fallthrough
-    case BSStr:     ret += escaped_string(t.m_data->sval); break;
+    case BSStr:     ret += escaped_string(t.m_data.sval); break;
     case BOptSArr:  // fallthrough
-    case BSArr:     ret += array_string(t.m_data->aval);   break;
+    case BSArr:     ret += array_string(t.m_data.aval);   break;
     case BOptObj:
       // fallthrough
     case BCls:
-      switch (t.m_data->dobj.type) {
+      switch (t.m_data.dobj.type) {
       case DObj::Exact:
-        folly::toAppend("=", show(t.m_data->dobj.cls), &ret);
+        folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
         break;
       case DObj::Sub:
-        folly::toAppend("<=", show(t.m_data->dobj.cls), &ret);
+        folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
         break;
       }
       break;
     case BObj:
-      switch (t.m_data->dobj.type) {
+      switch (t.m_data.dobj.type) {
       case DObj::Exact:
-        folly::toAppend("=", show(t.m_data->dobj.cls), &ret);
+        folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
         break;
       case DObj::Sub:
-        folly::toAppend("<=", show(t.m_data->dobj.cls), &ret);
+        folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
         break;
       }
       break;

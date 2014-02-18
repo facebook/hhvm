@@ -104,7 +104,7 @@ struct Options {
    * This allows possible overrides of a method to be resolved as a
    * set of candidates when we aren't sure which one it would be.
    */
-  bool FuncFamilies = false;
+  bool FuncFamilies = true;
 
   //////////////////////////////////////////////////////////////////////
   // Flags below this line perform optimizations that intentionally

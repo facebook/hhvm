@@ -372,6 +372,10 @@ bool File::lock(int operation, bool &wouldblock /* = false */) {
   return true;
 }
 
+bool File::stat(struct stat *sb) {
+  throw NotSupportedException(__func__, "cannot stat");
+}
+
 const StaticString
   s_wrapper_type("wrapper_type"),
   s_stream_type("stream_type"),

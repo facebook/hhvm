@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
 
+struct stat;
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -120,6 +122,7 @@ public:
   virtual bool truncate(int64_t size);
   virtual bool lock(int operation);
   virtual bool lock(int operation, bool &wouldblock);
+  virtual bool stat(struct stat *sb);
 
   virtual Array getMetaData();
   virtual Array getWrapperMetaData() { return null_array; }

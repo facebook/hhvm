@@ -42,6 +42,7 @@ StaticString s_stream_eof("stream_eof");
 StaticString s_stream_flush("stream_flush");
 StaticString s_stream_truncate("stream_truncate");
 StaticString s_stream_lock("stream_lock");
+StaticString s_stream_stat("stream_stat");
 StaticString s_url_stat("url_stat");
 StaticString s_unlink("unlink");
 StaticString s_rename("rename");
@@ -62,6 +63,7 @@ UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
   m_StreamFlush = lookupMethod(s_stream_flush.get());
   m_StreamTruncate = lookupMethod(s_stream_truncate.get());
   m_StreamLock  = lookupMethod(s_stream_lock.get());
+  m_StreamStat  = lookupMethod(s_stream_stat.get());
   m_UrlStat     = lookupMethod(s_url_stat.get());
   m_Unlink      = lookupMethod(s_unlink.get());
   m_Rename      = lookupMethod(s_rename.get());
@@ -292,16 +294,13 @@ const StaticString
   s_ctime("ctime"),
   s_blksize("blksize"),
   s_blocks("blocks");
-int UserFile::statImpl(const String& path, struct stat* stat_sb,
-                       int flags /* = 0 */) {
-  // array url_stat ( string $path , int $flags )
-  bool invoked = false;
-  Variant ret = invoke(m_UrlStat, s_url_stat,
-                       make_packed_array(path, flags), invoked);
-  if (!ret.isArray()) {
+
+static int statFill(Variant stat_array, struct stat* stat_sb)
+{
+  if (!stat_array.isArray()) {
     return -1;
   }
-  auto a = ret.getArrayData();
+  auto a = stat_array.getArrayData();
   stat_sb->st_dev = a->get(s_dev.get()).toInt64();
   stat_sb->st_ino = a->get(s_ino.get()).toInt64();
   stat_sb->st_mode = a->get(s_mode.get()).toInt64();
@@ -318,10 +317,27 @@ int UserFile::statImpl(const String& path, struct stat* stat_sb,
   return 0;
 }
 
+bool UserFile::stat(struct stat* stat_sb) {
+  bool invoked = false;
+  // array stream_stat ( )
+  return statFill(invoke(m_StreamStat, s_stream_stat,
+                         Array::Create(), invoked),
+                  stat_sb) == 0;
+}
+
+int UserFile::urlStat(const String& path, struct stat* stat_sb,
+                       int flags /* = 0 */) {
+  // array url_stat ( string $path , int $flags )
+  bool invoked = false;
+  return statFill(invoke(m_UrlStat, s_url_stat,
+                         make_packed_array(path, flags), invoked),
+                  stat_sb);
+}
+
 extern const int64_t k_STREAM_URL_STAT_QUIET;
 int UserFile::access(const String& path, int mode) {
   struct stat buf;
-  auto ret = statImpl(path, &buf, k_STREAM_URL_STAT_QUIET);
+  auto ret = urlStat(path, &buf, k_STREAM_URL_STAT_QUIET);
   if (ret < 0 || mode == F_OK) {
     return ret;
   }
@@ -330,11 +346,11 @@ int UserFile::access(const String& path, int mode) {
 
 extern const int64_t k_STREAM_URL_STAT_LINK;
 int UserFile::lstat(const String& path, struct stat* buf) {
-  return statImpl(path, buf, k_STREAM_URL_STAT_LINK);
+  return urlStat(path, buf, k_STREAM_URL_STAT_LINK);
 }
 
 int UserFile::stat(const String& path, struct stat* buf) {
-  return statImpl(path, buf);
+  return urlStat(path, buf);
 }
 
 bool UserFile::unlink(const String& filename) {

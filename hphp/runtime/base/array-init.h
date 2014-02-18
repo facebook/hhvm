@@ -416,6 +416,7 @@ namespace make_array_detail {
  */
 template<class... Vals>
 Array make_packed_array(Vals&&... vals) {
+  static_assert(sizeof...(vals), "use Array::Create() instead");
   PackedArrayInit init(sizeof...(vals));
   make_array_detail::packed_impl(init, std::forward<Vals>(vals)...);
   return init.toArray();

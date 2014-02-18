@@ -257,13 +257,10 @@ bool f_feof(CResRef handle) {
 }
 
 Variant f_fstat(CResRef handle) {
-  PlainFile *file = handle.getTyped<PlainFile>(true, true);
-  if (!file) {
-    raise_warning("Not a valid stream resource");
-    return false;
-  }
+  CHECK_HANDLE(handle, f);
   struct stat sb;
-  CHECK_SYSTEM(fstat(file->fd(), &sb));
+  if (!CHECK_ERROR(f->stat(&sb)))
+    return false;
   return stat_impl(&sb);
 }
 

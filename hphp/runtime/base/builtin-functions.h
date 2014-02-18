@@ -287,7 +287,7 @@ void throw_infinite_recursion_exception();
 Exception* generate_request_timeout_exception();
 Exception* generate_memory_exceeded_exception();
 void throw_call_non_object() ATTRIBUTE_NORETURN;
-void throw_call_non_object(const char *methodName)
+void throw_call_non_object(const char *methodName, const char* type = nullptr)
   ATTRIBUTE_NORETURN;
 
 // unserializable default value arguments such as TimeStamp::Current()

@@ -20,8 +20,6 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/user-fs-node.h"
 
-struct stat;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -61,6 +59,7 @@ public:
     return lock(operation, wouldBlock);
   }
   virtual bool lock(int operation, bool &wouldBlock);
+  virtual bool stat(struct stat* buf);
 
   int access(const String& path, int mode);
   int lstat(const String& path, struct stat* buf);
@@ -71,7 +70,7 @@ public:
   bool rmdir(const String& path, int options);
 
 private:
-  int statImpl(const String& path, struct stat* stat_sb, int flags = 0);
+  int urlStat(const String& path, struct stat* stat_sb, int flags = 0);
 
 protected:
   const Func* m_StreamOpen;
@@ -84,6 +83,7 @@ protected:
   const Func* m_StreamFlush;
   const Func* m_StreamTruncate;
   const Func* m_StreamLock;
+  const Func* m_StreamStat;
   const Func* m_UrlStat;
   const Func* m_Unlink;
   const Func* m_Rename;

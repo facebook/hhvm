@@ -573,10 +573,14 @@ Variant f_readfile(const String& filename, bool use_include_path /* = false */,
 
 bool f_move_uploaded_file(const String& filename, const String& destination) {
   Transport *transport = g_context->getTransport();
-  if (transport) {
-    return transport->moveUploadedFile(filename, destination);
-  }
-  return false;
+  if (!transport || !transport->isUploadedFile(filename))
+    return false;
+  if (f_rename(filename, destination))
+    return true;
+  if (!f_copy(filename, destination))
+    return false;
+  f_unlink(filename);
+  return true;
 }
 
 Variant f_parse_ini_file(const String& filename,

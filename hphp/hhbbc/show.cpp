@@ -479,9 +479,13 @@ std::string show(Type t) {
     return ret;
   case DataTag::Obj:
   case DataTag::Cls:
+  case DataTag::ArrPacked:
+  case DataTag::ArrPackedN:
+  case DataTag::ArrStruct:
+  case DataTag::ArrMapN:
     break;
   case DataTag::Str:
-  case DataTag::Arr:
+  case DataTag::ArrVal:
   case DataTag::Int:
   case DataTag::Dbl:
     folly::toAppend("=", &ret);
@@ -492,7 +496,9 @@ std::string show(Type t) {
   case DataTag::Int: folly::toAppend(t.m_data.ival, &ret); break;
   case DataTag::Dbl: folly::toAppend(t.m_data.dval, &ret); break;
   case DataTag::Str: ret += escaped_string(t.m_data.sval); break;
-  case DataTag::Arr: ret += array_string(t.m_data.aval);   break;
+  case DataTag::ArrVal:
+    ret += array_string(t.m_data.aval);
+    break;
   case DataTag::Obj:
     switch (t.m_data.dobj.type) {
     case DObj::Exact:
@@ -514,6 +520,41 @@ std::string show(Type t) {
     }
     break;
   case DataTag::None:
+    break;
+  case DataTag::ArrPacked:
+    ret += folly::format(
+      "({})",
+      [&] {
+        using namespace folly::gen;
+        return from(t.m_data.apacked->elems)
+          | map([&] (const Type& t) { return show(t); })
+          | unsplit<std::string>(",");
+      }()
+    ).str();
+    break;
+  case DataTag::ArrPackedN:
+    ret += folly::format("([{}])", show(t.m_data.apackedn->type)).str();
+    break;
+  case DataTag::ArrStruct:
+    ret += folly::format(
+      "({})",
+      [&] {
+        using namespace folly::gen;
+        return from(t.m_data.astruct->map)
+          | map([&] (const std::pair<SString,Type>& kv) {
+              return folly::format("{}:{}",
+                kv.first->data(), show(kv.second)).str();
+            })
+          | unsplit<std::string>(",");
+      }()
+    ).str();
+    break;
+  case DataTag::ArrMapN:
+    ret += folly::format(
+      "([{}:{}])",
+      show(t.m_data.amapn->key),
+      show(t.m_data.amapn->val)
+    ).str();
     break;
   }
 

@@ -6044,15 +6044,15 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
   bool isWInit = inst->op() == WIterInit || inst->op() == WIterInitK;
 
   PhysReg        fpReg = srcLoc(1).reg();
-  int64_t     iterOffset = this->iterOffset(inst->src(2));
-  int64_t valLocalOffset = localOffset(inst->src(3)->getValInt());
+  int64_t     iterOffset = this->iterOffset(inst->extra<IterData>()->iterId);
+  int64_t valLocalOffset = localOffset(inst->extra<IterData>()->valId);
   SSATmp*          src = inst->src(0);
   auto args = argGroup();
   args.addr(fpReg, iterOffset).ssa(0/*src*/);
   if (src->isA(Type::Arr)) {
     args.addr(fpReg, valLocalOffset);
     if (isInitK) {
-      args.addr(fpReg, localOffset(inst->src(4)->getValInt()));
+      args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
     } else if (isWInit) {
       args.imm(0);
     }
@@ -6064,7 +6064,7 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
     assert(src->type() <= Type::Obj);
     args.imm(uintptr_t(curClass())).addr(fpReg, valLocalOffset);
     if (isInitK) {
-      args.addr(fpReg, localOffset(inst->src(4)->getValInt()));
+      args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
     } else {
       args.imm(0);
     }
@@ -6087,8 +6087,8 @@ void CodeGenerator::cgMIterInitK(IRInstruction* inst) {
 
 void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
   PhysReg          fpReg = srcLoc(1).reg();
-  int64_t     iterOffset = this->iterOffset(inst->src(2));
-  int64_t valLocalOffset = localOffset(inst->src(3)->getValInt());
+  int64_t     iterOffset = this->iterOffset(inst->extra<IterData>()->iterId);
+  int64_t valLocalOffset = localOffset(inst->extra<IterData>()->valId);
   SSATmp*            src = inst->src(0);
 
   auto args = argGroup();
@@ -6101,7 +6101,7 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
   if (innerType.isArray()) {
     args.addr(fpReg, valLocalOffset);
     if (inst->op() == MIterInitK) {
-      args.addr(fpReg, localOffset(inst->src(4)->getValInt()));
+      args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
     } else {
       args.imm(0);
     }
@@ -6110,7 +6110,7 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
   } else if (innerType.isObj()) {
     args.immPtr(curClass()).addr(fpReg, valLocalOffset);
     if (inst->op() == MIterInitK) {
-      args.addr(fpReg, localOffset(inst->src(4)->getValInt()));
+      args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
     } else {
       args.imm(0);
     }
@@ -6147,10 +6147,10 @@ void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
   bool isWNext = inst->op() == WIterNext || inst->op() == WIterNextK;
   PhysReg fpReg = srcLoc(0).reg();
   auto args = argGroup();
-  args.addr(fpReg, iterOffset(inst->src(1)))
-      .addr(fpReg, localOffset(inst->src(2)->getValInt()));
+  args.addr(fpReg, iterOffset(inst->extra<IterData>()->iterId))
+      .addr(fpReg, localOffset(inst->extra<IterData>()->valId));
   if (isNextK) {
-    args.addr(fpReg, localOffset(inst->src(3)->getValInt()));
+    args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
   } else if (isWNext) {
     args.imm(0);
   }
@@ -6171,10 +6171,10 @@ void CodeGenerator::cgMIterNextK(IRInstruction* inst) {
 void CodeGenerator::cgMIterNextCommon(IRInstruction* inst) {
   PhysReg fpReg = srcLoc(0).reg();
   auto args = argGroup();
-  args.addr(fpReg, iterOffset(inst->src(1)))
-      .addr(fpReg, localOffset(inst->src(2)->getValInt()));
+  args.addr(fpReg, iterOffset(inst->extra<IterData>()->iterId))
+      .addr(fpReg, localOffset(inst->extra<IterData>()->valId));
   if (inst->op() == MIterNextK) {
-    args.addr(fpReg, localOffset(inst->src(3)->getValInt()));
+    args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
   } else {
     args.imm(0);
   }

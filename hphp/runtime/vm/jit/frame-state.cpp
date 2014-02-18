@@ -191,7 +191,7 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
                                  LocalStateHook& hook) const {
   auto killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
     for (auto id : ids) {
-      hook.setLocalValue(inst->src(id)->getValInt(), nullptr);
+      hook.setLocalValue(id, nullptr);
     }
   };
 
@@ -244,25 +244,27 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
     case IterInitK:
     case WIterInitK:
       // kill the locals to which this instruction stores iter's key and value
-      killIterLocals({3, 4});
+      killIterLocals({inst->extra<IterData>()->keyId,
+                      inst->extra<IterData>()->valId});
       break;
 
     case IterInit:
     case WIterInit:
       // kill the local to which this instruction stores iter's value
-      killIterLocals({3});
+      killIterLocals({inst->extra<IterData>()->valId});
       break;
 
     case IterNextK:
     case WIterNextK:
       // kill the locals to which this instruction stores iter's key and value
-      killIterLocals({2, 3});
+      killIterLocals({inst->extra<IterData>()->keyId,
+                      inst->extra<IterData>()->valId});
       break;
 
     case IterNext:
     case WIterNext:
       // kill the local to which this instruction stores iter's value
-      killIterLocals({2});
+      killIterLocals({inst->extra<IterData>()->valId});
       break;
 
     case InterpOne:

@@ -1252,10 +1252,9 @@ void HhbcTranslator::emitIterInit(uint32_t iterId,
       return gen(IterInit,
                  Type::Bool,
                  catchBlock,
+                 IterData(iterId, -1, valLocalId),
                  src,
-                 m_irb->fp(),
-                 cns(iterId),
-                 cns(valLocalId));
+                 m_irb->fp());
     },
     invertCond);
 }
@@ -1270,11 +1269,9 @@ void HhbcTranslator::emitIterInitK(uint32_t iterId,
       return gen(IterInitK,
                  Type::Bool,
                  catchBlock,
+                 IterData(iterId, keyLocalId, valLocalId),
                  src,
-                 m_irb->fp(),
-                 cns(iterId),
-                 cns(valLocalId),
-                 cns(keyLocalId));
+                 m_irb->fp());
     },
     invertCond);
 }
@@ -1287,9 +1284,8 @@ void HhbcTranslator::emitIterNext(uint32_t iterId,
     IterNext,
     Type::Bool,
     makeCatch(),
-    m_irb->fp(),
-    cns(iterId),
-    cns(valLocalId)
+    IterData(iterId, -1, valLocalId),
+    m_irb->fp()
   );
   emitJmpCondHelper(offset, invertCond, res);
 }
@@ -1303,10 +1299,8 @@ void HhbcTranslator::emitIterNextK(uint32_t iterId,
     IterNextK,
     Type::Bool,
     makeCatch(),
-    m_irb->fp(),
-    cns(iterId),
-    cns(valLocalId),
-    cns(keyLocalId)
+    IterData(iterId, keyLocalId, valLocalId),
+    m_irb->fp()
   );
   emitJmpCondHelper(offset, invertCond, res);
 }
@@ -1321,10 +1315,9 @@ void HhbcTranslator::emitWIterInit(uint32_t iterId,
       return gen(WIterInit,
                  Type::Bool,
                  catchBlock,
+                 IterData(iterId, -1, valLocalId),
                  src,
-                 m_irb->fp(),
-                 cns(iterId),
-                 cns(valLocalId));
+                 m_irb->fp());
     },
     invertCond);
 }
@@ -1340,11 +1333,9 @@ void HhbcTranslator::emitWIterInitK(uint32_t iterId,
       return gen(WIterInitK,
                  Type::Bool,
                  catchBlock,
+                 IterData(iterId, keyLocalId, valLocalId),
                  src,
-                 m_irb->fp(),
-                 cns(iterId),
-                 cns(valLocalId),
-                 cns(keyLocalId));
+                 m_irb->fp());
     },
     invertCond);
 }
@@ -1357,9 +1348,8 @@ void HhbcTranslator::emitWIterNext(uint32_t iterId,
     WIterNext,
     Type::Bool,
     makeCatch(),
-    m_irb->fp(),
-    cns(iterId),
-    cns(valLocalId)
+    IterData(iterId, -1, valLocalId),
+    m_irb->fp()
   );
   emitJmpCondHelper(offset, invertCond, res);
 }
@@ -1373,10 +1363,8 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
     WIterNextK,
     Type::Bool,
     makeCatch(),
-    m_irb->fp(),
-    cns(iterId),
-    cns(valLocalId),
-    cns(keyLocalId)
+    IterData(iterId, keyLocalId, valLocalId),
+    m_irb->fp()
   );
   emitJmpCondHelper(offset, invertCond, res);
 }
@@ -1390,10 +1378,9 @@ void HhbcTranslator::emitMIterInit(uint32_t iterId,
       MIterInit,
       Type::Bool,
       catchBlock,
+      IterData(iterId, -1, valLocalId),
       src,
-      m_irb->fp(),
-      cns(iterId),
-      cns(valLocalId)
+      m_irb->fp()
     );
   });
 }
@@ -1408,11 +1395,9 @@ void HhbcTranslator::emitMIterInitK(uint32_t iterId,
       MIterInitK,
       Type::Bool,
       catchBlock,
+      IterData(iterId, keyLocalId, valLocalId),
       src,
-      m_irb->fp(),
-      cns(iterId),
-      cns(valLocalId),
-      cns(keyLocalId)
+      m_irb->fp()
     );
   });
 }
@@ -1423,9 +1408,8 @@ void HhbcTranslator::emitMIterNext(uint32_t iterId,
   SSATmp* res = gen(
     MIterNext,
     Type::Bool,
-    m_irb->fp(),
-    cns(iterId),
-    cns(valLocalId)
+    IterData(iterId, -1, valLocalId),
+    m_irb->fp()
   );
   emitJmpCondHelper(offset, false, res);
 }
@@ -1437,10 +1421,8 @@ void HhbcTranslator::emitMIterNextK(uint32_t iterId,
   SSATmp* res = gen(
     MIterNextK,
     Type::Bool,
-    m_irb->fp(),
-    cns(iterId),
-    cns(valLocalId),
-    cns(keyLocalId)
+    IterData(iterId, keyLocalId, valLocalId),
+    m_irb->fp()
   );
   emitJmpCondHelper(offset, false, res);
 }

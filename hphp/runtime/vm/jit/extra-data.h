@@ -152,6 +152,19 @@ struct IterId : IRExtraData {
   uint32_t iterId;
 };
 
+struct IterData : IRExtraData {
+  explicit IterData(uint32_t iter, uint32_t key, uint32_t val)
+    : iterId(iter), keyId(key), valId(val)
+  {}
+  std::string show() const {
+    return folly::format("{}::{}::{}", iterId, valId, valId).str();
+  }
+
+  uint32_t iterId;
+  uint32_t keyId;
+  uint32_t valId;
+};
+
 struct ClassData : IRExtraData {
   explicit ClassData(const Class* cls) : cls(cls) {}
   std::string show() const {
@@ -749,6 +762,18 @@ X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);
 X(DecodeCufIter,                IterId);
+X(IterInit,                     IterData);
+X(IterInitK,                    IterData);
+X(IterNext,                     IterData);
+X(IterNextK,                    IterData);
+X(WIterInit,                    IterData);
+X(WIterInitK,                   IterData);
+X(WIterNext,                    IterData);
+X(WIterNextK,                   IterData);
+X(MIterInit,                    IterData);
+X(MIterInitK,                   IterData);
+X(MIterNext,                    IterData);
+X(MIterNextK,                   IterData);
 X(AllocObjFast,                 ClassData);
 X(LdCtx,                        FuncData);
 X(CufIterSpillFrame,            FPushCufData);

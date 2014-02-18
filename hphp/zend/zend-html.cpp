@@ -630,7 +630,7 @@ char *string_html_encode(const char *input, int &len,
               memcpy(buf, p, l);
               buf[l] = '\0';
               if (decode_entity(buf, &l, true, true,
-                cs_8859_15, true,false)) {
+                cs_utf_8, true)) {
                 found = true;
                 *q++ = '&';
                 for(const char *s = p; s <= t; s++){

@@ -84,8 +84,12 @@ String File::TranslatePathKeepRelative(const String& filename) {
 }
 
 String File::TranslatePath(const String& filename) {
-  String canonicalized = TranslatePathKeepRelative(filename);
+  String fname =
+    !strncmp(filename.data(), "file:", sizeof("file:") - 1)
+    ? filename.substr(sizeof("file:") - 1) : filename;  
 
+  String canonicalized = TranslatePathKeepRelative(fname);
+  
   if (canonicalized.charAt(0) == '/') {
     return canonicalized;
   }

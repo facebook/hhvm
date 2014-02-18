@@ -5785,10 +5785,11 @@ void ExecutionContext::fPushObjMethodImpl(
   }
 }
 
-static void throw_call_non_object(const char* methodName) {
+static void throw_call_non_object(const char* methodName,
+                                  const char* typeName = nullptr) {
   std::string msg;
-  folly::format(&msg, "Call to a member function {}() on a non-object",
-    methodName);
+  folly::format(&msg, "Call to a member function {}() on a non-object ({})",
+    methodName, typeName);
 
   if (RuntimeOption::ThrowExceptionOnBadMethodCall) {
     Object e(SystemLib::AllocBadMethodCallExceptionObject(String(msg)));
@@ -5806,7 +5807,8 @@ OPTBLD_INLINE void ExecutionContext::iopFPushObjMethod(IOP_ARGS) {
   }
   Cell* c2 = m_stack.indC(1); // Object.
   if (c2->m_type != KindOfObject) {
-    throw_call_non_object(c1->m_data.pstr->data());
+    throw_call_non_object(c1->m_data.pstr->data(),
+                          getDataTypeString(c2->m_type).get()->data());
   }
   ObjectData* obj = c2->m_data.pobj;
   Class* cls = obj->getVMClass();
@@ -5822,7 +5824,8 @@ OPTBLD_INLINE void ExecutionContext::iopFPushObjMethodD(IOP_ARGS) {
   DECODE_LITSTR(name);
   Cell* c1 = m_stack.topC();
   if (c1->m_type != KindOfObject) {
-    throw_call_non_object(name->data());
+    throw_call_non_object(name->data(),
+                          getDataTypeString(c1->m_type).get()->data());
   }
   ObjectData* obj = c1->m_data.pobj;
   Class* cls = obj->getVMClass();

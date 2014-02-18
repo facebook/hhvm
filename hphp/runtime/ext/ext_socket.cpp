@@ -225,7 +225,7 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
                                    int &count, short flag) {
   assert(sockets.is(KindOfArray));
   Array sock_array = sockets.toArray();
-  Array ret;
+  Array ret = Array::Create();
   for (ArrayIter iter(sock_array); iter; ++iter) {
     pollfd &fd = fds[nfds++];
     assert(fd.fd == iter.second().toResource().getTyped<File>()->fd());

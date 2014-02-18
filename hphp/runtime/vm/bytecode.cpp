@@ -576,7 +576,7 @@ void Stack::ValidateStackSize() {
         % RuntimeOption::EvalVMStackElms
         % sMinStackElms));
   }
-  if (!Util::isPowerOfTwo(RuntimeOption::EvalVMStackElms)) {
+  if (!folly::isPowTwo(RuntimeOption::EvalVMStackElms)) {
     throw std::runtime_error(str(
       boost::format("VM stack size of 0x%llx is not a power of 2")
         % RuntimeOption::EvalVMStackElms));

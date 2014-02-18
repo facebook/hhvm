@@ -21,6 +21,8 @@
 #include <deque>
 #include <limits>
 
+#include "folly/Bits.h"
+
 #include "hphp/util/util.h"
 #include "hphp/util/exp-arena.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -273,7 +275,7 @@ private:
   }
 
   void allocate(const size_t newCapac) {
-    assert(Util::isPowerOfTwo(newCapac));
+    assert(folly::isPowTwo(newCapac));
     const size_t newMask = newCapac - 1;
     assert(newMask <= std::numeric_limits<uint32_t>::max());
     Elm* newTab = static_cast<Elm*>(calloc(sizeof(Elm), newCapac));

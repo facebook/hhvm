@@ -2344,7 +2344,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
    * the allocated size is always the next power of two (or zero)
    * so we just need to reallocate when we hit a power of two
    */
-  if (!m_size || Util::isPowerOfTwo(m_size)) {
+  if (!m_size || folly::isPowTwo(m_size)) {
     unsigned size = m_size ? m_size * 2 : 1;
     m_data = (TypedValueAux*)realloc(m_data, size * sizeof(*m_data));
     assert(m_data);

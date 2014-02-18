@@ -57,7 +57,7 @@ T* handleToPtr(RDS::Handle h) {
 
 template<class Cache>
 typename Cache::Pair* keyToPair(Cache* cache, const StringData* k) {
-  assert(Util::isPowerOfTwo(Cache::kNumLines));
+  assert(folly::isPowTwo(Cache::kNumLines));
   return cache->m_pairs + (k->hash() & (Cache::kNumLines - 1));
 }
 

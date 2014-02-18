@@ -1193,7 +1193,7 @@ static const struct {
   { OpFPassR,      {Stack1|FuncdRef,  Stack1,       OutFInputR,        0 }},
   { OpFPassL,      {Local|FuncdRef,   Stack1,       OutFInputL,        1 }},
   { OpFPassN,      {Stack1|FuncdRef,  Stack1,       OutUnknown,        0 }},
-  { OpFPassG,      {Stack1|FuncdRef,  Stack1,       OutFInputR,        0 }},
+  { OpFPassG,      {Stack1|FuncdRef,  Stack1,       OutUnknown,        0 }},
   { OpFPassS,      {StackTop2|FuncdRef,
                                       Stack1,       OutUnknown,       -1 }},
   { OpFPassM,      {MVector|FuncdRef, Stack1|Local, OutUnknown,        1 }},

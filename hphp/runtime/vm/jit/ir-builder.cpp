@@ -96,10 +96,6 @@ SSATmp* IRBuilder::genPtrToUninit() {
   return gen(DefConst, Type::PtrToUninit, ConstData(&null_variant));
 }
 
-SSATmp* IRBuilder::genDefNone() {
-  return gen(DefConst, Type::None, ConstData(0));
-}
-
 void IRBuilder::appendInstruction(IRInstruction* inst) {
   auto defaultWhere = m_curBlock->end();
   auto& where = m_curWhere ? m_curWhere.get() : defaultWhere;

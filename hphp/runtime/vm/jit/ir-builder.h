@@ -188,7 +188,6 @@ struct IRBuilder {
   SSATmp* genDefNull();
   SSATmp* genPtrToInitNull();
   SSATmp* genPtrToUninit();
-  SSATmp* genDefNone();
 
   template<class... Args>
   SSATmp* cns(Args&&... args) {

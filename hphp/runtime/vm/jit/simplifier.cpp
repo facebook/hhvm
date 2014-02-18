@@ -437,7 +437,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvClsToCctx: return simplifyConvClsToCctx(inst);
 
   case SpillStack:   return simplifySpillStack(inst);
-  case Call:         return simplifyCall(inst);
   case CastStk:      return simplifyCastStk(inst);
   case CoerceStk:    return simplifyCoerceStk(inst);
   case AssertStk:    return simplifyAssertStk(inst);
@@ -468,34 +467,6 @@ SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
   // need the instruction; the old stack is still accurate.
   if (!numSpillSrcs && spDeficit == 0) return sp;
 
-  return nullptr;
-}
-
-SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
-  auto spillVals  = inst->srcs().subpiece(3);
-  auto const spillStack = inst->src(0)->inst();
-  if (spillStack->op() != SpillStack) {
-    return nullptr;
-  }
-
-  SSATmp* sp = spillStack->src(0);
-  int baseOffset = spillStack->src(1)->getValInt() -
-                   spillValueCells(spillStack);
-  auto const numSpillSrcs = spillVals.size();
-  for (int32_t i = 0; i < numSpillSrcs; i++) {
-    const int64_t offset = -(i + 1) + baseOffset;
-    assert(spillVals[i]->type() != Type::ActRec);
-    IRInstruction* srcInst = spillVals[i]->inst();
-    // If our value came from a LdStack on the same sp and offset,
-    // we don't need to spill it.
-    if (srcInst->op() == LdStack && srcInst->src(0) == sp &&
-        srcInst->extra<LdStack>()->offset == offset) {
-      spillVals[i] = m_irb.genDefNone();
-    }
-  }
-
-  // Note: although the instruction might have been modified above, we still
-  // need to return nullptr so that it gets cloned later if it's stack-allocated
   return nullptr;
 }
 

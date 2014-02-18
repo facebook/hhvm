@@ -131,7 +131,6 @@ private:
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
   SSATmp* simplifyConvClsToCctx(IRInstruction* inst);
   SSATmp* simplifySpillStack(IRInstruction* inst);
-  SSATmp* simplifyCall(IRInstruction* inst);
   SSATmp* simplifyCmp(Opcode opName, IRInstruction* inst,
                       SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);

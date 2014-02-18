@@ -18,6 +18,11 @@
 #include <gtest/gtest.h>
 #include <boost/range/join.hpp>
 
+#include "folly/Lazy.h"
+
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/array-init.h"
+
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
@@ -146,11 +151,32 @@ std::unique_ptr<php::Program> make_program() {
 
 //////////////////////////////////////////////////////////////////////
 
-auto const with_data = {
-  ival(2),
-  dval(2.0),
-  sval(s_test.get())
-};
+auto const test_array_map_value = folly::lazy([&] {
+  auto ar = make_map_array(
+    s_A.get(), s_B.get(),
+    s_test.get(), 12
+  );
+  return ArrayData::GetScalarArray(ar.get());
+});
+
+auto const test_array_packed_value = folly::lazy([&] {
+  auto ar = make_packed_array(
+    42,
+    23,
+    12
+  );
+  return ArrayData::GetScalarArray(ar.get());
+});
+
+auto const with_data = folly::lazy([&] {
+  return std::vector<Type> {
+    ival(2),
+    dval(2.0),
+    sval(s_test.get()),
+    aval(test_array_map_value()),
+    aval(test_array_packed_value())
+  };
+});
 
 // In the sense of "non-union type", not the sense of TPrim.
 auto const primitives = {
@@ -205,7 +231,15 @@ auto const non_opt_unions = {
 };
 
 auto const all_unions = boost::join(optionals, non_opt_unions);
-auto const all = boost::join(boost::join(with_data, primitives), all_unions);
+
+auto const all = folly::lazy([&] {
+  std::vector<Type> ret;
+  auto const wdata = with_data();
+  ret.insert(end(ret), begin(primitives), end(primitives));
+  ret.insert(end(ret), begin(all_unions), end(all_unions));
+  ret.insert(end(ret), begin(wdata), end(wdata));
+  return ret;
+});
 
 template<class Range>
 std::vector<Type> wait_handles_of(const Index& index, const Range& r) {
@@ -215,8 +249,8 @@ std::vector<Type> wait_handles_of(const Index& index, const Range& r) {
 }
 
 std::vector<Type> all_with_waithandles(const Index& index) {
-  auto ret = wait_handles_of(index, all);
-  for (auto& t : all) ret.push_back(t);
+  auto ret = wait_handles_of(index, all());
+  for (auto& t : all()) ret.push_back(t);
   return ret;
 }
 
@@ -281,7 +315,7 @@ TEST(Type, Relations) {
 
   // couldBe is symmetric and reflexive
   for (auto& t1 : all_with_waithandles(index)) {
-    for (auto& t2 : all) {
+    for (auto& t2 : all()) {
       EXPECT_TRUE(t1.couldBe(t2) == t2.couldBe(t1));
     }
   }
@@ -486,7 +520,7 @@ TEST(Type, Option) {
 
   for (auto& t : optionals) EXPECT_EQ(t, opt(unopt(t)));
   for (auto& t : optionals) EXPECT_TRUE(is_opt(t));
-  for (auto& t : all) {
+  for (auto& t : all()) {
     auto const found =
       std::find(begin(optionals), end(optionals), t) != end(optionals);
     EXPECT_EQ(found, is_opt(t));
@@ -1197,14 +1231,14 @@ TEST(Type, WaitH) {
   auto const program = make_program();
   Index index { borrow(program) };
 
-  for (auto& t : wait_handles_of(index, all)) {
+  for (auto& t : wait_handles_of(index, all())) {
     EXPECT_TRUE(is_specialized_wait_handle(t));
     EXPECT_TRUE(t.subtypeOf(wait_handle(index, TTop)));
   }
 
   // union_of(WaitH<A>, WaitH<B>) == WaitH<union_of(A, B)>
-  for (auto& t1 : all) {
-    for (auto& t2 : all) {
+  for (auto& t1 : all()) {
+    for (auto& t2 : all()) {
       auto const u1 = union_of(t1, t2);
       auto const u2 = union_of(wait_handle(index, t1), wait_handle(index, t2));
       EXPECT_TRUE(is_specialized_wait_handle(u2));
@@ -1214,8 +1248,8 @@ TEST(Type, WaitH) {
   }
 
   // union_of(?WaitH<A>, ?WaitH<B>) == ?WaitH<union_of(A, B)>
-  for (auto& t1 : all) {
-    for (auto& t2 : all) {
+  for (auto& t1 : all()) {
+    for (auto& t2 : all()) {
       auto const w1 = opt(wait_handle(index, t1));
       auto const w2 = opt(wait_handle(index, t2));
       auto const u1 = union_of(w1, w2);
@@ -1239,12 +1273,12 @@ TEST(Type, WaitH) {
   EXPECT_TRUE(optWH.couldBe(wait_handle(index, ival(2))));
 
   // union_of(WaitH<T>, Obj<=WaitHandle) == Obj<=WaitHandle
-  for (auto& t : all) {
+  for (auto& t : all()) {
     auto const u = union_of(wait_handle(index, t), twhobj);
     EXPECT_EQ(u, twhobj);
   }
 
-  for (auto& t : all) {
+  for (auto& t : all()) {
     auto const u1 = union_of(wait_handle(index, t), TInitNull);
     EXPECT_TRUE(is_opt(u1));
     EXPECT_TRUE(is_specialized_wait_handle(u1));
@@ -1255,7 +1289,7 @@ TEST(Type, WaitH) {
   }
 
   // You can have WaitH<WaitH<T>>.  And stuff.
-  for (auto& w : wait_handles_of(index, all)) {
+  for (auto& w : wait_handles_of(index, all())) {
     auto const ww  = wait_handle(index, w);
     auto const www = wait_handle(index, ww);
 

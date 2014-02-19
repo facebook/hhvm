@@ -52,7 +52,7 @@
   drupal:
     url: https://github.com/drupal/drupal.git
     branch: 8.x
-    commit: fa17da8649d492c302cd45499cbbd30fe462d650
+    commit: 0b2c622bfa70e07d414f2900274effee6df48c0d
     install_root: drupal
     test_root: drupal/core
     clowns:

@@ -503,6 +503,8 @@ other_files = (
     '/ext/fileinfo/tests/resources/test.png',
     '/ext/ftp/tests/cert.pem',
     '/ext/ftp/tests/server.inc',
+    '/ext/gd/tests/Rochester-Regular.otf',
+    '/ext/gd/tests/Rochester-Regular.otf.LICENSE.txt',
     '/ext/gd/tests/Tuffy.ttf',
     '/ext/gd/tests/bug37346.gif',
     '/ext/gd/tests/bug38112.gif',

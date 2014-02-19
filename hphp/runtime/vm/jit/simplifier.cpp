@@ -133,9 +133,8 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     for (int i = 0; i < numSpillSrcs; ++i) {
       SSATmp* tmp = inst->src(i + 2);
       if (index == numPushed) {
-        if (!tmp->isA(Type::None)) {
-          return StackValueInfo { tmp };
-        }
+        assert(!tmp->isA(Type::None));
+        return StackValueInfo { tmp };
       }
       ++numPushed;
     }

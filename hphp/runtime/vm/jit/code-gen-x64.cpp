@@ -3923,12 +3923,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   // put all outgoing arguments onto the VM stack
   int64_t adjustment = (-(int64_t)numArgs) * sizeof(Cell);
   for (int32_t i = 0; i < numArgs; i++) {
-    // Type::None here means that the simplifier proved that the value
-    // matches the value already in memory, thus the store is redundant.
-    if (args[i]->type() != Type::None) {
-      cgStore(spReg[-(i + 1) * sizeof(Cell)], args[i], srcLoc(i+3),
-              Width::Full);
-    }
+    cgStore(spReg[-(i + 1) * sizeof(Cell)], args[i], srcLoc(i+3), Width::Full);
   }
   // store the return bytecode offset into the outgoing actrec
   uint64_t returnBc = returnBcOffset->getValInt();

@@ -75,9 +75,8 @@ MInstrEffects::MInstrEffects(Opcode op, Type base) {
 }
 
 MInstrEffects::MInstrEffects(Opcode op, SSATmp* base) {
-  auto typeOrNone =
-    [](SSATmp* val){ return val ? val->type() : Type::None; };
-  init(op, typeOrNone(base));
+  assert(base != nullptr);
+  init(op, base->type());
 }
 
 MInstrEffects::MInstrEffects(Opcode opc, const std::vector<SSATmp*>& srcs) {
@@ -151,6 +150,7 @@ void getBaseType(Opcode rawOp, bool predict,
 }
 
 void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
+  assert(origBase != Type::None);
   baseType = origBase;
   always_assert(baseType.isPtr() ^ baseType.notPtr());
   auto const basePtr = baseType.isPtr();

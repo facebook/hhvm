@@ -1501,9 +1501,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
   int64_t adjustment = cellsToBytes((int64_t)-numArgs);
   for (int32_t i = 0; i < numArgs; ++i) {
-    if (args[i]->type() != Type::None) {
-      emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 3));
-    }
+    emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 3));
   }
 
   m_as.  Mov  (rAsm.W(), returnBcOffset->getValInt());

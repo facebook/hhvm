@@ -530,17 +530,6 @@ Type stkReturn(const IRInstruction* inst, int dstId,
   return Type::StkPtr;
 }
 
-Type binArithResultType(Opcode op, Type t1, Type t2) {
-  if (op == Mod) {
-    return Type::Int;
-  }
-  assert(op == Add || op == Sub || op == Mul);
-  if (t1.subtypeOf(Type::Dbl) || t2.subtypeOf(Type::Dbl)) {
-    return Type::Dbl;
-  }
-  return Type::Int;
-}
-
 Type ldRefReturn(const IRInstruction* inst) {
   // Guarding on specific classes/array kinds is expensive enough that we only
   // want to do it in situations we've confirmed the benefit.
@@ -669,9 +658,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
-#define DArith    return binArithResultType(inst->op(), \
-                                            inst->src(0)->type(),  \
-                                            inst->src(1)->type());
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -696,7 +682,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef ND
 #undef DBuiltin
 #undef DSubtract
-#undef DArith
 
 }
 
@@ -868,8 +853,6 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DLdRef      requireTypeParam();
 #define DAllocObj
 #define DThis
-#define DArith      checkDst(!inst->hasTypeParam(), \
-                             "DArith should have no type parameter");
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
   case opcode: dstinfo srcinfo countCheck(); return;
@@ -903,7 +886,6 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DAllocObj
 #undef DLdRef
 #undef DThis
-#undef DArith
 
 }
 

@@ -175,21 +175,18 @@ IRTranslator::translateDiv(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateBinaryArithOp(const NormalizedInstruction& i) {
-  auto const op = i.op();
-  switch (op) {
+  switch (i.op()) {
 #define CASE(OpBc) case Op::OpBc: HHIR_EMIT(OpBc);
     CASE(Add)
     CASE(Sub)
+    CASE(Mul)
     CASE(BitAnd)
     CASE(BitOr)
     CASE(BitXor)
-    CASE(Mul)
 #undef CASE
-    default: {
-      not_reached();
-    };
+    default: break;
   }
-  NOT_REACHED();
+  not_reached();
 }
 
 void
@@ -866,15 +863,15 @@ void
 IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
   auto const opc = [&] {
     switch (static_cast<SetOpOp>(i.imm[1].u_OA)) {
-    case SetOpOp::PlusEqual:   return Add;
-    case SetOpOp::MinusEqual:  return Sub;
-    case SetOpOp::MulEqual:    return Mul;
+    case SetOpOp::PlusEqual:   return Op::Add;
+    case SetOpOp::MinusEqual:  return Op::Sub;
+    case SetOpOp::MulEqual:    return Op::Mul;
     case SetOpOp::DivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
-    case SetOpOp::ConcatEqual: return ConcatCellCell;
+    case SetOpOp::ConcatEqual: return Op::Concat;
     case SetOpOp::ModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
-    case SetOpOp::AndEqual:    return BitAnd;
-    case SetOpOp::OrEqual:     return BitOr;
-    case SetOpOp::XorEqual:    return BitXor;
+    case SetOpOp::AndEqual:    return Op::BitAnd;
+    case SetOpOp::OrEqual:     return Op::BitOr;
+    case SetOpOp::XorEqual:    return Op::BitXor;
     case SetOpOp::SlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
     case SetOpOp::SrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
     }

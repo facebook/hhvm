@@ -449,39 +449,43 @@ CheckStaticLocInit S0:BoxedCell -> B
 2. Arithmetic
 
 
-D:Int            = AbsInt S0:Int
-D:Dbl            = AbsDbl S0:Dbl
-D:{Int|Dbl}      = Add    S0:{Int|Dbl} S1:{Int|Dbl}
-D:{Int|Dbl}      = Sub    S0:{Int|Dbl} S1:{Int|Dbl}
-D:{Int|Dbl}      = Mul    S0:{Int|Dbl} S1:{Int|Dbl}
-D:Int            = Mod    S0:Int       S1:Int
-D:Dbl            = Sqrt   S0:Dbl
-D:Dbl            = DivDbl S0:Dbl S1:Dbl -> B
-D:Int            = BitAnd S0:Int S1:Int
-D:Int            = BitOr  S0:Int S1:Int
-D:Int            = BitXor S0:Int S1:Int
-D:Int            = Shl    S0:Int S1:Int
-D:Int            = Shr    S0:Int S1:Int
-D:Dbl            = Floor  S0:Dbl
-D:Dbl            = Ceil   S0:Dbl
+D:Int     = AbsInt S0:Int
+D:Dbl     = AbsDbl S0:Dbl
+D:Int     = AddInt S0:Int S1:Int
+D:Int     = SubInt S0:Int S1:Int
+D:Int     = MulInt S0:Int S1:Int
+D:Dbl     = AddDbl S0:Dbl S1:Dbl
+D:Dbl     = SubDbl S0:Dbl S1:Dbl
+D:Dbl     = MulDbl S0:Dbl S1:Dbl
+D:Int     = Mod    S0:Int S1:Int
+D:Dbl     = Sqrt   S0:Dbl
+D:Dbl     = DivDbl S0:Dbl S1:Dbl -> B
+D:Int     = BitAnd S0:Int S1:Int
+D:Int     = BitOr  S0:Int S1:Int
+D:Int     = BitXor S0:Int S1:Int
+D:Int     = Shl    S0:Int S1:Int
+D:Int     = Shr    S0:Int S1:Int
+D:Dbl     = Floor  S0:Dbl
+D:Dbl     = Ceil   S0:Dbl
 
-  Integer/boolean arithmetic. Performs the operation described by the opcode
-  name on S0 and S1, and puts the result in D.
+  Double arithmetic, integer arithmetic, and integer bitwise operations.
+  Performs the operation described by the opcode name on S0 and S1, and puts
+  the result in D.
 
-  Undefined behavior occurs if OpMod is given a divisor of zero, or if the
+  Undefined behavior occurs if Mod is given a divisor of zero, or if the
   divisor is -1 and the dividend is the minimum representable integer.
 
   AbsInt and AbsDbl compute the absolute value of an integer or double
   respectively.
 
-  DivDbl Will branch to block B when S1 is zero (signed or unsigned). When the
+  DivDbl will branch to block B when S1 is zero (signed or unsigned). When the
   result of the division is a real valued number DivDbl conforms to IEEE 754.
   In particular should the result of a division be zero the sign will follow
   normal sign rules for division.
 
-  Note that OpShr is an arithmetic right shift.
+  Note that Shr is an arithmetic right shift.
 
-  OpFloor and OpCeil will return an integral value not greater, or not less
+  Floor and Ceil will return an integral value not greater, or not less
   than their input respectively. Their use requires SSE 4.1, availability
   should be checked before they are emitted.
 

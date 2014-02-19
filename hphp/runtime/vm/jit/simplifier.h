@@ -66,9 +66,12 @@ private:
   SSATmp* simplifyNot(SSATmp* src);
   SSATmp* simplifyAbsInt(IRInstruction* inst);
   SSATmp* simplifyAbsDbl(IRInstruction* inst);
-  SSATmp* simplifyAdd(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifySub(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyMul(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAddInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifySubInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyMulInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAddDbl(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifySubDbl(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyMulDbl(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMod(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyDivDbl(IRInstruction* inst);
   SSATmp* simplifyBitAnd(SSATmp* src1, SSATmp* src2);

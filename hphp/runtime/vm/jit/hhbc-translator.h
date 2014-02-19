@@ -183,9 +183,9 @@ struct HhbcTranslator {
   void emitEmptyL(int32_t id);
   void emitEmptyS();
   void emitEmptyG();
-  // The subOpc param can be one of either
+  // The subOp param can be one of either
   // Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor
-  void emitSetOpL(Opcode subOpc, uint32_t id);
+  void emitSetOpL(Op subOp, uint32_t id);
   // the pre & inc params encode the 4 possible sub opcodes:
   // PreInc, PostInc, PreDec, PostDec
   void emitIncDecL(bool pre, bool inc, uint32_t id);
@@ -293,12 +293,12 @@ struct HhbcTranslator {
   // binary arithmetic ops
   void emitAdd();
   void emitSub();
+  void emitMul();
   void emitBitAnd();
   void emitBitOr();
   void emitBitXor();
   void emitBitNot();
   void emitAbs();
-  void emitMul();
   void emitMod();
   void emitDiv();
   void emitSqrt();
@@ -653,7 +653,6 @@ private:
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
-  void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);
   BCMarker makeMarker(Offset bcOff);
@@ -676,6 +675,12 @@ private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff, std::vector<SSATmp*>& spillValues);
   Block* makeExitWarn(Offset targetBcOff, std::vector<SSATmp*>& spillValues,
                       const StringData* warning);
+
+  SSATmp* promoteBool(SSATmp* src);
+  Opcode promoteBinaryDoubles(Op op, SSATmp*& src1, SSATmp*& src2);
+
+  void emitBinaryBitOp(Op op);
+  void emitBinaryArith(Op op);
 
   /*
    * Create a custom side exit---that is, an exit that does some

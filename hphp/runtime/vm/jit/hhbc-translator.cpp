@@ -921,36 +921,114 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
 // only handles integer or double inc/dec
 SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
   assert(src->isA(Type::Int) || src->isA(Type::Dbl));
+
+  auto op =
+    src->isA(Type::Int) ? (inc ? AddInt : SubInt) : (inc ? AddDbl : SubDbl);
+
   SSATmp* one = src->isA(Type::Int) ? cns(1) : cns(1.0);
-  SSATmp* res = inc ? gen(Add, src, one) : gen(Sub, src, one);
+  SSATmp* res = gen(op, src, one);
   // no incref necessary on push since result is an int
   push(pre ? res : src);
   return res;
 }
 
-static bool areBinaryArithTypesSupported(Opcode opc, Type t1, Type t2) {
-  switch (opc) {
-  case Add:
-  case Sub:
-  case Mul: return t1.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl) &&
-                     t2.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
+#define BINARY_ARITH       \
+  AOP(Add, AddInt, AddDbl) \
+  AOP(Sub, SubInt, SubDbl) \
+  AOP(Mul, MulInt, MulDbl) \
 
-  case BitAnd:
-  case BitOr:
-  case BitXor:
-    return t1.subtypeOfAny(Type::Int, Type::Bool) &&
-                     t2.subtypeOfAny(Type::Int, Type::Bool);
-  default:
-    not_reached();
+#define BINARY_BITOP  \
+  BOP(BitAnd)         \
+  BOP(BitOr)          \
+  BOP(BitXor)         \
+
+static bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
+  auto checkArith = [](Type ty) {
+    return ty.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
+  };
+  auto checkBitOp = [](Type ty) {
+    return ty.subtypeOfAny(Type::Int, Type::Bool);
+  };
+
+  switch (op) {
+  #define AOP(OP, OPI, OPD) \
+    case Op::OP: return checkArith(t1) && checkArith(t2);
+  BINARY_ARITH
+  #undef AOP
+  #define BOP(OP) \
+    case Op::OP: return checkBitOp(t1) && checkBitOp(t2);
+  BINARY_BITOP
+  #undef BOP
+  default: not_reached();
   }
 }
 
-void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
+Opcode intArithOp(Op op) {
+  switch (op) {
+    #define AOP(OP, OPI, OPD) case Op::OP: return OPI;
+    BINARY_ARITH
+    #undef AOP
+    default: not_reached();
+  }
+}
+
+Opcode dblArithOp(Op op) {
+  switch (op) {
+    #define AOP(OP, OPI, OPD) case Op::OP: return OPD;
+    BINARY_ARITH
+    #undef AOP
+    default: not_reached();
+  }
+}
+
+Opcode bitOp(Op op) {
+  switch (op) {
+    #define BOP(OP) case Op::OP: return OP;
+    BINARY_BITOP
+    #undef BOP
+    default: not_reached();
+  }
+}
+
+bool isBitOp(Op op) {
+  switch (op) {
+    #define BOP(OP) case Op::OP: return true;
+    BINARY_BITOP
+    #undef BOP
+    default: return false;
+  }
+}
+
+SSATmp* HhbcTranslator::promoteBool(SSATmp* src) {
+  // booleans in arithmetic and bitwise operations get cast to ints
+  return src->isA(Type::Bool) ? gen(ConvBoolToInt, src) : src;
+}
+
+Opcode HhbcTranslator::promoteBinaryDoubles(Op op,
+                                            SSATmp*& src1,
+                                            SSATmp*& src2) {
+  auto type1 = src1->type();
+  auto type2 = src2->type();
+
+  Opcode opc = intArithOp(op);
+  if (type1 <= Type::Dbl) {
+    opc = dblArithOp(op);
+    if (type2 <= Type::Int) {
+      src2 = gen(ConvIntToDbl, src2);
+    }
+  } else if (type2 <= Type::Dbl) {
+    opc = dblArithOp(op);
+    src1 = gen(ConvIntToDbl, src1);
+  }
+  return opc;
+}
+
+void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
   /*
    * Handle array addition first because we don't want to bother with
    * boxed locals.
    */
-  if (subOpc == Add &&
+  if (subOp == Op::Add &&
       (m_irb->localType(id, DataTypeSpecific) <= Type::Arr) &&
       topC()->isA(Type::Arr)) {
     /*
@@ -967,10 +1045,10 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
     return;
   }
 
-  auto const exitBlock  = makeExit();
-  auto const loc        = ldLocInnerWarn(id, exitBlock, DataTypeSpecific);
+  auto const exitBlock = makeExit();
+  auto loc             = ldLocInnerWarn(id, exitBlock, DataTypeSpecific);
 
-  if (subOpc == ConcatCellCell) {
+  if (subOp == Op::Concat) {
     /*
      * The concat helpers incref their results, which will be consumed by
      * the stloc. We need an extra incref for the push onto the stack.
@@ -985,13 +1063,17 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
     return;
   }
 
-  if (areBinaryArithTypesSupported(subOpc, loc->type(), topC()->type())) {
-    auto const val    = popC();
-    auto const result = gen(
-      subOpc,
-      loc->isA(Type::Bool) ? gen(ConvBoolToInt, loc) : loc,
-      val->isA(Type::Bool) ? gen(ConvBoolToInt, val) : val
-    );
+  if (areBinaryArithTypesSupported(subOp, loc->type(), topC()->type())) {
+    auto val = popC();
+    loc = promoteBool(loc);
+    val = promoteBool(val);
+    Opcode opc;
+    if (isBitOp(subOp)) {
+      opc = bitOp(subOp);
+    } else {
+      opc = promoteBinaryDoubles(subOp, loc, val);
+    }
+    auto const result = gen(opc, loc, val);
     pushStLoc(id, nullptr, result);
     return;
   }
@@ -1510,7 +1592,7 @@ void HhbcTranslator::emitContSuspend(int64_t labelId) {
     // this needs optimization
     auto const idx = gen(LdContArRaw, Type::Int,
                          m_irb->fp(), cns(RawMemSlot::ContIndex));
-    auto const newIdx = gen(Add, idx, cns(1));
+    auto const newIdx = gen(AddInt, idx, cns(1));
     gen(StContArRaw, m_irb->fp(), cns(RawMemSlot::ContIndex), newIdx);
 
     auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
@@ -1569,7 +1651,7 @@ void HhbcTranslator::emitContRaise() {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_irb->fp());
   SSATmp* label = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel));
-  label = gen(Sub, label, cns(1));
+  label = gen(SubInt, label, cns(1));
   gen(StRaw, cont, cns(RawMemSlot::ContLabel), label);
 }
 
@@ -4103,34 +4185,42 @@ void HhbcTranslator::emitEmptyG() {
   push(ret);
 }
 
-void HhbcTranslator::emitBinaryArith(Opcode opc) {
-  bool isBitOp = (opc == BitAnd || opc == BitOr || opc == BitXor);
-  Type type1 = topC(0)->type();
-  Type type2 = topC(1)->type();
-  if (areBinaryArithTypesSupported(opc, type1, type2)) {
-    SSATmp* tr = popC();
-    SSATmp* tl = popC();
-    tr = (tr->isA(Type::Bool) ? gen(ConvBoolToInt, tr) : tr);
-    tl = (tl->isA(Type::Bool) ? gen(ConvBoolToInt, tl) : tl);
-    push(gen(opc, tl, tr));
-  } else {
+void HhbcTranslator::emitBinaryBitOp(Op op) {
+  Type type2 = topC(0)->type();
+  Type type1 = topC(1)->type();
+
+  if (!areBinaryArithTypesSupported(op, type1, type2)) {
     Type type = Type::Int;
-    if (isBitOp) {
-      if (type1.isString() && type2.isString()) {
-        type = Type::Str;
-      } else if ((type1.needsReg() && (type2.needsReg() || type2.isString()))
-                 || (type2.needsReg() && type1.isString())) {
-        // both types might be strings, but can't tell
-        type = Type::Cell;
-      } else {
-        type = Type::Int;
-      }
-    } else {
-      // either an int or a dbl, but can't tell
+    if (type1.isString() && type2.isString()) {
+      type = Type::Str;
+    } else if ((type1.needsReg() && (type2.needsReg() || type2.isString()))
+               || (type2.needsReg() && type1.isString())) {
+      // both types might be strings, but can't tell
       type = Type::Cell;
     }
     emitInterpOne(type, 2);
+    return;
   }
+
+  SSATmp* src2 = promoteBool(popC());
+  SSATmp* src1 = promoteBool(popC());
+  push(gen(bitOp(op), src1, src2));
+}
+
+void HhbcTranslator::emitBinaryArith(Op op) {
+  Type type2 = topC(0)->type();
+  Type type1 = topC(1)->type();
+
+  if (!areBinaryArithTypesSupported(op, type1, type2)) {
+    // either an int or a dbl, but can't tell
+    emitInterpOne(Type::Cell, 2);
+    return;
+  }
+
+  SSATmp* src2 = promoteBool(popC());
+  SSATmp* src1 = promoteBool(popC());
+  Opcode opc = promoteBinaryDoubles(op, src1, src2);
+  push(gen(opc, src1, src2));
 }
 
 void HhbcTranslator::emitNot() {
@@ -4325,19 +4415,15 @@ void HhbcTranslator::emitAbs() {
   PUNT(Abs);
 }
 
-#define BINOP(Opp)                            \
-  void HhbcTranslator::emit ## Opp() {        \
-    emitBinaryArith(Opp);                     \
-  }
+#define AOP(OP, OPI, OPD) \
+  void HhbcTranslator::emit ## OP() { emitBinaryArith(Op::OP); }
+BINARY_ARITH
+#undef AOP
 
-BINOP(Add)
-BINOP(Sub)
-BINOP(Mul)
-BINOP(BitAnd)
-BINOP(BitOr)
-BINOP(BitXor)
-
-#undef BINOP
+#define BOP(OP) \
+  void HhbcTranslator::emit ## OP() { emitBinaryBitOp(Op::OP); }
+BINARY_BITOP
+#undef BOP
 
 void HhbcTranslator::emitDiv() {
   auto divisorType  = topC(0)->type();

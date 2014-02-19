@@ -209,15 +209,6 @@ private:
   void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
 
   template<class Oper, class RegType>
-  void cgBinaryOp(IRInstruction*,
-                  void (Asm::*intImm)(Immed, RegType),
-                  void (Asm::*intRR)(RegType, RegType),
-                  void (Asm::*mov)(RegType, RegType),
-                  void (Asm::*fpRR)(RegXMM, RegXMM),
-                  Oper,
-                  RegType (*conv)(PhysReg),
-                  Commutativity);
-  template<class Oper, class RegType>
   void cgBinaryIntOp(IRInstruction*,
                      void (Asm::*intImm)(Immed, RegType),
                      void (Asm::*intRR)(RegType, RegType),
@@ -225,6 +216,8 @@ private:
                      Oper,
                      RegType (*conv)(PhysReg),
                      Commutativity);
+  void cgBinaryDblOp(IRInstruction*,
+                     void (Asm::*fpRR)(RegXMM, RegXMM));
 
   template<class Oper>
   void cgShiftCommon(IRInstruction* inst,

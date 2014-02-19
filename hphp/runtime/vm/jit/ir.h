@@ -144,7 +144,6 @@ class FailedCodeGen : public std::runtime_error {
  *               specialized object type if the class is known
  *     DThis     single dst has type Obj<ctx>, where ctx is the
  *               current context class
- *     DArith    single dst has a type based on arithmetic type rules
  *     DMulti    multiple dests. type and number depend on instruction
  *     DSetElem  single dst is a subset of CountedStr|Nullptr depending on
  *               sources
@@ -221,9 +220,12 @@ O(EndCatch,                         ND, S(FramePtr) S(StkPtr),           E|T) \
 O(TryEndCatch,                      ND, S(FramePtr) S(StkPtr),             E) \
 O(LdUnwinderValue,              DParam, NA,                              PRc) \
 O(DeleteUnwinderException,          ND, NA,                              N|E) \
-O(Add,                          DArith, S(Int,Dbl) S(Int,Dbl),             C) \
-O(Sub,                          DArith, S(Int,Dbl) S(Int,Dbl),             C) \
-O(Mul,                          DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(AddInt,                       D(Int), S(Int) S(Int),                     C) \
+O(SubInt,                       D(Int), S(Int) S(Int),                     C) \
+O(MulInt,                       D(Int), S(Int) S(Int),                     C) \
+O(AddDbl,                       D(Dbl), S(Dbl) S(Dbl),                     C) \
+O(SubDbl,                       D(Dbl), S(Dbl) S(Dbl),                     C) \
+O(MulDbl,                       D(Dbl), S(Dbl) S(Dbl),                     C) \
 O(DivDbl,                       D(Dbl), S(Dbl) S(Dbl),                   B|C) \
 O(Mod,                          D(Int), S(Int) S(Int),                     C) \
 O(Sqrt,                         D(Dbl), S(Dbl),                            C) \

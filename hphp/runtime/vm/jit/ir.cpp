@@ -71,7 +71,6 @@ namespace {
 #define DAllocObj HasDest
 #define DLdRef    HasDest
 #define DThis     HasDest
-#define DArith    HasDest
 #define DMulti    NaryDest
 #define DSetElem  HasDest
 #define DStk(x)   ModifiesStack|(x)
@@ -116,7 +115,6 @@ struct {
 #undef DAllocObj
 #undef DLdRef
 #undef DThis
-#undef DArith
 #undef DMulti
 #undef DSetElem
 #undef DStk

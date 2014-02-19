@@ -1162,19 +1162,20 @@ inline static Reg64 convertToReg64(PhysReg reg) { return reg; }
 
 template<class Oper, class RegType>
 void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
-              void (Asm::*instrIR)(Immed, RegType),
-              void (Asm::*instrRR)(RegType, RegType),
-              void (Asm::*movInstr)(RegType, RegType),
-              Oper oper,
-              RegType (*convertReg)(PhysReg),
-              Commutativity commuteFlag) {
+                                  void (Asm::*instrIR)(Immed, RegType),
+                                  void (Asm::*instrRR)(RegType, RegType),
+                                  void (Asm::*movInstr)(RegType, RegType),
+                                  Oper oper,
+                                  RegType (*convertReg)(PhysReg),
+                                  Commutativity commuteFlag) {
   assert(m_curInst == inst); // could remove the inst param
   const SSATmp* src1  = inst->src(0);
   const SSATmp* src2  = inst->src(1);
-  if (!(src1->isA(Type::Bool) || src1->isA(Type::Int)) ||
-      !(src2->isA(Type::Bool) || src2->isA(Type::Int))) {
-    CG_PUNT(cgBinaryIntOp);
-  }
+
+  // inputs must be ints, or a (bool,bool) operation that ends up behaving
+  // like an int anyway (e.g. LogicXor)
+  assert((src1->isA(Type::Int) && src2->isA(Type::Int)) ||
+         (src1->isA(Type::Bool) && src2->isA(Type::Bool)));
 
   bool const commutative = commuteFlag == Commutative;
   auto const dstReg      = dstLoc(0).reg();
@@ -1246,45 +1247,29 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   (a.*instrIR) (src2->getValRawInt(), dstOpReg);
 }
 
-template<class Oper, class RegType>
-void CodeGenerator::cgBinaryOp(IRInstruction* inst,
-                 void (Asm::*instrIR)(Immed, RegType),
-                 void (Asm::*instrRR)(RegType, RegType),
-                 void (Asm::*movInstr)(RegType, RegType),
-                 void (Asm::*fpInstr)(RegXMM, RegXMM),
-                 Oper oper,
-                 RegType (*convertReg)(PhysReg),
-                 Commutativity commuteFlag) {
+void CodeGenerator::cgBinaryDblOp(IRInstruction* inst,
+                                  void (Asm::*fpInstr)(RegXMM, RegXMM)) {
   assert(inst == m_curInst);
   const SSATmp* src1  = inst->src(0);
   const SSATmp* src2  = inst->src(1);
   auto loc1 = srcLoc(0);
   auto loc2 = srcLoc(1);
-  if (!(src1->isA(Type::Bool) || src1->isA(Type::Int) || src1->isA(Type::Dbl))
-      ||
-      !(src2->isA(Type::Bool) || src2->isA(Type::Int) || src2->isA(Type::Dbl)) )
-  {
-    CG_PUNT(cgBinaryOp);
-  }
-  if (src1->isA(Type::Dbl) || src2->isA(Type::Dbl)) {
-    PhysReg dstReg  = dstLoc(0).reg();
-    PhysReg resReg  = dstReg.isSIMD() && dstReg != loc2.reg() ?
-                      dstReg : PhysReg(rCgXMM0);
-    assert(resReg.isSIMD());
+  assert(src1->isA(Type::Dbl) && src2->isA(Type::Dbl));
 
-    PhysReg srcReg1 = prepXMMReg(src1, m_as, loc1, resReg);
-    PhysReg srcReg2 = prepXMMReg(src2, m_as, loc2, rCgXMM1);
-    assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
+  PhysReg dstReg  = dstLoc(0).reg();
+  PhysReg resReg  = dstReg.isSIMD() && dstReg != loc2.reg() ?
+                    dstReg : PhysReg(rCgXMM0);
+  assert(resReg.isSIMD());
 
-    emitMovRegReg(m_as, srcReg1, resReg);
+  PhysReg srcReg1 = prepXMMReg(src1, m_as, loc1, resReg);
+  PhysReg srcReg2 = prepXMMReg(src2, m_as, loc2, rCgXMM1);
+  assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
 
-    (m_as.*fpInstr)(srcReg2, resReg);
+  emitMovRegReg(m_as, srcReg1, resReg);
 
-    emitMovRegReg(m_as, resReg, dstReg);
-    return;
-  }
-  cgBinaryIntOp(inst, instrIR, instrRR, movInstr,
-                oper, convertReg, commuteFlag);
+  (m_as.*fpInstr)(srcReg2, resReg);
+
+  emitMovRegReg(m_as, resReg, dstReg);
 }
 
 bool CodeGenerator::emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
@@ -1339,7 +1324,7 @@ void CodeGenerator::cgCeil(IRInstruction* inst) {
   cgRoundCommon(inst, RoundDirection::ceil);
 }
 
-void CodeGenerator::cgAdd(IRInstruction* inst) {
+void CodeGenerator::cgAddInt(IRInstruction* inst) {
   SSATmp* src1 = inst->src(0);
   SSATmp* src2 = inst->src(1);
   auto loc1 = srcLoc(0);
@@ -1350,17 +1335,18 @@ void CodeGenerator::cgAdd(IRInstruction* inst) {
   if (emitInc(dst, src1, loc1, src2, loc2) ||
       emitInc(dst, src2, loc2, src1, loc1)) return;
 
-  cgBinaryOp(inst,
-             &Asm::addq,
-             &Asm::addq,
-             &Asm::movq,
-             &Asm::addsd_xmm_xmm,
-             std::plus<int64_t>(),
-             &convertToReg64,
-             Commutative);
+  cgBinaryIntOp(
+    inst,
+    &Asm::addq,
+    &Asm::addq,
+    &Asm::movq,
+    std::plus<int64_t>(),
+    &convertToReg64,
+    Commutative
+  );
 }
 
-void CodeGenerator::cgSub(IRInstruction* inst) {
+void CodeGenerator::cgSubInt(IRInstruction* inst) {
   auto src1 = inst->src(0);
   auto src2 = inst->src(1);
   auto loc1 = srcLoc(0);
@@ -1376,14 +1362,39 @@ void CodeGenerator::cgSub(IRInstruction* inst) {
     return;
   }
 
-  cgBinaryOp(inst,
-             &Asm::subq,
-             &Asm::subq,
-             &Asm::movq,
-             &Asm::subsd_xmm_xmm,
-             std::minus<int64_t>(),
-             &convertToReg64,
-             NonCommutative);
+  cgBinaryIntOp(
+    inst,
+    &Asm::subq,
+    &Asm::subq,
+    &Asm::movq,
+    std::minus<int64_t>(),
+    &convertToReg64,
+    NonCommutative
+  );
+}
+
+void CodeGenerator::cgMulInt(IRInstruction* inst) {
+  cgBinaryIntOp(
+    inst,
+    &Asm::imul,
+    &Asm::imul,
+    &Asm::movq,
+    std::multiplies<int64_t>(),
+    &convertToReg64,
+    Commutative
+  );
+}
+
+void CodeGenerator::cgAddDbl(IRInstruction* inst) {
+  cgBinaryDblOp(inst, &Asm::addsd_xmm_xmm);
+}
+
+void CodeGenerator::cgSubDbl(IRInstruction* inst) {
+  cgBinaryDblOp(inst, &Asm::subsd_xmm_xmm);
+}
+
+void CodeGenerator::cgMulDbl(IRInstruction* inst) {
+  cgBinaryDblOp(inst, &Asm::mulsd_xmm_xmm);
 }
 
 void CodeGenerator::cgDivDbl(IRInstruction* inst) {
@@ -1464,17 +1475,6 @@ void CodeGenerator::cgLogicXor(IRInstruction* inst) {
                 [] (bool a, bool b) { return a ^ b; },
                 &convertToReg8,
                 Commutative);
-}
-
-void CodeGenerator::cgMul(IRInstruction* inst) {
-  cgBinaryOp(inst,
-             &Asm::imul,
-             &Asm::imul,
-             &Asm::movq,
-             &Asm::mulsd_xmm_xmm,
-             std::multiplies<int64_t>(),
-             &convertToReg64,
-             Commutative);
 }
 
 void CodeGenerator::cgMod(IRInstruction* inst) {

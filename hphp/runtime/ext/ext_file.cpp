@@ -819,16 +819,20 @@ bool f_is_dir(const String& filename) {
   if (filename.empty()) {
     return false;
   }
-  bool isRelative = (filename.charAt(0) != '/');
+  String fname =
+  !strncmp(filename.data(), "file://", sizeof("file://") - 1)
+  ? filename.substr(sizeof("file://") - 1) : filename;
+
+  bool isRelative = (fname.charAt(0) != '/');
   if (isRelative) cwd = g_context->getCwd();
   if (!isRelative || cwd == String(RuntimeOption::SourceRoot)) {
-    if (File::IsVirtualDirectory(filename)) {
+    if (File::IsVirtualDirectory(fname)) {
       return true;
     }
   }
 
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb));
+  CHECK_SYSTEM(statSyscall(fname, &sb));
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 

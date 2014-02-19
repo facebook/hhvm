@@ -38,8 +38,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
 
-#include "hphp/runtime/vm/request-arena.h"
-
 #define ZEND_VERSION "2.4.99"
 
 namespace HPHP {
@@ -749,8 +747,6 @@ String f_ini_set(const String& varname, const String& newvalue) {
 int64_t f_memory_get_allocation() {
   auto const& stats = MM().getStats();
   int64_t ret = stats.totalAlloc;
-  ret -= request_arena().slackEstimate() +
-         varenv_arena().slackEstimate();
   return ret;
 }
 
@@ -762,11 +758,8 @@ int64_t f_memory_get_peak_usage(bool real_usage /* = false */) {
 int64_t f_memory_get_usage(bool real_usage /* = false */) {
   auto const& stats = MM().getStats();
   int64_t ret = real_usage ? stats.usage : stats.alloc;
-  ret -= request_arena().slackEstimate() +
-         varenv_arena().slackEstimate();
   // TODO(#3137377)
-  ret = std::max(ret, (int64_t) 0);
-  return ret;
+  return std::max<int64_t>(ret, 0);
 }
 
 Variant f_php_ini_loaded_file() {

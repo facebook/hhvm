@@ -355,7 +355,7 @@ struct PropByteOffset : IRExtraData {
 
 /*
  * DefInlineFP is present when we need to create a frame for inlining.
- * This instruction also carries some metadata used by tracebuilder to
+ * This instruction also carries some metadata used by IRBuilder to
  * track state during an inlined call.
  */
 struct DefInlineFPData : IRExtraData {

@@ -1,17 +1,17 @@
 <?hh
 
-// Test materialization *to* FrozenSet.
+// Test materialization *to* FixedSet.
 
 function main() {
-  $ref = new FrozenSet(Vector {1, 2, 3});
+  $ref = new FixedSet(Vector {1, 2, 3});
 
-  var_dump((Vector {1, 2, 3})->toFrozenSet() == $ref);
-  var_dump((FrozenVector {1, 2, 3})->toFrozenSet() == $ref);
-  var_dump((Set {1, 2, 3})->toFrozenSet() == $ref);
-  var_dump((FrozenSet {1, 2, 3})->toFrozenSet() == $ref);
-  var_dump((Map {0 => 1, 1 => 2, 2 => 3})->toFrozenSet() == $ref);
-  var_dump((StableMap {0 => 1, 1 => 2, 2 => 3})->toFrozenSet() == $ref);
-  var_dump((Pair {1, 2})->toFrozenSet() == FrozenSet {1, 2});
+  var_dump((Vector {1, 2, 3})->toFixedSet() == $ref);
+  var_dump((FixedVector {1, 2, 3})->toFixedSet() == $ref);
+  var_dump((Set {1, 2, 3})->toFixedSet() == $ref);
+  var_dump((FixedSet {1, 2, 3})->toFixedSet() == $ref);
+  var_dump((Map {0 => 1, 1 => 2, 2 => 3})->toFixedSet() == $ref);
+  var_dump((StableMap {0 => 1, 1 => 2, 2 => 3})->toFixedSet() == $ref);
+  var_dump((Pair {1, 2})->toFixedSet() == FixedSet {1, 2});
 }
 
 main();

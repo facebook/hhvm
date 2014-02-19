@@ -188,13 +188,13 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
     /* compression is better then 2:1, need to allocate more memory */
     bzs.avail_out = source_len;
     size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-    dest = (char *) Util::safe_realloc(dest, size + bzs.avail_out + 1);
+    dest = (char *) safe_realloc(dest, size + bzs.avail_out + 1);
     bzs.next_out = dest + size;
   }
 
   if (error == BZ_STREAM_END || error == BZ_OK) {
     size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-    dest = (char *)Util::safe_realloc(dest, size + 1);
+    dest = (char *)safe_realloc(dest, size + 1);
     dest[size] = '\0';
     String ret = String(dest, size, AttachString);
     BZ2_bzDecompressEnd(&bzs);

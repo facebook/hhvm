@@ -2378,12 +2378,15 @@ implements Reflector {
    */
   public function invoke($obj) {
     if ($this->info['accessible']) {
+      if ($this->isStatic()) {
+        // Docs says to pass null, but Zend completely ignores the argument
+        $obj = null;
+      }
       $args = func_get_args();
       array_shift($args);
       return hphp_invoke_method($obj, $this->info['class'], $this->info['name'],
                                 $args);
-    }
-    else {
+    } else {
       $className = $this->info['class'];
       $funcName = $this->info['name'];
       $access = $this->info['access'];

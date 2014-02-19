@@ -119,16 +119,21 @@ namespace detail {
     {}
 
     void walk(Block* block) {
-      assert(!block->empty());
       if (m_visited.test(block->id())) return;
       m_visited.set(block->id());
-      Block* taken = block->taken();
-      if (taken && !cold(block) && cold(taken)) {
-        walk(taken);
-        taken = nullptr;
+
+      // Blocks aren't allowed to be empty but this function is used when
+      // printing debug information, so we want to handle invalid Blocks
+      // gracefully.
+      if (!block->empty()) {
+        Block* taken = block->taken();
+        if (taken && !cold(block) && cold(taken)) {
+          walk(taken);
+          taken = nullptr;
+        }
+        if (Block* next = block->next()) walk(next);
+        if (taken) walk(taken);
       }
-      if (Block* next = block->next()) walk(next);
-      if (taken) walk(taken);
       m_visitor(block);
     }
   private:

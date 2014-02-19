@@ -248,7 +248,7 @@ bool SharedStoreFileStorage::addFile() {
     close(fd);
     return false;
   }
-  Util::numa_interleave(addr, m_chunkSize);
+  numa_interleave(addr, m_chunkSize);
   m_current = addr;
   m_chunkRemain = m_chunkSize - PaddingSize;
   m_chunks.push_back(addr);

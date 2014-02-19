@@ -308,7 +308,7 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SSLSocket *SSLSocket::Create(const Util::HostURL &hosturl, double timeout) {
+SSLSocket *SSLSocket::Create(const HostURL &hosturl, double timeout) {
   CryptoMethod method;
   const std::string scheme = hosturl.getScheme();
 

@@ -1,6 +1,6 @@
 from $o in $@query_param_0
   from $d in $o->Details
-  let $t = sum($d->UnitPrice * $d->Quantity)
+  let $t = q_sum($d->UnitPrice * $d->Quantity)
   where $t >= 1000
   select tuple($o->OrderID, $t)
 closure

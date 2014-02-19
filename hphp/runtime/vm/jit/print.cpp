@@ -238,7 +238,7 @@ void print(std::ostream& ostream, const IRInstruction* inst,
     ostream << folly::format("({:02d}) ", inst->id());
     ostream << color(ANSI_COLOR_END);
   }
-  printInstr(ostream, inst, regs);
+  printInstr(ostream, inst, regs, guards);
   if (Block* taken = inst->taken()) {
     ostream << punc(" -> ");
     printLabel(ostream, taken);
@@ -375,6 +375,11 @@ void print(std::ostream& os, const Block* block,
   }
   os << "\n";
 
+  if (block->empty()) {
+    os << std::string(kIndent, ' ') << "empty block\n";
+    return;
+  }
+
   const char* markerEndl = "";
   for (auto it = block->begin(); it != block->end();) {
     auto& inst = *it; ++it;
@@ -503,9 +508,13 @@ std::string Block::toString() const {
 void print(std::ostream& os, const IRUnit& unit,
            const RegAllocInfo* regs, const AsmInfo* asmInfo,
            const GuardConstraints* guards) {
+  auto const layout = layoutBlocks(unit);
+  auto const& blocks = layout.blocks;
   // Print the block CFG above the actual code.
   os << "digraph G {\n";
-  for (Block* block : layoutBlocks(unit).blocks) {
+  for (Block* block : blocks) {
+    if (block->empty()) continue;
+
     auto* next = block->next();
     auto* taken = block->taken();
     if (!next && !taken) continue;
@@ -519,8 +528,11 @@ void print(std::ostream& os, const IRUnit& unit,
   os << "}\n";
   // For nice-looking dumps, we want to remember curMarker between blocks.
   BCMarker curMarker;
-  for (Block* block : layoutBlocks(unit).blocks) {
-    print(os, block, regs, asmInfo, guards, &curMarker);
+  for (auto it = blocks.begin(); it != blocks.end(); ++it) {
+    if (it == layout.astubsIt) {
+      os << folly::format("\n{:-^60}", "unlikely blocks");
+    }
+    print(os, *it, regs, asmInfo, guards, &curMarker);
   }
 }
 

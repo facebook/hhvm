@@ -33,19 +33,6 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
-bool filterAssertType(IRInstruction* inst, Type oldType) {
-  auto const newType = inst->typeParam();
-  auto const intersect = oldType & newType;
-
-  if (intersect != newType) {
-    // The asserted type had some members that aren't in the input type. Assert
-    // only what they have in common.
-    inst->setTypeParam(intersect);
-    return true;
-  }
-  return false;
-}
-
 StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   FTRACE(5, "getStackValue: idx = {}, {}\n", index, sp->inst()->toString());
   assert(sp->isA(Type::StkPtr));
@@ -236,18 +223,18 @@ smart::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth) {
 
 //////////////////////////////////////////////////////////////////////
 
-static void copyPropSrc(IRInstruction* inst, int index) {
-  auto tmp     = inst->src(index);
-  auto srcInst = tmp->inst();
-
-  if (srcInst->is(Mov, PassSP, PassFP)) {
-    inst->setSrc(index, srcInst->src(0));
-  }
-}
-
 void copyProp(IRInstruction* inst) {
   for (uint32_t i = 0; i < inst->numSrcs(); i++) {
-    copyPropSrc(inst, i);
+    auto tmp     = inst->src(i);
+    auto srcInst = tmp->inst();
+
+    if (srcInst->is(Mov, PassSP, PassFP)) {
+      inst->setSrc(i, srcInst->src(0));
+    }
+
+    // We're assuming that all of our src instructions have already been
+    // copyPropped.
+    assert(!inst->src(i)->inst()->is(Mov, PassSP, PassFP));
   }
 }
 
@@ -271,6 +258,10 @@ IRInstruction* findSpillFrame(SSATmp* sp) {
     assert(inst->dst()->isA(Type::StkPtr));
     assert(!inst->is(RetAdjustStack, GenericRetDecRefs));
     if (inst->is(DefSP)) return nullptr;
+    if (inst->is(InterpOne) && isFPush(inst->extra<InterpOne>()->opcode)) {
+      // A non-punted translation of this bytecode would contain a SpillFrame.
+      return nullptr;
+    }
 
     // M-instr support opcodes have the previous sp in varying sources.
     if (inst->modifiesStack()) inst = inst->previousStkPtr()->inst();
@@ -548,12 +539,19 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   auto const newType = inst->typeParam();
 
   if (oldType.not(newType)) {
-    /* This guard will always fail. Probably an incorrect prediction from the
-     * frontend. We can't convert it to a Jmp because people may be relying on
-     * the src, so insert a Jmp before it. This CheckType and anything after it
-     * will be killed by DCE. */
-    gen(Jmp, inst->taken());
-    return nullptr;
+    if (oldType.isBoxed() && newType.isBoxed()) {
+      /* This CheckType serves to update the inner type hint for a boxed
+       * value, which requires no runtime work. */
+      m_irb.constrainValue(src, DataTypeCountness);
+      return gen(AssertType, newType, src);
+    } else {
+      /* This guard will always fail. Probably an incorrect prediction from the
+       * frontend. We can't convert it to a Jmp because people may be relying
+       * on the src, so insert a Jmp before it. This CheckType and anything
+       * after it will be killed by DCE. */
+      gen(Jmp, inst->taken());
+      return nullptr;
+    }
   }
 
   if (newType >= oldType) {
@@ -588,29 +586,10 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyAssertType(IRInstruction* inst) {
   auto const src = inst->src(0);
-  auto const oldType = src->type();
-  auto const newType = inst->typeParam();
 
-  if (oldType.not(newType)) {
-    // We got external information (probably from static analysis) that
-    // conflicts with what we've built up so far. There's no reasonable way to
-    // continue here: we can't properly fatal the request because we can't make
-    // a catch trace or spill stack, we can't punt on just this instruction
-    // because we might not be in the initial translation phase, and we can't
-    // just plow on forward since we'll probably generate malformed IR. Since
-    // this case is very rare, just punt on the whole trace so it gets
-    // interpreted.
-    TRACE_PUNT("Invalid AssertType");
-  }
-
-  if (m_irb.shouldElideAssertType(oldType, newType, src)) {
-    return src;
-  }
-
-  if (filterAssertType(inst, oldType)) {
-    m_irb.constrainValue(src, categoryForType(src->type()));
-  }
-  return nullptr;
+  return simplifyAssertTypeOp(inst, src->type(), [&](TypeConstraint tc) {
+    m_irb.constrainValue(src, tc);
+  });
 }
 
 SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
@@ -1490,6 +1469,8 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   auto src       = inst->src(0);
   auto srcType   = src->type();
 
+  if (m_irb.typeMightRelax(src)) return nullptr;
+
   // The comparisons below won't work for these cases covered by this
   // assert, and we currently don't generate these types.
   assert(type.isKnownUnboxedDataType());
@@ -1501,7 +1482,7 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   assert(IMPLIES(type.isArray(), type.equals(Type::Arr)));
 
   // The types are disjoint; the result must be false.
-  if ((srcType & type).equals(Type::Bottom)) {
+  if (srcType.not(type)) {
     return cns(!trueSense);
   }
 
@@ -2045,24 +2026,13 @@ SSATmp* Simplifier::simplifyCoerceStk(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyAssertStk(IRInstruction* inst) {
   auto const idx = inst->extra<AssertStk>()->offset;
-  auto const newType = inst->typeParam();
   auto const info = getStackValue(inst->src(0), idx);
-  auto const oldType = info.knownType;
-  always_assert(oldType <= Type::StackElem);
 
-  if (oldType.not(newType)) {
-    TRACE_PUNT("Invalid AssertStk");
-  }
-
-  if (m_irb.shouldElideAssertType(oldType, newType, info.value)) {
-    return inst->src(0);
-  }
-
-  if (filterAssertType(inst, oldType)) {
-    m_irb.constrainStack(idx, categoryForType(oldType));
-  }
-
-  return nullptr;
+  return simplifyAssertTypeOp(inst, info.knownType,
+    [&](TypeConstraint tc) {
+      m_irb.constrainStack(inst->src(0), idx, tc);
+    }
+  );
 }
 
 SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
@@ -2190,6 +2160,78 @@ SSATmp* Simplifier::simplifyLdPackedArrayElem(IRInstruction* inst) {
     if (value->m_type == KindOfRef) value = value->m_data.pref->tv();
     return cns(*value);
   }
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyAssertTypeOp(IRInstruction* inst, Type oldType,
+                                         ConstraintFunc constrain) const {
+  auto const newType = inst->typeParam();
+
+  if (oldType.not(newType)) {
+    // If both types are boxed this is ok and even expected as a means to
+    // update the hint for the inner type.
+    if (oldType.isBoxed() && newType.isBoxed()) return nullptr;
+
+    // We got external information (probably from static analysis) that
+    // conflicts with what we've built up so far. There's no reasonable way to
+    // continue here: we can't properly fatal the request because we can't make
+    // a catch trace or SpillStack without HhbcTranslator, we can't punt on
+    // just this instruction because we might not be in the initial translation
+    // phase, and we can't just plow on forward since we'll probably generate
+    // malformed IR. Since this case is very rare, just punt on the whole trace
+    // so it gets interpreted.
+    TRACE_PUNT("Invalid AssertTypeOp");
+  }
+
+  // Asserting in these situations doesn't add any information.
+  if (oldType == Type::Cls || newType == Type::Gen) return inst->src(0);
+
+  // We're asserting a strict subtype of the old type, so keep the assert
+  // around.
+  if (newType < oldType) return nullptr;
+
+  // oldType is at least as good as the new type. Kill this assert op but
+  // preserve the type we were asserting in case the source type gets relaxed
+  // past it.
+  if (newType >= oldType) {
+    constrain({DataTypeGeneric, newType});
+    return inst->src(0);
+  }
+
+  // Now we're left with cases where neither type is a subtype of the other but
+  // they have some nonzero intersection. We want to end up asserting the
+  // intersection, but we have to carefully constrain the input.
+  auto const intersect = newType & oldType;
+  auto const remainder = newType - intersect;
+  auto const toAssert = newType - remainder;
+  always_assert(toAssert <= oldType || oldType <= toAssert);
+  always_assert(oldType.not(remainder));
+  inst->setTypeParam(toAssert);
+
+  TypeConstraint tc;
+  if (remainder != Type::Bottom) {
+    // We removed types from inst's typeParam, so we must constrain the
+    // original value to ensure its type doesn't get relaxed to include the
+    // removed types.
+    auto increment = [](DataTypeCategory& cat) {
+      always_assert(cat != DataTypeSpecialized);
+      cat = static_cast<DataTypeCategory>(static_cast<uint8_t>(cat) + 1);
+    };
+
+    Type relaxed;
+    while ((relaxed = relaxType(oldType, tc)).maybe(remainder)) {
+      if (tc.category > DataTypeGeneric &&
+          relaxed.maybeBoxed() && remainder.maybeBoxed() &&
+          (relaxed & Type::Cell).not(remainder & Type::Cell)) {
+        // If the inner type is why we failed, constrain that a level.
+        increment(tc.innerCat);
+      } else {
+        increment(tc.category);
+      }
+    }
+  }
+  constrain(tc);
 
   return nullptr;
 }

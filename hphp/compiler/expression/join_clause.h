@@ -38,6 +38,8 @@ public:
   ExpressionPtr getLeft() { return m_left; }
   ExpressionPtr getRight() { return m_right; }
   std::string getGroup() { return m_group; }
+
+  void setColl(ExpressionPtr value) { m_coll = value; }
 private:
   std::string m_var;
   ExpressionPtr m_coll;

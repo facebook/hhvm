@@ -214,7 +214,7 @@ void* Func::allocFuncMem(
     numExtraPrologues * sizeof(unsigned char*) +
     numExtraFuncPtrs * sizeof(Func*);
 
-  void* mem = lowMem ? Util::low_malloc(funcSize) : malloc(funcSize);
+  void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
 
   /**
    * The Func object can have optional generatorOrigFunc and nextClonedClosure
@@ -305,7 +305,7 @@ void Func::destroy(Func* func) {
   }
   func->~Func();
   if (lowMem) {
-    Util::low_free(mem);
+    low_free(mem);
   } else {
     free(mem);
   }

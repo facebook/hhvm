@@ -314,6 +314,7 @@ void IRInstruction::convertToMov() {
   m_op = Mov;
   m_typeParam.clear();
   m_extra = nullptr;
+  if (m_numDsts == 1) m_dst->setInstruction(this); // recompute type
   assert(m_numSrcs == 1);
   // Instructions in the simplifier don't have dests yet
   assert((m_numDsts == 1) != isTransient());

@@ -1,20 +1,20 @@
 <?hh
 
-// Test that FrozenSet behaves properly when mixing namespaced and
+// Test that FixedSet behaves properly when mixing namespaced and
 // non-namespaced code.
 
 namespace Test {
-  // Can have custom class named FrozenSet.
+  // Can have custom class named FixedSet.
 
-  class FrozenSet {
+  class FixedSet {
     public function __construct() {
-      echo "Custom FrozenSet\n";
+      echo "Custom FixedSet\n";
     }
   }
 
   function foo() {
-    $custom_set = new FrozenSet();
-    var_dump($custom_set instanceof \HH\FrozenSet); // False
+    $custom_set = new FixedSet();
+    var_dump($custom_set instanceof \HH\FixedSet); // False
   }
 
 }
@@ -22,8 +22,8 @@ namespace Test {
 namespace {
 
   function bar() {
-    $builtin_set = new FrozenSet();
-    var_dump($builtin_set instanceof HH\FrozenSet); // True
+    $builtin_set = new FixedSet();
+    var_dump($builtin_set instanceof HH\FixedSet); // True
   }
 
   Test\foo();

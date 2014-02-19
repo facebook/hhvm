@@ -33,7 +33,7 @@
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
 
-using HPHP::Util::ScopedMem;
+using HPHP::ScopedMem;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

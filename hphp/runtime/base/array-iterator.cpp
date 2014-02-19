@@ -110,8 +110,8 @@ void ArrayIter::MapInit(ArrayIter* iter, ObjectData* obj) {
   iter->m_pos = mp->iter_begin();
 }
 
-void ArrayIter::FrozenMapInit(ArrayIter* iter, ObjectData* obj) {
-  auto smp = static_cast<c_FrozenMap*>(obj);
+void ArrayIter::FixedMapInit(ArrayIter* iter, ObjectData* obj) {
+  auto smp = static_cast<c_FixedMap*>(obj);
   iter->m_version = smp->getVersion();
   iter->m_pos = smp->iter_begin();
 }
@@ -126,13 +126,13 @@ void ArrayIter::PairInit(ArrayIter* iter, ObjectData* obj) {
   iter->m_pos = 0;
 }
 
-void ArrayIter::FrozenVectorInit(ArrayIter* iter, ObjectData* obj) {
-  auto vec = static_cast<c_FrozenVector*>(obj);
+void ArrayIter::FixedVectorInit(ArrayIter* iter, ObjectData* obj) {
+  auto vec = static_cast<c_FixedVector*>(obj);
   iter->m_version = vec->getVersion();
   iter->m_pos = 0;
 }
-void ArrayIter::FrozenSetInit(ArrayIter* iter, ObjectData* obj) {
-  auto st = static_cast<c_FrozenSet*>(obj);
+void ArrayIter::FixedSetInit(ArrayIter* iter, ObjectData* obj) {
+  auto st = static_cast<c_FixedSet*>(obj);
   iter->m_version = st->getVersion();
   iter->m_pos = st->iter_begin();
 }
@@ -145,8 +145,8 @@ IterNextIndex ArrayIter::getNextHelperIdx(ObjectData* obj) {
     return IterNextIndex::Map;
   } else if (cls == c_Set::classof()) {
     return IterNextIndex::Set;
-  } else if (cls == c_FrozenVector::classof()) {
-    return IterNextIndex::FrozenVector;
+  } else if (cls == c_FixedVector::classof()) {
+    return IterNextIndex::FixedVector;
   } else if (cls == c_Pair::classof()) {
     return IterNextIndex::Pair;
   } else {
@@ -180,9 +180,9 @@ ArrayIter::initFuncTable[Collection::MaxNumTypes] = {
   &ArrayIter::MapInit,
   &ArrayIter::SetInit,
   &ArrayIter::PairInit,
-  &ArrayIter::FrozenVectorInit,
-  &ArrayIter::FrozenMapInit,
-  &ArrayIter::FrozenSetInit,
+  &ArrayIter::FixedVectorInit,
+  &ArrayIter::FixedMapInit,
+  &ArrayIter::FixedSetInit,
 };
 
 template <bool incRef>
@@ -254,18 +254,18 @@ bool ArrayIter::endHelper() {
       return m_pos >= getVector()->size();
     }
     case Collection::MapType:
-    case Collection::FrozenMapType: {
+    case Collection::FixedMapType: {
       return m_pos == 0;
     }
     case Collection::SetType:
-    case Collection::FrozenSetType: {
+    case Collection::FixedSetType: {
       return m_pos == 0;
     }
     case Collection::PairType: {
       return m_pos >= getPair()->size();
     }
-    case Collection::FrozenVectorType: {
-      return m_pos >= getFrozenVector()->size();
+    case Collection::FixedVectorType: {
+      return m_pos >= getFixedVector()->size();
     }
     case Collection::InvalidType: {
       ObjectData* obj = getIteratorObj();
@@ -282,7 +282,7 @@ void ArrayIter::nextHelper() {
       return;
     }
     case Collection::MapType:
-    case Collection::FrozenMapType: {
+    case Collection::FixedMapType: {
       BaseMap* mp = getMappish();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
@@ -302,13 +302,13 @@ void ArrayIter::nextHelper() {
       m_pos++;
       return;
     }
-    case Collection::FrozenVectorType: {
+    case Collection::FixedVectorType: {
       m_pos++;
       return;
     }
-    case Collection::FrozenSetType: {
+    case Collection::FixedSetType: {
       assert(m_pos != 0);
-      c_FrozenSet* st = getFrozenSet();
+      c_FixedSet* st = getFixedSet();
       assert(m_version == st->getVersion());
       m_pos = st->iter_next(m_pos);
       return;
@@ -326,7 +326,7 @@ Variant ArrayIter::firstHelper() {
       return m_pos;
     }
     case Collection::MapType:
-    case Collection::FrozenMapType: {
+    case Collection::FixedMapType: {
       BaseMap* mp = getMappish();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
@@ -343,11 +343,11 @@ Variant ArrayIter::firstHelper() {
     case Collection::PairType: {
       return m_pos;
     }
-    case Collection::FrozenVectorType: {
+    case Collection::FixedVectorType: {
       return m_pos;
     }
-    case Collection::FrozenSetType: {
-      c_FrozenSet* st = getFrozenSet();
+    case Collection::FixedSetType: {
+      c_FixedSet* st = getFixedSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
@@ -376,7 +376,7 @@ Variant ArrayIter::second() {
       return tvAsCVarRef(vec->at(m_pos));
     }
     case Collection::MapType:
-    case Collection::FrozenMapType: {
+    case Collection::FixedMapType: {
       BaseMap* mp = getMappish();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
@@ -393,15 +393,15 @@ Variant ArrayIter::second() {
     case Collection::PairType: {
       return tvAsCVarRef(getPair()->at(m_pos));
     }
-    case Collection::FrozenVectorType: {
-      c_FrozenVector* fvec = getFrozenVector();
+    case Collection::FixedVectorType: {
+      c_FixedVector* fvec = getFixedVector();
       if (UNLIKELY(m_version != fvec->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(fvec->at(m_pos));
     }
-    case Collection::FrozenSetType: {
-      c_FrozenSet* st = getFrozenSet();
+    case Collection::FixedSetType: {
+      c_FixedSet* st = getFixedSet();
       assert(m_version == st->getVersion());
       return tvAsCVarRef(st->iter_value(m_pos));
     }
@@ -440,7 +440,7 @@ CVarRef ArrayIter::secondRefPlus() {
       return tvAsCVarRef(vec->at(m_pos));
     }
     case Collection::MapType:
-    case Collection::FrozenMapType: {
+    case Collection::FixedMapType: {
       BaseMap* mp = getMappish();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
@@ -457,15 +457,15 @@ CVarRef ArrayIter::secondRefPlus() {
     case Collection::PairType: {
       return tvAsCVarRef(getPair()->at(m_pos));
     }
-    case Collection::FrozenVectorType: {
-      c_FrozenVector* fvec = getFrozenVector();
+    case Collection::FixedVectorType: {
+      c_FixedVector* fvec = getFixedVector();
       if (UNLIKELY(m_version != fvec->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(fvec->at(m_pos));
     }
-    case Collection::FrozenSetType: {
-      c_FrozenSet* st = getFrozenSet();
+    case Collection::FixedSetType: {
+      c_FixedSet* st = getFixedSet();
       assert(m_version == st->getVersion());
       return tvAsCVarRef(st->iter_value(m_pos));
     }
@@ -1205,7 +1205,7 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                                 dest, static_cast<c_Vector*>(obj),
                                 valOut, keyOut);
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::FixedMapType:
       return iterInit<BaseMap, ArrayIter::VersionableSparse>(
                                 dest,
                                 static_cast<BaseMap*>(obj),
@@ -1220,14 +1220,14 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                                 dest,
                                 static_cast<c_Pair*>(obj),
                                 valOut, keyOut);
-    case Collection::FrozenVectorType:
-      return iterInit<c_FrozenVector, ArrayIter::Fixed>(
-                                dest, static_cast<c_FrozenVector*>(obj),
+    case Collection::FixedVectorType:
+      return iterInit<c_FixedVector, ArrayIter::Fixed>(
+                                dest, static_cast<c_FixedVector*>(obj),
                                 valOut, keyOut);
-    case Collection::FrozenSetType:
-      return iterInit<c_FrozenSet, ArrayIter::VersionableSparse>(
+    case Collection::FixedSetType:
+      return iterInit<c_FixedSet, ArrayIter::VersionableSparse>(
                                    dest,
-                                   static_cast<c_FrozenSet*>(obj),
+                                   static_cast<c_FixedSet*>(obj),
                                    valOut, keyOut);
     case Collection::InvalidType:
       return new_iter_object_any(dest, obj, ctx, valOut, keyOut);
@@ -1249,7 +1249,7 @@ static int64_t iter_next_collection(ArrayIter* ai,
       return iterNext<c_Vector, ArrayIter::Versionable>(
         ai, valOut, keyOut);
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::FixedMapType:
       return iterNext<BaseMap, ArrayIter::VersionableSparse>(
         ai, valOut, keyOut);
     case Collection::SetType:
@@ -1258,11 +1258,11 @@ static int64_t iter_next_collection(ArrayIter* ai,
     case Collection::PairType:
       return iterNext<c_Pair, ArrayIter::Fixed>(
         ai, valOut, keyOut);
-    case Collection::FrozenVectorType:
-      return iterNext<c_FrozenVector, ArrayIter::Fixed>(
+    case Collection::FixedVectorType:
+      return iterNext<c_FixedVector, ArrayIter::Fixed>(
         ai, valOut, keyOut);
-    case Collection::FrozenSetType:
-      return iterNext<c_FrozenSet, ArrayIter::VersionableSparse>(
+    case Collection::FixedSetType:
+      return iterNext<c_FixedSet, ArrayIter::VersionableSparse>(
         ai, valOut, keyOut);
     case Collection::InvalidType:
       break;
@@ -1729,16 +1729,16 @@ int64_t iterNextKVector(Iter* it,
   return iterNext<c_Vector, ArrayIter::Versionable>(iter, valOut, keyOut);
 }
 
-int64_t iterNextFrozenVector(Iter* it, TypedValue* valOut) {
+int64_t iterNextFixedVector(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterFrozenNextVector: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
          it->arr().hasCollection());
 
   auto const iter = &it->arr();
-  return iterNext<c_FrozenVector, ArrayIter::Fixed>(iter, valOut, nullptr);
+  return iterNext<c_FixedVector, ArrayIter::Fixed>(iter, valOut, nullptr);
 }
 
-int64_t iterNextKFrozenVector(Iter* it,
+int64_t iterNextKFixedVector(Iter* it,
                               TypedValue* valOut,
                               TypedValue* keyOut) {
   TRACE(2, "iterFrozenNextKVector: I %p\n", it);
@@ -1746,7 +1746,7 @@ int64_t iterNextKFrozenVector(Iter* it,
          it->arr().hasCollection());
 
   auto const iter = &it->arr();
-  return iterNext<c_FrozenVector, ArrayIter::Fixed>(iter, valOut, keyOut);
+  return iterNext<c_FixedVector, ArrayIter::Fixed>(iter, valOut, keyOut);
 }
 
 int64_t iterNextMap(Iter* it, TypedValue* valOut) {
@@ -1826,7 +1826,7 @@ const IterNextHelper g_iterNextHelpers[] = {
   (IterNextHelper)&iterNextArrayMixed,
   (IterNextHelper)&iterNextArray,
   (IterNextHelper)&iterNextVector,
-  (IterNextHelper)&iterNextFrozenVector,
+  (IterNextHelper)&iterNextFixedVector,
   (IterNextHelper)&iterNextMap,
   (IterNextHelper)&iterNextSet,
   (IterNextHelper)&iterNextPair,
@@ -1838,7 +1838,7 @@ const IterNextKHelper g_iterNextKHelpers[] = {
   (IterNextKHelper)&iterNextKArrayMixed,
   (IterNextKHelper)&iterNextKArray,
   (IterNextKHelper)&iterNextKVector,
-  (IterNextKHelper)&iterNextKFrozenVector,
+  (IterNextKHelper)&iterNextKFixedVector,
   (IterNextKHelper)&iterNextKMap,
   (IterNextKHelper)&iterNextKSet,
   (IterNextKHelper)&iterNextKPair,

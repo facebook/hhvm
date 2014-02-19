@@ -153,7 +153,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
     return nullptr;
   }
   // fill this out if people need it
-  php_stream_wrapper *stream = new (HPHP::request_arena()) php_stream_wrapper();
+  php_stream_wrapper *stream = HPHP::smart_new<php_stream_wrapper>();
   return stream;
 }
 
@@ -195,7 +195,7 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_conte
   }
 
   // TODO this leaks
-  php_stream *stream = new (HPHP::request_arena()) php_stream(dir);
+  php_stream *stream = HPHP::smart_new<php_stream>(dir);
   stream->hphp_dir->incRefCount();
   return stream;
 }

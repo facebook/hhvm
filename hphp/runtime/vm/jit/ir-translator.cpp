@@ -1298,6 +1298,16 @@ IRTranslator::translateVerifyParamType(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateVerifyRetTypeC(const NormalizedInstruction& i) {
+  HHIR_EMIT(VerifyRetTypeC);
+}
+
+void
+IRTranslator::translateVerifyRetTypeV(const NormalizedInstruction& i) {
+  HHIR_EMIT(VerifyRetTypeV);
+}
+
+void
 IRTranslator::translateInstanceOfD(const NormalizedInstruction& i) {
   HHIR_EMIT(InstanceOfD, (i.imm[0].u_SA));
 }
@@ -1587,7 +1597,7 @@ static Type flavorToType(FlavorDesc f) {
   switch (f) {
     case NOV: not_reached();
 
-    case CV: return Type::Cell;  // TODO(#3029148) this could be Cell - Uninit
+    case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
     case UV: return Type::Uninit;
     case VV: return Type::BoxedCell;
     case AV: return Type::Cls;

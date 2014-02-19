@@ -129,12 +129,18 @@ StringData* convCellToStrHelper(TypedValue tv);
 void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
 void raiseUndefVariable(StringData* nm);
-void VerifyParamTypeFail(int param);
-void VerifyParamTypeCallable(TypedValue value, int param);
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
-                         int param,
-                         const HPHP::TypeConstraint* expected);
+                         const HPHP::TypeConstraint* expected,
+                         int param);
+void VerifyParamTypeCallable(TypedValue value, int param);
+void VerifyParamTypeFail(int param);
+void VerifyRetTypeSlow(const Class* cls,
+                       const Class* constraint,
+                       const HPHP::TypeConstraint* expected,
+                       const TypedValue value);
+void VerifyRetTypeCallable(TypedValue value);
+void VerifyRetTypeFail(const TypedValue value);
 
 void raise_error_sd(const StringData* sd);
 

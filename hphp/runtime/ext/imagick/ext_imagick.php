@@ -7,19 +7,7 @@ class ImagickPixelException extends RuntimeException { }
 class ImagickPixelIteratorException extends RuntimeException { }
 
 class Imagick {
-  // Colortype constants
-  const COLOR_BLACK = 0;
-  const COLOR_BLUE = 1;
-  const COLOR_CYAN = 2;
-  const COLOR_GREEN = 3;
-  const COLOR_RED = 4;
-  const COLOR_YELLOW = 5;
-  const COLOR_MAGENTA = 6;
-  const COLOR_OPACITY = 7;
-  const COLOR_ALPHA = 8;
-  const COLOR_FUZZ = 9;
-
-  private resource $wand;
+  private ?resource $wand = null;
 
   /**
    * The Imagick constructor
@@ -30,11 +18,1343 @@ class Imagick {
    */
   <<__Native>>
   function __construct(mixed $files = null): void;
+
+  /**
+   * Renders the ImagickDraw object on the current image
+   *
+   * @param ImagickDraw $draw - The drawing operations to render on the
+   *   image.
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function drawImage(ImagickDraw $draw): bool;
+
+  /**
+   * Writes an image to the specified filename
+   *
+   * @param string $filename - Filename where to write the image. The
+   *   extension of the filename defines the type of the file. Format can
+   *   be forced regardless of file extension using format: prefix, for
+   *   example "jpg:test.png".
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function writeImage(string $filename = NULL): bool;
+
+  /**
+   * Writes an image to a filehandle
+   *
+   * @param resource $filehandle - Filehandle where to write the image
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function writeImageFile(resource $filehandle): bool;
+
+  /**
+   * Writes an image or image sequence
+   *
+   * @param string $filename -
+   * @param bool $adjoin -
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function writeImages(string $filename,
+                       bool $adjoin): bool;
+
+  /**
+   * Writes frames to a filehandle
+   *
+   * @param resource $filehandle - Filehandle where to write the images
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function writeImagesFile(resource $filehandle): bool;
+
+}
+
+class ImagickDraw {
+  private ?resource $wand;
+
+  /**
+   * Adjusts the current affine transformation matrix
+   *
+   * @param array $affine - Affine matrix parameters
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function affine(array $affine): bool;
+
+  /**
+   * Draws text on the image
+   *
+   * @param float $x - The x coordinate where text is drawn
+   * @param float $y - The y coordinate where text is drawn
+   * @param string $text - The text to draw on the image
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function annotation(float $x,
+                      float $y,
+                      string $text): bool;
+
+  /**
+   * Draws an arc
+   *
+   * @param float $sx - Starting x ordinate of bounding rectangle
+   * @param float $sy - starting y ordinate of bounding rectangle
+   * @param float $ex - ending x ordinate of bounding rectangle
+   * @param float $ey - ending y ordinate of bounding rectangle
+   * @param float $sd - starting degrees of rotation
+   * @param float $ed - ending degrees of rotation
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function arc(float $sx,
+               float $sy,
+               float $ex,
+               float $ey,
+               float $sd,
+               float $ed): bool;
+
+  /**
+   * Draws a bezier curve
+   *
+   * @param array $coordinates - Multidimensional array like array(
+   *   array( 'x' => 1, 'y' => 2 ), array( 'x' => 3, 'y' => 4 ) )
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function bezier(array $coordinates): bool;
+
+  /**
+   * Draws a circle
+   *
+   * @param float $ox - origin x coordinate
+   * @param float $oy - origin y coordinate
+   * @param float $px - perimeter x coordinate
+   * @param float $py - perimeter y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function circle(float $ox,
+                  float $oy,
+                  float $px,
+                  float $py): bool;
+
+  /**
+   * Clears the ImagickDraw
+   *
+   * @return bool - Returns an ImagickDraw object.
+   */
+  <<__Native>>
+  function clear(): bool;
+
+  /**
+   * Makes an exact copy of the specified ImagickDraw object
+   *
+   * @return ImagickDraw - What the function returns, first on success,
+   *   then on failure. See also the return.success; entity
+   */
+  <<__Native>>
+  function __clone(): ImagickDraw;
+
+  /**
+   * Draws color on image
+   *
+   * @param float $x - x coordinate of the paint
+   * @param float $y - y coordinate of the paint
+   * @param int $paintMethod - one of the PAINT_ constants
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function color(float $x,
+                 float $y,
+                 int $paintMethod): bool;
+
+  /**
+   * Adds a comment
+   *
+   * @param string $comment - The comment string to add to vector output
+   *   stream
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function comment(string $comment): bool;
+
+  /**
+   * Composites an image onto the current image
+   *
+   * @param int $compose - composition operator. One of COMPOSITE_
+   *   constants
+   * @param float $x - x coordinate of the top left corner
+   * @param float $y - y coordinate of the top left corner
+   * @param float $width - width of the composition image
+   * @param float $height - height of the composition image
+   * @param Imagick $compositeWand - the Imagick object where composition
+   *   image is taken from
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function composite(int $compose,
+                     float $x,
+                     float $y,
+                     float $width,
+                     float $height,
+                     Imagick $compositeWand): bool;
+
+  /**
+   * The ImagickDraw constructor
+   *
+   * @return  -
+   */
+  <<__Native>>
+  function __construct(): void;
+
+  /**
+   * Frees all associated resources
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function destroy(): bool;
+
+  /**
+   * Draws an ellipse on the image
+   *
+   * @param float $ox -
+   * @param float $oy -
+   * @param float $rx -
+   * @param float $ry -
+   * @param float $start -
+   * @param float $end -
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function ellipse(float $ox,
+                   float $oy,
+                   float $rx,
+                   float $ry,
+                   float $start,
+                   float $end): bool;
+
+  /**
+   * Obtains the current clipping path ID
+   *
+   * @return string - Returns a string containing the clip path ID or
+   *   false if no clip path exists.
+   */
+  <<__Native>>
+  function getClipPath(): string;
+
+  /**
+   * Returns the current polygon fill rule
+   *
+   * @return int - Returns one of the FILLRULE_ constants.
+   */
+  <<__Native>>
+  function getClipRule(): int;
+
+  /**
+   * Returns the interpretation of clip path units
+   *
+   * @return int - Returns an int on success.
+   */
+  <<__Native>>
+  function getClipUnits(): int;
+
+  /**
+   * Returns the fill color
+   *
+   * @return ImagickPixel - Returns an ImagickPixel object.
+   */
+  <<__Native>>
+  function getFillColor(): ImagickPixel;
+
+  /**
+   * Returns the opacity used when drawing
+   *
+   * @return float - The opacity.
+   */
+  <<__Native>>
+  function getFillOpacity(): float;
+
+  /**
+   * Returns the fill rule
+   *
+   * @return int - Returns a FILLRULE_ constant
+   */
+  <<__Native>>
+  function getFillRule(): int;
+
+  /**
+   * Returns the font
+   *
+   * @return string - Returns a string on success and false if no font is
+   *   set.
+   */
+  <<__Native>>
+  function getFont(): string;
+
+  /**
+   * Returns the font family
+   *
+   * @return string - Returns the font family currently selected or false
+   *   if font family is not set.
+   */
+  <<__Native>>
+  function getFontFamily(): string;
+
+  /**
+   * Returns the font pointsize
+   *
+   * @return float - Returns the font size associated with the current
+   *   ImagickDraw object.
+   */
+  <<__Native>>
+  function getFontSize(): float;
+
+  /**
+   * Returns the font style
+   *
+   * @return int - Returns the font style constant (STYLE_) associated
+   *   with the ImagickDraw object or 0 if no style is set.
+   */
+  <<__Native>>
+  function getFontStyle(): int;
+
+  /**
+   * Returns the font weight
+   *
+   * @return int - Returns an int on success and 0 if no weight is set.
+   */
+  <<__Native>>
+  function getFontWeight(): int;
+
+  /**
+   * Returns the text placement gravity
+   *
+   * @return int - Returns a GRAVITY_ constant on success and 0 if no
+   *   gravity is set.
+   */
+  <<__Native>>
+  function getGravity(): int;
+
+  /**
+   * Returns the current stroke antialias setting
+   *
+   * @return bool - Returns TRUE if antialiasing is on and false if it is
+   *   off.
+   */
+  <<__Native>>
+  function getStrokeAntialias(): bool;
+
+  /**
+   * Returns the color used for stroking object outlines
+   *
+   * @return ImagickPixel - Returns an ImagickPixel object which
+   *   describes the color.
+   */
+  <<__Native>>
+  function getStrokeColor(): ImagickPixel;
+
+  /**
+   * Returns an array representing the pattern of dashes and gaps used to
+   * stroke paths
+   *
+   * @return array - Returns an array on success and empty array if not
+   *   set.
+   */
+  <<__Native>>
+  function getStrokeDashArray(): array;
+
+  /**
+   * Returns the offset into the dash pattern to start the dash
+   *
+   * @return float - Returns a float representing the offset and 0 if
+   *   it's not set.
+   */
+  <<__Native>>
+  function getStrokeDashOffset(): float;
+
+  /**
+   * Returns the shape to be used at the end of open subpaths when they are
+   * stroked
+   *
+   * @return int - Returns one of the LINECAP_ constants or 0 if stroke
+   *   linecap is not set.
+   */
+  <<__Native>>
+  function getStrokeLineCap(): int;
+
+  /**
+   * Returns the shape to be used at the corners of paths when they are
+   * stroked
+   *
+   * @return int - Returns one of the LINEJOIN_ constants or 0 if stroke
+   *   line join is not set.
+   */
+  <<__Native>>
+  function getStrokeLineJoin(): int;
+
+  /**
+   * Returns the stroke miter limit
+   *
+   * @return int - Returns an int describing the miter limit and 0 if no
+   *   miter limit is set.
+   */
+  <<__Native>>
+  function getStrokeMiterLimit(): int;
+
+  /**
+   * Returns the opacity of stroked object outlines
+   *
+   * @return float - Returns a double describing the opacity.
+   */
+  <<__Native>>
+  function getStrokeOpacity(): float;
+
+  /**
+   * Returns the width of the stroke used to draw object outlines
+   *
+   * @return float - Returns a double describing the stroke width.
+   */
+  <<__Native>>
+  function getStrokeWidth(): float;
+
+  /**
+   * Returns the text alignment
+   *
+   * @return int - Returns one of the ALIGN_ constants and 0 if no align
+   *   is set.
+   */
+  <<__Native>>
+  function getTextAlignment(): int;
+
+  /**
+   * Returns the current text antialias setting
+   *
+   * @return bool - Returns TRUE if text is antialiased and false if not.
+   */
+  <<__Native>>
+  function getTextAntialias(): bool;
+
+  /**
+   * Returns the text decoration
+   *
+   * @return int - Returns one of the DECORATION_ constants and 0 if no
+   *   decoration is set.
+   */
+  <<__Native>>
+  function getTextDecoration(): int;
+
+  /**
+   * Returns the code set used for text annotations
+   *
+   * @return string - Returns a string specifying the code set or false
+   *   if text encoding is not set.
+   */
+  <<__Native>>
+  function getTextEncoding(): string;
+
+  /**
+   * Returns the text under color
+   *
+   * @return ImagickPixel - Returns an ImagickPixel object describing the
+   *   color.
+   */
+  <<__Native>>
+  function getTextUnderColor(): ImagickPixel;
+
+  /**
+   * Returns a string containing vector graphics
+   *
+   * @return string - Returns a string containing the vector graphics.
+   */
+  <<__Native>>
+  function getVectorGraphics(): string;
+
+  /**
+   * Draws a line
+   *
+   * @param float $sx - starting x coordinate
+   * @param float $sy - starting y coordinate
+   * @param float $ex - ending x coordinate
+   * @param float $ey - ending y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function line(float $sx,
+                float $sy,
+                float $ex,
+                float $ey): bool;
+
+  /**
+   * Paints on the image's opacity channel
+   *
+   * @param float $x - x coordinate of the matte
+   * @param float $y - y coordinate of the matte
+   * @param int $paintMethod - PAINT_ constant
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function matte(float $x,
+                 float $y,
+                 int $paintMethod): bool;
+
+  /**
+   * Adds a path element to the current path
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathClose(): bool;
+
+  /**
+   * Draws a cubic Bezier curve
+   *
+   * @param float $x1 - x coordinate of the first control point
+   * @param float $y1 - y coordinate of the first control point
+   * @param float $x2 - x coordinate of the second control point
+   * @param float $y2 - y coordinate of the first control point
+   * @param float $x - x coordinate of the curve end
+   * @param float $y - y coordinate of the curve end
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathCurveToAbsolute(float $x1,
+                               float $y1,
+                               float $x2,
+                               float $y2,
+                               float $x,
+                               float $y): bool;
+
+  /**
+   * Draws a quadratic Bezier curve
+   *
+   * @param float $x1 - x coordinate of the control point
+   * @param float $y1 - y coordinate of the control point
+   * @param float $x - x coordinate of the end point
+   * @param float $y - y coordinate of the end point
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathCurveToQuadraticBezierAbsolute(float $x1,
+                                              float $y1,
+                                              float $x,
+                                              float $y): bool;
+
+  /**
+   * Draws a quadratic Bezier curve
+   *
+   * @param float $x1 - starting x coordinate
+   * @param float $y1 - starting y coordinate
+   * @param float $x - ending x coordinate
+   * @param float $y - ending y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathCurveToQuadraticBezierRelative(float $x1,
+                                              float $y1,
+                                              float $x,
+                                              float $y): bool;
+
+  /**
+   * Draws a quadratic Bezier curve
+   *
+   * @param float $x - ending x coordinate
+   * @param float $y - ending y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathCurveToQuadraticBezierSmoothAbsolute(float $x,
+                                                    float $y): bool;
+
+  /**
+   * Draws a quadratic Bezier curve
+   *
+   * @param float $x - ending x coordinate
+   * @param float $y - ending y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathCurveToQuadraticBezierSmoothRelative(float $x,
+                                                    float $y): bool;
+
+  /**
+   * Draws a cubic Bezier curve
+   *
+   * @param float $x1 - x coordinate of starting control point
+   * @param float $y1 - y coordinate of starting control point
+   * @param float $x2 - x coordinate of ending control point
+   * @param float $y2 - y coordinate of ending control point
+   * @param float $x - ending x coordinate
+   * @param float $y - ending y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathCurveToRelative(float $x1,
+                               float $y1,
+                               float $x2,
+                               float $y2,
+                               float $x,
+                               float $y): bool;
+
+  /**
+   * Draws a cubic Bezier curve
+   *
+   * @param float $x2 - x coordinate of the second control point
+   * @param float $y2 - y coordinate of the second control point
+   * @param float $x - x coordinate of the ending point
+   * @param float $y - y coordinate of the ending point
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathCurveToSmoothAbsolute(float $x2,
+                                     float $y2,
+                                     float $x,
+                                     float $y): bool;
+
+  /**
+   * Draws a cubic Bezier curve
+   *
+   * @param float $x2 - x coordinate of the second control point
+   * @param float $y2 - y coordinate of the second control point
+   * @param float $x - x coordinate of the ending point
+   * @param float $y - y coordinate of the ending point
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathCurveToSmoothRelative(float $x2,
+                                     float $y2,
+                                     float $x,
+                                     float $y): bool;
+
+  /**
+   * Draws an elliptical arc
+   *
+   * @param float $rx - x radius
+   * @param float $ry - y radius
+   * @param float $x_axis_rotation - x axis rotation
+   * @param bool $large_arc_flag - large arc flag
+   * @param bool $sweep_flag - sweep flag
+   * @param float $x - x coordinate
+   * @param float $y - y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathEllipticArcAbsolute(float $rx,
+                                   float $ry,
+                                   float $x_axis_rotation,
+                                   bool $large_arc_flag,
+                                   bool $sweep_flag,
+                                   float $x,
+                                   float $y): bool;
+
+  /**
+   * Draws an elliptical arc
+   *
+   * @param float $rx - x radius
+   * @param float $ry - y radius
+   * @param float $x_axis_rotation - x axis rotation
+   * @param bool $large_arc_flag - large arc flag
+   * @param bool $sweep_flag - sweep flag
+   * @param float $x - x coordinate
+   * @param float $y - y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathEllipticArcRelative(float $rx,
+                                   float $ry,
+                                   float $x_axis_rotation,
+                                   bool $large_arc_flag,
+                                   bool $sweep_flag,
+                                   float $x,
+                                   float $y): bool;
+
+  /**
+   * Terminates the current path
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathFinish(): bool;
+
+  /**
+   * Draws a line path
+   *
+   * @param float $x - starting x coordinate
+   * @param float $y - ending x coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathLineToAbsolute(float $x,
+                              float $y): bool;
+
+  /**
+   * Draws a horizontal line path
+   *
+   * @param float $x - x coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathLineToHorizontalAbsolute(float $x): bool;
+
+  /**
+   * Draws a horizontal line
+   *
+   * @param float $x - x coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathLineToHorizontalRelative(float $x): bool;
+
+  /**
+   * Draws a line path
+   *
+   * @param float $x - starting x coordinate
+   * @param float $y - starting y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathLineToRelative(float $x,
+                              float $y): bool;
+
+  /**
+   * Draws a vertical line
+   *
+   * @param float $y - y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathLineToVerticalAbsolute(float $y): bool;
+
+  /**
+   * Draws a vertical line path
+   *
+   * @param float $y - y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathLineToVerticalRelative(float $y): bool;
+
+  /**
+   * Starts a new sub-path
+   *
+   * @param float $x - x coordinate of the starting point
+   * @param float $y - y coordinate of the starting point
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathMoveToAbsolute(float $x,
+                              float $y): bool;
+
+  /**
+   * Starts a new sub-path
+   *
+   * @param float $x - target x coordinate
+   * @param float $y - target y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathMoveToRelative(float $x,
+                              float $y): bool;
+
+  /**
+   * Declares the start of a path drawing list
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pathStart(): bool;
+
+  /**
+   * Draws a point
+   *
+   * @param float $x - point's x coordinate
+   * @param float $y - point's y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function point(float $x,
+                 float $y): bool;
+
+  /**
+   * Draws a polygon
+   *
+   * @param array $coordinates - multidimensional array like array(
+   *   array( 'x' => 3, 'y' => 4 ), array( 'x' => 2, 'y' => 6 ) );
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function polygon(array $coordinates): bool;
+
+  /**
+   * Draws a polyline
+   *
+   * @param array $coordinates - array of x and y coordinates: array(
+   *   array( 'x' => 4, 'y' => 6 ), array( 'x' => 8, 'y' => 10 ) )
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function polyline(array $coordinates): bool;
+
+  /**
+   * Destroys the current ImagickDraw in the stack, and returns to the
+   * previously pushed ImagickDraw
+   *
+   * @return bool - Returns TRUE on success and false on failure.
+   */
+  <<__Native>>
+  function pop(): bool;
+
+  /**
+   * Terminates a clip path definition
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function popClipPath(): bool;
+
+  /**
+   * Terminates a definition list
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function popDefs(): bool;
+
+  /**
+   * Terminates a pattern definition
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function popPattern(): bool;
+
+  /**
+   * Clones the current ImagickDraw and pushes it to the stack
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function push(): bool;
+
+  /**
+   * Starts a clip path definition
+   *
+   * @param string $clip_mask_id - Clip mask Id
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pushClipPath(string $clip_mask_id): bool;
+
+  /**
+   * Indicates that following commands create named elements for early
+   * processing
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pushDefs(): bool;
+
+  /**
+   * Indicates that subsequent commands up to a ImagickDraw::opPattern()
+   * command comprise the definition of a named pattern
+   *
+   * @param string $pattern_id - the pattern Id
+   * @param float $x - x coordinate of the top-left corner
+   * @param float $y - y coordinate of the top-left corner
+   * @param float $width - width of the pattern
+   * @param float $height - height of the pattern
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function pushPattern(string $pattern_id,
+                       float $x,
+                       float $y,
+                       float $width,
+                       float $height): bool;
+
+  /**
+   * Draws a rectangle
+   *
+   * @param float $x1 - x coordinate of the top left corner
+   * @param float $y1 - y coordinate of the top left corner
+   * @param float $x2 - x coordinate of the bottom right corner
+   * @param float $y2 - y coordinate of the bottom right corner
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function rectangle(float $x1,
+                     float $y1,
+                     float $x2,
+                     float $y2): bool;
+
+  /**
+   * Renders all preceding drawing commands onto the image
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function render(): bool;
+
+  /**
+   * Applies the specified rotation to the current coordinate space
+   *
+   * @param float $degrees - degrees to rotate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function rotate(float $degrees): bool;
+
+  /**
+   * Draws a rounded rectangle
+   *
+   * @param float $x1 - x coordinate of the top left corner
+   * @param float $y1 - y coordinate of the top left corner
+   * @param float $x2 - x coordinate of the bottom right
+   * @param float $y2 - y coordinate of the bottom right
+   * @param float $rx - x rounding
+   * @param float $ry - y rounding
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function roundRectangle(float $x1,
+                          float $y1,
+                          float $x2,
+                          float $y2,
+                          float $rx,
+                          float $ry): bool;
+
+  /**
+   * Adjusts the scaling factor
+   *
+   * @param float $x - horizontal factor
+   * @param float $y - vertical factor
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function scale(float $x,
+                 float $y): bool;
+
+  /**
+   * Associates a named clipping path with the image
+   *
+   * @param string $clip_mask - the clipping path name
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setClipPath(string $clip_mask): bool;
+
+  /**
+   * Set the polygon fill rule to be used by the clipping path
+   *
+   * @param int $fill_rule - FILLRULE_ constant
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setClipRule(int $fill_rule): bool;
+
+  /**
+   * Sets the interpretation of clip path units
+   *
+   * @param int $clip_units - the number of clip units
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setClipUnits(int $clip_units): bool;
+
+  /**
+   * Sets the opacity to use when drawing using the fill color or fill texture
+   *
+   * @param float $opacity - fill alpha
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFillAlpha(float $opacity): bool;
+
+  /**
+   * Sets the fill color to be used for drawing filled objects
+   *
+   * @param ImagickPixel $fill_pixel - ImagickPixel to use to set the
+   *   color
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFillColor(ImagickPixel $fill_pixel): bool;
+
+  /**
+   * Sets the opacity to use when drawing using the fill color or fill texture
+   *
+   * @param float $fillOpacity - the fill opacity
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFillOpacity(float $fillOpacity): bool;
+
+  /**
+   * Sets the URL to use as a fill pattern for filling objects
+   *
+   * @param string $fill_url - URL to use to obtain fill pattern.
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFillPatternURL(string $fill_url): bool;
+
+  /**
+   * Sets the fill rule to use while drawing polygons
+   *
+   * @param int $fill_rule - FILLRULE_ constant
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFillRule(int $fill_rule): bool;
+
+  /**
+   * Sets the fully-specified font to use when annotating with text
+   *
+   * @param string $font_name -
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFont(string $font_name): bool;
+
+  /**
+   * Sets the font family to use when annotating with text
+   *
+   * @param string $font_family - the font family
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFontFamily(string $font_family): bool;
+
+  /**
+   * Sets the font pointsize to use when annotating with text
+   *
+   * @param float $pointsize - the point size
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFontSize(float $pointsize): bool;
+
+  /**
+   * Sets the font stretch to use when annotating with text
+   *
+   * @param int $fontStretch - STRETCH_ constant
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFontStretch(int $fontStretch): bool;
+
+  /**
+   * Sets the font style to use when annotating with text
+   *
+   * @param int $style - STYLETYPE_ constant
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFontStyle(int $style): bool;
+
+  /**
+   * Sets the font weight
+   *
+   * @param int $font_weight -
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setFontWeight(int $font_weight): bool;
+
+  /**
+   * Sets the text placement gravity
+   *
+   * @param int $gravity - GRAVITY_ constant
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setGravity(int $gravity): bool;
+
+  /**
+   * Specifies the opacity of stroked object outlines
+   *
+   * @param float $opacity - opacity
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setStrokeAlpha(float $opacity): bool;
+
+  /**
+   * Controls whether stroked outlines are antialiased
+   *
+   * @param bool $stroke_antialias - the antialias setting
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setStrokeAntialias(bool $stroke_antialias): bool;
+
+  /**
+   * Sets the color used for stroking object outlines
+   *
+   * @param ImagickPixel $stroke_pixel - the stroke color
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setStrokeColor(ImagickPixel $stroke_pixel): bool;
+
+  /**
+   * Specifies the pattern of dashes and gaps used to stroke paths
+   *
+   * @param array $dashArray - array of floats
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setStrokeDashArray(array $dashArray): bool;
+
+  /**
+   * Specifies the offset into the dash pattern to start the dash
+   *
+   * @param float $dash_offset - dash offset
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setStrokeDashOffset(float $dash_offset): bool;
+
+  /**
+   * Specifies the shape to be used at the end of open subpaths when they are
+   * stroked
+   *
+   * @param int $linecap - LINECAP_ constant
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setStrokeLineCap(int $linecap): bool;
+
+  /**
+   * Specifies the shape to be used at the corners of paths when they are
+   * stroked
+   *
+   * @param int $linejoin - LINEJOIN_ constant
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setStrokeLineJoin(int $linejoin): bool;
+
+  /**
+   * Specifies the miter limit
+   *
+   * @param int $miterlimit - the miter limit
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setStrokeMiterLimit(int $miterlimit): bool;
+
+  /**
+   * Specifies the opacity of stroked object outlines
+   *
+   * @param float $stroke_opacity - stroke opacity. 1.0 is fully opaque
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setStrokeOpacity(float $stroke_opacity): bool;
+
+  /**
+   * Sets the pattern used for stroking object outlines
+   *
+   * @param string $stroke_url - stroke URL
+   *
+   * @return bool - imagick.imagickdraw.return.success;
+   */
+  <<__Native>>
+  function setStrokePatternURL(string $stroke_url): bool;
+
+  /**
+   * Sets the width of the stroke used to draw object outlines
+   *
+   * @param float $stroke_width - stroke width
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setStrokeWidth(float $stroke_width): bool;
+
+  /**
+   * Specifies a text alignment
+   *
+   * @param int $alignment - ALIGN_ constant
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setTextAlignment(int $alignment): bool;
+
+  /**
+   * Controls whether text is antialiased
+   *
+   * @param bool $antiAlias -
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setTextAntialias(bool $antiAlias): bool;
+
+  /**
+   * Specifies a decoration
+   *
+   * @param int $decoration - DECORATION_ constant
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setTextDecoration(int $decoration): bool;
+
+  /**
+   * Specifies specifies the text code set
+   *
+   * @param string $encoding - the encoding name
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setTextEncoding(string $encoding): bool;
+
+  /**
+   * Specifies the color of a background rectangle
+   *
+   * @param ImagickPixel $under_color - the under color
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setTextUnderColor(ImagickPixel $under_color): bool;
+
+  /**
+   * Sets the vector graphics
+   *
+   * @param string $xml - xml containing the vector graphics
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setVectorGraphics(string $xml): bool;
+
+  /**
+   * Sets the overall canvas size
+   *
+   * @param int $x1 - left x coordinate
+   * @param int $y1 - left y coordinate
+   * @param int $x2 - right x coordinate
+   * @param int $y2 - right y coordinate
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setViewbox(int $x1,
+                      int $y1,
+                      int $x2,
+                      int $y2): bool;
+
+  /**
+   * Skews the current coordinate system in the horizontal direction
+   *
+   * @param float $degrees - degrees to skew
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function skewX(float $degrees): bool;
+
+  /**
+   * Skews the current coordinate system in the vertical direction
+   *
+   * @param float $degrees - degrees to skew
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function skewY(float $degrees): bool;
+
+  /**
+   * Applies a translation to the current coordinate system
+   *
+   * @param float $x - horizontal translation
+   * @param float $y - vertical translation
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function translate(float $x,
+                     float $y): bool;
+
 }
 
 class ImagickPixel {
-  private resource $wand;
-  private bool $initByIterator;
+  private ?resource $wand = null;
 
   /**
    * Clears resources associated with this object
@@ -120,7 +1440,7 @@ class ImagickPixel {
   /**
    * Check the distance between this color and another
    *
-   * @param imagickpixel $color - The ImagickPixel object to compare this
+   * @param ImagickPixel $color - The ImagickPixel object to compare this
    *   object against.
    * @param float $fuzz - The maximum distance within which to consider
    *   these colors as similar. The theoretical maximum for this value is
@@ -135,7 +1455,7 @@ class ImagickPixel {
   /**
    * Check the distance between this color and another
    *
-   * @param imagickpixel $color - The ImagickPixel object to compare this
+   * @param ImagickPixel $color - The ImagickPixel object to compare this
    *   object against.
    * @param float $fuzz - The maximum distance within which to consider
    *   these colors as similar. The theoretical maximum for this value is
@@ -195,7 +1515,7 @@ class ImagickPixel {
 }
 
 class ImagickPixelIterator {
-  private resource $wand;
+  private ?resource $wand = null;
 
   <<__Native>>
   static function getPixelIterator(Imagick $wand): ImagickPixelIterator;
@@ -218,7 +1538,7 @@ class ImagickPixelIterator {
   /**
    * The ImagickPixelIterator constructor
    *
-   * @param imagick $wand -
+   * @param Imagick $wand -
    *
    * @return  -
    */
@@ -273,7 +1593,7 @@ class ImagickPixelIterator {
   /**
    * Returns a new pixel iterator
    *
-   * @param imagick $wand -
+   * @param Imagick $wand -
    *
    * @return bool - Throwing ImagickPixelIteratorException.
    */
@@ -283,7 +1603,7 @@ class ImagickPixelIterator {
   /**
    * Returns a new pixel iterator
    *
-   * @param imagick $wand -
+   * @param Imagick $wand -
    * @param int $x -
    * @param int $y -
    * @param int $columns -

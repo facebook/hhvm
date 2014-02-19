@@ -1,12 +1,12 @@
 <?hh
 
-// Test that FrozenVector is immutable.
+// Test that FixedVector is immutable.
 
 function main() {
 
   $callWithExc = function ($f) {
     try {
-      $f(FrozenVector {1, 2, 3});
+      $f(FixedVector {1, 2, 3});
     } catch (Exception $e) {
       return get_class($e) . ": " . $e->getMessage();
     }
@@ -16,7 +16,7 @@ function main() {
 
   // All of these should throw.
 
-  $fs = FrozenVector {
+  $fs = FixedVector {
     function ($fv) {
       $fv[0] = 1;
     },

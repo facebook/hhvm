@@ -34,8 +34,8 @@
 
 using namespace HPHP;
 
-#define PORT_MIN 7300
-#define PORT_MAX 7400
+#define PORT_MIN 1024
+#define PORT_MAX 65535
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -47,7 +47,9 @@ static int s_admin_port = 0;
 static int s_rpc_port = 0;
 static int inherit_fd = -1;
 static std::unique_ptr<AsyncFunc<TestServer>> s_func;
+static char s_pidfile[MAXPATHLEN];
 static char s_filename[MAXPATHLEN];
+static int k_timeout = 30;
 
 bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
                                       const char **urls, int nUrls,
@@ -76,7 +78,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
   func.start();
 
   if (s_func) {
-    s_func->waitForEnd();
+    s_func->waitForEnd(k_timeout);
     s_func.reset();
   }
   bool passed = true;
@@ -153,39 +155,70 @@ void TestServer::RunServer() {
   string option = (inherit_fd >= 0) ? (string("--port-fd=") + fd) :
     (string("-vServer.TakeoverFilename=") + string(s_filename));
   string serverType = string("-vServer.Type=") + m_serverType;
+  string pidFile = string("-vPidFile=") + string(s_pidfile);
 
   const char *argv[] = {
-    "", "--mode=server", "--config=test/ext/config-server.hdf",
+    "__HHVM__", "--mode=server", "--config=test/ext/config-server.hdf",
     portConfig.c_str(), adminConfig.c_str(), rpcConfig.c_str(),
-    option.c_str(),
-    serverType.c_str(),
-    NULL
+    option.c_str(), serverType.c_str(), pidFile.c_str(),
+    nullptr
   };
 
+  // replace __HHVM__
   if (Option::EnableEval < Option::FullEval) {
     argv[0] = "runtime/tmp/TestServer/test";
   } else {
     argv[0] = HHVM_PATH;
   }
 
-  Process::Exec(argv[0], argv, NULL, out, &err);
+  Process::Exec(argv[0], argv, nullptr, out, &err);
 }
 
 void TestServer::StopServer() {
   for (int i = 0; i < 10; i++) {
-    string out, err;
     Variant c = HHVM_FN(curl_init)();
     String url = "http://";
     url += f_php_uname("n");
     url += ":" + lexical_cast<string>(s_admin_port) + "/stop";
     HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, url);
     HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
+    HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_TIMEOUT, 1);
+    HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_CONNECTTIMEOUT, 1);
     Variant res = HHVM_FN(curl_exec)(c.toResource());
     if (!same(res, false)) {
-      break;
+      return;
     }
     sleep(1); // wait until HTTP server is up and running
   }
+
+  // Getting more aggresive
+  char buf[1024];
+  int fd = open(s_pidfile, O_RDONLY);
+  int ret = read(fd, buf, sizeof(buf) - 1);
+  if (ret <= 0) {
+    printf("Can't read pid from pid file %s\n", s_pidfile);
+    return;
+  }
+  buf[ret] = 0;
+  string out, err;
+  const char *argv[] = {"kill", buf, nullptr};
+  for (int i = 0; i < 10; i++) {
+    auto ret = Process::Exec(argv[0], argv, nullptr, out, &err);
+    if (ret) {
+      return;
+    }
+  }
+
+  // Last resort
+  const char *argv9[] = {"kill", "-9", buf, nullptr};
+  for (int i = 0; i < 10; i++) {
+    auto ret = Process::Exec(argv9[0], argv9, nullptr, out, &err);
+    if (ret) {
+      return;
+    }
+  }
+
+  printf("Can't kill pid %s read from pid file %s\n", buf, s_pidfile);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -202,19 +235,19 @@ public:
   }
 };
 
-static int find_server_port(const std::string &serverType,
-                            int port_min, int port_max) {
-  for (int port = port_min; ; port++) {
+static int find_server_port(const std::string &serverType) {
+  for (int tries = 0; true; tries++) {
+    auto port = (rand() % (PORT_MAX - PORT_MIN)) + PORT_MIN;
     try {
       ServerPtr server = ServerFactoryRegistry::createServer(
         serverType, "127.0.0.1", port, 50);
-      server->setRequestHandlerFactory<TestServerRequestHandler>(30);
+      server->setRequestHandlerFactory<TestServerRequestHandler>(k_timeout);
       server->start();
       server->stop();
       server->waitForEnd();
       return port;
     } catch (const FailedToListenException& e) {
-      if (port >= port_max) throw;
+      if (tries >= 100) throw;
     }
   }
 }
@@ -222,14 +255,13 @@ static int find_server_port(const std::string &serverType,
 bool TestServer::RunTests(const std::string &which) {
   bool ret = true;
 
-  {
-    // TestSimpleServer finds a good port to listen on, so it must
-    // always run.
-    std::string which = "TestSimpleServer";
-    RUN_TEST(TestSimpleServer);
-  }
-  s_admin_port = find_server_port(m_serverType, s_server_port + 1, PORT_MAX);
-  s_rpc_port = find_server_port(m_serverType, s_admin_port + 1, PORT_MAX);
+  srand(time(0));
+  s_server_port = find_server_port(m_serverType);
+  s_admin_port = find_server_port(m_serverType);
+  s_rpc_port = find_server_port(m_serverType);
+  snprintf(s_pidfile, MAXPATHLEN, "/tmp/pid_XXXXXX");
+  int tmpfd = mkstemp(s_pidfile);
+  close(tmpfd);
 
   RUN_TEST(TestInheritFdServer);
   RUN_TEST(TestTakeoverServer);
@@ -275,7 +307,7 @@ bool TestServer::TestServerVariables() {
         "function clean($x) { return str_replace(getcwd(),'',$x); }",
 
         "string(13) \"/path/subpath\"\n"
-        "string(13) \"/path/subpath\"\n"
+        "string(20) \"/string/path/subpath\"\n"
         "string(7) \"/string\"\n"
         "string(28) \"/string/path/subpath?a=1&b=2\"\n"
         "string(7) \"/string\"\n"
@@ -311,7 +343,7 @@ bool TestServer::TestInteraction() {
   VSR2("<?php "
         "$a[] = new stdclass;"
         "var_dump(count(array_combine($a, $a)));",
-        "int(0)\n");
+        "");
 
   return true;
 }
@@ -481,11 +513,6 @@ bool TestServer::TestRequestHandling() {
   return Count(true);
 }
 
-bool TestServer::TestSimpleServer() {
-  s_server_port = find_server_port(m_serverType, PORT_MIN, PORT_MAX);
-  return Count(true);
-}
-
 static bool PreBindSocketHelper(struct addrinfo *info) {
   if (info->ai_family != AF_INET && info->ai_family != AF_INET6) {
     printf("No IPV4/6 interface found.\n");
@@ -647,11 +674,11 @@ bool TestServer::TestHttpClient() {
     VS(code, 200);
     VS(response.data(),
        ("\nGET param: name = value"
-        "\nHeader: Accept"
-        "\n0: */*"
         "\nHeader: Cookie"
         "\n0: c1=v1;c2=v2;"
         "\n1: c3=v3;c4=v4;"
+        "\nHeader: Accept"
+        "\n0: */*"
         "\nHeader: Host"
         "\n0: 127.0.0.1:" + lexical_cast<string>(s_server_port)).c_str());
 
@@ -673,15 +700,15 @@ bool TestServer::TestHttpClient() {
     VS(response.data(),
        ("\nGET param: name = value"
         "\nPOST data: postdata"
-        "\nHeader: Accept"
-        "\n0: */*"
-        "\nHeader: Content-Length"
-        "\n0: 8"
         "\nHeader: Content-Type"
         "\n0: application/x-www-form-urlencoded"
+        "\nHeader: Content-Length"
+        "\n0: 8"
         "\nHeader: Cookie"
         "\n0: c1=v1;c2=v2;"
         "\n1: c3=v3;c4=v4;"
+        "\nHeader: Accept"
+        "\n0: */*"
         "\nHeader: Host"
         "\n0: 127.0.0.1:" + lexical_cast<string>(s_server_port)).c_str());
 

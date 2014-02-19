@@ -101,7 +101,7 @@ CodeCache::CodeCache()
   }
   if (base == (uint8_t*)-1) {
     allocationSize = m_totalSize + kRoundUp - 1;
-    base = (uint8_t*)Util::low_malloc(allocationSize);
+    base = (uint8_t*)low_malloc(allocationSize);
     if (!base) {
       base = (uint8_t*)malloc(allocationSize);
     }
@@ -111,13 +111,13 @@ CodeCache::CodeCache()
       exit(1);
     }
   } else {
-    Util::low_malloc_skip_huge(base, base + allocationSize - 1);
+    low_malloc_skip_huge(base, base + allocationSize - 1);
   }
   assert(base);
   m_base = base;
   base += -(uint64_t)base & (kRoundUp - 1);
 
-  Util::numa_interleave(base, m_totalSize);
+  numa_interleave(base, m_totalSize);
 
   TRACE(1, "init atrampolines @%p\n", base);
 

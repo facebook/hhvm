@@ -46,15 +46,15 @@ function bar($i) {
     $empty_col_2 = StableMap {};
     $empty_col_3 = Vector {};
     $empty_col_4 = Map {};
-    $empty_col_5 = FrozenVector {};
-    $empty_col_6 = FrozenSet {};
-    $empty_col_7 = FrozenMap {};
+    $empty_col_5 = FixedVector {};
+    $empty_col_6 = FixedSet {};
+    $empty_col_7 = FixedMap {};
 
     $filled_col_1 = Set {1};
     $filled_col_2 = StableMap {'k' => 'v'};
     $filled_col_3 = Vector {1};
     $filled_col_4 = Map {'k' => 'v'};
-    $filled_col_5 = FrozenVector {1};
+    $filled_col_5 = FixedVector {1};
     $filled_col_6 = Set {1};
     $filled_col_7 = Map {'k' => 'v'};
   }

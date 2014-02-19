@@ -19,7 +19,7 @@
 
 #include <string>
 
-namespace HPHP { namespace Util {
+namespace HPHP {
 
 struct embedded_data {
   std::string   m_filename;
@@ -30,6 +30,6 @@ struct embedded_data {
 bool get_embedded_data(const char *section, embedded_data* desc,
                        const std::string &filename = "");
 
-} }
+}
 
 #endif

@@ -19,7 +19,7 @@ object(HH\Pair)#5 (2) {
   int(3)
 }
 ...
-FrozenVector
+FixedVector
 ...
 object(HH\Pair)#7 (2) {
   [0]=>
@@ -61,7 +61,7 @@ object(HH\Pair)#13 (2) {
   int(3)
 }
 ...
-FrozenMap
+FixedMap
 ...
 object(HH\Pair)#15 (2) {
   [0]=>

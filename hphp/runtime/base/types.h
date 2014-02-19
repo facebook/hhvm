@@ -145,9 +145,9 @@ enum Type : uint16_t { // stored in ObjectData::o_subclassData
   MapType = 2,
   SetType = 3,
   PairType = 4,
-  FrozenVectorType = 5,
-  FrozenMapType = 6,
-  FrozenSetType = 7,
+  FixedVectorType = 5,
+  FixedMapType = 6,
+  FixedSetType = 7,
 };
 const size_t MaxNumTypes = 8;
 
@@ -163,12 +163,12 @@ inline Type stringToType(const char* str, size_t len) {
     case 9:
       if (!strcasecmp(str, "hh\\vector")) return VectorType;
       break;
-    case 12:
-      if (!strcasecmp(str, "hh\\frozenmap")) return FrozenMapType;
-      if (!strcasecmp(str, "hh\\frozenset")) return FrozenSetType;
+    case 11:
+      if (!strcasecmp(str, "hh\\fixedmap")) return FixedMapType;
+      if (!strcasecmp(str, "hh\\fixedset")) return FixedSetType;
       break;
-    case 15:
-      if (!strcasecmp(str, "hh\\frozenvector")) return FrozenVectorType;
+    case 14:
+      if (!strcasecmp(str, "hh\\fixedvector")) return FixedVectorType;
       break;
     default:
       break;
@@ -180,19 +180,19 @@ inline Type stringToType(const std::string& s) {
 }
 inline bool isVectorType(Collection::Type ctype) {
   return (ctype == Collection::VectorType ||
-          ctype == Collection::FrozenVectorType);
+          ctype == Collection::FixedVectorType);
 }
 inline bool isMapType(Collection::Type ctype) {
   return (ctype == Collection::MapType ||
-          ctype == Collection::FrozenMapType);
+          ctype == Collection::FixedMapType);
 }
 inline bool isSetType(Collection::Type ctype) {
   return (ctype == Collection::SetType ||
-          ctype == Collection::FrozenSetType);
+          ctype == Collection::FixedSetType);
 }
 inline bool isInvalidType(Collection::Type ctype) {
   return (ctype == Collection::InvalidType ||
-          ctype >= Collection::MaxNumTypes);
+          static_cast<size_t>(ctype) >= Collection::MaxNumTypes);
 }
 inline bool isMutableType(Collection::Type ctype) {
   return (ctype == Collection::VectorType ||

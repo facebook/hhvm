@@ -77,10 +77,10 @@ HH\Pair Object
     [1] => 3
 )
 
-FrozenVector...
-HH\FrozenVector Object
+FixedVector...
+HH\FixedVector Object
 (
-    [0] => HH\FrozenVector Object
+    [0] => HH\FixedVector Object
         (
             [0] => 1
             [1] => 2
@@ -88,9 +88,9 @@ HH\FrozenVector Object
 
     [1] => 3
 )
-HH\FrozenVector Object
+HH\FixedVector Object
 (
-    [0] => HH\FrozenVector Object
+    [0] => HH\FixedVector Object
         (
             [0] => 1
             [1] => 2

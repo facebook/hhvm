@@ -207,7 +207,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_traitRequirements = m_traitRequirements;
   pc->m_traitPrecRules = m_traitPrecRules;
   pc->m_traitAliasRules = m_traitAliasRules;
-  pc->m_userAttributes = m_userAttributes;
+  pc->setUserAttributes(m_userAttributes);
 
   PreClass::MethodMap::Builder methodBuild;
   for (MethodVec::const_iterator it = m_methods.begin();

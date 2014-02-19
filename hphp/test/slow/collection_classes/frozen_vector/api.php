@@ -1,10 +1,10 @@
 <?hh
 
-// Test miscellaneous methods of the FrozenVector API.
+// Test miscellaneous methods of the FixedVector API.
 
 function main() {
 
-  $fv = FrozenVector {1, 2, 3};
+  $fv = FixedVector {1, 2, 3};
 
   // values()
   var_dump($fv->values());
@@ -23,8 +23,8 @@ function main() {
   var_dump($fv->linearSearch(10));
 
   // slice
-  var_dump(FrozenVector::slice($fv, 1, 2));
-  var_dump(FrozenVector::slice($fv, 3, 0));
+  var_dump(FixedVector::slice($fv, 1, 2));
+  var_dump(FixedVector::slice($fv, 3, 0));
 }
 
 main();

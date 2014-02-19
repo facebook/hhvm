@@ -555,16 +555,18 @@ void HhbcTranslator::MInstrTranslator::constrainBase(TypeConstraint tc,
                                                      SSATmp* value) {
   if (!value) value = m_base;
 
-  // Lots of operations change their behavior based on the value type of the
-  // base, so this handles the logic of using the inner constraint when
+  // Member operations only care about the inner type of the base if it's
+  // boxed, so this handles the logic of using the inner constraint when
   // appropriate.
   auto baseType = value->type().derefIfPtr();
   assert(baseType == Type::Gen || baseType.isBoxed() || baseType.notBoxed());
-  m_irb.constrainValue(value, tc);
+
   if (baseType.isBoxed()) {
+    m_irb.constrainValue(value, DataTypeCountness);
     tc.innerCat = tc.category;
-    m_irb.constrainValue(value, tc);
+    tc.category = DataTypeGeneric;
   }
+  m_irb.constrainValue(value, tc);
 }
 
 SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,

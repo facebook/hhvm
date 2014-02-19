@@ -334,7 +334,7 @@ static void bump_counter_and_rethrow() {
 #ifdef USE_JEMALLOC
     // Capture a pprof (C++) dump when we OOM a request
     // TODO: (t3753133) Should dump a PHP-instrumented pprof dump here as well
-    Util::jemalloc_pprof_dump("", false);
+    jemalloc_pprof_dump("", false);
 #endif
 
     throw;
@@ -801,7 +801,7 @@ static int start_server(const std::string &username) {
 #ifdef USE_JEMALLOC
     mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
 #endif
-    Util::enable_numa(RuntimeOption::EvalEnableNumaLocal);
+    enable_numa(RuntimeOption::EvalEnableNumaLocal);
 
   }
 
@@ -1452,8 +1452,8 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
     }
   }
 
-  Util::embedded_data desc;
-  if (!Util::get_embedded_data(section.c_str(), &desc, filename)) return "";
+  embedded_data desc;
+  if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
 
   std::ifstream ifs(desc.m_filename);
   if (!ifs.good()) return "";
@@ -1485,7 +1485,7 @@ void hphp_process_init() {
 #else
   pthread_attr_init(&attr);
 #endif
-  Util::init_stack_limits(&attr);
+  init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
 
   struct sigaction action = {};

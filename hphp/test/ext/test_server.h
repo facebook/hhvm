@@ -49,7 +49,6 @@ public:
 
   // test multithreaded request processing
   bool TestRequestHandling();
-  bool TestSimpleServer();
 
   // test inheriting server fd
   virtual bool TestInheritFdServer();

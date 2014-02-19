@@ -25,14 +25,6 @@ const StaticString
   s_IntlCalendar("IntlCalendar"),
   s_IntlGregorianCalendar("IntlGregorianCalendar");
 
-IntlCalendar *IntlCalendar::Get(Object obj) {
-  return GetResData<IntlCalendar>(obj, s_IntlCalendar.get());
-}
-
-Object IntlCalendar::wrap() {
-  return WrapResData(s_IntlCalendar.get());
-}
-
 const icu::Calendar*
 IntlCalendar::ParseArg(CVarRef cal, const icu::Locale &locale,
                        const String &funcname, intl_error &err,
@@ -99,14 +91,6 @@ bad_argument:
   return nullptr;
 }
 
-IntlGregorianCalendar *IntlGregorianCalendar::Get(Object obj) {
-  return GetResData<IntlGregorianCalendar>(obj, s_IntlGregorianCalendar.get());
-}
-
-Object IntlGregorianCalendar::wrap() {
-  return WrapResData(s_IntlGregorianCalendar.get());
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // Methods
 
@@ -126,8 +110,8 @@ Object IntlGregorianCalendar::wrap() {
   }
 
 #define GCAL_FETCH(dest, src, def) \
-  auto dest = IntlGregorianCalendar::Get(src); \
-  if (!dest) { \
+  auto dest = IntlCalendar::Get(src); \
+  if (!dest || !dest->gcal()) { \
     return def; \
   }
 
@@ -197,7 +181,7 @@ static Object HHVM_STATIC_METHOD(IntlCalendar, createInstance,
     s_intl_error->set(error, "Error creating ICU Calendar object");
     return null_object;
   }
-  return (NEWOBJ(IntlCalendar)(cal))->wrap();
+  return IntlCalendar::newInstance(cal);
 }
 
 static bool HHVM_METHOD(IntlCalendar, equals, CObjRef other) {
@@ -355,8 +339,8 @@ static Variant HHVM_METHOD(IntlCalendar, getTime) {
 
 static Object HHVM_METHOD(IntlCalendar, getTimeZone) {
   CAL_FETCH(data, this_, null_object);
-  auto tz = data->calendar()->getTimeZone().clone();
-  return (NEWOBJ(IntlTimeZone)(tz))->wrap();
+  return IntlTimeZone::newInstance(
+    data->calendar()->getTimeZone().clone());
 }
 
 static Variant HHVM_METHOD(IntlCalendar, getType) {
@@ -516,8 +500,10 @@ static bool HHVM_METHOD(IntlCalendar, setTime, CVarRef date) {
 
 static bool HHVM_METHOD(IntlCalendar, setTimeZone, CVarRef timeZone) {
   CAL_FETCH(data, this_, false);
+  intl_error err;
   auto tz = IntlTimeZone::ParseArg(timeZone, "intlcal_set_time_zone",
-                                   data->m_error);
+                                   err);
+  data->setError(err);
   if (!tz) {
     // error already set
     return false;
@@ -540,8 +526,7 @@ static Variant HHVM_STATIC_METHOD(IntlCalendar, getKeywordValuesForLocale,
                              "error calling underlying method");
     return false;
   }
-  icu::StringEnumeration *se = new BugStringCharEnumeration(uenum);
-  return (NEWOBJ(IntlIterator)(se))->wrap();
+  return IntlIterator::newInstance(new BugStringCharEnumeration(uenum));
 }
 #endif // ICU 4.2
 
@@ -730,8 +715,7 @@ static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
   gcal->adoptTimeZone(tz);
 
 success:
-  auto data = NEWOBJ(IntlGregorianCalendar)(gcal);
-  this_->o_set(s_resdata, Resource(data), s_IntlGregorianCalendar.get());
+  Native::data<IntlCalendar>(this_.get())->setCalendar(gcal);
   gcal = nullptr; // prevent SCOPE_EXIT sweeps
 }
 
@@ -742,19 +726,19 @@ static bool HHVM_METHOD(IntlGregorianCalendar, isLeapYear, int64_t year) {
                    "intlgregcal_is_leap_year: year out of bounds");
     return false;
   }
-  return (bool)data->calendar()->isLeapYear((int32_t)year);
+  return (bool)data->gcal()->isLeapYear((int32_t)year);
 }
 
 static double HHVM_METHOD(IntlGregorianCalendar, getGregorianChange) {
   GCAL_FETCH(data, this_, 0.0);
-  return (double)data->calendar()->getGregorianChange();
+  return (double)data->gcal()->getGregorianChange();
 }
 
 static bool HHVM_METHOD(IntlGregorianCalendar, setGregorianChange,
                         double change) {
   GCAL_FETCH(data, this_, false);
   UErrorCode error = U_ZERO_ERROR;
-  data->calendar()->setGregorianChange(change, error);
+  data->gcal()->setGregorianChange(change, error);
   if (U_FAILURE(error)) {
     data->setError(error, "intlgregcal_set_gregorian_change: error "
                           "calling ICU method");
@@ -894,6 +878,8 @@ void IntlExtension::initCalendar() {
   HHVM_ME(IntlGregorianCalendar, isLeapYear);
   HHVM_ME(IntlGregorianCalendar, getGregorianChange);
   HHVM_ME(IntlGregorianCalendar, setGregorianChange);
+
+  Native::registerNativeDataInfo<IntlCalendar>(s_IntlCalendar.get());
 
   loadSystemlib("icu_calendar");
 }

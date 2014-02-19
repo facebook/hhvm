@@ -466,7 +466,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         break;
       }
       if (cmd == "jemalloc-prof-activate") {
-        int err = Util::jemalloc_pprof_enable();
+        int err = jemalloc_pprof_enable();
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"prof.active\", ...)"
@@ -478,7 +478,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         break;
       }
       if (cmd == "jemalloc-prof-deactivate") {
-        int err = Util::jemalloc_pprof_disable();
+        int err = jemalloc_pprof_disable();
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"prof.active\", ...)"
@@ -491,7 +491,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       }
       if (cmd == "jemalloc-prof-dump") {
         string f = transport->getParam("file");
-        int err = Util::jemalloc_pprof_dump(f, true);
+        int err = jemalloc_pprof_dump(f, true);
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"prof.dump\", ...";
@@ -510,6 +510,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
     transport->sendString("Unknown command: " + cmd + "\n", 404);
   } while (0);
+  transport->onSendEnd();
   GetAccessLog().log(transport, nullptr);
 }
 

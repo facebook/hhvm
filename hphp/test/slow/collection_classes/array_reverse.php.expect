@@ -185,7 +185,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\FrozenVector)#1 (3) {
+input: object(HH\FixedVector)#1 (3) {
   [0]=>
   string(3) "foo"
   [1]=>
@@ -212,7 +212,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\FrozenSet)#1 (3) {
+input: object(HH\FixedSet)#1 (3) {
   string(3) "foo"
   string(3) "bar"
   string(3) "baz"
@@ -236,7 +236,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\FrozenMap)#1 (3) {
+input: object(HH\FixedMap)#1 (3) {
   ["a"]=>
   string(3) "foo"
   ["b"]=>
@@ -263,7 +263,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\FrozenMap)#1 (3) {
+input: object(HH\FixedMap)#1 (3) {
   [10]=>
   string(3) "foo"
   [20]=>

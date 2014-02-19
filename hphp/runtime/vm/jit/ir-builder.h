@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HHVM_HHIR_TRACEBUILDER_H_
-#define incl_HPHP_HHVM_HHIR_TRACEBUILDER_H_
+#ifndef incl_HPHP_VM_IRBUILDER_H_
+#define incl_HPHP_VM_IRBUILDER_H_
 
 #include <boost/scoped_ptr.hpp>
 
@@ -79,7 +79,6 @@ struct IRBuilder {
 
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
   bool typeMightRelax(SSATmp* val = nullptr) const;
-  bool shouldElideAssertType(Type oldType, Type newType, SSATmp* oldVal) const;
 
   IRUnit& unit() { return m_unit; }
   FrameState& state() { return m_state; }

@@ -61,21 +61,6 @@ bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
   return true;
 }
 
-/*
- * To help guard relaxation, there are some situations where we want to keep
- * around an Assert(Type|Stk|Loc) instruction that doesn't provide a more
- * specific type than its source.
- */
-bool IRBuilder::shouldElideAssertType(Type oldType, Type newType,
-                                      SSATmp* oldVal) const {
-  assert(oldType.maybe(newType));
-
-  if (!typeMightRelax(oldVal)) return newType >= oldType;
-  if (oldType == Type::Cls || newType == Type::Gen) return true;
-
-  return newType > oldType;
-}
-
 SSATmp* IRBuilder::genDefUninit() {
   return gen(DefConst, Type::Uninit, ConstData(0));
 }
@@ -201,8 +186,13 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
     // successors during region selection.  This can lead to
     // incompatible types in blocks selected for the same region.
     //
-    if (!typeParam.isBoxed() || !prevType.isBoxed()) {
-      if ((typeParam & prevType) == Type::Bottom) {
+    if (prevType.not(typeParam)) {
+      if (typeParam.isBoxed() && prevType.isBoxed()) {
+        // When both types are non-intersecting boxed types, we're just
+        // updating the inner type hint. This requires no runtime work.
+        constrainLocal(locId, DataTypeCountness, "preOptimizeCheckLoc");
+        return gen(AssertLoc, LocalId(locId), typeParam, inst->src(0));
+      } else {
         assert(RuntimeOption::EvalJitPGO);
         return gen(Jmp, inst->taken());
       }
@@ -215,22 +205,15 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const locId = inst->extra<AssertLoc>()->locId;
 
-  auto const prevType = localType(locId, DataTypeGeneric);
-  auto const typeParam = inst->typeParam();
-
-  if (prevType.not(typeParam)) {
-    TRACE_PUNT("Invalid AssertLoc");
+  if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
+    return gen(AssertType, inst->typeParam(), prevValue);
   }
 
-  if (shouldElideAssertType(prevType, typeParam, nullptr)) {
-    return inst->src(0);
-  }
-
-  if (filterAssertType(inst, prevType)) {
-    constrainLocal(locId, categoryForType(prevType), "AssertLoc");
-  }
-
-  return nullptr;
+  return m_simplifier.simplifyAssertTypeOp(
+    inst, localType(locId, DataTypeGeneric), [&](TypeConstraint tc) {
+      constrainLocal(locId, tc, "preOptimizeAssertLoc");
+    }
+  );
 }
 
 SSATmp* IRBuilder::preOptimizeLdThis(IRInstruction* inst) {
@@ -353,14 +336,15 @@ SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
   auto const sameUnboxed = [&] {
     auto avoidable = { Type::Uninit,
                        Type::InitNull,
+                       Type::Bool,
                        Type::Int,
                        Type::Dbl,
                        // No strings.
                        Type::Arr,
                        Type::Obj,
                        Type::Res };
-    for (auto& t : avoidable) {
-      if (curType.subtypeOf(t) && newType.subtypeOf(t)) return true;
+    for (auto t : avoidable) {
+      if (curType <= t && newType <= t) return true;
     }
     return false;
   };
@@ -405,7 +389,7 @@ SSATmp* IRBuilder::optimizeWork(IRInstruction* inst,
 
   FTRACE(1, "optimizing {}{}\n", indent(), inst->toString());
 
-  // First pass of tracebuilder optimizations try to replace an
+  // First pass of IRBuilder optimizations try to replace an
   // instruction based on tracked state before we do anything else.
   // May mutate the IRInstruction in place (and return nullptr) or
   // return an SSATmp*.
@@ -498,8 +482,9 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
 void IRBuilder::reoptimize() {
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
-  assert(m_savedBlocks.empty());
-  assert(!m_curWhere);
+  always_assert(m_savedBlocks.empty());
+  always_assert(!m_curWhere);
+  always_assert(m_state.inlineDepth() == 0);
 
   m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
@@ -510,16 +495,18 @@ void IRBuilder::reoptimize() {
   auto const idoms = findDominators(m_unit, blocksIds);
   m_state.clear();
 
-  for (auto* block : rpoSortCfg(m_unit)) {
+  for (auto* block : blocksIds.blocks) {
     FTRACE(5, "Block: {}\n", block->id());
 
     m_state.startBlock(block);
     m_curBlock = block;
 
+    auto nextBlock = block->next();
+    auto backMarker = block->back().marker();
     auto instructions = std::move(block->instrs());
     assert(block->empty());
     while (!instructions.empty()) {
-      auto *inst = &instructions.front();
+      auto* inst = &instructions.front();
       instructions.pop_front();
 
       // merging state looks at the current marker, and optimizeWork
@@ -542,20 +529,22 @@ void IRBuilder::reoptimize() {
         // assume the last instruction in the block isn't a guard. If it was,
         // we would have to insert the mov on the fall-through edge.
         assert(block->empty() || !block->back().isBlockEnd());
-        IRInstruction* mov = m_unit.mov(dst, tmp, inst->marker());
-        appendInstruction(mov);
+        appendInstruction(m_unit.mov(dst, tmp, inst->marker()));
       }
 
       if (inst->isBlockEnd()) {
-        // Not re-adding inst; replace it with a jump to the next block.
-        auto next = inst->next();
-        appendInstruction(m_unit.gen(Jmp, inst->marker(), next));
+        // We're not re-adding the block-end instruction. Unset its edges.
         inst->setTaken(nullptr);
         inst->setNext(nullptr);
       }
     }
 
-    assert(!block->empty());
+    if (block->empty() || !block->back().isBlockEnd()) {
+      // Our block-end instruction was eliminated (most likely a Jmp* converted
+      // to a nop). Replace it with a jump to the next block.
+      appendInstruction(m_unit.gen(Jmp, backMarker, nextBlock));
+    }
+
     m_state.finishBlock(block);
   }
 }
@@ -570,36 +559,49 @@ bool IRBuilder::constrainGuard(IRInstruction* inst, TypeConstraint tc) {
 
   auto& guard = m_guardConstraints[inst];
   auto changed = false;
+  auto const assertFits = typeFitsConstraint(guard.assertedType, tc);
+  FTRACE(2, "constrainGuard({}, {}): existing constraint {}, assertFits: {}\n",
+         *inst, tc, guard, assertFits ? "true" : "false");
 
-  if (tc.innerCat) {
-    // If the constraint is for the inner type and is better than what guard
-    // has, update it.
-    auto& cat = *tc.innerCat;
-    if (guard.innerCat && *guard.innerCat >= cat) return false;
+  // For category and innerCat, constrain the guard if the assertedType isn't
+  // strong enough to fit what we want and tc is more specific than the
+  // existing category.
+
+  if (!assertFits && tc.innerCat > guard.innerCat) {
     if (!tc.weak) {
       FTRACE(1, "constraining inner type of {}: {} -> {}\n",
-             *inst, guard.innerCat ? *guard.innerCat : DataTypeGeneric, cat);
-      guard.innerCat = cat;
+             *inst, guard.innerCat, tc.innerCat);
+      guard.innerCat = tc.innerCat;
     }
-    return true;
+    changed = true;
+  } else {
+    FTRACE(2, "not constraining innerCat\n");
   }
 
-  if (tc.category > guard.category) {
+  if (!assertFits && tc.category > guard.category) {
     if (!tc.weak) {
       FTRACE(1, "constraining {}: {} -> {}\n",
              *inst, guard.category, tc.category);
       guard.category = tc.category;
     }
     changed = true;
+  } else {
+    FTRACE(2, "not constraining category\n");
   }
 
-  assert(tc.knownType.maybe(guard.knownType));
-  if (tc.knownType < guard.knownType) {
-    // We don't check tc.weak here because knownType is supposed to be
+  // It's fairly common to have a local that we've asserted to be Obj, and then
+  // later assert that it's Obj<C>|InitNull. We want to use their intersection,
+  // so in this case we'd assert Obj<C>.
+  always_assert(tc.assertedType.maybe(guard.assertedType));
+  auto assertCommon = tc.assertedType & guard.assertedType;
+  if (assertCommon < guard.assertedType) {
+    // We don't check tc.weak here because assertedType is supposed to be
     // statically known type information.
-    FTRACE(1, "refining knownType of {}: {} -> {}\n",
-           *inst, guard.knownType, tc.knownType);
-    guard.knownType = tc.knownType;
+    FTRACE(1, "using {} to refine assertedType of {}: {} -> {}\n",
+           tc.assertedType, *inst, guard.assertedType, assertCommon);
+    guard.assertedType = assertCommon;
+  } else {
+    FTRACE(2, "not refining assertedType\n");
   }
 
   return changed;
@@ -659,20 +661,33 @@ bool IRBuilder::constrainValue(SSATmp* const val,
       changed = constrainValue(inst->src(0), tc) || changed;
     }
     return changed;
-  } else if (inst->is(StRef, Box, BoxPtr)) {
-    // If our caller cares about the inner type, propagate that through.
-    // Otherwise we're done.
-    if (tc.innerCat) {
-      auto src = inst->src(inst->is(StRef) ? 1 : 0);
-      tc.innerCat.clear();
-      return constrainValue(src, tc);
-    }
-    return false;
-  } else if (inst->is(LdRef, Unbox, UnboxPtr)) {
-    // Pass through to the source of the box, remembering that we care about
-    // the inner type of the box.
-    assert(!tc.innerCat);
+  } else if (inst->is(StRef)) {
+    // StRef requires that src(0) is boxed so we're relying on callers to
+    // appropriately constrain the values they pass to it. Any innerCat in tc
+    // should be applied to the value being stored.
+
+    tc.category = tc.innerCat;
+    tc.innerCat = DataTypeGeneric;
+    tc.assertedType = Type::Gen;
+    return constrainValue(inst->src(1), tc);
+  } else if (inst->is(Box, BoxPtr, Unbox, UnboxPtr)) {
+    // All Box/Unbox opcodes are similar to StRef/LdRef in some situations and
+    // Mov in others (determined at runtime), so we need to constrain both
+    // outer and inner.
+
+    auto maxCat = std::max(tc.category, tc.innerCat);
+    tc.category = maxCat;
+    tc.innerCat = maxCat;
+    tc.assertedType = Type::Gen;
+    return constrainValue(inst->src(0), tc);
+  } else if (inst->is(LdRef)) {
+    // Like StRef, we're relying on the caller to have appropriately
+    // constrained the outer type of the box. Constrain the inner type of the
+    // box with tc.
+
     tc.innerCat = tc.category;
+    tc.category = DataTypeGeneric;
+    tc.assertedType = Type::Gen;
     return constrainValue(inst->src(0), tc);
   } else if (inst->isPassthrough()) {
     return constrainValue(inst->getPassthroughValue(), tc);
@@ -687,6 +702,8 @@ bool IRBuilder::constrainValue(SSATmp* const val,
 
 bool IRBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
                                const std::string& why) {
+  if (!shouldConstrainGuards()) return false;
+
   return constrainLocal(locId, localTypeSource(locId), tc, why);
 }
 
@@ -729,6 +746,8 @@ bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
 }
 
 bool IRBuilder::constrainStack(int32_t idx, TypeConstraint tc) {
+  if (!shouldConstrainGuards()) return false;
+
   return constrainStack(sp(), idx, tc);
 }
 
@@ -793,7 +812,7 @@ void IRBuilder::startBlock() {
       }
       m_curBlock = block;
       m_state.startBlock(m_curBlock);
-      FTRACE(2, "TraceBuilder switching to block B{}: {}\n", block->id(),
+      FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
              show(m_state));
     }
   }

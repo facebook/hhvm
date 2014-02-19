@@ -373,7 +373,8 @@ bool File::lock(int operation, bool &wouldblock /* = false */) {
 }
 
 bool File::stat(struct stat *sb) {
-  throw NotSupportedException(__func__, "cannot stat");
+  // Undocumented, but Zend returns false for streams where fstat is unsupported
+  return false;
 }
 
 const StaticString

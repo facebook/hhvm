@@ -35,7 +35,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int
     return nullptr;
   }
   // TODO this leaks
-  php_stream *stream = new (HPHP::request_arena()) php_stream(file);
+  php_stream *stream = HPHP::smart_new<php_stream>(file);
   stream->hphp_file->incRefCount();
 
   if (auto urlFile = dynamic_cast<HPHP::UrlFile*>(file)) {
@@ -60,7 +60,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) {
 PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC) {
   return stream->hphp_file->seek(offset, whence);
 }
- 
+
 PHPAPI off_t _php_stream_tell(php_stream *stream TSRMLS_DC) {
   return stream->hphp_file->tell();
 }

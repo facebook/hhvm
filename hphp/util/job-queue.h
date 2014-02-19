@@ -213,9 +213,9 @@ public:
         // since we timed out, maybe we can turn idle without holding memory
         if (m_jobCount == 0) {
           ScopedUnlock unlock(this);
-          Util::flush_thread_caches();
-          if (m_dropStack && Util::s_stackLimit) {
-            Util::flush_thread_stack();
+          flush_thread_caches();
+          if (m_dropStack && s_stackLimit) {
+            flush_thread_stack();
           }
           DropCachePolicy::dropCache();
           flushed = true;
@@ -401,7 +401,7 @@ public:
     while (!m_stopped) {
       try {
         bool expired = false;
-        TJob job = m_queue->dequeueMaybeExpired(m_id, Util::s_numaNode,
+        TJob job = m_queue->dequeueMaybeExpired(m_id, s_numaNode,
                                                 countActive, &expired);
         if (expired) {
           abortJob(job);

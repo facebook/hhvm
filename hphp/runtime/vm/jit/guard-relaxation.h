@@ -35,9 +35,8 @@ bool relaxGuards(IRUnit&, const GuardConstraints& guards, bool simple = false);
 typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
 void visitGuards(IRUnit&, const VisitGuardFn& func);
 
-bool typeFitsConstraint(Type t, DataTypeCategory cat);
-DataTypeCategory categoryForType(Type t);
-Type relaxType(Type t, DataTypeCategory cat);
+bool typeFitsConstraint(Type t, TypeConstraint cat);
+Type relaxType(Type t, TypeConstraint cat);
 
 } }
 

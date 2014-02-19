@@ -305,6 +305,8 @@ CALL_OPCODE(LdSwitchStrIndex)
 CALL_OPCODE(LdSwitchObjIndex)
 CALL_OPCODE(VerifyParamCallable)
 CALL_OPCODE(VerifyParamFail)
+CALL_OPCODE(VerifyRetCallable)
+CALL_OPCODE(VerifyRetFail)
 CALL_OPCODE(RaiseUninitLoc)
 CALL_OPCODE(WarnNonObjProp)
 CALL_OPCODE(ThrowNonObjProp)
@@ -2986,7 +2988,7 @@ void emitSpill(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
   assert(s.numWords() == d.numWords());
   assert(!s.spilled() && d.spilled());
   if (s.isFullSIMD()) {
-    as.movdqa(s.reg(0), reg::rsp[d.offset(0)]);
+    as.movdqu(s.reg(0), reg::rsp[d.offset(0)]);
   } else {
     for (int i = 0, n = s.numAllocated(); i < n; ++i) {
       // store the whole register even if it holds a bool or DataType
@@ -2999,7 +3001,7 @@ void emitReload(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
   assert(s.numWords() == d.numWords());
   assert(s.spilled() && !d.spilled());
   if (d.isFullSIMD()) {
-    as.movdqa(reg::rsp[s.offset(0)], d.reg(0));
+    as.movdqu(reg::rsp[s.offset(0)], d.reg(0));
   } else {
     for (int i = 0, n = d.numAllocated(); i < n; ++i) {
       // load the whole register even if it holds a bool or DataType
@@ -3138,6 +3140,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
+  assert(m_unit.bcOff() == inst->marker().bcOff);
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
   auto const destSR = m_tx64->getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);
@@ -4276,7 +4279,7 @@ void CodeGenerator::cgStoreTypedValue(BaseRef dst, SSATmp* src, PhysLoc loc) {
     // Whole typed value is stored in single SIMD reg srcReg0
     assert(RuntimeOption::EvalHHIRAllocSIMDRegs);
     assert(srcReg1 == InvalidReg);
-    m_as.movdqa(srcReg0, refTVData(dst));
+    m_as.movdqu(srcReg0, refTVData(dst));
     return;
   }
   m_as.storeq(srcReg0, refTVData(dst));
@@ -4366,7 +4369,7 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc,
     // Whole typed value is stored in single SIMD reg valueDstReg
     assert(RuntimeOption::EvalHHIRAllocSIMDRegs);
     assert(typeDstReg == InvalidReg);
-    m_as.movdqa(refTVData(ref), valueDstReg);
+    m_as.movdqu(refTVData(ref), valueDstReg);
     return;
   }
 
@@ -6302,7 +6305,7 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
   });
 }
 
-void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
+void CodeGenerator::cgVerifyClsWork(IRInstruction* inst) {
   assert(!inst->src(0)->isConst());
   auto objClassReg = srcLoc(0).reg();
   SSATmp* constraint = inst->src(1);
@@ -6317,6 +6320,14 @@ void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
   // proper subtype checking. The comparison above is just to
   // short-circuit the overhead when the Classes are an exact match.
   ifThen(m_as, CC_NE, [&]{ cgCallNative(m_as, inst); });
+}
+
+void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
+  cgVerifyClsWork(inst);
+}
+
+void CodeGenerator::cgVerifyRetCls(IRInstruction* inst) {
+  cgVerifyClsWork(inst);
 }
 
 void CodeGenerator::cgRBTrace(IRInstruction* inst) {

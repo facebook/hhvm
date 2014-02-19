@@ -36,6 +36,7 @@
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
@@ -128,14 +129,14 @@ bool ObjectData::o_toBooleanImpl() const noexcept {
       return c_Vector::ToBool(this);
     } else if (m_cls == c_Map::classof()) {
       return c_Map::ToBool(this);
-    } else if (m_cls == c_FrozenMap::classof()) {
-      return c_FrozenMap::ToBool(this);
+    } else if (m_cls == c_FixedMap::classof()) {
+      return c_FixedMap::ToBool(this);
     } else if (m_cls == c_Set::classof()) {
       return c_Set::ToBool(this);
-    } else if (m_cls == c_FrozenVector::classof()) {
-      return c_FrozenVector::ToBool(this);
-    } else if (m_cls == c_FrozenSet::classof()) {
-      return c_FrozenSet::ToBool(this);
+    } else if (m_cls == c_FixedVector::classof()) {
+      return c_FixedVector::ToBool(this);
+    } else if (m_cls == c_FixedSet::classof()) {
+      return c_FixedSet::ToBool(this);
     } else {
       always_assert(false);
     }
@@ -428,12 +429,12 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
       return c_Set::ToArray(this);
     } else if (m_cls == c_Pair::classof()) {
       return c_Pair::ToArray(this);
-    } else if (m_cls == c_FrozenVector::classof()) {
-      return c_FrozenVector::ToArray(this);
-    } else if (m_cls == c_FrozenMap::classof()) {
-      return c_FrozenMap::ToArray(this);
-    } else if (m_cls == c_FrozenSet::classof()) {
-      return c_FrozenSet::ToArray(this);
+    } else if (m_cls == c_FixedVector::classof()) {
+      return c_FixedVector::ToArray(this);
+    } else if (m_cls == c_FixedMap::classof()) {
+      return c_FixedMap::ToArray(this);
+    } else if (m_cls == c_FixedSet::classof()) {
+      return c_FixedSet::ToArray(this);
     }
     // It's undefined what happens if you reach not_reached. We want to be sure
     // to hard fail if we get here.
@@ -626,7 +627,41 @@ const StaticString
   s_PHP_DebugDisplay("__PHP_DebugDisplay"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
-  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
+  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name"),
+  s_debugInfo("__debugInfo");
+
+/* Get properties from the actual object unless we're
+ * serializing for var_dump()/print_r() and the object
+ * exports a __debugInfo() magic method.
+ * In which case, call that and use the array it returns.
+ */
+inline Array getSerializeProps(const ObjectData* obj,
+                               VariableSerializer* serializer) {
+  if ((serializer->getType() != VariableSerializer::Type::PrintR) &&
+      (serializer->getType() != VariableSerializer::Type::VarDump)) {
+    return obj->o_toArray();
+  }
+  auto cls = obj->getVMClass();
+  auto debuginfo = cls->lookupMethod(s_debugInfo.get());
+  if (!debuginfo) {
+    return obj->o_toArray();
+  }
+  if (debuginfo->attrs() & (AttrPrivate|AttrProtected|
+                            AttrAbstract|AttrStatic)) {
+    raise_warning("%s::__debugInfo() must be public and non-static",
+                  cls->name()->data());
+    return obj->o_toArray();
+  }
+  Variant ret = const_cast<ObjectData*>(obj)->o_invoke_few_args(s_debugInfo, 0);
+  if (ret.isArray()) {
+    return ret.toArray();
+  }
+  if (ret.isNull()) {
+    return Array::Create();
+  }
+  raise_error("__debugInfo() must return an array");
+  not_reached();
+}
 
 void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
@@ -778,7 +813,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
     } else {
       const String& className = o_getClassName();
-      Array properties = o_toArray();
+      Array properties = getSerializeProps(this, serializer);
       if (serializer->getType() ==
         VariableSerializer::Type::DebuggerSerialize) {
         try {
@@ -827,16 +862,16 @@ ObjectData* ObjectData::clone() {
         return c_Vector::Clone(this);
       } else if (m_cls == c_Map::classof()) {
         return c_Map::Clone(this);
-      } else if (m_cls == c_FrozenMap::classof()) {
-        return c_FrozenMap::Clone(this);
+      } else if (m_cls == c_FixedMap::classof()) {
+        return c_FixedMap::Clone(this);
       } else if (m_cls == c_Set::classof()) {
         return c_Set::Clone(this);
       } else if (m_cls == c_Pair::classof()) {
         return c_Pair::Clone(this);
-      } else if (m_cls == c_FrozenVector::classof()) {
-        return c_FrozenVector::Clone(this);
-      } else if (m_cls == c_FrozenSet::classof()) {
-        return c_FrozenSet::Clone(this);
+      } else if (m_cls == c_FixedVector::classof()) {
+        return c_FixedVector::Clone(this);
+      } else if (m_cls == c_FixedSet::classof()) {
+        return c_FixedSet::Clone(this);
       } else {
         always_assert(false);
       }
@@ -965,7 +1000,7 @@ ObjectData::~ObjectData() {
 void ObjectData::DeleteObject(ObjectData* objectData) {
   auto const cls = objectData->getVMClass();
 
-  if (UNLIKELY(objectData->getAttribute(IsCppBuiltin))) {
+  if (UNLIKELY(objectData->getAttribute(InstanceDtor))) {
     return cls->instanceDtor()(objectData, cls);
   }
 
@@ -1754,6 +1789,9 @@ ObjectData* ObjectData::cloneImpl() {
   ObjectData* obj;
   Object o = obj = ObjectData::newInstance(m_cls);
   cloneSet(obj);
+  if (UNLIKELY(getAttribute(HasNativeData))) {
+    Native::nativeDataInstanceCopy(obj, this);
+  }
 
   auto const hasCloneBit = getAttribute(HasClone);
 

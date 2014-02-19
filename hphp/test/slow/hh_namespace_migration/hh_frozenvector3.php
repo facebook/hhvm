@@ -2,9 +2,9 @@
 
 namespace Test;
 
-// Test that HH\FrozenVector is auto-imported in a namespace.
+// Test that HH\FixedVector is auto-imported in a namespace.
 function main() {
-  $s = new FrozenVector();
+  $s = new FixedVector();
 }
 
 main();

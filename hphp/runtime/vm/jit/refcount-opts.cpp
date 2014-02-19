@@ -381,11 +381,8 @@ struct SinkPoint {
   SSATmp* value;
 };
 
-#ifdef HAVE_BOOST1_49
 typedef smart::flat_multimap<IncSet, SinkPoint> SinkPoints;
-#else
-typedef smart::multimap<IncSet, SinkPoint> SinkPoints;
-#endif
+
 struct SinkPointsMap {
   // Maps values to SinkPoints for their IncRefs
   smart::hash_map<SSATmp*, SinkPoints> points;
@@ -595,8 +592,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
         mergedState.pessimize();
       }
 
-      auto* incVal = folly::get_default(retState.canon, pair.first,
-        pair.first);
+      auto* incVal =
+        folly::get_default(retState.canon, pair.first, pair.first);
       auto const mergedDelta = mergedState.optDelta();
       for (auto& inBlock : pair.second.inBlocks) {
         auto& inState = inBlock.value;
@@ -651,11 +648,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     // First, build a map from canonical values to the values they map to and
     // how many incoming branches have the mapped value available.
-#ifdef HAVE_BOOST1_49
     smart::flat_map<SSATmp*, smart::flat_map<SSATmp*, int>> mergedCanon;
-#else
-    smart::map<SSATmp*, smart::map<SSATmp*, int>> mergedCanon;
-#endif
 
     for (auto const& inState : states) {
       for (auto const& pair : inState.state.canon) {
@@ -934,6 +927,13 @@ struct SinkPointAnalyzer : private LocalStateHook {
         // that it doesn't matter.
         observeLocalRefs();
       }
+
+      if (m_inst->is(InterpOneCF)) {
+        // InterpOneCF's normal path leaves the trace, so consume all live
+        // references.
+        consumeAllLocals();
+        consumeAllFrames();
+      }
     }
 
     // SpillStack and Call may have some of their sources replaced with None,
@@ -1037,6 +1037,10 @@ struct SinkPointAnalyzer : private LocalStateHook {
     });
   }
 
+  /*
+   * When we leave a trace, we have to account for all the references we're
+   * tracking in pre-live frames and inlined frames.
+   */
   void consumeAllFrames() {
     forEachFrame([this](Frame& f) {
       if (f.currentThis) {
@@ -1326,9 +1330,10 @@ struct SinkPointAnalyzer : private LocalStateHook {
     }
   }
 
-  void refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {
+  void refineLocalValue(uint32_t id, unsigned inlineIdx,
+                        SSATmp* oldVal, SSATmp* newVal) override {
     if (oldVal->type().maybeCounted() && newVal->type().notCounted()) {
-      assert(newVal->inst()->is(CheckType));
+      assert(newVal->inst()->is(CheckType, AssertType));
       assert(newVal->inst()->src(0) == oldVal);
       // Similar to what we do when processing the CheckType directly, we
       // "consume" the value on behalf of the CheckType.
@@ -1489,7 +1494,7 @@ std::string show(const SinkPointsMap& sinkPoints, const IdMap& ids) {
     const IncSet* lastIncs = nullptr;
     for (auto const& point : points) {
       auto* thisIncs = &point.first;
-      if (lastIncs != thisIncs) {
+      if (!lastIncs || *lastIncs != *thisIncs) {
         ret += folly::format("    {}\n", show(*thisIncs, ids)).str();
         lastIncs = thisIncs;
       }
@@ -1573,7 +1578,7 @@ void sinkIncRefs(IRUnit& unit, const SinkPointsMap& info, const IdMap& ids) {
           // If inst is a DecRef that won't go to zero of the same value as the
           // IncRef, we're good.
           if (info.decRefs.count(ids.before(inst)) &&
-              sp.value == canonical(inst->src(0))) {
+              canonical(sp.value) == canonical(inst->src(0))) {
             return true;
           }
 

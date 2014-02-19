@@ -27,5 +27,5 @@ function zlib_encode($data, $encoding = 0, $level = -1) {
    *             mixed
    */
 function zlib_decode($data, $max_decoded_len = 0) {
-  return gzdecode($data);
+  return gzdecode($data, $max_decoded_len);
 }

@@ -373,7 +373,7 @@ public:
   F(uint64_t, JitAStubsSize,           64 << 20)                        \
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(bool, AllowHhas,                   false)                           \
-  F(bool, CheckExtendedTypeHints,      true)                            \
+  F(bool, CheckReturnTypeHints,        false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
@@ -410,7 +410,7 @@ public:
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRJumpOpts,                true)                            \
-  F(bool, HHIRRefcountOpts,            true)                            \
+  F(bool, HHIRRefcountOpts,            hhirRefcountOptsDefault())       \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
   F(bool, HHIRExtraOptPass,            true)                            \
   F(uint32_t, HHIRNumFreeRegs,         64)                              \
@@ -434,6 +434,7 @@ public:
   F(bool, HHIRAllocSIMDRegs,           true)                            \
   /* Region compiler flags */                                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
+  F(bool,     JitCompareRegions,       false)                           \
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    "hottrace")                      \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \

@@ -24,29 +24,43 @@
 
 namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
+extern const StaticString s_IntlTimeZone;
 
 class IntlTimeZone : public IntlResourceData {
  public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(IntlTimeZone);
-  CLASSNAME_IS("IntlTimeZone");
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  IntlTimeZone() {}
+  IntlTimeZone(const IntlTimeZone&) = delete;
+  IntlTimeZone& operator=(const IntlTimeZone& src) {
+    setTimeZone(src.timezone()->clone());
+    return *this;
+  }
+  ~IntlTimeZone() override {
+    setTimeZone(nullptr);
+  }
 
-  explicit IntlTimeZone(icu::TimeZone *tz, bool owned = true):
-    m_timezone(tz), m_owned(owned) {}
+  static Object newInstance(icu::TimeZone *tz = nullptr, bool owned = true) {
+    auto obj = NewInstance(s_IntlTimeZone);
+    if (tz) {
+      Native::data<IntlTimeZone>(obj.get())->setTimeZone(tz, owned);
+    }
+    return obj;
+  }
 
-  void sweep() override {
+  static IntlTimeZone* Get(Object obj) {
+    return GetData<IntlTimeZone>(obj, s_IntlTimeZone);
+  }
+
+  void setTimeZone(icu::TimeZone *tz, bool owned = true) {
     if (m_timezone && m_owned) {
       delete m_timezone;
     }
-    m_timezone = nullptr;
+    m_timezone = tz;
+    m_owned = owned;
   }
 
-  bool isInvalid() const override {
-    return m_timezone == nullptr;
+  bool isValid() const override {
+    return m_timezone;
   }
-
-  static IntlTimeZone *Get(Object obj);
-  Object wrap();
 
   static bool isValidStyle(int64_t style) {
     return (style == icu::TimeZone::SHORT) ||
@@ -67,8 +81,8 @@ class IntlTimeZone : public IntlResourceData {
   static icu::TimeZone* ParseArg(CVarRef arg, const String& funcname,
                                  intl_error &err);
  private:
-  icu::TimeZone *m_timezone;
-  bool m_owned;
+  icu::TimeZone *m_timezone = nullptr;
+  bool m_owned = false;
 };
 
 /////////////////////////////////////////////////////////////////////////////

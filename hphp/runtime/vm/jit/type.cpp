@@ -273,41 +273,10 @@ struct Type::Union {
     return Type(bits);
   }
 
-  /*
-   * combineExtra returns a's m_extra field if the union of a and b would
-   * contain a's specialization. Otherwise it returns 0. Assumes a and b can
-   * specialize differently.
-   */
-  static uintptr_t combineExtra(Type a, Type b) {
-    if (!a.isSpecialized()) return 0;
-    assert(a.canSpecializeClass() != b.canSpecializeClass());
-
-    if (a.getClass()) {
-      // We know b can specialize on array kind so it can't contain any members
-      // of AnyObj. a's class will be preserved in the union.
-      assert(!(b.m_bits & kAnyObj));
-      return a.m_extra;
-    }
-
-    if (a.hasArrayKind()) {
-      // We know b can specialize on object class so it can't contain any members
-      // of AnyArr. a's array kind will be preserved in the union.
-      assert(!(b.m_bits & kAnyArr));
-      return a.m_extra;
-    }
-
-    not_reached();
-  }
-
   static Type combineDifferent(bits_t newBits, Type a, Type b) {
-    // a and b can specialize differently. Figure out if each Type's
-    // specialization would be preserved in the union operation, sanity check,
-    // and keep the specialization that survived.
-    auto const aExtra = combineExtra(a, b);
-    auto const bExtra = combineExtra(b, a);
-
-    assert(!(aExtra && bExtra) && "Conflicting specializations in operator|");
-    return Type(newBits, aExtra ? aExtra : bExtra);
+    // a and b can specialize differently, so their union can't have any
+    // specialization (it would be an ambiguously specialized type).
+    return Type(newBits);
   }
 };
 
@@ -431,8 +400,8 @@ Type Type::operator-(Type other) const {
 
     // Subtracting different specializations of the same type could get messy
     // so we don't support it for now.
-    assert(specializedType() == other.specializedType() &&
-           "Incompatible specialized types given to operator-");
+    always_assert(specializedType() == other.specializedType() &&
+                  "Incompatible specialized types given to operator-");
 
     // If we got here, both types have the same specialization, so it's removed
     // from the result.
@@ -453,13 +422,13 @@ Type Type::operator-(Type other) const {
     not_reached();
   }
 
-  // Only other is specialized. This is fine as long as none of the bits
-  // corresponding to other's specialization are set in *this. Otherwise we'd
-  // have to represent things like "all classes except X".
-  assert(IMPLIES(other.canSpecializeArrayKind(), !(m_bits & kAnyArr)) &&
-         IMPLIES(other.canSpecializeClass(), !(m_bits & kAnyObj)) &&
-         "Unsupported specialization subtraction");
-  return Type(newBits);
+  // Only other is specialized. This is where things get a little fuzzy. We
+  // want to be able to support things like Obj - Obj<C> but we can't represent
+  // Obj<~C>. We compromise and return Bottom in cases like this, which means
+  // we need to be careful because (a - b) == Bottom doesn't imply a <= b in
+  // this world.
+  if (other.canSpecializeClass()) return Type(newBits & ~kAnyObj);
+  return Type(newBits & ~kAnyArr);
 }
 
 Type liveTVType(const TypedValue* tv) {
@@ -531,9 +500,16 @@ Type stkReturn(const IRInstruction* inst, int dstId,
 }
 
 Type ldRefReturn(const IRInstruction* inst) {
-  // Guarding on specific classes/array kinds is expensive enough that we only
-  // want to do it in situations we've confirmed the benefit.
-  return inst->typeParam().unspecialize();
+  // Guarding on specialized types and uncommon unions like {Int|Bool} is
+  // expensive enough that we only want to do it in situations where we've
+  // manually confirmed the benefit.
+  auto type = inst->typeParam().unspecialize();
+
+  if (type.isKnownDataType())      return type;
+  if (type <= Type::UncountedInit) return Type::UncountedInit;
+  if (type <= Type::Uncounted)     return Type::Uncounted;
+  always_assert(type <= Type::Cell);
+  return Type::Cell;
 }
 
 Type thisReturn(const IRInstruction* inst) {
@@ -890,14 +866,13 @@ void assertOperandTypes(const IRInstruction* inst) {
 }
 
 std::string TypeConstraint::toString() const {
-  std::string catStr;
-  if (innerCat) {
-    catStr = folly::to<std::string>("inner:", typeCategoryName(*innerCat));
-  } else {
-    catStr = typeCategoryName(category);
+  std::string catStr = typeCategoryName(category);
+
+  if (innerCat > DataTypeGeneric) {
+    folly::toAppend(",inner:", typeCategoryName(innerCat), &catStr);
   }
 
-  return folly::format("<{},{}>", catStr, knownType).str();
+  return folly::format("<{},{}>", catStr, assertedType).str();
 }
 
 //////////////////////////////////////////////////////////////////////

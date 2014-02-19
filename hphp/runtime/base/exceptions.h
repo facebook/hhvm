@@ -289,7 +289,7 @@ public:
 class NotSupportedException : public ExtendedException {
 public:
   NotSupportedException(const char *feature, const char *reason)
-    : ExtendedException("%s is not going to be supported: %s",
+    : ExtendedException("%s is not supported: %s",
                         feature, reason) {}
   virtual ~NotSupportedException() throw() {}
   EXCEPTION_COMMON_IMPL(NotSupportedException);

@@ -43,7 +43,7 @@
 # define MSGBUF_MTEXT(b) (b)->mtext
 #endif
 
-using HPHP::Util::ScopedMem;
+using HPHP::ScopedMem;
 
 namespace HPHP {
 

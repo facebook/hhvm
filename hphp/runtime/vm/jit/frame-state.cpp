@@ -56,6 +56,8 @@ FrameState::~FrameState() {
 }
 
 void FrameState::update(const IRInstruction* inst) {
+  FTRACE(3, "FrameState::update processing {}\n", *inst);
+
   if (auto* taken = inst->taken()) {
     // When we're building the IR, we append a conditional jump after
     // generating its target block: see emitJmpCondHelper, where we
@@ -231,7 +233,8 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
                            inst->dst());
       break;
 
-    case CheckType: {
+    case CheckType:
+    case AssertType: {
       SSATmp* newVal = inst->dst();
       SSATmp* oldVal = inst->src(0);
       refineLocalValues(hook, oldVal, newVal);
@@ -297,14 +300,15 @@ void FrameState::clearLocals(LocalStateHook& hook) const {
 
 void FrameState::refineLocalValues(LocalStateHook& hook,
                                    SSATmp* oldVal, SSATmp* newVal) const {
-  assert(newVal->inst()->is(CheckType));
+  assert(newVal->inst()->is(CheckType, AssertType));
   assert(newVal->inst()->src(0) == oldVal);
 
-  for (unsigned i = 0, n = m_locals.size(); i < n; ++i) {
-    if (m_locals[i].value == oldVal) {
-      hook.refineLocalValue(i, oldVal, newVal);
+  walkAllInlinedLocals(
+  [&](uint32_t i, unsigned inlineIdx, const LocalState& local) {
+    if (local.value == oldVal) {
+      hook.refineLocalValue(i, inlineIdx, oldVal, newVal);
     }
-  }
+  });
 }
 
 void FrameState::forEachFrame(FrameFunc body) const {
@@ -539,7 +543,7 @@ void FrameState::trackDefInlineFP(const IRInstruction* inst) {
   auto const calleeSP   = inst->src(0);
   auto const savedSP    = inst->src(1);
 
-  // Saved tracebuilder state will include the "return" fp/sp.
+  // Saved IRBuilder state will include the "return" fp/sp.
   // Whatever the current fpValue is is good enough, but we have to be
   // passed in the StkPtr that represents the stack prior to the
   // ActRec being allocated.
@@ -648,20 +652,14 @@ void FrameState::setLocalValue(uint32_t id, SSATmp* value) {
   m_locals[id].typeSource = value;
 }
 
-void FrameState::refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {
-  always_assert(id < m_locals.size());
-  auto& local = m_locals[id];
-  local.value = newVal;
-  local.type = newVal->type();
-  local.typeSource = newVal;
-}
-
 void FrameState::refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {
   always_assert(id < m_locals.size());
   auto& local = m_locals[id];
   if (type.isBoxed() && local.type.isBoxed()) {
     // It's OK for the old and new inner types of boxed values not to
     // intersect, since the inner type is really just a prediction.
+    FTRACE(2, "updating local {}'s inner type: {} -> {}\n",
+           id, local.type, type);
     local.type = type;
   } else {
     always_assert((local.type & type) != Type::Bottom);
@@ -689,6 +687,16 @@ FrameState::LocalVec& FrameState::locals(unsigned inlineIdx) {
     assert(inlineIdx < m_inlineSavedStates.size());
     return m_inlineSavedStates[inlineIdx].locals;
   }
+}
+
+void FrameState::refineLocalValue(uint32_t id, unsigned inlineIdx,
+                                  SSATmp* oldVal, SSATmp* newVal) {
+  auto& locs = locals(inlineIdx);
+  always_assert(id < locs.size());
+  auto& local = locs[id];
+  local.value = newVal;
+  local.type = newVal->type();
+  local.typeSource = newVal;
 }
 
 void FrameState::killLocalForCall(uint32_t id, unsigned inlineIdx,

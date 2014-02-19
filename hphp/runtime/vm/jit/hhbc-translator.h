@@ -65,7 +65,7 @@ struct HhbcTranslator {
                  const Func* func);
 
   // Accessors.
-  IRBuilder& traceBuilder() const { return *m_irb.get(); }
+  IRBuilder& irBuilder() const { return *m_irb.get(); }
   IRUnit& unit() { return m_unit; }
 
   // In between each emit* call, irtranslator indicates the new
@@ -263,7 +263,10 @@ struct HhbcTranslator {
   void emitAGetL(int localId);
   void emitIsScalarL(int id);
   void emitIsScalarC();
+  void emitVerifyTypeImpl(int32_t id);
   void emitVerifyParamType(int32_t paramId);
+  void emitVerifyRetTypeC();
+  void emitVerifyRetTypeV();
   void emitInstanceOfD(int classNameStrId);
   void emitInstanceOf();
   void emitNop() {}
@@ -556,7 +559,7 @@ private:
       PackedArray,
       // simple opcode on String
       String,
-      // simple opcode on Vector* (c_Vector* or c_FrozenVector*)
+      // simple opcode on Vector* (c_Vector* or c_FixedVector*)
       Vector,
       // simple opcode on Map* (c_Map*)
       Map,
@@ -626,7 +629,7 @@ private:
     std::vector<Block*> m_failedVec;
   };
 
-private: // tracebuilder forwarding utilities
+private: // forwarding utilities
   template<class... Args>
   SSATmp* cns(Args&&... args) {
     return m_unit.cns(std::forward<Args>(args)...);
@@ -794,12 +797,12 @@ private:
    * Eval stack helpers.
    */
   SSATmp* push(SSATmp* tmp);
-  SSATmp* pushIncRef(SSATmp* tmp) { gen(IncRef, tmp); return push(tmp); }
+  SSATmp* pushIncRef(SSATmp* tmp, TypeConstraint tc = DataTypeCountness);
   SSATmp* pop(Type type, TypeConstraint tc = DataTypeSpecific);
   void    popDecRef(Type type, TypeConstraint tc = DataTypeCountness);
   void    discard(unsigned n);
   SSATmp* popC(TypeConstraint tc = DataTypeSpecific) {
-    return pop(Type::Cell, {tc.category, std::min(Type::Cell, tc.knownType)});
+    return pop(Type::Cell, tc);
   }
   SSATmp* popV() { return pop(Type::BoxedCell); }
   SSATmp* popR() { return pop(Type::Gen);       }
@@ -814,6 +817,7 @@ private:
     return top(Type::Cell, i, tc);
   }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
+  SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);

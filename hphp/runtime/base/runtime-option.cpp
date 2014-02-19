@@ -389,6 +389,11 @@ static inline bool hhbcRelaxGuardsDefault() {
   return !RuntimeOption::EvalHHIRRelaxGuards;
 }
 
+static inline bool hhirRefcountOptsDefault() {
+  // TODO(t3091846)
+  return !RuntimeOption::EvalSimulateARM;
+}
+
 static inline bool simulateARMDefault() {
 #ifdef HHVM_SIMULATE_ARM_BY_DEFAULT
   return true;
@@ -715,7 +720,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerType = server["Type"].getString(ServerType);
     ServerIP = server["IP"].getString();
     ServerFileSocket = server["FileSocket"].getString();
-    ServerPrimaryIP = Util::GetPrimaryIP();
+    ServerPrimaryIP = GetPrimaryIP();
     ServerPort = server["Port"].getUInt16(80);
     ServerBacklog = server["Backlog"].getInt16(128);
     ServerConnectionLimit = server["ConnectionLimit"].getInt16(0);
@@ -1009,7 +1014,7 @@ void RuntimeOption::Load(Hdf &config,
   }
   {
     Hdf admin = config["AdminServer"];
-    AdminServerPort = admin["Port"].getInt16(0);
+    AdminServerPort = admin["Port"].getUInt16(0);
     AdminThreadCount = admin["ThreadCount"].getInt32(1);
     AdminPassword = admin["Password"].getString();
     admin["Passwords"].get(AdminPasswords);
@@ -1137,7 +1142,7 @@ void RuntimeOption::Load(Hdf &config,
 #undef get_uint32
 #undef get_uint32_t
 #undef get_uint64
-    Util::low_malloc_huge_pages(EvalMaxLowMemHugePages);
+    low_malloc_huge_pages(EvalMaxLowMemHugePages);
     EvalJitEnableRenameFunction = EvalJitEnableRenameFunction || !EvalJit;
 
     EnableEmitSwitch = eval["EnableEmitSwitch"].getBool(true);
@@ -1255,7 +1260,7 @@ void RuntimeOption::Load(Hdf &config,
   {
     Hdf hhprofServer = config["HHProfServer"];
     HHProfServerEnabled = hhprofServer["Enabled"].getBool(false);
-    HHProfServerPort = hhprofServer["Port"].getInt16(4327);
+    HHProfServerPort = hhprofServer["Port"].getUInt16(4327);
     HHProfServerThreads = hhprofServer["Threads"].getInt16(2);
     HHProfServerTimeoutSeconds =
       hhprofServer["TimeoutSeconds"].getInt64(30);
@@ -1273,15 +1278,14 @@ void RuntimeOption::Load(Hdf &config,
   }
   {
     Hdf simplexml = config["SimpleXML"];
-    // TODO (t3610856): Change the default to false once dependent code is fixed
     SimpleXMLEmptyNamespaceMatchesAll =
-      simplexml["EmptyNamespaceMatchesAll"].getBool(true);
+      simplexml["EmptyNamespaceMatchesAll"].getBool(false);
   }
 #ifdef FACEBOOK
   {
     Hdf fb303Server = config["Fb303Server"];
     EnableFb303Server = fb303Server["Enable"].getBool(true);
-    Fb303ServerPort = fb303Server["Port"].getInt16(0);
+    Fb303ServerPort = fb303Server["Port"].getUInt16(0);
     Fb303ServerThreadStackSizeMb = fb303Server["ThreadStackSizeMb"].getInt16(8);
     Fb303ServerWorkerThreads = fb303Server["WorkerThreads"].getInt16(1);
     Fb303ServerPoolThreads = fb303Server["PoolThreads"].getInt16(1);

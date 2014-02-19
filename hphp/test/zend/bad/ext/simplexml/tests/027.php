@@ -1,4 +1,4 @@
-<?php 
+<?php
 $xml =<<<EOF
 <people></people>
 EOF;

@@ -95,7 +95,6 @@ public:
   EXCEPTION_COMMON_IMPL(OutOfMemoryException);
 };
 
-namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef USE_JEMALLOC
@@ -240,6 +239,6 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force);
 #endif // USE_JEMALLOC
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 #endif // incl_HPHP_UTIL_ALLOC_H_

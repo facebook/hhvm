@@ -85,8 +85,6 @@
 #include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
-#include "hphp/runtime/vm/request-arena.h"
-#include "hphp/util/arena.h"
 
 #include <iostream>
 #include <iomanip>
@@ -127,8 +125,7 @@ TRACE_SET_MOD(bcinterp);
 
 ActRec* ActRec::arGetSfp() const {
   ActRec* prevFrame = (ActRec*)m_savedRbp;
-  if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
-             Util::s_stackSize)) {
+  if (LIKELY(((uintptr_t)prevFrame - s_stackLimit) >= s_stackSize)) {
     if (LIKELY(prevFrame != nullptr)) return prevFrame;
   }
 
@@ -247,8 +244,7 @@ VarEnv::VarEnv()
 {
   m_nvTable.emplace(RuntimeOption::EvalVMInitialGlobalTableSize);
 
-  auto tableWrapper =
-    new (request_arena()) GlobalNameValueTableWrapper(&*m_nvTable);
+  auto tableWrapper = smart_new<GlobalNameValueTableWrapper>(&*m_nvTable);
   auto globalArray = make_tv<KindOfArray>(tableWrapper);
   globalArray.m_data.parr->incRefCount();
   m_nvTable->set(makeStaticString("GLOBALS"), &globalArray);
@@ -284,12 +280,7 @@ VarEnv::~VarEnv() {
            isGlobalScope() ? "global scope" : "local scope");
   assert(m_restoreLocations.empty());
 
-  if (!isGlobalScope()) {
-    if (LIKELY(!m_malloced)) {
-      varenv_arena().endFrame();
-      return;
-    }
-  } else {
+  if (isGlobalScope()) {
     /*
      * When detaching the global scope, we leak any live objects (and
      * let the smart allocator clean them up).  This is because we're
@@ -305,9 +296,7 @@ size_t VarEnv::getObjectSz(ActRec* fp) {
 }
 
 VarEnv* VarEnv::createLocalOnStack(ActRec* fp) {
-  auto& va = varenv_arena();
-  va.beginFrame();
-  void* mem = va.alloc(getObjectSz(fp));
+  void* mem = smart_malloc(getObjectSz(fp));
   VarEnv* ret = new (mem) VarEnv(fp, fp->getExtraArgs());
   TRACE(3, "Creating lazily attached VarEnv %p on stack\n", mem);
   return ret;
@@ -324,7 +313,12 @@ VarEnv* VarEnv::createLocalOnHeap(ActRec* fp) {
 VarEnv* VarEnv::createGlobal() {
   assert(!g_vmContext->m_globalVarEnv);
 
-  VarEnv* ret = new (request_arena()) VarEnv();
+  // Use smart_malloc instead of smartMallocSize since we need to use it above
+  // and don't want to have to record which allocator was used to select the
+  // appropriate deallocation function.
+  auto const mem = smart_malloc(sizeof(VarEnv));
+  auto ret = new (mem) VarEnv();
+
   TRACE(3, "Creating VarEnv %p [global scope]\n", ret);
   ret->m_global = true;
   g_vmContext->m_globalVarEnv = ret;
@@ -333,8 +327,15 @@ VarEnv* VarEnv::createGlobal() {
 
 void VarEnv::destroy(VarEnv* ve) {
   bool malloced = ve->m_malloced;
+  bool global = ve->isGlobalScope();
   ve->~VarEnv();
-  if (UNLIKELY(malloced)) free(ve);
+  if (LIKELY(!malloced)) {
+    if (LIKELY(!global)) {
+      smart_free(ve);
+    }
+  } else {
+    free(ve);
+  }
 }
 
 void VarEnv::attach(ActRec* fp) {
@@ -358,8 +359,7 @@ void VarEnv::attach(ActRec* fp) {
     m_nvTable.emplace(numNames);
   }
 
-  TypedValue** origLocs = new (varenv_arena()) TypedValue*[
-    func->numNamedLocals()];
+  TypedValue** origLocs = smart_new_array<TypedValue*>(func->numNamedLocals());
   TypedValue* loc = frame_local(fp, 0);
   for (Id i = 0; i < numNames; ++i, --loc) {
     assert(func->lookupVarId(func->localVarName(i)) == (int)i);
@@ -547,7 +547,7 @@ class StackElms {
       }
 
       madvise(m_elms, algnSz, MADV_DONTNEED);
-      Util::numa_bind_to(m_elms, algnSz, Util::s_numaNode);
+      numa_bind_to(m_elms, algnSz, s_numaNode);
     }
     return m_elms;
   }
@@ -885,10 +885,6 @@ TypedValue* Stack::generatorStackBase(const ActRec* fp) {
 }
 
 
-__thread RequestArenaStorage s_requestArenaStorage;
-__thread VarEnvArenaStorage s_varEnvArenaStorage;
-
-
 //=============================================================================
 // ExecutionContext.
 
@@ -896,8 +892,7 @@ using namespace HPHP;
 
 ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
   ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
-  if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
-             Util::s_stackSize)) {
+  if (LIKELY(((uintptr_t)prevFrame - s_stackLimit) >= s_stackSize)) {
     if (LIKELY(prevFrame != nullptr)) return prevFrame;
   }
 
@@ -6871,21 +6866,37 @@ OPTBLD_INLINE void VMExecutionContext::iopVerifyParamType(IOP_ARGS) {
   SYNC(); // We might need m_pc to be updated to throw.
   NEXT();
 
-  DECODE_IVA(param);
+  DECODE_IVA(paramId);
   const Func *func = m_fp->m_func;
-  assert(param < func->numParams());
+  assert(paramId < func->numParams());
   assert(func->numParams() == int(func->params().size()));
-  const TypeConstraint& tc = func->params()[param].typeConstraint();
+  const TypeConstraint& tc = func->params()[paramId].typeConstraint();
   assert(tc.hasConstraint());
-  if (UNLIKELY(!RuntimeOption::EvalCheckExtendedTypeHints &&
-               tc.isExtended())) {
+  if (!tc.isTypeVar()) {
+    tc.verifyParam(frame_local(m_fp, paramId), func, paramId);
+  }
+}
+
+OPTBLD_INLINE void VMExecutionContext::implVerifyRetType(IOP_ARGS) {
+  if (LIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
+    NEXT();
     return;
   }
-  if (tc.isTypeVar()) {
-    return;
+  SYNC();
+  NEXT();
+  const auto func = m_fp->m_func;
+  const auto tc = func->returnTypeConstraint();
+  if (!tc.isTypeVar()) {
+    tc.verifyReturn(m_stack.topTV(), func);
   }
-  auto* tv = frame_local(m_fp, param);
-  tc.verify(tv, func, param);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopVerifyRetTypeC(PC& pc) {
+  implVerifyRetType(IOP_PASS_ARGS);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopVerifyRetTypeV(PC& pc) {
+  implVerifyRetType(IOP_PASS_ARGS);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopNativeImpl(IOP_ARGS) {
@@ -7682,10 +7693,7 @@ void VMExecutionContext::requestInit() {
   assert(SystemLib::s_nativeFuncUnit);
   assert(SystemLib::s_nativeClassUnit);
 
-  new (&s_requestArenaStorage) RequestArena();
-  new (&s_varEnvArenaStorage) VarEnvArena();
-
-  EnvConstants::requestInit(new (request_arena()) EnvConstants());
+  EnvConstants::requestInit(smart_new<EnvConstants>());
   VarEnv::createGlobal();
   m_stack.requestInit();
   tx64->requestInit();
@@ -7731,9 +7739,6 @@ void VMExecutionContext::requestExit() {
     VarEnv::destroy(m_globalVarEnv);
     m_globalVarEnv = 0;
   }
-
-  varenv_arena().~VarEnvArena();
-  request_arena().~RequestArena();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -80,6 +80,8 @@ struct TypeConstraint {
    */
   enum class MetaType { Precise, Self, Parent, Callable, Number };
 
+  static const int32_t ReturnId = -1;
+
   TypeConstraint()
     : m_flags(NoFlags)
     , m_typeName(nullptr)
@@ -212,16 +214,28 @@ struct TypeConstraint {
   bool checkTypeAliasNonObj(const TypedValue* tv) const;
 
   // NB: will throw if the check fails.
-  void verify(TypedValue* tv, const Func* func, int paramNum) const {
+  void verifyParam(TypedValue* tv, const Func* func, int paramNum) const {
     if (UNLIKELY(!check(tv, func))) {
-      verifyFail(func, paramNum, tv);
+      verifyParamFail(func, tv, paramNum);
+    }
+  }
+  void verifyReturn(TypedValue* tv, const Func* func) const {
+    if (UNLIKELY(!check(tv, func))) {
+      verifyReturnFail(func, tv);
     }
   }
 
   // Can not be private; used by the translator.
   void selfToClass(const Func* func, const Class **cls) const;
   void parentToClass(const Func* func, const Class **cls) const;
-  void verifyFail(const Func* func, int paramNum, TypedValue* tv) const;
+  void verifyFail(const Func* func, TypedValue* tv, int id) const;
+  void verifyParamFail(const Func* func, TypedValue* tv,
+                       int paramNum) const {
+    verifyFail(func, tv, paramNum);
+  }
+  void verifyReturnFail(const Func* func, TypedValue* tv) const {
+    verifyFail(func, tv, ReturnId);
+  }
 
 private:
   struct Type {

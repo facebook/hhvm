@@ -138,8 +138,8 @@ class FailedCodeGen : public std::runtime_error {
  *     DUnbox(N) single dst has unboxed type of src N
  *     DBox(N)   single dst has boxed type of src N
  *     DParam    single dst has type of the instruction's type parameter
- *     DLdRef    single dst has type of the instruction's type parameter, with
- *               any specialization removed
+ *     DLdRef    single dst has type of the instruction's type parameter,
+ *               loosened to allow efficient type checks
  *     DAllocObj single dst has a type of a newly allocated object; may be a
  *               specialized object type if the class is known
  *     DThis     single dst has type Obj<ctx>, where ctx is the
@@ -561,7 +561,7 @@ O(VerifyParamCls,                   ND, S(Cls)                                \
                                           S(Cls)                              \
                                           C(Int)                              \
                                           C(Int),                     E|N|Er) \
-O(VerifyParamCallable,              ND, S(Cell) C(Int),               E|N|Er) \
+O(VerifyParamCallable,              ND, S(Gen) C(Int),                E|N|Er) \
 O(VerifyParamFail,                  ND, C(Int),                       E|N|Er) \
 O(RaiseUninitLoc,                   ND, S(Str),                       E|N|Er) \
 O(WarnNonObjProp,                   ND, NA,                           E|N|Er) \
@@ -570,6 +570,12 @@ O(RaiseUndefProp,                   ND, S(Obj) CStr,                  E|N|Er) \
 O(PrintStr,                         ND, S(Str),                      E|N|CRc) \
 O(PrintInt,                         ND, S(Int),                      E|N|CRc) \
 O(PrintBool,                        ND, S(Bool),                     E|N|CRc) \
+O(VerifyRetCls,                     ND, S(Cls)                                \
+                                          S(Cls)                              \
+                                          C(Int)                              \
+                                          S(Cell),                    E|N|Er) \
+O(VerifyRetCallable,                ND, S(Gen),                       E|N|Er) \
+O(VerifyRetFail,                    ND, S(Gen),                       E|N|Er) \
 O(AddElemStrKey,                D(Arr), S(Arr)                                \
                                           S(Str)                              \
                                           S(Cell),                 N|CRc|PRc) \

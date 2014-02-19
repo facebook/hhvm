@@ -1,11 +1,7 @@
 <?hh
 
+<<__NativeData("IntlTimeZone")>>
 class IntlTimeZone {
-
-  /**
-   * Internal data
-   */
-  private mixed $__resdata = null;
 
   /**
    * Objects are only created wit the static create functions

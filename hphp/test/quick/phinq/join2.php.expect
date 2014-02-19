@@ -1,7 +1,9 @@
 from $c in $@query_param_0
-  join $o in $orders on $c->CustomerID equals $o->CustomerID into co
-  let $n = count($co)
+  join $o in $@query_param_1 on $c->CustomerID equals $o->CustomerID into co
+  let $n = q_count($co)
   where $n >= 10
   select tuple($c->Name, $n)
 closure
+object(Queryable)#2 (0) {
+}
 ok

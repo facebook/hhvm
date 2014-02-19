@@ -50,7 +50,7 @@ Block* IRUnit::defBlock() {
 }
 
 IRInstruction* IRUnit::mov(SSATmp* dst, SSATmp* src, BCMarker marker) {
-  IRInstruction* inst = gen(Mov, marker, dst->type(), src);
+  IRInstruction* inst = gen(Mov, marker, src);
   dst->setInstruction(inst);
   inst->setDst(dst);
   return inst;

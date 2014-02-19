@@ -340,10 +340,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toFixedVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this Vector.",
+                    "desc": "Returns a FixedVector built from the values of this Vector.",
                     "return": {
                         "type": "Object"
                     },
@@ -373,10 +373,10 @@
                     ]
                 },
                 {
-                    "name": "toFrozenSet",
+                    "name": "toFixedSet",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenSet built from the values of this Vector.",
+                    "desc": "Returns a FixedSet built from the values of this Vector.",
                     "return": {
                         "type": "Object"
                     },
@@ -685,7 +685,7 @@
             ]
         },
         {
-          "name": "HH\\FrozenVector",
+          "name": "HH\\FixedVector",
           "ifaces": [
             "ConstVector"
           ],
@@ -699,7 +699,7 @@
                 "name": "__construct",
                 "flags": [
                 ],
-                "desc": "Returns a FrozenVector built from the values produced by the specified Iterable.",
+                "desc": "Returns a FixedVector built from the values produced by the specified Iterable.",
                 "return": {
                     "type": null
                 },
@@ -715,7 +715,7 @@
                   "name": "isEmpty",
                   "flags": [
                   ],
-                  "desc": "Returns true if the FrozenVector is empty, false otherwise.",
+                  "desc": "Returns true if the FixedVector is empty, false otherwise.",
                   "return": {
                       "type": "Boolean"
                   },
@@ -726,7 +726,7 @@
                   "name": "count",
                   "flags": [
                   ],
-                  "desc": "Returns the number of values in the FrozenVector.",
+                  "desc": "Returns the number of values in the FixedVector.",
                   "return": {
                       "type": "Int64"
                   },
@@ -737,7 +737,7 @@
                   "name": "items",
                   "flags": [
                   ],
-                  "desc": "Returns an Iterable that produces the values from this FrozenVector.",
+                  "desc": "Returns an Iterable that produces the values from this FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -748,7 +748,7 @@
                   "name": "containsKey",
                   "flags": [
                   ],
-                  "desc": "Returns true if the specified key is present in the FrozenVector, returns false otherwise.",
+                  "desc": "Returns true if the specified key is present in the FixedVector, returns false otherwise.",
                   "return": {
                       "type": "Boolean"
                   },
@@ -793,7 +793,7 @@
                   "name": "getIterator",
                   "flags": [
                   ],
-                  "desc": "Returns an iterator that points to beginning of this FrozenVector.",
+                  "desc": "Returns an iterator that points to beginning of this FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -804,7 +804,7 @@
                   "name": "map",
                   "flags": [
                   ],
-                  "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this FrozenVector.",
+                  "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -819,7 +819,7 @@
                  "name": "mapWithKey",
                  "flags": [
                   ],
-                  "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this FrozenVector.",
+                  "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -834,7 +834,7 @@
                   "name": "filter",
                   "flags": [
                   ],
-                  "desc": "Returns a Vector of all the values from this FrozenVector for which the specified callback returns true.",
+                  "desc": "Returns a Vector of all the values from this FixedVector for which the specified callback returns true.",
                   "return": {
                       "type": "Object"
                   },
@@ -849,7 +849,7 @@
                   "name": "filterWithKey",
                   "flags": [
                   ],
-                  "desc": "Returns a Vector of all the values from this FrozenVector for which the specified callback returns true.",
+                  "desc": "Returns a Vector of all the values from this FixedVector for which the specified callback returns true.",
                   "return": {
                       "type": "Object"
                   },
@@ -879,7 +879,7 @@
                   "name": "kvzip",
                   "flags": [
                   ],
-                  "desc": "Returns an Iterable that produces the key\/value pairs from this FrozenVector.",
+                  "desc": "Returns an Iterable that produces the key\/value pairs from this FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -890,7 +890,7 @@
                   "name": "keys",
                   "flags": [
                   ],
-                  "desc": "Returns an Iterable that produces the keys from this FrozenVector.",
+                  "desc": "Returns an Iterable that produces the keys from this FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -971,7 +971,7 @@
                   "name": "toVector",
                   "flags": [
                   ],
-                  "desc": "Returns a Vector built from the values of this FrozenVector.",
+                  "desc": "Returns a Vector built from the values of this FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -979,10 +979,10 @@
                   ]
               },
               {
-                  "name": "toFrozenVector",
+                  "name": "toFixedVector",
                   "flags": [
                   ],
-                  "desc": "Returns a copy of this FrozenVector.",
+                  "desc": "Returns a copy of this FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -993,7 +993,7 @@
                   "name": "toMap",
                   "flags": [
                   ],
-                  "desc": "Returns a Map built from the keys and values of this FrozenVector.",
+                  "desc": "Returns a Map built from the keys and values of this FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -1004,7 +1004,7 @@
                   "name": "toSet",
                   "flags": [
                   ],
-                  "desc": "Returns a Set built from the values of this FrozenVector.",
+                  "desc": "Returns a Set built from the values of this FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -1012,10 +1012,10 @@
                   ]
              },
              {
-                 "name": "toFrozenSet",
+                 "name": "toFixedSet",
                  "flags": [
                  ],
-                  "desc": "Returns a FrozenSet built from the values of this FrozenVector.",
+                  "desc": "Returns a FixedSet built from the values of this FixedVector.",
                  "return": {
                      "type": "Object"
                  },
@@ -1026,7 +1026,7 @@
                  "name": "values",
                  "flags": [
                  ],
-                 "desc": "Returns a clone of this FrozenVector.",
+                 "desc": "Returns a clone of this FixedVector.",
                  "return": {
                      "type": "Object"
                  },
@@ -1037,7 +1037,7 @@
                  "name": "lazy",
                  "flags": [
                  ],
-                 "desc": "Returns a lazy iterable view of this FrozenVector.",
+                 "desc": "Returns a lazy iterable view of this FixedVector.",
                  "return": {
                      "type": "Object"
                  },
@@ -1048,7 +1048,7 @@
                  "name": "toArray",
                   "flags": [
                   ],
-                  "desc": "Returns an array built from the values from this FrozenVector.",
+                  "desc": "Returns an array built from the values from this FixedVector.",
                   "return": {
                       "type": "VariantMap"
                   },
@@ -1059,7 +1059,7 @@
                   "name": "toKeysArray",
                   "flags": [
                   ],
-                  "desc": "Returns an array built from the keys from this FrozenVector.",
+                  "desc": "Returns an array built from the keys from this FixedVector.",
                   "return": {
                       "type": "VariantMap"
                   },
@@ -1070,7 +1070,7 @@
                   "name": "toValuesArray",
                   "flags": [
                   ],
-                  "desc": "Returns an array built from the values from this FrozenVector.",
+                  "desc": "Returns an array built from the values from this FixedVector.",
                   "return": {
                       "type": "VariantMap"
                   },
@@ -1097,7 +1097,7 @@
                   "flags": [
                       "IsStatic"
                   ],
-                  "desc": "Returns a FrozenVector built from the specified slice of values from the specified FrozenVector.",
+                  "desc": "Returns a FixedVector built from the specified slice of values from the specified FixedVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -1124,7 +1124,7 @@
             "ifaces": [
                 "HH\\KeyedIterator"
             ],
-            "desc": "An iterator implementation for iterating over a Vector\/FrozenVector.",
+            "desc": "An iterator implementation for iterating over a Vector\/FixedVector.",
             "flags": [
                 "IsFinal",
                 "NoDefaultSweep"
@@ -1481,10 +1481,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toFixedVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this Map.",
+                    "desc": "Returns a FixedVector built from the values of this Map.",
                     "return": {
                         "type": "Object"
                     },
@@ -1514,10 +1514,10 @@
                     ]
                 },
                 {
-                    "name": "toFrozenSet",
+                    "name": "toFixedSet",
                     "flags": [
                     ],
-                     "desc": "Returns a FrozenSet built from the values of this Map.",
+                     "desc": "Returns a FixedSet built from the values of this Map.",
                     "return": {
                         "type": "Object"
                     },
@@ -1794,7 +1794,7 @@
             ]
         },
         {
-            "name": "HH\\FrozenMap",
+            "name": "HH\\FixedMap",
             "ifaces": [
                 "ConstMap"
             ],
@@ -1809,7 +1809,7 @@
                     "name": "__construct",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenMap built from the keys and values produced by the specified KeyedIterable.",
+                    "desc": "Returns a FixedMap built from the keys and values produced by the specified KeyedIterable.",
                     "return": {
                         "type": null
                     },
@@ -1825,7 +1825,7 @@
                     "name": "isEmpty",
                     "flags": [
                     ],
-                    "desc": "Returns true if the FrozenMap is empty, false otherwise.",
+                    "desc": "Returns true if the FixedMap is empty, false otherwise.",
                     "return": {
                         "type": "Boolean"
                     },
@@ -1836,7 +1836,7 @@
                     "name": "count",
                     "flags": [
                     ],
-                    "desc": "Returns the number of key\/value pairs in the FrozenMap.",
+                    "desc": "Returns the number of key\/value pairs in the FixedMap.",
                     "return": {
                         "type": "Int64"
                     },
@@ -1847,7 +1847,7 @@
                     "name": "items",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the key\/value Pairs from this FrozenMap.",
+                    "desc": "Returns an Iterable that produces the key\/value Pairs from this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1858,7 +1858,7 @@
                     "name": "keys",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the keys of this FrozenMap.",
+                    "desc": "Returns a FixedVector built from the keys of this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1869,7 +1869,7 @@
                     "name": "lazy",
                     "flags": [
                     ],
-                    "desc": "Returns a lazy iterable view of this FrozenMap.",
+                    "desc": "Returns a lazy iterable view of this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1880,7 +1880,7 @@
                     "name": "kvzip",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the key\/value pairs from this FrozenMap.",
+                    "desc": "Returns an Iterable that produces the key\/value pairs from this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1921,7 +1921,7 @@
                     "name": "contains",
                     "flags": [
                     ],
-                    "desc": "Returns true if the specified key is present in the FrozenMap, false otherwise.",
+                    "desc": "Returns true if the specified key is present in the FixedMap, false otherwise.",
                     "return": {
                         "type": "Boolean"
                     },
@@ -1936,7 +1936,7 @@
                     "name": "containsKey",
                     "flags": [
                     ],
-                    "desc": "Returns true if the specified key is present in the FrozenMap, false otherwise.",
+                    "desc": "Returns true if the specified key is present in the FixedMap, false otherwise.",
                     "return": {
                         "type": "Boolean"
                     },
@@ -1951,7 +1951,7 @@
                     "name": "toArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the keys and values from this FrozenMap.",
+                    "desc": "Returns an array built from the keys and values from this FixedMap.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -1962,7 +1962,7 @@
                     "name": "toVector",
                     "flags": [
                     ],
-                    "desc": "Returns a Vector built from the values of this FrozenMap.",
+                    "desc": "Returns a Vector built from the values of this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1970,10 +1970,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toFixedVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this FrozenMap.",
+                    "desc": "Returns a FixedVector built from the values of this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1984,7 +1984,7 @@
                     "name": "toMap",
                     "flags": [
                     ],
-                    "desc": "Returns a Map built from the keys and values of this FrozenMap.",
+                    "desc": "Returns a Map built from the keys and values of this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1995,7 +1995,7 @@
                     "name": "toSet",
                     "flags": [
                     ],
-                    "desc": "Returns a Set built from the values of this FrozenMap.",
+                    "desc": "Returns a Set built from the values of this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2003,10 +2003,10 @@
                     ]
                 },
                 {
-                    "name": "toFrozenSet",
+                    "name": "toFixedSet",
                     "flags": [
                     ],
-                     "desc": "Returns a FrozenSet built from the values of this FrozenMap.",
+                     "desc": "Returns a FixedSet built from the values of this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2017,7 +2017,7 @@
                     "name": "values",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this FrozenMap.",
+                    "desc": "Returns a FixedVector built from the values of this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2028,7 +2028,7 @@
                     "name": "toKeysArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the keys from this FrozenMap.",
+                    "desc": "Returns an array built from the keys from this FixedMap.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -2039,7 +2039,7 @@
                     "name": "toValuesArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the values from this FrozenMap.",
+                    "desc": "Returns an array built from the values from this FixedMap.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -2064,7 +2064,7 @@
                     "name": "getIterator",
                     "flags": [
                     ],
-                    "desc": "Returns an iterator that points to beginning of this FrozenMap.",
+                    "desc": "Returns an iterator that points to beginning of this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2075,7 +2075,7 @@
                     "name": "map",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenMap of the keys/values produced by applying the specified callback on each value from this FrozenMap.",
+                    "desc": "Returns a FixedMap of the keys/values produced by applying the specified callback on each value from this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2090,7 +2090,7 @@
                     "name": "mapWithKey",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenMap of the keys/values produced by applying the specified callback on each key and value from this FrozenMap.",
+                    "desc": "Returns a FixedMap of the keys/values produced by applying the specified callback on each key and value from this FixedMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2105,7 +2105,7 @@
                     "name": "filter",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenMap of all the keys/values from this FrozenMap for which the specified callback returns true.",
+                    "desc": "Returns a FixedMap of all the keys/values from this FixedMap for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -2120,7 +2120,7 @@
                     "name": "filterWithKey",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenMap of all the keys/values from this FrozenMap for which the specified callback returns true.",
+                    "desc": "Returns a FixedMap of all the keys/values from this FixedMap for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -2221,7 +2221,7 @@
                     "flags": [
                         "IsStatic"
                     ],
-                    "desc": "Returns a FrozenMap built from the key\/value Pairs produced by the specified Iterable.",
+                    "desc": "Returns a FixedMap built from the key\/value Pairs produced by the specified Iterable.",
                     "return": {
                         "type": "Object"
                     },
@@ -2493,10 +2493,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toFixedVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this Set.",
+                    "desc": "Returns a FixedVector built from the values of this Set.",
                     "return": {
                         "type": "Object"
                     },
@@ -2515,10 +2515,10 @@
                     ]
                 },
                 {
-                    "name": "toFrozenSet",
+                    "name": "toFixedSet",
                     "flags": [
                     ],
-                     "desc": "Returns a FrozenSet built from the values of this Set.",
+                     "desc": "Returns a FixedSet built from the values of this Set.",
                      "return": {
                         "type": "Object"
                     },
@@ -2751,7 +2751,7 @@
             ]
         },
         {
-            "name": "HH\\FrozenSet",
+            "name": "HH\\FixedSet",
             "ifaces": [
                 "ConstSet"
             ],
@@ -2766,7 +2766,7 @@
                     "name": "__construct",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenSet built from the values produced by the specified Iterable.",
+                    "desc": "Returns a FixedSet built from the values produced by the specified Iterable.",
                     "return": {
                         "type": null
                     },
@@ -2782,7 +2782,7 @@
                     "name": "isEmpty",
                     "flags": [
                     ],
-                    "desc": "Returns true if the FrozenSet is empty, false otherwise.",
+                    "desc": "Returns true if the FixedSet is empty, false otherwise.",
                     "return": {
                         "type": "Boolean"
                     },
@@ -2793,7 +2793,7 @@
                     "name": "count",
                     "flags": [
                     ],
-                    "desc": "Returns the number of values in the FrozenSet.",
+                    "desc": "Returns the number of values in the FixedSet.",
                     "return": {
                         "type": "Int64"
                     },
@@ -2804,7 +2804,7 @@
                     "name": "items",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the values from this FrozenSet.",
+                    "desc": "Returns an Iterable that produces the values from this FixedSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2815,7 +2815,7 @@
                     "name": "values",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this FrozenSet.",
+                    "desc": "Returns a FixedVector built from the values of this FixedSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2826,7 +2826,7 @@
                     "name": "lazy",
                     "flags": [
                     ],
-                    "desc": "Returns a lazy iterable view of this FrozenSet.",
+                    "desc": "Returns a lazy iterable view of this FixedSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2837,7 +2837,7 @@
                     "name": "contains",
                     "flags": [
                     ],
-                    "desc": "Returns true if the specified value is present in the FrozenSet, returns false otherwise.",
+                    "desc": "Returns true if the specified value is present in the FixedSet, returns false otherwise.",
                     "return": {
                         "type": "Boolean"
                     },
@@ -2852,7 +2852,7 @@
                     "name": "toArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the values from this FrozenSet, array(val1 => val1, val2 => val2, ...). This maintains set-like semantics in array() land: O(1) membership test with `array_has_key($a['key'])` and iteration with `foreach($a as $member)`. Int-like strings end up with numerical array keys.",
+                    "desc": "Returns an array built from the values from this FixedSet, array(val1 => val1, val2 => val2, ...). This maintains set-like semantics in array() land: O(1) membership test with `array_has_key($a['key'])` and iteration with `foreach($a as $member)`. Int-like strings end up with numerical array keys.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -2863,7 +2863,7 @@
                     "name": "toVector",
                     "flags": [
                     ],
-                    "desc": "Returns a Vector built from the values of this FrozenSet.",
+                    "desc": "Returns a Vector built from the values of this FixedSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2871,10 +2871,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toFixedVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this FrozenSet.",
+                    "desc": "Returns a FixedVector built from the values of this FixedSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2885,7 +2885,7 @@
                     "name": "toSet",
                     "flags": [
                     ],
-                    "desc": "Returns a Set built from the values of this FrozenSet.",
+                    "desc": "Returns a Set built from the values of this FixedSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2893,10 +2893,10 @@
                     ]
                 },
                 {
-                    "name": "toFrozenSet",
+                    "name": "toFixedSet",
                     "flags": [
                     ],
-                    "desc": "Returns a copy of this FrozenSet.",
+                    "desc": "Returns a copy of this FixedSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2907,7 +2907,7 @@
                     "name": "toKeysArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the values from this FrozenSet.",
+                    "desc": "Returns an array built from the values from this FixedSet.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -2918,7 +2918,7 @@
                     "name": "toValuesArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the values from this FrozenSet.",
+                    "desc": "Returns an array built from the values from this FixedSet.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -2929,7 +2929,7 @@
                     "name": "getIterator",
                     "flags": [
                     ],
-                    "desc": "Returns an iterator that points to beginning of this FrozenSet.",
+                    "desc": "Returns an iterator that points to beginning of this FixedSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2940,7 +2940,7 @@
                     "name": "map",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenSet of the values produced by applying the specified callback on each value from this FrozenSet.",
+                    "desc": "Returns a FixedSet of the values produced by applying the specified callback on each value from this FixedSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2955,7 +2955,7 @@
                     "name": "filter",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenSet of all the values from this FrozenSet for which the specified callback returns true.",
+                    "desc": "Returns a FixedSet of all the values from this FixedSet for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -3056,7 +3056,7 @@
                     "flags": [
                         "IsStatic"
                     ],
-                    "desc": "Returns a FrozenSet built from the values produced by the specified Iterable.",
+                    "desc": "Returns a FixedSet built from the values produced by the specified Iterable.",
                     "return": {
                         "type": "Object"
                     },
@@ -3073,7 +3073,7 @@
                         "IsStatic",
                         "VariableArguments"
                     ],
-                    "desc": "Returns a FrozenSet built from the values from the specified arrays.",
+                    "desc": "Returns a FixedSet built from the values from the specified arrays.",
                     "return": {
                         "type": "Object"
                     },
@@ -3286,10 +3286,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toFixedVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this Pair.",
+                    "desc": "Returns a FixedVector built from the values of this Pair.",
                     "return": {
                         "type": "Object"
                     },
@@ -3319,10 +3319,10 @@
                     ]
                 },
                 {
-                   "name": "toFrozenSet",
+                   "name": "toFixedSet",
                    "flags": [
                    ],
-                    "desc": "Returns a FrozenSet built from the values of this Pair.",
+                    "desc": "Returns a FixedSet built from the values of this Pair.",
                     "return": {
                         "type": "Object"
                     },

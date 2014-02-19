@@ -163,8 +163,8 @@ String f_gethostbyname(const String& hostname) {
     }
   }
 
-  Util::HostEnt result;
-  if (!Util::safe_gethostbyname(hostname.data(), result)) {
+  HostEnt result;
+  if (!safe_gethostbyname(hostname.data(), result)) {
     if (RuntimeOption::EnableDnsCache) {
       f_apc_store(hostname, false, RuntimeOption::DnsCacheTTL,
                   SHARED_STORE_DNS_CACHE);
@@ -174,7 +174,7 @@ String f_gethostbyname(const String& hostname) {
 
   struct in_addr in;
   memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
-  String ret(Util::safe_inet_ntoa(in));
+  String ret(safe_inet_ntoa(in));
   if (RuntimeOption::EnableDnsCache) {
     f_apc_store(hostname, ret, RuntimeOption::DnsCacheTTL,
                 SHARED_STORE_DNS_CACHE);
@@ -184,15 +184,15 @@ String f_gethostbyname(const String& hostname) {
 
 Variant f_gethostbynamel(const String& hostname) {
   IOStatusHelper io("gethostbynamel", hostname.data());
-  Util::HostEnt result;
-  if (!Util::safe_gethostbyname(hostname.data(), result)) {
+  HostEnt result;
+  if (!safe_gethostbyname(hostname.data(), result)) {
     return false;
   }
 
   Array ret;
   for (int i = 0 ; result.hostbuf.h_addr_list[i] != 0 ; i++) {
     struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
-    ret.append(String(Util::safe_inet_ntoa(in)));
+    ret.append(String(safe_inet_ntoa(in)));
   }
   return ret;
 }
@@ -296,7 +296,7 @@ Variant f_ip2long(const String& ip_address) {
 String f_long2ip(int proper_address) {
   struct in_addr myaddr;
   myaddr.s_addr = htonl(proper_address);
-  return Util::safe_inet_ntoa(myaddr);
+  return safe_inet_ntoa(myaddr);
 }
 
 /* just a hack to free resources allocated by glibc in __res_nsend()

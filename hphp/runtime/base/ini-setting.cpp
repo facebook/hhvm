@@ -69,9 +69,64 @@ bool ini_on_update_bool(const std::string& value, void *p) {
   return true;
 }
 
+bool ini_on_update_short(const std::string& value, void *p) {
+  if (p) {
+    auto n = convert_bytes_to_long(value);
+    auto maxValue = 0x7FFFL;
+    if (n > maxValue || n < (- maxValue - 1)) {
+      return false;
+    }
+    *((int16_t*)p) = n;
+  }
+  return true;
+}
+
+bool ini_on_update_int(const std::string& value, void *p) {
+  if (p) {
+    auto n = convert_bytes_to_long(value);
+    auto maxValue = 0x7FFFFFFFL;
+    if (n > maxValue || n < (- maxValue - 1)) {
+      return false;
+    }
+    *((int32_t*)p) = n;
+  }
+  return true;
+}
+
 bool ini_on_update_long(const std::string& value, void *p) {
   if (p) {
     *((int64_t*)p) = convert_bytes_to_long(value);
+  }
+  return true;
+}
+
+bool ini_on_update_ushort(const std::string& value, void *p) {
+  if (p) {
+    auto n = convert_bytes_to_long(value);
+    auto mask = ~0xFFFFUL;
+    if (((uint64_t)n & mask)) {
+      return false;
+    }
+    *((uint16_t*)p) = n;
+  }
+  return true;
+}
+
+bool ini_on_update_uint(const std::string& value, void *p) {
+  if (p) {
+    auto n = convert_bytes_to_long(value);
+    auto mask = ~0x7FFFFFFFUL;
+    if (((uint64_t)n & mask)) {
+      return false;
+    }
+    *((uint32_t*)p) = n;
+  }
+  return true;
+}
+
+bool ini_on_update_ulong(const std::string& value, void *p) {
+  if (p) {
+    *((uint64_t*)p) = convert_bytes_to_long(value);
   }
   return true;
 }
@@ -116,8 +171,28 @@ std::string ini_get_bool_as_int(void* p) {
   return (*(bool*) p) ? "1" : "0";
 }
 
+std::string ini_get_short(void *p) {
+  return std::to_string(*((int16_t*)p));
+}
+
+std::string ini_get_int(void *p) {
+  return std::to_string(*((int32_t*)p));
+}
+
 std::string ini_get_long(void *p) {
   return std::to_string(*((int64_t*)p));
+}
+
+std::string ini_get_ushort(void *p) {
+  return std::to_string(*((uint16_t*)p));
+}
+
+std::string ini_get_uint(void *p) {
+  return std::to_string(*((uint32_t*)p));
+}
+
+std::string ini_get_ulong(void *p) {
+  return std::to_string(*((uint64_t*)p));
 }
 
 std::string ini_get_real(void *p) {
@@ -274,22 +349,41 @@ void IniSetting::SystemParserCallback::onPopEntry(
   assert(!key.empty());
   auto& arr = *(IniSetting::Map*)arg;
   auto* ptr = arr.get_ptr(key);
-  if (!ptr || !ptr->isArray()) {
+  if (!ptr || !ptr->isObject()) {
     arr[key] = IniSetting::Map::object;
     ptr = arr.get_ptr(key);
   }
   if (!offset.empty()) {
-    (*ptr)[offset] = value;
+    makeArray(*ptr, offset, value);
   } else {
     // Find the highest index
     auto max = 0;
     for (auto &a : ptr->keys()) {
-      if (a.isInt() && a > max) {
-        max = a.asInt();
+      if (a.isInt() && a >= max) {
+        max = a.asInt() + 1;
       }
     }
-    (*ptr)[max] = value;
+    (*ptr)[std::to_string(max)] = value;
   }
+}
+void IniSetting::SystemParserCallback::makeArray(Map &hash,
+                                                 const std::string &offset,
+                                                 const std::string &value) {
+  assert(!offset.empty());
+  Map& val = hash;
+  auto start = offset.c_str();
+  auto p = start;
+  bool last = false;
+  do {
+    std::string index(p);
+    last = p + index.size() >= start + offset.size();
+    Map newval = last ? Map(value) : val.getDefault(index, Map::object());
+    val[index] = newval;
+    if (!last) {
+      val = newval;
+      p += index.size() + 1;
+    }
+  } while (!last);
 }
 void IniSetting::SystemParserCallback::onConstant(std::string &result,
                                                   const std::string &name) {
@@ -414,6 +508,26 @@ void IniSetting::Bind(const Extension* extension, const Mode mode,
 
 void IniSetting::Bind(const Extension* extension, const Mode mode,
                       const char *name,
+                      int16_t *p) {
+  Bind(extension, mode, name, ini_on_update_short, ini_get_short, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      int16_t *p) {
+  Bind(extension, mode, name, value, ini_on_update_short, ini_get_short, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
+                      int32_t *p) {
+  Bind(extension, mode, name, ini_on_update_int, ini_get_int, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      int32_t *p) {
+  Bind(extension, mode, name, value, ini_on_update_int, ini_get_int, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
                       int64_t *p) {
   Bind(extension, mode, name, ini_on_update_long, ini_get_long, p);
 }
@@ -421,6 +535,47 @@ void IniSetting::Bind(const Extension* extension, const Mode mode,
                       const char *name, const char *value,
                       int64_t *p) {
   Bind(extension, mode, name, value, ini_on_update_long, ini_get_long, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
+                      uint16_t *p) {
+  Bind(extension, mode, name, ini_on_update_ushort, ini_get_ushort, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      uint16_t *p) {
+  Bind(extension, mode, name, value, ini_on_update_ushort, ini_get_ushort, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
+                      uint32_t *p) {
+  Bind(extension, mode, name, ini_on_update_uint, ini_get_uint, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      uint32_t *p) {
+  Bind(extension, mode, name, value, ini_on_update_uint, ini_get_uint, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
+                      uint64_t *p) {
+  Bind(extension, mode, name, ini_on_update_ulong, ini_get_ulong, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      uint64_t *p) {
+  Bind(extension, mode, name, value, ini_on_update_ulong, ini_get_ulong, p);
+}
+
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name,
+                      double *p) {
+  Bind(extension, mode, name, ini_on_update_real, ini_get_real, p);
+}
+void IniSetting::Bind(const Extension* extension, const Mode mode,
+                      const char *name, const char *value,
+                      double *p) {
+  Bind(extension, mode, name, value, ini_on_update_real, ini_get_real, p);
 }
 
 void IniSetting::Bind(const Extension* extension, const Mode mode,

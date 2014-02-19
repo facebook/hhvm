@@ -2223,7 +2223,7 @@ VectorHasFrozenCopy S0:Obj<Vector> -> B
 
 VectorDoCow S0:Obj<Vector>
 
-  Triggers a copy on write for a Vector that has a live FrozenVector sharing
+  Triggers a copy on write for a Vector that has a live FixedVector sharing
   the same copy of the elements.
 
 D:Obj = ColAddNewElemC S0:Obj S0:Cell

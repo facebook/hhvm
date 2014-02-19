@@ -38,6 +38,11 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program);
 void process_env_variables(Variant &variables);
 
 /**
+ * Reset all the ini settings from the config file
+ */
+void process_ini_settings();
+
+/**
  * Inserting a variable into specified symbol table.
  *
  * "overwrite" parameter is only for cookies:

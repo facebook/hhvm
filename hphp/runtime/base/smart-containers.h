@@ -165,12 +165,22 @@ using queue = std::queue<T, deque<T>>;
 template <class T, class Compare = std::less<T>>
 using priority_queue = std::priority_queue<T, vector<T>, Compare>;
 
+#ifdef HAVE_BOOST1_49
+// These classes are oddly broken in older boost versions.
 template<class K, class V, class Pred = std::less<K>>
 using flat_map = boost::container::flat_map<K,V,Pred,Allocator<std::pair<K,V>>>;
 
 template<class K, class V, class Pred = std::less<K>>
 using flat_multimap =
   boost::container::flat_multimap<K,V,Pred,Allocator<std::pair<K,V>>>;
+#else
+template <class Key, class T, class Compare = std::less<Key>>
+using flat_map = std::map<Key, T, Compare, Allocator<std::pair<const Key,T>>>;
+
+template <class Key, class T, class Compare = std::less<Key>>
+using flat_multimap =
+  std::multimap<Key,T,Compare,Allocator<std::pair<const Key,T>>>;
+#endif
 
 template<class K, class Pred = std::less<K>>
 using flat_set = boost::container::flat_set<K, Pred, Allocator<K>>;

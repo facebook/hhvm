@@ -61,6 +61,10 @@ struct Simplifier {
    */
   SSATmp* simplify(IRInstruction*);
 
+  using ConstraintFunc = std::function<void(TypeConstraint)>;
+  SSATmp* simplifyAssertTypeOp(IRInstruction* inst, Type prevType,
+                               ConstraintFunc cf) const;
+
 private:
   SSATmp* simplifyMov(SSATmp* src);
   SSATmp* simplifyNot(SSATmp* src);
@@ -174,7 +178,7 @@ private:
   SSATmp* simplifyCheckPackedArrayBounds(IRInstruction*);
   SSATmp* simplifyLdPackedArrayElem(IRInstruction*);
 
-private: // tracebuilder forwarders
+private: // IRBuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, BCMarker marker, Args&&...);
@@ -235,13 +239,6 @@ struct StackValueInfo {
 };
 
 /*
- * If the typeParam of inst isn't a subtype of oldType, filter out the
- * parts of the typeParam that aren't in oldType and return
- * true. Otherwise, return false.
- */
-bool filterAssertType(IRInstruction* inst, Type oldType);
-
-/*
  * Track down a value or type using the StkPtr chain.
  *
  * The spansCall parameter tracks whether the returned value's
@@ -257,13 +254,13 @@ StackValueInfo getStackValue(SSATmp* stack, uint32_t index);
  * given the particular depth.
  *
  * This function is used for computing available value for
- * DecRef->DecRefNZ conversions in tracebuilder.
+ * DecRef->DecRefNZ conversions in IRBuilder.
  */
 smart::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth);
 
 /*
  * Propagate very simple copies on the given instruction.
- * Specifically, Movs, and also IncRefs of non-refcounted types.
+ * Specifically, Movs.
  *
  * More complicated copy-propagation is performed in the Simplifier.
  */

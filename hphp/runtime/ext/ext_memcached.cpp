@@ -153,6 +153,10 @@ const int64_t q_Memcached$$RES_BAD_KEY_PROVIDED
           = MEMCACHED_BAD_KEY_PROVIDED;
 const int64_t q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE
           = MEMCACHED_CONNECTION_SOCKET_CREATE_FAILURE;
+const int64_t q_Memcached$$RES_NOT_SUPPORTED
+          = MEMCACHED_NOT_SUPPORTED;
+const int64_t q_Memcached$$RES_INVALID_HOST_PROTOCOL
+          = MEMCACHED_INVALID_HOST_PROTOCOL;
 
 // Our result codes
 const int64_t q_Memcached$$RES_PAYLOAD_FAILURE = -1001;

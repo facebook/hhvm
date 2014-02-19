@@ -101,17 +101,17 @@ void ThreadInfo::onSessionInit() {
   // Take the address of the cached per-thread stackLimit, and use this to allow
   // some slack for (a) stack usage above the caller of reset() and (b) stack
   // usage after the position gets checked.
-  // If we're not in a threaded environment, then Util::s_stackSize will be
+  // If we're not in a threaded environment, then s_stackSize will be
   // zero. Use getrlimit to figure out what the size of the stack is to
   // calculate an approximation of where the bottom of the stack should be.
-  if (Util::s_stackSize == 0) {
+  if (s_stackSize == 0) {
     struct rlimit rl;
 
     getrlimit(RLIMIT_STACK, &rl);
     m_stacklimit = t_stackbase - (rl.rlim_cur - StackSlack);
   } else {
-    m_stacklimit = (char *)Util::s_stackLimit + StackSlack;
-    assert(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));
+    m_stacklimit = (char *)s_stackLimit + StackSlack;
+    assert(uintptr_t(m_stacklimit) < s_stackLimit + s_stackSize);
   }
 
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,

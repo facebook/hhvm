@@ -31,7 +31,7 @@
 
 #include "hphp/util/logger.h"
 
-namespace HPHP { namespace Util {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void flush_thread_caches() {
@@ -79,21 +79,22 @@ void init_stack_limits(pthread_attr_t* attr) {
   // Get the guard page's size, because the stack address returned
   // above starts at the guard page, so the thread's stack limit is
   // stackaddr + guardsize.
-  if (pthread_attr_getguardsize(attr, &guardsize) != 0)
+  if (pthread_attr_getguardsize(attr, &guardsize) != 0) {
     guardsize = 0;
+  }
 
   assert(stackaddr != nullptr);
   assert(stacksize >= PTHREAD_STACK_MIN);
-  Util::s_stackLimit = uintptr_t(stackaddr) + guardsize;
-  Util::s_stackSize = stacksize - guardsize;
+  s_stackLimit = uintptr_t(stackaddr) + guardsize;
+  s_stackSize = stacksize - guardsize;
 }
 
 void flush_thread_stack() {
-  uintptr_t top = get_stack_top() & ~(Util::s_pageSize - 1);
+  uintptr_t top = get_stack_top() & ~(s_pageSize - 1);
   // s_stackLimit is already aligned
   assert(top >= s_stackLimit);
   size_t len = top - s_stackLimit;
-  assert((len & (Util::s_pageSize - 1)) == 0);
+  assert((len & (s_pageSize - 1)) == 0);
   if (madvise((void*)s_stackLimit, len, MADV_DONTNEED) != 0 &&
       errno != EAGAIN) {
     fprintf(stderr, "%s failed to madvise with error %d\n", __func__, errno);
@@ -440,7 +441,7 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 #endif // USE_JEMALLOC
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 extern "C" {
   const char* malloc_conf = "narenas:1,lg_tcache_max:16";

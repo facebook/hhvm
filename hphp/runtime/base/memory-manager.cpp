@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
@@ -209,6 +210,7 @@ void MemoryManager::sweep() {
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
   Sweepable::SweepAll();
+  Native::sweepNativeData();
 }
 
 void MemoryManager::resetAllocator() {
@@ -327,7 +329,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   auto const oldPrev = n->prev;
 
   auto const newNode = static_cast<SweepNode*>(
-    Util::safe_realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
+    safe_realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
   );
 
   refreshStatsHelper();
@@ -345,7 +347,7 @@ NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
   if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
-  char* slab = (char*) Util::safe_malloc(SLAB_SIZE);
+  char* slab = (char*) safe_malloc(SLAB_SIZE);
   assert(uintptr_t(slab) % 16 == 0);
   JEMALLOC_STATS_ADJUST(&m_stats, SLAB_SIZE);
   m_stats.alloc += SLAB_SIZE;
@@ -399,7 +401,7 @@ NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
   assert(nbytes > 0);
   auto const n = static_cast<SweepNode*>(
-    Util::safe_malloc(nbytes + sizeof(SweepNode))
+    safe_malloc(nbytes + sizeof(SweepNode))
   );
   return smartEnlist(n);
 }
@@ -424,7 +426,7 @@ NEVER_INLINE
 void* MemoryManager::smartCallocBig(size_t totalbytes) {
   assert(totalbytes > 0);
   auto const n = static_cast<SweepNode*>(
-    Util::safe_calloc(totalbytes + sizeof(SweepNode), 1)
+    safe_calloc(totalbytes + sizeof(SweepNode), 1)
   );
   return smartEnlist(n);
 }

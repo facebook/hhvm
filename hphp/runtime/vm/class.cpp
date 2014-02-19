@@ -23,7 +23,7 @@
 #include "hphp/util/debug.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/request-arena.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/parser/parser.h"
@@ -193,19 +193,44 @@ void PreClass::prettyPrint(std::ostream &out) const {
   }
 }
 
+const StaticString s_nativedata("__nativedata");
+void PreClass::setUserAttributes(const UserAttributeMap &ua) {
+  m_userAttributes = ua;
+  m_nativeDataInfo = nullptr;
+  if (!ua.size()) return;
+
+  // Check for <<__NativeData("Type")>>
+  auto it = ua.find(s_nativedata.get());
+  if (it == ua.end()) return;
+
+  TypedValue ndiInfo = it->second;
+  if (ndiInfo.m_type != KindOfArray) return;
+
+  // Use the first string label which references a registered type
+  // In practice, there should generally only be one item and
+  // it should be a string, but maybe that'll be extended...
+  for (ArrayIter it(ndiInfo.m_data.parr); it; ++it) {
+    Variant val = it.second();
+    if (!val.isString()) continue;
+    if ((m_nativeDataInfo = Native::getNativeDataInfo(val.toString().get()))) {
+      break;
+    }
+  }
+}
+
 //=============================================================================
 // Class.
 
-static_assert(sizeof(Class) == 368, "Change this only on purpose");
+static_assert(sizeof(Class) == 376, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
   auto const size = offsetof(Class, m_classVec) + sizeof(Class*) * classVecLen;
-  auto const mem = Util::low_malloc(size);
+  auto const mem = low_malloc(size);
   try {
     return new (mem) Class(preClass, parent, classVecLen);
   } catch (...) {
-    Util::low_free(mem);
+    low_free(mem);
     throw;
   }
 }
@@ -237,6 +262,7 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   setInitializers();
   setClassVec();
   checkTraitConstraints();
+  setNativeDataInfo();
 }
 
 Class::~Class() {
@@ -336,7 +362,7 @@ void Class::atomicRelease() {
   assert(!m_cachedClass.bound());
   assert(!getCount());
   this->~Class();
-  Util::low_free(this);
+  low_free(this);
 }
 
 Class *Class::getCached() const {
@@ -490,8 +516,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
   // 86pinit() calls below. 86pinit() takes a reference to an array to populate
   // with initial property values; after it completes, we copy the values into
   // the new propVec.
-  request_arena().beginFrame();
-  PropInitVec* propVec = PropInitVec::allocInRequestArena(m_declPropInit);
+  auto propVec = PropInitVec::allocWithSmartAllocator(m_declPropInit);
 
   setPropData(propVec);
 
@@ -506,7 +531,8 @@ Class::PropInitVec* Class::initPropsImpl() const {
     }
   } catch (...) {
     // Undo the allocation of propVec
-    request_arena().endFrame();
+    smart_delete_array(propVec->begin(), propVec->size());
+    smart_delete(propVec);
     throw;
   }
 
@@ -631,7 +657,7 @@ TypedValue* Class::initSPropsImpl() const {
   // Create an array that is initially large enough to hold all static
   // properties.
   TypedValue* const spropTable =
-    new (request_arena()) TypedValue[m_staticProperties.size()];
+    smart_new_array<TypedValue>(m_staticProperties.size());
   memset(spropTable, 0, m_staticProperties.size() * sizeof(TypedValue));
   setSPropData(spropTable);
 
@@ -1990,6 +2016,16 @@ void Class::setInterfaces() {
   checkInterfaceMethods();
 }
 
+void Class::setNativeDataInfo() {
+  for (auto cls = this; cls; cls = cls->parent()) {
+    if ((m_nativeDataInfo = cls->preClass()->nativeDataInfo())) {
+      m_instanceCtor = Native::nativeDataInstanceCtor;
+      m_instanceDtor = Native::nativeDataInstanceDtor;
+      break;
+    }
+  }
+}
+
 void Class::setUsedTraits() {
   for (auto const& traitName : m_preClass->usedTraits()) {
     Class* classPtr = Unit::loadClass(traitName);
@@ -2315,11 +2351,10 @@ Class::PropInitVec::~PropInitVec() {
 Class::PropInitVec::PropInitVec() : m_data(nullptr), m_size(0), m_smart(false) {}
 
 Class::PropInitVec*
-Class::PropInitVec::allocInRequestArena(const PropInitVec& src) {
-  ThreadInfo* info UNUSED = ThreadInfo::s_threadInfo.getNoCheck();
-  PropInitVec* p = new (request_arena()) PropInitVec;
+Class::PropInitVec::allocWithSmartAllocator(const PropInitVec& src) {
+  PropInitVec* p = smart_new<PropInitVec>();
   p->m_size = src.size();
-  p->m_data = new (request_arena()) TypedValueAux[src.size()];
+  p->m_data = smart_new_array<TypedValueAux>(src.size());
   memcpy(p->m_data, src.m_data, src.size() * sizeof(*p->m_data));
   p->m_smart = true;
   return p;

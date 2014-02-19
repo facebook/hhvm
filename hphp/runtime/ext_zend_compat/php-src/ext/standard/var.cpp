@@ -40,7 +40,7 @@
 
 PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash TSRMLS_DC) {
   HPHP::String s = HPHP::f_serialize(HPHP::tvAsVariant((*struc)->tv()));
-  smart_str_appendl(buf, s->data(), s->size());
+  smart_str_appendl(buf, s.data(), s.size());
 }
 PHPAPI int php_var_unserialize(zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC) {
   HPHP::Variant ret = HPHP::f_unserialize(HPHP::String((const char*) *p, max - *p, HPHP::CopyString));

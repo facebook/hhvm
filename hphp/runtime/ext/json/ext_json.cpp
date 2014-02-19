@@ -112,7 +112,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
 
   int64_t p;
   double d;
-  DataType type = json->isNumericWithVal(p, d, 0);
+  DataType type = json.get()->isNumericWithVal(p, d, 0);
   if (type == KindOfInt64) {
     json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return p;

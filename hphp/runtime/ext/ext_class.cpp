@@ -70,7 +70,7 @@ bool f_class_alias(const String& original,
     autoload ? Unit::loadClass(original.get())
              : Unit::lookupClass(original.get());
   if (!origClass) {
-    raise_warning("Class %s not found", original->data());
+    raise_warning("Class %s not found", original.data());
     return false;
   }
   return Unit::aliasClass(origClass, alias.get());

@@ -479,8 +479,8 @@ PhpFile *FileRepository::readHhbc(const std::string &name,
 PhpFile* FileRepository::parseFile(const std::string& name,
                                    const FileInfo& fileInfo) {
   MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
-  Unit* unit = compile_file(fileInfo.m_inputString->data(),
-                            fileInfo.m_inputString->size(),
+  Unit* unit = compile_file(fileInfo.m_inputString.data(),
+                            fileInfo.m_inputString.size(),
                             md5, name.c_str());
   always_assert(unit != nullptr &&
                 "failed to produce a unit; possibly due to corrupt hhbc repo");
@@ -552,7 +552,7 @@ static bool findFileWrapper(const String& file, void* ctx) {
   }
   std::string server_root(SourceRootInfo::GetCurrentSourceRoot());
   if (server_root.empty()) {
-    server_root = std::string(g_context->getCwd()->data());
+    server_root = std::string(g_context->getCwd().data());
     if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
       server_root += "/";
     }

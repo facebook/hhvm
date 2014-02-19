@@ -657,7 +657,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
     if (debug) {
       String decrypted =
         f_openssl_decrypt(encrypted, cipher, key, k_OPENSSL_RAW_DATA, iv);
-      assert(decrypted->same(ip.get()));
+      assert(decrypted.get()->same(ip.get()));
     }
     addHeaderImpl("X-FB-Debug", output.c_str());
   }

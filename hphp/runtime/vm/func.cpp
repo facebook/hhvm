@@ -1121,12 +1121,12 @@ int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
     Variant userAttrVal = it.second();
     if (userAttrVal.isString()) {
       String userAttrStrVal = userAttrVal.toString();
-      if (userAttrStrVal->isame(s_actrec.get())) {
+      if (userAttrStrVal.get()->isame(s_actrec.get())) {
         ret = ret | Native::AttrActRec;
         attrs = attrs | AttrMayUseVV;
-      } else if (userAttrStrVal->isame(s_variadicbyref.get())) {
+      } else if (userAttrStrVal.get()->isame(s_variadicbyref.get())) {
         attrs = attrs | AttrVariadicByRef;
-      } else if (userAttrStrVal->isame(s_noinjection.get())) {
+      } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs = attrs | AttrNoInjection;
       }
     }

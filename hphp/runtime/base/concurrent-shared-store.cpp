@@ -446,7 +446,7 @@ bool ConcurrentTableSharedStore::constructPrime(const String& v,
                                                 bool serialized) {
   if (s_apc_file_storage.getState() !=
       SharedStoreFileStorage::StorageState::Invalid &&
-      (!v->isStatic() || serialized)) {
+      (!v.get()->isStatic() || serialized)) {
     // StaticString for non-object should consume limited amount of space,
     // not worth going through the file storage
 

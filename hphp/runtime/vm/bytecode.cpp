@@ -2152,7 +2152,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     }
 
     // check for pseudomain
-    if (funcname->empty()) {
+    if (funcname.empty()) {
       if (!prevFp) continue;
       funcname = s_include;
     }
@@ -2255,7 +2255,7 @@ const ClassInfo::MethodInfo* ExecutionContext::findFunctionInfo(
 }
 
 const ClassInfo* ExecutionContext::findClassInfo(const String& name) {
-  if (name->empty()) return nullptr;
+  if (name.empty()) return nullptr;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
     m_classInfos.find(name);
   if (it == m_classInfos.end()) {
@@ -2442,13 +2442,13 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
     absPath = currentDir.string() + '/';
     TRACE(2, "lookupIncludeRoot(%s): relative -> %s\n",
           path->data(),
-          absPath->data());
+          absPath.data());
   } else {
     assert(flags & InclOpFlags::DocRoot);
     absPath = SourceRootInfo::GetCurrentPhpRoot();
     TRACE(2, "lookupIncludeRoot(%s): docRoot -> %s\n",
           path->data(),
-          absPath->data());
+          absPath.data());
   }
 
   absPath += StrNR(path);
@@ -6628,7 +6628,7 @@ OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
         flags & InclOpFlags::DocRoot ? "DocRoot" : "",
         flags & InclOpFlags::Relative ? "Relative" : "",
         flags & InclOpFlags::Fatal ? "Fatal" : "",
-        path->data());
+        path.data());
 
   Unit* u = flags & (InclOpFlags::DocRoot|InclOpFlags::Relative) ?
     ec->evalIncludeRoot(path.get(), flags, &initial) :
@@ -6638,7 +6638,7 @@ OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
     ((flags & InclOpFlags::Fatal) ?
      (void (*)(const char *, ...))raise_error :
      (void (*)(const char *, ...))raise_warning)("File not found: %s",
-                                                 path->data());
+                                                 path.data());
     ec->m_stack.pushFalse();
   } else {
     if (!(flags & InclOpFlags::Once) || initial) {

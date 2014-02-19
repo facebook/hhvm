@@ -775,7 +775,7 @@ Variant Variant::rvalAt(const String& offset, ACCESSPARAMS_IMPL) const {
     }
     if (offset.isNull()) return m_data.parr->get(empty_string, error);
     int64_t n;
-    if (!offset->isStrictlyInteger(n)) {
+    if (!offset.get()->isStrictlyInteger(n)) {
       return m_data.parr->get(offset, error);
     } else {
       return m_data.parr->get(n, error);

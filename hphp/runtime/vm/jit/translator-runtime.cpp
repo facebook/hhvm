@@ -39,7 +39,7 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
                                  StringData* name,
                                  bool& inited) {
   assert(closure->instanceof(c_Closure::classof()));
-  String str(StringData::Make(s_staticPrefix->slice(), name->slice()));
+  String str(StringData::Make(s_staticPrefix.slice(), name->slice()));
   auto const cls = closure->getVMClass();
   auto const slot = cls->lookupDeclProp(str.get());
   assert(slot != kInvalidSlot);

@@ -1815,7 +1815,7 @@ bool f_session_is_registered(const String& varname) {
 static bool HHVM_METHOD(SessionHandler, hhopen,
                         const String& save_path, const String& session_id) {
   return PS(default_mod) &&
-    PS(default_mod)->open(save_path->data(), session_id->data());
+    PS(default_mod)->open(save_path.data(), session_id.data());
 }
 
 static bool HHVM_METHOD(SessionHandler, hhclose) {
@@ -1834,11 +1834,11 @@ static String HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
 static bool HHVM_METHOD(SessionHandler, hhwrite,
                         const String& session_id, const String& session_data) {
   return PS(default_mod) &&
-    PS(default_mod)->write(session_id->data(), session_data->data());
+    PS(default_mod)->write(session_id.data(), session_data.data());
 }
 
 static bool HHVM_METHOD(SessionHandler, hhdestroy, const String& session_id) {
-  return PS(default_mod) && PS(default_mod)->destroy(session_id->data());
+  return PS(default_mod) && PS(default_mod)->destroy(session_id.data());
 }
 
 static bool HHVM_METHOD(SessionHandler, hhgc, int maxlifetime) {

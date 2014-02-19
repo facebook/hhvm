@@ -927,11 +927,11 @@ void f_header(const String& str, bool replace /* = true */,
   }
 
   Transport *transport = g_context->getTransport();
-  if (transport && header->size()) {
-    const char *header_line = header->data();
+  if (transport && header.size()) {
+    const char *header_line = header.data();
 
     // handle single line of status code
-    if (header->size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
+    if (header.size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
       int code = 200;
       const char *reason = nullptr;
       for (const char *ptr = header_line; *ptr; ptr++) {

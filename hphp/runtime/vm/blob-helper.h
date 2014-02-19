@@ -247,7 +247,7 @@ struct BlobDecoder {
 
     String s = decodeString();
     assert(!!s);
-    if (s->empty()) return;
+    if (s.empty()) return;
 
     tvAsVariant(&tv) = unserialize_from_string(s);
     tvAsVariant(&tv).setEvalScalar();

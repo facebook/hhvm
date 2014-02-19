@@ -1306,7 +1306,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
       String v;
       v.unserialize(uns);
       assert(!v.isNull());
-      if (v->isStatic()) {
+      if (v.get()->isStatic()) {
         union {
           char pointer[8];
           StringData *sd;

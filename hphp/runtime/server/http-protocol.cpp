@@ -536,7 +536,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
     if (server[s_SERVER_PORT].isInteger()) {
       serverPort = lexical_cast<string>(server[s_SERVER_PORT].toInt32());
     } else {
-      serverPort = server[s_SERVER_PORT].toString()->data();
+      serverPort = server[s_SERVER_PORT].toString().data();
     }
   }
 
@@ -547,7 +547,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
 
   string hostHeader;
   if (server.toCArrRef().exists(s_HTTP_HOST)) {
-    hostHeader = server[s_HTTP_HOST].toCStrRef()->data();
+    hostHeader = server[s_HTTP_HOST].toCStrRef().data();
   }
   String hostName;
   if (server.toCArrRef().exists(s_SERVER_NAME)) {

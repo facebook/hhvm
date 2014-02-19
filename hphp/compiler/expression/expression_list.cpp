@@ -510,7 +510,7 @@ unsigned int ExpressionList::checkLitstrKeys() const {
     if (!ret) return 0;
     if (!value.isString()) return 0;
     String str = value.toString();
-    if (str->isInteger()) return 0;
+    if (str.isInteger()) return 0;
     string s(str.data(), str.size());
     keys.insert(s);
   }

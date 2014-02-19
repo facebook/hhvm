@@ -140,21 +140,21 @@ vm_decode_function(const Variant& function,
       Variant elem0 = arr.rvalAt(int64_t(0));
       if (elem0.isString()) {
         String sclass = elem0.toString();
-        if (sclass->isame(s_self.get())) {
+        if (sclass.get()->isame(s_self.get())) {
           if (ctx) {
             cls = ctx;
           }
           if (!nameContainsClass) {
             forwarding = true;
           }
-        } else if (sclass->isame(s_parent.get())) {
+        } else if (sclass.get()->isame(s_parent.get())) {
           if (ctx && ctx->parent()) {
             cls = ctx->parent();
           }
           if (!nameContainsClass) {
             forwarding = true;
           }
-        } else if (sclass->isame(s_static.get())) {
+        } else if (sclass.get()->isame(s_static.get())) {
           if (ar) {
             if (ar->hasThis()) {
               cls = ar->getThis()->getVMClass();
@@ -165,10 +165,10 @@ vm_decode_function(const Variant& function,
         } else {
           if (warn && nameContainsClass) {
             String nameClass = name.substr(0, pos);
-            if (nameClass->isame(s_self.get())   ||
-                nameClass->isame(s_static.get())) {
+            if (nameClass.get()->isame(s_self.get())   ||
+                nameClass.get()->isame(s_static.get())) {
               raise_warning("behavior of call_user_func(array('%s', '%s')) "
-                            "is undefined", sclass->data(), name->data());
+                            "is undefined", sclass.data(), name.data());
             }
           }
           cls = Unit::loadClass(sclass.get());
@@ -190,7 +190,7 @@ vm_decode_function(const Variant& function,
     if (nameContainsClass) {
       String c = name.substr(0, pos);
       name = name.substr(pos + 2);
-      if (c->isame(s_self.get())) {
+      if (c.get()->isame(s_self.get())) {
         if (cls) {
           cc = cls;
         } else if (ctx) {
@@ -199,7 +199,7 @@ vm_decode_function(const Variant& function,
         if (!this_) {
           forwarding = true;
         }
-      } else if (c->isame(s_parent.get())) {
+      } else if (c.get()->isame(s_parent.get())) {
         if (cls) {
           cc = cls->parent();
         } else if (ctx && ctx->parent()) {
@@ -208,7 +208,7 @@ vm_decode_function(const Variant& function,
         if (!this_) {
           forwarding = true;
         }
-      } else if (c->isame(s_static.get())) {
+      } else if (c.get()->isame(s_static.get())) {
         if (ar) {
           if (ar->hasThis()) {
             cc = ar->getThis()->getVMClass();
@@ -246,7 +246,7 @@ vm_decode_function(const Variant& function,
       if (!f) {
         if (warn) {
           throw_invalid_argument("function: method '%s' not found",
-                                 name->data());
+                                 name.data());
         }
         return nullptr;
       }
@@ -291,7 +291,7 @@ vm_decode_function(const Variant& function,
           // Bail out if we couldn't find the method or __call
           if (warn) {
             throw_invalid_argument("function: method '%s' not found",
-                                   name->data());
+                                   name.data());
           }
           return nullptr;
         }
@@ -949,7 +949,7 @@ static bool include_impl_invoke_context(const String& file, void* ctx) {
  */
 String resolve_include(const String& file, const char* currentDir,
                        bool (*tryFile)(const String& file, void*), void* ctx) {
-  const char* c_file = file->data();
+  const char* c_file = file.data();
 
   if (!File::IsPlainFilePath(file)) {
     // URIs don't have an include path
@@ -1038,7 +1038,7 @@ static Variant include_impl(const String& file, bool once,
   if (can_path.isNull()) {
     // Failure
     if (raiseNotice) {
-      raise_notice("Tried to invoke %s but file not found.", file->data());
+      raise_notice("Tried to invoke %s but file not found.", file.data());
     }
     if (required) {
       String ms = "Required file that does not exist: ";

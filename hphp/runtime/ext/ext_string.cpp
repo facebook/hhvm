@@ -69,7 +69,7 @@ String stringForEach(uint32_t len, const String& str, Op action) {
     *dst = action(*src);
   }
 
-  if (!mutate) ret->setSize(len);
+  if (!mutate) ret.get()->setSize(len);
   return ret;
 }
 
@@ -79,15 +79,15 @@ String stringForEachFast(const String& str, Op action) {
     return str;
   }
 
-  if (str->getCount() == 1) {
-    return stringForEach<true>(str.size(), str, action);
+  if (str.get()->getCount() == 1) {
+    return stringForEach<true>(str.size(), str.get(), action);
   }
 
-  return stringForEach<false>(str.size(), str, action);
+  return stringForEach<false>(str.size(), str.get(), action);
 }
 
 String f_addcslashes(const String& str, const String& charlist) {
-  if (str.empty() || (!charlist.isNull() && charlist->empty())) {
+  if (str.empty() || (!charlist.isNull() && charlist.empty())) {
     return str;
   }
 
@@ -312,9 +312,9 @@ String f_str_shuffle(const String& str) {
     return str;
   }
 
-  String ret = str->getCount() == 1 ? str : String(str, CopyString);
-  char* buf  = ret->mutableData();
-  int left   = ret->size();
+  String ret = str.get()->getCount() == 1 ? str : String(str, CopyString);
+  char* buf  = ret.get()->mutableData();
+  int left   = ret.size();
 
   while (--left) {
     int idx = f_rand(0, left);
@@ -330,8 +330,8 @@ String f_str_shuffle(const String& str) {
 String f_strrev(const String& str) {
   auto len = str.size();
 
-  if (str->getCount() == 1) {
-    char* sdata = str->mutableData();
+  if (str.get()->getCount() == 1) {
+    char* sdata = str.get()->mutableData();
     for (int i = 0; i < len / 2; ++i) {
       char temp = sdata[i];
       sdata[i] = sdata[len - i - 1];
@@ -343,13 +343,13 @@ String f_strrev(const String& str) {
   String ret(len, ReserveString);
 
   const char* data = str.data();
-  char* dest = ret->mutableData();
+  char* dest = ret.get()->mutableData();
 
   for (int i = 0; i < len; ++i) {
     dest[i] = data[len - i - 1];
   }
 
-  ret->setSize(len);
+  ret.setSize(len);
   return ret;
 }
 
@@ -367,14 +367,14 @@ String stringToCaseFirst(const String& str, OpTo tocase, OpIs iscase) {
     return str;
   }
 
-  if (str->getCount() == 1) {
-    char* sdata = str->mutableData();
+  if (str.get()->getCount() == 1) {
+    char* sdata = str.get()->mutableData();
     sdata[0] = tocase(sdata[0]);
     return str;
   }
 
   String ret(str, CopyString);
-  char* first = ret->mutableData();
+  char* first = ret.get()->mutableData();
 
   *first = tocase(*first);
   return ret;
@@ -418,13 +418,13 @@ String stringTrim(const String& str, const String& charlist) {
     for (; end >= start && flags[(unsigned char)str[end]]; --end) {}
   }
 
-  if (str->getCount() == 1) {
+  if (str.get()->getCount() == 1) {
     int slen = end - start + 1;
     if (start) {
-      char* sdata = str->mutableData();
+      char* sdata = str.get()->mutableData();
       for (int idx = 0; start < len;) sdata[idx++] = sdata[start++];
     }
-    str->setSize(slen);
+    str.get()->setSize(slen);
     return str;
   }
 
@@ -718,8 +718,8 @@ String f_str_repeat(const String& input, int multiplier) {
   if (input.size() == 1) {
     String ret(input.size() * multiplier, ReserveString);
 
-    memset(ret->mutableData(), *input->data(), multiplier);
-    ret->setSize(multiplier);
+    memset(ret.get()->mutableData(), *input.data(), multiplier);
+    ret.get()->setSize(multiplier);
     return ret;
   }
 

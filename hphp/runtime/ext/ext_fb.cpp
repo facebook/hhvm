@@ -1042,7 +1042,7 @@ const StaticString s_extract("extract");
 
 bool f_fb_rename_function(const String& orig_func_name, const String& new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
-      orig_func_name->isame(new_func_name.get())) {
+      orig_func_name.get()->isame(new_func_name.get())) {
     throw_invalid_argument("unable to rename %s", orig_func_name.data());
     return false;
   }
@@ -1054,7 +1054,7 @@ bool f_fb_rename_function(const String& orig_func_name, const String& new_func_n
     return false;
   }
 
-  if (orig_func_name->isame(s_extract.get())) {
+  if (orig_func_name.get()->isame(s_extract.get())) {
     raise_warning(
         "fb_rename_function(%s, %s) failed: rename of extract not allowed!",
         orig_func_name.data(), new_func_name.data());

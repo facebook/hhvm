@@ -181,7 +181,8 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
   do {
     UErrorCode error = U_ZERO_ERROR;
     int32_t len = ulocfunc(locale_name.c_str(),
-                           buf->mutableData(), buf->capacity(), &error);
+                           buf.get()->mutableData(), buf.get()->capacity(),
+                           &error);
     if (error != U_BUFFER_OVERFLOW_ERROR &&
         error != U_STRING_NOT_TERMINATED_WARNING) {
       if (U_FAILURE(error)) {
@@ -191,7 +192,7 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
       buf.setSize(len);
       return buf;
     }
-    if (len <= buf->capacity()) {
+    if (len <= buf.get()->capacity()) {
       // Avoid infinite loop
       s_intl_error->setError(U_INTERNAL_PROGRAM_ERROR,
                              "Got invalid response from ICU");
@@ -479,16 +480,16 @@ static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
   const char *key;
   int key_len;
   String val(128, ReserveString);
-  char *ptr = val->mutableData();
+  char *ptr = val.get()->mutableData();
   error = U_ZERO_ERROR;
   while ((key = uenum_next(e, &key_len, &error))) {
 tryagain:
     error = U_ZERO_ERROR;
     int val_len = uloc_getKeywordValue(locname.c_str(), key,
-                                       ptr, val->capacity(), &error);
+                                       ptr, val.get()->capacity(), &error);
     if (error == U_BUFFER_OVERFLOW_ERROR) {
       val = String(val_len + 128, ReserveString);
-      ptr = val->mutableData();
+      ptr = val.get()->mutableData();
       goto tryagain;
     }
     if (U_FAILURE(error)) {
@@ -529,14 +530,15 @@ static String locale_suffix_strip(const String& locale) {
 }
 
 inline void normalize_for_match(String& v) {
-  for (char *ptr = v->mutableData(), *end = ptr + v.size(); ptr < end; ++ptr) {
+  for (char *ptr = v.get()->mutableData(), *end = ptr + v.size(); ptr < end;
+       ++ptr) {
     if (*ptr == '-') {
       *ptr = '_';
     } else {
       *ptr = tolower(*ptr);
     }
   }
-  v->invalidateHash();
+  v.get()->invalidateHash();
 }
 
 static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,

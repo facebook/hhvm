@@ -172,7 +172,7 @@ void CmdHeaptrace::printHeap(DebuggerClient &client) {
 void CmdHeaptrace::printGraphToFile(DebuggerClient &client,
                                     String filename,
                                     const GraphFormat &gf) {
-  const char *name = filename->data();
+  const char *name = filename.data();
   FILE *graphFile = fopen(name, "w");
   if (!graphFile) {
     client.print("Could not open file!");
@@ -215,7 +215,7 @@ void CmdHeaptrace::onClient(DebuggerClient &client) {
   if (file.empty()) {
     cmd->printHeap(client);
   } else {
-    std::string formatStr = format->data();
+    std::string formatStr = format.data();
     const auto it = s_formatMap.find(formatStr);
 
     if (it == s_formatMap.end()) {

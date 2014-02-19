@@ -87,7 +87,7 @@ private:
     if (!m_registeredFilters.exists(filtername)) {
       raise_warning("%s: unable to locate filter \"%s\"",
                     func_name,
-                    filtername->data());
+                    filtername.data());
       return false;
     }
 
@@ -175,15 +175,15 @@ private:
       raise_warning("%s: user-filter \"%s\" requires class \"%s\", but that "
                     "class " "is not defined",
                     php_func,
-                    filter->data(),
-                    class_name->data());
+                    filter.data(),
+                    class_name.data());
       // Fall through, as to match Zend, the warning below should also be raised
     }
 
     if (obj.isNull()) {
       raise_warning("%s: unable to create or locate filter \"%s\"",
                     php_func,
-                    filter->data());
+                    filter.data());
       return null_resource;
     }
 

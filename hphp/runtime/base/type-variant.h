@@ -1372,7 +1372,7 @@ inline Variant &concat_assign(Variant &v1, litstr s2) = delete;
 inline Variant &concat_assign(Variant &v1, const String& s2) {
   if (v1.getType() == KindOfString) {
     auto& str = v1.asStrRef();
-    if (str->getCount() == 1) {
+    if (str.get()->getCount() == 1) {
       str += StringSlice{s2.data(), static_cast<uint32_t>(s2.size())};
       return v1;
     }

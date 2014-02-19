@@ -241,7 +241,7 @@ bool TestCppBase::TestArray() {
     VERIFY(arr0.toInt32() == 0);
     VERIFY(arr0.toInt64() == 0);
     VERIFY(arr0.toDouble() == 0.0);
-    VERIFY(arr0.toString()->empty());
+    VERIFY(arr0.toString().empty());
 
     Array arr1 = Array::Create("test");
     VERIFY(arr1.toBoolean() == true);

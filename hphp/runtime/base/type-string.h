@@ -99,12 +99,6 @@ public:
   StringData* get() const { return m_px; }
   void reset() { StringBase::reset(); }
 
-  // Deliberately doesn't throw_null_pointer_exception as a perf
-  // optimization.
-  StringData* operator->() const {
-    return m_px;
-  }
-
   // Transfer ownership of our reference to this StringData.
   StringData* detach() {
     StringData* ret = m_px;
@@ -441,19 +435,19 @@ typedef hphp_hash_set<const StringData*, string_data_hash, string_data_same>
 
 struct hphp_string_hash {
   size_t operator()(const String& s) const {
-    return s->hash();
+    return s.get()->hash();
   }
 };
 
 struct hphp_string_same {
   bool operator()(const String& s1, const String& s2) const {
-    return s1->same(s2.get());
+    return s1.get()->same(s2.get());
   }
 };
 
 struct hphp_string_isame {
   bool operator()(const String& s1, const String& s2) const {
-    return s1->isame(s2.get());
+    return s1.get()->isame(s2.get());
   }
 };
 

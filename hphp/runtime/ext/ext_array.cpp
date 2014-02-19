@@ -1179,7 +1179,7 @@ Variant f_range(const Variant& low, const Variant& high, const Variant& step /* 
   } else if (step.isString()) {
     int64_t sn;
     double sd;
-    DataType stype = step.toString()->isNumericWithVal(sn, sd, 0);
+    DataType stype = step.toString().get()->isNumericWithVal(sn, sd, 0);
     if (stype == KindOfDouble) {
       is_step_double = true;
       dstep = sd;
@@ -1199,8 +1199,8 @@ Variant f_range(const Variant& low, const Variant& high, const Variant& step /* 
     if (slow.size() >= 1 && shigh.size() >=1) {
       int64_t n1, n2;
       double d1, d2;
-      DataType type1 = slow->isNumericWithVal(n1, d1, 0);
-      DataType type2 = shigh->isNumericWithVal(n2, d2, 0);
+      DataType type1 = slow.get()->isNumericWithVal(n1, d1, 0);
+      DataType type2 = shigh.get()->isNumericWithVal(n2, d2, 0);
       if (type1 == KindOfDouble || type2 == KindOfDouble || is_step_double) {
         if (type1 != KindOfDouble) d1 = slow.toDouble();
         if (type2 != KindOfDouble) d2 = shigh.toDouble();

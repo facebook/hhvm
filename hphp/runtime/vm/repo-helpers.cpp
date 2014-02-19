@@ -170,7 +170,7 @@ void RepoQuery::bindTypedValue(const char* paramName, const TypedValue& tv) {
     bindBlob(paramName, "", 0, true);
   } else {
     String blob = f_serialize(tvAsCVarRef(&tv));
-    bindBlob(paramName, blob->data(), blob->size());
+    bindBlob(paramName, blob.data(), blob.size());
   }
 }
 

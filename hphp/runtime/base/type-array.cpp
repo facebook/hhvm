@@ -439,7 +439,7 @@ const Variant& Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
     if (flags & AccessFlags::Key) return m_px->get(key, error);
     if (key.isNull()) return m_px->get(empty_string, error);
     int64_t n;
-    if (!key->isStrictlyInteger(n)) {
+    if (!key.get()->isStrictlyInteger(n)) {
       return m_px->get(key, error);
     } else {
       return m_px->get(n, error);

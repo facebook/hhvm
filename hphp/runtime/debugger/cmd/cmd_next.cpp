@@ -290,7 +290,7 @@ void CmdNext::cleanupStepCont() {
 void* CmdNext::getContinuationTag(ActRec* fp) {
   c_Continuation* cont = frame_continuation(fp);
   TRACE(2, "CmdNext: continuation tag %p for %s\n", cont,
-        cont->t_getorigfuncname()->data());
+        cont->t_getorigfuncname().data());
   assert(cont->actRec() == fp);
   return cont->actRec();
 }

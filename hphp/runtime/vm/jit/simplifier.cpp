@@ -1981,7 +1981,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
       return true;
     case ConvCellToBool:
       return instr->src(0)->type().subtypeOfAny(
-        Type::Func, Type::Cls, Type::FuncCls, Type::VarEnv, Type::TCA);
+        Type::Func, Type::Cls, Type::VarEnv, Type::TCA);
     default:
       return false;
     }

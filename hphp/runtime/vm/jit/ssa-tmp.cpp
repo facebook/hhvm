@@ -52,11 +52,6 @@ int typeNeededWords(Type t) {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
   }
-  if (t <= Type::FuncCtx) {
-    // 2 registers regardless of union status: 1 for the Func* and 1
-    // for the {Obj|Cctx}, differentiated by the low bit.
-    return 2;
-  }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
     assert(IMPLIES(t <= Type::Gen, t.isKnownDataType()));

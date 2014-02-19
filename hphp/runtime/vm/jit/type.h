@@ -79,23 +79,20 @@ namespace JIT {
   IRT(Func,        1ULL << 45)                                          \
   IRT(VarEnv,      1ULL << 46)                                          \
   IRT(NamedEntity, 1ULL << 47)                                          \
-  IRT(FuncCls,     1ULL << 48) /* {Func*, Cctx} */                      \
-  IRT(FuncObj,     1ULL << 49) /* {Func*, Obj} */                       \
-  IRT(Cctx,        1ULL << 50) /* Class* with the lowest bit set,  */   \
+  IRT(Cctx,        1ULL << 48) /* Class* with the lowest bit set,  */   \
                                /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     1ULL << 51) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 52) /* stack pointer */                      \
-  IRT(FramePtr,    1ULL << 53) /* frame pointer */                      \
-  IRT(TCA,         1ULL << 54)                                          \
-  IRT(ActRec,      1ULL << 55)                                          \
-  IRT(None,        1ULL << 56)                                          \
-  IRT(RDSHandle,   1ULL << 57) /* RDS::Handle */                        \
-  IRT(Nullptr,     1ULL << 58)
+  IRT(RetAddr,     1ULL << 49) /* Return address */                     \
+  IRT(StkPtr,      1ULL << 50) /* stack pointer */                      \
+  IRT(FramePtr,    1ULL << 51) /* frame pointer */                      \
+  IRT(TCA,         1ULL << 52)                                          \
+  IRT(ActRec,      1ULL << 53)                                          \
+  IRT(None,        1ULL << 54)                                          \
+  IRT(RDSHandle,   1ULL << 55) /* RDS::Handle */                        \
+  IRT(Nullptr,     1ULL << 56)
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
   IRT(Ctx,         kObj|kCctx)                                          \
-  IRT(FuncCtx,     kFuncCls|kFuncObj)
 
 // Gen, Counted, PtrToGen, and PtrToCounted are here instead of
 // IRT_PHP_UNIONS because boxing them (e.g., BoxedGen, PtrToBoxedGen)

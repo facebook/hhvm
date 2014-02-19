@@ -154,11 +154,8 @@ above PHP-facing types.
   Func            Func*
   VarEnv          VarEnv*
   NamedEntity     NamedEntity*
-  FuncCls         Tuple of (Func*,Cctx)
-  FuncObj         Tuple of (Func*,Obj)
   Cctx            A Class* with the lowest bit set (as stored in ActRec.m_cls)
   Ctx             {Obj|Cctx}
-  FuncCtx         Tuple of (Func*,{Cctx|Obj})
   RetAddr         Return address
   StkPtr          Pointer into VM execution stack
   FramePtr        Pointer to a frame on the VM execution stack
@@ -1120,14 +1117,14 @@ D:Obj = Clone S0:Obj
 
 D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
                                        S1:FramePtr
-                                       S2:{Func|FuncCls|FuncCtx|Null}
+                                       S2:{Func|Null}
                                        S3:{Ctx|Class|Null}
 
   Operands:
 
      S0 - caller stack pointer
      S1 - caller frame pointer
-     S2 - callee Func, context, FuncCls, FuncCtx, or null
+     S2 - callee Func or null
      S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or null
           (for FPushFunc*).
 

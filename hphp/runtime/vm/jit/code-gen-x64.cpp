@@ -3572,8 +3572,6 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
 
   const int64_t spOffset = -kNumActRecCells * sizeof(Cell);
 
-  DEBUG_ONLY bool setThis = true;
-
   auto spReg = srcLoc(0).reg();
   // actRec->m_this
   if (objOrCls->isA(Type::Cls)) {
@@ -3601,14 +3599,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     assert(objOrCls->isA(Type::InitNull));
     // no obj or class; this happens in FPushFunc
     int offset_m_this = spOffset + int(AROFF(m_this));
-    // When func is either Type::FuncCls or Type::FuncCtx,
-    // m_this/m_cls will be initialized below
-    if (!func->isConst() && (func->isA(Type::FuncCtx))) {
-      // m_this is unioned with m_cls and will be initialized below
-      setThis = false;
-    } else {
-      m_as.store_imm64_disp_reg64(0, offset_m_this, spReg);
-    }
+    m_as.store_imm64_disp_reg64(0, offset_m_this, spReg);
   }
   // actRec->m_invName
   // ActRec::m_invName is encoded as a pointer with bit kInvNameBit
@@ -3626,25 +3617,14 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   } else if (func->isConst()) {
     const Func* f = func->getValFunc();
     m_as.storeq(f, spReg[spOffset + int(AROFF(m_func))]);
-    if (func->isA(Type::FuncCtx)) {
-      // Fill in m_cls if provided with both func* and class*
-      CG_PUNT(cgAllocActRec);
-    }
   } else {
     int offset_m_func = spOffset + int(AROFF(m_func));
     auto funcLoc = srcLoc(2);
     m_as.store_reg64_disp_reg64(funcLoc.reg(0),
                                 offset_m_func,
                                 spReg);
-    if (func->isA(Type::FuncCtx)) {
-      int offset_m_cls = spOffset + int(AROFF(m_cls));
-      m_as.store_reg64_disp_reg64(funcLoc.reg(1),
-                                  offset_m_cls,
-                                  spReg);
-      setThis = true; /* m_this and m_cls are in a union */
-    }
   }
-  assert(setThis);
+
   // actRec->m_savedRbp
   auto fpLoc = srcLoc(1);
   m_as.store_reg64_disp_reg64(fpLoc.reg(),

@@ -524,7 +524,7 @@ O(StaticLocInitCached,              ND, S(BoxedCell) S(Cell),              E) \
 O(SpillStack,                D(StkPtr), S(StkPtr) C(Int) SSpills,        CRc) \
 O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr)                         \
-                                          S(Func,FuncCls,FuncCtx,Null)        \
+                                          S(Func,Null)                        \
                                           S(Ctx,Cls,InitNull),           CRc) \
 O(CufIterSpillFrame,         D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr),                    NF) \

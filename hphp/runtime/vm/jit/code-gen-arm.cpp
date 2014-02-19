@@ -1352,7 +1352,6 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
 
   // Func and this/class are slightly tricky. The func may be a tuple of a Func*
   // and context.
-  DEBUG_ONLY bool setThis = true;
 
   if (objOrCls->isA(Type::Cls)) {
     if (objOrCls->isConst()) {
@@ -1366,11 +1365,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     m_as.  Str  (objClsReg, spReg[spOff + AROFF(m_this)]);
   } else {
     assert(objOrCls->isA(Type::InitNull));
-    if (!func->isConst() && func->isA(Type::FuncCtx)) {
-      setThis = false;
-    } else {
-      m_as.Str  (vixl::xzr, spReg[spOff + AROFF(m_this)]);
-    }
+    m_as.Str  (vixl::xzr, spReg[spOff + AROFF(m_this)]);
   }
 
   // Now set func, and possibly this/cls
@@ -1378,23 +1373,12 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     // Do nothing
     assert(func->isConst());
   } else if (func->isConst()) {
-    if (func->isA(Type::FuncCtx)) {
-      // x64 punts on this too
-      CG_PUNT(cgSpillFrame_ConstFuncCtx);
-    }
     m_as.  Mov  (rAsm, func->getValFunc());
     m_as.  Str  (rAsm, spReg[spOff + AROFF(m_func)]);
   } else {
     auto reg0 = x2a(funcLoc.reg(0));
     m_as.  Str  (reg0, spReg[spOff + AROFF(m_func)]);
-    if (func->isA(Type::FuncCtx)) {
-      auto reg1 = x2a(funcLoc.reg(1));
-      m_as.Str  (reg1, spReg[spOff + AROFF(m_cls)]);
-      setThis = true;
-    }
   }
-
-  assert(setThis);
 
   // Adjust stack pointer
   emitRegGetsRegPlusImm(m_as, x2a(dstLoc(0).reg()), spReg, spOff);

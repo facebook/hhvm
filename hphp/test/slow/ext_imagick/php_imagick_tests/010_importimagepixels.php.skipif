@@ -1,0 +1,7 @@
+<?php require_once(dirname(__FILE__) . '/skipif.inc');
+
+if (!method_exists("imagick", "importimagepixels")) {
+  die("skip imagick::importImagePixels not available");
+}
+
+?>

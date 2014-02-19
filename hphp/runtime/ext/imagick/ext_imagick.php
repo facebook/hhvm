@@ -18,10 +18,23 @@ class Imagick {
   const COLOR_OPACITY = 7;
   const COLOR_ALPHA = 8;
   const COLOR_FUZZ = 9;
+
+  private resource $wand;
+
+  /**
+   * The Imagick constructor
+   *
+   * @param mixed $files -
+   *
+   * @return  - Returns a new Imagick object on success.
+   */
+  <<__Native>>
+  function __construct(mixed $files = null): void;
 }
 
 class ImagickPixel {
   private resource $wand;
+  private bool $initByIterator;
 
   /**
    * Clears resources associated with this object
@@ -178,6 +191,155 @@ class ImagickPixel {
   function setHSL(float $hue,
                   float $saturation,
                   float $luminosity): bool;
+
+}
+
+class ImagickPixelIterator {
+  private resource $wand;
+
+  <<__Native>>
+  static function getPixelIterator(Imagick $wand): ImagickPixelIterator;
+
+  <<__Native>>
+  static function getPixelRegionIterator(Imagick $wand,
+                                         int $x,
+                                         int $y,
+                                         int $columns,
+                                         int $rows): ImagickPixelIterator;
+
+  /**
+   * Clear resources associated with a PixelIterator
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function clear(): bool;
+
+  /**
+   * The ImagickPixelIterator constructor
+   *
+   * @param imagick $wand -
+   *
+   * @return  -
+   */
+  <<__Native>>
+  function __construct(Imagick $wand): void;
+
+  /**
+   * Deallocates resources associated with a PixelIterator
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function destroy(): bool;
+
+  /**
+   * Returns the current row of ImagickPixel objects
+   *
+   * @return array - Returns a row as an array of ImagickPixel objects
+   *   that can themselves be iterated.
+   */
+  <<__Native>>
+  function getCurrentIteratorRow(): array;
+
+  /**
+   * Returns the current pixel iterator row
+   *
+   * @return int - Returns the integer offset of the row, throwing
+   *   ImagickPixelIteratorException on error.
+   */
+  <<__Native>>
+  function getIteratorRow(): int;
+
+  /**
+   * Returns the next row of the pixel iterator
+   *
+   * @return array - Returns the next row as an array of ImagickPixel
+   *   objects, throwing ImagickPixelIteratorException on error.
+   */
+  <<__Native>>
+  function getNextIteratorRow(): array;
+
+  /**
+   * Returns the previous row
+   *
+   * @return array - Returns the previous row as an array of
+   *   ImagickPixelWand objects from the ImagickPixelIterator, throwing
+   *   ImagickPixelIteratorException on error.
+   */
+  <<__Native>>
+  function getPreviousIteratorRow(): array;
+
+  /**
+   * Returns a new pixel iterator
+   *
+   * @param imagick $wand -
+   *
+   * @return bool - Throwing ImagickPixelIteratorException.
+   */
+  <<__Native>>
+  function newPixelIterator(Imagick $wand): bool;
+
+  /**
+   * Returns a new pixel iterator
+   *
+   * @param imagick $wand -
+   * @param int $x -
+   * @param int $y -
+   * @param int $columns -
+   * @param int $rows -
+   *
+   * @return bool - Returns a new ImagickPixelIterator on success; on
+   *   failure, throws ImagickPixelIteratorException.
+   */
+  <<__Native>>
+  function newPixelRegionIterator(Imagick $wand,
+                                  int $x,
+                                  int $y,
+                                  int $columns,
+                                  int $rows): bool;
+
+  /**
+   * Resets the pixel iterator
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function resetIterator(): bool;
+
+  /**
+   * Sets the pixel iterator to the first pixel row
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setIteratorFirstRow(): bool;
+
+  /**
+   * Sets the pixel iterator to the last pixel row
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setIteratorLastRow(): bool;
+
+  /**
+   * Set the pixel iterator row
+   *
+   * @param int $row -
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function setIteratorRow(int $row): bool;
+
+  /**
+   * Syncs the pixel iterator
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function syncIterator(): bool;
 
 }
 

@@ -14,7 +14,10 @@ static const StaticString
   s_hue("hue"),
   s_saturation("saturation"),
   s_luminosity("luminosity"),
-  s_ImagickPixel("ImagickPixel");
+  s_Imagick("Imagick"),
+  s_ImagickDraw("ImagickDraw"),
+  s_ImagickPixel("ImagickPixel"),
+  s_ImagickPixelIterator("ImagickPixelIterator");
 
 //////////////////////////////////////////////////////////////////////////////
 // PHP Exceptions and Classes
@@ -28,12 +31,12 @@ static const StaticString
       return ObjectData::newInstance(cls); \
     } \
     \
-    static Object allocObject(CVarRef msg) { \
+    static Object allocObject(CVarRef arg) { \
       Object ret = allocObject(); \
       TypedValue dummy; \
       g_vmContext->invokeFunc(&dummy, \
                               cls->getCtor(), \
-                              make_packed_array(msg), \
+                              make_packed_array(arg), \
                               ret.get()); \
       return ret; \
     } \
@@ -52,6 +55,11 @@ IMAGICK_DEFINE_CLASS(ImagickDrawException)
 IMAGICK_DEFINE_CLASS(ImagickPixelException)
 IMAGICK_DEFINE_CLASS(ImagickPixelIteratorException)
 
+IMAGICK_DEFINE_CLASS(Imagick)
+IMAGICK_DEFINE_CLASS(ImagickDraw)
+IMAGICK_DEFINE_CLASS(ImagickPixel)
+IMAGICK_DEFINE_CLASS(ImagickPixelIterator)
+
 #undef IMAGICK_DEFINE_EXCEPTION
 
 template<typename T>
@@ -68,7 +76,10 @@ static void imagickThrow(const char* fmt, ...) {
   throw T::allocObject(msg);
 }
 
+#define IMAGICK_THROW imagickThrow<ImagickException>
+#define IMAGICKDRAW_THROW imagickThrow<ImagickDrawException>
 #define IMAGICKPIXEL_THROW imagickThrow<ImagickPixelException>
+#define IMAGICKPIXELITERATOR_THROW imagickThrow<ImagickPixelIteratorException>
 
 //////////////////////////////////////////////////////////////////////////////
 // WandResource
@@ -77,7 +88,8 @@ class WandResource : public SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>);
 
 public:
-  explicit WandResource(Wand* wand): m_wand(wand) {
+  explicit WandResource(Wand* wand, bool owner):
+    m_wand(wand), m_owner(owner) {
   }
 
   ~WandResource() {
@@ -86,10 +98,14 @@ public:
 
   void clear() {
     if (m_wand != nullptr) {
-      DestroyPixelWand(m_wand);
+      if (m_owner) {
+        destoryWand();
+      }
       m_wand = nullptr;
     }
   }
+
+  void destoryWand();
 
   Wand* getWand() {
     return m_wand;
@@ -97,6 +113,7 @@ public:
 
 private:
   Wand* m_wand;
+  bool m_owner;
 };
 
 template<typename Wand>
@@ -105,12 +122,33 @@ void WandResource<Wand>::sweep() {
   clear();
 }
 
+template<>
+ALWAYS_INLINE
+void WandResource<MagickWand>::destoryWand() {
+  DestroyMagickWand(m_wand);
+}
+
+template<>
+ALWAYS_INLINE
+void WandResource<PixelWand>::destoryWand() {
+  DestroyPixelWand(m_wand);
+}
+
+template<>
+ALWAYS_INLINE
+void WandResource<PixelIterator>::destoryWand() {
+  DestroyPixelIterator(m_wand);
+}
+
 template<typename Wand>
 ALWAYS_INLINE
 static WandResource<Wand>* getWandResource(const StaticString& className,
                                            CObjRef obj) {
+  if (!obj.instanceof(className)) {
+    return nullptr;
+  }
   auto var = obj->o_get("wand", true, className.get());
-  if (var.getType() == KindOfNull) {
+  if (var.isNull()) {
     return nullptr;
   } else {
     return var.asCResRef().getTyped<WandResource<Wand>>();
@@ -121,14 +159,31 @@ template<typename Wand>
 ALWAYS_INLINE
 static void setWandResource(const StaticString& className,
                             CObjRef obj,
-                            Wand* wand) {
-  auto res = Resource(NEWOBJ(WandResource<Wand>(wand)));
+                            Wand* wand,
+                            bool destroy = true) {
+  auto res = Resource(NEWOBJ(WandResource<Wand>(wand, destroy)));
   obj->o_set("wand", res, className.get());
+}
+
+ALWAYS_INLINE
+static WandResource<MagickWand>* getMagickWandResource(CObjRef obj) {
+  return getWandResource<MagickWand>(s_Imagick, obj);
 }
 
 ALWAYS_INLINE
 static WandResource<PixelWand>* getPixelWandResource(CObjRef obj) {
   return getWandResource<PixelWand>(s_ImagickPixel, obj);
+}
+
+ALWAYS_INLINE
+static WandResource<PixelIterator>* getPixelIteratorResource(CObjRef obj) {
+  auto ret = getWandResource<PixelIterator>(s_ImagickPixelIterator, obj);
+  if (ret->getWand() == nullptr) {
+    IMAGICKPIXELITERATOR_THROW(
+      "ImagickPixelIterator is not initialized correctly");
+  } else {
+    return ret;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -153,15 +208,16 @@ static void freeMaigckMemory(T* &resource) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// Imagick Helper
+
+//////////////////////////////////////////////////////////////////////////////
 // ImagickPixel Helper
 template<typename T>
 static PixelWand* getPixelWand(CVarRef color, bool& allocated) {
   PixelWand* wand;
   allocated = false;
 
-  switch (color.getType()) {
-  case KindOfStaticString:
-  case KindOfString:
+  if (color.isString()) {
     wand = NewPixelWand();
     if (wand == nullptr) {
       imagickThrow<T>("Failed to allocate PixelWand structure");
@@ -172,18 +228,57 @@ static PixelWand* getPixelWand(CVarRef color, bool& allocated) {
     }
     allocated = true;
     return wand;
-    break;
-  case KindOfObject:
+  } else if (color.isObject()) {
     if (color.instanceof(s_ImagickPixel)) {
       return getPixelWandResource(color.asCObjRef())->getWand();
     } else {
       imagickThrow<T>(
         "The parameter must be an instance of ImagickPixel or a string");
     }
-    break;
-  default:
+  } else {
     imagickThrow<T>("Invalid color parameter provided");
-    break;
+  }
+}
+
+ALWAYS_INLINE
+static Object createImagickPixel(PixelWand* wand, bool destroy) {
+  Object ret = ImagickPixel::allocObject();
+  setWandResource(s_ImagickPixel, ret, wand, destroy);
+  return ret;
+}
+
+ALWAYS_INLINE
+static Array createImagickPixelArray(size_t num,
+                                     PixelWand* wands[],
+                                     bool destroy) {
+  if (wands == nullptr) {
+    return null_array;
+  } else {
+    ArrayInit ret(num);
+    for (int i = 0; i < num; ++i) {
+      ret.set(i, createImagickPixel(wands[i], destroy));
+    }
+    return ret.create();
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// ImagickPixelIterator Helper
+
+//////////////////////////////////////////////////////////////////////////////
+// class Imagick
+static void HHVM_METHOD(Imagick, __construct, CVarRef files) {
+  auto wand = NewMagickWand();
+  if (wand == nullptr) {
+    IMAGICK_THROW("Failed to create ImagickDraw object");
+  } else {
+    setWandResource(s_Imagick, this_, wand);
+  }
+  // todo: handle uri, stream, virtual;
+  // todo: handle array of files
+  // todo: handle error
+  if (files.isString()) {
+    MagickReadImage(wand, files.asCStrRef().c_str());
   }
 }
 
@@ -353,11 +448,149 @@ static bool HHVM_METHOD(ImagickPixel, setHSL,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// class ImagickPixelIterator
+ALWAYS_INLINE
+static void initPixelIterator(CObjRef this_, CObjRef magick) {
+  auto wand = getMagickWandResource(magick);
+  if (wand == nullptr || wand->getWand() == nullptr) {
+    IMAGICKPIXELITERATOR_THROW("Invalid Imagick object passed");
+  }
 
-class imagickExtension : public Extension {
+  auto it = NewPixelIterator(wand->getWand());
+  if (it == nullptr) {
+    IMAGICKPIXELITERATOR_THROW("Can not allocate ImagickPixelIterator");
+  } else {
+    setWandResource(s_ImagickPixelIterator, this_, it);
+  }
+}
+
+ALWAYS_INLINE
+static void initPixelRegioniIerator(CObjRef this_, CObjRef magick,
+    int64_t x, int64_t y, int64_t columns, int64_t rows) {
+  auto wand = getMagickWandResource(magick);
+  if (wand == nullptr || wand->getWand() == nullptr) {
+    IMAGICKPIXELITERATOR_THROW("Invalid Imagick object passed");
+  }
+
+  auto it = NewPixelRegionIterator(wand->getWand(), x, y, columns, rows);
+  if (it == nullptr) {
+    IMAGICKPIXELITERATOR_THROW("Can not allocate ImagickPixelIterator");
+  } else {
+    setWandResource(s_ImagickPixelIterator, this_, it);
+  }
+}
+
+static Object HHVM_STATIC_METHOD(ImagickPixelIterator, getPixelIterator,
+    CObjRef magick) {
+  Object ret = ImagickPixelIterator::allocObject();
+  initPixelIterator(ret, magick);
+  return ret;
+}
+
+static Object HHVM_STATIC_METHOD(ImagickPixelIterator, getPixelRegionIterator,
+    CObjRef magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
+  Object ret = ImagickPixelIterator::allocObject();
+  initPixelRegioniIerator(ret, magick, x, y, columns, rows);
+  return ret;
+}
+
+static bool HHVM_METHOD(ImagickPixelIterator, clear) {
+  auto it = getPixelIteratorResource(this_);
+  ClearPixelIterator(it->getWand());
+  return true;
+}
+
+static void HHVM_METHOD(ImagickPixelIterator, __construct, CObjRef magick) {
+  initPixelIterator(this_, magick);
+}
+
+static bool HHVM_METHOD(ImagickPixelIterator, destroy) {
+  return HHVM_MN(ImagickPixelIterator, clear)(this_);
+}
+
+static Array HHVM_METHOD(ImagickPixelIterator, getCurrentIteratorRow) {
+  size_t num;
+  auto it = getPixelIteratorResource(this_);
+  auto wands = PixelGetCurrentIteratorRow(it->getWand(), &num);
+  return createImagickPixelArray(num, wands, false);
+}
+
+static int64_t HHVM_METHOD(ImagickPixelIterator, getIteratorRow) {
+  auto it = getPixelIteratorResource(this_);
+  return PixelGetIteratorRow(it->getWand());
+}
+
+static Array HHVM_METHOD(ImagickPixelIterator, getNextIteratorRow) {
+  size_t num;
+  auto it = getPixelIteratorResource(this_);
+  auto wands = PixelGetNextIteratorRow(it->getWand(), &num);
+  return createImagickPixelArray(num, wands, false);
+}
+
+static Array HHVM_METHOD(ImagickPixelIterator, getPreviousIteratorRow) {
+  size_t num;
+  auto it = getPixelIteratorResource(this_);
+  auto wands = PixelGetPreviousIteratorRow(it->getWand(), &num);
+  return createImagickPixelArray(num, wands, false);
+}
+
+static bool HHVM_METHOD(ImagickPixelIterator, newPixelIterator,
+    CObjRef magick) {
+  raiseDeprecated(s_ImagickPixelIterator.c_str(), "newPixelIterator",
+                  s_ImagickPixelIterator.c_str(), "getPixelIterator");
+  initPixelIterator(this_, magick);
+  return true;
+}
+
+static bool HHVM_METHOD(ImagickPixelIterator, newPixelRegionIterator,
+    CObjRef magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
+  raiseDeprecated(s_ImagickPixelIterator.c_str(), "newPixelRegionIterator",
+                  s_ImagickPixelIterator.c_str(), "getPixelRegionIterator");
+  initPixelRegioniIerator(this_, magick, x, y, columns, rows);
+  return true;
+}
+
+static bool HHVM_METHOD(ImagickPixelIterator, resetIterator) {
+  auto it = getPixelIteratorResource(this_);
+  PixelResetIterator(it->getWand());
+  return true;
+}
+
+static bool HHVM_METHOD(ImagickPixelIterator, setIteratorFirstRow) {
+  auto it = getPixelIteratorResource(this_);
+  PixelSetFirstIteratorRow(it->getWand());
+  return true;
+}
+
+static bool HHVM_METHOD(ImagickPixelIterator, setIteratorLastRow) {
+  auto it = getPixelIteratorResource(this_);
+  PixelSetLastIteratorRow(it->getWand());
+  return true;
+}
+
+static bool HHVM_METHOD(ImagickPixelIterator, setIteratorRow, int64_t row) {
+  auto it = getPixelIteratorResource(this_);
+  if (PixelSetIteratorRow(it->getWand(), row) == MagickFalse) {
+    IMAGICKPIXELITERATOR_THROW("Unable to set iterator row");
+  } else {
+    return true;
+  }
+}
+
+static bool HHVM_METHOD(ImagickPixelIterator, syncIterator) {
+  auto it = getPixelIteratorResource(this_);
+  PixelSyncIterator(it->getWand());
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+class ImagickExtension : public Extension {
  public:
-  imagickExtension() : Extension("imagick") {}
+  ImagickExtension() : Extension("imagick") {}
   virtual void moduleInit() {
+    HHVM_ME(Imagick, __construct);
+
     HHVM_ME(ImagickPixel, clear);
     HHVM_ME(ImagickPixel, __construct);
     HHVM_ME(ImagickPixel, destroy);
@@ -371,6 +604,24 @@ class imagickExtension : public Extension {
     HHVM_ME(ImagickPixel, setColor);
     HHVM_ME(ImagickPixel, setColorValue);
     HHVM_ME(ImagickPixel, setHSL);
+
+    HHVM_STATIC_ME(ImagickPixelIterator, getPixelIterator);
+    HHVM_STATIC_ME(ImagickPixelIterator, getPixelRegionIterator);
+    HHVM_ME(ImagickPixelIterator, clear);
+    HHVM_ME(ImagickPixelIterator, __construct);
+    HHVM_ME(ImagickPixelIterator, destroy);
+    HHVM_ME(ImagickPixelIterator, getCurrentIteratorRow);
+    HHVM_ME(ImagickPixelIterator, getIteratorRow);
+    HHVM_ME(ImagickPixelIterator, getNextIteratorRow);
+    HHVM_ME(ImagickPixelIterator, getPreviousIteratorRow);
+    HHVM_ME(ImagickPixelIterator, newPixelIterator);
+    HHVM_ME(ImagickPixelIterator, newPixelRegionIterator);
+    HHVM_ME(ImagickPixelIterator, resetIterator);
+    HHVM_ME(ImagickPixelIterator, setIteratorFirstRow);
+    HHVM_ME(ImagickPixelIterator, setIteratorLastRow);
+    HHVM_ME(ImagickPixelIterator, setIteratorRow);
+    HHVM_ME(ImagickPixelIterator, syncIterator);
+
     loadSystemlib();
   }
 } s_imagick_extension;

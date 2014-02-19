@@ -76,6 +76,9 @@ void raise_debugging(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_message(ErrorConstants::ErrorModes mode,
                    const char *fmt,
                    va_list ap);
+void raise_message(ErrorConstants::ErrorModes mode,
+                   const char *fmt,
+                   ...) ATTRIBUTE_PRINTF(2, 3);
 void raise_message(ErrorConstants::ErrorModes mode, std::string &msg);
 void raise_param_type_warning(
     const char* func_name,

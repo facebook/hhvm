@@ -186,12 +186,17 @@ function get_options($argv) {
  */
 function map_convenience_filename($file) {
   $mappage = array(
-    'quick'    => 'hphp/test/quick',
-    'slow'     => 'hphp/test/slow',
-    'debugger' => 'hphp/test/server/debugger/tests',
-    'zend'     => 'hphp/test/zend/good',
-    'zend_bad' => 'hphp/test/zend/bad',
-    'facebook' => 'hphp/facebook/test',
+    'quick'      => 'hphp/test/quick',
+    'slow'       => 'hphp/test/slow',
+    'debugger'   => 'hphp/test/server/debugger/tests',
+    'zend'       => 'hphp/test/zend/good',
+    'facebook'   => 'hphp/facebook/test',
+
+    // Subsets of zend tests.
+    'zend_ext'   => 'hphp/test/zend/good/ext',
+    'zend_Zend'  => 'hphp/test/zend/good/Zend',
+    'zend_tests' => 'hphp/test/zend/good/tests',
+    'zend_bad'   => 'hphp/test/zend/bad',
   );
 
   if (!isset($mappage[$file])) {

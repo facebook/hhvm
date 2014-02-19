@@ -1125,10 +1125,10 @@ class CodeModelToPHP {
       $result = '@'.$result;
     }
     if ($name === 'tuple') {
-      $result .= $this->visitVector($type_arguments, '(', ', ', ')');
+      $result .= $this->visitVector($type_arguments, '(', ', ', ')', '()');
     } else if (is_string($return_type)) {
       $result .= '(function';
-      $result .= $this->visitVector($type_arguments, '(', ', ', ')');
+      $result .= $this->visitVector($type_arguments, '(', ', ', ')', '()');
       $result .= ': '.$return_type.')';
     } else {
       $result .= $name;

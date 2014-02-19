@@ -2,7 +2,7 @@
 $code = '<?php
 $global = 1;
 
-function foo($x) {
+function foo((function(): int) $x) {
   return $x + 1;
 }
 ';

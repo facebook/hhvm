@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <boost/variant/static_visitor.hpp>
+#include <boost/container/flat_set.hpp>
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
@@ -148,6 +149,38 @@ std::vector<borrowed_ptr<php::Block>> rpoSortFromMain(const php::Func&);
  * an edge to the main entry point.
  */
 std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func&);
+
+/*
+ * Mappings from blocks to sets of blocks.
+ *
+ * The first level is indexed by block->id.  The second is a set of
+ * block pointers.
+ */
+using BlockToBlocks = std::vector<
+  boost::container::flat_set<borrowed_ptr<php::Block>>
+>;
+
+/*
+ * Find the immediate non-exceptional predecessors for each block in
+ * an RPO-sorted list of blocks.
+ *
+ * The BlockToBlocks map returned will have any entry for each block
+ * in the input array, but may not have entries for blocks that aren't
+ * in the list.
+ */
+BlockToBlocks
+computeNormalPreds(const std::vector<borrowed_ptr<php::Block>>&);
+
+/*
+ * Find the immediate exceptional predecessors for each block in an
+ * RPO-sorted list of blocks.
+ *
+ * The BlockToBlocks map returned will have any entry for each block
+ * in the input array, but may not have entries for blocks that aren't
+ * in the list.
+ */
+BlockToBlocks
+computeFactoredPreds(const std::vector<borrowed_ptr<php::Block>>&);
 
 /*
  * Visit each leaf in the ExnNode tree.

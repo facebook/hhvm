@@ -205,13 +205,13 @@ Ratchet\Server\IoServerTest::testFactory
 Ratchet\Server\IoServerTest::testNoLoopProvidedError
 .
 Ratchet\Server\IoServerTest::testOnClose
-.
+E
 Ratchet\Server\IoServerTest::testOnData
-.
+E
 Ratchet\Server\IoServerTest::testOnErrorPassesException
 .
 Ratchet\Server\IoServerTest::testOnOpen
-.
+E
 Ratchet\Server\IpBlackListTest::testAddAndRemoveWithFluentInterfaces
 .
 Ratchet\Server\IpBlackListTest::testBlockClosesConnection
@@ -360,6 +360,10 @@ Ratchet\Wamp\TopicTest::testAddAndCount
 .
 Ratchet\Wamp\TopicTest::testBroadcast
 .
+Ratchet\Wamp\TopicTest::testBroadcastWithEligible
+.
+Ratchet\Wamp\TopicTest::testBroadcastWithExclude
+.
 Ratchet\Wamp\TopicTest::testDoesHave
 .
 Ratchet\Wamp\TopicTest::testDoesNotHave
@@ -375,6 +379,8 @@ Ratchet\Wamp\TopicTest::testRemove
 Ratchet\Wamp\TopicTest::testToString
 .
 Ratchet\Wamp\WampConnectionTest::testCallError
+.
+Ratchet\Wamp\WampConnectionTest::testCallErrorWithTopic
 .
 Ratchet\Wamp\WampConnectionTest::testCallResult
 .

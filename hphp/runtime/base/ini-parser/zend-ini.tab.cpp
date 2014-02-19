@@ -100,57 +100,12 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/ini-parser/zend-ini.h"
-#include "hphp/runtime/ext/ext_misc.h"
 using namespace HPHP;
-
-///////////////////////////////////////////////////////////////////////////////
-// helpers
-
-static void zend_ini_do_op(char type, std::string &result,
-                           const std::string& op1, const std::string& op2 = std::string()) {
-  int i_op1 = strtoll(op1.c_str(), nullptr, 10);
-  int i_op2 = strtoll(op2.c_str(), nullptr, 10);
-
-  int i_result = 0;
-  switch (type) {
-    case '|': i_result = i_op1 | i_op2; break;
-    case '&': i_result = i_op1 & i_op2; break;
-    case '^': i_result = i_op1 ^ i_op2; break;
-    case '~': i_result = ~i_op1;        break;
-    case '!': i_result = !i_op1;        break;
-  }
-
-  result = std::to_string((int64_t)i_result);
-}
-
-static void zend_ini_get_constant(std::string &result, const std::string& name) {
-  if (f_defined(name)) {
-    result = f_constant(name).toString().toCppString();
-  } else {
-    result = name;
-  }
-}
-
-static void zend_ini_get_var(std::string &result, const std::string& name) {
-  std::string curval;
-  if (IniSetting::Get(name, curval)) {
-    result = curval;
-    return;
-  }
-
-  char *value = getenv(name.data());
-  if (value) {
-    result = std::string(value);
-    return;
-  }
-
-  result.clear();
-}
 
 
 
 /* Line 268 of yacc.c  */
-#line 154 "zend-ini.tab.cpp"
+#line 109 "zend-ini.tab.cpp"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -184,14 +139,13 @@ static void zend_ini_get_var(std::string &result, const std::string& name) {
      TC_STRING = 262,
      TC_WHITESPACE = 263,
      TC_LABEL = 264,
-     TC_OFFSET = 265,
-     TC_DOLLAR_CURLY = 266,
-     TC_VARNAME = 267,
-     TC_QUOTED_STRING = 268,
-     BOOL_TRUE = 269,
-     BOOL_FALSE = 270,
-     END_OF_LINE = 271,
-     JUNK = 272
+     TC_DOLLAR_CURLY = 265,
+     TC_VARNAME = 266,
+     TC_QUOTED_STRING = 267,
+     BOOL_TRUE = 268,
+     BOOL_FALSE = 269,
+     END_OF_LINE = 270,
+     JUNK = 271
    };
 #endif
 
@@ -222,7 +176,7 @@ typedef struct YYLTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 226 "zend-ini.tab.cpp"
+#line 180 "zend-ini.tab.cpp"
 
 #ifdef short
 # undef short
@@ -448,15 +402,15 @@ union yyalloc
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  44
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  11
+#define YYNNTS  13
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  38
+#define YYNRULES  41
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  56
+#define YYNSTATES  59
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   272
+#define YYMAXUTOK   271
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -467,16 +421,16 @@ static const yytype_uint8 yytranslate[] =
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    40,    22,     2,    30,    29,    39,    23,
-      42,    43,    28,    25,    20,    26,    21,    27,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,    19,     2,
-      32,    18,    33,    34,    35,     2,     2,     2,     2,     2,
+       2,     2,     2,    39,    21,     2,    29,    28,    38,    22,
+      42,    43,    27,    24,    19,    25,    20,    26,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,    18,     2,
+      31,    17,    32,    33,    34,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    41,    24,     2,     2,     2,     2,     2,
+       2,    41,     2,    40,    23,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    36,    38,    37,    31,     2,     2,     2,
+       2,     2,     2,    35,    37,    36,    30,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -491,7 +445,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17
+      15,    16
 };
 
 #if YYDEBUG
@@ -499,35 +453,38 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     6,     7,    11,    15,    21,    23,    25,
-      27,    28,    30,    32,    34,    36,    38,    39,    42,    45,
-      46,    48,    50,    54,    57,    60,    65,    67,    71,    75,
-      79,    82,    85,    89,    93,    95,    97,    99,   101
+       0,     0,     3,     6,     7,    11,    16,    20,    22,    24,
+      27,    29,    33,    35,    36,    38,    40,    42,    44,    46,
+      47,    50,    53,    54,    56,    58,    62,    65,    68,    73,
+      75,    79,    83,    87,    90,    93,    97,   101,   103,   105,
+     107,   109
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      45,     0,    -1,    45,    46,    -1,    -1,     3,    47,    41,
-      -1,     9,    18,    48,    -1,    10,    49,    41,    18,    48,
-      -1,     9,    -1,    16,    -1,    51,    -1,    -1,    52,    -1,
-      14,    -1,    15,    -1,    16,    -1,    51,    -1,    -1,    50,
-      53,    -1,    50,    13,    -1,    -1,    53,    -1,    54,    -1,
-      22,    50,    22,    -1,    51,    53,    -1,    51,    54,    -1,
-      51,    22,    50,    22,    -1,    51,    -1,    52,    38,    52,
-      -1,    52,    39,    52,    -1,    52,    24,    52,    -1,    31,
-      52,    -1,    40,    52,    -1,    42,    52,    43,    -1,    11,
-      12,    37,    -1,     5,    -1,     4,    -1,     6,    -1,     7,
-      -1,     8,    -1
+      45,     0,    -1,    45,    46,    -1,    -1,     3,    49,    40,
+      -1,     9,    47,    17,    50,    -1,     9,    17,    50,    -1,
+       9,    -1,    15,    -1,    47,    48,    -1,    48,    -1,    41,
+      51,    40,    -1,    53,    -1,    -1,    54,    -1,    13,    -1,
+      14,    -1,    15,    -1,    53,    -1,    -1,    52,    55,    -1,
+      52,    12,    -1,    -1,    55,    -1,    56,    -1,    21,    52,
+      21,    -1,    53,    55,    -1,    53,    56,    -1,    53,    21,
+      52,    21,    -1,    53,    -1,    54,    37,    54,    -1,    54,
+      38,    54,    -1,    54,    23,    54,    -1,    30,    54,    -1,
+      39,    54,    -1,    42,    54,    43,    -1,    10,    11,    36,
+      -1,     5,    -1,     4,    -1,     6,    -1,     7,    -1,     8,
+      -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   104,   104,   105,   109,   112,   115,   118,   121,   125,
-     126,   130,   131,   132,   133,   137,   138,   142,   143,   144,
-     148,   149,   150,   151,   152,   153,   157,   158,   159,   160,
-     161,   162,   163,   167,   171,   172,   173,   174,   175
+       0,    58,    58,    59,    63,    64,    66,    67,    68,    72,
+      73,    77,    81,    82,    86,    87,    88,    89,    93,    94,
+      98,    99,   100,   104,   105,   106,   107,   108,   109,   113,
+     114,   115,   116,   117,   118,   119,   123,   127,   128,   129,
+     130,   131
 };
 #endif
 
@@ -537,12 +494,12 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "TC_SECTION", "TC_RAW", "TC_CONSTANT",
-  "TC_NUMBER", "TC_STRING", "TC_WHITESPACE", "TC_LABEL", "TC_OFFSET",
-  "TC_DOLLAR_CURLY", "TC_VARNAME", "TC_QUOTED_STRING", "BOOL_TRUE",
-  "BOOL_FALSE", "END_OF_LINE", "JUNK", "'='", "':'", "','", "'.'", "'\"'",
-  "'\\''", "'^'", "'+'", "'-'", "'/'", "'*'", "'%'", "'$'", "'~'", "'<'",
-  "'>'", "'?'", "'@'", "'{'", "'}'", "'|'", "'&'", "'!'", "']'", "'('",
-  "')'", "$accept", "statement_list", "statement",
+  "TC_NUMBER", "TC_STRING", "TC_WHITESPACE", "TC_LABEL", "TC_DOLLAR_CURLY",
+  "TC_VARNAME", "TC_QUOTED_STRING", "BOOL_TRUE", "BOOL_FALSE",
+  "END_OF_LINE", "JUNK", "'='", "':'", "','", "'.'", "'\"'", "'\\''",
+  "'^'", "'+'", "'-'", "'/'", "'*'", "'%'", "'$'", "'~'", "'<'", "'>'",
+  "'?'", "'@'", "'{'", "'}'", "'|'", "'&'", "'!'", "']'", "'['", "'('",
+  "')'", "$accept", "statement_list", "statement", "offset_list", "offset",
   "section_string_or_value", "string_or_value", "option_offset",
   "encapsed_list", "var_string_list", "expr", "cfg_var_ref",
   "constant_string", 0
@@ -555,10 +512,10 @@ static const char *const yytname[] =
 static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271,   272,    61,    58,
-      44,    46,    34,    39,    94,    43,    45,    47,    42,    37,
-      36,   126,    60,    62,    63,    64,   123,   125,   124,    38,
-      33,    93,    40,    41
+     265,   266,   267,   268,   269,   270,   271,    61,    58,    44,
+      46,    34,    39,    94,    43,    45,    47,    42,    37,    36,
+     126,    60,    62,    63,    64,   123,   125,   124,    38,    33,
+      93,    91,    40,    41
 };
 # endif
 
@@ -566,18 +523,20 @@ static const yytype_uint16 yytoknum[] =
 static const yytype_uint8 yyr1[] =
 {
        0,    44,    45,    45,    46,    46,    46,    46,    46,    47,
-      47,    48,    48,    48,    48,    49,    49,    50,    50,    50,
-      51,    51,    51,    51,    51,    51,    52,    52,    52,    52,
-      52,    52,    52,    53,    54,    54,    54,    54,    54
+      47,    48,    49,    49,    50,    50,    50,    50,    51,    51,
+      52,    52,    52,    53,    53,    53,    53,    53,    53,    54,
+      54,    54,    54,    54,    54,    54,    55,    56,    56,    56,
+      56,    56
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     2,     0,     3,     3,     5,     1,     1,     1,
-       0,     1,     1,     1,     1,     1,     0,     2,     2,     0,
-       1,     1,     3,     2,     2,     4,     1,     3,     3,     3,
-       2,     2,     3,     3,     1,     1,     1,     1,     1
+       0,     2,     2,     0,     3,     4,     3,     1,     1,     2,
+       1,     3,     1,     0,     1,     1,     1,     1,     1,     0,
+       2,     2,     0,     1,     1,     3,     2,     2,     4,     1,
+       3,     3,     3,     2,     2,     3,     3,     1,     1,     1,
+       1,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
@@ -585,39 +544,39 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       3,     0,     1,    10,     7,    16,     8,     2,    35,    34,
-      36,    37,    38,     0,    19,     0,     9,    20,    21,     0,
-       0,    15,     0,     0,     4,    19,    23,    24,    12,    13,
-      14,     0,     0,     0,     5,    26,    11,     0,    33,    18,
-      22,    17,     0,    30,    31,     0,     0,     0,     0,     0,
-      25,    32,    29,    27,    28,     6
+       3,     0,     1,    13,     7,     8,     2,    38,    37,    39,
+      40,    41,     0,    22,     0,    12,    23,    24,     0,    19,
+       0,    10,     0,     0,     4,    22,    26,    27,    15,    16,
+      17,     0,     0,     0,     6,    29,    14,     0,    18,     0,
+       9,    36,    21,    25,    20,     0,    33,    34,     0,     0,
+       0,     0,    11,     5,    28,    35,    32,    30,    31
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1,     7,    15,    34,    20,    23,    35,    36,    17,
-      18
+      -1,     1,     6,    20,    21,    14,    34,    37,    23,    35,
+      36,    16,    17
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -33
+#define YYPACT_NINF -28
 static const yytype_int8 yypact[] =
 {
-     -33,    68,   -33,    51,   -13,    51,   -33,   -33,   -33,   -33,
-     -33,   -33,   -33,    -6,   -33,   -32,    59,   -33,   -33,    -4,
-      -9,    59,   -12,     8,   -33,   -33,   -33,   -33,   -33,   -33,
-     -33,     9,     9,     9,   -33,    59,   -16,    19,   -33,   -33,
-     -33,   -33,    39,   -33,   -33,     5,     9,     9,     9,    -4,
-     -33,   -33,   -33,   -33,   -33,   -33
+     -28,    74,   -28,    45,   -12,   -28,   -28,   -28,   -28,   -28,
+     -28,   -28,     1,   -28,   -27,    65,   -28,   -28,    -4,    45,
+      -9,   -28,   -22,    55,   -28,   -28,   -28,   -28,   -28,   -28,
+     -28,    15,    15,    15,   -28,    65,    41,   -24,    65,    -4,
+     -28,   -28,   -28,   -28,   -28,    70,   -28,   -28,    25,    15,
+      15,    15,   -28,   -28,   -28,   -28,   -28,   -28,   -28
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -33,   -33,   -33,   -33,    -8,   -33,    17,    21,    43,    12,
-      18
+     -28,   -28,   -28,   -28,    -2,   -28,   -11,   -28,     6,    37,
+      10,    -8,     9
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -626,48 +585,48 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-       8,     9,    10,    11,    12,    19,    22,    13,    46,    24,
-      28,    29,    30,     8,     9,    10,    11,    12,    14,    13,
-      13,    39,    47,    48,    16,    38,    21,    31,    26,    46,
-      40,    14,    37,    26,    27,    41,    32,    49,    33,    27,
-      31,    55,    42,    47,    48,     0,     0,    26,    51,    32,
-      13,    33,    39,    27,    41,     8,     9,    10,    11,    12,
-       0,    50,    13,     8,     9,    10,    11,    12,     2,     0,
-      13,     3,     0,    14,    43,    44,    45,     4,     5,     0,
-       0,    25,     0,     0,     6,     0,     0,     0,     0,    52,
-      53,    54
+       7,     8,     9,    10,    11,    18,    12,    26,    39,    28,
+      29,    30,    22,    24,    41,    44,    52,    13,    40,     7,
+       8,     9,    10,    11,    27,    12,    31,    26,    53,    19,
+      26,    45,    19,     0,     0,    32,    13,    44,    33,     0,
+      15,    46,    47,    48,    27,    31,     0,    27,    49,     7,
+       8,     9,    10,    11,    32,    12,    38,    33,     0,    56,
+      57,    58,    50,    51,    49,    12,    13,    42,    55,     7,
+       8,     9,    10,    11,     2,    12,    43,     3,    50,    51,
+      12,     0,    42,     4,     0,     0,    25,     0,     0,     5,
+       0,    54
 };
 
 #define yypact_value_is_default(yystate) \
-  ((yystate) == (-33))
+  ((yystate) == (-28))
 
 #define yytable_value_is_error(yytable_value) \
   YYID (0)
 
 static const yytype_int8 yycheck[] =
 {
-       4,     5,     6,     7,     8,    18,    12,    11,    24,    41,
-      14,    15,    16,     4,     5,     6,     7,     8,    22,    11,
-      11,    13,    38,    39,     3,    37,     5,    31,    16,    24,
-      22,    22,    41,    21,    16,    23,    40,    18,    42,    21,
-      31,    49,    25,    38,    39,    -1,    -1,    35,    43,    40,
-      11,    42,    13,    35,    42,     4,     5,     6,     7,     8,
-      -1,    22,    11,     4,     5,     6,     7,     8,     0,    -1,
-      11,     3,    -1,    22,    31,    32,    33,     9,    10,    -1,
-      -1,    22,    -1,    -1,    16,    -1,    -1,    -1,    -1,    46,
-      47,    48
+       4,     5,     6,     7,     8,    17,    10,    15,    17,    13,
+      14,    15,    11,    40,    36,    23,    40,    21,    20,     4,
+       5,     6,     7,     8,    15,    10,    30,    35,    39,    41,
+      38,    25,    41,    -1,    -1,    39,    21,    45,    42,    -1,
+       3,    31,    32,    33,    35,    30,    -1,    38,    23,     4,
+       5,     6,     7,     8,    39,    10,    19,    42,    -1,    49,
+      50,    51,    37,    38,    23,    10,    21,    12,    43,     4,
+       5,     6,     7,     8,     0,    10,    21,     3,    37,    38,
+      10,    -1,    12,     9,    -1,    -1,    21,    -1,    -1,    15,
+      -1,    21
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    45,     0,     3,     9,    10,    16,    46,     4,     5,
-       6,     7,     8,    11,    22,    47,    51,    53,    54,    18,
-      49,    51,    12,    50,    41,    22,    53,    54,    14,    15,
-      16,    31,    40,    42,    48,    51,    52,    41,    37,    13,
-      22,    53,    50,    52,    52,    52,    24,    38,    39,    18,
-      22,    43,    52,    52,    52,    48
+       0,    45,     0,     3,     9,    15,    46,     4,     5,     6,
+       7,     8,    10,    21,    49,    53,    55,    56,    17,    41,
+      47,    48,    11,    52,    40,    21,    55,    56,    13,    14,
+      15,    30,    39,    42,    50,    53,    54,    51,    53,    17,
+      48,    36,    12,    21,    55,    52,    54,    54,    54,    23,
+      37,    38,    40,    50,    21,    43,    54,    54,    54
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1547,253 +1506,266 @@ yyreduce:
         case 4:
 
 /* Line 1806 of yacc.c  */
-#line 109 "zend-ini.y"
-    {
-      zend_ini_callback(&(yyvsp[(2) - (3)]), NULL, NULL, IniSetting::ParserSection);
-    }
+#line 63 "zend-ini.y"
+    { zend_ini_on_section((yyvsp[(2) - (3)]));}
     break;
 
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 112 "zend-ini.y"
-    {
-      zend_ini_callback(&(yyvsp[(1) - (3)]), &(yyvsp[(3) - (3)]), NULL, IniSetting::ParserEntry);
-    }
+#line 65 "zend-ini.y"
+    { zend_ini_on_pop_entry((yyvsp[(1) - (4)]), (yyvsp[(4) - (4)]), (yyvsp[(2) - (4)]));}
     break;
 
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 115 "zend-ini.y"
-    {
-      zend_ini_callback(&(yyvsp[(1) - (5)]), &(yyvsp[(5) - (5)]), &(yyvsp[(2) - (5)]), IniSetting::ParserPopEntry);
-    }
+#line 66 "zend-ini.y"
+    { zend_ini_on_entry((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 118 "zend-ini.y"
-    {
-      zend_ini_callback(&(yyvsp[(1) - (1)]), NULL, NULL, IniSetting::ParserEntry);
-    }
+#line 67 "zend-ini.y"
+    { zend_ini_on_label((yyvsp[(1) - (1)]));}
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 125 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (1)]);}
+#line 72 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (2)]) + '\0' + (yyvsp[(2) - (2)]);}
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 126 "zend-ini.y"
-    { (yyval) = "";}
+#line 73 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 130 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (1)]);}
+#line 77 "zend-ini.y"
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 131 "zend-ini.y"
+#line 81 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 132 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (1)]);}
+#line 82 "zend-ini.y"
+    { (yyval) = "";}
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 133 "zend-ini.y"
-    { (yyval) = "";}
+#line 86 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 137 "zend-ini.y"
+#line 87 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 138 "zend-ini.y"
-    { (yyval).clear();}
+#line 88 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 142 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
+#line 89 "zend-ini.y"
+    { (yyval) = "";}
     break;
 
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 143 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
+#line 93 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 144 "zend-ini.y"
-    { (yyval) = "";}
+#line 94 "zend-ini.y"
+    { (yyval).clear();}
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 148 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (1)]);}
+#line 98 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 149 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (1)]);}
+#line 99 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 150 "zend-ini.y"
-    { (yyval) = (yyvsp[(2) - (3)]);}
+#line 100 "zend-ini.y"
+    { (yyval) = "";}
     break;
 
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 151 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
+#line 104 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 152 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
+#line 105 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 153 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (4)]) + (yyvsp[(3) - (4)]);}
+#line 106 "zend-ini.y"
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 157 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (1)]);}
+#line 107 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 158 "zend-ini.y"
-    { zend_ini_do_op('|', (yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
+#line 108 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 159 "zend-ini.y"
-    { zend_ini_do_op('&', (yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
+#line 109 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (4)]) + (yyvsp[(3) - (4)]);}
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 160 "zend-ini.y"
-    { zend_ini_do_op('^', (yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
+#line 113 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 161 "zend-ini.y"
-    { zend_ini_do_op('~', (yyval), (yyvsp[(2) - (2)])    );}
+#line 114 "zend-ini.y"
+    { zend_ini_on_op((yyval), '|', (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 162 "zend-ini.y"
-    { zend_ini_do_op('!', (yyval), (yyvsp[(2) - (2)])    );}
+#line 115 "zend-ini.y"
+    { zend_ini_on_op((yyval), '&', (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 163 "zend-ini.y"
-    { (yyval) = (yyvsp[(2) - (3)]);}
+#line 116 "zend-ini.y"
+    { zend_ini_on_op((yyval), '^', (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 167 "zend-ini.y"
-    { zend_ini_get_var((yyval), (yyvsp[(2) - (3)]));}
+#line 117 "zend-ini.y"
+    { zend_ini_on_op((yyval), '~', (yyvsp[(2) - (2)])    );}
     break;
 
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 171 "zend-ini.y"
-    { zend_ini_get_constant((yyval), (yyvsp[(1) - (1)]));}
+#line 118 "zend-ini.y"
+    { zend_ini_on_op((yyval), '!', (yyvsp[(2) - (2)])    );}
     break;
 
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 172 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (1)]);}
+#line 119 "zend-ini.y"
+    { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 173 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (1)]);}
+#line 123 "zend-ini.y"
+    { zend_ini_on_var((yyval), (yyvsp[(2) - (3)]));}
     break;
 
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 174 "zend-ini.y"
-    { (yyval) = (yyvsp[(1) - (1)]);}
+#line 127 "zend-ini.y"
+    { zend_ini_on_constant((yyval), (yyvsp[(1) - (1)]));}
     break;
 
   case 38:
 
 /* Line 1806 of yacc.c  */
-#line 175 "zend-ini.y"
+#line 128 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (1)]);}
+    break;
+
+  case 39:
+
+/* Line 1806 of yacc.c  */
+#line 129 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (1)]);}
+    break;
+
+  case 40:
+
+/* Line 1806 of yacc.c  */
+#line 130 "zend-ini.y"
+    { (yyval) = (yyvsp[(1) - (1)]);}
+    break;
+
+  case 41:
+
+/* Line 1806 of yacc.c  */
+#line 131 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1797 "zend-ini.tab.cpp"
+#line 1769 "zend-ini.tab.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2031,15 +2003,15 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 178 "zend-ini.y"
+#line 134 "zend-ini.y"
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // exposed to runtime/base/ini-setting.cpp
 
-bool zend_parse_ini_string(const std::string& str, const std::string& filename,
+bool zend_parse_ini_string(const std::string &str, const std::string &filename,
                            int scanner_mode,
-                           IniSetting::PFN_PARSER_CALLBACK callback,
+                           IniSetting::ParserCallback &callback,
                            void *arg) {
   zend_ini_scan(str, scanner_mode, filename, callback, arg);
   bool ret = (ini_parse() == 0);

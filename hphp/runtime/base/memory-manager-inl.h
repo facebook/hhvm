@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -231,9 +231,7 @@ std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
   return std::make_pair(retptr, sz);
 #else
   m_stats.usage += bytes;
-  // TODO(#2831116): we only add sizeof(SmallNode) so smartMallocBig
-  // can subtract it.
-  auto const ret = smartMallocBig(debugAddExtra(bytes + sizeof(SmallNode)));
+  auto const ret = smartMallocBig(debugAddExtra(bytes));
   FTRACE(1, "smartMallocBig: {} ({} bytes)\n", ret, bytes);
   return std::make_pair(debugPostAllocate(ret, bytes, bytes), bytes);
 #endif

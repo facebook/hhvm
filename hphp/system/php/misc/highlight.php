@@ -11,11 +11,11 @@ function highlight_file($filename, $return = false) {
 
 function highlight_string($data, $return = false) {
   $colors = [
-    'html' => '#000000',
-    'comment' => '#FF8000',
-    'default' => '#0000BB',
-    'string' => '#DD0000',
-    'keyword' => '#007700',
+    'html' => ini_get('highlight.html'),
+    'comment' => ini_get('highlight.comment'),
+    'default' => ini_get('highlight.default'),
+    'string' => ini_get('highlight.string'),
+    'keyword' => ini_get('highlight.keyword'),
   ];
 
   $output = '';

@@ -43,6 +43,10 @@ if (FEATURES_HEADER)
 	add_definitions("-DHAVE_FEATURES_H=1")
 endif()
 
+# magickwand
+find_package(LibMagickWand REQUIRED)
+include_directories(${LIBMAGICKWAND_INCLUDE_DIRS})
+
 # google-glog
 find_package(Glog REQUIRED)
 include_directories(${LIBGLOG_INCLUDE_DIR})
@@ -441,6 +445,7 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
 	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
+	target_link_libraries(${target} ${LIBMAGICKWAND_LIBRARIES})
 
 if (LibXed_LIBRARY)
 	target_link_libraries(${target} ${LibXed_LIBRARY})

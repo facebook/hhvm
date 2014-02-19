@@ -12,6 +12,8 @@ ArticleTest::testStaticFunctions
 .
 AutoLoaderTest::testAutoLoadConfig
 .
+AutoLoaderTest::testCoreClass
+.
 AutoLoaderTest::testExtensionClass
 .
 AutoLoaderTest::testMediaWikiTestCaseParentSetupCalled
@@ -6526,6 +6528,12 @@ MessageTest::testMessageParamSubstitution
 .
 MessageTest::testMessageParams
 .
+ORMTableTest::testIgnoreErrorsOverride
+E
+ORMTableTest::testMediaWikiTestCaseParentSetupCalled
+.
+ORMTableTest::testSingleton
+.
 OutputPageTest::testHandheld
 .
 OutputPageTest::testMediaWikiTestCaseParentSetupCalled
@@ -7728,14 +7736,44 @@ SVGMetadataExtractorTest::testGetXMLMetadata with data set #0
 .
 SVGMetadataExtractorTest::testMediaWikiTestCaseParentSetupCalled
 .
+SanitizerTest::testAttributeSupport with data set #0
+.
+SanitizerTest::testAttributeSupport with data set #1
+.
 SanitizerTest::testCssCommentsChecking with data set #0
 .
 SanitizerTest::testCssCommentsChecking with data set #1
 .
+SanitizerTest::testCssCommentsChecking with data set #10
+.
+SanitizerTest::testCssCommentsChecking with data set #11
+.
+SanitizerTest::testCssCommentsChecking with data set #12
+.
+SanitizerTest::testCssCommentsChecking with data set #13
+.
+SanitizerTest::testCssCommentsChecking with data set #14
+.
+SanitizerTest::testCssCommentsChecking with data set #15
+.
+SanitizerTest::testCssCommentsChecking with data set #16
+.
 SanitizerTest::testCssCommentsChecking with data set #2
 .
 SanitizerTest::testCssCommentsChecking with data set #3
-FATAL
+.
+SanitizerTest::testCssCommentsChecking with data set #4
+.
+SanitizerTest::testCssCommentsChecking with data set #5
+.
+SanitizerTest::testCssCommentsChecking with data set #6
+.
+SanitizerTest::testCssCommentsChecking with data set #7
+.
+SanitizerTest::testCssCommentsChecking with data set #8
+.
+SanitizerTest::testCssCommentsChecking with data set #9
+.
 SanitizerTest::testDecodeMixedComplexEntities
 .
 SanitizerTest::testDecodeMixedEntities
@@ -7825,6 +7863,8 @@ SanitizerTest::testInvalidAmpersand
 SanitizerTest::testInvalidEntities
 .
 SanitizerTest::testInvalidNumberedEntities
+.
+SanitizerTest::testMediaWikiTestCaseParentSetupCalled
 .
 SanitizerTest::testRemoveHTMLtags with data set #0
 .
@@ -8700,6 +8740,8 @@ TagHookTest::testTagHooks with data set #3
 .
 TagHookTest::testTagHooks with data set #4
 .
+TestORMRowTest::testMediaWikiTestCaseParentSetupCalled
+E
 TestSample::testCheckMainPageTitleIsConsideredLocal
 .
 TestSample::testCreateBasicListOfTitles with data set #0

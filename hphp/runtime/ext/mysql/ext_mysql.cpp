@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -894,7 +894,7 @@ Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
   obj->o_set("unique_key",   info->flags & UNIQUE_KEY_FLAG? 1 : 0);
   obj->o_set("numeric",      IS_NUM(info->type)? 1 : 0);
   obj->o_set("blob",         IS_BLOB(info->flags)? 1 : 0);
-  obj->o_set("type",         info->type);
+  obj->o_set("type",         php_mysql_get_field_name(info->type));
   obj->o_set("unsigned",     info->flags & UNSIGNED_FLAG? 1 : 0);
   obj->o_set("zerofill",     info->flags & ZEROFILL_FLAG? 1 : 0);
   return obj;

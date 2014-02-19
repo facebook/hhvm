@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,10 +37,10 @@ UserDirectory::UserDirectory(Class* cls) : UserFSNode(cls) {
 
 bool UserDirectory::open(const String& path) {
   // bool dir_opendir ( string $path , int $options )
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(m_DirOpen, s_dir_opendir,
-                       make_packed_array(path, 0), success);
-  if (success && ret.toBoolean()) {
+                       make_packed_array(path, 0), invoked);
+  if (invoked && ret.toBoolean()) {
     return true;
   }
   raise_warning("\"%s::dir_opendir\" call failed", m_cls->name()->data());
@@ -54,10 +54,10 @@ void UserDirectory::close() {
 
 Variant UserDirectory::read() {
   // String dir_readdir()
-  bool success = false;
+  bool invoked = false;
   auto ret = invoke(m_DirRead, s_dir_readdir,
-                    make_packed_array(), success);
-  if (!success) {
+                    Array::Create(), invoked);
+  if (!invoked) {
     raise_warning("%s::dir_readdir is not implemented",
                   m_cls->name()->data());
     return null_string;
@@ -67,9 +67,9 @@ Variant UserDirectory::read() {
 
 void UserDirectory::rewind() {
   // String dir_rewinddir()
-  bool success = false;
-  invoke(m_DirRewind, s_dir_rewinddir, make_packed_array(), success);
-  if (!success) {
+  bool invoked = false;
+  invoke(m_DirRewind, s_dir_rewinddir, Array::Create(), invoked);
+  if (!invoked) {
     raise_warning("%s::dir_rewinddir is not implemented",
                   m_cls->name()->data());
   }

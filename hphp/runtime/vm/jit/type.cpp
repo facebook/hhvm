@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -530,17 +530,6 @@ Type stkReturn(const IRInstruction* inst, int dstId,
   return Type::StkPtr;
 }
 
-Type binArithResultType(Opcode op, Type t1, Type t2) {
-  if (op == Mod) {
-    return Type::Int;
-  }
-  assert(op == Add || op == Sub || op == Mul);
-  if (t1.subtypeOf(Type::Dbl) || t2.subtypeOf(Type::Dbl)) {
-    return Type::Dbl;
-  }
-  return Type::Int;
-}
-
 Type ldRefReturn(const IRInstruction* inst) {
   // Guarding on specific classes/array kinds is expensive enough that we only
   // want to do it in situations we've confirmed the benefit.
@@ -669,9 +658,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
-#define DArith    return binArithResultType(inst->op(), \
-                                            inst->src(0)->type(),  \
-                                            inst->src(1)->type());
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -696,7 +682,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef ND
 #undef DBuiltin
 #undef DSubtract
-#undef DArith
 
 }
 
@@ -848,8 +833,6 @@ void assertOperandTypes(const IRInstruction* inst) {
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)
-#define SNumInt  S(Int, Bool)
-#define SNum     S(Int, Bool, Dbl)
 #define SUnk     return;
 #define SSpills  checkSpills();
 #define ND
@@ -870,8 +853,6 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DLdRef      requireTypeParam();
 #define DAllocObj
 #define DThis
-#define DArith      checkDst(!inst->hasTypeParam(), \
-                             "DArith should have no type parameter");
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
   case opcode: dstinfo srcinfo countCheck(); return;
@@ -888,7 +869,6 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef S
 #undef C
 #undef CStr
-#undef SNum
 #undef SUnk
 #undef SSpills
 
@@ -906,21 +886,18 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DAllocObj
 #undef DLdRef
 #undef DThis
-#undef DArith
 
 }
 
 std::string TypeConstraint::toString() const {
   std::string catStr;
   if (innerCat) {
-    catStr = folly::to<std::string>("inner:",
-                                    typeCategoryName(innerCat.get()));
+    catStr = folly::to<std::string>("inner:", typeCategoryName(*innerCat));
   } else {
     catStr = typeCategoryName(category);
   }
 
-  return folly::format("<{},{}>",
-                       catStr, knownType).str();
+  return folly::format("<{},{}>", catStr, knownType).str();
 }
 
 //////////////////////////////////////////////////////////////////////

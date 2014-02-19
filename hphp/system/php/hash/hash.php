@@ -67,7 +67,7 @@ function hash_final(resource $context, bool $raw_output = false): string;
  *
  * @param string $algo     - Name of selected hashing algorithm
  *                           (i.e. "md5", "sha256", "haval160,4", etc..)
- * @param string $data     - Message to be hashed.
+ * @param mixed $data      - Message to be hashed. Will be cast to a string
  * @param string $key      - Shared secret key used for generating the
  *                           HMAC variant of the message digest.
  * @param bool $raw_output - When set to TRUE, outputs raw binary data.
@@ -80,7 +80,7 @@ function hash_final(resource $context, bool $raw_output = false): string;
  *                  On error, FALSE is returned.
  */
 function hash_hmac(?string $algo = null,
-                   ?string $data = null,
+                   ?mixed $data = null,
                    ?string $key = null,
                    ?bool $raw_output = false): mixed {
   // Behave like a builtin function so that we pass Zend's tests
@@ -99,7 +99,7 @@ function hash_hmac(?string $algo = null,
   if (!$ctx) {
     return false;
   }
-  hash_update($ctx, $data);
+  hash_update($ctx, (string) $data);
   return hash_final($ctx, $raw_output);
 }
 

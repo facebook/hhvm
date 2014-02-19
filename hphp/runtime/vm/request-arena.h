@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_VM_REQUEST_ARENA_H_
 #define incl_HPHP_VM_REQUEST_ARENA_H_
 
-#include <boost/aligned_storage.hpp>
+#include <type_traits>
 
 #include "hphp/util/arena.h"
 
@@ -25,12 +25,12 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 typedef ArenaImpl<32 * 1024> RequestArena;
-typedef boost::aligned_storage<sizeof(RequestArena),sizeof(void*)>::type
+typedef std::aligned_storage<sizeof(RequestArena),sizeof(void*)>::type
         RequestArenaStorage;
 extern __thread RequestArenaStorage s_requestArenaStorage;
 
 typedef Arena VarEnvArena;
-typedef boost::aligned_storage<sizeof(VarEnvArena),sizeof(void*)>::type
+typedef std::aligned_storage<sizeof(VarEnvArena),sizeof(void*)>::type
         VarEnvArenaStorage;
 extern __thread VarEnvArenaStorage s_varEnvArenaStorage;
 

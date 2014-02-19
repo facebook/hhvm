@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -434,11 +434,21 @@ void HhbcTranslator::profileFailedInlShape(const std::string& str) {
   );
 }
 
-void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
+void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff,
+                              bool maybeStartBlock) {
   if (isInlining()) assert(!lastBcOff);
 
   m_bcStateStack.back().bcOff = newOff;
   updateMarker();
+  // TODO(t3729627): Instead of passing maybeStartBlock, see if it's
+  // possible to lift this and the DefSP conditional into their own
+  // API function to be called after setBcOff where we would have
+  // passed in true.
+  if (maybeStartBlock) m_irb->startBlock();
+
+  if (m_irb->sp() == nullptr) {
+    gen(DefSP, StackOffset(spOffset()), m_irb->fp());
+  }
   m_lastBcOff = lastBcOff;
 }
 
@@ -921,36 +931,114 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
 // only handles integer or double inc/dec
 SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
   assert(src->isA(Type::Int) || src->isA(Type::Dbl));
+
+  auto op =
+    src->isA(Type::Int) ? (inc ? AddInt : SubInt) : (inc ? AddDbl : SubDbl);
+
   SSATmp* one = src->isA(Type::Int) ? cns(1) : cns(1.0);
-  SSATmp* res = inc ? gen(Add, src, one) : gen(Sub, src, one);
+  SSATmp* res = gen(op, src, one);
   // no incref necessary on push since result is an int
   push(pre ? res : src);
   return res;
 }
 
-static bool areBinaryArithTypesSupported(Opcode opc, Type t1, Type t2) {
-  switch (opc) {
-  case Add:
-  case Sub:
-  case Mul: return t1.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl) &&
-                     t2.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
+#define BINARY_ARITH       \
+  AOP(Add, AddInt, AddDbl) \
+  AOP(Sub, SubInt, SubDbl) \
+  AOP(Mul, MulInt, MulDbl) \
 
-  case BitAnd:
-  case BitOr:
-  case BitXor:
-    return t1.subtypeOfAny(Type::Int, Type::Bool) &&
-                     t2.subtypeOfAny(Type::Int, Type::Bool);
-  default:
-    not_reached();
+#define BINARY_BITOP  \
+  BOP(BitAnd)         \
+  BOP(BitOr)          \
+  BOP(BitXor)         \
+
+static bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
+  auto checkArith = [](Type ty) {
+    return ty.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
+  };
+  auto checkBitOp = [](Type ty) {
+    return ty.subtypeOfAny(Type::Int, Type::Bool);
+  };
+
+  switch (op) {
+  #define AOP(OP, OPI, OPD) \
+    case Op::OP: return checkArith(t1) && checkArith(t2);
+  BINARY_ARITH
+  #undef AOP
+  #define BOP(OP) \
+    case Op::OP: return checkBitOp(t1) && checkBitOp(t2);
+  BINARY_BITOP
+  #undef BOP
+  default: not_reached();
   }
 }
 
-void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
+Opcode intArithOp(Op op) {
+  switch (op) {
+    #define AOP(OP, OPI, OPD) case Op::OP: return OPI;
+    BINARY_ARITH
+    #undef AOP
+    default: not_reached();
+  }
+}
+
+Opcode dblArithOp(Op op) {
+  switch (op) {
+    #define AOP(OP, OPI, OPD) case Op::OP: return OPD;
+    BINARY_ARITH
+    #undef AOP
+    default: not_reached();
+  }
+}
+
+Opcode bitOp(Op op) {
+  switch (op) {
+    #define BOP(OP) case Op::OP: return OP;
+    BINARY_BITOP
+    #undef BOP
+    default: not_reached();
+  }
+}
+
+bool isBitOp(Op op) {
+  switch (op) {
+    #define BOP(OP) case Op::OP: return true;
+    BINARY_BITOP
+    #undef BOP
+    default: return false;
+  }
+}
+
+SSATmp* HhbcTranslator::promoteBool(SSATmp* src) {
+  // booleans in arithmetic and bitwise operations get cast to ints
+  return src->isA(Type::Bool) ? gen(ConvBoolToInt, src) : src;
+}
+
+Opcode HhbcTranslator::promoteBinaryDoubles(Op op,
+                                            SSATmp*& src1,
+                                            SSATmp*& src2) {
+  auto type1 = src1->type();
+  auto type2 = src2->type();
+
+  Opcode opc = intArithOp(op);
+  if (type1 <= Type::Dbl) {
+    opc = dblArithOp(op);
+    if (type2 <= Type::Int) {
+      src2 = gen(ConvIntToDbl, src2);
+    }
+  } else if (type2 <= Type::Dbl) {
+    opc = dblArithOp(op);
+    src1 = gen(ConvIntToDbl, src1);
+  }
+  return opc;
+}
+
+void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
   /*
    * Handle array addition first because we don't want to bother with
    * boxed locals.
    */
-  if (subOpc == Add &&
+  if (subOp == Op::Add &&
       (m_irb->localType(id, DataTypeSpecific) <= Type::Arr) &&
       topC()->isA(Type::Arr)) {
     /*
@@ -967,10 +1055,10 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
     return;
   }
 
-  auto const exitBlock  = makeExit();
-  auto const loc        = ldLocInnerWarn(id, exitBlock, DataTypeSpecific);
+  auto const exitBlock = makeExit();
+  auto loc             = ldLocInnerWarn(id, exitBlock, DataTypeSpecific);
 
-  if (subOpc == ConcatCellCell) {
+  if (subOp == Op::Concat) {
     /*
      * The concat helpers incref their results, which will be consumed by
      * the stloc. We need an extra incref for the push onto the stack.
@@ -985,13 +1073,17 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
     return;
   }
 
-  if (areBinaryArithTypesSupported(subOpc, loc->type(), topC()->type())) {
-    auto const val    = popC();
-    auto const result = gen(
-      subOpc,
-      loc->isA(Type::Bool) ? gen(ConvBoolToInt, loc) : loc,
-      val->isA(Type::Bool) ? gen(ConvBoolToInt, val) : val
-    );
+  if (areBinaryArithTypesSupported(subOp, loc->type(), topC()->type())) {
+    auto val = popC();
+    loc = promoteBool(loc);
+    val = promoteBool(val);
+    Opcode opc;
+    if (isBitOp(subOp)) {
+      opc = bitOp(subOp);
+    } else {
+      opc = promoteBinaryDoubles(subOp, loc, val);
+    }
+    auto const result = gen(opc, loc, val);
     pushStLoc(id, nullptr, result);
     return;
   }
@@ -1510,7 +1602,7 @@ void HhbcTranslator::emitContSuspend(int64_t labelId) {
     // this needs optimization
     auto const idx = gen(LdContArRaw, Type::Int,
                          m_irb->fp(), cns(RawMemSlot::ContIndex));
-    auto const newIdx = gen(Add, idx, cns(1));
+    auto const newIdx = gen(AddInt, idx, cns(1));
     gen(StContArRaw, m_irb->fp(), cns(RawMemSlot::ContIndex), newIdx);
 
     auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
@@ -1569,7 +1661,7 @@ void HhbcTranslator::emitContRaise() {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_irb->fp());
   SSATmp* label = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel));
-  label = gen(Sub, label, cns(1));
+  label = gen(SubInt, label, cns(1));
   gen(StRaw, cont, cns(RawMemSlot::ContLabel), label);
 }
 
@@ -1906,6 +1998,18 @@ void HhbcTranslator::emitJmp(int32_t offset,
   if (backward && !noSurprise) {
     emitJmpSurpriseCheck();
   }
+  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+    // TODO(t3730057): Optimize away spillstacks and fallthrough
+    // jumps, either by doing something clever here or adding to
+    // jumpopts.
+    exceptionBarrier();
+    auto target = (breakTracelet
+                   || m_irb->blockIsIncompatible(offset))
+      ? makeExit(offset)
+      : makeBlock(offset);
+    gen(Jmp, target);
+    return;
+  }
   if (!breakTracelet) return;
   gen(Jmp, makeExit(offset));
 }
@@ -1921,14 +2025,37 @@ SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
   return gen(negate ? JmpZero : JmpNZero, target, boolSrc);
 }
 
-void HhbcTranslator::emitJmpZ(Offset taken) {
-  auto const src = popC();
-  emitJmpCondHelper(taken, true, src);
+void HhbcTranslator::emitJmpHelper(int32_t taken,
+                                   int32_t next,
+                                   bool negate,
+                                   bool bothPaths,
+                                   SSATmp* src) {
+  spillStack();
+
+  auto const target  = (!bothPaths
+                        || m_irb->blockIsIncompatible(taken))
+    ? makeExit(taken)
+    : makeBlock(taken);
+  auto const boolSrc = gen(ConvCellToBool, src);
+  gen(DecRef, src);
+  gen(negate ? JmpZero : JmpNZero, target, boolSrc);
+
+  // TODO(t3730079): This block is probably redundant with the
+  // fallthrough logic in translateRegion.  Try removing the guards
+  // against conditional jumps there as well as this.
+  if (bothPaths && m_irb->blockIsIncompatible(next)) {
+    gen(Jmp, makeExit(next));
+  }
 }
 
-void HhbcTranslator::emitJmpNZ(Offset taken) {
+void HhbcTranslator::emitJmpZ(Offset taken, Offset next, bool bothPaths) {
   auto const src = popC();
-  emitJmpCondHelper(taken, false, src);
+  emitJmpHelper(taken, next, true, bothPaths, src);
+}
+
+void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, bool bothPaths) {
+  auto const src = popC();
+  emitJmpHelper(taken, next, false, bothPaths, src);
 }
 
 // Objects compared with strings may involve calling a user-defined
@@ -3526,6 +3653,11 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   if (tc.isNullable() && locType.subtypeOf(Type::InitNull)) {
     return;
   }
+  if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
+      (locType.isObj() || locVal->type().isBoxed())) {
+    PUNT(VerifyParamType-collectionToArray);
+    return;
+  }
   if (tc.isCallable()) {
     locVal = gen(Unbox, makeExit(), locVal);
     gen(VerifyParamCallable, makeCatch(), locVal, cns(paramId));
@@ -4098,34 +4230,42 @@ void HhbcTranslator::emitEmptyG() {
   push(ret);
 }
 
-void HhbcTranslator::emitBinaryArith(Opcode opc) {
-  bool isBitOp = (opc == BitAnd || opc == BitOr || opc == BitXor);
-  Type type1 = topC(0)->type();
-  Type type2 = topC(1)->type();
-  if (areBinaryArithTypesSupported(opc, type1, type2)) {
-    SSATmp* tr = popC();
-    SSATmp* tl = popC();
-    tr = (tr->isA(Type::Bool) ? gen(ConvBoolToInt, tr) : tr);
-    tl = (tl->isA(Type::Bool) ? gen(ConvBoolToInt, tl) : tl);
-    push(gen(opc, tl, tr));
-  } else {
+void HhbcTranslator::emitBinaryBitOp(Op op) {
+  Type type2 = topC(0)->type();
+  Type type1 = topC(1)->type();
+
+  if (!areBinaryArithTypesSupported(op, type1, type2)) {
     Type type = Type::Int;
-    if (isBitOp) {
-      if (type1.isString() && type2.isString()) {
-        type = Type::Str;
-      } else if ((type1.needsReg() && (type2.needsReg() || type2.isString()))
-                 || (type2.needsReg() && type1.isString())) {
-        // both types might be strings, but can't tell
-        type = Type::Cell;
-      } else {
-        type = Type::Int;
-      }
-    } else {
-      // either an int or a dbl, but can't tell
+    if (type1.isString() && type2.isString()) {
+      type = Type::Str;
+    } else if ((type1.needsReg() && (type2.needsReg() || type2.isString()))
+               || (type2.needsReg() && type1.isString())) {
+      // both types might be strings, but can't tell
       type = Type::Cell;
     }
     emitInterpOne(type, 2);
+    return;
   }
+
+  SSATmp* src2 = promoteBool(popC());
+  SSATmp* src1 = promoteBool(popC());
+  push(gen(bitOp(op), src1, src2));
+}
+
+void HhbcTranslator::emitBinaryArith(Op op) {
+  Type type2 = topC(0)->type();
+  Type type1 = topC(1)->type();
+
+  if (!areBinaryArithTypesSupported(op, type1, type2)) {
+    // either an int or a dbl, but can't tell
+    emitInterpOne(Type::Cell, 2);
+    return;
+  }
+
+  SSATmp* src2 = promoteBool(popC());
+  SSATmp* src1 = promoteBool(popC());
+  Opcode opc = promoteBinaryDoubles(op, src1, src2);
+  push(gen(opc, src1, src2));
 }
 
 void HhbcTranslator::emitNot() {
@@ -4302,7 +4442,10 @@ void HhbcTranslator::emitAbs() {
   auto value = popC();
 
   if (value->isA(Type::Int)) {
-    push(gen(AbsInt, value));
+    // compute integer absolute value ((src>>63) ^ src) - (src>>63)
+    auto t1 = gen(Shr, value, cns(63));
+    auto t2 = gen(BitXor, t1, value);
+    push(gen(SubInt, t2, t1));
     return;
   }
 
@@ -4320,19 +4463,15 @@ void HhbcTranslator::emitAbs() {
   PUNT(Abs);
 }
 
-#define BINOP(Opp)                            \
-  void HhbcTranslator::emit ## Opp() {        \
-    emitBinaryArith(Opp);                     \
-  }
+#define AOP(OP, OPI, OPD) \
+  void HhbcTranslator::emit ## OP() { emitBinaryArith(Op::OP); }
+BINARY_ARITH
+#undef AOP
 
-BINOP(Add)
-BINOP(Sub)
-BINOP(Mul)
-BINOP(BitAnd)
-BINOP(BitOr)
-BINOP(BitXor)
-
-#undef BINOP
+#define BOP(OP) \
+  void HhbcTranslator::emit ## OP() { emitBinaryBitOp(Op::OP); }
+BINARY_BITOP
+#undef BOP
 
 void HhbcTranslator::emitDiv() {
   auto divisorType  = topC(0)->type();
@@ -4713,10 +4852,11 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
   auto setImmLocType = [&](uint32_t id, Type t) {
     setLocType(inst.imm[id].u_LA, t);
   };
+  auto* func = curFunc();
 
   switch (inst.op()) {
     case OpCreateCont: case OpAsyncESuspend: {
-      auto numLocals = curFunc()->numLocals();
+      auto numLocals = func->numLocals();
       for (unsigned i = 0; i < numLocals; ++i) {
         setLocType(i, Type::Uninit);
       }
@@ -4834,6 +4974,17 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
       setImmLocType(2, Type::Gen);
       break;
 
+    case OpVerifyParamType: {
+      auto paramId = inst.imm[0].u_LA;
+      auto const& tc = func->params()[paramId].typeConstraint();
+      auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
+      if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
+          (locType.isObj() || locType.maybeBoxed())) {
+        setImmLocType(0, locType.isBoxed() ? Type::BoxedCell : Type::Cell);
+      }
+      break;
+    }
+
     default:
       not_reached();
   }
@@ -4896,13 +5047,11 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
   gen(changesPC ? InterpOneCF : InterpOne, outType,
       makeCatch(), idata, sp, m_irb->fp());
   assert(m_irb->stackDeficit() == 0);
-
-  if (changesPC) m_hasExit = true;
 }
 
 std::string HhbcTranslator::showStack() const {
   if (isInlining()) {
-    return folly::format("{:*^*80}\n",
+    return folly::format("{:*^80}\n",
                          " I don't understand inlining stacks yet ").str();
   }
   std::ostringstream out;
@@ -5193,6 +5342,13 @@ Block* HhbcTranslator::makeCatchNoSpill() {
   return makeCatchImpl([&] { return m_irb->sp(); });
 }
 
+/*
+ * Create a block corresponding to bytecode control flow.
+ */
+Block* HhbcTranslator::makeBlock(Offset targetBcOff) {
+  return m_irb->makeBlock(targetBcOff);
+}
+
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
                                        const std::vector<SSATmp*>& spillVals) {
   std::vector<SSATmp*> ssaArgs{ sp, cns(int64_t(m_irb->stackDeficit())) };
@@ -5369,6 +5525,13 @@ void HhbcTranslator::end(Offset nextPc) {
   gen(ReqBindJmp, BCOffset(nextPc));
 }
 
+void HhbcTranslator::endBlock(Offset next) {
+  if (m_irb->blockExists(next)) {
+    emitJmp(next,
+            false /* breakTracelet */,
+            true  /* noSurprise */ );
+  }
+}
 
 void HhbcTranslator::checkStrictlyInteger(
     SSATmp*& key, KeyType& keyType, bool& checkForInt) {

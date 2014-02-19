@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -444,9 +444,13 @@ Array BaseVector::toArrayImpl() const {
 void BaseVector::grow() {
   mutate();
 
+  if (m_capacity == MaxCapacity()) {
+    return;
+  }
+
   auto const oldSize = m_capacity * sizeof(TypedValue);
   if (m_capacity) {
-    m_capacity += m_capacity;
+    m_capacity = std::min(uint64_t(m_capacity) * 2, MaxCapacity());
   } else {
     m_capacity = 8;
   }
@@ -629,7 +633,7 @@ Variant c_Vector::t_pop() {
   }
 }
 
-void c_Vector::t_resize(CVarRef sz, CVarRef value) {
+int64_t c_Vector::checkRequestedCapacity(CVarRef sz) {
   if (!sz.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter sz must be a non-negative integer"));
@@ -641,22 +645,26 @@ void c_Vector::t_resize(CVarRef sz, CVarRef value) {
       "Parameter sz must be a non-negative integer"));
     throw e;
   }
+  if (intSz > MaxCapacity()) {
+    auto msg = folly::format(
+      "Parameter sz must be at most {}; {} passed",
+      MaxCapacity(),
+      intSz
+    ).str();
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
+    throw e;
+  }
+  return intSz;
+}
+
+void c_Vector::t_resize(CVarRef sz, CVarRef value) {
+  auto intSz = checkRequestedCapacity(sz);
   TypedValue* val = cvarToCell(&value);
   resize(intSz, val);
 }
 
 void c_Vector::t_reserve(CVarRef sz) {
-  if (!sz.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter sz must be a non-negative integer"));
-    throw e;
-  }
-  int64_t intSz = sz.toInt64();
-  if (intSz < 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter sz must be a non-negative integer"));
-    throw e;
-  }
+  auto intSz = checkRequestedCapacity(sz);
   reserve(intSz);
 }
 
@@ -2477,7 +2485,7 @@ NEVER_INLINE void BaseMap::reserve(int64_t sz) {
 void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
   assert(m_size <= m_used && m_used <= m_cap);
   size_t newHashSize = size_t(newMask) + 1;
-  assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
+  assert(folly::isPowTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
   auto oldHashSize = oldData ? hashSize() : 0;
@@ -3231,7 +3239,7 @@ NEVER_INLINE void BaseSet::reserve(int64_t sz) {
 void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
   assert(m_size <= m_used && m_used <= m_cap);
   size_t newHashSize = size_t(newMask) + 1;
-  assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
+  assert(folly::isPowTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
   auto oldHashSize = oldData ? hashSize() : 0;

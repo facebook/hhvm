@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -97,7 +97,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 0;
 
     case StRef:
-    case StRefNT:
     case StClosureArg:
     case StClosureCtx:
     case StContArValue:
@@ -203,7 +202,7 @@ SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
   assert(is(IncRef, PassFP, PassSP,
             CheckType, AssertType, AssertNonNull,
-            StRef, StRefNT,
+            StRef,
             ColAddElemC, ColAddNewElemC,
             Mov));
   return src(0);

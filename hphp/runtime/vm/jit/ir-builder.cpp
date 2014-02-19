@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -96,13 +96,9 @@ SSATmp* IRBuilder::genPtrToUninit() {
   return gen(DefConst, Type::PtrToUninit, ConstData(&null_variant));
 }
 
-SSATmp* IRBuilder::genDefNone() {
-  return gen(DefConst, Type::None, ConstData(0));
-}
-
 void IRBuilder::appendInstruction(IRInstruction* inst) {
   auto defaultWhere = m_curBlock->end();
-  auto& where = m_curWhere ? m_curWhere.get() : defaultWhere;
+  auto& where = m_curWhere ? *m_curWhere : defaultWhere;
 
   // If the block isn't empty, check if we need to create a new block.
   if (where != m_curBlock->begin()) {
@@ -569,8 +565,7 @@ void IRBuilder::reoptimize() {
  * than the guard's existing constraint. Note that this doesn't necessarily
  * mean that the guard was constrained: tc.weak might be true.
  */
-bool IRBuilder::constrainGuard(IRInstruction* inst,
-                               TypeConstraint tc) {
+bool IRBuilder::constrainGuard(IRInstruction* inst, TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
 
   auto& guard = m_guardConstraints[inst];
@@ -579,12 +574,11 @@ bool IRBuilder::constrainGuard(IRInstruction* inst,
   if (tc.innerCat) {
     // If the constraint is for the inner type and is better than what guard
     // has, update it.
-    auto cat = tc.innerCat.get();
-    if (guard.innerCat && guard.innerCat >= cat) return false;
+    auto& cat = *tc.innerCat;
+    if (guard.innerCat && *guard.innerCat >= cat) return false;
     if (!tc.weak) {
       FTRACE(1, "constraining inner type of {}: {} -> {}\n",
-             *inst, guard.innerCat ? guard.innerCat.get() : DataTypeGeneric,
-             cat);
+             *inst, guard.innerCat ? *guard.innerCat : DataTypeGeneric, cat);
       guard.innerCat = cat;
     }
     return true;
@@ -665,12 +659,12 @@ bool IRBuilder::constrainValue(SSATmp* const val,
       changed = constrainValue(inst->src(0), tc) || changed;
     }
     return changed;
-  } else if (inst->is(StRef, StRefNT, Box, BoxPtr)) {
+  } else if (inst->is(StRef, Box, BoxPtr)) {
     // If our caller cares about the inner type, propagate that through.
     // Otherwise we're done.
     if (tc.innerCat) {
-      auto src = inst->src(inst->is(StRef, StRefNT) ? 1 : 0);
-      tc.innerCat.reset();
+      auto src = inst->src(inst->is(StRef) ? 1 : 0);
+      tc.innerCat.clear();
       return constrainValue(src, tc);
     }
     return false;
@@ -780,8 +774,60 @@ void IRBuilder::setMarker(BCMarker marker) {
   m_state.setMarker(marker);
 }
 
+void IRBuilder::startBlock() {
+  assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
+  auto marker = m_state.marker();
+  auto it = m_offsetToBlockMap.find(marker.bcOff);
+  if (it != m_offsetToBlockMap.end() && it->second->empty()) {
+    auto block = it->second;
+    if (block != m_curBlock) {
+      if (m_state.compatible(block)) {
+        m_state.pauseBlock(block);
+      } else {
+        m_state.clearCse();
+      }
+      assert(m_curBlock);
+      auto& prev = m_curBlock->back();
+      if (!prev.isTerminal()) {
+        prev.setNext(block);
+      }
+      m_curBlock = block;
+      m_state.startBlock(m_curBlock);
+      FTRACE(2, "TraceBuilder switching to block B{}: {}\n", block->id(),
+             show(m_state));
+    }
+  }
+}
+
+Block* IRBuilder::makeBlock(Offset offset) {
+  auto it = m_offsetToBlockMap.find(offset);
+  if (it == m_offsetToBlockMap.end()) {
+    auto* block = m_unit.defBlock();
+    m_offsetToBlockMap.insert(std::make_pair(offset, block));
+    return block;
+  }
+  return it->second;
+}
+
+bool IRBuilder::blockExists(Offset offset) {
+  return m_offsetToBlockMap.count(offset);
+}
+
+bool IRBuilder::blockIsIncompatible(Offset offset) {
+  if (m_offsetSeen.count(offset)) return true;
+  auto it = m_offsetToBlockMap.find(offset);
+  if (it == m_offsetToBlockMap.end()) return true;
+  auto* block = it->second;
+  if (!it->second->empty()) return true;
+  return !m_state.compatible(block);
+}
+
+void IRBuilder::recordOffset(Offset offset) {
+  m_offsetSeen.insert(offset);
+}
+
 void IRBuilder::pushBlock(BCMarker marker, Block* b,
-                          const boost::optional<Block::iterator>& where) {
+                          const folly::Optional<Block::iterator>& where) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
          m_curBlock, m_state.marker().show(), b, marker.show());
   assert(b);

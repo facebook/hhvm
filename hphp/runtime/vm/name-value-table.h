@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,8 @@
 #include <boost/noncopyable.hpp>
 #include <deque>
 #include <limits>
+
+#include "folly/Bits.h"
 
 #include "hphp/util/util.h"
 #include "hphp/util/exp-arena.h"
@@ -273,7 +275,7 @@ private:
   }
 
   void allocate(const size_t newCapac) {
-    assert(Util::isPowerOfTwo(newCapac));
+    assert(folly::isPowTwo(newCapac));
     const size_t newMask = newCapac - 1;
     assert(newMask <= std::numeric_limits<uint32_t>::max());
     Elm* newTab = static_cast<Elm*>(calloc(sizeof(Elm), newCapac));

@@ -1,0 +1,101 @@
+open
+write
+close
+bool(true)
+
+open
+write
+flush did something
+close
+bool(true)
+
+open
+write
+flush succeeded
+close
+bool(true)
+
+open
+write
+flush failed
+close
+bool(false)
+
+open
+write
+close
+int(7)
+
+open
+write
+flush did something
+close
+int(16)
+
+open
+write
+flush succeeded
+close
+int(16)
+
+open
+write
+flush failed
+close
+bool(false)
+
+open
+close
+bool(true)
+HipHop Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 33
+bool(false)
+open
+bool(false)
+bool(false)
+close
+bool(true)
+
+open
+flush did something
+close
+bool(true)
+HipHop Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 42
+bool(false)
+open
+flush did something
+bool(false)
+flush did something
+bool(false)
+flush did something
+close
+bool(true)
+
+open
+flush succeeded
+close
+bool(true)
+HipHop Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 51
+bool(false)
+open
+flush succeeded
+bool(true)
+flush succeeded
+bool(true)
+flush succeeded
+close
+bool(true)
+
+open
+flush failed
+close
+bool(false)
+HipHop Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 60
+bool(false)
+open
+flush failed
+bool(false)
+flush failed
+bool(false)
+flush failed
+close
+bool(false)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,7 +77,7 @@ private:
       // m_data always has room for at least one element due to the m_data[1]
       // declaration, so the realloc() code first has to kick in when a second
       // element is about to be pushed.
-      if (Util::isPowerOfTwo(m_size)) {
+      if (folly::isPowTwo(m_size)) {
         gv = (Impl*)realloc(this,
                             offsetof(Impl, m_data) + 2 * m_size * sizeof(T));
       } else {

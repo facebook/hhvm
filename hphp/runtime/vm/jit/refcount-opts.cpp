@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -829,7 +829,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // locals and $this pointers.
       consumeAllLocals();
       consumeAllFrames();
-    } else if (m_inst->is(GenericRetDecRefs)) {
+    } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
       consumeAllLocals();
     } else {
       // All other instructions take the generic path.
@@ -951,26 +951,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       Indent _i;
       auto* src = m_inst->src(i);
 
-      if (src->isA(Type::None)) {
-        assert(m_inst->is(Call, SpillStack));
-        auto const isCall = m_inst->is(Call);
-        auto const& ldStacks = ldStacksLazy();
-        auto* spillInst = isCall ? m_inst->src(0)->inst() : m_inst;
-        auto const adjustment =
-          spillInst->src(1)->getValInt() - spillValueCells(spillInst);
-        uint32_t targetOff;
-        if (isCall) {
-          targetOff = -(i - 3 + 1) + adjustment;
-        } else {
-          targetOff = i - 2 + adjustment;
-        }
-
-        auto it = ldStacks.find(targetOff);
-        if (it != ldStacks.end()) {
-          ITRACE(3, "consuming {} instead of src {} of None\n", *it->second, i);
-          consumeValue(it->second);
-        }
-      } else if (src->isA(Type::StkPtr) && src->inst()->is(SpillFrame) &&
+      if (src->isA(Type::StkPtr) && src->inst()->is(SpillFrame) &&
                  !m_inst->is(DefInlineFP, DefInlineSP,
                              Call, CallArray, ContEnter)) {
         // If the StkPtr being consumed points to a pre-live ActRec, observe

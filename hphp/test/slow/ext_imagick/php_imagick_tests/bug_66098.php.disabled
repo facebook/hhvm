@@ -1,0 +1,10 @@
+<?php
+
+$img = new Imagick();
+echo $img->foobar;
+
+echo "OK";
+
+?>
+--EXPECT--
+OK

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -76,6 +76,9 @@ void raise_debugging(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_message(ErrorConstants::ErrorModes mode,
                    const char *fmt,
                    va_list ap);
+void raise_message(ErrorConstants::ErrorModes mode,
+                   const char *fmt,
+                   ...) ATTRIBUTE_PRINTF(2, 3);
 void raise_message(ErrorConstants::ErrorModes mode, std::string &msg);
 void raise_param_type_warning(
     const char* func_name,

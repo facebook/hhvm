@@ -414,6 +414,8 @@ DatabaseEloquentBuilderTest::testQueryPassThru
 .
 DatabaseEloquentBuilderTest::testQueryScopes
 .
+DatabaseEloquentBuilderTest::testRealNestedWhereWithScopes
+.
 DatabaseEloquentBuilderTest::testRelationshipEagerLoadProcess
 .
 DatabaseEloquentBuilderTest::testWithDeletedProperlyRemovesDeletedClause
@@ -1264,7 +1266,13 @@ HttpRequestTest::testRootMethod
 .
 HttpRequestTest::testSecureMethod
 .
-HttpRequestTest::testSegmentMethod
+HttpRequestTest::testSegmentMethod with data set #0
+.
+HttpRequestTest::testSegmentMethod with data set #1
+.
+HttpRequestTest::testSegmentMethod with data set #2
+.
+HttpRequestTest::testSegmentMethod with data set #3
 .
 HttpRequestTest::testSegmentsMethod
 .
@@ -1415,6 +1423,8 @@ PaginationPaginatorTest::testPaginatorDecoratesCollection
 PaginationPaginatorTest::testPaginatorIsCountable
 .
 PaginationPaginatorTest::testPaginatorIsIterable
+.
+PlainDisplayerTest::testStatusAndHeadersAreSetInResponse
 .
 ProviderRepositoryTest::testLoadManifestReturnsParsedJSON
 .
@@ -2147,4 +2157,6 @@ ViewTest::testViewNestBindsASubView
 ViewTest::testViewRenderSections
 .
 ViewTest::testWithErrors
+.
+WhoopsDisplayerTest::testStatusAndHeadersAreSetInResponse
 .

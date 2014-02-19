@@ -46,6 +46,12 @@ function test_preg_replace() {
     "test_preg_rep",
     "a"
   ));
+
+  var_dump(preg_replace(
+    "/(a)/e",
+    "str_repeat('$1', 500)",
+    "aaaaaaaaaaaaaaaaaaaa"
+  ));
 }
 
 test_preg_replace();

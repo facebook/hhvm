@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -132,7 +132,6 @@ struct FrameState : private LocalStateHook {
   ~FrameState();
 
   void update(const IRInstruction* inst);
-  void clear();
 
   /*
    * Starts tracking state for a block and reloads any previously
@@ -151,6 +150,22 @@ struct FrameState : private LocalStateHook {
    * after working on another.
    */
   void pauseBlock(Block*);
+
+  /*
+   * Clear all tracked state.
+   */
+  void clear();
+
+  /*
+   * Clear the CSE table.
+   */
+  void clearCse();
+
+  /*
+   * Check current state for compatibility (matching types of
+   * stack/locals) with the state at block.
+   */
+  bool compatible(Block*);
 
   const Func* func() const { return m_curFunc; }
   Offset spOffset() const { return m_spOffset; }
@@ -274,7 +289,6 @@ struct FrameState : private LocalStateHook {
   void cseInsert(const IRInstruction* inst);
   void cseKill(SSATmp* src);
   CSEHash* cseHashTable(const IRInstruction* inst);
-  void clearCse();
 
   Snapshot createSnapshot() const;
   void save(Block*);

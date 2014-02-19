@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -247,6 +247,17 @@ void raise_message(ErrorConstants::ErrorModes mode,
                    va_list ap) {
   std::string msg;
   string_vsnprintf(msg, fmt, ap);
+  raise_message(mode, msg);
+}
+
+void raise_message(ErrorConstants::ErrorModes mode,
+                   const char *fmt,
+                   ...) {
+  std::string msg;
+  va_list ap;
+  va_start(ap, fmt);
+  string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
   raise_message(mode, msg);
 }
 

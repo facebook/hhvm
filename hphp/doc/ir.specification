@@ -154,11 +154,8 @@ above PHP-facing types.
   Func            Func*
   VarEnv          VarEnv*
   NamedEntity     NamedEntity*
-  FuncCls         Tuple of (Func*,Cctx)
-  FuncObj         Tuple of (Func*,Obj)
   Cctx            A Class* with the lowest bit set (as stored in ActRec.m_cls)
   Ctx             {Obj|Cctx}
-  FuncCtx         Tuple of (Func*,{Cctx|Obj})
   RetAddr         Return address
   StkPtr          Pointer into VM execution stack
   FramePtr        Pointer to a frame on the VM execution stack
@@ -449,39 +446,42 @@ CheckStaticLocInit S0:BoxedCell -> B
 2. Arithmetic
 
 
-D:Int            = AbsInt S0:Int
-D:Dbl            = AbsDbl S0:Dbl
-D:{Int|Dbl}      = Add    S0:{Int|Dbl} S1:{Int|Dbl}
-D:{Int|Dbl}      = Sub    S0:{Int|Dbl} S1:{Int|Dbl}
-D:{Int|Dbl}      = Mul    S0:{Int|Dbl} S1:{Int|Dbl}
-D:Int            = Mod    S0:Int       S1:Int
-D:Dbl            = Sqrt   S0:Dbl
-D:Dbl            = DivDbl S0:Dbl S1:Dbl -> B
-D:Int            = BitAnd S0:Int S1:Int
-D:Int            = BitOr  S0:Int S1:Int
-D:Int            = BitXor S0:Int S1:Int
-D:Int            = Shl    S0:Int S1:Int
-D:Int            = Shr    S0:Int S1:Int
-D:Dbl            = Floor  S0:Dbl
-D:Dbl            = Ceil   S0:Dbl
+D:Dbl     = AbsDbl S0:Dbl
+D:Int     = AddInt S0:Int S1:Int
+D:Int     = SubInt S0:Int S1:Int
+D:Int     = MulInt S0:Int S1:Int
+D:Dbl     = AddDbl S0:Dbl S1:Dbl
+D:Dbl     = SubDbl S0:Dbl S1:Dbl
+D:Dbl     = MulDbl S0:Dbl S1:Dbl
+D:Int     = Mod    S0:Int S1:Int
+D:Dbl     = Sqrt   S0:Dbl
+D:Dbl     = DivDbl S0:Dbl S1:Dbl -> B
+D:Int     = BitAnd S0:Int S1:Int
+D:Int     = BitOr  S0:Int S1:Int
+D:Int     = BitXor S0:Int S1:Int
+D:Int     = Shl    S0:Int S1:Int
+D:Int     = Shr    S0:Int S1:Int
+D:Dbl     = Floor  S0:Dbl
+D:Dbl     = Ceil   S0:Dbl
 
-  Integer/boolean arithmetic. Performs the operation described by the opcode
-  name on S0 and S1, and puts the result in D.
+  Double arithmetic, integer arithmetic, and integer bitwise operations.
+  Performs the operation described by the opcode name on S0 and S1, and puts
+  the result in D.
 
-  Undefined behavior occurs if OpMod is given a divisor of zero, or if the
+  Undefined behavior occurs if Mod is given a divisor of zero, or if the
   divisor is -1 and the dividend is the minimum representable integer.
 
-  AbsInt and AbsDbl compute the absolute value of an integer or double
-  respectively.
+  AbsDbl computes the absolute value of a double-precision value by clearing
+  the sign bit.
 
-  DivDbl Will branch to block B when S1 is zero (signed or unsigned). When the
+  DivDbl will branch to block B when S1 is zero (signed or unsigned). When the
   result of the division is a real valued number DivDbl conforms to IEEE 754.
   In particular should the result of a division be zero the sign will follow
   normal sign rules for division.
 
-  Note that OpShr is an arithmetic right shift.
+  Note that Shr is an arithmetic right shift: The MSB is sign-extended.
 
-  OpFloor and OpCeil will return an integral value not greater, or not less
+  Floor and Ceil will return an integral value not greater, or not less
   than their input respectively. Their use requires SSE 4.1, availability
   should be checked before they are emitted.
 
@@ -566,12 +566,12 @@ D:Bool = NSame S0:Gen S1:Gen
   (Object,String) pairs, and do not throw. Note that Same and NSame never
   re-enter or throw, for any types.
 
-D:Bool = GtI   S0:{Int} S1:{Int}
-D:Bool = GteI  S0:{Int} S1:{Int}
-D:Bool = LtI   S0:{Int} S1:{Int}
-D:Bool = LteI  S0:{Int} S1:{Int}
-D:Bool = EqI   S0:{Int} S1:{Int}
-D:Bool = NeqI  S0:{Int} S1:{Int}
+D:Bool = GtInt   S0:{Int} S1:{Int}
+D:Bool = GteInt  S0:{Int} S1:{Int}
+D:Bool = LtInt   S0:{Int} S1:{Int}
+D:Bool = LteInt  S0:{Int} S1:{Int}
+D:Bool = EqInt   S0:{Int} S1:{Int}
+D:Bool = NeqInt  S0:{Int} S1:{Int}
 
   Perform 64-bit integer comparisons.
 
@@ -633,12 +633,12 @@ D:Bool = IsWaitHandle S0:Obj
 There is a conditional branch instruction for each predicate above, to enable
 generating efficient compare-and-branch instruction sequences.
 
-JmpGt   JmpGtI
-JmpGte  JmpGteI
-JmpLt   JmpLtI
-JmpLte  JmpLteI
-JmpEq   JmpEqI
-JmpNeq  JmpNeqI
+JmpGt   JmpGtInt
+JmpGte  JmpGteInt
+JmpLt   JmpLtInt
+JmpLte  JmpLteInt
+JmpEq   JmpEqInt
+JmpNeq  JmpNeqInt
 JmpSame
 JmpNSame
 JmpInstanceOf
@@ -1117,14 +1117,14 @@ D:Obj = Clone S0:Obj
 
 D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
                                        S1:FramePtr
-                                       S2:{Func|FuncCls|FuncCtx|Null}
+                                       S2:{Func|Null}
                                        S3:{Ctx|Class|Null}
 
   Operands:
 
      S0 - caller stack pointer
      S1 - caller frame pointer
-     S2 - callee Func, context, FuncCls, FuncCtx, or null
+     S2 - callee Func or null
      S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or null
           (for FPushFunc*).
 
@@ -1284,12 +1284,6 @@ D:BoxedCell = StRef S0:BoxedCell S1:Cell
   RefData::m_type also. Returns a new value for S0, which will now have the
   type of S1 after boxing.
 
-D:BoxedCell = StRefNT S0:BoxedCell S1:Cell
-
-  Store the value in S1 into the RefData pointed to by S0. Does not change
-  RefData::m_type. Returns a new value for S0, which will now have the type of
-  S1 after boxing.
-
 StRaw S0:?? S1:ConstInt S2:??
 
   "Raw" store to memory---i.e. outside of our type-system.
@@ -1350,12 +1344,12 @@ ReqRetranslateOpt<transID,bcOff>
   translation transID, which starts at bcOff. This instruction is used in exit
   traces that trigger profile-guided optimizations.
 
-ReqBindJmpGt   ReqBindJmpGtI
-ReqBindJmpGte  ReqBindJmpGteI
-ReqBindJmpLt   ReqBindJmpLtI
-ReqBindJmpLte  ReqBindJmpLteI
-ReqBindJmpEq   ReqBindJmpEqI
-ReqBindJmpNeq  ReqBindJmpNeqI
+ReqBindJmpGt   ReqBindJmpGtInt
+ReqBindJmpGte  ReqBindJmpGteInt
+ReqBindJmpLt   ReqBindJmpLtInt
+ReqBindJmpLte  ReqBindJmpLteInt
+ReqBindJmpEq   ReqBindJmpEqInt
+ReqBindJmpNeq  ReqBindJmpNeqInt
 ReqBindJmpSame
 ReqBindJmpNSame
 ReqBindJmpInstanceOfBitmask
@@ -1366,12 +1360,12 @@ ReqBindJmpNZero
   Test the condition based on the Jmp* op of similar name, and then emit a pair
   of smashable jumps to a REQ_BIND_JMPCC_FIRST service request.
 
-SideExitJmpGt   SideExitJmpGtI
-SideExitJmpGte  SideExitJmpGteI
-SideExitJmpLt   SideExitJmpLtI
-SideExitJmpLte  SideExitJmpLteI
-SideExitJmpEq   SideExitJmpEqI
-SideExitJmpNeq  SideExitJmpNeqI
+SideExitJmpGt   SideExitJmpGtInt
+SideExitJmpGte  SideExitJmpGteInt
+SideExitJmpLt   SideExitJmpLtInt
+SideExitJmpLte  SideExitJmpLteInt
+SideExitJmpEq   SideExitJmpEqInt
+SideExitJmpNeq  SideExitJmpNeqInt
 SideExitJmpSame
 SideExitJmpNSame
 SideExitJmpInstanceOfBitmask

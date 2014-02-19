@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -368,7 +368,7 @@ void CstrBuffer::append(StringSlice slice) {
     if (newlen + 1 > kMaxCap) {
       throw StringBufferLimitException(kMaxCap, detach());
     }
-    unsigned newcap = Util::nextPower2(newlen + 1);
+    unsigned newcap = folly::nextPowTwo(newlen + 1);
     m_buffer = (char*)Util::safe_realloc(m_buffer, newcap);
     m_cap = newcap - 1;
     assert(newlen + 1 <= m_cap);

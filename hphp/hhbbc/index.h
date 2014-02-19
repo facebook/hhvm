@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,6 +77,8 @@ inline bool operator<(Context a, Context b) {
   return std::make_tuple(a.unit, a.func, a.cls) <
          std::make_tuple(b.unit, b.func, b.cls);
 }
+
+std::string show(Context);
 
 /*
  * State of properties on a class.  Map from property name to its

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,8 @@
 #include "hphp/hhbbc/emit.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/debug.h"
-#include "hphp/hhbbc/abstract-interp.h"
+#include "hphp/hhbbc/analyze.h"
+#include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/stats.h"
 #include "hphp/runtime/vm/unit.h"

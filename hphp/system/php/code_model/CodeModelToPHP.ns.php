@@ -765,20 +765,35 @@ class CodeModelToPHP {
   }
 
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
   public function visitJoinClause(
     /*IJoinClause*/ $node) /*: mixed*/ {
+    $id = $node->getIdentifier();
     $collection = /*(string)*/$node->getCollection()->accept($this);
-    $left = /*(string)*/$node->getLeft()->accept($this);
-    $right = /*(string)*/$node->getRight()->accept($this);
+    $left = null;
+    $left_value = $node->getLeft();
+    if ($left_value != null) {
+      $left = /*(string)*/$left_value->accept($this);
+    }
+    $right = null;
+    $right_value = $node->getRight();
+    if ($right_value != null) {
+      $right = /*(string)*/$right_value->accept($this);
+    }
     $group = $node->getGroup();
 
-    $result = 'join $'.$node->getIdentifier().' in '.$collection.' on '
-      .$left.' equals '.$right;
-    if ($group !== null) {
-      $result .= ' into '.$group;
+    $result = 'join ';
+    if ($id !== null) {
+      $result .= '$'.$id.' in ';
+    }
+    $result .= $collection;
+    if ($left !== null && $right !== null) {
+      $result .= " on $left equals $right";
+      if ($group !== null) {
+        $result .= ' into '.$group;
+      }
     }
     return $result;
   }
@@ -1110,10 +1125,10 @@ class CodeModelToPHP {
       $result = '@'.$result;
     }
     if ($name === 'tuple') {
-      $result .= $this->visitVector($type_arguments, '(', ', ', ')');
+      $result .= $this->visitVector($type_arguments, '(', ', ', ')', '()');
     } else if (is_string($return_type)) {
       $result .= '(function';
-      $result .= $this->visitVector($type_arguments, '(', ', ', ')');
+      $result .= $this->visitVector($type_arguments, '(', ', ', ')', '()');
       $result .= ': '.$return_type.')';
     } else {
       $result .= $name;

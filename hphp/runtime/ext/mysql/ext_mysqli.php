@@ -116,6 +116,12 @@ class mysqli {
     $this->real_connect($host, $username, $passwd, $dbname, $port, $socket);
   }
 
+  public function __clone(): void {
+    throw new Exception(
+      'Trying to clone an uncloneable object of class mysqli'
+    );
+  }
+
   /**
    * Alias for __construct
    */
@@ -331,8 +337,23 @@ class mysqli {
    *
    * @return mysqli_warning -
    */
-  //<<__Native>>
-  //public function get_warnings(): mysqli_warning;
+  public function get_warnings(): mixed {
+    if (!$this->warning_count) {
+      return false;
+    }
+
+    $res = $this->query('SHOW WARNINGS');
+    if (!$res) {
+      return false;
+    }
+
+    $warnings = $res->fetch_all(MYSQLI_ASSOC);
+    if (!$warnings) {
+      return false;
+    }
+
+    return new mysqli_warning($warnings);
+  }
 
   /**
    * Initializes MySQLi and returns a resource for use with
@@ -380,7 +401,11 @@ class mysqli {
    *   mysqli_next_result() first.
    */
   public function multi_query(string $query): ?bool {
-    return $this->real_query($query);
+    $conn = $this->hh_get_connection(2);
+    if (!$conn) {
+      return null;
+    }
+    return mysql_multi_query($query, $conn);
   }
 
   /**
@@ -393,7 +418,7 @@ class mysqli {
     if (!$conn) {
       return null;
     }
-    return mysql_next_result($conn);
+    return !mysql_next_result($conn);
   }
 
   /**
@@ -582,7 +607,7 @@ class mysqli {
                                ?string $dbname = null,
                                ?int $port = null,
                                ?string $socket = null,
-                               int $flags = 0): bool {
+                               ?int $flags = 0): bool {
     $server = null;
     if ($host) {
       $server = $host;
@@ -612,7 +637,7 @@ class mysqli {
                                    ?string $username,
                                    ?string $passwd,
                                    ?string $dbname,
-                                   int $flags): bool;
+                                   ?int $flags): bool;
 
   /**
    * Escapes special characters in a string for use in an SQL statement,
@@ -893,10 +918,10 @@ class mysqli_driver {
   public function __set(string $name, mixed $value): void {
     switch ($name) {
       case 'reconnect':
-        $this->__reconnect = $value;
+        $this->__reconnect = (bool)$value;
         break;
       case 'report_mode':
-        $this->__report_mode = $value;
+        $this->__report_mode = (int)$value;
         break;
       default:
         trigger_error(
@@ -904,6 +929,12 @@ class mysqli_driver {
           E_USER_NOTICE
         );
     }
+  }
+
+  public function __clone(): void {
+    throw new Exception(
+      'Trying to clone an uncloneable object of class mysqli_driver'
+    );
   }
 }
 
@@ -914,8 +945,8 @@ class mysqli_driver {
  */
 class mysqli_result {
 
-  private resource $__result;
-  private int $__resulttype;
+  private ?resource $__result = null;
+  private ?int $__resulttype = null;
   private bool $__done = false;
 
   public function __get(string $name): mixed {
@@ -952,6 +983,12 @@ class mysqli_result {
                               int $resulttype = MYSQLI_STORE_RESULT) {
     $this->__result = $result;
     $this->__resulttype = $resulttype;
+  }
+
+  public function __clone(): void {
+    throw new Exception(
+      'Trying to clone an uncloneable object of class mysqli_result'
+    );
   }
 
   private function __checkRow(mixed $row) {
@@ -1109,9 +1146,8 @@ class mysqli_result {
    *   The data type used for this field   decimals The number of decimals
    *   used (for integer fields)
    */
-  public function fetch_field(): mixed {
-    return mysql_fetch_field($this->__result);
-  }
+  <<__Native>>
+  public function fetch_field(): mixed;
 
   /**
    * Returns an array of objects representing the fields in a result set
@@ -1215,8 +1251,8 @@ class mysqli_result {
  */
 class mysqli_stmt {
 
-  private resource $__stmt;
-  private mysqli $__link;
+  private ?resource $__stmt = null;
+  private ?mysqli $__link = null;
 
   public function __get(string $name): mixed {
     switch ($name) {
@@ -1246,6 +1282,12 @@ class mysqli_stmt {
     if ($query) {
       $this->prepare($query);
     }
+  }
+
+  public function __clone(): void {
+    throw new Exception(
+      'Trying to clone an uncloneable object of class mysqli_stmt'
+    );
   }
 
   <<__Native>>
@@ -1403,8 +1445,9 @@ class mysqli_stmt {
    *
    * @return object -
    */
-  //<<__Native>>
-  //public function get_warnings(): object;
+  public function get_warnings(): mixed {
+    return $this->__link->get_warnings();
+  }
 
   /**
    * Check if there are more query results from a multiple query
@@ -1491,23 +1534,41 @@ class mysqli_stmt {
 /**
  * Represents a MySQL warning.
  */
-//class mysqli_warning {
-//  /**
-//   * The __construct purpose
-//   *
-//   * @return  -
-//   */
-//  <<__Native>>
-//  public function __construct(): void;
-//
-//  /**
-//   * The next purpose
-//   *
-//   * @return void -
-//   */
-//  <<__Native>>
-//  public function next(): void;
-//}
+class mysqli_warning {
+
+  public string $message;
+  public string $sqlstate = "HY000";
+  public int $errno;
+
+  private array $__warnings;
+
+  /**
+   * The __construct purpose
+   *
+   * @return  -
+   */
+  public function __construct(array $warnings): void {
+    $this->__warnings = $warnings;
+    $this->next();
+  }
+
+  /**
+   * The next purpose
+   *
+   * @return bool -
+   */
+  public function next(): bool {
+    if (!$this->__warnings) {
+      return false;
+    }
+
+    $next = array_shift($this->__warnings);
+    $this->message = $next['Message'];
+    $this->errno = (int)$next['Code'];
+
+    return true;
+  }
+}
 
 /**
  * Returns client Zval cache statistics
@@ -1842,8 +1903,8 @@ function mysqli_get_server_version(mysqli $link): int {
  *
  * @return mysqli_warning -
  */
-function mysqli_get_warnings(mysqli $link): mysqli_warning {
-  return $link->get_warnings;
+function mysqli_get_warnings(mysqli $link): mixed {
+  return $link->get_warnings();
 }
 
 /**
@@ -2876,9 +2937,9 @@ function mysqli_stmt_free_result(mysqli_stmt $stmt): void {
  *
  * @return object -
  */
-//function mysqli_stmt_get_warnings(mysqli_stmt $stmt): object {
-//  return $stmt->get_warnings();
-//}
+function mysqli_stmt_get_warnings(mysqli_stmt $stmt): mixed {
+  return $stmt->get_warnings();
+}
 
 /**
  * Get the ID generated from the previous INSERT operation

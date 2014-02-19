@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,7 +91,6 @@
 #include <iostream>
 #include <iomanip>
 #include <boost/format.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
 
 #include <cinttypes>
 
@@ -245,13 +244,12 @@ VarEnv::VarEnv()
   , m_malloced(false)
   , m_global(false)
   , m_cfp(0)
-  , m_nvTable(boost::in_place<NameValueTable>(
-      RuntimeOption::EvalVMInitialGlobalTableSize))
 {
-  TypedValue globalArray;
-  globalArray.m_type = KindOfArray;
-  globalArray.m_data.parr =
+  m_nvTable.emplace(RuntimeOption::EvalVMInitialGlobalTableSize);
+
+  auto tableWrapper =
     new (request_arena()) GlobalNameValueTableWrapper(&*m_nvTable);
+  auto globalArray = make_tv<KindOfArray>(tableWrapper);
   globalArray.m_data.parr->incRefCount();
   m_nvTable->set(makeStaticString("GLOBALS"), &globalArray);
   tvRefcountedDecRef(&globalArray);
@@ -269,7 +267,7 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
 
   if (!numNames) return;
 
-  m_nvTable = boost::in_place<NameValueTable>(numNames);
+  m_nvTable.emplace(numNames);
 
   TypedValue** origLocs =
     reinterpret_cast<TypedValue**>(uintptr_t(this) + sizeof(VarEnv));
@@ -357,7 +355,7 @@ void VarEnv::attach(ActRec* fp) {
     return;
   }
   if (!m_nvTable) {
-    m_nvTable = boost::in_place<NameValueTable>(numNames);
+    m_nvTable.emplace(numNames);
   }
 
   TypedValue** origLocs = new (varenv_arena()) TypedValue*[
@@ -419,7 +417,7 @@ void VarEnv::detach(ActRec* fp) {
 void VarEnv::ensureNvt() {
   const size_t kLazyNvtSize = 3;
   if (!m_nvTable) {
-    m_nvTable = boost::in_place<NameValueTable>(kLazyNvtSize);
+    m_nvTable.emplace(kLazyNvtSize);
   }
 }
 
@@ -576,7 +574,7 @@ void Stack::ValidateStackSize() {
         % RuntimeOption::EvalVMStackElms
         % sMinStackElms));
   }
-  if (!Util::isPowerOfTwo(RuntimeOption::EvalVMStackElms)) {
+  if (!folly::isPowTwo(RuntimeOption::EvalVMStackElms)) {
     throw std::runtime_error(str(
       boost::format("VM stack size of 0x%llx is not a power of 2")
         % RuntimeOption::EvalVMStackElms));
@@ -2593,7 +2591,9 @@ public:
 void VMExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
   if (apcExtension::UseUncounted) {
-    Treadmill::WorkItem::enqueue(new FreedAPCHandle(std::move(m_apcHandles)));
+    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                  new FreedAPCHandle(std::move(m_apcHandles))));
+    m_apcHandles.clear();
   }
 }
 
@@ -6884,7 +6884,7 @@ OPTBLD_INLINE void VMExecutionContext::iopVerifyParamType(IOP_ARGS) {
   if (tc.isTypeVar()) {
     return;
   }
-  const TypedValue *tv = frame_local(m_fp, param);
+  auto* tv = frame_local(m_fp, param);
   tc.verify(tv, func, param);
 }
 

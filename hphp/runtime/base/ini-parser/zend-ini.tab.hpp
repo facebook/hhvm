@@ -44,14 +44,13 @@
      TC_STRING = 262,
      TC_WHITESPACE = 263,
      TC_LABEL = 264,
-     TC_OFFSET = 265,
-     TC_DOLLAR_CURLY = 266,
-     TC_VARNAME = 267,
-     TC_QUOTED_STRING = 268,
-     BOOL_TRUE = 269,
-     BOOL_FALSE = 270,
-     END_OF_LINE = 271,
-     JUNK = 272
+     TC_DOLLAR_CURLY = 265,
+     TC_VARNAME = 266,
+     TC_QUOTED_STRING = 267,
+     BOOL_TRUE = 268,
+     BOOL_FALSE = 269,
+     END_OF_LINE = 270,
+     JUNK = 271
    };
 #endif
 

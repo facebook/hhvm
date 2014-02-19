@@ -491,7 +491,7 @@ ExpectationTest::testOrderingUsingNumberedGroups
 ExpectationTest::testPassthruEnsuresRealMethodCalledForReturnValues
 .
 ExpectationTest::testPregMatchThrowsDelimiterWarningWithXdebugScreamTurnedOn
-E
+S
 ExpectationTest::testRealConstraintMatchesArgument
 .
 ExpectationTest::testRealConstraintNonMatchingCase
@@ -653,6 +653,12 @@ Mockery_AdhocTest::testSimplestMockCreation
 Mockery_LoaderTest::testCallingRegisterRegistersSelfAsSplAutoloaderFunction
 .
 Mockery_MockTest::testAnonymousMockWorksWithNotAllowingMockingOfNonExistantMethods
+.
+NamedMockTest::itCreatesANamedMock
+.
+NamedMockTest::itCreatesPassesFurtherArgumentsJustLikeMock
+.
+NamedMockTest::itShouldThrowIfAttemptingToRedefineNamedMock
 .
 RecorderTest::testArgumentsAreMatchedExactlyUnderStrictMode
 .

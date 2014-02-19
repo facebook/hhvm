@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -231,7 +231,10 @@ struct IRInstruction {
   bool       hasTypeParam() const      { return m_typeParam.hasValue(); }
   Type       typeParam() const         { return m_typeParam.value(); }
   folly::Optional<Type> maybeTypeParam() const { return m_typeParam; }
-  void       setTypeParam(Type t)      { m_typeParam.assign(t); }
+  void       setTypeParam(Type t) {
+    assert(t != Type::None);
+    m_typeParam.assign(t);
+  }
   uint32_t   numSrcs()  const          { return m_numSrcs; }
   SSATmp*    src(uint32_t i) const;
   void       setSrc(uint32_t i, SSATmp* newSrc);

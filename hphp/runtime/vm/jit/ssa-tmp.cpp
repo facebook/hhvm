@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,11 +51,6 @@ int typeNeededWords(Type t) {
   if (t <= Type::Ctx || t.isPtr()) {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
-  }
-  if (t <= Type::FuncCtx) {
-    // 2 registers regardless of union status: 1 for the Func* and 1
-    // for the {Obj|Cctx}, differentiated by the low bit.
-    return 2;
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.

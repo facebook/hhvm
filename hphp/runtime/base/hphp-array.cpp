@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -672,7 +672,7 @@ HphpArray* HphpArray::packedToMixed() {
  * All arrays (zombie or not):
  *
  *   m_tableMask is 2^k - 1 (required for quadratic probe)
- *   m_tableMask == nextPower2(m_cap) - 1;
+ *   m_tableMask == folly::nextPowTwo(m_cap) - 1;
  *   m_cap == computeMaxElms(m_tableMask);
  *
  * Zombie state:
@@ -711,7 +711,7 @@ bool HphpArray::checkInvariants() const {
 
   // All arrays:
   assert(m_tableMask > 0 && ((m_tableMask+1) & m_tableMask) == 0);
-  assert(m_tableMask == Util::nextPower2(m_cap) - 1);
+  assert(m_tableMask == folly::nextPowTwo(m_cap) - 1);
   assert(m_cap == computeMaxElms(m_tableMask));
 
   if (isZombie()) return true;

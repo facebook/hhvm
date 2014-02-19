@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,6 @@
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -176,21 +175,18 @@ IRTranslator::translateDiv(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateBinaryArithOp(const NormalizedInstruction& i) {
-  auto const op = i.op();
-  switch (op) {
+  switch (i.op()) {
 #define CASE(OpBc) case Op::OpBc: HHIR_EMIT(OpBc);
     CASE(Add)
     CASE(Sub)
+    CASE(Mul)
     CASE(BitAnd)
     CASE(BitOr)
     CASE(BitXor)
-    CASE(Mul)
 #undef CASE
-    default: {
-      not_reached();
-    };
+    default: break;
   }
-  NOT_REACHED();
+  not_reached();
 }
 
 void
@@ -256,21 +252,22 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
   assert(i.breaksTracelet ||
          i.nextOffset == takenOffset ||
          i.nextOffset == fallthruOffset);
+  assert(!i.includeBothPaths || !i.breaksTracelet);
 
   if (i.breaksTracelet || i.nextOffset == fallthruOffset) {
     if (op == OpJmpZ) {
-      HHIR_EMIT(JmpZ,  takenOffset);
+      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, i.includeBothPaths);
     } else {
-      HHIR_EMIT(JmpNZ, takenOffset);
+      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, i.includeBothPaths);
     }
     return;
   }
   assert(i.nextOffset == takenOffset);
   // invert the branch
   if (op == OpJmpZ) {
-    HHIR_EMIT(JmpNZ, fallthruOffset);
+    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, i.includeBothPaths);
   } else {
-    HHIR_EMIT(JmpZ,  fallthruOffset);
+    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, i.includeBothPaths);
   }
 }
 
@@ -867,15 +864,15 @@ void
 IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
   auto const opc = [&] {
     switch (static_cast<SetOpOp>(i.imm[1].u_OA)) {
-    case SetOpOp::PlusEqual:   return Add;
-    case SetOpOp::MinusEqual:  return Sub;
-    case SetOpOp::MulEqual:    return Mul;
+    case SetOpOp::PlusEqual:   return Op::Add;
+    case SetOpOp::MinusEqual:  return Op::Sub;
+    case SetOpOp::MulEqual:    return Op::Mul;
     case SetOpOp::DivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
-    case SetOpOp::ConcatEqual: return ConcatCellCell;
+    case SetOpOp::ConcatEqual: return Op::Concat;
     case SetOpOp::ModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
-    case SetOpOp::AndEqual:    return BitAnd;
-    case SetOpOp::OrEqual:     return BitOr;
-    case SetOpOp::XorEqual:    return BitXor;
+    case SetOpOp::AndEqual:    return Op::BitAnd;
+    case SetOpOp::OrEqual:     return Op::BitOr;
+    case SetOpOp::XorEqual:    return Op::BitXor;
     case SetOpOp::SlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
     case SetOpOp::SrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
     }

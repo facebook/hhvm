@@ -28,8 +28,6 @@ ParisTest::testFilterWithArguments
 .
 ParisTest::testFilterWithNoArguments
 .
-ParisTest::testFindResultSet
-.
 ParisTest::testHasManyRelation
 .
 ParisTest::testHasManyRelationWithCustomForeignKeyName

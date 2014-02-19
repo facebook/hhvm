@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -145,14 +145,6 @@ std::string safe_dirname(const std::string& path);
 size_t dirname_helper(char *path, int len);
 
 /**
- * Check if value is a power of two.
- */
-template<typename Int>
-inline bool isPowerOfTwo(Int value) {
-  return (value > 0 && (value & (value-1)) == 0);
-}
-
-/**
  * Round up value to the nearest power of two
  */
 template<typename Int>
@@ -197,15 +189,6 @@ inline int lgNextPower2(uint32_t value) {
 #else
   return value == 1 ? 0 : 32 - __builtin_clz(value - 1);
 #endif
-}
-
-// Returns the smallest power of 2 >= value, so long as value is not zero
-inline uint64_t nextPower2(uint64_t value) {
-  return uint64_t(1) << lgNextPower2(value);
-}
-
-inline uint32_t nextPower2(uint32_t value) {
-  return uint32_t(1) << lgNextPower2(value);
 }
 
 /**

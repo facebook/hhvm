@@ -23,52 +23,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/ini-parser/zend-ini.h"
-#include "hphp/runtime/ext/ext_misc.h"
 using namespace HPHP;
-
-///////////////////////////////////////////////////////////////////////////////
-// helpers
-
-static void zend_ini_do_op(char type, std::string &result,
-                           const std::string& op1, const std::string& op2 = std::string()) {
-  int i_op1 = strtoll(op1.c_str(), nullptr, 10);
-  int i_op2 = strtoll(op2.c_str(), nullptr, 10);
-
-  int i_result = 0;
-  switch (type) {
-    case '|': i_result = i_op1 | i_op2; break;
-    case '&': i_result = i_op1 & i_op2; break;
-    case '^': i_result = i_op1 ^ i_op2; break;
-    case '~': i_result = ~i_op1;        break;
-    case '!': i_result = !i_op1;        break;
-  }
-
-  result = std::to_string((int64_t)i_result);
-}
-
-static void zend_ini_get_constant(std::string &result, const std::string& name) {
-  if (f_defined(name)) {
-    result = f_constant(name).toString().toCppString();
-  } else {
-    result = name;
-  }
-}
-
-static void zend_ini_get_var(std::string &result, const std::string& name) {
-  std::string curval;
-  if (IniSetting::Get(name, curval)) {
-    result = curval;
-    return;
-  }
-
-  char *value = getenv(name.data());
-  if (value) {
-    result = std::string(value);
-    return;
-  }
-
-  result.clear();
-}
 
 %}
 
@@ -84,7 +39,6 @@ static void zend_ini_get_var(std::string &result, const std::string& name) {
 %token TC_STRING
 %token TC_WHITESPACE
 %token TC_LABEL
-%token TC_OFFSET
 %token TC_DOLLAR_CURLY
 %token TC_VARNAME
 %token TC_QUOTED_STRING
@@ -106,19 +60,21 @@ statement_list:
 ;
 
 statement:
-    TC_SECTION section_string_or_value ']' {
-      zend_ini_callback(&$2, NULL, NULL, IniSetting::ParserSection);
-    }
-  |  TC_LABEL '=' string_or_value {
-      zend_ini_callback(&$1, &$3, NULL, IniSetting::ParserEntry);
-    }
-  |  TC_OFFSET option_offset ']' '=' string_or_value {
-      zend_ini_callback(&$1, &$5, &$2, IniSetting::ParserPopEntry);
-    }
-  |  TC_LABEL  {
-      zend_ini_callback(&$1, NULL, NULL, IniSetting::ParserEntry);
-    }
+     TC_SECTION section_string_or_value ']' { zend_ini_on_section($2);}
+  |  TC_LABEL offset_list '=' 
+     string_or_value                        { zend_ini_on_pop_entry($1, $4, $2);}
+  |  TC_LABEL '=' string_or_value           { zend_ini_on_entry($1, $3);}
+  |  TC_LABEL                               { zend_ini_on_label($1);}
   |  END_OF_LINE
+;
+
+offset_list:
+     offset_list offset                     { $$ = $1 + '\0' + $2;}
+  |  offset                                 { $$ = $1;}
+;
+
+offset:
+     '[' option_offset ']'                  { $$ = $2;}
 ;
 
 section_string_or_value:
@@ -155,20 +111,20 @@ var_string_list:
 
 expr:
      var_string_list                        { $$ = $1;}
-  |  expr '|' expr                          { zend_ini_do_op('|', $$, $1, $3);}
-  |  expr '&' expr                          { zend_ini_do_op('&', $$, $1, $3);}
-  |  expr '^' expr                          { zend_ini_do_op('^', $$, $1, $3);}
-  |  '~' expr                               { zend_ini_do_op('~', $$, $2    );}
-  |  '!' expr                               { zend_ini_do_op('!', $$, $2    );}
+  |  expr '|' expr                          { zend_ini_on_op($$, '|', $1, $3);}
+  |  expr '&' expr                          { zend_ini_on_op($$, '&', $1, $3);}
+  |  expr '^' expr                          { zend_ini_on_op($$, '^', $1, $3);}
+  |  '~' expr                               { zend_ini_on_op($$, '~', $2    );}
+  |  '!' expr                               { zend_ini_on_op($$, '!', $2    );}
   |  '(' expr ')'                           { $$ = $2;}
 ;
 
 cfg_var_ref:
-     TC_DOLLAR_CURLY TC_VARNAME '}'         { zend_ini_get_var($$, $2);}
+     TC_DOLLAR_CURLY TC_VARNAME '}'         { zend_ini_on_var($$, $2);}
 ;
 
 constant_string:
-     TC_CONSTANT                            { zend_ini_get_constant($$, $1);}
+     TC_CONSTANT                            { zend_ini_on_constant($$, $1);}
   |  TC_RAW                                 { $$ = $1;}
   |  TC_NUMBER                              { $$ = $1;}
   |  TC_STRING                              { $$ = $1;}
@@ -180,9 +136,9 @@ constant_string:
 ///////////////////////////////////////////////////////////////////////////////
 // exposed to runtime/base/ini-setting.cpp
 
-bool zend_parse_ini_string(const std::string& str, const std::string& filename,
+bool zend_parse_ini_string(const std::string &str, const std::string &filename,
                            int scanner_mode,
-                           IniSetting::PFN_PARSER_CALLBACK callback,
+                           IniSetting::ParserCallback &callback,
                            void *arg) {
   zend_ini_scan(str, scanner_mode, filename, callback, arg);
   bool ret = (ini_parse() == 0);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,7 +60,7 @@ void moveToAlign(CodeBlock& cb,
 
   using namespace HPHP::Util;
   X64Assembler a { cb };
-  assert(isPowerOfTwo(align));
+  assert(folly::isPowTwo(align));
   size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
   if (leftInBlock == align) return;
   if (leftInBlock > 2) {
@@ -395,12 +395,12 @@ ConditionCode opToConditionCode(Opcode opc) {
   case JmpLte:                return CC_LE;
   case JmpEq:                 return CC_E;
   case JmpNeq:                return CC_NE;
-  case JmpGtI:                return CC_G;
-  case JmpGteI:               return CC_GE;
-  case JmpLtI:                return CC_L;
-  case JmpLteI:               return CC_LE;
-  case JmpEqI:                return CC_E;
-  case JmpNeqI:               return CC_NE;
+  case JmpGtInt:              return CC_G;
+  case JmpGteInt:             return CC_GE;
+  case JmpLtInt:              return CC_L;
+  case JmpLteInt:             return CC_LE;
+  case JmpEqInt:              return CC_E;
+  case JmpNeqInt:             return CC_NE;
   case JmpSame:               return CC_E;
   case JmpNSame:              return CC_NE;
   case JmpInstanceOfBitmask:  return CC_NZ;
@@ -413,12 +413,12 @@ ConditionCode opToConditionCode(Opcode opc) {
   case ReqBindJmpLte:                return CC_LE;
   case ReqBindJmpEq:                 return CC_E;
   case ReqBindJmpNeq:                return CC_NE;
-  case ReqBindJmpGtI:                return CC_G;
-  case ReqBindJmpGteI:               return CC_GE;
-  case ReqBindJmpLtI:                return CC_L;
-  case ReqBindJmpLteI:               return CC_LE;
-  case ReqBindJmpEqI:                return CC_E;
-  case ReqBindJmpNeqI:               return CC_NE;
+  case ReqBindJmpGtInt:              return CC_G;
+  case ReqBindJmpGteInt:             return CC_GE;
+  case ReqBindJmpLtInt:              return CC_L;
+  case ReqBindJmpLteInt:             return CC_LE;
+  case ReqBindJmpEqInt:              return CC_E;
+  case ReqBindJmpNeqInt:             return CC_NE;
   case ReqBindJmpSame:               return CC_E;
   case ReqBindJmpNSame:              return CC_NE;
   case ReqBindJmpInstanceOfBitmask:  return CC_NZ;
@@ -431,12 +431,12 @@ ConditionCode opToConditionCode(Opcode opc) {
   case SideExitJmpLte:                return CC_LE;
   case SideExitJmpEq:                 return CC_E;
   case SideExitJmpNeq:                return CC_NE;
-  case SideExitJmpGtI:                return CC_G;
-  case SideExitJmpGteI:               return CC_GE;
-  case SideExitJmpLtI:                return CC_L;
-  case SideExitJmpLteI:               return CC_LE;
-  case SideExitJmpEqI:                return CC_E;
-  case SideExitJmpNeqI:               return CC_NE;
+  case SideExitJmpGtInt:              return CC_G;
+  case SideExitJmpGteInt:             return CC_GE;
+  case SideExitJmpLtInt:              return CC_L;
+  case SideExitJmpLteInt:             return CC_LE;
+  case SideExitJmpEqInt:              return CC_E;
+  case SideExitJmpNeqInt:             return CC_NE;
   case SideExitJmpSame:               return CC_E;
   case SideExitJmpNSame:              return CC_NE;
   case SideExitJmpInstanceOfBitmask:  return CC_NZ;

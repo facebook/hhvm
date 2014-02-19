@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -134,11 +134,11 @@ insert_cached_pcre(const String& regex, const pcre_cache_entry* ent) {
     PCREEntry(makeStaticString(regex.get()), ent));
   if (!pair.second) {
     delete ent;
-    if (s_pcreCacheMap->size() < RuntimeOption::EvalPCRETableSize) {
-      return pair.first->second;
+    if (pair.first == s_pcreCacheMap->end()) {
+      raise_notice("PCRE cache full");
+      return nullptr;
     }
-    // if the AHA is too small, fail.
-    raise_error("PCRE cache full");
+    return pair.first->second;
   }
   return ent;
 }
@@ -399,17 +399,6 @@ static char** make_subpats_table(int num_subpats, const pcre_cache_entry* pce) {
   return subpat_names;
 }
 
-static pcre* pcre_get_compiled_regex(const String& regex, pcre_extra **extra,
-                                     int *preg_options) {
-  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(regex);
-  if (extra) {
-    *extra = pce ? pce->extra : nullptr;
-  }
-  if (preg_options) {
-    *preg_options = pce ? pce->preg_options : 0;
-  }
-  return pce ? pce->re : nullptr;
-}
 
 static inline void add_offset_pair(Variant &result, const String& str,
                                    int offset, const char *name) {
@@ -984,6 +973,8 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         }
 
         if (new_len + 1 > alloc_len) {
+          // Allocate needed memory plus some extra so we don't have to realloc
+          // too often
           alloc_len = 1 + alloc_len + 2 * new_len;
           result = (char *)realloc(result, alloc_len);
         }
@@ -1063,6 +1054,15 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                                     nullptr,
                                     VMExecutionContext::InvokePseudoMain);
             eval_result = v;
+
+            // Make sure that we have enough space in result
+            new_len = result_len + eval_result.size();
+            if (new_len + 1 > alloc_len) {
+              // Allocate needed memory plus some extra so we don't have to
+              // realloc too often
+              alloc_len = 1 + alloc_len + 2 * new_len;
+              result = (char *)realloc(result, alloc_len);
+            }
 
             memcpy(result + result_len, eval_result.data(), eval_result.size());
             result_len += eval_result.size();
@@ -1319,8 +1319,7 @@ Variant preg_split(const String& pattern, const String& subject,
   Variant return_value = Array::Create();
   int g_notempty = 0;   /* If the match should not be empty */
   int utf8_check = 0;
-  pcre *re_bump = nullptr; /* Regex instance for empty matches */
-  pcre_extra *extra_bump = nullptr; /* Almost dummy */
+  const pcre_cache_entry* bump_pce = nullptr; /* instance for empty matches */
   while ((limit == -1 || limit > 1)) {
     int count = pcre_exec(pce->re, extra, subject.data(), subject.size(),
                           start_offset, g_notempty | utf8_check,
@@ -1388,14 +1387,13 @@ Variant preg_split(const String& pattern, const String& subject,
          to achieve this, unless we're already at the end of the string. */
       if (g_notempty != 0 && start_offset < subject.size()) {
         if (pce->compile_options & PCRE_UTF8) {
-          if (re_bump == nullptr) {
-            int dummy;
-            if ((re_bump = pcre_get_compiled_regex("/./us", &extra_bump,
-                                                   &dummy)) == nullptr) {
+          if (bump_pce == nullptr) {
+            bump_pce = pcre_get_compiled_regex_cache("/./us");
+            if (bump_pce == nullptr) {
               return false;
             }
           }
-          count = pcre_exec(re_bump, extra_bump, subject.data(),
+          count = pcre_exec(bump_pce->re, bump_pce->extra, subject.data(),
                             subject.size(), start_offset,
                             0, offsets, size_offsets);
           if (count < 1) {

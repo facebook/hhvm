@@ -162,9 +162,13 @@ RequestTest::testGetContentLength
 .
 RequestTest::testGetContentLengthWhenNotExists
 .
+RequestTest::testGetContentTypeForBuiltInServer
+.
 RequestTest::testGetContentTypeWhenExists
 .
 RequestTest::testGetContentTypeWhenNotExists
+.
+RequestTest::testGetContentTypeWithBuiltInServer
 .
 RequestTest::testGetHost
 .
@@ -328,6 +332,10 @@ RouteTest::testDispatchWithMiddleware
 .
 RouteTest::testGetCallable
 .
+RouteTest::testGetCallableAsClass
+.
+RouteTest::testGetCallableAsStaticMethod
+.
 RouteTest::testGetConditions
 .
 RouteTest::testGetDefaultConditions
@@ -347,6 +355,10 @@ RouteTest::testGetParams
 RouteTest::testGetPattern
 .
 RouteTest::testMatches
+.
+RouteTest::testMatchesCanBeCaseInsensitive
+.
+RouteTest::testMatchesIsCaseSensitiveByDefault
 .
 RouteTest::testMatchesIsFalse
 .
@@ -678,6 +690,8 @@ SlimTest::testRenderTemplateWithDataAndStatus
 .
 SlimTest::testRouteGroups
 .
+SlimTest::testRouteMatchesInCaseInsensitiveMannerIfConfigured
+.
 SlimTest::testRouteWithUrlEncodedCharacters
 .
 SlimTest::testRouteWithoutSlashAndUrlWithOne
@@ -718,6 +732,8 @@ SlimTest::testStopWithSubsequentOutput
 .
 SlimTest::testViewDataTransfer
 .
+SlimTest::testViewGetsTemplatesPath
+.
 ViewTest::testAppendData
 .
 ViewTest::testAppendDataInvalidArgument
@@ -735,6 +751,8 @@ ViewTest::testGetDataKeyExists
 ViewTest::testGetDataKeyNotExists
 .
 ViewTest::testGetTemplatesDirectory
+.
+ViewTest::testLocalData
 .
 ViewTest::testSetDataArray
 .

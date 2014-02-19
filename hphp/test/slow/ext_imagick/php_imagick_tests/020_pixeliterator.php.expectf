@@ -1,0 +1,4 @@
+match
+match
+%s: ImagickPixelIterator::newPixelIterator is deprecated. ImagickPixelIterator::getPixelIterator should be used instead in %s on line %d
+done

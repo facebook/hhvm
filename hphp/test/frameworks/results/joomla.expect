@@ -1,12 +1,12 @@
-AbstractRegistryFormatTest::testGetInstance with data set #0 
+AbstractRegistryFormatTest::testGetInstance with data set #0
 .
-AbstractRegistryFormatTest::testGetInstance with data set #1 
+AbstractRegistryFormatTest::testGetInstance with data set #1
 .
-AbstractRegistryFormatTest::testGetInstance with data set #2 
+AbstractRegistryFormatTest::testGetInstance with data set #2
 .
-AbstractRegistryFormatTest::testGetInstance with data set #3 
+AbstractRegistryFormatTest::testGetInstance with data set #3
 .
-AbstractRegistryFormatTest::testGetInstance with data set #4 
+AbstractRegistryFormatTest::testGetInstance with data set #4
 .
 AbstractRegistryFormatTest::testGetInstanceNonExistent
 .
@@ -174,8 +174,6 @@ FolderTest::testDelete
 I
 FolderTest::testDeleteArrayPath
 .
-FolderTest::testExists
-.
 FolderTest::testFiles
 .
 FolderTest::testFolders
@@ -194,300 +192,430 @@ FormatYamlTest::testObjectToStringWithObject
 .
 FormatYamlTest::testStringToObject
 .
+ImageFilterBackgroundfillTest::testExecute
+.
+ImageFilterBackgroundfillTest::testExecuteInvalidArgument
+.
+ImageFilterBrightnessTest::testExecute
+.
+ImageFilterBrightnessTest::testExecuteInvalidArgument
+.
+ImageFilterContrastTest::testExecute
+.
+ImageFilterContrastTest::testExecuteInvalidArgument
+.
+ImageFilterEdgedetectTest::testExecute
+.
+ImageFilterTest::testConstructorInvalidArgument
+FATAL
 ImageTest::testConstructor
-E
+.
+ImageTest::testCrop with data set #0
+.
+ImageTest::testCrop with data set #1
+.
+ImageTest::testCrop with data set #2
+.
+ImageTest::testCropWithoutLoadedImage
+.
+ImageTest::testDestroy
+.
+ImageTest::testFilter
+.
+ImageTest::testFilterWithInvalidFilterType
+.
+ImageTest::testFilterWithoutLoadedImage
+.
+ImageTest::testGetFilterInstance
+.
+ImageTest::testGetHeight
+.
+ImageTest::testGetHeightWithoutLoadedImage
+.
+ImageTest::testGetImageFilePropertiesWithInvalidFile
+.
+ImageTest::testGetNullLogger
+.
+ImageTest::testGetWidth
+.
+ImageTest::testGetWidthWithoutLoadedImage
+.
+ImageTest::testIsTransparentWithoutLoadedImage
+.
+ImageTest::testOpaqueIsNotTransparent
+.
+ImageTest::testPrepareDimensions with data set #0
+.
+ImageTest::testPrepareDimensions with data set #1
+.
+ImageTest::testPrepareDimensions with data set #2
+.
+ImageTest::testPrepareDimensions with data set #3
+.
+ImageTest::testPrepareDimensions with data set #4
+.
+ImageTest::testPrepareDimensions with data set #5
+.
+ImageTest::testPrepareDimensions with data set #6
+.
+ImageTest::testPrepareDimensionsWithInvalidScale
+.
+ImageTest::testResize
+.
+ImageTest::testResizeNoFile
+.
+ImageTest::testResizeTransparent
+.
+ImageTest::testRotate
+.
+ImageTest::testRotateWithoutLoadedImage
+.
+ImageTest::testSanitizeHeight with data set #0
+.
+ImageTest::testSanitizeHeight with data set #1
+.
+ImageTest::testSanitizeHeight with data set #2
+.
+ImageTest::testSanitizeHeight with data set #3
+.
+ImageTest::testSanitizeHeight with data set #4
+.
+ImageTest::testSanitizeHeight with data set #5
+.
+ImageTest::testSanitizeOffset with data set #0
+.
+ImageTest::testSanitizeOffset with data set #1
+.
+ImageTest::testSanitizeWidth with data set #0
+.
+ImageTest::testSanitizeWidth with data set #1
+.
+ImageTest::testSanitizeWidth with data set #2
+.
+ImageTest::testSanitizeWidth with data set #3
+.
+ImageTest::testSanitizeWidth with data set #4
+.
+ImageTest::testSanitizeWidth with data set #5
+.
+ImageTest::testSetLogger
+.
+ImageTest::testToFileDefault
+.
+ImageTest::testToFileGif
+.
+ImageTest::testToFileInvalid
+.
+ImageTest::testToFileJpg
+.
+ImageTest::testToFilePng
+.
+ImageTest::testTransparentIsTransparent
+.
 ImageTest::testloadFile
-E
+.
 ImageTest::testloadFileBmp
-UNKNOWN STATUS
+.
 ImageTest::testloadFileGif
-E
+.
 ImageTest::testloadFilePng
-E
-JApplicationWebClientTest::testDetectBrowser with data set #0 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #1 
+ImageTest::testloadFileWithInvalidFile
 .
-JApplicationWebClientTest::testDetectBrowser with data set #10 
+JApplicationWebClientTest::testDetectBrowser with data set #0
 .
-JApplicationWebClientTest::testDetectBrowser with data set #11 
+JApplicationWebClientTest::testDetectBrowser with data set #1
 .
-JApplicationWebClientTest::testDetectBrowser with data set #12 
+JApplicationWebClientTest::testDetectBrowser with data set #10
 .
-JApplicationWebClientTest::testDetectBrowser with data set #13 
+JApplicationWebClientTest::testDetectBrowser with data set #11
 .
-JApplicationWebClientTest::testDetectBrowser with data set #14 
+JApplicationWebClientTest::testDetectBrowser with data set #12
 .
-JApplicationWebClientTest::testDetectBrowser with data set #15 
+JApplicationWebClientTest::testDetectBrowser with data set #13
 .
-JApplicationWebClientTest::testDetectBrowser with data set #16 
+JApplicationWebClientTest::testDetectBrowser with data set #14
 .
-JApplicationWebClientTest::testDetectBrowser with data set #17 
+JApplicationWebClientTest::testDetectBrowser with data set #15
 .
-JApplicationWebClientTest::testDetectBrowser with data set #18 
+JApplicationWebClientTest::testDetectBrowser with data set #16
 .
-JApplicationWebClientTest::testDetectBrowser with data set #19 
+JApplicationWebClientTest::testDetectBrowser with data set #17
 .
-JApplicationWebClientTest::testDetectBrowser with data set #2 
+JApplicationWebClientTest::testDetectBrowser with data set #18
 .
-JApplicationWebClientTest::testDetectBrowser with data set #20 
+JApplicationWebClientTest::testDetectBrowser with data set #19
 .
-JApplicationWebClientTest::testDetectBrowser with data set #21 
+JApplicationWebClientTest::testDetectBrowser with data set #2
 .
-JApplicationWebClientTest::testDetectBrowser with data set #22 
+JApplicationWebClientTest::testDetectBrowser with data set #20
 .
-JApplicationWebClientTest::testDetectBrowser with data set #23 
+JApplicationWebClientTest::testDetectBrowser with data set #21
 .
-JApplicationWebClientTest::testDetectBrowser with data set #24 
+JApplicationWebClientTest::testDetectBrowser with data set #22
 .
-JApplicationWebClientTest::testDetectBrowser with data set #25 
+JApplicationWebClientTest::testDetectBrowser with data set #23
 .
-JApplicationWebClientTest::testDetectBrowser with data set #26 
+JApplicationWebClientTest::testDetectBrowser with data set #24
 .
-JApplicationWebClientTest::testDetectBrowser with data set #27 
+JApplicationWebClientTest::testDetectBrowser with data set #25
 .
-JApplicationWebClientTest::testDetectBrowser with data set #28 
+JApplicationWebClientTest::testDetectBrowser with data set #26
 .
-JApplicationWebClientTest::testDetectBrowser with data set #29 
+JApplicationWebClientTest::testDetectBrowser with data set #27
 .
-JApplicationWebClientTest::testDetectBrowser with data set #3 
+JApplicationWebClientTest::testDetectBrowser with data set #28
 .
-JApplicationWebClientTest::testDetectBrowser with data set #30 
+JApplicationWebClientTest::testDetectBrowser with data set #29
 .
-JApplicationWebClientTest::testDetectBrowser with data set #31 
+JApplicationWebClientTest::testDetectBrowser with data set #3
 .
-JApplicationWebClientTest::testDetectBrowser with data set #32 
+JApplicationWebClientTest::testDetectBrowser with data set #30
 .
-JApplicationWebClientTest::testDetectBrowser with data set #33 
+JApplicationWebClientTest::testDetectBrowser with data set #31
 .
-JApplicationWebClientTest::testDetectBrowser with data set #34 
+JApplicationWebClientTest::testDetectBrowser with data set #32
 .
-JApplicationWebClientTest::testDetectBrowser with data set #35 
+JApplicationWebClientTest::testDetectBrowser with data set #33
 .
-JApplicationWebClientTest::testDetectBrowser with data set #4 
+JApplicationWebClientTest::testDetectBrowser with data set #34
 .
-JApplicationWebClientTest::testDetectBrowser with data set #5 
+JApplicationWebClientTest::testDetectBrowser with data set #35
 .
-JApplicationWebClientTest::testDetectBrowser with data set #6 
+JApplicationWebClientTest::testDetectBrowser with data set #4
 .
-JApplicationWebClientTest::testDetectBrowser with data set #7 
+JApplicationWebClientTest::testDetectBrowser with data set #5
 .
-JApplicationWebClientTest::testDetectBrowser with data set #8 
+JApplicationWebClientTest::testDetectBrowser with data set #6
 .
-JApplicationWebClientTest::testDetectBrowser with data set #9 
+JApplicationWebClientTest::testDetectBrowser with data set #7
 .
-JApplicationWebClientTest::testDetectEncoding with data set #0 
+JApplicationWebClientTest::testDetectBrowser with data set #8
 .
-JApplicationWebClientTest::testDetectEncoding with data set #1 
+JApplicationWebClientTest::testDetectBrowser with data set #9
 .
-JApplicationWebClientTest::testDetectEncoding with data set #2 
+JApplicationWebClientTest::testDetectEncoding with data set #0
 .
-JApplicationWebClientTest::testDetectEncoding with data set #3 
+JApplicationWebClientTest::testDetectEncoding with data set #1
 .
-JApplicationWebClientTest::testDetectEncoding with data set #4 
+JApplicationWebClientTest::testDetectEncoding with data set #2
 .
-JApplicationWebClientTest::testDetectEncoding with data set #5 
+JApplicationWebClientTest::testDetectEncoding with data set #3
 .
-JApplicationWebClientTest::testDetectEncoding with data set #6 
+JApplicationWebClientTest::testDetectEncoding with data set #4
 .
-JApplicationWebClientTest::testDetectEngine with data set #0 
+JApplicationWebClientTest::testDetectEncoding with data set #5
 .
-JApplicationWebClientTest::testDetectEngine with data set #1 
+JApplicationWebClientTest::testDetectEncoding with data set #6
 .
-JApplicationWebClientTest::testDetectEngine with data set #10 
+JApplicationWebClientTest::testDetectEngine with data set #0
 .
-JApplicationWebClientTest::testDetectEngine with data set #11 
+JApplicationWebClientTest::testDetectEngine with data set #1
 .
-JApplicationWebClientTest::testDetectEngine with data set #12 
+JApplicationWebClientTest::testDetectEngine with data set #10
 .
-JApplicationWebClientTest::testDetectEngine with data set #13 
+JApplicationWebClientTest::testDetectEngine with data set #11
 .
-JApplicationWebClientTest::testDetectEngine with data set #14 
+JApplicationWebClientTest::testDetectEngine with data set #12
 .
-JApplicationWebClientTest::testDetectEngine with data set #15 
+JApplicationWebClientTest::testDetectEngine with data set #13
 .
-JApplicationWebClientTest::testDetectEngine with data set #16 
+JApplicationWebClientTest::testDetectEngine with data set #14
 .
-JApplicationWebClientTest::testDetectEngine with data set #17 
+JApplicationWebClientTest::testDetectEngine with data set #15
 .
-JApplicationWebClientTest::testDetectEngine with data set #18 
+JApplicationWebClientTest::testDetectEngine with data set #16
 .
-JApplicationWebClientTest::testDetectEngine with data set #19 
+JApplicationWebClientTest::testDetectEngine with data set #17
 .
-JApplicationWebClientTest::testDetectEngine with data set #2 
+JApplicationWebClientTest::testDetectEngine with data set #18
 .
-JApplicationWebClientTest::testDetectEngine with data set #20 
+JApplicationWebClientTest::testDetectEngine with data set #19
 .
-JApplicationWebClientTest::testDetectEngine with data set #21 
+JApplicationWebClientTest::testDetectEngine with data set #2
 .
-JApplicationWebClientTest::testDetectEngine with data set #22 
+JApplicationWebClientTest::testDetectEngine with data set #20
 .
-JApplicationWebClientTest::testDetectEngine with data set #23 
+JApplicationWebClientTest::testDetectEngine with data set #21
 .
-JApplicationWebClientTest::testDetectEngine with data set #24 
+JApplicationWebClientTest::testDetectEngine with data set #22
 .
-JApplicationWebClientTest::testDetectEngine with data set #25 
+JApplicationWebClientTest::testDetectEngine with data set #23
 .
-JApplicationWebClientTest::testDetectEngine with data set #26 
+JApplicationWebClientTest::testDetectEngine with data set #24
 .
-JApplicationWebClientTest::testDetectEngine with data set #27 
+JApplicationWebClientTest::testDetectEngine with data set #25
 .
-JApplicationWebClientTest::testDetectEngine with data set #28 
+JApplicationWebClientTest::testDetectEngine with data set #26
 .
-JApplicationWebClientTest::testDetectEngine with data set #29 
+JApplicationWebClientTest::testDetectEngine with data set #27
 .
-JApplicationWebClientTest::testDetectEngine with data set #3 
+JApplicationWebClientTest::testDetectEngine with data set #28
 .
-JApplicationWebClientTest::testDetectEngine with data set #30 
+JApplicationWebClientTest::testDetectEngine with data set #29
 .
-JApplicationWebClientTest::testDetectEngine with data set #31 
+JApplicationWebClientTest::testDetectEngine with data set #3
 .
-JApplicationWebClientTest::testDetectEngine with data set #32 
+JApplicationWebClientTest::testDetectEngine with data set #30
 .
-JApplicationWebClientTest::testDetectEngine with data set #33 
+JApplicationWebClientTest::testDetectEngine with data set #31
 .
-JApplicationWebClientTest::testDetectEngine with data set #34 
+JApplicationWebClientTest::testDetectEngine with data set #32
 .
-JApplicationWebClientTest::testDetectEngine with data set #35 
+JApplicationWebClientTest::testDetectEngine with data set #33
 .
-JApplicationWebClientTest::testDetectEngine with data set #4 
+JApplicationWebClientTest::testDetectEngine with data set #34
 .
-JApplicationWebClientTest::testDetectEngine with data set #5 
+JApplicationWebClientTest::testDetectEngine with data set #35
 .
-JApplicationWebClientTest::testDetectEngine with data set #6 
+JApplicationWebClientTest::testDetectEngine with data set #4
 .
-JApplicationWebClientTest::testDetectEngine with data set #7 
+JApplicationWebClientTest::testDetectEngine with data set #5
 .
-JApplicationWebClientTest::testDetectEngine with data set #8 
+JApplicationWebClientTest::testDetectEngine with data set #6
 .
-JApplicationWebClientTest::testDetectEngine with data set #9 
+JApplicationWebClientTest::testDetectEngine with data set #7
 .
-JApplicationWebClientTest::testDetectLanguage with data set #0 
+JApplicationWebClientTest::testDetectEngine with data set #8
 .
-JApplicationWebClientTest::testDetectLanguage with data set #1 
+JApplicationWebClientTest::testDetectEngine with data set #9
 .
-JApplicationWebClientTest::testDetectLanguage with data set #2 
+JApplicationWebClientTest::testDetectLanguage with data set #0
 .
-JApplicationWebClientTest::testDetectLanguage with data set #3 
+JApplicationWebClientTest::testDetectLanguage with data set #1
 .
-JApplicationWebClientTest::testDetectLanguage with data set #4 
+JApplicationWebClientTest::testDetectLanguage with data set #2
 .
-JApplicationWebClientTest::testDetectLanguage with data set #5 
+JApplicationWebClientTest::testDetectLanguage with data set #3
 .
-JApplicationWebClientTest::testDetectLanguage with data set #6 
+JApplicationWebClientTest::testDetectLanguage with data set #4
 .
-JApplicationWebClientTest::testDetectPlatform with data set #0 
+JApplicationWebClientTest::testDetectLanguage with data set #5
 .
-JApplicationWebClientTest::testDetectPlatform with data set #1 
+JApplicationWebClientTest::testDetectLanguage with data set #6
 .
-JApplicationWebClientTest::testDetectPlatform with data set #10 
+JApplicationWebClientTest::testDetectPlatform with data set #0
 .
-JApplicationWebClientTest::testDetectPlatform with data set #11 
+JApplicationWebClientTest::testDetectPlatform with data set #1
 .
-JApplicationWebClientTest::testDetectPlatform with data set #12 
+JApplicationWebClientTest::testDetectPlatform with data set #10
 .
-JApplicationWebClientTest::testDetectPlatform with data set #13 
+JApplicationWebClientTest::testDetectPlatform with data set #11
 .
-JApplicationWebClientTest::testDetectPlatform with data set #14 
+JApplicationWebClientTest::testDetectPlatform with data set #12
 .
-JApplicationWebClientTest::testDetectPlatform with data set #15 
+JApplicationWebClientTest::testDetectPlatform with data set #13
 .
-JApplicationWebClientTest::testDetectPlatform with data set #16 
+JApplicationWebClientTest::testDetectPlatform with data set #14
 .
-JApplicationWebClientTest::testDetectPlatform with data set #17 
+JApplicationWebClientTest::testDetectPlatform with data set #15
 .
-JApplicationWebClientTest::testDetectPlatform with data set #18 
+JApplicationWebClientTest::testDetectPlatform with data set #16
 .
-JApplicationWebClientTest::testDetectPlatform with data set #19 
+JApplicationWebClientTest::testDetectPlatform with data set #17
 .
-JApplicationWebClientTest::testDetectPlatform with data set #2 
+JApplicationWebClientTest::testDetectPlatform with data set #18
 .
-JApplicationWebClientTest::testDetectPlatform with data set #20 
+JApplicationWebClientTest::testDetectPlatform with data set #19
 .
-JApplicationWebClientTest::testDetectPlatform with data set #21 
+JApplicationWebClientTest::testDetectPlatform with data set #2
 .
-JApplicationWebClientTest::testDetectPlatform with data set #22 
+JApplicationWebClientTest::testDetectPlatform with data set #20
 .
-JApplicationWebClientTest::testDetectPlatform with data set #23 
+JApplicationWebClientTest::testDetectPlatform with data set #21
 .
-JApplicationWebClientTest::testDetectPlatform with data set #24 
+JApplicationWebClientTest::testDetectPlatform with data set #22
 .
-JApplicationWebClientTest::testDetectPlatform with data set #25 
+JApplicationWebClientTest::testDetectPlatform with data set #23
 .
-JApplicationWebClientTest::testDetectPlatform with data set #26 
+JApplicationWebClientTest::testDetectPlatform with data set #24
 .
-JApplicationWebClientTest::testDetectPlatform with data set #27 
+JApplicationWebClientTest::testDetectPlatform with data set #25
 .
-JApplicationWebClientTest::testDetectPlatform with data set #28 
+JApplicationWebClientTest::testDetectPlatform with data set #26
 .
-JApplicationWebClientTest::testDetectPlatform with data set #29 
+JApplicationWebClientTest::testDetectPlatform with data set #27
 .
-JApplicationWebClientTest::testDetectPlatform with data set #3 
+JApplicationWebClientTest::testDetectPlatform with data set #28
 .
-JApplicationWebClientTest::testDetectPlatform with data set #30 
+JApplicationWebClientTest::testDetectPlatform with data set #29
 .
-JApplicationWebClientTest::testDetectPlatform with data set #31 
+JApplicationWebClientTest::testDetectPlatform with data set #3
 .
-JApplicationWebClientTest::testDetectPlatform with data set #32 
+JApplicationWebClientTest::testDetectPlatform with data set #30
 .
-JApplicationWebClientTest::testDetectPlatform with data set #33 
+JApplicationWebClientTest::testDetectPlatform with data set #31
 .
-JApplicationWebClientTest::testDetectPlatform with data set #34 
+JApplicationWebClientTest::testDetectPlatform with data set #32
 .
-JApplicationWebClientTest::testDetectPlatform with data set #35 
+JApplicationWebClientTest::testDetectPlatform with data set #33
 .
-JApplicationWebClientTest::testDetectPlatform with data set #4 
+JApplicationWebClientTest::testDetectPlatform with data set #34
 .
-JApplicationWebClientTest::testDetectPlatform with data set #5 
+JApplicationWebClientTest::testDetectPlatform with data set #35
 .
-JApplicationWebClientTest::testDetectPlatform with data set #6 
+JApplicationWebClientTest::testDetectPlatform with data set #4
 .
-JApplicationWebClientTest::testDetectPlatform with data set #7 
+JApplicationWebClientTest::testDetectPlatform with data set #5
 .
-JApplicationWebClientTest::testDetectPlatform with data set #8 
+JApplicationWebClientTest::testDetectPlatform with data set #6
 .
-JApplicationWebClientTest::testDetectPlatform with data set #9 
+JApplicationWebClientTest::testDetectPlatform with data set #7
 .
-JApplicationWebClientTest::testDetectRobot with data set #0 
+JApplicationWebClientTest::testDetectPlatform with data set #8
 .
-JApplicationWebClientTest::testDetectRobot with data set #1 
+JApplicationWebClientTest::testDetectPlatform with data set #9
 .
-JApplicationWebClientTest::testDetectRobot with data set #2 
+JApplicationWebClientTest::testDetectRobot with data set #0
 .
-JApplicationWebClientTest::testDetectRobot with data set #3 
+JApplicationWebClientTest::testDetectRobot with data set #1
 .
-JApplicationWebClientTest::testDetectRobot with data set #4 
+JApplicationWebClientTest::testDetectRobot with data set #2
 .
-JApplicationWebClientTest::testDetectRobot with data set #5 
+JApplicationWebClientTest::testDetectRobot with data set #3
 .
-JApplicationWebClientTest::testDetectRobot with data set #6 
+JApplicationWebClientTest::testDetectRobot with data set #4
 .
-JApplicationWebClientTest::testDetectRobot with data set #7 
+JApplicationWebClientTest::testDetectRobot with data set #5
+.
+JApplicationWebClientTest::testDetectRobot with data set #6
+.
+JApplicationWebClientTest::testDetectRobot with data set #7
 .
 JApplicationWebClientTest::test__construct
 I
 JApplicationWebClientTest::test__get
 I
 JFileTest::testCopy
-I
-JFileTest::testDelete
-I
-JFileTest::testExists
 .
-JFileTest::testGetExt
-I
-JFileTest::testMakeSafe
-I
+JFileTest::testDelete
+.
+JFileTest::testMakeSafe with data set #0
+.
+JFileTest::testMakeSafe with data set #1
+.
+JFileTest::testMakeSafe with data set #2
+.
+JFileTest::testMakeSafe with data set #3
+.
+JFileTest::testMakeSafe with data set #4
+.
+JFileTest::testMakeSafe with data set #5
+.
 JFileTest::testMove
-I
+.
 JFileTest::testRead
 I
-JFileTest::testStripExt
-I
+JFileTest::testStripExt with data set #0
+.
+JFileTest::testStripExt with data set #1
+.
+JFileTest::testStripExt with data set #2
+.
 JFileTest::testUpload
 I
 JFileTest::testWrite
-I
+E
 JGithubHttpTest::test__Construct
 .
 JGoogleEmbedMapsTest::testAddMarker
@@ -570,61 +698,9 @@ JGoogleEmbedMapsTest::testUseSensor
 .
 JGoogleEmbedMapsTest::testUseSync
 .
-JImageFilterBrightnessTest::testExecute
-FATAL
-JImageFilterContrastTest::testExecute
-FATAL
-JImageFilterEdgedetectTest::testExecute
-FATAL
-JImageFilterTest::testConstructor
-.
-JImageFilterTest::testConstructorInvalidArgument
-.
 JLanguageStemmerTest::testGetInstance
 .
 JLanguageStemmerTest::testGetInstanceException
-.
-JLogEntryTest::testBadPriorityValues
-.
-JLogEntryTest::testCategorySanitization
-.
-JLogEntryTest::testDefaultValues
-.
-JLogLoggerCallbackTest::testAddEntry
-.
-JLogLoggerCallbackTest::testConstructor01
-.
-JLogLoggerCallbackTest::testConstructor02
-.
-JLogLoggerCallbackTest::testConstructor03
-.
-JLogLoggerCallbackTest::testConstructor04
-.
-JLogLoggerCallbackTest::testConstructor05
-.
-JLogLoggerCallbackTest::testConstructor06
-.
-JLogLoggerEchoTest::testAddEntry01
-.
-JLogLoggerEchoTest::testAddEntry02
-.
-JLogLoggerEchoTest::testAddEntry03
-.
-JLogLoggerEchoTest::testAddEntry04
-.
-JLogLoggerFormattedTextTest::testAddEntry
-.
-JLogLoggerFormattedTextTest::testConstructor01
-.
-JLogLoggerFormattedTextTest::testConstructor02
-.
-JLogLoggerFormattedTextTest::testConstructor03
-.
-JLogLoggerFormattedTextTest::testConstructor04
-.
-JLogLoggerSysLogTest::testAddEntry
-I
-JLogLoggerW3CTest::testAddEntry
 .
 JRegistryFormatINITest::testObjectToString
 .
@@ -672,9 +748,7 @@ Joomla\Application\Tests\AbstractApplicationTest::testExecute
 .
 Joomla\Application\Tests\AbstractApplicationTest::testGet
 .
-Joomla\Application\Tests\AbstractApplicationTest::testGetLogger_exception
-.
-Joomla\Application\Tests\AbstractApplicationTest::testHasLogger
+Joomla\Application\Tests\AbstractApplicationTest::testGetNullLogger
 .
 Joomla\Application\Tests\AbstractApplicationTest::testSet
 .
@@ -732,17 +806,19 @@ Joomla\Application\Tests\AbstractWebApplicationTest::testCompressWithNoAcceptEnc
 .
 Joomla\Application\Tests\AbstractWebApplicationTest::testCompressWithUnsupportedEncodings
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #0 
+Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #0
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #1 
+Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #1
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #2 
+Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #2
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #3 
+Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #3
 .
 Joomla\Application\Tests\AbstractWebApplicationTest::testExecute
 .
 Joomla\Application\Tests\AbstractWebApplicationTest::testGetBody
+.
+Joomla\Application\Tests\AbstractWebApplicationTest::testGetFormToken
 .
 Joomla\Application\Tests\AbstractWebApplicationTest::testGetHeaders
 .
@@ -766,9 +842,9 @@ Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithJavascriptR
 .
 Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithMoved
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithUrl with data set #0 
+Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithUrl with data set #0
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithUrl with data set #1 
+Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithUrl with data set #1
 .
 Joomla\Application\Tests\AbstractWebApplicationTest::testRespond
 I
@@ -795,7 +871,7 @@ Joomla\Application\Tests\ColorProcessorTest::testProcessReplace
 Joomla\Application\Tests\ColorProcessorTest::testStripColors
 .
 Joomla\Archive\Tests\ArchiveTest::testExtractBzip2
-S
+.
 Joomla\Archive\Tests\ArchiveTest::testExtractGzip
 .
 Joomla\Archive\Tests\ArchiveTest::testExtractTar
@@ -803,13 +879,19 @@ Joomla\Archive\Tests\ArchiveTest::testExtractTar
 Joomla\Archive\Tests\ArchiveTest::testExtractZip
 .
 Joomla\Archive\Tests\ArchiveTest::testGetAdapter
-E
+.
 Joomla\Archive\Tests\ArchiveTest::testGetAdapterException
 .
+Joomla\Archive\Tests\ArchiveTest::testGetAdapterExceptionMessage
+.
+Joomla\Archive\Tests\ArchiveTest::testSetAdapterException
+.
+Joomla\Archive\Tests\ArchiveTest::testSetAdapterExceptionMessage
+.
 Joomla\Archive\Tests\Bzip2Test::testExtract
-S
+.
 Joomla\Archive\Tests\Bzip2Test::testExtractWithStreams
-S
+.
 Joomla\Archive\Tests\Bzip2Test::testIsSupported
 .
 Joomla\Archive\Tests\GzipTest::testExtract
@@ -839,20 +921,28 @@ Joomla\Archive\Tests\ZipTest::testHasNativeSupport
 Joomla\Archive\Tests\ZipTest::testIsSupported
 .
 Joomla\Cache\Tests\ApcTest::testClear
-S
+I
 Joomla\Cache\Tests\ApcTest::testExists
-S
+I
 Joomla\Cache\Tests\ApcTest::testGet
-S
+I
 Joomla\Cache\Tests\ApcTest::testPsrCache
-S
+.
 Joomla\Cache\Tests\ApcTest::testRemove
-S
+I
 Joomla\Cache\Tests\ApcTest::testSet
-S
+I
+Joomla\Cache\Tests\CacheTest::testGet
+.
 Joomla\Cache\Tests\CacheTest::testGetMultiple
 .
+Joomla\Cache\Tests\CacheTest::testPsrCache
+.
+Joomla\Cache\Tests\CacheTest::testRemove
+.
 Joomla\Cache\Tests\CacheTest::testRemoveMultiple
+.
+Joomla\Cache\Tests\CacheTest::testSet
 .
 Joomla\Cache\Tests\CacheTest::testSetMultiple
 .
@@ -884,18 +974,24 @@ Joomla\Cache\Tests\FileTest::testSet
 .
 Joomla\Cache\Tests\ItemTest::testItem
 .
-Joomla\Cache\Tests\MemcachedTest::testClear
-S
-Joomla\Cache\Tests\MemcachedTest::testExists
-S
 Joomla\Cache\Tests\MemcachedTest::testGet
-S
+F
+Joomla\Cache\Tests\MemcachedTest::testGetMultiple
+F
 Joomla\Cache\Tests\MemcachedTest::testPsrCache
-S
+F
 Joomla\Cache\Tests\MemcachedTest::testRemove
-S
+F
+Joomla\Cache\Tests\MemcachedTest::testRemoveMultiple
+F
 Joomla\Cache\Tests\MemcachedTest::testSet
-S
+F
+Joomla\Cache\Tests\MemcachedTest::testSetMultiple
+F
+Joomla\Cache\Tests\MemcachedTest::testSetOption
+.
+Joomla\Cache\Tests\MemcachedTest::test__construct
+.
 Joomla\Cache\Tests\NoneTest::testClear
 .
 Joomla\Cache\Tests\NoneTest::testExists
@@ -908,6 +1004,22 @@ Joomla\Cache\Tests\NoneTest::testRemove
 .
 Joomla\Cache\Tests\NoneTest::testSet
 .
+Joomla\Cache\Tests\RedisTest::testClear
+S
+Joomla\Cache\Tests\RedisTest::testExists
+S
+Joomla\Cache\Tests\RedisTest::testGetAndSet
+S
+Joomla\Cache\Tests\RedisTest::testGetAndSetWithTimeout
+S
+Joomla\Cache\Tests\RedisTest::testGetMultiple
+S
+Joomla\Cache\Tests\RedisTest::testPsrCache
+S
+Joomla\Cache\Tests\RedisTest::testRemove
+S
+Joomla\Cache\Tests\RedisTest::testSetMultiple
+S
 Joomla\Cache\Tests\RuntimeTest::testClear
 .
 Joomla\Cache\Tests\RuntimeTest::testExists
@@ -944,140 +1056,6 @@ Joomla\Cache\Tests\XCacheTest::testRemove
 S
 Joomla\Cache\Tests\XCacheTest::testSet
 S
-Joomla\Client\Tests\BufferTest::testStreamEOF with data set "EOF"
-.
-Joomla\Client\Tests\BufferTest::testStreamEOF with data set "~EOF"
-.
-Joomla\Client\Tests\BufferTest::testStreamOpen with data set "basic"
-.
-Joomla\Client\Tests\BufferTest::testStreamRead with data set "basic"
-.
-Joomla\Client\Tests\BufferTest::testStreamSeek with data set "bad_seek_code"
-.
-Joomla\Client\Tests\BufferTest::testStreamSeek with data set "basic"
-.
-Joomla\Client\Tests\BufferTest::testStreamSeek with data set "before_beg"
-.
-Joomla\Client\Tests\BufferTest::testStreamSeek with data set "from_end"
-.
-Joomla\Client\Tests\BufferTest::testStreamSeek with data set "is_neg"
-.
-Joomla\Client\Tests\BufferTest::testStreamSeek with data set "is_pos"
-.
-Joomla\Client\Tests\BufferTest::testStreamSeek with data set "off_end"
-.
-Joomla\Client\Tests\BufferTest::testStreamSeek with data set "too_early"
-.
-Joomla\Client\Tests\BufferTest::testStreamTell
-.
-Joomla\Client\Tests\BufferTest::testStreamWrite with data set "basic"
-.
-Joomla\Client\Tests\ClientHelperTest::testGetCredentials
-I
-Joomla\Client\Tests\ClientHelperTest::testHasCredentials
-I
-Joomla\Client\Tests\ClientHelperTest::testSetCredentials
-I
-Joomla\Client\Tests\ClientHelperTest::testSetCredentialsFromRequest
-I
-Joomla\Client\Tests\FtpClientTest::testChdir
-I
-Joomla\Client\Tests\FtpClientTest::testChmod
-I
-Joomla\Client\Tests\FtpClientTest::testConnect
-I
-Joomla\Client\Tests\FtpClientTest::testCreate
-I
-Joomla\Client\Tests\FtpClientTest::testDelete
-I
-Joomla\Client\Tests\FtpClientTest::testGet
-I
-Joomla\Client\Tests\FtpClientTest::testGetInstance
-I
-Joomla\Client\Tests\FtpClientTest::testIsConnected
-I
-Joomla\Client\Tests\FtpClientTest::testListDetails
-I
-Joomla\Client\Tests\FtpClientTest::testListNames
-I
-Joomla\Client\Tests\FtpClientTest::testLogin
-I
-Joomla\Client\Tests\FtpClientTest::testMkdir
-I
-Joomla\Client\Tests\FtpClientTest::testPwd
-I
-Joomla\Client\Tests\FtpClientTest::testQuit
-I
-Joomla\Client\Tests\FtpClientTest::testRead
-I
-Joomla\Client\Tests\FtpClientTest::testReinit
-I
-Joomla\Client\Tests\FtpClientTest::testRename
-I
-Joomla\Client\Tests\FtpClientTest::testRestart
-I
-Joomla\Client\Tests\FtpClientTest::testSetOptions
-I
-Joomla\Client\Tests\FtpClientTest::testStore
-I
-Joomla\Client\Tests\FtpClientTest::testSyst
-I
-Joomla\Client\Tests\FtpClientTest::testWrite
-I
-Joomla\Client\Tests\FtpClientTest::test__destruct
-I
-Joomla\Client\Tests\FtpClientTest::test_findMode
-I
-Joomla\Client\Tests\FtpClientTest::test_mode
-I
-Joomla\Client\Tests\FtpClientTest::test_passive
-I
-Joomla\Client\Tests\FtpClientTest::test_putCmd
-I
-Joomla\Client\Tests\FtpClientTest::test_verifyResponse
-I
-Joomla\Client\Tests\LdapClientTest::testAdd
-I
-Joomla\Client\Tests\LdapClientTest::testAnonymous_bind
-I
-Joomla\Client\Tests\LdapClientTest::testBind
-I
-Joomla\Client\Tests\LdapClientTest::testClose
-I
-Joomla\Client\Tests\LdapClientTest::testCompare
-I
-Joomla\Client\Tests\LdapClientTest::testConnect
-I
-Joomla\Client\Tests\LdapClientTest::testCreate
-I
-Joomla\Client\Tests\LdapClientTest::testDelete
-I
-Joomla\Client\Tests\LdapClientTest::testGeneratePassword
-I
-Joomla\Client\Tests\LdapClientTest::testGetDN
-I
-Joomla\Client\Tests\LdapClientTest::testGetErrorMsg
-I
-Joomla\Client\Tests\LdapClientTest::testIpToNetAddress
-I
-Joomla\Client\Tests\LdapClientTest::testLDAPNetAddr
-I
-Joomla\Client\Tests\LdapClientTest::testModify
-I
-Joomla\Client\Tests\LdapClientTest::testRead
-I
-Joomla\Client\Tests\LdapClientTest::testRemove
-I
-Joomla\Client\Tests\LdapClientTest::testRename
-I
-Joomla\Client\Tests\LdapClientTest::testReplace
-I
-Joomla\Client\Tests\LdapClientTest::testSearch
-I
-Joomla\Client\Tests\LdapClientTest::testSetDN
-I
-Joomla\Client\Tests\LdapClientTest::testSimple_search
-I
 Joomla\Controller\Tests\BaseTest::testGetApplication_exception
 .
 Joomla\Controller\Tests\BaseTest::testGetInput_exception
@@ -1094,91 +1072,91 @@ Joomla\Controller\Tests\BaseTest::testUnserialise_exception
 .
 Joomla\Controller\Tests\BaseTest::test__construct
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #0 
+Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #0
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #1 
+Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #1
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #2 
+Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #2
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #3 
+Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #3
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #4 
+Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #4
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #0 
+Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #0
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #1 
+Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #1
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #2 
+Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #2
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #3 
+Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #3
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #4 
+Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #4
 .
 Joomla\Crypt\Tests\Cipher3DESTest::testGenerateKey
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #0 
+Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #0
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #1 
+Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #1
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #2 
+Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #2
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #3 
+Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #3
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #4 
+Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #4
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #0 
+Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #0
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #1 
+Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #1
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #2 
+Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #2
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #3 
+Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #3
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #4 
+Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #4
 .
 Joomla\Crypt\Tests\CipherBlowfishTest::testGenerateKey
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #0 
+Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #0
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #1 
+Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #1
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #2 
+Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #2
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #3 
+Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #3
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #4 
+Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #4
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #0 
+Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #0
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #1 
+Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #1
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #2 
+Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #2
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #3 
+Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #3
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #4 
+Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #4
 .
 Joomla\Crypt\Tests\CipherRijndael256Test::testGenerateKey
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #0 
+Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #0
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #1 
+Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #1
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #2 
+Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #2
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #3 
+Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #3
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #4 
+Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #4
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #0 
+Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #0
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #1 
+Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #1
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #2 
+Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #2
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #3 
+Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #3
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #4 
+Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #4
 .
 Joomla\Crypt\Tests\CipherSimpleTest::testGenerateKey
 .
@@ -1228,6 +1206,8 @@ Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "MD5 Invalid"
 .
 Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "MD5 Valid"
 .
+Joomla\DI\Tests\ContainerTest::testAlias
+.
 Joomla\DI\Tests\ContainerTest::testBuildObjectGetDependencyFromContainer
 .
 Joomla\DI\Tests\ContainerTest::testBuildObjectNoDependencies
@@ -1241,6 +1221,8 @@ Joomla\DI\Tests\ContainerTest::testConstructor
 Joomla\DI\Tests\ContainerTest::testConstructorWithParent
 .
 Joomla\DI\Tests\ContainerTest::testCreateChild
+.
+Joomla\DI\Tests\ContainerTest::testExists
 .
 Joomla\DI\Tests\ContainerTest::testExtend
 .
@@ -1278,11 +1260,17 @@ Joomla\DI\Tests\ContainerTest::testProtectShared
 .
 Joomla\DI\Tests\ContainerTest::testRegisterServiceProvider
 .
+Joomla\DI\Tests\ContainerTest::testResolveAliasNotSet
+.
+Joomla\DI\Tests\ContainerTest::testResolveAliasSet
+.
 Joomla\DI\Tests\ContainerTest::testSetAlreadySetNotProtected
 .
 Joomla\DI\Tests\ContainerTest::testSetAlreadySetProtected
 .
-Joomla\DI\Tests\ContainerTest::testSetNotClosure
+Joomla\DI\Tests\ContainerTest::testSetCallable
+.
+Joomla\DI\Tests\ContainerTest::testSetNotCallable
 .
 Joomla\DI\Tests\ContainerTest::testSetNotShared
 .
@@ -1402,21 +1390,21 @@ Joomla\Database\Tests\DatabaseQueryElementTest::test__clone_array
 .
 Joomla\Database\Tests\DatabaseQueryElementTest::test__clone_object
 .
-Joomla\Database\Tests\DatabaseQueryElementTest::test__toString with data set #0 
+Joomla\Database\Tests\DatabaseQueryElementTest::test__toString with data set #0
 .
-Joomla\Database\Tests\DatabaseQueryElementTest::test__toString with data set #1 
+Joomla\Database\Tests\DatabaseQueryElementTest::test__toString with data set #1
 .
-Joomla\Database\Tests\DatabaseQueryElementTest::test__toString with data set #2 
+Joomla\Database\Tests\DatabaseQueryElementTest::test__toString with data set #2
 .
-Joomla\Database\Tests\DatabaseQueryElementTest::test__toString with data set #3 
+Joomla\Database\Tests\DatabaseQueryElementTest::test__toString with data set #3
 .
 Joomla\Database\Tests\DriverMysqlTest::testConnected
 S
 Joomla\Database\Tests\DriverMysqlTest::testDropTable
 S
-Joomla\Database\Tests\DriverMysqlTest::testEscape with data set #0 
+Joomla\Database\Tests\DriverMysqlTest::testEscape with data set #0
 S
-Joomla\Database\Tests\DriverMysqlTest::testEscape with data set #1 
+Joomla\Database\Tests\DriverMysqlTest::testEscape with data set #1
 S
 Joomla\Database\Tests\DriverMysqlTest::testExecute
 S
@@ -1468,9 +1456,9 @@ Joomla\Database\Tests\DriverMysqlTest::testSetUTF
 S
 Joomla\Database\Tests\DriverMysqlTest::testTransactionCommit
 S
-Joomla\Database\Tests\DriverMysqlTest::testTransactionRollback with data set #0 
+Joomla\Database\Tests\DriverMysqlTest::testTransactionRollback with data set #0
 S
-Joomla\Database\Tests\DriverMysqlTest::testTransactionRollback with data set #1 
+Joomla\Database\Tests\DriverMysqlTest::testTransactionRollback with data set #1
 S
 Joomla\Database\Tests\DriverMysqlTest::testUpdateObject
 S
@@ -1480,9 +1468,9 @@ Joomla\Database\Tests\DriverMysqliTest::testConnected
 S
 Joomla\Database\Tests\DriverMysqliTest::testDropTable
 S
-Joomla\Database\Tests\DriverMysqliTest::testEscape with data set #0 
+Joomla\Database\Tests\DriverMysqliTest::testEscape with data set #0
 S
-Joomla\Database\Tests\DriverMysqliTest::testEscape with data set #1 
+Joomla\Database\Tests\DriverMysqliTest::testEscape with data set #1
 S
 Joomla\Database\Tests\DriverMysqliTest::testExecute
 S
@@ -1536,9 +1524,9 @@ Joomla\Database\Tests\DriverMysqliTest::testSetUTF
 S
 Joomla\Database\Tests\DriverMysqliTest::testTransactionCommit
 S
-Joomla\Database\Tests\DriverMysqliTest::testTransactionRollback with data set #0 
+Joomla\Database\Tests\DriverMysqliTest::testTransactionRollback with data set #0
 S
-Joomla\Database\Tests\DriverMysqliTest::testTransactionRollback with data set #1 
+Joomla\Database\Tests\DriverMysqliTest::testTransactionRollback with data set #1
 S
 Joomla\Database\Tests\DriverMysqliTest::testUpdateObject
 S
@@ -1546,13 +1534,13 @@ Joomla\Database\Tests\DriverMysqliTest::test__destruct
 S
 Joomla\Database\Tests\DriverPostgresqlTest::testConnected
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testEscape with data set #0 
+Joomla\Database\Tests\DriverPostgresqlTest::testEscape with data set #0
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testEscape with data set #1 
+Joomla\Database\Tests\DriverPostgresqlTest::testEscape with data set #1
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testEscape with data set #2 
+Joomla\Database\Tests\DriverPostgresqlTest::testEscape with data set #2
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testEscape with data set #3 
+Joomla\Database\Tests\DriverPostgresqlTest::testEscape with data set #3
 S
 Joomla\Database\Tests\DriverPostgresqlTest::testGetAffectedRows
 S
@@ -1560,9 +1548,9 @@ Joomla\Database\Tests\DriverPostgresqlTest::testGetAlterDbCharacterSet
 S
 Joomla\Database\Tests\DriverPostgresqlTest::testGetCollation
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testGetCreateDbQuery with data set #0 
+Joomla\Database\Tests\DriverPostgresqlTest::testGetCreateDbQuery with data set #0
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testGetCreateDbQuery with data set #1 
+Joomla\Database\Tests\DriverPostgresqlTest::testGetCreateDbQuery with data set #1
 S
 Joomla\Database\Tests\DriverPostgresqlTest::testGetNumRows
 S
@@ -1602,47 +1590,47 @@ Joomla\Database\Tests\DriverPostgresqlTest::testLoadRowList
 S
 Joomla\Database\Tests\DriverPostgresqlTest::testQuery
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #0 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #0
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #1 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #1
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #10 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #10
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #11 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #11
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #12 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #12
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #2 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #2
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #3 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #3
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #4 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #4
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #5 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #5
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #6 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #6
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #7 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #7
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #8 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #8
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #9 
+Joomla\Database\Tests\DriverPostgresqlTest::testQuoteName with data set #9
 S
 Joomla\Database\Tests\DriverPostgresqlTest::testReleaseTransactionSavepoint
 S
 Joomla\Database\Tests\DriverPostgresqlTest::testRenameTable
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #0 
+Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #0
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #1 
+Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #1
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #2 
+Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #2
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #3 
+Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #3
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #4 
+Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #4
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #5 
+Joomla\Database\Tests\DriverPostgresqlTest::testReplacePrefix with data set #5
 S
 Joomla\Database\Tests\DriverPostgresqlTest::testSelect
 S
@@ -1654,9 +1642,9 @@ Joomla\Database\Tests\DriverPostgresqlTest::testTest
 S
 Joomla\Database\Tests\DriverPostgresqlTest::testTransactionCommit
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testTransactionRollback with data set #0 
+Joomla\Database\Tests\DriverPostgresqlTest::testTransactionRollback with data set #0
 S
-Joomla\Database\Tests\DriverPostgresqlTest::testTransactionRollback with data set #1 
+Joomla\Database\Tests\DriverPostgresqlTest::testTransactionRollback with data set #1
 S
 Joomla\Database\Tests\DriverPostgresqlTest::testTransactionSavepoint
 S
@@ -1670,11 +1658,11 @@ Joomla\Database\Tests\DriverSqliteTest::testConnected
 I
 Joomla\Database\Tests\DriverSqliteTest::testDropTable
 .
-Joomla\Database\Tests\DriverSqliteTest::testEscape with data set #0 
+Joomla\Database\Tests\DriverSqliteTest::testEscape with data set #0
 .
-Joomla\Database\Tests\DriverSqliteTest::testEscape with data set #1 
+Joomla\Database\Tests\DriverSqliteTest::testEscape with data set #1
 .
-Joomla\Database\Tests\DriverSqliteTest::testEscape with data set #2 
+Joomla\Database\Tests\DriverSqliteTest::testEscape with data set #2
 .
 Joomla\Database\Tests\DriverSqliteTest::testExecute
 .
@@ -1728,9 +1716,9 @@ Joomla\Database\Tests\DriverSqliteTest::testSetUTF
 I
 Joomla\Database\Tests\DriverSqliteTest::testTransactionCommit
 .
-Joomla\Database\Tests\DriverSqliteTest::testTransactionRollback with data set #0 
+Joomla\Database\Tests\DriverSqliteTest::testTransactionRollback with data set #0
 .
-Joomla\Database\Tests\DriverSqliteTest::testTransactionRollback with data set #1 
+Joomla\Database\Tests\DriverSqliteTest::testTransactionRollback with data set #1
 .
 Joomla\Database\Tests\DriverSqliteTest::testUnlockTables
 .
@@ -1742,9 +1730,9 @@ Joomla\Database\Tests\DriverSqlsrvTest::testConnected
 S
 Joomla\Database\Tests\DriverSqlsrvTest::testDropTable
 S
-Joomla\Database\Tests\DriverSqlsrvTest::testEscape with data set #0 
+Joomla\Database\Tests\DriverSqlsrvTest::testEscape with data set #0
 S
-Joomla\Database\Tests\DriverSqlsrvTest::testEscape with data set #1 
+Joomla\Database\Tests\DriverSqlsrvTest::testEscape with data set #1
 S
 Joomla\Database\Tests\DriverSqlsrvTest::testExecute
 S
@@ -1940,23 +1928,23 @@ Joomla\Database\Tests\ImporterMySqlTest::testGetAddColumnSQL
 .
 Joomla\Database\Tests\ImporterMySqlTest::testGetAddKeySQL
 .
-Joomla\Database\Tests\ImporterMySqlTest::testGetAlterTableSQL with data set #0 
+Joomla\Database\Tests\ImporterMySqlTest::testGetAlterTableSQL with data set #0
 .
-Joomla\Database\Tests\ImporterMySqlTest::testGetAlterTableSQL with data set #1 
+Joomla\Database\Tests\ImporterMySqlTest::testGetAlterTableSQL with data set #1
 .
-Joomla\Database\Tests\ImporterMySqlTest::testGetAlterTableSQL with data set #2 
+Joomla\Database\Tests\ImporterMySqlTest::testGetAlterTableSQL with data set #2
 .
-Joomla\Database\Tests\ImporterMySqlTest::testGetAlterTableSQL with data set #3 
+Joomla\Database\Tests\ImporterMySqlTest::testGetAlterTableSQL with data set #3
 .
-Joomla\Database\Tests\ImporterMySqlTest::testGetAlterTableSQL with data set #4 
+Joomla\Database\Tests\ImporterMySqlTest::testGetAlterTableSQL with data set #4
 .
 Joomla\Database\Tests\ImporterMySqlTest::testGetChangeColumnSQL
 .
-Joomla\Database\Tests\ImporterMySqlTest::testGetColumnSQL with data set #0 
+Joomla\Database\Tests\ImporterMySqlTest::testGetColumnSQL with data set #0
 .
-Joomla\Database\Tests\ImporterMySqlTest::testGetColumnSQL with data set #1 
+Joomla\Database\Tests\ImporterMySqlTest::testGetColumnSQL with data set #1
 .
-Joomla\Database\Tests\ImporterMySqlTest::testGetColumnSQL with data set #2 
+Joomla\Database\Tests\ImporterMySqlTest::testGetColumnSQL with data set #2
 .
 Joomla\Database\Tests\ImporterMySqlTest::testGetDropColumnSQL
 .
@@ -1966,7 +1954,7 @@ Joomla\Database\Tests\ImporterMySqlTest::testGetDropPrimaryKeySQL
 .
 Joomla\Database\Tests\ImporterMySqlTest::testGetKeyLookup
 .
-Joomla\Database\Tests\ImporterMySqlTest::testGetKeySQL with data set #0 
+Joomla\Database\Tests\ImporterMySqlTest::testGetKeySQL with data set #0
 .
 Joomla\Database\Tests\ImporterMySqlTest::testGetRealTableName
 .
@@ -1992,45 +1980,45 @@ Joomla\Database\Tests\ImporterPostgresqlTest::testGetAddIndexSQL
 .
 Joomla\Database\Tests\ImporterPostgresqlTest::testGetAddSequenceSQL
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #0 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #0
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #1 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #1
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #10 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #10
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #11 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #11
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #12 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #12
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #13 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #13
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #2 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #2
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #3 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #3
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #4 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #4
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #5 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #5
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #6 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #6
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #7 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #7
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #8 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #8
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #9 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetAlterTableSQL with data set #9
 .
 Joomla\Database\Tests\ImporterPostgresqlTest::testGetChangeColumnSQL
 .
 Joomla\Database\Tests\ImporterPostgresqlTest::testGetChangeSequenceSQL
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetColumnSQL with data set #0 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetColumnSQL with data set #0
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetColumnSQL with data set #1 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetColumnSQL with data set #1
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetColumnSQL with data set #2 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetColumnSQL with data set #2
 .
-Joomla\Database\Tests\ImporterPostgresqlTest::testGetColumnSQL with data set #3 
+Joomla\Database\Tests\ImporterPostgresqlTest::testGetColumnSQL with data set #3
 .
 Joomla\Database\Tests\ImporterPostgresqlTest::testGetDropColumnSQL
 .
@@ -2052,51 +2040,51 @@ Joomla\Database\Tests\ImporterPostgresqlTest::testWithStructure
 .
 Joomla\Database\Tests\IteratorMysqlTest::testCount
 S
-Joomla\Database\Tests\IteratorMysqlTest::testForEach with data set #0 
+Joomla\Database\Tests\IteratorMysqlTest::testForEach with data set #0
 S
-Joomla\Database\Tests\IteratorMysqlTest::testForEach with data set #1 
+Joomla\Database\Tests\IteratorMysqlTest::testForEach with data set #1
 S
-Joomla\Database\Tests\IteratorMysqlTest::testForEach with data set #2 
+Joomla\Database\Tests\IteratorMysqlTest::testForEach with data set #2
 S
-Joomla\Database\Tests\IteratorMysqlTest::testForEach with data set #3 
+Joomla\Database\Tests\IteratorMysqlTest::testForEach with data set #3
 S
-Joomla\Database\Tests\IteratorMysqlTest::testForEach with data set #4 
+Joomla\Database\Tests\IteratorMysqlTest::testForEach with data set #4
 S
 Joomla\Database\Tests\IteratorMysqliTest::testCount
 S
-Joomla\Database\Tests\IteratorMysqliTest::testForEach with data set #0 
+Joomla\Database\Tests\IteratorMysqliTest::testForEach with data set #0
 S
-Joomla\Database\Tests\IteratorMysqliTest::testForEach with data set #1 
+Joomla\Database\Tests\IteratorMysqliTest::testForEach with data set #1
 S
-Joomla\Database\Tests\IteratorMysqliTest::testForEach with data set #2 
+Joomla\Database\Tests\IteratorMysqliTest::testForEach with data set #2
 S
-Joomla\Database\Tests\IteratorMysqliTest::testForEach with data set #3 
+Joomla\Database\Tests\IteratorMysqliTest::testForEach with data set #3
 S
-Joomla\Database\Tests\IteratorMysqliTest::testForEach with data set #4 
+Joomla\Database\Tests\IteratorMysqliTest::testForEach with data set #4
 S
 Joomla\Database\Tests\IteratorPostgresqlTest::testCount
 S
-Joomla\Database\Tests\IteratorPostgresqlTest::testForEach with data set #0 
+Joomla\Database\Tests\IteratorPostgresqlTest::testForEach with data set #0
 S
-Joomla\Database\Tests\IteratorPostgresqlTest::testForEach with data set #1 
+Joomla\Database\Tests\IteratorPostgresqlTest::testForEach with data set #1
 S
-Joomla\Database\Tests\IteratorPostgresqlTest::testForEach with data set #2 
+Joomla\Database\Tests\IteratorPostgresqlTest::testForEach with data set #2
 S
-Joomla\Database\Tests\IteratorPostgresqlTest::testForEach with data set #3 
+Joomla\Database\Tests\IteratorPostgresqlTest::testForEach with data set #3
 S
-Joomla\Database\Tests\IteratorPostgresqlTest::testForEach with data set #4 
+Joomla\Database\Tests\IteratorPostgresqlTest::testForEach with data set #4
 S
 Joomla\Database\Tests\IteratorSqlsrvTest::testCount
 S
-Joomla\Database\Tests\IteratorSqlsrvTest::testForEach with data set #0 
+Joomla\Database\Tests\IteratorSqlsrvTest::testForEach with data set #0
 S
-Joomla\Database\Tests\IteratorSqlsrvTest::testForEach with data set #1 
+Joomla\Database\Tests\IteratorSqlsrvTest::testForEach with data set #1
 S
-Joomla\Database\Tests\IteratorSqlsrvTest::testForEach with data set #2 
+Joomla\Database\Tests\IteratorSqlsrvTest::testForEach with data set #2
 S
-Joomla\Database\Tests\IteratorSqlsrvTest::testForEach with data set #3 
+Joomla\Database\Tests\IteratorSqlsrvTest::testForEach with data set #3
 S
-Joomla\Database\Tests\IteratorSqlsrvTest::testForEach with data set #4 
+Joomla\Database\Tests\IteratorSqlsrvTest::testForEach with data set #4
 S
 Joomla\Database\Tests\PostgresqlQueryTest::testCastAsChar
 .
@@ -2126,15 +2114,15 @@ Joomla\Database\Tests\PostgresqlQueryTest::testHaving
 .
 Joomla\Database\Tests\PostgresqlQueryTest::testInnerJoin
 .
-Joomla\Database\Tests\PostgresqlQueryTest::testJoin with data set #0 
+Joomla\Database\Tests\PostgresqlQueryTest::testJoin with data set #0
 .
-Joomla\Database\Tests\PostgresqlQueryTest::testJoin with data set #1 
+Joomla\Database\Tests\PostgresqlQueryTest::testJoin with data set #1
 .
-Joomla\Database\Tests\PostgresqlQueryTest::testJoin with data set #2 
+Joomla\Database\Tests\PostgresqlQueryTest::testJoin with data set #2
 .
-Joomla\Database\Tests\PostgresqlQueryTest::testJoin with data set #3 
+Joomla\Database\Tests\PostgresqlQueryTest::testJoin with data set #3
 .
-Joomla\Database\Tests\PostgresqlQueryTest::testJoin with data set #4 
+Joomla\Database\Tests\PostgresqlQueryTest::testJoin with data set #4
 .
 Joomla\Database\Tests\PostgresqlQueryTest::testLeftJoin
 .
@@ -2142,9 +2130,9 @@ Joomla\Database\Tests\PostgresqlQueryTest::testLimit
 .
 Joomla\Database\Tests\PostgresqlQueryTest::testNoWait
 .
-Joomla\Database\Tests\PostgresqlQueryTest::testNullDate with data set #0 
+Joomla\Database\Tests\PostgresqlQueryTest::testNullDate with data set #0
 .
-Joomla\Database\Tests\PostgresqlQueryTest::testNullDate with data set #1 
+Joomla\Database\Tests\PostgresqlQueryTest::testNullDate with data set #1
 .
 Joomla\Database\Tests\PostgresqlQueryTest::testOffset
 .
@@ -2152,7 +2140,7 @@ Joomla\Database\Tests\PostgresqlQueryTest::testOrder
 .
 Joomla\Database\Tests\PostgresqlQueryTest::testOuterJoin
 .
-Joomla\Database\Tests\PostgresqlQueryTest::testQuote with data set #0 
+Joomla\Database\Tests\PostgresqlQueryTest::testQuote with data set #0
 .
 Joomla\Database\Tests\PostgresqlQueryTest::testQuoteName
 .
@@ -2238,9 +2226,9 @@ Joomla\Database\Tests\QueryTest::testLeftJoin
 .
 Joomla\Database\Tests\QueryTest::testLength
 .
-Joomla\Database\Tests\QueryTest::testNullDate with data set #0 
+Joomla\Database\Tests\QueryTest::testNullDate with data set #0
 .
-Joomla\Database\Tests\QueryTest::testNullDate with data set #1 
+Joomla\Database\Tests\QueryTest::testNullDate with data set #1
 .
 Joomla\Database\Tests\QueryTest::testNullDateException
 .
@@ -2248,13 +2236,13 @@ Joomla\Database\Tests\QueryTest::testOrder
 .
 Joomla\Database\Tests\QueryTest::testOuterJoin
 .
-Joomla\Database\Tests\QueryTest::testQuote with data set #0 
+Joomla\Database\Tests\QueryTest::testQuote with data set #0
 .
-Joomla\Database\Tests\QueryTest::testQuote with data set #1 
+Joomla\Database\Tests\QueryTest::testQuote with data set #1
 .
-Joomla\Database\Tests\QueryTest::testQuote with data set #2 
+Joomla\Database\Tests\QueryTest::testQuote with data set #2
 .
-Joomla\Database\Tests\QueryTest::testQuote with data set #3 
+Joomla\Database\Tests\QueryTest::testQuote with data set #3
 .
 Joomla\Database\Tests\QueryTest::testQuoteException
 .
@@ -2499,6 +2487,8 @@ Joomla\Event\Tests\DispatcherTest::testRemoveEvent
 Joomla\Event\Tests\DispatcherTest::testRemoveListeners
 .
 Joomla\Event\Tests\DispatcherTest::testSetEvent
+.
+Joomla\Event\Tests\DispatcherTest::testSetListenerFilter
 .
 Joomla\Event\Tests\DispatcherTest::testTriggerEventDifferentPriorities
 .
@@ -2904,17 +2894,17 @@ Joomla\Facebook\Tests\ObjectTest::testDeleteConnection
 S
 Joomla\Facebook\Tests\ObjectTest::testDeleteConnectionFailure
 S
-Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #0 
+Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #0
 .
-Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #1 
+Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #1
 .
-Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #2 
+Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #2
 .
-Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #3 
+Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #3
 .
-Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #4 
+Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #4
 .
-Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #5 
+Joomla\Facebook\Tests\ObjectTest::testFetchUrl with data set #5
 .
 Joomla\Facebook\Tests\ObjectTest::testGet
 S
@@ -2934,13 +2924,13 @@ Joomla\Facebook\Tests\PhotoTest::testCreateLike
 .
 Joomla\Facebook\Tests\PhotoTest::testCreateLikeFailure
 .
-Joomla\Facebook\Tests\PhotoTest::testCreateTag with data set #0 
+Joomla\Facebook\Tests\PhotoTest::testCreateTag with data set #0
 .
-Joomla\Facebook\Tests\PhotoTest::testCreateTag with data set #1 
+Joomla\Facebook\Tests\PhotoTest::testCreateTag with data set #1
 .
-Joomla\Facebook\Tests\PhotoTest::testCreateTagFailure with data set #0 
+Joomla\Facebook\Tests\PhotoTest::testCreateTagFailure with data set #0
 .
-Joomla\Facebook\Tests\PhotoTest::testCreateTagFailure with data set #1 
+Joomla\Facebook\Tests\PhotoTest::testCreateTagFailure with data set #1
 .
 Joomla\Facebook\Tests\PhotoTest::testDeleteComment
 .
@@ -3182,9 +3172,9 @@ Joomla\Facebook\Tests\UserTest::testGetPhotos
 .
 Joomla\Facebook\Tests\UserTest::testGetPhotosFailure
 .
-Joomla\Facebook\Tests\UserTest::testGetPicture with data set #0 
+Joomla\Facebook\Tests\UserTest::testGetPicture with data set #0
 .
-Joomla\Facebook\Tests\UserTest::testGetPicture with data set #1 
+Joomla\Facebook\Tests\UserTest::testGetPicture with data set #1
 .
 Joomla\Facebook\Tests\UserTest::testGetPictureFailure
 .
@@ -3212,13 +3202,13 @@ Joomla\Facebook\Tests\UserTest::testGetTelevision
 .
 Joomla\Facebook\Tests\UserTest::testGetTelevisionFailure
 .
-Joomla\Facebook\Tests\UserTest::testGetUser with data set #0 
+Joomla\Facebook\Tests\UserTest::testGetUser with data set #0
 .
-Joomla\Facebook\Tests\UserTest::testGetUser with data set #1 
+Joomla\Facebook\Tests\UserTest::testGetUser with data set #1
 .
-Joomla\Facebook\Tests\UserTest::testGetUserFailure with data set #0 
+Joomla\Facebook\Tests\UserTest::testGetUserFailure with data set #0
 .
-Joomla\Facebook\Tests\UserTest::testGetUserFailure with data set #1 
+Joomla\Facebook\Tests\UserTest::testGetUserFailure with data set #1
 .
 Joomla\Facebook\Tests\UserTest::testGetVideos
 .
@@ -3267,6 +3257,90 @@ Joomla\Facebook\Tests\VideoTest::testGetPictureFailure
 Joomla\Facebook\Tests\VideoTest::testGetVideo
 .
 Joomla\Facebook\Tests\VideoTest::testGetVideoFailure
+.
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testChdir
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testChmod
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testConnect
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testCreate
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testDelete
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testGet
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testGetInstance
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testIsConnected
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testListDetails
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testListNames
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testLogin
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testMkdir
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testPwd
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testQuit
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testRead
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testReinit
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testRename
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testRestart
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testSetOptions
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testStore
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testSyst
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::testWrite
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::test__destruct
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::test_findMode
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::test_mode
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::test_passive
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::test_putCmd
+I
+Joomla\Filesystem\Clients\Tests\FtpClientTest::test_verifyResponse
+I
+Joomla\Filesystem\Tests\BufferTest::testStreamEOF with data set "EOF"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamEOF with data set "~EOF"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamOpen with data set "basic"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamRead with data set "basic"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamSeek with data set "bad_seek_code"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamSeek with data set "basic"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamSeek with data set "before_beg"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamSeek with data set "from_end"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamSeek with data set "is_neg"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamSeek with data set "is_pos"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamSeek with data set "off_end"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamSeek with data set "too_early"
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamTell
+.
+Joomla\Filesystem\Tests\BufferTest::testStreamWrite with data set "basic"
 .
 Joomla\Filter\Tests\InputFilterTest::testCleanByCallingMember with data set "Attribute is zero"
 .
@@ -4398,8 +4472,6 @@ Joomla\Form\Tests\JFormFieldCheckboxesTest::testGetInputValuesNoChecked
 .
 Joomla\Form\Tests\JFormFieldCheckboxesTest::testGetOptions
 .
-Joomla\Form\Tests\JFormFieldComboTest::testGetInput
-I
 Joomla\Form\Tests\JFormFieldDatabaseConnectionTest::testGetInput
 .
 Joomla\Form\Tests\JFormFieldEmailTest::testGetInput
@@ -4419,7 +4491,9 @@ Joomla\Form\Tests\JFormFieldImageListTest::testGetInput
 Joomla\Form\Tests\JFormFieldIntegerTest::testGetInput
 .
 Joomla\Form\Tests\JFormFieldIntegerTest::testGetOptions
-F
+.
+Joomla\Form\Tests\JFormFieldLanguageTest::testCreateLanguageList
+.
 Joomla\Form\Tests\JFormFieldLanguageTest::testGetInput
 I
 Joomla\Form\Tests\JFormFieldListTest::testGetInput
@@ -4430,14 +4504,12 @@ Joomla\Form\Tests\JFormFieldRadioTest::testGetInput
 .
 Joomla\Form\Tests\JFormFieldRadioTest::testGetOptions
 .
-Joomla\Form\Tests\JFormFieldSQLTest::testGetInput
-.
 Joomla\Form\Tests\JFormFieldSpacerTest::testGetInput
 .
 Joomla\Form\Tests\JFormFieldSpacerTest::testGetLabel
-F
+.
 Joomla\Form\Tests\JFormFieldSpacerTest::testGetTitle
-F
+.
 Joomla\Form\Tests\JFormFieldTelTest::testGetInput
 .
 Joomla\Form\Tests\JFormFieldTest::testConstruct
@@ -4466,63 +4538,73 @@ Joomla\Form\Tests\JFormFieldTimezoneTest::testGetInput
 I
 Joomla\Form\Tests\JFormFieldUrlTest::testGetInput
 .
+Joomla\Form\Tests\JFormHelperTest::testAddFieldPath
+.
+Joomla\Form\Tests\JFormHelperTest::testAddFormPath
+.
+Joomla\Form\Tests\JFormHelperTest::testAddRulePath
+.
+Joomla\Form\Tests\JFormHelperTest::testLoadFieldType
+.
+Joomla\Form\Tests\JFormHelperTest::testLoadRuleType
+.
 Joomla\Form\Tests\JFormRuleBooleanTest::testBoolean
 .
 Joomla\Form\Tests\JFormRuleColorTest::testColor
 .
-Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #0 
+Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #0
 .
-Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #1 
+Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #1
 .
-Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #2 
+Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #2
 .
-Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #3 
+Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #3
 .
-Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #4 
+Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #4
 .
-Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #5 
+Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #5
 .
-Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #6 
+Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #6
 .
-Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #7 
+Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #7
 .
-Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #8 
+Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #8
 .
-Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #9 
+Joomla\Form\Tests\JFormRuleColorTest::testColorData with data set #9
 .
 Joomla\Form\Tests\JFormRuleEmailTest::testEmail
 I
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #0 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #0
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #1 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #1
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #2 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #2
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #3 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #3
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #4 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #4
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #5 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #5
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #6 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #6
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #7 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #7
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #8 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData with data set #8
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData2 with data set #0 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData2 with data set #0
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData2 with data set #1 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData2 with data set #1
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData3 with data set #0 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData3 with data set #0
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData3 with data set #1 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData3 with data set #1
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData3 with data set #2 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData3 with data set #2
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData3 with data set #3 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData3 with data set #3
 .
-Joomla\Form\Tests\JFormRuleEmailTest::testEmailData3 with data set #4 
+Joomla\Form\Tests\JFormRuleEmailTest::testEmailData3 with data set #4
 .
 Joomla\Form\Tests\JFormRuleEqualsTest::testEquals
 I
@@ -4530,96 +4612,90 @@ Joomla\Form\Tests\JFormRuleOptionsTest::testOptions
 .
 Joomla\Form\Tests\JFormRuleTelTest::testTel
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #0 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #0
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #1 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #1
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #10 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #10
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #11 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #11
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #12 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #12
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #13 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #13
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #14 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #14
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #15 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #15
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #16 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #16
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #17 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #17
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #18 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #18
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #19 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #19
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #2 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #2
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #20 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #20
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #21 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #21
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #22 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #22
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #23 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #23
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #24 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #24
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #3 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #3
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #4 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #4
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #5 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #5
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #6 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #6
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #7 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #7
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #8 
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #8
 .
-Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #9 
-.
-Joomla\Form\Tests\JFormTest::testAddFieldPath
-.
-Joomla\Form\Tests\JFormTest::testAddFormPath
+Joomla\Form\Tests\JFormRuleUrlTest::testUrl with data set #9
 .
 Joomla\Form\Tests\JFormTest::testAddNode
-.
-Joomla\Form\Tests\JFormTest::testAddRulePath
 .
 Joomla\Form\Tests\JFormTest::testBind
 .
 Joomla\Form\Tests\JFormTest::testConstruct
 .
 Joomla\Form\Tests\JFormTest::testFilter
-E
+.
 Joomla\Form\Tests\JFormTest::testFilterField
-I
+.
 Joomla\Form\Tests\JFormTest::testFindField
-F
+.
 Joomla\Form\Tests\JFormTest::testFindFieldsByFieldset
 .
 Joomla\Form\Tests\JFormTest::testFindFieldsByGroup
-F
+.
 Joomla\Form\Tests\JFormTest::testFindGroup
-F
+.
 Joomla\Form\Tests\JFormTest::testGetErrors
 .
 Joomla\Form\Tests\JFormTest::testGetField
-E
+.
 Joomla\Form\Tests\JFormTest::testGetFieldAttribute
 .
 Joomla\Form\Tests\JFormTest::testGetFieldset
 .
 Joomla\Form\Tests\JFormTest::testGetFieldsets
-F
+.
 Joomla\Form\Tests\JFormTest::testGetFormControl
 .
 Joomla\Form\Tests\JFormTest::testGetGroup
-F
+.
 Joomla\Form\Tests\JFormTest::testGetInput
-F
+.
 Joomla\Form\Tests\JFormTest::testGetInstance
 I
 Joomla\Form\Tests\JFormTest::testGetLabel
@@ -4629,14 +4705,10 @@ Joomla\Form\Tests\JFormTest::testGetName
 Joomla\Form\Tests\JFormTest::testGetValue
 .
 Joomla\Form\Tests\JFormTest::testLoad
-F
+.
 Joomla\Form\Tests\JFormTest::testLoadField
 .
-Joomla\Form\Tests\JFormTest::testLoadFieldType
-.
 Joomla\Form\Tests\JFormTest::testLoadFile
-.
-Joomla\Form\Tests\JFormTest::testLoadRuleType
 .
 Joomla\Form\Tests\JFormTest::testLoad_BadInput
 .
@@ -4661,12 +4733,28 @@ Joomla\Form\Tests\JFormTest::testSetFields
 Joomla\Form\Tests\JFormTest::testSetValue
 .
 Joomla\Form\Tests\JFormTest::testSyncPaths
-F
+.
 Joomla\Form\Tests\JFormTest::testValidate
-F
+.
 Joomla\Form\Tests\JFormTest::testValidateField
 .
 Joomla\Form\Tests\JFormTest::testValidateField_missingRule
+.
+Joomla\Github\Tests\AbstractGithubObjectTest::testFetchUrl with data set "Enterprise github - no pagination data"
+.
+Joomla\Github\Tests\AbstractGithubObjectTest::testFetchUrl with data set "Enterprise github - page 3, 50 per page"
+.
+Joomla\Github\Tests\AbstractGithubObjectTest::testFetchUrl with data set "Standard github - no pagination data"
+.
+Joomla\Github\Tests\AbstractGithubObjectTest::testFetchUrl with data set "Standard github - page 3"
+.
+Joomla\Github\Tests\AbstractGithubObjectTest::testFetchUrlBasicAuth
+.
+Joomla\Github\Tests\AbstractGithubObjectTest::testFetchUrlToken
+.
+Joomla\Github\Tests\AbstractPackageTest::test__Get
+.
+Joomla\Github\Tests\AbstractPackageTest::test__GetInvalid
 .
 Joomla\Github\Tests\ActivityTest::testConstruct
 .
@@ -4709,6 +4797,8 @@ Joomla\Github\Tests\AuthorizationsTest::testGetListFailure
 Joomla\Github\Tests\AuthorizationsTest::testGetRateLimit
 .
 Joomla\Github\Tests\AuthorizationsTest::testGetRateLimitFailure
+.
+Joomla\Github\Tests\AuthorizationsTest::testGetRateLimit_unlimited
 .
 Joomla\Github\Tests\AuthorizationsTest::testRequestToken
 .
@@ -5198,27 +5288,11 @@ Joomla\Github\Tests\NotificationsTest::testSetThreadSubscription
 .
 Joomla\Github\Tests\NotificationsTest::testViewThread
 .
-Joomla\Github\Tests\ObjectTest::testFetchUrl with data set "Enterprise github - no pagination data"
-.
-Joomla\Github\Tests\ObjectTest::testFetchUrl with data set "Enterprise github - page 3, 50 per page"
-.
-Joomla\Github\Tests\ObjectTest::testFetchUrl with data set "Standard github - no pagination data"
-.
-Joomla\Github\Tests\ObjectTest::testFetchUrl with data set "Standard github - page 3"
-.
-Joomla\Github\Tests\ObjectTest::testFetchUrlBasicAuth
-.
-Joomla\Github\Tests\ObjectTest::testFetchUrlToken
-.
 Joomla\Github\Tests\OrgsTest::testEdit
 .
 Joomla\Github\Tests\OrgsTest::testGet
 .
 Joomla\Github\Tests\OrgsTest::testGetList
-.
-Joomla\Github\Tests\PackageTest::test__Get
-.
-Joomla\Github\Tests\PackageTest::test__GetInvalid
 .
 Joomla\Github\Tests\Pulls\CommentsTest::testCreate
 .
@@ -5251,6 +5325,16 @@ Joomla\Github\Tests\RefsTest::testGetFailure
 Joomla\Github\Tests\RefsTest::testGetList
 .
 Joomla\Github\Tests\RefsTest::testGetListFailure
+.
+Joomla\Github\Tests\ReleasesTest::testCreate
+.
+Joomla\Github\Tests\ReleasesTest::testCreateFailure
+.
+Joomla\Github\Tests\ReleasesTest::testEdit
+.
+Joomla\Github\Tests\ReleasesTest::testGet
+.
+Joomla\Github\Tests\ReleasesTest::testGetList
 .
 Joomla\Github\Tests\RepositoriesTest::testCreate
 .
@@ -5325,6 +5409,8 @@ Joomla\Github\Tests\StatisticsTest::testContributors
 Joomla\Github\Tests\StatisticsTest::testFrequency
 .
 Joomla\Github\Tests\StatisticsTest::testParticipation
+.
+Joomla\Github\Tests\StatisticsTest::testProcessResponse202
 .
 Joomla\Github\Tests\StatisticsTest::testPunchCard
 .
@@ -5598,6 +5684,48 @@ Joomla\Keychain\Tests\KeychainTest::testLoadKeychainNonexistant
 .
 Joomla\Keychain\Tests\KeychainTest::testSaveKeychain
 .
+Joomla\Ldap\Tests\LdapClientTest::testAdd
+I
+Joomla\Ldap\Tests\LdapClientTest::testAnonymous_bind
+I
+Joomla\Ldap\Tests\LdapClientTest::testBind
+I
+Joomla\Ldap\Tests\LdapClientTest::testClose
+I
+Joomla\Ldap\Tests\LdapClientTest::testCompare
+I
+Joomla\Ldap\Tests\LdapClientTest::testConnect
+I
+Joomla\Ldap\Tests\LdapClientTest::testCreate
+I
+Joomla\Ldap\Tests\LdapClientTest::testDelete
+I
+Joomla\Ldap\Tests\LdapClientTest::testGeneratePassword
+I
+Joomla\Ldap\Tests\LdapClientTest::testGetDN
+I
+Joomla\Ldap\Tests\LdapClientTest::testGetErrorMsg
+I
+Joomla\Ldap\Tests\LdapClientTest::testIpToNetAddress
+I
+Joomla\Ldap\Tests\LdapClientTest::testLDAPNetAddr
+I
+Joomla\Ldap\Tests\LdapClientTest::testModify
+I
+Joomla\Ldap\Tests\LdapClientTest::testRead
+I
+Joomla\Ldap\Tests\LdapClientTest::testRemove
+I
+Joomla\Ldap\Tests\LdapClientTest::testRename
+I
+Joomla\Ldap\Tests\LdapClientTest::testReplace
+I
+Joomla\Ldap\Tests\LdapClientTest::testSearch
+I
+Joomla\Ldap\Tests\LdapClientTest::testSetDN
+I
+Joomla\Ldap\Tests\LdapClientTest::testSimple_search
+I
 Joomla\Linkedin\Tests\CommunicationsTest::testInviteByEmail
 .
 Joomla\Linkedin\Tests\CommunicationsTest::testInviteByEmailFailure
@@ -5614,15 +5742,15 @@ Joomla\Linkedin\Tests\CompaniesTest::testFollow
 .
 Joomla\Linkedin\Tests\CompaniesTest::testFollowFailure
 .
-Joomla\Linkedin\Tests\CompaniesTest::testGetCompanies with data set #0 
+Joomla\Linkedin\Tests\CompaniesTest::testGetCompanies with data set #0
 .
-Joomla\Linkedin\Tests\CompaniesTest::testGetCompanies with data set #1 
+Joomla\Linkedin\Tests\CompaniesTest::testGetCompanies with data set #1
 .
-Joomla\Linkedin\Tests\CompaniesTest::testGetCompanies with data set #2 
+Joomla\Linkedin\Tests\CompaniesTest::testGetCompanies with data set #2
 .
-Joomla\Linkedin\Tests\CompaniesTest::testGetCompanies with data set #3 
+Joomla\Linkedin\Tests\CompaniesTest::testGetCompanies with data set #3
 .
-Joomla\Linkedin\Tests\CompaniesTest::testGetCompanies with data set #4 
+Joomla\Linkedin\Tests\CompaniesTest::testGetCompanies with data set #4
 .
 Joomla\Linkedin\Tests\CompaniesTest::testGetCompaniesFailure
 .
@@ -5670,13 +5798,13 @@ Joomla\Linkedin\Tests\GroupsTest::testDeletePost
 .
 Joomla\Linkedin\Tests\GroupsTest::testDeletePostFailure
 .
-Joomla\Linkedin\Tests\GroupsTest::testDeleteSuggestion with data set #0 
+Joomla\Linkedin\Tests\GroupsTest::testDeleteSuggestion with data set #0
 .
-Joomla\Linkedin\Tests\GroupsTest::testDeleteSuggestion with data set #1 
+Joomla\Linkedin\Tests\GroupsTest::testDeleteSuggestion with data set #1
 .
-Joomla\Linkedin\Tests\GroupsTest::testDeleteSuggestionFailure with data set #0 
+Joomla\Linkedin\Tests\GroupsTest::testDeleteSuggestionFailure with data set #0
 .
-Joomla\Linkedin\Tests\GroupsTest::testDeleteSuggestionFailure with data set #1 
+Joomla\Linkedin\Tests\GroupsTest::testDeleteSuggestionFailure with data set #1
 .
 Joomla\Linkedin\Tests\GroupsTest::testFalgPost
 .
@@ -5698,13 +5826,13 @@ Joomla\Linkedin\Tests\GroupsTest::testGetGroup
 .
 Joomla\Linkedin\Tests\GroupsTest::testGetGroupFailure
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetMemberships with data set #0 
+Joomla\Linkedin\Tests\GroupsTest::testGetMemberships with data set #0
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetMemberships with data set #1 
+Joomla\Linkedin\Tests\GroupsTest::testGetMemberships with data set #1
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetMembershipsFailure with data set #0 
+Joomla\Linkedin\Tests\GroupsTest::testGetMembershipsFailure with data set #0
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetMembershipsFailure with data set #1 
+Joomla\Linkedin\Tests\GroupsTest::testGetMembershipsFailure with data set #1
 .
 Joomla\Linkedin\Tests\GroupsTest::testGetPost
 .
@@ -5714,25 +5842,25 @@ Joomla\Linkedin\Tests\GroupsTest::testGetPostCommentsFailure
 .
 Joomla\Linkedin\Tests\GroupsTest::testGetPostFailure
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetSettings with data set #0 
+Joomla\Linkedin\Tests\GroupsTest::testGetSettings with data set #0
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetSettings with data set #1 
+Joomla\Linkedin\Tests\GroupsTest::testGetSettings with data set #1
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetSettingsFailure with data set #0 
+Joomla\Linkedin\Tests\GroupsTest::testGetSettingsFailure with data set #0
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetSettingsFailure with data set #1 
+Joomla\Linkedin\Tests\GroupsTest::testGetSettingsFailure with data set #1
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetSuggested with data set #0 
+Joomla\Linkedin\Tests\GroupsTest::testGetSuggested with data set #0
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetSuggested with data set #1 
+Joomla\Linkedin\Tests\GroupsTest::testGetSuggested with data set #1
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetSuggestedFailure with data set #0 
+Joomla\Linkedin\Tests\GroupsTest::testGetSuggestedFailure with data set #0
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetSuggestedFailure with data set #1 
+Joomla\Linkedin\Tests\GroupsTest::testGetSuggestedFailure with data set #1
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetUserPosts with data set #0 
+Joomla\Linkedin\Tests\GroupsTest::testGetUserPosts with data set #0
 .
-Joomla\Linkedin\Tests\GroupsTest::testGetUserPosts with data set #1 
+Joomla\Linkedin\Tests\GroupsTest::testGetUserPosts with data set #1
 .
 Joomla\Linkedin\Tests\GroupsTest::testGetUserPostsFailure
 .
@@ -5802,9 +5930,9 @@ Joomla\Linkedin\Tests\OAuthTest::testGetScope
 .
 Joomla\Linkedin\Tests\OAuthTest::testSetScope
 .
-Joomla\Linkedin\Tests\OAuthTest::testVerifyCredentials with data set #0 
+Joomla\Linkedin\Tests\OAuthTest::testVerifyCredentials with data set #0
 .
-Joomla\Linkedin\Tests\OAuthTest::testVerifyCredentials with data set #1 
+Joomla\Linkedin\Tests\OAuthTest::testVerifyCredentials with data set #1
 .
 Joomla\Linkedin\Tests\ObjectTest::testSetOption
 .
@@ -5812,21 +5940,21 @@ Joomla\Linkedin\Tests\PeopleTest::testGetConnections
 .
 Joomla\Linkedin\Tests\PeopleTest::testGetConnectionsFailure
 .
-Joomla\Linkedin\Tests\PeopleTest::testGetProfile with data set #0 
+Joomla\Linkedin\Tests\PeopleTest::testGetProfile with data set #0
 .
-Joomla\Linkedin\Tests\PeopleTest::testGetProfile with data set #1 
+Joomla\Linkedin\Tests\PeopleTest::testGetProfile with data set #1
 .
-Joomla\Linkedin\Tests\PeopleTest::testGetProfile with data set #2 
+Joomla\Linkedin\Tests\PeopleTest::testGetProfile with data set #2
 .
-Joomla\Linkedin\Tests\PeopleTest::testGetProfileFailure with data set #0 
+Joomla\Linkedin\Tests\PeopleTest::testGetProfileFailure with data set #0
 .
-Joomla\Linkedin\Tests\PeopleTest::testGetProfileFailure with data set #1 
+Joomla\Linkedin\Tests\PeopleTest::testGetProfileFailure with data set #1
 .
-Joomla\Linkedin\Tests\PeopleTest::testGetProfileFailure with data set #2 
+Joomla\Linkedin\Tests\PeopleTest::testGetProfileFailure with data set #2
 .
-Joomla\Linkedin\Tests\PeopleTest::testSearch with data set #0 
+Joomla\Linkedin\Tests\PeopleTest::testSearch with data set #0
 .
-Joomla\Linkedin\Tests\PeopleTest::testSearch with data set #1 
+Joomla\Linkedin\Tests\PeopleTest::testSearch with data set #1
 .
 Joomla\Linkedin\Tests\PeopleTest::testSearchFailure
 .
@@ -5834,11 +5962,11 @@ Joomla\Linkedin\Tests\StreamTest::testGetComments
 .
 Joomla\Linkedin\Tests\StreamTest::testGetCommentsFailure
 .
-Joomla\Linkedin\Tests\StreamTest::testGetCurrentShare with data set #0 
+Joomla\Linkedin\Tests\StreamTest::testGetCurrentShare with data set #0
 .
-Joomla\Linkedin\Tests\StreamTest::testGetCurrentShare with data set #1 
+Joomla\Linkedin\Tests\StreamTest::testGetCurrentShare with data set #1
 .
-Joomla\Linkedin\Tests\StreamTest::testGetCurrentShare with data set #2 
+Joomla\Linkedin\Tests\StreamTest::testGetCurrentShare with data set #2
 .
 Joomla\Linkedin\Tests\StreamTest::testGetCurrentShareFailure
 .
@@ -5850,17 +5978,17 @@ Joomla\Linkedin\Tests\StreamTest::testGetNetworkStats
 .
 Joomla\Linkedin\Tests\StreamTest::testGetNetworkStatsFailure
 .
-Joomla\Linkedin\Tests\StreamTest::testGetNetworkUpdates with data set #0 
+Joomla\Linkedin\Tests\StreamTest::testGetNetworkUpdates with data set #0
 .
-Joomla\Linkedin\Tests\StreamTest::testGetNetworkUpdates with data set #1 
+Joomla\Linkedin\Tests\StreamTest::testGetNetworkUpdates with data set #1
 .
 Joomla\Linkedin\Tests\StreamTest::testGetNetworkUpdatesFailure
 .
-Joomla\Linkedin\Tests\StreamTest::testGetShareStream with data set #0 
+Joomla\Linkedin\Tests\StreamTest::testGetShareStream with data set #0
 .
-Joomla\Linkedin\Tests\StreamTest::testGetShareStream with data set #1 
+Joomla\Linkedin\Tests\StreamTest::testGetShareStream with data set #1
 .
-Joomla\Linkedin\Tests\StreamTest::testGetShareStream with data set #2 
+Joomla\Linkedin\Tests\StreamTest::testGetShareStream with data set #2
 .
 Joomla\Linkedin\Tests\StreamTest::testGetShareStreamFailure
 .
@@ -5880,9 +6008,9 @@ Joomla\Linkedin\Tests\StreamTest::testReshare
 .
 Joomla\Linkedin\Tests\StreamTest::testReshareFailure
 .
-Joomla\Linkedin\Tests\StreamTest::testShare with data set #0 
+Joomla\Linkedin\Tests\StreamTest::testShare with data set #0
 .
-Joomla\Linkedin\Tests\StreamTest::testShare with data set #1 
+Joomla\Linkedin\Tests\StreamTest::testShare with data set #1
 .
 Joomla\Linkedin\Tests\StreamTest::testShareFailure
 .
@@ -5890,6 +6018,70 @@ Joomla\Linkedin\Tests\StreamTest::testUnlike
 .
 Joomla\Linkedin\Tests\StreamTest::test_likeUnlike
 S
+Joomla\Log\Tests\LogEntryTest::testBadPriorityValues
+.
+Joomla\Log\Tests\LogEntryTest::testCategorySanitization
+.
+Joomla\Log\Tests\LogEntryTest::testDefaultValues
+.
+Joomla\Log\Tests\LogTest::testAddLogEntry
+.
+Joomla\Log\Tests\LogTest::testAddLoggerAutoInstantiation
+.
+Joomla\Log\Tests\LogTest::testAddLoggerAutoInstantiationInvalidLogger
+.
+Joomla\Log\Tests\LogTest::testFindLoggersByCategory
+.
+Joomla\Log\Tests\LogTest::testFindLoggersByNotCategory
+.
+Joomla\Log\Tests\LogTest::testFindLoggersByPriority
+.
+Joomla\Log\Tests\LogTest::testFindLoggersByPriorityAndCategory
+.
+Joomla\Log\Tests\LogTest::testSetInstance
+.
+Joomla\Log\Tests\Logger\CallbackTest::testAddEntry
+.
+Joomla\Log\Tests\Logger\CallbackTest::testConstructor01
+.
+Joomla\Log\Tests\Logger\CallbackTest::testConstructor02
+.
+Joomla\Log\Tests\Logger\CallbackTest::testConstructor03
+.
+Joomla\Log\Tests\Logger\CallbackTest::testConstructor04
+.
+Joomla\Log\Tests\Logger\CallbackTest::testConstructor05
+.
+Joomla\Log\Tests\Logger\CallbackTest::testConstructor06
+.
+Joomla\Log\Tests\Logger\DatabaseTest::testAddEntry01
+.
+Joomla\Log\Tests\Logger\DatabaseTest::testConstructor01
+.
+Joomla\Log\Tests\Logger\DatabaseTest::testConstructorException
+.
+Joomla\Log\Tests\Logger\EchoTest::testAddEntry01
+.
+Joomla\Log\Tests\Logger\EchoTest::testAddEntry02
+.
+Joomla\Log\Tests\Logger\EchoTest::testAddEntry03
+.
+Joomla\Log\Tests\Logger\EchoTest::testAddEntry04
+.
+Joomla\Log\Tests\Logger\FormattedtextTest::testAddEntry
+.
+Joomla\Log\Tests\Logger\FormattedtextTest::testConstructor01
+.
+Joomla\Log\Tests\Logger\FormattedtextTest::testConstructor02
+.
+Joomla\Log\Tests\Logger\FormattedtextTest::testConstructor03
+.
+Joomla\Log\Tests\Logger\FormattedtextTest::testConstructor04
+.
+Joomla\Log\Tests\Logger\SyslogTest::testAddEntry
+I
+Joomla\Log\Tests\Logger\W3cTest::testAddEntry
+.
 Joomla\Model\Tests\AbstractDatabaseModelTest::testSetDb
 .
 Joomla\Model\Tests\AbstractDatabaseModelTest::test__construct
@@ -5898,23 +6090,23 @@ Joomla\Model\Tests\AbstractModelTest::testSetState
 .
 Joomla\Model\Tests\AbstractModelTest::test__construct
 .
-Joomla\Oauth1\Tests\ClientTest::testAuthenticate with data set #0 
+Joomla\OAuth1\Tests\ClientTest::testAuthenticate with data set #0
 .
-Joomla\Oauth1\Tests\ClientTest::testAuthenticate with data set #1 
+Joomla\OAuth1\Tests\ClientTest::testAuthenticate with data set #1
 .
-Joomla\Oauth1\Tests\ClientTest::testAuthenticate with data set #2 
+Joomla\OAuth1\Tests\ClientTest::testAuthenticate with data set #2
 .
-Joomla\Oauth1\Tests\ClientTest::testAuthenticate with data set #3 
+Joomla\OAuth1\Tests\ClientTest::testAuthenticate with data set #3
 .
-Joomla\Oauth1\Tests\ClientTest::testGenerateRequestTokenFailure
+Joomla\OAuth1\Tests\ClientTest::testGenerateRequestTokenFailure
 .
-Joomla\Oauth1\Tests\ClientTest::testOauthRequest with data set #0 
+Joomla\OAuth1\Tests\ClientTest::testOauthRequest with data set #0
 .
-Joomla\Oauth1\Tests\ClientTest::testOauthRequest with data set #1 
+Joomla\OAuth1\Tests\ClientTest::testOauthRequest with data set #1
 .
-Joomla\Oauth1\Tests\ClientTest::testOauthRequest with data set #2 
+Joomla\OAuth1\Tests\ClientTest::testOauthRequest with data set #2
 .
-Joomla\Oauth1\Tests\ClientTest::testSafeEncodeEmpty
+Joomla\OAuth1\Tests\ClientTest::testSafeEncodeEmpty
 .
 Joomla\PHP\Tests\methodsTest::testWith
 .
@@ -5978,75 +6170,75 @@ Joomla\Profiler\Tests\ProfilerTest::test__construct
 .
 Joomla\Profiler\Tests\ProfilerTest::test__toString
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #0 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #0
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #1 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #1
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #10 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #10
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #11 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #11
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #12 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #12
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #13 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #13
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #14 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #14
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #15 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #15
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #16 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #16
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #17 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #17
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #18 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #18
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #19 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #19
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #2 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #2
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #20 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #20
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #21 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #21
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #22 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #22
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #23 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #23
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #24 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #24
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #25 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #25
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #26 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #26
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #27 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #27
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #28 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #28
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #29 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #29
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #3 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #3
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #30 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #30
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #31 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #31
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #4 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #4
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #5 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #5
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #6 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #6
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #7 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #7
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #8 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #8
 .
-Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #9 
+Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffix with data set #9
 .
 Joomla\Router\Tests\RestRouterTest::testFetchControllerSuffixWithMissingSuffixMap
 .
 Joomla\Router\Tests\RestRouterTest::testMethodInPostRequest
 .
-Joomla\Router\Tests\RestRouterTest::testParseRoute with data set #0 
+Joomla\Router\Tests\RestRouterTest::testParseRoute with data set #0
 .
 Joomla\Router\Tests\RestRouterTest::testSetHttpMethodSuffix
 .
@@ -6066,35 +6258,35 @@ Joomla\Router\Tests\RouterTest::testFetchControllerWithoutPrefixSetThoughNecessa
 .
 Joomla\Router\Tests\RouterTest::testGetController
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #0 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #0
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #1 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #1
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #10 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #10
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #11 
-F
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #12 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #11
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #13 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #12
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #14 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #13
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #2 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #14
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #3 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #2
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #4 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #3
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #5 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #4
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #6 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #5
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #7 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #6
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #8 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #7
 .
-Joomla\Router\Tests\RouterTest::testParseRoute with data set #9 
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #8
+.
+Joomla\Router\Tests\RouterTest::testParseRoute with data set #9
 .
 Joomla\Router\Tests\RouterTest::testSetControllerPrefix
 .
@@ -6102,6 +6294,94 @@ Joomla\Router\Tests\RouterTest::testSetDefaultController
 .
 Joomla\Router\Tests\RouterTest::test__construct
 .
+Joomla\Session\Tests\StorageTest::testClose
+.
+Joomla\Session\Tests\StorageTest::testDestroy
+.
+Joomla\Session\Tests\StorageTest::testGc
+.
+Joomla\Session\Tests\StorageTest::testGetInstance
+.
+Joomla\Session\Tests\StorageTest::testIsSupported
+.
+Joomla\Session\Tests\StorageTest::testOpen
+.
+Joomla\Session\Tests\StorageTest::testRead
+.
+Joomla\Session\Tests\StorageTest::testRegister
+.
+Joomla\Session\Tests\StorageTest::testWrite
+.
+Joomla\Session\Tests\StorageTest::test__Construct
+.
+Joomla\Session\Tests\Storage\ApcTest::testDestroy
+I
+Joomla\Session\Tests\Storage\ApcTest::testIsSupported
+I
+Joomla\Session\Tests\Storage\ApcTest::testRead
+I
+Joomla\Session\Tests\Storage\ApcTest::testWrite
+I
+Joomla\Session\Tests\Storage\DatabaseTest::testDestroy
+I
+Joomla\Session\Tests\Storage\DatabaseTest::testGc
+I
+Joomla\Session\Tests\Storage\DatabaseTest::testRead
+I
+Joomla\Session\Tests\Storage\DatabaseTest::testWrite
+I
+Joomla\Session\Tests\Storage\MemcacheTest::testClose
+E
+Joomla\Session\Tests\Storage\MemcacheTest::testDestroy
+E
+Joomla\Session\Tests\Storage\MemcacheTest::testGc
+E
+Joomla\Session\Tests\Storage\MemcacheTest::testIsSupported
+E
+Joomla\Session\Tests\Storage\MemcacheTest::testOpen
+E
+Joomla\Session\Tests\Storage\MemcacheTest::testRead
+E
+Joomla\Session\Tests\Storage\MemcacheTest::testWrite
+E
+Joomla\Session\Tests\Storage\MemcachedTest::testClose
+.
+Joomla\Session\Tests\Storage\MemcachedTest::testDestroy
+.
+Joomla\Session\Tests\Storage\MemcachedTest::testGc
+.
+Joomla\Session\Tests\Storage\MemcachedTest::testGetInstance
+I
+Joomla\Session\Tests\Storage\MemcachedTest::testIsSupported
+.
+Joomla\Session\Tests\Storage\MemcachedTest::testOpen
+.
+Joomla\Session\Tests\Storage\MemcachedTest::testRead
+.
+Joomla\Session\Tests\Storage\MemcachedTest::testRegister
+I
+Joomla\Session\Tests\Storage\MemcachedTest::testWrite
+.
+Joomla\Session\Tests\Storage\MemcachedTest::test__Construct
+I
+Joomla\Session\Tests\Storage\NoneTest::testRegister
+.
+Joomla\Session\Tests\Storage\WincacheTest::testDestroy
+S
+Joomla\Session\Tests\Storage\WincacheTest::testIsSupported
+S
+Joomla\Session\Tests\Storage\WincacheTest::testRead
+S
+Joomla\Session\Tests\Storage\WincacheTest::testWrite
+S
+Joomla\Session\Tests\Storage\XcacheTest::testDestroy
+S
+Joomla\Session\Tests\Storage\XcacheTest::testIsSupported
+S
+Joomla\Session\Tests\Storage\XcacheTest::testRead
+S
+Joomla\Session\Tests\Storage\XcacheTest::testWrite
+S
 Joomla\String\Tests\InflectorTest::testAddCountableRule
 .
 Joomla\String\Tests\InflectorTest::testAddPluraliseRule
@@ -6118,293 +6398,293 @@ Joomla\String\Tests\InflectorTest::testGetCachedSingular
 .
 Joomla\String\Tests\InflectorTest::testGetInstance
 .
-Joomla\String\Tests\InflectorTest::testIsCountable with data set #0 
+Joomla\String\Tests\InflectorTest::testIsCountable with data set #0
 .
-Joomla\String\Tests\InflectorTest::testIsCountable with data set #1 
+Joomla\String\Tests\InflectorTest::testIsCountable with data set #1
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #0 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #0
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #1 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #1
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #10 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #10
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #11 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #11
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #12 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #12
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #13 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #13
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #14 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #14
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #15 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #15
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #16 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #16
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #17 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #17
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #18 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #18
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #19 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #19
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #2 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #2
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #3 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #3
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #4 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #4
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #5 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #5
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #6 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #6
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #7 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #7
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #8 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #8
 .
-Joomla\String\Tests\InflectorTest::testIsPlural with data set #9 
+Joomla\String\Tests\InflectorTest::testIsPlural with data set #9
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #0 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #0
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #1 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #1
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #10 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #10
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #11 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #11
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #12 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #12
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #13 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #13
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #14 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #14
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #15 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #15
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #16 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #16
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #17 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #17
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #18 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #18
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #19 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #19
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #2 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #2
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #3 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #3
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #4 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #4
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #5 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #5
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #6 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #6
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #7 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #7
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #8 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #8
 .
-Joomla\String\Tests\InflectorTest::testIsSingular with data set #9 
+Joomla\String\Tests\InflectorTest::testIsSingular with data set #9
 .
 Joomla\String\Tests\InflectorTest::testMatchRegexRule
 .
 Joomla\String\Tests\InflectorTest::testSetCache
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #0 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #0
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #1 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #1
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #10 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #10
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #11 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #11
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #12 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #12
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #13 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #13
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #14 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #14
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #15 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #15
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #16 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #16
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #17 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #17
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #18 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #18
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #19 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #19
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #2 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #2
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #3 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #3
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #4 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #4
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #5 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #5
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #6 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #6
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #7 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #7
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #8 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #8
 .
-Joomla\String\Tests\InflectorTest::testToPlural with data set #9 
+Joomla\String\Tests\InflectorTest::testToPlural with data set #9
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #0 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #0
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #1 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #1
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #10 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #10
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #11 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #11
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #12 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #12
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #13 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #13
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #14 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #14
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #15 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #15
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #16 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #16
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #17 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #17
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #18 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #18
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #19 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #19
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #2 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #2
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #3 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #3
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #4 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #4
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #5 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #5
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #6 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #6
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #7 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #7
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #8 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #8
 .
-Joomla\String\Tests\InflectorTest::testToSingular with data set #9 
+Joomla\String\Tests\InflectorTest::testToSingular with data set #9
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #0 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #0
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #1 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #1
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #2 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #2
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #3 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #3
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #4 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #4
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #5 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #5
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #6 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_grouped with data set #6
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_nongrouped with data set #0 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_nongrouped with data set #0
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_nongrouped with data set #1 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_nongrouped with data set #1
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_nongrouped with data set #2 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_nongrouped with data set #2
 .
-Joomla\String\Tests\NormaliseTest::testFromCamelCase_nongrouped with data set #3 
+Joomla\String\Tests\NormaliseTest::testFromCamelCase_nongrouped with data set #3
 .
-Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #0 
+Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #0
 .
-Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #1 
+Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #1
 .
-Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #2 
+Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #2
 .
-Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #3 
+Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #3
 .
-Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #4 
+Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #4
 .
-Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #5 
+Joomla\String\Tests\NormaliseTest::testToCamelCase with data set #5
 .
-Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #0 
+Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #0
 .
-Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #1 
+Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #1
 .
-Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #2 
+Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #2
 .
-Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #3 
+Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #3
 .
-Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #4 
+Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #4
 .
-Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #5 
+Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #5
 .
-Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #6 
+Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #6
 .
-Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #7 
+Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #7
 .
-Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #8 
+Joomla\String\Tests\NormaliseTest::testToDashSeparated with data set #8
 .
-Joomla\String\Tests\NormaliseTest::testToKey with data set #0 
+Joomla\String\Tests\NormaliseTest::testToKey with data set #0
 .
-Joomla\String\Tests\NormaliseTest::testToKey with data set #1 
+Joomla\String\Tests\NormaliseTest::testToKey with data set #1
 .
-Joomla\String\Tests\NormaliseTest::testToKey with data set #2 
+Joomla\String\Tests\NormaliseTest::testToKey with data set #2
 .
-Joomla\String\Tests\NormaliseTest::testToKey with data set #3 
+Joomla\String\Tests\NormaliseTest::testToKey with data set #3
 .
-Joomla\String\Tests\NormaliseTest::testToKey with data set #4 
+Joomla\String\Tests\NormaliseTest::testToKey with data set #4
 .
-Joomla\String\Tests\NormaliseTest::testToKey with data set #5 
+Joomla\String\Tests\NormaliseTest::testToKey with data set #5
 .
-Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #0 
+Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #0
 .
-Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #1 
+Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #1
 .
-Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #2 
+Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #2
 .
-Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #3 
+Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #3
 .
-Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #4 
+Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #4
 .
-Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #5 
+Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #5
 .
-Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #6 
+Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #6
 .
-Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #7 
+Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #7
 .
-Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #8 
+Joomla\String\Tests\NormaliseTest::testToSpaceSeparated with data set #8
 .
-Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #0 
+Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #0
 .
-Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #1 
+Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #1
 .
-Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #2 
+Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #2
 .
-Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #3 
+Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #3
 .
-Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #4 
+Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #4
 .
-Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #5 
+Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #5
 .
-Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #6 
+Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #6
 .
-Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #7 
+Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #7
 .
-Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #8 
+Joomla\String\Tests\NormaliseTest::testToUnderscoreSeparated with data set #8
 .
-Joomla\String\Tests\NormaliseTest::testToVariable with data set #0 
+Joomla\String\Tests\NormaliseTest::testToVariable with data set #0
 .
-Joomla\String\Tests\NormaliseTest::testToVariable with data set #1 
+Joomla\String\Tests\NormaliseTest::testToVariable with data set #1
 .
-Joomla\String\Tests\NormaliseTest::testToVariable with data set #2 
+Joomla\String\Tests\NormaliseTest::testToVariable with data set #2
 .
-Joomla\String\Tests\NormaliseTest::testToVariable with data set #3 
+Joomla\String\Tests\NormaliseTest::testToVariable with data set #3
 .
-Joomla\String\Tests\NormaliseTest::testToVariable with data set #4 
+Joomla\String\Tests\NormaliseTest::testToVariable with data set #4
 .
-Joomla\String\Tests\NormaliseTest::testToVariable with data set #5 
+Joomla\String\Tests\NormaliseTest::testToVariable with data set #5
 .
-Joomla\String\Tests\StringTest::testCompliant with data set #0 
+Joomla\String\Tests\StringTest::testCompliant with data set #0
 .
-Joomla\String\Tests\StringTest::testCompliant with data set #1 
+Joomla\String\Tests\StringTest::testCompliant with data set #1
 .
-Joomla\String\Tests\StringTest::testCompliant with data set #2 
+Joomla\String\Tests\StringTest::testCompliant with data set #2
 .
-Joomla\String\Tests\StringTest::testCompliant with data set #3 
+Joomla\String\Tests\StringTest::testCompliant with data set #3
 .
 Joomla\String\Tests\StringTest::testIncrement with data set "First dash increment"
 .
@@ -6418,269 +6698,269 @@ Joomla\String\Tests\StringTest::testIncrement with data set "Set default increme
 .
 Joomla\String\Tests\StringTest::testIncrement with data set "Unknown style fallback to default"
 .
-Joomla\String\Tests\StringTest::testLtrim with data set #0 
+Joomla\String\Tests\StringTest::testLtrim with data set #0
 .
-Joomla\String\Tests\StringTest::testLtrim with data set #1 
+Joomla\String\Tests\StringTest::testLtrim with data set #1
 .
-Joomla\String\Tests\StringTest::testLtrim with data set #2 
+Joomla\String\Tests\StringTest::testLtrim with data set #2
 .
-Joomla\String\Tests\StringTest::testLtrim with data set #3 
+Joomla\String\Tests\StringTest::testLtrim with data set #3
 .
-Joomla\String\Tests\StringTest::testLtrim with data set #4 
+Joomla\String\Tests\StringTest::testLtrim with data set #4
 .
-Joomla\String\Tests\StringTest::testLtrim with data set #5 
+Joomla\String\Tests\StringTest::testLtrim with data set #5
 .
-Joomla\String\Tests\StringTest::testLtrim with data set #6 
+Joomla\String\Tests\StringTest::testLtrim with data set #6
 .
-Joomla\String\Tests\StringTest::testRtrim with data set #0 
+Joomla\String\Tests\StringTest::testRtrim with data set #0
 .
-Joomla\String\Tests\StringTest::testRtrim with data set #1 
+Joomla\String\Tests\StringTest::testRtrim with data set #1
 .
-Joomla\String\Tests\StringTest::testRtrim with data set #2 
+Joomla\String\Tests\StringTest::testRtrim with data set #2
 .
-Joomla\String\Tests\StringTest::testRtrim with data set #3 
+Joomla\String\Tests\StringTest::testRtrim with data set #3
 .
-Joomla\String\Tests\StringTest::testRtrim with data set #4 
+Joomla\String\Tests\StringTest::testRtrim with data set #4
 .
-Joomla\String\Tests\StringTest::testRtrim with data set #5 
+Joomla\String\Tests\StringTest::testRtrim with data set #5
 .
-Joomla\String\Tests\StringTest::testRtrim with data set #6 
+Joomla\String\Tests\StringTest::testRtrim with data set #6
 .
-Joomla\String\Tests\StringTest::testStr_ireplace with data set #0 
+Joomla\String\Tests\StringTest::testStr_ireplace with data set #0
 .
-Joomla\String\Tests\StringTest::testStr_ireplace with data set #1 
+Joomla\String\Tests\StringTest::testStr_ireplace with data set #1
 .
-Joomla\String\Tests\StringTest::testStr_ireplace with data set #2 
+Joomla\String\Tests\StringTest::testStr_ireplace with data set #2
 .
-Joomla\String\Tests\StringTest::testStr_ireplace with data set #3 
+Joomla\String\Tests\StringTest::testStr_ireplace with data set #3
 .
-Joomla\String\Tests\StringTest::testStr_ireplace with data set #4 
+Joomla\String\Tests\StringTest::testStr_ireplace with data set #4
 .
-Joomla\String\Tests\StringTest::testStr_ireplace with data set #5 
+Joomla\String\Tests\StringTest::testStr_ireplace with data set #5
 .
-Joomla\String\Tests\StringTest::testStr_split with data set #0 
+Joomla\String\Tests\StringTest::testStr_split with data set #0
 .
-Joomla\String\Tests\StringTest::testStr_split with data set #1 
+Joomla\String\Tests\StringTest::testStr_split with data set #1
 .
-Joomla\String\Tests\StringTest::testStr_split with data set #2 
+Joomla\String\Tests\StringTest::testStr_split with data set #2
 .
-Joomla\String\Tests\StringTest::testStr_split with data set #3 
+Joomla\String\Tests\StringTest::testStr_split with data set #3
 .
-Joomla\String\Tests\StringTest::testStrcasecmp with data set #0 
+Joomla\String\Tests\StringTest::testStrcasecmp with data set #0
 .
-Joomla\String\Tests\StringTest::testStrcasecmp with data set #1 
+Joomla\String\Tests\StringTest::testStrcasecmp with data set #1
 .
-Joomla\String\Tests\StringTest::testStrcasecmp with data set #2 
+Joomla\String\Tests\StringTest::testStrcasecmp with data set #2
 .
-Joomla\String\Tests\StringTest::testStrcasecmp with data set #3 
+Joomla\String\Tests\StringTest::testStrcasecmp with data set #3
 .
-Joomla\String\Tests\StringTest::testStrcasecmp with data set #4 
+Joomla\String\Tests\StringTest::testStrcasecmp with data set #4
 S
-Joomla\String\Tests\StringTest::testStrcasecmp with data set #5 
+Joomla\String\Tests\StringTest::testStrcasecmp with data set #5
 S
-Joomla\String\Tests\StringTest::testStrcasecmp with data set #6 
+Joomla\String\Tests\StringTest::testStrcasecmp with data set #6
 S
-Joomla\String\Tests\StringTest::testStrcasecmp with data set #7 
+Joomla\String\Tests\StringTest::testStrcasecmp with data set #7
 S
-Joomla\String\Tests\StringTest::testStrcasecmp with data set #8 
+Joomla\String\Tests\StringTest::testStrcasecmp with data set #8
 S
-Joomla\String\Tests\StringTest::testStrcasecmp with data set #9 
+Joomla\String\Tests\StringTest::testStrcasecmp with data set #9
 S
-Joomla\String\Tests\StringTest::testStrcmp with data set #0 
+Joomla\String\Tests\StringTest::testStrcmp with data set #0
 .
-Joomla\String\Tests\StringTest::testStrcmp with data set #1 
+Joomla\String\Tests\StringTest::testStrcmp with data set #1
 .
-Joomla\String\Tests\StringTest::testStrcmp with data set #10 
+Joomla\String\Tests\StringTest::testStrcmp with data set #10
 S
-Joomla\String\Tests\StringTest::testStrcmp with data set #11 
+Joomla\String\Tests\StringTest::testStrcmp with data set #11
 S
-Joomla\String\Tests\StringTest::testStrcmp with data set #12 
+Joomla\String\Tests\StringTest::testStrcmp with data set #12
 S
-Joomla\String\Tests\StringTest::testStrcmp with data set #2 
+Joomla\String\Tests\StringTest::testStrcmp with data set #2
 .
-Joomla\String\Tests\StringTest::testStrcmp with data set #3 
+Joomla\String\Tests\StringTest::testStrcmp with data set #3
 .
-Joomla\String\Tests\StringTest::testStrcmp with data set #4 
+Joomla\String\Tests\StringTest::testStrcmp with data set #4
 .
-Joomla\String\Tests\StringTest::testStrcmp with data set #5 
+Joomla\String\Tests\StringTest::testStrcmp with data set #5
 S
-Joomla\String\Tests\StringTest::testStrcmp with data set #6 
+Joomla\String\Tests\StringTest::testStrcmp with data set #6
 S
-Joomla\String\Tests\StringTest::testStrcmp with data set #7 
+Joomla\String\Tests\StringTest::testStrcmp with data set #7
 S
-Joomla\String\Tests\StringTest::testStrcmp with data set #8 
+Joomla\String\Tests\StringTest::testStrcmp with data set #8
 S
-Joomla\String\Tests\StringTest::testStrcmp with data set #9 
+Joomla\String\Tests\StringTest::testStrcmp with data set #9
 S
-Joomla\String\Tests\StringTest::testStrcspn with data set #0 
+Joomla\String\Tests\StringTest::testStrcspn with data set #0
 .
-Joomla\String\Tests\StringTest::testStrcspn with data set #1 
+Joomla\String\Tests\StringTest::testStrcspn with data set #1
 .
-Joomla\String\Tests\StringTest::testStrcspn with data set #2 
+Joomla\String\Tests\StringTest::testStrcspn with data set #2
 .
-Joomla\String\Tests\StringTest::testStristr with data set #0 
+Joomla\String\Tests\StringTest::testStristr with data set #0
 .
-Joomla\String\Tests\StringTest::testStristr with data set #1 
+Joomla\String\Tests\StringTest::testStristr with data set #1
 .
-Joomla\String\Tests\StringTest::testStristr with data set #2 
+Joomla\String\Tests\StringTest::testStristr with data set #2
 .
-Joomla\String\Tests\StringTest::testStrlen with data set #0 
+Joomla\String\Tests\StringTest::testStrlen with data set #0
 .
-Joomla\String\Tests\StringTest::testStrpos with data set #0 
+Joomla\String\Tests\StringTest::testStrpos with data set #0
 .
-Joomla\String\Tests\StringTest::testStrpos with data set #1 
+Joomla\String\Tests\StringTest::testStrpos with data set #1
 .
-Joomla\String\Tests\StringTest::testStrpos with data set #2 
+Joomla\String\Tests\StringTest::testStrpos with data set #2
 .
-Joomla\String\Tests\StringTest::testStrpos with data set #3 
+Joomla\String\Tests\StringTest::testStrpos with data set #3
 .
-Joomla\String\Tests\StringTest::testStrpos with data set #4 
+Joomla\String\Tests\StringTest::testStrpos with data set #4
 .
-Joomla\String\Tests\StringTest::testStrpos with data set #5 
+Joomla\String\Tests\StringTest::testStrpos with data set #5
 .
-Joomla\String\Tests\StringTest::testStrpos with data set #6 
+Joomla\String\Tests\StringTest::testStrpos with data set #6
 .
-Joomla\String\Tests\StringTest::testStrpos with data set #7 
+Joomla\String\Tests\StringTest::testStrpos with data set #7
 .
-Joomla\String\Tests\StringTest::testStrrev with data set #0 
+Joomla\String\Tests\StringTest::testStrrev with data set #0
 .
-Joomla\String\Tests\StringTest::testStrrev with data set #1 
+Joomla\String\Tests\StringTest::testStrrev with data set #1
 .
-Joomla\String\Tests\StringTest::testStrrpos with data set #0 
+Joomla\String\Tests\StringTest::testStrrpos with data set #0
 .
-Joomla\String\Tests\StringTest::testStrrpos with data set #1 
+Joomla\String\Tests\StringTest::testStrrpos with data set #1
 .
-Joomla\String\Tests\StringTest::testStrrpos with data set #2 
+Joomla\String\Tests\StringTest::testStrrpos with data set #2
 .
-Joomla\String\Tests\StringTest::testStrrpos with data set #3 
+Joomla\String\Tests\StringTest::testStrrpos with data set #3
 .
-Joomla\String\Tests\StringTest::testStrrpos with data set #4 
+Joomla\String\Tests\StringTest::testStrrpos with data set #4
 .
-Joomla\String\Tests\StringTest::testStrrpos with data set #5 
+Joomla\String\Tests\StringTest::testStrrpos with data set #5
 .
-Joomla\String\Tests\StringTest::testStrrpos with data set #6 
+Joomla\String\Tests\StringTest::testStrrpos with data set #6
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #0 
+Joomla\String\Tests\StringTest::testStrspn with data set #0
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #1 
+Joomla\String\Tests\StringTest::testStrspn with data set #1
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #10 
+Joomla\String\Tests\StringTest::testStrspn with data set #10
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #11 
+Joomla\String\Tests\StringTest::testStrspn with data set #11
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #2 
+Joomla\String\Tests\StringTest::testStrspn with data set #2
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #3 
+Joomla\String\Tests\StringTest::testStrspn with data set #3
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #4 
+Joomla\String\Tests\StringTest::testStrspn with data set #4
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #5 
+Joomla\String\Tests\StringTest::testStrspn with data set #5
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #6 
+Joomla\String\Tests\StringTest::testStrspn with data set #6
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #7 
+Joomla\String\Tests\StringTest::testStrspn with data set #7
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #8 
+Joomla\String\Tests\StringTest::testStrspn with data set #8
 .
-Joomla\String\Tests\StringTest::testStrspn with data set #9 
+Joomla\String\Tests\StringTest::testStrspn with data set #9
 .
-Joomla\String\Tests\StringTest::testStrtolower with data set #0 
+Joomla\String\Tests\StringTest::testStrtolower with data set #0
 .
-Joomla\String\Tests\StringTest::testStrtoupper with data set #0 
+Joomla\String\Tests\StringTest::testStrtoupper with data set #0
 .
-Joomla\String\Tests\StringTest::testSubstr with data set #0 
+Joomla\String\Tests\StringTest::testSubstr with data set #0
 .
-Joomla\String\Tests\StringTest::testSubstr with data set #1 
+Joomla\String\Tests\StringTest::testSubstr with data set #1
 .
-Joomla\String\Tests\StringTest::testSubstr with data set #2 
+Joomla\String\Tests\StringTest::testSubstr with data set #2
 .
-Joomla\String\Tests\StringTest::testSubstr with data set #3 
+Joomla\String\Tests\StringTest::testSubstr with data set #3
 .
-Joomla\String\Tests\StringTest::testSubstr with data set #4 
+Joomla\String\Tests\StringTest::testSubstr with data set #4
 .
-Joomla\String\Tests\StringTest::testSubstr_replace with data set #0 
+Joomla\String\Tests\StringTest::testSubstr_replace with data set #0
 .
-Joomla\String\Tests\StringTest::testSubstr_replace with data set #1 
+Joomla\String\Tests\StringTest::testSubstr_replace with data set #1
 .
-Joomla\String\Tests\StringTest::testSubstr_replace with data set #2 
+Joomla\String\Tests\StringTest::testSubstr_replace with data set #2
 .
-Joomla\String\Tests\StringTest::testSubstr_replace with data set #3 
+Joomla\String\Tests\StringTest::testSubstr_replace with data set #3
 .
-Joomla\String\Tests\StringTest::testTranscode with data set #0 
+Joomla\String\Tests\StringTest::testTranscode with data set #0
 .
-Joomla\String\Tests\StringTest::testTranscode with data set #1 
+Joomla\String\Tests\StringTest::testTranscode with data set #1
 .
-Joomla\String\Tests\StringTest::testTrim with data set #0 
+Joomla\String\Tests\StringTest::testTrim with data set #0
 .
-Joomla\String\Tests\StringTest::testTrim with data set #1 
+Joomla\String\Tests\StringTest::testTrim with data set #1
 .
-Joomla\String\Tests\StringTest::testTrim with data set #2 
+Joomla\String\Tests\StringTest::testTrim with data set #2
 .
-Joomla\String\Tests\StringTest::testTrim with data set #3 
+Joomla\String\Tests\StringTest::testTrim with data set #3
 .
-Joomla\String\Tests\StringTest::testTrim with data set #4 
+Joomla\String\Tests\StringTest::testTrim with data set #4
 .
-Joomla\String\Tests\StringTest::testTrim with data set #5 
+Joomla\String\Tests\StringTest::testTrim with data set #5
 .
-Joomla\String\Tests\StringTest::testTrim with data set #6 
+Joomla\String\Tests\StringTest::testTrim with data set #6
 .
-Joomla\String\Tests\StringTest::testUcfirst with data set #0 
+Joomla\String\Tests\StringTest::testUcfirst with data set #0
 .
-Joomla\String\Tests\StringTest::testUcfirst with data set #1 
+Joomla\String\Tests\StringTest::testUcfirst with data set #1
 .
-Joomla\String\Tests\StringTest::testUcfirst with data set #2 
+Joomla\String\Tests\StringTest::testUcfirst with data set #2
 .
-Joomla\String\Tests\StringTest::testUcfirst with data set #3 
+Joomla\String\Tests\StringTest::testUcfirst with data set #3
 .
-Joomla\String\Tests\StringTest::testUcfirst with data set #4 
+Joomla\String\Tests\StringTest::testUcfirst with data set #4
 .
-Joomla\String\Tests\StringTest::testUcfirst with data set #5 
+Joomla\String\Tests\StringTest::testUcfirst with data set #5
 .
-Joomla\String\Tests\StringTest::testUcwords with data set #0 
+Joomla\String\Tests\StringTest::testUcwords with data set #0
 .
-Joomla\String\Tests\StringTest::testUcwords with data set #1 
+Joomla\String\Tests\StringTest::testUcwords with data set #1
 .
-Joomla\String\Tests\StringTest::testUcwords with data set #2 
+Joomla\String\Tests\StringTest::testUcwords with data set #2
 .
-Joomla\String\Tests\StringTest::testUcwords with data set #3 
+Joomla\String\Tests\StringTest::testUcwords with data set #3
 .
-Joomla\String\Tests\StringTest::testUcwords with data set #4 
+Joomla\String\Tests\StringTest::testUcwords with data set #4
 .
-Joomla\String\Tests\StringTest::testValid with data set #0 
+Joomla\String\Tests\StringTest::testValid with data set #0
 .
-Joomla\String\Tests\StringTest::testValid with data set #1 
+Joomla\String\Tests\StringTest::testValid with data set #1
 .
-Joomla\String\Tests\StringTest::testValid with data set #2 
+Joomla\String\Tests\StringTest::testValid with data set #2
 .
-Joomla\String\Tests\StringTest::testValid with data set #3 
+Joomla\String\Tests\StringTest::testValid with data set #3
 .
-Joomla\Twitter\Tests\BlockTest::testBlockUser with data set #0 
+Joomla\Twitter\Tests\BlockTest::testBlockUser with data set #0
 .
-Joomla\Twitter\Tests\BlockTest::testBlockUser with data set #1 
+Joomla\Twitter\Tests\BlockTest::testBlockUser with data set #1
 .
-Joomla\Twitter\Tests\BlockTest::testBlockUser with data set #2 
+Joomla\Twitter\Tests\BlockTest::testBlockUser with data set #2
 .
-Joomla\Twitter\Tests\BlockTest::testBlockUserFailure with data set #0 
+Joomla\Twitter\Tests\BlockTest::testBlockUserFailure with data set #0
 .
-Joomla\Twitter\Tests\BlockTest::testBlockUserFailure with data set #1 
+Joomla\Twitter\Tests\BlockTest::testBlockUserFailure with data set #1
 .
-Joomla\Twitter\Tests\BlockTest::testBlockUserFailure with data set #2 
+Joomla\Twitter\Tests\BlockTest::testBlockUserFailure with data set #2
 .
 Joomla\Twitter\Tests\BlockTest::testGetBlocking
 .
 Joomla\Twitter\Tests\BlockTest::testGetBlockingFailure
 .
-Joomla\Twitter\Tests\BlockTest::testUnblockFailure with data set #0 
+Joomla\Twitter\Tests\BlockTest::testUnblockFailure with data set #0
 .
-Joomla\Twitter\Tests\BlockTest::testUnblockFailure with data set #1 
+Joomla\Twitter\Tests\BlockTest::testUnblockFailure with data set #1
 .
-Joomla\Twitter\Tests\BlockTest::testUnblockFailure with data set #2 
+Joomla\Twitter\Tests\BlockTest::testUnblockFailure with data set #2
 .
-Joomla\Twitter\Tests\BlockTest::testUnlock with data set #0 
+Joomla\Twitter\Tests\BlockTest::testUnlock with data set #0
 .
-Joomla\Twitter\Tests\BlockTest::testUnlock with data set #1 
+Joomla\Twitter\Tests\BlockTest::testUnlock with data set #1
 .
-Joomla\Twitter\Tests\BlockTest::testUnlock with data set #2 
+Joomla\Twitter\Tests\BlockTest::testUnlock with data set #2
 .
 Joomla\Twitter\Tests\DirectmessagesTest::testDeleteDirectMessages
 .
@@ -6698,17 +6978,17 @@ Joomla\Twitter\Tests\DirectmessagesTest::testGetSentDirectMessages
 .
 Joomla\Twitter\Tests\DirectmessagesTest::testGetSentDirectMessagesFailure
 .
-Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessages with data set #0 
+Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessages with data set #0
 .
-Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessages with data set #1 
+Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessages with data set #1
 .
-Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessages with data set #2 
+Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessages with data set #2
 .
-Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessagesFailure with data set #0 
+Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessagesFailure with data set #0
 .
-Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessagesFailure with data set #1 
+Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessagesFailure with data set #1
 .
-Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessagesFailure with data set #2 
+Joomla\Twitter\Tests\DirectmessagesTest::testSendDirectMessagesFailure with data set #2
 .
 Joomla\Twitter\Tests\FavoritesTest::testCreateFavorites
 .
@@ -6718,77 +6998,77 @@ Joomla\Twitter\Tests\FavoritesTest::testDeleteFavorites
 .
 Joomla\Twitter\Tests\FavoritesTest::testDeleteFavoritesFailure
 .
-Joomla\Twitter\Tests\FavoritesTest::testGetFavorites with data set #0 
+Joomla\Twitter\Tests\FavoritesTest::testGetFavorites with data set #0
 .
-Joomla\Twitter\Tests\FavoritesTest::testGetFavorites with data set #1 
+Joomla\Twitter\Tests\FavoritesTest::testGetFavorites with data set #1
 .
-Joomla\Twitter\Tests\FavoritesTest::testGetFavorites with data set #2 
+Joomla\Twitter\Tests\FavoritesTest::testGetFavorites with data set #2
 .
-Joomla\Twitter\Tests\FavoritesTest::testGetFavoritesFailure with data set #0 
+Joomla\Twitter\Tests\FavoritesTest::testGetFavoritesFailure with data set #0
 .
-Joomla\Twitter\Tests\FavoritesTest::testGetFavoritesFailure with data set #1 
+Joomla\Twitter\Tests\FavoritesTest::testGetFavoritesFailure with data set #1
 .
-Joomla\Twitter\Tests\FavoritesTest::testGetFavoritesFailure with data set #2 
+Joomla\Twitter\Tests\FavoritesTest::testGetFavoritesFailure with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testFollow with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testFollow with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testFollow with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testFollow with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testFollow with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testFollow with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testFollowFailure with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testFollowFailure with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testFollowFailure with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testFollowFailure with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testFollowFailure with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testFollowFailure with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFollowerIds with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testGetFollowerIds with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFollowerIds with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testGetFollowerIds with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFollowerIds with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testGetFollowerIds with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFollowerIdsFailure with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testGetFollowerIdsFailure with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFollowerIdsFailure with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testGetFollowerIdsFailure with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFollowerIdsFailure with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testGetFollowerIdsFailure with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendIds with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendIds with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendIds with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendIds with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendIds with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendIds with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendIdsFailure with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendIdsFailure with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendIdsFailure with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendIdsFailure with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendIdsFailure with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendIdsFailure with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #3 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #3
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #4 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #4
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #5 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetails with data set #5
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #3 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #3
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #4 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #4
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #5 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipDetailsFailure with data set #5
 .
 Joomla\Twitter\Tests\FriendsTest::testGetFriendshipNoRetweetIds
 .
@@ -6798,53 +7078,53 @@ Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsIncoming
 .
 Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsIncomingFailure
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookup with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookup with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookup with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookup with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookup with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookup with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookup with data set #3 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookup with data set #3
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookup with data set #4 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookup with data set #4
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookupFailure with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookupFailure with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookupFailure with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookupFailure with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookupFailure with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookupFailure with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookupFailure with data set #3 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookupFailure with data set #3
 .
-Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookupFailure with data set #4 
+Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsLookupFailure with data set #4
 .
 Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsOutgoing
 .
 Joomla\Twitter\Tests\FriendsTest::testGetFriendshipsOutgoingFailure
 .
-Joomla\Twitter\Tests\FriendsTest::testUnfollow with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testUnfollow with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testUnfollow with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testUnfollow with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testUnfollow with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testUnfollow with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testUnfollowFailure with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testUnfollowFailure with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testUnfollowFailure with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testUnfollowFailure with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testUnfollowFailure with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testUnfollowFailure with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testUpdateFriendship with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testUpdateFriendship with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testUpdateFriendship with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testUpdateFriendship with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testUpdateFriendship with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testUpdateFriendship with data set #2
 .
-Joomla\Twitter\Tests\FriendsTest::testUpdateFriendshipFailure with data set #0 
+Joomla\Twitter\Tests\FriendsTest::testUpdateFriendshipFailure with data set #0
 .
-Joomla\Twitter\Tests\FriendsTest::testUpdateFriendshipFailure with data set #1 
+Joomla\Twitter\Tests\FriendsTest::testUpdateFriendshipFailure with data set #1
 .
-Joomla\Twitter\Tests\FriendsTest::testUpdateFriendshipFailure with data set #2 
+Joomla\Twitter\Tests\FriendsTest::testUpdateFriendshipFailure with data set #2
 .
 Joomla\Twitter\Tests\HelpTest::testGetConfiguration
 .
@@ -6854,303 +7134,303 @@ Joomla\Twitter\Tests\HelpTest::testGetLanguages
 .
 Joomla\Twitter\Tests\HelpTest::testGetLanguagesFailure
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #0 
+Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #1 
+Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #2 
+Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #3 
+Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #4 
+Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #5 
+Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #5
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #6 
+Joomla\Twitter\Tests\ListsTest::testAddMembers with data set #6
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #5 
+Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #5
 .
-Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #6 
+Joomla\Twitter\Tests\ListsTest::testAddMembersFailure with data set #6
 .
 Joomla\Twitter\Tests\ListsTest::testCreate
 .
 Joomla\Twitter\Tests\ListsTest::testCreateFailure
 .
-Joomla\Twitter\Tests\ListsTest::testDelete with data set #0 
+Joomla\Twitter\Tests\ListsTest::testDelete with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testDelete with data set #1 
+Joomla\Twitter\Tests\ListsTest::testDelete with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testDelete with data set #2 
+Joomla\Twitter\Tests\ListsTest::testDelete with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testDelete with data set #3 
+Joomla\Twitter\Tests\ListsTest::testDelete with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testDelete with data set #4 
+Joomla\Twitter\Tests\ListsTest::testDelete with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testDeleteFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testDeleteFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testDeleteFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testDeleteFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testDeleteFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #0 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #1 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #2 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #3 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #4 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #5 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #5
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #6 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembers with data set #6
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #5 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #5
 .
-Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #6 
+Joomla\Twitter\Tests\ListsTest::testDeleteMembersFailure with data set #6
 .
-Joomla\Twitter\Tests\ListsTest::testGetListById with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetListById with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetListById with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetListById with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetListById with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetListById with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetListById with data set #3 
+Joomla\Twitter\Tests\ListsTest::testGetListById with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testGetListById with data set #4 
+Joomla\Twitter\Tests\ListsTest::testGetListById with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testGetListByIdFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetListByIdFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetListByIdFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetListByIdFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetListByIdFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetListByIdFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetListByIdFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testGetListByIdFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testGetListByIdFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testGetListByIdFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testGetLists with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetLists with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetLists with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetLists with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetLists with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetLists with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetListsFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetListsFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetListsFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetListsFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetListsFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetListsFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetMembers with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetMembers with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetMembers with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetMembers with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetMembers with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetMembers with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetMembers with data set #3 
+Joomla\Twitter\Tests\ListsTest::testGetMembers with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testGetMembers with data set #4 
+Joomla\Twitter\Tests\ListsTest::testGetMembers with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testGetMembersFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetMembersFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetMembersFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetMembersFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetMembersFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetMembersFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetMembersFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testGetMembersFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testGetMembersFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testGetMembersFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testGetStatuses with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetStatuses with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetStatuses with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetStatuses with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetStatuses with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetStatuses with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetStatuses with data set #3 
+Joomla\Twitter\Tests\ListsTest::testGetStatuses with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testGetStatuses with data set #4 
+Joomla\Twitter\Tests\ListsTest::testGetStatuses with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testGetStatusesFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetStatusesFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetStatusesFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetStatusesFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetStatusesFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetStatusesFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetStatusesFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testGetStatusesFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testGetStatusesFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testGetStatusesFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscribers with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetSubscribers with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscribers with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetSubscribers with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscribers with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetSubscribers with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscribers with data set #3 
+Joomla\Twitter\Tests\ListsTest::testGetSubscribers with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscribers with data set #4 
+Joomla\Twitter\Tests\ListsTest::testGetSubscribers with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscribersFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetSubscribersFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscribersFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetSubscribersFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscribersFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetSubscribersFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscribersFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testGetSubscribersFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscribersFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testGetSubscribersFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscriptions with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetSubscriptions with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscriptions with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetSubscriptions with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscriptions with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetSubscriptions with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscriptionsFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testGetSubscriptionsFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscriptionsFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testGetSubscriptionsFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testGetSubscriptionsFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testGetSubscriptionsFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testIsMember with data set #0 
+Joomla\Twitter\Tests\ListsTest::testIsMember with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testIsMember with data set #1 
+Joomla\Twitter\Tests\ListsTest::testIsMember with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testIsMember with data set #2 
+Joomla\Twitter\Tests\ListsTest::testIsMember with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testIsMember with data set #3 
+Joomla\Twitter\Tests\ListsTest::testIsMember with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testIsMember with data set #4 
+Joomla\Twitter\Tests\ListsTest::testIsMember with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testIsMember with data set #5 
+Joomla\Twitter\Tests\ListsTest::testIsMember with data set #5
 .
-Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #5 
+Joomla\Twitter\Tests\ListsTest::testIsMemberFailure with data set #5
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #0 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #1 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #2 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #3 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #4 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #5 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriber with data set #5
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #5 
+Joomla\Twitter\Tests\ListsTest::testIsSubscriberFailure with data set #5
 .
-Joomla\Twitter\Tests\ListsTest::testSubscribe with data set #0 
+Joomla\Twitter\Tests\ListsTest::testSubscribe with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testSubscribe with data set #1 
+Joomla\Twitter\Tests\ListsTest::testSubscribe with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testSubscribe with data set #2 
+Joomla\Twitter\Tests\ListsTest::testSubscribe with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testSubscribe with data set #3 
+Joomla\Twitter\Tests\ListsTest::testSubscribe with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testSubscribe with data set #4 
+Joomla\Twitter\Tests\ListsTest::testSubscribe with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testSubscribeFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testSubscribeFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testSubscribeFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testSubscribeFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testSubscribeFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testSubscribeFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testSubscribeFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testSubscribeFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testSubscribeFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testSubscribeFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testUnsubscribe with data set #0 
+Joomla\Twitter\Tests\ListsTest::testUnsubscribe with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testUnsubscribe with data set #1 
+Joomla\Twitter\Tests\ListsTest::testUnsubscribe with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testUnsubscribe with data set #2 
+Joomla\Twitter\Tests\ListsTest::testUnsubscribe with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testUnsubscribe with data set #3 
+Joomla\Twitter\Tests\ListsTest::testUnsubscribe with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testUnsubscribe with data set #4 
+Joomla\Twitter\Tests\ListsTest::testUnsubscribe with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testUnsubscribeFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testUnsubscribeFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testUnsubscribeFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testUnsubscribeFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testUnsubscribeFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testUnsubscribeFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testUnsubscribeFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testUnsubscribeFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testUnsubscribeFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testUnsubscribeFailure with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testUpdate with data set #0 
+Joomla\Twitter\Tests\ListsTest::testUpdate with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testUpdate with data set #1 
+Joomla\Twitter\Tests\ListsTest::testUpdate with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testUpdate with data set #2 
+Joomla\Twitter\Tests\ListsTest::testUpdate with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testUpdate with data set #3 
+Joomla\Twitter\Tests\ListsTest::testUpdate with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testUpdate with data set #4 
+Joomla\Twitter\Tests\ListsTest::testUpdate with data set #4
 .
-Joomla\Twitter\Tests\ListsTest::testUpdateFailure with data set #0 
+Joomla\Twitter\Tests\ListsTest::testUpdateFailure with data set #0
 .
-Joomla\Twitter\Tests\ListsTest::testUpdateFailure with data set #1 
+Joomla\Twitter\Tests\ListsTest::testUpdateFailure with data set #1
 .
-Joomla\Twitter\Tests\ListsTest::testUpdateFailure with data set #2 
+Joomla\Twitter\Tests\ListsTest::testUpdateFailure with data set #2
 .
-Joomla\Twitter\Tests\ListsTest::testUpdateFailure with data set #3 
+Joomla\Twitter\Tests\ListsTest::testUpdateFailure with data set #3
 .
-Joomla\Twitter\Tests\ListsTest::testUpdateFailure with data set #4 
+Joomla\Twitter\Tests\ListsTest::testUpdateFailure with data set #4
 .
 Joomla\Twitter\Tests\OAuthTest::testEndSession
 .
-Joomla\Twitter\Tests\OAuthTest::testVerifyCredentials with data set #0 
+Joomla\Twitter\Tests\OAuthTest::testVerifyCredentials with data set #0
 .
-Joomla\Twitter\Tests\OAuthTest::testVerifyCredentials with data set #1 
+Joomla\Twitter\Tests\OAuthTest::testVerifyCredentials with data set #1
 .
 Joomla\Twitter\Tests\ObjectTest::testCheckRateLimit
 .
@@ -7178,13 +7458,13 @@ Joomla\Twitter\Tests\PlacesTest::testGetPlace
 .
 Joomla\Twitter\Tests\PlacesTest::testGetPlaceFailure
 .
-Joomla\Twitter\Tests\PlacesTest::testSearch with data set #0 
+Joomla\Twitter\Tests\PlacesTest::testSearch with data set #0
 .
-Joomla\Twitter\Tests\PlacesTest::testSearch with data set #1 
+Joomla\Twitter\Tests\PlacesTest::testSearch with data set #1
 .
-Joomla\Twitter\Tests\PlacesTest::testSearchFailure with data set #0 
+Joomla\Twitter\Tests\PlacesTest::testSearchFailure with data set #0
 .
-Joomla\Twitter\Tests\PlacesTest::testSearchFailure with data set #1 
+Joomla\Twitter\Tests\PlacesTest::testSearchFailure with data set #1
 .
 Joomla\Twitter\Tests\PlacesTest::testSimilarPlaces
 .
@@ -7244,9 +7524,9 @@ Joomla\Twitter\Tests\StatusesTest::testGetMentionsFailure
 .
 Joomla\Twitter\Tests\StatusesTest::testGetOembed
 .
-Joomla\Twitter\Tests\StatusesTest::testGetOembedFailure with data set #0 
+Joomla\Twitter\Tests\StatusesTest::testGetOembedFailure with data set #0
 .
-Joomla\Twitter\Tests\StatusesTest::testGetOembedFailure with data set #1 
+Joomla\Twitter\Tests\StatusesTest::testGetOembedFailure with data set #1
 .
 Joomla\Twitter\Tests\StatusesTest::testGetRetweeters
 .
@@ -7264,17 +7544,17 @@ Joomla\Twitter\Tests\StatusesTest::testGetTweetById
 .
 Joomla\Twitter\Tests\StatusesTest::testGetTweetByIdFailure
 .
-Joomla\Twitter\Tests\StatusesTest::testGetUserTimeline with data set #0 
+Joomla\Twitter\Tests\StatusesTest::testGetUserTimeline with data set #0
 .
-Joomla\Twitter\Tests\StatusesTest::testGetUserTimeline with data set #1 
+Joomla\Twitter\Tests\StatusesTest::testGetUserTimeline with data set #1
 .
-Joomla\Twitter\Tests\StatusesTest::testGetUserTimeline with data set #2 
+Joomla\Twitter\Tests\StatusesTest::testGetUserTimeline with data set #2
 .
-Joomla\Twitter\Tests\StatusesTest::testGetUserTimelineFailure with data set #0 
+Joomla\Twitter\Tests\StatusesTest::testGetUserTimelineFailure with data set #0
 .
-Joomla\Twitter\Tests\StatusesTest::testGetUserTimelineFailure with data set #1 
+Joomla\Twitter\Tests\StatusesTest::testGetUserTimelineFailure with data set #1
 .
-Joomla\Twitter\Tests\StatusesTest::testGetUserTimelineFailure with data set #2 
+Joomla\Twitter\Tests\StatusesTest::testGetUserTimelineFailure with data set #2
 .
 Joomla\Twitter\Tests\StatusesTest::testRetweet
 .
@@ -7284,9 +7564,9 @@ Joomla\Twitter\Tests\StatusesTest::testTweet
 .
 Joomla\Twitter\Tests\StatusesTest::testTweetFailure
 .
-Joomla\Twitter\Tests\StatusesTest::testTweetWithMedia with data set #0 
+Joomla\Twitter\Tests\StatusesTest::testTweetWithMedia with data set #0
 .
-Joomla\Twitter\Tests\StatusesTest::testTweetWithMedia with data set #1 
+Joomla\Twitter\Tests\StatusesTest::testTweetWithMedia with data set #1
 .
 Joomla\Twitter\Tests\StatusesTest::testTweetWithMediaFailure
 .
@@ -7332,29 +7612,29 @@ Joomla\Twitter\Tests\TwitterTest::test__GetTrends
 .
 Joomla\Twitter\Tests\TwitterTest::test__GetUsers
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributees with data set #0 
+Joomla\Twitter\Tests\UsersTest::testGetContributees with data set #0
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributees with data set #1 
+Joomla\Twitter\Tests\UsersTest::testGetContributees with data set #1
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributees with data set #2 
+Joomla\Twitter\Tests\UsersTest::testGetContributees with data set #2
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributeesFailure with data set #0 
+Joomla\Twitter\Tests\UsersTest::testGetContributeesFailure with data set #0
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributeesFailure with data set #1 
+Joomla\Twitter\Tests\UsersTest::testGetContributeesFailure with data set #1
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributeesFailure with data set #2 
+Joomla\Twitter\Tests\UsersTest::testGetContributeesFailure with data set #2
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributors with data set #0 
+Joomla\Twitter\Tests\UsersTest::testGetContributors with data set #0
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributors with data set #1 
+Joomla\Twitter\Tests\UsersTest::testGetContributors with data set #1
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributors with data set #2 
+Joomla\Twitter\Tests\UsersTest::testGetContributors with data set #2
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributorsFailure with data set #0 
+Joomla\Twitter\Tests\UsersTest::testGetContributorsFailure with data set #0
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributorsFailure with data set #1 
+Joomla\Twitter\Tests\UsersTest::testGetContributorsFailure with data set #1
 .
-Joomla\Twitter\Tests\UsersTest::testGetContributorsFailure with data set #2 
+Joomla\Twitter\Tests\UsersTest::testGetContributorsFailure with data set #2
 .
 Joomla\Twitter\Tests\UsersTest::testGetSuggestions
 .
@@ -7368,49 +7648,49 @@ Joomla\Twitter\Tests\UsersTest::testGetSuggestionsSlugMembers
 .
 Joomla\Twitter\Tests\UsersTest::testGetSuggestionsSlugMembersFailure
 .
-Joomla\Twitter\Tests\UsersTest::testGetUser with data set #0 
+Joomla\Twitter\Tests\UsersTest::testGetUser with data set #0
 .
-Joomla\Twitter\Tests\UsersTest::testGetUser with data set #1 
+Joomla\Twitter\Tests\UsersTest::testGetUser with data set #1
 .
-Joomla\Twitter\Tests\UsersTest::testGetUser with data set #2 
+Joomla\Twitter\Tests\UsersTest::testGetUser with data set #2
 .
-Joomla\Twitter\Tests\UsersTest::testGetUserFailure with data set #0 
+Joomla\Twitter\Tests\UsersTest::testGetUserFailure with data set #0
 .
-Joomla\Twitter\Tests\UsersTest::testGetUserFailure with data set #1 
+Joomla\Twitter\Tests\UsersTest::testGetUserFailure with data set #1
 .
-Joomla\Twitter\Tests\UsersTest::testGetUserFailure with data set #2 
+Joomla\Twitter\Tests\UsersTest::testGetUserFailure with data set #2
 .
-Joomla\Twitter\Tests\UsersTest::testGetUserProfileBanner with data set #0 
+Joomla\Twitter\Tests\UsersTest::testGetUserProfileBanner with data set #0
 .
-Joomla\Twitter\Tests\UsersTest::testGetUserProfileBanner with data set #1 
+Joomla\Twitter\Tests\UsersTest::testGetUserProfileBanner with data set #1
 .
-Joomla\Twitter\Tests\UsersTest::testGetUserProfileBanner with data set #2 
+Joomla\Twitter\Tests\UsersTest::testGetUserProfileBanner with data set #2
 .
-Joomla\Twitter\Tests\UsersTest::testGetUserProfileBannerFailure with data set #0 
+Joomla\Twitter\Tests\UsersTest::testGetUserProfileBannerFailure with data set #0
 .
-Joomla\Twitter\Tests\UsersTest::testGetUserProfileBannerFailure with data set #1 
+Joomla\Twitter\Tests\UsersTest::testGetUserProfileBannerFailure with data set #1
 .
-Joomla\Twitter\Tests\UsersTest::testGetUserProfileBannerFailure with data set #2 
+Joomla\Twitter\Tests\UsersTest::testGetUserProfileBannerFailure with data set #2
 .
-Joomla\Twitter\Tests\UsersTest::testGetUsersLookup with data set #0 
+Joomla\Twitter\Tests\UsersTest::testGetUsersLookup with data set #0
 .
-Joomla\Twitter\Tests\UsersTest::testGetUsersLookup with data set #1 
+Joomla\Twitter\Tests\UsersTest::testGetUsersLookup with data set #1
 .
-Joomla\Twitter\Tests\UsersTest::testGetUsersLookup with data set #2 
+Joomla\Twitter\Tests\UsersTest::testGetUsersLookup with data set #2
 .
-Joomla\Twitter\Tests\UsersTest::testGetUsersLookup with data set #3 
+Joomla\Twitter\Tests\UsersTest::testGetUsersLookup with data set #3
 .
-Joomla\Twitter\Tests\UsersTest::testGetUsersLookup with data set #4 
+Joomla\Twitter\Tests\UsersTest::testGetUsersLookup with data set #4
 .
-Joomla\Twitter\Tests\UsersTest::testGetUsersLookupFailure with data set #0 
+Joomla\Twitter\Tests\UsersTest::testGetUsersLookupFailure with data set #0
 .
-Joomla\Twitter\Tests\UsersTest::testGetUsersLookupFailure with data set #1 
+Joomla\Twitter\Tests\UsersTest::testGetUsersLookupFailure with data set #1
 .
-Joomla\Twitter\Tests\UsersTest::testGetUsersLookupFailure with data set #2 
+Joomla\Twitter\Tests\UsersTest::testGetUsersLookupFailure with data set #2
 .
-Joomla\Twitter\Tests\UsersTest::testGetUsersLookupFailure with data set #3 
+Joomla\Twitter\Tests\UsersTest::testGetUsersLookupFailure with data set #3
 .
-Joomla\Twitter\Tests\UsersTest::testGetUsersLookupFailure with data set #4 
+Joomla\Twitter\Tests\UsersTest::testGetUsersLookupFailure with data set #4
 .
 Joomla\Twitter\Tests\UsersTest::testSearchUsers
 .
@@ -7518,135 +7798,103 @@ Joomla\View\Tests\AbstractViewTest::testEscape
 .
 Joomla\View\Tests\AbstractViewTest::test__construct
 .
-LanguageHelperTest::testCreateLanguageList
-.
-LanguageHelperTest::testDetectLanguage
-.
-LanguageHelperTest::testGetLanguages
-I
 LanguageTest::testConstruct
-.
+E
 LanguageTest::testExists
-.
+E
 LanguageTest::testGet
-I
+E
 LanguageTest::testGetDefault
-.
+E
 LanguageTest::testGetErrorFiles
-I
+E
 LanguageTest::testGetFirstDay
-I
+E
 LanguageTest::testGetIgnoredSearchWords
-.
+E
 LanguageTest::testGetIgnoredSearchWordsCallback
-.
+E
 LanguageTest::testGetInstanceAndLanguage
-.
+E
 LanguageTest::testGetKnownLanguages
-.
+E
 LanguageTest::testGetLanguagePath
-.
+E
 LanguageTest::testGetLocale
-I
+E
 LanguageTest::testGetLowerLimitSearchWord
-.
+E
 LanguageTest::testGetLowerLimitSearchWordCallback
-.
+E
 LanguageTest::testGetMetadata
-.
+E
 LanguageTest::testGetName
-I
+E
 LanguageTest::testGetOrphans
-I
+E
 LanguageTest::testGetPaths
-I
+E
 LanguageTest::testGetPluralSuffixes
-.
+E
 LanguageTest::testGetPluralSuffixesCallback
-.
+E
 LanguageTest::testGetSearchDisplayedCharactersNumber
-.
+E
 LanguageTest::testGetSearchDisplayedCharactersNumberCallback
-.
+E
 LanguageTest::testGetSetDebug
-.
+E
 LanguageTest::testGetTag
-I
+E
 LanguageTest::testGetTransliterator
-.
+E
 LanguageTest::testGetUpperLimitSearchWord
-.
+E
 LanguageTest::testGetUpperLimitSearchWordCallback
-.
+E
 LanguageTest::testGetUsed
-I
+E
 LanguageTest::testHasKey
-I
+E
 LanguageTest::testIsRTL
-I
+E
 LanguageTest::testLoad
-I
+E
 LanguageTest::testParse
-.
+E
 LanguageTest::testParseLanguageFiles
-.
+E
 LanguageTest::testParseXMLLanguageFile
-.
+E
 LanguageTest::testParseXMLLanguageFileException
-.
+E
 LanguageTest::testSetDefault
-.
+E
 LanguageTest::testSetIgnoredSearchWordsCallback
-.
+E
 LanguageTest::testSetLanguage
-.
+E
 LanguageTest::testSetLowerLimitSearchWordCallback
-.
+E
 LanguageTest::testSetPluralSuffixesCallback
-.
+E
 LanguageTest::testSetSearchDisplayedCharactersNumberCallback
-.
+E
 LanguageTest::testSetTransliterator
-.
+E
 LanguageTest::testSetUpperLimitSearchWordCallback
-.
+E
 LanguageTest::testTransliterate
-.
+E
 LanguageTest::test_
+E
+PatcherTest::testAdd with data set #0
 .
-LogTest::testAddLogEntry
+PatcherTest::testAdd with data set #1
 .
-LogTest::testAddLoggerAutoInstantiation
+PatcherTest::testAdd with data set #2
 .
-LogTest::testAddLoggerAutoInstantiationInvalidLogger
-.
-LogTest::testFindLoggersByCategory
-.
-LogTest::testFindLoggersByNotCategory
-.
-LogTest::testFindLoggersByPriority
-.
-LogTest::testFindLoggersByPriorityAndCategory
-.
-LogTest::testSetInstance
-.
-LoggerDatabaseTest::testAddEntry01
-.
-LoggerDatabaseTest::testAddEntry02
-.
-LoggerDatabaseTest::testConnect01
-.
-LoggerDatabaseTest::testConnect02
-.
-LoggerDatabaseTest::testConstructor01
-.
-PatcherTest::testAdd with data set #0 
-.
-PatcherTest::testAdd with data set #1 
-.
-PatcherTest::testAdd with data set #2 
-.
-PatcherTest::testAdd with data set #3 
+PatcherTest::testAdd with data set #3
 .
 PatcherTest::testAddFile
 .
@@ -7716,41 +7964,41 @@ PathTest::testSetPermissions
 I
 PorterenTest::testData
 .
-PorterenTest::testStem with data set #0 
+PorterenTest::testStem with data set #0
 .
-PorterenTest::testStem with data set #1 
+PorterenTest::testStem with data set #1
 .
-PorterenTest::testStem with data set #10 
+PorterenTest::testStem with data set #10
 .
-PorterenTest::testStem with data set #11 
+PorterenTest::testStem with data set #11
 .
-PorterenTest::testStem with data set #12 
+PorterenTest::testStem with data set #12
 .
-PorterenTest::testStem with data set #13 
+PorterenTest::testStem with data set #13
 .
-PorterenTest::testStem with data set #14 
+PorterenTest::testStem with data set #14
 .
-PorterenTest::testStem with data set #15 
+PorterenTest::testStem with data set #15
 .
-PorterenTest::testStem with data set #16 
+PorterenTest::testStem with data set #16
 .
-PorterenTest::testStem with data set #17 
+PorterenTest::testStem with data set #17
 .
-PorterenTest::testStem with data set #2 
+PorterenTest::testStem with data set #2
 .
-PorterenTest::testStem with data set #3 
+PorterenTest::testStem with data set #3
 .
-PorterenTest::testStem with data set #4 
+PorterenTest::testStem with data set #4
 .
-PorterenTest::testStem with data set #5 
+PorterenTest::testStem with data set #5
 .
-PorterenTest::testStem with data set #6 
+PorterenTest::testStem with data set #6
 .
-PorterenTest::testStem with data set #7 
+PorterenTest::testStem with data set #7
 .
-PorterenTest::testStem with data set #8 
+PorterenTest::testStem with data set #8
 .
-PorterenTest::testStem with data set #9 
+PorterenTest::testStem with data set #9
 .
 RegistryTest::testBindData
 .
@@ -7836,6 +8084,8 @@ StreamTest::testFilesize
 I
 StreamTest::testGetFileHandle
 I
+StreamTest::testGetStream
+.
 StreamTest::testGet_meta_data
 I
 StreamTest::testGets
@@ -7876,31 +8126,31 @@ StringControllerTest::test_getArray
 I
 TransliterateTest::testData
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #0 
+TransliterateTest::testUtf8_latin_to_ascii with data set #0
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #1 
+TransliterateTest::testUtf8_latin_to_ascii with data set #1
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #10 
+TransliterateTest::testUtf8_latin_to_ascii with data set #10
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #11 
+TransliterateTest::testUtf8_latin_to_ascii with data set #11
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #12 
+TransliterateTest::testUtf8_latin_to_ascii with data set #12
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #13 
+TransliterateTest::testUtf8_latin_to_ascii with data set #13
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #2 
+TransliterateTest::testUtf8_latin_to_ascii with data set #2
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #3 
+TransliterateTest::testUtf8_latin_to_ascii with data set #3
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #4 
+TransliterateTest::testUtf8_latin_to_ascii with data set #4
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #5 
+TransliterateTest::testUtf8_latin_to_ascii with data set #5
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #6 
+TransliterateTest::testUtf8_latin_to_ascii with data set #6
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #7 
+TransliterateTest::testUtf8_latin_to_ascii with data set #7
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #8 
+TransliterateTest::testUtf8_latin_to_ascii with data set #8
 .
-TransliterateTest::testUtf8_latin_to_ascii with data set #9 
+TransliterateTest::testUtf8_latin_to_ascii with data set #9
 .

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,7 +70,11 @@ struct HhbcTranslator {
 
   // In between each emit* call, irtranslator indicates the new
   // bytecode offset (or whether we're finished) using this API.
-  void setBcOff(Offset newOff, bool lastBcOff);
+  void setBcOff(Offset newOff, bool lastBcOff, bool maybeStartBlock = false);
+
+  // End a bytecode block and do the right thing with fallthrough.
+  void endBlock(Offset next);
+
   void end();
   void end(Offset nextPc);
 
@@ -183,9 +187,9 @@ struct HhbcTranslator {
   void emitEmptyL(int32_t id);
   void emitEmptyS();
   void emitEmptyG();
-  // The subOpc param can be one of either
+  // The subOp param can be one of either
   // Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor
-  void emitSetOpL(Opcode subOpc, uint32_t id);
+  void emitSetOpL(Op subOp, uint32_t id);
   // the pre & inc params encode the 4 possible sub opcodes:
   // PreInc, PostInc, PreDec, PostDec
   void emitIncDecL(bool pre, bool inc, uint32_t id);
@@ -195,8 +199,8 @@ struct HhbcTranslator {
   void emitPopR();
   void emitDup();
   void emitUnboxR();
-  void emitJmpZ(Offset taken);
-  void emitJmpNZ(Offset taken);
+  void emitJmpZ(Offset taken, Offset next, bool bothPaths);
+  void emitJmpNZ(Offset taken, Offset next, bool bothPaths);
   void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise);
   void emitGt()    { emitCmp(Gt);    }
   void emitGte()   { emitCmp(Gte);   }
@@ -293,12 +297,12 @@ struct HhbcTranslator {
   // binary arithmetic ops
   void emitAdd();
   void emitSub();
+  void emitMul();
   void emitBitAnd();
   void emitBitOr();
   void emitBitXor();
   void emitBitNot();
   void emitAbs();
-  void emitMul();
   void emitMod();
   void emitDiv();
   void emitSqrt();
@@ -652,8 +656,9 @@ private:
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
+  void emitJmpHelper(int32_t taken, int32_t next, bool negate,
+                     bool bothPaths, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
-  void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);
   BCMarker makeMarker(Offset bcOff);
@@ -676,6 +681,12 @@ private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff, std::vector<SSATmp*>& spillValues);
   Block* makeExitWarn(Offset targetBcOff, std::vector<SSATmp*>& spillValues,
                       const StringData* warning);
+
+  SSATmp* promoteBool(SSATmp* src);
+  Opcode promoteBinaryDoubles(Op op, SSATmp*& src1, SSATmp*& src2);
+
+  void emitBinaryBitOp(Op op);
+  void emitBinaryArith(Op op);
 
   /*
    * Create a custom side exit---that is, an exit that does some
@@ -707,6 +718,11 @@ private: // Exit trace creation routines.
   Block* makeCatch(std::vector<SSATmp*> extraSpill =
                    std::vector<SSATmp*>());
   Block* makeCatchNoSpill();
+
+  /*
+   * Create a block for a branch target that will be generated later.
+   */
+  Block* makeBlock(Offset);
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,

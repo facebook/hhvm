@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -282,13 +282,13 @@ void MemoryManager::resetAllocator() {
  */
 
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
-  nbytes += sizeof(SmallNode);
-  if (UNLIKELY(nbytes > kMaxSmartSize)) {
+  auto const nbytes_padded = nbytes + sizeof(SmallNode);
+  if (UNLIKELY(nbytes_padded > kMaxSmartSize)) {
     return smartMallocBig(nbytes);
   }
 
-  auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes));
-  ptr->padbytes = nbytes;
+  auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
+  ptr->padbytes = nbytes_padded;
   return ptr + 1;
 }
 
@@ -327,7 +327,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   auto const oldPrev = n->prev;
 
   auto const newNode = static_cast<SweepNode*>(
-    realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
+    Util::safe_realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
   );
 
   refreshStatsHelper();
@@ -399,7 +399,7 @@ NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
   assert(nbytes > 0);
   auto const n = static_cast<SweepNode*>(
-    Util::safe_malloc(nbytes + sizeof(SweepNode) - sizeof(SmallNode))
+    Util::safe_malloc(nbytes + sizeof(SweepNode))
   );
   return smartEnlist(n);
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,7 +47,6 @@
 #endif
 
 #include <boost/bind.hpp>
-#include <boost/optional.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -1043,7 +1042,7 @@ class FreeRequestStubTrigger : public Treadmill::WorkItem {
     if (tx64->freeRequestStub(m_stub) != true) {
       // If we can't free the stub, enqueue again to retry.
       TRACE(3, "FreeStubTrigger: write lease failed, requeueing %p\n", m_stub);
-      enqueue(new FreeRequestStubTrigger(m_stub));
+      enqueue(std::unique_ptr<WorkItem>(new FreeRequestStubTrigger(m_stub)));
     }
   }
 };
@@ -1506,7 +1505,8 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   }
 
   if (smashed && info.stubAddr) {
-    Treadmill::WorkItem::enqueue(new FreeRequestStubTrigger(info.stubAddr));
+    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                    new FreeRequestStubTrigger(info.stubAddr)));
   }
 
   return true;
@@ -2067,7 +2067,9 @@ TranslatorX64::translateTracelet(Tracelet& t) {
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
-      ht.setBcOff(ni->source.offset(), ni->breaksTracelet && !ht.isInlining());
+      ht.setBcOff(ni->source.offset(),
+                  ni->breaksTracelet && !ht.isInlining(),
+                  true);
       readMetaData(metaHand, *ni, m_irTrans->hhbcTrans(),
                    m_mode == TransProfile, MetaMode::Legacy);
 
@@ -2141,8 +2143,7 @@ void TranslatorX64::traceCodeGen() {
   auto& unit = ht.unit();
 
   auto finishPass = [&](const char* msg, int level) {
-    dumpTrace(level, unit, msg, nullptr, nullptr, nullptr,
-              ht.traceBuilder().guards());
+    dumpTrace(level, unit, msg, nullptr, nullptr, ht.traceBuilder().guards());
     assert(checkCfg(unit));
   };
 
@@ -2151,8 +2152,7 @@ void TranslatorX64::traceCodeGen() {
   optimize(unit, ht.traceBuilder(), m_mode);
   finishPass(" after optimizing ", kOptLevel);
 
-  auto regs = RuntimeOption::EvalHHIRXls ? allocateRegs(unit) :
-              allocRegsForUnit(unit);
+  auto regs = allocateRegs(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
   recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier());

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -170,16 +170,21 @@ public:
 class MySQLFieldInfo {
 public:
   MySQLFieldInfo()
-    : max_length(0), length(0), type(0), flags(0)
+    : max_length(0), length(0), type(0), flags(0), decimals(0), charsetnr(0)
   {}
 
   String name;
+  String org_name;
   String table;
+  String org_table;
   String def;
+  String db;
   int64_t max_length;
   int64_t length;
   int type;
   unsigned int flags;
+  unsigned int decimals;
+  unsigned int charsetnr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

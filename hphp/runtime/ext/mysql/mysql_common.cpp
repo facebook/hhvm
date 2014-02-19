@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -639,13 +639,18 @@ void MySQLResult::setFieldCount(int64_t fields) {
 
 void MySQLResult::setFieldInfo(int64_t f, MYSQL_FIELD *field) {
   MySQLFieldInfo &info = m_fields[f];
-  info.name = String(field->name, CopyString);
-  info.table = String(field->table, CopyString);
-  info.def = String(field->def, CopyString);
+  info.name       = String(field->name, CopyString);
+  info.org_name   = String(field->org_name, CopyString);
+  info.table      = String(field->table, CopyString);
+  info.org_table  = String(field->org_table, CopyString);
+  info.def        = String(field->def, CopyString);
+  info.db         = String(field->db, CopyString);
   info.max_length = (int64_t)field->max_length;
-  info.length = (int64_t)field->length;
-  info.type = (int)field->type;
-  info.flags = field->flags;
+  info.length     = (int64_t)field->length;
+  info.type       = (int)field->type;
+  info.flags      = field->flags;
+  info.decimals   = field->decimals;
+  info.charsetnr  = field->charsetnr;
 }
 
 MySQLFieldInfo *MySQLResult::getFieldInfo(int64_t field) {
@@ -799,6 +804,7 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
         b->buffer_length = sizeof(int64_t);
         break;
       case MYSQL_TYPE_DATE:
+      case MYSQL_TYPE_NEWDATE:
       case MYSQL_TYPE_DATETIME:
       case MYSQL_TYPE_TIMESTAMP:
       case MYSQL_TYPE_TIME:
@@ -820,9 +826,9 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
                              fields[i].length;
         break;
       default:
-        // There exists some more types in this enum like MYSQL_TYPE_NEWDATE,
-        // MYSQL_TYPE_TIMESTAMP2, MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but
-        // they are just used on the server
+        // There exists some more types in this enum like MYSQL_TYPE_TIMESTAMP2
+        // MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but they are just used on the
+        // server
         assert(false);
     }
 

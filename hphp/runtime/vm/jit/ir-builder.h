@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,6 +125,42 @@ struct IRBuilder {
    */
   void setMarker(BCMarker marker);
 
+ public:
+  /*
+   * API for managing state when building IR with bytecode-level
+   * control flow.
+   */
+
+  /*
+   * Start a new block using the current marker.
+   */
+  void startBlock();
+
+  /*
+   * Create a new block corresponding to bytecode control flow.
+   */
+  Block* makeBlock(Offset offset);
+
+  /*
+   * Block has been created and added to the offset map.
+   */
+  bool blockExists(Offset offset);
+
+  /*
+   * True if translating the block at offset is incompatible with the
+   * current state.  This is possible if the target block has already
+   * been translated, or if the types of guarded locals do not match.
+   *
+   * TODO(t3730468): Should we check guarded stack types here as well?
+   */
+  bool blockIsIncompatible(Offset offset);
+
+  /*
+   * Note that we've seen this offset as the start of a block.
+   */
+  void recordOffset(Offset offset);
+
+ public:
   /*
    * To emit code to a block other than the current block, call pushBlock(),
    * emit instructions as usual with gen(...), then call popBlock(). This is
@@ -141,7 +177,7 @@ struct IRBuilder {
    * otherwise code will be appended to the block.
    */
   void pushBlock(BCMarker marker, Block* b,
-                 const boost::optional<Block::iterator>& where);
+                 const folly::Optional<Block::iterator>& where);
   void popBlock();
 
   /*
@@ -188,7 +224,6 @@ struct IRBuilder {
   SSATmp* genDefNull();
   SSATmp* genPtrToInitNull();
   SSATmp* genPtrToUninit();
-  SSATmp* genDefNone();
 
   template<class... Args>
   SSATmp* cns(Args&&... args) {
@@ -363,16 +398,31 @@ private:
   struct BlockState {
     Block* block;
     BCMarker marker;
-    boost::optional<Block::iterator> where;
+    folly::Optional<Block::iterator> where;
   };
   smart::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
-  boost::optional<Block::iterator> m_curWhere;
+  folly::Optional<Block::iterator> m_curWhere;
 
   bool m_enableSimplification;
   bool m_constrainGuards;
 
   GuardConstraints m_guardConstraints;
+
+  // Keep track of blocks created to support bytecode control flow.
+  //
+  // TODO(t3730559): Offset is used here since it's passed from
+  // emitJmp*, but SrcKey might be better in case of inlining.
+  smart::flat_map<Offset,Block*> m_offsetToBlockMap;
+
+  // Track the offsets of every bytecode block that is started by
+  // translateRegion.
+  //
+  // TODO(t3730581): Slightly redundant with m_offsetToBlockMap, but
+  // not completely.  It is used to prevent translating backward
+  // branches to blocks on the main trace.  We should be able to kill
+  // this eventually.
+  smart::flat_set<Offset> m_offsetSeen;
 };
 
 /*
@@ -402,8 +452,7 @@ template<> struct IRBuilder::BranchImpl<SSATmp*> {
  */
 struct BlockPusher {
   BlockPusher(IRBuilder& irb, BCMarker marker, Block* block,
-              const boost::optional<Block::iterator>& where =
-                boost::optional<Block::iterator>())
+              const folly::Optional<Block::iterator>& where = folly::none)
     : m_irb(irb)
   {
     irb.pushBlock(marker, block, where);

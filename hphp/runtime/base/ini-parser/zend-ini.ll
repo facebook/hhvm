@@ -30,7 +30,7 @@ struct ZendINIGlobals {
   int scanner_mode;
   std::string filename;
   int lineno;
-  IniSetting::PFN_PARSER_CALLBACK callback;
+  IniSetting::ParserCallback *callback;
   void *arg;
   YY_BUFFER_STATE state;
 };
@@ -48,10 +48,9 @@ static ZendINIGlobals s_zend_ini;
     }                                             \
   }
 
-/* Eat trailing whitespace + extra char */
-#define EAT_TRAILING_WHITESPACE_EX(ch)            \
+/* Eat trailing whitespace */
+#define EAT_TRAILING_WHITESPACE()                 \
   while (yyleng > 0 && (                          \
-    (ch != 'X' && yytext[yyleng - 1] ==  ch) ||   \
     yytext[yyleng - 1] == '\n' ||                 \
     yytext[yyleng - 1] == '\r' ||                 \
     yytext[yyleng - 1] == '\t' ||                 \
@@ -59,9 +58,6 @@ static ZendINIGlobals s_zend_ini;
   ) {                                             \
     yyleng--;                                     \
   }
-
-/* Eat trailing whitespace */
-#define EAT_TRAILING_WHITESPACE()  EAT_TRAILING_WHITESPACE_EX('X')
 
 #define RETURN_TOKEN(type, str, len) {            \
   *ini_lval = std::string(str, len);              \
@@ -138,6 +134,7 @@ restart:
 
 %x ST_OFFSET
 %x ST_SECTION_VALUE
+%x ST_LABEL
 %x ST_VALUE
 %x ST_SECTION_RAW
 %x ST_DOUBLE_QUOTES
@@ -189,23 +186,23 @@ DOUBLE_QUOTES_CHARS (("\\"{ANY_CHAR}|"$"[^{\"]|[^$\"\\])+|"$")
   return ']';
 }
 
-<INITIAL>{LABEL}"["{TABS_AND_SPACES}* {
+<ST_LABEL>"["{TABS_AND_SPACES}* {
 /* Start of option with offset */
   /* Eat leading whitespace */
   EAT_LEADING_WHITESPACE();
 
   /* Eat trailing whitespace and [ */
-  EAT_TRAILING_WHITESPACE_EX('[');
+  EAT_TRAILING_WHITESPACE();
 
   /* Enter offset lookup state */
   yy_push_state(ST_OFFSET);
 
-  RETURN_TOKEN(TC_OFFSET, yytext, yyleng);
+  return '[';
 }
 
 <ST_OFFSET>{TABS_AND_SPACES}*"]" {
 /* End of section or an option offset */
-  BEGIN(INITIAL);
+  yy_push_state(ST_LABEL);
   return ']';
 }
 
@@ -248,11 +245,13 @@ DOUBLE_QUOTES_CHARS (("\\"{ANY_CHAR}|"$"[^{\"]|[^$\"\\])+|"$")
 
   /* Eat trailing whitespace */
   EAT_TRAILING_WHITESPACE();
+    
+  yy_push_state(ST_LABEL);
 
   RETURN_TOKEN(TC_LABEL, yytext, yyleng);
 }
 
-<INITIAL>{TABS_AND_SPACES}*[=]{TABS_AND_SPACES}* {
+<ST_LABEL>{TABS_AND_SPACES}*[=]{TABS_AND_SPACES}* {
 /* Start option value */
   if (SCNG(scanner_mode) == IniSetting::RawScanner) {
     yy_push_state(ST_RAW);
@@ -356,13 +355,14 @@ DOUBLE_QUOTES_CHARS (("\\"{ANY_CHAR}|"$"[^{\"]|[^$\"\\])+|"$")
   RETURN_TOKEN(TC_WHITESPACE, yytext, yyleng);
 }
 
-<INITIAL,ST_RAW>{TABS_AND_SPACES}+ {
+<INITIAL,ST_RAW,ST_LABEL>{TABS_AND_SPACES}+ {
   /* eat whitespace */
   return GOTO_RESTART;
 }
 
-<INITIAL>{TABS_AND_SPACES}*{NEWLINE} {
+<INITIAL,ST_LABEL>{TABS_AND_SPACES}*{NEWLINE} {
   SCNG(lineno)++;
+  BEGIN(INITIAL);
   return END_OF_LINE;
 }
 
@@ -382,7 +382,7 @@ DOUBLE_QUOTES_CHARS (("\\"{ANY_CHAR}|"$"[^{\"]|[^$\"\\])+|"$")
   return END_OF_LINE;
 }
 
-<ST_VALUE,ST_RAW><<EOF>> {
+<ST_VALUE,ST_RAW,ST_LABEL><<EOF>> {
 /* End of option value (if EOF is reached before EOL) */
   BEGIN(INITIAL);
   return END_OF_LINE;
@@ -400,12 +400,12 @@ suppress_defined_but_not_used_warnings() {
   yy_top_state();
 }
 
-void zend_ini_scan(const std::string& str, int scanner_mode, const std::string& filename,
-                   IniSetting::PFN_PARSER_CALLBACK callback, void *arg) {
+void zend_ini_scan(const std::string &str, int scanner_mode, const std::string &filename,
+                   IniSetting::ParserCallback &callback, void *arg) {
   SCNG(scanner_mode) = scanner_mode;
   SCNG(filename) = filename.data();
   SCNG(lineno) = 1;
-  SCNG(callback) = callback;
+  SCNG(callback) = &callback;
   SCNG(arg) = arg;
 
   BEGIN(INITIAL);
@@ -423,9 +423,28 @@ void zend_ini_scan_cleanup() {
   SCNG(state) = nullptr;
 }
 
-void zend_ini_callback(std::string *arg1, std::string *arg2, std::string *arg3,
-                       int callback_type) {
-  SCNG(callback)(arg1, arg2, arg3, callback_type, SCNG(arg));
+void zend_ini_on_section(const std::string &name) {
+  SCNG(callback)->onSection(name, SCNG(arg));
+}
+void zend_ini_on_label(const std::string &name) {
+  SCNG(callback)->onLabel(name, SCNG(arg));
+}
+void zend_ini_on_entry(const std::string &key, const std::string &value) {
+  SCNG(callback)->onEntry(key, value, SCNG(arg));
+}
+void zend_ini_on_pop_entry(const std::string &key, const std::string &value, 
+                           const std::string &offset) {
+  SCNG(callback)->onPopEntry(key, value, offset, SCNG(arg));
+}
+void zend_ini_on_constant(std::string &result, const std::string &name) {
+  SCNG(callback)->onConstant(result, name);
+}
+void zend_ini_on_var(std::string &result, const std::string &name) {
+  SCNG(callback)->onVar(result, name);
+}
+void zend_ini_on_op(std::string &result, char type, const std::string& op1,
+                    const std::string& op2) {
+  SCNG(callback)->onOp(result, type, op1, op2);
 }
 
 void ini_error(const char *msg) {

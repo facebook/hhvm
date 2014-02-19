@@ -1,0 +1,6 @@
+__construct
+setColor
+getColorValue
+setColorValue
+isPixelSimilar
+==DONE==

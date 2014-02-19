@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,11 +64,13 @@ struct Simplifier {
 private:
   SSATmp* simplifyMov(SSATmp* src);
   SSATmp* simplifyNot(SSATmp* src);
-  SSATmp* simplifyAbsInt(IRInstruction* inst);
   SSATmp* simplifyAbsDbl(IRInstruction* inst);
-  SSATmp* simplifyAdd(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifySub(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyMul(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAddInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifySubInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyMulInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAddDbl(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifySubDbl(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyMulDbl(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMod(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyDivDbl(IRInstruction* inst);
   SSATmp* simplifyBitAnd(SSATmp* src1, SSATmp* src2);
@@ -131,7 +133,6 @@ private:
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
   SSATmp* simplifyConvClsToCctx(IRInstruction* inst);
   SSATmp* simplifySpillStack(IRInstruction* inst);
-  SSATmp* simplifyCall(IRInstruction* inst);
   SSATmp* simplifyCmp(Opcode opName, IRInstruction* inst,
                       SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);
@@ -146,7 +147,6 @@ private:
   SSATmp* simplifyDecRefStack(IRInstruction*);
   SSATmp* simplifyDecRefLoc(IRInstruction*);
   SSATmp* simplifyLdLoc(IRInstruction*);
-  SSATmp* simplifyStRef(IRInstruction*);
   SSATmp* simplifyAssertNonNull(IRInstruction*);
 
 

@@ -19,7 +19,8 @@
 
 #include <cstdint>
 #include <cstring>
-#include <boost/optional/optional.hpp>
+
+#include "folly/Optional.h"
 
 #include "hphp/util/data-block.h"
 
@@ -676,7 +677,7 @@ struct TypeConstraint {
   // of the current value. It is set and cleared when the constraint code
   // traces through an operation that unboxes or boxes an operand,
   // respectively.
-  boost::optional<DataTypeCategory> innerCat;
+  folly::Optional<DataTypeCategory> innerCat;
 
   // If weak is true, the consumer of the value being constrained doesn't
   // actually want to constrain the guard (if found). Most often used to figure

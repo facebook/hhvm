@@ -141,7 +141,7 @@ struct IRBuilder {
    * otherwise code will be appended to the block.
    */
   void pushBlock(BCMarker marker, Block* b,
-                 const boost::optional<Block::iterator>& where);
+                 const folly::Optional<Block::iterator>& where);
   void popBlock();
 
   /*
@@ -362,11 +362,11 @@ private:
   struct BlockState {
     Block* block;
     BCMarker marker;
-    boost::optional<Block::iterator> where;
+    folly::Optional<Block::iterator> where;
   };
   smart::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
-  boost::optional<Block::iterator> m_curWhere;
+  folly::Optional<Block::iterator> m_curWhere;
 
   bool m_enableSimplification;
   bool m_constrainGuards;
@@ -401,8 +401,7 @@ template<> struct IRBuilder::BranchImpl<SSATmp*> {
  */
 struct BlockPusher {
   BlockPusher(IRBuilder& irb, BCMarker marker, Block* block,
-              const boost::optional<Block::iterator>& where =
-                boost::optional<Block::iterator>())
+              const folly::Optional<Block::iterator>& where = folly::none)
     : m_irb(irb)
   {
     irb.pushBlock(marker, block, where);

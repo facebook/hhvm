@@ -47,7 +47,6 @@
 #endif
 
 #include <boost/bind.hpp>
-#include <boost/optional.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/scoped_ptr.hpp>

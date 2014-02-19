@@ -18,7 +18,6 @@
 #define incl_HPHP_VM_BYTECODE_H_
 
 #include <type_traits>
-#include <boost/optional.hpp>
 
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -152,7 +151,7 @@ class VarEnv {
   // TinyVector<> for now increased icache misses, but maybe will be
   // feasable later (see D511561).
   std::vector<TypedValue**> m_restoreLocations;
-  boost::optional<NameValueTable> m_nvTable;
+  folly::Optional<NameValueTable> m_nvTable;
 
  private:
   explicit VarEnv();

@@ -98,7 +98,7 @@ SSATmp* IRBuilder::genPtrToUninit() {
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
   auto defaultWhere = m_curBlock->end();
-  auto& where = m_curWhere ? m_curWhere.get() : defaultWhere;
+  auto& where = m_curWhere ? *m_curWhere : defaultWhere;
 
   // If the block isn't empty, check if we need to create a new block.
   if (where != m_curBlock->begin()) {
@@ -565,8 +565,7 @@ void IRBuilder::reoptimize() {
  * than the guard's existing constraint. Note that this doesn't necessarily
  * mean that the guard was constrained: tc.weak might be true.
  */
-bool IRBuilder::constrainGuard(IRInstruction* inst,
-                               TypeConstraint tc) {
+bool IRBuilder::constrainGuard(IRInstruction* inst, TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
 
   auto& guard = m_guardConstraints[inst];
@@ -575,12 +574,11 @@ bool IRBuilder::constrainGuard(IRInstruction* inst,
   if (tc.innerCat) {
     // If the constraint is for the inner type and is better than what guard
     // has, update it.
-    auto cat = tc.innerCat.get();
-    if (guard.innerCat && guard.innerCat >= cat) return false;
+    auto& cat = *tc.innerCat;
+    if (guard.innerCat && *guard.innerCat >= cat) return false;
     if (!tc.weak) {
       FTRACE(1, "constraining inner type of {}: {} -> {}\n",
-             *inst, guard.innerCat ? guard.innerCat.get() : DataTypeGeneric,
-             cat);
+             *inst, guard.innerCat ? *guard.innerCat : DataTypeGeneric, cat);
       guard.innerCat = cat;
     }
     return true;
@@ -666,7 +664,7 @@ bool IRBuilder::constrainValue(SSATmp* const val,
     // Otherwise we're done.
     if (tc.innerCat) {
       auto src = inst->src(inst->is(StRef, StRefNT) ? 1 : 0);
-      tc.innerCat.reset();
+      tc.innerCat.clear();
       return constrainValue(src, tc);
     }
     return false;
@@ -777,7 +775,7 @@ void IRBuilder::setMarker(BCMarker marker) {
 }
 
 void IRBuilder::pushBlock(BCMarker marker, Block* b,
-                          const boost::optional<Block::iterator>& where) {
+                          const folly::Optional<Block::iterator>& where) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
          m_curBlock, m_state.marker().show(), b, marker.show());
   assert(b);

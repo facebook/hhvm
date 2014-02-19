@@ -52,7 +52,7 @@ StaticString s_rmdir("rmdir");
 ///////////////////////////////////////////////////////////////////////////////
 
 UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
-                   UserFSNode(cls), m_opened(false) {
+                   UserFSNode(cls) {
   m_StreamOpen  = lookupMethod(s_stream_open.get());
   m_StreamClose = lookupMethod(s_stream_close.get());
   m_StreamRead  = lookupMethod(s_stream_read.get());
@@ -73,9 +73,7 @@ UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
 }
 
 UserFile::~UserFile() {
-  if (m_opened && !m_closed) {
-    close();
-  }
+  close();
 }
 
 void UserFile::sweep() {
@@ -103,7 +101,6 @@ bool UserFile::openImpl(const String& filename, const String& mode,
     invoked
   );
   if (invoked && (ret.toBoolean() == true)) {
-    m_opened = true;
     return true;
   }
 
@@ -112,6 +109,7 @@ bool UserFile::openImpl(const String& filename, const String& mode,
 }
 
 bool UserFile::close() {
+  if (m_closed) return true;
   // PHP's streams layer explicitly flushes on close
   // Mimick that for user-wrappers by pushing the flush here
   // without impacting other HPHP stream types.

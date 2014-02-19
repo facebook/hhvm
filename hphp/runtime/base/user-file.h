@@ -89,8 +89,6 @@ protected:
   const Func* m_Rename;
   const Func* m_Mkdir;
   const Func* m_Rmdir;
-
-  bool m_opened;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

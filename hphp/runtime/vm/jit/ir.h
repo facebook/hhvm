@@ -229,7 +229,6 @@ O(MulDbl,                       D(Dbl), S(Dbl) S(Dbl),                     C) \
 O(DivDbl,                       D(Dbl), S(Dbl) S(Dbl),                   B|C) \
 O(Mod,                          D(Int), S(Int) S(Int),                     C) \
 O(Sqrt,                         D(Dbl), S(Dbl),                            C) \
-O(AbsInt,                       D(Int), S(Int),                            C) \
 O(AbsDbl,                       D(Dbl), S(Dbl),                            C) \
 O(BitAnd,                       D(Int), S(Int) S(Int),                     C) \
 O(BitOr,                        D(Int), S(Int) S(Int),                     C) \

@@ -330,7 +330,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 
   Opcode opc = inst->op();
   switch (opc) {
-  case AbsInt:    return simplifyAbsInt(inst);
   case AbsDbl:    return simplifyAbsDbl(inst);
 
   case AddInt:    return simplifyAddInt(src1, src2);
@@ -701,17 +700,6 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
   // TODO !(X | non_zero) --> 0
   default: (void)op;
   }
-  return nullptr;
-}
-
-SSATmp* Simplifier::simplifyAbsInt(IRInstruction* inst) {
-  auto src = inst->src(0);
-
-  if (src->isConst()) {
-    int64_t val = src->getValInt();
-    return val < 0 ? cns(-val) : cns(val);
-  }
-
   return nullptr;
 }
 

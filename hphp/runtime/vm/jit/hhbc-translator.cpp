@@ -4442,7 +4442,10 @@ void HhbcTranslator::emitAbs() {
   auto value = popC();
 
   if (value->isA(Type::Int)) {
-    push(gen(AbsInt, value));
+    // compute integer absolute value ((src>>63) ^ src) - (src>>63)
+    auto t1 = gen(Shr, value, cns(63));
+    auto t2 = gen(BitXor, t1, value);
+    push(gen(SubInt, t2, t1));
     return;
   }
 

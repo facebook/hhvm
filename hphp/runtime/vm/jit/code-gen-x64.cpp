@@ -1114,27 +1114,6 @@ void CodeGenerator::cgNegateWork(PhysLoc dst, SSATmp* src, PhysLoc src_loc) {
   cgUnaryIntOp(dst, src, src_loc, &Asm::neg, [](int64_t i) { return -i; });
 }
 
-void CodeGenerator::cgAbsInt(IRInstruction* inst) {
-  auto src = inst->src(0);
-  auto srcReg = srcLoc(0).reg();
-  auto dstReg = dstLoc(0).reg();
-
-  if (srcReg == InvalidReg) {
-    int64_t srcVal = src->getValInt();
-    emitLoadImm(m_as, srcVal < 0 ? -srcVal : srcVal, dstReg);
-    return;
-  }
-
-  // fast integer absolute value:
-  // dst = ((src >> 63) ^ src) - (src >> 63)
-  emitMovRegReg(m_as, srcReg, m_rScratch);
-  emitMovRegReg(m_as, srcReg, dstReg);
-
-  m_as.    sarq  (63, m_rScratch);
-  m_as.    xorq  (m_rScratch, dstReg);
-  m_as.    subq  (m_rScratch, dstReg);
-}
-
 void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
   auto src = inst->src(0);
   auto srcReg = srcLoc(0).reg();

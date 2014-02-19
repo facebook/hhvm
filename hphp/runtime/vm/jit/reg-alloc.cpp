@@ -143,4 +143,56 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   }
 }
 
+/*
+ * These functions return true by default to indicate a result register is
+ * required even if the instruction's dst is unused.  It's only useful to
+ * return false for instructions that have a side effect, *and* have the
+ * CodeGenerator logic to detect no result register and emit better code.
+ */
+
+namespace ARM {
+bool needsUnusedReg(const IRInstruction& inst, unsigned dst) {
+  switch (inst.op()) {
+  default: return true;
+  }
+}
+}
+
+namespace X64 {
+bool needsUnusedReg(const IRInstruction& inst, unsigned dst) {
+  // helpers that check for InvalidReg dest:
+  // cgCallHelper
+  // cgLoad
+  // cgLoadTypedValue
+  switch (inst.op()) {
+  default: return true;
+
+  // These have an explicit check for InvalidReg dst
+  case CheckNonNull:
+
+  // These use cgCallHelper, which has an explicit check
+  case CallBuiltin:
+
+  // these use cgLdFuncCachedCommon, which checks for no dest
+  case LdFuncCached:
+  case LdFuncCachedU:
+  case LdFuncCachedSafe:
+
+  // These are optional branches, so DCE may not remove them, and use
+  // cgLoad, which checks for InvalidReg
+  case LdThis:
+  case LdRef:
+  case LdMem:
+     break;
+  }
+  return false;
+}
+}
+
+bool needsUnusedReg(const IRInstruction& inst, unsigned dst) {
+  assert(dst <= inst.numDsts());
+  return arch() == Arch::X64 ? X64::needsUnusedReg(inst, dst) :
+         ARM::needsUnusedReg(inst, dst);
+}
+
 }} // HPHP::JIT

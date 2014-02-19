@@ -1101,7 +1101,6 @@ def walk(filename, dest_subdir):
                 '064': ['DUAL'],
                 '066': ['test_warnings'],
                 '067': [re.compile('cursor(?=(%d|\$i))')],
-                '072': ['not_exists'],
                 'bug32405': ['test_users'],
                 'bug34810': ['test_warnings'],
                 'bug34785': ['DUAL'],
@@ -1199,7 +1198,8 @@ def walk(filename, dest_subdir):
                 'mysqli_pconn_kill': ['test'],
                 'mysqli_poll_mixing_insert_select':
                     [re.compile('test(?! may)'), 'bogus'],
-                'mysqli_prepare': ['test2', re.compile('(?<!next )test(?!_)')],
+                'mysqli_prepare':
+                    [re.compile('(?<=(ISTS|FROM) )test(?!2)'), 'test2'],
                 'mysqli_query': ['test'],
                 'mysqli_query_iterators': ['test'],
                 'mysqli_query_stored_proc': ['test'],
@@ -1310,7 +1310,7 @@ def walk(filename, dest_subdir):
                     test = replace_id.sub(new_id, test)
 
         new_id = 'test_%s_table_1' % (testname, )
-        test = re.sub('(require(_once)*\([\'"](clean_)?table.inc[\'"]\))',
+        test = re.sub('(require(_once)*[ (][\'"](clean_)?table.inc[\'"]\)?)',
                       '$test_table_name = \'%s\'; \\1' % (new_id, ), test)
 
     file(full_dest_filename, 'w').write(test)

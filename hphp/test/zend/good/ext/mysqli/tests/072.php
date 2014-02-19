@@ -3,7 +3,7 @@
 
 	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
-	$mysql->query("DROP TABLE IF EXISTS test_072_table_1");
+	$mysql->query("DROP TABLE IF EXISTS not_exists");
 
 	var_dump($mysql->warning_count);
 

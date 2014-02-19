@@ -1,6 +1,6 @@
 <?php
 	require_once("connect.inc");
-	require "table.inc";
+	$test_table_name = 'test_mysqli_info_table_1'; require "table.inc";
 	if (!$res = mysqli_query($link, "INSERT INTO test_mysqli_info_table_1(id, label) VALUES (100, 'a')"))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 

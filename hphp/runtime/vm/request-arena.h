@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_VM_REQUEST_ARENA_H_
 #define incl_HPHP_VM_REQUEST_ARENA_H_
 
-#include <boost/aligned_storage.hpp>
+#include <type_traits>
 
 #include "hphp/util/arena.h"
 
@@ -25,12 +25,12 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 typedef ArenaImpl<32 * 1024> RequestArena;
-typedef boost::aligned_storage<sizeof(RequestArena),sizeof(void*)>::type
+typedef std::aligned_storage<sizeof(RequestArena),sizeof(void*)>::type
         RequestArenaStorage;
 extern __thread RequestArenaStorage s_requestArenaStorage;
 
 typedef Arena VarEnvArena;
-typedef boost::aligned_storage<sizeof(VarEnvArena),sizeof(void*)>::type
+typedef std::aligned_storage<sizeof(VarEnvArena),sizeof(void*)>::type
         VarEnvArenaStorage;
 extern __thread VarEnvArenaStorage s_varEnvArenaStorage;
 

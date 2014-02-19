@@ -21,7 +21,7 @@
 #include "hphp/util/exception.h"
 #include <errno.h>
 #include "folly/String.h"
-#include <boost/aligned_storage.hpp>
+#include <type_traits>
 
 namespace HPHP {
 
@@ -265,7 +265,7 @@ public:
 
 private:
   static __thread T *s_singleton;
-  typedef typename boost::aligned_storage<sizeof(T), sizeof(void*)>::type
+  typedef typename std::aligned_storage<sizeof(T), sizeof(void*)>::type
           StorageType;
   static __thread StorageType s_storage;
   static bool s_inited; // no-fast-TLS requires construction so be consistent

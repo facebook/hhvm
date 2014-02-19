@@ -327,7 +327,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   auto const oldPrev = n->prev;
 
   auto const newNode = static_cast<SweepNode*>(
-    realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
+    Util::safe_realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
   );
 
   refreshStatsHelper();

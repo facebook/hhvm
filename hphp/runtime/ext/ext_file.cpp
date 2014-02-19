@@ -707,11 +707,7 @@ Variant f_linkinfo(const String& filename) {
 }
 
 bool f_is_writable(const String& filename) {
-  struct stat sb;
   if (filename.empty()) {
-    return false;
-  }
-  if (statSyscall(filename, &sb)) {
     return false;
   }
   CHECK_SYSTEM(accessSyscall(filename, W_OK));
@@ -745,11 +741,9 @@ bool f_is_writeable(const String& filename) {
 }
 
 bool f_is_readable(const String& filename) {
-  struct stat sb;
   if (filename.empty()) {
     return false;
   }
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   CHECK_SYSTEM(accessSyscall(filename, R_OK, true));
   return true;
   /*
@@ -777,11 +771,9 @@ bool f_is_readable(const String& filename) {
 }
 
 bool f_is_executable(const String& filename) {
-  struct stat sb;
   if (filename.empty()) {
     return false;
   }
-  CHECK_SYSTEM(statSyscall(filename, &sb));
   CHECK_SYSTEM(accessSyscall(filename, X_OK));
   return true;
   /*

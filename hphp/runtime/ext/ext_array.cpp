@@ -217,7 +217,19 @@ Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
 
   ArrayInit ai(size);
   for (ArrayIter iter(cell_keys); iter; ++iter) {
-    ai.set(iter.secondRefPlus(), value);
+    auto& key = iter.secondRefPlus();
+    // This is intentionally different to the $foo[$invalid_key] coercion.
+    // See tests/slow/ext_array/array_fill_keys_tostring.php for examples.
+    if (LIKELY(key.isInteger() || key.isString())) {
+      ai.set(key, value);
+    } else if (RuntimeOption::EnableHipHopSyntax) {
+      // @todo (fredemmott): Use the Zend toString() behavior, but retain the
+      // warning/error behind a separate config setting
+      raise_warning("array_fill_keys: keys must be ints or strings");
+      ai.set(key, value);
+    } else {
+      ai.set(key.toString(), value);
+    }
   }
   return ai.create();
 }

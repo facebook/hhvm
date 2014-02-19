@@ -282,13 +282,13 @@ void MemoryManager::resetAllocator() {
  */
 
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
-  nbytes += sizeof(SmallNode);
-  if (UNLIKELY(nbytes > kMaxSmartSize)) {
+  auto const nbytes_padded = nbytes + sizeof(SmallNode);
+  if (UNLIKELY(nbytes_padded > kMaxSmartSize)) {
     return smartMallocBig(nbytes);
   }
 
-  auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes));
-  ptr->padbytes = nbytes;
+  auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
+  ptr->padbytes = nbytes_padded;
   return ptr + 1;
 }
 
@@ -399,7 +399,7 @@ NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
   assert(nbytes > 0);
   auto const n = static_cast<SweepNode*>(
-    Util::safe_malloc(nbytes + sizeof(SweepNode) - sizeof(SmallNode))
+    Util::safe_malloc(nbytes + sizeof(SweepNode))
   );
   return smartEnlist(n);
 }

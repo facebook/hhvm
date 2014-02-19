@@ -107,4 +107,5 @@ hphp/system/php/spl/iterators/NoRewindIterator.php
 hphp/system/php/spl/iterators/RecursiveIteratorIterator.php
 hphp/system/php/spl/miscellaneous/ArrayObject.php
 hphp/system/php/string/wordwrap.php
+hphp/system/php/wddx/wddx.php
 hphp/system/php/zlib/zlib_funcs.php

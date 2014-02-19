@@ -1110,10 +1110,6 @@ void CodeGenerator::cgUnaryIntOp(PhysLoc dst_loc,
   }
 }
 
-void CodeGenerator::cgNegateWork(PhysLoc dst, SSATmp* src, PhysLoc src_loc) {
-  cgUnaryIntOp(dst, src, src_loc, &Asm::neg, [](int64_t i) { return -i; });
-}
-
 void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
   auto src = inst->src(0);
   auto srcReg = srcLoc(0).reg();
@@ -1251,37 +1247,21 @@ void CodeGenerator::cgBinaryDblOp(IRInstruction* inst,
   emitMovRegReg(m_as, resReg, dstReg);
 }
 
+/*
+ * If src2 is 1, this generates dst = src1 - 1 or src1 + 1 using the inc
+ * or dec x86 instructions. The return value is whether or not the
+ * instruction could be generated.
+ */
 bool CodeGenerator::emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
                                      SSATmp* src2, PhysLoc loc2,
                                      void(Asm::*emitFunc)(Reg64)) {
-  if (loc1.reg() != InvalidReg &&
-      loc2.reg() != InvalidReg &&
-      src1->isA(Type::Int) &&
-      // src2 == 1:
-      src2->isConst() && src2->isA(Type::Int) && src2->getValInt() == 1) {
+  if (loc1.reg() != InvalidReg && loc2.reg() != InvalidReg &&
+      src2->isConst() && src2->getValInt() == 1) {
     emitMovRegReg(m_as, loc1.reg(), dst.reg());
     (m_as.*emitFunc)(dst.reg());
     return true;
   }
   return false;
-}
-
-/*
- * If src2 is 1, this generates dst = src1 + 1 using the "inc" x86 instruction.
- * The return value is whether or not the instruction could be generated.
- */
-bool CodeGenerator::emitInc(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-                            SSATmp* src2, PhysLoc loc2) {
-  return emitIncDecHelper(dst, src1, loc1, src2, loc2, &Asm::incq);
-}
-
-/*
- * If src2 is 1, this generates dst = src1 - 1 using the "dec" x86 instruction.
- * The return value is whether or not the instruction could be generated.
- */
-bool CodeGenerator::emitDec(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-                            SSATmp* src2, PhysLoc loc2) {
-  return emitIncDecHelper(dst, src1, loc1, src2, loc2, &Asm::decq);
 }
 
 void CodeGenerator::cgRoundCommon(IRInstruction* inst, RoundDirection dir) {
@@ -1310,9 +1290,11 @@ void CodeGenerator::cgAddInt(IRInstruction* inst) {
   auto loc2 = srcLoc(1);
   auto dst = dstLoc(0);
 
-  // Special cases: x = y + 1
-  if (emitInc(dst, src1, loc1, src2, loc2) ||
-      emitInc(dst, src2, loc2, src1, loc1)) return;
+  // Special cases: x = y + 1, x = 1 + y
+  if (emitIncDecHelper(dst, src1, loc1, src2, loc2, &Asm::incq) ||
+      emitIncDecHelper(dst, src2, loc2, src1, loc1, &Asm::incq)) {
+    return;
+  }
 
   cgBinaryIntOp(
     inst,
@@ -1332,12 +1314,11 @@ void CodeGenerator::cgSubInt(IRInstruction* inst) {
   auto loc2 = srcLoc(1);
   auto dst = dstLoc(0);
 
-  if (emitDec(dst, src1, loc1, src2, loc2)) return;
+  if (emitIncDecHelper(dst, src1, loc1, src2, loc2, &Asm::decq)) return;
 
-  if (src1->isConst() && src1->isA(Type::Int) && src1->getValInt() == 0 &&
-      src2->isA(Type::Int)) {
-    // this should be done only in simplifier
-    cgNegateWork(dst, src2, loc2);
+  if (src1->isConst() && src1->getValInt() == 0) {
+    // There is no unary negate HHIR instruction, so handle that here.
+    cgUnaryIntOp(dst, src2, loc2, &Asm::neg, [](int64_t i) { return -i; });
     return;
   }
 

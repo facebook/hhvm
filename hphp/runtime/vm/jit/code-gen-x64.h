@@ -224,9 +224,6 @@ private:
                      void (Asm::*instrR)(Reg64),
                      Oper oper);
 
-  void cgNegateWork(PhysLoc dst, SSATmp* src, PhysLoc src_loc);
-  void cgNotWork(SSATmp* dst, SSATmp* src);
-
   void emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                  bool    staticCallee);
 
@@ -261,10 +258,6 @@ private:
   bool emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
                         SSATmp* src2, PhysLoc loc2,
                         void(Asm::*emitFunc)(Reg64));
-  bool emitInc(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-               SSATmp* src2, PhysLoc loc2);
-  bool emitDec(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-               SSATmp* src2, PhysLoc loc2);
 
 private:
   PhysReg selectScratchReg(IRInstruction* inst);

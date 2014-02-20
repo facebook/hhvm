@@ -29,7 +29,7 @@ class StreamContext : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamContext);
 
-  CLASSNAME_IS("StreamContext")
+  CLASSNAME_IS("stream-context")
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 

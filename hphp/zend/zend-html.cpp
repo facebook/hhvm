@@ -653,12 +653,6 @@ char *string_html_encode(const char *input, int &len,
         *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';'; 
       }
       break;
-    case static_cast<unsigned char>('\xc2'):
-      if (nbsp && utf8 && p != end && *(p+1) == '\xa0') {
-        *q++ = '&'; *q++ = 'n'; *q++ = 'b'; *q++ = 's'; *q++ = 'p'; *q++ = ';';
-        p++;
-        break;
-      }
       // fallthrough
     default: {
       if (LIKELY(c < 0x80)) {

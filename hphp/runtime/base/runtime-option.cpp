@@ -339,6 +339,7 @@ int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::TimeoutsUseWallTime = true;
+bool RuntimeOption::CheckFlushOnUserClose = true;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1096,6 +1097,7 @@ void RuntimeOption::Load(Hdf &config,
     EnableXHP = eval["EnableXHP"].getBool(false);
     EnableZendCompat = eval["EnableZendCompat"].getBool(false);
     TimeoutsUseWallTime = eval["TimeoutsUseWallTime"].getBool(true);
+    CheckFlushOnUserClose = eval["CheckFlushOnUserClose"].getBool(true);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true

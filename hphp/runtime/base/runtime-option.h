@@ -343,6 +343,7 @@ public:
   static bool EnableArgsInBacktraces;
   static bool EnableZendCompat;
   static bool TimeoutsUseWallTime;
+  static bool CheckFlushOnUserClose;
 
   static int GetScannerType();
 

@@ -71,6 +71,7 @@ public:
 
 private:
   int urlStat(const String& path, struct stat* stat_sb, int flags = 0);
+  bool flushImpl(bool strict);
 
 protected:
   const Func* m_StreamOpen;
@@ -89,8 +90,6 @@ protected:
   const Func* m_Rename;
   const Func* m_Mkdir;
   const Func* m_Rmdir;
-
-  bool m_opened;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

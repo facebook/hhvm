@@ -1230,7 +1230,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
   }
   int nret = glob(work_pattern.data(), flags & GLOB_FLAGMASK, NULL, &globbuf);
   if (nret == GLOB_NOMATCH || !globbuf.gl_pathc || !globbuf.gl_pathv) {
-    if (RuntimeOption::SafeFileAccess) {
+    if (g_context->hasSafeFileAccess()) {
       if (!f_is_dir(work_pattern)) {
         return false;
       }

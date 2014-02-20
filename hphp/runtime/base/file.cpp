@@ -53,8 +53,8 @@ String File::TranslatePathKeepRelative(const String& filename) {
       strlen(filename.data()) // canonicalize asserts that we don't have nulls
     ),
     AttachString);
-  if (RuntimeOption::SafeFileAccess) {
-    auto const& allowedDirectories = VirtualHost::GetAllowedDirectories();
+  if (g_context->hasSafeFileAccess()) {
+    auto const& allowedDirectories = g_context->getAllowedDirectories();
     auto it = std::upper_bound(allowedDirectories.begin(),
                                allowedDirectories.end(), canonicalized,
                                [](const String& val, const std::string& dir) {

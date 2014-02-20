@@ -401,7 +401,11 @@ class mysqli {
    *   mysqli_next_result() first.
    */
   public function multi_query(string $query): ?bool {
-    return $this->real_query($query);
+    $conn = $this->hh_get_connection(2);
+    if (!$conn) {
+      return null;
+    }
+    return mysql_multi_query($query, $conn);
   }
 
   /**
@@ -414,7 +418,7 @@ class mysqli {
     if (!$conn) {
       return null;
     }
-    return mysql_next_result($conn);
+    return !mysql_next_result($conn);
   }
 
   /**

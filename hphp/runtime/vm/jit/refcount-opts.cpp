@@ -829,7 +829,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // locals and $this pointers.
       consumeAllLocals();
       consumeAllFrames();
-    } else if (m_inst->is(GenericRetDecRefs)) {
+    } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
       consumeAllLocals();
     } else {
       // All other instructions take the generic path.

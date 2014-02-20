@@ -1531,18 +1531,24 @@ SSATmp* Simplifier::simplifyIsScalarType(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConcatCellCell(IRInstruction* inst) {
   SSATmp* src1 = inst->src(0);
   SSATmp* src2 = inst->src(1);
+  auto catchBlock = inst->taken();
 
   if (src1->isA(Type::Str) && src2->isA(Type::Str)) { // StrStr
-    return gen(ConcatStrStr, src1, src2);
+    return gen(ConcatStrStr, catchBlock, src1, src2);
   }
   if (src1->isA(Type::Int) && src2->isA(Type::Str)) { // IntStr
-    return gen(ConcatIntStr, src1, src2);
+    return gen(ConcatIntStr, catchBlock, src1, src2);
   }
   if (src1->isA(Type::Str) && src2->isA(Type::Int)) { // StrInt
-    return gen(ConcatStrInt, src1, src2);
+    return gen(ConcatStrInt, catchBlock, src1, src2);
   }
+
+  // XXX: t3770157. All the cases below need two different catch blocks but we
+  // only have access to one here.
+  return nullptr;
+
   if (src1->isA(Type::Int)) { // IntCell
-    auto* asStr = gen(ConvCellToStr, inst->taken(), src2);
+    auto* asStr = gen(ConvCellToStr, catchBlock, src2);
     auto* result = gen(ConcatIntStr, src1, asStr);
     // ConcatIntStr doesn't consume its second input so we have to decref it
     // here.
@@ -1550,13 +1556,13 @@ SSATmp* Simplifier::simplifyConcatCellCell(IRInstruction* inst) {
     return result;
   }
   if (src2->isA(Type::Int)) { // CellInt
-    auto const asStr = gen(ConvCellToStr, inst->taken(), src1);
+    auto const asStr = gen(ConvCellToStr, catchBlock, src1);
     // concat promises to decref its first argument. we need to do it here
     gen(DecRef, src1);
     return gen(ConcatStrInt, asStr, src2);
   }
   if (src1->isA(Type::Str)) { // StrCell
-    auto* asStr = gen(ConvCellToStr, inst->taken(), src2);
+    auto* asStr = gen(ConvCellToStr, catchBlock, src2);
     auto* result = gen(ConcatStrStr, src1, asStr);
     // ConcatStrStr doesn't consume its second input so we have to decref it
     // here.
@@ -1564,7 +1570,7 @@ SSATmp* Simplifier::simplifyConcatCellCell(IRInstruction* inst) {
     return result;
   }
   if (src2->isA(Type::Str)) { // CellStr
-    auto const asStr = gen(ConvCellToStr, inst->taken(), src1);
+    auto const asStr = gen(ConvCellToStr, catchBlock, src1);
     // concat promises to decref its first argument. we need to do it here
     gen(DecRef, src1);
     return gen(ConcatStrStr, asStr, src2);

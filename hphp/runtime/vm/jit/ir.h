@@ -582,9 +582,9 @@ O(ColAddElemC,                  D(Obj), S(Obj)                                \
                                          S(Cell),                 N|Er|CRc|P) \
 O(ColAddNewElemC,               D(Obj), S(Obj) S(Cell),           N|Er|CRc|P) \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(ConcatStrStr,                 D(Str), S(Str) S(Str),             N|CRc|PRc) \
-O(ConcatIntStr,                 D(Str), S(Int) S(Str),                 N|PRc) \
-O(ConcatStrInt,                 D(Str), S(Str) S(Int),             N|CRc|PRc) \
+O(ConcatStrStr,                 D(Str), S(Str) S(Str),          Er|N|CRc|PRc) \
+O(ConcatIntStr,                 D(Str), S(Int) S(Str),              Er|N|PRc) \
+O(ConcatStrInt,                 D(Str), S(Str) S(Int),          Er|N|CRc|PRc) \
 O(ConcatCellCell,               D(Str), S(Cell) S(Cell),        Er|N|CRc|PRc) \
 O(ArrayAdd,                     D(Arr), S(Arr) S(Arr),          Er|N|CRc|PRc) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                   N) \

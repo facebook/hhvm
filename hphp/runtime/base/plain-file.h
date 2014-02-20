@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,13 +52,13 @@ public:
   virtual bool rewind();
   virtual bool flush();
   virtual bool truncate(int64_t size);
+  virtual bool stat(struct stat *sb);
 
   FILE *getStream() { return m_stream;}
   virtual const char *getStreamType() const { return "STDIO";}
 
 protected:
   FILE *m_stream;
-  bool m_eof;
   char *m_buffer;       // For setbuffer.  Needed to reduce mmap
                         // contention due to how glibc allocates memory
                         // for buffered io.

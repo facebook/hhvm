@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -107,9 +107,14 @@ static std::string constToString(Type t, const ConstData* c) {
   return os.str();
 }
 
-const PhysLoc* loc(const RegAllocInfo* regs,
-                   const IRInstruction* inst, const SSATmp* t) {
-  return regs ? &(*regs)[inst][t] : nullptr;
+const PhysLoc* srcLoc(const RegAllocInfo* regs,
+                      const IRInstruction* inst, unsigned i) {
+  return regs ? &(*regs)[inst].src(i) : nullptr;
+}
+
+const PhysLoc* dstLoc(const RegAllocInfo* regs,
+                      const IRInstruction* inst, unsigned i) {
+  return regs ? &(*regs)[inst].dst(i) : nullptr;
 }
 
 void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
@@ -120,7 +125,7 @@ void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
         lifetime->uses[src].lastUse == lifetime->linear[inst]) {
       ostream << "~";
     }
-    print(ostream, src, loc(regs, inst, src), lifetime);
+    print(ostream, src, srcLoc(regs, inst, i), lifetime);
   } else {
     ostream << color(ANSI_COLOR_RED)
             << "!!!NULL @ " << i
@@ -217,9 +222,9 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
 void printDsts(std::ostream& os, const IRInstruction* inst,
                const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
   const char* sep = "";
-  for (const SSATmp& dst : inst->dsts()) {
+  for (unsigned i = 0, n = inst->numDsts(); i < n; i++) {
     os << punc(sep);
-    print(os, &dst, loc(regs, inst, &dst), lifetime, true);
+    print(os, inst->dst(i), dstLoc(regs, inst, i), lifetime, true);
     sep = ", ";
   }
 }
@@ -447,7 +452,7 @@ void print(std::ostream& os, const Block* block,
                           folly::format("({}) ", inst.id()).str().size(),
                           ' ');
         auto dst = inst.dst(i);
-        JIT::print(os, dst, loc(regs, &inst, dst), lifetime, false);
+        JIT::print(os, dst, dstLoc(regs, &inst, i), lifetime, false);
         os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
            << color(ANSI_COLOR_END);
         bool first = true;

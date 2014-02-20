@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -322,7 +322,7 @@ FBUnserializer<V>::FBUnserializer(folly::StringPiece serialized) :
 
 template <class V>
 inline void FBUnserializer<V>::need(size_t n) const {
-  if (UNLIKELY(p_ + n > end_)) {
+  if (UNLIKELY(n > end_ - p_)) {
     throw UnserializeError("Unexpected end");
   }
 }

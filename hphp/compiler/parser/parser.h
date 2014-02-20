@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -282,8 +282,8 @@ public:
   void onFromClause(Token &out, Token &var, Token &coll);
   void onLetClause(Token &out, Token &var, Token &expr);
   void onWhereClause(Token &out, Token &expr);
-  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
-    Token &right);
+  void onJoinClause(Token &out, Token *var, Token &coll, Token *left,
+    Token *right);
   void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
     Token &right, Token &group);
   void onOrderbyClause(Token &out, Token &orderings);

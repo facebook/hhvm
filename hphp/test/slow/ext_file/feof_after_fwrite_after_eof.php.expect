@@ -1,0 +1,8 @@
+---php://temp---
+bool(true)
+bool(true)
+bool(false)
+---php://memory---
+bool(true)
+bool(true)
+bool(false)

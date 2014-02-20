@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -3526,6 +3526,11 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   if (tc.isNullable() && locType.subtypeOf(Type::InitNull)) {
     return;
   }
+  if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
+      (locType.isObj() || locVal->type().isBoxed())) {
+    PUNT(VerifyParamType-collectionToArray);
+    return;
+  }
   if (tc.isCallable()) {
     locVal = gen(Unbox, makeExit(), locVal);
     gen(VerifyParamCallable, makeCatch(), locVal, cns(paramId));
@@ -4180,10 +4185,20 @@ void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
 
   auto* cctx = gen(LdCctx, m_irb->fp());
   auto* cls = gen(LdClsCtx, cctx);
-  auto* propInitVec = gen(LdClsInitData, cls);
-
   auto* ctx = curClass();
-  auto idx = ctx->lookupDeclProp(propName);
+  SSATmp* propInitVec;
+  Slot idx;
+
+  switch(op) {
+    case InitPropOp::Static: {
+      propInitVec = gen(LdClsStaticInitData, cls);
+      idx = ctx->lookupSProp(propName);
+    } break;
+    case InitPropOp::NonStatic: {
+      propInitVec = gen(LdClsInitData, cls);
+      idx = ctx->lookupDeclProp(propName);
+    } break;
+  }
 
   gen(StElem, propInitVec, cns(idx * sizeof(TypedValue)), val);
 }
@@ -4703,10 +4718,11 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
   auto setImmLocType = [&](uint32_t id, Type t) {
     setLocType(inst.imm[id].u_LA, t);
   };
+  auto* func = curFunc();
 
   switch (inst.op()) {
     case OpCreateCont: case OpAsyncESuspend: {
-      auto numLocals = curFunc()->numLocals();
+      auto numLocals = func->numLocals();
       for (unsigned i = 0; i < numLocals; ++i) {
         setLocType(i, Type::Uninit);
       }
@@ -4824,6 +4840,17 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
       setImmLocType(2, Type::Gen);
       break;
 
+    case OpVerifyParamType: {
+      auto paramId = inst.imm[0].u_LA;
+      auto const& tc = func->params()[paramId].typeConstraint();
+      auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
+      if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
+          (locType.isObj() || locType.maybeBoxed())) {
+        setImmLocType(0, locType.isBoxed() ? Type::BoxedCell : Type::Cell);
+      }
+      break;
+    }
+
     default:
       not_reached();
   }
@@ -4892,7 +4919,7 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
 
 std::string HhbcTranslator::showStack() const {
   if (isInlining()) {
-    return folly::format("{:*^*80}\n",
+    return folly::format("{:*^80}\n",
                          " I don't understand inlining stacks yet ").str();
   }
   std::ostringstream out;

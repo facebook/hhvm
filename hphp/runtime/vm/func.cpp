@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1109,7 +1109,7 @@ int FuncEmitter::parseUserAttributes(Attr &attrs) const {
  *  "ActRec": The internal function takes a fixed prototype
  *      TypedValue* funcname(ActRec *ar);
  *      Note that systemlib declaration must still be hack annotated
- *  "NoInjection": Do not include this fram in backtraces
+ *  "NoInjection": Do not include this frame in backtraces
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
  */

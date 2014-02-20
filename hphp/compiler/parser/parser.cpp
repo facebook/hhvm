@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1937,10 +1937,13 @@ void Parser::onWhereClause(Token &out, Token &expr) {
   out->exp = NEW_EXP(WhereClause, expr.exp);
 }
 
-void Parser::onJoinClause(Token &out, Token &var, Token &coll,
-  Token &left, Token &right) {
-  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
-                     left.exp, right.exp, "");
+void Parser::onJoinClause(Token &out, Token *var, Token &coll,
+  Token *left, Token *right) {
+  out->exp = NEW_EXP(JoinClause,
+                     var == nullptr ? "" : var->text(), coll.exp,
+                     left == nullptr ? nullptr : left->exp,
+                     right == nullptr ? nullptr : right->exp,
+                     "");
 }
 
 void Parser::onJoinIntoClause(Token &out, Token &var, Token &coll,

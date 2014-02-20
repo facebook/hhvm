@@ -17,7 +17,7 @@ function main() {
   test();
   $c = memory_get_usage(true);
   $v1 = $b - $a;
-  $v2 = ($c - $b) * 5;
+  $v2 = ($c - $b) * 2;
   if ($v2 <= $v1) {
     echo "Ok\n";
   } else {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/hhbbc/abstract-interp.h"
+#ifndef incl_HHBBC_INTERP_H_
+#define incl_HHBBC_INTERP_H_
 
 #include <vector>
 #include <algorithm>
@@ -21,12 +22,9 @@
 #include <cmath>
 #include <bitset>
 
-#include <boost/dynamic_bitset.hpp>
-
-#include "folly/Conv.h"
 #include "folly/Optional.h"
-#include "folly/String.h"
 
+#include "hphp/util/trace.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
@@ -35,19 +33,19 @@
 
 #include "hphp/runtime/ext/ext_math.h" // f_abs
 
+#include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/cfg.h"
-#include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/index.h"
-#include "hphp/hhbbc/class-util.h"
-#include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/type-arith.h"
+#include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/analyze.h"
 
 namespace HPHP { namespace HHBBC {
-
-TRACE_SET_MOD(hhbbc);
-
-namespace {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -58,171 +56,7 @@ const StaticString s_Continuation("Continuation");
 const StaticString s_stdClass("stdClass");
 const StaticString s_unreachable("static analysis error: supposedly "
                                  "unreachable code was reached");
-
-//////////////////////////////////////////////////////////////////////
-
-std::string fpiKindStr(FPIKind k) {
-  switch (k) {
-  case FPIKind::Unknown:     return "unk";
-  case FPIKind::CallableArr: return "arr";
-  case FPIKind::Func:        return "func";
-  case FPIKind::Ctor:        return "ctor";
-  case FPIKind::ObjMeth:     return "objm";
-  case FPIKind::ClsMeth:     return "clsm";
-  case FPIKind::ObjInvoke:   return "invoke";
-  }
-  not_reached();
-}
-
-std::string show(const ActRec& a) {
-  return folly::to<std::string>(
-    "ActRec { ",
-    fpiKindStr(a.kind),
-    a.func ? (": " + show(*a.func)) : std::string{},
-    " }"
-  );
-}
-
-std::string state_string(const php::Func& f, const State& st) {
-  std::string ret;
-
-  if (!st.initialized) {
-    ret = "state: uninitialized\n";
-    return ret;
-  }
-
-  ret = "state:\n";
-  for (auto i = size_t{0}; i < st.locals.size(); ++i) {
-    ret += folly::format("${: <8} :: {}\n",
-      f.locals[i]->name
-        ? std::string(f.locals[i]->name->data())
-        : folly::format("<unnamed{}>", i).str(),
-      show(st.locals[i])
-    ).str();
-  }
-
-  for (auto i = size_t{0}; i < st.stack.size(); ++i) {
-    ret += folly::format("stk[{:02}] :: {}\n",
-      i,
-      show(st.stack[i])
-    ).str();
-  }
-
-  if (st.thisAvailable) { ret += "$this is not null\n"; }
-  for (auto& kv : st.privateProperties) {
-    ret += folly::format("$this->{: <14} :: {}\n",
-      kv.first->data(),
-      show(kv.second)
-    ).str();
-  }
-  for (auto& kv : st.privateStatics) {
-    ret += folly::format("self::${: <14} :: {}\n",
-      kv.first->data(),
-      show(kv.second)
-    ).str();
-  }
-
-  return ret;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-// Returns whether anything changed in the dst state.
-bool merge_into(PropState& dst, const PropState& src) {
-  assert(dst.size() == src.size());
-
-  auto changed = false;
-
-  auto dstIt = begin(dst);
-  auto srcIt = begin(src);
-  for (; dstIt != end(dst); ++dstIt, ++srcIt) {
-    assert(srcIt != end(src));
-    assert(srcIt->first == dstIt->first);
-    auto const newT = union_of(dstIt->second, srcIt->second);
-    if (newT != dstIt->second) {
-      changed = true;
-      dstIt->second = newT;
-    }
-  }
-
-  return changed;
-}
-
-bool merge_into(ActRec& dst, const ActRec& src) {
-  if (dst.kind != src.kind) {
-    dst = ActRec { FPIKind::Unknown };
-    return true;
-  }
-  if (dst != src) {
-    dst = ActRec { src.kind };
-    return true;
-  }
-  return false;
-}
-
-// Returns whether anything changed in the dst state.
-bool merge_into(State& dst, const State& src) {
-  if (!dst.initialized) {
-    dst = src;
-    return true;
-  }
-
-  assert(src.initialized);
-  assert(dst.locals.size() == src.locals.size());
-  assert(dst.stack.size() == src.stack.size());
-  assert(dst.fpiStack.size() == src.fpiStack.size());
-
-  auto changed = false;
-
-  auto const available = dst.thisAvailable && src.thisAvailable;
-  if (available != dst.thisAvailable) {
-    changed = true;
-    dst.thisAvailable = available;
-  }
-
-  for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
-    auto const newT = union_of(dst.stack[i], src.stack[i]);
-    if (dst.stack[i] != newT) {
-      changed = true;
-      dst.stack[i] = newT;
-    }
-  }
-
-  for (auto i = size_t{0}; i < dst.locals.size(); ++i) {
-    auto const newT = union_of(dst.locals[i], src.locals[i]);
-    if (dst.locals[i] != newT) {
-      changed = true;
-      dst.locals[i] = newT;
-    }
-  }
-
-  for (auto i = size_t{0}; i < dst.fpiStack.size(); ++i) {
-    if (merge_into(dst.fpiStack[i], src.fpiStack[i])) {
-      changed = true;
-    }
-  }
-
-  if (merge_into(dst.privateProperties, src.privateProperties)) {
-    changed = true;
-  }
-  if (merge_into(dst.privateStatics, src.privateStatics)) {
-    changed = true;
-  }
-
-  return changed;
-}
-
-// Return a copy of a State without copying either the evaluation
-// stack or FPI stack.
-State without_stacks(State const& src) {
-  auto ret = State{};
-  ret.initialized       = src.initialized;
-  ret.thisAvailable     = src.thisAvailable;
-  ret.locals            = src.locals;
-  ret.privateProperties = src.privateProperties;
-  ret.privateStatics    = src.privateStatics;
-  return ret;
-}
+const StaticString s_86pinit("86pinit"), s_86sinit("86sinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -290,24 +124,39 @@ struct StepFlags {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * TODO: move to interp state?
+ */
+
+// Return a copy of a State without copying either the evaluation
+// stack or FPI stack.
+inline State without_stacks(State const& src) {
+  auto ret = State{};
+  ret.initialized       = src.initialized;
+  ret.thisAvailable     = src.thisAvailable;
+  ret.locals            = src.locals;
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
 // Some member instruction type-system predicates.
 
-bool couldBeEmptyish(Type ty) {
+inline bool couldBeEmptyish(Type ty) {
   return ty.couldBe(TNull) ||
          ty.couldBe(sval(s_empty.get())) ||
          ty.couldBe(TFalse);
 }
 
-bool mustBeEmptyish(Type ty) {
+inline bool mustBeEmptyish(Type ty) {
   return ty.subtypeOf(TNull) ||
          ty.subtypeOf(sval(s_empty.get())) ||
          ty.subtypeOf(TFalse);
 }
 
-bool elemCouldPromoteToArr(Type ty) { return couldBeEmptyish(ty); }
-bool propCouldPromoteToObj(Type ty) { return couldBeEmptyish(ty); }
-bool elemMustPromoteToArr(Type ty)  { return mustBeEmptyish(ty); }
-bool propMustPromoteToObj(Type ty)  { return mustBeEmptyish(ty); }
+inline bool elemCouldPromoteToArr(Type ty) { return couldBeEmptyish(ty); }
+inline bool propCouldPromoteToObj(Type ty) { return couldBeEmptyish(ty); }
+inline bool elemMustPromoteToArr(Type ty)  { return mustBeEmptyish(ty); }
+inline bool propMustPromoteToObj(Type ty)  { return mustBeEmptyish(ty); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -315,12 +164,14 @@ template<class Propagate, class PropagateThrow>
 struct InterpStepper : boost::static_visitor<void> {
   explicit InterpStepper(const Index* index,
                          Context ctx,
+                         PropertiesInfo& props,
                          State& st,
                          StepFlags& flags,
                          Propagate propagate,
                          PropagateThrow propagateThrow)
     : m_index(*index)
     , m_ctx(ctx)
+    , m_props(props)
     , m_state(st)
     , m_flags(flags)
     , m_propagate(propagate)
@@ -663,6 +514,24 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::JmpNZ& op) { jmpImpl<true>(op); }
   void operator()(const bc::JmpZ& op)  { jmpImpl<false>(op); }
+
+  void group(const bc::AsyncAwait& await, const bc::JmpNZ& jmp) {
+    auto const t = topC();
+    if (!is_specialized_wait_handle(t) || is_opt(t)) {
+      return impl(await, jmp);
+    }
+    auto const inner = wait_handle_inner(t);
+    if (inner.subtypeOf(TBottom)) {
+      // It's always going to throw.
+      return impl(await, jmp);
+    }
+
+    popC();
+    push(wait_handle_inner(t));
+    m_propagate(*jmp.target, m_state);
+    popC();
+    push(t);
+  }
 
   template<class JmpOp>
   void group(const bc::IsTypeL& istype, const JmpOp& jmp) {
@@ -1165,7 +1034,7 @@ struct InterpStepper : boost::static_visitor<void> {
 
     // We can't constprop with this eval_cell, because of the effects
     // on locals.
-    auto resultTy = eval_cell([&] {
+    auto resultTy = eval_cell([inc,val] {
       auto c = *val;
       if (inc) {
         cellInc(c);
@@ -1834,20 +1703,38 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::ContStopped&) {}
   void operator()(const bc::ContHandle&)  { popC(); }
 
-  void operator()(const bc::AsyncAwait& op) {
+  void operator()(const bc::AsyncAwait&) {
+    // We handle this better if we manage to group the opcode.
     popC();
     push(TInitCell);
     push(TBool);
   }
 
-  void operator()(const bc::AsyncESuspend&) {
-    unsetAllLocals();
-    popC();
-    push(TObj);
+  void operator()(const bc::AsyncWrapResult&) {
+    auto const t = popC();
+    push(wait_handle(m_index, t));
   }
 
-  void operator()(const bc::AsyncWrapResult&) { popC(); push(TObj); }
-  void operator()(const bc::AsyncWrapException&) { popC(); push(TObj); }
+  void operator()(const bc::AsyncESuspend&) {
+    /*
+     * A suspended async function WaitHandle must end up returning
+     * whatever type we infer the eager function will return, so we
+     * don't want it to influence that type.  Using WaitH<Bottom>
+     * handles this, but note that it relies on the rule that the only
+     * thing you can do with the output of this opcode is pass it to
+     * RetC.
+     */
+    unsetNamedLocals();
+    popC();
+    push(wait_handle(m_index, TBottom));
+  }
+
+  void operator()(const bc::AsyncWrapException&) {
+    // A wait handle which always throws when you join it is
+    // represented as a WaitH<Bottom>.
+    popC();
+    push(wait_handle(m_index, TBottom));
+  }
 
   void operator()(const bc::Strlen&) {
     auto const t1 = popC();
@@ -1913,9 +1800,18 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Ceil&)  { floatFnImpl(ceil,  TDbl); }
   void operator()(const bc::Sqrt&)  { floatFnImpl(sqrt,  TInitUnc); }
 
-  // TODO: Task to analyze 86pinit methods: #3562690
   void operator()(const bc::CheckProp&) { push(TBool); }
-  void operator()(const bc::InitProp&) { popC(); }
+  void operator()(const bc::InitProp& op) {
+    auto const t = popC();
+    switch (op.subop) {
+      case InitPropOp::Static: {
+        mergeSelfProp(op.str1, t);
+      } break;
+      case InitPropOp::NonStatic: {
+        mergeThisProp(op.str1, t);
+      } break;
+    }
+  }
 
   void operator()(const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
   void operator()(const bc::HighInvalid&) { always_assert(!"HighInvalid"); }
@@ -2952,8 +2848,12 @@ private:
     for (auto& l : m_state.locals) l = union_of(l, TUninit);
   }
 
-  void unsetAllLocals() {
-    for (auto& l : m_state.locals) l = TUninit;
+  void unsetNamedLocals() {
+    for (auto i = size_t{0}; i < m_state.locals.size(); ++i) {
+      if (m_ctx.func->locals[i]->name) {
+        m_state.locals[i] = TUninit;
+      }
+    }
   }
 
 private:
@@ -3195,8 +3095,9 @@ private: // properties on $this
    */
 
   Type* thisPropRaw(SString name) const {
-    auto const it = m_state.privateProperties.find(name);
-    if (it != end(m_state.privateProperties)) {
+    auto& privateProperties = m_props.privateProperties();
+    auto const it = privateProperties.find(name);
+    if (it != end(privateProperties)) {
       return &it->second;
     }
     return nullptr;
@@ -3206,7 +3107,7 @@ private: // properties on $this
 
   void killThisProps() {
     FTRACE(2, "    killThisProps\n");
-    for (auto& kv : m_state.privateProperties) kv.second = TGen;
+    for (auto& kv : m_props.privateProperties()) kv.second = TGen;
   }
 
   /*
@@ -3257,14 +3158,14 @@ private: // properties on $this
    */
   template<class MapFn>
   void mergeEachThisPropRaw(MapFn fn) {
-    for (auto& kv : m_state.privateProperties) {
+    for (auto& kv : m_props.privateProperties()) {
       mergeThisProp(kv.first, fn(kv.second));
     }
   }
 
   void unsetThisProp(SString name) { mergeThisProp(name, TUninit); }
   void unsetUnknownThisProp() {
-    for (auto& kv : m_state.privateProperties) {
+    for (auto& kv : m_props.privateProperties()) {
       mergeThisProp(kv.first, TUninit);
     }
   }
@@ -3283,7 +3184,7 @@ private: // properties on $this
    */
   void loseNonRefThisPropTypes() {
     FTRACE(2, "    loseNonRefThisPropTypes\n");
-    for (auto& kv : m_state.privateProperties) {
+    for (auto& kv : m_props.privateProperties()) {
       if (kv.second.subtypeOf(TCell)) kv.second = TCell;
     }
   }
@@ -3293,8 +3194,9 @@ private: // properties on self::
   // insensitive types for these.
 
   Type* selfPropRaw(SString name) const {
-    auto it = m_state.privateStatics.find(name);
-    if (it != end(m_state.privateStatics)) {
+    auto& privateStatics = m_props.privateStatics();
+    auto it = privateStatics.find(name);
+    if (it != end(privateStatics)) {
       return &it->second;
     }
     return nullptr;
@@ -3302,7 +3204,7 @@ private: // properties on self::
 
   void killSelfProps() {
     FTRACE(2, "    killSelfProps\n");
-    for (auto& kv : m_state.privateStatics) kv.second = TGen;
+    for (auto& kv : m_props.privateStatics()) kv.second = TGen;
   }
 
   void killSelfProp(SString name) const {
@@ -3335,7 +3237,7 @@ private: // properties on self::
    */
   template<class MapFn>
   void mergeEachSelfPropRaw(MapFn fn) {
-    for (auto& kv : m_state.privateStatics) {
+    for (auto& kv : m_props.privateStatics()) {
       mergeSelfProp(kv.first, fn(kv.second));
     }
   }
@@ -3353,14 +3255,18 @@ private: // properties on self::
    */
   void loseNonRefSelfPropTypes() {
     FTRACE(2, "    loseNonRefSelfPropTypes\n");
-    for (auto& kv : m_state.privateStatics) {
+    for (auto& kv : m_props.privateStatics()) {
       if (kv.second.subtypeOf(TInitCell)) kv.second = TCell;
     }
   }
 
 private:
+  TRACE_SET_MOD(hhbbc);
+
+private:
   const Index& m_index;
   const Context m_ctx;
+  PropertiesInfo& m_props;
   State& m_state;
   StepFlags& m_flags;
   Propagate m_propagate;
@@ -3369,13 +3275,19 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Block-at-a-time interpreter usable for both analysis and
+ * optimization passes.
+ */
 struct Interpreter {
   Interpreter(const Index* index,
               Context ctx,
+              PropertiesInfo& props,
               const php::Block* blk,
               State& state)
     : m_index(*index)
     , m_ctx(ctx)
+    , m_props(props)
     , m_blk(*blk)
     , m_state(state)
   {}
@@ -3384,10 +3296,9 @@ struct Interpreter {
    * Run the interpreter on a whole block, propagating states using
    * the propagate function.
    */
-  template<class Propagate, class MergeReturn, class MergePrivates>
+  template<class Propagate, class MergeReturn>
   void run(Propagate propagate,
-           MergeReturn mergeReturn,
-           MergePrivates mergePrivates) {
+           MergeReturn mergeReturn) {
     SCOPE_EXIT {
       FTRACE(2, "out {}\n", state_string(*m_ctx.func, m_state));
     };
@@ -3410,8 +3321,6 @@ struct Interpreter {
       }
     }
 
-    mergePrivates(m_state.privateProperties, m_state.privateStatics);
-
     FTRACE(2, "  <end block>\n");
     if (m_blk.fallthrough) propagate(*m_blk.fallthrough, m_state);
   }
@@ -3429,6 +3338,7 @@ struct Interpreter {
     InterpStepper<decltype(propagate),decltype(propagateThrow)> stepper(
       &m_index,
       m_ctx,
+      m_props,
       m_state,
       flags,
       propagate,
@@ -3498,6 +3408,18 @@ private:
       default: break;
       }
       break;
+    case Op::AsyncAwait:
+      switch (o2) {
+      /*
+       * Note: AsyncAwait is in practice always followed by JmpNZ with
+       * the current async function implementation.  We could support
+       * JmpZ, but this is not easy to test, and we'd rather hit an
+       * assert here if we change emission to start doing this.
+       */
+      case Op::JmpNZ:  return group(st, it, it[0].AsyncAwait, it[1].JmpNZ);
+      case Op::JmpZ:   always_assert(!"who is generating this code?");
+      default: break;
+      }
     default: break;
     }
 
@@ -3517,6 +3439,7 @@ private:
     InterpStepper<Propagate,decltype(propagateThrow)> stepper(
       &m_index,
       m_ctx,
+      m_props,
       m_state,
       flags,
       propagate,
@@ -3548,752 +3471,18 @@ private:
   }
 
 private:
+  TRACE_SET_MOD(hhbbc);
+
+private:
   const Index& m_index;
   const Context m_ctx;
+  PropertiesInfo& m_props;
   const php::Block& m_blk;
   State& m_state;
 };
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<AssertTOp> assertTOpFor(Type t) {
-#define ASSERTT_OP(y) \
-  if (t.subtypeOf(T##y)) return AssertTOp::y;
-  ASSERTT_OPS
-#undef ASSERTT_OP
-  return folly::none;
-}
-
-template<class ObjBC, class TyBC, class ArgType>
-folly::Optional<Bytecode> makeAssert(ArgType arg, Type t) {
-  if (t.strictSubtypeOf(TObj)) {
-    auto const dobj = dobj_of(t);
-    auto const op = dobj.type == DObj::Exact ? AssertObjOp::Exact
-                                             : AssertObjOp::Sub;
-    return Bytecode { ObjBC { arg, dobj.cls.name(), op } };
-  }
-  if (is_opt(t) && t.strictSubtypeOf(TOptObj)) {
-    auto const dobj = dobj_of(t);
-    auto const op = dobj.type == DObj::Exact ? AssertObjOp::OptExact
-                                             : AssertObjOp::OptSub;
-    return Bytecode { ObjBC { arg, dobj.cls.name(), op } };
-  }
-
-  if (auto const op = assertTOpFor(t)) {
-    return Bytecode { TyBC { arg, *op } };
-  }
-  return folly::none;
-}
-
-template<class Gen>
-void insert_assertions(const php::Func& func,
-                       const Bytecode& bcode,
-                       const State& state,
-                       std::bitset<64> mayReadLocalSet,
-                       bool lastStackOutputObvious,
-                       Gen gen) {
-  for (size_t i = 0; i < state.locals.size(); ++i) {
-    if (options.FilterAssertions) {
-      if (i < mayReadLocalSet.size() && !mayReadLocalSet.test(i)) {
-        continue;
-      }
-    }
-    auto const realT = state.locals[i];
-    auto const op = makeAssert<bc::AssertObjL,bc::AssertTL>(
-      borrow(func.locals[i]), realT
-    );
-    if (op) gen(*op);
-  }
-
-  if (!options.InsertStackAssertions) return;
-
-  // Skip asserting the top of the stack if it just came immediately
-  // out of an 'obvious' instruction.  (See hasObviousStackOutput.)
-  assert(state.stack.size() >= bcode.numPop());
-  auto i = size_t{0};
-  auto stackIdx = state.stack.size() - 1;
-  if (lastStackOutputObvious) {
-    ++i, --stackIdx;
-  }
-
-  /*
-   * This doesn't need to account for ActRecs on the fpiStack, because
-   * no instruction in an FPI region can ever consume a stack value
-   * from above the pre-live ActRec.
-   */
-  for (; i < bcode.numPop(); ++i, --stackIdx) {
-    auto const realT = state.stack[stackIdx];
-
-    if (options.FilterAssertions &&
-        !realT.strictSubtypeOf(stack_flav(realT))) {
-      continue;
-    }
-
-    auto const op = makeAssert<bc::AssertObjStk,bc::AssertTStk>(
-      static_cast<int32_t>(i), realT
-    );
-    if (op) gen(*op);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-template<class Gen>
-bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
-  auto const numPop  = op.numPop();
-  auto const numPush = op.numPush();
-  auto const stkSize = state.stack.size();
-
-  // All outputs of the instruction must have constant types for this
-  // to be allowed.
-  for (auto i = size_t{0}; i < numPush; ++i) {
-    if (!tv(state.stack[stkSize - i - 1])) return false;
-  }
-
-  // Pop the inputs, and push the constants.
-  for (auto i = size_t{0}; i < numPop; ++i) {
-    switch (op.popFlavor(i)) {
-    case Flavor::C:  gen(bc::PopC {}); break;
-    case Flavor::V:  gen(bc::PopV {}); break;
-    case Flavor::A:  gen(bc::PopA {}); break;
-    case Flavor::R:  not_reached();    break;
-    case Flavor::F:  not_reached();    break;
-    case Flavor::U:  not_reached();    break;
-    }
-  }
-
-  for (auto i = size_t{0}; i < numPush; ++i) {
-    auto const v = tv(state.stack[stkSize - i - 1]);
-    switch (v->m_type) {
-    case KindOfUninit:        not_reached();          break;
-    case KindOfNull:          gen(bc::Null {});       break;
-    case KindOfBoolean:
-      if (v->m_data.num) {
-        gen(bc::True {});
-      } else {
-        gen(bc::False {});
-      }
-      break;
-    case KindOfInt64:
-      gen(bc::Int { v->m_data.num });
-      break;
-    case KindOfDouble:
-      gen(bc::Double { v->m_data.dbl });
-      break;
-    case KindOfStaticString:
-      gen(bc::String { v->m_data.pstr });
-      break;
-    case KindOfArray:
-      gen(bc::Array { v->m_data.parr });
-      break;
-
-    case KindOfRef:
-    case KindOfResource:
-    case KindOfString:
-    default:
-      always_assert(0 && "invalid constant in propagate_constants");
-    }
-
-    // Special case for FPass* instructions.  We just put a C on the
-    // stack, so we need to get it to be an F.
-    if (isFPassStar(op.op)) {
-      // We should only ever const prop for FPassL right now.
-      always_assert(numPush == 1 && op.op == Op::FPassL);
-      gen(bc::FPassC { op.FPassL.arg1 });
-    }
-  }
-
-  return true;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * When filter assertions is on, we use this to avoid putting stack
- * assertions on some "obvious" instructions.
- *
- * These are instructions that push an output type that is always the
- * same, i.e. where an AssertT is never going to add information.
- * (E.g. "Int 3" obviously pushes an Int, and the JIT has no trouble
- * figuring that out, so there's no reason to assert about it.)
- *
- * TODO(#3676101): It turns out many hhbc opcodes have known output
- * types---there are some super polymorphic ones, but many always do
- * bools or objects, etc.  We might consider making stack flavors have
- * subtypes and adding this to the opcode table.
- */
-bool hasObviousStackOutput(Op op) {
-  switch (op) {
-  case Op::Box:
-  case Op::BoxR:
-  case Op::Null:
-  case Op::NullUninit:
-  case Op::True:
-  case Op::False:
-  case Op::Int:
-  case Op::Double:
-  case Op::String:
-  case Op::Array:
-  case Op::NewArray:
-  case Op::NewArrayReserve:
-  case Op::NewPackedArray:
-  case Op::NewStructArray:
-  case Op::AddElemC:
-  case Op::AddElemV:
-  case Op::AddNewElemC:
-  case Op::AddNewElemV:
-  case Op::NameA:
-  case Op::File:
-  case Op::Dir:
-  case Op::Concat:
-  case Op::Not:
-  case Op::Xor:
-  case Op::Same:
-  case Op::NSame:
-  case Op::Eq:
-  case Op::Neq:
-  case Op::Lt:
-  case Op::Gt:
-  case Op::Lte:
-  case Op::Gte:
-  case Op::Shl:
-  case Op::Shr:
-  case Op::CastBool:
-  case Op::CastInt:
-  case Op::CastDouble:
-  case Op::CastString:
-  case Op::CastArray:
-  case Op::CastObject:
-  case Op::InstanceOfD:
-  case Op::InstanceOf:
-  case Op::Print:
-  case Op::Exit:
-  case Op::AKExists:
-  case Op::IssetL:
-  case Op::IssetN:
-  case Op::IssetG:
-  case Op::IssetS:
-  case Op::IssetM:
-  case Op::EmptyL:
-  case Op::EmptyN:
-  case Op::EmptyG:
-  case Op::EmptyS:
-  case Op::EmptyM:
-  case Op::IsTypeC:
-  case Op::IsTypeL:
-  case Op::ClassExists:
-  case Op::InterfaceExists:
-  case Op::TraitExists:
-  case Op::Floor:
-  case Op::Ceil:
-    return true;
-  default:
-    return false;
-  }
-}
-
-std::vector<Bytecode> optimize_block(const Index& index,
-                                     const Context ctx,
-                                     php::Block* const blk,
-                                     State state) {
-  std::vector<Bytecode> newBCs;
-  newBCs.reserve(blk->hhbcs.size());
-
-  auto lastStackOutputObvious = false;
-
-  Interpreter interp { &index, ctx, blk, state };
-  for (auto& op : blk->hhbcs) {
-    FTRACE(2, "  == {}\n", show(op));
-
-    auto gen = [&] (const Bytecode& newb) {
-      newBCs.push_back(newb);
-      newBCs.back().srcLoc = op.srcLoc;
-      FTRACE(2, "   + {}\n", show(newBCs.back()));
-
-      lastStackOutputObvious =
-        newb.numPush() != 0 && hasObviousStackOutput(newb.op);
-    };
-
-    auto const preState = state;
-    auto const flags    = interp.step(op);
-
-    if (flags.calledNoReturn) {
-      gen(op);
-      gen(bc::BreakTraceHint {}); // The rest of this code is going to
-                                  // be unreachable.
-      // It would be nice to put a fatal here, but we can't because it
-      // will mess up the bytecode invariant about blocks
-      // not-reachable via fallthrough if the stack depth is non-zero.
-      // It can also mess up FPI regions.
-      continue;
-    }
-
-    if (options.InsertAssertions) {
-      insert_assertions(*ctx.func, op, preState, flags.mayReadLocalSet,
-        lastStackOutputObvious, gen);
-    }
-
-    if (options.RemoveDeadBlocks && flags.tookBranch) {
-      switch (op.op) {
-      case Op::JmpNZ:  blk->fallthrough = op.JmpNZ.target; break;
-      case Op::JmpZ:   blk->fallthrough = op.JmpZ.target;  break;
-      default:
-        // No support for switch, etc, right now.
-        always_assert(0 && "unsupported tookBranch case");
-      }
-      /*
-       * We need to pop the cell that was on the stack for the
-       * conditional jump.  Note: this also conceptually needs to
-       * execute any side effects a conversion to bool can have.
-       * (Currently that is none.)
-       */
-      gen(bc::PopC {});
-      continue;
-    }
-
-    if (options.ConstantProp && flags.canConstProp) {
-      if (propagate_constants(op, state, gen)) continue;
-    }
-
-    if (options.StrengthReduce && flags.strengthReduced) {
-      for (auto& hh : *flags.strengthReduced) gen(hh);
-      continue;
-    }
-
-    gen(op);
-  }
-
-  return newBCs;
-}
-
-void do_optimize(const Index& index, const FuncAnalysis& ainfo) {
-  FTRACE(2, "{:-^70}\n", "Optimize Func");
-
-  for (auto& blk : ainfo.rpoBlocks) {
-    FTRACE(2, "block #{}\n", blk->id);
-
-    auto const& state = ainfo.bdata[blk->id].stateIn;
-    if (!state.initialized) {
-      FTRACE(2, "   unreachable\n");
-      if (!options.InsertAssertions) continue;
-      auto const srcLoc = blk->hhbcs.front().srcLoc;
-      blk->hhbcs = {
-        bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
-        bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
-      };
-      blk->fallthrough = nullptr;
-      continue;
-    }
-
-    blk->hhbcs = optimize_block(index, ainfo.ctx, blk, state);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-State entry_state(const Index& index,
-                  Context const ctx,
-                  ClassAnalysis* clsAnalysis) {
-  State ret;
-  ret.initialized = true;
-  ret.thisAvailable = false;
-  ret.locals.resize(ctx.func->locals.size());
-
-  uint32_t locId = 0;
-  for (; locId < ctx.func->params.size(); ++locId) {
-    // Parameters may be Uninit (i.e. no InitCell).  Also note that if
-    // a function takes a param by ref, it might come in as a Cell
-    // still if FPassC was used.
-    ret.locals[locId] = ctx.func->params[locId].byRef ? TGen : TCell;
-  }
-
-  /*
-   * Closures have a hidden local that's always the first local, which
-   * stores the closure itself.
-   */
-  if (ctx.func->isClosureBody) {
-    assert(locId < ret.locals.size());
-    assert(ctx.func->cls);
-    auto const rcls = index.resolve_class(ctx, ctx.func->cls->name);
-    assert(rcls && "Closure classes must always be unique and must resolve");
-    ret.locals[locId++] = objExact(*rcls);
-  }
-
-  for (; locId < ctx.func->locals.size(); ++locId) {
-    /*
-     * Generators and closures don't (necessarily) start with the
-     * frame locals uninitialized.
-     *
-     * Ideas:
-     *
-     *  - maybe we can do better for generators by adding edges from
-     *    the yields to the top of the generator
-     *
-     *  - for closures, since they are all unique to their creation
-     *    sites and in the same unit, looking at the CreateCl could
-     *    tell the types of used vars, even in single unit mode.
-     */
-    ret.locals[locId] =
-      ctx.func->isGeneratorBody || ctx.func->isClosureBody ? TGen : TUninit;
-  }
-
-  /*
-   * Get private properties into the entry state.  If there is a
-   * clsAnalysis object, we should use the state from there.
-   * Otherwise use the best known information in the index.
-   */
-  ret.privateProperties =
-    clsAnalysis ? clsAnalysis->privateProperties :
-    ctx.cls     ? index.lookup_private_props(ctx.cls)
-                : PropState{};
-  ret.privateStatics =
-    clsAnalysis ? clsAnalysis->privateStatics :
-    ctx.cls     ? index.lookup_private_statics(ctx.cls)
-                : PropState{};
-
-  return ret;
-}
-
-/*
- * Closures inside of classes are analyzed in the context they are
- * created in (this affects accessibility rules, access to privates,
- * etc).
- *
- * Note that in the interpreter code, ctx.func->cls is not
- * necessarily the same as ctx.cls because of closures.
- */
-Context adjust_closure_context(Context ctx) {
-  if (ctx.cls && ctx.cls->closureContextCls) {
-    ctx.cls = ctx.cls->closureContextCls;
-  }
-  return ctx;
-}
-
-FuncAnalysis do_analyze(const Index& index,
-                        Context const inputCtx,
-                        ClassAnalysis* clsAnalysis) {
-  assert(inputCtx.func != inputCtx.unit->pseudomain.get() &&
-         "pseudomains not supported");
-  FTRACE(2, "{:-^70}\n", "Analyze");
-
-  auto const ctx = adjust_closure_context(inputCtx);
-  FuncAnalysis ai(ctx);
-
-  auto rpoId = [&] (borrowed_ptr<php::Block> blk) {
-    return ai.bdata[blk->id].rpoId;
-  };
-
-  /*
-   * Set of RPO ids that still need to be visited.
-   *
-   * Initially, we need each entry block in this list.  As we visit
-   * blocks, we propagate states to their successors and across their
-   * back edges---when state merges cause a change to the block
-   * stateIn, we will add it to this queue so it gets visited again.
-   */
-  std::set<uint32_t> incompleteQ;
-
-  /*
-   * We need to initialize the states for all function entries
-   * (i.e. each dv init and the main entry), and all of them count as
-   * places the function could be entered, so they all must be visited
-   * at least once (add them to incompleteQ).
-   */
-  {
-    auto const entryState = entry_state(index, ctx, clsAnalysis);
-    for (auto& param : ctx.func->params) {
-      if (auto const dv = param.dvEntryPoint) {
-        ai.bdata[dv->id].stateIn = entryState;
-        incompleteQ.insert(rpoId(dv));
-      }
-    }
-    ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
-    incompleteQ.insert(rpoId(ctx.func->mainEntry));
-  }
-
-  // For debugging, count how many times basic blocks get interpreted.
-  auto interp_counter = uint32_t{0};
-
-  /*
-   * Iterate until a fixed point.
-   *
-   * We know a fixed point must occur because types increase
-   * monotonically.
-   *
-   * We may visit a block up to as many times as there are state
-   * variables coming into the block (locals and eval stack slots),
-   * times the height of the type lattice.
-   *
-   * Each time a stateIn for a block changes, we re-insert the block's
-   * rpo ID in incompleteQ.  Since incompleteQ is ordered, we'll
-   * always visit blocks with earlier RPO ids first, which hopefully
-   * means less iterations.
-   */
-  while (!incompleteQ.empty()) {
-    auto blk = ai.rpoBlocks[*begin(incompleteQ)];
-    incompleteQ.erase(begin(incompleteQ));
-
-    FTRACE(2, "block #{}\nin {}", blk->id,
-      state_string(*ctx.func, ai.bdata[blk->id].stateIn));
-
-    ++interp_counter;
-
-    auto propagate = [&] (php::Block& target, const State& st) {
-      FTRACE(2, "     -> {}\n", target.id);
-      FTRACE(4, "target old {}\n",
-        state_string(*ctx.func, ai.bdata[target.id].stateIn));
-
-      if (merge_into(ai.bdata[target.id].stateIn, st)) {
-        incompleteQ.insert(rpoId(&target));
-      }
-      FTRACE(4, "target new {}\n",
-        state_string(*ctx.func, ai.bdata[target.id].stateIn));
-    };
-
-    auto mergeReturn = [&] (Type type) {
-      ai.inferredReturn = union_of(ai.inferredReturn, type);
-    };
-
-    auto mergePrivates = [&] (const PropState& props,
-                              const PropState& statics) {
-      if (!clsAnalysis) return;
-      merge_into(clsAnalysis->privateProperties, props);
-      merge_into(clsAnalysis->privateStatics, statics);
-    };
-
-    auto stateOut = ai.bdata[blk->id].stateIn;
-    Interpreter interp { &index, ctx, blk, stateOut };
-    interp.run(propagate, mergeReturn, mergePrivates);
-  }
-
-  /*
-   * If inferredReturn is TBottom, the callee didn't execute a return
-   * at all.  (E.g. it unconditionally throws, or is an abstract
-   * function body.)
-   *
-   * In this case, we leave the return type as TBottom, to indicate
-   * the same to callers.
-   */
-  assert(ai.inferredReturn.subtypeOf(TGen));
-
-  // For debugging, print the final input states for each block.
-  FTRACE(2, "{}", [&] {
-    auto const bsep = std::string(60, '=') + "\n";
-    auto const sep = std::string(60, '-') + "\n";
-    auto ret = folly::format(
-      "{}function {}{} ({} block interps):\n{}",
-      bsep,
-      ctx.cls ? folly::format("{}::", ctx.cls->name->data()).str()
-              : std::string(),
-      ctx.func->name->data(),
-      interp_counter,
-      bsep
-    ).str();
-    for (auto& bd : ai.bdata) {
-      ret += folly::format(
-        "{}block {}:\nin {}",
-        sep,
-        ai.rpoBlocks[bd.rpoId]->id,
-        state_string(*ctx.func, bd.stateIn)
-      ).str();
-    }
-    ret += sep + bsep;
-    ret += folly::format(
-      "Inferred return type: {}\n", show(ai.inferredReturn)).str();
-    ret += bsep;
-    return ret;
-  }());
-
-  return ai;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
-bool operator==(const ActRec& a, const ActRec& b) {
-  auto const fsame =
-    a.func.hasValue() != b.func.hasValue() ? false :
-    a.func.hasValue() ? a.func->same(*b.func) :
-    true;
-  return a.kind == b.kind && fsame;
-}
-
-bool operator==(const State& a, const State& b) {
-  return a.initialized == b.initialized &&
-    a.thisAvailable == b.thisAvailable &&
-    a.locals == b.locals &&
-    a.stack == b.stack &&
-    a.fpiStack == b.fpiStack &&
-    a.privateProperties == b.privateProperties &&
-    a.privateStatics == b.privateStatics;
-}
-
-bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
-bool operator!=(const State& a, const State& b)   { return !(a == b); }
-
-//////////////////////////////////////////////////////////////////////
-
-FuncAnalysis::FuncAnalysis(Context ctx)
-  : ctx(ctx)
-  , rpoBlocks(rpoSortAddDVs(*ctx.func))
-  , bdata(ctx.func->blocks.size())
-  , inferredReturn(TBottom)
-{
-  for (auto rpoId = size_t{0}; rpoId < rpoBlocks.size(); ++rpoId) {
-    bdata[rpoBlocks[rpoId]->id].rpoId = rpoId;
-  }
-}
-
-FuncAnalysis analyze_func(const Index& index, Context const ctx) {
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-    is_systemlib_part(*ctx.unit)};
-  return do_analyze(index, ctx, nullptr);
-}
-
-ClassAnalysis analyze_class(const Index& index, Context const ctx) {
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-    is_systemlib_part(*ctx.unit)};
-  assert(ctx.cls && !ctx.func);
-  FTRACE(2, "{:#^70}\n", "Class");
-
-  ClassAnalysis clsAnalysis(ctx);
-  auto const associatedClosures = index.lookup_closures(ctx.cls);
-
-  /*
-   * Initialize inferred private property types to their in-class
-   * initializers.
-   *
-   * We need to loosen_statics and loosen_values on instance
-   * properties, because the class could be unserialized, which we
-   * don't guarantee preserves those aspects of the type.
-   */
-  for (auto& prop : ctx.cls->properties) {
-    if (!(prop.attrs & AttrPrivate)) continue;
-
-    if (!(prop.attrs & AttrStatic)) {
-      clsAnalysis.privateProperties[prop.name] =
-        loosen_statics(loosen_values(from_cell(prop.val)));
-    } else {
-      clsAnalysis.privateStatics[prop.name] = from_cell(prop.val);
-    }
-  }
-
-  /*
-   * Skip trying to do smart things with 86{p,s}init for now.
-   *
-   * These are special functions that run to initialize static or
-   * instance properties that depend on class constants, or have
-   * collection literals.
-   *
-   * We don't handle this yet, so for any class with these types of
-   * initializers put the properties up to TInitCell for now.
-   *
-   * TODO(#3567661, #3562690): we want to analyze these.
-   */
-  auto const specials = find_special_methods(ctx.cls);
-  if (contains(specials, MethodMask::Internal_86pinit)) {
-    for (auto& p : clsAnalysis.privateProperties) {
-      p.second = union_of(p.second, TInitCell);
-    }
-  }
-  if (contains(specials, MethodMask::Internal_86sinit)) {
-    for (auto& p : clsAnalysis.privateStatics) {
-      p.second = union_of(p.second, TInitCell);
-    }
-  }
-
-  for (;;) {
-    auto const previousProps   = clsAnalysis.privateProperties;
-    auto const previousStatics = clsAnalysis.privateStatics;
-
-    std::vector<FuncAnalysis> methodResults;
-    std::vector<FuncAnalysis> closureResults;
-
-    // Analyze every method in the class until we reach a fixed point
-    // on the private property states.
-    for (auto& f : ctx.cls->methods) {
-      if (f->isAsync && f->isGeneratorBody) {
-        /*
-         * Inner-bodies of async functions don't need to have their
-         * inner body analyzed for class analysis, because it is
-         * required to do the same thing as the eager-execution
-         * version.
-         */
-        continue;
-      }
-
-      methodResults.push_back(
-        do_analyze(
-          index,
-          Context { ctx.unit, borrow(f), ctx.cls },
-          &clsAnalysis
-        )
-      );
-    }
-
-    for (auto& c : associatedClosures) {
-      auto const invoke = borrow(c->methods[0]);
-      closureResults.push_back(
-        do_analyze(
-          index,
-          Context { ctx.unit, invoke, c },
-          &clsAnalysis
-        )
-      );
-    }
-
-    // Check if we've reached a fixed point yet.
-    if (previousProps   == clsAnalysis.privateProperties &&
-        previousStatics == clsAnalysis.privateStatics) {
-      clsAnalysis.methods  = std::move(methodResults);
-      clsAnalysis.closures = std::move(closureResults);
-      break;
-    }
-  }
-
-  // For debugging, print the final state of the class analysis.
-  FTRACE(2, "{}", [&] {
-    auto const bsep = std::string(60, '+') + "\n";
-    auto ret = folly::format(
-      "{}class {}:\n{}",
-      bsep,
-      ctx.cls->name->data(),
-      bsep
-    ).str();
-    for (auto& kv : clsAnalysis.privateProperties) {
-      ret += folly::format(
-        "private ${: <14} :: {}\n",
-        kv.first->data(),
-        show(kv.second)
-      ).str();
-    }
-    for (auto& kv : clsAnalysis.privateStatics) {
-      ret += folly::format(
-        "private static ${: <14} :: {}\n",
-        kv.first->data(),
-        show(kv.second)
-      ).str();
-    }
-    ret += bsep;
-    return ret;
-  }());
-
-  return clsAnalysis;
-}
-
-void optimize_func(const Index& index, const FuncAnalysis& ainfo) {
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-    is_systemlib_part(*ainfo.ctx.unit)};
-  do_optimize(index, ainfo);
-}
-
-void analyze_and_optimize_func(const Index& index, Context ctx) {
-  optimize_func(index, analyze_func(index, ctx));
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }}
+
+#endif

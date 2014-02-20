@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -177,6 +177,12 @@ struct FuncInfo {
    * return (e.g. always throws).
    */
   Type returnTy = TInitGen;
+
+  /*
+   * Whether $this can be null or not on entry to the method. Only applies
+   * to method and it's always false for functions.
+   */
+  bool thisAvailalble = false;
 };
 
 /*
@@ -470,6 +476,7 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
       ret.returnTy = union_of(t, TInitNull);
     }
   }
+  ret.thisAvailalble = false;
   return &ret;
 }
 
@@ -1025,7 +1032,7 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
       return do_resolve(it->second);
     }
 
-    if (!options.EnableFuncFamilies) return folly::none;
+    if (!options.FuncFamilies) return folly::none;
 
     {
       auto const famIt = cinfo->methodFamilies.find(name);
@@ -1079,12 +1086,13 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
     {
       auto const mainType = [&]() -> const Type {
         switch (tc.underlyingDataType()) {
-        case KindOfString:        return TStr;
-        case KindOfStaticString:  return TStr;
-        case KindOfArray:         return TArr;
-        case KindOfInt64:         return TInt;
-        case KindOfBoolean:       return TBool;
-        case KindOfDouble:        return TDbl;
+        case KindOfString:       return TStr;
+        case KindOfStaticString: return TStr;
+        case KindOfArray:        return TArr;
+        case KindOfInt64:        return TInt;
+        case KindOfBoolean:      return TBool;
+        case KindOfDouble:       return TDbl;
+        case KindOfResource:     return TRes;
         case KindOfObject:
           /*
            * Type constraints only imply an object of a particular
@@ -1096,8 +1104,6 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
               : subObj(*rcls);
           }
           return TInitCell;
-        case KindOfResource: // Note, some day we may have resource hints.
-          break;
         default:
           break;
         }
@@ -1160,6 +1166,11 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
   auto it = m_data->funcInfo.find(f);
   if (it != end(m_data->funcInfo)) return it->second.returnTy;
   return TInitGen;
+}
+
+bool Index::lookup_this_available(borrowed_ptr<const php::Func> f) const {
+  auto it = m_data->funcInfo.find(f);
+  return (it != end(m_data->funcInfo)) ? it->second.thisAvailalble : false;
 }
 
 // Parameter preparation modes never change during analysis, so

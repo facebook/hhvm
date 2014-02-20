@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -269,6 +269,7 @@ private:
                   FAST_REFCOUNT_OFFSET, "");
     static_assert(sizeof(RefData::m_count) ==
                   TypedValueAux::auxSize, "");
+    static_assert(sizeof(DataType) == 1, "required for m_cow/z packing");
   }
 
 #if defined(DEBUG) || defined(PACKED_TV)
@@ -294,20 +295,16 @@ public:
     TypedValueAux m_tv;
     struct {
       void* shadow_data;
-      int32_t shadow_type;
+      DataType shadow_type;
+      union {
+        struct {
+          mutable uint8_t m_cow;
+          mutable uint8_t m_z;
+        };
+        mutable uint16_t m_cowAndZ;
+      };
       mutable RefCount m_count; // refcount field
     };
-  };
-  // TODO Task #2893407: At present the m_cow and m_z fields cause the
-  // RefData structure to take up more than 16 bytes. If we use int8_t
-  // instead of int32_t for TypedValue::m_type and TypedValueAux::m_type,
-  // we can fit all of RefData's fields into 16 bytes.
-  union {
-    struct {
-      mutable uint8_t m_cow;
-      mutable uint8_t m_z;
-    };
-    mutable uint32_t m_cowAndZ;
   };
 #endif
 };

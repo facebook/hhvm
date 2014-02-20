@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -623,7 +623,7 @@ Variant f_date_create(const String& time /* = null_string */,
   Object ret(cdt);
   // Don't set the time here because it will throw if it is bad
   cdt->t___construct();
-  if (time.isNull()) {
+  if (time.empty()) {
     // zend does this, so so do we
     return ret;
   }

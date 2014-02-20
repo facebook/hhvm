@@ -1540,7 +1540,7 @@ class mysqli_warning {
   public string $sqlstate = "HY000";
   public int $errno;
 
-  private array $__warnings;
+  private $__warnings;
 
   /**
    * The __construct purpose

@@ -19,7 +19,7 @@ class Imagick {
   const COLOR_ALPHA = 8;
   const COLOR_FUZZ = 9;
 
-  private resource $wand;
+  private ?resource $wand = null;
 
   /**
    * The Imagick constructor
@@ -33,8 +33,8 @@ class Imagick {
 }
 
 class ImagickPixel {
-  private resource $wand;
-  private bool $initByIterator;
+  private ?resource $wand = null;
+  private bool $initByIterator = false;
 
   /**
    * Clears resources associated with this object
@@ -195,7 +195,7 @@ class ImagickPixel {
 }
 
 class ImagickPixelIterator {
-  private resource $wand;
+  private ?resource $wand = null;
 
   <<__Native>>
   static function getPixelIterator(Imagick $wand): ImagickPixelIterator;

@@ -817,7 +817,7 @@ Variant unserialize_ex(const char* str, int len,
     return false;
   }
 
-  VariableUnserializer vu(str, len, type, false, class_whitelist);
+  VariableUnserializer vu(str, len, type, true, class_whitelist);
   Variant v;
   try {
     v = vu.unserialize();

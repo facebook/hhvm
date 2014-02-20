@@ -1880,11 +1880,6 @@ void Variant::unserialize(VariableUnserializer *uns,
       Object obj;
       try {
         obj = create_object_only(clsName);
-        if (!obj->instanceof(SystemLib::s_SerializableClass)) {
-          raise_error("%s didn't implement Serializable", clsName.data());
-        }
-        obj->o_invoke_few_args(s_unserialize, 1, serialized);
-        obj.get()->clearNoDestruct();
       } catch (ClassNotFoundException &e) {
         if (!uns->allowUnknownSerializableClass()) {
           throw;
@@ -1893,6 +1888,14 @@ void Variant::unserialize(VariableUnserializer *uns,
         obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
         obj->o_set("serialized", serialized);
       }
+
+      if (!obj->instanceof(SystemLib::s_SerializableClass)) {
+        raise_warning("Class %s has no unserializer", obj->o_getClassName().data());
+      } else {
+        obj->o_invoke_few_args(s_unserialize, 1, serialized);
+        obj.get()->clearNoDestruct();
+      }
+
       operator=(obj);
       return; // object has '}' terminating
     }

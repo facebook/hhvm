@@ -48,7 +48,6 @@
 #include <sys/wait.h>
 #include <dlfcn.h>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -150,8 +149,7 @@ extern "C" void compiler_hook_initialize();
 int compiler_main(int argc, char **argv) {
   try {
     Hdf empty;
-    IniSetting::Map ini = IniSetting::Map::object;
-    RuntimeOption::Load(empty, ini);
+    RuntimeOption::Load(empty);
     initialize_repo();
 
     // we need to initialize pcre cache table very early
@@ -381,25 +379,14 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
 
   Hdf config;
-  IniSetting::Map ini = IniSetting::Map::object;
   for (vector<string>::const_iterator it = po.config.begin();
        it != po.config.end(); ++it) {
-    if (boost::ends_with(*it, "ini")) {
-      std::ifstream ifs(*it);
-      const std::string str((std::istreambuf_iterator<char>(ifs)),
-                            std::istreambuf_iterator<char>());
-      auto parsed_ini = IniSetting::FromStringAsMap(str, *it);
-      for (auto &pair : parsed_ini.items()) {
-        ini[pair.first] = pair.second;
-      }
-    } else {
-      config.append(*it);
-    }
+    config.append(*it);
   }
   for (unsigned int i = 0; i < po.confStrings.size(); i++) {
     config.fromString(po.confStrings[i].c_str());
   }
-  Option::Load(config, ini);
+  Option::Load(config);
   vector<string> badnodes;
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {

@@ -32,40 +32,29 @@ namespace HPHP {
 std::set<std::string> SatelliteServerInfo::InternalURLs;
 int SatelliteServerInfo::DanglingServerPort = 0;
 
-SatelliteServerInfo::SatelliteServerInfo(Hdf hdf, const IniSetting::Map &ini) {
+SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   m_name = hdf.getName();
+  m_port = hdf["Port"].getInt16(0);
+  m_threadCount = hdf["ThreadCount"].getInt32(5);
+  m_maxRequest = hdf["MaxRequest"].getInt32(500);
+  m_maxDuration = hdf["MaxDuration"].getInt32(120);
+  m_timeoutSeconds = std::chrono::seconds
+    (hdf["TimeoutSeconds"].getInt32(RuntimeOption::RequestTimeoutSeconds));
+  m_reqInitFunc = hdf["RequestInitFunction"].getString("");
+  m_reqInitDoc = hdf["RequestInitDocument"].getString("");
+  m_password = hdf["Password"].getString("");
+  hdf["Passwords"].get(m_passwords);
+  m_alwaysReset = hdf["AlwaysReset"].getBool(false);
 
-  // Kind of a hack, but XboxServer initializes us in another thread passing an
-  // empty config. We can't bind system variables that late, so skip it all.
-  if (m_name.empty()) {
-    return;
-  }
-
-  RuntimeOption::Bind(m_port, ini, hdf, "Port");
-  RuntimeOption::Bind(m_threadCount, ini, hdf, "ThreadCount");
-  RuntimeOption::Bind(m_maxRequest, ini, hdf, "MaxRequest");
-  RuntimeOption::Bind(m_maxDuration, ini, hdf, "MaxDuration");
-  int32_t timeoutSeconds;
-  RuntimeOption::Bind(timeoutSeconds, ini, hdf, "TimeoutSeconds");
-  m_timeoutSeconds = std::chrono::seconds(timeoutSeconds);
-  RuntimeOption::Bind(m_reqInitFunc, ini, hdf, "RequestInitFunction");
-  RuntimeOption::Bind(m_reqInitDoc, ini, hdf, "RequestInitDocument");
-  RuntimeOption::Bind(m_password, ini, hdf, "Password");
-  RuntimeOption::Bind(m_passwords, ini, hdf, "Passwords");
-  RuntimeOption::Bind(m_alwaysReset, ini, hdf, "AlwaysReset");
-
-  std::string type;
-  RuntimeOption::Bind(type, ini, hdf, "Type");
+  std::string type = hdf["Type"].getString();
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::Type::KindOfInternalPageServer;
     std::vector<std::string> urls;
-    RuntimeOption::Bind(urls, ini, hdf, "URLs");
+    hdf["URLs"].get(urls);
     for (unsigned int i = 0; i < urls.size(); i++) {
       m_urls.insert(Util::format_pattern(urls[i], true));
     }
-    bool blockMainServer;
-    RuntimeOption::Bind(blockMainServer, ini, hdf, "BlockMainServer");
-    if (blockMainServer) {
+    if (hdf["BlockMainServer"].getBool(true)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());
     }
   } else if (type == "DanglingPageServer") {

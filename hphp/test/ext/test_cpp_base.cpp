@@ -777,36 +777,30 @@ bool TestCppBase::TestIpBlockMap() {
   IpBlockMap::BinaryPrefixTrie::InsertNewPrefix(&root, value, 128, true);
   VERIFY(root.isAllowed(value));
 
-  {
-    Hdf hdf;
-    IniSetting::Map ini = IniSetting::Map::object;
-    hdf.fromString(
-      "  0 {\n"
-      "    Location = /test\n"
-      "    AllowFirst = true\n"
-      "    Ip {\n"
-      "      Allow {\n"
-      "       * = 127.0.0.1\n"
-      "     }\n"
-      "     Deny {\n"
-      "       * = 8.32.0.0/24\n"
-      "       * = aaaa:bbbb:cccc:dddd:eeee:ffff:1111::/80\n"
-      "     }\n"
-      "    }\n"
-      "  }\n"
-    );
+  Hdf hdf;
+  hdf.fromString(
+    "  0 {\n"
+    "    Location = /test\n"
+    "    AllowFirst = true\n"
+    "    Ip {\n"
+    "      Allow {\n"
+    "       * = 127.0.0.1\n"
+    "     }\n"
+    "     Deny {\n"
+    "       * = 8.32.0.0/24\n"
+    "       * = aaaa:bbbb:cccc:dddd:eeee:ffff:1111::/80\n"
+    "     }\n"
+    "    }\n"
+    "  }\n"
+  );
 
-    // Registering all the ini settings need the modules to not be loaded
-    IniSetting::s_pretendExtensionsHaveNotBeenLoaded = true;
-    IpBlockMap ibm(hdf, ini);
-    IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
-    VERIFY(!ibm.isBlocking("test/blah.php", "127.0.0.1"));
-    VERIFY(ibm.isBlocking("test/blah.php", "8.32.0.104"));
-    VERIFY(ibm.isBlocking("test/blah.php",
-                          "aaaa:bbbb:cccc:dddd:eeee:9999:8888:7777"));
-    VERIFY(!ibm.isBlocking("test/blah.php",
-                           "aaaa:bbbb:cccc:dddd:eee3:4444:3333:2222"));
-  }
+  IpBlockMap ibm(hdf);
+  VERIFY(!ibm.isBlocking("test/blah.php", "127.0.0.1"));
+  VERIFY(ibm.isBlocking("test/blah.php", "8.32.0.104"));
+  VERIFY(ibm.isBlocking("test/blah.php",
+                        "aaaa:bbbb:cccc:dddd:eeee:9999:8888:7777"));
+  VERIFY(!ibm.isBlocking("test/blah.php",
+                         "aaaa:bbbb:cccc:dddd:eee3:4444:3333:2222"));
 
   return Count(true);
 }

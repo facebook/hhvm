@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/debuggable.h"
-#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -59,7 +58,7 @@ public:
   static Extension *GetExtension(const String& name);
 
   // called by RuntimeOption to initialize all configurations of extension
-  static void LoadModules(Hdf hdf, const IniSetting::Map& ini);
+  static void LoadModules(Hdf hdf);
 
   // called by hphp_process_init/exit
   static void InitModules();
@@ -83,7 +82,7 @@ public:
 
   // override these functions to implement module specific init/shutdown
   // sequences and information display.
-  virtual void moduleLoad(Hdf hdf, const IniSetting::Map &ini) {}
+  virtual void moduleLoad(Hdf hdf) {}
   virtual void moduleInfo(Array &info) { info.set(m_name, true);}
   virtual void moduleInit() {}
   virtual void moduleShutdown() {}

@@ -19,7 +19,6 @@
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/ini-setting.h"
 #include <netinet/in.h>
 
 namespace HPHP {
@@ -38,7 +37,7 @@ public:
                               int &significant_bits);
 
 public:
-  explicit IpBlockMap(Hdf config, const IniSetting::Map &ini);
+  explicit IpBlockMap(Hdf config);
 
   bool isBlocking(const std::string &command, const std::string &ip) const;
 

@@ -23,7 +23,7 @@ namespace HPHP {
 static class CodeModelExtension : public Extension {
  public:
   CodeModelExtension() : Extension("code_model", NO_EXTENSION_VERSION_YET) { }
-  virtual void moduleLoad(Hdf config, const IniSetting::Map &ini) {
+  virtual void moduleLoad(Hdf config) {
     HHVM_NAMED_FE(HH\\CodeModel\\get_code_model_for,
                   HHVM_FN(get_code_model_for)
     );

@@ -1,0 +1,34 @@
+Eval {
+  AllowHhas = true
+}
+
+Log {
+  AlwaysLogUnhandledExceptions = false
+  RuntimeErrorReportingLevel = 0
+}
+
+ErrorHandling {
+  EnableHipHopErrors = false
+}
+
+Server {
+  Port = 8080
+  APC.AllowObject = true
+
+  AllowedFiles {
+    0 = string
+  }
+}
+
+VirtualHost {
+  default {
+  }
+}
+
+Repo {
+  Local.Mode = r-
+  Central.Path = /var/facebook/hhvm/cli.hhbc
+  Eval.Mode = readonly
+  Commit = true
+  DebugInfo = false
+}

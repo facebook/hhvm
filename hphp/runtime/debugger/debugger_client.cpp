@@ -17,7 +17,6 @@
 
 #include <boost/lexical_cast.hpp>
 #include <signal.h>
-#include <fstream>
 
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/debugger/cmd/all.h"
@@ -32,7 +31,6 @@
 #include "hphp/util/text-art.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -656,9 +654,7 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
 
   usageLogEvent("init");
 
-  IniSetting::s_pretendExtensionsHaveNotBeenLoaded = true;
   loadConfig();
-  IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
 
   if (m_scriptMode) {
     print("running in script mode, pid=%d\n",
@@ -2283,69 +2279,52 @@ void DebuggerClient::loadConfig() {
     return;
   }
 
-  IniSetting::Map ini = IniSetting::Map::object;
   try {
-    if (boost::ends_with(m_configFileName, "ini")) {
-      std::ifstream ifs(m_configFileName);
-      const std::string str((std::istreambuf_iterator<char>(ifs)),
-                            std::istreambuf_iterator<char>());
-      ini = IniSetting::FromStringAsMap(str, m_configFileName);
-    } else {
-      m_config.open(m_configFileName);
-    }
+    m_config.open(m_configFileName);
   } catch (const HdfException &e) {
     Logger::Error("Unable to load configuration file: %s", e.what());
     m_configFileName.clear();
   }
 
-  auto neverSaveConfig =
-    RuntimeOption::GetBool(ini, m_config, "NeverSaveConfig", false);
+  auto neverSaveConfig = m_config["NeverSaveConfig"].getBool(false);
   m_neverSaveConfig = true; // Prevent saving config while reading it
-  RuntimeOption::Bind(s_use_utf8, ini, m_config, "UTF8");
+  s_use_utf8 = m_config["UTF8"].getBool(true);
   m_config["UTF8"] = s_use_utf8; // for starter
 
   Hdf color = m_config["Color"];
-  RuntimeOption::Bind(UseColor, ini, m_config, "Color");
+  UseColor = color.getBool(true);
   color = UseColor; // for starter
   if (UseColor && RuntimeOption::EnableDebuggerColor) {
     defineColors(); // (1) no one can overwrite, (2) for starter
     LoadColors(color);
   }
 
-  RuntimeOption::Bind(m_tutorial, ini, m_config, "Tutorial");
-  RuntimeOption::Bind(m_scriptMode, ini, m_config, "ScriptMode");
+  m_tutorial = m_config["Tutorial"].getInt32(0);
+  m_scriptMode = m_config["ScriptMode"].getBool();
 
-  setDebuggerClientSmallStep(
-    RuntimeOption::GetBool(ini, m_config, "SmallStep", false));
-  setDebuggerClientMaxCodeLines(
-    RuntimeOption::GetInt(ini, m_config, "MaxCodeLines", -1));
-  setDebuggerClientBypassCheck(
-    RuntimeOption::GetBool(ini, m_config, "BypassAccessCheck", false));
-
-  auto printLevel = RuntimeOption::GetInt(ini, m_config, "PrintLevel", 5);
+  setDebuggerClientSmallStep(m_config["SmallStep"].getBool());
+  setDebuggerClientMaxCodeLines(m_config["MaxCodeLines"].getInt16(-1));
+  setDebuggerClientBypassCheck(m_config["BypassAccessCheck"].getBool());
+  int printLevel = m_config["PrintLevel"].getInt16(5);
   if (printLevel > 0 && printLevel < MinPrintLevel) {
     printLevel = MinPrintLevel;
   }
   setDebuggerClientPrintLevel(printLevel);
-
-  setDebuggerClientStackArgs(
-    RuntimeOption::GetBool(ini, m_config, "StackArgs", true));
-
+  setDebuggerClientStackArgs(m_config["StackArgs"].getBool(true));
   setDebuggerClientShortPrintCharCount(
-    RuntimeOption::GetInt(ini, m_config, "ShortPrintCharCount", 200));
+    m_config["ShortPrintCharCount"].getInt16(200));
 
-  RuntimeOption::Bind(m_tutorialVisited, ini, m_config["Tutorial"],
-                      "Visited");
+  m_config["Tutorial"]["Visited"].get(m_tutorialVisited);
 
   for (Hdf node = m_config["Macros"].firstChild(); node.exists();
        node = node.next()) {
     auto macro = std::make_shared<Macro>();
-    macro->load(node, ini);
+    macro->load(node);
     m_macros.push_back(macro);
   }
 
-  RuntimeOption::Bind(m_sourceRoot, ini, m_config, "SourceRoot");
-  RuntimeOption::Bind(m_zendExe, ini, m_config, "ZendExecutable");
+  m_sourceRoot = m_config["SourceRoot"].getString();
+  m_zendExe = m_config["ZendExecutable"].getString("php");
 
   m_neverSaveConfig = neverSaveConfig;
   if (needToWriteFile && !neverSaveConfig) {

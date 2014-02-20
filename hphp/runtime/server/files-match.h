@@ -21,14 +21,13 @@
 #include <vector>
 
 #include "hphp/util/hdf.h"
-#include "hphp/runtime/base/ini-setting.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class FilesMatch {
 public:
-  explicit FilesMatch(const Hdf &vh, const IniSetting::Map &ini);
+  explicit FilesMatch(Hdf vh);
 
   bool match(const std::string &filename) const;
   const std::vector<std::string> &getHeaders() const { return m_headers;}

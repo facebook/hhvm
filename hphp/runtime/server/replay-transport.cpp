@@ -69,42 +69,34 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
 }
 
 void ReplayTransport::replayInput(const char *filename) {
-  replayInputImpl(Hdf(filename));
+  m_hdf.open(filename);
+  replayInputImpl();
 }
 
 void ReplayTransport::replayInput(Hdf hdf) {
-  replayInputImpl(hdf);
+  m_hdf.assign(hdf);
+  replayInputImpl();
 }
 
-void ReplayTransport::replayInputImpl(const Hdf &hdf) {
-  // TODO support setting these from ini
-  IniSetting::Map ini = IniSetting::Map::object;
-
-  std::string postData;
-  RuntimeOption::Bind(postData, ini, hdf, "post");
-  auto postDataString = StringUtil::UUDecode(String(postData));
-  m_postData = std::string(postDataString.data(), postDataString.size());
+void ReplayTransport::replayInputImpl() {
+  String postData = StringUtil::UUDecode(m_hdf["post"].get(""));
+  m_postData = std::string(postData.data(), postData.size());
   m_requestHeaders.clear();
-  for (Hdf hdf = hdf["headers"].firstChild(); hdf.exists();
+  for (Hdf hdf = m_hdf["headers"].firstChild(); hdf.exists();
        hdf = hdf.next()) {
     m_requestHeaders[hdf["name"].get("")].push_back(hdf["value"].get(""));
   }
-
-  RuntimeOption::Bind(m_url, ini, hdf, "url");
-  RuntimeOption::Bind(m_remoteHost, ini, hdf, "remote_host");
-  RuntimeOption::Bind(m_remotePort, ini, hdf, "remote_port");
-  RuntimeOption::Bind(m_method, ini, hdf, "cmd");
 }
 
 const char *ReplayTransport::getUrl() {
-  return m_url.data();
+  return m_hdf["url"].get("");
 }
 
 const char *ReplayTransport::getRemoteHost() {
-  return m_remoteHost.data();
+  return m_hdf["remote_host"].get("");
 }
 uint16_t ReplayTransport::getRemotePort() {
-  return m_remotePort;
+  return m_hdf["remote_port"].getUInt16(0);
 }
 
 const void *ReplayTransport::getPostData(int &size) {
@@ -113,7 +105,7 @@ const void *ReplayTransport::getPostData(int &size) {
 }
 
 Transport::Method ReplayTransport::getMethod() {
-  return (Transport::Method)m_method;
+  return (Transport::Method)m_hdf["cmd"].getInt32();
 }
 
 std::string ReplayTransport::getHeader(const char *name) {

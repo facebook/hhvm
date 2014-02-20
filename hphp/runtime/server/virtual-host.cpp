@@ -15,8 +15,6 @@
 */
 #include "hphp/runtime/server/virtual-host.h"
 
-#include <boost/algorithm/string.hpp>
-
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -105,21 +103,20 @@ void VirtualHost::SortAllowedDirectories(std::vector<std::string>& dirs) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void VirtualHost::initRuntimeOption(Hdf overwrite, const IniSetting::Map &ini) {
-  RuntimeOption::Bind(m_runtimeOption.allowedDirectories, ini, overwrite,
-                      "Server.AllowedDirectories");
-  RuntimeOption::Bind(m_runtimeOption.requestTimeoutSeconds, ini, overwrite,
-                      "Server.RequestTimeoutSeconds");
-  RuntimeOption::Bind(m_runtimeOption.maxPostSize, ini, overwrite,
-                      "Server.MaxPostSize");
-  if (m_runtimeOption.maxPostSize != -1) {
-    m_runtimeOption.maxPostSize *= (1LL << 20);
-  }
-  RuntimeOption::Bind(m_runtimeOption.uploadMaxFileSize, ini, overwrite,
-                      "Server.Upload.UploadMaxFileSize");
-  if (m_runtimeOption.uploadMaxFileSize != -1) {
-    m_runtimeOption.uploadMaxFileSize *= (1LL << 20);
-  }
+void VirtualHost::initRuntimeOption(Hdf overwrite) {
+  int requestTimeoutSeconds =
+    overwrite["Server.RequestTimeoutSeconds"].getInt32(-1);
+  int64_t maxPostSize =
+    overwrite["Server.MaxPostSize"].getInt32(-1);
+  if (maxPostSize != -1) maxPostSize *= (1LL << 20);
+  int64_t uploadMaxFileSize =
+    overwrite["Server.Upload.UploadMaxFileSize"].getInt32(-1);
+  if (uploadMaxFileSize != -1) uploadMaxFileSize *= (1LL << 20);
+  overwrite["Server.AllowedDirectories"].
+    get(m_runtimeOption.allowedDirectories);
+  m_runtimeOption.requestTimeoutSeconds = requestTimeoutSeconds;
+  m_runtimeOption.maxPostSize = maxPostSize;
+  m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;
 
   m_documentRoot = RuntimeOption::SourceRoot + m_pathTranslation;
   if (!m_documentRoot.empty() &&
@@ -144,58 +141,52 @@ int VirtualHost::getRequestTimeoutSeconds(int defaultTimeout) const {
 
 VirtualHost::VirtualHost() : m_disabled(false) {
   Hdf empty;
-  IniSetting::Map empty_array = IniSetting::Map::object;
-  initRuntimeOption(empty, empty_array);
+  initRuntimeOption(empty);
 }
 
-VirtualHost::VirtualHost(Hdf vh, const IniSetting::Map &ini) :
-                         m_disabled(false) {
-  init(vh, ini);
+VirtualHost::VirtualHost(Hdf vh) : m_disabled(false) {
+  init(vh);
 }
 
-void VirtualHost::init(Hdf vh, const IniSetting::Map &ini) {
+void VirtualHost::init(Hdf vh) {
   m_name = vh.getName();
 
-  std::string prefix;
-  RuntimeOption::Bind(prefix, ini, vh, "Prefix");
-  std::string pattern;
-  RuntimeOption::Bind(pattern, ini, vh, "Pattern");
-  std::string pathTranslation;
-  RuntimeOption::Bind(pathTranslation, ini, vh, "PathTranslation");
+  const char *prefix = vh["Prefix"].get("");
+  const char *pattern = vh["Pattern"].get("");
+  const char *pathTranslation = vh["PathTranslation"].get("");
   Hdf overwrite = vh["overwrite"];
 
-  if (!prefix.empty()) m_prefix = prefix;
-  if (!pattern.empty()) {
+  if (prefix) m_prefix = prefix;
+  if (pattern) {
     m_pattern = Util::format_pattern(pattern, false);
     if (!m_pattern.empty()) {
       m_pattern += "i"; // case-insensitive
     }
   }
-  if (!pathTranslation.empty()) {
+  if (pathTranslation) {
     m_pathTranslation = pathTranslation;
     if (!m_pathTranslation.empty() &&
         m_pathTranslation[m_pathTranslation.length() - 1] != '/') {
       m_pathTranslation += '/';
     }
   }
-  initRuntimeOption(overwrite, ini);
+  initRuntimeOption(overwrite);
 
-  RuntimeOption::Bind(m_disabled, ini, vh, "Disabled");
+  m_disabled = vh["Disabled"].getBool(false);
 
-  RuntimeOption::Bind(m_checkExistenceBeforeRewrite, ini, vh,
-                      "CheckExistenceBeforeRewrite");
+  m_checkExistenceBeforeRewrite =
+    vh["CheckExistenceBeforeRewrite"].getBool(true);
 
   Hdf rewriteRules = vh["RewriteRules"];
   for (Hdf hdf = rewriteRules.firstChild(); hdf.exists(); hdf = hdf.next()) {
     RewriteRule dummy;
     m_rewriteRules.push_back(dummy);
     RewriteRule &rule = m_rewriteRules.back();
-    RuntimeOption::Bind(rule.pattern, ini, hdf, "pattern");
-    rule.pattern = Util::format_pattern(rule.pattern, true);
-    RuntimeOption::Bind(rule.to, ini, hdf, "to");
-    RuntimeOption::Bind(rule.qsa, ini, hdf, "qsa");
-    RuntimeOption::Bind(rule.redirect, ini, hdf, "redirect");
-    RuntimeOption::Bind(rule.encode_backrefs, ini, hdf, "encode_backrefs");
+    rule.pattern = Util::format_pattern(hdf["pattern"].getString(""), true);
+    rule.to = hdf["to"].getString("");
+    rule.qsa = hdf["qsa"].getBool(false);
+    rule.redirect = hdf["redirect"].getInt16(0);
+    rule.encode_backrefs = hdf["encode_backrefs"].getBool(false);
 
     if (rule.pattern.empty() || rule.to.empty()) {
       throw InvalidArgumentException("rewrite rule", "(empty pattern or to)");
@@ -206,17 +197,15 @@ void VirtualHost::init(Hdf vh, const IniSetting::Map &ini) {
       RewriteCond dummy;
       rule.rewriteConds.push_back(dummy);
       RewriteCond &cond = rule.rewriteConds.back();
-      RuntimeOption::Bind(cond.pattern, ini, chdf, "pattern");
-      cond.pattern = Util::format_pattern(cond.pattern, true);
+      cond.pattern = Util::format_pattern(chdf["pattern"].getString(""), true);
       if (cond.pattern.empty()) {
         throw InvalidArgumentException("rewrite rule", "(empty cond pattern)");
       }
-      std::string type;
-      RuntimeOption::Bind(type, ini, chdf, "type");
-      if (!type.empty()) {
-        if (boost::iequals(type, "host")) {
+      const char *type = chdf["type"].get();
+      if (type) {
+        if (strcasecmp(type, "host") == 0) {
           cond.type = RewriteCond::Type::Host;
-        } else if (boost::iequals(type, "request")) {
+        } else if (strcasecmp(type, "request") == 0) {
           cond.type = RewriteCond::Type::Request;
         } else {
           throw InvalidArgumentException("rewrite rule",
@@ -225,28 +214,26 @@ void VirtualHost::init(Hdf vh, const IniSetting::Map &ini) {
       } else {
         cond.type = RewriteCond::Type::Request;
       }
-      RuntimeOption::Bind(cond.negate, ini, chdf, "negate");
+      cond.negate = chdf["negate"].getBool(false);
     }
 
   }
 
   if (vh["IpBlockMap"].firstChild().exists()) {
     Hdf ipblocks = vh["IpBlockMap"];
-    m_ipBlocks = std::make_shared<IpBlockMap>(ipblocks, ini);
+    m_ipBlocks = std::make_shared<IpBlockMap>(ipblocks);
   }
 
   Hdf logFilters = vh["LogFilters"];
   for (Hdf hdf = logFilters.firstChild(); hdf.exists(); hdf = hdf.next()) {
     QueryStringFilter filter;
-    RuntimeOption::Bind(filter.urlPattern, ini, hdf, "url");
-    filter.urlPattern = Util::format_pattern(filter.urlPattern, true);
-    RuntimeOption::Bind(filter.replaceWith, ini, hdf, "value");
+    filter.urlPattern = Util::format_pattern(hdf["url"].getString(""), true);
+    filter.replaceWith = hdf["value"].getString("");
     filter.replaceWith = "\\1=" + filter.replaceWith;
 
-    std::string pattern;
-    RuntimeOption::Bind(pattern, ini, hdf, "pattern");
+    std::string pattern = hdf["pattern"].getString("");
     std::vector<std::string> names;
-    RuntimeOption::Bind(names, ini, hdf, "params");
+    hdf["params"].get(names);
 
     if (pattern.empty()) {
       for (unsigned int i = 0; i < names.size(); i++) {
@@ -270,8 +257,8 @@ void VirtualHost::init(Hdf vh, const IniSetting::Map &ini) {
     m_queryStringFilters.push_back(filter);
   }
 
-  RuntimeOption::Bind(m_serverVars, ini, vh, "ServerVariables");
-  RuntimeOption::Bind(m_serverName, ini, vh, "ServerName");
+  vh["ServerVariables"].get(m_serverVars);
+  m_serverName = vh["ServerName"].getString();
 }
 
 bool VirtualHost::match(const std::string &host) const {

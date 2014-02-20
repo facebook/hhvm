@@ -393,7 +393,7 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
 static class SPLExtension : public Extension {
  public:
   SPLExtension() : Extension("SPL", "0.2") { }
-  virtual void moduleLoad(Hdf config, const IniSetting::Map &ini) {
+  virtual void moduleLoad(Hdf config) {
     HHVM_ME(DirectoryIterator, hh_readdir);
     HHVM_ME(GlobIterator, count);
   }

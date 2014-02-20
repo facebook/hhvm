@@ -328,7 +328,7 @@ private:
   Hdf m_config;
   int m_tutorial;
   std::set<std::string> m_tutorialVisited;
-  bool m_scriptMode = false; // Is this client being scripted by a test?
+  bool m_scriptMode; // Is this client being scripted by a test?
   bool m_neverSaveConfig; // So that tests can avoid clobbering the config file
 
   DECLARE_DBG_CLIENT_SETTING
@@ -447,7 +447,7 @@ private:
                                const char *caller);
 
   // Zend executable for CmdZend, overridable via config.
-  std::string m_zendExe = "php";
+  std::string m_zendExe;
 
   bool m_unknownCmd;
 };

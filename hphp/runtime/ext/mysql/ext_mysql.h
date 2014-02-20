@@ -66,21 +66,21 @@ public:
   static std::string Socket;
   static bool TypedResults;
 
-  virtual void moduleLoad(Hdf config, const IniSetting::Map &ini) {
+  virtual void moduleLoad(Hdf config) {
     Hdf mysql = config["MySQL"];
-    RuntimeOption::Bind(ReadOnly, ini, mysql, "ReadOnly");
+    ReadOnly = mysql["ReadOnly"].getBool();
 #ifdef FACEBOOK
-    RuntimeOption::Bind(Localize, ini, mysql, "Localize");
+    Localize = mysql["Localize"].getBool();
 #endif
-    RuntimeOption::Bind(ConnectTimeout, ini, mysql, "ConnectTimeout");
-    RuntimeOption::Bind(ReadTimeout, ini, mysql, "ReadTimeout");
-    RuntimeOption::Bind(WaitTimeout, ini, mysql, "WaitTimeout");
-    RuntimeOption::Bind(SlowQueryThreshold, ini, mysql, "SlowQueryThreshold");
-    RuntimeOption::Bind(KillOnTimeout, ini, mysql, "KillOnTimeout");
-    RuntimeOption::Bind(MaxRetryOpenOnFail, ini, mysql, "MaxRetryOpenOnFail");
-    RuntimeOption::Bind(MaxRetryQueryOnFail, ini, mysql, "MaxRetryQueryOnFail");
-    RuntimeOption::Bind(Socket, ini, mysql, "Socket");
-    RuntimeOption::Bind(TypedResults, ini, mysql, "TypedResults");
+    ConnectTimeout = mysql["ConnectTimeout"].getInt32(1000);
+    ReadTimeout = mysql["ReadTimeout"].getInt32(60000);
+    WaitTimeout = mysql["WaitTimeout"].getInt32(-1);
+    SlowQueryThreshold = mysql["SlowQueryThreshold"].getInt32(1000);
+    KillOnTimeout = mysql["KillOnTimeout"].getBool();
+    MaxRetryOpenOnFail = mysql["MaxRetryOpenOnFail"].getInt32(1);
+    MaxRetryQueryOnFail = mysql["MaxRetryQueryOnFail"].getInt32(1);
+    Socket = mysql["Socket"].getString();
+    TypedResults = mysql["TypedResults"].getBool(true);
   }
 };
 

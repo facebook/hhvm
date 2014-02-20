@@ -48,7 +48,7 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 bool Logger::UseSyslog = false;
 bool Logger::UseLogFile = true;
-bool Logger::UseCronolog = false;
+bool Logger::UseCronolog = true;
 bool Logger::IsPipeOutput = false;
 FILE *Logger::Output = nullptr;
 Cronolog Logger::cronOutput;

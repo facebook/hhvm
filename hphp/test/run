@@ -324,8 +324,8 @@ function hhvm_cmd($options, $test, $test_run = null) {
   }
   $cmd = implode(' ', array(
     hhvm_path(),
-    '-c',
-    find_file_for_dir(dirname($test), "config.ini"),
+    '--config',
+    find_test_ext($test, 'hdf'),
     find_debug_config($test, 'hphpd.hdf'),
     mode_cmd($options),
     '-vEval.EnableArgsInBacktraces=true',
@@ -338,7 +338,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     $use_automain ? escapeshellarg($test) : ''
   ));
   if (file_exists($test.'.ini')) {
-    $cmd .= " -c $test.ini";
+    $cmd .= " -vServer.IniFile=$test.ini";
   }
   $env = $_ENV;
   $in = find_test_ext($test, 'in');
@@ -358,7 +358,7 @@ function hphp_cmd($options, $test) {
     hhvm_path(),
     '--hphp',
     '--config',
-    find_file($test, 'hphp_config.ini'),
+    find_file($test, 'hphp_config.hdf'),
     read_file("$test.hphp_opts"),
     "-thhbc -l0 -k1 -o $test.repo $test",
   ));

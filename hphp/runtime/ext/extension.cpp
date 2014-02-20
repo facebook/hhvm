@@ -103,13 +103,9 @@ Extension::Extension(litstr name, const char *version /* = "" */)
   (*s_registered_extensions)[name] = this;
 }
 
-void Extension::LoadModules(Hdf hdf, const IniSetting::Map& ini) {
+void Extension::LoadModules(Hdf hdf) {
   // Load up any dynamic extensions
-  std::string path = ".";
-  auto path_data = RuntimeOption::Get(ini, hdf, "DynamicExtensionPath");
-  if (path_data != nullptr) {
-    path = path_data;
-  }
+  std::string path = hdf["DynamicExtensionPath"].getString(".");
   for (Hdf ext = hdf["DynamicExtensions"].firstChild();
        ext.exists(); ext = ext.next()) {
     std::string extLoc = ext.getString();
@@ -150,7 +146,7 @@ void Extension::LoadModules(Hdf hdf, const IniSetting::Map& ini) {
   // Invoke Extension::moduleLoad() callbacks
   assert(s_registered_extensions);
   for (auto& kv : *s_registered_extensions) {
-    kv.second->moduleLoad(hdf, ini);
+    kv.second->moduleLoad(hdf);
   }
 }
 

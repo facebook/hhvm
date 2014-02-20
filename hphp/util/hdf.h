@@ -122,8 +122,25 @@ public:
    * any values that are not entirely parsable to be a number, it will return
    * default value instead.
    */
+  bool getBool(bool defValue = false) const;
   const char *get(const char *defValue = nullptr) const;
   std::string getString(const std::string &defValue = "") const;
+  char   getByte  (char   defValue = 0) const;
+  unsigned char  getUByte (unsigned char  defValue = 0) const;
+  int16_t  getInt16 (int16_t  defValue = 0) const;
+  uint16_t getUInt16(uint16_t defValue = 0) const;
+  int32_t  getInt32 (int32_t  defValue = 0) const;
+  uint32_t getUInt32(uint32_t defValue = 0) const;
+  int64_t  getInt64 (int64_t  defValue = 0) const;
+  uint64_t getUInt64(uint64_t defValue = 0) const;
+  double getDouble(double defValue = 0) const;
+
+  void get(std::vector<std::string> &values) const;
+  void get(std::set<std::string> &values) const;
+  void get(std::set<std::string, stdltistr> &values) const;
+  void get(boost::container::flat_set<std::string> &values) const;
+  void get(std::map<std::string, std::string> &values) const;
+  void get(hphp_string_imap<std::string> &values) const;
 
   /**
    * Set this node's value.
@@ -188,6 +205,11 @@ public:
   bool exists(const std::string &name) const;
 
   /**
+   * Note that this is NOT testing existence, but reading a boolean value.
+   */
+  bool operator!() const { return !getBool();}
+
+  /**
    * Removes a sub-node from parent.
    */
   void remove(int name) const;
@@ -204,6 +226,98 @@ public:
    */
   Hdf firstChild(bool markVisited = true) const;
   Hdf next(bool markVisited = true) const;
+
+  /**
+   * Comparisons
+   */
+  int compare(const char *v) const;
+  int compare(const std::string &v) const;
+  int compare(char   v) const;
+  int compare(unsigned char  v) const;
+  int compare(int16_t  v) const;
+  int compare(uint16_t v) const;
+  int compare(int32_t  v) const;
+  int compare(uint32_t v) const;
+  int compare(int64_t  v) const;
+  int compare(uint64_t v) const;
+  int compare(double v) const;
+
+  bool operator==(const char *v) const { return compare(v) == 0;}
+  bool operator!=(const char *v) const { return compare(v) != 0;}
+  bool operator>=(const char *v) const { return compare(v) >= 0;}
+  bool operator<=(const char *v) const { return compare(v) <= 0;}
+  bool operator> (const char *v) const { return compare(v) >  0;}
+  bool operator< (const char *v) const { return compare(v) <  0;}
+
+  bool operator==(const std::string &v) const { return compare(v) == 0;}
+  bool operator!=(const std::string &v) const { return compare(v) != 0;}
+  bool operator>=(const std::string &v) const { return compare(v) >= 0;}
+  bool operator<=(const std::string &v) const { return compare(v) <= 0;}
+  bool operator> (const std::string &v) const { return compare(v) >  0;}
+  bool operator< (const std::string &v) const { return compare(v) <  0;}
+
+  bool operator==(char v) const { return compare(v) == 0;}
+  bool operator!=(char v) const { return compare(v) != 0;}
+  bool operator>=(char v) const { return compare(v) >= 0;}
+  bool operator<=(char v) const { return compare(v) <= 0;}
+  bool operator> (char v) const { return compare(v) >  0;}
+  bool operator< (char v) const { return compare(v) <  0;}
+
+  bool operator==(unsigned char v) const { return compare(v) == 0;}
+  bool operator!=(unsigned char v) const { return compare(v) != 0;}
+  bool operator>=(unsigned char v) const { return compare(v) >= 0;}
+  bool operator<=(unsigned char v) const { return compare(v) <= 0;}
+  bool operator> (unsigned char v) const { return compare(v) >  0;}
+  bool operator< (unsigned char v) const { return compare(v) <  0;}
+
+  bool operator==(int16_t v) const { return compare(v) == 0;}
+  bool operator!=(int16_t v) const { return compare(v) != 0;}
+  bool operator>=(int16_t v) const { return compare(v) >= 0;}
+  bool operator<=(int16_t v) const { return compare(v) <= 0;}
+  bool operator> (int16_t v) const { return compare(v) >  0;}
+  bool operator< (int16_t v) const { return compare(v) <  0;}
+
+  bool operator==(uint16_t v) const { return compare(v) == 0;}
+  bool operator!=(uint16_t v) const { return compare(v) != 0;}
+  bool operator>=(uint16_t v) const { return compare(v) >= 0;}
+  bool operator<=(uint16_t v) const { return compare(v) <= 0;}
+  bool operator> (uint16_t v) const { return compare(v) >  0;}
+  bool operator< (uint16_t v) const { return compare(v) <  0;}
+
+  bool operator==(int32_t v) const { return compare(v) == 0;}
+  bool operator!=(int32_t v) const { return compare(v) != 0;}
+  bool operator>=(int32_t v) const { return compare(v) >= 0;}
+  bool operator<=(int32_t v) const { return compare(v) <= 0;}
+  bool operator> (int32_t v) const { return compare(v) >  0;}
+  bool operator< (int32_t v) const { return compare(v) <  0;}
+
+  bool operator==(uint32_t v) const { return compare(v) == 0;}
+  bool operator!=(uint32_t v) const { return compare(v) != 0;}
+  bool operator>=(uint32_t v) const { return compare(v) >= 0;}
+  bool operator<=(uint32_t v) const { return compare(v) <= 0;}
+  bool operator> (uint32_t v) const { return compare(v) >  0;}
+  bool operator< (uint32_t v) const { return compare(v) <  0;}
+
+  bool operator==(int64_t v) const { return compare(v) == 0;}
+  bool operator!=(int64_t v) const { return compare(v) != 0;}
+  bool operator>=(int64_t v) const { return compare(v) >= 0;}
+  bool operator<=(int64_t v) const { return compare(v) <= 0;}
+  bool operator> (int64_t v) const { return compare(v) >  0;}
+  bool operator< (int64_t v) const { return compare(v) <  0;}
+
+  bool operator==(uint64_t v) const { return compare(v) == 0;}
+  bool operator!=(uint64_t v) const { return compare(v) != 0;}
+  bool operator>=(uint64_t v) const { return compare(v) >= 0;}
+  bool operator<=(uint64_t v) const { return compare(v) <= 0;}
+  bool operator> (uint64_t v) const { return compare(v) >  0;}
+  bool operator< (uint64_t v) const { return compare(v) <  0;}
+
+  bool operator==(double v) const { return compare(v) == 0;}
+  bool operator!=(double v) const { return compare(v) != 0;}
+  bool operator>=(double v) const { return compare(v) >= 0;}
+  bool operator<=(double v) const { return compare(v) <= 0;}
+  bool operator> (double v) const { return compare(v) >  0;}
+  bool operator< (double v) const { return compare(v) <  0;}
 
   /**
    * Throw if there is an error from ClearSilver library.
@@ -224,6 +338,20 @@ private:
    * case is when we attach a raw HDF*, almost exclusively used by iterations.
    */
   HDF *getRaw() const;
+
+  /**
+   * Parse value as a signed integer and check to make sure it's within
+   * [-maxValue-1, maxValue]. If not, throw an HdfDataTypeException
+   * with specified type string. If node is absent, return default value.
+   */
+  int64_t getInt(int64_t defValue, const char *type, int64_t maxValue) const;
+
+  /**
+   * Parse value as a unsigned integer and check against mask to make sure
+   * it's in the specified range. If not, throw an HdfDataTypeException
+   * with specified type string. If node is absent, return default value.
+   */
+  uint64_t getUInt(uint64_t defValue, const char *type, uint64_t mask) const;
 
   /**
    * Implementation of parent() calls.

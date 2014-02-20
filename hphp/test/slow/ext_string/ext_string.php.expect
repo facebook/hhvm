@@ -1,0 +1,260 @@
+string(14) "\A\B\C\DEFGH\n"
+string(9) "ABCDEFGH
+"
+string(7) "\'\"\\
+"
+string(4) "'"\
+"
+string(8) "4142430a"
+string(4) "ABC
+"
+string(9) "A<br />
+B"
+string(32) "\. \\ \+ \* \? \[ \^ \] \( \$ \)"
+int(3)
+string(3) "CBA"
+string(3) "abc"
+string(3) "ABC"
+string(3) "Abc"
+string(3) "aBC"
+string(7) "Abc Def"
+string(26) "Test paragraph. Other text"
+string(57) "<p>Test paragraph.</p> <a href="#fragment">Other text</a>"
+string(3) "abc"
+string(4) "abc "
+string(4) " abc"
+string(4) " abc"
+int(1)
+string(12) "create stuff"
+int(1)
+string(12) "create stuff"
+string(6) "piece1"
+string(6) "piece2"
+int(2)
+string(3) "one"
+string(14) "two|three|four"
+int(3)
+string(3) "one"
+string(3) "two"
+string(5) "three"
+string(1) "a"
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(20) "lastname,email,phone"
+string(15) "lastname,,phone"
+string(12) ",email,phone"
+string(2) ",,"
+string(0) ""
+string(20) "lastname,email,phone"
+int(12)
+string(1) "H"
+string(1) "e"
+bool(true)
+string(3) "Hel"
+string(3) "lo "
+array(3) {
+  [0] =>
+  string(4) "This"
+  [1] =>
+  string(2) "is"
+  [2] =>
+  string(2) "an"
+}
+string(19) "<body text='black'>"
+string(14) "Hll Wrld f PHP"
+string(52) "You should eat pizza, beer, and ice cream every day."
+int(2)
+string(16) "apearpearle pear"
+string(19) "<body text='black'>"
+string(19) "<body Text='Black'>"
+string(3) "bob"
+string(3) "bob"
+string(20) "bobABCDEFGH:/MNRPQR/"
+string(14) "ABCDEFGH:/bob/"
+string(14) "ABCDEFGH:/bob/"
+string(11) "ABCDEFGH://"
+string(5) "bcdef"
+string(3) "bcd"
+string(4) "abcd"
+string(6) "abcdef"
+string(1) "f"
+bool(false)
+string(0) ""
+string(10) "Alien     "
+string(10) "-=-=-Alien"
+string(10) "__Alien___"
+string(6) "Alien_"
+string(6) "Alien\000"
+string(20) "-=-=-=-=-=-=-=-=-=-="
+string(57) "The quick brown fox<br />
+jumped over the lazy<br />
+dog."
+string(29) "A very
+long
+wooooooo
+ooooord."
+string(52) "I'll &quot;walk&quot; the &lt;b&gt;dog&lt;/b&gt; now"
+string(30) "I'll "walk" the <b>dog</b> now"
+string(4) "c2a0"
+string(2) "a0"
+string(4) "c2a0"
+string(5) "& & &"
+string(8) "a test &"
+string(4) "c388"
+string(4) "c388"
+string(2) "Α"
+string(4) "ce91"
+string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
+string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
+string(0) ""
+string(13) "&Acirc;&nbsp;"
+string(6) "&nbsp;"
+string(13) "egfe=20=0D=09"
+string(4) "egfe"
+string(11) "I love PHP!"
+string(28) "0=&5S=`IT97AT('1E>'0-"@``
+`
+"
+string(9) "CUC 4.3.0"
+int(2191738434)
+int(34)
+string(32) "1f3870be274f6c49b3e31a0c6728957f"
+string(40) "d0be2dc421be4fcd0172e5afceea3970e2f3d940"
+string(20) "hello all, I said hi"
+string(3) "abc"
+string(4) "test"
+string(4) "test"
+string(2) "AM"
+string(9) "AtestB10C"
+string(10) "0000001101"
+string(2) "09"
+string(17) "(foo\000bar-bar\000foo)"
+string(5) "[a\000b]"
+string(9) "AtestB10C"
+array(1) {
+  [0] =>
+  int(2350001)
+}
+int(1)
+int(2350001)
+string(1) "\"
+int(92)
+string(7) "1234.56"
+string(5) "1,235"
+int(-1)
+int(32)
+int(0)
+int(-1)
+int(0)
+int(0)
+int(0)
+int(0)
+int(-1)
+int(-1)
+int(-1)
+int(-1)
+int(1)
+int(1)
+int(1)
+int(1)
+int(-2)
+int(-2)
+int(2)
+int(2)
+int(-32)
+int(32)
+int(-1)
+int(-1)
+int(-1)
+int(-1)
+int(1)
+int(1)
+int(1)
+int(1)
+int(0)
+int(-1)
+int(-1)
+int(32)
+int(0)
+int(0)
+int(0)
+int(0)
+int(1)
+int(-1)
+string(12) "@example.com"
+string(7) "
+Line 3"
+string(12) "@example.com"
+string(4) "name"
+string(12) "@example.com"
+bool(false)
+string(5) "APPLE"
+string(20) "is is a Simple text."
+string(12) "Simple text."
+int(0)
+int(7)
+bool(false)
+bool(false)
+int(7)
+int(7)
+int(17)
+int(27)
+bool(false)
+int(7)
+int(2)
+int(1)
+int(0)
+int(1)
+int(2)
+int(0)
+int(4)
+int(2)
+int(5)
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+int(1)
+int(6)
+string(4) "C630"
+string(3) "KRT"
+string(5) "value"
+string(7) "foo bar"
+string(3) "baz"
+string(1) "3"
+string(1) "5"
+string(13) "foobar*foobar"
+string(23) "12345 12345 12345 12345"
+string(33) "12345 12345
+1234567890
+1234567890"
+string(33) "12345 12345
+1234567890
+1234567890"
+string(23) "12345
+12345
+12345
+12345"
+string(26) "12345ab12345ab12345ab12345"
+string(35) "12345 12345ab1234567890ab1234567890"
+string(13) "123ab123ab123"
+string(13) "123ab123ab123"
+string(14) "123ab 123ab123"
+string(13) "123ab123ab123"
+string(12) "123 123ab123"
+string(13) "123ab123ab123"
+string(13) "123ab123ab123"
+string(16) "123ab 12ab3ab123"
+string(14) "123 ab123ab123"
+string(14) "123  123ab 123"
+string(17) "123 ab12345 ab123"
+string(10) "1ab2ab3ab4"
+string(17) "12345|12345|67890"
+string(22) "123|==1234567890|==123"

@@ -343,8 +343,8 @@ public:
   const VirtualHost *getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
-  const Array& getAllowedDirectories() const { return m_allowedDirectories; }
-  void setAllowedDirectoires(const Array& dirs) { m_allowedDirectories = dirs; }
+  const std::vector<std::string>& getAllowedDirectories() const { return m_allowedDirectories; }
+  void setAllowedDirectories(std::vector<std::string>& dirs) { m_allowedDirectories = dirs; }
   const bool hasSafeFileAccess() const { return m_safeFileAccess; }
   void setSafeFileAccess(const bool b) { m_safeFileAccess = b; }
 

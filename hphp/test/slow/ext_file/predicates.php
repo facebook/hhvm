@@ -19,3 +19,11 @@ mkdir($tempfile);
 var_dump(is_dir($tempfile));
 rmdir($tempfile);
 var_dump(is_dir($tempfile));
+
+$tempfile = tempnam(getcwd(), 'vmextfiletest');
+$relativetempfile = './' . basename($tempfile);
+unlink($tempfile);
+mkdir($tempfile);
+var_dump(is_dir($relativetempfile));
+rmdir($tempfile);
+var_dump(is_dir($relativetempfile));

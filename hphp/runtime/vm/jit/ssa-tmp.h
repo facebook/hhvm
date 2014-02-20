@@ -33,14 +33,13 @@ public:
   void              setInstruction(IRInstruction* i, int dstId = 0);
   Type              type() const { return m_type; }
   void              setType(Type t) { m_type = t; }
-  bool              isBoxed() const { return type().isBoxed(); }
-  bool              isString() const { return isA(Type::Str); }
-  bool              isArray() const { return isA(Type::Arr); }
   std::string       toString() const;
 
-  // XXX: false for Null, etc.  Would rather it returns whether we
-  // have a compile-time constant value.
-  bool isConst() const;
+  // Convenience wrapper for type().isConst(...). See type.h for details.
+  template<typename... Args>
+  bool isConst(Args&&... args) const {
+    return type().isConst(std::forward<Args>(args)...);
+  }
 
   /*
    * For SSATmps with a compile-time constant value, the following
@@ -50,19 +49,17 @@ public:
    *   (inst()->op() == DefConst ||
    *    inst()->op() == LdConst)
    */
-  bool               getValBool() const;
-  int64_t            getValInt() const;
-  int64_t            getValRawInt() const;
-  double             getValDbl() const;
-  const StringData*  getValStr() const;
-  const ArrayData*   getValArr() const;
-  const Func*        getValFunc() const;
-  const Class*       getValClass() const;
-  const NamedEntity* getValNamedEntity() const;
-  RDS::Handle        getValRDSHandle() const;
+  bool               getValBool() const      { return type().boolVal(); }
+  int64_t            getValInt() const       { return type().intVal(); }
+  int64_t            getValRawInt() const    { return type().rawVal(); }
+  double             getValDbl() const       { return type().dblVal(); }
+  const StringData*  getValStr() const       { return type().strVal(); }
+  const ArrayData*   getValArr() const       { return type().arrVal(); }
+  const Func*        getValFunc() const      { return type().funcVal(); }
+  const Class*       getValClass() const     { return type().clsVal(); }
+  RDS::Handle        getValRDSHandle() const { return type().rdsHandleVal(); }
+  TCA                getValTCA() const       { return type().tcaVal(); }
   Variant            getValVariant() const;
-  TCA                getValTCA() const;
-  uintptr_t          getValCctx() const;
 
   /*
    * Returns: Type::subtypeOf(type(), tag).

@@ -671,7 +671,7 @@ predictOutputs(SrcKey startSk,
       default:
         baseType = Type(ni->inputs[1]->rtt);
     }
-    if (baseType.isString() && ni->immVecM.size() == 1) {
+    if (baseType <= Type::Str && ni->immVecM.size() == 1) {
       return ni->immVecM[0] == MW ? inDt : KindOfString;
     }
 

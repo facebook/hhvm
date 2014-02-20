@@ -18,6 +18,7 @@
 
 #include "folly/ScopeGuard.h"
 
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -46,10 +47,9 @@ TEST(Type, Equality) {
 }
 
 TEST(Type, Null) {
-  EXPECT_TRUE(Type::Null.isNull());
-  EXPECT_TRUE(Type::Uninit.isNull());
-  EXPECT_TRUE(Type::InitNull.isNull());
-  EXPECT_FALSE(Type::Bool.isNull());
+  EXPECT_TRUE(Type::Uninit <= Type::Null);
+  EXPECT_TRUE(Type::InitNull <= Type::Null);
+  EXPECT_FALSE(Type::Bool <= Type::Null);
   EXPECT_FALSE(Type::Null.subtypeOf(Type::InitNull));
   EXPECT_NE(Type::Null, Type::Uninit);
   EXPECT_NE(Type::Null, Type::InitNull);
@@ -251,6 +251,64 @@ TEST(Type, Relax) {
   EXPECT_EQ(Type::BoxedInitCell | Type::InitNull,
             relaxType(Type::BoxedObj | Type::InitNull,
                       {DataTypeCountness, Type::Gen, DataTypeGeneric}));
+}
+
+TEST(Type, Specialized) {
+  auto packed = Type::Arr.specialize(ArrayData::kPackedKind);
+  EXPECT_LE(packed, Type::Arr);
+  EXPECT_LT(packed, Type::Arr);
+  EXPECT_FALSE(Type::Arr <= packed);
+  EXPECT_LT(packed, Type::Arr | Type::Obj);
+  EXPECT_EQ(packed, packed & (Type::Arr | Type::Counted));
+  EXPECT_GE(packed, Type::Bottom);
+  EXPECT_GT(packed, Type::Bottom);
+
+  EXPECT_TRUE(Type::Int <= (packed | Type::Int));
+}
+
+TEST(Type, Const) {
+  auto five = Type::cns(5);
+  EXPECT_LT(five, Type::Int);
+  EXPECT_NE(five, Type::Int);
+  EXPECT_TRUE(five.isConst());
+  EXPECT_EQ(5, five.intVal());
+  EXPECT_TRUE(five.isConst(Type::Int));
+  EXPECT_TRUE(five.isConst(5));
+  EXPECT_FALSE(five.isConst(5.0));
+  EXPECT_TRUE(Type::Gen.maybe(five));
+  EXPECT_EQ(Type::Int, five | Type::Int);
+  EXPECT_EQ(Type::Int, five | Type::cns(10));
+  EXPECT_EQ(five, five | Type::cns(5));
+  EXPECT_EQ(five, Type::cns(5) & five);
+  EXPECT_EQ(five, five & Type::Int);
+  EXPECT_EQ(five, Type::Gen & five);
+  EXPECT_EQ("Int<5>", five.toString());
+  EXPECT_EQ(five, five - Type::Arr);
+  EXPECT_EQ(five, five - Type::cns(1));
+  EXPECT_EQ(Type::Bottom, five - Type::Int);
+  EXPECT_EQ(Type::Bottom, five - five);
+  EXPECT_EQ(Type::Int, five.dropConstVal());
+  EXPECT_TRUE(five.not(Type::cns(2)));
+
+  auto True = Type::cns(true);
+  EXPECT_EQ("Bool<true>", True.toString());
+  EXPECT_LT(True, Type::Bool);
+  EXPECT_NE(True, Type::Bool);
+  EXPECT_TRUE(True.isConst());
+  EXPECT_EQ(true, True.boolVal());
+  EXPECT_TRUE(Type::Uncounted.maybe(True));
+  EXPECT_FALSE(five <= True);
+  EXPECT_FALSE(five > True);
+
+  EXPECT_TRUE(five.not(True));
+  EXPECT_EQ(Type::Int | Type::Bool, five | True);
+  EXPECT_EQ(Type::Bottom, five & True);
+
+  EXPECT_TRUE(Type::Uninit.isConst());
+  EXPECT_TRUE(Type::InitNull.isConst());
+  EXPECT_FALSE(Type::Null.isConst());
+  EXPECT_FALSE((Type::Uninit | Type::Bool).isConst());
+  EXPECT_FALSE(Type::Int.isConst());
 }
 
 } }

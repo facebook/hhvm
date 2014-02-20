@@ -1043,7 +1043,7 @@ void CodeGenerator::emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
   }
 
   ConditionCode cc;
-  if (type.isString()) {
+  if (type <= Type::Str) {
     // Note: ARM can actually do better here; it has a fused test-and-branch
     // instruction. The way this code is factored makes it difficult to use,
     // though; the jump instruction will be written by some other code.
@@ -1212,7 +1212,6 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert(inst->numSrcs() == 5);
 
-  DEBUG_ONLY SSATmp* funcPtrTmp = inst->src(0);
   DEBUG_ONLY SSATmp* nParamsTmp = inst->src(1);
   DEBUG_ONLY SSATmp* firstBitNumTmp = inst->src(2);
   DEBUG_ONLY SSATmp* mask64Tmp  = inst->src(3);
@@ -1224,25 +1223,20 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   auto vals64Loc = srcLoc(4);
 
   // Get values in place
-  assert(funcPtrTmp->type() == Type::Func);
   auto funcPtrReg = x2a(funcPtrLoc.reg());
   assert(funcPtrReg.IsValid());
 
-  assert(nParamsTmp->type() == Type::Int);
   auto nParamsReg = x2a(nParamsLoc.reg());
   assert(nParamsReg.IsValid() || nParamsTmp->isConst());
 
-  assert(firstBitNumTmp->isConst() && firstBitNumTmp->type() == Type::Int);
-  uint32_t firstBitNum = (uint32_t)(firstBitNumTmp->getValInt());
+  auto firstBitNum = static_cast<uint32_t>(firstBitNumTmp->getValInt());
 
-  assert(mask64Tmp->type() == Type::Int);
   assert(mask64Tmp->isConst());
   auto mask64Reg = x2a(mask64Loc.reg());
   assert(mask64Reg.IsValid() || mask64Tmp->inst()->op() != LdConst);
   uint64_t mask64 = mask64Tmp->getValInt();
   assert(mask64);
 
-  assert(vals64Tmp->type() == Type::Int);
   assert(vals64Tmp->isConst());
   auto vals64Reg = x2a(vals64Loc.reg());
   assert(vals64Reg.IsValid() || vals64Tmp->inst()->op() != LdConst);
@@ -1399,7 +1393,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   }
 
   // Now set func, and possibly this/cls
-  if (func->type().isNull()) {
+  if (func->isA(Type::Null)) {
     // Do nothing
     assert(func->isConst());
   } else if (func->isConst()) {
@@ -1522,7 +1516,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
   assert(m_curInst->marker().valid());
   SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
-  bool isImmutable = (func->isConst() && !func->type().isNull());
+  bool isImmutable = func->isConst() && !func->isA(Type::Null);
   const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
   int32_t adjust  = emitBindCall(tx64->code.main(), tx64->code.stubs(),
                                  srcKey, funcd, numArgs);
@@ -1590,7 +1584,7 @@ void CodeGenerator::emitLoad(Type type, PhysLoc dstLoc,
   if (label) {
     not_implemented();
   }
-  if (type.isNull()) return;
+  if (type <= Type::Null) return;
 
   auto dstReg = x2a(dstLoc.reg());
   if (!dstReg.IsValid()) return;
@@ -1616,7 +1610,7 @@ void CodeGenerator::emitStore(vixl::Register base,
       m_as.  Strb  (rAsm.W(), base[offset + TVOFF(m_type)]);
     }
   }
-  if (type.isNull()) {
+  if (type <= Type::Null) {
     return;
   }
   if (src->isConst()) {
@@ -1659,7 +1653,7 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
 
 void CodeGenerator::cgLdConst(IRInstruction* inst) {
   auto const dstReg = x2a(dstLoc(0).reg());
-  auto const val    = inst->extra<LdConst>()->as<uintptr_t>();
+  auto const val    = inst->dst()->type().rawVal();
   if (dstReg.IsValid()) {
     m_as.  Mov  (dstReg, val);
   }

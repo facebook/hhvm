@@ -664,7 +664,13 @@ void FrameState::refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {
            id, local.type, type);
     local.type = type;
   } else {
-    always_assert((local.type & type) != Type::Bottom);
+    auto const result = local.type & type;
+    always_assert_log(
+      result != Type::Bottom,
+      [&] {
+        return folly::format("Bad new type for local {}: {} & {} = {}",
+                             id, local.type, type, result).str();
+      });
     local.type = local.type & type;
   }
   local.typeSource = typeSource;

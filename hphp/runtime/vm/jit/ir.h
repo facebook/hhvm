@@ -441,8 +441,7 @@ O(LookupClsMethod,                  ND, S(Cls)                                \
                                           S(FramePtr),                N|E|Er) \
 O(LdClsMethodCacheFunc,D(Func|Nullptr), NA,                               NF) \
 O(LdClsMethodCacheCls,         D(Cctx), NA,                               NF) \
-O(LookupClsMethodCache,D(Func|Nullptr), C(NamedEntity)                        \
-                                          S(FramePtr),                N|E|Er) \
+O(LookupClsMethodCache,D(Func|Nullptr), S(FramePtr),                  N|E|Er) \
 O(LdClsMethodFCacheFunc,                                                      \
                        D(Func|Nullptr), NA,                               NF) \
 O(LookupClsMethodFCache,                                                      \
@@ -525,7 +524,7 @@ O(StaticLocInitCached,              ND, S(BoxedCell) S(Cell),              E) \
 O(SpillStack,                D(StkPtr), S(StkPtr) C(Int) SSpills,        CRc) \
 O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr)                         \
-                                          S(Func,Null)                        \
+                                          S(Func,InitNull)                    \
                                           S(Ctx,Cls,InitNull),           CRc) \
 O(CufIterSpillFrame,         D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr),                    NF) \
@@ -954,107 +953,6 @@ bool hasEdges(Opcode opc);
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
 Opcode getStackModifyingOpcode(Opcode opc);
 
-/*
- * typeForConst(T)
- *
- *   returns the Type type for a C++ type that may be used with
- *   ConstData.
- */
-
-// The only interesting case is int/bool disambiguation.  Enums are
-// treated as ints.
-template<class T>
-typename std::enable_if<
-  std::is_integral<T>::value || std::is_enum<T>::value,
-  Type
->::type typeForConst(T) {
-  return std::is_same<T,bool>::value ? Type::Bool : Type::Int;
-}
-
-inline Type typeForConst(const NamedEntity*) { return Type::NamedEntity; }
-inline Type typeForConst(const Func*)        { return Type::Func; }
-inline Type typeForConst(const Class*)       { return Type::Cls; }
-inline Type typeForConst(const TypedValue*)  { return Type::PtrToGen; }
-inline Type typeForConst(TCA)                { return Type::TCA; }
-inline Type typeForConst(double)             { return Type::Dbl; }
-inline Type typeForConst(SetOpOp)            { return Type::Int; }
-inline Type typeForConst(IncDecOp)           { return Type::Int; }
-inline Type typeForConst(std::nullptr_t)     { return Type::Nullptr; }
-
-inline Type typeForConst(const StringData* sd) {
-  assert(sd->isStatic());
-  return Type::StaticStr;
-}
-inline Type typeForConst(const ArrayData* ad) {
-  assert(ad->isStatic());
-  return Type::StaticArr.specialize(ad->kind());
-}
-inline Type typeForConst(const TypedValue& tv) {
-  switch (tv.m_type) {
-    case KindOfClass:
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfStaticString:
-      return Type(tv.m_type);
-
-    case KindOfString:
-      return typeForConst(tv.m_data.pstr);
-
-    case KindOfArray:
-      return typeForConst(tv.m_data.parr);
-
-    default:
-      always_assert(false && "Invalid KindOf for constant TypedValue");
-  }
-}
-
-/*
- * constToBits(T)
- *
- *  Returns a constant value as a 8-byte word (in the shape it would
- *  need to be to go into a register).  Takes care to ensure that
- *  various types are safely copied.
- */
-
-namespace constToBits_detail {
-  template<class T>
-  struct needs_promotion
-    : std::integral_constant<
-        bool,
-        std::is_integral<T>::value  ||
-          std::is_same<T,bool>::value ||
-          std::is_enum<T>::value
-      >
-  {};
-
-  template<class T>
-  typename std::enable_if<needs_promotion<T>::value,uint64_t>::type
-  promoteIfNeeded(T t) { return static_cast<uint64_t>(t); }
-
-  template<class T>
-  typename std::enable_if<!needs_promotion<T>::value,T>::type
-  promoteIfNeeded(T t) { return t; }
-}
-
-template<class T>
-uintptr_t constToBits(T input) {
-  uintptr_t ret;
-  static_assert(sizeof(T) <= sizeof ret,
-                "Constant data was larger than supported");
-  static_assert(std::is_pod<T>::value,
-                "Constant data wasn't a pod?");
-  const auto toCopy = constToBits_detail::promoteIfNeeded(input);
-  std::memcpy(&ret, &toCopy, sizeof toCopy);
-  return ret;
-}
-
-inline uintptr_t constToBits(const TypedValue& tv) {
-  return tv.m_data.num;
-}
-
 class RawMemSlot {
  public:
 
@@ -1149,11 +1047,7 @@ void assertOperandTypes(const IRInstruction*);
 
 
 int minstrBaseIdx(Opcode opc);
-int minstrKeyIdx(Opcode opc);
-int minstrValueIdx(Opcode opc);
 int minstrBaseIdx(const IRInstruction* inst);
-int minstrKeyIdx(const IRInstruction* inst);
-int minstrValueIdx(const IRInstruction* inst);
 
 struct MInstrEffects {
   static bool supported(Opcode op);

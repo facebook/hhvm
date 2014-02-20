@@ -35,9 +35,15 @@ const size_t NumPreAllocatedSpillLocs = kReservedRSPSpillSpace /
 struct RegAllocInfo {
   struct RegMap {
     // new way
-    PhysLoc& src(unsigned i) { return at(i); }
+    PhysLoc& src(unsigned i) {
+      assert(i < m_dstOff);
+      return at(i);
+    }
     PhysLoc& dst(unsigned i) { return at(i + m_dstOff); }
-    const PhysLoc& src(unsigned i) const { return at(i); }
+    const PhysLoc& src(unsigned i) const {
+      assert(i < m_dstOff);
+      return at(i);
+    }
     const PhysLoc& dst(unsigned i) const { return at(i + m_dstOff); }
     void resize(unsigned n) const {
       m_dstOff = n;

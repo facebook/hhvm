@@ -832,7 +832,7 @@ D:T = LdConst<T,value>
   allocated a register. It is currently used only for the GuardRefs
   instruction.
 
-D:ConstT = DefConst<T,value>
+D:ConstT = DefConst<T>
 
   Define a constant value of type T. D is presumed to be globally available and
   the DefConst instruction will not actually appear in the IR instruction
@@ -944,14 +944,13 @@ D:Cctx = LdClsMethodCacheCls<clsName, methodName>
   is known to not be empty.
 
 D:{Func|Nullptr} =
-LookupClsMethodCache<clsName, methodName> S0:ConstNamedEntity*  S1:FramePtr
+LookupClsMethodCache<clsName, methodName, namedEntity> S0:FramePtr
 
   Lookup a function in the class method targetcache. The class name and method
-  name are clsName and methodName, respectively. S0 is the NamedEntity* for the
-  class, and S1 is the current vm frame pointer. Returns Nullptr if the method
-  cannot be found using a subset of the required lookup paths, indicating that
-  a more complete lookup path should be taken. May throw if the method does not
-  exist.
+  name are clsName and methodName, respectively. S0 is the current vm frame
+  pointer. Returns Nullptr if the method cannot be found using a subset of the
+  required lookup paths, indicating that a more complete lookup path should be
+  taken. May throw if the method does not exist.
 
 D:Func = LdClsMethod S0:Cls S1:ConstInt
 
@@ -1116,8 +1115,8 @@ D:Obj = Clone S0:Obj
 
 D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
                                        S1:FramePtr
-                                       S2:{Func|Null}
-                                       S3:{Ctx|Class|Null}
+                                       S2:{Func|InitNull}
+                                       S3:{Ctx|Class|InitNull}
 
   Operands:
 

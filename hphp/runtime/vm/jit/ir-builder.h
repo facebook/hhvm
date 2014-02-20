@@ -219,9 +219,6 @@ struct IRBuilder {
   //////////////////////////////////////////////////////////////////////
   // constants
 
-  SSATmp* genDefUninit();
-  SSATmp* genDefInitNull();
-  SSATmp* genDefNull();
   SSATmp* genPtrToInitNull();
   SSATmp* genPtrToUninit();
 
@@ -232,7 +229,7 @@ struct IRBuilder {
 
   template<typename T>
   SSATmp* genLdConst(T val) {
-    return gen(LdConst, typeForConst(val), ConstData(val));
+    return gen(LdConst, Type::cns(val));
   }
 
   //////////////////////////////////////////////////////////////////////

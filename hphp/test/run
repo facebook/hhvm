@@ -146,6 +146,7 @@ function get_options($argv) {
     'failure-file:' => '',
     'arm' => '',
     'hhas-round-trip' => '',
+    'color' => 'c',
   );
   $options = array();
   $files = array();
@@ -383,6 +384,7 @@ function hhbbc_cmd($options, $test) {
 class Status {
   private static $results = array();
   private static $mode = 0;
+  private static $use_color = false;
 
   const MODE_NORMAL = 0;
   const MODE_VERBOSE = 1;
@@ -390,6 +392,10 @@ class Status {
 
   public static function setMode($mode) {
     self::$mode = $mode;
+  }
+
+  public static function setUseColor($use) {
+    self::$use_color = $use;
   }
 
   public static function pass($test) {
@@ -496,7 +502,7 @@ class Status {
   }
 
   private static function hasColor() {
-    return posix_isatty(STDOUT);
+    return self::$use_color;
   }
 
   public static function jsonEncode($data) {
@@ -517,6 +523,8 @@ function run($options, $tests, $bad_test_file) {
   if (isset($options['fbmake'])) {
     Status::setMode(Status::MODE_FBMAKE);
   }
+  Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
+
   foreach ($tests as $test) {
     $status = run_test($options, $test);
     if ($status === 'skip') {
@@ -566,7 +574,7 @@ function run_one_config($options, $test, $hhvm, $hhvm_env) {
      2 => array("pipe", "w"),
   );
   if (isset($options['log'])) {
-    $hhvm_env['TRACE'] = 'printir:1';
+    $hhvm_env['TRACE'] = 'printir:2';
     $hhvm_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
   $pipes = null;

@@ -273,17 +273,11 @@ public:
   Block* defBlock();
 
   template<typename T> SSATmp* cns(T val) {
-    return cns(val, typeForConst(val));
-  }
-
-  template<typename T> SSATmp* cns(T val, Type type) {
-    ConstData cdata(val);
-    return findConst(cdata, type);
+    return cns(Type::cns(val));
   }
 
   SSATmp* cns(Type type) {
-    ConstData cdata(0);
-    return findConst(cdata, type);
+    return findConst(type);
   }
 
   /*
@@ -311,7 +305,7 @@ public:
   std::string toString() const;
 
 private:
-  SSATmp* findConst(ConstData& cdata, Type t);
+  SSATmp* findConst(Type t);
 
 private:
   Arena m_arena; // contains Block, IRInstruction, and SSATmp objects

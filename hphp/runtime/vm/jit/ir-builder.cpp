@@ -59,29 +59,17 @@ IRBuilder::~IRBuilder() {
  */
 bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
   if (!shouldConstrainGuards()) return false;
-  if (tmp && (tmp->isConst() || tmp->isA(Type::Cls))) return false;
+  if (tmp && (tmp->inst()->is(DefConst) || tmp->isA(Type::Cls))) return false;
 
   return true;
 }
 
-SSATmp* IRBuilder::genDefUninit() {
-  return gen(DefConst, Type::Uninit, ConstData(0));
-}
-
-SSATmp* IRBuilder::genDefInitNull() {
-  return gen(DefConst, Type::InitNull, ConstData(0));
-}
-
-SSATmp* IRBuilder::genDefNull() {
-  return gen(DefConst, Type::Null, ConstData(0));
-}
-
 SSATmp* IRBuilder::genPtrToInitNull() {
-  return gen(DefConst, Type::PtrToInitNull, ConstData(&init_null_variant));
+  return cns(Type::cns(&init_null_variant, Type::PtrToInitNull));
 }
 
 SSATmp* IRBuilder::genPtrToUninit() {
-  return gen(DefConst, Type::PtrToUninit, ConstData(&null_variant));
+  return cns(Type::cns(&null_variant, Type::PtrToUninit));
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -281,9 +269,7 @@ SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   }
 
   if (!typeMightRelax()) {
-    inst->setTypeParam(
-      Type::mostRefined(knownType, inst->typeParam())
-    );
+    inst->setTypeParam(std::min(knownType, inst->typeParam()));
   }
 
   return nullptr;
@@ -299,7 +285,7 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   // If FrameState's type isn't as good as the type param, we're missing
   // information in the IR.
   assert(inst->typeParam() >= type);
-  inst->setTypeParam(Type::mostRefined(type, inst->typeParam()));
+  inst->setTypeParam(std::min(type, inst->typeParam()));
   return nullptr;
 }
 
@@ -307,7 +293,7 @@ SSATmp* IRBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
   auto const locId = inst->extra<LdLocAddr>()->locId;
   auto const type = localType(locId, DataTypeGeneric);
   assert(inst->typeParam().deref() >= type);
-  inst->setTypeParam(Type::mostRefined(type.ptr(), inst->typeParam()));
+  inst->setTypeParam(std::min(type.ptr(), inst->typeParam()));
   return nullptr;
 }
 

@@ -187,9 +187,11 @@ struct FuncData : IRExtraData {
 };
 
 struct ClsMethodData : IRExtraData {
-  ClsMethodData(const StringData* cls, const StringData* method)
+  ClsMethodData(const StringData* cls, const StringData* method,
+                const NamedEntity* ne = nullptr)
     : clsName(cls)
     , methodName(method)
+    , namedEntity(ne)
   {}
 
   std::string show() const {
@@ -206,6 +208,7 @@ struct ClsMethodData : IRExtraData {
 
   const StringData* clsName;
   const StringData* methodName;
+  const NamedEntity* namedEntity;
 };
 
 struct FPushCufData : IRExtraData {
@@ -225,27 +228,6 @@ struct FPushCufData : IRExtraData {
 
   uint32_t args;
   uint32_t iterId;
-};
-
-struct ConstData : IRExtraData {
-  template<class T>
-  explicit ConstData(T data)
-    : m_dataBits(constToBits(data))
-  {}
-
-  template<class T>
-  T as() const {
-    T ret;
-    static_assert(sizeof ret <= sizeof m_dataBits, "Return type too big");
-    std::memcpy(&ret, &m_dataBits, sizeof ret);
-    return ret;
-  }
-
-  bool cseEquals(ConstData o) const { return m_dataBits == o.m_dataBits; }
-  size_t cseHash() const { return std::hash<uintptr_t>()(m_dataBits); }
-
-private:
-  uintptr_t m_dataBits;
 };
 
 /*
@@ -780,8 +762,6 @@ X(MIterNextK,                   IterData);
 X(AllocObjFast,                 ClassData);
 X(LdCtx,                        FuncData);
 X(CufIterSpillFrame,            FPushCufData);
-X(DefConst,                     ConstData);
-X(LdConst,                      ConstData);
 X(SpillFrame,                   ActRecInfo);
 X(GuardStk,                     StackOffset);
 X(CheckStk,                     StackOffset);

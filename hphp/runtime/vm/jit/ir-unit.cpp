@@ -56,12 +56,12 @@ IRInstruction* IRUnit::mov(SSATmp* dst, SSATmp* src, BCMarker marker) {
   return inst;
 }
 
-SSATmp* IRUnit::findConst(ConstData& cdata, Type ctype) {
+SSATmp* IRUnit::findConst(Type type) {
+  assert(type.isConst());
   IRInstruction inst(DefConst, BCMarker());
-  inst.setExtra(&cdata);
-  inst.setTypeParam(ctype);
+  inst.setTypeParam(type);
   if (SSATmp* tmp = m_constTable.lookup(&inst)) {
-    assert(tmp->type().equals(ctype));
+    assert(tmp->type().equals(type));
     return tmp;
   }
   return m_constTable.insert(cloneInstruction(&inst)->dst());

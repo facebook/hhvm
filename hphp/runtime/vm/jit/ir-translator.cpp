@@ -505,7 +505,7 @@ void
 IRTranslator::translateAdd(const NormalizedInstruction& i) {
   auto leftType = m_hhbcTrans.topType(1);
   auto rightType = m_hhbcTrans.topType(0);
-  if (leftType.isArray() && rightType.isArray()) {
+  if (leftType <= Type::Arr && rightType <= Type::Arr) {
     HHIR_EMIT(ArrayAdd);
   } else {
     HHIR_EMIT(Add);

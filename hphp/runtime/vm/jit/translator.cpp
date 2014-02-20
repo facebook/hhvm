@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1258,7 +1258,7 @@ static const struct {
                    {Stack1,           Local,        OutVUnknown,      -1 }},
   { OpCatch,       {None,             Stack1,       OutObject,         1 }},
   { OpVerifyParamType,
-                   {Local,            None,         OutNone,           0 }},
+                   {Local,            Local,        OutUnknown,        0 }},
   { OpClassExists, {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpInterfaceExists,
                    {StackTop2,        Stack1,       OutBoolean,       -1 }},
@@ -2327,6 +2327,24 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           continue;
         }
 
+        if (op == OpVerifyParamType) {
+          assert(ni->inputs.size() == 1);
+          auto func = ni->func();
+          const auto& inRtt = ni->inputs[0]->rtt;
+          auto paramId = ni->imm[0].u_IVA;
+          const auto& tc = func->params()[paramId].typeConstraint();
+          if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
+              (inRtt.isVagueValue() || inRtt.isObject() || inRtt.isRef())) {
+            auto* loc = t.newDynLocation(
+              ni->inputs[0]->location,
+              inRtt.isRef() ? RuntimeType(KindOfRef, KindOfAny)
+                            : RuntimeType(KindOfAny));
+            assert(loc->location.isLocal());
+            ni->outLocal = loc;
+          }
+          continue;
+        }
+
         ASSERT_NOT_IMPLEMENTED(op == OpSetOpL ||
                                op == OpSetM || op == OpSetOpM ||
                                op == OpBindM ||
@@ -2374,7 +2392,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         }
         if (op == OpStaticLocInit || op == OpInitThisLoc) {
           ni->outLocal = t.newDynLocation(Location(Location::Local,
-                                                   ni->imm[0].u_OA),
+                                                   ni->imm[0].u_LA),
                                           KindOfAny);
           continue;
         }

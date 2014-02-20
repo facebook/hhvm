@@ -6,6 +6,12 @@ foreach (file ${files})
 	if (${file} MATCHES "/test/")
 		list(REMOVE_ITEM CXX_SOURCES ${file})
 	endif()
+
+	# Disable Channeled JSON until we're sure it's going to stick
+	# sgolemon(2014-02-19)
+        if (${file} MATCHES "channeled-json-")
+		list(REMOVE_ITEM CXX_SOURCES ${file})
+	endif()
 endforeach()
 
 add_custom_command(

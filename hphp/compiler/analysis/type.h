@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -117,6 +117,25 @@ public:
    */
   static TypePtr GetType(KindOf kindOf,
                          const std::string &clsname = "");
+
+  /**
+   * Map Runtime DataType to analysis Type
+   */
+  static TypePtr FromDataType(DataType dt) {
+    switch (dt) {
+      case DataType::KindOfNull:     return Type::Null;
+      case DataType::KindOfBoolean:  return Type::Boolean;
+      case DataType::KindOfInt64:    return Type::Int64;
+      case DataType::KindOfDouble:   return Type::Double;
+      case DataType::KindOfStaticString:
+      case DataType::KindOfString:   return Type::String;
+      case DataType::KindOfArray:    return Type::Array;
+      case DataType::KindOfObject:   return Type::Object;
+      case DataType::KindOfResource: return Type::Resource;
+      default:
+        return Type::Any;
+    }
+  }
 
   /**
    * Whether a type can be used as another type.

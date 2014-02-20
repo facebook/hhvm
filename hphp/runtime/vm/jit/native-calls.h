@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,7 @@ enum class ArgType : unsigned {
 
 // Function that extracts the bits for an immediate value from extra
 // data.
-typedef std::function<uintptr_t (IRInstruction*)> ExtraDataBits;
+typedef std::function<uintptr_t (const IRInstruction*)> ExtraDataBits;
 
 struct Arg {
   Arg(ArgType type, intptr_t ival) : type(type), ival(ival) {}
@@ -90,8 +90,8 @@ struct CallInfo {
   SyncOptions sync;
   std::vector<Arg> args;
 
-  ArgGroup toArgGroup(const RegAllocInfo::RegMap& curPhysLocs,
-                      IRInstruction* inst) const;
+  ArgGroup toArgGroup(const RegAllocInfo &regs,
+                      const IRInstruction* inst) const;
 };
 
 typedef std::initializer_list<CallInfo> CallInfoList;

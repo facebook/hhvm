@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -154,7 +154,8 @@ Variant File::Open(const String& filename, const String& mode,
 
 File::File(bool nonblocking)
   : m_isLocal(false), m_fd(-1), m_closed(false), m_nonblocking(nonblocking),
-    m_writepos(0), m_readpos(0), m_position(0), m_buffer(nullptr) {
+    m_writepos(0), m_readpos(0), m_position(0), m_eof(false),
+    m_buffer(nullptr) {
 }
 
 File::~File() {
@@ -271,8 +272,16 @@ String File::read(int64_t length) {
 int64_t File::write(const String& data, int64_t length /* = 0 */) {
   if (seekable()) {
     int64_t offset = m_readpos - m_writepos;
+    // Writing shouldn't change the EOF status, but because we have a
+    // transparent buffer, we need to do read operations on the backing
+    // store, which can.
+    //
+    // EOF state isn't just a matter of position on all subclasses;
+    // even seek(0, SEEK_CUR) can change it.
+    auto eof = m_eof;
     m_readpos = m_writepos = 0; // invalidating read buffer
     seek(offset, SEEK_CUR);
+    m_eof = eof;
   }
   if (length <= 0 || length > data.size()) {
     length = data.size();
@@ -361,6 +370,10 @@ bool File::lock(int operation, bool &wouldblock /* = false */) {
     return false;
   }
   return true;
+}
+
+bool File::stat(struct stat *sb) {
+  throw NotSupportedException(__func__, "cannot stat");
 }
 
 const StaticString

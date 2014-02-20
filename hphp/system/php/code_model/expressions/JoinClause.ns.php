@@ -6,8 +6,8 @@
 namespace HH\CodeModel {
 
 /**
- *  join identifier in collection
- *    on left equals right [into group]
+ *  join [identifier in] collection
+ *    [[on left equals right] [into group]]
  */
 class JoinClause /*implements IJoinClause*/ {
   use QueryClause;
@@ -20,27 +20,24 @@ class JoinClause /*implements IJoinClause*/ {
   private /*?string*/ $group;
 
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
-  public function getIdentifier() /*: string*/ {
-    if ($this->identifier === null) {
-      throw new \Exception("Identifier is not initialized");
-    }
+  public function getIdentifier() /*: ?string*/ {
     return $this->identifier;
   }
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
-  public function setIdentifier(/*string*/ $value) /*: this*/ {
+  public function setIdentifier(/*?string*/ $value) /*: this*/ {
     $this->identifier = $value;
     return $this;
   }
 
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
   public function getCollection() /*: IExpression*/ {
     if ($this->collection === null) {
@@ -49,8 +46,8 @@ class JoinClause /*implements IJoinClause*/ {
     return $this->collection;
   }
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
   public function setCollection(/*IExpression*/ $value) /*: this*/ {
     $this->collection = $value;
@@ -58,53 +55,47 @@ class JoinClause /*implements IJoinClause*/ {
   }
 
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
-  public function getLeft() /*: IExpression*/ {
-    if ($this->left === null) {
-      throw new \Exception("Left is not initialized");
-    }
+  public function getLeft() /*: ?IExpression*/ {
     return $this->left;
   }
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
-  public function setLeft(/*IExpression*/ $value) /*: this*/ {
+  public function setLeft(/*?IExpression*/ $value) /*: this*/ {
     $this->left = $value;
     return $this;
   }
 
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
-  public function getRight() /*: IExpression*/ {
-    if ($this->right === null) {
-      throw new \Exception("Right is not initialized");
-    }
+  public function getRight() /*: ?IExpression*/ {
     return $this->right;
   }
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
-  public function setRight(/*IExpression*/ $value) /*: this*/ {
+  public function setRight(/*?IExpression*/ $value) /*: this*/ {
     $this->right = $value;
     return $this;
   }
 
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
   public function getGroup() /*: ?string*/ {
     return $this->group;
   }
   /**
-   *  join identifier in collection
-   *    on left equals right [into group]
+   *  join [identifier in] collection
+   *    [[on left equals right] [into group]]
    */
   public function setGroup(/*?string*/ $value) /*: this*/ {
     $this->group = $value;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,8 @@ const StaticString
   s_Pair("HH\\Pair"),
   s_FrozenVector("HH\\FrozenVector"),
   s_FrozenSet("HH\\FrozenSet"),
-  s_FrozenMap("HH\\FrozenMap");
+  s_FrozenMap("HH\\FrozenMap"),
+  s_Closure("Closure");
 
 const StaticString
   s_86pinit("86pinit"),
@@ -74,23 +75,14 @@ bool could_have_magic_bool_conversion(Type t) {
   return true;
 }
 
-MethodMask find_special_methods(borrowed_ptr<const php::Class> cls) {
-  auto ret = uint32_t{};
-
-#define X(str, mask)                            \
-  if (m->name->isame(str.get())) {              \
-    ret |= static_cast<uint32_t>(mask);         \
-    continue;                                   \
-  }
-
+borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class> cls,
+                                    SString name) {
   for (auto& m : cls->methods) {
-    X(s_86sinit, MethodMask::Internal_86sinit);
-    X(s_86pinit, MethodMask::Internal_86pinit);
+    if (m->name->isame(name)) {
+      return borrow(m);
+    }
   }
-
-#undef X
-
-  return static_cast<MethodMask>(ret);
+  return nullptr;
 }
 
 bool is_special_method_name(SString name) {
@@ -121,6 +113,10 @@ SString collectionTypeToString(uint32_t ctype) {
   }
   assert(!"Unknown Collection Type");
   not_reached();
+}
+
+bool is_closure(const php::Class& c) {
+  return c.parentName && c.parentName->isame(s_Closure.get());
 }
 
 //////////////////////////////////////////////////////////////////////

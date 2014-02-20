@@ -122,17 +122,17 @@ BaseExecutionContext::BaseExecutionContext() :
                      auto boom = f_explode(";", value).toCArrRef();
 
                      std::vector<std::string> directories;
-                     directories.reserve(f_count(boom));
+                     directories.reserve(boom.size());
                      for (ArrayIter iter(boom); iter; ++iter) {
-                       const auto& path = iter.toString();
+                       const auto& path = iter.second().toString();
                        if (File::TranslatePathKeepRelative(path).empty()) {
                          return false;
                        }
 
                        if (path.equal(s_dot)) {
-                         directories.push_back(getCwd());
+                         directories.push_back(getCwd().toCppString());
                        } else {
-                         directories.push_back(path);
+                         directories.push_back(path.toCppString());
                        }
                      }
                      setAllowedDirectories(directories);
@@ -143,8 +143,14 @@ BaseExecutionContext::BaseExecutionContext() :
                      if (!hasSafeFileAccess()) {
                       return "";
                      }
-                     return f_implode(";", getAllowedDirectories())
-                            .toCppString();
+
+                     std::string out;
+                     for (auto& directory: getAllowedDirectories()) {
+                       if (!directory.empty()) {
+                         out += directory + ";";
+                       }
+                     }
+                     return out;
                    }
                   );
 

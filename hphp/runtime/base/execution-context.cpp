@@ -120,17 +120,22 @@ BaseExecutionContext::BaseExecutionContext() :
                    "open_basedir",
                    [this](const String& value, void* p) {
                      auto boom = f_explode(";", value).toCArrRef();
-                     Variant v;
-                     for (MutableArrayIter iter(boom.get(), nullptr, v);
-                          iter.advance(); ) {
-                       if (File::TranslatePathKeepRelative(v.toString()).empty()) {
+
+                     std::vector<std::string> directories;
+                     directories.reserve(f_count(boom));
+                     for (ArrayIter iter(boom); iter; ++iter) {
+                       const auto& path = iter.toString();
+                       if (File::TranslatePathKeepRelative(path).empty()) {
                          return false;
                        }
-                       if (v.toString().equal(s_dot)) {
-                         v = getCwd();
+
+                       if (path.equal(s_dot)) {
+                         directories.push_back(getCwd());
+                       } else {
+                         directories.push_back(path);
                        }
                      }
-                     setAllowedDirectoires(boom);
+                     setAllowedDirectories(directories);
                      setSafeFileAccess(!boom.empty());
                      return true;
                    },

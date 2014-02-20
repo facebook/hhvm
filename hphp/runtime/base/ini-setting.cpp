@@ -175,7 +175,8 @@ void IniSetting::ParserCallback::makeArray(Variant &hash,
   do {
     String index(p);
     last = p + index.size() >= start + offset.size();
-    Variant newval = last ? Variant(value) : Variant(Array::Create());
+    auto def = Variant(Array::Create());
+    Variant newval = last ? Variant(value) : val.lvalRef(index, def);
     val.setRef(index, newval);
     if (!last) {
       val = strongBind(newval);

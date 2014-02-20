@@ -15,9 +15,14 @@ array(3) {
     [1]=>
     array(1) {
       [2]=>
-      array(1) {
+      array(2) {
         [34]=>
         string(1) "j"
+        [5]=>
+        array(1) {
+          [6]=>
+          string(1) "k"
+        }
       }
     }
   }

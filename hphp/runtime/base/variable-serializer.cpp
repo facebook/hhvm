@@ -850,7 +850,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
         m_buf->append('"');
       }
     }
-    m_buf->append("] =>\n");
+    m_buf->append("]=>\n");
     break;
 
   case Type::APCSerialize:

@@ -890,7 +890,6 @@ void RuntimeOption::Load(Hdf &config,
     UploadMaxFileSize =
       (upload["UploadMaxFileSize"].getInt32(100)) * (1LL << 20);
     UploadTmpDir = upload["UploadTmpDir"].getString("/tmp");
-    RuntimeOption::AllowedDirectories.push_back(UploadTmpDir);
     EnableFileUploads = upload["EnableFileUploads"].getBool(true);
     EnableUploadProgress = upload["EnableUploadProgress"].getBool();
     Rfc1867Freq = upload["Rfc1867Freq"].getInt32(256 * 1024);

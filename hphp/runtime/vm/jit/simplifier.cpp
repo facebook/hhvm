@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -351,6 +351,12 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case Lte:
   case Eq:
   case Neq:
+  case GtInt:
+  case GteInt:
+  case LtInt:
+  case LteInt:
+  case EqInt:
+  case NeqInt:
   case Same:
   case NSame:
     return simplifyCmp(opc, inst, src1, src2);
@@ -402,6 +408,12 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpLte:
   case JmpEq:
   case JmpNeq:
+  case JmpGtInt:
+  case JmpGteInt:
+  case JmpLtInt:
+  case JmpLteInt:
+  case JmpEqInt:
+  case JmpNeqInt:
   case JmpSame:
   case JmpNSame:
     return simplifyQueryJmp(inst);
@@ -562,8 +574,6 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   auto const oldType = src->type();
   auto const newType = inst->typeParam();
 
-  if (m_irb.typeMightRelax(src)) return nullptr;
-
   if (oldType.not(newType)) {
     /* This guard will always fail. Probably an incorrect prediction from the
      * frontend. We can't convert it to a Jmp because people may be relying on
@@ -581,6 +591,7 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
     return src;
   }
   if (newType < oldType) {
+    assert(!src->isConst());
     return nullptr;
   }
 
@@ -1202,13 +1213,19 @@ SSATmp* Simplifier::simplifyShr(IRInstruction* inst) {
 template<class T, class U>
 static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   switch (opName) {
+  case GtInt:
   case Gt:   return a > b;
+  case GteInt:
   case Gte:  return a >= b;
+  case LtInt:
   case Lt:   return a < b;
+  case LteInt:
   case Lte:  return a <= b;
   case Same:
+  case EqInt:
   case Eq:   return a == b;
   case NSame:
+  case NeqInt:
   case Neq:  return a != b;
   default:
     not_reached();
@@ -1336,6 +1353,11 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
         return newInst(Eq, src1, cns(true));
       }
     }
+  }
+
+  // Lower to int-comparison if possible.
+  if (!isIntQueryOp(opName) && type1 <= Type::Int && type2 <= Type::Int) {
+    return newInst(queryToIntQueryOp(opName), src1, src2);
   }
 
   // ---------------------------------------------------------------------
@@ -2087,6 +2109,9 @@ SSATmp* Simplifier::simplifyLdLoc(IRInstruction* inst) {
 // Replace StRef with StRefNT when we know we aren't going to change
 // its m_type field.
 SSATmp* Simplifier::simplifyStRef(IRInstruction* inst) {
+  // Guard relaxation might change the ref type, so don't try to
+  // change to StRefNT until after relaxation happens.
+  if (m_irb.typeMightRelax()) return nullptr;
   auto const oldUnbox = inst->src(0)->type().unbox();
   auto const newType = inst->src(1)->type();
   if (oldUnbox.isKnownDataType() &&

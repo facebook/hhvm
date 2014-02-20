@@ -811,7 +811,7 @@ struct ZendINIGlobals {
   int scanner_mode;
   std::string filename;
   int lineno;
-  IniSetting::PFN_PARSER_CALLBACK callback;
+  IniSetting::ParserCallback *callback;
   void *arg;
   YY_BUFFER_STATE state;
 };
@@ -845,16 +845,16 @@ static ZendINIGlobals s_zend_ini;
 #define EAT_TRAILING_WHITESPACE()  EAT_TRAILING_WHITESPACE_EX('X')
 
 #define RETURN_TOKEN(type, str, len) {            \
-  *ini_lval = String(str, len, CopyString);       \
+  *ini_lval = std::string(str, len);              \
   return type;                                    \
 }
 
-static void zend_ini_escape_string(String &lval, char *str, int len,
+static void zend_ini_escape_string(std::string &lval, char *str, int len,
                                    char quote_type) {
   register char *s, *t;
   char *end;
 
-  lval = String(str, len, CopyString);
+  lval = std::string(str, len);
 
   /* convert escape sequences */
   s = t = (char*)lval.data();
@@ -898,17 +898,17 @@ static void zend_ini_escape_string(String &lval, char *str, int len,
   *t = 0;
 
   if (length != lval.size()) {
-    lval.setSize(length);
+    lval.resize(length);
   }
 }
 
 #define YY_USE_PROTOS
-#define YY_DECL int ini_lex_impl(String *ini_lval, void *loc)
+#define YY_DECL int ini_lex_impl(std::string *ini_lval, void *loc)
 
 #define GOTO_RESTART 9999
 
-int ini_lex_impl(String *ini_lval, void *loc);
-int ini_lex(String *ini_lval, void *loc) {
+int ini_lex_impl(std::string *ini_lval, void *loc);
+int ini_lex(std::string *ini_lval, void *loc) {
 restart:
   int ret = ini_lex_impl(ini_lval, loc);
   if (ret == GOTO_RESTART) goto restart;
@@ -1307,7 +1307,7 @@ YY_RULE_SETUP
 #line 239 "zend-ini.ll"
 {
 /* FALSE value (when used outside option value/offset this causes error!)*/
-  RETURN_TOKEN(BOOL_FALSE, "", 0);
+  RETURN_TOKEN(BOOL_FALSE, "", (size_t) 0);
 }
 	YY_BREAK
 case 10:
@@ -2605,12 +2605,12 @@ suppress_defined_but_not_used_warnings() {
   yy_top_state();
 }
 
-void zend_ini_scan(const String& str, int scanner_mode, const String& filename,
-                   IniSetting::PFN_PARSER_CALLBACK callback, void *arg) {
+void zend_ini_scan(const std::string &str, int scanner_mode, const std::string &filename,
+                   IniSetting::ParserCallback &callback, void *arg) {
   SCNG(scanner_mode) = scanner_mode;
   SCNG(filename) = filename.data();
   SCNG(lineno) = 1;
-  SCNG(callback) = callback;
+  SCNG(callback) = &callback;
   SCNG(arg) = arg;
 
   BEGIN(INITIAL);
@@ -2628,9 +2628,28 @@ void zend_ini_scan_cleanup() {
   SCNG(state) = nullptr;
 }
 
-void zend_ini_callback(String *arg1, String *arg2, String *arg3,
-                       int callback_type) {
-  SCNG(callback)(arg1, arg2, arg3, callback_type, SCNG(arg));
+void zend_ini_on_section(const std::string &name) {
+  SCNG(callback)->onSection(name, SCNG(arg));
+}
+void zend_ini_on_label(const std::string &name) {
+  SCNG(callback)->onLabel(name, SCNG(arg));
+}
+void zend_ini_on_entry(const std::string &key, const std::string &value) {
+  SCNG(callback)->onEntry(key, value, SCNG(arg));
+}
+void zend_ini_on_pop_entry(const std::string &key, const std::string &value, 
+                           const std::string &offset) {
+  SCNG(callback)->onPopEntry(key, value, offset, SCNG(arg));
+}
+void zend_ini_on_constant(std::string &result, const std::string &name) {
+  SCNG(callback)->onConstant(result, name);
+}
+void zend_ini_on_var(std::string &result, const std::string &name) {
+  SCNG(callback)->onVar(result, name);
+}
+void zend_ini_on_op(std::string &result, char type, const std::string& op1,
+                    const std::string& op2) {
+  SCNG(callback)->onOp(result, type, op1, op2);
 }
 
 void ini_error(const char *msg) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,20 +46,20 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(SocketData, s_socket_data);
 // constructors and destructor
 
 Socket::Socket()
-  : File(true), m_port(0), m_type(-1), m_error(0), m_eof(false), m_timeout(0),
+  : File(true), m_port(0), m_type(-1), m_error(0), m_timeout(0),
     m_timedOut(false), m_bytesSent(0) {
 }
 
 Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
                int port /* = 0 */, double timeout /* = 0 */)
-  : File(true), m_port(port), m_type(type), m_error(0), m_eof(false),
+  : File(true), m_port(port), m_type(type), m_error(0),
     m_timeout(0), m_timedOut(false), m_bytesSent(0) {
   if (address) m_address = address;
   m_fd = sockfd;
 
   struct timeval tv;
   if (timeout <= 0) {
-    tv.tv_sec = RuntimeOption::SocketDefaultTimeout;
+    tv.tv_sec = g_context->getSocketDefaultTimeout();
     tv.tv_usec = 0;
   } else {
     tv.tv_sec = (int)timeout;
@@ -79,6 +79,8 @@ Socket::~Socket() {
 
 void Socket::sweep() {
   Socket::closeImpl();
+  using std::string;
+  m_address.~string();
   File::sweep();
   Socket::operator delete(this);
 }
@@ -208,6 +210,17 @@ int64_t Socket::writeImpl(const char *buffer, int64_t length) {
 }
 
 bool Socket::eof() {
+  if (!m_eof && valid()) {
+    // Test if stream is EOF if the flag is not already set.
+    // Attempt to peek at one byte from the stream, checking for:
+    // i)  recv() closing gracefully, or
+    // ii) recv() failed due to no waiting data on non-blocking socket.
+    char ch;
+    int64_t ret = recv(m_fd, &ch, 1, MSG_PEEK);
+    if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK)) {
+      m_eof = true;
+    }
+  }
   return m_eof;
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <map>
 
+#include <boost/variant.hpp>
 #include <boost/next_prior.hpp>
 
 #include "folly/gen/Base.h"
@@ -49,9 +50,15 @@ const StaticString s_Closure("Closure");
 
 struct ParseUnitState {
   /*
-   * This is computed once for each unit and stashed here.
+   * This is computed once for each unit and stashed here.  We support
+   * having either a SourceLocTable or a LineTable.  If we're
+   * optimizing a repo that was already created by hphpc, it won't
+   * have the full SourceLocTable information in it, so we're limited
+   * to line numbers.
    */
-  SourceLocTable srcLocTable;
+  boost::variant< SourceLocTable
+                , LineTable
+                > srcLocInfo;
 
   /*
    * Map from class id to the function containing its DefCls
@@ -548,18 +555,31 @@ void populate_block(ParseUnitState& puState,
     auto const next = pc + instrLen(pop);
     assert(next <= past);
 
-    auto const srcLoc = [&] {
-      SourceLoc sloc;
-      if (getSourceLoc(puState.srcLocTable, opPC - ue.bc(), sloc)) {
-        return php::SrcLoc {
-          { static_cast<uint32_t>(sloc.line0),
-            static_cast<uint32_t>(sloc.char0) },
-          { static_cast<uint32_t>(sloc.line1),
-            static_cast<uint32_t>(sloc.char1) }
+    auto const srcLoc = match<php::SrcLoc>(
+      puState.srcLocInfo,
+      [&] (const SourceLocTable& tab) {
+        SourceLoc sloc;
+        if (getSourceLoc(tab, opPC - ue.bc(), sloc)) {
+          return php::SrcLoc {
+            { static_cast<uint32_t>(sloc.line0),
+              static_cast<uint32_t>(sloc.char0) },
+            { static_cast<uint32_t>(sloc.line1),
+              static_cast<uint32_t>(sloc.char1) }
+          };
+        }
+        return php::SrcLoc{};
+      },
+      [&] (const LineTable& tab) {
+        auto const line = getLineNumber(tab, opPC - ue.bc());
+        if (line != -1) {
+          return php::SrcLoc {
+            { static_cast<uint32_t>(line), 0 },
+            { static_cast<uint32_t>(line), 0 },
+          };
         };
+        return php::SrcLoc{};
       }
-      return php::SrcLoc{};
-    }();
+    );
 
     switch (*pop) { OPCODES }
 
@@ -882,6 +902,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     ret->constants.push_back(
       php::Const {
         cconst.name(),
+        borrow(ret),
         cconst.val(),
         cconst.phpCode(),
         cconst.typeConstraint()
@@ -997,7 +1018,11 @@ std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
   ret->filename = ue.getFilepath();
 
   ParseUnitState puState;
-  puState.srcLocTable = ue.createSourceLocTable();
+  if (ue.hasSourceLocInfo()) {
+    puState.srcLocInfo = ue.createSourceLocTable();
+  } else {
+    puState.srcLocInfo = ue.lineTable();
+  }
   puState.defClsMap.resize(ue.numPreClasses(), nullptr);
 
   for (size_t i = 0; i < ue.numPreClasses(); ++i) {

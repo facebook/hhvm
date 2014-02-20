@@ -6,7 +6,7 @@
  */
 class ZipArchive {
 
-  private resource $zipDir;
+  private ?resource $zipDir = null;
 
   public function __get($name) {
     switch ($name) {

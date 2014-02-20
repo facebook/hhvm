@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -323,6 +323,11 @@ vm_decode_function(CVarRef function,
       // If __invoke is static, invoke it as such
       cls = this_->getVMClass();
       this_ = nullptr;
+    }
+    if (warn && f == nullptr) {
+      raise_warning("call_user_func() expects parameter 1 to be a valid "
+                    "callback, object of class %s given (no __invoke "
+                    "method found)", this_->getVMClass()->name()->data());
     }
     return f;
   }

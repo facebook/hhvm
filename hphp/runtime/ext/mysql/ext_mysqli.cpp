@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,6 +27,7 @@ namespace HPHP {
 const StaticString
   s_mysqli("mysqli"),
   s_connection("__connection"),
+  s_link("__link"),
   s_result("__result"),
   s_stmt("__stmt"),
   s_charset("charset"),
@@ -43,7 +44,8 @@ const StaticString
   s_mysqli_result("mysqli_result"),
   s_mysqli_sql_exception("mysqli_sql_exception"),
   s_mysqli_stmt("mysqli_stmt"),
-  s_mysqli_warning("mysqli_warning");
+  s_mysqli_warning("mysqli_warning"),
+  s_persistent_prefix("p:");
 
 //////////////////////////////////////////////////////////////////////////////
 // helper
@@ -51,7 +53,7 @@ static Resource get_connection_resource(Object obj) {
   auto res = obj->o_realProp(s_connection, ObjectData::RealPropUnchecked,
                              s_mysqli.get());
   if (!res || !res->isResource()) {
-    return Resource();
+    return null_resource;
   }
 
   return res->toResource();
@@ -63,10 +65,11 @@ static MySQL *get_connection(Object obj) {
 }
 
 static MySQLStmt *getStmt(Object obj) {
-  auto res = obj->o_get(s_stmt, false, s_mysqli_stmt.get());
-  assert(res.isResource());
+  auto res = obj->o_realProp(s_stmt, ObjectData::RealPropUnchecked,
+                             s_mysqli_stmt.get());
+  assert(res->isResource());
 
-  auto stmt = res.toResource().getTyped<MySQLStmt>(false, false);
+  auto stmt = res->asResRef().getTyped<MySQLStmt>(false, false);
   assert(stmt);
 
   return stmt;
@@ -232,17 +235,21 @@ static void HHVM_METHOD(mysqli, hh_init) {
 }
 
 static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
-                           const Variant& username, const Variant& password,
-                           const Variant& dbname, int client_flags) {
+                        const Variant& username, const Variant& password,
+                        const Variant& dbname, int client_flags) {
+  bool persistent = false;
+  String s = server.toString();
+  if (s.substr(0, 2).equal(s_persistent_prefix)) {
+    persistent = true;
+    s = s.substr(2);
+  }
   auto conn = get_connection(this_);
   assert(conn);
   Variant ret = php_mysql_do_connect_on_link(
-                  conn, server.toString(), username.toString(),
-                  password.toString(), dbname.toString(), client_flags, false,
-                  false, -1, -1);
+                  conn, s, username.toString(), password.toString(),
+                  dbname.toString(), client_flags, persistent, false, -1, -1);
   return ret.toBoolean();
 }
-
 
 static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
   auto res = get_connection_resource(this_);
@@ -260,6 +267,34 @@ static Variant HHVM_METHOD(mysqli, hh_sqlstate) {
   auto conn = get_connection(this_);
   VALIDATE_CONN_CONNECTED(conn);
   return String(mysql_sqlstate(conn->get()), CopyString);
+}
+
+static void HHVM_METHOD(mysqli, hh_update_last_error, Object stmt_obj) {
+  auto conn = get_connection(this_);
+  assert(conn);
+
+  auto stmt = getStmt(stmt_obj);
+  assert(stmt);
+
+  auto s = stmt->get();
+  auto mysql = conn->get();
+
+  auto last_errno = mysql_stmt_errno(s);
+  char last_error[MYSQL_ERRMSG_SIZE];
+  char sqlstate[SQLSTATE_LENGTH + 1];
+  memcpy(last_error, mysql_stmt_error(s), MYSQL_ERRMSG_SIZE);
+  memcpy(sqlstate, mysql->net.sqlstate, SQLSTATE_LENGTH + 1);
+
+  // This will clear the error both on the stmt and connection so we make sure
+  // it closed now. Otherwise it will happen when the object is swept later
+  stmt->close();
+
+  // The MySQL C API documentation say that you shouldn't touch the internals of
+  // the MySQL's datastructurs. But this is how Zend does it and there is no
+  // other good way
+  mysql->net.last_errno = last_errno;
+  memcpy(mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
+  memcpy(mysql->net.sqlstate, sqlstate, SQLSTATE_LENGTH + 1);
 }
 
 static Variant HHVM_METHOD(mysqli, kill, int64_t processid) {
@@ -458,9 +493,9 @@ static Variant HHVM_METHOD(mysqli_stmt, close) {
   return getStmt(this_)->close();
 }
 
-//static void HHVM_METHOD(mysqli_stmt, data_seek, int64_t offset) {
-//  throw NotImplementedException(__FUNCTION__);
-//}
+static void HHVM_METHOD(mysqli_stmt, data_seek, int64_t offset) {
+  getStmt(this_)->data_seek(offset);
+}
 
 static Variant HHVM_METHOD(mysqli_stmt, execute) {
   return getStmt(this_)->execute();
@@ -597,6 +632,7 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli, hh_real_query);
     HHVM_ME(mysqli, hh_server_version);
     HHVM_ME(mysqli, hh_sqlstate);
+    HHVM_ME(mysqli, hh_update_last_error);
     HHVM_ME(mysqli, kill);
     HHVM_ME(mysqli, options);
     //HHVM_STATIC_ME(mysqli, poll); // MYSQLND
@@ -614,7 +650,7 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli_stmt, bind_param);
     HHVM_ME(mysqli_stmt, bind_result);
     HHVM_ME(mysqli_stmt, close);
-    //HHVM_ME(mysqli_stmt, data_seek);
+    HHVM_ME(mysqli_stmt, data_seek);
     HHVM_ME(mysqli_stmt, execute);
     HHVM_ME(mysqli_stmt, fetch);
     HHVM_ME(mysqli_stmt, free_result);

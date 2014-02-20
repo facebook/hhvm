@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -428,6 +428,16 @@ IRTranslator::translateCeil(const NormalizedInstruction& i) {
   HHIR_EMIT(Ceil);
 }
 
+void
+IRTranslator::translateCheckProp(const NormalizedInstruction& i) {
+  HHIR_EMIT(CheckProp, i.imm[0].u_SA);
+}
+
+void
+IRTranslator::translateInitProp(const NormalizedInstruction& i) {
+  HHIR_EMIT(InitProp, i.imm[0].u_SA, static_cast<InitPropOp>(i.imm[1].u_OA));
+}
+
 void IRTranslator::translateAssertTL(const NormalizedInstruction& i) {
   HHIR_EMIT(AssertTL, i.imm[0].u_LA, static_cast<AssertTOp>(i.imm[1].u_OA));
 }
@@ -701,7 +711,7 @@ void IRTranslator::translateStrlen(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateIncStat(const NormalizedInstruction& i) {
-  HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA);
+  HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA, false);
 }
 
 void IRTranslator::translateIdx(const NormalizedInstruction& i) {
@@ -1118,6 +1128,14 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     }
 
     if (op == OpFCallArray) return refuse("FCallArray");
+
+    // These opcodes don't indicate any additional work in the callee,
+    // so they shouldn't count toward the inlining cost.
+    if (op == Op::AssertTL || op == Op::AssertTStk ||
+        op == Op::AssertObjL || op == Op::AssertObjStk ||
+        op == Op::PredictTL || op == Op::PredictTStk) {
+      continue;
+    }
 
     cost += 1;
 
@@ -1596,14 +1614,13 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   }
 
   if (moduleEnabled(HPHP::Trace::stats, 2)) {
-    ht.emitIncStat(Stats::opcodeToIRPreStatCounter(ni.op()), 1);
+    ht.emitIncStat(Stats::opcodeToIRPreStatCounter(ni.op()), 1, false);
   }
   if (RuntimeOption::EnableInstructionCounts ||
       moduleEnabled(HPHP::Trace::stats, 3)) {
     // If the instruction takes a slow exit, the exit trace will
     // decrement the post counter for that opcode.
-    ht.emitIncStat(Stats::opcodeToIRPostStatCounter(ni.op()),
-                            1, true);
+    ht.emitIncStat(Stats::opcodeToIRPostStatCounter(ni.op()), 1, true);
   }
   ht.emitRB(RBTypeBytecodeStart, ni.source, 2);
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -443,7 +443,7 @@ Variant f_stream_socket_accept(CResRef server_socket,
   p.revents = 0;
   IOStatusHelper io("socket_accept");
   if (timeout == -1) {
-    timeout = RuntimeOption::SocketDefaultTimeout;
+    timeout = g_context->getSocketDefaultTimeout();
   }
   n = poll(&p, 1, (uint64_t)(timeout * 1000.0));
   if (n > 0) {

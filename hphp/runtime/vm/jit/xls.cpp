@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -153,7 +153,6 @@ struct XLS {
   void update(unsigned pos);
   void spillActive(Interval* current);
   void spillInactive(Interval* current);
-  bool force(IRInstruction&, SSATmp& t);
   void insertCopy(Block* b, Block::iterator, IRInstruction*& shuffle,
                   SSATmp* src, const PhysLoc& rs, const PhysLoc& rd);
   void insertSpill(Interval* ivl);
@@ -396,16 +395,6 @@ void XLS::computePositions() {
   }
 }
 
-// Return true if t was forced into a register.
-bool XLS::force(IRInstruction& inst, SSATmp& t) {
-  auto reg = forceAlloc(t);
-  if (reg != InvalidReg) {
-    m_regs[inst][t].setReg(reg, 0);
-    return true;
-  }
-  return false;
-}
-
 bool allocUnusedDest(IRInstruction&) {
   return false;
 }
@@ -418,7 +407,7 @@ void srcConstraints(IRInstruction& inst, int i, SSATmp* src, Interval* ivl,
       ivl->prefer &= abi.simd;
       return;
     }
-    if (inst.storesCell(i) && src->numWords() == 2) {
+    if (storesCell(inst, i) && src->numWords() == 2) {
       ivl->prefer &= abi.simd;
       return;
     }
@@ -435,7 +424,7 @@ void dstConstraints(IRInstruction& inst, int i, SSATmp* dst, Interval* ivl,
       ivl->prefer &= abi.simd;
       return;
     }
-    if (inst.isLoad() && !inst.isControlFlow() && dst->numWords() == 2) {
+    if (loadsCell(inst.op()) && !inst.isControlFlow() && dst->numWords() == 2) {
       ivl->prefer &= abi.simd;
       if (!(ivl->allow & ivl->prefer).empty()) {
         // we prefer simd, but allow gp and simd, so restrict allow to just
@@ -472,6 +461,7 @@ void XLS::buildIntervals() {
       auto spos = m_posns[inst]; // position where srcs are read
       auto dpos = spos + 1;     // position where dsts are written
       unsigned dst_need = 0;
+      auto& inst_regs = m_regs[inst];
       for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
         auto d = inst.dst(i);
         auto dest = m_intervals[d];
@@ -479,7 +469,11 @@ void XLS::buildIntervals() {
           // dest is not live; give it a register anyway.
           assert(!dest);
           if (d->numWords() == 0) continue;
-          if (force(inst, *d)) continue;
+          auto r = forceAlloc(*d);
+          if (r != InvalidReg) {
+            inst_regs.dst(i).setReg(r, 0);
+            continue;
+          }
           if (!allocUnusedDest(inst)) continue;
           m_intervals[d] = dest = smart_new<Interval>();
           dest->add(closedRange(dpos, dpos));
@@ -512,7 +506,11 @@ void XLS::buildIntervals() {
         if (s->inst()->op() == DefConst) continue;
         auto need = s->numWords();
         if (need == 0) continue;
-        if (force(inst, *s)) continue;
+        auto r = forceAlloc(*s);
+        if (r != InvalidReg) {
+          inst_regs.src(i).setReg(r, 0);
+          continue;
+        }
         auto src = m_intervals[s];
         if (!src) m_intervals[s] = src = smart_new<Interval>();
         src->add(closedRange(blockRange.start, spos));
@@ -910,13 +908,16 @@ void XLS::assignLocations() {
   for (auto b : m_blocks) {
     for (auto& inst : *b) {
       auto spos = m_posns[inst];
-      for (auto s : inst.srcs()) {
-        if (!m_intervals[s]) continue;
-        m_regs[inst][s] = m_intervals[s]->childAt(spos)->loc;
+      auto& inst_regs = m_regs[inst];
+      for (unsigned i = 0, n = inst.numSrcs(); i < n; i++) {
+        auto ivl = m_intervals[inst.src(i)];
+        if (!ivl) continue;
+        inst_regs.src(i) = ivl->childAt(spos)->loc;
       }
-      for (auto& d : inst.dsts()) {
-        if (!m_intervals[d]) continue;
-        m_regs[inst][d] = m_intervals[d]->loc;
+      for (unsigned i = 0, n = inst.numDsts(); i < n; i++) {
+        auto ivl = m_intervals[inst.dst(i)];
+        if (!ivl) continue;
+        inst_regs.dst(i) = ivl->loc;
       }
     }
   }
@@ -927,10 +928,13 @@ void XLS::assignLocations() {
 void XLS::insertCopy(Block* b, Block::iterator pos, IRInstruction* &shuffle,
                      SSATmp* src, const PhysLoc& rs, const PhysLoc& rd) {
   if (rs == rd) return;
+  unsigned i;
   if (shuffle) {
     // already have shuffle here
+    i = shuffle->numSrcs();
     shuffle->addCopy(m_unit, src, rd);
   } else {
+    i = 0;
     auto cap = 1;
     auto dests = new (m_unit.arena()) PhysLoc[cap];
     dests[0] = rd;
@@ -938,7 +942,9 @@ void XLS::insertCopy(Block* b, Block::iterator pos, IRInstruction* &shuffle,
     shuffle = m_unit.gen(Shuffle, marker, ShuffleData(dests, 1, cap), src);
     b->insert(pos, shuffle);
   }
-  m_regs[shuffle][src] = rs;
+  auto& shuffle_regs = m_regs[shuffle];
+  shuffle_regs.resize(i+1);
+  shuffle_regs.src(i) = rs;
 }
 
 // Return the first instruction in block b that is not a Shuffle

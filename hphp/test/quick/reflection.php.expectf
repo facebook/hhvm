@@ -209,9 +209,9 @@ array(4) {
   [1]=>
   string(1) "K"
   [2]=>
-  string(1) "J"
-  [3]=>
   string(1) "H"
+  [3]=>
+  string(1) "J"
 }
 
 --- getInterfaces() ---

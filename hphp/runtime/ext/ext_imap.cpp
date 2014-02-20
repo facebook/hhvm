@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -192,7 +192,7 @@ public:
 
     /* set default timeout values */
     void *timeout = reinterpret_cast<void *>
-                      (RuntimeOption::SocketDefaultTimeout);
+                      (g_context->getSocketDefaultTimeout());
 
     mail_parameters(NIL, SET_OPENTIMEOUT,  timeout);
     mail_parameters(NIL, SET_READTIMEOUT,  timeout);

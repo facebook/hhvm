@@ -791,66 +791,6 @@
             ]
         },
         {
-            "name": "parse_hdf_file",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant"
-            },
-            "args": [
-                {
-                    "name": "filename",
-                    "type": "String"
-                }
-            ]
-        },
-        {
-            "name": "parse_hdf_string",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant"
-            },
-            "args": [
-                {
-                    "name": "input",
-                    "type": "String"
-                }
-            ]
-        },
-        {
-            "name": "write_hdf_file",
-            "flags": [
-            ],
-            "return": {
-                "type": "Boolean"
-            },
-            "args": [
-                {
-                    "name": "data",
-                    "type": "VariantMap"
-                },
-                {
-                    "name": "filename",
-                    "type": "String"
-                }
-            ]
-        },
-        {
-            "name": "write_hdf_string",
-            "flags": [
-            ],
-            "return": {
-                "type": "String"
-            },
-            "args": [
-                {
-                    "name": "data",
-                    "type": "VariantMap"
-                }
-            ]
-        },
-        {
             "name": "md5_file",
             "desc": "Calculates the MD5 hash of the file specified by the filename parameter using the RSA Data Security, Inc. MD5 Message-Digest Algorithm, and returns that hash. The hash is a 32-character hexadecimal number.",
             "flags": [

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ TRACE_SET_MOD(hhir);
  * given locId. If one can't be found, return nullptr.
  */
 IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp) {
-  FTRACE(2, "guardForLdLoc({}, {})\n", locId, *fp);
+  FTRACE(2, "guardForLocal({}, {})\n", locId, *fp);
 
   for (auto fpInst = fp->inst(); !fpInst->is(DefFP, DefInlineFP);
        fpInst = fpInst->src(0)->inst()) {
@@ -44,9 +44,6 @@ IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp) {
     switch (fpInst->op()) {
       case GuardLoc:
       case CheckLoc:
-        if (instLoc() == locId) return fpInst;
-        break;
-
       case AssertLoc:
         if (instLoc() == locId) return fpInst;
         break;
@@ -183,7 +180,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
         // If the known type is at least as good as the relaxed type, we can
         // replace the guard with an assert.
         auto newOp = guardToAssert(inst.op());
-        auto newType = std::min(constraint.knownType, previousGuardType(&inst));
+        auto newType = constraint.knownType;
         FTRACE(1, "relaxGuards changing {}'s type to {}, op to {}\n",
                inst, newType, newOp);
         assert(!hasEdges(newOp));
@@ -302,7 +299,6 @@ Type relaxType(Type t, DataTypeCategory cat) {
       return t.notCounted() ? Type::UncountedInit : t.unspecialize();
 
     case DataTypeSpecific:
-      assert(t.isKnownDataType());
       return t.unspecialize();
 
     case DataTypeSpecialized:

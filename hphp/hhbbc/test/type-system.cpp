@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,6 +48,7 @@ const StaticString s_IAA("IAA");
 const StaticString s_IB("IB");
 const StaticString s_NonUnique("NonUnique");
 const StaticString s_NonUniqueA("NonUniqueA");
+const StaticString s_WaitHandle("WaitHandle");
 
 // A test program so we can actually test things involving object or
 // class types.
@@ -57,6 +58,13 @@ std::unique_ptr<php::Unit> make_test_unit() {
     .main {
       Int 1
       RetC
+    }
+
+    # Technically this should be provided by systemlib, but it's the
+    # only one we have to make sure the type system can see for unit
+    # test purposes, so we can just define it here.  We don't need to
+    # give it any of its functions currently.
+    .class [abstract unique builtin] WaitHandle {
     }
 
     .class [interface unique] IBase {
@@ -107,10 +115,12 @@ std::unique_ptr<php::Unit> make_test_unit() {
       .default_ctor;
     }
 
-    .class NonUnique {
+    .class NonUnique { .default_ctor; }
+    .class NonUnique { .default_ctor; }
+
+    .class NonUniqueA extends NonUnique {
       .default_ctor;
     }
-
     .class NonUniqueA extends NonUnique {
       .default_ctor;
     }
@@ -128,6 +138,12 @@ std::unique_ptr<php::Unit> make_test_unit() {
   return parse_unit(*ue);
 }
 
+std::unique_ptr<php::Program> make_program() {
+  auto program = folly::make_unique<php::Program>();
+  program->units.push_back(make_test_unit());
+  return program;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 auto const with_data = {
@@ -136,6 +152,7 @@ auto const with_data = {
   sval(s_test.get())
 };
 
+// In the sense of "non-union type", not the sense of TPrim.
 auto const primitives = {
   TUninit,
   TInitNull,
@@ -180,6 +197,8 @@ auto const non_opt_unions = {
   TNum,
   TStr,
   TArr,
+  TInitPrim,
+  TPrim,
   TInitUnc,
   TUnc,
   TTop,
@@ -188,14 +207,30 @@ auto const non_opt_unions = {
 auto const all_unions = boost::join(optionals, non_opt_unions);
 auto const all = boost::join(boost::join(with_data, primitives), all_unions);
 
+template<class Range>
+std::vector<Type> wait_handles_of(const Index& index, const Range& r) {
+  std::vector<Type> ret;
+  for (auto& t : r) ret.push_back(wait_handle(index, t));
+  return ret;
+}
+
+std::vector<Type> all_with_waithandles(const Index& index) {
+  auto ret = wait_handles_of(index, all);
+  for (auto& t : all) ret.push_back(t);
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
 
 TEST(Type, Top) {
+  auto const program = make_program();
+  Index index { borrow(program) };
+
   // Everything is a subtype of Top, couldBe Top, and the union of Top
   // with anything is Top.
-  for (auto& t : all) {
+  for (auto& t : all_with_waithandles(index)) {
     EXPECT_TRUE(t.subtypeOf(TTop));
     EXPECT_TRUE(t.couldBe(TTop));
     EXPECT_TRUE(union_of(t, TTop) == TTop);
@@ -204,9 +239,12 @@ TEST(Type, Top) {
 }
 
 TEST(Type, Bottom) {
+  auto const program = make_program();
+  Index index { borrow(program) };
+
   // Bottom is a subtype of everything, nothing couldBe Bottom, and
   // the union_of anything with Bottom is itself.
-  for (auto& t : all) {
+  for (auto& t : all_with_waithandles(index)) {
     EXPECT_TRUE(TBottom.subtypeOf(t));
     EXPECT_TRUE(!TBottom.couldBe(t));
     EXPECT_TRUE(union_of(t, TBottom) == t);
@@ -215,43 +253,141 @@ TEST(Type, Bottom) {
 }
 
 TEST(Type, Prims) {
+  auto const program = make_program();
+  Index index { borrow(program) };
+
   // All pairs of non-equivalent primitives are not related by either
-  // subtypeOf or couldBe.
+  // subtypeOf or couldBe, including if you wrap them in wait handles.
   for (auto& t1 : primitives) {
     for (auto& t2 : primitives) {
       if (t1 != t2) {
         EXPECT_TRUE(!t1.subtypeOf(t2) && !t2.subtypeOf(t1));
         EXPECT_TRUE(!t1.couldBe(t2));
         EXPECT_TRUE(!t2.couldBe(t1));
+
+        auto const w1 = wait_handle(index, t1);
+        auto const w2 = wait_handle(index, t2);
+        EXPECT_TRUE(!w1.subtypeOf(w2) && !w2.subtypeOf(w1));
+        EXPECT_TRUE(!w1.couldBe(w2));
+        EXPECT_TRUE(!w2.couldBe(w1));
       }
     }
   }
 }
 
 TEST(Type, Relations) {
+  auto const program = make_program();
+  Index index { borrow(program) };
+
   // couldBe is symmetric and reflexive
-  for (auto& t1 : all) {
+  for (auto& t1 : all_with_waithandles(index)) {
     for (auto& t2 : all) {
       EXPECT_TRUE(t1.couldBe(t2) == t2.couldBe(t1));
     }
   }
-  for (auto& t1 : all) EXPECT_TRUE(t1.couldBe(t1));
+  for (auto& t1 : all_with_waithandles(index)) {
+    EXPECT_TRUE(t1.couldBe(t1));
+  }
 
   // subtype is antisymmetric and reflexive
-  for (auto& t1 : all) {
-    for (auto& t2 : all) {
+  for (auto& t1 : all_with_waithandles(index)) {
+    for (auto& t2 : all_with_waithandles(index)) {
       if (t1 != t2) {
         EXPECT_TRUE(!(t1.subtypeOf(t2) && t2.subtypeOf(t1)));
       }
     }
   }
-  for (auto& t1 : all) EXPECT_TRUE(t1.subtypeOf(t1));
+  for (auto& t1 : all_with_waithandles(index)) {
+    EXPECT_TRUE(t1.subtypeOf(t1));
+  }
 
   // union_of is commutative
-  for (auto& t1 : all) {
-    for (auto& t2 : all) {
+  for (auto& t1 : all_with_waithandles(index)) {
+    for (auto& t2 : all_with_waithandles(index)) {
       EXPECT_TRUE(union_of(t1, t2) == union_of(t2, t1));
     }
+  }
+}
+
+TEST(Type, Prim) {
+  auto subtype_true = std::initializer_list<std::pair<Type,Type>> {
+    { TInt,      TPrim },
+    { TBool,     TPrim },
+    { TNum,      TPrim },
+    { TInitNull, TPrim },
+    { TDbl,      TPrim },
+    { dval(0.0), TPrim },
+    { ival(0),   TPrim },
+    { TNull,     TPrim },
+    { TInt,      TInitPrim },
+    { TBool,     TInitPrim },
+    { TNum,      TInitPrim },
+    { TInitNull, TInitPrim },
+    { TDbl,      TInitPrim },
+    { dval(0.0), TInitPrim },
+    { ival(0),   TInitPrim },
+  };
+
+  auto subtype_false = std::initializer_list<std::pair<Type,Type>> {
+    { sval(s_test.get()), TPrim },
+    { TSStr, TPrim },
+    { TSArr, TPrim },
+    { TNull, TInitPrim }, // TNull could be uninit
+    { TPrim, TBool },
+    { TPrim, TInt },
+    { TPrim, TNum },
+    { TInitPrim, TNum },
+    { TUnc, TPrim },
+    { TUnc, TInitPrim },
+    { TInitUnc, TPrim },
+    { TSStr, TInitPrim },
+    { TArr, TInitPrim },
+    { TSArr, TPrim },
+    { TPrim, dval(0.0) },
+  };
+
+  auto couldbe_true = std::initializer_list<std::pair<Type,Type>> {
+    { TPrim, TInt },
+    { TPrim, TBool },
+    { TPrim, TNum },
+    { TInitPrim, TNum },
+    { TInitPrim, TFalse },
+    { TPrim, TCell },
+    { TPrim, TInt },
+    { TPrim, TInt },
+    { TPrim, TOptObj },
+    { TPrim, TOptFalse },
+  };
+
+  auto couldbe_false = std::initializer_list<std::pair<Type,Type>> {
+    { TPrim, TSStr },
+    { TInitPrim, TSStr },
+    { TInitPrim, sval(s_test.get()) },
+    { TPrim, sval(s_test.get()) },
+    { TInitPrim, TUninit },
+    { TPrim, TRef },
+    { TPrim, TObj },
+  };
+
+  for (auto kv : subtype_true) {
+    EXPECT_TRUE(kv.first.subtypeOf(kv.second))
+      << show(kv.first) << " subtypeOf " << show(kv.second);
+  }
+  for (auto kv : subtype_false) {
+    EXPECT_FALSE(kv.first.subtypeOf(kv.second))
+      << show(kv.first) << " !subtypeOf " << show(kv.second);
+  }
+  for (auto kv : couldbe_true) {
+    EXPECT_TRUE(kv.first.couldBe(kv.second))
+      << show(kv.first) << " couldbe " << show(kv.second);
+    EXPECT_TRUE(kv.second.couldBe(kv.first))
+      << show(kv.first) << " couldbe " << show(kv.second);
+  }
+  for (auto kv : couldbe_false) {
+    EXPECT_TRUE(!kv.first.couldBe(kv.second))
+      << show(kv.first) << " !couldbe " << show(kv.second);
+    EXPECT_TRUE(!kv.second.couldBe(kv.first))
+      << show(kv.first) << " !couldbe " << show(kv.second);
   }
 }
 
@@ -289,6 +425,9 @@ TEST(Type, DblNan) {
 }
 
 TEST(Type, Option) {
+  auto const program = make_program();
+  Index index { borrow(program) };
+
   EXPECT_TRUE(TTrue.subtypeOf(TOptTrue));
   EXPECT_TRUE(TInitNull.subtypeOf(TOptTrue));
   EXPECT_TRUE(!TUninit.subtypeOf(TOptTrue));
@@ -360,6 +499,9 @@ TEST(Type, Option) {
   EXPECT_FALSE(is_opt(sval(s_test.get())));
   EXPECT_FALSE(is_opt(ival(2)));
   EXPECT_FALSE(is_opt(dval(2.0)));
+
+  EXPECT_TRUE(wait_handle(index, opt(dval(2.0))).couldBe(
+    wait_handle(index, dval(2.0))));
 }
 
 TEST(Type, Num) {
@@ -506,8 +648,7 @@ TEST(Type, SpecificExamples) {
 }
 
 TEST(Type, IndexBased) {
-  auto const program = folly::make_unique<php::Program>();
-  program->units.push_back(make_test_unit());
+  auto const program = make_program();
   auto const unit = borrow(program->units.back());
   auto const func = [&]() -> borrowed_ptr<php::Func> {
     for (auto& f : unit->funcs) {
@@ -607,8 +748,7 @@ TEST(Type, IndexBased) {
 }
 
 TEST(Type, Hierarchies) {
-  auto const program = folly::make_unique<php::Program>();
-  program->units.push_back(make_test_unit());
+  auto const program = make_program();
   auto const unit = borrow(program->units.back());
   auto const func = [&]() -> borrowed_ptr<php::Func> {
     for (auto& f : unit->funcs) {
@@ -964,8 +1104,7 @@ TEST(Type, Hierarchies) {
 }
 
 TEST(Type, Interface) {
-  auto const program = folly::make_unique<php::Program>();
-  program->units.push_back(make_test_unit());
+  auto const program = make_program();
   auto const unit = borrow(program->units.back());
   auto const func = [&]() -> borrowed_ptr<php::Func> {
     for (auto& f : unit->funcs) {
@@ -989,15 +1128,15 @@ TEST(Type, Interface) {
   if (!clsAA) EXPECT_TRUE(false);
 
   // make sometypes and objects
-  auto const subObjIATy   = subObj(*clsIA);
-  auto const subClsIATy   = subCls(*clsIA);
-  auto const subObjIAATy   = subObj(*clsIAA);
-  auto const subClsIAATy   = subCls(*clsIAA);
+  auto const subObjIATy  = subObj(*clsIA);
+  auto const subClsIATy  = subCls(*clsIA);
+  auto const subObjIAATy = subObj(*clsIAA);
+  auto const subClsIAATy = subCls(*clsIAA);
   auto const subObjATy   = subObj(*clsA);
   auto const clsExactATy = clsExact(*clsA);
   auto const subClsATy   = subCls(*clsA);
-  auto const subObjAATy   = subObj(*clsAA);
-  auto const subClsAATy   = subCls(*clsAA);
+  auto const subObjAATy  = subObj(*clsAA);
+  auto const subClsAATy  = subCls(*clsAA);
 
   // we don't support interfaces quite yet so let's put few tests
   // that will fail once interfaces are supported
@@ -1019,8 +1158,7 @@ TEST(Type, Interface) {
 }
 
 TEST(Type, NonUnique) {
-  auto const program = folly::make_unique<php::Program>();
-  program->units.push_back(make_test_unit());
+  auto const program = make_program();
   auto const unit = borrow(program->units.back());
   auto const func = [&]() -> borrowed_ptr<php::Func> {
     for (auto& f : unit->funcs) {
@@ -1042,17 +1180,121 @@ TEST(Type, NonUnique) {
 
   // non unique types are funny because we cannot really make any conclusion
   // about them so they resolve to "non precise" subtype relationship
-  auto const subObjATy   = subObj(*clsA);
-  auto const subClsATy   = subCls(*clsA);
-  auto const subObjNonUniqueTy   = subObj(*clssNonUnique);
-  auto const subClsNonUniqueTy   = subCls(*clssNonUnique);
-  auto const subObjNonUniqueATy   = subObj(*clssNonUniqueA);
-  auto const subClsNonUniqueATy   = subCls(*clssNonUniqueA);
+  auto const subObjATy          = subObj(*clsA);
+  auto const subClsATy          = subCls(*clsA);
+  auto const subObjNonUniqueTy  = subObj(*clssNonUnique);
+  auto const subClsNonUniqueTy  = subCls(*clssNonUnique);
+  auto const subObjNonUniqueATy = subObj(*clssNonUniqueA);
+  auto const subClsNonUniqueATy = subCls(*clssNonUniqueA);
 
   // all are obviously "non precise" but what can you do?....
   EXPECT_FALSE(subClsNonUniqueATy.subtypeOf(objcls(subObjNonUniqueTy)));
   EXPECT_FALSE(objcls(subObjNonUniqueATy).strictSubtypeOf(subClsNonUniqueTy));
   EXPECT_TRUE(subClsATy.couldBe(objcls(subObjNonUniqueTy)));
+}
+
+TEST(Type, WaitH) {
+  auto const program = make_program();
+  Index index { borrow(program) };
+
+  for (auto& t : wait_handles_of(index, all)) {
+    EXPECT_TRUE(is_specialized_wait_handle(t));
+    EXPECT_TRUE(t.subtypeOf(wait_handle(index, TTop)));
+  }
+
+  // union_of(WaitH<A>, WaitH<B>) == WaitH<union_of(A, B)>
+  for (auto& t1 : all) {
+    for (auto& t2 : all) {
+      auto const u1 = union_of(t1, t2);
+      auto const u2 = union_of(wait_handle(index, t1), wait_handle(index, t2));
+      EXPECT_TRUE(is_specialized_wait_handle(u2));
+      EXPECT_EQ(wait_handle_inner(u2), u1);
+      EXPECT_EQ(wait_handle(index, u1), u2);
+    }
+  }
+
+  // union_of(?WaitH<A>, ?WaitH<B>) == ?WaitH<union_of(A, B)>
+  for (auto& t1 : all) {
+    for (auto& t2 : all) {
+      auto const w1 = opt(wait_handle(index, t1));
+      auto const w2 = opt(wait_handle(index, t2));
+      auto const u1 = union_of(w1, w2);
+      auto const u2 = opt(wait_handle(index, union_of(t1, t2)));
+      EXPECT_EQ(u1, u2);
+    }
+  }
+
+  auto const rcls   = index.builtin_class(s_WaitHandle.get());
+  auto const twhobj = subObj(rcls);
+  EXPECT_TRUE(wait_handle(index, TTop).subtypeOf(twhobj));
+
+  // Some test cases with optional wait handles.
+  auto const optWH = opt(wait_handle(index, ival(2)));
+  EXPECT_TRUE(is_opt(optWH));
+  EXPECT_TRUE(TInitNull.subtypeOf(optWH));
+  EXPECT_TRUE(optWH.subtypeOf(TOptObj));
+  EXPECT_TRUE(optWH.subtypeOf(opt(twhobj)));
+  EXPECT_TRUE(wait_handle(index, ival(2)).subtypeOf(optWH));
+  EXPECT_FALSE(optWH.subtypeOf(wait_handle(index, ival(2))));
+  EXPECT_TRUE(optWH.couldBe(wait_handle(index, ival(2))));
+
+  // union_of(WaitH<T>, Obj<=WaitHandle) == Obj<=WaitHandle
+  for (auto& t : all) {
+    auto const u = union_of(wait_handle(index, t), twhobj);
+    EXPECT_EQ(u, twhobj);
+  }
+
+  for (auto& t : all) {
+    auto const u1 = union_of(wait_handle(index, t), TInitNull);
+    EXPECT_TRUE(is_opt(u1));
+    EXPECT_TRUE(is_specialized_wait_handle(u1));
+    auto const u2 = union_of(TInitNull, wait_handle(index, t));
+    EXPECT_TRUE(is_opt(u2));
+    EXPECT_TRUE(is_specialized_wait_handle(u2));
+    EXPECT_EQ(u1, u2);
+  }
+
+  // You can have WaitH<WaitH<T>>.  And stuff.
+  for (auto& w : wait_handles_of(index, all)) {
+    auto const ww  = wait_handle(index, w);
+    auto const www = wait_handle(index, ww);
+
+    EXPECT_EQ(wait_handle_inner(www), ww);
+    EXPECT_EQ(wait_handle_inner(ww), w);
+
+    // Skip the following in cases like WaitH<WaitH<Obj>>, which
+    // actually *is* a subtype of WaitH<Obj>, since a WaitH<Obj> is
+    // also an Obj.  Similar for Top, or InitCell, etc.
+    auto const inner = wait_handle_inner(w);
+    if (twhobj.subtypeOf(inner)) continue;
+
+    EXPECT_FALSE(w.subtypeOf(ww));
+    EXPECT_FALSE(ww.subtypeOf(w));
+    EXPECT_FALSE(w.couldBe(ww));
+    EXPECT_TRUE(ww.subtypeOf(twhobj));
+    EXPECT_TRUE(www.subtypeOf(twhobj));
+    EXPECT_FALSE(ww.subtypeOf(www));
+    EXPECT_FALSE(www.subtypeOf(ww));
+    EXPECT_FALSE(ww.couldBe(www));
+  }
+}
+
+TEST(Type, FromHNIConstraint) {
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?resource")), TOptRes);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("resource")), TRes);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("bool")), TBool);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?bool")), TOptBool);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("int")), TInt);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("float")), TDbl);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?float")), TOptDbl);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("mixed")), TInitGen);
+
+  // These are conservative, but we're testing them that way.  If we
+  // make the function better later we'll remove the tests.
+  EXPECT_EQ(from_hni_constraint(makeStaticString("stdClass")), TGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?stdClass")), TGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("fooooo")), TGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("")), TGen);
 }
 
 //////////////////////////////////////////////////////////////////////

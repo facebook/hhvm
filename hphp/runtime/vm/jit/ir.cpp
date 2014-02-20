@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -204,12 +204,32 @@ bool isQueryOp(Opcode opc) {
   case Lte:
   case Eq:
   case Neq:
+  case GtInt:
+  case GteInt:
+  case LtInt:
+  case LteInt:
+  case EqInt:
+  case NeqInt:
   case Same:
   case NSame:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
   case IsType:
   case IsNType:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool isIntQueryOp(Opcode opc) {
+  switch (opc) {
+  case GtInt:
+  case GteInt:
+  case LtInt:
+  case LteInt:
+  case EqInt:
+  case NeqInt:
     return true;
   default:
     return false;
@@ -228,6 +248,12 @@ bool isQueryJmpOp(Opcode opc) {
   case JmpLte:
   case JmpEq:
   case JmpNeq:
+  case JmpGtInt:
+  case JmpGteInt:
+  case JmpLtInt:
+  case JmpLteInt:
+  case JmpEqInt:
+  case JmpNeqInt:
   case JmpSame:
   case JmpNSame:
   case JmpInstanceOfBitmask:
@@ -249,6 +275,12 @@ Opcode queryToJmpOp(Opcode opc) {
   case Lte:                return JmpLte;
   case Eq:                 return JmpEq;
   case Neq:                return JmpNeq;
+  case GtInt:              return JmpGtInt;
+  case GteInt:             return JmpGteInt;
+  case LtInt:              return JmpLtInt;
+  case LteInt:             return JmpLteInt;
+  case EqInt:              return JmpEqInt;
+  case NeqInt:             return JmpNeqInt;
   case Same:               return JmpSame;
   case NSame:              return JmpNSame;
   case InstanceOfBitmask:  return JmpInstanceOfBitmask;
@@ -266,6 +298,12 @@ Opcode queryJmpToQueryOp(Opcode opc) {
   case JmpLte:                return Lte;
   case JmpEq:                 return Eq;
   case JmpNeq:                return Neq;
+  case JmpGtInt:              return GtInt;
+  case JmpGteInt:             return GteInt;
+  case JmpLtInt:              return LtInt;
+  case JmpLteInt:             return LteInt;
+  case JmpEqInt:              return EqInt;
+  case JmpNeqInt:             return NeqInt;
   case JmpSame:               return Same;
   case JmpNSame:              return NSame;
   case JmpInstanceOfBitmask:  return InstanceOfBitmask;
@@ -282,6 +320,12 @@ Opcode jmpToSideExitJmp(Opcode opc) {
   case JmpLte:                return SideExitJmpLte;
   case JmpEq:                 return SideExitJmpEq;
   case JmpNeq:                return SideExitJmpNeq;
+  case JmpGtInt:              return SideExitJmpGtInt;
+  case JmpGteInt:             return SideExitJmpGteInt;
+  case JmpLtInt:              return SideExitJmpLtInt;
+  case JmpLteInt:             return SideExitJmpLteInt;
+  case JmpEqInt:              return SideExitJmpEqInt;
+  case JmpNeqInt:             return SideExitJmpNeqInt;
   case JmpSame:               return SideExitJmpSame;
   case JmpNSame:              return SideExitJmpNSame;
   case JmpInstanceOfBitmask:  return SideExitJmpInstanceOfBitmask;
@@ -300,6 +344,12 @@ Opcode jmpToReqBindJmp(Opcode opc) {
   case JmpLte:                return ReqBindJmpLte;
   case JmpEq:                 return ReqBindJmpEq;
   case JmpNeq:                return ReqBindJmpNeq;
+  case JmpGtInt:              return ReqBindJmpGtInt;
+  case JmpGteInt:             return ReqBindJmpGteInt;
+  case JmpLtInt:              return ReqBindJmpLtInt;
+  case JmpLteInt:             return ReqBindJmpLteInt;
+  case JmpEqInt:              return ReqBindJmpEqInt;
+  case JmpNeqInt:             return ReqBindJmpNeqInt;
   case JmpSame:               return ReqBindJmpSame;
   case JmpNSame:              return ReqBindJmpNSame;
   case JmpInstanceOfBitmask:  return ReqBindJmpInstanceOfBitmask;
@@ -319,6 +369,12 @@ Opcode negateQueryOp(Opcode opc) {
   case Lte:                 return Gt;
   case Eq:                  return Neq;
   case Neq:                 return Eq;
+  case GtInt:               return LteInt;
+  case GteInt:              return LtInt;
+  case LtInt:               return GteInt;
+  case LteInt:              return GtInt;
+  case EqInt:               return NeqInt;
+  case NeqInt:              return EqInt;
   case Same:                return NSame;
   case NSame:               return Same;
   case InstanceOfBitmask:   return NInstanceOfBitmask;
@@ -338,9 +394,46 @@ Opcode commuteQueryOp(Opcode opc) {
   case Lte:   return Gte;
   case Eq:    return Eq;
   case Neq:   return Neq;
+  case GtInt: return LtInt;
+  case GteInt:return LteInt;
+  case LtInt: return GtInt;
+  case LteInt:return GteInt;
+  case EqInt: return EqInt;
+  case NeqInt:return NeqInt;
   case Same:  return Same;
   case NSame: return NSame;
   default:      always_assert(0);
+  }
+}
+
+Opcode queryToIntQueryOp(Opcode opc) {
+  assert(isQueryOp(opc));
+  switch (opc) {
+  case Gt:    return GtInt;
+  case Gte:   return GteInt;
+  case Lt:    return LtInt;
+  case Lte:   return LteInt;
+  case Eq:    return EqInt;
+  case Neq:   return NeqInt;
+  case JmpGt:    return JmpGtInt;
+  case JmpGte:   return JmpGteInt;
+  case JmpLt:    return JmpLtInt;
+  case JmpLte:   return JmpLteInt;
+  case JmpEq:    return JmpEqInt;
+  case JmpNeq:   return JmpNeqInt;
+  case SideExitJmpGt:   return SideExitJmpGtInt;
+  case SideExitJmpGte:  return SideExitJmpGteInt;
+  case SideExitJmpLt:   return SideExitJmpLtInt;
+  case SideExitJmpLte:  return SideExitJmpLteInt;
+  case SideExitJmpEq:   return SideExitJmpEqInt;
+  case SideExitJmpNeq:  return SideExitJmpNeqInt;
+  case ReqBindJmpGt:    return ReqBindJmpGtInt;
+  case ReqBindJmpGte:   return ReqBindJmpGteInt;
+  case ReqBindJmpLt:    return ReqBindJmpLtInt;
+  case ReqBindJmpLte:   return ReqBindJmpLteInt;
+  case ReqBindJmpEq:    return ReqBindJmpEqInt;
+  case ReqBindJmpNeq:   return ReqBindJmpNeqInt;
+  default: always_assert(0);
   }
 }
 

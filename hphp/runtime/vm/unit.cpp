@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,7 @@
 #include <tbb/concurrent_unordered_map.h>
 #include <boost/algorithm/string.hpp>
 
+#include "folly/Memory.h"
 #include "folly/ScopeGuard.h"
 
 #include "hphp/compiler/option.h"
@@ -1539,20 +1540,24 @@ LineToOffsetRangeVecMap Unit::getLineToOffsetRangeVecMap() const {
     }
     baseOff = pastOff;
   }
-  ((Unit*)this)->m_lineToOffsetRangeVecMap = map;
+  const_cast<Unit*>(this)->m_lineToOffsetRangeVecMap = map;
   return m_lineToOffsetRangeVecMap;
 }
 
 // This uses range lookups so offsets in the middle of instructions are
 // supported.
-int Unit::getLineNumber(Offset pc) const {
-  LineEntry key = LineEntry(pc, -1);
-  auto it = upper_bound(m_lineTable.begin(), m_lineTable.end(), key);
-  if (it != m_lineTable.end()) {
+int getLineNumber(const LineTable& table, Offset pc) {
+  auto const key = LineEntry(pc, -1);
+  auto it = std::upper_bound(begin(table), end(table), key);
+  if (it != end(table)) {
     assert(pc < it->pastOffset());
     return it->val();
   }
   return -1;
+}
+
+int Unit::getLineNumber(Offset pc) const {
+  return HPHP::getLineNumber(m_lineTable, pc);
 }
 
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
@@ -1797,8 +1802,9 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   }
 }
 
-Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
-  UnitEmitter ue(md5);
+bool UnitRepoProxy::loadHelper(UnitEmitter& ue,
+                               const std::string& name,
+                               const MD5& md5) {
   ue.setFilepath(makeStaticString(name));
   // Look for a repo that contains a unit with matching MD5.
   int repoId;
@@ -1810,7 +1816,7 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   if (repoId < 0) {
     TRACE(3, "No repo contains '%s' (0x%016" PRIx64  "%016" PRIx64 ")\n",
              name.c_str(), md5.q[0], md5.q[1]);
-    return nullptr;
+    return false;
   }
   try {
     getUnitLitstrs(repoId).get(ue);
@@ -1824,10 +1830,23 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
           PRIx64 ") from '%s': %s\n",
           name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str(),
           re.msg().c_str());
-    return nullptr;
+    return false;
   }
   TRACE(3, "Repo loaded '%s' (0x%016" PRIx64 "%016" PRIx64 ") from '%s'\n",
            name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str());
+  return true;
+}
+
+std::unique_ptr<UnitEmitter>
+UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5) {
+  auto ue = folly::make_unique<UnitEmitter>(md5);
+  if (!loadHelper(*ue, name, md5)) ue.reset();
+  return ue;
+}
+
+Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
+  UnitEmitter ue(md5);
+  if (!loadHelper(ue, name, md5)) return nullptr;
   return ue.create();
 }
 
@@ -2471,11 +2490,10 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
       urp.insertUnitArray(repoId).insert(txn, usn, i, m_arrays[i].serialized);
     }
-    for (FeVec::const_iterator it = m_fes.begin(); it != m_fes.end(); ++it) {
+    for (auto it = m_fes.begin(); it != m_fes.end(); ++it) {
       (*it)->commit(txn);
     }
-    for (PceVec::const_iterator it = m_pceVec.begin(); it != m_pceVec.end();
-         ++it) {
+    for (auto it = m_pceVec.begin(); it != m_pceVec.end(); ++it) {
       (*it)->commit(txn);
     }
 
@@ -2578,7 +2596,7 @@ Unit* UnitEmitter::create() {
   size_t ix = m_fes.size() + m_hoistablePceIdList.size();
   if (m_mergeOnly && !m_allClassesHoistable) {
     size_t extra = 0;
-    for (MergeableStmtVec::const_iterator it = m_mergeableStmts.begin();
+    for (auto it = m_mergeableStmts.begin();
          it != m_mergeableStmts.end(); ++it) {
       extra++;
       if (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
@@ -2602,7 +2620,7 @@ Unit* UnitEmitter::create() {
   UnitMergeInfo *mi = UnitMergeInfo::alloc(ix);
   u->m_mergeInfo = mi;
   ix = 0;
-  for (FeVec::const_iterator it = m_fes.begin(); it != m_fes.end(); ++it) {
+  for (auto it = m_fes.begin(); it != m_fes.end(); ++it) {
     Func* func = (*it)->create(*u);
     if (func->top()) {
       if (!mi->m_firstHoistableFunc) {
@@ -2624,7 +2642,7 @@ Unit* UnitEmitter::create() {
   }
   mi->m_firstMergeablePreClass = ix;
   if (u->m_mergeOnly && !m_allClassesHoistable) {
-    for (MergeableStmtVec::const_iterator it = m_mergeableStmts.begin();
+    for (auto it = m_mergeableStmts.begin();
          it != m_mergeableStmts.end(); ++it) {
       switch (it->first) {
         case UnitMergeKindClass:

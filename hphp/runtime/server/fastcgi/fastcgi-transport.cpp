@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -404,6 +404,27 @@ void FastCGITransport::onHeadersComplete() {
     // If someone follows http://wiki.nginx.org/HttpFastcgiModule they won't
     // pass in PATH_TRANSLATED and instead will just send SCRIPT_FILENAME
     m_pathTranslated = getRawHeader(s_scriptFilename);
+  }
+
+  // do a check for mod_proxy_cgi and remove the start portion of the string
+  const std::string modProxy = "proxy:fcgi://";
+  if (m_pathTranslated.find(modProxy) == 0) {
+    m_pathTranslated = m_pathTranslated.substr(modProxy.length());
+    // remove everything before the first / which is host:port
+    int slashPos = m_pathTranslated.find('/');
+    if (slashPos != String::npos) {
+      m_pathTranslated = m_pathTranslated.substr(slashPos);
+    }
+  }
+
+  // RequestURI needs path_translated to not include the document root
+  if (!m_pathTranslated.empty()) {
+    if (m_pathTranslated.find(m_documentRoot) == 0) {
+      m_pathTranslated = m_pathTranslated.substr(m_documentRoot.length());
+    } else {
+      // if the document root isn't in the url set document root to /
+      m_documentRoot = "/";
+    }
   }
 
   auto* queryString = getRawHeaderPtr(s_queryString);

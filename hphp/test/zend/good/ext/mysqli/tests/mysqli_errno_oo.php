@@ -11,11 +11,11 @@
 
 	var_dump($mysqli->errno);
 
-	if (!$mysqli->query('DROP TABLE IF EXISTS test')) {
+	if (!$mysqli->query('DROP TABLE IF EXISTS test_mysqli_errno_oo_table_1')) {
 		printf("[003] Failed to drop old test table: [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
 
-	$mysqli->query('SELECT * FROM test');
+	$mysqli->query('SELECT * FROM test_mysqli_errno_oo_table_1');
 	var_dump($mysqli->errno);
 
 	@$mysqli->query('No SQL');

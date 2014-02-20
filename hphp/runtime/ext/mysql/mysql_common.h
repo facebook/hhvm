@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -302,6 +302,7 @@ public:
   Variant attr_set(int64_t attr, int64_t value);
   Variant bind_param(const String& types, std::vector<Variant*> vars);
   Variant bind_result(std::vector<Variant*> vars);
+  Variant data_seek(int64_t offset);
   Variant get_errno();
   Variant get_error();
   Variant execute();

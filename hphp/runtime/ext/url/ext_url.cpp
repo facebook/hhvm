@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/ext/ext_curl.h"
+#include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
@@ -55,11 +55,11 @@ Variant HHVM_FUNCTION(base64_encode, const String& data) {
 }
 
 Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */) {
-  Variant c = f_curl_init();
-  f_curl_setopt(c.toResource(), k_CURLOPT_URL, url);
-  f_curl_setopt(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
-  f_curl_setopt(c.toResource(), k_CURLOPT_HEADER, 1);
-  Variant res = f_curl_exec(c.toResource());
+  Variant c = HHVM_FN(curl_init)();
+  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, url);
+  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
+  HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_HEADER, 1);
+  Variant res = HHVM_FN(curl_exec)(c.toResource());
   if (same(res, false)) {
     return false;
   }

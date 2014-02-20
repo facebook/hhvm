@@ -28,7 +28,7 @@
   assetic:
     url: https://github.com/kriswallsmith/assetic.git
     branch: master
-    commit: 5e519fd750ea54a035386562ae03716ffba7014c
+    commit: d013aae51baf893fe8d38b41f2d24db03e1cfbf7
     install_root: assetic
     test_root: assetic
   codeigniter:
@@ -103,9 +103,9 @@
     install_root: klein
     test_root: klein
   laravel:
-    url: https://github.com/laravel/framework.git
-    branch: master
-    commit: f59b8e834e0e6e91110c6179152335fb78a7a1ed
+    url: https://github.com/fredemmott/framework.git
+    branch: update-mockery-0.9
+    commit: 25827f6bbf63c96ae750d7d77574709056d62455
     install_root: laravel
     test_root: laravel
   magento2:
@@ -116,21 +116,15 @@
     commit: 389668bca115e0fed4353664bd8c93d46a69da9e
     install_root: magento2
     test_root: magento2/dev/tests/unit
-  # Changing from ptarjan to wikimedia causes a FATAL in the test
-  # script. So some code change in wikimedia between Paul's forked
-  # change and the time it was pulled into wikimedia master on
-  # Nov 22, 2013 is causing problems.
   mediawiki:
-    url: https://github.com/ptarjan/mediawiki-core.git
-    branch: master
-    commit: 2a280fcfccfd48fe5bf9479ca02d986367fa33e9
+    url: https://github.com/fredemmott/mediawiki-core.git
+    # Bad test data in wikimedia/mediawiki-core at the moment
+    branch: fix-old-dates
+    commit: 10a7426639664a9222e430d6775e68b299e657f4
     install_root: mediawiki-core
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/
     config_file: mediawiki-core/tests/phpunit/suite.xml
-    clowns:
-      - mediawiki-core/tests/phpunit/includes/HttpTest.php
-      - mediawiki-core/tests/phpunit/includes/libs/CSSJanusTest.php
   mockery:
     url: https://github.com/padraic/mockery.git
     branch: master
@@ -290,22 +284,18 @@
     install_root: twig
     test_root: twig
   yii:
-    # Until PHPUnit 3.8 pull request is accepted
-    # https://github.com/yiisoft/yii/pull/3211
-    url: https://github.com/JoelMarcey/yii.git
+    url: https://github.com/yiisoft/yii.git
     branch: master
-    commit: 3739ba8696a51b4817a9bb26a88c1ff7fc1a0925
+    commit: 5f6de831ac4396d59dff34636d040cc5289b15db
     install_root: yii
     test_root: yii/tests
     clowns:
       # Needs a local memcache server
       - yii/tests/framework/caching/CMemCacheTest.php
   zf2:
-    # Until PHPUnit 3.8 pull request is accepted
-    # https://github.com/zendframework/zf2/pull/5781
-    url: https://github.com/JoelMarcey/zf2.git
+    url: https://github.com/zendframework/zf2.git
     branch: master
-    commit: c29404d8bfda2b0fe106ef1e73447a72ca37d80e
+    commit: 2b718e20cfc22cd388ef3aeff0bc66302379ae02
     install_root: zf2
     test_root: zf2/tests
     blacklist:

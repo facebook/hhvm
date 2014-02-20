@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -229,7 +229,7 @@ String c_Collator::t_geterrormessage() {
 
 String c_Collator::t_getlocale(int64_t type /* = 0 */) {
   if (!m_ucoll) {
-    raise_warning("getlocale called on uninitialized Collator object");
+    raise_error("getlocale called on uninitialized Collator object");
     return "";
   }
   m_errcode.clear();

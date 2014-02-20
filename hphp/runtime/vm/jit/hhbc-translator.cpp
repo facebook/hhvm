@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,8 +78,6 @@ HhbcTranslator::HhbcTranslator(Offset startOffset,
   , m_startBcOff(startOffset)
   , m_lastBcOff(false)
   , m_hasExit(false)
-  , m_stackDeficit(0)
-  , m_evalStack()
 {
   updateMarker();
   auto const fp = gen(DefFP);
@@ -127,7 +125,7 @@ const NamedEntity* HhbcTranslator::lookupNamedEntityId(int id) {
 SSATmp* HhbcTranslator::push(SSATmp* tmp) {
   assert(tmp);
   FTRACE(2, "HhbcTranslator pushing {}\n", *tmp->inst());
-  m_evalStack.push(tmp);
+  m_irb->evalStack().push(tmp);
   return tmp;
 }
 
@@ -164,12 +162,12 @@ void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
 }
 
 SSATmp* HhbcTranslator::pop(Type type, TypeConstraint tc) {
-  SSATmp* opnd = m_evalStack.pop();
+  SSATmp* opnd = m_irb->evalStack().pop();
   m_irb->constrainValue(opnd, tc);
 
   if (opnd == nullptr) {
-    uint32_t stackOff = m_stackDeficit;
-    m_stackDeficit++;
+    uint32_t stackOff = m_irb->stackDeficit();
+    m_irb->incStackDeficit();
     m_irb->constrainStack(stackOff, tc);
     auto value = gen(LdStack, type, StackOffset(stackOff), m_irb->sp());
     FTRACE(2, "HhbcTranslator popping {}\n", *value->inst());
@@ -192,15 +190,15 @@ void HhbcTranslator::discard(unsigned n) {
 
 // type is the type expected on the stack.
 void HhbcTranslator::popDecRef(Type type, TypeConstraint tc) {
-  if (SSATmp* src = m_evalStack.pop()) {
+  if (SSATmp* src = m_irb->evalStack().pop()) {
     m_irb->constrainValue(src, tc);
     gen(DecRef, src);
     return;
   }
 
-  m_irb->constrainStack(m_stackDeficit, tc);
-  gen(DecRefStack, StackOffset(m_stackDeficit), type, m_irb->sp());
-  m_stackDeficit++;
+  m_irb->constrainStack(m_irb->stackDeficit(), tc);
+  gen(DecRefStack, StackOffset(m_irb->stackDeficit()), type, m_irb->sp());
+  m_irb->incStackDeficit();
 }
 
 // We don't know what type description to expect for the stack
@@ -210,7 +208,7 @@ void HhbcTranslator::popDecRef(Type type, TypeConstraint tc) {
 // the known type.
 void HhbcTranslator::extendStack(uint32_t index, Type type) {
   // DataTypeGeneric is used in here because nobody's actually looking at the
-  // values, we're just inserting LdStacks into m_evalStack to be consumed
+  // values, we're just inserting LdStacks into the eval stack to be consumed
   // elsewhere.
   if (index == 0) {
     push(pop(type, DataTypeGeneric));
@@ -223,7 +221,7 @@ void HhbcTranslator::extendStack(uint32_t index, Type type) {
 }
 
 SSATmp* HhbcTranslator::top(TypeConstraint tc, uint32_t index) const {
-  SSATmp* tmp = m_evalStack.top(index);
+  SSATmp* tmp = m_irb->evalStack().top(index);
   if (!tmp) return nullptr;
   m_irb->constrainValue(tmp, tc);
   return tmp;
@@ -242,15 +240,15 @@ SSATmp* HhbcTranslator::top(Type type, uint32_t index,
 }
 
 void HhbcTranslator::replace(uint32_t index, SSATmp* tmp) {
-  m_evalStack.replace(index, tmp);
+  m_irb->evalStack().replace(index, tmp);
 }
 
 Type HhbcTranslator::topType(uint32_t idx, TypeConstraint constraint) const {
   FTRACE(5, "Asking for type of stack elem {}\n", idx);
-  if (idx < m_evalStack.size()) {
+  if (idx < m_irb->evalStack().size()) {
     return top(constraint, idx)->type();
   } else {
-    auto absIdx = idx - m_evalStack.size() + m_stackDeficit;
+    auto absIdx = idx - m_irb->evalStack().size() + m_irb->stackDeficit();
     auto stkVal = getStackValue(m_irb->sp(), absIdx);
     m_irb->constrainStack(absIdx, constraint);
     return stkVal.knownType;
@@ -258,7 +256,7 @@ Type HhbcTranslator::topType(uint32_t idx, TypeConstraint constraint) const {
 }
 
 size_t HhbcTranslator::spOffset() const {
-  return m_irb->spOffset() + m_evalStack.size() - m_stackDeficit;
+  return m_irb->spOffset() + m_irb->evalStack().size() - m_irb->stackDeficit();
 }
 
 /*
@@ -384,7 +382,7 @@ int HhbcTranslator::inliningDepth() const {
 
 BCMarker HhbcTranslator::makeMarker(Offset bcOff) {
   int32_t stackOff = m_irb->spOffset() +
-    m_evalStack.numCells() - m_stackDeficit;
+    m_irb->evalStack().numCells() - m_irb->stackDeficit();
 
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff, curFunc()->fullName()->data());
@@ -2321,7 +2319,7 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
     func,
     objOrClass
   );
-  assert(m_stackDeficit == 0);
+  assert(m_irb->stackDeficit() == 0);
 }
 
 void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
@@ -3032,8 +3030,8 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
    *
    * The push of the return value below is not yet materialized.
    */
-  assert(m_evalStack.numCells() == 0);
-  m_stackDeficit = 0;
+  assert(m_irb->evalStack().numCells() == 0);
+  m_irb->clearStackDeficit();
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc()->fullName()->data());
   push(useRet);
@@ -3322,9 +3320,10 @@ void HhbcTranslator::assertType(const RegionDesc::Location& loc,
 void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
                                     bool outerOnly) {
   assert(type <= Type::Gen);
-  assert(m_evalStack.size() == 0);
-  assert(m_stackDeficit == 0); // This should only be called at the beginning
-                               // of a trace, with a clean stack.
+  assert(m_irb->evalStack().size() == 0);
+  // This should only be called at the beginning of a trace, with a
+  // clean stack
+  assert(m_irb->stackDeficit() == 0);
   auto stackOff = StackOffset(stackIndex);
   gen(GuardStk, type, stackOff, m_irb->sp());
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
@@ -3337,20 +3336,21 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
 void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
   assert(type <= Type::Gen);
   auto exit = makeExit(dest);
-  if (idx < m_evalStack.size()) {
+  if (idx < m_irb->evalStack().size()) {
     FTRACE(1, "checkTypeStack({}): generating CheckType for {}\n",
            idx, type.toString());
     // CheckType only cares about its input type if the simplifier does
     // something with it and that's handled if and when it happens.
     SSATmp* tmp = top(DataTypeGeneric, idx);
     assert(tmp);
-    m_evalStack.replace(idx, gen(CheckType, type, exit, tmp));
+    m_irb->evalStack().replace(idx, gen(CheckType, type, exit, tmp));
   } else {
     FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx, type.toString());
     // Just like CheckType, CheckStk only cares about its input type if the
     // simplifier does something with it.
     gen(CheckStk, type, exit,
-        StackOffset(idx - m_evalStack.size() + m_stackDeficit), m_irb->sp());
+        StackOffset(idx - m_irb->evalStack().size() + m_irb->stackDeficit()),
+        m_irb->sp());
   }
 }
 
@@ -3359,14 +3359,14 @@ void HhbcTranslator::checkTypeTopOfStack(Type type, Offset nextByteCode) {
 }
 
 void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
-  if (idx < m_evalStack.size()) {
+  if (idx < m_irb->evalStack().size()) {
     // We're asserting a new type so we don't care about the previous type.
     SSATmp* tmp = top(DataTypeGeneric, idx);
     assert(tmp);
-    m_evalStack.replace(idx, gen(AssertType, type, tmp));
+    m_irb->evalStack().replace(idx, gen(AssertType, type, tmp));
   } else {
     gen(AssertStk, type,
-        StackOffset(idx - m_evalStack.size() + m_stackDeficit),
+        StackOffset(idx - m_irb->evalStack().size() + m_irb->stackDeficit()),
         m_irb->sp());
   }
 }
@@ -3409,12 +3409,13 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
     case Location::Stack: {
       auto i = loc.offset;
       assert(i >= 0);
-      if (i < m_evalStack.size()) {
+      if (i < m_irb->evalStack().size()) {
         val = top(DataTypeGeneric, i);
         t = val->type();
       } else {
-        auto stackVal = getStackValue(m_irb->sp(),
-                                      i - m_evalStack.size() + m_stackDeficit);
+        auto stackVal =
+          getStackValue(m_irb->sp(),
+                        i - m_irb->evalStack().size() + m_irb->stackDeficit());
         val = stackVal.value;
         t = stackVal.knownType;
         if (!val && t == Type::StackElem) return RuntimeType(KindOfAny);
@@ -3525,6 +3526,11 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   if (tc.isNullable() && locType.subtypeOf(Type::InitNull)) {
     return;
   }
+  if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
+      (locType.isObj() || locVal->type().isBoxed())) {
+    PUNT(VerifyParamType-collectionToArray);
+    return;
+  }
   if (tc.isCallable()) {
     locVal = gen(Unbox, makeExit(), locVal);
     gen(VerifyParamCallable, makeCatch(), locVal, cns(paramId));
@@ -3592,8 +3598,11 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
    */
   if (locType.strictSubtypeOf(Type::Obj)) {
     auto const cls = locType.getClass();
-    if (knownConstraint && cls->classof(knownConstraint)) return;
-    if (cls->name()->isame(clsName)) return;
+    if ((knownConstraint && cls->classof(knownConstraint)) ||
+        (cls->name()->isame(clsName))) {
+      m_irb->constrainValue(locVal, DataTypeSpecialized);
+      return;
+    }
   }
 
   InstanceBits::init();
@@ -4156,6 +4165,44 @@ void HhbcTranslator::emitCeil() {
   push(gen(Ceil, dblVal));
 }
 
+void HhbcTranslator::emitCheckProp(Id propId) {
+  StringData* propName = lookupStringId(propId);
+
+  auto* cctx = gen(LdCctx, m_irb->fp());
+  auto* cls = gen(LdClsCtx, cctx);
+  auto* propInitVec = gen(LdClsInitData, cls);
+
+  auto* ctx = curClass();
+  auto idx = ctx->lookupDeclProp(propName);
+
+  auto* curVal = gen(LdElem, propInitVec, cns(idx * sizeof(TypedValue)));
+  push(gen(IsNType, Type::Uninit, curVal));
+}
+
+void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
+  StringData* propName = lookupStringId(propId);
+  SSATmp* val = popC();
+
+  auto* cctx = gen(LdCctx, m_irb->fp());
+  auto* cls = gen(LdClsCtx, cctx);
+  auto* ctx = curClass();
+  SSATmp* propInitVec;
+  Slot idx;
+
+  switch(op) {
+    case InitPropOp::Static: {
+      propInitVec = gen(LdClsStaticInitData, cls);
+      idx = ctx->lookupSProp(propName);
+    } break;
+    case InitPropOp::NonStatic: {
+      propInitVec = gen(LdClsInitData, cls);
+      idx = ctx->lookupDeclProp(propName);
+    } break;
+  }
+
+  gen(StElem, propInitVec, cns(idx * sizeof(TypedValue)), val);
+}
+
 static folly::Optional<Type> assertOpToType(AssertTOp op) {
   switch (op) {
   case AssertTOp::Uninit:     return Type::Uninit;
@@ -4671,10 +4718,11 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
   auto setImmLocType = [&](uint32_t id, Type t) {
     setLocType(inst.imm[id].u_LA, t);
   };
+  auto* func = curFunc();
 
   switch (inst.op()) {
     case OpCreateCont: case OpAsyncESuspend: {
-      auto numLocals = curFunc()->numLocals();
+      auto numLocals = func->numLocals();
       for (unsigned i = 0; i < numLocals; ++i) {
         setLocType(i, Type::Uninit);
       }
@@ -4792,6 +4840,17 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
       setImmLocType(2, Type::Gen);
       break;
 
+    case OpVerifyParamType: {
+      auto paramId = inst.imm[0].u_LA;
+      auto const& tc = func->params()[paramId].typeConstraint();
+      auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
+      if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
+          (locType.isObj() || locType.maybeBoxed())) {
+        setImmLocType(0, locType.isBoxed() ? Type::BoxedCell : Type::Cell);
+      }
+      break;
+    }
+
     default:
       not_reached();
   }
@@ -4853,28 +4912,29 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
   assert(IMPLIES(outType.hasValue(), outType.value() != Type::None));
   gen(changesPC ? InterpOneCF : InterpOne, outType,
       makeCatch(), idata, sp, m_irb->fp());
-  assert(m_stackDeficit == 0);
+  assert(m_irb->stackDeficit() == 0);
 
   if (changesPC) m_hasExit = true;
 }
 
 std::string HhbcTranslator::showStack() const {
   if (isInlining()) {
-    return folly::format("{:*^60}\n",
+    return folly::format("{:*^80}\n",
                          " I don't understand inlining stacks yet ").str();
   }
   std::ostringstream out;
   auto header = [&](const std::string& str) {
-    out << folly::format("+{:-^62}+\n", str);
+    out << folly::format("+{:-^82}+\n", str);
   };
 
   const int32_t frameCells =
     curFunc()->isGenerator() ? 0 : curFunc()->numSlotsInFrame();
   const int32_t stackDepth =
-    m_irb->spOffset() + m_evalStack.size() - m_stackDeficit - frameCells;
+    m_irb->spOffset() + m_irb->evalStack().size()
+    - m_irb->stackDeficit() - frameCells;
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
-    out << folly::format("| {:<60} |\n",
+    out << folly::format("| {:<80} |\n",
                          folly::format("{:>2}: {}",
                                        stackDepth - spOffset, str));
     assert(spOffset > 0);
@@ -4905,14 +4965,14 @@ std::string HhbcTranslator::showStack() const {
 
   header(folly::format(" {} stack element(s); m_evalStack: ",
                        stackDepth).str());
-  for (unsigned i = 0; i < m_evalStack.size(); ++i) {
+  for (unsigned i = 0; i < m_irb->evalStack().size(); ++i) {
     while (checkFpi());
     SSATmp* value = top(DataTypeGeneric, i); // debug-only
     elem(value->inst()->toString());
   }
 
   header(" in-memory ");
-  for (unsigned i = m_stackDeficit; spOffset > 0; ) {
+  for (unsigned i = m_irb->stackDeficit(); spOffset > 0; ) {
     assert(i < curFunc()->maxStackCells());
     if (checkFpi()) {
       i += kNumActRecCells;
@@ -4927,7 +4987,18 @@ std::string HhbcTranslator::showStack() const {
 
     ++i;
   }
+  header("");
+  out << "\n";
 
+  header(folly::format(" {} local(s) ", curFunc()->numLocals()).str());
+  for (unsigned i = 0; i < curFunc()->numLocals(); ++i) {
+    auto localValue = m_irb->localValue(i, DataTypeGeneric);
+    auto str = localValue
+      ? localValue->inst()->toString()
+      : m_irb->localType(i, DataTypeGeneric).toString();
+    out << folly::format("| {:<80} |\n",
+                         folly::format("{:>2}: {}", i, str));
+  }
   header("");
   return out.str();
 }
@@ -4941,8 +5012,8 @@ std::string HhbcTranslator::showStack() const {
  */
 std::vector<SSATmp*> HhbcTranslator::peekSpillValues() const {
   std::vector<SSATmp*> ret;
-  ret.reserve(m_evalStack.size());
-  for (int i = 0; i < m_evalStack.size(); ++i) {
+  ret.reserve(m_irb->evalStack().size());
+  for (int i = 0; i < m_irb->evalStack().size(); ++i) {
     // DataTypeGeneric is used here because SpillStack just teleports the
     // values to memory.
     SSATmp* elem = top(DataTypeGeneric, i);
@@ -4986,23 +5057,21 @@ Block* HhbcTranslator::makeExitSlow() {
 }
 
 Block* HhbcTranslator::makeExitOpt(TransID transId) {
-  auto spillValues = peekSpillValues();
   Offset targetBcOff = bcOff();
   auto const exit = m_irb->makeExit();
 
   BCMarker exitMarker;
   exitMarker.bcOff = targetBcOff;
-  exitMarker.spOff = m_irb->spOffset() + spillValues.size() - m_stackDeficit;
+  exitMarker.spOff = m_irb->spOffset()
+    + m_irb->evalStack().size()
+    - m_irb->stackDeficit();
   exitMarker.func  = curFunc();
 
   BlockPusher blockPusher(*m_irb, exitMarker, exit);
 
   SSATmp* stack = nullptr;
-  if (m_stackDeficit != 0 || !spillValues.empty()) {
-    spillValues.insert(spillValues.begin(),
-                       { m_irb->sp(), cns(int64_t(m_stackDeficit)) });
-    stack = gen(SpillStack,
-                std::make_pair(spillValues.size(), &spillValues[0]));
+  if (m_irb->stackDeficit() != 0 || !m_irb->evalStack().empty()) {
+    stack = spillStack();
   } else {
     stack = m_irb->sp();
   }
@@ -5018,7 +5087,9 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
                                     const CustomExit& customFn) {
   BCMarker exitMarker;
   exitMarker.bcOff = targetBcOff;
-  exitMarker.spOff = m_irb->spOffset() + stackValues.size() - m_stackDeficit;
+  exitMarker.spOff = m_irb->spOffset()
+    + stackValues.size()
+    - m_irb->stackDeficit();
   exitMarker.func  = curFunc();
 
   BCMarker currentMarker = makeMarker(bcOff());
@@ -5033,13 +5104,15 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   auto stack = m_irb->sp();
 
   // TODO(#2404447) move this conditional to the simplifier?
-  if (m_stackDeficit != 0 || !stackValues.empty()) {
+  if (!stackValues.empty()) {
     stackValues.insert(
       stackValues.begin(),
-      { m_irb->sp(), cns(int64_t(m_stackDeficit)) }
+      { m_irb->sp(), cns(int64_t(m_irb->stackDeficit())) }
     );
     stack = gen(SpillStack,
       std::make_pair(stackValues.size(), &stackValues[0]));
+  } else if (m_irb->stackDeficit() != 0 || m_irb->evalStack().size() > 0) {
+    stack = spillStack();
   }
 
   if (customFn) {
@@ -5118,7 +5191,7 @@ Block* HhbcTranslator::makeCatchImpl(Body body) {
 /*
  * Create a catch block that spills the current state of the eval stack. The
  * incoming value of spillVals will be the top of the spilled stack: values in
- * m_evalStack will be appended to spillVals to form the sources for the
+ * the eval stack will be appended to spillVals to form the sources for the
  * SpillStack.
  */
 Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals) {
@@ -5139,7 +5212,7 @@ Block* HhbcTranslator::makeCatchNoSpill() {
 
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
                                        const std::vector<SSATmp*>& spillVals) {
-  std::vector<SSATmp*> ssaArgs{ sp, cns(int64_t(m_stackDeficit)) };
+  std::vector<SSATmp*> ssaArgs{ sp, cns(int64_t(m_irb->stackDeficit())) };
   ssaArgs.insert(ssaArgs.end(), spillVals.begin(), spillVals.end());
 
   auto args = std::make_pair(ssaArgs.size(), &ssaArgs[0]);
@@ -5148,8 +5221,8 @@ SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
 
 SSATmp* HhbcTranslator::spillStack() {
   auto newSp = emitSpillStack(m_irb->sp(), peekSpillValues());
-  m_evalStack.clear();
-  m_stackDeficit = 0;
+  m_irb->evalStack().clear();
+  m_irb->clearStackDeficit();
   return newSp;
 }
 
@@ -5160,13 +5233,13 @@ void HhbcTranslator::exceptionBarrier() {
 
 SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, TypeConstraint tc) {
   // You're almost certainly doing it wrong if you want to get the address of a
-  // stack cell that's in m_evalStack.
+  // stack cell that's in m_irb->evalStack().
   m_irb->constrainStack(offset, tc);
-  assert(offset >= (int32_t)m_evalStack.numCells());
+  assert(offset >= (int32_t)m_irb->evalStack().numCells());
   return gen(
     LdStackAddr,
     Type::PtrToGen,
-    StackOffset(offset + m_stackDeficit - m_evalStack.numCells()),
+    StackOffset(offset + m_irb->stackDeficit() - m_irb->evalStack().numCells()),
     m_irb->sp()
   );
 }
@@ -5174,14 +5247,14 @@ SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, TypeConstraint tc) {
 SSATmp* HhbcTranslator::ldLoc(uint32_t locId, TypeConstraint tc) {
   m_irb->constrainLocal(locId, tc, "LdLoc");
   return gen(LdLoc, Type::Gen,
-             LocalData(locId, m_irb->localValueSource(locId)),
+             LocalData(locId, m_irb->localTypeSource(locId)),
              m_irb->fp());
 }
 
 SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId, TypeConstraint tc) {
   m_irb->constrainLocal(locId, tc, "LdLocAddr");
   return gen(LdLocAddr, Type::PtrToGen,
-             LocalData(locId, m_irb->localValueSource(locId)),
+             LocalData(locId, m_irb->localTypeSource(locId)),
              m_irb->fp());
 }
 

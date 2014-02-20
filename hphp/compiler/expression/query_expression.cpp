@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -100,7 +100,7 @@ void QueryExpression::doRewrites(AnalysisResultPtr ar,
   // into a query (unless already cached).
   std::ostringstream serialized;
   CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
-  cg.setAstClassPrefix("Code");
+  cg.setAstClassPrefix("HH\\CodeModel\\");
   qe->outputCodeModel(cg);
   std::string s(serialized.str().c_str(), serialized.str().length());
   m_querystr = makeStaticString(s);
@@ -249,11 +249,12 @@ TypePtr QueryOrderby::inferTypes(AnalysisResultPtr ar, TypePtr type,
 void QueryOrderby::outputCodeModel(CodeGenerator &cg) {
   if (this->getKindOf() == Expression::KindOfOrderbyClause) {
     cg.printObjectHeader("OrderbyClause", 2);
+    cg.printPropertyHeader("orders");
   } else {
     cg.printObjectHeader("QueryExpression", 2);
+    cg.printPropertyHeader("clauses");
   }
-  cg.printPropertyHeader("clauses");
-  m_originalExpressions->outputCodeModel(cg);
+  cg.printExpressionVector(m_originalExpressions);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

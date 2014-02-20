@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -333,8 +333,9 @@ MySQLResult *php_mysql_extract_result(CVarRef result) {
   MySQLResult *res = result.toResource().getTyped<MySQLResult>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
-  if (res == NULL || (res->get() == NULL && !res->isLocalized())) {
+  if (res == nullptr || (res->get() == nullptr && !res->isLocalized())) {
     raise_warning("supplied argument is not a valid MySQL result resource");
+    return nullptr;
   }
   return res;
 }
@@ -1022,6 +1023,13 @@ Variant MySQLStmt::bind_result(std::vector<Variant*> vars) {
   return m_result_vars->bind_result(m_stmt);
 }
 
+Variant MySQLStmt::data_seek(int64_t offset) {
+  VALIDATE_PREPARED
+
+  mysql_stmt_data_seek(m_stmt, offset);
+  return init_null();
+}
+
 Variant MySQLStmt::get_errno() {
   VALIDATE_STMT
   return (int64_t)mysql_stmt_errno(m_stmt);
@@ -1116,8 +1124,8 @@ Variant MySQLStmt::prepare(const String& query) {
 }
 
 Variant MySQLStmt::reset() {
-  VALIDATE_STMT
-  return mysql_stmt_reset(m_stmt);
+  VALIDATE_PREPARED
+  return !mysql_stmt_reset(m_stmt);
 }
 
 Variant MySQLStmt::store_result() {

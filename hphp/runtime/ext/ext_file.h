@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -85,10 +85,6 @@ Variant f_parse_ini_file(const String& filename, bool process_sections = false,
                          int scanner_mode = k_INI_SCANNER_NORMAL);
 Variant f_parse_ini_string(const String& ini, bool process_sections = false,
                            int scanner_mode = k_INI_SCANNER_NORMAL);
-Variant f_parse_hdf_file(const String& filename);
-Variant f_parse_hdf_string(const String& input);
-bool f_write_hdf_file(CArrRef data, const String& filename);
-String f_write_hdf_string(CArrRef data);
 Variant f_md5_file(const String& filename, bool raw_output = false);
 Variant f_sha1_file(const String& filename, bool raw_output = false);
 

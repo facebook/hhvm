@@ -1,0 +1,4 @@
+<?php
+if (version_compare(INTL_ICU_VERSION, "4.4.0") < 0) {
+  echo "skip";
+}

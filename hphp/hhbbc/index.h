@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -88,6 +88,7 @@ using PropState = std::map<SString,Type>;
 
 // private types
 struct IndexData;
+struct FuncFamily;
 struct FuncInfo;
 struct ClassInfo;
 
@@ -166,16 +167,22 @@ private:
 };
 
 /*
- * Reference to a function in the program.  We may only know the name
- * of the function, or we may have a bunch of information about it.
+ * This is an abstraction layer to represent possible runtime function
+ * resolutions.
+ *
+ * Internally, this may only know the name of the function, or we may
+ * know exactly which source-code-level function it refers to, or we
+ * may only have ruled it down to one of a few functions in a class
+ * hierarchy.  The interpreter can treat all these cases the same way
+ * using this.
  */
 struct Func {
   /*
    * Returns whether two res::Funcs definitely mean the func at
    * runtime.
    *
-   * Explain how a res::Func can represent an unknown func but just
-   * the name.
+   * Note: this is potentially pessimistic for its use in ActRec state
+   * merging right now, but not incorrect.
    */
   bool same(const Func&) const;
 
@@ -185,13 +192,19 @@ struct Func {
   SString name() const;
 
 private:
-  Func(borrowed_ptr<const Index>, SStringOr<FuncInfo>);
+  friend struct ::HPHP::HHBBC::Index;
+  using Rep = boost::variant< SString
+                            , borrowed_ptr<FuncInfo>
+                            , borrowed_ptr<FuncFamily>
+                            >;
 
 private:
+  Func(borrowed_ptr<const Index>, Rep);
   friend std::string show(const Func&);
-  friend struct ::HPHP::HHBBC::Index;
+
+private:
   borrowed_ptr<const Index> index;
-  SStringOr<FuncInfo> val;
+  Rep val;
 };
 
 /*
@@ -261,7 +274,7 @@ struct Index {
    *
    * Pre: `name' must be the name of a class defined in a systemlib.
    */
-  res::Class builtin_class(Context, SString name) const;
+  res::Class builtin_class(SString name) const;
 
   /*
    * Try to resolve a function named `name' from a given context.
@@ -311,10 +324,26 @@ struct Index {
   Type lookup_class_constant(Context, res::Class, SString cns) const;
 
   /*
-   * Return the best known return type for a particular function.
+   * Return the best known return type for a resolved function.
    * Returns TInitGen at worst.
    */
   Type lookup_return_type(Context, res::Func) const;
+
+  /*
+   * Look up the return type for an unresolved function.  The
+   * interpreter should not use this routine---it's for stats or debug
+   * dumps.
+   *
+   * Nothing may be writing to the index when this function is used,
+   * but concurrent readers are allowed.
+   */
+  Type lookup_return_type_raw(borrowed_ptr<const php::Func>) const;
+
+  /*
+   * Return the availability of $this on entry to the provided method.
+   * If the Func provided is not a method of a class false is returned.
+   */
+  bool lookup_this_available(borrowed_ptr<const php::Func>) const;
 
   /*
    * Returns the parameter preparation kind (if known) for parameter

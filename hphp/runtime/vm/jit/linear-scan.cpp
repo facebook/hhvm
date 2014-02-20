@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -195,11 +195,6 @@ private:
   boost::dynamic_bitset<> m_fullSIMDCandidates;
 };
 
-static_assert(kReservedRSPSpillSpace ==
-              NumPreAllocatedSpillLocs * sizeof(void*),
-              "kReservedRSPSpillSpace changes require updates in "
-              "LinearScan");
-
 // The dst of IncRef, Mov, StRef, and StRefNT has the same value
 // as the src. For analysis purpose, we put them in one equivalence class.
 // This canonicalize function returns the representative of <tmp>'s
@@ -229,9 +224,14 @@ static SSATmp* canonicalize(SSATmp* tmp) {
 RegAllocInfo LinearScan::computeRegs() const {
   RegAllocInfo regs(m_unit);
   for (auto b : m_blocks) {
-    for (auto& i : *b) {
-      for (auto  s : i.srcs()) regs[i][s] = m_allocInfo[s];
-      for (auto& d : i.dsts()) regs[i][d] = m_allocInfo[d];
+    for (auto& inst : *b) {
+      auto& inst_regs = regs[inst];
+      for (unsigned i = 0, n = inst.numSrcs(); i < n; ++i) {
+        inst_regs.src(i) = m_allocInfo[inst.src(i)];
+      }
+      for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
+        inst_regs.dst(i) = m_allocInfo[inst.dst(i)];
+      }
     }
   }
   return regs;
@@ -327,56 +327,6 @@ PhysReg::Type LinearScan::getRegType(const SSATmp* tmp, int locIdx) const {
     return PhysReg::SIMD;
   }
   return PhysReg::GP;
-}
-
-PhysReg forceAlloc(SSATmp& dst) {
-  auto inst = dst.inst();
-  auto opc = inst->op();
-
-  // Note that the point of StashGeneratorSP is to save a StkPtr
-  // somewhere other than rVmSp.  (TODO(#2288359): make rbx not
-  // special.)
-  bool abnormalStkPtr = opc == StashGeneratorSP;
-
-  if (!abnormalStkPtr && dst.isA(Type::StkPtr)) {
-    assert(opc == DefSP ||
-           opc == ReDefSP ||
-           opc == ReDefGeneratorSP ||
-           opc == PassSP ||
-           opc == DefInlineSP ||
-           opc == Call ||
-           opc == CallArray ||
-           opc == SpillStack ||
-           opc == SpillFrame ||
-           opc == CufIterSpillFrame ||
-           opc == ExceptionBarrier ||
-           opc == RetAdjustStack ||
-           opc == InterpOne ||
-           opc == InterpOneCF ||
-           opc == GenericRetDecRefs ||
-           opc == CheckStk ||
-           opc == GuardStk ||
-           opc == AssertStk ||
-           opc == CastStk ||
-           opc == CoerceStk ||
-           opc == SideExitGuardStk  ||
-           MInstrEffects::supported(opc));
-    return arch() == Arch::X64 ? X64::rVmSp : ARM::rVmSp;
-  }
-
-  // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
-  // we have a pointer to an AR that is not in rVmFp.
-  bool abnormalFramePtr = opc == LdContActRec || opc == LdAFWHActRec;
-
-  if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
-    return arch() == Arch::X64 ? X64::rVmFp : ARM::rVmFp;
-  }
-
-  if (opc == DefMIStateBase) {
-    assert(dst.isA(Type::PtrToCell));
-    return arch() == Arch::X64 ? PhysReg(reg::rsp) : PhysReg(vixl::sp);
-  }
-  return InvalidReg;
 }
 
 void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
@@ -965,14 +915,14 @@ void LinearScan::findFullSIMDCandidates() {
   for (auto* block : m_blocks) {
     for (auto& inst : *block) {
       for (SSATmp& tmp : inst.dsts()) {
-        if (tmp.numWords() == 2 && inst.isLoad() &&
+        if (tmp.numWords() == 2 && loadsCell(inst.op()) &&
             !inst.isControlFlow()) {
           m_fullSIMDCandidates[tmp.id()] = true;
         }
       }
       int idx = 0;
       for (SSATmp* tmp : inst.srcs()) {
-        if (tmp->numWords() == 2 && !inst.storesCell(idx)) {
+        if (tmp->numWords() == 2 && !storesCell(inst, idx)) {
           notCandidates[tmp->id()] = true;
         }
         idx++;
@@ -1008,8 +958,9 @@ RegAllocInfo LinearScan::allocRegs() {
   // Pre: Ensure there are no existing Shuffle instructions
   assert(checkNoShuffles(m_unit));
 
-  m_blocks = rpoSortCfg(m_unit);
-  m_idoms = findDominators(m_unit, m_blocks);
+  auto blocksIds = rpoSortCfgWithIds(m_unit);
+  m_idoms = findDominators(m_unit, blocksIds);
+  m_blocks = std::move(blocksIds.blocks);
 
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
@@ -1052,8 +1003,7 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt) {
   size_t sz = m_slots.size();
   while (blockIt != m_blocks.end()) {
     Block* block = *blockIt;
-    FTRACE(5, "Block{}: {}\n",
-           (*blockIt)->id(), (*blockIt)->postId());
+    FTRACE(5, "Block{}\n", (*blockIt)->id());
 
     // clear remembered reloads that don't dominate this block
     for (SlotInfo& slot : m_slots) {

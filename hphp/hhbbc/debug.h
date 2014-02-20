@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,9 +27,10 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Dump the entire program to a temporary directory as readable text.
+ * If the hhbbc_dump trace module is on, dump the entire program to a
+ * temporary directory as readable text.
  */
-void debug_dump_program(const php::Program&);
+void debug_dump_program(const Index&, const php::Program&);
 
 /*
  * Utilities for printing the state of the program after various

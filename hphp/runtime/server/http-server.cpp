@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -281,6 +281,11 @@ void HttpServer::runOrExitProcess() {
     }
   }
 
+  if (RuntimeOption::HHProfServerEnabled) {
+    Logger::Info("Starting up profiling server");
+    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
+  }
+
   if (!Eval::Debugger::StartServer()) {
     Logger::Error("Unable to start debugger server");
     startupFailure();
@@ -509,6 +514,7 @@ bool HttpServer::startServer(bool pageServer) {
         return false;
       }
 
+      // TODO: fix /stop (t3725397)
       HttpClient http;
       std::string url = "http://";
       url += RuntimeOption::ServerIP;

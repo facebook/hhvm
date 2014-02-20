@@ -86,12 +86,12 @@ function hash_hmac(?string $algo = null,
   // Behave like a builtin function so that we pass Zend's tests
   $args = func_num_args();
   if ($args < 3) {
-    error_log("HipHop Warning: hash_hmac() expects 3 parameters, ".
-              "$args given");
+    trigger_error("hash_hmac() expects 3 parameters, $args given",
+      E_USER_WARNING);
     return null;
   } else if ($args > 4) {
-    error_log("HipHop Warning: hash_hmac() expects at most 4 parameters, ".
-              "$args given");
+    trigger_error("hash_hmac() expects at most 4 parameters, $args given",
+      E_USER_WARNING);
     return null;
   }
 
@@ -126,8 +126,8 @@ function hash_hmac_file(?string $algo = null,
                         ?bool $raw_output = false): mixed {
   $args = func_num_args();
   if ($args < 3) {
-    error_log("HipHop Warning: hash_hmac_file() expects 3 parameters, ".
-              "$args given");
+    trigger_error("hash_hmac_file() expects 3 parameters, $args given",
+      E_USER_WARNING);
     return null;
   }
 

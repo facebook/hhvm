@@ -950,15 +950,6 @@ class ReflectionClass implements Reflector {
 
     $info['attributes_rec'] = $info['attributes'];
 
-    $abstract = isset($info['abstract']) || isset($info['interface']);
-    // flattening the trees, so it's easier for lookups
-    foreach ($info['interfaces'] as $interface => $_) {
-      $p = self::fetch_recur($interface);
-      if ($abstract) $info['methods'] += $p['methods'];
-      $info['constants'] += $p['constants'];
-      $info['interfaces'] += $p['interfaces'];
-    }
-
     $parent = $info['parent'];
     if (!empty($parent)) {
       $p = self::fetch_recur($parent);
@@ -990,6 +981,16 @@ class ReflectionClass implements Reflector {
       $info['interfaces'] += $p['interfaces'];
       $info['attributes_rec'] += $p['attributes_rec'];
     }
+
+    $abstract = isset($info['abstract']) || isset($info['interface']);
+    // flattening the trees, so it's easier for lookups
+    foreach ($info['interfaces'] as $interface => $_) {
+      $p = self::fetch_recur($interface);
+      if ($abstract) $info['methods'] += $p['methods'];
+      $info['constants'] += $p['constants'];
+      $info['interfaces'] += $p['interfaces'];
+    }
+
     if (is_string($name)) {
       self::$fetched[$name] = $info;
     }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,9 +125,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
 
-  // XXX t3582470. hhir guard relaxation doesn't support Optimize translations
-  // right now.
-  if (RuntimeOption::EvalHHIRRelaxGuards && kind != TransOptimize) {
+  if (RuntimeOption::EvalHHIRRelaxGuards) {
     auto const simpleRelax = kind == TransProfile;
     auto changed = relaxGuards(unit, *irBuilder.guards(), simpleRelax);
     if (changed) finishPass("guard relaxation");

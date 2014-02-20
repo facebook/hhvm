@@ -141,6 +141,9 @@ function prepare(Set $available_frameworks, Set $framework_class_overrides,
 
 function fork_buckets(Traversable $data, Callable $callback): int {
   $num_threads = min(count($data), num_cpus() + 1);
+  if (Options::$num_threads !== -1) {
+    $num_threads = min(count($data), Options::$num_threads);
+  }
 
   // Create some data buckets proportional to the number of threads
   $data_buckets = array();
@@ -215,8 +218,8 @@ function run_tests(Vector $frameworks): void {
     // get all the test for that framework and add each to our tests
     // vector; otherwise, we are just going to add the framework to run
     // serially and use its global phpunit test run command to run the entire
-    // suite.
-    if ($framework->isParallel()) {
+    // suite (just like a normal phpunit run outside this framework).
+    if ($framework->isParallel() && !Options::$as_phpunit) {
       foreach($framework->getTests() as $test) {
         $st = new Runner($framework, $test);
         $all_tests->add($st);
@@ -500,6 +503,10 @@ INTRO;
     # for data extraction into entities like charts, including a header row.
     % hhvm run.php --all --csv --csvheader
 
+    # Run tests with the runner as they would be run with phpunit
+    % hhvm run.php --as-phpunit paris
+    % hhvm run.php --as-phpunit --all (THIS WILL BE SLOW AND COULD FATAL TOO)
+
     # Display help.
     % hhvm run.php --help
 
@@ -581,6 +588,12 @@ function oss_test_option_map(): OptionInfoMap {
                                          "opposed to a test file basis. This ".
                                          "basically means the --filter option ".
                                          "is being used for phpunit"},
+    'as-phpunit'          => Pair {'',   "Run tests for a framework just ".
+                                         "like it would be run normally with ".
+                                         "PHPUnit"},
+    'numthreads:'          => Pair {'',   "The exact number of threads to use ".
+                                         "when running framework tests in ".
+                                         "parallel"},
   };
 }
 

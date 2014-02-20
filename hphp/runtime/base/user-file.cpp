@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,6 +42,7 @@ StaticString s_stream_eof("stream_eof");
 StaticString s_stream_flush("stream_flush");
 StaticString s_stream_truncate("stream_truncate");
 StaticString s_stream_lock("stream_lock");
+StaticString s_stream_stat("stream_stat");
 StaticString s_url_stat("url_stat");
 StaticString s_unlink("unlink");
 StaticString s_rename("rename");
@@ -62,6 +63,7 @@ UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
   m_StreamFlush = lookupMethod(s_stream_flush.get());
   m_StreamTruncate = lookupMethod(s_stream_truncate.get());
   m_StreamLock  = lookupMethod(s_stream_lock.get());
+  m_StreamStat  = lookupMethod(s_stream_stat.get());
   m_UrlStat     = lookupMethod(s_url_stat.get());
   m_Unlink      = lookupMethod(s_unlink.get());
   m_Rename      = lookupMethod(s_rename.get());
@@ -71,7 +73,7 @@ UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
 }
 
 UserFile::~UserFile() {
-  if (m_opened) {
+  if (m_opened && !m_closed) {
     close();
   }
 }
@@ -87,7 +89,7 @@ void UserFile::sweep() {
 bool UserFile::openImpl(const String& filename, const String& mode,
                         int options) {
   // bool stream_open($path, $mode, $options, &$opened_path)
-  bool success = false;
+  bool invoked = false;
   Variant opened_path;
   Variant ret = invoke(
     m_StreamOpen,
@@ -98,9 +100,9 @@ bool UserFile::openImpl(const String& filename, const String& mode,
       .append(options)
       .appendRef(opened_path)
       .toArray(),
-    success
+    invoked
   );
-  if (success && (ret.toBoolean() == true)) {
+  if (invoked && (ret.toBoolean() == true)) {
     m_opened = true;
     return true;
   }
@@ -117,6 +119,7 @@ bool UserFile::close() {
 
   // void stream_close()
   invoke(m_StreamClose, s_stream_close, Array::Create());
+  m_closed = true;
   return true;
 }
 
@@ -124,10 +127,10 @@ bool UserFile::close() {
 
 int64_t UserFile::readImpl(char *buffer, int64_t length) {
   // String stread_read($count)
-  bool success = false;
+  bool invoked = false;
   String str = invoke(m_StreamRead, s_stream_read,
-                      make_packed_array(length), success);
-  if (!success) {
+                      make_packed_array(length), invoked);
+  if (!invoked) {
     raise_warning("%s::stream_read is not implemented",
                   m_cls->name()->data());
     return 0;
@@ -149,14 +152,14 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
   int64_t orig_length = length;
   // stream_write($data)
   while (length > 0) {
-    bool success = false;
+    bool invoked = false;
     int64_t didWrite = invoke(
       m_StreamWrite,
       s_stream_write,
       make_packed_array(String(buffer, length, CopyString)),
-      success
+      invoked
     ).toInt64();
-    if (!success) {
+    if (!invoked) {
       raise_warning("%s::stream_write is not implemented",
                     m_cls->name()->data());
       return 0;
@@ -183,11 +186,11 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
 bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   assert(seekable());
   // bool stream_seek($offset, $whence)
-  bool success = false;
+  bool invoked = false;
   bool sought  = invoke(
-    m_StreamSeek, s_stream_seek, make_packed_array(offset, whence), success
+    m_StreamSeek, s_stream_seek, make_packed_array(offset, whence), invoked
   ).toBoolean();
-  if (!success) {
+  if (!invoked) {
     always_assert("No seek method? But I found one earlier?");
   }
 
@@ -202,8 +205,8 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   }
 
   // int stream_tell()
-  Variant ret = invoke(m_StreamTell, s_stream_tell, Array::Create(), success);
-  if (!success) {
+  Variant ret = invoke(m_StreamTell, s_stream_tell, Array::Create(), invoked);
+  if (!invoked) {
     raise_warning("%s::stream_tell is not implemented!", m_cls->name()->data());
     return false;
   }
@@ -222,9 +225,9 @@ bool UserFile::eof() {
   }
 
   // bool stream_eof()
-  bool success = false;
-  Variant ret = invoke(m_StreamEof, s_stream_eof, Array::Create(), success);
-  if (!success) {
+  bool invoked = false;
+  Variant ret = invoke(m_StreamEof, s_stream_eof, Array::Create(), invoked);
+  if (!invoked) {
     return false;
   }
   return ret.isBoolean() ? ret.toBoolean() : true;
@@ -232,10 +235,10 @@ bool UserFile::eof() {
 
 bool UserFile::flush() {
   // bool stream_flush()
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(m_StreamFlush, s_stream_flush,
-                       Array::Create(), success);
-  if (!success) {
+                       Array::Create(), invoked);
+  if (!invoked) {
     return false;
   }
   return ret.isBoolean() ? ret.toBoolean() : false;
@@ -243,10 +246,10 @@ bool UserFile::flush() {
 
 bool UserFile::truncate(int64_t size) {
   // bool stream_truncate()
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(m_StreamTruncate, s_stream_truncate,
-                       make_packed_array(size), success);
-  if (!success) {
+                       make_packed_array(size), invoked);
+  if (!invoked) {
     return false;
   }
   return ret.isBoolean() ? ret.toBoolean() : false;
@@ -264,10 +267,10 @@ bool UserFile::lock(int operation, bool &wouldBlock) {
   }
 
   // bool stream_lock(int $operation)
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(m_StreamLock, s_stream_lock,
-                       make_packed_array(op), success);
-  if (!success) {
+                       make_packed_array(op), invoked);
+  if (!invoked) {
     if (operation) {
       raise_warning("%s::stream_lock is not implemented!",
                     m_cls->name()->data());
@@ -291,16 +294,13 @@ const StaticString
   s_ctime("ctime"),
   s_blksize("blksize"),
   s_blocks("blocks");
-int UserFile::statImpl(const String& path, struct stat* stat_sb,
-                       int flags /* = 0 */) {
-  // array url_stat ( string $path , int $flags )
-  bool success = false;
-  Variant ret = invoke(m_UrlStat, s_url_stat,
-                       make_packed_array(path, flags), success);
-  if (!ret.isArray()) {
+
+static int statFill(Variant stat_array, struct stat* stat_sb)
+{
+  if (!stat_array.isArray()) {
     return -1;
   }
-  auto a = ret.getArrayData();
+  auto a = stat_array.getArrayData();
   stat_sb->st_dev = a->get(s_dev.get()).toInt64();
   stat_sb->st_ino = a->get(s_ino.get()).toInt64();
   stat_sb->st_mode = a->get(s_mode.get()).toInt64();
@@ -317,10 +317,27 @@ int UserFile::statImpl(const String& path, struct stat* stat_sb,
   return 0;
 }
 
+bool UserFile::stat(struct stat* stat_sb) {
+  bool invoked = false;
+  // array stream_stat ( )
+  return statFill(invoke(m_StreamStat, s_stream_stat,
+                         Array::Create(), invoked),
+                  stat_sb) == 0;
+}
+
+int UserFile::urlStat(const String& path, struct stat* stat_sb,
+                       int flags /* = 0 */) {
+  // array url_stat ( string $path , int $flags )
+  bool invoked = false;
+  return statFill(invoke(m_UrlStat, s_url_stat,
+                         make_packed_array(path, flags), invoked),
+                  stat_sb);
+}
+
 extern const int64_t k_STREAM_URL_STAT_QUIET;
 int UserFile::access(const String& path, int mode) {
   struct stat buf;
-  auto ret = statImpl(path, &buf, k_STREAM_URL_STAT_QUIET);
+  auto ret = urlStat(path, &buf, k_STREAM_URL_STAT_QUIET);
   if (ret < 0 || mode == F_OK) {
     return ret;
   }
@@ -329,25 +346,25 @@ int UserFile::access(const String& path, int mode) {
 
 extern const int64_t k_STREAM_URL_STAT_LINK;
 int UserFile::lstat(const String& path, struct stat* buf) {
-  return statImpl(path, buf, k_STREAM_URL_STAT_LINK);
+  return urlStat(path, buf, k_STREAM_URL_STAT_LINK);
 }
 
 int UserFile::stat(const String& path, struct stat* buf) {
-  return statImpl(path, buf);
+  return urlStat(path, buf);
 }
 
 bool UserFile::unlink(const String& filename) {
   // bool unlink($path)
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(
     m_Unlink,
     s_unlink,
     PackedArrayInit(1)
       .append(filename)
       .toArray(),
-    success
+    invoked
   );
-  if (success && (ret.toBoolean() == true)) {
+  if (invoked && (ret.toBoolean() == true)) {
     return true;
   }
 
@@ -357,7 +374,7 @@ bool UserFile::unlink(const String& filename) {
 
 bool UserFile::rename(const String& oldname, const String& newname) {
   // bool rename($oldname, $newname);
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(
     m_Rename,
     s_rename,
@@ -365,9 +382,9 @@ bool UserFile::rename(const String& oldname, const String& newname) {
       .append(oldname)
       .append(newname)
       .toArray(),
-    success
+    invoked
   );
-  if (success && (ret.toBoolean() == true)) {
+  if (invoked && (ret.toBoolean() == true)) {
     return true;
   }
 
@@ -377,7 +394,7 @@ bool UserFile::rename(const String& oldname, const String& newname) {
 
 bool UserFile::mkdir(const String& filename, int mode, int options) {
   // bool mkdir($path, $mode, $options)
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(
     m_Mkdir,
     s_mkdir,
@@ -386,9 +403,9 @@ bool UserFile::mkdir(const String& filename, int mode, int options) {
       .append(mode)
       .append(options)
       .toArray(),
-    success
+    invoked
   );
-  if (success && (ret.toBoolean() == true)) {
+  if (invoked && (ret.toBoolean() == true)) {
     return true;
   }
 
@@ -398,7 +415,7 @@ bool UserFile::mkdir(const String& filename, int mode, int options) {
 
 bool UserFile::rmdir(const String& filename, int options) {
   // bool rmdir($path, $options)
-  bool success = false;
+  bool invoked = false;
   Variant ret = invoke(
     m_Rmdir,
     s_rmdir,
@@ -406,9 +423,9 @@ bool UserFile::rmdir(const String& filename, int options) {
       .append(filename)
       .append(options)
       .toArray(),
-    success
+    invoked
   );
-  if (success && (ret.toBoolean() == true)) {
+  if (invoked && (ret.toBoolean() == true)) {
     return true;
   }
 

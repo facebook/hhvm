@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2634,6 +2634,13 @@ Unit* VMExecutionContext::compileEvalString(
 }
 
 const String& VMExecutionContext::createFunction(const String& args, const String& code) {
+  if (UNLIKELY(RuntimeOption::RepoAuthoritative)) {
+    // Whole program optimizations need to assume they can see all the
+    // code.
+    raise_error("You can't use create_function in RepoAuthoritative mode; "
+                "use a closure instead");
+  }
+
   VMRegAnchor _;
   // It doesn't matter if there's a user function named __lambda_func; we only
   // use this name during parsing, and then change it to an impossible name
@@ -3517,6 +3524,14 @@ OPTBLD_INLINE void VMExecutionContext::iopDir(IOP_ARGS) {
   m_stack.pushStaticString(const_cast<StringData*>(s));
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopNameA(IOP_ARGS) {
+  NEXT();
+  auto const cls  = m_stack.topA();
+  auto const name = cls->name();
+  m_stack.popA();
+  m_stack.pushStaticString(const_cast<StringData*>(name));
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopInt(IOP_ARGS) {
   NEXT();
   DECODE(int64_t, i);
@@ -3722,24 +3737,16 @@ OPTBLD_INLINE void VMExecutionContext::iopDefCns(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopClsCns(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(clsCnsName);
-  TypedValue* tv = m_stack.topTV();
-  assert(tv->m_type == KindOfClass);
-  Class* class_ = tv->m_data.pcls;
-  assert(class_ != nullptr);
-  if (clsCnsName->isame(s_class.get())) {
-    // Doesn't decref tv since Classes aren't refcounted
-    auto name = const_cast<StringData*>(class_->name());
-    assert(name->isStatic());
-    tv->m_type = KindOfStaticString;
-    tv->m_data.pstr = name;
-    return;
-  }
-  auto const clsCns = class_->clsCnsGet(clsCnsName);
+
+  auto const cls    = m_stack.topA();
+  auto const clsCns = cls->clsCnsGet(clsCnsName);
+
   if (clsCns.m_type == KindOfUninit) {
     raise_error("Couldn't find constant %s::%s",
-                class_->name()->data(), clsCnsName->data());
+                cls->name()->data(), clsCnsName->data());
   }
-  cellDup(clsCns, *tv);
+
+  cellDup(clsCns, *m_stack.topTV());
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopClsCnsD(IOP_ARGS) {
@@ -6877,7 +6884,7 @@ OPTBLD_INLINE void VMExecutionContext::iopVerifyParamType(IOP_ARGS) {
   if (tc.isTypeVar()) {
     return;
   }
-  const TypedValue *tv = frame_local(m_fp, param);
+  auto* tv = frame_local(m_fp, param);
   tc.verify(tv, func, param);
 }
 
@@ -7277,6 +7284,56 @@ OPTBLD_INLINE void VMExecutionContext::iopFloor(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopCeil(IOP_ARGS) {
   NEXT();
   roundOpImpl(ceil);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopCheckProp(IOP_ARGS) {
+  NEXT();
+  DECODE_LITSTR(propName);
+
+  auto* cls = m_fp->getClass();
+  auto* propVec = cls->getPropData();
+  always_assert(propVec);
+
+  auto* ctx = arGetContextClass(getFP());
+  auto idx = ctx->lookupDeclProp(propName);
+
+  auto& tv = (*propVec)[idx];
+  if (tv.m_type != KindOfUninit) {
+    m_stack.pushTrue();
+  } else {
+    m_stack.pushFalse();
+  }
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopInitProp(IOP_ARGS) {
+  NEXT();
+  DECODE_LITSTR(propName);
+  DECODE_OA(InitPropOp, propOp);
+
+  auto* cls = m_fp->getClass();
+  TypedValue* tv;
+  Slot idx;
+
+  auto* ctx = arGetContextClass(getFP());
+  auto* fr = m_stack.topC();
+
+  switch (propOp) {
+    case InitPropOp::Static: {
+      auto* propVec = cls->getSPropData();
+      always_assert(propVec);
+      idx = ctx->lookupSProp(propName);
+      tv = &propVec[idx];
+    } break;
+    case InitPropOp::NonStatic: {
+      auto* propVec = cls->getPropData();
+      always_assert(propVec);
+      idx = ctx->lookupDeclProp(propName);
+      tv = &(*propVec)[idx];
+    } break;
+  }
+
+  cellDup(*fr, *tvToCell(tv));
+  m_stack.popC();
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopStrlen(IOP_ARGS) {

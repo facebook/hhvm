@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -358,7 +358,7 @@ class PreClass : public AtomicCountable {
   }
 
   Func* lookupMethod(const StringData* methName) const {
-    Func* f = m_methods.lookupDefault(methName, 0);
+    Func* f = m_methods.lookupDefault(methName, nullptr);
     assert(f != nullptr);
     return f;
   }
@@ -642,7 +642,15 @@ struct Class : AtomicCountable {
 
   // We use the TypedValue::_count field to indicate whether a property
   // requires "deep" initialization (0 = no, 1 = yes)
-  const PropInitVec* getPropData() const;
+  PropInitVec* getPropData() const;
+  static constexpr size_t propdataOff() {
+    return offsetof(Class, m_propDataCache);
+  }
+
+  TypedValue* getSPropData() const;
+  static constexpr size_t spropdataOff() {
+    return offsetof(Class, m_propSDataCache);
+  }
 
   bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }
@@ -692,7 +700,7 @@ struct Class : AtomicCountable {
   Slot traitsEndIdx() const   { return m_traitsEndIdx; }
 
   Func* lookupMethod(const StringData* methName) const {
-    return m_methods.lookupDefault(methName, 0);
+    return m_methods.lookupDefault(methName, nullptr);
   }
 
   bool isPersistent() const { return m_attrCopy & AttrPersistent; }
@@ -851,7 +859,6 @@ private:
   TypedValue* initSPropsImpl() const;
   void setPropData(PropInitVec* propData) const;
   void setSPropData(TypedValue* sPropData) const;
-  TypedValue* getSPropData() const;
 
   void importTraitMethod(const TraitMethod&  traitMethod,
                          const StringData*   methName,

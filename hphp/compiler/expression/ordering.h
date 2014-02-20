@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,15 +30,15 @@ class Ordering : public Expression {
 
 public:
   Ordering(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-    ExpressionPtr key, TokenID direction);
+    ExpressionPtr key, std::string direction);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   ExpressionPtr getKey() const { return m_key; }
-  TokenID getDirection() { return m_direction; }
+  int getDirection() { return m_direction; }
 private:
   ExpressionPtr m_key;
-  TokenID m_direction;
+  int m_direction;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

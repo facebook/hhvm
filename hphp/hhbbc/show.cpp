@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -124,6 +124,41 @@ std::string show(const Block& block) {
   return ret;
 }
 
+std::string dot_instructions(const Block& b) {
+  using namespace folly::gen;
+  return from(b.hhbcs)
+    | map([&] (const Bytecode& b) {
+        return "\"" + folly::cEscape<std::string>(show(b)) + "\\n\"";
+      })
+    | unsplit<std::string>("+\n")
+    ;
+}
+
+// Output DOT-format graph.  Paste into dot -Txlib or similar.
+std::string dot_cfg(const Func& func) {
+  std::string ret;
+  for (auto& b : rpoSortAddDVs(func)) {
+    ret += folly::format("B{} [ label = \"blk:{}\\n\"+{} ]\n",
+      b->id, b->id, dot_instructions(*b)).str();
+    bool outputed = false;
+    forEachNormalSuccessor(*b, [&] (const php::Block& target) {
+      ret += folly::format("B{} -> B{};", b->id, target.id).str();
+      outputed = true;
+    });
+    if (outputed) ret += "\n";
+    outputed = false;
+    if (!is_single_nop(*b)) {
+      for (auto& ex : b->factoredExits) {
+        ret += folly::format("B{} -> B{} [color=blue];",
+          b->id, ex->id).str();
+        outputed = true;
+      }
+    }
+    if (outputed) ret += "\n";
+  }
+  return ret;
+}
+
 std::string show(const Func& func) {
   std::string ret;
 
@@ -141,6 +176,9 @@ std::string show(const Func& func) {
   if (auto const f = func.outerGeneratorFunc) {
     ret += folly::format("outerGeneratorFunc: {}\n", f->name->data()).str();
   }
+
+  ret += folly::format("digraph {} {{\n  node [shape=box];\n{}}}\n",
+    func.name->data(), indent(2, dot_cfg(func))).str();
 
   for (auto& blk : func.blocks) {
     ret += folly::format(
@@ -376,8 +414,13 @@ std::string show(Type t) {
 
   assert(t.checkInvariants());
 
-  // Unknown union; just bits for now.
-  ret = folly::to<std::string>(t.m_bits);
+  if (is_specialized_wait_handle(t)) {
+    ret = folly::format("{}WaitH<{}>",
+      is_opt(t) ? "?" : "",
+      show(wait_handle_inner(t))
+    ).str();
+    return ret;
+  }
 
   switch (t.m_bits) {
   case BBottom:      ret = "Bottom";   break;
@@ -418,6 +461,8 @@ std::string show(Type t) {
   case BOptObj:      ret = "?Obj";     break;
   case BOptRes:      ret = "?Res";     break;
 
+  case BInitPrim:    ret = "InitPrim"; break;
+  case BPrim:        ret = "Prim";     break;
   case BInitUnc:     ret = "InitUnc";  break;
   case BUnc:         ret = "Unc";      break;
   case BInitCell:    ret = "InitCell"; break;

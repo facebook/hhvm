@@ -124,7 +124,7 @@
 
 	printf("With RS\n");
 	$mysqli = @new mysqli($host, $user, $passwd . "invalid", $db, $port, $socket);
-	$res = @$mysqli->query("SELECT * FROM test");
+	$res = @$mysqli->query("SELECT * FROM test_mysqli_class_mysqli_properties_no_conn_table_1");
 	dump_properties($mysqli);
 
 	print "done!";

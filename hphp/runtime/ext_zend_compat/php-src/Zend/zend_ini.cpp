@@ -51,7 +51,7 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
     };
     auto getCallback = [](void *p) {
       zend_ini_entry *entry = static_cast<zend_ini_entry*>(p);
-      return HPHP::String(entry->value, entry->value_length, HPHP::CopyString);
+      return std::string(entry->value, entry->value_length);
     };
     HPHP::IniSetting::Mode mode =
       p->modifiable == ZEND_INI_USER   ? HPHP::IniSetting::Mode::PHP_INI_USER :

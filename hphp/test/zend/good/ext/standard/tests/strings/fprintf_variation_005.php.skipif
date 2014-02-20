@@ -1,6 +1,6 @@
 <?php
-$data_file = dirname(__FILE__) . '/dump.txt';
+$data_file = dirname(__FILE__) . '/fprintf_variation_005.phpt.txt';
 if (!($fp = fopen($data_file, 'w'))) {
-  die('skip File dump.txt could not be created');
+  die('skip File fprintf_variation_005.phpt.txt could not be created');
 }
 ?>

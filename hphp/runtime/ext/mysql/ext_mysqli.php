@@ -289,7 +289,7 @@ class mysqli {
   /**
    * Alias for real_escape_string
    */
-  public function escape_string(string $escapestr): ?string {
+  public function escape_string($escapestr): ?string {
     return $this->real_escape_string($escapestr);
   }
 
@@ -480,13 +480,22 @@ class mysqli {
    *   FALSE if an error occurred.
    */
   public function prepare(string $query): ?mysqli_stmt {
-    $stmt = new mysqli_stmt($this, $query);
-    if ($stmt->error) {
+    $stmt = new mysqli_stmt($this);
+    $prepared = $stmt->prepare($query);
+
+    if (!$prepared) {
+      // If we failed to prepare we need to move the error messages that are on
+      // the mysqli_stmt object to the mysqli object otherwise the user will
+      // never be able to get them.
+      $this->hh_update_last_error($stmt);
       return false;
     }
 
     return $stmt;
   }
+
+  <<__Native>>
+  private function hh_update_last_error(mysqli_stmt $stmt): void;
 
   /**
    * Performs a query on the database
@@ -614,7 +623,7 @@ class mysqli {
    *
    * @return string - Returns an escaped string.
    */
-  public function real_escape_string(string $escapestr): ?string {
+  public function real_escape_string($escapestr): ?string {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -745,7 +754,7 @@ class mysqli {
    * Alias of options()
    */
   public function set_opt(int $option, mixed $value): bool {
-    return $this->options($opions, $value);
+    return $this->options($option, $value);
   }
 
   /**
@@ -884,10 +893,10 @@ class mysqli_driver {
   public function __set(string $name, mixed $value): void {
     switch ($name) {
       case 'reconnect':
-        $this->__reconnect = $value;
+        $this->__reconnect = (bool)$value;
         break;
       case 'report_mode':
-        $this->__report_mode = $value;
+        $this->__report_mode = (int)$value;
         break;
       default:
         trigger_error(
@@ -905,11 +914,17 @@ class mysqli_driver {
  */
 class mysqli_result {
 
-  private resource $__result;
-  private int $__resulttype;
+  private ?resource $__result = null;
+  private ?int $__resulttype = null;
   private bool $__done = false;
 
   public function __get(string $name): mixed {
+    if ($this->__result === null) {
+      trigger_error("supplied argument is not a valid MySQL result resource",
+                    E_USER_WARNING);
+      return null;
+    }
+
     switch ($name) {
       case 'current_field':
         return $this->hh_field_tell();
@@ -979,7 +994,10 @@ class mysqli_result {
    *
    * @return bool -
    */
-  public function data_seek(int $offset): bool {
+  public function data_seek(int $offset): mixed {
+    if ($this->__result === null) {
+      return null;
+    }
     if ($this->__resulttype == MYSQLI_USE_RESULT) {
       return false;
     }
@@ -1197,8 +1215,8 @@ class mysqli_result {
  */
 class mysqli_stmt {
 
-  private resource $__stmt;
-  private mysqli $__link;
+  private ?resource $__stmt = null;
+  private ?mysqli $__link = null;
 
   public function __get(string $name): mixed {
     switch ($name) {
@@ -1340,8 +1358,8 @@ class mysqli_stmt {
    *
    * @return void -
    */
-  //<<__Native>>
-  //public function data_seek(int $offset): void;
+  <<__Native>>
+  public function data_seek(int $offset): void;
 
   /**
    * Executes a prepared Query
@@ -2078,7 +2096,7 @@ function mysqli_real_connect(mysqli $link,
 /**
  * Alias of mysqli_real_escape_string
  */
-function mysqli_escape_string(mysqli $link, string $escapestr): string {
+function mysqli_escape_string(mysqli $link, $escapestr): string {
   return mysqli_real_escape_string($link, $escapestr);
 }
 
@@ -2092,7 +2110,7 @@ function mysqli_escape_string(mysqli $link, string $escapestr): string {
  *
  * @return string - Returns an escaped string.
  */
-function mysqli_real_escape_string(mysqli $link, string $escapestr): string {
+function mysqli_real_escape_string(mysqli $link, $escapestr): string {
   return $link->real_escape_string($escapestr);
 }
 
@@ -2755,9 +2773,9 @@ function mysqli_stmt_close(mysqli_stmt $stmt): bool {
  *
  * @return void -
  */
-//function mysqli_stmt_data_seek(mysqli_stmt $stmt, int $offset): void {
-//  $stmt->data_seek($offset);
-//}
+function mysqli_stmt_data_seek(mysqli_stmt $stmt, int $offset): void {
+  $stmt->data_seek($offset);
+}
 
 /**
  * Returns the error code for the most recent statement call

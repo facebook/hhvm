@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,6 +34,56 @@ namespace JIT {
 struct IRInstruction;
 struct SSATmp;
 
+//////////////////////////////////////////////////////////////////////
+
+struct EvalStack {
+  explicit EvalStack() {}
+
+  void push(SSATmp* tmp) {
+    m_vector.push_back(tmp);
+  }
+
+  SSATmp* pop() {
+    if (m_vector.size() == 0) {
+      return nullptr;
+    }
+    SSATmp* tmp = m_vector.back();
+    m_vector.pop_back();
+    return tmp;
+  }
+
+  SSATmp* top(uint32_t offset = 0) const {
+    if (offset >= m_vector.size()) {
+      return nullptr;
+    }
+    uint32_t index = m_vector.size() - 1 - offset;
+    return m_vector[index];
+  }
+
+  void replace(uint32_t offset, SSATmp* tmp) {
+    assert(offset < m_vector.size());
+    uint32_t index = m_vector.size() - 1 - offset;
+    m_vector[index] = tmp;
+  }
+
+  uint32_t numCells() const {
+    uint32_t ret = 0;
+    for (auto& t : m_vector) {
+      ret += t->type() == Type::ActRec ? kNumActRecCells : 1;
+    }
+    return ret;
+  }
+
+  bool empty() const { return m_vector.empty(); }
+  int  size()  const { return m_vector.size(); }
+  void clear()       { m_vector.clear(); }
+
+private:
+  std::vector<SSATmp*> m_vector;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * LocalStateHook is used to separate the acts of determining which locals are
  * affected by an instruction and recording those changes. It allows consumers
@@ -49,9 +99,11 @@ struct LocalStateHook {
                                    SSATmp* oldRef, SSATmp* newRef) {}
   virtual void dropLocalInnerType(uint32_t id, unsigned inlineIdx) {}
 
-  virtual void refineLocalType(uint32_t id, Type type) {}
+  virtual void refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {}
   virtual void setLocalType(uint32_t id, Type type) {}
 };
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * FrameState tracks state about the VM stack frame in the function currently
@@ -80,10 +132,25 @@ struct FrameState : private LocalStateHook {
   ~FrameState();
 
   void update(const IRInstruction* inst);
-
-  void startBlock(Block*);
-  void finishBlock(Block*);
   void clear();
+
+  /*
+   * Starts tracking state for a block and reloads any previously
+   * saved state.
+   */
+  void startBlock(Block*);
+
+  /*
+   * Finish tracking state for a block and save the current state to
+   * any successors.
+   */
+  void finishBlock(Block*);
+
+  /*
+   * Save current state of a block so we can resume processing it
+   * after working on another.
+   */
+  void pauseBlock(Block*);
 
   const Func* func() const { return m_curFunc; }
   Offset spOffset() const { return m_spOffset; }
@@ -97,10 +164,15 @@ struct FrameState : private LocalStateHook {
   bool enableCse() const { return m_enableCse; }
   void setEnableCse(bool e) { m_enableCse = e; }
   unsigned inlineDepth() const { return m_inlineSavedStates.size(); }
+  void setBuilding(bool b) { m_building = b; }
+  uint32_t stackDeficit() const { return m_stackDeficit; }
+  void incStackDeficit() { m_stackDeficit++; }
+  void clearStackDeficit() { m_stackDeficit = 0; }
+  EvalStack& evalStack() { return m_evalStack; }
 
   Type localType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
-  SSATmp* localValueSource(uint32_t id) const;
+  SSATmp* localTypeSource(uint32_t id) const;
 
   typedef std::function<void(SSATmp*, int32_t)> FrameFunc;
   // Call func for all enclosing frames, starting with the current one and
@@ -124,21 +196,19 @@ struct FrameState : private LocalStateHook {
     LocalState()
       : value(nullptr)
       , type(Type::Gen)
-      , unsafe(false)
-      , written(false)
+      , typeSource(nullptr)
     {}
 
     SSATmp* value; // The current value of the local. nullptr if unknown
     Type type;     // The current type of the local.
-    bool unsafe;   // true iff value is not safe to use at runtime. Currently
-                   // this only happens across a Call or CallArray instruction.
-    bool written;  // true iff the local has been written in this trace
+    SSATmp* typeSource; // The source of the currently known type: either the
+                        // current value, a FramePtr with a guard, or nullptr
+                        // if the value is new and unknown.
 
     bool operator==(const LocalState& b) const {
       return value == b.value &&
         type == b.type &&
-        unsafe == b.unsafe &&
-        written == b.written;
+        typeSource == b.typeSource;
     }
   };
   typedef smart::vector<LocalState> LocalVec;
@@ -153,7 +223,9 @@ struct FrameState : private LocalStateHook {
     const Func* curFunc;
     int32_t spOffset;
     bool thisAvailable;
-    smart::vector<LocalState> locals;
+    uint32_t stackDeficit;
+    EvalStack evalStack;
+    LocalVec locals;
     bool frameSpansCall;
     BCMarker curMarker;
     smart::vector<Snapshot> inlineSavedStates;
@@ -181,7 +253,7 @@ struct FrameState : private LocalStateHook {
   void updateLocalRefValue(uint32_t id, unsigned inlineIdx, SSATmp* oldRef,
                            SSATmp* newRef) override;
   void dropLocalInnerType(uint32_t id, unsigned inlineIdx) override;
-  void refineLocalType(uint32_t id, Type type) override;
+  void refineLocalType(uint32_t id, Type type, SSATmp* typeSource) override;
   void setLocalType(uint32_t id, Type type) override;
 
   LocalVec& locals(unsigned inlineIdx);
@@ -235,9 +307,31 @@ struct FrameState : private LocalStateHook {
   bool m_frameSpansCall;
 
   /*
+   * m_building is true if we're using FrameState to build the IR,
+   * since some state updates are conditional in that case.
+   */
+  bool m_building = false;
+
+  /*
+   * Tracking of the state of the virtual execution stack:
+   *
+   *   During HhbcTranslator's run over the bytecode, these stacks
+   *   contain SSATmp values representing the execution stack state
+   *   since the last SpillStack.
+   *
+   *   The EvalStack contains cells and ActRecs that need to be
+   *   spilled in order to materialize the stack.
+   *
+   *   m_stackDeficit represents the number of cells we've popped off
+   *   the virtual stack since the last sync.
+   */
+  uint32_t m_stackDeficit;
+  EvalStack m_evalStack;
+
+  /*
    * m_locals tracks the current types and values of locals.
    */
-  smart::vector<LocalState> m_locals;
+  LocalVec m_locals;
 
   /*
    * m_inlineSavedStates holds snapshots of the caller(s)'s state while in an

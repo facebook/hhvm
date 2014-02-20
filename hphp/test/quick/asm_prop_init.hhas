@@ -42,29 +42,21 @@
     Fatal Runtime
   }
 
-  .method [public] 86sinit(&$props) {
-    String "foo"
+  .method [public] 86sinit() {
     String "default ::foo value"
-    SetM <L:$props EC>
-    PopC
+    InitProp "foo" Static
 
     Null
     RetC
   }
 
-  .method [public] 86pinit(&$props, $sentinel) {
-    String "nonstat"
-    CGetM <L:$props EC>
-    CGetL $sentinel
-    Same
-    JmpZ done
-
-    String "nonstat"
+  .method [public] 86pinit() {
+    CheckProp "nonstat"
+    JmpNZ isset
     String "code-created prop value"
-    SetM <L:$props EC>
-    PopC
+    InitProp "nonstat" NonStatic
 
-  done:
+  isset:
     Null
     RetC
   }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,7 +65,8 @@ BaseExecutionContext::BaseExecutionContext() :
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
     m_vhost(nullptr) {
 
-  setRequestMemoryMaxBytes(String(RuntimeOption::RequestMemoryMaxBytes));
+  auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
+  setRequestMemoryMaxBytes(max_mem);
   restoreIncludePath();
 
   // Language and Misc Configuration Options
@@ -74,11 +75,11 @@ BaseExecutionContext::BaseExecutionContext() :
 
   // Resource Limits
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
-                   [this](const String& value, void* p) {
+                   [this](const std::string& value, void* p) {
                      this->setRequestMemoryMaxBytes(value);
                      return true;
                    },
-                   ini_get_string,
+                   ini_get_stdstring,
                    &m_maxMemory);
 
   // Data Handling
@@ -89,11 +90,12 @@ BaseExecutionContext::BaseExecutionContext() :
                    "post_max_size",
                    ini_on_update_long,
                    [](void*) {
-                     return String(VirtualHost::GetMaxPostSize());
+                     return std::to_string(VirtualHost::GetMaxPostSize());
                    },
                    &RuntimeOption::MaxPostSize);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "default_charset", &RuntimeOption::DefaultCharsetName);
+                   "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
+                   &m_defaultCharset);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
                    "always_populate_raw_post_data",
                    &RuntimeOption::AlwaysPopulateRawPostData);
@@ -106,13 +108,13 @@ BaseExecutionContext::BaseExecutionContext() :
                      return true;
                    },
                    [this](void*) {
-                     return this->getIncludePath();
+                     return this->getIncludePath().toCppString();
                    });
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "doc_root", &RuntimeOption::SourceRoot);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "open_basedir",
-                   [](const String& value, void* p) {
+                   [](const std::string& value, void* p) {
                      RuntimeOption::AllowedDirectories.clear();
                      auto boom = f_explode(";", value).toCArrRef();
                      for (ArrayIter iter(boom); iter; ++iter) {
@@ -148,7 +150,7 @@ BaseExecutionContext::BaseExecutionContext() :
                    [](void*) {
                      int uploadMaxFilesize =
                        VirtualHost::GetUploadMaxFileSize() / (1 << 20);
-                     return String(uploadMaxFilesize) + "M";
+                     return std::to_string(uploadMaxFilesize) + "M";
                    },
                    &RuntimeOption::UploadMaxFileSize);
 
@@ -158,7 +160,7 @@ BaseExecutionContext::BaseExecutionContext() :
                    &m_errorReportingLevel);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "log_errors",
-                   [this](const String& value, void* p) {
+                   [this](const std::string& value, void* p) {
                      bool log;
                      ini_on_update_bool(value, &log);
                      this->setLogErrors(log);
@@ -168,7 +170,7 @@ BaseExecutionContext::BaseExecutionContext() :
                    &m_logErrors);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "error_log",
-                   [this](const String& value, void* p) {
+                   [this](const std::string& value, void* p) {
                      this->setErrorLog(value);
                      return true;
                    },
@@ -181,20 +183,21 @@ BaseExecutionContext::BaseExecutionContext() :
                    ini_on_update_fail, ini_get_static_string_1);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_socket_timeout",
-                   &RuntimeOption::SocketDefaultTimeout);
+                   std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
+                   &m_socketDefaultTimeout);
 
   // HPHP specific
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_id",
                    ini_on_update_fail,
                    [](void*) {
-                     return String(getHphpCompilerId());
+                     return getHphpCompilerId();
                    });
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_version",
                    ini_on_update_fail,
                    [](void*) {
-                     return String(getHphpCompilerVersion());
+                     return getHphpCompilerVersion();
                    });
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hhvm.ext_zend_compat",
@@ -204,10 +207,10 @@ BaseExecutionContext::BaseExecutionContext() :
                    "hphp.build_id",
                    ini_on_update_fail, ini_get_stdstring,
                    &RuntimeOption::BuildId);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "notice_frequency",
                    &RuntimeOption::NoticeFrequency);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "warning_frequency",
                    &RuntimeOption::WarningFrequency);
 }
@@ -322,11 +325,11 @@ void BaseExecutionContext::setContentType(const String& mimetype,
   }
 }
 
-void BaseExecutionContext::setRequestMemoryMaxBytes(const String& max) {
-  int64_t newInt = max.toInt64();
+void BaseExecutionContext::setRequestMemoryMaxBytes(const std::string& max) {
+  int64_t newInt = strtoll(max.c_str(), nullptr, 10);
   if (newInt <= 0) {
     newInt = INT64_MAX;
-    m_maxMemory = String(newInt);
+    m_maxMemory = std::to_string(newInt);
   } else {
     m_maxMemory = max;
     newInt = convert_bytes_to_long(max);

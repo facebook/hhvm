@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -142,7 +142,8 @@ const StaticString
   s_THREAD_TYPE("THREAD_TYPE"),
   s_dash("-"),
   s_underscore("_"),
-  s_HTTP_("HTTP_");
+  s_HTTP_("HTTP_"),
+  s_forwardslash("/");
 
 static auto const s_arraysToClear = {
   s__SERVER,
@@ -293,10 +294,21 @@ void HttpProtocol::PreparePostVariables(Variant& post,
           int delta = 0;
           transport->getMorePostData(delta);
         }
+        data = nullptr;
+        size = 0;
       } else {
+        bool invalidate = false;
         if (transport->hasMorePostData()) {
-          needDelete = true;
-          data = Util::buffer_duplicate(data, size);
+          // Calls to getMorePostData may invalidate data, so make a copy
+          // iff we're trying to coalesce the entire POST body.  Otherwise,
+          // data may be invalid when DecodeRfc1867 returns.  See
+          // upload.cpp:read_post.
+          if (RuntimeOption::AlwaysPopulateRawPostData) {
+            needDelete = true;
+            data = Util::buffer_duplicate(data, size);
+          } else {
+            invalidate = true;
+          }
         }
         DecodeRfc1867(transport,
                       post,
@@ -305,6 +317,10 @@ void HttpProtocol::PreparePostVariables(Variant& post,
                       data,
                       size,
                       boundary);
+        if (invalidate) {
+          data = nullptr;
+          size = 0;
+        }
       }
       assert(!transport->getFiles(files_str));
     } else {
@@ -326,6 +342,9 @@ void HttpProtocol::PreparePostVariables(Variant& post,
       }
     }
 
+    if (!data) {
+      return;
+    }
     if (uint32_t(size) > StringData::MaxSize) {
       // Can't store it anywhere
       if (needDelete) {
@@ -432,11 +451,12 @@ void HttpProtocol::CopyServerInfo(Variant& server,
   string hostHeader = transport->getHeader("Host");
   String hostName(vhost->serverName(hostHeader));
   String serverNameHeader(transport->getServerName());
-
   if (hostHeader.empty()) {
     server.set(s_HTTP_HOST, hostName);
     StackTraceNoHeap::AddExtraLogging("Server", hostName.data());
   } else {
+    // reset the HTTP_HOST header from apache.
+    server.set(s_HTTP_HOST, hostHeader);
     StackTraceNoHeap::AddExtraLogging("Server", hostHeader.c_str());
   }
 
@@ -578,9 +598,23 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   } else {
     assert(server.toCArrRef().exists(s_DOCUMENT_ROOT));
     assert(server[s_DOCUMENT_ROOT].isString());
-    server.set(s_PATH_TRANSLATED,
-               String(server[s_DOCUMENT_ROOT].toCStrRef() +
-                      r.pathInfo().data()));
+    // reset path_translated back to the transport if it has it.
+    auto const& pathTranslated = transport->getPathTranslated();
+    if (!pathTranslated.empty()) {
+      if (documentRoot == s_forwardslash) {
+        // path outside document root or / is document root
+        server.set(s_PATH_TRANSLATED, String(pathTranslated));
+      } else {
+        server.set(s_PATH_TRANSLATED,
+                   String(server[s_DOCUMENT_ROOT].toCStrRef() +
+                          pathTranslated));
+      }
+    } else {
+      server.set(s_PATH_TRANSLATED,
+                 String(server[s_DOCUMENT_ROOT].toCStrRef() +
+                        server[s_SCRIPT_NAME].toCStrRef() +
+                        r.pathInfo().data()));
+    }
     server.set(s_PATH_INFO, r.pathInfo());
   }
 
@@ -637,6 +671,8 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
   // "may" exclude them; this is not what APE does, but it's harmless.
   HeaderMap headers;
   transport->getHeaders(headers);
+  // Do this first so other methods can overwrite them
+  CopyTransportParams(server, transport);
   CopyHeaderVariables(server, headers);
   CopyServerInfo(server, transport, vhost);
   CopyRemoteInfo(server, transport);
@@ -652,8 +688,6 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
     server.set(s_CONTENT_LENGTH, String(contentLength));
   }
 
-  CopyPathInfo(server, transport, r, vhost);
-
   for (map<string, string>::const_iterator iter =
          RuntimeOption::ServerVariables.begin();
        iter != RuntimeOption::ServerVariables.end(); ++iter) {
@@ -665,8 +699,7 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
        iter != vServerVars.end(); ++iter) {
     server.set(String(iter->first), String(iter->second));
   }
-  // Do this last so it can overwrite all the previous settings
-  CopyTransportParams(server, transport);
+
   sri.setServerVariables(server);
 
   const char *threadType = transport->getThreadTypeName();

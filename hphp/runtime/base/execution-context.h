@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -227,7 +227,7 @@ public:
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
   String getRequestMemoryMaxBytes() const { return m_maxMemory; }
-  void setRequestMemoryMaxBytes(const String& max);
+  void setRequestMemoryMaxBytes(const std::string& max);
   String getCwd() const { return m_cwd;}
   void setCwd(const String& cwd) { m_cwd = cwd;}
 
@@ -333,6 +333,9 @@ public:
   void setStreamContext(Resource &context) { m_streamContext = context; }
   Resource &getStreamContext() { return m_streamContext; }
 
+  String getDefaultCharset() const { return m_defaultCharset; }
+  int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
+
   void restoreIncludePath();
   void setIncludePath(const String& path);
   String getIncludePath() const;
@@ -357,7 +360,7 @@ private:
   static const StaticString s_amp;
   // system settings
   Transport *m_transport;
-  String m_maxMemory;
+  std::string m_maxMemory;
   String m_cwd;
 
   // output buffering
@@ -392,6 +395,8 @@ private:
   String m_argSeparatorOutput;
   bool m_throwAllErrors;
   Resource m_streamContext;
+  String m_defaultCharset;
+  int64_t m_socketDefaultTimeout;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,29 +39,35 @@ namespace HPHP { namespace HHBBC {
  *                       |
  *                 +-----+              InitGen :=  Gen - Uninit
  *                 |     |             InitCell := Cell - Uninit
- *                 |    Gen---+              ?X := X + InitNull
+ *                Cls   Gen---+              ?X := X + InitNull
  *                 |     |    |
- *                Cls  Cell  Ref
+ *              Cls<=c  Cell  Ref
  *                 |     |
- *              Cls<=c   +--------+--------+-------+-------+
- *                 |     |        |        |       |       |
- *              Cls=c   Unc       |        |      Obj     Res
- *                       |        |        |       |
- *                  +----+        |        |     Obj<=c
- *                 /     |        |        |       |
- *                /      |        |        |     Obj=c
- *             Null   InitUnc     |        |
- *             / |     / |\  \   Arr      Str
- *            /  |    /  | \  \  / \      / \
- *      Uninit  InitNull |  \  SArr CArr /  CStr
- *                       |   \   |      /
- *                       |    \ SArr=a /
- *                       |     \      /
- *                       |      \    /
- *                       |       \  /
- *                       |       SStr
- *                       |        |
- *                       |      SStr=s
+ *              Cls=c    +-------------+--------+-------+-------+
+ *                       |             |        |       |       |
+ *                      Unc            |        |      Obj     Res
+ *                       | \           |        |      /  \
+ *                       |  \          |        |  Obj<=c Obj<=WaitHandle
+ *                     Prim  \         |        |    |       |
+ *                     / |   InitUnc   |        |  Obj=c   WaitH<T>
+ *                    /  |   /  | |    |        |
+ *                   /   |  /   | |    |        |
+ *                  /    | /    | |    |        |
+ *                 /     |/     | |    |        |
+ *              Null  InitPrim  | \    |        |
+ *             /  |    / |      |  \  Arr      Str
+ *            /   |   /  |      |   \ / \      / \
+ *      Uninit  InitNull |      |   SArr CArr /  CStr
+ *                       |      |    |       /
+ *                       |      |   SArr=a  /
+ *                       |      |          /
+ *                       |      \         /
+ *                       |       \       /
+ *                       |        \     /
+ *                       |         \   /
+ *                       |          SStr
+ *                       |           |
+ *                       |         SStr=s
  *                       |
  *                       +----------+
  *                       |          |
@@ -70,6 +76,24 @@ namespace HPHP { namespace HHBBC {
  *                   True  False  Int  Dbl
  *                                 |    |
  *                               Int=n Dbl=n
+ *
+ * Some description of the types here:
+ *
+ *   {Init,}Prim
+ *
+ *       "Primitive" types---these can be represented in a TypedValue
+ *       without a pointer to the heap.
+ *
+ *   {Init,}Unc
+ *
+ *       "Uncounted" types---values of these types don't require
+ *       reference counting.
+ *
+ *   WaitH<T>
+ *
+ *       A WaitHandle that is known will either return a value of type
+ *       T from its join() method (or AsyncAwait), or else throw an
+ *       exception.
  *
  */
 
@@ -115,7 +139,9 @@ enum trep : uint32_t {
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
 
-  BInitUnc  = BInitNull | BBool | BInt | BDbl | BSStr | BSArr,
+  BInitPrim = BInitNull | BBool | BNum,
+  BPrim     = BInitPrim | BUninit,
+  BInitUnc  = BInitPrim | BSStr | BSArr,
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes,
   BCell     = BUninit | BInitCell,
@@ -139,8 +165,15 @@ struct DCls {
 /*
  * Information about a specific object type.  The class is either
  * exact or a subtype of the supplied class.
+ *
+ * If the class is WaitHandle, we can also carry a type that joining
+ * the wait handle will produce.  (This is hoisted into Type to keep
+ * DObj and Type::Data trivially copyable for now.)
  */
-using DObj = DCls;
+struct DObj {
+  enum { Exact, Sub } type;
+  res::Class cls;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -188,6 +221,9 @@ struct Type {
   bool couldBe(Type o) const;
 
 private:
+  friend Type wait_handle(const Index&, Type);
+  friend bool is_specialized_wait_handle(const Type&);
+  friend Type wait_handle_inner(const Type&);
   friend Type sval(SString);
   friend Type ival(int64_t);
   friend Type dval(double);
@@ -196,7 +232,7 @@ private:
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
   friend Type clsExact(res::Class);
-  friend DObj dobj_of(Type);
+  friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);
   friend Type opt(Type);
@@ -227,6 +263,7 @@ private:
 private:
   trep m_bits;
   folly::Optional<Data> m_data;
+  copy_ptr<Type> m_whType;
 };
 
 #define X(y) const Type T##y = Type(B##y);
@@ -253,6 +290,8 @@ X(Bool)
 X(Num)
 X(Str)
 X(Arr)
+X(InitPrim)
+X(Prim)
 X(InitUnc)
 X(Unc)
 
@@ -281,6 +320,18 @@ X(Top)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Return WaitH<T> for a type t.
+ */
+Type wait_handle(const Index&, Type t);
+
+/*
+ * Return T from a WaitH<T>.
+ *
+ * Pre: is_specialized_handle(t);
+ */
+Type wait_handle_inner(const Type& t);
 
 /*
  * Create Types that represent constant values.
@@ -321,10 +372,18 @@ Type unopt(Type t);
 bool is_opt(Type t);
 
 /*
- * Returns true if type 't' represents a specialized object, that is
- * an object of a specific class. Returns true also for optional obj type.
+ * Returns true if type 't' represents a "specialized" object, that is
+ * an object of a known class, or an optional object of a known class.
  */
 bool is_specialized_obj(Type t);
+
+/*
+ * Returns whether `t' is a WaitH<T> or ?WaitH<T> for some T.
+ *
+ * Note that this function returns false for Obj<=WaitHandle with no
+ * tracked inner type.
+ */
+bool is_specialized_wait_handle(const Type& t);
 
 /*
  * Returns the best known TCls subtype for an object type.
@@ -354,7 +413,7 @@ Type type_of_istype(IsTypeOp op);
  *
  * Pre: is_specialized_obj(t)
  */
-DObj dobj_of(Type t);
+DObj dobj_of(const Type& t);
 
 /*
  * Return the DCls structure for a strict subtype of TCls.
@@ -379,6 +438,14 @@ Type from_cell(Cell tv);
  * (or KindOfUninit).
  */
 Type from_DataType(DataType dt);
+
+/*
+ * Create a Type from a builtin type specification string.
+ *
+ * This is used for HNI class properties.  We assume that these are
+ * accurate.  s may be null.
+ */
+Type from_hni_constraint(SString s);
 
 /*
  * Make a type that represents values from either of the supplied
@@ -411,6 +478,15 @@ Type loosen_statics(Type);
  * TOptFalse become TOptBool.  All other types are unchanged.
  */
 Type loosen_values(Type);
+
+/*
+ * If t contains TUninit, returns the best type we can that contains
+ * at least everything t contains, but doesn't contain TUninit.  Note
+ * that this function will return TBottom for TUninit.
+ *
+ * Pre: t.subtypeOf(TCell)
+ */
+Type remove_uninit(Type t);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,59 +34,10 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/srckey.h"
 
-using HPHP::JIT::NormalizedInstruction;
-
 namespace HPHP {
-namespace JIT { struct PropInfo; }
 namespace JIT {
 
-//////////////////////////////////////////////////////////////////////
-
-struct EvalStack {
-  explicit EvalStack() {}
-
-  void push(SSATmp* tmp) {
-    m_vector.push_back(tmp);
-  }
-
-  SSATmp* pop() {
-    if (m_vector.size() == 0) {
-      return nullptr;
-    }
-    SSATmp* tmp = m_vector.back();
-    m_vector.pop_back();
-    return tmp;
-  }
-
-  SSATmp* top(uint32_t offset = 0) const {
-    if (offset >= m_vector.size()) {
-      return nullptr;
-    }
-    uint32_t index = m_vector.size() - 1 - offset;
-    return m_vector[index];
-  }
-
-  void replace(uint32_t offset, SSATmp* tmp) {
-    assert(offset < m_vector.size());
-    uint32_t index = m_vector.size() - 1 - offset;
-    m_vector[index] = tmp;
-  }
-
-  uint32_t numCells() const {
-    uint32_t ret = 0;
-    for (auto& t : m_vector) {
-      ret += t->type() == Type::ActRec ? kNumActRecCells : 1;
-    }
-    return ret;
-  }
-
-  bool empty() const { return m_vector.empty(); }
-  int  size()  const { return m_vector.size(); }
-  void clear()       { m_vector.clear(); }
-
-private:
-  std::vector<SSATmp*> m_vector;
-};
+struct PropInfo;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -330,6 +281,8 @@ struct HhbcTranslator {
   // miscelaneous ops
   void emitFloor();
   void emitCeil();
+  void emitCheckProp(Id propId);
+  void emitInitProp(Id propId, InitPropOp op);
   void emitAssertTL(int32_t id, AssertTOp);
   void emitAssertTStk(int32_t offset, AssertTOp);
   void emitAssertObjL(int32_t id, Id, AssertObjOp);
@@ -443,10 +396,10 @@ struct HhbcTranslator {
   void emitAsyncWrapException();
 
   void emitStrlen();
-  void emitIncStat(int32_t counter, int32_t value, bool force = false);
+  void emitIncStat(int32_t counter, int32_t value, bool force);
   void emitIncTransCounter();
-  void emitIncProfCounter(JIT::TransID transId);
-  void emitCheckCold(JIT::TransID transId);
+  void emitIncProfCounter(TransID transId);
+  void emitCheckCold(TransID transId);
   void emitRB(Trace::RingBufferType t, SrcKey sk, int level = 1);
   void emitRB(Trace::RingBufferType t, std::string msg, int level = 1) {
     emitRB(t, makeStaticString(msg), level);
@@ -490,7 +443,7 @@ private:
     void emitIntermediateOp();
     void emitProp();
     void emitPropGeneric();
-    void emitPropSpecialized(const MInstrAttr mia, JIT::PropInfo propInfo);
+    void emitPropSpecialized(const MInstrAttr mia, PropInfo propInfo);
     void emitElem();
     void emitElemArray(SSATmp* key, bool warn);
     void emitNewElem();
@@ -556,7 +509,7 @@ private:
 
     void prependToTraces(IRInstruction* inst) {
       for (auto b : m_failedVec) {
-        b->prepend(m_irf.cloneInstruction(inst));
+        b->prepend(m_unit.cloneInstruction(inst));
       }
     }
 
@@ -572,7 +525,7 @@ private:
     void    constrainBase(TypeConstraint tc, SSATmp* value = nullptr);
     SSATmp* checkInitProp(SSATmp* baseAsObj,
                           SSATmp* propAddr,
-                          JIT::PropInfo propOffset,
+                          PropInfo propOffset,
                           bool warn,
                           bool define);
     Class* contextClass() const;
@@ -617,7 +570,7 @@ private:
 
     template<class... Args>
     SSATmp* cns(Args&&... args) {
-      return m_irf.cns(std::forward<Args>(args)...);
+      return m_unit.cns(std::forward<Args>(args)...);
     }
 
     template<class... Args>
@@ -628,7 +581,7 @@ private:
     const NormalizedInstruction& m_ni;
     HhbcTranslator& m_ht;
     IRBuilder& m_irb;
-    IRUnit& m_irf;
+    IRUnit& m_unit;
     const MInstrInfo& m_mii;
     const BCMarker m_marker;
     hphp_hash_map<unsigned, unsigned> m_stackInputs;
@@ -747,7 +700,7 @@ private: // Exit trace creation routines.
    * only in slow paths.
    */
   Block* makeExitSlow();
-  Block* makeExitOpt(JIT::TransID transId);
+  Block* makeExitOpt(TransID transId);
 
   template<typename Body>
   Block* makeCatchImpl(Body body);
@@ -903,22 +856,6 @@ private:
   // end-of-tracelet duties.  (E.g. emitRetC, etc.)  If it's not true,
   // we'll create a generic ReqBindJmp instruction after we're done.
   bool m_hasExit;
-
-  /*
-   * Tracking of the state of the virtual execution stack:
-   *
-   *   During HhbcTranslator's run over the bytecode, these stacks
-   *   contain SSATmp values representing the execution stack state
-   *   since the last SpillStack.
-   *
-   *   The EvalStack contains cells and ActRecs that need to be
-   *   spilled in order to materialize the stack.
-   *
-   *   m_stackDeficit represents the number of cells we've popped off
-   *   the virtual stack since the last sync.
-   */
-  uint32_t m_stackDeficit;
-  EvalStack m_evalStack;
 
   /*
    * The FPI stack is used for inlining---when we start inlining at an

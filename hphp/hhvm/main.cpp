@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/emulate-zend.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/compiler/compiler.h"
+#include "hphp/hhbbc/hhbbc.h"
 
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/embedded-vfs.h"
@@ -32,6 +33,14 @@ int main(int argc, char** argv) {
   if (argc > 1 && !strcmp(argv[1], "--hphp")) {
     argv[1] = argv[0];
     return HPHP::compiler_main(argc - 1, argv + 1);
+  }
+
+  if (len >= 5 && !strcmp(argv[0] + len - 5, "hhbbc")) {
+    return HPHP::HHBBC::main(argc, argv);
+  }
+  if (argc > 1 && !strcmp(argv[1], "--hhbbc")) {
+    argv[1] = "hhbbc";
+    return HPHP::HHBBC::main(argc - 1, argv + 1);
   }
 
   HPHP::register_process_init();
@@ -64,3 +73,4 @@ int main(int argc, char** argv) {
   }
   return HPHP::execute_program(args.size(), &args[0]);
 }
+

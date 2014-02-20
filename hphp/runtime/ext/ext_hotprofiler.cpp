@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1016,12 +1016,11 @@ class TraceProfiler : public Profiler {
       // one in the process at any time.
       m_successful = false;
     } else {
-      char buf[20];
-      sprintf(buf, "%d", RuntimeOption::ProfilerMaxTraceBuffer);
+      m_maxTraceBuffer = RuntimeOption::ProfilerMaxTraceBuffer;
       Extension* ext = Extension::GetExtension(s_hotprofiler);
       assert(ext);
       IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                       "profiler.max_trace_buffer", buf,
+                       "profiler.max_trace_buffer",
                        &m_maxTraceBuffer);
     }
   }

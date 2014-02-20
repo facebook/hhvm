@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,6 +39,7 @@ IRBuilder::IRBuilder(Offset initialBcOffset,
   , m_enableSimplification(false)
   , m_constrainGuards(RuntimeOption::EvalHHIRRelaxGuards)
 {
+  m_state.setBuilding(true);
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
@@ -509,8 +510,8 @@ void IRBuilder::reoptimize() {
   if (!m_state.enableCse() && !m_enableSimplification) return;
   setConstrainGuards(false);
 
-  BlockList sortedBlocks = rpoSortCfg(m_unit);
-  auto const idoms = findDominators(m_unit, sortedBlocks);
+  auto blocksIds = rpoSortCfgWithIds(m_unit);
+  auto const idoms = findDominators(m_unit, blocksIds);
   m_state.clear();
 
   for (auto* block : rpoSortCfg(m_unit)) {
@@ -633,10 +634,10 @@ bool IRBuilder::constrainValue(SSATmp* const val,
     // a FramePtr, it's a real value that was killed by a Call. The value won't
     // be live but it's ok to use it to track down the guard.
 
-    auto source = inst->extra<LocalData>()->valSrc;
+    auto source = inst->extra<LocalData>()->typeSrc;
     if (!source) {
       // val was newly created in this trace. Nothing to constrain.
-      FTRACE(2, "  - valSrc is null, bailing\n");
+      FTRACE(2, "  - typeSrc is null, bailing\n");
       return false;
     }
 
@@ -692,7 +693,7 @@ bool IRBuilder::constrainValue(SSATmp* const val,
 
 bool IRBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
                                const std::string& why) {
-  return constrainLocal(locId, localValueSource(locId), tc, why);
+  return constrainLocal(locId, localTypeSource(locId), tc, why);
 }
 
 bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
@@ -723,7 +724,7 @@ bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
       if (typeFitsConstraint(guard->typeParam(), tc.category)) return false;
       guard = guardForLocal(locId, guard->src(0));
     } else {
-      assert(guard->is(GuardLoc, AssertLoc));
+      assert(guard->is(GuardLoc, CheckLoc));
       FTRACE(2, "    - found guard to constrain\n");
       return constrainGuard(guard, tc);
     }
@@ -787,6 +788,8 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b,
 
   m_savedBlocks.push_back(
     BlockState{ m_curBlock, m_state.marker(), m_curWhere });
+  m_state.pauseBlock(m_curBlock);
+  m_state.startBlock(b);
   m_curBlock = b;
   setMarker(marker);
   m_curWhere = where ? where : b->end();
@@ -805,6 +808,8 @@ void IRBuilder::popBlock() {
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
          m_curBlock, m_state.marker().show(), top.block, top.marker.show());
+  m_state.pauseBlock(m_curBlock);
+  m_state.startBlock(top.block);
   m_curBlock = top.block;
   setMarker(top.marker);
   m_curWhere = top.where;

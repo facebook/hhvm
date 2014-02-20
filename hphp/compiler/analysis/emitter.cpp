@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2569,17 +2569,22 @@ void EmitterVisitor::visit(FileScopePtr file) {
           break;
         case Statement::KindOfReturnStatement:
           if (mainReturn.m_type != KindOfInvalid) break;
+
+          visit(s);
           if (notMergeOnly) {
             tvWriteUninit(&mainReturn);
             m_ue.returnSeen();
-            goto fail;
-          } else {
+            continue;
+          }
+
+          {
             ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(s));
             Variant v((Variant::NullInit()));
             if (r->getRetExp() &&
                 !r->getRetExp()->getScalarValue(v)) {
               tvWriteUninit(&mainReturn);
-              goto fail;
+              notMergeOnly = true;
+              continue;
             }
             if (v.isString()) {
               v = String(makeStaticString(v.asCStrRef().get()));
@@ -2652,8 +2657,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
           } // fall through
         default:
           if (mainReturn.m_type != KindOfInvalid) break;
-          // fall through
-        fail:
           notMergeOnly = true;
           visit(s);
       }
@@ -3934,21 +3937,40 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Expression::KindOfClassConstantExpression: {
         ClassConstantExpressionPtr cc(
           static_pointer_cast<ClassConstantExpression>(node));
-        StringData* nName = makeStaticString(cc->getConName());
+        auto const nName = makeStaticString(cc->getConName());
         auto const getOriginalClassName = [&] {
           const std::string& clsName = cc->getOriginalClassName();
           return makeStaticString(clsName);
         };
+
+        // We treat ::class as a class constant in the AST and the
+        // parser, but at the bytecode and runtime level it isn't
+        // one.
+        auto const emitClsCns = [&] {
+          if (cc->isColonColonClass()) {
+            e.NameA();
+            return;
+          }
+          e.ClsCns(nName);
+        };
+        auto const noClassAllowed = [&] {
+          auto const nCls = getOriginalClassName();
+          std::ostringstream s;
+          s << "Cannot access " << nCls->data() << "::" << nName->data() <<
+               " when no class scope is active";
+          throw IncludeTimeFatalException(e.getNode(), s.str().c_str());
+        };
+
         if (cc->isStatic()) {
           // static::Constant
           e.LateBoundCls();
-          e.ClsCns(nName);
+          emitClsCns();
         } else if (cc->getClass()) {
           // $x::Constant
           ExpressionPtr cls(cc->getClass());
           visit(cls);
           emitAGet(e);
-          e.ClsCns(nName);
+          emitClsCns();
         } else if (cc->getOriginalClass() &&
                    !cc->getOriginalClass()->isTrait()) {
           // C::Constant inside a class
@@ -3961,11 +3983,19 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         } else if (cc->isSelf()) {
           // self::Constant inside trait or pseudomain
           e.Self();
-          e.ClsCns(nName);
+          if (cc->isColonColonClass() &&
+              cc->getFunctionScope()->inPseudoMain()) {
+            noClassAllowed();
+          }
+          emitClsCns();
         } else if (cc->isParent()) {
           // parent::Constant inside trait or pseudomain
           e.Parent();
-          e.ClsCns(nName);
+          if (cc->isColonColonClass() &&
+              cc->getFunctionScope()->inPseudoMain()) {
+            noClassAllowed();
+          }
+          emitClsCns();
         } else {
           // C::Constant inside a trait or pseudomain
           // Be careful to keep this case here after the isSelf and
@@ -3974,14 +4004,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           // the isSelf and isParent cases, but self and parent must
           // be resolved dynamically when used inside of traits.
           auto nCls = getOriginalClassName();
-          if (cc->isColonColonClass()) {
-            std::ostringstream s;
-            s << "Cannont access " << nCls->data() << "::" << nName->data() <<
-                 " when no class scope is active";
-            throw IncludeTimeFatalException(e.getNode(), s.str().c_str());
-          } else {
-            e.ClsCnsD(nName, nCls);
-          }
+          if (cc->isColonColonClass()) noClassAllowed();
+          e.ClsCnsD(nName, nCls);
         }
         return true;
       }
@@ -7068,83 +7092,30 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
   StringData* methDoc = empty_string.get();
   const Location* sLoc = p.m_is->getLocation().get();
   p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
-  {
-    FuncEmitter::ParamInfo pi;
-    pi.setRef(true);
-    static const StringData* s_props = makeStaticString("props");
-    p.m_fe->appendParam(s_props, pi);
-  }
-  if (pinit) {
-    static const StringData* s_sentinel =
-      makeStaticString("sentinel");
-    p.m_fe->appendParam(s_sentinel,
-                        FuncEmitter::ParamInfo());
-  }
 
   Emitter e(p.m_is, m_ue, *this);
   FuncFinisher ff(this, e, p.m_fe);
 
-  // Generate HHBC of the structure:
-  //
-  //   private static function 86pinit(&$props, $sentinel) {
-  //     # Private instance properties.
-  //     props["\0C\0p0"] = <non-scalar initialization>;
-  //     props["\0C\0p1"] = <non-scalar initialization>;
-  //     # ...
-  //
-  //     if (props["q0"]) === $sentinel) {
-  //       props["q0"] = <non-scalar initialization>;
-  //     }
-  //     if (props["q1"] === $sentinel) {
-  //       props["q1"] = <non-scalar initialization>;
-  //     }
-  //     # ...
-  //   }
-  //
-  //   private static function 86sinit(&$props) {
-  //     props["p0"] = <non-scalar initialization>;
-  //     props["p1"] = <non-scalar initialization>;
-  //     # ...
-  //   }
+  // Private instance and static properties are initialized using
+  // InitProp.
   size_t nProps = p.m_vec->size();
   assert(nProps > 0);
   for (size_t i = 0; i < nProps; ++i) {
     const StringData* propName =
       makeStaticString(((*p.m_vec)[i]).first);
+
     Label isset;
-
-    bool conditional;
-    if (pinit) {
-      const PreClassEmitter::Prop& preProp =
-        p.m_fe->pce()->lookupProp(propName);
-      if ((preProp.attrs() & (AttrPrivate|AttrStatic)) == AttrPrivate) {
-        conditional = false;
-        propName = preProp.mangledName();
-      } else {
-        conditional = true;
-      }
-    } else {
-      conditional = false;
+    InitPropOp op = InitPropOp::NonStatic;
+    const PreClassEmitter::Prop& preProp =
+      p.m_fe->pce()->lookupProp(propName);
+    if ((preProp.attrs() & AttrStatic) == AttrStatic) {
+      op = InitPropOp::Static;
+    } else if ((preProp.attrs() & (AttrPrivate|AttrStatic)) != AttrPrivate) {
+      e.CheckProp(const_cast<StringData*>(propName));
+      e.JmpNZ(isset);
     }
-
-    if (conditional) {
-      emitVirtualLocal(0);
-      e.String((StringData*)propName);
-      markElem(e);
-      emitCGet(e);
-      emitVirtualLocal(1);
-      emitCGet(e);
-      e.Same();
-      e.JmpZ(isset);
-    }
-
-    emitVirtualLocal(0);
-    e.String((StringData*)propName);
-    markElem(e);
     visit((*p.m_vec)[i].second);
-    emitSet(e);
-    e.PopC();
-
+    e.InitProp(const_cast<StringData*>(propName), op);
     isset.set(e);
   }
   e.Null();
@@ -7703,7 +7674,7 @@ void EmitterVisitor::emitClass(Emitter& e,
                                      AttrNone;
   if (Option::WholeProgram) {
     if (!cNode->isRedeclaring() &&
-        !cNode->derivesFromRedeclaring()) {
+        cNode->derivesFromRedeclaring() == Derivation::Normal) {
       attr = attr | AttrUnique;
       if (!cNode->isVolatile()) {
         attr = attr | AttrPersistent;
@@ -8607,11 +8578,18 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
         !RuntimeOption::EnableZendCompat) {
       continue;
     }
-    if (Unit::lookupFunc(name)) {
-      // already provided by systemlib, rename to allow the php
-      // version to delegate if necessary
-      name = makeStaticString("__builtin_" + name->toCPPString());
+
+    // We already provide array_map by the hhas systemlib.  Rename
+    // because that hhas implementation delegates back to the C++
+    // implementation for some edge cases.  This works for any
+    // similarly defined function (already defined not as a builtin),
+    // and requires that the hhas systemlib is already loaded.
+    if (auto const existing = Unit::lookupFunc(name)) {
+      if (!existing->isCPPBuiltin()) {
+        name = makeStaticString("__builtin_" + name->toCPPString());
+      }
     }
+
     FuncEmitter* fe = ue->newFuncEmitter(name);
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, nif, base);
@@ -8731,9 +8709,6 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors
   if (!Class::s_extClassHash.empty()) {
-    // For HHBBC we run this more than once in the process lifetime,
-    // but otherwise we shouldn't be doing that.
-    assert(Option::UseHHBBC);
     Class::s_extClassHash.clear();
   }
   for (long long i = 0; i < numBuiltinClasses; ++i) {
@@ -9018,35 +8993,6 @@ static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
   ((JobQueueDispatcher<EmitterWorker>*)data)->enqueue(sp->getFileScope());
 }
 
-static void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
-  assert(Option::GenerateBinaryHHBC);
-  Repo& repo = Repo::get();
-
-  // Attempt batch commit.  This can legitimately fail due to multiple input
-  // files having identical contents.
-  bool err = false;
-  {
-    RepoTxn txn(repo);
-
-    for (auto& ue : ues) {
-      if (repo.insertUnit(ue.get(), UnitOrigin::File, txn)) {
-        err = true;
-        break;
-      }
-    }
-    if (!err) {
-      txn.commit();
-    }
-  }
-
-  // Commit units individually if an error occurred during batch commit.
-  if (err) {
-    for (auto& ue : ues) {
-      repo.commitUnit(ue.get(), UnitOrigin::File);
-    }
-  }
-}
-
 static void commitGlobalData() {
   auto gd                     = Repo::GlobalData{};
   gd.HardTypeHints            = Option::HardTypeHints;
@@ -9123,16 +9069,24 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   }
 
   assert(Option::UseHHBBC || ues.empty());
-  if (Option::UseHHBBC) {
-    auto nfunc = emitHHBCNativeFuncUnit(hhbc_ext_funcs, hhbc_ext_funcs_count);
-    auto ncls  = emitHHBCNativeClassUnit(hhbc_ext_classes,
-                                         hhbc_ext_class_count);
-    ues.push_back(std::move(nfunc));
-    ues.push_back(std::move(ncls));
-    ues = HHBBC::whole_program(std::move(ues));
+
+  // We need to put the native func units in the repo so hhbbc can
+  // find them, even though they won't be used at runtime.  (We just
+  // regenerate them during process init.)
+  auto nfunc = emitHHBCNativeFuncUnit(hhbc_ext_funcs, hhbc_ext_funcs_count);
+  auto ncls  = emitHHBCNativeClassUnit(hhbc_ext_classes,
+                                       hhbc_ext_class_count);
+  ues.push_back(std::move(nfunc));
+  ues.push_back(std::move(ncls));
+
+  if (!Option::UseHHBBC) {
     batchCommit(std::move(ues));
-    commitGlobalData();
+    return;
   }
+
+  ues = HHBBC::whole_program(std::move(ues));
+  batchCommit(std::move(ues));
+  commitGlobalData();
 }
 
 extern "C" {

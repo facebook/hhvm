@@ -737,7 +737,7 @@ top_statement_list:
   |                                    { }
 ;
 top_statement:
-    statement                          { _p->nns($1.num()); $$ = $1;}
+    statement                          { _p->nns($1.num(), $1.text()); $$ = $1;}
   | function_declaration_statement     { _p->nns(); $$ = $1;}
   | class_declaration_statement        { _p->nns(); $$ = $1;}
   | trait_declaration_statement        { _p->nns(); $$ = $1;}
@@ -1892,8 +1892,12 @@ where_clause:
 ;
 
 join_clause:
-    T_JOIN T_VARIABLE T_IN expr T_ON expr T_EQUALS expr
-                                     { _p->onJoinClause($$, $2, $4, $6, $8); }
+    T_JOIN expr
+                                { _p->onJoinClause($$, NULL, $2, NULL, NULL); }
+  | T_JOIN T_VARIABLE T_IN expr
+                                { _p->onJoinClause($$, &$2, $4, NULL, NULL); }
+  | T_JOIN T_VARIABLE T_IN expr T_ON expr T_EQUALS expr
+                                { _p->onJoinClause($$, &$2, $4, &$6, &$8); }
 ;
 
 join_into_clause:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1063,7 +1063,7 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
   Resource ret;
   Socket *sock = NULL;
 
-  if (timeout < 0) timeout = RuntimeOption::SocketDefaultTimeout;
+  if (timeout < 0) timeout = g_context->getSocketDefaultTimeout();
   // test if protocol is SSL
   SSLSocket *sslsock = SSLSocket::Create(hosturl, timeout);
   if (sslsock) {

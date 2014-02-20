@@ -32,9 +32,11 @@ class Framework {
 
   // $name, $parallel, $test_fine_mode, etc. are constructor promoted
   // Assume the framework unit tests will be run in parallel until otherwise
-  // proven. Also assume that tests will be found by reflecting over the
-  // framework. However, some require that we use php tokens or are found via
-  // phpt files.
+  // proven. If $parallel is set to false, then the framework will be run
+  // in a similar vain as a normal PHPUnit run, it is one test after another
+  // in the same PHPUnit process. Also assume that tests will be found by
+  // reflecting over the framework. However, some require that we use php
+  // tokens or are found via phpt files.
   public function __construct(private string $name,
                               private string $test_command = null,
                               private Map $env_vars = null,
@@ -52,6 +54,10 @@ class Framework {
         !array_key_exists('commit', Options::$framework_info[$name]) ||
         !array_key_exists('branch', Options::$framework_info[$name])) {
       throw new Exception("Provide install, git and test file search info");
+    }
+
+    if (Options::$as_phpunit) {
+      $this->parallel = false;
     }
 
     // Set Framework information for install. These are the five necessary
@@ -275,6 +281,9 @@ class Framework {
     if ($redirect) {
       $this->test_command .= " 2>&1";
     }
+
+    verbose("General test command for: ".$this->name." is: ".
+            $this->test_command . "\n", Options::$verbose);
   }
 
   private function setTestFilePattern(?string $test_file_pattern = null):

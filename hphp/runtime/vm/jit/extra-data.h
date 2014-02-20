@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -126,18 +126,18 @@ struct LocalId : IRExtraData {
 struct LocalData : LocalId {
   explicit LocalData(uint32_t id, SSATmp* src)
     : LocalId(id)
-    , valSrc(src)
+    , typeSrc(src)
   {}
 
   bool cseEquals(const LocalData& o) const {
-    return LocalId::cseEquals(o) && valSrc == o.valSrc;
+    return LocalId::cseEquals(o) && typeSrc == o.typeSrc;
   }
   size_t cseHash() const {
-    return hash_int64_pair(LocalId::cseHash(), int64_t(valSrc));
+    return hash_int64_pair(LocalId::cseHash(), int64_t(typeSrc));
   }
   std::string show() const;
 
-  SSATmp* valSrc;
+  SSATmp* typeSrc;
 };
 
 struct IterId : IRExtraData {
@@ -796,6 +796,12 @@ X(ReqBindJmpLt,                 ReqBindJccData);
 X(ReqBindJmpLte,                ReqBindJccData);
 X(ReqBindJmpEq,                 ReqBindJccData);
 X(ReqBindJmpNeq,                ReqBindJccData);
+X(ReqBindJmpGtInt,              ReqBindJccData);
+X(ReqBindJmpGteInt,             ReqBindJccData);
+X(ReqBindJmpLtInt,              ReqBindJccData);
+X(ReqBindJmpLteInt,             ReqBindJccData);
+X(ReqBindJmpEqInt,              ReqBindJccData);
+X(ReqBindJmpNeqInt,             ReqBindJccData);
 X(ReqBindJmpSame,               ReqBindJccData);
 X(ReqBindJmpNSame,              ReqBindJccData);
 X(ReqBindJmpInstanceOfBitmask,  ReqBindJccData);
@@ -808,6 +814,12 @@ X(SideExitJmpLt,                SideExitJccData);
 X(SideExitJmpLte,               SideExitJccData);
 X(SideExitJmpEq,                SideExitJccData);
 X(SideExitJmpNeq,               SideExitJccData);
+X(SideExitJmpGtInt,             SideExitJccData);
+X(SideExitJmpGteInt,            SideExitJccData);
+X(SideExitJmpLtInt,             SideExitJccData);
+X(SideExitJmpLteInt,            SideExitJccData);
+X(SideExitJmpEqInt,             SideExitJccData);
+X(SideExitJmpNeqInt,            SideExitJccData);
 X(SideExitJmpSame,              SideExitJccData);
 X(SideExitJmpNSame,             SideExitJccData);
 X(SideExitJmpInstanceOfBitmask, SideExitJccData);

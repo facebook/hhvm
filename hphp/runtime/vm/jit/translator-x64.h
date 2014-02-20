@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/stats.h"
 
 namespace HPHP { class ExecutionContext; }
 
@@ -377,6 +378,14 @@ bool isSupportedCGetM(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Array(const NormalizedInstruction& i);
 void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
+
+// Both emitIncStat()s push/pop flags but don't clobber any registers.
+extern void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,
+                        int n = 1, bool force = false);
+inline void emitIncStat(CodeBlock& cb, Stats::StatCounter stat, int n = 1,
+                        bool force = false) {
+  emitIncStat(cb, &Stats::tl_counters[0], stat, n, force);
+}
 
 }}
 

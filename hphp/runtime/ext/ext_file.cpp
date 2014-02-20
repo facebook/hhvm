@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -52,7 +52,7 @@
 #include <pwd.h>
 #include <fnmatch.h>
 
-#define CHECK_HANDLE_BASE(handle, f, ret) \
+#define CHECK_HANDLE_BASE(handle, f, ret)               \
   File *f = handle.getTyped<File>(true, true);          \
   if (f == nullptr || f->isClosed()) {                  \
     raise_warning("Not a valid stream resource");       \
@@ -257,13 +257,10 @@ bool f_feof(CResRef handle) {
 }
 
 Variant f_fstat(CResRef handle) {
-  PlainFile *file = handle.getTyped<PlainFile>(true, true);
-  if (!file) {
-    raise_warning("Not a valid stream resource");
-    return false;
-  }
+  CHECK_HANDLE(handle, f);
   struct stat sb;
-  CHECK_SYSTEM(fstat(file->fd(), &sb));
+  if (!CHECK_ERROR(f->stat(&sb)))
+    return false;
   return stat_impl(&sb);
 }
 
@@ -423,7 +420,8 @@ Variant f_file_get_contents(const String& filename,
 Variant f_file_put_contents(const String& filename, CVarRef data,
                             int flags /* = 0 */,
                             CVarRef context /* = null */) {
-  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb");
+  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb",
+                            flags, context);
   if (!fvar.toBoolean()) {
     return false;
   }
@@ -494,7 +492,10 @@ Variant f_file_put_contents(const String& filename, CVarRef data,
   if (numbytes < 0) {
     return false;
   }
-  return numbytes;
+
+  // Since streams (ex. buffered files) often do the real work in close() we
+  // call it here and check the result instead of out-of-band in the destructor.
+  return f->close() ? numbytes : false;
 }
 
 Variant f_file(const String& filename, int flags /* = 0 */,
@@ -569,10 +570,21 @@ Variant f_readfile(const String& filename, bool use_include_path /* = false */,
 
 bool f_move_uploaded_file(const String& filename, const String& destination) {
   Transport *transport = g_context->getTransport();
-  if (transport) {
-    return transport->moveUploadedFile(filename, destination);
+  if (!transport || !transport->isUploadedFile(filename)) {
+    return false;
   }
-  return false;
+
+  if (f_rename(filename, destination)) {
+    return true;
+  }
+
+  // If rename didn't work, fall back to copy followed by unlink
+  if (!f_copy(filename, destination)) {
+    return false;
+  }
+  f_unlink(filename);
+
+  return true;
 }
 
 Variant f_parse_ini_file(const String& filename,
@@ -605,33 +617,6 @@ Variant f_parse_ini_string(const String& ini,
                            bool process_sections /* = false */,
                            int scanner_mode /* = k_INI_SCANNER_NORMAL */) {
   return IniSetting::FromString(ini, "", process_sections, scanner_mode);
-}
-
-Variant f_parse_hdf_file(const String& filename) {
-  Variant content = f_file_get_contents(filename);
-  if (same(content, false)) return false;
-  return f_parse_hdf_string(content.toString());
-}
-
-Variant f_parse_hdf_string(const String& input) {
-  Hdf hdf;
-  hdf.fromString(input.data());
-  return ArrayUtil::FromHdf(hdf);
-}
-
-bool f_write_hdf_file(CArrRef data, const String& filename) {
-  Hdf hdf;
-  ArrayUtil::ToHdf(data, hdf);
-  const char *str = hdf.toString();
-  Variant ret = f_file_put_contents(filename, str);
-  return !same(ret, false);
-}
-
-String f_write_hdf_string(CArrRef data) {
-  Hdf hdf;
-  ArrayUtil::ToHdf(data, hdf);
-  const char *str = hdf.toString();
-  return String(str, CopyString);
 }
 
 Variant f_md5_file(const String& filename, bool raw_output /* = false */) {
@@ -723,6 +708,9 @@ Variant f_linkinfo(const String& filename) {
 
 bool f_is_writable(const String& filename) {
   struct stat sb;
+  if (filename.empty()) {
+    return false;
+  }
   if (statSyscall(filename, &sb)) {
     return false;
   }
@@ -758,6 +746,9 @@ bool f_is_writeable(const String& filename) {
 
 bool f_is_readable(const String& filename) {
   struct stat sb;
+  if (filename.empty()) {
+    return false;
+  }
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   CHECK_SYSTEM(accessSyscall(filename, R_OK, true));
   return true;
@@ -787,6 +778,9 @@ bool f_is_readable(const String& filename) {
 
 bool f_is_executable(const String& filename) {
   struct stat sb;
+  if (filename.empty()) {
+    return false;
+  }
   CHECK_SYSTEM(statSyscall(filename, &sb));
   CHECK_SYSTEM(accessSyscall(filename, X_OK));
   return true;

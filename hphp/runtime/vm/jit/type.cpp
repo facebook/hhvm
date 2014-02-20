@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -316,6 +316,8 @@ struct Type::Intersect {
   static Type combineSame(bits_t bits, bits_t typeMask,
                           folly::Optional<T> aOpt,
                           folly::Optional<T> bOpt) {
+    if (!bits) return Type::Bottom;
+
     // We shouldn't get here if neither is specialized.
     assert(aOpt || bOpt);
 
@@ -464,7 +466,10 @@ Type liveTVType(const TypedValue* tv) {
   assert(tv->m_type == KindOfClass || tvIsPlausible(*tv));
 
   if (tv->m_type == KindOfObject) {
-    return Type::Obj.specialize(tv->m_data.pobj->getVMClass());
+    Class* cls = tv->m_data.pobj->getVMClass();
+    // We only allow specialization on final classes for now.
+    if (cls && !(cls->attrs() & AttrFinal)) cls = nullptr;
+    return Type::Obj.specialize(cls);
   }
   if (tv->m_type == KindOfArray) {
     return Type::Arr.specialize(tv->m_data.parr->kind());

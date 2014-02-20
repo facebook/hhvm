@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -83,6 +83,7 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
   if (!m_name.compare("bool"))     return KindOfBoolean;
   if (!m_name.compare("int"))      return KindOfInt64;
   if (!m_name.compare("float"))    return KindOfDouble;
+  if (!m_name.compare("num"))      return KindOfUnknown;
   if (!m_name.compare("string"))   return KindOfString;
   if (!m_name.compare("array"))    return KindOfArray;
   if (!m_name.compare("resource")) return KindOfResource;

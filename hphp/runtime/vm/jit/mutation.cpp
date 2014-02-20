@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,8 +31,6 @@ void cloneToBlock(const BlockList& rpoBlocks,
                   Block::iterator const first,
                   Block::iterator const last,
                   Block* const target) {
-  assert(isRPOSorted(rpoBlocks));
-
   StateVector<SSATmp,SSATmp*> rewriteMap(unit, nullptr);
 
   auto rewriteSources = [&] (IRInstruction* inst) {
@@ -66,14 +64,17 @@ void cloneToBlock(const BlockList& rpoBlocks,
     targetIt = ++target->iteratorTo(newInst);
   }
 
-  auto it = rpoIteratorTo(rpoBlocks, target);
-  for (; it != rpoBlocks.end(); ++it) {
-    FTRACE(5, "cloneToBlock: rewriting block {}\n", (*it)->id());
-    for (auto& inst : **it) {
-      FTRACE(5, " rewriting {}\n", inst.toString());
-      rewriteSources(&inst);
-    }
-  }
+  postorderWalk(
+    unit,
+    [&](Block* block) {
+      FTRACE(5, "cloneToBlock: rewriting block {}\n", block->id());
+      for (auto& inst : *block) {
+        FTRACE(5, " rewriting {}\n", inst.toString());
+        rewriteSources(&inst);
+      }
+    },
+    target
+  );
 }
 
 void moveToBlock(Block::iterator const first,

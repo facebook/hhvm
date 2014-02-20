@@ -58,11 +58,11 @@ bool(true)
 string(3) "Hel"
 string(3) "lo "
 array(3) {
-  [0] =>
+  [0]=>
   string(4) "This"
-  [1] =>
+  [1]=>
   string(2) "is"
-  [2] =>
+  [2]=>
   string(2) "an"
 }
 string(19) "<body text='black'>"
@@ -89,7 +89,7 @@ string(10) "Alien     "
 string(10) "-=-=-Alien"
 string(10) "__Alien___"
 string(6) "Alien_"
-string(6) "Alien\000"
+string(6) "Alien�"
 string(20) "-=-=-=-=-=-=-=-=-=-="
 string(57) "The quick brown fox<br />
 jumped over the lazy<br />
@@ -101,7 +101,7 @@ ooooord."
 string(52) "I'll &quot;walk&quot; the &lt;b&gt;dog&lt;/b&gt; now"
 string(30) "I'll "walk" the <b>dog</b> now"
 string(4) "c2a0"
-string(2) "a0"
+string(4) "c2a0"
 string(4) "c2a0"
 string(5) "& & &"
 string(8) "a test &"
@@ -112,7 +112,7 @@ string(4) "ce91"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
 string(0) ""
-string(13) "&Acirc;&nbsp;"
+string(6) "&nbsp;"
 string(6) "&nbsp;"
 string(13) "egfe=20=0D=09"
 string(4) "egfe"
@@ -133,11 +133,11 @@ string(2) "AM"
 string(9) "AtestB10C"
 string(10) "0000001101"
 string(2) "09"
-string(17) "(foo\000bar-bar\000foo)"
-string(5) "[a\000b]"
+string(17) "(foo�bar-bar�foo)"
+string(5) "[a�b]"
 string(9) "AtestB10C"
 array(1) {
-  [0] =>
+  [0]=>
   int(2350001)
 }
 int(1)
@@ -147,7 +147,7 @@ int(92)
 string(7) "1234.56"
 string(5) "1,235"
 int(-1)
-int(32)
+int(1)
 int(0)
 int(-1)
 int(0)
@@ -199,6 +199,8 @@ string(12) "Simple text."
 int(0)
 int(7)
 bool(false)
+
+Warning: strpos(): Empty needle in /tmp/a.php on line 377
 bool(false)
 int(7)
 int(7)

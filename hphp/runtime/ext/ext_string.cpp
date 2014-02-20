@@ -1301,7 +1301,7 @@ Variant f_metaphone(const String& str, int phones /* = 0 */) {
 }
 
 String f_html_entity_decode(const String& str, int flags /* = k_ENT_COMPAT */,
-                            const String& charset /* = "ISO-8859-1" */) {
+                            const String& charset /* = "UTF-8" */) {
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
   return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
@@ -1309,7 +1309,7 @@ String f_html_entity_decode(const String& str, int flags /* = k_ENT_COMPAT */,
 }
 
 String f_htmlentities(const String& str, int flags /* = k_ENT_COMPAT */,
-                      const String& charset /* = "ISO-8859-1" */,
+                      const String& charset /* = "UTF-8" */,
                       bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
@@ -1325,7 +1325,7 @@ String f_htmlspecialchars_decode(const String& str,
 }
 
 String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
-                          const String& charset /* = "ISO-8859-1" */,
+                          const String& charset /* = "UTF-8" */,
                           bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();

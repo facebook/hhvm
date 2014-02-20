@@ -217,7 +217,12 @@ Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
 
   ArrayInit ai(size);
   for (ArrayIter iter(cell_keys); iter; ++iter) {
-    ai.set(iter.secondRefPlus(), value);
+    CVarRef key = iter.secondRefPlus();
+    if (key.isObject()) {
+      ai.set(key.toString(), value);
+    } else {
+      ai.set(key, value);
+    }
   }
   return ai.create();
 }

@@ -40,7 +40,7 @@ sudo apt-fast -y install git-core cmake g++ libboost1.48-dev libmysqlclient-dev 
   wget memcached libreadline-dev libncurses-dev libmemcached-dev libbz2-dev \
   libc-client2007e-dev php5-mcrypt php5-imagick libgoogle-perftools-dev \
   libcloog-ppl0 libelf-dev libdwarf-dev libunwind7-dev subversion \
-  libmagickwand-dev &
+  libmagickwand-dev libxslt1-dev &
 
 git clone git://github.com/libevent/libevent.git --quiet &
 git clone git://github.com/bagder/curl.git --quiet &

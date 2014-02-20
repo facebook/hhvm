@@ -343,6 +343,11 @@ public:
   const VirtualHost *getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
+  const Array& getAllowedDirectories() const { return m_allowedDirectories; }
+  void setAllowedDirectoires(const Array& dirs) { m_allowedDirectories = dirs; }
+  const bool hasSafeFileAccess() const { return m_safeFileAccess; }
+  void setSafeFileAccess(const bool b) { m_safeFileAccess = b; }
+
   const String& getSandboxId() const { return m_sandboxId; }
   void setSandboxId(const String& sandboxId) { m_sandboxId = sandboxId; }
 
@@ -407,6 +412,9 @@ private:
 
   // include_path configuration option
   Array m_include_paths;
+
+  Array m_allowedDirectories;
+  bool m_safeFileAccess;
 
   // cache the sandbox id for the request
   String m_sandboxId;

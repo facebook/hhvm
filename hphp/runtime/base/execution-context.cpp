@@ -63,6 +63,8 @@ BaseExecutionContext::BaseExecutionContext() :
     m_errorState(ExecutionContext::ErrorState::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
+    m_allowedDirectories(RuntimeOption::AllowedDirectories),
+    m_safeFileAccess(RuntimeOption::SafeFileAccess),
     m_vhost(nullptr) {
 
   auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
@@ -114,30 +116,30 @@ BaseExecutionContext::BaseExecutionContext() :
                    "doc_root", &RuntimeOption::SourceRoot);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "open_basedir",
-                   [](const std::string& value, void* p) {
-                     RuntimeOption::AllowedDirectories.clear();
+                   [this](const String& value, void* p) {
                      auto boom = f_explode(";", value).toCArrRef();
-                     for (ArrayIter iter(boom); iter; ++iter) {
-                       RuntimeOption::AllowedDirectories.push_back(
-                         iter.second().toCStrRef().toCppString()
-                       );
-                     }
-
-                     RuntimeOption::SafeFileAccess = !boom.empty();
-                     return true;
-                   },
-                   [](void*) {
-                     std::string out = "";
-
-                     if (RuntimeOption::SafeFileAccess) {
-                       for (auto& dir : RuntimeOption::AllowedDirectories) {
-                         if (!dir.empty()) {
-                           out += dir + ";";
-                         }
+                     Variant v;
+                     for (MutableArrayIter iter(boom.get(), nullptr, v);
+                          iter.advance(); ) {
+                       if (File::TranslatePathKeepRelative(v.toString()).empty()) {
+                         return false;
+                       }
+                       if (v.toString().equal(s_dot)) {
+                         v = getCwd();
                        }
                      }
-                     return out;
-                   });
+                     setAllowedDirectoires(boom);
+                     setSafeFileAccess(!boom.empty());
+                     return true;
+                   },
+                   [this](void*) -> std::string {
+                     if (!hasSafeFileAccess()) {
+                      return "";
+                     }
+                     return f_implode(";", getAllowedDirectories())
+                            .toCppString();
+                   }
+                  );
 
   // FastCGI
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,

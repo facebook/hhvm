@@ -489,13 +489,12 @@ Variant f_file_put_contents(const String& filename, CVarRef data,
     break;
   }
 
-  if (numbytes < 0) {
+  // like fwrite(), fclose() can error when fflush()ing
+  if (numbytes < 0 || !f->close()) {
     return false;
   }
 
-  // Since streams (ex. buffered files) often do the real work in close() we
-  // call it here and check the result instead of out-of-band in the destructor.
-  return f->close() ? numbytes : false;
+  return numbytes;
 }
 
 Variant f_file(const String& filename, int flags /* = 0 */,
@@ -1104,8 +1103,10 @@ bool f_copy(const String& source, const String& dest,
       return false;
     }
 
-    return f_stream_copy_to_stream(sfile.toResource(),
-      dfile.toResource()).toBoolean();
+    if (!f_stream_copy_to_stream(sfile.toResource(), dfile.toResource()).toBoolean())
+      return false;
+
+    return f_fclose(dfile.toResource());
   } else {
     int ret =
       RuntimeOption::UseDirectCopy ?

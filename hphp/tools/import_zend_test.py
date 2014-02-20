@@ -171,9 +171,6 @@ bad_tests = (
     # flaky: t3241496
     '/ext/standard/tests/file/copy_variation16.php',
 
-    # flakey
-    '/ext/session/tests/023.php',
-
     # segfaults on contbuild in opt
     '/ext/standard/tests/strings/explode_bug.php',
 
@@ -187,9 +184,7 @@ bad_tests = (
     '/ext/standard/tests/file/file_exists_variation1.php',
 
     # flaky: t3552849
-    '/ext/session/tests/013.php',
-    '/ext/session/tests/014.php',
-    '/ext/session/tests/027.php',
+    '/ext/session',
 
     # flaky: t3619770
     '/ext/zlib/tests/gzfile_basic.php',

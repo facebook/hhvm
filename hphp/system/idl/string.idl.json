@@ -735,7 +735,7 @@
                 {
                     "name": "charset",
                     "type": "String",
-                    "value": "\"ISO-8859-1\"",
+                    "value": "\"UTF-8\"",
                     "desc": "The ISO-8859-1 character set is used as default for the optional third charset. This defines the character set used in conversion.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead."
                 }
             ]
@@ -764,7 +764,7 @@
                 {
                     "name": "charset",
                     "type": "String",
-                    "value": "\"ISO-8859-1\"",
+                    "value": "\"UTF-8\"",
                     "desc": "Like htmlspecialchars(), it takes an optional third argument charset which defines character set used in conversion. Presently, the ISO-8859-1 character set is used as the default.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead."
                 },
                 {
@@ -822,7 +822,7 @@
                 {
                     "name": "charset",
                     "type": "String",
-                    "value": "\"ISO-8859-1\"",
+                    "value": "\"UTF-8\"",
                     "desc": "Defines character set used in conversion. The default character set is ISO-8859-1.\n\nFor the purposes of this function, the charsets ISO-8859-1, ISO-8859-15, UTF-8, cp866, cp1251, cp1252, and KOI8-R are effectively equivalent, as the characters affected by htmlspecialchars() occupy the same positions in all of these charsets.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead."
                 },
                 {

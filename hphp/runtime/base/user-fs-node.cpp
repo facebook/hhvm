@@ -41,11 +41,11 @@ UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
 }
 
 Variant UserFSNode::invoke(const Func *func, const String& name,
-                           CArrRef args, bool &success) {
+                           CArrRef args, bool &invoked) {
   JIT::VMRegAnchor _;
 
   // Assume failure
-  success = false;
+  invoked = false;
 
   // Public method, no private ancestor, no need for further checks (common)
   if (func &&
@@ -53,7 +53,7 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
       !func->hasPrivateAncestor()) {
     Variant ret;
     g_vmContext->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
-    success = true;
+    invoked = true;
     return ret;
   }
 
@@ -70,7 +70,7 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
     {
       Variant ret;
       g_vmContext->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
-      success = true;
+      invoked = true;
       return ret;
     }
 
@@ -79,7 +79,7 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
       Variant ret;
       g_vmContext->invokeFunc(ret.asTypedValue(), func,
                               make_packed_array(name, args), m_obj.get());
-      success = true;
+      invoked = true;
       return ret;
     }
 

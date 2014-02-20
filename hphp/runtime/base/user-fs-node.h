@@ -29,10 +29,10 @@ public:
 
 protected:
   Variant invoke(const Func *func, const String& name, CArrRef args,
-                 bool &success);
+                 bool &invoked);
   Variant invoke(const Func *func, const String& name, CArrRef args) {
-    bool success;
-    return invoke(func, name, args, success);
+    bool invoked;
+    return invoke(func, name, args, invoked);
   }
   const Func* lookupMethod(const StringData* name);
 

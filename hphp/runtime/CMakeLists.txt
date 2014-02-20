@@ -44,3 +44,5 @@ add_dependencies(hphp_runtime_static hphp_parser)
 
 # Workaround for GCC bug, remove after 4.8 is the minimum supported
 add_definitions(-D_GLIBCXX_USE_NANOSLEEP)
+
+cotire(hphp_runtime_static)

@@ -31,6 +31,7 @@ add_custom_command(
 add_library(hphp_util STATIC ${CXX_SOURCES}
             "${HPHP_HOME}/hphp/hphp-repo-schema.h"
             "${HPHP_HOME}/hphp/hphp-build-info.cpp")
+cotire(hphp_util)
 
 #if (LIBNUMA_LIBRARIES)
 #	target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})

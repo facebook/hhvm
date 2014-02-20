@@ -11,3 +11,4 @@ endforeach(file ${CXX_SOURCES})
 
 add_library(hphp_hhbbc STATIC ${CXX_SOURCES})
 add_dependencies(hphp_hhbbc hphp_system)
+cotire(hphp_hhbbc)

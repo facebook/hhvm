@@ -89,4 +89,4 @@ target_link_libraries(ext_hhvm_static hphp_runtime_static)
 SET_TARGET_PROPERTIES(ext_hhvm_static PROPERTIES OUTPUT_NAME "ext_hhvm")
 SET_TARGET_PROPERTIES(ext_hhvm_static PROPERTIES PREFIX "lib")
 SET_TARGET_PROPERTIES(ext_hhvm_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
-
+cotire(ext_hhvm_static)

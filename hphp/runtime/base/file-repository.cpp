@@ -206,7 +206,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
       );
     }
     Stream::Wrapper* w = Stream::getWrapperFromURI(name);
-    File* f = w->open(name, "r", 0, null_variant);
+    File* f = w->open(name, "r", 0, null_resource);
     if (!f) return nullptr;
     StringBuffer sb;
     sb.read(f);

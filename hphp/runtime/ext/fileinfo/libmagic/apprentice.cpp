@@ -945,7 +945,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 
   ms->file = fn;
   auto wrapper = HPHP::Stream::getWrapperFromURI(fn);
-  stream = wrapper->open(fn, "rb", 0, HPHP::Variant());
+  stream = wrapper->open(fn, "rb", 0, null_resource);
 
   if (stream == NULL) {
     if (errno != ENOENT)
@@ -2625,7 +2625,7 @@ apprentice_map(struct magic_set *ms, const char *fn)
     goto error;
 
   wrapper = HPHP::Stream::getWrapperFromURI(fn);
-  stream = wrapper->open(fn, "rb", 0, HPHP::Variant());
+  stream = wrapper->open(fn, "rb", 0, null_resource);
 
   if (!stream) {
     goto error;
@@ -2759,7 +2759,7 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 
 /* wb+ == O_WRONLY|O_CREAT|O_TRUNC|O_BINARY */
   wrapper = HPHP::Stream::getWrapperFromURI(fn);
-  stream = wrapper->open(fn, "wb+", 0, HPHP::Variant());
+  stream = wrapper->open(fn, "wb+", 0, null_resource);
 
   if (!stream) {
     file_error(ms, errno, "cannot open `%s'", dbname);

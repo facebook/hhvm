@@ -36,7 +36,7 @@ const StaticString
   s_User_Agent("User-Agent");
 
 File* HttpStreamWrapper::open(const String& filename, const String& mode,
-                              int options, const Variant& context) {
+                              int options, const Resource& context) {
   if (RuntimeOption::ServerHttpSafeMode) {
     return nullptr;
   }
@@ -47,8 +47,7 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
   }
 
   std::unique_ptr<UrlFile> file;
-  StreamContext *ctx = !context.isResource() ? nullptr :
-                        context.toResource().getTyped<StreamContext>();
+  StreamContext *ctx = context.getTyped<StreamContext>();
   if (!ctx || ctx->getOptions().isNull() ||
       ctx->getOptions()[s_http].isNull()) {
     file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)());

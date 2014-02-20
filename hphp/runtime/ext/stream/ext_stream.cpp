@@ -49,7 +49,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static StreamContext* get_stream_context(const Variant& stream_or_context);
+static StreamContext* get_stream_context(const Resource& stream_or_context);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -89,7 +89,7 @@ bool f_stream_context_set_option1(StreamContext* context,
   return true;
 }
 
-bool f_stream_context_set_option(const Variant& stream_or_context,
+bool f_stream_context_set_option(const Resource& stream_or_context,
                                  const Variant& wrapper_or_options,
                                  const Variant& option /* = null_variant */,
                                  const Variant& value /* = null_variant */) {
@@ -545,16 +545,12 @@ bool f_stream_socket_shutdown(const Resource& stream, int how) {
   return f_socket_shutdown(stream, how);
 }
 
-static StreamContext* get_stream_context(const Variant& stream_or_context) {
-  if (!stream_or_context.isResource()) {
-    return nullptr;
-  }
-  const Resource& resource = stream_or_context.asCResRef();
-  StreamContext* context = resource.getTyped<StreamContext>(true, true);
+static StreamContext* get_stream_context(const Resource& stream_or_context) {
+  StreamContext* context = stream_or_context.getTyped<StreamContext>(true, true);
   if (context != nullptr) {
     return context;
   }
-  File *file = resource.getTyped<File>(true, true);
+  File *file = stream_or_context.getTyped<File>(true, true);
   if (file != nullptr) {
     Resource resource = file->getStreamContext();
     if (file->getStreamContext().isNull()) {

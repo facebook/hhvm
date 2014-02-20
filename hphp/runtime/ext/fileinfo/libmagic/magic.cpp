@@ -378,7 +378,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
   if (!stream && inname) {
     no_in_stream = 1;
     auto wrapper = HPHP::Stream::getWrapperFromURI(inname);
-    stream = wrapper->open(inname, "rb", 0, HPHP::Variant());
+    stream = wrapper->open(inname, "rb", 0, null_resource);
   }
 
   if (!stream) {

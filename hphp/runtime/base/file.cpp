@@ -140,10 +140,9 @@ bool File::IsPlainFilePath(const String& filename) {
 
 Variant File::Open(const String& filename, const String& mode,
                    int options /* = 0 */,
-                   const Variant& context /* = null */) {
+                   const Resource& context /* = null */) {
   Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
-  Resource rcontext =
-    context.isNull() ? g_context->getStreamContext() : context.toResource();
+  Resource rcontext = context.isNull() ? g_context->getStreamContext() : context;
   File *file = wrapper->open(filename, mode, options, rcontext);
   if (file != nullptr) {
     file->m_name = filename.data();

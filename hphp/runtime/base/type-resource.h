@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#define null_resource Resource::s_nullResource
+#define null_resource HPHP::Resource::s_nullResource
 
 /**
  * Object type wrapping around ObjectData to implement reference count.

@@ -167,7 +167,7 @@ static Variant php_finfo_get_type(
       }
 
       auto wrapper = Stream::getWrapperFromURI(buffer);
-      auto stream = wrapper->open(buffer, "rb", 0, HPHP::Variant());
+      auto stream = wrapper->open(buffer, "rb", 0, null_resource);
 
       if (!stream) {
         ret_val = null_string;

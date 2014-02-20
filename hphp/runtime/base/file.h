@@ -56,7 +56,7 @@ public:
   static String TranslatePathWithFileCache(const String& filename);
   static String TranslateCommand(const String& cmd);
   static Variant Open(const String& filename, const String& mode,
-                      int options = 0, const Variant& context = uninit_null());
+                      int options = 0, const Resource& context = null_resource);
 
   static bool IsVirtualDirectory(const String& filename);
   static bool IsPlainFilePath(const String& filename);

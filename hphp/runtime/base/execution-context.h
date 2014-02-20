@@ -413,7 +413,7 @@ private:
   // include_path configuration option
   Array m_include_paths;
 
-  Array m_allowedDirectories;
+  std::vector<std::string> m_allowedDirectories;
   bool m_safeFileAccess;
 
   // cache the sandbox id for the request

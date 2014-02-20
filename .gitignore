@@ -66,3 +66,13 @@ install_manifest.txt
 .project
 .cproject
 .settings
+
+# vim files
+.*.swp
+.*.swo
+*.vimrc
+.syntastic_cpp_config
+
+# tags files
+tags
+TAGS

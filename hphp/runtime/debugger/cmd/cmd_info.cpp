@@ -250,7 +250,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
     for (unsigned int i = 0 ; i < sizeof(tempList)/sizeof(int); ++i) {
       for (unsigned int j = 0 ; j < tmpAcLiveLists[tempList[i]].size(); ++j) {
         m_acLiveLists[tempList[i]].push_back(
-          tmpAcLiveLists[tempList[i]][j]->toCPPString());
+          tmpAcLiveLists[tempList[i]][j].toCppString());
       }
     }
 
@@ -260,7 +260,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
       m_acLiveLists[DebuggerClient::AutoCompleteVariables];
     vars.reserve(variables.size());
     for (ArrayIter iter(variables); iter; ++iter) {
-      vars.push_back("$" + iter.first().toString()->toCPPString());
+      vars.push_back("$" + iter.first().toString().toCppString());
     }
 
     return proxy.sendToClient(this);

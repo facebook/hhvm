@@ -1169,7 +1169,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(m_name->data()[0]) ||
-    ParserBase::IsClosureName(m_name->toCPPString()) || m_isGenerator;
+    ParserBase::IsClosureName(m_name->toCppString()) || m_isGenerator;
 
   Attr attrs = m_attrs;
   if (preClass && preClass->attrs() & AttrInterface) {

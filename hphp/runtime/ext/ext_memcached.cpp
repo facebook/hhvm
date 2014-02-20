@@ -201,7 +201,7 @@ void c_Memcached::t___construct(const String& persistent_id /*= null_string*/) {
   if (persistent_id.isNull()) {
     m_impl.reset(new Impl);
   } else {
-    ImplPtr &impl = (*s_persistentMap)[persistent_id->toCPPString()];
+    ImplPtr &impl = (*s_persistentMap)[persistent_id.toCppString()];
     if (!impl) impl.reset(new Impl);
     m_impl = impl;
   }

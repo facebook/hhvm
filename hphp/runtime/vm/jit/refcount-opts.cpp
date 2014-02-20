@@ -381,11 +381,8 @@ struct SinkPoint {
   SSATmp* value;
 };
 
-#ifdef HAVE_BOOST1_49
 typedef smart::flat_multimap<IncSet, SinkPoint> SinkPoints;
-#else
-typedef smart::multimap<IncSet, SinkPoint> SinkPoints;
-#endif
+
 struct SinkPointsMap {
   // Maps values to SinkPoints for their IncRefs
   smart::hash_map<SSATmp*, SinkPoints> points;
@@ -651,11 +648,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     // First, build a map from canonical values to the values they map to and
     // how many incoming branches have the mapped value available.
-#ifdef HAVE_BOOST1_49
     smart::flat_map<SSATmp*, smart::flat_map<SSATmp*, int>> mergedCanon;
-#else
-    smart::map<SSATmp*, smart::map<SSATmp*, int>> mergedCanon;
-#endif
 
     for (auto const& inState : states) {
       for (auto const& pair : inState.state.canon) {

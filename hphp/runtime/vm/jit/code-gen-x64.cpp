@@ -305,6 +305,8 @@ CALL_OPCODE(LdSwitchStrIndex)
 CALL_OPCODE(LdSwitchObjIndex)
 CALL_OPCODE(VerifyParamCallable)
 CALL_OPCODE(VerifyParamFail)
+CALL_OPCODE(VerifyRetCallable)
+CALL_OPCODE(VerifyRetFail)
 CALL_OPCODE(RaiseUninitLoc)
 CALL_OPCODE(WarnNonObjProp)
 CALL_OPCODE(ThrowNonObjProp)
@@ -6303,7 +6305,7 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
   });
 }
 
-void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
+void CodeGenerator::cgVerifyClsWork(IRInstruction* inst) {
   assert(!inst->src(0)->isConst());
   auto objClassReg = srcLoc(0).reg();
   SSATmp* constraint = inst->src(1);
@@ -6318,6 +6320,14 @@ void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
   // proper subtype checking. The comparison above is just to
   // short-circuit the overhead when the Classes are an exact match.
   ifThen(m_as, CC_NE, [&]{ cgCallNative(m_as, inst); });
+}
+
+void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
+  cgVerifyClsWork(inst);
+}
+
+void CodeGenerator::cgVerifyRetCls(IRInstruction* inst) {
+  cgVerifyClsWork(inst);
 }
 
 void CodeGenerator::cgRBTrace(IRInstruction* inst) {

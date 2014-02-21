@@ -1298,6 +1298,16 @@ IRTranslator::translateVerifyParamType(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateVerifyRetTypeC(const NormalizedInstruction& i) {
+  HHIR_EMIT(VerifyRetTypeC);
+}
+
+void
+IRTranslator::translateVerifyRetTypeV(const NormalizedInstruction& i) {
+  HHIR_EMIT(VerifyRetTypeV);
+}
+
+void
 IRTranslator::translateInstanceOfD(const NormalizedInstruction& i) {
   HHIR_EMIT(InstanceOfD, (i.imm[0].u_SA));
 }

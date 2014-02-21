@@ -263,7 +263,10 @@ struct HhbcTranslator {
   void emitAGetL(int localId);
   void emitIsScalarL(int id);
   void emitIsScalarC();
+  void emitVerifyTypeImpl(int32_t id);
   void emitVerifyParamType(int32_t paramId);
+  void emitVerifyRetTypeC();
+  void emitVerifyRetTypeV();
   void emitInstanceOfD(int classNameStrId);
   void emitInstanceOf();
   void emitNop() {}
@@ -814,6 +817,7 @@ private:
     return top(Type::Cell, i, tc);
   }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
+  SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);

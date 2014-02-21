@@ -857,7 +857,7 @@ getDynLocType(const SrcKey startSk,
         // rhs comes before the M-vector elements.
         op == OpSetL  || op == OpSetN  || op == OpSetG  || op == OpSetS  ||
         op == OpBindL || op == OpBindG || op == OpBindS || op == OpBindN ||
-        op == OpBindM ||
+        op == OpBindM || op == OpVerifyRetTypeV || op == OpVerifyRetTypeC ||
         // Dup takes a single element.
         op == OpDup
       );
@@ -867,7 +867,7 @@ getDynLocType(const SrcKey startSk,
       if (debug) {
         if (!inputs[idx]->rtt.isVagueValue()) {
           if (op == OpBindG || op == OpBindN || op == OpBindS ||
-              op == OpBindM || op == OpBindL) {
+              op == OpBindM || op == OpBindL || op == OpVerifyRetTypeV) {
             assert(inputs[idx]->rtt.isRef() && !inputs[idx]->isLocal());
           } else {
             assert(inputs[idx]->rtt.valueType() ==
@@ -1255,6 +1255,10 @@ static const struct {
   { OpCatch,       {None,             Stack1,       OutObject,         1 }},
   { OpVerifyParamType,
                    {Local,            Local,        OutUnknown,        0 }},
+  { OpVerifyRetTypeV,
+                   {Stack1,           Stack1,       OutSameAsInput,    0 }},
+  { OpVerifyRetTypeC,
+                   {Stack1,           Stack1,       OutSameAsInput,    0 }},
   { OpClassExists, {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpInterfaceExists,
                    {StackTop2,        Stack1,       OutBoolean,       -1 }},
@@ -1315,7 +1319,13 @@ static void initInstrInfo() {
          i++) {
       instrInfo[instrInfoSparse[i].op] = instrInfoSparse[i].info;
     }
-
+    if (!RuntimeOption::EvalCheckReturnTypeHints) {
+      for (size_t j = 0; j < 2; ++j) {
+        auto& ii = instrInfo[j == 0 ? OpVerifyRetTypeC : OpVerifyRetTypeV];
+        ii.in = ii.out = None;
+        ii.type = OutNone;
+      }
+    }
     instrInfoInited = true;
   }
 }
@@ -1510,6 +1520,9 @@ static bool isAlwaysNop(Op op) {
   case Op::FPassVNop:
   case Op::FPassC:
     return true;
+  case Op::VerifyRetTypeC:
+  case Op::VerifyRetTypeV:
+    return !RuntimeOption::EvalCheckReturnTypeHints;
   default:
     return false;
   }

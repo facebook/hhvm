@@ -6868,21 +6868,37 @@ OPTBLD_INLINE void VMExecutionContext::iopVerifyParamType(IOP_ARGS) {
   SYNC(); // We might need m_pc to be updated to throw.
   NEXT();
 
-  DECODE_IVA(param);
+  DECODE_IVA(paramId);
   const Func *func = m_fp->m_func;
-  assert(param < func->numParams());
+  assert(paramId < func->numParams());
   assert(func->numParams() == int(func->params().size()));
-  const TypeConstraint& tc = func->params()[param].typeConstraint();
+  const TypeConstraint& tc = func->params()[paramId].typeConstraint();
   assert(tc.hasConstraint());
-  if (UNLIKELY(!RuntimeOption::EvalCheckExtendedTypeHints &&
-               tc.isExtended())) {
+  if (!tc.isTypeVar()) {
+    tc.verifyParam(frame_local(m_fp, paramId), func, paramId);
+  }
+}
+
+OPTBLD_INLINE void VMExecutionContext::implVerifyRetType(IOP_ARGS) {
+  if (LIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
+    NEXT();
     return;
   }
-  if (tc.isTypeVar()) {
-    return;
+  SYNC();
+  NEXT();
+  const auto func = m_fp->m_func;
+  const auto tc = func->returnTypeConstraint();
+  if (!tc.isTypeVar()) {
+    tc.verifyReturn(m_stack.topTV(), func);
   }
-  auto* tv = frame_local(m_fp, param);
-  tc.verify(tv, func, param);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopVerifyRetTypeC(PC& pc) {
+  implVerifyRetType(IOP_PASS_ARGS);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopVerifyRetTypeV(PC& pc) {
+  implVerifyRetType(IOP_PASS_ARGS);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopNativeImpl(IOP_ARGS) {

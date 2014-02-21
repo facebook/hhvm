@@ -224,6 +224,8 @@ private:
                      void (Asm::*instrR)(Reg64),
                      Oper oper);
 
+  void cgVerifyClsWork(IRInstruction* inst);
+
   void emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                  bool    staticCallee);
 

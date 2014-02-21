@@ -3616,68 +3616,71 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
   }
 }
 
-void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
-  const Func* func = curFunc();
-  auto const& tc = func->params()[paramId].typeConstraint();
-  auto locVal = ldLoc(paramId, DataTypeSpecific);
-  assert(locVal->type().isBoxed() || locVal->type().notBoxed());
-  if (locVal->type().isBoxed()) {
-    locVal = gen(LdRef, locVal->type().innerType(), makeExit(), locVal);
-    m_irb->constrainValue(locVal, DataTypeSpecific);
-  }
-  auto const locType = locVal->type();
-
-  if (!locType.isKnownDataType()) {
-    // This is supposed to be impossible, but it does happen in a rare case
-    // with the legacy region selector. Until it's figured out, punt in release
-    // builds. t3412704
-    assert_log(false,
-    [&] {
-      return folly::format("Bad type {} for local {}:\n\n{}\n",
-                           locType, paramId, m_irb->unit().toString()).str();
-    });
-    emitInterpOne(0);
+void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
+  bool isReturnType = (id == HPHP::TypeConstraint::ReturnId);
+  if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) {
     return;
   }
+  auto func = curFunc();
+  auto const& tc = isReturnType ? func->returnTypeConstraint()
+                                : func->params()[id].typeConstraint();
+  auto* val = isReturnType ? topR() : ldLoc(id, DataTypeSpecific);
+  assert(val->type().isBoxed() || val->type().notBoxed());
+  if (val->type().isBoxed()) {
+    val = gen(LdRef, val->type().innerType(), makeExit(), val);
+    m_irb->constrainValue(val, DataTypeSpecific);
+  }
+  auto const valType = val->type();
 
-  if (!RuntimeOption::EvalCheckExtendedTypeHints && tc.isExtended()) {
+  if (!valType.isKnownDataType()) {
+    if (!isReturnType) {
+      // This is supposed to be impossible, but it does happen in a rare case
+      // with the legacy region selector. Until it's figured out, punt in
+      // release builds. t3412704
+      assert_log(false,
+      [&] {
+        return folly::format("Bad type {} for local {}:\n\n{}\n",
+                             valType, id, m_irb->unit().toString()).str();
+      });
+    }
+    emitInterpOne(0);
     return;
   }
   if (tc.isTypeVar()) {
     return;
   }
-  if (tc.isNullable() && locType.subtypeOf(Type::InitNull)) {
+  if (tc.isNullable() && valType.subtypeOf(Type::InitNull)) {
     return;
   }
-  if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
-      (locType.isObj() || locVal->type().isBoxed())) {
+  if (!isReturnType && tc.isArray() && !tc.isSoft() && !func->mustBeRef(id) &&
+      valType.isObj()) {
     PUNT(VerifyParamType-collectionToArray);
     return;
   }
   if (tc.isCallable()) {
-    gen(VerifyParamCallable, makeCatch(), locVal, cns(paramId));
+    if (isReturnType) {
+      gen(VerifyRetCallable, makeCatch(), val);
+    } else {
+      gen(VerifyParamCallable, makeCatch(), val, cns(id));
+    }
     return;
   }
 
   // For non-object guards, we rely on what we know from the tracelet
   // guards and never have to do runtime checks.
   if (!tc.isObjectOrTypeAlias()) {
-    if (!tc.checkPrimitive(locType.toDataType())) {
-      gen(VerifyParamFail, makeCatch(), cns(paramId));
-      return;
+    if (!tc.checkPrimitive(valType.toDataType())) {
+      if (isReturnType) {
+        gen(VerifyRetFail, makeCatch(), val);
+      } else {
+        gen(VerifyParamFail, makeCatch(), cns(id));
+      }
     }
     return;
   }
-
-  /*
-   * If the parameter is an object, we check the object in one of
-   * various ways (similar to instance of).  If the parameter is not
-   * an object, it still might pass the VerifyParamType if the
-   * constraint is a typedef.
-   *
-   * For now we just interp that case.
-   */
-  if (!locType.isObj()) {
+  // If val is not an object, it still might pass the type constraint
+  // if the constraint is a typedef. For now we just interp that case.
+  if (!valType.isObj()) {
     emitInterpOne(0);
     return;
   }
@@ -3698,7 +3701,11 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
     } else {
       // The hint was self or parent and there's no corresponding
       // class for the current func. This typehint will always fail.
-      gen(VerifyParamFail, makeCatch(), cns(paramId));
+      if (isReturnType) {
+        gen(VerifyRetFail, makeCatch(), val);
+      } else {
+        gen(VerifyParamFail, makeCatch(), cns(id));
+      }
       return;
     }
   }
@@ -3712,14 +3719,14 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   /*
    * If the local is a specialized object type, we can avoid emitting
    * runtime checks if we know the thing would pass.  If we don't
-   * know, we still have to emit them because locType might be a
+   * know, we still have to emit them because valType might be a
    * subtype of its specialized object type.
    */
-  if (locType.strictSubtypeOf(Type::Obj)) {
-    auto const cls = locType.getClass();
+  if (valType.strictSubtypeOf(Type::Obj)) {
+    auto const cls = valType.getClass();
     if ((knownConstraint && cls->classof(knownConstraint)) ||
-        (cls->name()->isame(clsName))) {
-      m_irb->constrainValue(locVal, DataTypeSpecialized);
+        cls->name()->isame(clsName)) {
+      m_irb->constrainValue(val, DataTypeSpecialized);
       return;
     }
   }
@@ -3728,7 +3735,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   bool haveBit = InstanceBits::lookup(clsName) != 0;
   SSATmp* constraint = knownConstraint ? cns(knownConstraint)
                                        : gen(LdClsCachedSafe, cns(clsName));
-  SSATmp* objClass = gen(LdObjClass, locVal);
+  SSATmp* objClass = gen(LdObjClass, val);
   if (haveBit || classIsUniqueNormalClass(knownConstraint)) {
     SSATmp* isInstance = haveBit
       ? gen(InstanceOfBitmask, objClass, cns(clsName))
@@ -3738,17 +3745,34 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
       },
       [&] { // taken: the param type does not match
         m_irb->hint(Block::Hint::Unlikely);
-        gen(VerifyParamFail, makeCatch(), cns(paramId));
+        if (isReturnType) {
+          gen(VerifyRetFail, makeCatch(), val);
+        } else {
+          gen(VerifyParamFail, makeCatch(), cns(id));
+        }
       }
     );
   } else {
-    gen(VerifyParamCls,
-        makeCatch(),
-        objClass,
-        constraint,
-        cns(paramId),
-        cns(uintptr_t(&tc)));
+    if (isReturnType) {
+      gen(VerifyRetCls, makeCatch(), objClass, constraint,
+          cns(uintptr_t(&tc)), val);
+    } else {
+      gen(VerifyParamCls, makeCatch(), objClass, constraint,
+          cns(uintptr_t(&tc)), cns(id));
+    }
   }
+}
+
+void HhbcTranslator::emitVerifyRetTypeC() {
+  emitVerifyTypeImpl(HPHP::TypeConstraint::ReturnId);
+}
+
+void HhbcTranslator::emitVerifyRetTypeV() {
+  emitVerifyTypeImpl(HPHP::TypeConstraint::ReturnId);
+}
+
+void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
+  emitVerifyTypeImpl(paramId);
 }
 
 void HhbcTranslator::emitInstanceOfD(int classNameStrId) {

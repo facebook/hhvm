@@ -373,7 +373,7 @@ public:
   F(uint64_t, JitAStubsSize,           64 << 20)                        \
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(bool, AllowHhas,                   false)                           \
-  F(bool, CheckExtendedTypeHints,      true)                            \
+  F(bool, CheckReturnTypeHints,        false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \

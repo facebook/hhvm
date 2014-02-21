@@ -486,6 +486,7 @@ private:
 
   template<class Op> void implCellBinOp(IOP_ARGS, Op op);
   template<class Op> void implCellBinOpBool(IOP_ARGS, Op op);
+  void implVerifyRetType(IOP_ARGS);
   bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);
   bool iopInstanceOfHelper(const StringData* s1, Cell* c2);
   bool initIterator(PC& pc, PC& origPc, Iter* it,

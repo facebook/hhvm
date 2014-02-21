@@ -237,8 +237,7 @@ std::string format_pattern(const std::string &pattern, bool prefixSlash);
 
 inline void assert_native_stack_aligned() {
 #ifndef NDEBUG
-  DECLARE_STACK_POINTER(sp);
-  assert(reinterpret_cast<uintptr_t>(sp) % 16 == 0);
+  assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
 #endif
 }
 

@@ -261,30 +261,13 @@ void raise_error_sd(const StringData *msg) {
   raise_error("%s", msg->data());
 }
 
-void VerifyParamTypeFail(int paramNum) {
-  VMRegAnchor _;
-  const ActRec* ar = liveFrame();
-  const Func* func = ar->m_func;
-  auto const& tc = func->params()[paramNum].typeConstraint();
-  TypedValue* tv = frame_local(ar, paramNum);
-  assert(!tc.check(tv, func));
-  tc.verifyFail(func, paramNum, tv);
-}
-
-void VerifyParamTypeCallable(TypedValue value, int param) {
-  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
-    VerifyParamTypeFail(param);
-  }
-}
-
-void VerifyParamTypeSlow(const Class* cls,
-                         const Class* constraint,
-                         int param,
-                         const HPHP::TypeConstraint* expected) {
+ALWAYS_INLINE
+static bool VerifyTypeSlowImpl(const Class* cls,
+                               const Class* constraint,
+                               const HPHP::TypeConstraint* expected) {
   if (LIKELY(constraint && cls->classof(constraint))) {
-    return;
+    return true;
   }
-
   // Check a typedef for a class.  We interp'd if the param wasn't an
   // object, so if it's a typedef for something non-objecty we're
   // failing anyway.
@@ -304,14 +287,62 @@ void VerifyParamTypeSlow(const Class* cls,
       // mixed.
       if (def->kind == KindOfObject) {
         constraint = def->klass;
-        if (constraint && cls->classof(constraint)) return;
+        if (constraint && cls->classof(constraint)) return true;
       } else if (def->kind == KindOfAny) {
-        return;
+        return true;
       }
     }
   }
+  return false;
+}
 
-  VerifyParamTypeFail(param);
+void VerifyParamTypeSlow(const Class* cls,
+                         const Class* constraint,
+                         const HPHP::TypeConstraint* expected,
+                         int param) {
+  if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
+    VerifyParamTypeFail(param);
+  }
+}
+
+void VerifyParamTypeCallable(TypedValue value, int param) {
+  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+    VerifyParamTypeFail(param);
+  }
+}
+
+void VerifyParamTypeFail(int paramNum) {
+  VMRegAnchor _;
+  const ActRec* ar = liveFrame();
+  const Func* func = ar->m_func;
+  auto const& tc = func->params()[paramNum].typeConstraint();
+  TypedValue* tv = frame_local(ar, paramNum);
+  assert(!tc.check(tv, func));
+  tc.verifyParamFail(func, tv, paramNum);
+}
+
+void VerifyRetTypeSlow(const Class* cls,
+                       const Class* constraint,
+                       const HPHP::TypeConstraint* expected,
+                       const TypedValue tv) {
+  if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
+    VerifyRetTypeFail(tv);
+  }
+}
+
+void VerifyRetTypeCallable(TypedValue value) {
+  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+    VerifyRetTypeFail(value);
+  }
+}
+
+void VerifyRetTypeFail(TypedValue tv) {
+  VMRegAnchor _;
+  const ActRec* ar = liveFrame();
+  const Func* func = ar->m_func;
+  const HPHP::TypeConstraint& tc = func->returnTypeConstraint();
+  assert(!tc.check(&tv, func));
+  tc.verifyReturnFail(func, &tv);
 }
 
 RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {

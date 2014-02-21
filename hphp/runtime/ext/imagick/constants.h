@@ -15,35 +15,50 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/imagick/ext_imagick.h"
+#ifndef incl_HPHP_EXT_IMAGICK_CONSTANTS_H_
+#define incl_HPHP_EXT_IMAGICK_CONSTANTS_H_
+
+#include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
 
-HPHP::Class* ImagickException::cls = nullptr;
-HPHP::Class* ImagickDrawException::cls = nullptr;
-HPHP::Class* ImagickPixelException::cls = nullptr;
-HPHP::Class* ImagickPixelIteratorException::cls = nullptr;
+enum IMAGCIK_COLOR {
+  IMAGICK_COLOR_BLACK = 0,
+  IMAGICK_COLOR_BLUE,
+  IMAGICK_COLOR_CYAN,
+  IMAGICK_COLOR_GREEN,
+  IMAGICK_COLOR_RED,
+  IMAGICK_COLOR_YELLOW,
+  IMAGICK_COLOR_MAGENTA,
+  IMAGICK_COLOR_OPACITY,
+  IMAGICK_COLOR_ALPHA,
+  IMAGICK_COLOR_FUZZ
+};
 
-HPHP::Class* Imagick::cls = nullptr;
-HPHP::Class* ImagickDraw::cls = nullptr;
-HPHP::Class* ImagickPixel::cls = nullptr;
-HPHP::Class* ImagickPixelIterator::cls = nullptr;
+extern const StaticString
+  s_r,
+  s_g,
+  s_b,
+  s_a,
+  s_hue,
+  s_saturation,
+  s_luminosity,
+  s_Imagick,
+  s_ImagickDraw,
+  s_ImagickPixel,
+  s_ImagickPixelIterator;
 
-class ImagickExtension : public Extension {
- public:
-  ImagickExtension() : Extension("imagick") {}
-  virtual void moduleInit() {
-    loadImagickConstants();
-    loadImagickClass();
-    loadImagickDrawClass();
-    loadImagickPixelClass();
-    loadImagickPixelIteratorClass();
-    loadSystemlib();
-  }
-} s_imagick_extension;
+template<typename T>
+ALWAYS_INLINE
+bool registerImagickConstants(const StaticString& name, T value) {
+  return Native::registerClassConstant<KindOfInt64>(s_Imagick.get(),
+                                                    name.get(),
+                                                    (int64_t)value);
+}
 
-// Uncomment for non-bundled module
-//HHVM_GET_MODULE(imagick);
+void loadImagickConstants();
 
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
+
+#endif // incl_HPHP_EXT_IMAGICK_CONSTANTS_H_

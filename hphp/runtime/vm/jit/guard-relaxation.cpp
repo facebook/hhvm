@@ -426,6 +426,7 @@ Type relaxType(Type t, TypeConstraint tc) {
                             : relaxInner(t.unspecialize(), tc);
 
     case DataTypeSpecific:
+      assert(t.isKnownDataType());
       return relaxInner(t.unspecialize(), tc);
 
     case DataTypeSpecialized:

@@ -364,14 +364,13 @@ void FastCGITransport::onHeadersComplete() {
     m_serverPort = 0;
   }
 
+  // Treat everything apart from GET and HEAD as a post to be like php-src.
   if (m_extendedMethod == "GET") {
     m_method = Method::GET;
-  } else if (m_extendedMethod == "POST") {
-    m_method = Method::POST;
   } else if (m_extendedMethod == "HEAD") {
     m_method = Method::HEAD;
   } else {
-    m_method = Method::Unknown;
+    m_method = Method::POST;
   }
 
   try {

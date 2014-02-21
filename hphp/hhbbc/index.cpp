@@ -891,7 +891,7 @@ Index::Index(borrowed_ptr<php::Program> program)
 
   NamingEnv env;
   for (auto& u : program->units) {
-    Trace::Bump bumper{Trace::hhbbc, is_systemlib_part(*u), kSystemLibBump};
+    Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(*u)};
     for (auto& c : u->classes) {
       preresolve(*m_data, env, c->name);
     }

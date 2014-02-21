@@ -392,7 +392,10 @@ void FastCGITransport::onHeadersComplete() {
 
   if (m_extendedMethod == "GET") {
     m_method = Method::GET;
-  } else if (m_extendedMethod == "POST") {
+  } else if (m_extendedMethod == "POST" ||
+             m_extendedMethod == "PUT" ||
+             m_extendedMethod == "UPDATE" ||
+             m_extendedMethod == "DELETE") {
     m_method = Method::POST;
   } else if (m_extendedMethod == "HEAD") {
     m_method = Method::HEAD;

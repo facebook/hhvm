@@ -626,7 +626,41 @@ const StaticString
   s_PHP_DebugDisplay("__PHP_DebugDisplay"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
-  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
+  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name"),
+  s_debugInfo("__debugInfo");
+
+/* Get properties from the actual object unless we're
+ * serializing for var_dump()/print_r() and the object
+ * exports a __debugInfo() magic method.
+ * In which case, call that and use the array it returns.
+ */
+inline Array getSerializeProps(const ObjectData* obj,
+                               VariableSerializer* serializer) {
+  if ((serializer->getType() != VariableSerializer::Type::PrintR) &&
+      (serializer->getType() != VariableSerializer::Type::VarDump)) {
+    return obj->o_toArray();
+  }
+  auto cls = obj->getVMClass();
+  auto debuginfo = cls->lookupMethod(s_debugInfo.get());
+  if (!debuginfo) {
+    return obj->o_toArray();
+  }
+  if (debuginfo->attrs() & (AttrPrivate|AttrProtected|
+                            AttrAbstract|AttrStatic)) {
+    raise_warning("%s::__debugInfo() must be public and non-static",
+                  cls->name()->data());
+    return obj->o_toArray();
+  }
+  Variant ret = const_cast<ObjectData*>(obj)->o_invoke_few_args(s_debugInfo, 0);
+  if (ret.isArray()) {
+    return ret.toArray();
+  }
+  if (ret.isNull()) {
+    return Array::Create();
+  }
+  raise_error("__debugInfo() must return an array");
+  not_reached();
+}
 
 void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
@@ -778,7 +812,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
     } else {
       const String& className = o_getClassName();
-      Array properties = o_toArray();
+      Array properties = getSerializeProps(this, serializer);
       if (serializer->getType() ==
         VariableSerializer::Type::DebuggerSerialize) {
         try {

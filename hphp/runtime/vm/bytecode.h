@@ -19,6 +19,7 @@
 
 #include <type_traits>
 
+#include "hphp/util/arena.h"
 #include "hphp/util/util.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/tv-arith.h"
@@ -31,7 +32,6 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name-value-table.h"
-#include "hphp/runtime/vm/request-arena.h"
 
 namespace HPHP {
 

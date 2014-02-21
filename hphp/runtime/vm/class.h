@@ -485,7 +485,7 @@ struct Class : AtomicCountable {
     PropInitVec();
     const PropInitVec& operator=(const PropInitVec&);
     ~PropInitVec();
-    static PropInitVec* allocInRequestArena(const PropInitVec& src);
+    static PropInitVec* allocWithSmartAllocator(const PropInitVec& src);
     static size_t dataOff() { return offsetof(PropInitVec, m_data); }
 
     typedef TypedValueAux* iterator;

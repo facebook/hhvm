@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/vm/request-arena.h"
 
 namespace HPHP {
 

@@ -2100,8 +2100,8 @@ FCallD <num params> <class name> <func name>   [F..F]  ->  [R]
   FPI call direct. This instruction has exactly the effects of FCall %1, but
   provides hints from static analysis to assist the region selector in
   determining the callee. The strings in %2 and %3 are statically known names
-  of the class (if any) and method being called. If the call is targeting a
-  non-method, %2 must be the empty string.
+  of the class or interface (if any) and method being called. If the call is
+  targeting a non-method, %2 must be the empty string.
 
 FCallArray    [F]  ->  [R]
 

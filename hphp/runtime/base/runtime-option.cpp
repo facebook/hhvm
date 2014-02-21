@@ -1273,9 +1273,8 @@ void RuntimeOption::Load(Hdf &config,
   }
   {
     Hdf simplexml = config["SimpleXML"];
-    // TODO (t3610856): Change the default to false once dependent code is fixed
     SimpleXMLEmptyNamespaceMatchesAll =
-      simplexml["EmptyNamespaceMatchesAll"].getBool(true);
+      simplexml["EmptyNamespaceMatchesAll"].getBool(false);
   }
 #ifdef FACEBOOK
   {

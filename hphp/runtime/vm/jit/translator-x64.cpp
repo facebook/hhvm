@@ -809,8 +809,6 @@ TCA TranslatorX64::regeneratePrologues(Func* func, SrcKey triggerSk) {
 
   for (int nArgs = 0; nArgs <= func->numParams() + 1; nArgs++) {
     TransID tid = profData()->prologueTransId(func, nArgs);
-    assert(IMPLIES(func->getPrologue(nArgs) != uniqueStubs.fcallHelperThunk,
-                   tid != InvalidID));
     if (tid != InvalidID) {
       prologTransIDs.push_back(tid);
     }

@@ -155,7 +155,7 @@ void TestServer::RunServer() {
   string option = (inherit_fd >= 0) ? (string("--port-fd=") + fd) :
     (string("-vServer.TakeoverFilename=") + string(s_filename));
   string serverType = string("-vServer.Type=") + m_serverType;
-  string pidFile = string("-vServer.PidFile=") + string(s_pidfile);
+  string pidFile = string("-vPidFile=") + string(s_pidfile);
 
   const char *argv[] = {
     "__HHVM__", "--mode=server", "--config=test/ext/config-server.hdf",
@@ -194,11 +194,12 @@ void TestServer::StopServer() {
   // Getting more aggresive
   char buf[1024];
   int fd = open(s_pidfile, O_RDONLY);
-  int ret = read(fd, buf, 1024);
+  int ret = read(fd, buf, sizeof(buf) - 1);
   if (ret <= 0) {
     printf("Can't read pid from pid file %s\n", s_pidfile);
     return;
   }
+  buf[ret] = 0;
   string out, err;
   const char *argv[] = {"kill", buf, nullptr};
   for (int i = 0; i < 10; i++) {

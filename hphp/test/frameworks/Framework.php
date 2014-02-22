@@ -185,6 +185,10 @@ class Framework {
     return $this->install_root;
   }
 
+  protected function getGitBranch(): string {
+	return $this->git_branch;
+  }
+
   //********************
   // Private setters
   //********************

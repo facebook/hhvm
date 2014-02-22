@@ -113,6 +113,12 @@
     commit: 6e1f228ce82333b437402dafad049713eb3eeac6
     install_root: klein
     test_root: klein
+  kohana:
+    url: https://github.com/kohana/kohana.git
+    branch: "3.3/develop"
+    commit: 61e12755bf9eb32af82808b26d58ccb73cf2a971
+    install_root: kohana
+    test_root: kohana
   laravel:
     url: https://github.com/laravel/framework.git
     # Use the 4.1 branch instead of the 4.1.x tag because of pull request

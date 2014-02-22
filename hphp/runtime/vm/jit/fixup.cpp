@@ -63,7 +63,7 @@ namespace {
 bool isVMFrame(const VMExecutionContext* ec, const ActRec* ar) {
   // If this assert is failing, you may have forgotten a sync point somewhere
   assert(ar);
-  bool ret = uintptr_t(ar) - Util::s_stackLimit >= Util::s_stackSize;
+  bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
   assert(!ret ||
          (ar >= ec->m_stack.getStackLowAddress() &&
           ar < ec->m_stack.getStackHighAddress()) ||
@@ -117,7 +117,7 @@ FixupMap::fixupWorkSimulated(VMExecutionContext* ec) const {
     // If this assert is failing, you may have forgotten a sync point somewhere
     assert(ar);
     bool ret =
-      uintptr_t(ar) - Util::s_stackLimit >= Util::s_stackSize &&
+      uintptr_t(ar) - s_stackLimit >= s_stackSize &&
       !sim->is_on_stack(ar);
     assert(!ret ||
            (ar >= g_vmContext->m_stack.getStackLowAddress() &&

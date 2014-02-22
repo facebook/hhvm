@@ -467,11 +467,11 @@ Unit::~Unit() {
 }
 
 void* Unit::operator new(size_t sz) {
-  return Util::low_malloc(sz);
+  return low_malloc(sz);
 }
 
 void Unit::operator delete(void* p, size_t sz) {
-  Util::low_free(p);
+  low_free(p);
 }
 
 bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {

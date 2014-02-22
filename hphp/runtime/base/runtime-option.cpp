@@ -1142,7 +1142,7 @@ void RuntimeOption::Load(Hdf &config,
 #undef get_uint32
 #undef get_uint32_t
 #undef get_uint64
-    Util::low_malloc_huge_pages(EvalMaxLowMemHugePages);
+    low_malloc_huge_pages(EvalMaxLowMemHugePages);
     EvalJitEnableRenameFunction = EvalJitEnableRenameFunction || !EvalJit;
 
     EnableEmitSwitch = eval["EnableEmitSwitch"].getBool(true);

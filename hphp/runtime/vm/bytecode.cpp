@@ -125,8 +125,7 @@ TRACE_SET_MOD(bcinterp);
 
 ActRec* ActRec::arGetSfp() const {
   ActRec* prevFrame = (ActRec*)m_savedRbp;
-  if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
-             Util::s_stackSize)) {
+  if (LIKELY(((uintptr_t)prevFrame - s_stackLimit) >= s_stackSize)) {
     if (LIKELY(prevFrame != nullptr)) return prevFrame;
   }
 
@@ -548,7 +547,7 @@ class StackElms {
       }
 
       madvise(m_elms, algnSz, MADV_DONTNEED);
-      Util::numa_bind_to(m_elms, algnSz, Util::s_numaNode);
+      numa_bind_to(m_elms, algnSz, s_numaNode);
     }
     return m_elms;
   }
@@ -893,8 +892,7 @@ using namespace HPHP;
 
 ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
   ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
-  if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
-             Util::s_stackSize)) {
+  if (LIKELY(((uintptr_t)prevFrame - s_stackLimit) >= s_stackSize)) {
     if (LIKELY(prevFrame != nullptr)) return prevFrame;
   }
 

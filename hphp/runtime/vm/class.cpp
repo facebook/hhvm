@@ -226,11 +226,11 @@ static_assert(sizeof(Class) == 376, "Change this only on purpose");
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
   auto const size = offsetof(Class, m_classVec) + sizeof(Class*) * classVecLen;
-  auto const mem = Util::low_malloc(size);
+  auto const mem = low_malloc(size);
   try {
     return new (mem) Class(preClass, parent, classVecLen);
   } catch (...) {
-    Util::low_free(mem);
+    low_free(mem);
     throw;
   }
 }
@@ -362,7 +362,7 @@ void Class::atomicRelease() {
   assert(!m_cachedClass.bound());
   assert(!getCount());
   this->~Class();
-  Util::low_free(this);
+  low_free(this);
 }
 
 Class *Class::getCached() const {

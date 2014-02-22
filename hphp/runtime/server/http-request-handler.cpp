@@ -206,7 +206,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     bool original = compressed;
     // check against static content cache
     if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
-      Util::ScopedMem decompressed_data;
+      ScopedMem decompressed_data;
       // (qigao) not calling stat at this point because the timestamp of
       // local cache file is not valuable, maybe misleading. This way
       // the Last-Modified header will not show in response.

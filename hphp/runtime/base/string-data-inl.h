@@ -127,7 +127,7 @@ inline void StringData::setSize(int len) {
 }
 
 inline void StringData::checkStack() const {
-  assert(uintptr_t(this) - Util::s_stackLimit >= Util::s_stackSize);
+  assert(uintptr_t(this) - s_stackLimit >= s_stackSize);
 }
 
 inline const char* StringData::data() const {

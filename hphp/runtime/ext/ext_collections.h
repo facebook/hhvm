@@ -30,9 +30,9 @@
 
 #define DECLARE_ITERABLE_MATERIALIZE_METHODS()       \
   Object t_tovector();                               \
-  Object t_tofrozenvector();                         \
+  Object t_tofixedvector();                          \
   Object t_toset();                                  \
-  Object t_tofrozenset()
+  Object t_tofixedset()
 
 #define DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS()  \
   DECLARE_ITERABLE_MATERIALIZE_METHODS();            \
@@ -62,7 +62,7 @@ void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class BaseVector: encapsulates functionality that is common to both
-// c_Vector and c_FrozenVector. It doesn't map to any PHP-land class.
+// c_Vector and c_FixedVector. It doesn't map to any PHP-land class.
 
 class BaseVector : public ExtCollectionObjectData {
 
@@ -308,7 +308,7 @@ class BaseVector : public ExtCollectionObjectData {
   TypedValue* m_data;
   uint m_capacity;
   int32_t m_version;
-  // A pointer to a FrozenVector which with it shares the buffer.
+  // A pointer to a FixedVector which with it shares the buffer.
   Object m_frozenCopy;
 
  private:
@@ -428,7 +428,7 @@ class c_Vector : public BaseVector {
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc);
 
-  void initFvFields(c_FrozenVector* fv);
+  void initFvFields(c_FixedVector* fv);
   int64_t checkRequestedCapacity(CVarRef sz);
 
   // Friends
@@ -467,12 +467,12 @@ class c_VectorIterator : public ExtObjectData {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class FrozenVector
+// class FixedVector
 
-FORWARD_DECLARE_CLASS(FrozenVector);
-class c_FrozenVector : public BaseVector {
+FORWARD_DECLARE_CLASS(FixedVector);
+class c_FixedVector : public BaseVector {
 public:
-  DECLARE_CLASS_NO_SWEEP(FrozenVector)
+  DECLARE_CLASS_NO_SWEEP(FixedVector)
 
 public:
   // The methods that implement the ConstVector interface simply forward
@@ -512,8 +512,8 @@ public:
   static Object ti_slice(CVarRef vec, CVarRef offset,
                          CVarRef len = uninit_null());
 
-  static c_FrozenVector* Clone(ObjectData* obj) {
-    return BaseVector::Clone<c_FrozenVector>(obj);
+  static c_FixedVector* Clone(ObjectData* obj) {
+    return BaseVector::Clone<c_FixedVector>(obj);
   }
 
   DECLARE_COLLECTION_MAGIC_METHODS();
@@ -522,11 +522,11 @@ public:
 
 public:
 
-  explicit c_FrozenVector(Class* cls = c_FrozenVector::classof());
+  explicit c_FixedVector(Class* cls = c_FixedVector::classof());
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type) {
-    BaseVector::Unserialize("FrozenVector", obj, uns, sz, type);
+    BaseVector::Unserialize("FixedVector", obj, uns, sz, type);
   }
 
   friend class c_Vector;
@@ -882,7 +882,7 @@ class BaseMap : public ExtCollectionObjectData {
 
   friend class c_MapIterator;
   friend class c_Vector;
-  friend class c_FrozenMap;
+  friend class c_FixedMap;
   friend class ArrayIter;
   friend class c_GenMapWaitHandle;
 
@@ -1009,18 +1009,18 @@ class c_Map : public BaseMap {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class FrozenMap
+// class FixedMap
 
-FORWARD_DECLARE_CLASS(FrozenMap);
-class c_FrozenMap : public BaseMap {
+FORWARD_DECLARE_CLASS(FixedMap);
+class c_FixedMap : public BaseMap {
 
  public:
-  DECLARE_CLASS_NO_SWEEP(FrozenMap)
+  DECLARE_CLASS_NO_SWEEP(FixedMap)
 
   public:
-  explicit c_FrozenMap(Class* cls = c_FrozenMap::classof());
+  explicit c_FixedMap(Class* cls = c_FixedMap::classof());
 
-  static c_FrozenMap* Clone(ObjectData* obj);
+  static c_FixedMap* Clone(ObjectData* obj);
 
  public: // PHP API - No inlines (required by .idl.json linking)
   void t___construct(CVarRef iterable = null_variant);
@@ -1523,13 +1523,13 @@ class c_Set : public BaseSet {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class FrozenSet
+// class FixedSet
 
-FORWARD_DECLARE_CLASS(FrozenSet);
-class c_FrozenSet : public BaseSet {
+FORWARD_DECLARE_CLASS(FixedSet);
+class c_FixedSet : public BaseSet {
 
  public:
-  DECLARE_CLASS_NO_SWEEP(FrozenSet)
+  DECLARE_CLASS_NO_SWEEP(FixedSet)
 
  public:
   // PHP-land methods.
@@ -1562,12 +1562,12 @@ class c_FrozenSet : public BaseSet {
   static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
 
  public:
-  explicit c_FrozenSet(Class* cls = c_FrozenSet::classof());
+  explicit c_FixedSet(Class* cls = c_FixedSet::classof());
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
-  static c_FrozenSet* Clone(ObjectData* obj);
+  static c_FixedSet* Clone(ObjectData* obj);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1777,11 +1777,11 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2);
 void collectionDeepCopyTV(TypedValue* tv);
 ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);
-ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec);
+ObjectData* collectionDeepCopyFixedVector(c_FixedVector* vec);
 ObjectData* collectionDeepCopyMap(c_Map* mp);
-ObjectData* collectionDeepCopyFrozenMap(c_FrozenMap* mp);
+ObjectData* collectionDeepCopyFixedMap(c_FixedMap* mp);
 ObjectData* collectionDeepCopySet(c_Set* mp);
-ObjectData* collectionDeepCopyFrozenSet(c_FrozenSet* st);
+ObjectData* collectionDeepCopyFixedSet(c_FixedSet* st);
 ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
 ObjectData* newCollectionHelper(uint32_t type, uint32_t size);

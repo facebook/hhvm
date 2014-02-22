@@ -6,7 +6,7 @@
 
 class A {
 
-  public $fv  = FrozenVector {FrozenVector {1, 2}, 3};
+  public $fv  = FixedVector {FixedVector {1, 2}, 3};
   public $v   = Vector {Vector {1, 2}, 3};
   public $s   = Set {1, 2, 3};
   public $m   = Map {0 => Map{0 => 1}, 1 => 2, 2 => 3};
@@ -40,14 +40,14 @@ function main() {
   print_r($a1->sm);
   print_r($a2->sm);
 
-  // Pair and FrozenVector are immutable, so
+  // Pair and FixedVector are immutable, so
   // we can't do a similar test for them.
 
   echo "\nPair...\n";
   print_r($a1->p);
   print_r($a2->p);
 
-  echo "\nFrozenVector...\n";
+  echo "\nFixedVector...\n";
   print_r($a1->fv);
   print_r($a2->fv);
 }

@@ -67,7 +67,7 @@ int(3)
 
 = differencebykey =
 bool(true)
-HH\FrozenMap [
+HH\FixedMap [
 object(HH\Pair)#20 (2) {
   [0]=>
   int(3)
@@ -78,7 +78,7 @@ object(HH\Pair)#20 (2) {
 
 = map =
 bool(true)
-HH\FrozenMap [
+HH\FixedMap [
 object(HH\Pair)#22 (2) {
   [0]=>
   int(0)
@@ -101,7 +101,7 @@ object(HH\Pair)#24 (2) {
 
 = mapwithkey =
 bool(true)
-HH\FrozenMap [
+HH\FixedMap [
 object(HH\Pair)#30 (2) {
   [0]=>
   int(0)
@@ -139,7 +139,7 @@ object(HH\Pair)#32 (2) {
 
 = filter =
 bool(true)
-HH\FrozenMap [
+HH\FixedMap [
 object(HH\Pair)#35 (2) {
   [0]=>
   int(0)
@@ -150,7 +150,7 @@ object(HH\Pair)#35 (2) {
 
 = filterwithkey =
 bool(true)
-HH\FrozenMap [
+HH\FixedMap [
 object(HH\Pair)#37 (2) {
   [0]=>
   int(0)
@@ -167,7 +167,7 @@ object(HH\Pair)#38 (2) {
 
 = fromItems =
 bool(true)
-HH\FrozenMap [
+HH\FixedMap [
 object(HH\Pair)#45 (2) {
   [0]=>
   int(1)

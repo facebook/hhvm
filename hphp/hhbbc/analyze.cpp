@@ -157,20 +157,20 @@ FuncAnalysis do_analyze(const Index& index,
     incompleteQ.erase(begin(incompleteQ));
     PropertiesInfo props(index, inputCtx, clsAnalysis);
 
-    FTRACE(2, "block #{}\nin {}\n{}", blk->id,
+    FTRACE(2, "block #{}\nin {}{}", blk->id,
       state_string(*ctx.func, ai.bdata[blk->id].stateIn),
       property_state_string(props));
     ++interp_counter;
 
     auto propagate = [&] (php::Block& target, const State& st) {
       FTRACE(2, "     -> {}\n", target.id);
-      FTRACE(4, "target old {}\n",
+      FTRACE(4, "target old {}",
         state_string(*ctx.func, ai.bdata[target.id].stateIn));
 
       if (merge_into(ai.bdata[target.id].stateIn, st)) {
         incompleteQ.insert(rpoId(&target));
       }
-      FTRACE(4, "target new {}\n",
+      FTRACE(4, "target new {}",
         state_string(*ctx.func, ai.bdata[target.id].stateIn));
     };
 

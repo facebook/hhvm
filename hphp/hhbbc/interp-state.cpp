@@ -224,7 +224,6 @@ std::string state_string(const php::Func& f, const State& st) {
 std::string property_state_string(const PropertiesInfo& props) {
   std::string ret;
 
-  ret += "properties:\n";
   for (auto& kv : props.privateProperties()) {
     ret += folly::format("$this->{: <14} :: {}\n",
       kv.first->data(),

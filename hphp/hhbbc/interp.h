@@ -2654,11 +2654,11 @@ private: // member instructions
     // The m_state before miBase is propagated across factored edges
     // because wasPEI will be true---no need for miThrow.
     state.base = miBase(state);
-    FTRACE(4, "   base: {}\n", base_string(state.base));
+    FTRACE(4, "    base: {}\n", base_string(state.base));
     miThrow();
     for (; state.mInd < mvec.mcodes.size() - 1; ++state.mInd) {
       miIntermediate(state);
-      FTRACE(4, "   base: {}\n", base_string(state.base));
+      FTRACE(4, "    base: {}\n", base_string(state.base));
       // Note: this one might not be necessary: review whether member
       // instructions can ever modify local types on itermediate dims.
       miThrow();

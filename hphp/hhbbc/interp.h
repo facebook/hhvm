@@ -2049,6 +2049,13 @@ private: // member instructions
     if (elemCouldPromoteToArr(locTy)) {
       setLoc(state.mvec.locBase, union_of(locTy, TArr));
     }
+    if (locTy.subtypeOf(TStr)) {
+      // We need to do this even if was already a Str, because we may
+      // modify a SStr or SStr=.  The reload of locTy is in case we
+      // also took the case above.
+      setLoc(state.mvec.locBase,
+             union_of(locAsCell(state.mvec.locBase), TStr));
+    }
   }
 
   /*

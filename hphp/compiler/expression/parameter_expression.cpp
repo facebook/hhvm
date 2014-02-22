@@ -311,7 +311,7 @@ void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
   if (m_defaultValue != nullptr) propCount++;
   cg.printObjectHeader("ParameterDeclaration", propCount);
   if (m_attributeList) {
-    cg.printPropertyHeader("isPassedByReference");
+    cg.printPropertyHeader("attributes");
     cg.printExpressionVector(m_attributeList);
   }
   if (m_modifier != 0) {

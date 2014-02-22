@@ -53,39 +53,6 @@ HH\Map[
 a => 1
 c => 3
 ]
-******** StableMap ********
-callback(a, 1)
-callback(b, 2)
-callback(c, 3)
-callback(d, 4)
-========
-HH\Map[
-a => 101
-b => 102
-c => 103
-d => 104
-]
-========
-callback(a, 1)
-callback(b, 2)
-callback(c, 3)
-callback(d, 4)
-========
-HH\Map[
-a => 1
-c => 3
-]
-========
-callback(a, 1)
-callback(b, 2)
-callback(c, 3)
-callback(d, 4)
-========
-bool(true)
-HH\Map[
-a => 1
-c => 3
-]
 ******** Pair ********
 callback(0, 1)
 callback(1, 2)
@@ -137,28 +104,6 @@ callback(c, 3)
 c => 103
 callback(d, 4)
 d => 104
-========
-========
-LazyFilterWithKeyIterable[
-callback(a, 1)
-a => 1
-callback(b, 2)
-callback(c, 3)
-c => 3
-callback(d, 4)
-]
-******** LazyStableMap ********
-========
-LazyMapWithKeyIterable[
-callback(a, 1)
-a => 101
-callback(b, 2)
-b => 102
-callback(c, 3)
-c => 103
-callback(d, 4)
-d => 104
-]
 ========
 ========
 LazyFilterWithKeyIterable[

@@ -1,4 +1,3 @@
-
 Vector...
 HH\Vector Object
 (
@@ -31,29 +30,6 @@ bool(false)
 
 Map...
 bool(false)
-
-StableMap...
-HH\Map Object
-(
-    [0] => HH\Map Object
-        (
-            [0] => 1
-        )
-
-    [1] => 2
-    [2] => 3
-    [3] => 4
-)
-HH\Map Object
-(
-    [0] => HH\Map Object
-        (
-            [0] => 1
-        )
-
-    [1] => 2
-    [2] => 3
-)
 
 Pair...
 HH\Pair Object

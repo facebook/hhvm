@@ -7,7 +7,6 @@ function main() {
   var_dump($fm1 == $fm1);
   var_dump($fm1 == ImmMap {});
   var_dump($fm1 == Map {});
-  var_dump($fm1 == StableMap {});
 
   $fm2 = ImmMap {1 => 'a', 2 => 'b'};
   var_dump($fm2 == $fm2);
@@ -18,11 +17,8 @@ function main() {
   echo '= equality with other mapping types =', "\n";
   $fm = ImmMap {1 => 'a', 2 => 'b'};
   $m = Map {2 => 'b', 1 => 'a'};
-  $sm = StableMap {2 => 'b', 1 => 'a'};
   var_dump($m == $fm);
   var_dump($fm == $m);
-  var_dump($sm == $fm);
-  var_dump($fm == $sm);
 
   echo '= inequality =', "\n";
 

@@ -28,8 +28,6 @@ function main() {
   show_keyed_iter(new ImmMap(Map {0 => 1, 10 => 2, 40 => 3}));
   echo "ImmMap\n";
   show_keyed_iter(new ImmMap(new ImmMap(Map {0 => 1, 10 => 2, 40 => 3})));
-  echo "StableMap\n";
-  show_keyed_iter(new ImmMap(StableMap {0 => 1, 10 => 2, 40 => 3}));
   echo "array\n";
   show_keyed_iter(new ImmMap(array(1, 2, 3)));
 

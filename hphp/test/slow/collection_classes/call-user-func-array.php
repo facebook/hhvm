@@ -33,13 +33,13 @@ function main() {
   echo "\n";
   $cufa('C::foo', Map {2 => 123});
   echo "\n";
-  call_user_func_array('var_dump', StableMap {4 => 123, 6 => 456});
+  call_user_func_array('var_dump', Map {4 => 123, 6 => 456});
   echo "\n";
-  call_user_func_array('C::foo', StableMap {4 => 123, 6 => 456});
+  call_user_func_array('C::foo', Map {4 => 123, 6 => 456});
   echo "\n";
-  $cufa('var_dump', StableMap {4 => 123, 6 => 456});
+  $cufa('var_dump', Map {4 => 123, 6 => 456});
   echo "\n";
-  $cufa('C::foo', StableMap {4 => 123, 6 => 456});
+  $cufa('C::foo', Map {4 => 123, 6 => 456});
   echo "\n";
   call_user_func_array('var_dump', Set {123});
   echo "\n";

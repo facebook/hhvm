@@ -23,7 +23,7 @@ function f2() {
   var_dump($a);
 }
 function f3() {
-  $a = StableMap {
+  $a = Map {
 }
 ;
   $b = Vector {
@@ -33,10 +33,10 @@ function f3() {
   var_dump($a);
 }
 function f4() {
-  $a = StableMap {
+  $a = Map {
 }
 ;
-  $b = StableMap {
+  $b = Map {
 3 => 42, 2 => 73}
 ;
   $a->setAll($b);

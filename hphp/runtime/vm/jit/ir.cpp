@@ -33,7 +33,6 @@
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -72,7 +71,6 @@ namespace {
 #define DAllocObj HasDest
 #define DLdRef    HasDest
 #define DThis     HasDest
-#define DArith    HasDest
 #define DMulti    NaryDest
 #define DSetElem  HasDest
 #define DStk(x)   ModifiesStack|(x)
@@ -117,7 +115,6 @@ struct {
 #undef DAllocObj
 #undef DLdRef
 #undef DThis
-#undef DArith
 #undef DMulti
 #undef DSetElem
 #undef DStk

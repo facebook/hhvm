@@ -652,7 +652,7 @@ strhash_t StringData::hashHelper() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Debug
 
-std::string StringData::toCPPString() const {
+std::string StringData::toCppString() const {
   StringSlice s = slice();
   return std::string(s.ptr, s.len);
 }

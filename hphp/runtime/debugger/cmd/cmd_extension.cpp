@@ -49,7 +49,7 @@ void CmdExtension::list(DebuggerClient &client) {
     Array exts = Extension::GetLoadedExtensions();
     std::vector<std::string> items;
     for (ArrayIter iter(exts); iter; ++iter) {
-      items.push_back(iter.second().toString()->toCPPString());
+      items.push_back(iter.second().toString().toCppString());
     }
     client.addCompletion(items);
   }

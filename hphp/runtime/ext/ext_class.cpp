@@ -329,7 +329,7 @@ bool f_method_exists(CVarRef class_or_object, const String& method_name) {
   const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
   if (cls->lookupMethod(method_name.get()) != NULL) return true;
-  if (cls->attrs() & AttrAbstract) {
+  if (cls->attrs() & (AttrAbstract | AttrInterface)) {
     const Class::InterfaceMap& ifaces = cls->allInterfaces();
     for (int i = 0, size = ifaces.size(); i < size; i++) {
       if (ifaces[i]->lookupMethod(method_name.get())) return true;

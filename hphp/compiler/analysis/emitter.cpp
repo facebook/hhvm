@@ -8586,7 +8586,7 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     // and requires that the hhas systemlib is already loaded.
     if (auto const existing = Unit::lookupFunc(name)) {
       if (!existing->isCPPBuiltin()) {
-        name = makeStaticString("__builtin_" + name->toCPPString());
+        name = makeStaticString("__builtin_" + name->toCppString());
       }
     }
 

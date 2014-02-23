@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <iterator>
 #include <cmath>
-#include <bitset>
 
 #include "folly/Optional.h"
 
@@ -51,92 +50,13 @@ namespace HPHP { namespace HHBBC {
 
 const StaticString s_empty("");
 const StaticString s_extract("extract");
+const StaticString s_compact("compact");
+const StaticString s_get_defined_vars("get_defined_vars");
 const StaticString s_Exception("Exception");
 const StaticString s_Continuation("Continuation");
 const StaticString s_stdClass("stdClass");
-const StaticString s_unreachable("static analysis error: supposedly "
-                                 "unreachable code was reached");
-const StaticString s_86pinit("86pinit"), s_86sinit("86sinit");
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Each single-instruction step of the abstract interpreter sends
- * various information back to the caller in this structure.
- */
-struct StepFlags {
-  /*
-   * Potentially Exception-throwing Instruction.
-   *
-   * Instructions are assumed to be PEIs unless the abstract
-   * interpreter says they aren't.  A PEI must propagate the state
-   * from before the instruction across all factored exit edges.
-   *
-   * Some instructions that can throw with mid-opcode states need to
-   * handle those cases specially.
-   */
-  bool wasPEI = true;
-
-  /*
-   * If a conditional branch at the end of the BB was known to be
-   * taken (e.g. because the condition was a constant), this flag
-   * indicates the state doesn't need to be propagated to the
-   * fallthrough block.
-   */
-  bool tookBranch = false;
-
-  /*
-   * If true, we made a call to a function that never returns.
-   */
-  bool calledNoReturn = false;
-
-  /*
-   * If an instruction sets this flag, it means that if it pushed a
-   * type with a constant value, it had no side effects other than
-   * computing the value which was pushed.  This means the instruction
-   * can be replaced with pops of its inputs followed by a push of the
-   * constant.
-   */
-  bool canConstProp = false;
-
-  /*
-   * If an instruction may read or write to locals, these flags
-   * indicate which ones.  We don't track this information for local
-   * ids past 64.
-   *
-   * This is currently only used to try to leave out unnecessary type
-   * assertions on locals (for options.FilterAssertions).
-   */
-  std::bitset<64> mayReadLocalSet;
-
-  /*
-   * If the instruction on this step could've been replaced with
-   * cheaper bytecode, this is the list of bytecode that can be used.
-   */
-  folly::Optional<std::vector<Bytecode>> strengthReduced;
-
-  /*
-   * If this is not none, the interpreter executed a return on this
-   * step, with this type.
-   */
-  folly::Optional<Type> returned;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * TODO: move to interp state?
- */
-
-// Return a copy of a State without copying either the evaluation
-// stack or FPI stack.
-inline State without_stacks(State const& src) {
-  auto ret = State{};
-  ret.initialized       = src.initialized;
-  ret.thisAvailable     = src.thisAvailable;
-  ret.locals            = src.locals;
-  return ret;
-}
+const StaticString s_86pinit("86pinit");
+const StaticString s_86sinit("86sinit");
 
 //////////////////////////////////////////////////////////////////////
 // Some member instruction type-system predicates.
@@ -1804,12 +1724,12 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::InitProp& op) {
     auto const t = popC();
     switch (op.subop) {
-      case InitPropOp::Static: {
-        mergeSelfProp(op.str1, t);
-      } break;
-      case InitPropOp::NonStatic: {
-        mergeThisProp(op.str1, t);
-      } break;
+    case InitPropOp::Static:
+      mergeSelfProp(op.str1, t);
+      break;
+    case InitPropOp::NonStatic:
+      mergeThisProp(op.str1, t);
+      break;
     }
   }
 
@@ -2862,6 +2782,15 @@ private:
     if (name->isame(s_extract.get())) {
       readUnknownLocals();
       killLocals();
+      return;
+    }
+    // compact() and get_defined_vars() read the local variable
+    // environment.  We could check which locals for compact, but for
+    // now we just include them all.
+    if (name->isame(s_compact.get()) ||
+        name->isame(s_get_defined_vars.get())) {
+      readUnknownLocals();
+      return;
     }
   }
 
@@ -2870,7 +2799,7 @@ private:
     case FPIKind::Unknown:
       // fallthrough
     case FPIKind::Func:
-      // Could be a dynamic call to extract:
+      // Could be a dynamic call to extract, get_defined_vars, etc:
       if (!ar.func) {
         readUnknownLocals();
         killLocals();

@@ -1,0 +1,29 @@
+array(3) {
+  ["b"]=>
+  string(1) "c"
+  ["d"]=>
+  array(3) {
+    [0]=>
+    string(1) "e"
+    [1]=>
+    string(1) "f"
+    ["g "]=>
+    string(1) "h"
+  }
+  ["i"]=>
+  array(1) {
+    [1]=>
+    array(1) {
+      [2]=>
+      array(2) {
+        [34]=>
+        string(1) "j"
+        [5]=>
+        array(1) {
+          [6]=>
+          string(1) "k"
+        }
+      }
+    }
+  }
+}

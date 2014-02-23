@@ -39,7 +39,7 @@ namespace HPHP { namespace JIT {
  * function isn't known at translation time).  4-way cache.
  */
 struct FuncCache {
-  static constexpr int kNumLines = 4;
+  static constexpr uint32_t kNumLines = 4;
 
   struct Pair {
     StringData*  m_key;
@@ -66,7 +66,7 @@ void invalidateForRenameFunction(const StringData* name);
  * class isn't known at translation time).  4-way cache.
  */
 struct ClassCache {
-  static constexpr int kNumLines = 4;
+  static constexpr uint32_t kNumLines = 4;
 
   struct Pair {
     StringData*  m_key;

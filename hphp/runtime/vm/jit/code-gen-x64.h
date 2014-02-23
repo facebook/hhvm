@@ -197,7 +197,6 @@ private:
   template<class Loc>
   void emitTypeGuard(Type type, Loc typeLoc, Loc dataLoc);
 
-  void cgStRefWork(IRInstruction* inst, Width);
   void cgIncRefWork(Type type, SSATmp* src, PhysLoc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
@@ -209,15 +208,6 @@ private:
   void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
 
   template<class Oper, class RegType>
-  void cgBinaryOp(IRInstruction*,
-                  void (Asm::*intImm)(Immed, RegType),
-                  void (Asm::*intRR)(RegType, RegType),
-                  void (Asm::*mov)(RegType, RegType),
-                  void (Asm::*fpRR)(RegXMM, RegXMM),
-                  Oper,
-                  RegType (*conv)(PhysReg),
-                  Commutativity);
-  template<class Oper, class RegType>
   void cgBinaryIntOp(IRInstruction*,
                      void (Asm::*intImm)(Immed, RegType),
                      void (Asm::*intRR)(RegType, RegType),
@@ -225,15 +215,14 @@ private:
                      Oper,
                      RegType (*conv)(PhysReg),
                      Commutativity);
+  void cgBinaryDblOp(IRInstruction*,
+                     void (Asm::*fpRR)(RegXMM, RegXMM));
 
   template<class Oper>
   void cgShiftCommon(IRInstruction* inst,
                      void (Asm::*instrIR)(Immed, Reg64),
                      void (Asm::*instrR)(Reg64),
                      Oper oper);
-
-  void cgNegateWork(PhysLoc dst, SSATmp* src, PhysLoc src_loc);
-  void cgNotWork(SSATmp* dst, SSATmp* src);
 
   void emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                  bool    staticCallee);
@@ -269,10 +258,6 @@ private:
   bool emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
                         SSATmp* src2, PhysLoc loc2,
                         void(Asm::*emitFunc)(Reg64));
-  bool emitInc(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-               SSATmp* src2, PhysLoc loc2);
-  bool emitDec(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-               SSATmp* src2, PhysLoc loc2);
 
 private:
   PhysReg selectScratchReg(IRInstruction* inst);

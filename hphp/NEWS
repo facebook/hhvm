@@ -1,4 +1,16 @@
+  - Remove legacy linear-scan register allocator and Eval.HHIRXls option
+
+"Eminem" 18-Feb-2014
   - reenabled jemalloc tcache flush for idle threads
+  - array_combine now performs __toString conversion on objects in $keys
+  - Allow streams in move_uploaded_file
+  - Fix a bug double closing a UserFile
+  - Warn when first arg to call_user_func is an object with no __invoke
+  - kill userland hdf functions
+  - Final method reports itself as final
+  - Implement IntlCalendar
+  - Disallow create_function in RepoAuthoritative mode
+  - Case-insensitive check for Accept-Encoding: gzip
 
 "Donald Glover" 3-Feb-2014
   - Support for "::class"

@@ -203,6 +203,8 @@ extern const int64_t k_CURLOPT_POSTFIELDS;
 extern const int64_t k_CURLOPT_POSTREDIR;
 extern const int64_t k_CURLOPT_POSTQUOTE;
 extern const int64_t k_CURLOPT_PRIVATE;
+extern const int64_t k_CURLOPT_PROGRESSDATA;
+extern const int64_t k_CURLOPT_PROGRESSFUNCTION;
 extern const int64_t k_CURLOPT_PROXY;
 extern const int64_t k_CURLOPT_PROXYAUTH;
 extern const int64_t k_CURLOPT_PROXYPORT;

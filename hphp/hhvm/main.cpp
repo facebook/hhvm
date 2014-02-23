@@ -52,8 +52,8 @@ int main(int argc, char** argv) {
     return HPHP::emulate_zend(argc - 1, argv + 1);
   }
 
-  HPHP::Util::embedded_data data;
-  if (!HPHP::Util::get_embedded_data("repo", &data)) {
+  HPHP::embedded_data data;
+  if (!HPHP::get_embedded_data("repo", &data)) {
     return HPHP::execute_program(argc, argv);
   }
   std::string repo;

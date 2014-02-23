@@ -1452,8 +1452,8 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
     }
   }
 
-  Util::embedded_data desc;
-  if (!Util::get_embedded_data(section.c_str(), &desc, filename)) return "";
+  embedded_data desc;
+  if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
 
   std::ifstream ifs(desc.m_filename);
   if (!ifs.good()) return "";

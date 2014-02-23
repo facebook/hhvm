@@ -32,7 +32,7 @@
 #include <mach-o/getsect.h>
 #endif
 
-namespace HPHP { namespace Util {
+namespace HPHP {
 
 bool get_embedded_data(const char *section, embedded_data* desc,
                        const std::string &filename /*= "" */) {
@@ -95,4 +95,4 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   return false;
 }
 
-} }
+}

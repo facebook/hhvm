@@ -1303,7 +1303,7 @@ Variant f_metaphone(const String& str, int phones /* = 0 */) {
 String f_html_entity_decode(const String& str, int flags /* = k_ENT_COMPAT */,
                             const String& charset /* = "UTF-8" */) {
   const char *scharset = charset.data();
-  if (!*scharset) scharset = "UTF-8";
+  if (!*scharset) scharset = "ISO-8859-1";
   return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 scharset, true);
 }
@@ -1313,9 +1313,9 @@ String f_htmlentities(const String& str, int flags /* = k_ENT_COMPAT */,
                       bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
-  if (!*scharset) scharset = "UTF-8";
+  if (!*scharset) scharset = "ISO-8859-1";
   return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyleBitmask(flags),
-                                scharset, true);
+                                scharset, double_encode, true);
 }
 
 String f_htmlspecialchars_decode(const String& str,
@@ -1329,9 +1329,9 @@ String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
                           bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
-  if (!*scharset) scharset = "UTF-8";
+  if (!*scharset) scharset = "ISO-8859-1";
   return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyleBitmask(flags),
-                                scharset, double_encode);
+                                scharset, double_encode, false);
 }
 
 String f_fb_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,

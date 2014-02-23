@@ -561,7 +561,8 @@ inline static bool decode_entity(char *entity, int *len,
 }
 
 char *string_html_encode(const char *input, int &len,
-                         const int64_t qsBitmask, bool utf8, bool nbsp) {
+                         const int64_t qsBitmask, bool utf8, 
+                         bool dEncode, bool htmlEnt) {
   assert(input);
   /**
    * Though seems to be wasting memory a lot, we have to realize most of the
@@ -606,15 +607,11 @@ char *string_html_encode(const char *input, int &len,
       *q++ = '&'; *q++ = 'g'; *q++ = 't'; *q++ = ';';
       break;
     case '&':
-      if(!nbsp){
+      if(!dEncode){
         p++;
-        if (!EntityMapInited) {
-          Lock lock(EntityMapMutex);
-          if (!EntityMapInited) {
-            init_entity_table();
-            EntityMapInited = true;
-          }
-        }
+        
+        html_get_entity_map();
+  
         bool found = false;
         for (const char *t = p; *t; t++) {
           if (*t == ';') {
@@ -654,7 +651,7 @@ char *string_html_encode(const char *input, int &len,
       }
       break;
     case static_cast<unsigned char>('\xc2'):
-      if (nbsp && utf8 && p != end && *(p+1) == '\xa0') {
+      if (htmlEnt && utf8 && p != end && *(p+1) == '\xa0') {
         *q++ = '&'; *q++ = 'n'; *q++ = 'b'; *q++ = 's'; *q++ = 'p'; *q++ = ';';
         p++;
         break;

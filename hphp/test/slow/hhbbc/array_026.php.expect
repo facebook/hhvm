@@ -1,0 +1,7 @@
+bool(false)
+bool(false)
+bool(true)
+array(1) {
+  ["x"]=>
+  int(3)
+}

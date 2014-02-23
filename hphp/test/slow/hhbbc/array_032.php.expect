@@ -1,0 +1,14 @@
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+array(2) {
+  ["l"]=>
+  int(2)
+  ["z"]=>
+  array(1) {
+    ["k"]=>
+    &string(3) "heh"
+  }
+}

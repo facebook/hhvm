@@ -25,7 +25,7 @@
 /**
  * Network utility functions.
  */
-namespace HPHP { namespace Util {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // thread-safe network functions
 
@@ -78,6 +78,6 @@ std::string safe_inet_ntoa(struct in_addr &in);
 std::string GetPrimaryIP();
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 #endif // incl_HPHP_NETWORK_H_

@@ -720,7 +720,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerType = server["Type"].getString(ServerType);
     ServerIP = server["IP"].getString();
     ServerFileSocket = server["FileSocket"].getString();
-    ServerPrimaryIP = Util::GetPrimaryIP();
+    ServerPrimaryIP = GetPrimaryIP();
     ServerPort = server["Port"].getUInt16(80);
     ServerBacklog = server["Backlog"].getInt16(128);
     ServerConnectionLimit = server["ConnectionLimit"].getInt16(0);

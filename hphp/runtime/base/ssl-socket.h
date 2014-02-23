@@ -45,7 +45,7 @@ public:
   };
 
   static int GetSSLExDataIndex();
-  static SSLSocket *Create(const Util::HostURL &hosturl, double timeout);
+  static SSLSocket *Create(const HostURL &hosturl, double timeout);
 
 public:
   SSLSocket();

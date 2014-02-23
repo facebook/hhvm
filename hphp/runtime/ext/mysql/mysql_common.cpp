@@ -523,7 +523,7 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
     server = server.substr(0, slash_pos - 1);
   }
 
-  Util::HostURL hosturl(std::string(server), MySQL::GetDefaultPort());
+  HostURL hosturl(std::string(server), MySQL::GetDefaultPort());
   if (hosturl.isValid()) {
     host = hosturl.getHost();
     port = hosturl.getPort();

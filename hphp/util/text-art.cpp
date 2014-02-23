@@ -17,7 +17,7 @@
 
 #include <cassert>
 
-namespace HPHP { namespace Util { namespace TextArt {
+namespace HPHP { namespace TextArt {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool s_use_utf8 = true;
@@ -51,4 +51,4 @@ const char *get_box_drawing_char(BoxDrawing name) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}}
+}}

@@ -45,7 +45,7 @@
 #include <readline/history.h>
 #endif
 
-using namespace HPHP::Util::TextArt;
+using namespace HPHP::TextArt;
 
 #define PHP_WORD_BREAK_CHARACTERS " \t\n\"\\'`@=;,|{[()]}+*%^!~&"
 

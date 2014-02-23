@@ -548,8 +548,10 @@ static const StaticString
   s_DISTORTION_BILINEARFORWARD("DISTORTION_BILINEARFORWARD"),
   s_DISTORTION_BILINEARREVERSE("DISTORTION_BILINEARREVERSE"),
   s_DISTORTION_RESIZE("DISTORTION_RESIZE"),
+#if MagickLibVersion >= 0x671
   s_DISTORTION_CYLINDER2PLANE("DISTORTION_CYLINDER2PLANE"),
   s_DISTORTION_PLANE2CYLINDER("DISTORTION_PLANE2CYLINDER"),
+#endif
 
   // ALPHACHANNEL constants
   s_ALPHACHANNEL_ACTIVATE("ALPHACHANNEL_ACTIVATE"),
@@ -1148,10 +1150,12 @@ void loadImagickConstants() {
   registerImagickConstants(s_DISTORTION_BILINEARREVERSE,
                            BilinearReverseDistortion);
   registerImagickConstants(s_DISTORTION_RESIZE, ResizeDistortion);
+#if MagickLibVersion >= 0x671
   registerImagickConstants(s_DISTORTION_CYLINDER2PLANE,
                            Cylinder2PlaneDistortion);
   registerImagickConstants(s_DISTORTION_PLANE2CYLINDER,
                            Plane2CylinderDistortion);
+#endif
 
   // ALPHACHANNEL constants
   registerImagickConstants(s_ALPHACHANNEL_ACTIVATE, ActivateAlphaChannel);

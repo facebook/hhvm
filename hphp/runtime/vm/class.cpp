@@ -23,6 +23,7 @@
 #include "hphp/util/debug.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/parser/parser.h"
@@ -192,10 +193,35 @@ void PreClass::prettyPrint(std::ostream &out) const {
   }
 }
 
+const StaticString s_nativedata("__nativedata");
+void PreClass::setUserAttributes(const UserAttributeMap &ua) {
+  m_userAttributes = ua;
+  m_nativeDataInfo = nullptr;
+  if (!ua.size()) return;
+
+  // Check for <<__NativeData("Type")>>
+  auto it = ua.find(s_nativedata.get());
+  if (it == ua.end()) return;
+
+  TypedValue ndiInfo = it->second;
+  if (ndiInfo.m_type != KindOfArray) return;
+
+  // Use the first string label which references a registered type
+  // In practice, there should generally only be one item and
+  // it should be a string, but maybe that'll be extended...
+  for (ArrayIter it(ndiInfo.m_data.parr); it; ++it) {
+    Variant val = it.second();
+    if (!val.isString()) continue;
+    if ((m_nativeDataInfo = Native::getNativeDataInfo(val.toString().get()))) {
+      break;
+    }
+  }
+}
+
 //=============================================================================
 // Class.
 
-static_assert(sizeof(Class) == 368, "Change this only on purpose");
+static_assert(sizeof(Class) == 376, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
@@ -236,6 +262,7 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   setInitializers();
   setClassVec();
   checkTraitConstraints();
+  setNativeDataInfo();
 }
 
 Class::~Class() {
@@ -1987,6 +2014,16 @@ void Class::setInterfaces() {
 
   m_interfaces.create(interfacesBuilder);
   checkInterfaceMethods();
+}
+
+void Class::setNativeDataInfo() {
+  for (auto cls = this; cls; cls = cls->parent()) {
+    if ((m_nativeDataInfo = cls->preClass()->nativeDataInfo())) {
+      m_instanceCtor = Native::nativeDataInstanceCtor;
+      m_instanceDtor = Native::nativeDataInstanceDtor;
+      break;
+    }
+  }
 }
 
 void Class::setUsedTraits() {

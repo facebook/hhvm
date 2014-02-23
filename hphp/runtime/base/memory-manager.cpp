@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
@@ -209,6 +210,7 @@ void MemoryManager::sweep() {
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
   Sweepable::SweepAll();
+  Native::sweepNativeData();
 }
 
 void MemoryManager::resetAllocator() {

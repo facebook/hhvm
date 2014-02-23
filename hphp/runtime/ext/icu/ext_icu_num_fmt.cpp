@@ -129,9 +129,9 @@ UNUM_DECL(TYPE_CURRENCY, 4);
 #undef UNUM_DECL
 #undef UNUM_ICU_DECL
 
-NumberFormatter::NumberFormatter(const String& locale,
-                                 int64_t style,
-                                 const String& pattern) {
+void NumberFormatter::setNumberFormatter(const String& locale,
+                                         int64_t style,
+                                         const String& pattern) {
   String pat;
   UErrorCode error = U_ZERO_ERROR;
   if (!pattern.empty()) {
@@ -157,7 +157,7 @@ NumberFormatter::NumberFormatter(const String& locale,
   }
 }
 
-NumberFormatter::NumberFormatter(const NumberFormatter *orig) {
+void NumberFormatter::setNumberFormatter(const NumberFormatter *orig) {
   if (!orig || !orig->formatter()) {
     s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
                       "Cannot clone unconstructed NumberFormatter");
@@ -169,14 +169,6 @@ NumberFormatter::NumberFormatter(const NumberFormatter *orig) {
     s_intl_error->set(error, "numfmt_clone: number formatter clone failed");
     throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
-}
-
-NumberFormatter *NumberFormatter::Get(Object obj) {
-  return GetResData<NumberFormatter>(obj, s_NumberFormatter.get());
-}
-
-Object NumberFormatter::wrap() {
-  return WrapResData(s_NumberFormatter.get());
 }
 
 #define NUMFMT_GET(dest, src, def) \
@@ -198,13 +190,8 @@ static void HHVM_METHOD(NumberFormatter, __construct,
                         const String& locale,
                         int64_t style,
                         const String& pattern) {
-  auto data = NEWOBJ(NumberFormatter)(locale, style, pattern);
-  this_->o_set(s_resdata, Resource(data), s_NumberFormatter.get());
-}
-
-static void HHVM_METHOD(NumberFormatter, __clone) {
-  auto data = NEWOBJ(NumberFormatter)(NumberFormatter::Get(this_));
-  this_->o_set(s_resdata, Resource(data), s_NumberFormatter.get());
+  Native::data<NumberFormatter>(this_.get())->
+    setNumberFormatter(locale, style, pattern);
 }
 
 static String HHVM_METHOD(NumberFormatter, formatCurrency,
@@ -582,7 +569,6 @@ static bool HHVM_METHOD(NumberFormatter, setTextAttribute,
 
 void IntlExtension::initNumberFormatter() {
   HHVM_ME(NumberFormatter, __construct);
-  HHVM_ME(NumberFormatter, __clone);
   HHVM_ME(NumberFormatter, formatCurrency);
   HHVM_ME(NumberFormatter, format);
   HHVM_ME(NumberFormatter, getAttribute);
@@ -678,6 +664,8 @@ void IntlExtension::initNumberFormatter() {
   NUMFMT_CONST(TYPE_DOUBLE);
   NUMFMT_CONST(TYPE_CURRENCY);
 #undef NUMFMT_CONST
+
+  Native::registerNativeDataInfo<NumberFormatter>(s_NumberFormatter.get());
 
   loadSystemlib("icu_num_fmt");
 }

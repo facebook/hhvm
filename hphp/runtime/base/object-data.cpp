@@ -36,6 +36,7 @@
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
@@ -999,7 +1000,7 @@ ObjectData::~ObjectData() {
 void ObjectData::DeleteObject(ObjectData* objectData) {
   auto const cls = objectData->getVMClass();
 
-  if (UNLIKELY(objectData->getAttribute(IsCppBuiltin))) {
+  if (UNLIKELY(objectData->getAttribute(InstanceDtor))) {
     return cls->instanceDtor()(objectData, cls);
   }
 
@@ -1788,6 +1789,9 @@ ObjectData* ObjectData::cloneImpl() {
   ObjectData* obj;
   Object o = obj = ObjectData::newInstance(m_cls);
   cloneSet(obj);
+  if (UNLIKELY(getAttribute(HasNativeData))) {
+    Native::nativeDataInstanceCopy(obj, this);
+  }
 
   auto const hasCloneBit = getAttribute(HasClone);
 

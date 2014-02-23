@@ -183,6 +183,11 @@ struct FuncInfo {
   Type returnTy = TInitGen;
 
   /*
+   * The number of times we've refined returnTy.
+   */
+  uint32_t returnRefinments{0};
+
+  /*
    * Whether $this can be null or not on entry to the method. Only applies
    * to method and it's always false for functions.
    */
@@ -1253,8 +1258,10 @@ std::vector<Context>
 Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
   auto const fdata = create_func_info(*m_data, func);
   assert(t.subtypeOf(fdata->returnTy));
-  if (t.strictSubtypeOf(fdata->returnTy)) {
+  if (!t.strictSubtypeOf(fdata->returnTy)) return {};
+  if (fdata->returnRefinments + 1 < options.returnTypeRefineLimit) {
     fdata->returnTy = t;
+    ++fdata->returnRefinments;
     return find_deps(*m_data, func, Dep::ReturnTy);
   }
   return {};

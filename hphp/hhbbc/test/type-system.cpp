@@ -283,6 +283,35 @@ std::vector<Type> all_with_waithandles(const Index& index) {
   return ret;
 }
 
+auto const specialized_array_examples = folly::lazy([&] {
+  auto ret = std::vector<Type>{};
+
+  auto test_map_a          = StructMap{};
+  test_map_a[s_test.get()] = ival(2);
+  ret.emplace_back(sarr_struct(test_map_a));
+
+  auto test_map_b          = StructMap{};
+  test_map_b[s_test.get()] = TInt;
+  ret.emplace_back(sarr_struct(test_map_b));
+
+  auto test_map_c          = StructMap{};
+  test_map_c[s_A.get()]    = TInt;
+  ret.emplace_back(sarr_struct(test_map_c));
+
+  auto test_map_d          = StructMap{};
+  test_map_d[s_A.get()]    = TInt;
+  test_map_d[s_test.get()] = TDbl;
+  ret.emplace_back(sarr_struct(test_map_d));
+
+  ret.emplace_back(arr_packedn(TInt));
+  ret.emplace_back(arr_mapn(TSStr, arr_mapn(TInt, TSStr)));
+  ret.emplace_back(arr_mapn(TSStr, TArr));
+  ret.emplace_back(arr_mapn(TSStr, arr_packedn(TSStr)));
+  ret.emplace_back(arr_mapn(TSStr, arr_mapn(TSStr, TSStr)));
+
+  return ret;
+});
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -1815,6 +1844,17 @@ TEST(Type, ArrOfArr) {
   EXPECT_FALSE(t1.couldBe(t4));
   EXPECT_FALSE(t4.couldBe(t3));
   EXPECT_TRUE(t4.subtypeOf(t2));
+}
+
+TEST(Type, WideningAlreadyStable) {
+  // A widening union on types that are already stable should not move
+  // the type anywhere.
+  for (auto& t : all()) {
+    EXPECT_EQ(widening_union(t, t), t);
+  }
+  for (auto& t : specialized_array_examples()) {
+    EXPECT_EQ(widening_union(t, t), t);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

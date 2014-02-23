@@ -339,6 +339,7 @@ private:
   friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);
+  friend Type widening_union(const Type&, const Type&);
   friend Type opt(Type);
   friend Type unopt(Type);
   friend bool is_opt(Type);
@@ -642,8 +643,29 @@ Type from_hni_constraint(SString s);
 /*
  * Make a type that represents values from either of the supplied
  * types.
+ *
+ * Importantly, note that there are infinitely long chains of array
+ * types that continue to become less specialized, so chains of
+ * union_of operations are not guaranteed to reach a stable point in
+ * finite steps.
  */
 Type union_of(Type a, Type b);
+
+/*
+ * Widening union.
+ *
+ * This operation returns a type T, such that a is a subtype of T, b
+ * is a subtype of T, and union_of(a, b) is a subtype of T.  The
+ * widening union also has the property that every possible chain of
+ * successive applications of the function eventually reaches a stable
+ * point.
+ *
+ * For portions of our analysis that rely on growing types reaching
+ * stable points for termination, this function must occasionally be
+ * used instead of union_of to guarantee termination.  See details in
+ * analyze.cpp.
+ */
+Type widening_union(const Type& a, const Type& b);
 
 /*
  * Returns the smallest type that `a' is a subtype of, from the

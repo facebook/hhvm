@@ -139,18 +139,27 @@ FuncAnalysis do_analyze(const Index& index,
     incompleteQ.insert(rpoId(ctx.func->mainEntry));
   }
 
+  /*
+   * There are potentially infinitely growing types when we're using
+   * union_of to merge states, so occasonially we need to apply a
+   * widening operator.
+   *
+   * Currently this is done by having a straight-forward hueristic: if
+   * you visit a block too many times, we'll start doing all the
+   * merges with the widening operator until we've had a chance to
+   * visit the block again.  We must then continue iterating in case
+   * the actual fixed point is higher than the result of widening.
+   *
+   * Terminiation is guaranteed because the widening operator has only
+   * finite chains in the type lattice.
+   */
+  auto nonWideVisits = std::vector<uint32_t>(ctx.func->nextBlockId);
+
   // For debugging, count how many times basic blocks get interpreted.
   auto interp_counter = uint32_t{0};
 
   /*
    * Iterate until a fixed point.
-   *
-   * We know a fixed point must occur because types increase
-   * monotonically.
-   *
-   * We may visit a block up to as many times as there are state
-   * variables coming into the block (locals and eval stack slots),
-   * times the height of the type lattice.
    *
    * Each time a stateIn for a block changes, we re-insert the block's
    * rpo ID in incompleteQ.  Since incompleteQ is ordered, we'll
@@ -162,17 +171,27 @@ FuncAnalysis do_analyze(const Index& index,
     incompleteQ.erase(begin(incompleteQ));
     PropertiesInfo props(index, inputCtx, clsAnalysis);
 
+    if (nonWideVisits[blk->id]++ > options.analyzeFuncWideningLimit) {
+      nonWideVisits[blk->id] = 0;
+    }
+
     FTRACE(2, "block #{}\nin {}{}", blk->id,
       state_string(*ctx.func, ai.bdata[blk->id].stateIn),
       property_state_string(props));
     ++interp_counter;
 
     auto propagate = [&] (php::Block& target, const State& st) {
-      FTRACE(2, "     -> {}\n", target.id);
+      auto const needsWiden =
+        nonWideVisits[target.id] >= options.analyzeFuncWideningLimit;
+
+      FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target.id);
       FTRACE(4, "target old {}",
         state_string(*ctx.func, ai.bdata[target.id].stateIn));
 
-      if (merge_into(ai.bdata[target.id].stateIn, st)) {
+      auto const changed =
+        needsWiden ? widen_into(ai.bdata[target.id].stateIn, st)
+                   : merge_into(ai.bdata[target.id].stateIn, st);
+      if (changed) {
         incompleteQ.insert(rpoId(&target));
       }
       FTRACE(4, "target new {}",
@@ -400,6 +419,18 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     }
   }
 
+  /*
+   * Similar to the function case in do_analyze, we have to handle the
+   * fact that there are infinitely growing chains in our type lattice
+   * under union_of.
+   *
+   * So if we've visited the whole class some number of times and
+   * still aren't at a fixed point, we'll set the property state to
+   * the result of widening the old state with the new state, and then
+   * reset the counter.  This guarantees eventual termination.
+   */
+  auto nonWideVisits = uint32_t{0};
+
   for (;;) {
     auto const previousProps   = clsAnalysis.privateProperties;
     auto const previousStatics = clsAnalysis.privateStatics;
@@ -450,6 +481,13 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       clsAnalysis.methods  = std::move(methodResults);
       clsAnalysis.closures = std::move(closureResults);
       break;
+    }
+
+    if (nonWideVisits++ > options.analyzeClassWideningLimit) {
+      auto const a = widen_into(clsAnalysis.privateProperties, previousProps);
+      auto const b = widen_into(clsAnalysis.privateStatics, previousStatics);
+      always_assert(a || b);
+      nonWideVisits = 0;
     }
   }
 

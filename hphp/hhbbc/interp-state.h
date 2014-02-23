@@ -103,13 +103,19 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * State merging functions.
+ * State merging functions, based on the union_of operation for types.
  *
  * These return true if the destination state changed.
  */
-bool merge_into(PropState&, const PropState&);
 bool merge_into(ActRec&, const ActRec&);
 bool merge_into(State&, const State&);
+
+/*
+ * State merging functions, based on the widening_union operation.
+ * See analyze.cpp for details on when this is needed.
+ */
+bool widen_into(PropState&, const PropState&);
+bool widen_into(State&, const State&);
 
 //////////////////////////////////////////////////////////////////////
 

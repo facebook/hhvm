@@ -90,7 +90,7 @@ const PropState& PropertiesInfo::privateStatics() const {
 
 //////////////////////////////////////////////////////////////////////
 
-bool merge_into(PropState& dst, const PropState& src) {
+bool widen_into(PropState& dst, const PropState& src) {
   assert(dst.size() == src.size());
 
   auto changed = false;
@@ -100,7 +100,7 @@ bool merge_into(PropState& dst, const PropState& src) {
   for (; dstIt != end(dst); ++dstIt, ++srcIt) {
     assert(srcIt != end(src));
     assert(srcIt->first == dstIt->first);
-    auto const newT = union_of(dstIt->second, srcIt->second);
+    auto const newT = widening_union(dstIt->second, srcIt->second);
     if (newT != dstIt->second) {
       changed = true;
       dstIt->second = newT;
@@ -122,7 +122,8 @@ bool merge_into(ActRec& dst, const ActRec& src) {
   return false;
 }
 
-bool merge_into(State& dst, const State& src) {
+template<class JoinOp>
+bool merge_impl(State& dst, const State& src, JoinOp join) {
   if (!dst.initialized) {
     dst = src;
     return true;
@@ -142,7 +143,7 @@ bool merge_into(State& dst, const State& src) {
   }
 
   for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
-    auto const newT = union_of(dst.stack[i], src.stack[i]);
+    auto const newT = join(dst.stack[i], src.stack[i]);
     if (dst.stack[i] != newT) {
       changed = true;
       dst.stack[i] = newT;
@@ -150,7 +151,7 @@ bool merge_into(State& dst, const State& src) {
   }
 
   for (auto i = size_t{0}; i < dst.locals.size(); ++i) {
-    auto const newT = union_of(dst.locals[i], src.locals[i]);
+    auto const newT = join(dst.locals[i], src.locals[i]);
     if (dst.locals[i] != newT) {
       changed = true;
       dst.locals[i] = newT;
@@ -164,6 +165,14 @@ bool merge_into(State& dst, const State& src) {
   }
 
   return changed;
+}
+
+bool merge_into(State& dst, const State& src) {
+  return merge_impl(dst, src, union_of);
+}
+
+bool widen_into(State& dst, const State& src) {
+  return merge_impl(dst, src, widening_union);
 }
 
 //////////////////////////////////////////////////////////////////////

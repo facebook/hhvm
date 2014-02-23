@@ -680,6 +680,7 @@ Type::Type(const Type& o) noexcept
   : m_bits(o.m_bits)
   , m_dataTag(o.m_dataTag)
 {
+  SCOPE_EXIT { assert(checkInvariants()); };
   switch (m_dataTag) {
   case DataTag::None:   return;
   case DataTag::Str:    m_data.sval = o.m_data.sval; return;
@@ -708,6 +709,8 @@ Type::Type(Type&& o) noexcept
   : m_bits(o.m_bits)
   , m_dataTag(o.m_dataTag)
 {
+  SCOPE_EXIT { assert(checkInvariants());
+               assert(o.checkInvariants()); };
   using std::move;
   o.m_dataTag = DataTag::None;
   switch (m_dataTag) {
@@ -735,12 +738,15 @@ Type::Type(Type&& o) noexcept
 }
 
 Type& Type::operator=(const Type& o) noexcept {
+  SCOPE_EXIT { assert(checkInvariants()); };
   this->~Type();
   new (this) Type(o);
   return *this;
 }
 
 Type& Type::operator=(Type&& o) noexcept {
+  SCOPE_EXIT { assert(checkInvariants());
+               assert(o.checkInvariants()); };
   this->~Type();
   new (this) Type(std::move(o));
   return *this;
@@ -1140,64 +1146,64 @@ Type Type::wait_handle_outer(const Type& wh) {
 Type sval(SString val) {
   assert(val->isStatic());
   auto r        = Type { BSStr };
-  r.m_dataTag   = DataTag::Str;
   r.m_data.sval = val;
+  r.m_dataTag   = DataTag::Str;
   return r;
 }
 
 Type ival(int64_t val) {
   auto r        = Type { BInt };
-  r.m_dataTag   = DataTag::Int;
   r.m_data.ival = val;
+  r.m_dataTag   = DataTag::Int;
   return r;
 }
 
 Type dval(double val) {
   auto r        = Type { BDbl };
-  r.m_dataTag   = DataTag::Dbl;
   r.m_data.dval = val;
+  r.m_dataTag   = DataTag::Dbl;
   return r;
 }
 
 Type aval(SArray val) {
   assert(val->isStatic());
   auto r        = Type { BSArr };
-  r.m_dataTag   = DataTag::ArrVal;
   r.m_data.aval = val;
+  r.m_dataTag   = DataTag::ArrVal;
   return r;
 }
 
 Type subObj(res::Class val) {
-  auto r        = Type { BObj };
-  r.m_dataTag   = DataTag::Obj;
+  auto r = Type { BObj };
   new (&r.m_data.dobj) DObj(
     val.couldBeOverriden() ? DObj::Sub : DObj::Exact,
     val
   );
+  r.m_dataTag = DataTag::Obj;
   return r;
 }
 
 Type objExact(res::Class val) {
-  auto r        = Type { BObj };
-  r.m_dataTag   = DataTag::Obj;
+  auto r = Type { BObj };
   new (&r.m_data.dobj) DObj(DObj::Exact, val);
+  r.m_dataTag = DataTag::Obj;
   return r;
 }
 
 Type subCls(res::Class val) {
-  auto r        = Type { BCls };
-  r.m_dataTag   = DataTag::Cls;
+  auto r = Type { BCls };
   r.m_data.dcls = DCls {
     val.couldBeOverriden() ? DCls::Sub : DCls::Exact,
     val
   };
+  r.m_dataTag = DataTag::Cls;
   return r;
 }
 
 Type clsExact(res::Class val) {
   auto r        = Type { BCls };
-  r.m_dataTag   = DataTag::Cls;
   r.m_data.dcls = DCls { DCls::Exact, val };
+  r.m_dataTag   = DataTag::Cls;
   return r;
 }
 
@@ -1222,11 +1228,11 @@ bool is_specialized_array(const Type& t) {
 
 Type arr_packed(std::vector<Type> elems) {
   assert(!elems.empty());
-  auto r      = Type { BArr };
-  r.m_dataTag = DataTag::ArrPacked;
+  auto r = Type { BArr };
   new (&r.m_data.apacked) copy_ptr<DArrPacked>(
     make_copy_ptr<DArrPacked>(std::move(elems))
   );
+  r.m_dataTag = DataTag::ArrPacked;
   return r;
 }
 
@@ -1243,11 +1249,11 @@ Type carr_packed(std::vector<Type> elems) {
 }
 
 Type arr_packedn(Type t) {
-  auto r      = Type { BArr };
-  r.m_dataTag = DataTag::ArrPackedN;
+  auto r = Type { BArr };
   new (&r.m_data.apackedn) copy_ptr<DArrPackedN>(
     make_copy_ptr<DArrPackedN>(std::move(t))
   );
+  r.m_dataTag = DataTag::ArrPackedN;
   return r;
 }
 
@@ -1265,11 +1271,11 @@ Type carr_packedn(Type t) {
 
 Type arr_struct(StructMap m) {
   assert(!m.empty());
-  auto r      = Type { BArr };
-  r.m_dataTag = DataTag::ArrStruct;
+  auto r = Type { BArr };
   new (&r.m_data.astruct) copy_ptr<DArrStruct>(
     make_copy_ptr<DArrStruct>(std::move(m))
   );
+  r.m_dataTag = DataTag::ArrStruct;
   return r;
 }
 
@@ -1286,11 +1292,11 @@ Type carr_struct(StructMap m) {
 }
 
 Type arr_mapn(Type k, Type v) {
-  auto r      = Type { BArr };
-  r.m_dataTag = DataTag::ArrMapN;
+  auto r = Type { BArr };
   new (&r.m_data.amapn) copy_ptr<DArrMapN>(
     make_copy_ptr<DArrMapN>(std::move(k), std::move(v))
   );
+  r.m_dataTag = DataTag::ArrMapN;
   return r;
 }
 
@@ -1629,6 +1635,20 @@ Type union_of(Type a, Type b) {
 #undef X
 
   return TTop;
+}
+
+Type widening_union(const Type& a, const Type& b) {
+  if (a == b) return a;
+
+  // Currently the only types in our typesystem that have infinitely
+  // growing chains of union_of are specialized arrays.
+  if (!is_specialized_array(a) || !is_specialized_array(b)) {
+    return union_of(a, b);
+  }
+
+  // This is overly conservative, but works for now.
+  auto const newBits = static_cast<trep>(a.m_bits | b.m_bits);
+  return Type { newBits };
 }
 
 Type stack_flav(Type a) {

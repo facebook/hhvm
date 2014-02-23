@@ -87,6 +87,15 @@ void parse_options(int argc, char** argv) {
       "Add an interceptable function")
     ;
 
+  // Some extra esoteric options that aren't exposed in --help for
+  // now.
+  po::options_description extended("Extended Options");
+  extended.add_options()
+    ("analyze-func-wlimit",  po::value(&options.analyzeFuncWideningLimit))
+    ("analyze-class-wlimit", po::value(&options.analyzeClassWideningLimit))
+    ("return-refine-limit",  po::value(&options.returnTypeRefineLimit))
+    ;
+
   po::options_description oflags("Optimization Flags");
   oflags.add_options()
     ("remove-dead-blocks",      po::value(&options.RemoveDeadBlocks))
@@ -105,7 +114,7 @@ void parse_options(int argc, char** argv) {
     ;
 
   po::options_description all;
-  all.add(basic).add(oflags);
+  all.add(basic).add(extended).add(oflags);
 
   po::positional_options_description pd;
   pd.add("input", 1);

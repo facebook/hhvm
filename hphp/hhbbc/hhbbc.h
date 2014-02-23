@@ -46,6 +46,36 @@ struct Options {
   //////////////////////////////////////////////////////////////////////
 
   /*
+   * Flags for various limits on when to perform widening operations.
+   * See analyze.cpp for details.
+   */
+  uint32_t analyzeFuncWideningLimit = 20;
+  uint32_t analyzeClassWideningLimit = 20;
+
+  /*
+   * When to stop refining return types.
+   *
+   * This needs to be limited because types can walk downwards in our
+   * type lattice indefinitely.  The index never contains incorrect
+   * return types, since the return types only shrink, which means we
+   * can just stop refining a return type whenever we want to without
+   * causing problems.
+   *
+   * For an example of where this can occur, imagine the analysis of the
+   * following function:
+   *
+   *    function foo() { return array('x' => foo()); }
+   *
+   * Each time we visit `foo', we'll discover a slightly smaller return
+   * type, in a downward-moving sequence that would never terminate:
+   *
+   *   InitCell, CArr(x:InitCell), CArr(x:CArr(x:InitCell)), ...
+   */
+  uint32_t returnTypeRefineLimit = 15;
+
+  //////////////////////////////////////////////////////////////////////
+
+  /*
    * If true, all optimizations are disabled, and analysis isn't even
    * performed.
    */

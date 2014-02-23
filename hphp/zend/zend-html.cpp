@@ -560,6 +560,24 @@ inline static bool decode_entity(char *entity, int *len,
   return false;
 }
 
+inline static bool encode_entity(char* buf, int* buflen,
+                                 unsigned char entity, bool utf8){
+  entity_charset charset = cs_utf_8;
+  if(!utf8){ charset = cs_8859_1; }
+  
+  HtmlEntityMap *entityMap = &EntityMap[charset];
+ 
+  for(HtmlEntityMap::const_iterator iter = entityMap->begin(); 
+      iter != entityMap->end(); iter++) {
+    if(static_cast<unsigned char>(*iter->second.c_str()) == entity){
+      memcpy(buf, iter->first, strlen(iter->first));
+      *buflen = strlen(iter->first);
+      return true;
+    }
+  }
+  return false;
+}
+
 char *string_html_encode(const char *input, int &len,
                          const int64_t qsBitmask, bool utf8, 
                          bool dEncode, bool htmlEnt) {
@@ -656,6 +674,7 @@ char *string_html_encode(const char *input, int &len,
         p++;
         break;
       }
+
       // fallthrough
     default: {
       if (LIKELY(c < 0x80)) {
@@ -664,6 +683,25 @@ char *string_html_encode(const char *input, int &len,
       }
       if (qsBitmask & static_cast<int64_t>(EntBitmask::ENT_BM_IGNORE)) {
         break;
+      }
+      
+      if(htmlEnt){
+        html_get_entity_map();
+         
+        char buf[16] = {0};
+        buf[0] = c;
+        int len = 1;
+         
+        if (encode_entity(buf, &len, c, utf8)){
+          *q++ = '&';
+          const char *s = buf;
+          for(int n = 0; n < len; n++){
+            *q++ = *s;
+            s++;
+          }
+          *q++ = ';';
+          break;
+        }   
       }
 
       auto avail = end - p;

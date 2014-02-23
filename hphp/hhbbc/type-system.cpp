@@ -34,6 +34,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_WaitHandle("WaitHandle");
+const StaticString s_empty("");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -303,6 +304,18 @@ bool couldBeStruct(const DArrStruct& a, const DArrStruct& b) {
   return true;
 }
 
+Type struct_values(const DArrStruct& a) {
+  auto ret = TBottom;
+  for (auto& kv : a.map) ret = union_of(ret, kv.second);
+  return ret;
+}
+
+Type packed_values(const DArrPacked& a) {
+  auto ret = TBottom;
+  for (auto& e : a.elems) ret = union_of(ret, e);
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -436,18 +449,6 @@ struct DisjointCouldBeImpl {
     return false;
   }
 };
-
-Type struct_values(const DArrStruct& a) {
-  auto ret = TBottom;
-  for (auto& kv : a.map) ret = union_of(ret, kv.second);
-  return ret;
-}
-
-Type packed_values(const DArrPacked& a) {
-  auto ret = TBottom;
-  for (auto& e : a.elems) ret = union_of(ret, e);
-  return ret;
-}
 
 // The countedness of the arrays is handled outside of this function,
 // so it's ok to just return TArr from all of these here.
@@ -1173,6 +1174,9 @@ Type aval(SArray val) {
   return r;
 }
 
+Type aempty() { return aval(HphpArray::GetStaticEmptyArray()); }
+Type sempty() { return sval(s_empty.get()); }
+
 Type subObj(res::Class val) {
   auto r = Type { BObj };
   new (&r.m_data.dobj) DObj(
@@ -1684,6 +1688,332 @@ Type remove_uninit(Type t) {
   if (t.subtypeOf(TPrim))   return TInitPrim;
   if (t.subtypeOf(TUnc))    return TInitUnc;
   return TInitCell;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * For known strings that are strictly integers, we'll set both the
+ * known integer and string keys, so generally the int case should be
+ * checked first below.
+ *
+ * For keys that could be strings, we have to assume they could be
+ * strictly-integer strings.  After disection, the effective type we
+ * can assume for the array key is in `type'.
+ */
+
+struct ArrKey {
+  folly::Optional<int64_t> i;
+  folly::Optional<SString> s;
+  Type type;
+};
+
+ArrKey disect_key(const Type& keyTy) {
+  auto ret = ArrKey{};
+
+  if (keyTy.strictSubtypeOf(TInt)) {
+    ret.i = keyTy.m_data.ival;
+    ret.type = keyTy;
+    return ret;
+  }
+  if (keyTy.strictSubtypeOf(TStr) && keyTy.m_dataTag == DataTag::Str) {
+    ret.s = keyTy.m_data.sval;
+    ret.type = keyTy;
+    int64_t i;
+    if (keyTy.m_data.sval->isStrictlyInteger(i)) {
+      ret.i = i;
+      ret.type = TInt;
+    }
+    return ret;
+  }
+  if (keyTy.strictSubtypeOf(TDbl)) {
+    ret.i = static_cast<int64_t>(keyTy.m_data.dval);
+    ret.type = TInt;
+    return ret;
+  }
+  if (keyTy.subtypeOf(TNum)) {
+    ret.type = TInt;
+    return ret;
+  }
+
+  if (keyTy.subtypeOf(TNull)) {
+    ret.s = s_empty.get();
+    ret.type = sempty();
+    return ret;
+  }
+  if (keyTy.subtypeOf(TRes)) {
+    ret.type = TInt;
+    return ret;
+  }
+
+  if (keyTy.subtypeOf(TTrue)) {
+    ret.i = 1;
+    ret.type = TInt;
+    return ret;
+  }
+  if (keyTy.subtypeOf(TFalse)) {
+    ret.i = 0;
+    ret.type = TInt;
+    return ret;
+  }
+  if (keyTy.subtypeOf(TBool)) {
+    ret.type = TInt;
+    return ret;
+  }
+
+  // If we have an OptStr with a value, we can at least exclude the
+  // possibility of integer-like strings by looking at that value.
+  // But we can't use the value itself, because if it is null the key
+  // will act like the empty string.  In that case, the code uses the
+  // static empty string, so if it was an OptCStr it needs to
+  // incorporate SStr, but an OptSStr can stay as SStr.
+  if (keyTy.strictSubtypeOf(TOptStr) && keyTy.m_dataTag == DataTag::Str) {
+    int64_t ignore;
+    if (!keyTy.m_data.sval->isStrictlyInteger(ignore)) {
+      ret.type = keyTy.strictSubtypeOf(TOptSStr) ? TSStr : TStr;
+      return ret;
+    }
+  }
+
+  // Nothing we can do in other cases that could be strings (without
+  // statically known values)---they may behave like integers at
+  // runtime.
+
+  // TODO(#3774082): We should be able to set this to a Str|Int type.
+  ret.type = TInitCell;
+  return ret;
+}
+
+Type array_elem(const Type& arr, const Type& undisectedKey) {
+  assert(arr.subtypeOf(TArr));
+
+  auto unboxed = [&] (Type t) {
+    return t.subtypeOf(TInitCell) ? t : TInitCell;
+  };
+
+  auto const key = disect_key(undisectedKey);
+  switch (arr.m_dataTag) {
+  case DataTag::Str:
+  case DataTag::Obj:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Cls:
+    not_reached();
+
+  case DataTag::None:
+    return arr.subtypeOf(TSArr) ? TInitUnc : TInitCell;
+
+  case DataTag::ArrVal:
+    if (key.i) {
+      if (auto const r = arr.m_data.aval->nvGet(*key.i)) {
+        return from_cell(*r);
+      }
+      return TInitNull;
+    }
+    if (key.s) {
+      if (auto const r = arr.m_data.aval->nvGet(*key.s)) {
+        return from_cell(*r);
+      }
+      return TInitNull;
+    }
+    return arr.subtypeOf(TSArr) ? TInitUnc : TInitCell;
+
+  /*
+   * In the following cases, note that if you get an elem out of an
+   * array that doesn't exist, php semantics are to return null (after
+   * a warning).  So in cases where we don't know the key statically
+   * we need to union TInitNull into the result.
+   */
+
+  case DataTag::ArrPacked:
+    if (!key.i) {
+      return unboxed(union_of(packed_values(*arr.m_data.apacked), TInitNull));
+    }
+    if (*key.i >= 0 && *key.i < arr.m_data.apacked->elems.size()) {
+      return unboxed(arr.m_data.apacked->elems[*key.i]);
+    }
+    return TInitNull;
+
+  case DataTag::ArrPackedN:
+    return unboxed(union_of(arr.m_data.apackedn->type, TInitNull));
+
+  case DataTag::ArrStruct:
+    if (key.s) {
+      auto it = arr.m_data.astruct->map.find(*key.s);
+      return it != end(arr.m_data.astruct->map)
+        ? unboxed(it->second)
+        : TInitNull;
+    }
+    return unboxed(union_of(struct_values(*arr.m_data.astruct), TInitNull));
+
+  case DataTag::ArrMapN:
+    return unboxed(union_of(arr.m_data.amapn->val, TInitNull));
+  }
+
+  not_reached();
+}
+
+/*
+ * Note: for now we're merging counted arrays into whatever type it
+ * used to have in the following set functions, and returning arr_*'s
+ * in some cases where we could know it was a carr_*.
+ *
+ * To be able to assume it is actually counted it if used to be
+ * static, we need to add code checking for keys that are one of the
+ * "illegal offset type" of keys.
+ */
+
+Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
+  assert(arr.subtypeOf(TArr));
+
+  // Unless you know an array can't cow, you don't know if the TRef
+  // will stay a TRef or turn back into a TInitCell.  Generally you
+  // want a TInitGen.
+  always_assert(!val.subtypeOf(TRef) &&
+         "You probably don't want to put Ref types into arrays ...");
+
+  auto ensure_counted = [&] {
+    arr.m_bits = static_cast<trep>(arr.m_bits | BCArr);
+  };
+  auto set = [&] (Type& t) { if (t.subtypeOf(TInitCell)) t = val; };
+
+  auto const key = disect_key(undisectedKey);
+  switch (arr.m_dataTag) {
+  case DataTag::Str:
+  case DataTag::Obj:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Cls:
+    not_reached();
+
+  case DataTag::None:
+    ensure_counted();
+    return arr;
+
+  case DataTag::ArrVal:
+    if (!arr.m_data.aval->size()) {
+      if (key.s && !key.i) {
+        auto map = StructMap{};
+        map[*key.s] = val;
+        return arr_struct(std::move(map));
+      }
+      if (key.i && *key.i == 0) return arr_packed({val});
+      return arr_mapn(key.type, val);
+    }
+    if (auto d = toDArrStruct(arr.m_data.aval)) {
+      return array_set(arr_struct(std::move(d->map)), undisectedKey, val);
+    }
+    if (auto d = toDArrPacked(arr.m_data.aval)) {
+      return array_set(arr_packed(std::move(d->elems)), undisectedKey, val);
+    }
+    if (auto d = toDArrPackedN(arr.m_data.aval)) {
+      return array_set(arr_packedn(d->type), undisectedKey, val);
+    }
+    if (auto d = toDArrMapN(arr.m_data.aval)) {
+      return array_set(arr_mapn(d->key, d->val), undisectedKey, val);
+    }
+    return TArr;
+
+  case DataTag::ArrPacked:
+    ensure_counted();
+    if (key.i) {
+      if (*key.i >= 0 && *key.i < arr.m_data.apacked->elems.size()) {
+        set(arr.m_data.apacked->elems[*key.i]);
+        return arr;
+      }
+      if (*key.i == arr.m_data.apacked->elems.size()) {
+        arr.m_data.apacked->elems.push_back(val);
+        return arr;
+      }
+    }
+    return arr_mapn(union_of(TInt, key.type),
+                    union_of(packed_values(*arr.m_data.apacked), val));
+
+  case DataTag::ArrPackedN:
+    ensure_counted();
+    return arr_mapn(union_of(TInt, key.type),
+                    union_of(arr.m_data.apackedn->type, val));
+
+  case DataTag::ArrStruct:
+    ensure_counted();
+    if (key.s) {
+      set(arr.m_data.astruct->map[*key.s]);
+      return arr;
+    }
+    return arr_mapn(union_of(key.type, TSStr),
+                    union_of(struct_values(*arr.m_data.astruct), val));
+
+  case DataTag::ArrMapN:
+    ensure_counted();
+    return arr_mapn(union_of(key.type, arr.m_data.amapn->key),
+                    union_of(val, arr.m_data.amapn->val));
+  }
+
+  not_reached();
+}
+
+std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
+  assert(arr.subtypeOf(TArr));
+
+  // Unless you know an array can't cow, you don't know if the TRef
+  // will stay a TRef or turn back into a TInitCell.  Generally you
+  // want a TInitGen.
+  always_assert(!val.subtypeOf(TRef) &&
+         "You probably don't want to put Ref types into arrays ...");
+
+  switch (arr.m_dataTag) {
+  case DataTag::Str:
+  case DataTag::Obj:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Cls:
+    not_reached();
+
+  case DataTag::None:
+    return { TArr, TInt };
+
+  case DataTag::ArrVal:
+    if (!arr.m_data.aval->size()) return { carr_packed({val}), ival(0) };
+    if (auto d = toDArrStruct(arr.m_data.aval)) {
+      return array_newelem_key(arr_struct(std::move(d->map)), val);
+    }
+    if (auto d = toDArrPacked(arr.m_data.aval)) {
+      return array_newelem_key(arr_packed(std::move(d->elems)), val);
+    }
+    if (auto d = toDArrPackedN(arr.m_data.aval)) {
+      return array_newelem_key(arr_packedn(d->type), val);
+    }
+    if (auto d = toDArrMapN(arr.m_data.aval)) {
+      return array_newelem_key(arr_mapn(d->key, d->val), val);
+    }
+    return { TArr, TInt };
+
+  case DataTag::ArrPacked:
+    {
+      auto v = arr.m_data.apacked->elems;
+      v.push_back(val);
+      return { arr_packed(std::move(v)), ival(v.size() - 1) };
+    }
+
+  case DataTag::ArrPackedN:
+    return { arr_packedn(union_of(arr.m_data.apackedn->type, val)), TInt };
+
+  case DataTag::ArrStruct:
+    return { arr_mapn(union_of(TSStr, TInt),
+                      union_of(struct_values(*arr.m_data.astruct), val)),
+             TInt };
+
+  case DataTag::ArrMapN:
+    return { arr_mapn(union_of(arr.m_data.amapn->key, TInt),
+                      union_of(arr.m_data.amapn->val, TInitNull)),
+             TInt };
+  }
+
+  not_reached();
+}
+
+Type array_newelem(const Type& arr, const Type& val) {
+  return array_newelem_key(arr, val).first;
 }
 
 //////////////////////////////////////////////////////////////////////

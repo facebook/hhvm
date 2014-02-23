@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <utility>
 
 #include <boost/container/flat_map.hpp>
 
@@ -345,6 +346,10 @@ private:
   friend bool is_opt(Type);
   friend folly::Optional<Cell> tv(Type);
   friend std::string show(Type);
+  friend struct ArrKey disect_key(const Type&);
+  friend Type array_elem(const Type&, const Type&);
+  friend Type array_set(Type, const Type&, const Type&);
+  friend std::pair<Type,Type> array_newelem_key(const Type&, const Type&);
 
 private:
   union Data {
@@ -365,6 +370,7 @@ private:
 
   template<class Ret, class T, class Function>
   struct DJHelperFn;
+  struct ArrKey;
 
 private:
   static Type wait_handle_outer(const Type&);
@@ -492,6 +498,12 @@ Type sval(SString);
 Type ival(int64_t);
 Type dval(double);
 Type aval(SArray);
+
+/*
+ * Create empty array or string types.
+ */
+Type sempty();
+Type aempty();
 
 /*
  * Create types for objects or classes with some known constraint on
@@ -690,6 +702,9 @@ Type loosen_statics(Type);
  * Precisely: strict subtypes of TInt, TDbl, TBool, TSStr, and TSArr
  * become exactly that corresponding type.  Additionally, TOptTrue and
  * TOptFalse become TOptBool.  All other types are unchanged.
+ *
+ * TODO(#3696042): loosen values of an array shape should keep the
+ * shape.
  */
 Type loosen_values(Type);
 
@@ -701,6 +716,37 @@ Type loosen_values(Type);
  * Pre: t.subtypeOf(TCell)
  */
 Type remove_uninit(Type t);
+
+/*
+ * Returns the best known type of an array inner element given a type
+ * for the key.  The returned type is always a subtype of TInitCell.
+ *
+ * Pre: arr.subtypeOf(TArr)
+ */
+Type array_elem(const Type& arr, const Type& key);
+
+/*
+ * Perform an array set on types.  Returns a type that represents the
+ * effects of arr[key] = val.
+ *
+ * Pre arr.subtypeOf(TArr)
+ */
+Type array_set(Type arr, const Type& key, const Type& val);
+
+/*
+ * Perform a newelem operation on an array type.  Returns an array
+ * that contains a new pushed-back element with the supplied value, in
+ * the sense of arr[] = val.
+ *
+ * Pre: arr.subtypeOf(TArr)
+ */
+Type array_newelem(const Type& arr, const Type& val);
+
+/*
+ * The same as array_newelem, except return the best known type of the
+ * key that was added.  (This is either TInt or a subtype of it.)
+ */
+std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val);
 
 //////////////////////////////////////////////////////////////////////
 

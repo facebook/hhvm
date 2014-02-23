@@ -48,7 +48,6 @@ namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_empty("");
 const StaticString s_extract("extract");
 const StaticString s_compact("compact");
 const StaticString s_get_defined_vars("get_defined_vars");
@@ -63,13 +62,13 @@ const StaticString s_86sinit("86sinit");
 
 inline bool couldBeEmptyish(Type ty) {
   return ty.couldBe(TNull) ||
-         ty.couldBe(sval(s_empty.get())) ||
+         ty.couldBe(sempty()) ||
          ty.couldBe(TFalse);
 }
 
 inline bool mustBeEmptyish(Type ty) {
   return ty.subtypeOf(TNull) ||
-         ty.subtypeOf(sval(s_empty.get())) ||
+         ty.subtypeOf(sempty()) ||
          ty.subtypeOf(TFalse);
 }
 
@@ -163,13 +162,20 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::NewArrayReserve&) { push(TArr); }
 
   void operator()(const bc::NewPackedArray& op) {
-    for (auto i = uint32_t{0}; i < op.arg1; ++i) popT();
-    push(TArr);
+    auto elems = std::vector<Type>{};
+    for (auto i = uint32_t{0}; i < op.arg1; ++i) {
+      elems.push_back(popC());
+    }
+    std::reverse(begin(elems), end(elems));
+    push(carr_packed(std::move(elems)));
   }
 
   void operator()(const bc::NewStructArray& op) {
-    for (auto n = op.keys.size(); n > 0; n--) popC();
-    push(TArr);
+    auto map = StructMap{};
+    for (auto rit = op.keys.rbegin(); rit != op.keys.rend(); ++rit) {
+      map[*rit] = popC();
+    }
+    push(carr_struct(std::move(map)));
   }
 
   void operator()(const bc::AddElemC& op) {
@@ -310,6 +316,7 @@ struct InterpStepper : boost::static_visitor<void> {
   template<bool Negate>
   void sameImpl() {
     nothrow();
+    // TODO(#3783145): should constprop this
 
     auto const t1 = popC();
     auto const t2 = popC();
@@ -894,7 +901,7 @@ struct InterpStepper : boost::static_visitor<void> {
 
       // We may have inferred a TSStr or TSArr with a value here, but
       // at runtime it will not be static.  For now just throw that
-      // away.
+      // away.  TODO(#3696042): should be able to loosen_statics here.
       if (resultTy.subtypeOf(TStr))      resultTy = TStr;
       else if (resultTy.subtypeOf(TArr)) resultTy = TArr;
 
@@ -1753,7 +1760,8 @@ private: // member instructions
     /*
      * Base is in a number of possible places after an Elem op.  It
      * cannot possibly be in an object property (although it certainly
-     * may alias one).  See miElem for details.
+     * may alias one).  See miElem for details.  Not all post-elem ops
+     * use this location (see LocalArrChain).
      *
      * If it is definitely in an array, the locTy in the Base will be
      * a subtype of TArr.
@@ -1778,6 +1786,17 @@ private: // member instructions
     StaticObjProp,
 
     /*
+     * The base is inside of a local that contains a specialized array
+     * type, and the arrayChain is non-empty.
+     *
+     * When the location is set to this, the chain will continue as
+     * long as we keep staying inside specialized array types.  If it
+     * moves to something like a ?Arr type, we must leave the chain
+     * when the base moves.
+     */
+    LocalArrChain,
+
+    /*
      * Known to be contained in the current frame as a local, as the
      * frame $this, by the evaluation stack, or inside $GLOBALS.  Only
      * possible as initial bases.
@@ -1800,8 +1819,8 @@ private: // member instructions
 
     /*
      * We also need to track effects of intermediate dims on the type
-     * of the base.  So we have a type and name information about the
-     * base's container..
+     * of the base.  So we have a type, name, and possibly associated
+     * local for the base's container.
      *
      * For StaticObjProp, locName this is the name of the property if
      * known, or nullptr, and locTy is the type of the class
@@ -1814,6 +1833,7 @@ private: // member instructions
      */
     Type locTy;
     SString locName;
+    borrowed_ptr<php::Local> local;
   };
 
   static std::string base_string(const Base& b) {
@@ -1822,6 +1842,7 @@ private: // member instructions
       case BaseLoc::PostElem:      return "PostElem";
       case BaseLoc::PostProp:      return "PostProp";
       case BaseLoc::StaticObjProp: return "StaticObjProp";
+      case BaseLoc::LocalArrChain: return "ArrChain";
       case BaseLoc::Frame:         return "Frame";
       case BaseLoc::FrameThis:     return "FrameThis";
       case BaseLoc::EvalStack:     return "EvalStack";
@@ -1831,7 +1852,7 @@ private: // member instructions
       not_reached();
     }();
     return folly::format(
-      "{: <8}  ({: <14} {: <8} @ {})",
+      "{: <32}  ({: <14} {: <8} @ {})",
       show(b.type),
       locStr,
       show(b.locTy),
@@ -1847,30 +1868,48 @@ private: // member instructions
       , stackIdx(info->valCount() + numVecPops(mvec))
     {}
 
-    // Return the current MElem.  Only valid after the first base has
-    // been processed.
+    /*
+     * Return the current MElem.  Only valid after the first base has
+     * been processed.
+     */
     const MElem& melem() const {
       assert(mInd < mvec.mcodes.size());
       return mvec.mcodes[mInd];
     }
 
-    // Return the current MemberCode.  Only valid after the first base
-    // has been processed.
+    /*
+     * Return the current MemberCode.  Only valid after the first base
+     * has been processed.
+     */
     MemberCode mcode() const { return melem().mcode; }
 
     const MInstrInfo& info;
     const MVector& mvec;
 
-    // The current base.  Updated as we move through the vector
-    // instruction.
+    /*
+     * The current base.  Updated as we move through the vector
+     * instruction.
+     */
     Base base;
 
-    // Current index in mcodes vector (or 0 if we still haven't done
-    // the base).
+    /*
+     * Chains of operations on array elements will all affect the type
+     * of something further back in the member instruction.  Currently
+     * this is just used for locals.  This vector tracks the base,key
+     * type pair that was used at each stage.  See resolveArrayChain.
+     */
+    std::vector<std::pair<Type,Type>> arrayChain;
+
+    /*
+     * Current index in mcodes vector (or 0 if we still haven't done
+     * the base).
+     */
     uint32_t mInd = 0;
 
-    // One above next stack slot to read, going forward in the mvec
-    // (deeper to higher on stack).
+    /*
+     * One above next stack slot to read, going forward in the mvec
+     * (deeper to higher on stack).
+     */
     int32_t stackIdx;
   };
 
@@ -1879,35 +1918,59 @@ private: // member instructions
   /*
    * A note about bases.
    *
-   * Generally inference needs to know two kinds of things about the
-   * base to handle effects on tracked locations:
+   * Generally type inference needs to know two kinds of things about
+   * the base to handle effects on tracked locations:
    *
    *   - Could the base be a location we're tracking deeper structure
    *     on, so the next operation actually affects something inside
-   *     of it.  (For example, could the base be an object with the
-   *     same type as $this.)
+   *     of it.  For example, could the base be an object with the
+   *     same type as $this, or an array in a local variable.
    *
    *   - Could the base be something (regardless of type) that is
    *     inside one of the things we're tracking.  I.e., the base
    *     might be whatever (an array or a bool or something), but
    *     living inside a property inside an object with the same type
-   *     as $this.
+   *     as $this, or living inside of an array in the local frame.
    *
    * The first cases apply because final operations are going to
    * directly affect the type of these elements.  The second case is
    * because vector operations may change the base at each step if it
    * is a defining instruction.
    *
-   * Note that both of these cases can apply to the same base: you
-   * might have an object property on $this that could be an object of
-   * the type of $this.
+   * Note that both of these cases can apply to the same base in some
+   * cases: you might have an object property on $this that could be
+   * an object of the type of $this.
    *
    * The functions below with names "couldBeIn*" detect the second
    * case.  The effects on the tracked location in the second case are
    * handled in the functions with names "handleIn*{Prop,Elem,..}".
    * The effects for the first case are generally handled in the
    * miFinal op functions.
+   *
+   * Control flow insensitive vs. control flow sensitive types:
+   *
+   * Things are also slightly complicated by the fact that we are
+   * analyzing some control flow insensitve types along side precisely
+   * tracked types.  For effects on locals, we perform the type
+   * effects of each operation on base.type, and then allow moveBase()
+   * to make the updates to the local when we know what its final type
+   * will be.
+   *
+   * This approach doesn't do as well for possible properties in $this
+   * or self::, because we may see situations where the base could be
+   * one of these properties but we're not sure---perhaps because it
+   * came off a property with the same name on an object with an
+   * unknown type (i.e. base.type is InitCell but couldBeInThis is
+   * true).  In these situations, we can get away with just merging
+   * Obj=stdClass into the thisProp (because it 'could' promote)
+   * instead of merging the whole InitCell, which possibly lets us
+   * leave the type at ?Obj in some cases.
+   *
+   * This is why there's two fairly different mechanisms for handling
+   * the effects of defining ops on base types.
    */
+
+  //////////////////////////////////////////////////////////////////////
 
   bool couldBeThisObj(const Base& b) const {
     if (b.loc == BaseLoc::Fataled) return false;
@@ -1919,6 +1982,10 @@ private: // member instructions
     if (b.loc == BaseLoc::FrameThis) return true;
     if (auto const ty = thisType())  return b.type.subtypeOf(*ty);
     return false;
+  }
+
+  bool mustBeInFrame(const Base& b) const {
+    return b.loc == BaseLoc::Frame;
   }
 
   bool couldBeInThis(const Base& b) const {
@@ -2020,70 +2087,150 @@ private: // member instructions
   }
 
   //////////////////////////////////////////////////////////////////////
+
+  void setLocalForBase(const MInstrState& state, Type ty) {
+    assert(mustBeInFrame(state.base) ||
+           state.base.loc == BaseLoc::LocalArrChain);
+    if (!state.base.local) return loseNonRefLocalTypes();
+    setLoc(state.base.local, ty);
+    FTRACE(4, "      ${} := {}\n",
+      state.base.locName ? state.base.locName->data() : "$<unnamed>",
+      show(ty)
+    );
+  }
+
+  // Run backwards through an array chain doing array_set operations
+  // to produce the array type that incorporates the effects of any
+  // intermediate defining dims.
+  Type currentChainType(MInstrState& state, Type val) {
+    auto it = state.arrayChain.rbegin();
+    for (; it != state.arrayChain.rend(); ++it) {
+      val = array_set(it->first, it->second, val);
+    }
+    return val;
+  }
+
+  Type resolveArrayChain(MInstrState& state, Type val) {
+    static UNUSED const char prefix[] = "              ";
+    FTRACE(5, "{}chain\n", prefix, show(val));
+    do {
+      auto arr = std::move(state.arrayChain.back().first);
+      auto key = std::move(state.arrayChain.back().second);
+      assert(arr.subtypeOf(TArr));
+      state.arrayChain.pop_back();
+      FTRACE(5, "{}  | {} := {} in {}\n", prefix,
+        show(key), show(val), show(arr));
+      val = array_set(std::move(arr), key, val);
+    } while (!state.arrayChain.empty());
+    FTRACE(5, "{}  = {}\n", prefix, show(val));
+    return val;
+  }
+
+  void moveBase(MInstrState& state, folly::Optional<Base> base) {
+    SCOPE_EXIT { if (base) state.base = *base; };
+
+    // Note: these miThrows probably can be left out if base is
+    // folly::none (i.e. we're on the last dim).
+
+    auto const& ty = state.base.type;
+    if (mustBeInFrame(state.base)) {
+      setLocalForBase(state, ty);
+      miThrow();
+      return;
+    }
+
+    if (!state.arrayChain.empty()) {
+      auto const continueChain = base && base->loc == BaseLoc::LocalArrChain;
+      if (!continueChain) {
+        setLocalForBase(state, resolveArrayChain(state, state.base.type));
+        return;
+      }
+
+      /*
+       * We have a chain in progress, but it's not done.  But we still
+       * need to throw any type effects on the local across factored
+       * edges.
+       */
+      setLocalForBase(state, currentChainType(state, state.base.type));
+      miThrow();
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+
+  void handleBaseElemU(MInstrState& state) {
+    auto& ty = state.base.type;
+    if (ty.couldBe(TArr)) {
+      // We're conservative with unsets on array types for now.
+      ty = union_of(ty, TArr);
+    }
+    if (ty.couldBe(TSStr)) {
+      ty = loosen_statics(state.base.type);
+    }
+  }
+
+  void handleBasePropD(MInstrState& state) {
+    auto& ty = state.base.type;
+    if (ty.subtypeOf(TObj)) return;
+    if (propMustPromoteToObj(ty)) {
+      ty = objExact(m_index.builtin_class(s_stdClass.get()));
+      return;
+    }
+    if (propCouldPromoteToObj(ty)) {
+      ty = union_of(ty, TObj);
+      return;
+    }
+  }
+
+  void handleBaseElemD(MInstrState& state) {
+    auto& ty = state.base.type;
+    if (ty.subtypeOf(TArr)) return;
+    if (elemMustPromoteToArr(ty)) {
+      ty = aempty();
+      return;
+    }
+    // Intermediate ElemD operations on strings fatal, unless the
+    // string is empty, which promotes to array.  So for any string
+    // here we can assume it promoted to an empty array.
+    if (ty.subtypeOf(TStr)) {
+      ty = aempty();
+      return;
+    }
+    if (elemCouldPromoteToArr(ty)) {
+      ty = union_of(ty, aempty());
+    }
+  }
+
+  void handleBaseNewElem(MInstrState& state) {
+    handleBaseElemD(state);
+    // Technically we don't need to do TStr case.
+  }
+
+  //////////////////////////////////////////////////////////////////////
   // base ops
 
-  void handleLocBasePropD(const MInstrState& state) {
-    auto const locTy = locAsCell(state.mvec.locBase);
-    if (propMustPromoteToObj(locTy)) {
-      auto const ty = objExact(m_index.builtin_class(s_stdClass.get()));
-      setLoc(state.mvec.locBase, ty);
-      return;
-    }
-    if (propCouldPromoteToObj(locTy)) {
-      setLoc(state.mvec.locBase, union_of(locTy, TObj));
-    }
-  }
-
-  void handleLocBaseElemD(const MInstrState& state) {
-    auto const locTy = locAsCell(state.mvec.locBase);
-    if (locTy.subtypeOf(TArr) || elemMustPromoteToArr(locTy)) {
-      // We need to do this even if it was already an array, because
-      // we may modify it if it was an SArr or SArr=.
-      setLoc(state.mvec.locBase, TArr);
-      return;
-    }
-    if (elemCouldPromoteToArr(locTy)) {
-      setLoc(state.mvec.locBase, union_of(locTy, TArr));
-    }
-    if (locTy.subtypeOf(TStr)) {
-      // We need to do this even if was already a Str, because we may
-      // modify a SStr or SStr=.  The reload of locTy is in case we
-      // also took the case above.
-      setLoc(state.mvec.locBase,
-             union_of(locAsCell(state.mvec.locBase), TStr));
-    }
-  }
-
-  /*
-   * Local bases can change the type of the local depending on the
-   * mvector, and the next dim.  This function updates the types as
-   * well as calling the appropriate handler to compute effects on
-   * local types.
-   */
   Base miBaseLoc(const MInstrState& state) {
-    auto& info = state.info;
-    auto& mvec = state.mvec;
-    bool const isDefine = info.getAttr(mvec.lcode) & MIA_define;
+    bool const isDefine = state.info.getAttr(state.mvec.lcode) & MIA_define;
+    auto const locBase  = state.mvec.locBase;
 
-    if (info.m_instr == MI_UnsetM) {
-      // Unsetting can turn static strings and arrays non-static.
-      auto const loose = loosen_statics(derefLoc(mvec.locBase));
-      setLoc(mvec.locBase, loose);
-      return Base { loose, BaseLoc::Frame };
+    if (!isDefine) {
+      return Base { derefLoc(locBase),
+                    BaseLoc::Frame,
+                    TBottom,
+                    locBase->name,
+                    locBase };
     }
 
-    if (!isDefine) return Base { derefLoc(mvec.locBase), BaseLoc::Frame };
-
-    ensureInit(mvec.locBase);
-
-    auto const firstDim = mvec.mcodes[0].mcode;
-    if (mcodeIsProp(firstDim)) {
-      handleLocBasePropD(state);
-    } else if (mcodeIsElem(firstDim) || firstDim == MemberCode::MW) {
-      handleLocBaseElemD(state);
-    }
-
-    return Base { locAsCell(mvec.locBase), BaseLoc::Frame };
+    // We're changing the local to define it, but we don't need to do
+    // an miThrow yet---the promotions (to array or stdClass) on
+    // previously uninitialized locals happen before raising warnings
+    // that could throw, so we can wait until the first moveBase.
+    ensureInit(locBase);
+    return Base { locAsCell(locBase),
+                  BaseLoc::Frame,
+                  TBottom,
+                  locBase->name,
+                  locBase };
   }
 
   Base miBaseSProp(Type cls, Type tprop) {
@@ -2124,11 +2271,11 @@ private: // member instructions
       topC(--state.stackIdx);
       return Base { TInitCell, BaseLoc::Global };
 
+      // The first moveBase() on these unknown local bases will cause
+      // a loseNonRefLocalTypes.
     case LNL:
-      loseNonRefLocalTypes();
       return Base { TInitCell, BaseLoc::Frame };
     case LNC:
-      loseNonRefLocalTypes();
       topC(--state.stackIdx);
       return Base { TInitCell, BaseLoc::Frame };
 
@@ -2230,6 +2377,7 @@ private: // member instructions
     if (isDefine) {
       handleInThisPropD(state);
       handleInSelfPropD(state);
+      handleBasePropD(state);
     }
 
     if (mustBeThisObj(state.base)) {
@@ -2237,22 +2385,22 @@ private: // member instructions
       auto const thisTy    = optThisTy ? *optThisTy : TObj;
       if (name) {
         auto const propTy = thisPropAsCell(name);
-        state.base = Base { propTy ? *propTy : TInitCell,
-                            BaseLoc::PostProp,
-                            thisTy,
-                            name };
+        moveBase(state, Base { propTy ? *propTy : TInitCell,
+                               BaseLoc::PostProp,
+                               thisTy,
+                               name });
       } else {
-        state.base = Base { TInitCell, BaseLoc::PostProp, thisTy };
+        moveBase(state, Base { TInitCell, BaseLoc::PostProp, thisTy });
       }
       return;
     }
 
     // We know for sure we're going to be in an object property.
     if (state.base.type.subtypeOf(TObj)) {
-      state.base = Base { TInitCell,
-                          BaseLoc::PostProp,
-                          state.base.type,
-                          name };
+      moveBase(state, Base { TInitCell,
+                             BaseLoc::PostProp,
+                             state.base.type,
+                             name });
       return;
     }
 
@@ -2273,11 +2421,11 @@ private: // member instructions
         ? objExact(m_index.builtin_class(s_stdClass.get()))
         : TTop;
 
-    state.base = Base { TInitCell, BaseLoc::PostProp, newBaseLocTy, name };
+    moveBase(state, Base { TInitCell, BaseLoc::PostProp, newBaseLocTy, name });
   }
 
   void miElem(MInstrState& state) {
-    mcodeKey(state);
+    auto const key      = mcodeKey(state);
     bool const isDefine = state.info.getAttr(state.mcode()) & MIA_define;
     bool const isUnset  = state.info.getAttr(state.mcode()) & MIA_unset;
 
@@ -2292,18 +2440,35 @@ private: // member instructions
      */
     if (isUnset) {
       handleInSelfElemU(state);
+      handleBaseElemU(state);
     }
+
     if (isDefine) {
       handleInThisElemD(state);
       handleInSelfElemD(state);
+      handleBaseElemD(state);
+
+      auto const couldDoChain =
+        mustBeInFrame(state.base) || state.base.loc == BaseLoc::LocalArrChain;
+      if (couldDoChain && state.base.type.subtypeOf(TArr)) {
+        state.arrayChain.emplace_back(state.base.type, key);
+        moveBase(state, Base { array_elem(state.base.type, key),
+                               BaseLoc::LocalArrChain,
+                               TBottom,
+                               state.base.locName,
+                               state.base.local });
+        return;
+      }
     }
 
     if (state.base.type.subtypeOf(TArr)) {
-      state.base = Base { TInitCell, BaseLoc::PostElem, state.base.type };
+      moveBase(state, Base { array_elem(state.base.type, key),
+                             BaseLoc::PostElem,
+                             state.base.type });
       return;
     }
     if (state.base.type.subtypeOf(TStr)) {
-      state.base = Base { TStr, BaseLoc::PostElem };
+      moveBase(state, Base { TStr, BaseLoc::PostElem });
       return;
     }
 
@@ -2315,17 +2480,31 @@ private: // member instructions
      * init_null_variant, or inside tvScratch.  We represent this with
      * the PostElem base location with locType TTop.
      */
-    state.base = Base { TInitCell, BaseLoc::PostElem, TTop };
+    moveBase(state, Base { TInitCell, BaseLoc::PostElem, TTop });
   }
 
   void miNewElem(MInstrState& state) {
     if (!state.info.newElem()) {
-      state.base = Base { TInitCell, BaseLoc::Fataled };
+      moveBase(state, Base { TInitCell, BaseLoc::Fataled });
       return;
     }
 
     handleInThisNewElem(state);
     handleInSelfNewElem(state);
+    handleBaseNewElem(state);
+
+    auto const couldDoChain =
+      mustBeInFrame(state.base) || state.base.loc == BaseLoc::LocalArrChain;
+    if (couldDoChain && state.base.type.subtypeOf(TArr)) {
+      state.arrayChain.push_back(
+        array_newelem_key(state.base.type, TInitNull));
+      moveBase(state, Base { TInitNull,
+                             BaseLoc::LocalArrChain,
+                             TBottom,
+                             state.base.locName,
+                             state.base.local });
+      return;
+    }
 
     if (state.base.type.subtypeOf(TArr)) {
       /*
@@ -2338,12 +2517,15 @@ private: // member instructions
        * like we should be using Uninit in these cases (it would be
        * nice if Elem dims didn't have to have KindOfUninit in their
        * switches), and a wider type is never wrong.
+       *
+       * TODO(#3821136): the KindOfUninits should never be visible, so
+       * this almost certainly can be TInitNull.
        */
-      state.base = Base { TNull, BaseLoc::PostElem, state.base.type };
+      moveBase(state, Base { TNull, BaseLoc::PostElem, state.base.type });
       return;
     }
 
-    state.base = Base { TInitCell, BaseLoc::PostElem, TTop };
+    moveBase(state, Base { TInitCell, BaseLoc::PostElem, TTop });
   }
 
   void miIntermediate(MInstrState& state) {
@@ -2381,6 +2563,7 @@ private: // member instructions
     miPop(state);
     handleInThisPropD(state);
     handleInSelfPropD(state);
+    handleBasePropD(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         boxThisProp(name);
@@ -2394,9 +2577,12 @@ private: // member instructions
   void miFinalSetProp(MInstrState& state) {
     auto const name = mcodeStringKey(state);
     auto const t1 = popC();
+
     miPop(state);
     handleInThisPropD(state);
     handleInSelfPropD(state);
+    handleBasePropD(state);
+
     if (couldBeThisObj(state.base)) {
       if (!name) {
         // We could just merge t1 into every thisProp, but not for
@@ -2412,6 +2598,7 @@ private: // member instructions
       push(mustBeThisObj(state.base) ? t1 : TInitCell);
       return;
     }
+
     push(TInitCell);
   }
 
@@ -2421,6 +2608,7 @@ private: // member instructions
     miPop(state);
     handleInThisPropD(state);
     handleInSelfPropD(state);
+    handleBasePropD(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         mergeThisProp(name, TInitCell);
@@ -2436,6 +2624,7 @@ private: // member instructions
     miPop(state);
     handleInThisPropD(state);
     handleInSelfPropD(state);
+    handleBasePropD(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         mergeThisProp(name, TInitCell);
@@ -2452,6 +2641,7 @@ private: // member instructions
     miPop(state);
     handleInThisPropD(state);
     handleInSelfPropD(state);
+    handleBasePropD(state);
     if (couldBeThisObj(state.base)) {
       if (name) {
         boxThisProp(name);
@@ -2471,7 +2661,8 @@ private: // member instructions
      * rules than sets.  It only applies to object properties.
      *
      * Note that this can't affect self props, because static
-     * properties can never be unset.
+     * properties can never be unset.  It also can't change anything
+     * about an inner array type.
      */
     handleInThisPropD(state);
 
@@ -2487,55 +2678,193 @@ private: // member instructions
   //////////////////////////////////////////////////////////////////////
   // Final elem ops
 
-  void miFinalSetElem(MInstrState& state) {
-    // TODO(#3343813): we should push the type of the rhs when we can;
-    // SetM has some weird cases where it pushes null instead to
-    // handle.
-    mcodeKey(state);
-    auto const t1 = popC();
+  // This is a helper for final defining Elem operations that need to
+  // handle array chains and frame effects, but don't yet do anything
+  // better than supplying a single type.
+  void pessimisticFinalElemD(MInstrState& state, Type key, Type ty) {
+    if (mustBeInFrame(state.base) && state.base.type.subtypeOf(TArr)) {
+      state.base.type = array_set(state.base.type, key, ty);
+      return;
+    }
+    if (state.base.loc == BaseLoc::LocalArrChain) {
+      if (state.base.type.subtypeOf(TArr)) {
+        state.arrayChain.emplace_back(state.base.type, key);
+        state.base.type = ty;
+      }
+    }
+  }
+
+  void miFinalCGetElem(MInstrState& state) {
+    auto const key = mcodeKey(state);
+    auto const ty =
+      state.base.type.subtypeOf(TArr)
+        ? array_elem(state.base.type, key)
+        : TInitCell;
+    miPop(state);
+    push(ty);
+  }
+
+  void miFinalVGetElem(MInstrState& state) {
+    auto const key = mcodeKey(state);
     miPop(state);
     handleInThisElemD(state);
     handleInSelfElemD(state);
-    // ArrayAccess on $this will always push the rhs.
-    push(mustBeThisObj(state.base) ? t1 : TInitCell);
+    handleBaseElemD(state);
+    pessimisticFinalElemD(state, key, TInitGen);
+    push(TRef);
+  }
+
+  void miFinalSetElem(MInstrState& state) {
+    auto const key = mcodeKey(state);
+    auto const t1  = popC();
+    miPop(state);
+
+    handleInThisElemD(state);
+    handleInSelfElemD(state);
+
+    // Note: we must handle the string-related cases before doing the
+    // general handleBaseElemD, since operates on strings as if this
+    // was an intermediate ElemD.
+    if (state.base.type.subtypeOf(sempty())) {
+      state.base.type = aempty();
+    } else {
+      auto& ty = state.base.type;
+      if (ty.couldBe(TStr)) {
+        ty = union_of(loosen_statics(ty), aempty());
+      }
+      if (!ty.subtypeOf(TStr)) {
+        handleBaseElemD(state);
+      }
+    }
+
+    /*
+     * In some unusual cases with illegal keys, SetM pushes null
+     * instead of the right hand side.  If the base is a string, it
+     * pushes a new string with the value of the first character of
+     * the right hand side converted to a string (or something like
+     * that), so for now we're leaving out string bases too.
+     */
+    auto const isWeird = state.base.type.couldBe(TStr) ||
+                         key.couldBe(TObj) ||
+                         key.couldBe(TArr);
+
+    if (mustBeInFrame(state.base) && state.base.type.subtypeOf(TArr)) {
+      state.base.type = array_set(state.base.type, key, t1);
+      push(isWeird ? TInitCell : t1);
+      return;
+    }
+    if (state.base.loc == BaseLoc::LocalArrChain) {
+      if (state.base.type.subtypeOf(TArr)) {
+        state.arrayChain.emplace_back(state.base.type, key);
+        state.base.type = t1;
+        push(isWeird ? TInitCell : t1);
+        return;
+      }
+    }
+
+    // ArrayAccess on $this will always push the rhs, even if things
+    // were weird.
+    if (mustBeThisObj(state.base)) return push(t1);
+
+    push(isWeird ? TInitCell : t1);
   }
 
   void miFinalSetOpElem(MInstrState& state) {
-    mcodeKey(state);
+    auto const key = mcodeKey(state);
     popC();
     miPop(state);
     handleInThisElemD(state);
     handleInSelfElemD(state);
+    handleBaseElemD(state);
+    pessimisticFinalElemD(state, key, TInitCell);
     push(TInitCell);
   }
 
   void miFinalIncDecElem(MInstrState& state) {
-    mcodeKey(state);
+    auto const key = mcodeKey(state);
     miPop(state);
     handleInThisElemD(state);
     handleInSelfElemD(state);
+    handleBaseElemD(state);
+    pessimisticFinalElemD(state, key, TInitCell);
     push(TInitCell);
   }
 
   void miFinalBindElem(MInstrState& state) {
-    mcodeKey(state);
+    auto const key = mcodeKey(state);
     popV();
     miPop(state);
     handleInThisElemD(state);
     handleInSelfElemD(state);
+    handleBaseElemD(state);
+    pessimisticFinalElemD(state, key, TInitCell);
     push(TRef);
+  }
+
+  void miFinalUnsetElem(MInstrState& state) {
+    mcodeKey(state);
+    miPop(state);
+    handleInSelfElemU(state);
+    handleBaseElemU(state);
+    // We don't handle inner-array types with unset yet.
+    always_assert(state.base.loc != BaseLoc::LocalArrChain);
+    if (mustBeInFrame(state.base)) {
+      always_assert(!state.base.type.strictSubtypeOf(TArr));
+    }
   }
 
   //////////////////////////////////////////////////////////////////////
   // Final new elem ops
+
+  // This is a helper for final defining Elem operations that need to
+  // handle array chains and frame effects, but don't yet do anything
+  // better than supplying a single type.
+  void pessimisticFinalNewElem(MInstrState& state, Type ty) {
+    if (mustBeInFrame(state.base) && state.base.type.subtypeOf(TArr)) {
+      state.base.type = array_newelem(state.base.type, ty);
+      return;
+    }
+    if (state.base.loc == BaseLoc::LocalArrChain &&
+        state.base.type.subtypeOf(TArr)) {
+      state.base.type = array_newelem(state.base.type, ty);
+    }
+  }
+
+  void miFinalVGetNewElem(MInstrState& state) {
+    miPop(state);
+    handleInThisNewElem(state);
+    handleInSelfNewElem(state);
+    handleBaseNewElem(state);
+    pessimisticFinalNewElem(state, TInitGen);
+    push(TRef);
+  }
 
   void miFinalSetNewElem(MInstrState& state) {
     auto const t1 = popC();
     miPop(state);
     handleInThisNewElem(state);
     handleInSelfNewElem(state);
+    handleBaseNewElem(state);
+
+    if (mustBeInFrame(state.base) && state.base.type.subtypeOf(TArr)) {
+      state.base.type = array_newelem(state.base.type, t1);
+      push(t1);
+      return;
+    }
+    if (state.base.loc == BaseLoc::LocalArrChain &&
+        state.base.type.subtypeOf(TArr)) {
+      state.base.type = array_newelem(state.base.type, t1);
+      push(t1);
+      return;
+    }
+
     // ArrayAccess on $this will always push the rhs.
-    push(mustBeThisObj(state.base) ? t1 : TInitCell);
+    if (mustBeThisObj(state.base)) return push(t1);
+
+    // TODO(#3343813): we should push the type of the rhs when we can;
+    // SetM for a new elem still has some weird cases where it pushes
+    // null instead to handle.  (E.g. if the base is a number.)
+    push(TInitCell);
   }
 
   void miFinalSetOpNewElem(MInstrState& state) {
@@ -2543,6 +2872,8 @@ private: // member instructions
     miPop(state);
     handleInThisNewElem(state);
     handleInSelfNewElem(state);
+    handleBaseNewElem(state);
+    pessimisticFinalNewElem(state, TInitCell);
     push(TInitCell);
   }
 
@@ -2550,6 +2881,8 @@ private: // member instructions
     miPop(state);
     handleInThisNewElem(state);
     handleInSelfNewElem(state);
+    handleBaseNewElem(state);
+    pessimisticFinalNewElem(state, TInitCell);
     push(TInitCell);
   }
 
@@ -2558,6 +2891,8 @@ private: // member instructions
     miPop(state);
     handleInThisNewElem(state);
     handleInSelfNewElem(state);
+    handleBaseNewElem(state);
+    pessimisticFinalNewElem(state, TInitGen);
     push(TRef);
   }
 
@@ -2581,25 +2916,18 @@ private: // member instructions
 
   void miFinal(MInstrState& state, const bc::CGetM& op) {
     if (mcodeIsProp(state.mcode())) return miFinalCGetProp(state);
-    // Elem case (MW would be a fatal):
-    if (state.mcode() != MemberCode::MW) mcodeKey(state);
-    miPop(state);
-    push(TInitCell);
+    if (state.mcode() == MemberCode::MW) {
+      // MW is a fatal.
+      miPop(state);
+      push(TInitCell);
+    }
+    return miFinalCGetElem(state);
   }
 
   void miFinal(MInstrState& state, const bc::VGetM& op) {
+    if (mcodeIsElem(state.mcode())) return miFinalVGetElem(state);
     if (mcodeIsProp(state.mcode())) return miFinalVGetProp(state);
-    // Elem and MW case:
-    if (state.mcode() != MemberCode::MW) mcodeKey(state);
-    miPop(state);
-    if (state.mcode() != MemberCode::MW) {
-      handleInThisElemD(state);
-      handleInSelfElemD(state);
-    } else {
-      handleInThisNewElem(state);
-      handleInSelfNewElem(state);
-    }
-    push(TRef);
+    return miFinalVGetNewElem(state);
   }
 
   void miFinal(MInstrState& state, const bc::SetM& op) {
@@ -2627,14 +2955,15 @@ private: // member instructions
   }
 
   void miFinal(MInstrState& state, const bc::UnsetM& op) {
+    if (mcodeIsElem(state.mcode())) return miFinalUnsetElem(state);
     if (mcodeIsProp(state.mcode())) return miFinalUnsetProp(state);
-    // Elem and MW case:
-    if (state.mcode() != MemberCode::MW) mcodeKey(state);
-    handleInSelfElemU(state);
+    // The MW case is a fatal.
     miPop(state);
   }
 
   void miFinal(MInstrState& state, const bc::SetWithRefLM& op) {
+    moveBase(state, folly::none);
+    killLocals();
     killThisProps();
     killSelfProps();
     if (state.mcode() != MemberCode::MW) mcodeKey(state);
@@ -2642,6 +2971,8 @@ private: // member instructions
   }
 
   void miFinal(MInstrState& state, const bc::SetWithRefRM& op) {
+    moveBase(state, folly::none);
+    killLocals();
     killThisProps();
     killSelfProps();
     if (state.mcode() != MemberCode::MW) mcodeKey(state);
@@ -2654,19 +2985,21 @@ private: // member instructions
   template<class Op>
   void miImpl(const Op& op, const MInstrInfo& info, const MVector& mvec) {
     auto state = MInstrState { &info, mvec };
-    // The m_state before miBase is propagated across factored edges
-    // because wasPEI will be true---no need for miThrow.
     state.base = miBase(state);
-    FTRACE(4, "    base: {}\n", base_string(state.base));
+    FTRACE(3, "    base: {}\n", base_string(state.base));
     miThrow();
     for (; state.mInd < mvec.mcodes.size() - 1; ++state.mInd) {
       miIntermediate(state);
-      FTRACE(4, "    base: {}\n", base_string(state.base));
-      // Note: this one might not be necessary: review whether member
-      // instructions can ever modify local types on itermediate dims.
+      FTRACE(3, "    base: {}\n", base_string(state.base));
       miThrow();
     }
     miFinal(state, op);
+
+    // If the final operation was either a define, a NewElem, or an
+    // unset, there may be pending effects in local array chains or on
+    // local types, so we need to move the base one last time.  The
+    // other cases should have no effects here.
+    moveBase(state, folly::none);
   }
 
   template<class Op>

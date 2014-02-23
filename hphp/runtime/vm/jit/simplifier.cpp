@@ -600,10 +600,25 @@ SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
   auto stkVal = getStackValue(sp, offset);
   auto const oldType = stkVal.knownType;
 
+  if (newType < oldType) {
+    // The new type is strictly better than the old type.
+    return nullptr;
+  }
+
   if (newType >= oldType) {
     // The new type isn't better than the old type.
     return sp;
   }
+
+  if (newType.not(oldType)) {
+    // This will always fail. We can't mutate the instruction in place because
+    // it produces a new StkPtr.
+    gen(Jmp, inst->taken());
+    return nullptr;
+  }
+
+  // Guard on the intersection of newType and oldType.
+  inst->setTypeParam(newType & oldType);
   return nullptr;
 }
 
@@ -2217,29 +2232,25 @@ SSATmp* Simplifier::simplifyAssertTypeOp(IRInstruction* inst, Type oldType,
 
   // Now we're left with cases where neither type is a subtype of the other but
   // they have some nonzero intersection. We want to end up asserting the
-  // intersection, but we have to carefully constrain the input.
+  // intersection, but we have to constrain the input to avoid reintroducing
+  // types that were removed from the original typeParam.
   auto const intersect = newType & oldType;
-  auto const remainder = newType - intersect;
-  auto const toAssert = newType - remainder;
-  always_assert(toAssert <= oldType || oldType <= toAssert);
-  always_assert(oldType.not(remainder));
-  inst->setTypeParam(toAssert);
+  inst->setTypeParam(intersect);
 
   TypeConstraint tc;
-  if (remainder != Type::Bottom) {
-    // We removed types from inst's typeParam, so we must constrain the
-    // original value to ensure its type doesn't get relaxed to include the
-    // removed types.
+  if (intersect != newType) {
     auto increment = [](DataTypeCategory& cat) {
       always_assert(cat != DataTypeSpecialized);
       cat = static_cast<DataTypeCategory>(static_cast<uint8_t>(cat) + 1);
     };
 
     Type relaxed;
-    while ((relaxed = relaxType(oldType, tc)).maybe(remainder)) {
+    // Find the most general constraint that doesn't modify the type being
+    // asserted.
+    while ((relaxed = newType & relaxType(oldType, tc)) != intersect) {
       if (tc.category > DataTypeGeneric &&
-          relaxed.maybeBoxed() && remainder.maybeBoxed() &&
-          (relaxed & Type::Cell).not(remainder & Type::Cell)) {
+          relaxed.maybeBoxed() && intersect.maybeBoxed() &&
+          (relaxed & Type::Cell) == (intersect & Type::Cell)) {
         // If the inner type is why we failed, constrain that a level.
         increment(tc.innerCat);
       } else {

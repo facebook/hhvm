@@ -42,23 +42,24 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/vm/jit/arch.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/vm/jit/translator-x64-internal.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/native-calls.h"
-#include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/layout.h"
-#include "hphp/runtime/vm/jit/reg-algorithms.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
-#include "hphp/runtime/vm/jit/service-requests-x64.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
-#include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/layout.h"
+#include "hphp/runtime/vm/jit/native-calls.h"
+#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/reg-algorithms.h"
+#include "hphp/runtime/vm/jit/service-requests-x64.h"
+#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-x64-internal.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 using HPHP::JIT::TCA;
 
@@ -1897,7 +1898,7 @@ Reg64 getDataPtrEnregistered(Asm& as,
 
 template<class Loc1, class Loc2, class JmpFn>
 void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
-                                 JmpFn doJcc) {
+                                 JmpFn doJcc, OptType prevType) {
   assert(!(type <= Type::Cls));
   ConditionCode cc;
   if (type <= Type::StaticStr) {
@@ -1936,6 +1937,13 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
   doJcc(cc);
 
   if (type.isSpecialized()) {
+    // Sometimes we don't need to emit the specialized test to know that the
+    // value is appropriately specialized. This helps in situations like this:
+    //
+    // t3:StkPtr = AssertStk<{Obj<C>|InitNull}> t1:StkPtr
+    // t4:StkPtr = GuardStk<Obj<C>> t3:StkPtr
+    if (prevType && (type.unspecialize() & *prevType) == type) return;
+
     emitSpecializedTypeTest(type, dataSrc, doJcc);
   }
 }
@@ -1998,11 +2006,14 @@ template<class Loc>
 void CodeGenerator::emitTypeCheck(Type type,
                                   Loc typeSrc,
                                   Loc dataSrc,
-                                  Block* taken) {
-  emitTypeTest(type, typeSrc, dataSrc,
+                                  Block* taken,
+                                  OptType prevType) {
+  emitTypeTest(
+    type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       emitFwdJcc(ccNegate(cc), taken);
-    });
+    },
+    prevType);
 }
 
 template<class Loc>
@@ -4788,8 +4799,10 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
 void CodeGenerator::cgCheckStk(IRInstruction* inst) {
   auto const rbase = srcLoc(0).reg();
   auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset);
+  auto const prevType = getStackValue(inst->src(0), baseOff).knownType;
+
   emitTypeCheck(inst->typeParam(), rbase[baseOff + TVOFF(m_type)],
-                rbase[baseOff + TVOFF(m_data)], inst->taken());
+                rbase[baseOff + TVOFF(m_data)], inst->taken(), prevType);
 }
 
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
@@ -4811,12 +4824,15 @@ template<class Loc>
 void CodeGenerator::emitSideExitGuard(Type type,
                                       Loc typeSrc,
                                       Loc dataSrc,
-                                      Offset taken) {
-  emitTypeTest(type, typeSrc, dataSrc,
+                                      Offset taken,
+                                      OptType prevType) {
+  emitTypeTest(
+    type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), taken);
       emitBindSideExit(this->m_mainCode, this->m_stubsCode, ccNegate(cc), sk);
-  });
+    },
+    prevType);
 }
 
 void CodeGenerator::cgSideExitGuardLoc(IRInstruction* inst) {
@@ -4831,10 +4847,14 @@ void CodeGenerator::cgSideExitGuardLoc(IRInstruction* inst) {
 void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
   auto const sp    = srcLoc(0).reg();
   auto const extra = inst->extra<SideExitGuardStk>();
+  auto const prevType = getStackValue(inst->src(0),
+                                      extra->checkedSlot).knownType;
+
   emitSideExitGuard(inst->typeParam(),
                     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_type)],
                     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
-                    extra->taken);
+                    extra->taken,
+                    prevType);
 }
 
 void CodeGenerator::cgExitJcc(IRInstruction* inst) {

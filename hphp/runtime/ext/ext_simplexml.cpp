@@ -407,7 +407,13 @@ static Object sxe_prop_dim_read(c_SimpleXMLElement* sxe, CVarRef member,
         if (node) {
           return_value = _node_as_zval(sxe, node, SXE_ITER_NONE, nullptr,
                                        sxe->iter.nsprefix, sxe->iter.isprefix);
-        } else {
+        } 
+        /**
+         * Zend PHP would check if this is a write operation, in case of this being
+         * something like $sxe->prop[123] = 'something'. HHVM always handles that
+         * case with offsetSet.
+         */
+        else if (false) {
           if (!member.isNull() && cnt < member.toInt64()) {
             raise_warning("Cannot add element %s number %" PRId64 " when "
                           "only %ld such elements exist", mynode->name,

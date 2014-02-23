@@ -2988,7 +2988,7 @@ void emitSpill(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
   assert(s.numWords() == d.numWords());
   assert(!s.spilled() && d.spilled());
   if (s.isFullSIMD()) {
-    as.movdqa(s.reg(0), reg::rsp[d.offset(0)]);
+    as.movdqu(s.reg(0), reg::rsp[d.offset(0)]);
   } else {
     for (int i = 0, n = s.numAllocated(); i < n; ++i) {
       // store the whole register even if it holds a bool or DataType
@@ -3001,7 +3001,7 @@ void emitReload(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
   assert(s.numWords() == d.numWords());
   assert(s.spilled() && !d.spilled());
   if (d.isFullSIMD()) {
-    as.movdqa(reg::rsp[s.offset(0)], d.reg(0));
+    as.movdqu(reg::rsp[s.offset(0)], d.reg(0));
   } else {
     for (int i = 0, n = d.numAllocated(); i < n; ++i) {
       // load the whole register even if it holds a bool or DataType
@@ -4279,7 +4279,7 @@ void CodeGenerator::cgStoreTypedValue(BaseRef dst, SSATmp* src, PhysLoc loc) {
     // Whole typed value is stored in single SIMD reg srcReg0
     assert(RuntimeOption::EvalHHIRAllocSIMDRegs);
     assert(srcReg1 == InvalidReg);
-    m_as.movdqa(srcReg0, refTVData(dst));
+    m_as.movdqu(srcReg0, refTVData(dst));
     return;
   }
   m_as.storeq(srcReg0, refTVData(dst));
@@ -4369,7 +4369,7 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc,
     // Whole typed value is stored in single SIMD reg valueDstReg
     assert(RuntimeOption::EvalHHIRAllocSIMDRegs);
     assert(typeDstReg == InvalidReg);
-    m_as.movdqa(refTVData(ref), valueDstReg);
+    m_as.movdqu(refTVData(ref), valueDstReg);
     return;
   }
 

@@ -444,7 +444,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
       return nullptr;
     }
     return collectionAt(obj, key);
-  } else if (obj->getVMClass() == SystemLib::s_ArrayObjectClass) {
+  } else if (obj->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
     auto storage = obj->o_realProp(s_storage, 0,
                                    SystemLib::s_ArrayObjectClass->nameRef());
     // ArrayObject should have the 'storage' property...

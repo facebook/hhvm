@@ -333,6 +333,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     ServerStatsHelper ssh("input");
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
     Extension::RequestInitModules();
+    process_ini_settings();
 
     if (RuntimeOption::EnableDebugger) {
       Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();

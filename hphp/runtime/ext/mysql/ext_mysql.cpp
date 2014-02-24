@@ -39,7 +39,7 @@ bool mysqlExtension::ReadOnly = false;
 bool mysqlExtension::Localize = false;
 #endif
 int mysqlExtension::ConnectTimeout = 1000;
-int mysqlExtension::ReadTimeout = 1000;
+int mysqlExtension::ReadTimeout = 60000;
 int mysqlExtension::WaitTimeout = -1;
 int mysqlExtension::SlowQueryThreshold = 1000; // ms
 bool mysqlExtension::KillOnTimeout = false;

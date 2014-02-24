@@ -803,26 +803,29 @@ SSATmp* Simplifier::simplifyCommutative(SSATmp* src1,
   if (auto simp = simplifyConst(src1, src2, op)) {
     return simp;
   }
+  // Canonicalize constants to the right.
   if (src1->isConst() && !src2->isConst()) {
     return gen(opcode, src2, src1);
   }
-  if (src1->isA(Type::Int) && src2->isA(Type::Int)) {
-    auto inst1 = src1->inst();
-    auto inst2 = src2->inst();
-    if (inst1->op() == opcode && inst1->src(1)->isConst()) {
-      /* (X + C1) + C2 --> X + C3 */
-      if (src2->isConst()) {
-        int64_t right = inst1->src(1)->getValInt();
-        right = op(right, src2->getValInt());
-        return gen(opcode, inst1->src(0), cns(right));
-      }
-      /* (X + C1) + (Y + C2) --> X + Y + C3 */
-      if (inst2->op() == opcode && inst2->src(1)->isConst()) {
-        int64_t right = inst1->src(1)->getValInt();
-        right = op(right, inst2->src(1)->getValInt());
-        SSATmp* left = gen(opcode, inst1->src(0), inst2->src(0));
-        return gen(opcode, left, cns(right));
-      }
+  if (!src1->isA(Type::Int) || !src2->isA(Type::Int)) {
+    return nullptr;
+  }
+
+  auto inst1 = src1->inst();
+  auto inst2 = src2->inst();
+  if (inst1->op() == opcode && inst1->src(1)->isConst()) {
+    // (X + C1) + C2 --> X + C3
+    if (src2->isConst()) {
+      int64_t right = inst1->src(1)->getValInt();
+      right = op(right, src2->getValInt());
+      return gen(opcode, inst1->src(0), cns(right));
+    }
+    // (X + C1) + (Y + C2) --> X + Y + C3
+    if (inst2->op() == opcode && inst2->src(1)->isConst()) {
+      int64_t right = inst1->src(1)->getValInt();
+      right = op(right, inst2->src(1)->getValInt());
+      SSATmp* left = gen(opcode, inst1->src(0), inst2->src(0));
+      return gen(opcode, left, cns(right));
     }
   }
   return nullptr;
@@ -835,7 +838,7 @@ SSATmp* Simplifier::simplifyDistributive(SSATmp* src1,
                                          Opcode incode,
                                          OutOper outop,
                                          InOper inop) {
-  /* assumes that outop is commutative, don't use with subtract! */
+  // assumes that outop is commutative, don't use with subtract!
   if (auto simp = simplifyCommutative(src1, src2, outcode, outop)) {
     return simp;
   }
@@ -843,7 +846,7 @@ SSATmp* Simplifier::simplifyDistributive(SSATmp* src1,
   auto inst2 = src2->inst();
   Opcode op1 = inst1->op();
   Opcode op2 = inst2->op();
-  /* all combinations of X * Y + X * Z --> X * (Y + Z) */
+  // all combinations of X * Y + X * Z --> X * (Y + Z)
   if (op1 == incode && op2 == incode) {
     if (inst1->src(0) == inst2->src(0)) {
       SSATmp* fold = gen(outcode, inst1->src(1), inst2->src(1));
@@ -970,28 +973,44 @@ SSATmp* Simplifier::simplifyMulInt(SSATmp* src1, SSATmp* src2) {
   if (auto simp = simplifyCommutative(src1, src2, MulInt, mul)) {
     return simp;
   }
-  if (src2->isConst()) {
-    // X * (-1) --> -X
-    if (src2->getValInt() == -1) {
-      return gen(SubInt, cns(0), src1);
-    }
-    // X * 0 --> 0
-    if (src2->getValInt() == 0) {
-      return cns(0);
-    }
-    // X * 1 --> X
-    if (src2->getValInt() == 1) {
-      return src1;
-    }
-    // X * 2 --> X + X
-    if (src2->getValInt() == 2) {
-      return gen(AddInt, src1, src1);
-    }
-    // TODO once IR has shifts
-    // X * 2^C --> X << C
-    // X * (2^C + 1) --> ((X << C) + X)
-    // X * (2^C - 1) --> ((X << C) - X)
+
+  if (!src2->isConst()) {
+    return nullptr;
   }
+
+  int64_t rhs = src2->getValInt();
+
+  // X * (-1) --> -X
+  if (rhs == -1) return gen(SubInt, cns(0), src1);
+  // X * 0 --> 0
+  if (rhs == 0) return cns(0);
+  // X * 1 --> X
+  if (rhs == 1) return src1;
+  // X * 2 --> X + X
+  if (rhs == 2) return gen(AddInt, src1, src1);
+
+  auto isPowTwo = [](int64_t a) {
+    return a > 0 && folly::isPowTwo<uint64_t>(a);
+  };
+  auto log2 = [](int64_t a) {
+    assert(a > 0);
+    return folly::findLastSet<uint64_t>(a) - 1;
+  };
+
+  // X * 2^C --> X << C
+  if (isPowTwo(rhs)) return gen(Shl, src1, cns(log2(rhs)));
+
+  // X * (2^C + 1) --> ((X << C) + X)
+  if (isPowTwo(rhs - 1)) {
+    auto lhs = gen(Shl, src1, cns(log2(rhs - 1)));
+    return gen(AddInt, lhs, src1);
+  }
+  // X * (2^C - 1) --> ((X << C) - X)
+  if (isPowTwo(rhs + 1)) {
+    auto lhs = gen(Shl, src1, cns(log2(rhs + 1)));
+    return gen(SubInt, lhs, src1);
+  }
+
   return nullptr;
 }
 
@@ -1017,25 +1036,26 @@ SSATmp* Simplifier::simplifyMulDbl(SSATmp* src1, SSATmp* src2) {
 }
 
 SSATmp* Simplifier::simplifyMod(SSATmp* src1, SSATmp* src2) {
-  if (src2->isConst()) {
-    int64_t src2Val = src2->getValInt();
-    // refrain from generating undefined IR
-    assert(src2Val != 0);
-    // simplify const
-    if (src1->isConst()) {
-      // still don't want undefined IR
-      assert(src1->getValInt() != std::numeric_limits<int64_t>::min() ||
-             src2Val != -1);
-      return cns(src1->getValInt() % src2Val);
-    }
-    // X % 1, X % -1 --> 0
-    if (src2Val == 1 || src2Val == -1LL) {
-      return cns(0);
-    }
-    // X % LONG_MIN = X (largest magnitude possible as rhs)
-    if (src2Val == std::numeric_limits<int64_t>::min()) {
-      return src1;
-    }
+  if (!src2->isConst()) {
+    return nullptr;
+  }
+  int64_t src2Val = src2->getValInt();
+  // refrain from generating undefined IR
+  assert(src2Val != 0);
+  // simplify const
+  if (src1->isConst()) {
+    // still don't want undefined IR
+    assert(src1->getValInt() != std::numeric_limits<int64_t>::min() ||
+           src2Val != -1);
+    return cns(src1->getValInt() % src2Val);
+  }
+  // X % 1, X % -1 --> 0
+  if (src2Val == 1 || src2Val == -1LL) {
+    return cns(0);
+  }
+  // X % LONG_MIN = X (largest magnitude possible as rhs)
+  if (src2Val == std::numeric_limits<int64_t>::min()) {
+    return src1;
   }
   return nullptr;
 }
@@ -1146,11 +1166,7 @@ SSATmp* Simplifier::simplifyLogicXor(SSATmp* src1, SSATmp* src2) {
 
   // One constant: either a Not or constant result.
   if (src2->isConst()) {
-    if (src2->getValBool()) {
-      return gen(Not, src1);
-    } else {
-      return src1;
-    }
+    return src2->getValBool() ? gen(Not, src1) : src1;
   }
   return nullptr;
 }

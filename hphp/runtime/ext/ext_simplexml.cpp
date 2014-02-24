@@ -407,17 +407,9 @@ static Object sxe_prop_dim_read(c_SimpleXMLElement* sxe, CVarRef member,
         if (node) {
           return_value = _node_as_zval(sxe, node, SXE_ITER_NONE, nullptr,
                                        sxe->iter.nsprefix, sxe->iter.isprefix);
-        } else {
-          if (!member.isNull() && cnt < member.toInt64()) {
-            raise_warning("Cannot add element %s number %" PRId64 " when "
-                          "only %ld such elements exist", mynode->name,
-                          member.toInt64(), cnt);
-          }
-          node = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name,
-                                 nullptr);
-          return_value = _node_as_zval(sxe, node, SXE_ITER_NONE, nullptr,
-                                       sxe->iter.nsprefix, sxe->iter.isprefix);
         }
+        // Zend would check here if this is a write operation, but HHVM always
+        // handles that with offsetSet so we just want to return nullptr here.
       } else {
 #if SXE_ELEMENT_BY_NAME
         int newtype;

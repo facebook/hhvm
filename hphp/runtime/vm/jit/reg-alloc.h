@@ -112,25 +112,56 @@ PhysReg forceAlloc(SSATmp& t);
 RegAllocInfo allocateRegs(IRUnit&);
 
 /*
- * Returns true if the instruction can store source operand srcIdx to
- * memory as a cell using a 16-byte store.  (implying its okay to
- * clobber TypedValue.m_aux)
+ * A Constraint represents a set of locations an operand may
+ * be assigned to by the register allocator.  GP and SIMD are
+ * self explanitory.  VOID means no-location, i.e. InvalidReg.
+ * Only some instructions allow a VOID destination, so VOID
+ * is explicit.
  */
-bool storesCell(const IRInstruction& inst, uint32_t srcIdx);
+struct Constraint {
+  enum ConstraintMask {
+    GP = 1,
+    SIMD = 2,
+    VOID = 4
+  };
+  /* implicit */ Constraint(ConstraintMask m) : m_bits(m) {}
+  Constraint& operator=(Constraint c2) {
+    m_bits = c2.m_bits;
+    return *this;
+  }
+  Constraint operator|(Constraint c2) const {
+    return Constraint(m_bits | c2.m_bits);
+  }
+  Constraint operator&(Constraint c2) const {
+    return Constraint(m_bits & c2.m_bits);
+  }
+  Constraint operator-(Constraint c2) const {
+    return Constraint(m_bits & ~c2.m_bits);
+  }
+
+  Constraint& operator|=(Constraint c2) { return *this = *this | c2; }
+  Constraint& operator&=(Constraint c2) { return *this = *this & c2; }
+  Constraint& operator-=(Constraint c2) { return *this = *this - c2; }
+
+  explicit operator bool() const { return m_bits != 0; }
+
+private:
+  typedef uint8_t bits_t;
+  explicit Constraint(bits_t b) : m_bits(b) {}
+
+private:
+  bits_t m_bits;
+};
 
 /*
- * Return true if this instruction can load a TypedValue using a 16-byte
- * load into a SIMD register.  Note that this function returns
- * false for instructions that load internal meta-data, such as Func*,
- * Class*, etc.
+ * return a constraint for the given src
  */
-bool loadsCell(Opcode op);
+Constraint srcConstraint(const IRInstruction& inst, unsigned src);
 
 /*
- * Return true if the given destination operand needs to be assigned
- * a register even if it's unused.
+ * Return a constraint for the given destination.
  */
-bool needsUnusedReg(const IRInstruction& inst, unsigned dst);
+Constraint dstConstraint(const IRInstruction& inst, unsigned dst);
 
 }}
 

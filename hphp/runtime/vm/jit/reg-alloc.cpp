@@ -32,9 +32,7 @@ PhysReg forceAlloc(SSATmp& dst) {
   // Note that the point of StashGeneratorSP is to save a StkPtr
   // somewhere other than rVmSp.  (TODO(#2288359): make rbx not
   // special.)
-  bool abnormalStkPtr = opc == StashGeneratorSP;
-
-  if (!abnormalStkPtr && dst.isA(Type::StkPtr)) {
+  if (opc != StashGeneratorSP && dst.isA(Type::StkPtr)) {
     assert(opc == DefSP ||
            opc == ReDefSP ||
            opc == ReDefGeneratorSP ||
@@ -62,9 +60,7 @@ PhysReg forceAlloc(SSATmp& dst) {
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
   // we have a pointer to an AR that is not in rVmFp.
-  bool abnormalFramePtr = opc == LdContActRec || opc == LdAFWHActRec;
-
-  if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
+  if (opc != LdContActRec && opc != LdAFWHActRec && dst.isA(Type::FramePtr)) {
     return arch() == Arch::X64 ? X64::rVmFp : ARM::rVmFp;
   }
 
@@ -75,6 +71,24 @@ PhysReg forceAlloc(SSATmp& dst) {
   return InvalidReg;
 }
 
+namespace ARM {
+Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
+  return Constraint::GP;
+}
+
+Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
+  return Constraint::GP;
+}
+}
+
+namespace X64 {
+
+/*
+ * Return true if this instruction can load a TypedValue using a 16-byte
+ * load into a SIMD register.  Note that this function returns
+ * false for instructions that load internal meta-data, such as Func*,
+ * Class*, etc.
+ */
 bool loadsCell(Opcode op) {
   switch (op) {
     case LdStack:
@@ -105,6 +119,11 @@ bool loadsCell(Opcode op) {
   }
 }
 
+/*
+ * Returns true if the instruction can store source operand srcIdx to
+ * memory as a cell using a 16-byte store.  (implying its okay to
+ * clobber TypedValue.m_aux)
+ */
 bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   // If this function returns true for an operand, then the register allocator
   // may give it an XMM register, and the instruction will store the whole 16
@@ -143,22 +162,24 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   }
 }
 
-/*
- * These functions return true by default to indicate a result register is
- * required even if the instruction's dst is unused.  It's only useful to
- * return false for instructions that have a side effect, *and* have the
- * CodeGenerator logic to detect no result register and emit better code.
- */
-
-namespace ARM {
-bool needsUnusedReg(const IRInstruction& inst, unsigned dst) {
-  switch (inst.op()) {
-  default: return true;
+Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
+  Constraint c { Constraint::GP };
+  auto src = inst.src(i);
+  if (src->type() <= Type::Dbl) {
+    c |= Constraint::SIMD;
+  } else if (!packed_tv && storesCell(inst, i) && src->numWords() == 2) {
+    // don't do this for packed_tv because the type byte is hard to access
+    // don't do it for control-flow instructions because we assume the
+    // instruction is looking at the type-byte.
+    c |= Constraint::SIMD;
   }
-}
+  return c;
 }
 
-namespace X64 {
+// Return true by default to indicate a result register is required even
+// if the instruction's dst is unused.  It's only useful to return false
+// for instructions that have a side effect, *and* have the CodeGenerator
+// logic to detect no result register and emit better code.
 bool needsUnusedReg(const IRInstruction& inst, unsigned dst) {
   // helpers that check for InvalidReg dest:
   // cgCallHelper
@@ -187,12 +208,37 @@ bool needsUnusedReg(const IRInstruction& inst, unsigned dst) {
   }
   return false;
 }
+
+Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
+  Constraint c { Constraint::GP };
+  auto dst = inst.dst(i);
+  if (dst->type() <= Type::Dbl) {
+    c |= Constraint::SIMD;
+  } else if (!packed_tv && loadsCell(inst.op()) && !inst.isControlFlow() &&
+             dst->numWords() == 2) {
+    // we don't do this for packed_tv because the type byte is at offset 1
+    // we don't do this for isControlFlow() under the assumption the instruction
+    // is some kind of type-check, no such instruction would be peeking into
+    // the XMM to examine the type-byte.
+    c |= Constraint::SIMD;
+  }
+  if (!needsUnusedReg(inst, i)) {
+    c |= Constraint::VOID;
+  }
+  return c;
+}
 }
 
-bool needsUnusedReg(const IRInstruction& inst, unsigned dst) {
+Constraint srcConstraint(const IRInstruction& inst, unsigned src) {
+  assert(src <= inst.numSrcs());
+  return arch() == Arch::X64 ? X64::srcConstraint(inst, src) :
+         ARM::srcConstraint(inst, src);
+}
+
+Constraint dstConstraint(const IRInstruction& inst, unsigned dst) {
   assert(dst <= inst.numDsts());
-  return arch() == Arch::X64 ? X64::needsUnusedReg(inst, dst) :
-         ARM::needsUnusedReg(inst, dst);
+  return arch() == Arch::X64 ? X64::dstConstraint(inst, dst) :
+         ARM::dstConstraint(inst, dst);
 }
 
 }} // HPHP::JIT

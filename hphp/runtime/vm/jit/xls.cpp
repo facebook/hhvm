@@ -396,43 +396,48 @@ void XLS::computePositions() {
   }
 }
 
-// Reduce the allow and prefer sets according to this particular use
-void srcConstraints(IRInstruction& inst, int i, SSATmp* src, Interval* ivl,
-                    const Abi& abi) {
-  if (!packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs) {
-    if (src->type() <= Type::Dbl) {
-      ivl->prefer &= abi.simd;
-      return;
-    }
-    if (storesCell(inst, i) && src->numWords() == 2) {
-      ivl->prefer &= abi.simd;
-      return;
+// Return the reg mask that corresponds to a constraint, and deal with
+// the EvalHHIRAllocSIMDRegs option.  Only disable SIMD for constraints
+// that have some other option. (Don't create empty allow sets).
+// The check is intentionally here instead of in src/dstConstraint(), so
+// the latter can directly reflect the instruction-selection source code
+// in CodeGenerator.
+RegSet constrainedRegs(Constraint c, const Abi& abi) {
+  auto regs = RegSet();
+  if (c & Constraint::GP) regs |= abi.gp;
+  if (c & Constraint::SIMD) {
+    if (regs.empty() || RuntimeOption::EvalHHIRAllocSIMDRegs) {
+      regs |= abi.simd;
     }
   }
-  ivl->allow &= abi.gp;
-  ivl->prefer &= abi.gp;
+  return regs;
+}
+
+// Reduce the allow and prefer sets according to this particular use
+void srcConstraints(Interval* ivl, const Abi& abi, Constraint constraint) {
+  auto allow = constrainedRegs(constraint, abi);
+  ivl->allow &= allow;
+  ivl->prefer &= allow;
+  if (!(ivl->allow & abi.simd).empty()) {
+    // we allow gp and simd, so prefer just simd
+    ivl->prefer &= abi.simd;
+  }
 }
 
 // Reduce the allow and prefer constraints based on this definition
-void dstConstraints(IRInstruction& inst, int i, SSATmp* dst, Interval* ivl,
-                    const Abi& abi) {
-  if (!packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs) {
-    if (dst->type() <= Type::Dbl) {
-      ivl->prefer &= abi.simd;
-      return;
-    }
-    if (loadsCell(inst.op()) && !inst.isControlFlow() && dst->numWords() == 2) {
-      ivl->prefer &= abi.simd;
-      if (!(ivl->allow & ivl->prefer).empty()) {
-        // we prefer simd, but allow gp and simd, so restrict allow to just
-        // simd to avoid (simd)<->(gpr,gpr) shuffles.
-        ivl->allow = ivl->prefer;
-      }
-      return;
-    }
+void dstConstraints(Interval* ivl, const Abi& abi, Constraint constraint) {
+  auto allow = constrainedRegs(constraint, abi);
+  ivl->allow &= allow;
+  ivl->prefer &= allow;
+  if (!(ivl->allow & abi.simd).empty()) {
+    // if we allow gp and simd, then prefer just simd
+    ivl->prefer &= abi.simd;
   }
-  ivl->allow &= abi.gp;
-  ivl->prefer &= abi.gp;
+  if (ivl->tmp->numWords() == 2 && !(ivl->allow & ivl->prefer).empty()) {
+    // we prefer simd, but allow gp and simd, so restrict allow to just
+    // simd to avoid (simd)<->(gpr,gpr) shuffles.
+    ivl->allow = ivl->prefer;
+  }
 }
 
 // build intervals in one pass by walking the block list backwards.
@@ -462,6 +467,7 @@ void XLS::buildIntervals() {
       for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
         auto d = inst.dst(i);
         auto dest = m_intervals[d];
+        auto constraint = dstConstraint(inst, i);
         if (!live[d]) {
           // dest is not live; give it a register anyway.
           assert(!dest);
@@ -471,7 +477,9 @@ void XLS::buildIntervals() {
             inst_regs.dst(i).setReg(r, 0);
             continue;
           }
-          if (!needsUnusedReg(inst, i)) continue;
+          if (constraint & Constraint::VOID) {
+            continue; // unused dest will be InvalidReg
+          }
           m_intervals[d] = dest = smart_new<Interval>();
           dest->add(closedRange(dpos, dpos));
           dest->tmp = d;
@@ -485,7 +493,7 @@ void XLS::buildIntervals() {
         }
         dst_need += dest->need;
         dest->addUse(dpos);
-        dstConstraints(inst, i, d, dest, m_abi);
+        dstConstraints(dest, m_abi, constraint);
       }
       stress = std::max(dst_need, stress);
       if (inst.isNative()) {
@@ -519,7 +527,8 @@ void XLS::buildIntervals() {
         } else {
           assert(src->tmp == s);
         }
-        srcConstraints(inst, i, s, src, m_abi);
+        auto constraint = srcConstraint(inst, i);
+        srcConstraints(src, m_abi, constraint);
         src_need += src->need;
         live.add(s);
       }

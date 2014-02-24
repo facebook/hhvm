@@ -1,6 +1,6 @@
 <?php
 $f = dirname(__FILE__)."/004.txt.gz";
-$f2 = "zlib_wrapper_ftruncate_basic.txt.gz";
+$f2 = "zlib_wrapper_ftruncate_basic.gz";
 copy($f, $f2);
 
 $h = gzopen($f2, "r");

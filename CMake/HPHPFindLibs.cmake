@@ -28,13 +28,10 @@ if (LIBDL_INCLUDE_DIRS)
 endif()
 
 # boost checks
-find_package(Boost 1.48.0 COMPONENTS system program_options filesystem regex REQUIRED)
+find_package(Boost 1.49.0 COMPONENTS system program_options filesystem regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
-# Boost 1.49 supports a better flat_multimap, but 1.48 is good enough
-if (Boost_VERSION GREATER 104899)
-	add_definitions("-DHAVE_BOOST1_49")
-endif()
+add_definitions("-DHAVE_BOOST1_49")
 
 
 # features.h

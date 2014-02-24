@@ -47,18 +47,18 @@
 /* Translator front-end. */
 namespace HPHP {
 namespace JIT {
-class HhbcTranslator;
-class IRTranslator;
+struct HhbcTranslator;
+struct IRTranslator;
 }
 namespace Debug {
-class DebugInfo;
+struct DebugInfo;
 }
 namespace JIT {
 
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
-class Translator;
+struct Translator;
 extern Translator* g_translator;
 
 /*
@@ -174,24 +174,23 @@ struct TraceletContext;
 // Return a summary string of the bytecode in a tracelet.
 std::string traceletShape(const Tracelet&);
 
-class TranslationFailedExc : public std::runtime_error {
- public:
+struct TranslationFailedExc : std::runtime_error {
   TranslationFailedExc(const char* file, int line)
     : std::runtime_error(folly::format("TranslationFailedExc @ {}:{}",
                                        file, line).str())
   {}
 };
 
-class UnknownInputExc : public std::runtime_error {
- public:
-  const char* m_file; // must be static
-  const int m_line;
+struct UnknownInputExc : std::runtime_error {
   UnknownInputExc(const char* file, int line)
     : std::runtime_error(folly::format("UnknownInputExc @ {}:{}",
                                        file, line).str())
     , m_file(file)
     , m_line(line)
   {}
+
+  const char* m_file; // must be static
+  const int m_line;
 };
 
 #define punt() do { \
@@ -202,8 +201,7 @@ class UnknownInputExc : public std::runtime_error {
   throw JIT::UnknownInputExc(__FILE__, __LINE__); \
 } while(0);
 
-class GuardType {
- public:
+struct GuardType {
   explicit GuardType(DataType outer = KindOfAny,
                      DataType inner = KindOfNone);
   explicit GuardType(const RuntimeType& rtt);

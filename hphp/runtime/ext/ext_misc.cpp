@@ -33,48 +33,48 @@
 
 namespace HPHP {
 
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_string);
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_comment);
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_keyword);
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_default);
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
+
 static class MiscExtension : public Extension {
 public:
   MiscExtension() : Extension("misc", k_PHP_VERSION.c_str()) { }
-  void requestInit() {
+  void threadInit() {
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.string", "#DD0000",
       ini_on_update_stdstring, ini_get_stdstring,
-      &m_misc_highlight_default_string
+      &s_misc_highlight_default_string
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.comment", "#FF8000",
       ini_on_update_stdstring, ini_get_stdstring,
-      &m_misc_highlight_default_comment
+      &s_misc_highlight_default_comment
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.keyword", "#007700",
       ini_on_update_stdstring, ini_get_stdstring,
-      &m_misc_highlight_default_keyword
+      &s_misc_highlight_default_keyword
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.default", "#0000BB",
       ini_on_update_stdstring, ini_get_stdstring,
-      &m_misc_highlight_default_default
+      &s_misc_highlight_default_default
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.html", "#000000",
       ini_on_update_stdstring, ini_get_stdstring,
-      &m_misc_highlight_default_html
+      &s_misc_highlight_default_html
     );
 
   }
-
-  std::string m_misc_highlight_default_string;
-  std::string m_misc_highlight_default_comment;
-  std::string m_misc_highlight_default_keyword;
-  std::string m_misc_highlight_default_default;
-  std::string m_misc_highlight_default_html;
 
 } s_misc_extension;
 

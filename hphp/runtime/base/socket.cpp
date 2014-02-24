@@ -59,7 +59,9 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
 
   struct timeval tv;
   if (timeout <= 0) {
-    tv.tv_sec = g_context->getSocketDefaultTimeout();
+    auto defaultTimeout = ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getSocketDefaultTimeout();
+    tv.tv_sec = defaultTimeout;
     tv.tv_usec = 0;
   } else {
     tv.tv_sec = (int)timeout;

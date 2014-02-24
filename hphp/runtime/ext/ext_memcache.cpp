@@ -54,7 +54,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(MEMCACHEGlobals, s_memcache_globals);
 class MemcacheExtension : public Extension {
   public:
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
-    void requestInit() override {
+    void threadInit() override {
       IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                        "memcache.hash_strategy", "standard",
                        ini_on_update_hash_strategy, ini_get_hash_strategy,

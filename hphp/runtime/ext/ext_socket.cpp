@@ -1063,7 +1063,10 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   Resource ret;
   Socket *sock = NULL;
 
-  if (timeout < 0) timeout = g_context->getSocketDefaultTimeout();
+  if (timeout < 0) {
+    timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getSocketDefaultTimeout();
+  }
   // test if protocol is SSL
   SSLSocket *sslsock = SSLSocket::Create(hosturl, timeout);
   if (sslsock) {

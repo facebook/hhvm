@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/lock.h"
 
 namespace HPHP {
@@ -448,6 +449,7 @@ static IMPLEMENT_THREAD_LOCAL(DefaultMap, s_savedDefaults);
 class IniSettingExtension : public Extension {
 public:
   IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
+
   void requestShutdown() {
     // Put all the defaults back to the way they were before any ini_set()
     for (auto &item : *s_savedDefaults) {
@@ -455,6 +457,7 @@ public:
     }
     s_savedDefaults->clear();
   }
+
 } s_ini_extension;
 
 void IniSetting::SetGlobalDefault(const char *name, const char *value) {
@@ -619,6 +622,12 @@ bool IniSetting::Get(const String& name, String &value) {
   std::string b;
   auto ret = Get(name.toCppString(), b);
   value = b;
+  return ret;
+}
+
+std::string IniSetting::Get(const std::string& name) {
+  std::string ret;
+  Get(name, ret);
   return ret;
 }
 

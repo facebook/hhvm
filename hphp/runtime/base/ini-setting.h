@@ -102,9 +102,17 @@ public:
 
   static bool Get(const std::string& name, std::string &value);
   static bool Get(const String& name, String &value);
-  static bool Set(const String& name, const String& value);
-  static bool SetUser(const String& name, const String& value);
+  static std::string Get(const std::string& name);
   static Array GetAll(const String& extension, bool details);
+
+  /**
+   * Change an INI setting as if it was in the php.ini file
+   */
+  static bool Set(const String& name, const String& value);
+  /**
+   * Change an INI setting as if there was a call to ini_set()
+   */
+  static bool SetUser(const String& name, const String& value);
 
   static void Bind(const Extension* extension, const Mode mode,
                    const char *name, const char *value,

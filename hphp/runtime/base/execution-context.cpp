@@ -61,158 +61,12 @@ BaseExecutionContext::BaseExecutionContext() :
     m_out(nullptr), m_implicitFlush(false), m_protectedLevel(0),
     m_stdout(nullptr), m_stdoutData(nullptr),
     m_errorState(ExecutionContext::ErrorState::NoError),
-    m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
-    m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
+    m_lastErrorNum(0), m_throwAllErrors(false),
     m_vhost(nullptr) {
 
+  // We want this to run on every request, instead of just once per thread
   auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
-  setRequestMemoryMaxBytes(max_mem);
-  restoreIncludePath();
-
-  // Language and Misc Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
-                   &RuntimeOption::ExposeHPHP);
-
-  // Resource Limits
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
-                   [this](const std::string& value, void* p) {
-                     this->setRequestMemoryMaxBytes(value);
-                     return true;
-                   },
-                   ini_get_stdstring,
-                   &m_maxMemory);
-
-  // Data Handling
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "arg_separator.output", "&",
-                   &m_argSeparatorOutput);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "post_max_size",
-                   ini_on_update_long,
-                   [](void*) {
-                     return std::to_string(VirtualHost::GetMaxPostSize());
-                   },
-                   &RuntimeOption::MaxPostSize);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
-                   &m_defaultCharset);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "always_populate_raw_post_data",
-                   &RuntimeOption::AlwaysPopulateRawPostData);
-
-  // Paths and Directories
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "include_path",
-                   [this](const String& value, void* p) {
-                     this->setIncludePath(value);
-                     return true;
-                   },
-                   [this](void*) {
-                     return this->getIncludePath().toCppString();
-                   });
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "doc_root", &RuntimeOption::SourceRoot);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "open_basedir",
-                   [](const std::string& value, void* p) {
-                     RuntimeOption::AllowedDirectories.clear();
-                     auto boom = f_explode(";", value).toCArrRef();
-                     for (ArrayIter iter(boom); iter; ++iter) {
-                       RuntimeOption::AllowedDirectories.push_back(
-                         iter.second().toCStrRef().toCppString()
-                       );
-                     }
-                     return true;
-                   },
-                   [](void*) {
-                     std::string out = "";
-                     for (auto& dir : RuntimeOption::AllowedDirectories) {
-                       if (!dir.empty()) {
-                         out += dir + ";";
-                       }
-                     }
-                     return out;
-                   });
-
-  // FastCGI
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
-                   "pid", &RuntimeOption::PidFile);
-
-  // File Uploads
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "file_uploads", "true",
-                   &RuntimeOption::EnableFileUploads);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "upload_max_filesize",
-                   ini_on_update_long,
-                   [](void*) {
-                     int uploadMaxFilesize =
-                       VirtualHost::GetUploadMaxFileSize() / (1 << 20);
-                     return std::to_string(uploadMaxFilesize) + "M";
-                   },
-                   &RuntimeOption::UploadMaxFileSize);
-
-  // Errors and Logging Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "error_reporting",
-                   &m_errorReportingLevel);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "log_errors",
-                   [this](const std::string& value, void* p) {
-                     bool log;
-                     ini_on_update_bool(value, &log);
-                     this->setLogErrors(log);
-                     return true;
-                   },
-                   ini_get_bool_as_int,
-                   &m_logErrors);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "error_log",
-                   [this](const std::string& value, void* p) {
-                     this->setErrorLog(value);
-                     return true;
-                   },
-                   ini_get_string,
-                   &m_errorLog);
-
-  // Filesystem and Streams Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "allow_url_fopen",
-                   ini_on_update_fail, ini_get_static_string_1);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "default_socket_timeout",
-                   std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
-                   &m_socketDefaultTimeout);
-
-  // HPHP specific
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
-                   "hphp.compiler_id",
-                   ini_on_update_fail,
-                   [](void*) {
-                     return getHphpCompilerId();
-                   });
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
-                   "hphp.compiler_version",
-                   ini_on_update_fail,
-                   [](void*) {
-                     return getHphpCompilerVersion();
-                   });
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
-                   "hhvm.ext_zend_compat",
-                   ini_on_update_fail, ini_get_bool,
-                   &RuntimeOption::EnableZendCompat),
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
-                   "hphp.build_id",
-                   ini_on_update_fail, ini_get_stdstring,
-                   &RuntimeOption::BuildId);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "notice_frequency",
-                   &RuntimeOption::NoticeFrequency);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                   "warning_frequency",
-                   &RuntimeOption::WarningFrequency);
+  IniSetting::Set("memory_limit", max_mem);
 }
 
 VMExecutionContext::VMExecutionContext() :
@@ -323,21 +177,6 @@ void BaseExecutionContext::setContentType(const String& mimetype,
     m_transport->addHeader("Content-Type", contentType.c_str());
     m_transport->setDefaultContentType(false);
   }
-}
-
-void BaseExecutionContext::setRequestMemoryMaxBytes(const std::string& max) {
-  int64_t newInt = strtoll(max.c_str(), nullptr, 10);
-  if (newInt <= 0) {
-    newInt = INT64_MAX;
-    m_maxMemory = std::to_string(newInt);
-  } else {
-    m_maxMemory = max;
-    newInt = convert_bytes_to_long(max);
-    if (newInt <= 0) {
-      newInt = INT64_MAX;
-    }
-  }
-  MM().getStatsNoRefresh().maxBytes = newInt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -730,7 +569,9 @@ bool BaseExecutionContext::errorNeedsHandling(int errnum,
 }
 
 bool BaseExecutionContext::errorNeedsLogging(int errnum) {
-  return RuntimeOption::NoSilencer || (getErrorReportingLevel() & errnum) != 0;
+  auto level = ThreadInfo::s_threadInfo.getNoCheck()->
+    m_reqInjectionData.getErrorReportingLevel();
+  return RuntimeOption::NoSilencer || (level & errnum) != 0;
 }
 
 class ErrorStateHelper {
@@ -912,37 +753,11 @@ bool BaseExecutionContext::onUnhandledException(Object e) {
   return false;
 }
 
-void BaseExecutionContext::setLogErrors(bool on) {
-  if (m_logErrors != on) {
-    m_logErrors = on;
-    if (m_logErrors) {
-      if (!m_errorLog.empty()) {
-        FILE *output = fopen(m_errorLog.data(), "a");
-        if (output) {
-          Logger::SetNewOutput(output);
-        }
-      }
-    } else {
-      Logger::SetNewOutput(nullptr);
-    }
-  }
-}
-
-void BaseExecutionContext::setErrorLog(const String& filename) {
-  m_errorLog = filename;
-  if (m_logErrors && !m_errorLog.empty()) {
-    FILE *output = fopen(m_errorLog.data(), "a");
-    if (output) {
-      Logger::SetNewOutput(output);
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // IDebuggable
 
 void BaseExecutionContext::debuggerInfo(InfoVec &info) {
-  int64_t newInt = convert_bytes_to_long(m_maxMemory);
+  int64_t newInt = convert_bytes_to_long(IniSetting::Get("memory_limit"));
   if (newInt <= 0) {
     newInt = INT64_MAX;
   }
@@ -973,33 +788,6 @@ String BaseExecutionContext::getenv(const String& name) const {
     return String(RuntimeOption::EnvVariables[name.c_str()].data(), CopyString);
   }
   return String();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void BaseExecutionContext::restoreIncludePath() {
-  m_include_paths = Array::Create();
-  for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {
-    m_include_paths.append(String(RuntimeOption::IncludeSearchPaths[i]));
-  }
-}
-
-void BaseExecutionContext::setIncludePath(const String& path) {
-  m_include_paths = f_explode(":", path);
-}
-
-String BaseExecutionContext::getIncludePath() const {
-  StringBuffer sb;
-  bool first = true;
-  for (ArrayIter iter(m_include_paths); iter; ++iter) {
-    if (first) {
-      first = false;
-    } else {
-      sb.append(':');
-    }
-    sb.append(iter.second().toString());
-  }
-  return sb.detach();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

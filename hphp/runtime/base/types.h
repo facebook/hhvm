@@ -271,9 +271,12 @@ public:
       m_timeoutSeconds(-1), m_hasTimer(false), m_timerActive(false),
       m_debugger(false), m_debuggerIntr(false), m_coverage(false),
       m_jit(false) {
+    threadInit();
   }
 
   ~RequestInjectionData();
+
+  void threadInit();
 
   inline std::atomic<ssize_t>* getConditionFlags() {
     assert(cflagsPtr);
@@ -296,6 +299,17 @@ public:
   bool m_debuggerIntr;   // indicating we should force interrupt for debugger
   bool m_coverage;       // is coverage being collected
   bool m_jit;            // is the jit enabled
+
+  // Things corresponding to zend INI settings
+  std::string m_argSeparatorOutput;
+  std::string m_maxMemory;
+  std::string m_defaultCharset;
+  int64_t m_socketDefaultTimeout;
+  int64_t m_errorReportingLevel;
+  bool m_logErrors;
+  std::string m_errorLog;
+  std::vector<std::string> m_include_paths;
+
  public:
   int getTimeout() const { return m_timeoutSeconds; }
   void setTimeout(int seconds);
@@ -322,6 +336,11 @@ public:
     updateJit();
   }
   void updateJit();
+
+  int64_t getSocketDefaultTimeout() { return m_socketDefaultTimeout; }
+  int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
+  std::vector<std::string> getIncludePaths() { return m_include_paths; }
+  std::string getDefaultIncludePath();
 
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
 

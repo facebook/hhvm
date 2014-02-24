@@ -191,8 +191,9 @@ public:
     mail_parameters(NIL, SET_GETS, (void *) NIL);
 
     /* set default timeout values */
-    void *timeout = reinterpret_cast<void *>
-                      (g_context->getSocketDefaultTimeout());
+    void *timeout = reinterpret_cast<void *>(
+      ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getSocketDefaultTimeout());
 
     mail_parameters(NIL, SET_OPENTIMEOUT,  timeout);
     mail_parameters(NIL, SET_READTIMEOUT,  timeout);

@@ -1574,12 +1574,8 @@ struct InterpStepper : boost::static_visitor<void> {
       setLoc(loc, m_index.lookup_constraint(m_ctx, constraint));
     }
   }
-  void operator()(const bc::VerifyRetTypeV& op) {
-    // TODO: handle VerifyRetType
-  }
-  void operator()(const bc::VerifyRetTypeC& op) {
-    // TODO: handle VerifyRetType
-  }
+  void operator()(const bc::VerifyRetTypeV& op) {}
+  void operator()(const bc::VerifyRetTypeC& op) {}
 
   // These only occur in traits, so we don't need to do better than
   // this.

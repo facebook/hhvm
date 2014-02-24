@@ -180,7 +180,7 @@ char *string_crypt(const char *key, const char *salt) {
     ito64(itobuf,rand(),8);
     strcpy(random_salt,"$1$");
     strcat(random_salt,itobuf);
-    random_salt[13] = '\0';
+    random_salt[12] = '\0';
     return string_crypt(key, random_salt);
   }
 

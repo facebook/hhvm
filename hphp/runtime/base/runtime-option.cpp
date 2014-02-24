@@ -339,6 +339,7 @@ int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::TimeoutsUseWallTime = true;
+bool RuntimeOption::CheckFlushOnUserClose = true;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -475,8 +476,7 @@ bool RuntimeOption::HHProfServerAllocationProfile = false;
 int RuntimeOption::HHProfServerFilterMinAllocPerReq = 2;
 int RuntimeOption::HHProfServerFilterMinBytesPerReq = 128;
 
-// TODO (t3610856): Change the default to false once dependent code is fixed
-bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = true;
+bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = false;
 
 bool RuntimeOption::EnableHotProfiler = true;
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
@@ -1009,7 +1009,7 @@ void RuntimeOption::Load(Hdf &config,
   }
   {
     Hdf admin = config["AdminServer"];
-    AdminServerPort = admin["Port"].getInt16(0);
+    AdminServerPort = admin["Port"].getUInt16(0);
     AdminThreadCount = admin["ThreadCount"].getInt32(1);
     AdminPassword = admin["Password"].getString();
     admin["Passwords"].get(AdminPasswords);
@@ -1097,6 +1097,7 @@ void RuntimeOption::Load(Hdf &config,
     EnableXHP = eval["EnableXHP"].getBool(false);
     EnableZendCompat = eval["EnableZendCompat"].getBool(false);
     TimeoutsUseWallTime = eval["TimeoutsUseWallTime"].getBool(true);
+    CheckFlushOnUserClose = eval["CheckFlushOnUserClose"].getBool(true);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -1254,7 +1255,7 @@ void RuntimeOption::Load(Hdf &config,
   {
     Hdf hhprofServer = config["HHProfServer"];
     HHProfServerEnabled = hhprofServer["Enabled"].getBool(false);
-    HHProfServerPort = hhprofServer["Port"].getInt16(4327);
+    HHProfServerPort = hhprofServer["Port"].getUInt16(4327);
     HHProfServerThreads = hhprofServer["Threads"].getInt16(2);
     HHProfServerTimeoutSeconds =
       hhprofServer["TimeoutSeconds"].getInt64(30);
@@ -1272,15 +1273,14 @@ void RuntimeOption::Load(Hdf &config,
   }
   {
     Hdf simplexml = config["SimpleXML"];
-    // TODO (t3610856): Change the default to false once dependent code is fixed
     SimpleXMLEmptyNamespaceMatchesAll =
-      simplexml["EmptyNamespaceMatchesAll"].getBool(true);
+      simplexml["EmptyNamespaceMatchesAll"].getBool(false);
   }
 #ifdef FACEBOOK
   {
     Hdf fb303Server = config["Fb303Server"];
     EnableFb303Server = fb303Server["Enable"].getBool(true);
-    Fb303ServerPort = fb303Server["Port"].getInt16(0);
+    Fb303ServerPort = fb303Server["Port"].getUInt16(0);
     Fb303ServerThreadStackSizeMb = fb303Server["ThreadStackSizeMb"].getInt16(8);
     Fb303ServerWorkerThreads = fb303Server["WorkerThreads"].getInt16(1);
     Fb303ServerPoolThreads = fb303Server["PoolThreads"].getInt16(1);

@@ -171,9 +171,6 @@ bad_tests = (
     # flaky: t3241496
     '/ext/standard/tests/file/copy_variation16.php',
 
-    # flakey
-    '/ext/session/tests/023.php',
-
     # segfaults on contbuild in opt
     '/ext/standard/tests/strings/explode_bug.php',
 
@@ -187,13 +184,17 @@ bad_tests = (
     '/ext/standard/tests/file/file_exists_variation1.php',
 
     # flaky: t3552849
-    '/ext/session/tests/013.php',
-    '/ext/session/tests/014.php',
-    '/ext/session/tests/027.php',
+    '/ext/session',
 
     # flaky: t3619770
     '/ext/zlib/tests/gzfile_basic.php',
     '/ext/zlib/tests/readgzfile_basic.php',
+
+    # flaky: t3758194
+    '/ext/date/tests/bug36988.php',
+
+    # flaky: t3758218
+    '/ext/intl/tests/calendar_getNow_basic.php',
 )
 
 # Tests that work but not in repo mode
@@ -497,6 +498,8 @@ other_files = (
     '/ext/fileinfo/tests/resources/test.png',
     '/ext/ftp/tests/cert.pem',
     '/ext/ftp/tests/server.inc',
+    '/ext/gd/tests/Rochester-Regular.otf',
+    '/ext/gd/tests/Rochester-Regular.otf.LICENSE.txt',
     '/ext/gd/tests/Tuffy.ttf',
     '/ext/gd/tests/bug37346.gif',
     '/ext/gd/tests/bug38112.gif',
@@ -1095,7 +1098,6 @@ def walk(filename, dest_subdir):
                 '064': ['DUAL'],
                 '066': ['test_warnings'],
                 '067': [re.compile('cursor(?=(%d|\$i))')],
-                '072': ['not_exists'],
                 'bug32405': ['test_users'],
                 'bug34810': ['test_warnings'],
                 'bug34785': ['DUAL'],
@@ -1193,7 +1195,8 @@ def walk(filename, dest_subdir):
                 'mysqli_pconn_kill': ['test'],
                 'mysqli_poll_mixing_insert_select':
                     [re.compile('test(?! may)'), 'bogus'],
-                'mysqli_prepare': ['test2', re.compile('(?<!next )test(?!_)')],
+                'mysqli_prepare':
+                    [re.compile('(?<=(ISTS|FROM) )test(?!2)'), 'test2'],
                 'mysqli_query': ['test'],
                 'mysqli_query_iterators': ['test'],
                 'mysqli_query_stored_proc': ['test'],
@@ -1304,7 +1307,7 @@ def walk(filename, dest_subdir):
                     test = replace_id.sub(new_id, test)
 
         new_id = 'test_%s_table_1' % (testname, )
-        test = re.sub('(require(_once)*\([\'"](clean_)?table.inc[\'"]\))',
+        test = re.sub('(require(_once)*[ (][\'"](clean_)?table.inc[\'"]\)?)',
                       '$test_table_name = \'%s\'; \\1' % (new_id, ), test)
 
     file(full_dest_filename, 'w').write(test)

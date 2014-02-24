@@ -343,6 +343,7 @@ public:
   static bool EnableArgsInBacktraces;
   static bool EnableZendCompat;
   static bool TimeoutsUseWallTime;
+  static bool CheckFlushOnUserClose;
 
   static int GetScannerType();
 
@@ -404,6 +405,7 @@ public:
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitTransCounters,            false)                           \
+  F(bool, HHIRBytecodeControlFlow,     false)                           \
   F(bool, HHIRCse,                     true)                            \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
@@ -426,7 +428,6 @@ public:
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   /* Register allocation flags */                                       \
-  F(bool, HHIRXls,                     true)                            \
   F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \

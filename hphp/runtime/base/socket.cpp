@@ -216,7 +216,7 @@ bool Socket::eof() {
     // i)  recv() closing gracefully, or
     // ii) recv() failed due to no waiting data on non-blocking socket.
     char ch;
-    int64_t ret = recv(m_fd, &ch, 1, MSG_PEEK);
+    int64_t ret = recv(m_fd, &ch, 1, MSG_PEEK | MSG_DONTWAIT);
     if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK)) {
       m_eof = true;
     }

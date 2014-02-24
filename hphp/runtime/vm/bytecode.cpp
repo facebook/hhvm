@@ -85,13 +85,10 @@
 #include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
-#include "hphp/runtime/vm/request-arena.h"
-#include "hphp/util/arena.h"
 
 #include <iostream>
 #include <iomanip>
 #include <boost/format.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
 
 #include <cinttypes>
 
@@ -245,13 +242,11 @@ VarEnv::VarEnv()
   , m_malloced(false)
   , m_global(false)
   , m_cfp(0)
-  , m_nvTable(boost::in_place<NameValueTable>(
-      RuntimeOption::EvalVMInitialGlobalTableSize))
 {
-  TypedValue globalArray;
-  globalArray.m_type = KindOfArray;
-  globalArray.m_data.parr =
-    new (request_arena()) GlobalNameValueTableWrapper(&*m_nvTable);
+  m_nvTable.emplace(RuntimeOption::EvalVMInitialGlobalTableSize);
+
+  auto tableWrapper = smart_new<GlobalNameValueTableWrapper>(&*m_nvTable);
+  auto globalArray = make_tv<KindOfArray>(tableWrapper);
   globalArray.m_data.parr->incRefCount();
   m_nvTable->set(makeStaticString("GLOBALS"), &globalArray);
   tvRefcountedDecRef(&globalArray);
@@ -269,7 +264,7 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
 
   if (!numNames) return;
 
-  m_nvTable = boost::in_place<NameValueTable>(numNames);
+  m_nvTable.emplace(numNames);
 
   TypedValue** origLocs =
     reinterpret_cast<TypedValue**>(uintptr_t(this) + sizeof(VarEnv));
@@ -286,12 +281,7 @@ VarEnv::~VarEnv() {
            isGlobalScope() ? "global scope" : "local scope");
   assert(m_restoreLocations.empty());
 
-  if (!isGlobalScope()) {
-    if (LIKELY(!m_malloced)) {
-      varenv_arena().endFrame();
-      return;
-    }
-  } else {
+  if (isGlobalScope()) {
     /*
      * When detaching the global scope, we leak any live objects (and
      * let the smart allocator clean them up).  This is because we're
@@ -307,9 +297,7 @@ size_t VarEnv::getObjectSz(ActRec* fp) {
 }
 
 VarEnv* VarEnv::createLocalOnStack(ActRec* fp) {
-  auto& va = varenv_arena();
-  va.beginFrame();
-  void* mem = va.alloc(getObjectSz(fp));
+  void* mem = smart_malloc(getObjectSz(fp));
   VarEnv* ret = new (mem) VarEnv(fp, fp->getExtraArgs());
   TRACE(3, "Creating lazily attached VarEnv %p on stack\n", mem);
   return ret;
@@ -326,7 +314,12 @@ VarEnv* VarEnv::createLocalOnHeap(ActRec* fp) {
 VarEnv* VarEnv::createGlobal() {
   assert(!g_vmContext->m_globalVarEnv);
 
-  VarEnv* ret = new (request_arena()) VarEnv();
+  // Use smart_malloc instead of smartMallocSize since we need to use it above
+  // and don't want to have to record which allocator was used to select the
+  // appropriate deallocation function.
+  auto const mem = smart_malloc(sizeof(VarEnv));
+  auto ret = new (mem) VarEnv();
+
   TRACE(3, "Creating VarEnv %p [global scope]\n", ret);
   ret->m_global = true;
   g_vmContext->m_globalVarEnv = ret;
@@ -335,8 +328,15 @@ VarEnv* VarEnv::createGlobal() {
 
 void VarEnv::destroy(VarEnv* ve) {
   bool malloced = ve->m_malloced;
+  bool global = ve->isGlobalScope();
   ve->~VarEnv();
-  if (UNLIKELY(malloced)) free(ve);
+  if (LIKELY(!malloced)) {
+    if (LIKELY(!global)) {
+      smart_free(ve);
+    }
+  } else {
+    free(ve);
+  }
 }
 
 void VarEnv::attach(ActRec* fp) {
@@ -357,11 +357,10 @@ void VarEnv::attach(ActRec* fp) {
     return;
   }
   if (!m_nvTable) {
-    m_nvTable = boost::in_place<NameValueTable>(numNames);
+    m_nvTable.emplace(numNames);
   }
 
-  TypedValue** origLocs = new (varenv_arena()) TypedValue*[
-    func->numNamedLocals()];
+  TypedValue** origLocs = smart_new_array<TypedValue*>(func->numNamedLocals());
   TypedValue* loc = frame_local(fp, 0);
   for (Id i = 0; i < numNames; ++i, --loc) {
     assert(func->lookupVarId(func->localVarName(i)) == (int)i);
@@ -419,7 +418,7 @@ void VarEnv::detach(ActRec* fp) {
 void VarEnv::ensureNvt() {
   const size_t kLazyNvtSize = 3;
   if (!m_nvTable) {
-    m_nvTable = boost::in_place<NameValueTable>(kLazyNvtSize);
+    m_nvTable.emplace(kLazyNvtSize);
   }
 }
 
@@ -576,7 +575,7 @@ void Stack::ValidateStackSize() {
         % RuntimeOption::EvalVMStackElms
         % sMinStackElms));
   }
-  if (!Util::isPowerOfTwo(RuntimeOption::EvalVMStackElms)) {
+  if (!folly::isPowTwo(RuntimeOption::EvalVMStackElms)) {
     throw std::runtime_error(str(
       boost::format("VM stack size of 0x%llx is not a power of 2")
         % RuntimeOption::EvalVMStackElms));
@@ -885,10 +884,6 @@ TypedValue* Stack::generatorStackBase(const ActRec* fp) {
   // stack.
   return (TypedValue*)sfp - sfp->m_func->numSlotsInFrame();
 }
-
-
-__thread RequestArenaStorage s_requestArenaStorage;
-__thread VarEnvArenaStorage s_varEnvArenaStorage;
 
 
 //=============================================================================
@@ -2593,7 +2588,9 @@ public:
 void VMExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
   if (apcExtension::UseUncounted) {
-    Treadmill::WorkItem::enqueue(new FreedAPCHandle(std::move(m_apcHandles)));
+    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                  new FreedAPCHandle(std::move(m_apcHandles))));
+    m_apcHandles.clear();
   }
 }
 
@@ -7682,10 +7679,7 @@ void VMExecutionContext::requestInit() {
   assert(SystemLib::s_nativeFuncUnit);
   assert(SystemLib::s_nativeClassUnit);
 
-  new (&s_requestArenaStorage) RequestArena();
-  new (&s_varEnvArenaStorage) VarEnvArena();
-
-  EnvConstants::requestInit(new (request_arena()) EnvConstants());
+  EnvConstants::requestInit(smart_new<EnvConstants>());
   VarEnv::createGlobal();
   m_stack.requestInit();
   tx64->requestInit();
@@ -7731,9 +7725,6 @@ void VMExecutionContext::requestExit() {
     VarEnv::destroy(m_globalVarEnv);
     m_globalVarEnv = 0;
   }
-
-  varenv_arena().~VarEnvArena();
-  request_arena().~RequestArena();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

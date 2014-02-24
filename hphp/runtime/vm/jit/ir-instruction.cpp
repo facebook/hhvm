@@ -97,7 +97,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 0;
 
     case StRef:
-    case StRefNT:
     case StClosureArg:
     case StClosureCtx:
     case StContArValue:
@@ -203,7 +202,7 @@ SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
   assert(is(IncRef, PassFP, PassSP,
             CheckType, AssertType, AssertNonNull,
-            StRef, StRefNT,
+            StRef,
             ColAddElemC, ColAddNewElemC,
             Mov));
   return src(0);

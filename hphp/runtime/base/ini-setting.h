@@ -46,6 +46,9 @@ public:
     virtual void onVar(std::string &result, const std::string &name);
     virtual void onOp(std::string &result, char type, const std::string& op1,
                       const std::string& op2);
+  private:
+    void makeArray(Variant &hash, const std::string &offset,
+                   const std::string &value);
   };
   class SectionParserCallback : public ParserCallback {
   public:

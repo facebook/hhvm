@@ -1,13 +1,25 @@
 from $c in $@query_param_0
-  join $o in $orders on $c->CustomerID equals $o->CustomerID
-  join $d in $details on $o->OrderID equals $d->OrderID
-  join $p in $products on $d->ProductsID equals $p->ProductID
+  join $o in $@query_param_1 on $c->CustomerID equals $o->CustomerID
+  join $d in $@query_param_2 on $o->OrderID equals $d->OrderID
+  join $p in $@query_param_3 on $d->ProductsID equals $p->ProductID
   select tuple($c->Name, $o->OrderDate, $p->ProductName)
 closure
+object(Queryable)#2 (0) {
+}
+object(Queryable)#3 (0) {
+}
+object(Queryable)#4 (0) {
+}
 
   from $c in $@query_param_0
-  join $o in $orders
-  join $details
-  join $p in $products
+  join $o in $@query_param_1
+  join $@query_param_2
+  join $p in $@query_param_3
   select tuple($c->Name, $o->OrderDate, $p->ProductName)
 closure
+object(Queryable)#2 (0) {
+}
+object(Queryable)#3 (0) {
+}
+object(Queryable)#4 (0) {
+}

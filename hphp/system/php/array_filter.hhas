@@ -14,7 +14,7 @@ not_array:
           InstanceOfD "HH\\Set"
           JmpNZ start_kt
           CGetL $arr
-          InstanceOfD "HH\\FrozenSet"
+          InstanceOfD "HH\\FixedSet"
           JmpNZ start_kt
           String "array_filter() expects parameter 1 to be an array or collection"
           Jmp warning

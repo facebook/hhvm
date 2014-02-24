@@ -382,7 +382,7 @@ struct StringData {
   int64_t toInt64(int base = 10) const;
   double toDouble() const;
   DataType toNumeric(int64_t& lval, double& dval) const;
-  std::string toCPPString() const;
+  std::string toCppString() const;
 
   /*
    * Returns: case insensitive hash value for this string.

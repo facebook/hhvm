@@ -1,3 +1,427 @@
+Doctrine\Tests\ORM\Cache\CacheConfigTest::testSetGetCacheClassName
+FATAL
+Doctrine\Tests\ORM\Cache\CacheKeyTest::testCollectionCacheKeyAssociationCollision
+.
+Doctrine\Tests\ORM\Cache\CacheKeyTest::testCollectionCacheKeyIdentifierCollision
+.
+Doctrine\Tests\ORM\Cache\CacheKeyTest::testCollectionCacheKeyIdentifierOrder
+.
+Doctrine\Tests\ORM\Cache\CacheKeyTest::testCollectionCacheKeyIdentifierType
+.
+Doctrine\Tests\ORM\Cache\CacheKeyTest::testEntityCacheKeyIdentifierCollision
+.
+Doctrine\Tests\ORM\Cache\CacheKeyTest::testEntityCacheKeyIdentifierOrder
+.
+Doctrine\Tests\ORM\Cache\CacheKeyTest::testEntityCacheKeyIdentifierType
+.
+Doctrine\Tests\ORM\Cache\CacheLoggerChainTest::testCollectionCacheChain
+.
+Doctrine\Tests\ORM\Cache\CacheLoggerChainTest::testEntityCacheChain
+.
+Doctrine\Tests\ORM\Cache\CacheLoggerChainTest::testGetAndSetLogger
+.
+Doctrine\Tests\ORM\Cache\CacheLoggerChainTest::testQueryCacheChain
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testBuildCachedCollectionPersisterException
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testBuildCachedCollectionPersisterNonStrictReadWrite
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testBuildCachedCollectionPersisterReadOnly
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testBuildCachedCollectionPersisterReadWrite
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testBuildCachedEntityPersisterNonStrictException
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testBuildCachedEntityPersisterNonStrictReadWrite
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testBuildCachedEntityPersisterReadOnly
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testBuildCachedEntityPersisterReadWrite
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testCreateNewCacheDriver
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testImplementsCacheFactory
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testInheritedEntityCacheRegion
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheFactoryTest::testInvalidFileLockRegionDirectoryException
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testContainsCollection
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testContainsEntity
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testEvictCollection
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testEvictCollectionRegion
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testEvictCollectionRegions
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testEvictEntity
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testEvictEntityRegion
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testEvictEntityRegions
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testGetCollectionCacheRegionAccess
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testGetEntityCacheRegionAccess
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testImplementsCache
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testQueryCache
+.
+Doctrine\Tests\ORM\Cache\DefaultCacheTest::testToIdentifierArrayShouldLookupForEntityIdentifier
+.
+Doctrine\Tests\ORM\Cache\DefaultCollectionHydratorTest::testImplementsCollectionEntryStructure
+.
+Doctrine\Tests\ORM\Cache\DefaultCollectionHydratorTest::testLoadCacheCollection
+.
+Doctrine\Tests\ORM\Cache\DefaultEntityHydratorTest::testBuildCacheEntry
+.
+Doctrine\Tests\ORM\Cache\DefaultEntityHydratorTest::testBuildCacheEntryAssociation
+.
+Doctrine\Tests\ORM\Cache\DefaultEntityHydratorTest::testBuildCacheEntryNonInitializedAssocProxy
+.
+Doctrine\Tests\ORM\Cache\DefaultEntityHydratorTest::testCreateEntity
+.
+Doctrine\Tests\ORM\Cache\DefaultEntityHydratorTest::testImplementsEntityEntryStructure
+.
+Doctrine\Tests\ORM\Cache\DefaultEntityHydratorTest::testLoadProxy
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testCancelPutResultIfAssociationEntityPutFails
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testCancelPutResultIfEntityPutFails
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testCancelPutToManyAssociationQueryResult
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testClearShouldEvictRegion
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testGetBasicQueryResult
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testGetRegion
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testGetShouldIgnoreMissingEntityQueryCacheEntry
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testGetShouldIgnoreNonQueryCacheEntryResult
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testGetShouldIgnoreOldQueryCacheEntryResult
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testIgnoreCacheNonGetMode
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testIgnoreCacheNonPutMode
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testImplementQueryCache
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testNotCacheableEntityException
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testPutBasicQueryResult
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testPutToManyAssociationQueryResult
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testPutToOneAssociationNullQueryResult
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testPutToOneAssociationQueryResult
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testQueryNotCacheableAssociationException
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testScalarResultException
+.
+Doctrine\Tests\ORM\Cache\DefaultQueryCacheTest::testSupportMultipleRootEntitiesException
+.
+Doctrine\Tests\ORM\Cache\DefaultRegionTest::testEvictAll
+.
+Doctrine\Tests\ORM\Cache\DefaultRegionTest::testGetters
+.
+Doctrine\Tests\ORM\Cache\DefaultRegionTest::testPutGetContainsEvict with data set #0
+.
+Doctrine\Tests\ORM\Cache\DefaultRegionTest::testPutGetContainsEvict with data set #1
+.
+Doctrine\Tests\ORM\Cache\DefaultRegionTest::testSharedRegion
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testEvictAll
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testGetRegionName
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testLockAndUnlock
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testLockLifetime
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testLockWithExistingLock
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testLockedEvict
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testLockedEvictAll
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testPutGetContainsEvict with data set #0
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testPutGetContainsEvict with data set #1
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testPutWithExistingLock
+.
+Doctrine\Tests\ORM\Cache\FileLockRegionTest::testUnlockWithExistingLock
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testImplementsEntityPersister
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeContains
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeContainsKey
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeCount
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeDelete
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeDeleteRows
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeGet
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeInsertRows
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeRemoveElement
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeRemoveKey
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeSlice
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedCollectionPersisterTest::testInvokeUpdate
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testDeleteTransactionCommitShouldEvictCache
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testImplementsEntityPersister
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInsertTransactionCommitShouldPutCache
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeAddInsert
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeDelete
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeExecuteInserts
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeExists
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeExpandParameters
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeGetInsertSQL
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeGetInserts
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeGetManyToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeGetOneToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeGetOwningTable
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeGetSelectSQL
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeLoad
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeLoadAll
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeLoadById
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeLoadCriteria
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeLoadManyToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeLoadOneToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeLoadOneToOneEntity
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeLock
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeRefresh
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeSelectConditionStatementSQL
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testInvokeUpdate
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testTransactionRollBackShouldClearQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\NonStrictReadWriteCachedEntityPersisterTest::testUpdateTransactionCommitShouldPutCache
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testImplementsEntityPersister
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeContains
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeContainsKey
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeCount
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeDelete
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeDeleteRows
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeGet
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeInsertRows
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeRemoveElement
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeRemoveKey
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeSlice
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedCollectionPersisterTest::testInvokeUpdate
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testImplementsEntityPersister
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeAddInsert
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeDelete
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeExecuteInserts
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeExists
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeExpandParameters
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeGetInsertSQL
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeGetInserts
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeGetManyToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeGetOneToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeGetOwningTable
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeGetSelectSQL
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeLoad
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeLoadAll
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeLoadById
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeLoadCriteria
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeLoadManyToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeLoadOneToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeLoadOneToOneEntity
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeLock
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeRefresh
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeSelectConditionStatementSQL
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadOnlyCachedEntityPersisterTest::testInvokeUpdate
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testDeleteLockFailureShouldIgnoreQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testDeleteShouldLockItem
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testDeleteTransactionRollBackShouldEvictItem
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testImplementsEntityPersister
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeContains
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeContainsKey
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeCount
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeDelete
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeDeleteRows
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeGet
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeInsertRows
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeRemoveElement
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeRemoveKey
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeSlice
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testInvokeUpdate
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testTransactionRollBackDeleteShouldClearQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testTransactionRollBackUpdateShouldClearQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testTransactionRollCommitDeleteShouldClearQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testTransactionRollCommitUpdateShouldClearQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testUpdateLockFailureShouldIgnoreQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testUpdateShouldLockItem
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedCollectionPersisterTest::testUpdateTransactionRollBackShouldEvictItem
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testDeleteLockFailureShouldIgnoreQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testDeleteShouldLockItem
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testDeleteTransactionRollBackShouldEvictItem
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testImplementsEntityPersister
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeAddInsert
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeDelete
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeExecuteInserts
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeExists
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeExpandParameters
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeGetInsertSQL
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeGetInserts
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeGetManyToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeGetOneToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeGetOwningTable
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeGetSelectSQL
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeLoad
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeLoadAll
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeLoadById
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeLoadCriteria
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeLoadManyToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeLoadOneToManyCollection
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeLoadOneToOneEntity
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeLock
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeRefresh
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeSelectConditionStatementSQL
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testInvokeUpdate
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testTransactionCommitShouldClearQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testTransactionRollBackShouldClearQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testUpdateLockFailureShouldIgnoreQueue
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testUpdateShouldLockItem
+.
+Doctrine\Tests\ORM\Cache\Persister\ReadWriteCachedEntityPersisterTest::testUpdateTransactionRollBackShouldEvictItem
+.
+Doctrine\Tests\ORM\Cache\StatisticsCacheLoggerTest::testCollectionCache
+.
+Doctrine\Tests\ORM\Cache\StatisticsCacheLoggerTest::testEntityCache
+.
+Doctrine\Tests\ORM\Cache\StatisticsCacheLoggerTest::testMultipleCaches
+.
+Doctrine\Tests\ORM\Cache\StatisticsCacheLoggerTest::testQueryCache
+.
 Doctrine\Tests\ORM\CommitOrderCalculatorTest::testCommitOrdering1
 .
 Doctrine\Tests\ORM\ConfigurationTest::testAddGetCustomDatetimeFunction
@@ -42,105 +466,113 @@ Doctrine\Tests\ORM\ConfigurationTest::testSetGetQueryCacheImpl
 .
 Doctrine\Tests\ORM\ConfigurationTest::testSetGetQuoteStrategy
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #0 
+Doctrine\Tests\ORM\ConfigurationTest::testSetGetSecondLevelCacheConfig
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #1 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #0
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #10 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #1
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #11 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #10
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #12 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #11
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #13 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #12
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #14 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #13
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #15 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #14
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #16 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #15
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #17 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #16
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #18 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #17
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #19 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #18
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #2 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #19
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #20 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #2
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #21 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #20
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #22 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #21
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #23 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #22
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #24 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #23
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #25 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #24
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #26 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #25
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #27 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #26
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #28 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #27
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #29 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #28
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #3 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #29
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #30 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #3
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #31 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #30
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #32 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #31
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #33 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #32
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #34 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #33
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #35 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #34
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #36 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #35
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #37 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #36
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #38 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #37
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #39 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #38
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #4 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #39
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #40 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #4
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #41 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #40
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #42 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #41
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #43 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #42
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #44 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #43
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #5 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #44
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #6 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #45
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #7 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #5
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #8 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #6
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #9 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #7
 .
-Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #0 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #8
 .
-Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #1 
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #9
 .
-Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #2 
+Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #0
 .
-Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #3 
+Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #1
 .
-Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #4 
+Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #2
+.
+Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #3
+.
+Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #4
+.
+Doctrine\Tests\ORM\EntityManagerTest::testCreateNamedNativeQuery
+.
+Doctrine\Tests\ORM\EntityManagerTest::testCreateNamedQuery
 .
 Doctrine\Tests\ORM\EntityManagerTest::testCreateNativeQuery
 .
@@ -168,15 +600,15 @@ Doctrine\Tests\ORM\EntityManagerTest::testGetUnitOfWork
 .
 Doctrine\Tests\ORM\EntityManagerTest::testIsOpen
 .
-Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #0 
+Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #0
 .
-Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #1 
+Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #1
 .
-Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #2 
+Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #2
 .
-Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #3 
+Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #3
 .
-Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #4 
+Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #4
 .
 Doctrine\Tests\ORM\EntityManagerTest::testTransactionalAcceptsReturn
 .
@@ -292,6 +724,10 @@ Doctrine\Tests\ORM\Functional\BasicFunctionalTest::testTextColumnSaveAndRetrieve
 .
 Doctrine\Tests\ORM\Functional\BasicFunctionalTest::testWrongAssociationInstance
 .
+Doctrine\Tests\ORM\Functional\ClassTableInheritanceTest2::testManyToManyToCTIHierarchy
+.
+Doctrine\Tests\ORM\Functional\ClassTableInheritanceTest2::testOneToOneAssocToBaseTypeBidirectional
+.
 Doctrine\Tests\ORM\Functional\ClassTableInheritanceTest::testBulkUpdateIssueDDC368
 .
 Doctrine\Tests\ORM\Functional\ClassTableInheritanceTest::testBulkUpdateNonScalarParameterDDC1341
@@ -349,6 +785,8 @@ Doctrine\Tests\ORM\Functional\CustomTreeWalkersTest::testSupportsQueriesWithMult
 Doctrine\Tests\ORM\Functional\CustomTreeWalkersTest::testSupportsQueriesWithSimpleConditionalExpression
 .
 Doctrine\Tests\ORM\Functional\CustomTreeWalkersTest::testSupportsQueriesWithoutWhere
+.
+Doctrine\Tests\ORM\Functional\CustomTreeWalkersTest::testSupportsSeveralHintsQueries
 .
 Doctrine\Tests\ORM\Functional\DatabaseDriverTest::testDetectManyToManyTables
 S
@@ -502,6 +940,20 @@ Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testSetDefaultRepositoryInva
 .
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testValidNamedQueryRetrieval
 .
+Doctrine\Tests\ORM\Functional\ExtraLazyCollectionTest::testContainsKeyIndexByManyToMany
+.
+Doctrine\Tests\ORM\Functional\ExtraLazyCollectionTest::testContainsKeyIndexByManyToManyNonOwning
+.
+Doctrine\Tests\ORM\Functional\ExtraLazyCollectionTest::testContainsKeyIndexByOneToMany
+.
+Doctrine\Tests\ORM\Functional\ExtraLazyCollectionTest::testContainsKeyIndexByWithPkManyToMany
+.
+Doctrine\Tests\ORM\Functional\ExtraLazyCollectionTest::testContainsKeyIndexByWithPkManyToManyNonOwning
+.
+Doctrine\Tests\ORM\Functional\ExtraLazyCollectionTest::testContainsKeyNonExistentIndexByManyToMany
+.
+Doctrine\Tests\ORM\Functional\ExtraLazyCollectionTest::testContainsKeyNonExistentIndexByOneToMany
+.
 Doctrine\Tests\ORM\Functional\ExtraLazyCollectionTest::testContainsManyToMany
 .
 Doctrine\Tests\ORM\Functional\ExtraLazyCollectionTest::testContainsManyToManyInverse
@@ -559,7 +1011,7 @@ Doctrine\Tests\ORM\Functional\IdentityMapTest::testCollectionValuedAssociationId
 Doctrine\Tests\ORM\Functional\IdentityMapTest::testCollectionValuedAssociationIdentityMapBehaviorWithRefreshQuery
 .
 Doctrine\Tests\ORM\Functional\IdentityMapTest::testReusedSplObjectHashDoesNotConfuseUnitOfWork
-F
+.
 Doctrine\Tests\ORM\Functional\IdentityMapTest::testSingleValuedAssociationIdentityMapBehaviorWithRefresh
 .
 Doctrine\Tests\ORM\Functional\IdentityMapTest::testSingleValuedAssociationIdentityMapBehaviorWithRefreshQuery
@@ -626,6 +1078,8 @@ Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testMultipleFlushesDoIncre
 .
 Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testOptimisticTimestampFailureThrowsException
 .
+Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testOptimisticTimestampLockFailureThrowsException
+.
 Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testOptimisticTimestampSetsDefaultValue
 .
 Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testStandardFailureThrowsException
@@ -690,6 +1144,8 @@ Doctrine\Tests\ORM\Functional\ManyToManyUnidirectionalAssociationTest::testSaves
 .
 Doctrine\Tests\ORM\Functional\MappedSuperclassTest::testCRUD
 .
+Doctrine\Tests\ORM\Functional\NativeQueryTest::testAbstractClassInSingleTableInheritanceSchemaWithRSMBuilderThrowsException
+.
 Doctrine\Tests\ORM\Functional\NativeQueryTest::testBasicNativeNamedQueryWithResultClass
 .
 Doctrine\Tests\ORM\Functional\NativeQueryTest::testBasicNativeNamedQueryWithSqlResultSetMapping
@@ -697,6 +1153,8 @@ Doctrine\Tests\ORM\Functional\NativeQueryTest::testBasicNativeNamedQueryWithSqlR
 Doctrine\Tests\ORM\Functional\NativeQueryTest::testBasicNativeQuery
 .
 Doctrine\Tests\ORM\Functional\NativeQueryTest::testBasicNativeQueryWithMetaResult
+.
+Doctrine\Tests\ORM\Functional\NativeQueryTest::testConcreteClassInSingleTableInheritanceSchemaWithRSMBuilderIsFine
 .
 Doctrine\Tests\ORM\Functional\NativeQueryTest::testFluentInterface
 .
@@ -735,7 +1193,7 @@ Doctrine\Tests\ORM\Functional\NativeQueryTest::testRSMBuilderThrowsExceptionOnCo
 Doctrine\Tests\ORM\Functional\NativeQueryTest::testUnknownParentAliasThrowsException
 .
 Doctrine\Tests\ORM\Functional\NewOperatorTest::testClassCantBeInstantiatedException
-F
+.
 Doctrine\Tests\ORM\Functional\NewOperatorTest::testInvalidClassConstructorException
 .
 Doctrine\Tests\ORM\Functional\NewOperatorTest::testInvalidClassException
@@ -878,31 +1336,33 @@ Doctrine\Tests\ORM\Functional\PaginationTest::testCloneQuery
 .
 Doctrine\Tests\ORM\Functional\PaginationTest::testCountComplexWithOutputWalker
 .
-Doctrine\Tests\ORM\Functional\PaginationTest::testCountSimpleWithoutJoin with data set #0 
+Doctrine\Tests\ORM\Functional\PaginationTest::testCountSimpleWithoutJoin with data set #0
 .
-Doctrine\Tests\ORM\Functional\PaginationTest::testCountSimpleWithoutJoin with data set #1 
+Doctrine\Tests\ORM\Functional\PaginationTest::testCountSimpleWithoutJoin with data set #1
 .
-Doctrine\Tests\ORM\Functional\PaginationTest::testCountWithFetchJoin with data set #0 
+Doctrine\Tests\ORM\Functional\PaginationTest::testCountWithFetchJoin with data set #0
 .
-Doctrine\Tests\ORM\Functional\PaginationTest::testCountWithFetchJoin with data set #1 
+Doctrine\Tests\ORM\Functional\PaginationTest::testCountWithFetchJoin with data set #1
 .
 Doctrine\Tests\ORM\Functional\PaginationTest::testDetectOutputWalker
 .
 Doctrine\Tests\ORM\Functional\PaginationTest::testIterateComplexWithOutputWalker
 .
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOff with data set #0 
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOff with data set #0
 .
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOff with data set #1 
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOff with data set #1
 .
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOn with data set #0 
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOn with data set #0
 .
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOn with data set #1 
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOn with data set #1
 .
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateWithFetchJoin with data set #0 
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateWithFetchJoin with data set #0
 .
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateWithFetchJoin with data set #1 
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateWithFetchJoin with data set #1
 .
 Doctrine\Tests\ORM\Functional\PaginationTest::testQueryWalkerIsKept
+.
+Doctrine\Tests\ORM\Functional\PersistentCollectionTest::testExtraLazyIsEmptyDoesNotInitializeCollection
 .
 Doctrine\Tests\ORM\Functional\PersistentCollectionTest::testPersist
 .
@@ -936,8 +1396,6 @@ Doctrine\Tests\ORM\Functional\PostLoadEventTest::testLoadedProxyEntityShouldTrig
 .
 Doctrine\Tests\ORM\Functional\PostLoadEventTest::testLoadedProxyPartialShouldTriggerEvent
 .
-Doctrine\Tests\ORM\Functional\PostgreSQLIdentityStrategyTest::testPreSavePostSaveCallbacksAreInvoked
-S
 Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testEntityWithIdentifier
 .
 Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testFindWithProxyName
@@ -1048,6 +1506,8 @@ Doctrine\Tests\ORM\Functional\QueryTest::testQueryWithArrayOfEntitiesAsParameter
 .
 Doctrine\Tests\ORM\Functional\QueryTest::testQueryWithHiddenAsSelectExpression
 .
+Doctrine\Tests\ORM\Functional\QueryTest::testSetCollectionParameterBindingSingleIdentifierObject
+.
 Doctrine\Tests\ORM\Functional\QueryTest::testSetParameterBindingSingleIdentifierObject
 .
 Doctrine\Tests\ORM\Functional\QueryTest::testSetParameters
@@ -1087,7 +1547,7 @@ Doctrine\Tests\ORM\Functional\ReferenceProxyTest::testDoNotInitializeProxyOnGett
 Doctrine\Tests\ORM\Functional\ReferenceProxyTest::testDoNotInitializeProxyOnGettingTheIdentifierAndReturnTheRightType
 .
 Doctrine\Tests\ORM\Functional\ReferenceProxyTest::testDoNotInitializeProxyOnGettingTheIdentifier_DDC_1625
-E
+.
 Doctrine\Tests\ORM\Functional\ReferenceProxyTest::testInitializeChangeAndFlushProxy
 .
 Doctrine\Tests\ORM\Functional\ReferenceProxyTest::testInitializeProxy
@@ -1238,32 +1698,182 @@ Doctrine\Tests\ORM\Functional\SchemaTool\PostgreSqlSchemaToolTest::testPostgresM
 S
 Doctrine\Tests\ORM\Functional\SchemaTool\PostgreSqlSchemaToolTest::testUpdateSchemaWithPostgreSQLSchema
 S
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #0 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #0
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #1 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #1
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #10 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #10
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #11 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #11
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #12 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #12
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #2 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #13
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #3 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #2
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #4 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #3
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #5 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #4
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #6 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #5
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #7 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #6
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #8 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #7
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #9 
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #8
 .
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #9
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheCompositePrimaryKeyTest::testPutAndLoadCompositPrimaryKeyEntities
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheCompositePrimaryKeyTest::testRemoveCompositPrimaryKeyEntities
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheCompositePrimaryKeyTest::testUpdateCompositPrimaryKeyEntities
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheConcurrentTest::testBasicConcurrentCollectionReadLock
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheConcurrentTest::testBasicConcurrentEntityReadLock
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheExtraLazyCollectionTest::testCacheCountAfterAddThenFlush
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheJoinTableInheritanceTest::testJoinTableCountaisRootClass
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheJoinTableInheritanceTest::testOneToManyRelationJoinTable
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheJoinTableInheritanceTest::testPutAndLoadJoinTableEntities
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheJoinTableInheritanceTest::testPutOnPersistJoinTableInheritance
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheJoinTableInheritanceTest::testQueryCacheFindAllJoinTableEntities
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheJoinTableInheritanceTest::testUseSameRegion
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheManyToManyTest::testManyToManyWithEmptyRelation
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheManyToManyTest::testPutAndLoadManyToManyRelation
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheManyToManyTest::testReadOnlyCollection
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheManyToManyTest::testShouldPutManyToManyCollectionOwningSideOnPersist
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheManyToManyTest::testStoreManyToManyAssociationWhitCascade
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheManyToOneTest::testPutAndLoadManyToOneRelation
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheManyToOneTest::testPutOnPersist
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheManyToOneTest::testShouldNotReloadWhenAssociationIsMissing
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToManyTest::testCacheInitializeCollectionWithNewObjects
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToManyTest::testLoadOnoToManyCollectionFromDatabaseWhenEntityMissing
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToManyTest::testOneToManyCount
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToManyTest::testOneToManyRemove
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToManyTest::testOneToManyWithEmptyRelation
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToManyTest::testPutAndLoadOneToManyRelation
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToManyTest::testShoudNotPutOneToManyRelationOnPersist
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToManyTest::testShouldNotPutCollectionInverseSideOnPersist
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToOneTest::testPutAndLoadOneToOneBidirectionalRelation
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToOneTest::testPutAndLoadOneToOneUnidirectionalRelation
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToOneTest::testPutOneToOneOnBidirectionalPersist
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheOneToOneTest::testPutOneToOneOnUnidirectionalPersist
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testBasicNativeQueryCache
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testBasicQueryCache
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testBasicQueryCachePutEntityCache
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testBasicQueryFetchJoinsManyToOne
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testBasicQueryFetchJoinsOneToMany
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testBasicQueryParams
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testCacheablePartialQueryException
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testHintClearEntityRegionDeleteStatement
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testHintClearEntityRegionUpdateStatement
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testLoadFromDatabaseWhenEntityMissing
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testNonCacheableQueryDeleteStatementException
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testNonCacheableQueryUpdateStatementException
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testQueryCacheLifetime
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testQueryCacheModeGet
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testQueryCacheModePut
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testQueryCacheModeRefresh
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testQueryCacheRegion
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testQueryDependsOnFirstAndMaxResultResult
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testReloadQueryIfToManyAssociationItemIsNotFound
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheQueryCacheTest::testReloadQueryIfToOneIsNotFound
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheRepositoryTest::testRepositoryCacheFind
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheRepositoryTest::testRepositoryCacheFindAll
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheRepositoryTest::testRepositoryCacheFindAllInvalidation
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheRepositoryTest::testRepositoryCacheFindAllToOneAssociation
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheRepositoryTest::testRepositoryCacheFindBy
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheRepositoryTest::testRepositoryCacheFindOneBy
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheSingleTableInheritanceTest::testCountaisRootClass
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheSingleTableInheritanceTest::testOneToManyRelationSingleTable
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheSingleTableInheritanceTest::testPutAndLoadEntities
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheSingleTableInheritanceTest::testPutOnPersistSingleTableInheritance
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheSingleTableInheritanceTest::testQueryCacheFindAll
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheSingleTableInheritanceTest::testShouldNotPutOneToManyRelationOnPersist
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheSingleTableInheritanceTest::testUseSameRegion
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheTest::testCachedNewEntityExists
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheTest::testPostFlushFailure
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheTest::testPostRemoveFailure
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheTest::testPostUpdateFailure
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheTest::testPutAndLoadEntities
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheTest::testPutOnPersist
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheTest::testRemoveEntities
+.
+Doctrine\Tests\ORM\Functional\SecondLevelCacheTest::testUpdateEntities
+.
+Doctrine\Tests\ORM\Functional\SequenceEmulatedIdentityStrategyTest::testPreSavePostSaveCallbacksAreInvoked
+S
 Doctrine\Tests\ORM\Functional\SequenceGeneratorTest::testHighAllocationSizeSequence
 S
 Doctrine\Tests\ORM\Functional\SingleTableCompositeKeyTest::testInsertWithCompositeKey
@@ -1530,6 +2140,8 @@ Doctrine\Tests\ORM\Functional\Ticket\DDC1778Test::testRemove
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC1778Test::testRemoveElement
 .
+Doctrine\Tests\ORM\Functional\Ticket\DDC1787Test::testIssue
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC1843Test::testCreateRetrieveUpdateDelete
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC1884Test::testSelectFromInverseSideWithCompositePkAndSolelyIdentifierColumnsUsingFetchJoins
@@ -1561,6 +2173,8 @@ Doctrine\Tests\ORM\Functional\Ticket\DDC1998Test::testSqlConversionAsIdentifier
 Doctrine\Tests\ORM\Functional\Ticket\DDC199Test::testPolymorphicLoading
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC2012Test::testIssue
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC2074Test::testSavingClonedPersistentCollection
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC2074Test::testShouldNotScheduleDeletionOnClonedInstances
 .
@@ -1616,11 +2230,33 @@ Doctrine\Tests\ORM\Functional\Ticket\DDC2579Test::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC258Test::testIssue
 .
+Doctrine\Tests\ORM\Functional\Ticket\DDC2645Test::testIssue
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC2655Test::testSingleScalarOneOrNullResult
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC2660Test::testIssueWithExtraColumn
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC2660Test::testIssueWithoutExtraColumn
 .
+Doctrine\Tests\ORM\Functional\Ticket\DDC2692Test::testIsListenerCalledOnlyOnceOnPreFlush
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC2759Test::testCorrectNumberOfAssociationsIsReturned
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC2775Test::testIssueCascadeRemove
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC2790Test::testIssue
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC279Test::testDDC279
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC2862Test::testIssue
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC2862Test::testIssueReopened
+F
+Doctrine\Tests\ORM\Functional\Ticket\DDC2895Test::testPostLoadOneToManyInheritance
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC2931Test::testFetchJoinedEntitiesCanBeRefreshed
+.
+Doctrine\Tests\ORM\Functional\Ticket\DDC2931Test::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC309Test::testTwoIterateHydrations
 .
@@ -1635,7 +2271,7 @@ Doctrine\Tests\ORM\Functional\Ticket\DDC353Test::testWorkingCase
 Doctrine\Tests\ORM\Functional\Ticket\DDC371Test::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC381Test::testCallUnserializedProxyMethods
-E
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC422Test::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC425Test::testIssue
@@ -1697,7 +2333,7 @@ Doctrine\Tests\ORM\Functional\Ticket\DDC657Test::testaTicketEntityArrayResult
 Doctrine\Tests\ORM\Functional\Ticket\DDC698Test::testTicket
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC719Test::testIsEmptySqlGeneration
-F
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC729Test::testBidirectionalMergeManyToMany
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC729Test::testBidirectionalMultiMergeManyToMany
@@ -1800,35 +2436,47 @@ Doctrine\Tests\ORM\Functional\UnitOfWorkLifecycleTest::testScheduleInsertManaged
 .
 Doctrine\Tests\ORM\Functional\UnitOfWorkLifecycleTest::testScheduleInsertTwice
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #0 
+Doctrine\Tests\ORM\Functional\ValueObjectsTest::testCRUD
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #1 
+Doctrine\Tests\ORM\Functional\ValueObjectsTest::testDqlOnEmbeddedObjectsField
+.
+Doctrine\Tests\ORM\Functional\ValueObjectsTest::testDqlWithNonExistentEmbeddableField
+.
+Doctrine\Tests\ORM\Functional\ValueObjectsTest::testEmbeddableWithInheritance
+.
+Doctrine\Tests\ORM\Functional\ValueObjectsTest::testEmbeddableWithinEmbeddable
+.
+Doctrine\Tests\ORM\Functional\ValueObjectsTest::testLoadDql
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #0
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #1
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testEntityQueryCustomResultSetOrder
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #0 
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #1 
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #1
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #0 
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #1 
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #1
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #0 
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #1 
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #1
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #0 
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #1 
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #1
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryMultipleFetchJoin
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #0 
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #1 
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #1
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testResultIteration
 .
@@ -1860,13 +2508,13 @@ Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testCreatesProxyForLazyLoadingW
 .
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testEntityQueryCustomResultSetOrder
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByAndMixedResult with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByAndMixedResult with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByAndMixedResult with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByAndMixedResult with data set #1
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByScalarsOnly with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByScalarsOnly with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByScalarsOnly with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByScalarsOnly with data set #1
 .
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testManyToManyHydration
 .
@@ -1874,47 +2522,47 @@ Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testManyToManyHydrationWithAlia
 .
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingDiscriminatorColumnException
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForCollectionValuedChildEntity with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForCollectionValuedChildEntity with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForCollectionValuedChildEntity with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForCollectionValuedChildEntity with data set #1
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForRootEntity with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForRootEntity with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForRootEntity with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForRootEntity with data set #1
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForSingleValuedChildEntity with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForSingleValuedChildEntity with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForSingleValuedChildEntity with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForSingleValuedChildEntity with data set #1
 .
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingMetaMappingException
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoin with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoin with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoin with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoin with data set #1
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #1
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin with data set #1
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleFetchJoin with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleFetchJoin with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleFetchJoin with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleFetchJoin with data set #1
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryNormalJoin with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryNormalJoin with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryNormalJoin with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryNormalJoin with data set #1
 .
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testResultIteration
 .
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testResultIterationWithAliasedUserEntity
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testScalarQueryWithoutResultVariables with data set #0 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testScalarQueryWithoutResultVariables with data set #0
 .
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testScalarQueryWithoutResultVariables with data set #1 
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testScalarQueryWithoutResultVariables with data set #1
 .
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testSimpleEntityQuery
 .
@@ -1952,13 +2600,13 @@ Doctrine\Tests\ORM\Hydration\SimpleObjectHydratorTest::testExtraFieldInResultSet
 .
 Doctrine\Tests\ORM\Hydration\SimpleObjectHydratorTest::testMissingDiscriminatorColumnException
 .
-Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #0 
+Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #0
 .
-Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #1 
+Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #1
 .
-Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #2 
+Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #2
 .
-Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #3 
+Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #3
 .
 Doctrine\Tests\ORM\Id\AssignedGeneratorTest::testCorrectIdGeneration
 .
@@ -2006,6 +2654,8 @@ Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testFieldMappings
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testFieldMappingsColumnNames
 .
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testFieldOptions
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testGetAllClassNamesIsIdempotent
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testGetAllClassNamesIsIdempotentEvenWithDifferentDriverInstances
@@ -2013,6 +2663,8 @@ Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testGetAllClassNamesIsIdempoten
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testGetAllClassNamesReturnsAlreadyLoadedClassesIfAppropriate
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testGetClassNamesReturnsOnlyTheAppropriateClasses
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testIdFieldOptions
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testIdentifier
 .
@@ -2059,6 +2711,8 @@ Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testNamedQuery
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testNamingStrategy
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testOwningOneToOneAssociation
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testSecondLevelCacheMapping
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testSqlResultSetMapping
 .
@@ -2129,6 +2783,8 @@ Doctrine\Tests\ORM\Mapping\ClassMetadataBuilderTest::testCreateOneToMany
 Doctrine\Tests\ORM\Mapping\ClassMetadataBuilderTest::testCreateOneToOne
 .
 Doctrine\Tests\ORM\Mapping\ClassMetadataBuilderTest::testCreatePrimaryField
+.
+Doctrine\Tests\ORM\Mapping\ClassMetadataBuilderTest::testCreateUnsignedOptionField
 .
 Doctrine\Tests\ORM\Mapping\ClassMetadataBuilderTest::testCreateVersionedField
 .
@@ -2222,6 +2878,8 @@ Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testInvalidPropertyAttributeOverri
 .
 Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testInverseIdentifierAssociation
 .
+Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testIsIdentifierMappedSuperClass
+.
 Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testJoinTableMappingDefaults
 .
 Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testLifecycleCallbackNotFound
@@ -2294,77 +2952,77 @@ Doctrine\Tests\ORM\Mapping\EntityListenerResolverTest::testRegisterStringExcepti
 .
 Doctrine\Tests\ORM\Mapping\EntityListenerResolverTest::testResolve
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #0 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #0
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #1 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #1
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #2 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #2
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #3 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #3
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #4 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #4
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #5 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #5
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #6 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testClassToTableName with data set #6
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinColumnName with data set #0 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinColumnName with data set #0
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinColumnName with data set #1 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinColumnName with data set #1
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinColumnName with data set #2 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinColumnName with data set #2
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinColumnName with data set #3 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinColumnName with data set #3
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #0 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #0
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #1 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #1
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #2 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #2
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #3 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #3
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #4 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #4
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #5 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinKeyColumnName with data set #5
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #0 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #0
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #1 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #1
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #2 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #2
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #3 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #3
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #4 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #4
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #5 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #5
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #6 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #6
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #7 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #7
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #8 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testJoinTableName with data set #8
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #0 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #0
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #1 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #1
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #2 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #2
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #3 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #3
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #4 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #4
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #5 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #5
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #6 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testPropertyToColumnName with data set #6
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testReferenceColumnName with data set #0 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testReferenceColumnName with data set #0
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testReferenceColumnName with data set #1 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testReferenceColumnName with data set #1
 .
-Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testReferenceColumnName with data set #2 
+Doctrine\Tests\ORM\Mapping\NamingStrategyTest::testReferenceColumnName with data set #2
 .
 Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testAssociationOverridesMapping
 .
@@ -2402,6 +3060,10 @@ Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testFieldMappings
 .
 Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testFieldMappingsColumnNames
 .
+Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testFieldOptions
+.
+Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testIdFieldOptions
+.
 Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testIdentifier
 .
 Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testIdentifierColumnDefinition
@@ -2431,6 +3093,8 @@ Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testNamedQuery
 Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testNamingStrategy
 .
 Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testOwningOneToOneAssociation
+.
+Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testSecondLevelCacheMapping
 .
 Doctrine\Tests\ORM\Mapping\PHPMappingDriverTest::testSqlResultSetMapping
 .
@@ -2494,6 +3158,10 @@ Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testFieldMappings
 .
 Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testFieldMappingsColumnNames
 .
+Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testFieldOptions
+.
+Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testIdFieldOptions
+.
 Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testIdentifier
 .
 Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testIdentifierColumnDefinition
@@ -2523,6 +3191,8 @@ Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testNamedQuery
 Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testNamingStrategy
 .
 Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testOwningOneToOneAssociation
+.
+Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testSecondLevelCacheMapping
 .
 Doctrine\Tests\ORM\Mapping\StaticPHPMappingDriverTest::testSqlResultSetMapping
 .
@@ -2564,6 +3234,10 @@ Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testDiscriminatorColumnDefaults
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testDiscriminatorColumnDefinition
 .
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEmbeddableMapping
+.
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEmbeddedMapping
+.
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityCustomGenerator
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityIndexes
@@ -2585,6 +3259,10 @@ Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityUniqueConstraints
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testFieldMappings
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testFieldMappingsColumnNames
+.
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testFieldOptions
+.
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testIdFieldOptions
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testIdentifier
 .
@@ -2620,61 +3298,69 @@ Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testNamingStrategy
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testOwningOneToOneAssociation
 .
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testSecondLevelCacheMapping
+.
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testSqlResultSetMapping
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testStringFieldMappings
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #0 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #0
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #1 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #1
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #10 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #10
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #11 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #11
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #12 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #12
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #13 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #13
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #14 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #14
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #16 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #15
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #17 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #17
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #18 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #18
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #19 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #19
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #2 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #2
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #20 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #20
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #21 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #21
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #22 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #22
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #23 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #23
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #24 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #24
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #25 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #25
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #26 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #26
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #3 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #27
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #4 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #28
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #5 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #29
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #6 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #3
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #7 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #4
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #8 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #5
 .
-Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #9 
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #6
+.
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #7
+.
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #8
+.
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #9
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testVersionedField
 .
@@ -2716,6 +3402,10 @@ Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testFieldMappings
 .
 Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testFieldMappingsColumnNames
 .
+Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testFieldOptions
+.
+Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testIdFieldOptions
+.
 Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testIdentifier
 .
 Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testIdentifierColumnDefinition
@@ -2751,6 +3441,8 @@ Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testNamedQuery
 Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testNamingStrategy
 .
 Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testOwningOneToOneAssociation
+.
+Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testSecondLevelCacheMapping
 .
 Doctrine\Tests\ORM\Mapping\YamlMappingDriverTest::testSpacesShouldBeIgnoredWhenUseExplode
 .
@@ -2798,9 +3490,19 @@ Doctrine\Tests\ORM\QueryBuilderTest::testAddCriteriaUndefinedLimit
 .
 Doctrine\Tests\ORM\QueryBuilderTest::testAddCriteriaWhere
 .
+Doctrine\Tests\ORM\QueryBuilderTest::testAddCriteriaWhereWithMultipleParametersWithDifferentFields
+.
+Doctrine\Tests\ORM\QueryBuilderTest::testAddCriteriaWhereWithMultipleParametersWithSameField
+.
+Doctrine\Tests\ORM\QueryBuilderTest::testAddCriteriaWhereWithMultipleParametersWithSubpathsAndDifferentProperties
+.
+Doctrine\Tests\ORM\QueryBuilderTest::testAddCriteriaWhereWithMultipleParametersWithSubpathsAndSameProperty
+.
 Doctrine\Tests\ORM\QueryBuilderTest::testAddDistinct
 .
 Doctrine\Tests\ORM\QueryBuilderTest::testAddFromString
+.
+Doctrine\Tests\ORM\QueryBuilderTest::testAddMultipleSameCriteriaWhere
 .
 Doctrine\Tests\ORM\QueryBuilderTest::testAddOrderBy
 .
@@ -3330,23 +4032,23 @@ Doctrine\Tests\ORM\Query\LexerTest::testScannerRecognizesStringContainingWhitesp
 .
 Doctrine\Tests\ORM\Query\LexerTest::testScannerTokenizesASimpleQueryCorrectly
 .
-Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #0 
+Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #0
 .
-Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #1 
+Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #1
 .
-Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #2 
+Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #2
 .
-Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #3 
+Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #3
 .
-Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #4 
+Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #4
 .
-Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #5 
+Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #5
 .
-Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #6 
+Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #6
 .
-Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #7 
+Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #7
 .
-Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #8 
+Doctrine\Tests\ORM\Query\ParameterTypeInfererTest::testParameterTypeInferer with data set #8
 .
 Doctrine\Tests\ORM\Query\ParserResultTest::testGetParameterMappings
 .
@@ -3360,29 +4062,31 @@ Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testClearParameters
 .
 Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkAndCompositeExpression
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #0 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #0
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #1 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #1
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #10 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #10
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #11 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #11
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #2 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #12
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #3 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #2
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #4 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #3
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #5 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #4
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #6 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #5
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #7 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #6
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #8 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #7
 .
-Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #9 
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #8
+.
+Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkComparison with data set #9
 .
 Doctrine\Tests\ORM\Query\QueryExpressionVisitorTest::testWalkOrCompositeExpression
 .
@@ -3529,7 +4233,7 @@ Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testLimitFromQueryClass
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testLockModeNoneQueryHint
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testMappedSuperclassAssociationJoin
-F
+.
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testMultipleFromAndInheritanceCondition
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testNestedExpressions
@@ -3714,6 +4418,8 @@ Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsOrderByDesc
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsOrderByWithAscAsDefault
 .
+Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsParenthesisExpressionInSubSelect
+.
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsPlainJoinWithoutClause
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsSelectDistinct
@@ -3739,6 +4445,8 @@ Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsSingleValuedInExpr
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsSubSqlFunction
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsTrimFunction
+.
+Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsTrimLeadingZeroString
 .
 Doctrine\Tests\ORM\Query\SelectSqlGenerationTest::testSupportsWhereAndClauseWithNamedParameters
 .
@@ -3784,31 +4492,61 @@ Doctrine\Tests\ORM\Query\UpdateSqlGenerationTest::testSupportsWhereClausesOnTheU
 .
 Doctrine\Tests\ORM\Query\UpdateSqlGenerationTest::testUpdateWithSubselectAsNewValue
 .
+Doctrine\Tests\ORM\Tools\AttachEntityListenersListenerTest::testAttachEntityListeners
+.
+Doctrine\Tests\ORM\Tools\AttachEntityListenersListenerTest::testAttachToExistingEntityListeners
+.
+Doctrine\Tests\ORM\Tools\AttachEntityListenersListenerTest::testDuplicateEntityListenerException
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheCollectionRegionCommandTest::testClearAllRegion
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheCollectionRegionCommandTest::testClearByOwnerEntityClassName
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheCollectionRegionCommandTest::testClearCacheEntryName
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheCollectionRegionCommandTest::testFlushRegionName
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheEntityRegionCommandTest::testClearAllRegion
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheEntityRegionCommandTest::testClearByEntityClassName
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheEntityRegionCommandTest::testClearCacheEntryName
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheEntityRegionCommandTest::testFlushRegionName
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheQueryRegionCommandTest::testClearAllRegion
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheQueryRegionCommandTest::testClearByRegionName
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheQueryRegionCommandTest::testClearDefaultRegionName
+.
+Doctrine\Tests\ORM\Tools\Console\Command\ClearCacheQueryRegionCommandTest::testFlushRegionName
+.
 Doctrine\Tests\ORM\Tools\Console\Command\ConvertDoctrine1SchemaCommandTest::testExecution
 .
 Doctrine\Tests\ORM\Tools\ConvertDoctrine1SchemaTest::testTest
 .
 Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityExtendsStdClass
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #0 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #0
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #1 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #1
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #2 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #2
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #3 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #3
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #4 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #4
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #5 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #5
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #6 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #6
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #7 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #7
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #8 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #8
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #9 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityTypeAlias with data set #9
 .
 Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testEntityUpdatingWorks
 .
@@ -3832,13 +4570,13 @@ Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testLoadPrefixedMetadata
 .
 Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testMethodDocBlockShouldStartWithBackSlash
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testParseTokensInEntityFile with data set #0 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testParseTokensInEntityFile with data set #0
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testParseTokensInEntityFile with data set #1 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testParseTokensInEntityFile with data set #1
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testParseTokensInEntityFile with data set #2 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testParseTokensInEntityFile with data set #2
 .
-Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testParseTokensInEntityFile with data set #3 
+Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testParseTokensInEntityFile with data set #3
 .
 Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testTraitPropertiesAndMethodsAreNotDuplicated
 .
@@ -4052,8 +4790,18 @@ Doctrine\Tests\ORM\Tools\SchemaValidatorTest::testRoutingModelSet
 .
 Doctrine\Tests\ORM\Tools\SchemaValidatorTest::testValidOneToOneAsIdentifierSchema
 .
+Doctrine\Tests\ORM\Tools\SetupTest::testAnnotationConfiguration
+.
+Doctrine\Tests\ORM\Tools\SetupTest::testConfigureCache
+.
+Doctrine\Tests\ORM\Tools\SetupTest::testConfigureProxyDir
+.
 Doctrine\Tests\ORM\Tools\SetupTest::testDirectoryAutoload
-FATAL
+.
+Doctrine\Tests\ORM\Tools\SetupTest::testXMLConfiguration
+.
+Doctrine\Tests\ORM\Tools\SetupTest::testYAMLConfiguration
+.
 Doctrine\Tests\ORM\UnitOfWorkTest::testCascadedIdentityColumnInsert
 .
 Doctrine\Tests\ORM\UnitOfWorkTest::testChangeTrackingNotify

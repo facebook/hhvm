@@ -30,7 +30,7 @@ function parse_php_functions(string $file):
                            ConstMap<string, Pair<string, ConstVector<string>>> {
   $source = file_get_contents($file);
   if (!$source) {
-    return FrozenMap {};
+    return FixedMap {};
   }
 
   // Don't handle methods yet, so function can't be indented
@@ -78,7 +78,7 @@ function parse_cpp_functions(string $file):
                            ConstMap<string, Pair<string, ConstVector<string>>> {
   $source = file_get_contents($file);
   if (!$source) {
-    return FrozenMap {};
+    return FixedMap {};
   }
 
   // Don't handle methods yet, so function can't be indented

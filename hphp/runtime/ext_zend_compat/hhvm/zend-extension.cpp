@@ -23,19 +23,25 @@
 // Initial size of the map
 #define APPROXIMATE_STATIC_ZEND_MODULES 10
 static std::atomic_int s_zend_next_module(1);
-static folly::AtomicHashMap<int, ZendExtension*> s_zend_extensions(
-  APPROXIMATE_STATIC_ZEND_MODULES
-);
+static folly::AtomicHashMap<int, ZendExtension*> *s_zend_extensions;
 
 ZendExtension::ZendExtension(const char* name) : HPHP::Extension(name) {
+  if (!s_zend_extensions) {
+    // No need to worry about races, this all happens during pre-main
+    // initialization
+    s_zend_extensions = new folly::AtomicHashMap<int, ZendExtension*>(
+      APPROXIMATE_STATIC_ZEND_MODULES
+    );
+  }
   zend_module_entry* module = this->getEntry();
   module->module_number = s_zend_next_module++;
-  s_zend_extensions.insert(module->module_number, this);
+  s_zend_extensions->insert(module->module_number, this);
 }
 
 ZendExtension* ZendExtension::GetByModuleNumber(int module_number) {
-  auto iter = s_zend_extensions.find(module_number);
-  if (iter != s_zend_extensions.end()) {
+  if (!s_zend_extensions) return nullptr;
+  auto iter = s_zend_extensions->find(module_number);
+  if (iter != s_zend_extensions->end()) {
     return iter->second;
   }
   return nullptr;

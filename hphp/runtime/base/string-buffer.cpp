@@ -368,7 +368,7 @@ void CstrBuffer::append(StringSlice slice) {
     if (newlen + 1 > kMaxCap) {
       throw StringBufferLimitException(kMaxCap, detach());
     }
-    unsigned newcap = Util::nextPower2(newlen + 1);
+    unsigned newcap = folly::nextPowTwo(newlen + 1);
     m_buffer = (char*)Util::safe_realloc(m_buffer, newcap);
     m_cap = newcap - 1;
     assert(newlen + 1 <= m_cap);

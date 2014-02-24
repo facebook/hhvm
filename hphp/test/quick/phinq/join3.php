@@ -3,6 +3,9 @@
 include "queryable.inc";
 
 $customers = new Queryable();
+$orders = new Queryable();
+$details = new Queryable();
+$products = new Queryable();
 
 $q = from $c in $customers
      join $o in $orders on $c->CustomerID equals $o->CustomerID

@@ -25,10 +25,10 @@ function main() {
   var_dump(array_slice($m, 1, 2, true));
   var_dump(array_slice($m, 1, 2, false));
 
-  var_dump(array_slice(FrozenVector{123, "b", "c"}, 1, 2, true));
-  var_dump(array_slice(FrozenVector{123, "b", "c"}, 1, 2, false));
+  var_dump(array_slice(FixedVector{123, "b", "c"}, 1, 2, true));
+  var_dump(array_slice(FixedVector{123, "b", "c"}, 1, 2, false));
 
   var_dump(array_slice(Set {"a", "b", "c"}, 1, 2, true));
-  var_dump(array_slice(FrozenSet {"a", "b", "c"}, 1, 2, false));
+  var_dump(array_slice(FixedSet {"a", "b", "c"}, 1, 2, false));
 }
 main();

@@ -22,10 +22,10 @@ function main() {
   reverse(Set {'foo', 'bar', 'baz'});
   reverse(Map { 'a' => 'foo', 'b' => 'bar', 'c' => 'baz'});
   reverse(Map { 10 => 'foo', 20 => 'bar', 30 => 'baz'});
-  reverse(FrozenVector {'foo', 'bar', 'baz'});
-  reverse(FrozenSet {'foo', 'bar', 'baz'});
-  reverse(FrozenMap { 'a' => 'foo', 'b' => 'bar', 'c' => 'baz'});
-  reverse(FrozenMap { 10 => 'foo', 20 => 'bar', 30 => 'baz'});
+  reverse(FixedVector {'foo', 'bar', 'baz'});
+  reverse(FixedSet {'foo', 'bar', 'baz'});
+  reverse(FixedMap { 'a' => 'foo', 'b' => 'bar', 'c' => 'baz'});
+  reverse(FixedMap { 10 => 'foo', 20 => 'bar', 30 => 'baz'});
 }
 
 main();

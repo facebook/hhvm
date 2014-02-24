@@ -45,6 +45,14 @@ bool operator==(const State& a, const State& b) {
 bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
 bool operator!=(const State& a, const State& b)   { return !(a == b); }
 
+State without_stacks(const State& src) {
+  auto ret          = State{};
+  ret.initialized   = src.initialized;
+  ret.thisAvailable = src.thisAvailable;
+  ret.locals        = src.locals;
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 PropertiesInfo::PropertiesInfo(const Index& index,

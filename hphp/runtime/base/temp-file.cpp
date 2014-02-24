@@ -34,6 +34,7 @@ TempFile::TempFile(bool autoDelete /* = true */) : m_autoDelete(autoDelete) {
     return;
   }
   m_fd = fd;
+  m_stream = fdopen(fd, "r+");
   m_name = std::string(path);
   m_rawName = std::string(path);
 }

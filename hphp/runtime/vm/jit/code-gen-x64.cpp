@@ -49,7 +49,6 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/layout.h"
@@ -1111,31 +1110,6 @@ void CodeGenerator::cgUnaryIntOp(PhysLoc dst_loc,
   }
 }
 
-void CodeGenerator::cgNegateWork(PhysLoc dst, SSATmp* src, PhysLoc src_loc) {
-  cgUnaryIntOp(dst, src, src_loc, &Asm::neg, [](int64_t i) { return -i; });
-}
-
-void CodeGenerator::cgAbsInt(IRInstruction* inst) {
-  auto src = inst->src(0);
-  auto srcReg = srcLoc(0).reg();
-  auto dstReg = dstLoc(0).reg();
-
-  if (srcReg == InvalidReg) {
-    int64_t srcVal = src->getValInt();
-    emitLoadImm(m_as, srcVal < 0 ? -srcVal : srcVal, dstReg);
-    return;
-  }
-
-  // fast integer absolute value:
-  // dst = ((src >> 63) ^ src) - (src >> 63)
-  emitMovRegReg(m_as, srcReg, m_rScratch);
-  emitMovRegReg(m_as, srcReg, dstReg);
-
-  m_as.    sarq  (63, m_rScratch);
-  m_as.    xorq  (m_rScratch, dstReg);
-  m_as.    subq  (m_rScratch, dstReg);
-}
-
 void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
   auto src = inst->src(0);
   auto srcReg = srcLoc(0).reg();
@@ -1163,19 +1137,20 @@ inline static Reg64 convertToReg64(PhysReg reg) { return reg; }
 
 template<class Oper, class RegType>
 void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
-              void (Asm::*instrIR)(Immed, RegType),
-              void (Asm::*instrRR)(RegType, RegType),
-              void (Asm::*movInstr)(RegType, RegType),
-              Oper oper,
-              RegType (*convertReg)(PhysReg),
-              Commutativity commuteFlag) {
+                                  void (Asm::*instrIR)(Immed, RegType),
+                                  void (Asm::*instrRR)(RegType, RegType),
+                                  void (Asm::*movInstr)(RegType, RegType),
+                                  Oper oper,
+                                  RegType (*convertReg)(PhysReg),
+                                  Commutativity commuteFlag) {
   assert(m_curInst == inst); // could remove the inst param
   const SSATmp* src1  = inst->src(0);
   const SSATmp* src2  = inst->src(1);
-  if (!(src1->isA(Type::Bool) || src1->isA(Type::Int)) ||
-      !(src2->isA(Type::Bool) || src2->isA(Type::Int))) {
-    CG_PUNT(cgBinaryIntOp);
-  }
+
+  // inputs must be ints, or a (bool,bool) operation that ends up behaving
+  // like an int anyway (e.g. LogicXor)
+  assert((src1->isA(Type::Int) && src2->isA(Type::Int)) ||
+         (src1->isA(Type::Bool) && src2->isA(Type::Bool)));
 
   bool const commutative = commuteFlag == Commutative;
   auto const dstReg      = dstLoc(0).reg();
@@ -1247,78 +1222,46 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   (a.*instrIR) (src2->getValRawInt(), dstOpReg);
 }
 
-template<class Oper, class RegType>
-void CodeGenerator::cgBinaryOp(IRInstruction* inst,
-                 void (Asm::*instrIR)(Immed, RegType),
-                 void (Asm::*instrRR)(RegType, RegType),
-                 void (Asm::*movInstr)(RegType, RegType),
-                 void (Asm::*fpInstr)(RegXMM, RegXMM),
-                 Oper oper,
-                 RegType (*convertReg)(PhysReg),
-                 Commutativity commuteFlag) {
+void CodeGenerator::cgBinaryDblOp(IRInstruction* inst,
+                                  void (Asm::*fpInstr)(RegXMM, RegXMM)) {
   assert(inst == m_curInst);
   const SSATmp* src1  = inst->src(0);
   const SSATmp* src2  = inst->src(1);
   auto loc1 = srcLoc(0);
   auto loc2 = srcLoc(1);
-  if (!(src1->isA(Type::Bool) || src1->isA(Type::Int) || src1->isA(Type::Dbl))
-      ||
-      !(src2->isA(Type::Bool) || src2->isA(Type::Int) || src2->isA(Type::Dbl)) )
-  {
-    CG_PUNT(cgBinaryOp);
-  }
-  if (src1->isA(Type::Dbl) || src2->isA(Type::Dbl)) {
-    PhysReg dstReg  = dstLoc(0).reg();
-    PhysReg resReg  = dstReg.isSIMD() && dstReg != loc2.reg() ?
-                      dstReg : PhysReg(rCgXMM0);
-    assert(resReg.isSIMD());
+  assert(src1->isA(Type::Dbl) && src2->isA(Type::Dbl));
 
-    PhysReg srcReg1 = prepXMMReg(src1, m_as, loc1, resReg);
-    PhysReg srcReg2 = prepXMMReg(src2, m_as, loc2, rCgXMM1);
-    assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
+  PhysReg dstReg  = dstLoc(0).reg();
+  PhysReg resReg  = dstReg.isSIMD() && dstReg != loc2.reg() ?
+                    dstReg : PhysReg(rCgXMM0);
+  assert(resReg.isSIMD());
 
-    emitMovRegReg(m_as, srcReg1, resReg);
+  PhysReg srcReg1 = prepXMMReg(src1, m_as, loc1, resReg);
+  PhysReg srcReg2 = prepXMMReg(src2, m_as, loc2, rCgXMM1);
+  assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
 
-    (m_as.*fpInstr)(srcReg2, resReg);
+  emitMovRegReg(m_as, srcReg1, resReg);
 
-    emitMovRegReg(m_as, resReg, dstReg);
-    return;
-  }
-  cgBinaryIntOp(inst, instrIR, instrRR, movInstr,
-                oper, convertReg, commuteFlag);
+  (m_as.*fpInstr)(srcReg2, resReg);
+
+  emitMovRegReg(m_as, resReg, dstReg);
 }
 
+/*
+ * If src2 is 1, this generates dst = src1 - 1 or src1 + 1 using the inc
+ * or dec x86 instructions. The return value is whether or not the
+ * instruction could be generated.
+ */
 bool CodeGenerator::emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
                                      SSATmp* src2, PhysLoc loc2,
                                      void(Asm::*emitFunc)(Reg64)) {
-  if (loc1.reg() != InvalidReg &&
-      loc2.reg() != InvalidReg &&
-      src1->isA(Type::Int) &&
-      // src2 == 1:
-      src2->isConst() && src2->isA(Type::Int) && src2->getValInt() == 1) {
+  if (loc1.reg() != InvalidReg && loc2.reg() != InvalidReg &&
+      src2->isConst() && src2->getValInt() == 1) {
     emitMovRegReg(m_as, loc1.reg(), dst.reg());
     (m_as.*emitFunc)(dst.reg());
     return true;
   }
   return false;
-}
-
-/*
- * If src2 is 1, this generates dst = src1 + 1 using the "inc" x86 instruction.
- * The return value is whether or not the instruction could be generated.
- */
-bool CodeGenerator::emitInc(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-                            SSATmp* src2, PhysLoc loc2) {
-  return emitIncDecHelper(dst, src1, loc1, src2, loc2, &Asm::incq);
-}
-
-/*
- * If src2 is 1, this generates dst = src1 - 1 using the "dec" x86 instruction.
- * The return value is whether or not the instruction could be generated.
- */
-bool CodeGenerator::emitDec(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-                            SSATmp* src2, PhysLoc loc2) {
-  return emitIncDecHelper(dst, src1, loc1, src2, loc2, &Asm::decq);
 }
 
 void CodeGenerator::cgRoundCommon(IRInstruction* inst, RoundDirection dir) {
@@ -1340,51 +1283,78 @@ void CodeGenerator::cgCeil(IRInstruction* inst) {
   cgRoundCommon(inst, RoundDirection::ceil);
 }
 
-void CodeGenerator::cgAdd(IRInstruction* inst) {
+void CodeGenerator::cgAddInt(IRInstruction* inst) {
   SSATmp* src1 = inst->src(0);
   SSATmp* src2 = inst->src(1);
   auto loc1 = srcLoc(0);
   auto loc2 = srcLoc(1);
   auto dst = dstLoc(0);
 
-  // Special cases: x = y + 1
-  if (emitInc(dst, src1, loc1, src2, loc2) ||
-      emitInc(dst, src2, loc2, src1, loc1)) return;
+  // Special cases: x = y + 1, x = 1 + y
+  if (emitIncDecHelper(dst, src1, loc1, src2, loc2, &Asm::incq) ||
+      emitIncDecHelper(dst, src2, loc2, src1, loc1, &Asm::incq)) {
+    return;
+  }
 
-  cgBinaryOp(inst,
-             &Asm::addq,
-             &Asm::addq,
-             &Asm::movq,
-             &Asm::addsd_xmm_xmm,
-             std::plus<int64_t>(),
-             &convertToReg64,
-             Commutative);
+  cgBinaryIntOp(
+    inst,
+    &Asm::addq,
+    &Asm::addq,
+    &Asm::movq,
+    std::plus<int64_t>(),
+    &convertToReg64,
+    Commutative
+  );
 }
 
-void CodeGenerator::cgSub(IRInstruction* inst) {
+void CodeGenerator::cgSubInt(IRInstruction* inst) {
   auto src1 = inst->src(0);
   auto src2 = inst->src(1);
   auto loc1 = srcLoc(0);
   auto loc2 = srcLoc(1);
   auto dst = dstLoc(0);
 
-  if (emitDec(dst, src1, loc1, src2, loc2)) return;
+  if (emitIncDecHelper(dst, src1, loc1, src2, loc2, &Asm::decq)) return;
 
-  if (src1->isConst() && src1->isA(Type::Int) && src1->getValInt() == 0 &&
-      src2->isA(Type::Int)) {
-    // this should be done only in simplifier
-    cgNegateWork(dst, src2, loc2);
+  if (src1->isConst() && src1->getValInt() == 0) {
+    // There is no unary negate HHIR instruction, so handle that here.
+    cgUnaryIntOp(dst, src2, loc2, &Asm::neg, [](int64_t i) { return -i; });
     return;
   }
 
-  cgBinaryOp(inst,
-             &Asm::subq,
-             &Asm::subq,
-             &Asm::movq,
-             &Asm::subsd_xmm_xmm,
-             std::minus<int64_t>(),
-             &convertToReg64,
-             NonCommutative);
+  cgBinaryIntOp(
+    inst,
+    &Asm::subq,
+    &Asm::subq,
+    &Asm::movq,
+    std::minus<int64_t>(),
+    &convertToReg64,
+    NonCommutative
+  );
+}
+
+void CodeGenerator::cgMulInt(IRInstruction* inst) {
+  cgBinaryIntOp(
+    inst,
+    &Asm::imul,
+    &Asm::imul,
+    &Asm::movq,
+    std::multiplies<int64_t>(),
+    &convertToReg64,
+    Commutative
+  );
+}
+
+void CodeGenerator::cgAddDbl(IRInstruction* inst) {
+  cgBinaryDblOp(inst, &Asm::addsd_xmm_xmm);
+}
+
+void CodeGenerator::cgSubDbl(IRInstruction* inst) {
+  cgBinaryDblOp(inst, &Asm::subsd_xmm_xmm);
+}
+
+void CodeGenerator::cgMulDbl(IRInstruction* inst) {
+  cgBinaryDblOp(inst, &Asm::mulsd_xmm_xmm);
 }
 
 void CodeGenerator::cgDivDbl(IRInstruction* inst) {
@@ -1465,17 +1435,6 @@ void CodeGenerator::cgLogicXor(IRInstruction* inst) {
                 [] (bool a, bool b) { return a ^ b; },
                 &convertToReg8,
                 Commutative);
-}
-
-void CodeGenerator::cgMul(IRInstruction* inst) {
-  cgBinaryOp(inst,
-             &Asm::imul,
-             &Asm::imul,
-             &Asm::movq,
-             &Asm::mulsd_xmm_xmm,
-             std::multiplies<int64_t>(),
-             &convertToReg64,
-             Commutative);
 }
 
 void CodeGenerator::cgMod(IRInstruction* inst) {
@@ -3132,21 +3091,13 @@ void CodeGenerator::cgStMem(IRInstruction* inst) {
   cgStore(ptr[offset], inst->src(2), srcLoc(2), Width::Full);
 }
 
-void CodeGenerator::cgStRefWork(IRInstruction* inst, Width width) {
+void CodeGenerator::cgStRef(IRInstruction* inst) {
   always_assert(!srcLoc(1).isFullSIMD());
   auto destReg = dstLoc(0).reg();
   auto ptr = srcLoc(0).reg();
   auto off = RefData::tvOffset();
-  cgStore(ptr[off], inst->src(1), srcLoc(1), width);
+  cgStore(ptr[off], inst->src(1), srcLoc(1), Width::Full);
   if (destReg != InvalidReg) emitMovRegReg(m_as, ptr, destReg);
-}
-
-void CodeGenerator::cgStRef(IRInstruction* inst) {
-  cgStRefWork(inst, Width::Full);
-}
-
-void CodeGenerator::cgStRefNT(IRInstruction* inst) {
-  cgStRefWork(inst, Width::Value);
 }
 
 int CodeGenerator::iterOffset(uint32_t id) {
@@ -3621,8 +3572,6 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
 
   const int64_t spOffset = -kNumActRecCells * sizeof(Cell);
 
-  DEBUG_ONLY bool setThis = true;
-
   auto spReg = srcLoc(0).reg();
   // actRec->m_this
   if (objOrCls->isA(Type::Cls)) {
@@ -3650,14 +3599,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     assert(objOrCls->isA(Type::InitNull));
     // no obj or class; this happens in FPushFunc
     int offset_m_this = spOffset + int(AROFF(m_this));
-    // When func is either Type::FuncCls or Type::FuncCtx,
-    // m_this/m_cls will be initialized below
-    if (!func->isConst() && (func->isA(Type::FuncCtx))) {
-      // m_this is unioned with m_cls and will be initialized below
-      setThis = false;
-    } else {
-      m_as.store_imm64_disp_reg64(0, offset_m_this, spReg);
-    }
+    m_as.store_imm64_disp_reg64(0, offset_m_this, spReg);
   }
   // actRec->m_invName
   // ActRec::m_invName is encoded as a pointer with bit kInvNameBit
@@ -3675,25 +3617,14 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   } else if (func->isConst()) {
     const Func* f = func->getValFunc();
     m_as.storeq(f, spReg[spOffset + int(AROFF(m_func))]);
-    if (func->isA(Type::FuncCtx)) {
-      // Fill in m_cls if provided with both func* and class*
-      CG_PUNT(cgAllocActRec);
-    }
   } else {
     int offset_m_func = spOffset + int(AROFF(m_func));
     auto funcLoc = srcLoc(2);
     m_as.store_reg64_disp_reg64(funcLoc.reg(0),
                                 offset_m_func,
                                 spReg);
-    if (func->isA(Type::FuncCtx)) {
-      int offset_m_cls = spOffset + int(AROFF(m_cls));
-      m_as.store_reg64_disp_reg64(funcLoc.reg(1),
-                                  offset_m_cls,
-                                  spReg);
-      setThis = true; /* m_this and m_cls are in a union */
-    }
   }
-  assert(setThis);
+
   // actRec->m_savedRbp
   auto fpLoc = srcLoc(1);
   m_as.store_reg64_disp_reg64(fpLoc.reg(),
@@ -3924,12 +3855,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   // put all outgoing arguments onto the VM stack
   int64_t adjustment = (-(int64_t)numArgs) * sizeof(Cell);
   for (int32_t i = 0; i < numArgs; i++) {
-    // Type::None here means that the simplifier proved that the value
-    // matches the value already in memory, thus the store is redundant.
-    if (args[i]->type() != Type::None) {
-      cgStore(spReg[-(i + 1) * sizeof(Cell)], args[i], srcLoc(i+3),
-              Width::Full);
-    }
+    cgStore(spReg[-(i + 1) * sizeof(Cell)], args[i], srcLoc(i+3), Width::Full);
   }
   // store the return bytecode offset into the outgoing actrec
   uint64_t returnBc = returnBcOffset->getValInt();
@@ -6441,7 +6367,7 @@ void CodeGenerator::cgLdClsStaticInitData(IRInstruction* inst) {
 }
 
 void CodeGenerator::print() const {
-  JIT::print(std::cout, m_unit, &m_state.regs, nullptr, m_state.asmInfo);
+  JIT::print(std::cout, m_unit, &m_state.regs, m_state.asmInfo);
 }
 
 static void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
@@ -6606,7 +6532,7 @@ void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
     genCodeImpl(main, stubs, unit, bcMap, tx64, regs, &ai);
-    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, nullptr, &ai);
+    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
   } else {
     genCodeImpl(main, stubs, unit, bcMap, tx64, regs, nullptr);
   }

@@ -100,13 +100,15 @@ PUNT_OPCODE(CheckDefinedClsEq)
 PUNT_OPCODE(TryEndCatch)
 PUNT_OPCODE(LdUnwinderValue)
 PUNT_OPCODE(DeleteUnwinderException)
-PUNT_OPCODE(Add)
-PUNT_OPCODE(Sub)
-PUNT_OPCODE(Mul)
+PUNT_OPCODE(AddInt)
+PUNT_OPCODE(SubInt)
+PUNT_OPCODE(MulInt)
+PUNT_OPCODE(AddDbl)
+PUNT_OPCODE(SubDbl)
+PUNT_OPCODE(MulDbl)
 PUNT_OPCODE(DivDbl)
 PUNT_OPCODE(Mod)
 PUNT_OPCODE(Sqrt)
-PUNT_OPCODE(AbsInt)
 PUNT_OPCODE(AbsDbl)
 PUNT_OPCODE(BitAnd)
 PUNT_OPCODE(BitOr)
@@ -340,7 +342,6 @@ PUNT_OPCODE(StMem)
 PUNT_OPCODE(StProp)
 PUNT_OPCODE(StLocNT)
 PUNT_OPCODE(StRef)
-PUNT_OPCODE(StRefNT)
 PUNT_OPCODE(StRaw)
 PUNT_OPCODE(StElem)
 PUNT_OPCODE(IterCopy)
@@ -1351,7 +1352,6 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
 
   // Func and this/class are slightly tricky. The func may be a tuple of a Func*
   // and context.
-  DEBUG_ONLY bool setThis = true;
 
   if (objOrCls->isA(Type::Cls)) {
     if (objOrCls->isConst()) {
@@ -1365,11 +1365,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     m_as.  Str  (objClsReg, spReg[spOff + AROFF(m_this)]);
   } else {
     assert(objOrCls->isA(Type::InitNull));
-    if (!func->isConst() && func->isA(Type::FuncCtx)) {
-      setThis = false;
-    } else {
-      m_as.Str  (vixl::xzr, spReg[spOff + AROFF(m_this)]);
-    }
+    m_as.Str  (vixl::xzr, spReg[spOff + AROFF(m_this)]);
   }
 
   // Now set func, and possibly this/cls
@@ -1377,23 +1373,12 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     // Do nothing
     assert(func->isConst());
   } else if (func->isConst()) {
-    if (func->isA(Type::FuncCtx)) {
-      // x64 punts on this too
-      CG_PUNT(cgSpillFrame_ConstFuncCtx);
-    }
     m_as.  Mov  (rAsm, func->getValFunc());
     m_as.  Str  (rAsm, spReg[spOff + AROFF(m_func)]);
   } else {
     auto reg0 = x2a(funcLoc.reg(0));
     m_as.  Str  (reg0, spReg[spOff + AROFF(m_func)]);
-    if (func->isA(Type::FuncCtx)) {
-      auto reg1 = x2a(funcLoc.reg(1));
-      m_as.Str  (reg1, spReg[spOff + AROFF(m_cls)]);
-      setThis = true;
-    }
   }
-
-  assert(setThis);
 
   // Adjust stack pointer
   emitRegGetsRegPlusImm(m_as, x2a(dstLoc(0).reg()), spReg, spOff);
@@ -1498,9 +1483,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
   int64_t adjustment = cellsToBytes((int64_t)-numArgs);
   for (int32_t i = 0; i < numArgs; ++i) {
-    if (args[i]->type() != Type::None) {
-      emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 3));
-    }
+    emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 3));
   }
 
   m_as.  Mov  (rAsm.W(), returnBcOffset->getValInt());

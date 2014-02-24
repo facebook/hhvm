@@ -1,0 +1,10 @@
+object(Foo)#%d (3) {
+  ["a"]=>
+  int(1)
+  ["b":protected]=>
+  int(2)
+  ["c":"Foo":private]=>
+  int(3)
+}
+object(Bar)#%d (0) {
+}

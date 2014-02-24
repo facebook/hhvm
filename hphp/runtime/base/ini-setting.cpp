@@ -159,10 +159,30 @@ void IniSetting::ParserCallback::onPopEntry(
     hash = Array::Create();
   }
   if (!offset.empty()) {
-    hash.set(String(offset), String(value));
+    makeArray(hash, offset, value);
   } else {
     hash.append(value);
   }
+}
+void IniSetting::ParserCallback::makeArray(Variant &hash,
+                                           const std::string &offset,
+                                           const std::string &value) {
+  assert(!offset.empty());
+  Variant val = strongBind(hash);
+  auto start = offset.c_str();
+  auto p = start;
+  bool last = false;
+  do {
+    String index(p);
+    last = p + index.size() >= start + offset.size();
+    auto def = Variant(Array::Create());
+    Variant newval = last ? Variant(value) : val.lvalRef(index, def);
+    val.setRef(index, newval);
+    if (!last) {
+      val = strongBind(newval);
+      p += index.size() + 1;
+    }
+  } while (!last);
 }
 void IniSetting::ParserCallback::onConstant(std::string &result,
                                             const std::string &name) {

@@ -23,7 +23,6 @@
 #include "hphp/util/debug.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/request-arena.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/parser/parser.h"
@@ -328,7 +327,8 @@ void Class::destroy() {
    * could call destroy
    */
   releaseRefs();
-  Treadmill::WorkItem::enqueue(new FreeClassTrigger(this));
+  Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                              new FreeClassTrigger(this)));
 }
 
 void Class::atomicRelease() {
@@ -489,8 +489,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
   // 86pinit() calls below. 86pinit() takes a reference to an array to populate
   // with initial property values; after it completes, we copy the values into
   // the new propVec.
-  request_arena().beginFrame();
-  PropInitVec* propVec = PropInitVec::allocInRequestArena(m_declPropInit);
+  auto propVec = PropInitVec::allocWithSmartAllocator(m_declPropInit);
 
   setPropData(propVec);
 
@@ -505,7 +504,8 @@ Class::PropInitVec* Class::initPropsImpl() const {
     }
   } catch (...) {
     // Undo the allocation of propVec
-    request_arena().endFrame();
+    smart_delete_array(propVec->begin(), propVec->size());
+    smart_delete(propVec);
     throw;
   }
 
@@ -630,7 +630,7 @@ TypedValue* Class::initSPropsImpl() const {
   // Create an array that is initially large enough to hold all static
   // properties.
   TypedValue* const spropTable =
-    new (request_arena()) TypedValue[m_staticProperties.size()];
+    smart_new_array<TypedValue>(m_staticProperties.size());
   memset(spropTable, 0, m_staticProperties.size() * sizeof(TypedValue));
   setSPropData(spropTable);
 
@@ -2314,11 +2314,10 @@ Class::PropInitVec::~PropInitVec() {
 Class::PropInitVec::PropInitVec() : m_data(nullptr), m_size(0), m_smart(false) {}
 
 Class::PropInitVec*
-Class::PropInitVec::allocInRequestArena(const PropInitVec& src) {
-  ThreadInfo* info UNUSED = ThreadInfo::s_threadInfo.getNoCheck();
-  PropInitVec* p = new (request_arena()) PropInitVec;
+Class::PropInitVec::allocWithSmartAllocator(const PropInitVec& src) {
+  PropInitVec* p = smart_new<PropInitVec>();
   p->m_size = src.size();
-  p->m_data = new (request_arena()) TypedValueAux[src.size()];
+  p->m_data = smart_new_array<TypedValueAux>(src.size());
   memcpy(p->m_data, src.m_data, src.size() * sizeof(*p->m_data));
   p->m_smart = true;
   return p;
@@ -2344,7 +2343,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
    * the allocated size is always the next power of two (or zero)
    * so we just need to reallocate when we hit a power of two
    */
-  if (!m_size || Util::isPowerOfTwo(m_size)) {
+  if (!m_size || folly::isPowTwo(m_size)) {
     unsigned size = m_size ? m_size * 2 : 1;
     m_data = (TypedValueAux*)realloc(m_data, size * sizeof(*m_data));
     assert(m_data);

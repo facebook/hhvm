@@ -1153,6 +1153,14 @@
                 {
                     "name": "RES_PAYLOAD_FAILURE",
                     "type": "Int64"
+                },
+                {
+                    "name": "RES_NOT_SUPPORTED",
+                    "type": "Int64"
+                },
+                {
+                    "name": "RES_INVALID_HOST_PROTOCOL",
+                    "type": "Int64"
                 }
             ]
         }

@@ -15,7 +15,7 @@ before_script:
   - export PDO_MYSQL_TEST_USER="travis"
   - export PDO_MYSQL_TEST_PASS=""
 
-# The larger test suites (slow, zend) take longer than 50 miuntes to run. Since
+# The larger test suites (slow, zend) take longer than 50 minutes to run. Since
 # we have no way to change the timeout, we subdivide the jit/interp repo/normal
 # matrix and then further split the large suites using an experimental cut
 # which divides the number of tests in each sub-run roughly in two.

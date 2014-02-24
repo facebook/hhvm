@@ -5,17 +5,17 @@ function main() {
     Vector {11, 22, 33},
     Map {'a' => 11, 'b' => 22, 'c' => 33},
     Set {11, 22, 33},
-    FrozenVector {11, 22, 33},
-    FrozenMap {'a' => 11, 'b' => 22, 'c' => 33},
-    FrozenSet {11, 22, 33},
+    FixedVector {11, 22, 33},
+    FixedMap {'a' => 11, 'b' => 22, 'c' => 33},
+    FixedSet {11, 22, 33},
     Pair {11, 22},
     array(),
     Vector {},
     Map {},
     Set {},
-    FrozenVector {},
-    FrozenMap {},
-    FrozenSet {},
+    FixedVector {},
+    FixedMap {},
+    FixedSet {},
   };
   foreach ($containers as $x) {
     var_dump(array_pop($x));

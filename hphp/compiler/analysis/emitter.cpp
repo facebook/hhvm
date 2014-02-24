@@ -3867,8 +3867,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             throw IncludeTimeFatalException(b,
               "Cannot use collection initialization for non-collection class");
           }
-          bool kvPairs = cType == Collection::FrozenMapType
-            || cType == Collection::MapType;
+          bool kvPairs = (cType == Collection::MapType ||
+                          cType == Collection::FixedMapType);
           e.NewCol(cType, nElms);
           if (kvPairs) {
             for (int i = 0; i < nElms; i++) {
@@ -8586,7 +8586,7 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     // and requires that the hhas systemlib is already loaded.
     if (auto const existing = Unit::lookupFunc(name)) {
       if (!existing->isCPPBuiltin()) {
-        name = makeStaticString("__builtin_" + name->toCPPString());
+        name = makeStaticString("__builtin_" + name->toCppString());
       }
     }
 

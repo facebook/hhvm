@@ -182,7 +182,7 @@ struct FuncInfo {
    * Whether $this can be null or not on entry to the method. Only applies
    * to method and it's always false for functions.
    */
-  bool thisAvailalble = false;
+  bool thisAvailable = false;
 };
 
 /*
@@ -476,7 +476,7 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
       ret.returnTy = union_of(t, TInitNull);
     }
   }
-  ret.thisAvailalble = false;
+  ret.thisAvailable = false;
   return &ret;
 }
 
@@ -891,7 +891,7 @@ Index::Index(borrowed_ptr<php::Program> program)
 
   NamingEnv env;
   for (auto& u : program->units) {
-    Trace::Bump bumper{Trace::hhbbc, is_systemlib_part(*u), kSystemLibBump};
+    Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(*u)};
     for (auto& c : u->classes) {
       preresolve(*m_data, env, c->name);
     }
@@ -1170,7 +1170,7 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
 
 bool Index::lookup_this_available(borrowed_ptr<const php::Func> f) const {
   auto it = m_data->funcInfo.find(f);
-  return (it != end(m_data->funcInfo)) ? it->second.thisAvailalble : false;
+  return it != end(m_data->funcInfo) ? it->second.thisAvailable : false;
 }
 
 // Parameter preparation modes never change during analysis, so

@@ -440,18 +440,22 @@ struct IniCallbackData {
 typedef std::map<std::string, IniCallbackData> CallbackMap;
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_callbacks);
 
-// This can't be the same as s_callbacks since some classes register callbacks
-// before g_context is ready to have the shutdown handler registered
+typedef std::map<std::string, std::string> DefaultMap;
+static DefaultMap s_global_ini;
+
+static IMPLEMENT_THREAD_LOCAL(DefaultMap, s_savedDefaults);
+
 class IniSettingExtension : public Extension {
 public:
   IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
   void requestShutdown() {
-    s_callbacks->clear();
+    // Put all the defaults back to the way they were before any ini_set()
+    for (auto &item : *s_savedDefaults) {
+      IniSetting::Set(item.first, item.second);
+    }
+    s_savedDefaults->clear();
   }
 } s_ini_extension;
-
-typedef std::map<std::string, std::string> DefaultMap;
-static DefaultMap s_global_ini;
 
 void IniSetting::SetGlobalDefault(const char *name, const char *value) {
   assert(name && *name);
@@ -635,8 +639,13 @@ bool IniSetting::Set(const String& name, const String& value) {
   ));
 }
 
-bool IniSetting::SetUser(const String& name, const String& value) {
-  return ini_set(name, value, static_cast<Mode>(
+bool IniSetting::SetUser(const String& nameString, const String& value) {
+  auto name = nameString.toCppString();
+  auto it = s_savedDefaults->find(name);
+  if (it == s_savedDefaults->end()) {
+    Get(name, (*s_savedDefaults)[name]);
+  }
+  return ini_set(nameString, value, static_cast<Mode>(
     PHP_INI_USER | PHP_INI_ALL
   ));
 }

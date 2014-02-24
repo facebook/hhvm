@@ -24,7 +24,7 @@ namespace HPHP {
 static class DateExtension : public Extension {
  public:
   DateExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
-  void requestInit() {
+  void threadInit() {
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.timezone",
@@ -34,30 +34,22 @@ static class DateExtension : public Extension {
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
-      "date.default_latitude",
-      "31.7667",
-      ini_on_update_real, ini_get_real,
+      "date.default_latitude", "31.7667",
       &m_date_default_latitude
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
-      "date.default_longitude",
-      "35.2333",
-      ini_on_update_real, ini_get_real,
+      "date.default_longitude", "35.2333",
       &m_date_default_longitude
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
-      "date.sunset_zenith",
-      "90.583333",
-      ini_on_update_real, ini_get_real,
+      "date.sunset_zenith", "90.583333",
       &m_date_default_sunset_zenith
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
-      "date.sunrise_zenith",
-      "90.583333",
-      ini_on_update_real, ini_get_real,
+      "date.sunrise_zenith", "90.583333",
       &m_date_default_sunrise_zenith
     );
   }

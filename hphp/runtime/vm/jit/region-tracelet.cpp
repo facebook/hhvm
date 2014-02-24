@@ -231,7 +231,7 @@ RegionDescPtr RegionFormer::go() {
   }
 
   dumpTrace(2, m_ht.unit(), " after tracelet formation ",
-            nullptr, nullptr, m_ht.traceBuilder().guards());
+            nullptr, nullptr, m_ht.irBuilder().guards());
 
   if (m_region && !m_region->blocks.empty()) {
     always_assert_log(
@@ -270,7 +270,7 @@ bool RegionFormer::prepareInstruction() {
 
   InputInfos inputInfos;
   getInputs(m_startSk, m_inst, inputInfos, m_curBlock->func(), [&](int i) {
-    return m_ht.traceBuilder().localType(i, DataTypeGeneric);
+    return m_ht.irBuilder().localType(i, DataTypeGeneric);
   });
 
   // Read types for all the inputs and apply MetaData.
@@ -418,7 +418,7 @@ bool RegionFormer::tryInline() {
   }
 
   // Make sure the FPushOp wasn't interpreted.
-  auto spillFrame = findSpillFrame(m_ht.traceBuilder().sp());
+  auto spillFrame = findSpillFrame(m_ht.irBuilder().sp());
   if (!spillFrame) {
     return refuse("couldn't find SpillFrame for FPushOp");
   }
@@ -528,7 +528,7 @@ void RegionFormer::recordDependencies() {
   auto blockStart = firstBlock.start();
   auto& unit = m_ht.unit();
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
-  auto changed = doRelax ? relaxGuards(unit, *m_ht.traceBuilder().guards(),
+  auto changed = doRelax ? relaxGuards(unit, *m_ht.irBuilder().guards(),
                                        m_profiling)
                          : false;
   visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
@@ -539,7 +539,7 @@ void RegionFormer::recordDependencies() {
   });
   if (changed) {
     dumpTrace(3, unit, " after guard relaxation ",
-              nullptr, nullptr, m_ht.traceBuilder().guards());
+              nullptr, nullptr, m_ht.irBuilder().guards());
   }
 
 }

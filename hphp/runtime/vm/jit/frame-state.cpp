@@ -543,7 +543,7 @@ void FrameState::trackDefInlineFP(const IRInstruction* inst) {
   auto const calleeSP   = inst->src(0);
   auto const savedSP    = inst->src(1);
 
-  // Saved tracebuilder state will include the "return" fp/sp.
+  // Saved IRBuilder state will include the "return" fp/sp.
   // Whatever the current fpValue is is good enough, but we have to be
   // passed in the StkPtr that represents the stack prior to the
   // ActRec being allocated.

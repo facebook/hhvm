@@ -65,7 +65,7 @@ struct HhbcTranslator {
                  const Func* func);
 
   // Accessors.
-  IRBuilder& traceBuilder() const { return *m_irb.get(); }
+  IRBuilder& irBuilder() const { return *m_irb.get(); }
   IRUnit& unit() { return m_unit; }
 
   // In between each emit* call, irtranslator indicates the new
@@ -629,7 +629,7 @@ private:
     std::vector<Block*> m_failedVec;
   };
 
-private: // tracebuilder forwarding utilities
+private: // forwarding utilities
   template<class... Args>
   SSATmp* cns(Args&&... args) {
     return m_unit.cns(std::forward<Args>(args)...);

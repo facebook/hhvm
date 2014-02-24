@@ -178,7 +178,7 @@ private:
   SSATmp* simplifyCheckPackedArrayBounds(IRInstruction*);
   SSATmp* simplifyLdPackedArrayElem(IRInstruction*);
 
-private: // tracebuilder forwarders
+private: // IRBuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, BCMarker marker, Args&&...);
@@ -254,7 +254,7 @@ StackValueInfo getStackValue(SSATmp* stack, uint32_t index);
  * given the particular depth.
  *
  * This function is used for computing available value for
- * DecRef->DecRefNZ conversions in tracebuilder.
+ * DecRef->DecRefNZ conversions in IRBuilder.
  */
 smart::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth);
 

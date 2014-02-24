@@ -389,7 +389,7 @@ SSATmp* IRBuilder::optimizeWork(IRInstruction* inst,
 
   FTRACE(1, "optimizing {}{}\n", indent(), inst->toString());
 
-  // First pass of tracebuilder optimizations try to replace an
+  // First pass of IRBuilder optimizations try to replace an
   // instruction based on tracked state before we do anything else.
   // May mutate the IRInstruction in place (and return nullptr) or
   // return an SSATmp*.
@@ -812,7 +812,7 @@ void IRBuilder::startBlock() {
       }
       m_curBlock = block;
       m_state.startBlock(m_curBlock);
-      FTRACE(2, "TraceBuilder switching to block B{}: {}\n", block->id(),
+      FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
              show(m_state));
     }
   }

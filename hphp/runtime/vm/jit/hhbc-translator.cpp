@@ -321,7 +321,7 @@ size_t HhbcTranslator::spOffset() const {
  * instruction which calls native or may raise an error is considered a
  * reference to the FP and prevent it from being elided.  This is done by
  * inserting an InlineFPAnchor instruction when they are encountered.  These
- * instructions are inserted initially by trace-builder and later removed and
+ * instructions are inserted initially by IRBuilder and later removed and
  * re-inserted during the reoptimize pass to ensure that they are not associated
  * with instructions that have been removed in DCE or modified in the
  * simplifier.

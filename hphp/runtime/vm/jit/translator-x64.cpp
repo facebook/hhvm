@@ -1888,7 +1888,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
           // use them in region selection whenever we decide to retranslate.
           if (m_mode == TransProfile && result == Success &&
               RuntimeOption::EvalJitPGOUsePostConditions) {
-            pconds = m_irTrans->hhbcTrans().traceBuilder().getKnownTypes();
+            pconds = m_irTrans->hhbcTrans().irBuilder().getKnownTypes();
           }
 
           FTRACE(2, "translateRegion finished with result {}\n",
@@ -1929,7 +1929,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         // retranslate.
         if (m_mode == TransProfile && result == Success &&
             RuntimeOption::EvalJitPGOUsePostConditions) {
-          pconds = m_irTrans->hhbcTrans().traceBuilder().getKnownTypes();
+          pconds = m_irTrans->hhbcTrans().irBuilder().getKnownTypes();
         }
       }
 
@@ -2166,13 +2166,13 @@ void TranslatorX64::traceCodeGen() {
   auto& unit = ht.unit();
 
   auto finishPass = [&](const char* msg, int level) {
-    dumpTrace(level, unit, msg, nullptr, nullptr, ht.traceBuilder().guards());
+    dumpTrace(level, unit, msg, nullptr, nullptr, ht.irBuilder().guards());
     assert(checkCfg(unit));
   };
 
   finishPass(" after initial translation ", kIRLevel);
 
-  optimize(unit, ht.traceBuilder(), m_mode);
+  optimize(unit, ht.irBuilder(), m_mode);
   finishPass(" after optimizing ", kOptLevel);
 
   auto regs = allocateRegs(unit);

@@ -4137,7 +4137,7 @@ Translator::translateRegion(const RegionDesc& region,
     auto knownFuncs = makeMapWalker(block->knownFuncs());
     bool maybeStartNewBlock = true;
 
-    ht.traceBuilder().recordOffset(sk.offset());
+    ht.irBuilder().recordOffset(sk.offset());
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
@@ -4256,7 +4256,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       InputInfos inputInfos;
       getInputs(startSk, inst, inputInfos, block->func(), [&](int i) {
-          return ht.traceBuilder().localType(i, DataTypeGeneric);
+          return ht.irBuilder().localType(i, DataTypeGeneric);
         });
 
       // Populate the NormalizedInstruction's input vector, using types from

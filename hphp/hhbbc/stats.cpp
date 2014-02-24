@@ -54,6 +54,9 @@ namespace {
   X(InitUnc)                                    \
   X(Obj)                                        \
   X(OptObj)                                     \
+  X(Arr)                                        \
+  X(SArr)                                       \
+  X(CArr)                                       \
   X(Null)                                       \
   X(Bottom)
 

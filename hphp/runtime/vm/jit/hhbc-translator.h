@@ -828,7 +828,6 @@ private:
   SSATmp* ldStackAddr(int32_t offset, TypeConstraint tc);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
-  void    refineType(SSATmp* tmp, Type type);
 
   /*
    * Local instruction helpers.

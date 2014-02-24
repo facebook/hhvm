@@ -136,38 +136,6 @@ SSATmp* HhbcTranslator::pushIncRef(SSATmp* tmp, TypeConstraint tc) {
   return push(tmp);
 }
 
-void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
-  // If type is more refined than tmp's type, reset tmp's type to type
-  IRInstruction* inst = tmp->inst();
-  if (type.strictSubtypeOf(tmp->type())) {
-    // If tmp is incref or move, then chase down its src
-    Opcode opc = inst->op();
-    if (opc == Mov) {
-      refineType(inst->src(0), type);
-      tmp->setType(outputType(inst));
-    } else if (tmp->type().isNull() && type.isNull()) {
-      // Refining Null to Uninit or InitNull is supported
-      tmp->setType(type);
-    } else if (tmp->type().isArray() && type.isArray()) {
-      // Refine array kind
-      tmp->setType(type);
-    } else {
-      // At this point, we have no business refining the type of any
-      // instructions other than the following, which all control
-      // their destination type via a type parameter.
-      //
-      // FIXME: I think most of these shouldn't be possible still
-      // (except LdStack?).
-      assert(opc == LdLoc || opc == LdStack ||
-             opc == LdMem || opc == LdProp  ||
-             opc == LdRef);
-      inst->setTypeParam(type);
-      tmp->setType(type);
-      assert(outputType(inst) == type);
-    }
-  }
-}
-
 SSATmp* HhbcTranslator::pop(Type type, TypeConstraint tc) {
   SSATmp* opnd = m_irb->evalStack().pop();
   m_irb->constrainValue(opnd, tc);
@@ -181,10 +149,6 @@ SSATmp* HhbcTranslator::pop(Type type, TypeConstraint tc) {
     return value;
   }
 
-  // Refine the type of the temp given the information we have from
-  // `type'.  This case can occur if we did an extendStack() and
-  // didn't know the type of the intermediate values yet (see below).
-  refineType(opnd, type);
   FTRACE(2, "HhbcTranslator popping {}\n", *opnd->inst());
   return opnd;
 }
@@ -242,7 +206,6 @@ SSATmp* HhbcTranslator::top(Type type, uint32_t index,
     tmp = top(constraint, index);
   }
   assert(tmp);
-  refineType(tmp, type);
   return tmp;
 }
 

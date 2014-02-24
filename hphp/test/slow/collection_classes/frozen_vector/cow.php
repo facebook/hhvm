@@ -10,7 +10,7 @@ function main() {
   $mv = function($op, $cb) {
     echo "------ " . $op . " -------\n";
     $v = Vector {1, 2, 3};
-    $fv = $v->toFixedVector();
+    $fv = $v->toFrozenVector();
     $cb($v);
     var_dump($v, $fv);
   };

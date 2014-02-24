@@ -78,9 +78,9 @@ void print_boolean(bool val) {
 NEW_COLLECTION_HELPER(Vector)
 NEW_COLLECTION_HELPER(Map)
 NEW_COLLECTION_HELPER(Set)
-NEW_COLLECTION_HELPER(FixedMap)
-NEW_COLLECTION_HELPER(FixedVector)
-NEW_COLLECTION_HELPER(FixedSet)
+NEW_COLLECTION_HELPER(FrozenMap)
+NEW_COLLECTION_HELPER(FrozenVector)
+NEW_COLLECTION_HELPER(FrozenSet)
 
 ObjectData* newPairHelper() {
   ObjectData *obj = NEWOBJ(c_Pair)();

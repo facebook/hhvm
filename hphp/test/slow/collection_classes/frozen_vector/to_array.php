@@ -1,10 +1,10 @@
 <?hh
 
-// Test casting FixedVector to array.
+// Test casting FrozenVector to array.
 
 function main() {
-  var_dump((array) FixedVector {});
-  var_dump((array) FixedVector {1, 2, 3});
+  var_dump((array) FrozenVector {});
+  var_dump((array) FrozenVector {1, 2, 3});
 }
 
 main();

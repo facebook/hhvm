@@ -1,6 +1,6 @@
 <?hh
 
-// Check that FixedSet is a ConstSet.
+// Check that FrozenSet is a ConstSet.
 
 function foo(ConstSet $s) {
   foreach ($s as $e) {
@@ -9,7 +9,7 @@ function foo(ConstSet $s) {
 }
 
 function main() {
-  foo(new FixedSet(Vector {1, 2, 3}));
+  foo(new FrozenSet(Vector {1, 2, 3}));
   foo(Set {4, 5, 6});
 }
 

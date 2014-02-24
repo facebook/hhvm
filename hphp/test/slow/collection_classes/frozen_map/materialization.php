@@ -1,6 +1,6 @@
 <?hh
 
-// Test FixedMap's materialization methods.
+// Test FrozenMap's materialization methods.
 
 function show_iter($iter) {
   $vs = new Vector($iter);
@@ -11,7 +11,7 @@ function show_iter($iter) {
 }
 
 function main() {
-  $fm = new FixedMap(Map {"a" => 10, "b" => 30, 10 => 42});
+  $fm = new FrozenMap(Map {"a" => 10, "b" => 30, 10 => 42});
 
   echo "\ntoArray...\n";
   $res = $fm->toArray();
@@ -33,9 +33,9 @@ function main() {
   var_dump($res instanceof Vector);
   show_iter($res);
 
-  echo "\ntoFixedVector...\n";
-  $res = $fm->toFixedVector();
-  var_dump($res instanceof FixedVector);
+  echo "\ntoFrozenVector...\n";
+  $res = $fm->toFrozenVector();
+  var_dump($res instanceof FrozenVector);
   show_iter($res);
 
   echo "\ntoSet...\n";
@@ -43,16 +43,16 @@ function main() {
   var_dump($res instanceof Set);
   show_iter($res);
 
-  echo "\ntoFixedSet...\n";
-  $res = $fm->toFixedSet();
-  var_dump($res instanceof FixedSet);
+  echo "\ntoFrozenSet...\n";
+  $res = $fm->toFrozenSet();
+  var_dump($res instanceof FrozenSet);
   show_iter($res);
 
   echo "\ntoMap...\n";
   $res = $fm->toMap();
   var_dump($res instanceof Map && $res == Map { "a" => 10, "b" => 30, 10 => 42 });
 
-  // TODO: add toFixedMap() once it exists.
+  // TODO: add toFrozenMap() once it exists.
 }
 
 main();

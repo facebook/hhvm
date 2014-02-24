@@ -1,18 +1,18 @@
 <?hh
 
-// Test that we can define our own custom FixedVector class
+// Test that we can define our own custom FrozenVector class
 // as long as we're not in the top-level namespace.
 
 namespace Test;
 
-class FixedVector {
+class FrozenVector {
   public function __construct() {
-    echo "Custom FixedVector\n";
+    echo "Custom FrozenVector\n";
   }
 }
 
 function main() {
-  $custom_set = new FixedVector();
+  $custom_set = new FrozenVector();
 }
 
 main();

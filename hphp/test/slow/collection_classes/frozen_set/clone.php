@@ -1,9 +1,9 @@
 <?hh
 
-// Test that we can clone a FixedSet.
+// Test that we can clone a FrozenSet.
 
 function main() {
-  $fs = FixedSet {1, 2, 3};
+  $fs = FrozenSet {1, 2, 3};
   $clone = clone $fs;
   var_dump($clone == $fs);
 }

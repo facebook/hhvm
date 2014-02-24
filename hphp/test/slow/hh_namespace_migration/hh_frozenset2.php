@@ -6,7 +6,7 @@
 namespace {
 
 function main() {
-  $s = FixedSet {};
+  $s = FrozenSet {};
   var_dump($s->isEmpty());
 }
 

@@ -13,7 +13,7 @@ function foo(ConstCollection $fv) {
 
 function main() {
   $v = Vector {1, 2, 3};
-  $fv = new FixedVector($v);
+  $fv = new FrozenVector($v);
   foo($fv);
 }
 

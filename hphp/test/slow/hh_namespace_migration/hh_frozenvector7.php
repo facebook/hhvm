@@ -1,20 +1,20 @@
 <?hh
 
-// Test that FixedVector behaves properly when mixing namespaced and
+// Test that FrozenVector behaves properly when mixing namespaced and
 // non-namespaced code.
 
 namespace Test {
-  // Can have custom class named FixedVector.
+  // Can have custom class named FrozenVector.
 
-  class FixedVector {
+  class FrozenVector {
     public function __construct() {
-      echo "Custom FixedVector\n";
+      echo "Custom FrozenVector\n";
     }
   }
 
   function foo() {
-    $custom_set = new FixedVector();
-    var_dump($custom_set instanceof \HH\FixedVector); // False
+    $custom_set = new FrozenVector();
+    var_dump($custom_set instanceof \HH\FrozenVector); // False
   }
 
 }
@@ -22,8 +22,8 @@ namespace Test {
 namespace {
 
   function bar() {
-    $builtin_set = new FixedVector();
-    var_dump($builtin_set instanceof HH\FixedVector); // True
+    $builtin_set = new FrozenVector();
+    var_dump($builtin_set instanceof HH\FrozenVector); // True
   }
 
   Test\foo();

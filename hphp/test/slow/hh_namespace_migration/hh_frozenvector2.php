@@ -6,7 +6,7 @@
 namespace {
 
 function main() {
-  $s = FixedVector {};
+  $s = FrozenVector {};
   var_dump($s->isEmpty());
 }
 

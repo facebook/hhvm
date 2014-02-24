@@ -5,7 +5,7 @@
 function main() {
   $v = Vector {};
   for ($i = 0; $i < 100000; $i++) $v[] = 42;
-  for ($i = 0; $i < 1000; $i++) $v->toFixedVector();
+  for ($i = 0; $i < 1000; $i++) $v->toFrozenVector();
 
   var_dump($v[0]);
 }

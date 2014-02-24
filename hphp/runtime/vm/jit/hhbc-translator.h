@@ -559,7 +559,7 @@ private:
       PackedArray,
       // simple opcode on String
       String,
-      // simple opcode on Vector* (c_Vector* or c_FixedVector*)
+      // simple opcode on Vector* (c_Vector* or c_FrozenVector*)
       Vector,
       // simple opcode on Map* (c_Map*)
       Map,

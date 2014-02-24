@@ -1,9 +1,9 @@
 <?hh
 
-// Test creating a FixedVector literal.
+// Test creating a FrozenVector literal.
 
 function main() {
-  $fv = FixedVector {"hello", "world"};
+  $fv = FrozenVector {"hello", "world"};
   var_dump($fv->get(0) . ' ' . $fv->get(1));
 }
 

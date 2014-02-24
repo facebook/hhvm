@@ -274,22 +274,41 @@ void IniSetting::SystemParserCallback::onPopEntry(
   assert(!key.empty());
   auto& arr = *(IniSetting::Map*)arg;
   auto* ptr = arr.get_ptr(key);
-  if (!ptr || !ptr->isArray()) {
+  if (!ptr || !ptr->isObject()) {
     arr[key] = IniSetting::Map::object;
     ptr = arr.get_ptr(key);
   }
   if (!offset.empty()) {
-    (*ptr)[offset] = value;
+    makeArray(*ptr, offset, value);
   } else {
     // Find the highest index
     auto max = 0;
     for (auto &a : ptr->keys()) {
-      if (a.isInt() && a > max) {
-        max = a.asInt();
+      if (a.isInt() && a >= max) {
+        max = a.asInt() + 1;
       }
     }
-    (*ptr)[max] = value;
+    (*ptr)[std::to_string(max)] = value;
   }
+}
+void IniSetting::SystemParserCallback::makeArray(Map &hash,
+                                                 const std::string &offset,
+                                                 const std::string &value) {
+  assert(!offset.empty());
+  Map& val = hash;
+  auto start = offset.c_str();
+  auto p = start;
+  bool last = false;
+  do {
+    std::string index(p);
+    last = p + index.size() >= start + offset.size();
+    Map newval = last ? Map(value) : val.getDefault(index, Map::object());
+    val[index] = newval;
+    if (!last) {
+      val = newval;
+      p += index.size() + 1;
+    }
+  } while (!last);
 }
 void IniSetting::SystemParserCallback::onConstant(std::string &result,
                                                   const std::string &name) {

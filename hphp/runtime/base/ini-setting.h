@@ -32,6 +32,7 @@ public:
     NormalScanner,
     RawScanner,
   };
+  typedef folly::dynamic Map;
 
   class ParserCallback {
   public:
@@ -74,6 +75,9 @@ public:
     virtual void onPopEntry(const std::string &key, const std::string &value,
                             const std::string &offset, void *arg);
     virtual void onConstant(std::string &result, const std::string &name);
+  private:
+    void makeArray(Map &hash, const std::string &offset,
+                   const std::string &value);
   };
 
   enum Mode {
@@ -89,7 +93,6 @@ public:
 
   typedef std::function<bool(const std::string& value, void*p)> UpdateCallback;
   typedef std::function<std::string(void* p)> GetCallback;
-  typedef folly::dynamic Map;
 
 public:
   static Variant FromString(const String& ini, const String& filename,

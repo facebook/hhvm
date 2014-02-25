@@ -1571,7 +1571,7 @@ static void unserializeProp(VariableUnserializer *uns,
  * what's passed.
  * If no alternate name is found, returns nullptr.
  */
-static const StringData* getAlternateName(const StringData* clsName) {
+static const StringData* getAlternateCollectionName(const StringData* clsName) {
   typedef hphp_hash_map<const StringData*, const StringData*,
                         string_data_hash, string_data_isame> ClsNameMap;
 
@@ -1602,6 +1602,11 @@ static const StringData* getAlternateName(const StringData* clsName) {
 
   auto it = altMap->find(clsName);
   return it != altMap->end() ? it->second : nullptr;
+}
+
+static Class* tryAlternateCollectionClass(const StringData* clsName) {
+  auto altName = getAlternateCollectionName(clsName);
+  return altName ? Unit::getClass(altName, /* autoload */ false) : nullptr;
 }
 
 void Variant::unserialize(VariableUnserializer *uns,
@@ -1752,39 +1757,53 @@ void Variant::unserialize(VariableUnserializer *uns,
         throw Exception("Expected '{' but got '%c'", sep);
       }
 
-      Class* cls = Unit::loadClass(clsName.get());
+      const bool allowObjectFormatForCollections = true;
 
-      // If we can't load the class, try an alternate name.
-      // This is so we can tolerate stale data while the migration of
-      // collections takes place.
-      const StringData* altName;
-      if (!cls) {
-        altName = getAlternateName(clsName.get());
-        if (altName) cls = Unit::loadClass(altName);
+      Class* cls;
+      // If we are potentially dealing with a collection, we need to try to
+      // load the collection class under an alternate name so that we can
+      // deserialize data that was serialized before the migration of
+      // collections to the HH namespace.
+
+      if (type != 'O') {
+        // Collections are CPP builtins; don't attempt to autoload
+        cls = Unit::getClass(clsName.get(), /* autoload */ false);
+        if (!cls) {
+          cls = tryAlternateCollectionClass(clsName.get());
+        }
+      } else if (allowObjectFormatForCollections) {
+        // In order to support the legacy {O|V}:{Set|Vector|Map}
+        // serialization, we defer autoloading until we know that there's
+        // no alternate (builtin) collection class.
+        cls = Unit::getClass(clsName.get(), /* autoload */ false);
+        if (!cls) {
+          cls = tryAlternateCollectionClass(clsName.get());
+        }
+        if (!cls) {
+          cls = Unit::loadClass(clsName.get()); // with autoloading
+        }
+      } else {
+        cls = Unit::loadClass(clsName.get()); // with autoloading
       }
 
       Object obj;
       if (RuntimeOption::UnserializationWhitelistCheck &&
+          (type == 'O') &&
           !uns->isWhitelistedClass(clsName)) {
-
-        if (!altName) altName = getAlternateName(clsName.get());
-
-        if (!altName || !uns->isWhitelistedClass(String(altName))) {
-          const char* err_msg =
-            "The object being unserialized with class name '%s' "
-            "is not in the given whitelist. "
-            "See http://fburl.com/SafeSerializable for more detail";
-          if (RuntimeOption::UnserializationWhitelistCheckWarningOnly) {
-            raise_warning(err_msg, clsName.c_str());
-          } else {
-            raise_error(err_msg, clsName.c_str());
-          }
+        const char* err_msg =
+          "The object being unserialized with class name '%s' "
+          "is not in the given whitelist. "
+          "See http://fburl.com/SafeSerializable for more detail";
+        if (RuntimeOption::UnserializationWhitelistCheckWarningOnly) {
+          raise_warning(err_msg, clsName.c_str());
+        } else {
+          raise_error(err_msg, clsName.c_str());
         }
       }
       if (cls) {
         // Only unserialize CPP extension types which can actually
         // support it. Otherwise, we risk creating a CPP object
-        // without having it intialized completely.
+        // without having it initialized completely.
         if (cls->instanceCtor() && !cls->isCppSerializable()) {
           obj = ObjectData::newInstance(
             SystemLib::s___PHP_Unserializable_ClassClass);

@@ -92,6 +92,16 @@ class BaseVector : public ExtCollectionObjectData {
     std::is_base_of<BaseVector, TVector>::value, Object>::type
   php_filter(CVarRef callback, MakeArgs);
 
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_skip(CVarRef n);
+
+  template<class TVector, bool checkVersion>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_skipWhile(CVarRef fn);
+
   void zip(BaseVector* bvec, CVarRef iterable);
   void kvzip(BaseVector* bvec);
   void keys(BaseVector* bvec);
@@ -310,6 +320,8 @@ class c_Vector : public BaseVector {
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_skip(CVarRef n);
+  Object t_skipwhile(CVarRef fn);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
@@ -428,6 +440,8 @@ public:
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_skip(CVarRef n);
+  Object t_skipwhile(CVarRef fn);
   Object t_kvzip();
   Object t_keys();
 
@@ -682,6 +696,8 @@ class BaseMap : public ExtCollectionObjectData {
     return isTombstone(data()[pos].data.m_type);
   }
 
+  bool hasTombstones() const { return m_size != m_used; }
+
   size_t hashSize() const {
     return size_t(m_tableMask) + 1;
   }
@@ -881,6 +897,16 @@ class BaseMap : public ExtCollectionObjectData {
   template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_skip(CVarRef n);
+
+  template<class TMap, bool checkVersion>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_skipWhile(CVarRef fn);
+
+  template<class TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
   static php_mapFromIterable(CVarRef iterable);
 
   template<class TMap>
@@ -936,6 +962,8 @@ class c_Map : public BaseMap {
   Object t_retain(CVarRef callback);
   Object t_retainwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_skip(CVarRef n);
+  Object t_skipwhile(CVarRef fn);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
@@ -980,6 +1008,8 @@ class c_ImmMap : public BaseMap {
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_skip(CVarRef n);
+  Object t_skipwhile(CVarRef fn);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   Object t_immutable();
@@ -1138,6 +1168,8 @@ class BaseSet : public ExtCollectionObjectData {
     assert(size_t(pos) <= m_used);
     return isTombstone(data()[pos].data.m_type);
   }
+
+  bool hasTombstones() const { return m_size != m_used; }
 
   size_t hashSize() const {
     return size_t(m_tableMask) + 1;
@@ -1363,6 +1395,16 @@ protected:
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
+  php_skip(CVarRef n);
+
+  template<class TSet, bool checkVersion>
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
+  php_skipWhile(CVarRef fn);
+
+  template<class TSet>
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
   static php_fromItems(CVarRef iterable);
 
   template<class TSet>
@@ -1442,6 +1484,8 @@ class c_Set : public BaseSet {
   Object t_map(CVarRef callback);
   Object t_filter(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_skip(CVarRef n);
+  Object t_skipwhile(CVarRef fn);
   Object t_removeall(CVarRef iterable);
   Object t_difference(CVarRef iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
@@ -1483,6 +1527,8 @@ class c_ImmSet : public BaseSet {
   Object t_map(CVarRef callback);
   Object t_filter(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_skip(CVarRef n);
+  Object t_skipwhile(CVarRef fn);
 
   // Materialization methods.
   Array t_toarray();
@@ -1571,6 +1617,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_skip(CVarRef n);
+  Object t_skipwhile(CVarRef fn);
   DECLARE_COLLECTION_MAGIC_METHODS();
   Object t_immutable();
 

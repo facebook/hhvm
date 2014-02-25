@@ -314,6 +314,62 @@ Object c_Vector::ti_slice(CVarRef vec, CVarRef offset,
   return ret;
 }
 
+template<class TVector>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_skip(CVarRef n) {
+  if (!n.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter n must be an integer"));
+    throw e;
+  }
+  int64_t len = n.toInt64();
+  auto* vec = NEWOBJ(TVector)();
+  Object obj = vec;
+  if (len <= 0) len = 0;
+  size_t skipAmt = std::min<size_t>(len, m_size);
+  size_t sz = size_t(m_size) - skipAmt;
+  vec->reserve(sz);
+  vec->m_size = sz;
+  for (size_t i = 0; i < sz; ++i) {
+    cellDup(m_data[i + skipAmt], vec->m_data[i]);
+  }
+  return obj;
+}
+
+template<class TVector, bool checkVersion>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_skipWhile(CVarRef fn) {
+  CallCtx ctx;
+  vm_decode_function(fn, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  auto* vec = NEWOBJ(TVector)();
+  Object obj = vec;
+  uint i = 0;
+  for (; i < m_size; ++i) {
+    Variant retval;
+    if (checkVersion) {
+      int32_t version = m_version;
+      g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &m_data[i]);
+      if (UNLIKELY(version != m_version)) {
+        throw_collection_modified();
+      }
+    } else {
+      g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &m_data[i]);
+    }
+    if (!retval.toBoolean()) break;
+  }
+  for (; i < m_size; ++i) {
+    vec->add(&m_data[i]);
+  }
+  return obj;
+}
+
 void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
@@ -948,6 +1004,22 @@ Object c_Vector::t_zip(CVarRef iterable) {
   Object obj = vec;
   BaseVector::zip(vec, iterable);
   return obj;
+}
+
+Object c_Vector::t_skip(CVarRef n) {
+  return BaseVector::php_skip<c_Vector>(n);
+}
+
+Object c_ImmVector::t_skip(CVarRef n) {
+  return BaseVector::php_skip<c_ImmVector>(n);
+}
+
+Object c_Vector::t_skipwhile(CVarRef fn) {
+  return BaseVector::php_skipWhile<c_Vector, true>(fn);
+}
+
+Object c_ImmVector::t_skipwhile(CVarRef fn) {
+  return BaseVector::php_skipWhile<c_ImmVector, false>(fn);
 }
 
 Object c_Vector::t_set(CVarRef key, CVarRef value) {
@@ -2047,6 +2119,127 @@ Object c_Map::t_zip(CVarRef iterable) {
   return php_zip<c_Map>(iterable);
 }
 
+template<class TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_skip(CVarRef n) {
+  if (!n.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter n must be an integer"));
+    throw e;
+  }
+  int64_t len = n.toInt64();
+  if (len <= 0) {
+    // We know the resulting Map will simply be a copy of this Map,
+    // so we can just call Clone() and return early here.
+    return Object::attach(TMap::Clone(this));
+  }
+  auto* mp = NEWOBJ(TMap)();
+  Object obj = mp;
+  if (len >= m_size) {
+    // We know the resulting Map will be empty, so we can return
+    // early here.
+    return obj;
+  }
+  size_t sz = size_t(m_size) - size_t(len);
+  assert(sz);
+  mp->reserve(sz);
+  mp->m_size = mp->m_used = sz;
+  uint32_t frPos;
+  if (LIKELY(!hasTombstones())) {
+    // Fast path: Map contains no tombstones
+    frPos = len;
+  } else {
+    // Slow path: Map has at least one tombstone, so we need to
+    // count forward
+    frPos = 0;
+    while (len > 0) {
+      while (isTombstone(m_data[frPos].data.m_type)) {
+        assert(frPos + 1 < m_used);
+        ++frPos;
+      }
+      --len;
+      ++frPos;
+    }
+  }
+  auto table = mp->hashTab();
+  auto mask = mp->m_tableMask;
+  for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
+    while (isTombstone(m_data[frPos].data.m_type)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
+    }
+    auto& toE = mp->m_data[toPos];
+    toE.skey = m_data[frPos].skey;
+    toE.data.hash() = m_data[frPos].data.hash();
+    if (toE.hasStrKey()) toE.skey->incRefCount();
+    cellDup(m_data[frPos].data, toE.data);
+    auto ie = findForNewInsert(table, mask,
+                               toE.hasIntKey() ? toE.ikey : toE.hash());
+    *ie = toPos;
+  }
+  return obj;
+}
+
+template<class TMap, bool checkVersion>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_skipWhile(CVarRef fn) {
+  CallCtx ctx;
+  vm_decode_function(fn, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  auto* mp = NEWOBJ(TMap)();
+  Object obj = mp;
+  if (!m_size) return obj;
+  uint32_t used = iterLimit();
+  uint i = 0;
+  for (; i < used; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
+    Variant ret;
+    if (checkVersion) {
+      int32_t version = m_version;
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      if (UNLIKELY(version != m_version)) {
+        throw_collection_modified();
+      }
+    } else {
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+    }
+    if (!ret.toBoolean()) break;
+  }
+  for (; i < used; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
+    if (p.hasIntKey()) {
+      mp->update(p.ikey, &p.data);
+    } else {
+      mp->update(p.skey, &p.data);
+    }
+  }
+  return obj;
+}
+
+Object c_Map::t_skip(CVarRef n) {
+  return BaseMap::php_skip<c_Map>(n);
+}
+
+Object c_ImmMap::t_skip(CVarRef n) {
+  return BaseMap::php_skip<c_ImmMap>(n);
+}
+
+Object c_Map::t_skipwhile(CVarRef fn) {
+  return BaseMap::php_skipWhile<c_Map, true>(fn);
+}
+
+Object c_ImmMap::t_skipwhile(CVarRef fn) {
+  return BaseMap::php_skipWhile<c_ImmMap, false>(fn);
+}
+
 template<typename TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
@@ -2666,7 +2859,7 @@ struct MapValAccessor {
 template <typename AccessorT>
 BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
-  if (!checkTypes && m_size == m_used) {
+  if (!checkTypes && !hasTombstones()) {
     // No need to loop over the elements, we're done
     return GenericSort;
   }
@@ -2706,7 +2899,7 @@ BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
   }
   done:
   m_used = start - data();
-  assert(m_size == m_used);
+  assert(!hasTombstones());
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
   } else {
@@ -3668,6 +3861,110 @@ BaseSet::php_zip(CVarRef iterable) {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_skip(CVarRef n) {
+  if (!n.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter n must be an integer"));
+    throw e;
+  }
+  int64_t len = n.toInt64();
+  if (len <= 0) {
+    // We know the resulting Set will simply be a copy of this Set,
+    // so we can just call Clone() and return early here.
+    return Object::attach(TSet::Clone(this));
+  }
+  auto* st = NEWOBJ(TSet)();
+  Object obj = st;
+  if (len >= m_size) {
+    // We know the resulting Set will be empty, so we can return
+    // early here.
+    return obj;
+  }
+  size_t sz = size_t(m_size) - size_t(len);
+  assert(sz);
+  st->reserve(sz);
+  st->m_size = st->m_used = sz;
+  uint32_t frPos;
+  if (LIKELY(!hasTombstones())) {
+    // Fast path: Set contains no tombstones
+    frPos = len;
+  } else {
+    // Slow path: Set has at least one tombstone, so we need to
+    // count forward
+    frPos = 0;
+    while (len > 0) {
+      while (isTombstone(m_data[frPos].data.m_type)) {
+        assert(frPos + 1 < m_used);
+        ++frPos;
+      }
+      --len;
+      ++frPos;
+    }
+  }
+  auto table = st->hashTab();
+  auto mask = st->m_tableMask;
+  for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
+    while (isTombstone(m_data[frPos].data.m_type)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
+    }
+    auto& toE = st->m_data[toPos];
+    toE.data.hash() = m_data[frPos].data.hash();
+    cellDup(m_data[frPos].data, toE.data);
+    auto ie = findForNewInsert(table, mask,
+            toE.hasInt() ? toE.data.m_data.num : toE.data.m_data.pstr->hash());
+    *ie = toPos;
+  }
+  return obj;
+}
+
+template<class TSet, bool checkVersion>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_skipWhile(CVarRef fn) {
+  CallCtx ctx;
+  vm_decode_function(fn, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  auto* st = NEWOBJ(TSet)();
+  Object obj = st;
+  if (!m_size) return obj;
+  uint32_t used = iterLimit();
+  uint i = 0;
+  for (; i < used; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
+    Variant ret;
+    if (checkVersion) {
+      int32_t version = m_version;
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      if (UNLIKELY(version != m_version)) {
+        throw_collection_modified();
+      }
+    } else {
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+    }
+    if (!ret.toBoolean()) break;
+  }
+  for (; i < used; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
+    if (p.hasInt()) {
+      st->add(p.data.m_data.num);
+    } else {
+      assert(p.hasStr());
+      st->add(p.data.m_data.pstr);
+    }
+  }
+  return obj;
+}
+
+template<class TSet>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromItems(CVarRef iterable) {
   if (iterable.isNull()) return NEWOBJ(TSet)();
   size_t sz;
@@ -4092,6 +4389,22 @@ Object c_Set::t_filter(CVarRef callback) {
 
 Object c_Set::t_zip(CVarRef iterable) {
   return BaseSet::php_zip<c_Set>(iterable);
+}
+
+Object c_Set::t_skip(CVarRef n) {
+  return BaseSet::php_skip<c_Set>(n);
+}
+
+Object c_ImmSet::t_skip(CVarRef n) {
+  return BaseSet::php_skip<c_ImmSet>(n);
+}
+
+Object c_Set::t_skipwhile(CVarRef fn) {
+  return BaseSet::php_skipWhile<c_Set, true>(fn);
+}
+
+Object c_ImmSet::t_skipwhile(CVarRef fn) {
+  return BaseSet::php_skipWhile<c_ImmSet, false>(fn);
 }
 
 Object c_Set::t_removeall(CVarRef iterable) {
@@ -4533,6 +4846,48 @@ Object c_Pair::t_zip(CVarRef iterable) {
 
 Object c_Pair::t_immutable() {
   return this;
+}
+
+Object c_Pair::t_skip(CVarRef n) {
+  if (!n.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter n must be an integer"));
+    throw e;
+  }
+  int64_t len = n.toInt64();
+  auto* vec = NEWOBJ(c_Vector);
+  Object obj = vec;
+  if (len <= 0) len = 0;
+  size_t skipAmt = std::min<size_t>(len, 2);
+  size_t sz = size_t(m_size) - skipAmt;
+  vec->reserve(sz);
+  vec->m_size = sz;
+  for (size_t i = 0; i < sz; ++i) {
+    cellDup(getElms()[i + skipAmt], vec->m_data[i]);
+  }
+  return obj;
+}
+
+Object c_Pair::t_skipwhile(CVarRef fn) {
+  CallCtx ctx;
+  vm_decode_function(fn, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  auto* vec = NEWOBJ(c_Vector)();
+  Object obj = vec;
+  uint i = 0;
+  for (; i < 2; ++i) {
+    Variant retval;
+    g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &getElms()[i]);
+    if (!retval.toBoolean()) break;
+  }
+  for (; i < 2; ++i) {
+    vec->add(&getElms()[i]);
+  }
+  return obj;
 }
 
 void c_Pair::throwOOB(int64_t key) {

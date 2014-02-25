@@ -3509,7 +3509,6 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
     if (val->type().isCls())     return RuntimeType(val->getValClass());
   }
 
-  assert(t != Type::None);
   return t.toRuntimeType();
 }
 
@@ -4973,7 +4972,6 @@ void HhbcTranslator::emitInterpOne(int popped) {
 
 void HhbcTranslator::emitInterpOne(Type outType, int popped) {
   InterpOneData idata;
-  assert(outType != Type::None);
   emitInterpOne(outType, popped, 1, idata);
 }
 
@@ -4996,7 +4994,6 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
   idata.opcode = op;
 
   auto const changesPC = opcodeChangesPC(idata.opcode);
-  assert(IMPLIES(outType.hasValue(), outType.value() != Type::None));
   gen(changesPC ? InterpOneCF : InterpOne, outType,
       makeCatch(), idata, sp, m_irb->fp());
   assert(m_irb->stackDeficit() == 0);

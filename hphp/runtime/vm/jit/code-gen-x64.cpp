@@ -115,11 +115,6 @@ const char* getContextName(Class* ctx) {
 
 ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
   : m_imm(-1), m_zeroExtend(false), m_done(false) {
-  if (tmp->type() == Type::None) {
-    assert(val);
-    m_kind = Kind::None;
-    return;
-  }
   if (tmp->inst()->op() == DefConst || tmp->type().isNull()) {
     // tmp is a constant
     m_srcReg = InvalidReg;
@@ -4042,7 +4037,6 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
 
   int64_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
   for (uint32_t i = 0; i < numSpillSrcs; ++i) {
-    assert(spillVals[i]->type() != Type::None);
     const int64_t offset = i * sizeof(Cell) + adjustment;
     cgStore(spReg[offset], spillVals[i], srcLoc(i + 2), Width::Full);
   }

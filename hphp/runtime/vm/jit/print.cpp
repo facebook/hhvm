@@ -95,8 +95,6 @@ static std::string constToString(Type t, const ConstData* c) {
       name = name.substr(0, pos);
     }
     os << folly::format("TCA: {}({})", tca, boost::trim_copy(name));
-  } else if (t <=Type::None) {
-    os << "None:" << c->as<int64_t>();
   } else if (t.isPtr()) {
     os << folly::format("{}({:#x})", t.toString(), c->as<uint64_t>());
   } else if (t <= Type::RDSHandle) {

@@ -643,7 +643,6 @@ SSATmp* FrameState::localTypeSource(uint32_t id) const {
 
 Type FrameState::localType(uint32_t id) const {
   always_assert(id < m_locals.size());
-  assert(m_locals[id].type != Type::None);
   return m_locals[id].type;
 }
 

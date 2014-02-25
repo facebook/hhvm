@@ -147,7 +147,6 @@ above PHP-facing types.
   Type            HHVM representation
   ----            -------------------
   PtrToT          Exists for all T in Gen. Represents a TypedValue*
-  None            No value, KindOfInvalid
   Bottom          No value, {}. Subtype of every other type
   Top             Supertype of every other type
   Cls             Class*

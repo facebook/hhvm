@@ -150,7 +150,6 @@ void getBaseType(Opcode rawOp, bool predict,
 }
 
 void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
-  assert(origBase != Type::None);
   baseType = origBase;
   always_assert(baseType.isPtr() ^ baseType.notPtr());
   auto const basePtr = baseType.isPtr();

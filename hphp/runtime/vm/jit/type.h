@@ -86,9 +86,8 @@ namespace JIT {
   IRT(FramePtr,    1ULL << 51) /* frame pointer */                      \
   IRT(TCA,         1ULL << 52)                                          \
   IRT(ActRec,      1ULL << 53)                                          \
-  IRT(None,        1ULL << 54)                                          \
-  IRT(RDSHandle,   1ULL << 55) /* RDS::Handle */                        \
-  IRT(Nullptr,     1ULL << 56)
+  IRT(RDSHandle,   1ULL << 54) /* RDS::Handle */                        \
+  IRT(Nullptr,     1ULL << 55)
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
@@ -204,7 +203,7 @@ public:
 # undef IRT
 
   Type()
-    : m_bits(kNone)
+    : m_bits(kBottom)
     , m_extra(0)
   {}
 
@@ -293,7 +292,6 @@ public:
    * Pre: subtypeOf(StackElem) || equals(None)
    */
   bool isKnownDataType() const {
-    if (subtypeOf(Type::None)) return false;
     assert(subtypeOf(StackElem));
 
     // Some unions that correspond to single KindOfs.  And Type::Str
@@ -494,7 +492,6 @@ public:
    * function always returns one of the predefined types.
    */
   static Type unionOf(Type t1, Type t2) {
-    assert(t1 != None && t2 != None);
     if (t1 == t2) return t1;
     if (t1.subtypeOf(t2)) return t2;
     if (t2.subtypeOf(t1)) return t1;

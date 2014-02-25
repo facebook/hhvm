@@ -91,12 +91,6 @@ TEST(Type, ToString) {
   EXPECT_EQ("BoxedDbl", Type::BoxedDbl.toString());
 }
 
-TEST(Type, FromString) {
-  EXPECT_EQ(Type::Int, Type::fromString("Int"));
-  EXPECT_EQ(Type::None, Type::fromString("Blah"));
-  EXPECT_EQ(Type::PtrToBoxedInt, Type::fromString("PtrToBoxedInt"));
-}
-
 TEST(Type, Boxes) {
   EXPECT_EQ(Type::BoxedDbl, Type::Dbl.box());
   EXPECT_TRUE(Type::BoxedDbl.isBoxed());

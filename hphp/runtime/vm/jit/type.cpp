@@ -85,18 +85,6 @@ std::string Type::debugString(Type t) {
   return t.toString();
 }
 
-Type Type::fromString(const std::string& str) {
-  static hphp_string_map<Type> types;
-  static bool init = false;
-  if (UNLIKELY(!init)) {
-#   define IRT(name, ...) types[#name] = name;
-    IR_TYPES
-#   undef IRT
-    init = true;
-  }
-  return folly::get_default(types, str, Type::None);
-}
-
 bool Type::checkValid() const {
   static_assert(sizeof(m_arrayKind) == 1,
                 "Type expects ArrayKind to be one byte");
@@ -121,7 +109,6 @@ DataType Type::toDataType() const {
 
   // Order is important here: types must progress from more specific
   // to less specific to return the most specific DataType.
-  if (subtypeOf(None))          return KindOfNone;
   if (subtypeOf(Uninit))        return KindOfUninit;
   if (subtypeOf(Null))          return KindOfNull;
   if (subtypeOf(Bool))          return KindOfBoolean;
@@ -627,7 +614,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DAllocObj return allocObjReturn(inst);
 #define DLdRef    return ldRefReturn(inst);
 #define DThis     return thisReturn(inst);
-#define DMulti    return Type::None;
+#define DMulti    return Type::Bottom;
 #define DStk(in)  return stkReturn(inst, dstId,                         \
                                    [&]() -> Type { in not_reached(); });
 #define DSetElem  return setElemReturn(inst);
@@ -787,9 +774,8 @@ void assertOperandTypes(const IRInstruction* inst) {
     for (; curSrc < inst->numSrcs(); ++curSrc) {
       // SpillStack slots may be stack types or None, if the
       // simplifier removed some.
-      auto const valid = inst->src(curSrc)->type()
-        .subtypeOfAny(Type::StackElem, Type::None);
-      check(valid, Type(), "Gen|Cls|None");
+      auto const valid = (inst->src(curSrc)->type() <= Type::StackElem);
+      check(valid, Type(), "Gen|Cls");
     }
   };
 

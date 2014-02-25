@@ -523,7 +523,7 @@ void IRBuilder::reoptimize() {
       }
 
       SSATmp* dst = inst->dst();
-      if (dst->type() != Type::None && dst != tmp) {
+      if (dst != tmp) {
         // The result of optimization has a different destination than the inst.
         // Generate a mov(tmp->dst) to get result into dst. If we get here then
         // assume the last instruction in the block isn't a guard. If it was,

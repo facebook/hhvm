@@ -1751,7 +1751,6 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
 
   int64_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
   for (uint32_t i = 0; i < numSpillSrcs; ++i) {
-    assert(spillVals[i]->type() != Type::None);
     const int64_t offset = i * sizeof(Cell) + adjustment;
     emitStore(spReg, offset, spillVals[i], srcLoc(i + 2));
   }

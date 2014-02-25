@@ -30,7 +30,7 @@
 #include "hphp/util/db-conn.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/process.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/async-func.h"
@@ -415,7 +415,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
   for (unsigned int i = 0; i < po.excludePatterns.size(); i++) {
     Option::PackageExcludePatterns.insert
-      (Util::format_pattern(po.excludePatterns[i], true));
+      (format_pattern(po.excludePatterns[i], true));
   }
   for (unsigned int i = 0; i < po.excludeStaticDirs.size(); i++) {
     Option::PackageExcludeStaticDirs.insert
@@ -426,7 +426,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
   for (unsigned int i = 0; i < po.excludeStaticPatterns.size(); i++) {
     Option::PackageExcludeStaticPatterns.insert
-      (Util::format_pattern(po.excludeStaticPatterns[i], true));
+      (format_pattern(po.excludeStaticPatterns[i], true));
   }
 
   if (po.target == "hhbc" || po.target == "run") {

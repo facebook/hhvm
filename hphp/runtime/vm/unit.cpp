@@ -49,13 +49,19 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-using Util::getDataRef;
-
 TRACE_SET_MOD(hhbc);
 
-static const StaticString s_stdin("STDIN");
-static const StaticString s_stdout("STDOUT");
-static const StaticString s_stderr("STDERR");
+const StaticString s_stdin("STDIN");
+const StaticString s_stdout("STDOUT");
+const StaticString s_stderr("STDERR");
+
+/**
+ * Read typed data from an offset relative to a base address
+ */
+template <class T>
+T& getDataRef(void* base, unsigned offset) {
+  return *(T*)((char*)base + offset);
+}
 
 ReadOnlyArena& get_readonly_arena() {
   static ReadOnlyArena arena(RuntimeOption::EvalHHBCArenaChunkSize);

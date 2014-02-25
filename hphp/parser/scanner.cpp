@@ -17,17 +17,18 @@
 
 #include <fstream>
 
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 #include "hphp/zend/zend-string.h"
 #include "hphp/zend/zend-html.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ScannerToken::xhpLabel(bool prefix /* = true */) {
-  Util::replaceAll(m_text, ":", "__");
-  Util::replaceAll(m_text, "-", "_");
+  replaceAll(m_text, ":", "__");
+  replaceAll(m_text, "-", "_");
   if (prefix) {
     m_text = "xhp_" + m_text;
   }

@@ -24,7 +24,7 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/runtime/base/zend-printf.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/hash.h"
 #include <boost/format.hpp>
 #include <boost/scoped_array.hpp>
@@ -256,7 +256,7 @@ std::string CodeGenerator::FormatLabel(const std::string &name) {
 
 std::string CodeGenerator::EscapeLabel(const std::string &name,
                                        bool *binary /* = NULL */) {
-  return Util::escapeStringForCPP(name, binary);
+  return escapeStringForCPP(name, binary);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -28,6 +28,7 @@
 #include "hphp/util/network.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/db-mysql.h"
+#include "hphp/util/text-util.h"
 
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/request-local.h"
@@ -1315,8 +1316,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
                         q, ref(matches));
     int size = matches.toArray().size();
     if (size > 2) {
-      string verb = Util::toLower(matches[size - 2].toString().data());
-      string table = Util::toLower(matches[size - 1].toString().data());
+      string verb = toLower(matches[size - 2].toString().data());
+      string table = toLower(matches[size - 1].toString().data());
       if (!table.empty() && table[0] == '`') {
         table = table.substr(1, table.length() - 2);
       }
@@ -1342,7 +1343,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
                           query, ref(matches));
       size = matches.toArray().size();
       if (size == 2) {
-        string verb = Util::toLower(matches[1].toString().data());
+        string verb = toLower(matches[1].toString().data());
         rconn->m_xaction_count = ((verb == "begin") ? 1 : 0);
         ServerStats::Log(string("sql.query.") + verb, 1);
         if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {

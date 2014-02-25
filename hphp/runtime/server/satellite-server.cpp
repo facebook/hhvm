@@ -20,7 +20,7 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "folly/Memory.h"
 
 using folly::make_unique;
@@ -52,7 +52,7 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
     std::vector<std::string> urls;
     hdf["URLs"].get(urls);
     for (unsigned int i = 0; i < urls.size(); i++) {
-      m_urls.insert(Util::format_pattern(urls[i], true));
+      m_urls.insert(format_pattern(urls[i], true));
     }
     if (hdf["BlockMainServer"].getBool(true)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());

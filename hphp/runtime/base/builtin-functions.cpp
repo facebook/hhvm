@@ -42,6 +42,8 @@
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 #include "folly/Format.h"
+#include "hphp/util/text-util.h"
+#include "hphp/util/string-vsnprintf.h"
 
 #include <limits>
 
@@ -754,8 +756,7 @@ void throw_call_non_object(const char *methodName) {
   if (methodName == nullptr) {
     msg = "Call to a member function on a non-object";
   } else {
-    Util::string_printf(msg,
-                        "Call to a member function %s() on a non-object",
+    string_printf(msg, "Call to a member function %s() on a non-object",
                         methodName);
   }
 

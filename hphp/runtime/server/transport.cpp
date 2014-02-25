@@ -27,7 +27,7 @@
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/ext/ext_openssl.h"
 #include "hphp/util/compression.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
@@ -294,7 +294,7 @@ void Transport::getSplitParam(const char *name,
                               Method method /* = Method::GET */) {
   std::string param = getParam(name, method);
   if (!param.empty()) {
-    Util::split(delimiter, param.c_str(), values);
+    split(delimiter, param.c_str(), values);
   }
 }
 
@@ -346,7 +346,7 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
   }
 
   std::string svalue = value;
-  Util::replaceAll(svalue, "\n", "");
+  replaceAll(svalue, "\n", "");
   m_responseHeaders[name].push_back(svalue);
 
   if (strcasecmp(name, "Location") == 0 && m_responseCode != 201 &&

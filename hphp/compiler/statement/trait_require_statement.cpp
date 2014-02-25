@@ -18,6 +18,7 @@
 #include "hphp/compiler/statement/class_statement.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/code_model_enums.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 
@@ -48,7 +49,7 @@ void TraitRequireStatement::onParseRecur(AnalysisResultConstPtr ar,
                    "Only traits can require in class scope");
   }
 
-  ar->parseOnDemandByClass(Util::toLower(m_required));
+  ar->parseOnDemandByClass(toLower(m_required));
   scope->addTraitRequirement(m_required, m_extends);
 }
 

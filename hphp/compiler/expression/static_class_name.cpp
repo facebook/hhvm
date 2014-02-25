@@ -21,7 +21,7 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ void StaticClassName::updateClassName() {
       !m_static) {
     ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
     const string &className = s->getString();
-    m_className = Util::toLower(className);
+    m_className = toLower(className);
     m_origClassName = className;
     m_class.reset();
   } else {
@@ -75,7 +75,7 @@ void StaticClassName::resolveStatic(const string &name) {
   m_present = false;
   m_class.reset();
   m_origClassName = name;
-  m_className = Util::toLower(name);
+  m_className = toLower(name);
 }
 
 ClassScopePtr StaticClassName::resolveClass() {
@@ -94,7 +94,7 @@ ClassScopePtr StaticClassName::resolveClass() {
   } else if (m_parent) {
     if (ClassScopePtr self = scope->getContainingClass()) {
       if (!self->getOriginalParent().empty()) {
-        m_className = Util::toLower(self->getOriginalParent());
+        m_className = toLower(self->getOriginalParent());
         m_origClassName = self->getOriginalParent();
         m_present = true;
       }

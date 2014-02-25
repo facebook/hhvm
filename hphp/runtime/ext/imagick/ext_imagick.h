@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/imagick/constants.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 

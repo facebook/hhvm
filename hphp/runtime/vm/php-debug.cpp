@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "hphp/util/debug.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 #ifndef DEBUG
@@ -46,7 +46,7 @@ struct PhpDebugger {
     const char *env = getenv("PHPBREAKPOINTS");
     if (env) {
       vector<string> names;
-      Util::split(',', env, names, true /*ignoreEmpty*/);
+      split(',', env, names, true /*ignoreEmpty*/);
       for (size_t i = 0; i < names.size(); ++i) {
         enabledFunctions.insert(names[i]);
       }

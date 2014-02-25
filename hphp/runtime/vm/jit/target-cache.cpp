@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP { namespace JIT {
 
@@ -566,8 +567,7 @@ SPropCache::lookupSProp(const Class *cls, const StringData *name, Class* ctx) {
   if (UNLIKELY(!visible || !accessible)) {
     if (!raiseOnError) return NULL;
     std::string propertyName;
-    Util::string_printf(propertyName, "%s::%s",
-                  cls->name()->data(), name->data());
+    string_printf(propertyName, "%s::%s", cls->name()->data(), name->data());
     raise_error("Invalid static property access: %s", propertyName.c_str());
   }
   return val;

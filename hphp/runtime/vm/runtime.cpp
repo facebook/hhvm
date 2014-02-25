@@ -26,8 +26,8 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/text-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_string.h"
 
@@ -46,7 +46,7 @@ BuildNativeClassUnitFn g_hphp_build_native_class_unit;
 void print_string(StringData* s) {
   g_context->write(s->data(), s->size());
   TRACE(1, "t-x64 output(str): (%p) %43s\n", s->data(),
-        Util::escapeStringForCPP(s->data(), s->size()).data());
+        escapeStringForCPP(s->data(), s->size()).data());
   decRefStr(s);
 }
 

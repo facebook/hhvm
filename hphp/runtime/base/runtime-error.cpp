@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

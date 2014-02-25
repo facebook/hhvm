@@ -22,7 +22,7 @@
 #include "hphp/parser/scanner.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/db-query.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/process.h"
 #include "hphp/hhbbc/hhbbc.h"
 #include <boost/algorithm/string/trim.hpp>
@@ -349,9 +349,9 @@ std::string Option::MangleFilename(const std::string &name, bool id) {
   ret += name;
 
   if (id) {
-    Util::replaceAll(ret, "/", "$");
-    Util::replaceAll(ret, "-", "_");
-    Util::replaceAll(ret, ".", "_");
+    replaceAll(ret, "/", "$");
+    replaceAll(ret, "-", "_");
+    replaceAll(ret, ".", "_");
   }
   return ret;
 }

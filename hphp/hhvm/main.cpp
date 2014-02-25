@@ -22,7 +22,7 @@
 
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/embedded-vfs.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 int main(int argc, char** argv) {
   if (!argc) return 0;
@@ -57,9 +57,9 @@ int main(int argc, char** argv) {
     return HPHP::execute_program(argc, argv);
   }
   std::string repo;
-  HPHP::Util::string_printf(repo, "%s:%u:%u",
-                            data.m_filename.c_str(),
-                            (unsigned)data.m_start, (unsigned)data.m_len);
+  HPHP::string_printf(repo, "%s:%u:%u",
+                      data.m_filename.c_str(),
+                      (unsigned)data.m_start, (unsigned)data.m_len);
   HPHP::sqlite3_embedded_initialize(nullptr, true);
 
   std::vector<char*> args;

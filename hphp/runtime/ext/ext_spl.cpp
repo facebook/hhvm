@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 
 #include "hphp/system/systemlib.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

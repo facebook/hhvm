@@ -42,40 +42,9 @@
 #include <stdarg.h>
 #include <arpa/inet.h> // For htonl().
 
-#include "folly/Likely.h"
-
-#include "hphp/util/portability.h"
-#include "hphp/util/string-vsnprintf.h"
-
 namespace HPHP { namespace Util {
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/**
- * Split a string into a list of tokens by character delimiter.
- */
-void split(char delimiter, const char *s, std::vector<std::string> &out,
-           bool ignoreEmpty = false);
-
-/**
- * Replace all occurrences of "from" substring to "to" string.
- */
-void replaceAll(std::string &s, const char *from, const char *to);
-
-/**
- * Change an ASCII string to lower case.
- */
-std::string toLower(const std::string &s);
-
-/**
- * Change an ASCII string to upper case.
- */
-std::string toUpper(const std::string &s);
-
-/**
- * Convert a full pathname of a file to an identifier.
- */
-std::string getIdentifier(const std::string &fileName);
 
 /**
  * Make sure path exists. Same as "mkdir -p", but "a/b" will only make sure
@@ -162,67 +131,6 @@ inline Int roundUpToPowerOfTwo(Int value) {
 }
 
 /**
- * Return log-base-2 of the next power of 2, i.e. CLZ
- */
-inline int lgNextPower2(uint64_t value) {
-  assert(value != 0);
-#ifdef __x86_64__
-  // __builtin_clz emits the bsr instruction, but doesn't let us pass -1
-  // through for the 0 case.  Also, it is careful to convert bsr to clz
-  // with 6-bit arithmetic, which is not necessary here
-  uint64_t result = -1;
-  --value;
-  asm ("bsr %2, %0" : "=r" (result) : "0" (result), "r" (value) : "flags");
-  return result + 1;
-#else
-  return value == 1 ? 0 : 64 - __builtin_clzll(value - 1);
-#endif
-}
-
-inline int lgNextPower2(uint32_t value) {
-  assert(value != 0);
-#ifdef __x86_64__
-  uint32_t result = -1;
-  --value;
-  asm ("bsr %2, %0" : "=r" (result) : "0" (result), "r" (value) : "flags");
-  return result + 1;
-#else
-  return value == 1 ? 0 : 32 - __builtin_clz(value - 1);
-#endif
-}
-
-/**
- * Duplicate a buffer of given size, null-terminate the result.
- */
-const void *buffer_duplicate(const void *src, int size);
-
-/**
- * Append buf2 to buf2, null-terminate the result.
- */
-const void *buffer_append(const void *buf1, int size1,
-                          const void *buf2, int size2);
-
-/**
- * printf into a std::string.
- */
-void string_printf(std::string &msg,
-                   const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-
-/**
- * Escaping strings for code generation.
- */
-std::string escapeStringForCPP(const char *input, int len,
-                               bool* binary = nullptr);
-inline std::string escapeStringForCPP(const std::string &input,
-                                      bool* binary = nullptr) {
-  return escapeStringForCPP(input.data(), input.length(), binary);
-}
-std::string escapeStringForPHP(const char *input, int len);
-inline std::string escapeStringForPHP(const std::string &input) {
-  return escapeStringForPHP(input.data(), input.length());
-}
-
-/**
  * Search for PHP or non-PHP files under a directory.
  */
 void find(std::vector<std::string> &out,
@@ -230,23 +138,10 @@ void find(std::vector<std::string> &out,
           const std::set<std::string> *excludeDirs = nullptr,
           const std::set<std::string> *excludeFiles = nullptr);
 
-/**
- * Format a regex pattern by surrounding with slashes and escaping pattern.
- */
-std::string format_pattern(const std::string &pattern, bool prefixSlash);
-
 inline void assert_native_stack_aligned() {
 #ifndef NDEBUG
   assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
 #endif
-}
-
-/**
- * Read typed data from an offset relative to a base address
- */
-template <class T>
-T& getDataRef(void* base, unsigned offset) {
-  return *(T*)((char*)base + offset);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

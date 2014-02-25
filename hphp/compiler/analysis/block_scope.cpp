@@ -25,6 +25,7 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/util/text-util.h"
 
 using namespace HPHP;
 
@@ -44,7 +45,7 @@ BlockScope::BlockScope(const std::string &name, const std::string &docComment,
     m_inVisitScopes(false), m_needsReschedule(false),
     m_rescheduleFlags(0), m_selfUser(0) {
   m_originalName = name;
-  m_name = Util::toLower(name);
+  m_name = toLower(name);
   m_variables = VariableTablePtr(new VariableTable(*this));
   m_constants = ConstantTablePtr(new ConstantTable(*this));
 

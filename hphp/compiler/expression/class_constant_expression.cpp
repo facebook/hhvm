@@ -20,7 +20,7 @@
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/util/hash.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/scalar_expression.h"
@@ -210,8 +210,8 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
 
 unsigned ClassConstantExpression::getCanonHash() const {
   int64_t val =
-    hash_string(Util::toLower(m_varName).c_str(), m_varName.size()) -
-    hash_string(Util::toLower(m_className).c_str(), m_className.size());
+    hash_string(toLower(m_varName).c_str(), m_varName.size()) -
+    hash_string(toLower(m_className).c_str(), m_className.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 

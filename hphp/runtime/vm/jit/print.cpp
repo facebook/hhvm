@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -58,7 +59,7 @@ static std::string constToString(Type t, const ConstData* c) {
   } else if (t.isString()) {
     auto str = c->as<const StringData*>();
     os << "\""
-       << Util::escapeStringForCPP(str->data(), str->size())
+       << escapeStringForCPP(str->data(), str->size())
        << "\"";
   } else if (t.isArray()) {
     auto arr = c->as<const ArrayData*>();

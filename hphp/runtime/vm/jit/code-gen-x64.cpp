@@ -22,7 +22,7 @@
 #include "folly/ScopeGuard.h"
 #include "folly/Format.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/abi-cxx.h"
 
 #include "hphp/runtime/base/hphp-array.h"
@@ -5326,7 +5326,7 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   const StringData* propNameString = propName->getValStr();
   const StringData* clsNameString  = clsName->getValStr();
 
-  std::string sds(Util::toLower(clsNameString->data()) + ":" +
+  std::string sds(toLower(clsNameString->data()) + ":" +
                   std::string(propNameString->data(), propNameString->size()));
   String sd(sds);
   auto const ch = SPropCache::alloc(makeStaticString(sd));

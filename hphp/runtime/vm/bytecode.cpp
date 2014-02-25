@@ -42,7 +42,7 @@
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/apc-typed-value.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/stat-cache.h"
@@ -686,7 +686,7 @@ static std::string toStringElm(const TypedValue* tv) {
       os << tv->m_data.pstr
          << "c(" << tv->m_data.pstr->getCount() << ")"
          << ":\""
-         << Util::escapeStringForCPP(tv->m_data.pstr->data(), len)
+         << escapeStringForCPP(tv->m_data.pstr->data(), len)
          << "\"" << (truncated ? "..." : "");
     }
     break;
@@ -6674,7 +6674,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEval(IOP_ARGS) {
   String prefixedCode = concat("<?php ", code);
 
   auto evalFilename = std::string();
-  Util::string_printf(
+  string_printf(
     evalFilename,
     "%s(%d) : eval()'d code",
     getContainingFileName().data(),

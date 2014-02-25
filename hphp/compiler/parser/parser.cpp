@@ -95,6 +95,8 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/text-util.h"
+#include "hphp/util/string-vsnprintf.h"
 
 #include "hphp/runtime/base/file-repository.h"
 

@@ -32,7 +32,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-
+#include "hphp/util/string-vsnprintf.h"
 #include "hphp/system/systemlib.h"
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \

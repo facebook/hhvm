@@ -21,6 +21,7 @@
 #include "hphp/util/thread-local.h"
 #include "folly/String.h"
 #include <lber.h>
+#include "hphp/util/text-util.h"
 
 #define LDAP_DEPRECATED 1
 #include <ldap.h>
@@ -511,7 +512,7 @@ static void get_attributes(Array &ret, LDAP *ldap,
     ldap_value_free_len(ldap_value);
 
     String sAttribute(attribute, CopyString);
-    ret.set(to_lower ? String(Util::toLower(attribute)) : sAttribute, tmp);
+    ret.set(to_lower ? String(toLower(attribute)) : sAttribute, tmp);
     ret.set(num_attrib, sAttribute);
 
     num_attrib++;

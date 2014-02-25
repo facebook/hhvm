@@ -39,6 +39,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
+#include "hphp/util/text-util.h"
 #include "hphp/runtime/base/hardware-counter.h"
 
 namespace HPHP {
@@ -150,7 +151,7 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
                          std::map<std::string, int> &wantedKeys) {
   if (!keys.empty()) {
     std::vector<std::string> rules0;
-    Util::split(',', keys.c_str(), rules0, true);
+    split(',', keys.c_str(), rules0, true);
     if (!rules0.empty()) {
 
       // prepare rules

@@ -25,7 +25,7 @@
 #include "folly/String.h"
 
 #include "hphp/util/hdf.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
@@ -1234,8 +1234,7 @@ void RuntimeOption::Load(Hdf &config,
   {
     Hdf sandbox = config["Sandbox"];
     SandboxMode = sandbox["SandboxMode"].getBool();
-    SandboxPattern = Util::format_pattern
-      (sandbox["Pattern"].getString(), true);
+    SandboxPattern = format_pattern(sandbox["Pattern"].getString(), true);
     SandboxHome = sandbox["Home"].getString();
     SandboxFallback = sandbox["Fallback"].getString();
     SandboxConfFile = sandbox["ConfFile"].getString();

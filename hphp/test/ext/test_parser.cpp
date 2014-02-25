@@ -19,7 +19,7 @@
 #include "hphp/compiler/code_generator.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -30,13 +30,13 @@ static void strip_empty_block(std::string &s) {
 }
 
 bool TestParser::SameCode(std::string code1, std::string code2) {
-  Util::replaceAll(code1, "\n", "");
-  Util::replaceAll(code2, "\n", "");
+  replaceAll(code1, "\n", "");
+  replaceAll(code2, "\n", "");
 
-  Util::replaceAll(code1, "{{}}", "{}");
-  Util::replaceAll(code2, "{{}}", "{}");
-  Util::replaceAll(code1, "else {}", "");
-  Util::replaceAll(code2, "else {}", "");
+  replaceAll(code1, "{{}}", "{}");
+  replaceAll(code2, "{{}}", "{}");
+  replaceAll(code1, "else {}", "");
+  replaceAll(code2, "else {}", "");
   strip_empty_block(code1);
   strip_empty_block(code2);
 

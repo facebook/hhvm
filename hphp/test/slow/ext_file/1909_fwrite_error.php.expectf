@@ -1,0 +1,5 @@
+int(8)
+string(58) "fwrite(): send of 3 bytes failed with errno=32 Broken pipe"
+string(%d) %s
+int(17)
+int(0)

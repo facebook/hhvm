@@ -324,10 +324,19 @@ Variant f_fpassthru(CResRef handle) {
   return f->print();
 }
 
-Variant f_fwrite(CResRef handle, const String& data, int64_t length /* = 0 */) {
+Variant f_fwrite(CResRef handle, const String& data,
+                 int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
-  if (ret < 0) ret = 0;
+  if (ret < 0) {
+    std::ostringstream message;
+    message << "fwrite(): send of " << data->size() << " bytes failed with " \
+               "errno=" << errno << " " << folly::errnoStr(errno).c_str();
+    g_context->handleError(message.str(), k_E_NOTICE, true,
+                       ExecutionContext::ErrorThrowMode::Never,
+                       "HipHop Notice: ");
+    ret = 0;
+  }
   return ret;
 }
 

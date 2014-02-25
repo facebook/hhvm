@@ -146,6 +146,23 @@ trait StrictIterable {
     }
     return $res;
   }
+  public function take($n) {
+    $res = Vector {};
+    if ($n <= 0) return $res;
+    foreach ($this as $v) {
+      $res[] = $v;
+      if (--$n === 0) break;
+    }
+    return $res;
+  }
+  public function takeWhile($fn) {
+    $res = Vector {};
+    foreach ($this as $v) {
+      if (!$fn($v)) break;
+      $res[] = $v;
+    }
+    return $res;
+  }
   public function skip($n) {
     $res = Vector {};
     foreach ($this as $v) {
@@ -252,6 +269,23 @@ trait StrictKeyedIterable {
     }
     return $res;
   }
+  public function take($n) {
+    $res = Map {};
+    if ($n <= 0) return $res;
+    foreach ($this as $k => $v) {
+      $res[$k] = $v;
+      if (--$n === 0) break;
+    }
+    return $res;
+  }
+  public function takeWhile($fn) {
+    $res = Map {};
+    foreach ($this as $k => $v) {
+      if (!$fn($v)) break;
+      $res[$k] = $v;
+    }
+    return $res;
+  }
   public function skip($n) {
     $res = Map {};
     foreach ($this as $k => $v) {
@@ -329,6 +363,12 @@ trait LazyIterable {
   public function zip($iterable) {
     return new LazyZipIterable($this, $iterable);
   }
+  public function take($n) {
+    return new LazyTakeIterable($this, $n);
+  }
+  public function takeWhile($fn) {
+    return new LazyTakeWhileIterable($this, $fn);
+  }
   public function skip($n) {
     return new LazySkipIterable($this, $n);
   }
@@ -397,6 +437,12 @@ trait LazyKeyedIterable {
   }
   public function zip($iterable) {
     return new LazyZipKeyedIterable($this, $iterable);
+  }
+  public function take($n) {
+    return new LazyTakeKeyedIterable($this, $n);
+  }
+  public function takeWhile($fn) {
+    return new LazyTakeWhileKeyedIterable($this, $fn);
   }
   public function skip($n) {
     return new LazySkipKeyedIterable($this, $n);
@@ -797,6 +843,195 @@ class LazyZipKeyedIterable implements \HH\KeyedIterable {
   }
 }
 
+class LazyTakeIterator implements \HH\Iterator {
+  private $it;
+  private $n;
+  private $numLeft;
+
+  public function __construct($it, $n) {
+    $this->it = $it;
+    $this->n = $n;
+    $this->numLeft = $n;
+  }
+  public function __clone() {
+    $this->it = clone $this->it;
+  }
+  public function rewind() {
+    $this->it->rewind();
+    $this->numLeft = $this->n;
+  }
+  public function valid() {
+    return ($this->numLeft > 0 && $this->it->valid());
+  }
+  public function next() {
+    $this->it->next();
+    --$this->numLeft;
+  }
+  public function key() {
+    return null;
+  }
+  public function current() {
+    return $this->it->current();
+  }
+}
+
+class LazyTakeIterable implements \HH\Iterable {
+  use LazyIterable;
+
+  private $iterable;
+  private $n;
+
+  public function __construct($iterable, $n) {
+    $this->iterable = $iterable;
+    $this->n = $n;
+  }
+  public function getIterator() {
+    return new LazyTakeIterator($this->iterable->getIterator(),
+                                $this->n);
+  }
+}
+
+class LazyTakeKeyedIterator implements \HH\KeyedIterator {
+  private $it;
+  private $n;
+  private $numLeft;
+
+  public function __construct($it, $n) {
+    $this->it = $it;
+    $this->n = $n;
+    $this->numLeft = $n;
+  }
+  public function __clone() {
+    $this->it = clone $this->it;
+  }
+  public function rewind() {
+    $this->it->rewind();
+    $this->numLeft = $this->n;
+  }
+  public function valid() {
+    return ($this->numLeft > 0 && $this->it->valid());
+  }
+  public function next() {
+    $this->it->next();
+    --$this->numLeft;
+  }
+  public function key() {
+    return $this->it->key();
+  }
+  public function current() {
+    return $this->it->current();
+  }
+}
+
+class LazyTakeKeyedIterable implements \HH\KeyedIterable {
+  use LazyKeyedIterable;
+
+  private $iterable;
+  private $n;
+
+  public function __construct($iterable, $n) {
+    $this->iterable = $iterable;
+    $this->n = $n;
+  }
+  public function getIterator() {
+    return new LazyTakeKeyedIterator($this->iterable->getIterator(),
+                                     $this->n);
+  }
+}
+
+class LazyTakeWhileIterator implements \HH\Iterator {
+  private $it;
+  private $fn;
+
+  public function __construct($it, $fn) {
+    $this->it = $it;
+    $this->fn = $fn;
+    while ($it->valid() && $fn($it->current())) {
+      $it->next();
+    }
+  }
+  public function __clone() {
+    $this->it = clone $this->it;
+  }
+  public function rewind() {
+    $this->it->rewind();
+  }
+  public function valid() {
+    $it = $this->it;
+    return ($it->valid() && ($this->fn)($it->current()));
+  }
+  public function next() {
+    $this->it->next();
+  }
+  public function key() {
+    return null;
+  }
+  public function current() {
+    return $this->it->current();
+  }
+}
+
+class LazyTakeWhileIterable implements \HH\Iterable {
+  use LazyIterable;
+
+  private $iterable;
+  private $fn;
+
+  public function __construct($iterable, $fn) {
+    $this->iterable = $iterable;
+    $this->fn = $fn;
+  }
+  public function getIterator() {
+    return new LazyTakeWhileIterator($this->iterable->getIterator(),
+                                     $this->fn);
+  }
+}
+
+class LazyTakeWhileKeyedIterator implements \HH\Iterator {
+  private $it;
+  private $fn;
+
+  public function __construct($it, $fn) {
+    $this->it = $it;
+    $this->fn = $fn;
+  }
+  public function __clone() {
+    $this->it = clone $this->it;
+  }
+  public function rewind() {
+    $this->it->rewind();
+  }
+  public function valid() {
+    $it = $this->it;
+    return ($it->valid() && ($this->fn)($it->current()));
+  }
+  public function next() {
+    $this->it->next();
+  }
+  public function key() {
+    return $this->it->key();
+  }
+  public function current() {
+    return $this->it->current();
+  }
+}
+
+class LazyTakeWhileKeyedIterable implements \HH\Iterable {
+  use LazyIterable;
+
+  private $iterable;
+  private $fn;
+
+  public function __construct($iterable, $fn) {
+    $this->iterable = $iterable;
+    $this->fn = $fn;
+  }
+  public function getIterator() {
+    return new LazyTakeWhileKeyedIterator($this->iterable->getIterator(),
+                                          $this->fn);
+  }
+}
+
 class LazySkipIterator implements \HH\Iterator {
   private $it;
   private $n;
@@ -1168,6 +1403,12 @@ class LazyIterableView implements \HH\Iterable {
   public function zip($iterable) {
     return new LazyZipIterable($this->iterable, $iterable);
   }
+  public function take($n) {
+    return new LazyTakeIterable($this->iterable, $n);
+  }
+  public function takeWhile($fn) {
+    return new LazyTakeWhileIterable($this->iterable, $fn);
+  }
   public function skip($n) {
     return new LazySkipIterable($this->iterable, $n);
   }
@@ -1237,6 +1478,12 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   }
   public function zip($iterable) {
     return new LazyZipKeyedIterable($this->iterable, $iterable);
+  }
+  public function take($n) {
+    return new LazyTakeKeyedIterable($this->iterable, $n);
+  }
+  public function takeWhile($fn) {
+    return new LazyTakeWhileKeyedIterable($this->iterable, $fn);
   }
   public function skip($n) {
     return new LazySkipKeyedIterable($this->iterable, $n);

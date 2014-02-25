@@ -95,6 +95,16 @@ class BaseVector : public ExtCollectionObjectData {
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_take(CVarRef n);
+
+  template<class TVector, bool checkVersion>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_takeWhile(CVarRef fn);
+
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
   php_skip(CVarRef n);
 
   template<class TVector, bool checkVersion>
@@ -320,6 +330,8 @@ class c_Vector : public BaseVector {
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_take(CVarRef n);
+  Object t_takewhile(CVarRef fn);
   Object t_skip(CVarRef n);
   Object t_skipwhile(CVarRef fn);
   DECLARE_COLLECTION_MAGIC_METHODS();
@@ -440,6 +452,8 @@ public:
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_take(CVarRef n);
+  Object t_takewhile(CVarRef fn);
   Object t_skip(CVarRef n);
   Object t_skipwhile(CVarRef fn);
   Object t_kvzip();
@@ -897,6 +911,16 @@ class BaseMap : public ExtCollectionObjectData {
   template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_take(CVarRef n);
+
+  template<class TMap, bool checkVersion>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_takeWhile(CVarRef fn);
+
+  template<class TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_skip(CVarRef n);
 
   template<class TMap, bool checkVersion>
@@ -962,6 +986,8 @@ class c_Map : public BaseMap {
   Object t_retain(CVarRef callback);
   Object t_retainwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_take(CVarRef n);
+  Object t_takewhile(CVarRef callback);
   Object t_skip(CVarRef n);
   Object t_skipwhile(CVarRef fn);
   DECLARE_COLLECTION_MAGIC_METHODS();
@@ -1008,6 +1034,8 @@ class c_ImmMap : public BaseMap {
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_take(CVarRef n);
+  Object t_takewhile(CVarRef callback);
   Object t_skip(CVarRef n);
   Object t_skipwhile(CVarRef fn);
   DECLARE_COLLECTION_MAGIC_METHODS();
@@ -1395,6 +1423,16 @@ protected:
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
+  php_take(CVarRef n);
+
+  template<class TSet, bool checkVersion>
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
+  php_takeWhile(CVarRef fn);
+
+  template<class TSet>
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
   php_skip(CVarRef n);
 
   template<class TSet, bool checkVersion>
@@ -1484,6 +1522,8 @@ class c_Set : public BaseSet {
   Object t_map(CVarRef callback);
   Object t_filter(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_take(CVarRef n);
+  Object t_takewhile(CVarRef callback);
   Object t_skip(CVarRef n);
   Object t_skipwhile(CVarRef fn);
   Object t_removeall(CVarRef iterable);
@@ -1527,6 +1567,8 @@ class c_ImmSet : public BaseSet {
   Object t_map(CVarRef callback);
   Object t_filter(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_take(CVarRef n);
+  Object t_takewhile(CVarRef callback);
   Object t_skip(CVarRef n);
   Object t_skipwhile(CVarRef fn);
 
@@ -1617,6 +1659,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
+  Object t_take(CVarRef n);
+  Object t_takewhile(CVarRef callback);
   Object t_skip(CVarRef n);
   Object t_skipwhile(CVarRef fn);
   DECLARE_COLLECTION_MAGIC_METHODS();

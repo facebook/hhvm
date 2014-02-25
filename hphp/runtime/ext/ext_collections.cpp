@@ -317,6 +317,60 @@ Object c_Vector::ti_slice(CVarRef vec, CVarRef offset,
 template<class TVector>
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_take(CVarRef n) {
+  if (!n.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter n must be an integer"));
+    throw e;
+  }
+  int64_t len = n.toInt64();
+  auto* vec = NEWOBJ(TVector)();
+  Object obj = vec;
+  if (len <= 0) {
+    return obj;
+  }
+  size_t sz = std::min(size_t(len), size_t(m_size));
+  vec->reserve(sz);
+  vec->m_size = sz;
+  for (size_t i = 0; i < sz; ++i) {
+    cellDup(m_data[i], vec->m_data[i]);
+  }
+  return obj;
+}
+
+template<class TVector, bool checkVersion>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_takeWhile(CVarRef fn) {
+  CallCtx ctx;
+  vm_decode_function(fn, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  auto* vec = NEWOBJ(TVector)();
+  Object obj = vec;
+  for (uint i = 0; i < m_size; ++i) {
+    Variant retval;
+    if (checkVersion) {
+      int32_t version = m_version;
+      g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &m_data[i]);
+      if (UNLIKELY(version != m_version)) {
+        throw_collection_modified();
+      }
+    } else {
+      g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &m_data[i]);
+    }
+    if (!retval.toBoolean()) break;
+    vec->add(&m_data[i]);
+  }
+  return obj;
+}
+
+template<class TVector>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_skip(CVarRef n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -1004,6 +1058,22 @@ Object c_Vector::t_zip(CVarRef iterable) {
   Object obj = vec;
   BaseVector::zip(vec, iterable);
   return obj;
+}
+
+Object c_Vector::t_take(CVarRef n) {
+  return BaseVector::php_take<c_Vector>(n);
+}
+
+Object c_ImmVector::t_take(CVarRef n) {
+  return BaseVector::php_take<c_ImmVector>(n);
+}
+
+Object c_Vector::t_takewhile(CVarRef fn) {
+  return BaseVector::php_takeWhile<c_Vector, true>(fn);
+}
+
+Object c_ImmVector::t_takewhile(CVarRef fn) {
+  return BaseVector::php_takeWhile<c_ImmVector, false>(fn);
 }
 
 Object c_Vector::t_skip(CVarRef n) {
@@ -2122,6 +2192,88 @@ Object c_Map::t_zip(CVarRef iterable) {
 template<class TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_take(CVarRef n) {
+  if (!n.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter n must be an integer"));
+    throw e;
+  }
+  int64_t len = n.toInt64();
+  if (len >= int64_t(m_size)) {
+    // We know the resulting Map will simply be a copy of this Map,
+    // so we can just call Clone() and return early here.
+    return Object::attach(TMap::Clone(this));
+  }
+  auto* mp = NEWOBJ(TMap)();
+  Object obj = mp;
+  if (len <= 0) {
+    // We know the resulting Map will be empty, so we can return
+    // early here.
+    return obj;
+  }
+  size_t sz = size_t(len);
+  mp->reserve(sz);
+  mp->m_size = mp->m_used = sz;
+  auto table = mp->hashTab();
+  auto mask = mp->m_tableMask;
+  for (uint32_t frPos = 0, toPos = 0; toPos < sz; ++toPos, ++frPos) {
+    while (isTombstone(m_data[frPos].data.m_type)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
+    }
+    auto& toE = mp->m_data[toPos];
+    toE.skey = m_data[frPos].skey;
+    toE.data.hash() = m_data[frPos].data.hash();
+    if (toE.hasStrKey()) toE.skey->incRefCount();
+    cellDup(m_data[frPos].data, toE.data);
+    auto ie = findForNewInsert(table, mask,
+                               toE.hasIntKey() ? toE.ikey : toE.hash());
+    *ie = toPos;
+  }
+  return obj;
+}
+
+template<class TMap, bool checkVersion>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_takeWhile(CVarRef fn) {
+  CallCtx ctx;
+  vm_decode_function(fn, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  auto* mp = NEWOBJ(TMap)();
+  Object obj = mp;
+  if (!m_size) return obj;
+  uint32_t used = iterLimit();
+  for (uint i = 0; i < used; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
+    Variant ret;
+    if (checkVersion) {
+      int32_t version = m_version;
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      if (UNLIKELY(version != m_version)) {
+        throw_collection_modified();
+      }
+    } else {
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+    }
+    if (!ret.toBoolean()) continue;
+    if (p.hasIntKey()) {
+      mp->update(p.ikey, &p.data);
+    } else {
+      mp->update(p.skey, &p.data);
+    }
+  }
+  return obj;
+}
+
+template<class TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_skip(CVarRef n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -2222,6 +2374,22 @@ BaseMap::php_skipWhile(CVarRef fn) {
     }
   }
   return obj;
+}
+
+Object c_Map::t_take(CVarRef n) {
+  return BaseMap::php_take<c_Map>(n);
+}
+
+Object c_ImmMap::t_take(CVarRef n) {
+  return BaseMap::php_take<c_ImmMap>(n);
+}
+
+Object c_Map::t_takewhile(CVarRef fn) {
+  return BaseMap::php_takeWhile<c_Map, true>(fn);
+}
+
+Object c_ImmMap::t_takewhile(CVarRef fn) {
+  return BaseMap::php_takeWhile<c_ImmMap, false>(fn);
 }
 
 Object c_Map::t_skip(CVarRef n) {
@@ -3861,6 +4029,87 @@ BaseSet::php_zip(CVarRef iterable) {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_take(CVarRef n) {
+  if (!n.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter n must be an integer"));
+    throw e;
+  }
+  int64_t len = n.toInt64();
+  if (len >= int64_t(m_size)) {
+    // We know the result Set will simply be a copy of this Set,
+    // so we can just call Clone() and return early here.
+    return Object::attach(TSet::Clone(this));
+  }
+  auto* st = NEWOBJ(TSet)();
+  Object obj = st;
+  if (len <= 0) {
+    // We know the resulting Set will be empty, so we can return
+    // early here.
+    return obj;
+  }
+  size_t sz = size_t(len);
+  st->reserve(sz);
+  st->m_size = st->m_used = sz;
+  auto table = st->hashTab();
+  auto mask = st->m_tableMask;
+  for (uint32_t frPos = 0, toPos = 0; toPos < sz; ++toPos, ++frPos) {
+    while (isTombstone(m_data[frPos].data.m_type)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
+    }
+    auto& toE = st->m_data[toPos];
+    toE.data.hash() = m_data[frPos].data.hash();
+    cellDup(m_data[frPos].data, toE.data);
+    auto ie = findForNewInsert(table, mask,
+            toE.hasInt() ? toE.data.m_data.num : toE.data.m_data.pstr->hash());
+    *ie = toPos;
+  }
+  return obj;
+}
+
+template<class TSet, bool checkVersion>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_takeWhile(CVarRef fn) {
+  CallCtx ctx;
+  vm_decode_function(fn, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  auto* st = NEWOBJ(TSet);
+  Object obj = st;
+  if (!m_size) return obj;
+  uint32_t used = iterLimit();
+  for (uint i = 0; i < used; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
+    Variant ret;
+    if (checkVersion) {
+      int32_t version = m_version;
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      if (UNLIKELY(version != m_version)) {
+        throw_collection_modified();
+      }
+    } else {
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+    }
+    if (!ret.toBoolean()) continue;
+    if (p.hasInt()) {
+      st->add(p.data.m_data.num);
+    } else {
+      assert(p.hasStr());
+      st->add(p.data.m_data.pstr);
+    }
+  }
+  return obj;
+}
+
+template<class TSet>
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_skip(CVarRef n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -4391,6 +4640,22 @@ Object c_Set::t_zip(CVarRef iterable) {
   return BaseSet::php_zip<c_Set>(iterable);
 }
 
+Object c_Set::t_take(CVarRef n) {
+  return BaseSet::php_take<c_Set>(n);
+}
+
+Object c_ImmSet::t_take(CVarRef n) {
+  return BaseSet::php_take<c_ImmSet>(n);
+}
+
+Object c_Set::t_takewhile(CVarRef fn) {
+  return BaseSet::php_takeWhile<c_Set, true>(fn);
+}
+
+Object c_ImmSet::t_takewhile(CVarRef fn) {
+  return BaseSet::php_takeWhile<c_ImmSet, false>(fn);
+}
+
 Object c_Set::t_skip(CVarRef n) {
   return BaseSet::php_skip<c_Set>(n);
 }
@@ -4846,6 +5111,46 @@ Object c_Pair::t_zip(CVarRef iterable) {
 
 Object c_Pair::t_immutable() {
   return this;
+}
+
+Object c_Pair::t_take(CVarRef n) {
+  if (!n.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter n must be an integer"));
+    throw e;
+  }
+  int64_t len = n.toInt64();
+  auto* vec = NEWOBJ(c_Vector)();
+  Object obj = vec;
+  if (len <= 0) {
+    return obj;
+  }
+  size_t sz = std::min(size_t(len), size_t(2));
+  vec->reserve(sz);
+  vec->m_size = sz;
+  for (size_t i = 0; i < sz; ++i) {
+    cellDup(getElms()[i], vec->m_data[i]);
+  }
+  return obj;
+}
+
+Object c_Pair::t_takewhile(CVarRef callback) {
+  CallCtx ctx;
+  vm_decode_function(callback, nullptr, false, ctx);
+  if (!ctx.func) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback"));
+    throw e;
+  }
+  auto* vec = NEWOBJ(c_Vector)();
+  Object obj = vec;
+  for (uint i = 0; i < 2; ++i) {
+    Variant retval;
+    g_context->invokeFuncFew(retval.asTypedValue(), ctx, 1, &getElms()[i]);
+    if (!retval.toBoolean()) break;
+    vec->add(&getElms()[i]);
+  }
+  return obj;
 }
 
 Object c_Pair::t_skip(CVarRef n) {

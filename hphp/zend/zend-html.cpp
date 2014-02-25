@@ -595,8 +595,11 @@ char *string_html_encode(const char *input, int &len,
    *    consuming;
    * 2. take a guess and double buffer size when over: still wasting, and
    *    it may not save that much.
+   *
+   * Note: Amount of  allocation per character to be encoded may have to be 
+   *       increased as larger HTML Entities are implemented.
    */
-  char *ret = (char *)malloc(len * 6uL + 1);
+  char *ret = (char *)malloc(len * 14uL + 1);
   if (!ret) {
     return nullptr;
   }

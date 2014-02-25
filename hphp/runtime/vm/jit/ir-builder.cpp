@@ -503,7 +503,7 @@ void IRBuilder::reoptimize() {
 
     auto nextBlock = block->next();
     auto backMarker = block->back().marker();
-    auto instructions = std::move(block->instrs());
+    auto instructions = block->moveInstrs();
     assert(block->empty());
     while (!instructions.empty()) {
       auto* inst = &instructions.front();

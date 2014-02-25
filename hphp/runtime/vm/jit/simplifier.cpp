@@ -630,23 +630,15 @@ SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
   SSATmp* newCmp = simplifyCmp(queryJmpToQueryOp(opc), nullptr, src1, src2);
   if (!newCmp) return nullptr;
 
-  SSATmp* newQueryJmp = makeInstruction(
-    [=] (IRInstruction* condJmp) -> SSATmp* {
-      SSATmp* newCondJmp = simplifyCondJmp(condJmp);
-      if (newCondJmp) return newCondJmp;
-      if (condJmp->op() == Nop) {
-        // simplifyCondJmp folded the branch into a nop
-        inst->convertToNop();
-      }
-      // Couldn't fold condJmp or combine it with newCmp
-      return nullptr;
-    },
+  // Become an equivalent conditional jump and reuse that logic.
+  m_irb.unit().replace(
+    inst,
     JmpNZero,
-    inst->marker(),
     inst->taken(),
-    newCmp);
-  if (!newQueryJmp) return nullptr;
-  return newQueryJmp;
+    newCmp
+  );
+
+  return simplifyCondJmp(inst);
 }
 
 SSATmp* Simplifier::simplifyMov(SSATmp* src) {
@@ -1968,17 +1960,18 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
       val = !val;
     }
     if (val) {
-      return gen(Jmp, inst->taken());
+      inst->convertToJmp();
+    } else {
+      inst->convertToNop();
     }
-    inst->convertToNop();
     return nullptr;
   }
 
   // Pull negations into the jump.
   if (src->inst()->op() == Not) {
-    return gen(inst->op() == JmpZero ? JmpNZero : JmpZero,
-               inst->taken(),
-               srcInst->src(0));
+    inst->setOpcode(inst->op() == JmpZero ? JmpNZero : JmpZero);
+    inst->setSrc(0, srcInst->src(0));
+    return nullptr;
   }
 
   /*
@@ -2005,7 +1998,9 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
     }
   };
   if (isConvIntOrPtrToBool(srcInst)) {
-    return gen(inst->op(), inst->taken(), srcInst->src(0));
+    // We can just check the int or ptr directly. Borrow the Conv's src.
+    inst->setSrc(0, srcInst->src(0));
+    return nullptr;
   }
 
   auto canCompareFused = [&]() {
@@ -2020,14 +2015,14 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
 
   // Fuse jumps with query operators.
   if (isFusableQueryOp(srcOpcode) && canCompareFused()) {
+    auto opc = queryToJmpOp(inst->op() == JmpZero
+                            ? negateQueryOp(srcOpcode) : srcOpcode);
     SrcRange ssas = srcInst->srcs();
-    return gen(
-      queryToJmpOp(
-        inst->op() == JmpZero
-          ? negateQueryOp(srcOpcode)
-          : srcOpcode),
-      srcInst->maybeTypeParam(), // if it had a type param
-      inst->taken(),
+
+    m_irb.unit().replace(
+      inst,
+      opc,
+      inst->maybeTypeParam(),
       std::make_pair(ssas.size(), ssas.begin())
     );
   }

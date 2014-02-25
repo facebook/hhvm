@@ -316,26 +316,26 @@ O(NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                       C) \
 O(IsType,                      D(Bool), S(Cell),                           C) \
 O(IsNType,                     D(Bool), S(Cell),                           C) \
 O(IsScalarType,                D(Bool), S(Cell),                           C) \
-O(JmpGt,                       D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpGte,                      D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpLt,                       D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpLte,                      D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpEq,                       D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpNeq,                      D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpSame,                     D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpNSame,                    D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpGtInt,                    D(None), S(Int) S(Int),                   B|E) \
-O(JmpGteInt,                   D(None), S(Int) S(Int),                   B|E) \
-O(JmpLtInt,                    D(None), S(Int) S(Int),                   B|E) \
-O(JmpLteInt,                   D(None), S(Int) S(Int),                   B|E) \
-O(JmpEqInt,                    D(None), S(Int) S(Int),                   B|E) \
-O(JmpNeqInt,                   D(None), S(Int) S(Int),                   B|E) \
-O(JmpInstanceOfBitmask,        D(None), S(Cls) CStr,                     B|E) \
-O(JmpNInstanceOfBitmask,       D(None), S(Cls) CStr,                     B|E) \
+O(JmpGt,                            ND, S(Gen) S(Gen),                   B|E) \
+O(JmpGte,                           ND, S(Gen) S(Gen),                   B|E) \
+O(JmpLt,                            ND, S(Gen) S(Gen),                   B|E) \
+O(JmpLte,                           ND, S(Gen) S(Gen),                   B|E) \
+O(JmpEq,                            ND, S(Gen) S(Gen),                   B|E) \
+O(JmpNeq,                           ND, S(Gen) S(Gen),                   B|E) \
+O(JmpSame,                          ND, S(Gen) S(Gen),                   B|E) \
+O(JmpNSame,                         ND, S(Gen) S(Gen),                   B|E) \
+O(JmpGtInt,                         ND, S(Int) S(Int),                   B|E) \
+O(JmpGteInt,                        ND, S(Int) S(Int),                   B|E) \
+O(JmpLtInt,                         ND, S(Int) S(Int),                   B|E) \
+O(JmpLteInt,                        ND, S(Int) S(Int),                   B|E) \
+O(JmpEqInt,                         ND, S(Int) S(Int),                   B|E) \
+O(JmpNeqInt,                        ND, S(Int) S(Int),                   B|E) \
+O(JmpInstanceOfBitmask,             ND, S(Cls) CStr,                     B|E) \
+O(JmpNInstanceOfBitmask,            ND, S(Cls) CStr,                     B|E) \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(JmpZero,                     D(None), S(Int,Bool),                     B|E) \
-O(JmpNZero,                    D(None), S(Int,Bool),                     B|E) \
-O(Jmp,                         D(None), SUnk,                          B|T|E) \
+O(JmpZero,                          ND, S(Int,Bool),                     B|E) \
+O(JmpNZero,                         ND, S(Int,Bool),                     B|E) \
+O(Jmp,                              ND, SUnk,                          B|T|E) \
 O(ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T|E) \
@@ -354,26 +354,26 @@ O(ReqBindJmpInstanceOfBitmask,      ND, S(Cls) CStr,                     T|E) \
 O(ReqBindJmpNInstanceOfBitmask,     ND, S(Cls) CStr,                     T|E) \
 O(ReqBindJmpZero,                   ND, S(Int,Bool),                     T|E) \
 O(ReqBindJmpNZero,                  ND, S(Int,Bool),                     T|E) \
-O(SideExitJmpGt,               D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpGte,              D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpLt,               D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpLte,              D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpEq,               D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpNeq,              D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpGtInt,            D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpGteInt,           D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpLtInt,            D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpLteInt,           D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpEqInt,            D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpNeqInt,           D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpSame,             D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpNSame,            D(None), S(Int) S(Int),                     E) \
+O(SideExitJmpGt,                    ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpGte,                   ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpLt,                    ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpLte,                   ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpEq,                    ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpNeq,                   ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpGtInt,                 ND, S(Int) S(Int),                     E) \
+O(SideExitJmpGteInt,                ND, S(Int) S(Int),                     E) \
+O(SideExitJmpLtInt,                 ND, S(Int) S(Int),                     E) \
+O(SideExitJmpLteInt,                ND, S(Int) S(Int),                     E) \
+O(SideExitJmpEqInt,                 ND, S(Int) S(Int),                     E) \
+O(SideExitJmpNeqInt,                ND, S(Int) S(Int),                     E) \
+O(SideExitJmpSame,                  ND, S(Int) S(Int),                     E) \
+O(SideExitJmpNSame,                 ND, S(Int) S(Int),                     E) \
 O(SideExitJmpInstanceOfBitmask,                                               \
-                               D(None), S(Cls) CStr,                       E) \
+                                    ND, S(Cls) CStr,                       E) \
 O(SideExitJmpNInstanceOfBitmask,                                              \
-                               D(None), S(Cls) CStr,                       E) \
-O(SideExitJmpZero,             D(None), S(Int,Bool),                       E) \
-O(SideExitJmpNZero,            D(None), S(Int,Bool),                       E) \
+                                    ND, S(Cls) CStr,                       E) \
+O(SideExitJmpZero,                  ND, S(Int,Bool),                       E) \
+O(SideExitJmpNZero,                 ND, S(Int,Bool),                       E) \
 O(SideExitGuardLoc,        D(FramePtr), S(FramePtr),                       E) \
 O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 /*    name                      dstinfo srcinfo                      flags */ \

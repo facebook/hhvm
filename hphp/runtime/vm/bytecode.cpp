@@ -5667,7 +5667,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushObjMethod(IOP_ARGS) {
   }
   Cell* c2 = m_stack.indC(1); // Object.
   if (c2->m_type != KindOfObject) {
-    throw_call_non_object(c1->m_data.pstr->data(), tname(c2->m_type).c_str());
+    throw_call_non_object(c1->m_data.pstr->data());
   }
   ObjectData* obj = c2->m_data.pobj;
   Class* cls = obj->getVMClass();
@@ -5683,7 +5683,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushObjMethodD(IOP_ARGS) {
   DECODE_LITSTR(name);
   Cell* c1 = m_stack.topC();
   if (c1->m_type != KindOfObject) {
-    throw_call_non_object(name->data(), tname(c1->m_type).c_str());
+    throw_call_non_object(name->data());
   }
   ObjectData* obj = c1->m_data.pobj;
   Class* cls = obj->getVMClass();

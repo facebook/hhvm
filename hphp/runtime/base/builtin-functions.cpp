@@ -748,19 +748,15 @@ void throw_call_non_object() {
   throw_call_non_object(nullptr);
 }
 
-void throw_call_non_object(const char *methodName, const char *type) {
+void throw_call_non_object(const char *methodName) {
   std::string msg;
 
   if (methodName == nullptr) {
     msg = "Call to a member function on a non-object";
-  } else if (type == nullptr) {
+  } else {
     Util::string_printf(msg,
                         "Call to a member function %s() on a non-object",
                         methodName);
-  } else {
-    Util::string_printf(msg,
-                        "Call to a member function %s() on a non-object (%s)",
-                        methodName, type);
   }
 
   if (RuntimeOption::ThrowExceptionOnBadMethodCall) {

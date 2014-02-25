@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -15,7 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/base/socket.h"
@@ -26,6 +27,7 @@
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/user-stream-wrapper.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/network.h"
 #include <memory>
 #include <unistd.h>
@@ -666,6 +668,23 @@ Array StreamContext::getParams() const {
   params.set(options_key, getOptions());
   return params;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+class StreamExtension : public Extension {
+ public:
+  StreamExtension() : Extension("stream") {}
+  virtual void moduleInit() {
+    HHVM_FE(stream_get_filters);
+    HHVM_FE(stream_filter_register);
+    HHVM_FE(stream_filter_append);
+    HHVM_FE(stream_filter_prepend);
+    HHVM_FE(stream_bucket_make_writeable);
+    HHVM_FE(stream_bucket_append);
+    HHVM_FE(stream_bucket_prepend);
+    loadSystemlib("stream-user-filters");
+  }
+} s_stream_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

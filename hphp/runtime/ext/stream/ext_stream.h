@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -75,30 +75,8 @@ Variant f_stream_copy_to_stream(CResRef source, CResRef dest,
 
 bool f_stream_encoding(CResRef stream, const String& encoding = null_string);
 
-void f_stream_bucket_append(CResRef brigade, CResRef bucket);
-
-void f_stream_bucket_prepend(CResRef brigade, CResRef bucket);
-
-Resource f_stream_bucket_make_writeable(CResRef brigade);
-
-Resource f_stream_bucket_new(CResRef stream, const String& buffer);
-
-bool f_stream_filter_register(const String& filtername, const String& classname);
-
-bool f_stream_filter_remove(CResRef stream_filter);
-
-Resource f_stream_filter_append(CResRef stream, const String& filtername,
-                              int read_write = 0,
-                              CVarRef params = null_variant);
-
-Resource f_stream_filter_prepend(CResRef stream, const String& filtername,
-                               int read_write = 0,
-                               CVarRef params = null_variant);
-
 Variant f_stream_get_contents(CResRef handle, int maxlen = -1,
                               int offset = -1);
-
-Array f_stream_get_filters();
 
 Variant f_stream_get_line(CResRef handle, int length = 0,
                           const String& ending = null_string);

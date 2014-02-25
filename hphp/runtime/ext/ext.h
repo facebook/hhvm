@@ -63,7 +63,7 @@
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_sqlite3.h"
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_thread.h"
 #include "hphp/runtime/ext/ext_thrift.h"

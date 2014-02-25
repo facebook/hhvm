@@ -31,9 +31,11 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "folly/String.h"
 #include "hphp/util/file-util.h"
 
+#include <algorithm>
 #include <sys/file.h>
 #include <algorithm>
 
@@ -158,7 +160,7 @@ File::File(bool nonblocking, const String& wrapper, const String& stream_type)
   : m_isLocal(false), m_fd(-1), m_closed(false), m_nonblocking(nonblocking),
     m_writepos(0), m_readpos(0), m_position(0), m_eof(false),
     m_wrapperType(wrapper.get()), m_streamType(stream_type.get()),
-    m_buffer(nullptr) {
+    m_buffer(nullptr), m_bufferSize(CHUNK_SIZE) {
 }
 
 File::~File() {
@@ -182,6 +184,34 @@ void File::sweep() {
 void File::closeImpl() {
   free(m_buffer);
   m_buffer = nullptr;
+}
+
+void File::invokeFiltersOnClose() {
+  if (MemoryManager::sweeping()) {
+    return;
+  }
+  // As it's being closed, we can't actually do anything with filter output
+  applyFilters(
+    empty_string,
+    m_readFilters,
+    /* closing = */ true
+  );
+  if (!m_writeFilters.empty()) {
+    auto buf = applyFilters(
+      empty_string,
+      m_writeFilters,
+      /* closing = */ true
+    );
+    if (buf.length() > 0) {
+      writeImpl(buf.data(), buf.length());
+    }
+  }
+  for (auto filter: m_readFilters) {
+    filter.getTyped<StreamFilter>()->invokeOnClose();
+  }
+  for (auto filter: m_writeFilters) {
+    filter.getTyped<StreamFilter>()->invokeOnClose();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -210,6 +240,7 @@ String File::read() {
   while (!eof() || avail) {
     if (m_buffer == nullptr) {
       m_buffer = (char *)malloc(CHUNK_SIZE);
+      m_bufferSize = CHUNK_SIZE;
     }
 
     if (avail > 0) {
@@ -217,7 +248,7 @@ String File::read() {
       copied += avail;
     }
 
-    m_writepos = readImpl(m_buffer, CHUNK_SIZE);
+    m_writepos = filteredReadToBuffer();
     m_readpos = 0;
     avail = bufferedLen();
 
@@ -244,6 +275,7 @@ String File::read(int64_t length) {
   while (avail < length && !eof()) {
     if (m_buffer == nullptr) {
       m_buffer = (char *)malloc(CHUNK_SIZE);
+      m_bufferSize = CHUNK_SIZE;
     }
 
     if (avail > 0) {
@@ -252,7 +284,7 @@ String File::read(int64_t length) {
       length -= avail;
     }
 
-    m_writepos = readImpl(m_buffer, CHUNK_SIZE);
+    m_writepos = filteredReadToBuffer();
     m_readpos = 0;
     avail = bufferedLen();
 
@@ -274,6 +306,46 @@ String File::read(int64_t length) {
   return s.setSize(copied);
 }
 
+int64_t File::filteredReadToBuffer() {
+  int64_t bytes_read = readImpl(m_buffer, CHUNK_SIZE);
+  if (LIKELY(m_readFilters.empty())) {
+    return bytes_read;
+  }
+
+  String data(m_buffer, bytes_read, CopyString);
+  String filtered = applyFilters(data,
+                                 m_readFilters,
+                                 /* closing = */ false);
+  if (filtered.length() > m_bufferSize) {
+    auto new_buffer = realloc(m_buffer, filtered.length());
+    if (!new_buffer) {
+      raise_error("Failed to realloc buffer");
+      return 0;
+    }
+    m_buffer = (char*) new_buffer;
+    m_bufferSize = filtered.length();
+  }
+  memcpy(m_buffer, filtered.data(), filtered.length());
+  return filtered.length();
+}
+
+int64_t File::filteredWrite(const char* buffer, int64_t length) {
+  if (LIKELY(m_writeFilters.empty())) {
+    return writeImpl(buffer, length);
+  }
+
+  String data(buffer, length, CopyString);
+  String filtered = applyFilters(data,
+                                 m_writeFilters,
+                                 /* closing = */ false);
+
+  if (!filtered.empty()) {
+    int64_t written = writeImpl(filtered.data(), filtered.size());
+    m_position += written;
+  }
+  return 0;
+}
+
 int64_t File::write(const String& data, int64_t length /* = 0 */) {
   if (seekable()) {
     int64_t offset = m_readpos - m_writepos;
@@ -288,21 +360,24 @@ int64_t File::write(const String& data, int64_t length /* = 0 */) {
     seek(offset, SEEK_CUR);
     m_eof = eof;
   }
+
   if (length <= 0 || length > data.size()) {
     length = data.size();
   }
-  if (length) {
-    int64_t written = writeImpl(data.data(), length);
-    m_position += written;
-    return written;
+
+  if (!length) {
+    return 0;
   }
-  return 0;
+
+  int64_t written = filteredWrite(data.data(), length);
+  m_position += written;
+  return written;
 }
 
 int File::putc(char c) {
   char buf[1];
   buf[0] = c;
-  int ret = writeImpl(buf, 1);
+  int ret = filteredWrite(buf, 1);
   m_position += ret;
   return ret;
 }
@@ -380,6 +455,26 @@ bool File::lock(int operation, bool &wouldblock /* = false */) {
 bool File::stat(struct stat *sb) {
   // Undocumented, but Zend returns false for streams where fstat is unsupported
   return false;
+}
+
+void File::appendReadFilter(Resource& resource) {
+  assert(resource.getTyped<StreamFilter>());
+  m_readFilters.push_back(resource);
+}
+
+void File::appendWriteFilter(Resource& resource) {
+  assert(resource.getTyped<StreamFilter>());
+  m_writeFilters.push_back(resource);
+}
+
+void File::prependReadFilter(Resource& resource) {
+  assert(resource.getTyped<StreamFilter>());
+  m_readFilters.push_front(resource);
+}
+
+void File::prependWriteFilter(Resource& resource) {
+  assert(resource.getTyped<StreamFilter>());
+  m_writeFilters.push_front(resource);
 }
 
 const StaticString
@@ -477,6 +572,7 @@ String File::readLine(int64_t maxlen /* = 0 */) {
     } else {
       if (m_buffer == nullptr) {
         m_buffer = (char *)malloc(CHUNK_SIZE);
+        m_bufferSize = CHUNK_SIZE;
       }
       m_writepos = readImpl(m_buffer, CHUNK_SIZE);
       m_readpos = 0;
@@ -885,6 +981,38 @@ String File::getLastError() {
   return String(folly::errnoStr(errno).toStdString());
 }
 
+String File::applyFilters(const String& buffer,
+                          smart::list<Resource>& filters,
+                          bool closing) {
+  if (buffer.empty() && !closing) {
+    return buffer;
+  }
+  Resource in(null_resource);
+  Resource out;(NEWOBJ(BucketBrigade));
+  if (buffer.empty()) {
+    out = Resource(NEWOBJ(BucketBrigade)());
+  } else {
+    out = Resource(NEWOBJ(BucketBrigade)(buffer));
+  }
+
+  for (auto resource: filters) {
+    in = out;
+    out = Resource(NEWOBJ(BucketBrigade)());
+
+    auto filter = resource.getTyped<StreamFilter>();
+    assert(filter);
+    auto result = filter->invokeFilter(in, out, closing);
+    // PSFS_ERR_FATAL doesn't raise a fatal in Zend - appears to be
+    // treated the same as PSFS_FEED_ME
+    if (UNLIKELY(result != k_PSFS_PASS_ON)) {
+      return empty_string;
+    }
+  }
+
+  auto bb = out.getTyped<BucketBrigade>();
+  assert(bb);
+  return bb->createString();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

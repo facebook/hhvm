@@ -60,7 +60,7 @@ PlainFile::~PlainFile() {
 }
 
 void PlainFile::sweep() {
-  PlainFile::closeImpl();
+  closeImpl();
   File::sweep();
 }
 
@@ -110,6 +110,7 @@ bool PlainFile::open(const String& filename, const String& mode) {
 }
 
 bool PlainFile::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 
@@ -259,6 +260,7 @@ BuiltinFile::~BuiltinFile() {
 }
 
 bool BuiltinFile::close() {
+  invokeFiltersOnClose();
   auto status = ::fclose(m_stream);
   m_closed = true;
   m_stream = nullptr;
@@ -268,6 +270,7 @@ bool BuiltinFile::close() {
 }
 
 void BuiltinFile::sweep() {
+  invokeFiltersOnClose();
   // This object was just a wrapper around a FILE* or fd owned by someone else,
   // so don't close it except in explicit calls to close().
   m_stream = nullptr;

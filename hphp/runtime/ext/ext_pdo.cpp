@@ -25,7 +25,7 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/ini-setting.h"

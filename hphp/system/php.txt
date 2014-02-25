@@ -195,5 +195,6 @@ hphp/system/php/spl/iterators/LimitIterator.php
 hphp/system/php/spl/iterators/NoRewindIterator.php
 hphp/system/php/spl/iterators/RecursiveIteratorIterator.php
 hphp/system/php/spl/miscellaneous/ArrayObject.php
+hphp/system/php/stream/user-filters.php
 hphp/system/php/string/wordwrap.php
 hphp/system/php/zlib/zlib_funcs.php

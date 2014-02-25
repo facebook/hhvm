@@ -45,11 +45,11 @@ MemFile::MemFile(const char *data, int64_t len,
 }
 
 MemFile::~MemFile() {
-  closeImpl();
+  close();
 }
 
 void MemFile::sweep() {
-  closeImpl();
+  close();
   File::sweep();
 }
 
@@ -91,6 +91,7 @@ bool MemFile::open(const String& filename, const String& mode) {
 }
 
 bool MemFile::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 

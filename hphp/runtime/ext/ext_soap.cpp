@@ -30,7 +30,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_output.h"
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_string.h"
 
 #include "hphp/system/systemlib.h"

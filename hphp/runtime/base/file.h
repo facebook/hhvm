@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/smart-containers.h"
 
 struct stat;
 
@@ -90,9 +91,26 @@ public:
 
   /**
    * How to close this type of file.
+   *
+   * Your implementaitn should call invokeFiltersOnClose() before anything else
+   * to make sure that any user-provided php_user_filter instances get to flush
+   * and clean up.
    */
   virtual bool close() = 0;
   virtual bool isClosed() const { return m_closed;}
+
+  /* Use:
+   * - read() when fetching data to return to PHP
+   * - readImpl() when you want raw unbuffered data; for example, if you use
+   *   the Socket class to implement a network-based extension, use readImpl
+   *   to avoid the internal buffer, stream filters, and so on
+   * - filteredRead() (wrapper around readImpl()) to call user-supplied stream
+   *   filters if you reimplement read()
+   *
+   * Stream filters are only supported for read() - the fgetc() and seek()
+   * behavior in Zend is undocumented, surprising, and not supported
+   * in HHVM.
+   */
 
   /**
    * Read one chunk of input. Returns a null string on failure or eof.
@@ -101,6 +119,19 @@ public:
   virtual int getc();
   virtual String read(int64_t length);
   virtual String read();
+
+  /* Use:
+   * - write() in response to a PHP code that is documented as writing to a
+   *   stream
+   * - writeImpl() if you want C-like behavior, instead of PHP-like behavior;
+   *   for example, if you write a network-based extension using Socket
+   * - filteredWrite() if you re-implement write() to provide support for PHP
+   *   user filters
+   *
+   * Stream filters are only supported for write() - the fputc() and seek()
+   * behavior in Zend is undocumented, surprising, and not supported
+   * in HHVM.
+   */
 
   /**
    * Write one chunk of output. Returns bytes written.
@@ -129,6 +160,10 @@ public:
   String getStreamType() const { return m_streamType; }
   Resource &getStreamContext() { return m_streamContext; }
   void setStreamContext(Resource &context) { m_streamContext = context; }
+  void appendReadFilter(Resource &filter);
+  void appendWriteFilter(Resource &filter);
+  void prependReadFilter(Resource &filter);
+  void prependWriteFilter(Resource &filter);
 
   int64_t bufferedLen() { return m_writepos - m_readpos; }
 
@@ -194,13 +229,30 @@ protected:
   StringData* m_wrapperType;
   StringData* m_streamType;
   Resource m_streamContext;
+  smart::list<Resource> m_readFilters;
+  smart::list<Resource> m_writeFilters;
 
+  void invokeFiltersOnClose();
   void closeImpl();
   virtual void sweep() FOLLY_OVERRIDE;
 
+  /**
+   * call readImpl(m_buffer, CHUNK_SIZE), passing through stream filters if any.
+   */
+  int64_t filteredReadToBuffer();
+
+  /**
+   * call writeImpl, passing through stream filters if any.
+   */
+  int64_t filteredWrite(const char* buffer, int64_t length);
 private:
   static const int CHUNK_SIZE = 8192;
   char *m_buffer;
+  int64_t m_bufferSize;
+
+  String applyFilters(const String& buffer,
+                      smart::list<Resource>& filters,
+                      bool closing);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

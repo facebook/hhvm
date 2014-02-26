@@ -114,35 +114,12 @@ std::string safe_dirname(const std::string& path);
 size_t dirname_helper(char *path, int len);
 
 /**
- * Round up value to the nearest power of two
- */
-template<typename Int>
-inline Int roundUpToPowerOfTwo(Int value) {
-#ifdef DEBUG
-  (void) (0 / value); // fail for 0; ASSERT is a pain.
-#endif
-  --value;
-  // Verified that gcc is smart enough to unroll this and emit
-  // constant shifts.
-  for (unsigned i = 1; i < sizeof(Int) * 8; i *= 2)
-    value |= value >> i;
-  ++value;
-  return value;
-}
-
-/**
  * Search for PHP or non-PHP files under a directory.
  */
 void find(std::vector<std::string> &out,
           const std::string &root, const char *path, bool php,
           const std::set<std::string> *excludeDirs = nullptr,
           const std::set<std::string> *excludeFiles = nullptr);
-
-inline void assert_native_stack_aligned() {
-#ifndef NDEBUG
-  assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
-#endif
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

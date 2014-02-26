@@ -27,7 +27,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/parser/parser.h"
-
+#include "folly/Bits.h"
 #include <iostream>
 #include <algorithm>
 
@@ -2365,7 +2365,7 @@ Class::PropInitVec::operator=(const PropInitVec& piv) {
   assert(!m_smart);
   if (this != &piv) {
     unsigned sz = m_size = piv.size();
-    if (sz) sz = Util::roundUpToPowerOfTwo(sz);
+    if (sz) sz = folly::nextPowTwo(sz);
     free(m_data);
     m_data = (TypedValueAux*)malloc(sz * sizeof(*m_data));
     assert(m_data);

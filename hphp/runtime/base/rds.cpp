@@ -22,6 +22,7 @@
 
 #include "folly/String.h"
 #include "folly/Hash.h"
+#include "folly/Bits.h"
 
 #include "hphp/util/maphuge.h"
 #include "hphp/util/mutex.h"
@@ -135,7 +136,7 @@ namespace detail {
 
 Handle alloc(Mode mode, size_t numBytes, size_t align) {
   s_allocMutex.assertOwnedBySelf();
-  align = Util::roundUpToPowerOfTwo(align);
+  align = folly::nextPowTwo(align);
   auto& frontier = mode == Mode::Persistent ? s_persistent_frontier
                                             : s_frontier;
 

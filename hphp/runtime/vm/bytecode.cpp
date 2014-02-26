@@ -6341,7 +6341,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
 }
 
 bool VMExecutionContext::doFCallArrayTC(PC pc) {
-  Util::assert_native_stack_aligned();
+  JIT::assert_native_stack_aligned();
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
   auto const ret = doFCallArray(pc);

@@ -83,11 +83,16 @@ inline int64_t localOffset(int64_t locId) {
   return -cellsToBytes(locId + 1);
 }
 
+inline void assert_native_stack_aligned() {
+#ifndef NDEBUG
+  assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
+#endif
+}
 
 struct VMRegAnchor : private boost::noncopyable {
   VMRegState m_old;
   VMRegAnchor() {
-    Util::assert_native_stack_aligned();
+    assert_native_stack_aligned();
     m_old = tl_regState;
     g_translator->sync();
   }

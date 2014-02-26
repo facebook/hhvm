@@ -212,7 +212,7 @@ int64_t Socket::writeImpl(const char *buffer, int64_t length) {
 }
 
 bool Socket::eof() {
-  if (!m_eof && valid()) {
+  if (!m_eof && valid() && bufferedLen() == 0) {
     // Test if stream is EOF if the flag is not already set.
     // Attempt to peek at one byte from the stream, checking for:
     // i)  recv() closing gracefully, or

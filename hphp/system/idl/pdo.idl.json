@@ -79,7 +79,7 @@
                     ]
                 },
                 {
-                    "name": "begintransaction",
+                    "name": "beginTransaction",
                     "desc": "Turns off autocommit mode. While autocommit mode is turned off, changes made to the database via the PDO object instance are not committed until you end the transaction by calling PDO::commit(). Calling PDO::rollBack() will roll back all changes to the database and return the connection to autocommit mode.\n\nSome databases, including MySQL, automatically issue an implicit COMMIT when a database definition language (DDL) statement such as DROP TABLE or CREATE TABLE is issued within a transaction. The implicit COMMIT will prevent you from rolling back any other changes within the transaction boundary.",
                     "flags": [
                     ],
@@ -103,7 +103,7 @@
                     ]
                 },
                 {
-                    "name": "rollback",
+                    "name": "rollBack",
                     "desc": "Rolls back the current transaction, as initiated by PDO::beginTransaction(). It is an error to call this method if no transaction is active.\n\nIf the database was set to autocommit mode, this function will restore autocommit mode after it has rolled back the transaction.\n\nSome databases, including MySQL, automatically issue an implicit COMMIT when a database definition language (DDL) statement such as DROP TABLE or CREATE TABLE is issued within a transaction. The implicit COMMIT will prevent you from rolling back any other changes within the transaction boundary.",
                     "flags": [
                     ],
@@ -115,7 +115,7 @@
                     ]
                 },
                 {
-                    "name": "setattribute",
+                    "name": "setAttribute",
                     "desc": "Sets an attribute on the database handle. Some of the available generic attributes are listed below; some drivers may make use of additional driver specific attributes.\n\nPDO::ATTR_CASE: Force column names to a specific case.\n\nPDO::CASE_LOWER: Force column names to lower case.\n\nPDO::CASE_NATURAL: Leave column names as returned by the database driver.\n\nPDO::CASE_UPPER: Force column names to upper case. PDO::ATTR_ERRMODE: Error reporting. PDO::ERRMODE_SILENT: Just set error codes. PDO::ERRMODE_WARNING: Raise E_WARNING. PDO::ERRMODE_EXCEPTION: Throw exceptions. PDO::ATTR_ORACLE_NULLS (available with all drivers, not just Oracle): Conversion of NULL and empty strings. PDO::NULL_NATURAL: No conversion. PDO::NULL_EMPTY_STRING: Empty string is converted to NULL. PDO::NULL_TO_STRING: NULL is converted to an empty string. PDO::ATTR_STRINGIFY_FETCHES: Convert numeric values to strings when fetching. Requires bool. PDO::ATTR_STATEMENT_CLASS: Set user-supplied statement class derived from PDOStatement. Cannot be used with persistent PDO instances. Requires array(string classname, array(mixed constructor_args)). PDO::ATTR_TIMEOUT: Specifies the timeout duration in seconds. Not all drivers support this option, and it's meaning may differ from driver to driver. For example, sqlite will wait for up to this time value before giving up on obtaining an writable lock, but other drivers may interpret this as a connect or a read timeout interval. Requires int. PDO::ATTR_AUTOCOMMIT (available in OCI, Firebird and MySQL): Whether to autocommit every single statement. PDO::MYSQL_ATTR_USE_BUFFERED_QUERY (available in MySQL): Use buffered queries.",
                     "flags": [
                     ],
@@ -135,7 +135,7 @@
                     ]
                 },
                 {
-                    "name": "getattribute",
+                    "name": "getAttribute",
                     "desc": "This function returns the value of a database connection attribute. To retrieve PDOStatement attributes, refer to PDOStatement::getAttribute().\n\nNote that some database\/driver combinations may not support all of the database connection attributes.",
                     "flags": [
                     ],
@@ -169,7 +169,7 @@
                     ]
                 },
                 {
-                    "name": "lastinsertid",
+                    "name": "lastInsertId",
                     "desc": "Returns the ID of the last inserted row, or the last value from a sequence object, depending on the underlying driver. For example, PDO_PGSQL() requires you to specify the name of a sequence object for the name parameter.\n\nThis method may not return a meaningful or consistent result across different PDO drivers, because the underlying database may not even support the notion of auto-increment fields or sequences.",
                     "flags": [
                     ],
@@ -187,7 +187,7 @@
                     ]
                 },
                 {
-                    "name": "errorcode",
+                    "name": "errorCode",
                     "flags": [
                     ],
                     "return": {
@@ -198,7 +198,7 @@
                     ]
                 },
                 {
-                    "name": "errorinfo",
+                    "name": "errorInfo",
                     "flags": [
                     ],
                     "return": {
@@ -212,6 +212,7 @@
                     "name": "query",
                     "desc": "PDO::query() executes an SQL statement in a single function call, returning the result set (if any) returned by the statement as a PDOStatement object.\n\nFor a query that you need to issue multiple times, you will realize better performance if you prepare a PDOStatement object using PDO::prepare() and issue the statement with multiple calls to PDOStatement::execute().\n\nIf you do not fetch all of the data in a result set before issuing your next call to PDO::query(), your call may fail. Call PDOStatement::closeCursor() to release the database resources associated with the PDOStatement object before issuing your next call to PDO::query().\n\nAlthough this function is only documented as having a single parameter, you may pass additional arguments to this function. They will be treated as though you called PDOStatement::setFetchMode() on the resultant statement object.",
                     "flags": [
+                        "VariableArguments"
                     ],
                     "return": {
                         "type": "Variant",
@@ -330,7 +331,7 @@
                     ]
                 },
                 {
-                    "name": "getavailabledrivers",
+                    "name": "getAvailableDrivers",
                     "desc": "This function returns all currently available PDO drivers which can be used in DSN parameter of PDO::__construct(). This is a static method.",
                     "flags": [
                         "IsStatic"
@@ -733,7 +734,7 @@
                     ]
                 },
                 {
-                    "name": "fetchobject",
+                    "name": "fetchObject",
                     "desc": "Fetches the next row and returns it as an object. This function is an alternative to PDOStatement::fetch() with PDO::FETCH_CLASS or PDO::FETCH_OBJ style.",
                     "flags": [
                     ],
@@ -757,7 +758,7 @@
                     ]
                 },
                 {
-                    "name": "fetchcolumn",
+                    "name": "fetchColumn",
                     "desc": "Returns a single column from the next row of a result set or FALSE if there are no more rows.",
                     "flags": [
                     ],
@@ -775,7 +776,7 @@
                     ]
                 },
                 {
-                    "name": "fetchall",
+                    "name": "fetchAll",
                     "flags": [
                     ],
                     "return": {
@@ -804,7 +805,7 @@
                     ]
                 },
                 {
-                    "name": "bindvalue",
+                    "name": "bindValue",
                     "desc": "Binds a value to a corresponding named or question mark placeholder in the SQL statement that was use to prepare the statement.",
                     "flags": [
                     ],
@@ -832,7 +833,7 @@
                     ]
                 },
                 {
-                    "name": "bindparam",
+                    "name": "bindParam",
                     "desc": "Binds a PHP variable to a corresponding named or question mark placeholder in the SQL statement that was use to prepare the statement. Unlike PDOStatement::bindValue(), the variable is bound as a reference and will only be evaluated at the time that PDOStatement::execute() is called.\n\nMost parameters are input parameters, that is, parameters that are used in a read-only fashion to build up the query. Some drivers support the invocation of stored procedures that return data as output parameters, and some also as input\/output parameters that both send in data and are updated to receive it.",
                     "flags": [
                     ],
@@ -872,7 +873,7 @@
                     ]
                 },
                 {
-                    "name": "bindcolumn",
+                    "name": "bindColumn",
                     "desc": "PDOStatement::bindColumn() arranges to have a particular variable bound to a given column in the result-set from a query. Each call to PDOStatement::fetch() or PDOStatement::fetchAll() will update all the variables that are bound to columns.\n\nSince information about the columns is not always available to PDO until the statement is executed, portable applications should call this function after PDOStatement::execute().\n\nHowever, to be able to bind a LOB column as a stream when using the PgSQL driver, applications should call this method before calling PDOStatement::execute(), otherwise the large object OID will be returned as an integer.",
                     "flags": [
                     ],
@@ -913,7 +914,7 @@
                     ]
                 },
                 {
-                    "name": "rowcount",
+                    "name": "rowCount",
                     "desc": "PDOStatement::rowCount() returns the number of rows affected by the last DELETE, INSERT, or UPDATE statement executed by the corresponding PDOStatement object.\n\nIf the last SQL statement executed by the associated PDOStatement was a SELECT statement, some databases may return the number of rows returned by that statement. However, this behaviour is not guaranteed for all databases and should not be relied on for portable applications.",
                     "flags": [
                     ],
@@ -925,7 +926,7 @@
                     ]
                 },
                 {
-                    "name": "errorcode",
+                    "name": "errorCode",
                     "flags": [
                     ],
                     "return": {
@@ -936,7 +937,7 @@
                     ]
                 },
                 {
-                    "name": "errorinfo",
+                    "name": "errorInfo",
                     "flags": [
                     ],
                     "return": {
@@ -947,7 +948,7 @@
                     ]
                 },
                 {
-                    "name": "setattribute",
+                    "name": "setAttribute",
                     "desc": "Sets an attribute on the statement. Currently, no generic attributes are set but only driver specific: PDO::ATTR_CURSOR_NAME (Firebird and ODBC specific): Set the name of cursor for UPDATE ... WHERE CURRENT OF.",
                     "flags": [
                     ],
@@ -967,7 +968,7 @@
                     ]
                 },
                 {
-                    "name": "getattribute",
+                    "name": "getAttribute",
                     "desc": "Gets an attribute of the statement. Currently, no generic attributes exist but only driver specific: PDO::ATTR_CURSOR_NAME (Firebird and ODBC specific): Get the name of cursor for UPDATE ... WHERE CURRENT OF.",
                     "flags": [
                     ],
@@ -983,7 +984,7 @@
                     ]
                 },
                 {
-                    "name": "columncount",
+                    "name": "columnCount",
                     "desc": "Use PDOStatement::columnCount() to return the number of columns in the result set represented by the PDOStatement object.\n\nIf the PDOStatement object was returned from PDO::query(), the column count is immediately available.\n\nIf the PDOStatement object was returned from PDO::prepare(), an accurate column count will not be available until you invoke PDOStatement::execute().",
                     "flags": [
                     ],
@@ -995,7 +996,7 @@
                     ]
                 },
                 {
-                    "name": "getcolumnmeta",
+                    "name": "getColumnMeta",
                     "flags": [
                     ],
                     "return": {
@@ -1011,7 +1012,7 @@
                     ]
                 },
                 {
-                    "name": "setfetchmode",
+                    "name": "setFetchMode",
                     "flags": [
                         "VariableArguments"
                     ],
@@ -1028,7 +1029,7 @@
                     ]
                 },
                 {
-                    "name": "nextrowset",
+                    "name": "nextRowset",
                     "desc": "Some database servers support stored procedures that return more than one rowset (also known as a result set). PDOStatement::nextRowset() enables you to access the second and subsequent rowsets associated with a PDOStatement object. Each rowset can have a different set of columns from the preceding rowset.",
                     "flags": [
                     ],
@@ -1040,7 +1041,7 @@
                     ]
                 },
                 {
-                    "name": "closecursor",
+                    "name": "closeCursor",
                     "desc": "PDOStatement::closeCursor() frees up the connection to the server so that other SQL statements may be issued, but leaves the statement in a state that enables it to be executed again.\n\nThis method is useful for database drivers that do not support executing a PDOStatement object when a previously executed PDOStatement object still has unfetched rows. If your database driver suffers from this limitation, the problem may manifest itself in an out-of-sequence error.\n\nPDOStatement::closeCursor() is implemented either as an optional driver specific method (allowing for maximum efficiency), or as the generic PDO fallback if no driver specific function is installed. The PDO generic fallback is semantically the same as writing the following code in your PHP script:",
                     "flags": [
                     ],
@@ -1052,7 +1053,7 @@
                     ]
                 },
                 {
-                    "name": "debugdumpparams",
+                    "name": "debugDumpParams",
                     "desc": "Dumps the informations contained by a prepared statement directly on the output. It will provide the SQL query in use, the number of parameters used (Params), the list of parameters, with their name, type (paramtype) as an integer, their key name or position, the value, and the position in the query (if this is supported by the PDO driver, otherwise, it will be -1).\n\nThis is a debug function, which dump directly the data on the normal output. TipAs with anything that outputs its result directly to the browser, the output-control functions can be used to capture the output of this function, and save it in a string (for example).\n\nThis will only dumps the parameters in the statement at the moment of the dump. Extra parameters are not stored in the statement, and not displayed.",
                     "flags": [
                     ],

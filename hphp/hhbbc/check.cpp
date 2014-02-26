@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/class-util.h"
 
 namespace HPHP { namespace HHBBC { namespace php {
 
@@ -237,7 +238,7 @@ bool check(const php::Class& c) {
   for (DEBUG_ONLY auto& m : c.methods) assert(check(*m));
 
   // Some invariants about Closure classes.
-  auto const isClo = c.parentName && c.parentName->isame(s_Closure.get());
+  auto const isClo = is_closure(c);
   if (c.closureContextCls) {
     assert(c.closureContextCls->unit == c.unit);
     assert(isClo);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,7 @@
  *
  *   - Missing support for static variables in a function/method.
  *
- * @author Jorden DeLong <delong.j@fb.com>
+ * @author Jordan DeLong <delong.j@fb.com>
  */
 
 #include "hphp/runtime/vm/as.h"
@@ -398,7 +398,7 @@ struct StackDepth {
   int maxOffset;
   int minOffset;
   int minOffsetLine;
-  boost::optional<int> baseValue;
+  folly::Optional<int> baseValue;
 
   /*
    * During the parsing process, when a Jmp instruction is encountered, the
@@ -505,8 +505,8 @@ struct AsmState : private boost::noncopyable {
 
     if (currentStackDepth == nullptr) {
       stack << "/";
-    } else if(currentStackDepth->baseValue) {
-      stack << currentStackDepth->baseValue.get() +
+    } else if (currentStackDepth->baseValue) {
+      stack << *currentStackDepth->baseValue +
                currentStackDepth->currentOffset;
     } else {
       stack << "?" << currentStackDepth->currentOffset;
@@ -611,7 +611,7 @@ struct AsmState : private boost::noncopyable {
     ent.m_fcallOff = ue->bcPos();
     ent.m_fpOff = reg.fpOff;
     if (reg.stackDepth->baseValue) {
-      ent.m_fpOff += reg.stackDepth->baseValue.get();
+      ent.m_fpOff += *reg.stackDepth->baseValue;
     } else {
       // base value still unknown, this will need to be updated later
       fpiToUpdate.push_back(std::make_pair(&ent, reg.stackDepth));
@@ -678,7 +678,7 @@ struct AsmState : private boost::noncopyable {
         error("created a FPI from an unreachable instruction");
       }
 
-      kv.first->m_fpOff += kv.second->baseValue.get();
+      kv.first->m_fpOff += *kv.second->baseValue;
     }
 
     // Stack depth should be 0 at the end of a function body

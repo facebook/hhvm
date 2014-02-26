@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,21 +40,6 @@ typedef hphp_const_char_map<hphp_const_char_map<uint64_t>> StatGroupMap;
 __thread StatGroupMap* tl_stat_groups = nullptr;
 
 std::atomic<const char*> helperNames[kMaxNumTrampolines];
-
-void
-emitInc(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
-  if (!force && !enabled()) return;
-  uintptr_t virtualAddress = uintptr_t(&tl_table[index]) - tlsBase();
-  X64Assembler a { cb };
-
-  a.    pushf ();
-  a.    push  (reg::rAsm);
-  a.    movq  (virtualAddress, reg::rAsm);
-  a.    fs();
-  a.    addq  (n, *reg::rAsm);
-  a.    pop   (reg::rAsm);
-  a.    popf  ();
-}
 
 void init() {
   if (!enabledAny()) return;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,14 +46,14 @@ static ResolverLibInitializer _resolver_lib_initializer;
 ///////////////////////////////////////////////////////////////////////////////
 // thread-safe network functions
 
-std::string Util::safe_inet_ntoa(struct in_addr &in) {
+std::string safe_inet_ntoa(struct in_addr &in) {
   char buf[256];
   memset(buf, 0, sizeof(buf));
   inet_ntop(AF_INET, &in, buf, sizeof(buf)-1);
   return buf;
 }
 
-bool Util::safe_gethostbyname(const char *address, HostEnt &result) {
+bool safe_gethostbyname(const char *address, HostEnt &result) {
 #if defined(__APPLE__)
   struct hostent *hp = gethostbyname(address);
 
@@ -81,7 +81,7 @@ bool Util::safe_gethostbyname(const char *address, HostEnt &result) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string Util::GetPrimaryIP() {
+std::string GetPrimaryIP() {
   struct utsname buf;
   uname((struct utsname *)&buf);
 
@@ -109,7 +109,7 @@ static std::string normalizeIPv6Address(const std::string& address) {
   return ipPresentation;
 }
 
-Util::HostURL::HostURL(const std::string &hosturl, int port) :
+HostURL::HostURL(const std::string &hosturl, int port) :
   m_ipv6(false), m_port(port) {
 
   // Find the scheme

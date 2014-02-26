@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,6 +27,7 @@ namespace HPHP {
 const StaticString
   s_mysqli("mysqli"),
   s_connection("__connection"),
+  s_link("__link"),
   s_result("__result"),
   s_stmt("__stmt"),
   s_charset("charset"),
@@ -43,7 +44,9 @@ const StaticString
   s_mysqli_result("mysqli_result"),
   s_mysqli_sql_exception("mysqli_sql_exception"),
   s_mysqli_stmt("mysqli_stmt"),
-  s_mysqli_warning("mysqli_warning");
+  s_mysqli_warning("mysqli_warning"),
+  s_persistent_prefix("p:"),
+  s_def("def");
 
 //////////////////////////////////////////////////////////////////////////////
 // helper
@@ -51,7 +54,7 @@ static Resource get_connection_resource(Object obj) {
   auto res = obj->o_realProp(s_connection, ObjectData::RealPropUnchecked,
                              s_mysqli.get());
   if (!res || !res->isResource()) {
-    return Resource();
+    return null_resource;
   }
 
   return res->toResource();
@@ -63,10 +66,11 @@ static MySQL *get_connection(Object obj) {
 }
 
 static MySQLStmt *getStmt(Object obj) {
-  auto res = obj->o_get(s_stmt, false, s_mysqli_stmt.get());
-  assert(res.isResource());
+  auto res = obj->o_realProp(s_stmt, ObjectData::RealPropUnchecked,
+                             s_mysqli_stmt.get());
+  assert(res->isResource());
 
-  auto stmt = res.toResource().getTyped<MySQLStmt>(false, false);
+  auto stmt = res->asResRef().getTyped<MySQLStmt>(false, false);
   assert(stmt);
 
   return stmt;
@@ -147,7 +151,7 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
 #define VALIDATE_CONN(conn, state)                                             \
   if (!conn || (state && (int64_t)conn->getState() < state)) {                 \
     raise_warning("invalid object or resource mysqli");                        \
-    return Variant(Variant::NullInit());                                       \
+    return init_null();                                                        \
   }
 
 #define VALIDATE_CONN_CONNECTED(conn) VALIDATE_CONN(conn, MySQLState::CONNECTED)
@@ -203,10 +207,6 @@ static Variant HHVM_METHOD(mysqli, get_charset) {
 //static Variant HHVM_METHOD(mysqli, get_connection_stats) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
-//
-//static Object HHVM_METHOD(mysqli, get_warnings) {
-//  throw NotImplementedException(__FUNCTION__);
-//}
 
 static Variant HHVM_METHOD(mysqli, hh_field_count) {
   auto conn = get_connection(this_);
@@ -232,17 +232,22 @@ static void HHVM_METHOD(mysqli, hh_init) {
 }
 
 static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
-                           const Variant& username, const Variant& password,
-                           const Variant& dbname, int client_flags) {
+                        const Variant& username, const Variant& password,
+                        const Variant& dbname, const Variant& client_flags) {
+  bool persistent = false;
+  String s = server.toString();
+  if (s.substr(0, 2).equal(s_persistent_prefix)) {
+    persistent = true;
+    s = s.substr(2);
+  }
   auto conn = get_connection(this_);
   assert(conn);
   Variant ret = php_mysql_do_connect_on_link(
-                  conn, server.toString(), username.toString(),
-                  password.toString(), dbname.toString(), client_flags, false,
-                  false, -1, -1);
+                  conn, s, username.toString(), password.toString(),
+                  dbname.toString(), client_flags.toInt64(), persistent, false,
+                  -1, -1);
   return ret.toBoolean();
 }
-
 
 static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
   auto res = get_connection_resource(this_);
@@ -253,13 +258,41 @@ static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
 static Variant HHVM_METHOD(mysqli, hh_server_version) {
   auto conn = get_connection(this_);
   VALIDATE_CONN_CONNECTED(conn);
-  return mysql_get_server_version(conn->get());
+  return (int64_t)mysql_get_server_version(conn->get());
 }
 
 static Variant HHVM_METHOD(mysqli, hh_sqlstate) {
   auto conn = get_connection(this_);
   VALIDATE_CONN_CONNECTED(conn);
   return String(mysql_sqlstate(conn->get()), CopyString);
+}
+
+static void HHVM_METHOD(mysqli, hh_update_last_error, Object stmt_obj) {
+  auto conn = get_connection(this_);
+  assert(conn);
+
+  auto stmt = getStmt(stmt_obj);
+  assert(stmt);
+
+  auto s = stmt->get();
+  auto mysql = conn->get();
+
+  auto last_errno = mysql_stmt_errno(s);
+  char last_error[MYSQL_ERRMSG_SIZE];
+  char sqlstate[SQLSTATE_LENGTH + 1];
+  memcpy(last_error, mysql_stmt_error(s), MYSQL_ERRMSG_SIZE);
+  memcpy(sqlstate, mysql->net.sqlstate, SQLSTATE_LENGTH + 1);
+
+  // This will clear the error both on the stmt and connection so we make sure
+  // it closed now. Otherwise it will happen when the object is swept later
+  stmt->close();
+
+  // The MySQL C API documentation say that you shouldn't touch the internals of
+  // the MySQL's datastructurs. But this is how Zend does it and there is no
+  // other good way
+  mysql->net.last_errno = last_errno;
+  memcpy(mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
+  memcpy(mysql->net.sqlstate, sqlstate, SQLSTATE_LENGTH + 1);
 }
 
 static Variant HHVM_METHOD(mysqli, kill, int64_t processid) {
@@ -426,7 +459,7 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
 #define VALIDATE_RESULT(res)                                                   \
   if (!res || !res->get()) {                                                   \
     raise_warning("invalid object or resource mysqli_result");                 \
-    return Variant(Variant::NullInit());                                       \
+    return init_null();                                                        \
   }
 
 static Variant HHVM_METHOD(mysqli_result, hh_field_tell) {
@@ -434,6 +467,35 @@ static Variant HHVM_METHOD(mysqli_result, hh_field_tell) {
   VALIDATE_RESULT(res)
   return res->tellField();
 }
+
+static Variant HHVM_METHOD(mysqli_result, fetch_field) {
+  auto res = getResult(this_);
+  VALIDATE_RESULT(res)
+
+  auto info = res->fetchFieldInfo();
+  if (!info) {
+    return false;
+  }
+
+  Object obj(SystemLib::AllocStdClassObject());
+  obj->o_set("name",       info->name);
+  obj->o_set("orgname",    info->org_name);
+  obj->o_set("table",      info->table);
+  obj->o_set("orgtable",   info->org_table);
+  obj->o_set("def",        info->def);
+  obj->o_set("db",         info->db);
+  obj->o_set("catalog",    s_def);
+  obj->o_set("max_length", info->max_length);
+  obj->o_set("length",     info->length);
+  obj->o_set("charsetnr",  (int64_t)info->charsetnr);
+  obj->o_set("flags",      (int64_t)info->flags);
+  obj->o_set("type",       info->type);
+  obj->o_set("decimals",   (int64_t)info->decimals);
+
+  return obj;
+}
+
+#undef VALIDATE_RESULT
 
 //////////////////////////////////////////////////////////////////////////////
 // class mysqli_stmt
@@ -458,9 +520,9 @@ static Variant HHVM_METHOD(mysqli_stmt, close) {
   return getStmt(this_)->close();
 }
 
-//static void HHVM_METHOD(mysqli_stmt, data_seek, int64_t offset) {
-//  throw NotImplementedException(__FUNCTION__);
-//}
+static void HHVM_METHOD(mysqli_stmt, data_seek, int64_t offset) {
+  getStmt(this_)->data_seek(offset);
+}
 
 static Variant HHVM_METHOD(mysqli_stmt, execute) {
   return getStmt(this_)->execute();
@@ -476,10 +538,6 @@ static void HHVM_METHOD(mysqli_stmt, free_result) {
 
 //static Object HHVM_METHOD(mysqli_stmt, get_result) {
 //  throw NotImplementedException("mysqli_stmt::get_result");
-//}
-//
-//static Object HHVM_METHOD(mysqli_stmt, get_warnings) {
-//  throw NotImplementedException(__FUNCTION__);
 //}
 
 static Variant HHVM_METHOD(mysqli_stmt, hh_affected_rows) {
@@ -588,7 +646,6 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli, dump_debug_info);
     HHVM_ME(mysqli, get_charset);
     //HHVM_ME(mysqli, get_connection_stats); // MYSQLND
-    //HHVM_ME(mysqli, get_warnings);
     HHVM_ME(mysqli, hh_field_count);
     HHVM_ME(mysqli, hh_get_connection);
     HHVM_ME(mysqli, hh_get_result);
@@ -597,6 +654,7 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli, hh_real_query);
     HHVM_ME(mysqli, hh_server_version);
     HHVM_ME(mysqli, hh_sqlstate);
+    HHVM_ME(mysqli, hh_update_last_error);
     HHVM_ME(mysqli, kill);
     HHVM_ME(mysqli, options);
     //HHVM_STATIC_ME(mysqli, poll); // MYSQLND
@@ -607,6 +665,7 @@ class mysqliExtension : public Extension {
 
     // mysqli_result
     HHVM_ME(mysqli_result, hh_field_tell);
+    HHVM_ME(mysqli_result, fetch_field);
 
     // mysqli_stmt
     HHVM_ME(mysqli_stmt, attr_get);
@@ -614,12 +673,11 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli_stmt, bind_param);
     HHVM_ME(mysqli_stmt, bind_result);
     HHVM_ME(mysqli_stmt, close);
-    //HHVM_ME(mysqli_stmt, data_seek);
+    HHVM_ME(mysqli_stmt, data_seek);
     HHVM_ME(mysqli_stmt, execute);
     HHVM_ME(mysqli_stmt, fetch);
     HHVM_ME(mysqli_stmt, free_result);
     //HHVM_ME(mysqli_stmt, get_result); // MYSQLND
-    //HHVM_ME(mysqli_stmt, get_warnings);
     HHVM_ME(mysqli_stmt, hh_affected_rows);
     HHVM_ME(mysqli_stmt, hh_errno);
     HHVM_ME(mysqli_stmt, hh_error);
@@ -633,10 +691,6 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli_stmt, result_metadata);
     HHVM_ME(mysqli_stmt, send_long_data);
     HHVM_ME(mysqli_stmt, store_result);
-
-    // mysqli_warning
-    //HHVM_ME(mysqli_warning, __construct);
-    //HHVM_ME(mysqli_warning, next);
 
     HHVM_FE(mysqli_get_client_version);
     //HHVM_FE(mysqli_get_client_stats);

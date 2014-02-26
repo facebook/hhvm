@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -32,6 +32,51 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
+
+static class MiscExtension : public Extension {
+public:
+  MiscExtension() : Extension("misc", k_PHP_VERSION.c_str()) { }
+  void requestInit() {
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "highlight.string", "#DD0000",
+      ini_on_update_stdstring, ini_get_stdstring,
+      &m_misc_highlight_default_string
+    );
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "highlight.comment", "#FF8000",
+      ini_on_update_stdstring, ini_get_stdstring,
+      &m_misc_highlight_default_comment
+    );
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "highlight.keyword", "#007700",
+      ini_on_update_stdstring, ini_get_stdstring,
+      &m_misc_highlight_default_keyword
+    );
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "highlight.default", "#0000BB",
+      ini_on_update_stdstring, ini_get_stdstring,
+      &m_misc_highlight_default_default
+    );
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "highlight.html", "#000000",
+      ini_on_update_stdstring, ini_get_stdstring,
+      &m_misc_highlight_default_html
+    );
+
+  }
+
+  std::string m_misc_highlight_default_string;
+  std::string m_misc_highlight_default_comment;
+  std::string m_misc_highlight_default_keyword;
+  std::string m_misc_highlight_default_default;
+  std::string m_misc_highlight_default_html;
+
+} s_misc_extension;
 
 using JIT::CallerFrame;
 

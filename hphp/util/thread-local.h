@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #include "hphp/util/exception.h"
 #include <errno.h>
 #include "folly/String.h"
-#include <boost/aligned_storage.hpp>
+#include <type_traits>
 
 namespace HPHP {
 
@@ -265,7 +265,7 @@ public:
 
 private:
   static __thread T *s_singleton;
-  typedef typename boost::aligned_storage<sizeof(T), sizeof(void*)>::type
+  typedef typename std::aligned_storage<sizeof(T), sizeof(void*)>::type
           StorageType;
   static __thread StorageType s_storage;
   static bool s_inited; // no-fast-TLS requires construction so be consistent

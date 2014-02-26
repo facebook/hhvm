@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -343,6 +343,16 @@ enum class IsTypeOp : uint8_t {
 #undef ISTYPE_OP
 };
 
+#define INITPROP_OPS    \
+  INITPROP_OP(Static)   \
+  INITPROP_OP(NonStatic)
+
+enum class InitPropOp : uint8_t {
+#define INITPROP_OP(op) op,
+  INITPROP_OPS
+#undef INITPROP_OP
+};
+
 // NB: right now hphp/hhbbc/abstract-interp.cpp depends on this enum
 // being in order from smaller types to larger ones.
 #define ASSERTT_OPS                             \
@@ -482,6 +492,7 @@ enum class BareThisOp : uint8_t {
   O(CnsU,            TWO(SA,SA),       NOV,             ONE(CV),    NF) \
   O(ClsCns,          ONE(SA),          ONE(AV),         ONE(CV),    NF) \
   O(ClsCnsD,         TWO(SA,SA),       NOV,             ONE(CV),    NF) \
+  O(NameA,           NA,               ONE(AV),         ONE(CV),    NF) \
   O(File,            NA,               NOV,             ONE(CV),    NF) \
   O(Dir,             NA,               NOV,             ONE(CV),    NF) \
   O(Concat,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -674,6 +685,8 @@ enum class BareThisOp : uint8_t {
   O(InterfaceExists, NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(TraitExists,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyParamType, ONE(IVA),         NOV,             NOV,        NF) \
+  O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
+  O(VerifyRetTypeV,  NA,               ONE(VV),         ONE(VV),    NF) \
   O(Self,            NA,               NOV,             ONE(AV),    NF) \
   O(Parent,          NA,               NOV,             ONE(AV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
@@ -703,6 +716,9 @@ enum class BareThisOp : uint8_t {
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(Floor,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Ceil,            NA,               ONE(CV),         ONE(CV),    NF) \
+  O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(InitProp,        TWO(SA,                                            \
+                       OA(InitPropOp)),ONE(CV),         NOV,        NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF) \
 
 enum class Op : uint8_t {
@@ -923,6 +939,7 @@ void staticArrayStreamer(ArrayData*, std::ostream&);
  * Convert subopcodes or opcodes into strings.
  */
 const char* opcodeToName(Op op);
+const char* subopToName(InitPropOp);
 const char* subopToName(IsTypeOp);
 const char* subopToName(AssertTOp);
 const char* subopToName(AssertObjOp);

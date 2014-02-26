@@ -9,7 +9,7 @@ else(READLINE_INCLUDE_DIR AND READLINE_LIBRARY AND NCURSES_LIBRARY)
   FIND_PATH(READLINE_INCLUDE_DIR readline/readline.h
     /usr/include/readline
   )
-  
+
 # 2008-04-22 The next clause used to read like this:
 #
 #  FIND_LIBRARY(READLINE_LIBRARY NAMES readline)
@@ -19,7 +19,7 @@ else(READLINE_INCLUDE_DIR AND READLINE_LIBRARY AND NCURSES_LIBRARY)
 #
 # I was advised to modify it such that it will find an ncurses library if
 # required, but not if one was explicitly given, that is, it allows the
-# default to be overridden. PH 
+# default to be overridden. PH
 
   FIND_LIBRARY(READLINE_LIBRARY NAMES readline)
         include(FindPackageHandleStandardArgs)

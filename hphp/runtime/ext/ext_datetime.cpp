@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,7 +24,7 @@ namespace HPHP {
 static class DateExtension : public Extension {
  public:
   DateExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
-  void moduleInit() {
+  void threadInit() {
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.timezone",
@@ -34,30 +34,22 @@ static class DateExtension : public Extension {
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
-      "date.default_latitude",
-      "31.7667",
-      ini_on_update_real, ini_get_real,
+      "date.default_latitude", "31.7667",
       &m_date_default_latitude
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
-      "date.default_longitude",
-      "35.2333",
-      ini_on_update_real, ini_get_real,
+      "date.default_longitude", "35.2333",
       &m_date_default_longitude
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
-      "date.sunset_zenith",
-      "90.583333",
-      ini_on_update_real, ini_get_real,
+      "date.sunset_zenith", "90.583333",
       &m_date_default_sunset_zenith
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
-      "date.sunrise_zenith",
-      "90.583333",
-      ini_on_update_real, ini_get_real,
+      "date.sunrise_zenith", "90.583333",
       &m_date_default_sunrise_zenith
     );
   }
@@ -94,12 +86,12 @@ static class DateExtension : public Extension {
     return f_date_default_timezone_set(value);
   }
 
-  static String dateTimezoneIniGet(void* p) {
+  static std::string dateTimezoneIniGet(void* p) {
     auto ret = g_context->getTimeZone();
     if (ret.isNull()) {
-      return empty_string;
+      return "";
     }
-    return ret;
+    return ret.toCppString();
   }
 
   double m_date_default_latitude;
@@ -162,9 +154,10 @@ Variant c_DateTime::ti_createfromformat(const String& format,
                                         const String& time,
                                         CObjRef timezone /*= null_object */) {
   c_DateTime *datetime = NEWOBJ(c_DateTime);
-  datetime->m_dt = NEWOBJ(DateTime);
+  const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
+  datetime->m_dt = NEWOBJ(DateTime(curr, false));
   if(!datetime->m_dt->fromString(time, c_DateTimeZone::unwrap(timezone),
-                             format.data(), false)) {
+                                 format.data(), false)) {
     return false;
   }
 
@@ -622,7 +615,7 @@ Variant f_date_create(const String& time /* = null_string */,
   Object ret(cdt);
   // Don't set the time here because it will throw if it is bad
   cdt->t___construct();
-  if (time.isNull()) {
+  if (time.empty()) {
     // zend does this, so so do we
     return ret;
   }

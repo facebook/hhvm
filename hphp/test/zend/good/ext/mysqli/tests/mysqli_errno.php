@@ -10,11 +10,11 @@
 
 	var_dump(mysqli_errno($link));
 
-	if (!mysqli_query($link, 'DROP TABLE IF EXISTS test')) {
+	if (!mysqli_query($link, 'DROP TABLE IF EXISTS test_mysqli_errno_table_1')) {
 		printf("[004] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 
-	mysqli_query($link, 'SELECT * FROM test');
+	mysqli_query($link, 'SELECT * FROM test_mysqli_errno_table_1');
 	var_dump(mysqli_errno($link));
 
 	@mysqli_query($link, 'No SQL');

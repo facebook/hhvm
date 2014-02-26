@@ -8,9 +8,9 @@
 	var_dump(@mysqli_sqlstate($link, "foo"));
 
 	var_dump(mysqli_sqlstate($link));
-	mysqli_query($link, "SELECT unknown_column FROM test");
+	mysqli_query($link, "SELECT unknown_column FROM test_mysqli_sqlstate_table_1");
 	var_dump(mysqli_sqlstate($link));
-	mysqli_free_result(mysqli_query($link, "SELECT id FROM test"));
+	mysqli_free_result(mysqli_query($link, "SELECT id FROM test_mysqli_sqlstate_table_1"));
 	var_dump(mysqli_sqlstate($link));
 
 	mysqli_close($link);

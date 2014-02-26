@@ -71,7 +71,7 @@ string. HipHop VM will just convert return value to string.
 
 (4) __call/__callStatic() handling
 
-These 2 examples give inconsistent results in Zend PHP 5.3:
+This example gives inconsistent results in Zend PHP 5.5:
 
   <?php
   class B {
@@ -80,19 +80,6 @@ These 2 examples give inconsistent results in Zend PHP 5.3:
     function __call($name, $arguments) { var_dump('G');}
     function f4missing($a) {
       B::f4missing(5); // __call checking happened at B
-    }
-  }
-  $g = new G();
-  $g->f4missing(3);
-
-  <?php
-  class B {
-    function __call($name, $arguments) { var_dump('B');}
-  }
-  class G extends B {
-    function __call($name, $arguments) { var_dump('G');}
-    function f4missing($a) {
-      B::f4missing(5); // G::__call() was called actually!
     }
   }
   $g = new G();
@@ -110,18 +97,16 @@ key(), reset(), end(), and each() builtin functions do not support objects.
 
 3. Misc
 
-(1) HipHop VM currently does not support PHP namespaces.
-
-(2) Case-insensitive constants
+(1) Case-insensitive constants
 
 HipHop VM does not support case-insensitive constants, for example:
   define('FOO', 123, true);
 
-(3) get_defined_vars() and get_declared_classes()
+(2) get_defined_vars() and get_declared_classes()
 
 HipHop VM may return variables/classes in a different order than Zend PHP.
 
-(4) XMLWriter
+(3) XMLWriter
 
 Under Zend PHP, XMLWriter class and its functions returned different types of
 objects,
@@ -136,13 +121,10 @@ objects,
 
 Under HipHop VM, they are the same.
 
-(5) ReflectionProperty::setAccessible() and ReflectionMethod::setAccessible()
-are not currently supported under HipHop VM.
-
-(6) HipHop VM only support preg_replace /e in limited cases.
+(4) HipHop VM only supports preg_replace /e in limited cases.
 Example unsupported case: phpt...bug24403
 
-(7) Under Zend PHP, you can assign to $GLOBALS:
+(5) Under Zend PHP, you can assign to $GLOBALS:
 
   $GLOBALS = 0;
   $x = $GLOBALS - 5;
@@ -152,5 +134,5 @@ Example unsupported case: phpt...bug24403
 
 Under HipHop VM, this is not allowed or not working at present.
 
-(8) All fatals prevent further PHP code from executing, including __destruct
+(6) All fatals prevent further PHP code from executing, including __destruct
 methods. N.B.: exit() is a fatal.

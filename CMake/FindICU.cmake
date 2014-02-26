@@ -93,4 +93,3 @@ ELSE(ICU_FOUND)
 		MESSAGE( STATUS "Optional package ICU was not found" )
 	ENDIF(ICU_FIND_REQUIRED)
 ENDIF(ICU_FOUND)
-

@@ -53,4 +53,3 @@ endif()
 if(CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
-

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1937,10 +1937,13 @@ void Parser::onWhereClause(Token &out, Token &expr) {
   out->exp = NEW_EXP(WhereClause, expr.exp);
 }
 
-void Parser::onJoinClause(Token &out, Token &var, Token &coll,
-  Token &left, Token &right) {
-  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
-                     left.exp, right.exp, "");
+void Parser::onJoinClause(Token &out, Token *var, Token &coll,
+  Token *left, Token *right) {
+  out->exp = NEW_EXP(JoinClause,
+                     var == nullptr ? "" : var->text(), coll.exp,
+                     left == nullptr ? nullptr : left->exp,
+                     right == nullptr ? nullptr : right->exp,
+                     "");
 }
 
 void Parser::onJoinIntoClause(Token &out, Token &var, Token &coll,
@@ -1965,7 +1968,7 @@ void Parser::onOrdering(Token &out, Token *orderings, Token &ordering) {
 }
 
 void Parser::onOrderingExpr(Token &out, Token &expr, Token *direction) {
-  out->exp = NEW_EXP(Ordering, expr.exp, (direction) ? direction->num() : 0);
+  out->exp = NEW_EXP(Ordering, expr.exp, (direction) ? direction->text() : "");
 }
 
 void Parser::onSelectClause(Token &out, Token &expr) {
@@ -2085,13 +2088,15 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
   return aliases;
 }
 
-void Parser::nns(int token) {
+void Parser::nns(int token, const std::string& text) {
   if (m_nsState == SeenNamespaceStatement && token != ';') {
     error("No code may exist outside of namespace {}: %s",
           getMessage().c_str());
     return;
   }
-  if (m_nsState == SeenNothing && token != T_DECLARE && token != ';') {
+
+  if (m_nsState == SeenNothing && !text.empty() && token != T_DECLARE &&
+      token != ';') {
     m_nsState = SeenNonNamespaceStatement;
   }
 }

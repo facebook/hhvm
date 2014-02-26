@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,13 +85,10 @@
 #include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
-#include "hphp/runtime/vm/request-arena.h"
-#include "hphp/util/arena.h"
 
 #include <iostream>
 #include <iomanip>
 #include <boost/format.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
 
 #include <cinttypes>
 
@@ -128,8 +125,7 @@ TRACE_SET_MOD(bcinterp);
 
 ActRec* ActRec::arGetSfp() const {
   ActRec* prevFrame = (ActRec*)m_savedRbp;
-  if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
-             Util::s_stackSize)) {
+  if (LIKELY(((uintptr_t)prevFrame - s_stackLimit) >= s_stackSize)) {
     if (LIKELY(prevFrame != nullptr)) return prevFrame;
   }
 
@@ -245,13 +241,11 @@ VarEnv::VarEnv()
   , m_malloced(false)
   , m_global(false)
   , m_cfp(0)
-  , m_nvTable(boost::in_place<NameValueTable>(
-      RuntimeOption::EvalVMInitialGlobalTableSize))
 {
-  TypedValue globalArray;
-  globalArray.m_type = KindOfArray;
-  globalArray.m_data.parr =
-    new (request_arena()) GlobalNameValueTableWrapper(&*m_nvTable);
+  m_nvTable.emplace(RuntimeOption::EvalVMInitialGlobalTableSize);
+
+  auto tableWrapper = smart_new<GlobalNameValueTableWrapper>(&*m_nvTable);
+  auto globalArray = make_tv<KindOfArray>(tableWrapper);
   globalArray.m_data.parr->incRefCount();
   m_nvTable->set(makeStaticString("GLOBALS"), &globalArray);
   tvRefcountedDecRef(&globalArray);
@@ -269,7 +263,7 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
 
   if (!numNames) return;
 
-  m_nvTable = boost::in_place<NameValueTable>(numNames);
+  m_nvTable.emplace(numNames);
 
   TypedValue** origLocs =
     reinterpret_cast<TypedValue**>(uintptr_t(this) + sizeof(VarEnv));
@@ -286,12 +280,7 @@ VarEnv::~VarEnv() {
            isGlobalScope() ? "global scope" : "local scope");
   assert(m_restoreLocations.empty());
 
-  if (!isGlobalScope()) {
-    if (LIKELY(!m_malloced)) {
-      varenv_arena().endFrame();
-      return;
-    }
-  } else {
+  if (isGlobalScope()) {
     /*
      * When detaching the global scope, we leak any live objects (and
      * let the smart allocator clean them up).  This is because we're
@@ -307,9 +296,7 @@ size_t VarEnv::getObjectSz(ActRec* fp) {
 }
 
 VarEnv* VarEnv::createLocalOnStack(ActRec* fp) {
-  auto& va = varenv_arena();
-  va.beginFrame();
-  void* mem = va.alloc(getObjectSz(fp));
+  void* mem = smart_malloc(getObjectSz(fp));
   VarEnv* ret = new (mem) VarEnv(fp, fp->getExtraArgs());
   TRACE(3, "Creating lazily attached VarEnv %p on stack\n", mem);
   return ret;
@@ -326,7 +313,12 @@ VarEnv* VarEnv::createLocalOnHeap(ActRec* fp) {
 VarEnv* VarEnv::createGlobal() {
   assert(!g_vmContext->m_globalVarEnv);
 
-  VarEnv* ret = new (request_arena()) VarEnv();
+  // Use smart_malloc instead of smartMallocSize since we need to use it above
+  // and don't want to have to record which allocator was used to select the
+  // appropriate deallocation function.
+  auto const mem = smart_malloc(sizeof(VarEnv));
+  auto ret = new (mem) VarEnv();
+
   TRACE(3, "Creating VarEnv %p [global scope]\n", ret);
   ret->m_global = true;
   g_vmContext->m_globalVarEnv = ret;
@@ -335,8 +327,15 @@ VarEnv* VarEnv::createGlobal() {
 
 void VarEnv::destroy(VarEnv* ve) {
   bool malloced = ve->m_malloced;
+  bool global = ve->isGlobalScope();
   ve->~VarEnv();
-  if (UNLIKELY(malloced)) free(ve);
+  if (LIKELY(!malloced)) {
+    if (LIKELY(!global)) {
+      smart_free(ve);
+    }
+  } else {
+    free(ve);
+  }
 }
 
 void VarEnv::attach(ActRec* fp) {
@@ -357,11 +356,10 @@ void VarEnv::attach(ActRec* fp) {
     return;
   }
   if (!m_nvTable) {
-    m_nvTable = boost::in_place<NameValueTable>(numNames);
+    m_nvTable.emplace(numNames);
   }
 
-  TypedValue** origLocs = new (varenv_arena()) TypedValue*[
-    func->numNamedLocals()];
+  TypedValue** origLocs = smart_new_array<TypedValue*>(func->numNamedLocals());
   TypedValue* loc = frame_local(fp, 0);
   for (Id i = 0; i < numNames; ++i, --loc) {
     assert(func->lookupVarId(func->localVarName(i)) == (int)i);
@@ -419,7 +417,7 @@ void VarEnv::detach(ActRec* fp) {
 void VarEnv::ensureNvt() {
   const size_t kLazyNvtSize = 3;
   if (!m_nvTable) {
-    m_nvTable = boost::in_place<NameValueTable>(kLazyNvtSize);
+    m_nvTable.emplace(kLazyNvtSize);
   }
 }
 
@@ -549,7 +547,7 @@ class StackElms {
       }
 
       madvise(m_elms, algnSz, MADV_DONTNEED);
-      Util::numa_bind_to(m_elms, algnSz, Util::s_numaNode);
+      numa_bind_to(m_elms, algnSz, s_numaNode);
     }
     return m_elms;
   }
@@ -576,7 +574,7 @@ void Stack::ValidateStackSize() {
         % RuntimeOption::EvalVMStackElms
         % sMinStackElms));
   }
-  if (!Util::isPowerOfTwo(RuntimeOption::EvalVMStackElms)) {
+  if (!folly::isPowTwo(RuntimeOption::EvalVMStackElms)) {
     throw std::runtime_error(str(
       boost::format("VM stack size of 0x%llx is not a power of 2")
         % RuntimeOption::EvalVMStackElms));
@@ -887,10 +885,6 @@ TypedValue* Stack::generatorStackBase(const ActRec* fp) {
 }
 
 
-__thread RequestArenaStorage s_requestArenaStorage;
-__thread VarEnvArenaStorage s_varEnvArenaStorage;
-
-
 //=============================================================================
 // ExecutionContext.
 
@@ -898,8 +892,7 @@ using namespace HPHP;
 
 ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
   ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
-  if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
-             Util::s_stackSize)) {
+  if (LIKELY(((uintptr_t)prevFrame - s_stackLimit) >= s_stackSize)) {
     if (LIKELY(prevFrame != nullptr)) return prevFrame;
   }
 
@@ -2593,7 +2586,9 @@ public:
 void VMExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
   if (apcExtension::UseUncounted) {
-    Treadmill::WorkItem::enqueue(new FreedAPCHandle(std::move(m_apcHandles)));
+    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                  new FreedAPCHandle(std::move(m_apcHandles))));
+    m_apcHandles.clear();
   }
 }
 
@@ -2634,6 +2629,13 @@ Unit* VMExecutionContext::compileEvalString(
 }
 
 const String& VMExecutionContext::createFunction(const String& args, const String& code) {
+  if (UNLIKELY(RuntimeOption::RepoAuthoritative)) {
+    // Whole program optimizations need to assume they can see all the
+    // code.
+    raise_error("You can't use create_function in RepoAuthoritative mode; "
+                "use a closure instead");
+  }
+
   VMRegAnchor _;
   // It doesn't matter if there's a user function named __lambda_func; we only
   // use this name during parsing, and then change it to an impossible name
@@ -3517,6 +3519,14 @@ OPTBLD_INLINE void VMExecutionContext::iopDir(IOP_ARGS) {
   m_stack.pushStaticString(const_cast<StringData*>(s));
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopNameA(IOP_ARGS) {
+  NEXT();
+  auto const cls  = m_stack.topA();
+  auto const name = cls->name();
+  m_stack.popA();
+  m_stack.pushStaticString(const_cast<StringData*>(name));
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopInt(IOP_ARGS) {
   NEXT();
   DECODE(int64_t, i);
@@ -3722,24 +3732,16 @@ OPTBLD_INLINE void VMExecutionContext::iopDefCns(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopClsCns(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(clsCnsName);
-  TypedValue* tv = m_stack.topTV();
-  assert(tv->m_type == KindOfClass);
-  Class* class_ = tv->m_data.pcls;
-  assert(class_ != nullptr);
-  if (clsCnsName->isame(s_class.get())) {
-    // Doesn't decref tv since Classes aren't refcounted
-    auto name = const_cast<StringData*>(class_->name());
-    assert(name->isStatic());
-    tv->m_type = KindOfStaticString;
-    tv->m_data.pstr = name;
-    return;
-  }
-  auto const clsCns = class_->clsCnsGet(clsCnsName);
+
+  auto const cls    = m_stack.topA();
+  auto const clsCns = cls->clsCnsGet(clsCnsName);
+
   if (clsCns.m_type == KindOfUninit) {
     raise_error("Couldn't find constant %s::%s",
-                class_->name()->data(), clsCnsName->data());
+                cls->name()->data(), clsCnsName->data());
   }
-  cellDup(clsCns, *tv);
+
+  cellDup(clsCns, *m_stack.topTV());
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopClsCnsD(IOP_ARGS) {
@@ -6864,21 +6866,37 @@ OPTBLD_INLINE void VMExecutionContext::iopVerifyParamType(IOP_ARGS) {
   SYNC(); // We might need m_pc to be updated to throw.
   NEXT();
 
-  DECODE_IVA(param);
+  DECODE_IVA(paramId);
   const Func *func = m_fp->m_func;
-  assert(param < func->numParams());
+  assert(paramId < func->numParams());
   assert(func->numParams() == int(func->params().size()));
-  const TypeConstraint& tc = func->params()[param].typeConstraint();
+  const TypeConstraint& tc = func->params()[paramId].typeConstraint();
   assert(tc.hasConstraint());
-  if (UNLIKELY(!RuntimeOption::EvalCheckExtendedTypeHints &&
-               tc.isExtended())) {
+  if (!tc.isTypeVar()) {
+    tc.verifyParam(frame_local(m_fp, paramId), func, paramId);
+  }
+}
+
+OPTBLD_INLINE void VMExecutionContext::implVerifyRetType(IOP_ARGS) {
+  if (LIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
+    NEXT();
     return;
   }
-  if (tc.isTypeVar()) {
-    return;
+  SYNC();
+  NEXT();
+  const auto func = m_fp->m_func;
+  const auto tc = func->returnTypeConstraint();
+  if (!tc.isTypeVar()) {
+    tc.verifyReturn(m_stack.topTV(), func);
   }
-  const TypedValue *tv = frame_local(m_fp, param);
-  tc.verify(tv, func, param);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopVerifyRetTypeC(PC& pc) {
+  implVerifyRetType(IOP_PASS_ARGS);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopVerifyRetTypeV(PC& pc) {
+  implVerifyRetType(IOP_PASS_ARGS);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopNativeImpl(IOP_ARGS) {
@@ -7279,6 +7297,56 @@ OPTBLD_INLINE void VMExecutionContext::iopCeil(IOP_ARGS) {
   roundOpImpl(ceil);
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopCheckProp(IOP_ARGS) {
+  NEXT();
+  DECODE_LITSTR(propName);
+
+  auto* cls = m_fp->getClass();
+  auto* propVec = cls->getPropData();
+  always_assert(propVec);
+
+  auto* ctx = arGetContextClass(getFP());
+  auto idx = ctx->lookupDeclProp(propName);
+
+  auto& tv = (*propVec)[idx];
+  if (tv.m_type != KindOfUninit) {
+    m_stack.pushTrue();
+  } else {
+    m_stack.pushFalse();
+  }
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopInitProp(IOP_ARGS) {
+  NEXT();
+  DECODE_LITSTR(propName);
+  DECODE_OA(InitPropOp, propOp);
+
+  auto* cls = m_fp->getClass();
+  TypedValue* tv;
+  Slot idx;
+
+  auto* ctx = arGetContextClass(getFP());
+  auto* fr = m_stack.topC();
+
+  switch (propOp) {
+    case InitPropOp::Static: {
+      auto* propVec = cls->getSPropData();
+      always_assert(propVec);
+      idx = ctx->lookupSProp(propName);
+      tv = &propVec[idx];
+    } break;
+    case InitPropOp::NonStatic: {
+      auto* propVec = cls->getPropData();
+      always_assert(propVec);
+      idx = ctx->lookupDeclProp(propName);
+      tv = &(*propVec)[idx];
+    } break;
+  }
+
+  cellDup(*fr, *tvToCell(tv));
+  m_stack.popC();
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopStrlen(IOP_ARGS) {
   NEXT();
   TypedValue* subj = m_stack.topTV();
@@ -7625,10 +7693,7 @@ void VMExecutionContext::requestInit() {
   assert(SystemLib::s_nativeFuncUnit);
   assert(SystemLib::s_nativeClassUnit);
 
-  new (&s_requestArenaStorage) RequestArena();
-  new (&s_varEnvArenaStorage) VarEnvArena();
-
-  EnvConstants::requestInit(new (request_arena()) EnvConstants());
+  EnvConstants::requestInit(smart_new<EnvConstants>());
   VarEnv::createGlobal();
   m_stack.requestInit();
   tx64->requestInit();
@@ -7674,9 +7739,6 @@ void VMExecutionContext::requestExit() {
     VarEnv::destroy(m_globalVarEnv);
     m_globalVarEnv = 0;
   }
-
-  varenv_arena().~VarEnvArena();
-  request_arena().~RequestArena();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

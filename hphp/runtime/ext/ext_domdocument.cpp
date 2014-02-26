@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -132,10 +132,10 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
  * error handler callbacks.
  */
 
-static void php_libxml_ctx_error(void *ctx,
-                                 const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-static void php_libxml_ctx_error(void *ctx,
-                                 const char *msg, ...) {
+void php_libxml_ctx_error(void *ctx,
+                          const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+void php_libxml_ctx_error(void *ctx,
+                          const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {
@@ -144,10 +144,10 @@ static void php_libxml_ctx_error(void *ctx,
   va_end(args);
 }
 
-static void php_libxml_ctx_warning(void *ctx,
-                                   const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-static void php_libxml_ctx_warning(void *ctx,
-                                   const char *msg, ...) {
+void php_libxml_ctx_warning(void *ctx,
+                            const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+void php_libxml_ctx_warning(void *ctx,
+                            const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {

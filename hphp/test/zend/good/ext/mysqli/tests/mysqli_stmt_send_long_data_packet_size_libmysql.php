@@ -4,13 +4,13 @@
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
+	if (!mysqli_query($link, "DROP TABLE IF EXISTS test_mysqli_stmt_send_long_data_packet_size_libmysql_table_1"))
 		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, sprintf("CREATE TABLE test(id INT NOT NULL AUTO_INCREMENT, label LONGBLOB, PRIMARY KEY(id)) ENGINE = %s", $engine)))
+	if (!mysqli_query($link, sprintf("CREATE TABLE test_mysqli_stmt_send_long_data_packet_size_libmysql_table_1(id INT NOT NULL AUTO_INCREMENT, label LONGBLOB, PRIMARY KEY(id)) ENGINE = %s", $engine)))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (?, ?)"))
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_send_long_data_packet_size_libmysql_table_1(id, label) VALUES (?, ?)"))
 		printf("[004] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	$id = null;

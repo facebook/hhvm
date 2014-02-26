@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,6 +36,7 @@
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
@@ -611,7 +612,7 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
 
 const StaticString
   s_zero("\0", 1),
-  s_star("*");
+  s_protected_prefix("\0*\0", 3);
 
 void ObjectData::serialize(VariableSerializer* serializer) const {
   if (UNLIKELY(serializer->incNestedLevel((void*)this, true))) {
@@ -626,7 +627,41 @@ const StaticString
   s_PHP_DebugDisplay("__PHP_DebugDisplay"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
-  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
+  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name"),
+  s_debugInfo("__debugInfo");
+
+/* Get properties from the actual object unless we're
+ * serializing for var_dump()/print_r() and the object
+ * exports a __debugInfo() magic method.
+ * In which case, call that and use the array it returns.
+ */
+inline Array getSerializeProps(const ObjectData* obj,
+                               VariableSerializer* serializer) {
+  if ((serializer->getType() != VariableSerializer::Type::PrintR) &&
+      (serializer->getType() != VariableSerializer::Type::VarDump)) {
+    return obj->o_toArray();
+  }
+  auto cls = obj->getVMClass();
+  auto debuginfo = cls->lookupMethod(s_debugInfo.get());
+  if (!debuginfo) {
+    return obj->o_toArray();
+  }
+  if (debuginfo->attrs() & (AttrPrivate|AttrProtected|
+                            AttrAbstract|AttrStatic)) {
+    raise_warning("%s::__debugInfo() must be public and non-static",
+                  cls->name()->data());
+    return obj->o_toArray();
+  }
+  Variant ret = const_cast<ObjectData*>(obj)->o_invoke_few_args(s_debugInfo, 0);
+  if (ret.isArray()) {
+    return ret.toArray();
+  }
+  if (ret.isNull()) {
+    return Array::Create();
+  }
+  raise_error("__debugInfo() must return an array");
+  not_reached();
+}
 
 void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
@@ -706,38 +741,71 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   if (UNLIKELY(handleSleep)) {
     assert(!isCollection());
     if (ret.isArray()) {
-      auto thiz = const_cast<ObjectData*>(this);
       Array wanted = Array::Create();
-      Array props = ret.toArray();
+      assert(ret.getRawType() == KindOfArray); // can't be KindOfRef
+      const Array &props = ret.asCArrRef();
       for (ArrayIter iter(props); iter; ++iter) {
-        String name = iter.second().toString();
-        bool visible, accessible, unset;
-        thiz->getProp(m_cls, name.get(), visible, accessible, unset);
-        if (accessible && !unset) {
-          String propName = name;
-          Slot propInd = m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
-          if (accessible && propInd != kInvalidSlot) {
-            auto attrs = m_cls->declProperties()[propInd].m_attrs;
-            if (attrs & AttrPrivate) {
-              propName = concat4(s_zero, o_getClassName(), s_zero, name);
-            } else if (attrs & AttrProtected) {
-              propName = concat4(s_zero, s_star, s_zero, name);
+        String memberName = iter.second().toString();
+        String propName = memberName;
+        Class* ctx = m_cls;
+        auto attrMask = AttrNone;
+        if (memberName.data()[0] == 0) {
+          int subLen = memberName.find('\0', 1) + 1;
+          if (subLen > 2) {
+            if (subLen == 3 && memberName.data()[1] == '*') {
+              attrMask = AttrProtected;
+              memberName = memberName.substr(subLen);
+            } else {
+              attrMask = AttrPrivate;
+              String cls = memberName.substr(1, subLen - 2);
+              ctx = Unit::lookupClass(cls.get());
+              if (ctx) {
+                memberName = memberName.substr(subLen);
+              } else {
+                ctx = m_cls;
+              }
             }
           }
-          wanted.set(propName, const_cast<ObjectData*>(this)->
-              o_getImpl(name, RealPropUnchecked, true, o_getClassName()));
-        } else {
-          raise_warning("\"%s\" returned as member variable from "
-              "__sleep() but does not exist", name.data());
-          wanted.set(name, uninit_null());
         }
+
+        bool accessible;
+        Slot propInd = m_cls->getDeclPropIndex(ctx, memberName.get(),
+                                               accessible);
+        if (propInd != kInvalidSlot) {
+          if (accessible) {
+            const TypedValue* prop = &propVec()[propInd];
+            if (prop->m_type != KindOfUninit) {
+              auto attrs = m_cls->declProperties()[propInd].m_attrs;
+              if (attrs & AttrPrivate) {
+                memberName = concat4(s_zero, ctx->nameRef(),
+                                     s_zero, memberName);
+              } else if (attrs & AttrProtected) {
+                memberName = concat(s_protected_prefix, memberName);
+              }
+              if (!attrMask || (attrMask & attrs) == attrMask) {
+                wanted.set(memberName, tvAsCVarRef(prop));
+                continue;
+              }
+            }
+          }
+        }
+        if (!attrMask && UNLIKELY(getAttribute(HasDynPropArr))) {
+          const TypedValue* prop = dynPropArray()->nvGet(propName.get());
+          if (prop) {
+            wanted.set(propName, tvAsCVarRef(prop));
+            continue;
+          }
+        }
+        raise_notice("serialize(): \"%s\" returned as member variable from "
+                     "__sleep() but does not exist", propName.data());
+        wanted.set(propName, init_null());
       }
       serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
       wanted.serialize(serializer, true);
     } else {
-      raise_warning("serialize(): __sleep should return an array only "
-                    "containing the names of instance-variables to "
-                    "serialize");
+      raise_notice("serialize(): __sleep should return an array only "
+                   "containing the names of instance-variables to "
+                   "serialize");
       uninit_null().serialize(serializer);
     }
   } else {
@@ -745,7 +813,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
     } else {
       const String& className = o_getClassName();
-      Array properties = o_toArray();
+      Array properties = getSerializeProps(this, serializer);
       if (serializer->getType() ==
         VariableSerializer::Type::DebuggerSerialize) {
         try {
@@ -932,7 +1000,7 @@ ObjectData::~ObjectData() {
 void ObjectData::DeleteObject(ObjectData* objectData) {
   auto const cls = objectData->getVMClass();
 
-  if (UNLIKELY(objectData->getAttribute(IsCppBuiltin))) {
+  if (UNLIKELY(objectData->getAttribute(InstanceDtor))) {
     return cls->instanceDtor()(objectData, cls);
   }
 
@@ -1721,6 +1789,9 @@ ObjectData* ObjectData::cloneImpl() {
   ObjectData* obj;
   Object o = obj = ObjectData::newInstance(m_cls);
   cloneSet(obj);
+  if (UNLIKELY(getAttribute(HasNativeData))) {
+    Native::nativeDataInstanceCopy(obj, this);
+  }
 
   auto const hasCloneBit = getAttribute(HasClone);
 

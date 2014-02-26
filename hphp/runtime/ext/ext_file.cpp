@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/zend-scanf.h"
@@ -52,7 +53,7 @@
 #include <pwd.h>
 #include <fnmatch.h>
 
-#define CHECK_HANDLE_BASE(handle, f, ret) \
+#define CHECK_HANDLE_BASE(handle, f, ret)               \
   File *f = handle.getTyped<File>(true, true);          \
   if (f == nullptr || f->isClosed()) {                  \
     raise_warning("Not a valid stream resource");       \
@@ -119,9 +120,21 @@ static int accessSyscall(
 static int statSyscall(
     const String& path,
     struct stat* buf,
-    bool useFileCache = false) {
+    bool useFileCache = false,
+    bool isRelative = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
+  auto canUseFileCache = useFileCache && dynamic_cast<FileStreamWrapper*>(w);
+  if (isRelative) {
+    std::string realpath = StatCache::realpath(path.data());
+    // realpath will return an empty string for nonexistent files
+    if (realpath.empty()) {
+      return ENOENT;
+    }
+    auto translatedPath = canUseFileCache ?
+      File::TranslatePathWithFileCache(path) : File::TranslatePath(path);
+    return ::stat(translatedPath.data(), buf);
+  }
+  if (canUseFileCache) {
     return ::stat(File::TranslatePathWithFileCache(path).data(), buf);
   }
   return w->stat(path, buf);
@@ -257,13 +270,10 @@ bool f_feof(CResRef handle) {
 }
 
 Variant f_fstat(CResRef handle) {
-  PlainFile *file = handle.getTyped<PlainFile>(true, true);
-  if (!file) {
-    raise_warning("Not a valid stream resource");
-    return false;
-  }
+  CHECK_HANDLE(handle, f);
   struct stat sb;
-  CHECK_SYSTEM(fstat(file->fd(), &sb));
+  if (!CHECK_ERROR(f->stat(&sb)))
+    return false;
   return stat_impl(&sb);
 }
 
@@ -423,7 +433,8 @@ Variant f_file_get_contents(const String& filename,
 Variant f_file_put_contents(const String& filename, CVarRef data,
                             int flags /* = 0 */,
                             CVarRef context /* = null */) {
-  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb");
+  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb",
+                            flags, context);
   if (!fvar.toBoolean()) {
     return false;
   }
@@ -491,9 +502,11 @@ Variant f_file_put_contents(const String& filename, CVarRef data,
     break;
   }
 
-  if (numbytes < 0) {
+  // like fwrite(), fclose() can error when fflush()ing
+  if (numbytes < 0 || !f->close()) {
     return false;
   }
+
   return numbytes;
 }
 
@@ -569,10 +582,21 @@ Variant f_readfile(const String& filename, bool use_include_path /* = false */,
 
 bool f_move_uploaded_file(const String& filename, const String& destination) {
   Transport *transport = g_context->getTransport();
-  if (transport) {
-    return transport->moveUploadedFile(filename, destination);
+  if (!transport || !transport->isUploadedFile(filename)) {
+    return false;
   }
-  return false;
+
+  if (f_rename(filename, destination)) {
+    return true;
+  }
+
+  // If rename didn't work, fall back to copy followed by unlink
+  if (!f_copy(filename, destination)) {
+    return false;
+  }
+  f_unlink(filename);
+
+  return true;
 }
 
 Variant f_parse_ini_file(const String& filename,
@@ -605,33 +629,6 @@ Variant f_parse_ini_string(const String& ini,
                            bool process_sections /* = false */,
                            int scanner_mode /* = k_INI_SCANNER_NORMAL */) {
   return IniSetting::FromString(ini, "", process_sections, scanner_mode);
-}
-
-Variant f_parse_hdf_file(const String& filename) {
-  Variant content = f_file_get_contents(filename);
-  if (same(content, false)) return false;
-  return f_parse_hdf_string(content.toString());
-}
-
-Variant f_parse_hdf_string(const String& input) {
-  Hdf hdf;
-  hdf.fromString(input.data());
-  return ArrayUtil::FromHdf(hdf);
-}
-
-bool f_write_hdf_file(CArrRef data, const String& filename) {
-  Hdf hdf;
-  ArrayUtil::ToHdf(data, hdf);
-  const char *str = hdf.toString();
-  Variant ret = f_file_put_contents(filename, str);
-  return !same(ret, false);
-}
-
-String f_write_hdf_string(CArrRef data) {
-  Hdf hdf;
-  ArrayUtil::ToHdf(data, hdf);
-  const char *str = hdf.toString();
-  return String(str, CopyString);
 }
 
 Variant f_md5_file(const String& filename, bool raw_output /* = false */) {
@@ -722,8 +719,7 @@ Variant f_linkinfo(const String& filename) {
 }
 
 bool f_is_writable(const String& filename) {
-  struct stat sb;
-  if (statSyscall(filename, &sb)) {
+  if (filename.empty()) {
     return false;
   }
   CHECK_SYSTEM(accessSyscall(filename, W_OK));
@@ -757,8 +753,9 @@ bool f_is_writeable(const String& filename) {
 }
 
 bool f_is_readable(const String& filename) {
-  struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  if (filename.empty()) {
+    return false;
+  }
   CHECK_SYSTEM(accessSyscall(filename, R_OK, true));
   return true;
   /*
@@ -786,8 +783,9 @@ bool f_is_readable(const String& filename) {
 }
 
 bool f_is_executable(const String& filename) {
-  struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb));
+  if (filename.empty()) {
+    return false;
+  }
   CHECK_SYSTEM(accessSyscall(filename, X_OK));
   return true;
   /*
@@ -834,7 +832,8 @@ bool f_is_dir(const String& filename) {
   }
 
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb));
+  String path = isRelative ? cwd + String::FromChar('/') + filename : filename;
+  CHECK_SYSTEM(statSyscall(path, &sb, false, isRelative));
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 
@@ -905,14 +904,16 @@ Variant f_realpath(const String& path) {
       StaticContentCache::TheFileCache->exists(translated.data(), false)) {
     return translated;
   }
-  if (accessSyscall(path, F_OK) == 0) {
-    char resolved_path[PATH_MAX];
-    if (!realpath(translated.c_str(), resolved_path)) {
-      return false;
-    }
-    return String(resolved_path, CopyString);
+  // Zend doesn't support streams in realpath
+  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  if (!dynamic_cast<FileStreamWrapper*>(w)) {
+    return false;
   }
-  return false;
+  char resolved_path[PATH_MAX];
+  if (!realpath(translated.c_str(), resolved_path)) {
+    return false;
+  }
+  return String(resolved_path, CopyString);
 }
 
 #define PHP_PATHINFO_DIRNAME    1
@@ -1110,8 +1111,12 @@ bool f_copy(const String& source, const String& dest,
       return false;
     }
 
-    return f_stream_copy_to_stream(sfile.toResource(),
-      dfile.toResource()).toBoolean();
+    if (!f_stream_copy_to_stream(sfile.toResource(),
+                                 dfile.toResource()).toBoolean()) {
+      return false;
+    }
+
+    return f_fclose(dfile.toResource());
   } else {
     int ret =
       RuntimeOption::UseDirectCopy ?

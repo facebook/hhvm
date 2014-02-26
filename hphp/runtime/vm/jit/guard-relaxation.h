@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,9 +35,8 @@ bool relaxGuards(IRUnit&, const GuardConstraints& guards, bool simple = false);
 typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
 void visitGuards(IRUnit&, const VisitGuardFn& func);
 
-bool typeFitsConstraint(Type t, DataTypeCategory cat);
-DataTypeCategory categoryForType(Type t);
-Type relaxType(Type t, DataTypeCategory cat);
+bool typeFitsConstraint(Type t, TypeConstraint cat);
+Type relaxType(Type t, TypeConstraint cat);
 
 } }
 

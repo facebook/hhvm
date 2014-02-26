@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,6 +24,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // pcre
 
+Variant HHVM_FUNCTION(preg_filter, CVarRef pattern, CVarRef replacement,
+                                   CVarRef subject, int limit = -1,
+                                   VRefParam count = uninit_null());
 Variant HHVM_FUNCTION(preg_grep, const String& pattern, CArrRef input,
                                  int flags = 0);
 Variant HHVM_FUNCTION(preg_match, const String& pattern, const String& subject,

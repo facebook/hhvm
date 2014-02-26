@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,7 +57,7 @@ T* handleToPtr(RDS::Handle h) {
 
 template<class Cache>
 typename Cache::Pair* keyToPair(Cache* cache, const StringData* k) {
-  assert(Util::isPowerOfTwo(Cache::kNumLines));
+  assert(folly::isPowTwo(Cache::kNumLines));
   return cache->m_pairs + (k->hash() & (Cache::kNumLines - 1));
 }
 
@@ -504,8 +504,9 @@ void pmethodCacheMissPath(MethodCache* mce,
     imm = fval << 32 | cval;
   }
   if (!smashMov(pdata->smashImmAddr, imm)) {
-    // someone beat us to it
-    return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
+    // Someone beat us to it.  Bail early so we don't double-free
+    // pdata.
+    return;
   }
 
   // Regardless of whether the inline cache was populated, smash the

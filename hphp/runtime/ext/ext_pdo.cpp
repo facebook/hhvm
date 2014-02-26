@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/pdo_driver.h"
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/pdo_sqlite.h"
+#include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_stream.h"
@@ -1398,7 +1399,7 @@ Array c_PDO::t_errorinfo() {
   return ret;
 }
 
-Variant c_PDO::t_query(const String& sql) {
+Variant c_PDO::t_query(int _argc, const String& sql, CArrRef _argv) {
   SYNC_VM_REGS_SCOPED();
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
@@ -1429,7 +1430,9 @@ Variant c_PDO::t_query(const String& sql) {
 
     // when we add support for varargs here, we only need to set the stmt if
     // the argument count is > 1
-    if (true || pdo_stmt_set_fetch_mode(stmt, 0, PDO_FETCH_BOTH, Array())) {
+    if (_argc == 1 ||
+        pdo_stmt_set_fetch_mode(stmt, 0, _argv.rvalAt(0).toInt64Val(),
+                                f_array_splice(_argv, 1).getArrayData())) {
       /* now execute the statement */
       strcpy(stmt->error_code, PDO_ERR_NONE);
       if (stmt->executer()) {

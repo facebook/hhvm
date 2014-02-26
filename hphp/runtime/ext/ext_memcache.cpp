@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -28,9 +28,9 @@
 namespace HPHP {
 
 static bool ini_on_update_hash_strategy(const String& value, void *p);
-static String ini_get_hash_strategy(void *p);
+static std::string ini_get_hash_strategy(void *p);
 static bool ini_on_update_hash_function(const String& value, void *p);
-static String ini_get_hash_function(void *p);
+static std::string ini_get_hash_function(void *p);
 
 class MEMCACHEGlobals : public RequestEventHandler {
 public:
@@ -54,7 +54,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(MEMCACHEGlobals, s_memcache_globals);
 class MemcacheExtension : public Extension {
   public:
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
-    void moduleInit() override {
+    void requestInit() override {
       IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                        "memcache.hash_strategy", "standard",
                        ini_on_update_hash_strategy, ini_get_hash_strategy,
@@ -75,7 +75,7 @@ static bool ini_on_update_hash_strategy(const String& value, void *p) {
   return false;
 }
 
-static String ini_get_hash_strategy(void *p) {
+static std::string ini_get_hash_strategy(void *p) {
   return MEMCACHEG(hash_strategy);
 }
 
@@ -88,7 +88,7 @@ static bool ini_on_update_hash_function(const String& value, void *p) {
   return false;
 }
 
-static String ini_get_hash_function(void *p) {
+static std::string ini_get_hash_function(void *p) {
   return MEMCACHEG(hash_strategy);
 }
 

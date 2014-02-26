@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -376,6 +376,13 @@ struct Func {
   SString returnUserType;
 
   /*
+   * Return type specified in the source code (ex. "function foo(): Bar").
+   * HHVM checks if the a function's return value matches it's return type
+   * constraint via the VerifyRetType* instructions.
+   */
+  TypeConstraint retTypeConstraint;
+
+  /*
    * If traits are being flattened by hphpc, we keep the original
    * filename of a function (the file that defined the trait) so
    * backtraces and things work correctly.  Otherwise this is nullptr.
@@ -421,6 +428,14 @@ struct Prop {
  */
 struct Const {
   SString name;
+
+  // The class that defined this constant.
+  borrowed_ptr<php::Class> cls;
+
+  /*
+   * The value will be KindOfUninit if the class constant is defined
+   * using an 86cinit method.
+   */
   Cell val;
 
   /*

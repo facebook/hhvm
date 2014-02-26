@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -124,6 +124,8 @@ using EHInfo = boost::variant< EHFault
                              >;
 
 struct FuncInfo {
+  FuncInfo(const Unit* u, const Func* f) : unit(u), func(f) {}
+
   const Unit* unit;
   const Func* func;
 
@@ -139,7 +141,7 @@ struct FuncInfo {
 };
 
 FuncInfo find_func_info(const Func* func) {
-  auto finfo = FuncInfo { func->unit(), func };
+  auto finfo = FuncInfo(func->unit(), func);
 
   auto label_num = uint32_t{0};
   auto gen_label = [&] (const char* kind) {
@@ -488,7 +490,7 @@ std::string func_flag_list(const FuncInfo& finfo) {
 
   if (auto name = func->getGeneratorBodyName()) {
     flags.push_back(
-        folly::format("hasGeneratorBody(\"{}\")", name->toCPPString()).str()
+        folly::format("hasGeneratorBody(\"{}\")", name->toCppString()).str()
     );
   }
   if (func->isGenerator()) flags.push_back("isGenerator");

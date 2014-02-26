@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -823,7 +823,7 @@ public:
   // These methods handle the return, break, continue, and goto operations.
   // These methods are aware of try/finally blocks and foreach blocks and
   // will free iterators and jump to finally epilogues as appropriate.
-  void emitReturn(Emitter& e, char sym, StatementPtr s);
+  void emitReturn(Emitter& e, char sym, bool hasConstraint, StatementPtr s);
   void emitBreak(Emitter& e, int depth, StatementPtr s);
   void emitContinue(Emitter& e, int depth, StatementPtr s);
   void emitGoto(Emitter& e, StringData* name, StatementPtr s);

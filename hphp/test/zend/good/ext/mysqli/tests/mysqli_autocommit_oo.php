@@ -30,20 +30,20 @@
 	if (!$tmp['auto_commit'])
 		printf("[008] Cannot turn on autocommit\n");
 
-	if (!$mysqli->query('DROP TABLE IF EXISTS test'))
+	if (!$mysqli->query('DROP TABLE IF EXISTS test_mysqli_autocommit_oo_table_1'))
 		printf("[009] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
-	if (!$mysqli->query('CREATE TABLE test(id INT) ENGINE = InnoDB')) {
+	if (!$mysqli->query('CREATE TABLE test_mysqli_autocommit_oo_table_1(id INT) ENGINE = InnoDB')) {
 		printf("[010] Cannot create test table, [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
 
-	if (!$mysqli->query('INSERT INTO test(id) VALUES (1)'))
+	if (!$mysqli->query('INSERT INTO test_mysqli_autocommit_oo_table_1(id) VALUES (1)'))
 		printf("[011] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
 	if (!$mysqli->query('ROLLBACK'))
 		printf("[012] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
-	if (!$res = $mysqli->query('SELECT COUNT(*) AS num FROM test'))
+	if (!$res = $mysqli->query('SELECT COUNT(*) AS num FROM test_mysqli_autocommit_oo_table_1'))
 		printf("[013] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
 	if ((!$tmp = $res->fetch_assoc()) || (1 != $tmp['num']))
@@ -52,7 +52,7 @@
 
 	$res->free_result();
 
-	if (!$mysqli->query('DROP TABLE IF EXISTS test'))
+	if (!$mysqli->query('DROP TABLE IF EXISTS test_mysqli_autocommit_oo_table_1'))
 		printf("[015] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
 	if (!$mysqli->query('SET AUTOCOMMIT = 1'))
@@ -69,30 +69,30 @@
 	if (true !== ($tmp = $mysqli->autocommit( false)))
 		printf("[019] Expecting true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$mysqli->query('CREATE TABLE test(id INT) ENGINE = InnoDB')) {
+	if (!$mysqli->query('CREATE TABLE test_mysqli_autocommit_oo_table_1(id INT) ENGINE = InnoDB')) {
 		printf("[020] Cannot create test table, [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
 
-	if (!$mysqli->query('INSERT INTO test(id) VALUES (1)'))
+	if (!$mysqli->query('INSERT INTO test_mysqli_autocommit_oo_table_1(id) VALUES (1)'))
 		printf("[021] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
 	if (!$mysqli->query('ROLLBACK'))
 		printf("[022] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
-	if (!$res = $mysqli->query('SELECT COUNT(*) AS num FROM test'))
+	if (!$res = $mysqli->query('SELECT COUNT(*) AS num FROM test_mysqli_autocommit_oo_table_1'))
 		printf("[023] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	$tmp = $res->fetch_assoc();
 	if (0 != $tmp['num'])
 		printf("[24] Expecting 0 rows in table test, found %d rows\n", $tmp['num']);
 	$res->free_result();
 
-	if (!$mysqli->query('INSERT INTO test(id) VALUES (1)'))
+	if (!$mysqli->query('INSERT INTO test_mysqli_autocommit_oo_table_1(id) VALUES (1)'))
 		printf("[025] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
 	if (!$mysqli->query('COMMIT'))
 		printf("[025] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
-	if (!$res = $mysqli->query('SELECT COUNT(*) AS num FROM test'))
+	if (!$res = $mysqli->query('SELECT COUNT(*) AS num FROM test_mysqli_autocommit_oo_table_1'))
 		printf("[027] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
 	if ((!$tmp = $res->fetch_assoc()) || (1 != $tmp['num']))
@@ -100,7 +100,7 @@
 			$tmp['num'], $mysqli->errno, $mysqli->error);
 	$res->free_result();
 
-	if (!$mysqli->query('DROP TABLE IF EXISTS test'))
+	if (!$mysqli->query('DROP TABLE IF EXISTS test_mysqli_autocommit_oo_table_1'))
 		printf("[029] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
 	$mysqli->close();

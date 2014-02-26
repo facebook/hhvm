@@ -1,0 +1,56 @@
+array(6) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(12)
+  [5]=>
+  int(52)
+}
+array(6) {
+  [0]=>
+  string(1) "d"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "f"
+  [4]=>
+  string(1) "c"
+  [5]=>
+  string(1) "e"
+}
+array(6) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(52)
+  [2]=>
+  int(0)
+  [3]=>
+  int(12)
+  [4]=>
+  int(3)
+  [5]=>
+  int(2)
+}
+array(6) {
+  [0]=>
+  string(1) "f"
+  [1]=>
+  string(1) "e"
+  [2]=>
+  string(1) "d"
+  [3]=>
+  string(1) "c"
+  [4]=>
+  string(1) "b"
+  [5]=>
+  string(1) "a"
+}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -89,7 +89,7 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   }
 
   auto const sd = static_cast<StringData*>(
-    Util::low_malloc(sizeof(StringData) + sl.len + 1)
+    low_malloc(sizeof(StringData) + sl.len + 1)
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
@@ -128,7 +128,7 @@ StringData* StringData::MakeUncounted(StringSlice sl) {
 void StringData::destructStatic() {
   assert(checkSane());
   assert(isFlat());
-  Util::low_free(this);
+  low_free(this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -652,7 +652,7 @@ strhash_t StringData::hashHelper() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Debug
 
-std::string StringData::toCPPString() const {
+std::string StringData::toCppString() const {
   StringSlice s = slice();
   return std::string(s.ptr, s.len);
 }

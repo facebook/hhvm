@@ -1,3 +1,19 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 1997-2010 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
 #include "hphp/runtime/ext/icu/ext_icu_timezone.h"
 #include "hphp/runtime/ext/icu/ext_icu_iterator.h"
 #include "hphp/runtime/ext/ext_datetime.h"
@@ -8,14 +24,6 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 const StaticString s_IntlTimeZone("IntlTimeZone");
 
-IntlTimeZone *IntlTimeZone::Get(Object obj) {
-  return GetResData<IntlTimeZone>(obj, s_IntlTimeZone.get());
-}
-
-Object IntlTimeZone::wrap() {
-  return WrapResData(s_IntlTimeZone.get());
-}
-
 icu::TimeZone* IntlTimeZone::ParseArg(CVarRef arg,
                                       const String& funcname,
                                       intl_error &err) {
@@ -24,9 +32,12 @@ icu::TimeZone* IntlTimeZone::ParseArg(CVarRef arg,
   if (arg.isNull()) {
     tzstr = f_date_default_timezone_get();
   } else if (arg.isObject()) {
-    Object objarg = arg.toObject();
-    if (auto obj = IntlTimeZone::Get(objarg)) {
-      return obj->timezone();
+    auto objarg = arg.toObject();
+    auto cls = objarg->getVMClass();
+    auto IntlTimeZone_Class = Unit::lookupClass(s_IntlTimeZone.get());
+    if (IntlTimeZone_Class &&
+        ((cls == IntlTimeZone_Class) || cls->classof(IntlTimeZone_Class))) {
+      return IntlTimeZone::Get(objarg)->timezone()->clone();
     }
     if (auto dtz = objarg.getTyped<c_DateTimeZone>(true, true)) {
       tzstr = dtz->t_getname();
@@ -94,7 +105,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, countEquivalentIDs,
 }
 
 static Object HHVM_STATIC_METHOD(IntlTimeZone, createDefault) {
-  return (NEWOBJ(IntlTimeZone)(icu::TimeZone::createDefault()))->wrap();
+  return IntlTimeZone::newInstance(icu::TimeZone::createDefault());
 }
 
 static Variant HHVM_STATIC_METHOD(IntlTimeZone, createEnumeration,
@@ -112,7 +123,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, createEnumeration,
                       "intltz_create_enumeration: invalid argument type");
     return false;
   }
-  return (NEWOBJ(IntlIterator)(se))->wrap();
+  return IntlIterator::newInstance(se);
 }
 
 static Object HHVM_STATIC_METHOD(IntlTimeZone, createTimeZone,
@@ -124,7 +135,7 @@ static Object HHVM_STATIC_METHOD(IntlTimeZone, createTimeZone,
                              "time zone id to UTF-16");
     return null_object;
   }
-  return (NEWOBJ(IntlTimeZone)(icu::TimeZone::createTimeZone(id)))->wrap();
+  return IntlTimeZone::newInstance(icu::TimeZone::createTimeZone(id));
 }
 
 static Variant HHVM_STATIC_METHOD(IntlTimeZone, getCanonicalID,
@@ -218,8 +229,8 @@ static String HHVM_METHOD(IntlTimeZone, getErrorMessage) {
 }
 
 static Object HHVM_STATIC_METHOD(IntlTimeZone, getGMT) {
-  return (NEWOBJ(IntlTimeZone)(
-    const_cast<icu::TimeZone*>(icu::TimeZone::getGMT()), false))->wrap();
+  return IntlTimeZone::newInstance(
+    const_cast<icu::TimeZone*>(icu::TimeZone::getGMT()), false);
 }
 
 static Variant HHVM_METHOD(IntlTimeZone, getID) {
@@ -310,7 +321,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, createTimeZoneIDEnumeration,
                              "Error obtaining time zone id enumeration");
     return false;
   }
-  return (NEWOBJ(IntlIterator)(se))->wrap();
+  return IntlIterator::newInstance(se);
 }
 
 static Variant HHVM_STATIC_METHOD(IntlTimeZone, getRegion,
@@ -339,8 +350,8 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getRegion,
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 49
 static Variant HHVM_STATIC_METHOD(IntlTimeZone, getUnknown) {
-  return (NEWOBJ(IntlTimeZone)(
-    const_cast<icu::TimeZone*>(&icu::TimeZone::getUnknown()), false))->wrap();
+  return IntlTimeZone::newInstance(
+    const_cast<icu::TimeZone*>(&icu::TimeZone::getUnknown()), false);
 }
 #endif // ICU 4.9
 
@@ -395,6 +406,8 @@ void IntlExtension::initTimeZone() {
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 49
  HHVM_STATIC_ME(IntlTimeZone, getUnknown);
 #endif // ICU 4.9
+
+  Native::registerNativeDataInfo<IntlTimeZone>(s_IntlTimeZone.get());
 
   loadSystemlib("icu_timezone");
 }

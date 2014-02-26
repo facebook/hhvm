@@ -16,7 +16,7 @@
 	} while (in_array($invalid_attr, $valid_attr));
 
 	$stmt = mysqli_stmt_init($link);
-	mysqli_stmt_prepare($stmt, 'SELECT * FROM test');
+	mysqli_stmt_prepare($stmt, 'SELECT * FROM test_mysqli_stmt_attr_get_table_1');
 	foreach ($valid_attr as $k => $attr) {
 		if (false === ($tmp = mysqli_stmt_attr_get($stmt, $attr))) {
 			printf("[006] Expecting any type, but not boolean/false, got %s/%s for attribute %s/%s\n",

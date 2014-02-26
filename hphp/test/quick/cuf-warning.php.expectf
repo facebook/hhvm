@@ -1,0 +1,2 @@
+HipHop Warning: call_user_func() expects parameter 1 to be a valid callback, object of class Goo given (no __invoke method found) in %s on line 3
+NULL

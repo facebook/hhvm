@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@ namespace HPHP { namespace JIT {
 
 /*
  * Clone a range of IRInstructions into the front of a target block
- * (immediately after its DefLabel, but before its Marker).
+ * (immediately after its DefLabel).
  *
  * Then, for any block reachable from `target', rewrite the sources of
  * any instructions that referred to the old destinations of the
@@ -43,13 +43,13 @@ namespace HPHP { namespace JIT {
  *
  * Pre: The range [first,last) may not contain control flow
  *      instructions.
- * Pre: isRPOSorted(blocks)
+ * Pre: blocks is in reverse postorder
  */
 void cloneToBlock(const BlockList& blocks,
                   IRUnit& unit,
                   Block::iterator first,
                   Block::iterator last,
-                  Block* dst);
+                  Block* target);
 
 
 /*

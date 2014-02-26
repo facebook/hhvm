@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,19 +31,22 @@
 
 #include "hphp/util/logger.h"
 
-namespace HPHP { namespace Util {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   if (mallctl) {
-    unsigned arena;
-    size_t usz = sizeof(unsigned);
-    if (mallctl("tcache.flush", nullptr, nullptr, nullptr, 0)
-        || mallctl("thread.arena", &arena, &usz, nullptr, 0)
-        || mallctl("arenas.purge", nullptr, nullptr, &arena, usz)) {
-      // Error; do nothing.
+    int err = mallctl("thread.tcache.flush", nullptr, nullptr, nullptr, 0);
+    if (UNLIKELY(err != 0)) {
+      Logger::Warning("mallctl thread.tcache.flush failed with error %d", err);
     }
+
+    // hhvm uses only 1 jemalloc arena per numa node, instead of the
+    // jemalloc default of 4 per cpu, avoiding arena thrashing by pinning
+    // threads.  This means purging the arena assigned to the thread is
+    // unnecessary (and probably actively harmful).  Compare this code to
+    // folly::detail::MemoryIdler
   }
 #endif
 #ifdef USE_TCMALLOC
@@ -76,21 +79,22 @@ void init_stack_limits(pthread_attr_t* attr) {
   // Get the guard page's size, because the stack address returned
   // above starts at the guard page, so the thread's stack limit is
   // stackaddr + guardsize.
-  if (pthread_attr_getguardsize(attr, &guardsize) != 0)
+  if (pthread_attr_getguardsize(attr, &guardsize) != 0) {
     guardsize = 0;
+  }
 
   assert(stackaddr != nullptr);
   assert(stacksize >= PTHREAD_STACK_MIN);
-  Util::s_stackLimit = uintptr_t(stackaddr) + guardsize;
-  Util::s_stackSize = stacksize - guardsize;
+  s_stackLimit = uintptr_t(stackaddr) + guardsize;
+  s_stackSize = stacksize - guardsize;
 }
 
 void flush_thread_stack() {
-  uintptr_t top = get_stack_top() & ~(Util::s_pageSize - 1);
+  uintptr_t top = get_stack_top() & ~(s_pageSize - 1);
   // s_stackLimit is already aligned
   assert(top >= s_stackLimit);
   size_t len = top - s_stackLimit;
-  assert((len & (Util::s_pageSize - 1)) == 0);
+  assert((len & (s_pageSize - 1)) == 0);
   if (madvise((void*)s_stackLimit, len, MADV_DONTNEED) != 0 &&
       errno != EAGAIN) {
     fprintf(stderr, "%s failed to madvise with error %d\n", __func__, errno);
@@ -382,8 +386,12 @@ static void low_malloc_hugify(void* ptr) {
 }
 
 void* low_malloc_impl(size_t size) {
+#ifdef USE_JEMALLOC_MALLOCX
+  void* ptr = mallocx(size, MALLOCX_ARENA(low_arena));
+#else
   void* ptr = nullptr;
   allocm(&ptr, nullptr, size, ALLOCM_ARENA(low_arena));
+#endif
   low_malloc_hugify((char*)ptr + size - 1);
   return ptr;
 }
@@ -403,8 +411,41 @@ void low_malloc_skip_huge(void* start, void* end) {}
 
 #endif // USE_JEMALLOC
 
+#ifdef USE_JEMALLOC
+
+int jemalloc_pprof_enable() {
+  bool active = true;
+  return mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+}
+
+int jemalloc_pprof_disable() {
+  bool active = false;
+  return mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+}
+
+int jemalloc_pprof_dump(const std::string& prefix, bool force) {
+  if (!force) {
+    bool active = false;
+    size_t activeSize = sizeof(active);
+    // Check if profiling has been enabled before trying to dump.
+    int err = mallctl("opt.prof", &active, &activeSize, nullptr, 0);
+    if (err || !active) {
+      return 0; // nothing to do
+    }
+  }
+
+  if (prefix != "") {
+    const char *s = prefix.c_str();
+    return mallctl("prof.dump", nullptr, nullptr, (void *)&s, sizeof(char *));
+  } else {
+    return mallctl("prof.dump", nullptr, nullptr, nullptr, 0);
+  }
+}
+
+#endif // USE_JEMALLOC
+
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 extern "C" {
   const char* malloc_conf = "narenas:1,lg_tcache_max:16";

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1018,6 +1018,12 @@ static const char* IsTypeOp_names[] = {
 #undef ISTYPE_OP
 };
 
+static const char* InitPropOp_names[] = {
+#define INITPROP_OP(x) #x,
+  INITPROP_OPS
+#undef INITPROP_OP
+};
+
 static const char* AssertTOp_names[] = {
 #define ASSERTT_OP(op) #op,
   ASSERTT_OPS
@@ -1094,6 +1100,7 @@ template<class T> folly::Optional<T> nameToSubop(const char* str) {
   }                                                         \
   template folly::Optional<subop> nameToSubop(const char*);
 
+X(InitPropOp)
 X(IsTypeOp)
 X(AssertTOp)
 X(AssertObjOp)

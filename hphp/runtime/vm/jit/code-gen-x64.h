@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@
 #include <vector>
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -123,14 +123,14 @@ struct CodeGenerator {
 private:
   Address cgInst(IRInstruction* inst);
 
-  const PhysLoc curOpd(const SSATmp* t) const {
-    return m_state.regs[m_curInst][t];
+  const PhysLoc srcLoc(unsigned i) const {
+    return (*m_instRegs).src(i);
   }
-  const PhysLoc curOpd(const SSATmp& t) const {
-    return curOpd(&t);
+  const PhysLoc dstLoc(unsigned i) const {
+    return (*m_instRegs).dst(i);
   }
-  const RegAllocInfo::RegMap& curOpds() const {
-    return m_state.regs[m_curInst];
+  ArgGroup argGroup() const {
+    return ArgGroup(m_curInst, *m_instRegs);
   }
 
   // Autogenerate function declarations for each IR instruction in ir.h
@@ -141,9 +141,9 @@ private:
   void cgCallNative(Asm& a, IRInstruction* inst);
 
   CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
-  CallDest callDest(SSATmp* dst) const;
-  CallDest callDestTV(SSATmp* dst) const;
-  CallDest callDest2(SSATmp* dst) const;
+  CallDest callDest(const IRInstruction*) const;
+  CallDest callDestTV(const IRInstruction*) const;
+  CallDest callDest2(const IRInstruction*) const;
 
   // Main call helper:
   CallHelperInfo cgCallHelper(Asm& a,
@@ -160,19 +160,20 @@ private:
                               ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
+  enum class Width { Value, Full };
   template<class MemRef>
-  void cgStore(MemRef dst,
-               SSATmp* src,
-               bool genStoreType = true);
+  void cgStore(MemRef dst, SSATmp* src, PhysLoc src_loc, Width);
   template<class MemRef>
-  void cgStoreTypedValue(MemRef dst, SSATmp* src);
+  void cgStoreTypedValue(MemRef dst, SSATmp* src, PhysLoc src_loc);
 
   // helpers to load a value in dst. When label is not null a type check
   // is performed against value to ensure it is of the type expected by dst
   template<class BaseRef>
-  void cgLoad(SSATmp* dst, BaseRef value, Block* label = nullptr);
+  void cgLoad(SSATmp* dst, PhysLoc dstLoc, BaseRef value,
+              Block* label = nullptr);
   template<class BaseRef>
-  void cgLoadTypedValue(SSATmp* dst, BaseRef base, Block* label = nullptr);
+  void cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc, BaseRef base,
+                        Block* label = nullptr);
 
   // internal helpers to manage register conflicts from a source to a PhysReg
   // destination.
@@ -186,38 +187,28 @@ private:
                                 bool& isResolved);
 
   template<class Loc1, class Loc2, class JmpFn>
-  void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, JmpFn doJcc);
+  void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, JmpFn doJcc,
+                    OptType prevType = folly::none );
 
   template<class DataLoc, class JmpFn>
   void emitSpecializedTypeTest(Type type, DataLoc data, JmpFn doJcc);
 
   template<class Loc>
-  void emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc, Block* taken);
+  void emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc, Block* taken,
+                     OptType prevType = folly::none);
   template<class Loc>
   void emitTypeGuard(Type type, Loc typeLoc, Loc dataLoc);
 
-  void cgStMemWork(IRInstruction* inst, bool genStoreType);
-  void cgStRefWork(IRInstruction* inst, bool genStoreType);
-  void cgStPropWork(IRInstruction* inst, bool genStoreType);
-  void cgIncRefWork(Type type, SSATmp* src);
+  void cgIncRefWork(Type type, SSATmp* src, PhysLoc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
   template<class OpInstr, class Oper>
-  void cgUnaryIntOp(SSATmp* dst, SSATmp* src, OpInstr, Oper);
+  void cgUnaryIntOp(PhysLoc dst, SSATmp* src, PhysLoc src_loc, OpInstr, Oper);
 
   enum Commutativity { Commutative, NonCommutative };
 
   void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
 
-  template<class Oper, class RegType>
-  void cgBinaryOp(IRInstruction*,
-                  void (Asm::*intImm)(Immed, RegType),
-                  void (Asm::*intRR)(RegType, RegType),
-                  void (Asm::*mov)(RegType, RegType),
-                  void (Asm::*fpRR)(RegXMM, RegXMM),
-                  Oper,
-                  RegType (*conv)(PhysReg),
-                  Commutativity);
   template<class Oper, class RegType>
   void cgBinaryIntOp(IRInstruction*,
                      void (Asm::*intImm)(Immed, RegType),
@@ -226,6 +217,8 @@ private:
                      Oper,
                      RegType (*conv)(PhysReg),
                      Commutativity);
+  void cgBinaryDblOp(IRInstruction*,
+                     void (Asm::*fpRR)(RegXMM, RegXMM));
 
   template<class Oper>
   void cgShiftCommon(IRInstruction* inst,
@@ -233,8 +226,7 @@ private:
                      void (Asm::*instrR)(Reg64),
                      Oper oper);
 
-  void cgNegateWork(SSATmp* dst, SSATmp* src);
-  void cgNotWork(SSATmp* dst, SSATmp* src);
+  void cgVerifyClsWork(IRInstruction* inst);
 
   void emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                  bool    staticCallee);
@@ -245,7 +237,11 @@ private:
 
   void cgJcc(IRInstruction* inst);          // helper
   void cgReqBindJcc(IRInstruction* inst);   // helper
-  void cgSideExitJcc(IRInstruction* inst);  // helper
+  void cgExitJcc(IRInstruction* inst);      // helper
+  void cgJccInt(IRInstruction* inst);         // helper
+  void cgReqBindJccInt(IRInstruction* inst);  // helper
+  void cgExitJccInt(IRInstruction* inst); // helper
+  void emitCmpInt(IRInstruction* inst, ConditionCode);
   void cgCmpHelper(IRInstruction* inst,
                    void (Asm::*setter)(Reg8),
                    int64_t (*str_cmp_str)(StringData*, StringData*),
@@ -257,15 +253,16 @@ private:
 
   template<class Loc>
   void emitSideExitGuard(Type type, Loc typeLoc,
-                         Loc dataLoc, Offset taken);
+                         Loc dataLoc, Offset taken,
+                         OptType prevType = folly::none);
   void emitReqBindJcc(ConditionCode cc, const ReqBindJccData*);
 
-  void emitCompare(SSATmp*, SSATmp*);
-  void emitTestZero(SSATmp*);
-  bool emitIncDecHelper(SSATmp* dst, SSATmp* src1, SSATmp* src2,
+  void emitCompare(IRInstruction* inst);
+  void emitCompareInt(IRInstruction* inst);
+  void emitTestZero(SSATmp*, PhysLoc);
+  bool emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
+                        SSATmp* src2, PhysLoc loc2,
                         void(Asm::*emitFunc)(Reg64));
-  bool emitInc(SSATmp* dst, SSATmp* src1, SSATmp* src2);
-  bool emitDec(SSATmp* dst, SSATmp* src1, SSATmp* src2);
 
 private:
   PhysReg selectScratchReg(IRInstruction* inst);
@@ -319,7 +316,7 @@ private:
   Class*      curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }
   void recordSyncPoint(Asm& as, SyncOptions sync = SyncOptions::kSyncPoint);
-  int iterOffset(SSATmp* tmp);
+  int iterOffset(SSATmp* tmp) { return iterOffset(tmp->getValInt()); }
   int iterOffset(uint32_t id);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
@@ -414,6 +411,7 @@ private:
   CodegenState&       m_state;
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
+  const RegAllocInfo::RegMap* m_instRegs; // registers for current m_curInst.
 };
 
 const Func* loadClassCtor(Class* cls);
@@ -428,27 +426,27 @@ void genCode(CodeBlock&              mainCode,
              const RegAllocInfo&     regs);
 
 // Helpers to compute a reference to a TypedValue type and data
-inline MemoryRef loadTVType(PhysReg reg) {
+inline MemoryRef refTVType(PhysReg reg) {
   return reg[TVOFF(m_type)];
 }
 
-inline MemoryRef loadTVData(PhysReg reg) {
+inline MemoryRef refTVData(PhysReg reg) {
   return reg[TVOFF(m_data)];
 }
 
-inline MemoryRef loadTVType(MemoryRef ref) {
+inline MemoryRef refTVType(MemoryRef ref) {
   return *(ref.r + TVOFF(m_type));
 }
 
-inline MemoryRef loadTVData(MemoryRef ref) {
+inline MemoryRef refTVData(MemoryRef ref) {
   return *(ref.r + TVOFF(m_data));
 }
 
-inline IndexedMemoryRef loadTVType(IndexedMemoryRef ref) {
+inline IndexedMemoryRef refTVType(IndexedMemoryRef ref) {
   return *(ref.r + TVOFF(m_type));
 }
 
-inline IndexedMemoryRef loadTVData(IndexedMemoryRef ref) {
+inline IndexedMemoryRef refTVData(IndexedMemoryRef ref) {
   return *(ref.r + TVOFF(m_data));
 }
 

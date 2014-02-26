@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -330,6 +330,13 @@ static void bump_counter_and_rethrow() {
     static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
       "requests_memory_exceeded", {ServiceData::StatsType::COUNT});
     requestMemoryExceededCounter->addValue(1);
+
+#ifdef USE_JEMALLOC
+    // Capture a pprof (C++) dump when we OOM a request
+    // TODO: (t3753133) Should dump a PHP-instrumented pprof dump here as well
+    jemalloc_pprof_dump("", false);
+#endif
+
     throw;
   }
 }
@@ -583,6 +590,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 
   Extension::RequestInitModules();
+  process_ini_settings();
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -761,11 +769,6 @@ static int start_server(const std::string &username) {
   // initialize the process
   HttpServer::Server = std::make_shared<HttpServer>();
 
-  if (RuntimeOption::HHProfServerEnabled) {
-    Logger::Info("Starting up profiling server");
-    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
-  }
-
   // If we have any warmup requests, replay them before listening for
   // real connections
   for (auto& file : RuntimeOption::ServerWarmupRequests) {
@@ -798,7 +801,7 @@ static int start_server(const std::string &username) {
 #ifdef USE_JEMALLOC
     mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
 #endif
-    Util::enable_numa(RuntimeOption::EvalEnableNumaLocal);
+    enable_numa(RuntimeOption::EvalEnableNumaLocal);
 
   }
 
@@ -1449,8 +1452,8 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
     }
   }
 
-  Util::embedded_data desc;
-  if (!Util::get_embedded_data(section.c_str(), &desc, filename)) return "";
+  embedded_data desc;
+  if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
 
   std::ifstream ifs(desc.m_filename);
   if (!ifs.good()) return "";
@@ -1482,7 +1485,7 @@ void hphp_process_init() {
 #else
   pthread_attr_init(&attr);
 #endif
-  Util::init_stack_limits(&attr);
+  init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
 
   struct sigaction action = {};
@@ -1601,8 +1604,6 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_vmContext->requestInit();
-
-  process_ini_settings();
 }
 
 ExecutionContext *hphp_context_init() {

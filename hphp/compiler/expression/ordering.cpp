@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #include "hphp/compiler/expression/ordering.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/compiler/code_model_enums.h"
 
 using namespace HPHP;
 
@@ -25,9 +26,17 @@ using namespace HPHP;
 
 Ordering::Ordering
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- ExpressionPtr key, TokenID direction)
+ ExpressionPtr key, std::string direction)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(Ordering)),
-    m_key(key), m_direction(direction){
+    m_key(key) {
+  if (direction == "") {
+    m_direction = PHP_NOT_SPECIFIED;
+  } else if (strcasecmp(direction.c_str(), "ascending") == 0) {
+    m_direction = PHP_ASCENDING;
+  } else {
+    assert(strcasecmp(direction.c_str(), "descending") == 0);
+    m_direction = PHP_DESCENDING;
+  }
 }
 
 ExpressionPtr Ordering::clone() {
@@ -82,26 +91,11 @@ TypePtr Ordering::inferTypes(AnalysisResultPtr ar, TypePtr type,
 ///////////////////////////////////////////////////////////////////////////////
 
 void Ordering::outputCodeModel(CodeGenerator &cg) {
-  int direction;
-  switch (m_direction) {
-  case T_ASCENDING:
-    direction = 1;
-    break;
-  case T_DESCENDING:
-    direction = 2;
-    break;
-  default:
-    direction = 3;
-    break;
-  }
-  auto propCount = direction > 0 ? 3 : 2;
-  cg.printObjectHeader("Ordering", propCount);
-  cg.printPropertyHeader("key");
+  cg.printObjectHeader("Ordering", 3);
+  cg.printPropertyHeader("expression");
   m_key->outputCodeModel(cg);
-  if (propCount == 3) {
-    cg.printPropertyHeader("direction");
-    cg.printValue(direction);
-  }
+  cg.printPropertyHeader("order");
+  cg.printValue(m_direction);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
@@ -113,11 +107,11 @@ void Ordering::outputCodeModel(CodeGenerator &cg) {
 void Ordering::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_key->outputPHP(cg, ar);
   switch (m_direction) {
-  case T_ASCENDING:
+  case PHP_ASCENDING:
     cg_printf(" ascending");
     break;
-  case T_DESCENDING:
-    cg_printf(" decending");
+  case PHP_DESCENDING:
+    cg_printf(" descending");
     break;
   default:
     break;

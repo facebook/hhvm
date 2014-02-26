@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -97,7 +97,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 0;
 
     case StRef:
-    case StRefNT:
     case StClosureArg:
     case StClosureCtx:
     case StContArValue:
@@ -109,10 +108,8 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 1;
 
     case StProp:
-    case StPropNT:
     case StMem:
-    case StMemNT:
-      // StProp[NT]|StMem[NT] <base>, <offset>, <value>
+      // StProp|StMem <base>, <offset>, <value>
       return srcNo == 2;
 
     case ArraySet:
@@ -180,42 +177,6 @@ bool IRInstruction::isPassthrough() const {
 }
 
 /*
- * Returns true if the instruction loads into a SSATmp representing a
- * PHP value (a subtype of Gen).  Note that this function returns
- * false for instructions that load internal meta-data, such as Func*,
- * Class*, etc.
- */
-bool IRInstruction::isLoad() const {
-  switch (m_op) {
-    case LdStack:
-    case LdLoc:
-    case LdMem:
-    case LdProp:
-    case LdElem:
-    case LdPackedArrayElem:
-    case LdRef:
-    case LdThis:
-    case LdStaticLocCached:
-    case LookupCns:
-    case LookupClsCns:
-    case CGetProp:
-    case VGetProp:
-    case VGetPropStk:
-    case ArrayGet:
-    case MapGet:
-    case CGetElem:
-    case VGetElem:
-    case VGetElemStk:
-    case ArrayIdx:
-    case GenericIdx:
-      return true;
-
-    default:
-      return false;
-  }
-}
-
-/*
  * Returns true if the instruction does nothing but load a PHP value from
  * memory, possibly with some straightforward computation beforehand to decide
  * where the load should come from. This specifically excludes opcodes such as
@@ -237,46 +198,11 @@ bool IRInstruction::isRawLoad() const {
   }
 }
 
-bool IRInstruction::storesCell(uint32_t srcIdx) const {
-  switch (m_op) {
-    case StRetVal:
-    case StLoc:
-    case StLocNT:
-      return srcIdx == 1;
-
-    case StMem:
-    case StMemNT:
-    case StProp:
-    case StPropNT:
-    case StElem:
-      return srcIdx == 2;
-
-    case ArraySet:
-    case MapSet:
-      return srcIdx == 3;
-
-    case SpillStack:
-      return srcIdx >= 2 && srcIdx < numSrcs();
-
-    case Call:
-      return srcIdx >= 3 && srcIdx < numSrcs();
-
-    case CallBuiltin:
-      return srcIdx >= 1 && srcIdx < numSrcs();
-
-    case FunctionExitSurpriseHook:
-      return srcIdx == 2;
-
-    default:
-      return false;
-  }
-}
-
 SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
   assert(is(IncRef, PassFP, PassSP,
             CheckType, AssertType, AssertNonNull,
-            StRef, StRefNT,
+            StRef,
             ColAddElemC, ColAddNewElemC,
             Mov));
   return src(0);
@@ -388,6 +314,7 @@ void IRInstruction::convertToMov() {
   m_op = Mov;
   m_typeParam.clear();
   m_extra = nullptr;
+  if (m_numDsts == 1) m_dst->setInstruction(this); // recompute type
   assert(m_numSrcs == 1);
   // Instructions in the simplifier don't have dests yet
   assert((m_numDsts == 1) != isTransient());

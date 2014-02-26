@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,6 +47,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
@@ -228,7 +229,7 @@ Translator::liveType(const Cell* outer, const Location& l, bool specialize) {
   RuntimeType retval = RuntimeType(outerType, innerType);
   const Class *klass = nullptr;
   if (specialize) {
-    // Only infer the class/array kind if specialization requested
+    // Only record the class/array kind if specialization requested
     if (valueType == KindOfObject) {
       klass = valCell->m_data.pobj->getVMClass();
       if (klass != nullptr && (klass->attrs() & AttrFinal)) {
@@ -236,7 +237,10 @@ Translator::liveType(const Cell* outer, const Location& l, bool specialize) {
       }
     } else if (valueType == KindOfArray) {
       ArrayData::ArrayKind arrayKind = valCell->m_data.parr->kind();
-      retval = retval.setArrayKind(arrayKind);
+      // We currently only benefit from array specialization for packed arrays.
+      if (arrayKind == ArrayData::ArrayKind::kPackedKind) {
+        retval = retval.setArrayKind(arrayKind);
+      }
     }
   }
   return retval;
@@ -361,7 +365,6 @@ static uint32_t get_random()
     return (m_z << 16) + m_w;  /* 32-bit result */
 }
 
-static const int kTooPolyPred = 2;
 static const int kTooPolyRet = 6;
 
 bool
@@ -675,11 +678,6 @@ predictOutputs(SrcKey startSk,
   auto const op = ni->op();
   static const double kAccept = 1.0;
   std::pair<DataType, double> pred = std::make_pair(KindOfAny, 0.0);
-  // Type predictions grow tracelets, and can have a side effect of making
-  // them combinatorially explode if they bring in precondtions that vary a
-  // lot. Get more conservative as evidence mounts that this is a
-  // polymorphic tracelet.
-  if (tx64->numTranslations(startSk) >= kTooPolyPred) return KindOfAny;
   if (op == OpCGetS) {
     const StringData* propName = ni->inputs[1]->rtt.valueStringOrNull();
     if (propName) {
@@ -776,7 +774,9 @@ getDynLocType(const SrcKey startSk,
       StringData* sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
       assert(sd);
       const TypedValue* tv = Unit::lookupPersistentCns(sd);
-      if (tv) {
+      // KindOfUninit means this is a dynamic system constant so we don't know
+      // the type. <img src="clowntown.jpg">
+      if (tv && tv->m_type != KindOfUninit) {
         return RuntimeType(tv->m_type);
       }
     } // Fall through
@@ -857,7 +857,7 @@ getDynLocType(const SrcKey startSk,
         // rhs comes before the M-vector elements.
         op == OpSetL  || op == OpSetN  || op == OpSetG  || op == OpSetS  ||
         op == OpBindL || op == OpBindG || op == OpBindS || op == OpBindN ||
-        op == OpBindM ||
+        op == OpBindM || op == OpVerifyRetTypeV || op == OpVerifyRetTypeC ||
         // Dup takes a single element.
         op == OpDup
       );
@@ -867,7 +867,7 @@ getDynLocType(const SrcKey startSk,
       if (debug) {
         if (!inputs[idx]->rtt.isVagueValue()) {
           if (op == OpBindG || op == OpBindN || op == OpBindS ||
-              op == OpBindM || op == OpBindL) {
+              op == OpBindM || op == OpBindL || op == OpVerifyRetTypeV) {
             assert(inputs[idx]->rtt.isRef() && !inputs[idx]->isLocal());
           } else {
             assert(inputs[idx]->rtt.valueType() ==
@@ -1007,6 +1007,7 @@ static const struct {
   { OpClsCnsD,     {None,             Stack1,       OutPred,           1 }},
   { OpFile,        {None,             Stack1,       OutString,         1 }},
   { OpDir,         {None,             Stack1,       OutString,         1 }},
+  { OpNameA,       {Stack1,           Stack1,       OutString,         0 }},
 
   /*** 3. Operator instructions ***/
 
@@ -1188,7 +1189,7 @@ static const struct {
   { OpFPassR,      {Stack1|FuncdRef,  Stack1,       OutFInputR,        0 }},
   { OpFPassL,      {Local|FuncdRef,   Stack1,       OutFInputL,        1 }},
   { OpFPassN,      {Stack1|FuncdRef,  Stack1,       OutUnknown,        0 }},
-  { OpFPassG,      {Stack1|FuncdRef,  Stack1,       OutFInputR,        0 }},
+  { OpFPassG,      {Stack1|FuncdRef,  Stack1,       OutUnknown,        0 }},
   { OpFPassS,      {StackTop2|FuncdRef,
                                       Stack1,       OutUnknown,       -1 }},
   { OpFPassM,      {MVector|FuncdRef, Stack1|Local, OutUnknown,        1 }},
@@ -1253,7 +1254,11 @@ static const struct {
                    {Stack1,           Local,        OutVUnknown,      -1 }},
   { OpCatch,       {None,             Stack1,       OutObject,         1 }},
   { OpVerifyParamType,
-                   {Local,            None,         OutNone,           0 }},
+                   {Local,            Local,        OutUnknown,        0 }},
+  { OpVerifyRetTypeV,
+                   {Stack1,           Stack1,       OutSameAsInput,    0 }},
+  { OpVerifyRetTypeC,
+                   {Stack1,           Stack1,       OutSameAsInput,    0 }},
   { OpClassExists, {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpInterfaceExists,
                    {StackTop2,        Stack1,       OutBoolean,       -1 }},
@@ -1269,6 +1274,8 @@ static const struct {
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown,       -2 }},
   { OpFloor,       {Stack1,           Stack1,       OutDouble,         0 }},
   { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
+  { OpCheckProp,   {None,             Stack1,       OutBoolean,        1 }},
+  { OpInitProp,    {Stack1,           None,         OutNone,          -1 }},
   { OpAssertTL,    {None,             None,         OutNone,           0 }},
   { OpAssertTStk,  {None,             None,         OutNone,           0 }},
   { OpAssertObjL,  {None,             None,         OutNone,           0 }},
@@ -1312,7 +1319,13 @@ static void initInstrInfo() {
          i++) {
       instrInfo[instrInfoSparse[i].op] = instrInfoSparse[i].info;
     }
-
+    if (!RuntimeOption::EvalCheckReturnTypeHints) {
+      for (size_t j = 0; j < 2; ++j) {
+        auto& ii = instrInfo[j == 0 ? OpVerifyRetTypeC : OpVerifyRetTypeV];
+        ii.in = ii.out = None;
+        ii.type = OutNone;
+      }
+    }
     instrInfoInited = true;
   }
 }
@@ -1507,6 +1520,9 @@ static bool isAlwaysNop(Op op) {
   case Op::FPassVNop:
   case Op::FPassC:
     return true;
+  case Op::VerifyRetTypeC:
+  case Op::VerifyRetTypeV:
+    return !RuntimeOption::EvalCheckReturnTypeHints;
   default:
     return false;
   }
@@ -1675,7 +1691,7 @@ void Translator::handleAssertionEffects(Tracelet& t,
      */
     if (tas.m_changeSet.count(dl->location)) {
       auto const src = findInputSrc(tas.m_t->m_instrStream.last, dl);
-      if (src->outputPredicted) src->outputPredicted = false;
+      if (src && src->outputPredicted) src->outputPredicted = false;
     }
   }
 
@@ -2320,6 +2336,24 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           continue;
         }
 
+        if (op == OpVerifyParamType) {
+          assert(ni->inputs.size() == 1);
+          auto func = ni->func();
+          const auto& inRtt = ni->inputs[0]->rtt;
+          auto paramId = ni->imm[0].u_IVA;
+          const auto& tc = func->params()[paramId].typeConstraint();
+          if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
+              (inRtt.isVagueValue() || inRtt.isObject() || inRtt.isRef())) {
+            auto* loc = t.newDynLocation(
+              ni->inputs[0]->location,
+              inRtt.isRef() ? RuntimeType(KindOfRef, KindOfAny)
+                            : RuntimeType(KindOfAny));
+            assert(loc->location.isLocal());
+            ni->outLocal = loc;
+          }
+          continue;
+        }
+
         ASSERT_NOT_IMPLEMENTED(op == OpSetOpL ||
                                op == OpSetM || op == OpSetOpM ||
                                op == OpBindM ||
@@ -2367,7 +2401,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         }
         if (op == OpStaticLocInit || op == OpInitThisLoc) {
           ni->outLocal = t.newDynLocation(Location(Location::Local,
-                                                   ni->imm[0].u_OA),
+                                                   ni->imm[0].u_LA),
                                           KindOfAny);
           continue;
         }
@@ -2625,11 +2659,12 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
         m_resolvedDeps[l] = dl;
       }
     } else {
-      // TODO: Once the region translator supports guard relaxation
-      //       (task #2598894), we can enable specialization for all modes.
-      const bool specialize = (RuntimeOption::EvalHHBCRelaxGuards ||
-                               RuntimeOption::EvalHHIRRelaxGuards) &&
-                              tx64->mode() == TransLive;
+      const bool specialize =
+        (tx64->mode() == TransLive    && (RuntimeOption::EvalHHBCRelaxGuards ||
+                                          RuntimeOption::EvalHHIRRelaxGuards))
+        ||
+        (tx64->mode() == TransProfile &&  RuntimeOption::EvalHHIRRelaxGuards);
+
       RuntimeType rtt = tx64->liveType(l, *liveUnit(), specialize);
       assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the
@@ -2923,6 +2958,9 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       return DataTypeSpecific;
     }
 
+    case OpUnsetL:
+      return DataTypeCountness;
+
     case OpCGetL:
       return DataTypeCountnessInit;
 
@@ -2973,9 +3011,14 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
     //
     // Collections and Iterator related specializations
     //
+    case OpFPassM:
+      if (instr->preppedByRef) {
+        // This is equivalent to a VGetM.
+        return DataTypeSpecific;
+      }
+      // fallthrough
     case OpCGetM:
     case OpIssetM:
-    case OpFPassM:
       if (specType.getOuterType() == KindOfArray) {
         if (instr->inputs.size() == 2 && opndIdx == 0) {
           if (specType.hasArrayKind() &&
@@ -2997,7 +3040,9 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       if (specType.getOuterType() == KindOfObject) {
         if (instr->inputs.size() == 3 && opndIdx == 1) {
           const Class* klass = specType.getSpecializedClass();
-          if (klass != nullptr && isOptimizableCollectionClass(klass)) {
+          // Pairs are immutable so special case that here.
+          if (klass != nullptr && isOptimizableCollectionClass(klass) &&
+              klass != c_Pair::classof()) {
             return DataTypeSpecialized;
           }
         }
@@ -3775,10 +3820,11 @@ breakBB:
     }
   }
 
-  // translateRegion doesn't support guard relaxation/specialization yet
-  if (RuntimeOption::EvalHHBCRelaxGuards &&
-      m_mode != TransProfile && m_mode != TransOptimize) {
+  if (RuntimeOption::EvalHHBCRelaxGuards && m_mode == TransLive) {
     relaxDeps(t, tas);
+  } else {
+    FTRACE(3, "Not relaxing deps. HHBCRelax: {}, mode: {}\n",
+           RuntimeOption::EvalHHBCRelaxGuards, show(m_mode));
   }
 
   // Mark the last instruction appropriately
@@ -3955,10 +4001,14 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         auto const offset = inst.source.offset();
 
         // These 'predictions' mean the type is InitNull or the predicted type,
-        // so we assert InitNull | t, then guard t. This allows certain
-        // optimizations in the IR.
+        // so we assert InitNull | t, then guard t if the location isn't known
+        // to be null. This allows certain optimizations in the IR.
         hhbcTrans.assertType(loc, Type::InitNull | t);
-        hhbcTrans.checkType(loc, t, offset);
+        auto oldType = hhbcTrans.rttFromLocation(
+          stackFilter(inst.inputs[arg]->location)).valueType();
+        if (!IS_NULL_TYPE(oldType)) {
+          hhbcTrans.checkType(loc, t, offset);
+        }
         updateType();
         break;
       }
@@ -4050,12 +4100,6 @@ void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
          color(ANSI_COLOR_END));
 
   m_irTrans.reset(new JIT::IRTranslator(initBcOffset, initSpOffset, func));
-
-  // XXX t3582470: TransOptimize translations don't work with hhir guard
-  // relaxation yet.
-  if (m_mode == TransOptimize) {
-    m_irTrans->hhbcTrans().traceBuilder().setConstrainGuards(false);
-  }
 }
 
 void Translator::traceEnd() {
@@ -4091,11 +4135,14 @@ Translator::translateRegion(const RegionDesc& region,
     auto byRefs     = makeMapWalker(block->paramByRefs());
     auto refPreds   = makeMapWalker(block->reffinessPreds());
     auto knownFuncs = makeMapWalker(block->knownFuncs());
+    bool maybeStartNewBlock = true;
 
+    ht.irBuilder().recordOffset(sk.offset());
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
-      ht.setBcOff(sk.offset(), false);
+      ht.setBcOff(sk.offset(), false, maybeStartNewBlock);
+      maybeStartNewBlock = false;
 
       // Emit prediction guards. If this is the first instruction in the
       // region the guards will go to a retranslate request. Otherwise, they'll
@@ -4164,7 +4211,22 @@ Translator::translateRegion(const RegionDesc& region,
       }
       inst.outputPredicted = false;
       populateImmediates(inst);
-
+      if (inst.op() == OpJmpZ || inst.op() == OpJmpNZ) {
+        // TODO(t3730617): Could extend this logic to other
+        // conditional control flow ops, e.g., IterNext, etc.
+        inst.includeBothPaths = [&] {
+          if (!RuntimeOption::EvalHHIRBytecodeControlFlow) return false;
+          Offset takenOffset = inst.offset() + inst.imm[0].u_BA;
+          Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));
+          bool takenIncluded = false;
+          bool fallthruIncluded = false;
+          for (auto& b : region.blocks) {
+            if (b->start().offset() == takenOffset) takenIncluded = true;
+            if (b->start().offset() == fallthruOffset) fallthruIncluded = true;
+          }
+          return takenIncluded && fallthruIncluded;
+        }();
+      }
       // If this block ends with an inlined FCall, we don't emit anything for
       // the FCall and instead set up HhbcTranslator for inlining. Blocks from
       // the callee will be next in the region.
@@ -4194,7 +4256,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       InputInfos inputInfos;
       getInputs(startSk, inst, inputInfos, block->func(), [&](int i) {
-          return ht.traceBuilder().localType(i, DataTypeGeneric);
+          return ht.irBuilder().localType(i, DataTypeGeneric);
         });
 
       // Populate the NormalizedInstruction's input vector, using types from
@@ -4236,11 +4298,26 @@ Translator::translateRegion(const RegionDesc& region,
       try {
         m_irTrans->translateInstr(inst);
       } catch (const JIT::FailedIRGen& exn) {
-        FTRACE(1, "ir generation for {} failed with {}\n",
-               inst.toString(), exn.what());
-        always_assert(!toInterp.count(sk));
+        always_assert_log(
+          !toInterp.count(sk),
+          [&] {
+            std::ostringstream oss;
+            oss << folly::format("IR generation failed with {}\n", exn.what());
+            print(oss, m_irTrans->hhbcTrans().unit());
+            return oss.str();
+          });
         toInterp.insert(sk);
         return Retry;
+      }
+
+      // Insert a fallthrough jump
+      if (RuntimeOption::EvalHHIRBytecodeControlFlow
+          && i == block->length() - 1
+          && block != region.blocks.back()
+          && instrAllowsFallThru(inst.op())
+          && !(inst.op() == OpJmpZ || inst.op() == OpJmpNZ)) {
+        auto fallthru = inst.offset() + instrLen((Op*)(inst.pc()));
+        ht.endBlock(fallthru);
       }
 
       // Check the prediction. If the predicted type is less specific than what
@@ -4262,9 +4339,15 @@ Translator::translateRegion(const RegionDesc& region,
     traceCodeGen();
     if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
   } catch (const JIT::FailedCodeGen& exn) {
-    FTRACE(1, "code generation failed with {}\n", exn.what());
     SrcKey sk{exn.vmFunc, exn.bcOff};
-    always_assert(!toInterp.count(sk));
+    always_assert_log(
+      !toInterp.count(sk),
+      [&] {
+        std::ostringstream oss;
+        oss << folly::format("code generation failed with {}\n", exn.what());
+        print(oss, m_irTrans->hhbcTrans().unit());
+        return oss.str();
+      });
     toInterp.insert(sk);
     return Retry;
   }

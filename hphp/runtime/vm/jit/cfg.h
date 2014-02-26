@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,29 +30,24 @@ namespace HPHP { namespace JIT {
  * perform a depth-first postorder walk
  */
 template <class Visitor>
-void postorderWalk(const IRUnit&, Visitor visitor);
-
-/*
- * Return an iterator into an rpo-sorted BlockList for a given Block.
- * Uses the postId() assigned by rpoSortCfg.
- *
- * Pre: isRPOSorted(cfg)
- */
-BlockList::const_iterator rpoIteratorTo(const BlockList& cfg, Block* b);
+void postorderWalk(const IRUnit&, Visitor visitor, Block* start = nullptr);
 
 /*
  * Compute a reverse postorder list of the basic blocks reachable from
- * the IR's entry block. Updates the postId field of each reachable Block.
- *
- * Post: isRPOSorted(return value)
+ * the IR's entry block.
  */
 BlockList rpoSortCfg(const IRUnit&);
 
+
 /*
- * Returns: true if the supplied block list is sorted in reverse post
- * order.
+ * Similar to repoSortCfg, but also returns a StateVector mapping Blocks to
+ * their index in the BlockList.
  */
-bool isRPOSorted(const BlockList&);
+struct BlocksWithIds {
+  BlockList blocks;
+  StateVector<Block, uint32_t> ids;
+};
+BlocksWithIds rpoSortCfgWithIds(const IRUnit&);
 
 /*
  * Removes unreachable blocks from the unit and then splits any critical edges.
@@ -72,10 +67,10 @@ bool removeUnreachable(IRUnit& unit);
  * Compute the postorder number of each immediate dominator of each
  * block, using a list produced by rpoSortCfg().
  *
- * Pre: isRPOSorted(blocks)
+ * Pre: blocks is in reverse postorder
  */
 typedef StateVector<Block,Block*> IdomVector;
-IdomVector findDominators(const IRUnit&, const BlockList& blocks);
+IdomVector findDominators(const IRUnit&, const BlocksWithIds& blocks);
 
 /*
  * A vector of children lists, indexed by block
@@ -86,7 +81,7 @@ typedef StateVector<Block,BlockList> DomChildren;
  * Compute the dominator tree, then populate a list of dominator children
  * for each block.
  */
-DomChildren findDomChildren(const IRUnit&, const BlockList& blocks);
+DomChildren findDomChildren(const IRUnit&, const BlocksWithIds& blocks);
 
 /*
  * return true if b1 == b2 or if b1 dominates b2.
@@ -116,7 +111,7 @@ template <class BlockList, class Body>
 void forEachInst(const BlockList& blocks, Body body);
 
 namespace detail {
-   // PostorderSort encapsulates a depth-first postorder walk
+   // PostorderSort encapsulates a depth-first postorder walk.
   template <class Visitor>
   struct PostorderSort {
     PostorderSort(Visitor& visitor, unsigned num_blocks)
@@ -124,16 +119,21 @@ namespace detail {
     {}
 
     void walk(Block* block) {
-      assert(!block->empty());
       if (m_visited.test(block->id())) return;
       m_visited.set(block->id());
-      Block* taken = block->taken();
-      if (taken && !cold(block) && cold(taken)) {
-        walk(taken);
-        taken = nullptr;
+
+      // Blocks aren't allowed to be empty but this function is used when
+      // printing debug information, so we want to handle invalid Blocks
+      // gracefully.
+      if (!block->empty()) {
+        Block* taken = block->taken();
+        if (taken && !cold(block) && cold(taken)) {
+          walk(taken);
+          taken = nullptr;
+        }
+        if (Block* next = block->next()) walk(next);
+        if (taken) walk(taken);
       }
-      if (Block* next = block->next()) walk(next);
-      if (taken) walk(taken);
       m_visitor(block);
     }
   private:
@@ -145,17 +145,13 @@ namespace detail {
 }
 
 /**
- * perform a depth-first postorder walk
+ * Perform a depth-first postorder walk. If a starting Block is not supplied,
+ * unit's entry Block will be used.
  */
 template <class Visitor>
-void postorderWalk(const IRUnit& unit, Visitor visitor) {
+void postorderWalk(const IRUnit& unit, Visitor visitor, Block* start) {
   detail::PostorderSort<Visitor> ps(visitor, unit.numBlocks());
-  ps.walk(unit.entry());
-}
-
-inline
-BlockList::const_iterator rpoIteratorTo(const BlockList& cfg, Block* b) {
-  return cfg.end() - (b->postId() + 1);
+  ps.walk(start ? start : unit.entry());
 }
 
 template <class State, class Body>

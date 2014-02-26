@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -50,13 +50,13 @@ namespace HPHP {
 
 using std::string;
 
-static bool ini_on_update_save_handler(const String& value, void *p);
-static String ini_get_save_handler(void *p);
-static bool ini_on_update_serializer(const String& value, void *p);
-static String ini_get_serializer(void *p);
-static bool ini_on_update_trans_sid(const String& value, void *p);
-static String ini_get_trans_sid(void *p);
-static bool ini_on_update_save_dir(const String& value, void *p);
+static bool ini_on_update_save_handler(const std::string& value, void *p);
+static std::string ini_get_save_handler(void *p);
+static bool ini_on_update_serializer(const std::string& value, void *p);
+static std::string ini_get_serializer(void *p);
+static bool ini_on_update_trans_sid(const std::string& value, void *p);
+static std::string ini_get_trans_sid(void *p);
+static bool ini_on_update_save_dir(const std::string& value, void *p);
 static bool mod_is_open();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -133,31 +133,17 @@ const StaticString s_session_ext_name("session");
 
 class SessionRequestData : public RequestEventHandler, public Session {
 public:
-  SessionRequestData() : m_threadInited(false) {}
+  SessionRequestData() {}
 
-  virtual void requestInit() {
-    if (!m_threadInited) {
-      m_threadInited = true;
-      threadInit();
-    }
+  void destroy() {
     m_id.reset();
     m_session_status = Session::None;
     m_ps_session_handler = nullptr;
   }
 
-  virtual void requestShutdown() {
-    // We don't actually want to do our requestShutdownImpl here---it
-    // is run explicitly from the execution context, because it could
-    // run user code.
-  }
+  virtual void requestInit() {
+    destroy();
 
-  void requestShutdownImpl();
-
-public:
-  bool m_threadInited;
-  String m_id;
-
-  void threadInit() {
     Extension* ext = Extension::GetExtension(s_session_ext_name);
     assert(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
@@ -231,6 +217,18 @@ public:
                      "session.hash_bits_per_character", "4",
                      &m_hash_bits_per_character);
   }
+
+  virtual void requestShutdown() {
+    // We don't actually want to do our requestShutdownImpl here---it
+    // is run explicitly from the execution context, because it could
+    // run user code.
+  }
+
+  void requestShutdownImpl();
+
+public:
+  String m_id;
+
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(SessionRequestData, s_session);
 #define PS(name) s_session->m_ ## name
@@ -328,7 +326,7 @@ String SessionModule::create_sid() {
   }
 
   if (PS(entropy_length) > 0) {
-    int fd = open(PS(entropy_file).c_str(), O_RDONLY);
+    int fd = ::open(PS(entropy_file).c_str(), O_RDONLY);
     if (fd >= 0) {
       unsigned char rbuf[2048];
       int n;
@@ -1166,41 +1164,41 @@ static bool mod_is_open() {
   return PS(mod_data) || PS(mod_user_implemented);
 }
 
-static bool ini_on_update_save_handler(const String& value, void *p) {
+static bool ini_on_update_save_handler(const std::string& value, void *p) {
   SESSION_CHECK_ACTIVE_STATE;
-  PS(mod) = SessionModule::Find(value.data());
+  PS(mod) = SessionModule::Find(value.c_str());
   return true;
 }
 
-static String ini_get_save_handler(void *p) {
+static std::string ini_get_save_handler(void *p) {
   return PS(mod)->getName();
 }
 
-static bool ini_on_update_serializer(const String& value, void *p) {
+static bool ini_on_update_serializer(const std::string& value, void *p) {
   SESSION_CHECK_ACTIVE_STATE;
   PS(serializer) = SessionSerializer::Find(value.data());
   return true;
 }
 
-static String ini_get_serializer(void *p) {
+static std::string ini_get_serializer(void *p) {
   return PS(serializer)->getName();
 }
 
-static bool ini_on_update_trans_sid(const String& value, void *p) {
+static bool ini_on_update_trans_sid(const std::string& value, void *p) {
   SESSION_CHECK_ACTIVE_STATE;
   if (!strncasecmp(value.data(), "on", sizeof("on"))) {
     PS(use_trans_sid) = true;
   } else {
-    PS(use_trans_sid) = value.toBoolean();
+    ini_on_update_bool(value, &PS(use_trans_sid));
   }
   return true;
 }
 
-static String ini_get_trans_sid(void *p) {
-  return PS(use_trans_sid);
+static std::string ini_get_trans_sid(void *p) {
+  return std::to_string(PS(use_trans_sid));
 }
 
-static bool ini_on_update_save_dir(const String& value, void *p) {
+static bool ini_on_update_save_dir(const std::string& value, void *p) {
   if (value.find('\0') >= 0) {
     return false;
   }
@@ -1227,7 +1225,7 @@ static int php_session_destroy() {
   }
 
   s_session->requestShutdownImpl();
-  s_session->requestInit();
+  s_session->destroy();
 
   return retval;
 }
@@ -1844,7 +1842,7 @@ bool f_session_destroy() {
   }
 
   s_session->requestShutdownImpl();
-  s_session->requestInit();
+  s_session->destroy();
 
   return retval;
 }

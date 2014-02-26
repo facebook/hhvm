@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -215,11 +215,11 @@ void DBConn::open(std::shared_ptr<ServerData> server,
                     iter->second;
     }
 
-    char *sessionVarSQL = (char*)Util::safe_malloc(sessionCmd.length() * 2 + 1);
+    char *sessionVarSQL = (char*)safe_malloc(sessionCmd.length() * 2 + 1);
     mysql_real_escape_string(m_conn, sessionVarSQL, sessionCmd.c_str(),
       sessionCmd.length());
     bool failure = mysql_query(m_conn, sessionVarSQL);
-    Util::safe_free(sessionVarSQL);
+    safe_free(sessionVarSQL);
     if (failure) {
       int code = mysql_errno(m_conn);
       throw DatabaseException(code, "Failed to execute SQL '%s': %s (%d)",

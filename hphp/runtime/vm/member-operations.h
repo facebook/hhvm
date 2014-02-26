@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -266,7 +266,7 @@ inline TypedValue* ElemString(TypedValue& tvScratch, TypedValue* base,
     x = cellAsCVarRef(*key).toInt64();
   }
   if (x < 0 || x >= base->m_data.pstr->size()) {
-    if (warn) {
+    if (warn && RuntimeOption::EnableHipHopSyntax) {
       raise_warning("Out of bounds");
     }
     static StringData* sd = makeStaticString("");
@@ -444,7 +444,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
       return nullptr;
     }
     return collectionAt(obj, key);
-  } else if (obj->getVMClass() == SystemLib::s_ArrayObjectClass) {
+  } else if (obj->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
     auto storage = obj->o_realProp(s_storage, 0,
                                    SystemLib::s_ArrayObjectClass->nameRef());
     // ArrayObject should have the 'storage' property...

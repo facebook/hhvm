@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -333,8 +333,9 @@ MySQLResult *php_mysql_extract_result(CVarRef result) {
   MySQLResult *res = result.toResource().getTyped<MySQLResult>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
-  if (res == NULL || (res->get() == NULL && !res->isLocalized())) {
+  if (res == nullptr || (res->get() == nullptr && !res->isLocalized())) {
     raise_warning("supplied argument is not a valid MySQL result resource");
+    return nullptr;
   }
   return res;
 }
@@ -522,7 +523,7 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
     server = server.substr(0, slash_pos - 1);
   }
 
-  Util::HostURL hosturl(std::string(server), MySQL::GetDefaultPort());
+  HostURL hosturl(std::string(server), MySQL::GetDefaultPort());
   if (hosturl.isValid()) {
     host = hosturl.getHost();
     port = hosturl.getPort();
@@ -638,13 +639,18 @@ void MySQLResult::setFieldCount(int64_t fields) {
 
 void MySQLResult::setFieldInfo(int64_t f, MYSQL_FIELD *field) {
   MySQLFieldInfo &info = m_fields[f];
-  info.name = String(field->name, CopyString);
-  info.table = String(field->table, CopyString);
-  info.def = String(field->def, CopyString);
+  info.name       = String(field->name, CopyString);
+  info.org_name   = String(field->org_name, CopyString);
+  info.table      = String(field->table, CopyString);
+  info.org_table  = String(field->org_table, CopyString);
+  info.def        = String(field->def, CopyString);
+  info.db         = String(field->db, CopyString);
   info.max_length = (int64_t)field->max_length;
-  info.length = (int64_t)field->length;
-  info.type = (int)field->type;
-  info.flags = field->flags;
+  info.length     = (int64_t)field->length;
+  info.type       = (int)field->type;
+  info.flags      = field->flags;
+  info.decimals   = field->decimals;
+  info.charsetnr  = field->charsetnr;
 }
 
 MySQLFieldInfo *MySQLResult::getFieldInfo(int64_t field) {
@@ -798,6 +804,7 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
         b->buffer_length = sizeof(int64_t);
         break;
       case MYSQL_TYPE_DATE:
+      case MYSQL_TYPE_NEWDATE:
       case MYSQL_TYPE_DATETIME:
       case MYSQL_TYPE_TIMESTAMP:
       case MYSQL_TYPE_TIME:
@@ -819,9 +826,9 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
                              fields[i].length;
         break;
       default:
-        // There exists some more types in this enum like MYSQL_TYPE_NEWDATE,
-        // MYSQL_TYPE_TIMESTAMP2, MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but
-        // they are just used on the server
+        // There exists some more types in this enum like MYSQL_TYPE_TIMESTAMP2
+        // MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but they are just used on the
+        // server
         assert(false);
     }
 
@@ -1022,6 +1029,13 @@ Variant MySQLStmt::bind_result(std::vector<Variant*> vars) {
   return m_result_vars->bind_result(m_stmt);
 }
 
+Variant MySQLStmt::data_seek(int64_t offset) {
+  VALIDATE_PREPARED
+
+  mysql_stmt_data_seek(m_stmt, offset);
+  return init_null();
+}
+
 Variant MySQLStmt::get_errno() {
   VALIDATE_STMT
   return (int64_t)mysql_stmt_errno(m_stmt);
@@ -1095,7 +1109,7 @@ Variant MySQLStmt::num_rows() {
 
 Variant MySQLStmt::param_count() {
   VALIDATE_PREPARED
-  return mysql_stmt_param_count(m_stmt);
+  return (int64_t)mysql_stmt_param_count(m_stmt);
 }
 
 Variant MySQLStmt::prepare(const String& query) {
@@ -1116,8 +1130,8 @@ Variant MySQLStmt::prepare(const String& query) {
 }
 
 Variant MySQLStmt::reset() {
-  VALIDATE_STMT
-  return mysql_stmt_reset(m_stmt);
+  VALIDATE_PREPARED
+  return !mysql_stmt_reset(m_stmt);
 }
 
 Variant MySQLStmt::store_result() {

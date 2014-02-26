@@ -1,0 +1,15 @@
+array(6) {
+  [0]=>
+  string(5) "A:C:1"
+  [1]=>
+  string(5) "B:C:a"
+  [2]=>
+  string(3) "A:2"
+  [3]=>
+  string(3) "B:b"
+  [4]=>
+  string(3) "A:3"
+  [7]=>
+  string(3) "A:4"
+}
+===DONE===

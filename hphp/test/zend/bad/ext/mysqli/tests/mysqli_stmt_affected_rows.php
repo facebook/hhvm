@@ -9,12 +9,12 @@
 	}
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, 'DROP TABLE IF EXISTS test') ||
+	if (!mysqli_stmt_prepare($stmt, 'DROP TABLE IF EXISTS test_mysqli_stmt_affected_rows_table_1') ||
 		!mysqli_stmt_execute($stmt)) {
 		printf("[003] Failed to drop old test table: [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	}
 
-	if (!mysqli_stmt_prepare($stmt, 'CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE = ' . $engine) ||
+	if (!mysqli_stmt_prepare($stmt, 'CREATE TABLE test_mysqli_stmt_affected_rows_table_1(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE = ' . $engine) ||
 		!mysqli_stmt_execute($stmt)) {
 		printf("[004] Failed to create test table: [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	}
@@ -25,14 +25,14 @@
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (1, 'a')") ||
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_affected_rows_table_1(id, label) VALUES (1, 'a')") ||
 		!mysqli_stmt_execute($stmt))
 		printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (100, 'z')") ||
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_affected_rows_table_1(id, label) VALUES (100, 'z')") ||
 		!mysqli_stmt_execute($stmt))
 		printf("[007] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
@@ -42,7 +42,7 @@
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (100, 'z')") ||
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_affected_rows_table_1(id, label) VALUES (100, 'z')") ||
 		!mysqli_stmt_execute($stmt))
 		// NOTE: the error message varies with the MySQL Server version, dump only the error code!
 		printf("[009] [%d] (error message varies with the MySQL Server version, check the error code)\n", mysqli_stmt_errno($stmt));
@@ -54,7 +54,7 @@
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (1, 'a') ON DUPLICATE KEY UPDATE id = 4") ||
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_affected_rows_table_1(id, label) VALUES (1, 'a') ON DUPLICATE KEY UPDATE id = 4") ||
 		!mysqli_stmt_execute($stmt))
 		printf("[011] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
@@ -64,7 +64,7 @@
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (2, 'b'), (3, 'c')") ||
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_affected_rows_table_1(id, label) VALUES (2, 'b'), (3, 'c')") ||
 		!mysqli_stmt_execute($stmt))
 		printf("[013] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
@@ -74,14 +74,14 @@
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT IGNORE INTO test(id, label) VALUES (1, 'a')") ||
+	if (!mysqli_stmt_prepare($stmt, "INSERT IGNORE INTO test_mysqli_stmt_affected_rows_table_1(id, label) VALUES (1, 'a')") ||
 		!mysqli_stmt_execute($stmt))
 		printf("[015] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	if (1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
 		printf("[016] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!($res = mysqli_query($link, "SELECT count(id) AS num FROM test")) ||
+	if (!($res = mysqli_query($link, "SELECT count(id) AS num FROM test_mysqli_stmt_affected_rows_table_1")) ||
 		!($tmp = mysqli_fetch_assoc($res)))
 		printf("[017] [%d] %s\n", mysqli_error($link), mysqli_error($link));
 	$num = (int)$tmp['num'];
@@ -90,7 +90,7 @@
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) SELECT id + 10, label FROM test") ||
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_affected_rows_table_1(id, label) SELECT id + 10, label FROM test_mysqli_stmt_affected_rows_table_1") ||
 		!mysqli_stmt_execute($stmt))
 		printf("[018] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
@@ -100,7 +100,7 @@
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "REPLACE INTO test(id, label) values (4, 'd')") ||
+	if (!mysqli_stmt_prepare($stmt, "REPLACE INTO test_mysqli_stmt_affected_rows_table_1(id, label) values (4, 'd')") ||
 		!mysqli_stmt_execute($stmt))
 		printf("[020] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
@@ -110,7 +110,7 @@
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "REPLACE INTO test(id, label) values (5, 'e')") ||
+	if (!mysqli_stmt_prepare($stmt, "REPLACE INTO test_mysqli_stmt_affected_rows_table_1(id, label) values (5, 'e')") ||
 		!mysqli_stmt_execute($stmt))
 		printf("[022] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
@@ -144,7 +144,7 @@
 	if (1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
 		printf("[029] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_prepare($stmt, 'SELECT label FROM test WHERE id = 100') ||
+	if (!mysqli_stmt_prepare($stmt, 'SELECT label FROM test_mysqli_stmt_affected_rows_table_1 WHERE id = 100') ||
 		!mysqli_stmt_execute($stmt))
 		printf("[030] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
@@ -169,7 +169,7 @@
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, 'SELECT label FROM test WHERE 1 = 2') ||
+	if (!mysqli_stmt_prepare($stmt, 'SELECT label FROM test_mysqli_stmt_affected_rows_table_1 WHERE 1 = 2') ||
 		!mysqli_stmt_execute($stmt))
 		printf("[036] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
@@ -212,7 +212,7 @@
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "DROP TABLE IF EXISTS test") ||
+	if (!mysqli_stmt_prepare($stmt, "DROP TABLE IF EXISTS test_mysqli_stmt_affected_rows_table_1") ||
 		!mysqli_stmt_execute($stmt))
 		printf("[046] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 

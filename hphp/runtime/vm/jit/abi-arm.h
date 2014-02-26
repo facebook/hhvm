@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -103,8 +103,8 @@ const RegSet kCallerSaved = RegSet()
   | RegSet(vixl::x13)
   | RegSet(vixl::x14)
   | RegSet(vixl::x15)
-  // x16 = rHostCallReg
-  | RegSet(vixl::x17)
+  // x16 = rHostCallReg, used as ip0/tmp0 by MacroAssembler
+  // x17 = used as ip1/tmp1 by MacroAssembler
   | RegSet(vixl::x18)
   ;
 

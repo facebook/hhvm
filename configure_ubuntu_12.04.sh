@@ -1,5 +1,5 @@
 #########################################
-# 
+#
 # Install all the dependencies for HipHop
 #
 #########################################
@@ -39,7 +39,8 @@ sudo apt-fast -y install git-core cmake g++ libboost1.48-dev libmysqlclient-dev 
   libboost-program-options1.48-dev libboost-filesystem1.48-dev libboost-thread1.48-dev \
   wget memcached libreadline-dev libncurses-dev libmemcached-dev libbz2-dev \
   libc-client2007e-dev php5-mcrypt php5-imagick libgoogle-perftools-dev \
-  libcloog-ppl0 libelf-dev libdwarf-dev libunwind7-dev subversion &
+  libcloog-ppl0 libelf-dev libdwarf-dev libunwind7-dev subversion \
+  libmagickwand-dev libxslt1-dev &
 
 git clone git://github.com/libevent/libevent.git --quiet &
 git clone git://github.com/bagder/curl.git --quiet &
@@ -64,7 +65,7 @@ then
 else
     echo "$FAIL errors while downloading!"
     exit 100
-fi 
+fi
 
 # Leave this install till after the main parallel package install above
 # since it adds a non-12.04 package repo and we don't want to

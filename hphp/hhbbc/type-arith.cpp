@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,8 +33,8 @@ folly::Optional<Type> usual_arith_conversions(Type t1, Type t2) {
   /*
    * TODO(#3577303): some of these could be nothrow, which is probably
    * information we have want to propagate back out through the return
-   * value here (rather than bundling everything into
-   * abstract-interp.cpp).
+   * value here (rather than bundling everything into the
+   * interpreter).
    */
   if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt)) return TInt;
   if (t1.subtypeOf(TInt) && t2.subtypeOf(TDbl)) return TDbl;

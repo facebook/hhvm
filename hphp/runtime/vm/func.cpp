@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -214,7 +214,7 @@ void* Func::allocFuncMem(
     numExtraPrologues * sizeof(unsigned char*) +
     numExtraFuncPtrs * sizeof(Func*);
 
-  void* mem = lowMem ? Util::low_malloc(funcSize) : malloc(funcSize);
+  void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
 
   /**
    * The Func object can have optional generatorOrigFunc and nextClonedClosure
@@ -305,7 +305,7 @@ void Func::destroy(Func* func) {
   }
   func->~Func();
   if (lowMem) {
-    Util::low_free(mem);
+    low_free(mem);
   } else {
     free(mem);
   }
@@ -1109,7 +1109,7 @@ int FuncEmitter::parseUserAttributes(Attr &attrs) const {
  *  "ActRec": The internal function takes a fixed prototype
  *      TypedValue* funcname(ActRec *ar);
  *      Note that systemlib declaration must still be hack annotated
- *  "NoInjection": Do not include this fram in backtraces
+ *  "NoInjection": Do not include this frame in backtraces
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
  */
@@ -1169,7 +1169,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(m_name->data()[0]) ||
-    ParserBase::IsClosureName(m_name->toCPPString()) || m_isGenerator;
+    ParserBase::IsClosureName(m_name->toCppString()) || m_isGenerator;
 
   Attr attrs = m_attrs;
   if (preClass && preClass->attrs() & AttrInterface) {
@@ -1246,7 +1246,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
                                           f->isStatic());
     if (nif) {
       Attr dummy = AttrNone;
-      if (parseNativeAttributes(dummy) && Native::AttrActRec) {
+      if (parseNativeAttributes(dummy) & Native::AttrActRec) {
         f->shared()->m_builtinFuncPtr = nif;
         f->shared()->m_nativeFuncPtr = nullptr;
       } else {

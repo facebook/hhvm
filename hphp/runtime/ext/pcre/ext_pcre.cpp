@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -65,7 +65,8 @@ Variant HHVM_FUNCTION(preg_match_all, const String& pattern,
 Variant HHVM_FUNCTION(preg_replace, CVarRef pattern, CVarRef replacement,
                                     CVarRef subject, int limit /* = -1 */,
                                     VRefParam count /* = null */) {
-  return preg_replace_impl(pattern, replacement, subject, limit, count, false);
+  return preg_replace_impl(pattern, replacement, subject,
+                           limit, count, false, false);
 }
 
 Variant HHVM_FUNCTION(preg_replace_callback, CVarRef pattern, CVarRef callback,
@@ -77,7 +78,15 @@ Variant HHVM_FUNCTION(preg_replace_callback, CVarRef pattern, CVarRef callback,
         callback.toString().data());
     return empty_string;
   }
-  return preg_replace_impl(pattern, callback, subject, limit, count, true);
+  return preg_replace_impl(pattern, callback, subject,
+                           limit, count, true, false);
+}
+
+Variant HHVM_FUNCTION(preg_filter, CVarRef pattern, CVarRef callback,
+                                   CVarRef subject, int limit /* = -1 */,
+                                   VRefParam count /* = null */) {
+  return preg_replace_impl(pattern, callback, subject,
+                           limit, count, false, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,17 +183,7 @@ public:
       s_PCRE_VERSION.get(), makeStaticString(pcre_version())
     );
 
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
-                     "pcre.backtrack_limit",
-                     std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),
-                     ini_on_update_long, ini_get_long,
-                     &g_context->m_preg_backtrace_limit);
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
-                     "pcre.recursion_limit",
-                     std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
-                     ini_on_update_long, ini_get_long,
-                     &g_context->m_preg_recursion_limit);
-
+    HHVM_FE(preg_filter);
     HHVM_FE(preg_grep);
     HHVM_FE(preg_match);
     HHVM_FE(preg_match_all);
@@ -203,6 +202,20 @@ public:
 
     loadSystemlib();
   }
+
+  virtual void requestInit() {
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "pcre.backtrack_limit",
+                     std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),
+                     ini_on_update_long, ini_get_long,
+                     &g_context->m_preg_backtrace_limit);
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "pcre.recursion_limit",
+                     std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
+                     ini_on_update_long, ini_get_long,
+                     &g_context->m_preg_recursion_limit);
+  }
+
 } s_pcre_extension;
 
 ///////////////////////////////////////////////////////////////////////////////

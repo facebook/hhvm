@@ -1,0 +1,34 @@
+array(2) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(16) "www.facebook.com"
+}
+array(6) {
+  ["scheme"]=>
+  string(5) "https"
+  ["host"]=>
+  string(16) "www.facebook.com"
+  ["port"]=>
+  int(14159)
+  ["user"]=>
+  string(3) "lol"
+  ["pass"]=>
+  string(5) "12345"
+  ["path"]=>
+  string(9) "/hhvmabcd"
+}
+array(4) {
+  ["scheme"]=>
+  string(3) "irc"
+  ["host"]=>
+  string(17) "chat.freenode.net"
+  ["path"]=>
+  string(1) "/"
+  ["fragment"]=>
+  string(4) "hhvm"
+}
+array(1) {
+  ["path"]=>
+  string(12) "content/:/\*"
+}

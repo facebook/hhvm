@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -65,6 +65,8 @@ public:
   static void MergeSystemlib();
   static void ShutdownModules();
   static bool ModulesInitialised();
+  static void ThreadInitModules();
+  static void ThreadShutdownModules();
   static void RequestInitModules();
   static void RequestShutdownModules();
 
@@ -86,6 +88,8 @@ public:
   virtual void moduleInfo(Array &info) { info.set(m_name, true);}
   virtual void moduleInit() {}
   virtual void moduleShutdown() {}
+  virtual void threadInit() {}
+  virtual void threadShutdown() {}
   virtual void requestInit() {}
   virtual void requestShutdown() {}
 

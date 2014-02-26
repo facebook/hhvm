@@ -3,9 +3,9 @@
 
 	function bind_many($offset, $link, $num_params, $rows, $eval = true) {
 
-		$drop = "DROP TABLE IF EXISTS test";
-		$create = "CREATE TABLE test(id INT AUTO_INCREMENT PRIMARY KEY, ";
-		$insert = "INSERT INTO test";
+		$drop = "DROP TABLE IF EXISTS test_mysqli_stmt_bind_limits_table_1";
+		$create = "CREATE TABLE test_mysqli_stmt_bind_limits_table_1(id INT AUTO_INCREMENT PRIMARY KEY, ";
+		$insert = "INSERT INTO test_mysqli_stmt_bind_limits_table_1";
 		$columns = "";
 		$values = "";
 		$stmt_params = "";
@@ -75,7 +75,7 @@
 
 		$stmt->close();
 
-		if (!($res = $link->query("SELECT * FROM test"))) {
+		if (!($res = $link->query("SELECT * FROM test_mysqli_stmt_bind_limits_table_1"))) {
 			printf("[%03d + 05] [%d] %s\n", $offset, $link->errno, $link->error);
 			return false;
 		}

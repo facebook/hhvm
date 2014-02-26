@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,6 @@
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -176,21 +175,18 @@ IRTranslator::translateDiv(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateBinaryArithOp(const NormalizedInstruction& i) {
-  auto const op = i.op();
-  switch (op) {
+  switch (i.op()) {
 #define CASE(OpBc) case Op::OpBc: HHIR_EMIT(OpBc);
     CASE(Add)
     CASE(Sub)
+    CASE(Mul)
     CASE(BitAnd)
     CASE(BitOr)
     CASE(BitXor)
-    CASE(Mul)
 #undef CASE
-    default: {
-      not_reached();
-    };
+    default: break;
   }
-  NOT_REACHED();
+  not_reached();
 }
 
 void
@@ -256,21 +252,22 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
   assert(i.breaksTracelet ||
          i.nextOffset == takenOffset ||
          i.nextOffset == fallthruOffset);
+  assert(!i.includeBothPaths || !i.breaksTracelet);
 
   if (i.breaksTracelet || i.nextOffset == fallthruOffset) {
     if (op == OpJmpZ) {
-      HHIR_EMIT(JmpZ,  takenOffset);
+      HHIR_EMIT(JmpZ,  takenOffset, fallthruOffset, i.includeBothPaths);
     } else {
-      HHIR_EMIT(JmpNZ, takenOffset);
+      HHIR_EMIT(JmpNZ, takenOffset, fallthruOffset, i.includeBothPaths);
     }
     return;
   }
   assert(i.nextOffset == takenOffset);
   // invert the branch
   if (op == OpJmpZ) {
-    HHIR_EMIT(JmpNZ, fallthruOffset);
+    HHIR_EMIT(JmpNZ, fallthruOffset, takenOffset, i.includeBothPaths);
   } else {
-    HHIR_EMIT(JmpZ,  fallthruOffset);
+    HHIR_EMIT(JmpZ,  fallthruOffset, takenOffset, i.includeBothPaths);
   }
 }
 
@@ -426,6 +423,16 @@ IRTranslator::translateFloor(const NormalizedInstruction& i) {
 void
 IRTranslator::translateCeil(const NormalizedInstruction& i) {
   HHIR_EMIT(Ceil);
+}
+
+void
+IRTranslator::translateCheckProp(const NormalizedInstruction& i) {
+  HHIR_EMIT(CheckProp, i.imm[0].u_SA);
+}
+
+void
+IRTranslator::translateInitProp(const NormalizedInstruction& i) {
+  HHIR_EMIT(InitProp, i.imm[0].u_SA, static_cast<InitPropOp>(i.imm[1].u_OA));
 }
 
 void IRTranslator::translateAssertTL(const NormalizedInstruction& i) {
@@ -701,7 +708,7 @@ void IRTranslator::translateStrlen(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateIncStat(const NormalizedInstruction& i) {
-  HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA);
+  HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA, false);
 }
 
 void IRTranslator::translateIdx(const NormalizedInstruction& i) {
@@ -857,15 +864,15 @@ void
 IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
   auto const opc = [&] {
     switch (static_cast<SetOpOp>(i.imm[1].u_OA)) {
-    case SetOpOp::PlusEqual:   return Add;
-    case SetOpOp::MinusEqual:  return Sub;
-    case SetOpOp::MulEqual:    return Mul;
+    case SetOpOp::PlusEqual:   return Op::Add;
+    case SetOpOp::MinusEqual:  return Op::Sub;
+    case SetOpOp::MulEqual:    return Op::Mul;
     case SetOpOp::DivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
-    case SetOpOp::ConcatEqual: return ConcatCellCell;
+    case SetOpOp::ConcatEqual: return Op::Concat;
     case SetOpOp::ModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
-    case SetOpOp::AndEqual:    return BitAnd;
-    case SetOpOp::OrEqual:     return BitOr;
-    case SetOpOp::XorEqual:    return BitXor;
+    case SetOpOp::AndEqual:    return Op::BitAnd;
+    case SetOpOp::OrEqual:     return Op::BitOr;
+    case SetOpOp::XorEqual:    return Op::BitXor;
     case SetOpOp::SlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
     case SetOpOp::SrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
     }
@@ -1119,6 +1126,14 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
 
     if (op == OpFCallArray) return refuse("FCallArray");
 
+    // These opcodes don't indicate any additional work in the callee,
+    // so they shouldn't count toward the inlining cost.
+    if (op == Op::AssertTL || op == Op::AssertTStk ||
+        op == Op::AssertObjL || op == Op::AssertObjStk ||
+        op == Op::PredictTL || op == Op::PredictTStk) {
+      continue;
+    }
+
     cost += 1;
 
     // Check for an immediate vector, and if it's present add its size to the
@@ -1280,6 +1295,16 @@ void
 IRTranslator::translateVerifyParamType(const NormalizedInstruction& i) {
   int param = i.imm[0].u_IVA;
   HHIR_EMIT(VerifyParamType, param);
+}
+
+void
+IRTranslator::translateVerifyRetTypeC(const NormalizedInstruction& i) {
+  HHIR_EMIT(VerifyRetTypeC);
+}
+
+void
+IRTranslator::translateVerifyRetTypeV(const NormalizedInstruction& i) {
+  HHIR_EMIT(VerifyRetTypeV);
 }
 
 void
@@ -1572,7 +1597,7 @@ static Type flavorToType(FlavorDesc f) {
   switch (f) {
     case NOV: not_reached();
 
-    case CV: return Type::Cell;  // TODO(#3029148) this could be Cell - Uninit
+    case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
     case UV: return Type::Uninit;
     case VV: return Type::BoxedCell;
     case AV: return Type::Cls;
@@ -1596,14 +1621,13 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   }
 
   if (moduleEnabled(HPHP::Trace::stats, 2)) {
-    ht.emitIncStat(Stats::opcodeToIRPreStatCounter(ni.op()), 1);
+    ht.emitIncStat(Stats::opcodeToIRPreStatCounter(ni.op()), 1, false);
   }
   if (RuntimeOption::EnableInstructionCounts ||
       moduleEnabled(HPHP::Trace::stats, 3)) {
     // If the instruction takes a slow exit, the exit trace will
     // decrement the post counter for that opcode.
-    ht.emitIncStat(Stats::opcodeToIRPostStatCounter(ni.op()),
-                            1, true);
+    ht.emitIncStat(Stats::opcodeToIRPostStatCounter(ni.op()), 1, true);
   }
   ht.emitRB(RBTypeBytecodeStart, ni.source, 2);
 

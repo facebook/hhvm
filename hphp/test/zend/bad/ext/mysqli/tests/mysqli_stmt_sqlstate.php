@@ -10,7 +10,7 @@
 	if (NULL !== ($tmp = mysqli_stmt_sqlstate($stmt)))
 		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test"))
+	if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test_mysqli_stmt_sqlstate_table_1"))
 		printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	if ('00000' !== ($tmp = mysqli_stmt_sqlstate($stmt)))

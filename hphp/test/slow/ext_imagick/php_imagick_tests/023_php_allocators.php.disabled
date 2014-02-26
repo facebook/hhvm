@@ -1,0 +1,9 @@
+<?php
+ini_set ('memory_limit', '1M');
+
+$im = new imagick ();
+for ($i = 0; $i < 100; $i++)
+  $im->readImage ('magick:rose');
+
+
+?>

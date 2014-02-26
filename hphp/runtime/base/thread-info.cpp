@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,10 +42,10 @@ __thread char* ThreadInfo::t_stackbase = 0;
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
-String ini_get_max_execution_time(void*) {
+std::string ini_get_max_execution_time(void*) {
   int64_t timeout = ThreadInfo::s_threadInfo.getNoCheck()->
     m_reqInjectionData.getTimeout();
-  return String(timeout);
+  return std::to_string(timeout);
 }
 
 bool ini_on_update_max_execution_time(const String& value, void*) {
@@ -68,15 +68,6 @@ ThreadInfo::ThreadInfo()
 
   RDS::threadInit();
   onSessionInit();
-
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "max_execution_time",
-                   ini_on_update_max_execution_time,
-                   ini_get_max_execution_time);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "maximum_execution_time",
-                   ini_on_update_max_execution_time,
-                   ini_get_max_execution_time);
 
   Lock lock(s_thread_info_mutex);
   s_thread_infos.insert(this);
@@ -110,18 +101,27 @@ void ThreadInfo::onSessionInit() {
   // Take the address of the cached per-thread stackLimit, and use this to allow
   // some slack for (a) stack usage above the caller of reset() and (b) stack
   // usage after the position gets checked.
-  // If we're not in a threaded environment, then Util::s_stackSize will be
+  // If we're not in a threaded environment, then s_stackSize will be
   // zero. Use getrlimit to figure out what the size of the stack is to
   // calculate an approximation of where the bottom of the stack should be.
-  if (Util::s_stackSize == 0) {
+  if (s_stackSize == 0) {
     struct rlimit rl;
 
     getrlimit(RLIMIT_STACK, &rl);
     m_stacklimit = t_stackbase - (rl.rlim_cur - StackSlack);
   } else {
-    m_stacklimit = (char *)Util::s_stackLimit + StackSlack;
-    assert(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));
+    m_stacklimit = (char *)s_stackLimit + StackSlack;
+    assert(uintptr_t(m_stacklimit) < s_stackLimit + s_stackSize);
   }
+
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "max_execution_time",
+                   ini_on_update_max_execution_time,
+                   ini_get_max_execution_time);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "maximum_execution_time",
+                   ini_on_update_max_execution_time,
+                   ini_get_max_execution_time);
 }
 
 void ThreadInfo::clearPendingException() {

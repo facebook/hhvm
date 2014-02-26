@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -424,7 +424,7 @@ bool Transport::acceptEncoding(const char *encoding) {
 
   // This is testing a substring than a word match, but in practice, this
   // always works.
-  return header.find(encoding) != std::string::npos;
+  return strcasestr(header.c_str(), encoding) != nullptr;
 }
 
 bool Transport::cookieExists(const char *name) {
@@ -635,7 +635,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
   if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end() &&
       m_responseCode != 304) {
     std::string contentType = "text/html; charset="
-                         + RuntimeOption::DefaultCharsetName;
+                              + g_context->getDefaultCharset().toCppString();
     addHeaderImpl("Content-Type", contentType.c_str());
   }
 
@@ -839,29 +839,6 @@ int Transport::getLastChunkSentSize() {
 
 bool Transport::isUploadedFile(const String& filename) {
   return is_uploaded_file(filename.c_str());
-}
-
-// Move a file if and only if it was created by an upload
-bool Transport::moveUploadedFileHelper(const String& filename, const String& destination) {
-  // Do access check.
-  String dest = File::TranslatePath(destination);
-  if (Util::rename(filename.c_str(), dest.c_str()) < 0) {
-    Logger::Error("Unable to move uploaded file %s to %s: %s.",
-                  filename.c_str(), dest.c_str(),
-                  folly::errnoStr(errno).c_str());
-    return false;
-  }
-  Logger::Verbose("Successfully moved uploaded file %s to %s.",
-                  filename.c_str(), dest.c_str());
-  return true;
-}
-
-bool Transport::moveUploadedFile(const String& filename, const String& destination) {
-  if (!is_uploaded_file(filename.c_str())) {
-    Logger::Error("%s is not an uploaded file.", filename.c_str());
-    return false;
-  }
-  return moveUploadedFileHelper(filename, destination);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

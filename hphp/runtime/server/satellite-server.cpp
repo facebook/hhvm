@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@ int SatelliteServerInfo::DanglingServerPort = 0;
 
 SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   m_name = hdf.getName();
-  m_port = hdf["Port"].getInt16(0);
+  m_port = hdf["Port"].getUInt16(0);
   m_threadCount = hdf["ThreadCount"].getInt32(5);
   m_maxRequest = hdf["MaxRequest"].getInt32(500);
   m_maxDuration = hdf["MaxDuration"].getInt32(120);

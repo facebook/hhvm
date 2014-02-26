@@ -32,9 +32,11 @@ class Framework {
 
   // $name, $parallel, $test_fine_mode, etc. are constructor promoted
   // Assume the framework unit tests will be run in parallel until otherwise
-  // proven. Also assume that tests will be found by reflecting over the
-  // framework. However, some require that we use php tokens or are found via
-  // phpt files.
+  // proven. If $parallel is set to false, then the framework will be run
+  // in a similar vain as a normal PHPUnit run, it is one test after another
+  // in the same PHPUnit process. Also assume that tests will be found by
+  // reflecting over the framework. However, some require that we use php
+  // tokens or are found via phpt files.
   public function __construct(private string $name,
                               private string $test_command = null,
                               private Map $env_vars = null,
@@ -52,6 +54,10 @@ class Framework {
         !array_key_exists('commit', Options::$framework_info[$name]) ||
         !array_key_exists('branch', Options::$framework_info[$name])) {
       throw new Exception("Provide install, git and test file search info");
+    }
+
+    if (Options::$as_phpunit) {
+      $this->parallel = false;
     }
 
     // Set Framework information for install. These are the five necessary
@@ -275,6 +281,9 @@ class Framework {
     if ($redirect) {
       $this->test_command .= " 2>&1";
     }
+
+    verbose("General test command for: ".$this->name." is: ".
+            $this->test_command . "\n", Options::$verbose);
   }
 
   private function setTestFilePattern(?string $test_file_pattern = null):
@@ -291,16 +300,23 @@ class Framework {
       $this->config_file = find_first_file_recursive($phpunit_config_files,
                                                      $this->test_path,
                                                      false);
-
-      if ($this->config_file !== null) {
-        verbose("Using phpunit xml file in: ".$this->config_file."\n",
-                Options::$verbose);
-      } else {
-        verbose("No phpunit xml file found for: ".$this->name.".\n",
-                Options::$verbose);
-      }
     } else {
       $this->config_file = Options::$frameworks_root."/".$config_file;
+    }
+
+    if ($this->config_file !== null) {
+      verbose("Using phpunit xml file in: ".$this->config_file."\n",
+              Options::$verbose);
+      // For now, remove any logging and code coverage settings from
+      // the configuration file.
+      $config_data = simplexml_load_file($this->config_file);
+      if ($config_data->logging !== null) {
+        unset($config_data->logging);
+      }
+      file_put_contents($this->config_file, $config_data->saveXML());
+    } else {
+      verbose("No phpunit xml file found for: ".$this->name.".\n",
+              Options::$verbose);
     }
   }
 

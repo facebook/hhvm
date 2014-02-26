@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,8 +43,7 @@ constexpr size_t kJmpTargetAlign = 16;
 
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
-void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc,
-                                 const Offset spDiff);
+void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc);
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
 
@@ -109,8 +108,7 @@ inline void
 emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
             RegNumber reg) {
   uintptr_t virtualAddress = uintptr_t(&datum.m_node.m_p) - tlsBase();
-  a.    fs();
-  a.    load_disp32_reg64(virtualAddress, reg);
+  a.    fs().load_disp32_reg64(virtualAddress, reg);
 }
 
 #else // USE_GCC_FAST_TLS

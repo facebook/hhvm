@@ -22,6 +22,8 @@ class Options {
   public static string $script_errors_file;
   public static array $framework_info;
   public static array $original_framework_info;
+  public static int $num_threads = -1;
+  public static bool $as_phpunit = false;
 
   public static function parse(OptionInfoMap $options, array $argv): Vector {
     self::$frameworks_root = __DIR__.'/framework_downloads';
@@ -73,16 +75,27 @@ class Options {
       $framework_names->removeKey(0);
     }
 
-    if ($options->contains('csvheader')) {
+    if ($options->containsKey('csvheader')) {
+      if (!$options->containsKey('csv')) {
+        error_and_exit("Must have --csv to use --csvheader");
+      }
       self::$csv_header = true;
       $framework_names->removeKey(0);
     }
 
-
-    if ($options->contains('by-single-test')) {
+    if ($options->containsKey('as-phpunit')) {
+      if ($options->containsKey('by-single-test') ||
+          $options->containsKey('by-file') ||
+          $options->containsKey('numthreads')) {
+        error_and_exit("Cannot specify as-phpunit with by-file ".
+                       "by-single-test, or numthreads");
+      }
+      self::$as_phpunit = true;
+      $framework_names->removeKey(0);
+    } else if ($options->contains('by-single-test')) {
       if ($options->containsKey('by-file')) {
         // Can't run framework tests both by file and single test
-        error_and_exit("Cannot specify both by-file or by-single-test");
+        error_and_exit("Cannot specify both by-file and by-single-test");
       }
       self::$test_by_single_test = true;
       $framework_names->removeKey(0);
@@ -91,13 +104,14 @@ class Options {
       $framework_names->removeKey(0);
     }
 
-    verbose("Script running...Be patient as some frameworks take a while with ".
-            "a debug build of HHVM\n", self::$verbose);
-
-    if (ProxyInformation::is_proxy_required()) {
-      verbose("Looks like proxy may be required. Setting to default FB proxy ".
-           "values. Please change Map in ProxyInformation to correct values, ".
-           "if necessary.\n", self::$verbose);
+    if ($options->containsKey('numthreads')) {
+      self::$num_threads = (int) $options['numthreads'];
+      if (self::$num_threads < 1) {
+        self::$num_threads = 1;
+      }
+      // Remove numthreads option and its value from the $framework_names vector
+      $framework_names->removeKey(0);
+      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('timeout')) {
@@ -142,6 +156,15 @@ class Options {
       self::$get_latest_framework_code = true;
       self::$generate_new_expect_file = true;
       $framework_names->removeKey(0);
+    }
+
+    verbose("Script running...Be patient as some frameworks take a while with ".
+            "a debug build of HHVM\n", self::$verbose);
+
+    if (ProxyInformation::is_proxy_required()) {
+      verbose("Looks like proxy may be required. Setting to default FB proxy ".
+           "values. Please change Map in ProxyInformation.php to correct ".
+           "values, if necessary.\n", self::$verbose);
     }
 
     // This will return just the name of the frameworks passed in, if any left

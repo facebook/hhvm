@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -33,7 +33,7 @@
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
 
-using HPHP::Util::ScopedMem;
+using HPHP::ScopedMem;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,8 @@ void apcExtension::moduleLoad(Hdf config) {
 
   apc["NoTTLPrefix"].get(NoTTLPrefix);
 
-  UseUncounted = apc["MemModelTreadmill"].getBool(false);
+  UseUncounted = apc["MemModelTreadmill"].getBool(
+      RuntimeOption::ServerExecutionMode());
 }
 
 void apcExtension::moduleInit() {
@@ -124,9 +125,9 @@ int apcExtension::TTLLimit = -1;
 bool apcExtension::UseFileStorage = false;
 int64_t apcExtension::FileStorageChunkSize = int64_t(1LL << 29);
 int64_t apcExtension::FileStorageMaxSize = int64_t(1LL << 32);
-std::string apcExtension::FileStoragePrefix;
+std::string apcExtension::FileStoragePrefix = "/tmp/apc_store";
 int apcExtension::FileStorageAdviseOutPeriod = 1800;
-std::string apcExtension::FileStorageFlagKey;
+std::string apcExtension::FileStorageFlagKey = "_madvise_out";
 bool apcExtension::ConcurrentTableLockFree = false;
 bool apcExtension::FileStorageKeepFileLinked = false;
 std::vector<std::string> apcExtension::NoTTLPrefix;

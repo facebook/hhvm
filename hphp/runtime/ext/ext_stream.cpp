@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -443,7 +443,7 @@ Variant f_stream_socket_accept(CResRef server_socket,
   p.revents = 0;
   IOStatusHelper io("socket_accept");
   if (timeout == -1) {
-    timeout = RuntimeOption::SocketDefaultTimeout;
+    timeout = g_context->getSocketDefaultTimeout();
   }
   n = poll(&p, 1, (uint64_t)(timeout * 1000.0));
   if (n > 0) {
@@ -465,7 +465,7 @@ Variant f_stream_socket_server(const String& local_socket,
                                VRefParam errstr /* = null */,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
-  Util::HostURL hosturl(static_cast<const std::string>(local_socket));
+  HostURL hosturl(static_cast<const std::string>(local_socket));
   return socket_server_impl(hosturl, flags, errnum, errstr);
 }
 
@@ -475,7 +475,7 @@ Variant f_stream_socket_client(const String& remote_socket,
                                double timeout /* = -1.0 */,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
-  Util::HostURL hosturl(static_cast<const std::string>(remote_socket));
+  HostURL hosturl(static_cast<const std::string>(remote_socket));
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
@@ -529,7 +529,7 @@ Variant f_stream_socket_sendto(CResRef socket, const String& data,
     host = sock->getAddress();
     port = sock->getPort();
   } else {
-    Util::HostURL hosturl(static_cast<std::string>(address));
+    HostURL hosturl(static_cast<std::string>(address));
     host = hosturl.getHost();
     port = hosturl.getPort();
   }
@@ -546,13 +546,19 @@ static StreamContext* get_stream_context(CVarRef stream_or_context) {
     return nullptr;
   }
   CResRef resource = stream_or_context.asCResRef();
-  StreamContext* context = resource.getTyped<StreamContext>();
+  StreamContext* context = resource.getTyped<StreamContext>(true, true);
   if (context != nullptr) {
     return context;
   }
-  File* file = resource.getTyped<File>();
+  File *file = resource.getTyped<File>(true, true);
   if (file != nullptr) {
-    return file->getStreamContext();
+    Resource resource = file->getStreamContext();
+    if (file->getStreamContext().isNull()) {
+      resource =
+        Resource(NEWOBJ(StreamContext)(Array::Create(), Array::Create()));
+      file->setStreamContext(resource);
+    }
+    return resource.getTyped<StreamContext>();
   }
   return nullptr;
 }

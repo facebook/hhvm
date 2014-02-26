@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,10 +16,13 @@
 
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/modifier_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/function_call.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -83,6 +86,15 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
   if (!m_method &&
       m_userAttributes.find("__Overridable") != m_userAttributes.end()) {
     setAllowOverride();
+  }
+
+  // Try to find if the function have __Native("VariadicByRef")
+  auto params = getUserAttributeStringParams("__native");
+  for (auto &param : params) {
+    if (param.compare("VariadicByRef") == 0) {
+      setVariableArgument(1);
+      break;
+    }
   }
 }
 
@@ -909,6 +921,37 @@ void FunctionScope::setOverriding(TypePtr returnType,
   for (unsigned int i = 0; i < m_paramTypes.size(); i++) {
     m_paramTypes[i] = Type::Variant;
   }
+}
+
+std::vector<std::string> FunctionScope::getUserAttributeStringParams(
+    const std::string& key) {
+  std::vector<std::string> ret;
+  auto native = m_userAttributes.find(key);
+  if (native == m_userAttributes.end()) {
+    return ret;
+  }
+
+  auto arrayExp = static_pointer_cast<UnaryOpExpression>(native->second);
+  if (!arrayExp->getExpression()) {
+    return ret;
+  }
+
+  auto memberExp = static_pointer_cast<ExpressionList>(
+                     arrayExp->getExpression());
+
+  for (int i = 0; i < memberExp->getCount(); i++) {
+    auto pairExp = dynamic_pointer_cast<ArrayPairExpression>((*memberExp)[i]);
+    if (!pairExp) {
+      continue;
+    }
+
+    auto value = dynamic_pointer_cast<ScalarExpression>(pairExp->getValue());
+    if (value) {
+      ret.push_back(value->getString());
+    }
+  }
+
+  return ret;
 }
 
 std::string FunctionScope::getId() const {

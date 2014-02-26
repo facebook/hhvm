@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,8 +35,12 @@ const StaticString
   s_FrozenVector("HH\\FrozenVector"),
   s_FrozenSet("HH\\FrozenSet"),
   s_FrozenMap("HH\\FrozenMap"),
+  s_Closure("Closure");
+
+const StaticString
   s_86pinit("86pinit"),
-  s_86sinit("86sinit");
+  s_86sinit("86sinit"),
+  s_MockClass("__MockClass");
 
 bool has_magic_bool_conversion(res::Class cls) {
   return is_collection(cls) || cls.name()->isame(s_SimpleXMLElement.get());
@@ -51,6 +55,7 @@ bool is_collection(res::Class cls) {
   return name->isame(s_Vector.get()) ||
     name->isame(s_Map.get()) ||
     name->isame(s_Set.get()) ||
+    name->isame(s_Pair.get()) ||
     name->isame(s_FrozenVector.get()) ||
     name->isame(s_FrozenSet.get()) ||
     name->isame(s_FrozenMap.get());
@@ -60,6 +65,7 @@ bool could_have_magic_bool_conversion(Type t) {
   if (!t.couldBe(TObj)) return false;
   // TODO(#3499765): we need to handle interfaces that the collection
   // classes implement before we can ever return false here.
+  // Note: exclude s_Pair if we re-enable this.
   // if (t.strictSubtypeOf(TObj)) {
   //   return has_magic_bool_conversion(dobj_of(t).cls);
   // }
@@ -69,23 +75,23 @@ bool could_have_magic_bool_conversion(Type t) {
   return true;
 }
 
-MethodMask find_special_methods(borrowed_ptr<const php::Class> cls) {
-  auto ret = uint32_t{};
-
-#define X(str, mask)                            \
-  if (m->name->isame(str.get())) {              \
-    ret |= static_cast<uint32_t>(mask);         \
-    continue;                                   \
-  }
-
+borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class> cls,
+                                    SString name) {
   for (auto& m : cls->methods) {
-    X(s_86sinit, MethodMask::Internal_86sinit);
-    X(s_86pinit, MethodMask::Internal_86pinit);
+    if (m->name->isame(name)) {
+      return borrow(m);
+    }
   }
+  return nullptr;
+}
 
-#undef X
+bool is_special_method_name(SString name) {
+  auto const p = name->data();
+  return p && p[0] == '8' && p[1] == '6';
+}
 
-  return static_cast<MethodMask>(ret);
+bool is_mock_class(borrowed_ptr<const php::Class> cls) {
+  return cls->userAttributes.count(s_MockClass.get());
 }
 
 SString collectionTypeToString(uint32_t ctype) {
@@ -107,6 +113,10 @@ SString collectionTypeToString(uint32_t ctype) {
   }
   assert(!"Unknown Collection Type");
   not_reached();
+}
+
+bool is_closure(const php::Class& c) {
+  return c.parentName && c.parentName->isame(s_Closure.get());
 }
 
 //////////////////////////////////////////////////////////////////////

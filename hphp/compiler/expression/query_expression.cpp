@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -100,7 +100,7 @@ void QueryExpression::doRewrites(AnalysisResultPtr ar,
   // into a query (unless already cached).
   std::ostringstream serialized;
   CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
-  cg.setAstClassPrefix("Code");
+  cg.setAstClassPrefix("HH\\CodeModel\\");
   qe->outputCodeModel(cg);
   std::string s(serialized.str().c_str(), serialized.str().length());
   m_querystr = makeStaticString(s);
@@ -152,9 +152,8 @@ ClosureExpressionPtr QueryExpression::clientSideRewrite(AnalysisResultPtr ar,
   // Create a function statement for the lambda:
 
   // First create a formal parameter list, consisting of a single
-  // parameter that will receive an object from the query provider
-  // with a property for each table column that is referenced in the
-  // expression of this select clause.
+  // parameter that will receive an array from the query provider
+  // with an element for each server-side expression of this select clause.
   TypeAnnotationPtr type;
   bool hhType = true;
   std::string paramName = "__query_result_row__";
@@ -190,6 +189,8 @@ ClosureExpressionPtr QueryExpression::clientSideRewrite(AnalysisResultPtr ar,
   FunctionScopePtr funcScope
     (new FunctionScope(ar, false, name, func, false, 1, 1,
                        nullptr, attr, docComment, fileScope, uattrs));
+  funcScope->setParamCounts(ar, 1, 1);
+  FunctionScope::RecordFunctionInfo(name, funcScope);
   fileScope->addFunction(ar, funcScope);
   func->resetScope(funcScope, true);
   funcScope->setOuterScope(fileScope);
@@ -249,11 +250,12 @@ TypePtr QueryOrderby::inferTypes(AnalysisResultPtr ar, TypePtr type,
 void QueryOrderby::outputCodeModel(CodeGenerator &cg) {
   if (this->getKindOf() == Expression::KindOfOrderbyClause) {
     cg.printObjectHeader("OrderbyClause", 2);
+    cg.printPropertyHeader("orders");
   } else {
     cg.printObjectHeader("QueryExpression", 2);
+    cg.printPropertyHeader("clauses");
   }
-  cg.printPropertyHeader("clauses");
-  m_originalExpressions->outputCodeModel(cg);
+  cg.printExpressionVector(m_originalExpressions);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

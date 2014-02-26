@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -109,6 +109,14 @@ struct TypedValue {
   std::string pretty() const; // debug formatting. see trace.h
 };
 #endif
+
+// Check that TypedValue's size is a power of 2 (16bytes currently)
+static_assert((sizeof(TypedValue) & (sizeof(TypedValue)-1)) == 0,
+              "TypedValue's size is expected to be a power of 2");
+const size_t kTypedValueAlignMask = sizeof(TypedValue) - 1;
+inline size_t alignTypedValue(size_t sz) {
+  return (sz + kTypedValueAlignMask) & ~kTypedValueAlignMask;
+}
 
 /*
  * This TypedValue subclass exposes a 32-bit "aux" field somewhere inside it.

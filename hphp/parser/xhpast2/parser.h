@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -944,10 +944,10 @@ struct Parser : ParserBase {
   void onWhereClause(Token &out, Token &expr) {
     out.setNodeType(ONWHERECLAUSE).appendChild(&expr);
   }
-  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
-      Token &right) {
-    out.setNodeType(ONJOINCLAUSE).appendChild(&var).appendChild(&coll)
-      .appendChild(&left).appendChild(&right);
+  void onJoinClause(Token &out, Token *var, Token &coll, Token *left,
+      Token *right) {
+    out.setNodeType(ONJOINCLAUSE).appendChild(var).appendChild(&coll)
+      .appendChild(left).appendChild(right);
   }
   void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
       Token &right, Token &group) {
@@ -981,7 +981,7 @@ struct Parser : ParserBase {
   void onUse(const std::string &ns, const std::string &as) {
     // TODO
   }
-  void nns(bool declare = false) {
+  void nns(int token = 0, const std::string& text = std::string()) {
     // TODO
   }
   std::string nsDecl(const std::string &name) {

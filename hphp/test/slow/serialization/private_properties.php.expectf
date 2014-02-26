@@ -1,0 +1,82 @@
+'O:1:"A":1:{s:4:"' . "\0" . 'A' . "\0" . 'a";i:42;}'
+object(A)#2 (1) {
+  ["a":"A":private]=>
+  int(42)
+}
+'O:1:"A":1:{s:4:"' . "\0" . 'A' . "\0" . 'a";i:42;}'
+object(A)#2 (1) {
+  ["a":"A":private]=>
+  int(42)
+}
+%SNotice: serialize(): "" returned as member variable from __sleep() but does not exist in %shphp/test/slow/serialization/private_properties.php on line 23
+'O:1:"A":1:{s:4:"' . "\0" . '*' . "\0" . 'a";N;}'
+object(A)#2 (2) {
+  ["a":"A":private]=>
+  int(1)
+  ["a":protected]=>
+  NULL
+}
+%SNotice: serialize(): "" returned as member variable from __sleep() but does not exist in %shphp/test/slow/serialization/private_properties.php on line 23
+'O:1:"A":1:{s:4:"' . "\0" . '*' . "\0" . 'b";N;}'
+object(A)#2 (2) {
+  ["a":"A":private]=>
+  int(1)
+  ["b":protected]=>
+  NULL
+}
+%SNotice: Undefined property: A::$b in %shphp/test/slow/serialization/private_properties.php on line 29
+NULL
+%SNotice: serialize(): "" returned as member variable from __sleep() but does not exist in %shphp/test/slow/serialization/private_properties.php on line 23
+'O:1:"A":1:{s:4:"' . "\0" . 'B' . "\0" . 'b";N;}'
+object(A)#2 (2) {
+  ["a":"A":private]=>
+  int(1)
+  ["b":"B":private]=>
+  NULL
+}
+%SNotice: Undefined property: A::$b in %shphp/test/slow/serialization/private_properties.php on line 29
+NULL
+%SNotice: serialize(): __sleep should return an array only containing the names of instance-variables to serialize in %shphp/test/slow/serialization/private_properties.php on line 23
+'N;'
+NULL
+%SNotice: serialize(): "a" returned as member variable from __sleep() but does not exist in %shphp/test/slow/serialization/private_properties.php on line 23
+'O:1:"B":1:{s:1:"a";N;}'
+object(B)#2 (2) {
+  ["a":"A":private]=>
+  int(1)
+  ["a"]=>
+  NULL
+}
+'O:1:"B":1:{s:4:"' . "\0" . 'A' . "\0" . 'a";i:42;}'
+object(B)#2 (1) {
+  ["a":"A":private]=>
+  int(42)
+}
+%SNotice: serialize(): "" returned as member variable from __sleep() but does not exist in %shphp/test/slow/serialization/private_properties.php on line 23
+'O:1:"B":1:{s:4:"' . "\0" . '*' . "\0" . 'a";N;}'
+object(B)#2 (2) {
+  ["a":"A":private]=>
+  int(1)
+  ["a":protected]=>
+  NULL
+}
+%SNotice: serialize(): "" returned as member variable from __sleep() but does not exist in %shphp/test/slow/serialization/private_properties.php on line 23
+'O:1:"B":1:{s:4:"' . "\0" . '*' . "\0" . 'b";N;}'
+object(B)#2 (2) {
+  ["a":"A":private]=>
+  int(1)
+  ["b":protected]=>
+  NULL
+}
+%SNotice: Undefined property: B::$b in %shphp/test/slow/serialization/private_properties.php on line 29
+NULL
+%SNotice: serialize(): "" returned as member variable from __sleep() but does not exist in %shphp/test/slow/serialization/private_properties.php on line 23
+'O:1:"B":1:{s:4:"' . "\0" . 'B' . "\0" . 'b";N;}'
+object(B)#2 (2) {
+  ["a":"A":private]=>
+  int(1)
+  ["b":"B":private]=>
+  NULL
+}
+%SNotice: Undefined property: B::$b in %shphp/test/slow/serialization/private_properties.php on line 29
+NULL

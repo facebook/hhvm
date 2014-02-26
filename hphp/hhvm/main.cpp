@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/emulate-zend.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/compiler/compiler.h"
+#include "hphp/hhbbc/hhbbc.h"
 
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/embedded-vfs.h"
@@ -34,6 +35,14 @@ int main(int argc, char** argv) {
     return HPHP::compiler_main(argc - 1, argv + 1);
   }
 
+  if (len >= 5 && !strcmp(argv[0] + len - 5, "hhbbc")) {
+    return HPHP::HHBBC::main(argc, argv);
+  }
+  if (argc > 1 && !strcmp(argv[1], "--hhbbc")) {
+    argv[1] = "hhbbc";
+    return HPHP::HHBBC::main(argc - 1, argv + 1);
+  }
+
   HPHP::register_process_init();
   if (len >= 3 && !strcmp(argv[0] + len - 3, "php")) {
     return HPHP::emulate_zend(argc, argv);
@@ -43,8 +52,8 @@ int main(int argc, char** argv) {
     return HPHP::emulate_zend(argc - 1, argv + 1);
   }
 
-  HPHP::Util::embedded_data data;
-  if (!HPHP::Util::get_embedded_data("repo", &data)) {
+  HPHP::embedded_data data;
+  if (!HPHP::get_embedded_data("repo", &data)) {
     return HPHP::execute_program(argc, argv);
   }
   std::string repo;
@@ -64,3 +73,4 @@ int main(int argc, char** argv) {
   }
   return HPHP::execute_program(args.size(), &args[0]);
 }
+

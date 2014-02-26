@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -145,15 +145,6 @@ void PageletTransport::onSendEndImpl() {
 bool PageletTransport::isUploadedFile(const String& filename) {
   return m_rfc1867UploadedFiles.find(filename.c_str()) !=
          m_rfc1867UploadedFiles.end();
-}
-
-bool PageletTransport::moveUploadedFile(const String& filename,
-    const String& destination) {
-  if (!isUploadedFile(filename.c_str())) {
-    Logger::Error("%s is not an uploaded file.", filename.c_str());
-    return false;
-  }
-  return moveUploadedFileHelper(filename, destination);
 }
 
 bool PageletTransport::getFiles(std::string &files) {

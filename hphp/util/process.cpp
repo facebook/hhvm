@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -553,9 +553,36 @@ std::string Process::GetCurrentUser() {
 }
 
 std::string Process::GetCurrentDirectory() {
-  char buf[PATH_MAX];
-  memset(buf, 0, PATH_MAX);
-  return getcwd(buf, PATH_MAX);
+  auto const kDeleted = " (deleted)";
+  auto const kDeletedLen = strlen(kDeleted);
+
+  // Allocate additional space for kDeleted part.
+  char buf[PATH_MAX + kDeletedLen];
+  memset(buf, 0, sizeof(buf));
+  char* cwd = getcwd(buf, PATH_MAX);
+
+  if (cwd != nullptr) {
+    return cwd;
+  }
+
+#if defined(__linux__)
+  if (errno != ENOENT) {
+    return "";
+  }
+  // Read cwd symlink directly if it leads to the deleted path.
+  int r = readlink("/proc/self/cwd", buf, sizeof(buf));
+  if (r == -1) {
+    return "";
+  }
+
+  if (r >= kDeletedLen && !strcmp(buf + r - kDeletedLen, " (deleted)")) {
+    buf[r - kDeletedLen] = 0;
+  }
+  return buf;
+#else
+  // /proc/self/cwd is not available.
+  return "";
+#endif
 }
 
 std::string Process::GetHomeDirectory() {

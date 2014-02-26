@@ -17,7 +17,7 @@
 	if (NULL !== ($tmp = mysqli_stmt_reset($stmt)))
 		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (true !== ($tmp = mysqli_stmt_prepare($stmt, 'SELECT id FROM test')))
+	if (true !== ($tmp = mysqli_stmt_prepare($stmt, 'SELECT id FROM test_mysqli_stmt_reset_table_1')))
 		printf("[005] Expecting boolean/true, got %s/%s, [%d] %s\n",
 			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
@@ -39,13 +39,13 @@
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
+	if (!mysqli_query($link, "DROP TABLE IF EXISTS test_mysqli_stmt_reset_table_1"))
 		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "CREATE TABLE test(id INT NOT NULL AUTO_INCREMENT, label BLOB, PRIMARY KEY(id))"))
+	if (!mysqli_query($link, "CREATE TABLE test_mysqli_stmt_reset_table_1(id INT NOT NULL AUTO_INCREMENT, label BLOB, PRIMARY KEY(id))"))
 		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(label) VALUES (?)"))
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test_mysqli_stmt_reset_table_1(label) VALUES (?)"))
 		printf("[013] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	$label = null;
@@ -64,7 +64,7 @@
 	if (!mysqli_stmt_execute($stmt))
 		printf("[017] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-	if (!$res = mysqli_query($link, "SELECT label FROM test"))
+	if (!$res = mysqli_query($link, "SELECT label FROM test_mysqli_stmt_reset_table_1"))
 		printf("[018] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!$row = mysqli_fetch_assoc($res))

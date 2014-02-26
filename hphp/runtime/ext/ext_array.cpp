@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -189,7 +189,12 @@ Variant f_array_combine(CVarRef keys, CVarRef values) {
   Array ret = ArrayData::Create();
   for (ArrayIter iter1(cell_keys), iter2(cell_values);
        iter1; ++iter1, ++iter2) {
-    ret.setWithRef(iter1.secondRefPlus(), iter2.secondRefPlus());
+    CVarRef key = iter1.secondRefPlus();
+    if (key.isInteger() || key.isString()) {
+      ret.setWithRef(key, iter2.secondRefPlus());
+    } else {
+      ret.setWithRef(key.toString(), iter2.secondRefPlus());
+    }
   }
   return ret;
 }
@@ -212,7 +217,19 @@ Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
 
   ArrayInit ai(size);
   for (ArrayIter iter(cell_keys); iter; ++iter) {
-    ai.set(iter.secondRefPlus(), value);
+    auto& key = iter.secondRefPlus();
+    // This is intentionally different to the $foo[$invalid_key] coercion.
+    // See tests/slow/ext_array/array_fill_keys_tostring.php for examples.
+    if (LIKELY(key.isInteger() || key.isString())) {
+      ai.set(key, value);
+    } else if (RuntimeOption::EnableHipHopSyntax) {
+      // @todo (fredemmott): Use the Zend toString() behavior, but retain the
+      // warning/error behind a separate config setting
+      raise_warning("array_fill_keys: keys must be ints or strings");
+      ai.set(key, value);
+    } else {
+      ai.set(key.toString(), value);
+    }
   }
   return ai.create();
 }

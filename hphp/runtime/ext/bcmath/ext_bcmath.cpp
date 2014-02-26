@@ -248,7 +248,7 @@ class bcmathExtension : public Extension {
     loadSystemlib();
   }
 
-  virtual void threadInit() {
+  virtual void requestInit() {
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "bcmath.scale", "0",
                      &BCG(bc_precision));

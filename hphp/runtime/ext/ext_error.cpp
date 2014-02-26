@@ -167,10 +167,9 @@ bool f_error_log(const String& message, int message_type /* = 0 */,
 }
 
 int64_t f_error_reporting(CVarRef level /* = null */) {
-  int oldErrorReportingLevel = ThreadInfo::s_threadInfo.getNoCheck()->
-      m_reqInjectionData.getErrorReportingLevel();
+  int oldErrorReportingLevel = g_context->getErrorReportingLevel();
   if (!level.isNull()) {
-    IniSetting::Set("error_reporting", level.toInt32());
+    g_context->setErrorReportingLevel(level.toInt32());
   }
   return oldErrorReportingLevel;
 }

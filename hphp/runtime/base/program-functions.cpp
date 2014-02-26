@@ -1180,9 +1180,6 @@ static int execute_program_impl(int argc, char** argv) {
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
-  // Reload the thread local ini settings now that RuntimeOption is right
-  ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.threadInit();
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     HPHP::initTypeProfileStructure();
   }

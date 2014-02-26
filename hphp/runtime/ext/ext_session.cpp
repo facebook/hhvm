@@ -50,13 +50,12 @@ namespace HPHP {
 
 using std::string;
 
-static bool ini_on_update_save_handler(const std::string& value, void *p);
-static std::string ini_get_save_handler(void *p);
-static bool ini_on_update_serializer(const std::string& value, void *p);
-static std::string ini_get_serializer(void *p);
-static bool ini_on_update_trans_sid(const std::string& value, void *p);
-static std::string ini_get_trans_sid(void *p);
-static bool ini_on_update_save_dir(const std::string& value, void *p);
+static bool ini_on_update_save_handler(const std::string& value);
+static std::string ini_get_save_handler();
+static bool ini_on_update_serializer(const std::string& value);
+static std::string ini_get_serializer();
+static bool ini_on_update_trans_sid(const bool& value);
+static bool ini_on_update_save_dir(const std::string& value);
 static bool mod_is_open();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1091,13 +1090,13 @@ static bool mod_is_open() {
   return PS(mod_data) || PS(mod_user_implemented);
 }
 
-static bool ini_on_update_save_handler(const std::string& value, void *p) {
+static bool ini_on_update_save_handler(const std::string& value) {
   SESSION_CHECK_ACTIVE_STATE;
   PS(mod) = SessionModule::Find(value.c_str());
   return true;
 }
 
-static std::string ini_get_save_handler(void *p) {
+static std::string ini_get_save_handler() {
   auto &mod = PS(mod);
   if (mod == nullptr) {
     return "";
@@ -1105,13 +1104,13 @@ static std::string ini_get_save_handler(void *p) {
   return mod->getName();
 }
 
-static bool ini_on_update_serializer(const std::string& value, void *p) {
+static bool ini_on_update_serializer(const std::string& value) {
   SESSION_CHECK_ACTIVE_STATE;
   PS(serializer) = SessionSerializer::Find(value.data());
   return true;
 }
 
-static std::string ini_get_serializer(void *p) {
+static std::string ini_get_serializer() {
   auto &serializer = PS(serializer);
   if (serializer == nullptr) {
     return "";
@@ -1119,21 +1118,12 @@ static std::string ini_get_serializer(void *p) {
   return serializer->getName();
 }
 
-static bool ini_on_update_trans_sid(const std::string& value, void *p) {
+static bool ini_on_update_trans_sid(const bool& value) {
   SESSION_CHECK_ACTIVE_STATE;
-  if (!strncasecmp(value.data(), "on", sizeof("on"))) {
-    PS(use_trans_sid) = true;
-  } else {
-    ini_on_update(value, &PS(use_trans_sid));
-  }
   return true;
 }
 
-static std::string ini_get_trans_sid(void *p) {
-  return std::to_string(PS(use_trans_sid));
-}
-
-static bool ini_on_update_save_dir(const std::string& value, void *p) {
+static bool ini_on_update_save_dir(const std::string& value) {
   if (value.find('\0') >= 0) {
     return false;
   }
@@ -1141,7 +1131,7 @@ static bool ini_on_update_save_dir(const std::string& value, void *p) {
   if (File::TranslatePath(path).empty()) {
     return false;
   }
-  return ini_on_update(value, (std::string*) p);
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1874,15 +1864,18 @@ static class SessionExtension : public Extension {
     assert(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.save_path",               "",
-                     ini_on_update_save_dir,
-                     [](void *p) { return ini_get((std::string*)p); },
+                     IniSetting::SetAndGet<std::string>(
+                       ini_on_update_save_dir, nullptr
+                     ),
                      &PS(save_path));
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.name",                    "PHPSESSID",
                      &PS(session_name));
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.save_handler",            "files",
-                     ini_on_update_save_handler,        ini_get_save_handler);
+                     IniSetting::SetAndGet<std::string>(
+                       ini_on_update_save_handler, ini_get_save_handler
+                     ));
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.auto_start",              "0",
                      &PS(auto_start));
@@ -1897,7 +1890,9 @@ static class SessionExtension : public Extension {
                      &PS(gc_maxlifetime));
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.serialize_handler",       "php",
-                     ini_on_update_serializer,          ini_get_serializer);
+                     IniSetting::SetAndGet<std::string>(
+                       ini_on_update_serializer, ini_get_serializer
+                     ));
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.cookie_lifetime",         "0",
                      &PS(cookie_lifetime));
@@ -1936,7 +1931,10 @@ static class SessionExtension : public Extension {
                      &PS(cache_expire));
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.use_trans_sid",           "0",
-                     ini_on_update_trans_sid,           ini_get_trans_sid);
+                     IniSetting::SetAndGet<bool>(
+                       ini_on_update_trans_sid, nullptr
+                     ),
+                     &PS(use_trans_sid));
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.hash_function",           "0",
                      &PS(hash_func));

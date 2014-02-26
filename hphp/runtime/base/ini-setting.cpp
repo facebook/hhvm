@@ -416,9 +416,8 @@ IniSetting::Map IniSetting::FromStringAsMap(const std::string& ini,
 struct IniCallbackData {
   const Extension* extension;
   IniSetting::Mode mode;
-  IniSetting::UpdateCallback updateCallback;
-  IniSetting::GetCallback getCallback;
-  void *p;
+  std::function<bool(const std::string& value)> updateCallback;
+  std::function<std::string()> getCallback;
 };
 
 typedef std::map<std::string, IniCallbackData> CallbackMap;
@@ -445,18 +444,10 @@ public:
 } s_ini_extension;
 
 void IniSetting::Bind(const Extension* extension, const Mode mode,
-                      const char *name, const char *value,
-                      UpdateCallback updateCallback, GetCallback getCallback,
-                      void *p /* = NULL */) {
-  assert(value);
-  Bind(extension, mode, name, updateCallback, getCallback, p);
-  updateCallback(value, p);
-}
-
-void IniSetting::Bind(const Extension* extension, const Mode mode,
                       const char *name,
-                      UpdateCallback updateCallback, GetCallback getCallback,
-                      void *p /* = NULL */) {
+                      std::function<bool(const std::string& value)>
+                        updateCallback,
+                      std::function<std::string()> getCallback) {
   assert(name && *name);
 
   bool is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
@@ -476,7 +467,6 @@ void IniSetting::Bind(const Extension* extension, const Mode mode,
   data.mode = mode;
   data.updateCallback = updateCallback;
   data.getCallback = getCallback;
-  data.p = p;
 }
 
 void IniSetting::Unbind(const char *name) {
@@ -493,7 +483,7 @@ bool IniSetting::Get(const std::string& name, std::string &value) {
     }
   }
 
-  value = iter->second.getCallback(iter->second.p);
+  value = iter->second.getCallback();
   return true;
 }
 
@@ -515,7 +505,7 @@ static bool ini_set(const String& name, const String& value,
   CallbackMap::iterator iter = s_user_callbacks->find(name.data());
   if (iter != s_user_callbacks->end()) {
     if ((iter->second.mode & mode) && iter->second.updateCallback) {
-      return iter->second.updateCallback(value.toCppString(), iter->second.p);
+      return iter->second.updateCallback(value.toCppString());
     }
   }
   return false;
@@ -562,7 +552,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
 
     if (details) {
       Array item = Array::Create();
-      auto value = iter.second.getCallback(iter.second.p);
+      auto value = iter.second.getCallback();
       item.add(s_global_value, value);
       item.add(s_local_value, value);
       if (iter.second.mode == PHP_INI_ALL) {
@@ -577,7 +567,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
       }
       r.add(String(iter.first), item);
     } else {
-      r.add(String(iter.first), iter.second.getCallback(iter.second.p));
+      r.add(String(iter.first), iter.second.getCallback());
     }
   }
   return r;

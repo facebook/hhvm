@@ -1298,12 +1298,12 @@ void RuntimeOption::Load(Hdf &config,
   // Data Handling
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
                    "post_max_size",
-                   [](const std::string& value, void* p) {
-                     return ini_on_update(value, (int64_t*)p);
-                   },
-                   [](void*) {
-                     return std::to_string(VirtualHost::GetMaxPostSize());
-                   },
+                   IniSetting::SetAndGet<int64_t>(
+                     nullptr,
+                     []() {
+                       return VirtualHost::GetMaxPostSize();
+                     }
+                   ),
                    &RuntimeOption::MaxPostSize);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
                    "always_populate_raw_post_data",
@@ -1325,44 +1325,50 @@ void RuntimeOption::Load(Hdf &config,
                    "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
                    "upload_max_filesize",
-                   [](const std::string& value, void* p) {
-                     return ini_on_update(value, (int64_t*)p);
-                   },
-                   [](void*) {
-                     int uploadMaxFilesize =
-                       VirtualHost::GetUploadMaxFileSize() / (1 << 20);
-                     return std::to_string(uploadMaxFilesize) + "M";
-                   },
-                   &RuntimeOption::UploadMaxFileSize);
-
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) {
+                       return ini_on_update(
+                         value, &RuntimeOption::UploadMaxFileSize);
+                     },
+                     []() {
+                       int uploadMaxFilesize =
+                         VirtualHost::GetUploadMaxFileSize() / (1 << 20);
+                       return std::to_string(uploadMaxFilesize) + "M";
+                     }
+                   ));
   // Filesystem and Streams Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "allow_url_fopen",
-                   ini_on_update_fail,
-                   [](void*p) { return std::string("1"); });
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     []() { return "1"; }));
 
   // HPHP specific
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_id",
-                   ini_on_update_fail,
-                   [](void*) {
-                     return getHphpCompilerId();
-                   });
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     []() { return getHphpCompilerId(); }
+                   ));
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_version",
-                   ini_on_update_fail,
-                   [](void*) {
-                     return getHphpCompilerVersion();
-                   });
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     []() { return getHphpCompilerVersion(); }
+                   ));
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hhvm.ext_zend_compat",
-                   ini_on_update_fail,
-                   [](void*p) { return ini_get((bool*)p); },
+                   IniSetting::SetAndGet<bool>(
+                     [](const bool& value) { return false; },
+                     nullptr
+                   ),
                    &RuntimeOption::EnableZendCompat),
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.build_id",
-                   ini_on_update_fail,
-                   [](void* p) { return ini_get((std::string*)p); },
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     nullptr
+                   ),
                    &RuntimeOption::BuildId);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "notice_frequency",

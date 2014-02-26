@@ -35,8 +35,9 @@ static class DateExtension : public Extension {
       this, IniSetting::PHP_INI_ALL,
       "date.timezone",
       g_context->getDefaultTimeZone().c_str(),
-      dateTimezoneIniUpdate, dateTimezoneIniGet,
-      nullptr
+      IniSetting::SetAndGet<std::string>(
+        dateTimezoneIniUpdate, dateTimezoneIniGet
+      )
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
@@ -68,15 +69,14 @@ static class DateExtension : public Extension {
   }
 
  private:
-  static bool dateTimezoneIniUpdate(const HPHP::String& value, void *p) {
-    assert(p == nullptr);
+  static bool dateTimezoneIniUpdate(const std::string& value) {
     if (value.empty()) {
       return false;
     }
     return f_date_default_timezone_set(value);
   }
 
-  static std::string dateTimezoneIniGet(void* p) {
+  static std::string dateTimezoneIniGet() {
     auto ret = g_context->getTimeZone();
     if (ret.isNull()) {
       return "";

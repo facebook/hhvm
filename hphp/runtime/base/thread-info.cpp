@@ -44,14 +44,12 @@ __thread char* ThreadInfo::t_stackbase = 0;
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
-std::string ini_get_max_execution_time(void*) {
-  int64_t timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+static int64_t ini_get_max_execution_time() {
+  return ThreadInfo::s_threadInfo.getNoCheck()->
     m_reqInjectionData.getTimeout();
-  return std::to_string(timeout);
 }
 
-bool ini_on_update_max_execution_time(const String& value, void*) {
-  int64_t limit = value.toInt64();
+static bool ini_on_update_max_execution_time(const int64_t &limit) {
   ThreadInfo::s_threadInfo.getNoCheck()->
     m_reqInjectionData.setTimeout(limit);
   return true;
@@ -118,12 +116,14 @@ void ThreadInfo::onSessionInit() {
 
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "max_execution_time",
-                   ini_on_update_max_execution_time,
-                   ini_get_max_execution_time);
+                   IniSetting::SetAndGet<int64_t>(
+                     ini_on_update_max_execution_time,
+                     ini_get_max_execution_time));
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "maximum_execution_time",
-                   ini_on_update_max_execution_time,
-                   ini_get_max_execution_time);
+                   IniSetting::SetAndGet<int64_t>(
+                     ini_on_update_max_execution_time,
+                     ini_get_max_execution_time));
 }
 
 void ThreadInfo::clearPendingException() {
@@ -155,30 +155,29 @@ RequestInjectionData::~RequestInjectionData() {
 void RequestInjectionData::threadInit() {
   // Resource Limits
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
-                   [this](const std::string& value, void* p) {
-                     int64_t newInt = strtoll(value.c_str(), nullptr, 10);
-                     if (newInt <= 0) {
-                       newInt = std::numeric_limits<int64_t>::max();
-                       m_maxMemory = std::to_string(newInt);
-                     } else {
-                       m_maxMemory = value;
-                       newInt = convert_bytes_to_long(value);
+                   IniSetting::SetAndGet<std::string>(
+                     [this](const std::string& value) {
+                       int64_t newInt = strtoll(value.c_str(), nullptr, 10);
                        if (newInt <= 0) {
                          newInt = std::numeric_limits<int64_t>::max();
+                         m_maxMemory = std::to_string(newInt);
+                       } else {
+                         m_maxMemory = value;
+                         newInt = convert_bytes_to_long(value);
+                         if (newInt <= 0) {
+                           newInt = std::numeric_limits<int64_t>::max();
+                         }
                        }
-                     }
-                     MM().getStatsNoRefresh().maxBytes = newInt;
-                     return true;
-                   },
-                   [](void* p) { return ini_get((std::string*)p); },
-                   &m_maxMemory);
+                       MM().getStatsNoRefresh().maxBytes = newInt;
+                       return true;
+                     },
+                     nullptr
+                   ), &m_maxMemory);
 
   // Data Handling
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "arg_separator.output", "&",
                    &m_argSeparatorOutput);
-
-  // Data Handling
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
                    &m_defaultCharset);
@@ -186,89 +185,92 @@ void RequestInjectionData::threadInit() {
   // Paths and Directories
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "include_path", getDefaultIncludePath().c_str(),
-                   [this](const std::string& value, void* p) {
-                     auto paths = f_explode(":", value);
-                     m_include_paths.clear();
-                     for (ArrayIter iter(paths); iter; ++iter) {
-                       m_include_paths.push_back(
-                         iter.second().toString().toCppString());
-                     }
-                     return true;
-                   },
-                   [this](void*) {
-                     std::string ret;
-                     bool first = true;
-                     for (auto &path : m_include_paths) {
-                       if (first) {
-                         first = false;
-                       } else {
-                         ret += ":";
+                   IniSetting::SetAndGet<std::string>(
+                     [this](const std::string& value) {
+                       auto paths = f_explode(":", value);
+                       m_include_paths.clear();
+                       for (ArrayIter iter(paths); iter; ++iter) {
+                         m_include_paths.push_back(
+                           iter.second().toString().toCppString());
                        }
-                       ret += path;
+                       return true;
+                     },
+                     [this]() {
+                       std::string ret;
+                       bool first = true;
+                       for (auto &path : m_include_paths) {
+                         if (first) {
+                           first = false;
+                         } else {
+                           ret += ":";
+                         }
+                         ret += path;
+                       }
+                       return ret;
                      }
-                     return ret;
-                   });
+                   ));
 
   // Paths and Directories
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "open_basedir",
-                   [](const std::string& value, void* p) {
-                     RuntimeOption::AllowedDirectories.clear();
-                     auto boom = f_explode(";", value).toCArrRef();
-                     for (ArrayIter iter(boom); iter; ++iter) {
-                       RuntimeOption::AllowedDirectories.push_back(
-                         iter.second().toCStrRef().toCppString()
-                       );
-                     }
-                     return true;
-                   },
-                   [](void*) {
-                     std::string out = "";
-                     for (auto& dir : RuntimeOption::AllowedDirectories) {
-                       if (!dir.empty()) {
-                         out += dir + ";";
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) {
+                       RuntimeOption::AllowedDirectories.clear();
+                       auto boom = f_explode(";", value).toCArrRef();
+                       for (ArrayIter iter(boom); iter; ++iter) {
+                         RuntimeOption::AllowedDirectories.push_back(
+                           iter.second().toCStrRef().toCppString()
+                         );
                        }
+                       return true;
+                     },
+                     []() {
+                       std::string out = "";
+                       for (auto& dir : RuntimeOption::AllowedDirectories) {
+                         if (!dir.empty()) {
+                           out += dir + ";";
+                         }
+                       }
+                       return out;
                      }
-                     return out;
-                   });
+                   ));
 
   // Errors and Logging Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "log_errors",
-                   [this](const std::string& value, void* p) {
-                     bool on;
-                     ini_on_update(value, &on);
-                     if (m_logErrors != on) {
-                       m_logErrors = on;
-                       if (m_logErrors) {
-                         if (!m_errorLog.empty()) {
-                           FILE *output = fopen(m_errorLog.data(), "a");
-                           if (output) {
-                             Logger::SetNewOutput(output);
+                   IniSetting::SetAndGet<bool>(
+                     [this](const bool& on) {
+                       if (m_logErrors != on) {
+                         if (on) {
+                           if (!m_errorLog.empty()) {
+                             FILE *output = fopen(m_errorLog.data(), "a");
+                             if (output) {
+                               Logger::SetNewOutput(output);
+                             }
                            }
+                         } else {
+                           Logger::SetNewOutput(nullptr);
                          }
-                       } else {
-                         Logger::SetNewOutput(nullptr);
                        }
-                     }
-                     return true;
-                   },
-                   [](void*p) { return *(bool*)p ? "1" : "0";},
+                       return true;
+                     },
+                     nullptr
+                   ),
                    &m_logErrors);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "error_log",
-                   [this](const std::string& value, void* p) {
-                     m_errorLog = value;
-                     if (m_logErrors && !m_errorLog.empty()) {
-                       FILE *output = fopen(m_errorLog.data(), "a");
-                       if (output) {
-                         Logger::SetNewOutput(output);
+                   IniSetting::SetAndGet<std::string>(
+                     [this](const std::string& value) {
+                       if (m_logErrors && !m_errorLog.empty()) {
+                         FILE *output = fopen(m_errorLog.data(), "a");
+                         if (output) {
+                           Logger::SetNewOutput(output);
+                         }
                        }
-                     }
-                     return true;
-                   },
-                   [](void*p) { return ini_get((std::string*)p); },
-                   &m_errorLog);
+                       return true;
+                     },
+                     nullptr
+                   ), &m_errorLog);
 
   // Filesystem and Streams Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,

@@ -39,35 +39,18 @@ class DefaultLocale : public RequestEventHandler {
  public:
   void requestInit() override {}
   void requestShutdown() override {}
-
-  std::string getDefaultLocale() const { return m_defaultLocale; }
-  void setDefaultLocale(const std::string& locale) {
-    m_defaultLocale = locale;
-  }
-
- private:
   std::string m_defaultLocale;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(DefaultLocale, s_default_locale);
 
-std::string icu_get_default_locale(void *p) {
-  return s_default_locale->getDefaultLocale();
-}
-
-bool icu_on_update_default_locale(const String& value, void *p) {
-  s_default_locale->setDefaultLocale(value->toCppString());
-  return true;
-}
-
 void IntlExtension::bindIniSettings() {
   IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                    "intl.default_locale", "",
-                   icu_on_update_default_locale, icu_get_default_locale,
-                   nullptr);
+                   &s_default_locale->m_defaultLocale);
 }
 
 const String GetDefaultLocale() {
-  String locale(s_default_locale->getDefaultLocale());
+  String locale(s_default_locale->m_defaultLocale);
   if (locale.empty()) {
     locale = String(uloc_getDefault(), CopyString);
   }
@@ -75,7 +58,7 @@ const String GetDefaultLocale() {
 }
 
 bool SetDefaultLocale(const String& locale) {
-  s_default_locale->setDefaultLocale(locale->toCppString());
+  s_default_locale->m_defaultLocale = locale->toCppString();
   return true;
 }
 

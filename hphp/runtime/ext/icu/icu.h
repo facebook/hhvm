@@ -205,7 +205,7 @@ class IntlExtension : public Extension {
     initCalendar();
   }
 
-  void requestInit() override {
+  void threadInit() override {
     bindIniSettings();
   }
 

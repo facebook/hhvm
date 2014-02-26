@@ -1,11 +1,11 @@
 <?hh
 
-// Test magic methods for FrozenVector.
+// Test magic methods for ImmVector.
 
 // Call $f(); if it throws, return the exception's error message.
 // Otherwise, return $f's return value.
-function callFailsafe((function (FrozenVector): string) $f) {
-  $fv = FrozenVector {1, 2, 3};
+function callFailsafe((function (ImmVector): string) $f) {
+  $fv = ImmVector {1, 2, 3};
 
   try {
     $r = $f($fv);
@@ -18,7 +18,7 @@ function callFailsafe((function (FrozenVector): string) $f) {
 
 function main() {
 
-  $functions = FrozenVector {
+  $functions = ImmVector {
     function ($fv) {
       // __toString()
       return (string)$fv;

@@ -32,9 +32,9 @@ const StaticString
   s_Map("HH\\Map"),
   s_Set("HH\\Set"),
   s_Pair("HH\\Pair"),
-  s_FrozenVector("HH\\FrozenVector"),
-  s_FrozenSet("HH\\FrozenSet"),
-  s_FrozenMap("HH\\FrozenMap"),
+  s_ImmVector("HH\\ImmVector"),
+  s_ImmSet("HH\\ImmSet"),
+  s_ImmMap("HH\\ImmMap"),
   s_Closure("Closure");
 
 const StaticString
@@ -56,9 +56,9 @@ bool is_collection(res::Class cls) {
     name->isame(s_Map.get()) ||
     name->isame(s_Set.get()) ||
     name->isame(s_Pair.get()) ||
-    name->isame(s_FrozenVector.get()) ||
-    name->isame(s_FrozenSet.get()) ||
-    name->isame(s_FrozenMap.get());
+    name->isame(s_ImmVector.get()) ||
+    name->isame(s_ImmSet.get()) ||
+    name->isame(s_ImmMap.get());
 }
 
 bool could_have_magic_bool_conversion(Type t) {
@@ -104,12 +104,12 @@ SString collectionTypeToString(uint32_t ctype) {
     return s_Set.get();
   case Collection::PairType:
     return s_Pair.get();
-  case Collection::FrozenVectorType:
-    return s_FrozenVector.get();
-  case Collection::FrozenSetType:
-    return s_FrozenSet.get();
-  case Collection::FrozenMapType:
-    return s_FrozenMap.get();
+  case Collection::ImmVectorType:
+    return s_ImmVector.get();
+  case Collection::ImmSetType:
+    return s_ImmSet.get();
+  case Collection::ImmMapType:
+    return s_ImmMap.get();
   }
   assert(!"Unknown Collection Type");
   not_reached();

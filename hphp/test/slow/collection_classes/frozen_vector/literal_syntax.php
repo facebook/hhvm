@@ -1,9 +1,9 @@
 <?hh
 
-// Test creating a FrozenVector literal.
+// Test creating a ImmVector literal.
 
 function main() {
-  $fv = FrozenVector {"hello", "world"};
+  $fv = ImmVector {"hello", "world"};
   var_dump($fv->get(0) . ' ' . $fv->get(1));
 }
 

@@ -13,7 +13,7 @@ int(2)
 int(3)
 
 values...
-object(HH\FrozenVector)#4 (3) {
+object(HH\ImmVector)#4 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -21,7 +21,7 @@ object(HH\FrozenVector)#4 (3) {
   [2]=>
   int(3)
 }
-object(HH\FrozenVector)#4 (0) {
+object(HH\ImmVector)#4 (0) {
 }
 
 lazy...
@@ -74,8 +74,8 @@ object(HH\Vector)#6 (3) {
   int(3)
 }
 
-toFrozenVector...
-object(HH\FrozenVector)#6 (3) {
+toImmVector...
+object(HH\ImmVector)#6 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -92,7 +92,7 @@ object(HH\Set)#6 (3) {
 }
 
 __toString...
-FrozenSet
+ImmSet
 
 __get...
 Cannot access a property on a collection

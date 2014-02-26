@@ -22,7 +22,7 @@ function foo(ConstIndexAccess $fv) {
 
 function main() {
   $v = Vector {1, 2, 3};
-  $fv = new FrozenVector($v);
+  $fv = new ImmVector($v);
   foo($fv);
 }
 

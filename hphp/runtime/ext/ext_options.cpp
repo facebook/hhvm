@@ -729,7 +729,7 @@ bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec) {
 int64_t f_cpu_get_count() { return Process::GetCPUCount();}
 String f_cpu_get_model() { return Process::GetCPUModel();}
 
-String f_ini_get(const String& varname) {
+Variant f_ini_get(const String& varname) {
   String value = empty_string;
   IniSetting::Get(varname, value);
   return value;
@@ -742,13 +742,13 @@ Array f_ini_get_all(const String& extension, bool detailed) {
 void f_ini_restore(const String& varname) {
 }
 
-Variant f_ini_set(const String& varname, const String& newvalue) {
-  String oldvalue = f_ini_get(varname);
-  if (IniSetting::SetUser(varname, newvalue)) {
-    return oldvalue;
-  } else {
+Variant f_ini_set(const String& varname, const Variant& newvalue) {
+  auto oldvalue = f_ini_get(varname);
+  auto ret = IniSetting::SetUser(varname, newvalue);
+  if (!ret) {
     return false;
   }
+  return oldvalue;
 }
 
 int64_t f_memory_get_allocation() {

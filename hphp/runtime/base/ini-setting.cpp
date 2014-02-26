@@ -501,24 +501,24 @@ std::string IniSetting::Get(const std::string& name) {
   return ret;
 }
 
-static bool ini_set(const String& name, const String& value,
+static bool ini_set(const String& name, const Variant& value,
                     IniSetting::Mode mode) {
   CallbackMap::iterator iter = s_user_callbacks->find(name.data());
   if (iter != s_user_callbacks->end()) {
     if ((iter->second.mode & mode) && iter->second.updateCallback) {
-      return iter->second.updateCallback(value.toCppString());
+      return iter->second.updateCallback(value.toString().toCppString());
     }
   }
   return false;
 }
 
-bool IniSetting::Set(const String& name, const String& value) {
+bool IniSetting::Set(const String& name, const Variant& value) {
   return ini_set(name, value, static_cast<Mode>(
     PHP_INI_ONLY | PHP_INI_SYSTEM | PHP_INI_PERDIR | PHP_INI_USER | PHP_INI_ALL
   ));
 }
 
-bool IniSetting::SetUser(const String& nameString, const String& value) {
+bool IniSetting::SetUser(const String& nameString, const Variant& value) {
   auto name = nameString.toCppString();
   auto it = s_savedDefaults->find(name);
   if (it == s_savedDefaults->end()) {

@@ -118,19 +118,19 @@ public:
   static Map FromStringAsMap(const std::string& ini,
                              const std::string& filename);
 
-  static bool Get(const std::string& name, std::string &value);
-  static bool Get(const String& name, String &value);
+  static bool Get(const std::string& name, std::string& value);
+  static bool Get(const String& name, String& value);
   static std::string Get(const std::string& name);
   static Array GetAll(const String& extension, bool details);
 
   /**
    * Change an INI setting as if it was in the php.ini file
    */
-  static bool Set(const String& name, const String& value);
+  static bool Set(const String& name, const Variant& value);
   /**
    * Change an INI setting as if there was a call to ini_set()
    */
-  static bool SetUser(const String& name, const String& value);
+  static bool SetUser(const String& name, const Variant& value);
 
   template<class T>
   struct SetAndGet {

@@ -203,7 +203,7 @@ public:
     loadSystemlib();
   }
 
-  virtual void requestInit() {
+  virtual void threadInit() {
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "pcre.backtrack_limit",
                      std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),

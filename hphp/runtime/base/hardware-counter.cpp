@@ -172,7 +172,7 @@ public:
 };
 
 HardwareCounter::HardwareCounter()
-  : m_countersSet(false), m_pseudoEvents(false) {
+  : m_countersSet(false) {
   m_instructionCounter = new InstructionCounter();
   if (RuntimeOption::EvalProfileHWEvents == "") {
     m_loadCounter = new LoadCounter();
@@ -371,12 +371,10 @@ bool HardwareCounter::setPerfEvents(const String& events) {
 
   char* strtok_buf = nullptr;
   char* s = strtok_r(sevents_buf, ",", &strtok_buf);
-  m_pseudoEvents = false;
   while (s) {
     int len = strlen(s);
     char* event = url_decode(s, len);
     bool isPseudoEvent = JIT::TranslatorX64::isPseudoEvent(event);
-    m_pseudoEvents = m_pseudoEvents || isPseudoEvent;
     if (!isPseudoEvent && !eventExists(event) && !addPerfEvent(event)) {
       return false;
     }
@@ -414,9 +412,7 @@ void HardwareCounter::getPerfEvents(Array& ret) {
   for (unsigned i = 0; i < m_counters.size(); i++) {
     ret.set(m_counters[i]->m_desc, m_counters[i]->read());
   }
-  if (m_pseudoEvents) {
-    JIT::tx64->getPerfCounters(ret);
-  }
+  JIT::tx64->getPerfCounters(ret);
 }
 
 void HardwareCounter::GetPerfEvents(Array& ret) {

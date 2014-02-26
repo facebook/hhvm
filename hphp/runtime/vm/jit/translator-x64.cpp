@@ -121,6 +121,7 @@
 #include "hphp/runtime/vm/jit/func-prologues-x64.h"
 #include "hphp/runtime/vm/jit/func-prologues-arm.h"
 #include "hphp/runtime/vm/jit/debug-guards.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
@@ -148,7 +149,7 @@ using std::max;
 static const char* const kInstrCountTx64Name = "instr_tx64";
 static const char* const kInstrCountIRName = "instr_hhir";
 
-#define TPC(n) "trans_" #n,
+#define TPC(n) "jit_" #n,
 static const char* const kPerfCounterNames[] = {
   TRANS_PERF_COUNTERS
   kInstrCountTx64Name,
@@ -478,6 +479,7 @@ TranslatorX64::lookupTranslation(SrcKey sk) const {
 TCA
 TranslatorX64::translate(const TranslArgs& args) {
   INC_TPC(translate);
+
   assert(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
   assert(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
   assert(m_mode != TransInvalid);
@@ -1797,6 +1799,8 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
 
 void
 TranslatorX64::translateWork(const TranslArgs& args) {
+  Timer _t("translate");
+
   auto sk = args.m_sk;
   std::unique_ptr<Tracelet> tp;
 
@@ -2024,6 +2028,8 @@ TranslatorX64::translateWork(const TranslArgs& args) {
 
 TranslatorX64::TranslateResult
 TranslatorX64::translateTracelet(Tracelet& t) {
+  Timer _t("translateTracelet");
+
   FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
   assert(!Translator::liveFrameIsPseudoMain());
   const SrcKey &sk = t.m_sk;
@@ -2080,6 +2086,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       ht.profileSmallFunctionShape(traceletShape(t));
     }();
 
+    Timer irGenTimer("translateTracelet_irGeneration");
     Unit::MetaHandle metaHand;
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
@@ -2108,6 +2115,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       if (ni->breaksTracelet || m_irTrans->hhbcTrans().hasExit()) break;
     }
     traceEnd();
+    irGenTimer.end();
 
     try {
       traceCodeGen();
@@ -2164,7 +2172,6 @@ TranslatorX64::translateTracelet(Tracelet& t) {
 }
 
 void TranslatorX64::traceCodeGen() {
-
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   auto& unit = ht.unit();
 
@@ -2236,6 +2243,7 @@ void
 TranslatorX64::requestInit() {
   TRACE(1, "in requestInit(%" PRId64 ")\n", g_vmContext->m_currentThreadIdx);
   tl_regState = VMRegState::CLEAN;
+  Timer::RequestInit();
   PendQ::drain();
   requestResetHighLevelTranslator();
   Treadmill::startRequest(g_vmContext->m_currentThreadIdx);
@@ -2257,6 +2265,7 @@ TranslatorX64::requestExit() {
   TRACE(1, "done requestExit(%" PRId64 ")\n", g_vmContext->m_currentThreadIdx);
   Stats::dump();
   Stats::clear();
+  Timer::RequestExit();
 
   if (Trace::moduleEnabledRelease(Trace::tx64stats, 1)) {
     Trace::traceRelease("TranslatorX64 perf counters for %s:\n",
@@ -2303,6 +2312,12 @@ TranslatorX64::getPerfCounters(Array& ret) {
              kInstrCountTx64Name);
     doCounts(Stats::Instr_TranslIRPostLowInvalid + STATS_PER_OPCODE,
              kInstrCountIRName);
+  }
+
+  for (auto const& pair : Timer::Counters()) {
+    if (pair.second.total == 0 && pair.second.count == 0) continue;
+
+    ret.set(String("jit_time_" + pair.first), pair.second.total);
   }
 }
 
@@ -2399,7 +2414,7 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
     return false;
   }
   struct timespec tsBegin, tsEnd;
-  Timer::GetMonotonicTime(tsBegin);
+  HPHP::Timer::GetMonotonicTime(tsBegin);
   // Doc says even find _could_ invalidate iterator, in pactice it should
   // be very rare, so go with it now.
   for (SrcDB::iterator it = m_srcDB.begin(); it != m_srcDB.end(); ++it) {
@@ -2415,7 +2430,7 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
     }
   }
   s_writeLease.drop();
-  Timer::GetMonotonicTime(tsEnd);
+  HPHP::Timer::GetMonotonicTime(tsEnd);
   int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
   if (Trace::moduleEnabledRelease(Trace::tx64, 5)) {
     Trace::traceRelease("addDbgGuards got lease for %" PRId64 " us\n", elapsed);

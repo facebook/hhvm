@@ -19,6 +19,8 @@
 
 #include <cstdint>
 #include <string>
+#include <sys/resource.h>
+#include <sys/time.h>
 
 #include "hphp/util/compatibility.h"
 
@@ -49,6 +51,7 @@ public:
   static void GetRealtimeTime(timespec &sp);
   static void GetMonotonicTime(timespec &sp);
   static int64_t GetCurrentTimeMicros();
+  static int64_t GetRusageMicros(Type t, int who);
   const char *getName() const;
   int64_t getMicroSeconds() const;
   void report() const;

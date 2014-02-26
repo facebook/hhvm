@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP {
 namespace JIT {
@@ -105,6 +106,8 @@ static void insertAsserts(IRUnit& unit) {
 }
 
 void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
+  Timer _t("optimize");
+
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, unit, folly::format("after {}", msg).str().c_str());
     assert(checkCfg(unit));
@@ -126,6 +129,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   };
 
   if (RuntimeOption::EvalHHIRRelaxGuards) {
+    Timer _t("optimize_relaxGuards");
     auto const simpleRelax = kind == TransProfile;
     auto changed = relaxGuards(unit, *irBuilder.guards(), simpleRelax);
     if (changed) finishPass("guard relaxation");

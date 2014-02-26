@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 #include <unordered_set>
 #include <algorithm>
@@ -1311,6 +1312,8 @@ const Abi arm_abi {
 
 // This is the public entry-point
 RegAllocInfo allocateRegs(IRUnit& unit) {
+  Timer _t("regalloc");
+
   RegAllocInfo regs(unit);
   XLS xls(unit, regs, arch() == Arch::ARM ? arm_abi : x64_abi);
   xls.allocate();

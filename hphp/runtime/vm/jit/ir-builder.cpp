@@ -21,6 +21,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/assertions.h"
 
@@ -480,6 +481,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
  *     fall-through edge to the next block.
  */
 void IRBuilder::reoptimize() {
+  Timer _t("optimize_reoptimize");
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
   always_assert(m_savedBlocks.empty());

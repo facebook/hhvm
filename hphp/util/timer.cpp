@@ -105,22 +105,28 @@ int64_t Timer::GetCurrentTimeMicros() {
   return to_usec(tv);
 }
 
+int64_t Timer::GetRusageMicros(Type t, int who) {
+  assert(t != WallTime);
+
+  struct rusage ru;
+  memset(&ru, 0, sizeof(ru));
+  auto DEBUG_ONLY ret = getrusage(who, &ru);
+  assert(ret == 0);
+
+  switch (who) {
+    case SystemCPU: return to_usec(ru.ru_stime);
+    case UserCPU:   return to_usec(ru.ru_utime);
+    case TotalCPU:  return to_usec(ru.ru_stime) + to_usec(ru.ru_utime);
+    default: always_assert(false);
+  }
+}
+
 int64_t Timer::measure() const {
   if (m_type == WallTime) {
     return GetCurrentTimeMicros();
   }
 
-  struct rusage ru;
-  memset(&ru, 0, sizeof(ru));
-  getrusage(RUSAGE_SELF, &ru);
-
-  switch (m_type) {
-  case SystemCPU: return to_usec(ru.ru_stime);
-  case UserCPU:   return to_usec(ru.ru_utime);
-  case TotalCPU:  return to_usec(ru.ru_stime) + to_usec(ru.ru_utime);
-  default: assert(false);
-  }
-  return 0;
+  return GetRusageMicros(m_type, RUSAGE_SELF);
 }
 
 const char *Timer::getName() const {

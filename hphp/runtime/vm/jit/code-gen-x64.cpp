@@ -55,6 +55,7 @@
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
@@ -6506,6 +6507,8 @@ void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
              std::vector<TransBCMapping>* bcMap,
              JIT::TranslatorX64* tx64,
              const RegAllocInfo& regs) {
+  Timer _t("codeGen");
+
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
     genCodeImpl(main, stubs, unit, bcMap, tx64, regs, &ai);

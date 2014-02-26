@@ -50,6 +50,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
@@ -3556,6 +3557,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
  */
 std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
                                               const TypeMap& initialTypes) {
+  Timer _t("analyze");
+
   std::unique_ptr<Tracelet> retval(new Tracelet());
   auto func = sk.func();
   auto unit = sk.unit();
@@ -3845,7 +3848,7 @@ breakBB:
 
 Translator::Translator()
   : uniqueStubs{}
-  , m_createdTime(Timer::GetCurrentTimeMicros())
+  , m_createdTime(HPHP::Timer::GetCurrentTimeMicros())
   , m_mode(TransInvalid)
   , m_profData(nullptr)
   , m_analysisDepth(0)
@@ -4121,12 +4124,15 @@ void Translator::traceFree() {
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             RegionBlacklist& toInterp) {
+  Timer _t("translateRegion");
+
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   assert(!region.blocks.empty());
   const SrcKey startSk = region.blocks.front()->start();
   auto profilingFunc = false;
 
+  Timer irGenTimer("translateRegion_irGeneration");
   for (auto b = 0; b < region.blocks.size(); b++) {
     auto const& block = region.blocks[b];
     Unit::MetaHandle metaHand;
@@ -4336,6 +4342,8 @@ Translator::translateRegion(const RegionDesc& region,
   }
 
   traceEnd();
+  irGenTimer.end();
+
   try {
     traceCodeGen();
     if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
@@ -4377,7 +4385,7 @@ void Translator::addTranslation(const TransRec& transRec) {
   if (Trace::moduleEnabledRelease(Trace::trans, 1)) {
     // Log the translation's size, creation time, SrcKey, and size
     Trace::traceRelease("New translation: %" PRId64 " %s %u %u %d\n",
-                        Timer::GetCurrentTimeMicros() - m_createdTime,
+                        HPHP::Timer::GetCurrentTimeMicros() - m_createdTime,
                         folly::format("{}:{}:{}",
                           transRec.src.unit()->filepath()->data(),
                           transRec.src.getFuncId(),

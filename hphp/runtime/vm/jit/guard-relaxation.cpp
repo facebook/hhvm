@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace JIT {
 
@@ -194,6 +195,8 @@ Type relaxInner(Type t, TypeConstraint tc) {
  * DataTypeGeneric. Returns true iff any changes were made to the trace.
  */
 bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
+  Timer _t("optimize_relaxGuards");
+
   splitCriticalEdges(unit);
   auto blocks = rpoSortCfg(unit);
   auto changed = false;

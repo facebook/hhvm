@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP {
 namespace JIT {
@@ -456,6 +457,8 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
 // Publicly exported functions:
 
 void eliminateDeadCode(IRUnit& unit) {
+  Timer _t("optimize_dce");
+
   // kill unreachable code and remove any traces that are now empty
   BlockList blocks = prepareBlocks(unit);
 

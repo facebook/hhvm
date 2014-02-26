@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -530,9 +531,12 @@ void RegionFormer::recordDependencies() {
   auto blockStart = firstBlock.start();
   auto& unit = m_ht.unit();
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
-  auto changed = doRelax ? relaxGuards(unit, *m_ht.irBuilder().guards(),
-                                       m_profiling)
-                         : false;
+  bool changed = false;
+  if (doRelax) {
+    Timer _t("selectTracelet_relaxGuards");
+    changed = relaxGuards(unit, *m_ht.irBuilder().guards(), m_profiling);
+  }
+
   visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
     if (type <= Type::Cls) return;
     RegionDesc::TypePred pred{loc, type};
@@ -558,6 +562,7 @@ void RegionFormer::recordDependencies() {
  */
 RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
                              bool profiling) {
+  Timer _t("selectTracelet");
   InterpSet interp;
   RegionDescPtr region;
   uint32_t tries = 1;

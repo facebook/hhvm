@@ -67,7 +67,6 @@ private:
   LoadCounter *m_loadCounter;
   StoreCounter *m_storeCounter;
   std::vector<HardwareCounterImpl *> m_counters;
-  bool m_pseudoEvents;
 };
 
 #else // NO_HARDWARE_COUNTERS

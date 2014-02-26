@@ -27,7 +27,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlDateFormatter;
 
-class IntlDateFormatter : public IntlResourceData {
+class IntlDateFormatter : public IntlError {
  public:
   IntlDateFormatter() {}
   IntlDateFormatter(const IntlDateFormatter&) = delete;
@@ -35,7 +35,7 @@ class IntlDateFormatter : public IntlResourceData {
     setDateFormatter(&src);
     return *this;
   }
-  ~IntlDateFormatter() override {
+  ~IntlDateFormatter() {
     if (m_date_fmt) {
       udat_close((UDateFormat*)m_date_fmt);
       m_date_fmt = nullptr;
@@ -48,12 +48,16 @@ class IntlDateFormatter : public IntlResourceData {
                         const String& pattern);
   void setDateFormatter(const IntlDateFormatter *orig);
 
-  bool isValid() const override {
+  bool isValid() const {
     return m_date_fmt;
   }
 
   static Object newInstance() {
-    return NewInstance(s_IntlDateFormatter);
+    if (!c_IntlDateFormatter) {
+      c_IntlDateFormatter = Unit::lookupClass(s_IntlDateFormatter.get());
+      assert(c_IntlDateFormatter);
+    }
+    return ObjectData::newInstance(c_IntlDateFormatter);
   }
   static IntlDateFormatter* Get(Object obj) {
     return GetData<IntlDateFormatter>(obj, s_IntlDateFormatter);
@@ -76,6 +80,8 @@ class IntlDateFormatter : public IntlResourceData {
   int64_t m_date_type;
   int64_t m_time_type;
   int64_t m_calendar;
+
+  static Class* c_IntlDateFormatter;
 };
 
 /////////////////////////////////////////////////////////////////////////////

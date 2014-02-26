@@ -21,6 +21,8 @@ namespace HPHP { namespace Intl {
 
 const StaticString s_IntlIterator("IntlIterator");
 
+Class* IntlIterator::c_IntlIterator = nullptr;
+
 #define II_GET(dest, src, def) \
   auto dest = IntlIterator::Get(src); \
   if (!dest) { \

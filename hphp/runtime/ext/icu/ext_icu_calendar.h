@@ -27,7 +27,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlCalendar;
 
-class IntlCalendar : public IntlResourceData {
+class IntlCalendar : public IntlError {
  public:
   IntlCalendar() {}
   IntlCalendar(const IntlCalendar&) = delete;
@@ -35,7 +35,7 @@ class IntlCalendar : public IntlResourceData {
     setCalendar(src.calendar()->clone());
     return *this;
   }
-  ~IntlCalendar() override {
+  ~IntlCalendar() {
     setCalendar(nullptr);
   }
 
@@ -47,9 +47,13 @@ class IntlCalendar : public IntlResourceData {
   }
 
   static Object newInstance(icu::Calendar *cal) {
-    auto ret = NewInstance(s_IntlCalendar);
+    if (!c_IntlCalendar) {
+      c_IntlCalendar = Unit::lookupClass(s_IntlCalendar.get());
+      assert(c_IntlCalendar);
+    }
+    auto ret = ObjectData::newInstance(c_IntlCalendar);
     if (cal) {
-      Native::data<IntlCalendar>(ret.get())->setCalendar(cal);
+      Native::data<IntlCalendar>(ret)->setCalendar(cal);
     }
     return ret;
   }
@@ -58,7 +62,7 @@ class IntlCalendar : public IntlResourceData {
     return GetData<IntlCalendar>(obj, s_IntlCalendar);
   }
 
-  bool isValid() const override {
+  bool isValid() const {
     return m_cal;
   }
 
@@ -72,6 +76,8 @@ class IntlCalendar : public IntlResourceData {
                                        int64_t &calType, bool &calOwned);
  protected:
   icu::Calendar *m_cal = nullptr;
+
+  static Class* c_IntlCalendar;
 };
 
 /////////////////////////////////////////////////////////////////////////////

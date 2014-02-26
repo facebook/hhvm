@@ -1099,7 +1099,7 @@ static bool ini_on_update_save_handler(const std::string& value, void *p) {
 
 static std::string ini_get_save_handler(void *p) {
   auto &mod = PS(mod);
-  if (!mod) {
+  if (mod == nullptr) {
     return "";
   }
   return mod->getName();
@@ -1112,7 +1112,11 @@ static bool ini_on_update_serializer(const std::string& value, void *p) {
 }
 
 static std::string ini_get_serializer(void *p) {
-  return PS(serializer)->getName();
+  auto &serializer = PS(serializer);
+  if (serializer == nullptr) {
+    return "";
+  }
+  return serializer->getName();
 }
 
 static bool ini_on_update_trans_sid(const std::string& value, void *p) {
@@ -1864,6 +1868,7 @@ static class SessionExtension : public Extension {
     HHVM_ME(SessionHandler, hhdestroy);
     HHVM_ME(SessionHandler, hhgc);
   }
+
   virtual void threadInit() {
     Extension* ext = Extension::GetExtension(s_session_ext_name);
     assert(ext);
@@ -1937,6 +1942,11 @@ static class SessionExtension : public Extension {
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.hash_bits_per_character", "4",
                      &PS(hash_bits_per_character));
+  }
+
+  virtual void requestInit() {
+    // warm up the session data
+    s_session->requestInit();
   }
 } s_session_extension;
 

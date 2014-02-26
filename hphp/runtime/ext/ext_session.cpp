@@ -1124,7 +1124,7 @@ static bool ini_on_update_trans_sid(const std::string& value, void *p) {
   if (!strncasecmp(value.data(), "on", sizeof("on"))) {
     PS(use_trans_sid) = true;
   } else {
-    ini_on_update_bool(value, &PS(use_trans_sid));
+    ini_on_update(value, &PS(use_trans_sid));
   }
   return true;
 }
@@ -1141,7 +1141,7 @@ static bool ini_on_update_save_dir(const std::string& value, void *p) {
   if (File::TranslatePath(path).empty()) {
     return false;
   }
-  return ini_on_update_stdstring(value, p);
+  return ini_on_update(value, (std::string*) p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1874,7 +1874,8 @@ static class SessionExtension : public Extension {
     assert(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.save_path",               "",
-                     ini_on_update_save_dir,            ini_get_stdstring,
+                     ini_on_update_save_dir,
+                     [](void *p) { return ini_get((std::string*)p); },
                      &PS(save_path));
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.name",                    "PHPSESSID",

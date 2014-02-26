@@ -46,32 +46,27 @@ public:
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.string", "#DD0000",
-      ini_on_update_stdstring, ini_get_stdstring,
-      &s_misc_highlight_default_string
+      s_misc_highlight_default_string.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.comment", "#FF8000",
-      ini_on_update_stdstring, ini_get_stdstring,
-      &s_misc_highlight_default_comment
+      s_misc_highlight_default_comment.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.keyword", "#007700",
-      ini_on_update_stdstring, ini_get_stdstring,
-      &s_misc_highlight_default_keyword
+      s_misc_highlight_default_keyword.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.default", "#0000BB",
-      ini_on_update_stdstring, ini_get_stdstring,
-      &s_misc_highlight_default_default
+      s_misc_highlight_default_default.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.html", "#000000",
-      ini_on_update_stdstring, ini_get_stdstring,
-      &s_misc_highlight_default_html
+      s_misc_highlight_default_html.get()
     );
 
   }

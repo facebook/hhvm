@@ -25,6 +25,28 @@ namespace HPHP {
 
 class Extension;
 
+#define ini_on_update_fail HPHP::IniSetting::UpdateCallback()
+bool ini_on_update(const std::string& value, bool *p);
+bool ini_on_update(const std::string& value, double *p);
+bool ini_on_update(const std::string& value, int16_t *p);
+bool ini_on_update(const std::string& value, int32_t *p);
+bool ini_on_update(const std::string& value, int64_t *p);
+bool ini_on_update(const std::string& value, uint16_t *p);
+bool ini_on_update(const std::string& value, uint32_t *p);
+bool ini_on_update(const std::string& value, uint64_t *p);
+bool ini_on_update(const std::string& value, std::string *p);
+bool ini_on_update(const std::string& value, String *p);
+std::string ini_get(bool *p);
+std::string ini_get(double *p);
+std::string ini_get(int16_t *p);
+std::string ini_get(int32_t *p);
+std::string ini_get(int64_t *p);
+std::string ini_get(uint16_t *p);
+std::string ini_get(uint32_t *p);
+std::string ini_get(uint64_t *p);
+std::string ini_get(std::string *p);
+std::string ini_get(String *p);
+
 class IniSetting {
 public:
   static const Extension* CORE;
@@ -122,66 +144,31 @@ public:
                    const char *name,
                    UpdateCallback updateCallback, GetCallback getCallback,
                    void *p = nullptr);
+  template<class T>
   static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   std::string *p);
+                   const char *name, T *p) {
+    Bind(extension, mode, name,
+         [](const std::string& strval, void* val) {
+           return ini_on_update(strval, static_cast<T*>(val));
+         },
+         [](void* val) {
+           return ini_get(static_cast<T*>(val));
+         },
+         p);
+  }
+  template<class T>
   static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   std::string *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   String *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   String *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   bool *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   bool *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   int16_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   int16_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   int32_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   int32_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   int64_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   int64_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   uint16_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   uint16_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   uint32_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   uint32_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   uint64_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   uint64_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   double *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   double *p);
+                   const char *name, const char *value, T *p) {
+    Bind(extension, mode, name, value,
+         [](const std::string &s, void *p) {
+           return ini_on_update(s, (T*) p);
+         },
+         [](void *p) {
+           return ini_get((T*) p);
+         },
+         p);
+  }
+
   static void Unbind(const char *name);
 
   static void SetGlobalDefault(const char *name, const char *value);
@@ -189,32 +176,6 @@ public:
 };
 
 int64_t convert_bytes_to_long(const std::string& value);
-
-#define ini_on_update_fail HPHP::IniSetting::UpdateCallback()
-bool ini_on_update_bool(const std::string& value, void *p);
-bool ini_on_update_short(const std::string& value, void *p);
-bool ini_on_update_int(const std::string& value, void *p);
-bool ini_on_update_long(const std::string& value, void *p);
-bool ini_on_update_ushort(const std::string& value, void *p);
-bool ini_on_update_uint(const std::string& value, void *p);
-bool ini_on_update_ulong(const std::string& value, void *p);
-bool ini_on_update_non_negative(const std::string& value, void *p);
-bool ini_on_update_real(const std::string& value, void *p);
-bool ini_on_update_stdstring(const std::string& value, void *p);
-bool ini_on_update_string(const std::string& value, void *p);
-
-std::string ini_get_bool(void *p);
-std::string ini_get_bool_as_int(void *p);
-std::string ini_get_short(void *p);
-std::string ini_get_int(void *p);
-std::string ini_get_long(void *p);
-std::string ini_get_ushort(void *p);
-std::string ini_get_uint(void *p);
-std::string ini_get_ulong(void *p);
-std::string ini_get_real(void *p);
-std::string ini_get_string(void *p);
-std::string ini_get_stdstring(void *p);
-std::string ini_get_static_string_1(void *p);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

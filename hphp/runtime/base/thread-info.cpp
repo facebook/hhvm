@@ -165,7 +165,7 @@ void RequestInjectionData::threadInit() {
                      MM().getStatsNoRefresh().maxBytes = newInt;
                      return true;
                    },
-                   ini_get_stdstring,
+                   [](void* p) { return ini_get((std::string*)p); },
                    &m_maxMemory);
 
   // Data Handling
@@ -174,7 +174,9 @@ void RequestInjectionData::threadInit() {
                    &m_argSeparatorOutput);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
                    "post_max_size",
-                   ini_on_update_long,
+                   [](const std::string& value, void* p) {
+                     return ini_on_update(value, (int64_t*)p);
+                   },
                    [](void*) {
                      return std::to_string(VirtualHost::GetMaxPostSize());
                    },
@@ -247,7 +249,9 @@ void RequestInjectionData::threadInit() {
                    "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
                    "upload_max_filesize",
-                   ini_on_update_long,
+                   [](const std::string& value, void* p) {
+                     return ini_on_update(value, (int64_t*)p);
+                   },
                    [](void*) {
                      int uploadMaxFilesize =
                        VirtualHost::GetUploadMaxFileSize() / (1 << 20);
@@ -265,7 +269,7 @@ void RequestInjectionData::threadInit() {
                    "log_errors", "false",
                    [this](const std::string& value, void* p) {
                      bool on;
-                     ini_on_update_bool(value, &on);
+                     ini_on_update(value, &on);
                      if (m_logErrors != on) {
                        m_logErrors = on;
                        if (m_logErrors) {
@@ -281,7 +285,7 @@ void RequestInjectionData::threadInit() {
                      }
                      return true;
                    },
-                   ini_get_bool,
+                   [](void*p) { return ini_get((bool*)p); },
                    &m_logErrors);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "error_log",
@@ -295,13 +299,13 @@ void RequestInjectionData::threadInit() {
                      }
                      return true;
                    },
-                   ini_get_stdstring,
+                   [](void*p) { return ini_get((std::string*)p); },
                    &m_errorLog);
 
   // Filesystem and Streams Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "allow_url_fopen",
-                   ini_on_update_fail, ini_get_static_string_1);
+                   ini_on_update_fail, [](void*) { return std::string("1"); });
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_socket_timeout",
                    std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
@@ -332,11 +336,13 @@ void RequestInjectionData::threadInit() {
                    });
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hhvm.ext_zend_compat",
-                   ini_on_update_fail, ini_get_bool,
+                   ini_on_update_fail,
+                   [](void *p) { return ini_get((bool*)p); },
                    &RuntimeOption::EnableZendCompat),
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.build_id",
-                   ini_on_update_fail, ini_get_stdstring,
+                   ini_on_update_fail,
+                   [](void *p) { return ini_get((std::string*)p); },
                    &RuntimeOption::BuildId);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "notice_frequency",

@@ -21,6 +21,12 @@
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
+
+IMPLEMENT_THREAD_LOCAL(double, s_date_default_latitude);
+IMPLEMENT_THREAD_LOCAL(double, s_date_default_longitude);
+IMPLEMENT_THREAD_LOCAL(double, s_date_default_sunset_zenith);
+IMPLEMENT_THREAD_LOCAL(double, s_date_default_sunrise_zenith);
+
 static class DateExtension : public Extension {
  public:
   DateExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
@@ -35,39 +41,23 @@ static class DateExtension : public Extension {
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.default_latitude", "31.7667",
-      &m_date_default_latitude
+      s_date_default_latitude.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.default_longitude", "35.2333",
-      &m_date_default_longitude
+      s_date_default_longitude.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.sunset_zenith", "90.583333",
-      &m_date_default_sunset_zenith
+      s_date_default_sunset_zenith.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.sunrise_zenith", "90.583333",
-      &m_date_default_sunrise_zenith
+      s_date_default_sunrise_zenith.get()
     );
-  }
-
-  double get_date_default_latitude() {
-    return m_date_default_latitude;
-  }
-
-  double get_date_default_longitude() {
-    return m_date_default_longitude;
-  }
-
-  double get_date_default_sunset_zenith() {
-    return m_date_default_sunset_zenith;
-  }
-
-  double get_date_default_sunrise_zenith() {
-    return m_date_default_sunrise_zenith;
   }
 
   double get_date_default_gmt_offset() {
@@ -93,11 +83,6 @@ static class DateExtension : public Extension {
     }
     return ret.toCppString();
   }
-
-  double m_date_default_latitude;
-  double m_date_default_longitude;
-  double m_date_default_sunset_zenith;
-  double m_date_default_sunrise_zenith;
 } s_date_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -705,23 +690,23 @@ Object f_date_sub(CObjRef datetime, CObjRef interval) {
 // sun
 
 double get_date_default_latitude() {
-  return s_date_extension.get_date_default_latitude();
+  return *s_date_default_latitude;
 }
 
 double get_date_default_longitude() {
-    return s_date_extension.get_date_default_longitude();
+  return *s_date_default_longitude;
 }
 
 double get_date_default_sunset_zenith() {
-    return s_date_extension.get_date_default_sunset_zenith();
+  return *s_date_default_sunset_zenith;
 }
 
 double get_date_default_sunrise_zenith() {
-    return s_date_extension.get_date_default_sunrise_zenith();
+  return *s_date_default_sunrise_zenith;
 }
 
 double get_date_default_gmt_offset() {
-    return s_date_extension.get_date_default_gmt_offset();
+  return s_date_extension.get_date_default_gmt_offset();
 }
 
 Array f_date_sun_info(int64_t ts, double latitude, double longitude) {

@@ -27,6 +27,7 @@ sudo apt-get install -y python-software-properties
 
 # install apt-fast to speed up later dependency installation
 sudo add-apt-repository -y ppa:apt-fast/stable
+sudo add-apt-repository -y ppa:mapnik/boost
 sudo apt-get -y update
 sudo apt-get -y install apt-fast
 

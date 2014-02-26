@@ -66,7 +66,9 @@ public:
 public:
   static const int USE_INCLUDE_PATH;
 
-  explicit File(bool nonblocking = true);
+  explicit File(bool nonblocking = true,
+                const String& wrapper_type = null_string,
+                const String& stream_type = empty_string);
   virtual ~File();
 
   static StaticString& classnameof() {
@@ -126,7 +128,8 @@ public:
 
   virtual Array getMetaData();
   virtual Array getWrapperMetaData() { return null_array; }
-  virtual const char *getStreamType() const { return "";}
+  String getWrapperType() const;
+  String getStreamType() const { return m_streamType; }
   Resource &getStreamContext() { return m_streamContext; }
   void setStreamContext(Resource &context) { m_streamContext = context; }
 
@@ -191,6 +194,8 @@ protected:
   std::string m_name;
   std::string m_mode;
 
+  StringData* m_wrapperType;
+  StringData* m_streamType;
   Resource m_streamContext;
 
   void closeImpl();

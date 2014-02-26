@@ -30,8 +30,11 @@ class MemFile : public File {
 public:
   DECLARE_RESOURCE_ALLOCATION(MemFile);
 
-  MemFile();
-  MemFile(const char *data, int64_t len);
+  explicit MemFile(const String& wrapper_type = null_string,
+                   const String& stream_type = empty_string);
+  MemFile(const char *data, int64_t len,
+          const String& wrapper_type = null_string,
+          const String& stream_type = empty_string);
   virtual ~MemFile();
 
   CLASSNAME_IS("MemFile");

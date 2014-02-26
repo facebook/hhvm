@@ -30,8 +30,14 @@ class PlainFile : public File {
 public:
   DECLARE_RESOURCE_ALLOCATION(PlainFile);
 
-  explicit PlainFile(FILE *stream = nullptr, bool nonblocking = false);
-  explicit PlainFile(int fd, bool nonblocking = false);
+  explicit PlainFile(FILE *stream = nullptr,
+                     bool nonblocking = false,
+                     const String& wrapper_type = null_string,
+                     const String& stream_type = null_string);
+  explicit PlainFile(int fd,
+                     bool nonblocking = false,
+                     const String& wrapper = null_string,
+                     const String& stream_type = null_string);
   virtual ~PlainFile();
 
   // overriding ResourceData
@@ -55,7 +61,6 @@ public:
   virtual bool stat(struct stat *sb);
 
   FILE *getStream() { return m_stream;}
-  virtual const char *getStreamType() const { return "STDIO";}
 
 protected:
   FILE *m_stream;

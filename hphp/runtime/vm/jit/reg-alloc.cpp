@@ -57,18 +57,36 @@ PhysReg forceAlloc(const SSATmp& tmp) {
            opc == CoerceStk ||
            opc == SideExitGuardStk  ||
            MInstrEffects::supported(opc));
-    return arch() == Arch::X64 ? X64::rVmSp : ARM::rVmSp;
+    switch (arch()) {
+      case Arch::X64:
+        return X64::rVmSp;
+      case Arch::ARM:
+        return ARM::rVmSp;
+    }
+    not_reached();
   }
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
   // we have a pointer to an AR that is not in rVmFp.
   if (opc != LdContActRec && opc != LdAFWHActRec && tmp.isA(Type::FramePtr)) {
-    return arch() == Arch::X64 ? X64::rVmFp : ARM::rVmFp;
+    switch (arch()) {
+      case Arch::X64:
+        return X64::rVmFp;
+      case Arch::ARM:
+        return ARM::rVmFp;
+    }
+    not_reached();
   }
 
   if (opc == DefMIStateBase) {
     assert(tmp.isA(Type::PtrToCell));
-    return arch() == Arch::X64 ? PhysReg(reg::rsp) : PhysReg(vixl::sp);
+    switch (arch()) {
+      case Arch::X64:
+        return PhysReg(reg::rsp);
+      case Arch::ARM:
+        return PhysReg(vixl::sp);
+    }
+    not_reached();
   }
   return InvalidReg;
 }
@@ -441,15 +459,25 @@ Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
   auto r = forceAlloc(*inst.src(i));
   if (r != InvalidReg) return r;
   if (mustUseConst(inst, i)) return Constraint::IMM;
-  return arch() == Arch::X64 ? X64::srcConstraint(inst, i) :
-         ARM::srcConstraint(inst, i);
+  switch (arch()) {
+    case Arch::X64:
+      return X64::srcConstraint(inst, i);
+    case Arch::ARM:
+      return ARM::srcConstraint(inst, i);
+  }
+  not_reached();
 }
 
 Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
   auto r = forceAlloc(*inst.dst(i));
   if (r != InvalidReg) return r;
-  return arch() == Arch::X64 ? X64::dstConstraint(inst, i) :
-         ARM::dstConstraint(inst, i);
+  switch (arch()) {
+    case Arch::X64:
+      return X64::dstConstraint(inst, i);
+    case Arch::ARM:
+      return ARM::dstConstraint(inst, i);
+  }
+  not_reached();
 }
 
 }}

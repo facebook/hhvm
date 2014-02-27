@@ -529,12 +529,13 @@ MCGenerator::getCallArrayPrologue(Func* func) {
     if (!writer) return nullptr;
     tca = func->getFuncBody();
     if (tca != m_tx.uniqueStubs.funcBodyHelperThunk) return tca;
-    if (JIT::arch() == JIT::Arch::X64) {
-      tca = JIT::X64::emitCallArrayPrologue(func, dvs);
-    } else if (JIT::arch() == JIT::Arch::ARM) {
-      tca = JIT::ARM::emitCallArrayPrologue(func, dvs);
-    } else {
-      not_implemented();
+    switch (arch()) {
+      case Arch::X64:
+        tca = JIT::X64::emitCallArrayPrologue(func, dvs);
+        break;
+      case Arch::ARM:
+        tca = JIT::ARM::emitCallArrayPrologue(func, dvs);
+        break;
     }
     func->setFuncBody(tca);
   } else {
@@ -570,12 +571,13 @@ MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
                        LeaseAcquire::BLOCKING));
         }
       }
-      if (JIT::arch() == JIT::Arch::X64) {
-        JIT::X64::funcPrologueSmashGuard(prologues[i], func);
-      } else if (JIT::arch() == JIT::Arch::ARM) {
-        JIT::ARM::funcPrologueSmashGuard(prologues[i], func);
-      } else {
-        not_implemented();
+      switch (arch()) {
+        case Arch::X64:
+          JIT::X64::funcPrologueSmashGuard(prologues[i], func);
+          break;
+        case Arch::ARM:
+          JIT::ARM::funcPrologueSmashGuard(prologues[i], func);
+          break;
       }
     }
   }
@@ -1173,85 +1175,91 @@ MCGenerator::enterTC(TCA start, void* data) {
       Trace::ringbufferEntry(RBTypeEnterTC, skData, (uint64_t)start);
     }
 
-    if (RuntimeOption::EvalSimulateARM) {
-      // This is a pseudo-copy of the logic in enterTCHelper: it sets up the
-      // simulator's registers and stack, runs the translation, and gets the
-      // necessary information out of the registers when it's done.
-
-      vixl::PrintDisassembler disasm(std::cout);
-      vixl::Decoder decoder;
-      if (getenv("ARM_DISASM")) {
-        decoder.AppendVisitor(&disasm);
+    switch (arch()) {
+      case Arch::X64: {
+        // We have to force C++ to spill anything that might be in a
+        // callee-saved register (aside from rbp). enterTCHelper does not save
+        // them.
+        CALLEE_SAVED_BARRIER();
+        enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
+                      RDS::tl_base);
+        CALLEE_SAVED_BARRIER();
+        break;
       }
-      vixl::Simulator sim(&decoder, std::cout);
-      SCOPE_EXIT {
-        Stats::inc(Stats::vixl_SimulatedInstr, sim.instr_count());
-        Stats::inc(Stats::vixl_SimulatedLoad, sim.load_count());
-        Stats::inc(Stats::vixl_SimulatedStore, sim.store_count());
-      };
-      sim.set_exception_hook(
-        [] (vixl::Simulator* s) {
-          if (tl_regState == VMRegState::DIRTY) {
-            // This is a pseudo-copy of the logic in sync_regstate.
-            mcg->fixupMap().fixupWorkSimulated(g_context.getNoCheck());
-            tl_regState = VMRegState::CLEAN;
-          }
+      case Arch::ARM: {
+        // This is a pseudo-copy of the logic in enterTCHelper: it sets up the
+        // simulator's registers and stack, runs the translation, and gets the
+        // necessary information out of the registers when it's done.
+
+        vixl::PrintDisassembler disasm(std::cout);
+        vixl::Decoder decoder;
+        if (getenv("ARM_DISASM")) {
+          decoder.AppendVisitor(&disasm);
         }
-      );
+        vixl::Simulator sim(&decoder, std::cout);
+        SCOPE_EXIT {
+          Stats::inc(Stats::vixl_SimulatedInstr, sim.instr_count());
+          Stats::inc(Stats::vixl_SimulatedLoad, sim.load_count());
+          Stats::inc(Stats::vixl_SimulatedStore, sim.store_count());
+        };
+        sim.set_exception_hook(
+          [] (vixl::Simulator* s) {
+            if (tl_regState == VMRegState::DIRTY) {
+              // This is a pseudo-copy of the logic in sync_regstate.
+              mcg->fixupMap().fixupWorkSimulated(g_context.getNoCheck());
+              tl_regState = VMRegState::CLEAN;
+            }
+          }
+        );
 
-      g_context->m_activeSims.push_back(&sim);
-      SCOPE_EXIT { g_context->m_activeSims.pop_back(); };
+        g_context->m_activeSims.push_back(&sim);
+        SCOPE_EXIT { g_context->m_activeSims.pop_back(); };
 
-      sim.   set_xreg(ARM::rGContextReg.code(), g_context.getNoCheck());
-      sim.   set_xreg(ARM::rVmFp.code(), vmfp());
-      sim.   set_xreg(ARM::rVmSp.code(), vmsp());
-      sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
-      sim.   set_xreg(ARM::rStashedAR.code(), info.saved_rStashedAr);
+        sim.   set_xreg(ARM::rGContextReg.code(), g_context.getNoCheck());
+        sim.   set_xreg(ARM::rVmFp.code(), vmfp());
+        sim.   set_xreg(ARM::rVmSp.code(), vmsp());
+        sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
+        sim.   set_xreg(ARM::rStashedAR.code(), info.saved_rStashedAr);
 
-      // Leave space for register spilling and MInstrState.
-      sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
-      assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
+        // Leave space for register spilling and MInstrState.
+        sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
+        assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
 
-      DEBUG_ONLY auto spOnEntry = sim.sp();
+        DEBUG_ONLY auto spOnEntry = sim.sp();
 
-      // Push the link register onto the stack. The link register is technically
-      // caller-saved; what this means in practice is that non-leaf functions
-      // push it at the very beginning and pop it just before returning (as
-      // opposed to just saving it around calls).
-      sim.   set_sp(sim.sp() - 16);
-      *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
+        // Push the link register onto the stack. The link register is
+        // technically caller-saved; what this means in practice is that
+        // non-leaf functions push it at the very beginning and pop it just
+        // before returning (as opposed to just saving it around calls).
+        sim.   set_sp(sim.sp() - 16);
+        *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
 
-      // The handshake is different in the case of REQ_BIND_CALL. The code we're
-      // jumping to expects to find a return address in x30, and a saved return
-      // address on the stack.
-      if (info.requestNum == REQ_BIND_CALL) {
-        // Put the call's return address in the link register.
-        auto* ar = reinterpret_cast<ActRec*>(info.saved_rStashedAr);
-        sim.set_lr(ar->m_savedRip);
+        // The handshake is different in the case of REQ_BIND_CALL. The code
+        // we're jumping to expects to find a return address in x30, and a saved
+        // return address on the stack.
+        if (info.requestNum == REQ_BIND_CALL) {
+          // Put the call's return address in the link register.
+          auto* ar = reinterpret_cast<ActRec*>(info.saved_rStashedAr);
+          sim.set_lr(ar->m_savedRip);
+        }
+
+        std::cout.flush();
+        sim.RunFrom(vixl::Instruction::Cast(start));
+        std::cout.flush();
+
+        assert(sim.sp() == spOnEntry);
+
+        info.requestNum = sim.xreg(0);
+        info.args[0] = sim.xreg(1);
+        info.args[1] = sim.xreg(2);
+        info.args[2] = sim.xreg(3);
+        info.args[3] = sim.xreg(4);
+        info.args[4] = sim.xreg(5);
+        info.saved_rStashedAr = sim.xreg(ARM::rStashedAR.code());
+
+        info.stubAddr = reinterpret_cast<TCA>(sim.xreg(ARM::rAsm.code()));
+        break;
       }
-
-      std::cout.flush();
-      sim.RunFrom(vixl::Instruction::Cast(start));
-      std::cout.flush();
-
-      assert(sim.sp() == spOnEntry);
-
-      info.requestNum = sim.xreg(0);
-      info.args[0] = sim.xreg(1);
-      info.args[1] = sim.xreg(2);
-      info.args[2] = sim.xreg(3);
-      info.args[3] = sim.xreg(4);
-      info.args[4] = sim.xreg(5);
-      info.saved_rStashedAr = sim.xreg(ARM::rStashedAR.code());
-
-      info.stubAddr = reinterpret_cast<TCA>(sim.xreg(ARM::rAsm.code()));
-    } else {
-      // We have to force C++ to spill anything that might be in a callee-saved
-      // register (aside from rbp). enterTCHelper does not save them.
-      CALLEE_SAVED_BARRIER();
-      enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
-                    RDS::tl_base);
-      CALLEE_SAVED_BARRIER();
     }
 
     assert(g_context->m_stack.isValidAddress((uintptr_t)vmsp()));
@@ -1971,27 +1979,32 @@ MCGenerator::translateWork(const TranslArgs& args) {
     auto interpOps = tp ? tp->m_numOpcodes : 1;
     FTRACE(1, "emitting {}-instr interp request for failed translation\n",
            interpOps);
-    if (JIT::arch() == JIT::Arch::X64) {
-      Asm a { code.main() };
-      // Add a counter for the translation if requested
-      if (RuntimeOption::EvalJitTransCounters) {
-        JIT::X64::emitTransCounterInc(a);
+    switch (arch()) {
+      case Arch::X64: {
+        Asm a { code.main() };
+        // Add a counter for the translation if requested
+        if (RuntimeOption::EvalJitTransCounters) {
+          JIT::X64::emitTransCounterInc(a);
+        }
+        a.    jmp(emitServiceReq(code.stubs(), JIT::REQ_INTERPRET,
+                                 sk.offset(), interpOps));
+        break;
       }
-      a.    jmp(emitServiceReq(code.stubs(), JIT::REQ_INTERPRET,
-                               sk.offset(), interpOps));
-    } else if (JIT::arch() == JIT::Arch::ARM) {
-      if (RuntimeOption::EvalJitTransCounters) {
-        vixl::MacroAssembler a { code.main() };
-        JIT::ARM::emitTransCounterInc(a);
+      case Arch::ARM: {
+        if (RuntimeOption::EvalJitTransCounters) {
+          vixl::MacroAssembler a { code.main() };
+          JIT::ARM::emitTransCounterInc(a);
+        }
+        // This jump won't be smashed, but a far jump on ARM requires the same
+        // code sequence.
+        JIT::emitSmashableJump(
+          code.main(),
+          emitServiceReq(code.stubs(), JIT::REQ_INTERPRET,
+                         sk.offset(), interpOps),
+          CC_None
+        );
+        break;
       }
-      // This jump won't be smashed, but a far jump on ARM requires the same
-      // code sequence.
-      JIT::emitSmashableJump(
-        code.main(),
-        emitServiceReq(code.stubs(), JIT::REQ_INTERPRET,
-                       sk.offset(), interpOps),
-        CC_None
-      );
     }
     // Fall through.
   }
@@ -2227,10 +2240,13 @@ MCGenerator::MCGenerator()
 void MCGenerator::initUniqueStubs() {
   // Put the following stubs into ahot, rather than a.
   CodeCache::Selector asmSel(CodeCache::Selector::Args(code).hot(true));
-  if (JIT::arch() == JIT::Arch::ARM) {
-    m_tx.uniqueStubs = JIT::ARM::emitUniqueStubs();
-  } else {
-    m_tx.uniqueStubs = JIT::X64::emitUniqueStubs();
+  switch (arch()) {
+    case Arch::X64:
+      m_tx.uniqueStubs = JIT::X64::emitUniqueStubs();
+      break;
+    case Arch::ARM:
+      m_tx.uniqueStubs = JIT::ARM::emitUniqueStubs();
+      break;
   }
 }
 

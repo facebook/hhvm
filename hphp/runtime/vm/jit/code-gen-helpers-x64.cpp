@@ -54,19 +54,21 @@ TRACE_SET_MOD(hhir);
  */
 void moveToAlign(CodeBlock& cb,
                  const size_t align /* =kJmpTargetAlign */) {
-  // TODO(2967396) implement properly, move function
-  if (arch() == Arch::ARM) return;
-
-  X64Assembler a { cb };
-  assert(folly::isPowTwo(align));
-  size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
-  if (leftInBlock == align) return;
-  if (leftInBlock > 2) {
-    a.ud2();
-    leftInBlock -= 2;
-  }
-  if (leftInBlock > 0) {
-    a.emitInt3s(leftInBlock);
+  switch (arch()) {
+    case Arch::X64: {
+      X64Assembler a { cb };
+      assert(folly::isPowTwo(align));
+      size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
+      if (leftInBlock == align) return;
+      if (leftInBlock > 2) {
+        a.ud2();
+        leftInBlock -= 2;
+      }
+      break;
+    }
+    case Arch::ARM:
+      // TODO(2967396) implement properly, move function
+      break;
   }
 }
 
@@ -308,17 +310,22 @@ void emitRB(X64Assembler& a,
 }
 
 void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
-  // TODO(2967396) implement properly, move function
-  if (arch() == Arch::ARM) return;
-
-  Asm a { cb };
-  // call to a trace function
-  a.    movq   (a.frontier(), rcx);
-  a.    movq   (rVmFp, rdi);
-  a.    movq   (rVmSp, rsi);
-  a.    movq   (pcOff, rdx);
-  // do the call; may use a trampoline
-  emitCall(a, reinterpret_cast<TCA>(traceCallback));
+  switch (arch()) {
+    case Arch::X64: {
+      Asm a { cb };
+      // call to a trace function
+      a.    movq   (a.frontier(), rcx);
+      a.    movq   (rVmFp, rdi);
+      a.    movq   (rVmSp, rsi);
+      a.    movq   (pcOff, rdx);
+      // do the call; may use a trampoline
+      emitCall(a, reinterpret_cast<TCA>(traceCallback));
+      break;
+    }
+    case Arch::ARM:
+      // TODO(2967396) implement properly, move function
+      break;
+  }
 }
 
 void emitTestSurpriseFlags(Asm& a) {

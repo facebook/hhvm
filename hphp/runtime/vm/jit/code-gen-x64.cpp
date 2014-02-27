@@ -6295,10 +6295,13 @@ void genCodeImpl(CodeBlock& mainCode,
 
     auto const aStart      = cb.frontier();
     auto const astubsStart = stubsCode.frontier();
-    if (arch() == Arch::ARM) {
-      ARM::patchJumps(cb, state, block);
-    } else {
-      patchJumps(cb, state, block);
+    switch (arch()) {
+      case Arch::X64:
+        patchJumps(cb, state, block);
+        break;
+      case Arch::ARM:
+        ARM::patchJumps(cb, state, block);
+        break;
     }
     state.addresses[block] = aStart;
 
@@ -6311,12 +6314,17 @@ void genCodeImpl(CodeBlock& mainCode,
       state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
     }
 
-    if (arch() == Arch::ARM) {
-      ARM::CodeGenerator cg(unit, cb, stubsCode, mcg, state);
-      cg.cgBlock(block, bcMap);
-    } else {
-      CodeGenerator cg(unit, cb, stubsCode, mcg, state);
-      cg.cgBlock(block, bcMap);
+    switch (arch()) {
+      case Arch::X64: {
+        CodeGenerator cg(unit, cb, stubsCode, mcg, state);
+        cg.cgBlock(block, bcMap);
+        break;
+      }
+      case Arch::ARM: {
+        ARM::CodeGenerator cg(unit, cb, stubsCode, mcg, state);
+        cg.cgBlock(block, bcMap);
+        break;
+      }
     }
 
     if (auto next = block->next()) {

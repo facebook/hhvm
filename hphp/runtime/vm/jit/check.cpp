@@ -317,13 +317,21 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
       auto& inst_regs = regs[inst];
       for (int i = 0, n = inst.numSrcs(); i < n; ++i) {
         auto const &rs = inst_regs.src(i);
-        if (!rs.spilled() &&
-            ((arch() == Arch::X64 && (rs.reg(0) == X64::rVmSp ||
-                                      rs.reg(0) == X64::rVmFp)) ||
-             (arch() == Arch::ARM && (rs.reg(0) == ARM::rVmSp ||
-                                      rs.reg(0) == ARM::rVmFp)))) {
+        if (!rs.spilled()) {
           // hack - ignore rbx and rbp
-          continue;
+          bool ignore_frame_regs;
+
+          switch (arch()) {
+            case Arch::X64:
+              ignore_frame_regs = (rs.reg(0) == X64::rVmSp ||
+                                  rs.reg(0) == X64::rVmFp);
+              break;
+            case Arch::ARM:
+               ignore_frame_regs = (rs.reg(0) == ARM::rVmSp ||
+                                   rs.reg(0) == ARM::rVmFp);
+              break;
+          }
+          if (ignore_frame_regs) continue;
         }
         DEBUG_ONLY auto src = inst.src(i);
         assert(rs.numWords() == src->numWords() ||

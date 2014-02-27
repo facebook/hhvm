@@ -1168,7 +1168,7 @@ Variant HHVM_FUNCTION(hphp_get_property, CObjRef obj, const String& cls,
 
 void HHVM_FUNCTION(hphp_set_property, CObjRef obj, const String& cls,
                                       const String& prop, CVarRef value) {
-  if (!cls.empty() && RuntimeOption::RepoAuthoritative) {
+  if (!cls.empty() && RuntimeOption::EvalAuthoritativeMode) {
     raise_error(
       "We've already made many assumptions about private variables. "
       "You can't change accessibility in Whole Program mode"

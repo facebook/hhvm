@@ -139,7 +139,7 @@ Variant f_assert(CVarRef assertion) {
 
   auto const passed = [&]() -> bool {
     if (assertion.isString()) {
-      if (RuntimeOption::RepoAuthoritative) {
+      if (RuntimeOption::EvalAuthoritativeMode) {
         // We could support this with compile-time string literals,
         // but it's not yet implemented.
         throw NotSupportedException(__func__,

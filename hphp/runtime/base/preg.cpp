@@ -841,7 +841,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
   }
   bool eval = pce->preg_options & PREG_REPLACE_EVAL;
   if (eval) {
-    if (RuntimeOption::RepoAuthoritative) {
+    if (RuntimeOption::EvalAuthoritativeMode) {
       throw Exception(
         "You can't use eval in RepoAuthoritative mode. It breaks all sorts of "
         "assumptions we use for speed. Switch to using preg_replace_callback()."

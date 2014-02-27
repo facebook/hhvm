@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/logger.h"
 #include "folly/String.h"
 
 using std::map;
@@ -230,6 +231,44 @@ void RequestInjectionData::threadInit() {
                      }
                      return out;
                    });
+
+  // Errors and Logging Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "log_errors",
+                   [this](const std::string& value, void* p) {
+                     bool on;
+                     ini_on_update(value, &on);
+                     if (m_logErrors != on) {
+                       m_logErrors = on;
+                       if (m_logErrors) {
+                         if (!m_errorLog.empty()) {
+                           FILE *output = fopen(m_errorLog.data(), "a");
+                           if (output) {
+                             Logger::SetNewOutput(output);
+                           }
+                         }
+                       } else {
+                         Logger::SetNewOutput(nullptr);
+                       }
+                     }
+                     return true;
+                   },
+                   [](void*p) { return *(bool*)p ? "1" : "0";},
+                   &m_logErrors);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "error_log",
+                   [this](const std::string& value, void* p) {
+                     m_errorLog = value;
+                     if (m_logErrors && !m_errorLog.empty()) {
+                       FILE *output = fopen(m_errorLog.data(), "a");
+                       if (output) {
+                         Logger::SetNewOutput(output);
+                       }
+                     }
+                     return true;
+                   },
+                   [](void*p) { return ini_get((std::string*)p); },
+                   &m_errorLog);
 }
 
 

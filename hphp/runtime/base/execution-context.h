@@ -307,10 +307,6 @@ public:
   void setErrorReportingLevel(int level) { m_errorReportingLevel = level;}
   String getErrorPage() const { return m_errorPage;}
   void setErrorPage(const String& page) { m_errorPage = (std::string) page; }
-  bool getLogErrors() const { return m_logErrors;}
-  void setLogErrors(bool on);
-  String getErrorLog() const { return m_errorLog;}
-  void setErrorLog(const String& filename);
 
   /**
    * Misc. settings
@@ -377,8 +373,6 @@ private:
   String m_lastError;
   int m_lastErrorNum;
   std::string m_errorPage;
-  bool m_logErrors;
-  String m_errorLog;
 
   // misc settings
   Array m_envs;

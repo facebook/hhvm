@@ -62,7 +62,7 @@ BaseExecutionContext::BaseExecutionContext() :
     m_stdout(nullptr), m_stdoutData(nullptr),
     m_errorState(ExecutionContext::ErrorState::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
-    m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
+    m_lastErrorNum(0), m_throwAllErrors(false),
     m_vhost(nullptr) {
 
   // We want this to run on every request, instead of just once per thread
@@ -73,25 +73,6 @@ BaseExecutionContext::BaseExecutionContext() :
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "error_reporting",
                    &m_errorReportingLevel);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "log_errors",
-                   [this](const std::string& value, void* p) {
-                     bool log;
-                     ini_on_update(value, &log);
-                     this->setLogErrors(log);
-                     return true;
-                   },
-                   [](void*p) { return *(bool*)p ? "1" : "0";},
-                   &m_logErrors);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "error_log",
-                   [this](const std::string& value, void* p) {
-                     this->setErrorLog(value);
-                     return true;
-                   },
-                   [](void*p) { return ini_get((String*)p); },
-                   &m_errorLog);
-
   // Filesystem and Streams Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_socket_timeout",
@@ -779,32 +760,6 @@ bool BaseExecutionContext::onUnhandledException(Object e) {
     Logger::Error("HipHop Fatal error: Uncaught %s", err.data());
   }
   return false;
-}
-
-void BaseExecutionContext::setLogErrors(bool on) {
-  if (m_logErrors != on) {
-    m_logErrors = on;
-    if (m_logErrors) {
-      if (!m_errorLog.empty()) {
-        FILE *output = fopen(m_errorLog.data(), "a");
-        if (output) {
-          Logger::SetNewOutput(output);
-        }
-      }
-    } else {
-      Logger::SetNewOutput(nullptr);
-    }
-  }
-}
-
-void BaseExecutionContext::setErrorLog(const String& filename) {
-  m_errorLog = filename;
-  if (m_logErrors && !m_errorLog.empty()) {
-    FILE *output = fopen(m_errorLog.data(), "a");
-    if (output) {
-      Logger::SetNewOutput(output);
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

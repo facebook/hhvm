@@ -305,6 +305,8 @@ public:
   std::string m_argSeparatorOutput;
   std::string m_defaultCharset;
   std::vector<std::string> m_include_paths;
+  bool m_logErrors;
+  std::string m_errorLog;
 
  public:
   int getTimeout() const { return m_timeoutSeconds; }

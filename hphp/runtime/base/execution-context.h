@@ -331,7 +331,6 @@ public:
   void setStreamContext(Resource &context) { m_streamContext = context; }
   Resource &getStreamContext() { return m_streamContext; }
 
-  String getDefaultCharset() const { return m_defaultCharset; }
   int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
 
   void restoreIncludePath();
@@ -391,7 +390,6 @@ private:
   String m_timezoneDefault;
   bool m_throwAllErrors;
   Resource m_streamContext;
-  String m_defaultCharset;
   int64_t m_socketDefaultTimeout;
 
   // session backup/restore for RPCRequestHandler

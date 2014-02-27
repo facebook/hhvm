@@ -194,22 +194,22 @@ Key18 = null
 ; end of ini file
 EOD;
 /* creating parse.ini file */
-$file_handle = fopen($file_path."/parse.ini", "w");
+$file_handle = fopen($file_path."/parse_ini_file.ini", "w");
 fwrite($file_handle, $parse_string);
 fclose($file_handle);
 
 echo "*** Test parse_ini_file() function:  with various keys and values given in parse.ini file ***\n";
 echo "-- ini file without process_sections optional arg --\n";
 define('BIRD', 'Humming bird');
-$ini_array = parse_ini_file($file_path."/parse.ini");
+$ini_array = parse_ini_file($file_path."/parse_ini_file.ini");
 print_r($ini_array);
 
 echo "\n-- ini file with process_sections as TRUE --\n";
-$ini_array = parse_ini_file($file_path."/parse.ini", TRUE);
+$ini_array = parse_ini_file($file_path."/parse_ini_file.ini", TRUE);
 print_r($ini_array);
 
 echo "*** Done **\n";
 ?>
 <?php
-unlink(dirname(__FILE__)."/parse.ini");
+unlink(dirname(__FILE__)."/parse_ini_file.ini");
 ?>

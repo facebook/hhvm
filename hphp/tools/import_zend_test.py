@@ -1135,6 +1135,10 @@ def walk(filename, dest_subdir):
         test = test.replace('rename_variation.tmp', dest_filename+'.tmp')
         test = test.replace('rename_variation2.tmp', dest_filename+'2.tmp')
         test = test.replace('rename_variation_link.tmp', dest_filename+'_link.tmp')
+    if '/ext/standard/tests/file/bug46347.php' in full_dest_filename:
+        test = test.replace('/parse.ini', '/bug46347.ini')
+    if '/ext/standard/tests/file/parse_ini_file.php' in full_dest_filename:
+        test = test.replace('/parse.ini', '/parse_ini_file.ini')
     if '/ext/mysqli/tests/' in full_dest_filename:
 
         (testname, _) = os.path.splitext(os.path.basename(full_dest_filename))

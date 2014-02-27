@@ -150,6 +150,9 @@ RequestInjectionData::~RequestInjectionData() {
 #endif
 }
 
+void RequestInjectionData::threadInit() {
+}
+
 void RequestInjectionData::onSessionInit() {
   RDS::requestInit();
   cflagsPtr = &RDS::header()->conditionFlags;

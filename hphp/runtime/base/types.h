@@ -271,9 +271,12 @@ public:
       m_timeoutSeconds(-1), m_hasTimer(false), m_timerActive(false),
       m_debugger(false), m_debuggerIntr(false), m_coverage(false),
       m_jit(false) {
+    threadInit();
   }
 
   ~RequestInjectionData();
+
+  void threadInit();
 
   inline std::atomic<ssize_t>* getConditionFlags() {
     assert(cflagsPtr);

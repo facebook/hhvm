@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -102,10 +103,6 @@ private:
   StateVector<IRInstruction,RegMap> m_regs;
 };
 
-// Return a valid register if this tmp should be forced into a particular
-// register, otherwise return InvalidReg.
-PhysReg forceAlloc(SSATmp& t);
-
 /*
  * New register allocator doing extended linear scan
  */
@@ -119,38 +116,66 @@ RegAllocInfo allocateRegs(IRUnit&);
  * is explicit.
  */
 struct Constraint {
-  enum ConstraintMask {
+  enum ConstraintMask: uint8_t {
     GP = 1,
     SIMD = 2,
-    VOID = 4
+    VOID = 4,   // used for unused dests that can be InvalidReg
   };
-  /* implicit */ Constraint(ConstraintMask m) : m_bits(m) {}
+
+  /* implicit */ Constraint(ConstraintMask m)
+    : m_mask(m)
+    , m_reg(InvalidReg)
+  {}
+  /* implicit */ Constraint(PhysReg r)
+    : m_mask(maskFromReg(r))
+    , m_reg(r)
+  {}
+
   Constraint& operator=(Constraint c2) {
-    m_bits = c2.m_bits;
+    m_mask = c2.m_mask;
+    m_reg = c2.m_reg;
     return *this;
   }
+
+  bool operator==(Constraint c2) const {
+    return m_mask == c2.m_mask && m_reg == c2.m_reg;
+  }
+
+  bool operator!=(Constraint c2) const {
+    return !(*this == c2);
+  }
+
+  PhysReg reg() const { return m_reg; }
+
   Constraint operator|(Constraint c2) const {
-    return Constraint(m_bits | c2.m_bits);
+    return (*this == c2) ? *this :
+           Constraint(ConstraintMask(m_mask | c2.m_mask));
   }
+
   Constraint operator&(Constraint c2) const {
-    return Constraint(m_bits & c2.m_bits);
+    return (*this == c2) ? *this :
+           Constraint(ConstraintMask(m_mask & c2.m_mask));
   }
+
   Constraint operator-(Constraint c2) const {
-    return Constraint(m_bits & ~c2.m_bits);
+    assert(m_reg == InvalidReg && c2.m_reg == InvalidReg);
+    return ConstraintMask(m_mask & ~c2.m_mask);
   }
 
   Constraint& operator|=(Constraint c2) { return *this = *this | c2; }
   Constraint& operator&=(Constraint c2) { return *this = *this & c2; }
   Constraint& operator-=(Constraint c2) { return *this = *this - c2; }
 
-  explicit operator bool() const { return m_bits != 0; }
+  explicit operator bool() const { return m_mask != 0; }
 
 private:
-  typedef uint8_t bits_t;
-  explicit Constraint(bits_t b) : m_bits(b) {}
+  static ConstraintMask maskFromReg(PhysReg r) {
+    return r.isGP() ? GP : r.isSIMD() ? SIMD : VOID;
+  }
 
 private:
-  bits_t m_bits;
+  ConstraintMask m_mask;
+  PhysReg m_reg; // if valid, force this register
 };
 
 /*

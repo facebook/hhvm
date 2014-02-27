@@ -25,14 +25,14 @@ using namespace JIT::reg;
 
 TRACE_SET_MOD(hhir);
 
-PhysReg forceAlloc(SSATmp& dst) {
-  auto inst = dst.inst();
+PhysReg forceAlloc(const SSATmp& tmp) {
+  auto inst = tmp.inst();
   auto opc = inst->op();
 
   // Note that the point of StashGeneratorSP is to save a StkPtr
   // somewhere other than rVmSp.  (TODO(#2288359): make rbx not
   // special.)
-  if (opc != StashGeneratorSP && dst.isA(Type::StkPtr)) {
+  if (opc != StashGeneratorSP && tmp.isA(Type::StkPtr)) {
     assert(opc == DefSP ||
            opc == ReDefSP ||
            opc == ReDefGeneratorSP ||
@@ -60,12 +60,12 @@ PhysReg forceAlloc(SSATmp& dst) {
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
   // we have a pointer to an AR that is not in rVmFp.
-  if (opc != LdContActRec && opc != LdAFWHActRec && dst.isA(Type::FramePtr)) {
+  if (opc != LdContActRec && opc != LdAFWHActRec && tmp.isA(Type::FramePtr)) {
     return arch() == Arch::X64 ? X64::rVmFp : ARM::rVmFp;
   }
 
   if (opc == DefMIStateBase) {
-    assert(dst.isA(Type::PtrToCell));
+    assert(tmp.isA(Type::PtrToCell));
     return arch() == Arch::X64 ? PhysReg(reg::rsp) : PhysReg(vixl::sp);
   }
   return InvalidReg;
@@ -229,16 +229,18 @@ Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
 }
 }
 
-Constraint srcConstraint(const IRInstruction& inst, unsigned src) {
-  assert(src <= inst.numSrcs());
-  return arch() == Arch::X64 ? X64::srcConstraint(inst, src) :
-         ARM::srcConstraint(inst, src);
+Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
+  auto r = forceAlloc(*inst.src(i));
+  if (r != InvalidReg) return r;
+  return arch() == Arch::X64 ? X64::srcConstraint(inst, i) :
+         ARM::srcConstraint(inst, i);
 }
 
-Constraint dstConstraint(const IRInstruction& inst, unsigned dst) {
-  assert(dst <= inst.numDsts());
-  return arch() == Arch::X64 ? X64::dstConstraint(inst, dst) :
-         ARM::dstConstraint(inst, dst);
+Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
+  auto r = forceAlloc(*inst.dst(i));
+  if (r != InvalidReg) return r;
+  return arch() == Arch::X64 ? X64::dstConstraint(inst, i) :
+         ARM::dstConstraint(inst, i);
 }
 
 }} // HPHP::JIT

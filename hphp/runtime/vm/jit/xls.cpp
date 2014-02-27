@@ -472,9 +472,8 @@ void XLS::buildIntervals() {
           // dest is not live; give it a register anyway.
           assert(!dest);
           if (d->numWords() == 0) continue;
-          auto r = forceAlloc(*d);
-          if (r != InvalidReg) {
-            inst_regs.dst(i).setReg(r, 0);
+          if (constraint.reg() != InvalidReg) {
+            inst_regs.dst(i).setReg(constraint.reg(), 0);
             continue;
           }
           if (constraint & Constraint::VOID) {
@@ -511,9 +510,9 @@ void XLS::buildIntervals() {
         if (s->inst()->op() == DefConst) continue;
         auto need = s->numWords();
         if (need == 0) continue;
-        auto r = forceAlloc(*s);
-        if (r != InvalidReg) {
-          inst_regs.src(i).setReg(r, 0);
+        auto constraint = srcConstraint(inst, i);
+        if (constraint.reg() != InvalidReg) {
+          inst_regs.src(i).setReg(constraint.reg(), 0);
           continue;
         }
         auto src = m_intervals[s];
@@ -527,7 +526,6 @@ void XLS::buildIntervals() {
         } else {
           assert(src->tmp == s);
         }
-        auto constraint = srcConstraint(inst, i);
         srcConstraints(src, m_abi, constraint);
         src_need += src->need;
         live.add(s);

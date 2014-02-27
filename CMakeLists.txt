@@ -21,17 +21,19 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
 include(CheckFunctionExists)
 include(cotire)
 
+FIND_PATH(LIBC_INCLUDE_PATH stdlib.h)
+
 set_property(DIRECTORY
     PROPERTY COTIRE_PREFIX_HEADER_IGNORE_PATH
-        "/usr/include/stdlib.h"
+        "${LIBC_INCLUDE_PATH}/stdlib.h"
         "/usr/include/x86_64-linux-gnu/bits"
-        "/usr/include/c-client"
-        "/usr/include/jemalloc"
-        "/usr/include/onigposix.h"
-        "/usr/include/oniguruma.h"
-        "/usr/include/png.h"
-        "/usr/include/ldap.h"
-        "/usr/include/libxml"
+        ${CCLIENT_INCLUDE_PATH}
+        "${JEMALLOC_INCLUDE_DIR}/jemalloc"
+        "${ONIGURUMA_INCLUDE_DIR}/onigposix.h"
+        "${ONIGURUMA_INCLUDE_DIR}/oniguruma.h"
+        "${LIBPNG_INCLUDE_DIRS}/png.h"
+        "${LDAP_INCLUDE_DIR}/ldap.h"
+#        "/usr/include/libxml"
         "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}")
 
 add_subdirectory(hphp)

@@ -47,7 +47,6 @@
 #endif
 
 #include <boost/bind.hpp>
-#include <boost/optional.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -86,6 +85,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/runtime-option-guard.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -810,8 +810,6 @@ TCA TranslatorX64::regeneratePrologues(Func* func, SrcKey triggerSk) {
 
   for (int nArgs = 0; nArgs <= func->numParams() + 1; nArgs++) {
     TransID tid = profData()->prologueTransId(func, nArgs);
-    assert(IMPLIES(func->getPrologue(nArgs) != uniqueStubs.fcallHelperThunk,
-                   tid != InvalidID));
     if (tid != InvalidID) {
       prologTransIDs.push_back(tid);
     }
@@ -1043,7 +1041,7 @@ class FreeRequestStubTrigger : public Treadmill::WorkItem {
     if (tx64->freeRequestStub(m_stub) != true) {
       // If we can't free the stub, enqueue again to retry.
       TRACE(3, "FreeStubTrigger: write lease failed, requeueing %p\n", m_stub);
-      enqueue(new FreeRequestStubTrigger(m_stub));
+      enqueue(std::unique_ptr<WorkItem>(new FreeRequestStubTrigger(m_stub)));
     }
   }
 };
@@ -1506,7 +1504,8 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   }
 
   if (smashed && info.stubAddr) {
-    Treadmill::WorkItem::enqueue(new FreeRequestStubTrigger(info.stubAddr));
+    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                    new FreeRequestStubTrigger(info.stubAddr)));
   }
 
   return true;
@@ -1854,6 +1853,21 @@ TranslatorX64::translateWork(const TranslArgs& args) {
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
       region = selectRegion(rContext, tp.get(), m_mode);
+
+      if (RuntimeOption::EvalJitCompareRegions &&
+          RuntimeOption::EvalJitRegionSelector == "tracelet") {
+        // Re-analyze with guard relaxation on
+        OPTION_GUARD(EvalHHBCRelaxGuards, 1);
+        OPTION_GUARD(EvalHHIRRelaxGuards, 0);
+        auto legacyRegion = selectTraceletLegacy(rContext.spOffset,
+                                                 *analyze(sk));
+        if (!region) {
+          Trace::ftraceRelease("{:-^60}\nCouldn't select tracelet region "
+                               "for:\n{}", "", show(*legacyRegion));
+        } else {
+          diffRegions(*region, *legacyRegion);
+        }
+      }
     }
 
     TranslateResult result = Retry;
@@ -1874,7 +1888,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
           // use them in region selection whenever we decide to retranslate.
           if (m_mode == TransProfile && result == Success &&
               RuntimeOption::EvalJitPGOUsePostConditions) {
-            pconds = m_irTrans->hhbcTrans().traceBuilder().getKnownTypes();
+            pconds = m_irTrans->hhbcTrans().irBuilder().getKnownTypes();
           }
 
           FTRACE(2, "translateRegion finished with result {}\n",
@@ -1915,7 +1929,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         // retranslate.
         if (m_mode == TransProfile && result == Success &&
             RuntimeOption::EvalJitPGOUsePostConditions) {
-          pconds = m_irTrans->hhbcTrans().traceBuilder().getKnownTypes();
+          pconds = m_irTrans->hhbcTrans().irBuilder().getKnownTypes();
         }
       }
 
@@ -2067,7 +2081,9 @@ TranslatorX64::translateTracelet(Tracelet& t) {
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
-      ht.setBcOff(ni->source.offset(), ni->breaksTracelet && !ht.isInlining());
+      ht.setBcOff(ni->source.offset(),
+                  ni->breaksTracelet && !ht.isInlining(),
+                  true);
       readMetaData(metaHand, *ni, m_irTrans->hhbcTrans(),
                    m_mode == TransProfile, MetaMode::Legacy);
 
@@ -2101,7 +2117,16 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       // problem, flag it to be interpreted, and retranslate the tracelet.
       for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
         if (ni->source.offset() == fcg.bcOff) {
-          always_assert(!ni->interp);
+          always_assert_log(
+            !ni->interp,
+            [&] {
+              std::ostringstream oss;
+              oss << folly::format("code generation failed with {}\n",
+                                   fcg.what());
+              print(oss, m_irTrans->hhbcTrans().unit());
+              return oss.str();
+            });
+
           ni->interp = true;
           FTRACE(1, "HHIR: RETRY Translation {}: will interpOne BC instr {} "
                  "after failing to code-gen \n\n",
@@ -2141,18 +2166,16 @@ void TranslatorX64::traceCodeGen() {
   auto& unit = ht.unit();
 
   auto finishPass = [&](const char* msg, int level) {
-    dumpTrace(level, unit, msg, nullptr, nullptr, nullptr,
-              ht.traceBuilder().guards());
+    dumpTrace(level, unit, msg, nullptr, nullptr, ht.irBuilder().guards());
     assert(checkCfg(unit));
   };
 
   finishPass(" after initial translation ", kIRLevel);
 
-  optimize(unit, ht.traceBuilder(), m_mode);
+  optimize(unit, ht.irBuilder(), m_mode);
   finishPass(" after optimizing ", kOptLevel);
 
-  auto regs = RuntimeOption::EvalHHIRXls ? allocateRegs(unit) :
-              allocRegsForUnit(unit);
+  auto regs = allocateRegs(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
   recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier());

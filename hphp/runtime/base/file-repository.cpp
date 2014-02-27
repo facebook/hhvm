@@ -110,7 +110,8 @@ void PhpFile::decRefAndDelete() {
   };
 
   if (decRef() == 0) {
-    Treadmill::WorkItem::enqueue(new FileInvalidationTrigger(this));
+    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                        new FileInvalidationTrigger(this)));
   }
 }
 

@@ -1,5 +1,7 @@
 from $c in $@query_param_0
-  join $o in $orders on $c->CustomerID equals $o->CustomerID
+  join $o in $@query_param_1 on $c->CustomerID equals $o->CustomerID
   select tuple($c->Name, $o->OrderID, $o->Total)
 closure
+object(Queryable)#2 (0) {
+}
 ok

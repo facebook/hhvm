@@ -164,8 +164,6 @@ Assetic\Test\Asset\StringAssetTest::testAutomaticLoad
 .
 Assetic\Test\Asset\StringAssetTest::testDumpAppliesAdditionalFilter
 .
-Assetic\Test\Asset\StringAssetTest::testGetContentNullUnlessLoaded
-.
 Assetic\Test\Asset\StringAssetTest::testGetFilters
 .
 Assetic\Test\Asset\StringAssetTest::testInterface
@@ -177,7 +175,7 @@ Assetic\Test\Asset\StringAssetTest::testLoadAppliesAdditionalFilter
 Assetic\Test\Asset\StringAssetTest::testLoadAppliesFilters
 .
 Assetic\Test\Cache\ApcCacheTest::testCache
-.
+S
 Assetic\Test\Cache\ArrayCacheTest::testCache
 .
 Assetic\Test\Cache\ConfigCacheTest::testCache
@@ -201,7 +199,7 @@ Assetic\Test\Cache\ExpiringCacheTest::testRemove
 Assetic\Test\Cache\ExpiringCacheTest::testSetLifetime
 .
 Assetic\Test\Cache\FilesystemCacheTest::testCache
-.
+F
 Assetic\Test\Cache\FilesystemCacheTest::testSetCreatesDir
 .
 Assetic\Test\Extension\Twig\AsseticExtensionTest::testAbsolutePath
@@ -219,8 +217,6 @@ Assetic\Test\Extension\Twig\AsseticExtensionTest::testGlob
 Assetic\Test\Extension\Twig\AsseticExtensionTest::testImage
 .
 Assetic\Test\Extension\Twig\AsseticExtensionTest::testMixture
-.
-Assetic\Test\Extension\Twig\AsseticExtensionTest::testMultipleSameVariableValues
 .
 Assetic\Test\Extension\Twig\AsseticExtensionTest::testOptionalFilter
 .
@@ -264,10 +260,6 @@ Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #2
 .
 Assetic\Test\Factory\AssetFactoryTest::testFilter
 .
-Assetic\Test\Factory\AssetFactoryTest::testGetLastModified
-.
-Assetic\Test\Factory\AssetFactoryTest::testGetLastModifiedCollection
-.
 Assetic\Test\Factory\AssetFactoryTest::testIncludingOptionalFilter
 .
 Assetic\Test\Factory\AssetFactoryTest::testInvalidFilter
@@ -289,6 +281,8 @@ Assetic\Test\Factory\AssetFactoryTest::testWorkers
 Assetic\Test\Factory\LazyAssetManagerTest::testGetFromLoader
 .
 Assetic\Test\Factory\LazyAssetManagerTest::testGetLastModified
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testGetLastModifiedCollection
 .
 Assetic\Test\Factory\LazyAssetManagerTest::testGetResources
 .
@@ -475,12 +469,10 @@ Assetic\Test\Filter\FilterCollectionTest::testEnsure
 Assetic\Test\Filter\FilterCollectionTest::testInterface
 .
 Assetic\Test\Filter\GoogleClosure\CompilerApiFilterTest::testRoundTrip
-.
+F
 Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testCompile
 S
 Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testCompileEcma5
-S
-Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testFlagFile
 S
 Assetic\Test\Filter\GssFilterTest::testCompile
 S
@@ -493,8 +485,6 @@ S
 Assetic\Test\Filter\JSMinFilterTest::testRelativeSourceUrlImportImports
 .
 Assetic\Test\Filter\JSMinPlusFilterTest::testRelativeSourceUrlImportImports
-.
-Assetic\Test\Filter\JSqueezeFilterTest::testRelativeSourceUrlImportImports
 .
 Assetic\Test\Filter\JpegoptimFilterTest::testFilter
 S
@@ -648,8 +638,6 @@ Assetic\Test\Filter\ScssphpFilterTest::testFilterLoad
 .
 Assetic\Test\Filter\ScssphpFilterTest::testImport
 .
-Assetic\Test\Filter\ScssphpFilterTest::testRegisterFunction
-.
 Assetic\Test\Filter\ScssphpFilterTest::testSetImportPath
 .
 Assetic\Test\Filter\SprocketsFilterTest::testFilterLoad
@@ -657,8 +645,6 @@ S
 Assetic\Test\Filter\StylusFilterTest::testFilterLoad
 S
 Assetic\Test\Filter\StylusFilterTest::testFilterLoadWithCompression
-S
-Assetic\Test\Filter\StylusFilterTest::testFilterLoadWithUseNib
 S
 Assetic\Test\Filter\TypeScriptFilterTest::testFilterLoad
 S
@@ -694,17 +680,7 @@ Assetic\Test\Filter\Yui\JsCompressorFilterTest::testInterface
 .
 Assetic\Test\Util\CssUtilsTest::testExtractImports
 .
-Assetic\Test\Util\CssUtilsTest::testFilterCommentless
-.
-Assetic\Test\Util\CssUtilsTest::testFilterUrls
-.
-Assetic\Test\Util\LessUtilsTest::testExtractImports
-.
-Assetic\Test\Util\LessUtilsTest::testFilterCommentless
-.
-Assetic\Test\Util\LessUtilsTest::testFilterCommentlessLess
-.
-Assetic\Test\Util\LessUtilsTest::testFilterUrls
+Assetic\Test\Util\PathUtilsTest::testResolvePath
 .
 Assetic\Test\Util\TraversableStringTest::testArray
 .
@@ -717,6 +693,4 @@ Assetic\Test\Util\VarUtilsTest::testGetCombinations with data set #1
 Assetic\Test\Util\VarUtilsTest::testGetCombinations with data set #2
 .
 Assetic\Test\Util\VarUtilsTest::testGetCombinations with data set #3
-.
-Assetic\Test\Util\VarUtilsTest::testResolve
 .

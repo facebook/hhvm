@@ -214,7 +214,7 @@ void* Func::allocFuncMem(
     numExtraPrologues * sizeof(unsigned char*) +
     numExtraFuncPtrs * sizeof(Func*);
 
-  void* mem = lowMem ? Util::low_malloc(funcSize) : malloc(funcSize);
+  void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
 
   /**
    * The Func object can have optional generatorOrigFunc and nextClonedClosure
@@ -305,7 +305,7 @@ void Func::destroy(Func* func) {
   }
   func->~Func();
   if (lowMem) {
-    Util::low_free(mem);
+    low_free(mem);
   } else {
     free(mem);
   }
@@ -1169,7 +1169,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(m_name->data()[0]) ||
-    ParserBase::IsClosureName(m_name->toCPPString()) || m_isGenerator;
+    ParserBase::IsClosureName(m_name->toCppString()) || m_isGenerator;
 
   Attr attrs = m_attrs;
   if (preClass && preClass->attrs() & AttrInterface) {

@@ -1,0 +1,161 @@
+array(1) {
+  [0]=>
+  object(ReflectionMethod)#2 (4) {
+    ["name"]=>
+    string(8) "fetchAll"
+    ["class"]=>
+    string(1) "A"
+    ["originalClass"]=>
+    string(1) "A"
+    ["info"]=>
+    array(16) {
+      ["name"]=>
+      string(8) "fetchAll"
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(1) "A"
+      ["return_type"]=>
+      bool(false)
+      ["doc"]=>
+      bool(false)
+      ["params"]=>
+      array(0) {
+      }
+      ["static_variables"]=>
+      array(0) {
+      }
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_async"]=>
+      bool(false)
+      ["is_closure"]=>
+      bool(false)
+      ["is_generator"]=>
+      bool(false)
+      ["file"]=>
+      string(%d) "%s/hphp/test/slow/reflection/class_get_methods.php"
+      ["line1"]=>
+      int(3)
+      ["line2"]=>
+      int(4)
+    }
+  }
+}
+array(1) {
+  [0]=>
+  string(8) "fetchAll"
+}
+array(26) {
+  [0]=>
+  string(21) "PDOStatement::execute"
+  [1]=>
+  string(19) "PDOStatement::fetch"
+  [2]=>
+  string(25) "PDOStatement::fetchObject"
+  [3]=>
+  string(25) "PDOStatement::fetchColumn"
+  [4]=>
+  string(22) "PDOStatement::fetchAll"
+  [5]=>
+  string(23) "PDOStatement::bindValue"
+  [6]=>
+  string(23) "PDOStatement::bindParam"
+  [7]=>
+  string(24) "PDOStatement::bindColumn"
+  [8]=>
+  string(22) "PDOStatement::rowCount"
+  [9]=>
+  string(23) "PDOStatement::errorCode"
+  [10]=>
+  string(23) "PDOStatement::errorInfo"
+  [11]=>
+  string(26) "PDOStatement::setAttribute"
+  [12]=>
+  string(26) "PDOStatement::getAttribute"
+  [13]=>
+  string(25) "PDOStatement::columnCount"
+  [14]=>
+  string(27) "PDOStatement::getColumnMeta"
+  [15]=>
+  string(26) "PDOStatement::setFetchMode"
+  [16]=>
+  string(24) "PDOStatement::nextRowset"
+  [17]=>
+  string(25) "PDOStatement::closeCursor"
+  [18]=>
+  string(29) "PDOStatement::debugDumpParams"
+  [19]=>
+  string(21) "PDOStatement::current"
+  [20]=>
+  string(17) "PDOStatement::key"
+  [21]=>
+  string(18) "PDOStatement::next"
+  [22]=>
+  string(20) "PDOStatement::rewind"
+  [23]=>
+  string(19) "PDOStatement::valid"
+  [24]=>
+  string(22) "PDOStatement::__wakeup"
+  [25]=>
+  string(21) "PDOStatement::__sleep"
+}
+array(26) {
+  [0]=>
+  string(7) "execute"
+  [1]=>
+  string(5) "fetch"
+  [2]=>
+  string(11) "fetchObject"
+  [3]=>
+  string(11) "fetchColumn"
+  [4]=>
+  string(8) "fetchAll"
+  [5]=>
+  string(9) "bindValue"
+  [6]=>
+  string(9) "bindParam"
+  [7]=>
+  string(10) "bindColumn"
+  [8]=>
+  string(8) "rowCount"
+  [9]=>
+  string(9) "errorCode"
+  [10]=>
+  string(9) "errorInfo"
+  [11]=>
+  string(12) "setAttribute"
+  [12]=>
+  string(12) "getAttribute"
+  [13]=>
+  string(11) "columnCount"
+  [14]=>
+  string(13) "getColumnMeta"
+  [15]=>
+  string(12) "setFetchMode"
+  [16]=>
+  string(10) "nextRowset"
+  [17]=>
+  string(11) "closeCursor"
+  [18]=>
+  string(15) "debugDumpParams"
+  [19]=>
+  string(7) "current"
+  [20]=>
+  string(3) "key"
+  [21]=>
+  string(4) "next"
+  [22]=>
+  string(6) "rewind"
+  [23]=>
+  string(5) "valid"
+  [24]=>
+  string(8) "__wakeup"
+  [25]=>
+  string(7) "__sleep"
+}

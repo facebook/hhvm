@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/util/text-art.h"
 
-using namespace HPHP::Util::TextArt;
+using namespace HPHP::TextArt;
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ void CmdExtension::list(DebuggerClient &client) {
     Array exts = Extension::GetLoadedExtensions();
     std::vector<std::string> items;
     for (ArrayIter iter(exts); iter; ++iter) {
-      items.push_back(iter.second().toString()->toCPPString());
+      items.push_back(iter.second().toString().toCppString());
     }
     client.addCompletion(items);
   }

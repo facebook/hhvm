@@ -3929,9 +3929,16 @@ VerifyParamType <parameter id>    []  ->  []
   of arguments they will accept. These type constraints are memoized into each
   function's FPI structure.
 
-  VerifyParamTypes checks the specified parameter against the enclosing
+  VerifyParamType checks the specified parameter against the enclosing
   function's corresponding parameter constraints. In case of a mismatch, a
   recoverable error is raised.
+
+VerifyRetTypeC    [C] -> [C]
+VerifyRetTypeV    [V] -> [V]
+
+  Verify return type. This instruction pops $1 off of the stack, checks if $1
+  is compatible with the current function's return type annotation and raises
+  a warning if there is a mismatch, and then it pushes $1 back onto the stack.
 
 Self    []  ->  [A]
 

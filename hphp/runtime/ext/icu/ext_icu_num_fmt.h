@@ -24,36 +24,43 @@
 
 namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
+extern const StaticString s_NumberFormatter;
 
 class NumberFormatter : public IntlResourceData {
 public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(NumberFormatter);
-  CLASSNAME_IS("NumberFormatter");
-  const String& o_getClassNameHook() const override { return classnameof(); }
-
-  NumberFormatter(const String& locale,
-                  int64_t style,
-                  const String& pattern);
-  explicit NumberFormatter(const NumberFormatter *orig);
-
-  void sweep() override {
+  NumberFormatter() {}
+  NumberFormatter(const NumberFormatter&) = delete;
+  NumberFormatter& operator=(const NumberFormatter& src) {
+    setNumberFormatter(&src);
+    return *this;
+  }
+  ~NumberFormatter() override {
     if (m_formatter) {
       unum_close(m_formatter);
       m_formatter = nullptr;
     }
   }
 
-  bool isInvalid() const override {
-    return m_formatter == nullptr;
+  void setNumberFormatter(const String& locale,
+                          int64_t style,
+                          const String& pattern);
+  void setNumberFormatter(const NumberFormatter *orig);
+
+  bool isValid() const override {
+    return m_formatter;
   }
 
-  static NumberFormatter* Get(Object obj);
-  Object wrap();
+  static Object newInstance() {
+    return NewInstance(s_NumberFormatter);
+  }
+  static NumberFormatter* Get(Object obj) {
+    return GetData<NumberFormatter>(obj, s_NumberFormatter);
+  }
 
   UNumberFormat *formatter() const { return m_formatter; }
 
 private:
-  UNumberFormat *m_formatter;
+  UNumberFormat *m_formatter = nullptr;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,33 @@
+---stringable_obj---
+array(1) {
+  ["Hello"]=>
+  string(5) "value"
+}
+---array---
+HipHop Notice: Array to string conversion in %s on line %d
+array(1) {
+  ["Array"]=>
+  string(5) "value"
+}
+---bool true---
+array(1) {
+  [1]=>
+  string(5) "value"
+}
+---bool false---
+array(1) {
+  [""]=>
+  string(5) "value"
+}
+---double---
+array(1) {
+  ["3.141"]=>
+  string(5) "value"
+}
+---null---
+array(1) {
+  [""]=>
+  string(5) "value"
+}
+---unstringable_obj---
+HipHop Fatal error: Object of class UnstringableObj could not be converted to string in %s on line %d

@@ -24,31 +24,35 @@ PHPSDKTestCase::testCurlFailure
 .
 PHPSDKTestCase::testDestroyClearsCookie
 .
+PHPSDKTestCase::testDisallowSignedRequest
+.
 PHPSDKTestCase::testEmptyCodeReturnsFalse
 .
 PHPSDKTestCase::testEmptyMetadataCookie
 .
 PHPSDKTestCase::testEmptyResponseInCodeExchangeIsIgnored
 .
-PHPSDKTestCase::testEndsWith with data set #0 
+PHPSDKTestCase::testEndsWith with data set #0
 .
-PHPSDKTestCase::testEndsWith with data set #1 
+PHPSDKTestCase::testEndsWith with data set #1
 .
-PHPSDKTestCase::testEndsWith with data set #2 
+PHPSDKTestCase::testEndsWith with data set #2
 .
-PHPSDKTestCase::testEndsWith with data set #3 
+PHPSDKTestCase::testEndsWith with data set #3
 .
-PHPSDKTestCase::testEndsWith with data set #4 
+PHPSDKTestCase::testEndsWith with data set #4
 .
-PHPSDKTestCase::testEndsWith with data set #5 
+PHPSDKTestCase::testEndsWith with data set #5
 .
-PHPSDKTestCase::testEndsWith with data set #6 
+PHPSDKTestCase::testEndsWith with data set #6
 .
-PHPSDKTestCase::testEndsWith with data set #7 
+PHPSDKTestCase::testEndsWith with data set #7
 .
 PHPSDKTestCase::testErrorCodeFromRestAPIThrowsException
 .
 PHPSDKTestCase::testExceptionConstructorWithErrorCode
+.
+PHPSDKTestCase::testExceptionConstructorWithInvalidErrorCode
 .
 PHPSDKTestCase::testExceptionToString
 .
@@ -118,15 +122,15 @@ PHPSDKTestCase::testInvalidCodeInSignedRequestWillClearData
 .
 PHPSDKTestCase::testInvalidCodeWillClearData
 .
-PHPSDKTestCase::testIsAllowedDomain with data set #0 
+PHPSDKTestCase::testIsAllowedDomain with data set #0
 .
-PHPSDKTestCase::testIsAllowedDomain with data set #1 
+PHPSDKTestCase::testIsAllowedDomain with data set #1
 .
-PHPSDKTestCase::testIsAllowedDomain with data set #2 
+PHPSDKTestCase::testIsAllowedDomain with data set #2
 .
-PHPSDKTestCase::testIsAllowedDomain with data set #3 
+PHPSDKTestCase::testIsAllowedDomain with data set #3
 .
-PHPSDKTestCase::testIsAllowedDomain with data set #4 
+PHPSDKTestCase::testIsAllowedDomain with data set #4
 .
 PHPSDKTestCase::testJsonEncodeOfNonStringParams
 .
@@ -167,6 +171,10 @@ PHPSDKTestCase::testNonUserAccessToken
 PHPSDKTestCase::testNullRedirectURIAllowsEmptyStringForCookie
 .
 PHPSDKTestCase::testNullRedirectURIUsesCurrentURL
+.
+PHPSDKTestCase::testPersistentCSRFState
+.
+PHPSDKTestCase::testPersistentCSRFStateWithSharedSession
 .
 PHPSDKTestCase::testQuotedMetadataCookie
 .

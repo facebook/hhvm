@@ -187,17 +187,18 @@ private:
                                 bool& isResolved);
 
   template<class Loc1, class Loc2, class JmpFn>
-  void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, JmpFn doJcc);
+  void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, JmpFn doJcc,
+                    OptType prevType = folly::none );
 
   template<class DataLoc, class JmpFn>
   void emitSpecializedTypeTest(Type type, DataLoc data, JmpFn doJcc);
 
   template<class Loc>
-  void emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc, Block* taken);
+  void emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc, Block* taken,
+                     OptType prevType = folly::none);
   template<class Loc>
   void emitTypeGuard(Type type, Loc typeLoc, Loc dataLoc);
 
-  void cgStRefWork(IRInstruction* inst, Width);
   void cgIncRefWork(Type type, SSATmp* src, PhysLoc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
@@ -209,15 +210,6 @@ private:
   void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
 
   template<class Oper, class RegType>
-  void cgBinaryOp(IRInstruction*,
-                  void (Asm::*intImm)(Immed, RegType),
-                  void (Asm::*intRR)(RegType, RegType),
-                  void (Asm::*mov)(RegType, RegType),
-                  void (Asm::*fpRR)(RegXMM, RegXMM),
-                  Oper,
-                  RegType (*conv)(PhysReg),
-                  Commutativity);
-  template<class Oper, class RegType>
   void cgBinaryIntOp(IRInstruction*,
                      void (Asm::*intImm)(Immed, RegType),
                      void (Asm::*intRR)(RegType, RegType),
@@ -225,6 +217,8 @@ private:
                      Oper,
                      RegType (*conv)(PhysReg),
                      Commutativity);
+  void cgBinaryDblOp(IRInstruction*,
+                     void (Asm::*fpRR)(RegXMM, RegXMM));
 
   template<class Oper>
   void cgShiftCommon(IRInstruction* inst,
@@ -232,8 +226,7 @@ private:
                      void (Asm::*instrR)(Reg64),
                      Oper oper);
 
-  void cgNegateWork(PhysLoc dst, SSATmp* src, PhysLoc src_loc);
-  void cgNotWork(SSATmp* dst, SSATmp* src);
+  void cgVerifyClsWork(IRInstruction* inst);
 
   void emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                  bool    staticCallee);
@@ -260,7 +253,8 @@ private:
 
   template<class Loc>
   void emitSideExitGuard(Type type, Loc typeLoc,
-                         Loc dataLoc, Offset taken);
+                         Loc dataLoc, Offset taken,
+                         OptType prevType = folly::none);
   void emitReqBindJcc(ConditionCode cc, const ReqBindJccData*);
 
   void emitCompare(IRInstruction* inst);
@@ -269,10 +263,6 @@ private:
   bool emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
                         SSATmp* src2, PhysLoc loc2,
                         void(Asm::*emitFunc)(Reg64));
-  bool emitInc(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-               SSATmp* src2, PhysLoc loc2);
-  bool emitDec(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-               SSATmp* src2, PhysLoc loc2);
 
 private:
   PhysReg selectScratchReg(IRInstruction* inst);

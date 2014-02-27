@@ -186,12 +186,17 @@ function get_options($argv) {
  */
 function map_convenience_filename($file) {
   $mappage = array(
-    'quick'    => 'hphp/test/quick',
-    'slow'     => 'hphp/test/slow',
-    'debugger' => 'hphp/test/server/debugger/tests',
-    'zend'     => 'hphp/test/zend/good',
-    'zend_bad' => 'hphp/test/zend/bad',
-    'facebook' => 'hphp/facebook/test',
+    'quick'      => 'hphp/test/quick',
+    'slow'       => 'hphp/test/slow',
+    'debugger'   => 'hphp/test/server/debugger/tests',
+    'zend'       => 'hphp/test/zend/good',
+    'facebook'   => 'hphp/facebook/test',
+
+    // Subsets of zend tests.
+    'zend_ext'   => 'hphp/test/zend/good/ext',
+    'zend_Zend'  => 'hphp/test/zend/good/Zend',
+    'zend_tests' => 'hphp/test/zend/good/tests',
+    'zend_bad'   => 'hphp/test/zend/bad',
   );
 
   if (!isset($mappage[$file])) {
@@ -361,6 +366,17 @@ function hphp_cmd($options, $test) {
     find_file($test, 'hphp_config.hdf'),
     read_file("$test.hphp_opts"),
     "-thhbc -l0 -k1 -o $test.repo $test",
+  ));
+}
+
+function hhbbc_cmd($options, $test) {
+  return implode(" ", array(
+    hhvm_path(),
+    '--hhbbc',
+    '--no-logging',
+    '--parallel-num-threads=1',
+    read_file("$test.hhbbc_opts"),
+    "-o $test.repo/hhvm.hhbbc $test.repo/hhvm.hhbc",
   ));
 }
 
@@ -543,40 +559,7 @@ function dump_hhas_to_temp($hhvm_cmd, $test) {
   return $tmp_file;
 }
 
-function run_test($options, $test) {
-  if (skip_test($options, $test)) {
-    return 'skip';
-  }
-  $test_ext = pathinfo($test, PATHINFO_EXTENSION);
-  list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
-
-  $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
-  $output = '';
-
-  if (isset($options['repo'])) {
-    if ($test_ext === 'hhas' ||
-        strpos($hhvm, '-m debug') !== false ||
-        file_exists($test.'.norepo')) {
-      return 'skip-norepo';
-    } else {
-      $repodb = "$test.repo/hhvm.hhbc";
-      if (file_exists($repodb)) unlink($repodb);
-      $hphp = hphp_cmd($options, $test);
-      $output .= shell_exec("$hphp 2>&1");
-      $hhvm .= " -vRepo.Authoritative=true ".
-               "-vRepo.Central.Path=$repodb";
-    }
-  } else {
-    if (file_exists($test.'.onlyrepo')) {
-      return 'skip-onlyrepo';
-    }
-  }
-
-  if (isset($options['hhas-round-trip'])) {
-    $hhas_temp = dump_hhas_to_temp($hhvm, $test);
-    list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
-  }
-
+function run_one_config($options, $test, $hhvm, $hhvm_env) {
   $descriptorspec = array(
      0 => array("pipe", "r"),
      1 => array("pipe", "w"),
@@ -711,6 +694,51 @@ function run_test($options, $test) {
   }
 }
 
+function run_test($options, $test) {
+  if (skip_test($options, $test)) return 'skip';
+
+  $test_ext = pathinfo($test, PATHINFO_EXTENSION);
+  list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
+
+  $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
+  $output = '';
+
+  if (isset($options['repo'])) {
+    if ($test_ext === 'hhas' ||
+        strpos($hhvm, '-m debug') !== false ||
+        file_exists($test.'.norepo')) {
+      return 'skip-norepo';
+    }
+
+    $repodb1 = "$test.repo/hhvm.hhbc";
+    $repodb2 = "$test.repo/hhvm.hhbbc";
+    if (file_exists($repodb1)) unlink($repodb1);
+    if (file_exists($repodb2)) unlink($repodb2);
+    $hphp = hphp_cmd($options, $test);
+    $hhbbc = hhbbc_cmd($options, $test);
+    $output .= shell_exec("$hphp 2>&1");
+    $output .= shell_exec("$hhbbc 2>&1");
+    $hhvm .= ' -vRepo.Authoritative=true -vRepo.Commit=0 ';
+    $hhvm1 = $hhvm."-vRepo.Central.Path=$repodb1";
+    $hhvm2 = $hhvm."-vRepo.Central.Path=$repodb2";
+
+    if (!($ret = run_one_config($options, $test, $hhvm1, $hhvm_env))) {
+      return $ret;
+    }
+    return run_one_config($options, $test, $hhvm2, $hhvm_env);
+  }
+
+  if (file_exists($test.'.onlyrepo')) {
+    return 'skip-onlyrepo';
+  }
+  if (isset($options['hhas-round-trip'])) {
+    $hhas_temp = dump_hhas_to_temp($hhvm, $test);
+    list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
+  }
+
+  return run_one_config($options, $test, $hhvm, $hhvm_env);
+}
+
 function num_cpus() {
   switch(PHP_OS) {
     case 'Linux':
@@ -738,13 +766,26 @@ function print_commands($tests, $options) {
 
   foreach ($tests as $test) {
     list($command, $_) = hhvm_cmd($options, $test);
-    if (isset($options['repo'])) {
-      $command .= " -vRepo.Authoritative=true ";
-      $command = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc",
-                             $command);
-      $command = hphp_cmd($options, $test)."\n".$command."\n";
+    if (!isset($options['repo'])) {
+      print "$command\n";
+      continue;
     }
-    print "$command\n";
+
+    // How to run without hhbbc:
+    $command .= " -vRepo.Authoritative=true ";
+    $hphpc_hhvm = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc",
+                                $command);
+    $hphpc_cmds = hphp_cmd($options, $test)."\n";
+    $hphpc_cmds .= $hphpc_hhvm."\n";
+    print "$hphpc_cmds\n\n";
+
+    // How to run it with hhbbc:
+    $hhbbc_hhvm = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbbc",
+                              $command);
+    $hhbbc_cmds = hphp_cmd($options, $test)."\n";
+    $hhbbc_cmds .= hhbbc_cmd($options, $test)."\n";
+    $hhbbc_cmds .= $hhbbc_hhvm."\n";
+    print "$hhbbc_cmds\n";
   }
 }
 

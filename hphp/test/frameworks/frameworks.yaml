@@ -2,7 +2,7 @@
 #
 # name
 # url: a github url
-# branch: a github branch
+# branch: a github branch or tag. You can use a tag for stable release testing, for example.
 # commit: a commit hash
 # install_root: an install root (usually just the name of the framework)
 # test_root: the root where the tests are located.
@@ -25,55 +25,66 @@
 # constructors and overriding any methods you need to get your particular
 # framework to run.
 ---
+# Unless otherwise specfied, "branch" will be the latest stable release
+# of a framework
   assetic:
     url: https://github.com/kriswallsmith/assetic.git
-    branch: master
-    commit: d013aae51baf893fe8d38b41f2d24db03e1cfbf7
+    branch: v1.1.2
+    commit: 735cffd3982c6e8cdebe292d5db39d077f65890f
     install_root: assetic
     test_root: assetic
   codeigniter:
     url: https://github.com/EllisLab/CodeIgniter.git
+    # Stable is 2.1.4, but need develop since we have pull requests
+    # e.g., https://github.com/EllisLab/CodeIgniter/pull/2815
     branch: develop
-    commit: 27e91a07ed66308ba02833b104ca8ca6a05e7be8
+    commit: ac8ac6a90812d3d2c880efe00c2293aef6fd8030
     install_root: codeigniter
     test_root: codeigniter/tests
   composer:
     url: https://github.com/composer/composer.git
+    # master is the only available branch
     branch: master
-    commit: 11facc3f449310e862feb95a140fe0e84aaee7b4
+    commit: 5d4900e79d5ea08118782345fb97e23e6ab1e4f0
     install_root: composer
     test_root: composer
   doctrine2:
     url: https://github.com/doctrine/doctrine2.git
+    # Stable is 2.4.2, but need master since we have pull requests.
+    # e.g., https://github.com/doctrine/doctrine2/pull/928
     branch: master
-    commit: 626efdafd48a01cd9f54b6b94b158a5dfb4f8261
+    commit: 0797feeb0f6aa1fdbdd88088df70539cb15b54cb
     install_root: doctrine2
     test_root: doctrine2
   drupal:
     url: https://github.com/drupal/drupal.git
+    # Stable is 7.26, but the test framework is lacking in 7.x
+    # 8.x has the real testing framework for our runner.
     branch: 8.x
-    commit: fa17da8649d492c302cd45499cbbd30fe462d650
+    commit: 8b40554c5aa45ecf6dd11418ee8d48b379ff2a34
     install_root: drupal
     test_root: drupal/core
     clowns:
       - drupal/core/modules/views/tests/Drupal/views/Tests/ViewsDataHelperTest.php
   facebookphpsdk:
     url: https://github.com/facebook/facebook-php-sdk.git
-    branch: master
-    commit: 55f179f3741bfb3732d92b7c041b7e56966173a7
+    branch: v3.2.3
+    commit: 6714042fa2f5979d4c64c7d11fb4bcab16bdf6cb
     install_root: facebook-php-sdk
     test_root: facebook-php-sdk
     test_file_regex: /.*(tests\.php)$/
   idiorm:
     url: https://github.com/j4mie/idiorm.git
-    branch: master
+    branch: v1.4.1
     commit: 11e964157a6a2c6128a0546673ad5e99ac1a62cd
     install_root: idiorm
     test_root: idiorm
   joomla:
     url: https://github.com/joomla/joomla-framework.git
+    # Stable is 2.4.2, but need master since we have pull requests.
+    # e.g., https://github.com/joomla/joomla-framework/pull/314
     branch: master
-    commit: fb57d5e2a83979c90c1a7a186ac2804404a61385
+    commit: f8a2343d3147f595d43e735b89b11c277520f141
     install_root: joomla-framework
     test_root: joomla-framework
     # These are subtests which need their own composer set and aren't run
@@ -92,33 +103,36 @@
       - joomla-framework/src/Joomla/Google/Tests/JGoogleTest.php
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
-    branch: master
-    commit: 925cb82ee989a3af6adf09e3285d0c4a67eaa306
+    branch: "3.2.2"
+    commit: 07d6712836c4520963e78b9fda14b14d13ff000c
     install_root: joomla-cms
     test_root: joomla-cms
   klein:
     url: https://github.com/chriso/klein.php.git
-    branch: master
-    commit: 376fd62813eb2008f3644e206d03002a3250122a
+    branch: v2.0.2
+    commit: 6e1f228ce82333b437402dafad049713eb3eeac6
     install_root: klein
     test_root: klein
   laravel:
-    url: https://github.com/fredemmott/framework.git
-    branch: update-mockery-0.9
-    commit: 25827f6bbf63c96ae750d7d77574709056d62455
+    url: https://github.com/laravel/framework.git
+    # Use the 4.1 branch instead of the 4.1.x tag because of pull request
+    # https://github.com/laravel/framework/pull/3563
+    branch: "4.1"
+    commit: 1faf4c8508378b0b102d148c53c322a8048b16dd
     install_root: laravel
     test_root: laravel
   magento2:
     # Until PHPUnit 3.8 pull request is accepted
-    # https://github.com/magento/magento2/pull/489
     url: https://github.com/JoelMarcey/magento2.git
+    # Master is the only branch
     branch: master
     commit: 389668bca115e0fed4353664bd8c93d46a69da9e
     install_root: magento2
     test_root: magento2/dev/tests/unit
   mediawiki:
-    url: https://github.com/fredemmott/mediawiki-core.git
     # Bad test data in wikimedia/mediawiki-core at the moment
+    url: https://github.com/fredemmott/mediawiki-core.git
+    # When we move back to mediawiki-core, stable branch is wmf/1.22wmf22
     branch: fix-old-dates
     commit: 10a7426639664a9222e430d6775e68b299e657f4
     install_root: mediawiki-core
@@ -127,26 +141,27 @@
     config_file: mediawiki-core/tests/phpunit/suite.xml
   mockery:
     url: https://github.com/padraic/mockery.git
-    branch: master
-    commit: cce505fe699d12bea3735eee2638d9955a908052
+    branch: "0.9.0"
+    commit: 0fd49fd3f6c984409802004b1dd7b55d0f35ce4a
     install_root: mockery
     test_root: mockery
   monolog:
     url: https://github.com/Seldaek/monolog.git
-    branch: master
-    commit: 01a01a4841ea749426834d127c897f4dc9d62611
+    branch: "1.7.0"
+    commit: 6225b22de9dcf36546be3a0b2fa8e3d986153f57
     install_root: monolog
     test_root: monolog
   paris:
     url: https://github.com/j4mie/paris.git
-    branch: master
+    branch: v1.4.2
     commit: dd1a87544127874dce367f0252dcc81246dfc83b
     install_root: paris
     test_root: paris
   pear:
     url: https://github.com/pear/pear-core.git
+    # master is the best branch for pear
     branch: master
-    commit: e379594cef09079be131d2fbbb19b1c2256872c2
+    commit: 15dd8a6cceb520226a6546dd09b740cdc3ea4d4c
     install_root: pear-core
     test_root: pear-core
     test_file_regex: /.*(\.phpt)$/
@@ -220,8 +235,10 @@
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt
   phpbb3:
     url: https://github.com/phpbb/phpbb.git
-    branch: master
-    commit: 3e84fb76a3639dce2becb7ae620423a5cfdccecb
+    # Stable is release-3.0.12, but we have pull requests in develop
+    # https://github.com/phpbb/phpbb/pull/1908
+    branch: develop
+    commit: eaf9a41ed8bd016880b11f480f92f1b0cfb32f84
     install_root: phpbb3
     test_root: phpbb3
     # This may work if we increase the timeout. Blacklist for now
@@ -229,47 +246,50 @@
       - phpbb3/tests/lint_test.php
   phpmyadmin:
     url: https://github.com/phpmyadmin/phpmyadmin.git
-    branch: master
-    commit: 993023de918c34673c96ef7d7f810baedd24d3d4
+    branch: RELEASE_4_1_7
+    commit: 775d4f1e6fe8da3dfb5e8b4e6063d2c0d345e52f
     install_root: phpmyadmin
     test_root: phpmyadmin
     config_file: phpmyadmin/phpunit.xml.nocoverage
   phpunit:
     url: https://github.com/sebastianbergmann/phpunit.git
-    branch: master
-    commit: 92e8faf88773fa173b0ab2425ba4ade434c58c5d
+    # 4.0 (formerly 3.8) becomes the latest stable branch on March 17, 2014. Use it.
+    branch: "4.0"
+    commit: 875303ab790427a4c0316cbb4457e52d608747f9
     install_root: phpunit
     test_root: phpunit
-    blacklist:
-      - phpunit/Tests/Util/ConfigurationTest.php
   ratchet:
     url: https://github.com/cboden/Ratchet.git
+    # "stable" might be 0.3, but master seems reasonable to test against
     branch: master
-    commit: c2f82efb8536a3d6a94e19a371f928f76ed0f31c
+    commit: f2c67b346084e70c66922cde6af909b74c2a1ca8
     install_root: ratchet
     test_root: ratchet
   reactphp:
     url: https://github.com/reactphp/react.git
-    branch: "0.3"
-    commit: 0dac387e29f10db50dc23acc1da746f53862a662
+    branch: v0.3.3
+    commit: 210c11a6041cfa2ce1701a4870b69475d9081265
     install_root: reactphp
     test_root: reactphp
   silverstripe:
     url: https://github.com/silverstripe/silverstripe-installer.git
-    branch: "3.1"
-    commit: 16c9312f2995c9dab0d6a17b303b77e09b1ae43d
+    # Needed to go beyond the most likely stable 3.1.2 in order
+    # to pull request code added.
+    # https://github.com/silverstripe/silverstripe-framework/pull/2819
+    branch: master
+    commit: 3b3cda59d2d8a1618ed66c5d9fd1d76395040ddd
     install_root: silverstripe
     test_root: silverstripe
   slim:
     url: https://github.com/codeguy/Slim
-    branch: release-2.4.1
-    commit: fa8495e7dd5399d7de2e32170ac1aea2547713a9
+    branch: "2.4.2"
+    commit: 3a2ac723f17b5d81607287ff28575d38b9fbc70e
     install_root: slim
     test_root: slim
   symfony:
     url: https://github.com/symfony/symfony.git
-    branch: master
-    commit: 147c82b39d5c55d49e1b96ffe8d7041fc544f259
+    branch: v2.4.2
+    commit: b70633f92ff71ef490af4c17e7ca3f3bf3d0f304
     install_root: symfony
     test_root: symfony
     blacklist:
@@ -279,14 +299,16 @@
       - symfony/src/Symfony/Component/Process/Tests/SimpleProcessTest.php
   twig:
     url: https://github.com/fabpot/Twig.git
-    branch: master
-    commit: ae89c8853582f074c1e8f26ac3b67b2c4fff2609
+    branch: v1.15.1
+    commit: 1fb5784662f438d7d96a541e305e28b812e2eeed
     install_root: twig
     test_root: twig
   yii:
     url: https://github.com/yiisoft/yii.git
     branch: master
-    commit: 5f6de831ac4396d59dff34636d040cc5289b15db
+    # Stable is 1.1.14, but pull requests require master
+    # e.g., https://github.com/yiisoft/yii/pull/3211
+    commit: ff72f51b9c46a3580df39d634c60eb8fc4687457
     install_root: yii
     test_root: yii/tests
     clowns:
@@ -294,6 +316,8 @@
       - yii/tests/framework/caching/CMemCacheTest.php
   zf2:
     url: https://github.com/zendframework/zf2.git
+    # Stable is release-2.2.5, but pull requests require master
+    # e.g., https://github.com/zendframework/zf2/pull/5781
     branch: master
     commit: 2b718e20cfc22cd388ef3aeff0bc66302379ae02
     install_root: zf2

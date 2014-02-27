@@ -110,6 +110,14 @@ struct TypedValue {
 };
 #endif
 
+// Check that TypedValue's size is a power of 2 (16bytes currently)
+static_assert((sizeof(TypedValue) & (sizeof(TypedValue)-1)) == 0,
+              "TypedValue's size is expected to be a power of 2");
+const size_t kTypedValueAlignMask = sizeof(TypedValue) - 1;
+inline size_t alignTypedValue(size_t sz) {
+  return (sz + kTypedValueAlignMask) & ~kTypedValueAlignMask;
+}
+
 /*
  * This TypedValue subclass exposes a 32-bit "aux" field somewhere inside it.
  * For now, access the m_aux field declared in TypedValue, but once we

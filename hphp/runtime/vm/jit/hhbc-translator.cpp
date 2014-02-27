@@ -129,6 +129,12 @@ SSATmp* HhbcTranslator::push(SSATmp* tmp) {
   return tmp;
 }
 
+SSATmp* HhbcTranslator::pushIncRef(SSATmp* tmp, TypeConstraint tc) {
+  m_irb->constrainValue(tmp, tc);
+  gen(IncRef, tmp);
+  return push(tmp);
+}
+
 void HhbcTranslator::refineType(SSATmp* tmp, Type type) {
   // If type is more refined than tmp's type, reset tmp's type to type
   IRInstruction* inst = tmp->inst();
@@ -315,7 +321,7 @@ size_t HhbcTranslator::spOffset() const {
  * instruction which calls native or may raise an error is considered a
  * reference to the FP and prevent it from being elided.  This is done by
  * inserting an InlineFPAnchor instruction when they are encountered.  These
- * instructions are inserted initially by trace-builder and later removed and
+ * instructions are inserted initially by IRBuilder and later removed and
  * re-inserted during the reoptimize pass to ensure that they are not associated
  * with instructions that have been removed in DCE or modified in the
  * simplifier.
@@ -350,6 +356,14 @@ void HhbcTranslator::beginInlining(unsigned numParams,
   // they're all given markers in the callee.
   m_bcStateStack.emplace_back(target->base(), target);
   updateMarker();
+
+  always_assert_log(
+    findSpillFrame(calleeSP),
+    [&] {
+      return folly::format("Couldn't find SpillFrame for inlined call on sp {}."
+                           " Was the FPush instruction interpreted?\n{}",
+                           *calleeSP->inst(), m_irb->unit().toString()).str();
+    });
 
   auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP, m_irb->fp());
   gen(DefInlineSP, StackOffset(target->numLocals()), m_irb->sp(), m_irb->fp());
@@ -434,11 +448,26 @@ void HhbcTranslator::profileFailedInlShape(const std::string& str) {
   );
 }
 
-void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
-  if (isInlining()) assert(!lastBcOff);
+void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff,
+                              bool maybeStartBlock) {
+  always_assert_log(
+    IMPLIES(isInlining(), !lastBcOff),
+    [&] {
+      return folly::format("Tried to end trace while inlining:\n{}",
+                           unit()).str();
+    });
 
   m_bcStateStack.back().bcOff = newOff;
   updateMarker();
+  // TODO(t3729627): Instead of passing maybeStartBlock, see if it's
+  // possible to lift this and the DefSP conditional into their own
+  // API function to be called after setBcOff where we would have
+  // passed in true.
+  if (maybeStartBlock) m_irb->startBlock();
+
+  if (m_irb->sp() == nullptr) {
+    gen(DefSP, StackOffset(spOffset()), m_irb->fp());
+  }
   m_lastBcOff = lastBcOff;
 }
 
@@ -557,9 +586,9 @@ void HhbcTranslator::emitNewPackedArray(int numArgs) {
   // Before the spillStack() we touch all of the incoming stack
   // arguments so that they are available to later optimizations via
   // getStackValue().
-  for (int i = 0; i < numArgs; i++) topC(i);
+  for (int i = 0; i < numArgs; i++) topC(i, DataTypeGeneric);
   SSATmp* sp = spillStack();
-  for (int i = 0; i < numArgs; i++) popC();
+  for (int i = 0; i < numArgs; i++) popC(DataTypeGeneric);
   push(gen(NewPackedArray, cns(numArgs), sp));
 }
 
@@ -570,7 +599,7 @@ void HhbcTranslator::emitNewStructArray(uint32_t numArgs, StringData** keys) {
   // a problem then we should refactor the NewPackedArray opcode to
   // take its values directly as SSA operands.
   SSATmp* sp = spillStack();
-  for (int i = 0; i < numArgs; i++) popC();
+  for (int i = 0; i < numArgs; i++) popC(DataTypeGeneric);
   NewStructData extra;
   extra.numKeys = numArgs;
   extra.keys = new (m_unit.arena()) StringData*[numArgs];
@@ -829,7 +858,10 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
 
 void HhbcTranslator::emitCGetL(int32_t id) {
   auto exit = makeExit();
-  pushIncRef(ldLocInnerWarn(id, exit, DataTypeCountnessInit));
+  // Mimic hhbc guard relaxation for now.
+  auto cat = curSrcKey().op() == OpFPassL ? DataTypeSpecific
+                                          : DataTypeCountnessInit;
+  pushIncRef(ldLocInnerWarn(id, exit, cat));
 }
 
 void HhbcTranslator::emitPushL(uint32_t id) {
@@ -871,7 +903,7 @@ void HhbcTranslator::emitBindL(int32_t id) {
   // pseudo-main: the destructor could decref the value again after
   // we've stored it into the local.
   pushIncRef(newValue);
-  auto const oldValue = ldLoc(id, DataTypeGeneric);
+  auto const oldValue = ldLoc(id, DataTypeSpecific);
   gen(StLoc, LocalId(id), m_irb->fp(), newValue);
   gen(DecRef, oldValue);
 }
@@ -921,36 +953,114 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
 // only handles integer or double inc/dec
 SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
   assert(src->isA(Type::Int) || src->isA(Type::Dbl));
+
+  auto op =
+    src->isA(Type::Int) ? (inc ? AddInt : SubInt) : (inc ? AddDbl : SubDbl);
+
   SSATmp* one = src->isA(Type::Int) ? cns(1) : cns(1.0);
-  SSATmp* res = inc ? gen(Add, src, one) : gen(Sub, src, one);
+  SSATmp* res = gen(op, src, one);
   // no incref necessary on push since result is an int
   push(pre ? res : src);
   return res;
 }
 
-static bool areBinaryArithTypesSupported(Opcode opc, Type t1, Type t2) {
-  switch (opc) {
-  case Add:
-  case Sub:
-  case Mul: return t1.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl) &&
-                     t2.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
+#define BINARY_ARITH       \
+  AOP(Add, AddInt, AddDbl) \
+  AOP(Sub, SubInt, SubDbl) \
+  AOP(Mul, MulInt, MulDbl) \
 
-  case BitAnd:
-  case BitOr:
-  case BitXor:
-    return t1.subtypeOfAny(Type::Int, Type::Bool) &&
-                     t2.subtypeOfAny(Type::Int, Type::Bool);
-  default:
-    not_reached();
+#define BINARY_BITOP  \
+  BOP(BitAnd)         \
+  BOP(BitOr)          \
+  BOP(BitXor)         \
+
+static bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
+  auto checkArith = [](Type ty) {
+    return ty.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
+  };
+  auto checkBitOp = [](Type ty) {
+    return ty.subtypeOfAny(Type::Int, Type::Bool);
+  };
+
+  switch (op) {
+  #define AOP(OP, OPI, OPD) \
+    case Op::OP: return checkArith(t1) && checkArith(t2);
+  BINARY_ARITH
+  #undef AOP
+  #define BOP(OP) \
+    case Op::OP: return checkBitOp(t1) && checkBitOp(t2);
+  BINARY_BITOP
+  #undef BOP
+  default: not_reached();
   }
 }
 
-void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
+Opcode intArithOp(Op op) {
+  switch (op) {
+    #define AOP(OP, OPI, OPD) case Op::OP: return OPI;
+    BINARY_ARITH
+    #undef AOP
+    default: not_reached();
+  }
+}
+
+Opcode dblArithOp(Op op) {
+  switch (op) {
+    #define AOP(OP, OPI, OPD) case Op::OP: return OPD;
+    BINARY_ARITH
+    #undef AOP
+    default: not_reached();
+  }
+}
+
+Opcode bitOp(Op op) {
+  switch (op) {
+    #define BOP(OP) case Op::OP: return OP;
+    BINARY_BITOP
+    #undef BOP
+    default: not_reached();
+  }
+}
+
+bool isBitOp(Op op) {
+  switch (op) {
+    #define BOP(OP) case Op::OP: return true;
+    BINARY_BITOP
+    #undef BOP
+    default: return false;
+  }
+}
+
+SSATmp* HhbcTranslator::promoteBool(SSATmp* src) {
+  // booleans in arithmetic and bitwise operations get cast to ints
+  return src->isA(Type::Bool) ? gen(ConvBoolToInt, src) : src;
+}
+
+Opcode HhbcTranslator::promoteBinaryDoubles(Op op,
+                                            SSATmp*& src1,
+                                            SSATmp*& src2) {
+  auto type1 = src1->type();
+  auto type2 = src2->type();
+
+  Opcode opc = intArithOp(op);
+  if (type1 <= Type::Dbl) {
+    opc = dblArithOp(op);
+    if (type2 <= Type::Int) {
+      src2 = gen(ConvIntToDbl, src2);
+    }
+  } else if (type2 <= Type::Dbl) {
+    opc = dblArithOp(op);
+    src1 = gen(ConvIntToDbl, src1);
+  }
+  return opc;
+}
+
+void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
   /*
    * Handle array addition first because we don't want to bother with
    * boxed locals.
    */
-  if (subOpc == Add &&
+  if (subOp == Op::Add &&
       (m_irb->localType(id, DataTypeSpecific) <= Type::Arr) &&
       topC()->isA(Type::Arr)) {
     /*
@@ -967,10 +1077,10 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
     return;
   }
 
-  auto const exitBlock  = makeExit();
-  auto const loc        = ldLocInnerWarn(id, exitBlock, DataTypeSpecific);
+  auto const exitBlock = makeExit();
+  auto loc             = ldLocInnerWarn(id, exitBlock, DataTypeSpecific);
 
-  if (subOpc == ConcatCellCell) {
+  if (subOp == Op::Concat) {
     /*
      * The concat helpers incref their results, which will be consumed by
      * the stloc. We need an extra incref for the push onto the stack.
@@ -985,13 +1095,17 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
     return;
   }
 
-  if (areBinaryArithTypesSupported(subOpc, loc->type(), topC()->type())) {
-    auto const val    = popC();
-    auto const result = gen(
-      subOpc,
-      loc->isA(Type::Bool) ? gen(ConvBoolToInt, loc) : loc,
-      val->isA(Type::Bool) ? gen(ConvBoolToInt, val) : val
-    );
+  if (areBinaryArithTypesSupported(subOp, loc->type(), topC()->type())) {
+    auto val = popC();
+    loc = promoteBool(loc);
+    val = promoteBool(val);
+    Opcode opc;
+    if (isBitOp(subOp)) {
+      opc = bitOp(subOp);
+    } else {
+      opc = promoteBinaryDoubles(subOp, loc, val);
+    }
+    auto const result = gen(opc, loc, val);
     pushStLoc(id, nullptr, result);
     return;
   }
@@ -1054,7 +1168,7 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
     return cachedBox;
   }();
   gen(IncRef, box);
-  auto const oldValue = ldLoc(locId, DataTypeCountness);
+  auto const oldValue = ldLoc(locId, DataTypeGeneric);
   gen(StLoc, LocalId(locId), m_irb->fp(), box);
   gen(DecRef, oldValue);
   // We don't need to decref value---it's a bytecode invariant that
@@ -1097,7 +1211,7 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
     }
   );
   gen(IncRef, box);
-  auto const oldValue = ldLoc(locId, DataTypeCountness);
+  auto const oldValue = ldLoc(locId, DataTypeGeneric);
   gen(StLoc, LocalId(locId), m_irb->fp(), box);
   gen(DecRef, oldValue);
   push(res);
@@ -1121,29 +1235,18 @@ SSATmp* HhbcTranslator::emitMIterInitCommon(int offset, Lambda genFunc) {
   Type type = src->type();
 
   assert(type.isBoxed());
-  gen(LdRef, type.innerType(), exit, src);
+  m_irb->constrainValue(gen(LdRef, type.innerType(), exit, src),
+                        DataTypeSpecific);
   SSATmp* res = genFunc(src);
   SSATmp* out = popV();
   gen(DecRef, out);
   return emitJmpCondHelper(offset, true, res);
 }
 
-namespace {
-void constrainIterLocals(IRBuilder& tb) {}
-
-template<typename... Args>
-void constrainIterLocals(IRBuilder& tb, uint32_t locId, Args... args) {
-  tb.constrainLocal(locId, DataTypeCountness, "Iter*");
-  constrainIterLocals(tb, args...);
-}
-}
-
 void HhbcTranslator::emitIterInit(uint32_t iterId,
                                   int offset,
                                   uint32_t valLocalId,
                                   bool invertCond) {
-  constrainIterLocals(*m_irb, valLocalId);
-
   auto catchBlock = makeCatch();
   emitIterInitCommon(offset, [&] (SSATmp* src) {
       return gen(IterInit,
@@ -1162,8 +1265,6 @@ void HhbcTranslator::emitIterInitK(uint32_t iterId,
                                    uint32_t valLocalId,
                                    uint32_t keyLocalId,
                                    bool invertCond) {
-  constrainIterLocals(*m_irb, valLocalId, keyLocalId);
-
   auto catchBlock = makeCatch();
   emitIterInitCommon(offset, [&] (SSATmp* src) {
       return gen(IterInitK,
@@ -1182,8 +1283,6 @@ void HhbcTranslator::emitIterNext(uint32_t iterId,
                                   int offset,
                                   uint32_t valLocalId,
                                   bool invertCond) {
-  constrainIterLocals(*m_irb, valLocalId);
-
   SSATmp* res = gen(
     IterNext,
     Type::Bool,
@@ -1200,8 +1299,6 @@ void HhbcTranslator::emitIterNextK(uint32_t iterId,
                                    uint32_t valLocalId,
                                    uint32_t keyLocalId,
                                    bool invertCond) {
-  constrainIterLocals(*m_irb, valLocalId, keyLocalId);
-
   SSATmp* res = gen(
     IterNextK,
     Type::Bool,
@@ -1218,8 +1315,6 @@ void HhbcTranslator::emitWIterInit(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
                                    bool invertCond) {
-  constrainIterLocals(*m_irb, valLocalId);
-
   auto catchBlock = makeCatch();
   emitIterInitCommon(
     offset, [&] (SSATmp* src) {
@@ -1239,8 +1334,6 @@ void HhbcTranslator::emitWIterInitK(uint32_t iterId,
                                     uint32_t valLocalId,
                                     uint32_t keyLocalId,
                                     bool invertCond) {
-  constrainIterLocals(*m_irb, valLocalId, keyLocalId);
-
   auto catchBlock = makeCatch();
   emitIterInitCommon(
     offset, [&] (SSATmp* src) {
@@ -1260,8 +1353,6 @@ void HhbcTranslator::emitWIterNext(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
                                    bool invertCond) {
-  constrainIterLocals(*m_irb, valLocalId);
-
   SSATmp* res = gen(
     WIterNext,
     Type::Bool,
@@ -1278,8 +1369,6 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
                                     uint32_t valLocalId,
                                     uint32_t keyLocalId,
                                     bool invertCond) {
-  constrainIterLocals(*m_irb, valLocalId, keyLocalId);
-
   SSATmp* res = gen(
     WIterNextK,
     Type::Bool,
@@ -1295,8 +1384,6 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
 void HhbcTranslator::emitMIterInit(uint32_t iterId,
                                   int offset,
                                   uint32_t valLocalId) {
-  constrainIterLocals(*m_irb, valLocalId);
-
   auto catchBlock = makeCatch();
   emitMIterInitCommon(offset, [&] (SSATmp* src) {
     return gen(
@@ -1315,8 +1402,6 @@ void HhbcTranslator::emitMIterInitK(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId,
                                    uint32_t keyLocalId) {
-  constrainIterLocals(*m_irb, valLocalId, keyLocalId);
-
   auto catchBlock = makeCatch();
   emitMIterInitCommon(offset, [&] (SSATmp* src) {
     return gen(
@@ -1335,8 +1420,6 @@ void HhbcTranslator::emitMIterInitK(uint32_t iterId,
 void HhbcTranslator::emitMIterNext(uint32_t iterId,
                                    int offset,
                                    uint32_t valLocalId) {
-  constrainIterLocals(*m_irb, valLocalId);
-
   SSATmp* res = gen(
     MIterNext,
     Type::Bool,
@@ -1351,8 +1434,6 @@ void HhbcTranslator::emitMIterNextK(uint32_t iterId,
                                     int offset,
                                     uint32_t valLocalId,
                                     uint32_t keyLocalId) {
-  constrainIterLocals(*m_irb, valLocalId, keyLocalId);
-
   SSATmp* res = gen(
     MIterNextK,
     Type::Bool,
@@ -1510,7 +1591,7 @@ void HhbcTranslator::emitContSuspend(int64_t labelId) {
     // this needs optimization
     auto const idx = gen(LdContArRaw, Type::Int,
                          m_irb->fp(), cns(RawMemSlot::ContIndex));
-    auto const newIdx = gen(Add, idx, cns(1));
+    auto const newIdx = gen(AddInt, idx, cns(1));
     gen(StContArRaw, m_irb->fp(), cns(RawMemSlot::ContIndex), newIdx);
 
     auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
@@ -1528,7 +1609,7 @@ void HhbcTranslator::emitContSuspend(int64_t labelId) {
 void HhbcTranslator::emitContSuspendK(int64_t labelId) {
   emitContSuspendImpl(labelId);
 
-  auto const newKey = popC();
+  auto const newKey = popC(DataTypeGeneric);
   auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
   gen(StContArKey, m_irb->fp(), newKey);
   gen(DecRef, oldKey);
@@ -1569,7 +1650,7 @@ void HhbcTranslator::emitContRaise() {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_irb->fp());
   SSATmp* label = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel));
-  label = gen(Sub, label, cns(1));
+  label = gen(SubInt, label, cns(1));
   gen(StRaw, cont, cns(RawMemSlot::ContLabel), label);
 }
 
@@ -1857,7 +1938,7 @@ void HhbcTranslator::emitEmptyL(int32_t id) {
 }
 
 void HhbcTranslator::emitIsTypeC(DataType t) {
-  SSATmp* src = popC();
+  SSATmp* src = popC(DataTypeGeneric);
   push(gen(IsType, Type(t), src));
   gen(DecRef, src);
 }
@@ -1883,11 +1964,11 @@ void HhbcTranslator::emitIsScalarC() {
 void HhbcTranslator::emitPopA() { popA(); }
 
 void HhbcTranslator::emitPopC() {
-  popDecRef(Type::Cell, {DataTypeGeneric, Type::Cell});
+  popDecRef(Type::Cell, DataTypeGeneric);
 }
 
 void HhbcTranslator::emitPopV() {
-  popDecRef(Type::BoxedCell, {DataTypeGeneric, Type::BoxedCell});
+  popDecRef(Type::BoxedCell, DataTypeGeneric);
 }
 
 void HhbcTranslator::emitPopR() {
@@ -1906,6 +1987,18 @@ void HhbcTranslator::emitJmp(int32_t offset,
   if (backward && !noSurprise) {
     emitJmpSurpriseCheck();
   }
+  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+    // TODO(t3730057): Optimize away spillstacks and fallthrough
+    // jumps, either by doing something clever here or adding to
+    // jumpopts.
+    exceptionBarrier();
+    auto target = (breakTracelet
+                   || m_irb->blockIsIncompatible(offset))
+      ? makeExit(offset)
+      : makeBlock(offset);
+    gen(Jmp, target);
+    return;
+  }
   if (!breakTracelet) return;
   gen(Jmp, makeExit(offset));
 }
@@ -1921,14 +2014,37 @@ SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
   return gen(negate ? JmpZero : JmpNZero, target, boolSrc);
 }
 
-void HhbcTranslator::emitJmpZ(Offset taken) {
-  auto const src = popC();
-  emitJmpCondHelper(taken, true, src);
+void HhbcTranslator::emitJmpHelper(int32_t taken,
+                                   int32_t next,
+                                   bool negate,
+                                   bool bothPaths,
+                                   SSATmp* src) {
+  spillStack();
+
+  auto const target  = (!bothPaths
+                        || m_irb->blockIsIncompatible(taken))
+    ? makeExit(taken)
+    : makeBlock(taken);
+  auto const boolSrc = gen(ConvCellToBool, src);
+  gen(DecRef, src);
+  gen(negate ? JmpZero : JmpNZero, target, boolSrc);
+
+  // TODO(t3730079): This block is probably redundant with the
+  // fallthrough logic in translateRegion.  Try removing the guards
+  // against conditional jumps there as well as this.
+  if (bothPaths && m_irb->blockIsIncompatible(next)) {
+    gen(Jmp, makeExit(next));
+  }
 }
 
-void HhbcTranslator::emitJmpNZ(Offset taken) {
+void HhbcTranslator::emitJmpZ(Offset taken, Offset next, bool bothPaths) {
   auto const src = popC();
-  emitJmpCondHelper(taken, false, src);
+  emitJmpHelper(taken, next, true, bothPaths, src);
+}
+
+void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, bool bothPaths) {
+  auto const src = popC();
+  emitJmpHelper(taken, next, false, bothPaths, src);
 }
 
 // Objects compared with strings may involve calling a user-defined
@@ -2170,8 +2286,8 @@ bool HhbcTranslator::emitFPushCufArray(SSATmp* callable, int32_t numParams) {
     // the type.  Do so now.
     auto exit = makeExit();
     object = gen(CheckType, Type::Obj, exit, object);
-    m_irb->constrainValue(object, DataTypeSpecific);
   }
+  m_irb->constrainValue(object, DataTypeSpecific);
 
   popC();
 
@@ -2563,20 +2679,20 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
   SSATmp* objOrCls = obj;
   const Class* baseClass = nullptr;
   if (obj->type().isSpecialized() &&
-      !m_irb->constrainValue(obj, TypeConstraint(DataTypeSpecialized,
-                                                Type::Cell).setWeak())) {
+      !m_irb->constrainValue(obj,
+                             TypeConstraint(DataTypeSpecialized).setWeak())) {
     // If we know the class without having to specialize a guard any
     // further, use it.
     baseClass = obj->type().getClass();
   }
 
   bool magicCall = false;
-  const Func* func = HPHP::JIT::lookupImmutableMethod(baseClass,
-                                                         methodName,
-                                                         magicCall,
-                                                         /* staticLookup: */
-                                                         false,
-                                                         curClass());
+  const Func* func = lookupImmutableMethod(baseClass,
+                                           methodName,
+                                           magicCall,
+                                           /* staticLookup: */
+                                           false,
+                                           curClass());
 
   if (!func) {
     if (baseClass && !(baseClass->attrs() & AttrInterface)) {
@@ -2593,9 +2709,9 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
          * OR
          *  b) any derived class must have a func that matches in staticness
          *     and is at least as accessible (and in particular, you can't
-         *     override a public/protected method with a private method).
-         *     In this case, we emit code to dynamically lookup the method
-         *     given the Object and the method slot, which is the same as func's.
+         *     override a public/protected method with a private method).  In
+         *     this case, we emit code to dynamically lookup the method given
+         *     the Object and the method slot, which is the same as func's.
          */
         if (!(func->attrs() & AttrPrivate)) {
           SSATmp* clsTmp = gen(LdObjClass, obj);
@@ -3079,6 +3195,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(TypeProfileFunc, TypeProfileData(-1), retVal, cns(curFunc));
   }
   SSATmp* sp;
+
   if (freeInline) {
     retVal = emitDecRefLocalsInline(retVal);
     for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
@@ -3499,66 +3616,71 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
   }
 }
 
-void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
-  const Func* func = curFunc();
-  auto const& tc = func->params()[paramId].typeConstraint();
-  auto locVal = ldLoc(paramId, DataTypeSpecific);
-  Type locType = locVal->type().unbox();
-  if (!locType.isKnownDataType()) {
-    // This is supposed to be impossible, but it does happen in a rare case
-    // with the legacy region selector. Until it's figured out, punt in release
-    // builds. t3412704
-    assert_log(false,
-    [&] {
-      return folly::format("Bad type {} for local {}:\n\n{}\n",
-                           locType, paramId, m_irb->unit().toString()).str();
-    });
-    emitInterpOne(0);
+void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
+  bool isReturnType = (id == HPHP::TypeConstraint::ReturnId);
+  if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) {
     return;
   }
+  auto func = curFunc();
+  auto const& tc = isReturnType ? func->returnTypeConstraint()
+                                : func->params()[id].typeConstraint();
+  auto* val = isReturnType ? topR() : ldLoc(id, DataTypeSpecific);
+  assert(val->type().isBoxed() || val->type().notBoxed());
+  if (val->type().isBoxed()) {
+    val = gen(LdRef, val->type().innerType(), makeExit(), val);
+    m_irb->constrainValue(val, DataTypeSpecific);
+  }
+  auto const valType = val->type();
 
-  if (!RuntimeOption::EvalCheckExtendedTypeHints && tc.isExtended()) {
+  if (!valType.isKnownDataType()) {
+    if (!isReturnType) {
+      // This is supposed to be impossible, but it does happen in a rare case
+      // with the legacy region selector. Until it's figured out, punt in
+      // release builds. t3412704
+      assert_log(false,
+      [&] {
+        return folly::format("Bad type {} for local {}:\n\n{}\n",
+                             valType, id, m_irb->unit().toString()).str();
+      });
+    }
+    emitInterpOne(0);
     return;
   }
   if (tc.isTypeVar()) {
     return;
   }
-  if (tc.isNullable() && locType.subtypeOf(Type::InitNull)) {
+  if (tc.isNullable() && valType.subtypeOf(Type::InitNull)) {
     return;
   }
-  if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
-      (locType.isObj() || locVal->type().isBoxed())) {
+  if (!isReturnType && tc.isArray() && !tc.isSoft() && !func->mustBeRef(id) &&
+      valType.isObj()) {
     PUNT(VerifyParamType-collectionToArray);
     return;
   }
   if (tc.isCallable()) {
-    locVal = gen(Unbox, makeExit(), locVal);
-    gen(VerifyParamCallable, makeCatch(), locVal, cns(paramId));
+    if (isReturnType) {
+      gen(VerifyRetCallable, makeCatch(), val);
+    } else {
+      gen(VerifyParamCallable, makeCatch(), val, cns(id));
+    }
     return;
   }
 
   // For non-object guards, we rely on what we know from the tracelet
   // guards and never have to do runtime checks.
   if (!tc.isObjectOrTypeAlias()) {
-    if (locVal->type().isBoxed()) {
-      locVal = gen(LdRef, locVal->type().innerType(), makeExit(), locVal);
-    }
-    if (!tc.checkPrimitive(locType.toDataType())) {
-      gen(VerifyParamFail, makeCatch(), cns(paramId));
-      return;
+    if (!tc.checkPrimitive(valType.toDataType())) {
+      if (isReturnType) {
+        gen(VerifyRetFail, makeCatch(), val);
+      } else {
+        gen(VerifyParamFail, makeCatch(), cns(id));
+      }
     }
     return;
   }
-
-  /*
-   * If the parameter is an object, we check the object in one of
-   * various ways (similar to instance of).  If the parameter is not
-   * an object, it still might pass the VerifyParamType if the
-   * constraint is a typedef.
-   *
-   * For now we just interp that case.
-   */
-  if (!locType.isObj()) {
+  // If val is not an object, it still might pass the type constraint
+  // if the constraint is a typedef. For now we just interp that case.
+  if (!valType.isObj()) {
     emitInterpOne(0);
     return;
   }
@@ -3579,7 +3701,11 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
     } else {
       // The hint was self or parent and there's no corresponding
       // class for the current func. This typehint will always fail.
-      gen(VerifyParamFail, makeCatch(), cns(paramId));
+      if (isReturnType) {
+        gen(VerifyRetFail, makeCatch(), val);
+      } else {
+        gen(VerifyParamFail, makeCatch(), cns(id));
+      }
       return;
     }
   }
@@ -3593,14 +3719,14 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   /*
    * If the local is a specialized object type, we can avoid emitting
    * runtime checks if we know the thing would pass.  If we don't
-   * know, we still have to emit them because locType might be a
+   * know, we still have to emit them because valType might be a
    * subtype of its specialized object type.
    */
-  if (locType.strictSubtypeOf(Type::Obj)) {
-    auto const cls = locType.getClass();
+  if (valType.strictSubtypeOf(Type::Obj)) {
+    auto const cls = valType.getClass();
     if ((knownConstraint && cls->classof(knownConstraint)) ||
-        (cls->name()->isame(clsName))) {
-      m_irb->constrainValue(locVal, DataTypeSpecialized);
+        cls->name()->isame(clsName)) {
+      m_irb->constrainValue(val, DataTypeSpecialized);
       return;
     }
   }
@@ -3609,8 +3735,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   bool haveBit = InstanceBits::lookup(clsName) != 0;
   SSATmp* constraint = knownConstraint ? cns(knownConstraint)
                                        : gen(LdClsCachedSafe, cns(clsName));
-  locVal = gen(Unbox, makeExit(), locVal);
-  SSATmp* objClass = gen(LdObjClass, locVal);
+  SSATmp* objClass = gen(LdObjClass, val);
   if (haveBit || classIsUniqueNormalClass(knownConstraint)) {
     SSATmp* isInstance = haveBit
       ? gen(InstanceOfBitmask, objClass, cns(clsName))
@@ -3620,17 +3745,34 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
       },
       [&] { // taken: the param type does not match
         m_irb->hint(Block::Hint::Unlikely);
-        gen(VerifyParamFail, makeCatch(), cns(paramId));
+        if (isReturnType) {
+          gen(VerifyRetFail, makeCatch(), val);
+        } else {
+          gen(VerifyParamFail, makeCatch(), cns(id));
+        }
       }
     );
   } else {
-    gen(VerifyParamCls,
-        makeCatch(),
-        objClass,
-        constraint,
-        cns(paramId),
-        cns(uintptr_t(&tc)));
+    if (isReturnType) {
+      gen(VerifyRetCls, makeCatch(), objClass, constraint,
+          cns(uintptr_t(&tc)), val);
+    } else {
+      gen(VerifyParamCls, makeCatch(), objClass, constraint,
+          cns(uintptr_t(&tc)), cns(id));
+    }
   }
+}
+
+void HhbcTranslator::emitVerifyRetTypeC() {
+  emitVerifyTypeImpl(HPHP::TypeConstraint::ReturnId);
+}
+
+void HhbcTranslator::emitVerifyRetTypeV() {
+  emitVerifyTypeImpl(HPHP::TypeConstraint::ReturnId);
+}
+
+void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
+  emitVerifyTypeImpl(paramId);
 }
 
 void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
@@ -4103,34 +4245,34 @@ void HhbcTranslator::emitEmptyG() {
   push(ret);
 }
 
-void HhbcTranslator::emitBinaryArith(Opcode opc) {
-  bool isBitOp = (opc == BitAnd || opc == BitOr || opc == BitXor);
-  Type type1 = topC(0)->type();
-  Type type2 = topC(1)->type();
-  if (areBinaryArithTypesSupported(opc, type1, type2)) {
-    SSATmp* tr = popC();
-    SSATmp* tl = popC();
-    tr = (tr->isA(Type::Bool) ? gen(ConvBoolToInt, tr) : tr);
-    tl = (tl->isA(Type::Bool) ? gen(ConvBoolToInt, tl) : tl);
-    push(gen(opc, tl, tr));
-  } else {
-    Type type = Type::Int;
-    if (isBitOp) {
-      if (type1.isString() && type2.isString()) {
-        type = Type::Str;
-      } else if ((type1.needsReg() && (type2.needsReg() || type2.isString()))
-                 || (type2.needsReg() && type1.isString())) {
-        // both types might be strings, but can't tell
-        type = Type::Cell;
-      } else {
-        type = Type::Int;
-      }
-    } else {
-      // either an int or a dbl, but can't tell
-      type = Type::Cell;
-    }
-    emitInterpOne(type, 2);
+void HhbcTranslator::emitBinaryBitOp(Op op) {
+  Type type2 = topC(0)->type();
+  Type type1 = topC(1)->type();
+
+  if (!areBinaryArithTypesSupported(op, type1, type2)) {
+    PUNT(BunaryBitOp-Unsupported);
+    return;
   }
+
+  SSATmp* src2 = promoteBool(popC());
+  SSATmp* src1 = promoteBool(popC());
+  push(gen(bitOp(op), src1, src2));
+}
+
+void HhbcTranslator::emitBinaryArith(Op op) {
+  Type type2 = topC(0)->type();
+  Type type1 = topC(1)->type();
+
+  if (!areBinaryArithTypesSupported(op, type1, type2)) {
+    // either an int or a dbl, but can't tell
+    PUNT(BinaryArith-Unsupported);
+    return;
+  }
+
+  SSATmp* src2 = promoteBool(popC());
+  SSATmp* src1 = promoteBool(popC());
+  Opcode opc = promoteBinaryDoubles(op, src1, src2);
+  push(gen(opc, src1, src2));
 }
 
 void HhbcTranslator::emitNot() {
@@ -4307,7 +4449,10 @@ void HhbcTranslator::emitAbs() {
   auto value = popC();
 
   if (value->isA(Type::Int)) {
-    push(gen(AbsInt, value));
+    // compute integer absolute value ((src>>63) ^ src) - (src>>63)
+    auto t1 = gen(Shr, value, cns(63));
+    auto t2 = gen(BitXor, t1, value);
+    push(gen(SubInt, t2, t1));
     return;
   }
 
@@ -4325,19 +4470,15 @@ void HhbcTranslator::emitAbs() {
   PUNT(Abs);
 }
 
-#define BINOP(Opp)                            \
-  void HhbcTranslator::emit ## Opp() {        \
-    emitBinaryArith(Opp);                     \
-  }
+#define AOP(OP, OPI, OPD) \
+  void HhbcTranslator::emit ## OP() { emitBinaryArith(Op::OP); }
+BINARY_ARITH
+#undef AOP
 
-BINOP(Add)
-BINOP(Sub)
-BINOP(Mul)
-BINOP(BitAnd)
-BINOP(BitOr)
-BINOP(BitXor)
-
-#undef BINOP
+#define BOP(OP) \
+  void HhbcTranslator::emit ## OP() { emitBinaryBitOp(Op::OP); }
+BINARY_BITOP
+#undef BOP
 
 void HhbcTranslator::emitDiv() {
   auto divisorType  = topC(0)->type();
@@ -4913,8 +5054,6 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
   gen(changesPC ? InterpOneCF : InterpOne, outType,
       makeCatch(), idata, sp, m_irb->fp());
   assert(m_irb->stackDeficit() == 0);
-
-  if (changesPC) m_hasExit = true;
 }
 
 std::string HhbcTranslator::showStack() const {
@@ -5210,6 +5349,13 @@ Block* HhbcTranslator::makeCatchNoSpill() {
   return makeCatchImpl([&] { return m_irb->sp(); });
 }
 
+/*
+ * Create a block corresponding to bytecode control flow.
+ */
+Block* HhbcTranslator::makeBlock(Offset targetBcOff) {
+  return m_irb->makeBlock(targetBcOff);
+}
+
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
                                        const std::vector<SSATmp*>& spillVals) {
   std::vector<SSATmp*> ssaArgs{ sp, cns(int64_t(m_irb->stackDeficit())) };
@@ -5338,7 +5484,6 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
   );
   gen(StRef, oldLoc, newVal);
   if (doRefCount) {
-    m_irb->constrainValue(newVal, DataTypeCountness);
     gen(DecRef, innerCell);
   }
 
@@ -5348,7 +5493,11 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
 SSATmp* HhbcTranslator::pushStLoc(uint32_t id, Block* exit, SSATmp* newVal) {
   const bool doRefCount = true;
   SSATmp* ret = stLocImpl(id, exit, newVal, doRefCount);
-  return pushIncRef(ret);
+
+  // Approximately mimic hhbc guard relaxation.
+  auto outputPopped = curSrcKey().advanced().op() == OpPopC &&
+    m_irb->localType(id, DataTypeGeneric).notBoxed();
+  return pushIncRef(ret, outputPopped ? DataTypeGeneric : DataTypeCountness);
 }
 
 SSATmp* HhbcTranslator::stLoc(uint32_t id, Block* exit, SSATmp* newVal) {
@@ -5386,6 +5535,13 @@ void HhbcTranslator::end(Offset nextPc) {
   gen(ReqBindJmp, BCOffset(nextPc));
 }
 
+void HhbcTranslator::endBlock(Offset next) {
+  if (m_irb->blockExists(next)) {
+    emitJmp(next,
+            false /* breakTracelet */,
+            true  /* noSurprise */ );
+  }
+}
 
 void HhbcTranslator::checkStrictlyInteger(
     SSATmp*& key, KeyType& keyType, bool& checkForInt) {

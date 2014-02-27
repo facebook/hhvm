@@ -91,29 +91,6 @@ ObjectData* newPairHelper() {
 
 #undef NEW_COLLECTION_HELPER
 
-static inline void
-tvPairToCString(DataType t, uint64_t v,
-                const char** outStr,
-                size_t* outSz,
-                bool* outMustFree) {
-  if (IS_STRING_TYPE(t)) {
-    StringData *strd = (StringData*)v;
-    *outStr = strd->data();
-    *outSz = strd->size();
-    *outMustFree = false;
-    return;
-  }
-  Cell c;
-  c.m_type = t;
-  c.m_data.num = v;
-  String s = tvAsVariant(&c).toString();
-  *outStr = (const char*)malloc(s.size());
-  TRACE(1, "t-x64: stringified: %s -> %s\n", s.data(), *outStr);
-  memcpy((char*)*outStr, s.data(), s.size());
-  *outSz = s.size();
-  *outMustFree = true;
-}
-
 /**
  * concat_ss will will incRef the output string
  * and decref its first argument

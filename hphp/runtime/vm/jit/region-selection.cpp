@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <boost/range/adaptors.hpp>
+#include <functional>
 
 #include "folly/Memory.h"
 #include "folly/Conv.h"
@@ -172,6 +173,8 @@ void RegionDesc::Block::addReffinessPred(SrcKey sk, const ReffinessPred& pred) {
 }
 
 void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
+  if (func == nullptr && m_knownFuncs.empty()) return;
+
   FTRACE(2, "Block::setKnownFunc({}, {})\n", showShort(sk),
          func ? func->fullName()->data() : "nullptr");
   assert(m_knownFuncs.find(sk) == m_knownFuncs.end());
@@ -489,6 +492,125 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
 }
 
 //////////////////////////////////////////////////////////////////////
+
+
+namespace {
+template<typename T>
+struct Ignore {
+  bool a(const T&) const { return false; }
+  bool b(const T&) const { return false; }
+};
+
+struct IgnoreTypePred {
+  explicit IgnoreTypePred(bool aLonger = false)
+    : m_aLonger(aLonger)
+  {}
+
+  // It's ok for a to have more TypePreds if it's longer.
+  bool a(const RegionDesc::TypePred& tp) const {
+    return m_aLonger;
+  }
+
+  // It's ok for b to have more TypePreds if it's for a type we can probably
+  // get from statically-known stack flavors.
+  bool b(const RegionDesc::TypePred& tp) const {
+    return tp.location.tag() == RegionDesc::Location::Tag::Stack &&
+      tp.location.stackOffset() == 0 &&
+      tp.type.isBoxed();
+  }
+
+ private:
+  const bool m_aLonger;
+};
+
+template<typename M, typename Cmp = std::equal_to<typename M::mapped_type>,
+         typename IgnorePred = Ignore<typename M::mapped_type>>
+bool mapsEqual(const M& a, const M& b, SrcKey endSk, Cmp equal = Cmp(),
+               IgnorePred ignore = IgnorePred()) {
+  // Return true iff every value in aRange also exists in bRange. Leaves 'it'
+  // pointing to aRange.second either way.
+  using IterPair = std::pair<typename M::const_iterator,
+                             typename M::const_iterator>;
+  auto checkRange = [&](typename M::const_iterator& it, IterPair aRange,
+                        IterPair bRange, bool aFirst) {
+    for (it = aRange.first; it != aRange.second; ++it) {
+      if (aFirst ? ignore.a(it->second) : ignore.b(it->second)) continue;
+
+      auto bIt = bRange.first;
+      for (; bIt != bRange.second; ++bIt) {
+        if (equal(it->second, bIt->second)) break;
+      }
+      if (bIt == bRange.second) {
+        it = aRange.second;
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Check if b has anything a doesn't
+  for (auto it = b.begin(), end = b.end(); it != end; ) {
+    if (!checkRange(it, b.equal_range(it->first), a.equal_range(it->first),
+                    false)) {
+      return false;
+    }
+  }
+
+  // Check if a has anything b doesn't, up to b's end.
+  for (auto it = a.begin(), end = a.end(); it != end; ) {
+    if (it->first > endSk) break;
+
+    if (!checkRange(it, a.equal_range(it->first), b.equal_range(it->first),
+                    true)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+}
+
+void diffRegions(const RegionDesc& a, const RegionDesc& b) {
+  auto fail = [&](const std::string why) {
+    Trace::ftraceRelease("{:-^60}\nRegions differ: {}"
+                         "\ntracelet:\n{}\nlegacy:\n{}\n",
+                         "", why, show(a), show(b));
+  };
+  if (a.blocks.size() < b.blocks.size()) return fail("a has fewer blocks");
+
+  for (unsigned i = 0; i < b.blocks.size(); ++i) {
+    auto& ab = *a.blocks[i];
+    auto& bb = *b.blocks[i];
+    if (ab.func() != bb.func() ||
+        ab.start() != bb.start() ||
+        ab.length() < bb.length() ||
+        (i == 0 && ab.initialSpOffset() != bb.initialSpOffset())) {
+      return fail("block metadata differs");
+    }
+
+    auto const endSk = bb.last();
+    auto const ignore = IgnoreTypePred{ab.length() > bb.length()};
+    auto tpCmp = [](const RegionDesc::TypePred& a,
+                    const RegionDesc::TypePred& b) {
+      /* Different inner types are generally ok. */
+      return a.location == b.location &&
+        (a.type == b.type || (a.type.isBoxed() && b.type.isBoxed()));
+    };
+    if (!mapsEqual(ab.typePreds(), bb.typePreds(), endSk, tpCmp, ignore)) {
+      return fail("type predictions");
+    }
+
+    if (!mapsEqual(ab.paramByRefs(), bb.paramByRefs(), endSk)) {
+      return fail("param byrefs");
+    }
+    if (false && !mapsEqual(ab.reffinessPreds(), bb.reffinessPreds(), endSk)) {
+      return fail("reffiness preds");
+    }
+    if (!mapsEqual(ab.knownFuncs(), bb.knownFuncs(), endSk)) {
+      return fail("known funcs");
+    }
+  }
+}
 
 std::string show(RegionDesc::Location l) {
   switch (l.tag()) {

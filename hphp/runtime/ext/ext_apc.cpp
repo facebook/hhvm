@@ -33,7 +33,7 @@
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
 
-using HPHP::Util::ScopedMem;
+using HPHP::ScopedMem;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,9 +125,9 @@ int apcExtension::TTLLimit = -1;
 bool apcExtension::UseFileStorage = false;
 int64_t apcExtension::FileStorageChunkSize = int64_t(1LL << 29);
 int64_t apcExtension::FileStorageMaxSize = int64_t(1LL << 32);
-std::string apcExtension::FileStoragePrefix;
+std::string apcExtension::FileStoragePrefix = "/tmp/apc_store";
 int apcExtension::FileStorageAdviseOutPeriod = 1800;
-std::string apcExtension::FileStorageFlagKey;
+std::string apcExtension::FileStorageFlagKey = "_madvise_out";
 bool apcExtension::ConcurrentTableLockFree = false;
 bool apcExtension::FileStorageKeepFileLinked = false;
 std::vector<std::string> apcExtension::NoTTLPrefix;

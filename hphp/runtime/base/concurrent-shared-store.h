@@ -165,7 +165,7 @@ private:
     return APCHandle::Create(v, false);
   }
 
-  bool eraseImpl(const String& key, bool expired);
+  bool eraseImpl(const String& key, bool expired, int64_t oldestTime = 0);
 
   void eraseAcc(Map::accessor &acc) {
     const char *pkey = acc->first;

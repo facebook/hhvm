@@ -490,7 +490,7 @@ std::string func_flag_list(const FuncInfo& finfo) {
 
   if (auto name = func->getGeneratorBodyName()) {
     flags.push_back(
-        folly::format("hasGeneratorBody(\"{}\")", name->toCPPString()).str()
+        folly::format("hasGeneratorBody(\"{}\")", name->toCppString()).str()
     );
   }
   if (func->isGenerator()) flags.push_back("isGenerator");

@@ -599,7 +599,7 @@ void Debugger::updateProxySandbox(DebuggerProxyPtr proxy,
     // don't have the sandbox on file yet. create a sandbox info with
     // no path for now. Sandbox path will be updated upon first request
     // with that sandbox arrives
-    DSandboxInfoPtr sb(new DSandboxInfo(sandboxId->toCPPString()));
+    DSandboxInfoPtr sb(new DSandboxInfo(sandboxId->toCppString()));
     proxy->updateSandbox(sb);
   }
 }

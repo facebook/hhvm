@@ -60,7 +60,7 @@ void moveToAlign(CodeBlock& cb,
 
   using namespace HPHP::Util;
   X64Assembler a { cb };
-  assert(isPowerOfTwo(align));
+  assert(folly::isPowTwo(align));
   size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
   if (leftInBlock == align) return;
   if (leftInBlock > 2) {

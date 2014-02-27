@@ -19,7 +19,8 @@
 
 #include <cstdint>
 #include <cstring>
-#include <boost/optional/optional.hpp>
+
+#include "folly/Optional.h"
 
 #include "hphp/util/data-block.h"
 
@@ -78,23 +79,20 @@ namespace JIT {
   IRT(Func,        1ULL << 45)                                          \
   IRT(VarEnv,      1ULL << 46)                                          \
   IRT(NamedEntity, 1ULL << 47)                                          \
-  IRT(FuncCls,     1ULL << 48) /* {Func*, Cctx} */                      \
-  IRT(FuncObj,     1ULL << 49) /* {Func*, Obj} */                       \
-  IRT(Cctx,        1ULL << 50) /* Class* with the lowest bit set,  */   \
+  IRT(Cctx,        1ULL << 48) /* Class* with the lowest bit set,  */   \
                                /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     1ULL << 51) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 52) /* stack pointer */                      \
-  IRT(FramePtr,    1ULL << 53) /* frame pointer */                      \
-  IRT(TCA,         1ULL << 54)                                          \
-  IRT(ActRec,      1ULL << 55)                                          \
-  IRT(None,        1ULL << 56)                                          \
-  IRT(RDSHandle,   1ULL << 57) /* RDS::Handle */                        \
-  IRT(Nullptr,     1ULL << 58)
+  IRT(RetAddr,     1ULL << 49) /* Return address */                     \
+  IRT(StkPtr,      1ULL << 50) /* stack pointer */                      \
+  IRT(FramePtr,    1ULL << 51) /* frame pointer */                      \
+  IRT(TCA,         1ULL << 52)                                          \
+  IRT(ActRec,      1ULL << 53)                                          \
+  IRT(None,        1ULL << 54)                                          \
+  IRT(RDSHandle,   1ULL << 55) /* RDS::Handle */                        \
+  IRT(Nullptr,     1ULL << 56)
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
   IRT(Ctx,         kObj|kCctx)                                          \
-  IRT(FuncCtx,     kFuncCls|kFuncObj)
 
 // Gen, Counted, PtrToGen, and PtrToCounted are here instead of
 // IRT_PHP_UNIONS because boxing them (e.g., BoxedGen, PtrToBoxedGen)
@@ -243,6 +241,7 @@ public:
   }
 
   bool notBoxed() const {
+    assert(subtypeOf(Gen));
     return subtypeOf(Cell);
   }
 
@@ -291,11 +290,11 @@ public:
    * TODO(#3390819): this function should return false for Str and
    * Null.
    *
-   * Pre: subtypeOf(Gen | Cls) || equals(None)
+   * Pre: subtypeOf(StackElem) || equals(None)
    */
   bool isKnownDataType() const {
     if (subtypeOf(Type::None)) return false;
-    assert(subtypeOf(Gen | Cls));
+    assert(subtypeOf(StackElem));
 
     // Some unions that correspond to single KindOfs.  And Type::Str
     // and Type::Null for now for historical reasons.
@@ -319,7 +318,7 @@ public:
    * runtime.
    */
   bool needsReg() const {
-    return subtypeOf(Gen) && !isKnownDataType();
+    return subtypeOf(StackElem) && !isKnownDataType();
   }
 
   bool needsStaticBitCheck() const {
@@ -483,8 +482,8 @@ public:
     not_reached();
   }
 
-  Type innerType() const {
-    assert(isBoxed());
+ Type innerType() const {
+    assert(isBoxed() || equals(Bottom));
     return Type(m_bits >> kBoxShift, m_extra);
   }
 
@@ -623,6 +622,8 @@ public:
   }
 };
 
+typedef folly::Optional<Type> OptType;
+
 inline bool operator<(Type a, Type b) { return a.strictSubtypeOf(b); }
 inline bool operator>(Type a, Type b) { return b.strictSubtypeOf(a); }
 inline bool operator<=(Type a, Type b) { return a.subtypeOf(b); }
@@ -655,10 +656,12 @@ Type convertToType(RepoAuthType ty);
 
 struct TypeConstraint {
   /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric,
-                                Type type = Type::Gen)
+                                Type aType = Type::Gen,
+                                DataTypeCategory inner = DataTypeGeneric)
     : category(cat)
+    , innerCat(inner)
     , weak(false)
-    , knownType(type)
+    , assertedType(aType)
   {}
 
   std::string toString() const;
@@ -672,21 +675,20 @@ struct TypeConstraint {
   // by consumers of the type.
   DataTypeCategory category;
 
-  // if innerCat is set, this object represents a constraint on the inner type
-  // of the current value. It is set and cleared when the constraint code
-  // traces through an operation that unboxes or boxes an operand,
-  // respectively.
-  boost::optional<DataTypeCategory> innerCat;
+  // When a value is boxed, innerCat is used to determine how we can relax the
+  // inner type.
+  DataTypeCategory innerCat;
 
   // If weak is true, the consumer of the value being constrained doesn't
   // actually want to constrain the guard (if found). Most often used to figure
   // out if a type can be used without further constraining guards.
   bool weak;
 
-  // knownType represents an upper bound for the type of the guard, which is
-  // known from static analysis or other guards that have been appropriately
-  // constrained. It can be used to convert some guards into asserts.
-  Type knownType;
+  // It's fairly common to emit an AssertType op with a type that is less
+  // specific than the current guard type, but more specific than the type the
+  // guard will eventually be relaxed to. We want to simplify these
+  // instructions away, and when we do, we remember their type in assertedType.
+  Type assertedType;
 };
 
 }}

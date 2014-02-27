@@ -250,6 +250,17 @@ void raise_message(ErrorConstants::ErrorModes mode,
   raise_message(mode, msg);
 }
 
+void raise_message(ErrorConstants::ErrorModes mode,
+                   const char *fmt,
+                   ...) {
+  std::string msg;
+  va_list ap;
+  va_start(ap, fmt);
+  string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+  raise_message(mode, msg);
+}
+
 void raise_message(ErrorConstants::ErrorModes mode, std::string &msg) {
   switch (mode) {
     case ErrorConstants::ErrorModes::ERROR:

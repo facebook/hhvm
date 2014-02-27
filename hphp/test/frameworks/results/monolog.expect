@@ -9,7 +9,7 @@ Monolog\Formatter\ChromePHPFormatterTest::testFormatWithFileAndLine
 Monolog\Formatter\ChromePHPFormatterTest::testFormatWithoutContext
 .
 Monolog\Formatter\ElasticaFormatterTest::testFormat
-F
+.
 Monolog\Formatter\ElasticaFormatterTest::testGetters
 .
 Monolog\Formatter\GelfMessageFormatterTest::testDefaultFormatter
@@ -43,9 +43,9 @@ Monolog\Formatter\LineFormatterTest::testDefFormatWithString
 Monolog\Formatter\LineFormatterTest::testFormatExtras
 .
 Monolog\Formatter\LogstashFormatterTest::testDefaultFormatter
-F
+.
 Monolog\Formatter\LogstashFormatterTest::testDefaultFormatterV1
-F
+.
 Monolog\Formatter\LogstashFormatterTest::testFormatWithApplicationName
 .
 Monolog\Formatter\LogstashFormatterTest::testFormatWithApplicationNameV1
@@ -135,7 +135,13 @@ S
 Monolog\Handler\DoctrineCouchDBHandlerTest::testHandle
 .
 Monolog\Handler\DynamoDbHandlerTest::testConstruct
-FATAL
+.
+Monolog\Handler\DynamoDbHandlerTest::testGetFormatter
+.
+Monolog\Handler\DynamoDbHandlerTest::testHandle
+.
+Monolog\Handler\DynamoDbHandlerTest::testInterface
+.
 Monolog\Handler\ElasticSearchHandlerTest::testConnectionErrors with data set #0
 F
 Monolog\Handler\ElasticSearchHandlerTest::testConnectionErrors with data set #1

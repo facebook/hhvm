@@ -773,6 +773,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->attrs                  = fe.attrs();
   ret->userAttributes         = fe.getUserAttributes();
   ret->returnUserType         = fe.returnUserType();
+  ret->retTypeConstraint      = fe.returnTypeConstraint();
   ret->originalFilename       = fe.originalFilename();
 
   ret->top                    = fe.top();

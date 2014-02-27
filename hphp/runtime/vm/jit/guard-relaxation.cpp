@@ -76,9 +76,9 @@ void retypeLoad(IRInstruction* load, Type newType) {
 
 /*
  * Loads from locals and the stack are special: they get their type from a
- * guard instruction but have no direct reference to that guard. This block
- * only changes the load's type param; the loop afterwards will retype the dest
- * if needed.
+ * guard instruction but have no direct reference to that guard. This function
+ * only changes the load's type param; the caller is responsible for retyping
+ * the dest if needed.
  */
 void visitLoad(IRInstruction* inst, const FrameState& state) {
   switch (inst->op()) {
@@ -94,10 +94,9 @@ void visitLoad(IRInstruction* inst, const FrameState& state) {
     case LdStack:
     case LdStackAddr: {
       auto idx = inst->extra<StackOffset>()->offset;
-      auto typeSrc = getStackValue(inst->src(0), idx).typeSrc;
-      if (typeSrc->is(GuardStk, CheckStk, AssertStk)) {
-        retypeLoad(inst, typeSrc->typeParam());
-      }
+      auto newType = getStackValue(inst->src(0), idx).knownType;
+
+      retypeLoad(inst, newType);
       break;
     }
 
@@ -119,37 +118,81 @@ void visitLoad(IRInstruction* inst, const FrameState& state) {
 }
 
 /*
- * Returns the best known type of the value being guarded by guard, from right
- * before guard.
+ * If inst is a guard/assert instruction that can be removed with its newly
+ * relaxed typeParam, do so and return true. Otherwise, return false.
  */
-Type previousGuardType(const IRInstruction* guard) {
-  switch (guard->op()) {
+bool removeGuard(IRUnit& unit, IRInstruction* inst, const FrameState& state) {
+  Type prevType;
+  switch (inst->op()) {
     case GuardLoc:
-    case CheckLoc: {
-      auto* prevGuard = guardForLocal(guard->extra<LocalId>()->locId,
-                                      guard->src(0));
-      if (!prevGuard) return Type::Gen;
-      return prevGuard->typeParam();
-    }
+    case CheckLoc:
+    case AssertLoc:
+      prevType = state.localType(inst->extra<LocalId>()->locId);
+      break;
 
     case GuardStk:
-    case CheckStk: {
-      auto stkVal = getStackValue(guard->src(0),
-                                  guard->extra<StackOffset>()->offset);
-      return stkVal.knownType;
-    }
+    case CheckStk:
+    case AssertStk:
+      prevType = getStackValue(inst->src(0),
+                               inst->extra<StackOffset>()->offset).knownType;
+      break;
 
     case CheckType:
-      return guard->src(0)->type();
+    case AssertType:
+      prevType = inst->src(0)->type();
+      break;
 
     default:
-      not_reached();
+      return false;
   }
+
+  FTRACE(2, "removeGuard inspecting {}\n", *inst);
+  auto type = inst->typeParam();
+  if (type < prevType) return false;
+
+  if (!(type >= prevType)) {
+    // Neither is a subtype of the other. If they have no intersection the
+    // guard will always fail but we can let the simplifier take care of
+    // that. Otherwise, refine the guarded type to be a subtype of prevType.
+    auto common = type & prevType;
+    if (common != Type::Bottom) {
+      FTRACE(3, "setting typeParam to {}\n", common);
+      inst->setTypeParam(common);
+    }
+
+    return false;
+  }
+
+  FTRACE(2, "replacing {} with Mov due to prevType {}\n", *inst, prevType);
+  if (inst->isControlFlow()) {
+    // We can't replace CF instructions with a Mov, so stick a Mov in front of
+    // it and convert it to a Jmp to the next block.
+    auto* block = inst->block();
+    block->insert(block->iteratorTo(inst),
+                  unit.mov(inst->dst(), inst->src(0), inst->marker()));
+    inst->setTaken(inst->next());
+    inst->convertToJmp();
+  } else {
+    inst->convertToMov();
+  }
+  return true;
+}
+
+Type relaxInner(Type t, TypeConstraint tc) {
+  if (t.notBoxed()) return t;
+
+  auto cell = t & Type::Cell;
+  auto inner = (t & Type::BoxedCell).innerType();
+  auto innerCat = tc.innerCat;
+
+  auto innerRelaxed = innerCat == DataTypeGeneric ? Type::Cell
+                                                  : relaxType(inner, innerCat);
+  return cell | (innerRelaxed - Type::Uninit).box();
 }
 }
 
 /*
- * For all guard instructions in trace, check to see if we can relax the
+ * For all guard instructions in unit, check to see if we can relax the
  * destination type to something less specific. The GuardConstraints map
  * contains information about what properties of the guarded type matter for
  * each instruction. If simple is true, guards will not be relaxed past
@@ -157,6 +200,7 @@ Type previousGuardType(const IRInstruction* guard) {
  * DataTypeGeneric. Returns true iff any changes were made to the trace.
  */
 bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
+  splitCriticalEdges(unit);
   auto blocks = rpoSortCfg(unit);
   auto changed = false;
 
@@ -166,31 +210,107 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
 
       auto it = guards.find(&inst);
       auto constraint = it == guards.end() ? TypeConstraint() : it->second;
+      FTRACE(2, "relaxGuards processing {} with constraint {}\n",
+             inst, constraint);
 
       if (simple && constraint.category > DataTypeGeneric &&
           constraint.category < DataTypeSpecific) {
         constraint.category = DataTypeSpecific;
       }
 
-      // TODO(t2598894): Support relaxing inner types
       auto const oldType = inst.typeParam();
-      auto newType = relaxType(oldType, constraint.category);
+      auto newType = relaxType(oldType, constraint);
 
-      if (constraint.knownType <= newType) {
-        // If the known type is at least as good as the relaxed type, we can
-        // replace the guard with an assert.
-        auto newOp = guardToAssert(inst.op());
-        auto newType = constraint.knownType;
-        FTRACE(1, "relaxGuards changing {}'s type to {}, op to {}\n",
-               inst, newType, newOp);
-        assert(!hasEdges(newOp));
-        if (inst.hasEdges()) {
-          block->push_back(unit.gen(Jmp, inst.marker(), inst.next()));
+      // Sometimes we (legitimately) end up with a guard like this:
+      //
+      // t4:StkPtr = GuardStk<BoxedArr,0,<DataTypeGeneric,
+      //                                  inner:DataTypeSpecific,
+      //                                  Type::BoxedCell>> t2:StkPtr
+      //
+      // The outer category is DataTypeGeneric because we know from eval stack
+      // flavors that the top of the stack here is always boxed. The inner
+      // category is DataTypeSpecific, indicating we care what the inner type
+      // is, even though it's just a hint. If we treated this like any other
+      // guard, we would relax the typeParam to Type::Gen and insert an assert
+      // to Type::BoxedCell right after it. Unfortunately, this loses the hint
+      // that the inner type is Arr. Eventually we should have some side
+      // channel for passing around hints for inner ref types, but for now the
+      // best we can do is forcibly keep the guard around, preserving the inner
+      // type hint.
+      if (constraint.assertedType.isBoxed() &&
+          oldType < constraint.assertedType) {
+        auto relaxedInner = relaxInner(oldType, constraint);
+
+        if (relaxedInner < Type::BoxedCell && newType >= Type::BoxedCell) {
+          FTRACE(1, "relaxGuards changing newType to {}\n", newType);
+          newType = relaxedInner;
         }
+      }
+
+      if (constraint.assertedType < newType) {
+        // If the asserted type is more specific than the new guarded type, set
+        // the guard to the relaxed type but insert an assert operation between
+        // the instruction and its dst. We go from something like this:
+        //
+        // t5:FramePtr = GuardLoc<Int, 4, <DataTypeGeneric,Int>> t4:FramePtr
+        //
+        // to this:
+        //
+        // t6:FramePtr = GuardLoc<Gen, 4> t4:FramePtr
+        // t5:FramePtr = AssertLoc<Int, 4> t6:FramePtr
+
+        auto* oldDst = inst.dst();
+        auto* newDst = unit.genDst(&inst);
+        auto* newAssert = [&] {
+          switch (inst.op()) {
+            case GuardLoc:
+            case CheckLoc:
+              return unit.genWithDst(oldDst,
+                                     guardToAssert(inst.op()),
+                                     inst.marker(),
+                                     *inst.extra<LocalId>(),
+                                     constraint.assertedType,
+                                     newDst);
+
+            case GuardStk:
+            case CheckStk:
+              return unit.genWithDst(oldDst,
+                                     guardToAssert(inst.op()),
+                                     inst.marker(),
+                                     *inst.extra<StackOffset>(),
+                                     constraint.assertedType,
+                                     newDst);
+
+            case CheckType:
+              return unit.genWithDst(oldDst,
+                                     guardToAssert(inst.op()),
+                                     inst.marker(),
+                                     constraint.assertedType,
+                                     newDst);
+
+            default: always_assert(false);
+          }
+        }();
+
+        FTRACE(1, "relaxGuards inserting {} between {} and its dst, "
+               "changing typeParam to {}\n",
+               *newAssert, inst, newType);
         inst.setTypeParam(newType);
-        inst.setOpcode(newOp);
+
+        // Now, insert the assert after the guard. For control flow guards,
+        // this means inserting it on the next edge.
+        if (inst.isControlFlow()) {
+          auto* block = inst.next();
+          block->insert(block->skipHeader(), newAssert);
+        } else {
+          auto* block = inst.block();
+          auto it = block->iteratorTo(&inst);
+          ++it;
+          block->insert(it, newAssert);
+        }
+
         changed = true;
-      } else if (!oldType.equals(newType)) {
+      } else if (oldType != newType) {
         FTRACE(1, "relaxGuards changing {}'s type to {}\n", inst, newType);
         inst.setTypeParam(newType);
         changed = true;
@@ -207,9 +327,12 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
 
     for (auto& inst : *block) {
       state.setMarker(inst.marker());
+      copyProp(&inst);
       visitLoad(&inst, state);
-      retypeDests(&inst);
-      state.update(&inst);
+      if (!removeGuard(unit, &inst, state)) {
+        retypeDests(&inst);
+        state.update(&inst);
+      }
     }
 
     state.finishBlock(block);
@@ -241,10 +364,23 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
 }
 
 /*
- * Returns true iff t is specific enough to fit cat.
+ * Returns true iff t is specific enough to fit tc, meaning a consumer
+ * constraining a value with tc would be satisfied with t as the value's type
+ * after relaxation.
  */
-bool typeFitsConstraint(Type t, DataTypeCategory cat) {
-  switch (cat) {
+bool typeFitsConstraint(Type t, TypeConstraint tc) {
+  assert(t != Type::Bottom);
+
+  if (tc.innerCat > DataTypeGeneric) {
+    // First check the outer constraint.
+    if (!typeFitsConstraint(t, tc.category)) return false;
+
+    // Then, if t might be boxed, check the inner type.
+    return t.notBoxed() ||
+      typeFitsConstraint((t & Type::BoxedCell).innerType(), tc.innerCat);
+  }
+
+  switch (tc.category) {
     case DataTypeGeneric:
       return true;
 
@@ -270,40 +406,32 @@ bool typeFitsConstraint(Type t, DataTypeCategory cat) {
 }
 
 /*
- * Returns the most general category 'cat' that satisfies this expression:
- * relaxType(t, categoryForType(t)) == t
- */
-DataTypeCategory categoryForType(Type t) {
-  if (t >= Type::Gen) return DataTypeGeneric;
-  if (t >= Type::Uncounted || t.isCounted()) return DataTypeCountness;
-  if (t >= Type::UncountedInit) return DataTypeCountnessInit;
-  return t.isSpecialized() ? DataTypeSpecialized : DataTypeSpecific;
-}
-
-/*
  * Returns the least specific supertype of t that maintains the properties
- * required by cat.
+ * required by tc.
  */
-Type relaxType(Type t, DataTypeCategory cat) {
+Type relaxType(Type t, TypeConstraint tc) {
   always_assert(t <= Type::Gen);
 
-  switch (cat) {
+  switch (tc.category) {
     case DataTypeGeneric:
       return Type::Gen;
 
     case DataTypeCountness:
-      return t.notCounted() ? Type::Uncounted : t.unspecialize();
+      return t.notCounted() ? Type::Uncounted
+                            : relaxInner(t.unspecialize(), tc);
 
     case DataTypeCountnessInit:
       if (t <= Type::Uninit) return Type::Uninit;
-      return t.notCounted() ? Type::UncountedInit : t.unspecialize();
+      return t.notCounted() ? Type::UncountedInit
+                            : relaxInner(t.unspecialize(), tc);
 
     case DataTypeSpecific:
-      return t.unspecialize();
+      assert(t.isKnownDataType());
+      return relaxInner(t.unspecialize(), tc);
 
     case DataTypeSpecialized:
       assert(t.isSpecialized());
-      return t;
+      return relaxInner(t, tc);
   }
 
   not_reached();

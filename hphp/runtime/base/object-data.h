@@ -56,11 +56,12 @@ class ObjectData {
     HasClone      = 0x0100, // if IsCppBuiltin, has custom clone logic
                             // if not IsCppBuiltin, defines __clone PHP method
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
-    // FreeFlag      = 0x0400, // ** a free flag **
+    HasNativeData = 0x0400, // HNI Class with <<__NativeData("T")>>
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsCppBuiltin  = 0x1000, // has custom C++ subclass
     IsCollection  = 0x2000, // it's a collection (and the specific type is
                             // stored in o_subclassData.u16)
+    InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
   };
 
   enum {
@@ -116,7 +117,6 @@ class ObjectData {
   bool isUncounted() const { return false; }
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
- protected:
   ~ObjectData();
  public:
 

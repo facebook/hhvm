@@ -732,11 +732,11 @@ void ArrayData::dump(std::ostream &out) {
   for (ArrayIter iter(this); iter; ++iter, i++) {
     VariableSerializer vs(VariableSerializer::Type::Serialize);
     Variant key(iter.first());
-    out << i << " #### " << key.toString()->toCPPString() << " #### ";
+    out << i << " #### " << key.toString().toCppString() << " #### ";
     Variant val(iter.second());
     try {
       String valS(vs.serialize(val, true));
-      out << valS->toCPPString();
+      out << valS.toCppString();
     } catch (const Exception &e) {
       out << "Exception: " << e.what();
     }

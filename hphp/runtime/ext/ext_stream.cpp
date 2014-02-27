@@ -465,7 +465,7 @@ Variant f_stream_socket_server(const String& local_socket,
                                VRefParam errstr /* = null */,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
-  Util::HostURL hosturl(static_cast<const std::string>(local_socket));
+  HostURL hosturl(static_cast<const std::string>(local_socket));
   return socket_server_impl(hosturl, flags, errnum, errstr);
 }
 
@@ -475,7 +475,7 @@ Variant f_stream_socket_client(const String& remote_socket,
                                double timeout /* = -1.0 */,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
-  Util::HostURL hosturl(static_cast<const std::string>(remote_socket));
+  HostURL hosturl(static_cast<const std::string>(remote_socket));
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
@@ -529,7 +529,7 @@ Variant f_stream_socket_sendto(CResRef socket, const String& data,
     host = sock->getAddress();
     port = sock->getPort();
   } else {
-    Util::HostURL hosturl(static_cast<std::string>(address));
+    HostURL hosturl(static_cast<std::string>(address));
     host = hosturl.getHost();
     port = hosturl.getPort();
   }

@@ -45,6 +45,7 @@ class UnitEmitter;
 class Class;
 class NamedEntity;
 class PreClass;
+namespace Native { struct NativeDataInfo; }
 
 typedef hphp_hash_set<const StringData*, string_data_hash,
                       string_data_isame> TraitNameSet;
@@ -325,6 +326,10 @@ class PreClass : public AtomicCountable {
   bool isPersistent() const { return m_attrs & AttrPersistent; }
   bool isBuiltin() const { return attrs() & AttrBuiltin; }
 
+  void setUserAttributes(const UserAttributeMap &ua);
+  const Native::NativeDataInfo* nativeDataInfo() const
+                                                 { return m_nativeDataInfo; }
+
   /*
    * Funcs, Consts, and Props all behave similarly. Define raw accessors
    * foo() and numFoos() for people munging by hand, and ranges.
@@ -419,6 +424,7 @@ private:
   TraitPrecRuleVec m_traitPrecRules;
   TraitAliasRuleVec m_traitAliasRules;
   UserAttributeMap m_userAttributes;
+  const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
   MethodMap m_methods;
   PropMap m_properties;
   ConstMap m_constants;
@@ -485,7 +491,7 @@ struct Class : AtomicCountable {
     PropInitVec();
     const PropInitVec& operator=(const PropInitVec&);
     ~PropInitVec();
-    static PropInitVec* allocInRequestArena(const PropInitVec& src);
+    static PropInitVec* allocWithSmartAllocator(const PropInitVec& src);
     static size_t dataOff() { return offsetof(PropInitVec, m_data); }
 
     typedef TypedValueAux* iterator;
@@ -908,8 +914,15 @@ private:
   void checkTraitConstraints() const;
   void checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
                                 const StringData* recName) const;
+  void setNativeDataInfo();
+
   template<bool setParents> void setInstanceBitsImpl();
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
+
+public:
+  const Native::NativeDataInfo* getNativeDataInfo() const {
+    return m_nativeDataInfo;
+  }
 
 private:
 
@@ -986,6 +999,11 @@ public:
   Class* m_nextClass; // used by Unit
 
 private:
+  /* Objects with the <<__NativeData("T")>> UA are allocated with
+   * extra space prior to the ObjectData structure itself.
+   */
+  const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
+
   // Bitmap of parent classes and implemented interfaces. Each bit
   // corresponds to a commonly used class name, determined during the
   // profiling warmup requests.

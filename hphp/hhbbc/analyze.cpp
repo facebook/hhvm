@@ -153,24 +153,24 @@ FuncAnalysis do_analyze(const Index& index,
    * means less iterations.
    */
   while (!incompleteQ.empty()) {
-    auto blk = ai.rpoBlocks[*begin(incompleteQ)];
+    auto const blk = ai.rpoBlocks[*begin(incompleteQ)];
     incompleteQ.erase(begin(incompleteQ));
     PropertiesInfo props(index, inputCtx, clsAnalysis);
 
-    FTRACE(2, "block #{}\nin {}\n{}", blk->id,
+    FTRACE(2, "block #{}\nin {}{}", blk->id,
       state_string(*ctx.func, ai.bdata[blk->id].stateIn),
       property_state_string(props));
     ++interp_counter;
 
     auto propagate = [&] (php::Block& target, const State& st) {
       FTRACE(2, "     -> {}\n", target.id);
-      FTRACE(4, "target old {}\n",
+      FTRACE(4, "target old {}",
         state_string(*ctx.func, ai.bdata[target.id].stateIn));
 
       if (merge_into(ai.bdata[target.id].stateIn, st)) {
         incompleteQ.insert(rpoId(&target));
       }
-      FTRACE(4, "target new {}\n",
+      FTRACE(4, "target new {}",
         state_string(*ctx.func, ai.bdata[target.id].stateIn));
     };
 
@@ -198,11 +198,9 @@ FuncAnalysis do_analyze(const Index& index,
     auto const bsep = std::string(60, '=') + "\n";
     auto const sep = std::string(60, '-') + "\n";
     auto ret = folly::format(
-      "{}function {}{} ({} block interps):\n{}",
+      "{}function {} ({} block interps):\n{}",
       bsep,
-      ctx.cls ? folly::format("{}::", ctx.cls->name->data()).str()
-              : std::string(),
-      ctx.func->name->data(),
+      show(ctx),
       interp_counter,
       bsep
     ).str();
@@ -484,23 +482,24 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<State>
+std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index& index,
                           const Context ctx,
                           borrowed_ptr<const php::Block> blk,
                           State state) {
   Trace::Bump bumper{Trace::hhbbc, 10};
 
-  std::vector<State> ret;
-  ret.reserve(blk->hhbcs.size());
+  std::vector<std::pair<State,StepFlags>> ret;
+  ret.reserve(blk->hhbcs.size() + 1);
 
   PropertiesInfo props(index, ctx, nullptr);
   Interpreter interp { &index, ctx, props, blk, state };
   for (auto& op : blk->hhbcs) {
-    ret.push_back(state);
-    interp.step(op);
+    ret.emplace_back(state, StepFlags{});
+    ret.back().second = interp.step(op);
   }
 
+  ret.emplace_back(std::move(state), StepFlags{});
   return ret;
 }
 

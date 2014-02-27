@@ -151,6 +151,11 @@ struct RegionDesc::TypePred {
   Type type;
 };
 
+inline bool operator==(const RegionDesc::TypePred& a,
+                       const RegionDesc::TypePred& b) {
+  return a.location == b.location && a.type == b.type;
+}
+
 typedef std::vector<RegionDesc::TypePred> PostConditions;
 
 /*
@@ -168,6 +173,11 @@ struct RegionDesc::ReffinessPred {
   std::vector<bool> vals;
   int64_t arSpOffset;
 };
+
+inline bool operator==(const RegionDesc::ReffinessPred& a,
+                       const RegionDesc::ReffinessPred& b) {
+  return a.mask == b.mask && a.vals == b.vals && a.arSpOffset == b.arSpOffset;
+}
 
 /*
  * A basic block in the region, with type predictions for conditions
@@ -376,6 +386,12 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
 void regionizeFunc(const Func*    func,
                    TranslatorX64* tx64,
                    RegionVec&     regions);
+
+/*
+ * Compare the two regions. If they differ in any way other than a being longer
+ * than b, trace both regions.
+ */
+void diffRegions(const RegionDesc& a, const RegionDesc& b);
 
 /*
  * Debug stringification for various things.

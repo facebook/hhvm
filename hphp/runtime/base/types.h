@@ -192,7 +192,7 @@ inline bool isSetType(Collection::Type ctype) {
 }
 inline bool isInvalidType(Collection::Type ctype) {
   return (ctype == Collection::InvalidType ||
-          ctype >= Collection::MaxNumTypes);
+          static_cast<size_t>(ctype) >= Collection::MaxNumTypes);
 }
 inline bool isMutableType(Collection::Type ctype) {
   return (ctype == Collection::VectorType ||

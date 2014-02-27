@@ -376,6 +376,13 @@ struct Func {
   SString returnUserType;
 
   /*
+   * Return type specified in the source code (ex. "function foo(): Bar").
+   * HHVM checks if the a function's return value matches it's return type
+   * constraint via the VerifyRetType* instructions.
+   */
+  TypeConstraint retTypeConstraint;
+
+  /*
    * If traits are being flattened by hphpc, we keep the original
    * filename of a function (the file that defined the trait) so
    * backtraces and things work correctly.  Otherwise this is nullptr.

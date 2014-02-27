@@ -296,7 +296,7 @@ void threadInit() {
   tl_base = mmap(nullptr, RuntimeOption::EvalJitTargetCacheSize,
                  PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
   always_assert(tl_base != MAP_FAILED);
-  Util::numa_bind_to(tl_base, s_persistent_base, Util::s_numaNode);
+  numa_bind_to(tl_base, s_persistent_base, s_numaNode);
   if (RuntimeOption::EvalMapTgtCacheHuge) {
     hintHuge(tl_base, RuntimeOption::EvalJitTargetCacheSize);
   }

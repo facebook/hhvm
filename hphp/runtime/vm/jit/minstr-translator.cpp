@@ -75,9 +75,8 @@ MInstrEffects::MInstrEffects(Opcode op, Type base) {
 }
 
 MInstrEffects::MInstrEffects(Opcode op, SSATmp* base) {
-  auto typeOrNone =
-    [](SSATmp* val){ return val ? val->type() : Type::None; };
-  init(op, typeOrNone(base));
+  assert(base != nullptr);
+  init(op, base->type());
 }
 
 MInstrEffects::MInstrEffects(Opcode opc, const std::vector<SSATmp*>& srcs) {
@@ -151,6 +150,7 @@ void getBaseType(Opcode rawOp, bool predict,
 }
 
 void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
+  assert(origBase != Type::None);
   baseType = origBase;
   always_assert(baseType.isPtr() ^ baseType.notPtr());
   auto const basePtr = baseType.isPtr();
@@ -555,16 +555,18 @@ void HhbcTranslator::MInstrTranslator::constrainBase(TypeConstraint tc,
                                                      SSATmp* value) {
   if (!value) value = m_base;
 
-  // Lots of operations change their behavior based on the value type of the
-  // base, so this handles the logic of using the inner constraint when
+  // Member operations only care about the inner type of the base if it's
+  // boxed, so this handles the logic of using the inner constraint when
   // appropriate.
   auto baseType = value->type().derefIfPtr();
   assert(baseType == Type::Gen || baseType.isBoxed() || baseType.notBoxed());
-  m_irb.constrainValue(value, tc);
+
   if (baseType.isBoxed()) {
+    m_irb.constrainValue(value, DataTypeCountness);
     tc.innerCat = tc.category;
-    m_irb.constrainValue(value, tc);
+    tc.category = DataTypeGeneric;
   }
+  m_irb.constrainValue(value, tc);
 }
 
 SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,

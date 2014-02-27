@@ -52,6 +52,10 @@
 # ifndef ALLOCM_ARENA
 #  define ALLOCM_ARENA(a) 0
 # endif
+# if JEMALLOC_VERSION_MAJOR > 3 || \
+     (JEMALLOC_VERSION_MAJOR == 3 && JEMALLOC_VERSION_MINOR >= 5)
+#  define USE_JEMALLOC_MALLOCX
+# endif
 #endif
 
 #include "hphp/util/maphuge.h"
@@ -95,7 +99,6 @@ public:
   EXCEPTION_COMMON_IMPL(OutOfMemoryException);
 };
 
-namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef USE_JEMALLOC
@@ -115,6 +118,8 @@ inline void* low_malloc(size_t size) {
 inline void low_free(void* ptr) {
 #ifndef USE_JEMALLOC
   free(ptr);
+#elif defined(USE_JEMALLOC_MALLOCX)
+  dallocx(ptr, MALLOCX_ARENA(low_arena));
 #else
   dallocm(ptr, ALLOCM_ARENA(low_arena));
 #endif
@@ -240,6 +245,6 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force);
 #endif // USE_JEMALLOC
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 #endif // incl_HPHP_UTIL_ALLOC_H_

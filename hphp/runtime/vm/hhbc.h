@@ -685,6 +685,8 @@ enum class BareThisOp : uint8_t {
   O(InterfaceExists, NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(TraitExists,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyParamType, ONE(IVA),         NOV,             NOV,        NF) \
+  O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
+  O(VerifyRetTypeV,  NA,               ONE(VV),         ONE(VV),    NF) \
   O(Self,            NA,               NOV,             ONE(AV),    NF) \
   O(Parent,          NA,               NOV,             ONE(AV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \

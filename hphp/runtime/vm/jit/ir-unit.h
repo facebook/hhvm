@@ -194,6 +194,18 @@ public:
   }
 
   /*
+   * Create an IRInstruction with a pre-allocated destination operand. The dst
+   * argument will be retyped to match the newly generated instruction.
+   */
+  template<class... Args>
+  IRInstruction* genWithDst(SSATmp* dst, Args&&... args) {
+    return makeInstruction(
+      [this, dst] (IRInstruction* inst) { return cloneInstruction(inst, dst); },
+      std::forward<Args>(args)...
+    );
+  }
+
+  /*
    * Replace an existing IRInstruction with a new one.
    *
    * This may involve making more allocations in the arena, but the
@@ -212,13 +224,29 @@ public:
   }
 
   /*
-   * Deep-copy an IRInstruction and its src/dests.
+   * Replace inst's dst with a newly allocated SSATmp, returning a pointer to
+   * the new dst. Use with extreme caution, as it is easy to create invalid IR
+   * with this method.
    */
-  IRInstruction* cloneInstruction(const IRInstruction* inst) {
+  SSATmp* genDst(IRInstruction* inst) {
+    if (!inst->hasDst()) return nullptr;
+    SSATmp* tmp = new (m_arena) SSATmp(m_nextOpndId++, inst);
+    inst->setDst(tmp);
+    return tmp;
+  }
+
+  /*
+   * Deep-copy an IRInstruction and its src/dests into arena-allocated
+   * memory. dst, if provided, will be used as the clone's dst instead of a
+   * newly allocated SSATmp.
+   */
+  IRInstruction* cloneInstruction(const IRInstruction* inst,
+                                  SSATmp* dst = nullptr) {
     auto newInst = new (m_arena) IRInstruction(
       m_arena, inst, IRInstruction::Id(m_nextInstId++));
     if (newInst->modifiesStack()) {
       assert(newInst->naryDst());
+      assert(!dst);
       // The instruction is an opcode that modifies the stack, returning a new
       // StkPtr.
       int numDsts = 1 + (newInst->hasMainDst() ? 1 : 0);
@@ -227,8 +255,11 @@ public:
         new (&dsts[dstNo]) SSATmp(m_nextOpndId++, newInst, dstNo);
       }
       newInst->setDsts(numDsts, dsts);
+    } else if (dst) {
+      newInst->setDst(dst);
+      dst->setInstruction(newInst, 0);
     } else {
-      newSSATmp(newInst);
+      genDst(newInst);
     }
     FTRACE(5, "cloned {}\n", *inst);
     return newInst;
@@ -280,11 +311,6 @@ public:
 
 private:
   SSATmp* findConst(ConstData& cdata, Type t);
-  void newSSATmp(IRInstruction* inst) {
-    if (!inst->hasDst()) return;
-    SSATmp* tmp = new (m_arena) SSATmp(m_nextOpndId++, inst);
-    inst->setDst(tmp);
-  }
 
 private:
   Arena m_arena; // contains Block, IRInstruction, and SSATmp objects

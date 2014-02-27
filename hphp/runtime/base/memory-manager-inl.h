@@ -231,9 +231,7 @@ std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
   return std::make_pair(retptr, sz);
 #else
   m_stats.usage += bytes;
-  // TODO(#2831116): we only add sizeof(SmallNode) so smartMallocBig
-  // can subtract it.
-  auto const ret = smartMallocBig(debugAddExtra(bytes + sizeof(SmallNode)));
+  auto const ret = smartMallocBig(debugAddExtra(bytes));
   FTRACE(1, "smartMallocBig: {} ({} bytes)\n", ret, bytes);
   return std::make_pair(debugPostAllocate(ret, bytes, bytes), bytes);
 #endif

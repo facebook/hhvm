@@ -59,22 +59,24 @@ FixupMap::recordIndirectFixup(CodeAddress frontier, int dwordsPushed) {
   recordIndirectFixup(frontier, IndirectFixup((2 + dwordsPushed) * 8));
 }
 
+namespace {
+bool isVMFrame(const VMExecutionContext* ec, const ActRec* ar) {
+  // If this assert is failing, you may have forgotten a sync point somewhere
+  assert(ar);
+  bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
+  assert(!ret ||
+         (ar >= ec->m_stack.getStackLowAddress() &&
+          ar < ec->m_stack.getStackHighAddress()) ||
+         (ar->m_func->validate(), ar->m_func->isGenerator()));
+  return ret;
+}
+}
+
 void
 FixupMap::fixupWork(VMExecutionContext* ec, ActRec* rbp) const {
   assert(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");
-
-  auto isVMFrame = [] (ActRec* ar) {
-    // If this assert is failing, you may have forgotten a sync point somewhere
-    assert(ar);
-    bool ret = uintptr_t(ar) - Util::s_stackLimit >= Util::s_stackSize;
-    assert(!ret ||
-           (ar >= g_vmContext->m_stack.getStackLowAddress() &&
-            ar < g_vmContext->m_stack.getStackHighAddress()) ||
-           ar->m_func->isGenerator());
-    return ret;
-  };
 
   auto* nextRbp = rbp;
   rbp = 0;
@@ -85,7 +87,7 @@ FixupMap::fixupWork(VMExecutionContext* ec, ActRec* rbp) const {
     nextRbp = reinterpret_cast<ActRec*>(rbp->m_savedRbp);
     TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
-    if (isVMFrame(nextRbp)) {
+    if (isVMFrame(ec, nextRbp)) {
       TRACE(2, "fixup checking vm frame %s\n",
                nextRbp->m_func->name()->data());
       VMRegs regs;
@@ -115,7 +117,7 @@ FixupMap::fixupWorkSimulated(VMExecutionContext* ec) const {
     // If this assert is failing, you may have forgotten a sync point somewhere
     assert(ar);
     bool ret =
-      uintptr_t(ar) - Util::s_stackLimit >= Util::s_stackSize &&
+      uintptr_t(ar) - s_stackLimit >= s_stackSize &&
       !sim->is_on_stack(ar);
     assert(!ret ||
            (ar >= g_vmContext->m_stack.getStackLowAddress() &&

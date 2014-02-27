@@ -317,7 +317,7 @@ void StringBuffer::growBy(int spaceRequired) {
 //////////////////////////////////////////////////////////////////////
 
 CstrBuffer::CstrBuffer(int cap)
-  : m_buffer((char*)Util::safe_malloc(cap + 1)), m_len(0), m_cap(cap) {
+  : m_buffer((char*)safe_malloc(cap + 1)), m_len(0), m_cap(cap) {
   assert(unsigned(cap) <= kMaxCap);
 }
 
@@ -332,7 +332,7 @@ CstrBuffer::CstrBuffer(const char *filename)
       throw StringBufferLimitException(kMaxCap, String(str.c_str()));
     }
     m_cap = sb.st_size;
-    m_buffer = (char *)Util::safe_malloc(m_cap + 1);
+    m_buffer = (char *)safe_malloc(m_cap + 1);
 
     int fd = ::open(filename, O_RDONLY);
     if (fd != -1) {
@@ -368,8 +368,8 @@ void CstrBuffer::append(StringSlice slice) {
     if (newlen + 1 > kMaxCap) {
       throw StringBufferLimitException(kMaxCap, detach());
     }
-    unsigned newcap = Util::nextPower2(newlen + 1);
-    m_buffer = (char*)Util::safe_realloc(m_buffer, newcap);
+    unsigned newcap = folly::nextPowTwo(newlen + 1);
+    m_buffer = (char*)safe_realloc(m_buffer, newcap);
     m_cap = newcap - 1;
     assert(newlen + 1 <= m_cap);
   }

@@ -24,28 +24,41 @@
 
 namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
+extern const StaticString s_IntlIterator;
 
 class IntlIterator : public IntlResourceData {
 public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(IntlIterator);
-  CLASSNAME_IS("IntlIterator");
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  IntlIterator() {}
+  IntlIterator(const IntlIterator&) = delete;
+  IntlIterator& operator=(const IntlIterator& src) {
+    setEnumeration(src.enumeration()->clone());
+    return *this;
+  }
+  ~IntlIterator() override {
+    setEnumeration(nullptr);
+  }
 
-  explicit IntlIterator(icu::StringEnumeration *se) : m_enum(se) {}
-
-  void sweep() override {
+  void setEnumeration(icu::StringEnumeration *se) {
     if (m_enum) {
       delete m_enum;
-      m_enum = nullptr;
     }
+    m_enum = se;
   }
 
-  bool isInvalid() const override {
-    return m_enum == nullptr;
+  bool isValid() const override {
+    return m_enum;
   }
 
-  static IntlIterator *Get(Object obj);
-  Object wrap();
+  static Object newInstance(icu::StringEnumeration *se = nullptr) {
+    auto obj = NewInstance(s_IntlIterator);
+    if (se) {
+      Native::data<IntlIterator>(obj.get())->setEnumeration(se);
+    }
+    return obj;
+  }
+  static IntlIterator* Get(Object obj) {
+    return GetData<IntlIterator>(obj, s_IntlIterator);
+  }
 
   int64_t key() const { return m_key; }
   Variant current() const { return m_current; }
@@ -77,6 +90,8 @@ public:
     next();
     return true;
   }
+
+  icu::StringEnumeration *enumeration() const { return m_enum; }
 
 private:
   icu::StringEnumeration *m_enum = nullptr;

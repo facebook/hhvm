@@ -153,6 +153,10 @@ const int64_t q_Memcached$$RES_BAD_KEY_PROVIDED
           = MEMCACHED_BAD_KEY_PROVIDED;
 const int64_t q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE
           = MEMCACHED_CONNECTION_SOCKET_CREATE_FAILURE;
+const int64_t q_Memcached$$RES_NOT_SUPPORTED
+          = MEMCACHED_NOT_SUPPORTED;
+const int64_t q_Memcached$$RES_INVALID_HOST_PROTOCOL
+          = MEMCACHED_INVALID_HOST_PROTOCOL;
 
 // Our result codes
 const int64_t q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
@@ -201,7 +205,7 @@ void c_Memcached::t___construct(const String& persistent_id /*= null_string*/) {
   if (persistent_id.isNull()) {
     m_impl.reset(new Impl);
   } else {
-    ImplPtr &impl = (*s_persistentMap)[persistent_id->toCPPString()];
+    ImplPtr &impl = (*s_persistentMap)[persistent_id.toCppString()];
     if (!impl) impl.reset(new Impl);
     m_impl = impl;
   }

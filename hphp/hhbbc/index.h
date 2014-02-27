@@ -78,6 +78,8 @@ inline bool operator<(Context a, Context b) {
          std::make_tuple(b.unit, b.func, b.cls);
 }
 
+std::string show(Context);
+
 /*
  * State of properties on a class.  Map from property name to its
  * Type.

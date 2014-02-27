@@ -93,6 +93,7 @@ class NormalizedInstruction {
   Offset nextOffset; // for intra-trace* non-call control-flow instructions,
                      // this is the offset of the next instruction in the trace*
   bool breaksTracelet:1;
+  bool includeBothPaths:1;
   bool changesPC:1;
   bool fuseBranch:1;
   bool preppedByRef:1;

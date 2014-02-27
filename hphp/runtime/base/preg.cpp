@@ -973,6 +973,8 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         }
 
         if (new_len + 1 > alloc_len) {
+          // Allocate needed memory plus some extra so we don't have to realloc
+          // too often
           alloc_len = 1 + alloc_len + 2 * new_len;
           result = (char *)realloc(result, alloc_len);
         }
@@ -1052,6 +1054,15 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                                     nullptr,
                                     VMExecutionContext::InvokePseudoMain);
             eval_result = v;
+
+            // Make sure that we have enough space in result
+            new_len = result_len + eval_result.size();
+            if (new_len + 1 > alloc_len) {
+              // Allocate needed memory plus some extra so we don't have to
+              // realloc too often
+              alloc_len = 1 + alloc_len + 2 * new_len;
+              result = (char *)realloc(result, alloc_len);
+            }
 
             memcpy(result + result_len, eval_result.data(), eval_result.size());
             result_len += eval_result.size();

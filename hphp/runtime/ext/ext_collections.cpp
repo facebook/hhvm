@@ -2485,7 +2485,7 @@ NEVER_INLINE void BaseMap::reserve(int64_t sz) {
 void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
   assert(m_size <= m_used && m_used <= m_cap);
   size_t newHashSize = size_t(newMask) + 1;
-  assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
+  assert(folly::isPowTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
   auto oldHashSize = oldData ? hashSize() : 0;
@@ -3239,7 +3239,7 @@ NEVER_INLINE void BaseSet::reserve(int64_t sz) {
 void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
   assert(m_size <= m_used && m_used <= m_cap);
   size_t newHashSize = size_t(newMask) + 1;
-  assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
+  assert(folly::isPowTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
   auto oldHashSize = oldData ? hashSize() : 0;

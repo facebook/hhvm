@@ -125,6 +125,8 @@
   CASE(FCallArray) \
   CASE(FCallBuiltin) \
   CASE(VerifyParamType) \
+  CASE(VerifyRetTypeC) \
+  CASE(VerifyRetTypeV) \
   CASE(InstanceOfD) \
   CASE(InstanceOf) \
   CASE(StaticLocInit) \

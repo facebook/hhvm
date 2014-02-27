@@ -24,9 +24,8 @@
  * 75%.   For more complex formatting, like spelled-out numbers, the
  * rule-based number formatters are used.
  */
+<<__NativeData("NumberFormatter")>>
 class NumberFormatter {
-  private ?resource $__resdata = null;
-
   /**
    * Create a number formatter
    *
@@ -47,9 +46,6 @@ class NumberFormatter {
   <<__Native>>
   public function __construct(string $locale, int $style,
                               string $pattern = ""): void;
-
-  <<__Native>>
-  public function __clone(): void;
 
   public static function create($locale,
                                 $style,

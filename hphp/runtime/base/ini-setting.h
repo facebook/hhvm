@@ -32,6 +32,7 @@ public:
     NormalScanner,
     RawScanner,
   };
+  typedef folly::dynamic Map;
 
   class ParserCallback {
   public:
@@ -46,6 +47,9 @@ public:
     virtual void onVar(std::string &result, const std::string &name);
     virtual void onOp(std::string &result, char type, const std::string& op1,
                       const std::string& op2);
+  private:
+    void makeArray(Variant &hash, const std::string &offset,
+                   const std::string &value);
   };
   class SectionParserCallback : public ParserCallback {
   public:
@@ -71,6 +75,9 @@ public:
     virtual void onPopEntry(const std::string &key, const std::string &value,
                             const std::string &offset, void *arg);
     virtual void onConstant(std::string &result, const std::string &name);
+  private:
+    void makeArray(Map &hash, const std::string &offset,
+                   const std::string &value);
   };
 
   enum Mode {
@@ -86,7 +93,6 @@ public:
 
   typedef std::function<bool(const std::string& value, void*p)> UpdateCallback;
   typedef std::function<std::string(void* p)> GetCallback;
-  typedef folly::dynamic Map;
 
 public:
   static Variant FromString(const String& ini, const String& filename,
@@ -128,10 +134,46 @@ public:
                    bool *p);
   static void Bind(const Extension* extension, const Mode mode,
                    const char *name,
+                   int16_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   int16_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   int32_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   int32_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
                    int64_t *p);
   static void Bind(const Extension* extension, const Mode mode,
                    const char *name, const char *value,
                    int64_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   uint16_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   uint16_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   uint32_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   uint32_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   uint64_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   uint64_t *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   double *p);
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name, const char *value,
+                   double *p);
   static void Unbind(const char *name);
 
   static void SetGlobalDefault(const char *name, const char *value);
@@ -142,7 +184,12 @@ int64_t convert_bytes_to_long(const std::string& value);
 
 #define ini_on_update_fail HPHP::IniSetting::UpdateCallback()
 bool ini_on_update_bool(const std::string& value, void *p);
+bool ini_on_update_short(const std::string& value, void *p);
+bool ini_on_update_int(const std::string& value, void *p);
 bool ini_on_update_long(const std::string& value, void *p);
+bool ini_on_update_ushort(const std::string& value, void *p);
+bool ini_on_update_uint(const std::string& value, void *p);
+bool ini_on_update_ulong(const std::string& value, void *p);
 bool ini_on_update_non_negative(const std::string& value, void *p);
 bool ini_on_update_real(const std::string& value, void *p);
 bool ini_on_update_stdstring(const std::string& value, void *p);
@@ -150,7 +197,12 @@ bool ini_on_update_string(const std::string& value, void *p);
 
 std::string ini_get_bool(void *p);
 std::string ini_get_bool_as_int(void *p);
+std::string ini_get_short(void *p);
+std::string ini_get_int(void *p);
 std::string ini_get_long(void *p);
+std::string ini_get_ushort(void *p);
+std::string ini_get_uint(void *p);
+std::string ini_get_ulong(void *p);
 std::string ini_get_real(void *p);
 std::string ini_get_string(void *p);
 std::string ini_get_stdstring(void *p);

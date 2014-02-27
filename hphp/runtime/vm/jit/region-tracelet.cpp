@@ -110,7 +110,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
   , m_region(std::make_shared<RegionDesc>())
   , m_curBlock(m_region->addBlock(ctx.func, m_sk.offset(), 0, ctx.spOffset))
   , m_blockFinished(false)
-  , m_irTrans(ctx.bcOffset, ctx.spOffset, ctx.func)
+  , m_irTrans(ctx.bcOffset, ctx.spOffset, ctx.inGenerator, ctx.func)
   , m_ht(m_irTrans.hhbcTrans())
   , m_arStates(1)
   , m_inlineDepth(inlineDepth)
@@ -425,10 +425,12 @@ bool RegionFormer::tryInline() {
 
   // Set up the region context, mapping stack slots in the caller to locals in
   // the callee.
+  assert(!callee->isGenerator());
   RegionContext ctx;
   ctx.func = callee;
   ctx.bcOffset = callee->base();
-  ctx.spOffset = callee->isGenerator() ? 0 : callee->numSlotsInFrame();
+  ctx.spOffset = callee->numSlotsInFrame();
+  ctx.inGenerator = false;
   for (int i = 0; i < callee->numParams(); ++i) {
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee. It's up to the callee to constraint further if needed.

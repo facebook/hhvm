@@ -36,10 +36,13 @@ struct intl_error {
   }
 };
 
-class IntlError : public RequestEventHandler {
+/* Request global error set by all Intl classes
+ * and accessed via intl_get_error_code|message()
+ */
+class IntlGlobalError : public RequestEventHandler {
 public:
   intl_error m_error;
-  IntlError() {
+  IntlGlobalError() {
     m_error.clear();
   }
   void requestInit() override {
@@ -69,41 +72,14 @@ public:
   const String getErrorMessage() const { return m_error.custom_error_message; }
 };
 
-DECLARE_EXTERN_REQUEST_LOCAL(IntlError, s_intl_error);
+DECLARE_EXTERN_REQUEST_LOCAL(IntlGlobalError, s_intl_error);
 
 namespace Intl {
 
-class IntlResourceData {
+/* Common error handling logic used by all Intl classes
+ */
+class IntlError {
  public:
-  template<class T>
-  static T* GetData(Object obj, const String& ctx) {
-    if (obj.isNull()) {
-      raise_error("NULL object passed");
-      return nullptr;
-    }
-    auto ret = Native::data<T>(obj.get());
-    if (!ret) {
-      return nullptr;
-    }
-    if (!ret->isValid()) {
-      ret->setError(U_ILLEGAL_ARGUMENT_ERROR,
-                    "Found unconstructed %s", ctx.c_str());
-      return nullptr;
-    }
-    return ret;
-  }
-
-  virtual bool isValid() const = 0;
-  virtual ~IntlResourceData() {}
-
-  static Object NewInstance(const String& name) {
-    auto cls = Unit::lookupClass(name.get());
-    assert(cls);
-    auto objdata = ObjectData::newInstance(cls);
-    assert(objdata);
-    return Object(objdata);
-  }
-
   void setError(intl_error& err) {
     s_intl_error->m_error = err;
     m_errorCode = err.code;
@@ -167,37 +143,30 @@ class IntlResourceData {
   UErrorCode m_errorCode;
 };
 
-class RequestData : public RequestEventHandler {
- public:
-  void requestInit() override {}
-
-  void requestShutdown() override {
-    if (m_utf8) {
-      ucnv_close(m_utf8);
-      m_utf8 = nullptr;
-    }
+template<class T>
+T* GetData(Object obj, const String& ctx) {
+  if (obj.isNull()) {
+    raise_error("NULL object passed");
+    return nullptr;
   }
-
-  UConverter* utf8() {
-    if (!m_utf8) {
-      UErrorCode error = U_ZERO_ERROR;
-      m_utf8 = ucnv_open("utf-8", &error);
-      assert(U_SUCCESS(error));
-    }
-    return m_utf8;
+  auto ret = Native::data<T>(obj.get());
+  if (!ret) {
+    return nullptr;
   }
+  if (!ret->isValid()) {
+    ret->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                  "Found unconstructed %s", ctx.c_str());
+    return nullptr;
+  }
+  return ret;
+}
 
-  const std::string& getDefaultLocale() const { return m_defaultLocale; }
-  void setDefaultLocale(const std::string& loc) { m_defaultLocale = loc; }
-
- private:
-  UConverter *m_utf8 = nullptr;
-  std::string m_defaultLocale;
-};
-
-DECLARE_EXTERN_REQUEST_LOCAL(RequestData, s_intl_request);
+/////////////////////////////////////////////////////////////////////////////
 
 const String GetDefaultLocale();
+inline String localeOrDefault(const String& str) {
+  return str.empty() ? GetDefaultLocale() : str;
+}
 bool SetDefaultLocale(const String& locale);
 double VariantToMilliseconds(CVarRef arg);
 
@@ -236,19 +205,11 @@ class IntlExtension : public Extension {
     initCalendar();
   }
 
-  void requestInit() override {
+  void threadInit() override {
     bindIniSettings();
   }
 
  private:
-  static bool icu_on_update_default_locale(const String& value, void *p) {
-    s_intl_request->setDefaultLocale(value->data());
-    return true;
-  }
-  static std::string icu_get_default_locale(void *p) {
-    return s_intl_request->getDefaultLocale();
-  }
-
   void bindIniSettings();
   void bindConstants();
   void initLocale();

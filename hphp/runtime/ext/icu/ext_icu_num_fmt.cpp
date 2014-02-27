@@ -24,6 +24,8 @@ namespace HPHP { namespace Intl {
 
 const StaticString s_NumberFormatter("NumberFormatter");
 
+Class* NumberFormatter::c_NumberFormatter = nullptr;
+
 #define UNUM_DECL(cns, val) \
   const int64_t q_NumberFormatter_ ## cns = val; \
   const StaticString s_NumberFormatter_ ## cns(#cns)
@@ -143,7 +145,7 @@ void NumberFormatter::setNumberFormatter(const String& locale,
     }
   }
 
-  const String loc = locale.empty() ? GetDefaultLocale() : locale;
+  const String loc(localeOrDefault(locale));
 
   error = U_ZERO_ERROR;
   m_formatter = unum_open((UNumberFormatStyle)style,

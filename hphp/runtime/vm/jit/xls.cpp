@@ -395,10 +395,6 @@ void XLS::computePositions() {
   }
 }
 
-bool allocUnusedDest(IRInstruction&) {
-  return false;
-}
-
 // Reduce the allow and prefer sets according to this particular use
 void srcConstraints(IRInstruction& inst, int i, SSATmp* src, Interval* ivl,
                     const Abi& abi) {
@@ -474,7 +470,7 @@ void XLS::buildIntervals() {
             inst_regs.dst(i).setReg(r, 0);
             continue;
           }
-          if (!allocUnusedDest(inst)) continue;
+          if (!needsUnusedReg(inst, i)) continue;
           m_intervals[d] = dest = smart_new<Interval>();
           dest->add(closedRange(dpos, dpos));
           dest->tmp = d;

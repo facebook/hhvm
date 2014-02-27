@@ -126,6 +126,12 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx);
  */
 bool loadsCell(Opcode op);
 
+/*
+ * Return true if the given destination operand needs to be assigned
+ * a register even if it's unused.
+ */
+bool needsUnusedReg(const IRInstruction& inst, unsigned dst);
+
 }}
 
 #endif

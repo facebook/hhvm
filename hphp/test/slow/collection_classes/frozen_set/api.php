@@ -1,8 +1,8 @@
 <?hh
 
-// Test FrozenSet's methods.
+// Test ImmSet's methods.
 
-// Print every element of a FrozenSet with a custom function,
+// Print every element of a ImmSet with a custom function,
 // since serialization is not wired up yet.
 function show_elems($fs) {
   echo "----\n";
@@ -13,8 +13,8 @@ function show_elems($fs) {
 };
 
 function api() {
-  $fs = new FrozenSet(Vector {1, 2, 3});
-  $e = new FrozenSet();
+  $fs = new ImmSet(Vector {1, 2, 3});
+  $e = new ImmSet();
 
   echo "\nempty...\n";
   var_dump($fs->isEmpty());
@@ -49,7 +49,7 @@ function api() {
 }
 
 function materialization_methods() {
-  $fs = new FrozenSet(Vector {1, 2, 3});
+  $fs = new ImmSet(Vector {1, 2, 3});
 
   echo "\ntoArray...\n";
   var_dump($fs->toArray());
@@ -63,8 +63,8 @@ function materialization_methods() {
   echo "\ntoVector...\n";
   var_dump($fs->toVector());
 
-  echo "\ntoFrozenVector...\n";
-  var_dump($fs->toFrozenVector());
+  echo "\ntoImmVector...\n";
+  var_dump($fs->toImmVector());
 
   echo "\ntoSet...\n";
   var_dump($fs->toSet());
@@ -72,7 +72,7 @@ function materialization_methods() {
 
 function magic_methods() {
   echo "\n__toString...\n";
-  echo (new FrozenSet(Vector {1, 2, 3})) . "\n";
+  echo (new ImmSet(Vector {1, 2, 3})) . "\n";
 
   $cfail = function($f) {
     try {
@@ -85,22 +85,22 @@ function magic_methods() {
 
   echo "\n__get...\n";
   echo $cfail( function () {
-    $fs = new FrozenSet(Vector {1, 2, 3});
+    $fs = new ImmSet(Vector {1, 2, 3});
     $x = $fs->nonexistentProperty;
   });
 
   echo "\n__set...\n";
   echo $cfail( function () {
-    $fs = new FrozenSet(Vector {1, 2, 3});
+    $fs = new ImmSet(Vector {1, 2, 3});
     $fs->inexistentProperty = 42;
   });
 
   echo "\n__isSet...\n";
-  var_dump(isset((new FrozenSet (Vector {1, 2, 3}))->notAProp));
+  var_dump(isset((new ImmSet (Vector {1, 2, 3}))->notAProp));
 
   echo "\n__unset...\n";
   echo $cfail( function () {
-    $fs = new FrozenSet(Vector {1, 2, 3});
+    $fs = new ImmSet(Vector {1, 2, 3});
     unset($fs->inexistentProperty);
   });
 }
@@ -108,20 +108,20 @@ function magic_methods() {
 function static_methods() {
 
   echo "\nfromItems...\n";
-  show_elems(FrozenSet::fromItems((Vector {1, 2, 3})->items()));
-  show_elems(FrozenSet::fromItems(Set {4, 5, 6}));
+  show_elems(ImmSet::fromItems((Vector {1, 2, 3})->items()));
+  show_elems(ImmSet::fromItems(Set {4, 5, 6}));
 
   echo "\nfromArrays...\n";
-  show_elems(FrozenSet::fromArrays(array(), array(1, 2, 3), array(4, 5, 6)));
+  show_elems(ImmSet::fromArrays(array(), array(1, 2, 3), array(4, 5, 6)));
 }
 
 function constructors() {
   echo "\nconstructors\n";
-  show_elems(new FrozenSet(Vector {1, 2, 3}));
-  show_elems(new FrozenSet(FrozenVector {1, 2, 3}));
-  show_elems(new FrozenSet(Set {1, 2, 3}));
-  show_elems(new FrozenSet(Map {0 => 1, 10 => 2, 40 => 3}));
-  show_elems(new FrozenSet(array(1, 2, 3)));
+  show_elems(new ImmSet(Vector {1, 2, 3}));
+  show_elems(new ImmSet(ImmVector {1, 2, 3}));
+  show_elems(new ImmSet(Set {1, 2, 3}));
+  show_elems(new ImmSet(Map {0 => 1, 10 => 2, 40 => 3}));
+  show_elems(new ImmSet(array(1, 2, 3)));
 }
 
 function main() {

@@ -226,8 +226,6 @@ public:
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
-  String getRequestMemoryMaxBytes() const { return m_maxMemory; }
-  void setRequestMemoryMaxBytes(const std::string& max);
   String getCwd() const { return m_cwd;}
   void setCwd(const String& cwd) { m_cwd = cwd;}
 
@@ -305,13 +303,8 @@ public:
   void setErrorState(ErrorState state) { m_errorState = state;}
   String getLastError() const { return m_lastError;}
   int getLastErrorNumber() const { return m_lastErrorNum;}
-  int getErrorReportingLevel() const { return m_errorReportingLevel;}
-  void setErrorReportingLevel(int level) { m_errorReportingLevel = level;}
   String getErrorPage() const { return m_errorPage;}
   void setErrorPage(const String& page) { m_errorPage = (std::string) page; }
-  bool getLogErrors() const { return m_logErrors;}
-  void setLogErrors(bool on);
-  String getErrorLog() const { return m_errorLog;}
   void setErrorLog(const String& filename);
 
   /**
@@ -333,13 +326,6 @@ public:
   void setStreamContext(Resource &context) { m_streamContext = context; }
   Resource &getStreamContext() { return m_streamContext; }
 
-  String getDefaultCharset() const { return m_defaultCharset; }
-  int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
-
-  void restoreIncludePath();
-  void setIncludePath(const String& path);
-  String getIncludePath() const;
-  Array getIncludePathArray() const { return m_include_paths; }
   const VirtualHost *getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
@@ -360,7 +346,6 @@ private:
   static const StaticString s_amp;
   // system settings
   Transport *m_transport;
-  std::string m_maxMemory;
   String m_cwd;
 
   // output buffering
@@ -381,22 +366,16 @@ private:
   std::vector<std::pair<Variant,int> > m_userErrorHandlers;
   std::vector<Variant> m_userExceptionHandlers;
   ErrorState m_errorState;
-  int64_t m_errorReportingLevel;
   String m_lastError;
   int m_lastErrorNum;
   std::string m_errorPage;
-  bool m_logErrors;
-  String m_errorLog;
 
   // misc settings
   Array m_envs;
   String m_timezone;
   String m_timezoneDefault;
-  String m_argSeparatorOutput;
   bool m_throwAllErrors;
   Resource m_streamContext;
-  String m_defaultCharset;
-  int64_t m_socketDefaultTimeout;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;
@@ -404,9 +383,6 @@ private:
   std::vector<Variant> m_userExceptionHandlersBackup;
 
   Variant m_exitCallback;
-
-  // include_path configuration option
-  Array m_include_paths;
 
   // cache the sandbox id for the request
   String m_sandboxId;

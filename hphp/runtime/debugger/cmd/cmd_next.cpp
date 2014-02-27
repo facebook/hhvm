@@ -199,7 +199,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // and end up at the caller of ASIO or send(). For async functions
   // stepping over an await, we land on the next statement.
   auto op = toOp(*pc);
-  if (fp->m_func->isGenerator() &&
+  if (fp->inGenerator() &&
       (op == OpContSuspend || op == OpContSuspendK || op == OpContRetC)) {
     TRACE(2, "CmdNext: encountered yield, await or return from generator\n");
     // Patch the projected return point(s) in both cases for

@@ -36,6 +36,8 @@ const StaticString
   s_tm_yday("tm_yday"),
   s_tm_isdst("tm_isdst");
 
+Class* IntlDateFormatter::c_IntlDateFormatter = nullptr;
+
 void IntlDateFormatter::setDateFormatter(const String& locale,
                                          int64_t datetype, int64_t timetype,
                                          CVarRef timezone, CVarRef calendar,

@@ -1,6 +1,6 @@
 
 __toString...
-FrozenMap
+ImmMap
 
 __get...
 Cannot access a property on a collection

@@ -1,9 +1,9 @@
 <?hh
 
-// Test isset() with FrozenVector.
+// Test isset() with ImmVector.
 
 function main() {
-  $fv = FrozenVector {1, 2, 3};
+  $fv = ImmVector {1, 2, 3};
   var_dump(isset($fv[0]));
   var_dump(isset($fv[2]));
   var_dump(isset($fv[3]));

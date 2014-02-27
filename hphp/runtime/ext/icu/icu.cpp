@@ -16,17 +16,48 @@
 */
 #include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/request-local.h"
 
 #include <unicode/uloc.h>
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_REQUEST_LOCAL(IntlError, s_intl_error);
+IMPLEMENT_REQUEST_LOCAL(IntlGlobalError, s_intl_error);
 
 namespace Intl {
 
-IMPLEMENT_REQUEST_LOCAL(RequestData, s_intl_request);
+/////////////////////////////////////////////////////////////////////////////
+// INI Setting
+
+/* gcc 4.7 doesn't support thread_locale storage
+ * required for dynamic initializers (like std::string)
+ * So wrap it up in a RequestEventHandler until we set
+ * gcc 4.8 as our minimum version
+ */
+class DefaultLocale : public RequestEventHandler {
+ public:
+  void requestInit() override {}
+  void requestShutdown() override {}
+
+  std::string getDefaultLocale() const { return m_defaultLocale; }
+  void setDefaultLocale(const std::string& locale) {
+    m_defaultLocale = locale;
+  }
+
+ private:
+  std::string m_defaultLocale;
+};
+IMPLEMENT_STATIC_REQUEST_LOCAL(DefaultLocale, s_default_locale);
+
+std::string icu_get_default_locale(void *p) {
+  return s_default_locale->getDefaultLocale();
+}
+
+bool icu_on_update_default_locale(const String& value, void *p) {
+  s_default_locale->setDefaultLocale(value->toCppString());
+  return true;
+}
 
 void IntlExtension::bindIniSettings() {
   IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
@@ -34,6 +65,22 @@ void IntlExtension::bindIniSettings() {
                    icu_on_update_default_locale, icu_get_default_locale,
                    nullptr);
 }
+
+const String GetDefaultLocale() {
+  String locale(s_default_locale->getDefaultLocale());
+  if (locale.empty()) {
+    locale = String(uloc_getDefault(), CopyString);
+  }
+  return locale;
+}
+
+bool SetDefaultLocale(const String& locale) {
+  s_default_locale->setDefaultLocale(locale->toCppString());
+  return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Common extension init
 
 const StaticString
 #ifdef U_ICU_DATA_VERSION
@@ -52,34 +99,23 @@ void IntlExtension::bindConstants() {
                                          s_U_ICU_VERSION.get());
 }
 
-const String GetDefaultLocale() {
-  String locale(s_intl_request->getDefaultLocale());
-  if (locale.empty()) {
-    locale = String(uloc_getDefault(), CopyString);
-  }
-  return locale;
-}
-
-bool SetDefaultLocale(const String& locale) {
-  s_intl_request->setDefaultLocale(locale->data());
-  return true;
-}
+/////////////////////////////////////////////////////////////////////////////
+// UTF8<->UTF16 string encoding conversion
 
 String u16(const char *u8, int32_t u8_len, UErrorCode &error) {
   error = U_ZERO_ERROR;
   if (u8_len == 0) {
     return empty_string;
   }
-  int32_t outlen = ucnv_toUChars(s_intl_request->utf8(),
-                                 nullptr, 0, u8, u8_len, &error);
+  int32_t outlen;
+  u_strFromUTF8(nullptr, 0, &outlen, u8, u8_len, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
     return null_string;
   }
   String ret = String(sizeof(UChar) * (outlen + 1), ReserveString);
   UChar *out = (UChar*)ret->mutableData();
   error = U_ZERO_ERROR;
-  outlen = ucnv_toUChars(s_intl_request->utf8(),
-                         out, outlen + 1, u8, u8_len, &error);
+  u_strFromUTF8(out, outlen + 1, &outlen, u8, u8_len, &error);
   if (U_FAILURE(error)) {
     return null_string;
   }
@@ -92,16 +128,15 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
   if (u16_len == 0) {
     return empty_string;
   }
-  int32_t outlen = ucnv_fromUChars(s_intl_request->utf8(),
-                                   nullptr, 0, u16, u16_len, &error);
+  int32_t outlen;
+  u_strToUTF8(nullptr, 0, &outlen, u16, u16_len, &error);
   if (error != U_BUFFER_OVERFLOW_ERROR) {
     return null_string;
   }
   String ret(outlen + 1, ReserveString);
   char *out = ret->mutableData();
   error = U_ZERO_ERROR;
-  outlen = ucnv_fromUChars(s_intl_request->utf8(),
-                           out, outlen + 1, u16, u16_len, &error);
+  u_strToUTF8(out, outlen + 1, &outlen, u16, u16_len, &error);
   if (U_FAILURE(error)) {
     return null_string;
   }

@@ -21,7 +21,7 @@
 #include <unicode/ures.h>
 #include <unicode/uloc.h>
 
-namespace HPHP {
+namespace HPHP { namespace Intl {
 //////////////////////////////////////////////////////////////////////////////
 // class Locale
 
@@ -30,8 +30,6 @@ namespace HPHP {
     s_intl_error->set(err, "%s", u_errorName(err)); \
     return ret; \
   }
-
-#define ULOC_DEFAULT(loc) (loc.empty() ? Intl::GetDefaultLocale() : loc)
 
 #define MAX_LOCALE_LEN 80
 
@@ -250,7 +248,7 @@ static Variant get_icu_display_value(const String &locale,
       buf.setSize(len * sizeof(UChar));
 
       error = U_ZERO_ERROR;
-      String out(Intl::u8(buf, error));
+      String out(u8(buf, error));
       if (U_FAILURE(error)) {
         s_intl_error->set(error, "Unable to convert result from "
                                  "locale_get_display_%s to UTF-8",
@@ -291,7 +289,7 @@ static Variant HHVM_STATIC_METHOD(Locale, acceptFromHttp,
 }
 
 static Variant HHVM_STATIC_METHOD(Locale, canonicalize, const String& locale) {
-  return get_icu_value(ULOC_DEFAULT(locale), LOC_CANONICALIZE);
+  return get_icu_value(localeOrDefault(locale), LOC_CANONICALIZE);
 }
 
 inline void element_not_string() {
@@ -406,7 +404,7 @@ static Variant HHVM_STATIC_METHOD(Locale, composeLocale, CArrRef subtags) {
 }
 
 static Array HHVM_STATIC_METHOD(Locale, getAllVariants, const String& locale) {
-  Variant val = get_icu_value(ULOC_DEFAULT(locale), LOC_VARIANT);
+  Variant val = get_icu_value(localeOrDefault(locale), LOC_VARIANT);
   String strval = val.toString();
   if (strval.empty()) {
     return null_array;
@@ -428,47 +426,47 @@ static Array HHVM_STATIC_METHOD(Locale, getAllVariants, const String& locale) {
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDefault) {
-  return Intl::GetDefaultLocale();
+  return GetDefaultLocale();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayLanguage,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(ULOC_DEFAULT(locale),
-                               ULOC_DEFAULT(in_locale), LOC_LANG);
+  return get_icu_display_value(localeOrDefault(locale),
+                               localeOrDefault(in_locale), LOC_LANG);
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayName,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(ULOC_DEFAULT(locale),
-                               ULOC_DEFAULT(in_locale), LOC_DISPLAY);
+  return get_icu_display_value(localeOrDefault(locale),
+                               localeOrDefault(in_locale), LOC_DISPLAY);
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayRegion,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(ULOC_DEFAULT(locale),
-                               ULOC_DEFAULT(in_locale), LOC_REGION);
+  return get_icu_display_value(localeOrDefault(locale),
+                               localeOrDefault(in_locale), LOC_REGION);
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayScript,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(ULOC_DEFAULT(locale),
-                               ULOC_DEFAULT(in_locale), LOC_SCRIPT);
+  return get_icu_display_value(localeOrDefault(locale),
+                               localeOrDefault(in_locale), LOC_SCRIPT);
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayVariant,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(ULOC_DEFAULT(locale),
-                               ULOC_DEFAULT(in_locale), LOC_VARIANT);
+  return get_icu_display_value(localeOrDefault(locale),
+                               localeOrDefault(in_locale), LOC_VARIANT);
 }
 
 static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
   UErrorCode error = U_ZERO_ERROR;
-  String locname = ULOC_DEFAULT(locale);
+  String locname = localeOrDefault(locale);
   UEnumeration *e = uloc_openKeywords(locname.c_str(), &error);
   if (!e) return null_array;
 
@@ -500,15 +498,15 @@ tryagain:
 
 static String HHVM_STATIC_METHOD(Locale, getPrimaryLanguage,
                                  const String& locale) {
-  return get_icu_value(ULOC_DEFAULT(locale), LOC_LANG);
+  return get_icu_value(localeOrDefault(locale), LOC_LANG);
 }
 
 static Variant HHVM_STATIC_METHOD(Locale, getRegion, const String& locale) {
-  return get_icu_value(ULOC_DEFAULT(locale), LOC_REGION);
+  return get_icu_value(localeOrDefault(locale), LOC_REGION);
 }
 
 static Variant HHVM_STATIC_METHOD(Locale, getScript, const String& locale) {
-  return get_icu_value(ULOC_DEFAULT(locale), LOC_SCRIPT);
+  return get_icu_value(localeOrDefault(locale), LOC_SCRIPT);
 }
 
 static String locale_suffix_strip(const String& locale) {
@@ -538,7 +536,7 @@ inline void normalize_for_match(String& v) {
 static String HHVM_STATIC_METHOD(Locale, lookup, CArrRef langtag,
                                  const String& locale,
                                  bool canonicalize, const String& def) {
-  String locname(ULOC_DEFAULT(locale), CopyString);
+  String locname(localeOrDefault(locale), CopyString);
   std::vector<std::pair<String,String>> cur_arr;
   for (ArrayIter iter(langtag); iter; ++iter) {
     auto val = iter.second();
@@ -638,7 +636,7 @@ static void add_array_entry(Array& ret,
 }
 
 static Array HHVM_STATIC_METHOD(Locale, parseLocale, const String& locale) {
-  String locname = ULOC_DEFAULT(locale);
+  String locname = localeOrDefault(locale);
   Array ret = Array::Create();
   if (std::find(g_grandfathered.begin(),
                 g_grandfathered.end(), locale.data()) !=
@@ -655,14 +653,14 @@ static Array HHVM_STATIC_METHOD(Locale, parseLocale, const String& locale) {
 }
 
 static bool HHVM_STATIC_METHOD(Locale, setDefault, const String& locale) {
-  return Intl::SetDefaultLocale(locale);
+  return SetDefaultLocale(locale);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_Locale("Locale");
 
-void Intl::IntlExtension::initLocale() {
+void IntlExtension::initLocale() {
   HHVM_STATIC_ME(Locale, acceptFromHttp);
   HHVM_STATIC_ME(Locale, canonicalize);
   HHVM_STATIC_ME(Locale, composeLocale);
@@ -710,4 +708,4 @@ void Intl::IntlExtension::initLocale() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-} // namespace HPHP
+}} // namespace HPHP::Intl

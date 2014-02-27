@@ -199,6 +199,12 @@ bad_tests = (
 
     # flaky: t3758218
     '/ext/intl/tests/calendar_getNow_basic.php',
+
+    # flaky: t3798855
+    '/ext/standard/tests/strings/sha1_file.php',
+
+    # flaky: t3805998
+    '/ext/standard/tests/file/realpath_basic4.php',
 )
 
 # Tests that work but not in repo mode

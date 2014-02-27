@@ -177,35 +177,35 @@ trait StrictKeyedIterable {
     return new LazyKeyedIterableView($this);
   }
   public function map($callback) {
-    $res = StableMap {};
+    $res = Map {};
     foreach ($this as $k => $v) {
       $res[$k] = $callback($v);
     }
     return $res;
   }
   public function mapWithKey($callback) {
-    $res = StableMap {};
+    $res = Map {};
     foreach ($this as $k => $v) {
       $res[$k] = $callback($k, $v);
     }
     return $res;
   }
   public function filter($callback) {
-    $res = StableMap {};
+    $res = Map {};
     foreach ($this as $k => $v) {
       if ($callback($v)) $res[$k] = $v;
     }
     return $res;
   }
   public function filterWithKey($callback) {
-    $res = StableMap {};
+    $res = Map {};
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) $res[$k] = $v;
     }
     return $res;
   }
   public function zip($iterable) {
-    $res = StableMap {};
+    $res = Map {};
     $it = $iterable->getIterator();
     foreach ($this as $k => $v) {
       if (!$it->valid()) break;

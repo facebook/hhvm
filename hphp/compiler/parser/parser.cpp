@@ -2077,12 +2077,12 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
     (AliasEntry){"Collection", "HH\\Collection"},
     (AliasEntry){"Vector", "HH\\Vector"},
     (AliasEntry){"Set", "HH\\Set"},
-    (AliasEntry){"FrozenVector", "HH\\FrozenVector"},
-    (AliasEntry){"FrozenSet", "HH\\FrozenSet"},
+    (AliasEntry){"ImmVector", "HH\\ImmVector"},
+    (AliasEntry){"ImmSet", "HH\\ImmSet"},
     (AliasEntry){"Pair", "HH\\Pair"},
     (AliasEntry){"Map", "HH\\Map"},
     (AliasEntry){"StableMap", "HH\\Map"}, // Merging with Map
-    (AliasEntry){"FrozenMap", "HH\\FrozenMap"},
+    (AliasEntry){"ImmMap", "HH\\ImmMap"},
   };
 
   return aliases;

@@ -141,7 +141,7 @@ void InterruptSite::Initialize(ActRec *fp) {
     m_char1 = m_sourceLoc.char1;
   }
   m_function = fp->m_func->name()->data();
-  if (fp->m_func->isGenerator()) {
+  if (fp->inGenerator()) {
     // Strip off "$continuation" to get the original function name
     assert(m_function.compare(m_function.length() - 13,
                               string::npos, "$continuation") == 0);

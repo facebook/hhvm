@@ -1,0 +1,96 @@
+object(ArrayIterator)#2 (2) {
+  ["storage":"ArrayIterator":private]=>
+  array(2) {
+    [0]=>
+    object(ArrayIterator)#3 (2) {
+      ["storage":"ArrayIterator":private]=>
+      array(1) {
+        [0]=>
+        int(1)
+      }
+      ["flags":"ArrayIterator":private]=>
+      int(0)
+    }
+    [1]=>
+    object(ArrayIterator)#4 (2) {
+      ["storage":"ArrayIterator":private]=>
+      array(2) {
+        [0]=>
+        int(21)
+        [1]=>
+        int(22)
+      }
+      ["flags":"ArrayIterator":private]=>
+      int(0)
+    }
+  }
+  ["flags":"ArrayIterator":private]=>
+  int(0)
+}
+object(ArrayIterator)#2 (2) {
+  ["storage":"ArrayIterator":private]=>
+  array(3) {
+    [0]=>
+    object(ArrayIterator)#3 (2) {
+      ["storage":"ArrayIterator":private]=>
+      array(1) {
+        [0]=>
+        int(1)
+      }
+      ["flags":"ArrayIterator":private]=>
+      int(0)
+    }
+    [1]=>
+    object(ArrayIterator)#4 (2) {
+      ["storage":"ArrayIterator":private]=>
+      array(2) {
+        [0]=>
+        int(21)
+        [1]=>
+        int(22)
+      }
+      ["flags":"ArrayIterator":private]=>
+      int(0)
+    }
+    [2]=>
+    object(ArrayIterator)#5 (2) {
+      ["storage":"ArrayIterator":private]=>
+      array(3) {
+        [0]=>
+        int(31)
+        [1]=>
+        int(32)
+        [2]=>
+        int(33)
+      }
+      ["flags":"ArrayIterator":private]=>
+      int(0)
+    }
+  }
+  ["flags":"ArrayIterator":private]=>
+  int(0)
+}
+===0===
+int(0)
+int(0)
+int(1)
+===1===
+int(1)
+int(0)
+int(21)
+===2===
+int(1)
+int(1)
+int(22)
+===3===
+int(2)
+int(0)
+int(31)
+===4===
+int(2)
+int(1)
+int(32)
+===5===
+int(2)
+int(2)
+int(33)

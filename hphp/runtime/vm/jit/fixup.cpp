@@ -67,7 +67,7 @@ bool isVMFrame(const VMExecutionContext* ec, const ActRec* ar) {
   assert(!ret ||
          (ar >= ec->m_stack.getStackLowAddress() &&
           ar < ec->m_stack.getStackHighAddress()) ||
-         (ar->m_func->validate(), ar->m_func->isGenerator()));
+         (ar->m_func->validate(), ar->inGenerator()));
   return ret;
 }
 }
@@ -122,7 +122,7 @@ FixupMap::fixupWorkSimulated(VMExecutionContext* ec) const {
     assert(!ret ||
            (ar >= g_vmContext->m_stack.getStackLowAddress() &&
             ar < g_vmContext->m_stack.getStackHighAddress()) ||
-           ar->m_func->isGenerator());
+           ar->inGenerator());
     return ret;
   };
 

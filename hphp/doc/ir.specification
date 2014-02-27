@@ -1858,24 +1858,29 @@ DbgAssertRetAddr
 18. Iterators
 
 
-D:Bool = IterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
-D:Bool = IterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
-D:Bool = WIterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
-D:Bool = WIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
-D:Bool = MIterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
-D:Bool = MIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
+D:Bool = IterInit <IterData> S0:{Arr|Obj} S1:FramePtr
+D:Bool = IterInitK <IterData> S0:{Arr|Obj} S1:FramePtr
+D:Bool = WIterInit <IterData> S0:{Arr|Obj} S1:FramePtr
+D:Bool = WIterInitK <IterData> S0:{Arr|Obj} S1:FramePtr
+D:Bool = MIterInit <IterData> S0:{Arr|Obj} S1:FramePtr
+D:Bool = MIterInitK <IterData> S0:{Arr|Obj} S1:FramePtr
 
-  Initializes the iterator variable whose index is given by S2. This
-  instruction creates the appropriate iterator for the array or object that S0
-  references, and rewinds the new iterator to its start. S3 and S4 are local
-  variable indices. S0 points to the stack frame containing the iterator and
-  local variables S2, S3, and S4.
+  <IterData> consists of three indices, iterId, keyId and valId. iterId is
+  the index of the iterator variable, keyId and valId are indices of local
+  variables.
+
+  Initializes the iterator variable whose index is given by iterId.
+  This instruction creates the appropriate iterator for the array or object that
+  S0 references, and rewinds the new iterator to its start. S0 points to the
+  stack frame containing the iterator and local variables with the indices
+  iterId, keyId and valId.
 
   If the new iterator is at its end (i.e., has no elements to iterate over),
   this instruction decrements the refcount of S0 and returns false; otheriwse,
   it stores a reference to S0 in the new iterator and returns true. If the
   iterator is not at its end, then this instruction stores the iterator's first
-  value (and key) into the local variable S3 (and S4, respectively).
+  value (and key) into the local variable with index valId (and keyId,
+  respectively).
 
   The IterInit and IterInitK instructions always copy the array element by
   value.
@@ -1889,21 +1894,24 @@ D:Bool = MIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
   This instruction has the ConsumesRC property because it either decrements the
   reference count of s0 or stores a reference to S0 into the new iterator.
 
-D:Bool = IterNext S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
-D:Bool = WIterNext S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = WIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
-D:Bool = MIterNext S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = MIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
+D:Bool = IterNext <IterData> S0:FramePtr
+D:Bool = IterNextK <IterData> S0:FramePtr
+D:Bool = WIterNext <IterData> S0:FramePtr
+D:Bool = WIterNextK <IterData> S0:FramePtr
+D:Bool = MIterNext <IterData> S0:FramePtr
+D:Bool = MIterNextK <IterData> S0:FramePtr
 
-  Advances the iterator variable whose index is given by S1. S2 and S3 are
-  local variable indices. S0 points to the stack frame containing the iterator
-  and local variables S1, S2, and S3.
+  <IterData> consists of three indices, iterId, keyId and valId. iterId is
+  the index of the iterator variable, keyId and valId are indices of local
+  variables.  S0 points to the stack frame containing the iterator and local
+  variables with the indices iterId, keyId and valId.
+
+  Advances the iterator variable whose index is given by iterId.
 
   If the iterator has reached the end, this instruction frees the iterator
   variable and returns false; otherwise, it returns true. If the iterator has
   not reached its end, then this instruction stores the iterator's next value
-  (and key) into the local variable S3 (and S4, respectively).
+  (and key) into the local variable with index valId (and keyId, respectively).
 
   The IterInit and IterInitK instructions always copy the array element by
   value. The WIterInit and WIterInitK instructions copy referenced array
@@ -2223,7 +2231,7 @@ VectorHasFrozenCopy S0:Obj<Vector> -> B
 
 VectorDoCow S0:Obj<Vector>
 
-  Triggers a copy on write for a Vector that has a live FrozenVector sharing
+  Triggers a copy on write for a Vector that has a live ImmVector sharing
   the same copy of the elements.
 
 D:Obj = ColAddNewElemC S0:Obj S0:Cell

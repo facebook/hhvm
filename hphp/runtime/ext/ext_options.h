@@ -56,7 +56,7 @@ String f_cpu_get_model();
 String f_ini_get(const String& varname);
 Array f_ini_get_all(const String& extension, bool detailed);
 void f_ini_restore(const String& varname);
-String f_ini_set(const String& varname, const String& newvalue);
+Variant f_ini_set(const String& varname, const String& newvalue);
 int64_t f_memory_get_allocation();
 int64_t f_memory_get_peak_usage(bool real_usage = false);
 int64_t f_memory_get_usage(bool real_usage = false);

@@ -22,11 +22,12 @@ include(CheckFunctionExists)
 include(cotire)
 
 FIND_PATH(LIBC_INCLUDE_PATH stdlib.h)
+FIND_PATH(LIBC_ARCH_INCLUDE_PATH bits/waitflags.h)
 
 set_property(DIRECTORY
     PROPERTY COTIRE_PREFIX_HEADER_IGNORE_PATH
         "${LIBC_INCLUDE_PATH}/stdlib.h"
-        "/usr/include/x86_64-linux-gnu/bits"
+        "${LIBC_ARCH_INCLUDE_PATH}/bits"
         ${CCLIENT_INCLUDE_PATH}
         "${JEMALLOC_INCLUDE_DIR}/jemalloc"
         "${ONIGURUMA_INCLUDE_DIR}/onigposix.h"

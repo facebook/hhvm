@@ -92,7 +92,7 @@ class Phar extends RecursiveDirectoryIterator
     }
 
     $this->contents = substr($data, $pos);
-    $this->parsePhar($this->contents);
+    $this->parsePhar($data, $pos);
 
     if ($alias) {
       self::$aliases[$alias] = $this;
@@ -936,38 +936,38 @@ class Phar extends RecursiveDirectoryIterator
     return $ret;
   }
 
-  private function parsePhar($str) {
-    $pos = 0;
-    $len = self::bytesToInt($str, $pos, 4);
-    $this->count = self::bytesToInt($str, $pos, 4);
-    $this->apiVersion = self::bytesToInt($str, $pos, 2);
-    $this->archiveFlags = self::bytesToInt($str, $pos, 4);
-    $alias_len = self::bytesToInt($str, $pos, 4);
-    $this->alias = self::substr($str, $pos, $alias_len);
-    $metadata_len = self::bytesToInt($str, $pos, 4);
+  private function parsePhar($data, &$pos) {
+    $start = $pos;
+    $len = self::bytesToInt($data, $pos, 4);
+    $this->count = self::bytesToInt($data, $pos, 4);
+    $this->apiVersion = self::bytesToInt($data, $pos, 2);
+    $this->archiveFlags = self::bytesToInt($data, $pos, 4);
+    $alias_len = self::bytesToInt($data, $pos, 4);
+    $this->alias = self::substr($data, $pos, $alias_len);
+    $metadata_len = self::bytesToInt($data, $pos, 4);
     $this->metadata = unserialize(
-      self::substr($str, $pos, $metadata_len)
+      self::substr($data, $pos, $metadata_len)
     );
-    $this->parseFileInfo($str, $pos);
-    if ($pos != $len + 4) {
+    $this->parseFileInfo($data, $pos);
+    if ($pos != $start + $len + 4) {
       throw new PharException(
         "Malformed manifest. Expected $len bytes, got $pos"
       );
     }
     foreach ($this->fileInfo as $key => $info) {
-      $this->fileOffsets[$key] = array($pos, $info[2]);
+      $this->fileOffsets[$key] = array($pos - $start, $info[2]);
       $pos += $info[2];
     }
 
     // Try to see if there is a signature
     if (($this->archiveFlags & self::SIGNATURE)) {
-      if (strlen($str) < 8 || substr($str, -4) !== "GBMB") {
+      if (strlen($data) < 8 || substr($data, -4) !== "GBMB") {
         // Not even the GBMB and the flags?
         throw new PharException("phar has a broken signature");
       }
 
-      $pos = strlen($str) - 8;
-      $this->signatureFlags = self::bytesToInt($str, $pos, 4);
+      $pos = strlen($data) - 8;
+      $this->signatureFlags = self::bytesToInt($data, $pos, 4);
       switch (($this->signatureFlags & 0xF)) {
         case 1 << self::MD5:
           $digestSize = 16;
@@ -989,14 +989,14 @@ class Phar extends RecursiveDirectoryIterator
           throw new PharException("phar has a broken or unsupported signature");
       }
 
-      if (strlen($str) < 8 + $digestSize) {
+      if (strlen($data) < 8 + $digestSize) {
         throw new PharException("phar has a broken signature");
       }
 
       $pos -= 4;
       $signatureStart = $pos - $digestSize;
-      $this->signature = substr($str, $signatureStart);
-      $actualHash = self::verifyHash($str, $digestName, $signatureStart);
+      $this->signature = substr($data, $signatureStart, $digestSize);
+      $actualHash = self::verifyHash($data, $digestName, $signatureStart);
 
       if ($actualHash !== $this->signature) {
         throw new PharException("phar has a broken signature");

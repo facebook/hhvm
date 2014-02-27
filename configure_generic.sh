@@ -1,7 +1,7 @@
 #########################################
-#
-# Install all the dependencies for HipHop
-#
+#                                       #
+# Generic Dependency Installer Script   #
+#                                       #
 #########################################
 
 # Current Script details

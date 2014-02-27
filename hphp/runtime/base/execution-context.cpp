@@ -65,18 +65,10 @@ BaseExecutionContext::BaseExecutionContext() :
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
     m_vhost(nullptr) {
 
+  // We want this to run on every request, instead of just once per thread
   auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
-  setRequestMemoryMaxBytes(max_mem);
+  IniSetting::Set("memory_limit", max_mem);
   restoreIncludePath();
-
-  // Resource Limits
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
-                   [this](const std::string& value, void* p) {
-                     this->setRequestMemoryMaxBytes(value);
-                     return true;
-                   },
-                   [](void* p) { return ini_get((std::string*)p); },
-                   &m_maxMemory);
 
   // Data Handling
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
@@ -256,21 +248,6 @@ void BaseExecutionContext::setContentType(const String& mimetype,
     m_transport->addHeader("Content-Type", contentType.c_str());
     m_transport->setDefaultContentType(false);
   }
-}
-
-void BaseExecutionContext::setRequestMemoryMaxBytes(const std::string& max) {
-  int64_t newInt = strtoll(max.c_str(), nullptr, 10);
-  if (newInt <= 0) {
-    newInt = INT64_MAX;
-    m_maxMemory = std::to_string(newInt);
-  } else {
-    m_maxMemory = max;
-    newInt = convert_bytes_to_long(max);
-    if (newInt <= 0) {
-      newInt = INT64_MAX;
-    }
-  }
-  MM().getStatsNoRefresh().maxBytes = newInt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -875,7 +852,7 @@ void BaseExecutionContext::setErrorLog(const String& filename) {
 // IDebuggable
 
 void BaseExecutionContext::debuggerInfo(InfoVec &info) {
-  int64_t newInt = convert_bytes_to_long(m_maxMemory);
+  int64_t newInt = convert_bytes_to_long(IniSetting::Get("memory_limit"));
   if (newInt <= 0) {
     newInt = INT64_MAX;
   }

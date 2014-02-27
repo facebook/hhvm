@@ -299,6 +299,10 @@ public:
   bool m_debuggerIntr;   // indicating we should force interrupt for debugger
   bool m_coverage;       // is coverage being collected
   bool m_jit;            // is the jit enabled
+
+  // Things corresponding to user setable INI settings
+  std::string m_maxMemory;
+
  public:
   int getTimeout() const { return m_timeoutSeconds; }
   void setTimeout(int seconds);

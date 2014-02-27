@@ -226,8 +226,6 @@ public:
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
-  String getRequestMemoryMaxBytes() const { return m_maxMemory; }
-  void setRequestMemoryMaxBytes(const std::string& max);
   String getCwd() const { return m_cwd;}
   void setCwd(const String& cwd) { m_cwd = cwd;}
 
@@ -360,7 +358,6 @@ private:
   static const StaticString s_amp;
   // system settings
   Transport *m_transport;
-  std::string m_maxMemory;
   String m_cwd;
 
   // output buffering

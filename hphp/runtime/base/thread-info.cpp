@@ -151,6 +151,25 @@ RequestInjectionData::~RequestInjectionData() {
 }
 
 void RequestInjectionData::threadInit() {
+  // Resource Limits
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
+                   [this](const std::string& value, void* p) {
+                     int64_t newInt = strtoll(value.c_str(), nullptr, 10);
+                     if (newInt <= 0) {
+                       newInt = std::numeric_limits<int64_t>::max();
+                       m_maxMemory = std::to_string(newInt);
+                     } else {
+                       m_maxMemory = value;
+                       newInt = convert_bytes_to_long(value);
+                       if (newInt <= 0) {
+                         newInt = std::numeric_limits<int64_t>::max();
+                       }
+                     }
+                     MM().getStatsNoRefresh().maxBytes = newInt;
+                     return true;
+                   },
+                   [](void* p) { return ini_get((std::string*)p); },
+                   &m_maxMemory);
 }
 
 void RequestInjectionData::onSessionInit() {

@@ -138,8 +138,8 @@ BaseExecutionContext::BaseExecutionContext() :
                          directories.push_back(path.toCppString());
                        }
                      }
-                     setAllowedDirectories(directories);
-                     setSafeFileAccess(!boom.empty());
+                     m_allowedDirectories = directories;
+                     m_safeFileAccess = !boom.empty();
                      return true;
                    },
                    [this](void*) -> std::string {

@@ -2,7 +2,7 @@
 
 class Foo {
   private $private;
-  private $protected;
+  protected $protected;
   public $public;
   public function __unset($prop) { echo "__unset($prop)\n"; }
 }

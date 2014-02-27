@@ -635,13 +635,20 @@ static std::string toStringElm(const TypedValue* tv) {
     os << " ??? type " << tv->m_type << "\n";
     return os.str();
   }
-
-  assert(tv->m_type >= MinDataType && tv->m_type < MaxNumDataTypes);
-  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->m_count <= 0) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->m_count <= 0 &&
+      tv->m_data.pref->m_count != StaticValue) {
     // OK in the invoking frame when running a destructor.
     os << " ??? inner_count " << tv->m_data.pref->m_count << " ";
     return os.str();
   }
+
+  auto print_count = [&] {
+    if (tv->m_data.pref->m_count == StaticValue) {
+      os << ":c(static)";
+    } else {
+      os << ":c(" << tv->m_data.pref->m_count << ")";
+    }
+  };
 
   switch (tv->m_type) {
   case KindOfRef:
@@ -683,32 +690,32 @@ static std::string toStringElm(const TypedValue* tv) {
         len = 128;
         truncated = true;
       }
-      os << tv->m_data.pstr
-         << "c(" << tv->m_data.pstr->getCount() << ")"
-         << ":\""
+      os << tv->m_data.pstr;
+      print_count();
+      os << ":\""
          << escapeStringForCPP(tv->m_data.pstr->data(), len)
          << "\"" << (truncated ? "..." : "");
     }
     break;
   case KindOfArray:
     assert_refcount_realistic_nz(tv->m_data.parr->getCount());
-    os << tv->m_data.parr
-       << "c(" << tv->m_data.parr->getCount() << ")"
-       << ":Array";
-     break;
+    os << tv->m_data.parr;
+    print_count();
+    os << ":Array";
+    break;
   case KindOfObject:
     assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
-    os << tv->m_data.pobj
-       << "c(" << tv->m_data.pobj->getCount() << ")"
-       << ":Object("
+    os << tv->m_data.pobj;
+    print_count();
+    os << ":Object("
        << tv->m_data.pobj->o_getClassName().get()->data()
        << ")";
     break;
   case KindOfResource:
     assert_refcount_realistic_nz(tv->m_data.pres->getCount());
-    os << tv->m_data.pres
-       << "c(" << tv->m_data.pres->getCount() << ")"
-       << ":Resource("
+    os << tv->m_data.pres;
+    print_count();
+    os << ":Resource("
        << const_cast<ResourceData*>(tv->m_data.pres)
             ->o_getClassName().get()->data()
        << ")";

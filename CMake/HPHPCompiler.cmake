@@ -40,6 +40,7 @@ else()
 	endif()
 	set(GNUCC_PLAT_OPT "")
 	if(NOT IS_AARCH64)
+		# TODO: This should really only be set on X86/X64
 		set(GNUCC_PLAT_OPT "-mcrc32")
 	endif()
 	set(CMAKE_C_FLAGS "-w")

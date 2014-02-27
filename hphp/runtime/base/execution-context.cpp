@@ -69,29 +69,6 @@ BaseExecutionContext::BaseExecutionContext() :
   auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
   IniSetting::Set("memory_limit", max_mem);
 
-  // Paths and Directories
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "open_basedir",
-                   [](const std::string& value, void* p) {
-                     RuntimeOption::AllowedDirectories.clear();
-                     auto boom = f_explode(";", value).toCArrRef();
-                     for (ArrayIter iter(boom); iter; ++iter) {
-                       RuntimeOption::AllowedDirectories.push_back(
-                         iter.second().toCStrRef().toCppString()
-                       );
-                     }
-                     return true;
-                   },
-                   [](void*) {
-                     std::string out = "";
-                     for (auto& dir : RuntimeOption::AllowedDirectories) {
-                       if (!dir.empty()) {
-                         out += dir + ";";
-                       }
-                     }
-                     return out;
-                   });
-
   // Errors and Logging Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "error_reporting",

@@ -185,7 +185,7 @@ Wrapper* getWrapper(const String& scheme) {
   return nullptr;
 }
 
-Wrapper* getWrapperFromURI(const String& uri) {
+Wrapper* getWrapperFromURI(const String& uri, int* pathIndex /* = NULL */) {
   const char *uri_string = uri.data();
 
   /* Special case for PHP4 Backward Compatability */
@@ -204,6 +204,7 @@ Wrapper* getWrapperFromURI(const String& uri) {
   }
 
   int len = colon - uri_string;
+  if (pathIndex != NULL) *pathIndex = len + sizeof("://") - 1;
   if (Wrapper *w = getWrapper(String(uri_string, len, CopyString))) {
     return w;
   }

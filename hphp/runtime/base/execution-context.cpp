@@ -61,7 +61,6 @@ BaseExecutionContext::BaseExecutionContext() :
     m_out(nullptr), m_implicitFlush(false), m_protectedLevel(0),
     m_stdout(nullptr), m_stdoutData(nullptr),
     m_errorState(ExecutionContext::ErrorState::NoError),
-    m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
     m_lastErrorNum(0), m_throwAllErrors(false),
     m_vhost(nullptr) {
 
@@ -69,10 +68,11 @@ BaseExecutionContext::BaseExecutionContext() :
   auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
   IniSetting::Set("memory_limit", max_mem);
 
-  // Errors and Logging Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "error_reporting",
-                   &m_errorReportingLevel);
+  // This one is hot so we don't want to go through the ini_set() machinery to
+  // change it in error_reporting(). Because of that, we have to set it back to
+  // the default on every request.
+  ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.
+    setErrorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel);
 }
 
 VMExecutionContext::VMExecutionContext() :
@@ -575,7 +575,9 @@ bool BaseExecutionContext::errorNeedsHandling(int errnum,
 }
 
 bool BaseExecutionContext::errorNeedsLogging(int errnum) {
-  return RuntimeOption::NoSilencer || (getErrorReportingLevel() & errnum) != 0;
+  auto level = ThreadInfo::s_threadInfo.getNoCheck()->
+    m_reqInjectionData.getErrorReportingLevel();
+  return RuntimeOption::NoSilencer || (level & errnum) != 0;
 }
 
 class ErrorStateHelper {

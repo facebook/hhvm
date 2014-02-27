@@ -237,6 +237,11 @@ void RequestInjectionData::threadInit() {
 
   // Errors and Logging Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "error_reporting",
+                   std::to_string(RuntimeOption::RuntimeErrorReportingLevel)
+                    .c_str(),
+                   &m_errorReportingLevel);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "log_errors",
                    IniSetting::SetAndGet<bool>(
                      [this](const bool& on) {

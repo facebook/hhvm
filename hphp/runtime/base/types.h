@@ -305,6 +305,7 @@ public:
   std::string m_argSeparatorOutput;
   std::string m_defaultCharset;
   std::vector<std::string> m_include_paths;
+  int64_t m_errorReportingLevel;
   bool m_logErrors;
   std::string m_errorLog;
   int64_t m_socketDefaultTimeout;
@@ -340,6 +341,8 @@ public:
   // getters for user setable INI settings
   std::vector<std::string> getIncludePaths() { return m_include_paths; }
   std::string getDefaultIncludePath();
+  int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
+  void setErrorReportingLevel(int level) { m_errorReportingLevel = level; }
   int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
 
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling

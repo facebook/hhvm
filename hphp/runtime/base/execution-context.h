@@ -303,8 +303,6 @@ public:
   void setErrorState(ErrorState state) { m_errorState = state;}
   String getLastError() const { return m_lastError;}
   int getLastErrorNumber() const { return m_lastErrorNum;}
-  int getErrorReportingLevel() const { return m_errorReportingLevel;}
-  void setErrorReportingLevel(int level) { m_errorReportingLevel = level;}
   String getErrorPage() const { return m_errorPage;}
   void setErrorPage(const String& page) { m_errorPage = (std::string) page; }
 
@@ -367,7 +365,6 @@ private:
   std::vector<std::pair<Variant,int> > m_userErrorHandlers;
   std::vector<Variant> m_userExceptionHandlers;
   ErrorState m_errorState;
-  int64_t m_errorReportingLevel;
   String m_lastError;
   int m_lastErrorNum;
   std::string m_errorPage;

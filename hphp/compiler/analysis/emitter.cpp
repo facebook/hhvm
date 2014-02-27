@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2569,17 +2569,22 @@ void EmitterVisitor::visit(FileScopePtr file) {
           break;
         case Statement::KindOfReturnStatement:
           if (mainReturn.m_type != KindOfInvalid) break;
+
+          visit(s);
           if (notMergeOnly) {
             tvWriteUninit(&mainReturn);
             m_ue.returnSeen();
-            goto fail;
-          } else {
+            continue;
+          }
+
+          {
             ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(s));
             Variant v((Variant::NullInit()));
             if (r->getRetExp() &&
                 !r->getRetExp()->getScalarValue(v)) {
               tvWriteUninit(&mainReturn);
-              goto fail;
+              notMergeOnly = true;
+              continue;
             }
             if (v.isString()) {
               v = String(makeStaticString(v.asCStrRef().get()));
@@ -2652,8 +2657,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
           } // fall through
         default:
           if (mainReturn.m_type != KindOfInvalid) break;
-          // fall through
-        fail:
           notMergeOnly = true;
           visit(s);
       }
@@ -7089,50 +7092,31 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
   StringData* methDoc = empty_string.get();
   const Location* sLoc = p.m_is->getLocation().get();
   p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
-  if (!pinit) {
-    FuncEmitter::ParamInfo pi;
-    pi.setRef(true);
-    static const StringData* s_props = makeStaticString("props");
-    p.m_fe->appendParam(s_props, pi);
-  }
 
   Emitter e(p.m_is, m_ue, *this);
   FuncFinisher ff(this, e, p.m_fe);
 
-  // Generate HHBC of the structure:
-  //
-  // Private instance properties are initialized using InitProp.
-  //
-  //   private static function 86sinit(&$props) {
-  //     props["p0"] = <non-scalar initialization>;
-  //     props["p1"] = <non-scalar initialization>;
-  //     # ...
-  //   }
+  // Private instance and static properties are initialized using
+  // InitProp.
   size_t nProps = p.m_vec->size();
   assert(nProps > 0);
   for (size_t i = 0; i < nProps; ++i) {
     const StringData* propName =
       makeStaticString(((*p.m_vec)[i]).first);
 
-    if (pinit) {
-      Label isset;
-      const PreClassEmitter::Prop& preProp =
-        p.m_fe->pce()->lookupProp(propName);
-      if ((preProp.attrs() & (AttrPrivate|AttrStatic)) != AttrPrivate) {
-        e.CheckProp(const_cast<StringData*>(propName));
-        e.JmpNZ(isset);
-      }
-      visit((*p.m_vec)[i].second);
-      e.InitProp(const_cast<StringData*>(propName), InitPropOp::NonStatic);
-      isset.set(e);
-    } else {
-      emitVirtualLocal(0);
-      e.String((StringData*)propName);
-      markElem(e);
-      visit((*p.m_vec)[i].second);
-      emitSet(e);
-      e.PopC();
+    Label isset;
+    InitPropOp op = InitPropOp::NonStatic;
+    const PreClassEmitter::Prop& preProp =
+      p.m_fe->pce()->lookupProp(propName);
+    if ((preProp.attrs() & AttrStatic) == AttrStatic) {
+      op = InitPropOp::Static;
+    } else if ((preProp.attrs() & (AttrPrivate|AttrStatic)) != AttrPrivate) {
+      e.CheckProp(const_cast<StringData*>(propName));
+      e.JmpNZ(isset);
     }
+    visit((*p.m_vec)[i].second);
+    e.InitProp(const_cast<StringData*>(propName), op);
+    isset.set(e);
   }
   e.Null();
   e.RetC();

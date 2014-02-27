@@ -1,12 +1,12 @@
 HipHop Notice: Array to string conversion in %s/test/slow/ext_array/array_combine_key_tostring.php on line 8
 array(1) {
   ["Hello"]=>
-  &object(Foo)#1 (0) {
+  object(Foo)#1 (0) {
   }
 }
 array(2) {
   ["Array"]=>
-  &array(1) {
+  array(1) {
     [0]=>
     int(1)
   }

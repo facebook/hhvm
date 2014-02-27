@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -169,7 +169,7 @@ bool TypeConstraint::checkTypeAliasObj(const TypedValue* tv) const {
 }
 
 bool
-TypeConstraint::check(const TypedValue* tv, const Func* func) const {
+TypeConstraint::check(TypedValue* tv, const Func* func) const {
   assert(hasConstraint());
 
   // This is part of the interpreter runtime; perf matters.
@@ -283,7 +283,7 @@ static const char* describe_actual_type(const TypedValue* tv) {
 }
 
 void TypeConstraint::verifyFail(const Func* func, int paramNum,
-                                const TypedValue* tv) const {
+                                TypedValue* tv) const {
   JIT::VMRegAnchor _;
 
   const StringData* tn = typeName();
@@ -294,6 +294,26 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
   }
 
   auto const givenType = describe_actual_type(tv);
+
+  auto c = tvToCell(tv);
+  if (isArray() && !isSoft() && !func->mustBeRef(paramNum) &&
+      c->m_type == KindOfObject && c->m_data.pobj->isCollection()) {
+    // To ease migration, the 'array' type constraint will implicitly cast
+    // collections to arrays, provided the type constraint is not soft and
+    // the parameter is not by reference. We raise a notice to let the user
+    // know that there was a type mismatch and that an implicit conversion
+    // was performed.
+    raise_notice(
+      folly::format(
+        "Argument {} to {}() must be of type {}, {} given; argument {} was "
+        "implicitly cast to array",
+        paramNum + 1, func->fullName()->data(), fullName(), givenType,
+        paramNum + 1
+      ).str()
+    );
+    tvCastToArrayInPlace(tv);
+    return;
+  }
 
   if (isExtended() && isSoft()) {
     // Soft extended type hints raise warnings instead of recoverable

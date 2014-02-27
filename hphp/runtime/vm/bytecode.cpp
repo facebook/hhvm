@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -6884,7 +6884,7 @@ OPTBLD_INLINE void VMExecutionContext::iopVerifyParamType(IOP_ARGS) {
   if (tc.isTypeVar()) {
     return;
   }
-  const TypedValue *tv = frame_local(m_fp, param);
+  auto* tv = frame_local(m_fp, param);
   tc.verify(tv, func, param);
 }
 
@@ -7311,16 +7311,28 @@ OPTBLD_INLINE void VMExecutionContext::iopInitProp(IOP_ARGS) {
   DECODE_OA(InitPropOp, propOp);
 
   auto* cls = m_fp->getClass();
-  auto* propVec = cls->getPropData();
-  always_assert(propVec);
+  TypedValue* tv;
+  Slot idx;
 
   auto* ctx = arGetContextClass(getFP());
-  auto idx = ctx->lookupDeclProp(propName);
-
-  auto& tv = (*propVec)[idx];
   auto* fr = m_stack.topC();
 
-  cellDup(*fr, *tvToCell(&tv));
+  switch (propOp) {
+    case InitPropOp::Static: {
+      auto* propVec = cls->getSPropData();
+      always_assert(propVec);
+      idx = ctx->lookupSProp(propName);
+      tv = &propVec[idx];
+    } break;
+    case InitPropOp::NonStatic: {
+      auto* propVec = cls->getPropData();
+      always_assert(propVec);
+      idx = ctx->lookupDeclProp(propName);
+      tv = &(*propVec)[idx];
+    } break;
+  }
+
+  cellDup(*fr, *tvToCell(tv));
   m_stack.popC();
 }
 

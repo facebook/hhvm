@@ -893,10 +893,10 @@ class mysqli_driver {
   public function __set(string $name, mixed $value): void {
     switch ($name) {
       case 'reconnect':
-        $this->__reconnect = $value;
+        $this->__reconnect = (bool)$value;
         break;
       case 'report_mode':
-        $this->__report_mode = $value;
+        $this->__report_mode = (int)$value;
         break;
       default:
         trigger_error(
@@ -914,8 +914,8 @@ class mysqli_driver {
  */
 class mysqli_result {
 
-  private resource $__result;
-  private int $__resulttype;
+  private ?resource $__result = null;
+  private ?int $__resulttype = null;
   private bool $__done = false;
 
   public function __get(string $name): mixed {
@@ -1215,8 +1215,8 @@ class mysqli_result {
  */
 class mysqli_stmt {
 
-  private resource $__stmt;
-  private mysqli $__link;
+  private ?resource $__stmt = null;
+  private ?mysqli $__link = null;
 
   public function __get(string $name): mixed {
     switch ($name) {

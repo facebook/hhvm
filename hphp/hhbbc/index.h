@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -338,6 +338,12 @@ struct Index {
    * but concurrent readers are allowed.
    */
   Type lookup_return_type_raw(borrowed_ptr<const php::Func>) const;
+
+  /*
+   * Return the availability of $this on entry to the provided method.
+   * If the Func provided is not a method of a class false is returned.
+   */
+  bool lookup_this_available(borrowed_ptr<const php::Func>) const;
 
   /*
    * Returns the parameter preparation kind (if known) for parameter

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -466,8 +466,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         break;
       }
       if (cmd == "jemalloc-prof-activate") {
-        bool active = true;
-        int err = mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+        int err = Util::jemalloc_pprof_enable();
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"prof.active\", ...)"
@@ -479,8 +478,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         break;
       }
       if (cmd == "jemalloc-prof-deactivate") {
-        bool active = false;
-        int err = mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+        int err = Util::jemalloc_pprof_disable();
         if (err) {
           std::ostringstream estr;
           estr << "Error " << err << " in mallctl(\"prof.active\", ...)"
@@ -493,26 +491,16 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       }
       if (cmd == "jemalloc-prof-dump") {
         string f = transport->getParam("file");
-        if (f != "") {
-          const char *s = f.c_str();
-          int err = mallctl("prof.dump", nullptr, nullptr, (void *)&s,
-              sizeof(char *));
-          if (err) {
-            std::ostringstream estr;
-            estr << "Error " << err << " in mallctl(\"prof.dump\", ..., \"" << f
-              << "\", ...)" << endl;
-            transport->sendString(estr.str());
-            break;
+        int err = Util::jemalloc_pprof_dump(f, true);
+        if (err) {
+          std::ostringstream estr;
+          estr << "Error " << err << " in mallctl(\"prof.dump\", ...";
+          if (!f.empty()) {
+            estr << ", \"" << f << "\", ...";
           }
-        } else {
-          int err = mallctl("prof.dump", nullptr, nullptr, nullptr, 0);
-          if (err) {
-            std::ostringstream estr;
-            estr << "Error " << err << " in mallctl(\"prof.dump\", ...)"
-              << endl;
-            transport->sendString(estr.str());
-            break;
-          }
+          estr << ")" << endl;
+          transport->sendString(estr.str());
+          break;
         }
         transport->sendString("OK\n");
         break;

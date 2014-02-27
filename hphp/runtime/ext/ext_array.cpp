@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -193,7 +193,7 @@ Variant f_array_combine(CVarRef keys, CVarRef values) {
     if (key.isInteger() || key.isString()) {
       ret.setWithRef(key, iter2.secondRefPlus());
     } else {
-      ret.setRef(key.toString(), iter2.secondRefPlus());
+      ret.setWithRef(key.toString(), iter2.secondRefPlus());
     }
   }
   return ret;

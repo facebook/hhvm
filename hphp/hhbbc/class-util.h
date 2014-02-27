@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #define incl_HHBBC_CLASS_UTIL_H_
 
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/representation.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -30,6 +31,11 @@ struct Type;
  * Returns whether a res::Class refers to a collection class.
  */
 bool is_collection(res::Class);
+
+/*
+ * Returns whether a php::Class is a closure.
+ */
+bool is_closure(const php::Class&);
 
 /*
  * Returns whether a Type could hold an object that has a custom
@@ -49,9 +55,10 @@ inline bool contains(MethodMask mask, MethodMask val) {
 }
 
 /*
- * Returns a mask that indicates special methods a class has.
+ * Returns method named "name" if it exists.
  */
-MethodMask find_special_methods(borrowed_ptr<const php::Class>);
+borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class>,
+                                    SString name);
 
 /*
  * Returns true if `name' is the name of an internal VM special class

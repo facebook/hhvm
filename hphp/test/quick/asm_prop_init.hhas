@@ -42,11 +42,9 @@
     Fatal Runtime
   }
 
-  .method [public] 86sinit(&$props) {
-    String "foo"
+  .method [public] 86sinit() {
     String "default ::foo value"
-    SetM <L:$props EC>
-    PopC
+    InitProp "foo" Static
 
     Null
     RetC

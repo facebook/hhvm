@@ -1892,8 +1892,12 @@ where_clause:
 ;
 
 join_clause:
-    T_JOIN T_VARIABLE T_IN expr T_ON expr T_EQUALS expr
-                                     { _p->onJoinClause($$, $2, $4, $6, $8); }
+    T_JOIN expr
+                                { _p->onJoinClause($$, NULL, $2, NULL, NULL); }
+  | T_JOIN T_VARIABLE T_IN expr
+                                { _p->onJoinClause($$, &$2, $4, NULL, NULL); }
+  | T_JOIN T_VARIABLE T_IN expr T_ON expr T_EQUALS expr
+                                { _p->onJoinClause($$, &$2, $4, &$6, &$8); }
 ;
 
 join_into_clause:

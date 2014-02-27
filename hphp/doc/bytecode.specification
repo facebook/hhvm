@@ -1854,12 +1854,15 @@ CheckProp <propName> [] -> [C:Bool]
 
 InitProp <propName> <op> [C] -> []
 
-  Initialize non-scalar property. This instruction sets the initializer for
-  the property named %1 in the context class to $1.
+  Initialize non-scalar property. If %2 is 'NonStatic', this instruction sets
+  the initializer for the property named %1 in the context class to $1. If %2
+  is 'Static', this instruction sets the initializer for the static property
+  named %1 in the context class to $1.
 
   The CheckProp and InitProp opcodes should only be used in 86pinit methods.
   86pinit methods are HHVM-internal property initialization methods that
-  cannot be called from user-land.
+  cannot be called from user-land. After 86pinit runs, no declared properties
+  of the class can be of type NullUninit.
 
 8. Call instructions
 --------------------
@@ -4150,13 +4153,17 @@ AsyncAwait   [C]  ->  [C C:Bool]
 AsyncESuspend <label id> <number of iterators>   [C:Obj]  ->  [C:Obj]
 
   Suspends an eagerly executed async function into an AsyncFunctionWaitHandle
-  object. The AsyncFunctionWaitHandle object will capture all defined local
+  object. The AsyncFunctionWaitHandle object will capture all named local
   variables and the first %2 iterators in the current eagerly executed async
-  function, and mark them uninitialized on the current frame. The object will
-  store a reference to the associated resumable async function and a label %1
-  to be used to resume the execution once the WaitHandle object given by $1 is
-  finished. If the $1 is not a WaitHandle, or is a WaitHandle that is already
-  finished, the behavior is undefined.
+  function, and mark them uninitialized on the current frame. Unnamed locals
+  are not affected. The object will store a reference to the associated
+  resumable async function and a label %1 to be used to resume the execution
+  once the WaitHandle object given by $1 is finished.
+
+  If $1 is not a WaitHandle, or is a WaitHandle that is already finished, the
+  behavior is undefined. This opcode must only occur in the outer functions of
+  generator body pairs used to implement async functions. The value this opcode
+  pushes on the stack must be passed to a RetC opcode.
 
 AsyncWrapResult   [C]  ->  [C:Obj]
 
@@ -4165,7 +4172,8 @@ AsyncWrapResult   [C]  ->  [C:Obj]
 AsyncWrapException   [C:Obj]  ->  [C:Obj]
 
   Wraps $1 into a StaticExceptionWaitHandle object. If $1 is not an Exception,
-  the behavior is undefined.
+  the behavior is undefined. The value this opcode pushes on the stack must be
+  passed to a RetC opcode.
 
 Basic statement transformations
 -------------------------------

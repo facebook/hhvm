@@ -21,8 +21,12 @@ $excluded = array(
   'util/cronoutils.h',
   'util/cronoutils.cpp',
   'vixl/',
+  'runtime/base/ini-parser/zend-ini.tab.cpp',
+  'runtime/base/ini-parser/zend-ini.yy.cpp',
+  'runtime/ext/gd/libgd/',
   'runtime/ext/zlib/quicklz.h',
   'runtime/ext/zlib/quicklz.inc',
+  'runtime/vm/jit/vtune/',
   'facebook',
   'submodules',
 

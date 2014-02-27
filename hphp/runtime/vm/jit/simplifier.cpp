@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -351,12 +351,12 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case Lte:
   case Eq:
   case Neq:
-  case GtI:
-  case GteI:
-  case LtI:
-  case LteI:
-  case EqI:
-  case NeqI:
+  case GtInt:
+  case GteInt:
+  case LtInt:
+  case LteInt:
+  case EqInt:
+  case NeqInt:
   case Same:
   case NSame:
     return simplifyCmp(opc, inst, src1, src2);
@@ -408,12 +408,12 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpLte:
   case JmpEq:
   case JmpNeq:
-  case JmpGtI:
-  case JmpGteI:
-  case JmpLtI:
-  case JmpLteI:
-  case JmpEqI:
-  case JmpNeqI:
+  case JmpGtInt:
+  case JmpGteInt:
+  case JmpLtInt:
+  case JmpLteInt:
+  case JmpEqInt:
+  case JmpNeqInt:
   case JmpSame:
   case JmpNSame:
     return simplifyQueryJmp(inst);
@@ -1213,19 +1213,19 @@ SSATmp* Simplifier::simplifyShr(IRInstruction* inst) {
 template<class T, class U>
 static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   switch (opName) {
-  case GtI:
+  case GtInt:
   case Gt:   return a > b;
-  case GteI:
+  case GteInt:
   case Gte:  return a >= b;
-  case LtI:
+  case LtInt:
   case Lt:   return a < b;
-  case LteI:
+  case LteInt:
   case Lte:  return a <= b;
   case Same:
-  case EqI:
+  case EqInt:
   case Eq:   return a == b;
   case NSame:
-  case NeqI:
+  case NeqInt:
   case Neq:  return a != b;
   default:
     not_reached();
@@ -2109,6 +2109,9 @@ SSATmp* Simplifier::simplifyLdLoc(IRInstruction* inst) {
 // Replace StRef with StRefNT when we know we aren't going to change
 // its m_type field.
 SSATmp* Simplifier::simplifyStRef(IRInstruction* inst) {
+  // Guard relaxation might change the ref type, so don't try to
+  // change to StRefNT until after relaxation happens.
+  if (m_irb.typeMightRelax()) return nullptr;
   auto const oldUnbox = inst->src(0)->type().unbox();
   auto const newType = inst->src(1)->type();
   if (oldUnbox.isKnownDataType() &&

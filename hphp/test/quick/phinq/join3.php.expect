@@ -4,3 +4,10 @@ from $c in $@query_param_0
   join $p in $products on $d->ProductsID equals $p->ProductID
   select tuple($c->Name, $o->OrderDate, $p->ProductName)
 closure
+
+  from $c in $@query_param_0
+  join $o in $orders
+  join $details
+  join $p in $products
+  select tuple($c->Name, $o->OrderDate, $p->ProductName)
+closure

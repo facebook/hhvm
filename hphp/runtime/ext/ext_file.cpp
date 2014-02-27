@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -257,13 +257,10 @@ bool f_feof(CResRef handle) {
 }
 
 Variant f_fstat(CResRef handle) {
-  PlainFile *file = handle.getTyped<PlainFile>(true, true);
-  if (!file) {
-    raise_warning("Not a valid stream resource");
-    return false;
-  }
+  CHECK_HANDLE(handle, f);
   struct stat sb;
-  CHECK_SYSTEM(fstat(file->fd(), &sb));
+  if (!CHECK_ERROR(f->stat(&sb)))
+    return false;
   return stat_impl(&sb);
 }
 
@@ -573,10 +570,21 @@ Variant f_readfile(const String& filename, bool use_include_path /* = false */,
 
 bool f_move_uploaded_file(const String& filename, const String& destination) {
   Transport *transport = g_context->getTransport();
-  if (transport) {
-    return transport->moveUploadedFile(filename, destination);
+  if (!transport || !transport->isUploadedFile(filename)) {
+    return false;
   }
-  return false;
+
+  if (f_rename(filename, destination)) {
+    return true;
+  }
+
+  // If rename didn't work, fall back to copy followed by unlink
+  if (!f_copy(filename, destination)) {
+    return false;
+  }
+  f_unlink(filename);
+
+  return true;
 }
 
 Variant f_parse_ini_file(const String& filename,

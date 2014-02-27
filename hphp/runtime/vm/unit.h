@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -770,6 +770,7 @@ private:
   mutable PseudoMainCacheMap *m_pseudoMainCache;
 };
 
+int getLineNumber(const LineTable& table, Offset pc);
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 
 class UnitEmitter {
@@ -830,9 +831,23 @@ class UnitEmitter {
   void recordSourceLocation(const Location *sLoc, Offset start);
 
   /*
-   * Return the SrcLocTable for this unit.
+   * Return the SrcLocTable for this unit emitter, if it has one.
+   * Otherwise an empty table is returned.
    */
   SourceLocTable createSourceLocTable() const;
+
+  /*
+   * Returns whether this unit emitter contains full SourceLoc
+   * information.
+   */
+  bool hasSourceLocInfo() const { return !m_sourceLocTab.empty(); }
+
+  /*
+   * Returns access to this UnitEmitter's LineTable.  Generally
+   * UnitEmitters loaded from a production repo will have a line table
+   * instead of a full SourceLocTable.
+   */
+  const LineTable& lineTable() const { return m_lineTable; }
 
   /*
    * Adds a new FuncEmitter to the unit.  You can only do this once

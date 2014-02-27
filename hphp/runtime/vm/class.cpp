@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -560,7 +560,9 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
         // private property with this name.
         accessible = false;
       } else {
-        if (ctx->classof(baseClass)) {
+        if (ctx == (Class*)-1 || ctx->classof(baseClass)) {
+          // the special ctx (Class*)-1 is used by unserialization to
+          // mean that protected properties are ok. Otherwise,
           // ctx is derived from baseClass, so we know this protected
           // property is accessible and we know ctx cannot have private
           // property with the same name, so we're done.
@@ -600,7 +602,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
   }
   // If ctx is an ancestor of this, check if ctx has a private property
   // with the same name.
-  if (ctx && classof(ctx)) {
+  if (ctx && ctx != (Class*)-1 && classof(ctx)) {
     Slot ctxPropInd = ctx->lookupDeclProp(key);
     if (ctxPropInd != kInvalidSlot &&
         ctx->m_declProperties[ctxPropInd].m_class == ctx &&
@@ -615,92 +617,49 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
 }
 
 TypedValue* Class::initSPropsImpl() const {
-  assert(numStaticProperties() > 0);
   assert(getSPropData() == nullptr);
+
+  // Initialize static props for parent
+  Class* parent = this->parent();
+  if (parent && parent->getSPropData() == nullptr) {
+    parent->initSPropsImpl();
+  }
+
+  if (!numStaticProperties()) return nullptr;
+
   // Create an array that is initially large enough to hold all static
   // properties.
   TypedValue* const spropTable =
     new (request_arena()) TypedValue[m_staticProperties.size()];
+  memset(spropTable, 0, m_staticProperties.size() * sizeof(TypedValue));
+  setSPropData(spropTable);
 
   const bool hasNonscalarInit = !m_sinitVec.empty();
-  Array propArr;
-
-  TypedValue tvSentinel;
-  tvWriteUninit(&tvSentinel);
-  SCOPE_EXIT { tvRefcountedDecRef(&tvSentinel); };
 
   // If there are non-scalar initializers (i.e. 86sinit methods), run them now.
   // They'll put their initialized values into an array, and we'll read any
   // values we need out of the array later.
   if (hasNonscalarInit) {
-    ArrayInit propDataInit(m_staticProperties.size());
-
-    // The 86sinit functions will initialize some subset of the static props.
-    // Set all of them to a sentinel object so we can distinguish these.
-    tvSentinel.m_type = KindOfObject;
-    tvSentinel.m_data.pobj = SystemLib::AllocPinitSentinel();
-    tvSentinel.m_data.pobj->incRefCount();
-
-    for (Slot slot = 0; slot < m_staticProperties.size(); ++slot) {
-      auto const& sProp = m_staticProperties[slot];
-      propDataInit.set(StrNR(sProp.m_name),
-        tvAsCVarRef(&tvSentinel), true /* isKey */);
-    }
-
-    // Run the 86sinit functions, going up the inheritance chain.
-    Variant arg0(propDataInit.toArray());
-    PackedArrayInit args(1);
-    args.appendRef(arg0);
-    assert(arg0.toArrRef()->getCount() == 1);  // don't want to trigger COW
-
-    auto const argsArray = args.toArray();
     for (unsigned i = 0; i < m_sinitVec.size(); i++) {
       TypedValue retval;
-      g_vmContext->invokeFunc(&retval, m_sinitVec[i], argsArray, nullptr,
-                              const_cast<Class*>(this));
+      g_vmContext->invokeFunc(&retval, m_sinitVec[i], init_null_variant,
+                              nullptr, const_cast<Class*>(this));
       assert(retval.m_type == KindOfNull);
     }
-
-    // Transfer ownership of the reference to the outer scope.
-    propArr = arg0.toArrRef();
   }
-
-  assert(propArr.isNull() || propArr->getCount() == 1);
-
-  // A helper to look up values produced by 86sinit.
-  auto getValueFromArr = [&](const StringData* name) -> const TypedValue* {
-    if (!propArr.isNull()) {
-      assert(tvSentinel.m_type == KindOfObject);
-      auto const* v = propArr.get()->nvGet(name);
-      if (v->m_type != KindOfObject ||
-          v->m_data.pobj != tvSentinel.m_data.pobj) {
-        return v;
-      }
-    }
-    return nullptr;
-  };
 
   for (Slot slot = 0; slot < m_staticProperties.size(); ++slot) {
     auto const& sProp = m_staticProperties[slot];
     auto const* propName = sProp.m_name;
 
     if (sProp.m_class == this) {
-      auto const* value = getValueFromArr(propName);
-      if (value) {
-        cellDup(*value, spropTable[slot]);
-      } else {
-        assert(tvIsStatic(&sProp.m_val));
+      if (spropTable[slot].m_type == KindOfUninit) {
         spropTable[slot] = sProp.m_val;
       }
     } else {
       bool visible, accessible;
       auto* storage = sProp.m_class->getSProp(nullptr, propName,
                                               visible, accessible);
-      auto const* value = getValueFromArr(propName);
-      if (value) {
-        cellDup(*value, *storage);
-      }
-
       tvBindIndirect(&spropTable[slot], storage);
     }
   }
@@ -1862,22 +1821,14 @@ void Class::addTraitPropInitializers(bool staticProps) {
     InitVec& thisInitVec  = staticProps ? m_sinitVec : m_pinitVec;
     // Insert trait's 86[ps]init into the current class, avoiding repetitions.
     for (unsigned m = 0; m < traitInitVec.size(); m++) {
-      if (staticProps) {
-        // Linear search, but these vectors shouldn't be big.
-        if (find(thisInitVec.begin(), thisInitVec.end(), traitInitVec[m]) ==
-            thisInitVec.end()) {
-          thisInitVec.push_back(traitInitVec[m]);
-        }
-      } else {
-        // Clone 86pinit methods, and set the class to the current class.
-        // This allows 86pinit to determine the property offset for the
-        // initializer array corectly.
-        Func *f = traitInitVec[m]->clone(this);
-        f->setNewFuncId();
-        f->setBaseCls(this);
-        f->setHasPrivateAncestor(false);
-        thisInitVec.push_back(f);
-      }
+      // Clone 86[ps]init methods, and set the class to the current class.
+      // This allows 86[ps]init to determine the property offset for the
+      // initializer array corectly.
+      Func *f = traitInitVec[m]->clone(this);
+      f->setNewFuncId();
+      f->setBaseCls(this);
+      f->setHasPrivateAncestor(false);
+      thisInitVec.push_back(f);
     }
   }
 }
@@ -2429,7 +2380,6 @@ void Class::initSPropHandle() const {
 
 TypedValue* Class::initSProps() const {
   TypedValue* sprops = initSPropsImpl();
-  setSPropData(sprops);
   return sprops;
 }
 

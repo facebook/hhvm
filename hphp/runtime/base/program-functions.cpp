@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -330,6 +330,13 @@ static void bump_counter_and_rethrow() {
     static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
       "requests_memory_exceeded", {ServiceData::StatsType::COUNT});
     requestMemoryExceededCounter->addValue(1);
+
+#ifdef USE_JEMALLOC
+    // Capture a pprof (C++) dump when we OOM a request
+    // TODO: (t3753133) Should dump a PHP-instrumented pprof dump here as well
+    Util::jemalloc_pprof_dump("", false);
+#endif
+
     throw;
   }
 }
@@ -761,11 +768,6 @@ static int start_server(const std::string &username) {
   // Create the HttpServer before any warmup requests to properly
   // initialize the process
   HttpServer::Server = std::make_shared<HttpServer>();
-
-  if (RuntimeOption::HHProfServerEnabled) {
-    Logger::Info("Starting up profiling server");
-    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
-  }
 
   // If we have any warmup requests, replay them before listening for
   // real connections

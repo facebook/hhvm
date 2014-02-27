@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,8 +58,8 @@ namespace HPHP { namespace HHBBC {
  *             /  |    / |      |  \  Arr      Str
  *            /   |   /  |      |   \ / \      / \
  *      Uninit  InitNull |      |   SArr CArr /  CStr
- *                       |      |     |      /
- *                       |      |    SArr=a /
+ *                       |      |    |       /
+ *                       |      |   SArr=a  /
  *                       |      |          /
  *                       |      \         /
  *                       |       \       /
@@ -438,6 +438,14 @@ Type from_cell(Cell tv);
  * (or KindOfUninit).
  */
 Type from_DataType(DataType dt);
+
+/*
+ * Create a Type from a builtin type specification string.
+ *
+ * This is used for HNI class properties.  We assume that these are
+ * accurate.  s may be null.
+ */
+Type from_hni_constraint(SString s);
 
 /*
  * Make a type that represents values from either of the supplied

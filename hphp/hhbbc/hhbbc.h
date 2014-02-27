@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -66,6 +66,15 @@ struct Options {
   bool ConstantProp = true;
 
   /*
+   * Whether to perform local dead code elimination.  This removes
+   * unnecessary instructions within a single block.
+   *
+   * Note: this is off for now because it is a bit of a work in
+   * progress (needs more testing).
+   */
+  bool LocalDCE = false;
+
+  /*
    * If true, insert opcodes that assert inferred types, so we can
    * assume them at runtime.
    */
@@ -90,12 +99,10 @@ struct Options {
   /*
    * Whether to enable 'FuncFamily' method resolution.
    *
-   * TODO(#3666741): This is guarded by a flag because currently
-   * turning it on seems to cause a performance regression, despite
-   * the fact that it also seems to infer a lot more types.  We'll
-   * probably remove the flag once that is figured out.
+   * This allows possible overrides of a method to be resolved as a
+   * set of candidates when we aren't sure which one it would be.
    */
-  bool EnableFuncFamilies = false;
+  bool FuncFamilies = false;
 
   //////////////////////////////////////////////////////////////////////
   // Flags below this line perform optimizations that intentionally

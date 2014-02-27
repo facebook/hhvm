@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1277,6 +1277,24 @@ TEST(Type, WaitH) {
     EXPECT_FALSE(www.subtypeOf(ww));
     EXPECT_FALSE(ww.couldBe(www));
   }
+}
+
+TEST(Type, FromHNIConstraint) {
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?resource")), TOptRes);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("resource")), TRes);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("bool")), TBool);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?bool")), TOptBool);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("int")), TInt);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("float")), TDbl);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?float")), TOptDbl);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("mixed")), TInitGen);
+
+  // These are conservative, but we're testing them that way.  If we
+  // make the function better later we'll remove the tests.
+  EXPECT_EQ(from_hni_constraint(makeStaticString("stdClass")), TGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?stdClass")), TGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("fooooo")), TGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("")), TGen);
 }
 
 //////////////////////////////////////////////////////////////////////

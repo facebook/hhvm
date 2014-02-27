@@ -811,7 +811,7 @@ struct ZendINIGlobals {
   int scanner_mode;
   std::string filename;
   int lineno;
-  IniSetting::PFN_PARSER_CALLBACK callback;
+  IniSetting::ParserCallback *callback;
   void *arg;
   YY_BUFFER_STATE state;
 };
@@ -2605,12 +2605,12 @@ suppress_defined_but_not_used_warnings() {
   yy_top_state();
 }
 
-void zend_ini_scan(const std::string& str, int scanner_mode, const std::string& filename,
-                   IniSetting::PFN_PARSER_CALLBACK callback, void *arg) {
+void zend_ini_scan(const std::string &str, int scanner_mode, const std::string &filename,
+                   IniSetting::ParserCallback &callback, void *arg) {
   SCNG(scanner_mode) = scanner_mode;
   SCNG(filename) = filename.data();
   SCNG(lineno) = 1;
-  SCNG(callback) = callback;
+  SCNG(callback) = &callback;
   SCNG(arg) = arg;
 
   BEGIN(INITIAL);
@@ -2628,9 +2628,28 @@ void zend_ini_scan_cleanup() {
   SCNG(state) = nullptr;
 }
 
-void zend_ini_callback(std::string *arg1, std::string *arg2, std::string *arg3,
-                       int callback_type) {
-  SCNG(callback)(arg1, arg2, arg3, callback_type, SCNG(arg));
+void zend_ini_on_section(const std::string &name) {
+  SCNG(callback)->onSection(name, SCNG(arg));
+}
+void zend_ini_on_label(const std::string &name) {
+  SCNG(callback)->onLabel(name, SCNG(arg));
+}
+void zend_ini_on_entry(const std::string &key, const std::string &value) {
+  SCNG(callback)->onEntry(key, value, SCNG(arg));
+}
+void zend_ini_on_pop_entry(const std::string &key, const std::string &value, 
+                           const std::string &offset) {
+  SCNG(callback)->onPopEntry(key, value, offset, SCNG(arg));
+}
+void zend_ini_on_constant(std::string &result, const std::string &name) {
+  SCNG(callback)->onConstant(result, name);
+}
+void zend_ini_on_var(std::string &result, const std::string &name) {
+  SCNG(callback)->onVar(result, name);
+}
+void zend_ini_on_op(std::string &result, char type, const std::string& op1,
+                    const std::string& op2) {
+  SCNG(callback)->onOp(result, type, op1, op2);
 }
 
 void ini_error(const char *msg) {

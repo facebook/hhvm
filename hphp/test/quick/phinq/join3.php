@@ -13,3 +13,13 @@ $q = from $c in $customers
 foreach ($q as $e) {
   print_result($e);
 }
+
+$q =
+  from $c in $customers join $o in $orders join $details join $p in $products
+  select tuple($c->Name, $o->OrderDate, $p->ProductName);
+
+foreach ($q as $e) {
+  print_result($e);
+}
+
+

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -435,8 +435,7 @@ IRTranslator::translateCheckProp(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateInitProp(const NormalizedInstruction& i) {
-  HHIR_EMIT(InitProp, i.imm[0].u_SA,
-            static_cast<InitPropOp>(i.imm[1].u_OA));
+  HHIR_EMIT(InitProp, i.imm[0].u_SA, static_cast<InitPropOp>(i.imm[1].u_OA));
 }
 
 void IRTranslator::translateAssertTL(const NormalizedInstruction& i) {

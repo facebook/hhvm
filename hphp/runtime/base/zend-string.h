@@ -55,7 +55,8 @@ inline int string_strcmp(const char *s1, int len1, const char *s2, int len2) {
   if (!retval) {
     return (len1 - len2);
   }
-  return retval;
+  
+  return (retval > 0) - (retval < 0);
 }
 /**
  * Compare two binary strings of the first n bytes.

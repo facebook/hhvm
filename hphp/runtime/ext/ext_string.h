@@ -77,14 +77,14 @@ String f_str_repeat(const String& input, int multiplier);
 // encoding/decoding
 
 String f_html_entity_decode(const String& str, int quote_style = k_ENT_COMPAT,
-                            const String& charset = "ISO-8859-1");
+                            const String& charset = "UTF-8");
 String f_htmlentities(const String& str, int quote_style = k_ENT_COMPAT,
-                      const String& charset = "ISO-8859-1",
+                      const String& charset = "UTF-8",
                       bool double_encode = true);
 String f_htmlspecialchars_decode(const String& str,
                                  int quote_style = k_ENT_COMPAT);
 String f_htmlspecialchars(const String& str, int quote_style = k_ENT_COMPAT,
-                          const String& charset = "ISO-8859-1",
+                          const String& charset = "UTF-8",
                           bool double_encode = true);
 String f_fb_htmlspecialchars(const String& str, int quote_style = k_ENT_COMPAT,
                              const String& charset = "ISO-8859-1",

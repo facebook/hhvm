@@ -389,7 +389,6 @@ private:
   Array m_envs;
   String m_timezone;
   String m_timezoneDefault;
-  String m_argSeparatorOutput;
   bool m_throwAllErrors;
   Resource m_streamContext;
   String m_defaultCharset;

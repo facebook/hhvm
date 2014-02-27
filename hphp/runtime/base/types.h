@@ -302,6 +302,7 @@ public:
 
   // Things corresponding to user setable INI settings
   std::string m_maxMemory;
+  std::string m_argSeparatorOutput;
 
  public:
   int getTimeout() const { return m_timeoutSeconds; }

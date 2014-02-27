@@ -170,6 +170,11 @@ void RequestInjectionData::threadInit() {
                    },
                    [](void* p) { return ini_get((std::string*)p); },
                    &m_maxMemory);
+
+  // Data Handling
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "arg_separator.output", "&",
+                   &m_argSeparatorOutput);
 }
 
 void RequestInjectionData::onSessionInit() {

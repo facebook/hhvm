@@ -74,7 +74,8 @@ case $DISTRO in
             libunwind-devel libvpx-devel libX11-devel libXau-devel libxcb-devel libxml2-devel \
             libxml++-devel libXpm-devel mysql-devel ncurses-devel oniguruma-devel openldap-devel \
             openssl-devel pam-devel pcre-devel readline-devel tbb-devel unixODBC-devel \
-            uw-imap-devel zlib zlib-devel
+            uw-imap-devel zlib zlib-devel \
+            ImageMagick-devel libxslt-devel
 
         # For patched stuff.
         git clone git://github.com/libevent/libevent.git --quiet &

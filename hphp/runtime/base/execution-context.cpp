@@ -68,18 +68,8 @@ BaseExecutionContext::BaseExecutionContext() :
   // We want this to run on every request, instead of just once per thread
   auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
   IniSetting::Set("memory_limit", max_mem);
-  restoreIncludePath();
 
   // Paths and Directories
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "include_path",
-                   [this](const String& value, void* p) {
-                     this->setIncludePath(value);
-                     return true;
-                   },
-                   [this](void*) {
-                     return this->getIncludePath().toCppString();
-                   });
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "open_basedir",
                    [](const std::string& value, void* p) {
@@ -875,33 +865,6 @@ String BaseExecutionContext::getenv(const String& name) const {
     return String(RuntimeOption::EnvVariables[name.c_str()].data(), CopyString);
   }
   return String();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void BaseExecutionContext::restoreIncludePath() {
-  m_include_paths = Array::Create();
-  for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {
-    m_include_paths.append(String(RuntimeOption::IncludeSearchPaths[i]));
-  }
-}
-
-void BaseExecutionContext::setIncludePath(const String& path) {
-  m_include_paths = f_explode(":", path);
-}
-
-String BaseExecutionContext::getIncludePath() const {
-  StringBuffer sb;
-  bool first = true;
-  for (ArrayIter iter(m_include_paths); iter; ++iter) {
-    if (first) {
-      first = false;
-    } else {
-      sb.append(':');
-    }
-    sb.append(iter.second().toString());
-  }
-  return sb.detach();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -304,6 +304,7 @@ public:
   std::string m_maxMemory;
   std::string m_argSeparatorOutput;
   std::string m_defaultCharset;
+  std::vector<std::string> m_include_paths;
 
  public:
   int getTimeout() const { return m_timeoutSeconds; }
@@ -331,6 +332,11 @@ public:
     updateJit();
   }
   void updateJit();
+
+
+  // getters for user setable INI settings
+  std::vector<std::string> getIncludePaths() { return m_include_paths; }
+  std::string getDefaultIncludePath();
 
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
 

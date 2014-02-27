@@ -216,16 +216,18 @@ Array f_get_defined_constants(bool categorize /* = false */) {
 }
 
 String f_get_include_path() {
-  return g_context->getIncludePath();
+  return IniSetting::Get("include_path");
 }
 
 void f_restore_include_path() {
-  g_context->restoreIncludePath();
+  auto path = ThreadInfo::s_threadInfo.getNoCheck()->
+    m_reqInjectionData.getDefaultIncludePath();
+  IniSetting::SetUser("include_path", path);
 }
 
 String f_set_include_path(const String& new_include_path) {
-  String s = g_context->getIncludePath();
-  g_context->setIncludePath(new_include_path);
+  String s = f_get_include_path();
+  IniSetting::SetUser("include_path", new_include_path);
   return s;
 }
 

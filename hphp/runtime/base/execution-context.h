@@ -333,10 +333,6 @@ public:
 
   int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
 
-  void restoreIncludePath();
-  void setIncludePath(const String& path);
-  String getIncludePath() const;
-  Array getIncludePathArray() const { return m_include_paths; }
   const VirtualHost *getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
@@ -398,9 +394,6 @@ private:
   std::vector<Variant> m_userExceptionHandlersBackup;
 
   Variant m_exitCallback;
-
-  // include_path configuration option
-  Array m_include_paths;
 
   // cache the sandbox id for the request
   String m_sandboxId;

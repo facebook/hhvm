@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "folly/String.h"
@@ -180,6 +181,41 @@ void RequestInjectionData::threadInit() {
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
                    &m_defaultCharset);
+
+  // Paths and Directories
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "include_path", getDefaultIncludePath().c_str(),
+                   [this](const std::string& value, void* p) {
+                     auto paths = f_explode(":", value);
+                     m_include_paths.clear();
+                     for (ArrayIter iter(paths); iter; ++iter) {
+                       m_include_paths.push_back(
+                         iter.second().toString().toCppString());
+                     }
+                     return true;
+                   },
+                   [this](void*) {
+                     std::string ret;
+                     bool first = true;
+                     for (auto &path : m_include_paths) {
+                       if (first) {
+                         first = false;
+                       } else {
+                         ret += ":";
+                       }
+                       ret += path;
+                     }
+                     return ret;
+                   });
+}
+
+
+std::string RequestInjectionData::getDefaultIncludePath() {
+  auto include_paths = Array::Create();
+  for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {
+    include_paths.append(String(RuntimeOption::IncludeSearchPaths[i]));
+  }
+  return f_implode(":", include_paths).toCppString();
 }
 
 void RequestInjectionData::onSessionInit() {

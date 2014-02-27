@@ -734,6 +734,10 @@ users can use the same machine serving their own source files.
     TimeoutsUseWallTime = true
     CheckFlushOnUserClose = true
 
+    # Causes HHVM to disallow constructs that are unavailable when Repo.Authoritative
+    # is active, without requiring you to run in Repo.Authoritative.
+    AuthoritativeMode = true
+
     # experimental, please ignore
     BytecodeInterpreter = false
     DumpBytecode = false

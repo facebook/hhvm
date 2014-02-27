@@ -1231,7 +1231,7 @@ void RuntimeOption::Load(Hdf &config,
     // NB: after we know the value of RepoAuthoritative.
     EnableArgsInBacktraces =
       eval["EnableArgsInBacktraces"].getBool(!RepoAuthoritative);
-	EvalAuthoritativeMode =
+    EvalAuthoritativeMode =
       eval["AuthoritativeMode"].getBool(false) || RepoAuthoritative;
   }
   {

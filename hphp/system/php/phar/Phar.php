@@ -969,19 +969,19 @@ class Phar extends RecursiveDirectoryIterator
       $pos = strlen($data) - 8;
       $this->signatureFlags = self::bytesToInt($data, $pos, 4);
       switch (($this->signatureFlags & 0xF)) {
-        case 1 << self::MD5:
+        case 1 << (self::MD5 - 1):
           $digestSize = 16;
           $digestName = "md5";
           break;
-        case 1 << self::SHA1:
+        case 1 << (self::SHA1 - 1):
           $digestSize = 20;
           $digestName = "sha1";
           break;
-        case 1 << self::SHA256:
+        case 1 << (self::SHA256 - 1):
           $digestSize = 32;
           $digestName = "sha256";
           break;
-        case 1 << self::SHA512:
+        case 1 << (self::SHA512 - 1):
           $digestSize = 64;
           $digestName = "sha512";
           break;

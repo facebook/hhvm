@@ -341,10 +341,11 @@ bool f_method_exists(CVarRef class_or_object, const String& method_name) {
 Variant f_property_exists(CVarRef class_or_object, const String& property) {
   if (class_or_object.isObject()) {
     const String& context = ctxClassName();
-    return (bool)class_or_object.toObject()->o_realProp(
-      property, ObjectData::RealPropExist, context);
-  }
-  if (!class_or_object.isString()) {
+    if (class_or_object.toObject()->o_realProp(
+      property, ObjectData::RealPropExist, context)) {
+      return true;
+    }
+  } else if (!class_or_object.isString()) {
     raise_warning(
       "First parameter must either be an object"
       " or the name of an existing class"

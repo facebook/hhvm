@@ -18,6 +18,7 @@
 
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
+#include <boost/range/join.hpp>
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -34,6 +35,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 const Extension* IniSetting::CORE = (Extension*)(-1);
+
+bool IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
 
 const StaticString
   s_global_value("global_value"),
@@ -419,11 +422,12 @@ struct IniCallbackData {
 };
 
 typedef std::map<std::string, IniCallbackData> CallbackMap;
-static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_callbacks);
+// Things that the user can change go here
+static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_user_callbacks);
+// Things that are only settable at startup go here
+static CallbackMap s_system_ini_callbacks;
 
 typedef std::map<std::string, std::string> DefaultMap;
-static DefaultMap s_global_ini;
-
 static IMPLEMENT_THREAD_LOCAL(DefaultMap, s_savedDefaults);
 
 class IniSettingExtension : public Extension {
@@ -437,14 +441,6 @@ public:
     s_savedDefaults->clear();
   }
 } s_ini_extension;
-
-void IniSetting::SetGlobalDefault(const char *name, const char *value) {
-  assert(name && *name);
-  assert(value);
-  assert(!Extension::ModulesInitialised());
-
-  s_global_ini[name] = value;
-}
 
 void IniSetting::Bind(const Extension* extension, const Mode mode,
                       const char *name, const char *value,
@@ -461,7 +457,19 @@ void IniSetting::Bind(const Extension* extension, const Mode mode,
                       void *p /* = NULL */) {
   assert(name && *name);
 
-  auto &data = (*s_callbacks)[name];
+  bool is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
+  // For now, we require the extensions to use their own thread local memory for
+  // user-changeable settings. This means you need to use the default field to
+  // Bind and can't statically initialize them. We could conceivably let you
+  // use static memory and have our own thread local here that users can change
+  // and then reset it back to the default, but we haven't built that yet.
+  auto &data = is_thread_local ? (*s_user_callbacks)[name]
+                               : s_system_ini_callbacks[name];
+  // I would love if I could verify p is thread local or not instead of
+  // this dumb hack
+  assert(is_thread_local || !Extension::ModulesInitialised() ||
+         s_pretendExtensionsHaveNotBeenLoaded);
+
   data.extension = extension;
   data.mode = mode;
   data.updateCallback = updateCallback;
@@ -471,21 +479,20 @@ void IniSetting::Bind(const Extension* extension, const Mode mode,
 
 void IniSetting::Unbind(const char *name) {
   assert(name && *name);
-  s_callbacks->erase(name);
+  s_user_callbacks->erase(name);
 }
 
 bool IniSetting::Get(const std::string& name, std::string &value) {
-  DefaultMap::iterator iter = s_global_ini.find(name.data());
-  if (iter != s_global_ini.end()) {
-    value = iter->second;
-    return true;
+  CallbackMap::iterator iter = s_system_ini_callbacks.find(name.data());
+  if (iter == s_system_ini_callbacks.end()) {
+    iter = s_user_callbacks->find(name.data());
+    if (iter == s_user_callbacks->end()) {
+      return false;
+    }
   }
-  CallbackMap::iterator cb_iter = s_callbacks->find(name.data());
-  if (cb_iter != s_callbacks->end()) {
-    value = cb_iter->second.getCallback(cb_iter->second.p);
-    return true;
-  }
-  return false;
+
+  value = iter->second.getCallback(iter->second.p);
+  return true;
 }
 
 bool IniSetting::Get(const String& name, String &value) {
@@ -497,8 +504,8 @@ bool IniSetting::Get(const String& name, String &value) {
 
 static bool ini_set(const String& name, const String& value,
                     IniSetting::Mode mode) {
-  CallbackMap::iterator iter = s_callbacks->find(name.data());
-  if (iter != s_callbacks->end()) {
+  CallbackMap::iterator iter = s_user_callbacks->find(name.data());
+  if (iter != s_user_callbacks->end()) {
     if ((iter->second.mode & mode) && iter->second.updateCallback) {
       return iter->second.updateCallback(value.toCppString(), iter->second.p);
     }
@@ -540,7 +547,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     }
   }
 
-  for (auto& iter: (*s_callbacks)) {
+  for (auto& iter: boost::join(s_system_ini_callbacks, *s_user_callbacks)) {
     if (ext && ext != iter.second.extension) {
       continue;
     }

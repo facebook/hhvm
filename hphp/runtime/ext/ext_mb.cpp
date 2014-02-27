@@ -49,15 +49,23 @@ extern void mbfl_memory_device_unput(mbfl_memory_device *device);
 namespace HPHP {
 
 static class mbstringExtension : public Extension {
- public:
+  public:
   mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET) {}
 
   virtual void moduleInit() {
-    IniSetting::SetGlobalDefault("mbstring.http_input", "pass");
-    IniSetting::SetGlobalDefault("mbstring.http_output", "pass");
+    // TODO make these PHP_INI_ALL and thread local once we use them
+    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "mbstring.http_input",
+                     &http_input);
+    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "mbstring.http_output",
+                     &http_output);
   }
 
+  static std::string http_input;
+  static std::string http_output;
 } s_mbstring_extension;
+
+std::string mbstringExtension::http_input = "pass";
+std::string mbstringExtension::http_output = "pass";
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics

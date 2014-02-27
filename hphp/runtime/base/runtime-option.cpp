@@ -1291,6 +1291,86 @@ void RuntimeOption::Load(Hdf &config,
 
   refineStaticStringTableSize();
 
+  // Language and Misc Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
+                   &RuntimeOption::ExposeHPHP);
+
+  // Data Handling
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "post_max_size",
+                   [](const std::string& value, void* p) {
+                     return ini_on_update(value, (int64_t*)p);
+                   },
+                   [](void*) {
+                     return std::to_string(VirtualHost::GetMaxPostSize());
+                   },
+                   &RuntimeOption::MaxPostSize);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "always_populate_raw_post_data",
+                   &RuntimeOption::AlwaysPopulateRawPostData);
+
+  // Paths and Directories
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "doc_root", &RuntimeOption::SourceRoot);
+
+  // FastCGI
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "pid", &RuntimeOption::PidFile);
+
+  // File Uploads
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "file_uploads", "true",
+                   &RuntimeOption::EnableFileUploads);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "upload_max_filesize",
+                   [](const std::string& value, void* p) {
+                     return ini_on_update(value, (int64_t*)p);
+                   },
+                   [](void*) {
+                     int uploadMaxFilesize =
+                       VirtualHost::GetUploadMaxFileSize() / (1 << 20);
+                     return std::to_string(uploadMaxFilesize) + "M";
+                   },
+                   &RuntimeOption::UploadMaxFileSize);
+
+  // Filesystem and Streams Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "allow_url_fopen",
+                   ini_on_update_fail,
+                   [](void*p) { return std::string("1"); });
+
+  // HPHP specific
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.compiler_id",
+                   ini_on_update_fail,
+                   [](void*) {
+                     return getHphpCompilerId();
+                   });
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.compiler_version",
+                   ini_on_update_fail,
+                   [](void*) {
+                     return getHphpCompilerVersion();
+                   });
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hhvm.ext_zend_compat",
+                   ini_on_update_fail,
+                   [](void*p) { return ini_get((bool*)p); },
+                   &RuntimeOption::EnableZendCompat),
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.build_id",
+                   ini_on_update_fail,
+                   [](void* p) { return ini_get((std::string*)p); },
+                   &RuntimeOption::BuildId);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "notice_frequency",
+                   &RuntimeOption::NoticeFrequency);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "warning_frequency",
+                   &RuntimeOption::WarningFrequency);
+
   Extension::LoadModules(config);
   if (overwrites) Loaded = true;
 }

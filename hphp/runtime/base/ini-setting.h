@@ -163,8 +163,10 @@ public:
 
   static void Unbind(const char *name);
 
-  static void SetGlobalDefault(const char *name, const char *value);
-
+  // Used to allow you to Bind to PHP_INI_SYSTEM settings even after modules
+  // have been initialized. This should only be used in rare cases that can't
+  // be refactored into registration before extensions are done.
+  static bool s_pretendExtensionsHaveNotBeenLoaded;
 };
 
 int64_t convert_bytes_to_long(const std::string& value);

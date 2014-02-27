@@ -125,7 +125,10 @@ BaseExecutionContext::BaseExecutionContext() :
                      directories.reserve(boom.size());
                      for (ArrayIter iter(boom); iter; ++iter) {
                        const auto& path = iter.second().toString();
-                       if (File::TranslatePathKeepRelative(path).empty()) {
+
+                       // Canonicalise the path
+                       if (!path.empty() &&
+                           File::TranslatePathKeepRelative(path).empty()) {
                          return false;
                        }
 
@@ -149,6 +152,11 @@ BaseExecutionContext::BaseExecutionContext() :
                        if (!directory.empty()) {
                          out += directory + ";";
                        }
+                     }
+
+                     // Remove the trailing ;
+                     if (!out.empty()) {
+                       out.erase(std::end(out) - 1, std::end(out));
                      }
                      return out;
                    }

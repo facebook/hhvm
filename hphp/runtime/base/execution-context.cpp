@@ -54,6 +54,8 @@ int64_t VMExecutionContext::s_threadIdxCounter = 0;
 Mutex VMExecutionContext::s_threadIdxLock;
 hphp_hash_map<pid_t, int64_t> VMExecutionContext::s_threadIdxMap;
 
+const StaticString s_dot(".");
+
 BaseExecutionContext::BaseExecutionContext() :
     m_fp(nullptr), m_pc(nullptr),
     m_transport(nullptr),
@@ -63,6 +65,8 @@ BaseExecutionContext::BaseExecutionContext() :
     m_errorState(ExecutionContext::ErrorState::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
+    m_allowedDirectories(RuntimeOption::AllowedDirectories),
+    m_safeFileAccess(RuntimeOption::SafeFileAccess),
     m_vhost(nullptr) {
 
   auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
@@ -114,25 +118,49 @@ BaseExecutionContext::BaseExecutionContext() :
                    "doc_root", &RuntimeOption::SourceRoot);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "open_basedir",
-                   [](const std::string& value, void* p) {
-                     RuntimeOption::AllowedDirectories.clear();
+                   [this](const String& value, void* p) {
                      auto boom = f_explode(";", value).toCArrRef();
+
+                     std::vector<std::string> directories;
+                     directories.reserve(boom.size());
                      for (ArrayIter iter(boom); iter; ++iter) {
-                       RuntimeOption::AllowedDirectories.push_back(
-                         iter.second().toCStrRef().toCppString()
-                       );
-                     }
-                     return true;
-                   },
-                   [](void*) {
-                     std::string out = "";
-                     for (auto& dir : RuntimeOption::AllowedDirectories) {
-                       if (!dir.empty()) {
-                         out += dir + ";";
+                       const auto& path = iter.second().toString();
+
+                       // Canonicalise the path
+                       if (!path.empty() &&
+                           File::TranslatePathKeepRelative(path).empty()) {
+                         return false;
+                       }
+
+                       if (path.equal(s_dot)) {
+                         directories.push_back(getCwd().toCppString());
+                       } else {
+                         directories.push_back(path.toCppString());
                        }
                      }
+                     m_allowedDirectories = directories;
+                     m_safeFileAccess = !boom.empty();
+                     return true;
+                   },
+                   [this](void*) -> std::string {
+                     if (!hasSafeFileAccess()) {
+                      return "";
+                     }
+
+                     std::string out;
+                     for (auto& directory: getAllowedDirectories()) {
+                       if (!directory.empty()) {
+                         out += directory + ";";
+                       }
+                     }
+
+                     // Remove the trailing ;
+                     if (!out.empty()) {
+                       out.erase(std::end(out) - 1, std::end(out));
+                     }
                      return out;
-                   });
+                   }
+                  );
 
   // FastCGI
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,

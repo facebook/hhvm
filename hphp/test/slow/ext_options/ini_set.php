@@ -1,7 +1,12 @@
 <?php
 
 // PHP_INI_ALL
-var_dump(ini_set('open_basedir', '/foo/a;/foo/b;'));
+var_dump(ini_set('open_basedir', '/tmp'));
+var_dump(ini_set('open_basedir', '/home;/tmp;/home/dfg;dfg'));
+var_dump(ini_get('open_basedir'));
+
+// Test removing things from open_basedir
+var_dump(ini_set('open_basedir', '/home'));
 var_dump(ini_get('open_basedir'));
 
 // PHP_INI_NONE

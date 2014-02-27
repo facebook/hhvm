@@ -343,6 +343,9 @@ public:
   const VirtualHost *getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
+  const std::vector<std::string>& getAllowedDirectories() const { return m_allowedDirectories; }
+  const bool hasSafeFileAccess() const { return m_safeFileAccess; }
+
   const String& getSandboxId() const { return m_sandboxId; }
   void setSandboxId(const String& sandboxId) { m_sandboxId = sandboxId; }
 
@@ -407,6 +410,9 @@ private:
 
   // include_path configuration option
   Array m_include_paths;
+
+  std::vector<std::string> m_allowedDirectories;
+  bool m_safeFileAccess;
 
   // cache the sandbox id for the request
   String m_sandboxId;

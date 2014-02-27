@@ -1,10 +1,13 @@
-string(5) "/tmp;"
-string(14) "/foo/a;/foo/b;"
+string(0) ""
+bool(false)
+string(4) "/tmp"
+bool(false)
+string(4) "/tmp"
+bool(false)
 string(%d) "%s"
-string(%d) "%s"
+bool(false)
 string(1) "1"
+bool(false)
 string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
+bool(false)
 string(1) "1"

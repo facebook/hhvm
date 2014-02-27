@@ -73,11 +73,6 @@ BaseExecutionContext::BaseExecutionContext() :
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "error_reporting",
                    &m_errorReportingLevel);
-  // Filesystem and Streams Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "default_socket_timeout",
-                   std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
-                   &m_socketDefaultTimeout);
 }
 
 VMExecutionContext::VMExecutionContext() :

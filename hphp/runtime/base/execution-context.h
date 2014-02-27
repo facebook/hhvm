@@ -327,8 +327,6 @@ public:
   void setStreamContext(Resource &context) { m_streamContext = context; }
   Resource &getStreamContext() { return m_streamContext; }
 
-  int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
-
   const VirtualHost *getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
@@ -380,7 +378,6 @@ private:
   String m_timezoneDefault;
   bool m_throwAllErrors;
   Resource m_streamContext;
-  int64_t m_socketDefaultTimeout;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;

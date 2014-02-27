@@ -1,5 +1,8 @@
 string(0) ""
-string(14) "/foo/a;/foo/b;"
+bool(false)
+string(4) "/tmp"
+bool(false)
+string(4) "/tmp"
 string(%d) "%s"
 string(%d) "%s"
 string(1) "1"

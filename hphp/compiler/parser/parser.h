@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -190,6 +190,7 @@ public:
   void onCollectionPair(Token &out, Token *pairs, Token *name, Token &value);
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
+  void onClassClass(Token &out, Token &cls, Token &name, bool text);
   void fixStaticVars();
   void onFunctionStart(Token &name, bool doPushComment = true);
   void onFunction(Token &out, Token *modifier, Token &ret, Token &ref,
@@ -281,8 +282,8 @@ public:
   void onFromClause(Token &out, Token &var, Token &coll);
   void onLetClause(Token &out, Token &var, Token &expr);
   void onWhereClause(Token &out, Token &expr);
-  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
-    Token &right);
+  void onJoinClause(Token &out, Token *var, Token &coll, Token *left,
+    Token *right);
   void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
     Token &right, Token &group);
   void onOrderbyClause(Token &out, Token &orderings);
@@ -296,7 +297,7 @@ public:
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
   void onNamespaceEnd();
   void onUse(const std::string &ns, const std::string &as);
-  void nns(int token = 0);
+  void nns(int token = 0, const std::string& text = std::string());
   std::string nsDecl(const std::string &name);
   std::string resolve(const std::string &ns, bool cls);
 
@@ -346,7 +347,7 @@ private:
     {}
 
     void checkFinalAssertions() {
-      assert((isGenerator && !isAsync && !hasReturn) || !isGenerator);
+      assert(!isGenerator || (!isAsync && !hasReturn));
     }
 
     bool hasReturn;       // function contains a return statement

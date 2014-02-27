@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,8 @@
 namespace HPHP { struct TypeConstraint; }
 namespace HPHP { namespace HHBBC {
 
+struct Type;
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -39,35 +41,61 @@ namespace HPHP { namespace HHBBC {
  *                       |
  *                 +-----+              InitGen :=  Gen - Uninit
  *                 |     |             InitCell := Cell - Uninit
- *                 |    Gen---+              ?X := X + InitNull
+ *                Cls   Gen---+              ?X := X + InitNull
  *                 |     |    |
- *                Cls  Cell  Ref
+ *              Cls<=c  Cell  Ref
  *                 |     |
- *              Cls<=c   +--------+--------+-------+-------+
- *                 |     |        |        |       |       |
- *              Cls=c   Unc       |        |      Obj     Res
- *                       |        |        |       |
- *                  +----+        |        |     Obj<=c
- *                 /     |        |        |       |
- *                /      |        |        |     Obj=c
- *             Null   InitUnc     |        |
- *             / |     / |\  \   Arr      Str
- *            /  |    /  | \  \  / \      / \
- *      Uninit  InitNull |  \  SArr CArr /  CStr
- *                       |   \   |      /
- *                       |    \ SArr=a /
- *                       |     \      /
- *                       |      \    /
- *                       |       \  /
- *                       |       SStr
- *                       |        |
- *                       |      SStr=s
+ *              Cls=c    +-------------+--------+-------+-------+
+ *                       |             |        |       |       |
+ *                      Unc            |        |      Obj     Res
+ *                       | \           |        |      /  \
+ *                       |  \          |        |  Obj<=c Obj<=WaitHandle
+ *                     Prim  \         |        |    |       |
+ *                     / |   InitUnc   |        |  Obj=c   WaitH<T>
+ *                    /  |   /  | |    |        |
+ *                   /   |  /   | |    |        |
+ *                  /    | /    | |    |        |
+ *                 /     |/     | |    |        |
+ *              Null  InitPrim  | \    |        |
+ *             /  |    / |      |  \  Arr      Str
+ *            /   |   /  |      |   \ / \      / \
+ *      Uninit  InitNull |      |   SArr CArr /  CStr
+ *                       |      |    |       /
+ *                       |      |   SArr=a  /
+ *                       |      |          /
+ *                       |      \         /
+ *                       |       \       /
+ *                       |        \     /
+ *                       |         \   /
+ *                       |          SStr
+ *                       |           |
+ *                       |         SStr=s
  *                       |
- *                       +----------+-------+
- *                       |          |       |
- *                      Bool       Int     Dbl
- *                      /  \        |       |
- *                    True False  Int=n   Dbl=n
+ *                       +----------+
+ *                       |          |
+ *                      Bool       Num
+ *                      /  \       |  \
+ *                   True  False  Int  Dbl
+ *                                 |    |
+ *                               Int=n Dbl=n
+ *
+ * Some description of the types here:
+ *
+ *   {Init,}Prim
+ *
+ *       "Primitive" types---these can be represented in a TypedValue
+ *       without a pointer to the heap.
+ *
+ *   {Init,}Unc
+ *
+ *       "Uncounted" types---values of these types don't require
+ *       reference counting.
+ *
+ *   WaitH<T>
+ *
+ *       A WaitHandle that is known will either return a value of type
+ *       T from its join() method (or AsyncAwait), or else throw an
+ *       exception.
  *
  */
 
@@ -93,6 +121,7 @@ enum trep : uint32_t {
 
   BNull     = BUninit | BInitNull,
   BBool     = BFalse | BTrue,
+  BNum      = BInt | BDbl,
   BStr      = BSStr | BCStr,
   BArr      = BSArr | BCArr,
 
@@ -102,6 +131,7 @@ enum trep : uint32_t {
   BOptBool     = BInitNull | BBool,
   BOptInt      = BInitNull | BInt,       // may have value
   BOptDbl      = BInitNull | BDbl,       // may have value
+  BOptNum      = BInitNull | BNum,
   BOptSStr     = BInitNull | BSStr,      // may have value
   BOptCStr     = BInitNull | BCStr,
   BOptStr      = BInitNull | BStr,
@@ -111,7 +141,9 @@ enum trep : uint32_t {
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
 
-  BInitUnc  = BInitNull | BBool | BInt | BDbl | BSStr | BSArr,
+  BInitPrim = BInitNull | BBool | BNum,
+  BPrim     = BInitPrim | BUninit,
+  BInitUnc  = BInitPrim | BSStr | BSArr,
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes,
   BCell     = BUninit | BInitCell,
@@ -119,6 +151,17 @@ enum trep : uint32_t {
   BGen      = BUninit | BInitGen,
 
   BTop      = static_cast<uint32_t>(-1),
+};
+
+// Tag for what kind of specialized data a Type object has.
+enum class DataTag : uint8_t {
+  None,
+  Str,
+  Arr,
+  Obj,
+  Int,
+  Dbl,
+  Cls,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -135,15 +178,38 @@ struct DCls {
 /*
  * Information about a specific object type.  The class is either
  * exact or a subtype of the supplied class.
+ *
+ * If the class is WaitHandle, we can also carry a type that joining
+ * the wait handle will produce.
  */
-using DObj = DCls;
+struct DObj {
+  enum Tag { Exact, Sub };
+
+  explicit DObj(Tag type, res::Class cls)
+    : type(type)
+    , cls(cls)
+  {}
+
+  Tag type;
+  res::Class cls;
+  copy_ptr<Type> whType;
+};
 
 //////////////////////////////////////////////////////////////////////
 
 struct Type {
-  explicit Type(trep t = BTop) : m_bits(t) {
+  Type() : m_bits(BTop) {
     assert(checkInvariants());
   }
+  explicit Type(trep t) : m_bits(t) {
+    assert(checkInvariants());
+  }
+
+  Type(const Type&) noexcept;
+  Type(Type&&) noexcept;
+  Type& operator=(const Type&) noexcept;
+  Type& operator=(Type&&) noexcept;
+  ~Type() noexcept;
 
   /*
    * Exact equality or inequality of types.
@@ -152,7 +218,9 @@ struct Type {
   bool operator!=(Type o) const { return !(*this == o); }
 
   /*
-   * Subtype and strict subtype.
+   * Returns true if this type is definitely going to be a subtype or a strict
+   * subtype of `o' at runtime.  If this function returns false, this may
+   * still be a subtype of `o' at runtime, it just may not be known.
    */
   bool subtypeOf(Type o) const;
   bool strictSubtypeOf(Type o) const;
@@ -169,10 +237,19 @@ struct Type {
   /*
    * Returns whether there are any values of this type that are also
    * values of the type `o'.
+   * When this function returns false, it is known that this type
+   * must not be in any subtype relationship with the argument Type 'o'.
+   * When true is returned the two types may still be unrelated but it is
+   * not possible to tell.
+   * Essentially this function can conservatively return true but must be
+   * precise when returning false.
    */
   bool couldBe(Type o) const;
 
 private:
+  friend Type wait_handle(const Index&, Type);
+  friend bool is_specialized_wait_handle(const Type&);
+  friend Type wait_handle_inner(const Type&);
   friend Type sval(SString);
   friend Type ival(int64_t);
   friend Type dval(double);
@@ -181,7 +258,7 @@ private:
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
   friend Type clsExact(res::Class);
-  friend DObj dobj_of(Type);
+  friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);
   friend Type opt(Type);
@@ -192,7 +269,8 @@ private:
 
 private:
   union Data {
-    Data() : sval(nullptr) {}
+    Data() {}
+    ~Data() {}
 
     SString sval;
     int64_t ival;
@@ -203,14 +281,19 @@ private:
   };
 
 private:
-  Type(trep t, Data d);
-  bool equivData(Type o) const;
-  bool subtypeData(Type o) const;
+  static Type wait_handle_outer(const Type&);
+
+private:
+  bool hasData() const;
+  bool equivData(const Type& o) const;
+  bool subtypeData(const Type& o) const;
+  bool couldBeData(const Type& o) const;
   bool checkInvariants() const;
 
 private:
   trep m_bits;
-  folly::Optional<Data> m_data;
+  DataTag m_dataTag = DataTag::None;
+  Data m_data;
 };
 
 #define X(y) const Type T##y = Type(B##y);
@@ -234,8 +317,11 @@ X(Ref)
 
 X(Null)
 X(Bool)
+X(Num)
 X(Str)
 X(Arr)
+X(InitPrim)
+X(Prim)
 X(InitUnc)
 X(Unc)
 
@@ -244,6 +330,7 @@ X(OptFalse)
 X(OptBool)
 X(OptInt)
 X(OptDbl)
+X(OptNum)
 X(OptSStr)
 X(OptCStr)
 X(OptStr)
@@ -263,6 +350,18 @@ X(Top)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Return WaitH<T> for a type t.
+ */
+Type wait_handle(const Index&, Type t);
+
+/*
+ * Return T from a WaitH<T>.
+ *
+ * Pre: is_specialized_handle(t);
+ */
+Type wait_handle_inner(const Type& t);
 
 /*
  * Create Types that represent constant values.
@@ -303,6 +402,20 @@ Type unopt(Type t);
 bool is_opt(Type t);
 
 /*
+ * Returns true if type 't' represents a "specialized" object, that is
+ * an object of a known class, or an optional object of a known class.
+ */
+bool is_specialized_obj(Type t);
+
+/*
+ * Returns whether `t' is a WaitH<T> or ?WaitH<T> for some T.
+ *
+ * Note that this function returns false for Obj<=WaitHandle with no
+ * tracked inner type.
+ */
+bool is_specialized_wait_handle(const Type& t);
+
+/*
  * Returns the best known TCls subtype for an object type.
  *
  * Pre: t.subtypeOf(TObj)
@@ -328,10 +441,9 @@ Type type_of_istype(IsTypeOp op);
 /*
  * Return the DObj structure for a strict subtype of TObj or TOptObj.
  *
- * Pre: t.strictSubtypeOf(TObj) ||
- *        (t.subtypeOf(TOptObj) && unopt(t).strictSubtypeOf(TObj))
+ * Pre: is_specialized_obj(t)
  */
-DObj dobj_of(Type t);
+DObj dobj_of(const Type& t);
 
 /*
  * Return the DCls structure for a strict subtype of TCls.
@@ -356,6 +468,14 @@ Type from_cell(Cell tv);
  * (or KindOfUninit).
  */
 Type from_DataType(DataType dt);
+
+/*
+ * Create a Type from a builtin type specification string.
+ *
+ * This is used for HNI class properties.  We assume that these are
+ * accurate.  s may be null.
+ */
+Type from_hni_constraint(SString s);
 
 /*
  * Make a type that represents values from either of the supplied
@@ -388,6 +508,15 @@ Type loosen_statics(Type);
  * TOptFalse become TOptBool.  All other types are unchanged.
  */
 Type loosen_values(Type);
+
+/*
+ * If t contains TUninit, returns the best type we can that contains
+ * at least everything t contains, but doesn't contain TUninit.  Note
+ * that this function will return TBottom for TUninit.
+ *
+ * Pre: t.subtypeOf(TCell)
+ */
+Type remove_uninit(Type t);
 
 //////////////////////////////////////////////////////////////////////
 

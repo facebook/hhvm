@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,7 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/option.h"
+#include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/util/hash.h"
 #include "hphp/parser/hphp.tab.hpp"
@@ -277,7 +278,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   }
 
   TypePtr ret;
-  if (m_propSymValid && (!cls->derivesFromRedeclaring() ||
+  if (m_propSymValid && (cls->derivesFromRedeclaring() == Derivation::Normal ||
                          m_propSym->isPrivate())) {
     always_assert(m_symOwner);
     TypePtr t(m_propSym->getType());

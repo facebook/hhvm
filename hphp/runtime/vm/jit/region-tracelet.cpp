@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,6 @@ namespace HPHP { namespace JIT {
 TRACE_SET_MOD(region);
 
 typedef hphp_hash_set<SrcKey, SrcKey::Hasher> InterpSet;
-RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth);
 
 namespace {
 struct RegionDescIter : public RegionIter {
@@ -67,7 +66,8 @@ struct RegionDescIter : public RegionIter {
 };
 
 struct RegionFormer {
-  RegionFormer(const RegionContext& ctx, InterpSet& interp, int inlineDepth);
+  RegionFormer(const RegionContext& ctx, InterpSet& interp, int inlineDepth,
+               bool profiling);
 
   RegionDescPtr go();
 
@@ -86,6 +86,7 @@ private:
   smart::vector<ActRecState> m_arStates;
   RefDeps m_refDeps;
   const int m_inlineDepth;
+  const bool m_profiling;
 
   const Func* curFunc() const;
   const Unit* curUnit() const;
@@ -94,14 +95,14 @@ private:
 
   bool prepareInstruction();
   void addInstruction();
-  bool consumeInput(int i, const JIT::InputInfo& ii);
+  bool consumeInput(int i, const InputInfo& ii);
   bool tryInline();
   void recordDependencies();
   void truncateLiterals();
 };
 
 RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
-                           int inlineDepth)
+                           int inlineDepth, bool profiling)
   : m_ctx(ctx)
   , m_interp(interp)
   , m_sk(ctx.func, ctx.bcOffset)
@@ -113,6 +114,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
   , m_ht(m_irTrans.hhbcTrans())
   , m_arStates(1)
   , m_inlineDepth(inlineDepth)
+  , m_profiling(profiling)
 {
 }
 
@@ -148,8 +150,8 @@ RegionDescPtr RegionFormer::go() {
     if (!prepareInstruction()) break;
 
     // Instead of translating a Jmp, go to its destination.
-    if (isUnconditionalJmp(m_inst.op()) && m_inst.imm[0].u_BA > 0 &&
-        numJmps < JIT::Translator::MaxJmpsTracedThrough) {
+    if (!m_profiling && isUnconditionalJmp(m_inst.op()) &&
+        m_inst.imm[0].u_BA > 0 && numJmps < Translator::MaxJmpsTracedThrough) {
       // Include the Jmp in the region and continue to its destination.
       ++numJmps;
       m_sk.setOffset(m_sk.offset() + m_inst.imm[0].u_BA);
@@ -161,7 +163,8 @@ RegionDescPtr RegionFormer::go() {
     m_curBlock->setKnownFunc(m_sk, m_inst.funcd);
 
     m_inst.interp = m_interp.count(m_sk);
-    auto const doPrediction = JIT::outputIsPredicted(m_startSk, m_inst);
+    auto const doPrediction =
+      m_profiling ? false : outputIsPredicted(m_startSk, m_inst);
 
     if (tryInline()) {
       // If m_inst is an FCall and the callee is suitable for inlining, we can
@@ -209,10 +212,9 @@ RegionDescPtr RegionFormer::go() {
       m_arStates.pop_back();
       m_blockFinished = true;
       continue;
-    } else if (m_inst.breaksTracelet) {
+    } else if (m_inst.breaksTracelet ||
+               (m_profiling && instrBreaksProfileBB(&m_inst))) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", m_inst);
-      // We don't currently support partial inlining.
-      assert(!m_ht.isInlining());
       break;
     } else {
       assert(m_sk.func() == m_ht.curFunc());
@@ -228,15 +230,22 @@ RegionDescPtr RegionFormer::go() {
     }
   }
 
-  m_ht.end(m_sk.offset());
   dumpTrace(2, m_ht.unit(), " after tracelet formation ",
-            nullptr, nullptr, nullptr, m_ht.traceBuilder().guards());
+            nullptr, nullptr, m_ht.irBuilder().guards());
 
-  if (m_region && !m_region->blocks.empty()) recordDependencies();
+  if (m_region && !m_region->blocks.empty()) {
+    always_assert_log(
+      !m_ht.isInlining(),
+      [&] {
+        return folly::format("Tried to end region while inlining:\n{}",
+                             m_ht.unit()).str();
+      });
 
-  assert(!m_ht.isInlining());
+    m_ht.end(m_sk.offset());
+    recordDependencies();
+    truncateLiterals();
+  }
 
-  truncateLiterals();
   return std::move(m_region);
 }
 
@@ -250,22 +259,22 @@ bool RegionFormer::prepareInstruction() {
   new (&m_inst) NormalizedInstruction();
   m_inst.source = m_sk;
   m_inst.m_unit = curUnit();
-  m_inst.breaksTracelet = JIT::opcodeBreaksBB(m_inst.op()) ||
-                            (JIT::dontGuardAnyInputs(m_inst.op()) &&
-                             JIT::opcodeChangesPC(m_inst.op()));
-  m_inst.changesPC = JIT::opcodeChangesPC(m_inst.op());
+  m_inst.breaksTracelet = opcodeBreaksBB(m_inst.op()) ||
+                            (dontGuardAnyInputs(m_inst.op()) &&
+                             opcodeChangesPC(m_inst.op()));
+  m_inst.changesPC = opcodeChangesPC(m_inst.op());
   m_inst.funcd = m_arStates.back().knownFunc();
-  JIT::populateImmediates(m_inst);
-  JIT::preInputApplyMetaData(m_metaHand, &m_inst);
+  populateImmediates(m_inst);
+  preInputApplyMetaData(m_metaHand, &m_inst);
   m_ht.setBcOff(m_sk.offset(), false);
 
-  JIT::InputInfos inputInfos;
+  InputInfos inputInfos;
   getInputs(m_startSk, m_inst, inputInfos, m_curBlock->func(), [&](int i) {
-    return m_ht.traceBuilder().localType(i, DataTypeGeneric);
+    return m_ht.irBuilder().localType(i, DataTypeGeneric);
   });
 
   // Read types for all the inputs and apply MetaData.
-  auto newDynLoc = [&](const JIT::InputInfo& ii) {
+  auto newDynLoc = [&](const InputInfo& ii) {
     auto dl = m_inst.newDynLoc(ii.loc, m_ht.rttFromLocation(ii.loc));
     FTRACE(2, "rttFromLocation: {} -> {}\n",
            ii.loc.pretty(), dl->rtt.pretty());
@@ -274,13 +283,16 @@ bool RegionFormer::prepareInstruction() {
 
   for (auto const& ii : inputInfos) m_inst.inputs.push_back(newDynLoc(ii));
   try {
-    readMetaData(m_metaHand, m_inst, m_ht);
+    readMetaData(m_metaHand, m_inst, m_ht, m_profiling);
   } catch (const FailedTraceGen& exn) {
     FTRACE(1, "failed to apply metadata for {}: {}\n",
            m_inst, exn.what());
     return false;
   }
 
+  // This reads valueClass from the inputs so it needs to happen after
+  // readMetaData.
+  if (inliningDepth() == 0) annotate(&m_inst);
 
   // Check all the inputs for unknown values.
   assert(inputInfos.size() == m_inst.inputs.size());
@@ -297,7 +309,7 @@ bool RegionFormer::prepareInstruction() {
     try {
       m_inst.preppedByRef = m_arStates.back().checkByRef(argNum, entryArDelta,
                                                          &m_refDeps);
-    } catch (const JIT::UnknownInputExc& exn) {
+    } catch (const UnknownInputExc& exn) {
       // We don't have a guess for the current ActRec.
       FTRACE(1, "selectTracelet: don't have reffiness guess for {}\n",
              m_inst.toString());
@@ -405,6 +417,12 @@ bool RegionFormer::tryInline() {
                                   opcodeToName(pushSk.op())).str());
   }
 
+  // Make sure the FPushOp wasn't interpreted.
+  auto spillFrame = findSpillFrame(m_ht.irBuilder().sp());
+  if (!spillFrame) {
+    return refuse("couldn't find SpillFrame for FPushOp");
+  }
+
   // Set up the region context, mapping stack slots in the caller to locals in
   // the callee.
   RegionContext ctx;
@@ -422,7 +440,7 @@ bool RegionFormer::tryInline() {
 
   FTRACE(1, "selectTracelet analyzing callee {} with context:\n{}",
          callee->fullName()->data(), show(ctx));
-  auto region = selectTracelet(ctx, m_inlineDepth + 1);
+  auto region = selectTracelet(ctx, inliningDepth() + 1, m_profiling);
   if (!region) {
     return refuse("failed to select region in callee");
   }
@@ -458,9 +476,16 @@ void RegionFormer::truncateLiterals() {
  * Check if the current type for the location in ii is specific enough for what
  * the current opcode wants. If not, return false.
  */
-bool RegionFormer::consumeInput(int i, const JIT::InputInfo& ii) {
+bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
   auto& rtt = m_inst.inputs[i]->rtt;
   if (ii.dontGuard || !rtt.isValue()) return true;
+
+  if (m_profiling && rtt.isRef() &&
+      (m_region->blocks.size() > 1 || !m_region->blocks[0]->empty())) {
+    // We don't want side exits when profiling, so only allow instructions that
+    // consume refs at the beginning of the region.
+    return false;
+  }
 
   if (!ii.dontBreak && !Type(rtt).isKnownDataType()) {
     // Trying to consume a value without a precise enough type.
@@ -503,16 +528,18 @@ void RegionFormer::recordDependencies() {
   auto blockStart = firstBlock.start();
   auto& unit = m_ht.unit();
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
-  auto changed = doRelax ? relaxGuards(unit, *m_ht.traceBuilder().guards())
+  auto changed = doRelax ? relaxGuards(unit, *m_ht.irBuilder().guards(),
+                                       m_profiling)
                          : false;
   visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
+    if (type <= Type::Cls) return;
     RegionDesc::TypePred pred{loc, type};
     FTRACE(1, "selectTracelet adding guard {}\n", show(pred));
     firstBlock.addPredicted(blockStart, pred);
   });
   if (changed) {
     dumpTrace(3, unit, " after guard relaxation ",
-              nullptr, nullptr, nullptr, m_ht.traceBuilder().guards());
+              nullptr, nullptr, m_ht.irBuilder().guards());
   }
 
 }
@@ -527,12 +554,13 @@ void RegionFormer::recordDependencies() {
  * May return a null region if the given RegionContext doesn't have
  * enough information to translate at least one instruction.
  */
-RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth) {
+RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
+                             bool profiling) {
   InterpSet interp;
   RegionDescPtr region;
   uint32_t tries = 1;
 
-  while (!(region = RegionFormer(ctx, interp, inlineDepth).go())) {
+  while (!(region = RegionFormer(ctx, interp, inlineDepth, profiling).go())) {
     ++tries;
   }
 

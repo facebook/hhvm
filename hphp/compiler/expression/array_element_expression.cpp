@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -392,17 +392,7 @@ ExpressionPtr ArrayElementExpression::unneeded() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ArrayElementExpression::outputCodeModel(CodeGenerator &cg) {
-  if (Option::ConvertSuperGlobals && m_global && !m_dynamicGlobal &&
-      getScope() && (getScope()->is(BlockScope::ProgramScope) ||
-                     getScope()-> getVariables()->
-                     isConvertibleSuperGlobal(m_globalName))) {
-    cg.printObjectHeader("SimpleVariableExpression", 2);
-    cg.printPropertyHeader("name");
-    cg.printValue(m_globalName);
-    cg.printPropertyHeader("sourceLocation");
-    cg.printLocation(this->getLocation());
-    cg.printObjectFooter();
-  } else if (m_offset) {
+  if (m_offset) {
     cg.printObjectHeader("BinaryOpExpression", 4);
     cg.printPropertyHeader("expression1");
     m_variable->outputCodeModel(cg);

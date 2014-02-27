@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,9 +19,9 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
+#include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/trace-builder.h"
 
 namespace HPHP {
 namespace JIT {
@@ -104,7 +104,7 @@ static void insertAsserts(IRUnit& unit) {
     });
 }
 
-void optimize(IRUnit& unit, TraceBuilder& traceBuilder) {
+void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, unit, folly::format("after {}", msg).str().c_str());
     assert(checkCfg(unit));
@@ -126,7 +126,8 @@ void optimize(IRUnit& unit, TraceBuilder& traceBuilder) {
   };
 
   if (RuntimeOption::EvalHHIRRelaxGuards) {
-    auto changed = relaxGuards(unit, *traceBuilder.guards());
+    auto const simpleRelax = kind == TransProfile;
+    auto changed = relaxGuards(unit, *irBuilder.guards(), simpleRelax);
     if (changed) finishPass("guard relaxation");
   }
 
@@ -144,7 +145,7 @@ void optimize(IRUnit& unit, TraceBuilder& traceBuilder) {
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
           || RuntimeOption::EvalHHIRSimplification)) {
-    traceBuilder.reoptimize();
+    irBuilder.reoptimize();
     finishPass("reoptimize");
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned

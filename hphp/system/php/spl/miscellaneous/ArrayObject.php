@@ -7,13 +7,19 @@
  * This class allows objects to work as arrays.
  *
  */
-class ArrayObject implements KeyedIterable, ArrayAccess,
+class ArrayObject implements \HH\KeyedIterable, ArrayAccess,
                              Serializable, Countable {
   use StrictKeyedIterable;
 
   const integer STD_PROP_LIST = 1;
   const integer ARRAY_AS_PROPS = 2;
 
+  /*
+   * Note: don't add type annotations to these properties---this class
+   * contains code that does unset($this->$foo) in its magic unsetter,
+   * which could unset any of these properties.  The types are not
+   * statically knowable.
+   */
   private $storage = array();
   private $flags = 0;
   private $iteratorClass = 'ArrayIterator';

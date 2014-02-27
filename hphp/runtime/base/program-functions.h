@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,6 +36,11 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program);
  * Setting up environment variables.
  */
 void process_env_variables(Variant &variables);
+
+/**
+ * Reset all the ini settings from the config file
+ */
+void process_ini_settings();
 
 /**
  * Inserting a variable into specified symbol table.

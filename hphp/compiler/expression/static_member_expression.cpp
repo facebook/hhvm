@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,7 +77,7 @@ bool StaticMemberExpression::findMember(AnalysisResultPtr ar, string &name,
   m_resolvedClass = resolveClass();
   if (!m_resolvedClass) return isRedeclared();
 
-  if (m_resolvedClass->derivesFromRedeclaring()) {
+  if (m_resolvedClass->derivesFromRedeclaring() == Derivation::Redeclaring) {
     m_dynamicClass = true;
   }
 
@@ -341,14 +341,15 @@ bool StaticMemberExpression::canonCompare(ExpressionPtr e) const {
 
 void StaticMemberExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("ClassPropertyExpression", 3);
-  cg.printPropertyHeader("className");
   StaticClassName::outputCodeModel(cg);
   if (m_exp->is(Expression::KindOfScalarExpression)) {
     cg.printPropertyHeader("propertyName");
+    ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
+    cg.printValue(var->getString());
   } else {
     cg.printPropertyHeader("propertyExpression");
+    m_exp->outputCodeModel(cg);
   }
-  m_exp->outputCodeModel(cg);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

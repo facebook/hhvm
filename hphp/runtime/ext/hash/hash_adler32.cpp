@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,7 +24,9 @@ typedef struct {
   unsigned int state;
 } PHP_ADLER32_CTX;
 
-hash_adler32::hash_adler32() : HashEngine(4, 4, sizeof(PHP_ADLER32_CTX)) {
+hash_adler32::hash_adler32(bool invert /*= false */) :
+  HashEngine(4, 4, sizeof(PHP_ADLER32_CTX)),
+  m_invert(invert) {
 }
 
 void hash_adler32::hash_init(void *context) {
@@ -50,17 +52,17 @@ void hash_adler32::hash_final(unsigned char *digest, void *context) {
 
   // This was a bug in PHP, see PHP bug #48284
   // We currently rely on the old behaviour
-#if defined(HPHP_OSS)
-  digest[0] = (unsigned char)((state >> 24) & 0xff);
-  digest[1] = (unsigned char)((state >> 16) & 0xff);
-  digest[2] = (unsigned char)((state >> 8) & 0xff);
-  digest[3] = (unsigned char)(state & 0xff);
-#else
-  digest[3] = (unsigned char)((state >> 24) & 0xff);
-  digest[2] = (unsigned char)((state >> 16) & 0xff);
-  digest[1] = (unsigned char)((state >> 8) & 0xff);
-  digest[0] = (unsigned char)(state & 0xff);
-#endif
+  if (m_invert) {
+    digest[3] = (unsigned char)((state >> 24) & 0xff);
+    digest[2] = (unsigned char)((state >> 16) & 0xff);
+    digest[1] = (unsigned char)((state >> 8) & 0xff);
+    digest[0] = (unsigned char)(state & 0xff);
+  } else {
+    digest[0] = (unsigned char)((state >> 24) & 0xff);
+    digest[1] = (unsigned char)((state >> 16) & 0xff);
+    digest[2] = (unsigned char)((state >> 8) & 0xff);
+    digest[3] = (unsigned char)(state & 0xff);
+  }
 
   state = 0;
 }

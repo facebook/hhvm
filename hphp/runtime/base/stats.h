@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -237,17 +237,6 @@ inline StatCounter opcodeToIRPreStatCounter(Op opc) {
 inline StatCounter opcodeToIRPostStatCounter(Op opc) {
   return StatCounter(Instr_TranslIRPostLowInvalid +
                      STATS_PER_OPCODE * uint8_t(opc));
-}
-
-// Both emitIncs use r10.
-extern void emitInc(CodeBlock& cb,
-                    uint64_t* tl_table,
-                    uint index,
-                    int n = 1,
-                    bool force = false);
-inline void emitInc(CodeBlock& cb, StatCounter stat, int n = 1,
-                    bool force = false) {
-  emitInc(cb, &tl_counters[0], stat, n, force);
 }
 
 extern void init();

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1846,8 +1846,8 @@ public:
   }
 
   // Segment register prefixes.
-  void fs()           { byte(0x64); }
-  void gs()           { byte(0x65); }
+  X64Assembler& fs()  { byte(0x64); return *this; }
+  X64Assembler& gs()  { byte(0x65); return *this; }
 
 public:
   /*
@@ -2020,17 +2020,6 @@ public:
                                         RegNumber rdest) {        \
     emitIM(instr_ ## name, rdest, reg::noreg, sz::byte,                 \
            disp, imm);                                                  \
-  }                                                                     \
-  /* op imm64, rdest */                                                 \
-  /* NOTE: This will emit multiple x64 instructions and use the */      \
-  /* scratch register if the immediate does not fit in 32 bits. */      \
-  inline void name ## _imm64_reg64(int64_t imm, RegNumber rdest) { \
-    if (deltaFits(imm, sz::dword)) {                                    \
-      name ## _imm32_reg64(imm, rdest);                                 \
-      return;                                                           \
-    }                                                                   \
-    mov_imm64_reg(imm, reg::rAsm);                                      \
-    name ## _reg64_reg64(reg::rAsm, rdest);                             \
   }                                                                     \
   /* opq rsrc, disp(rdest) */                                           \
   inline void name ## _reg64_disp_reg64(RegNumber rsrc, int disp, \

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $m = new Map;
 $m[3] = 'foo';

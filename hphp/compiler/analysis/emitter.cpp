@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +15,16 @@
 */
 #include "hphp/compiler/analysis/emitter.h"
 
+#include <memory>
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <algorithm>
+#include <memory>
+
 #include "folly/MapUtil.h"
+#include "folly/Memory.h"
+#include "folly/ScopeGuard.h"
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -87,6 +96,7 @@
 #include "hphp/util/util.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/parser/hphp.tab.hpp"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
@@ -105,14 +115,6 @@
 #include "hphp/runtime/vm/preclass-emit.h"
 
 #include "hphp/system/systemlib.h"
-
-#include "folly/ScopeGuard.h"
-
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <algorithm>
-#include <memory>
 
 namespace HPHP {
 namespace Compiler {
@@ -1413,7 +1415,8 @@ void EmitterVisitor::emitJump(Emitter& e, IterVec& iters, Label& target) {
   }
 }
 
-void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
+void EmitterVisitor::emitReturn(Emitter& e, char sym, bool hasConstraint,
+                                StatementPtr s) {
   Region* region = m_regions.back().get();
   registerReturn(s, region, sym);
   assert(getEvalStack().size() == 1);
@@ -1426,13 +1429,20 @@ void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
       // Free the pending iterators and perform the actual return.
       emitIterFree(e, iters);
       if (sym == StackSym::C) {
+        if (hasConstraint) {
+          e.VerifyRetTypeC();
+        }
         e.RetC();
       } else {
         assert(sym == StackSym::V);
+        if (hasConstraint) {
+          e.VerifyRetTypeV();
+        }
         e.RetV();
       }
       return;
     }
+
     if (r->isTryFinally()) {
       // We encountered a try block - a finally needs to be run
       // before returning.
@@ -2567,17 +2577,22 @@ void EmitterVisitor::visit(FileScopePtr file) {
           break;
         case Statement::KindOfReturnStatement:
           if (mainReturn.m_type != KindOfInvalid) break;
+
+          visit(s);
           if (notMergeOnly) {
             tvWriteUninit(&mainReturn);
             m_ue.returnSeen();
-            goto fail;
-          } else {
+            continue;
+          }
+
+          {
             ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(s));
             Variant v((Variant::NullInit()));
             if (r->getRetExp() &&
                 !r->getRetExp()->getScalarValue(v)) {
               tvWriteUninit(&mainReturn);
-              goto fail;
+              notMergeOnly = true;
+              continue;
             }
             if (v.isString()) {
               v = String(makeStaticString(v.asCStrRef().get()));
@@ -2650,8 +2665,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
           } // fall through
         default:
           if (mainReturn.m_type != KindOfInvalid) break;
-          // fall through
-        fail:
           notMergeOnly = true;
           visit(s);
       }
@@ -2742,8 +2755,8 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
   }
   bool voidReturn = false;
   if (builtinFunc) {
-    ref = (builtinFunc->methInfo()->attribute & ClassInfo::IsReference) != 0;
-    voidReturn = builtinFunc->methInfo()->returnType == KindOfNull;
+    ref = (builtinFunc->attrs() & AttrReference) != 0;
+    voidReturn = builtinFunc->returnType() == KindOfNull;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
     if (!(fn->getActualType()) && !fn->getFuncScope()->isNative()) {
@@ -2774,7 +2787,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     m_evalStack.setNotRef();
   } else if (!ref) {
     DataType dt = builtinFunc ?
-      builtinFunc->methInfo()->returnType :
+      builtinFunc->returnType() :
       getPredictedDataType(fn);
 
     if (dt != KindOfUnknown) {
@@ -3146,7 +3159,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                       false, 0, 0);
         }
 
-        emitReturn(e, retSym, r);
+        auto tc = m_curFunc->returnTypeConstraint();
+        emitReturn(e, retSym, tc.hasConstraint(), r);
+
         return false;
       }
 
@@ -3863,8 +3878,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               "Cannot use collection initialization for non-collection class");
           }
           bool kvPairs = cType == Collection::FrozenMapType
-            || cType == Collection::MapType
-            || cType == Collection::StableMapType;
+            || cType == Collection::MapType;
           e.NewCol(cType, nElms);
           if (kvPairs) {
             for (int i = 0; i < nElms; i++) {
@@ -3933,31 +3947,65 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Expression::KindOfClassConstantExpression: {
         ClassConstantExpressionPtr cc(
           static_pointer_cast<ClassConstantExpression>(node));
-        StringData* nName = makeStaticString(cc->getConName());
+        auto const nName = makeStaticString(cc->getConName());
+        auto const getOriginalClassName = [&] {
+          const std::string& clsName = cc->getOriginalClassName();
+          return makeStaticString(clsName);
+        };
+
+        // We treat ::class as a class constant in the AST and the
+        // parser, but at the bytecode and runtime level it isn't
+        // one.
+        auto const emitClsCns = [&] {
+          if (cc->isColonColonClass()) {
+            e.NameA();
+            return;
+          }
+          e.ClsCns(nName);
+        };
+        auto const noClassAllowed = [&] {
+          auto const nCls = getOriginalClassName();
+          std::ostringstream s;
+          s << "Cannot access " << nCls->data() << "::" << nName->data() <<
+               " when no class scope is active";
+          throw IncludeTimeFatalException(e.getNode(), s.str().c_str());
+        };
+
         if (cc->isStatic()) {
           // static::Constant
           e.LateBoundCls();
-          e.ClsCns(nName);
+          emitClsCns();
         } else if (cc->getClass()) {
           // $x::Constant
           ExpressionPtr cls(cc->getClass());
           visit(cls);
           emitAGet(e);
-          e.ClsCns(nName);
+          emitClsCns();
         } else if (cc->getOriginalClass() &&
                    !cc->getOriginalClass()->isTrait()) {
           // C::Constant inside a class
-          const std::string& clsName = cc->getOriginalClassName();
-          StringData* nCls = makeStaticString(clsName);
-          e.ClsCnsD(nName, nCls);
+          auto nCls = getOriginalClassName();
+          if (cc->isColonColonClass()) {
+            e.String(nCls);
+          } else {
+            e.ClsCnsD(nName, nCls);
+          }
         } else if (cc->isSelf()) {
           // self::Constant inside trait or pseudomain
           e.Self();
-          e.ClsCns(nName);
+          if (cc->isColonColonClass() &&
+              cc->getFunctionScope()->inPseudoMain()) {
+            noClassAllowed();
+          }
+          emitClsCns();
         } else if (cc->isParent()) {
           // parent::Constant inside trait or pseudomain
           e.Parent();
-          e.ClsCns(nName);
+          if (cc->isColonColonClass() &&
+              cc->getFunctionScope()->inPseudoMain()) {
+            noClassAllowed();
+          }
+          emitClsCns();
         } else {
           // C::Constant inside a trait or pseudomain
           // Be careful to keep this case here after the isSelf and
@@ -3965,8 +4013,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           // will set cc->originalClassName to the trait's name for
           // the isSelf and isParent cases, but self and parent must
           // be resolved dynamically when used inside of traits.
-          const std::string& clsName = cc->getOriginalClassName();
-          StringData* nCls = makeStaticString(clsName);
+          auto nCls = getOriginalClassName();
+          if (cc->isColonColonClass()) noClassAllowed();
           e.ClsCnsD(nName, nCls);
         }
         return true;
@@ -4877,7 +4925,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         tvWriteUninit(&uninit);
         for (auto& useVar : useVars) {
           pce->addProperty(useVar.first, AttrPrivate, nullptr, nullptr,
-                           &uninit, KindOfInvalid);
+                           &uninit, RepoAuthType{});
         }
 
         // The __invoke method. This is the body of the closure, preceded by
@@ -5019,20 +5067,27 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         emitConvertToCell(e);
         auto fpiStart = m_ue.bcPos();
         StringData* executeQuery = makeStaticString("executeQuery");
-        e.FPushObjMethodD(numArgs, executeQuery);
+        e.FPushObjMethodD(numArgs+1, executeQuery);
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
           e.String(query->getQueryString());
           emitFPass(e, 0, PassByRefKind::ErrorOnCell);
+          auto selectCallback = query->getSelectClosure();
+          if (selectCallback != nullptr) {
+            visit(selectCallback);
+            emitConvertToCell(e);
+          } else {
+            e.Null();
+          }
+          emitFPass(e, 1, PassByRefKind::ErrorOnCell);
           for (int i = 1; i < numArgs; i++) {
             visit(args[i]);
             emitConvertToCell(e);
-            emitFPass(e, i, PassByRefKind::ErrorOnCell);
+            emitFPass(e, i+1, PassByRefKind::ErrorOnCell);
           }
         }
-        e.FCall(numArgs);
+        e.FCall(numArgs+1);
         e.UnboxR();
-
         return true;
       }
       case Expression::KindOfFromClause:
@@ -6424,6 +6479,49 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
   return attrs;
 }
 
+/**
+ * The code below is used for both, function/method parameter type as well as
+ * for function/method return type.
+ */
+static TypeConstraint
+determine_type_constraint_from_annot(const TypeAnnotationPtr annot,
+                                     bool is_return) {
+  if (annot) {
+    auto flags = TypeConstraint::ExtendedHint | TypeConstraint::HHType;
+
+    // We only care about a subset of extended type constaints:
+    // typevar, nullable, soft, return types.
+    //
+    // For everything else, we return {}. We also return {} for annotations
+    // we don't know how to handle.
+    if (annot->isFunction() || annot->isMixed()) {
+      return {};
+    }
+    if (annot->isTypeVar()) {
+      flags = flags | TypeConstraint::TypeVar;
+    }
+    if (annot->isNullable()) {
+      flags = flags | TypeConstraint::Nullable;
+    }
+    if (annot->isSoft()) {
+      flags = flags | TypeConstraint::Soft;
+    }
+    if (!is_return &&
+        (flags == (TypeConstraint::ExtendedHint | TypeConstraint::HHType))) {
+      return {};
+    }
+
+    auto strippedName = annot->stripNullable().stripSoft().vanillaName();
+
+    return TypeConstraint{
+      makeStaticString(strippedName),
+      flags
+    };
+  }
+
+  return {};
+}
+
 static TypeConstraint
 determine_type_constraint(const ParameterExpressionPtr& par) {
   if (par->hasTypeHint()) {
@@ -6441,41 +6539,7 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
     };
   }
 
-  if (auto annot = par->annotation()) {
-    auto flags = TypeConstraint::ExtendedHint | TypeConstraint::HHType;
-
-    // We only care about a subset of extended type constaints:
-    // typevar
-    // nullable
-    // soft
-    //
-    // For everything else, we return {}. We also return {} for annotations
-    // we don't know how to handle.
-    if (annot->isFunction() || annot->isMixed()) {
-      return {};
-    }
-    if (annot->isTypeVar()) {
-      flags = flags | TypeConstraint::TypeVar;
-    }
-    if (annot->isNullable()) {
-      flags = flags | TypeConstraint::Nullable;
-    }
-    if (annot->isSoft()) {
-      flags = flags | TypeConstraint::Soft;
-    }
-    if (flags == (TypeConstraint::ExtendedHint | TypeConstraint::HHType)) {
-      return {};
-    }
-
-    auto strippedName = annot->stripNullable().stripSoft().vanillaName();
-
-    return TypeConstraint{
-      makeStaticString(strippedName),
-      flags
-    };
-  }
-
-  return {};
+  return determine_type_constraint_from_annot(par->annotation(), false);
 }
 
 void EmitterVisitor::emitPostponedMeths() {
@@ -6505,35 +6569,29 @@ void EmitterVisitor::emitPostponedMeths() {
     if (funcScope->isGenerator()) {
       // emit the outer 'create generator' function
       m_curFunc = fe;
-      fe->setGeneratorBodyName(makeStaticString(meth->getGeneratorName()));
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitGeneratorCreate(meth);
 
       // emit the generator body
-      bool needsEmit;
-      std::tie(m_curFunc, needsEmit) =
-        createFuncEmitterForGeneratorBody(meth, fe, top_fes);
-      if (needsEmit) {
-        emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
-        emitGeneratorBody(meth);
-      }
+      auto const bodyFe = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      fe->setGeneratorBodyName(bodyFe->name());
+      m_curFunc = bodyFe;
+      emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
+      emitGeneratorBody(meth);
     } else if (funcScope->isAsync()) {
       // emit the outer function (which creates continuation if blocked)
       m_curFunc = fe;
-      fe->setGeneratorBodyName(makeStaticString(meth->getGeneratorName()));
       fe->setIsAsync(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitAsyncMethod(meth);
 
       // emit the generator body
-      bool needsEmit;
-      std::tie(m_curFunc, needsEmit) =
-        createFuncEmitterForGeneratorBody(meth, fe, top_fes);
-      if (needsEmit) {
-        m_curFunc->setIsAsync(true);
-        emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
-        emitGeneratorBody(meth);
-      }
+      auto const bodyFe = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
+      fe->setGeneratorBodyName(bodyFe->name());
+      m_curFunc = bodyFe;
+      m_curFunc->setIsAsync(true);
+      emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
+      emitGeneratorBody(meth);
     } else {
       m_curFunc = fe;
       if (funcScope->isNative()) {
@@ -6551,7 +6609,7 @@ void EmitterVisitor::emitPostponedMeths() {
         auto const str = makeStaticString(
           folly::format("86static_{}", sv.name->data()).str());
         fe->pce()->addProperty(str, AttrPrivate, nullptr, nullptr,
-                               &uninit, KindOfInvalid);
+                               &uninit, RepoAuthType{});
         if (m_curFunc != fe && !fe->isAsync()) {
           // In the case of a generator (these func emitters will be
           // different), we need to propagate the information about
@@ -6709,8 +6767,16 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     fillFuncEmitterParams(fe, meth->getParams());
 
     // copy declared return type (hack)
-    fe->setReturnUserType(
-      makeStaticString(meth->getReturnTypeConstraint()));
+    fe->setReturnUserType(makeStaticString(meth->getReturnTypeConstraint()));
+
+    auto annot = meth->retTypeAnnotation();
+    // Ideally we should handle the void case in TypeConstraint::check. This
+    // should however get done in a different diff, since it could impact
+    // perf in a negative way (#3145038)
+    if (annot && !annot->isVoid() && !annot->isThis()) {
+      fe->setReturnTypeConstraint(
+        determine_type_constraint_from_annot(annot, true));
+    }
   }
 
   // add the original filename for flattened traits
@@ -6912,34 +6978,40 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
   emitMethodDVInitializers(e, meth, topOfBody);
 }
 
-std::pair<FuncEmitter*,bool>
-EmitterVisitor::createFuncEmitterForGeneratorBody(
+FuncEmitter* EmitterVisitor::createFuncEmitterForGeneratorBody(
                                MethodStatementPtr meth,
                                FuncEmitter* fe,
                                vector<FuncEmitter*>& top_fes) {
   FuncEmitter* genFe;
-  string genName = meth->getGeneratorName();
+  auto genName = meth->getGeneratorName();
   if (fe->isMethod() && !fe->isClosureBody()) {
     genFe = m_ue.newMethodEmitter(
       makeStaticString(genName), fe->pce());
     bool UNUSED added = fe->pce()->addMethod(genFe);
     assert(added);
   } else {
-    auto it = m_generatorEmitted.find(genName);
-    if (it != end(m_generatorEmitted)) {
-      // Generator body already emitted.  This can happen because in
-      // traits, we emit only a single generator body, but one
-      // generator creator function per use of the trait.
-      return std::make_pair(it->second, false);
+    auto& emitCount = m_generatorEmitted[genName];
+    ++emitCount;
+    if (emitCount > 1) {
+      /*
+       * Generator body already emitted.  This can happen because of
+       * repo-mode trait flattening.
+       *
+       * In order to preserve the bytecode invariant that every inner
+       * generator function is uniquely identified to an outer
+       * generator function, we need to bump a counter on the names in
+       * this case (similar to what we do for closure class names).
+       */
+      genName = folly::format("{}_{}", genName, emitCount).str();
     }
+
     genFe = new FuncEmitter(m_ue, -1, -1, makeStaticString(genName));
-    m_generatorEmitted[genName] = genFe;
     top_fes.push_back(genFe);
     genFe->setTop(true);
   }
   genFe->setIsGeneratorFromClosure(fe->isClosureBody());
   genFe->setIsGenerator(true);
-  return std::make_pair(genFe, true);
+  return genFe;
 }
 
 void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {
@@ -7047,83 +7119,30 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
   StringData* methDoc = empty_string.get();
   const Location* sLoc = p.m_is->getLocation().get();
   p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
-  {
-    FuncEmitter::ParamInfo pi;
-    pi.setRef(true);
-    static const StringData* s_props = makeStaticString("props");
-    p.m_fe->appendParam(s_props, pi);
-  }
-  if (pinit) {
-    static const StringData* s_sentinel =
-      makeStaticString("sentinel");
-    p.m_fe->appendParam(s_sentinel,
-                        FuncEmitter::ParamInfo());
-  }
 
   Emitter e(p.m_is, m_ue, *this);
   FuncFinisher ff(this, e, p.m_fe);
 
-  // Generate HHBC of the structure:
-  //
-  //   private static function 86pinit(&$props, $sentinel) {
-  //     # Private instance properties.
-  //     props["\0C\0p0"] = <non-scalar initialization>;
-  //     props["\0C\0p1"] = <non-scalar initialization>;
-  //     # ...
-  //
-  //     if (props["q0"]) === $sentinel) {
-  //       props["q0"] = <non-scalar initialization>;
-  //     }
-  //     if (props["q1"] === $sentinel) {
-  //       props["q1"] = <non-scalar initialization>;
-  //     }
-  //     # ...
-  //   }
-  //
-  //   private static function 86sinit(&$props) {
-  //     props["p0"] = <non-scalar initialization>;
-  //     props["p1"] = <non-scalar initialization>;
-  //     # ...
-  //   }
+  // Private instance and static properties are initialized using
+  // InitProp.
   size_t nProps = p.m_vec->size();
   assert(nProps > 0);
   for (size_t i = 0; i < nProps; ++i) {
     const StringData* propName =
       makeStaticString(((*p.m_vec)[i]).first);
+
     Label isset;
-
-    bool conditional;
-    if (pinit) {
-      const PreClassEmitter::Prop& preProp =
-        p.m_fe->pce()->lookupProp(propName);
-      if ((preProp.attrs() & (AttrPrivate|AttrStatic)) == AttrPrivate) {
-        conditional = false;
-        propName = preProp.mangledName();
-      } else {
-        conditional = true;
-      }
-    } else {
-      conditional = false;
+    InitPropOp op = InitPropOp::NonStatic;
+    const PreClassEmitter::Prop& preProp =
+      p.m_fe->pce()->lookupProp(propName);
+    if ((preProp.attrs() & AttrStatic) == AttrStatic) {
+      op = InitPropOp::Static;
+    } else if ((preProp.attrs() & (AttrPrivate|AttrStatic)) != AttrPrivate) {
+      e.CheckProp(const_cast<StringData*>(propName));
+      e.JmpNZ(isset);
     }
-
-    if (conditional) {
-      emitVirtualLocal(0);
-      e.String((StringData*)propName);
-      markElem(e);
-      emitCGet(e);
-      emitVirtualLocal(1);
-      emitCGet(e);
-      e.Same();
-      e.JmpZ(isset);
-    }
-
-    emitVirtualLocal(0);
-    e.String((StringData*)propName);
-    markElem(e);
     visit((*p.m_vec)[i].second);
-    emitSet(e);
-    e.PopC();
-
+    e.InitProp(const_cast<StringData*>(propName), op);
     isset.set(e);
   }
   e.Null();
@@ -7368,30 +7387,54 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
     }
   }
   Func* f = Unit::lookupFunc(makeStaticString(name));
-  if (!f || !f->methInfo() || f->numParams() > kMaxBuiltinArgs) return nullptr;
+  if (!f ||
+      !f->nativeFuncPtr() ||
+      (f->numParams() > kMaxBuiltinArgs) ||
+      (numParams > f->numParams()) ||
+      (f->returnType() == KindOfDouble)) return nullptr;
 
-  const ClassInfo::MethodInfo* info = f->methInfo();
-  if (info->attribute & (ClassInfo::NeedsActRec |
-                         ClassInfo::VariableArguments |
-                         ClassInfo::RefVariableArguments |
-                         ClassInfo::MixedVariableArguments)) {
+  if (f->methInfo()) {
+    // IDL style builtin
+    const ClassInfo::MethodInfo* info = f->methInfo();
+    if (info->attribute & (ClassInfo::NeedsActRec |
+                           ClassInfo::VariableArguments |
+                           ClassInfo::RefVariableArguments |
+                           ClassInfo::MixedVariableArguments)) {
+      return nullptr;
+    }
+  } else if (!(f->attrs() & AttrNative)) {
+    // HNI only enables Variable args via NeedsActRec which in turn
+    // is captured by the f->nativeFuncPtr() == nullptr,
+    // so there's nothing additional to check in the HNI case
     return nullptr;
   }
-  if (numParams > f->numParams()) return nullptr;
-
-  if (info->returnType == KindOfDouble) return nullptr;
 
   for (int i = 0; i < f->numParams(); i++) {
-    const ClassInfo::ParameterInfo* pi = f->methInfo()->parameters[i];
-    if (pi->argType == KindOfDouble) return nullptr;
-
+    if (f->params()[i].builtinType() == KindOfDouble) {
+      return nullptr;
+    }
     if (i >= numParams) {
-      if (!pi->valueLen) {
-        return nullptr;
+      if (f->methInfo()) {
+        // IDL-style
+        auto pi = f->methInfo()->parameters[i];
+        if (!pi->valueLen) {
+          return nullptr;
+        }
+        // unserializable default values such as TimeStamp::Current()
+        // are serialized as kUnserializableString ("\x01")
+        if (!strcmp(f->methInfo()->parameters[i]->value,
+                    kUnserializableString)) return nullptr;
+      } else {
+        // HNI style
+        auto &pi = f->params()[i];
+        if (!pi.hasDefaultValue()) {
+          return nullptr;
+        }
+        if (pi.defaultValue().m_type == KindOfUninit) {
+          // TODO: Resolve persistent constants
+          return nullptr;
+        }
       }
-      // unserializable default values such as TimeStamp::Current()
-      // are serialized as kUnserializableString ("\x01")
-      if (!strcmp(pi->value, kUnserializableString)) return nullptr;
     }
   }
 
@@ -7493,12 +7536,24 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       bool byRef = fcallBuiltin->byRef(i);
       emitBuiltinCallArg(e, (*params)[i], i, byRef);
     }
-    for (; i < fcallBuiltin->numParams(); i++) {
-      const ClassInfo::ParameterInfo* pi =
-        fcallBuiltin->methInfo()->parameters[i];
-      Variant v = unserialize_from_string(
-        String(pi->value, pi->valueLen, CopyString));
-      emitBuiltinDefaultArg(e, v, pi->argType, i);
+    if (fcallBuiltin->methInfo()) {
+      // IDL style
+      for (; i < fcallBuiltin->numParams(); i++) {
+        const ClassInfo::ParameterInfo* pi =
+          fcallBuiltin->methInfo()->parameters[i];
+        Variant v = unserialize_from_string(
+          String(pi->value, pi->valueLen, CopyString));
+        emitBuiltinDefaultArg(e, v, pi->argType, i);
+      }
+    } else {
+      // HNI style
+      for (; i < fcallBuiltin->numParams(); i++) {
+        auto &pi = fcallBuiltin->params()[i];
+        assert(pi.hasDefaultValue());
+        auto &def = pi.defaultValue();
+        emitBuiltinDefaultArg(e, tvAsVariant(const_cast<TypedValue*>(&def)),
+                              pi.builtinType(), i);
+      }
     }
     e.FCallBuiltin(fcallBuiltin->numParams(), numParams, nLiteral);
   } else {
@@ -7599,6 +7654,29 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   e.DefTypeAlias(id);
 }
 
+static RepoAuthType repoAuthTypeForHphpcType(DataType dtype) {
+  if (!Option::WholeProgram) return RepoAuthType{};
+  switch (dtype) {
+  case KindOfBoolean:
+    return RepoAuthType{RepoAuthType::Tag::OptBool};
+  case KindOfInt64:
+    return RepoAuthType{RepoAuthType::Tag::OptInt};
+  case KindOfDouble:
+    return RepoAuthType{RepoAuthType::Tag::OptDbl};
+  case KindOfArray:
+    return RepoAuthType{RepoAuthType::Tag::OptArr};
+  case KindOfObject:
+    return RepoAuthType{RepoAuthType::Tag::OptObj};
+  case KindOfString:
+  case KindOfStaticString:
+    return RepoAuthType{RepoAuthType::Tag::OptStr};
+  case KindOfResource:
+    return RepoAuthType{RepoAuthType::Tag::OptRes};
+  default:
+    return RepoAuthType{};
+  }
+}
+
 void EmitterVisitor::emitClass(Emitter& e,
                                ClassScopePtr cNode,
                                bool toplevel) {
@@ -7623,7 +7701,7 @@ void EmitterVisitor::emitClass(Emitter& e,
                                      AttrNone;
   if (Option::WholeProgram) {
     if (!cNode->isRedeclaring() &&
-        !cNode->derivesFromRedeclaring()) {
+        cNode->derivesFromRedeclaring() == Derivation::Normal) {
       attr = attr | AttrUnique;
       if (!cNode->isVolatile()) {
         attr = attr | AttrPersistent;
@@ -7741,15 +7819,21 @@ void EmitterVisitor::emitClass(Emitter& e,
             var = static_pointer_cast<SimpleVariable>(exp);
           }
 
-          // A non-invalid HPHPC type for a property implies the
-          // property's type is !KindOfUninit, and always
-          // hphpcType|KindOfNull.
-          const auto hphpcType = var->getSymbol()
-            ? var->getSymbol()->getFinalType()->getDataType()
-            : KindOfInvalid;
+          /*
+           * Translate what hphpc can infer about a property type into
+           * a RepoAuthType for the runtime.  The type hphpc has
+           * implies non-uninit, but is always nullable.
+           *
+           * Note: for hphpc's types it appears this doesn't actually
+           * imply the type is unboxed, either.
+           */
+          auto const hphpcType = repoAuthTypeForHphpcType(
+            var->getSymbol()
+              ? var->getSymbol()->getFinalType()->getDataType()
+              : KindOfInvalid);
 
-          StringData* propName = makeStaticString(var->getName());
-          StringData* propDoc = Option::GenerateDocComments ?
+          auto const propName = makeStaticString(var->getName());
+          auto const propDoc = Option::GenerateDocComments ?
             makeStaticString(var->getDocComment()) : empty_string.get();
           TypedValue tvVal;
           // Some properties may need to be marked with the AttrDeepInit
@@ -8261,6 +8345,7 @@ void EmitterVisitor::copyOverCatchAndFaultRegions(FuncEmitter* fe) {
     delete f;
   }
   m_funclets.clear();
+  m_memoizedFunclets.clear();
 }
 
 void EmitterVisitor::copyOverFPIRegions(FuncEmitter* fe) {
@@ -8401,6 +8486,8 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
         return false;
       } else if (u->getOp() == '+' || u->getOp() == '-') {
         return requiresDeepInit(u->getExpression());
+      } else if (u->getOp() == T_FILE || u->getOp() == T_DIR) {
+        return false;
       }
       // fall through
     }
@@ -8484,10 +8571,11 @@ struct Entry {
   const ClassInfo* ci;
 };
 
-static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
-                                    ssize_t numBuiltinFuncs) {
+static std::unique_ptr<UnitEmitter>
+emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
+                       ssize_t numBuiltinFuncs) {
   MD5 md5("11111111111111111111111111111111");
-  UnitEmitter* ue = new UnitEmitter(md5);
+  auto ue = folly::make_unique<UnitEmitter>(md5);
   ue->setFilepath(makeStaticString(""));
   ue->addTrivialPseudoMain();
 
@@ -8517,11 +8605,18 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
         !RuntimeOption::EnableZendCompat) {
       continue;
     }
-    if (Unit::lookupFunc(name)) {
-      // already provided by systemlib, rename to allow the php
-      // version to delegate if necessary
-      name = makeStaticString("__builtin_" + name->toCPPString());
+
+    // We already provide array_map by the hhas systemlib.  Rename
+    // because that hhas implementation delegates back to the C++
+    // implementation for some edge cases.  This works for any
+    // similarly defined function (already defined not as a builtin),
+    // and requires that the hhas systemlib is already loaded.
+    if (auto const existing = Unit::lookupFunc(name)) {
+      if (!existing->isCPPBuiltin()) {
+        name = makeStaticString("__builtin_" + name->toCppString());
+      }
     }
+
     FuncEmitter* fe = ue->newFuncEmitter(name);
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, nif, base);
@@ -8532,9 +8627,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     ue->recordFunction(fe);
   }
 
-  Unit* unit = ue->create();
-  delete ue;
-  return unit;
+  return ue;
 }
 
 enum ContinuationMethod {
@@ -8624,10 +8717,11 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
 }
 
 StaticString s_construct("__construct");
-static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
-                                     ssize_t numBuiltinClasses) {
+static std::unique_ptr<UnitEmitter>
+emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
+                        ssize_t numBuiltinClasses) {
   MD5 md5("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-  UnitEmitter* ue = new UnitEmitter(md5);
+  auto ue = folly::make_unique<UnitEmitter>(md5);
   ue->setFilepath(makeStaticString(""));
   ue->addTrivialPseudoMain();
 
@@ -8641,7 +8735,9 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
 
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors
-  assert(Class::s_extClassHash.size() == 0);
+  if (!Class::s_extClassHash.empty()) {
+    Class::s_extClassHash.clear();
+  }
   for (long long i = 0; i < numBuiltinClasses; ++i) {
     const HhbcExtClassInfo* info = builtinClasses + i;
     StringData *s = makeStaticString(info->m_name);
@@ -8810,7 +8906,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           propInfo->docComment ?
           makeStaticString(propInfo->docComment) : nullptr,
           &tvNull,
-          KindOfInvalid
+          RepoAuthType{}
         );
       }
     }
@@ -8820,9 +8916,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   Peephole peephole(*ue, metaInfo);
   metaInfo.setForUnit(*ue);
 
-  Unit* unit = ue->create();
-  delete ue;
-  return unit;
+  return ue;
 }
 
 static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
@@ -8926,38 +9020,12 @@ static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
   ((JobQueueDispatcher<EmitterWorker>*)data)->enqueue(sp->getFileScope());
 }
 
-static void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
-  assert(Option::GenerateBinaryHHBC);
-  Repo& repo = Repo::get();
-
-  // Attempt batch commit.  This can legitimately fail due to multiple input
-  // files having identical contents.
-  bool err = false;
-  {
-    RepoTxn txn(repo);
-
-    for (auto& ue : ues) {
-      if (repo.insertUnit(ue.get(), UnitOrigin::File, txn)) {
-        err = true;
-        break;
-      }
-    }
-    if (!err) {
-      txn.commit();
-    }
-  }
-
-  // Commit units individually if an error occurred during batch commit.
-  if (err) {
-    for (auto& ue : ues) {
-      repo.commitUnit(ue.get(), UnitOrigin::File);
-    }
-  }
-}
-
 static void commitGlobalData() {
-  auto gd = Repo::GlobalData{};
-  gd.HardTypeHints = Option::HardTypeHints;
+  auto gd                     = Repo::GlobalData{};
+  gd.HardTypeHints            = Option::HardTypeHints;
+  gd.UsedHHBBC                = Option::UseHHBBC;
+  gd.HardPrivatePropInference = Option::UseHHBBC;
+
   Repo::get().saveGlobalData(gd);
 }
 
@@ -9028,11 +9096,24 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   }
 
   assert(Option::UseHHBBC || ues.empty());
-  if (Option::UseHHBBC) {
-    ues = HHBBC::whole_program(std::move(ues));
+
+  // We need to put the native func units in the repo so hhbbc can
+  // find them, even though they won't be used at runtime.  (We just
+  // regenerate them during process init.)
+  auto nfunc = emitHHBCNativeFuncUnit(hhbc_ext_funcs, hhbc_ext_funcs_count);
+  auto ncls  = emitHHBCNativeClassUnit(hhbc_ext_classes,
+                                       hhbc_ext_class_count);
+  ues.push_back(std::move(nfunc));
+  ues.push_back(std::move(ncls));
+
+  if (!Option::UseHHBBC) {
     batchCommit(std::move(ues));
-    commitGlobalData();
+    return;
   }
+
+  ues = HHBBC::whole_program(std::move(ues));
+  batchCommit(std::move(ues));
+  commitGlobalData();
 }
 
 extern "C" {
@@ -9128,9 +9209,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       fsp->analyzeProgram(ar);
 
       ue.reset(emitHHBCUnitEmitter(ar, fsp, md5));
-      if (Option::UseHHBBC && SystemLib::s_inited) {
-        ue = HHBBC::single_unit(std::move(ue));
-      }
     }
     Repo::get().commitUnit(ue.get(), unitOrigin);
 
@@ -9155,12 +9233,12 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
 
 Unit* hphp_build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
                                   ssize_t numBuiltinFuncs) {
-  return emitHHBCNativeFuncUnit(builtinFuncs, numBuiltinFuncs);
+  return emitHHBCNativeFuncUnit(builtinFuncs, numBuiltinFuncs)->create();
 }
 
 Unit* hphp_build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
                                    ssize_t numBuiltinClasses) {
-  return emitHHBCNativeClassUnit(builtinClasses, numBuiltinClasses);
+  return emitHHBCNativeClassUnit(builtinClasses, numBuiltinClasses)->create();
 }
 
 } // extern "C"

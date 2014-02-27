@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,14 +46,14 @@ static ResolverLibInitializer _resolver_lib_initializer;
 ///////////////////////////////////////////////////////////////////////////////
 // thread-safe network functions
 
-std::string Util::safe_inet_ntoa(struct in_addr &in) {
+std::string safe_inet_ntoa(struct in_addr &in) {
   char buf[256];
   memset(buf, 0, sizeof(buf));
   inet_ntop(AF_INET, &in, buf, sizeof(buf)-1);
   return buf;
 }
 
-bool Util::safe_gethostbyname(const char *address, HostEnt &result) {
+bool safe_gethostbyname(const char *address, HostEnt &result) {
 #if defined(__APPLE__)
   struct hostent *hp = gethostbyname(address);
 
@@ -81,7 +81,7 @@ bool Util::safe_gethostbyname(const char *address, HostEnt &result) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string Util::GetPrimaryIP() {
+std::string GetPrimaryIP() {
   struct utsname buf;
   uname((struct utsname *)&buf);
 
@@ -95,7 +95,21 @@ std::string Util::GetPrimaryIP() {
   return safe_inet_ntoa(in);
 }
 
-Util::HostURL::HostURL(const std::string &hosturl, int port) :
+static std::string normalizeIPv6Address(const std::string& address) {
+  struct in6_addr addr;
+  if (inet_pton(AF_INET6, address.c_str(), &addr) <= 0) {
+    return std::string();
+  }
+
+  char ipPresentation[INET6_ADDRSTRLEN];
+  if (inet_ntop(AF_INET6, &addr, ipPresentation, INET6_ADDRSTRLEN) == nullptr) {
+    return std::string();
+  }
+
+  return ipPresentation;
+}
+
+HostURL::HostURL(const std::string &hosturl, int port) :
   m_ipv6(false), m_port(port) {
 
   // Find the scheme
@@ -122,8 +136,16 @@ Util::HostURL::HostURL(const std::string &hosturl, int port) :
     }
 
     // IPv6 address between '[' and ']'
-    m_host = hosturl.substr(bpos + 1, epos - bpos - 1);
-    m_hosturl += hosturl.substr(bpos, epos - bpos);
+    auto v6h = normalizeIPv6Address(hosturl.substr(bpos + 1, epos - bpos - 1));
+    if (v6h.empty()) {
+      m_valid = false;
+      m_hosturl = hosturl;
+      return;
+    }
+    m_host = v6h;
+    m_hosturl += '[';
+    m_hosturl += v6h;
+    m_hosturl += ']';
 
     // Colon for port.  Start after ']';
     auto cpos = hosturl.find(':', epos);

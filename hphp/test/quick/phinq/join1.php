@@ -7,15 +7,14 @@ class C {
 }
 
 $customers = new Queryable();
+$orders = new Queryable();
 
 $q = from $c in $customers
      join $o in $orders on $c->CustomerID equals $o->CustomerID
      select tuple($c->Name, $o->OrderID, $o->Total);
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }
 
 echo (new C())->join();
-
-

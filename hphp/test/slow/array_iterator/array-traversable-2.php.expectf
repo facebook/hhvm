@@ -1,5 +1,14 @@
-bool(false)
 bool(true)
 bool(true)
+bool(true)
 bool(false)
-HipHop Fatal error: Argument 1 passed to trav() must be an instance of Traversable, array given in %s on line 8
+Traversable
+array(0) {
+}
+KeyedTraversable
+array(0) {
+}
+Indexish
+array(0) {
+}
+HipHop Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s on line 20

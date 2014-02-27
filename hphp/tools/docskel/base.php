@@ -7,7 +7,7 @@ class HHVMDocExtension {
   protected array $functions = [];
 
   protected function svnScandir(string $path): array {
-    $ret = [];
+    $ret = array('dirs' => [], 'files' => []);
     $entries = scandir($path);
     foreach ($entries as $entry) {
       if ($entry[0] == '.') continue;
@@ -16,7 +16,7 @@ class HHVMDocExtension {
           'name' => $entry,
           'path' => "$path/$entry",
         ];
-      } else {
+      } else if (pathinfo($entry, PATHINFO_EXTENSION) === 'xml') {
         $ret['files'][$entry] = [
           'name' => $entry,
           'path' => "$path/$entry",

@@ -31,10 +31,6 @@ namespace HH {
 interface Traversable {
 }
 
-}
-
-namespace {
-
 interface KeyedTraversable extends \HH\Traversable {
 }
 

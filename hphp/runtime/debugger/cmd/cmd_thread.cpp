@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_thread.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/system/constants.h"
 #include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
@@ -170,7 +171,7 @@ void CmdThread::onClient(DebuggerClient &client) {
 void CmdThread::debuggerInfo(InfoVec &info) {
   Add(info, "Host",       Process::GetHostName());
   Add(info, "Binary",     Process::GetAppName());
-  Add(info, "Version",    Process::GetAppVersion());
+  Add(info, "Version",    k_HHVM_VERSION.toCppString());
   Add(info, "Process ID", FormatNumber("%lld", Process::GetProcessId()));
   Add(info, "Thread ID",  FormatNumber("0x%llx", (int64_t)Process::GetThreadId()));
 }

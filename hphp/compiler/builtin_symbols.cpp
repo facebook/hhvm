@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include <dlfcn.h>
@@ -259,6 +260,15 @@ void BuiltinSymbols::ImportExtProperties(AnalysisResultPtr ar,
   }
 }
 
+void BuiltinSymbols::ImportNativeConstants(AnalysisResultPtr ar,
+                                           ConstantTablePtr dest) {
+  for (auto cnsPair : Native::getConstants()) {
+    dest->add(cnsPair.first->data(),
+              typePtrFromDataType(cnsPair.second.m_type, Type::Variant),
+              ExpressionPtr(), ar, ConstructPtr());
+  }
+}
+
 void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
                                         ConstantTablePtr dest,
                                         ClassInfo *cls) {
@@ -333,6 +343,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
 
   ConstantTablePtr cns = ar->getConstants();
   // load extension constants, classes and dynamics
+  ImportNativeConstants(ar, cns);
   ImportExtConstants(ar, cns, ClassInfo::GetSystem());
   ImportExtClasses(ar);
 

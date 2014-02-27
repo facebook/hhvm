@@ -6,10 +6,12 @@ function instance_of_test(array $x) {
                                        // EnableHipHopSyntax or <?hh
   var_dump($x instanceof XHPChild);
   var_dump($x instanceof Indexish);
-  var_dump($x instanceof KeyedTraversable);
+  var_dump($x instanceof \HH\KeyedTraversable);
+  var_dump($x instanceof KeyedTraversable); // false without
+                                            // EnableHipHopSyntax or <?hh
 }
 
-function type_hint_test(KeyedTraversable $x) {
+function type_hint_test(\HH\KeyedTraversable $x) {
   var_dump(is_array($x));
 }
 

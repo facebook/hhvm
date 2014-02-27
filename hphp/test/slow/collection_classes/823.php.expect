@@ -24,8 +24,8 @@ array(2) {
   int(42)
 }
 ------------------------
-string(30) "V:4:"Pair":2:{s:3:"foo";i:42;}"
-object(Pair)#5 (2) {
+string(33) "V:7:"HH\Pair":2:{s:3:"foo";i:42;}"
+object(HH\Pair)#4 (2) {
   [0]=>
   string(3) "foo"
   [1]=>
@@ -54,7 +54,7 @@ array(2) {
   int(42)
 }
 ------------------------
-object(Pair)#5 (2) {
+object(HH\Pair)#4 (2) {
   [0]=>
   string(3) "foo"
   [1]=>

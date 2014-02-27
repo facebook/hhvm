@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@ ReadOnlyArena::ReadOnlyArena(size_t chunkSize)
   , m_frontier(nullptr)
   , m_end(nullptr)
 {
-  always_assert(m_chunkSize % Util::s_pageSize == 0);
+  always_assert(m_chunkSize % s_pageSize == 0);
   grow();
 }
 
@@ -67,7 +67,7 @@ const void* ReadOnlyArena::allocate(const void* data, size_t dataLen) {
   m_frontier += alignedLen;
 
   auto pageAddr = reinterpret_cast<unsigned char*>(
-    uintptr_t(ret) & ~(Util::s_pageSize - 1)
+    uintptr_t(ret) & ~(s_pageSize - 1)
   );
   mprotect(pageAddr, m_frontier - pageAddr, PROT_WRITE|PROT_READ);
   auto const ucData = static_cast<const unsigned char*>(data);

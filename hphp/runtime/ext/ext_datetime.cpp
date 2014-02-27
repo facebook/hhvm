@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,13 +24,57 @@ namespace HPHP {
 static class DateExtension : public Extension {
  public:
   DateExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
-  void moduleInit() {
+  void threadInit() {
     IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
       "date.timezone",
       g_context->getDefaultTimeZone().c_str(),
       dateTimezoneIniUpdate, dateTimezoneIniGet,
       nullptr
     );
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "date.default_latitude", "31.7667",
+      &m_date_default_latitude
+    );
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "date.default_longitude", "35.2333",
+      &m_date_default_longitude
+    );
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "date.sunset_zenith", "90.583333",
+      &m_date_default_sunset_zenith
+    );
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "date.sunrise_zenith", "90.583333",
+      &m_date_default_sunrise_zenith
+    );
+  }
+
+  double get_date_default_latitude() {
+    return m_date_default_latitude;
+  }
+
+  double get_date_default_longitude() {
+    return m_date_default_longitude;
+  }
+
+  double get_date_default_sunset_zenith() {
+    return m_date_default_sunset_zenith;
+  }
+
+  double get_date_default_sunrise_zenith() {
+    return m_date_default_sunrise_zenith;
+  }
+
+  double get_date_default_gmt_offset() {
+    SmartResource<TimeZone> tzi = TimeZone::Current();
+    // just get the offset form utc time
+    // set the timestamp 0 is ok
+    return tzi->offset(0) / 3600;
   }
 
  private:
@@ -42,13 +86,18 @@ static class DateExtension : public Extension {
     return f_date_default_timezone_set(value);
   }
 
-  static String dateTimezoneIniGet(void* p) {
+  static std::string dateTimezoneIniGet(void* p) {
     auto ret = g_context->getTimeZone();
     if (ret.isNull()) {
-      return empty_string;
+      return "";
     }
-    return ret;
+    return ret.toCppString();
   }
+
+  double m_date_default_latitude;
+  double m_date_default_longitude;
+  double m_date_default_sunset_zenith;
+  double m_date_default_sunrise_zenith;
 } s_date_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,9 +154,10 @@ Variant c_DateTime::ti_createfromformat(const String& format,
                                         const String& time,
                                         CObjRef timezone /*= null_object */) {
   c_DateTime *datetime = NEWOBJ(c_DateTime);
-  datetime->m_dt = NEWOBJ(DateTime);
+  const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
+  datetime->m_dt = NEWOBJ(DateTime(curr, false));
   if(!datetime->m_dt->fromString(time, c_DateTimeZone::unwrap(timezone),
-                             format.data(), false)) {
+                                 format.data(), false)) {
     return false;
   }
 
@@ -565,6 +615,10 @@ Variant f_date_create(const String& time /* = null_string */,
   Object ret(cdt);
   // Don't set the time here because it will throw if it is bad
   cdt->t___construct();
+  if (time.empty()) {
+    // zend does this, so so do we
+    return ret;
+  }
   auto dt = c_DateTime::unwrap(ret);
   if (!dt->fromString(time, c_DateTimeZone::unwrap(timezone), nullptr, false)) {
     return false;
@@ -650,23 +704,47 @@ Object f_date_sub(CObjRef datetime, CObjRef interval) {
 ///////////////////////////////////////////////////////////////////////////////
 // sun
 
+double get_date_default_latitude() {
+  return s_date_extension.get_date_default_latitude();
+}
+
+double get_date_default_longitude() {
+    return s_date_extension.get_date_default_longitude();
+}
+
+double get_date_default_sunset_zenith() {
+    return s_date_extension.get_date_default_sunset_zenith();
+}
+
+double get_date_default_sunrise_zenith() {
+    return s_date_extension.get_date_default_sunrise_zenith();
+}
+
+double get_date_default_gmt_offset() {
+    return s_date_extension.get_date_default_gmt_offset();
+}
+
 Array f_date_sun_info(int64_t ts, double latitude, double longitude) {
   return DateTime(ts, false).getSunInfo(latitude, longitude);
 }
 
-Variant f_date_sunrise(int64_t timestamp, int format /* = 0 */,
-                       double latitude /* = 0.0 */, double longitude /* = 0.0 */,
-                       double zenith /* = 0.0 */,
-                       double gmt_offset /* = 99999.0 */) {
+Variant f_date_sunrise(int64_t timestamp,
+                       int format,
+                       double latitude ,
+                       double longitude,
+                       double zenith,
+                       double gmt_offset) {
   return DateTime(timestamp, false).getSunInfo
     (static_cast<DateTime::SunInfoFormat>(format), latitude, longitude,
      zenith, gmt_offset, false);
 }
 
-Variant f_date_sunset(int64_t timestamp, int format /* = 0 */,
-                      double latitude /* = 0.0 */, double longitude /* = 0.0 */,
-                      double zenith /* = 0.0 */,
-                      double gmt_offset /* = 99999.0 */) {
+Variant f_date_sunset(int64_t timestamp,
+                      int format,
+                      double latitude,
+                      double longitude,
+                      double zenith,
+                      double gmt_offset) {
   return DateTime(timestamp, false).getSunInfo
     (static_cast<DateTime::SunInfoFormat>(format), latitude, longitude,
      zenith, gmt_offset, true);

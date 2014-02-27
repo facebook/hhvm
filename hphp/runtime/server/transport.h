@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 #define incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 
-#include <map>
 #include <string>
+#include <unordered_map>
 
 #include "hphp/util/compression.h"
 #include "hphp/util/functional.h"
@@ -33,8 +33,12 @@ namespace HPHP {
 /**
  * For storing headers and cookies.
  */
-typedef std::map<std::string, std::vector<std::string>, stdltistr> HeaderMap;
-typedef std::map<std::string, std::string, stdltistr> CookieMap;
+template <typename V>
+using CaseInsenMap =
+  std::unordered_map<std::string, V, string_hash, string_eqstri>;
+
+using HeaderMap = CaseInsenMap<std::vector<std::string>>;
+using CookieMap = CaseInsenMap<std::string>;
 
 /**
  * A class defining an interface that request handler can use to query
@@ -116,6 +120,8 @@ public:
   virtual const char *getRemoteAddr() { return ""; }
   // The transport can override the virtualhosts' docroot
   virtual const std::string getDocumentRoot() { return ""; }
+  // The transport can say exactly what script to use
+  virtual const std::string getPathTranslated() { return ""; }
 
   /**
    * Server Headers
@@ -357,7 +363,6 @@ public:
 
   // TODO: support rfc1867
   virtual bool isUploadedFile(const String& filename);
-  virtual bool moveUploadedFile(const String& filename, const String& destination);
 
   int getResponseSize() const { return m_responseSize; }
   int getResponseCode() const { return m_responseCode; }
@@ -456,7 +461,6 @@ protected:
 
   String prepareResponse(const void *data, int size, bool &compressed,
                          bool last);
-  bool moveUploadedFileHelper(const String& filename, const String& destination);
 
 private:
   void prepareHeaders(bool compressed, bool chunked, const String &response,

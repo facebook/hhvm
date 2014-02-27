@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,8 @@
 */
 #include "hphp/runtime/vm/as-shared.h"
 
-#include "folly/experimental/Gen.h"
-#include "folly/experimental/StringGen.h"
+#include "folly/gen/Base.h"
+#include "folly/gen/String.h"
 
 #include <vector>
 
@@ -48,7 +48,8 @@ bool supported(ContextMask mask, AttrContext a) {
   X(AttrNoOverride,    C|F|T,   "no_override");     \
   X(AttrFinal,         C|F|T,   "final");           \
   X(AttrTrait,         C|F,     "trait");           \
-  X(AttrUnique,        C|F,     "unique");
+  X(AttrUnique,        C|F,     "unique");          \
+  X(AttrBuiltin,       C|F,     "builtin");
 
 }
 

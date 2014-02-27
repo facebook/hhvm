@@ -1,0 +1,27 @@
+%s(25) "MYSQLI_READ_DEFAULT_GROUP"
+bool(true)
+%s(24) "MYSQLI_READ_DEFAULT_FILE"
+bool(true)
+%s(26) "MYSQLI_OPT_CONNECT_TIMEOUT"
+bool(true)
+%s(23) "MYSQLI_OPT_LOCAL_INFILE"
+bool(true)
+HipHop Notice: %s
+%s(19) "MYSQLI_INIT_COMMAND"
+bool(true)
+%s(25) "MYSQLI_READ_DEFAULT_GROUP"
+bool(true)
+%s(24) "MYSQLI_READ_DEFAULT_FILE"
+bool(true)
+%s(26) "MYSQLI_OPT_CONNECT_TIMEOUT"
+bool(true)
+%s(23) "MYSQLI_OPT_LOCAL_INFILE"
+bool(true)
+%s(19) "MYSQLI_INIT_COMMAND"
+bool(true)
+%s(17) "MYSQLI_CLIENT_SSL"
+bool(false)
+Link closedHipHop Warning: %s
+%s(19) "MYSQLI_INIT_COMMAND"
+NULL
+done!

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -109,6 +109,24 @@ bool f_stream_context_set_option(CVarRef stream_or_context,
     raise_warning("called with wrong number or type of parameters; please RTM");
     return false;
   }
+}
+
+Variant f_stream_context_get_default(CArrRef options /* = null_array */) {
+  Resource &resource = g_context->getStreamContext();
+  if (resource.isNull()) {
+    resource = Resource(NEWOBJ(StreamContext)(Array::Create(),
+                                              Array::Create()));
+    g_context->setStreamContext(resource);
+  }
+  StreamContext *context = resource.getTyped<StreamContext>();
+  if (!options.isNull() && !f_stream_context_set_option0(context, options)) {
+    return false;
+  }
+  return resource;
+}
+
+Variant f_stream_context_set_default(CArrRef options) {
+  return f_stream_context_get_default(options);
 }
 
 Variant f_stream_context_get_params(CResRef stream_or_context) {
@@ -312,15 +330,17 @@ bool f_stream_is_local(CVarRef stream_or_url) {
 }
 
 
-bool f_stream_register_wrapper(const String& protocol, const String& classname) {
-  return f_stream_wrapper_register(protocol, classname);
+bool f_stream_register_wrapper(const String& protocol, const String& classname,
+                               int flags) {
+  return f_stream_wrapper_register(protocol, classname, flags);
 }
 
-bool f_stream_wrapper_register(const String& protocol, const String& classname) {
+bool f_stream_wrapper_register(const String& protocol, const String& classname,
+                               int flags) {
   std::unique_ptr<Stream::Wrapper> wrapper;
   try {
     wrapper = std::unique_ptr<Stream::Wrapper>(
-                   new UserStreamWrapper(protocol, classname));
+                   new UserStreamWrapper(protocol, classname, flags));
   } catch (const InvalidArgumentException& e) {
     raise_warning("%s", e.what());
     return false;
@@ -423,7 +443,7 @@ Variant f_stream_socket_accept(CResRef server_socket,
   p.revents = 0;
   IOStatusHelper io("socket_accept");
   if (timeout == -1) {
-    timeout = RuntimeOption::SocketDefaultTimeout;
+    timeout = g_context->getSocketDefaultTimeout();
   }
   n = poll(&p, 1, (uint64_t)(timeout * 1000.0));
   if (n > 0) {
@@ -445,7 +465,7 @@ Variant f_stream_socket_server(const String& local_socket,
                                VRefParam errstr /* = null */,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
-  Util::HostURL hosturl(static_cast<const std::string>(local_socket));
+  HostURL hosturl(static_cast<const std::string>(local_socket));
   return socket_server_impl(hosturl, flags, errnum, errstr);
 }
 
@@ -455,7 +475,7 @@ Variant f_stream_socket_client(const String& remote_socket,
                                double timeout /* = -1.0 */,
                                int flags /* = 0 */,
                                CResRef context /* = null_object */) {
-  Util::HostURL hosturl(static_cast<const std::string>(remote_socket));
+  HostURL hosturl(static_cast<const std::string>(remote_socket));
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
@@ -509,7 +529,7 @@ Variant f_stream_socket_sendto(CResRef socket, const String& data,
     host = sock->getAddress();
     port = sock->getPort();
   } else {
-    Util::HostURL hosturl(static_cast<std::string>(address));
+    HostURL hosturl(static_cast<std::string>(address));
     host = hosturl.getHost();
     port = hosturl.getPort();
   }
@@ -526,13 +546,19 @@ static StreamContext* get_stream_context(CVarRef stream_or_context) {
     return nullptr;
   }
   CResRef resource = stream_or_context.asCResRef();
-  StreamContext* context = resource.getTyped<StreamContext>();
+  StreamContext* context = resource.getTyped<StreamContext>(true, true);
   if (context != nullptr) {
     return context;
   }
-  File* file = resource.getTyped<File>();
+  File *file = resource.getTyped<File>(true, true);
   if (file != nullptr) {
-    return file->getStreamContext();
+    Resource resource = file->getStreamContext();
+    if (file->getStreamContext().isNull()) {
+      resource =
+        Resource(NEWOBJ(StreamContext)(Array::Create(), Array::Create()));
+      file->setStreamContext(resource);
+    }
+    return resource.getTyped<StreamContext>();
   }
   return nullptr;
 }

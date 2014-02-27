@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,7 @@
 #include "folly/Conv.h"
 #include "folly/Format.h"
 #include "folly/MapUtil.h"
-#include "folly/experimental/Gen.h"
+#include "folly/gen/Base.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"
@@ -146,9 +146,9 @@ RuntimeType Type::toRuntimeType() const {
   auto rtt = RuntimeType{outer, inner};
 
   if (isSpecialized()) {
-    if (isArray()) {
+    if (subtypeOf(Type::Arr)) {
       return rtt.setArrayKind(getArrayKind());
-    } else {
+    } else if (subtypeOf(Type::Obj)) {
       return rtt.setKnownClass(getClass());
     }
   }
@@ -273,41 +273,10 @@ struct Type::Union {
     return Type(bits);
   }
 
-  /*
-   * combineExtra returns a's m_extra field if the union of a and b would
-   * contain a's specialization. Otherwise it returns 0. Assumes a and b can
-   * specialize differently.
-   */
-  static uintptr_t combineExtra(Type a, Type b) {
-    if (!a.isSpecialized()) return 0;
-    assert(a.canSpecializeClass() != b.canSpecializeClass());
-
-    if (a.getClass()) {
-      // We know b can specialize on array kind so it can't contain any members
-      // of AnyObj. a's class will be preserved in the union.
-      assert(!(b.m_bits & kAnyObj));
-      return a.m_extra;
-    }
-
-    if (a.hasArrayKind()) {
-      // We know b can specialize on object class so it can't contain any members
-      // of AnyArr. a's array kind will be preserved in the union.
-      assert(!(b.m_bits & kAnyArr));
-      return a.m_extra;
-    }
-
-    not_reached();
-  }
-
   static Type combineDifferent(bits_t newBits, Type a, Type b) {
-    // a and b can specialize differently. Figure out if each Type's
-    // specialization would be preserved in the union operation, sanity check,
-    // and keep the specialization that survived.
-    auto const aExtra = combineExtra(a, b);
-    auto const bExtra = combineExtra(b, a);
-
-    assert(!(aExtra && bExtra) && "Conflicting specializations in operator|");
-    return Type(newBits, aExtra ? aExtra : bExtra);
+    // a and b can specialize differently, so their union can't have any
+    // specialization (it would be an ambiguously specialized type).
+    return Type(newBits);
   }
 };
 
@@ -316,6 +285,8 @@ struct Type::Intersect {
   static Type combineSame(bits_t bits, bits_t typeMask,
                           folly::Optional<T> aOpt,
                           folly::Optional<T> bOpt) {
+    if (!bits) return Type::Bottom;
+
     // We shouldn't get here if neither is specialized.
     assert(aOpt || bOpt);
 
@@ -429,8 +400,8 @@ Type Type::operator-(Type other) const {
 
     // Subtracting different specializations of the same type could get messy
     // so we don't support it for now.
-    assert(specializedType() == other.specializedType() &&
-           "Incompatible specialized types given to operator-");
+    always_assert(specializedType() == other.specializedType() &&
+                  "Incompatible specialized types given to operator-");
 
     // If we got here, both types have the same specialization, so it's removed
     // from the result.
@@ -451,20 +422,23 @@ Type Type::operator-(Type other) const {
     not_reached();
   }
 
-  // Only other is specialized. This is fine as long as none of the bits
-  // corresponding to other's specialization are set in *this. Otherwise we'd
-  // have to represent things like "all classes except X".
-  assert(IMPLIES(other.canSpecializeArrayKind(), !(m_bits & kAnyArr)) &&
-         IMPLIES(other.canSpecializeClass(), !(m_bits & kAnyObj)) &&
-         "Unsupported specialization subtraction");
-  return Type(newBits);
+  // Only other is specialized. This is where things get a little fuzzy. We
+  // want to be able to support things like Obj - Obj<C> but we can't represent
+  // Obj<~C>. We compromise and return Bottom in cases like this, which means
+  // we need to be careful because (a - b) == Bottom doesn't imply a <= b in
+  // this world.
+  if (other.canSpecializeClass()) return Type(newBits & ~kAnyObj);
+  return Type(newBits & ~kAnyArr);
 }
 
 Type liveTVType(const TypedValue* tv) {
   assert(tv->m_type == KindOfClass || tvIsPlausible(*tv));
 
   if (tv->m_type == KindOfObject) {
-    return Type::Obj.specialize(tv->m_data.pobj->getVMClass());
+    Class* cls = tv->m_data.pobj->getVMClass();
+    // We only allow specialization on final classes for now.
+    if (cls && !(cls->attrs() & AttrFinal)) cls = nullptr;
+    return Type::Obj.specialize(cls);
   }
   if (tv->m_type == KindOfArray) {
     return Type::Arr.specialize(tv->m_data.parr->kind());
@@ -525,21 +499,17 @@ Type stkReturn(const IRInstruction* inst, int dstId,
   return Type::StkPtr;
 }
 
-Type binArithResultType(Opcode op, Type t1, Type t2) {
-  if (op == Mod) {
-    return Type::Int;
-  }
-  assert(op == Add || op == Sub || op == Mul);
-  if (t1.subtypeOf(Type::Dbl) || t2.subtypeOf(Type::Dbl)) {
-    return Type::Dbl;
-  }
-  return Type::Int;
-}
-
 Type ldRefReturn(const IRInstruction* inst) {
-  // Guarding on specific classes/array kinds is expensive enough that we only
-  // want to do it in situations we've confirmed the benefit.
-  return inst->typeParam().unspecialize();
+  // Guarding on specialized types and uncommon unions like {Int|Bool} is
+  // expensive enough that we only want to do it in situations where we've
+  // manually confirmed the benefit.
+  auto type = inst->typeParam().unspecialize();
+
+  if (type.isKnownDataType())      return type;
+  if (type <= Type::UncountedInit) return Type::UncountedInit;
+  if (type <= Type::Uncounted)     return Type::Uncounted;
+  always_assert(type <= Type::Cell);
+  return Type::Cell;
 }
 
 Type thisReturn(const IRInstruction* inst) {
@@ -590,6 +560,60 @@ Type boxType(Type t) {
   return t.box();
 }
 
+Type convertToType(RepoAuthType ty) {
+  using T = RepoAuthType::Tag;
+  switch (ty.tag()) {
+  case T::OptBool:        return Type::Bool      | Type::InitNull;
+  case T::OptInt:         return Type::Int       | Type::InitNull;
+  case T::OptSArr:        return Type::StaticArr | Type::InitNull;
+  case T::OptArr:         return Type::Arr       | Type::InitNull;
+  case T::OptSStr:        return Type::StaticStr | Type::InitNull;
+  case T::OptStr:         return Type::Str       | Type::InitNull;
+  case T::OptDbl:         return Type::Dbl       | Type::InitNull;
+  case T::OptRes:         return Type::Res       | Type::InitNull;
+  case T::OptObj:         return Type::Obj       | Type::InitNull;
+
+  case T::Uninit:         return Type::Uninit;
+  case T::InitNull:       return Type::InitNull;
+  case T::Null:           return Type::Null;
+  case T::Bool:           return Type::Bool;
+  case T::Int:            return Type::Int;
+  case T::Dbl:            return Type::Dbl;
+  case T::Res:            return Type::Res;
+  case T::SStr:           return Type::StaticStr;
+  case T::Str:            return Type::Str;
+  case T::SArr:           return Type::StaticArr;
+  case T::Arr:            return Type::Arr;
+  case T::Obj:            return Type::Obj;
+
+  case T::Cell:           return Type::Cell;
+  case T::Ref:            return Type::BoxedCell;
+  case T::InitUnc:        return Type::UncountedInit;
+  case T::Unc:            return Type::Uncounted;
+  case T::InitCell:       return Type::InitCell;
+  case T::InitGen:        return Type::Init;
+  case T::Gen:            return Type::Gen;
+
+  case T::SubObj:
+  case T::ExactObj:
+    {
+      if (auto const cls = Unit::lookupUniqueClass(ty.clsName())) {
+        return Type::Obj.specialize(cls);
+      }
+      return Type::Obj;
+    }
+  case T::OptSubObj:
+  case T::OptExactObj:
+    {
+      if (auto const cls = Unit::lookupUniqueClass(ty.clsName())) {
+        return Type::Obj.specialize(cls) | Type::InitNull;
+      }
+      return Type::Obj | Type::InitNull;
+    }
+  }
+  not_reached();
+}
+
 Type outputType(const IRInstruction* inst, int dstId) {
 #define IRT(name, ...) UNUSED static const Type name = Type::name;
   IR_TYPES
@@ -610,9 +634,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
-#define DArith    return binArithResultType(inst->op(), \
-                                            inst->src(0)->type(),  \
-                                            inst->src(1)->type());
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -637,7 +658,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef ND
 #undef DBuiltin
 #undef DSubtract
-#undef DArith
 
 }
 
@@ -755,10 +775,12 @@ void assertOperandTypes(const IRInstruction* inst) {
   };
 
   auto requireTypeParam = [&] {
-    auto const t = inst->typeParam();
-    checkDst(t != Type::Bottom &&
-             (t != Type::None || inst->is(DefConst)),
+    checkDst(inst->hasTypeParam() || inst->is(DefConst),
              "Invalid paramType for DParam instruction");
+    if (inst->hasTypeParam()) {
+      checkDst(inst->typeParam() != Type::Bottom,
+             "Invalid paramType for DParam instruction");
+    }
   };
 
   auto checkSpills = [&] {
@@ -787,8 +809,6 @@ void assertOperandTypes(const IRInstruction* inst) {
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)
-#define SNumInt  S(Int, Bool)
-#define SNum     S(Int, Bool, Dbl)
 #define SUnk     return;
 #define SSpills  checkSpills();
 #define ND
@@ -809,8 +829,6 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DLdRef      requireTypeParam();
 #define DAllocObj
 #define DThis
-#define DArith      checkDst(inst->typeParam() == Type::None, \
-                             "DArith should have no type parameter");
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
   case opcode: dstinfo srcinfo countCheck(); return;
@@ -827,7 +845,6 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef S
 #undef C
 #undef CStr
-#undef SNum
 #undef SUnk
 #undef SSpills
 
@@ -845,24 +862,19 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DAllocObj
 #undef DLdRef
 #undef DThis
-#undef DArith
 
 }
 
 std::string TypeConstraint::toString() const {
-  std::string catStr;
-  if (innerCat) {
-    catStr = folly::to<std::string>("inner:",
-                                    typeCategoryName(innerCat.get()));
-  } else {
-    catStr = typeCategoryName(category);
+  std::string catStr = typeCategoryName(category);
+
+  if (innerCat > DataTypeGeneric) {
+    folly::toAppend(",inner:", typeCategoryName(innerCat), &catStr);
   }
 
-  return folly::format("<{},{}>",
-                       catStr, knownType).str();
+  return folly::format("<{},{}>", catStr, assertedType).str();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 }}
-

@@ -1,0 +1,33 @@
+Parent class:
+bool(false)
+
+Methods:
+ok
+
+Class variables:
+client_info
+client_version
+driver_version
+embedded
+reconnect
+report_mode
+
+Object variables:
+client_info
+client_version
+driver_version
+embedded
+reconnect
+report_mode
+
+Magic, magic properties:
+driver->client_info = '%s'
+driver->client_version = '%d'
+driver->driver_version = '%d'
+driver->report_mode = '%d'
+driver->embedded = ''
+driver->reconnect = ''
+
+Access to undefined properties:
+driver->unknown = ''
+done!

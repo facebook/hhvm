@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -29,7 +29,7 @@ class StreamContext : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamContext);
 
-  CLASSNAME_IS("StreamContext")
+  CLASSNAME_IS("stream-context")
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
@@ -109,8 +109,10 @@ Array f_stream_get_transports();
 
 Array f_stream_get_wrappers();
 bool f_stream_is_local(CVarRef stream_or_url);
-bool f_stream_register_wrapper(const String& protocol, const String& classname);
-bool f_stream_wrapper_register(const String& protocol, const String& classname);
+bool f_stream_register_wrapper(const String& protocol, const String& classname,
+                               int flags);
+bool f_stream_wrapper_register(const String& protocol, const String& classname,
+                               int flags);
 bool f_stream_wrapper_restore(const String& protocol);
 bool f_stream_wrapper_unregister(const String& protocol);
 

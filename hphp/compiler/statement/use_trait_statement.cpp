@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -111,8 +111,8 @@ void UseTraitStatement::inferTypes(AnalysisResultPtr ar) {
 
 void UseTraitStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("UseTraitStatement", 3);
-  cg.printPropertyHeader("expressions");
-  cg.printExpressionVector(m_exp);
+  cg.printPropertyHeader("typeExpressions");
+  cg.printTypeExpressionVector(m_exp);
   cg.printPropertyHeader("block");
   cg.printAsBlock(m_stmt);
   cg.printPropertyHeader("sourceLocation");

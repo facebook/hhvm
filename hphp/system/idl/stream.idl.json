@@ -28,6 +28,39 @@
             ]
         },
         {
+            "name": "stream_context_set_default",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the default stream context."
+            },
+            "args": [
+                {
+                    "name": "options",
+                    "type": "VariantMap",
+                    "desc": "The options to set for the default context.\n\noptions must be an associative array of associative arrays in the format $arr['wrapper']['option'] = $value.\n\nRefer to context options and parameters for a listing of stream options."
+                }
+            ]
+        },
+        {
+            "name": "stream_context_get_default",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the default stream context."
+            },
+            "args": [
+                {
+                    "name": "options",
+                    "type": "VariantMap",
+                    "value": "null_array",
+                    "desc": "The options to set for the default context.\n\noptions must be an associative array of associative arrays in the format $arr['wrapper']['option'] = $value.\n\nRefer to context options and parameters for a listing of stream options."
+                }
+            ]
+        },
+        {
             "name": "stream_context_get_options",
             "flags": [
             ],
@@ -258,6 +291,7 @@
         },
         {
             "name": "stream_register_wrapper",
+            "desc": "This function is an alias of: stream_wrapper_register().",
             "flags": [
             ],
             "return": {
@@ -271,6 +305,11 @@
                 {
                     "name": "classname",
                     "type": "String"
+                },
+                {
+                    "name": "flags",
+                    "type": "Int32",
+                    "value": "0"
                 }
             ]
         },
@@ -293,6 +332,12 @@
                     "name": "classname",
                     "type": "String",
                     "desc": "The classname which implements the protocol."
+                },
+                {
+                    "name": "flags",
+                    "type": "Int32",
+                    "value": "0",
+                    "desc": "Should be set to STREAM_IS_URL if protocol is a URL protocol. Default is 0, local stream."
                 }
             ]
         },

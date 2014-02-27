@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -77,6 +77,8 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(xhprof, 0.9.4);
 
 using std::vector;
 using std::string;
+
+const StaticString s_hotprofiler("hotprofiler");
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -310,8 +312,7 @@ static inline uint64_t
 to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
 {
 #ifdef CLOCK_THREAD_CPUTIME_ID
-  static int64_t vdso_usable =
-    Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
+  static int64_t vdso_usable = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
 #else
   static int64_t vdso_usable = -1;
 #endif
@@ -325,7 +326,7 @@ static esyscall vtsc_syscall("vtsc");
 
 static inline uint64_t vtsc(int64_t MHz) {
 #ifdef CLOCK_THREAD_CPUTIME_ID
-  int64_t rval = Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
+  int64_t rval = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
   if (rval >= 0) {
     return rval;
   }
@@ -1014,10 +1015,11 @@ class TraceProfiler : public Profiler {
       // one in the process at any time.
       m_successful = false;
     } else {
-      char buf[20];
-      sprintf(buf, "%d", RuntimeOption::ProfilerMaxTraceBuffer);
-      IniSetting::Bind("profiler.max_trace_buffer", buf,
-                       ini_on_update_long, ini_get_long,
+      m_maxTraceBuffer = RuntimeOption::ProfilerMaxTraceBuffer;
+      Extension* ext = Extension::GetExtension(s_hotprofiler);
+      assert(ext);
+      IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                       "profiler.max_trace_buffer",
                        &m_maxTraceBuffer);
     }
   }
@@ -1750,7 +1752,7 @@ void f_xhprof_enable(int flags/* = 0 */,
 #ifdef HOTPROFILER
 #ifdef CLOCK_THREAD_CPUTIME_ID
   bool missingClockGetTimeNS =
-    Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
+    Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
 #else
   bool missingClockGetTimeNS = true;
 #endif

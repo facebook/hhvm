@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <utility>
+#include "folly/Bits.h"
 #include "hphp/util/util.h"
 #include "hphp/util/atomic.h"
 
@@ -222,7 +223,7 @@ private:
   }
 
   size_t project(Table* tab, Key key) const {
-    assert(Util::isPowerOfTwo(tab->capac));
+    assert(folly::isPowTwo(tab->capac));
     return m_hash(key) & (tab->capac - 1);
   }
 

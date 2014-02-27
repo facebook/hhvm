@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_CLASS_EMIT_H_
 
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/class.h"
 
@@ -46,7 +47,7 @@ class PreClassEmitter {
       , m_attrs(AttrNone)
       , m_typeConstraint(0)
       , m_docComment(0)
-      , m_hphpcType(KindOfInvalid)
+      , m_repoAuthType{}
     {}
 
     Prop(const PreClassEmitter* pce,
@@ -55,7 +56,7 @@ class PreClassEmitter {
          const StringData* typeConstraint,
          const StringData* docComment,
          const TypedValue* val,
-         DataType hphpcType);
+         RepoAuthType repoAuthType);
     ~Prop();
 
     const StringData* name() const { return m_name; }
@@ -64,7 +65,7 @@ class PreClassEmitter {
     const StringData* typeConstraint() const { return m_typeConstraint; }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
-    DataType hphpcType() const { return m_hphpcType; }
+    RepoAuthType repoAuthType() const { return m_repoAuthType; }
 
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_name)
@@ -73,7 +74,7 @@ class PreClassEmitter {
         (m_typeConstraint)
         (m_docComment)
         (m_val)
-        (m_hphpcType)
+        (m_repoAuthType)
         ;
     }
 
@@ -84,7 +85,7 @@ class PreClassEmitter {
     const StringData* m_typeConstraint;
     const StringData* m_docComment;
     TypedValue m_val;
-    DataType m_hphpcType;
+    RepoAuthType m_repoAuthType;
   };
 
   class Const {
@@ -151,7 +152,7 @@ class PreClassEmitter {
                    const StringData* typeConstraint,
                    const StringData* docComment,
                    const TypedValue* val,
-                   DataType hphpcType);
+                   RepoAuthType);
   const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode);

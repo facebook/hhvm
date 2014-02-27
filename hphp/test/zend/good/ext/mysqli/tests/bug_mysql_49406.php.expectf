@@ -1,0 +1,12 @@
+Field        : %s
+Name         : %s
+Orgname      :%s
+Table        :%s
+Orgtable     :%s
+Maxlength    : %d
+Length       : %d
+Charsetnr    : %d
+Flags        : %d
+Type         : %d (%s)
+Decimals     : %d
+done

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <boost/range/adaptors.hpp>
+#include <functional>
 
 #include "folly/Memory.h"
 #include "folly/Conv.h"
@@ -40,7 +41,6 @@ TRACE_SET_MOD(region);
 
 extern RegionDescPtr selectMethod(const RegionContext&);
 extern RegionDescPtr selectOneBC(const RegionContext&);
-extern RegionDescPtr selectTracelet(const RegionContext&, int inlineDepth);
 extern RegionDescPtr selectHotBlock(TransID transId,
                                     const ProfData* profData,
                                     const TransCFG& cfg);
@@ -53,29 +53,35 @@ enum class RegionMode {
   None,      // empty region
 
   // Modes that create a region by inspecting live VM state
-  OneBC,     // region with a single bytecode instruction
   Method,    // region with a whole method
   Tracelet,  // single-entry, multiple-exits region that ends on conditional
              // branches or when an instruction consumes a value of unknown type
   Legacy,    // same as Tracelet, but using the legacy analyze() code
-
-  // Modes that create a region by leveraging profiling data
-  HotBlock,  // single-entry, single-exit region
-  HotTrace,  // single-entry, multiple-exits region
 };
 
 RegionMode regionMode() {
   auto& s = RuntimeOption::EvalJitRegionSelector;
   if (s == ""        ) return RegionMode::None;
-  if (s == "onebc"   ) return RegionMode::OneBC;
   if (s == "method"  ) return RegionMode::Method;
   if (s == "tracelet") return RegionMode::Tracelet;
   if (s == "legacy"  ) return RegionMode::Legacy;
-  if (s == "hotblock") return RegionMode::HotBlock;
-  if (s == "hottrace") return RegionMode::HotTrace;
   FTRACE(1, "unknown region mode {}: using none\n", s);
-  if (debug) abort();
+  assert(false);
   return RegionMode::None;
+}
+
+enum class PGORegionMode {
+  Hottrace, // Select a long region, using profile counters to guide the trace
+  Hotblock, // Select a single block
+};
+
+PGORegionMode pgoRegionMode() {
+  auto& s = RuntimeOption::EvalJitPGORegionSelector;
+  if (s == "hottrace") return PGORegionMode::Hottrace;
+  if (s == "hotblock") return PGORegionMode::Hotblock;
+  FTRACE(1, "unknown pgo region mode {}: using hottrace\n", s);
+  assert(false);
+  return PGORegionMode::Hottrace;
 }
 
 template<typename Container>
@@ -167,6 +173,8 @@ void RegionDesc::Block::addReffinessPred(SrcKey sk, const ReffinessPred& pred) {
 }
 
 void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
+  if (func == nullptr && m_knownFuncs.empty()) return;
+
   FTRACE(2, "Block::setKnownFunc({}, {})\n", showShort(sk),
          func ? func->fullName()->data() : "nullptr");
   assert(m_knownFuncs.find(sk) == m_knownFuncs.end());
@@ -263,7 +271,7 @@ void RegionDesc::Block::checkMetadata() const {
 //////////////////////////////////////////////////////////////////////
 
 RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
-                                   const JIT::Tracelet& tlet) {
+                                   const Tracelet& tlet) {
   typedef RegionDesc::Block Block;
 
   auto region = std::make_shared<RegionDesc>();
@@ -359,13 +367,13 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
     };
 
     switch (dep.first.space) {
-      case JIT::Location::Stack: {
+      case Location::Stack: {
         uint32_t offsetFromSp = uint32_t(-dep.first.offset - 1);
         uint32_t offsetFromFp = initSpOffset - offsetFromSp;
         addPred(R::Location::Stack{offsetFromSp, offsetFromFp});
         break;
       }
-      case JIT::Location::Local:
+      case Location::Local:
         addPred(R::Location::Local{uint32_t(dep.first.offset)});
         break;
 
@@ -387,7 +395,8 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
 }
 
 RegionDescPtr selectRegion(const RegionContext& context,
-                           const JIT::Tracelet* t) {
+                           const Tracelet* t,
+                           TransKind kind) {
   auto const mode = regionMode();
 
   FTRACE(1,
@@ -399,15 +408,12 @@ RegionDescPtr selectRegion(const RegionContext& context,
     try {
       switch (mode) {
         case RegionMode::None:     return RegionDescPtr{nullptr};
-        case RegionMode::OneBC:    return selectOneBC(context);
         case RegionMode::Method:   return selectMethod(context);
-        case RegionMode::Tracelet: return selectTracelet(context, 0);
+        case RegionMode::Tracelet: return selectTracelet(context, 0,
+                                                         kind == TransProfile);
         case RegionMode::Legacy:
                  always_assert(t); return selectTraceletLegacy(context.spOffset,
                                                                *t);
-        case RegionMode::HotBlock:
-        case RegionMode::HotTrace: always_assert(0 &&
-                                                 "unsupported region mode");
       }
       not_reached();
     } catch (const std::exception& e) {
@@ -434,25 +440,18 @@ RegionDescPtr selectHotRegion(TransID transId,
   FuncId funcId = profData->transFuncId(transId);
   TransCFG cfg(funcId, profData, tx64->getSrcDB(), tx64->getJmpToTransIDMap());
   TransIDSet selectedTIDs;
-  RegionDescPtr region = nullptr;
-  RegionMode mode = regionMode();
-
-  switch (mode) {
-    case RegionMode::None:
-      region = RegionDescPtr{nullptr};
-      break;
-    case RegionMode::HotBlock:
-      region = selectHotBlock(transId, profData, cfg);
-      break;
-    case RegionMode::HotTrace:
+  assert(regionMode() != RegionMode::Method);
+  RegionDescPtr region;
+  switch (pgoRegionMode()) {
+    case PGORegionMode::Hottrace:
       region = selectHotTrace(transId, profData, cfg, selectedTIDs);
       break;
-    case RegionMode::OneBC:
-    case RegionMode::Method:
-    case RegionMode::Tracelet:
-    case RegionMode::Legacy:
-      always_assert(0 && "unsupported region mode");
+
+    case PGORegionMode::Hotblock:
+      region = selectHotBlock(transId, profData, cfg);
+      break;
   }
+  assert(region);
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     std::string dotFileName = std::string("/tmp/trans-cfg-") +
@@ -493,6 +492,125 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
 }
 
 //////////////////////////////////////////////////////////////////////
+
+
+namespace {
+template<typename T>
+struct Ignore {
+  bool a(const T&) const { return false; }
+  bool b(const T&) const { return false; }
+};
+
+struct IgnoreTypePred {
+  explicit IgnoreTypePred(bool aLonger = false)
+    : m_aLonger(aLonger)
+  {}
+
+  // It's ok for a to have more TypePreds if it's longer.
+  bool a(const RegionDesc::TypePred& tp) const {
+    return m_aLonger;
+  }
+
+  // It's ok for b to have more TypePreds if it's for a type we can probably
+  // get from statically-known stack flavors.
+  bool b(const RegionDesc::TypePred& tp) const {
+    return tp.location.tag() == RegionDesc::Location::Tag::Stack &&
+      tp.location.stackOffset() == 0 &&
+      tp.type.isBoxed();
+  }
+
+ private:
+  const bool m_aLonger;
+};
+
+template<typename M, typename Cmp = std::equal_to<typename M::mapped_type>,
+         typename IgnorePred = Ignore<typename M::mapped_type>>
+bool mapsEqual(const M& a, const M& b, SrcKey endSk, Cmp equal = Cmp(),
+               IgnorePred ignore = IgnorePred()) {
+  // Return true iff every value in aRange also exists in bRange. Leaves 'it'
+  // pointing to aRange.second either way.
+  using IterPair = std::pair<typename M::const_iterator,
+                             typename M::const_iterator>;
+  auto checkRange = [&](typename M::const_iterator& it, IterPair aRange,
+                        IterPair bRange, bool aFirst) {
+    for (it = aRange.first; it != aRange.second; ++it) {
+      if (aFirst ? ignore.a(it->second) : ignore.b(it->second)) continue;
+
+      auto bIt = bRange.first;
+      for (; bIt != bRange.second; ++bIt) {
+        if (equal(it->second, bIt->second)) break;
+      }
+      if (bIt == bRange.second) {
+        it = aRange.second;
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Check if b has anything a doesn't
+  for (auto it = b.begin(), end = b.end(); it != end; ) {
+    if (!checkRange(it, b.equal_range(it->first), a.equal_range(it->first),
+                    false)) {
+      return false;
+    }
+  }
+
+  // Check if a has anything b doesn't, up to b's end.
+  for (auto it = a.begin(), end = a.end(); it != end; ) {
+    if (it->first > endSk) break;
+
+    if (!checkRange(it, a.equal_range(it->first), b.equal_range(it->first),
+                    true)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+}
+
+void diffRegions(const RegionDesc& a, const RegionDesc& b) {
+  auto fail = [&](const std::string why) {
+    Trace::ftraceRelease("{:-^60}\nRegions differ: {}"
+                         "\ntracelet:\n{}\nlegacy:\n{}\n",
+                         "", why, show(a), show(b));
+  };
+  if (a.blocks.size() < b.blocks.size()) return fail("a has fewer blocks");
+
+  for (unsigned i = 0; i < b.blocks.size(); ++i) {
+    auto& ab = *a.blocks[i];
+    auto& bb = *b.blocks[i];
+    if (ab.func() != bb.func() ||
+        ab.start() != bb.start() ||
+        ab.length() < bb.length() ||
+        (i == 0 && ab.initialSpOffset() != bb.initialSpOffset())) {
+      return fail("block metadata differs");
+    }
+
+    auto const endSk = bb.last();
+    auto const ignore = IgnoreTypePred{ab.length() > bb.length()};
+    auto tpCmp = [](const RegionDesc::TypePred& a,
+                    const RegionDesc::TypePred& b) {
+      /* Different inner types are generally ok. */
+      return a.location == b.location &&
+        (a.type == b.type || (a.type.isBoxed() && b.type.isBoxed()));
+    };
+    if (!mapsEqual(ab.typePreds(), bb.typePreds(), endSk, tpCmp, ignore)) {
+      return fail("type predictions");
+    }
+
+    if (!mapsEqual(ab.paramByRefs(), bb.paramByRefs(), endSk)) {
+      return fail("param byrefs");
+    }
+    if (false && !mapsEqual(ab.reffinessPreds(), bb.reffinessPreds(), endSk)) {
+      return fail("reffiness preds");
+    }
+    if (!mapsEqual(ab.knownFuncs(), bb.knownFuncs(), endSk)) {
+      return fail("known funcs");
+    }
+  }
+}
 
 std::string show(RegionDesc::Location l) {
   switch (l.tag()) {

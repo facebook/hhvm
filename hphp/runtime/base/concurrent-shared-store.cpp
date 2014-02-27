@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include <mutex>
 
 using std::set;
@@ -91,7 +92,9 @@ bool ConcurrentTableSharedStore::erase(const String& key,
  * The ReadLock here is to sync with clear(), which only has a WriteLock,
  * not a specific accessor.
  */
-bool ConcurrentTableSharedStore::eraseImpl(const String& key, bool expired) {
+bool ConcurrentTableSharedStore::eraseImpl(const String& key,
+                                           bool expired,
+                                           int64_t oldestLive) {
   if (key.isNull()) return false;
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
@@ -101,7 +104,12 @@ bool ConcurrentTableSharedStore::eraseImpl(const String& key, bool expired) {
       return false;
     }
     if (acc->second.inMem()) {
-      acc->second.var->unreferenceRoot();
+      if (expired && acc->second.expiry < oldestLive &&
+          acc->second.var->getUncounted()) {
+        APCTypedValue::fromHandle(acc->second.var)->deleteUncounted();
+      } else {
+        acc->second.var->unreferenceRoot();
+      }
     } else {
       assert(acc->second.inFile());
       assert(acc->second.expiry == 0);
@@ -126,6 +134,8 @@ void ConcurrentTableSharedStore::purgeExpired() {
     return;
   }
   time_t now = time(nullptr);
+  int64_t oldestLive = apcExtension::UseUncounted ?
+      HPHP::Treadmill::getOldestStartTime() : 0;
   ExpirationPair tmp;
   int i = 0;
   while (apcExtension::PurgeRate < 0 || i < apcExtension::PurgeRate) {
@@ -145,7 +155,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
       continue;
     }
     m_expMap.erase(tmp.first);
-    eraseImpl(tmp.first, true);
+    eraseImpl(tmp.first, true, oldestLive);
     free((void *)tmp.first);
     ++i;
   }
@@ -258,7 +268,8 @@ bool ConcurrentTableSharedStore::get(const String& key, Variant &value) {
     }
   }
   if (expired) {
-    eraseImpl(key, true);
+    eraseImpl(key, true, apcExtension::UseUncounted ?
+                              HPHP::Treadmill::getOldestStartTime() : 0);
     return false;
   }
 
@@ -344,7 +355,8 @@ bool ConcurrentTableSharedStore::exists(const String& key) {
     }
   }
   if (expired) {
-    eraseImpl(key, true);
+    eraseImpl(key, true, apcExtension::UseUncounted ?
+                              HPHP::Treadmill::getOldestStartTime() : 0);
     return false;
   }
   return true;
@@ -531,7 +543,7 @@ void ConcurrentTableSharedStore::dump(std::ostream & out, bool keyOnly,
         }
         try {
           String valS(vs.serialize(value, true));
-          out << valS->toCPPString();
+          out << valS.toCppString();
         } catch (const Exception &e) {
           out << "Exception: " << e.what();
         }

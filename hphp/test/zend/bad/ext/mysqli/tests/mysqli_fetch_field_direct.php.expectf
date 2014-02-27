@@ -1,0 +1,34 @@
+HipHop Warning: %s
+bool(false)
+object(stdClass)#%d (13) {
+  [%u|b%"name"]=>
+  %unicode|string%(2) "ID"
+  [%u|b%"orgname"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "TEST"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"catalog"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"max_length"]=>
+  int(%d)
+  [%u|b%"length"]=>
+  int(%d)
+  [%u|b%"charsetnr"]=>
+  int(%d)
+  [%u|b%"flags"]=>
+  int(%d)
+  [%u|b%"type"]=>
+  int(%d)
+  [%u|b%"decimals"]=>
+  int(%d)
+}
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+done!

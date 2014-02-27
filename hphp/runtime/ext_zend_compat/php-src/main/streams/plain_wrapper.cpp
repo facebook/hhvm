@@ -20,13 +20,12 @@
 
 #include "php.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/vm/request-arena.h"
 
 PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC) {
   FILE *f = tmpfile();
   if (f) {
     auto* file = NEWOBJ(HPHP::PlainFile)(f);
-    auto* stream = new (HPHP::request_arena()) php_stream(file);
+    auto* stream = HPHP::smart_new<php_stream>(file);
     stream->hphp_file->incRefCount();
     return stream;
   }

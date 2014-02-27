@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -80,6 +80,8 @@ struct TypeConstraint {
    */
   enum class MetaType { Precise, Self, Parent, Callable, Number };
 
+  static const int32_t ReturnId = -1;
+
   TypeConstraint()
     : m_flags(NoFlags)
     , m_typeName(nullptr)
@@ -152,6 +154,8 @@ struct TypeConstraint {
   bool isNumber()   const { return metaType() == MetaType::Number; }
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
 
+  bool isArray()    const { return m_type.dt == KindOfArray; }
+
   bool isObjectOrTypeAlias() const {
     assert(IMPLIES(isNumber(), m_type.dt != KindOfObject));
     assert(IMPLIES(isParent(), m_type.dt == KindOfObject));
@@ -199,7 +203,7 @@ struct TypeConstraint {
   }
 
   // General check for any constraint.
-  bool check(const TypedValue* tv, const Func* func) const;
+  bool check(TypedValue* tv, const Func* func) const;
 
   // Check a constraint when !isObjectOrTypeAlias().
   bool checkPrimitive(DataType dt) const;
@@ -210,16 +214,28 @@ struct TypeConstraint {
   bool checkTypeAliasNonObj(const TypedValue* tv) const;
 
   // NB: will throw if the check fails.
-  void verify(const TypedValue* tv, const Func* func, int paramNum) const {
+  void verifyParam(TypedValue* tv, const Func* func, int paramNum) const {
     if (UNLIKELY(!check(tv, func))) {
-      verifyFail(func, paramNum, tv);
+      verifyParamFail(func, tv, paramNum);
+    }
+  }
+  void verifyReturn(TypedValue* tv, const Func* func) const {
+    if (UNLIKELY(!check(tv, func))) {
+      verifyReturnFail(func, tv);
     }
   }
 
   // Can not be private; used by the translator.
   void selfToClass(const Func* func, const Class **cls) const;
   void parentToClass(const Func* func, const Class **cls) const;
-  void verifyFail(const Func* func, int paramNum, const TypedValue* tv) const;
+  void verifyFail(const Func* func, TypedValue* tv, int id) const;
+  void verifyParamFail(const Func* func, TypedValue* tv,
+                       int paramNum) const {
+    verifyFail(func, tv, paramNum);
+  }
+  void verifyReturnFail(const Func* func, TypedValue* tv) const {
+    verifyFail(func, tv, ReturnId);
+  }
 
 private:
   struct Type {

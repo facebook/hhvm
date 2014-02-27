@@ -3,7 +3,7 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010 Hyves (http://www.hyves.nl)                       |
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -81,6 +81,8 @@ extern const int64_t q_Memcached$$RES_TIMEOUT;
 extern const int64_t q_Memcached$$RES_BAD_KEY_PROVIDED;
 extern const int64_t q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE;
 extern const int64_t q_Memcached$$RES_PAYLOAD_FAILURE;
+extern const int64_t q_Memcached$$RES_NOT_SUPPORTED;
+extern const int64_t q_Memcached$$RES_INVALID_HOST_PROTOCOL;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Memcached

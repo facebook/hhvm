@@ -1,3 +1,0 @@
-<?php 
-if (!extension_loaded("curl")) print "skip cURL extension not loaded"; 
-?>

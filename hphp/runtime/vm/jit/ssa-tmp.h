@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,13 +24,13 @@ namespace HPHP { namespace JIT {
 
 class IRInstruction;
 class IRUnit;
-class TraceBuilder;
+class IRBuilder;
 
 class SSATmp {
 public:
   uint32_t          id() const { return m_id; }
   IRInstruction*    inst() const { return m_inst; }
-  void              setInstruction(IRInstruction* i) { m_inst = i; }
+  void              setInstruction(IRInstruction* i, int dstId = 0);
   Type              type() const { return m_type; }
   void              setType(Type t) { m_type = t; }
   bool              isBoxed() const { return type().isBoxed(); }
@@ -60,7 +60,6 @@ public:
   const Class*       getValClass() const;
   const NamedEntity* getValNamedEntity() const;
   RDS::Handle        getValRDSHandle() const;
-  uintptr_t          getValBits() const;
   Variant            getValVariant() const;
   TCA                getValTCA() const;
   uintptr_t          getValCctx() const;
@@ -84,11 +83,11 @@ public:
 
 private:
   friend class IRUnit;
-  friend class TraceBuilder;
+  friend class IRBuilder;
 
   // May only be created via IRUnit.  Note that this class is never
   // destructed, so don't add complex members.
-  SSATmp(uint32_t opndId, IRInstruction* i, int dstId = 0);
+  SSATmp(uint32_t opndId, IRInstruction* inst, int dstId = 0);
   SSATmp(const SSATmp&) = delete;
   SSATmp& operator=(const SSATmp&) = delete;
 

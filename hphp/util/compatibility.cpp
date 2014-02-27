@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -72,10 +72,10 @@ int gettime(clockid_t which_clock, struct timespec *tp) {
   tp->tv_nsec = tv.tv_usec * 1000;
   return ret;
 #else
-  static int vdso_usable =
-    Util::Vdso::ClockGetTime(which_clock, tp);
-  if (vdso_usable == 0)
-    return Util::Vdso::ClockGetTime(which_clock, tp);
+  static int vdso_usable = Vdso::ClockGetTime(which_clock, tp);
+  if (vdso_usable == 0) {
+    return Vdso::ClockGetTime(which_clock, tp);
+  }
   return clock_gettime(which_clock, tp);
 #endif
 }

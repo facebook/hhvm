@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,12 +25,15 @@ namespace HPHP {
 
 class hash_adler32 : public HashEngine {
 public:
-  hash_adler32();
+  explicit hash_adler32(bool invert = false);
 
   virtual void hash_init(void *context);
   virtual void hash_update(void *context, const unsigned char *buf,
                            unsigned int count);
   virtual void hash_final(unsigned char *digest, void *context);
+
+private:
+  bool m_invert;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

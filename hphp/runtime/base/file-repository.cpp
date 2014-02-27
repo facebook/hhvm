@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -110,7 +110,8 @@ void PhpFile::decRefAndDelete() {
   };
 
   if (decRef() == 0) {
-    Treadmill::WorkItem::enqueue(new FileInvalidationTrigger(this));
+    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                        new FileInvalidationTrigger(this)));
   }
 }
 
@@ -333,10 +334,12 @@ std::string FileRepository::unitMd5(const std::string& fileMd5) {
   // Incorporate relevant options into the unit md5 (there will be more)
   std::ostringstream opts;
   std::string t = fileMd5 + '\0'
-    + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     + (RuntimeOption::EnableEmitSwitch ? '1' : '0')
-    + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
-    + (RuntimeOption::EvalAllowHhas ? '1' : '0');
+    + (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0')
+    + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
+    + (RuntimeOption::EnableXHP ? '1' : '0')
+    + (RuntimeOption::EvalAllowHhas ? '1' : '0')
+    + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0');
   return string_md5(t.c_str(), t.size());
 }
 
@@ -470,15 +473,17 @@ PhpFile *FileRepository::readHhbc(const std::string &name,
   return nullptr;
 }
 
-PhpFile *FileRepository::parseFile(const std::string &name,
-                                   const FileInfo &fileInfo) {
+PhpFile* FileRepository::parseFile(const std::string& name,
+                                   const FileInfo& fileInfo) {
   MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
   Unit* unit = compile_file(fileInfo.m_inputString->data(),
-                                fileInfo.m_inputString->size(),
-                                md5, name.c_str());
-  PhpFile *p = new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
-                           fileInfo.m_md5, unit);
-  return p;
+                            fileInfo.m_inputString->size(),
+                            md5, name.c_str());
+  always_assert(unit != nullptr &&
+                "failed to produce a unit; possibly due to corrupt hhbc repo");
+
+  return new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
+                     fileInfo.m_md5, unit);
 }
 
 bool FileRepository::fileStat(const std::string &name, struct stat *s) {

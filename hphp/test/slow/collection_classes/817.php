@@ -1,9 +1,13 @@
 <?hh
+
 function main() {
-  $ctypes = array('HH\\Vector', 'Map', 'StableMap');
-  foreach ($ctypes as $ctype) {
+  $ctypes = array(
+    'Vector' => new Vector(),
+    'Map' => new Map(),
+    'StableMap' => new StableMap(),
+  );
+  foreach ($ctypes as $ctype => $c) {
     echo "=== $ctype ===\n";
-    $c = new $ctype();
     try {
       $c[0];
     } catch (Exception $e) {
@@ -19,7 +23,7 @@ function main() {
     } catch (Exception $e) {
       echo $e->getMessage() . "\n";
     }
-    if ($ctype === 'HH\\Vector') {
+    if ($ctype === 'Vector') {
       continue;
     }
     try {
@@ -60,4 +64,3 @@ function main() {
 }
 
 main();
-

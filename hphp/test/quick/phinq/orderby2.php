@@ -9,13 +9,13 @@ $q = from $o in $orders
      select $o;
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }
 
 $q2 = from $o in $orders
      orderby $o->Customer->Name, $o->Total
      select $o;
 
-foreach ($q as $e) {
-  echo $e."\n";
+foreach ($q2 as $e) {
+  print_result($e);
 }

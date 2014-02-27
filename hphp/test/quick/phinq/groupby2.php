@@ -10,7 +10,7 @@ $q = from $c in $customers
      group $c->Name by $c->Country;
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }
 
 echo in();

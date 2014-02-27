@@ -22,9 +22,9 @@ function main() {
   $rc_v  = new ReflectionClass($v);
   var_dump($rc_v->getName() === 'HH\Vector');
   $rc_m  = new ReflectionClass($m);
-  var_dump($rc_m->getName() === 'Map');
+  var_dump($rc_m->getName() === 'HH\Map');
   $rc_sm = new ReflectionClass($sm);
-  var_dump($rc_sm->getName() === 'StableMap');
+  var_dump($rc_sm->getName() === 'HH\Map');
   $rc_s  = new ReflectionClass($s);
   var_dump($rc_s->getName() === 'HH\Set');
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $m = Map::fromArray(array('a' => 'foo'));
 var_dump($m['a']);

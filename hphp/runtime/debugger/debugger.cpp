@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -599,7 +599,7 @@ void Debugger::updateProxySandbox(DebuggerProxyPtr proxy,
     // don't have the sandbox on file yet. create a sandbox info with
     // no path for now. Sandbox path will be updated upon first request
     // with that sandbox arrives
-    DSandboxInfoPtr sb(new DSandboxInfo(sandboxId->toCPPString()));
+    DSandboxInfoPtr sb(new DSandboxInfo(sandboxId->toCppString()));
     proxy->updateSandbox(sb);
   }
 }

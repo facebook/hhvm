@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 
 #include <vector>
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
@@ -52,7 +53,7 @@ const TransID InvalidID = -1LL;
  *
  *   - Anchor   : a service request for retranslating
  *   - Prologue : function prologue
- *   - Interp   : a service to interpret at least one instruction
+ *   - Interp   : a service request to interpret at least one instruction
  *   - Live     : translate one tracelet by inspecting live VM state
  *   - Profile  : translate one block by inspecting live VM state and
  *                inserting profiling counters
@@ -75,6 +76,15 @@ enum TransKind {
   TRANS_KINDS
 #undef DO
 };
+
+inline std::string show(TransKind k) {
+  switch (k) {
+#   define DO(name) case Trans##name: return "Trans" #name;
+TRANS_KINDS
+#   undef DO
+  }
+  not_reached();
+}
 
 }}
 

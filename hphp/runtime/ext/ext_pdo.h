@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -134,7 +134,7 @@ class c_PDO : public ExtObjectData {
   public: Variant t_lastinsertid(const String& seqname = null_string);
   public: Variant t_errorcode();
   public: Array t_errorinfo();
-  public: Variant t_query(const String& sql);
+  public: Variant t_query(int _argc, const String& sql, CArrRef _argv);
   public: Variant t_quote(const String& str,
                           int64_t paramtype = q_PDO$$PARAM_STR);
   public: bool t_sqlitecreatefunction(const String& name, CVarRef callback,

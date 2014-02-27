@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,31 +32,6 @@ public:
   // Compositions.
 
   /**
-   * Create an array using the elements of the first parameter as keys
-   * each initialized to value.
-   */
-  static Variant CreateArray(CArrRef keys, CVarRef value);
-
-  /**
-   * Create an array containing num elements starting with index start_key
-   * each initialized to value.
-   */
-  static Variant CreateArray(int start_index, int num, CVarRef value);
-
-  /**
-   * Split array into chunks.
-   */
-  static Variant Chunk(CArrRef input, int size, bool preserve_keys = false);
-
-  /**
-   * Taking a slice. When "preserve_keys" is true, a vector will turn
-   * into numerically keyed map. When "preserve_keys" is false, a map will
-   * turn into vectors, unless keys are not numeric.
-   */
-  static Variant Slice(CArrRef input, int offset, int64_t length,
-                       bool preserve_keys);
-
-  /**
    * Removes the elements designated by offset and length and replace them
    * with supplied array.
    */
@@ -77,12 +52,6 @@ public:
   static Variant Range(unsigned char low, unsigned char high, int64_t step = 1);
   static Variant Range(double low, double high, double step = 1.0);
   static Variant Range(double low, double high, int64_t step = 1);
-
-  /**
-   * Conversion between HDF and array.
-   */
-  static Variant FromHdf(const Hdf &hdf);
-  static void ToHdf(const Array &arr, Hdf &hdf);
 
   /////////////////////////////////////////////////////////////////////////////
   // Information and calculations.

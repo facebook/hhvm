@@ -1,0 +1,129 @@
+--- Testing default ---
+array(1) {
+  ["id"]=>
+  string(1) "1"
+}
+array(1) {
+  ["id"]=>
+  string(1) "2"
+}
+array(1) {
+  ["id"]=>
+  string(1) "3"
+}
+array(1) {
+  ["id"]=>
+  string(1) "4"
+}
+array(1) {
+  ["id"]=>
+  string(1) "5"
+}
+array(1) {
+  ["id"]=>
+  string(1) "6"
+}
+======
+array(1) {
+  ["id"]=>
+  string(1) "1"
+}
+array(1) {
+  ["id"]=>
+  string(1) "2"
+}
+array(1) {
+  ["id"]=>
+  string(1) "3"
+}
+array(1) {
+  ["id"]=>
+  string(1) "4"
+}
+array(1) {
+  ["id"]=>
+  string(1) "5"
+}
+array(1) {
+  ["id"]=>
+  string(1) "6"
+}
+HipHop Warning: %s
+--- Testing USE_RESULT ---
+array(1) {
+  ["id"]=>
+  string(1) "1"
+}
+array(1) {
+  ["id"]=>
+  string(1) "2"
+}
+array(1) {
+  ["id"]=>
+  string(1) "3"
+}
+array(1) {
+  ["id"]=>
+  string(1) "4"
+}
+array(1) {
+  ["id"]=>
+  string(1) "5"
+}
+array(1) {
+  ["id"]=>
+  string(1) "6"
+}
+======
+HipHop Warning: %s
+--- Testing STORE_RESULT ---
+array(1) {
+  ["id"]=>
+  string(1) "1"
+}
+array(1) {
+  ["id"]=>
+  string(1) "2"
+}
+array(1) {
+  ["id"]=>
+  string(1) "3"
+}
+array(1) {
+  ["id"]=>
+  string(1) "4"
+}
+array(1) {
+  ["id"]=>
+  string(1) "5"
+}
+array(1) {
+  ["id"]=>
+  string(1) "6"
+}
+======
+array(1) {
+  ["id"]=>
+  string(1) "1"
+}
+array(1) {
+  ["id"]=>
+  string(1) "2"
+}
+array(1) {
+  ["id"]=>
+  string(1) "3"
+}
+array(1) {
+  ["id"]=>
+  string(1) "4"
+}
+array(1) {
+  ["id"]=>
+  string(1) "5"
+}
+array(1) {
+  ["id"]=>
+  string(1) "6"
+}
+done!

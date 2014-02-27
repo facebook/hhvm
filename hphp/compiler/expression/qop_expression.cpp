@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
 
 #include "hphp/compiler/expression/qop_expression.h"
 #include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/code_model_enums.h"
 #include "hphp/runtime/base/complex-types.h"
 
 using namespace HPHP;
@@ -167,10 +168,12 @@ ExpressionPtr QOpExpression::unneededHelper() {
 
 void QOpExpression::outputCodeModel(CodeGenerator &cg) {
   if (m_expYes == nullptr) {
-    cg.printObjectHeader("ValueIfNullExpression", 3);
-    cg.printPropertyHeader("expression");
+    cg.printObjectHeader("BinaryOpExpression", 4);
+    cg.printPropertyHeader("operation");
+    cg.printValue(PHP_CONDITIONAL);
+    cg.printPropertyHeader("expression1");
     m_condition->outputCodeModel(cg);
-    cg.printPropertyHeader("valueIfNull");
+    cg.printPropertyHeader("expression2");
   } else {
     cg.printObjectHeader("ConditionalExpression", 4);
     cg.printPropertyHeader("condition");

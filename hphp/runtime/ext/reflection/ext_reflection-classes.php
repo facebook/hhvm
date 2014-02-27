@@ -950,15 +950,6 @@ class ReflectionClass implements Reflector {
 
     $info['attributes_rec'] = $info['attributes'];
 
-    $abstract = isset($info['abstract']) || isset($info['interface']);
-    // flattening the trees, so it's easier for lookups
-    foreach ($info['interfaces'] as $interface => $_) {
-      $p = self::fetch_recur($interface);
-      if ($abstract) $info['methods'] += $p['methods'];
-      $info['constants'] += $p['constants'];
-      $info['interfaces'] += $p['interfaces'];
-    }
-
     $parent = $info['parent'];
     if (!empty($parent)) {
       $p = self::fetch_recur($parent);
@@ -990,6 +981,16 @@ class ReflectionClass implements Reflector {
       $info['interfaces'] += $p['interfaces'];
       $info['attributes_rec'] += $p['attributes_rec'];
     }
+
+    $abstract = isset($info['abstract']) || isset($info['interface']);
+    // flattening the trees, so it's easier for lookups
+    foreach ($info['interfaces'] as $interface => $_) {
+      $p = self::fetch_recur($interface);
+      if ($abstract) $info['methods'] += $p['methods'];
+      $info['constants'] += $p['constants'];
+      $info['interfaces'] += $p['interfaces'];
+    }
+
     if (is_string($name)) {
       self::$fetched[$name] = $info;
     }
@@ -2377,12 +2378,15 @@ implements Reflector {
    */
   public function invoke($obj) {
     if ($this->info['accessible']) {
+      if ($this->isStatic()) {
+        // Docs says to pass null, but Zend completely ignores the argument
+        $obj = null;
+      }
       $args = func_get_args();
       array_shift($args);
       return hphp_invoke_method($obj, $this->info['class'], $this->info['name'],
                                 $args);
-    }
-    else {
+    } else {
       $className = $this->info['class'];
       $funcName = $this->info['name'];
       $access = $this->info['access'];

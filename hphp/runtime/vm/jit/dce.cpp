@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -477,7 +477,8 @@ void eliminateDeadCode(IRUnit& unit) {
         continue;
       }
 
-      if (src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
+      if (RuntimeOption::EvalHHIRInlineFrameOpts &&
+          src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
         auto* root = frameRoot(srcInst);
         if (root->is(DefInlineFP)) {
           FTRACE(4, "adding use to {} from {}\n", *src, *inst);

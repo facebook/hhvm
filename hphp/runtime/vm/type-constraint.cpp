@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,10 +91,6 @@ void TypeConstraint::init() {
     m_type.metatype = MetaType::Precise;
     return;
   }
-  if (m_typeName && isExtended()) {
-    assert((isNullable() || isSoft()) &&
-           "Only nullable and soft extended type hints are implemented");
-  }
 
   if (m_typeName == nullptr) {
     m_type.dt = KindOfInvalid;
@@ -153,7 +149,7 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
 
   auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
   if (!td) return false;
-  if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
+  if (td->nullable && tv->m_type == KindOfNull) return true;
   return td->kind == KindOfAny || equivDataTypes(td->kind, tv->m_type);
 }
 
@@ -163,20 +159,20 @@ bool TypeConstraint::checkTypeAliasObj(const TypedValue* tv) const {
 
   auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
   if (!td) return false;
-  if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
+  if (td->nullable && tv->m_type == KindOfNull) return true;
   if (td->kind != KindOfObject) return td->kind == KindOfAny;
   return td->klass && tv->m_data.pobj->instanceof(td->klass);
 }
 
 bool
-TypeConstraint::check(const TypedValue* tv, const Func* func) const {
+TypeConstraint::check(TypedValue* tv, const Func* func) const {
   assert(hasConstraint());
 
   // This is part of the interpreter runtime; perf matters.
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
-  if (isNullable() && IS_NULL_TYPE(tv->m_type)) { return true; }
+  if (isNullable() && tv->m_type == KindOfNull) return true;
 
   if (isNumber()) {
     return IS_INT_TYPE(tv->m_type) || IS_DOUBLE_TYPE(tv->m_type);
@@ -256,7 +252,7 @@ bool
 TypeConstraint::checkPrimitive(DataType dt) const {
   assert(m_type.dt != KindOfObject);
   assert(dt != KindOfRef);
-  if (isNullable() && IS_NULL_TYPE(dt)) { return true; }
+  if (isNullable() && dt == KindOfNull) return true;
   if (isNumber()) { return IS_INT_TYPE(dt) || IS_DOUBLE_TYPE(dt); }
   return equivDataTypes(m_type.dt, dt);
 }
@@ -282,37 +278,68 @@ static const char* describe_actual_type(const TypedValue* tv) {
   not_reached();
 }
 
-void TypeConstraint::verifyFail(const Func* func, int paramNum,
-                                const TypedValue* tv) const {
+void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
+                                int id) const {
   JIT::VMRegAnchor _;
-
   const StringData* tn = typeName();
   if (isSelf()) {
     selfToTypeName(func, &tn);
   } else if (isParent()) {
     parentToTypeName(func, &tn);
   }
-
   auto const givenType = describe_actual_type(tv);
-
+  // Handle return type constraint failures
+  if (id == ReturnId) {
+    raise_warning(
+      "Value returned from %s() must be of type %s, %s given",
+      func->fullName()->data(),
+      tn->data(),
+      givenType
+    );
+    return;
+  }
+  // Handle implicit collection->array conversion for array parameter type
+  // constraints
+  auto c = tvToCell(tv);
+  if (isArray() && !isSoft() && !func->mustBeRef(id) &&
+      c->m_type == KindOfObject && c->m_data.pobj->isCollection()) {
+    // To ease migration, the 'array' type constraint will implicitly cast
+    // collections to arrays, provided the type constraint is not soft and
+    // the parameter is not by reference. We raise a notice to let the user
+    // know that there was a type mismatch and that an implicit conversion
+    // was performed.
+    raise_notice(
+      folly::format(
+        "Argument {} to {}() must be of type {}, {} given; argument {} was "
+        "implicitly cast to array",
+        id + 1, func->fullName()->data(), fullName(), givenType, id + 1
+      ).str()
+    );
+    tvCastToArrayInPlace(tv);
+    return;
+  }
+  // Handle parameter type constraint failures
   if (isExtended() && isSoft()) {
     // Soft extended type hints raise warnings instead of recoverable
     // errors, to ease migration.
     raise_debugging(
-      "Argument %d to %s() must be of type %s, %s given",
-      paramNum + 1, func->fullName()->data(), fullName().c_str(), givenType);
+      folly::format(
+        "Argument {} to {}() must be of type {}, {} given",
+        id + 1, func->fullName()->data(), fullName(), givenType
+      ).str()
+    );
   } else if (isExtended() && isNullable()) {
     raise_typehint_error(
       folly::format(
         "Argument {} to {}() must be of type {}, {} given",
-        paramNum + 1, func->fullName()->data(), fullName(), givenType
+        id + 1, func->fullName()->data(), fullName(), givenType
       ).str()
     );
   } else {
     raise_typehint_error(
       folly::format(
         "Argument {} passed to {}() must be an instance of {}, {} given",
-        paramNum + 1, func->fullName()->data(), tn->data(), givenType
+        id + 1, func->fullName()->data(), tn->data(), givenType
       ).str()
     );
   }

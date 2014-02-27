@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -63,7 +63,8 @@ bool f_key_exists(CVarRef key, CVarRef search);
 
 Variant f_array_keys(CVarRef input, CVarRef search_value = null_variant,
                      bool strict = false);
-Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv = null_array);
+Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1,
+                    CArrRef _argv = null_array);
 
 Variant f_array_merge_recursive(int _argc, CVarRef array1, CArrRef _argv = null_array);
 
@@ -96,7 +97,7 @@ Variant f_array_splice(VRefParam input, int offset,
 Variant f_array_sum(CVarRef array);
 Variant f_array_unique(CVarRef array, int sort_flags = 2);
 
-int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
+Variant f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
 
 Variant f_array_values(CVarRef input);
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,

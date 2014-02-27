@@ -79,9 +79,10 @@ class ZendExtension : public HPHP::Extension {
 private:
   zend_module_entry *getEntry();
 public:
-  /* implicit */ ZendExtension(const char* name) : HPHP::Extension(name) {}
+  /* implicit */ ZendExtension(const char* name);
   virtual void moduleInit() override;
   virtual void moduleShutdown() override;
+  static ZendExtension* GetByModuleNumber(int module_number);
 };
 #endif
 
@@ -130,7 +131,7 @@ inline void ZendExtension::moduleInit() {
     entry->globals_ctor(entry->globals_ptr);
   }
   if (entry->module_startup_func) {
-    entry->module_startup_func(1, 1);
+    entry->module_startup_func(1, entry->module_number);
   }
 }
 inline void ZendExtension::moduleShutdown() {

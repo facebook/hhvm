@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_UTIL_TEXT_ART_H_
 #define incl_HPHP_UTIL_TEXT_ART_H_
 
-namespace HPHP { namespace Util { namespace TextArt {
+namespace HPHP { namespace TextArt {
 ///////////////////////////////////////////////////////////////////////////////
-
+// comment only change
 #define BOX_H  get_box_drawing_char(LightHorizontal)
 #define BOX_V  get_box_drawing_char(LightVertical)
 #define BOX_UL get_box_drawing_char(LightDownAndRight)
@@ -45,6 +45,6 @@ const char *get_box_drawing_char(BoxDrawing name);
 extern bool s_use_utf8;
 
 ///////////////////////////////////////////////////////////////////////////////
-}}}
+}}
 
 #endif // incl_HPHP_UTIL_TEXT_ART_H_

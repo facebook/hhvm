@@ -1,0 +1,18 @@
+<?php
+if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
+	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
+}
+
+require_once('skipif.inc');
+require_once('skipifemb.inc');
+require_once('skipifconnectfailure.inc');
+require_once('connect.inc');
+
+if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	die(sprintf("skip Cannot connect to MySQL, [%d] %s\n",
+		mysqli_connect_errno(), mysqli_connect_error()));
+}
+if (!mysqli_set_charset($link, 'sjis'))
+	die(sprintf("skip Cannot set charset 'sjis'"));
+mysqli_close($link);
+?>

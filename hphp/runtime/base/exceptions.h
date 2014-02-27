@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -289,7 +289,7 @@ public:
 class NotSupportedException : public ExtendedException {
 public:
   NotSupportedException(const char *feature, const char *reason)
-    : ExtendedException("%s is not going to be supported: %s",
+    : ExtendedException("%s is not supported: %s",
                         feature, reason) {}
   virtual ~NotSupportedException() throw() {}
   EXCEPTION_COMMON_IMPL(NotSupportedException);

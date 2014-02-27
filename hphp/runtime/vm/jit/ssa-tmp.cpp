@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,10 +21,14 @@
 namespace HPHP { namespace JIT {
 
 SSATmp::SSATmp(uint32_t opndId, IRInstruction* i, int dstId /* = 0 */)
-  : m_inst(i)
-  , m_type(outputType(i, dstId))
-  , m_id(opndId)
+  : m_id(opndId)
 {
+  setInstruction(i, dstId);
+}
+
+void SSATmp::setInstruction(IRInstruction* inst, int dstId) {
+  m_inst = inst;
+  m_type = outputType(inst, dstId);
 }
 
 bool SSATmp::isConst() const {
@@ -52,18 +56,13 @@ int typeNeededWords(Type t) {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
   }
-  if (t <= Type::FuncCtx) {
-    // 2 registers regardless of union status: 1 for the Func* and 1
-    // for the {Obj|Cctx}, differentiated by the low bit.
-    return 2;
-  }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assert(IMPLIES(t <= Type::Gen, t.isKnownDataType()));
+    assert(IMPLIES(t <= Type::StackElem, t.isKnownDataType()));
     return 1;
   }
 
-  assert(t <= Type::Gen);
+  assert(t <= Type::StackElem);
   return t.needsReg() ? 2 : 1;
 }
 }
@@ -130,11 +129,6 @@ RDS::Handle SSATmp::getValRDSHandle() const {
   assert(isConst());
   assert(m_inst->typeParam().equals(Type::RDSHandle));
   return m_inst->extra<ConstData>()->as<RDS::Handle>();
-}
-
-uintptr_t SSATmp::getValBits() const {
-  assert(isConst());
-  return m_inst->extra<ConstData>()->as<uintptr_t>();
 }
 
 Variant SSATmp::getValVariant() const {

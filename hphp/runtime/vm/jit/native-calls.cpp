@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/ir.h"
@@ -46,7 +45,7 @@ constexpr DestType DNone = DestType::None;
 
 template<class EDType, class MemberType>
 Arg extra(MemberType EDType::*ptr) {
-  auto fun = [ptr] (IRInstruction* inst) {
+  auto fun = [ptr] (const IRInstruction* inst) {
     auto const extra = inst->extra<EDType>();
     return constToBits(extra->*ptr);
   };
@@ -211,6 +210,10 @@ static CallMap s_callMap {
     {VerifyParamCallable, VerifyParamTypeCallable, DNone, SSync,
                            {{TV, 0}, {SSA, 1}}},
     {VerifyParamFail,    VerifyParamTypeFail, DNone, SSync, {{SSA, 0}}},
+    {VerifyRetCls,       VerifyRetTypeSlow, DNone, SSync,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {TV, 3}}},
+    {VerifyRetCallable,  VerifyRetTypeCallable, DNone, SSync, {{TV, 0}}},
+    {VerifyRetFail,      VerifyRetTypeFail, DNone, SSync, {{TV, 0}}},
     {RaiseUninitLoc,     raiseUndefVariable, DNone, SSync, {{SSA, 0}}},
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},
     {RaiseNotice,        raiseNotice, DNone, SSync, {{SSA, 0}}},
@@ -299,8 +302,6 @@ static CallMap s_callMap {
                  {{SSA, 1}, {SSA, 2}}},
     {MapGet,   fssa(0), DTV, SSync,
                  {{SSA, 1}, {SSA, 2}}},
-    {StableMapGet, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
     {CGetElem, fssa(0), DTV, SSync,
                  {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
     {VGetElem, fssa(0), DSSA, SSync,
@@ -312,8 +313,6 @@ static CallMap s_callMap {
     {ArraySet, fssa(0), DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}}},
     {MapSet,   fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {StableMapSet, fssa(0), DNone, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}}},
     {ArraySetRef, fssa(0), DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
@@ -335,7 +334,6 @@ static CallMap s_callMap {
     {VectorIsset, fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
     {PairIsset, fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
     {MapIsset,  fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
-    {StableMapIsset, fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
     {IssetElem, fssa(0), DSSA, SSync,
                  {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
     {EmptyElem, fssa(0), DSSA, SSync,
@@ -363,23 +361,22 @@ static CallMap s_callMap {
                                {{SSA, 0}}},
 };
 
-ArgGroup CallInfo::toArgGroup(const RegAllocInfo::RegMap& curOpds,
-                              IRInstruction* inst) const {
-  ArgGroup argGroup{curOpds};
-
+ArgGroup CallInfo::toArgGroup(const RegAllocInfo& regs,
+                              const IRInstruction* inst) const {
+  ArgGroup argGroup{inst, regs[inst]};
   for (auto const& arg : args) {
     switch (arg.type) {
     case ArgType::SSA:
-      argGroup.ssa(inst->src(arg.ival));
+      argGroup.ssa(arg.ival);
       break;
     case ArgType::TV:
-      argGroup.typedValue(inst->src(arg.ival));
+      argGroup.typedValue(arg.ival);
       break;
     case ArgType::MemberKeyS:
-      argGroup.vectorKeyS(inst->src(arg.ival));
+      argGroup.vectorKeyS(arg.ival);
       break;
     case ArgType::MemberKeyIS:
-      argGroup.vectorKeyIS(inst->src(arg.ival));
+      argGroup.vectorKeyIS(arg.ival);
       break;
     case ArgType::ExtraImm:
       argGroup.imm(arg.extraFunc(inst));
@@ -389,7 +386,6 @@ ArgGroup CallInfo::toArgGroup(const RegAllocInfo::RegMap& curOpds,
       break;
     }
   }
-
   return argGroup;
 }
 

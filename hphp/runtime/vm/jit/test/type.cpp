@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,10 @@
 
 #include "folly/ScopeGuard.h"
 
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
+#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/type.h"
+
 // for specialized object tests to get some real VM::Class
 #include "hphp/system/systemlib.h"
 
@@ -104,9 +107,6 @@ TEST(Type, Boxes) {
             (Type::Cell - Type::Uninit).box());
 
   EXPECT_EQ(Type::Bottom, Type::BoxedCell & Type::PtrToGen);
-
-  EXPECT_FALSE(Type::Func.isBoxed());
-  EXPECT_FALSE(Type::Func.notBoxed());
 
   EXPECT_EQ(Type::Int | Type::Dbl, (Type::Int | Type::BoxedDbl).unbox());
 }
@@ -232,6 +232,31 @@ TEST(Type, Top) {
     if (t.equals(Type::Top)) continue;
     EXPECT_FALSE(Type::Top.subtypeOf(t));
   }
+}
+
+namespace {
+inline bool fits(Type t, TypeConstraint tc) {
+  return typeFitsConstraint(t, tc);
+}
+}
+
+TEST(Type, TypeConstraints) {
+  EXPECT_TRUE(fits(Type::Gen, DataTypeGeneric));
+  EXPECT_FALSE(fits(Type::Gen, DataTypeCountness));
+  EXPECT_FALSE(fits(Type::Gen, DataTypeCountnessInit));
+  EXPECT_FALSE(fits(Type::Gen, DataTypeSpecific));
+  EXPECT_FALSE(fits(Type::Gen, DataTypeSpecialized));
+
+  EXPECT_TRUE(fits(Type::Cell,
+                   {DataTypeGeneric, Type::Gen, DataTypeSpecific}));
+  EXPECT_FALSE(fits(Type::Gen,
+                    {DataTypeGeneric, Type::Gen, DataTypeSpecific}));
+}
+
+TEST(Type, Relax) {
+  EXPECT_EQ(Type::BoxedInitCell | Type::InitNull,
+            relaxType(Type::BoxedObj | Type::InitNull,
+                      {DataTypeCountness, Type::Gen, DataTypeGeneric}));
 }
 
 } }

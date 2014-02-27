@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -554,6 +554,34 @@ bool tvCoerceParamToResourceInPlace(TypedValue* tv);
 
 typedef void(*RawDestructor)(void*);
 extern const RawDestructor g_destructors[kDestrTableSize];
+
+inline void tvCastInPlace(TypedValue *tv, DataType DType) {
+#define X(kind) \
+  if (DType == KindOf##kind) { tvCastTo##kind##InPlace(tv); return; }
+  X(Boolean)
+  X(Int64)
+  X(Double)
+  X(String)
+  X(Array)
+  X(Object)
+  X(Resource)
+#undef X
+  not_reached();
+}
+
+inline bool tvCoerceParamInPlace(TypedValue* tv, DataType DType) {
+#define X(kind) \
+  if (DType == KindOf##kind) return tvCoerceParamTo##kind##InPlace(tv);
+  X(Boolean)
+  X(Int64)
+  X(Double)
+  X(String)
+  X(Array)
+  X(Object)
+  X(Resource)
+#undef X
+  not_reached();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

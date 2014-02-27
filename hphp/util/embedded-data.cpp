@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@
 #include <mach-o/getsect.h>
 #endif
 
-namespace HPHP { namespace Util {
+namespace HPHP {
 
 bool get_embedded_data(const char *section, embedded_data* desc,
                        const std::string &filename /*= "" */) {
@@ -51,6 +51,7 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   SCOPE_EXIT { close(fd); };
 
   Elf* e = elf_begin(fd, ELF_C_READ, nullptr);
+  SCOPE_EXIT { elf_end(e); };
   if (e == nullptr || elf_kind(e) != ELF_K_ELF) {
     return false;
   }
@@ -94,4 +95,4 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   return false;
 }
 
-} }
+}

@@ -7,7 +7,7 @@
  * Key features:
  *
  *   - Autodownload of frameworks, so we don't have to add 3 GB of frameworks to
- *     our official repo. This can be a bit flakey due to our proxy; so we
+ *     our official repo. This can be a bit flaky due to our proxy; so we
  *     we will see how this works out moving forward. If the framework does not
  *     exist in your local repo, it gets downloaded to your dev box. The
  *     .gitignore will ensure that the frameworks aren't added to the official
@@ -71,7 +71,7 @@
  *
  * Future enhancements:
  *
- *   - Integreate the testing with our current "test/run" style infrastructure
+ *   - Integrate the testing with our current "test/run" style infrastructure
  *     for official pass/fail statistics when we have diffs.
  *
  *   - Special case frameworks that don't use PHPUnit (e.g. Thinkup).
@@ -92,7 +92,8 @@ require_once __DIR__.'/Runner.php';
 require_once __DIR__.'/Options.php';
 require_once __DIR__.'/spyc/Spyc.php';
 
-function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
+function prepare(Set $available_frameworks, Set $framework_class_overrides,
+                 Vector $passed_frameworks): Vector {
   get_unit_testing_infra_dependencies();
 
   if (Options::$all) {
@@ -104,11 +105,11 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
     // Test all frameworks
     $passed_frameworks = $available_frameworks->toVector();
   } else if (Options::$allexcept) {
-    // Run all the frameworks, but the ones we listed.
+    // Run all the frameworks, except the ones we listed.
     $passed_frameworks  = Vector::fromItems(array_diff(
-                                              $available_frameworks->toVector(),
-                                              $passed_frameworks));
-  } else if (count($passed_frameworks) === 0) {
+                                            $available_frameworks->toVector(),
+                                            $passed_frameworks));
+  } else if ($passed_frameworks->isEmpty()) {
     error_and_exit(usage());
   }
 
@@ -123,12 +124,15 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
     $name = trim(strtolower($name));
     if ($available_frameworks->contains($name)) {
       $uname = ucfirst($name);
-      $framework = new $uname($name);
-      $frameworks[] = $framework;
+      if ($framework_class_overrides->contains($name)) {
+        $frameworks[] = new $uname($name);
+      } else {
+        $frameworks[] = new Framework($name);
+      }
     }
   }
 
-  if (count($frameworks) === 0) {
+  if ($frameworks->isEmpty()) {
     error_and_exit(usage());
   }
 
@@ -137,6 +141,9 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
 
 function fork_buckets(Traversable $data, Callable $callback): int {
   $num_threads = min(count($data), num_cpus() + 1);
+  if (Options::$num_threads !== -1) {
+    $num_threads = min(count($data), Options::$num_threads);
+  }
 
   // Create some data buckets proportional to the number of threads
   $data_buckets = array();
@@ -169,7 +176,7 @@ function fork_buckets(Traversable $data, Callable $callback): int {
 }
 
 function run_tests(Vector $frameworks): void {
-  if (count($frameworks) === 0) {
+  if ($frameworks->isEmpty()) {
     error_and_exit("No frameworks available on which to run tests");
   }
 
@@ -188,19 +195,19 @@ function run_tests(Vector $frameworks): void {
       verbose(Colors::YELLOW.$framework->getName().Colors::NONE.": running. ".
               "Comparing against ".count($framework->getCurrentTestStatuses()).
               " tests\n", !Options::$csv_only);
-      $run_msg = "Comparing test suite with previous run. ";
-      $run_msg .= Colors::GREEN."Green . (dot) ".Colors::NONE;
-      $run_msg .= "means test result same as previous. ";
-      $run_msg .= "A ".Colors::GREEN." green F ".Colors::NONE;
-      $run_msg .= "means we have gone from fail to pass. ";
-      $run_msg .= "A ".Colors::RED." red F ".Colors::NONE;
-      $run_msg .= "means we have gone from pass to fail. ";
-      $run_msg .= "A ".Colors::BLUE." blue F ".Colors::NONE;
-      $run_msg .= "means we have gone from one type of fail to another type ";
-      $run_msg .= "of fail (e.g., F to E, or I to F). ";
-      $run_msg .= "A ".Colors::LIGHTBLUE." light blue F ".Colors::NONE;
-      $run_msg .= "means we are having trouble accessing the tests from the ";
-      $run_msg .= "expected run and can't get a proper status".PHP_EOL;
+      $run_msg = "Comparing test suite with previous run. ".
+        Colors::GREEN."Green . (dot) ".Colors::NONE.
+        "means test result same as previous. ".
+        "A ".Colors::GREEN." green F ".Colors::NONE.
+        "means we have gone from fail to pass. ".
+        "A ".Colors::RED." red F ".Colors::NONE.
+        "means we have gone from pass to fail. ".
+        "A ".Colors::BLUE." blue F ".Colors::NONE.
+        "means we have gone from one type of fail to another type ".
+        "of fail (e.g., F to E, or I to F). ".
+        "A ".Colors::LIGHTBLUE." light blue F ".Colors::NONE.
+        "means we are having trouble accessing the tests from the ".
+        "expected run and can't get a proper status".PHP_EOL;
       verbose($run_msg, Options::$verbose);
     } else {
       verbose("Establishing baseline statuses for ".$framework->getName().
@@ -211,8 +218,8 @@ function run_tests(Vector $frameworks): void {
     // get all the test for that framework and add each to our tests
     // vector; otherwise, we are just going to add the framework to run
     // serially and use its global phpunit test run command to run the entire
-    // suite.
-    if ($framework->isParallel()) {
+    // suite (just like a normal phpunit run outside this framework).
+    if ($framework->isParallel() && !Options::$as_phpunit) {
       foreach($framework->getTests() as $test) {
         $st = new Runner($framework, $test);
         $all_tests->add($st);
@@ -227,16 +234,11 @@ function run_tests(Vector $frameworks): void {
    * Run the test suite
    ************************************/
   verbose("Beginning the unit tests.....\n", !Options::$csv_only);
-  if (count($all_tests) === 0) {
+  if ($all_tests->isEmpty()) {
     error_and_exit("No tests found to run");
   }
 
-  fork_buckets(
-    $all_tests,
-    function($bucket) {
-      return run_test_bucket($bucket);
-    }
-  );
+  fork_buckets($all_tests, ($bucket) ==> run_test_bucket($bucket));
 
   /****************************************
   * All tests complete. Create results for
@@ -273,7 +275,10 @@ function run_tests(Vector $frameworks): void {
   }
 
   if ($all_tests_success) {
-    $msg = "\nAll tests ran as expected.\n\n".<<<THUMBSUP
+    $msg = <<<THUMBSUP
+All tests ran as expected.
+
+
           _
          /(|
         (  :
@@ -282,13 +287,16 @@ function run_tests(Vector $frameworks): void {
     (____)|   |
      (____).__|
       (___)__.|_____
-THUMBSUP
-."\n";
+
+THUMBSUP;
    verbose($msg, !Options::$csv_only);
   } else {
-    $msg = "\nAll tests did not run as expected. Either some statuses were ".
-           "different or the number of tests run didn't match the number of ".
-           "tests expected to run\n\n".<<<THUMBSDOWN
+    $msg = <<<THUMBSDOWN
+All tests did not run as expected. Either some statuses were
+different or the number of tests run didn't match the number of
+tests expected to run
+
+
       ______
      (( ____ \-
      (( _____
@@ -296,8 +304,8 @@ THUMBSUP
      ((____   ----
           /  /
          (_((
-THUMBSDOWN
-."\n";
+
+THUMBSDOWN;
     verbose($msg, !Options::$csv_only);
   }
 
@@ -349,18 +357,18 @@ function get_unit_testing_infra_dependencies(): void {
 
   // Quick hack to make sure we get the latest phpunit binary from composer
   $md5_file = __DIR__."/composer.json.md5";
-  $json_file = __DIR__."/composer.json";
+  $json_file_contents = file_get_contents(__DIR__."/composer.json");
   $vendor_dir = __DIR__."/vendor";
   $lock_file = __DIR__."/composer.lock";
   if (!file_exists($md5_file) ||
-      file_get_contents($md5_file) !== md5($json_file)) {
+      file_get_contents($md5_file) !== md5($json_file_contents)) {
     verbose("\nUpdated composer.json found. Updating phpunit binary.\n",
             !Options::$csv_only);
     if (file_exists($vendor_dir)) {
       remove_dir_recursive($vendor_dir);
     }
     unlink($lock_file);
-    file_put_contents($md5_file, md5($json_file));
+    file_put_contents($md5_file, md5($json_file_contents));
   }
 
   // Install phpunit from composer.json located in __DIR__
@@ -399,8 +407,7 @@ function print_diffs(Framework $framework): void {
 function print_summary_information(string $summary_file): void {
   if (file_exists($summary_file)
       && ($contents = file_get_contents($summary_file)) !== "") {
-    $file_data = file_get_contents($summary_file);
-    $decoded_results = json_decode($file_data, true);
+    $decoded_results = json_decode($contents, true);
     ksort($decoded_results);
 
     if (Options::$csv_only) {
@@ -409,21 +416,13 @@ function print_summary_information(string $summary_file): void {
         foreach ($decoded_results as $key => $value) {
           $print_str .= str_pad($key.",", 20);
         }
-        // Get rid of the the last spaces and comma
-        $print_str = rtrim($print_str);
-        $print_str = rtrim($print_str, ",");
-        $print_str .= PHP_EOL;
-        print $print_str;
+        print rtrim($print_str, " ,") . PHP_EOL;
       }
       $print_str = str_pad(date("Y/m/d-G:i:s").",", 20);
       foreach ($decoded_results as $key => $value) {
         $print_str .= str_pad($value.",", 20);
       }
-      // Get rid of the the last spaces and comma
-      $print_str = rtrim($print_str);
-      $print_str = rtrim($print_str, ",");
-      $print_str .= PHP_EOL;
-      print $print_str;
+      print rtrim($print_str, " ,") . PHP_EOL;
     } else {
       print PHP_EOL."ALL TESTS COMPLETE!".PHP_EOL;
       print "SUMMARY:".PHP_EOL;
@@ -503,6 +502,10 @@ INTRO;
     # Run all the tests, but only produce a machine readable csv
     # for data extraction into entities like charts, including a header row.
     % hhvm run.php --all --csv --csvheader
+
+    # Run tests with the runner as they would be run with phpunit
+    % hhvm run.php --as-phpunit paris
+    % hhvm run.php --as-phpunit --all (THIS WILL BE SLOW AND COULD FATAL TOO)
 
     # Display help.
     % hhvm run.php --help
@@ -585,6 +588,12 @@ function oss_test_option_map(): OptionInfoMap {
                                          "opposed to a test file basis. This ".
                                          "basically means the --filter option ".
                                          "is being used for phpunit"},
+    'as-phpunit'          => Pair {'',   "Run tests for a framework just ".
+                                         "like it would be run normally with ".
+                                         "PHPUnit"},
+    'numthreads:'          => Pair {'',   "The exact number of threads to use ".
+                                         "when running framework tests in ".
+                                         "parallel"},
   };
 }
 
@@ -593,11 +602,14 @@ function main(array $argv): void {
   if ($options->containsKey('help')) {
     return help();
   }
-  include_all_php(__DIR__."/frameworks");
-  $available_frameworks = get_subclasses_of("Framework")->toSet();
-  // Parse other possible options out in run()
+  // Parse all the options passed to run.php and come out with a list of
+  // frameworks passed into test (or --all or --allexcept)
   $passed_frameworks = Options::parse($options, $argv);
-  $frameworks = prepare($available_frameworks, $passed_frameworks);
+  $available_frameworks = new Set(array_keys(Options::$framework_info));
+  include_all_php(__DIR__."/framework_class_overrides");
+  $framework_class_overrides = get_subclasses_of("Framework")->toSet();
+  $frameworks = prepare($available_frameworks, $framework_class_overrides,
+                        $passed_frameworks);
   run_tests($frameworks);
 }
 

@@ -1,0 +1,19 @@
+=== basic ===
+bool(true)
+string(3) "irx"
+bool(false)
+bool(false)
+=== strict ===
+bool(true)
+int(124)
+bool(false)
+bool(false)
+bool(true)
+int(113)
+=== nested ===
+bool(true)
+int(0)
+bool(false)
+bool(false)
+bool(true)
+int(2)

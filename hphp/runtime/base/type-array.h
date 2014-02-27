@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -135,8 +135,6 @@ public:
   bool isNull() const {
     return m_px == nullptr;
   }
-  bool valueExists(CVarRef search_value, bool strict = false) const;
-  Variant key(CVarRef search_value, bool strict = false) const;
   Array values() const;
 
   /*
@@ -202,7 +200,6 @@ public:
    * into numerically keyed map.
    */
   Array& merge(CArrRef arr);
-  Array  slice(int offset, int length, bool preserve_keys) const;
 
   /*
    * Sorting.
@@ -436,7 +433,6 @@ public:
 
   template<typename T>
   Variant& lvalAtImpl(const T& key, ACCESSPARAMS_DECL) {
-    assert(!(flags & AccessFlags::CheckExist));
     if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant* ret = nullptr;
     ArrayData* escalated = m_px->lval(key, ret, m_px->hasMultipleRefs());

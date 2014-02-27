@@ -55,7 +55,6 @@ no_import = (
     '/ext/gmp',
     '/ext/interbase',
     '/ext/mssql',
-    '/ext/mysqli',
     '/ext/mysqlnd',
     '/ext/oci8',
     '/ext/odbc',
@@ -79,7 +78,6 @@ no_import = (
     '/ext/tokenizer',
     '/ext/wddx',
     '/ext/xmlrpc',
-    '/ext/xsl',
     '/sapi',
 
     # conscious decision not to match these
@@ -100,25 +98,6 @@ bad_tests = (
 
     # "ls" sometimes prints on stderr
     '/ext/standard/tests/streams/bug64770.php',
-
-    # broken in contbuild
-    '/ext/standard/tests/strings/bug51059.php',
-    '/ext/standard/tests/strings/setlocale_variation1.php',
-    '/ext/standard/tests/strings/setlocale_basic1.php',
-    '/ext/standard/tests/strings/setlocale_basic2.php',
-    '/ext/standard/tests/strings/setlocale_basic3.php',
-    '/ext/standard/tests/file/filetype_variation2.php',
-    '/ext/standard/tests/file/filetype_variation3.php',
-    '/ext/sockets/tests/ipv4loop.php',
-    '/ext/posix/tests/posix_kill_basic.php',
-    '/ext/standard/tests/file/005_variation-win32.php',
-    '/ext/json/tests/fail001.php',
-    '/ext/standard/network/tests/getmxrr.php',
-    '/ext/standard/network/tests/gethostbyname_error004.php',
-    '/ext/standard/tests/file/fgets_socket_variation1.php',
-    '/ext/pcntl/tests/pcntl_wait.php',
-    '/tests/classes/unset_properties.php',
-    '/ext/spl/tests/RecursiveDirectoryIterator_getSubPath_basic.php',
 
     # our build machines have no members in group 0...
     '/ext/posix/tests/posix_getgrgid.php',
@@ -163,14 +142,17 @@ bad_tests = (
     '/Zend/tests/lsb_021.php',
     '/Zend/tests/lsb_022.php',
 
+    # broken in contbuild for unknown reasons
+    '/ext/standard/tests/strings/bug51059.php',
+    '/ext/posix/tests/posix_kill_basic.php',
+    '/ext/spl/tests/RecursiveDirectoryIterator_getSubPath_basic.php',
+    '/tests/classes/unset_properties.php',
+    '/ext/pcntl/tests/pcntl_wait.php',
+
     # flaky for various reasons
     '/ext/standard/tests/network/gethostbyname_error004.php',
     '/ext/standard/tests/network/getmxrr.php',
     '/ext/sockets/tests/socket_getpeername_ipv6loop.php',
-
-    # broken: t2991109
-    '/ext/zlib/tests/gzfile_variation5.php',
-    '/ext/zlib/tests/readgzfile_variation5.php',
 
     # broken: t3036086
     '/Zend/tests/bug55007.php',
@@ -183,9 +165,6 @@ bad_tests = (
 
     # flaky: t3241496
     '/ext/standard/tests/file/copy_variation16.php',
-
-    # flakey
-    '/ext/session/tests/023.php',
 
     # segfaults on contbuild in opt
     '/ext/standard/tests/strings/explode_bug.php',
@@ -200,9 +179,26 @@ bad_tests = (
     '/ext/standard/tests/file/file_exists_variation1.php',
 
     # flaky: t3552849
-    '/ext/session/tests/013.php'
-    '/ext/session/tests/014.php'
-    '/ext/session/tests/027.php'
+    '/ext/session',
+
+    # XSL
+    '/ext/xsl/tests/bug49634.php',
+    '/ext/xsl/tests/bug54446_with_ini.php',
+    '/ext/xsl/tests/xsl-phpinfo.php',
+    '/ext/xsl/tests/xslt008.php',
+    '/ext/xsl/tests/xslt009.php',
+    '/ext/xsl/tests/xsltprocessor_getParameter-wrongparam.php',
+    '/ext/xsl/tests/xsltprocessor_removeParameter-wrongparams.php',
+
+    # flaky: t3619770
+    '/ext/zlib/tests/gzfile_basic.php',
+    '/ext/zlib/tests/readgzfile_basic.php',
+
+    # flaky: t3758194
+    '/ext/date/tests/bug36988.php',
+
+    # flaky: t3758218
+    '/ext/intl/tests/calendar_getNow_basic.php',
 )
 
 # Tests that work but not in repo mode
@@ -251,6 +247,7 @@ norepo_tests = (
     '/Zend/tests/unset_cv01.php',
     '/ext/bz2/tests/with_strings.php',
     '/ext/pcre/tests/preg_replace.php',
+    '/ext/pdo_mysql/tests/pdo_mysql_connect_charset.php',
     '/ext/pdo_sqlite/tests/bug33841.php',
     '/ext/pdo_sqlite/tests/bug46139.php',
     '/ext/pdo_sqlite/tests/bug52487.php',
@@ -315,6 +312,7 @@ norepo_tests = (
     '/ext/standard/tests/strings/bug44242.php',
     '/ext/standard/tests/strings/trim.php',
     '/ext/standard/tests/strings/wordwrap.php',
+    '/ext/standard/tests/url/base64_encode_variation_001.php',
     '/ext/standard/tests/url/parse_url_basic_001.php',
     '/ext/standard/tests/url/parse_url_basic_002.php',
     '/ext/standard/tests/url/parse_url_basic_003.php',
@@ -324,6 +322,37 @@ norepo_tests = (
     '/ext/standard/tests/url/parse_url_basic_007.php',
     '/ext/standard/tests/url/parse_url_basic_008.php',
     '/ext/standard/tests/url/parse_url_basic_009.php',
+    '/ext/standard/tests/url/parse_url_variation_001.php',
+    '/ext/standard/tests/url/parse_url_variation_002_64bit.php',
+    '/ext/standard/tests/url/rawurldecode_variation_001.php',
+    '/ext/standard/tests/url/rawurlencode_variation_001.php',
+    '/ext/standard/tests/url/urldecode_variation_001.php',
+    '/ext/standard/tests/url/urlencode_variation_001.php',
+    '/ext/xsl/tests/bug48221.php.norepo',
+    '/ext/xsl/tests/bug54446.php.norepo',
+    '/ext/xsl/tests/xslt001.php.norepo',
+    '/ext/xsl/tests/xslt002.php.norepo',
+    '/ext/xsl/tests/xslt003.php.norepo',
+    '/ext/xsl/tests/xslt004.php.norepo',
+    '/ext/xsl/tests/xslt005.php.norepo',
+    '/ext/xsl/tests/xslt006.php.norepo',
+    '/ext/xsl/tests/xslt007.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_getParameter-invalidparam.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_getParameter.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-allfuncs.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array-multiple.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array-notallowed.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-funcnostring.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-funcundef.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-null.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string-multiple.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string-notallowed.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_removeParameter-invalidparam.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_removeParameter.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_setparameter-errorquote.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_setparameter-nostring.php.norepo',
     '/ext/zip/tests/bug53579.php',
     '/ext/zip/tests/bug64342_1.php',
     '/ext/zip/tests/bug7658.php',
@@ -384,6 +413,60 @@ norepo_tests = (
     '/tests/lang/018.php',
     '/tests/lang/bug21961.php',
     '/tests/lang/foreachLoop.012.php',
+
+    # XSL: 'include "prepare.inc"' makes repo mode fail.
+    '/ext/xsl/tests/bug48221.php',
+    '/ext/xsl/tests/bug54446.php',
+    '/ext/xsl/tests/bug54446_with_ini.php',
+    '/ext/xsl/tests/xslt001.php',
+    '/ext/xsl/tests/xslt002.php',
+    '/ext/xsl/tests/xslt003.php',
+    '/ext/xsl/tests/xslt004.php',
+    '/ext/xsl/tests/xslt005.php',
+    '/ext/xsl/tests/xslt006.php',
+    '/ext/xsl/tests/xslt007.php',
+    '/ext/xsl/tests/xslt008.php',
+    '/ext/xsl/tests/xslt009.php',
+    '/ext/xsl/tests/xsltprocessor_getParameter-invalidparam.php',
+    '/ext/xsl/tests/xsltprocessor_getParameter.php',
+    '/ext/xsl/tests/xsltprocessor_getParameter-wrongparam.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-allfuncs.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array-multiple.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array-notallowed.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-funcnostring.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-funcundef.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-null.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string-multiple.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string-notallowed.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string.php',
+    '/ext/xsl/tests/xsltprocessor_removeParameter-invalidparam.php',
+    '/ext/xsl/tests/xsltprocessor_removeParameter.php',
+    '/ext/xsl/tests/xsltprocessor_removeParameter-wrongparams.php',
+    '/ext/xsl/tests/xsltprocessor_setparameter-errorquote.php',
+    '/ext/xsl/tests/xsltprocessor_setparameter-nostring.php',
+
+    # These tests use create_function, which is basically eval.
+    '/Zend/tests/anonymous_func_001.php',
+    '/Zend/tests/anonymous_func_002.php',
+    '/Zend/tests/anonymous_func_003.php',
+    '/Zend/tests/closure_025.php',
+    '/Zend/tests/instanceof_001.php',
+    '/ext/spl/tests/bug61697.php',
+    '/ext/standard/tests/array/array_filter_variation7.php',
+    '/ext/standard/tests/array/array_map_variation10.php',
+    '/ext/standard/tests/array/array_walk_recursive_variation7.php',
+    '/ext/standard/tests/array/array_walk_variation7.php',
+    '/ext/standard/tests/array/uasort_variation7.php',
+    '/ext/standard/tests/array/usort_variation7.php',
+    '/ext/standard/tests/strings/bug37262.php',
+    '/tests/lang/bug17115.php',
+    '/tests/lang/bug22690.php',
+    '/tests/lang/bug24926.php',
+
+    # This creates an interface with the same name as a builtin, which
+    # hphpc doesn't correctly support AttrUnique flags on.
+    '/Zend/tests/inter_06.php',
 )
 
 # Random other files that zend wants
@@ -425,6 +508,7 @@ other_files = (
     '/ext/calendar/tests/skipif.inc',
     '/ext/curl/tests/curl_testdata1.txt',
     '/ext/curl/tests/curl_testdata2.txt',
+    '/ext/curl/tests/responder/get.php',
     '/ext/date/tests/DateTime_data-absolute.inc',
     '/ext/date/tests/DateTime_data-dates.inc',
     '/ext/date/tests/DateTime_data-fall-type2-type2.inc',
@@ -441,6 +525,10 @@ other_files = (
     '/ext/exif/tests/bug34704.jpg',
     '/ext/exif/tests/bug48378.jpeg',
     '/ext/exif/tests/bug60150.jpg',
+    '/ext/exif/tests/bug62523_1.jpg',
+    '/ext/exif/tests/bug62523_2.jpg',
+    '/ext/exif/tests/bug62523_3.jpg',
+    '/ext/exif/tests/exif_encoding_crash.jpg',
     '/ext/exif/tests/image007.jpg',
     '/ext/exif/tests/image008.jpg',
     '/ext/exif/tests/image009.jpg',
@@ -475,6 +563,8 @@ other_files = (
     '/ext/fileinfo/tests/resources/test.png',
     '/ext/ftp/tests/cert.pem',
     '/ext/ftp/tests/server.inc',
+    '/ext/gd/tests/Rochester-Regular.otf',
+    '/ext/gd/tests/Rochester-Regular.otf.LICENSE.txt',
     '/ext/gd/tests/Tuffy.ttf',
     '/ext/gd/tests/bug37346.gif',
     '/ext/gd/tests/bug38112.gif',
@@ -486,8 +576,8 @@ other_files = (
     '/ext/gd/tests/php.gif',
     '/ext/gd/tests/src.gd2',
     '/ext/gd/tests/src.wbmp',
-    '/ext/gd/tests/test8859.ttf',
     '/ext/gd/tests/test.png',
+    '/ext/gd/tests/test8859.ttf',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest.mo',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest.po',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest_switch.mo',
@@ -510,6 +600,15 @@ other_files = (
     '/ext/mbstring/tests/common.inc',
     '/ext/mcrypt/tests/vectors.txt',
     '/ext/mysql/tests/connect.inc',
+    '/ext/mysql/tests/table.inc',
+    '/ext/mysqli/tests/clean_table.inc',
+    '/ext/mysqli/tests/connect.inc',
+    '/ext/mysqli/tests/skipif.inc',
+    '/ext/mysqli/tests/skipifconnectfailure.inc',
+    '/ext/mysqli/tests/skipifemb.inc',
+    '/ext/mysqli/tests/skipifnotemb.inc',
+    '/ext/mysqli/tests/skipifunicode.inc',
+    '/ext/mysqli/tests/table.inc',
     '/ext/openssl/tests/005_crt.txt',
     '/ext/openssl/tests/bug28382cert.txt',
     '/ext/openssl/tests/bug37820cert.pem',
@@ -557,11 +656,12 @@ other_files = (
     '/ext/spl/tests/testclass.class.inc',
     '/ext/sqlite3/tests/new_db.inc',
     '/ext/sqlite3/tests/stream_test.inc',
-    '/ext/standard/tests/array/data.inc',
     '/ext/standard/tests/array/compare_function.inc',
+    '/ext/standard/tests/array/data.inc',
     '/ext/standard/tests/class_object/AutoInterface.inc',
     '/ext/standard/tests/class_object/AutoLoaded.inc',
     '/ext/standard/tests/class_object/AutoTrait.inc',
+    '/ext/standard/tests/file/bug30362.txt',
     '/ext/standard/tests/file/bug40501.csv',
     '/ext/standard/tests/file/file.inc',
     '/ext/standard/tests/file/fopen_include_path.inc',
@@ -572,6 +672,9 @@ other_files = (
     '/ext/standard/tests/general_functions/004.data',
     '/ext/standard/tests/general_functions/bug49692.ini',
     '/ext/standard/tests/general_functions/bug52138.data',
+    '/ext/standard/tests/general_functions/get_included_files_inc1.inc',
+    '/ext/standard/tests/general_functions/get_included_files_inc2.inc',
+    '/ext/standard/tests/general_functions/get_included_files_inc3.inc',
     '/ext/standard/tests/general_functions/parse_ini_basic.data',
     '/ext/standard/tests/general_functions/parse_ini_booleans.data',
     '/ext/standard/tests/image/246x247.png',
@@ -591,15 +694,28 @@ other_files = (
     '/ext/xmlreader/tests/relaxNG.rng',
     '/ext/xmlreader/tests/relaxNG2.rng',
     '/ext/xmlreader/tests/relaxNG3.rng',
+    '/ext/xsl/tests/area_list.xsl',
+    '/ext/xsl/tests/area_name.xml',
+    '/ext/xsl/tests/bug49634.xml',
+    '/ext/xsl/tests/documentxpath.xsl',
+    '/ext/xsl/tests/exslt.xml',
+    '/ext/xsl/tests/exslt.xsl',
+    '/ext/xsl/tests/phpfunc-nostring.xsl',
+    '/ext/xsl/tests/phpfunc-undef.xsl',
+    '/ext/xsl/tests/phpfunc.xsl',
+    '/ext/xsl/tests/prepare.inc',
+    '/ext/xsl/tests/skipif.inc',
+    '/ext/xsl/tests/streamsinclude.xsl',
+    '/ext/xsl/tests/xslt011.xml',
+    '/ext/xsl/tests/xslt011.xsl',
+    '/ext/xsl/tests/xslt012.xsl',
+    '/ext/xsl/tests/xslt.xml',
+    '/ext/xsl/tests/xslt.xsl',
+    '/ext/xsl/tests/xslt.xsl.gz',
     '/ext/zlib/tests/004.txt.gz',
     '/ext/zlib/tests/data.inc',
-    '/ext/standard/tests/file/bug30362.txt',
-    '/tests/lang/include_files/eval.inc',
-    '/ext/exif/tests/exif_encoding_crash.jpg',
+    '/ext/zlib/tests/reading_include_path.inc',
     '/tests/classes/autoload_derived.p5c',
-    '/ext/exif/tests/bug62523_1.jpg',
-    '/ext/exif/tests/bug62523_2.jpg',
-    '/ext/exif/tests/bug62523_3.jpg',
     '/tests/classes/autoload_implements.p5c',
     '/tests/classes/autoload_interface.p5c',
     '/tests/classes/autoload_root.p5c',
@@ -612,6 +728,7 @@ other_files = (
     '/tests/lang/inc.inc',
     '/tests/lang/inc_throw.inc',
     '/tests/lang/include_files/echo.inc',
+    '/tests/lang/include_files/eval.inc',
     '/tests/lang/include_files/function.inc',
     '/tests/quicktester.inc',
 )
@@ -651,11 +768,9 @@ def mkdir_p(path):
     except OSError as exc: # Python >2.5
         pass
 
-def walk(filename, source_dir):
+def walk(filename, dest_subdir):
     dest_filename = os.path.basename(filename)
 
-    script_dir = os.path.dirname(__file__)
-    dest_subdir = os.path.join(script_dir, '../test/zend/all', source_dir)
     mkdir_p(dest_subdir)
     full_dest_filename = os.path.join(dest_subdir, dest_filename)
 
@@ -666,12 +781,32 @@ def walk(filename, source_dir):
     full_dest_filename = full_dest_filename.replace('.phpt', '.php')
 
     if not '.phpt' in filename:
-        def replace(find, replace):
-            data = file(full_dest_filename).read().replace(find, replace)
-            file(full_dest_filename, 'w').write(data)
+        data = file(full_dest_filename).read()
 
         if '/ext/ftp/tests/server.inc' in full_dest_filename:
-            replace('stream_socket_server', '@stream_socket_server')
+            data = data.replace('stream_socket_server', '@stream_socket_server')
+
+        if '/ext/mysqli/tests/table.inc' in full_dest_filename:
+            data = data.replace(
+                'DROP TABLE IF EXISTS test\'',
+                'DROP TABLE IF EXISTS \'.$test_table_name'
+            )
+            data = data.replace(
+                'CREATE TABLE test',
+                'CREATE TABLE \'.$test_table_name.\'',
+            )
+            data = data.replace(
+                'INSERT INTO test',
+                'INSERT INTO ".$test_table_name."',
+            )
+
+        if '/ext/mysqli/tests/clean_table.inc' in full_dest_filename:
+            data = data.replace(
+                'DROP TABLE IF EXISTS test\'',
+                'DROP TABLE IF EXISTS \'.$test_table_name'
+            )
+
+        file(full_dest_filename, 'w').write(data)
 
         if full_dest_filename.endswith('.php'):
             f = file(full_dest_filename.replace('.php', '.php.skipif'), 'w')
@@ -758,6 +893,8 @@ def walk(filename, source_dir):
 
         if '/ext/standard/tests/file/tempnam_variation5.php' in full_dest_filename:
             exp = exp.replace('tempnam_variation6', 'tempnam_variation5')
+        if '/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename:
+            exp = exp.replace('to be long', 'to be integer')
 
         file(full_dest_filename+'.expectf', 'w').write(exp)
     else:
@@ -769,7 +906,12 @@ def walk(filename, source_dir):
         file(full_dest_filename+'.ini', 'w').write(exp)
 
     if sections.has_key('SKIPIF'):
-        file(full_dest_filename + '.skipif', 'w').write(sections['SKIPIF'])
+        skipif = sections['SKIPIF']
+
+        if '/ext/standard/tests/strings/fprintf_' in full_dest_filename:
+            skipif = skipif.replace('dump.txt', dest_filename + '.txt')
+
+        file(full_dest_filename + '.skipif', 'w').write(skipif)
 
     test = sections['FILE']
 
@@ -984,6 +1126,269 @@ def walk(filename, source_dir):
         test = test.replace('rename_variation.tmp', dest_filename+'.tmp')
         test = test.replace('rename_variation2.tmp', dest_filename+'2.tmp')
         test = test.replace('rename_variation_link.tmp', dest_filename+'_link.tmp')
+    if '/ext/mysqli/tests/' in full_dest_filename:
+
+        (testname, _) = os.path.splitext(os.path.basename(full_dest_filename))
+
+        replace_configs = {
+            'table': {
+                '002': ['test_fetch_null'],
+                '003': ['test_bind_result'],
+                '004': ['test_bind_fetch'],
+                '005': ['test_bind_fetch'],
+                '006': ['test_bind_fetch'],
+                '007': ['test_bind_fetch'],
+                '008': ['test_bind_fetch'],
+                '009': ['test_bind_fetch'],
+                '010': ['test_bind_fetch'],
+                '011': ['test_bind_result'],
+                '012': ['test_bind_result'],
+                '013': ['test_bind_result'],
+                '014': ['test'],
+                '015': ['test'],
+                '019': ['insert_read'],
+                '020': ['test_bind_result'],
+                '021': ['test_bind_fetch'],
+                '022': ['test_bind_fetch'],
+                '023': ['test_bind_fetch'],
+                '024': ['test_bind_fetch'],
+                '025': ['test_bind_fetch'],
+                '026': ['test_bind_fetch'],
+                '029': ['general_test'],
+                '030': ['non_exisiting_table'],
+                '031': ['non_exisiting_table'],
+                '032': ['general_test'],
+                '036': ['t036'],
+                '037': ['test_result'],
+                '038': ['test_result'],
+                '040': ['test_result'],
+                '041': ['test_warnings'],
+                '042': ['test_bind_fetch'],
+                '043': ['test_update'],
+                '046': ['test_affected'],
+                '047': ['test_affected'],
+                '048': ['test_fetch_null'],
+                '057': ['test_store_result'],
+                '058': ['mbind'],
+                '059': ['mbind'],
+                '060': ['test_fetch'],
+                '061': ['t_061'],
+                '062': ['DUAL'],
+                '063': ['DUAL'],
+                '064': ['DUAL'],
+                '066': ['test_warnings'],
+                '067': [re.compile('cursor(?=(%d|\$i))')],
+                'bug32405': ['test_users'],
+                'bug34810': ['test_warnings'],
+                'bug34785': ['DUAL'],
+                'bug35103': ['test_bint', 'test_buint'],
+                'bug35517': ['temp'],
+                'bug35759': ['test'],
+                'bug36745': ['litest'],
+                'bug36802': ['DUAL'],
+                'bug36949': ['DUAL'],
+                'bug42378': [re.compile('test(?!_format)')],
+                'bug44897': ['test'],
+                'bug45289': ['test'],
+                'bug48909': ['test'],
+                'bug49027': ['test'],
+                'bug49442': ['test'],
+                'bug52891': ['tuint', 'tsint'],
+                'bug53503': ['test'],
+                'bug54221': ['t54221'],
+                'mysqli_affected_rows': ['test'],
+                'mysqli_affected_rows_oo': ['test'],
+                'mysqli_autocommit':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_autocommit_oo':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_change_user_insert_id': ['test'],
+                'mysqli_change_user_locks_temporary':
+                    [re.compile('(?<= )test')],
+                'mysqli_change_user_rollback': ['test'],
+                'mysqli_character_set': [re.compile('test(?!!)')],
+                'mysqli_class_mysqli_properties_no_conn': ['test'],
+                'mysqli_class_mysqli_result_interface': ['test'],
+                'mysqli_class_mysqli_stmt_interface': ['test'],
+                'mysqli_commit':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_commit_oo':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_data_seek': ['test'],
+                'mysqli_data_seek_oo': ['test'],
+                'mysqli_errno':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_errno_oo':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_error':
+                    [re.compile('test(?! )')],
+                'mysqli_error_oo':
+                    [re.compile('test(?! )')],
+                'mysqli_expire_password': [re.compile('(?<= )test')],
+                'mysqli_explain_metadata': ['test'],
+                'mysqli_fetch_all': ['test'],
+                'mysqli_fetch_all_oo': ['test'],
+                'mysqli_fetch_array': ['test'],
+                'mysqli_fetch_array_assoc': ['test'],
+                'mysqli_fetch_array_large':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_fetch_array_many_rows': ['test'],
+                'mysqli_fetch_array_oo': ['test'],
+                'mysqli_fetch_assoc': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_assoc_bit': [re.compile('(?<= )test')],
+                'mysqli_fetch_assoc_oo': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_assoc_zerofill': ['test'],
+                'mysqli_fetch_field_direct': ['test'],
+                'mysqli_fetch_field_direct_oo': ['test'],
+                'mysqli_fetch_field_flags': ['test'],
+                'mysqli_fetch_field': [re.compile('(?<!type )test')],
+                'mysqli_fetch_field_oo': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_field_types': [re.compile('test(?!\w)')],
+                'mysqli_fetch_fields': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_lengths': ['test'],
+                'mysqli_fetch_lengths_oo': ['test'],
+                'mysqli_fetch_object': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_object_no_constructor':
+                    [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_object_no_object': ['test'],
+                'mysqli_fetch_object_oo': [re.compile('(?<= )test(?= )')],
+                'mysqli_fetch_row': ['test'],
+                'mysqli_field_count': ['test'],
+                'mysqli_field_seek': ['test'],
+                'mysqli_field_tell': ['test'],
+                'mysqli_fork': [re.compile('test(?!s)'), 'messages'],
+                'mysqli_free_result': ['test'],
+                'mysqli_get_client_stats': [re.compile('(?<= )test')],
+                'mysqli_get_client_stats_skipped': ['test'],
+                'mysqli_info': ['test'],
+                'mysqli_insert_id': ['test'],
+                'mysqli_insert_packet_overflow': ['test'],
+                'mysqli_kill': [re.compile('test(?= )')],
+                'mysqli_last_insert_id': ['test', 'DUAL'],
+                'mysqli_max_links': ['test'],
+                'mysqli_more_results': ['test'],
+                'mysqli_multi_query': ['test'],
+                'mysqli_next_result': [re.compile('(?<= )test')],
+                'mysqli_num_fields': [re.compile('(?<= )test')],
+                'mysqli_num_rows': [re.compile('(?<= )test')],
+                'mysqli_options_init_command': [re.compile('test(?! more)')],
+                'mysqli_pconn_kill': ['test'],
+                'mysqli_poll_mixing_insert_select':
+                    [re.compile('test(?! may)'), 'bogus'],
+                'mysqli_prepare':
+                    [re.compile('(?<=(ISTS|FROM) )test(?!2)'), 'test2'],
+                'mysqli_query': ['test'],
+                'mysqli_query_iterators': ['test'],
+                'mysqli_query_stored_proc': ['test'],
+                'mysqli_real_escape_string_big5': ['test'],
+                'mysqli_real_escape_string_eucjpms': ['test'],
+                'mysqli_real_escape_string_euckr': ['test'],
+                'mysqli_real_escape_string_gb2312': ['test'],
+                'mysqli_real_escape_string_gbk': ['test'],
+                'mysqli_real_escape_string_nobackslash': ['test'],
+                'mysqli_real_escape_string_sjis': ['test'],
+                'mysqli_real_query': ['test'],
+                'mysqli_report': [re.compile('(?<=(INTO|FROM) )test')],
+                'mysqli_result_references': ['test'],
+                'mysqli_result_references_mysqlnd': ['test'],
+                'mysqli_rollback':
+                    [re.compile('(?<=(INTO|FROM|ISTS|ABLE) )test')],
+                'mysqli_select_db': ['test'],
+                'mysqli_sqlstate': ['test'],
+                'mysqli_stmt_affected_rows':
+                    [re.compile('(?<=(INTO|FROM|ISTS|ABLE) )test')],
+                'mysqli_stmt_attr_get': ['test'],
+                'mysqli_stmt_attr_set': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_bind_limits': ['test'],
+                'mysqli_stmt_bind_param':
+                    [re.compile('(?<=(INTO|FROM|ISTS|ABLE) )test')],
+                'mysqli_stmt_bind_param_call_user_func': ['test'],
+                'mysqli_stmt_bind_param_references': ['test'],
+                'mysqli_stmt_bind_param_type_juggling':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_stmt_bind_result': [re.compile('test(?!(s| is))')],
+                'mysqli_stmt_bind_result_bit': [re.compile('test(?!s)')],
+                'mysqli_stmt_bind_result_format':
+                    [re.compile('test(?!_format)'), 'DUAL'],
+                'mysqli_stmt_bind_result_references': ['test'],
+                'mysqli_stmt_bind_result_zerofill': [re.compile('test(?= )')],
+                'mysqli_stmt_close': ['test'],
+                'mysqli_stmt_data_seek': ['test'],
+                'mysqli_stmt_errno': ['test'],
+                'mysqli_stmt_error': ['test'],
+                'mysqli_stmt_execute': [re.compile('(?<=(INTO|FROM) )test')],
+                'mysqli_stmt_fetch': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_fetch_bit': [re.compile('test(?!s)')],
+                'mysqli_stmt_fetch_fields_win32_unicode': ['test'],
+                'mysqli_stmt_fetch_geom': ['test'],
+                'mysqli_stmt_field_count': ['test'],
+                'mysqli_stmt_free_result': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_get_result': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_get_result_bit': [re.compile('(?<= )test')],
+                'mysqli_stmt_get_result_field_count': ['test'],
+                'mysqli_stmt_get_result_geom': ['test'],
+                'mysqli_stmt_get_result_metadata':
+                    [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_get_result_metadata_fetch_field': ['test'],
+                'mysqli_stmt_get_result_seek': ['test'],
+                'mysqli_stmt_get_result_types':
+                    [re.compile('test(?!( is broken|s))')],
+                'mysqli_stmt_get_result2': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_insert_id': ['test'],
+                'mysqli_stmt_num_rows': [re.compile('(?<!run_)test')],
+                'mysqli_stmt_param_count': ['test'],
+                'mysqli_stmt_prepare': [re.compile('(?<=FROM )test')],
+                'mysqli_stmt_reset':
+                    [re.compile('(?<=(INTO|ISTS|ABLE|FROM) )test')],
+                'mysqli_stmt_result_metadata': ['test'],
+                'mysqli_stmt_send_long_data': [re.compile('(?<!=we )test')],
+                'mysqli_stmt_send_long_data_packet_size_libmysql':
+                    [re.compile('(?<=(INTO|ISTS|ABLE) )test')],
+                'mysqli_stmt_sqlstate': ['test'],
+                'mysqli_stmt_store_result':
+                    [re.compile('(?<=(INTO|FROM) )test')],
+                'mysqli_store_result': ['test'],
+                'mysqli_use_result': ['test'],
+                'mysqli_warning_count': ['test'],
+                'mysqli_warning_unclonable': ['test'],
+            },
+            'procedure': {
+                'bug42548': ['p1'],
+                'bug44897': [re.compile('p(?=[\'"(])')],
+                'mysqli_poll_mixing_insert_select': [re.compile('p(?=[\'"(])')],
+                'mysqli_query': [re.compile('(?<= )p(?=[\'"(])')],
+                'mysqli_query_stored_proc': [re.compile('(?<= )p(?=[\'"(])')],
+            },
+            'function': {
+                'mysqli_query': [re.compile('(?<= )f(?=[\'"(])')],
+            },
+            'lock': {
+                'mysqli_change_user_locks_temporary': ['phptest'],
+                'mysqli_prepare': ['testlock'],
+            },
+            'var': {
+                'mysqli_prepare': ['testvar'],
+            }
+        }
+
+        # This remove the ZendParamMode checks that is usually in the beginning
+        # of the tests. Remove this when we have ZendParamMode working for PHP
+        # methods
+        r = re.compile('^\s*if \(.*@.*\)[\s\r\n]*.*Expecting.*[\r\n]+',
+                       re.MULTILINE)
+        test = r.sub('', test)
+
+        for t, t_replace_config in replace_configs.iteritems():
+            for i, replace_id in enumerate(t_replace_config.get(testname, [])):
+                new_id = 'test_%s_%s_%d' % (testname, t, i + 1)
+                if isinstance(replace_id, basestring):
+                    test = test.replace(replace_id, new_id)
+                else:
+                    test = replace_id.sub(new_id, test)
+
+        new_id = 'test_%s_table_1' % (testname, )
+        test = re.sub('(require(_once)*[ (][\'"](clean_)?table.inc[\'"]\)?)',
+                      '$test_table_name = \'%s\'; \\1' % (new_id, ), test)
 
     file(full_dest_filename, 'w').write(test)
 
@@ -992,6 +1397,9 @@ def should_import(filename):
         if bad in filename:
             return False
     return True
+
+script_dir = os.path.dirname(__file__)
+all_dir = os.path.join(script_dir, '../test/zend/all')
 
 for root, dirs, files in os.walk(args.zend_path):
     for filename in files:
@@ -1009,10 +1417,11 @@ for root, dirs, files in os.walk(args.zend_path):
             return False
 
         if matches(args.only) and should_import(full_file):
-            walk(full_file, os.path.relpath(root, args.zend_path))
+            walk(
+                full_file,
+                os.path.join(all_dir, os.path.relpath(root, args.zend_path))
+            )
 
-script_dir = os.path.dirname(__file__)
-all_dir = os.path.join(script_dir, '../test/zend/all')
 if not os.path.isdir(all_dir):
     if args.only:
         print "No test/zend/all. Your --only arg didn't match any test that should be imported."

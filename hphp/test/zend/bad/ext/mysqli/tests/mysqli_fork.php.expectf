@@ -1,0 +1,13 @@
+array(1) {
+  ["message"]=>
+  string(20) "dumped by the parent"
+}
+     child start
+     child array
+    parent conti
+     child array
+    parent conti
+     child array
+    parent conti
+     child stop
+done!

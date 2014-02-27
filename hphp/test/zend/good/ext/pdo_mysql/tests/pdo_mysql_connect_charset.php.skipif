@@ -1,0 +1,7 @@
+<?php
+
+if (!extension_loaded("pdo_mysql")) exit("skip pdo_mysql extension not loaded");
+
+if (false === getenv('PDO_MYSQL_TEST_DSN')) exit("skip PDO_MYSQL_TEST_DSN env variable is not defined");
+if (false === getenv('PDO_MYSQL_TEST_USER')) exit("skip PDO_MYSQL_TEST_USER env variable is not defined");
+if (false === getenv('PDO_MYSQL_TEST_PASS')) exit("skip PDO_MYSQL_TEST_PASS env variable is not defined");

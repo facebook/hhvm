@@ -15,5 +15,5 @@ $q = from $student in $f->students
        group $student by $student->LastName;
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }

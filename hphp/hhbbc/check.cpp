@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,15 +17,19 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/next_prior.hpp>
 
-#include "folly/experimental/Gen.h"
+#include "folly/gen/Base.h"
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/class-util.h"
 
 namespace HPHP { namespace HHBBC { namespace php {
 
 namespace {
+
+const StaticString s_Closure("Closure");
+const StaticString s_invoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -187,12 +191,31 @@ bool check(const php::Func& f) {
    * revisited here if they aren't true anymore.
    */
   if (f.isClosureBody)          assert(!f.top);
-  //if (f.isGeneratorBody)        assert(f.top);  // TODO_L this fires
-  //if (f.isGeneratorFromClosure) assert(f.top);  // TODO_L dunno this too
-  if (f.isGeneratorFromClosure) assert(f.isGeneratorBody);
   if (f.isAsync)                assert(f.isGeneratorBody ||
-                                       f.generatorBodyName);
+                                       f.innerGeneratorFunc);
   if (f.isPairGenerator)        assert(f.isGeneratorBody);
+  if (f.isGeneratorBody)        assert(f.outerGeneratorFunc);
+
+  if (f.isClosureBody) {
+    assert(f.cls &&
+           f.cls->parentName &&
+           f.cls->parentName->isame(s_Closure.get()));
+  }
+
+  if (f.isGeneratorFromClosure) {
+    assert(f.isGeneratorBody);
+    // Inner generator functions from closures don't live on any
+    // class.
+    assert(f.cls == nullptr);
+  }
+
+  assert(!(f.outerGeneratorFunc && f.innerGeneratorFunc));
+  if (f.outerGeneratorFunc) {
+    assert(f.outerGeneratorFunc->innerGeneratorFunc == &f);
+  }
+  if (f.innerGeneratorFunc) {
+    assert(f.innerGeneratorFunc->outerGeneratorFunc == &f);
+  }
 
   boost::dynamic_bitset<> seenId(f.nextBlockId);
   for (auto& block : f.blocks) {
@@ -213,6 +236,22 @@ bool check(const php::Func& f) {
 bool check(const php::Class& c) {
   assert(checkName(c.name));
   for (DEBUG_ONLY auto& m : c.methods) assert(check(*m));
+
+  // Some invariants about Closure classes.
+  auto const isClo = is_closure(c);
+  if (c.closureContextCls) {
+    assert(c.closureContextCls->unit == c.unit);
+    assert(isClo);
+  }
+  if (isClo) {
+    assert(c.methods.size() == 1);
+    assert(c.methods[0]->name->isame(s_invoke.get()));
+    assert(c.methods[0]->isClosureBody);
+    assert(c.hoistability == PreClass::ClosureHoistable);
+  } else {
+    assert(!c.closureContextCls);
+  }
+
   return true;
 }
 

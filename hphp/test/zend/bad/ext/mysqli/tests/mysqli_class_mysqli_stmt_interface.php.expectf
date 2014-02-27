@@ -1,0 +1,56 @@
+Parent class:
+bool(false)
+
+Methods:
+ok
+
+Class variables:
+affected_rows
+errno
+error
+error_list
+field_count
+id
+insert_id
+num_rows
+param_count
+sqlstate
+
+Object variables:
+affected_rows
+insert_id
+num_rows
+param_count
+field_count
+errno
+error
+error_list
+sqlstate
+id
+
+Magic, magic properties:
+HipHop Warning: %s
+ in %s on line %d
+HipHop Warning: %s
+HipHop Warning: %s
+stmt->affected_rows = ''
+stmt->affected_rows = '1'
+stmt->errno = '0'
+stmt->error = ''
+string(14) "stmt->error = "
+array(0) {
+}
+stmt->field_count = '0'
+stmt->id = '%d'
+stmt->insert_id = '0'
+stmt->num_rows = '0'
+stmt->param_count = '0'
+stmt->sqlstate = '00000'
+
+Access to undefined properties:
+stmt->unknown = ''
+stmt->unknown = '13'
+
+Prepare using the constructor:
+HipHop Warning: %s
+done!

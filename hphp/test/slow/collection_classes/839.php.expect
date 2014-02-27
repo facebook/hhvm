@@ -11,7 +11,7 @@ object(HH\Vector)#3 (4) {
   }
 }
 ========
-object(Map)#6 (4) {
+object(HH\Map)#6 (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -24,7 +24,7 @@ object(Map)#6 (4) {
   }
 }
 ========
-object(StableMap)#9 (4) {
+object(HH\Map)#9 (4) {
   ["a"]=>
   int(1)
   ["b"]=>

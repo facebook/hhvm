@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -440,9 +440,11 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     const string stripped = lastBackslash == string::npos
                             ? s
                             : s.substr(lastBackslash+1);
+    auto useStripped = false;
     if (stripped == "func_num_args" ||
         stripped == "func_get_args" ||
         stripped == "func_get_arg") {
+      useStripped = true;
       if (m_hasCallToGetArgs.size() > 0) {
         m_hasCallToGetArgs.back() = true;
       }
@@ -450,7 +452,9 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
 
     SimpleFunctionCallPtr call
       (new RealSimpleFunctionCall
-       (BlockScopePtr(), getLocation(), name->text(), name->num() & 2,
+       (BlockScopePtr(), getLocation(),
+        useStripped ? stripped : name->text(),
+        name->num() & 2,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     if (m_scanner.isHHSyntaxEnabled() && !(name->num() & 2)) {
       // If the function name is without any backslashes or
@@ -797,6 +801,30 @@ void Parser::onClassConst(Token &out, Token &cls, Token &name, bool text) {
   out->exp = con;
 }
 
+void Parser::onClassClass(Token &out, Token &cls, Token &name,
+                          bool inStaticContext) {
+  if (inStaticContext) {
+    if (cls->same("parent") || cls->same("static")) {
+      PARSE_ERROR(
+        "%s::class cannot be used for compile-time class name resolution",
+        cls->text().c_str()
+      );
+      return;
+    }
+  }
+  if (cls->same("self") || cls->same("parent") || cls->same("static")) {
+    if (cls->same("self") && m_inTrait) {
+      // Sooo... self:: works dynamically for everything in a trait except
+      // for self::CLASS where it returns the trait name. Great...
+      onScalar(out, T_TRAIT_C, cls);
+    } else {
+      onClassConst(out, cls, name, inStaticContext);
+    }
+  } else {
+    onScalar(out, T_STRING, cls);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // function/method declaration
 
@@ -1082,7 +1110,9 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
   // look for argument promotion in ctor
   ExpressionListPtr promote = NEW_EXP(ExpressionList);
   cls->checkArgumentsToPromote(promote, type);
-  for (int i = 0, count = promote->getCount(); i < count; i++) {
+  auto count = promote->getCount();
+  cls->setPromotedParameterCount(count);
+  for (int i = 0; i < count; i++) {
     auto param =
         dynamic_pointer_cast<ParameterExpression>((*promote)[i]);
     TokenID mod = param->getModifier();
@@ -1091,7 +1121,7 @@ void Parser::onClass(Token &out, int type, Token &name, Token &base,
                                   param->getUserTypeHint() : "";
 
     // create the class variable and change the location to
-    // point to the paramenter location for error reporting
+    // point to the parameter location for error reporting
     LocationPtr location = param->getLocation();
     ModifierExpressionPtr modifier = NEW_EXP0(ModifierExpression);
     modifier->add(mod);
@@ -1444,11 +1474,16 @@ void Parser::onBreakContinue(Token &out, bool isBreak, Token* expr) {
 
 void Parser::onReturn(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
-  if (!m_funcContexts.empty()) {
+  // When HipHopSyntax is enabled, "yield break" is the only supported method
+  // for early termination of a generator.
+  if (!m_funcContexts.empty() &&
+      (expr || (Scanner::AllowHipHopSyntax & Option::GetScannerType()))) {
     FunctionContext& fc = m_funcContexts.back();
     if (fc.isGenerator) {
       Compiler::Error(InvalidYield, out->stmt);
-      PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
+      PARSE_ERROR((Scanner::AllowHipHopSyntax & Option::GetScannerType()) ?
+        "Cannot mix 'return' and 'yield' in the same function" :
+        "Generators cannot return values using \"return\"");
       return;
     }
     fc.hasReturn = true;
@@ -1499,7 +1534,9 @@ bool Parser::setIsGenerator() {
   FunctionContext& fc = m_funcContexts.back();
   if (fc.hasReturn) {
     invalidYield();
-    PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
+    PARSE_ERROR((Scanner::AllowHipHopSyntax & Option::GetScannerType()) ?
+      "Cannot mix 'return' and 'yield' in the same function" :
+      "Generators cannot return values using \"return\"");
     return false;
   }
   if (fc.isAsync) {
@@ -1853,7 +1890,9 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
 }
 
 void Parser::onQuery(Token &out, Token &head, Token &body) {
-  out->exp = NEW_EXP(QueryExpression, head.exp, body.exp);
+  auto qe = NEW_EXP(QueryExpression, head.exp, body.exp);
+  qe->doRewrites(m_ar, m_file);
+  out->exp = qe;
 }
 
 void appendList(ExpressionListPtr expList, Token *exps) {
@@ -1898,10 +1937,13 @@ void Parser::onWhereClause(Token &out, Token &expr) {
   out->exp = NEW_EXP(WhereClause, expr.exp);
 }
 
-void Parser::onJoinClause(Token &out, Token &var, Token &coll,
-  Token &left, Token &right) {
-  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
-                     left.exp, right.exp, "");
+void Parser::onJoinClause(Token &out, Token *var, Token &coll,
+  Token *left, Token *right) {
+  out->exp = NEW_EXP(JoinClause,
+                     var == nullptr ? "" : var->text(), coll.exp,
+                     left == nullptr ? nullptr : left->exp,
+                     right == nullptr ? nullptr : right->exp,
+                     "");
 }
 
 void Parser::onJoinIntoClause(Token &out, Token &var, Token &coll,
@@ -1926,7 +1968,7 @@ void Parser::onOrdering(Token &out, Token *orderings, Token &ordering) {
 }
 
 void Parser::onOrderingExpr(Token &out, Token &expr, Token *direction) {
-  out->exp = NEW_EXP(Ordering, expr.exp, (direction) ? direction->num() : 0);
+  out->exp = NEW_EXP(Ordering, expr.exp, (direction) ? direction->text() : "");
 }
 
 void Parser::onSelectClause(Token &out, Token &expr) {
@@ -2027,25 +2069,34 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
 
   std::vector<AliasEntry> aliases {
     (AliasEntry){"Traversable", "HH\\Traversable"},
+    (AliasEntry){"KeyedTraversable", "HH\\KeyedTraversable"},
     (AliasEntry){"Iterator", "HH\\Iterator"},
+    (AliasEntry){"KeyedIterator", "HH\\KeyedIterator"},
+    (AliasEntry){"Iterable", "HH\\Iterable"},
+    (AliasEntry){"KeyedIterable", "HH\\KeyedIterable"},
     (AliasEntry){"Collection", "HH\\Collection"},
     (AliasEntry){"Vector", "HH\\Vector"},
     (AliasEntry){"Set", "HH\\Set"},
     (AliasEntry){"FrozenVector", "HH\\FrozenVector"},
     (AliasEntry){"FrozenSet", "HH\\FrozenSet"},
+    (AliasEntry){"Pair", "HH\\Pair"},
+    (AliasEntry){"Map", "HH\\Map"},
+    (AliasEntry){"StableMap", "HH\\Map"}, // Merging with Map
     (AliasEntry){"FrozenMap", "HH\\FrozenMap"},
   };
 
   return aliases;
 }
 
-void Parser::nns(int token) {
+void Parser::nns(int token, const std::string& text) {
   if (m_nsState == SeenNamespaceStatement && token != ';') {
     error("No code may exist outside of namespace {}: %s",
           getMessage().c_str());
     return;
   }
-  if (m_nsState == SeenNothing && token != T_DECLARE && token != ';') {
+
+  if (m_nsState == SeenNothing && !text.empty() && token != T_DECLARE &&
+      token != ';') {
     m_nsState = SeenNonNamespaceStatement;
   }
 }

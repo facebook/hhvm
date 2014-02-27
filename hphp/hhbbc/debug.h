@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,16 +17,20 @@
 #define incl_HHBBC_DEBUG_H_
 
 #include "hphp/util/trace.h"
+
+#include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Dump the entire program to a temporary directory as readable text.
+ * If the hhbbc_dump trace module is on, dump the entire program to a
+ * temporary directory as readable text.
  */
-void debug_dump_program(const php::Program&);
+void debug_dump_program(const Index&, const php::Program&);
 
 /*
  * Utilities for printing the state of the program after various
@@ -41,7 +45,10 @@ inline void banner(const char* what) {
 inline void state_after(const char* when, const php::Program& program) {
   TRACE_SET_MOD(hhbbc);
   banner(when);
-  FTRACE(4, "{}", show(program));
+  for (auto& u : program.units) {
+    Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(*u)};
+    FTRACE(4, "{}", show(*u));
+  }
   banner("");
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -780,7 +780,7 @@ TypePtr Type::InferredObject(AnalysisResultConstPtr ar,
     } else if (c2ok && cls2->derivesFrom(ar, type1->m_name, true, false)) {
       resultType = type2;
     } else if (c1ok && c2ok && cls1->derivedByDynamic() &&
-               cls2->derivesFromRedeclaring()) {
+               cls2->derivesFromRedeclaring() == Derivation::Redeclaring) {
       resultType = type2;
     } else {
       resultType = type1;

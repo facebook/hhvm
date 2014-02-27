@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,6 +71,7 @@ class FastCGITransport;
 class FastCGIConnection
   : public SocketConnection,
     public apache::thrift::async::TAsyncTransport::ReadCallback,
+    public apache::thrift::async::TAsyncTransport::WriteCallback,
     public ProtocolSession::Callback {
 friend class FastCGITransport;
 public:
@@ -91,6 +92,10 @@ public:
   virtual std::shared_ptr<ProtocolSessionHandler>
     newSessionHandler(int handler_id) override;
   virtual void onSessionEgress(std::unique_ptr<folly::IOBuf> chain) override;
+  virtual void writeError(size_t bytes,
+    const apache::thrift::transport::TTransportException& ex) 
+    noexcept override;
+  virtual void writeSuccess() noexcept override;
   virtual void onSessionError() override;
   virtual void onSessionClose() override;
 
@@ -108,11 +113,13 @@ private:
   static const uint32_t k_minReadSize;
   static const uint32_t k_maxReadSize;
 
-  std::map<int,std::shared_ptr<FastCGITransport>> m_transports;
+  std::unordered_map<int, std::shared_ptr<FastCGITransport>> m_transports;
   apache::thrift::async::TEventBase* m_eventBase;
   FastCGIServer* m_server;
   FastCGISession m_session;
   folly::IOBufQueue m_readBuf;
+  bool m_shutdown{false};
+  uint32_t m_writeCount{0};
 };
 
 
@@ -121,7 +128,8 @@ class FastCGIServer : public Server,
 public:
   FastCGIServer(const std::string &address,
                 int port,
-                int workers);
+                int workers,
+                bool useFileSocket);
   ~FastCGIServer() {
     if (!m_done) {
       waitForEnd();

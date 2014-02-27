@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
 
 #include "hphp/compiler/expression/static_class_name.h"
 #include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -168,14 +169,17 @@ bool StaticClassName::checkPresent() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void StaticClassName::outputCodeModel(CodeGenerator &cg) {
-  if (isSelf()) {
-    cg.printValue("self");
-  } else if (isParent()) {
-    cg.printValue("parent");
-  } else if (isStatic()) {
-    cg.printValue("static");
+  if (isStatic() || !m_origClassName.empty()) {
+    cg.printPropertyHeader("class");
   } else {
-    cg.printValue(m_origClassName);
+    cg.printPropertyHeader("classExpression");
+  }
+  if (isStatic()) {
+    cg.printTypeExpression("static");
+  } else if (!m_origClassName.empty()) {
+    cg.printTypeExpression(m_origClassName);
+  } else {
+    m_class->outputCodeModel(cg);
   }
 }
 

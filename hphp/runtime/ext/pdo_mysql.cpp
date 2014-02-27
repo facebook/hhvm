@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -84,6 +84,7 @@ private:
 
 class PDOMySqlStatement : public PDOStatement {
 public:
+  DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement);
   PDOMySqlStatement(PDOMySqlConnection *conn, MYSQL *server);
   virtual ~PDOMySqlStatement();
 
@@ -244,8 +245,9 @@ bool PDOMySqlConnection::create(CArrRef options) {
   char *host = NULL, *unix_socket = NULL;
   unsigned int port = 3306;
   char *dbname;
+  char *charset = nullptr;
   struct pdo_data_src_parser vars[] = {
-    { "charset",      NULL,             0 },
+    { "charset",      nullptr,          0 },
     { "dbname",       "",               0 },
     { "host",         "localhost",      0 },
     { "port",         "3306",           0 },
@@ -270,6 +272,7 @@ bool PDOMySqlConnection::create(CArrRef options) {
 
   m_max_buffer_size = 1024*1024;
   m_buffered = m_emulate_prepare = 1;
+  charset = vars[0].optval;
 
   /* handle MySQL options */
   if (!options.empty()) {
@@ -347,6 +350,13 @@ bool PDOMySqlConnection::create(CArrRef options) {
         handleError(__FILE__, __LINE__);
         goto cleanup;
       }
+    }
+  }
+
+  if (charset) {
+    if (mysql_options(m_server, MYSQL_SET_CHARSET_NAME, charset)) {
+      handleError(__FILE__, __LINE__);
+      goto cleanup;
     }
   }
 
@@ -465,7 +475,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
 
 bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
                                   CVarRef options) {
-  PDOMySqlStatement *s = new PDOMySqlStatement(this, m_server);
+  PDOMySqlStatement *s = NEWOBJ(PDOMySqlStatement)(this, m_server);
   *stmt = s;
 
   if (m_emulate_prepare) {
@@ -799,6 +809,10 @@ PDOMySqlStatement::PDOMySqlStatement(PDOMySqlConnection *conn, MYSQL *server)
 }
 
 PDOMySqlStatement::~PDOMySqlStatement() {
+  sweep();
+}
+
+void PDOMySqlStatement::sweep() {
   if (m_result) {
     /* free the resource */
     mysql_free_result(m_result);
@@ -992,7 +1006,7 @@ bool PDOMySqlStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Resource(new PDOColumn()));
+      columns.set(i, Resource(NEWOBJ(PDOColumn)));
     }
   }
 
@@ -1267,6 +1281,7 @@ PDOMySql::PDOMySql() : PDODriver("mysql") {
 }
 
 PDOConnection *PDOMySql::createConnectionObject() {
+  // Doesn't use NEWOBJ because PDOConnection is malloced
   return new PDOMySqlConnection();
 }
 

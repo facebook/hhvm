@@ -12,7 +12,7 @@ $q = from $student in $students
        group $student by $student->LastName;
 
 foreach ($q as $e) {
-  echo $e."\n";
+  print_result($e);
 }
 
 echo into();

@@ -1,0 +1,7 @@
+HipHop Warning: %s
+ in %s on line %d
+HipHop Warning: %s
+HipHop Warning: %s
+int(1)
+%s(1) "a"
+done!

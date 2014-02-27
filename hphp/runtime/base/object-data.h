@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -56,11 +56,12 @@ class ObjectData {
     HasClone      = 0x0100, // if IsCppBuiltin, has custom clone logic
                             // if not IsCppBuiltin, defines __clone PHP method
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
-    // FreeFlag      = 0x0400, // ** a free flag **
+    HasNativeData = 0x0400, // HNI Class with <<__NativeData("T")>>
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsCppBuiltin  = 0x1000, // has custom C++ subclass
     IsCollection  = 0x2000, // it's a collection (and the specific type is
                             // stored in o_subclassData.u16)
+    InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
   };
 
   enum {
@@ -116,7 +117,6 @@ class ObjectData {
   bool isUncounted() const { return false; }
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
- protected:
   ~ObjectData();
  public:
 
@@ -201,12 +201,17 @@ class ObjectData {
     return getAttribute(Attribute::IsCollection);
   }
 
+  bool isMutableCollection() const {
+    return Collection::isMutableType(getCollectionType());
+  }
+
   Collection::Type getCollectionType() const {
     return isCollection() ? static_cast<Collection::Type>(o_subclassData.u16)
                           : Collection::Type::InvalidType;
   }
 
   size_t getCollectionSize() const {
+    assert(isCollection());
     return *(uint*)((char*)this + FAST_COLLECTION_SIZE_OFFSET);
   }
 
@@ -263,7 +268,7 @@ class ObjectData {
   bool o_toBooleanImpl() const noexcept;
   int64_t o_toInt64Impl() const noexcept;
   double o_toDoubleImpl() const noexcept;
-  Array o_toArray() const;
+  Array o_toArray(bool pubOnly = false) const;
 
   bool destruct();
 

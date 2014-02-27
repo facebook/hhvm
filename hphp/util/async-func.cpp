@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,8 +45,8 @@ AsyncFuncImpl::~AsyncFuncImpl() {
 
 void *AsyncFuncImpl::ThreadFunc(void *obj) {
   auto self = static_cast<AsyncFuncImpl*>(obj);
-  Util::init_stack_limits(self->getThreadAttr());
-  Util::set_numa_binding(self->m_node);
+  init_stack_limits(self->getThreadAttr());
+  set_numa_binding(self->m_node);
 
   self->threadFuncImpl();
   return nullptr;
@@ -55,7 +55,7 @@ void *AsyncFuncImpl::ThreadFunc(void *obj) {
 void AsyncFuncImpl::start() {
   struct rlimit rlim;
 
-  m_node = Util::next_numa_node();
+  m_node = next_numa_node();
   // Allocate the thread-stack
   pthread_attr_init(&m_attr);
 
@@ -65,14 +65,14 @@ void AsyncFuncImpl::start() {
   }
 
   // On Success use the allocated memory for the thread's stack
-  if (posix_memalign(&m_threadStack, Util::s_pageSize, rlim.rlim_cur) == 0) {
+  if (posix_memalign(&m_threadStack, s_pageSize, rlim.rlim_cur) == 0) {
     size_t guardsize;
     if (pthread_attr_getguardsize(&m_attr, &guardsize) == 0 && guardsize) {
       mprotect(m_threadStack, guardsize, PROT_NONE);
     }
 
     madvise(m_threadStack, rlim.rlim_cur, MADV_DONTNEED);
-    Util::numa_bind_to(m_threadStack, rlim.rlim_cur, m_node);
+    numa_bind_to(m_threadStack, rlim.rlim_cur, m_node);
 
     pthread_attr_setstack(&m_attr, m_threadStack, rlim.rlim_cur);
   }

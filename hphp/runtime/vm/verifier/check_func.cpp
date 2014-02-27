@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -537,6 +537,13 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         ISTYPE_OPS
 #undef ISTYPE_OP
         error("invalid operation for IsType*: %d\n", op);
+        ok = false;
+        break;
+      case Op::InitProp:
+#define INITPROP_OP(x) if (op == static_cast<uint8_t>(InitPropOp::x)) break;
+        INITPROP_OPS
+#undef INITPROP_OP
+        error("invalid operation for InitProp: %d\n", op);
         ok = false;
         break;
       case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS:

@@ -17,11 +17,11 @@ function main() {
   test();
   $c = memory_get_usage(true);
   $v1 = $b - $a;
-  $v2 = ($c - $b) * 10;
+  $v2 = ($c - $b) * 2;
   if ($v2 <= $v1) {
     echo "Ok\n";
   } else {
-    echo "strtotime is leaking: $a, $b, $c\n";
+    echo "strtotime is leaking: $a, $b, $c:  $v1 $v2\n";
   }
 }
 

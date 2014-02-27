@@ -1,0 +1,92 @@
+Array
+(
+    [green] => green
+    [red] => red
+    [yellow] => yellow
+)
+Array
+(
+    [green] => 1
+    [red] => 2
+    [yellow] => 3
+)
+Array
+(
+    [green] => 0
+    [red] => 1
+    [yellow] => 2
+)
+Array
+(
+    [green] => 1
+    [red] => 
+    [yellow] => 
+)
+Array
+(
+    [1] => green
+    [2] => red
+    [3] => yellow
+)
+Array
+(
+    [1] => 1
+    [2] => 2
+    [3] => 3
+)
+Array
+(
+    [1] => 0
+    [2] => 1
+    [3] => 2
+)
+Array
+(
+    [1] => 1
+    [2] => 
+    [3] => 
+)
+Array
+(
+    [0] => green
+    [1] => red
+    [2] => yellow
+)
+Array
+(
+    [0] => 1
+    [1] => 2
+    [2] => 3
+)
+Array
+(
+    [0] => 0
+    [1] => 1
+    [2] => 2
+)
+Array
+(
+    [0] => 1
+    [1] => 
+    [2] => 
+)
+Array
+(
+    [1] => green
+    [] => yellow
+)
+Array
+(
+    [1] => 1
+    [] => 3
+)
+Array
+(
+    [1] => 0
+    [] => 2
+)
+Array
+(
+    [1] => 1
+    [] => 
+)

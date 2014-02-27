@@ -1,6 +1,6 @@
 <?php
 
-$filename = dirname(__FILE__)."/gzputs_basic.txt.gz";
+$filename = dirname(__FILE__)."/gzputs_basic.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 $length = 10;

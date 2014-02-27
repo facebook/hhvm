@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,12 +34,12 @@ PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
                             const StringData* typeConstraint,
                             const StringData* docComment,
                             const TypedValue* val,
-                            DataType hphpcType)
+                            RepoAuthType repoAuthType)
   : m_name(n)
   , m_attrs(attrs)
   , m_typeConstraint(typeConstraint)
   , m_docComment(docComment)
-  , m_hphpcType(hphpcType)
+  , m_repoAuthType(repoAuthType)
 {
   m_mangledName = PreClass::manglePropName(pce->name(), n, attrs);
   memcpy(&m_val, val, sizeof(TypedValue));
@@ -100,13 +100,13 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
                                   const StringData* typeConstraint,
                                   const StringData* docComment,
                                   const TypedValue* val,
-                                  DataType hphpcType) {
+                                  RepoAuthType repoAuthType) {
   PropMap::Builder::const_iterator it = m_propMap.find(n);
   if (it != m_propMap.end()) {
     return false;
   }
   PreClassEmitter::Prop prop(this, n, attrs, typeConstraint, docComment, val,
-    hphpcType);
+    repoAuthType);
   m_propMap.add(prop.name(), prop);
   return true;
 }
@@ -207,7 +207,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_traitRequirements = m_traitRequirements;
   pc->m_traitPrecRules = m_traitPrecRules;
   pc->m_traitAliasRules = m_traitAliasRules;
-  pc->m_userAttributes = m_userAttributes;
+  pc->setUserAttributes(m_userAttributes);
 
   PreClass::MethodMap::Builder methodBuild;
   for (MethodVec::const_iterator it = m_methods.begin();
@@ -226,7 +226,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
                                               prop.typeConstraint(),
                                               prop.docComment(),
                                               prop.val(),
-                                              prop.hphpcType()));
+                                              prop.repoAuthType()));
   }
   pc->m_properties.create(propBuild);
 

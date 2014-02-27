@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -201,7 +201,7 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
   if (defScope) {
     m_valid = true;
     m_defScope = defScope;
-  } else if (cls->derivesFromRedeclaring()) {
+  } else if (cls->derivesFromRedeclaring() == Derivation::Redeclaring) {
     m_defScope = cls.get();
   }
 
@@ -224,10 +224,9 @@ bool ClassConstantExpression::canonCompare(ExpressionPtr e) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassConstantExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ClassPropertyExpression", 3);
-  cg.printPropertyHeader("className");
+  cg.printObjectHeader("ClassConstantExpression", 3);
   StaticClassName::outputCodeModel(cg);
-  cg.printPropertyHeader("propertyName");
+  cg.printPropertyHeader("constantName");
   cg.printValue(m_varName);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());

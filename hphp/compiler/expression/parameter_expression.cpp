@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -306,27 +306,35 @@ void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
   auto propCount = 2;
   if (m_attributeList) propCount++;
   if (m_modifier != 0) propCount++;
+  if (m_originalType) propCount++;
   if (m_ref) propCount++;
   if (m_defaultValue != nullptr) propCount++;
   cg.printObjectHeader("ParameterDeclaration", propCount);
   if (m_attributeList) {
-    cg.printPropertyHeader("isPassedByReference");
+    cg.printPropertyHeader("attributes");
     cg.printExpressionVector(m_attributeList);
   }
   if (m_modifier != 0) {
     cg.printPropertyHeader("modifiers");
-    printf("V:9:\"HH\\Vector\":1:{");
+    cg.printf("V:9:\"HH\\Vector\":1:{");
+    cg.printObjectHeader("Modifier", 1);
+    cg.printPropertyHeader("name");
     switch (m_modifier) {
       case T_PUBLIC: cg.printValue("public"); break;
       case T_PROTECTED: cg.printValue("protected"); break;
       case T_PRIVATE: cg.printValue("private"); break;
       default: assert(false);
     }
-    printf("}");
+    cg.printObjectFooter();
+    cg.printf("}");
+  }
+  if (m_originalType) {
+    cg.printPropertyHeader("typeAnnotation");
+    m_originalType->outputCodeModel(cg);
   }
   if (m_ref) {
     cg.printPropertyHeader("isPassedByReference");
-    cg.printValue(true);
+    cg.printBool(true);
   }
   cg.printPropertyHeader("name");
   cg.printValue(m_name);

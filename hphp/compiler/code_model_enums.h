@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,9 +28,9 @@ namespace HPHP {
     PHP_ASSIGNMENT = 5,
     PHP_BOOLEAN_AND = 6,
     PHP_BOOLEAN_OR = 7,
-    PHP_CAST = 8,
-    PHP_CONCAT_ASSIGN = 9,
-    PHP_CONCAT = 10,
+    PHP_CONCAT_ASSIGN = 8,
+    PHP_CONCAT = 9,
+    PHP_CONDITIONAL = 10,
     PHP_DIVIDE_ASSIGN = 11,
     PHP_DIVIDE = 12,
     PHP_INSTANCEOF = 13,

@@ -1,0 +1,60 @@
+HipHop Warning: %s
+%unicode|string%(%d) "%s"
+bool(false)
+object(mysqli)#%d (%d) {
+  [%u|b%"affected_rows"]=>
+  int(-1)
+  [%u|b%"client_info"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"client_version"]=>
+  int(%d)
+  [%u|b%"connect_errno"]=>
+  int(0)
+  [%u|b%"connect_error"]=>
+  NULL
+  [%u|b%"errno"]=>
+  int(2006)
+  [%u|b%"error"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"error_list"]=>
+  array(1) {
+    [0]=>
+    array(3) {
+      [%u|b%"errno"]=>
+      int(2006)
+      [%u|b%"sqlstate"]=>
+      %unicode|string%(5) "%s"
+      [%u|b%"error"]=>
+      %unicode|string%(%d) "%s"
+    }
+  }
+  [%u|b%"field_count"]=>
+  int(0)
+  [%u|b%"host_info"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"info"]=>
+  %s
+  [%u|b%"insert_id"]=>
+  int(0)
+  [%u|b%"server_info"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"server_version"]=>
+  int(%d)
+  [%u|b%"stat"]=>
+  %s
+  [%u|b%"sqlstate"]=>
+  %unicode|string%(5) "HY000"
+  [%u|b%"protocol_version"]=>
+  int(10)
+  [%u|b%"thread_id"]=>
+  int(%d)
+  [%u|b%"warning_count"]=>
+  int(0)
+}
+HipHop Warning: %s
+array(1) {
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+}
+HipHop Warning: %s
+done!

@@ -17,3 +17,5 @@ var_dump(image_type_to_mime_type(IMAGETYPE_IFF));
 var_dump(image_type_to_mime_type(IMAGETYPE_WBMP));
 var_dump(image_type_to_mime_type(IMAGETYPE_XBM));
 var_dump(image_type_to_mime_type(IMAGETYPE_ICO));
+var_dump(image_type_to_mime_type(IMAGETYPE_UNKNOWN));
+var_dump(image_type_to_mime_type(IMAGETYPE_COUNT));

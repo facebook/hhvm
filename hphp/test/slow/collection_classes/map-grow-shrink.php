@@ -1,4 +1,4 @@
-<?php
+<?hh
 function main() {
   $m = Map {};
   $m[1] = 1;

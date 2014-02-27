@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,6 +51,15 @@ StatementPtr StatementList::clone() {
   stmt->m_stmts.clear();
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     stmt->m_stmts.push_back(Clone(m_stmts[i]));
+  }
+  return stmt;
+}
+
+StatementListPtr StatementList::shallowClone() {
+  StatementListPtr stmt(new StatementList(*this));
+  stmt->m_stmts.clear();
+  for (unsigned int i = 0; i < m_stmts.size(); i++) {
+    stmt->m_stmts.push_back(m_stmts[i]);
   }
   return stmt;
 }

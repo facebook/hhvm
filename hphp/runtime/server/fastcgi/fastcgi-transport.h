@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,6 +49,7 @@ public:
   virtual const char *getRemoteHost() override;
   virtual const char *getRemoteAddr() override;
   virtual uint16_t getRemotePort() override;
+  virtual const std::string getPathTranslated() override;
   virtual const std::string getDocumentRoot() override;
   virtual const char *getServerName() override;
   virtual const char *getServerAddr() override;
@@ -89,9 +90,13 @@ public:
   virtual void onHeadersComplete() override;
 
 private:
-  typedef std::map<std::string, std::vector<std::string>> ResponseHeaders;
+  using ResponseHeaders =
+    std::unordered_map<std::string, std::vector<std::string>>;
 
   std::string getRawHeader(const std::string& name);
+  std::string* getRawHeaderPtr(const std::string& name);
+  int getIntHeader(const std::string& name);
+
   /*
    * HTTP_IF_MODIFIED_SINCE -> If-Unmodified-Since
    */
@@ -108,6 +113,7 @@ private:
   folly::IOBufQueue m_bodyQueue;
   std::unique_ptr<folly::IOBuf> m_currBody;
   std::unordered_map<std::string, std::string> m_requestHeaders;
+  std::string m_pathTranslated;
   std::string m_requestURI;
   std::string m_documentRoot;
   std::string m_remoteHost;

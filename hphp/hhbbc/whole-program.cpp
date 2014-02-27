@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,8 +27,10 @@
 #include "hphp/hhbbc/emit.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/debug.h"
-#include "hphp/hhbbc/abstract-interp.h"
+#include "hphp/hhbbc/analyze.h"
+#include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/stats.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace HHBBC {
@@ -148,6 +150,11 @@ std::vector<WorkItem> initial_work(const php::Program& program) {
 
   for (auto& u : program.units) {
     for (auto& c : u->classes) {
+      if (c->closureContextCls) {
+        // For class-at-a-time analysis, closures that are associated
+        // with a class context are analyzed as part of that context.
+        continue;
+      }
       ret.emplace_back(WorkType::Class,
                        Context { borrow(u), nullptr, borrow(c) });
     }
@@ -207,7 +214,7 @@ void optimize(Index& index, php::Program& program) {
         "analyzing",
         folly::format("round {} -- {} work items", round, work.size()).str()
       );
-      return parallel_map(
+      return parallel::map(
         work,
         // We have a folly::Optional just to keep the result type
         // DefaultConstructible.
@@ -243,7 +250,10 @@ void optimize(Index& index, php::Program& program) {
       case WorkType::Class:
         index.refine_private_props(result->cls.ctx.cls,
                                    result->cls.privateProperties);
-        for (auto& fa : result->cls.methods) update_func(fa);
+        index.refine_private_statics(result->cls.ctx.cls,
+                                     result->cls.privateStatics);
+        for (auto& fa : result->cls.methods)  update_func(fa);
+        for (auto& fa : result->cls.closures) update_func(fa);
         break;
       }
     }
@@ -271,7 +281,7 @@ void optimize(Index& index, php::Program& program) {
    * queries to php::Func and php::Class structures.
    */
   trace_time final_pass("final pass");
-  parallel_for_each(
+  parallel::for_each(
     all_function_contexts(program),
     [&] (Context ctx) { optimize_func(index, analyze_func(index, ctx)); }
   );
@@ -283,7 +293,7 @@ template<class Container>
 std::unique_ptr<php::Program> parse_program(const Container& units) {
   trace_time tracer("parse");
   auto ret = folly::make_unique<php::Program>();
-  ret->units = parallel_map(
+  ret->units = parallel::map(
     units,
     [&] (const std::unique_ptr<UnitEmitter>& ue) {
       return parse_unit(*ue);
@@ -293,12 +303,12 @@ std::unique_ptr<php::Program> parse_program(const Container& units) {
 }
 
 std::vector<std::unique_ptr<UnitEmitter>>
-make_unit_emitters(const php::Program& program) {
+make_unit_emitters(const Index& index, const php::Program& program) {
   trace_time trace("make_unit_emitters");
-  return parallel_map(
+  return parallel::map(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& unit) {
-      return emit_unit(*unit);
+      return emit_unit(index, *unit);
     }
   );
 }
@@ -321,14 +331,13 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   state_after("parse", *program);
 
   Index index{borrow(program)};
-  optimize(index, *program);
+  if (!options.NoOptimizations) optimize(index, *program);
 
-  if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 1)) {
-    debug_dump_program(*program);
-  }
+  debug_dump_program(index, *program);
+  print_stats(index, *program);
 
   LitstrTable::get().setWriting();
-  ues = make_unit_emitters(*program);
+  ues = make_unit_emitters(index, *program);
 
   return ues;
 }

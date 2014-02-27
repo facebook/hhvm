@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -151,6 +151,11 @@ struct RegionDesc::TypePred {
   Type type;
 };
 
+inline bool operator==(const RegionDesc::TypePred& a,
+                       const RegionDesc::TypePred& b) {
+  return a.location == b.location && a.type == b.type;
+}
+
 typedef std::vector<RegionDesc::TypePred> PostConditions;
 
 /*
@@ -168,6 +173,11 @@ struct RegionDesc::ReffinessPred {
   std::vector<bool> vals;
   int64_t arSpOffset;
 };
+
+inline bool operator==(const RegionDesc::ReffinessPred& a,
+                       const RegionDesc::ReffinessPred& b) {
+  return a.mask == b.mask && a.vals == b.vals && a.arSpOffset == b.arSpOffset;
+}
 
 /*
  * A basic block in the region, with type predictions for conditions
@@ -328,32 +338,39 @@ struct RegionContext::PreLiveAR {
  * Select a compilation region corresponding to the given context.
  * The shape of the region selected is controlled by
  * RuntimeOption::EvalJitRegionSelector.  If the specified shape is
- * 'tracelet', then the input argument t is used to build the region.
+ * 'legacy', then the input argument t is used to build the region.
  *
  * This function may return nullptr.
  *
  * For now this is hooked up in TranslatorX64::translateWork, and
  * returning nullptr causes it to use the current level 0 tracelet
- * analyzer.  Eventually we'd like analyze to occur underneath this as
- * well.
+ * analyzer.  Eventually we'd like this to completely replace analyze.
  */
 RegionDescPtr selectRegion(const RegionContext& context,
-                           const JIT::Tracelet* t);
+                           const Tracelet* t,
+                           TransKind kind);
 
 /*
  * Select a compilation region based on profiling information.  This
  * is used in JitPGO mode.  Argument transId specifies the profiling
  * translation that triggered the profiling-based region selection.
  */
-RegionDescPtr selectHotRegion(JIT::TransID transId,
-                              JIT::TranslatorX64* tx64);
+RegionDescPtr selectHotRegion(TransID transId,
+                              TranslatorX64* tx64);
+
+/*
+ * Select a compilation region using roughly the same heuristics as the old
+ * analyze() framework.
+ */
+RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
+                             bool profiling);
 
 /*
  * Create a compilation region corresponding to a tracelet created by
  * the old analyze() framework.
  */
 RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
-                                   const JIT::Tracelet& tlet);
+                                   const Tracelet& tlet);
 
 /*
  * Checks whether the type predictions at the beginning of block
@@ -366,9 +383,15 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
  * Creates regions covering all existing profile translations for
  * func, and returns them in the regions vector.
  */
-void regionizeFunc(const Func*            func,
-                   JIT::TranslatorX64* tx64,
-                   RegionVec&             regions);
+void regionizeFunc(const Func*    func,
+                   TranslatorX64* tx64,
+                   RegionVec&     regions);
+
+/*
+ * Compare the two regions. If they differ in any way other than a being longer
+ * than b, trace both regions.
+ */
+void diffRegions(const RegionDesc& a, const RegionDesc& b);
 
 /*
  * Debug stringification for various things.

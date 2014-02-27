@@ -55,7 +55,7 @@ interface MapAccess extends ConstMapAccess,
                             IndexAccess {
 }
 
-interface Indexish extends KeyedTraversable {
+interface Indexish extends \HH\KeyedTraversable {
 }
 
 interface XHPChild {
@@ -63,7 +63,7 @@ interface XHPChild {
 
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
-                              KeyedIterable,
+                              \HH\KeyedIterable,
                               Indexish {
 }
 
@@ -74,7 +74,7 @@ interface MutableVector extends ConstVector,
 
 interface ConstMap extends ConstCollection,
                            ConstMapAccess,
-                           KeyedIterable,
+                           \HH\KeyedIterable,
                            Indexish {
 }
 
@@ -85,7 +85,7 @@ interface MutableMap extends ConstMap,
 
 interface ConstSet extends ConstCollection,
                            ConstSetAccess,
-                           Iterable {
+                           \HH\Iterable {
 }
 
 interface MutableSet extends ConstSet,
@@ -169,9 +169,6 @@ trait StrictKeyedIterable {
   }
   public function toMap() {
     return new Map($this);
-  }
-  public function toStableMap() {
-    return new StableMap($this);
   }
   public function toSet() {
     return new Set($this);
@@ -295,9 +292,6 @@ trait LazyKeyedIterable {
   public function toMap() {
     return new Map($this);
   }
-  public function toStableMap() {
-    return new StableMap($this);
-  }
   public function toSet() {
     return new Set($this);
   }
@@ -358,7 +352,7 @@ class LazyMapIterator implements \HH\Iterator {
   }
 }
 
-class LazyMapIterable implements Iterable {
+class LazyMapIterable implements \HH\Iterable {
   use LazyIterable;
 
   private $iterable;
@@ -373,7 +367,7 @@ class LazyMapIterable implements Iterable {
   }
 }
 
-class LazyMapKeyedIterator implements KeyedIterator {
+class LazyMapKeyedIterator implements \HH\KeyedIterator {
   private $it;
   private $fn;
 
@@ -401,7 +395,7 @@ class LazyMapKeyedIterator implements KeyedIterator {
   }
 }
 
-class LazyMapKeyedIterable implements KeyedIterable {
+class LazyMapKeyedIterable implements \HH\KeyedIterable {
   use LazyKeyedIterable;
 
   private $iterable;
@@ -416,7 +410,7 @@ class LazyMapKeyedIterable implements KeyedIterable {
   }
 }
 
-class LazyMapWithKeyIterator implements KeyedIterator {
+class LazyMapWithKeyIterator implements \HH\KeyedIterator {
   private $it;
   private $fn;
 
@@ -444,7 +438,7 @@ class LazyMapWithKeyIterator implements KeyedIterator {
   }
 }
 
-class LazyMapWithKeyIterable implements KeyedIterable {
+class LazyMapWithKeyIterable implements \HH\KeyedIterable {
   use LazyKeyedIterable;
 
   private $iterable;
@@ -498,7 +492,7 @@ class LazyFilterIterator implements \HH\Iterator {
   }
 }
 
-class LazyFilterIterable implements Iterable {
+class LazyFilterIterable implements \HH\Iterable {
   use LazyIterable;
 
   private $iterable;
@@ -513,7 +507,7 @@ class LazyFilterIterable implements Iterable {
   }
 }
 
-class LazyFilterKeyedIterator implements KeyedIterator {
+class LazyFilterKeyedIterator implements \HH\KeyedIterator {
   private $it;
   private $fn;
 
@@ -551,7 +545,7 @@ class LazyFilterKeyedIterator implements KeyedIterator {
   }
 }
 
-class LazyFilterKeyedIterable implements KeyedIterable {
+class LazyFilterKeyedIterable implements \HH\KeyedIterable {
   use LazyKeyedIterable;
 
   private $iterable;
@@ -567,7 +561,7 @@ class LazyFilterKeyedIterable implements KeyedIterable {
   }
 }
 
-class LazyFilterWithKeyIterator implements KeyedIterator {
+class LazyFilterWithKeyIterator implements \HH\KeyedIterator {
   private $it;
   private $fn;
 
@@ -605,7 +599,7 @@ class LazyFilterWithKeyIterator implements KeyedIterator {
   }
 }
 
-class LazyFilterWithKeyIterable implements KeyedIterable {
+class LazyFilterWithKeyIterable implements \HH\KeyedIterable {
   use LazyKeyedIterable;
 
   private $iterable;
@@ -652,7 +646,7 @@ class LazyZipIterator implements \HH\Iterator {
   }
 }
 
-class LazyZipIterable implements Iterable {
+class LazyZipIterable implements \HH\Iterable {
   use LazyIterable;
 
   private $iterable1;
@@ -668,7 +662,7 @@ class LazyZipIterable implements Iterable {
   }
 }
 
-class LazyZipKeyedIterator implements KeyedIterator {
+class LazyZipKeyedIterator implements \HH\KeyedIterator {
   private $it1;
   private $it2;
 
@@ -699,7 +693,7 @@ class LazyZipKeyedIterator implements KeyedIterator {
   }
 }
 
-class LazyZipKeyedIterable implements KeyedIterable {
+class LazyZipKeyedIterable implements \HH\KeyedIterable {
   use LazyKeyedIterable;
 
   private $iterable1;
@@ -741,7 +735,7 @@ class LazyKeysIterator implements \HH\Iterator {
   }
 }
 
-class LazyKeysIterable implements Iterable {
+class LazyKeysIterable implements \HH\Iterable {
   use LazyIterable;
 
   private $iterable;
@@ -780,7 +774,7 @@ class LazyValuesIterator implements \HH\Iterator {
   }
 }
 
-class LazyValuesIterable implements Iterable {
+class LazyValuesIterable implements \HH\Iterable {
   use LazyIterable;
 
   private $iterable;
@@ -819,7 +813,7 @@ class LazyKVZipIterator implements \HH\Iterator {
   }
 }
 
-class LazyKVZipIterable implements Iterable {
+class LazyKVZipIterable implements \HH\Iterable {
   use LazyIterable;
 
   private $iterable;
@@ -832,7 +826,7 @@ class LazyKVZipIterable implements Iterable {
   }
 }
 
-class LazyIterableView implements Iterable {
+class LazyIterableView implements \HH\Iterable {
   public $iterable;
 
   public function __construct($iterable) { $this->iterable = $iterable; }
@@ -870,7 +864,7 @@ class LazyIterableView implements Iterable {
   }
 }
 
-class LazyKeyedIterableView implements KeyedIterable {
+class LazyKeyedIterableView implements \HH\KeyedIterable {
   public $iterable;
 
   public function __construct($iterable) { $this->iterable = $iterable; }
@@ -901,9 +895,6 @@ class LazyKeyedIterableView implements KeyedIterable {
   }
   public function toMap() {
     return $this->iterable->toMap();
-  }
-  public function toStableMap() {
-    return $this->iterable->toStableMap();
   }
   public function toSet() {
     return $this->iterable->toSet();
@@ -938,4 +929,3 @@ class LazyKeyedIterableView implements KeyedIterable {
 }
 
 }
-

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -208,6 +208,16 @@ inline bool isContainerOrNull(const Cell& c) {
 
 inline bool isContainerOrNull(CVarRef v) {
   return isContainerOrNull(*v.asCell());
+}
+
+inline bool isMutableContainer(const Cell& c) {
+  assert(cellIsPlausible(c));
+  return c.m_type == KindOfArray ||
+         (c.m_type == KindOfObject && c.m_data.pobj->isMutableCollection());
+}
+
+inline bool isMutableContainer(CVarRef v) {
+  return isMutableContainer(*v.asCell());
 }
 
 inline size_t getContainerSize(const Cell& c) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@ namespace HPHP { namespace JIT {
 
 std::string LocalData::show() const {
   return folly::to<std::string>(LocalId::show(), ',',
-                                valSrc ? valSrc->toString() : "null");
+                                typeSrc ? typeSrc->toString() : "null");
 }
 
 std::string NewStructData::show() const {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -136,6 +136,13 @@ static DataType kindOfFromDynamic(const folly::dynamic& t) {
   if (!t.isString()) {
     return KindOfInvalid;
   }
+
+  // If you hit this assert, the IDL contains "type": "Array"; you need to
+  // use one of {Int64,String,Variant}{Vec,Map} instead.
+  //
+  // These are still KindOfArray, not the HH types.
+  assert(t.asString() != "Array");
+
   auto it = g_kindOfMap.find(t.asString());
   if (it == g_kindOfMap.end()) {
     return KindOfObject;

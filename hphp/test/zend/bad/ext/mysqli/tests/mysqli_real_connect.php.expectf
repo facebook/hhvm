@@ -1,0 +1,43 @@
+HipHop Warning: %s
+object(mysqli)#%d (%d) {
+  [%u|b%"affected_rows"]=>
+  NULL
+  [%u|b%"client_info"]=>
+  %s
+  [%u|b%"client_version"]=>
+  int(%d)
+  [%u|b%"connect_errno"]=>
+  int(%d)
+  [%u|b%"connect_error"]=>
+  NULL
+  [%u|b%"errno"]=>
+  %s
+  [%u|b%"error"]=>
+  %s
+  [%u|b%"error_list"]=>
+  NULL
+  [%u|b%"field_count"]=>
+  NULL
+  [%u|b%"host_info"]=>
+  NULL
+  [%u|b%"info"]=>
+  NULL
+  [%u|b%"insert_id"]=>
+  NULL
+  [%u|b%"server_info"]=>
+  NULL
+  [%u|b%"server_version"]=>
+  NULL
+  [%u|b%"stat"]=>
+  NULL
+  [%u|b%"sqlstate"]=>
+  NULL
+  [%u|b%"protocol_version"]=>
+  NULL
+  [%u|b%"thread_id"]=>
+  NULL
+  [%u|b%"warning_count"]=>
+  NULL
+}
+HipHop Warning: %s
+done!

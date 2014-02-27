@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,7 @@ namespace HPHP {  namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
-class TraceBuilder;
+class IRBuilder;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -37,18 +37,18 @@ class TraceBuilder;
  * can be modified in place or replaced with new instructions as
  * needed.
  *
- * The Simplifier recursively invokes TraceBuilder, which can call
+ * The Simplifier recursively invokes IRBuilder, which can call
  * back into it.  It's used both during our initial gen-time
- * optimizations and in the TraceBuilder::reoptimize pass.
+ * optimizations and in the IRBuilder::reoptimize pass.
  *
  * The line of separation between these two modules is essentially
  * about who needs to know about tracked state.  If an optimization is
  * completely stateless (e.g. strength reduction, constant folding,
- * etc) it goes in here, otherwise it goes in TraceBuilder or some
+ * etc) it goes in here, otherwise it goes in IRBuilder or some
  * other pass.
  */
 struct Simplifier {
-  explicit Simplifier(TraceBuilder& t) : m_tb(t) {}
+  explicit Simplifier(IRBuilder& irb) : m_irb(irb) {}
 
   /*
    * Simplify performs a number of optimizations.
@@ -61,14 +61,20 @@ struct Simplifier {
    */
   SSATmp* simplify(IRInstruction*);
 
+  using ConstraintFunc = std::function<void(TypeConstraint)>;
+  SSATmp* simplifyAssertTypeOp(IRInstruction* inst, Type prevType,
+                               ConstraintFunc cf) const;
+
 private:
   SSATmp* simplifyMov(SSATmp* src);
   SSATmp* simplifyNot(SSATmp* src);
-  SSATmp* simplifyAbsInt(IRInstruction* inst);
   SSATmp* simplifyAbsDbl(IRInstruction* inst);
-  SSATmp* simplifyAdd(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifySub(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyMul(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAddInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifySubInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyMulInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAddDbl(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifySubDbl(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyMulDbl(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMod(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyDivDbl(IRInstruction* inst);
   SSATmp* simplifyBitAnd(SSATmp* src1, SSATmp* src2);
@@ -87,7 +93,6 @@ private:
   SSATmp* simplifyNSame(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyIsType(IRInstruction*);
   SSATmp* simplifyIsScalarType(IRInstruction*);
-  SSATmp* simplifyJmpIsType(IRInstruction*);
   SSATmp* simplifyConcatCellCell(IRInstruction*);
   SSATmp* simplifyConcatStrStr(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyConvToArr(IRInstruction*);
@@ -116,6 +121,7 @@ private:
   SSATmp* simplifyCeil(IRInstruction*);
   SSATmp* simplifyUnbox(IRInstruction*);
   SSATmp* simplifyUnboxPtr(IRInstruction*);
+  SSATmp* simplifyBoxPtr(IRInstruction*);
   SSATmp* simplifyCheckInit(IRInstruction* inst);
   SSATmp* simplifyPrint(IRInstruction* inst);
   SSATmp* simplifyDecRef(IRInstruction* inst);
@@ -131,7 +137,6 @@ private:
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
   SSATmp* simplifyConvClsToCctx(IRInstruction* inst);
   SSATmp* simplifySpillStack(IRInstruction* inst);
-  SSATmp* simplifyCall(IRInstruction* inst);
   SSATmp* simplifyCmp(Opcode opName, IRInstruction* inst,
                       SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);
@@ -146,7 +151,6 @@ private:
   SSATmp* simplifyDecRefStack(IRInstruction*);
   SSATmp* simplifyDecRefLoc(IRInstruction*);
   SSATmp* simplifyLdLoc(IRInstruction*);
-  SSATmp* simplifyStRef(IRInstruction*);
   SSATmp* simplifyAssertNonNull(IRInstruction*);
 
 
@@ -172,14 +176,15 @@ private:
   template<class Oper> SSATmp* simplifyRoundCommon(IRInstruction*, Oper);
 
   SSATmp* simplifyCheckPackedArrayBounds(IRInstruction*);
+  SSATmp* simplifyLdPackedArrayElem(IRInstruction*);
 
-private: // tracebuilder forwarders
+private: // IRBuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, BCMarker marker, Args&&...);
 
 private:
-  TraceBuilder& m_tb;
+  IRBuilder& m_irb;
 
   // The current instruction being simplified is always at
   // m_insts.top(). This has to be a stack instead of just a pointer
@@ -234,13 +239,6 @@ struct StackValueInfo {
 };
 
 /*
- * If the typeParam of inst isn't a subtype of oldType, filter out the
- * parts of the typeParam that aren't in oldType and return
- * true. Otherwise, return false.
- */
-bool filterAssertType(IRInstruction* inst, Type oldType);
-
-/*
  * Track down a value or type using the StkPtr chain.
  *
  * The spansCall parameter tracks whether the returned value's
@@ -256,26 +254,17 @@ StackValueInfo getStackValue(SSATmp* stack, uint32_t index);
  * given the particular depth.
  *
  * This function is used for computing available value for
- * DecRef->DecRefNZ conversions in tracebuilder.
+ * DecRef->DecRefNZ conversions in IRBuilder.
  */
 smart::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth);
 
 /*
  * Propagate very simple copies on the given instruction.
- * Specifically, Movs, and also IncRefs of non-refcounted types.
+ * Specifically, Movs.
  *
  * More complicated copy-propagation is performed in the Simplifier.
  */
 void copyProp(IRInstruction*);
-
-/*
- * Checks if property propName of class clsTmp, called from context class ctx,
- * can be accessed via the static property cache.
- */
-bool canUseSPropCache(SSATmp* clsTmp,
-                      const StringData* propName,
-                      const Class* ctx);
-
 
 /*
  * Returns the canonical version of the given value by tracing through any

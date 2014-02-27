@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
@@ -34,6 +35,7 @@ protected:
   explicit QueryOrderby(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS);
 
   ExpressionListPtr m_expressions;
+  ExpressionListPtr m_originalExpressions;
 };
 
 DECLARE_BOOST_TYPES(QueryExpression);
@@ -49,18 +51,27 @@ public:
     QueryExpressionPtr exp(new QueryExpression(*this));
     Expression::deepCopy(exp);
     exp->m_expressions = Clone(m_expressions);
-    exp->m_queryargs = Clone(m_queryargs);
     exp->m_querystr = m_querystr;
     return exp;
   }
 
   ExpressionListPtr getClauses() const { return m_expressions; }
-  ExpressionListPtr getQueryArguments();
-  StringData* getQueryString();
-private:
-  void serializeQueryExpression();
+  ExpressionListPtr getQueryArguments() const {
+    assert(m_expressions->getCount() > 0);
+    return static_pointer_cast<ExpressionList>((*m_expressions)[0]);
+  }
+  StringData* getQueryString() const { return m_querystr; }
+  ClosureExpressionPtr getSelectClosure() const {
+    if (m_expressions->getCount() < 2) return nullptr;
+    return static_pointer_cast<ClosureExpression>((*m_expressions)[1]);
+  }
 
-  ExpressionListPtr m_queryargs;
+  void doRewrites(AnalysisResultPtr ar, FileScopePtr fileScope);
+
+private:
+  ClosureExpressionPtr clientSideRewrite(AnalysisResultPtr ar,
+                                         FileScopePtr fileScope);
+
   StringData* m_querystr;
 };
 
@@ -72,13 +83,15 @@ public:
   : QueryOrderby(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(OrderbyClause)) {
     assert(orderings && orderings->is(Expression::KindOfExpressionList));
     m_expressions = static_pointer_cast<ExpressionList>(orderings);
+    m_originalExpressions = m_expressions;
   }
 
   virtual ExpressionPtr clone() {
     OrderbyClausePtr exp(new OrderbyClause(*this));
     Expression::deepCopy(exp);
     exp->m_expressions = Clone(m_expressions);
-    return exp;
+    exp->m_originalExpressions = exp->m_expressions;
+   return exp;
   }
 
   ExpressionListPtr getOrderings() const { return m_expressions; }

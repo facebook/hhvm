@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,20 +15,20 @@
 */
 
 #include "hphp/runtime/base/user-stream-wrapper.h"
+#include "hphp/system/constants.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 UserStreamWrapper::UserStreamWrapper(const String& name,
-                                     const String& clsname)
+                                     const String& clsname,
+                                     int flags)
     : m_name(name) {
   m_cls = Unit::loadClass(clsname.get());
   if (!m_cls) {
     throw InvalidArgumentException(0, "Undefined class '%s'", clsname.data());
   }
-  // There is a third param in Zend to stream_wrapper_register() which could
-  // affect that when we add that param
-  m_isLocal = true;
+  m_isLocal = !(flags & k_STREAM_IS_URL);
 }
 
 File* UserStreamWrapper::open(const String& filename, const String& mode,
@@ -40,7 +40,8 @@ File* UserStreamWrapper::open(const String& filename, const String& mode,
     return nullptr;
   }
   DEBUG_ONLY auto tmp = wrapper.detach();
-  assert(tmp == file);
+  assert(tmp == file && file->getCount() == 1);
+  file->decRefCount();
   return file;
 }
 

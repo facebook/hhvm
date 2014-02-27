@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -480,13 +480,13 @@ int string_rfind(const char *input, int len, const char *s, int s_len,
     if (pos >= 0) {
       ptr = bstrrstr(input + pos, len - pos, s, s_len);
     } else {
-      ptr = bstrrstr(input, len + pos + 1, s, s_len);
+      ptr = bstrrstr(input, len + pos + s_len, s, s_len);
     }
   } else {
     if (pos >= 0) {
       ptr = bstrrcasestr(input + pos, len - pos, s, s_len);
     } else {
-      ptr = bstrrcasestr(input, len + pos + 1, s, s_len);
+      ptr = bstrrcasestr(input, len + pos + s_len, s, s_len);
     }
   }
   if (ptr != nullptr) {

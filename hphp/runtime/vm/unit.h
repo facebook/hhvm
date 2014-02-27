@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,8 @@
 
 #ifndef incl_HPHP_VM_UNIT_H_
 #define incl_HPHP_VM_UNIT_H_
+
+#include <memory>
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -456,6 +458,7 @@ struct Unit {
   static Array getClassesInfo();
   static Array getInterfacesInfo();
   static Array getTraitsInfo();
+  static Array getClassesWithAttrInfo(HPHP::Attr attrs, bool inverse = false);
 
   size_t numLitstrs() const {
     return m_namedInfo.size();
@@ -767,6 +770,7 @@ private:
   mutable PseudoMainCacheMap *m_pseudoMainCache;
 };
 
+int getLineNumber(const LineTable& table, Offset pc);
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 
 class UnitEmitter {
@@ -778,8 +782,9 @@ class UnitEmitter {
 
   bool isASystemLib() const {
     static const char systemlib_prefix[] = "/:systemlib";
-    return !strncmp(getFilepath()->data(),
-      systemlib_prefix, sizeof systemlib_prefix - 1);
+    return !*getFilepath()->data() ||
+      !strncmp(getFilepath()->data(),
+        systemlib_prefix, sizeof systemlib_prefix - 1);
   }
 
   void addTrivialPseudoMain();
@@ -826,9 +831,23 @@ class UnitEmitter {
   void recordSourceLocation(const Location *sLoc, Offset start);
 
   /*
-   * Return the SrcLocTable for this unit.
+   * Return the SrcLocTable for this unit emitter, if it has one.
+   * Otherwise an empty table is returned.
    */
   SourceLocTable createSourceLocTable() const;
+
+  /*
+   * Returns whether this unit emitter contains full SourceLoc
+   * information.
+   */
+  bool hasSourceLocInfo() const { return !m_sourceLocTab.empty(); }
+
+  /*
+   * Returns access to this UnitEmitter's LineTable.  Generally
+   * UnitEmitters loaded from a production repo will have a line table
+   * instead of a full SourceLocTable.
+   */
+  const LineTable& lineTable() const { return m_lineTable; }
 
   /*
    * Adds a new FuncEmitter to the unit.  You can only do this once
@@ -997,6 +1016,8 @@ class UnitRepoProxy : public RepoProxy {
   ~UnitRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
   Unit* load(const std::string& name, const MD5& md5);
+  std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
+                                           const MD5& md5);
 
 #define URP_IOP(o) URP_OP(Insert##o, insert##o)
 #define URP_GOP(o) URP_OP(Get##o, get##o)
@@ -1102,6 +1123,10 @@ class UnitRepoProxy : public RepoProxy {
     GetBaseOffsetAfterPCLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     bool get(int64_t unitSn, Offset pc, Offset& offset);
   };
+
+private:
+  bool loadHelper(UnitEmitter& ue, const std::string&, const MD5&);
+
 #define URP_OP(c, o) \
  public: \
   c##Stmt& o(int repoId) { return *m_##o[repoId]; } \

@@ -28,13 +28,10 @@ if (LIBDL_INCLUDE_DIRS)
 endif()
 
 # boost checks
-find_package(Boost 1.48.0 COMPONENTS system program_options filesystem regex REQUIRED)
+find_package(Boost 1.49.0 COMPONENTS system program_options filesystem regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
-# Boost 1.49 supports a better flat_multimap, but 1.48 is good enough
-if (Boost_VERSION GREATER 104899)
-	add_definitions("-DHAVE_BOOST1_49")
-endif()
+add_definitions("-DHAVE_BOOST1_49")
 
 
 # features.h
@@ -42,6 +39,10 @@ FIND_PATH(FEATURES_HEADER features.h)
 if (FEATURES_HEADER)
 	add_definitions("-DHAVE_FEATURES_H=1")
 endif()
+
+# magickwand
+find_package(LibMagickWand REQUIRED)
+include_directories(${LIBMAGICKWAND_INCLUDE_DIRS})
 
 # google-glog
 find_package(Glog REQUIRED)
@@ -151,6 +152,10 @@ set(CMAKE_REQUIRED_LIBRARIES)
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 add_definitions(${LIBXML2_DEFINITIONS})
+
+find_package(LibXslt REQUIRED)
+include_directories(${LIBXSLT_INCLUDE_DIR})
+add_definitions(${LIBXSLT_DEFINITIONS})
 
 find_package(EXPAT REQUIRED)
 include_directories(${EXPAT_INCLUDE_DIRS})
@@ -380,14 +385,14 @@ if (LINUX OR APPLE)
 endif()
 
 FIND_LIBRARY (BFD_LIB bfd)
-FIND_LIBRARY (BINUTIL_LIB iberty)
+FIND_LIBRARY (LIBIBERTY_LIB iberty)
 
 if (NOT BFD_LIB)
 	message(FATAL_ERROR "You need to install binutils")
 endif()
 
-if (NOT BINUTIL_LIB)
-	message(FATAL_ERROR "You need to install binutils")
+if (NOT LIBIBERTY_LIB)
+	message(FATAL_ERROR "You need to install libiberty (usually bundled with binutils)")
 endif()
 
 if (FREEBSD)
@@ -441,6 +446,7 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
 	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
+	target_link_libraries(${target} ${LIBMAGICKWAND_LIBRARIES})
 
 if (LibXed_LIBRARY)
 	target_link_libraries(${target} ${LibXed_LIBRARY})
@@ -474,7 +480,7 @@ if (APPLE)
 endif()
 
 	target_link_libraries(${target} ${BFD_LIB})
-	target_link_libraries(${target} ${BINUTIL_LIB})
+	target_link_libraries(${target} ${LIBIBERTY_LIB})
 if (${LIBPTHREAD_LIBRARIES})
 	target_link_libraries(${target} ${LIBPTHREAD_LIBRARIES})
 endif()
@@ -484,6 +490,8 @@ endif()
 	target_link_libraries(${target} ${BZIP2_LIBRARIES})
 
 	target_link_libraries(${target} ${LIBXML2_LIBRARIES})
+	target_link_libraries(${target} ${LIBXSLT_LIBRARIES})
+	target_link_libraries(${target} ${LIBXSLT_EXSLT_LIBRARIES})
 	target_link_libraries(${target} ${EXPAT_LIBRARY})
 	target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
 	target_link_libraries(${target} ${Mcrypt_LIB})

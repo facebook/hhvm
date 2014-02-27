@@ -1,3 +1,19 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 1997-2010 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
 #include "hphp/runtime/ext/icu/ext_icu_date_fmt.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/ext/icu/ext_icu_timezone.h"
@@ -20,10 +36,10 @@ const StaticString
   s_tm_yday("tm_yday"),
   s_tm_isdst("tm_isdst");
 
-IntlDateFormatter::IntlDateFormatter(const String& locale,
-                                     int64_t datetype, int64_t timetype,
-                                     CVarRef timezone, CVarRef calendar,
-                                     const String& pattern) {
+void IntlDateFormatter::setDateFormatter(const String& locale,
+                                         int64_t datetype, int64_t timetype,
+                                         CVarRef timezone, CVarRef calendar,
+                                         const String& pattern) {
   auto loc = icu::Locale::createFromName(locale.c_str());
   int64_t calType = UCAL_GREGORIAN;
   bool calOwned = false;
@@ -38,7 +54,7 @@ IntlDateFormatter::IntlDateFormatter(const String& locale,
                                                    "datefmt_create",
                                                    s_intl_error->m_error);
   if (!tz) { return; }
-  SCOPE_EXIT { if (tz && isInvalid()) delete tz; };
+  SCOPE_EXIT { if (tz && !isValid()) delete tz; };
 
   UErrorCode error = U_ZERO_ERROR;
   String pat(u16(pattern, error));
@@ -49,6 +65,9 @@ IntlDateFormatter::IntlDateFormatter(const String& locale,
   }
 
   error = U_ZERO_ERROR;
+  if (m_date_fmt) {
+    udat_close(m_date_fmt);
+  }
   m_date_fmt = udat_open(pat.empty()?(UDateFormatStyle)timetype:UDAT_IGNORE,
                          pat.empty()?(UDateFormatStyle)datetype:UDAT_IGNORE,
                          locale.c_str(), nullptr, 0,
@@ -76,11 +95,14 @@ IntlDateFormatter::IntlDateFormatter(const String& locale,
   m_calendar = calType;
 }
 
-IntlDateFormatter::IntlDateFormatter(const IntlDateFormatter *orig) {
+void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   if (!orig || !orig->datefmt()) {
     s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
                       "Cannot clone unconstructed IntlDateFormatter");
     throwException("%s", s_intl_error->getErrorMessage().c_str());
+  }
+  if (m_date_fmt) {
+    udat_close(m_date_fmt);
   }
   UErrorCode error = U_ZERO_ERROR;
   m_date_fmt = udat_clone(orig->datefmt(), &error);
@@ -88,14 +110,6 @@ IntlDateFormatter::IntlDateFormatter(const IntlDateFormatter *orig) {
     s_intl_error->set(error, "datefmt_clone: date formatter clone failed");
     throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
-}
-
-IntlDateFormatter* IntlDateFormatter::Get(Object obj) {
-  return GetResData<IntlDateFormatter>(obj, s_IntlDateFormatter);
-}
-
-Object IntlDateFormatter::wrap() {
-  return WrapResData(s_IntlDateFormatter);
 }
 
 int64_t IntlDateFormatter::getArrayElemInt(CArrRef arr,
@@ -120,14 +134,14 @@ double IntlDateFormatter::getTimestamp(CVarRef arg) {
   }
 
   auto arr = arg.toArray();
-  m_error.clear();
+  clearError();
   auto year = getArrayElemInt(arr, s_tm_year) + 1900,
        month = getArrayElemInt(arr, s_tm_mon),
        mday = getArrayElemInt(arr, s_tm_mday),
        hour = getArrayElemInt(arr, s_tm_hour),
        minute = getArrayElemInt(arr, s_tm_min),
        second = getArrayElemInt(arr, s_tm_sec);
-  if (U_FAILURE(m_error.code)) {
+  if (U_FAILURE(getErrorCode())) {
     // error already set
     return NAN;
   }
@@ -163,19 +177,17 @@ double IntlDateFormatter::getTimestamp(CVarRef arg) {
 //////////////////////////////////////////////////////////////////////////////
 // class IntlDateFormatter
 
-static void HHVM_METHOD(IntlDateFormatter, __construct_array, CArrRef args) {
-  auto data = NEWOBJ(IntlDateFormatter)(args[0].toString(), // locale
-                                        args[1].toInt64(), // datetype
-                                        args[2].toInt64(), // timetype
-                                        args[3], // timezone
-                                        args[4], // calendar
-                                        args[5].toString()); // pattern
-  this_->o_set(s_resdata, Resource(data), s_IntlDateFormatter.get());
-}
-
-static void HHVM_METHOD(IntlDateFormatter, __clone) {
-  auto data = NEWOBJ(IntlDateFormatter)(IntlDateFormatter::Get(this_));
-  this_->o_set(s_resdata, Resource(data), s_IntlDateFormatter.get());
+static TypedValue* HHVM_MN(IntlDateFormatter, __construct)(ActRec *ar) {
+  auto data = Native::data<IntlDateFormatter>(ar->getThis());
+  data->setDateFormatter(
+    getArg<KindOfString>(ar, 0), // locale
+    getArg<KindOfInt64>(ar, 1), // datetype
+    getArg<KindOfInt64>(ar, 2), // timetype
+    getArg<KindOfAny>(ar, 3), // timezone
+    getArg<KindOfAny>(ar, 4), // calendar
+    getArg<KindOfString>(ar, 5, empty_string.get())); // pattern
+  ar->m_r.m_type = KindOfNull;
+  return &ar->m_r;
 }
 
 static String HHVM_METHOD(IntlDateFormatter, format, CVarRef value) {
@@ -302,7 +314,7 @@ static Object HHVM_METHOD(IntlDateFormatter, getTimeZone) {
                    "when cloning time zone");
     return null_object;
   }
-  return (NEWOBJ(IntlTimeZone)(ntz, true))->wrap();
+  return IntlTimeZone::newInstance(ntz, true);
 }
 
 static bool HHVM_METHOD(IntlDateFormatter, isLenient) {
@@ -432,8 +444,10 @@ static bool HHVM_METHOD(IntlDateFormatter, setPattern,
 
 static bool HHVM_METHOD(IntlDateFormatter, setTimeZone, CVarRef zone) {
   DATFMT_GET(data, this_, false);
+  intl_error err;
   icu::TimeZone *tz = IntlTimeZone::ParseArg(zone, "datefmt_set_timezone",
-                                             data->m_error);
+                                             err);
+  data->setError(err);
   if (tz == nullptr) {
     return false;
   }
@@ -460,8 +474,7 @@ void IntlExtension::initDateFormatter() {
   UCAL_CONST(GREGORIAN);
   UCAL_CONST(TRADITIONAL);
 
-  HHVM_ME(IntlDateFormatter, __construct_array);
-  HHVM_ME(IntlDateFormatter, __clone);
+  HHVM_ME(IntlDateFormatter, __construct);
   HHVM_ME(IntlDateFormatter, format);
   HHVM_STATIC_ME(IntlDateFormatter, formatObject);
   HHVM_ME(IntlDateFormatter, getCalendar);
@@ -481,6 +494,9 @@ void IntlExtension::initDateFormatter() {
   HHVM_ME(IntlDateFormatter, setLenient);
   HHVM_ME(IntlDateFormatter, setPattern);
   HHVM_ME(IntlDateFormatter, setTimeZone);
+
+  Native::registerNativeDataInfo<IntlDateFormatter>(s_IntlDateFormatter.get());
+
   loadSystemlib("icu_date_fmt");
 }
 

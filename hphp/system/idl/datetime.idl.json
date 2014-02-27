@@ -371,6 +371,7 @@
             "name": "date_sunrise",
             "desc": "date_sunrise() returns the sunrise time for a given day (specified as a timestamp) and location.",
             "flags": [
+              "ZendParamModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -385,31 +386,31 @@
                 {
                     "name": "format",
                     "type": "Int32",
-                    "value": "0",
+                    "value": "1",
                     "desc": "format constants constant description example SUNFUNCS_RET_STRING returns the result as string 16:46 SUNFUNCS_RET_DOUBLE returns the result as float 16.78243132 SUNFUNCS_RET_TIMESTAMP returns the result as integer (timestamp) 1095034606"
                 },
                 {
                     "name": "latitude",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "get_date_default_latitude()",
                     "desc": "Defaults to North, pass in a negative value for South. See also: date.default_latitude"
                 },
                 {
                     "name": "longitude",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "get_date_default_longitude()",
                     "desc": "Defaults to East, pass in a negative value for West. See also: date.default_longitude"
                 },
                 {
                     "name": "zenith",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "get_date_default_sunrise_zenith()",
                     "desc": "Default: date.sunrise_zenith"
                 },
                 {
                     "name": "gmt_offset",
                     "type": "Double",
-                    "value": "99999.0",
+                    "value": "get_date_default_gmt_offset()",
                     "desc": "Specified in hours."
                 }
             ]
@@ -418,6 +419,7 @@
             "name": "date_sunset",
             "desc": "date_sunset() returns the sunset time for a given day (specified as a timestamp) and location.",
             "flags": [
+              "ZendParamModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -432,31 +434,31 @@
                 {
                     "name": "format",
                     "type": "Int32",
-                    "value": "0",
+                    "value": "1",
                     "desc": "format constants constant description example SUNFUNCS_RET_STRING returns the result as string 16:46 SUNFUNCS_RET_DOUBLE returns the result as float 16.78243132 SUNFUNCS_RET_TIMESTAMP returns the result as integer (timestamp) 1095034606"
                 },
                 {
                     "name": "latitude",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "get_date_default_latitude()",
                     "desc": "Defaults to North, pass in a negative value for South. See also: date.default_latitude"
                 },
                 {
                     "name": "longitude",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "get_date_default_longitude()",
                     "desc": "Defaults to East, pass in a negative value for West. See also: date.default_longitude"
                 },
                 {
                     "name": "zenith",
                     "type": "Double",
-                    "value": "0.0",
+                    "value": "get_date_default_sunset_zenith()",
                     "desc": "Default: date.sunset_zenith"
                 },
                 {
                     "name": "gmt_offset",
                     "type": "Double",
-                    "value": "99999.0",
+                    "value": "get_date_default_gmt_offset()",
                     "desc": "Specified in hours."
                 }
             ]

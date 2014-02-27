@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -649,7 +649,7 @@ private:
   std::deque<PostponedNonScalars> m_postponedCinits;
   std::deque<PostponedClosureCtor> m_postponedClosureCtors;
   PendingIterVec m_pendingIters;
-  hphp_hash_map<std::string,FuncEmitter*> m_generatorEmitted;
+  hphp_hash_map<std::string,unsigned int> m_generatorEmitted;
   hphp_hash_set<std::string> m_nonTopGeneratorEmitted;
   hphp_hash_set<std::string> m_topMethodEmitted;
   SymbolicStack m_evalStack;
@@ -763,7 +763,7 @@ public:
                              bool builtin = false);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
-  std::pair<FuncEmitter*,bool> createFuncEmitterForGeneratorBody(
+  FuncEmitter* createFuncEmitterForGeneratorBody(
                  MethodStatementPtr meth,
                  FuncEmitter* fe,
                  vector<FuncEmitter*>& top_fes);
@@ -823,7 +823,7 @@ public:
   // These methods handle the return, break, continue, and goto operations.
   // These methods are aware of try/finally blocks and foreach blocks and
   // will free iterators and jump to finally epilogues as appropriate.
-  void emitReturn(Emitter& e, char sym, StatementPtr s);
+  void emitReturn(Emitter& e, char sym, bool hasConstraint, StatementPtr s);
   void emitBreak(Emitter& e, int depth, StatementPtr s);
   void emitContinue(Emitter& e, int depth, StatementPtr s);
   void emitGoto(Emitter& e, StringData* name, StatementPtr s);

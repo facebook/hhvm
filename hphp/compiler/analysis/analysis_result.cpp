@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,7 +46,6 @@
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
-#include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/atomic.h"
@@ -735,10 +734,10 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
       cls->setStaticDynamic(ar);
     }
     StringToFunctionScopePtrMap methods;
-    cls->collectMethods(ar, methods);
+    cls->collectMethods(ar, methods, true /* include privates */);
     bool needAbstractMethodImpl =
       (!cls->isAbstract() && !cls->isInterface() &&
-       !cls->derivesFromRedeclaring() &&
+       cls->derivesFromRedeclaring() == Derivation::Normal &&
        !cls->getAttribute(ClassScope::UsesUnknownTrait));
     for (StringToFunctionScopePtrMap::const_iterator iterMethod =
            methods.begin(); iterMethod != methods.end(); ++iterMethod) {
@@ -757,7 +756,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   string cname;
   BOOST_FOREACH(tie(cname, cls), m_systemClasses) {
     StringToFunctionScopePtrMap methods;
-    cls->collectMethods(ar, methods);
+    cls->collectMethods(ar, methods, true /* include privates */);
     for (StringToFunctionScopePtrMap::const_iterator iterMethod =
            methods.begin(); iterMethod != methods.end(); ++iterMethod) {
       m_methodToClassDecs[iterMethod->first].push_back(cls);
@@ -813,7 +812,7 @@ void AnalysisResult::analyzePerfectVirtuals() {
       ClassScopePtr cls = iter->second[i];
 
       // being conservative, not to do redeclaring classes at all
-      if (cls->derivesFromRedeclaring()) {
+      if (cls->derivesFromRedeclaring() == Derivation::Redeclaring) {
         addClassRootMethods(ar, cls, redeclaringMethods);
         continue;
       }

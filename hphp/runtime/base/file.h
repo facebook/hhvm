@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
+
+struct stat;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,11 +122,13 @@ public:
   virtual bool truncate(int64_t size);
   virtual bool lock(int operation);
   virtual bool lock(int operation, bool &wouldblock);
+  virtual bool stat(struct stat *sb);
 
   virtual Array getMetaData();
   virtual Array getWrapperMetaData() { return null_array; }
   virtual const char *getStreamType() const { return "";}
-  virtual StreamContext *getStreamContext() { return m_stream_context; }
+  Resource &getStreamContext() { return m_streamContext; }
+  void setStreamContext(Resource &context) { m_streamContext = context; }
 
   int64_t bufferedLen() { return m_writepos - m_readpos; }
 
@@ -182,11 +186,12 @@ protected:
 
   // fields useful for both reads and writes
   int64_t m_position; // the current cursor position
+  bool m_eof;
 
   std::string m_name;
   std::string m_mode;
 
-  StreamContext *m_stream_context;
+  Resource m_streamContext;
 
   void closeImpl();
   virtual void sweep() FOLLY_OVERRIDE;

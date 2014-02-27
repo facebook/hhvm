@@ -69,6 +69,36 @@ try {
     var_dump($v);
   }
 
+  $vstmt = $dbh->query("select * from foo", 0);
+  foreach ($vstmt as $k => $v) {
+    var_dump($k);
+    var_dump($v);
+  }
+
+  //Test column fetching
+  $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
+  var_dump($vstmt->fetchAll());
+
+  class MyShadyObject {
+  }
+
+  //Test object fetching
+  foreach ($dbh->query("select * from foo", PDO::FETCH_CLASS,
+                       'MyShadyObject', NULL) as $row) {
+    var_dump($row);
+  }
+
+  //Test fetching into an object
+  $object = (object)array();
+  foreach ($dbh->query("select * from foo", PDO::FETCH_INTO, $object) as $row) {
+
+  }
+
+  //Test bad function calls
+  foreach ($dbh->query("select * from foo", PDO::FETCH_INTO) as $row) {
+
+  }
+
   unset($dbh);
   unset($vstmt);
 

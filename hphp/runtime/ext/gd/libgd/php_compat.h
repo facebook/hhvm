@@ -83,9 +83,24 @@ inline void php_verror(const char *docref, const char *params, int type,
 }
 inline void php_error_docref(const char *docref, int type,
                              const char *format, ...) {
-	va_list args;
-	va_start(args, format);
+  va_list args;
+  va_start(args, format);
   php_verror(docref, "", type, format, args);
-	va_end(args);
+  va_end(args);
 }
+
+// Force gdhelpers.h to run with thread safety.
+#define ZTS
+#define MUTEX_T pthread_mutex_t
+
+// This abomination is required because of what happens in gdhelpers.h.
+// They steal (x) away from us, so we just looked up the one place
+// which used it and hard-coded it in here.  Yep.
+#define tsrm_mutex_alloc(x) gdFontCacheMutex; \
+    pthread_mutex_init(&gdFontCacheMutex, 0)
+
+#define tsrm_mutex_free(x) pthread_mutex_destroy(&x)
+#define tsrm_mutex_lock(x) pthread_mutex_lock(&x)
+#define tsrm_mutex_unlock(x) pthread_mutex_unlock(&x)
+
 #endif // incl_HPHP_LIBGD_COMPAT_H_

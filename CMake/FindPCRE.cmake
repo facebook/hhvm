@@ -19,7 +19,7 @@ FIND_PATH(PCRE_INCLUDE_DIR pcre.h)
 SET(PCRE_NAMES pcre)
 FIND_LIBRARY(PCRE_LIBRARY NAMES ${PCRE_NAMES} )
 
-# handle the QUIETLY and REQUIRED arguments and set PCRE_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set PCRE_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PCRE DEFAULT_MSG PCRE_LIBRARY PCRE_INCLUDE_DIR)

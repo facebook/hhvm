@@ -1,0 +1,6 @@
+array(2) {
+  ["pcre_zend_compat.backtrack_limit"]=>
+  string(7) "1000000"
+  ["pcre_zend_compat.recursion_limit"]=>
+  string(6) "100000"
+}

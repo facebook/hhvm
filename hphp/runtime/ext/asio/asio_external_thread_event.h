@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -192,7 +192,7 @@ class AsioExternalThreadEvent {
      * If a result was already initialized, it must be uninitialized (decref
      * if needed) prior to throwing an exception.
      */
-    virtual void unserialize(Cell& result) const = 0;
+    virtual void unserialize(Cell& result) = 0;
 
   protected:
     /**

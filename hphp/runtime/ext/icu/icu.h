@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,6 +18,7 @@
 #define incl_HPHP_ICU_H
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/vm/native-data.h"
 #include <unicode/utypes.h>
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
@@ -72,24 +73,19 @@ DECLARE_EXTERN_REQUEST_LOCAL(IntlError, s_intl_error);
 
 namespace Intl {
 
-extern const StaticString s_resdata;
-class IntlResourceData : public SweepableResourceData {
+class IntlResourceData {
  public:
   template<class T>
-  static T* GetResData(Object obj, const String& ctx) {
+  static T* GetData(Object obj, const String& ctx) {
     if (obj.isNull()) {
       raise_error("NULL object passed");
       return nullptr;
     }
-    auto res = obj->o_get(s_resdata, false, ctx);
-    if (!res.isResource()) {
-      return nullptr;
-    }
-    auto ret = res.toResource().getTyped<T>(false, false);
+    auto ret = Native::data<T>(obj.get());
     if (!ret) {
       return nullptr;
     }
-    if (ret->isInvalid()) {
+    if (!ret->isValid()) {
       ret->setError(U_ILLEGAL_ARGUMENT_ERROR,
                     "Found unconstructed %s", ctx.c_str());
       return nullptr;
@@ -97,12 +93,25 @@ class IntlResourceData : public SweepableResourceData {
     return ret;
   }
 
-  Object WrapResData(const String& ctx) {
-    auto cls = Unit::lookupClass(ctx.get());
-    auto obj = ObjectData::newInstance(cls);
-    Object ret(obj);
-    obj->o_set(s_resdata, Resource(this), ctx);
-    return ret;
+  virtual bool isValid() const = 0;
+  virtual ~IntlResourceData() {}
+
+  static Object NewInstance(const String& name) {
+    auto cls = Unit::lookupClass(name.get());
+    assert(cls);
+    auto objdata = ObjectData::newInstance(cls);
+    assert(objdata);
+    return Object(objdata);
+  }
+
+  void setError(intl_error& err) {
+    s_intl_error->m_error = err;
+    m_errorCode = err.code;
+    if (err.custom_error_message.empty()) {
+      m_errorMessage.clear();
+    } else {
+      m_errorMessage = err.custom_error_message->toCppString();
+    }
   }
 
   void setError(UErrorCode code, const char *format, ...) {
@@ -110,12 +119,23 @@ class IntlResourceData : public SweepableResourceData {
     va_start(args, format);
     s_intl_error->set(code, format, args);
     va_end(args);
-    m_error = s_intl_error->m_error;
+    m_errorCode = code;
+    if (s_intl_error->m_error.custom_error_message.empty()) {
+      m_errorMessage.clear();
+    } else {
+      m_errorMessage =
+        s_intl_error->m_error.custom_error_message->toCppString();
+    }
   }
 
   void setError(UErrorCode code) {
     const char *errorMsg = u_errorName(code);
     setError(code, "%s", errorMsg);
+  }
+
+  void clearError() {
+    m_errorCode = U_ZERO_ERROR;
+    m_errorMessage.clear();
   }
 
   void throwException(const char *format, ...) {
@@ -127,15 +147,24 @@ class IntlResourceData : public SweepableResourceData {
     throw Object(SystemLib::AllocExceptionObject(buffer));
   }
 
-  UErrorCode getErrorCode() const {
-    return m_error.code;
-  }
+  UErrorCode getErrorCode() const { return m_errorCode; }
 
   String getErrorMessage() const {
-    return m_error.custom_error_message;
+    auto errorName = u_errorName(m_errorCode);
+    if (m_errorMessage.empty()) {
+      return errorName;
+    }
+    return m_errorMessage + ": " + errorName;
   }
 
-  intl_error m_error;
+ private:
+   /* NativeData instances can't contain sweepable objects
+    * Map around s_intl_error's use of String
+    * TODO: Finish intl extension and unify s_intl_error back
+    * onto std::string -sgolemon(2014-02-20)
+    */
+  std::string m_errorMessage;
+  UErrorCode m_errorCode;
 };
 
 class RequestData : public RequestEventHandler {
@@ -198,12 +227,17 @@ class IntlExtension : public Extension {
   IntlExtension() : Extension("intl.not-done", "1.1.0") {}
 
   void moduleInit() override {
-    bindIniSettings();
+    bindConstants();
     initLocale();
     initNumberFormatter();
     initTimeZone();
     initIterator();
     initDateFormatter();
+    initCalendar();
+  }
+
+  void requestInit() override {
+    bindIniSettings();
   }
 
  private:
@@ -211,16 +245,18 @@ class IntlExtension : public Extension {
     s_intl_request->setDefaultLocale(value->data());
     return true;
   }
-  static String icu_get_default_locale(void *p) {
+  static std::string icu_get_default_locale(void *p) {
     return s_intl_request->getDefaultLocale();
   }
 
   void bindIniSettings();
+  void bindConstants();
   void initLocale();
   void initNumberFormatter();
   void initTimeZone();
   void initIterator();
   void initDateFormatter();
+  void initCalendar();
 };
 
 } // namespace Intl

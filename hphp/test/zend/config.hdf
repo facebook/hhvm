@@ -3,6 +3,15 @@ Eval {
   EnableZendCompat = true
 }
 
+MySQL {
+ TypedResults = false
+}
+
 Http {
   SlowQueryThreshold = 0
+}
+
+# TODO (t3610856): Remove this once the default changes
+SimpleXML {
+  EmptyNamespaceMatchesAll = false
 }

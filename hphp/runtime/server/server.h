@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -265,7 +265,8 @@ public:
       m_numThreads(numThreads),
       m_serverFD(-1),
       m_sslFD(-1),
-      m_takeoverFilename() {
+      m_takeoverFilename(),
+      m_useFileSocket(false) {
   }
 
   std::string m_address;
@@ -274,6 +275,7 @@ public:
   int m_serverFD;
   int m_sslFD;
   std::string m_takeoverFilename;
+  bool m_useFileSocket;
 };
 
 /**
@@ -327,6 +329,9 @@ public:
 
 class FailedToListenException : public ServerException {
 public:
+  explicit FailedToListenException(const std::string &addr)
+    : ServerException("Failed to listen to unix socket at %s", addr.c_str()) {
+  }
   FailedToListenException(const std::string &addr, int port)
     : ServerException("Failed to listen on %s:%d", addr.c_str(), port) {
   }

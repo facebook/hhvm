@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,13 +91,11 @@ void WhileStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void WhileStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("WhileStatement", m_stmt != nullptr ? 3 : 2);
+  cg.printObjectHeader("WhileStatement", 3);
   cg.printPropertyHeader("condition");
   m_condition->outputCodeModel(cg);
-  if (m_stmt != nullptr) {
-    cg.printPropertyHeader("block");
-    cg.printAsBlock(m_stmt);
-  }
+  cg.printPropertyHeader("block");
+  cg.printAsBlock(m_stmt);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

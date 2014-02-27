@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -41,9 +41,9 @@ Array f_inclued_get_data();
 int64_t f_get_magic_quotes_gpc();
 int64_t f_get_magic_quotes_runtime();
 Variant f_getenv(const String& varname);
-int64_t f_getlastmod();
+Variant f_getlastmod();
 int64_t f_getmygid();
-int64_t f_getmyinode();
+Variant f_getmyinode();
 int64_t f_getmypid();
 int64_t f_getmyuid();
 Array f_getopt(const String& options, CVarRef longopts = null_variant);
@@ -54,6 +54,7 @@ bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec);
 int64_t f_cpu_get_count();
 String f_cpu_get_model();
 String f_ini_get(const String& varname);
+Array f_ini_get_all(const String& extension, bool detailed);
 void f_ini_restore(const String& varname);
 String f_ini_set(const String& varname, const String& newvalue);
 int64_t f_memory_get_allocation();

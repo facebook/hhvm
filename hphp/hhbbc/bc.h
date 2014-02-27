@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -191,7 +191,7 @@ namespace bc {
 
 #define POP_TWO(x, y)       uint32_t numPop() const { return 2; }   \
                             Flavor popFlavor(uint32_t i) const {    \
-                              POP_##x; --i; POP_##x; not_reached(); \
+                              POP_##x; --i; POP_##y; not_reached(); \
                             }
 
 #define POP_THREE(x, y, z)  uint32_t numPop() const { return 3; }   \

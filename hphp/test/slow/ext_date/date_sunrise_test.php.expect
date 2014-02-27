@@ -1,0 +1,30 @@
+*** Testing date_sunrise() : usage variation ***
+
+-- Testing date_sunrise() function by passing one parameter --
+string(5) "09:37"
+
+-- Testing date_sunrise() function by passing two parameters --
+string(5) "09:37"
+float(9.622663104669)
+int(1356496641)
+
+-- Testing date_sunrise() function by passing two parameters --
+string(5) "09:54"
+float(9.9142368079326)
+int(1356497691)
+
+-- Testing date_sunrise() function by passing three  parameters --
+string(5) "12:51"
+float(12.863799485848)
+int(1356508309)
+
+-- Testing date_sunrise() function by passing four parameters --
+string(5) "12:55"
+float(12.921003983007)
+int(1356508515)
+
+-- Testing date_sunrise() function by passing five parameters --
+string(5) "08:55"
+float(8.9210039830067)
+int(1356508515)
+===DONE===

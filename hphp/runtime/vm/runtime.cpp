@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,7 +77,6 @@ void print_boolean(bool val) {
 
 NEW_COLLECTION_HELPER(Vector)
 NEW_COLLECTION_HELPER(Map)
-NEW_COLLECTION_HELPER(StableMap)
 NEW_COLLECTION_HELPER(Set)
 NEW_COLLECTION_HELPER(FrozenMap)
 NEW_COLLECTION_HELPER(FrozenVector)
@@ -91,29 +90,6 @@ ObjectData* newPairHelper() {
 }
 
 #undef NEW_COLLECTION_HELPER
-
-static inline void
-tvPairToCString(DataType t, uint64_t v,
-                const char** outStr,
-                size_t* outSz,
-                bool* outMustFree) {
-  if (IS_STRING_TYPE(t)) {
-    StringData *strd = (StringData*)v;
-    *outStr = strd->data();
-    *outSz = strd->size();
-    *outMustFree = false;
-    return;
-  }
-  Cell c;
-  c.m_type = t;
-  c.m_data.num = v;
-  String s = tvAsVariant(&c).toString();
-  *outStr = (const char*)malloc(s.size());
-  TRACE(1, "t-x64: stringified: %s -> %s\n", s.data(), *outStr);
-  memcpy((char*)*outStr, s.data(), s.size());
-  *outSz = s.size();
-  *outMustFree = true;
-}
 
 /**
  * concat_ss will will incRef the output string
@@ -158,16 +134,27 @@ concat_is(int64_t v1, StringData* v2) {
  * concat_si will incRef the output string
  * and decref its first argument
  */
-StringData*
-concat_si(StringData* v1, int64_t v2) {
+StringData* concat_si(StringData* v1, int64_t v2) {
   char intbuf[21];
-  // Convert the int to a string
   auto const s2 = conv_10(v2, intbuf + sizeof(intbuf));
-  StringSlice s1 = v1->slice();
-  StringData* ret = StringData::Make(s1, s2);
-  ret->incRefCount();
-  decRefStr(v1);
-  return ret;
+  if (v1->hasMultipleRefs()) {
+    auto const s1 = v1->slice();
+    auto const ret = StringData::Make(s1, s2);
+    ret->setRefCount(1);
+    // Because v1->getCount() is greater than 1, we know we will never
+    // have to release the string here
+    v1->decRefCount();
+    return ret;
+  }
+
+  auto const newV1 = v1->append(s2);
+  if (UNLIKELY(newV1 != v1)) {
+    assert(v1->getCount() == 1);
+    v1->release();
+    newV1->incRefCount();
+    return newV1;
+  }
+  return v1;
 }
 
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
@@ -282,20 +269,20 @@ void defClsHelper(PreClass* preClass) {
 
 const StaticString
   s_HH_Traversable("HH\\Traversable"),
-  s_KeyedTraversable("KeyedTraversable"),
+  s_HH_KeyedTraversable("HH\\KeyedTraversable"),
   s_Indexish("Indexish"),
   s_XHPChild("XHPChild");
 
 bool interface_supports_non_objects(const StringData* s) {
   return s->isame(s_HH_Traversable.get()) ||
-         s->isame(s_KeyedTraversable.get()) ||
+         s->isame(s_HH_KeyedTraversable.get()) ||
          s->isame(s_Indexish.get()) ||
          s->isame(s_XHPChild.get());
 }
 
 bool interface_supports_array(const StringData* s) {
   return (s->isame(s_HH_Traversable.get()) ||
-          s->isame(s_KeyedTraversable.get()) ||
+          s->isame(s_HH_KeyedTraversable.get()) ||
           s->isame(s_Indexish.get()) ||
           s->isame(s_XHPChild.get()));
 }
@@ -303,7 +290,7 @@ bool interface_supports_array(const StringData* s) {
 bool interface_supports_array(const std::string& n) {
   const char* s = n.c_str();
   return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
-          (n.size() == 16 && !strcasecmp(s, "KeyedTraversable")) ||
+          (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
           (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
           (n.size() == 8 && !strcasecmp(s, "XHPChild")));
 }

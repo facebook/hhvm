@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -83,6 +83,7 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
   if (!m_name.compare("bool"))     return KindOfBoolean;
   if (!m_name.compare("int"))      return KindOfInt64;
   if (!m_name.compare("float"))    return KindOfDouble;
+  if (!m_name.compare("num"))      return KindOfUnknown;
   if (!m_name.compare("string"))   return KindOfString;
   if (!m_name.compare("array"))    return KindOfArray;
   if (!m_name.compare("resource")) return KindOfResource;
@@ -182,20 +183,36 @@ void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
   }
   typeArgsElem = m_typeArgs;
 
-  auto numProps = 3;
-  if (m_function) numProps++;
-  if (numTypeArgs > 0) numProps++;
+  auto numProps = 1;
+  if (m_nullable) numProps++;
+  if (m_soft) numProps++;
+  if (m_function) {
+    numProps++;
+    // Since this is a function type, the first type argument is the return type
+    // and no typeArguments property will be serialized unless there are at
+    // least two type arguments.
+    if (numTypeArgs > 1) numProps++;
+  } else {
+    if (numTypeArgs > 0) numProps++;
+  }
   cg.printObjectHeader("TypeExpression", numProps);
   cg.printPropertyHeader("name");
   cg.printValue(m_tuple ? "tuple" : m_name);
-  cg.printPropertyHeader("isNullable");
-  cg.printBool((bool)m_nullable);
-  cg.printPropertyHeader("isSoft");
-  cg.printBool((bool)m_soft);
+  if (m_nullable) {
+    cg.printPropertyHeader("isNullable");
+    cg.printBool(true);
+  }
+  if (m_soft) {
+    cg.printPropertyHeader("isSoft");
+    cg.printBool(true);
+  }
   if (m_function) {
     cg.printPropertyHeader("returnType");
     typeArgsElem->outputCodeModel(cg);
     typeArgsElem = typeArgsElem->m_typeList;
+    // Since we've grabbed the first element of the list as the return
+    // type, make sure that the logic for serializing type arguments gets
+    // disabled unless there is at least one more type argument.
     numTypeArgs--;
   }
   if (numTypeArgs > 0) {

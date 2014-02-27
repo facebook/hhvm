@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,7 +48,7 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 bool Logger::UseSyslog = false;
 bool Logger::UseLogFile = true;
-bool Logger::UseCronolog = true;
+bool Logger::UseCronolog = false;
 bool Logger::IsPipeOutput = false;
 FILE *Logger::Output = nullptr;
 Cronolog Logger::cronOutput;

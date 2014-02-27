@@ -1,0 +1,15 @@
+[E_WARNING] mysqli_fetch_object() expects at least 1 parameter, 0 given in %s on line %d
+[E_WARNING] mysqli_fetch_object() expects parameter 1 to be mysqli_result, null given in %s on line %d
+[E_WARNING] Missing argument 1 for mysqli_fetch_object_construct::__construct() in %s on line %d
+[E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
+[E_NOTICE] Undefined variable: a in %s on line %d
+[E_NOTICE] Undefined variable: b in %s on line %d
+[E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
+[E_NOTICE] Undefined variable: b in %s on line %d
+NULL
+NULL
+[E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
+NULL
+[E_RECOVERABLE_ERROR] Argument 3 passed to mysqli_fetch_object() must be of the type array, string given in %s on line %d
+Parameter ctor_params must be an array
+HipHop Fatal error: %s

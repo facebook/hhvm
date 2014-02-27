@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,6 +71,16 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   splitURL(url, m_originalURL, m_queryString);
   m_originalURL = StringUtil::UrlDecode(m_originalURL, false);
   m_rewritten = false;
+
+  auto pathTranslated = transport->getPathTranslated();
+  if (!pathTranslated.empty()) {
+    // The transport is overriding everything and just handing us the filename
+    m_originalURL = pathTranslated;
+    if (!resolveURL(vhost, pathTranslation, sourceRoot)) {
+      return false;
+    }
+    return true;
+  }
 
   // Fast path for files that exist
   if (vhost->checkExistenceBeforeRewrite()) {
@@ -227,6 +237,14 @@ bool RequestURI::resolveURL(const VirtualHost *vhost,
     }
     m_resolvedURL = startURL.substr(0, pos);
     m_origPathInfo = startURL.substr(pos);
+  }
+  if (!m_resolvedURL.empty() &&
+      m_resolvedURL.charAt(0) != '/') {
+    m_resolvedURL = "/" + m_resolvedURL;
+  }
+  if (!m_originalURL.empty() &&
+      m_originalURL.charAt(0) != '/') {
+    m_originalURL = "/" + m_originalURL;
   }
   m_pathInfo = String(
       Util::canonicalize(m_origPathInfo.c_str(), m_origPathInfo.size()),

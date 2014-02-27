@@ -28,7 +28,6 @@ function testFromFrozenVector() {
   var_dump($fv->toVector() == Vector {1, 2, 3});
   printNormalized($fv->toFrozenVector());
   var_dump($fv->toMap() == Map { 0 => 1, 1 => 2, 2 => 3 });
-  var_dump($fv->toStableMap() == StableMap { 0 => 1, 1 => 2, 2 => 3 });
   var_dump($fv->toSet() == Set { 1, 2, 3 });
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,7 @@
  *
  *   - Missing support for static variables in a function/method.
  *
- * @author Jorden DeLong <delong.j@fb.com>
+ * @author Jordan DeLong <delong.j@fb.com>
  */
 
 #include "hphp/runtime/vm/as.h"
@@ -354,7 +354,7 @@ struct Input {
 private:
   struct is_bareword {
     bool operator()(int i) const {
-      return isalnum(i) || i == '_' || i == '.';
+      return isalnum(i) || i == '_' || i == '.' || i == '$';
     }
   };
 
@@ -398,7 +398,7 @@ struct StackDepth {
   int maxOffset;
   int minOffset;
   int minOffsetLine;
-  boost::optional<int> baseValue;
+  folly::Optional<int> baseValue;
 
   /*
    * During the parsing process, when a Jmp instruction is encountered, the
@@ -505,8 +505,8 @@ struct AsmState : private boost::noncopyable {
 
     if (currentStackDepth == nullptr) {
       stack << "/";
-    } else if(currentStackDepth->baseValue) {
-      stack << currentStackDepth->baseValue.get() +
+    } else if (currentStackDepth->baseValue) {
+      stack << *currentStackDepth->baseValue +
                currentStackDepth->currentOffset;
     } else {
       stack << "?" << currentStackDepth->currentOffset;
@@ -611,7 +611,7 @@ struct AsmState : private boost::noncopyable {
     ent.m_fcallOff = ue->bcPos();
     ent.m_fpOff = reg.fpOff;
     if (reg.stackDepth->baseValue) {
-      ent.m_fpOff += reg.stackDepth->baseValue.get();
+      ent.m_fpOff += *reg.stackDepth->baseValue;
     } else {
       // base value still unknown, this will need to be updated later
       fpiToUpdate.push_back(std::make_pair(&ent, reg.stackDepth));
@@ -678,7 +678,7 @@ struct AsmState : private boost::noncopyable {
         error("created a FPI from an unreachable instruction");
       }
 
-      kv.first->m_fpOff += kv.second->baseValue.get();
+      kv.first->m_fpOff += *kv.second->baseValue;
     }
 
     // Stack depth should be 0 at the end of a function body
@@ -1570,8 +1570,35 @@ void parse_parameter_list(AsmState& as) {
   }
 }
 
+void parse_function_flags(AsmState& as) {
+  as.in.skipWhitespace();
+  std::string flag;
+  for (;;) {
+    if (as.in.peek() == '{') break;
+    if (!as.in.readword(flag)) break;
+
+    if (flag == "hasGeneratorBody") {
+      as.in.expectWs('(');
+      as.fe->setGeneratorBodyName(read_litstr(as));
+      as.in.expectWs(')');
+    } else if (flag == "isGenerator") {
+      as.fe->setIsGenerator(true);
+    } else if (flag == "isGeneratorFromClosure") {
+      as.fe->setIsGeneratorFromClosure(true);
+    } else if (flag == "isAsync") {
+      as.fe->setIsAsync(true);
+    } else if (flag == "isClosureBody") {
+      as.fe->setIsClosureBody(true);
+    } else if (flag == "isPairGenerator") {
+      as.fe->setIsPairGenerator(true);
+    } else {
+      as.error("Unexpected function flag \"" + flag + "\"");
+    }
+  }
+}
+
 /*
- * directive-function : attribute-list identifier parameter-list
+ * directive-function : attribute-list identifier parameter-list function-flags
  *                        '{' function-body
  *                    ;
  */
@@ -1591,6 +1618,8 @@ void parse_function(AsmState& as) {
               as.ue->bcPos(), attrs, true, 0);
 
   parse_parameter_list(as);
+  parse_function_flags(as);
+
   as.in.expectWs('{');
 
   parse_function_body(as);
@@ -1689,7 +1718,7 @@ void parse_property(AsmState& as) {
                       attrs, empty_string.get(),
                       empty_string.get(),
                       &tvInit,
-                      KindOfInvalid);
+                      RepoAuthType{});
 }
 
 /*

@@ -40,33 +40,28 @@ bool(true)
 bool(true)
 
 int(-2)
-HipHop Warning: Out of bounds in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
 bool(false)
 bool(false)
 
 float(-2.5)
 HipHop Warning: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-HipHop Warning: Out of bounds in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
 bool(false)
 bool(false)
 
 int(21)
-HipHop Warning: Out of bounds in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
 bool(false)
 bool(false)
 
 float(22.5)
 HipHop Warning: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-HipHop Warning: Out of bounds in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
 bool(false)
 bool(false)
 
 int(9223372036854775807)
-HipHop Warning: Out of bounds in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
 bool(false)
 bool(false)
@@ -113,7 +108,6 @@ bool(true)
 bool(true)
 
 string(27) "999999999999999999999999999"
-HipHop Warning: Out of bounds in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
 bool(false)
 bool(false)

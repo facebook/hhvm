@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/base/class-info.h"
@@ -226,7 +226,7 @@ Variant f_call_user_func_rpc(int _argc, const String& host, int port,
 
   // This double decoding can be avoided by modifying RPC server to directly
   // take PHP serialization format.
-  Variant res = unserialize_from_string(f_json_decode(sresponse));
+  Variant res = unserialize_from_string(HHVM_FN(json_decode)(sresponse));
   if (!res.isArray()) {
     raise_error("Internal protocol error");
     return false;
@@ -313,25 +313,6 @@ Variant f_func_get_arg(int arg_num) {
   return false;
 }
 
-Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos) {
-  if (num_args <= params.size()) {
-    if (pos >= 0 && pos < num_args) {
-      return params.rvalAt(pos);
-    }
-  } else {
-    if (pos >= 0) {
-      int index = pos - params.size();
-      if (index < 0) {
-        return params.rvalAt(pos);
-      }
-      if (index < args.size()) {
-        return args.rvalAt(index);
-      }
-    }
-  }
-  return false;
-}
-
 Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   if (ar == NULL) {
     return Array();
@@ -373,26 +354,6 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
 
 Variant f_func_get_args() {
   FUNC_GET_ARGS_IMPL(0);
-}
-
-Array func_get_args(int num_args, CArrRef params, CArrRef args) {
-  if (params.empty() && args.empty()) return Array::Create();
-  if (args.empty()) {
-    if (num_args < params.size()) {
-      return params.slice(0, num_args, false);
-    }
-    return params;
-  }
-
-  Array derefArgs;
-  for (ArrayIter iter(args); iter; ++iter) {
-    derefArgs.append(iter.second());
-  }
-
-  if (params.empty()) return derefArgs;
-  assert(num_args > params.size());
-  Array ret = Array(params).merge(derefArgs);
-  return ret;
 }
 
 Variant f_hphp_func_slice_args(int offset) {

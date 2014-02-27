@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,9 +44,11 @@ namespace HPHP { namespace JIT {
  * PhysLoc contains Register/spill locations for one SSATmp
  */
 class PhysLoc {
-  enum Kind { kRegister, kSIMD, kSpill };
+  enum Kind : uint8_t { kRegister, kSIMD, kSpill };
 
 public:
+  static auto constexpr kMaxSlotNum = 255; // since we use uint8_t
+
   PhysLoc() : m_kind(kRegister) {
     m_regs[0] = m_regs[1] = InvalidReg;
   }
@@ -142,13 +144,16 @@ public:
    * so all we really need to do is adjust for the return address and scale
    * by the machine word size.
    */
-  static int offset(uint32_t slot) {
-    return (slot + 1) * sizeof(uint64_t);
-  }
-
   uint32_t offset(int idx) const {
     assert(m_kind == kSpill);
-    return offset(m_slots[idx]);
+    return (m_slots[idx] + 1) * sizeof(uint64_t);
+  }
+
+  /*
+   * return true if the offset of this slot is 16-byte aligned
+   */
+  static bool isAligned(uint32_t slot) {
+    return slot % 2 == 1;
   }
 
   bool operator==(const PhysLoc& other) const {
@@ -165,7 +170,7 @@ private:
   Kind m_kind;
   union {
     PhysReg m_regs[2];
-    uint32_t m_slots[2];
+    uint8_t m_slots[2];
   };
 };
 

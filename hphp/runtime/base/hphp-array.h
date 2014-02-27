@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -124,6 +124,14 @@ public:
    */
   static HphpArray* MakeStruct(uint32_t size, StringData** keys,
                                const TypedValue* values);
+
+  /*
+   * Allocate an uncounted HphpArray and copy the values from the input 'array'
+   * into the uncounted one. All values copied are made uncounted as well.
+   * An uncounted array can only contain uncounted values (primitive values,
+   * uncounted or static strings and uncounted or static arrays).
+   */
+  static HphpArray* MakeUncounted(ArrayData* array);
 
   /*
    * Return a pointer to the singleton static empty array.  This is
@@ -358,8 +366,14 @@ private:
   static void getElmKey(const Elm& e, TypedValue* out);
 
 private:
-  static HphpArray* CopyPacked(const HphpArray& other, AllocationMode);
-  static HphpArray* CopyMixed(const HphpArray& other, AllocationMode);
+  template<class CopyElem>
+  static HphpArray* CopyPacked(const HphpArray& other,
+                               AllocationMode,
+                               CopyElem);
+  template<class CopyKeyValue>
+  static HphpArray* CopyMixed(const HphpArray& other,
+                              AllocationMode,
+                              CopyKeyValue);
   static HphpArray* CopyReserve(const HphpArray* src, size_t expectedSize);
 
   HphpArray() = delete;

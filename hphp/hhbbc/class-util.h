@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,10 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_CLASS_UTIL_H_
-#define incl_HPHP_CLASS_UTIL_H_
+#ifndef incl_HHBBC_CLASS_UTIL_H_
+#define incl_HHBBC_CLASS_UTIL_H_
 
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/representation.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -32,15 +33,44 @@ struct Type;
 bool is_collection(res::Class);
 
 /*
+ * Returns whether a php::Class is a closure.
+ */
+bool is_closure(const php::Class&);
+
+/*
  * Returns whether a Type could hold an object that has a custom
  * boolean conversion function.
  */
 bool could_have_magic_bool_conversion(Type);
 
 /*
- * Returns whether a php::Class contains an 86pinit method.
+ * A mask of which types of special functions a class has.
  */
-bool has_86pinit(borrowed_ptr<const php::Class>);
+enum class MethodMask : uint32_t {
+  Internal_86pinit = 0x1,
+  Internal_86sinit = 0x2,
+};
+inline bool contains(MethodMask mask, MethodMask val) {
+  return static_cast<uint32_t>(mask) & static_cast<uint32_t>(val);
+}
+
+/*
+ * Returns method named "name" if it exists.
+ */
+borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class>,
+                                    SString name);
+
+/*
+ * Returns true if `name' is the name of an internal VM special class
+ * method.  (Not callable directly by php code.)
+ */
+bool is_special_method_name(SString name);
+
+/*
+ * Returns true if a class has the __MockClass user attribute.  This
+ * attribute allows final methods and final classes to be overridden.
+ */
+bool is_mock_class(borrowed_ptr<const php::Class>);
 
 /*
  * Returns a collection type name given a Collection::Type.

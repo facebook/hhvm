@@ -1,0 +1,14 @@
+object(A)#1 (2) {
+  ["x":"A":private]=>
+  array(3) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["y":"A":private]=>
+  string(6) "string"
+}
+string(6) "string"

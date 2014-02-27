@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,25 +59,26 @@ void prepareForSmash(CodeBlock&, int nBytes, int offset = 0);
  * Returns true if the given current frontier can have an nBytes-long
  * instruction written that will be smashable later.
  */
-bool isSmashable(JIT::TCA frontier, int nBytes, int offset = 0);
+bool isSmashable(TCA frontier, int nBytes, int offset = 0);
 
-void smashJmp(JIT::TCA jmpAddr, JIT::TCA newDest);
-void smashCall(JIT::TCA callAddr, JIT::TCA newDest);
-void smashJcc(JIT::TCA jccAddr, JIT::TCA newDest);
+void smashJmp(TCA jmpAddr, TCA newDest);
+void smashCall(TCA callAddr, TCA newDest);
+void smashJcc(TCA jccAddr, TCA newDest);
 
 /*
- * Emits a jump that satisfies the smash* routines above.
+ * Emits a jump or call that satisfies the smash* routines above.
  */
-void emitSmashableJump(CodeBlock&, JIT::TCA dest, JIT::ConditionCode cc);
+void emitSmashableJump(CodeBlock&, TCA dest, ConditionCode cc);
+void emitSmashableCall(CodeBlock&, TCA dest);
 
 /*
  * Decodes jump instructions and returns their target. This includes handling
  * for ARM's multi-instruction "smashable jump" sequences. If the code does not
  * encode the right kind of jump, these functions return nullptr.
  */
-JIT::TCA jmpTarget(JIT::TCA addr);
-JIT::TCA jccTarget(JIT::TCA addr);
-JIT::TCA callTarget(JIT::TCA addr);
+TCA jmpTarget(TCA addr);
+TCA jccTarget(TCA addr);
+TCA callTarget(TCA addr);
 
 }}
 

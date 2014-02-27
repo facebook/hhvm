@@ -1,0 +1,8 @@
+array(2) {
+  [0]=>
+  %s(3) "foo"
+  [1]=>
+  %s(3) "bar"
+}
+NULL
+bool(true)

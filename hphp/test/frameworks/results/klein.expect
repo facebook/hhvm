@@ -1,0 +1,296 @@
+Klein\Tests\DataCollection\DataCollectionTest::testAll with data set #0
+E
+Klein\Tests\DataCollection\DataCollectionTest::testArrayAccessGet with data set #0
+.
+Klein\Tests\DataCollection\DataCollectionTest::testArrayAccessIsset with data set #0
+F
+Klein\Tests\DataCollection\DataCollectionTest::testArrayAccessSet
+.
+Klein\Tests\DataCollection\DataCollectionTest::testArrayAccessUnset with data set #0
+F
+Klein\Tests\DataCollection\DataCollectionTest::testExists with data set #0
+F
+Klein\Tests\DataCollection\DataCollectionTest::testGet with data set #0
+.
+Klein\Tests\DataCollection\DataCollectionTest::testIteratorAggregate with data set #0
+.
+Klein\Tests\DataCollection\DataCollectionTest::testMagicGet with data set #0
+.
+Klein\Tests\DataCollection\DataCollectionTest::testMagicIsset with data set #0
+F
+Klein\Tests\DataCollection\DataCollectionTest::testMagicSet
+.
+Klein\Tests\DataCollection\DataCollectionTest::testMagicUnset with data set #0
+F
+Klein\Tests\DataCollection\DataCollectionTest::testMerge with data set #0
+.
+Klein\Tests\DataCollection\DataCollectionTest::testMergeHard with data set #0
+.
+Klein\Tests\DataCollection\DataCollectionTest::testRemove with data set #0
+F
+Klein\Tests\DataCollection\DataCollectionTest::testReplace with data set #0
+.
+Klein\Tests\DataCollection\DataCollectionTest::testSet
+.
+Klein\Tests\DataCollection\HeaderDataCollectionTest::testConstructorCorrectlyFormatted with data set #0
+E
+Klein\Tests\DataCollection\HeaderDataCollectionTest::testExists with data set #0
+F
+Klein\Tests\DataCollection\HeaderDataCollectionTest::testGet with data set #0
+.
+Klein\Tests\DataCollection\HeaderDataCollectionTest::testNameNormalizing
+.
+Klein\Tests\DataCollection\HeaderDataCollectionTest::testRemove with data set #0
+F
+Klein\Tests\DataCollection\HeaderDataCollectionTest::testSet
+.
+Klein\Tests\DataCollection\ResponseCookieDataCollectionTest::testConstructorRoutesThroughSet with data set #0
+.
+Klein\Tests\DataCollection\ResponseCookieDataCollectionTest::testSet with data set #0
+.
+Klein\Tests\DataCollection\ResponseCookieDataCollectionTest::testSetStringConvertsToCookie
+.
+Klein\Tests\DataCollection\ServerDataCollectionTest::testGetHeaders with data set #0
+.
+Klein\Tests\DataCollection\ServerDataCollectionTest::testHasPrefix
+.
+Klein\Tests\HttpStatusTests::testAutomaticMessage
+.
+Klein\Tests\HttpStatusTests::testManualEntry
+.
+Klein\Tests\HttpStatusTests::testStaticMessageFromCode
+.
+Klein\Tests\HttpStatusTests::testStringOutput
+.
+Klein\Tests\RequestTest::testBody
+.
+Klein\Tests\RequestTest::testConstructorAndGetters
+.
+Klein\Tests\RequestTest::testGlobalsCreation
+.
+Klein\Tests\RequestTest::testId
+.
+Klein\Tests\RequestTest::testIp
+.
+Klein\Tests\RequestTest::testMagic
+.
+Klein\Tests\RequestTest::testMethod
+.
+Klein\Tests\RequestTest::testMethodOverride
+.
+Klein\Tests\RequestTest::testMockFactory
+.
+Klein\Tests\RequestTest::testPathname
+.
+Klein\Tests\RequestTest::testQueryModify
+.
+Klein\Tests\RequestTest::testSecure
+.
+Klein\Tests\RequestTest::testUniversalParams
+.
+Klein\Tests\RequestTest::testUniversalParamsWithFilter
+.
+Klein\Tests\RequestTest::testUri
+.
+Klein\Tests\RequestTest::testUserAgent
+.
+Klein\Tests\ResponseCookieTest::testDomainGetSet with data set #0
+.
+Klein\Tests\ResponseCookieTest::testExpireGetSet with data set #0
+.
+Klein\Tests\ResponseCookieTest::testHttpOnlyGetSet with data set #0
+.
+Klein\Tests\ResponseCookieTest::testNameGetSet with data set #0
+.
+Klein\Tests\ResponseCookieTest::testPathGetSet with data set #0
+.
+Klein\Tests\ResponseCookieTest::testSecureGetSet with data set #0
+.
+Klein\Tests\ResponseCookieTest::testValueGetSet with data set #0
+.
+Klein\Tests\ResponsesTest::testAppend
+.
+Klein\Tests\ResponsesTest::testBodyGetSet
+.
+Klein\Tests\ResponsesTest::testChunk
+.
+Klein\Tests\ResponsesTest::testCodeGetSet
+.
+Klein\Tests\ResponsesTest::testCookiesGetter
+.
+Klein\Tests\ResponsesTest::testDump
+.
+Klein\Tests\ResponsesTest::testFileSend
+.
+Klein\Tests\ResponsesTest::testHeader
+.
+Klein\Tests\ResponsesTest::testHeadersGetter
+.
+Klein\Tests\ResponsesTest::testJSON
+.
+Klein\Tests\ResponsesTest::testLockToggleAndGetters
+.
+Klein\Tests\ResponsesTest::testLockedNotModifiable
+.
+Klein\Tests\ResponsesTest::testNoCache
+.
+Klein\Tests\ResponsesTest::testPrepend
+.
+Klein\Tests\ResponsesTest::testProtocolVersionGetSet
+.
+Klein\Tests\ResponsesTest::testRedirect
+.
+Klein\Tests\ResponsesTest::testSend
+.
+Klein\Tests\ResponsesTest::testSendBody
+.
+Klein\Tests\ResponsesTest::testSendCookies
+.
+Klein\Tests\ResponsesTest::testSendHeaders
+.
+Klein\Tests\ResponsesTest::testStatusGetter
+.
+Klein\Tests\RoutesTest::test404
+.
+Klein\Tests\RoutesTest::test404TriggersOnce
+.
+Klein\Tests\RoutesTest::test405DefaultRequest
+.
+Klein\Tests\RoutesTest::test405Routes
+.
+Klein\Tests\RoutesTest::testAppReference
+.
+Klein\Tests\RoutesTest::testBasic
+.
+Klein\Tests\RoutesTest::testCallable
+.
+Klein\Tests\RoutesTest::testCatchallAsterisk
+.
+Klein\Tests\RoutesTest::testCatchallImplicit
+.
+Klein\Tests\RoutesTest::testCatchallImplicitTriggers404
+.
+Klein\Tests\RoutesTest::testControllerActionStyleRouteMatch
+.
+Klein\Tests\RoutesTest::testDeleteAlias
+.
+Klein\Tests\RoutesTest::testDispatchOutput
+.
+Klein\Tests\RoutesTest::testDispatchOutputAppended
+.
+Klein\Tests\RoutesTest::testDispatchOutputCaptured
+.
+Klein\Tests\RoutesTest::testDispatchOutputNotSent
+.
+Klein\Tests\RoutesTest::testDispatchOutputPrepended
+.
+Klein\Tests\RoutesTest::testDispatchOutputReplaced
+.
+Klein\Tests\RoutesTest::testDotSeparator
+.
+Klein\Tests\RoutesTest::testFormatMatch
+.
+Klein\Tests\RoutesTest::testGetAlias
+.
+Klein\Tests\RoutesTest::testHeadDefaultRequest
+.
+Klein\Tests\RoutesTest::testLazyTrailingMatch
+.
+Klein\Tests\RoutesTest::testMethodCatchAll
+.
+Klein\Tests\RoutesTest::testNSDispatch
+.
+Klein\Tests\RoutesTest::testNSDispatchExternal
+.
+Klein\Tests\RoutesTest::testNSDispatchExternalRerequired
+.
+Klein\Tests\RoutesTest::testOptionsDefaultRequest
+.
+Klein\Tests\RoutesTest::testOptionsRoutes
+.
+Klein\Tests\RoutesTest::testParamsAlphaNum
+.
+Klein\Tests\RoutesTest::testParamsBasic
+.
+Klein\Tests\RoutesTest::testParamsHex
+.
+Klein\Tests\RoutesTest::testParamsIntegerFail
+.
+Klein\Tests\RoutesTest::testParamsIntegerSuccess
+.
+Klein\Tests\RoutesTest::testPostAlias
+.
+Klein\Tests\RoutesTest::testPutAlias
+.
+Klein\Tests\RoutesTest::testRegex
+.
+Klein\Tests\RoutesTest::testRegexNegate
+.
+Klein\Tests\RoutesTest::testRespondArgumentOrder
+.
+Klein\Tests\RoutesTest::testRespondReturn
+.
+Klein\Tests\RoutesTest::testTrailingMatch
+.
+Klein\Tests\RoutesTest::testTrailingPossessiveMatch
+.
+Klein\Tests\ServiceProviderTest::testAddValidator
+.
+Klein\Tests\ServiceProviderTest::testBack
+.
+Klein\Tests\ServiceProviderTest::testBinder
+.
+Klein\Tests\ServiceProviderTest::testConstructor
+.
+Klein\Tests\ServiceProviderTest::testEscapeCharacters
+F
+Klein\Tests\ServiceProviderTest::testLayoutGetSet
+.
+Klein\Tests\ServiceProviderTest::testMagicGetSetExistsRemove
+.
+Klein\Tests\ServiceProviderTest::testMarkdownParser
+.
+Klein\Tests\ServiceProviderTest::testPartial
+.
+Klein\Tests\ServiceProviderTest::testRefresh
+.
+Klein\Tests\ServiceProviderTest::testRender
+.
+Klein\Tests\ServiceProviderTest::testSharedDataGetter
+.
+Klein\Tests\ServiceProviderTest::testValidate
+.
+Klein\Tests\ServiceProviderTest::testValidateParam
+.
+Klein\Tests\ValidationsTest::testAlnum
+.
+Klein\Tests\ValidationsTest::testAlpha
+.
+Klein\Tests\ValidationsTest::testChars
+.
+Klein\Tests\ValidationsTest::testContains
+.
+Klein\Tests\ValidationsTest::testCustomValidationMessage
+.
+Klein\Tests\ValidationsTest::testCustomValidator
+.
+Klein\Tests\ValidationsTest::testEmail
+.
+Klein\Tests\ValidationsTest::testFloat
+.
+Klein\Tests\ValidationsTest::testInt
+.
+Klein\Tests\ValidationsTest::testIp
+.
+Klein\Tests\ValidationsTest::testNotRegex
+.
+Klein\Tests\ValidationsTest::testRegex
+.
+Klein\Tests\ValidationsTest::testRemoteIp
+.
+Klein\Tests\ValidationsTest::testStringLengthExact
+.
+Klein\Tests\ValidationsTest::testStringLengthRange
+.
+Klein\Tests\ValidationsTest::testUrl
+.

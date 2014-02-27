@@ -5,9 +5,6 @@ require_once __DIR__.'/SortedIterator.php';
 require_once __DIR__.'/utils.php';
 require_once __DIR__.'/TestFindModes.php';
 
-// For reflection in finding tests
-include_once __DIR__."/vendor/phpunit/phpunit/PHPUnit/Autoload.php";
-
 class TestFinder {
   private Set $test_files;
 
@@ -31,9 +28,26 @@ class TestFinder {
   // faec990edc3e3e8f3b491070b0e8cd90e9df7a4d for the addition of the
   // new ext_reflection-classes.php class.
   public function findTestMethods(): void {
+    // For reflection in finding tests
+    // Since PHPUnit 3.8, Autoload.php has gone away.
+    // And the main source directory 'PHPUnit' was changed to 'src'.
+    // So check for both and do the right thing
+    if (file_exists(__DIR__."/vendor/phpunit/phpunit/src/")) {
+      // For 3.8+
+      include_once __DIR__."/vendor/autoload.php";
+    } else if (file_exists(__DIR__."/vendor/phpunit/phpunit/PHPUnit/")) {
+      // For 3.7 and below
+      include_once __DIR__."/vendor/phpunit/phpunit/PHPUnit/Autoload.php";
+    } else {
+      // Fallback to token based test finding
+      findTestMethodsViaToken();
+      return;
+    }
+
+    include_once $this->bootstrap_file;
+
     $current_classes = get_declared_classes();
     $tests = "";
-    include_once $this->bootstrap_file;
     foreach ($this->test_files as $tf) {
       if (strpos($tf, ".phpt") !== false) {
         $tests .= $tf.PHP_EOL;
@@ -63,11 +77,7 @@ class TestFinder {
   }
 
   public function findTestsPHPT(): void {
-    $test_files = "";
-    foreach ($this->test_files as $test_file) {
-      $test_files .= $test_file.PHP_EOL;
-    }
-    file_put_contents($this->tests_file, $test_files);
+    file_put_contents($this->tests_file, implode(PHP_EOL, $this->test_files));
   }
 
   public function findTestMethodsViaTokens(): void {
@@ -144,7 +154,7 @@ class TestFinder {
     // Some framework phpunit.xml files do not have a <testsuites><testsuite>
     // element, just a single <testsuite> element
     $test_suite = $config_xml->testsuites->testsuite;
-    if ($test_suite->count() === 0) {
+    if ($test_suite === null || $test_suite->count() === 0) {
       $test_suite = $config_xml->testsuite;
     }
     foreach ($test_suite as $suite) {
@@ -159,11 +169,9 @@ class TestFinder {
       foreach($suite->directory as $dir) {
         $search_dirs = null;
         // If config doesn't provide a test suffix, assume the default
-        if ($dir->attributes()->count() === 0) {
-          $pattern = $this->test_file_pattern;
-        } else {
-          $pattern = "/".$dir->attributes()->suffix."/";
-        }
+        $pattern = $dir->attributes()->count() === 0
+          ? $this->test_file_pattern
+          : "/".$dir->attributes()->suffix."/";
         $search_path = $this->test_path."/".$dir;
         // Gotta make sure these dirs don't contain wildcards (Looking at you
         // Symfony)
@@ -247,12 +255,15 @@ function main(array $argv): void {
   // Mediawiki and others are clowntown when it comes to autoloading stuff
   // for reflection. Or I am a clown. Either way, workaround it.
   // May try spl_autoload_register() to workaround some clowniness, if possible.
-  if ($mode === TestFindModes::TOKEN) {
-    $tf->findTestMethodsViaTokens();
-  } else if ($mode === TestFindModes::PHPT) {
-    $tf->findTestsPHPT();
-  } else {
-    $tf->findTestMethods();
+  switch ($mode) {
+    case TestFindModes::TOKEN:
+      $tf->findTestMethodsViaTokens();
+      break;
+    case $mode === TestFindModes::PHPT:
+      $tf->findTestsPHPT();
+      break;
+    default:
+      $tf->findTestMethods();
   }
   exit(0);
 }

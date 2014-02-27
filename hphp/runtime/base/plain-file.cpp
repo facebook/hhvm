@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,7 @@ namespace HPHP {
 // constructor and destructor
 
 PlainFile::PlainFile(FILE *stream, bool nonblocking)
-  : File(nonblocking), m_stream(stream), m_eof(false), m_buffer(nullptr) {
+  : File(nonblocking), m_stream(stream), m_buffer(nullptr) {
   if (stream) {
     m_fd = fileno(stream);
     m_buffer = (char *)malloc(BUFSIZ);
@@ -40,7 +40,7 @@ PlainFile::PlainFile(FILE *stream, bool nonblocking)
 }
 
 PlainFile::PlainFile(int fd, bool nonblocking)
-  : File(nonblocking), m_stream(nullptr), m_eof(false), m_buffer(nullptr) {
+  : File(nonblocking), m_stream(nullptr), m_buffer(nullptr) {
   m_fd = fd;
 }
 
@@ -217,6 +217,11 @@ bool PlainFile::rewind() {
   m_readpos = 0;
   m_position = 0;
   return true;
+}
+
+bool PlainFile::stat(struct stat *sb) {
+  assert(valid());
+  return ::fstat(m_fd, sb) == 0;
 }
 
 bool PlainFile::flush() {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,18 +47,18 @@
 /* Translator front-end. */
 namespace HPHP {
 namespace JIT {
-class HhbcTranslator;
-class IRTranslator;
+struct HhbcTranslator;
+struct IRTranslator;
 }
 namespace Debug {
-class DebugInfo;
+struct DebugInfo;
 }
 namespace JIT {
 
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
-class Translator;
+struct Translator;
 extern Translator* g_translator;
 
 /*
@@ -174,24 +174,23 @@ struct TraceletContext;
 // Return a summary string of the bytecode in a tracelet.
 std::string traceletShape(const Tracelet&);
 
-class TranslationFailedExc : public std::runtime_error {
- public:
+struct TranslationFailedExc : std::runtime_error {
   TranslationFailedExc(const char* file, int line)
     : std::runtime_error(folly::format("TranslationFailedExc @ {}:{}",
                                        file, line).str())
   {}
 };
 
-class UnknownInputExc : public std::runtime_error {
- public:
-  const char* m_file; // must be static
-  const int m_line;
+struct UnknownInputExc : std::runtime_error {
   UnknownInputExc(const char* file, int line)
     : std::runtime_error(folly::format("UnknownInputExc @ {}:{}",
                                        file, line).str())
     , m_file(file)
     , m_line(line)
   {}
+
+  const char* m_file; // must be static
+  const int m_line;
 };
 
 #define punt() do { \
@@ -202,8 +201,7 @@ class UnknownInputExc : public std::runtime_error {
   throw JIT::UnknownInputExc(__FILE__, __LINE__); \
 } while(0);
 
-class GuardType {
- public:
+struct GuardType {
   explicit GuardType(DataType outer = KindOfAny,
                      DataType inner = KindOfNone);
   explicit GuardType(const RuntimeType& rtt);
@@ -560,7 +558,7 @@ enum class ControlFlowInfo {
   BreaksBB
 };
 
-static inline ControlFlowInfo
+inline ControlFlowInfo
 opcodeControlFlowInfo(const Op instr) {
   switch (instr) {
     case Op::Jmp:
@@ -617,7 +615,7 @@ opcodeControlFlowInfo(const Op instr) {
  *   Returns true if the instruction can potentially set PC to point
  *   to something other than the next instruction in the bytecode
  */
-static inline bool
+inline bool
 opcodeChangesPC(const Op instr) {
   return opcodeControlFlowInfo(instr) >= ControlFlowInfo::ChangesPC;
 }
@@ -629,10 +627,19 @@ opcodeChangesPC(const Op instr) {
  *   instructions that change PC will break the tracelet, though some
  *   do not (ex. FCall).
  */
-static inline bool
+inline bool
 opcodeBreaksBB(const Op instr) {
   return opcodeControlFlowInfo(instr) == ControlFlowInfo::BreaksBB;
 }
+
+/*
+ * instrBreaksProfileBB --
+ *
+ * Similar to opcodeBreaksBB but more strict. We break profiling blocks after
+ * any instruction that can side exit, including instructions with predicted
+ * output.
+ */
+bool instrBreaksProfileBB(const NormalizedInstruction* instr);
 
 /*
  * If this returns true, we dont generate guards for any of the inputs
@@ -669,7 +676,7 @@ enum class MetaMode {
   Legacy,
 };
 void readMetaData(Unit::MetaHandle&, NormalizedInstruction&, HhbcTranslator&,
-                  MetaMode m = MetaMode::Normal);
+                  bool profiling, MetaMode m = MetaMode::Normal);
 bool instrMustInterp(const NormalizedInstruction&);
 
 typedef std::function<Type(int)> LocalTypeFn;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -197,8 +197,7 @@ public:
   PrologueCallersRec*     prologueCallers(const Func* func, int nArgs) const;
   int                     prologueArgs(TransID id)    const;
 
-  TransID                 addTransProfile(const Tracelet&       tracelet,
-                                          Offset                initSpOffset,
+  TransID                 addTransProfile(const RegionDescPtr&  region,
                                           const PostConditions& pconds);
   TransID                 addTransNonProf(TransKind kind,
                                           const SrcKey& sk);

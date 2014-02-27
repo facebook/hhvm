@@ -1,0 +1,141 @@
+Test begin
+--- C ---
+int(1)
+int(-1)
+int(0)
+int(0)
+int(1)
+NULL
+NULL
+NULL
+C Object
+(
+    [preInc] => 1
+    [preDec] => -1
+    [postInc] => 1
+    [postDec] => -1
+    [p] => 1
+    [q] => 
+    [r] => 1
+    [s] => 
+)
+--- D ---
+In D::__get(a)
+string(4) "D::b"
+In D::__get(b)
+int(43)
+int(1)
+int(-1)
+int(0)
+int(0)
+In D::__get(l)
+int(1)
+In D::__get(m)
+int(-1)
+In D::__get(n)
+int(0)
+In D::__get(o)
+int(0)
+In D::__get(p)
+int(1)
+In D::__get(q)
+NULL
+In D::__get(r)
+NULL
+In D::__get(s)
+NULL
+D Object
+(
+    [container:D:private] => Array
+        (
+            [a] => D::a
+            [b] => 42
+            [l] => 0
+            [m] => 0
+            [n] => 0
+            [o] => 0
+        )
+
+    [preInc] => 1
+    [preDec] => -1
+    [postInc] => 1
+    [postDec] => -1
+    [a] => D::b
+    [b] => 43
+    [l] => 1
+    [m] => -1
+    [n] => 1
+    [o] => -1
+    [p] => 1
+    [q] => 
+    [r] => 1
+    [s] => 
+)
+--- E ---
+int(1)
+int(-1)
+int(0)
+int(0)
+In E::__get(l)
+In E::__set(l, 1)
+int(1)
+In E::__get(m)
+In E::__set(m, -1)
+int(-1)
+In E::__get(n)
+In E::__set(n, 1)
+int(0)
+In E::__get(o)
+In E::__set(o, -1)
+int(0)
+In E::__get(p)
+In E::__set(p, 1)
+int(1)
+In E::__get(q)
+In E::__set(q, )
+NULL
+In E::__get(r)
+In E::__set(r, 1)
+NULL
+In E::__get(s)
+In E::__set(s, )
+NULL
+E Object
+(
+    [container:E:private] => Array
+        (
+            [a] => E::a
+            [b] => 42
+            [l] => 1
+            [m] => -1
+            [n] => 1
+            [o] => -1
+            [p] => 1
+            [q] => 
+            [r] => 1
+            [s] => 
+        )
+
+    [preInc] => 1
+    [preDec] => -1
+    [postInc] => 1
+    [postDec] => -1
+)
+--- null ---
+HipHop Warning: Creating default object from empty value in %s on line 98
+int(1)
+NULL
+NULL
+NULL
+stdClass Object
+(
+    [preInc] => 1
+    [preDec] => 
+    [postInc] => 1
+    [postDec] => 
+)
+--- 42 ---
+HipHop Warning: Attempt to increment/decrement property of non-object in %s on line 106
+NULL
+42
+Test end

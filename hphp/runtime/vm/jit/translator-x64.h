@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 #include <memory>
 #include <boost/noncopyable.hpp>
 
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/asm-x64.h"
@@ -33,6 +34,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/stats.h"
 
 namespace HPHP { class ExecutionContext; }
 
@@ -40,7 +42,7 @@ namespace HPHP { namespace JIT {
 class HhbcTranslator;
 class IRUnit;
 class CSEHash;
-class TraceBuilder;
+class IRBuilder;
 class CodeGenerator;
 }}
 
@@ -209,6 +211,7 @@ public:
   void setJmpTransID(TCA jmp);
 
   bool profileSrcKey(const SrcKey& sk) const;
+  bool profilePrologue(const SrcKey& sk) const;
 
   TCA getTopTranslation(SrcKey sk) {
     return getSrcRec(sk)->getTopTranslation();
@@ -344,29 +347,22 @@ TCA fcallHelper(ActRec* ar, void* sp);
 TCA funcBodyHelper(ActRec* ar, void* sp);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
-// These could be static but are used in hopt/codegen.cpp
-void raiseUndefVariable(StringData* nm);
-void defFuncHelper(Func *f);
-
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
-                       int propInput,
-                       int objInput);
-
-bool mInstrHasUnknownOffsets(const NormalizedInstruction& i,
-                             Class* contextClass);
+                            int propInput,
+                            int objInput);
 
 struct PropInfo {
   PropInfo()
     : offset(-1)
-    , hphpcType(KindOfInvalid)
+    , repoAuthType{}
   {}
-  explicit PropInfo(int offset, DataType hphpcType)
+  explicit PropInfo(int offset, RepoAuthType repoAuthType)
     : offset(offset)
-    , hphpcType(hphpcType)
+    , repoAuthType{repoAuthType}
   {}
 
   int offset;
-  DataType hphpcType;
+  RepoAuthType repoAuthType;
 };
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
@@ -382,6 +378,14 @@ bool isSupportedCGetM(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Array(const NormalizedInstruction& i);
 void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
+
+// Both emitIncStat()s push/pop flags but don't clobber any registers.
+extern void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,
+                        int n = 1, bool force = false);
+inline void emitIncStat(CodeBlock& cb, Stats::StatCounter stat, int n = 1,
+                        bool force = false) {
+  emitIncStat(cb, &Stats::tl_counters[0], stat, n, force);
+}
 
 }}
 

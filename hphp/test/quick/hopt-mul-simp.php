@@ -41,6 +41,14 @@ function foo10($x) {
   return (3 * $x) * 7;
 }
 
+function foo11($x) {
+  return $x * 8;
+}
+
+function foo12($x) {
+  return $x * (-8);
+}
+
 var_dump(foo1());
 var_dump(foo2(6));
 var_dump(foo3(6,2));
@@ -51,3 +59,5 @@ var_dump(foo7(2,1,5));
 var_dump(foo8(2,1,5));
 var_dump(foo9(2,5));
 var_dump(foo10(2));
+var_dump(foo11(7));
+var_dump(foo12(3));

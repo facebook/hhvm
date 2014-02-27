@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,18 @@
 #include "hphp/runtime/vm/bytecode.h"
 
 namespace HPHP { namespace JIT {
+
+
+/* MInstrState is stored right above the reserved spill space on the C++
+ * stack. */
+#define MISOFF(nm)                                         \
+  (offsetof(MInstrState, nm) + kReservedRSPSpillSpace)
+
+const size_t kReservedRSPMInstrStateSpace = RESERVED_STACK_MINSTR_STATE_SPACE;
+const size_t kReservedRSPSpillSpace       = RESERVED_STACK_SPILL_SPACE;
+const size_t kReservedRSPTotalSpace       = RESERVED_STACK_TOTAL_SPACE;
+
+//////////////////////////////////////////////////////////////////////
 
 struct MInstrState {
   // Room for this structure is allocated on the stack before we
@@ -48,7 +60,7 @@ struct MInstrState {
 static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,
               "MInstrState members require 16-byte alignment for SSE");
 static_assert(sizeof(MInstrState) - sizeof(uintptr_t) // return address
-              < X64::kReservedRSPTotalSpace,
+              < kReservedRSPTotalSpace,
               "MInstrState is too large for the rsp scratch space "
               "in enterTCHelper");
 
@@ -116,12 +128,19 @@ StringData* convCellToStrHelper(TypedValue tv);
 
 void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
-void VerifyParamTypeFail(int param);
-void VerifyParamTypeCallable(TypedValue value, int param);
+void raiseUndefVariable(StringData* nm);
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
-                         int param,
-                         const HPHP::TypeConstraint* expected);
+                         const HPHP::TypeConstraint* expected,
+                         int param);
+void VerifyParamTypeCallable(TypedValue value, int param);
+void VerifyParamTypeFail(int param);
+void VerifyRetTypeSlow(const Class* cls,
+                       const Class* constraint,
+                       const HPHP::TypeConstraint* expected,
+                       const TypedValue value);
+void VerifyRetTypeCallable(TypedValue value);
+void VerifyRetTypeFail(const TypedValue value);
 
 void raise_error_sd(const StringData* sd);
 

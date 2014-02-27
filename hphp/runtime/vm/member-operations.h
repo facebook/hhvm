@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -266,7 +266,7 @@ inline TypedValue* ElemString(TypedValue& tvScratch, TypedValue* base,
     x = cellAsCVarRef(*key).toInt64();
   }
   if (x < 0 || x >= base->m_data.pstr->size()) {
-    if (warn) {
+    if (warn && RuntimeOption::EnableHipHopSyntax) {
       raise_warning("Out of bounds");
     }
     static StringData* sd = makeStaticString("");
@@ -283,13 +283,22 @@ inline TypedValue* ElemString(TypedValue& tvScratch, TypedValue* base,
 /**
  * Elem when base is an Object
  */
-template <KeyType keyType>
+template <bool warn, KeyType keyType>
 inline TypedValue* ElemObject(TypedValue& tvRef, TypedValue* base,
                               TypedValue* key) {
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
   if (LIKELY(base->m_data.pobj->isCollection())) {
-    return collectionGet(base->m_data.pobj, key);
+    if (warn) {
+      return collectionAt(base->m_data.pobj, key);
+    } else {
+      auto* res = collectionGet(base->m_data.pobj, key);
+      if (!res) {
+        res = &tvRef;
+        tvWriteNull(res);
+      }
+      return res;
+    }
   }
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
 }
@@ -317,7 +326,7 @@ NEVER_INLINE TypedValue* ElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfArray:
     return ElemArray<warn, keyType>(base->m_data.parr, key);
   case KindOfObject:
-    return ElemObject<keyType>(tvRef, base, key);
+    return ElemObject<warn, keyType>(tvRef, base, key);
   default:
     assert(false);
     return nullptr;
@@ -374,14 +383,14 @@ template <bool warn, KeyType keyType>
 inline TypedValue* ElemDEmptyish(TypedValue* base, TypedValue* key) {
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
-  Array a = Array::Create();
-  TypedValue* result = const_cast<TypedValue*>(a.lvalAt(cellAsCVarRef(*key))
-                                               .asTypedValue());
+  tvAsVariant(base) = Array::Create();
+  auto const result = const_cast<TypedValue*>(
+    tvAsVariant(base).asArrRef().lvalAt(cellAsCVarRef(*key)).asTypedValue()
+  );
   if (warn) {
     raise_notice(Strings::UNDEFINED_INDEX,
                  tvAsCVarRef(key).toString().data());
   }
-  tvAsVariant(base) = a;
   return result;
 }
 
@@ -434,8 +443,8 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
       raise_error("Collection elements cannot be taken by reference");
       return nullptr;
     }
-    return collectionGet(obj, key);
-  } else if (obj->getVMClass() == SystemLib::s_ArrayObjectClass) {
+    return collectionAt(obj, key);
+  } else if (obj->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
     auto storage = obj->o_realProp(s_storage, 0,
                                    SystemLib::s_ArrayObjectClass->nameRef());
     // ArrayObject should have the 'storage' property...
@@ -509,7 +518,7 @@ inline TypedValue* ElemUObject(TypedValue& tvRef, TypedValue* base,
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
   if (LIKELY(base->m_data.pobj->isCollection())) {
-    return collectionGet(base->m_data.pobj, key);
+    return collectionAt(base->m_data.pobj, key);
   }
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
 }
@@ -640,9 +649,8 @@ inline void SetElemEmptyish(TypedValue* base, TypedValue* key,
                             Cell* value) {
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
-  Array a = Array::Create();
-  a.set(tvAsCVarRef(key), tvAsCVarRef(value));
-  tvAsVariant(base) = a;
+  tvAsVariant(base) = Array::Create();
+  tvAsVariant(base).asArrRef().set(tvAsCVarRef(key), tvAsCVarRef(value));
 }
 
 /**
@@ -1121,7 +1129,7 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfObject: {
     initScratchKey<keyType>(scratch, key);
     if (LIKELY(base->m_data.pobj->isCollection())) {
-      result = collectionGet(base->m_data.pobj, key);
+      result = collectionAt(base->m_data.pobj, key);
       SETOP_BODY(result, op, rhs);
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
@@ -1357,7 +1365,7 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     TypedValue* result;
     initScratchKey<keyType>(scratch, key);
     if (LIKELY(base->m_data.pobj->isCollection())) {
-      result = collectionGet(base->m_data.pobj, key);
+      result = collectionAt(base->m_data.pobj, key);
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
     }

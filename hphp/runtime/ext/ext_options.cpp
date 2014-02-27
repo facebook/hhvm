@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-local.h"
@@ -36,8 +37,6 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
-
-#include "hphp/runtime/vm/request-arena.h"
 
 #define ZEND_VERSION "2.4.99"
 
@@ -233,8 +232,8 @@ String f_set_include_path(const String& new_include_path) {
 Array f_get_included_files() {
   Array included_files = Array::Create();
   int idx = 0;
-  for (auto& ent : g_vmContext->m_evaledFiles) {
-    included_files.set(idx++, ent.first);
+  for (auto& file: g_vmContext->m_evaledFilesOrder) {
+    included_files.set(idx++, file->getFileName());
   }
   return included_files;
 }
@@ -260,16 +259,20 @@ Variant f_getenv(const String& varname) {
   return false;
 }
 
-int64_t f_getlastmod() {
-  throw NotSupportedException(__func__, "page modified time not supported");
+Variant f_getlastmod() {
+  struct stat s;
+  int ret = ::stat(g_context->getContainingFileName().c_str(), &s);
+  return ret == 0 ? s.st_mtime : false;
 }
 
 int64_t f_getmygid() {
   return getgid();
 }
 
-int64_t f_getmyinode() {
-  throw NotSupportedException(__func__, "not exposing operating system info");
+Variant f_getmyinode() {
+  struct stat s;
+  int ret = ::stat(g_context->getContainingFileName().c_str(), &s);
+  return ret == 0 ? s.st_ino : false;
 }
 
 int64_t f_getmypid() {
@@ -728,20 +731,22 @@ String f_ini_get(const String& varname) {
   return value;
 }
 
+Array f_ini_get_all(const String& extension, bool detailed) {
+  return IniSetting::GetAll(extension, detailed);
+}
+
 void f_ini_restore(const String& varname) {
 }
 
 String f_ini_set(const String& varname, const String& newvalue) {
   String oldvalue = f_ini_get(varname);
-  IniSetting::Set(varname, newvalue);
+  IniSetting::SetUser(varname, newvalue);
   return oldvalue;
 }
 
 int64_t f_memory_get_allocation() {
   auto const& stats = MM().getStats();
   int64_t ret = stats.totalAlloc;
-  ret -= request_arena().slackEstimate() +
-         varenv_arena().slackEstimate();
   return ret;
 }
 
@@ -753,11 +758,8 @@ int64_t f_memory_get_peak_usage(bool real_usage /* = false */) {
 int64_t f_memory_get_usage(bool real_usage /* = false */) {
   auto const& stats = MM().getStats();
   int64_t ret = real_usage ? stats.usage : stats.alloc;
-  ret -= request_arena().slackEstimate() +
-         varenv_arena().slackEstimate();
   // TODO(#3137377)
-  ret = std::max(ret, (int64_t) 0);
-  return ret;
+  return std::max<int64_t>(ret, 0);
 }
 
 Variant f_php_ini_loaded_file() {

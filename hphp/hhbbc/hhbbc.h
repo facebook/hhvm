@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,6 +46,12 @@ struct Options {
   //////////////////////////////////////////////////////////////////////
 
   /*
+   * If true, all optimizations are disabled, and analysis isn't even
+   * performed.
+   */
+  bool NoOptimizations = false;
+
+  /*
    * If true, completely remove jumps to blocks that are inferred to
    * be dead.  When false, dead blocks are replaced with Fatal
    * bytecodes.
@@ -58,6 +64,17 @@ struct Options {
    * that produce that constant.
    */
   bool ConstantProp = true;
+
+  /*
+   * Whether to perform local or global dead code elimination.  This
+   * removes unnecessary instructions within a single block, or across
+   * blocks, respectively.
+   *
+   * Note: this is off for now because it is a bit of a work in
+   * progress (needs more testing).
+   */
+  bool LocalDCE = false;
+  bool GlobalDCE = false;
 
   /*
    * If true, insert opcodes that assert inferred types, so we can
@@ -79,7 +96,15 @@ struct Options {
    * Whether to replace bytecode with less expensive bytecodes when we
    * can.  E.g. InstanceOf -> InstanceOfD or FPushFunc -> FPushFuncD.
    */
-  bool StrengthReduceBC = true;
+  bool StrengthReduce = true;
+
+  /*
+   * Whether to enable 'FuncFamily' method resolution.
+   *
+   * This allows possible overrides of a method to be resolved as a
+   * set of candidates when we aren't sure which one it would be.
+   */
+  bool FuncFamilies = true;
 
   //////////////////////////////////////////////////////////////////////
   // Flags below this line perform optimizations that intentionally
@@ -119,7 +144,7 @@ struct Options {
    * potentially segfaulting at runtime.  We want to change this to
    * fatal at unserialize time.  TODO(#2516227).
    */
-  bool HardPrivatePropInference = false;
+  bool HardPrivatePropInference = true;
 };
 extern Options options;
 
@@ -141,6 +166,13 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>>);
  * Perform single-unit optimizations.
  */
 std::unique_ptr<UnitEmitter> single_unit(std::unique_ptr<UnitEmitter>);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Main entry point when the program should behave like hhbbc.
+ */
+int main(int argc, char** argv);
 
 //////////////////////////////////////////////////////////////////////
 

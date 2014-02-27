@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,6 +78,8 @@ inline bool operator<(Context a, Context b) {
          std::make_tuple(b.unit, b.func, b.cls);
 }
 
+std::string show(Context);
+
 /*
  * State of properties on a class.  Map from property name to its
  * Type.
@@ -88,6 +90,7 @@ using PropState = std::map<SString,Type>;
 
 // private types
 struct IndexData;
+struct FuncFamily;
 struct FuncInfo;
 struct ClassInfo;
 
@@ -119,16 +122,19 @@ struct Class {
   bool same(const Class&) const;
 
   /*
-   * Returns true if this class is definitely going to be a subclass
+   * Returns true if this class is definitely going to be a subtype
    * of `o' at runtime.  If this function returns false, this may
    * still be a subtype of `o' at runtime, it just may not be known.
+   * A typical example is with "non unique" classes.
    */
   bool subtypeOf(const Class& o) const;
 
   /*
-   * Returns true if this class could be a subclass of `o' at runtime.
    * If this function return false, it is known that this class
-   * definitely is not a subclass of `o'.
+   * is in no subtype relationship with the argument Class 'o'.
+   * Returns true if this class could be a subtype of `o' at runtime.
+   * When true is returned the two classes may still be unrelated but it is
+   * not possible to tell. A typical example is with "non unique" classes.
    */
   bool couldBe(const Class& o) const;
 
@@ -136,6 +142,21 @@ struct Class {
    * Returns the name of this class.  Non-null guarantee.
    */
   SString name() const;
+
+  /*
+   * Returns whether this type has the no override attribute, that is, if it
+   * is a final class (explicitly marked by the user or known by the static
+   * analysis).
+   * When returning false the class is guaranteed to be final. When returning
+   * true the system cannot tell though the class may still be final.
+   */
+  bool couldBeOverriden() const;
+
+  /*
+   * Returns the Class that is the first common ancestor between 'this' and 'o'.
+   * If there is no common ancestor folly::none is returned
+   */
+  folly::Optional<Class> commonAncestor(const Class& o) const;
 
 private:
   Class(borrowed_ptr<const Index>, SStringOr<ClassInfo>);
@@ -148,16 +169,22 @@ private:
 };
 
 /*
- * Reference to a function in the program.  We may only know the name
- * of the function, or we may have a bunch of information about it.
+ * This is an abstraction layer to represent possible runtime function
+ * resolutions.
+ *
+ * Internally, this may only know the name of the function, or we may
+ * know exactly which source-code-level function it refers to, or we
+ * may only have ruled it down to one of a few functions in a class
+ * hierarchy.  The interpreter can treat all these cases the same way
+ * using this.
  */
 struct Func {
   /*
    * Returns whether two res::Funcs definitely mean the func at
    * runtime.
    *
-   * Explain how a res::Func can represent an unknown func but just
-   * the name.
+   * Note: this is potentially pessimistic for its use in ActRec state
+   * merging right now, but not incorrect.
    */
   bool same(const Func&) const;
 
@@ -167,13 +194,19 @@ struct Func {
   SString name() const;
 
 private:
-  Func(borrowed_ptr<const Index>, SStringOr<FuncInfo>);
+  friend struct ::HPHP::HHBBC::Index;
+  using Rep = boost::variant< SString
+                            , borrowed_ptr<FuncInfo>
+                            , borrowed_ptr<FuncFamily>
+                            >;
 
 private:
+  Func(borrowed_ptr<const Index>, Rep);
   friend std::string show(const Func&);
-  friend struct ::HPHP::HHBBC::Index;
+
+private:
   borrowed_ptr<const Index> index;
-  SStringOr<FuncInfo> val;
+  Rep val;
 };
 
 /*
@@ -219,6 +252,13 @@ struct Index {
   ~Index();
 
   /*
+   * Find all the closures created inside the context of a given
+   * php::Class.
+   */
+  std::vector<borrowed_ptr<php::Class>>
+    lookup_closures(borrowed_ptr<const php::Class>) const;
+
+  /*
    * Try to resolve which class will be the class named `name' from a
    * given context, if we can resolve it to a single class.
    *
@@ -230,6 +270,13 @@ struct Index {
    * object type.  (E.g. if there are type aliases.)
    */
   folly::Optional<res::Class> resolve_class(Context, SString name) const;
+
+  /*
+   * Return a resolved class for a builtin class.
+   *
+   * Pre: `name' must be the name of a class defined in a systemlib.
+   */
+  res::Class builtin_class(SString name) const;
 
   /*
    * Try to resolve a function named `name' from a given context.
@@ -279,10 +326,26 @@ struct Index {
   Type lookup_class_constant(Context, res::Class, SString cns) const;
 
   /*
-   * Return the best known return type for a particular function.
+   * Return the best known return type for a resolved function.
    * Returns TInitGen at worst.
    */
   Type lookup_return_type(Context, res::Func) const;
+
+  /*
+   * Look up the return type for an unresolved function.  The
+   * interpreter should not use this routine---it's for stats or debug
+   * dumps.
+   *
+   * Nothing may be writing to the index when this function is used,
+   * but concurrent readers are allowed.
+   */
+  Type lookup_return_type_raw(borrowed_ptr<const php::Func>) const;
+
+  /*
+   * Return the availability of $this on entry to the provided method.
+   * If the Func provided is not a method of a class false is returned.
+   */
+  bool lookup_this_available(borrowed_ptr<const php::Func>) const;
 
   /*
    * Returns the parameter preparation kind (if known) for parameter
@@ -291,15 +354,25 @@ struct Index {
   PrepKind lookup_param_prep(Context, res::Func, uint32_t paramId) const;
 
   /*
-   * Returns the control-flow insensitive inferred private property
-   * types for a Class.  The Class doesn't need to be fully resolved,
-   * because private properties don't depend on the inheritance
-   * hierarchy.
+   * Returns the control-flow insensitive inferred private instance
+   * property types for a Class.  The Class doesn't need to be
+   * resolved, because private properties don't depend on the
+   * inheritance hierarchy.
    *
    * The Index tracks the largest types for private properties that
    * are guaranteed to hold at any program point.
    */
   PropState lookup_private_props(borrowed_ptr<const php::Class>) const;
+
+  /*
+   * Returns the control-flow insensitive inferred private static
+   * property types for a Class.  The class doesn't need to be
+   * resolved for the same reasons as for instance properties.
+   *
+   * The Index tracks the largest types for private static properties
+   * that are guaranteed to hold at any program point.
+   */
+  PropState lookup_private_statics(borrowed_ptr<const php::Class>) const;
 
   /*
    * Refine the return type for a function, based on a round of
@@ -322,6 +395,16 @@ struct Index {
    */
   void refine_private_props(borrowed_ptr<const php::Class> cls,
                             const PropState&);
+
+  /*
+   * Refine the static private property types for a class, based on a
+   * round of analysis.
+   *
+   * No other threads should be calling functions on this Index when
+   * this function is called.
+   */
+  void refine_private_statics(borrowed_ptr<const php::Class> cls,
+                              const PropState&);
 
 private:
   Index(const Index&) = delete;

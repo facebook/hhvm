@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,11 +21,11 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/id-set.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -154,7 +154,8 @@ bool checkBlock(Block* b) {
  */
 bool checkCfg(const IRUnit& unit) {
   // Check valid successor/predecessor edges.
-  auto const blocks = rpoSortCfg(unit);
+  auto const blocksIds = rpoSortCfgWithIds(unit);
+  auto const& blocks = blocksIds.blocks;
   std::unordered_set<const Edge*> edges;
   for (Block* b : blocks) {
     auto checkEdge = [&] (const Edge* e) {
@@ -175,7 +176,7 @@ bool checkCfg(const IRUnit& unit) {
   }
 
   // visit dom tree in preorder, checking all tmps
-  auto const children = findDomChildren(unit, blocks);
+  auto const children = findDomChildren(unit, blocksIds);
   StateVector<SSATmp, bool> defined0(unit, false);
   forPreorderDoms(blocks.front(), children, defined0,
                   [] (Block* block, StateVector<SSATmp, bool>& defined) {
@@ -275,19 +276,21 @@ bool checkShuffle(const IRInstruction& inst, const RegAllocInfo& regs) {
   assert(n == inst.extra<Shuffle>()->size);
   RegSet destRegs;
   std::bitset<NumPreAllocatedSpillLocs> destSlots;
-  std::bitset<NumPreAllocatedSpillLocs> srcSlots;
+  auto& inst_regs = regs[inst];
   for (uint32_t i = 0; i < n; ++i) {
-    DEBUG_ONLY auto& rs = regs[inst][inst.src(i)];
+    DEBUG_ONLY auto& rs = inst_regs.src(i);
     DEBUG_ONLY auto& rd = inst.extra<Shuffle>()->dests[i];
     if (rd.numAllocated() == 0) continue; // dest was unused; ignore.
-    // rs could have less assigned registers/slots than rd, in these cases:
-    // - when rs is empty, because the source is a constant.
-    // - when rd needs 2 and rs needs 0 or 1, and the source is either constant
-    //   or hasKnownType() without being constant, and the dest type is more
-    //   general than the src type due to a control-flow join.
-    assert(rs.numAllocated() <= rd.numAllocated());
-    assert(!rs.spilled() || !rd.spilled());
-    assert(rs.isFullSIMD() == rd.isFullSIMD());
+    if (rd.spilled()) {
+      assert(!rs.spilled()); // no mem-mem copies
+    } else {
+      // rs could have less assigned registers/slots than rd, in these cases:
+      // - when rs is empty, because the source is a constant.
+      // - when rs has 1 register because it's untagged but rd needs 2 because
+      //   it's a more general (tagged) type, because of a phi.
+      assert(rs.numWords() <= rd.numWords());
+      assert(rs.spilled() || rs.isFullSIMD() == rd.isFullSIMD());
+    }
     for (int j = 0; j < rd.numAllocated(); ++j) {
       if (rd.spilled()) {
         assert(!destSlots.test(rd.slot(j)));
@@ -297,8 +300,6 @@ bool checkShuffle(const IRInstruction& inst, const RegAllocInfo& regs) {
         destRegs.add(rd.reg(j));
       }
     }
-    // don't let any spill slot appear on both sides of the copy.
-    assert((srcSlots & destSlots).none());
   }
   return true;
 }
@@ -312,8 +313,9 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
     RegState state = states[block];
     for (IRInstruction& inst : *block) {
       if (inst.op() == Jmp) continue; // handled by Shuffle
-      for (SSATmp* src : inst.srcs()) {
-        auto const &rs = regs[inst][src];
+      auto& inst_regs = regs[inst];
+      for (int i = 0, n = inst.numSrcs(); i < n; ++i) {
+        auto const &rs = inst_regs.src(i);
         if (!rs.spilled() &&
             ((arch() == Arch::X64 && (rs.reg(0) == X64::rVmSp ||
                                       rs.reg(0) == X64::rVmFp)) ||
@@ -322,6 +324,7 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
           // hack - ignore rbx and rbp
           continue;
         }
+        DEBUG_ONLY auto src = inst.src(i);
         assert(rs.numWords() == src->numWords() ||
                (src->inst()->op() == DefConst && rs.numWords() == 0));
         DEBUG_ONLY auto allocated = rs.numAllocated();
@@ -343,12 +346,12 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
       };
       if (inst.op() == Shuffle) {
         checkShuffle(inst, regs);
-        for (uint32_t i = 0; i < inst.numSrcs(); ++i) {
+        for (unsigned i = 0; i < inst.numSrcs(); ++i) {
           update(inst.src(i), inst.extra<Shuffle>()->dests[i]);
         }
       } else {
-        for (auto& d : inst.dsts()) {
-          update(&d, regs[inst][d]);
+        for (unsigned i = 0; i < inst.numDsts(); ++i) {
+          update(inst.dst(i), inst_regs.dst(i));
         }
       }
     }

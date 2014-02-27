@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,15 +77,15 @@ private:
     };
     Type type;
     std::string pattern;
-    bool negate;
+    bool negate = false;
   };
 
   struct RewriteRule {
     std::string pattern;
     std::string to;
-    bool qsa;      // whether to append original query string
-    bool encode_backrefs;
-    int redirect;  // redirect status code (301 or 302) or 0 for no redirect
+    bool qsa = false; // whether to append original query string
+    bool encode_backrefs = false;
+    int redirect = 0;  // redirect status code (301 or 302) or 0 for no redirect
     std::vector<RewriteCond> rewriteConds;
   };
 
@@ -97,15 +97,15 @@ private:
 
   struct VhostRuntimeOption {
   public:
-    int requestTimeoutSeconds;
-    int64_t maxPostSize;
-    int64_t uploadMaxFileSize;
+    int requestTimeoutSeconds = -1;
+    int64_t maxPostSize = -1;
+    int64_t uploadMaxFileSize = -1;
     std::vector<std::string> allowedDirectories;
   };
 
   void initRuntimeOption(Hdf overwrite);
-  bool m_disabled;
-  bool m_checkExistenceBeforeRewrite;
+  bool m_disabled = false;
+  bool m_checkExistenceBeforeRewrite = true;
   std::string m_name;
   std::string m_prefix;
   std::string m_pattern;

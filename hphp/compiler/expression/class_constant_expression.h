@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,6 +46,7 @@ public:
   bool isValid() const { return m_valid; }
   bool isDynamic() const;
   bool hasClass() const { return m_defScope != 0; }
+  bool isColonColonClass() const { return m_varName == "class"; }
 private:
   std::string m_varName;
   BlockScope *m_defScope;

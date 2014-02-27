@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -358,18 +358,29 @@ struct Func {
   UserAttributeMap userAttributes;
 
   /*
-   * This is the name of "inner" function for a generator.  When compiling
-   * a generator, we generate two funtions.  The "outer" one stores (with
-   * this field set) allocates the continuation object and returns it.  The
-   * "inner" one named here will have isGeneratorBody set.
+   * These pointers link "inner" functions for a generator to their
+   * associated outer function.
+   *
+   * When compiling a generator, hhbc makes use of two functions.  The
+   * "outer" one allocates the continuation object and returns it.
+   * The "inner" one contains the body of the function, and will
+   * always have isGeneratorBody set.
    */
-  SString generatorBodyName;
+  borrowed_ptr<php::Func> innerGeneratorFunc;
+  borrowed_ptr<php::Func> outerGeneratorFunc;
 
   /*
    * User-visible return type specification as a string.  This is only
    * passed through to expose it to reflection.
    */
   SString returnUserType;
+
+  /*
+   * Return type specified in the source code (ex. "function foo(): Bar").
+   * HHVM checks if the a function's return value matches it's return type
+   * constraint via the VerifyRetType* instructions.
+   */
+  TypeConstraint retTypeConstraint;
 
   /*
    * If traits are being flattened by hphpc, we keep the original
@@ -417,6 +428,14 @@ struct Prop {
  */
 struct Const {
   SString name;
+
+  // The class that defined this constant.
+  borrowed_ptr<php::Class> cls;
+
+  /*
+   * The value will be KindOfUninit if the class constant is defined
+   * using an 86cinit method.
+   */
   Cell val;
 
   /*
@@ -450,15 +469,15 @@ struct Class {
   PreClass::Hoistable hoistability;
 
   /*
-   * The function that contains the DefCls for this class, or nullptr
-   * in the case of classes that do not have a DefCls (e.g. closure
-   * classes).
+   * If this class represents a closure, this points to the class that
+   * lexically contains the closure, if there was one.  If this class
+   * doesn't represent a closure, this will be nullptr.
    *
-   * The plan was to use this information in part to compute
-   * hoistability at emit time, but it's unused right now.  (Using
-   * hphpc's hoistability notions.)
+   * The significance of this is that closures created lexically
+   * inside of a class run as if they were part of that class context
+   * (with regard to access checks, etc).
    */
-  // borrowed_ptr<php::Func> definingFunc;
+  borrowed_ptr<php::Class> closureContextCls;
 
   /*
    * Name of the parent class.

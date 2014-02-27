@@ -26,7 +26,7 @@ callback(b, 2)
 callback(c, 3)
 callback(d, 4)
 ========
-Map[
+HH\Map[
 a => 101
 b => 102
 c => 103
@@ -38,7 +38,7 @@ callback(b, 2)
 callback(c, 3)
 callback(d, 4)
 ========
-Map[
+HH\Map[
 a => 1
 c => 3
 ]
@@ -49,7 +49,7 @@ callback(c, 3)
 callback(d, 4)
 ========
 bool(true)
-Map[
+HH\Map[
 a => 1
 c => 3
 ]
@@ -59,7 +59,7 @@ callback(b, 2)
 callback(c, 3)
 callback(d, 4)
 ========
-StableMap[
+HH\Map[
 a => 101
 b => 102
 c => 103
@@ -71,7 +71,7 @@ callback(b, 2)
 callback(c, 3)
 callback(d, 4)
 ========
-StableMap[
+HH\Map[
 a => 1
 c => 3
 ]
@@ -82,7 +82,7 @@ callback(c, 3)
 callback(d, 4)
 ========
 bool(true)
-StableMap[
+HH\Map[
 a => 1
 c => 3
 ]

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -285,10 +285,13 @@ public:
   void printValue(std::string value);
   void printModifierVector(std::string value);
   void printTypeExpression(std::string value);
+  void printTypeExpression(ExpressionPtr expression);
   void printExpression(ExpressionPtr expression, bool isRef);
   void printExpressionVector(ExpressionListPtr el);
+  void printTypeExpressionVector(ExpressionListPtr el);
   void printExpressionVector(ExpressionPtr e);
-  void printAsBlock(StatementPtr s);
+  void printAsBlock(StatementPtr s, bool isEnclosed = false);
+  void printAsEnclosedBlock(StatementPtr s) { printAsBlock(s, true); }
   void printStatementVector(StatementListPtr sl);
   void printStatementVector(StatementPtr s);
   void printLocation(LocationPtr location);

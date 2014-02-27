@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -93,11 +93,9 @@ void DoStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void DoStatement::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("DoStatement", m_stmt != nullptr ? 3 : 2);
-  if (m_stmt != nullptr) {
-    cg.printPropertyHeader("block");
-    cg.printAsBlock(m_stmt);
-  }
+  cg.printObjectHeader("DoStatement", 3);
+  cg.printPropertyHeader("block");
+  cg.printAsBlock(m_stmt);
   cg.printPropertyHeader("condition");
   m_condition->outputCodeModel(cg);
   cg.printPropertyHeader("sourceLocation");

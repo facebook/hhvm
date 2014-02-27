@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/vtune-jit.h"
 
 #include "folly/MapUtil.h"
 
@@ -46,7 +47,6 @@
 #endif
 
 #include <boost/bind.hpp>
-#include <boost/optional.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -85,6 +85,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/runtime-option-guard.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -218,6 +219,19 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
   return true;
 }
 
+bool TranslatorX64::profilePrologue(const SrcKey& sk) const {
+  if (!sk.func()->shouldPGO()) return false;
+
+  if (profData()->optimized(sk.getFuncId())) return false;
+
+  // Proflogues don't trigger retranslation, so only emit them if
+  // we've already generated a retranslation-triggering translation
+  // for its function or if we're about to generate one (which
+  // requires depends on requestCount(), see profileSrcKey()).
+  return profData()->profiling(sk.getFuncId()) ||
+         requestCount() <= RuntimeOption::EvalJitProfileRequests;
+}
+
 /*
  * Invalidate the SrcDB entries for func's SrcKeys that have any
  * Profile translation.
@@ -254,9 +268,10 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
     return sr->getTopTranslation();
   }
   SKTRACE(1, args.m_sk, "retranslate\n");
-  if (m_mode == TransInvalid) {
-    m_mode = profileSrcKey(args.m_sk) ? TransProfile : TransLive;
-  }
+
+  m_mode = profileSrcKey(args.m_sk) ? TransProfile : TransLive;
+  SCOPE_EXIT{ m_mode = TransInvalid; };
+
   return translate(args);
 }
 
@@ -436,8 +451,13 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
   size_t stubsize = code.stubs().frontier() - stubstart;
   assert(asize == 0);
   if (stubsize && RuntimeOption::EvalDumpTCAnchors) {
-    addTranslation(TransRec(sk, sk.unit()->md5(), TransAnchor,
-                            astart, asize, stubstart, stubsize));
+    TransRec tr(sk, sk.unit()->md5(), TransAnchor,
+                astart, asize, stubstart, stubsize);
+    addTranslation(tr);
+    if (RuntimeOption::EvalJitUseVtuneAPI) {
+      reportTraceletToVtune(sk.unit(), sk.func(), tr);
+    }
+
     if (m_profData) {
       m_profData->addTransNonProf(TransAnchor, sk);
     }
@@ -647,7 +667,7 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   // We're comming from a BIND_CALL service request, so enable
   // profiling if we haven't optimized the function entry yet.
   assert(m_mode == TransInvalid || m_mode == TransPrologue);
-  if (m_mode == TransInvalid && profileSrcKey(funcBody)) {
+  if (m_mode == TransInvalid && profilePrologue(funcBody)) {
     m_mode = TransProflogue;
   } else {
     m_mode = TransPrologue;
@@ -691,9 +711,13 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   func->setPrologue(paramIndex, start);
 
   assert(m_mode == TransPrologue || m_mode == TransProflogue);
-  addTranslation(TransRec(skFuncBody, func->unit()->md5(),
-                          m_mode, aStart, code.main().frontier() - aStart,
-                          stubStart, code.stubs().frontier() - stubStart));
+  TransRec tr(skFuncBody, func->unit()->md5(),
+              m_mode, aStart, code.main().frontier() - aStart,
+              stubStart, code.stubs().frontier() - stubStart);
+  addTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(func->unit(), func, tr);
+  }
 
   if (m_profData) {
     m_profData->addTransPrologue(m_mode, skFuncBody, paramIndex);
@@ -752,8 +776,8 @@ TCA TranslatorX64::regeneratePrologue(TransID prologueTransId,
       TransID funcletTransId = m_profData->dvFuncletTransId(func, nArgs);
       if (funcletTransId != InvalidID) {
         invalidateSrcKey(funcletSK);
-        TCA dvStart = retranslate(TranslArgs(funcletSK, false).
-                                  transId(funcletTransId));
+        TCA dvStart = translate(TranslArgs(funcletSK, false).
+                                transId(funcletTransId));
         if (dvStart && !triggerSkStart && funcletSK == triggerSk) {
           triggerSkStart = dvStart;
         }
@@ -764,7 +788,7 @@ TCA TranslatorX64::regeneratePrologue(TransID prologueTransId,
     }
   }
 
-  return triggerSkStart;;
+  return triggerSkStart;
 }
 
 /**
@@ -786,8 +810,6 @@ TCA TranslatorX64::regeneratePrologues(Func* func, SrcKey triggerSk) {
 
   for (int nArgs = 0; nArgs <= func->numParams() + 1; nArgs++) {
     TransID tid = profData()->prologueTransId(func, nArgs);
-    assert(IMPLIES(func->getPrologue(nArgs) != uniqueStubs.fcallHelperThunk,
-                   tid != InvalidID));
     if (tid != InvalidID) {
       prologTransIDs.push_back(tid);
     }
@@ -1019,7 +1041,7 @@ class FreeRequestStubTrigger : public Treadmill::WorkItem {
     if (tx64->freeRequestStub(m_stub) != true) {
       // If we can't free the stub, enqueue again to retry.
       TRACE(3, "FreeStubTrigger: write lease failed, requeueing %p\n", m_stub);
-      enqueue(new FreeRequestStubTrigger(m_stub));
+      enqueue(std::unique_ptr<WorkItem>(new FreeRequestStubTrigger(m_stub)));
     }
   }
 };
@@ -1144,6 +1166,10 @@ TranslatorX64::enterTC(TCA start, void* data) {
     }
 
     if (RuntimeOption::EvalSimulateARM) {
+      // This is a pseudo-copy of the logic in enterTCHelper: it sets up the
+      // simulator's registers and stack, runs the translation, and gets the
+      // necessary information out of the registers when it's done.
+
       vixl::PrintDisassembler disasm(std::cout);
       vixl::Decoder decoder;
       if (getenv("ARM_DISASM")) {
@@ -1163,15 +1189,39 @@ TranslatorX64::enterTC(TCA start, void* data) {
       g_vmContext->m_activeSims.push_back(&sim);
       SCOPE_EXIT { g_vmContext->m_activeSims.pop_back(); };
 
-      sim.   set_xreg(JIT::ARM::rGContextReg.code(), g_vmContext);
-      sim.   set_xreg(JIT::ARM::rVmFp.code(), vmfp());
-      sim.   set_xreg(JIT::ARM::rVmSp.code(), vmsp());
-      sim.   set_xreg(JIT::ARM::rVmTl.code(), RDS::tl_base);
-      sim.   set_xreg(JIT::ARM::rStashedAR.code(), info.saved_rStashedAr);
+      sim.   set_xreg(ARM::rGContextReg.code(), g_vmContext);
+      sim.   set_xreg(ARM::rVmFp.code(), vmfp());
+      sim.   set_xreg(ARM::rVmSp.code(), vmsp());
+      sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
+      sim.   set_xreg(ARM::rStashedAR.code(), info.saved_rStashedAr);
+
+      // Leave space for register spilling and MInstrState.
+      sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
+      assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
+
+      DEBUG_ONLY auto spOnEntry = sim.sp();
+
+      // Push the link register onto the stack. The link register is technically
+      // caller-saved; what this means in practice is that non-leaf functions
+      // push it at the very beginning and pop it just before returning (as
+      // opposed to just saving it around calls).
+      sim.   set_sp(sim.sp() - 16);
+      *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
+
+      // The handshake is different in the case of REQ_BIND_CALL. The code we're
+      // jumping to expects to find a return address in x30, and a saved return
+      // address on the stack.
+      if (info.requestNum == REQ_BIND_CALL) {
+        // Put the call's return address in the link register.
+        auto* ar = reinterpret_cast<ActRec*>(info.saved_rStashedAr);
+        sim.set_lr(ar->m_savedRip);
+      }
 
       std::cout.flush();
       sim.RunFrom(vixl::Instruction::Cast(start));
       std::cout.flush();
+
+      assert(sim.sp() == spOnEntry);
 
       info.requestNum = sim.xreg(0);
       info.args[0] = sim.xreg(1);
@@ -1179,9 +1229,9 @@ TranslatorX64::enterTC(TCA start, void* data) {
       info.args[2] = sim.xreg(3);
       info.args[3] = sim.xreg(4);
       info.args[4] = sim.xreg(5);
-      info.saved_rStashedAr = sim.xreg(JIT::ARM::rStashedAR.code());
+      info.saved_rStashedAr = sim.xreg(ARM::rStashedAR.code());
 
-      info.stubAddr = reinterpret_cast<TCA>(sim.xreg(JIT::ARM::rAsm.code()));
+      info.stubAddr = reinterpret_cast<TCA>(sim.xreg(ARM::rAsm.code()));
     } else {
       // We have to force C++ to spill anything that might be in a callee-saved
       // register (aside from rbp). enterTCHelper does not save them.
@@ -1280,16 +1330,14 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
           JIT::smashCall(toSmash, dest);
           smashed = true;
-          // For functions to be PGO'ed, if their prologues haven't been
-          // regenerated yet, then save toSmash as a caller to the
-          // prologue, so that it can later be smashed to call a new
-          // prologue when it's generated.
+          // For functions to be PGO'ed, if their current prologues
+          // are still profiling ones (living in code.prof()), then
+          // save toSmash as a caller to the prologue, so that it can
+          // later be smashed to call a new prologue when it's generated.
           int calleeNumParams = func->numParams();
           int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                                      nArgs :  calleeNumParams + 1);
-          SrcKey calleeSK = {func,
-                             func->getEntryForNumArgs(calledPrologNumArgs)};
-          if (profileSrcKey(calleeSK)) {
+          if (code.prof().contains(dest)) {
             if (isImmutable) {
               m_profData->addPrologueMainCaller(func, calledPrologNumArgs,
                                                 toSmash);
@@ -1456,7 +1504,8 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   }
 
   if (smashed && info.stubAddr) {
-    Treadmill::WorkItem::enqueue(new FreeRequestStubTrigger(info.stubAddr));
+    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
+                                    new FreeRequestStubTrigger(info.stubAddr)));
   }
 
   return true;
@@ -1584,13 +1633,6 @@ TranslatorX64::syncWork() {
   Stats::inc(Stats::TC_Sync);
 }
 
-// could be static but used in hopt/codegen.cpp
-void raiseUndefVariable(StringData* nm) {
-  raise_notice(Strings::UNDEFINED_VARIABLE, nm->data());
-  // FIXME: do we need to decref the string if an exception is propagating?
-  decRefStr(nm);
-}
-
 TCA
 TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   auto& trampolines = code.trampolines();
@@ -1606,7 +1648,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
   uint32_t index = m_numNativeTrampolines++;
   TCA trampAddr = trampolines.frontier();
   if (Stats::enabled()) {
-    Stats::emitInc(trampolines, &Stats::tl_helper_counters[0], index);
+    emitIncStat(trampolines, &Stats::tl_helper_counters[0], index);
     auto name = getNativeFunctionName(helperAddr);
     const size_t limit = 50;
     if (name.size() > limit) {
@@ -1624,6 +1666,10 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
 
   trampolineMap[helperAddr] = trampAddr;
   recordBCInstr(OpNativeTrampoline, trampolines, trampAddr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTrampolineToVtune(trampAddr, trampolines.frontier() - trampAddr);
+  }
+
   return trampAddr;
 }
 
@@ -1682,7 +1728,7 @@ TranslatorX64::emitGuardChecks(SrcKey sk,
                                const RefDeps& refDeps,
                                SrcRec& fail) {
   if (Trace::moduleEnabled(Trace::stats, 2)) {
-    Stats::emitInc(code.main(), Stats::TraceletGuard_enter);
+    emitIncStat(code.main(), Stats::TraceletGuard_enter);
   }
 
   m_irTrans->hhbcTrans().emitRB(RBTypeTraceletGuards, sk);
@@ -1694,7 +1740,7 @@ TranslatorX64::emitGuardChecks(SrcKey sk,
   checkRefs(sk, refDeps, fail);
 
   if (Trace::moduleEnabled(Trace::stats, 2)) {
-    Stats::emitInc(code.main(), Stats::TraceletGuard_execute);
+    emitIncStat(code.main(), Stats::TraceletGuard_execute);
   }
 }
 
@@ -1763,10 +1809,12 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   TransKind  transKind = TransInterp;
   UndoMarker undoA(code.main());
   UndoMarker undoAstubs(code.stubs());
+  UndoMarker undoGlobalData(code.data());
 
   auto resetState = [&] {
     undoA.undo();
     undoAstubs.undo();
+    undoGlobalData.undo();
     m_fixupMap.clearPendingFixups();
     m_pendingCatchTraces.clear();
     m_bcMap.clear();
@@ -1782,32 +1830,44 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     assert(srcRec.inProgressTailJumps().empty());
   };
 
-  JIT::PostConditions pconds;
+  PostConditions pconds;
+  RegionDescPtr region;
   if (!args.m_interp && !reachedTranslationLimit(sk, srcRec)) {
     // Attempt to create a region at this SrcKey
-    JIT::RegionDescPtr region;
-    if (RuntimeOption::EvalJitPGO) {
-      if (m_mode == TransOptimize) {
-        region = args.m_region;
-        if (region) {
-          assert(region->blocks.size() > 0);
-        } else {
-          TransID transId = args.m_transId;
-          assert(transId != InvalidID);
-          region = JIT::selectHotRegion(transId, this);
-          assert(region);
-          if (region && region->blocks.size() == 0) region = nullptr;
-        }
+    if (m_mode == TransOptimize) {
+      assert(RuntimeOption::EvalJitPGO);
+      region = args.m_region;
+      if (region) {
+        assert(region->blocks.size() > 0);
       } else {
-        assert(m_mode == TransProfile || m_mode == TransLive);
-        tp = analyze(sk);
+        TransID transId = args.m_transId;
+        assert(transId != InvalidID);
+        region = JIT::selectHotRegion(transId, this);
+        assert(region);
+        if (region && region->blocks.size() == 0) region = nullptr;
       }
     } else {
+      assert(m_mode == TransProfile || m_mode == TransLive);
       tp = analyze(sk);
-      JIT::RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
+      RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
-      region = JIT::selectRegion(rContext, tp.get());
+      region = selectRegion(rContext, tp.get(), m_mode);
+
+      if (RuntimeOption::EvalJitCompareRegions &&
+          RuntimeOption::EvalJitRegionSelector == "tracelet") {
+        // Re-analyze with guard relaxation on
+        OPTION_GUARD(EvalHHBCRelaxGuards, 1);
+        OPTION_GUARD(EvalHHIRRelaxGuards, 0);
+        auto legacyRegion = selectTraceletLegacy(rContext.spOffset,
+                                                 *analyze(sk));
+        if (!region) {
+          Trace::ftraceRelease("{:-^60}\nCouldn't select tracelet region "
+                               "for:\n{}", "", show(*legacyRegion));
+        } else {
+          diffRegions(*region, *legacyRegion);
+        }
+      }
     }
 
     TranslateResult result = Retry;
@@ -1823,6 +1883,14 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         try {
           assertCleanState();
           result = translateRegion(*region, regionInterps);
+
+          // If we're profiling, grab the postconditions so we can
+          // use them in region selection whenever we decide to retranslate.
+          if (m_mode == TransProfile && result == Success &&
+              RuntimeOption::EvalJitPGOUsePostConditions) {
+            pconds = m_irTrans->hhbcTrans().irBuilder().getKnownTypes();
+          }
+
           FTRACE(2, "translateRegion finished with result {}\n",
                  translateResultName(result));
         } catch (const std::exception& e) {
@@ -1861,7 +1929,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         // retranslate.
         if (m_mode == TransProfile && result == Success &&
             RuntimeOption::EvalJitPGOUsePostConditions) {
-          pconds = m_irTrans->hhbcTrans().traceBuilder().getKnownTypes();
+          pconds = m_irTrans->hhbcTrans().irBuilder().getKnownTypes();
         }
       }
 
@@ -1883,9 +1951,9 @@ TranslatorX64::translateWork(const TranslArgs& args) {
 
   if (transKind == TransInterp) {
     assertCleanState();
-    TRACE(1,
-          "emitting %d-instr interp request for failed translation\n",
-          int(tp->m_numOpcodes));
+    auto interpOps = tp ? tp->m_numOpcodes : 1;
+    FTRACE(1, "emitting {}-instr interp request for failed translation\n",
+           interpOps);
     if (JIT::arch() == JIT::Arch::X64) {
       Asm a { code.main() };
       // Add a counter for the translation if requested
@@ -1893,7 +1961,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         JIT::X64::emitTransCounterInc(a);
       }
       a.    jmp(emitServiceReq(code.stubs(), JIT::REQ_INTERPRET,
-                               sk.offset(), tp ? tp->m_numOpcodes : 1));
+                               sk.offset(), interpOps));
     } else if (JIT::arch() == JIT::Arch::ARM) {
       if (RuntimeOption::EvalJitTransCounters) {
         vixl::MacroAssembler a { code.main() };
@@ -1904,7 +1972,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
       JIT::emitSmashableJump(
         code.main(),
         emitServiceReq(code.stubs(), JIT::REQ_INTERPRET,
-                       sk.offset(), tp ? tp->m_numOpcodes : 1),
+                       sk.offset(), interpOps),
         CC_None
       );
     }
@@ -1914,10 +1982,14 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   m_fixupMap.processPendingFixups();
   processPendingCatchTraces();
 
-  addTranslation(TransRec(sk, sk.unit()->md5(), transKind, tp.get(), start,
-                          code.main().frontier() - start, stubStart,
-                          code.stubs().frontier() - stubStart,
-                          m_bcMap));
+  TransRec tr(sk, sk.unit()->md5(), transKind, tp.get(), start,
+              code.main().frontier() - start, stubStart,
+              code.stubs().frontier() - stubStart,
+              m_bcMap);
+  addTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(sk.unit(), sk.func(), tr);
+  }
   m_bcMap.clear();
 
   recordGdbTranslation(sk, sk.func(), code.main(), start,
@@ -1926,7 +1998,11 @@ TranslatorX64::translateWork(const TranslArgs& args) {
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
     if (transKind == TransProfile) {
-      m_profData->addTransProfile(*tp, liveSpOff(), pconds);
+      if (!region) {
+        assert(tp);
+        region = selectTraceletLegacy(liveSpOff(), *tp);
+      }
+      m_profData->addTransProfile(region, pconds);
     } else {
       m_profData->addTransNonProf(transKind, sk);
     }
@@ -1974,8 +2050,8 @@ TranslatorX64::translateTracelet(Tracelet& t) {
         }
       }
 
-      m_irTrans->hhbcTrans().emitRB(RBTypeTraceletBody, t.m_sk);
-      Stats::emitInc(code.main(), Stats::Instr_TC, t.m_numOpcodes);
+      ht.emitRB(RBTypeTraceletBody, t.m_sk);
+      emitIncStat(code.main(), Stats::Instr_TC, t.m_numOpcodes);
     }
 
     // Profiling on function entry.
@@ -2005,8 +2081,11 @@ TranslatorX64::translateTracelet(Tracelet& t) {
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
-      ht.setBcOff(ni->source.offset(), ni->breaksTracelet && !ht.isInlining());
-      readMetaData(metaHand, *ni, m_irTrans->hhbcTrans(), MetaMode::Legacy);
+      ht.setBcOff(ni->source.offset(),
+                  ni->breaksTracelet && !ht.isInlining(),
+                  true);
+      readMetaData(metaHand, *ni, m_irTrans->hhbcTrans(),
+                   m_mode == TransProfile, MetaMode::Legacy);
 
       try {
         SKTRACE(1, ni->source, "HHIR: translateInstr\n");
@@ -2038,7 +2117,16 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       // problem, flag it to be interpreted, and retranslate the tracelet.
       for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
         if (ni->source.offset() == fcg.bcOff) {
-          always_assert(!ni->interp);
+          always_assert_log(
+            !ni->interp,
+            [&] {
+              std::ostringstream oss;
+              oss << folly::format("code generation failed with {}\n",
+                                   fcg.what());
+              print(oss, m_irTrans->hhbcTrans().unit());
+              return oss.str();
+            });
+
           ni->interp = true;
           FTRACE(1, "HHIR: RETRY Translation {}: will interpOne BC instr {} "
                  "after failing to code-gen \n\n",
@@ -2078,18 +2166,16 @@ void TranslatorX64::traceCodeGen() {
   auto& unit = ht.unit();
 
   auto finishPass = [&](const char* msg, int level) {
-    dumpTrace(level, unit, msg, nullptr, nullptr, nullptr,
-              ht.traceBuilder().guards());
+    dumpTrace(level, unit, msg, nullptr, nullptr, ht.irBuilder().guards());
     assert(checkCfg(unit));
   };
 
   finishPass(" after initial translation ", kIRLevel);
 
-  optimize(unit, ht.traceBuilder());
+  optimize(unit, ht.irBuilder(), m_mode);
   finishPass(" after optimizing ", kOptLevel);
 
-  auto regs = RuntimeOption::EvalHHIRXls ? allocateRegs(unit) :
-              allocRegsForUnit(unit);
+  auto regs = allocateRegs(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
   recordBCInstr(OpTraceletGuard, code.main(), code.main().frontier());
@@ -2267,8 +2353,12 @@ void TranslatorX64::recordGdbStub(const CodeBlock& cb,
 
 std::string TranslatorX64::getUsage() {
   std::string usage;
+  size_t totalBlockSize = 0;
+  size_t totalBlockCapacity = 0;
 
   auto addRow = [&](const std::string& name, size_t used, size_t capacity) {
+    totalBlockSize += used;
+    totalBlockCapacity += capacity;
     auto percent = capacity ? 100 * used / capacity : 0;
     usage += folly::format("tx64: {:9} bytes ({}%) in {}\n",
                            used, percent, name).str();
@@ -2281,6 +2371,11 @@ std::string TranslatorX64::getUsage() {
          RuntimeOption::EvalJitTargetCacheSize * 3 / 4);
   addRow("persistentRDS", RDS::usedPersistentBytes(),
          RuntimeOption::EvalJitTargetCacheSize / 4);
+  addRow("total",
+         totalBlockSize + code.data().used() +
+         RDS::usedBytes() + RDS::usedPersistentBytes(),
+         totalBlockCapacity + code.data().capacity() +
+         RuntimeOption::EvalJitTargetCacheSize);
 
   return usage;
 }
@@ -2470,6 +2565,18 @@ void TranslatorX64::setJmpTransID(TCA jmp) {
   TransID transId = m_profData->curTransID();
   FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transId);
   m_jmpToTransID[jmp] = transId;
+}
+
+void
+emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
+  if (!force && !Stats::enabled()) return;
+  intptr_t disp = uintptr_t(&tl_table[index]) - tlsBase();
+  X64Assembler a { cb };
+
+  a.    pushf ();
+  //    addq $n, [%fs:disp]
+  a.    fs().add_imm64_index_scale_disp_reg64(n, noreg, 1, disp, noreg);
+  a.    popf  ();
 }
 
 } // HPHP::JIT

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,7 +45,7 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/ext/ext_json.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -330,6 +330,13 @@ static void bump_counter_and_rethrow() {
     static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
       "requests_memory_exceeded", {ServiceData::StatsType::COUNT});
     requestMemoryExceededCounter->addValue(1);
+
+#ifdef USE_JEMALLOC
+    // Capture a pprof (C++) dump when we OOM a request
+    // TODO: (t3753133) Should dump a PHP-instrumented pprof dump here as well
+    jemalloc_pprof_dump("", false);
+#endif
+
     throw;
   }
 }
@@ -583,6 +590,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 
   Extension::RequestInitModules();
+  process_ini_settings();
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -593,7 +601,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 
   if (xhprof) {
-    f_var_dump(f_json_encode(f_xhprof_disable()));
+    f_var_dump(HHVM_FN(json_encode)(f_xhprof_disable()));
   }
   hphp_context_exit(g_context.getNoCheck(), true, true, program);
   hphp_session_exit();
@@ -761,11 +769,6 @@ static int start_server(const std::string &username) {
   // initialize the process
   HttpServer::Server = std::make_shared<HttpServer>();
 
-  if (RuntimeOption::HHProfServerEnabled) {
-    Logger::Info("Starting up profiling server");
-    HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
-  }
-
   // If we have any warmup requests, replay them before listening for
   // real connections
   for (auto& file : RuntimeOption::ServerWarmupRequests) {
@@ -798,7 +801,7 @@ static int start_server(const std::string &username) {
 #ifdef USE_JEMALLOC
     mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
 #endif
-    Util::enable_numa(RuntimeOption::EvalEnableNumaLocal);
+    enable_numa(RuntimeOption::EvalEnableNumaLocal);
 
   }
 
@@ -989,8 +992,9 @@ static int execute_program_impl(int argc, char** argv) {
   desc.add_options()
     ("help", "display this message")
     ("version", "display version number")
-    ("compiler-id", "display the git hash for the compiler id")
-    ("repo-schema", "display the repo schema id used by this app")
+    ("php", "emulate the standard php command line")
+    ("compiler-id", "display the git hash for the compiler")
+    ("repo-schema", "display the repository schema id")
     ("mode,m", value<string>(&po.mode)->default_value("run"),
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
     ("config,c", value<string>(&po.config),
@@ -1129,14 +1133,9 @@ static int execute_program_impl(int argc, char** argv) {
     return 0;
   }
   if (vm.count("version")) {
-#ifdef HHVM_VERSION
-#undefine HHVM_VERSION
-#endif
-#define HHVM_VERSION(v) const char *version = #v;
-#include "../../version" // nolint
-
     cout << "HipHop VM";
-    cout << " " << version << " (" << (debug ? "dbg" : "rel") << ")\n";
+    cout << " " << k_HHVM_VERSION.c_str();
+    cout << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
     return 0;
@@ -1453,8 +1452,8 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
     }
   }
 
-  Util::embedded_data desc;
-  if (!Util::get_embedded_data(section.c_str(), &desc, filename)) return "";
+  embedded_data desc;
+  if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
 
   std::ifstream ifs(desc.m_filename);
   if (!ifs.good()) return "";
@@ -1486,7 +1485,7 @@ void hphp_process_init() {
 #else
   pthread_attr_init(&attr);
 #endif
-  Util::init_stack_limits(&attr);
+  init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
 
   struct sigaction action = {};
@@ -1605,8 +1604,6 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_vmContext->requestInit();
-
-  process_ini_settings();
 }
 
 ExecutionContext *hphp_context_init() {

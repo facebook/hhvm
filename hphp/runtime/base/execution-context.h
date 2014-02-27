@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/server/virtual-host.h"
@@ -54,6 +55,7 @@ class PCFilter;
 
 typedef hphp_hash_map<StringData*, HPHP::Eval::PhpFile*, string_data_hash,
                       string_data_same> EvaledFilesMap;
+typedef std::vector<HPHP::Eval::PhpFile*> EvaledFilesVec;
 
 /**
  * Mainly designed for extensions to perform initialization and shutdown
@@ -225,7 +227,7 @@ public:
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
   String getRequestMemoryMaxBytes() const { return m_maxMemory; }
-  void setRequestMemoryMaxBytes(const String& max);
+  void setRequestMemoryMaxBytes(const std::string& max);
   String getCwd() const { return m_cwd;}
   void setCwd(const String& cwd) { m_cwd = cwd;}
 
@@ -263,6 +265,8 @@ public:
     m_out = sb;
     return current;
   }
+  String getRawPostData() const { return m_rawPostData; }
+  void setRawPostData(String& pd) { m_rawPostData = pd; }
 
   /**
    * Request sequences and program execution hooks.
@@ -321,15 +325,16 @@ public:
   void setTimeZone(const String& timezone) { m_timezone = timezone;}
   String getDefaultTimeZone() const { return m_timezoneDefault;}
   void setDefaultTimeZone(const String& s) { m_timezoneDefault = s;}
-  String getArgSeparatorOutput() const {
-    if (m_argSeparatorOutput.isNull()) return s_amp;
-    return m_argSeparatorOutput;
-  }
-  void setArgSeparatorOutput(const String& s) { m_argSeparatorOutput = s;}
   void setThrowAllErrors(bool f) { m_throwAllErrors = f; }
   bool getThrowAllErrors() const { return m_throwAllErrors; }
   void setExitCallback(Variant f) { m_exitCallback = f; }
   Variant getExitCallback() { return m_exitCallback; }
+
+  void setStreamContext(Resource &context) { m_streamContext = context; }
+  Resource &getStreamContext() { return m_streamContext; }
+
+  String getDefaultCharset() const { return m_defaultCharset; }
+  int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
 
   void restoreIncludePath();
   void setIncludePath(const String& path);
@@ -355,7 +360,7 @@ private:
   static const StaticString s_amp;
   // system settings
   Transport *m_transport;
-  String m_maxMemory;
+  std::string m_maxMemory;
   String m_cwd;
 
   // output buffering
@@ -365,6 +370,7 @@ private:
   int m_protectedLevel;
   PFUNC_STDOUT m_stdout;
   void *m_stdoutData;
+  String m_rawPostData;
 
   // request handlers
   std::set<RequestEventHandler*> m_requestEventHandlerSet;
@@ -375,7 +381,7 @@ private:
   std::vector<std::pair<Variant,int> > m_userErrorHandlers;
   std::vector<Variant> m_userExceptionHandlers;
   ErrorState m_errorState;
-  int m_errorReportingLevel;
+  int64_t m_errorReportingLevel;
   String m_lastError;
   int m_lastErrorNum;
   std::string m_errorPage;
@@ -388,6 +394,9 @@ private:
   String m_timezoneDefault;
   String m_argSeparatorOutput;
   bool m_throwAllErrors;
+  Resource m_streamContext;
+  String m_defaultCharset;
+  int64_t m_socketDefaultTimeout;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;
@@ -406,7 +415,6 @@ private:
   // helper functions
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);
-  int64_t convertBytesToInt(const String& value) const;
 
   DECLARE_DBG_SETTING
 };
@@ -478,6 +486,7 @@ private:
 
   template<class Op> void implCellBinOp(IOP_ARGS, Op op);
   template<class Op> void implCellBinOpBool(IOP_ARGS, Op op);
+  void implVerifyRetType(IOP_ARGS);
   bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);
   bool iopInstanceOfHelper(const StringData* s1, Cell* c2);
   bool initIterator(PC& pc, PC& origPc, Iter* it,
@@ -552,6 +561,7 @@ public:
   VarEnv* m_globalVarEnv;
 
   EvaledFilesMap m_evaledFiles;
+  EvaledFilesVec m_evaledFilesOrder;
   typedef std::vector<HPHP::Unit*> EvaledUnitsVec;
   EvaledUnitsVec m_createdFuncs;
 

@@ -3,7 +3,7 @@ require_once __DIR__.'/Options.php';
 require_once __DIR__.'/utils.php';
 require_once __DIR__.'/TestFindModes.php';
 
-abstract class Framework {
+class Framework {
   private string $out_file;
   private string $expect_file;
   private string $diff_file;
@@ -32,16 +32,18 @@ abstract class Framework {
 
   // $name, $parallel, $test_fine_mode, etc. are constructor promoted
   // Assume the framework unit tests will be run in parallel until otherwise
-  // proven. Also assume that tests will be found by reflecting over the
-  // framework. However, some require that we use php tokens or are found via
-  // phpt files.
-  protected function __construct(private string $name,
-                                 private string $test_command = null,
-                                 private Map $env_vars = null,
-                                 private Map $args_for_tests = null,
-                                 private bool $parallel = true,
-                                 private string $test_find_mode =
-                                                TestFindModes::REFLECTION) {
+  // proven. If $parallel is set to false, then the framework will be run
+  // in a similar vain as a normal PHPUnit run, it is one test after another
+  // in the same PHPUnit process. Also assume that tests will be found by
+  // reflecting over the framework. However, some require that we use php
+  // tokens or are found via phpt files.
+  public function __construct(private string $name,
+                              private string $test_command = null,
+                              private Map $env_vars = null,
+                              private Map $args_for_tests = null,
+                              private bool $parallel = true,
+                              private string $test_find_mode =
+                                TestFindModes::REFLECTION) {
 
     // Get framework information and set all needed properties. Beyond
     // the install root, git info, test roots, etc., the other
@@ -54,6 +56,10 @@ abstract class Framework {
       throw new Exception("Provide install, git and test file search info");
     }
 
+    if (Options::$as_phpunit) {
+      $this->parallel = false;
+    }
+
     // Set Framework information for install. These are the five necessary
     // properties for a proper install, with pull_requests being optional.
     $this->setInstallRoot(Options::$framework_info[$name]["install_root"]);
@@ -61,34 +67,13 @@ abstract class Framework {
     $this->setGitCommit(Options::$framework_info[$name]['commit']);
     $this->setGitBranch(Options::$framework_info[$name]['branch']);
     $this->setTestPath(Options::$framework_info[$name]["test_root"]);
-    if (array_key_exists('pull_requests', Options::$framework_info[$name])) {
-      $this->setPullRequests(Options::$framework_info[$name]["pull_requests"]);
-    } else {
-      $this->setPullRequests(null);
-    }
-    // Get some more possible framework test information
-    if (array_key_exists('blacklist', Options::$framework_info[$name])) {
-      $this->setBlacklist(Options::$framework_info[$name]["blacklist"]);
-    } else {
-       $this->setBlacklist(null);
-    }
-    if (array_key_exists('clowns', Options::$framework_info[$name])) {
-      $this->setClownylist(Options::$framework_info[$name]["clowns"]);
-    } else {
-      $this->setClownylist(null);
-    }
-    if (array_key_exists('test_name_regex', Options::$framework_info[$name])) {
-      $this->setTestNamePattern(
-        Options::$framework_info[$name]["test_name_regex"]);
-    } else {
-      $this->setTestNamePattern(null);
-    }
-    if (array_key_exists('test_file_regex', Options::$framework_info[$name])) {
-      $this->setTestFilePattern(
-        Options::$framework_info[$name]["test_file_regex"]);
-    } else {
-      $this->setTestFilePattern(null);
-    }
+    $this->setPullRequests(Options::getFrameworkInfo($name, "pull_requests"));
+    $this->setBlacklist(Options::getFrameworkInfo($name, "blacklist"));
+    $this->setClownylist(Options::getFrameworkInfo($name, "clowns"));
+    $this->setTestNamePattern(Options::getFrameworkInfo($name,
+                                                        "test_name_regex"));
+    $this->setTestFilePattern(Options::getFrameworkInfo($name,
+                                                        "test_file_regex"));
 
     $this->prepareOutputFiles();
 
@@ -104,17 +89,8 @@ abstract class Framework {
 
     // Now that we have an install, we can safely set all possible
     // other framework information
-    if (array_key_exists('config_file', Options::$framework_info[$name])) {
-      $this->setConfigFile(Options::$framework_info[$name]["config_file"]);
-    } else {
-      $this->setConfigFile(null);
-    }
-    if (array_key_exists('bootstrap_file', Options::$framework_info[$name])) {
-      $this->setBootstrapFile(
-        Options::$framework_info[$name]["bootstrap_file"]);
-    } else {
-      $this->setBootstrapFile(null);
-    }
+    $this->setConfigFile(Options::getFrameworkInfo($name, "config_file"));
+    $this->setBootstrapFile(Options::getFrameworkInfo($name, "bootstrap_file"));
     $this->setTestCommand(true);
     $this->findTests();
   }
@@ -167,11 +143,9 @@ abstract class Framework {
   }
 
   public function getTests(): ?Set {
-    if (Options::$test_by_single_test) {
-      return $this->individual_tests;
-    } else {
-      return $this->test_files;
-    }
+    return Options::$test_by_single_test
+      ? $this->individual_tests
+      : $this->test_files;
   }
 
   public function getEnvVars(): ?Map {
@@ -268,7 +242,7 @@ abstract class Framework {
     }
   }
 
-  private function setBootstrapFile(?string $bootstrap_file = null): void {
+  private function setBootstrapFile(?string $bootstrap_file): void {
     $this->bootstrap_file = $bootstrap_file;
   }
 
@@ -280,8 +254,7 @@ abstract class Framework {
     $this->install_root = Options::$frameworks_root."/".$install_root;
   }
 
-  private function setTestNamePattern(?string $test_name_pattern = null):
-                                        void {
+  private function setTestNamePattern(?string $test_name_pattern): void {
     // Test name pattern can be different depending on the framework,
     // although most follow the default.
     $this->test_name_pattern = $test_name_pattern === null
@@ -301,13 +274,16 @@ abstract class Framework {
     }
     if ($this->parallel) {
       if (Options::$test_by_single_test) {
-         $this->test_command .= " --filter";
+        $this->test_command .= " --filter";
       }
       $this->test_command .= " '%test%'";
     }
     if ($redirect) {
       $this->test_command .= " 2>&1";
     }
+
+    verbose("General test command for: ".$this->name." is: ".
+            $this->test_command . "\n", Options::$verbose);
   }
 
   private function setTestFilePattern(?string $test_file_pattern = null):
@@ -324,16 +300,23 @@ abstract class Framework {
       $this->config_file = find_first_file_recursive($phpunit_config_files,
                                                      $this->test_path,
                                                      false);
-
-      if ($this->config_file !== null) {
-        verbose("Using phpunit xml file in: ".$this->config_file."\n",
-                Options::$verbose);
-      } else {
-        verbose("No phpunit xml file found for: ".$this->name.".\n",
-                Options::$verbose);
-      }
     } else {
       $this->config_file = Options::$frameworks_root."/".$config_file;
+    }
+
+    if ($this->config_file !== null) {
+      verbose("Using phpunit xml file in: ".$this->config_file."\n",
+              Options::$verbose);
+      // For now, remove any logging and code coverage settings from
+      // the configuration file.
+      $config_data = simplexml_load_file($this->config_file);
+      if ($config_data->logging !== null) {
+        unset($config_data->logging);
+      }
+      file_put_contents($this->config_file, $config_data->saveXML());
+    } else {
+      verbose("No phpunit xml file found for: ".$this->name.".\n",
+              Options::$verbose);
     }
   }
 
@@ -665,7 +648,7 @@ abstract class Framework {
       $find_tests_command .= " --config-file ".$this->config_file;
       $find_tests_command .= " --test-find-mode ".$this->test_find_mode;
       if ($this->bootstrap_file !== null) {
-        $find_tests_command .= " --bfile ".$this->bootstrap_file;
+        $find_tests_command .= " --bootstrap-file ".$this->bootstrap_file;
       };
       $descriptorspec = array(
         0 => array("pipe", "r"),

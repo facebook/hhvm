@@ -1,0 +1,32 @@
+HipHop Warning: %s
+ in %s on line %d
+object(stdClass)#5 (13) {
+  [%u|b%"name"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"orgname"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"db"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"catalog"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"max_length"]=>
+  int(0)
+  [%u|b%"length"]=>
+  int(11)
+  [%u|b%"charsetnr"]=>
+  int(63)
+  [%u|b%"flags"]=>
+  int(49155)
+  [%u|b%"type"]=>
+  int(3)
+  [%u|b%"decimals"]=>
+  int(0)
+}
+HipHop Warning: %s
+done!

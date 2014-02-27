@@ -1,0 +1,67 @@
+int(1)
+int(3)
+array(3) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  int(1)
+}
+int(5)
+array(5) {
+  [0]=>
+  string(1) "e"
+  [1]=>
+  string(1) "f"
+  [2]=>
+  int(2)
+  [3]=>
+  string(1) "f"
+  [4]=>
+  string(1) "d"
+}
+int(1)
+int(3)
+object(HH\Vector)#1 (3) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+  [2]=>
+  int(1)
+}
+int(5)
+object(HH\Vector)#2 (5) {
+  [0]=>
+  string(1) "e"
+  [1]=>
+  string(1) "f"
+  [2]=>
+  int(2)
+  [3]=>
+  string(1) "f"
+  [4]=>
+  string(1) "d"
+}
+int(1)
+int(3)
+object(HH\Set)#3 (3) {
+  string(1) "b"
+  string(1) "c"
+  int(1)
+}
+int(4)
+object(HH\Set)#4 (4) {
+  string(1) "e"
+  int(2)
+  string(1) "f"
+  string(1) "d"
+}
+int(3)
+int(3)
+object(HH\Set)#5 (3) {
+  string(1) "h"
+  int(3)
+  string(1) "j"
+}

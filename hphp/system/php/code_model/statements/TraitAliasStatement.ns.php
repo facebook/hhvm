@@ -20,10 +20,7 @@ class TraitAliasStatement /*implements ITraitAliasStatement*/ {
   /**
    *  [traitName::]methodName1 as modifiers methodName2;
    */
-  public function getTraitName() /*: string*/ {
-    if ($this->traitName === null) {
-      throw new \Exception("TraitName is not initialized");
-    }
+  public function getTraitName() /*: ?string*/ {
     return $this->traitName;
   }
   /**

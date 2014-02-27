@@ -102,6 +102,8 @@ namespace Trace {
       TM(regalloc)    \
       TM(bcinterp)    \
       TM(interpOne)   \
+      TM(dispatchBB)  \
+      TM(dispatchN)   \
       TM(refcount)    \
       TM(asmx64)      \
       TM(runtime)     \

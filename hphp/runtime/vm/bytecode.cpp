@@ -7606,11 +7606,25 @@ void VMExecutionContext::switchModeForDebugger() {
 }
 
 void VMExecutionContext::dispatchN(int numInstrs) {
+  if (Trace::moduleEnabled(Trace::dispatchN)) {
+    auto cat = makeStaticString("dispatchN");
+    auto name = makeStaticString(
+      folly::format("{} ops @ {}",
+                    numInstrs, show(SrcKey(m_fp->m_func, m_pc))).str());
+    Stats::incStatGrouped(cat, name, 1);
+  }
+
   dispatchImpl<LimitInstrs | BreakOnCtlFlow>(numInstrs);
   switchModeForDebugger();
 }
 
 void VMExecutionContext::dispatchBB() {
+  if (Trace::moduleEnabled(Trace::dispatchBB)) {
+    auto cat = makeStaticString("dispatchBB");
+    auto name = makeStaticString(show(SrcKey(m_fp->m_func, m_pc)));
+    Stats::incStatGrouped(cat, name, 1);
+  }
+
   dispatchImpl<BreakOnCtlFlow>(0);
   switchModeForDebugger();
 }

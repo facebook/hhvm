@@ -3662,16 +3662,17 @@ void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
   if (!classIsUniqueOrCtxParent(knownConstraint)) knownConstraint = nullptr;
 
   /*
-   * If the local is a specialized object type, we can avoid emitting
-   * runtime checks if we know the thing would pass.  If we don't
-   * know, we still have to emit them because valType might be a
-   * subtype of its specialized object type.
+   * If the local is a specialized object type and we don't have to constrain a
+   * guard to get it, we can avoid emitting runtime checks if we know the thing
+   * would pass. If we don't know, we still have to emit them because valType
+   * might be a subtype of its specialized object type.
    */
-  if (valType.strictSubtypeOf(Type::Obj)) {
+  if (valType < Type::Obj &&
+      !m_irb->constrainValue(val,
+                             TypeConstraint(DataTypeSpecialized).setWeak())) {
     auto const cls = valType.getClass();
     if ((knownConstraint && cls->classof(knownConstraint)) ||
         cls->name()->isame(clsName)) {
-      m_irb->constrainValue(val, DataTypeSpecialized);
       return;
     }
   }

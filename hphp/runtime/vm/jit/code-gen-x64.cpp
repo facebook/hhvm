@@ -1890,7 +1890,7 @@ Reg64 getDataPtrEnregistered(Asm& as,
 
 template<class Loc1, class Loc2, class JmpFn>
 void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
-                                 JmpFn doJcc, OptType prevType) {
+                                 JmpFn doJcc) {
   assert(!(type <= Type::Cls));
   ConditionCode cc;
   if (type <= Type::StaticStr) {
@@ -1929,13 +1929,6 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
   doJcc(cc);
 
   if (type.isSpecialized()) {
-    // Sometimes we don't need to emit the specialized test to know that the
-    // value is appropriately specialized. This helps in situations like this:
-    //
-    // t3:StkPtr = AssertStk<{Obj<C>|InitNull}> t1:StkPtr
-    // t4:StkPtr = GuardStk<Obj<C>> t3:StkPtr
-    if (prevType && (type.unspecialize() & *prevType) == type) return;
-
     emitSpecializedTypeTest(type, dataSrc, doJcc);
   }
 }
@@ -1998,14 +1991,12 @@ template<class Loc>
 void CodeGenerator::emitTypeCheck(Type type,
                                   Loc typeSrc,
                                   Loc dataSrc,
-                                  Block* taken,
-                                  OptType prevType) {
+                                  Block* taken) {
   emitTypeTest(
     type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       emitFwdJcc(ccNegate(cc), taken);
-    },
-    prevType);
+    });
 }
 
 template<class Loc>
@@ -4768,10 +4759,9 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
 void CodeGenerator::cgCheckStk(IRInstruction* inst) {
   auto const rbase = srcLoc(0).reg();
   auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset);
-  auto const prevType = getStackValue(inst->src(0), baseOff).knownType;
 
   emitTypeCheck(inst->typeParam(), rbase[baseOff + TVOFF(m_type)],
-                rbase[baseOff + TVOFF(m_data)], inst->taken(), prevType);
+                rbase[baseOff + TVOFF(m_data)], inst->taken());
 }
 
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
@@ -4793,15 +4783,13 @@ template<class Loc>
 void CodeGenerator::emitSideExitGuard(Type type,
                                       Loc typeSrc,
                                       Loc dataSrc,
-                                      Offset taken,
-                                      OptType prevType) {
+                                      Offset taken) {
   emitTypeTest(
     type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), taken);
       emitBindSideExit(this->m_mainCode, this->m_stubsCode, ccNegate(cc), sk);
-    },
-    prevType);
+    });
 }
 
 void CodeGenerator::cgSideExitGuardLoc(IRInstruction* inst) {
@@ -4816,14 +4804,11 @@ void CodeGenerator::cgSideExitGuardLoc(IRInstruction* inst) {
 void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
   auto const sp    = srcLoc(0).reg();
   auto const extra = inst->extra<SideExitGuardStk>();
-  auto const prevType = getStackValue(inst->src(0),
-                                      extra->checkedSlot).knownType;
 
   emitSideExitGuard(inst->typeParam(),
                     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_type)],
                     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
-                    extra->taken,
-                    prevType);
+                    extra->taken);
 }
 
 void CodeGenerator::cgExitJcc(IRInstruction* inst) {

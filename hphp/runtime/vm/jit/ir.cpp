@@ -67,6 +67,7 @@ namespace {
 #define DofS(n)   HasDest
 #define DUnbox(n) HasDest
 #define DBox(n)   HasDest
+#define DFilterS(n) HasDest
 #define DParam    HasDest
 #define DAllocObj HasDest
 #define DLdRef    HasDest
@@ -111,6 +112,7 @@ struct {
 #undef DofS
 #undef DUnbox
 #undef DBox
+#undef DFilterS
 #undef DParam
 #undef DAllocObj
 #undef DLdRef
@@ -445,4 +447,3 @@ int32_t spillValueCells(const IRInstruction* spillStack) {
 }
 
 }}
-

@@ -153,13 +153,7 @@ bool removeGuard(IRUnit& unit, IRInstruction* inst, const FrameState& state) {
   if (!(type >= prevType)) {
     // Neither is a subtype of the other. If they have no intersection the
     // guard will always fail but we can let the simplifier take care of
-    // that. Otherwise, refine the guarded type to be a subtype of prevType.
-    auto common = type & prevType;
-    if (common != Type::Bottom) {
-      FTRACE(3, "setting typeParam to {}\n", common);
-      inst->setTypeParam(common);
-    }
-
+    // that.
     return false;
   }
 

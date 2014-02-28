@@ -76,13 +76,20 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     // fallthrough
   case CoerceStk:
     // fallthrough
-  case CheckStk:
-    // fallthrough
   case GuardStk:
     // We don't have a value, but we may know the type due to guarding
     // on it.
     if (inst->extra<StackOffset>()->offset == index) {
       return StackValueInfo { inst, inst->typeParam() };
+    }
+    return getStackValue(inst->src(0), index);
+
+  case CheckStk:
+    // CheckStk's resulting type is the intersection of its typeParam
+    // with whatever type preceded it.
+    if (inst->extra<StackOffset>()->offset == index) {
+      Type prevType = getStackValue(inst->src(0), index).knownType;
+      return StackValueInfo { inst, inst->typeParam() & prevType};
     }
     return getStackValue(inst->src(0), index);
 
@@ -540,17 +547,17 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   if (oldType.not(newType)) {
     if (oldType.isBoxed() && newType.isBoxed()) {
       /* This CheckType serves to update the inner type hint for a boxed
-       * value, which requires no runtime work. */
+       * value, which requires no runtime work.  This depends on the type being
+       * boxed, and constraining it with DataTypeCountness will do it.  */
       m_irb.constrainValue(src, DataTypeCountness);
       return gen(AssertType, newType, src);
-    } else {
-      /* This guard will always fail. Probably an incorrect prediction from the
-       * frontend. We can't convert it to a Jmp because people may be relying
-       * on the src, so insert a Jmp before it. This CheckType and anything
-       * after it will be killed by DCE. */
-      gen(Jmp, inst->taken());
-      return nullptr;
     }
+    /* This check will always fail. It's probably due to an incorrect
+     * prediction. Convert it to a Jmp, and return src because
+     * following instructions may depend on the output of CheckType
+     * (they'll be DCEd later). */
+    inst->convertToJmp();
+    return src;
   }
 
   if (newType >= oldType) {
@@ -565,21 +572,6 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
     return nullptr;
   }
 
-  if (newType.equals(Type::Str) && oldType.maybe(Type::Str)) {
-    /*
-     * If we're guarding against Str and oldType has StaticStr or CountedStr
-     * in it, refine the output type. This can happen when we have a
-     * KindOfString guard from Translator but internally we know a more
-     * specific subtype of Str.
-     */
-    FTRACE(1, "CheckType: refining {} to {}\n", oldType.toString(),
-           Type::Str.toString());
-    inst->setTypeParam(Type::Str & oldType);
-    return nullptr;
-  }
-
-  FTRACE(1, "WARNING: CheckType that will always fail: prediction that "
-         "{} is {}\n", oldType, newType);
   return nullptr;
 }
 
@@ -610,14 +602,21 @@ SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
   }
 
   if (newType.not(oldType)) {
-    // This will always fail. We can't mutate the instruction in place because
-    // it produces a new StkPtr.
-    gen(Jmp, inst->taken());
-    return nullptr;
+    if (oldType.isBoxed() && newType.isBoxed()) {
+      /* This CheckStk serves to update the inner type hint for a boxed
+       * value, which requires no runtime work. This depends on the type being
+       * boxed, and constraining it with DataTypeCountness will do it.  */
+      m_irb.constrainStack(sp, offset, DataTypeCountness);
+      return gen(AssertStk, newType, sp);
+    }
+    /* This check will always fail. It's probably due to an incorrect
+     * prediction. Convert it to a Jmp, and return the source because
+     * following instructions may depend on the output of CheckStk
+     * (they'll be DCEd later). */
+    inst->convertToJmp();
+    return sp;
   }
 
-  // Guard on the intersection of newType and oldType.
-  inst->setTypeParam(newType & oldType);
   return nullptr;
 }
 

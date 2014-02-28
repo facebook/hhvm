@@ -610,6 +610,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DofS(n)   return inst->src(n)->type();
 #define DUnbox(n) return inst->src(n)->type().unbox();
 #define DBox(n)   return boxType(inst->src(n)->type());
+#define DFilterS(n) return inst->src(n)->type() & inst->typeParam();
 #define DParam    return inst->typeParam();
 #define DAllocObj return allocObjReturn(inst);
 #define DLdRef    return ldRefReturn(inst);
@@ -635,6 +636,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DofS
 #undef DUnbox
 #undef DBox
+#undef DFilterS
 #undef DParam
 #undef DAllocObj
 #undef DLdRef
@@ -811,6 +813,9 @@ void assertOperandTypes(const IRInstruction* inst) {
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
+#define DFilterS(src) checkDst(src < inst->numSrcs(),  \
+                               "invalid src num");     \
+                      requireTypeParam();
 #define DParam      requireTypeParam();
 #define DLdRef      requireTypeParam();
 #define DAllocObj
@@ -844,6 +849,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DSetElem
 #undef DBox
 #undef DofS
+#undef DFilterS
 #undef DParam
 #undef DAllocObj
 #undef DLdRef

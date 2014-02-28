@@ -4630,8 +4630,8 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
 }
 
 /**
- * Given a vector, check if it has a frozen copy and jump to
- * the taken branch if so.
+ * Given a vector, check if it has a immutable copy and jump to the taken
+ * branch if so.
  */
 void CodeGenerator::cgVectorHasFrozenCopy(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
@@ -4640,9 +4640,9 @@ void CodeGenerator::cgVectorHasFrozenCopy(IRInstruction* inst) {
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
          vec->type().getClass() == c_Vector::classof());
 
-  // Vector keeps a smart pointer to the frozen copy, so we need
+  // Vector keeps a smart pointer to the immutable copy, so we need
   // some advanced arithmetic to get the offset of the raw pointer.
-  uint rawPtrOffset = c_Vector::frozenCopyOffset() + kExpectedMPxOffset;
+  uint rawPtrOffset = c_Vector::immCopyOffset() + kExpectedMPxOffset;
 
   m_as.loadq(vecReg[rawPtrOffset], m_rScratch);
   m_as.testq(m_rScratch, m_rScratch);

@@ -38,8 +38,8 @@ namespace HPHP {
  */
 template<typename TCollection>
 inline static Object materializeDefaultImpl(ObjectData* obj) {
-  TCollection* col;
-  Object o = col = NEWOBJ(TCollection)();
+  auto* col = NEWOBJ(TCollection)();
+  Object o = col;
   col->init(VarNR(obj));
   return o;
 }
@@ -110,7 +110,7 @@ ArrayIter getArrayIterHelper(CVarRef v, size_t& sz) {
 }
 
 void triggerCow(c_Vector* vec) {
-  assert(!vec->m_frozenCopy.isNull()); // Should've been checked by the JIT.
+  assert(!vec->m_immCopy.isNull()); // Should've been checked by the JIT.
   vec->mutate();
 }
 
@@ -181,7 +181,7 @@ Variant BaseVector::get(CVarRef key) {
 
 // KeyedIterable
 Object BaseVector::getiterator() {
-  c_VectorIterator* it = NEWOBJ(c_VectorIterator)();
+  auto* it = NEWOBJ(c_VectorIterator)();
   it->m_obj = this;
   it->m_pos = 0;
   it->m_version = getVersion();
@@ -270,7 +270,7 @@ void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
     if (bvec->m_capacity <= bvec->m_size) {
       bvec->grow();
     }
-    c_Pair* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->initAdd(&m_data[i]);
     pair->initAdd(cvarToCell(&v));
@@ -283,7 +283,7 @@ void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
 void BaseVector::kvzip(BaseVector* bvec) {
   bvec->reserve(m_size);
   for (uint i = 0; i < m_size; ++i) {
-    c_Pair* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->elm0.m_type = KindOfInt64;
     pair->elm0.m_data.num = i;
@@ -504,15 +504,15 @@ void BaseVector::reserve(int64_t sz) {
 BaseVector::BaseVector(Class* cls)
     : ExtCollectionObjectData(cls)
     , m_size(0), m_data(nullptr), m_capacity(0)
-    , m_version(0), m_frozenCopy(nullptr) {
+    , m_version(0), m_immCopy(nullptr) {
 }
 
 /**
- * Delegate the responsibility for freeing the buffer to the
- * frozen copy, if it exists.
+ * Delegate the responsibility for freeing the buffer to the immutable copy,
+ * if it exists.
  */
 BaseVector::~BaseVector() {
-  if (m_frozenCopy.isNull() && m_data) {
+  if (m_immCopy.isNull() && m_data) {
     for (uint i = 0; i < m_size; ++i) {
       tvRefcountedDecRef(&m_data[i]);
     }
@@ -554,7 +554,7 @@ void BaseVector::cow() {
   }
 
   m_data = newData;
-  m_frozenCopy.reset();
+  m_immCopy.reset();
 }
 
 
@@ -700,9 +700,9 @@ Object c_Vector::t_items() {
 }
 
 Object c_Vector::t_keys() {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::keys(bv);
+  auto* vec = NEWOBJ(c_Vector);
+  Object obj = vec;
+  BaseVector::keys(vec);
   return obj;
 }
 
@@ -715,9 +715,9 @@ Object c_Vector::t_lazy() {
 }
 
 Object c_Vector::t_kvzip() {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::kvzip(bv);
+  auto* vec = NEWOBJ(c_Vector);
+  Object obj = vec;
+  BaseVector::kvzip(vec);
   return obj;
 }
 
@@ -882,9 +882,9 @@ Object c_Vector::t_filterwithkey(CVarRef callback) {
 }
 
 Object c_Vector::t_zip(CVarRef iterable) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::zip(bv, iterable);
+  auto* vec = NEWOBJ(c_Vector);
+  Object obj = vec;
+  BaseVector::zip(vec, iterable);
   return obj;
 }
 
@@ -1068,11 +1068,18 @@ void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throw e;
 }
 
-void c_Vector::initFvFields(c_ImmVector* fv) {
-  fv->m_data = m_data;
-  fv->m_size = m_size;
-  fv->m_capacity = m_capacity;
-  fv->m_version = m_version;
+// This function will create a immutable copy of this Vector (if it doesn't
+// already exist) and then return it
+Object c_Vector::getImmutableCopy() {
+  if (m_immCopy.isNull()) {
+    auto* vec = NEWOBJ(c_ImmVector)();
+    m_immCopy = vec;
+    vec->m_data = m_data;
+    vec->m_size = m_size;
+    vec->m_capacity = m_capacity;
+    vec->m_version = m_version;
+  }
+  return m_immCopy;
 }
 
 Object c_Vector::t_tovector() {
@@ -1084,17 +1091,19 @@ Object c_Vector::t_toset() {
 }
 
 Object c_Vector::t_toimmvector() {
-  if (m_frozenCopy.isNull()) {
-    c_ImmVector* fv = NEWOBJ(c_ImmVector)();
-    initFvFields(fv);
-    m_frozenCopy = fv;
-  }
+  return getImmutableCopy();
+}
 
-  return m_frozenCopy;
+Object c_Vector::t_immutable() {
+  return getImmutableCopy();
 }
 
 Object c_Vector::t_tomap() {
   return materializeDefaultImpl<c_Map>(this);
+}
+
+Object c_Vector::t_toimmmap() {
+  return materializeDefaultImpl<c_ImmMap>(this);
 }
 
 Object c_Vector::t_toimmset() {
@@ -1198,23 +1207,23 @@ Object c_ImmVector::t_filterwithkey(CVarRef callback) {
 }
 
 Object c_ImmVector::t_zip(CVarRef iterable) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_ImmVector);
-  BaseVector::zip(bv, iterable);
+  auto* vec = NEWOBJ(c_ImmVector);
+  Object obj = vec;
+  BaseVector::zip(vec, iterable);
   return obj;
 }
 
 Object c_ImmVector::t_kvzip() {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_ImmVector);
-  BaseVector::kvzip(bv);
+  auto* vec = NEWOBJ(c_ImmVector);
+  Object obj = vec;
+  BaseVector::kvzip(vec);
   return obj;
 }
 
 Object c_ImmVector::t_keys() {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_ImmVector);
-  BaseVector::keys(bv);
+  auto* vec = NEWOBJ(c_ImmVector);
+  Object obj = vec;
+  BaseVector::keys(vec);
   return obj;
 }
 
@@ -1253,6 +1262,9 @@ Object c_ImmVector::t_values() {
   return Object::attach(BaseVector::Clone<c_ImmVector>(this));
 }
 
+Object c_ImmVector::t_immutable() {
+  return this;
+}
 
 // Non PHP methods.
 
@@ -1489,7 +1501,7 @@ Object BaseMap::php_kvzip() const {
   ssize_t j = 0;
   for (; p != pLimit; ++p) {
     if (isTombstone(p->data.m_type)) continue;
-    c_Pair* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     if (p->hasIntKey()) {
       pair->elm0.m_data.num = p->ikey;
@@ -1732,8 +1744,19 @@ Object c_Map::t_differencebykey(CVarRef it) {
   return php_differenceByKey<c_Map>(it);
 }
 
+Object c_Map::t_immutable() {
+  auto* mp = NEWOBJ(c_ImmMap)();
+  Object o = mp;
+  mp->init(VarNR(this));
+  return o;
+}
+
+Object c_ImmMap::t_immutable() {
+  return this;
+}
+
 Object BaseMap::php_getIterator() {
-  c_MapIterator* it = NEWOBJ(c_MapIterator)();
+  auto* it = NEWOBJ(c_MapIterator)();
   it->m_obj = this;
   it->m_pos = iter_begin();
   it->m_version = getVersion();
@@ -3503,7 +3526,7 @@ Array BaseSet::php_toValuesArray() {
 }
 
 Object BaseSet::php_getIterator() {
-  c_SetIterator* it = NEWOBJ(c_SetIterator)();
+  auto* it = NEWOBJ(c_SetIterator)();
   it->m_obj = this;
   it->m_pos = iter_begin();
   it->m_version = getVersion();
@@ -4055,6 +4078,13 @@ c_Set* c_Set::Clone(ObjectData* obj) {
   return BaseSet::Clone<c_Set>(obj);
 }
 
+Object c_Set::t_immutable() {
+  auto* st = NEWOBJ(c_ImmSet)();
+  Object o = st;
+  st->init(VarNR(this));
+  return o;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // ImmSet
 
@@ -4135,6 +4165,9 @@ c_ImmSet* c_ImmSet::Clone(ObjectData* obj) {
   return BaseSet::Clone<c_ImmSet>(obj);
 }
 
+Object c_ImmSet::t_immutable() {
+  return this;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -4253,8 +4286,8 @@ Object c_Pair::t_keys() {
 }
 
 Object c_Pair::t_values() {
-  c_Vector* vec;
-  Object o = vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_Vector)();
+  Object o = vec;
   vec->init(VarNR(this));
   return o;
 }
@@ -4270,7 +4303,7 @@ Object c_Pair::t_kvzip() {
   Object obj = vec = NEWOBJ(c_Vector)();
   vec->reserve(2);
   for (uint i = 0; i < 2; ++i) {
-    c_Pair* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->elm0.m_type = KindOfInt64;
     pair->elm0.m_data.num = i;
@@ -4335,7 +4368,7 @@ Array c_Pair::t_tovaluesarray() {
 
 Object c_Pair::t_getiterator() {
   assert(isFullyConstructed());
-  c_PairIterator* it = NEWOBJ(c_PairIterator)();
+  auto* it = NEWOBJ(c_PairIterator)();
   it->m_obj = this;
   it->m_pos = 0;
   return it;
@@ -4435,7 +4468,7 @@ Object c_Pair::t_zip(CVarRef iterable) {
     if (vec->m_capacity <= vec->m_size) {
       vec->grow();
     }
-    c_Pair* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->initAdd(&getElms()[i]);
     pair->initAdd(cvarToCell(&v));
@@ -4444,6 +4477,10 @@ Object c_Pair::t_zip(CVarRef iterable) {
     ++vec->m_size;
   }
   return obj;
+}
+
+Object c_Pair::t_immutable() {
+  return this;
 }
 
 void c_Pair::throwOOB(int64_t key) {
@@ -4627,26 +4664,26 @@ COLLECTION_MAGIC_METHODS(Pair)
 
 #define ITERABLE_MATERIALIZE_METHODS(cls) \
   Object c_##cls::t_tovector() { \
-    c_Vector* vec; \
-    Object o = vec = NEWOBJ(c_Vector)(); \
+    auto* vec = NEWOBJ(c_Vector)(); \
+    Object o = vec; \
     vec->init(VarNR(this)); \
     return o; \
   } \
   Object c_##cls::t_toimmvector() { \
-    c_ImmVector* fv; \
-    Object o = fv = NEWOBJ(c_ImmVector)(); \
-    fv->init(VarNR(this)); \
+    auto* vec = NEWOBJ(c_ImmVector)(); \
+    Object o = vec; \
+    vec->init(VarNR(this)); \
     return o; \
   } \
   Object c_##cls::t_toset() { \
-    c_Set* st; \
-    Object o = st = NEWOBJ(c_Set)(); \
+    auto* st = NEWOBJ(c_Set)(); \
+    Object o = st; \
     st->init(VarNR(this)); \
     return o; \
   } \
   Object c_##cls::t_toimmset() { \
-    c_ImmSet* st; \
-    Object o = st = NEWOBJ(c_ImmSet)(); \
+    auto* st = NEWOBJ(c_ImmSet)(); \
+    Object o = st; \
     st->init(VarNR(this)); \
     return o; \
   }
@@ -4654,8 +4691,14 @@ COLLECTION_MAGIC_METHODS(Pair)
 #define KEYEDITERABLE_MATERIALIZE_METHODS(cls) \
   ITERABLE_MATERIALIZE_METHODS(cls) \
   Object c_##cls::t_tomap() { \
-    c_Map* mp; \
-    Object o = mp = NEWOBJ(c_Map)(); \
+    auto* mp = NEWOBJ(c_Map)(); \
+    Object o = mp; \
+    mp->init(VarNR(this)); \
+    return o; \
+  } \
+  Object c_##cls::t_toimmmap() { \
+    auto* mp = NEWOBJ(c_ImmMap)(); \
+    Object o = mp; \
     mp->init(VarNR(this)); \
     return o; \
   }

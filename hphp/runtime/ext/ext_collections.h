@@ -37,7 +37,8 @@
 
 #define DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS()  \
   DECLARE_ITERABLE_MATERIALIZE_METHODS();            \
-  Object t_tomap()
+  Object t_tomap();                                  \
+  Object t_toimmmap()
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -254,8 +255,8 @@ class BaseVector : public ExtCollectionObjectData {
   static size_t sizeOffset() { return offsetof(BaseVector, m_size); }
   static size_t dataOffset() { return offsetof(BaseVector, m_data); }
 
-  static size_t frozenCopyOffset() {
-    return offsetof(BaseVector, m_frozenCopy);
+  static size_t immCopyOffset() {
+    return offsetof(BaseVector, m_immCopy);
   }
 
   void addFront(TypedValue* val);
@@ -291,11 +292,11 @@ class BaseVector : public ExtCollectionObjectData {
    * we might need to to trigger COW.
    */
   void mutate() {
-    if (!m_frozenCopy.isNull()) cow();
+    if (!m_immCopy.isNull()) cow();
   }
 
   /**
-   * Copy-On-Write the buffer and reset the frozen copy.
+   * Copy-On-Write the buffer and reset the immutable copy.
    */
   void cow();
 
@@ -310,7 +311,7 @@ class BaseVector : public ExtCollectionObjectData {
   uint m_capacity;
   int32_t m_version;
   // A pointer to a ImmVector which with it shares the buffer.
-  Object m_frozenCopy;
+  Object m_immCopy;
 
  private:
 
@@ -390,6 +391,7 @@ class c_Vector : public BaseVector {
                         CVarRef len = uninit_null()) {
     return ti_slice(vec, offset, len);
   }
+  Object t_immutable();
 
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
@@ -429,7 +431,7 @@ class c_Vector : public BaseVector {
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc);
 
-  void initFvFields(c_ImmVector* fv);
+  Object getImmutableCopy();
   int64_t checkRequestedCapacity(CVarRef sz);
 
   // Friends
@@ -512,6 +514,8 @@ public:
 
   static Object ti_slice(CVarRef vec, CVarRef offset,
                          CVarRef len = uninit_null());
+
+  Object t_immutable();
 
   static c_ImmVector* Clone(ObjectData* obj) {
     return BaseVector::Clone<c_ImmVector>(obj);
@@ -1007,6 +1011,7 @@ class c_Map : public BaseMap {
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
+  Object t_immutable();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1049,6 +1054,7 @@ class c_ImmMap : public BaseMap {
   Object t_zip(CVarRef iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
+  Object t_immutable();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1514,6 +1520,7 @@ class c_Set : public BaseSet {
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
   static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
+  Object t_immutable();
 
  public:
 
@@ -1561,6 +1568,8 @@ class c_ImmSet : public BaseSet {
   // Static methods.
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
+
+  Object t_immutable();
 
  public:
   explicit c_ImmSet(Class* cls = c_ImmSet::classof());
@@ -1635,6 +1644,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
+  Object t_immutable();
 
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 

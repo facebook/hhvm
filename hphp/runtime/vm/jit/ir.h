@@ -626,44 +626,23 @@ O(CreateAFWHMeth,               D(Obj), S(Ctx) C(Int) S(Obj), E|Er|N|CRc|PRc) \
 O(CreateSRWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
 O(CreateSEWH,                   D(Obj), S(Obj),                    N|CRc|PRc) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int),                 Er|E|N|CRc) \
+                                          S(FramePtr),            Er|E|N|CRc) \
 O(IterInitK,                   D(Bool), S(Arr,Obj)                            \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int)                              \
-                                          C(Int),                 Er|E|N|CRc) \
-O(IterNext,                    D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),              Er|E|N) \
-O(IterNextK,                   D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int),       Er|E|N) \
+                                          S(FramePtr),            Er|E|N|CRc) \
+O(IterNext,                    D(Bool), S(FramePtr),                  Er|E|N) \
+O(IterNextK,                   D(Bool), S(FramePtr),                  Er|E|N) \
 O(WIterInit,                   D(Bool), S(Arr,Obj)                            \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int),                 Er|E|N|CRc) \
+                                          S(FramePtr),            Er|E|N|CRc) \
 O(WIterInitK,                  D(Bool), S(Arr,Obj)                            \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int)                              \
-                                          C(Int),                 Er|E|N|CRc) \
-O(WIterNext,                   D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),              Er|E|N) \
-O(WIterNextK,                  D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int),       Er|E|N) \
+                                          S(FramePtr),            Er|E|N|CRc) \
+O(WIterNext,                   D(Bool), S(FramePtr),                  Er|E|N) \
+O(WIterNextK,                  D(Bool), S(FramePtr),                  Er|E|N) \
 O(MIterInit,                   D(Bool), S(BoxedCell)                          \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int),                     Er|E|N) \
+                                          S(FramePtr),                Er|E|N) \
 O(MIterInitK,                  D(Bool), S(BoxedCell)                          \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int)                              \
-                                          C(Int),                     Er|E|N) \
-O(MIterNext,                   D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),                 E|N) \
-O(MIterNextK,                  D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int),          E|N) \
+                                          S(FramePtr),                Er|E|N) \
+O(MIterNext,                   D(Bool), S(FramePtr),                     E|N) \
+O(MIterNextK,                  D(Bool), S(FramePtr),                     E|N) \
 O(IterFree,                         ND, S(FramePtr),                     E|N) \
 O(MIterFree,                        ND, S(FramePtr),                     E|N) \
 O(DecodeCufIter,               D(Bool), S(Arr,Obj,Str)                        \

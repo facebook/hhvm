@@ -1,9 +1,9 @@
 <?hh
 
-// Test that trying to index a FixedSet array-style triggers an error.
+// Test that trying to index a ImmSet array-style triggers an error.
 
 function main() {
-  $fs = FixedSet {1, 2, 3};
+  $fs = ImmSet {1, 2, 3};
   $x = $fs[0];
 }
 

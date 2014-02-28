@@ -1,10 +1,10 @@
 <?hh
 
-// Test casting FixedVector to array.
+// Test casting ImmVector to array.
 
 function main() {
-  var_dump((array) FixedVector {});
-  var_dump((array) FixedVector {1, 2, 3});
+  var_dump((array) ImmVector {});
+  var_dump((array) ImmVector {1, 2, 3});
 }
 
 main();

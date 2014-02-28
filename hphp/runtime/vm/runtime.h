@@ -29,9 +29,9 @@ struct HhbcExtClassInfo;
 ObjectData* newVectorHelper(int nElms);
 ObjectData* newMapHelper(int nElms);
 ObjectData* newSetHelper(int nElms);
-ObjectData* newFixedVectorHelper(int nElms);
-ObjectData* newFixedMapHelper(int nElms);
-ObjectData* newFixedSetHelper(int nElms);
+ObjectData* newImmVectorHelper(int nElms);
+ObjectData* newImmMapHelper(int nElms);
+ObjectData* newImmSetHelper(int nElms);
 ObjectData* newPairHelper();
 
 StringData* concat_is(int64_t v1, StringData* v2);

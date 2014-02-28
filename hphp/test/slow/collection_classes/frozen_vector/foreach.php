@@ -1,10 +1,10 @@
 <?hh
 
-// Test iterating over a FixedVector with a "foreach".
+// Test iterating over a ImmVector with a "foreach".
 
 function main() {
 
-  $fv = FixedVector {1, 2, 3};
+  $fv = ImmVector {1, 2, 3};
 
   foreach ($fv as $e) {
     var_dump($e);

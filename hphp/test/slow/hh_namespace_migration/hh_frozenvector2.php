@@ -6,7 +6,7 @@
 namespace {
 
 function main() {
-  $s = FixedVector {};
+  $s = ImmVector {};
   var_dump($s->isEmpty());
 }
 

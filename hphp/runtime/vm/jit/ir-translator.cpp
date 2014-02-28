@@ -88,8 +88,9 @@ static const bool debug = false;
     }                                                   \
   } while (0)
 
-IRTranslator::IRTranslator(Offset bcOff, Offset spOff, const Func* curFunc)
-  : m_hhbcTrans(bcOff, spOff, curFunc)
+IRTranslator::IRTranslator(Offset bcOff, Offset spOff, bool inGenerator,
+                           const Func* curFunc)
+  : m_hhbcTrans(bcOff, spOff, inGenerator, curFunc)
 {
 }
 

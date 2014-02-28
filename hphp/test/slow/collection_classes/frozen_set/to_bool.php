@@ -1,10 +1,10 @@
 <?hh
 
-// Test that FixedSets can be cast to bool.
+// Test that ImmSets can be cast to bool.
 
 function main() {
-  var_dump((bool)(FixedSet {}));
-  var_dump((bool)(FixedSet {1, 2, 3}));
+  var_dump((bool)(ImmSet {}));
+  var_dump((bool)(ImmSet {1, 2, 3}));
 }
 
 main();

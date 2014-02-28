@@ -1,18 +1,18 @@
 <?hh
 
-// Test that we can define our own custom FixedSet class
+// Test that we can define our own custom ImmSet class
 // as long as we're not in the top-level namespace.
 
 namespace Test;
 
-class FixedSet {
+class ImmSet {
   public function __construct() {
-    echo "Custom FixedSet\n";
+    echo "Custom ImmSet\n";
   }
 }
 
 function main() {
-  $custom_set = new FixedSet();
+  $custom_set = new ImmSet();
 }
 
 main();

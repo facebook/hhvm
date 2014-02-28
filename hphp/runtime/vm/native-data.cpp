@@ -86,7 +86,7 @@ DEBUG_ONLY
 static bool invalidateNativeData(ObjectData* obj, const NativeDataInfo* ndi) {
   const size_t size = ndi->sz + sizeof(SweepNode);
   void *ptr = reinterpret_cast<char*>(obj) - size;
-  memset(ptr, size, 0x6A);
+  memset(ptr, kSmartFreeFill, size);
   return true;
 }
 

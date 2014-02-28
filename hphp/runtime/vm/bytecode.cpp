@@ -860,15 +860,15 @@ bool Stack::wouldOverflow(int numCells) const {
 }
 
 TypedValue* Stack::frameStackBase(const ActRec* fp) {
+  assert(!fp->inGenerator());
   const Func* func = fp->m_func;
-  assert(!func->isGenerator());
   return (TypedValue*)((uintptr_t)fp
                        - (uintptr_t)(func->numLocals()) * sizeof(TypedValue)
                        - (uintptr_t)(func->numIterators() * sizeof(Iter)));
 }
 
 TypedValue* Stack::generatorStackBase(const ActRec* fp) {
-  assert(fp->m_func->isGenerator());
+  assert(fp->inGenerator());
   VMExecutionContext* context = g_vmContext;
   ActRec* sfp = fp->arGetSfp();
   if (sfp == fp) {
@@ -1407,7 +1407,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       shuffleMagicArgs(ar);
     } else if (ar->hasVarEnv()) {
       m_fp = ar;
-      if (!func->isGenerator()) {
+      if (!ar->inGenerator()) {
         assert(func->isPseudoMain());
         pushLocalsAndIterators(func);
         ar->m_varEnv->attach(ar);
@@ -1470,7 +1470,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
     func = ar->m_func;
   }
 
-  if (LIKELY(!func->isGenerator())) {
+  if (LIKELY(!ar->inGenerator())) {
     /*
      * we only get here from callAndResume
      * if we failed to get a translation for
@@ -1981,7 +1981,7 @@ ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
   ActRec* prevFp = fp->arGetSfp();
   if (prevFp != fp) {
     if (prevSp) {
-      if (UNLIKELY(fp->m_func->isGenerator())) {
+      if (UNLIKELY(fp->inGenerator())) {
         *prevSp = (TypedValue*)prevFp - prevFp->m_func->numSlotsInFrame();
       } else {
         *prevSp = (TypedValue*)&fp[1];
@@ -2096,7 +2096,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     auto const isReturning = curOp == OpRetC || curOp == OpRetV;
 
     // Builtins and generators don't have a file and line number
-    if (prevFp && !prevFp->m_func->isBuiltin() && !fp->m_func->isGenerator()) {
+    if (prevFp && !prevFp->m_func->isBuiltin() && !fp->inGenerator()) {
       auto const prevUnit = prevFp->m_func->unit();
       auto prevFile = prevUnit->filepath();
       if (prevFp->m_func->originalFilename()) {
@@ -2126,7 +2126,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
 
     // check for include
     String funcname = const_cast<StringData*>(fp->m_func->name());
-    if (fp->m_func->isGenerator()) {
+    if (fp->inGenerator()) {
       // retrieve the original function name from the inner continuation
       funcname = frame_continuation(fp)->t_getorigfuncname();
     }
@@ -2479,7 +2479,6 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   }
   Func* func = unit->getMain(cls);
   assert(!func->isCPPBuiltin());
-  assert(!func->isGenerator());
   ar->m_func = func;
   ar->initNumArgs(0);
   assert(getFP());
@@ -2791,6 +2790,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
   assert(m_stack.count() == 0);
   ActRec* ar = m_stack.allocA();
   ar->m_func = s_debuggerDummy->getMain();
+  ar->initNumArgs(0);
   ar->setThis(nullptr);
   ar->m_soff = 0;
   ar->m_savedRbp = 0;
@@ -2851,7 +2851,7 @@ void VMExecutionContext::preventReturnsToTC() {
         TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
                  "func %s\n", ar, ar->m_savedRip,
                  ar->m_func->fullName()->data());
-        if (ar->m_func->isGenerator()) {
+        if (ar->inGenerator()) {
           ar->m_savedRip =
             reinterpret_cast<uintptr_t>(tx64->uniqueStubs.genRetHelper);
         } else {
@@ -4348,7 +4348,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSSwitch(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopRetC(IOP_ARGS) {
   NEXT();
   uint soff = m_fp->m_soff;
-  assert(!m_fp->m_func->isGenerator());
+  assert(!m_fp->inGenerator());
 
   // Call the runtime helpers to free the local variables and iterators
   frame_free_locals_inl(m_fp, m_fp->m_func->numLocals());
@@ -5814,7 +5814,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushCtor(IOP_ARGS) {
   arSetSfp(ar, m_fp);
   ar->m_func = f;
   ar->setThis(this_);
-  ar->initNumArgs(numArgs, true /* isFPushCtor */);
+  ar->initNumArgsFromFPushCtor(numArgs);
   arSetSfp(ar, m_fp);
   ar->setVarEnv(nullptr);
 }
@@ -5845,7 +5845,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushCtorD(IOP_ARGS) {
   arSetSfp(ar, m_fp);
   ar->m_func = f;
   ar->setThis(this_);
-  ar->initNumArgs(numArgs, true /* isFPushCtor */);
+  ar->initNumArgsFromFPushCtor(numArgs);
   ar->setVarEnv(nullptr);
 }
 
@@ -5909,7 +5909,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushCufIter(IOP_ARGS) {
   } else {
     ar->setVarEnv(nullptr);
   }
-  ar->initNumArgs(numArgs, false /* isFPushCtor */);
+  ar->initNumArgs(numArgs);
 }
 
 OPTBLD_INLINE void VMExecutionContext::doFPushCuf(IOP_ARGS,
@@ -5950,7 +5950,7 @@ OPTBLD_INLINE void VMExecutionContext::doFPushCuf(IOP_ARGS,
   } else {
     ar->setThis(nullptr);
   }
-  ar->initNumArgs(numArgs, false /* isFPushCtor */);
+  ar->initNumArgs(numArgs);
   if (invName) {
     ar->setInvName(invName);
   } else {
@@ -6315,7 +6315,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
     checkStack(m_stack, func);
 
     assert(ar->m_savedRbp == (uint64_t)m_fp);
-    assert(!ar->m_func->isGenerator());
+    assert(!ar->inGenerator());
     ar->m_savedRip =
       reinterpret_cast<uintptr_t>(tx64->uniqueStubs.retHelper);
     assert(isReturnHelper(ar->m_savedRip));

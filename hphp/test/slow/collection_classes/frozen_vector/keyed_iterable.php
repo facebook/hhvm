@@ -44,7 +44,7 @@ function foo(KeyedIterable $fv) {
 
 function main() {
   $v = Vector {1, 2, 3};
-  foo(new FixedVector($v));
+  foo(new ImmVector($v));
 }
 
 main();

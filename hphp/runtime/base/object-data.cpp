@@ -129,14 +129,14 @@ bool ObjectData::o_toBooleanImpl() const noexcept {
       return c_Vector::ToBool(this);
     } else if (m_cls == c_Map::classof()) {
       return c_Map::ToBool(this);
-    } else if (m_cls == c_FixedMap::classof()) {
-      return c_FixedMap::ToBool(this);
+    } else if (m_cls == c_ImmMap::classof()) {
+      return c_ImmMap::ToBool(this);
     } else if (m_cls == c_Set::classof()) {
       return c_Set::ToBool(this);
-    } else if (m_cls == c_FixedVector::classof()) {
-      return c_FixedVector::ToBool(this);
-    } else if (m_cls == c_FixedSet::classof()) {
-      return c_FixedSet::ToBool(this);
+    } else if (m_cls == c_ImmVector::classof()) {
+      return c_ImmVector::ToBool(this);
+    } else if (m_cls == c_ImmSet::classof()) {
+      return c_ImmSet::ToBool(this);
     } else {
       always_assert(false);
     }
@@ -429,12 +429,12 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
       return c_Set::ToArray(this);
     } else if (m_cls == c_Pair::classof()) {
       return c_Pair::ToArray(this);
-    } else if (m_cls == c_FixedVector::classof()) {
-      return c_FixedVector::ToArray(this);
-    } else if (m_cls == c_FixedMap::classof()) {
-      return c_FixedMap::ToArray(this);
-    } else if (m_cls == c_FixedSet::classof()) {
-      return c_FixedSet::ToArray(this);
+    } else if (m_cls == c_ImmVector::classof()) {
+      return c_ImmVector::ToArray(this);
+    } else if (m_cls == c_ImmMap::classof()) {
+      return c_ImmMap::ToArray(this);
+    } else if (m_cls == c_ImmSet::classof()) {
+      return c_ImmSet::ToArray(this);
     }
     // It's undefined what happens if you reach not_reached. We want to be sure
     // to hard fail if we get here.
@@ -862,16 +862,16 @@ ObjectData* ObjectData::clone() {
         return c_Vector::Clone(this);
       } else if (m_cls == c_Map::classof()) {
         return c_Map::Clone(this);
-      } else if (m_cls == c_FixedMap::classof()) {
-        return c_FixedMap::Clone(this);
+      } else if (m_cls == c_ImmMap::classof()) {
+        return c_ImmMap::Clone(this);
       } else if (m_cls == c_Set::classof()) {
         return c_Set::Clone(this);
       } else if (m_cls == c_Pair::classof()) {
         return c_Pair::Clone(this);
-      } else if (m_cls == c_FixedVector::classof()) {
-        return c_FixedVector::Clone(this);
-      } else if (m_cls == c_FixedSet::classof()) {
-        return c_FixedSet::Clone(this);
+      } else if (m_cls == c_ImmVector::classof()) {
+        return c_ImmVector::Clone(this);
+      } else if (m_cls == c_ImmSet::classof()) {
+        return c_ImmSet::Clone(this);
       } else {
         always_assert(false);
       }

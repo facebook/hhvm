@@ -1,6 +1,6 @@
 <?hh
 
-// Test constructing a FixedMap in different ways.
+// Test constructing a ImmMap in different ways.
 function show_keyed_iter($iter) {
   $vs = Vector {};
 
@@ -21,19 +21,19 @@ function show_keyed_iter($iter) {
 
 function main() {
   echo "Vector\n";
-  show_keyed_iter(new FixedMap(Vector {1, 2, 3}));
-  echo "FixedVector\n";
-  show_keyed_iter(new FixedMap(FixedVector {1, 2, 3}));
+  show_keyed_iter(new ImmMap(Vector {1, 2, 3}));
+  echo "ImmVector\n";
+  show_keyed_iter(new ImmMap(ImmVector {1, 2, 3}));
   echo "Map\n";
-  show_keyed_iter(new FixedMap(Map {0 => 1, 10 => 2, 40 => 3}));
-  echo "FixedMap\n";
-  show_keyed_iter(new FixedMap(new FixedMap(Map {0 => 1, 10 => 2, 40 => 3})));
+  show_keyed_iter(new ImmMap(Map {0 => 1, 10 => 2, 40 => 3}));
+  echo "ImmMap\n";
+  show_keyed_iter(new ImmMap(new ImmMap(Map {0 => 1, 10 => 2, 40 => 3})));
   echo "StableMap\n";
-  show_keyed_iter(new FixedMap(StableMap {0 => 1, 10 => 2, 40 => 3}));
+  show_keyed_iter(new ImmMap(StableMap {0 => 1, 10 => 2, 40 => 3}));
   echo "array\n";
-  show_keyed_iter(new FixedMap(array(1, 2, 3)));
+  show_keyed_iter(new ImmMap(array(1, 2, 3)));
 
-  // We can't construct a Map or FixedMap from a Set.
+  // We can't construct a Map or ImmMap from a Set.
 }
 
 main();

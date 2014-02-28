@@ -24,6 +24,8 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 const StaticString s_IntlTimeZone("IntlTimeZone");
 
+Class* IntlTimeZone::c_IntlTimeZone = nullptr;
+
 icu::TimeZone* IntlTimeZone::ParseArg(CVarRef arg,
                                       const String& funcname,
                                       intl_error &err) {
@@ -86,8 +88,6 @@ icu::TimeZone* IntlTimeZone::ParseArg(CVarRef arg,
     ov->setError(ec); \
     return fail; \
   }
-
-#define ULOC_DEFAULT(loc) (loc.empty() ? Intl::GetDefaultLocale() : loc)
 
 //////////////////////////////////////////////////////////////////////////////
 // class IntlTimeZone
@@ -183,7 +183,7 @@ static Variant HHVM_METHOD(IntlTimeZone, getDisplayName,
   data->timezone()->getDisplayName((UBool)isDaylight,
                                    (icu::TimeZone::EDisplayType)style,
                                     icu::Locale::createFromName(
-                                     ULOC_DEFAULT(locale).c_str()),
+                                     localeOrDefault(locale).c_str()),
                                    result);
   UErrorCode error = U_ZERO_ERROR;
   String ret(u8(result, error));

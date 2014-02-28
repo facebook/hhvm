@@ -1849,7 +1849,8 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     } else {
       assert(m_mode == TransProfile || m_mode == TransLive);
       tp = analyze(sk);
-      RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
+      RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
+                                    liveFrame()->inGenerator() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
       region = selectRegion(rContext, tp.get(), m_mode);
@@ -1875,7 +1876,8 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     Offset initSpOffset = region ? region->blocks[0]->initialSpOffset()
                                  : liveSpOff();
     while (result == Retry) {
-      traceStart(sk.offset(), initSpOffset, sk.func());
+      traceStart(sk.offset(), initSpOffset, liveFrame()->inGenerator(),
+                 sk.func());
 
       // Try translating a region if we have one, then fall back to using the
       // Tracelet.
@@ -1899,7 +1901,8 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         }
         if (result == Failure) {
           traceFree();
-          traceStart(sk.offset(), liveSpOff(), sk.func());
+          traceStart(sk.offset(), liveSpOff(), liveFrame()->inGenerator(),
+                     sk.func());
           resetState();
         }
       }

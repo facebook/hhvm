@@ -63,7 +63,7 @@ std::string RuntimeOption::PidFile = "www.pid";
 
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
-int RuntimeOption::LogHeaderMangle;
+int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::InjectedStackTrace = true;
@@ -94,10 +94,10 @@ int RuntimeOption::RaiseDebuggingFrequency = 1;
 int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
 int64_t RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
 
-std::string RuntimeOption::AccessLogDefaultFormat;
+std::string RuntimeOption::AccessLogDefaultFormat = "%h %l %u %t \"%r\" %>s %b";
 std::vector<AccessLogFileData> RuntimeOption::AccessLogs;
 
-std::string RuntimeOption::AdminLogFormat;
+std::string RuntimeOption::AdminLogFormat = "%h %t %s %U";
 std::string RuntimeOption::AdminLogFile;
 std::string RuntimeOption::AdminLogSymLink;
 
@@ -109,15 +109,13 @@ std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerFileSocket;
 std::string RuntimeOption::ServerPrimaryIP;
-int RuntimeOption::ServerPort;
+int RuntimeOption::ServerPort = 80;
 int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
 bool RuntimeOption::ServerThreadRoundRobin = false;
-constexpr int kDefaultWarmupThrottleRequestCount = 0;
-int RuntimeOption::ServerWarmupThrottleRequestCount =
-  kDefaultWarmupThrottleRequestCount;
+int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
 int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
@@ -132,18 +130,18 @@ bool RuntimeOption::PageletServerThreadRoundRobin = false;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::PageletServerQueueLimit = 0;
 bool RuntimeOption::PageletServerThreadDropStack = false;
-int RuntimeOption::FiberCount = 1;
+int RuntimeOption::FiberCount = Process::GetCPUCount();
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::PspTimeoutSeconds = 0;
 size_t RuntimeOption::ServerMemoryHeadRoom = 0;
 int64_t RuntimeOption::RequestMemoryMaxBytes =
   std::numeric_limits<int64_t>::max();
 int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
-int RuntimeOption::ResponseQueueCount;
-int RuntimeOption::ServerGracefulShutdownWait;
+int RuntimeOption::ResponseQueueCount = 0;
+int RuntimeOption::ServerGracefulShutdownWait = 0;
 bool RuntimeOption::ServerHarshShutdown = true;
 bool RuntimeOption::ServerEvilShutdown = true;
-int RuntimeOption::ServerDanglingWait;
+int RuntimeOption::ServerDanglingWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownListenNoWork = -1;
 int RuntimeOption::GzipCompressionLevel = 3;
@@ -162,15 +160,15 @@ std::string RuntimeOption::OutputHandler;
 bool RuntimeOption::ImplicitFlush = false;
 bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
-int64_t RuntimeOption::MaxPostSize;
+int64_t RuntimeOption::MaxPostSize = 100;
 bool RuntimeOption::AlwaysPopulateRawPostData = true;
-int64_t RuntimeOption::UploadMaxFileSize;
-std::string RuntimeOption::UploadTmpDir;
-bool RuntimeOption::EnableFileUploads;
-bool RuntimeOption::EnableUploadProgress;
-int RuntimeOption::Rfc1867Freq;
-std::string RuntimeOption::Rfc1867Prefix;
-std::string RuntimeOption::Rfc1867Name;
+int64_t RuntimeOption::UploadMaxFileSize = 100;
+std::string RuntimeOption::UploadTmpDir = "/tmp";
+bool RuntimeOption::EnableFileUploads = true;
+bool RuntimeOption::EnableUploadProgress = false;
+int RuntimeOption::Rfc1867Freq = 256 * 1024;
+std::string RuntimeOption::Rfc1867Prefix = "vupload_";
+std::string RuntimeOption::Rfc1867Name = "video_ptoken";
 bool RuntimeOption::LibEventSyncSend = true;
 bool RuntimeOption::ExpiresActive = true;
 int RuntimeOption::ExpiresDefault = 2592000;
@@ -187,7 +185,7 @@ int RuntimeOption::SSLPortFd = -1;
 std::string RuntimeOption::SSLCertificateFile;
 std::string RuntimeOption::SSLCertificateKeyFile;
 std::string RuntimeOption::SSLCertificateDir;
-bool RuntimeOption::TLSDisableTLS1_2;
+bool RuntimeOption::TLSDisableTLS1_2 = false;
 std::string RuntimeOption::TLSClientCipherSpec;
 
 std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
@@ -250,7 +248,7 @@ bool RuntimeOption::UnserializationWhitelistCheck = false;
 bool RuntimeOption::UnserializationWhitelistCheckWarningOnly = true;
 
 std::string RuntimeOption::TakeoverFilename;
-int RuntimeOption::AdminServerPort;
+int RuntimeOption::AdminServerPort = 0;
 int RuntimeOption::AdminThreadCount = 1;
 std::string RuntimeOption::AdminPassword;
 std::set<std::string> RuntimeOption::AdminPasswords;
@@ -277,7 +275,7 @@ bool RuntimeOption::ServerErrorMessage = false;
 bool RuntimeOption::TranslateSource = false;
 bool RuntimeOption::RecordInput = false;
 bool RuntimeOption::ClearInputOnSuccess = true;
-std::string RuntimeOption::ProfilerOutputDir;
+std::string RuntimeOption::ProfilerOutputDir = "/tmp";
 std::string RuntimeOption::CoreDumpEmail;
 bool RuntimeOption::CoreDumpReport = true;
 std::string RuntimeOption::CoreDumpReportDirectory
@@ -305,7 +303,7 @@ int RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
 int64_t RuntimeOption::MaxRSS = 0;
 int64_t RuntimeOption::MaxRSSPollingCycle = 0;
 int64_t RuntimeOption::DropCacheCycle = 0;
-int64_t RuntimeOption::MaxSQLRowCount = 10000;
+int64_t RuntimeOption::MaxSQLRowCount = 0;
 int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
 int64_t RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
@@ -322,8 +320,8 @@ int RuntimeOption::DnsCacheKeyFrequencyUpdatePeriod = 1000;
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
-std::string RuntimeOption::LightProcessFilePrefix;
-int RuntimeOption::LightProcessCount;
+std::string RuntimeOption::LightProcessFilePrefix = "./lightprocess";
+int RuntimeOption::LightProcessCount = 0;
 
 bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
@@ -434,7 +432,7 @@ std::string RuntimeOption::RepoLocalMode;
 std::string RuntimeOption::RepoLocalPath;
 std::string RuntimeOption::RepoCentralPath;
 std::string RuntimeOption::RepoEvalMode;
-std::string RuntimeOption::RepoJournal;
+std::string RuntimeOption::RepoJournal = "delete";
 bool RuntimeOption::RepoCommit = true;
 bool RuntimeOption::RepoDebugInfo = true;
 // Missing: RuntimeOption::RepoAuthoritative's physical location is
@@ -446,7 +444,7 @@ std::string RuntimeOption::SandboxHome;
 std::string RuntimeOption::SandboxFallback;
 std::string RuntimeOption::SandboxConfFile;
 std::map<std::string, std::string> RuntimeOption::SandboxServerVariables;
-bool RuntimeOption::SandboxFromCommonRoot;
+bool RuntimeOption::SandboxFromCommonRoot = false;
 std::string RuntimeOption::SandboxDirectoriesRoot;
 std::string RuntimeOption::SandboxLogsRoot;
 
@@ -465,7 +463,7 @@ std::string RuntimeOption::DebuggerDefaultSandboxPath;
 std::string RuntimeOption::DebuggerStartupDocument;
 int RuntimeOption::DebuggerSignalTimeout = 1;
 
-std::string RuntimeOption::SendmailPath;
+std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
 
 long RuntimeOption::PregBacktraceLimit = 1000000;
@@ -490,7 +488,7 @@ int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 
 #ifdef FACEBOOK
 bool RuntimeOption::EnableFb303Server = true;
-int RuntimeOption::Fb303ServerPort;
+int RuntimeOption::Fb303ServerPort = 0;
 int RuntimeOption::Fb303ServerThreadStackSizeMb = 8;
 int RuntimeOption::Fb303ServerWorkerThreads = 1;
 int RuntimeOption::Fb303ServerPoolThreads = 1;
@@ -728,7 +726,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerThreadRoundRobin = server["ThreadRoundRobin"].getBool();
     ServerWarmupThrottleRequestCount =
       server["WarmupThrottleRequestCount"].getInt32(
-        kDefaultWarmupThrottleRequestCount
+        ServerWarmupThrottleRequestCount
       );
     ServerThreadDropCacheTimeoutSeconds =
       server["ThreadDropCacheTimeoutSeconds"].getInt32(0);

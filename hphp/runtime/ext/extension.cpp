@@ -168,6 +168,20 @@ void Extension::InitModules() {
   s_modules_initialised = true;
 }
 
+void Extension::ThreadInitModules() {
+  assert(s_registered_extensions);
+  for (auto& kv : *s_registered_extensions) {
+    kv.second->threadInit();
+  }
+}
+
+void Extension::ThreadShutdownModules() {
+  assert(s_registered_extensions);
+  for (auto& kv : *s_registered_extensions) {
+    kv.second->threadShutdown();
+  }
+}
+
 void Extension::RequestInitModules() {
   assert(s_registered_extensions);
   for (auto& kv : *s_registered_extensions) {

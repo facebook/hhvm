@@ -3403,7 +3403,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
   fakeAR.m_savedRip = 0xbaabaa;  // should never be inspected
   fakeAR.m_func = fcall->funcd;
   fakeAR.m_soff = 0xb00b00;      // should never be inspected
-  fakeAR.m_numArgsAndCtorFlag = numArgs;
+  fakeAR.m_numArgsAndGenCtorFlags = numArgs;
   fakeAR.m_varEnv = nullptr;
 
   /*
@@ -4091,7 +4091,7 @@ bool instrMustInterp(const NormalizedInstruction& inst) {
 }
 
 void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
-                            const Func* func) {
+                            bool inGenerator, const Func* func) {
   assert(!m_irTrans);
 
   FTRACE(1, "{}{:-^40}{}\n",
@@ -4099,7 +4099,8 @@ void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
          " HHIR during translation ",
          color(ANSI_COLOR_END));
 
-  m_irTrans.reset(new JIT::IRTranslator(initBcOffset, initSpOffset, func));
+  m_irTrans.reset(new JIT::IRTranslator(initBcOffset, initSpOffset, inGenerator,
+                                        func));
 }
 
 void Translator::traceEnd() {

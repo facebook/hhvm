@@ -3878,7 +3878,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               "Cannot use collection initialization for non-collection class");
           }
           bool kvPairs = (cType == Collection::MapType ||
-                          cType == Collection::FixedMapType);
+                          cType == Collection::ImmMapType);
           e.NewCol(cType, nElms);
           if (kvPairs) {
             for (int i = 0; i < nElms; i++) {

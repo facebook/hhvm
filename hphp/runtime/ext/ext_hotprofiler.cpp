@@ -312,8 +312,7 @@ static inline uint64_t
 to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
 {
 #ifdef CLOCK_THREAD_CPUTIME_ID
-  static int64_t vdso_usable =
-    Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
+  static int64_t vdso_usable = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
 #else
   static int64_t vdso_usable = -1;
 #endif
@@ -327,7 +326,7 @@ static esyscall vtsc_syscall("vtsc");
 
 static inline uint64_t vtsc(int64_t MHz) {
 #ifdef CLOCK_THREAD_CPUTIME_ID
-  int64_t rval = Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
+  int64_t rval = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
   if (rval >= 0) {
     return rval;
   }
@@ -1423,7 +1422,7 @@ class MemoProfiler : public Profiler {
     // Lots of random cases to skip just to keep this simple for
     // now. There's no reason not to do more later.
     if (!g_vmContext->m_faults.empty()) return;
-    if (ar->m_func->isCPPBuiltin() || ar->m_func->isGenerator()) return;
+    if (ar->m_func->isCPPBuiltin() || ar->inGenerator()) return;
     auto ret_tv = g_vmContext->m_stack.topTV();
     auto ret = tvAsCVarRef(ret_tv);
     if (ret.isNull()) return;
@@ -1753,7 +1752,7 @@ void f_xhprof_enable(int flags/* = 0 */,
 #ifdef HOTPROFILER
 #ifdef CLOCK_THREAD_CPUTIME_ID
   bool missingClockGetTimeNS =
-    Util::Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
+    Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
 #else
   bool missingClockGetTimeNS = true;
 #endif

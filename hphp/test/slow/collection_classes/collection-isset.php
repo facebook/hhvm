@@ -2,7 +2,7 @@
 function main() {
   $containers = Vector {
     Pair {Vector {}, Vector {Vector {}}},
-    Pair {FixedVector {}, FixedVector {FixedVector {}}},
+    Pair {ImmVector {}, ImmVector {ImmVector {}}},
     Pair {Pair {42, 73}, Pair {Pair {43, 74}, Pair {44, 75}}}
   };
   foreach ($containers as list($x, $y)) {
@@ -24,7 +24,7 @@ function main() {
 
   $containers = Vector {
     Pair {Map {}, Map {'a' => Map {}}},
-    Pair {FixedMap {}, FixedMap {'a' => FixedMap {}}}
+    Pair {ImmMap {}, ImmMap {'a' => ImmMap {}}}
   };
   foreach ($containers as list($x, $y)) {
     var_dump(isset($x[11][22]));

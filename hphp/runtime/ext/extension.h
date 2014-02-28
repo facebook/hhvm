@@ -65,6 +65,8 @@ public:
   static void MergeSystemlib();
   static void ShutdownModules();
   static bool ModulesInitialised();
+  static void ThreadInitModules();
+  static void ThreadShutdownModules();
   static void RequestInitModules();
   static void RequestShutdownModules();
 
@@ -86,6 +88,8 @@ public:
   virtual void moduleInfo(Array &info) { info.set(m_name, true);}
   virtual void moduleInit() {}
   virtual void moduleShutdown() {}
+  virtual void threadInit() {}
+  virtual void threadShutdown() {}
   virtual void requestInit() {}
   virtual void requestShutdown() {}
 

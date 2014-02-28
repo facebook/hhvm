@@ -225,7 +225,7 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
                                    int &count, short flag) {
   assert(sockets.is(KindOfArray));
   Array sock_array = sockets.toArray();
-  Array ret;
+  Array ret = Array::Create();
   for (ArrayIter iter(sock_array); iter; ++iter) {
     pollfd &fd = fds[nfds++];
     assert(fd.fd == iter.second().toResource().getTyped<File>()->fd());
@@ -1063,7 +1063,10 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   Resource ret;
   Socket *sock = NULL;
 
-  if (timeout < 0) timeout = g_context->getSocketDefaultTimeout();
+  if (timeout < 0) {
+    timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getSocketDefaultTimeout();
+  }
   // test if protocol is SSL
   SSLSocket *sslsock = SSLSocket::Create(hosturl, timeout);
   if (sslsock) {

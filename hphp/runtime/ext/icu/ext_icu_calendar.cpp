@@ -25,6 +25,8 @@ const StaticString
   s_IntlCalendar("IntlCalendar"),
   s_IntlGregorianCalendar("IntlGregorianCalendar");
 
+Class* IntlCalendar::c_IntlCalendar = nullptr;
+
 const icu::Calendar*
 IntlCalendar::ParseArg(CVarRef cal, const icu::Locale &locale,
                        const String &funcname, intl_error &err,
@@ -93,8 +95,6 @@ bad_argument:
 
 /////////////////////////////////////////////////////////////////////////////
 // Methods
-
-#define ULOC_DEFAULT(loc) (loc.empty() ? Intl::GetDefaultLocale() : loc)
 
 #define CAL_FETCH(dest, src, def) \
   auto dest = IntlCalendar::Get(src); \
@@ -171,7 +171,7 @@ static Object HHVM_STATIC_METHOD(IntlCalendar, createInstance,
   if (!tz) {
     return null_object;
   }
-  String loc = ULOC_DEFAULT(locale);
+  String loc = localeOrDefault(locale);
   UErrorCode error = U_ZERO_ERROR;
   icu::Calendar *cal =
     icu::Calendar::createInstance(tz, icu::Locale::createFromName(loc.c_str()),
@@ -518,7 +518,7 @@ static Variant HHVM_STATIC_METHOD(IntlCalendar, getKeywordValuesForLocale,
                                  bool common) {
   UErrorCode error = U_ZERO_ERROR;
   UEnumeration *uenum = ucal_getKeywordValuesForLocale(key.c_str(),
-                                   ULOC_DEFAULT(locale).c_str(),
+                                   localeOrDefault(locale).c_str(),
                                    common, &error);
   if (U_FAILURE(error)) {
     if (uenum) { uenum_close(uenum); }
@@ -649,7 +649,7 @@ static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
   if (numargs < 3) {
     tz = IntlTimeZone::ParseArg(args[0], "intlgregcal_create_instance",
                                          s_intl_error->m_error);
-    String loc(ULOC_DEFAULT(args[1].toString()));
+    String loc(localeOrDefault(args[1].toString()));
     error = U_ZERO_ERROR;
     gcal = new icu::GregorianCalendar(tz,
                icu::Locale::createFromName(loc.c_str()), error);

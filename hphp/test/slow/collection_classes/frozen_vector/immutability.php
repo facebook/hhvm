@@ -1,12 +1,12 @@
 <?hh
 
-// Test that FixedVector is immutable.
+// Test that ImmVector is immutable.
 
 function main() {
 
   $callWithExc = function ($f) {
     try {
-      $f(FixedVector {1, 2, 3});
+      $f(ImmVector {1, 2, 3});
     } catch (Exception $e) {
       return get_class($e) . ": " . $e->getMessage();
     }
@@ -16,7 +16,7 @@ function main() {
 
   // All of these should throw.
 
-  $fs = FixedVector {
+  $fs = ImmVector {
     function ($fv) {
       $fv[0] = 1;
     },

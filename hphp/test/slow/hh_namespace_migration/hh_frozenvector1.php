@@ -1,10 +1,10 @@
 <?hh
 
-// Test that in the top-level namespace HH\FixedVector can be
-// accessed as FixedVector.
+// Test that in the top-level namespace HH\ImmVector can be
+// accessed as ImmVector.
 
 function main() {
-  $s = FixedVector {1, 2, 3};
+  $s = ImmVector {1, 2, 3};
   var_dump($s->isEmpty());
 }
 

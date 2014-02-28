@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/util/text-art.h"
 
-using namespace HPHP::Util::TextArt;
+using namespace HPHP::TextArt;
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

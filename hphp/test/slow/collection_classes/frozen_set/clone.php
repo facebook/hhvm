@@ -1,9 +1,9 @@
 <?hh
 
-// Test that we can clone a FixedSet.
+// Test that we can clone a ImmSet.
 
 function main() {
-  $fs = FixedSet {1, 2, 3};
+  $fs = ImmSet {1, 2, 3};
   $clone = clone $fs;
   var_dump($clone == $fs);
 }

@@ -21,6 +21,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP {
 namespace JIT {
@@ -86,6 +87,10 @@ static const int kExtraLevel = 6;
 void dumpTrace(int level, const IRUnit&, const char* caption,
                const RegAllocInfo* regs = nullptr, AsmInfo* ai = nullptr,
                const GuardConstraints* guards = nullptr);
+
+inline std::ostream& operator<<(std::ostream& os, Type t) {
+  return os << t.toString();
+}
 
 }}
 

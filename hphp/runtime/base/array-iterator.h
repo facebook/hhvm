@@ -31,8 +31,8 @@ class c_Vector;
 class BaseMap;
 class c_Set;
 class c_Pair;
-class c_FixedVector;
-class c_FixedSet;
+class c_ImmVector;
+class c_ImmSet;
 struct Iter;
 
 enum class IterNextIndex : uint16_t {
@@ -40,7 +40,7 @@ enum class IterNextIndex : uint16_t {
   ArrayMixed,
   Array,
   Vector,
-  FixedVector,
+  ImmVector,
   Map,
   Set,
   Pair,
@@ -284,11 +284,11 @@ class ArrayIter {
 
   static void VectorInit(ArrayIter* iter, ObjectData* obj);
   static void MapInit(ArrayIter* iter, ObjectData* obj);
-  static void FixedMapInit(ArrayIter* iter, ObjectData* obj);
+  static void ImmMapInit(ArrayIter* iter, ObjectData* obj);
   static void SetInit(ArrayIter* iter, ObjectData* obj);
   static void PairInit(ArrayIter* iter, ObjectData* obj);
-  static void FixedVectorInit(ArrayIter* iter, ObjectData* obj);
-  static void FixedSetInit(ArrayIter* iter, ObjectData* obj);
+  static void ImmVectorInit(ArrayIter* iter, ObjectData* obj);
+  static void ImmSetInit(ArrayIter* iter, ObjectData* obj);
   static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
 
   typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
@@ -313,15 +313,15 @@ class ArrayIter {
     assert(hasCollection() && getCollectionType() == Collection::PairType);
     return (c_Pair*)((intptr_t)m_obj & ~1);
   }
-  c_FixedVector* getFixedVector() {
+  c_ImmVector* getImmVector() {
     assert(hasCollection() &&
-           getCollectionType() == Collection::FixedVectorType);
+           getCollectionType() == Collection::ImmVectorType);
 
-    return (c_FixedVector*)((intptr_t)m_obj & ~1);
+    return (c_ImmVector*)((intptr_t)m_obj & ~1);
   }
-  c_FixedSet* getFixedSet() {
-    assert(hasCollection() && getCollectionType() == Collection::FixedSetType);
-    return (c_FixedSet*)((intptr_t)m_obj & ~1);
+  c_ImmSet* getImmSet() {
+    assert(hasCollection() && getCollectionType() == Collection::ImmSetType);
+    return (c_ImmSet*)((intptr_t)m_obj & ~1);
   }
   Collection::Type getCollectionType() {
     ObjectData* obj = getObject();

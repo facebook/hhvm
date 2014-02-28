@@ -77,12 +77,12 @@ BinaryOpExpression::BinaryOpExpression
       cType = Collection::SetType;
     } else if (strcasecmp(s.c_str(), "pair") == 0) {
       cType = Collection::PairType;
-    } else if (strcasecmp(s.c_str(), "fixedvector") == 0) {
-      cType = Collection::FixedVectorType;
-    } else if (strcasecmp(s.c_str(), "fixedmap") == 0) {
-      cType = Collection::FixedMapType;
-    } else if (strcasecmp(s.c_str(), "fixedset") == 0) {
-      cType = Collection::FixedSetType;
+    } else if (strcasecmp(s.c_str(), "immvector") == 0) {
+      cType = Collection::ImmVectorType;
+    } else if (strcasecmp(s.c_str(), "immmap") == 0) {
+      cType = Collection::ImmMapType;
+    } else if (strcasecmp(s.c_str(), "immset") == 0) {
+      cType = Collection::ImmSetType;
     }
     ExpressionListPtr el = static_pointer_cast<ExpressionList>(m_exp2);
     el->setCollectionType(cType);

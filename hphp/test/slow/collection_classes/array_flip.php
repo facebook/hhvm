@@ -14,9 +14,9 @@ function main() {
   flip(Vector {'foo', 'bar', 'baz'});
   flip(Set {'foo', 'bar', 'baz'});
   flip(Map { 'a' => 10, 'b' => 20, 'c' => 30});
-  flip(FixedVector {'foo', 'bar', 'baz'});
-  flip(FixedSet {'foo', 'bar', 'baz'});
-  flip(FixedMap { 'a' => 10, 'b' => 20, 'c' => 30});
+  flip(ImmVector {'foo', 'bar', 'baz'});
+  flip(ImmSet {'foo', 'bar', 'baz'});
+  flip(ImmMap { 'a' => 10, 'b' => 20, 'c' => 30});
 
   flip(Vector {new stdClass(), 10, '20', 'str'});
 

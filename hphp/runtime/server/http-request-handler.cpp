@@ -76,7 +76,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
          strcmp(valp + 5, "html")  == 0)) {
       // Apache adds character set for these two types
       val += "; charset=";
-      val += g_context->getDefaultCharset().toCppString();
+      val += IniSetting::Get("default_charset");
       valp = val.c_str();
     }
     transport->addHeader("Content-Type", valp);

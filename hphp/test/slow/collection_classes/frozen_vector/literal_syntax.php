@@ -1,9 +1,9 @@
 <?hh
 
-// Test creating a FixedVector literal.
+// Test creating a ImmVector literal.
 
 function main() {
-  $fv = FixedVector {"hello", "world"};
+  $fv = ImmVector {"hello", "world"};
   var_dump($fv->get(0) . ' ' . $fv->get(1));
 }
 

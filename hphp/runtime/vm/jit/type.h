@@ -622,6 +622,8 @@ public:
   }
 };
 
+typedef folly::Optional<Type> OptType;
+
 inline bool operator<(Type a, Type b) { return a.strictSubtypeOf(b); }
 inline bool operator>(Type a, Type b) { return b.strictSubtypeOf(a); }
 inline bool operator<=(Type a, Type b) { return a.subtypeOf(b); }

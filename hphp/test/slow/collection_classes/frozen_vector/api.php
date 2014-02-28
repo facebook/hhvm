@@ -1,10 +1,10 @@
 <?hh
 
-// Test miscellaneous methods of the FixedVector API.
+// Test miscellaneous methods of the ImmVector API.
 
 function main() {
 
-  $fv = FixedVector {1, 2, 3};
+  $fv = ImmVector {1, 2, 3};
 
   // values()
   var_dump($fv->values());
@@ -23,8 +23,8 @@ function main() {
   var_dump($fv->linearSearch(10));
 
   // slice
-  var_dump(FixedVector::slice($fv, 1, 2));
-  var_dump(FixedVector::slice($fv, 3, 0));
+  var_dump(ImmVector::slice($fv, 1, 2));
+  var_dump(ImmVector::slice($fv, 3, 0));
 }
 
 main();

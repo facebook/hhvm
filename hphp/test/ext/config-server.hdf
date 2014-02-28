@@ -45,9 +45,3 @@ AdminServer {
 Fb303Server {
   Enable = false
 }
-
-Repo {
-  Central {
-    Path = ../_bin/hphp/test/ext/test_server.hhvm.hhbc
-  }
-}

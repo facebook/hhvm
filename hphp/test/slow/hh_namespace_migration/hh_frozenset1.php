@@ -1,10 +1,10 @@
 <?hh
 
-// Test that in the top-level namespace HH\FixedSet can be
-// accessed as FixedSet.
+// Test that in the top-level namespace HH\ImmSet can be
+// accessed as ImmSet.
 
 function main() {
-  $s = FixedSet {1, 2, 3};
+  $s = ImmSet {1, 2, 3};
   var_dump($s->isEmpty());
 }
 

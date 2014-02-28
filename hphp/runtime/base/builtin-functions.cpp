@@ -973,12 +973,13 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else {
-    Array includePaths = g_context->getIncludePathArray();
+    auto includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getIncludePaths();
     unsigned int path_count = includePaths.size();
 
     for (int i = 0; i < (int)path_count; i++) {
       String path("");
-      String includePath = includePaths[i].toString();
+      String includePath(includePaths[i]);
 
       if (includePath[0] != '/') {
         path += (g_context->getCwd() + "/");

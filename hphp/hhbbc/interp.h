@@ -1574,12 +1574,8 @@ struct InterpStepper : boost::static_visitor<void> {
       setLoc(loc, m_index.lookup_constraint(m_ctx, constraint));
     }
   }
-  void operator()(const bc::VerifyRetTypeV& op) {
-    // TODO: handle VerifyRetType
-  }
-  void operator()(const bc::VerifyRetTypeC& op) {
-    // TODO: handle VerifyRetType
-  }
+  void operator()(const bc::VerifyRetTypeV& op) {}
+  void operator()(const bc::VerifyRetTypeC& op) {}
 
   // These only occur in traits, so we don't need to do better than
   // this.
@@ -2048,6 +2044,13 @@ private: // member instructions
     }
     if (elemCouldPromoteToArr(locTy)) {
       setLoc(state.mvec.locBase, union_of(locTy, TArr));
+    }
+    if (locTy.subtypeOf(TStr)) {
+      // We need to do this even if was already a Str, because we may
+      // modify a SStr or SStr=.  The reload of locTy is in case we
+      // also took the case above.
+      setLoc(state.mvec.locBase,
+             union_of(locAsCell(state.mvec.locBase), TStr));
     }
   }
 
@@ -2654,11 +2657,11 @@ private: // member instructions
     // The m_state before miBase is propagated across factored edges
     // because wasPEI will be true---no need for miThrow.
     state.base = miBase(state);
-    FTRACE(4, "   base: {}\n", base_string(state.base));
+    FTRACE(4, "    base: {}\n", base_string(state.base));
     miThrow();
     for (; state.mInd < mvec.mcodes.size() - 1; ++state.mInd) {
       miIntermediate(state);
-      FTRACE(4, "   base: {}\n", base_string(state.base));
+      FTRACE(4, "    base: {}\n", base_string(state.base));
       // Note: this one might not be necessary: review whether member
       // instructions can ever modify local types on itermediate dims.
       miThrow();

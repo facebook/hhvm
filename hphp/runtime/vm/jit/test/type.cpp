@@ -19,6 +19,7 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 // for specialized object tests to get some real VM::Class
@@ -250,6 +251,12 @@ TEST(Type, TypeConstraints) {
                    {DataTypeGeneric, Type::Gen, DataTypeSpecific}));
   EXPECT_FALSE(fits(Type::Gen,
                     {DataTypeGeneric, Type::Gen, DataTypeSpecific}));
+}
+
+TEST(Type, Relax) {
+  EXPECT_EQ(Type::BoxedInitCell | Type::InitNull,
+            relaxType(Type::BoxedObj | Type::InitNull,
+                      {DataTypeCountness, Type::Gen, DataTypeGeneric}));
 }
 
 } }

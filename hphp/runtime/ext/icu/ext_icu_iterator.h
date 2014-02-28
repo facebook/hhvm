@@ -26,7 +26,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlIterator;
 
-class IntlIterator : public IntlResourceData {
+class IntlIterator : public IntlError {
 public:
   IntlIterator() {}
   IntlIterator(const IntlIterator&) = delete;
@@ -34,7 +34,7 @@ public:
     setEnumeration(src.enumeration()->clone());
     return *this;
   }
-  ~IntlIterator() override {
+  ~IntlIterator() {
     setEnumeration(nullptr);
   }
 
@@ -45,14 +45,18 @@ public:
     m_enum = se;
   }
 
-  bool isValid() const override {
+  bool isValid() const {
     return m_enum;
   }
 
   static Object newInstance(icu::StringEnumeration *se = nullptr) {
-    auto obj = NewInstance(s_IntlIterator);
+    if (!c_IntlIterator) {
+      c_IntlIterator = Unit::lookupClass(s_IntlIterator.get());
+      assert(c_IntlIterator);
+    }
+    auto obj = ObjectData::newInstance(c_IntlIterator);
     if (se) {
-      Native::data<IntlIterator>(obj.get())->setEnumeration(se);
+      Native::data<IntlIterator>(obj)->setEnumeration(se);
     }
     return obj;
   }
@@ -97,6 +101,8 @@ private:
   icu::StringEnumeration *m_enum = nullptr;
   int64_t m_key = -1;
   Variant m_current = null_string;
+
+  static Class* c_IntlIterator;
 };
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42

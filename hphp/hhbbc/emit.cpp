@@ -750,6 +750,7 @@ void emit_finish_func(const php::Func& func,
   if (func.nativeInfo) {
     fe.setReturnType(func.nativeInfo->returnType);
   }
+  fe.setReturnTypeConstraint(func.retTypeConstraint);
 
   fe.finish(fe.ue().bcPos(), false /* load */);
   fe.ue().recordFunction(&fe);

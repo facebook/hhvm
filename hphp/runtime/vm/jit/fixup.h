@@ -201,7 +201,7 @@ private:
     outRegs->m_pc = pc(ar, f, fixup);
     outRegs->m_fp = ar;
 
-    if (UNLIKELY(f->isGenerator())) {
+    if (UNLIKELY(ar->inGenerator())) {
       TypedValue* genStackBase = Stack::generatorStackBase(ar);
       outRegs->m_sp = genStackBase - fixup.m_spOffset;
     } else {

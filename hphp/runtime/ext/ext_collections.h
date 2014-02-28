@@ -30,9 +30,9 @@
 
 #define DECLARE_ITERABLE_MATERIALIZE_METHODS()       \
   Object t_tovector();                               \
-  Object t_tofixedvector();                          \
+  Object t_toimmvector();                          \
   Object t_toset();                                  \
-  Object t_tofixedset()
+  Object t_toimmset()
 
 #define DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS()  \
   DECLARE_ITERABLE_MATERIALIZE_METHODS();            \
@@ -62,7 +62,7 @@ void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class BaseVector: encapsulates functionality that is common to both
-// c_Vector and c_FixedVector. It doesn't map to any PHP-land class.
+// c_Vector and c_ImmVector. It doesn't map to any PHP-land class.
 
 class BaseVector : public ExtCollectionObjectData {
 
@@ -308,7 +308,7 @@ class BaseVector : public ExtCollectionObjectData {
   TypedValue* m_data;
   uint m_capacity;
   int32_t m_version;
-  // A pointer to a FixedVector which with it shares the buffer.
+  // A pointer to a ImmVector which with it shares the buffer.
   Object m_frozenCopy;
 
  private:
@@ -428,7 +428,7 @@ class c_Vector : public BaseVector {
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc);
 
-  void initFvFields(c_FixedVector* fv);
+  void initFvFields(c_ImmVector* fv);
   int64_t checkRequestedCapacity(CVarRef sz);
 
   // Friends
@@ -467,12 +467,12 @@ class c_VectorIterator : public ExtObjectData {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class FixedVector
+// class ImmVector
 
-FORWARD_DECLARE_CLASS(FixedVector);
-class c_FixedVector : public BaseVector {
+FORWARD_DECLARE_CLASS(ImmVector);
+class c_ImmVector : public BaseVector {
 public:
-  DECLARE_CLASS_NO_SWEEP(FixedVector)
+  DECLARE_CLASS_NO_SWEEP(ImmVector)
 
 public:
   // The methods that implement the ConstVector interface simply forward
@@ -512,8 +512,8 @@ public:
   static Object ti_slice(CVarRef vec, CVarRef offset,
                          CVarRef len = uninit_null());
 
-  static c_FixedVector* Clone(ObjectData* obj) {
-    return BaseVector::Clone<c_FixedVector>(obj);
+  static c_ImmVector* Clone(ObjectData* obj) {
+    return BaseVector::Clone<c_ImmVector>(obj);
   }
 
   DECLARE_COLLECTION_MAGIC_METHODS();
@@ -522,11 +522,11 @@ public:
 
 public:
 
-  explicit c_FixedVector(Class* cls = c_FixedVector::classof());
+  explicit c_ImmVector(Class* cls = c_ImmVector::classof());
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type) {
-    BaseVector::Unserialize("FixedVector", obj, uns, sz, type);
+    BaseVector::Unserialize("ImmVector", obj, uns, sz, type);
   }
 
   friend class c_Vector;
@@ -882,7 +882,7 @@ class BaseMap : public ExtCollectionObjectData {
 
   friend class c_MapIterator;
   friend class c_Vector;
-  friend class c_FixedMap;
+  friend class c_ImmMap;
   friend class ArrayIter;
   friend class c_GenMapWaitHandle;
 
@@ -1009,18 +1009,18 @@ class c_Map : public BaseMap {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class FixedMap
+// class ImmMap
 
-FORWARD_DECLARE_CLASS(FixedMap);
-class c_FixedMap : public BaseMap {
+FORWARD_DECLARE_CLASS(ImmMap);
+class c_ImmMap : public BaseMap {
 
  public:
-  DECLARE_CLASS_NO_SWEEP(FixedMap)
+  DECLARE_CLASS_NO_SWEEP(ImmMap)
 
   public:
-  explicit c_FixedMap(Class* cls = c_FixedMap::classof());
+  explicit c_ImmMap(Class* cls = c_ImmMap::classof());
 
-  static c_FixedMap* Clone(ObjectData* obj);
+  static c_ImmMap* Clone(ObjectData* obj);
 
  public: // PHP API - No inlines (required by .idl.json linking)
   void t___construct(CVarRef iterable = null_variant);
@@ -1523,13 +1523,13 @@ class c_Set : public BaseSet {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class FixedSet
+// class ImmSet
 
-FORWARD_DECLARE_CLASS(FixedSet);
-class c_FixedSet : public BaseSet {
+FORWARD_DECLARE_CLASS(ImmSet);
+class c_ImmSet : public BaseSet {
 
  public:
-  DECLARE_CLASS_NO_SWEEP(FixedSet)
+  DECLARE_CLASS_NO_SWEEP(ImmSet)
 
  public:
   // PHP-land methods.
@@ -1562,12 +1562,12 @@ class c_FixedSet : public BaseSet {
   static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
 
  public:
-  explicit c_FixedSet(Class* cls = c_FixedSet::classof());
+  explicit c_ImmSet(Class* cls = c_ImmSet::classof());
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
-  static c_FixedSet* Clone(ObjectData* obj);
+  static c_ImmSet* Clone(ObjectData* obj);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1777,11 +1777,11 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2);
 void collectionDeepCopyTV(TypedValue* tv);
 ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);
-ObjectData* collectionDeepCopyFixedVector(c_FixedVector* vec);
+ObjectData* collectionDeepCopyImmVector(c_ImmVector* vec);
 ObjectData* collectionDeepCopyMap(c_Map* mp);
-ObjectData* collectionDeepCopyFixedMap(c_FixedMap* mp);
+ObjectData* collectionDeepCopyImmMap(c_ImmMap* mp);
 ObjectData* collectionDeepCopySet(c_Set* mp);
-ObjectData* collectionDeepCopyFixedSet(c_FixedSet* st);
+ObjectData* collectionDeepCopyImmSet(c_ImmSet* st);
 ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
 ObjectData* newCollectionHelper(uint32_t type, uint32_t size);

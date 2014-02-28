@@ -6,7 +6,7 @@
 namespace {
 
 function main() {
-  $s = FixedSet {};
+  $s = ImmSet {};
   var_dump($s->isEmpty());
 }
 

@@ -48,6 +48,7 @@ static int s_rpc_port = 0;
 static int inherit_fd = -1;
 static std::unique_ptr<AsyncFunc<TestServer>> s_func;
 static char s_pidfile[MAXPATHLEN];
+static char s_repoFile[MAXPATHLEN];
 static char s_filename[MAXPATHLEN];
 static int k_timeout = 30;
 
@@ -156,6 +157,7 @@ void TestServer::RunServer() {
     (string("-vServer.TakeoverFilename=") + string(s_filename));
   string serverType = string("-vServer.Type=") + m_serverType;
   string pidFile = string("-vPidFile=") + string(s_pidfile);
+  string repoFile = string("-vRepo.Central.Path=") + string(s_repoFile);
 
   const char *argv[] = {
     "__HHVM__", "--mode=server", "--config=test/ext/config-server.hdf",
@@ -261,6 +263,9 @@ bool TestServer::RunTests(const std::string &which) {
   s_rpc_port = find_server_port(m_serverType);
   snprintf(s_pidfile, MAXPATHLEN, "/tmp/pid_XXXXXX");
   int tmpfd = mkstemp(s_pidfile);
+  close(tmpfd);
+  snprintf(s_repoFile, MAXPATHLEN, "/tmp/test_server.hhvm.hhbc_XXXXXX");
+  tmpfd = mkstemp(s_repoFile);
   close(tmpfd);
 
   RUN_TEST(TestInheritFdServer);

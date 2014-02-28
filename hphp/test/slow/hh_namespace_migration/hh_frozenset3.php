@@ -2,9 +2,9 @@
 
 namespace Test;
 
-// Test that HH\FixedSet is imported inside of a namespace.
+// Test that HH\ImmSet is imported inside of a namespace.
 function main() {
-  $s = new FixedSet();
+  $s = new ImmSet();
 }
 
 main();

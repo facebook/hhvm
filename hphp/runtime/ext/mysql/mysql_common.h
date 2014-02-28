@@ -207,6 +207,8 @@ public:
     }
   }
 
+  virtual bool isInvalid() const { return m_res == nullptr; }
+
   MYSQL_RES *get() {
     return m_res;
   }

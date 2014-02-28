@@ -275,6 +275,13 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
       if (type <= Type::Int) return okCmp(cint);
     }
     break;
+  case SubInt:
+    if (i == 0) return cint == 0 && !inst.src(1)->isConst(); // 0-X
+    if (i == 1) return !inst.src(0)->isConst() && isI32(cint); // X-C
+    break;
+  case Shl: case Shr:
+    if (i == 1) return true; // shift amount
+    break;
   default:
     break;
   }

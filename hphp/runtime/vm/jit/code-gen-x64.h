@@ -200,29 +200,26 @@ private:
   void cgIncRefWork(Type type, SSATmp* src, PhysLoc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
-  template<class OpInstr, class Oper>
-  void cgUnaryIntOp(PhysLoc dst, SSATmp* src, PhysLoc src_loc, OpInstr, Oper);
+  template<class OpInstr>
+  void cgUnaryIntOp(PhysLoc dst, SSATmp* src, PhysLoc src_loc, OpInstr);
 
   enum Commutativity { Commutative, NonCommutative };
 
   void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
 
-  template<class Oper, class RegType>
+  template<class RegType>
   void cgBinaryIntOp(IRInstruction*,
                      void (Asm::*intImm)(Immed, RegType),
                      void (Asm::*intRR)(RegType, RegType),
                      void (Asm::*mov)(RegType, RegType),
-                     Oper,
                      RegType (*conv)(PhysReg),
                      Commutativity);
   void cgBinaryDblOp(IRInstruction*,
                      void (Asm::*fpRR)(RegXMM, RegXMM));
 
-  template<class Oper>
   void cgShiftCommon(IRInstruction* inst,
                      void (Asm::*instrIR)(Immed, Reg64),
-                     void (Asm::*instrR)(Reg64),
-                     Oper oper);
+                     void (Asm::*instrR)(Reg64));
 
   void cgVerifyClsWork(IRInstruction* inst);
 

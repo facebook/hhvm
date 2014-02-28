@@ -69,6 +69,12 @@ struct TypeStat {
 
 struct Stats {
   std::array<std::atomic<uint64_t>,Op_count> op_counts;
+  std::atomic<uint64_t> persistentClasses;
+  std::atomic<uint64_t> persistentFunctions;
+  std::atomic<uint64_t> uniqueClasses;
+  std::atomic<uint64_t> uniqueFunctions;
+  std::atomic<uint64_t> totalClasses;
+  std::atomic<uint64_t> totalFunctions;
   TypeStat returns;
   TypeStat privateProps;
   TypeStat privateStatics;
@@ -92,17 +98,34 @@ std::string show(const Stats& stats) {
 
   ret += "Opcode counts:\n";
   for (auto i = uint32_t{}; i < stats.op_counts.size(); ++i) {
-    ret += folly::format(
+    folly::format(
+      &ret,
       "  {: >20}:  {: >15}\n",
       opcodeToName(static_cast<Op>(i)),
       stats.op_counts[i].load()
-    ).str();
+    );
   }
   ret += "\n";
 
   ret += type_stat_string("ret", stats.returns);
   ret += type_stat_string("priv prop", stats.privateProps);
   ret += type_stat_string("priv static", stats.privateStatics);
+
+  folly::format(
+    &ret,
+    "         total_funcs:  {: >8}\n"
+    "        unique_funcs:  {: >8}\n"
+    "    persistent_funcs:  {: >8}\n"
+    "       total_classes:  {: >8}\n"
+    "      unique_classes:  {: >8}\n"
+    "  persistent_classes:  {: >8}\n",
+    stats.totalFunctions.load(),
+    stats.uniqueFunctions.load(),
+    stats.persistentFunctions.load(),
+    stats.totalClasses.load(),
+    stats.uniqueClasses.load(),
+    stats.persistentClasses.load()
+  );
 
   return ret;
 }
@@ -120,6 +143,16 @@ void add_type(TypeStat& stat, const Type& t) {
 //////////////////////////////////////////////////////////////////////
 
 void collect_func(Stats& stats, const Index& index, const php::Func& func) {
+  if (!func.cls && func.unit->pseudomain.get() != &func) {
+    ++stats.totalFunctions;
+    if (func.attrs & AttrPersistent) {
+      ++stats.persistentFunctions;
+    }
+    if (func.attrs & AttrUnique) {
+      ++stats.uniqueFunctions;
+    }
+  }
+
   auto const ty = index.lookup_return_type_raw(&func);
   add_type(stats.returns, ty);
 
@@ -131,6 +164,13 @@ void collect_func(Stats& stats, const Index& index, const php::Func& func) {
 }
 
 void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
+  ++stats.totalClasses;
+  if (cls.attrs & AttrPersistent) {
+    ++stats.persistentClasses;
+  }
+  if (cls.attrs & AttrUnique) {
+    ++stats.uniqueClasses;
+  }
   for (auto& kv : index.lookup_private_props(&cls)) {
     add_type(stats.privateProps, kv.second);
   }

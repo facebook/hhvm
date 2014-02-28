@@ -1,0 +1,1 @@
+PHP Fatal error:  Cannot access protected property F::$foo in %s on line 9

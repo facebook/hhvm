@@ -1,0 +1,1 @@
+PHP Fatal error:  Cannot access private property F::$foo in %s on line 9

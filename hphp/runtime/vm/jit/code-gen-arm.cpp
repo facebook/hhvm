@@ -100,7 +100,6 @@ PUNT_OPCODE(CheckDefinedClsEq)
 PUNT_OPCODE(TryEndCatch)
 PUNT_OPCODE(LdUnwinderValue)
 PUNT_OPCODE(DeleteUnwinderException)
-PUNT_OPCODE(AddInt)
 PUNT_OPCODE(SubInt)
 PUNT_OPCODE(MulInt)
 PUNT_OPCODE(AddDbl)
@@ -722,6 +721,24 @@ void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
   emitDecRefMem(inst->typeParam(),
                 x2a(srcLoc(0).reg()),
                 inst->src(1)->getValInt());
+}
+
+//////////////////////////////////////////////////////////////////////
+// Arithmetic Instructions
+
+void CodeGenerator::cgAddInt(IRInstruction* inst) {
+  assert(inst->numSrcs() == 2 && inst->numDsts() == 1);
+
+  auto destReg = dstLoc(0).reg();
+  auto srcReg0 = srcLoc(0).reg();
+  auto srcReg1 = srcLoc(1).reg();
+
+  if (srcReg1 != InvalidReg) {
+    m_as. Add(x2a(destReg), x2a(srcReg0), x2a(srcReg1));
+  } else {
+    m_as. Add(x2a(destReg), x2a(srcReg0), inst->src(1)->getValInt());
+  }
+
 }
 
 //////////////////////////////////////////////////////////////////////

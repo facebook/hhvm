@@ -333,8 +333,8 @@ Variant f_fwrite(CResRef handle, const String& data,
     message << "fwrite(): send of " << data->size() << " bytes failed with " \
                "errno=" << errno << " " << folly::errnoStr(errno).c_str();
     g_context->handleError(message.str(), k_E_NOTICE, true,
-                       ExecutionContext::ErrorThrowMode::Never,
-                       "HipHop Notice: ");
+                           ExecutionContext::ErrorThrowMode::Never,
+                           "HipHop Notice: ");
     ret = 0;
   }
   return ret;

@@ -40,7 +40,6 @@ set_property(DIRECTORY
         "${ONIGURUMA_INCLUDE_DIR}/oniguruma.h"
         "${LIBPNG_INCLUDE_DIRS}/png.h"
         "${LDAP_INCLUDE_DIR}/ldap.h"
-#        "/usr/include/libxml"
         "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}")
 
 add_subdirectory(hphp)

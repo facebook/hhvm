@@ -1613,7 +1613,7 @@ template void ObjectData::incDecProp<false>(TypedValue&,
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   auto propVal = getProp(ctx, key, visible, accessible, unset);
-  if (visible && accessible) {
+  if (visible && accessible && !unset) {
     Slot propInd = declPropInd(propVal);
     if (propInd != kInvalidSlot) {
       // Declared property.
@@ -1626,7 +1626,6 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     return;
   }
 
-  assert(!accessible);
   TypedValue ignored;
   if (!getAttribute(UseUnset) || !invokeUnset(&ignored, key)) {
     if (UNLIKELY(!*key->data())) {

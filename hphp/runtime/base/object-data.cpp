@@ -1627,12 +1627,14 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     return;
   }
 
-  if (!accessible && !getAttribute(UseUnset)) {
+  bool tryUnset = getAttribute(UseUnset);
+
+  if (!accessible && !tryUnset) {
     raise_error("Cannot unset inaccessible property");
   }
 
   TypedValue ignored;
-  if (!getAttribute(UseUnset) || !invokeUnset(&ignored, key)) {
+  if (!tryUnset || !invokeUnset(&ignored, key)) {
     if (UNLIKELY(!*key->data())) {
       throw_invalid_property_name(StrNR(key));
     }

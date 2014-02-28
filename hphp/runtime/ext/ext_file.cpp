@@ -329,12 +329,8 @@ Variant f_fwrite(CResRef handle, const String& data,
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
   if (ret < 0) {
-    std::ostringstream message;
-    message << "fwrite(): send of " << data->size() << " bytes failed with " \
-               "errno=" << errno << " " << folly::errnoStr(errno).c_str();
-    g_context->handleError(message.str(), k_E_NOTICE, true,
-                           ExecutionContext::ErrorThrowMode::Never,
-                           "HipHop Notice: ");
+    raise_notice("fwrite(): send of %d bytes failed with errno=%d %s", 
+                 data->size(), errno, folly::errnoStr(errno).c_str());
     ret = 0;
   }
   return ret;

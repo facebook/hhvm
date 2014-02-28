@@ -461,6 +461,11 @@ inline void arSetSfp(ActRec* ar, const ActRec* sfp) {
   ar->m_savedRbp = (uint64_t)sfp;
 }
 
+inline TypedValue* arReturn(ActRec* ar, CVarRef value) {
+  ar->m_r = *value.asTypedValue();
+  return &ar->m_r;
+}
+
 template <bool crossBuiltin> Class* arGetContextClassImpl(const ActRec* ar);
 template <> Class* arGetContextClassImpl<true>(const ActRec* ar);
 template <> Class* arGetContextClassImpl<false>(const ActRec* ar);

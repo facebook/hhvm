@@ -21,5 +21,3 @@ $im->destroy ();
 echo 'success';
 
 ?>
---EXPECT--
-success

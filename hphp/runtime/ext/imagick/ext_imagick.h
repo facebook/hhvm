@@ -18,6 +18,9 @@
 #ifndef incl_HPHP_EXT_IMAGICK_H_
 #define incl_HPHP_EXT_IMAGICK_H_
 
+#include <utility>
+#include <vector>
+
 #include <wand/MagickWand.h>
 
 #include "hphp/runtime/base/base-includes.h"
@@ -25,6 +28,26 @@
 #include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
+
+//////////////////////////////////////////////////////////////////////////////
+// ImagickExtension
+class ImagickExtension : public Extension {
+ public:
+  ImagickExtension();
+  virtual void moduleInit();
+  virtual void threadInit();
+
+  static bool hasLocaleFix();
+  static bool hasProgressMonitor();
+
+ private:
+  struct ImagickIniSetting {
+    bool m_locale_fix;
+    bool m_progress_monitor;
+  };
+
+  static DECLARE_THREAD_LOCAL(ImagickIniSetting, s_ini_setting);
+};
 
 //////////////////////////////////////////////////////////////////////////////
 // PHP Exceptions and Classes
@@ -89,8 +112,12 @@ class WandResource : public SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>);
 
 public:
-  explicit WandResource(Wand* wand, bool owner):
+  explicit WandResource(Wand* wand, bool owner) :
     m_wand(wand), m_owner(owner) {
+  }
+
+  explicit WandResource(std::pair<Wand*, bool> args) :
+    WandResource(args.first, args.second) {
   }
 
   ~WandResource() {
@@ -149,8 +176,18 @@ void WandResource<PixelIterator>::destoryWand() {
 
 template<typename Wand>
 ALWAYS_INLINE
+void setWandResource(const StaticString& className,
+                     CObjRef obj,
+                     Wand* wand,
+                     bool destroy = true) {
+  auto res = Resource(NEWOBJ(WandResource<Wand>(wand, destroy)));
+  obj->o_set("wand", res, className.get());
+}
+
+template<typename Wand>
+ALWAYS_INLINE
 WandResource<Wand>* getWandResource(const StaticString& className,
-                                           CObjRef obj) {
+                                    CObjRef obj) {
   if (!obj.instanceof(className)) {
     return nullptr;
   }
@@ -162,40 +199,45 @@ WandResource<Wand>* getWandResource(const StaticString& className,
   }
 }
 
-template<typename Wand>
+template<typename Wand, typename T>
 ALWAYS_INLINE
-void setWandResource(const StaticString& className,
-                            CObjRef obj,
-                            Wand* wand,
-                            bool destroy = true) {
-  auto res = Resource(NEWOBJ(WandResource<Wand>(wand, destroy)));
-  obj->o_set("wand", res, className.get());
+WandResource<Wand>* getWandResource(const StaticString& className,
+                                    CObjRef obj,
+                                    const std::string& msg) {
+  auto ret = getWandResource<Wand>(className, obj);
+  if (ret == nullptr || ret->getWand() == nullptr) {
+    throw T::allocObject(msg);
+  } else {
+    return ret;
+  }
 }
 
 ALWAYS_INLINE
 WandResource<MagickWand>* getMagickWandResource(CObjRef obj) {
-  return getWandResource<MagickWand>(s_Imagick, obj);
+  return getWandResource<MagickWand, ImagickException>(
+    s_Imagick, obj,
+    "Can not process invalid Imagick object");
 }
 
 ALWAYS_INLINE
 WandResource<DrawingWand>* getDrawingWandResource(CObjRef obj) {
-  return getWandResource<DrawingWand>(s_ImagickDraw, obj);
+  return getWandResource<DrawingWand, ImagickDrawException>(
+    s_ImagickDraw, obj,
+    "Can not process invalid ImagickDraw object");
 }
 
 ALWAYS_INLINE
 WandResource<PixelWand>* getPixelWandResource(CObjRef obj) {
-  return getWandResource<PixelWand>(s_ImagickPixel, obj);
+  auto ret = getWandResource<PixelWand>(s_ImagickPixel, obj);
+  assert(ret != nullptr && ret->getWand() != nullptr);
+  return ret;
 }
 
 ALWAYS_INLINE
 WandResource<PixelIterator>* getPixelIteratorResource(CObjRef obj) {
-  auto ret = getWandResource<PixelIterator>(s_ImagickPixelIterator, obj);
-  if (ret->getWand() == nullptr) {
-    imagickThrow<ImagickPixelIteratorException>(
-      "ImagickPixelIterator is not initialized correctly");
-  } else {
-    return ret;
-  }
+  return getWandResource<PixelIterator, ImagickPixelIteratorException>(
+    s_ImagickPixelIterator, obj,
+    "ImagickPixelIterator is not initialized correctly");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -227,21 +269,58 @@ void freeMagickMemory(T* &resource) {
 }
 
 ALWAYS_INLINE
-String convertMagickString(char* &&s) {
-  if (s == nullptr) {
+String convertMagickString(char* &&str) {
+  if (str == nullptr) {
     return null_string;
   } else {
-    String ret(s);
-    freeMagickMemory(s);
+    String ret(str);
+    freeMagickMemory(str);
     return ret;
   }
 }
 
+template<typename T>
+ALWAYS_INLINE
+Array convertMagickArray(size_t num, T* &arr) {
+  if (arr == nullptr) {
+    return null_array;
+  } else {
+    PackedArrayInit ret(num);
+    for (size_t i = 0; i < num; ++i) {
+      ret.appendWithRef(arr[i]);
+    }
+    freeMagickMemory(arr);
+    return ret.create();
+  }
+}
+
+ALWAYS_INLINE
+MagickBooleanType toMagickBool(bool value) {
+  return value ? MagickTrue : MagickFalse;
+}
+
+MagickBooleanType withMagickLocaleFix(
+    const std::function<MagickBooleanType()>& lambda);
+
+std::vector<double> toDoubleArray(CArrRef array);
+
+std::vector<PointInfo> toPointInfoArray(CArrRef coordinates);
+
+//////////////////////////////////////////////////////////////////////////////
+// Imagick Helper
+Array magickQueryFonts(const char* pattern = "*");
+
+Array magickQueryFormats(const char* pattern = "*");
+
+String magickResolveFont(const String& fontName);
+
 //////////////////////////////////////////////////////////////////////////////
 // ImagickPixel Helper
-PixelWand* getPixelWand(CVarRef color, bool& allocated);
+Object createImagickPixel(PixelWand* wand, bool owner);
 
-Array createImagickPixelArray(size_t num, PixelWand* wands[], bool destroy);
+Array createImagickPixelArray(size_t num, PixelWand* wands[], bool owner);
+
+std::pair<PixelWand*, bool> buildPixelWand(CVarRef color);
 
 //////////////////////////////////////////////////////////////////////////////
 // Init Module

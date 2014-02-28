@@ -10,6 +10,14 @@ class Imagick {
   private ?resource $wand = null;
 
   /**
+   * Clears all resources associated to Imagick object
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function clear(): bool;
+
+  /**
    * The Imagick constructor
    *
    * @param mixed $files -
@@ -18,6 +26,14 @@ class Imagick {
    */
   <<__Native>>
   function __construct(mixed $files = null): void;
+
+  /**
+   * Destroys the Imagick object
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function destroy(): bool;
 
   /**
    * Renders the ImagickDraw object on the current image
@@ -29,6 +45,61 @@ class Imagick {
    */
   <<__Native>>
   function drawImage(ImagickDraw $draw): bool;
+
+  /**
+   * Creates a new image
+   *
+   * @param int $cols - Columns in the new image
+   * @param int $rows - Rows in the new image
+   * @param mixed $background - The background color used for this image
+   * @param string $format - Image format. This parameter was added in
+   *   Imagick version 2.0.1.
+   *
+   * @return bool -
+   */
+  <<__Native>>
+  function newImage(int $cols,
+                    int $rows,
+                    mixed $background,
+                    string $format = ''): bool;
+
+  /**
+   * Returns an array representing the font metrics
+   *
+   * @param imagickdraw $properties - ImagickDraw object containing font
+   *   properties
+   * @param string $text - The text
+   * @param bool $multiline - Multiline parameter. If left empty it is
+   *   autodetected
+   *
+   * @return array - Returns a multi-dimensional array representing the
+   *   font metrics.
+   */
+  <<__Native>>
+  function queryFontMetrics(ImagickDraw $properties,
+                            string $text,
+                            bool $multiline): array;
+
+  /**
+   * Returns the configured fonts
+   *
+   * @param string $pattern - The query pattern
+   *
+   * @return array - Returns an array containing the configured fonts.
+   */
+  <<__Native>>
+  function queryFonts(string $pattern = "*"): array;
+
+  /**
+   * Returns formats supported by Imagick
+   *
+   * @param string $pattern -
+   *
+   * @return array - Returns an array containing the formats supported by
+   *   Imagick.
+   */
+  <<__Native>>
+  function queryFormats(string $pattern = "*"): array;
 
   /**
    * Writes an image to the specified filename
@@ -78,7 +149,7 @@ class Imagick {
 }
 
 class ImagickDraw {
-  private ?resource $wand;
+  private ?resource $wand = null;
 
   /**
    * Adjusts the current affine transformation matrix
@@ -116,7 +187,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function arc(float $sx,
                float $sy,
                float $ex,
@@ -207,7 +278,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function composite(int $compose,
                      float $x,
                      float $y,
@@ -243,7 +314,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function ellipse(float $ox,
                    float $oy,
                    float $rx,
@@ -326,6 +397,15 @@ class ImagickDraw {
    */
   <<__Native>>
   function getFontSize(): float;
+
+  /**
+   * Returns the font stretch
+   *
+   * @return int - Returns the font stretch constant (STRETCH_) associated
+   *   with the ImagickDraw object or 0 if no stretch is set.
+   */
+  <<__Native>>
+  function getFontStretch(): int;
 
   /**
    * Returns the font style
@@ -537,7 +617,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function pathCurveToAbsolute(float $x1,
                                float $y1,
                                float $x2,
@@ -613,7 +693,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function pathCurveToRelative(float $x1,
                                float $y1,
                                float $x2,
@@ -666,7 +746,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function pathEllipticArcAbsolute(float $rx,
                                    float $ry,
                                    float $x_axis_rotation,
@@ -688,7 +768,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function pathEllipticArcRelative(float $rx,
                                    float $ry,
                                    float $x_axis_rotation,
@@ -960,7 +1040,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function roundRectangle(float $x1,
                           float $y1,
                           float $x2,
@@ -1029,7 +1109,7 @@ class ImagickDraw {
    * @return bool -
    */
   <<__Native>>
-  function setFillColor(ImagickPixel $fill_pixel): bool;
+  function setFillColor(mixed $fill_pixel): bool;
 
   /**
    * Sets the opacity to use when drawing using the fill color or fill texture
@@ -1159,7 +1239,7 @@ class ImagickDraw {
    * @return bool -
    */
   <<__Native>>
-  function setStrokeColor(ImagickPixel $stroke_pixel): bool;
+  function setStrokeColor(mixed $stroke_pixel): bool;
 
   /**
    * Specifies the pattern of dashes and gaps used to stroke paths
@@ -1291,7 +1371,7 @@ class ImagickDraw {
    * @return bool -
    */
   <<__Native>>
-  function setTextUnderColor(ImagickPixel $under_color): bool;
+  function setTextUnderColor(mixed $under_color): bool;
 
   /**
    * Sets the vector graphics
@@ -1514,7 +1594,7 @@ class ImagickPixel {
 
 }
 
-class ImagickPixelIterator {
+class ImagickPixelIterator implements Iterator {
   private ?resource $wand = null;
 
   <<__Native>>
@@ -1526,6 +1606,21 @@ class ImagickPixelIterator {
                                          int $y,
                                          int $columns,
                                          int $rows): ImagickPixelIterator;
+
+  <<__Native>>
+  function current(): array;
+
+  <<__Native>>
+  function key(): int;
+
+  <<__Native>>
+  function next(): void;
+
+  <<__Native>>
+  function rewind(): void;
+
+  <<__Native>>
+  function valid(): bool;
 
   /**
    * Clear resources associated with a PixelIterator

@@ -17,8 +17,12 @@
 
 #include "hphp/runtime/ext/imagick/ext_imagick.h"
 
+#include <vector>
+
 namespace HPHP {
 
+//////////////////////////////////////////////////////////////////////////////
+// PHP Exceptions and Classes
 HPHP::Class* ImagickException::cls = nullptr;
 HPHP::Class* ImagickDrawException::cls = nullptr;
 HPHP::Class* ImagickPixelException::cls = nullptr;
@@ -29,21 +33,105 @@ HPHP::Class* ImagickDraw::cls = nullptr;
 HPHP::Class* ImagickPixel::cls = nullptr;
 HPHP::Class* ImagickPixelIterator::cls = nullptr;
 
-class ImagickExtension : public Extension {
- public:
-  ImagickExtension() : Extension("imagick") {}
-  virtual void moduleInit() {
-    loadImagickConstants();
-    loadImagickClass();
-    loadImagickDrawClass();
-    loadImagickPixelClass();
-    loadImagickPixelIteratorClass();
-    loadSystemlib();
-  }
-} s_imagick_extension;
+//////////////////////////////////////////////////////////////////////////////
+// Common Helper
+MagickBooleanType withMagickLocaleFix(
+    const std::function<MagickBooleanType()>& lambda) {
+  static const char* const IMAGICK_LC_NUMERIC_LOCALE = "C";
 
-// Uncomment for non-bundled module
-//HHVM_GET_MODULE(imagick);
+  if (!ImagickExtension::hasLocaleFix()) {
+    return lambda();
+  }
+
+  const char* plocale = setlocale(LC_NUMERIC, nullptr);
+  if (plocale == nullptr) {
+    return lambda();
+  }
+
+  // Switch the locale to IMAGICK_LC_NUMERIC_LOCALE if imagick.locale_fix is on
+  const std::string locale = plocale;
+  setlocale(LC_NUMERIC, IMAGICK_LC_NUMERIC_LOCALE);
+  auto ret = lambda();
+  setlocale(LC_NUMERIC, locale.c_str());
+  return ret;
+}
+
+std::vector<double> toDoubleArray(CArrRef array) {
+  std::vector<double> ret;
+  for (ArrayIter it(array); it; ++it) {
+    ret.push_back(it.secondRefPlus().toDouble());
+  }
+  return ret;
+}
+
+std::vector<PointInfo> toPointInfoArray(CArrRef coordinates) {
+  std::vector<PointInfo> ret(coordinates.size());
+  int idx = 0;
+
+  for (ArrayIter it(coordinates); it; ++it) {
+    CVarRef element = it.secondRefPlus();
+    if (!element.isArray()) {
+      return {};
+    }
+
+    CArrRef coordinate = element.toCArrRef();
+    if (coordinate.size() != 2) {
+      return {};
+    }
+
+    for (ArrayIter jt(coordinate); jt; ++jt) {
+      const String& key = jt.first().toString();
+      double value = jt.secondRefPlus().toDouble();
+      if (key == s_x) {
+        ret[idx].x = value;
+      } else if (key == s_y) {
+        ret[idx].y = value;
+      } else {
+        return {};
+      }
+    }
+    ++idx;
+  }
+
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// ImagickExtension
+ImagickExtension::ImagickExtension() :
+  Extension("imagick") {
+}
+
+void ImagickExtension::moduleInit() {
+  loadImagickConstants();
+  loadImagickClass();
+  loadImagickDrawClass();
+  loadImagickPixelClass();
+  loadImagickPixelIteratorClass();
+  loadSystemlib();
+}
+
+void ImagickExtension::threadInit() {
+  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                   "imagick.locale_fix", "0",
+                   &s_ini_setting->m_locale_fix);
+  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                   "imagick.progress_monitor", "0",
+                   &s_ini_setting->m_progress_monitor);
+}
+
+bool ImagickExtension::hasLocaleFix() {
+  return s_ini_setting->m_locale_fix;
+}
+
+bool ImagickExtension::hasProgressMonitor() {
+  return s_ini_setting->m_progress_monitor;
+}
+
+IMPLEMENT_THREAD_LOCAL(ImagickExtension::ImagickIniSetting,
+                       ImagickExtension::s_ini_setting);
+
+ImagickExtension s_imagick_extension;
 
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

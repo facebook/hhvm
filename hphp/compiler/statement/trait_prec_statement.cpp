@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/statement/trait_prec_statement.h"
+#include <set>
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/statement/class_statement.h"
 #include "hphp/compiler/statement/method_statement.h"

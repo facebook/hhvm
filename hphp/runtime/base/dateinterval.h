@@ -23,6 +23,7 @@
 
 extern "C" {
 #include <timelib.h>
+#include <memory>
 }
 
 /**

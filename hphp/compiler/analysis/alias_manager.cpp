@@ -15,6 +15,9 @@
 */
 
 #include "hphp/compiler/analysis/alias_manager.h"
+#include <map>
+#include <utility>
+#include <vector>
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/function_scope.h"

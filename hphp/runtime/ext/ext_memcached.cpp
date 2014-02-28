@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include <zlib.h>
+#include <vector>
 
 #include "hphp/system/systemlib.h"
 

@@ -65,6 +65,11 @@
 #include <iostream>
 #include <fstream>
 #include <zlib.h>
+#include <algorithm>
+#include <map>
+#include <new>
+#include <utility>
+#include <vector>
 
 // Append the delimiter
 #define HP_STACK_DELIM        "==>"

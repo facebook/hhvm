@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/statement/interface_statement.h"
+#include <vector>
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/parameter_expression.h"

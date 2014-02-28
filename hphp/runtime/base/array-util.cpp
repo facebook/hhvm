@@ -16,6 +16,8 @@
 #include "hphp/runtime/base/array-util.h"
 
 #include <vector>
+#include <set>
+#include <utility>
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/string-util.h"

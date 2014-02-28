@@ -30,6 +30,7 @@ extern "C" {
 #include <mbfl/mbfl_convert.h>
 #include <mbfl/mbfilter.h>
 #include <oniguruma.h>
+#include <map>
 }
 
 #define php_mb_re_pattern_buffer   re_pattern_buffer

@@ -20,6 +20,7 @@
 #include <initializer_list>
 #include <functional>
 #include <vector>
+#include <algorithm>
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"

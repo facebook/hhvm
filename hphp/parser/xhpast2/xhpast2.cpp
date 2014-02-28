@@ -18,6 +18,8 @@
 #include <cstdlib>
 #include <fstream>
 #include <string.h>
+#include <exception>
+#include <vector>
 
 #include "folly/String.h"
 

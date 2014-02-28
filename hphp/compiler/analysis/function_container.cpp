@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/analysis/function_container.h"
+#include <map>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"

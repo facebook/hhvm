@@ -25,6 +25,10 @@
 #include <boost/range/iterator_range.hpp>
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_unordered_map.h>
+#include <algorithm>
+#include <memory>
+#include <unordered_set>
+#include <vector>
 
 #include "folly/Format.h"
 #include "folly/Hash.h"

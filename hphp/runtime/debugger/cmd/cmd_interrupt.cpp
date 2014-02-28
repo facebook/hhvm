@@ -16,6 +16,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 
 #include <boost/lexical_cast.hpp>
+#include <vector>
 
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 #include "hphp/runtime/debugger/cmd/cmd_print.h"

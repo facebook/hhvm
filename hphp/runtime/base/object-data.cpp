@@ -15,6 +15,7 @@
 */
 
 #include "folly/Hash.h"
+#include <vector>
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/base/complex-types.h"

@@ -25,6 +25,8 @@
 #include "hphp/system/systemlib.h"
 
 #include <folly/ScopeGuard.h>
+#include <algorithm>
+#include <array>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

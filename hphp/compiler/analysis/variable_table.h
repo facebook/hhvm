@@ -18,6 +18,9 @@
 #define incl_HPHP_VARIABLE_TABLE_H_
 
 #include "hphp/compiler/analysis/symbol_table.h"
+#include <map>
+#include <set>
+#include <vector>
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/util/hash-map-typedefs.h"

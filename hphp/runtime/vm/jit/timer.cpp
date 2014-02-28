@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/timer.h"
+#include <map>
 
 #include "folly/Format.h"
 

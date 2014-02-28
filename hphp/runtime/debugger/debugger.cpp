@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/debugger/debugger.h"
+#include <set>
+#include <stack>
+#include <vector>
 #include "hphp/runtime/debugger/debugger_server.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"

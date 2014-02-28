@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/analysis/symbol_table.h"
+#include <map>
 #include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"

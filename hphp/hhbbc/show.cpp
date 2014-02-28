@@ -17,6 +17,8 @@
 
 #include <sstream>
 #include <boost/algorithm/string.hpp>
+#include <memory>
+#include <vector>
 
 #include "folly/Conv.h"
 #include "folly/Format.h"

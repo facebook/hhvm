@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/base/string-util.h"
+#include <algorithm>
+#include <vector>
 #include "hphp/zend/zend-html.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"

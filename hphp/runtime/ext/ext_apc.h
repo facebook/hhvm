@@ -19,6 +19,8 @@
 #define incl_HPHP_EXT_APC_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include <set>
+#include <vector>
 #include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/server/upload.h"
 

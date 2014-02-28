@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/vm/jit/opt.h"
+#include <algorithm>
+#include <utility>
 
 #include "folly/Lazy.h"
 #include "folly/Optional.h"

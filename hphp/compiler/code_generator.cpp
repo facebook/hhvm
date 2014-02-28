@@ -28,6 +28,8 @@
 #include "hphp/util/hash.h"
 #include <boost/format.hpp>
 #include <boost/scoped_array.hpp>
+#include <algorithm>
+#include <vector>
 
 using namespace HPHP;
 

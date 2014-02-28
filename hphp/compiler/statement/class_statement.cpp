@@ -36,6 +36,7 @@
 #include "hphp/compiler/option.h"
 #include <sstream>
 #include <algorithm>
+#include <vector>
 
 using namespace HPHP;
 

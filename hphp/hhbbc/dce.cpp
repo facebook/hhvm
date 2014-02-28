@@ -22,6 +22,8 @@
 #include <sstream>
 
 #include <boost/dynamic_bitset.hpp>
+#include <algorithm>
+#include <set>
 
 #include "folly/gen/Base.h"
 #include "folly/gen/String.h"

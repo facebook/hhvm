@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_domdocument.h"
+#include <map>
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_string.h"

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/expression/expression.h"
+#include <vector>
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/parser/hphp.tab.hpp"

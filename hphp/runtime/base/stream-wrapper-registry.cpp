@@ -25,6 +25,8 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include <set>
 #include <map>
+#include <algorithm>
+#include <memory>
 
 namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////

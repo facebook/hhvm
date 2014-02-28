@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_IRBUILDER_H_
 
 #include <boost/scoped_ptr.hpp>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 #include "folly/Optional.h"

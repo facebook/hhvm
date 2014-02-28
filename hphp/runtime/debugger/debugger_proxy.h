@@ -20,6 +20,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <map>
 
 #include "hphp/util/synchronizable.h"
 #include "hphp/util/async-func.h"

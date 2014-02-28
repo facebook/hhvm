@@ -22,6 +22,12 @@
 
 #include <boost/variant.hpp>
 #include <boost/next_prior.hpp>
+#include <algorithm>
+#include <memory>
+#include <set>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "folly/gen/Base.h"
 #include "folly/gen/String.h"

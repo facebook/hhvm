@@ -19,6 +19,7 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 #include <boost/range/join.hpp>
+#include <map>
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"

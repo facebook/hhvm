@@ -18,6 +18,7 @@
 #define incl_HPHP_USE_TRAIT_STATEMENT_H_
 
 #include "hphp/compiler/statement/statement.h"
+#include <vector>
 #include "hphp/compiler/expression/expression_list.h"
 
 namespace HPHP {

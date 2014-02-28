@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/statement/global_statement.h"
+#include <set>
 #include "hphp/compiler/statement/block_statement.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/analysis/block_scope.h"

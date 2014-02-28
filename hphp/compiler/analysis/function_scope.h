@@ -18,6 +18,10 @@
 #define incl_HPHP_FUNCTION_SCOPE_H_
 
 #include "hphp/compiler/expression/user_attribute.h"
+#include <list>
+#include <set>
+#include <utility>
+#include <vector>
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/json.h"

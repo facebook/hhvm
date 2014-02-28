@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_heaptrace.h"
+#include <map>
+#include <vector>
 
 #include "hphp/runtime/base/memory-profile.h"
 

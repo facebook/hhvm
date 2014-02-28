@@ -22,6 +22,8 @@
 #include <string>
 #include <unwind.h>
 #include <memory>
+#include <exception>
+#include <typeinfo>
 
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/types.h"

@@ -15,6 +15,8 @@
 */
 
 #include "hphp/compiler/analysis/function_scope.h"
+#include <utility>
+#include <vector>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/analysis/alias_manager.h"
+#include <vector>
 #include "hphp/compiler/analysis/dictionary.h"
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/statement/statement.h"

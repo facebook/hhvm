@@ -19,6 +19,7 @@
 #include <string>
 
 #include <boost/lexical_cast.hpp>
+#include <memory>
 
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/util/text-util.h"

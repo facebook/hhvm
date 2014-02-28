@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_COLLECTION_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include <limits>
 #include "hphp/system/systemlib.h"
 
 #define DECLARE_COLLECTION_MAGIC_METHODS()           \

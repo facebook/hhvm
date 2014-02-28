@@ -18,6 +18,11 @@
 #define incl_HPHP_CODE_GENERATOR_H_
 
 #include "hphp/compiler/hphp.h"
+#include <deque>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -32,6 +32,7 @@
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 # include <sys/msgbuf.h>
+#include <set>
 # define MSGBUF_MTYPE(b) (b)->msg_magic
 # ifdef __APPLE__
 #  define MSGBUF_MTEXT(b) (b)->msg_bufc

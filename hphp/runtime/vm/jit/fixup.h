@@ -18,6 +18,7 @@
 #define incl_HPHP_FIXUP_H_
 
 #include "hphp/util/util.h"
+#include <vector>
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/tread-hash-map.h"

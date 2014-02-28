@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_soap.h"
+#include <map>
+#include <memory>
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/base/class-info.h"

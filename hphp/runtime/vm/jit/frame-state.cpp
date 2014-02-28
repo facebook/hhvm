@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/frame-state.h"
+#include <algorithm>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"

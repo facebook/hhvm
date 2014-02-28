@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <cstdarg>
+#include <vector>
 #include "folly/Format.h"
 #include "folly/String.h"
 #include "hphp/parser/parser.h"

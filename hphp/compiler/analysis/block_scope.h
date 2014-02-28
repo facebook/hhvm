@@ -24,6 +24,11 @@
 #include "hphp/runtime/base/macros.h"
 
 #include <tbb/concurrent_hash_map.h>
+#include <list>
+#include <memory>
+#include <set>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

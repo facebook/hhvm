@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/vm/jit/ir-builder.h"
+#include <algorithm>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 

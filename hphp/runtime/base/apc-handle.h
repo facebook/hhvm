@@ -18,6 +18,7 @@
 #define incl_HPHP_APC_HANDLE_H_
 
 #include "hphp/runtime/base/types.h"
+#include <atomic>
 #include "hphp/util/lock.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/atomic.h"

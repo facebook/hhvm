@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/apc-local-array.h"
+#include <vector>
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/type-conversions.h"

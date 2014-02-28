@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/intercept.h"
 
 #include <vector>
+#include <utility>
 
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/array-init.h"

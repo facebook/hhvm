@@ -31,6 +31,7 @@
 #include "hphp/runtime/server/server.h"
 
 #include <memory>
+#include <vector>
 
 using namespace HPHP;
 

@@ -21,6 +21,7 @@
 #include <cinttypes>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 #include "folly/Conv.h"
 #include "folly/String.h"

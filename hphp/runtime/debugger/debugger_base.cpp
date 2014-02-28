@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/debugger/debugger_base.h"
+#include <utility>
+#include <vector>
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/parser/scanner.h"

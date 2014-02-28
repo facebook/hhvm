@@ -44,6 +44,11 @@
 #else
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <algorithm>
+#include <map>
+#include <memory>
+#include <set>
+#include <vector>
 #endif
 
 using namespace HPHP::TextArt;

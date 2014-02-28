@@ -19,6 +19,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <map>
+#include <memory>
+#include <set>
+#include <utility>
+#include <vector>
 #include "folly/String.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/parser/parser.h"

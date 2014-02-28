@@ -37,6 +37,8 @@
 #include <memory>
 #include <cmath>
 #include <cstdio>
+#include <algorithm>
+#include <iterator>
 
 using namespace HPHP;
 

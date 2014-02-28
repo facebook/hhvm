@@ -21,6 +21,10 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include <deque>
+#include <exception>
+#include <set>
+#include <utility>
 
 #include "folly/MapUtil.h"
 #include "folly/Memory.h"

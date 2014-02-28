@@ -17,6 +17,11 @@
 
 #include <gtest/gtest.h>
 #include <boost/range/join.hpp>
+#include <algorithm>
+#include <limits>
+#include <memory>
+#include <utility>
+#include <vector>
 
 #include "folly/Lazy.h"
 

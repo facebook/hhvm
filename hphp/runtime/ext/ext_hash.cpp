@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_hash.h"
+#include <algorithm>
+#include <memory>
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_md.h"

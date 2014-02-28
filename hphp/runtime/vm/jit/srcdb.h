@@ -17,6 +17,8 @@
 #define incl_HPHP_SRCDB_H_
 
 #include <boost/noncopyable.hpp>
+#include <algorithm>
+#include <atomic>
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"

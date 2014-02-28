@@ -15,6 +15,10 @@
 */
 
 #include "hphp/runtime/base/stats.h"
+#include <algorithm>
+#include <atomic>
+#include <utility>
+#include <vector>
 
 #include "hphp/util/data-block.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"

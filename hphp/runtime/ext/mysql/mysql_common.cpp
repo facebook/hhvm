@@ -21,6 +21,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <poll.h>
+#include <algorithm>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 #include "folly/String.h"

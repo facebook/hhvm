@@ -26,6 +26,7 @@
 #include <vector>
 #include <stack>
 #include <list>
+#include <map>
 
 #include "hphp/util/thread-local.h"
 #include "hphp/util/mutex.h"

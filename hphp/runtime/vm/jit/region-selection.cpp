@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <boost/range/adaptors.hpp>
 #include <functional>
+#include <exception>
+#include <utility>
 
 #include "folly/Memory.h"
 #include "folly/Conv.h"

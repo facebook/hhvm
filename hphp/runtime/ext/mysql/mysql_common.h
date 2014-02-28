@@ -19,6 +19,7 @@
 #define incl_HPHP_MYSQL_COMMON_H_
 
 #include "folly/Optional.h"
+#include <vector>
 
 #include "hphp/runtime/base/base-includes.h"
 #include "mysql.h"

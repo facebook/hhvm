@@ -26,6 +26,9 @@
 #include "hphp/util/process.h"
 #include "hphp/hhbbc/hhbbc.h"
 #include <boost/algorithm/string/trim.hpp>
+#include <map>
+#include <set>
+#include <vector>
 #include "hphp/runtime/base/preg.h"
 
 namespace HPHP {

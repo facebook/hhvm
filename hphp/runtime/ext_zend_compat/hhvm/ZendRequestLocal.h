@@ -18,6 +18,8 @@
 #define incl_HPHP_ZEND_REQUEST_LOCAL
 
 #include "hphp/runtime/base/request-local.h"
+#include <unordered_map>
+#include <vector>
 
 #define ZEND_REQUEST_LOCAL_LIST(T, N) static __thread HPHP::RequestLocal<ZendRequestLocalList<T> > N;
 template <class T>

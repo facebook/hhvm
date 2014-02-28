@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
+#include <vector>
 
 #include "folly/dynamic.h"
 #include "folly/json.h"

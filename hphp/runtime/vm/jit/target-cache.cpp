@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <limits>
 
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/complex-types.h"

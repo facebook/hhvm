@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_memcache.h"
+#include <vector>
 #include "hphp/runtime/ext/libmemcached_portability.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/ini-setting.h"

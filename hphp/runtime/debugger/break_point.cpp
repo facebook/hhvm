@@ -16,6 +16,7 @@
 #include "hphp/runtime/debugger/break_point.h"
 
 #include <boost/lexical_cast.hpp>
+#include <vector>
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"

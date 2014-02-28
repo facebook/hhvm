@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_simplexml.h"
+#include <vector>
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_domdocument.h"

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/compiler/parser/parser.h"
+#include <vector>
 
 #include "hphp/compiler/type_annotation.h"
 #include "hphp/parser/hphp.tab.hpp"

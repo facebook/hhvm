@@ -17,6 +17,7 @@
 #define incl_HPHP_TRACELET_H_
 
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <vector>
 
 #include "hphp/runtime/vm/jit/runtime-type.h"
 

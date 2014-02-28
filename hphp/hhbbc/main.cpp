@@ -27,6 +27,9 @@
 #include <boost/filesystem.hpp>
 
 #include <unistd.h>
+#include <exception>
+#include <utility>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 

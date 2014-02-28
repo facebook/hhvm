@@ -19,6 +19,8 @@
 
 #include <memory>
 #include <vector>
+#include <list>
+#include <utility>
 
 #include "hphp/runtime/debugger/debugger_thrift_buffer.h"
 

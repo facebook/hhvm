@@ -17,6 +17,7 @@
 
 #include <boost/next_prior.hpp>
 #include <unordered_set>
+#include <bitset>
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir.h"

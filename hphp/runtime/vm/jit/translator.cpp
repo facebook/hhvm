@@ -25,6 +25,9 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
+#include <memory>
+#include <utility>
 
 #include "folly/Optional.h"
 #include "folly/Conv.h"

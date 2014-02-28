@@ -38,6 +38,7 @@
  * and wiping it out.
  */
 # include <sys/param.h>
+#include <algorithm>
 # ifdef isset
 #  undef isset
 # endif

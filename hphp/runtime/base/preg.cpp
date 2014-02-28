@@ -30,6 +30,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include <tbb/concurrent_hash_map.h>
+#include <utility>
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2

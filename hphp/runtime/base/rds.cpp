@@ -19,6 +19,7 @@
 #include <cstdio>
 
 #include <sys/mman.h>
+#include <atomic>
 
 #include "folly/String.h"
 #include "folly/Hash.h"

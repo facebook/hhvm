@@ -20,6 +20,7 @@
 #include <utility>
 
 #include <boost/mpl/has_xxx.hpp>
+#include <algorithm>
 
 #include "hphp/util/tiny-vector.h"
 #include "hphp/runtime/vm/hhbc.h"

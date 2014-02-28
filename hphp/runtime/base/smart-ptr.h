@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/countable.h"
 #include <utility>
+#include <algorithm>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,6 +18,7 @@
 #define incl_HPHP_APC_LOCAL_ARRAY_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include <vector>
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/apc-array.h"

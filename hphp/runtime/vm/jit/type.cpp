@@ -15,6 +15,7 @@
 */
 
 #include "folly/Conv.h"
+#include <vector>
 #include "folly/Format.h"
 #include "folly/MapUtil.h"
 #include "folly/gen/Base.h"

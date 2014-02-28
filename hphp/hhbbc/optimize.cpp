@@ -21,6 +21,7 @@
 #include <utility>
 #include <algorithm>
 #include <cassert>
+#include <bitset>
 
 #include "folly/Optional.h"
 

@@ -18,6 +18,7 @@
 #define incl_HPHP_ZEND_EXECUTION_STACK
 
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
+#include <vector>
 #include "hphp/runtime/base/request-local.h"
 
 enum class ZendStackMode {

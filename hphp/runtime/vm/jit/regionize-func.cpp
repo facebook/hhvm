@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include <algorithm>
+#include <vector>
 
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/runtime-option.h"

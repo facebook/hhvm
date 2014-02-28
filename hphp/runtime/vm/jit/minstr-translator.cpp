@@ -16,6 +16,8 @@
 
 
 #include "hphp/runtime/base/hphp-array-defs.h"
+#include <algorithm>
+#include <vector>
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/frame-state.h"

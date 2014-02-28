@@ -66,6 +66,11 @@
 #include <oniguruma.h>
 #include <signal.h>
 #include <libxml/parser.h>
+#include <exception>
+#include <iterator>
+#include <map>
+#include <memory>
+#include <vector>
 
 #include "hphp/runtime/base/file-repository.h"
 

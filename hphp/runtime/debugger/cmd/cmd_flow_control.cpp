@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
+#include <algorithm>
 #include "hphp/runtime/vm/debugger-hook.h"
 
 namespace HPHP { namespace Eval {

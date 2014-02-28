@@ -17,6 +17,7 @@
 #define incl_HHBBC_SRC_LOC_H_
 
 #include <cstdint>
+#include <tuple>
 
 namespace HPHP { namespace HHBBC {
 

@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_EXTRADATA_H_
 
 #include "hphp/util/ringbuffer.h"
+#include <algorithm>
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-loc.h"

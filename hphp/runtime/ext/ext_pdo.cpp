@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/ext_pdo.h"
 
 #include <string>
+#include <set>
 
 #include "hphp/runtime/ext/pdo_driver.h"
 #include "hphp/runtime/ext/pdo_mysql.h"

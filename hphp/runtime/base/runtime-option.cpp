@@ -21,6 +21,10 @@
 
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <map>
+#include <memory>
+#include <set>
+#include <vector>
 
 #include "folly/String.h"
 

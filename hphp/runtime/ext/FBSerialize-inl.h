@@ -20,6 +20,7 @@
 
 #include <folly/Bits.h>
 #include <folly/Conv.h>
+#include <algorithm>
 
 namespace HPHP { namespace serialize {
 

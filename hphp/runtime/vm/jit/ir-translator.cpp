@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/ir-translator.h"
 
 #include <stdint.h>
+#include <algorithm>
 #include "hphp/runtime/base/strings.h"
 
 #include "folly/Format.h"

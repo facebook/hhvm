@@ -22,6 +22,10 @@
 
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
+#include <algorithm>
+#include <memory>
+#include <utility>
+#include <vector>
 
 #include "folly/String.h"
 

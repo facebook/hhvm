@@ -31,6 +31,7 @@
 #include <lz4.h>
 #include <lz4hc.h>
 #include <memory>
+#include <algorithm>
 
 #define PHP_ZLIB_MODIFIER 1000
 

@@ -23,6 +23,7 @@
 #endif
 
 #include "hphp/runtime/base/complex-types.h"
+#include <map>
 #include "hphp/runtime/base/sweepable.h"
 
 namespace HPHP {

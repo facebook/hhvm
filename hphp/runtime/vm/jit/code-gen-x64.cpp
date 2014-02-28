@@ -18,6 +18,8 @@
 
 #include <cstring>
 #include <unwind.h>
+#include <limits>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 #include "folly/Format.h"

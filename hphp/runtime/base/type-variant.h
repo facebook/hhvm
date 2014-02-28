@@ -23,6 +23,7 @@
 #endif
 
 #include <type_traits>
+#include <algorithm>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/types.h"

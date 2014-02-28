@@ -33,6 +33,7 @@
 #include "hphp/runtime/ext/gd/libgd/gdfontl.h"  /* 4 Large font */
 #include "hphp/runtime/ext/gd/libgd/gdfontg.h"  /* 5 Giant font */
 #include <zlib.h>
+#include <set>
 
 // #define IM_MEMORY_CHECK
 

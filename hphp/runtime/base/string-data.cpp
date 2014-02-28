@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/string-data.h"
 
 #include <cmath>
+#include <utility>
 
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/zend-functions.h"

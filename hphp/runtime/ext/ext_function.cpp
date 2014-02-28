@@ -17,6 +17,8 @@
 #include "hphp/runtime/ext/ext_function.h"
 
 #include <boost/lexical_cast.hpp>
+#include <algorithm>
+#include <vector>
 
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_class.h"

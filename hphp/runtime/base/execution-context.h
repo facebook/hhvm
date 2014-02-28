@@ -30,6 +30,11 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
 #include <setjmp.h>
+#include <list>
+#include <set>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 #define PHP_OUTPUT_HANDLER_START  (1<<0)
 #define PHP_OUTPUT_HANDLER_CONT   (1<<1)

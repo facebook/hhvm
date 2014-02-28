@@ -47,6 +47,10 @@
 
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
 
 using namespace HPHP;
 using std::map;

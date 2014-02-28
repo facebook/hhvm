@@ -23,6 +23,9 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <algorithm>
+#include <memory>
+#include <vector>
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"

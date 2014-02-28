@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_REG_ALLOC_H_
 
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include <vector>
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 

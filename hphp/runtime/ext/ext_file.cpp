@@ -52,6 +52,7 @@
 #include <grp.h>
 #include <pwd.h>
 #include <fnmatch.h>
+#include <vector>
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
   File *f = handle.getTyped<File>(true, true);          \

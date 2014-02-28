@@ -18,6 +18,7 @@
 
 #include <sstream>
 #include <type_traits>
+#include <limits>
 
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/type-conversions.h"

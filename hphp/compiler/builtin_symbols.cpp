@@ -37,6 +37,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include <dlfcn.h>
+#include <vector>
 
 using namespace HPHP;
 

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/print.h"
+#include <vector>
 
 #include "hphp/util/disasm.h"
 #include "hphp/util/text-color.h"

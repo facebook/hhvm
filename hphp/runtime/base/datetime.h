@@ -18,6 +18,7 @@
 #define incl_HPHP_DATETIME_H_
 
 #include "hphp/runtime/base/types.h"
+#include <memory>
 #include "hphp/runtime/base/smart-object.h"
 #include "hphp/runtime/base/timezone.h"
 #include "hphp/runtime/base/dateinterval.h"

@@ -19,6 +19,9 @@
 #define PHP_SOAP_H
 
 #include "hphp/runtime/base/base-includes.h"
+#include <map>
+#include <memory>
+#include <vector>
 #include "hphp/runtime/ext/soap/sdl.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/exceptions.h"

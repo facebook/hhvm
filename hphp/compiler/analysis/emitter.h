@@ -31,6 +31,9 @@
 
 #include <deque>
 #include <utility>
+#include <map>
+#include <set>
+#include <vector>
 
 namespace HPHP {
 

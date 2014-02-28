@@ -20,6 +20,10 @@
 
 #include <dlfcn.h>
 #include <sys/time.h> // gettimeofday
+#include <limits>
+#include <memory>
+#include <set>
+#include <vector>
 
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_fb.h"

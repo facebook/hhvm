@@ -18,6 +18,7 @@
 #define incl_HPHP_FUNCTION_CONTAINER_H_
 
 #include "hphp/compiler/hphp.h"
+#include <map>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

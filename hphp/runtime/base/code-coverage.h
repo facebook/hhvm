@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_CODE_COVERAGE_H_
 
 #include "hphp/runtime/base/complex-types.h"
+#include <vector>
 #include "hphp/util/lock.h"
 
 namespace HPHP {

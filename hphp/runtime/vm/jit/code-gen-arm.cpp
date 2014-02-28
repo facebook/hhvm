@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
+#include <vector>
 
 #include "folly/Optional.h"
 

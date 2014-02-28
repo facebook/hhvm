@@ -20,6 +20,9 @@
 
 #include <unicode/ures.h>
 #include <unicode/uloc.h>
+#include <algorithm>
+#include <utility>
+#include <vector>
 
 namespace HPHP { namespace Intl {
 //////////////////////////////////////////////////////////////////////////////

@@ -52,6 +52,7 @@
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
+#include <exception>
 
 using namespace boost::program_options;
 using std::cout;

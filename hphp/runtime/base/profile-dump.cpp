@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/base/profile-dump.h"
+#include <algorithm>
+#include <condition_variable>
+#include <mutex>
 
 #include "folly/Format.h"
 #include "folly/Conv.h"

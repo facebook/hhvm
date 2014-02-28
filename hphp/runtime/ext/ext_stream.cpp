@@ -35,6 +35,7 @@
 #include <sys/socket.h>
 #if defined(AF_UNIX)
 #include <sys/un.h>
+#include <algorithm>
 #endif
 
 #define PHP_STREAM_BUFFER_NONE  0   /* unbuffered */

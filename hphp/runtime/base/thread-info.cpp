@@ -20,6 +20,9 @@
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <signal.h>
+#include <limits>
+#include <map>
+#include <set>
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp-system.h"

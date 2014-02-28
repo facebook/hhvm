@@ -19,6 +19,9 @@
 #include "hphp/runtime/base/execution-context.h"
 
 #include <stdint.h>
+#include <algorithm>
+#include <list>
+#include <utility>
 
 #include "folly/MapUtil.h"
 

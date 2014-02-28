@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/memory-profile.h"

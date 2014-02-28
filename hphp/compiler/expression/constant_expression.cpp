@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/expression/constant_expression.h"
+#include <vector>
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"

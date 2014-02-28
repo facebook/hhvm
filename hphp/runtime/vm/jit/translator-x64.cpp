@@ -50,6 +50,10 @@
 #include <boost/utility/typed_in_place_factory.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <algorithm>
+#include <exception>
+#include <memory>
+#include <vector>
 
 #include "folly/Format.h"
 #include "folly/String.h"

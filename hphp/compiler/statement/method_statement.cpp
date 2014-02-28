@@ -15,6 +15,8 @@
 */
 
 #include "hphp/compiler/statement/method_statement.h"
+#include <map>
+#include <set>
 #include "hphp/compiler/statement/return_statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/statement/try_statement.h"

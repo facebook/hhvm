@@ -18,6 +18,11 @@
 #define incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
 
 #include <boost/smart_ptr/shared_array.hpp>
+#include <map>
+#include <memory>
+#include <set>
+#include <utility>
+#include <vector>
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client_settings.h"

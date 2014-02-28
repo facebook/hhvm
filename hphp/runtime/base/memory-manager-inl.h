@@ -18,6 +18,7 @@
 #define incl_HPHP_MEMORY_MANAGER_INL_H
 
 #include <limits>
+#include <utility>
 
 #include "hphp/util/compilation-flags.h"
 

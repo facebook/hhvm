@@ -46,6 +46,7 @@
 #include "hphp/util/string-vsnprintf.h"
 
 #include <limits>
+#include <algorithm>
 
 namespace HPHP {
 

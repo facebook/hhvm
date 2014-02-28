@@ -20,6 +20,8 @@
 #include <sys/resource.h>
 #include <sys/utsname.h>
 #include <pwd.h>
+#include <algorithm>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 

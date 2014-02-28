@@ -16,6 +16,7 @@
 
 
 #include "hphp/compiler/analysis/block_scope.h"
+#include <utility>
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/expression/expression.h"

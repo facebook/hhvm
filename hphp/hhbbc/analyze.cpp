@@ -15,6 +15,11 @@
 */
 #include "hphp/hhbbc/analyze.h"
 
+#include <algorithm>
+#include <set>
+#include <utility>
+#include <vector>
+
 #include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/interp-state.h"

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/runtime.h"
 #include <boost/format.hpp>
+#include <map>
 
 using namespace HPHP;
 

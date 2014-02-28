@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/class-info.h"
+#include <vector>
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/complex-types.h"

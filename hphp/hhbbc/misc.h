@@ -20,6 +20,7 @@
 #include <cassert>
 
 #include <boost/variant.hpp>
+#include <memory>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"

@@ -19,6 +19,7 @@
 
 #include <type_traits>
 #include <vector>
+#include <utility>
 
 #include "folly/ScopeGuard.h"
 #include "hphp/util/arena.h"

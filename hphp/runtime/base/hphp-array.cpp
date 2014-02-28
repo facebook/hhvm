@@ -17,6 +17,8 @@
 #define INLINE_VARIANT_HELPER 1
 
 #include "hphp/runtime/base/hphp-array.h"
+#include <algorithm>
+#include <utility>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/statement/switch_statement.h"
+#include <set>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/statement/case_statement.h"

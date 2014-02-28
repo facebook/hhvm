@@ -16,6 +16,10 @@
 #include "hphp/runtime/debugger/debugger_proxy.h"
 
 #include <boost/lexical_cast.hpp>
+#include <exception>
+#include <map>
+#include <stack>
+#include <vector>
 
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"

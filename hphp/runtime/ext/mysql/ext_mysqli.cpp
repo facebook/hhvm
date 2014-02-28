@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/base/base-includes.h"
+#include <vector>
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/util/logger.h"

@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include <algorithm>
+#include <vector>
 
 #include "folly/CpuId.h"
 #include "folly/Optional.h"

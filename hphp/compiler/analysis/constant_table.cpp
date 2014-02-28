@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/analysis/constant_table.h"
+#include <vector>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/type.h"

@@ -18,6 +18,10 @@
 #define incl_HPHP_SYMBOL_TABLE_H_
 
 #include "hphp/compiler/hphp.h"
+#include <map>
+#include <memory>
+#include <set>
+#include <vector>
 #include "hphp/compiler/json.h"
 #include "hphp/util/util.h"
 #include "hphp/util/lock.h"

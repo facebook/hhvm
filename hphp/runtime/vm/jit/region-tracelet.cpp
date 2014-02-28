@@ -15,6 +15,8 @@
 */
 
 #include "hphp/util/trace.h"
+#include <algorithm>
+#include <vector>
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"

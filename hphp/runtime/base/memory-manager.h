@@ -19,6 +19,7 @@
 
 #include <array>
 #include <vector>
+#include <utility>
 
 #include "folly/Memory.h"
 

@@ -2,6 +2,9 @@ array(1) {
   [0]=>
   object(stdClass)#1 (1) {
     ["foo"]=>
-    NULL
+    object(stdClass)#2 (1) {
+      ["bar"]=>
+      int(2)
+    }
   }
 }

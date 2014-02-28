@@ -1668,11 +1668,7 @@ inline DataType propPreNull(TypedValue& tvScratch, TypedValue*& result) {
   }
   return KindOfNull;
 }
-inline ObjectData* createDefaultObject() {
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
-  ObjectData* obj = newInstance(SystemLib::s_stdclassClass);
-  return obj;
-}
+
 template <bool warn, bool define>
 inline DataType propPreStdclass(TypedValue& tvScratch,
                                 TypedValue*& result, TypedValue* base) {
@@ -1680,12 +1676,13 @@ inline DataType propPreStdclass(TypedValue& tvScratch,
     return propPreNull<warn>(tvScratch, result);
   }
   // TODO(#1124706): We don't want to do this anymore.
-  ObjectData* obj = createDefaultObject();
+  auto const obj = newInstance(SystemLib::s_stdclassClass);
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
   base->m_data.pobj = obj;
   obj->incRefCount();
   result = base;
+  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
   return KindOfObject;
 }
 
@@ -1815,17 +1812,15 @@ inline void SetPropNull(Cell* val) {
 
 inline void SetPropStdclass(TypedValue* base, TypedValue* key,
                             Cell* val) {
-  // createDefaultObject could re-enter and clobber base.
-  auto const baseCopy = *base;
-
-  ObjectData* obj = createDefaultObject();
+  auto const obj = newInstance(SystemLib::s_stdclassClass);
   obj->incRefCount();
-  StringData* keySD = prepareKey(key);
+  auto const keySD = prepareKey(key);
   obj->setProp(nullptr, keySD, (TypedValue*)val);
   decRefStr(keySD);
-  tvRefcountedDecRef(baseCopy);
+  tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
   base->m_data.pobj = obj;
+  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
 }
 
 template <KeyType keyType>
@@ -1893,11 +1888,12 @@ inline TypedValue* SetOpPropNull(TypedValue& tvScratch) {
 inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
                                      TypedValue* base, TypedValue* key,
                                      Cell* rhs) {
-  ObjectData* obj = createDefaultObject();
+  auto const obj = newInstance(SystemLib::s_stdclassClass);
   obj->incRefCount();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
   base->m_data.pobj = obj;
+  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
 
   StringData* keySD = prepareKey(key);
   tvWriteNull(&tvRef);
@@ -1982,11 +1978,12 @@ inline void IncDecPropNull(TypedValue& dest) {
 template <bool setResult>
 inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
                                TypedValue* key, TypedValue& dest) {
-  ObjectData* obj = createDefaultObject();
+  auto const obj = newInstance(SystemLib::s_stdclassClass);
   obj->incRefCount();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
   base->m_data.pobj = obj;
+  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
 
   StringData* keySD = prepareKey(key);
   TypedValue tv;

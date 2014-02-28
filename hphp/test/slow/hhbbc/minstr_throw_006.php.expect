@@ -1,0 +1,7 @@
+catch
+bool(true)
+bool(false)
+object(stdClass)#1 (1) {
+  ["a"]=>
+  int(2)
+}

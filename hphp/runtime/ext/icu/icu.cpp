@@ -85,24 +85,35 @@ void IntlExtension::bindConstants() {
 /////////////////////////////////////////////////////////////////////////////
 // UTF8<->UTF16 string encoding conversion
 
-String u16(const char *u8, int32_t u8_len, UErrorCode &error) {
+icu::UnicodeString u16(const char *u8, int32_t u8_len, UErrorCode &error,
+                       UChar32 subst /* =0 */) {
   error = U_ZERO_ERROR;
   if (u8_len == 0) {
-    return empty_string;
+    return icu::UnicodeString();
   }
   int32_t outlen;
-  u_strFromUTF8(nullptr, 0, &outlen, u8, u8_len, &error);
+  if (subst) {
+    u_strFromUTF8WithSub(nullptr, 0, &outlen, u8, u8_len,
+                         subst, nullptr, &error);
+  } else {
+    u_strFromUTF8(nullptr, 0, &outlen, u8, u8_len, &error);
+  }
   if (error != U_BUFFER_OVERFLOW_ERROR) {
-    return null_string;
+    return icu::UnicodeString();
   }
-  String ret = String(sizeof(UChar) * (outlen + 1), ReserveString);
-  UChar *out = (UChar*)ret->mutableData();
+  icu::UnicodeString ret;
+  auto out = ret.getBuffer(outlen + 1);
   error = U_ZERO_ERROR;
-  u_strFromUTF8(out, outlen + 1, &outlen, u8, u8_len, &error);
-  if (U_FAILURE(error)) {
-    return null_string;
+  if (subst) {
+    u_strFromUTF8WithSub(out, outlen + 1, &outlen, u8, u8_len,
+                         subst, nullptr, &error);
+  } else {
+    u_strFromUTF8(out, outlen + 1, &outlen, u8, u8_len, &error);
   }
-  ret.setSize(outlen * sizeof(UChar));
+  ret.releaseBuffer(outlen);
+  if (U_FAILURE(error)) {
+    return icu::UnicodeString();
+  }
   return ret;
 }
 
@@ -125,25 +136,6 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
   }
   ret.setSize(outlen);
   return ret;
-}
-
-bool ustring_from_char(icu::UnicodeString& ret,
-                       const String& str,
-                       UErrorCode &error) {
-  int32_t capacity = str.size() + 1;
-  UChar *utf16 = ret.getBuffer(capacity);
-  int32_t utf16_len = 0;
-  error = U_ZERO_ERROR;
-  u_strFromUTF8WithSub(utf16, ret.getCapacity(), &utf16_len,
-                       str.c_str(), str.size(),
-                       U_SENTINEL /* no substitution */,
-                       nullptr, &error);
-  ret.releaseBuffer(utf16_len);
-  if (U_FAILURE(error)) {
-    ret.setToBogus();
-    return false;
-  }
-  return true;
 }
 
 double VariantToMilliseconds(CVarRef arg) {

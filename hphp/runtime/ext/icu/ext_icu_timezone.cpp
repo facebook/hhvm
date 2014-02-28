@@ -26,6 +26,18 @@ const StaticString s_IntlTimeZone("IntlTimeZone");
 
 Class* IntlTimeZone::c_IntlTimeZone = nullptr;
 
+static bool ustring_from_char(icu::UnicodeString& ret,
+                              const String& str,
+                              UErrorCode &error) {
+  error = U_ZERO_ERROR;
+  ret = u16(str, error, U_SENTINEL);
+  if (U_FAILURE(error)) {
+    ret.setToBogus();
+    return false;
+  }
+  return true;
+}
+
 icu::TimeZone* IntlTimeZone::ParseArg(CVarRef arg,
                                       const String& funcname,
                                       intl_error &err) {
@@ -52,7 +64,7 @@ icu::TimeZone* IntlTimeZone::ParseArg(CVarRef arg,
 
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString id;
-  if (!Intl::ustring_from_char(id, tzstr, error)) {
+  if (!ustring_from_char(id, tzstr, error)) {
     err.code = error;
     err.custom_error_message = funcname +
       String(": Time zone identifier given is not a "

@@ -171,21 +171,16 @@ bool SetDefaultLocale(const String& locale);
 double VariantToMilliseconds(CVarRef arg);
 
 // Common encoding conversions UTF8<->UTF16
-String u16(const char *u8, int32_t u8_len, UErrorCode &error);
-inline String u16(const String u8, UErrorCode &error) {
-  return u16(u8.c_str(), u8.size(), error);
+icu::UnicodeString u16(const char* u8, int32_t u8_len, UErrorCode &error,
+                       UChar32 subst = 0);
+inline icu::UnicodeString u16(const String& u8, UErrorCode& error,
+                       UChar32 subst = 0) {
+  return u16(u8.c_str(), u8.size(), error, subst);
 }
 String u8(const UChar *u16, int32_t u16_len, UErrorCode &error);
-inline String u8(const String &u16, UErrorCode &error) {
-  return u8((const UChar *)u16.c_str(), u16.size() / sizeof(UChar), error);
-}
-inline String u8(const icu::UnicodeString& u16, UErrorCode &error) {
+inline String u8(const icu::UnicodeString& u16, UErrorCode& error) {
   return u8(u16.getBuffer(), u16.length(), error);
 }
-
-bool ustring_from_char(icu::UnicodeString& ret,
-                       const String& str,
-                       UErrorCode &error);
 
 class IntlExtension : public Extension {
  public:

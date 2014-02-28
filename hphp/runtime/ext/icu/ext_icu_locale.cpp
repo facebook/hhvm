@@ -229,13 +229,12 @@ static Variant get_icu_display_value(const String &locale,
       return false;
   }
 
-  String buf(64 * sizeof(UChar), ReserveString);
+  icu::UnicodeString buf;
+  auto ubuf = buf.getBuffer(64);
   do {
     UErrorCode error = U_ZERO_ERROR;
     int32_t len = ulocfunc(locname.c_str(), disp_locale.c_str(),
-                           (UChar*)buf->mutableData(),
-                           buf->capacity() / sizeof(UChar),
-                           &error);
+                           ubuf, buf.getCapacity(), &error);
     if (error != U_BUFFER_OVERFLOW_ERROR &&
         error != U_STRING_NOT_TERMINATED_WARNING) {
       if (U_FAILURE(error)) {
@@ -245,7 +244,7 @@ static Variant get_icu_display_value(const String &locale,
                                  LocaleName(tag).c_str());
         return false;
       }
-      buf.setSize(len * sizeof(UChar));
+      buf.releaseBuffer(len);
 
       error = U_ZERO_ERROR;
       String out(u8(buf, error));
@@ -257,13 +256,17 @@ static Variant get_icu_display_value(const String &locale,
       }
       return out;
     }
-    if (len <= (buf->capacity() / sizeof(UChar))) {
+    if (len <= buf.getCapacity()) {
       // Avoid infinite loop
+      buf.releaseBuffer(0);
       s_intl_error->set(U_INTERNAL_PROGRAM_ERROR,
                         "Got invalid response from ICU");
       return false;
     }
-    buf = String(len * sizeof(UChar), ReserveString);
+
+    // Grow the buffer to sufficient size
+    buf.releaseBuffer(0);
+    ubuf = buf.getBuffer(len);
   } while (true);
 
   not_reached();

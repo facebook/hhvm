@@ -22,7 +22,8 @@ include(CheckFunctionExists)
 include(cotire)
 
 FIND_PATH(LIBC_INCLUDE_PATH stdlib.h)
-FIND_PATH(LIBC_ARCH_INCLUDE_PATH bits/waitflags.h)
+FIND_PATH(ARCH_INCLUDE_PATH ${CMAKE_LIBRARY_ARCHITECTURE})
+SET(ARCH_INCLUDE_PATH "${ARCH_INCLUDE_PATH}/${CMAKE_LIBRARY_ARCHITECTURE}")
 
 set_property(DIRECTORY
     PROPERTY COTIRE_PREFIX_HEADER_IGNORE_PATH
@@ -32,7 +33,7 @@ set_property(DIRECTORY
         "${LIBC_INCLUDE_PATH}/libelf.h"
         "${LIBC_INCLUDE_PATH}/elf.h"
         "${LIBC_INCLUDE_PATH}/gelf.h"
-        "${LIBC_ARCH_INCLUDE_PATH}"
+        "${ARCH_INCLUDE_PATH}"
         ${CCLIENT_INCLUDE_PATH}
         "${JEMALLOC_INCLUDE_DIR}/jemalloc"
         "${ONIGURUMA_INCLUDE_DIR}/onigposix.h"

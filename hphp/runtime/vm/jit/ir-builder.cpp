@@ -164,7 +164,8 @@ std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() const {
 
 SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const locId = inst->extra<CheckLoc>()->locId;
-  Type typeParam = inst->typeParam();
+  Type typeParam   = inst->typeParam();
+  SSATmp* src      = inst->src(0);
 
   if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
     return gen(CheckType, typeParam, inst->taken(), prevValue);
@@ -173,31 +174,24 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const prevType = localType(locId, DataTypeSpecific);
 
   if (prevType <= typeParam) {
-    return inst->src(0);
-  } else {
-    //
-    // Normally, it doesn't make sense to be checking something that's
-    // deemed to fail.  Incompatible boxed types are ok though, since
-    // we don't track them precisely, but instead check them at every
-    // use.
-    //
-    // However, in JitPGO mode right now, this pathological case can
-    // happen, because profile counters are not accurate and we
-    // currently don't analyze Block post-conditions when picking its
-    // successors during region selection.  This can lead to
-    // incompatible types in blocks selected for the same region.
-    //
-    if (prevType.not(typeParam)) {
-      if (typeParam.isBoxed() && prevType.isBoxed()) {
-        // When both types are non-intersecting boxed types, we're just
-        // updating the inner type hint. This requires no runtime work.
-        constrainLocal(locId, DataTypeCountness, "preOptimizeCheckLoc");
-        return gen(AssertLoc, LocalId(locId), typeParam, inst->src(0));
-      } else {
-        assert(RuntimeOption::EvalJitPGO);
-        return gen(Jmp, inst->taken());
-      }
+    return src;
+  }
+
+  if (prevType.not(typeParam)) {
+    if (typeParam.isBoxed() && prevType.isBoxed()) {
+      /* When both types are non-intersecting boxed types, we're just
+       * updating the inner type hint. This requires no runtime work. */
+      constrainLocal(locId, DataTypeCountness, "preOptimizeCheckLoc");
+      return gen(AssertLoc, LocalId(locId), typeParam, src);
     }
+    /* This check will always fail. It's probably due to an incorrect
+     * prediction. Generate a Jmp, and return the source because
+     * following instructions may depend on the output of CheckLoc
+     * (they'll be DCEd later).  Note that we can't use convertToJmp
+     * because the return value isn't nullptr, so the original
+     * instruction won't be inserted into the stream. */
+    gen(Jmp, inst->taken());
+    return src;
   }
 
   return nullptr;

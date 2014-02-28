@@ -553,10 +553,12 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
       return gen(AssertType, newType, src);
     }
     /* This check will always fail. It's probably due to an incorrect
-     * prediction. Convert it to a Jmp, and return src because
+     * prediction. Generate a Jmp, and return src because
      * following instructions may depend on the output of CheckType
-     * (they'll be DCEd later). */
-    inst->convertToJmp();
+     * (they'll be DCEd later). Note that we can't use convertToJmp
+     * because the return value isn't nullptr, so the original
+     * instruction won't be inserted into the stream. */
+    gen(Jmp, inst->taken());
     return src;
   }
 
@@ -610,10 +612,12 @@ SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
       return gen(AssertStk, newType, sp);
     }
     /* This check will always fail. It's probably due to an incorrect
-     * prediction. Convert it to a Jmp, and return the source because
+     * prediction. Generate a Jmp, and return the source because
      * following instructions may depend on the output of CheckStk
-     * (they'll be DCEd later). */
-    inst->convertToJmp();
+     * (they'll be DCEd later).  Note that we can't use convertToJmp
+     * because the return value isn't nullptr, so the original
+     * instruction won't be inserted into the stream. */
+    gen(Jmp, inst->taken());
     return sp;
   }
 

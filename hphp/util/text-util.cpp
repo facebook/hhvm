@@ -16,6 +16,8 @@
 
 #include "hphp/util/text-util.h"
 
+#include <cassert>
+#include <cstring> // memcpy
 #include <string>
 #include <vector>
 #include "hphp/util/string-vsnprintf.h"

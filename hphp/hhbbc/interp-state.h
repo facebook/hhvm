@@ -20,6 +20,8 @@
 #include <string>
 #include <bitset>
 
+#include <boost/variant.hpp>
+
 #include "folly/Optional.h"
 
 #include "hphp/hhbbc/index.h"
@@ -49,12 +51,22 @@ struct ActRec {
 };
 
 /*
+ * State of an iterator in the program.
+ */
+struct UnknownIter {};
+struct TrackedIter { std::pair<Type,Type> kv; };
+using Iter = boost::variant< UnknownIter
+                           , TrackedIter
+                           >;
+
+/*
  * A program state at a position in a php::Block.
  */
 struct State {
   bool initialized = false;
   bool thisAvailable = false;
   std::vector<Type> locals;
+  std::vector<Iter> iters;
   std::vector<Type> stack;
   std::vector<ActRec> fpiStack;
 };

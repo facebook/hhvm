@@ -350,6 +350,7 @@ private:
   friend Type array_elem(const Type&, const Type&);
   friend Type array_set(Type, const Type&, const Type&);
   friend std::pair<Type,Type> array_newelem_key(const Type&, const Type&);
+  friend std::pair<Type,Type> iter_types(const Type&);
 
 private:
   union Data {
@@ -747,6 +748,13 @@ Type array_newelem(const Type& arr, const Type& val);
  * key that was added.  (This is either TInt or a subtype of it.)
  */
 std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val);
+
+/*
+ * Return the best known key and value type for iteration of the
+ * supplied type.  This is only intended for non-mutable iteration, so
+ * the returned types are at worst InitCell.
+ */
+std::pair<Type,Type> iter_types(const Type&);
 
 //////////////////////////////////////////////////////////////////////
 

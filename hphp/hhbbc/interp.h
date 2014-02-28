@@ -1385,13 +1385,17 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::DecodeCufIter&) { popC(); }
 
   void operator()(const bc::IterInit& op) {
-    popC();
+    auto const t1 = popC();
     // Take the branch before setting locals if the iter is already
     // empty, but after popping.  Similar for the other IterInits
     // below.
+    freeIter(op.iter1);
     m_propagate(*op.target, m_state);
-    setLoc(op.loc3, TInitCell);
+    auto ity = iter_types(t1);
+    setLoc(op.loc3, ity.second);
+    setIter(op.iter1, TrackedIter { std::move(ity) });
   }
+
   void operator()(const bc::MIterInit& op) {
     popV();
     m_propagate(*op.target, m_state);
@@ -1399,11 +1403,15 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::IterInitK& op) {
-    popC();
+    auto const t1 = popC();
+    freeIter(op.iter1);
     m_propagate(*op.target, m_state);
-    setLoc(op.loc3, TInitCell);
-    setLoc(op.loc4, TInitCell);
+    auto ity = iter_types(t1);
+    setLoc(op.loc3, ity.second);
+    setLoc(op.loc4, ity.first);
+    setIter(op.iter1, TrackedIter { std::move(ity) });
   }
+
   void operator()(const bc::MIterInitK& op) {
     popV();
     m_propagate(*op.target, m_state);
@@ -1419,6 +1427,7 @@ struct InterpStepper : boost::static_visitor<void> {
     // ref.
     setLocRaw(op.loc3, TInitGen);
   }
+
   void operator()(const bc::WIterInitK& op) {
     popC();
     m_propagate(*op.target, m_state);
@@ -1427,19 +1436,36 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::IterNext& op) {
+    match<void>(
+      m_state.iters[op.iter1->id],
+      [&] (UnknownIter)           { this->setLoc(op.loc3, TInitCell); },
+      [&] (const TrackedIter& ti) { this->setLoc(op.loc3, ti.kv.second); }
+    );
     m_propagate(*op.target, m_state);
-    setLoc(op.loc3, TInitCell);
+    freeIter(op.iter1);
   }
+
   void operator()(const bc::MIterNext& op) {
     m_propagate(*op.target, m_state);
     setLocRaw(op.loc3, TRef);
   }
 
   void operator()(const bc::IterNextK& op) {
+    match<void>(
+      m_state.iters[op.iter1->id],
+      [&] (UnknownIter) {
+        this->setLoc(op.loc3, TInitCell);
+        this->setLoc(op.loc4, TInitCell);
+      },
+      [&] (const TrackedIter& ti) {
+        this->setLoc(op.loc3, ti.kv.second);
+        this->setLoc(op.loc4, ti.kv.first);
+      }
+    );
     m_propagate(*op.target, m_state);
-    setLoc(op.loc3, TInitCell);
-    setLoc(op.loc4, TInitCell);
+    freeIter(op.iter1);
   }
+
   void operator()(const bc::MIterNextK& op) {
     m_propagate(*op.target, m_state);
     setLocRaw(op.loc3, TRef);
@@ -1450,17 +1476,19 @@ struct InterpStepper : boost::static_visitor<void> {
     m_propagate(*op.target, m_state);
     setLocRaw(op.loc3, TInitGen);
   }
+
   void operator()(const bc::WIterNextK& op) {
     m_propagate(*op.target, m_state);
     setLocRaw(op.loc3, TInitGen);
     setLoc(op.loc4, TInitCell);
   }
 
-  void operator()(const bc::IterFree&)  { nothrow(); }
-  void operator()(const bc::MIterFree&) { nothrow(); }
-  void operator()(const bc::CIterFree&) { nothrow(); }
+  void operator()(const bc::IterFree& op)  { nothrow(); freeIter(op.iter1); }
+  void operator()(const bc::MIterFree& op) { nothrow(); freeIter(op.iter1); }
+  void operator()(const bc::CIterFree& op) { nothrow(); freeIter(op.iter1); }
 
   void operator()(const bc::IterBreak& op) {
+    for (auto& kv : op.iterTab) freeIter(kv.second);
     m_propagate(*op.target, m_state);
   }
 
@@ -3325,6 +3353,14 @@ private: // locals
     assert(id < m_ctx.func->locals.size());
     mayReadLocal(id);
     return borrow(m_ctx.func->locals[id]);
+  }
+
+private: // iterators
+  void setIter(borrowed_ptr<php::Iter> iter, Iter iterState) {
+    m_state.iters[iter->id] = std::move(iterState);
+  }
+  void freeIter(borrowed_ptr<php::Iter> iter) {
+    m_state.iters[iter->id] = UnknownIter {};
   }
 
 private: // $this

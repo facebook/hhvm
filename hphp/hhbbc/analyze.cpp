@@ -40,6 +40,7 @@ State entry_state(const Index& index,
   ret.initialized = true;
   ret.thisAvailable = index.lookup_this_available(ctx.func);
   ret.locals.resize(ctx.func->locals.size());
+  ret.iters.resize(ctx.func->iters.size());
 
   auto locId = uint32_t{0};
   for (; locId < ctx.func->params.size(); ++locId) {

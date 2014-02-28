@@ -2016,6 +2016,41 @@ Type array_newelem(const Type& arr, const Type& val) {
   return array_newelem_key(arr, val).first;
 }
 
+std::pair<Type,Type> iter_types(const Type& iterable) {
+  if (!iterable.subtypeOf(TArr) || !is_specialized_array(iterable)) {
+    return { TInitCell, TInitCell };
+  }
+
+  switch (iterable.m_dataTag) {
+  case DataTag::None:
+    if (iterable.subtypeOf(TSArr)) {
+      return { TInitUnc, TInitUnc };
+    }
+    return { TInitCell, TInitCell };
+  case DataTag::Str:
+  case DataTag::Obj:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Cls:
+    always_assert(0);
+  case DataTag::ArrVal:
+    if (auto const mn = toDArrMapN(iterable.m_data.aval)) {
+      return { mn->key, mn->val };
+    }
+    return { TInitUnc, TInitUnc };
+  case DataTag::ArrPacked:
+    return { TInt, packed_values(*iterable.m_data.apacked) };
+  case DataTag::ArrPackedN:
+    return { TInt, iterable.m_data.apackedn->type };
+  case DataTag::ArrStruct:
+    return { TSStr, struct_values(*iterable.m_data.astruct) };
+  case DataTag::ArrMapN:
+    return { iterable.m_data.amapn->key, iterable.m_data.amapn->val };
+  }
+
+  not_reached();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

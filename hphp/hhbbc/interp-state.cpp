@@ -20,9 +20,51 @@
 #include "folly/Format.h"
 #include "folly/Conv.h"
 
+#include "hphp/util/match.h"
 #include "hphp/hhbbc/analyze.h"
 
 namespace HPHP { namespace HHBBC {
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template<class JoinOp>
+bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
+  return match<bool>(
+    dst,
+    [&] (UnknownIter) { return false; },
+    [&] (TrackedIter& diter) {
+      return match<bool>(
+        src,
+        [&] (UnknownIter) {
+          dst = UnknownIter {};
+          return true;
+        },
+        [&] (const TrackedIter& siter) {
+          auto k1 = join(diter.kv.first, siter.kv.first);
+          auto k2 = join(diter.kv.second, siter.kv.second);
+          auto const changed = k1 != diter.kv.first || k2 != diter.kv.second;
+          diter.kv = std::make_pair(std::move(k1), std::move(k2));
+          return changed;
+        }
+      );
+    }
+  );
+}
+
+std::string show(const Iter& iter) {
+  return match<std::string>(
+    iter,
+    [&] (UnknownIter) { return "unk"; },
+    [&] (const TrackedIter& ti) {
+      return folly::format("{}, {}", show(ti.kv.first),
+        show(ti.kv.second)).str();
+    }
+  );
+}
+
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -50,6 +92,7 @@ State without_stacks(const State& src) {
   ret.initialized   = src.initialized;
   ret.thisAvailable = src.thisAvailable;
   ret.locals        = src.locals;
+  ret.iters         = src.iters;
   return ret;
 }
 
@@ -131,6 +174,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   assert(src.initialized);
   assert(dst.locals.size() == src.locals.size());
+  assert(dst.iters.size() == src.iters.size());
   assert(dst.stack.size() == src.stack.size());
   assert(dst.fpiStack.size() == src.fpiStack.size());
 
@@ -155,6 +199,12 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     if (dst.locals[i] != newT) {
       changed = true;
       dst.locals[i] = newT;
+    }
+  }
+
+  for (auto i = size_t{0}; i < dst.iters.size(); ++i) {
+    if (merge_into(dst.iters[i], src.iters[i], join)) {
+      changed = true;
     }
   }
 
@@ -209,22 +259,27 @@ std::string state_string(const php::Func& f, const State& st) {
 
   ret = "state:\n";
   if (f.cls) {
-    ret += folly::format("thisAvailable({})\n", st.thisAvailable).str();
+    folly::format(&ret, "thisAvailable({})\n", st.thisAvailable);
   }
+
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
-    ret += folly::format("${: <8} :: {}\n",
+    folly::format(&ret, "${: <8} :: {}\n",
       f.locals[i]->name
         ? std::string(f.locals[i]->name->data())
         : folly::format("<unnamed{}>", i).str(),
       show(st.locals[i])
-    ).str();
+    );
+  }
+
+  for (auto i = size_t{0}; i < st.iters.size(); ++i) {
+    folly::format(&ret, "iter {: <2}   :: {}\n", i, show(st.iters[i]));
   }
 
   for (auto i = size_t{0}; i < st.stack.size(); ++i) {
-    ret += folly::format("stk[{:02}] :: {}\n",
+    folly::format(&ret, "stk[{:02}] :: {}\n",
       i,
       show(st.stack[i])
-    ).str();
+    );
   }
 
   return ret;

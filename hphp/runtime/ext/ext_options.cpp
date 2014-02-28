@@ -749,18 +749,24 @@ String f_ini_set(const String& varname, const String& newvalue) {
 int64_t f_memory_get_allocation() {
   auto const& stats = MM().getStats();
   int64_t ret = stats.totalAlloc;
+  assert(ret >= 0);
   return ret;
 }
 
 int64_t f_memory_get_peak_usage(bool real_usage /* = false */) {
   auto const& stats = MM().getStats();
-  return real_usage ? stats.peakUsage : stats.peakAlloc;
+  int64_t ret = real_usage ? stats.peakUsage : stats.peakAlloc;
+  assert(ret >= 0);
+  return ret;
 }
 
 int64_t f_memory_get_usage(bool real_usage /* = false */) {
   auto const& stats = MM().getStats();
   int64_t ret = real_usage ? stats.usage : stats.alloc;
-  // TODO(#3137377)
+  // Since we don't always alloc and dealloc a shared structure from the same
+  // thread it is possible that this can go negative when we are tracking
+  // jemalloc stats.
+  assert((use_jemalloc && real_usage) || ret >= 0);
   return std::max<int64_t>(ret, 0);
 }
 

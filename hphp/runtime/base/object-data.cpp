@@ -976,7 +976,7 @@ ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  return new (MM().smartMallocSizeBigLogged(size).first)
+  return new (MM().smartMallocSizeBigLogged<false>(size).first)
     ObjectData(cls, NoInit::noinit);
 }
 

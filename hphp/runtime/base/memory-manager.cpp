@@ -164,25 +164,78 @@ MemoryManager::MemoryManager()
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
 #endif
-  resetStats();
+  resetStatsImpl(true);
   m_stats.maxBytes = std::numeric_limits<int64_t>::max();
   // make the circular-lists empty.
   m_sweep.next = m_sweep.prev = &m_sweep;
   m_strings.next = m_strings.prev = &m_strings;
 }
 
-void MemoryManager::resetStats() {
-  m_stats.usage = 0;
-  m_stats.alloc = 0;
-  m_stats.peakUsage = 0;
-  m_stats.peakAlloc = 0;
-  m_stats.totalAlloc = 0;
+void MemoryManager::resetStatsImpl(bool isInternalCall) {
+#ifdef USE_JEMALLOC
+  FTRACE(1, "resetStatsImpl({}) pre:\n", isInternalCall);
+  FTRACE(1, "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n",
+    m_stats.usage, m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+  FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
+    m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
+  FTRACE(1, "je debt: {}\n\n", m_stats.jemallocDebt);
+#else
+  FTRACE(1, "resetStatsImpl({}) pre:\n"
+    "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
+    isInternalCall,
+    m_stats.usage, m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+#endif
+  if (isInternalCall) {
+    m_stats.usage = 0;
+    m_stats.alloc = 0;
+    m_stats.peakUsage = 0;
+    m_stats.peakAlloc = 0;
+    m_stats.totalAlloc = 0;
+  } else {
+    // We only expect this to be called before any stats are sync'd. We only
+    // sync peakUsage during refreshStats() so these are safe tests for that.
+    assert(m_stats.peakUsage == 0);
+    assert(m_slabs.size() > 0);
+#ifdef USE_JEMALLOC
+    assert(m_stats.jemallocDebt >= m_stats.alloc);
+#endif
+
+    // The effect of this call is simply to ignore anything we've done *outside*
+    // the smart allocator after we initialized to avoid attributing shared
+    // structure initialization that happens during init_thread_locals() to this
+    // session.
+
+    // We don't want to clear the other values because we do already have some
+    // sized smart allocator usage and live slabs and wiping now will result in
+    // negative values when we try to reconcile our accounting with jemalloc.
+#ifdef USE_JEMALLOC
+    // Anything that was definitively allocated by the smart allocator should
+    // be counted in this number even if we're otherwise zeroing out the count
+    // for each thread.
+    m_stats.totalAlloc = m_stats.jemallocDebt;
+#else
+    m_stats.totalAlloc = 0;
+#endif
+  }
 #ifdef USE_JEMALLOC
   if (s_statsEnabled) {
     m_stats.jemallocDebt = 0;
-    m_prevAllocated = int64_t(*m_allocated);
-    m_delta = m_prevAllocated - int64_t(*m_deallocated);
+    m_prevDeallocated = *m_deallocated;
+    m_prevAllocated = *m_allocated;
   }
+#endif
+#ifdef USE_JEMALLOC
+  FTRACE(1, "resetStatsImpl({}) post:\n", isInternalCall);
+  FTRACE(1, "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n",
+    m_stats.usage, m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
+  FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
+    m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
+  FTRACE(1, "je debt: {}\n\n", m_stats.jemallocDebt);
+#else
+  FTRACE(1, "resetStatsImpl({}) post:\n"
+    "usage: {}\nalloc: {}\npeak usage: {}\npeak alloc: {}\n\n",
+    isInternalCall,
+    m_stats.usage, m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
 #endif
 }
 
@@ -221,6 +274,7 @@ void MemoryManager::resetAllocator() {
     free(slab);
   }
   m_slabs.clear();
+  resetStatsImpl(true);
 
   // free large allocation blocks
   for (SweepNode *n = m_sweep.next, *next; n != &m_sweep; n = next) {
@@ -305,7 +359,7 @@ inline void MemoryManager::smartFree(void* ptr) {
 }
 
 inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
-  FTRACE(1, "smartRealloc: {} to {}\n", inputPtr, nbytes);
+  FTRACE(3, "smartRealloc: {} to {}\n", inputPtr, nbytes);
   assert(nbytes > 0);
 
   void* ptr = debug ? static_cast<DebugHeader*>(inputPtr) - 1 : inputPtr;
@@ -357,7 +411,7 @@ NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
   m_slabs.push_back(slab);
   m_front = slab + nbytes;
   m_limit = slab + SLAB_SIZE;
-  FTRACE(1, "newSlab: adding slab at {} to limit {}\n",
+  FTRACE(3, "newSlab: adding slab at {} to limit {}\n",
          static_cast<void*>(slab),
          static_cast<void*>(m_limit));
   return slab;
@@ -373,15 +427,6 @@ void* MemoryManager::slabAlloc(size_t nbytes) {
     return ptr;
   }
   return newSlab(nbytes);
-}
-
-NEVER_INLINE
-void* MemoryManager::smartMallocSlab(size_t padbytes) {
-  SmallNode* n = (SmallNode*) slabAlloc(padbytes);
-  n->padbytes = padbytes;
-  FTRACE(1, "smartMallocSlab: {} -> {}\n", padbytes,
-         static_cast<void*>(n + 1));
-  return n + 1;
 }
 
 inline void* MemoryManager::smartEnlist(SweepNode* n) {
@@ -407,11 +452,20 @@ void* MemoryManager::smartMallocBig(size_t nbytes) {
 }
 
 #ifdef USE_JEMALLOC
+template
+NEVER_INLINE
+void* MemoryManager::smartMallocSizeBigHelper<true>(
+    void*&, size_t&, size_t);
+template
+NEVER_INLINE
+void* MemoryManager::smartMallocSizeBigHelper<false>(
+    void*&, size_t&, size_t);
+
+template<bool callerSavesActualSize>
 NEVER_INLINE
 void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
                                               size_t& szOut,
                                               size_t bytes) {
-  m_stats.usage += bytes;
 #ifdef USE_JEMALLOC_MALLOCX
   ptr = mallocx(debugAddExtra(bytes + sizeof(SweepNode)), 0);
   szOut = debugRemoveExtra(sallocx(ptr, 0) - sizeof(SweepNode));
@@ -419,6 +473,13 @@ void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
   allocm(&ptr, &szOut, debugAddExtra(bytes + sizeof(SweepNode)), 0);
   szOut = debugRemoveExtra(szOut - sizeof(SweepNode));
 #endif
+
+  // NB: We don't report the SweepNode size in the stats.
+  auto const delta = callerSavesActualSize ? szOut : bytes;
+  m_stats.usage += int64_t(delta);
+  // Adjust jemalloc otherwise we'll double count the direct allocation.
+  JEMALLOC_STATS_ADJUST(&m_stats, delta);
+
   return debugPostAllocate(
     smartEnlist(static_cast<SweepNode*>(ptr)),
     bytes,

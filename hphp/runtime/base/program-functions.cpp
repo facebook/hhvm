@@ -1595,7 +1595,7 @@ static bool hphp_warmup(ExecutionContext *context,
 void hphp_session_init() {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
-  MM().resetStats();
+  MM().resetExternalStats();
 
 #ifdef ENABLE_SIMPLE_COUNTER
   SimpleCounter::Enabled = true;
@@ -1709,7 +1709,6 @@ void hphp_session_exit() {
   ThreadInfo::s_threadInfo->clearPendingException();
 
   auto& mm = MM();
-  mm.resetStats();
 
   {
     ServerStatsHelper ssh("rollback");

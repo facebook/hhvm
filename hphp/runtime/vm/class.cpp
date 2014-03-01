@@ -482,8 +482,8 @@ void Class::initialize(TypedValue*& sProps) const {
   }
   // The asymmetry between the logic around initProps() above and initSProps()
   // below is due to the fact that instance properties only require storage in
-  // g_vmContext if there are non-scalar initializers involved, whereas static
-  // properties *always* require storage in g_vmContext.
+  // g_context if there are non-scalar initializers involved, whereas static
+  // properties *always* require storage in g_context.
   if (numStaticProperties() > 0) {
     if ((sProps = getSPropData()) == nullptr) {
       sProps = initSProps();
@@ -515,7 +515,7 @@ Class::PropInitVec* Class::initPropsImpl() const {
     // through the inheritance chain.
     for (auto it = m_pinitVec.rbegin(); it != m_pinitVec.rend(); ++it) {
       TypedValue retval;
-      g_vmContext->invokeFunc(&retval, *it, init_null_variant, nullptr,
+      g_context->invokeFunc(&retval, *it, init_null_variant, nullptr,
                               const_cast<Class*>(this));
       assert(retval.m_type == KindOfNull);
     }
@@ -553,7 +553,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
   if (propInd != kInvalidSlot) {
     Attr attrs = m_declProperties[propInd].m_attrs;
     if ((attrs & (AttrProtected|AttrPrivate)) &&
-        !g_vmContext->getDebuggerBypassCheck()) {
+        !g_context->getDebuggerBypassCheck()) {
       // Fetch 'baseClass', which is the class in the inheritance
       // tree which first declared the property
       Class* baseClass = m_declProperties[propInd].m_class;
@@ -659,7 +659,7 @@ TypedValue* Class::initSPropsImpl() const {
   if (hasNonscalarInit) {
     for (unsigned i = 0; i < m_sinitVec.size(); i++) {
       TypedValue retval;
-      g_vmContext->invokeFunc(&retval, m_sinitVec[i], init_null_variant,
+      g_context->invokeFunc(&retval, m_sinitVec[i], init_null_variant,
                               nullptr, const_cast<Class*>(this));
       assert(retval.m_type == KindOfNull);
     }
@@ -711,7 +711,7 @@ TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
       case AttrPublic:
       case AttrProtected: accessible = true; break;
       case AttrPrivate:
-        accessible = g_vmContext->getDebuggerBypassCheck(); break;
+        accessible = g_context->getDebuggerBypassCheck(); break;
       default:            not_reached();
       }
     } else {
@@ -721,7 +721,7 @@ TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
       case AttrPublic:    accessible = true; break;
       case AttrProtected:
       case AttrPrivate:
-        accessible = g_vmContext->getDebuggerBypassCheck(); break;
+        accessible = g_context->getDebuggerBypassCheck(); break;
       default:            not_reached();
       }
     }
@@ -791,7 +791,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
   };
 
   Cell ret;
-  g_vmContext->invokeFuncFew(
+  g_context->invokeFuncFew(
     &ret,
     meth86cinit,
     ActRec::encodeClass(this),

@@ -62,7 +62,7 @@ ObjectData* SystemLib::AllocPinitSentinel() {
     /* Increment refcount across call to ctor, so the object doesn't */     \
     /* get destroyed when ctor's frame is torn down */                      \
     CountableHelper cnt(inst);                                              \
-    g_vmContext->invokeFunc(&ret,                                           \
+    g_context->invokeFunc(&ret,                                           \
                             SystemLib::s_##clsname##Class->getCtor(),       \
                             params,                                         \
                             inst);                                          \

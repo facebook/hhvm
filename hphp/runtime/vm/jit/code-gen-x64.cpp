@@ -3627,7 +3627,7 @@ const Func* loadClassCtor(Class* cls) {
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
     VMRegAnchor _;
     UNUSED LookupResult res =
-      g_vmContext->lookupCtorMethod(f, cls, true /*raise*/);
+      g_context->lookupCtorMethod(f, cls, true /*raise*/);
     assert(res == LookupResult::MethodFoundWithThis);
   }
   return f;
@@ -5788,8 +5788,8 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   // The interpOne method returns a pointer to the current ExecutionContext
   // in rax.  Use it read the 'm_fp' and 'm_stack.m_top' fields into the
   // rVmFp and rVmSp registers.
-  m_as.loadq(rax[offsetof(VMExecutionContext, m_fp)], rVmFp);
-  m_as.loadq(rax[offsetof(VMExecutionContext, m_stack) +
+  m_as.loadq(rax[offsetof(ExecutionContext, m_fp)], rVmFp);
+  m_as.loadq(rax[offsetof(ExecutionContext, m_stack) +
                  Stack::topOfStackOffset()], rVmSp);
 
   emitServiceReq(m_mainCode, REQ_RESUME);

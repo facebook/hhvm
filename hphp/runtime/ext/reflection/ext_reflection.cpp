@@ -475,7 +475,7 @@ static void set_function_info(Array &ret, const Func* func) {
           // undefined class constants can cause the eval() to
           // fatal. Zend lets such fatals propagate, so don't bother catching
           // exceptions here.
-          CVarRef v = g_vmContext->getEvaledArg(
+          CVarRef v = g_context->getEvaledArg(
             fpi.phpCode(),
             func->cls() ? func->cls()->nameRef() : func->nameRef()
           );
@@ -1153,12 +1153,12 @@ Variant HHVM_FUNCTION(hphp_invoke_method, CVarRef obj, const String& cls,
 }
 
 Object HHVM_FUNCTION(hphp_create_object, const String& name, CVarRef params) {
-  return g_vmContext->createObject(name.get(), params);
+  return g_context->createObject(name.get(), params);
 }
 
 Object HHVM_FUNCTION(hphp_create_object_without_constructor,
                       const String& name) {
-  return g_vmContext->createObject(name.get(), init_null_variant, false);
+  return g_context->createObject(name.get(), init_null_variant, false);
 }
 
 Variant HHVM_FUNCTION(hphp_get_property, CObjRef obj, const String& cls,
@@ -1188,7 +1188,7 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
   VMRegAnchor _;
   bool visible, accessible;
   TypedValue* tv = class_->getSProp(
-    force ? class_ : arGetContextClass(g_vmContext->getFP()),
+    force ? class_ : arGetContextClass(g_context->getFP()),
     prop.get(), visible, accessible
   );
   if (tv == nullptr) {
@@ -1213,7 +1213,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   VMRegAnchor _;
   bool visible, accessible;
   TypedValue* tv = class_->getSProp(
-    force ? class_ : arGetContextClass(g_vmContext->getFP()),
+    force ? class_ : arGetContextClass(g_context->getFP()),
     prop.get(), visible, accessible
   );
   if (tv == nullptr) {
@@ -1244,7 +1244,7 @@ ObjectData* Reflection::AllocReflectionExceptionObject(CVarRef message) {
     /* Increment refcount across call to ctor, so the object doesn't */
     /* get destroyed when ctor's frame is torn down */
     CountableHelper cnt(inst);
-    g_vmContext->invokeFunc(&ret,
+    g_context->invokeFunc(&ret,
                             s_ReflectionExceptionClass->getCtor(),
                             make_packed_array(message),
                             inst);

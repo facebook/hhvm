@@ -41,7 +41,7 @@ namespace HPHP {
     static Object allocObject(CVarRef arg) { \
       Object ret = allocObject(); \
       TypedValue dummy; \
-      g_vmContext->invokeFunc(&dummy, \
+      g_context->invokeFunc(&dummy, \
                               cls->getCtor(), \
                               make_packed_array(arg), \
                               ret.get()); \

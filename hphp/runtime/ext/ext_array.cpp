@@ -367,7 +367,7 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
     Array ret = Array::Create();
     for (ArrayIter iter(arr1); iter; ++iter) {
       Variant result;
-      g_vmContext->invokeFuncFew((TypedValue*)&result, ctx, 1,
+      g_context->invokeFuncFew((TypedValue*)&result, ctx, 1,
                                  iter.secondRefPlus().asCell());
       ret.add(iter.first(), result, true);
     }
@@ -411,7 +411,7 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
     }
     if (ctx.func) {
       Variant result;
-      g_vmContext->invokeFunc((TypedValue*)&result,
+      g_context->invokeFunc((TypedValue*)&result,
                               ctx.func, params, ctx.this_,
                               ctx.cls, nullptr, ctx.invName);
       ret.append(result);
@@ -672,7 +672,7 @@ static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant ret;
   TypedValue args[2] = { *result.asCell(), *operand.asCell() };
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
+  g_context->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
   return ret;
 }
 Variant f_array_reduce(CVarRef input, CVarRef callback,
@@ -917,7 +917,7 @@ static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
   CallCtx* ctx = (CallCtx*)data;
   Variant sink;
   TypedValue args[3] = { *value->asRef(), *key.asCell(), *userdata.asCell() };
-  g_vmContext->invokeFuncFew(sink.asTypedValue(), *ctx, 3, args);
+  g_context->invokeFuncFew(sink.asTypedValue(), *ctx, 3, args);
 }
 
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
@@ -968,7 +968,7 @@ static void compact(VarEnv* v, Array &ret, CVarRef var) {
 
 Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
   Array ret = Array::Create();
-  VarEnv* v = g_vmContext->getVarEnv();
+  VarEnv* v = g_context->getVarEnv();
   if (v) {
     compact(v, ret, varname);
     compact(v, ret, _argv);

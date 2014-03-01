@@ -106,7 +106,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     if (s_option_data->assertQuietEval) f_error_reporting(oldErrorLevel);
   };
 
-  auto const unit = g_vmContext->compileEvalString(prefixedCode.get());
+  auto const unit = g_context->compileEvalString(prefixedCode.get());
   if (unit == nullptr) {
     raise_recoverable_error("Syntax error in assert()");
     // Failure to compile the eval string doesn't count as an
@@ -116,7 +116,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
 
   auto const func = unit->getMain();
   TypedValue retVal;
-  g_vmContext->invokeFunc(
+  g_context->invokeFunc(
     &retVal,
     func,
     init_null_variant,
@@ -126,7 +126,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     // builtin, but we deviate by having no shared env here.
     nullptr /* VarEnv */,
     nullptr,
-    VMExecutionContext::InvokePseudoMain
+    ExecutionContext::InvokePseudoMain
   );
 
   return tvAsVariant(&retVal);
@@ -236,7 +236,7 @@ String f_set_include_path(const String& new_include_path) {
 Array f_get_included_files() {
   Array included_files = Array::Create();
   int idx = 0;
-  for (auto& file: g_vmContext->m_evaledFilesOrder) {
+  for (auto& file: g_context->m_evaledFilesOrder) {
     included_files.set(idx++, file->getFileName());
   }
   return included_files;

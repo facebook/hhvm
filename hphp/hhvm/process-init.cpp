@@ -54,7 +54,7 @@ SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 class VMClassInfoHook : public ClassInfoHook {
 public:
   virtual Array getUserFunctions() const {
-    return g_vmContext->getUserFunctionsInfo();
+    return g_context->getUserFunctionsInfo();
   }
   virtual Array getClasses() const {
     return Unit::getClassesInfo();
@@ -66,26 +66,26 @@ public:
     return Unit::getTraitsInfo();
   }
   virtual const ClassInfo::MethodInfo *findFunction(const String& name) const {
-    return g_vmContext->findFunctionInfo(name);
+    return g_context->findFunctionInfo(name);
   }
   virtual const ClassInfo *findClassLike(const String& name) const {
     const ClassInfo* ci;
-    if ((ci = g_vmContext->findClassInfo(name)) != nullptr
-        || (ci = g_vmContext->findInterfaceInfo(name)) != nullptr
-        || (ci = g_vmContext->findTraitInfo(name)) != nullptr) {
+    if ((ci = g_context->findClassInfo(name)) != nullptr
+        || (ci = g_context->findInterfaceInfo(name)) != nullptr
+        || (ci = g_context->findTraitInfo(name)) != nullptr) {
       return ci;
     }
     return nullptr;
   }
   virtual const ClassInfo *findInterface(const String& name) const {
-    return g_vmContext->findInterfaceInfo(name);
+    return g_context->findInterfaceInfo(name);
   }
   virtual const ClassInfo* findTrait(const String& name) const {
-    return g_vmContext->findTraitInfo(name);
+    return g_context->findTraitInfo(name);
   }
   virtual const ClassInfo::ConstantInfo *
   findConstant(const String& name) const {
-    return g_vmContext->findConstantInfo(name);
+    return g_context->findConstantInfo(name);
   }
 };
 

@@ -345,9 +345,9 @@ void CmdPrint::onClient(DebuggerClient &client) {
 // NB: unlike most other commands, the client expects that more interrupts
 // can occur while we're doing the server-side work for a print.
 bool CmdPrint::onServer(DebuggerProxy &proxy) {
-  PCFilter* locSave = g_vmContext->m_lastLocFilter;
-  g_vmContext->m_lastLocFilter = new PCFilter();
-  g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
+  PCFilter* locSave = g_context->m_lastLocFilter;
+  g_context->m_lastLocFilter = new PCFilter();
+  g_context->setDebuggerBypassCheck(m_bypassAccessCheck);
   {
     EvalBreakControl eval(m_noBreak);
     bool failed;
@@ -358,9 +358,9 @@ bool CmdPrint::onServer(DebuggerProxy &proxy) {
                        (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
                         DebuggerProxy::ExecutePHPFlagsNone));
   }
-  g_vmContext->setDebuggerBypassCheck(false);
-  delete g_vmContext->m_lastLocFilter;
-  g_vmContext->m_lastLocFilter = locSave;
+  g_context->setDebuggerBypassCheck(false);
+  delete g_context->m_lastLocFilter;
+  g_context->m_lastLocFilter = locSave;
   return proxy.sendToClient(this);
 }
 

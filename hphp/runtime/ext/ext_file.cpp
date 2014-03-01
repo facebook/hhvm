@@ -611,7 +611,7 @@ Variant f_parse_ini_file(const String& filename,
   String translated = File::TranslatePath(filename);
   if (translated.empty() || !f_file_exists(translated)) {
     if (filename[0] != '/') {
-      String cfd = g_vmContext->getContainingFileName();
+      String cfd = g_context->getContainingFileName();
       if (!cfd.empty()) {
         int npos = cfd.rfind('/');
         if (npos >= 0) {

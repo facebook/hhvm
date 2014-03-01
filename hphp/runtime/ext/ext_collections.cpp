@@ -222,7 +222,7 @@ BaseVector::php_map(CVarRef callback, MakeArgs makeArgs) {
     TypedValue* tv = &nv->m_data[i];
     int32_t version = m_version;
     auto args = makeArgs(m_data[i], i);
-    g_vmContext->invokeFuncFew(tv, ctx, args.size(), &args[0]);
+    g_context->invokeFuncFew(tv, ctx, args.size(), &args[0]);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -249,7 +249,7 @@ BaseVector::php_filter(CVarRef callback, MakeArgs makeArgs) {
     Variant ret;
     int32_t version = m_version;
     auto args = makeArgs(m_data[i], i);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, args.size(), &args[0]);
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx, args.size(), &args[0]);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -1822,7 +1822,7 @@ BaseMap::php_map(CVarRef callback, MakeArgs makeArgs) const {
     TypedValue* tv = &np.data;
     int32_t version = m_version;
     auto args = makeArgs(p);
-    g_vmContext->invokeFuncFew(tv, ctx, args.size(), &(args[0]));
+    g_context->invokeFuncFew(tv, ctx, args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -1874,7 +1874,7 @@ BaseMap::php_filter(CVarRef callback, MakeArgs makeArgs) const {
     Variant ret;
     int32_t version = m_version;
     auto args = makeArgs(p);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx,
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx,
                                args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
@@ -1925,7 +1925,7 @@ Object BaseMap::php_retain(CVarRef callback, MakeArgs makeArgs) {
     Variant ret;
     int32_t version = m_version;
     auto args = makeArgs(p);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx,
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx,
                                args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
@@ -3553,7 +3553,7 @@ BaseSet::php_map(CVarRef callback) {
     if (isTombstone(p->data.m_type)) continue;
     TypedValue tvCbRet;
     int32_t pVer = m_version;
-    g_vmContext->invokeFuncFew(&tvCbRet, ctx, 1, &p->data);
+    g_context->invokeFuncFew(&tvCbRet, ctx, 1, &p->data);
     // Now that tvCbRet is live, make sure to decref even if we throw.
     SCOPE_EXIT { tvRefcountedDecRef(&tvCbRet); };
     if (UNLIKELY(m_version != pVer)) throw_collection_modified();
@@ -3582,7 +3582,7 @@ BaseSet::php_filter(CVarRef callback) {
     if (isTombstone(p->data.m_type)) continue;
     Variant ret;
     int32_t version = m_version;
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -4387,7 +4387,7 @@ Object c_Pair::t_map(CVarRef callback) {
   Object obj = vec = NEWOBJ(c_Vector)();
   vec->reserve(2);
   for (uint64_t i = 0; i < 2; ++i) {
-    g_vmContext->invokeFuncFew(&vec->m_data[i], ctx, 1, &getElms()[i]);
+    g_context->invokeFuncFew(&vec->m_data[i], ctx, 1, &getElms()[i]);
     ++vec->m_size;
   }
   return obj;
@@ -4407,7 +4407,7 @@ Object c_Pair::t_mapwithkey(CVarRef callback) {
   vec->reserve(2);
   for (uint64_t i = 0; i < 2; ++i) {
     TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
-    g_vmContext->invokeFuncFew(&vec->m_data[i], ctx, 2, args);
+    g_context->invokeFuncFew(&vec->m_data[i], ctx, 2, args);
     ++vec->m_size;
   }
   return obj;
@@ -4426,7 +4426,7 @@ Object c_Pair::t_filter(CVarRef callback) {
   Object obj = vec = NEWOBJ(c_Vector)();
   for (uint64_t i = 0; i < 2; ++i) {
     Variant ret;
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &getElms()[i]);
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &getElms()[i]);
     if (ret.toBoolean()) {
       vec->add(&getElms()[i]);
     }
@@ -4448,7 +4448,7 @@ Object c_Pair::t_filterwithkey(CVarRef callback) {
   for (uint64_t i = 0; i < 2; ++i) {
     Variant ret;
     TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
     if (ret.toBoolean()) {
       vec->add(&getElms()[i]);
     }

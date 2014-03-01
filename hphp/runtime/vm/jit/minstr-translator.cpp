@@ -753,7 +753,7 @@ static inline TypedValue* baseGImpl(TypedValue *key,
                                     MInstrState* mis) {
   TypedValue* base;
   StringData* name = prepareKey(key);
-  VarEnv* varEnv = g_vmContext->m_globalVarEnv;
+  VarEnv* varEnv = g_context->m_globalVarEnv;
   assert(varEnv != NULL);
   base = varEnv->lookup(name);
   if (base == NULL) {

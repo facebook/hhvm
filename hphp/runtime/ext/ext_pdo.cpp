@@ -592,7 +592,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
   }
   TypedValue ret;
   ObjectData* inst = object.get();
-  g_vmContext->invokeFunc(&ret, cls->getCtor(), ctor_args.toArray(), inst);
+  g_context->invokeFunc(&ret, cls->getCtor(), ctor_args.toArray(), inst);
   tvRefcountedDecRef(&ret);
 }
 

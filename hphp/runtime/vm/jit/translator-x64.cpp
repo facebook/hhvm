@@ -370,8 +370,8 @@ TranslatorX64::numTranslations(SrcKey sk) const {
 static void populateLiveContext(JIT::RegionContext& ctx) {
   typedef JIT::RegionDesc::Location L;
 
-  const ActRec*     const fp {g_vmContext->getFP()};
-  const TypedValue* const sp {g_vmContext->getStack().top()};
+  const ActRec*     const fp {g_context->getFP()};
+  const TypedValue* const sp {g_context->getStack().top()};
 
   for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
@@ -1143,11 +1143,11 @@ TranslatorX64::enterTC(TCA start, void* data) {
     // recognizes, or we luck out and the leaseholder exits.
     while (!start) {
       TRACE(2, "enterTC forwarding BB to interpreter\n");
-      g_vmContext->m_pc = sk.unit()->at(sk.offset());
+      g_context->m_pc = sk.unit()->at(sk.offset());
       INC_TPC(interp_bb);
-      g_vmContext->dispatchBB();
-      PC newPc = g_vmContext->getPC();
-      if (!newPc) { g_vmContext->m_fp = 0; return; }
+      g_context->dispatchBB();
+      PC newPc = g_context->getPC();
+      if (!newPc) { g_context->m_fp = 0; return; }
       sk = SrcKey(liveFunc(), newPc);
       start = getTranslation(TranslArgs(sk, true));
     }
@@ -1184,16 +1184,16 @@ TranslatorX64::enterTC(TCA start, void* data) {
         [] (vixl::Simulator* s) {
           if (tl_regState == VMRegState::DIRTY) {
             // This is a pseudo-copy of the logic in sync_regstate.
-            tx64->fixupMap().fixupWorkSimulated(g_vmContext);
+            tx64->fixupMap().fixupWorkSimulated(g_context.getNoCheck());
             tl_regState = VMRegState::CLEAN;
           }
         }
       );
 
-      g_vmContext->m_activeSims.push_back(&sim);
-      SCOPE_EXIT { g_vmContext->m_activeSims.pop_back(); };
+      g_context->m_activeSims.push_back(&sim);
+      SCOPE_EXIT { g_context->m_activeSims.pop_back(); };
 
-      sim.   set_xreg(ARM::rGContextReg.code(), g_vmContext);
+      sim.   set_xreg(ARM::rGContextReg.code(), g_context.getNoCheck());
       sim.   set_xreg(ARM::rVmFp.code(), vmfp());
       sim.   set_xreg(ARM::rVmSp.code(), vmsp());
       sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
@@ -1245,7 +1245,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
       CALLEE_SAVED_BARRIER();
     }
 
-    assert(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
+    assert(g_context->m_stack.isValidAddress((uintptr_t)vmsp()));
 
     tl_regState = VMRegState::CLEAN; // Careful: pc isn't sync'ed yet.
     TRACE(1, "enterTC: %p fp%p sp%p } return\n", start,
@@ -1426,7 +1426,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   case JIT::REQ_INTERPRET: {
     Offset off = args[0];
     int numInstrs = args[1];
-    g_vmContext->m_pc = liveUnit()->at(off);
+    g_context->m_pc = liveUnit()->at(off);
     /*
      * We know the compilation unit has not changed; basic blocks do
      * not span files. I claim even exceptions do not violate this
@@ -1436,14 +1436,14 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     SKTRACE(5, SrcKey(liveFunc(), off), "interp: enter\n");
     if (numInstrs) {
       s_perfCounters[tpc_interp_instr] += numInstrs;
-      g_vmContext->dispatchN(numInstrs);
+      g_context->dispatchN(numInstrs);
     } else {
       // numInstrs == 0 means it wants to dispatch until BB ends
       INC_TPC(interp_bb);
-      g_vmContext->dispatchBB();
+      g_context->dispatchBB();
     }
-    PC newPc = g_vmContext->getPC();
-    if (!newPc) { g_vmContext->m_fp = 0; return false; }
+    PC newPc = g_context->getPC();
+    if (!newPc) { g_context->m_fp = 0; return false; }
     SrcKey newSk(liveFunc(), newPc);
     SKTRACE(5, newSk, "interp: exit\n");
     sk = newSk;
@@ -1469,7 +1469,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
 
   case JIT::REQ_RESUME: {
     if (UNLIKELY(vmpc() == 0)) {
-      g_vmContext->m_fp = 0;
+      g_context->m_fp = 0;
       return false;
     }
     SrcKey dest(liveFunc(), vmpc());
@@ -1579,14 +1579,14 @@ TCA TranslatorX64::getFreeStub() {
  * calls into the interpreter, and then return a pointer to the
  * current ExecutionContext.
  */  \
-VMExecutionContext*                                                     \
+ExecutionContext*                                                       \
 interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
   interp_set_regs(ar, sp, pcOff);                                       \
   SKTRACE(5, SrcKey(liveFunc(), vmpc()), "%40s %p %p\n",                \
           "interpOne" #opcode " before (fp,sp)",                        \
           vmfp(), vmsp());                                              \
   assert(toOp(*vmpc()) == Op::opcode);                                  \
-  VMExecutionContext* ec = g_vmContext;                                 \
+  auto const ec = g_context.getNoCheck();                             \
   Stats::inc(Stats::Instr_InterpOne ## opcode);                         \
   if (Trace::moduleEnabled(Trace::interpOne, 1)) {                      \
     static const StringData* cat = makeStaticString("interpOne");       \
@@ -1632,7 +1632,7 @@ TCA TranslatorX64::getTranslatedCaller() const {
 void
 TranslatorX64::syncWork() {
   assert(tl_regState == VMRegState::DIRTY);
-  m_fixupMap.fixup(g_vmContext);
+  m_fixupMap.fixup(g_context.getNoCheck());
   tl_regState = VMRegState::CLEAN;
   Stats::inc(Stats::TC_Sync);
 }
@@ -1793,7 +1793,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
     // to vary across the optimized/debug builds.
     PC oldPC = vmpc();
     vmpc() = unit->at(sk.offset());
-    TRACE(3, g_vmContext->prettyStack(std::string(" tx64 ")));
+    TRACE(3, g_context->prettyStack(std::string(" tx64 ")));
     vmpc() = oldPC;
     TRACE(3, "----------------------------------------------\n");
   }
@@ -2243,12 +2243,12 @@ folly::Optional<TCA> TranslatorX64::getCatchTrace(CTCA ip) const {
 
 void
 TranslatorX64::requestInit() {
-  TRACE(1, "in requestInit(%" PRId64 ")\n", g_vmContext->m_currentThreadIdx);
+  TRACE(1, "in requestInit(%" PRId64 ")\n", g_context->m_currentThreadIdx);
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
   PendQ::drain();
   requestResetHighLevelTranslator();
-  Treadmill::startRequest(g_vmContext->m_currentThreadIdx);
+  Treadmill::startRequest(g_context->m_currentThreadIdx);
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
   Stats::init();
 }
@@ -2263,8 +2263,8 @@ TranslatorX64::requestExit() {
             Process::GetThreadIdForTrace(), s_writeLease.m_hintKept,
             s_writeLease.m_hintGrabbed);
   PendQ::drain();
-  Treadmill::finishRequest(g_vmContext->m_currentThreadIdx);
-  TRACE(1, "done requestExit(%" PRId64 ")\n", g_vmContext->m_currentThreadIdx);
+  Treadmill::finishRequest(g_context->m_currentThreadIdx);
+  TRACE(1, "done requestExit(%" PRId64 ")\n", g_context->m_currentThreadIdx);
   Stats::dump();
   Stats::clear();
   Timer::RequestExit();

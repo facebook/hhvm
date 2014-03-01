@@ -32,7 +32,7 @@ const int DEBUG_BACKTRACE_IGNORE_ARGS = 2;
 Array f_debug_backtrace(int64_t options /* = 1 */, int64_t limit /* = 0 */) {
   bool provide_object = options & DEBUG_BACKTRACE_PROVIDE_OBJECT;
   bool ignore_args = options & DEBUG_BACKTRACE_IGNORE_ARGS;
-  return g_vmContext->debugBacktrace(
+  return g_context->debugBacktrace(
     true, false, provide_object, nullptr, ignore_args, limit
   );
 }
@@ -50,7 +50,7 @@ Array f_debug_backtrace(int64_t options /* = 1 */, int64_t limit /* = 0 */) {
  */
 Array f_hphp_debug_caller_info() {
   if (RuntimeOption::InjectedStackTrace) {
-    return g_vmContext->getCallerInfo();
+    return g_context->getCallerInfo();
   }
   return Array::Create();
 }
@@ -75,7 +75,7 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
   if (RuntimeOption::InjectedStackTrace) {
     Array bt;
     StringBuffer buf;
-    bt = g_vmContext->debugBacktrace(skip, false, false, nullptr,
+    bt = g_context->debugBacktrace(skip, false, false, nullptr,
                                      ignore_args, limit);
     int i = 0;
     for (ArrayIter it = bt.begin(); !it.end(); it.next(), i++) {

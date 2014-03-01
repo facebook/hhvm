@@ -26,7 +26,7 @@
     if (LogLevel < Log ## LOGLEVEL) return;                            \
     if (RuntimeOption::InjectedStackTrace &&                           \
         !ExtendedLogger::EnabledByDefault) {                           \
-      Array bt = g_vmContext->debugBacktrace();                        \
+      Array bt = g_context->debugBacktrace();                        \
       if (!bt.empty()) {                                               \
         va_list ap; va_start(ap, fmt);                                 \
         Logger::LogEscapeMore(Log ## LOGLEVEL, fmt, ap);               \
@@ -43,7 +43,7 @@
     if (LogLevel < Log ## LOGLEVEL) return;                            \
     if (RuntimeOption::InjectedStackTrace &&                           \
         !ExtendedLogger::EnabledByDefault) {                           \
-      Array bt = g_vmContext->debugBacktrace();                        \
+      Array bt = g_context->debugBacktrace();                        \
       if (!bt.empty()) {                                               \
         Logger::Log(Log ## LOGLEVEL, msg, nullptr, true, true);        \
         Log(Log ## LOGLEVEL, bt);                                      \
@@ -87,7 +87,7 @@ void ExtendedLogger::log(LogLevelType level, const std::string &msg,
                          bool escape /* = true */,
                          bool escapeMore /* = false */) {
   if (RuntimeOption::InjectedStackTrace) {
-    Array bt = g_vmContext->debugBacktrace();
+    Array bt = g_context->debugBacktrace();
     if (!bt.empty()) {
       Logger::log(level, msg, stackTrace, escape, escape);
       Log(level, bt, escape, escapeMore);

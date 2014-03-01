@@ -341,8 +341,8 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
 
   if (!m_firstHeaderSet) {
     m_firstHeaderSet = true;
-    m_firstHeaderFile = g_vmContext->getContainingFileName().data();
-    m_firstHeaderLine = g_vmContext->getLine();
+    m_firstHeaderFile = g_context->getContainingFileName().data();
+    m_firstHeaderLine = g_context->getLine();
   }
 
   std::string svalue = value;

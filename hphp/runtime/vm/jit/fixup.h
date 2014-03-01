@@ -158,9 +158,9 @@ public:
 
   void recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff);
   void recordIndirectFixup(CodeAddress frontier, int dwordsPushed);
-  void fixup(VMExecutionContext* ec) const;
-  void fixupWork(VMExecutionContext* ec, ActRec* rbp) const;
-  void fixupWorkSimulated(VMExecutionContext* ec) const;
+  void fixup(ExecutionContext* ec) const;
+  void fixupWork(ExecutionContext* ec, ActRec* rbp) const;
+  void fixupWorkSimulated(ExecutionContext* ec) const;
   void processPendingFixups();
   void clearPendingFixups() { m_pendingFixups.clear(); }
   bool pendingFixupsEmpty() const { return m_pendingFixups.empty(); }

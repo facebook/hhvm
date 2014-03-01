@@ -1165,7 +1165,7 @@ Variant MySQLStmt::result_metadata() {
   Object obj = ObjectData::newInstance(cls);
 
   TypedValue ret;
-  g_vmContext->invokeFunc(&ret, cls->getCtor(), args, obj.get());
+  g_context->invokeFunc(&ret, cls->getCtor(), args, obj.get());
   tvRefcountedDecRef(&ret);
 
   return obj;

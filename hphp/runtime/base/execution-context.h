@@ -13,15 +13,20 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #ifndef incl_HPHP_EXECUTION_CONTEXT_H_
 #define incl_HPHP_EXECUTION_CONTEXT_H_
+
+#include <list>
+#include <set>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+#include <string>
 
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/server/transport.h"
-#include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/hphp-array.h"
@@ -29,12 +34,6 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
-#include <setjmp.h>
-#include <list>
-#include <set>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
 #define PHP_OUTPUT_HANDLER_START  (1<<0)
 #define PHP_OUTPUT_HANDLER_CONT   (1<<1)
@@ -176,12 +175,7 @@ struct VMParserFrame {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * Put all global variables here so we can gather them into one thread-local
- * variable for easy access.
- */
-class BaseExecutionContext : public IDebuggable {
-public:
+struct ExecutionContext {
   // These members are declared first for performance reasons: they
   // are accessed from within the TC and having their offset fit
   // within a single byte makes the generated code slightly smaller
@@ -190,7 +184,7 @@ public:
   ActRec* m_fp;
   PC m_pc;
   int64_t m_currentThreadIdx;
-public:
+
   enum ShutdownType {
     ShutDown,
     PostSend,
@@ -213,15 +207,22 @@ public:
   };
 
 public:
-  BaseExecutionContext();
-  ~BaseExecutionContext();
+  ExecutionContext();
+  ExecutionContext(const ExecutionContext&) = delete;
+  ExecutionContext& operator=(const ExecutionContext&) = delete;
+  ~ExecutionContext();
 
   // For RPCRequestHandler
   void backupSession();
   void restoreSession();
 
-  // implementing IDebuggable
-  virtual void debuggerInfo(InfoVec &info);
+  /*
+   * API for the debugger.  Format of the vector is the same as
+   * IDebuggable::debuggerInfo, but we don't actually need to
+   * implement that interface since the execution context is not
+   * accessed by the debugger polymorphically.
+   */
+  void debuggerInfo(std::vector<std::pair<const char*,std::string>>&);
 
   /**
    * System settings.
@@ -301,7 +302,7 @@ public:
                    bool skipFrame = false);
   bool callUserErrorHandler(const Exception &e, int errnum,
                             bool swallowExceptions);
-  virtual void recordLastError(const Exception &e, int errnum = 0);
+  void recordLastError(const Exception &e, int errnum = 0);
   bool onFatalError(const Exception &e); // returns handled
   bool onUnhandledException(Object e);
   ErrorState getErrorState() const { return m_errorState;}
@@ -397,13 +398,11 @@ private:
   void executeFunctions(CArrRef funcs);
 
   DECLARE_DBG_SETTING
-};
 
-class VMExecutionContext : public BaseExecutionContext {
+  // TODO(#3666438): reorder the fields.  This ordering is historical
+  // (due to a transitional period where we had two subclasses of a
+  // ExecutionContext, for hphpc and hhvm).
 public:
-  VMExecutionContext();
-  ~VMExecutionContext();
-
   typedef std::set<ObjectData*> LiveObjSet;
   LiveObjSet m_liveBCObjs;
 
@@ -546,7 +545,7 @@ public:
   EvaledUnitsVec m_createdFuncs;
 
   /*
-   * Accessors for VMExecutionContext state that check safety wrt
+   * Accessors for ExecutionContext state that check safety wrt
    * whether these values may be stale due to TC.  Asserts in these
    * usually mean the need for a VMRegAnchor somewhere in the call
    * chain.
@@ -630,7 +629,6 @@ public:
   bool doFCallArray(PC& pc);
   bool doFCallArrayTC(PC pc);
   CVarRef getEvaledArg(const StringData* val, const String& namespacedName);
-  virtual void recordLastError(const Exception &e, int errnum = 0);
   String getLastErrorPath() const { return m_lastErrorPath; }
   int getLastErrorLine() const { return m_lastErrorLine; }
 
@@ -749,17 +747,6 @@ public:
 
   std::vector<vixl::Simulator*> m_activeSims;
 };
-
-class ExecutionContext : public VMExecutionContext {};
-
-#if DEBUG
-#define g_vmContext (&dynamic_cast<HPHP::VMExecutionContext&>( \
-                       *HPHP::g_context.getNoCheck()))
-#else
-#define g_vmContext (static_cast<HPHP::VMExecutionContext*>( \
-                                   static_cast<HPHP::BaseExecutionContext*>( \
-                                     HPHP::g_context.getNoCheck())))
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

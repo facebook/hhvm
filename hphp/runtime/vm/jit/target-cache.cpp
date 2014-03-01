@@ -156,7 +156,7 @@ static void methodCacheFatal(ActRec* ar,
                              StringData* name,
                              Class* ctx) {
   try {
-    g_vmContext->lookupMethodCtx(
+    g_context->lookupMethodCtx(
       cls,
       name,
       ctx,
@@ -191,7 +191,7 @@ static void methodCacheSlowerPath(MethodCache* mce,
                                   StringData* name,
                                   Class* cls) {
   auto const ctx = reinterpret_cast<ActRec*>(ar->m_savedRbp)->m_func->cls();
-  auto func = g_vmContext->lookupMethodCtx(
+  auto func = g_context->lookupMethodCtx(
     cls,
     name,
     ctx,
@@ -666,8 +666,8 @@ StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
         clsName->data(), methName->data(), __builtin_return_address(0));
 
   const Func* f;
-  VMExecutionContext* ec = g_vmContext;
-  const Class* cls = Unit::loadClass(ne, clsName);
+  auto const ec = g_context.getNoCheck();
+  auto const cls = Unit::loadClass(ne, clsName);
   if (UNLIKELY(!cls)) {
     raise_error(Strings::UNKNOWN_CLASS, clsName->data());
   }
@@ -704,7 +704,7 @@ StaticMethodFCache::lookup(RDS::Handle handle, const Class* cls,
   Stats::inc(Stats::TgtCache_StaticMethodFHit, -1);
 
   const Func* f;
-  VMExecutionContext* ec = g_vmContext;
+  auto const ec = g_context.getNoCheck();
   LookupResult res = ec->lookupClsMethod(f, cls, methName,
                                          nullptr,
                                          arGetContextClass((ActRec*)vmfp),

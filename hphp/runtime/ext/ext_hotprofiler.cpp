@@ -1387,7 +1387,7 @@ class MemoProfiler : public Profiler {
  private:
   virtual void beginFrame(const char *symbol) {
     JIT::VMRegAnchor _;
-    ActRec *ar = g_vmContext->getFP();
+    ActRec *ar = g_context->getFP();
     Frame f(symbol);
     if (ar->hasThis()) {
       auto& memo = m_memos[symbol];
@@ -1423,12 +1423,12 @@ class MemoProfiler : public Profiler {
     ++memo.m_count;
     memo.m_ignore = true;
     JIT::VMRegAnchor _;
-    ActRec *ar = g_vmContext->getFP();
+    ActRec *ar = g_context->getFP();
     // Lots of random cases to skip just to keep this simple for
     // now. There's no reason not to do more later.
-    if (!g_vmContext->m_faults.empty()) return;
+    if (!g_context->m_faults.empty()) return;
     if (ar->m_func->isCPPBuiltin() || ar->inGenerator()) return;
-    auto ret_tv = g_vmContext->m_stack.topTV();
+    auto ret_tv = g_context->m_stack.topTV();
     auto ret = tvAsCVarRef(ret_tv);
     if (ret.isNull()) return;
     if (!(ret.isString() || ret.isObject() || ret.isArray())) return;
@@ -1725,7 +1725,7 @@ void f_fb_setprofile(CVarRef callback) {
     return;
   }
 #endif
-  g_vmContext->m_setprofileCallback = callback;
+  g_context->m_setprofileCallback = callback;
   if (callback.isNull()) {
     HPHP::EventHook::Disable();
   } else {

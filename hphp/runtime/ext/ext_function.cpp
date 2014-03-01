@@ -261,7 +261,7 @@ Variant f_get_called_class() {
 }
 
 String f_create_function(const String& args, const String& code) {
-  return g_vmContext->createFunction(args, code);
+  return g_context->createFunction(args, code);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

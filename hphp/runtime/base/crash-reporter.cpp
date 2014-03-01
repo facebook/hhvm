@@ -104,7 +104,7 @@ static void bt_handler(int sig) {
     // sync up gdb Dwarf info so that gdb can do a full backtrace
     // from the core file. Do this at the very end as syncing needs
     // to allocate memory for the ELF file.
-    g_vmContext->syncGdbState();
+    g_context->syncGdbState();
   }
 
   // re-raise the signal and pass it to the default handler

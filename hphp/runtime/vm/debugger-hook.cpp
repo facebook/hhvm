@@ -37,20 +37,20 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   TRACE(5, "in phpDebuggerOpcodeHook() with pc %p\n", pc);
   // Short-circuit when we're doing things like evaling PHP for print command,
   // or conditional breakpoints.
-  if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
+  if (UNLIKELY(g_context->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
   // Short-circuit for cases where we're executing a line of code that we know
   // we don't need an interrupt for, e.g., stepping over a line of code.
-  if (UNLIKELY(g_vmContext->m_lastLocFilter != nullptr) &&
-      g_vmContext->m_lastLocFilter->checkPC(pc)) {
+  if (UNLIKELY(g_context->m_lastLocFilter != nullptr) &&
+      g_context->m_lastLocFilter->checkPC(pc)) {
     TRACE_RB(5, "Location filter hit at pc %p\n", pc);
     return;
   }
   // Are we hitting a breakpoint?
-  if (LIKELY(g_vmContext->m_breakPointFilter == nullptr ||
-      !g_vmContext->m_breakPointFilter->checkPC(pc))) {
+  if (LIKELY(g_context->m_breakPointFilter == nullptr ||
+      !g_context->m_breakPointFilter->checkPC(pc))) {
     TRACE(5, "not in the PC range for any breakpoints\n");
     if (LIKELY(!DEBUGGER_FORCE_INTR)) {
       return;
@@ -64,7 +64,7 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
 // Hook called from iopThrow to signal that we are about to throw an exception.
 void phpDebuggerExceptionThrownHook(ObjectData* exception) {
   TRACE(5, "in phpDebuggerExceptionThrownHook()\n");
-  if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
+  if (UNLIKELY(g_context->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
@@ -76,7 +76,7 @@ void phpDebuggerExceptionThrownHook(ObjectData* exception) {
 // exception.
 void phpDebuggerExceptionHandlerHook() {
   TRACE(5, "in phpDebuggerExceptionHandlerHook()\n");
-  if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
+  if (UNLIKELY(g_context->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
@@ -87,7 +87,7 @@ void phpDebuggerExceptionHandlerHook() {
 // Hook called when the VM raises an error.
 void phpDebuggerErrorHook(const std::string& message) {
   TRACE(5, "in phpDebuggerErrorHook()\n");
-  if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
+  if (UNLIKELY(g_context->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
@@ -117,7 +117,7 @@ static void blacklistRangesInJit(const Unit* unit,
   // In this case, we may be setting a breakpoint in a tracelet which could
   // already be jitted, and present on the stack. Make sure we don't return
   // to it so we have a chance to honor breakpoints.
-  g_vmContext->preventReturnsToTC();
+  g_context->preventReturnsToTC();
 }
 
 // Ensure we interpret an entire function when the debugger is attached.
@@ -129,10 +129,10 @@ static void blacklistFuncInJit(const Func* f) {
 }
 
 static PCFilter *getBreakPointFilter() {
-  if (!g_vmContext->m_breakPointFilter) {
-    g_vmContext->m_breakPointFilter = new PCFilter();
+  if (!g_context->m_breakPointFilter) {
+    g_context->m_breakPointFilter = new PCFilter();
   }
-  return g_vmContext->m_breakPointFilter;
+  return g_context->m_breakPointFilter;
 }
 
 // Looks up the offset range in the given unit, of the given breakpoint.
@@ -257,22 +257,22 @@ void phpAddBreakPoint(const Unit* unit, Offset offset) {
       // In this case, we may be setting a breakpoint in a tracelet which could
       // already be jitted, and present on the stack. Make sure we don't return
       // to it so we have a chance to honor breakpoints.
-      g_vmContext->preventReturnsToTC();
+      g_context->preventReturnsToTC();
     }
   }
 }
 
 void phpRemoveBreakPoint(const Unit* unit, Offset offset) {
-  if (g_vmContext->m_breakPointFilter) {
+  if (g_context->m_breakPointFilter) {
     PC pc = unit->at(offset);
-    g_vmContext->m_breakPointFilter->removePC(pc);
+    g_context->m_breakPointFilter->removePC(pc);
   }
 }
 
 bool phpHasBreakpoint(const Unit* unit, Offset offset) {
-  if (g_vmContext->m_breakPointFilter) {
+  if (g_context->m_breakPointFilter) {
     PC pc = unit->at(offset);
-    return g_vmContext->m_breakPointFilter->checkPC(pc);
+    return g_context->m_breakPointFilter->checkPC(pc);
   }
   return false;
 }
@@ -355,8 +355,8 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
     auto fileName = bp->m_file;
     if (!fileName.empty()) {
       for (EvaledFilesMap::const_iterator it =
-           g_vmContext->m_evaledFiles.begin();
-           it != g_vmContext->m_evaledFiles.end(); ++it) {
+           g_context->m_evaledFiles.begin();
+           it != g_context->m_evaledFiles.end(); ++it) {
         auto efile = it->second;
         if (!Eval::BreakPointInfo::MatchFile(fileName, efile->getFileName())) {
           continue;

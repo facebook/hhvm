@@ -122,10 +122,10 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 //////////////////////////////////////////////////////////////////////
 
 void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
-  a.    Str  (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+  a.    Str  (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
                                   Stack::topOfStackOffset()]);
   if ((bool)(flags & RegSaveFlags::SaveFP)) {
-    a.  Str  (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
+    a.  Str  (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
   }
 
   if ((bool)(flags & RegSaveFlags::SavePC)) {
@@ -134,7 +134,7 @@ void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
     a.  Ldr  (rAsm, rAsm[Func::unitOff()]);
     a.  Ldr  (rAsm, rAsm[Unit::bcOff()]);
     a.  Add  (rAsm, rAsm, vixl::Operand(argReg(0), vixl::UXTW));
-    a.  Str  (rAsm, rGContextReg[offsetof(VMExecutionContext, m_pc)]);
+    a.  Str  (rAsm, rGContextReg[offsetof(ExecutionContext, m_pc)]);
   }
 }
 

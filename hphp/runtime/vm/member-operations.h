@@ -1220,7 +1220,7 @@ template <bool setResult>
 NEVER_INLINE
 void incDecBodySlow(IncDecOp op, TypedValue* fr, TypedValue* to) {
   if (fr->m_type == KindOfUninit) {
-    ActRec* fp = g_vmContext->m_fp;
+    ActRec* fp = g_context->m_fp;
     size_t pind = reinterpret_cast<TypedValue*>(fp) - fr - 1;
     if (pind < size_t(fp->m_func->numNamedLocals())) {
       // Only raise a warning if fr points to a local variable

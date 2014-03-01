@@ -653,25 +653,25 @@ void Debugger::UsageLogInterrupt(const std::string &mode,
 
 DebuggerDummyEnv::DebuggerDummyEnv() {
   TRACE(2, "DebuggerDummyEnv::DebuggerDummyEnv\n");
-  g_vmContext->enterDebuggerDummyEnv();
+  g_context->enterDebuggerDummyEnv();
 }
 
 DebuggerDummyEnv::~DebuggerDummyEnv() {
   TRACE(2, "DebuggerDummyEnv::~DebuggerDummyEnv\n");
-  g_vmContext->exitDebuggerDummyEnv();
+  g_context->exitDebuggerDummyEnv();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 EvalBreakControl::EvalBreakControl(bool noBreak) {
   TRACE(2, "EvalBreakControl::EvalBreakControl\n");
-  m_noBreakSave = g_vmContext->m_dbgNoBreak;
-  g_vmContext->m_dbgNoBreak = noBreak;
+  m_noBreakSave = g_context->m_dbgNoBreak;
+  g_context->m_dbgNoBreak = noBreak;
 }
 
 EvalBreakControl::~EvalBreakControl() {
   TRACE(2, "EvalBreakControl::~EvalBreakControl\n");
-  g_vmContext->m_dbgNoBreak = m_noBreakSave;
+  g_context->m_dbgNoBreak = m_noBreakSave;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

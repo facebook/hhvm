@@ -254,7 +254,7 @@ vm_decode_function(CVarRef function,
     assert(cls);
     CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
     const HPHP::Func* f =
-      g_vmContext->lookupMethodCtx(cc, name.get(), ctx, lookupType);
+      g_context->lookupMethodCtx(cc, name.get(), ctx, lookupType);
     if (f && (f->attrs() & AttrStatic)) {
       // If we found a method and its static, null out this_
       this_ = nullptr;
@@ -352,7 +352,7 @@ Variant vm_call_user_func(CVarRef function, CVarRef params,
     return uninit_null();
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
+  g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
                           nullptr, invName, ExecutionContext::InvokeCuf);
   return ret;
 }
@@ -407,7 +407,7 @@ static Variant vm_call_user_func_cufiter(const CufIter& cufIter,
     invName->incRefCount();
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
+  g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
                           nullptr, invName, ExecutionContext::InvokeCuf);
   return ret;
 }
@@ -418,7 +418,7 @@ Variant invoke(const String& function, CVarRef params,
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     Variant ret;
-    g_vmContext->invokeFunc(ret.asTypedValue(), func, params);
+    g_context->invokeFunc(ret.asTypedValue(), func, params);
     return ret;
   }
   return invoke_failed(function.c_str(), fatal);
@@ -444,7 +444,7 @@ Variant invoke_static_method(const String& s, const String& method,
     return uninit_null();
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
+  g_context->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
   return ret;
 }
 
@@ -561,11 +561,11 @@ void check_collection_cast_to_array() {
 }
 
 Object create_object_only(const String& s) {
-  return g_vmContext->createObjectOnly(s.get());
+  return g_context->createObjectOnly(s.get());
 }
 
 Object create_object(const String& s, CArrRef params, bool init /* = true */) {
-  return g_vmContext->createObject(s.get(), params, init);
+  return g_context->createObject(s.get(), params, init);
 }
 
 /*
@@ -674,7 +674,7 @@ void throw_bad_type_exception(const char *fmt, ...) {
 
 void throw_expected_array_exception() {
   const char* fn = "(unknown)";
-  ActRec *ar = g_vmContext->getStackFrame();
+  ActRec *ar = g_context->getStackFrame();
   if (ar) {
     fn = ar->m_func->name()->data();
   }
@@ -683,7 +683,7 @@ void throw_expected_array_exception() {
 
 void throw_expected_array_or_collection_exception() {
   const char* fn = "(unknown)";
-  ActRec *ar = g_vmContext->getStackFrame();
+  ActRec *ar = g_context->getStackFrame();
   if (ar) {
     fn = ar->m_func->name()->data();
   }
@@ -731,7 +731,7 @@ Exception* generate_request_timeout_exception() {
   exceptionMsg += cli ? " seconds exceeded" : " seconds and timed out";
   ArrayHolder exceptionStack;
   if (RuntimeOption::InjectedStackTrace) {
-    exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
+    exceptionStack = g_context->debugBacktrace(false, true, true).get();
   }
   ret = new RequestTimeoutException(exceptionMsg, exceptionStack.get());
 
@@ -741,7 +741,7 @@ Exception* generate_request_timeout_exception() {
 Exception* generate_memory_exceeded_exception() {
   ArrayHolder exceptionStack;
   if (RuntimeOption::InjectedStackTrace) {
-    exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
+    exceptionStack = g_context->debugBacktrace(false, true, true).get();
   }
   return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack.get());
@@ -902,14 +902,14 @@ bool invoke_file_impl(Variant &res, const String& path, bool once,
                       const char *currentDir) {
   bool initial;
   HPHP::Eval::PhpFile* efile =
-    g_vmContext->lookupPhpFile(path.get(), currentDir, &initial);
+    g_context->lookupPhpFile(path.get(), currentDir, &initial);
   HPHP::Unit* u = nullptr;
   if (efile) u = efile->unit();
   if (u == nullptr) {
     return false;
   }
   if (!once || initial) {
-    g_vmContext->invokeUnit((TypedValue*)(&res), u);
+    g_context->invokeUnit((TypedValue*)(&res), u);
   }
   return true;
 }
@@ -1126,7 +1126,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
       try {
         JIT::VMRegAnchor _;
         bool initial;
-        VMExecutionContext* ec = g_vmContext;
+        auto const ec = g_context.getNoCheck();
         Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
         if (u) {
           if (initial) {

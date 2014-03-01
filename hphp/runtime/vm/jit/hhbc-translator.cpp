@@ -2643,7 +2643,7 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
   if (!func) {
     if (baseClass && !(baseClass->attrs() & AttrInterface)) {
       LookupResult res =
-        g_vmContext->lookupObjMethod(func, baseClass, methodName, curClass(),
+        g_context->lookupObjMethod(func, baseClass, methodName, curClass(),
                                      false);
       if ((res == LookupResult::MethodFoundWithThis ||
            res == LookupResult::MethodFoundNoThis) &&
@@ -2824,7 +2824,7 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
     auto const cls = curClass();
     const Func* func;
     auto res =
-      g_vmContext->lookupClsMethod(func,
+      g_context->lookupClsMethod(func,
                                    cls,
                                    methVal->getValStr(),
                                    nullptr,

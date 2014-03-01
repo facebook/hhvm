@@ -1046,14 +1046,14 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
             JIT::VMRegAnchor _;
             String prefixedCode = concat(concat(
                 "<?php return ", result + result_len), ";");
-            Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
+            Unit* unit = g_context->compileEvalString(prefixedCode.get());
             Variant v;
             Func* func = unit->getMain();
-            g_vmContext->invokeFunc(v.asTypedValue(), func, init_null_variant,
-                                    g_vmContext->getThis(),
-                                    g_vmContext->getContextClass(), nullptr,
+            g_context->invokeFunc(v.asTypedValue(), func, init_null_variant,
+                                    g_context->getThis(),
+                                    g_context->getContextClass(), nullptr,
                                     nullptr,
-                                    VMExecutionContext::InvokePseudoMain);
+                                    ExecutionContext::InvokePseudoMain);
             eval_result = v;
 
             // Make sure that we have enough space in result

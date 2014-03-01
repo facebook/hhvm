@@ -355,7 +355,7 @@ void SystemlibSessionModule::lookupClass() {
   }
 
   if (LookupResult::MethodFoundWithThis !=
-      g_vmContext->lookupCtorMethod(m_ctor, cls)) {
+      g_context->lookupCtorMethod(m_ctor, cls)) {
     throw InvalidArgumentException(0, "Unable to call %s's constructor",
                                    m_classname);
   }
@@ -382,7 +382,7 @@ ObjectData* SystemlibSessionModule::getObject() {
   }
   s_obj->setObject(ObjectData::newInstance(m_cls));
   ObjectData *obj = s_obj->getObject();
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_ctor, obj);
+  g_context->invokeFuncFew(ret.asTypedValue(), m_ctor, obj);
 
   return obj;
 }
@@ -395,7 +395,7 @@ bool SystemlibSessionModule::open(const char *save_path,
   Variant sessionName = String(session_name, CopyString);
   Variant ret;
   TypedValue args[2] = { *savePath.asCell(), *sessionName.asCell() };
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_open, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_open, obj,
                              nullptr, 2, args);
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -414,7 +414,7 @@ bool SystemlibSessionModule::close() {
   }
 
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_close, obj);
+  g_context->invokeFuncFew(ret.asTypedValue(), m_close, obj);
   s_obj->destroy();
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -430,7 +430,7 @@ bool SystemlibSessionModule::read(const char *key, String &value) {
 
   Variant sessionKey = String(key, CopyString);
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_read, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_read, obj,
                              nullptr, 1, sessionKey.asCell());
 
   if (ret.isString()) {
@@ -449,7 +449,7 @@ bool SystemlibSessionModule::write(const char *key, const String& value) {
   Variant sessionVal = value;
   Variant ret;
   TypedValue args[2] = { *sessionKey.asCell(), *sessionVal.asCell() };
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_write, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_write, obj,
                              nullptr, 2, args);
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -465,7 +465,7 @@ bool SystemlibSessionModule::destroy(const char *key) {
 
   Variant sessionKey = String(key, CopyString);
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_destroy, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_destroy, obj,
                              nullptr, 1, sessionKey.asCell());
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -481,7 +481,7 @@ bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
 
   Variant maxLifeTime = maxlifetime;
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_gc, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_gc, obj,
                              nullptr, 1, maxLifeTime.asCell());
 
   if (ret.isInteger()) {

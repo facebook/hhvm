@@ -1265,7 +1265,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     hphp_process_init();
     try {
-      HPHP::Eval::PhpFile* phpFile = g_vmContext->lookupPhpFile(
+      HPHP::Eval::PhpFile* phpFile = g_context->lookupPhpFile(
         makeStaticString(po.lint.c_str()), "", nullptr);
       if (phpFile == nullptr) {
         throw FileOpenException(po.lint.c_str());
@@ -1277,7 +1277,7 @@ static int execute_program_impl(int argc, char** argv) {
         VMParserFrame parserFrame;
         parserFrame.filename = po.lint.c_str();
         parserFrame.lineNumber = line;
-        Array bt = g_vmContext->debugBacktrace(false, true,
+        Array bt = g_context->debugBacktrace(false, true,
                                                false, &parserFrame);
         throw FatalErrorException(msg->data(), bt);
       }
@@ -1609,10 +1609,10 @@ void hphp_session_init() {
 #endif
 
   // Ordering is sensitive; StatCache::requestInit produces work that
-  // must be done in VMExecutionContext::requestInit.
+  // must be done in ExecutionContext::requestInit.
   StatCache::requestInit();
 
-  g_vmContext->requestInit();
+  g_context->requestInit();
 }
 
 ExecutionContext *hphp_context_init() {
@@ -1688,7 +1688,7 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
   }
 
   // Run shutdown handlers. This may cause user code to run.
-  static_cast<VMExecutionContext*>(context)->destructObjects();
+  static_cast<ExecutionContext*>(context)->destructObjects();
   if (shutdown) {
     context->onRequestShutdown();
   }

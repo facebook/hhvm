@@ -32,7 +32,7 @@ using JIT::VMRegAnchor;
 // helpers
 
 static inline const String& ctxClassName() {
-  Class* ctx = g_vmContext->getContextClass();
+  Class* ctx = g_context->getContextClass();
   return ctx ? ctx->nameRef() : empty_string;
 }
 
@@ -157,7 +157,7 @@ Array f_get_class_methods(const Variant& class_or_object) {
   auto retVal = Array::attach(HphpArray::MakeReserve(cls->numMethods()));
   getMethodNamesImpl(
     cls,
-    arGetContextClassFromBuiltin(g_vmContext->getFP()),
+    arGetContextClassFromBuiltin(g_context->getFP()),
     retVal
   );
   return f_array_values(retVal).toArray();

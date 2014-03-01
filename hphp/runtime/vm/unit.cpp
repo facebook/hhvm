@@ -516,7 +516,7 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
 class FrameRestore {
  public:
   explicit FrameRestore(const PreClass* preClass) {
-    VMExecutionContext* ec = g_vmContext;
+    auto const ec = g_context.getNoCheck();
     ActRec* fp = ec->getFP();
     PC pc = ec->getPC();
 
@@ -553,7 +553,7 @@ class FrameRestore {
     }
   }
   ~FrameRestore() {
-    VMExecutionContext* ec = g_vmContext;
+    auto const ec = g_context.getNoCheck();
     if (m_top) {
       ec->m_stack.top() = m_top;
       ec->m_fp = m_fp;
@@ -775,7 +775,7 @@ void Unit::defTypeAlias(Id id) {
 }
 
 void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
-  // renameFunc() should only be used by VMExecutionContext::createFunction.
+  // renameFunc() should only be used by ExecutionContext::createFunction.
   // We do a linear scan over all the functions in the unit searching for the
   // func with a given name; in practice this is okay because the units created
   // by create_function() will always have the function being renamed at the
@@ -918,7 +918,7 @@ void Unit::initialMerge() {
             case UnitMergeKindReqDoc: {
               StringData* s = (StringData*)((char*)obj - (int)k);
               HPHP::Eval::PhpFile* efile =
-                g_vmContext->lookupIncludeRoot(s, InclOpDocRoot, nullptr, this);
+                g_context->lookupIncludeRoot(s, InclOpDocRoot, nullptr, this);
               assert(efile);
               Unit* unit = efile->unit();
               unit->initialMerge();
@@ -1064,7 +1064,7 @@ void Unit::defDynamicSystemConstant(const StringData* cnsName,
 }
 
 static void setGlobal(StringData* name, TypedValue *value) {
-  g_vmContext->m_globalVarEnv->set(name, value);
+  g_context->m_globalVarEnv->set(name, value);
 }
 
 void Unit::merge() {
@@ -1410,9 +1410,9 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
               Stats::inc(Stats::PseudoMain_Reentered);
               TypedValue ret;
               VarEnv* ve = nullptr;
-              ActRec* fp = g_vmContext->m_fp;
+              ActRec* fp = g_context->m_fp;
               if (!fp) {
-                ve = g_vmContext->m_globalVarEnv;
+                ve = g_context->m_globalVarEnv;
               } else {
                 if (fp->hasVarEnv()) {
                   ve = fp->m_varEnv;
@@ -1422,7 +1422,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
                   // local scope.
                 }
               }
-              g_vmContext->invokeFunc(&ret, unit->getMain(), init_null_variant,
+              g_context->invokeFunc(&ret, unit->getMain(), init_null_variant,
                                       nullptr, nullptr, ve);
               tvRefcountedDecRef(&ret);
             } else {

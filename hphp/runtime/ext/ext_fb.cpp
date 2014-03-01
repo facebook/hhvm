@@ -1142,7 +1142,7 @@ void f_fb_enable_code_coverage() {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_coverage->Reset();
   ti->m_reqInjectionData.setCoverage(true);;
-  if (g_vmContext->isNested()) {
+  if (g_context->isNested()) {
     raise_notice("Calling fb_enable_code_coverage from a nested "
                  "VM instance may cause unpredicable results");
   }

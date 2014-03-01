@@ -37,10 +37,10 @@ namespace HPHP   {
  * Note that these do not assert anything about tl_regState; use
  * carefully.
  */
-inline Cell*&  vmsp() { return (Cell*&)g_vmContext->m_stack.top(); }
-inline Cell*&  vmfp() { return (Cell*&)g_vmContext->m_fp; }
-inline const unsigned char*& vmpc() { return g_vmContext->m_pc; }
-inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
+inline Cell*&  vmsp() { return (Cell*&)g_context->m_stack.top(); }
+inline Cell*&  vmfp() { return (Cell*&)g_context->m_fp; }
+inline const unsigned char*& vmpc() { return g_context->m_pc; }
+inline ActRec*& vmFirstAR() { return g_context->m_firstAR; }
 
 inline ActRec* liveFrame()    { return (ActRec*)vmfp(); }
 inline const Func* liveFunc() { return liveFrame()->m_func; }
@@ -103,12 +103,12 @@ struct VMRegAnchor : private boost::noncopyable {
     m_old = VMRegState::DIRTY;
     tl_regState = VMRegState::CLEAN;
 
-    auto prevAr = g_vmContext->getOuterVMFrame(ar);
+    auto prevAr = g_context->getOuterVMFrame(ar);
     const Func* prevF = prevAr->m_func;
     vmsp() = ar->inGenerator() ?
       Stack::generatorStackBase(ar) - 1 :
       (TypedValue*)ar - ar->numArgs();
-    assert(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
+    assert(g_context->m_stack.isValidAddress((uintptr_t)vmsp()));
     vmpc() = prevF->unit()->at(prevF->base() + ar->m_soff);
     vmfp() = (TypedValue*)prevAr;
   }
@@ -141,8 +141,8 @@ inline ActRec* regAnchorFP(Offset* pc = nullptr) {
   // in which case, getPrevVMState() gets the caller's frame.
   // In addition, we need to skip over php-defined builtin functions
   // in order to find the true context.
-  VMExecutionContext* context = g_vmContext;
-  ActRec* cur = context->getFP();
+  auto const context = g_context.getNoCheck();
+  auto cur = context->getFP();
   if (pc) *pc = cur->m_func->unit()->offsetOf(context->getPC());
   while (cur && cur->skipFrame()) {
     cur = context->getPrevVMState(cur, pc);
@@ -152,7 +152,7 @@ inline ActRec* regAnchorFP(Offset* pc = nullptr) {
 
 inline ActRec* regAnchorFPForArgs() {
   // Like regAnchorFP, but only account for FCallBuiltin
-  VMExecutionContext* context = g_vmContext;
+  auto const context = g_context.getNoCheck();
   ActRec* cur = context->getFP();
   if (cur && cur->m_func->isCPPBuiltin()) {
     cur = context->getPrevVMState(cur);

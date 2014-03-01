@@ -4443,7 +4443,7 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
      * this lookup; since the path has changed, the file we'll get out is
      * going to be some new file, not the old file that needs invalidation.
      */
-    (void)g_vmContext->lookupPhpFile(spath.get(), "");
+    (void)g_context->lookupPhpFile(spath.get(), "");
   }
 };
 
@@ -4640,8 +4640,8 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   const Func* func;
   LookupResult res = staticLookup ?
-    g_vmContext->lookupClsMethod(func, cls, name, nullptr, ctx, false) :
-    g_vmContext->lookupObjMethod(func, cls, name, ctx, false);
+    g_context->lookupClsMethod(func, cls, name, nullptr, ctx, false) :
+    g_context->lookupObjMethod(func, cls, name, ctx, false);
 
   if (res == LookupResult::MethodNotFound) return nullptr;
 

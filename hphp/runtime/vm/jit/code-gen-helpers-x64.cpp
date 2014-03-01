@@ -71,10 +71,10 @@ void moveToAlign(CodeBlock& cb,
 }
 
 void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc) {
-  static COff spOff = offsetof(VMExecutionContext, m_stack) +
+  static COff spOff = offsetof(ExecutionContext, m_stack) +
     Stack::topOfStackOffset();
-  static COff fpOff = offsetof(VMExecutionContext, m_fp);
-  static COff pcOff = offsetof(VMExecutionContext, m_pc);
+  static COff fpOff = offsetof(ExecutionContext, m_fp);
+  static COff pcOff = offsetof(ExecutionContext, m_pc);
 
   /* we can't use rAsm because the pc store uses it as a
      temporary */
@@ -104,10 +104,10 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
 
   emitGetGContext(as, rEC);
 
-  static COff spOff = offsetof(VMExecutionContext, m_stack) +
+  static COff spOff = offsetof(ExecutionContext, m_stack) +
     Stack::topOfStackOffset();
-  static COff fpOff = offsetof(VMExecutionContext, m_fp) - spOff;
-  static COff pcOff = offsetof(VMExecutionContext, m_pc) - spOff;
+  static COff fpOff = offsetof(ExecutionContext, m_fp) - spOff;
+  static COff pcOff = offsetof(ExecutionContext, m_pc) - spOff;
 
   assert(spOff != 0);
   as.   addq   (spOff, r64(rEC));

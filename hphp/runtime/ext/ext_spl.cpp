@@ -146,7 +146,7 @@ String f_spl_object_hash(CObjRef obj) {
 int64_t f_hphp_object_pointer(CObjRef obj) { return (int64_t)obj.get();}
 
 Variant f_hphp_get_this() {
-  return g_vmContext->getThis();
+  return g_context->getThis();
 }
 
 Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {

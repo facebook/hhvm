@@ -1245,7 +1245,7 @@ static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
   }
   auto it = s_nodeMap->find(obj);
   if (it == s_nodeMap->end()) {
-    auto od = g_vmContext->createObjectOnly(clsname.get());
+    auto od = g_context->createObjectOnly(clsname.get());
     auto nodeobj = static_cast<c_DOMNode*>(od);
     auto inserted = s_nodeMap->insert(std::make_pair(obj, nodeobj));
     assert(inserted.second);

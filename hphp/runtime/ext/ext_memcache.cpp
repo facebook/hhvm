@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/libmemcached_portability.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -31,20 +32,18 @@ namespace HPHP {
 static bool ini_on_update_hash_strategy(const std::string& value);
 static bool ini_on_update_hash_function(const std::string& value);
 
-class MEMCACHEGlobals : public RequestEventHandler {
-public:
+struct MEMCACHEGlobals final : RequestEventHandler {
   std::string hash_strategy;
   std::string hash_function;
 
   MEMCACHEGlobals() {}
 
-  virtual void requestInit() {
+  void requestInit() override {
     hash_strategy = "standard";
     hash_function = "crc32";
   }
 
-  virtual void requestShutdown() {
-  }
+  void requestShutdown() override {}
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(MEMCACHEGlobals, s_memcache_globals);

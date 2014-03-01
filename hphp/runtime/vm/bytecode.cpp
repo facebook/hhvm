@@ -2333,9 +2333,9 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
   if (spath.isNull()) return nullptr;
 
   // Check if this file has already been included.
-  EvaledFilesMap::const_iterator it = m_evaledFiles.find(spath.get());
+  auto it = m_evaledFiles.find(spath.get());
   HPHP::Eval::PhpFile* efile = nullptr;
-  if (it != m_evaledFiles.end()) {
+  if (it != end(m_evaledFiles)) {
     // We found it! Return the unit.
     efile = it->second;
     initial = false;
@@ -2439,8 +2439,8 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
 
   absPath += StrNR(path);
 
-  EvaledFilesMap::const_iterator it = m_evaledFiles.find(absPath.get());
-  if (it != m_evaledFiles.end()) {
+  auto const it = m_evaledFiles.find(absPath.get());
+  if (it != end(m_evaledFiles)) {
     if (initial) *initial = false;
     return it->second;
   }

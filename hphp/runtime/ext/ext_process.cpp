@@ -42,6 +42,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #if !defined(_NSIG) && defined(NSIG)
 # define _NSIG NSIG
@@ -268,18 +269,17 @@ static Sigfunc *php_signal(int signo, Sigfunc *func, bool restart) {
 }
 
 /* Our custom signal handler that calls the appropriate php_function */
-class SignalHandlers : public RequestEventHandler {
-public:
+struct SignalHandlers final : RequestEventHandler {
   SignalHandlers() {
     memset(signaled, 0, sizeof(signaled));
     pthread_sigmask(SIG_SETMASK, NULL, &oldSet);
   }
-  virtual void requestInit() {
+  void requestInit() override {
     handlers.reset();
     // restore the old signal mask, thus unblock those that should be
     pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     // block all signals
     sigset_t set;
     sigfillset(&set);

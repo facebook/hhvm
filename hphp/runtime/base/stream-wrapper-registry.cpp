@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/data-stream-wrapper.h"
 #include "hphp/runtime/base/glob-stream-wrapper.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include <set>
 #include <map>
@@ -32,10 +33,9 @@ namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-class RequestWrappers : public RequestEventHandler {
- public:
-  virtual void requestInit() {}
-  virtual void requestShutdown() {
+struct RequestWrappers final : RequestEventHandler {
+  void requestInit() override {}
+  void requestShutdown() override {
     m_disabled.clear();
     m_wrappers.clear();
   }

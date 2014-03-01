@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #include <unicode/uloc.h>
 
@@ -62,8 +63,7 @@ void IntlError::clearError(bool clearGlobalError /*= true */) {
  * So wrap it up in a RequestEventHandler until we set
  * gcc 4.8 as our minimum version
  */
-class DefaultLocale : public RequestEventHandler {
- public:
+struct DefaultLocale final : RequestEventHandler {
   void requestInit() override {}
   void requestShutdown() override {}
   std::string m_defaultLocale;

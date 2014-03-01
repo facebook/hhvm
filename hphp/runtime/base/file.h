@@ -18,6 +18,7 @@
 #define incl_HPHP_FILE_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
 
@@ -28,16 +29,12 @@ namespace HPHP {
 
 class StreamContext;
 
-class FileData : public RequestEventHandler {
+class FileData final : public RequestEventHandler {
 public:
   FileData() : m_pcloseRet(0) {}
   void clear() { m_pcloseRet = 0; }
-  virtual void requestInit() {
-    clear();
-  }
-  virtual void requestShutdown() {
-    clear();
-  }
+  void requestInit() override { clear(); }
+  void requestShutdown() override { clear(); }
   int m_pcloseRet;
 };
 

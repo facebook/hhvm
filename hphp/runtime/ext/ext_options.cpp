@@ -39,22 +39,22 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #define ZEND_VERSION "2.4.99"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class OptionData : public RequestEventHandler {
-public:
-  virtual void requestInit() {
+struct OptionData final : RequestEventHandler {
+  void requestInit() override {
     assertActive = RuntimeOption::AssertActive ? 1 : 0;
     assertWarning = RuntimeOption::AssertWarning ? 1 : 0;
     assertBail = 0;
     assertQuietEval = false;
   }
 
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     assertCallback.unset();
   }
 

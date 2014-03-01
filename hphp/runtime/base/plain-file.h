@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,10 +88,9 @@ public:
  * A request-local wrapper for the three standard files:
  * STDIN, STDOUT, and STDERR.
  */
-class BuiltinFiles : public RequestEventHandler {
-public:
-  virtual void requestInit();
-  virtual void requestShutdown();
+struct BuiltinFiles final : RequestEventHandler {
+  void requestInit() override;
+  void requestShutdown() override;
 
   static CVarRef GetSTDIN();
   static CVarRef GetSTDOUT();

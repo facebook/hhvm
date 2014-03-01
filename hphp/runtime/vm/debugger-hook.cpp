@@ -354,9 +354,9 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
     }
     auto fileName = bp->m_file;
     if (!fileName.empty()) {
-      for (EvaledFilesMap::const_iterator it =
-           g_context->m_evaledFiles.begin();
-           it != g_context->m_evaledFiles.end(); ++it) {
+      for (auto it = g_context->m_evaledFiles.begin();
+           it != g_context->m_evaledFiles.end();
+           ++it) {
         auto efile = it->second;
         if (!Eval::BreakPointInfo::MatchFile(fileName, efile->getFileName())) {
           continue;

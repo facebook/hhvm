@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/logger.h"
 
 #define SORT_DESC               3
@@ -1882,8 +1883,7 @@ Variant f_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
 ///////////////////////////////////////////////////////////////////////////////
 // sorting functions
 
-class Collator : public RequestEventHandler {
-public:
+struct Collator final : RequestEventHandler {
   String getLocale() {
     return m_locale;
   }
@@ -1953,7 +1953,7 @@ public:
     return m_errcode.getErrorCode();
   }
 
-  virtual void requestInit() {
+  void requestInit() override {
     m_locale = String(uloc_getDefault(), CopyString);
     m_errcode.clearError();
     UErrorCode error = U_ZERO_ERROR;
@@ -1963,7 +1963,7 @@ public:
     }
     assert(m_ucoll);
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     m_locale.reset();
     m_errcode.clearError(false);
     if (m_ucoll) {

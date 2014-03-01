@@ -30,6 +30,7 @@
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "folly/Unicode.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 
@@ -477,18 +478,17 @@ Variant f_chunk_split(const String& body, int chunklen /* = 76 */,
   return StringUtil::ChunkSplit(body, chunklen, end);
 }
 
-class TokenizerData : public RequestEventHandler {
-public:
+struct TokenizerData final : RequestEventHandler {
   String str;
   int pos;
   int mask[256];
 
-  virtual void requestInit() {
+  void requestInit() override {
     str.reset();
     pos = 0;
     memset(&mask, 0, sizeof(mask));
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     requestInit();
   }
 };

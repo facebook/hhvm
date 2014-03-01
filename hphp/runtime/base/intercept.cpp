@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -41,8 +42,7 @@ namespace HPHP {
 
 TRACE_SET_MOD(intercept);
 
-class InterceptRequestData : public RequestEventHandler {
-public:
+struct InterceptRequestData final : RequestEventHandler {
   InterceptRequestData()
       : m_use_allowed_functions(false) {
   }
@@ -55,13 +55,8 @@ public:
     m_intercept_handlers.clear();
   }
 
-  virtual void requestInit() {
-    clear();
-  }
-
-  virtual void requestShutdown() {
-    clear();
-  }
+  void requestInit() override { clear(); }
+  void requestShutdown() override { clear(); }
 
 public:
   bool m_use_allowed_functions;

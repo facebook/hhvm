@@ -27,6 +27,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/text-color.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -126,10 +127,7 @@ ExecutionContext::~ExecutionContext() {
   }
 
   // Discard all units that were created via create_function().
-  for (EvaledUnitsVec::iterator it = m_createdFuncs.begin();
-       it != m_createdFuncs.end(); ++it) {
-    delete *it;
-  }
+  for (auto& v : m_createdFuncs) delete v;
 
   delete m_breakPointFilter;
   delete m_lastLocFilter;

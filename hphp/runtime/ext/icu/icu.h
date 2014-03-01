@@ -22,6 +22,7 @@
 #include <unicode/utypes.h>
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -141,8 +142,7 @@ class IntlExtension : public Extension {
 /* Request global error set by all Intl classes
  * and accessed via intl_get_error_code|message()
  */
-class IntlGlobalError : public RequestEventHandler, public Intl::IntlError {
-public:
+struct IntlGlobalError final : RequestEventHandler, Intl::IntlError {
   IntlGlobalError() {}
   void requestInit() override {}
   void requestShutdown() override {

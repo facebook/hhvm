@@ -25,6 +25,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/util/text-util.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 using std::set;
 
@@ -33,21 +34,20 @@ namespace HPHP {
 
 static void destroy_uploaded_files();
 
-class Rfc1867Data : public RequestEventHandler {
-public:
+struct Rfc1867Data final : RequestEventHandler {
   std::set<std::string> rfc1867ProtectedVariables;
   std::set<std::string> rfc1867UploadedFiles;
   apc_rfc1867_data rfc1867ApcData;
   int (*rfc1867Callback)(apc_rfc1867_data *rfc1867ApcData,
                          unsigned int event, void *event_data, void **extra);
-  virtual void requestInit() {
+  void requestInit() override {
     if (RuntimeOption::EnableUploadProgress) {
       rfc1867Callback = apc_rfc1867_progress;
     } else {
       rfc1867Callback = nullptr;
     }
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     if (!rfc1867UploadedFiles.empty()) destroy_uploaded_files();
   }
 };

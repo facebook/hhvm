@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/util/lock.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines
@@ -77,8 +78,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SoapData : public RequestEventHandler {
-private:
+class SoapData final : public RequestEventHandler {
   // SDL cache
   struct sdlCacheBucket {
     sdlPtr sdl;

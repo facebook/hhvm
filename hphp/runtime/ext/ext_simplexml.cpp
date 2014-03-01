@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 
@@ -1724,15 +1725,14 @@ public:
   }
 };
 
-class LibXmlErrors : public RequestEventHandler {
-public:
-  virtual void requestInit() {
+struct LibXmlErrors final : RequestEventHandler {
+  void requestInit() override {
     m_use_error = false;
     m_errors.reset();
     m_entity_loader_disabled = false;
     xmlParserInputBufferCreateFilenameDefault(hphp_libxml_input_buffer);
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     m_use_error = false;
     m_errors.reset();
   }

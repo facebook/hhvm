@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/min-max-macros.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #include "hphp/runtime/ext/gd/libgd/gdfontt.h"  /* 1 Tiny font */
 #include "hphp/runtime/ext/gd/libgd/gdfonts.h"  /* 2 Small font */
@@ -79,11 +80,11 @@ void Image::sweep() {
   SweepableResourceData::sweep();
 }
 
-class ImageMemoryAlloc: public RequestEventHandler {
+struct ImageMemoryAlloc final : RequestEventHandler {
 public:
   ImageMemoryAlloc() : m_mallocSize(0) {}
 
-  virtual void requestInit() {
+  void requestInit() override {
 #ifdef IM_MEMORY_CHECK
     void *ptrs[1000];
     int n = 1000;
@@ -92,7 +93,7 @@ public:
     assert(m_mallocSize == 0);
     m_mallocSize = 0;
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
 #ifdef IM_MEMORY_CHECK
     void *ptrs[1000];
     int n = 1000;

@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \
   if (strcmp(dbh->error_code, PDO_ERR_NONE)) {          \
@@ -887,14 +888,11 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mod
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PDORequestData : public RequestEventHandler {
-public:
-  virtual void requestInit() {
-  }
+struct PDORequestData final : RequestEventHandler {
+  void requestInit() override {}
 
-  virtual void requestShutdown() {
-    for (std::set<PDOConnection*>::iterator iter =
-            m_persistent_connections.begin();
+  void requestShutdown() override {
+    for (auto iter = m_persistent_connections.begin();
          iter != m_persistent_connections.end(); ++iter) {
       PDOConnection *conn = *iter;
       if (!conn) {

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/socket.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -27,16 +28,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SocketData : public RequestEventHandler {
-public:
+struct SocketData final : RequestEventHandler {
   SocketData() : m_lastErrno(0) {}
   void clear() { m_lastErrno = 0; }
-  virtual void requestInit() {
-    clear();
-  }
-  virtual void requestShutdown() {
-    clear();
-  }
+  void requestInit() override { clear(); }
+  void requestShutdown() override { clear(); }
   int m_lastErrno;
 };
 

@@ -28,6 +28,7 @@
 #include "hphp/util/cycles.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -1576,8 +1577,7 @@ class MemoProfiler : public Profiler {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ProfilerFactory : public RequestEventHandler {
-public:
+struct ProfilerFactory final : RequestEventHandler {
   enum Level {
     Simple       = 1,
     Hierarchical = 2,
@@ -1601,10 +1601,8 @@ public:
     return m_profiler;
   }
 
-  virtual void requestInit() {
-  }
-
-  virtual void requestShutdown() {
+  void requestInit() override {}
+  void requestShutdown() override {
     stop();
     m_artificialFrameNames.reset();
   }

@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 extern "C" {
 #include <mbfl/mbfl_convert.h>
@@ -164,8 +165,7 @@ static php_mb_nls_ident_list php_mb_default_identify_list[] = {
 // globals
 typedef std::map<std::string, php_mb_regex_t *> RegexCache;
 
-class MBGlobals : public RequestEventHandler {
-public:
+struct MBGlobals final : RequestEventHandler {
   mbfl_no_language language;
   mbfl_no_language current_language;
   mbfl_no_encoding internal_encoding;
@@ -244,7 +244,7 @@ public:
     regex_default_syntax(ONIG_SYNTAX_RUBY) {
   }
 
-  virtual void requestInit() {
+  void requestInit() override {
     current_language = language;
     current_internal_encoding = internal_encoding;
     current_http_output_encoding = http_output_encoding;
@@ -273,7 +273,7 @@ public:
     }
   }
 
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     if (current_detect_order_list != NULL) {
       free(current_detect_order_list);
       current_detect_order_list = NULL;

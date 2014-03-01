@@ -44,6 +44,7 @@
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 
@@ -131,8 +132,7 @@ const int64_t k_PHP_SESSION_NONE     = Session::None;
 const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
 const StaticString s_session_ext_name("session");
 
-class SessionRequestData : public RequestEventHandler, public Session {
-public:
+struct SessionRequestData final : RequestEventHandler, Session {
   SessionRequestData() {}
 
   void destroy() {
@@ -141,11 +141,11 @@ public:
     m_ps_session_handler = nullptr;
   }
 
-  virtual void requestInit() {
+  void requestInit() override {
     destroy();
   }
 
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     // We don't actually want to do our requestShutdownImpl here---it
     // is run explicitly from the execution context, because it could
     // run user code.

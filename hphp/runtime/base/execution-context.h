@@ -39,50 +39,20 @@
 #define PHP_OUTPUT_HANDLER_CONT   (1<<1)
 #define PHP_OUTPUT_HANDLER_END    (1<<2)
 
-namespace vixl {
-class Simulator;
+namespace vixl { class Simulator; }
+
+namespace HPHP {
+struct c_Continuation;
+struct RequestEventHandler;
+struct EventHook;
+struct PCFilter;
+namespace Eval { struct PhpFile; }
+namespace JIT { struct Translator; }
 }
 
 namespace HPHP {
-class c_Continuation;
-namespace Eval {
-class PhpFile;
-}
-
-class EventHook;
-namespace JIT {
-class Translator;
-}
-class PCFilter;
 
 ///////////////////////////////////////////////////////////////////////////////
-
-typedef hphp_hash_map<StringData*, HPHP::Eval::PhpFile*, string_data_hash,
-                      string_data_same> EvaledFilesMap;
-typedef std::vector<HPHP::Eval::PhpFile*> EvaledFilesVec;
-
-/**
- * Mainly designed for extensions to perform initialization and shutdown
- * sequences at request scope.
- */
-class RequestEventHandler {
-public:
-  RequestEventHandler() : m_inited(false) {}
-  virtual ~RequestEventHandler() {}
-
-  virtual void requestInit() = 0;
-  virtual void requestShutdown() = 0;
-
-  void setInited(bool inited) { m_inited = inited;}
-  bool getInited() const { return m_inited;}
-
-  // Priority of request shutdown call. Lower priority value means
-  // requestShutdown is called earlier than higher priority values.
-  virtual int priority() const { return 0;}
-
-protected:
-  bool m_inited;
-};
 
 struct VMState {
   PC pc;
@@ -275,7 +245,7 @@ public:
   /**
    * Request sequences and program execution hooks.
    */
-  void registerRequestEventHandler(RequestEventHandler *handler);
+  void registerRequestEventHandler(RequestEventHandler* handler);
   void registerShutdownFunction(CVarRef function, Array arguments,
                                 ShutdownType type);
   Variant popShutdownFunction(ShutdownType type);
@@ -539,10 +509,14 @@ public:
 
   VarEnv* m_globalVarEnv;
 
-  EvaledFilesMap m_evaledFiles;
-  EvaledFilesVec m_evaledFilesOrder;
-  typedef std::vector<HPHP::Unit*> EvaledUnitsVec;
-  EvaledUnitsVec m_createdFuncs;
+  hphp_hash_map<
+    StringData*,
+    Eval::PhpFile*,
+    string_data_hash,
+    string_data_same
+  > m_evaledFiles;
+  std::vector<Eval::PhpFile*> m_evaledFilesOrder;
+  std::vector<Unit*> m_createdFuncs;
 
   /*
    * Accessors for ExecutionContext state that check safety wrt

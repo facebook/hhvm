@@ -117,13 +117,13 @@ struct InterpStepper : boost::static_visitor<void> {
     push(val);
   }
 
-  void operator()(const bc::AssertTL&)       {}
-  void operator()(const bc::AssertTStk&)     {}
-  void operator()(const bc::AssertObjL&)     {}
-  void operator()(const bc::AssertObjStk&)   {}
-  void operator()(const bc::PredictTL&)      {}
-  void operator()(const bc::PredictTStk&)    {}
-  void operator()(const bc::BreakTraceHint&) {}
+  void operator()(const bc::AssertTL&)       { nothrow(); }
+  void operator()(const bc::AssertTStk&)     { nothrow(); }
+  void operator()(const bc::AssertObjL&)     { nothrow(); }
+  void operator()(const bc::AssertObjStk&)   { nothrow(); }
+  void operator()(const bc::PredictTL&)      { nothrow(); }
+  void operator()(const bc::PredictTStk&)    { nothrow(); }
+  void operator()(const bc::BreakTraceHint&) { nothrow(); }
 
   void operator()(const bc::Box&)     { nothrow(); popC(); push(TRef); }
   void operator()(const bc::BoxR&)    { nothrow(); popR(); push(TRef); }

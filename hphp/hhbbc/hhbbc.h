@@ -73,6 +73,12 @@ struct Options {
    */
   uint32_t returnTypeRefineLimit = 15;
 
+  /*
+   * Whether to produce extended stats information.  (Takes extra
+   * time.)
+   */
+  bool extendedStats = false;
+
   //////////////////////////////////////////////////////////////////////
 
   /*

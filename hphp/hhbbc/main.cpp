@@ -76,6 +76,9 @@ void parse_options(int argc, char** argv) {
     ("no-logging",
       po::bool_switch(&no_logging),
       "turn off logging")
+    ("extended-stats",
+      po::bool_switch(&options.extendedStats),
+      "Spend time to produce extra stats")
     ("parallel-num-threads",
       po::value(&parallel::num_threads)->default_value(defaultThreadCount),
       "Number of threads to use for parallelism")

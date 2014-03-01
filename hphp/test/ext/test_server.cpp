@@ -50,6 +50,7 @@ static int inherit_fd = -1;
 static std::unique_ptr<AsyncFunc<TestServer>> s_func;
 static char s_pidfile[MAXPATHLEN];
 static char s_repoFile[MAXPATHLEN];
+static char s_logFile[MAXPATHLEN];
 static char s_filename[MAXPATHLEN];
 static int k_timeout = 30;
 
@@ -79,11 +80,23 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
   AsyncFunc<TestServer> func(this, &TestServer::RunServer);
   func.start();
 
+  bool passed = true;
   if (s_func) {
-    s_func->waitForEnd(k_timeout);
+    if (!s_func->waitForEnd(k_timeout)) {
+      // Takeover didn't complete in 30s, stop the old server
+      fprintf(stderr, "stopping HHVM\n");
+      AsyncFunc<TestServer> stopFunc(this, &TestServer::KillServer);
+      stopFunc.run();
+      fprintf(stderr, "Waiting for stop\n");
+      stopFunc.waitForEnd();
+      fprintf(stderr, "Waiting for old HHVM\n");
+      s_func->waitForEnd();
+      // Mark this test a failure
+      fprintf(stderr, "Proceeding to test\n");
+      passed = false;
+    }
     s_func.reset();
   }
-  bool passed = true;
 
   string actual;
 
@@ -159,11 +172,13 @@ void TestServer::RunServer() {
   string serverType = string("-vServer.Type=") + m_serverType;
   string pidFile = string("-vPidFile=") + string(s_pidfile);
   string repoFile = string("-vRepo.Central.Path=") + string(s_repoFile);
+  string logFile = string("-vLog.File=") + string(s_logFile);
 
   const char *argv[] = {
     "__HHVM__", "--mode=server", "--config=test/ext/config-server.hdf",
     portConfig.c_str(), adminConfig.c_str(), rpcConfig.c_str(),
-    option.c_str(), serverType.c_str(), pidFile.c_str(),
+    option.c_str(), serverType.c_str(), pidFile.c_str(), repoFile.c_str(),
+    logFile.c_str(),
     nullptr
   };
 
@@ -193,7 +208,11 @@ void TestServer::StopServer() {
     }
     sleep(1); // wait until HTTP server is up and running
   }
+  KillServer();
+}
 
+void TestServer::KillServer() {
+  fprintf(stderr, "Have to kill HHVM\n");
   // Getting more aggresive
   char buf[1024];
   int fd = open(s_pidfile, O_RDONLY);
@@ -262,11 +281,14 @@ bool TestServer::RunTests(const std::string &which) {
   s_server_port = find_server_port(m_serverType);
   s_admin_port = find_server_port(m_serverType);
   s_rpc_port = find_server_port(m_serverType);
-  snprintf(s_pidfile, MAXPATHLEN, "/tmp/pid_XXXXXX");
+  snprintf(s_pidfile, MAXPATHLEN, "/tmp/test_server.hhvm.pid_XXXXXX");
   int tmpfd = mkstemp(s_pidfile);
   close(tmpfd);
   snprintf(s_repoFile, MAXPATHLEN, "/tmp/test_server.hhvm.hhbc_XXXXXX");
   tmpfd = mkstemp(s_repoFile);
+  close(tmpfd);
+  snprintf(s_logFile, MAXPATHLEN, "/tmp/test_server.hhvm.log_XXXXXX");
+  tmpfd = mkstemp(s_logFile);
   close(tmpfd);
 
   RUN_TEST(TestInheritFdServer);
@@ -708,13 +730,13 @@ bool TestServer::TestHttpClient() {
         "\nPOST data: postdata"
         "\nHeader: Content-Type"
         "\n0: application/x-www-form-urlencoded"
-        "\nHeader: Content-Length"
-        "\n0: 8"
         "\nHeader: Cookie"
         "\n0: c1=v1;c2=v2;"
         "\n1: c3=v3;c4=v4;"
         "\nHeader: Accept"
         "\n0: */*"
+        "\nHeader: Content-Length"
+        "\n0: 8"
         "\nHeader: Host"
         "\n0: 127.0.0.1:" + lexical_cast<string>(s_server_port)).c_str());
 

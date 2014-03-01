@@ -1,6 +1,7 @@
 
 Log {
   AlwaysLogUnhandledExceptions = false
+  Level = Verbose
 }
 
 Server {

@@ -476,7 +476,6 @@ enum class BareThisOp : uint8_t {
   O(Double,          ONE(DA),          NOV,             ONE(CV),    NF) \
   O(String,          ONE(SA),          NOV,             ONE(CV),    NF) \
   O(Array,           ONE(AA),          NOV,             ONE(CV),    NF) \
-  O(NewArray,        NA,               NOV,             ONE(CV),    NF) \
   O(NewArrayReserve, ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewPackedArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NewStructArray,  ONE(VSA),         SMANY,           ONE(CV),    NF) \

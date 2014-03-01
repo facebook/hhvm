@@ -3560,11 +3560,6 @@ OPTBLD_INLINE void ExecutionContext::iopArray(IOP_ARGS) {
   m_stack.pushStaticArray(a);
 }
 
-OPTBLD_INLINE void ExecutionContext::iopNewArray(IOP_ARGS) {
-  NEXT();
-  m_stack.pushArrayNoRc(HphpArray::MakeReserve(HphpArray::SmallSize));
-}
-
 OPTBLD_INLINE void ExecutionContext::iopNewArrayReserve(IOP_ARGS) {
   NEXT();
   DECODE_IVA(capacity);

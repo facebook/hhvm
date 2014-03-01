@@ -3617,7 +3617,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (capacityHint != -1) {
               e.NewArrayReserve(capacityHint);
             } else {
-              e.NewArray();
+              e.NewArrayReserve(HphpArray::SmallSize);
             }
             visit(ex);
           }

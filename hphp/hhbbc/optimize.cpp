@@ -161,7 +161,6 @@ bool hasObviousStackOutput(Op op) {
   case Op::Double:
   case Op::String:
   case Op::Array:
-  case Op::NewArray:
   case Op::NewArrayReserve:
   case Op::NewPackedArray:
   case Op::NewStructArray:

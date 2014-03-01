@@ -993,7 +993,6 @@ static const struct {
   { OpDouble,      {None,             Stack1,       OutDouble,         1 }},
   { OpString,      {None,             Stack1,       OutStringImm,      1 }},
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
-  { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
   { OpNewArrayReserve, {None,         Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray,          0 }},

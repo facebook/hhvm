@@ -280,7 +280,6 @@ struct DceVisitor : boost::static_visitor<void> {
   void operator()(const bc::Dir&)        { pushRemovable(); }
   void operator()(const bc::NameA&)      { popCond(push()); }
 
-  void operator()(const bc::NewArray&)        { pushRemovable(); }
   void operator()(const bc::NewArrayReserve&) { pushRemovable(); }
   void operator()(const bc::NewCol&)          { pushRemovable(); }
 

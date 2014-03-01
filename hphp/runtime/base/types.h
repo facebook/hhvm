@@ -268,10 +268,14 @@ public:
   static const ssize_t LastFlag             = DebuggerSignalFlag;
 
   RequestInjectionData()
-    : cflagsPtr(nullptr),
-      m_timeoutSeconds(-1), m_hasTimer(false), m_timerActive(false),
-      m_debugger(false), m_debuggerIntr(false), m_coverage(false),
-      m_jit(false) {
+      : cflagsPtr(nullptr),
+        m_timeoutSeconds(0), // no timeout by default
+        m_hasTimer(false),
+        m_timerActive(false),
+        m_debugger(false),
+        m_debuggerIntr(false),
+        m_coverage(false),
+        m_jit(false) {
     threadInit();
   }
 

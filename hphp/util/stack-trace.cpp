@@ -414,6 +414,11 @@ static void find_address_in_section(bfd *abfd, asection *section, void *data) {
     return;
   }
 
+#ifdef VALGRIND
+  adata->found = false;
+  return;
+#endif
+
   adata->found = bfd_find_nearest_line(abfd, section, adata->syms,
                                        adata->pc - vma, &adata->filename,
                                        &adata->functionname, &adata->line);

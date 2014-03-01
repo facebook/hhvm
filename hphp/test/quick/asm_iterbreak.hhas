@@ -9,7 +9,7 @@
 
 .function main() {
   .numiters 2;
-  NewArrayReserve 3
+  NewArray 3
 
   String "hello"
   String "world"

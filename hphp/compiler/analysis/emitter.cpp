@@ -3615,9 +3615,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               }
             }
             if (capacityHint != -1) {
-              e.NewArrayReserve(capacityHint);
+              e.NewArray(capacityHint);
             } else {
-              e.NewArrayReserve(HphpArray::SmallSize);
+              e.NewArray(HphpArray::SmallSize);
             }
             visit(ex);
           }

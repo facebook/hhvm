@@ -158,7 +158,7 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::String& op) { nothrow(); push(sval(op.str1)); }
   void operator()(const bc::Array&  op) { nothrow(); push(aval(op.arr1)); }
 
-  void operator()(const bc::NewArrayReserve&) { push(TArr); }
+  void operator()(const bc::NewArray&) { push(TArr); }
 
   void operator()(const bc::NewPackedArray& op) {
     auto elems = std::vector<Type>{};

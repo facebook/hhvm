@@ -43,6 +43,10 @@ const StaticString
   s_core("core");
 
 int64_t convert_bytes_to_long(const std::string& value) {
+  if (value.empty()) {
+    return 0;
+  }
+
   int64_t newInt = strtoll(value.c_str(), nullptr, 10);
   char lastChar = value.at(value.size() - 1);
   if (lastChar == 'K' || lastChar == 'k') {

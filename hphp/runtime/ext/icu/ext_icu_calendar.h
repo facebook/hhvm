@@ -72,7 +72,7 @@ class IntlCalendar : public IntlError {
   }
 
   static const icu::Calendar* ParseArg(CVarRef cal, const icu::Locale &locale,
-                                       const String &funcname, intl_error &err,
+                                       const String &funcname, IntlError *err,
                                        int64_t &calType, bool &calOwned);
  protected:
   icu::Calendar *m_cal = nullptr;

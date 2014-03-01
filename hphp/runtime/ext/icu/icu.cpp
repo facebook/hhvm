@@ -27,6 +27,33 @@ IMPLEMENT_REQUEST_LOCAL(IntlGlobalError, s_intl_error);
 
 namespace Intl {
 
+void IntlError::setError(UErrorCode code, const char *format, ...) {
+  m_errorCode = code;
+  if (format) {
+    va_list args;
+    va_start(args, format);
+    char message[1024];
+    int message_len = vsnprintf(message, sizeof(message), format, args);
+    m_errorMessage = std::string(message, message_len);
+    va_end(args);
+  }
+
+  if (this != s_intl_error.get()) {
+    s_intl_error->m_errorCode = m_errorCode;
+    s_intl_error->m_errorMessage = m_errorMessage;
+  }
+}
+
+void IntlError::clearError(bool clearGlobalError /*= true */) {
+  m_errorCode = U_ZERO_ERROR;
+  m_errorMessage.clear();
+
+  if (clearGlobalError && (this != s_intl_error.get())) {
+    s_intl_error->m_errorCode = U_ZERO_ERROR;
+    s_intl_error->m_errorMessage.clear();
+  }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // INI Setting
 

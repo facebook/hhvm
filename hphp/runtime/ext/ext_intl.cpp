@@ -42,14 +42,14 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(idn, NO_EXTENSION_VERSION_YET);
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t f_intl_get_error_code() {
-  return s_intl_error->m_error.code;
+  return s_intl_error->getErrorCode();
 }
 
 String f_intl_get_error_message() {
-  if (!s_intl_error->m_error.custom_error_message.empty()) {
-    return s_intl_error->m_error.custom_error_message;
+  if (!s_intl_error->getErrorMessage().empty()) {
+    return s_intl_error->getErrorMessage();
   }
-  return String(u_errorName(s_intl_error->m_error.code), CopyString);
+  return String(u_errorName(s_intl_error->getErrorCode()), CopyString);
 }
 
 String f_intl_error_name(int64_t error_code) {
@@ -106,22 +106,20 @@ void c_Collator::t___construct(const String& locale) {
     ucol_close(m_ucoll);
     m_ucoll = NULL;
   }
-  m_errcode.clear();
+  m_errcode.clearError();
   if (!locale.empty()) {
+    UErrorCode error = U_ZERO_ERROR;
     m_locale = locale;
-    m_ucoll = ucol_open(locale.data(), &(m_errcode.code));
-    if (!U_FAILURE(m_errcode.code)) {
+    m_ucoll = ucol_open(locale.data(), &error);
+    if (!U_FAILURE(error)) {
       // If the specified locale opened successfully, return
-      s_intl_error->m_error.clear();
-      s_intl_error->m_error.code = m_errcode.code;
       return;
     }
+    m_errcode.setError(error);
   }
   // If the empty string was given or if the specified locale did
   // not open successfully, so fall back to using the default locale
-  m_errcode.code = U_USING_FALLBACK_WARNING;
-  s_intl_error->m_error.clear();
-  s_intl_error->m_error.code = m_errcode.code;
+  m_errcode.setError(U_USING_FALLBACK_WARNING);
   if (m_ucoll) {
     ucol_close(m_ucoll);
     m_ucoll = NULL;
@@ -130,12 +128,8 @@ void c_Collator::t___construct(const String& locale) {
   m_locale = String(uloc_getDefault(), CopyString);
   m_ucoll = ucol_open(m_locale.data(), &errcode);
   if (U_FAILURE(errcode)) {
-    m_errcode.code = errcode;
-    m_errcode.custom_error_message =
-      "collator_create: unable to open ICU collator";
-    s_intl_error->m_error.clear();
-    s_intl_error->m_error.code = m_errcode.code;
-    s_intl_error->m_error.custom_error_message = m_errcode.custom_error_message;
+    m_errcode.setError(errcode,
+                       "collator_create: unable to open ICU collator");
     if (m_ucoll) {
       ucol_close(m_ucoll);
       m_ucoll = NULL;
@@ -153,12 +147,9 @@ bool c_Collator::t_asort(VRefParam arr,
     raise_warning("asort called on uninitialized Collator object");
     return false;
   }
-  m_errcode.clear();
+  m_errcode.clearError();
   bool ret = collator_asort(arr, sort_flag, true, m_ucoll, &m_errcode);
-  s_intl_error->m_error.clear();
-  s_intl_error->m_error.code = m_errcode.code;
-  s_intl_error->m_error.custom_error_message = m_errcode.custom_error_message;
-  if (U_FAILURE(m_errcode.code)) {
+  if (U_FAILURE(m_errcode.getErrorCode())) {
     return false;
   }
   return ret;
@@ -173,18 +164,22 @@ Variant c_Collator::t_compare(const String& str1, const String& str2) {
   UChar* ustr2 = NULL;
   int ustr1_len = 0;
   int ustr2_len = 0;
-  m_errcode.clear();
+  m_errcode.clearError();
+  UErrorCode error = U_ZERO_ERROR;
   intl_convert_utf8_to_utf16(&ustr1, &ustr1_len,
                              str1.data(), str1.length(),
-                             &(m_errcode.code));
-  if (U_FAILURE(m_errcode.code)) {
+                             &error);
+  if (U_FAILURE(error)) {
+    m_errcode.setError(error);
     free(ustr1);
     return false;
   }
+  error = U_ZERO_ERROR;
   intl_convert_utf8_to_utf16(&ustr2, &ustr2_len,
                              str2.data(), str2.length(),
-                             &(m_errcode.code));
-  if (U_FAILURE(m_errcode.code)) {
+                             &error);
+  if (U_FAILURE(error)) {
+    m_errcode.setError(error);
     free(ustr1);
     free(ustr2);
     return false;
@@ -206,25 +201,23 @@ int64_t c_Collator::t_getattribute(int64_t attr) {
     raise_warning("getattribute called on uninitialized Collator object");
     return 0;
   }
-  m_errcode.clear();
+  m_errcode.clearError();
+  UErrorCode error = U_ZERO_ERROR;
   int64_t ret = (int64_t)ucol_getAttribute(m_ucoll, (UColAttribute)attr,
-                                       &(m_errcode.code));
-  s_intl_error->m_error.clear();
-  s_intl_error->m_error.code = m_errcode.code;
-  if (U_FAILURE(m_errcode.code)) {
-    m_errcode.custom_error_message = "Error getting attribute value";
-    s_intl_error->m_error.custom_error_message = m_errcode.custom_error_message;
+                                       &error);
+  if (U_FAILURE(error)) {
+    m_errcode.setError(error, "Error getting attribute value");
     return 0;
   }
   return ret;
 }
 
 int64_t c_Collator::t_geterrorcode() {
-  return m_errcode.code;
+  return m_errcode.getErrorCode();
 }
 
 String c_Collator::t_geterrormessage() {
-  return String(u_errorName(m_errcode.code), CopyString);
+  return String(u_errorName(m_errcode.getErrorCode()), CopyString);
 }
 
 String c_Collator::t_getlocale(int64_t type /* = 0 */) {
@@ -232,16 +225,14 @@ String c_Collator::t_getlocale(int64_t type /* = 0 */) {
     raise_error("getlocale called on uninitialized Collator object");
     return "";
   }
-  m_errcode.clear();
+  m_errcode.clearError();
+  UErrorCode error = U_ZERO_ERROR;
   String ret(
     (char*)ucol_getLocaleByType(m_ucoll, (ULocDataLocaleType)type,
-                                &(m_errcode.code)),
+                                &error),
     CopyString);
-  if (U_FAILURE(m_errcode.code)) {
-    m_errcode.custom_error_message = "Error getting locale by type";
-    s_intl_error->m_error.code = m_errcode.code;
-    s_intl_error->m_error.custom_error_message =
-      m_errcode.custom_error_message;
+  if (U_FAILURE(error)) {
+    m_errcode.setError(error, "Error getting locale by type");
     return "";
   }
   return ret;
@@ -260,14 +251,12 @@ bool c_Collator::t_setattribute(int64_t attr, int64_t val) {
     raise_warning("setattribute called on uninitialized Collator object");
     return false;
   }
-  m_errcode.clear();
+  m_errcode.clearError();
+  UErrorCode error = U_ZERO_ERROR;
   ucol_setAttribute(m_ucoll, (UColAttribute)attr,
-                    (UColAttributeValue)val, &(m_errcode.code));
-  s_intl_error->m_error.clear();
-  s_intl_error->m_error.code = m_errcode.code;
-  if (U_FAILURE(m_errcode.code)) {
-    m_errcode.custom_error_message = "Error setting attribute value";
-    s_intl_error->m_error.custom_error_message = m_errcode.custom_error_message;
+                    (UColAttributeValue)val, &error);
+  if (U_FAILURE(error)) {
+    m_errcode.setError(error, "Error setting attribute value");
     return false;
   }
   return true;
@@ -327,8 +316,7 @@ bool c_Collator::t_sortwithsortkeys(VRefParam arr) {
   /* length of converted string */
   int         utf16_len            = 0;
 
-  m_errcode.clear();
-  s_intl_error->m_error.clear();
+  m_errcode.clearError();
 
   /*
    * Sort specified array.
@@ -356,10 +344,12 @@ bool c_Collator::t_sortwithsortkeys(VRefParam arr) {
     Variant val(hash->getValue(pos));
     if (val.isString()) {
       String str = val.toString();
+      m_errcode.clearError();
+      UErrorCode error = U_ZERO_ERROR;
       intl_convert_utf8_to_utf16(&utf16_buf, &utf16_len, str.data(),
-                                 str.size(), &(m_errcode.code));
-      if (U_FAILURE(m_errcode.code)) {
-        m_errcode.custom_error_message = "Sort with sort keys failed";
+                                 str.size(), &error);
+      if (U_FAILURE(error)) {
+        m_errcode.setError(error, "Sort with sort keys failed");
         if (utf16_buf) {
           free(utf16_buf);
         }
@@ -451,12 +441,9 @@ bool c_Collator::t_sort(VRefParam arr,
     raise_warning("sort called on uninitialized Collator object");
     return false;
   }
-  m_errcode.clear();
-  bool ret = collator_sort(arr, sort_flag, true, m_ucoll, &(m_errcode));
-  s_intl_error->m_error.clear();
-  s_intl_error->m_error.code = m_errcode.code;
-  s_intl_error->m_error.custom_error_message = m_errcode.custom_error_message;
-  if (U_FAILURE(m_errcode.code)) {
+  m_errcode.clearError();
+  bool ret = collator_sort(arr, sort_flag, true, m_ucoll, &m_errcode);
+  if (U_FAILURE(m_errcode.getErrorCode())) {
     return false;
   }
   return ret;
@@ -563,7 +550,7 @@ void c_Normalizer::t___construct() {
 
 Variant c_Normalizer::ti_isnormalized(const String& input,
                                       int64_t form /* = q_Normalizer$$FORM_C */) {
-  s_intl_error->m_error.clear();
+  s_intl_error->clearError();
 
   switch (form) {
   case UNORM_NFD:
@@ -572,9 +559,9 @@ Variant c_Normalizer::ti_isnormalized(const String& input,
   case UNORM_NFKC:
     break;
   default:
-    s_intl_error->m_error.code = U_ILLEGAL_ARGUMENT_ERROR;
-    s_intl_error->m_error.custom_error_message =
-      "normalizer_isnormalized: illegal normalization form";
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "normalizer_isnormalized: "
+                           "illegal normalization form");
     return uninit_null();
   }
 
@@ -585,8 +572,7 @@ Variant c_Normalizer::ti_isnormalized(const String& input,
                              &status);
 
   if (U_FAILURE(status)) {
-    s_intl_error->m_error.code = status;
-    s_intl_error->m_error.custom_error_message = "Error converting string to UTF-16.";
+    s_intl_error->setError(status, "Error converting string to UTF-16.");
     free(uinput);
     return false;
   }
@@ -599,9 +585,8 @@ Variant c_Normalizer::ti_isnormalized(const String& input,
 
   /* Bail out if an unexpected error occured. */
   if (U_FAILURE(status)) {
-    s_intl_error->m_error.code = status;
-    s_intl_error->m_error.custom_error_message =
-      "Error testing if string is the given normalization form.";
+    s_intl_error->setError(status, "Error testing if string is the given "
+                                   "normalization form.");
     return false;
   }
 
@@ -610,7 +595,7 @@ Variant c_Normalizer::ti_isnormalized(const String& input,
 
 Variant c_Normalizer::ti_normalize(const String& input,
                                    int64_t form /* = q_Normalizer$$FORM_C */) {
-  s_intl_error->m_error.clear();
+  s_intl_error->clearError();
 
   int expansion_factor = 1;
   switch(form) {
@@ -623,9 +608,9 @@ Variant c_Normalizer::ti_normalize(const String& input,
     expansion_factor = 3;
     break;
   default:
-    s_intl_error->m_error.code = U_ILLEGAL_ARGUMENT_ERROR;
-    s_intl_error->m_error.custom_error_message =
-      "normalizer_normalize: illegal normalization form";
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "normalizer_normalize: "
+                           "illegal normalization form");
     return uninit_null();
   }
 
@@ -636,9 +621,7 @@ Variant c_Normalizer::ti_normalize(const String& input,
                              &status);
 
   if (U_FAILURE(status)) {
-    s_intl_error->m_error.code = status;
-    s_intl_error->m_error.custom_error_message =
-        "Error converting string to UTF-16.";
+    s_intl_error->setError(status, "Error converting string to UTF-16.");
     free(uinput);
     return uninit_null();
   }
@@ -682,8 +665,7 @@ Variant c_Normalizer::ti_normalize(const String& input,
     /* Bail out if an unexpected error occured. */
     if (U_FAILURE(status)) {
       /* Set error messages. */
-      s_intl_error->m_error.code = status;
-      s_intl_error->m_error.custom_error_message = "Error normalizing string";
+      s_intl_error->setError(status, "Error normalizing string");
       free(uret_buf);
       free(uinput);
       return uninit_null();
@@ -700,9 +682,8 @@ Variant c_Normalizer::ti_normalize(const String& input,
   intl_convert_utf16_to_utf8(&ret_buf, &ret_len, uret_buf, uret_len, &status);
   free(uret_buf);
   if (U_FAILURE(status)) {
-    s_intl_error->m_error.code = status;
-    s_intl_error->m_error.custom_error_message =
-      "normalizer_normalize: error converting normalized text UTF-8";
+    s_intl_error->setError(status, "normalizer_normalize: "
+                                   "error converting normalized text UTF-8");
     return uninit_null();
   }
 

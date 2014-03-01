@@ -47,22 +47,22 @@ void IntlDateFormatter::setDateFormatter(const String& locale,
   bool calOwned = false;
   const icu::Calendar *cal = IntlCalendar::ParseArg(calendar, loc,
                                                     "datefm_create",
-                                                    s_intl_error->m_error,
+                                                    s_intl_error.get(),
                                                     calType, calOwned);
   if (!cal) { return; }
   SCOPE_EXIT { if (cal && calOwned) delete cal; };
 
   const icu::TimeZone *tz = IntlTimeZone::ParseArg(timezone,
                                                    "datefmt_create",
-                                                   s_intl_error->m_error);
+                                                   s_intl_error.get());
   if (!tz) { return; }
   SCOPE_EXIT { if (tz && !isValid()) delete tz; };
 
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString pat(u16(pattern, error));
   if (U_FAILURE(error)) {
-    s_intl_error->set(error, "datefmt_create: "
-                             "error converting pattern to UTF-16");
+    s_intl_error->setError(error, "datefmt_create: "
+                                  "error converting pattern to UTF-16");
     return;
   }
 
@@ -76,8 +76,8 @@ void IntlDateFormatter::setDateFormatter(const String& locale,
                          pat.getBuffer(), pat.length(),
                          &error);
   if (U_FAILURE(error)) {
-    s_intl_error->set(error, "datefmt_create: date "
-                             "formatter creation failed");
+    s_intl_error->setError(error, "datefmt_create: date "
+                                  "formatter creation failed");
     return;
   }
 
@@ -99,9 +99,9 @@ void IntlDateFormatter::setDateFormatter(const String& locale,
 
 void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   if (!orig || !orig->datefmt()) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "Cannot clone unconstructed IntlDateFormatter");
-    throwException("%s", s_intl_error->getErrorMessage().c_str());
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "Cannot clone unconstructed IntlDateFormatter");
+    throwException("%s", s_intl_error->getErrorMessage(false).c_str());
   }
   if (m_date_fmt) {
     udat_close(m_date_fmt);
@@ -109,7 +109,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   UErrorCode error = U_ZERO_ERROR;
   m_date_fmt = udat_clone(orig->datefmt(), &error);
   if (U_FAILURE(error)) {
-    s_intl_error->set(error, "datefmt_clone: date formatter clone failed");
+    s_intl_error->setError(error, "datefmt_clone: date formatter clone failed");
     throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
 }
@@ -390,6 +390,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, localtime,
 static Variant HHVM_METHOD(IntlDateFormatter, parse,
                            const String& value, VRefParam position) {
   DATFMT_GET(data, this_, 0);
+  data->clearError();
   int32_t pos = position.toInt64();
   if (pos > value.size()) {
     return false;
@@ -446,10 +447,8 @@ static bool HHVM_METHOD(IntlDateFormatter, setPattern,
 
 static bool HHVM_METHOD(IntlDateFormatter, setTimeZone, CVarRef zone) {
   DATFMT_GET(data, this_, false);
-  intl_error err;
   icu::TimeZone *tz = IntlTimeZone::ParseArg(zone, "datefmt_set_timezone",
-                                             err);
-  data->setError(err);
+                                             data);
   if (tz == nullptr) {
     return false;
   }

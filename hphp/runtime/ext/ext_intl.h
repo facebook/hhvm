@@ -111,7 +111,7 @@ class c_Collator : public ExtObjectData, public Sweepable {
  private:
   String     m_locale;
   UCollator *m_ucoll;
-  intl_error m_errcode;
+  Intl::IntlError m_errcode;
 };
 extern const int64_t q_Normalizer$$NONE;
 extern const int64_t q_Normalizer$$FORM_D;

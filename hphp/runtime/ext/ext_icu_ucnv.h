@@ -119,7 +119,7 @@ class c_UConverter : public ExtObjectData {
 
   private:
     static void throwFailure(UErrorCode error, const char *fname,
-                             intl_error &merror);
+                             Intl::IntlError* merror);
     bool checkLimits(int64_t available, int64_t needed);
     void appendToUTarget(Variant val, UConverterToUnicodeArgs *args);
     void appendFromUTarget(Variant val, UConverterFromUnicodeArgs *args);
@@ -135,14 +135,15 @@ class c_UConverter : public ExtObjectData {
                                   UConverterCallbackReason reason,
                                   UErrorCode *pErrorCode);
     static bool setEncoding(const String& encoding, UConverter **pcnv,
-                            intl_error &err);
-    static bool setSubstChars(String chars, UConverter *cnv, intl_error &err);
+                            Intl::IntlError* err);
+    static bool setSubstChars(String chars, UConverter *cnv,
+                              Intl::IntlError* err);
     bool setCallback(UConverter *cnv);
     Variant defaultCallback(int64_t reason, VRefParam error);
     static String doConvert(const String& str, UConverter *toCnv,
-                            UConverter *fromCnv, intl_error &err);
+                            UConverter *fromCnv, Intl::IntlError* err);
   public:
-    intl_error  m_error;
+    Intl::IntlError m_error;
     UConverter *m_src;
     UConverter *m_dest;
 };

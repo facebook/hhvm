@@ -77,23 +77,19 @@ const StaticString
 
 c_UConverter::c_UConverter(Class* cb)
     : ExtObjectData(cb), m_src(NULL), m_dest(NULL) {
-  m_error.code = U_ZERO_ERROR;
-  m_error.custom_error_message = "";
+  m_error.clearError();
 }
 
 void c_UConverter::throwFailure(UErrorCode error, const char *fname,
-                                intl_error &merror) {
-  char message[1024];
-  snprintf(message, sizeof(message), "%s() returned error %ld: %s",
-           fname, (long)error, u_errorName(error));
-  merror.code = error;
-  merror.custom_error_message = String((const char*)message, CopyString);
+                                Intl::IntlError* merror) {
+  merror->setError(error, "%s() returned error %ld",
+                   fname, (long)error);
 }
 
 void c_UConverter::t___construct(const String& toEncoding,
                                  const String& fromEncoding) {
-  setEncoding(toEncoding,   &m_dest, m_error);
-  setEncoding(fromEncoding, &m_src,  m_error);
+  setEncoding(toEncoding,   &m_dest, &m_error);
+  setEncoding(fromEncoding, &m_src,  &m_error);
   setCallback(m_dest);
   setCallback(m_src);
 }
@@ -115,7 +111,7 @@ Variant c_UConverter::t___destruct() {
         checkLimits(args->targetLimit - args->target, len)
 bool c_UConverter::checkLimits(int64_t available, int64_t needed) {
   if (needed > available) {
-    THROW_UFAILURE(appendUTarget, U_BUFFER_OVERFLOW_ERROR, m_error);
+    THROW_UFAILURE(appendUTarget, U_BUFFER_OVERFLOW_ERROR, &m_error);
     return false;
   }
   return true;
@@ -130,7 +126,7 @@ void c_UConverter::appendToUTarget(Variant val,
   if (val.isInteger()) {
     int64_t lval = val.toInt64();
     if (lval < 0 || lval > 0x10FFFF) {
-      THROW_UFAILURE(appendToUTarget, U_ILLEGAL_ARGUMENT_ERROR, m_error);
+      THROW_UFAILURE(appendToUTarget, U_ILLEGAL_ARGUMENT_ERROR, &m_error);
       return;
     }
     if (lval > 0xFFFF) {
@@ -161,7 +157,7 @@ void c_UConverter::appendToUTarget(Variant val,
     }
     return;
   }
-  THROW_UFAILURE(appendToTarget, U_ILLEGAL_ARGUMENT_ERROR, m_error);
+  THROW_UFAILURE(appendToTarget, U_ILLEGAL_ARGUMENT_ERROR, &m_error);
 }
 
 void c_UConverter::ucnvToUCallback(c_UConverter *objval,
@@ -178,7 +174,7 @@ void c_UConverter::ucnvToUCallback(c_UConverter *objval,
     *pErrorCode = (UErrorCode)errRef.toInt64();
   } else {
     throwFailure(U_ILLEGAL_ARGUMENT_ERROR, "ucnvToUCallback()",
-                 objval->m_error);
+                 &(objval->m_error));
   }
   objval->appendToUTarget(ret, args);
 }
@@ -192,7 +188,7 @@ void c_UConverter::appendFromUTarget(Variant val,
   if (val.isInteger()) {
     int64_t lval = val.toInt64();
     if (lval < 0 || lval > 255) {
-      THROW_UFAILURE(appendFromUTarget, U_ILLEGAL_ARGUMENT_ERROR, m_error);
+      THROW_UFAILURE(appendFromUTarget, U_ILLEGAL_ARGUMENT_ERROR, &m_error);
       return;
     }
     if (TARGET_CHECK(args, 1)) {
@@ -214,7 +210,7 @@ void c_UConverter::appendFromUTarget(Variant val,
     }
     return;
   }
-  THROW_UFAILURE(appendFromUTarget, U_ILLEGAL_ARGUMENT_ERROR, m_error);
+  THROW_UFAILURE(appendFromUTarget, U_ILLEGAL_ARGUMENT_ERROR, &m_error);
 }
 
 void c_UConverter::ucnvFromUCallback(c_UConverter *objval,
@@ -238,7 +234,7 @@ void c_UConverter::ucnvFromUCallback(c_UConverter *objval,
     *pErrorCode = (UErrorCode)errRef.toInt64();
   } else {
     throwFailure(U_ILLEGAL_ARGUMENT_ERROR, "ucnvFromUCallback()",
-                 objval->m_error);
+                 &(objval->m_error));
   }
   objval->appendFromUTarget(ret, args);
 }
@@ -252,7 +248,7 @@ bool c_UConverter::setCallback(UConverter *cnv) {
   ucnv_setToUCallBack(cnv, (UConverterToUCallback)ucnvToUCallback,
                            (const void*)this, NULL, NULL, &error);
   if (U_FAILURE(error)) {
-    THROW_UFAILURE(ucnv_setToUCallback, error, m_error);
+    THROW_UFAILURE(ucnv_setToUCallback, error, &m_error);
     ucnv_close(cnv);
     return false;
   }
@@ -260,7 +256,7 @@ bool c_UConverter::setCallback(UConverter *cnv) {
   ucnv_setFromUCallBack(cnv, (UConverterFromUCallback)ucnvFromUCallback,
                              (const void*)this, NULL, NULL, &error);
   if (U_FAILURE(error)) {
-    THROW_UFAILURE(ucnv_setFromUCallback, error, m_error);
+    THROW_UFAILURE(ucnv_setFromUCallback, error, &m_error);
     ucnv_close(cnv);
     return false;
   }
@@ -269,7 +265,7 @@ bool c_UConverter::setCallback(UConverter *cnv) {
 }
 
 bool c_UConverter::setEncoding(const String& encoding, UConverter **pcnv,
-                               intl_error &err) {
+                               Intl::IntlError* err) {
   UErrorCode error = U_ZERO_ERROR;
   UConverter *cnv = ucnv_open(encoding.data(), &error);
 
@@ -294,11 +290,11 @@ bool c_UConverter::setEncoding(const String& encoding, UConverter **pcnv,
 }
 
 void c_UConverter::t_setsourceencoding(const String& encoding) {
-  setEncoding(encoding, &m_src, m_error);
+  setEncoding(encoding, &m_src, &m_error);
 }
 
 void c_UConverter::t_setdestinationencoding(const String& encoding) {
-  setEncoding(encoding, &m_dest, m_error);
+  setEncoding(encoding, &m_dest, &m_error);
 }
 
 String c_UConverter::t_getsourceencoding() {
@@ -309,7 +305,7 @@ String c_UConverter::t_getsourceencoding() {
   UErrorCode error = U_ZERO_ERROR;
   const char *name = ucnv_getName(m_src, &error);
   if (U_FAILURE(error)) {
-    THROW_UFAILURE(ucnv_getName, error, m_error);
+    THROW_UFAILURE(ucnv_getName, error, &m_error);
     return uninit_null();
   }
 
@@ -324,7 +320,7 @@ String c_UConverter::t_getdestinationencoding() {
   UErrorCode error = U_ZERO_ERROR;
   const char *name = ucnv_getName(m_dest, &error);
   if (U_FAILURE(error)) {
-    THROW_UFAILURE(ucnv_getName, error, m_error);
+    THROW_UFAILURE(ucnv_getName, error, &m_error);
     return uninit_null();
   }
 
@@ -352,7 +348,7 @@ int64_t c_UConverter::t_getdestinationtype() {
 /* Basic substitution */
 
 bool c_UConverter::setSubstChars(String chars, UConverter *cnv,
-                                 intl_error &err) {
+                                 Intl::IntlError* err) {
   UErrorCode error = U_ZERO_ERROR;
   ucnv_setSubstChars(cnv, chars.data(), chars.size(), &error);
   if (U_FAILURE(error)) {
@@ -363,8 +359,8 @@ bool c_UConverter::setSubstChars(String chars, UConverter *cnv,
 }
 
 bool c_UConverter::t_setsubstchars(const String& chars) {
-  return setSubstChars(chars, m_dest, m_error) &&
-         setSubstChars(chars, m_src,  m_error);
+  return setSubstChars(chars, m_dest, &m_error) &&
+         setSubstChars(chars, m_src,  &m_error);
 }
 
 String c_UConverter::t_getsubstchars() {
@@ -374,7 +370,7 @@ String c_UConverter::t_getsubstchars() {
 
   ucnv_getSubstChars(m_src, chars, &chars_len, &error);
   if (U_FAILURE(error)) {
-    THROW_UFAILURE(ucnv_getSubstChars, error, m_error);
+    THROW_UFAILURE(ucnv_getSubstChars, error, &m_error);
     return uninit_null();
   }
 
@@ -413,17 +409,17 @@ Variant c_UConverter::t_toucallback(int64_t reason,
 Variant c_UConverter::t_convert(const String& str, bool reverse) {
   SYNC_VM_REGS_SCOPED();
   return doConvert(str, reverse ? m_src : m_dest,
-                        reverse ? m_dest : m_src, m_error);
+                        reverse ? m_dest : m_src, &m_error);
 }
 
 String c_UConverter::doConvert(const String& str,
                                UConverter *toCnv, UConverter *fromCnv,
-                               intl_error &err) {
+                               Intl::IntlError* err) {
   UErrorCode error = U_ZERO_ERROR;
 
   if (!fromCnv || !toCnv) {
-    err.code = U_INVALID_STATE_ERROR;
-    err.custom_error_message = "Internal converters not initialized";
+    err->setError(U_INVALID_STATE_ERROR,
+                  "Internal converters not initialized");
     return uninit_null();
   }
 
@@ -477,23 +473,23 @@ Variant c_UConverter::ti_transcode(const String& str, const String& toEncoding,
                                    const String& fromEncoding,
                                    CArrRef options) {
   UConverter *fromCnv = NULL, *toCnv = NULL;
-  if (!setEncoding(fromEncoding, &fromCnv, s_intl_error->m_error)) {
+  if (!setEncoding(fromEncoding, &fromCnv, s_intl_error.get())) {
     return uninit_null();
   }
-  if (!setEncoding(toEncoding, &toCnv, s_intl_error->m_error)) {
+  if (!setEncoding(toEncoding, &toCnv, s_intl_error.get())) {
     return uninit_null();
   }
   if (options.exists(s_from_subst) &&
      !setSubstChars(options[s_from_subst].toString(), fromCnv,
-                    s_intl_error->m_error)) {
+                    s_intl_error.get())) {
     return uninit_null();
   }
   if (options.exists(s_to_subst) &&
      !setSubstChars(options[s_to_subst].toString(), toCnv,
-                    s_intl_error->m_error)) {
+                    s_intl_error.get())) {
     return uninit_null();
   }
-  Variant ret = doConvert(str, toCnv, fromCnv, s_intl_error->m_error);
+  Variant ret = doConvert(str, toCnv, fromCnv, s_intl_error.get());
   ucnv_close(toCnv);
   ucnv_close(fromCnv);
   return ret;
@@ -502,11 +498,11 @@ Variant c_UConverter::ti_transcode(const String& str, const String& toEncoding,
 /* ext/intl error handling */
 
 int64_t c_UConverter::t_geterrorcode() {
-  return m_error.code;
+  return m_error.getErrorCode();
 }
 
 String c_UConverter::t_geterrormessage() {
-  return m_error.custom_error_message;
+  return m_error.getErrorMessage();
 }
 
 /* Ennumerators and lookups */
@@ -542,7 +538,7 @@ Array c_UConverter::ti_getaliases(const String& encoding) {
   int16_t i, count = ucnv_countAliases(encoding.data(), &error);
 
   if (U_FAILURE(error)) {
-    THROW_UFAILURE(ucnv_getAliases, error, s_intl_error->m_error);
+    THROW_UFAILURE(ucnv_getAliases, error, s_intl_error.get());
     return uninit_null().toArray();
   }
 
@@ -551,7 +547,7 @@ Array c_UConverter::ti_getaliases(const String& encoding) {
     error = U_ZERO_ERROR;
     const char *alias = ucnv_getAlias(encoding.c_str(), i, &error);
     if (U_FAILURE(error)) {
-      THROW_UFAILURE(ucnv_getAlias, error, s_intl_error->m_error);
+      THROW_UFAILURE(ucnv_getAlias, error, s_intl_error.get());
       return uninit_null().toArray();
     }
     ret.append(alias);
@@ -567,7 +563,7 @@ Array c_UConverter::ti_getstandards() {
     UErrorCode error = U_ZERO_ERROR;
     const char *name = ucnv_getStandard(i, &error);
     if (U_FAILURE(error)) {
-      THROW_UFAILURE(ucnv_getStandard, error, s_intl_error->m_error);
+      THROW_UFAILURE(ucnv_getStandard, error, s_intl_error.get());
       return uninit_null().toArray();
     }
     ret.append(name);
@@ -583,7 +579,7 @@ String c_UConverter::ti_getstandardname(const String& name,
                                                    &error);
 
   if (U_FAILURE(error)) {
-    THROW_UFAILURE(ucnv_getStandardName, error, s_intl_error->m_error);
+    THROW_UFAILURE(ucnv_getStandardName, error, s_intl_error.get());
     return uninit_null();
   }
 

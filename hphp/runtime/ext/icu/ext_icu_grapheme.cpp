@@ -9,8 +9,8 @@ namespace HPHP { namespace Intl {
 
 #define CHECK_CONVERR(error) \
   if (U_FAILURE(error)) { \
-    s_intl_error->set(error, \
-                      "Error converting input string to UTF-16"); \
+    s_intl_error->setError(error, \
+                           "Error converting input string to UTF-16"); \
     return false; \
   }
 
@@ -42,7 +42,7 @@ inline UBreakIterator* get_break_iterator(const UChar* str, int32_t len) {
   UErrorCode error = U_ZERO_ERROR;
   UBreakIterator *bi = ubrk_open(UBRK_CHARACTER, nullptr, str, len, &error);
   if (U_FAILURE(error)) {
-    s_intl_error->set(error, "Failed to instantiate break iterator");
+    s_intl_error->setError(error, "Failed to instantiate break iterator");
     return nullptr;
   }
   return bi;
@@ -87,13 +87,13 @@ static Variant grapheme_do_strpos(const String& haystack,
                                   bool case_insensitive,
                                   bool reverse) {
   if (outside_string(offset, haystack.size())) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "grapheme_strpos: Offset not contained in string");
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "grapheme_strpos: Offset not contained in string");
     return false;
   }
   if (needle.empty()) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "grapheme_strpos: Empty delimiter");
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "grapheme_strpos: Empty delimiter");
     return false;
   }
 
@@ -124,7 +124,7 @@ static Variant grapheme_do_strpos(const String& haystack,
                           haystack16.getBuffer(), haystack16.length(),
                           "", bi, &error);
   if (!src || U_FAILURE(error)) {
-    s_intl_error->set(error, "Error creating search object");
+    s_intl_error->setError(error, "Error creating search object");
     return false;
   }
   SCOPE_EXIT { usearch_close(src); };
@@ -134,7 +134,7 @@ static Variant grapheme_do_strpos(const String& haystack,
     error = U_ZERO_ERROR;
     ucol_setAttribute(coll, UCOL_STRENGTH, UCOL_SECONDARY, &error);
     if (U_FAILURE(error)) {
-      s_intl_error->set(error, "Error setting collation strength");
+      s_intl_error->setError(error, "Error setting collation strength");
     }
     usearch_reset(src);
   }
@@ -143,13 +143,13 @@ static Variant grapheme_do_strpos(const String& haystack,
   if (offset != 0) {
     offset_pos = grapheme_get_haystack_offset(bi, offset);
     if (offset_pos < 0) {
-      s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR, "Invalid search offset");
+      s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR, "Invalid search offset");
       return false;
     }
     error = U_ZERO_ERROR;
     usearch_setOffset(src, offset_pos, &error);
     if (U_FAILURE(error)) {
-      s_intl_error->set(error, "invalid search offset");
+      s_intl_error->setError(error, "invalid search offset");
       return false;
     }
   }
@@ -158,7 +158,7 @@ static Variant grapheme_do_strpos(const String& haystack,
   pos = reverse ? usearch_last(src, &error) : usearch_next(src, &error);
   if (pos < offset_pos) pos = USEARCH_DONE;
   if (U_FAILURE(error)) {
-    s_intl_error->set(error, "Error looking up string");
+    s_intl_error->setError(error, "Error looking up string");
     return false;
   }
   if (pos != USEARCH_DONE && ubrk_isBoundary(bi, pos)) {
@@ -243,18 +243,18 @@ static Variant HHVM_FUNCTION(grapheme_extract, const String& haystack,
   next = start;
   if ((extract_type < GraphemeExtractType::MIN) ||
       (extract_type > GraphemeExtractType::MAX)) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "grapheme_extract: unknown extract type param");
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "grapheme_extract: unknown extract type param");
     return false;
   }
   if ((start < 0) || (start > INT32_MAX) || (start >= haystack.size())) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "grapheme_extract: start not contained in string");
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "grapheme_extract: start not contained in string");
     return false;
   }
   if ((size < 0) || (size > INT32_MAX)) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "grapheme_extract: size is invalid");
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "grapheme_extract: size is invalid");
     return false;
   }
   if (size == 0) {
@@ -270,8 +270,8 @@ static Variant HHVM_FUNCTION(grapheme_extract, const String& haystack,
 
     while ( !UTF8_IS_SINGLE(*p) && !U8_IS_LEAD(*p) ) {
       if (++p >= e) {
-        s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                          "grapheme_extract: invalid input string");
+        s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                               "grapheme_extract: invalid input string");
         return false;
       }
     }
@@ -292,7 +292,7 @@ static Variant HHVM_FUNCTION(grapheme_extract, const String& haystack,
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString chunk16(u16(p, len, error));
   if (U_FAILURE(error)) {
-    s_intl_error->set(error, "Error converting input string to UTF-16");
+    s_intl_error->setError(error, "Error converting input string to UTF-16");
     return false;
   }
   auto bi = get_break_iterator(chunk16.getBuffer(), chunk16.length());
@@ -374,8 +374,8 @@ static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
                                               int64_t start,
                                               CVarRef len /*= NULL */) {
   if (outside_string(start, str.size())) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "grapheme_substr: start not contained in string");
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "grapheme_substr: start not contained in string");
     return false;
   }
 
@@ -410,8 +410,8 @@ static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
   if (start || (start_pos < 0) ||
       (start_pos >= str16.length()) ||
       (start_pos == UBRK_DONE)) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "grapheme_substr: start not contained in string");
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "grapheme_substr: start not contained in string");
     return false;
   }
 
@@ -444,8 +444,8 @@ static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
   }
   if (end_pos == UBRK_DONE) {
     if (iter_func == ubrk_previous) {
-      s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                        "grapheme_substr: length not contained in string");
+      s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                             "grapheme_substr: length not contained in string");
       return false;
     }
     // Asked for more than whole string, treat like len.isNull case
@@ -456,8 +456,8 @@ static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
   }
 
   if (end_pos < start_pos) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "grapheme_substr: length not contained in string");
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "grapheme_substr: length not contained in string");
     return false;
   } else {
     const char *s = str.c_str();

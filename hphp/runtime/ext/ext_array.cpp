@@ -1887,7 +1887,7 @@ public:
   String getLocale() {
     return m_locale;
   }
-  intl_error &getErrorCodeRef() {
+  Intl::IntlError &getErrorRef() {
     return m_errcode;
   }
   bool setLocale(const String& locale) {
@@ -1898,13 +1898,15 @@ public:
       ucol_close(m_ucoll);
       m_ucoll = NULL;
     }
-    m_errcode.clear();
-    m_ucoll = ucol_open(locale.data(), &(m_errcode.code));
+    m_errcode.clearError();
+    UErrorCode error = U_ZERO_ERROR;
+    m_ucoll = ucol_open(locale.data(), &error);
     if (m_ucoll == NULL) {
       raise_warning("failed to load %s locale from icu data", locale.data());
       return false;
     }
-    if (U_FAILURE(m_errcode.code)) {
+    if (U_FAILURE(error)) {
+      m_errcode.setError(error);
       ucol_close(m_ucoll);
       m_ucoll = NULL;
       return false;
@@ -1922,10 +1924,12 @@ public:
       Logger::Verbose("m_ucoll is NULL");
       return false;
     }
-    m_errcode.clear();
+    m_errcode.clearError();
+    UErrorCode error = U_ZERO_ERROR;
     ucol_setAttribute(m_ucoll, (UColAttribute)attr,
-                      (UColAttributeValue)val, &(m_errcode.code));
-    if (U_FAILURE(m_errcode.code)) {
+                      (UColAttributeValue)val, &error);
+    if (U_FAILURE(error)) {
+      m_errcode.setError(error);
       Logger::Verbose("Error setting attribute value");
       return false;
     }
@@ -1946,18 +1950,22 @@ public:
       Logger::Verbose("m_ucoll is NULL");
       return false;
     }
-    return m_errcode.code;
+    return m_errcode.getErrorCode();
   }
 
   virtual void requestInit() {
     m_locale = String(uloc_getDefault(), CopyString);
-    m_errcode.clear();
-    m_ucoll = ucol_open(m_locale.data(), &(m_errcode.code));
+    m_errcode.clearError();
+    UErrorCode error = U_ZERO_ERROR;
+    m_ucoll = ucol_open(m_locale.data(), &error);
+    if (U_FAILURE(error)) {
+      m_errcode.setError(error);
+    }
     assert(m_ucoll);
   }
   virtual void requestShutdown() {
     m_locale.reset();
-    m_errcode.clear();
+    m_errcode.clearError(false);
     if (m_ucoll) {
       ucol_close(m_ucoll);
       m_ucoll = NULL;
@@ -1967,7 +1975,7 @@ public:
 private:
   String     m_locale;
   UCollator *m_ucoll;
-  intl_error m_errcode;
+  Intl::IntlError m_errcode;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
@@ -2022,7 +2030,7 @@ php_sort(VRefParam container, int sort_flags,
     if (use_collator && sort_flags != SORT_LOCALE_STRING) {
       UCollator *coll = s_collator->getCollator();
       if (coll) {
-        intl_error &errcode = s_collator->getErrorCodeRef();
+        Intl::IntlError &errcode = s_collator->getErrorRef();
         return collator_sort(container, sort_flags, ascending,
                              coll, &errcode);
       }
@@ -2055,7 +2063,7 @@ php_asort(VRefParam container, int sort_flags,
     if (use_collator && sort_flags != SORT_LOCALE_STRING) {
       UCollator *coll = s_collator->getCollator();
       if (coll) {
-        intl_error &errcode = s_collator->getErrorCodeRef();
+        Intl::IntlError &errcode = s_collator->getErrorRef();
         return collator_asort(container, sort_flags, ascending,
                               coll, &errcode);
       }

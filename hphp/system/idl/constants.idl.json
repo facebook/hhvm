@@ -840,18 +840,6 @@
             "value": 8192
         },
         {
-            "name": "GRAPHEME_EXTR_COUNT",
-            "value": 0
-        },
-        {
-            "name": "GRAPHEME_EXTR_MAXBYTES",
-            "value": 1
-        },
-        {
-            "name": "GRAPHEME_EXTR_MAXCHARS",
-            "value": 2
-        },
-        {
             "name": "HASH_HMAC",
             "value": 1
         },

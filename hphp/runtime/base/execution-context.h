@@ -104,7 +104,7 @@ class ClassInfoVM : public ClassInfo,
   UserAttributeVec m_userAttrVec;
 
  public:
-  friend class HPHP::Class;
+  friend class Class;
 };
 
 enum class CallType {
@@ -387,7 +387,7 @@ public:
 
   static void fillContinuationVars(
     ActRec* origFp, const Func* origFunc, ActRec* genFp, const Func* genFunc);
-  void pushLocalsAndIterators(const HPHP::Func* f, int nparams = 0);
+  void pushLocalsAndIterators(const Func* f, int nparams = 0);
   void enqueueAPCHandle(APCHandle* handle);
 
 private:
@@ -437,7 +437,7 @@ private:
   template<class Op> void implCellBinOp(IOP_ARGS, Op op);
   template<class Op> void implCellBinOpBool(IOP_ARGS, Op op);
   void implVerifyRetType(IOP_ARGS);
-  bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);
+  bool cellInstanceOf(TypedValue* c, const NamedEntity* s);
   bool iopInstanceOfHelper(const StringData* s1, Cell* c2);
   bool initIterator(PC& pc, PC& origPc, Iter* it,
                     Offset offset, Cell* c1);
@@ -463,24 +463,24 @@ public:
 
   std::unordered_map<const ObjectData*,ArrayNoDtor> dynPropTable;
 
-  const HPHP::Func* lookupMethodCtx(const HPHP::Class* cls,
+  const Func* lookupMethodCtx(const Class* cls,
                                         const StringData* methodName,
-                                        const HPHP::Class* pctx,
+                                        const Class* pctx,
                                         CallType lookupType,
                                         bool raise = false);
-  LookupResult lookupObjMethod(const HPHP::Func*& f,
-                               const HPHP::Class* cls,
+  LookupResult lookupObjMethod(const Func*& f,
+                               const Class* cls,
                                const StringData* methodName,
                                const Class* ctx,
                                bool raise = false);
-  LookupResult lookupClsMethod(const HPHP::Func*& f,
-                               const HPHP::Class* cls,
+  LookupResult lookupClsMethod(const Func*& f,
+                               const Class* cls,
                                const StringData* methodName,
                                ObjectData* this_,
                                const Class* ctx,
                                bool raise = false);
-  LookupResult lookupCtorMethod(const HPHP::Func*& f,
-                                const HPHP::Class* cls,
+  LookupResult lookupCtorMethod(const Func*& f,
+                                const Class* cls,
                                 bool raise = false);
   ObjectData* createObject(StringData* clsName,
                            CVarRef params,
@@ -494,7 +494,7 @@ public:
    * type.  Raises an error if the class has no constant with that
    * name, or if the class is not defined.
    */
-  Cell lookupClsCns(const HPHP::NamedEntity* ne,
+  Cell lookupClsCns(const NamedEntity* ne,
                     const StringData* cls,
                     const StringData* cns);
   Cell lookupClsCns(const StringData* cls,
@@ -549,18 +549,18 @@ public:
   const String& getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  HPHP::Eval::PhpFile* lookupPhpFile(
+  Eval::PhpFile* lookupPhpFile(
       StringData* path, const char* currentDir, bool* initial = nullptr);
-  HPHP::Unit* evalInclude(StringData* path,
+  Unit* evalInclude(StringData* path,
                               const StringData* curUnitFilePath, bool* initial);
-  HPHP::Unit* evalIncludeRoot(StringData* path,
+  Unit* evalIncludeRoot(StringData* path,
                                   InclOpFlags flags, bool* initial);
-  HPHP::Eval::PhpFile* lookupIncludeRoot(StringData* path,
+  Eval::PhpFile* lookupIncludeRoot(StringData* path,
                                          InclOpFlags flags, bool* initial,
-                                         HPHP::Unit* unit = 0);
-  bool evalUnit(HPHP::Unit* unit, PC& pc, int funcType);
-  void invokeUnit(TypedValue* retval, HPHP::Unit* unit);
-  HPHP::Unit* compileEvalString(StringData* code,
+                                         Unit* unit = 0);
+  bool evalUnit(Unit* unit, PC& pc, int funcType);
+  void invokeUnit(TypedValue* retval, Unit* unit);
+  Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
   const String& createFunction(const String& args, const String& code);
   bool evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
@@ -597,10 +597,10 @@ public:
   VarEnv* getVarEnv(int frame = 0);
   void setVar(StringData* name, TypedValue* v, bool ref);
   Array getLocalDefinedVariables(int frame);
-  HPHP::PCFilter* m_breakPointFilter;
-  HPHP::PCFilter* m_lastLocFilter;
+  PCFilter* m_breakPointFilter;
+  PCFilter* m_lastLocFilter;
   bool m_dbgNoBreak;
-  bool doFCall(HPHP::ActRec* ar, PC& pc);
+  bool doFCall(ActRec* ar, PC& pc);
   bool doFCallArray(PC& pc);
   bool doFCallArrayTC(PC pc);
   CVarRef getEvaledArg(const StringData* val, const String& namespacedName);
@@ -622,7 +622,7 @@ private:
   bool isReturnHelper(uintptr_t address);
   void switchModeForDebugger();
   int m_coverPrevLine;
-  HPHP::Unit* m_coverPrevUnit;
+  Unit* m_coverPrevUnit;
   Array m_evaledArgs;
   String m_lastErrorPath;
   int m_lastErrorLine;
@@ -636,10 +636,10 @@ public:
     InvokePseudoMain = 2
   };
   void invokeFunc(TypedValue* retval,
-                  const HPHP::Func* f,
+                  const Func* f,
                   CVarRef args_ = init_null_variant,
                   ObjectData* this_ = nullptr,
-                  HPHP::Class* class_ = nullptr,
+                  Class* class_ = nullptr,
                   VarEnv* varEnv = nullptr,
                   StringData* invName = nullptr,
                   InvokeFlags flags = InvokeNormal);
@@ -654,13 +654,13 @@ public:
                                ActRec* ar,
                                int numArgsPushed);
   void invokeFuncFew(TypedValue* retval,
-                     const HPHP::Func* f,
+                     const Func* f,
                      void* thisOrCls,
                      StringData* invName,
                      int argc,
                      const TypedValue* argv);
   void invokeFuncFew(TypedValue* retval,
-                     const HPHP::Func* f,
+                     const Func* f,
                      void* thisOrCls,
                      StringData* invName = nullptr) {
     invokeFuncFew(retval, f, thisOrCls, invName, 0, nullptr);
@@ -674,7 +674,7 @@ public:
                   ctx.cls ? (char*)ctx.cls + 1 : nullptr,
                   ctx.invName, argc, argv);
   }
-  void invokeContFunc(const HPHP::Func* f,
+  void invokeContFunc(const Func* f,
                       ObjectData* this_,
                       Cell* param = nullptr);
   // VM ClassInfo support

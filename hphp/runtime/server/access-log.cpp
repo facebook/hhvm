@@ -34,7 +34,6 @@
 #include "hphp/util/atomic.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/hardware-counter.h"
 
 using std::endl;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,20 +16,8 @@
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * This header is deprecated, please don't include it in anything new
- * or add new code to this header.
- *
- * If you need something defined in this header, pull it out to a
- * smaller header and include that.
- *
- * TODO(#3468751): split this header up
- */
-
-//////////////////////////////////////////////////////////////////////
-
-#ifndef incl_HPHP_UTIL_H_
-#define incl_HPHP_UTIL_H_
+#ifndef incl_HPHP_FILE_UTIL_H_
+#define incl_HPHP_FILE_UTIL_H_
 
 #include <cassert>
 #include <atomic>
@@ -42,7 +30,7 @@
 #include <stdarg.h>
 #include <arpa/inet.h> // For htonl().
 
-namespace HPHP { namespace Util {
+namespace HPHP { namespace FileUtil {
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -26,13 +26,13 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "folly/String.h"
+#include "hphp/util/file-util.h"
 
 #include <sys/file.h>
 #include <algorithm>
@@ -49,7 +49,7 @@ const int File::USE_INCLUDE_PATH = 1;
 
 String File::TranslatePathKeepRelative(const String& filename) {
   String canonicalized(
-    Util::canonicalize(
+    FileUtil::canonicalize(
       filename.data(),
       strlen(filename.data()) // canonicalize asserts that we don't have nulls
     ),
@@ -101,7 +101,7 @@ String File::TranslatePath(const String& filename) {
 
 String File::TranslatePathWithFileCache(const String& filename) {
   String canonicalized(
-    Util::canonicalize(
+    FileUtil::canonicalize(
       filename.data(),
       strlen(filename.data()) // canonicalize asserts that we don't have nulls
     ),

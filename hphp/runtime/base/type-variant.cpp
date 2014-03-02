@@ -33,7 +33,6 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/tv-arith.h"
-#include "hphp/util/util.h"
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/logger.h"
 

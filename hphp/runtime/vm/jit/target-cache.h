@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_RUNTIME_VM_JIT_TARGETCACHE_H_
 #define incl_HPHP_RUNTIME_VM_JIT_TARGETCACHE_H_
 
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/types.h"

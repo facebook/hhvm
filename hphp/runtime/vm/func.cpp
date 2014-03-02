@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/atomic-vector.h"
-#include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/strings.h"

@@ -23,7 +23,6 @@
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/option.h"
-#include "hphp/util/util.h"
 #include "hphp/util/hash.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/runtime/base/complex-types.h"

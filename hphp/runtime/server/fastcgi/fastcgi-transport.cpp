@@ -23,7 +23,6 @@
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
 #include "thrift/lib/cpp/async/TAsyncTimeout.h"
 #include "thrift/lib/cpp/transport/TSocketAddress.h"
-#include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 #include "folly/MoveWrapper.h"

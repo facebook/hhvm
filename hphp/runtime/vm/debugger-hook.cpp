@@ -21,7 +21,6 @@
 #include "hphp/runtime/debugger/debugger_proxy.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 
 namespace HPHP {
 

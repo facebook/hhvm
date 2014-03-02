@@ -23,7 +23,6 @@
 #include <set>
 #include <vector>
 #include "hphp/compiler/json.h"
-#include "hphp/util/util.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "folly/Bits.h"

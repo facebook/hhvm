@@ -31,7 +31,6 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/base/stats.h"

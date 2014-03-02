@@ -36,6 +36,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/file-cache.h"
 #include "hphp/util/log-file-flusher.h"
+#include "hphp/util/file-util.h"
 
 #include "hphp/parser/scanner.h"
 
@@ -805,13 +806,13 @@ void RuntimeOption::Load(Hdf &config,
     TLSDisableTLS1_2 = server["TLSDisableTLS1_2"].getBool(false);
     TLSClientCipherSpec = server["TLSClientCipherSpec"].getString();
 
-    string srcRoot = Util::normalizeDir(server["SourceRoot"].getString());
+    string srcRoot = FileUtil::normalizeDir(server["SourceRoot"].getString());
     if (!srcRoot.empty()) SourceRoot = srcRoot;
     FileCache::SourceRoot = SourceRoot;
 
     server["IncludeSearchPaths"].get(IncludeSearchPaths);
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
-      IncludeSearchPaths[i] = Util::normalizeDir(IncludeSearchPaths[i]);
+      IncludeSearchPaths[i] = FileUtil::normalizeDir(IncludeSearchPaths[i]);
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
@@ -823,7 +824,7 @@ void RuntimeOption::Load(Hdf &config,
     ErrorDocument500 = server["ErrorDocument500"].getString();
     normalizePath(ErrorDocument500);
     FatalErrorMessage = server["FatalErrorMessage"].getString();
-    FontPath = Util::normalizeDir(server["FontPath"].getString());
+    FontPath = FileUtil::normalizeDir(server["FontPath"].getString());
     EnableStaticContentFromDisk =
       server["EnableStaticContentFromDisk"].getBool(true);
     EnableOnDemandUncompress =

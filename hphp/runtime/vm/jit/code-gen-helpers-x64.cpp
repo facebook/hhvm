@@ -35,7 +35,6 @@ namespace HPHP { namespace JIT { namespace X64 {
 
 //////////////////////////////////////////////////////////////////////
 
-using namespace Util;
 using namespace JIT::reg;
 
 TRACE_SET_MOD(hhir);
@@ -58,7 +57,6 @@ void moveToAlign(CodeBlock& cb,
   // TODO(2967396) implement properly, move function
   if (arch() == Arch::ARM) return;
 
-  using namespace HPHP::Util;
   X64Assembler a { cb };
   assert(folly::isPowTwo(align));
   size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));

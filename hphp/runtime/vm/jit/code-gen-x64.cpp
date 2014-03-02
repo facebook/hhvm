@@ -75,7 +75,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-using namespace Util;
 using namespace JIT::reg;
 using namespace X64; // XXX: we need to split the x64-specific parts out
 

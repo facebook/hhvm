@@ -23,7 +23,6 @@
 
 #include "folly/Bits.h"
 
-#include "hphp/util/util.h"
 #include "hphp/util/exp-arena.h"
 #include "hphp/runtime/base/complex-types.h"
 

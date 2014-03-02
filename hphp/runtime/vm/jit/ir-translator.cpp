@@ -24,7 +24,6 @@
 #include "folly/Conv.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/stack-trace.h"
-#include "hphp/util/util.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -51,7 +50,6 @@ namespace HPHP {
 namespace JIT {
 
 using namespace reg;
-using namespace Util;
 using namespace Trace;
 using std::max;
 

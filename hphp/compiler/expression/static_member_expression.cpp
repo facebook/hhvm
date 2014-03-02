@@ -22,7 +22,6 @@
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/util/util.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/hash.h"
 #include "hphp/parser/hphp.tab.hpp"

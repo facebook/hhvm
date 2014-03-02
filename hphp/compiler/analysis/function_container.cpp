@@ -23,7 +23,6 @@
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/option.h"
-#include "hphp/util/util.h"
 #include "hphp/util/hash.h"
 
 using namespace HPHP;

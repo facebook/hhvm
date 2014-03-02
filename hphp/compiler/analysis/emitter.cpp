@@ -97,7 +97,6 @@
 
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/repo-auth-type.h"

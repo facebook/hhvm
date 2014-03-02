@@ -20,7 +20,6 @@
 #include <type_traits>
 
 #include "hphp/util/arena.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-conversions.h"

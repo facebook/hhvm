@@ -22,7 +22,6 @@
 #include <cassert>
 #include <atomic>
 
-#include "hphp/util/util.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/trace.h"

@@ -35,6 +35,7 @@
 #include "hphp/util/hdf.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/current-executable.h"
+#include "hphp/util/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-init-fini.h"
@@ -399,17 +400,17 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   if (po.inputDir.empty()) {
     po.inputDir = '.';
   }
-  po.inputDir = Util::normalizeDir(po.inputDir);
+  po.inputDir = FileUtil::normalizeDir(po.inputDir);
   if (po.configDir.empty()) {
     po.configDir = po.inputDir;
   }
-  po.configDir = Util::normalizeDir(po.configDir);
+  po.configDir = FileUtil::normalizeDir(po.configDir);
   Option::RootDirectory = po.configDir;
   Option::IncludeSearchPaths = po.includePaths;
 
   for (unsigned int i = 0; i < po.excludeDirs.size(); i++) {
     Option::PackageExcludeDirs.insert
-      (Util::normalizeDir(po.excludeDirs[i]));
+      (FileUtil::normalizeDir(po.excludeDirs[i]));
   }
   for (unsigned int i = 0; i < po.excludeFiles.size(); i++) {
     Option::PackageExcludeFiles.insert(po.excludeFiles[i]);
@@ -420,7 +421,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
   for (unsigned int i = 0; i < po.excludeStaticDirs.size(); i++) {
     Option::PackageExcludeStaticDirs.insert
-      (Util::normalizeDir(po.excludeStaticDirs[i]));
+      (FileUtil::normalizeDir(po.excludeStaticDirs[i]));
   }
   for (unsigned int i = 0; i < po.excludeStaticFiles.size(); i++) {
     Option::PackageExcludeStaticFiles.insert(po.excludeStaticFiles[i]);
@@ -849,7 +850,7 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
     if (!po.filecache.empty()) {
       fcThread.waitForEnd();
     }
-    Util::syncdir(po.outputDir, po.syncDir);
+    FileUtil::syncdir(po.outputDir, po.syncDir);
     boost::filesystem::remove_all(po.syncDir);
   }
 
@@ -919,7 +920,7 @@ int runTarget(const CompilerOptions &po) {
     (po.inputs.size() == 1 ? po.inputs[0] : "") +
     " " + po.programArgs;
   Logger::Info("running executable: %s", cmd.c_str());
-  ret = Util::ssystem(cmd.c_str());
+  ret = FileUtil::ssystem(cmd.c_str());
   if (ret && ret != -1) ret = 1;
 
   // delete the temporary directory if not needed

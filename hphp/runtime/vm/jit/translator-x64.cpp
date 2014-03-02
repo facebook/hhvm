@@ -70,7 +70,6 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/meta.h"
 #include "hphp/util/process.h"
-#include "hphp/util/util.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/cycles.h"
 
@@ -136,7 +135,6 @@ namespace JIT {
 TRACE_SET_MOD(tx64);
 
 using namespace reg;
-using namespace Util;
 using namespace Trace;
 using std::max;
 

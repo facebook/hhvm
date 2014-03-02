@@ -33,7 +33,6 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -43,6 +42,7 @@
 #include "hphp/system/systemlib.h"
 #include "folly/Format.h"
 #include "hphp/util/text-util.h"
+#include "hphp/util/file-util.h"
 #include "hphp/util/string-vsnprintf.h"
 
 #include <limits>
@@ -879,8 +879,8 @@ Variant include_impl_invoke(const String& file, bool once,
       } catch(PhpFileDoesNotExistException &e) {}
     }
 
-    String rel_path(Util::relativePath(RuntimeOption::SourceRoot,
-                                       string(file.data())));
+    String rel_path(FileUtil::relativePath(RuntimeOption::SourceRoot,
+                                           string(file.data())));
 
     // Don't try/catch - We want the exception to be passed along
     return invoke_file(rel_path, once, currentDir);
@@ -956,7 +956,7 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else if (c_file[0] == '/') {
-    String can_path(Util::canonicalize(file.c_str(), file.size()),
+    String can_path(FileUtil::canonicalize(file.c_str(), file.size()),
                     AttachString);
 
     if (tryFile(can_path, ctx)) {
@@ -967,7 +967,7 @@ String resolve_include(const String& file, const char* currentDir,
     c_file[1] == '.' && c_file[2] == '/')))) {
 
     String path(String(g_context->getCwd() + "/" + file));
-    String can_path(Util::canonicalize(path.c_str(), path.size()),
+    String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
                     AttachString);
 
     if (tryFile(can_path, ctx)) {
@@ -994,7 +994,7 @@ String resolve_include(const String& file, const char* currentDir,
       }
 
       path += file;
-      String can_path(Util::canonicalize(path.c_str(), path.size()),
+      String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
       if (tryFile(can_path, ctx)) {
@@ -1006,7 +1006,7 @@ String resolve_include(const String& file, const char* currentDir,
       String path(currentDir);
       path += "/";
       path += file;
-      String can_path(Util::canonicalize(path.c_str(), path.size()),
+      String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
       if (tryFile(can_path, ctx)) {
@@ -1014,7 +1014,7 @@ String resolve_include(const String& file, const char* currentDir,
       }
     } else {
       String path(g_context->getCwd() + "/" + currentDir + file);
-      String can_path(Util::canonicalize(path.c_str(), path.size()),
+      String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
       if (tryFile(can_path, ctx)) {

@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/util/util.h"
 
 namespace HPHP {
 

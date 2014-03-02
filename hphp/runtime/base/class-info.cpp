@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/util/util.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 

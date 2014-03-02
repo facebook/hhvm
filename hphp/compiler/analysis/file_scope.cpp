@@ -30,7 +30,6 @@
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include "hphp/util/deprecated/base.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/statement/function_statement.h"

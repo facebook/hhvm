@@ -36,8 +36,8 @@
 #include "hphp/runtime/base/directory.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include "hphp/util/process.h"
+#include "hphp/util/file-util.h"
 #include "folly/String.h"
 #include <dirent.h>
 #include <glob.h>
@@ -1121,10 +1121,10 @@ bool f_copy(const String& source, const String& dest,
   } else {
     int ret =
       RuntimeOption::UseDirectCopy ?
-      Util::directCopy(File::TranslatePath(source).data(),
+      FileUtil::directCopy(File::TranslatePath(source).data(),
           File::TranslatePath(dest).data())
       :
-      Util::copy(File::TranslatePath(source).data(),
+      FileUtil::copy(File::TranslatePath(source).data(),
           File::TranslatePath(dest).data());
     return (ret == 0);
   }
@@ -1338,7 +1338,7 @@ bool f_rmdir(const String& dirname, CVarRef context /* = null */) {
 
 String f_dirname(const String& path) {
   char *buf = strndup(path.data(), path.size());
-  int len = Util::dirname_helper(buf, path.size());
+  int len = FileUtil::dirname_helper(buf, path.size());
   return String(buf, len, AttachString);
 }
 

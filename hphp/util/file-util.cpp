@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/util/util.h"
+#include "hphp/util/file-util.h"
 
 #include <vector>
 #include <fstream>
@@ -41,7 +41,7 @@ using std::string;
 using std::vector;
 namespace fs = boost::filesystem;
 
-bool Util::mkdir(const std::string &path, int mode /* = 0777 */) {
+bool FileUtil::mkdir(const std::string &path, int mode /* = 0777 */) {
   if (path.empty()) {
     return false;
   }
@@ -106,8 +106,8 @@ static bool same(const char *file1, const char *file2) {
   return ret;
 }
 
-void Util::syncdir(const std::string &dest_, const std::string &src_,
-                   bool keepSrc /* = false */) {
+void FileUtil::syncdir(const std::string &dest_, const std::string &src_,
+                       bool keepSrc /* = false */) {
   if (src_.empty() || dest_.empty()) return;
 
   string src = src_;
@@ -197,7 +197,7 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
   closedir(ddest);
 }
 
-int Util::copy(const char *srcfile, const char *dstfile) {
+int FileUtil::copy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -236,7 +236,7 @@ static int force_sync(int fd) {
 #endif
 }
 
-int Util::directCopy(const char *srcfile, const char *dstfile) {
+int FileUtil::directCopy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -289,7 +289,7 @@ int Util::directCopy(const char *srcfile, const char *dstfile) {
   return 0;
 }
 
-int Util::rename(const char *oldname, const char *newname) {
+int FileUtil::rename(const char *oldname, const char *newname) {
   int ret = ::rename(oldname, newname);
   if (ret == 0) return 0;
   if (errno != EXDEV) return -1;
@@ -299,7 +299,7 @@ int Util::rename(const char *oldname, const char *newname) {
   return 0;
 }
 
-int Util::directRename(const char *oldname, const char *newname) {
+int FileUtil::directRename(const char *oldname, const char *newname) {
   int ret = ::rename(oldname, newname);
   if (ret == 0) return 0;
   if (errno != EXDEV) return -1;
@@ -309,7 +309,7 @@ int Util::directRename(const char *oldname, const char *newname) {
   return 0;
 }
 
-int Util::ssystem(const char* command) {
+int FileUtil::ssystem(const char* command) {
   int ret = system(command);
   if (ret == -1) {
     Logger::Error("system(\"%s\"): %s", command,
@@ -320,7 +320,7 @@ int Util::ssystem(const char* command) {
   return ret;
 }
 
-size_t Util::dirname_helper(char *path, int len) {
+size_t FileUtil::dirname_helper(char *path, int len) {
   if (len == 0) {
     /* Illegal use of this function */
     return 0;
@@ -363,7 +363,7 @@ size_t Util::dirname_helper(char *path, int len) {
   return end + 1 - path;
 }
 
-std::string Util::safe_dirname(const char *path, int len) {
+std::string FileUtil::safe_dirname(const char *path, int len) {
   char* tmp_path = (char*)malloc(len+1);
   memcpy(tmp_path, path, len);
   tmp_path[len] = '\0';
@@ -374,16 +374,16 @@ std::string Util::safe_dirname(const char *path, int len) {
   return ret;
 }
 
-std::string Util::safe_dirname(const char *path) {
+std::string FileUtil::safe_dirname(const char *path) {
   int len = strlen(path);
   return safe_dirname(path, len);
 }
 
-std::string Util::safe_dirname(const std::string& path) {
+std::string FileUtil::safe_dirname(const std::string& path) {
   return safe_dirname(path.c_str(), path.size());
 }
 
-std::string Util::relativePath(const std::string fromDir,
+std::string FileUtil::relativePath(const std::string fromDir,
   const std::string toFile) {
 
   size_t maxlen = (fromDir.size() + toFile.size()) * 3;
@@ -453,7 +453,7 @@ std::string Util::relativePath(const std::string fromDir,
   return p;
 }
 
-std::string Util::canonicalize(const std::string &path) {
+std::string FileUtil::canonicalize(const std::string &path) {
   const char *r = canonicalize(path.c_str(), path.size());
   string res(r);
   free((void*)r);
@@ -476,8 +476,8 @@ std::string Util::canonicalize(const std::string &path) {
  * limitations under the License.
  */
 
-char* Util::canonicalize(const char *addpath, size_t addlen,
-                         bool collapse_slashes /* = true */) {
+char* FileUtil::canonicalize(const char *addpath, size_t addlen,
+                             bool collapse_slashes /* = true */) {
   assert(strlen(addpath) == addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
   // null
@@ -558,18 +558,18 @@ char* Util::canonicalize(const char *addpath, size_t addlen,
   return path;
 }
 
-std::string Util::normalizeDir(const std::string &dirname) {
-  string ret = Util::canonicalize(dirname);
+std::string FileUtil::normalizeDir(const std::string &dirname) {
+  string ret = FileUtil::canonicalize(dirname);
   if (!ret.empty() && ret[ret.length() - 1] != '/') {
     ret += '/';
   }
   return ret;
 }
 
-void Util::find(std::vector<std::string> &out,
-                const std::string &root, const char *path, bool php,
-                const std::set<std::string> *excludeDirs /* = NULL */,
-                const std::set<std::string> *excludeFiles /* = NULL */) {
+void FileUtil::find(std::vector<std::string> &out,
+                    const std::string &root, const char *path, bool php,
+                    const std::set<std::string> *excludeDirs /* = NULL */,
+                    const std::set<std::string> *excludeFiles /* = NULL */) {
   if (!path) path = "";
   if (*path == '/') path++;
 
@@ -587,7 +587,7 @@ void Util::find(std::vector<std::string> &out,
   }
   DIR *dir = opendir(fullPath.c_str());
   if (dir == nullptr) {
-    Logger::Error("Util::find(): unable to open directory %s",
+    Logger::Error("FileUtil::find(): unable to open directory %s",
                   fullPath.c_str());
     return;
   }
@@ -606,7 +606,7 @@ void Util::find(std::vector<std::string> &out,
     string fe = fullPath + ename;
     struct stat se;
     if (stat(fe.c_str(), &se)) {
-      Logger::Error("Util::find(): unable to stat %s", fe.c_str());
+      Logger::Error("FileUtil::find(): unable to stat %s", fe.c_str());
       continue;
     }
 
@@ -642,7 +642,7 @@ void Util::find(std::vector<std::string> &out,
           }
         }
       } catch (...) {
-        Logger::Error("Util::find(): unable to read %s", fe.c_str());
+        Logger::Error("FileUtil::find(): unable to read %s", fe.c_str());
       }
     }
 

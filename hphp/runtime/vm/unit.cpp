@@ -26,9 +26,9 @@
 
 #include "hphp/compiler/option.h"
 #include "hphp/util/lock.h"
-#include "hphp/util/util.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/read-only-arena.h"
+#include "hphp/util/file-util.h"
 #include "hphp/parser/parser.h"
 
 #include "hphp/runtime/ext/ext_variable.h"
@@ -2569,8 +2569,8 @@ Unit* UnitEmitter::create() {
   u->m_mainReturn = m_mainReturn;
   u->m_mergeOnly = m_mergeOnly;
   {
-    const std::string& dirname = Util::safe_dirname(m_filepath->data(),
-                                                    m_filepath->size());
+    const std::string& dirname = FileUtil::safe_dirname(m_filepath->data(),
+                                                        m_filepath->size());
     u->m_dirpath = makeStaticString(dirname);
   }
   u->m_md5 = m_md5;

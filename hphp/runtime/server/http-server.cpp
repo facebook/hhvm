@@ -39,6 +39,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
+#include "hphp/util/file-util.h"
 
 #include <sys/types.h>
 #include <signal.h>
@@ -535,7 +536,7 @@ bool HttpServer::startServer(bool pageServer) {
           std::string cmd = "bash -c '! fuser ";
           cmd += RuntimeOption::ServerFileSocket;
           cmd += "'";
-          if (Util::ssystem(cmd.c_str()) == 0) {
+          if (FileUtil::ssystem(cmd.c_str()) == 0) {
             unlink(RuntimeOption::ServerFileSocket.c_str());
           }
         }
@@ -594,7 +595,7 @@ bool HttpServer::startServer(bool pageServer) {
           std::string cmd = "lsof -t -i :";
           cmd += lexical_cast<std::string>(port);
           cmd += " | xargs kill -9";
-          Util::ssystem(cmd.c_str());
+          FileUtil::ssystem(cmd.c_str());
         }
         sleep(1);
       }

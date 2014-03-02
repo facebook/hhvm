@@ -553,7 +553,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
   if (propInd != kInvalidSlot) {
     Attr attrs = m_declProperties[propInd].m_attrs;
     if ((attrs & (AttrProtected|AttrPrivate)) &&
-        !g_context->getDebuggerBypassCheck()) {
+        !g_context->debuggerSettings.bypassCheck) {
       // Fetch 'baseClass', which is the class in the inheritance
       // tree which first declared the property
       Class* baseClass = m_declProperties[propInd].m_class;
@@ -711,7 +711,7 @@ TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
       case AttrPublic:
       case AttrProtected: accessible = true; break;
       case AttrPrivate:
-        accessible = g_context->getDebuggerBypassCheck(); break;
+        accessible = g_context->debuggerSettings.bypassCheck; break;
       default:            not_reached();
       }
     } else {
@@ -721,7 +721,7 @@ TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
       case AttrPublic:    accessible = true; break;
       case AttrProtected:
       case AttrPrivate:
-        accessible = g_context->getDebuggerBypassCheck(); break;
+        accessible = g_context->debuggerSettings.bypassCheck; break;
       default:            not_reached();
       }
     }

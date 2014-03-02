@@ -71,12 +71,12 @@ void CmdEval::handleReply(DebuggerClient &client) {
 bool CmdEval::onServer(DebuggerProxy &proxy) {
   PCFilter* locSave = g_context->m_lastLocFilter;
   g_context->m_lastLocFilter = new PCFilter();
-  g_context->setDebuggerBypassCheck(m_bypassAccessCheck);
+  g_context->debuggerSettings.bypassCheck = m_bypassAccessCheck;
   proxy.ExecutePHP(m_body, m_output, m_frame, m_failed,
                    DebuggerProxy::ExecutePHPFlagsAtInterrupt |
                    (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
                     DebuggerProxy::ExecutePHPFlagsNone));
-  g_context->setDebuggerBypassCheck(false);
+  g_context->debuggerSettings.bypassCheck = false;
   delete g_context->m_lastLocFilter;
   g_context->m_lastLocFilter = locSave;
   return proxy.sendToClient(this);

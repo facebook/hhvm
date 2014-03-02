@@ -45,7 +45,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   : m_type(type), m_option(option), m_buf(nullptr), m_indent(0),
     m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur),
     m_levelDebugger(0) {
-  m_maxLevelDebugger = g_context->getDebuggerPrintLevel();
+  m_maxLevelDebugger = g_context->debuggerSettings.printLevel;
   if (type == Type::Serialize ||
       type == Type::APCSerialize ||
       type == Type::DebuggerSerialize) {

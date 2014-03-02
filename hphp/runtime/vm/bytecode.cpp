@@ -985,7 +985,7 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
   // If we found a protected or private method, we need to do some
   // accessibility checks.
   if ((method->attrs() & (AttrProtected|AttrPrivate)) &&
-      !g_context->getDebuggerBypassCheck()) {
+      !g_context->debuggerSettings.bypassCheck) {
     Class* baseClass = method->baseCls();
     assert(baseClass);
     // If the context class is the same as the class that first

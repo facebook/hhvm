@@ -143,6 +143,12 @@ struct VMParserFrame {
   int lineNumber;
 };
 
+struct DebuggerSettings {
+  bool bypassCheck = false;
+  bool stackArgs = true;
+  int printLevel = -1;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ExecutionContext {
@@ -307,8 +313,6 @@ public:
   const String& getSandboxId() const { return m_sandboxId; }
   void setSandboxId(const String& sandboxId) { m_sandboxId = sandboxId; }
 
-  DECLARE_DBG_SETTING_ACCESSORS
-
 private:
   class OutputBuffer {
   public:
@@ -367,7 +371,8 @@ private:
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);
 
-  DECLARE_DBG_SETTING
+public:
+  DebuggerSettings debuggerSettings;
 
   // TODO(#3666438): reorder the fields.  This ordering is historical
   // (due to a transitional period where we had two subclasses of a

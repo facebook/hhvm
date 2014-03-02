@@ -815,6 +815,9 @@ void Parser::onClassClass(Token &out, Token &cls, Token &name,
       return;
     }
   }
+  if (cls->exp && !cls->exp->is(Expression::KindOfScalarExpression)) {
+    PARSE_ERROR("::class can only be used on scalars");
+  }
   if (cls->same("self") || cls->same("parent") || cls->same("static")) {
     if (cls->same("self") && m_inTrait) {
       // Sooo... self:: works dynamically for everything in a trait except

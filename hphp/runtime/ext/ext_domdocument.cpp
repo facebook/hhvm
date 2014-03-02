@@ -1186,7 +1186,8 @@ const StaticString
   s_domentity("domentity"),
   s_domcdatasection("domcdatasection"),
   s_domdocumentfragment("domdocumentfragment"),
-  s_domnotation("domnotation");
+  s_domnotation("domnotation"),
+  s_domnamespacenode("domnamespacenode");
 
 static String domClassname(xmlNodePtr obj) {
   switch (obj->type) {
@@ -1205,6 +1206,7 @@ static String domClassname(xmlNodePtr obj) {
   case XML_CDATA_SECTION_NODE: return s_domcdatasection;
   case XML_DOCUMENT_FRAG_NODE: return s_domdocumentfragment;
   case XML_NOTATION_NODE:      return s_domnotation;
+  case XML_NAMESPACE_DECL:     return s_domnamespacenode;
   default:
     return String((StringData*)nullptr);
   }
@@ -2439,6 +2441,9 @@ Variant c_DOMNode::t_getnodepath() {
     return ret;
   }
   return uninit_null();
+}
+
+void c_DOMNameSpaceNode::t___construct() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

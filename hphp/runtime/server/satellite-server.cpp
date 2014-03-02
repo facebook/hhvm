@@ -194,23 +194,22 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // SatelliteServer
 
-std::shared_ptr<SatelliteServer>
+std::unique_ptr<SatelliteServer>
 SatelliteServer::Create(std::shared_ptr<SatelliteServerInfo> info) {
-  std::shared_ptr<SatelliteServer> satellite;
+  std::unique_ptr<SatelliteServer> satellite;
   if (info->getPort()) {
-    using SatelliteServerPtr = std::shared_ptr<SatelliteServer>;
     switch (info->getType()) {
     case Type::KindOfInternalPageServer:
-      satellite = SatelliteServerPtr(new InternalPageServer(info));
+      satellite.reset(new InternalPageServer(info));
       break;
     case Type::KindOfDanglingPageServer:
-      satellite = SatelliteServerPtr(new DanglingPageServer(info));
+      satellite.reset(new DanglingPageServer(info));
       break;
     case Type::KindOfRPCServer:
-      satellite = SatelliteServerPtr(new RPCServer(info));
+      satellite.reset(new RPCServer(info));
       break;
     case Type::KindOfXboxServer:
-      satellite = SatelliteServerPtr(new RPCServer(info));
+      satellite.reset(new RPCServer(info));
       break;
     default:
       assert(false);

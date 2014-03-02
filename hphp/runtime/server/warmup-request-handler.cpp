@@ -51,13 +51,9 @@ void WarmupRequestHandlerFactory::bumpReqCount() {
   if (!num) {
     return;
   }
-  auto const server = m_server.lock();
-  if (!server) {
-    return;
-  }
 
   Logger::Info("Finished warmup; adding %d new worker threads", num);
-  server->addWorkers(num);
+  m_server->addWorkers(num);
 
   // Set to zero so we can't do it if the req counter wraps.
   m_additionalThreads.store(0);

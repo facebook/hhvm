@@ -585,7 +585,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                             first ? "" : ",", name, value);
        first = false;
     };
-    ServerPtr server = HttpServer::Server->getPageServer();
+    HPHP::Server* server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
     auto* tx = JIT::tx64;

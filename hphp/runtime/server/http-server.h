@@ -53,8 +53,10 @@ public:
 
   void takeoverShutdown() override;
 
-  ServerPtr getPageServer() { return m_pageServer;}
+  HPHP::Server *getPageServer() { return m_pageServer.get(); }
   void getSatelliteStats(std::vector<std::pair<std::string, int>> *stats);
+
+  void stopOnSignal();
 
 private:
   static void startupFailure();
@@ -65,8 +67,8 @@ private:
 
   ServerPtr m_pageServer;
   ServerPtr m_adminServer;
-  std::vector<std::shared_ptr<SatelliteServer>> m_satellites;
-  std::vector<std::shared_ptr<SatelliteServer>> m_danglings;
+  std::vector<std::unique_ptr<SatelliteServer>> m_satellites;
+  std::vector<std::unique_ptr<SatelliteServer>> m_danglings;
   AsyncFunc<HttpServer> m_watchDog;
   std::vector<std::shared_ptr<ServiceThread>> m_serviceThreads;
 

@@ -39,6 +39,45 @@ constexpr uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
 
 namespace {
 
+class StoreImmPatcher {
+ public:
+  StoreImmPatcher(CodeBlock& cb, uint64_t initial, RegNumber reg,
+                  int32_t offset, RegNumber base);
+  void patch(uint64_t actual);
+ private:
+  CodeAddress m_addr;
+  bool m_is32;
+};
+
+StoreImmPatcher::StoreImmPatcher(CodeBlock& cb, uint64_t initial,
+                                 RegNumber reg,
+                                 int32_t offset, RegNumber base) {
+  X64Assembler as { cb };
+  m_is32 = deltaFits(initial, sz::dword);
+  if (m_is32) {
+    as.storeq(initial, r64(base)[offset]);
+    m_addr = cb.frontier() - 4;
+  } else {
+    as.movq(initial, r64(reg));
+    m_addr = cb.frontier() - 8;
+    as.storeq(r64(reg), r64(base)[offset]);
+  }
+  assert((m_is32 ? (uint64_t)*(int32_t*)m_addr : *(uint64_t*)m_addr)
+         == initial);
+}
+
+void StoreImmPatcher::patch(uint64_t actual) {
+  if (m_is32) {
+    if (deltaFits(actual, sz::dword)) {
+      *(uint32_t*)m_addr = actual;
+    } else {
+      not_reached();
+    }
+  } else {
+    *(uint64_t*)m_addr = actual;
+  }
+}
+
 void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
                ConditionCode cc, SrcKey dest, ServiceRequest req) {
   prepareForSmash(cb, cc == JIT::CC_None ? kJmpLen : kJmpccLen);
@@ -67,10 +106,6 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
 /*
  * NativeImpl is a special operation in the sense that it must be the
  * only opcode in a function body, and also functions as the return.
- *
- * if emitSavedRIPReturn is false, it returns the amount by which
- * rVmSp should be adjusted, otherwise, it emits code to perform
- * the adjustment (this allows us to combine updates to rVmSp)
  */
 int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
@@ -87,7 +122,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
    * will handle it for us.
    */
   Asm a { mainCode };
-  a.   mov_reg64_reg64(rVmFp, argNumToRegName[0]);
+  a.   movq  (rVmFp, argNumToRegName[0]);
   if (tx64->fixupMap().eagerRecord(func)) {
     emitEagerSyncPoint(a, func->getEntry());
   }
@@ -123,7 +158,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
    * reg-to-reg move.
    */
   int nLocalCells = func->numSlotsInFrame();
-  a.   load_reg64_disp_reg64(rVmFp, AROFF(m_savedRbp), rVmFp);
+  a.   loadq  (rVmFp[AROFF(m_savedRbp)], rVmFp);
 
   emitRB(a, Trace::RBTypeFuncExit, func->fullName()->data());
   return sizeof(ActRec) + cellsToBytes(nLocalCells-1);
@@ -145,7 +180,7 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& stubsCode,
   a.    call(stubsCode.frontier());
 
   Asm astubs { stubsCode };
-  astubs.    mov_reg64_reg64(rStashedAR, serviceReqArgRegs[1]);
+  astubs.    movq   (rStashedAR, serviceReqArgRegs[1]);
   emitPopRetIntoActRec(astubs);
   emitServiceReq(stubsCode, JIT::REQ_BIND_CALL, req);
 

@@ -195,8 +195,7 @@ void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype) {
 void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
   { // if RC
     IfRefCounted irc(as, base, disp);
-    as.   load_reg64_disp_reg64(base, disp + TVOFF(m_data),
-                                tmpReg);
+    as.   loadq  (base[disp + TVOFF(m_data)], tmpReg);
     { // if !static
       IfCountNotStatic ins(as, tmpReg);
       as. incl(tmpReg[FAST_REFCOUNT_OFFSET]);
@@ -231,11 +230,11 @@ void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg) {
     } else {                             // GP => XMM
       // This generates a movq x86 instruction, which zero extends
       // the 64-bit value in srcReg into a 128-bit XMM register
-      as. mov_reg64_xmm(srcReg, dstReg);
+      as. movq_rx(srcReg, dstReg);
     }
   } else {
     if (dstReg.isGP()) {                 // XMM => GP
-      as. mov_xmm_reg64(srcReg, dstReg);
+      as. movq_xr(srcReg, dstReg);
     } else {                             // XMM => XMM
       // This copies all 128 bits in XMM,
       // thus avoiding partial register stalls
@@ -312,14 +311,14 @@ void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
   // TODO(2967396) implement properly, move function
   if (arch() == Arch::ARM) return;
 
-  Asm as { cb };
+  Asm a { cb };
   // call to a trace function
-  as.mov_imm64_reg((int64_t)as.frontier(), reg::rcx);
-  as.mov_reg64_reg64(rVmFp, reg::rdi);
-  as.mov_reg64_reg64(rVmSp, reg::rsi);
-  as.mov_imm64_reg(pcOff, reg::rdx);
+  a.    movq   (a.frontier(), rcx);
+  a.    movq   (rVmFp, rdi);
+  a.    movq   (rVmSp, rsi);
+  a.    movq   (pcOff, rdx);
   // do the call; may use a trampoline
-  emitCall(as, (TCA)traceCallback);
+  emitCall(a, reinterpret_cast<TCA>(traceCallback));
 }
 
 void emitTestSurpriseFlags(Asm& a) {
@@ -368,8 +367,8 @@ void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   } else if (d0.isSIMD() && s0.isGP() && s1.isGP()) {
     // move 2 gpr to 1 xmm
     assert(d0 != rCgXMM0); // xmm0 is reserved for scratch
-    as.   mov_reg64_xmm(s0, d0);
-    as.   mov_reg64_xmm(s1, rCgXMM0);
+    as.   movq_rx(s0, d0);
+    as.   movq_rx(s1, rCgXMM0);
     as.   unpcklpd(rCgXMM0, d0); // s1 -> d0[1]
   } else {
     if (d0 != InvalidReg) emitMovRegReg(as, s0, d0); // d0 != s1

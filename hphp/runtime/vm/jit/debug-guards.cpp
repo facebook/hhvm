@@ -41,13 +41,13 @@ void addDbgGuardImpl(SrcKey sk) {
 
   // Emit the checks for debugger attach
   emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, reg::rAsm);
-  a.   load_reg64_disp_reg32(reg::rAsm, dbgOff, reg::rAsm);
-  a.   testb((int8_t)0xff, rbyte(reg::rAsm));
+  a.   loadb  (reg::rAsm[dbgOff], rbyte(reg::rAsm));
+  a.   testb  ((int8_t)0xff, rbyte(reg::rAsm));
 
   // Branch to a special REQ_INTERPRET if attached
-  TCA fallback =
+  auto const fallback =
     emitServiceReq(tx64->code.stubs(), REQ_INTERPRET, sk.offset(), 0);
-  a. jnz(fallback);
+  a.   jnz    (fallback);
 }
 
 }

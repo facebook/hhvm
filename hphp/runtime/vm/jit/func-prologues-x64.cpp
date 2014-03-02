@@ -328,14 +328,13 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   Asm a { mainCode };
   TCA start = mainCode.frontier();
   if (dvs.size() == 1) {
-    a.  cmp_imm32_disp_reg32(dvs[0].first,
-                             AROFF(m_numArgsAndGenCtorFlags), rVmFp);
+    a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndGenCtorFlags)]);
     emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[0].second));
     emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
   } else {
-    a.  load_reg64_disp_reg32(rVmFp, AROFF(m_numArgsAndGenCtorFlags), reg::rax);
+    a.    loadl  (rVmFp[AROFF(m_numArgsAndGenCtorFlags)], reg::eax);
     for (unsigned i = 0; i < dvs.size(); i++) {
-      a.  cmp_imm32_reg32(dvs[i].first, reg::rax);
+      a.  cmpl   (dvs[i].first, reg::eax);
       emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
     }
     emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));

@@ -2604,7 +2604,7 @@ emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
 
     a.    pushf ();
     //    addq $n, [%fs:disp]
-    a.    fs().add_imm64_index_scale_disp_reg64(n, noreg, 1, disp, noreg);
+    a.    fs().addq(n, baseless(disp));
     a.    popf  ();
   } else if (arch() == Arch::ARM) {
     using ARM::rAsm;

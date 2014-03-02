@@ -184,9 +184,6 @@ protected:
   }
 };
 
-typedef std::map<std::string, ResourceData*> ResourceMap;
-typedef std::map<std::string, ResourceMap> ResourceMapMap;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE bool decRefRes(ResourceData* res) {

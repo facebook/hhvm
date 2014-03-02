@@ -43,6 +43,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/persistent-resource-store.h"
 
 namespace HPHP {
 
@@ -150,7 +151,7 @@ MySQL *MySQL::GetCachedImpl(const char *name, const String& host, int port,
                             const String& socket, const String& username,
                             const String& password, int client_flags) {
   String key = GetHash(host, port, socket, username, password, client_flags);
-  return dynamic_cast<MySQL*>(g_persistentObjects->get(name, key.data()));
+  return dynamic_cast<MySQL*>(g_persistentResources->get(name, key.data()));
 }
 
 void MySQL::SetCachedImpl(const char *name, const String& host, int port,
@@ -158,7 +159,7 @@ void MySQL::SetCachedImpl(const char *name, const String& host, int port,
                           const String& password, int client_flags,
                           MySQL *conn) {
   String key = GetHash(host, port, socket, username, password, client_flags);
-  g_persistentObjects->set(name, key.data(), conn);
+  g_persistentResources->set(name, key.data(), conn);
 }
 
 MySQL *MySQL::GetDefaultConn() {

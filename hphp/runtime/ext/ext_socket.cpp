@@ -39,6 +39,7 @@
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/persistent-resource-store.h"
 #include "hphp/util/logger.h"
 
 #define PHP_NORMAL_READ 0x0001
@@ -1048,7 +1049,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
     key = hosturl.getHostURL() + ":" +
           boost::lexical_cast<std::string>(hosturl.getPort());
     Socket *sock =
-      dynamic_cast<Socket*>(g_persistentObjects->get("socket", key.c_str()));
+      dynamic_cast<Socket*>(g_persistentResources->get("socket", key.c_str()));
     if (sock) {
       if (sock->getError() == 0 && sock->checkLiveness()) {
         return Resource(sock);
@@ -1056,7 +1057,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
 
       // socket had an error earlier, we need to remove it from persistent
       // storage, and create a new one
-      g_persistentObjects->remove("socket", key.c_str());
+      g_persistentResources->remove("socket", key.c_str());
     }
   }
 
@@ -1145,7 +1146,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
 
   if (persistent) {
     assert(!key.empty());
-    g_persistentObjects->set("socket", key.c_str(), sock);
+    g_persistentResources->set("socket", key.c_str(), sock);
   }
 
   return ret;

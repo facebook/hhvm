@@ -36,6 +36,7 @@
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/persistent-resource-store.h"
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \
   if (strcmp(dbh->error_code, PDO_ERR_NONE)) {          \
@@ -995,7 +996,7 @@ void c_PDO::t___construct(const String& dsn, const String& username /* = null_st
       shashkey = hashkey.detach();
       /* let's see if we have one cached.... */
       m_dbh = dynamic_cast<PDOConnection*>
-        (g_persistentObjects->get(PDOConnection::PersistentKey,
+        (g_persistentResources->get(PDOConnection::PersistentKey,
                                   shashkey.data()));
 
       if (m_dbh.get()) {
@@ -1046,7 +1047,7 @@ void c_PDO::t___construct(const String& dsn, const String& username /* = null_st
   } else if (m_dbh.get()) {
     if (is_persistent) {
       assert(!shashkey.empty());
-      g_persistentObjects->set(PDOConnection::PersistentKey, shashkey.data(),
+      g_persistentResources->set(PDOConnection::PersistentKey, shashkey.data(),
                                m_dbh.get());
       s_pdo_request_data->m_persistent_connections.insert(m_dbh.get());
     }

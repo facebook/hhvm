@@ -720,31 +720,9 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PersistentObjectStore {
-public:
-  ~PersistentObjectStore();
-
-  int size() const;
-
-  void set(const char *type, const char *name, ResourceData *obj);
-  ResourceData *get(const char *type, const char *name);
-  void remove(const char *type, const char *name);
-
-  const ResourceMap &getMap(const char *type);
-
-private:
-  ResourceMapMap m_objects;
-
-  void removeObject(ResourceData *data);
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
-extern DECLARE_THREAD_LOCAL_NO_CHECK(PersistentObjectStore,
-                                     g_persistentObjects);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXECUTION_CONTEXT_H_
+#endif

@@ -13,6 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include "hphp/runtime/base/preg.h"
+
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/util/lock.h"
@@ -63,6 +66,8 @@ enum {
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // regex cache and helpers
+
+IMPLEMENT_THREAD_LOCAL(PCREglobals, s_pcre_globals);
 
 class pcre_cache_entry {
   pcre_cache_entry(const pcre_cache_entry&);
@@ -336,8 +341,8 @@ static void set_extra_limits(pcre_extra*& extra) {
       PCRE_EXTRA_MATCH_LIMIT_RECURSION;
     extra = &extra_data;
   }
-  extra->match_limit = g_context->m_preg_backtrace_limit;
-  extra->match_limit_recursion = g_context->m_preg_recursion_limit;
+  extra->match_limit = s_pcre_globals->m_preg_backtrace_limit;
+  extra->match_limit_recursion = s_pcre_globals->m_preg_recursion_limit;
 }
 
 static int *create_offset_array(const pcre_cache_entry *pce,
@@ -444,7 +449,8 @@ static void pcre_log_error(const char *func, int line, int pcre_code,
     "limits=(%" PRId64 ", %" PRId64 "), extra=(%d, %d, %d, %d)",
     func, line, pcre_code, errString,
     escapedPattern, escapedSubject, escapedRepl,
-    g_context->m_preg_backtrace_limit, g_context->m_preg_recursion_limit,
+    s_pcre_globals->m_preg_backtrace_limit,
+    s_pcre_globals->m_preg_recursion_limit,
     arg1, arg2, arg3, arg4);
   free((void *)escapedPattern);
   free((void *)escapedSubject);

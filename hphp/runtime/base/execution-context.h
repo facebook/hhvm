@@ -376,10 +376,6 @@ public:
   typedef std::set<ObjectData*> LiveObjSet;
   LiveObjSet m_liveBCObjs;
 
-  // pcre ini_settings
-  int64_t m_preg_backtrace_limit;
-  int64_t m_preg_recursion_limit;
-
 public:
   void requestInit();
   void requestExit();

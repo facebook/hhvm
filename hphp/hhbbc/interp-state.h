@@ -72,7 +72,7 @@ struct State {
 };
 
 /*
- * States are EqualityComparible (provided they are in-states for the
+ * States are EqualityComparable (provided they are in-states for the
  * same block).
  */
 bool operator==(const ActRec&, const ActRec&);

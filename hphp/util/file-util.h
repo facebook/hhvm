@@ -19,16 +19,9 @@
 #ifndef incl_HPHP_FILE_UTIL_H_
 #define incl_HPHP_FILE_UTIL_H_
 
-#include <cassert>
-#include <atomic>
 #include <vector>
 #include <string>
-#include <map>
 #include <set>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <arpa/inet.h> // For htonl().
 
 namespace HPHP { namespace FileUtil {
 
@@ -75,7 +68,7 @@ int ssystem(const char *command);
 /**
  * Find the relative path from a directory with trailing slash to the file
  */
-std::string relativePath(const std::string fromDir, const std::string toFile);
+std::string relativePath(const std::string& fromDir, const std::string& toFile);
 
 /**
  * Canonicalize path to remove "..", "." and "\/", etc..

@@ -27,6 +27,7 @@
 #include <libgen.h>
 
 #include "folly/String.h"
+#include "folly/ScopeGuard.h"
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -383,8 +384,8 @@ std::string FileUtil::safe_dirname(const std::string& path) {
   return safe_dirname(path.c_str(), path.size());
 }
 
-std::string FileUtil::relativePath(const std::string fromDir,
-  const std::string toFile) {
+std::string FileUtil::relativePath(const std::string& fromDir,
+                                   const std::string& toFile) {
 
   size_t maxlen = (fromDir.size() + toFile.size()) * 3;
 
@@ -401,6 +402,7 @@ std::string FileUtil::relativePath(const std::string fromDir,
   }
 
   char* path = (char*) malloc(maxlen);
+  SCOPE_EXIT { free(path); };
   int path_len = 0;
 
   const char* from_dir = fromDir.c_str();
@@ -446,11 +448,7 @@ std::string FileUtil::relativePath(const std::string fromDir,
   }
 
   strncpy(path_end, to_start, maxlen - 1);
-
-  string p(path);
-  free((void*) path);
-
-  return p;
+  return std::string(path);
 }
 
 std::string FileUtil::canonicalize(const std::string &path) {

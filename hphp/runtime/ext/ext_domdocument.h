@@ -564,6 +564,27 @@ class c_DOMProcessingInstruction : public c_DOMNode {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// class DOMNameSpaceNode
+
+FORWARD_DECLARE_CLASS(DOMNameSpaceNode);
+class c_DOMNameSpaceNode : public c_DOMNode {
+ public:
+  DECLARE_CLASS_NO_SWEEP(DOMComment)
+
+  // need to implement
+  c_DOMNameSpaceNode(Class* cls = c_DOMNameSpaceNode::classof())
+    : c_DOMNode(cls)
+  {}
+  ~c_DOMNameSpaceNode() {}
+  public: void t___construct();
+
+
+
+};
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // class DOMNodeIterator
 
 FORWARD_DECLARE_CLASS(DOMNodeIterator);

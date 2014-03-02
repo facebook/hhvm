@@ -3704,6 +3704,28 @@
             ]
         },
         {
+            "name": "DOMNameSpaceNode",
+            "parent": "DOMNode",
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
             "name": "DOMNodeIterator",
             "ifaces": [
                 "Iterator"

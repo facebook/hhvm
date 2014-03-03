@@ -1332,7 +1332,7 @@ void RuntimeOption::Load(Hdf &config,
                    IniSetting::SetAndGet<std::string>(
                      [](const std::string& value) {
                        return ini_on_update(
-                         value, &RuntimeOption::UploadMaxFileSize);
+                         value, RuntimeOption::UploadMaxFileSize);
                      },
                      []() {
                        int uploadMaxFilesize =

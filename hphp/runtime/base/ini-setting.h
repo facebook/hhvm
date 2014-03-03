@@ -25,26 +25,26 @@ namespace HPHP {
 
 class Extension;
 
-bool ini_on_update(const std::string& value, bool *p);
-bool ini_on_update(const std::string& value, double *p);
-bool ini_on_update(const std::string& value, int16_t *p);
-bool ini_on_update(const std::string& value, int32_t *p);
-bool ini_on_update(const std::string& value, int64_t *p);
-bool ini_on_update(const std::string& value, uint16_t *p);
-bool ini_on_update(const std::string& value, uint32_t *p);
-bool ini_on_update(const std::string& value, uint64_t *p);
-bool ini_on_update(const std::string& value, std::string *p);
-bool ini_on_update(const std::string& value, String *p);
-std::string ini_get(bool *p);
-std::string ini_get(double *p);
-std::string ini_get(int16_t *p);
-std::string ini_get(int32_t *p);
-std::string ini_get(int64_t *p);
-std::string ini_get(uint16_t *p);
-std::string ini_get(uint32_t *p);
-std::string ini_get(uint64_t *p);
-std::string ini_get(std::string *p);
-std::string ini_get(String *p);
+bool ini_on_update(const std::string& value, bool& p);
+bool ini_on_update(const std::string& value, double& p);
+bool ini_on_update(const std::string& value, int16_t& p);
+bool ini_on_update(const std::string& value, int32_t& p);
+bool ini_on_update(const std::string& value, int64_t& p);
+bool ini_on_update(const std::string& value, uint16_t& p);
+bool ini_on_update(const std::string& value, uint32_t& p);
+bool ini_on_update(const std::string& value, uint64_t& p);
+bool ini_on_update(const std::string& value, std::string& p);
+bool ini_on_update(const std::string& value, String& p);
+std::string ini_get(bool& p);
+std::string ini_get(double& p);
+std::string ini_get(int16_t& p);
+std::string ini_get(int32_t& p);
+std::string ini_get(int64_t& p);
+std::string ini_get(uint16_t& p);
+std::string ini_get(uint32_t& p);
+std::string ini_get(uint64_t& p);
+std::string ini_get(std::string& p);
+std::string ini_get(String& p);
 
 class IniSetting {
 public:
@@ -160,9 +160,9 @@ public:
   static void Bind(const Extension* extension, const Mode mode,
                    const char *name, const char *defaultValue,
                    SetAndGet<T> callbacks, T* p = nullptr) {
-    auto setter = [callbacks, p](std::string value) {
+    auto setter = [callbacks, p](const std::string& value) {
       T v;
-      auto ret = ini_on_update(value, &v);
+      auto ret = ini_on_update(value, v);
       if (!ret) {
         return false;
       }
@@ -184,7 +184,7 @@ public:
       } else if (p) {
         v = *p;
       }
-      return ini_get(&v);
+      return ini_get(v);
     };
     Bind(extension, mode, name, setter, getter);
     if (defaultValue) {

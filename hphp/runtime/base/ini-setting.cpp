@@ -58,141 +58,121 @@ int64_t convert_bytes_to_long(const std::string& value) {
   return newInt;
 }
 
-bool ini_on_update(const std::string& value, bool *p) {
-  if (p) {
-    if ((value.size() == 0) ||
-        (value.size() == 1 && value == "0") ||
-        (value.size() == 2 && strcasecmp("no", value.data()) == 0) ||
-        (value.size() == 3 && strcasecmp("off", value.data()) == 0) ||
-        (value.size() == 5 && strcasecmp("false", value.data()) == 0)) {
-      *p = false;
-    } else {
-      *p = true;
-    }
+bool ini_on_update(const std::string& value, bool& p) {
+  if ((value.size() == 0) ||
+      (value.size() == 1 && value == "0") ||
+      (value.size() == 2 && strcasecmp("no", value.data()) == 0) ||
+      (value.size() == 3 && strcasecmp("off", value.data()) == 0) ||
+      (value.size() == 5 && strcasecmp("false", value.data()) == 0)) {
+    p = false;
+  } else {
+    p = true;
   }
   return true;
 }
 
-bool ini_on_update(const std::string& value, double *p) {
-  if (p) {
-    *p = zend_strtod(value.c_str(), nullptr);
-  }
+bool ini_on_update(const std::string& value, double& p) {
+  p = zend_strtod(value.c_str(), nullptr);
   return true;
 }
 
-bool ini_on_update(const std::string& value, int16_t *p) {
-  if (p) {
-    auto n = convert_bytes_to_long(value);
-    auto maxValue = 0x7FFFL;
-    if (n > maxValue || n < (- maxValue - 1)) {
-      return false;
-    }
-    *p = n;
+bool ini_on_update(const std::string& value, int16_t& p) {
+  auto n = convert_bytes_to_long(value);
+  auto maxValue = 0x7FFFL;
+  if (n > maxValue || n < (- maxValue - 1)) {
+    return false;
   }
+  p = n;
   return true;
 }
 
-bool ini_on_update(const std::string& value, int32_t *p) {
-  if (p) {
-    auto n = convert_bytes_to_long(value);
-    auto maxValue = 0x7FFFFFFFL;
-    if (n > maxValue || n < (- maxValue - 1)) {
-      return false;
-    }
-    *p = n;
+bool ini_on_update(const std::string& value, int32_t& p) {
+  auto n = convert_bytes_to_long(value);
+  auto maxValue = 0x7FFFFFFFL;
+  if (n > maxValue || n < (- maxValue - 1)) {
+    return false;
   }
+  p = n;
   return true;
 }
 
-bool ini_on_update(const std::string& value, int64_t *p) {
-  if (p) {
-    *p = convert_bytes_to_long(value);
-  }
+bool ini_on_update(const std::string& value, int64_t& p) {
+  p = convert_bytes_to_long(value);
   return true;
 }
 
-bool ini_on_update(const std::string& value, uint16_t *p) {
-  if (p) {
-    auto n = convert_bytes_to_long(value);
-    auto mask = ~0xFFFFUL;
-    if (((uint64_t)n & mask)) {
-      return false;
-    }
-    *p = n;
+bool ini_on_update(const std::string& value, uint16_t& p) {
+  auto n = convert_bytes_to_long(value);
+  auto mask = ~0xFFFFUL;
+  if (((uint64_t)n & mask)) {
+    return false;
   }
+  p = n;
   return true;
 }
 
-bool ini_on_update(const std::string& value, uint32_t *p) {
-  if (p) {
-    auto n = convert_bytes_to_long(value);
-    auto mask = ~0x7FFFFFFFUL;
-    if (((uint64_t)n & mask)) {
-      return false;
-    }
-    *p = n;
+bool ini_on_update(const std::string& value, uint32_t& p) {
+  auto n = convert_bytes_to_long(value);
+  auto mask = ~0x7FFFFFFFUL;
+  if (((uint64_t)n & mask)) {
+    return false;
   }
+  p = n;
   return true;
 }
 
-bool ini_on_update(const std::string& value, uint64_t *p) {
-  if (p) {
-    *p = convert_bytes_to_long(value);
-  }
+bool ini_on_update(const std::string& value, uint64_t& p) {
+  p = convert_bytes_to_long(value);
   return true;
 }
 
-bool ini_on_update(const std::string& value, std::string *p) {
-  if (p) {
-    *p = value;
-  }
+bool ini_on_update(const std::string& value, std::string& p) {
+  p = value;
   return true;
 }
 
-bool ini_on_update(const std::string& value, String *p) {
-  if (p) {
-    *p = String(value);
-  }
+bool ini_on_update(const std::string& value, String& p) {
+  p = String(value);
   return true;
 }
 
-std::string ini_get(bool *p) {
-  return *p ? "1" : "";
+std::string ini_get(bool& p) {
+  return p ? "1" : "";
 }
 
-std::string ini_get(double *p) {
-  return std::to_string(*p);
+std::string ini_get(double& p) {
+  return std::to_string(p);
 }
 
-std::string ini_get(int16_t *p) {
-  return std::to_string(*p);
+std::string ini_get(int16_t& p) {
+  return std::to_string(p);
 }
 
-std::string ini_get(int32_t *p) {
-  return std::to_string(*p);
+std::string ini_get(int32_t& p) {
+  return std::to_string(p);
 }
 
-std::string ini_get(int64_t *p) {
-  return std::to_string(*p);
+std::string ini_get(int64_t& p) {
+  return std::to_string(p);
 }
 
-std::string ini_get(uint16_t *p) {
-  return std::to_string(*p);
+std::string ini_get(uint16_t& p) {
+  return std::to_string(p);
 }
 
-std::string ini_get(uint32_t *p) {
-  return std::to_string(*p);
+std::string ini_get(uint32_t& p) {
+  return std::to_string(p);
 }
 
-std::string ini_get(uint64_t *p) {
-  return std::to_string(*p);
+std::string ini_get(uint64_t& p) {
+  return std::to_string(p);
 }
 
-std::string ini_get(std::string *p) {
-  return *p;
+std::string ini_get(std::string& p) {
+  return p;
 }
 
-std::string ini_get(String *p) {
+std::string ini_get(String& p) {
   return p->toCppString();
 }
 

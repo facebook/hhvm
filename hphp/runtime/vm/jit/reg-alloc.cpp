@@ -275,23 +275,35 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     if (i == 0) return true; // cls -> ArgGroup.ssa().
     break;
   case Same: case NSame:
-  case Eq:   case EqX:  case EqInt:
-  case Neq:  case NeqX: case NeqInt:
-  case Lt:   case LtX:  case LtInt:
-  case Gt:   case GtX:  case GtInt:
-  case Lte:  case LteX: case LteInt:
-  case Gte:  case GteX: case GteInt:
+  case Eq:   case EqX:
+  case Neq:  case NeqX:
+  case Lt:   case LtX:
+  case Gt:   case GtX:
+  case Lte:  case LteX:
+  case Gte:  case GteX:
+    if (i == 1) {
+      // cases in cgCmpHelper()
+      auto type0 = inst.src(0)->type();
+      if (type0 <= Type::Str && type <= Type::Str) return true; // call
+      if (type0 <= Type::Bool && type <= Type::Bool) return true;
+      if (type0 <= Type::Obj && type <= Type::Int) return true;
+      if (type0 <= Type::Arr && type <= Type::Arr) return true;
+    }
+    break;
+  case EqInt:
+  case NeqInt:
+  case LtInt:
+  case GtInt:
+  case LteInt:
+  case GteInt:
   case JmpEqInt:  case SideExitJmpEqInt:  case ReqBindJmpEqInt:
   case JmpNeqInt: case SideExitJmpNeqInt: case ReqBindJmpNeqInt:
   case JmpGtInt:  case SideExitJmpGtInt:  case ReqBindJmpGtInt:
   case JmpGteInt: case SideExitJmpGteInt: case ReqBindJmpGteInt:
   case JmpLtInt:  case SideExitJmpLtInt:  case ReqBindJmpLtInt:
   case JmpLteInt: case SideExitJmpLteInt: case ReqBindJmpLteInt:
-    if (i == 1) {
-      if (type <= Type::Str) return true; // rhs -> ArgGroup.ssa()
-      if (type <= Type::Bool) return true;
-      if (type <= Type::Int) return okCmp(cint);
-    }
+    // cases in emitCompareInt()
+    if (i == 1) return okCmp(cint);
     break;
   case SubInt:
     if (i == 0) return cint == 0 && !inst.src(1)->isConst(); // 0-X

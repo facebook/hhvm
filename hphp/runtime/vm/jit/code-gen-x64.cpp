@@ -424,15 +424,6 @@ void CodeGenerator::emitLoadImm(Asm& as, int64_t val, PhysReg dstReg) {
   }
 }
 
-static int64_t convIntToDouble(int64_t i) {
-  union {
-    double  d;
-    int64_t i;
-  } u;
-  u.d = double(i);
-  return u.i;
-}
-
 /*
  * Returns a XMM register containing the value of SSATmp tmp,
  * which can be either a bool, an int, or a double.
@@ -442,47 +433,31 @@ static int64_t convIntToDouble(int64_t i) {
  * they're emitted in 'as'.
  * TODO: #3634984, #3727837 This function must die.
  */
-PhysReg CodeGenerator::prepXMMReg(const SSATmp* tmp,
-                                  Asm& as,
-                                  const PhysLoc& loc,
-                                  RegXMM rCgXMM) {
-  assert(tmp->isA(Type::Bool) || tmp->isA(Type::Int) || tmp->isA(Type::Dbl));
+PhysReg CodeGenerator::prepXMMReg(Asm& as, const SSATmp* src,
+                                  const PhysLoc& srcLoc, RegXMM rtmp) {
+  assert(src->isA(Type::Bool) || src->isA(Type::Int) || src->isA(Type::Dbl));
+  always_assert(srcLoc.reg() != InvalidReg);
+  auto rsrc = srcLoc.reg();
 
-  PhysReg reg = loc.reg();
-
-  // Case 1: tmp is already in a XMM register
-  if (reg.isSIMD()) return reg;
-
-  // Case 2: tmp is in a GP register
-  if (reg != InvalidReg) {
-    // Case 2.a: Dbl stored in GP reg
-    if (tmp->isA(Type::Dbl)) {
-      emitMovRegReg(as, reg, rCgXMM);
-      return rCgXMM;
-    }
-    // Case 2.b: Bool or Int stored in GP reg
-    assert(tmp->isA(Type::Bool) || tmp->isA(Type::Int));
-    zeroExtendIfBool(as, tmp, loc.reg());
-    as.pxor(rCgXMM, rCgXMM);
-    as.cvtsi2sd(reg, rCgXMM);
-    return rCgXMM;
+  // Case 1: src is already in a XMM register
+  if (rsrc.isSIMD()) {
+    return rsrc;
   }
 
-  // Case 3: tmp is a constant
-  assert(tmp->isConst());
-
-  int64_t val = tmp->rawVal();
-  if (!tmp->isA(Type::Dbl)) {
-    assert(tmp->isA(Type::Bool | Type::Int));
-    val = convIntToDouble(val);
+  // Case 2: src Dbl stored in GP reg
+  if (src->isA(Type::Dbl)) {
+    emitMovRegReg(as, rsrc, rtmp);
+    return rtmp;
   }
-  emitLoadImm(as, val, m_rScratch);
-  emitMovRegReg(as, m_rScratch, rCgXMM);
-  return rCgXMM;
+
+  // Case 2.b: Bool or Int stored in GP reg
+  zeroExtendIfBool(as, src, rsrc);
+  as.pxor(rtmp, rtmp);
+  as.cvtsi2sd(rsrc, rtmp);
+  return rtmp;
 }
 
-void CodeGenerator::doubleCmp(Asm& a,
-                              RegXMM xmmReg0, RegXMM xmmReg1) {
+void CodeGenerator::doubleCmp(Asm& a, RegXMM xmmReg0, RegXMM xmmReg1) {
   a.    ucomisd(xmmReg0, xmmReg1);
   Label notPF;
   a.    jnp8(notPF);
@@ -510,8 +485,8 @@ void CodeGenerator::emitCompare(IRInstruction* inst) {
     CG_PUNT(emitCompare);
   }
   if (src1Type <= Type::Dbl || src2Type <= Type::Dbl) {
-    PhysReg srcReg1 = prepXMMReg(src1, m_as, loc1, rCgXMM0);
-    PhysReg srcReg2 = prepXMMReg(src2, m_as, loc2, rCgXMM1);
+    PhysReg srcReg1 = prepXMMReg(m_as, src1, loc1, rCgXMM0);
+    PhysReg srcReg2 = prepXMMReg(m_as, src2, loc2, rCgXMM1);
     assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
     doubleCmp(m_as, srcReg1, srcReg2);
   } else {
@@ -1219,8 +1194,8 @@ void CodeGenerator::cgBinaryDblOp(IRInstruction* inst,
                     dstReg : PhysReg(rCgXMM0);
   assert(resReg.isSIMD());
 
-  PhysReg srcReg1 = prepXMMReg(src1, m_as, loc1, resReg);
-  PhysReg srcReg2 = prepXMMReg(src2, m_as, loc2, rCgXMM1);
+  PhysReg srcReg1 = prepXMMReg(m_as, src1, loc1, resReg);
+  PhysReg srcReg2 = prepXMMReg(m_as, src2, loc2, rCgXMM1);
   assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
 
   emitMovRegReg(m_as, srcReg1, resReg);
@@ -1251,7 +1226,7 @@ void CodeGenerator::cgRoundCommon(IRInstruction* inst, RoundDirection dir) {
   auto src = inst->src(0);
 
   auto dstReg = dstLoc(0).reg();
-  auto inReg  = prepXMMReg(src, m_as, srcLoc(0), rCgXMM0);
+  auto inReg  = prepXMMReg(m_as, src, srcLoc(0), rCgXMM0);
   auto outReg = dstReg.isSIMD() ? dstReg : PhysReg(rCgXMM1);
 
   m_as.   roundsd   (dir, inReg, outReg);
@@ -1350,7 +1325,7 @@ void CodeGenerator::cgDivDbl(IRInstruction* inst) {
   assert(resReg.isSIMD());
 
   // only load divisor
-  PhysReg srcReg2 = prepXMMReg(src2, m_as, loc2, rCgXMM1);
+  PhysReg srcReg2 = prepXMMReg(m_as, src2, loc2, rCgXMM1);
   assert(srcReg2 != rCgXMM0);
 
   // divide by zero check
@@ -1361,7 +1336,7 @@ void CodeGenerator::cgDivDbl(IRInstruction* inst) {
   });
 
   // now load dividend
-  PhysReg srcReg1 = prepXMMReg(src1, m_as, loc1, resReg);
+  PhysReg srcReg1 = prepXMMReg(m_as, src1, loc1, resReg);
   assert(srcReg1 != rCgXMM1);
 
   emitMovRegReg(m_as, srcReg1, resReg);
@@ -1655,8 +1630,8 @@ void CodeGenerator::cgCmpHelper(
     if (type1 <= Type::Dbl || type2 <= Type::Dbl) {
       if ((type1 <= Type::Dbl || type1 <= Type::Int) &&
           (type2 <= Type::Dbl || type2 <= Type::Int)) {
-        PhysReg srcReg1 = prepXMMReg(src1, m_as, loc1, rCgXMM0);
-        PhysReg srcReg2 = prepXMMReg(src2, m_as, loc2, rCgXMM1);
+        PhysReg srcReg1 = prepXMMReg(m_as, src1, loc1, rCgXMM0);
+        PhysReg srcReg2 = prepXMMReg(m_as, src2, loc2, rCgXMM1);
         assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
         doubleCmp(m_as, srcReg1, srcReg2);
         setFromFlags();
@@ -2162,7 +2137,7 @@ asm_label(a, out);
 
 void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   auto src = inst->src(0);
-  auto srcReg = prepXMMReg(src, m_as, srcLoc(0), rCgXMM0);
+  auto srcReg = prepXMMReg(m_as, src, srcLoc(0), rCgXMM0);
   auto dstReg = dstLoc(0).reg();
 
   constexpr uint64_t indefiniteInteger = 0x8000000000000000LL;

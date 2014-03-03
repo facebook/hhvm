@@ -304,7 +304,7 @@ bool Class::couldBe(const Class& o) const {
   auto c1 = val.other();
   auto c2 = o.val.other();
   // if one or the other is an interface return true for now.
-  // TODO: TASK #3621433
+  // TODO(#3621433): better interface stuff
   if (c1->cls->attrs & AttrInterface || c2->cls->attrs & AttrInterface) {
     return true;
   }

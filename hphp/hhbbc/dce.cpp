@@ -36,6 +36,7 @@
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/cfg.h"
 
 namespace HPHP { namespace HHBBC {
 

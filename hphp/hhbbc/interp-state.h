@@ -18,7 +18,6 @@
 
 #include <vector>
 #include <string>
-#include <bitset>
 
 #include <boost/variant.hpp>
 
@@ -137,80 +136,6 @@ bool widen_into(State&, const State&);
 std::string show(const ActRec& a);
 std::string property_state_string(const PropertiesInfo&);
 std::string state_string(const php::Func&, const State&);
-
-//////////////////////////////////////////////////////////////////////
-
-constexpr int kMaxTrackedLocals = 128;
-
-/*
- * StepFlags are information about the effects of a single opcode.
- * Each single-instruction step of the interpreter sends various
- * effects information back to the caller in this structure.
- */
-struct StepFlags {
-  /*
-   * Potentially Exception-throwing Instruction.
-   *
-   * Instructions are assumed to be PEIs unless the abstract
-   * interpreter says they aren't.  A PEI must propagate the state
-   * from before the instruction across all factored exit edges.
-   *
-   * Some instructions that can throw with mid-opcode states need to
-   * handle those cases specially.
-   */
-  bool wasPEI = true;
-
-  /*
-   * If a conditional branch at the end of the BB was known to be
-   * taken (e.g. because the condition was a constant), this flag
-   * indicates the state doesn't need to be propagated to the
-   * fallthrough block.
-   */
-  bool tookBranch = false;
-
-  /*
-   * If true, we made a call to a function that never returns.
-   */
-  bool calledNoReturn = false;
-
-  /*
-   * If an instruction sets this flag, it means that if it pushed a
-   * type with a constant value, it had no side effects other than
-   * computing the value which was pushed.  This means the instruction
-   * can be replaced with pops of its inputs followed by a push of the
-   * constant.
-   */
-  bool canConstProp = false;
-
-  /*
-   * If an instruction may read or write to locals, these flags
-   * indicate which ones.  We don't track this information for local
-   * ids past kMaxTrackedLocals, which are assumed to always be in
-   * this set.
-   *
-   * This is currently used to try to leave out unnecessary type
-   * assertions on locals (for options.FilterAssertions), and as a
-   * conservative list of variables that should be added to the gen
-   * set for global dce.
-   *
-   * The latter use means these flags must be conservative in the
-   * direction of which locals are read.  That is: an instruction may
-   * not read a local that isn't mentioned in this set.
-   */
-  std::bitset<kMaxTrackedLocals> mayReadLocalSet;
-
-  /*
-   * If the instruction on this step could've been replaced with
-   * cheaper bytecode, this is the list of bytecode that can be used.
-   */
-  folly::Optional<std::vector<Bytecode>> strengthReduced;
-
-  /*
-   * If this is not none, the interpreter executed a return on this
-   * step, with this type.
-   */
-  folly::Optional<Type> returned;
-};
 
 //////////////////////////////////////////////////////////////////////
 

@@ -17,7 +17,6 @@
 
 #include <vector>
 #include <string>
-#include <set>
 #include <utility>
 #include <algorithm>
 #include <cassert>
@@ -37,8 +36,10 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
+#include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/dce.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -227,8 +228,8 @@ void insert_assertions(const Index& index,
 
   auto lastStackOutputObvious = false;
 
-  PropertiesInfo props(index, ctx, nullptr);
-  Interpreter interp { &index, ctx, props, blk, state };
+  PropertiesInfo props { index, ctx, nullptr };
+  auto interp = Interp { index, ctx, props, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
 
@@ -242,7 +243,7 @@ void insert_assertions(const Index& index,
     };
 
     auto const preState = state;
-    auto const flags    = interp.step(op);
+    auto const flags    = step(interp, op);
 
     insert_assertions_step(*ctx.func, op, preState, flags.mayReadLocalSet,
       lastStackOutputObvious, gen);
@@ -333,7 +334,7 @@ void first_pass(const Index& index,
   newBCs.reserve(blk->hhbcs.size());
 
   PropertiesInfo props(index, ctx, nullptr);
-  Interpreter interp { &index, ctx, props, blk, state };
+  auto interp = Interp { index, ctx, props, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
 
@@ -343,7 +344,7 @@ void first_pass(const Index& index,
       FTRACE(2, "   + {}\n", show(newBCs.back()));
     };
 
-    auto const flags = interp.step(op);
+    auto const flags = step(interp, op);
     if (flags.calledNoReturn) {
       gen(op);
       gen(bc::BreakTraceHint {}); // The rest of this code is going to

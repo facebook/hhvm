@@ -223,11 +223,11 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
     if (!state.initialized) continue;
 
     PropertiesInfo props { index, ctx, nullptr };
-    Interpreter interp { &index, ctx, props, borrow(blk), state };
+    auto interp = Interp { index, ctx, props, borrow(blk), state };
     for (auto& bc : blk->hhbcs) {
       auto visitor = StatsVisitor { stats, state };
       visit(bc, visitor);
-      interp.step(bc);
+      step(interp, bc);
     }
   }
 }

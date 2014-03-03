@@ -15,21 +15,35 @@
 */
 #include "hphp/hhbbc/analyze.h"
 
-#include <algorithm>
+#include <cstdint>
+#include <cstdio>
 #include <set>
-#include <utility>
+#include <algorithm>
+#include <string>
 #include <vector>
+
+#include "hphp/runtime/base/complex-types.h"
 
 #include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
+#include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/class-util.h"
 
 namespace HPHP { namespace HHBBC {
 
 namespace {
 
 TRACE_SET_MOD(hhbbc);
+
+//////////////////////////////////////////////////////////////////////
+
+const StaticString s_86pinit("86pinit");
+const StaticString s_86sinit("86sinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -199,13 +213,13 @@ FuncAnalysis do_analyze(const Index& index,
         state_string(*ctx.func, ai.bdata[target.id].stateIn));
     };
 
-    auto mergeReturn = [&] (Type type) {
-      ai.inferredReturn = union_of(ai.inferredReturn, type);
-    };
-
     auto stateOut = ai.bdata[blk->id].stateIn;
-    Interpreter interp { &index, ctx, props, blk, stateOut };
-    interp.run(propagate, mergeReturn);
+    auto interp   = Interp { index, ctx, props, blk, stateOut };
+    auto flags    = run(interp, propagate);
+    if (flags.returned) {
+      ai.inferredReturn = union_of(std::move(ai.inferredReturn),
+                                   std::move(*flags.returned));
+    }
   }
 
   /*
@@ -536,11 +550,11 @@ locally_propagated_states(const Index& index,
   std::vector<std::pair<State,StepFlags>> ret;
   ret.reserve(blk->hhbcs.size() + 1);
 
-  PropertiesInfo props(index, ctx, nullptr);
-  Interpreter interp { &index, ctx, props, blk, state };
+  PropertiesInfo props { index, ctx, nullptr };
+  auto interp = Interp { index, ctx, props, blk, state };
   for (auto& op : blk->hhbcs) {
     ret.emplace_back(state, StepFlags{});
-    ret.back().second = interp.step(op);
+    ret.back().second = step(interp, op);
   }
 
   ret.emplace_back(std::move(state), StepFlags{});

@@ -16,11 +16,12 @@
 */
 
 #include "hphp/runtime/ext/ext_xmlreader.h"
-
+#include "hphp/runtime/ext/ext_domdocument.h"
 
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/system/systemlib.h"
+
 
 namespace HPHP {
 
@@ -588,6 +589,27 @@ Variant c_XMLReader::t___get(Variant name) {
       return uninit_null();
   }
   return uninit_null();
+}
+
+Variant c_XMLReader::t_expand() {
+  xmlDocPtr docp = NULL; //TODO(charley): FIXME
+  if (m_ptr) {
+	xmlNodePtr node = xmlTextReaderExpand(m_ptr);
+	if (node == NULL) {
+		raise_warning("An Error Occurred while expanding");
+		return false;
+	} else {
+		xmlNodePtr nodec = xmlDocCopyNode(node, docp, 1);
+		if(nodec == NULL) {
+			raise_notice("Cannot expand this node type");
+			return false;
+		} else {
+			return php_dom_create_object(node, (p_DOMDocument) SystemLib::AllocDOMDocumentObject(), false);
+		}
+	}
+  }
+  raise_warning("Load Data before trying to read");
+  return false;
 }
 
 Variant c_XMLReader::t___destruct() {

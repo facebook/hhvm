@@ -596,34 +596,33 @@ Variant c_XMLReader::t_expand(CObjRef basenode /* = null */) {
   xmlDocPtr docp = NULL;
 
   if (!basenode.isNull()) {
-	  c_DOMNode *dombasenode = basenode.getTyped<c_DOMNode>();
-	  doc = dombasenode->doc();
-	  docp = (xmlDocPtr) doc->m_node;
-	  if (docp == NULL) {
-		raise_warning("Invalid State Error");
-	    return false;
-	  }
-  }
-
-  if (!docp) {
-	  doc = (p_DOMDocument) SystemLib::AllocDOMDocumentObject();
+    c_DOMNode *dombasenode = basenode.getTyped<c_DOMNode>();
+    doc = dombasenode->doc();
+    docp = (xmlDocPtr) doc->m_node;
+    if (docp == NULL) {
+      raise_warning("Invalid State Error");
+      return false;
+    }
+  } else {
+    doc = (p_DOMDocument) SystemLib::AllocDOMDocumentObject();
   }
 
   if (m_ptr) {
-	xmlNodePtr node = xmlTextReaderExpand(m_ptr);
-	if (node == NULL) {
-		raise_warning("An Error Occurred while expanding");
-		return false;
-	} else {
-		xmlNodePtr nodec = xmlDocCopyNode(node, docp, 1);
-		if(nodec == NULL) {
-			raise_notice("Cannot expand this node type");
-			return false;
-		} else {
-			return php_dom_create_object(nodec, doc, false);
-		}
-	}
+    xmlNodePtr node = xmlTextReaderExpand(m_ptr);
+    if (node == NULL) {
+      raise_warning("An Error Occurred while expanding");
+      return false;
+    } else {
+      xmlNodePtr nodec = xmlDocCopyNode(node, docp, 1);
+      if(nodec == NULL) {
+        raise_notice("Cannot expand this node type");
+        return false;
+      } else {
+        return php_dom_create_object(nodec, doc, false);
+      }
+    }
   }
+
   raise_warning("Load Data before trying to read");
   return false;
 }

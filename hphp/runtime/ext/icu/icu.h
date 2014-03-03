@@ -119,6 +119,7 @@ class IntlExtension : public Extension {
     initDateFormatter();
     initCalendar();
     initGrapheme();
+    initBreakIterator(); // Must come after initIterator()
   }
 
   void threadInit() override {
@@ -135,6 +136,7 @@ class IntlExtension : public Extension {
   void initDateFormatter();
   void initCalendar();
   void initGrapheme();
+  void initBreakIterator();
 };
 
 } // namespace Intl

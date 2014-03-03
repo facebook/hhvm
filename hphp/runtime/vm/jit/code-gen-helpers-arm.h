@@ -108,7 +108,7 @@ inline void emitTLSLoad(vixl::MacroAssembler& a,
   a.   Pop  (x29, x30);
 
   a.   Add  (rReturnReg, rReturnReg,
-             uintptr_t(&datum.m_node.m_p) - JIT::tlsBase());
+             uintptr_t(&datum.m_node.m_p) - tlsBase());
   // Now rReturnReg holds a pointer to *a pointer to* the object.
   a.   Ldr  (destReg, rReturnReg[0]);
 }

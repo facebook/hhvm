@@ -1180,6 +1180,11 @@ TranslatorX64::enterTC(TCA start, void* data) {
         decoder.AppendVisitor(&disasm);
       }
       vixl::Simulator sim(&decoder, std::cout);
+      SCOPE_EXIT {
+        Stats::inc(Stats::vixl_SimulatedInstr, sim.instr_count());
+        Stats::inc(Stats::vixl_SimulatedLoad, sim.load_count());
+        Stats::inc(Stats::vixl_SimulatedStore, sim.store_count());
+      };
       sim.set_exception_hook(
         [] (vixl::Simulator* s) {
           if (tl_regState == VMRegState::DIRTY) {
@@ -2593,12 +2598,26 @@ void
 emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
   if (!force && !Stats::enabled()) return;
   intptr_t disp = uintptr_t(&tl_table[index]) - tlsBase();
-  X64Assembler a { cb };
 
-  a.    pushf ();
-  //    addq $n, [%fs:disp]
-  a.    fs().add_imm64_index_scale_disp_reg64(n, noreg, 1, disp, noreg);
-  a.    popf  ();
+  if (arch() == Arch::X64) {
+    X64Assembler a { cb };
+
+    a.    pushf ();
+    //    addq $n, [%fs:disp]
+    a.    fs().add_imm64_index_scale_disp_reg64(n, noreg, 1, disp, noreg);
+    a.    popf  ();
+  } else if (arch() == Arch::ARM) {
+    using ARM::rAsm;
+    using ARM::rAsm2;
+    vixl::MacroAssembler a { cb };
+
+    a.    Mrs   (rAsm2, vixl::TPIDR_EL0);
+    a.    Ldr   (rAsm, rAsm2[disp]);
+    a.    Add   (rAsm, rAsm, n);
+    a.    Str   (rAsm, rAsm2[disp]);
+  } else {
+    not_implemented();
+  }
 }
 
 } // HPHP::JIT

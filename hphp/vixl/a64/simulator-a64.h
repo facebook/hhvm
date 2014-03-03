@@ -392,6 +392,10 @@ class Simulator : public DecoderVisitor {
     return uint64_t((byte*)ptr - stack_) < (uint64_t)stack_size_;
   }
 
+  uint64_t load_count() const { return load_count_; }
+  uint64_t store_count() const { return store_count_; }
+  uint64_t instr_count() const { return instr_count_; }
+
  protected:
   // Simulation helpers ------------------------------------
   bool ConditionPassed(Condition cond) {
@@ -567,6 +571,12 @@ class Simulator : public DecoderVisitor {
   // automatically incremented.
   bool pc_modified_;
   Instruction* pc_;
+
+  // Counters for basic simulated-system events. Note that the load counter does
+  // not count instruction fetches, only explicit loads.
+  uint64_t load_count_ = 0;
+  uint64_t store_count_ = 0;
+  uint64_t instr_count_ = 0;
 
   static const char* xreg_names[];
   static const char* wreg_names[];

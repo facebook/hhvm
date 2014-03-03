@@ -1164,6 +1164,7 @@ void Disassembler::VisitSystem(Instruction* instr) {
         switch (instr->ImmSystemRegister()) {
           case NZCV: form = "'Xt, nzcv"; break;
           case FPCR: form = "'Xt, fpcr"; break;
+          case TPIDR_EL0: form = "'Xt, tpidr_el0"; break;
           default: form = "'Xt, (unknown)"; break;
         }
         break;

@@ -293,8 +293,6 @@ public:
                              std::vector<String> *clsProperties,
                              std::vector<String> *clsConstants);
 
-  static void SetHook(ClassInfoHook *hook) { s_hook = hook; }
-
   static Variant GetVariant(DataType type, const void *addr) {
     switch (type) {
       case KindOfBoolean:
@@ -378,8 +376,6 @@ protected:
   static bool s_loaded;            // whether class map is loaded
   static ClassInfo *s_systemFuncs; // all system functions
 
-  static ClassInfoHook *s_hook;
-
   Attribute m_attribute;
   int m_cdec_offset;
   String m_name;
@@ -439,24 +435,6 @@ private:
   ConstantMap   m_constants;       // all constants
   ConstantVec   m_constantsVec;    // all constants in declaration order
   UserAttributeVec m_userAttrVec;
-};
-
-/**
- * Interface for a hook into class info for eval. This way I can avoid
- * a dependency on eval.
- */
-class ClassInfoHook {
-public:
-  virtual ~ClassInfoHook() {};
-  virtual Array getUserFunctions() const = 0;
-  virtual Array getClasses() const = 0;
-  virtual Array getInterfaces() const = 0;
-  virtual Array getTraits() const = 0;
-  virtual const ClassInfo::MethodInfo*
-  findFunction(const String& name) const = 0;
-  virtual const ClassInfo *findClassLike(const String& name) const = 0;
-  virtual const ClassInfo::ConstantInfo*
-  findConstant(const String& name) const = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

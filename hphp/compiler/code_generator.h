@@ -186,7 +186,6 @@ public:
   void ifdefEnd(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   void printDocComment(const std::string comment);
   const char *getGlobals(AnalysisResultPtr ar);
-  static std::string FormatLabel(const std::string &name);
   static std::string EscapeLabel(const std::string &name, bool *binary = nullptr);
 
   /**

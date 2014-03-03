@@ -87,13 +87,11 @@ string Option::RepoCentralPath;
 bool Option::RepoDebugInfo = false;
 
 string Option::IdPrefix = "$$";
-string Option::LabelEscape = "$";
 
 string Option::LambdaPrefix = "df_";
 string Option::Tab = "  ";
 
 const char *Option::UserFilePrefix = "php/";
-const char *Option::ClassHeaderPrefix = "cls/";
 
 bool Option::PreOptimization = false;
 bool Option::PostOptimization = false;
@@ -206,7 +204,6 @@ void Option::Load(Hdf &config) {
     }
 
     READ_CG_OPTION(IdPrefix);
-    READ_CG_OPTION(LabelEscape);
     READ_CG_OPTION(LambdaPrefix);
   }
 

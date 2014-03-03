@@ -126,8 +126,6 @@ public:
   const std::string &getOriginalName() const;
   std::string getDocName() const;
 
-  virtual std::string getId() const;
-
   void checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen);
   const std::string &getOriginalParent() const { return m_parent; }
 

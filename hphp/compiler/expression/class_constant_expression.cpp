@@ -84,13 +84,6 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-string ClassConstantExpression::getActualClassName() const {
-  if (m_defScope) {
-    return static_cast<ClassScope*>(m_defScope)->getId();
-  }
-  return m_className;
-}
-
 ConstructPtr ClassConstantExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

@@ -126,18 +126,8 @@ const std::string &ClassScope::getOriginalName() const {
   return m_originalName;
 }
 
-// like getId(), but without the label formatting
 std::string ClassScope::getDocName() const {
   string name = getOriginalName();
-  if (m_redeclaring < 0) {
-    return name;
-  }
-  return name + Option::IdPrefix +
-    boost::lexical_cast<std::string>(m_redeclaring);
-}
-
-std::string ClassScope::getId() const {
-  string name = CodeGenerator::FormatLabel(getOriginalName());
   if (m_redeclaring < 0) {
     return name;
   }

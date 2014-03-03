@@ -164,8 +164,6 @@ public:
     return getName();
   }
 
-  virtual std::string getId() const;
-
   int getRedeclaringId() const {
     return m_redeclaring;
   }
@@ -386,10 +384,6 @@ public:
 
   void getClosureUseVars(ParameterExpressionPtrIdxPairVec &useVars,
                          bool filterUsed = true);
-
-  bool needsAnonClosureClass(ParameterExpressionPtrVec &useVars);
-
-  bool needsAnonClosureClass(ParameterExpressionPtrIdxPairVec &useVars);
 
   void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
   void addNewObjCaller(BlockScopePtr caller);

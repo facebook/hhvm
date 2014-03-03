@@ -55,10 +55,6 @@ BlockScope::BlockScope(const std::string &name, const std::string &docComment,
   SymbolTable::AllSymbolTables.push_back(m_constants);
 }
 
-std::string BlockScope::getId() const {
-  return CodeGenerator::FormatLabel(getName());
-}
-
 void BlockScope::incLoopNestedLevel() {
   m_loopNestedLevel++;
 }

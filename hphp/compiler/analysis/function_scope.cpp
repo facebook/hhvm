@@ -955,15 +955,6 @@ std::vector<std::string> FunctionScope::getUserAttributeStringParams(
   return ret;
 }
 
-std::string FunctionScope::getId() const {
-  string name = CodeGenerator::FormatLabel(getOriginalName());
-  if (m_redeclaring < 0) {
-    return name;
-  }
-  return name + Option::IdPrefix +
-    boost::lexical_cast<std::string>(m_redeclaring);
-}
-
 std::string FunctionScope::getDocName() const {
   string name = getOriginalName();
   if (m_redeclaring < 0) {
@@ -1098,31 +1089,6 @@ void FunctionScope::getClosureUseVars(
       useVars.push_back(ParameterExpressionPtrIdxPair(param, i));
     }
   }
-}
-
-template <class U, class V>
-static U pair_first_elem(std::pair<U, V> p) { return p.first; }
-
-bool FunctionScope::needsAnonClosureClass(ParameterExpressionPtrVec &useVars) {
-  useVars.clear();
-  if (!isClosure()) return false;
-  ParameterExpressionPtrIdxPairVec useVars0;
-  getClosureUseVars(useVars0, !m_generator && !m_async);
-  useVars.resize(useVars0.size());
-  // C++ seems to be unable to infer the type here on pair_first_elem
-  transform(useVars0.begin(),
-            useVars0.end(),
-            useVars.begin(),
-            pair_first_elem<ParameterExpressionPtr, int>);
-  return useVars.size() > 0 || getVariables()->hasStaticLocals();
-}
-
-bool FunctionScope::needsAnonClosureClass(
-    ParameterExpressionPtrIdxPairVec &useVars) {
-  useVars.clear();
-  if (!isClosure()) return false;
-  getClosureUseVars(useVars, !m_generator && !m_async);
-  return useVars.size() > 0 || getVariables()->hasStaticLocals();
 }
 
 FunctionScope::StringToFunctionInfoPtrMap FunctionScope::s_refParamInfo;

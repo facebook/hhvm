@@ -632,8 +632,9 @@ public:
         return !canSpecializeClass() ||
           (m_class != nullptr && m_class->classof(t2.m_class));
       }
+
       return !canSpecializeArrayKind() ||
-        (m_arrayKindValid && getArrayKind() == getArrayKind());
+        (m_arrayKindValid && getArrayKind() == t2.getArrayKind());
     }
 
     return true;

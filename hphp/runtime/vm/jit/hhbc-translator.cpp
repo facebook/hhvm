@@ -2221,7 +2221,7 @@ bool HhbcTranslator::emitFPushCufArray(SSATmp* callable, int32_t numParams) {
   auto object = getStackValue(m_irb->sp(), 1).value;
   if (!method || !object) return false;
 
-  if (!method->isConst() ||
+  if (!method->isConst(Type::Str) ||
       strstr(method->getValStr()->data(), "::") != nullptr) {
     return false;
   }

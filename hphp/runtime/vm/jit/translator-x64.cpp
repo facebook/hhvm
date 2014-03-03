@@ -2128,8 +2128,10 @@ TranslatorX64::translateTracelet(Tracelet& t) {
     } catch (JIT::FailedCodeGen& fcg) {
       // Code-gen failed. Search for the bytecode instruction that caused the
       // problem, flag it to be interpreted, and retranslate the tracelet.
+      SrcKey sk{fcg.vmFunc, fcg.bcOff};
+
       for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
-        if (ni->source.offset() == fcg.bcOff) {
+        if (ni->source == sk) {
           always_assert_log(
             !ni->interp,
             [&] {

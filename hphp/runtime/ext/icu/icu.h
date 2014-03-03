@@ -122,6 +122,7 @@ class IntlExtension : public Extension {
     initBreakIterator(); // Must come after initIterator()
     initUConverter();
     initUcsDet();
+    initUSpoof();
   }
 
   void threadInit() override {
@@ -141,6 +142,7 @@ class IntlExtension : public Extension {
   void initBreakIterator();
   void initUConverter();
   void initUcsDet();
+  void initUSpoof();
 };
 
 } // namespace Intl

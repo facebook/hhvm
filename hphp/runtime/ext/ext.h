@@ -38,7 +38,6 @@
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/ext_iconv.h"
 #include "hphp/runtime/ext/ext_icu.h"
-#include "hphp/runtime/ext/ext_icu_uspoof.h"
 #include "hphp/runtime/ext/ext_imap.h"
 #include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/ext/ext_ipc.h"

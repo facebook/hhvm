@@ -380,6 +380,11 @@
                         "type": "Variant"
                     },
                     "args": [
+                        {
+                            "name": "basenode",
+                            "type": "Object",
+                            "value": "null_object"
+                        }
                     ]
                 }
             ],

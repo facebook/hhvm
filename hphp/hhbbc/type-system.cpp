@@ -1195,8 +1195,8 @@ Type objExact(res::Class val) {
 }
 
 Type subCls(res::Class val) {
-  auto r = Type { BCls };
-  r.m_data.dcls = DCls {
+  auto r        = Type { BCls };
+  new (&r.m_data.dcls) DCls {
     val.couldBeOverriden() ? DCls::Sub : DCls::Exact,
     val
   };
@@ -1206,7 +1206,7 @@ Type subCls(res::Class val) {
 
 Type clsExact(res::Class val) {
   auto r        = Type { BCls };
-  r.m_data.dcls = DCls { DCls::Exact, val };
+  new (&r.m_data.dcls) DCls { DCls::Exact, val };
   r.m_dataTag   = DataTag::Cls;
   return r;
 }

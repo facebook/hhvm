@@ -1220,7 +1220,6 @@ static void clearNodeMap(xmlNodePtr startNode) {
   }
 }
 
-
 Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc, bool owner) {
   String clsname = domClassname(obj);
   if (!clsname.get()) {

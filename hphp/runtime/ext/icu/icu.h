@@ -121,6 +121,7 @@ class IntlExtension : public Extension {
     initGrapheme();
     initBreakIterator(); // Must come after initIterator()
     initUConverter();
+    initUcsDet();
   }
 
   void threadInit() override {
@@ -139,6 +140,7 @@ class IntlExtension : public Extension {
   void initGrapheme();
   void initBreakIterator();
   void initUConverter();
+  void initUcsDet();
 };
 
 } // namespace Intl

@@ -540,8 +540,7 @@ predictMVec(const NormalizedInstruction* ni) {
  *   Provide a best guess for the output type of this instruction.
  */
 static DataType
-predictOutputs(SrcKey startSk,
-               const NormalizedInstruction* ni) {
+predictOutputs(const NormalizedInstruction* ni) {
   if (!RuntimeOption::EvalJitTypePrediction) return KindOfAny;
 
   if (RuntimeOption::EvalJitStressTypePredPercent &&
@@ -698,14 +697,14 @@ predictOutputs(SrcKey startSk,
   if (pred.second < kAccept) {
     if (const StringData* invName = fcallToFuncName(ni)) {
       pred = predictType(TypeProfileKey(TypeProfileKey::MethodName, invName));
-      TRACE(1, "prediction for methods named %s: %d, %f\n",
-            invName->data(),
-            pred.first,
-            pred.second);
+      FTRACE(1, "prediction for methods named {}: {}, {:.2}\n",
+             invName->data(),
+             pred.first,
+             pred.second);
     }
   }
   if (pred.second >= kAccept) {
-    TRACE(1, "accepting prediction of type %d\n", pred.first);
+    FTRACE(1, "accepting prediction of type {}\n", pred.first);
     assert(pred.first != KindOfUninit);
     return pred.first;
   }
@@ -786,7 +785,7 @@ getDynLocType(const SrcKey startSk,
     } // Fall through
     case OutPred: {
       // In TransProfile mode, disable type prediction to avoid side exits.
-      auto dt = mode == TransProfile ? KindOfAny : predictOutputs(startSk, ni);
+      auto dt = mode == TransProfile ? KindOfAny : predictOutputs(ni);
       if (dt != KindOfAny) ni->outputPredicted = true;
       return RuntimeType(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
     }
@@ -1450,15 +1449,14 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
 
 // Task #3449943: This returns true even if there's meta-data telling
 // that the value was inferred.
-bool outputIsPredicted(SrcKey startSk,
-                       NormalizedInstruction& inst) {
+bool outputIsPredicted(NormalizedInstruction& inst) {
   auto const& iInfo = getInstrInfo(inst.op());
   auto doPrediction =
     (iInfo.type == OutPred || iInfo.type == OutCns) && !inst.breaksTracelet;
   if (doPrediction) {
     // All OutPred ops except for SetM have a single stack output for now.
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);
-    auto dt = predictOutputs(startSk, &inst);
+    auto dt = predictOutputs(&inst);
     if (dt != KindOfAny) {
       inst.outPred = Type(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
     } else {
@@ -4236,23 +4234,6 @@ Translator::translateRegion(const RegionDesc& region,
           return takenIncluded && fallthruIncluded;
         }();
       }
-      // If this block ends with an inlined FCall, we don't emit anything for
-      // the FCall and instead set up HhbcTranslator for inlining. Blocks from
-      // the callee will be next in the region.
-      if (i == block->length() - 1 &&
-          inst.op() == OpFCall && block->inlinedCallee()) {
-        auto const* callee = block->inlinedCallee();
-        FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
-               "and stack:\n{}\n",
-               block->func()->fullName()->data(),
-               callee->fullName()->data(),
-               inst.imm[0].u_IVA,
-               ht.showStack());
-        auto returnSk = inst.nextSk();
-        auto returnFuncOff = returnSk.offset() - block->func()->base();
-        ht.beginInlining(inst.imm[0].u_IVA, callee, returnFuncOff);
-        continue;
-      }
 
       // We can get a more precise output type for interpOne if we know all of
       // its inputs, so we still populate the rest of the instruction even if
@@ -4301,7 +4282,26 @@ Translator::translateRegion(const RegionDesc& region,
       // stack essentially does the role of type prediction.  And, if the value
       // is also inferred, then the guard is omitted.
       auto const doPrediction = mode() != TransOptimize &&
-                                outputIsPredicted(startSk, inst);
+                                outputIsPredicted(inst);
+
+      // If this block ends with an inlined FCall, we don't emit anything for
+      // the FCall and instead set up HhbcTranslator for inlining. Blocks from
+      // the callee will be next in the region.
+      if (i == block->length() - 1 &&
+          inst.op() == OpFCall && block->inlinedCallee()) {
+        auto const* callee = block->inlinedCallee();
+        FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
+               "and stack:\n{}\n",
+               block->func()->fullName()->data(),
+               callee->fullName()->data(),
+               inst.imm[0].u_IVA,
+               ht.showStack());
+        auto returnSk = inst.nextSk();
+        auto returnFuncOff = returnSk.offset() - block->func()->base();
+        ht.beginInlining(inst.imm[0].u_IVA, callee, returnFuncOff,
+                         doPrediction ? inst.outPred : Type::Gen);
+        continue;
+      }
 
       // Emit IR for the body of the instruction.
       try {

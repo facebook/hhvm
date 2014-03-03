@@ -104,7 +104,8 @@ struct HhbcTranslator {
   // Inlining-related functions.
   void beginInlining(unsigned numArgs,
                      const Func* target,
-                     Offset returnBcOffset);
+                     Offset returnBcOffset,
+                     Type retTypePred = Type::Gen);
   bool isInlining() const;
   int inliningDepth() const;
   void profileFunctionEntry(const char* category);
@@ -758,7 +759,7 @@ public:
   Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
   SrcKey      curSrcKey()   const { return SrcKey(curFunc(), bcOff()); }
   bool        inGenerator() const { return m_bcStateStack.back().inGenerator; }
-  size_t      spOffset(  )  const;
+  size_t      spOffset()    const;
   Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
 
 private:

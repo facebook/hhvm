@@ -139,6 +139,7 @@ int RegionFormer::inliningDepth() const {
 
 RegionDescPtr RegionFormer::go() {
   uint32_t numJmps = 0;
+
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
     if (t <= Type::Cls) {
@@ -167,7 +168,7 @@ RegionDescPtr RegionFormer::go() {
 
     m_inst.interp = m_interp.count(m_sk);
     auto const doPrediction =
-      m_profiling ? false : outputIsPredicted(m_startSk, m_inst);
+      m_profiling ? false : outputIsPredicted(m_inst);
 
     if (tryInline()) {
       // If m_inst is an FCall and the callee is suitable for inlining, we can
@@ -184,7 +185,8 @@ RegionDescPtr RegionFormer::go() {
       m_arStates.back().pop();
       m_arStates.emplace_back();
       m_curBlock->setInlinedCallee(callee);
-      m_ht.beginInlining(m_inst.imm[0].u_IVA, callee, returnFuncOff);
+      m_ht.beginInlining(m_inst.imm[0].u_IVA, callee, returnFuncOff,
+                         doPrediction ? m_inst.outPred : Type::Gen);
       m_metaHand = Unit::MetaHandle();
 
       m_sk = m_ht.curSrcKey();
@@ -578,8 +580,8 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
     return RegionDescPtr { nullptr };
   }
 
-  FTRACE(1, "selectTracelet returning after {} tries:\n{}\n",
-         tries, show(*region));
+  FTRACE(1, "selectTracelet returning, inlineDepth {}, {} tries:\n{}\n",
+         inlineDepth, tries, show(*region));
   if (region->blocks.back()->length() == 0) {
     // If the final block is empty because it would've only contained
     // instructions producing literal values, kill it.

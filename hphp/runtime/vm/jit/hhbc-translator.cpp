@@ -294,7 +294,8 @@ size_t HhbcTranslator::spOffset() const {
  */
 void HhbcTranslator::beginInlining(unsigned numParams,
                                    const Func* target,
-                                   Offset returnBcOffset) {
+                                   Offset returnBcOffset,
+                                   Type retTypePred) {
   assert(!m_fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");
   assert(!target->isGenerator() && "Generator stack handling not implemented");
@@ -317,6 +318,7 @@ void HhbcTranslator::beginInlining(unsigned numParams,
   data.target   = target;
   data.retBCOff = returnBcOffset;
   data.retSPOff = prevSPOff;
+  data.retTypePred = retTypePred;
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.
@@ -3055,6 +3057,11 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
 
   auto useRet = emitDecRefLocalsInline(retVal);
 
+  // Before we leave the inlined frame, grab a type prediction from our
+  // DefInlineFP.
+  auto retPred = frameRoot(
+    m_irb->fp()->inst())->extra<DefInlineFP>()->retTypePred;
+
   /*
    * Pop the ActRec and restore the stack and frame pointers.  It's
    * important that this does endInlining before pushing the return
@@ -3096,6 +3103,10 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc()->fullName()->data());
   push(useRet);
+  if (retPred < useRet->type()) {
+    // If we had a predicted output type that's useful, check that here.
+    checkTypeStack(0, retPred, curSrcKey().advanced().offset());
+  }
 }
 
 SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {

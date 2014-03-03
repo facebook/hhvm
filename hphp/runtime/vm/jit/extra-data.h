@@ -352,20 +352,22 @@ struct PropByteOffset : IRExtraData {
 };
 
 /*
- * DefInlineFP is present when we need to create a frame for inlining.
- * This instruction also carries some metadata used by IRBuilder to
- * track state during an inlined call.
+ * DefInlineFP is present when we need to create a frame for inlining.  This
+ * instruction also carries some metadata used by IRBuilder to track state
+ * during an inlined call.
  */
 struct DefInlineFPData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
-      target->fullName()->data(), "(),", retBCOff, ',', retSPOff
+      target->fullName()->data(), "(),", retBCOff, ',', retSPOff,
+      retTypePred < Type::Gen ? (',' + retTypePred.toString()) : ""
     );
   }
 
   const Func* target;
   Offset retBCOff;
   Offset retSPOff;
+  Type retTypePred;
 };
 
 /*

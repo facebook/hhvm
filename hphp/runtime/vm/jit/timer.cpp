@@ -31,11 +31,17 @@ namespace HPHP { namespace JIT {
 static __thread Timer::CounterMap* s_counters;
 
 static int64_t getCPUTimeNanos() {
+#ifdef CLOCK_THREAD_CPUTIME_ID
   auto const ns = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID);
   if (ns != -1) return ns;
+#endif
 
+#ifdef RUSAGE_THREAD
   return HPHP::Timer::GetRusageMicros(HPHP::Timer::TotalCPU,
                                       RUSAGE_THREAD) * 1000;
+#else
+  return -1;
+#endif
 }
 
 Timer::Timer(const std::string& name)

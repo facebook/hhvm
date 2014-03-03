@@ -1300,14 +1300,6 @@
             "value": 1
         },
         {
-            "name": "INTL_IDNA_VARIANT_2003",
-            "value": 0
-        },
-        {
-            "name": "INTL_IDNA_VARIANT_UTS46",
-            "value": 1
-        },
-        {
             "name": "INTL_MAX_LOCALE_LEN",
             "value": 80
         },

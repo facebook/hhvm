@@ -123,6 +123,7 @@ class IntlExtension : public Extension {
     initUConverter();
     initUcsDet();
     initUSpoof();
+    initMisc();
   }
 
   void threadInit() override {
@@ -143,6 +144,7 @@ class IntlExtension : public Extension {
   void initUConverter();
   void initUcsDet();
   void initUSpoof();
+  void initMisc();
 };
 
 } // namespace Intl

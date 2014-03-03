@@ -29,10 +29,6 @@ extern const int64_t q_Collator$$SORT_REGULAR;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t f_intl_get_error_code();
-String f_intl_get_error_message();
-String f_intl_error_name(int64_t error_code);
-bool f_intl_is_failure(int64_t error_code);
 Variant f_collator_asort(
   CVarRef obj, VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
 Variant f_collator_compare(CVarRef obj, const String& str1, const String& str2);
@@ -47,15 +43,6 @@ Variant f_collator_set_strength(CVarRef obj, int64_t strength);
 Variant f_collator_sort_with_sort_keys(CVarRef obj, VRefParam arr);
 Variant f_collator_sort(
   CVarRef obj, VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
-Variant f_idn_to_ascii(
-  const String& domain, int64_t options = 0, int64_t variant = 0,
-  VRefParam idna_info = uninit_null());
-Variant f_idn_to_unicode(
-  const String& domain, int64_t options = 0, int64_t variant = 0,
-  VRefParam idna_info = uninit_null());
-Variant f_idn_to_utf8(
-  const String& domain, int64_t options = 0, int64_t variant = 0,
-  VRefParam idna_info = uninit_null());
 extern const int64_t q_Collator$$SORT_REGULAR;
 extern const int64_t q_Collator$$SORT_NUMERIC;
 extern const int64_t q_Collator$$SORT_STRING;

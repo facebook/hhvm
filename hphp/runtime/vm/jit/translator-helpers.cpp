@@ -24,5 +24,9 @@ void translatorSync() {
   tx64->sync();
 }
 
+void translatorTraceCodeGen() {
+  tx64->traceCodeGen();
+}
+
 } // HPHP::JIT
 } // HPHP

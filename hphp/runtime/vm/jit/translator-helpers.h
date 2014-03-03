@@ -22,6 +22,7 @@ namespace JIT {
 
 // Perform VM state fixup (see fixup.h).
 void translatorSync();
+void translatorTraceCodeGen();
 
 } } // HPHP::JIT
 #endif

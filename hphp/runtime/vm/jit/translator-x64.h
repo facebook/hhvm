@@ -118,8 +118,10 @@ private:
   // Data structures for HHIR-based translation
   uint64_t               m_numHHIRTrans;
 
-  void traceCodeGen() override;
+public:
+  void traceCodeGen();
 
+private:
   FixupMap                   m_fixupMap;
   UnwindInfoHandle           m_unwindRegistrar;
   std::vector<std::pair<CTCA, TCA>> m_pendingCatchTraces;

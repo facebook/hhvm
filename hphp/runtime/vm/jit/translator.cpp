@@ -4344,7 +4344,7 @@ Translator::translateRegion(const RegionDesc& region,
   irGenTimer.end();
 
   try {
-    traceCodeGen();
+    translatorTraceCodeGen();
     if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
   } catch (const JIT::FailedCodeGen& exn) {
     SrcKey sk{exn.vmFunc, exn.bcOff};

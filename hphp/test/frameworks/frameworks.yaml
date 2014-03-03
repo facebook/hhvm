@@ -107,6 +107,22 @@
     commit: 07d6712836c4520963e78b9fda14b14d13ff000c
     install_root: joomla-cms
     test_root: joomla-cms
+    clowns:
+      - joomla-cms/tests/unit/suites/libraries/cms/pagination/JPaginationTest.php
+      - joomla-cms/tests/unit/suites/libraries/cms/toolbar/button/JToolbarButtonHelpTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleAuthOauth2Test.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataAdsenseTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataCalendarTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPicasaAlbumTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPicasaPhotoTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPicasaTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPicasaTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPlusActivitiesTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPlusCommentsTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPlusPeopleTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleDataPlusTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/google/JGoogleTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
     branch: v2.0.2

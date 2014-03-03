@@ -46,8 +46,11 @@ const StaticString
   s_core("core");
 
 int64_t convert_bytes_to_long(const std::string& value) {
-  int64_t newInt = strtoll(value.c_str(), nullptr, 10);
-  char lastChar = value.at(value.size() - 1);
+  if (value.size() == 0) {
+    return 0;
+  }
+  int64_t newInt = strtoll(value.data(), nullptr, 10);
+  char lastChar = value.data()[value.size() - 1];
   if (lastChar == 'K' || lastChar == 'k') {
     newInt <<= 10;
   } else if (lastChar == 'M' || lastChar == 'm') {
@@ -58,12 +61,37 @@ int64_t convert_bytes_to_long(const std::string& value) {
   return newInt;
 }
 
-bool ini_on_update(const std::string& value, bool& p) {
-  if ((value.size() == 0) ||
-      (value.size() == 1 && value == "0") ||
-      (value.size() == 2 && strcasecmp("no", value.data()) == 0) ||
-      (value.size() == 3 && strcasecmp("off", value.data()) == 0) ||
-      (value.size() == 5 && strcasecmp("false", value.data()) == 0)) {
+static std::string dynamic_to_std_string(const folly::dynamic& v) {
+  switch (v.type()) {
+    case folly::dynamic::Type::NULLT:
+    case folly::dynamic::Type::ARRAY:
+    case folly::dynamic::Type::OBJECT:
+      return "";
+    case folly::dynamic::Type::BOOL:
+      return std::to_string(v.asBool());
+    case folly::dynamic::Type::DOUBLE:
+      return std::to_string(v.asDouble());
+    case folly::dynamic::Type::INT64:
+      return std::to_string(v.asInt());
+    case folly::dynamic::Type::STRING:
+      return v.data();
+  }
+  not_reached();
+}
+
+#define INI_ASSERT_STR(v) \
+  if (value.isArray() || value.isObject()) { \
+    return false; \
+  } \
+  auto str = dynamic_to_std_string(v);
+
+bool ini_on_update(const folly::dynamic& value, bool& p) {
+  INI_ASSERT_STR(value);
+  if ((str.size() == 0) ||
+      (str.size() == 1 && strcasecmp("0", str.data()) == 0) ||
+      (str.size() == 2 && strcasecmp("no", str.data()) == 0) ||
+      (str.size() == 3 && strcasecmp("off", str.data()) == 0) ||
+      (str.size() == 5 && strcasecmp("false", str.data()) == 0)) {
     p = false;
   } else {
     p = true;
@@ -71,13 +99,15 @@ bool ini_on_update(const std::string& value, bool& p) {
   return true;
 }
 
-bool ini_on_update(const std::string& value, double& p) {
-  p = zend_strtod(value.c_str(), nullptr);
+bool ini_on_update(const folly::dynamic& value, double& p) {
+  INI_ASSERT_STR(value);
+  p = zend_strtod(str.data(), nullptr);
   return true;
 }
 
-bool ini_on_update(const std::string& value, int16_t& p) {
-  auto n = convert_bytes_to_long(value);
+bool ini_on_update(const folly::dynamic& value, int16_t& p) {
+  INI_ASSERT_STR(value);
+  auto n = convert_bytes_to_long(str);
   auto maxValue = 0x7FFFL;
   if (n > maxValue || n < (- maxValue - 1)) {
     return false;
@@ -86,8 +116,9 @@ bool ini_on_update(const std::string& value, int16_t& p) {
   return true;
 }
 
-bool ini_on_update(const std::string& value, int32_t& p) {
-  auto n = convert_bytes_to_long(value);
+bool ini_on_update(const folly::dynamic& value, int32_t& p) {
+  INI_ASSERT_STR(value);
+  auto n = convert_bytes_to_long(str);
   auto maxValue = 0x7FFFFFFFL;
   if (n > maxValue || n < (- maxValue - 1)) {
     return false;
@@ -96,13 +127,15 @@ bool ini_on_update(const std::string& value, int32_t& p) {
   return true;
 }
 
-bool ini_on_update(const std::string& value, int64_t& p) {
-  p = convert_bytes_to_long(value);
+bool ini_on_update(const folly::dynamic& value, int64_t& p) {
+  INI_ASSERT_STR(value);
+  p = convert_bytes_to_long(str);
   return true;
 }
 
-bool ini_on_update(const std::string& value, uint16_t& p) {
-  auto n = convert_bytes_to_long(value);
+bool ini_on_update(const folly::dynamic& value, uint16_t& p) {
+  INI_ASSERT_STR(value);
+  auto n = convert_bytes_to_long(str);
   auto mask = ~0xFFFFUL;
   if (((uint64_t)n & mask)) {
     return false;
@@ -111,8 +144,9 @@ bool ini_on_update(const std::string& value, uint16_t& p) {
   return true;
 }
 
-bool ini_on_update(const std::string& value, uint32_t& p) {
-  auto n = convert_bytes_to_long(value);
+bool ini_on_update(const folly::dynamic& value, uint32_t& p) {
+  INI_ASSERT_STR(value);
+  auto n = convert_bytes_to_long(str);
   auto mask = ~0x7FFFFFFFUL;
   if (((uint64_t)n & mask)) {
     return false;
@@ -121,59 +155,62 @@ bool ini_on_update(const std::string& value, uint32_t& p) {
   return true;
 }
 
-bool ini_on_update(const std::string& value, uint64_t& p) {
-  p = convert_bytes_to_long(value);
+bool ini_on_update(const folly::dynamic& value, uint64_t& p) {
+  INI_ASSERT_STR(value);
+  p = convert_bytes_to_long(str);
   return true;
 }
 
-bool ini_on_update(const std::string& value, std::string& p) {
-  p = value;
+bool ini_on_update(const folly::dynamic& value, std::string& p) {
+  INI_ASSERT_STR(value);
+  p = str;
   return true;
 }
 
-bool ini_on_update(const std::string& value, String& p) {
-  p = String(value);
+bool ini_on_update(const folly::dynamic& value, String& p) {
+  INI_ASSERT_STR(value);
+  p = str.data();
   return true;
 }
 
-std::string ini_get(bool& p) {
+folly::dynamic ini_get(bool& p) {
   return p ? "1" : "";
 }
 
-std::string ini_get(double& p) {
-  return std::to_string(p);
-}
-
-std::string ini_get(int16_t& p) {
-  return std::to_string(p);
-}
-
-std::string ini_get(int32_t& p) {
-  return std::to_string(p);
-}
-
-std::string ini_get(int64_t& p) {
-  return std::to_string(p);
-}
-
-std::string ini_get(uint16_t& p) {
-  return std::to_string(p);
-}
-
-std::string ini_get(uint32_t& p) {
-  return std::to_string(p);
-}
-
-std::string ini_get(uint64_t& p) {
-  return std::to_string(p);
-}
-
-std::string ini_get(std::string& p) {
+folly::dynamic ini_get(double& p) {
   return p;
 }
 
-std::string ini_get(String& p) {
-  return p->toCppString();
+folly::dynamic ini_get(int16_t& p) {
+  return p;
+}
+
+folly::dynamic ini_get(int32_t& p) {
+  return p;
+}
+
+folly::dynamic ini_get(int64_t& p) {
+  return p;
+}
+
+folly::dynamic ini_get(uint16_t& p) {
+  return p;
+}
+
+folly::dynamic ini_get(uint32_t& p) {
+  return p;
+}
+
+folly::dynamic ini_get(uint64_t& p) {
+  return p;
+}
+
+folly::dynamic ini_get(std::string& p) {
+  return p.data();
+}
+
+folly::dynamic ini_get(String& p) {
+  return p.data();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -397,8 +434,8 @@ IniSetting::Map IniSetting::FromStringAsMap(const std::string& ini,
 struct IniCallbackData {
   const Extension* extension;
   IniSetting::Mode mode;
-  std::function<bool(const std::string& value)> updateCallback;
-  std::function<std::string()> getCallback;
+  std::function<bool(const folly::dynamic& value)> updateCallback;
+  std::function<folly::dynamic()> getCallback;
 };
 
 typedef std::map<std::string, IniCallbackData> CallbackMap;
@@ -407,7 +444,7 @@ static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_user_callbacks);
 // Things that are only settable at startup go here
 static CallbackMap s_system_ini_callbacks;
 
-typedef std::map<std::string, std::string> DefaultMap;
+typedef std::map<std::string, folly::dynamic> DefaultMap;
 static IMPLEMENT_THREAD_LOCAL(DefaultMap, s_savedDefaults);
 
 class IniSettingExtension : public Extension {
@@ -417,7 +454,7 @@ public:
   void requestShutdown() {
     // Put all the defaults back to the way they were before any ini_set()
     for (auto &item : *s_savedDefaults) {
-      IniSetting::Set(item.first, item.second);
+      IniSetting::Set(item.first, item.second, IniSetting::FollyDynamic());
     }
     s_savedDefaults->clear();
   }
@@ -426,9 +463,9 @@ public:
 
 void IniSetting::Bind(const Extension* extension, const Mode mode,
                       const char *name,
-                      std::function<bool(const std::string& value)>
+                      std::function<bool(const folly::dynamic& value)>
                         updateCallback,
-                      std::function<std::string()> getCallback) {
+                      std::function<folly::dynamic()> getCallback) {
   assert(name && *name);
 
   bool is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
@@ -455,7 +492,7 @@ void IniSetting::Unbind(const char *name) {
   s_user_callbacks->erase(name);
 }
 
-bool IniSetting::Get(const std::string& name, std::string &value) {
+bool IniSetting::Get(const std::string& name, folly::dynamic& value) {
   CallbackMap::iterator iter = s_system_ini_callbacks.find(name.data());
   if (iter == s_system_ini_callbacks.end()) {
     iter = s_user_callbacks->find(name.data());
@@ -468,10 +505,80 @@ bool IniSetting::Get(const std::string& name, std::string &value) {
   return true;
 }
 
-bool IniSetting::Get(const String& name, String &value) {
-  std::string b;
+bool IniSetting::Get(const std::string& name, std::string &value) {
+  folly::dynamic b = nullptr;
+  auto ret = Get(name, b);
+  value = dynamic_to_std_string(b);
+  return ret && !value.empty();
+}
+
+bool IniSetting::Get(const String& name, String& value) {
+  Variant b;
+  auto ret = Get(name, b);
+  value = b.toString();
+  return ret;
+}
+
+/**
+ * I was going to make this a constructor for Variant, but both folly::dynamic
+ * and Variant have so many overrides that everything becomes ambiguous.
+ **/
+static Variant dynamic_to_variant(const folly::dynamic& v) {
+  switch (v.type()) {
+    case folly::dynamic::Type::NULLT:
+      return init_null_variant;
+    case folly::dynamic::Type::BOOL:
+      return v.asBool();
+    case folly::dynamic::Type::DOUBLE:
+      return v.asDouble();
+    case folly::dynamic::Type::INT64:
+      return v.asInt();
+    case folly::dynamic::Type::STRING:
+      return v.data();
+    case folly::dynamic::Type::ARRAY:
+    case folly::dynamic::Type::OBJECT:
+      ArrayInit ret(v.size());
+      for (auto& item : v.items()) {
+        ret.add(dynamic_to_variant(item.first),
+                dynamic_to_variant(item.second));
+      }
+      return ret.toArray();
+  }
+  not_reached();
+}
+
+static folly::dynamic variant_to_dynamic(const Variant& v) {
+  switch (v.getType()) {
+    case KindOfUninit:
+    case KindOfNull:
+    default:
+      return nullptr;
+    case KindOfBoolean:
+      return v.toBoolean();
+    case KindOfDouble:
+      return v.toDouble();
+    case KindOfInt64:
+      return v.toInt64();
+    case KindOfStaticString:
+    case KindOfString:
+      return v.toString().data();
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      folly::dynamic ret = folly::dynamic::object;
+      for (ArrayIter iter(v.toArray()); iter; ++iter) {
+        ret.insert(variant_to_dynamic(iter.first()),
+                   variant_to_dynamic(iter.second()));
+      }
+      return ret;
+  }
+  not_reached();
+}
+
+bool IniSetting::Get(const String& name, Variant& value) {
+  folly::dynamic b = nullptr;
   auto ret = Get(name.toCppString(), b);
-  value = b;
+  value = dynamic_to_variant(b);
   return ret;
 }
 
@@ -481,32 +588,45 @@ std::string IniSetting::Get(const std::string& name) {
   return ret;
 }
 
-static bool ini_set(const String& name, const Variant& value,
+static bool ini_set(const std::string& name, const folly::dynamic& value,
                     IniSetting::Mode mode) {
   CallbackMap::iterator iter = s_user_callbacks->find(name.data());
   if (iter != s_user_callbacks->end()) {
     if ((iter->second.mode & mode) && iter->second.updateCallback) {
-      return iter->second.updateCallback(value.toString().toCppString());
+      return iter->second.updateCallback(value);
     }
   }
   return false;
 }
 
-bool IniSetting::Set(const String& name, const Variant& value) {
+bool IniSetting::Set(const std::string& name, const folly::dynamic& value,
+                     FollyDynamic) {
   return ini_set(name, value, static_cast<Mode>(
     PHP_INI_ONLY | PHP_INI_SYSTEM | PHP_INI_PERDIR | PHP_INI_USER | PHP_INI_ALL
   ));
 }
 
-bool IniSetting::SetUser(const String& nameString, const Variant& value) {
-  auto name = nameString.toCppString();
+bool IniSetting::Set(const String& name, const Variant& value) {
+  return Set(name.toCppString(), variant_to_dynamic(value), FollyDynamic());
+}
+
+bool IniSetting::SetUser(const std::string& name, const folly::dynamic& value,
+                         FollyDynamic) {
   auto it = s_savedDefaults->find(name);
   if (it == s_savedDefaults->end()) {
-    Get(name, (*s_savedDefaults)[name]);
+    folly::dynamic def = nullptr;
+    auto success = Get(name, def);
+    if (success) {
+      s_savedDefaults->insert(make_pair(name, def));
+    }
   }
-  return ini_set(nameString, value, static_cast<Mode>(
+  return ini_set(name, value, static_cast<Mode>(
     PHP_INI_USER | PHP_INI_ALL
   ));
+}
+
+bool IniSetting::SetUser(const String& name, const Variant& value) {
+  return SetUser(name.toCppString(), variant_to_dynamic(value), FollyDynamic());
 }
 
 Array IniSetting::GetAll(const String& ext_name, bool details) {
@@ -531,9 +651,13 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
       continue;
     }
 
+    auto value = dynamic_to_variant(iter.second.getCallback());
+    // Cast all non-arrays to strings since that is what everything used ot be
+    if (!value.isArray()) {
+      value = value.toString();
+    }
     if (details) {
       Array item = Array::Create();
-      auto value = iter.second.getCallback();
       item.add(s_global_value, value);
       item.add(s_local_value, value);
       if (iter.second.mode == PHP_INI_ALL) {
@@ -548,7 +672,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
       }
       r.add(String(iter.first), item);
     } else {
-      r.add(String(iter.first), iter.second.getCallback());
+      r.add(String(iter.first), value);
     }
   }
   return r;

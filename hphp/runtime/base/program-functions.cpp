@@ -196,9 +196,13 @@ void process_ini_settings() {
   if (RuntimeOption::IniFile.empty()) {
     return;
   }
-  auto settings = f_parse_ini_file(String(RuntimeOption::IniFile));
-  for (ArrayIter iter(settings); iter; ++iter) {
-    IniSetting::Set(iter.first(), iter.second());
+  std::ifstream ifs(RuntimeOption::IniFile);
+  const std::string str((std::istreambuf_iterator<char>(ifs)),
+                        std::istreambuf_iterator<char>());
+  auto settings = IniSetting::FromStringAsMap(str, RuntimeOption::IniFile);
+
+  for (auto& item : settings.items()) {
+    IniSetting::Set(item.first.data(), item.second, IniSetting::FollyDynamic());
   }
 }
 

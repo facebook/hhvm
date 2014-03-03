@@ -25,26 +25,26 @@ namespace HPHP {
 
 class Extension;
 
-bool ini_on_update(const std::string& value, bool& p);
-bool ini_on_update(const std::string& value, double& p);
-bool ini_on_update(const std::string& value, int16_t& p);
-bool ini_on_update(const std::string& value, int32_t& p);
-bool ini_on_update(const std::string& value, int64_t& p);
-bool ini_on_update(const std::string& value, uint16_t& p);
-bool ini_on_update(const std::string& value, uint32_t& p);
-bool ini_on_update(const std::string& value, uint64_t& p);
-bool ini_on_update(const std::string& value, std::string& p);
-bool ini_on_update(const std::string& value, String& p);
-std::string ini_get(bool& p);
-std::string ini_get(double& p);
-std::string ini_get(int16_t& p);
-std::string ini_get(int32_t& p);
-std::string ini_get(int64_t& p);
-std::string ini_get(uint16_t& p);
-std::string ini_get(uint32_t& p);
-std::string ini_get(uint64_t& p);
-std::string ini_get(std::string& p);
-std::string ini_get(String& p);
+bool ini_on_update(const folly::dynamic& value, bool& p);
+bool ini_on_update(const folly::dynamic& value, double& p);
+bool ini_on_update(const folly::dynamic& value, int16_t& p);
+bool ini_on_update(const folly::dynamic& value, int32_t& p);
+bool ini_on_update(const folly::dynamic& value, int64_t& p);
+bool ini_on_update(const folly::dynamic& value, uint16_t& p);
+bool ini_on_update(const folly::dynamic& value, uint32_t& p);
+bool ini_on_update(const folly::dynamic& value, uint64_t& p);
+bool ini_on_update(const folly::dynamic& value, std::string& p);
+bool ini_on_update(const folly::dynamic& value, String& p);
+folly::dynamic ini_get(bool& p);
+folly::dynamic ini_get(double& p);
+folly::dynamic ini_get(int16_t& p);
+folly::dynamic ini_get(int32_t& p);
+folly::dynamic ini_get(int64_t& p);
+folly::dynamic ini_get(uint16_t& p);
+folly::dynamic ini_get(uint32_t& p);
+folly::dynamic ini_get(uint64_t& p);
+folly::dynamic ini_get(std::string& p);
+folly::dynamic ini_get(String& p);
 
 class IniSetting {
 public:
@@ -118,18 +118,26 @@ public:
   static Map FromStringAsMap(const std::string& ini,
                              const std::string& filename);
 
-  static bool Get(const std::string& name, std::string& value);
+  static bool Get(const std::string& name, folly::dynamic &value);
+  static bool Get(const std::string& name, std::string &value);
+  static bool Get(const String& name, Variant& value);
   static bool Get(const String& name, String& value);
   static std::string Get(const std::string& name);
   static Array GetAll(const String& extension, bool details);
 
+  // Because folly::dynamic and Variant are too ambiguous
+  enum class FollyDynamic {};
   /**
    * Change an INI setting as if it was in the php.ini file
    */
+  static bool Set(const std::string& name, const folly::dynamic& value,
+                  FollyDynamic);
   static bool Set(const String& name, const Variant& value);
   /**
    * Change an INI setting as if there was a call to ini_set()
    */
+  static bool SetUser(const std::string& name, const folly::dynamic& value,
+                      FollyDynamic);
   static bool SetUser(const String& name, const Variant& value);
 
   template<class T>
@@ -160,7 +168,7 @@ public:
   static void Bind(const Extension* extension, const Mode mode,
                    const char *name, const char *defaultValue,
                    SetAndGet<T> callbacks, T* p = nullptr) {
-    auto setter = [callbacks, p](const std::string& value) {
+    auto setter = [callbacks, p](const folly::dynamic &value) {
       T v;
       auto ret = ini_on_update(value, v);
       if (!ret) {
@@ -221,8 +229,9 @@ public:
 private:
   static void Bind(const Extension* extension, const Mode mode,
                    const char *name,
-                   std::function<bool(const std::string& value)> updateCallback,
-                   std::function<std::string()> getCallback);
+                   std::function<bool(const folly::dynamic& value)>
+                     updateCallback,
+                   std::function<folly::dynamic()> getCallback);
 };
 
 int64_t convert_bytes_to_long(const std::string& value);

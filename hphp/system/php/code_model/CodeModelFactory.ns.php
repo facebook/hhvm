@@ -1979,7 +1979,7 @@ class CodeModelFactory {
    *
    */
   public function makeTraitAliasStatement(
-    /*string*/ $trait_name,
+    /*?string*/ $trait_name,
     /*string*/ $method_name1,
     /*Vector<IModifier>*/ $modifiers,
     /*string*/ $method_name2,

@@ -26,7 +26,7 @@ class TraitAliasStatement /*implements ITraitAliasStatement*/ {
   /**
    *  [traitName::]methodName1 as modifiers methodName2;
    */
-  public function setTraitName(/*string*/ $value) /*: this*/ {
+  public function setTraitName(/*?string*/ $value) /*: this*/ {
     $this->traitName = $value;
     return $this;
   }

@@ -226,8 +226,12 @@ public:
   static bool isPseudoEvent(const char* event);
   void getPerfCounters(Array& ret);
 
+  inline void sync() {
+    if (tl_regState == VMRegState::CLEAN) return;
+    syncWork();
+  }
 private:
-  void syncWork() override;
+  void syncWork();
 
 public:
 

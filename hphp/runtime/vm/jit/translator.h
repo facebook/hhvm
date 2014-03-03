@@ -58,9 +58,6 @@ namespace JIT {
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
-struct Translator;
-extern Translator* g_translator;
-
 /*
  * DIRTY when the live register state is spread across the stack and m_fixup,
  * CLEAN when it has been sync'ed into g_context.
@@ -397,8 +394,6 @@ private:
                        const Location& l,
                        bool specialize = false);
 
-  virtual void syncWork() = 0;
-
 protected:
   enum TranslateResult {
     Failure,
@@ -501,11 +496,6 @@ public:
   void postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
                    Tracelet& t, TraceletContext& tas);
   static bool liveFrameIsPseudoMain();
-
-  inline void sync() {
-    if (tl_regState == VMRegState::CLEAN) return;
-    syncWork();
-  }
 
   inline bool stateIsDirty() {
     return tl_regState == VMRegState::DIRTY;

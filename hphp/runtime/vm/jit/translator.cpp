@@ -78,7 +78,6 @@ using HPHP::JIT::Type;
 using HPHP::JIT::HhbcTranslator;
 
 static __thread BiasedCoin *dbgTranslateCoin;
-Translator* g_translator;
 Lease Translator::s_writeLease;
 
 struct TraceletContext {

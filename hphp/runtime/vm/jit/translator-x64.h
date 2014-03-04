@@ -320,7 +320,7 @@ public:
   // true iff calling thread is sole writer.
   static bool canWrite() {
     // We can get called early in boot, so allow null tx64.
-    return !tx64 || Translator::s_writeLease.amOwner();
+    return !tx64 || Translator::WriteLease().amOwner();
   }
 
   // Returns true on success

@@ -357,7 +357,6 @@ struct Translator {
   JIT::UniqueStubs uniqueStubs;
 
 private:
-  friend class TranslatorX64;
   friend struct TraceletContext;
 
   void analyzeCallee(TraceletContext&,
@@ -398,7 +397,7 @@ private:
                        const Location& l,
                        bool specialize = false);
 
-private:
+public:
   enum TranslateResult {
     Failure,
     Retry,
@@ -410,9 +409,9 @@ private:
   void traceEnd();
   void traceFree();
 
-private:
   void requestResetHighLevelTranslator();
 
+public:
   /* translateRegion reads from the RegionBlacklist to determine when
    * to interpret an instruction, and adds failed instructions to the
    * blacklist so they're interpreted on the next attempt. */
@@ -420,16 +419,23 @@ private:
   TranslateResult translateRegion(const RegionDesc& region,
                                   RegionBlacklist& interp);
 
+private:
   typedef std::map<TCA, TransID> TransDB;
-  TransDB                 m_transDB;
-  std::vector<TransRec>   m_translations;
-  std::vector<uint64_t*>  m_transCounters;
+  TransDB m_transDB;
+  std::vector<TransRec> m_translations;
+  std::vector<uint64_t*> m_transCounters;
 
-  int64_t              m_createdTime;
+  int64_t m_createdTime;
 
   std::unique_ptr<JIT::IRTranslator> m_irTrans;
 
-  SrcDB              m_srcDB;
+public:
+  JIT::IRTranslator* irTrans() {
+    return m_irTrans.get();
+  }
+
+private:
+  SrcDB m_srcDB;
 
   static Lease s_writeLease;
 
@@ -512,8 +518,11 @@ private:
   PCFilter m_dbgBLPC;
   hphp_hash_set<SrcKey,SrcKey::Hasher> m_dbgBLSrcKey;
   Mutex m_dbgBlacklistLock;
+
+public:
   bool isSrcKeyInBL(const SrcKey& sk);
 
+private:
   TransKind m_mode;
   ProfData* m_profData;
 
@@ -530,6 +539,9 @@ public:
 
   TransKind mode() const {
     return m_mode;
+  }
+  void setMode(TransKind mode) {
+    m_mode = mode;
   }
 
   int analysisDepth() const {

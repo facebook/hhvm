@@ -2148,7 +2148,13 @@ void Simulator::DoHostCall(Instruction* instr) {
     }
   } catch (...) {
     if (exception_hook_) {
-      exception_hook_(this);
+      auto exn = std::current_exception();
+      auto exnPc = exception_hook_(this, exn);
+      if (exnPc) {
+        exns_in_flight_.push(exn);
+        set_pc(exnPc);
+        return;
+      }
     }
     throw;
   }

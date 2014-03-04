@@ -1,3 +1,0 @@
-<?php
-// TODO(#3091846) catch traces
-if ($_ENV['HHVM_ARCH'] == 'arm') echo 'skip';

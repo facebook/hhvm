@@ -114,6 +114,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/unwind-arm.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
@@ -1109,6 +1110,33 @@ extern "C" void enterTCHelper(Cell* vm_sp,
                               ActRec* firstAR,
                               void* targetCacheBase);
 
+/*
+ * A partial equivalent of enterTCHelper, used to set up the ARM simulator.
+ */
+uintptr_t setupSimRegsAndStack(vixl::Simulator& sim,
+                               uintptr_t saved_rStashedAr) {
+  sim.   set_xreg(ARM::rGContextReg.code(), g_context.getNoCheck());
+  sim.   set_xreg(ARM::rVmFp.code(), vmfp());
+  sim.   set_xreg(ARM::rVmSp.code(), vmsp());
+  sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
+  sim.   set_xreg(ARM::rStashedAR.code(), saved_rStashedAr);
+
+  // Leave space for register spilling and MInstrState.
+  sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
+  assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
+
+  auto spOnEntry = sim.sp();
+
+  // Push the link register onto the stack. The link register is
+  // technically caller-saved; what this means in practice is that
+  // non-leaf functions push it at the very beginning and pop it just
+  // before returning (as opposed to just saving it around calls).
+  sim.   set_sp(sim.sp() - 16);
+  *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
+
+  return spOnEntry;
+}
+
 
 struct TReqInfo {
   uintptr_t requestNum;
@@ -1204,37 +1232,14 @@ MCGenerator::enterTC(TCA start, void* data) {
           Stats::inc(Stats::vixl_SimulatedLoad, sim.load_count());
           Stats::inc(Stats::vixl_SimulatedStore, sim.store_count());
         };
-        sim.set_exception_hook(
-          [] (vixl::Simulator* s) {
-            if (tl_regState == VMRegState::DIRTY) {
-              // This is a pseudo-copy of the logic in sync_regstate.
-              mcg->fixupMap().fixupWorkSimulated(g_context.getNoCheck());
-              tl_regState = VMRegState::CLEAN;
-            }
-          }
-        );
+
+        sim.set_exception_hook(ARM::simulatorExceptionHook);
 
         g_context->m_activeSims.push_back(&sim);
         SCOPE_EXIT { g_context->m_activeSims.pop_back(); };
 
-        sim.   set_xreg(ARM::rGContextReg.code(), g_context.getNoCheck());
-        sim.   set_xreg(ARM::rVmFp.code(), vmfp());
-        sim.   set_xreg(ARM::rVmSp.code(), vmsp());
-        sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
-        sim.   set_xreg(ARM::rStashedAR.code(), info.saved_rStashedAr);
-
-        // Leave space for register spilling and MInstrState.
-        sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
-        assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
-
-        DEBUG_ONLY auto spOnEntry = sim.sp();
-
-        // Push the link register onto the stack. The link register is
-        // technically caller-saved; what this means in practice is that
-        // non-leaf functions push it at the very beginning and pop it just
-        // before returning (as opposed to just saving it around calls).
-        sim.   set_sp(sim.sp() - 16);
-        *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
+        DEBUG_ONLY auto spOnEntry =
+          setupSimRegsAndStack(sim, info.saved_rStashedAr);
 
         // The handshake is different in the case of REQ_BIND_CALL. The code
         // we're jumping to expects to find a return address in x30, and a saved

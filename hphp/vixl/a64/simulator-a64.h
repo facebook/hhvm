@@ -28,6 +28,7 @@
 #define VIXL_A64_SIMULATOR_A64_H_
 
 #include <iosfwd>
+#include <stack>
 
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
@@ -59,12 +60,12 @@ enum ReverseByteMode {
 //    x0: The format string
 // x1-x7: Optional arguments, if type == CPURegister::kRegister
 // d0-d7: Optional arguments, if type == CPURegister::kFPRegister
-const Instr kPrintfOpcode = 0xdeb1;
-const unsigned kPrintfTypeOffset = 1 * kInstructionSize;
-const unsigned kPrintfLength = 2 * kInstructionSize;
+constexpr Instr kPrintfOpcode = 0xdeb1;
+constexpr unsigned kPrintfTypeOffset = 1 * kInstructionSize;
+constexpr unsigned kPrintfLength = 2 * kInstructionSize;
 
-const Instr kHostCallOpcode = 0xdeb4;
-const unsigned kHostCallCountOffset = 1 * kInstructionSize;
+constexpr Instr kHostCallOpcode = 0xdeb4;
+constexpr unsigned kHostCallCountOffset = 1 * kInstructionSize;
 
 // The proper way to initialize a simulated system register (such as NZCV) is as
 // follows:
@@ -138,10 +139,18 @@ class Simulator : public DecoderVisitor {
     float s;
   };
 
-  // When an exception is thrown through simulated code, call this hook.
-  typedef void(*ExceptionHook)(Simulator*);
+  // When an exception is thrown through simulated code, call this hook. The
+  // hook returns a new instruction pointer at which to resume execution, or
+  // nullptr to continue execution normally.
+  typedef Instruction*(*ExceptionHook)(Simulator*, std::exception_ptr);
   void set_exception_hook(ExceptionHook hook) {
     exception_hook_ = hook;
+  }
+
+  void resume_last_exception() {
+    auto exn = exns_in_flight_.top();
+    exns_in_flight_.pop();
+    std::rethrow_exception(exn);
   }
 
   // Run the simulator.
@@ -518,6 +527,7 @@ class Simulator : public DecoderVisitor {
 
   // Hook to handle exceptions being thrown through simulated code.
   ExceptionHook exception_hook_ = nullptr;
+  std::stack<std::exception_ptr> exns_in_flight_;
 
   // General purpose registers. Register 31 is the stack pointer.
   SimRegister registers_[kNumberOfRegisters];

@@ -1162,6 +1162,18 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
     recordHostCallSyncPoint(a, syncPoint);
   }
 
+  auto* taken = m_curInst->taken();
+  if (taken && taken->isCatch()) {
+    auto& info = m_state.catches[taken];
+    assert(!info.afterCall);
+    info.afterCall = syncPoint;
+    info.savedRegs = toSave;
+    assert_not_implemented(args.numStackArgs() == 0);
+    info.rspOffset = args.numStackArgs();
+  } else if (!m_curInst->is(Call, CallArray, ContEnter)) {
+    m_mcg->registerCatchBlock(a.frontier(), nullptr);
+  }
+
   vixl::CPURegister armDst0{dstReg0};
 
   switch (dstInfo.type) {
@@ -1710,11 +1722,26 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
-  m_as.  Brk  (0);
+  auto const& info = m_state.catches[inst->block()];
+  assert(info.afterCall);
+
+  m_mcg->registerCatchBlock(info.afterCall, m_as.frontier());
+
+  assert(info.rspOffset == 0);
+  RegSaver regSaver(info.savedRegs);
+  regSaver.emitPops(m_as);
+}
+
+static void unwindResumeHelper() {
+  // We don't have this sorted out for native mode yet
+  always_assert(RuntimeOption::EvalSimulateARM);
+
+  tl_regState = VMRegState::CLEAN;
+  g_context->m_activeSims.back()->resume_last_exception();
 }
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
-  m_as.  Brk  (0);
+  emitCall(m_as, CppCall{unwindResumeHelper});
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -82,7 +82,7 @@
   jackalope-jackrabbit:
     url: https://github.com/jackalope/jackalope-jackrabbit.git
     bootstrap_file: ./bin/jackrabbit.sh
-    branch: master
+    branch: 1.1.1
     commit: b4744acbceb7ad70484ec4e4d2391df4a5a533fc
     install_root: jackalope-jackrabbit
     test_root: jackalope-jackrabbit

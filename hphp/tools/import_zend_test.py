@@ -200,6 +200,9 @@ bad_tests = (
 
     # flaky: t3817758
     '/ext/ftp/tests/ftp_nb_fget_basic1.php',
+
+    # flaky: t3846500
+    '/ext/standard/tests/file/copy_variation8.php',
 )
 
 # Tests that work but not in repo mode

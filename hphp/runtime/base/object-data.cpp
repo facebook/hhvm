@@ -686,7 +686,8 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     }
     // Only serialize CPP extension type instances which can actually
     // be deserialized.
-    if (getAttribute(IsCppBuiltin) && !getVMClass()->isCppSerializable()) {
+    auto cls = getVMClass();
+    if (cls->instanceCtor() && !cls->isCppSerializable()) {
       Object placeholder = ObjectData::newInstance(
         SystemLib::s___PHP_Unserializable_ClassClass);
       placeholder->o_set(s_PHP_Unserializable_Class_Name, o_getClassName());

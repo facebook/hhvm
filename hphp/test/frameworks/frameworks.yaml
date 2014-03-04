@@ -80,7 +80,7 @@
     install_root: idiorm
     test_root: idiorm
   jackalope-jackrabbit:
-    url: git@github.com:jackalope/jackalope-jackrabbit.git
+    url: https://github.com/jackalope/jackalope-jackrabbit.git
     bootstrap_file: ./bin/jackrabbit.sh
     branch: master
     commit: b4744acbceb7ad70484ec4e4d2391df4a5a533fc

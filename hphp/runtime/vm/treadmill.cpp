@@ -112,13 +112,7 @@ struct GenCountGuard {
 typedef std::list<std::unique_ptr<WorkItem>> PendingTriggers;
 static PendingTriggers s_tq;
 
-// Inherently racy. We get a lower bound on the generation; presumably
-// clients are aware of this, and are creating the trigger for an object
-// that was reachable strictly in the past.
-WorkItem::WorkItem() : m_gen(0) {
-}
-
-void WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem> gt) {
+void enqueueInternal(std::unique_ptr<WorkItem> gt) {
   GenCount time = getTime();
   {
     GenCountGuard g;
@@ -191,7 +185,7 @@ void finishRequest() {
     }
   }
   for (unsigned i = 0; i < toFire.size(); ++i) {
-    (*toFire[i])();
+    toFire[i]->run();
   }
 }
 
@@ -200,17 +194,8 @@ int64_t getOldestStartTime() {
   return time / ONE_SEC_IN_MICROSEC + 1; // round up 1 sec
 }
 
-FreeMemoryTrigger::FreeMemoryTrigger(void* ptr) : m_ptr(ptr) {
-  TRACE(3, "FreeMemoryTrigger @ %p, m_f %p\n", this, m_ptr);
-}
-
-void FreeMemoryTrigger::operator()() {
-  TRACE(3, "FreeMemoryTrigger: Firing @ %p , m_f %p\n", this, m_ptr);
-  free(m_ptr);
-}
-
 void deferredFree(void* p) {
-  WorkItem::enqueue(std::unique_ptr<WorkItem>(new FreeMemoryTrigger(p)));
+  enqueue([p] { free(p); });
 }
 
 }}

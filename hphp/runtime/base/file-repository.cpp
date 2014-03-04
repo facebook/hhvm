@@ -103,18 +103,8 @@ int PhpFile::decRef(int n) {
 }
 
 void PhpFile::decRefAndDelete() {
-  class FileInvalidationTrigger : public Treadmill::WorkItem {
-    Eval::PhpFile* m_f;
-   public:
-    FileInvalidationTrigger(Eval::PhpFile* f) : m_f(f) { }
-    virtual void operator()() {
-      FileRepository::onDelete(m_f);
-    }
-  };
-
   if (decRef() == 0) {
-    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
-                                        new FileInvalidationTrigger(this)));
+    Treadmill::enqueue([this] { FileRepository::onDelete(this); });
   }
 }
 

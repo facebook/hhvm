@@ -1040,21 +1040,23 @@ MCGenerator::checkRefs(SrcKey sk,
   }
 }
 
-class FreeRequestStubTrigger : public Treadmill::WorkItem {
+namespace {
+class FreeRequestStubTrigger {
   TCA m_stub;
  public:
   explicit FreeRequestStubTrigger(TCA stub) : m_stub(stub) {
     TRACE(3, "FreeStubTrigger @ %p, stub %p\n", this, m_stub);
   }
-  virtual void operator()() {
+  void operator()() {
     TRACE(3, "FreeStubTrigger: Firing @ %p , stub %p\n", this, m_stub);
     if (mcg->freeRequestStub(m_stub) != true) {
       // If we can't free the stub, enqueue again to retry.
       TRACE(3, "FreeStubTrigger: write lease failed, requeueing %p\n", m_stub);
-      enqueue(std::unique_ptr<WorkItem>(new FreeRequestStubTrigger(m_stub)));
+      Treadmill::enqueue(FreeRequestStubTrigger(m_stub));
     }
   }
 };
+}
 
 #ifdef DEBUG
 
@@ -1525,8 +1527,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
   }
 
   if (smashed && info.stubAddr) {
-    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
-                                    new FreeRequestStubTrigger(info.stubAddr)));
+    Treadmill::enqueue(FreeRequestStubTrigger(info.stubAddr));
   }
 
   return true;

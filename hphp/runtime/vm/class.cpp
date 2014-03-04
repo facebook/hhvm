@@ -302,25 +302,6 @@ void Class::releaseRefs() {
   m_usedTraits.clear();
 }
 
-namespace {
-
-class FreeClassTrigger : public Treadmill::WorkItem {
-  TRACE_SET_MOD(treadmill);
-  Class* m_cls;
- public:
-  explicit FreeClassTrigger(Class* cls) : m_cls(cls) {
-    TRACE(3, "FreeClassTrigger @ %p, cls %p\n", this, m_cls);
-  }
-  void operator()() {
-    TRACE(3, "FreeClassTrigger: Firing @ %p , cls %p\n", this, m_cls);
-    if (!m_cls->decAtomicCount()) {
-      m_cls->atomicRelease();
-    }
-  }
-};
-
-}
-
 void Class::destroy() {
   /*
    * If we were never put on NamedEntity::classList, or
@@ -344,8 +325,9 @@ void Class::destroy() {
    * could call destroy
    */
   releaseRefs();
-  Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
-                                              new FreeClassTrigger(this)));
+  Treadmill::enqueue(
+    [this] { if (!this->decAtomicCount()) this->atomicRelease(); }
+  );
 }
 
 void Class::atomicRelease() {

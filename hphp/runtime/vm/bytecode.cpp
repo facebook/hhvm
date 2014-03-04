@@ -2567,23 +2567,25 @@ void ExecutionContext::enqueueAPCHandle(APCHandle* handle) {
 }
 
 // Treadmill solution for the SharedVariant memory management
-class FreedAPCHandle : public Treadmill::WorkItem {
+namespace {
+class FreedAPCHandle {
   std::vector<APCHandle*> m_apcHandles;
 public:
   explicit FreedAPCHandle(std::vector<APCHandle*>&& shandles)
-      : m_apcHandles(std::move(shandles)) {}
-  virtual void operator()() {
-    for (auto handle: m_apcHandles) {
+    : m_apcHandles(std::move(shandles))
+  {}
+  void operator()() {
+    for (auto handle : m_apcHandles) {
       APCTypedValue::fromHandle(handle)->deleteUncounted();
     }
   }
 };
+}
 
 void ExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
   if (apcExtension::UseUncounted) {
-    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
-                                  new FreedAPCHandle(std::move(m_apcHandles))));
+    Treadmill::enqueue(FreedAPCHandle(std::move(m_apcHandles)));
     m_apcHandles.clear();
   }
 }

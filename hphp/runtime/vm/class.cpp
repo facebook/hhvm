@@ -1493,8 +1493,25 @@ void Class::setProperties() {
     // happen if a derived class redeclares a public or protected property
     // from an ancestor class. We still get correct behavior in these cases,
     // so it works out okay.
+    auto const numParentDeclProperties = m_parent->m_declProperties.size();
+    auto const numParentStaticProperties = m_parent->m_staticProperties.size();
+    int idxOffset = 0;
+    if (0 < numParentDeclProperties &&
+        idxOffset <
+          m_parent->
+            m_declProperties[numParentDeclProperties - 1].m_idx + 1) {
+      idxOffset =
+        m_parent->m_declProperties[numParentDeclProperties - 1].m_idx + 1;
+    }
+    if (0 < numParentStaticProperties &&
+        idxOffset <
+          m_parent->
+            m_staticProperties[numParentStaticProperties - 1].m_idx + 1) {
+      idxOffset =
+        m_parent->m_staticProperties[numParentStaticProperties - 1].m_idx + 1;
+    }
     m_hasDeepInitProps = m_parent->m_hasDeepInitProps;
-    for (Slot slot = 0; slot < m_parent->m_declProperties.size(); ++slot) {
+    for (Slot slot = 0; slot < numParentDeclProperties; ++slot) {
       const Prop& parentProp = m_parent->m_declProperties[slot];
 
       // Copy parent's declared property.  Protected properties may be
@@ -1509,6 +1526,7 @@ void Class::setProperties() {
       prop.m_typeConstraint = parentProp.m_typeConstraint;
       prop.m_name = parentProp.m_name;
       prop.m_repoAuthType = parentProp.m_repoAuthType;
+      prop.m_idx = parentProp.m_idx - idxOffset;
       if (!(parentProp.m_attrs & AttrPrivate)) {
         curPropMap.add(prop.m_name, prop);
       } else {
@@ -1517,7 +1535,7 @@ void Class::setProperties() {
       }
     }
     m_declPropInit = m_parent->m_declPropInit;
-    for (Slot slot = 0; slot < m_parent->m_staticProperties.size(); ++slot) {
+    for (Slot slot = 0; slot < numParentStaticProperties; ++slot) {
       const SProp& parentProp = m_parent->m_staticProperties[slot];
       if (parentProp.m_attrs & AttrPrivate) continue;
 
@@ -1528,6 +1546,7 @@ void Class::setProperties() {
       sProp.m_typeConstraint = parentProp.m_typeConstraint;
       sProp.m_docComment = parentProp.m_docComment;
       sProp.m_class = parentProp.m_class;
+      sProp.m_idx = parentProp.m_idx - idxOffset;
       tvWriteUninit(&sProp.m_val);
       curSPropMap.add(sProp.m_name, sProp);
     }
@@ -1583,6 +1602,7 @@ void Class::setProperties() {
         prop.m_typeConstraint = preProp->typeConstraint();
         prop.m_docComment = preProp->docComment();
         prop.m_repoAuthType = preProp->repoAuthType();
+        prop.m_idx = slot;
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1616,6 +1636,7 @@ void Class::setProperties() {
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
         prop.m_repoAuthType = preProp->repoAuthType();
+        prop.m_idx = slot;
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1655,6 +1676,7 @@ void Class::setProperties() {
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
         prop.m_repoAuthType = preProp->repoAuthType();
+        prop.m_idx = slot;
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1699,6 +1721,7 @@ void Class::setProperties() {
         SProp sProp;
         sProp.m_name = preProp->name();
         sPropInd = curSPropMap.size();
+        sProp.m_idx = slot;
         curSPropMap.add(sProp.m_name, sProp);
       }
       // Finish initializing.

@@ -82,6 +82,7 @@ const StaticString
   s_methods("methods"),
   s_properties("properties"),
   s_private_properties("private_properties"),
+  s_private_properties_offsets("private_properties_offsets"),
   s_attributes("attributes"),
   s_function("function"),
   s_trait_aliases("trait_aliases"),
@@ -872,7 +873,11 @@ static Array get_class_info(const ClassInfo *cls) {
   {
     Array arr = Array::Create();
     Array arrPriv = Array::Create();
-    for (auto const& prop : cls->getPropertiesVec()) {
+    Array arrOffset = Array::Create();
+    auto const propertiesVec = cls->getPropertiesVec();
+    const int propertiesCount = propertiesVec.size();
+    for (int i = 0; i < propertiesCount; ++i) {
+      auto const& prop = propertiesVec[i];
       Array info = Array::Create();
       info.add(s_default, true_varNR);
       set_property_info(info, prop, cls);
@@ -880,12 +885,14 @@ static Array get_class_info(const ClassInfo *cls) {
       if (prop->attribute & ClassInfo::IsPrivate) {
         assert(prop->owner == cls);
         arrPriv.set(prop->name, info);
+        arrOffset.set(prop->name, i);
       } else {
         arr.set(prop->name, info);
       }
     }
     ret.set(s_properties, VarNR(arr));
     ret.set(s_private_properties, VarNR(arrPriv));
+    ret.set(s_private_properties_offsets, VarNR(arrOffset));
   }
 
   // constants
@@ -913,6 +920,45 @@ static Array get_class_info(const ClassInfo *cls) {
   }
 
   return ret;
+}
+
+static void set_prop_ret(const Class* const cls,
+                         const Class::Prop& prop,
+                         const Class::PropInitVec& propInitVec,
+                         const int idx,
+                         Array& arr,
+                         Array& arrPriv,
+                         Array& arrOffset) {
+  Array info = Array::Create();
+  auto const& default_val = tvAsCVarRef(&propInitVec[idx]);
+  if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
+    if (prop.m_class == cls) {
+      set_instance_prop_info(info, &prop, default_val);
+      arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
+      arrOffset.set(*(String*)(&prop.m_name), prop.m_idx);
+    }
+  } else {
+    set_instance_prop_info(info, &prop, default_val);
+    arr.set(*(String*)(&prop.m_name), VarNR(info));
+  }
+}
+
+static void set_static_prop_ret(const Class* const cls,
+                                const Class::SProp& sProp,
+                                Array& arr,
+                                Array& arrPriv,
+                                Array& arrOffset) {
+  Array info = Array::Create();
+  if ((sProp.m_attrs & AttrPrivate) == AttrPrivate) {
+    if (sProp.m_class == cls) {
+      set_static_prop_info(info, &sProp);
+      arrPriv.set(*(String*)(&sProp.m_name), VarNR(info));
+      arrOffset.set(*(String*)(&sProp.m_name), sProp.m_idx);
+    }
+  } else {
+    set_static_prop_info(info, &sProp);
+    arr.set(*(String*)(&sProp.m_name), VarNR(info));
+  }
 }
 
 Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name) {
@@ -1027,41 +1073,41 @@ Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name) {
   {
     Array arr = Array::Create();
     Array arrPriv = Array::Create();
+    Array arrOffset = Array::Create();
 
     const Class::Prop* properties = cls->declProperties();
     auto const& propInitVec = cls->declPropInit();
     const size_t nProps = cls->numDeclProperties();
-
-    for (Slot i = 0; i < nProps; ++i) {
-      const Class::Prop& prop = properties[i];
-      Array info = Array::Create();
-      auto const& default_val = tvAsCVarRef(&propInitVec[i]);
-      if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
-        if (prop.m_class == cls) {
-          set_instance_prop_info(info, &prop, default_val);
-          arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
-        }
-        continue;
-      }
-      set_instance_prop_info(info, &prop, default_val);
-      arr.set(*(String*)(&prop.m_name), VarNR(info));
-    }
-
+    Slot propIdx = 0;
     const Class::SProp* staticProperties = cls->staticProperties();
     const size_t nSProps = cls->numStaticProperties();
+    Slot sPropIdx = 0;
 
-    for (Slot i = 0; i < nSProps; ++i) {
-      auto const& prop = staticProperties[i];
-      Array info = Array::Create();
-      if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
-        if (prop.m_class == cls) {
-          set_static_prop_info(info, &prop);
-          arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
-        }
-        continue;
+    while (propIdx < nProps && sPropIdx < nSProps) {
+      const Class::Prop& prop = properties[propIdx];
+      auto const& sProp = staticProperties[sPropIdx];
+
+      if (prop.m_idx < sProp.m_idx) {
+        set_prop_ret(cls, prop, propInitVec, propIdx,
+                     arr, arrPriv, arrOffset);
+        ++propIdx;
+      } else {
+        set_static_prop_ret(cls, sProp, arr, arrPriv, arrOffset);
+        ++sPropIdx;
       }
-      set_static_prop_info(info, &prop);
-      arr.set(*(String*)(&prop.m_name), VarNR(info));
+    }
+
+    if (nProps <= propIdx) {
+      for (; sPropIdx < nSProps; ++sPropIdx) {
+        auto const& sProp = staticProperties[sPropIdx];
+        set_static_prop_ret(cls, sProp, arr, arrPriv, arrOffset);
+      }
+    } else {
+      for (; propIdx < nProps; ++propIdx) {
+        const Class::Prop& prop = properties[propIdx];
+        set_prop_ret(cls, prop, propInitVec, propIdx,
+                     arr, arrPriv, arrOffset);
+      }
     }
 
     if (name.isObject()) {
@@ -1077,6 +1123,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name) {
 
     ret.set(s_properties, VarNR(arr));
     ret.set(s_private_properties, VarNR(arrPriv));
+    ret.set(s_private_properties_offsets, VarNR(arrOffset));
   }
 
   // constants

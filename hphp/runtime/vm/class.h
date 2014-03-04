@@ -465,6 +465,7 @@ struct Class : AtomicCountable {
     RepoAuthType m_repoAuthType;
 
     const StringData* m_docComment;
+    int m_idx;
   };
 
   struct SProp {
@@ -475,6 +476,7 @@ struct Class : AtomicCountable {
     Class* m_class; // Most derived class that declared this property.
     TypedValue m_val; // Used if (m_class == this).
     RepoAuthType m_repoAuthType;
+    int m_idx;
   };
 
   struct Const {

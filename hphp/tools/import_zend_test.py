@@ -15,7 +15,7 @@ import subprocess
 import sys
 
 # Don't even pull these into the repo.
-# We want runnig the bad tests to still complete.
+# We want running the bad tests to still complete.
 no_import = (
     # these hang forever
     '/ext/standard/tests/array/array_pad_variation2.phpt',
@@ -544,6 +544,8 @@ other_files = (
     '/ext/gettext/tests/locale/fi/LC_MESSAGES/messages.po',
     '/ext/intl/tests/ut_common.inc',
     '/ext/ldap/tests/connect.inc',
+    '/ext/ldap/tests/skipif.inc',
+    '/ext/ldap/tests/skipifbindfailure.inc',
     '/ext/mbstring/tests/common.inc',
     '/ext/mcrypt/tests/vectors.txt',
     '/ext/mysql/tests/connect.inc',
@@ -891,6 +893,12 @@ def walk(filename, dest_subdir):
         test = test.replace("1)) {\n\tunlink($file2", "2)) {\n\tunlink($file2")
     if '/ext/bz2/tests/bug51997.php' in full_dest_filename:
         test = test.replace("testfile.bz2", "bug51997.bz2")
+    if '/ext/ldap/tests/ldap_control_paged_results_variation1.php' in full_dest_filename:
+        exp = exp.replace("resource(6)", "resource(%d)")
+        file(full_dest_filename + '.expectf', 'w').write(exp)
+    if '/ext/ldap/tests/ldap_control_paged_results_variation2.php' in full_dest_filename:
+        exp = exp.replace("resource(6)", "resource(%d)")
+        file(full_dest_filename + '.expectf', 'w').write(exp)
     if '/ext/bz2/tests/with_files.php' in full_dest_filename:
         test = test.replace("testfile.bz2", "with_files.bz2")
     if ('/ext/standard/tests/math/pow.php' in full_dest_filename) or \

@@ -1252,5 +1252,118 @@ Variant f_ldap_get_values(CResRef link, CResRef result_entry,
   return f_ldap_get_values_len(link, result_entry, attribute);
 }
 
+bool f_ldap_control_paged_result(CResRef link, int pagesize,
+                                 bool iscritical, const String& cookie) {
+  LdapLink *ld = link.getTyped<LdapLink>();
+  LDAPControl ctrl, *ctrlsp[2];
+  int rc;
+  struct berval lcookie;
+  BerElement *ber;
+
+  ber = ber_alloc_t(LBER_USE_DER);
+  if (ber == nullptr) {
+    raise_warning("Unable to alloc BER encoding resources for paged "
+                  "results control");
+    return false;
+  }
+
+  lcookie.bv_val = (char *)cookie.c_str();
+  lcookie.bv_len = cookie.length();
+  if (ber_printf(ber, "{iO}", pagesize, &lcookie) == LBER_ERROR) {
+    raise_warning("Unable to BER printf paged results control");
+    ber_free(ber, 1);
+    return false;
+  }
+
+  rc = ber_flatten2(ber, &ctrl.ldctl_value, 0);
+  if (rc == LBER_ERROR) {
+    raise_warning("Unable to BER encode paged results control");
+    ber_free(ber, 1);
+    return false;
+  }
+
+  ctrl.ldctl_oid = LDAP_CONTROL_PAGEDRESULTS;
+  ctrl.ldctl_iscritical = iscritical;
+
+  ctrlsp[0] = &ctrl;
+  ctrlsp[1] = nullptr;
+  rc = ldap_set_option(ld->link, LDAP_OPT_SERVER_CONTROLS, ctrlsp);
+
+  ber_free(ber, 1);
+  return rc == LDAP_SUCCESS;
+}
+
+bool f_ldap_control_paged_result_response(CResRef link, CResRef result,
+                                          VRefParam cookie,
+                                          VRefParam estimated) {
+  LdapLink *ld = link.getTyped<LdapLink>();
+  LdapResult *res = result.getTyped<LdapResult>();
+  int rc, lerrcode;
+  LDAPControl **lserverctrls, *lctrl;
+  BerElement *ber;
+  int lestimated;
+  struct berval lcookie;
+  ber_tag_t tag;
+
+  rc = ldap_parse_result(ld->link,
+                         res->data,
+                         &lerrcode,
+                         nullptr,   /* matcheddn */
+                         nullptr,   /* errmsg */
+                         nullptr,   /* referrals */
+                         &lserverctrls,
+                         0);
+  if (rc != LDAP_SUCCESS) {
+    raise_warning("Unable to parse result: %s (%d)", ldap_err2string(rc), rc);
+    return false;
+  }
+
+  if (lerrcode != LDAP_SUCCESS) {
+    raise_warning("Result is: %s (%d)", ldap_err2string(lerrcode), lerrcode);
+    return false;
+  }
+
+  if (lserverctrls == nullptr) {
+    raise_warning("No server controls in result");
+    return false;
+  }
+
+  lctrl = ldap_find_control(LDAP_CONTROL_PAGEDRESULTS, lserverctrls);
+  if (lctrl == nullptr) {
+    raise_warning("No paged results control response in result");
+    ldap_controls_free(lserverctrls);
+    return false;
+  }
+
+  ber = ber_init(&lctrl->ldctl_value);
+  if (ber == nullptr) {
+    raise_warning("Unable to alloc BER decoding resources for paged "
+                  "results control response");
+    ldap_controls_free(lserverctrls);
+    return false;
+  }
+
+  tag = ber_scanf(ber, "{io}", &lestimated, &lcookie);
+  ber_free(ber, 1);
+  ldap_controls_free(lserverctrls);
+
+  if (tag == LBER_ERROR) {
+    raise_warning("Unable to decode paged results control response");
+    return false;
+  }
+
+  if (lestimated < 0) {
+    raise_warning("Invalid paged results control response value");
+    ber_memfree(lcookie.bv_val);
+    return false;
+  }
+
+  cookie = String(lcookie.bv_val, lcookie.bv_len, CopyString);
+  estimated = lestimated;
+
+  ber_memfree(lcookie.bv_val);
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -969,6 +969,8 @@ String f_escapeshellarg(const String& arg) {
   if (!arg.empty()) {
     char *ret = string_escape_shell_arg(arg.c_str());
     return String(ret, AttachString);
+  } else if (!RuntimeOption::EnableHipHopSyntax) {
+    return String("''");
   }
   return arg;
 }

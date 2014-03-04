@@ -28,54 +28,11 @@ namespace JIT {
 TRACE_SET_MOD(trans);
 
 /*
- * A mapping from FCall instructions to the statically-known StringData*
- * that they're calling. Used to accelerate our FCall translations.
+ * A mapping from FCall instructions to the statically-known Func* that they're
+ * calling. Used to accelerate our FCall translations.
  */
-enum class CallRecordType {
-  EncodedNameAndArgs,
-  Function
-};
-struct CallRecord {
-  CallRecordType m_type;
-  union {
-    const StringData* m_encodedName;
-    const Func* m_func;
-  };
-};
-
-typedef hphp_hash_map<SrcKey,CallRecord,SrcKey::Hasher> CallDB;
+typedef hphp_hash_map<SrcKey,const Func*,SrcKey::Hasher> CallDB;
 static CallDB s_callDB;
-
-static const StringData*
-encodeCallAndArgs(const StringData* name, int numArgs) {
-  char numArgsBuf[16];
-  snprintf(numArgsBuf, 15, "@%d@", numArgs);
-  String s = String(numArgsBuf) + String(name->data());
-  return makeStaticString(s.get());
-}
-
-static void
-decodeNameAndArgs(const StringData* enc,
-                  std::string& outName,
-                  int& outNumArgs) {
-  const char* numArgs = strchr(enc->data(), '@');
-  assert(numArgs && *numArgs =='@');
-  numArgs++;
-  outNumArgs = atoi(numArgs);
-  const char* name = strchr(numArgs, '@');
-  assert(name && *name == '@');
-  name++;
-  outName = name;
-}
-
-static void recordNameAndArgs(const SrcKey sk,
-                              const StringData* name,
-                              int numArgs) {
-  CallRecord cr;
-  cr.m_type = CallRecordType::EncodedNameAndArgs;
-  cr.m_encodedName = encodeCallAndArgs(name, numArgs);
-  s_callDB.insert(std::make_pair(sk, cr));
-}
 
 static void recordFunc(const SrcKey sk,
                        const Func* func) {
@@ -84,10 +41,7 @@ static void recordFunc(const SrcKey sk,
          sk.offset(),
          func->fullName()->data());
 
-  CallRecord cr;
-  cr.m_type = CallRecordType::Function;
-  cr.m_func = func;
-  s_callDB.insert(std::make_pair(sk, cr));
+  s_callDB.insert(std::make_pair(sk, func));
 }
 
 static void recordActRecPush(const SrcKey sk,
@@ -128,11 +82,6 @@ static void recordActRecPush(const SrcKey sk,
     // encode the args. it will be used in OpFCall below to
     // set the i->funcd.
     recordFunc(fcall, func);
-  } else {
-    // It's not enough to remember the function name; we also need to encode
-    // the number of arguments and current flag disposition.
-    int numArgs = getImm((Op*)unit->at(sk.offset()), 0).u_IVA;
-    recordNameAndArgs(fcall, name, numArgs);
   }
 }
 
@@ -187,15 +136,8 @@ void annotate(NormalizedInstruction* i) {
     } break;
     case OpFCall:
     case OpFCallArray: {
-      if (auto const callRec = folly::get_ptr(s_callDB, i->source)) {
-        if (callRec->m_type == CallRecordType::Function) {
-          i->funcd = callRec->m_func;
-        } else {
-          assert(callRec->m_type == CallRecordType::EncodedNameAndArgs);
-          i->funcName = callRec->m_encodedName;
-        }
-      } else {
-        i->funcName = nullptr;
+      if (auto const func = folly::get_ptr(s_callDB, i->source)) {
+        i->funcd = *func;
       }
     } break;
     default: break;
@@ -204,14 +146,8 @@ void annotate(NormalizedInstruction* i) {
 
 const StringData*
 fcallToFuncName(const NormalizedInstruction* i) {
-  if (auto const callRec = folly::get_ptr(s_callDB, i->source)) {
-    if (callRec->m_type == CallRecordType::Function) {
-      return callRec->m_func->name();
-    }
-    std::string name;
-    int numArgs;
-    decodeNameAndArgs(callRec->m_encodedName, name, numArgs);
-    return makeStaticString(name.c_str());
+  if (auto const func = folly::get_ptr(s_callDB, i->source)) {
+    return (*func)->name();
   }
   return nullptr;
 }
